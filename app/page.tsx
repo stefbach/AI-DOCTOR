@@ -31,7 +31,7 @@ import ConsultationReportPanel from "../components/consultation-report"
 // ========================================
 // 🧠 SYSTÈME MÉDICAL EXPERT AVANCÉ - NIVEAU INTERNISTE
 // ========================================
-class AdvancedMedicalExpert {
+export class AdvancedMedicalExpert {
   constructor() {
     this.isDemo = false
     this.confidence = 0
@@ -44,21 +44,47 @@ class AdvancedMedicalExpert {
         key: typeof window !== "undefined" ? window.localStorage?.getItem("openai_key") || "" : "",
         model: "gpt-4",
       },
+      drugAPIs: {
+        openFDA: {
+          baseURL: "https://api.fda.gov/drug/label.json",
+          enabled: true,
+        },
+        rxNorm: {
+          baseURL: "https://rxnav.nlm.nih.gov/REST",
+          enabled: true,
+        },
+        dailyMed: {
+          baseURL: "https://dailymed.nlm.nih.gov/dailymed/services/v2",
+          enabled: true,
+        },
+      },
+      medicalResearch: {
+        pubmed: { 
+          apiKey: typeof window !== "undefined" ? window.localStorage?.getItem("pubmed_key") || "" : "",
+          enabled: true 
+        },
+        clinicalTrials: { enabled: true },
+        umls: { 
+          apiKey: typeof window !== "undefined" ? window.localStorage?.getItem("umls_key") || "" : "",
+          enabled: true 
+        },
+      },
     }
 
-    // Base de données médicamenteuse COMPLÈTE Maurice
+    // Initialise les sous-services API ultra-avancés
+    this.pubmed = new PubMedService({ pubmed: this.apiConfig.medicalResearch.pubmed })
+    this.clinicalTrials = new ClinicalTrialsService({ clinicalTrials: this.apiConfig.medicalResearch.clinicalTrials })
+    this.umls = new UMLSService({ umls: this.apiConfig.medicalResearch.umls })
+
+    // Local DB fallback (tu peux l’enrichir si besoin)
     this.medicationDatabase = this.initializeComprehensiveMedicationDatabase()
-
-    // Base antécédents médicaux
     this.medicalHistoryDatabase = this.initializeMedicalHistoryDatabase()
-
-    // Système d'interactions médicamenteuses
     this.drugInteractionChecker = this.initializeDrugInteractionChecker()
-
-    // Questions cliniques expertes
     this.clinicalQuestions = this.initializeClinicalQuestions()
+    this.drugAPICache = new Map()
+    this.researchCache = new Map()
+    this.cacheExpiry = 24 * 60 * 60 * 1000
   }
-
   // ========================================
   // 🏥 DIAGNOSTIC MÉDICAL EXPERT NIVEAU INTERNISTE
   // ========================================
