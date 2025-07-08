@@ -753,7 +753,8 @@ Réponds en JSON avec prescription d'examens EXPERTE:
     ]
   },
   "clinical_justification": "Justification médicale détaillée de chaque examen",
-  "urgency_level": "high|moderate|low"}`
+  "urgency_level": "high|moderate|low"
+}`
 
     const response = await fetch(this.apiConfig.openai.baseURL, {
       method: "POST",
@@ -1389,6 +1390,8 @@ const AdvancedMedicalExpertSystem = () => {
   const [workup, setWorkup] = useState(null)
   const [showWorkupOrder, setShowWorkupOrder] = useState(false)
   const [showConsultationReport, setShowConsultationReport] = useState(false)
+  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false)
+  const [showWorkupModal, setShowWorkupModal] = useState(false)
 
   // Ajouter de nouveaux états pour le processus en deux étapes
   const [clinicalQuestions, setClinicalQuestions] = useState(null)
@@ -2931,11 +2934,13 @@ const AdvancedMedicalExpertSystem = () => {
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <h3 className="font-semibold text-green-800 mb-2">💊 Ordonnance</h3>
                   <p className="text-sm text-green-700">
-                    Imprimez ou téléchargez l'ordonnance avec les médicaments prescrits.
+                    Consultez, imprimez ou téléchargez l'ordonnance avec les médicaments prescrits.
                   </p>
-                  <button className="mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center font-semibold">
+                  <button 
+                    onClick={() => setShowPrescriptionModal(true)}
+                    className="mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center font-semibold">
                     <Printer className="h-5 w-5 mr-2" />
-                    Imprimer Ordonnance
+                    Voir Ordonnance
                   </button>
                 </div>
 
@@ -2943,11 +2948,13 @@ const AdvancedMedicalExpertSystem = () => {
                 <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
                   <h3 className="font-semibold text-orange-800 mb-2">🔬 Prescription d'Examens</h3>
                   <p className="text-sm text-orange-700">
-                    Imprimez ou téléchargez la prescription d'examens complémentaires.
+                    Consultez, imprimez ou téléchargez la prescription d'examens complémentaires.
                   </p>
-                  <button className="mt-4 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center font-semibold">
+                  <button 
+                    onClick={() => setShowWorkupModal(true)}
+                    className="mt-4 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center font-semibold">
                     <Printer className="h-5 w-5 mr-2" />
-                    Imprimer Prescription Examens
+                    Voir Prescription Examens
                   </button>
                 </div>
               </div>
@@ -3064,8 +3071,14 @@ const AdvancedMedicalExpertSystem = () => {
 
       {/* Modal Rapport de Consultation */}
       {showConsultationReport && (
-        <div className="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-3/4 h-3/4 overflow-auto">
+        <div className="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-3/4 h-3/4 overflow-auto relative">
+            <button
+              onClick={() => setShowConsultationReport(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold z-10"
+            >
+              ✕
+            </button>
             <h2 className="text-2xl font-bold mb-6 flex items-center">
               <FileText className="h-6 w-6 mr-3 text-indigo-600" />
               Rapport de Consultation
@@ -3074,10 +3087,264 @@ const AdvancedMedicalExpertSystem = () => {
               patientData={patientData}
               clinicalPresentation={clinicalPresentation}
               diagnosis={diagnosis}
+              selectedDiagnoses={selectedDiagnoses}
               prescription={prescription}
               workup={workup}
               onClose={() => setShowConsultationReport(false)}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Modal Ordonnance */}
+      {showPrescriptionModal && prescription && (
+        <div className="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-3/4 h-3/4 overflow-auto relative">
+            <button
+              onClick={() => setShowPrescriptionModal(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold z-10"
+            >
+              ✕
+            </button>
+            <h2 className="text-2xl font-bold mb-6 flex items-center">
+              <Pill className="h-6 w-6 mr-3 text-green-600" />
+              Ordonnance Médicale
+            </h2>
+            
+            <div className="space-y-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h3 className="font-semibold text-green-800 mb-2">💊 Informations Prescription</h3>
+                <p className="text-sm text-green-700">
+                  Prescrite par: {prescription.prescribedBy} le{" "}
+                  {new Date(prescription.prescriptionDate).toLocaleDateString()}
+                </p>
+                <p className="text-sm text-green-700">ID Prescription: {prescription.prescriptionId}</p>
+              </div>
+
+              {prescription.prescription?.medications && prescription.prescription.medications.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-gray-900">Médicaments Prescrits:</h4>
+                  {prescription.prescription.medications.map((med, index) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                      <h5 className="font-semibold text-gray-900 mb-1">{med.medication_name}</h5>
+                      <div className="text-sm text-gray-600">
+                        <strong>Marque:</strong> {med.brand_name}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <strong>Dosage:</strong> {med.strength}, {med.pharmaceutical_form}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <strong>Posologie:</strong> {med.dosage_regimen.dose}, {med.dosage_regimen.frequency},{" "}
+                        {med.dosage_regimen.timing}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <strong>Instructions:</strong> {med.instructions.french}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <strong>Indication:</strong> {med.indication}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-4 mt-6">
+                <button
+                  onClick={() => {
+                    // Fonction pour imprimer l'ordonnance
+                    const printContent = `
+ORDONNANCE MÉDICALE
+
+Prescrite par: ${prescription.prescribedBy}
+Date: ${new Date(prescription.prescriptionDate).toLocaleDateString()}
+ID: ${prescription.prescriptionId}
+
+Patient: ${patientData.name}
+Âge: ${patientData.age} ans
+
+MÉDICAMENTS PRESCRITS:
+${prescription.prescription?.medications?.map((med, index) => `
+${index + 1}. ${med.medication_name} ${med.strength}
+   Posologie: ${med.dosage_regimen.dose}, ${med.dosage_regimen.frequency}
+   Instructions: ${med.instructions.french}
+   Quantité: ${med.quantity}
+`).join('\n') || 'Aucun médicament prescrit'}
+
+Instructions de suivi:
+${prescription.prescription?.follow_up_instructions?.next_appointment || 'À programmer'}
+
+Signature: ${prescription.prescribedBy}
+                    `.trim();
+                    
+                    const printWindow = window.open("", "_blank");
+                    printWindow.document.write(`
+                      <html>
+                        <head><title>Ordonnance</title></head>
+                        <body><pre>${printContent}</pre></body>
+                      </html>
+                    `);
+                    printWindow.document.close();
+                    printWindow.print();
+                  }}
+                  className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center font-semibold"
+                >
+                  <Printer className="h-5 w-5 mr-2" />
+                  Imprimer
+                </button>
+                <button
+                  onClick={() => setShowPrescriptionModal(false)}
+                  className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 font-semibold"
+                >
+                  Fermer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Prescription Examens */}
+      {showWorkupModal && workup && (
+        <div className="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-3/4 h-3/4 overflow-auto relative">
+            <button
+              onClick={() => setShowWorkupModal(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold z-10"
+            >
+              ✕
+            </button>
+            <h2 className="text-2xl font-bold mb-6 flex items-center">
+              <Search className="h-6 w-6 mr-3 text-orange-600" />
+              Prescription d'Examens Complémentaires
+            </h2>
+            
+            <div className="space-y-4">
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <h3 className="font-semibold text-orange-800 mb-2">🔬 Informations Examens</h3>
+                <p className="text-sm text-orange-700">
+                  Prescrits par: {workup.prescribedBy} le {new Date(workup.workupDate).toLocaleDateString()}
+                </p>
+                <p className="text-sm text-orange-700">ID Prescription Examens: {workup.workupId}</p>
+              </div>
+
+              {workup.workup?.laboratory_tests && workup.workup.laboratory_tests.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-gray-900">Examens de Laboratoire:</h4>
+                  {workup.workup.laboratory_tests.map((test, index) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                      <h5 className="font-semibold text-gray-900 mb-1">{test.test_name}</h5>
+                      <div className="text-sm text-gray-600">
+                        <strong>Catégorie:</strong> {test.category}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <strong>Indication:</strong> {test.indication}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <strong>Urgence:</strong> {test.urgency}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {workup.workup?.imaging_studies && workup.workup.imaging_studies.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-gray-900">Examens d'Imagerie:</h4>
+                  {workup.workup.imaging_studies.map((study, index) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                      <h5 className="font-semibold text-gray-900 mb-1">{study.study_name}</h5>
+                      <div className="text-sm text-gray-600">
+                        <strong>Modalité:</strong> {study.modality}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <strong>Indication:</strong> {study.indication}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <strong>Urgence:</strong> {study.urgency}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {workup.workup?.functional_tests && workup.workup.functional_tests.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-gray-900">Examens Fonctionnels:</h4>
+                  {workup.workup.functional_tests.map((test, index) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                      <h5 className="font-semibold text-gray-900 mb-1">{test.test_name}</h5>
+                      <div className="text-sm text-gray-600">
+                        <strong>Indication:</strong> {test.indication}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <strong>Urgence:</strong> {test.urgency}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-4 mt-6">
+                <button
+                  onClick={() => {
+                    // Fonction pour imprimer la prescription d'examens
+                    const printContent = `
+PRESCRIPTION D'EXAMENS COMPLÉMENTAIRES
+
+Prescrits par: ${workup.prescribedBy}
+Date: ${new Date(workup.workupDate).toLocaleDateString()}
+ID: ${workup.workupId}
+
+Patient: ${patientData.name}
+Âge: ${patientData.age} ans
+
+EXAMENS DE LABORATOIRE:
+${workup.workup?.laboratory_tests?.map((test, index) => `
+${index + 1}. ${test.test_name}
+   Indication: ${test.indication}
+   Urgence: ${test.urgency}
+`).join('\n') || 'Aucun examen de laboratoire'}
+
+EXAMENS D'IMAGERIE:
+${workup.workup?.imaging_studies?.map((study, index) => `
+${index + 1}. ${study.study_name}
+   Indication: ${study.indication}
+   Urgence: ${study.urgency}
+`).join('\n') || 'Aucun examen d\'imagerie'}
+
+EXAMENS FONCTIONNELS:
+${workup.workup?.functional_tests?.map((test, index) => `
+${index + 1}. ${test.test_name}
+   Indication: ${test.indication}
+   Urgence: ${test.urgency}
+`).join('\n') || 'Aucun examen fonctionnel'}
+
+Signature: ${workup.prescribedBy}
+                    `.trim();
+                    
+                    const printWindow = window.open("", "_blank");
+                    printWindow.document.write(`
+                      <html>
+                        <head><title>Prescription Examens</title></head>
+                        <body><pre>${printContent}</pre></body>
+                      </html>
+                    `);
+                    printWindow.document.close();
+                    printWindow.print();
+                  }}
+                  className="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center font-semibold"
+                >
+                  <Printer className="h-5 w-5 mr-2" />
+                  Imprimer
+                </button>
+                <button
+                  onClick={() => setShowWorkupModal(false)}
+                  className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 font-semibold"
+                >
+                  Fermer
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
