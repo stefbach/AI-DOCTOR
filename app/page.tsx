@@ -41,7 +41,7 @@ export class AdvancedMedicalExpert {
     this.apiConfig = {
       openai: {
         baseURL: "https://api.openai.com/v1/chat/completions",
-        key: typeof window !== "undefined" ? window.localStorage?.getItem("openai_key") || "" : "",
+        key: "", // Sera chargé dynamiquement côté client
         model: "gpt-4",
       },
       drugAPIs: {
@@ -60,23 +60,24 @@ export class AdvancedMedicalExpert {
       },
       medicalResearch: {
         pubmed: { 
-          apiKey: typeof window !== "undefined" ? window.localStorage?.getItem("pubmed_key") || "" : "",
+          apiKey: "", // Sera chargé dynamiquement côté client
           enabled: true 
         },
         clinicalTrials: { enabled: true },
         umls: { 
-          apiKey: typeof window !== "undefined" ? window.localStorage?.getItem("umls_key") || "" : "",
+          apiKey: "", // Sera chargé dynamiquement côté client
           enabled: true 
         },
       },
     }
 
-    // Initialise les sous-services API ultra-avancés
-    this.pubmed = new PubMedService({ pubmed: this.apiConfig.medicalResearch.pubmed })
-    this.clinicalTrials = new ClinicalTrialsService({ clinicalTrials: this.apiConfig.medicalResearch.clinicalTrials })
-    this.umls = new UMLSService({ umls: this.apiConfig.medicalResearch.umls })
+    // ✅ CORRECTION: Services désactivés temporairement
+    // Ces classes n'existent pas, donc on les initialise à null
+    this.pubmed = null
+    this.clinicalTrials = null
+    this.umls = null
 
-    // Local DB fallback (tu peux l’enrichir si besoin)
+    // Local DB fallback
     this.medicationDatabase = this.initializeComprehensiveMedicationDatabase()
     this.medicalHistoryDatabase = this.initializeMedicalHistoryDatabase()
     this.drugInteractionChecker = this.initializeDrugInteractionChecker()
@@ -84,6 +85,48 @@ export class AdvancedMedicalExpert {
     this.drugAPICache = new Map()
     this.researchCache = new Map()
     this.cacheExpiry = 24 * 60 * 60 * 1000
+
+    // ✅ AJOUT: Méthode pour charger les clés API côté client
+    this.loadAPIKeys()
+  }
+
+  // ✅ NOUVELLE MÉTHODE: Charger les clés API côté client uniquement
+  loadAPIKeys() {
+    if (typeof window !== "undefined") {
+      const openaiKey = window.localStorage?.getItem("openai_key") || ""
+      const pubmedKey = window.localStorage?.getItem("pubmed_key") || ""
+      const umlsKey = window.localStorage?.getItem("umls_key") || ""
+      
+      if (openaiKey) {
+        this.apiConfig.openai.key = openaiKey
+      }
+      if (pubmedKey) {
+        this.apiConfig.medicalResearch.pubmed.apiKey = pubmedKey
+      }
+      if (umlsKey) {
+        this.apiConfig.medicalResearch.umls.apiKey = umlsKey
+      }
+    }
+  }
+
+  // ✅ MÉTHODE: Mise à jour des clés API
+  updateAPIKey(service, key) {
+    if (typeof window !== "undefined") {
+      switch(service) {
+        case 'openai':
+          this.apiConfig.openai.key = key
+          window.localStorage?.setItem("openai_key", key)
+          break
+        case 'pubmed':
+          this.apiConfig.medicalResearch.pubmed.apiKey = key
+          window.localStorage?.setItem("pubmed_key", key)
+          break
+        case 'umls':
+          this.apiConfig.medicalResearch.umls.apiKey = key
+          window.localStorage?.setItem("umls_key", key)
+          break
+      }
+    }
   }
   // ========================================
   // 🏥 DIAGNOSTIC MÉDICAL EXPERT NIVEAU INTERNISTE
