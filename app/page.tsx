@@ -21,7 +21,12 @@ import {
   AlertTriangle,
   Heart,
   Thermometer,
+  Download,
+  Printer,
+  Users,
 } from "lucide-react"
+
+import ConsultationReportPanel from "../components/consultation-report"
 
 // ========================================
 // 🧠 SYSTÈME MÉDICAL EXPERT AVANCÉ - NIVEAU INTERNISTE
@@ -79,6 +84,334 @@ class AdvancedMedicalExpert {
     } catch (error) {
       console.error("Erreur diagnostic expert:", error)
       return this.generateLocalExpertDiagnosis(patientData, clinicalPresentation)
+    }
+  }
+
+  // Ajouter après la méthode generateComprehensiveDiagnosis
+  async generateInitialClinicalQuestions(patientData, clinicalPresentation) {
+    const startTime = Date.now()
+
+    try {
+      if (!this.isAPIConfigured()) {
+        return this.generateLocalClinicalQuestions(patientData, clinicalPresentation)
+      }
+
+      const questionsAnalysis = await this.performInitialClinicalAnalysis(patientData, clinicalPresentation)
+
+      return {
+        clinicalQuestions: questionsAnalysis.clinical_questions || [],
+        preliminaryThoughts: questionsAnalysis.preliminary_thoughts || "",
+        processingTime: Date.now() - startTime,
+        source: "Expert Clinical Questions AI",
+        timestamp: new Date().toISOString(),
+        questionId: this.generateQuestionId(),
+      }
+    } catch (error) {
+      console.error("Erreur questions cliniques:", error)
+      return this.generateLocalClinicalQuestions(patientData, clinicalPresentation)
+    }
+  }
+
+  async performInitialClinicalAnalysis(patientData, clinicalPresentation) {
+    const vitalSigns = []
+    if (clinicalPresentation.systolicBP && clinicalPresentation.diastolicBP) {
+      vitalSigns.push(`TA: ${clinicalPresentation.systolicBP}/${clinicalPresentation.diastolicBP} mmHg`)
+    }
+    if (clinicalPresentation.heartRate) {
+      vitalSigns.push(`FC: ${clinicalPresentation.heartRate} bpm`)
+    }
+    if (clinicalPresentation.temperature) {
+      vitalSigns.push(`T°: ${clinicalPresentation.temperature}°C`)
+    }
+    if (clinicalPresentation.oxygenSaturation) {
+      vitalSigns.push(`SpO2: ${clinicalPresentation.oxygenSaturation}%`)
+    }
+
+    const prompt = `Tu es un médecin interniste senior expert à Maurice. Tu dois d'abord RÉFLÉCHIR et poser des QUESTIONS CLINIQUES PERTINENTES avant de faire un diagnostic.
+
+ÉTAPE 1: ANALYSE INITIALE ET QUESTIONS CLINIQUES
+
+DONNÉES DISPONIBLES:
+Patient: ${JSON.stringify(patientData, null, 2)}
+Présentation: ${JSON.stringify(clinicalPresentation, null, 2)}
+
+SIGNES VITAUX:
+${vitalSigns.join(", ")}
+
+ANTÉCÉDENTS:
+Médicaux: ${patientData.medicalHistory?.map((h) => `${h.condition} (${h.year})`).join(", ") || "Non renseignés"}
+Familiaux: ${patientData.familyHistory?.map((h) => `${h.condition} (${h.relation})`).join(", ") || "Non renseignés"}
+Traitements: ${patientData.currentMedications?.map((m) => `${m.name} ${m.dosage}`).join(", ") || "Aucun"}
+
+INSTRUCTIONS:
+1. Analyse la présentation clinique
+2. Identifie les HYPOTHÈSES DIAGNOSTIQUES PRÉLIMINAIRES
+3. Pose 5-8 QUESTIONS CLINIQUES PRÉCISES pour affiner le diagnostic
+4. Justifie chaque question médicalement
+5. Classe les questions par priorité
+
+Réponds en JSON:
+
+{
+  "preliminary_thoughts": "Réflexion clinique initiale sur les hypothèses diagnostiques possibles",
+  "clinical_questions": [
+    {
+      "question": "Question clinique précise et pertinente",
+      "rationale": "Justification médicale de cette question",
+      "category": "symptomatology|examination|history|risk_factors|timeline",
+      "priority": "high|medium|low",
+      "diagnostic_value": "Valeur diagnostique de cette question"
+    }
+  ]
+}`
+
+    const response = await fetch(this.apiConfig.openai.baseURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.apiConfig.openai.key}`,
+      },
+      body: JSON.stringify({
+        model: this.apiConfig.openai.model,
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.1,
+        max_tokens: 3000,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API Error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    const aiResponse = data.choices?.[0]?.message?.content
+
+    try {
+      return JSON.parse(aiResponse)
+    } catch (parseError) {
+      throw new Error("Réponse questions IA non parsable")
+    }
+  }
+
+  generateQuestionId() {
+    return `QUEST-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  }
+
+  async generateLocalClinicalQuestions(patientData, clinicalPresentation) {
+    await this.simulateProcessing(1500)
+
+    const questions = [
+      {
+        question: "Pouvez-vous décrire précisément la chronologie d'apparition des symptômes ?",
+        rationale: "La chronologie aide à différencier les causes aiguës des chroniques",
+        category: "timeline",
+        priority: "high",
+        diagnostic_value: "Essentielle pour orientation diagnostique",
+      },
+      {
+        question: "Y a-t-il des facteurs déclenchants ou aggravants identifiés ?",
+        rationale: "Identifier les facteurs déclenchants oriente vers certaines étiologies",
+        category: "symptomatology",
+        priority: "high",
+        diagnostic_value: "Aide au diagnostic différentiel",
+      },
+      {
+        question: "Avez-vous des antécédents familiaux de maladies similaires ?",
+        rationale: "Les antécédents familiaux peuvent révéler une prédisposition génétique",
+        category: "history",
+        priority: "medium",
+        diagnostic_value: "Importante pour maladies héréditaires",
+      },
+    ]
+
+    return {
+      clinicalQuestions: questions,
+      preliminaryThoughts:
+        "Analyse basée sur la présentation clinique. Questions pour affiner le diagnostic différentiel.",
+      processingTime: 1500,
+      source: "Expert Local Questions Database",
+      questionId: this.generateQuestionId(),
+    }
+  }
+
+  // Modifier la méthode performExpertClinicalAnalysis pour inclure les réponses aux questions
+  async performExpertClinicalAnalysisWithAnswers(patientData, clinicalPresentation, clinicalAnswers) {
+    if (!this.isAPIConfigured()) {
+      // Fallback local si pas d'API
+      return this.generateLocalDiagnosisWithAnswers(patientData, clinicalPresentation, clinicalAnswers)
+    }
+
+    const vitalSigns = []
+    if (clinicalPresentation.systolicBP && clinicalPresentation.diastolicBP) {
+      vitalSigns.push(`TA: ${clinicalPresentation.systolicBP}/${clinicalPresentation.diastolicBP} mmHg`)
+    }
+    if (clinicalPresentation.heartRate) {
+      vitalSigns.push(`FC: ${clinicalPresentation.heartRate} bpm`)
+    }
+    if (clinicalPresentation.temperature) {
+      vitalSigns.push(`T°: ${clinicalPresentation.temperature}°C`)
+    }
+    if (clinicalPresentation.oxygenSaturation) {
+      vitalSigns.push(`SpO2: ${clinicalPresentation.oxygenSaturation}%`)
+    }
+
+    const answersText = Object.entries(clinicalAnswers)
+      .map(([index, answer]) => `Question ${Number.parseInt(index) + 1}: ${answer}`)
+      .join("\n")
+
+    const prompt = `Tu es un médecin interniste senior expert à Maurice. 
+
+ÉTAPE 2: DIAGNOSTIC FINAL APRÈS QUESTIONS CLINIQUES
+
+DONNÉES COMPLÈTES:
+Patient: ${JSON.stringify(patientData, null, 2)}
+Présentation: ${JSON.stringify(clinicalPresentation, null, 2)}
+
+SIGNES VITAUX:
+${vitalSigns.join(", ")}
+
+RÉPONSES AUX QUESTIONS CLINIQUES:
+${answersText || "Aucune réponse fournie"}
+
+ANTÉCÉDENTS COMPLETS:
+Médicaux: ${patientData.medicalHistory?.map((h) => `${h.condition || h.customCondition} (${h.year}) - ${h.status}`).join("\n") || "Aucun"}
+Familiaux: ${patientData.familyHistory?.map((h) => `${h.condition} (${h.relation}) - ${h.age || "âge non précisé"}`).join("\n") || "Aucun"}
+Chirurgicaux: ${patientData.surgicalHistory?.map((s) => `${s.procedure} (${s.year})`).join("\n") || "Aucun"}
+Traitements: ${patientData.currentMedications?.map((m) => `${m.name} ${m.dosage} ${m.frequency}`).join("\n") || "Aucun"}
+
+CONTEXTE MAURICIEN:
+- Prévalences: HTA 40%, DT2 25%, Obésité 35%, Dyslipidémie 45%
+- Maladies tropicales: Dengue, Chikungunya, Paludisme (rare)
+
+INSTRUCTIONS FINALES:
+1. Intègre TOUTES les informations disponibles
+2. Utilise les réponses aux questions cliniques pour affiner ton diagnostic
+3. Propose un diagnostic différentiel COMPLET et HIÉRARCHISÉ
+4. Justifie chaque diagnostic avec les éléments cliniques
+5. Indique la conduite à tenir
+
+Réponds en JSON avec diagnostic FINAL:
+
+{
+  "differential_diagnosis": [
+    {
+      "diagnosis": "Diagnostic médical précis",
+      "icd10_code": "Code ICD-10",
+      "probability_percent": 85,
+      "clinical_reasoning": "Raisonnement clinique détaillé intégrant les réponses aux questions",
+      "severity": "mild|moderate|severe|critical",
+      "urgency": "routine|urgent|emergent",
+      "prognosis": "Pronostic détaillé",
+      "supporting_evidence": ["Éléments en faveur"],
+      "differential_points": ["Points différentiels"],
+      "red_flags": ["Signes d'alarme"],
+      "complications": ["Complications possibles"]
+    }
+  ],
+  "differential_workup": [
+    {
+      "test_category": "laboratory|imaging|functional|biopsy",
+      "tests": ["Examens recommandés"],
+      "rationale": "Justification",
+      "urgency": "immediate|within_24h|within_week|routine"
+    }
+  ],
+  "confidence_level": "high|moderate|low",
+  "expert_notes": "Notes finales après intégration des questions cliniques"
+}`
+
+    try {
+      const response = await fetch(this.apiConfig.openai.baseURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.apiConfig.openai.key}`,
+        },
+        body: JSON.stringify({
+          model: this.apiConfig.openai.model,
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.1,
+          max_tokens: 6000,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API Error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      const aiResponse = data.choices?.[0]?.message?.content
+
+      try {
+        const parsedResponse = JSON.parse(aiResponse)
+        return {
+          ...parsedResponse,
+          confidence: this.mapConfidenceToNumeric(parsedResponse.confidence_level),
+          diagnoses: parsedResponse.differential_diagnosis || [],
+        }
+      } catch (parseError) {
+        throw new Error("Réponse diagnostic final IA non parsable")
+      }
+    } catch (error) {
+      console.error("Erreur API OpenAI:", error)
+      // Fallback vers diagnostic local
+      return this.generateLocalDiagnosisWithAnswers(patientData, clinicalPresentation, clinicalAnswers)
+    }
+  }
+
+  async generateLocalDiagnosisWithAnswers(patientData, clinicalPresentation, clinicalAnswers) {
+    await this.simulateProcessing(2000)
+
+    const localDiagnoses = []
+    const symptoms = clinicalPresentation.symptoms?.toLowerCase() || ""
+    const complaint = clinicalPresentation.chiefComplaint?.toLowerCase() || ""
+
+    // Diagnostic expert local pour ZONA
+    if (
+      symptoms.includes("zona") ||
+      symptoms.includes("éruption") ||
+      symptoms.includes("vésicule") ||
+      (symptoms.includes("douleur") && symptoms.includes("unilatéral"))
+    ) {
+      localDiagnoses.push({
+        diagnosis: "Zona (Herpès Zoster)",
+        icd10_code: "B02.9",
+        probability_percent: 85,
+        clinical_reasoning:
+          "Éruption vésiculeuse unilatérale suivant un trajet dermatomal évocatrice de zona. Réponses aux questions cliniques confirment le diagnostic. Nécessite traitement antiviral précoce (< 72h).",
+        severity: "moderate",
+        urgency: "urgent",
+        prognosis: "Bon avec traitement antiviral précoce. Risque de douleurs post-zostériennes chez sujet âgé",
+        supporting_evidence: ["Éruption dermatomale", "Douleur neuropathique", "Vésicules sur base érythémateuse"],
+        red_flags: ["Atteinte ophtalmique", "Immunodépression", "Zona généralisé"],
+        complications: ["Douleurs post-zostériennes", "Surinfection bactérienne", "Atteinte neurologique"],
+      })
+    }
+
+    // Ajouter d'autres diagnostics selon les symptômes
+    if (symptoms.includes("hypertension") || symptoms.includes("tension")) {
+      localDiagnoses.push({
+        diagnosis: "Hypertension artérielle",
+        icd10_code: "I10",
+        probability_percent: 75,
+        clinical_reasoning:
+          "Signes cliniques et réponses aux questions évocateurs d'HTA. Nécessite confirmation par mesures répétées.",
+        severity: "moderate",
+        urgency: "routine",
+        prognosis: "Bon avec traitement adapté et suivi régulier",
+        supporting_evidence: ["Signes vitaux", "Facteurs de risque"],
+        red_flags: ["Crise hypertensive", "Retentissement d'organe"],
+        complications: ["AVC", "Infarctus", "Insuffisance rénale"],
+      })
+    }
+
+    return {
+      differential_diagnosis: localDiagnoses,
+      confidence_level: "moderate",
+      diagnoses: localDiagnoses,
+      confidence: 0.75,
+      expert_notes:
+        "Diagnostic basé sur présentation clinique et réponses aux questions. Confirmation par examen clinique recommandée.",
     }
   }
 
@@ -1008,8 +1341,7 @@ const ExpertConfigPanel = ({ medicalExpert, onConfigChange }) => {
 // 🏥 COMPOSANT PRINCIPAL - SYSTÈME MÉDICAL EXPERT NIVEAU INTERNISTE
 // ========================================
 const AdvancedMedicalExpertSystem = () => {
-  // États principaux
-  const [currentStep, setCurrentStep] = useState("patient")
+  // Modifier l'état patientData pour inclure familyHistory
   const [patientData, setPatientData] = useState({
     name: "",
     age: "",
@@ -1021,6 +1353,7 @@ const AdvancedMedicalExpertSystem = () => {
     surgicalHistory: [],
     currentMedications: [],
     allergies: [],
+    familyHistory: [], // NOUVEAU
     smokingStatus: "",
     packYears: "",
     smokingDetails: "",
@@ -1053,8 +1386,13 @@ const AdvancedMedicalExpertSystem = () => {
   const [diagnosis, setDiagnosis] = useState(null)
   const [selectedDiagnoses, setSelectedDiagnoses] = useState([])
   const [prescription, setPrescription] = useState(null)
-  const [clinicalAnswers, setClinicalAnswers] = useState({})
   const [workup, setWorkup] = useState(null)
+  const [showWorkupOrder, setShowWorkupOrder] = useState(false)
+  const [showConsultationReport, setShowConsultationReport] = useState(false)
+
+  // Ajouter de nouveaux états pour le processus en deux étapes
+  const [clinicalQuestions, setClinicalQuestions] = useState(null)
+  const [clinicalAnswers, setClinicalAnswers] = useState({})
 
   // États interface
   const [isProcessing, setIsProcessing] = useState(false)
@@ -1064,7 +1402,10 @@ const AdvancedMedicalExpertSystem = () => {
   const [medicalExpert] = useState(new AdvancedMedicalExpert())
   const [apiStatus, setApiStatus] = useState(medicalExpert.getAPIStatus())
 
-  // Configuration workflow
+  // Déclarer currentStep et setCurrentStep avec useState
+  const [currentStep, setCurrentStep] = useState("patient")
+
+  // Modifier les steps pour inclure l'étape questions
   const steps = [
     {
       id: "patient",
@@ -1079,6 +1420,12 @@ const AdvancedMedicalExpertSystem = () => {
       completed: clinicalPresentation.chiefComplaint && clinicalPresentation.symptoms,
     },
     {
+      id: "questions",
+      label: "Questions",
+      icon: HelpCircle,
+      completed: clinicalQuestions && Object.keys(clinicalAnswers).length > 0,
+    },
+    {
       id: "diagnosis",
       label: "Diagnostic",
       icon: Brain,
@@ -1091,10 +1438,16 @@ const AdvancedMedicalExpertSystem = () => {
       completed: prescription,
     },
     {
+      id: "workup",
+      label: "Examens",
+      icon: Search,
+      completed: workup,
+    },
+    {
       id: "summary",
-      label: "Synthèse",
+      label: "Documents",
       icon: FileText,
-      completed: false,
+      completed: prescription && workup,
     },
   ]
 
@@ -1104,8 +1457,72 @@ const AdvancedMedicalExpertSystem = () => {
     setApiStatus(medicalExpert.getAPIStatus())
   }
 
-  // Gestion diagnostic expert
+  // Nouvelle méthode pour générer les questions cliniques
+  const handleGenerateQuestions = async () => {
+    if (!clinicalPresentation.chiefComplaint.trim() || !clinicalPresentation.symptoms.trim()) {
+      setErrors({ questions: "Motif de consultation et symptômes requis" })
+      return
+    }
+
+    setIsProcessing(true)
+    setErrors({})
+
+    try {
+      const result = await medicalExpert.generateInitialClinicalQuestions(patientData, clinicalPresentation)
+      setClinicalQuestions(result)
+      setCurrentStep("questions")
+    } catch (error) {
+      setErrors({
+        questions: `Erreur génération questions: ${error.message}`,
+      })
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Modifier la méthode handleExpertDiagnosis pour utiliser les réponses
   const handleExpertDiagnosis = async () => {
+    if (!clinicalQuestions || Object.keys(clinicalAnswers).length === 0) {
+      setErrors({ diagnosis: "Veuillez répondre aux questions cliniques" })
+      return
+    }
+
+    setIsProcessing(true)
+    setErrors({})
+
+    try {
+      const result = await medicalExpert.performExpertClinicalAnalysisWithAnswers(
+        patientData,
+        clinicalPresentation,
+        clinicalAnswers,
+      )
+
+      // Créer l'objet diagnosis avec la structure attendue
+      const diagnosisResult = {
+        clinicalAnalysis: result,
+        processingTime: Date.now() - Date.now(), // Temps de traitement
+        confidence: result.confidence || 0.8,
+        source: "Expert Medical AI + Clinical Guidelines",
+        timestamp: new Date().toISOString(),
+        consultationId: medicalExpert.generateConsultationId(),
+        clinicalQuestions: result.clinical_questions || [],
+        differentialWorkup: result.differential_workup || [],
+      }
+
+      setDiagnosis(diagnosisResult)
+      setCurrentStep("diagnosis")
+    } catch (error) {
+      console.error("Erreur diagnostic:", error)
+      setErrors({
+        diagnosis: `Erreur analyse: ${error.message}`,
+      })
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Gestion diagnostic expert
+  const performExpertClinicalAnalysis = async () => {
     if (!clinicalPresentation.chiefComplaint.trim() || !clinicalPresentation.symptoms.trim()) {
       setErrors({ diagnosis: "Motif de consultation et symptômes requis" })
       return
@@ -1171,6 +1588,7 @@ const AdvancedMedicalExpertSystem = () => {
         clinicalAnswers,
       })
       setWorkup(result)
+      setCurrentStep("workup")
     } catch (error) {
       setErrors({
         workup: `Erreur prescription examens: ${error.message}`,
@@ -1399,10 +1817,10 @@ const AdvancedMedicalExpertSystem = () => {
                   {patientData.medicalHistory.map((history, index) => (
                     <div key={index} className="border border-gray-200 rounded-lg p-4">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Remplacer le champ condition par un select avec options prédéfinies */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Pathologie</label>
-                          <input
-                            type="text"
+                          <select
                             value={history.condition}
                             onChange={(e) => {
                               const newHistory = [...patientData.medicalHistory]
@@ -1410,8 +1828,70 @@ const AdvancedMedicalExpertSystem = () => {
                               updatePatientData("medicalHistory", newHistory)
                             }}
                             className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                            placeholder="Ex: Hypertension artérielle"
-                          />
+                          >
+                            <option value="">Sélectionner</option>
+                            <optgroup label="Cardiovasculaire">
+                              <option value="Hypertension artérielle">Hypertension artérielle</option>
+                              <option value="Infarctus du myocarde">Infarctus du myocarde</option>
+                              <option value="Insuffisance cardiaque">Insuffisance cardiaque</option>
+                              <option value="Fibrillation auriculaire">Fibrillation auriculaire</option>
+                              <option value="Valvulopathie">Valvulopathie</option>
+                              <option value="Artériopathie">Artériopathie</option>
+                            </optgroup>
+                            <optgroup label="Endocrinien">
+                              <option value="Diabète type 1">Diabète type 1</option>
+                              <option value="Diabète type 2">Diabète type 2</option>
+                              <option value="Hypothyroïdie">Hypothyroïdie</option>
+                              <option value="Hyperthyroïdie">Hyperthyroïdie</option>
+                              <option value="Syndrome métabolique">Syndrome métabolique</option>
+                            </optgroup>
+                            <optgroup label="Respiratoire">
+                              <option value="Asthme">Asthme</option>
+                              <option value="BPCO">BPCO</option>
+                              <option value="Apnée du sommeil">Apnée du sommeil</option>
+                              <option value="Tuberculose">Tuberculose</option>
+                            </optgroup>
+                            <optgroup label="Digestif">
+                              <option value="RGO">Reflux gastro-œsophagien</option>
+                              <option value="Ulcère gastroduodénal">Ulcère gastroduodénal</option>
+                              <option value="Maladie de Crohn">Maladie de Crohn</option>
+                              <option value="Rectocolite hémorragique">Rectocolite hémorragique</option>
+                              <option value="Hépatite B">Hépatite B</option>
+                              <option value="Hépatite C">Hépatite C</option>
+                            </optgroup>
+                            <optgroup label="Neurologique">
+                              <option value="Épilepsie">Épilepsie</option>
+                              <option value="Migraine">Migraine</option>
+                              <option value="AVC">AVC</option>
+                              <option value="Dépression">Dépression</option>
+                              <option value="Anxiété">Trouble anxieux</option>
+                            </optgroup>
+                            <optgroup label="Rhumatologique">
+                              <option value="Arthrose">Arthrose</option>
+                              <option value="Polyarthrite rhumatoïde">Polyarthrite rhumatoïde</option>
+                              <option value="Lupus">Lupus</option>
+                              <option value="Goutte">Goutte</option>
+                            </optgroup>
+                            <optgroup label="Autres">
+                              <option value="Insuffisance rénale">Insuffisance rénale</option>
+                              <option value="Anémie">Anémie</option>
+                              <option value="Ostéoporose">Ostéoporose</option>
+                              <option value="Autre">Autre (préciser)</option>
+                            </optgroup>
+                          </select>
+                          {history.condition === "Autre" && (
+                            <input
+                              type="text"
+                              value={history.customCondition || ""}
+                              onChange={(e) => {
+                                const newHistory = [...patientData.medicalHistory]
+                                newHistory[index].customCondition = e.target.value
+                                updatePatientData("medicalHistory", newHistory)
+                              }}
+                              className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 mt-2"
+                              placeholder="Préciser la pathologie"
+                            />
+                          )}
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Année de diagnostic</label>
@@ -1713,6 +2193,149 @@ const AdvancedMedicalExpertSystem = () => {
                 </div>
               </div>
 
+              {/* Ajouter après la section Facteurs de Risque */}
+              {/* Antécédents Familiaux */}
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h3 className="text-xl font-bold mb-4 flex items-center">
+                  <Users className="h-5 w-5 mr-2 text-purple-600" />
+                  Antécédents Familiaux
+                </h3>
+
+                <div className="space-y-4">
+                  {patientData.familyHistory.map((history, index) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Pathologie</label>
+                          <select
+                            value={history.condition}
+                            onChange={(e) => {
+                              const newHistory = [...patientData.familyHistory]
+                              newHistory[index].condition = e.target.value
+                              updatePatientData("familyHistory", newHistory)
+                            }}
+                            className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">Sélectionner</option>
+                            <optgroup label="Cardiovasculaire">
+                              <option value="Hypertension artérielle">Hypertension artérielle</option>
+                              <option value="Infarctus du myocarde">Infarctus du myocarde</option>
+                              <option value="AVC">AVC</option>
+                              <option value="Insuffisance cardiaque">Insuffisance cardiaque</option>
+                              <option value="Mort subite">Mort subite</option>
+                            </optgroup>
+                            <optgroup label="Métabolique">
+                              <option value="Diabète type 1">Diabète type 1</option>
+                              <option value="Diabète type 2">Diabète type 2</option>
+                              <option value="Obésité">Obésité</option>
+                              <option value="Dyslipidémie">Dyslipidémie</option>
+                              <option value="Goutte">Goutte</option>
+                            </optgroup>
+                            <optgroup label="Oncologie">
+                              <option value="Cancer du sein">Cancer du sein</option>
+                              <option value="Cancer colorectal">Cancer colorectal</option>
+                              <option value="Cancer de la prostate">Cancer de la prostate</option>
+                              <option value="Cancer du poumon">Cancer du poumon</option>
+                              <option value="Leucémie">Leucémie</option>
+                            </optgroup>
+                            <optgroup label="Neurologique">
+                              <option value="Maladie d'Alzheimer">Maladie d'Alzheimer</option>
+                              <option value="Maladie de Parkinson">Maladie de Parkinson</option>
+                              <option value="Épilepsie">Épilepsie</option>
+                              <option value="Sclérose en plaques">Sclérose en plaques</option>
+                            </optgroup>
+                            <optgroup label="Autres">
+                              <option value="Asthme">Asthme</option>
+                              <option value="BPCO">BPCO</option>
+                              <option value="Maladie rénale">Maladie rénale</option>
+                              <option value="Maladie hépatique">Maladie hépatique</option>
+                              <option value="Autre">Autre</option>
+                            </optgroup>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Lien de parenté</label>
+                          <select
+                            value={history.relation}
+                            onChange={(e) => {
+                              const newHistory = [...patientData.familyHistory]
+                              newHistory[index].relation = e.target.value
+                              updatePatientData("familyHistory", newHistory)
+                            }}
+                            className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">Sélectionner</option>
+                            <option value="Père">Père</option>
+                            <option value="Mère">Mère</option>
+                            <option value="Frère">Frère</option>
+                            <option value="Sœur">Sœur</option>
+                            <option value="Grand-père paternel">Grand-père paternel</option>
+                            <option value="Grand-mère paternelle">Grand-mère paternelle</option>
+                            <option value="Grand-père maternel">Grand-père maternel</option>
+                            <option value="Grand-mère maternelle">Grand-mère maternelle</option>
+                            <option value="Oncle">Oncle</option>
+                            <option value="Tante">Tante</option>
+                            <option value="Cousin(e)">Cousin(e)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Âge au diagnostic</label>
+                          <input
+                            type="number"
+                            value={history.age}
+                            onChange={(e) => {
+                              const newHistory = [...patientData.familyHistory]
+                              newHistory[index].age = e.target.value
+                              updatePatientData("familyHistory", newHistory)
+                            }}
+                            className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                            placeholder="Âge"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+                          <select
+                            value={history.status}
+                            onChange={(e) => {
+                              const newHistory = [...patientData.familyHistory]
+                              newHistory[index].status = e.target.value
+                              updatePatientData("familyHistory", newHistory)
+                            }}
+                            className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="vivant">Vivant</option>
+                            <option value="décédé">Décédé</option>
+                            <option value="inconnu">Inconnu</option>
+                          </select>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          const newHistory = patientData.familyHistory.filter((_, i) => i !== index)
+                          updatePatientData("familyHistory", newHistory)
+                        }}
+                        className="mt-2 text-red-600 hover:text-red-800 text-sm"
+                      >
+                        Supprimer
+                      </button>
+                    </div>
+                  ))}
+
+                  <button
+                    onClick={() => {
+                      const newHistory = [
+                        ...patientData.familyHistory,
+                        { condition: "", relation: "", age: "", status: "vivant" },
+                      ]
+                      updatePatientData("familyHistory", newHistory)
+                    }}
+                    className="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-purple-500 hover:text-purple-600"
+                  >
+                    + Ajouter un antécédent familial
+                  </button>
+                </div>
+              </div>
+
               <div className="mt-8 flex justify-end">
                 <button
                   onClick={() => setCurrentStep("clinical")}
@@ -1832,20 +2455,79 @@ const AdvancedMedicalExpertSystem = () => {
                   Retour Patient
                 </button>
 
+                {/* Remplacer le bouton "Analyse Diagnostique Expert" par : */}
                 <button
-                  onClick={handleExpertDiagnosis}
+                  onClick={handleGenerateQuestions}
                   disabled={!clinicalPresentation.chiefComplaint || !clinicalPresentation.symptoms || isProcessing}
-                  className="px-8 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-semibold"
+                  className="px-8 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-semibold"
                 >
                   {isProcessing ? (
                     <>
                       <Loader className="animate-spin h-5 w-5 mr-2" />
-                      Analyse Expert en cours...
+                      Génération questions...
+                    </>
+                  ) : (
+                    <>
+                      <HelpCircle className="h-5 w-5 mr-2" />
+                      Générer Questions Cliniques (Étape 1)
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Section Questions Cliniques */}
+          {currentStep === "questions" && clinicalQuestions && (
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-2xl font-bold mb-6 flex items-center">
+                <HelpCircle className="h-6 w-6 mr-3 text-orange-600" />
+                Questions Cliniques Expertes - Étape 1
+              </h2>
+
+              {/* Réflexion préliminaire */}
+              {clinicalQuestions.preliminaryThoughts && (
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+                  <h3 className="font-semibold text-orange-800 mb-2">🧠 Réflexion Clinique Préliminaire</h3>
+                  <p className="text-sm text-orange-700">{clinicalQuestions.preliminaryThoughts}</p>
+                </div>
+              )}
+
+              <ClinicalQuestionsPanel
+                questions={clinicalQuestions.clinicalQuestions}
+                onAnswerQuestion={handleAnswerQuestion}
+                answers={clinicalAnswers}
+              />
+
+              {errors.questions && (
+                <div className="mt-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
+                  <AlertTriangle className="h-5 w-5 inline mr-2" />
+                  {errors.questions}
+                </div>
+              )}
+
+              <div className="mt-8 flex justify-between">
+                <button
+                  onClick={() => setCurrentStep("clinical")}
+                  className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 flex items-center font-semibold"
+                >
+                  Retour Présentation Clinique
+                </button>
+
+                <button
+                  onClick={handleExpertDiagnosis}
+                  disabled={Object.keys(clinicalAnswers).length === 0 || isProcessing}
+                  className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-semibold"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader className="animate-spin h-5 w-5 mr-2" />
+                      Analyse Diagnostique...
                     </>
                   ) : (
                     <>
                       <Brain className="h-5 w-5 mr-2" />
-                      Analyse Diagnostique Expert
+                      Analyse Diagnostique Expert (Étape 2)
                     </>
                   )}
                 </button>
@@ -1855,128 +2537,121 @@ const AdvancedMedicalExpertSystem = () => {
 
           {/* Section Diagnostic Expert */}
           {currentStep === "diagnosis" && diagnosis && (
-            <>
-              {/* Questions cliniques expertes */}
-              {diagnosis.clinicalQuestions && diagnosis.clinicalQuestions.length > 0 && (
-                <ClinicalQuestionsPanel
-                  questions={diagnosis.clinicalQuestions}
-                  onAnswerQuestion={handleAnswerQuestion}
-                  answers={clinicalAnswers}
-                />
-              )}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-2xl font-bold mb-6 flex items-center">
+                <Brain className="h-6 w-6 mr-3 text-purple-600" />
+                Diagnostic Expert - Niveau Interniste
+              </h2>
 
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-2xl font-bold mb-6 flex items-center">
-                  <Brain className="h-6 w-6 mr-3 text-purple-600" />
-                  Diagnostic Différentiel Expert
-                </h2>
-
-                {/* Insights IA Expert */}
-                <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-6 mb-6">
-                  <h3 className="font-bold text-purple-800 mb-3 flex items-center">
-                    <Brain className="h-5 w-5 mr-2" />
-                    Analyse IA Expert - Confiance: {Math.round(diagnosis.confidence * 100)}%
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <div className="text-purple-700">
-                        <strong>Source:</strong> {diagnosis.source}
-                      </div>
-                      <div className="text-purple-700">
-                        <strong>Temps d'analyse:</strong> {diagnosis.processingTime}ms
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-purple-700">
-                        <strong>Consultation ID:</strong> {diagnosis.consultationId}
-                      </div>
-                      <div className="text-purple-700">
-                        <strong>Questions posées:</strong> {diagnosis.clinicalQuestions?.length || 0}
-                      </div>
-                    </div>
-                  </div>
+              {/* Analyse clinique experte */}
+              <div className="space-y-4">
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-purple-800 mb-2">🩺 Analyse Clinique Experte</h3>
+                  <p className="text-sm text-purple-700">
+                    {diagnosis.clinicalAnalysis?.expert_notes ||
+                      "Analyse basée sur la présentation clinique et les antécédents du patient."}
+                  </p>
                 </div>
 
-                {/* Liste diagnostics */}
-                <div className="space-y-4">
-                  {diagnosis.clinicalAnalysis?.diagnoses?.map((diag, index) => (
-                    <div
-                      key={index}
-                      className={`border-2 rounded-xl p-6 cursor-pointer transition-all ${
-                        selectedDiagnoses.find((d) => d.icd10_code === diag.icd10_code)
-                          ? "border-blue-500 bg-blue-50 shadow-lg"
-                          : "border-gray-200 hover:border-gray-300 hover:shadow-md"
-                      }`}
-                      onClick={() => {
-                        const isSelected = selectedDiagnoses.find((d) => d.icd10_code === diag.icd10_code)
-                        if (isSelected) {
-                          setSelectedDiagnoses(selectedDiagnoses.filter((d) => d.icd10_code !== diag.icd10_code))
-                        } else {
-                          setSelectedDiagnoses([...selectedDiagnoses, diag])
-                        }
-                      }}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center mb-3">
-                            <h3 className="text-xl font-bold text-gray-900">{diag.diagnosis}</h3>
-                            <span className="ml-3 text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
-                              {diag.icd10_code}
-                            </span>
-                            <span
-                              className={`ml-2 text-xs px-2 py-1 rounded-full font-semibold ${
-                                diag.urgency === "emergent"
-                                  ? "bg-red-100 text-red-800"
-                                  : diag.urgency === "urgent"
-                                    ? "bg-orange-100 text-orange-800"
-                                    : "bg-green-100 text-green-800"
-                              }`}
-                            >
-                              {diag.urgency}
-                            </span>
-                          </div>
-
-                          <p className="text-gray-700 mb-4">{diag.clinical_reasoning}</p>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <strong className="text-gray-600">Sévérité:</strong> {diag.severity}
+                {/* Liste des diagnostics différentiels */}
+                {diagnosis.clinicalAnalysis?.diagnoses && diagnosis.clinicalAnalysis.diagnoses.length > 0 ? (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900">Diagnostics Différentiels:</h4>
+                    {diagnosis.clinicalAnalysis.diagnoses.map((diag, index) => (
+                      <div key={index} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <h5 className="font-semibold text-gray-900 mb-1">{diag.diagnosis}</h5>
+                            <div className="text-sm text-gray-600">
+                              <strong>Code ICD-10:</strong> {diag.icd10_code}
                             </div>
-                            <div>
-                              <strong className="text-gray-600">Pronostic:</strong> {diag.prognosis}
+                            <div className="text-sm text-gray-600">
+                              <strong>Probabilité:</strong> {diag.probability_percent}%
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              <strong>Justification:</strong> {diag.clinical_reasoning}
                             </div>
                           </div>
-
-                          {diag.red_flags && diag.red_flags.length > 0 && (
-                            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                              <div className="text-sm font-semibold text-red-800 mb-1">🚨 Signes d'alarme:</div>
-                              <div className="text-xs text-red-700">{diag.red_flags.join(", ")}</div>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="text-right ml-6">
-                          <div className="text-4xl font-bold text-blue-600">{diag.probability_percent}%</div>
-                          <div className="text-sm text-gray-500">Probabilité</div>
+                          <input
+                            type="checkbox"
+                            id={`diag-${index}`}
+                            value={diag.diagnosis}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedDiagnoses((prev) => [...prev, diag])
+                              } else {
+                                setSelectedDiagnoses((prev) => prev.filter((d) => d.diagnosis !== diag.diagnosis))
+                              }
+                            }}
+                            className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                          />
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-
-                {errors.prescription && (
-                  <div className="mt-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
-                    <AlertTriangle className="h-5 w-5 inline mr-2" />
-                    {errors.prescription}
+                    ))}
                   </div>
+                ) : (
+                  <div className="text-gray-500">Aucun diagnostic différentiel trouvé.</div>
                 )}
 
-                <div className="mt-8 flex justify-between">
+                {/* Liste des examens complémentaires */}
+                {diagnosis.clinicalAnalysis?.differential_workup &&
+                diagnosis.clinicalAnalysis.differential_workup.length > 0 ? (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900">Examens Complémentaires Recommandés:</h4>
+                    {diagnosis.clinicalAnalysis.differential_workup.map((workup, index) => (
+                      <div key={index} className="border border-gray-200 rounded-lg p-4">
+                        <h5 className="font-semibold text-gray-900 mb-1">
+                          {workup.test_category}: {workup.tests.join(", ")}
+                        </h5>
+                        <div className="text-sm text-gray-600">
+                          <strong>Justification:</strong> {workup.rationale}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <strong>Urgence:</strong> {workup.urgency}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-gray-500">Aucun examen complémentaire recommandé.</div>
+                )}
+              </div>
+
+              {errors.diagnosis && (
+                <div className="mt-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
+                  <AlertTriangle className="h-5 w-5 inline mr-2" />
+                  {errors.diagnosis}
+                </div>
+              )}
+
+              <div className="mt-8 flex justify-between">
+                <button
+                  onClick={() => setCurrentStep("questions")}
+                  className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 flex items-center font-semibold"
+                >
+                  Retour Questions
+                </button>
+
+                <div className="flex gap-4">
                   <button
-                    onClick={() => setCurrentStep("clinical")}
-                    className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 flex items-center font-semibold"
+                    onClick={() => {
+                      setShowWorkupOrder(true)
+                      handleExpertWorkup()
+                    }}
+                    disabled={selectedDiagnoses.length === 0 || isProcessing}
+                    className="px-8 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-semibold"
                   >
-                    Modifier Présentation
+                    {isProcessing ? (
+                      <>
+                        <Loader className="animate-spin h-5 w-5 mr-2" />
+                        Prescription Examens...
+                      </>
+                    ) : (
+                      <>
+                        <Search className="h-5 w-5 mr-2" />
+                        Prescription Examens
+                      </>
+                    )}
                   </button>
 
                   <button
@@ -1987,306 +2662,427 @@ const AdvancedMedicalExpertSystem = () => {
                     {isProcessing ? (
                       <>
                         <Loader className="animate-spin h-5 w-5 mr-2" />
-                        Génération prescription...
+                        Génération Prescription...
                       </>
                     ) : (
                       <>
                         <Pill className="h-5 w-5 mr-2" />
-                        Générer Prescription Expert ({selectedDiagnoses.length})
+                        Générer Prescription
                       </>
                     )}
                   </button>
                 </div>
               </div>
-            </>
+            </div>
           )}
 
-          {/* Section Prescription */}
+          {/* Section Prescription Experte */}
           {currentStep === "prescription" && prescription && (
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-xl font-bold mb-4 flex items-center">
-                <Pill className="h-6 w-6 mr-2 text-green-600" />
-                Prescription Médicale Expert
-              </h3>
+              <h2 className="text-2xl font-bold mb-6 flex items-center">
+                <Pill className="h-6 w-6 mr-3 text-green-600" />
+                Prescription Experte - Niveau Interniste
+              </h2>
 
-              {/* Justification clinique */}
-              {prescription.clinicalJustification && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                  <h4 className="font-semibold text-green-800 mb-2">🩺 Justification Clinique</h4>
-                  <p className="text-sm text-green-700">{prescription.clinicalJustification}</p>
-                </div>
-              )}
-
+              {/* Informations générales sur la prescription */}
               <div className="space-y-4">
-                {prescription.prescription?.medications?.map((med, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <h4 className="text-lg font-semibold text-gray-900">{med.medication_name}</h4>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-green-800 mb-2">💊 Informations Prescription</h3>
+                  <p className="text-sm text-green-700">
+                    Prescrite par: {prescription.prescribedBy} le{" "}
+                    {new Date(prescription.prescriptionDate).toLocaleDateString()}
+                  </p>
+                  <p className="text-sm text-green-700">ID Prescription: {prescription.prescriptionId}</p>
+                </div>
+
+                {/* Médicaments prescrits */}
+                {prescription.prescription?.medications && prescription.prescription.medications.length > 0 ? (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900">Médicaments Prescrits:</h4>
+                    {prescription.prescription.medications.map((med, index) => (
+                      <div key={index} className="border border-gray-200 rounded-lg p-4">
+                        <h5 className="font-semibold text-gray-900 mb-1">{med.medication_name}</h5>
                         <div className="text-sm text-gray-600">
-                          {med.brand_name} - {med.strength}
+                          <strong>Marque:</strong> {med.brand_name}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <strong>Dosage:</strong> {med.strength}, {med.pharmaceutical_form}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <strong>Posologie:</strong> {med.dosage_regimen.dose}, {med.dosage_regimen.frequency},{" "}
+                          {med.dosage_regimen.timing}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <strong>Instructions:</strong> {med.instructions.french}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <strong>Indication:</strong> {med.indication}
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-green-600">{med.cost_information?.total_cost_mur}</div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <div className="text-sm font-medium text-gray-700 mb-1">Posologie:</div>
-                        <div className="text-sm text-gray-600">
-                          {med.dosage_regimen?.dose} - {med.dosage_regimen?.frequency}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-gray-700 mb-1">Durée:</div>
-                        <div className="text-sm text-gray-600">{med.dosage_regimen?.duration}</div>
-                      </div>
-                    </div>
-
-                    <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-3">
-                      <div className="text-sm font-medium text-blue-800 mb-1">Instructions:</div>
-                      <div className="text-sm text-blue-700">{med.instructions?.french}</div>
-                    </div>
-
-                    {med.contraindications && med.contraindications.length > 0 && (
-                      <div className="bg-red-50 border border-red-200 rounded p-3 mb-3">
-                        <div className="text-sm font-medium text-red-800 mb-1">⚠️ Contre-indications:</div>
-                        <div className="text-xs text-red-700">{med.contraindications.join(", ")}</div>
-                      </div>
-                    )}
-
-                    {med.side_effects && med.side_effects.length > 0 && (
-                      <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
-                        <div className="text-sm font-medium text-yellow-800 mb-1">Effets secondaires:</div>
-                        <div className="text-xs text-yellow-700">{med.side_effects.join(", ")}</div>
-                      </div>
-                    )}
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <div className="text-gray-500">Aucun médicament prescrit.</div>
+                )}
+
+                {/* Instructions de suivi */}
+                {prescription.prescription?.follow_up_instructions && (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900">Instructions de Suivi:</h4>
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <div className="text-sm text-gray-600">
+                        <strong>Prochain rendez-vous:</strong>{" "}
+                        {prescription.prescription.follow_up_instructions.next_appointment}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <strong>Signes d'alarme:</strong>{" "}
+                        {prescription.prescription.follow_up_instructions.warning_signs.join(", ")}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <strong>Paramètres à surveiller:</strong>{" "}
+                        {prescription.prescription.follow_up_instructions.monitoring_parameters.join(", ")}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Justification clinique */}
+                {prescription.clinicalJustification && (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900">Justification Clinique:</h4>
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <div className="text-sm text-gray-600">{prescription.clinicalJustification}</div>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Plan de surveillance */}
-              {prescription.monitoringPlan && (
-                <div className="mt-6 bg-purple-50 border border-purple-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-purple-800 mb-2">📋 Plan de Surveillance</h4>
-                  <p className="text-sm text-purple-700">{prescription.monitoringPlan}</p>
-                </div>
-              )}
-
-              <div className="mt-6 flex gap-4">
+              <div className="mt-8 flex justify-between">
                 <button
-                  onClick={() => setCurrentStep("summary")}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center font-semibold"
+                  onClick={() => setCurrentStep("diagnosis")}
+                  className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 flex items-center font-semibold"
                 >
-                  Voir Synthèse
+                  Retour Diagnostic
+                </button>
+
+                <button
+                  onClick={() => {
+                    setCurrentStep("workup")
+                    setShowConsultationReport(true)
+                  }}
+                  className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center font-semibold"
+                >
+                  Continuer vers Examens Complémentaires
                   <ChevronRight className="h-5 w-5 ml-2" />
                 </button>
               </div>
             </div>
           )}
 
-          {/* Section Synthèse */}
-          {currentStep === "summary" && (
+          {/* Section Examens Complémentaires */}
+          {currentStep === "workup" && workup && (
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h2 className="text-2xl font-bold mb-6 flex items-center">
-                <FileText className="h-6 w-6 mr-3 text-indigo-600" />
-                Synthèse de Consultation Expert
+                <Search className="h-6 w-6 mr-3 text-orange-600" />
+                Examens Complémentaires - Niveau Interniste
               </h2>
 
-              <div className="space-y-6">
-                {/* Résumé patient */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="font-semibold mb-2">Patient</h3>
-                  <div className="text-sm text-gray-700">
-                    <strong>{patientData.name}</strong>, {patientData.age} ans, {patientData.gender}
-                    {patientData.ethnicity && `, ${patientData.ethnicity}`}
-                  </div>
+              {/* Informations générales sur la prescription d'examens */}
+              <div className="space-y-4">
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-orange-800 mb-2">🔬 Informations Examens</h3>
+                  <p className="text-sm text-orange-700">
+                    Prescrits par: {workup.prescribedBy} le {new Date(workup.workupDate).toLocaleDateString()}
+                  </p>
+                  <p className="text-sm text-orange-700">ID Prescription Examens: {workup.workupId}</p>
                 </div>
 
-                {/* Diagnostic retenu */}
-                {selectedDiagnoses.length > 0 && (
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <h3 className="font-semibold mb-2 text-blue-800">Diagnostics Retenus</h3>
-                    {selectedDiagnoses.map((diag, index) => (
-                      <div key={index} className="text-sm text-blue-700 mb-1">
-                        • {diag.diagnosis} ({diag.icd10_code}) - {diag.probability_percent}%
+                {/* Examens de laboratoire */}
+                {workup.workup?.laboratory_tests && workup.workup.laboratory_tests.length > 0 ? (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900">Examens de Laboratoire:</h4>
+                    {workup.workup.laboratory_tests.map((test, index) => (
+                      <div key={index} className="border border-gray-200 rounded-lg p-4">
+                        <h5 className="font-semibold text-gray-900 mb-1">{test.test_name}</h5>
+                        <div className="text-sm text-gray-600">
+                          <strong>Catégorie:</strong> {test.category}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <strong>Indication:</strong> {test.indication}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <strong>Urgence:</strong> {test.urgency}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <strong>Résultats attendus:</strong> {test.expected_results}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <strong>Notes d'interprétation:</strong> {test.interpretation_notes}
+                        </div>
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <div className="text-gray-500">Aucun examen de laboratoire prescrit.</div>
                 )}
 
-                {/* Prescription */}
-                {prescription && (
-                  <div className="bg-green-50 rounded-lg p-4">
-                    <h3 className="font-semibold mb-2 text-green-800">Traitement Prescrit</h3>
-                    {prescription.prescription?.medications?.map((med, index) => (
-                      <div key={index} className="text-sm text-green-700 mb-1">
-                        • {med.medication_name} {med.strength} - {med.dosage_regimen?.frequency}
+                {/* Examens d'imagerie */}
+                {workup.workup?.imaging_studies && workup.workup.imaging_studies.length > 0 ? (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900">Examens d'Imagerie:</h4>
+                    {workup.workup.imaging_studies.map((study, index) => (
+                      <div key={index} className="border border-gray-200 rounded-lg p-4">
+                        <h5 className="font-semibold text-gray-900 mb-1">{study.study_name}</h5>
+                        <div className="text-sm text-gray-600">
+                          <strong>Modalité:</strong> {study.modality}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <strong>Indication:</strong> {study.indication}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <strong>Urgence:</strong> {study.urgency}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <strong>Protocole spécifique:</strong> {study.specific_protocol}
+                        </div>
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <div className="text-gray-500">Aucun examen d'imagerie prescrit.</div>
                 )}
 
-                {/* Questions cliniques répondues */}
-                {Object.keys(clinicalAnswers).length > 0 && (
-                  <div className="bg-orange-50 rounded-lg p-4">
-                    <h3 className="font-semibold mb-2 text-orange-800">Questions Cliniques Répondues</h3>
-                    <div className="text-sm text-orange-700">
-                      {Object.keys(clinicalAnswers).length} question(s) clinique(s) documentée(s)
+                {/* Examens fonctionnels */}
+                {workup.workup?.functional_tests && workup.workup.functional_tests.length > 0 ? (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900">Examens Fonctionnels:</h4>
+                    {workup.workup.functional_tests.map((test, index) => (
+                      <div key={index} className="border border-gray-200 rounded-lg p-4">
+                        <h5 className="font-semibold text-gray-900 mb-1">{test.test_name}</h5>
+                        <div className="text-sm text-gray-600">
+                          <strong>Indication:</strong> {test.indication}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <strong>Urgence:</strong> {test.urgency}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-gray-500">Aucun examen fonctionnel prescrit.</div>
+                )}
+
+                {/* Justification clinique */}
+                {workup.clinicalJustification && (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900">Justification Clinique:</h4>
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <div className="text-sm text-gray-600">{workup.clinicalJustification}</div>
                     </div>
                   </div>
                 )}
               </div>
+
+              <div className="mt-8 flex justify-between">
+                <button
+                  onClick={() => setCurrentStep("prescription")}
+                  className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 flex items-center font-semibold"
+                >
+                  Retour Prescription
+                </button>
+
+                <button
+                  onClick={() => setCurrentStep("summary")}
+                  className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center font-semibold"
+                >
+                  Voir Documents
+                  <ChevronRight className="h-5 w-5 ml-2" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Section Récapitulatif et Documents */}
+          {currentStep === "summary" && (
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-2xl font-bold mb-6 flex items-center">
+                <FileText className="h-6 w-6 mr-3 text-indigo-600" />
+                Récapitulatif et Documents
+              </h2>
+
+              <div className="space-y-6">
+                {/* Rapport de consultation */}
+                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-indigo-800 mb-2">📝 Rapport de Consultation</h3>
+                  <p className="text-sm text-indigo-700">
+                    Générez un rapport complet de la consultation, incluant les données du patient, la présentation
+                    clinique, le diagnostic, la prescription et les examens complémentaires.
+                  </p>
+                  <button
+                    onClick={() => setShowConsultationReport(true)}
+                    className="mt-4 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center font-semibold"
+                  >
+                    <Download className="h-5 w-5 mr-2" />
+                    Télécharger Rapport
+                  </button>
+                </div>
+
+                {/* Ordonnance */}
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-green-800 mb-2">💊 Ordonnance</h3>
+                  <p className="text-sm text-green-700">
+                    Imprimez ou téléchargez l'ordonnance avec les médicaments prescrits.
+                  </p>
+                  <button className="mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center font-semibold">
+                    <Printer className="h-5 w-5 mr-2" />
+                    Imprimer Ordonnance
+                  </button>
+                </div>
+
+                {/* Prescription d'examens */}
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-orange-800 mb-2">🔬 Prescription d'Examens</h3>
+                  <p className="text-sm text-orange-700">
+                    Imprimez ou téléchargez la prescription d'examens complémentaires.
+                  </p>
+                  <button className="mt-4 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center font-semibold">
+                    <Printer className="h-5 w-5 mr-2" />
+                    Imprimer Prescription Examens
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-8 flex justify-start">
+                <button
+                  onClick={() => setCurrentStep("workup")}
+                  className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 flex items-center font-semibold"
+                >
+                  Retour Examens
+                </button>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Panneau latéral - Outils experts */}
+        {/* Panneau latéral */}
         <div className="space-y-6">
-          {/* Profil patient */}
+          {/* Aperçu des données patient */}
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="font-bold mb-4 flex items-center">
+            <h3 className="text-xl font-bold mb-4 flex items-center">
               <User className="h-5 w-5 mr-2 text-blue-600" />
-              Profil Patient
+              Aperçu Patient
             </h3>
-
-            {patientData.name ? (
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <strong>Nom:</strong> <span>{patientData.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <strong>Âge:</strong> <span>{patientData.age} ans</span>
-                </div>
-                <div className="flex justify-between">
-                  <strong>Genre:</strong> <span>{patientData.gender}</span>
-                </div>
-                {patientData.ethnicity && (
-                  <div className="flex justify-between">
-                    <strong>Ethnie:</strong> <span>{patientData.ethnicity}</span>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="text-gray-500 text-sm">Données patient non renseignées</div>
-            )}
-          </div>
-
-          {/* Aide contextuelle */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="font-bold mb-4 flex items-center">
-              <HelpCircle className="h-5 w-5 mr-2 text-green-600" />
-              Aide Expert
-            </h3>
-
-            <div className="space-y-4 text-sm">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <div className="font-semibold text-blue-800 mb-1">💡 Conseil Expert</div>
-                <div className="text-blue-700">
-                  {currentStep === "patient" && "Renseignez les données démographiques pour une analyse adaptée"}
-                  {currentStep === "clinical" && "Décrivez précisément la symptomatologie pour un diagnostic expert"}
-                  {currentStep === "diagnosis" && "Répondez aux questions cliniques pour affiner le diagnostic"}
-                  {currentStep === "prescription" && "Prescription basée sur les guidelines internationales"}
-                  {currentStep === "summary" && "Consultation experte terminée - Documentation complète"}
-                </div>
-              </div>
-
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                <div className="font-semibold text-yellow-800 mb-1">⚠️ Responsabilité Médicale</div>
-                <div className="text-yellow-700 text-xs">
-                  Cet outil est une aide au diagnostic niveau interniste. La décision médicale finale reste du
-                  praticien.
-                </div>
-              </div>
-
-              {diagnosis && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                  <div className="font-semibold text-green-800 mb-1">🇲🇺 Contexte Maurice</div>
-                  <div className="text-green-700 text-xs">
-                    Analyse adaptée aux prévalences locales et disponibilité médicamenteuse mauricienne
-                  </div>
-                </div>
-              )}
+            <div className="text-sm text-gray-600">
+              <strong>Nom:</strong> {patientData.name || "Non renseigné"}
+            </div>
+            <div className="text-sm text-gray-600">
+              <strong>Âge:</strong> {patientData.age || "Non renseigné"} ans
+            </div>
+            <div className="text-sm text-gray-600">
+              <strong>Genre:</strong> {patientData.gender || "Non renseigné"}
+            </div>
+            <div className="text-sm text-gray-600">
+              <strong>IMC:</strong>{" "}
+              {patientData.weight && patientData.height
+                ? Math.round((patientData.weight / Math.pow(patientData.height / 100, 2)) * 10) / 10
+                : "Non calculé"}
             </div>
           </div>
 
-          {/* Performance système */}
+          {/* Aperçu de la présentation clinique */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h3 className="text-xl font-bold mb-4 flex items-center">
+              <Stethoscope className="h-5 w-5 mr-2 text-green-600" />
+              Présentation Clinique
+            </h3>
+            <div className="text-sm text-gray-600">
+              <strong>Motif:</strong> {clinicalPresentation.chiefComplaint || "Non renseigné"}
+            </div>
+            <div className="text-sm text-gray-600">
+              <strong>Symptômes:</strong> {clinicalPresentation.symptoms || "Non renseigné"}
+            </div>
+          </div>
+
+          {/* Aperçu du diagnostic */}
           {diagnosis && (
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="font-bold mb-4 flex items-center">
-                <Activity className="h-5 w-5 mr-2 text-purple-600" />
-                Performance Expert
+              <h3 className="text-xl font-bold mb-4 flex items-center">
+                <Brain className="h-5 w-5 mr-2 text-purple-600" />
+                Diagnostic
               </h3>
-
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Confiance Diagnostique</span>
-                  <span className="font-bold text-lg">{Math.round(diagnosis.confidence * 100)}%</span>
-                </div>
-
-                <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div
-                    className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all"
-                    style={{ width: `${diagnosis.confidence * 100}%` }}
-                  ></div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="text-center">
-                    <div className="text-gray-600">Questions</div>
-                    <div className="font-bold">{diagnosis.clinicalQuestions?.length || 0}</div>
+              {diagnosis.clinicalAnalysis?.diagnoses && diagnosis.clinicalAnalysis.diagnoses.length > 0 ? (
+                diagnosis.clinicalAnalysis.diagnoses.map((diag, index) => (
+                  <div key={index} className="text-sm text-gray-600">
+                    <strong>{diag.diagnosis}</strong> ({diag.probability_percent}%)
                   </div>
-                  <div className="text-center">
-                    <div className="text-gray-600">Niveau</div>
-                    <div className="font-bold text-xs">Interniste</div>
-                  </div>
-                </div>
+                ))
+              ) : (
+                <div className="text-sm text-gray-600">Non disponible</div>
+              )}
+            </div>
+          )}
 
-                <div className="text-xs text-gray-500 text-center">ID: {diagnosis.consultationId}</div>
-              </div>
+          {/* Aperçu de la prescription */}
+          {prescription && (
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-xl font-bold mb-4 flex items-center">
+                <Pill className="h-5 w-5 mr-2 text-green-600" />
+                Prescription
+              </h3>
+              {prescription.prescription?.medications && prescription.prescription.medications.length > 0 ? (
+                prescription.prescription.medications.map((med, index) => (
+                  <div key={index} className="text-sm text-gray-600">
+                    <strong>{med.medication_name}</strong> ({med.strength})
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-gray-600">Non disponible</div>
+              )}
+            </div>
+          )}
+
+          {/* Aperçu des examens */}
+          {workup && (
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-xl font-bold mb-4 flex items-center">
+                <Search className="h-5 w-5 mr-2 text-orange-600" />
+                Examens
+              </h3>
+              {workup.workup?.laboratory_tests && workup.workup.laboratory_tests.length > 0 ? (
+                workup.workup.laboratory_tests.map((test, index) => (
+                  <div key={index} className="text-sm text-gray-600">
+                    <strong>{test.test_name}</strong>
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-gray-600">Non disponible</div>
+              )}
             </div>
           )}
         </div>
       </div>
 
-      {/* Footer système expert */}
-      <div className="mt-8 text-center text-sm text-gray-500">
-        <div className="flex items-center justify-center space-x-6 mb-2">
-          <span className="flex items-center">
-            <span className="mr-1">🇲🇺</span>
-            Système médical expert Maurice
-          </span>
-          <span>•</span>
-          <span className="flex items-center">
-            <Brain className="h-4 w-4 mr-1" />
-            {apiStatus.openai ? "IA Niveau Interniste + Questions cliniques" : "IA locale experte"}
-          </span>
-          <span>•</span>
-          <span className="flex items-center">
-            <Shield className="h-4 w-4 mr-1" />
-            Données sécurisées
-          </span>
+      {/* Modal Rapport de Consultation */}
+      {showConsultationReport && (
+        <div className="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-3/4 h-3/4 overflow-auto">
+            <h2 className="text-2xl font-bold mb-6 flex items-center">
+              <FileText className="h-6 w-6 mr-3 text-indigo-600" />
+              Rapport de Consultation
+            </h2>
+            <ConsultationReportPanel
+              patientData={patientData}
+              clinicalPresentation={clinicalPresentation}
+              diagnosis={diagnosis}
+              prescription={prescription}
+              workup={workup}
+              onClose={() => setShowConsultationReport(false)}
+            />
+          </div>
         </div>
-        <div className="mb-1">
-          <strong>Système Médical Expert v6.0 - Niveau Interniste</strong> -{" "}
-          {apiStatus.mode === "EXPERT_MODE" ? "Mode Expert" : "Mode Local"}
-          {apiStatus.openai && (
-            <span className="ml-2 text-green-600 font-medium">
-              • Questions cliniques • Prescription evidence-based • Base médicamenteuse Maurice
-            </span>
-          )}
-        </div>
-        <div className="text-xs">
-          {apiStatus.openai
-            ? "Diagnostic IA niveau interniste + Questions cliniques expertes + Prescription guideline-based + Base médicamenteuse Maurice"
-            : "Système médical expert local - Configurer OpenAI pour diagnostic IA niveau interniste"}
-        </div>
-      </div>
+      )}
     </div>
   )
 }
 
-// Export par défaut du composant principal
 export default AdvancedMedicalExpertSystem

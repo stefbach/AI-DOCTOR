@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { FileText, Download, Printer, Edit, Calendar, User, Brain } from "lucide-react"
+import { FileText, Download, Printer, Edit, Calendar, User, Brain, Users } from "lucide-react"
 
 const ConsultationReportPanel = ({ patientData, clinicalPresentation, diagnosis, selectedDiagnoses, prescription }) => {
   const [editMode, setEditMode] = useState(false)
@@ -60,7 +60,7 @@ ${patientData.weight && patientData.height ? `IMC: ${Math.round((patientData.wei
 ANTÉCÉDENTS
 ${
   patientData.medicalHistory?.length > 0
-    ? `Médicaux: ${patientData.medicalHistory.map((h) => `${h.condition} (${h.year})`).join(", ")}`
+    ? `Médicaux: ${patientData.medicalHistory.map((h) => `${h.condition || h.customCondition} (${h.year})`).join(", ")}`
     : "Médicaux: Aucun antécédent significatif"
 }
 
@@ -68,6 +68,12 @@ ${
   patientData.surgicalHistory?.length > 0
     ? `Chirurgicaux: ${patientData.surgicalHistory.map((s) => `${s.procedure} (${s.year})`).join(", ")}`
     : "Chirurgicaux: Aucun antécédent chirurgical"
+}
+
+${
+  patientData.familyHistory?.length > 0
+    ? `Familiaux: ${patientData.familyHistory.map((f) => `${f.condition} (${f.relation}${f.age ? `, ${f.age} ans` : ""})`).join(", ")}`
+    : "Familiaux: Aucun antécédent familial significatif"
 }
 
 TRAITEMENTS EN COURS
@@ -155,7 +161,7 @@ Date: ${new Date().toLocaleDateString("fr-FR")}
 Cachet médical
 
 ═══════════════════════════════════════════════════════════════
-Ce compte-rendu a été généré par le Système Médical Expert v5.0
+Ce compte-rendu a été généré par le Système Médical Expert v6.0
 Consultation ID: ${diagnosis?.consultationId || "N/A"}
 `.trim()
   }
@@ -354,7 +360,7 @@ Consultation ID: ${diagnosis?.consultationId || "N/A"}
       </div>
 
       {/* Actions rapides */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
           <Calendar className="h-8 w-8 mx-auto mb-2 text-blue-600" />
           <div className="font-semibold text-blue-800">Consultation</div>
@@ -376,6 +382,14 @@ Consultation ID: ${diagnosis?.consultationId || "N/A"}
           <div className="font-semibold text-purple-800">Diagnostic(s)</div>
           <div className="text-sm text-purple-700">{selectedDiagnoses?.length || 0} diagnostic(s)</div>
         </div>
+
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
+          <Users className="h-8 w-8 mx-auto mb-2 text-orange-600" />
+          <div className="font-semibold text-orange-800">Antécédents</div>
+          <div className="text-sm text-orange-700">
+            {(patientData.medicalHistory?.length || 0) + (patientData.familyHistory?.length || 0)} antécédent(s)
+          </div>
+        </div>
       </div>
 
       {/* Information système */}
@@ -386,6 +400,7 @@ Consultation ID: ${diagnosis?.consultationId || "N/A"}
             <div className="font-semibold mb-1">📋 Informations Compte-Rendu</div>
             <ul className="list-disc list-inside space-y-1 text-xs">
               <li>Compte-rendu généré automatiquement à partir des données de consultation</li>
+              <li>Inclut antécédents personnels et familiaux détaillés</li>
               <li>Personnalisable selon les besoins du praticien</li>
               <li>Format adapté pour archivage et transmission</li>
               <li>Conforme aux standards de documentation médicale mauricienne</li>
