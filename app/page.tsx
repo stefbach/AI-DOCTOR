@@ -41,8 +41,7 @@ class AdvancedMedicalExpert {
     this.apiConfig = {
       openai: {
         baseURL: "https://api.openai.com/v1/chat/completions",
-        key: typeof window !== "undefined" ? window.localStorage?.getItem("openai_key") || "" : "",
-        model: "gpt-4",
+       key: "sk-proj-5iiC4XyXmjxsHsn_efGt1MX2x7n5-nVdz7gFvrAURmwzxirtwgkLhl8KpGAZbGzCyLIeS4KyVxT3BlbkFJJKbv7IZDAqp-Ub8MedsJR-7oWp9wINqoakEXYVh8W1Fht0B9KH8IB0yVKdTuuBqAl3OvcZ53kAmodel: "gpt-4",
       },
     }
 
