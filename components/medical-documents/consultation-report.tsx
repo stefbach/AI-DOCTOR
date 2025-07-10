@@ -1,481 +1,388 @@
 "use client"
 
-import { useState } from "react"
-import { FileText, Download, Printer, Edit } from "lucide-react"
+import { FileText, User, Calendar, Phone, MapPin, Stethoscope, Brain, Pill, AlertTriangle } from "lucide-react"
 
-const ConsultationReportComponent = ({
+interface ConsultationReportProps {
+  patientData: any
+  clinicalData: any
+  enhancedResults: any
+  prescriptionData: any
+  recommendedExams: any
+  examResults: any
+}
+
+export default function ConsultationReport({
   patientData,
   clinicalData,
   enhancedResults,
   prescriptionData,
   recommendedExams,
   examResults,
-}) => {
-  const [editMode, setEditMode] = useState(false)
-  const [doctorInfo, setDoctorInfo] = useState({
-    name: "Dr. Jean DUPONT",
-    specialty: "Médecine Générale",
-    rpps: "10003123456",
-    address: "123 Avenue de la République, 75011 Paris",
-    phone: "01.42.12.34.56",
-    email: "dr.dupont@cabinet-medical.fr",
+}: ConsultationReportProps) {
+  const currentDate = new Date().toLocaleDateString("fr-FR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   })
 
-  const formatDate = (date) => {
-    return new Date(date).toLocaleDateString("fr-FR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    })
-  }
-
-  const formatTime = (date) => {
-    return new Date(date).toLocaleTimeString("fr-FR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-  }
-
-  const calculateAge = () => {
-    if (!patientData.age) return "Non renseigné"
-    return `${patientData.age} ans`
-  }
-
-  const calculateBMI = () => {
-    if (!patientData.weight || !patientData.height) return null
-    const weight = Number.parseFloat(patientData.weight)
-    const height = Number.parseFloat(patientData.height) / 100
-    const bmi = weight / (height * height)
-    return bmi.toFixed(1)
-  }
-
-  const generateFullReport = () => {
-    const consultationDate = new Date()
-
-    return `
-══════════════════════════════════════════════════════════════════════════════
-                        COMPTE-RENDU DE CONSULTATION MÉDICALE
-══════════════════════════════════════════════════════════════════════════════
-
-PRATICIEN
-${doctorInfo.name}
-${doctorInfo.specialty}
-N° RPPS: ${doctorInfo.rpps}
-${doctorInfo.address}
-Tél: ${doctorInfo.phone} | Email: ${doctorInfo.email}
-
-══════════════════════════════════════════════════════════════════════════════
-
-CONSULTATION
-Date: ${formatDate(consultationDate)}
-Heure: ${formatTime(consultationDate)}
-Type: Consultation de médecine générale
-Lieu: Cabinet médical
-
-══════════════════════════════════════════════════════════════════════════════
-
-PATIENT
-Nom et Prénom: ${patientData.name}
-Âge: ${calculateAge()}
-Sexe: ${patientData.gender === "M" ? "Masculin" : patientData.gender === "F" ? "Féminin" : "Non précisé"}
-${patientData.weight ? `Poids: ${patientData.weight} kg` : ""}
-${patientData.height ? `Taille: ${patientData.height} cm` : ""}
-${calculateBMI() ? `IMC: ${calculateBMI()} kg/m²` : ""}
-${patientData.insurance ? `Assurance: ${patientData.insurance}` : ""}
-${patientData.emergencyContact ? `Contact d'urgence: ${patientData.emergencyContact}` : ""}
-
-══════════════════════════════════════════════════════════════════════════════
-
-ANTÉCÉDENTS
-Médicaux: ${patientData.medicalHistory || "Aucun antécédent médical significatif rapporté"}
-
-Chirurgicaux: Non renseignés
-
-Familiaux: Non renseignés
-
-Allergies: ${patientData.allergies || "Aucune allergie connue"}
-
-Traitements en cours: ${patientData.currentMedications || "Aucun traitement médicamenteux en cours"}
-
-══════════════════════════════════════════════════════════════════════════════
-
-MOTIF DE CONSULTATION
-${clinicalData.chiefComplaint}
-
-HISTOIRE DE LA MALADIE ACTUELLE
-${clinicalData.symptoms}
-
-Durée d'évolution: ${clinicalData.duration || "Non précisée"}
-Intensité: ${clinicalData.severity || "Non évaluée"}
-
-══════════════════════════════════════════════════════════════════════════════
-
-EXAMEN CLINIQUE
-État général: Patient ${patientData.gender === "M" ? "conscient" : "consciente"}, ${patientData.gender === "M" ? "coopérant" : "coopérante"}
-
-Signes vitaux:
-${clinicalData.vitals?.bp ? `- Tension artérielle: ${clinicalData.vitals.bp} mmHg` : "- Tension artérielle: Non mesurée"}
-${clinicalData.vitals?.hr ? `- Fréquence cardiaque: ${clinicalData.vitals.hr} bpm` : "- Fréquence cardiaque: Non mesurée"}
-${clinicalData.vitals?.temp ? `- Température: ${clinicalData.vitals.temp}°C` : "- Température: Non mesurée"}
-${clinicalData.vitals?.spo2 ? `- Saturation O2: ${clinicalData.vitals.spo2}%` : "- Saturation O2: Non mesurée"}
-${clinicalData.vitals?.rr ? `- Fréquence respiratoire: ${clinicalData.vitals.rr}/min` : ""}
-${clinicalData.vitals?.pain ? `- Échelle de douleur: ${clinicalData.vitals.pain}/10` : ""}
-
-Examen physique:
-${clinicalData.physicalExam || "Examen physique normal dans les limites explorées"}
-
-══════════════════════════════════════════════════════════════════════════════
-
-DIAGNOSTIC(S)
-${
-  enhancedResults?.diagnostic_analysis?.differential_diagnoses
-    ?.map(
-      (diag, index) =>
-        `${index + 1}. ${diag.diagnosis} (${diag.icd10 || "Code ICD non attribué"})
-   Probabilité: ${diag.probability}%
-   Sévérité: ${diag.severity}
-   Urgence: ${diag.urgency}
-   Justification: ${diag.reasoning}
-   ${diag.supporting_evidence ? `Éléments en faveur: ${diag.supporting_evidence.join(", ")}` : ""}
-`,
-    )
-    .join("\n") || "Diagnostic en cours d'évaluation"
-}
-
-Impression clinique globale:
-${enhancedResults?.diagnostic_analysis?.clinical_impression || "Évaluation en cours"}
-
-Niveau de confiance: ${enhancedResults?.diagnostic_analysis?.confidence_level || "Non évalué"}
-
-══════════════════════════════════════════════════════════════════════════════
-
-EXAMENS COMPLÉMENTAIRES PRESCRITS
-${
-  recommendedExams?.recommended_exams
-    ?.map(
-      (exam, index) =>
-        `${index + 1}. ${exam.name}
-   Indication: ${exam.indication}
-   Priorité: ${exam.priority}
-   ${examResults[exam.id] ? `Résultat: ${examResults[exam.id]}` : "Résultat: En attente"}
-`,
-    )
-    .join("\n") || "Aucun examen complémentaire prescrit"
-}
-
-══════════════════════════════════════════════════════════════════════════════
-
-THÉRAPEUTIQUE
-${
-  prescriptionData?.prescription?.medications
-    ?.map(
-      (med, index) =>
-        `${index + 1}. ${med.name} ${med.strength || ""}
-   Posologie: ${med.dosage}
-   Durée: ${med.duration}
-   Indication: ${med.indication}
-   Instructions: ${med.instructions}
-   Quantité délivrée: ${med.quantity}
-   ${med.monitoring ? `Surveillance: ${med.monitoring}` : ""}
-`,
-    )
-    .join("\n") || "Aucune prescription médicamenteuse"
-}
-
-══════════════════════════════════════════════════════════════════════════════
-
-RECOMMANDATIONS ET CONSEILS
-${
-  enhancedResults?.recommendations?.immediate_actions?.length > 0
-    ? `Actions immédiates:
-${enhancedResults.recommendations.immediate_actions.map((action) => `- ${action}`).join("\n")}
-
-`
-    : ""
-}${
-  enhancedResults?.recommendations?.lifestyle_modifications?.length > 0
-    ? `Conseils hygiéno-diététiques:
-${enhancedResults.recommendations.lifestyle_modifications.map((mod) => `- ${mod}`).join("\n")}
-
-`
-    : ""
-}${
-  prescriptionData?.prescription?.follow_up?.lifestyle_advice?.length > 0
-    ? `Recommandations complémentaires:
-${prescriptionData.prescription.follow_up.lifestyle_advice.map((advice) => `- ${advice}`).join("\n")}
-
-`
-    : ""
-}
-
-══════════════════════════════════════════════════════════════════════════════
-
-SURVEILLANCE ET SUIVI
-Prochain rendez-vous: ${prescriptionData?.prescription?.follow_up?.next_visit || enhancedResults?.recommendations?.follow_up || "À programmer selon l'évolution"}
-
-Paramètres à surveiller:
-${
-  prescriptionData?.prescription?.follow_up?.monitoring?.map((param) => `- ${param}`).join("\n") ||
-  enhancedResults?.risk_factors?.monitoring_required?.map((param) => `- ${param}`).join("\n") ||
-  "- Évolution des symptômes"
-}
-
-Signes d'alarme nécessitant une consultation urgente:
-${
-  prescriptionData?.prescription?.follow_up?.warning_signs?.map((sign) => `- ${sign}`).join("\n") ||
-  `- Aggravation des symptômes
-- Apparition de nouveaux symptômes préoccupants
-- Effets secondaires importants des traitements
-- Fièvre persistante ou élevée`
-}
-
-══════════════════════════════════════════════════════════════════════════════
-
-RÉFÉRENCE SPÉCIALISÉE
-${enhancedResults?.recommendations?.specialist_referral || "Aucune référence spécialisée nécessaire à ce stade"}
-
-══════════════════════════════════════════════════════════════════════════════
-
-FACTEURS DE RISQUE IDENTIFIÉS
-${
-  enhancedResults?.risk_factors?.identified?.length > 0
-    ? `Facteurs de risque présents:
-${enhancedResults.risk_factors.identified.map((factor) => `- ${factor}`).join("\n")}
-
-`
-    : ""
-}${
-  enhancedResults?.risk_factors?.modifiable?.length > 0
-    ? `Facteurs de risque modifiables:
-${enhancedResults.risk_factors.modifiable.map((factor) => `- ${factor}`).join("\n")}
-
-`
-    : ""
-}
-
-══════════════════════════════════════════════════════════════════════════════
-
-NOTES COMPLÉMENTAIRES
-- Patient informé de son état de santé et des traitements proposés
-- Consentement éclairé obtenu pour les traitements prescrits
-- Remise des ordonnances et documents d'information
-- Possibilité de recontact en cas de questions ou d'aggravation
-
-══════════════════════════════════════════════════════════════════════════════
-
-SIGNATURE ET VALIDATION
-Date: ${formatDate(consultationDate)}
-Heure: ${formatTime(consultationDate)}
-
-Dr. ${doctorInfo.name}
-${doctorInfo.specialty}
-N° RPPS: ${doctorInfo.rpps}
-
-[Signature et cachet médical]
-
-══════════════════════════════════════════════════════════════════════════════
-
-Document généré par le Système Expert Médical v2.0
-ID Consultation: CR-${Date.now()}
-Classification: Document médical confidentiel
-`.trim()
-  }
-
-  const downloadReport = () => {
-    const reportContent = generateFullReport()
-    const blob = new Blob([reportContent], { type: "text/plain; charset=utf-8" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `Compte_Rendu_Consultation_${patientData.name?.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.txt`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }
-
-  const printReport = () => {
-    const reportContent = generateFullReport()
-    const printWindow = window.open("", "_blank")
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Compte-Rendu de Consultation - ${patientData.name}</title>
-          <style>
-            @page { 
-              margin: 2cm;
-              size: A4;
-            }
-            body { 
-              font-family: 'Courier New', monospace; 
-              font-size: 11px;
-              line-height: 1.3;
-              color: #000;
-              background: #fff;
-            }
-            .header {
-              text-align: center;
-              font-weight: bold;
-              margin-bottom: 20px;
-            }
-            .section {
-              margin-bottom: 15px;
-            }
-            .section-title {
-              font-weight: bold;
-              text-decoration: underline;
-              margin-bottom: 5px;
-            }
-            @media print {
-              body { font-size: 10px; }
-              .no-print { display: none; }
-            }
-          </style>
-        </head>
-        <body>
-          <pre>${reportContent}</pre>
-          <script>
-            window.onload = function() {
-              window.print();
-              window.onafterprint = function() {
-                window.close();
-              };
-            };
-          </script>
-        </body>
-      </html>
-    `)
-    printWindow.document.close()
-  }
-
   return (
-    <div className="space-y-6">
-      {/* En-tête avec actions */}
-      <div className="flex justify-between items-center">
-        <h3 className="text-xl font-bold flex items-center">
-          <FileText className="h-6 w-6 mr-2 text-green-600" />
-          Compte-Rendu de Consultation
-        </h3>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setEditMode(!editMode)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center transition-colors text-sm"
-          >
-            <Edit className="h-4 w-4 mr-2" />
-            {editMode ? "Lecture" : "Modifier"}
-          </button>
-          <button
-            onClick={downloadReport}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center transition-colors text-sm"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Télécharger
-          </button>
-          <button
-            onClick={printReport}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center transition-colors text-sm"
-          >
-            <Printer className="h-4 w-4 mr-2" />
-            Imprimer
-          </button>
+    <div className="max-w-4xl mx-auto bg-white p-8 shadow-lg rounded-lg">
+      {/* En-tête du document */}
+      <div className="border-b-2 border-blue-600 pb-6 mb-8">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-blue-800 mb-2">COMPTE-RENDU DE CONSULTATION</h1>
+            <p className="text-lg text-gray-600">Médecine Générale</p>
+          </div>
+          <div className="text-right">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-600">Date de consultation</p>
+              <p className="text-lg font-semibold">{currentDate}</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Mode édition des informations médecin */}
-      {editMode && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-          <h4 className="font-semibold mb-4 text-blue-800">Informations du Praticien</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              value={doctorInfo.name}
-              onChange={(e) => setDoctorInfo((prev) => ({ ...prev, name: e.target.value }))}
-              placeholder="Nom du médecin"
-              className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="text"
-              value={doctorInfo.specialty}
-              onChange={(e) => setDoctorInfo((prev) => ({ ...prev, specialty: e.target.value }))}
-              placeholder="Spécialité"
-              className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="text"
-              value={doctorInfo.rpps}
-              onChange={(e) => setDoctorInfo((prev) => ({ ...prev, rpps: e.target.value }))}
-              placeholder="N° RPPS"
-              className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="text"
-              value={doctorInfo.phone}
-              onChange={(e) => setDoctorInfo((prev) => ({ ...prev, phone: e.target.value }))}
-              placeholder="Téléphone"
-              className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="text"
-              value={doctorInfo.email}
-              onChange={(e) => setDoctorInfo((prev) => ({ ...prev, email: e.target.value }))}
-              placeholder="Email"
-              className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            />
-            <textarea
-              value={doctorInfo.address}
-              onChange={(e) => setDoctorInfo((prev) => ({ ...prev, address: e.target.value }))}
-              placeholder="Adresse du cabinet"
-              rows={2}
-              className="md:col-span-2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            />
+      {/* Informations praticien */}
+      <div className="mb-8 bg-gray-50 p-6 rounded-lg">
+        <h2 className="text-xl font-bold mb-4 flex items-center">
+          <User className="h-5 w-5 mr-2 text-blue-600" />
+          Praticien
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p className="font-semibold">Dr. Jean MARTIN</p>
+            <p className="text-gray-600">Médecin Généraliste</p>
+            <p className="text-gray-600">N° RPPS: 12345678901</p>
+          </div>
+          <div>
+            <p className="flex items-center text-gray-600">
+              <MapPin className="h-4 w-4 mr-1" />
+              123 Avenue de la Santé, 75000 Paris
+            </p>
+            <p className="flex items-center text-gray-600">
+              <Phone className="h-4 w-4 mr-1" />
+              01 23 45 67 89
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Informations patient */}
+      <div className="mb-8">
+        <h2 className="text-xl font-bold mb-4 flex items-center">
+          <User className="h-5 w-5 mr-2 text-green-600" />
+          Informations Patient
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <p>
+              <span className="font-semibold">Nom:</span> {patientData.name || "Non renseigné"}
+            </p>
+            <p>
+              <span className="font-semibold">Âge:</span> {patientData.age || "Non renseigné"} ans
+            </p>
+            <p>
+              <span className="font-semibold">Genre:</span>{" "}
+              {patientData.gender === "M"
+                ? "Masculin"
+                : patientData.gender === "F"
+                  ? "Féminin"
+                  : patientData.gender || "Non renseigné"}
+            </p>
+            {patientData.weight && (
+              <p>
+                <span className="font-semibold">Poids:</span> {patientData.weight} kg
+              </p>
+            )}
+            {patientData.height && (
+              <p>
+                <span className="font-semibold">Taille:</span> {patientData.height} cm
+              </p>
+            )}
+          </div>
+          <div className="space-y-2">
+            {patientData.insurance && (
+              <p>
+                <span className="font-semibold">Assurance:</span> {patientData.insurance}
+              </p>
+            )}
+            {patientData.emergencyContact && (
+              <p>
+                <span className="font-semibold">Contact d'urgence:</span> {patientData.emergencyContact}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {patientData.medicalHistory && (
+          <div className="mt-4">
+            <h3 className="font-semibold mb-2">Antécédents médicaux:</h3>
+            <p className="text-gray-700 bg-gray-50 p-3 rounded">{patientData.medicalHistory}</p>
+          </div>
+        )}
+
+        {patientData.currentMedications && (
+          <div className="mt-4">
+            <h3 className="font-semibold mb-2">Traitements actuels:</h3>
+            <p className="text-gray-700 bg-gray-50 p-3 rounded">{patientData.currentMedications}</p>
+          </div>
+        )}
+
+        {patientData.allergies && (
+          <div className="mt-4">
+            <h3 className="font-semibold mb-2 text-red-600">Allergies connues:</h3>
+            <p className="text-red-700 bg-red-50 p-3 rounded border border-red-200">{patientData.allergies}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Motif de consultation et examen */}
+      <div className="mb-8">
+        <h2 className="text-xl font-bold mb-4 flex items-center">
+          <Stethoscope className="h-5 w-5 mr-2 text-purple-600" />
+          Consultation
+        </h2>
+
+        <div className="space-y-4">
+          <div>
+            <h3 className="font-semibold mb-2">Motif de consultation:</h3>
+            <p className="text-gray-700 bg-blue-50 p-3 rounded">{clinicalData.chiefComplaint || "Non renseigné"}</p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold mb-2">Histoire de la maladie actuelle:</h3>
+            <p className="text-gray-700 bg-gray-50 p-3 rounded">{clinicalData.symptoms || "Non renseigné"}</p>
+            {clinicalData.duration && (
+              <p className="text-sm text-gray-600 mt-2">
+                <span className="font-semibold">Durée:</span> {clinicalData.duration}
+              </p>
+            )}
+            {clinicalData.severity && (
+              <p className="text-sm text-gray-600">
+                <span className="font-semibold">Sévérité:</span> {clinicalData.severity}
+              </p>
+            )}
+          </div>
+
+          {clinicalData.physicalExam && (
+            <div>
+              <h3 className="font-semibold mb-2">Examen physique:</h3>
+              <p className="text-gray-700 bg-gray-50 p-3 rounded">{clinicalData.physicalExam}</p>
+            </div>
+          )}
+
+          {/* Signes vitaux */}
+          {(clinicalData.vitals.bp ||
+            clinicalData.vitals.hr ||
+            clinicalData.vitals.temp ||
+            clinicalData.vitals.spo2) && (
+            <div>
+              <h3 className="font-semibold mb-2">Signes vitaux:</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-green-50 p-3 rounded">
+                {clinicalData.vitals.bp && <p>TA: {clinicalData.vitals.bp}</p>}
+                {clinicalData.vitals.hr && <p>FC: {clinicalData.vitals.hr}</p>}
+                {clinicalData.vitals.temp && <p>T°: {clinicalData.vitals.temp}</p>}
+                {clinicalData.vitals.spo2 && <p>SpO2: {clinicalData.vitals.spo2}</p>}
+                {clinicalData.vitals.rr && <p>FR: {clinicalData.vitals.rr}</p>}
+                {clinicalData.vitals.pain && <p>Douleur: {clinicalData.vitals.pain}/10</p>}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Diagnostic */}
+      {enhancedResults && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 flex items-center">
+            <Brain className="h-5 w-5 mr-2 text-indigo-600" />
+            Diagnostic
+          </h2>
+
+          {enhancedResults.diagnostic_analysis?.clinical_impression && (
+            <div className="mb-4">
+              <h3 className="font-semibold mb-2">Impression clinique:</h3>
+              <p className="text-gray-700 bg-indigo-50 p-3 rounded">
+                {enhancedResults.diagnostic_analysis.clinical_impression}
+              </p>
+            </div>
+          )}
+
+          {enhancedResults.diagnostic_analysis?.differential_diagnoses && (
+            <div className="mb-4">
+              <h3 className="font-semibold mb-2">Diagnostics différentiels:</h3>
+              <div className="space-y-3">
+                {enhancedResults.diagnostic_analysis.differential_diagnoses.map((diag: any, index: number) => (
+                  <div key={index} className="border border-gray-200 rounded p-3">
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="font-semibold">{diag.diagnosis}</h4>
+                      <div className="flex space-x-2">
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">{diag.probability}%</span>
+                        <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm">{diag.icd10}</span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600">{diag.reasoning}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Prescription */}
+      {prescriptionData && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 flex items-center">
+            <Pill className="h-5 w-5 mr-2 text-green-600" />
+            Prescription
+          </h2>
+
+          {prescriptionData.prescription?.medications && (
+            <div className="space-y-4">
+              {prescriptionData.prescription.medications.map((med: any, index: number) => (
+                <div key={index} className="border border-gray-200 rounded p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold">{med.name}</h4>
+                    {med.brand_name && <span className="text-sm text-gray-600">({med.brand_name})</span>}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p>
+                        <span className="font-semibold">Dosage:</span> {med.strength} - {med.form}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Posologie:</span> {med.dosage}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Durée:</span> {med.duration}
+                      </p>
+                    </div>
+                    <div>
+                      <p>
+                        <span className="font-semibold">Quantité:</span> {med.quantity}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Indication:</span> {med.indication}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <p className="text-sm">
+                      <span className="font-semibold">Instructions:</span> {med.instructions}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Examens complémentaires */}
+      {recommendedExams?.recommended_exams && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 flex items-center">
+            <FileText className="h-5 w-5 mr-2 text-orange-600" />
+            Examens Complémentaires Prescrits
+          </h2>
+          <div className="space-y-3">
+            {recommendedExams.recommended_exams.map((exam: any, index: number) => (
+              <div key={index} className="border border-gray-200 rounded p-3">
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-semibold">{exam.name}</h4>
+                  <span
+                    className={`px-2 py-1 rounded text-xs ${
+                      exam.priority === "urgent"
+                        ? "bg-red-100 text-red-800"
+                        : exam.priority === "routine"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-orange-100 text-orange-800"
+                    }`}
+                  >
+                    {exam.priority}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 mb-1">
+                  <span className="font-semibold">Indication:</span> {exam.indication}
+                </p>
+                {exam.preparation && (
+                  <p className="text-sm text-gray-600">
+                    <span className="font-semibold">Préparation:</span> {exam.preparation}
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      {/* Aperçu du rapport */}
-      <div className="bg-white border border-gray-300 rounded-xl">
-        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 rounded-t-xl">
-          <h4 className="font-semibold text-gray-800 flex items-center">
-            <FileText className="h-5 w-5 mr-2" />
-            Aperçu du Compte-Rendu Officiel
-          </h4>
-        </div>
+      {/* Suivi et recommandations */}
+      {(prescriptionData?.prescription?.follow_up || enhancedResults?.recommendations) && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 flex items-center">
+            <Calendar className="h-5 w-5 mr-2 text-blue-600" />
+            Suivi et Recommandations
+          </h2>
 
-        <div className="p-6">
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-6 font-mono text-xs whitespace-pre-line max-h-96 overflow-y-auto shadow-inner">
-            {generateFullReport()}
-          </div>
-        </div>
-      </div>
+          {prescriptionData?.prescription?.follow_up?.next_visit && (
+            <div className="mb-4">
+              <h3 className="font-semibold mb-2">Prochain rendez-vous:</h3>
+              <p className="text-gray-700 bg-blue-50 p-3 rounded">
+                {prescriptionData.prescription.follow_up.next_visit}
+              </p>
+            </div>
+          )}
 
-      {/* Statistiques du document */}
-      <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
-        <h4 className="font-semibold mb-4 text-gray-800">Informations Document</h4>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-          <div className="text-center">
-            <div className="font-bold text-lg text-blue-600">{generateFullReport().split("\n").length}</div>
-            <div className="text-gray-600">Lignes</div>
-          </div>
-          <div className="text-center">
-            <div className="font-bold text-lg text-green-600">{generateFullReport().length}</div>
-            <div className="text-gray-600">Caractères</div>
-          </div>
-          <div className="text-center">
-            <div className="font-bold text-lg text-purple-600">
-              {enhancedResults?.diagnostic_analysis?.differential_diagnoses?.length || 0}
+          {enhancedResults?.recommendations?.follow_up && (
+            <div className="mb-4">
+              <h3 className="font-semibold mb-2">Plan de suivi:</h3>
+              <p className="text-gray-700 bg-gray-50 p-3 rounded">{enhancedResults.recommendations.follow_up}</p>
             </div>
-            <div className="text-gray-600">Diagnostics</div>
+          )}
+
+          {prescriptionData?.prescription?.follow_up?.warning_signs && (
+            <div className="mb-4">
+              <h3 className="font-semibold mb-2 text-red-600 flex items-center">
+                <AlertTriangle className="h-4 w-4 mr-1" />
+                Signes d'alarme:
+              </h3>
+              <ul className="list-disc list-inside text-red-700 bg-red-50 p-3 rounded border border-red-200">
+                {prescriptionData.prescription.follow_up.warning_signs.map((sign: string, index: number) => (
+                  <li key={index}>{sign}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {prescriptionData?.prescription?.follow_up?.lifestyle_advice && (
+            <div>
+              <h3 className="font-semibold mb-2">Conseils hygiène de vie:</h3>
+              <ul className="list-disc list-inside text-gray-700 bg-green-50 p-3 rounded">
+                {prescriptionData.prescription.follow_up.lifestyle_advice.map((advice: string, index: number) => (
+                  <li key={index}>{advice}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Signature */}
+      <div className="mt-12 pt-8 border-t border-gray-300">
+        <div className="flex justify-between items-end">
+          <div>
+            <p className="text-sm text-gray-600">Document généré le {currentDate}</p>
+            <p className="text-sm text-gray-600">Système Médical Expert - v2.0</p>
           </div>
           <div className="text-center">
-            <div className="font-bold text-lg text-orange-600">
-              {prescriptionData?.prescription?.medications?.length || 0}
-            </div>
-            <div className="text-gray-600">Médicaments</div>
+            <div className="border-t border-gray-400 w-48 mb-2"></div>
+            <p className="text-sm font-semibold">Dr. Jean MARTIN</p>
+            <p className="text-xs text-gray-600">Signature et cachet</p>
           </div>
         </div>
       </div>
     </div>
   )
 }
-
-export default ConsultationReportComponent

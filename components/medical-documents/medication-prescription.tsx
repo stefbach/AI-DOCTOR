@@ -1,656 +1,371 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Download, Printer, Edit, Save, Plus, Trash2 } from "lucide-react"
+import { Pill, User, Calendar, MapPin, Phone, AlertTriangle, Shield, Clock } from "lucide-react"
 
-const MedicationPrescriptionComponent = ({ patientData, clinicalData, enhancedResults }) => {
-  const [doctorInfo, setDoctorInfo] = useState({
-    name: "Dr. Jean DUPONT",
-    specialty: "Médecine Générale",
-    rpps: "10003123456",
-    address: "123 Avenue de la République, 75011 Paris",
-    phone: "01.42.12.34.56",
-    adeli: "751234567",
+interface MedicationPrescriptionProps {
+  patientData: any
+  clinicalData: any
+  prescriptionData: any
+  enhancedResults: any
+}
+
+export default function MedicationPrescription({
+  patientData,
+  clinicalData,
+  prescriptionData,
+  enhancedResults,
+}: MedicationPrescriptionProps) {
+  const currentDate = new Date().toLocaleDateString("fr-FR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   })
 
-  const [editMode, setEditMode] = useState(false)
-
-  const [prescribedMedications, setPrescribedMedications] = useState([
+  const medications = prescriptionData?.prescription?.medications || [
     {
-      id: 1,
-      name: "PARACETAMOL",
-      dosage: "1000mg",
+      name: "Paracétamol",
+      brand_name: "Doliprane",
+      strength: "1000mg",
       form: "Comprimé",
-      posology: "1 comprimé 3 fois par jour",
+      quantity: "30 comprimés",
+      dosage: "1 comprimé 3 fois par jour",
       duration: "7 jours",
+      instructions: "À prendre avec un verre d'eau, de préférence après les repas",
       indication: "Douleur et fièvre",
-      generic: true,
-      urgent: false,
-      quantity: "21 comprimés",
-      renewals: "0",
-    },
-  ])
-
-  const commonMedications = [
-    {
-      category: "ANTALGIQUES",
-      medications: [
-        { name: "PARACETAMOL", dosages: ["500mg", "1000mg"], forms: ["Comprimé", "Gélule", "Suppositoire"] },
-        { name: "IBUPROFENE", dosages: ["200mg", "400mg", "600mg"], forms: ["Comprimé", "Gélule"] },
-        { name: "ASPIRINE", dosages: ["500mg", "1000mg"], forms: ["Comprimé", "Poudre"] },
-        { name: "CODEINE + PARACETAMOL", dosages: ["30mg/500mg"], forms: ["Comprimé"] },
-        { name: "TRAMADOL", dosages: ["50mg", "100mg"], forms: ["Gélule", "Comprimé LP"] },
-      ],
-    },
-    {
-      category: "ANTIBIOTIQUES",
-      medications: [
-        { name: "AMOXICILLINE", dosages: ["500mg", "1000mg"], forms: ["Gélule", "Comprimé", "Suspension"] },
-        { name: "AMOXICILLINE + ACIDE CLAVULANIQUE", dosages: ["500mg/125mg", "1000mg/125mg"], forms: ["Comprimé"] },
-        { name: "AZITHROMYCINE", dosages: ["250mg", "500mg"], forms: ["Comprimé", "Suspension"] },
-        { name: "CIPROFLOXACINE", dosages: ["250mg", "500mg"], forms: ["Comprimé"] },
-        { name: "CEFIXIME", dosages: ["200mg", "400mg"], forms: ["Comprimé", "Suspension"] },
-      ],
-    },
-    {
-      category: "CARDIOVASCULAIRE",
-      medications: [
-        { name: "AMLODIPINE", dosages: ["5mg", "10mg"], forms: ["Comprimé"] },
-        { name: "ENALAPRIL", dosages: ["5mg", "10mg", "20mg"], forms: ["Comprimé"] },
-        { name: "ATENOLOL", dosages: ["50mg", "100mg"], forms: ["Comprimé"] },
-        { name: "SIMVASTATINE", dosages: ["20mg", "40mg"], forms: ["Comprimé"] },
-        { name: "ASPIRINE CARDIO", dosages: ["75mg", "100mg"], forms: ["Comprimé"] },
-      ],
-    },
-    {
-      category: "GASTRO-ENTEROLOGIE",
-      medications: [
-        { name: "OMEPRAZOLE", dosages: ["20mg", "40mg"], forms: ["Gélule"] },
-        { name: "ESOMEPRAZOLE", dosages: ["20mg", "40mg"], forms: ["Comprimé"] },
-        { name: "DOMPERIDONE", dosages: ["10mg"], forms: ["Comprimé"] },
-        { name: "LOPERAMIDE", dosages: ["2mg"], forms: ["Gélule"] },
-        { name: "SMECTA", dosages: ["3g"], forms: ["Poudre"] },
-      ],
-    },
-    {
-      category: "RESPIRATOIRE",
-      medications: [
-        { name: "SALBUTAMOL", dosages: ["100µg/dose"], forms: ["Aérosol"] },
-        { name: "PREDNISOLONE", dosages: ["5mg", "20mg"], forms: ["Comprimé"] },
-        { name: "CARBOCISTEINE", dosages: ["375mg"], forms: ["Gélule"] },
-        { name: "DEXTROMETHORPHANE", dosages: ["15mg"], forms: ["Sirop"] },
-      ],
     },
   ]
 
-  const addMedication = () => {
-    const newMedication = {
-      id: Date.now(),
-      name: "",
-      dosage: "",
-      form: "",
-      posology: "",
-      duration: "",
-      indication: "",
-      generic: true,
-      urgent: false,
-      quantity: "",
-      renewals: "0",
-    }
-    setPrescribedMedications([...prescribedMedications, newMedication])
-  }
-
-  const removeMedication = (id) => {
-    setPrescribedMedications(prescribedMedications.filter((med) => med.id !== id))
-  }
-
-  const updateMedication = (id, field, value) => {
-    setPrescribedMedications(prescribedMedications.map((med) => (med.id === id ? { ...med, [field]: value } : med)))
-  }
-
-  const generatePrescription = () => {
-    const prescriptionDate = new Date()
-
-    return `
-══════════════════════════════════════════════════════════════════════════════
-                            ORDONNANCE MEDICAMENTEUSE
-══════════════════════════════════════════════════════════════════════════════
-
-PRATICIEN PRESCRIPTEUR
-${doctorInfo.name}
-${doctorInfo.specialty}
-N° RPPS: ${doctorInfo.rpps} | N° ADELI: ${doctorInfo.adeli}
-${doctorInfo.address}
-Tél: ${doctorInfo.phone}
-
-Date: ${prescriptionDate.toLocaleDateString("fr-FR")}
-Heure: ${prescriptionDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-
-══════════════════════════════════════════════════════════════════════════════
-
-PATIENT
-Nom et Prénom: ${patientData.name}
-Date de naissance: ${patientData.age ? `${patientData.age} ans` : "Non renseignée"}
-Sexe: ${patientData.gender === "M" ? "Masculin" : patientData.gender === "F" ? "Féminin" : "Non précisé"}
-N° Sécurité Sociale: [À compléter]
-Mutuelle: ${patientData.insurance || "Non renseignée"}
-Poids: ${patientData.weight ? `${patientData.weight} kg` : "Non renseigné"}
-Taille: ${patientData.height ? `${patientData.height} cm` : "Non renseignée"}
-
-Allergies médicamenteuses: ${patientData.allergies || "Aucune allergie connue"}
-Traitements en cours: ${patientData.currentMedications || "Aucun traitement"}
-
-══════════════════════════════════════════════════════════════════════════════
-
-DIAGNOSTIC ET INDICATION
-Motif de consultation: ${clinicalData.chiefComplaint}
-Diagnostic principal: ${enhancedResults?.diagnostic_analysis?.differential_diagnoses?.[0]?.diagnosis || "En cours d'évaluation"}
-
-Signes vitaux:
-${clinicalData.vitals?.bp ? `- TA: ${clinicalData.vitals.bp} mmHg` : ""}
-${clinicalData.vitals?.hr ? `- FC: ${clinicalData.vitals.hr} bpm` : ""}
-${clinicalData.vitals?.temp ? `- T°: ${clinicalData.vitals.temp}°C` : ""}
-
-══════════════════════════════════════════════════════════════════════════════
-
-PRESCRIPTION MEDICAMENTEUSE
-
-${prescribedMedications
-  .map(
-    (med, index) =>
-      `${index + 1}. ${med.name} ${med.dosage} - ${med.form}
-   
-   Posologie: ${med.posology}
-   Durée du traitement: ${med.duration}
-   Quantité à délivrer: ${med.quantity}
-   Nombre de renouvellements: ${med.renewals}
-   
-   Indication: ${med.indication}
-   ${med.generic ? "☑ Droit de substitution" : "☐ Non substituable"}
-   ${med.urgent ? "⚠️ TRAITEMENT URGENT - Délivrance immédiate" : ""}
-   
-   ─────────────────────────────────────────────────────────────────────────
-`,
-  )
-  .join("\n")}
-
-══════════════════════════════════════════════════════════════════════════════
-
-CONSEILS ET RECOMMANDATIONS
-
-PRISE DES MEDICAMENTS:
-- Respecter scrupuleusement les posologies prescrites
-- Prendre les médicaments aux heures indiquées
-- Ne pas arrêter le traitement sans avis médical
-- En cas d'oubli: ne pas doubler la dose suivante
-
-EFFETS INDESIRABLES:
-- Surveiller l'apparition d'effets secondaires
-- Contacter le médecin en cas de réaction inhabituelle
-- Arrêter le traitement et consulter en urgence si allergie
-
-INTERACTIONS:
-- Signaler tout nouveau traitement à votre médecin/pharmacien
-- Éviter l'automédication pendant le traitement
-- Attention aux interactions avec l'alcool
-
-CONSERVATION:
-- Conserver les médicaments dans leur emballage d'origine
-- Respecter les conditions de conservation
-- Vérifier les dates de péremption
-
-══════════════════════════════════════════════════════════════════════════════
-
-SURVEILLANCE ET SUIVI
-
-Consultation de contrôle recommandée:
-- Dans 7-10 jours pour évaluation de l'efficacité
-- Plus tôt en cas d'aggravation ou d'effets indésirables
-
-Paramètres à surveiller:
-${prescribedMedications.some((med) => med.name.includes("ANTIBIOTIQUE")) ? "- Évolution des signes infectieux" : ""}
-${prescribedMedications.some((med) => med.name.includes("ANTALGIQUE")) ? "- Intensité de la douleur (échelle 0-10)" : ""}
-${prescribedMedications.some((med) => med.name.includes("CARDIOVASCULAIRE")) ? "- Tension artérielle et fréquence cardiaque" : ""}
-
-Contact en cas d'urgence: ${doctorInfo.phone}
-
-══════════════════════════════════════════════════════════════════════════════
-
-MENTIONS LEGALES
-
-Cette ordonnance est valable 3 mois à compter de sa date d'établissement.
-Les médicaments stupéfiants et assimilés ont une validité de 72 heures.
-
-Le pharmacien doit:
-- Vérifier l'identité du patient
-- Contrôler la validité de l'ordonnance
-- Délivrer la quantité exacte prescrite
-- Apposer son cachet et sa signature
-
-Droit de substitution: Sauf mention "non substituable", le pharmacien peut 
-délivrer un générique ou un médicament de même composition.
-
-══════════════════════════════════════════════════════════════════════════════
-
-PRESCRIPTION ETABLIE EN 1 EXEMPLAIRE
-À remettre au pharmacien lors de la délivrance
-
-Signature et cachet du prescripteur:
-
-
-Dr. ${doctorInfo.name}
-${doctorInfo.specialty}
-N° RPPS: ${doctorInfo.rpps}
-
-══════════════════════════════════════════════════════════════════════════════
-
-INFORMATIONS PATIENT
-
-REMBOURSEMENT:
-- Médicaments remboursés selon taux Sécurité Sociale
-- Tiers payant possible selon votre mutuelle
-- Conserver les vignettes pour remboursement
-
-GENERIQUES:
-- Même efficacité que le médicament de référence
-- Économies pour l'Assurance Maladie
-- Droit de refus du patient (reste à charge majoré)
-
-OBSERVANCE:
-- L'efficacité du traitement dépend du respect de la prescription
-- Ne pas partager vos médicaments avec d'autres personnes
-- Rapporter les médicaments non utilisés en pharmacie
-
-QUESTIONS/CONSEILS:
-- Votre pharmacien est votre interlocuteur privilégié
-- N'hésitez pas à lui poser vos questions
-- Demandez conseil pour l'utilisation des dispositifs (inhalateurs, etc.)
-
-══════════════════════════════════════════════════════════════════════════════
-
-Document généré le ${prescriptionDate.toLocaleDateString("fr-FR")} à ${prescriptionDate.toLocaleTimeString("fr-FR")}
-ID Ordonnance: MED-${Date.now()}
-`.trim()
-  }
-
-  const downloadPrescription = () => {
-    const prescriptionContent = generatePrescription()
-    const blob = new Blob([prescriptionContent], { type: "text/plain; charset=utf-8" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `Ordonnance_Medicaments_${patientData.name?.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.txt`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }
-
-  const printPrescription = () => {
-    const prescriptionContent = generatePrescription()
-    const printWindow = window.open("", "_blank")
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Ordonnance Médicamenteuse</title>
-          <style>
-            body { font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.4; margin: 20px; }
-            pre { white-space: pre-wrap; word-wrap: break-word; }
-          </style>
-        </head>
-        <body>
-          <pre>${prescriptionContent}</pre>
-        </body>
-      </html>
-    `)
-    printWindow.document.close()
-    printWindow.print()
-  }
-
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-xl font-bold text-green-700">Ordonnance Médicamenteuse</CardTitle>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setEditMode(!editMode)}>
-              {editMode ? <Save className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
-              {editMode ? "Sauvegarder" : "Modifier"}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={downloadPrescription}
-              disabled={prescribedMedications.length === 0}
-            >
-              <Download className="w-4 h-4" />
-              Télécharger
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={printPrescription}
-              disabled={prescribedMedications.length === 0}
-            >
-              <Printer className="w-4 h-4" />
-              Imprimer
-            </Button>
+    <div className="max-w-4xl mx-auto bg-white p-8 shadow-lg rounded-lg">
+      {/* En-tête officiel */}
+      <div className="border-b-2 border-green-600 pb-6 mb-8">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-green-800 mb-2">ORDONNANCE MÉDICALE</h1>
+            <p className="text-lg text-gray-600">Prescription de Médicaments</p>
+          </div>
+          <div className="text-right">
+            <div className="bg-green-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-600">Date de prescription</p>
+              <p className="text-lg font-semibold">{currentDate}</p>
+              <p className="text-xs text-gray-500 mt-1">N° Ordonnance: ORD-{Date.now().toString().slice(-6)}</p>
+            </div>
           </div>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="space-y-6">
-        {/* Informations du praticien */}
-        {editMode && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Informations du Praticien</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="doctorName">Nom du médecin</Label>
-                <Input
-                  id="doctorName"
-                  value={doctorInfo.name}
-                  onChange={(e) => setDoctorInfo({ ...doctorInfo, name: e.target.value })}
-                  autoComplete="nope"
-                  spellCheck="false"
-                  autoCapitalize="off"
-                  autoCorrect="off"
-                  data-lpignore="true"
-                  data-form-type="other"
-                />
-              </div>
-              <div>
-                <Label htmlFor="specialty">Spécialité</Label>
-                <Input
-                  id="specialty"
-                  value={doctorInfo.specialty}
-                  onChange={(e) => setDoctorInfo({ ...doctorInfo, specialty: e.target.value })}
-                  autoComplete="nope"
-                  spellCheck="false"
-                  autoCapitalize="off"
-                  autoCorrect="off"
-                  data-lpignore="true"
-                  data-form-type="other"
-                />
-              </div>
-              <div>
-                <Label htmlFor="rpps">N° RPPS</Label>
-                <Input
-                  id="rpps"
-                  value={doctorInfo.rpps}
-                  onChange={(e) => setDoctorInfo({ ...doctorInfo, rpps: e.target.value })}
-                  autoComplete="nope"
-                  spellCheck="false"
-                  autoCapitalize="off"
-                  autoCorrect="off"
-                  data-lpignore="true"
-                  data-form-type="other"
-                />
-              </div>
-              <div>
-                <Label htmlFor="phone">Téléphone</Label>
-                <Input
-                  id="phone"
-                  value={doctorInfo.phone}
-                  onChange={(e) => setDoctorInfo({ ...doctorInfo, phone: e.target.value })}
-                  autoComplete="nope"
-                  spellCheck="false"
-                  autoCapitalize="off"
-                  autoCorrect="off"
-                  data-lpignore="true"
-                  data-form-type="other"
-                />
-              </div>
-              <div className="col-span-2">
-                <Label htmlFor="address">Adresse</Label>
-                <Textarea
-                  id="address"
-                  value={doctorInfo.address}
-                  onChange={(e) => setDoctorInfo({ ...doctorInfo, address: e.target.value })}
-                  autoComplete="nope"
-                  spellCheck="false"
-                  autoCapitalize="off"
-                  autoCorrect="off"
-                  data-lpignore="true"
-                  data-form-type="other"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Médicaments prescrits */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Médicaments Prescrits</h3>
-            <Button onClick={addMedication} size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Ajouter un médicament
-            </Button>
+      {/* Informations praticien */}
+      <div className="mb-8 bg-gray-50 p-6 rounded-lg">
+        <h2 className="text-xl font-bold mb-4 flex items-center">
+          <User className="h-5 w-5 mr-2 text-blue-600" />
+          Praticien Prescripteur
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p className="font-semibold text-lg">Dr. Jean MARTIN</p>
+            <p className="text-gray-600">Médecin Généraliste</p>
+            <p className="text-gray-600">N° RPPS: 12345678901</p>
+            <p className="text-gray-600">N° ADELI: 123456789</p>
+            <p className="text-gray-600">Conventionné Secteur 1</p>
           </div>
+          <div>
+            <p className="flex items-center text-gray-600 mb-1">
+              <MapPin className="h-4 w-4 mr-1" />
+              123 Avenue de la Santé
+            </p>
+            <p className="text-gray-600 ml-5">75000 Paris</p>
+            <p className="flex items-center text-gray-600 mt-2">
+              <Phone className="h-4 w-4 mr-1" />
+              01 23 45 67 89
+            </p>
+            <p className="text-gray-600">Email: dr.martin@medical.fr</p>
+          </div>
+        </div>
+      </div>
 
-          {prescribedMedications.map((medication, index) => (
-            <Card key={medication.id} className="relative">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-base">
-                    Médicament {index + 1}
-                    {medication.urgent && (
-                      <Badge variant="destructive" className="ml-2">
-                        URGENT
-                      </Badge>
-                    )}
-                  </CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeMedication(medication.id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-4">
+      {/* Informations patient */}
+      <div className="mb-8 border border-blue-200 bg-blue-50 p-6 rounded-lg">
+        <h2 className="text-xl font-bold mb-4 flex items-center">
+          <User className="h-5 w-5 mr-2 text-blue-600" />
+          Patient
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p className="text-lg font-semibold">{patientData.name || "Nom du patient"}</p>
+            <p>
+              <span className="font-semibold">Né(e) le:</span> {patientData.birthDate || "Date de naissance"}
+            </p>
+            <p>
+              <span className="font-semibold">Âge:</span> {patientData.age || "Non renseigné"} ans
+            </p>
+            <p>
+              <span className="font-semibold">Genre:</span>{" "}
+              {patientData.gender === "M" ? "Masculin" : patientData.gender === "F" ? "Féminin" : "Non renseigné"}
+            </p>
+            {patientData.weight && (
+              <p>
+                <span className="font-semibold">Poids:</span> {patientData.weight} kg
+              </p>
+            )}
+          </div>
+          <div>
+            {patientData.insurance && (
+              <p>
+                <span className="font-semibold">N° Sécurité Sociale:</span> {patientData.insurance}
+              </p>
+            )}
+            <p>
+              <span className="font-semibold">Adresse:</span> [Adresse du patient]
+            </p>
+            <p>
+              <span className="font-semibold">Mutuelle:</span> [Mutuelle du patient]
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Indication thérapeutique */}
+      <div className="mb-8 bg-yellow-50 border border-yellow-200 p-6 rounded-lg">
+        <h2 className="text-xl font-bold mb-4 text-yellow-800">Indication Thérapeutique</h2>
+        <div className="space-y-2">
+          <p>
+            <span className="font-semibold">Diagnostic:</span>{" "}
+            {enhancedResults?.diagnostic_analysis?.differential_diagnoses?.[0]?.diagnosis ||
+              clinicalData.chiefComplaint}
+          </p>
+          {enhancedResults?.diagnostic_analysis?.differential_diagnoses?.[0]?.icd10 && (
+            <p>
+              <span className="font-semibold">Code CIM-10:</span>{" "}
+              {enhancedResults.diagnostic_analysis.differential_diagnoses[0].icd10}
+            </p>
+          )}
+          <p>
+            <span className="font-semibold">Contexte clinique:</span>{" "}
+            {clinicalData.symptoms?.substring(0, 200) || "Traitement symptomatique"}...
+          </p>
+        </div>
+      </div>
+
+      {/* Médicaments prescrits */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-6 flex items-center">
+          <Pill className="h-6 w-6 mr-3 text-green-600" />
+          MÉDICAMENTS PRESCRITS
+        </h2>
+
+        <div className="space-y-6">
+          {medications.map((med: any, index: number) => (
+            <div key={index} className="border-2 border-green-200 rounded-lg p-6 bg-green-50">
+              {/* En-tête médicament */}
+              <div className="flex justify-between items-start mb-4">
                 <div>
-                  <Label>Nom du médicament</Label>
-                  <Input
-                    value={medication.name}
-                    onChange={(e) => updateMedication(medication.id, "name", e.target.value)}
-                    placeholder="Ex: PARACETAMOL"
-                    autoComplete="nope"
-                    spellCheck="false"
-                    autoCapitalize="off"
-                    autoCorrect="off"
-                    data-lpignore="true"
-                    data-form-type="other"
-                  />
+                  <h3 className="text-xl font-bold text-green-800">{med.name}</h3>
+                  {med.brand_name && <p className="text-lg text-green-600">({med.brand_name})</p>}
                 </div>
-                <div>
-                  <Label>Dosage</Label>
-                  <Input
-                    value={medication.dosage}
-                    onChange={(e) => updateMedication(medication.id, "dosage", e.target.value)}
-                    placeholder="Ex: 1000mg"
-                    autoComplete="nope"
-                    spellCheck="false"
-                    autoCapitalize="off"
-                    autoCorrect="off"
-                    data-lpignore="true"
-                    data-form-type="other"
-                  />
+                <div className="text-right">
+                  <p className="text-sm font-semibold">{med.strength}</p>
+                  <p className="text-sm text-gray-600">{med.form}</p>
                 </div>
-                <div>
-                  <Label>Forme</Label>
-                  <Select
-                    value={medication.form}
-                    onValueChange={(value) => updateMedication(medication.id, "form", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner la forme" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Comprimé">Comprimé</SelectItem>
-                      <SelectItem value="Gélule">Gélule</SelectItem>
-                      <SelectItem value="Sirop">Sirop</SelectItem>
-                      <SelectItem value="Suppositoire">Suppositoire</SelectItem>
-                      <SelectItem value="Pommade">Pommade</SelectItem>
-                      <SelectItem value="Aérosol">Aérosol</SelectItem>
-                      <SelectItem value="Injection">Injection</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Posologie</Label>
-                  <Input
-                    value={medication.posology}
-                    onChange={(e) => updateMedication(medication.id, "posology", e.target.value)}
-                    placeholder="Ex: 1 comprimé 3 fois par jour"
-                    autoComplete="nope"
-                    spellCheck="false"
-                    autoCapitalize="off"
-                    autoCorrect="off"
-                    data-lpignore="true"
-                    data-form-type="other"
-                  />
-                </div>
-                <div>
-                  <Label>Durée</Label>
-                  <Input
-                    value={medication.duration}
-                    onChange={(e) => updateMedication(medication.id, "duration", e.target.value)}
-                    placeholder="Ex: 7 jours"
-                    autoComplete="nope"
-                    spellCheck="false"
-                    autoCapitalize="off"
-                    autoCorrect="off"
-                    data-lpignore="true"
-                    data-form-type="other"
-                  />
-                </div>
-                <div>
-                  <Label>Quantité</Label>
-                  <Input
-                    value={medication.quantity}
-                    onChange={(e) => updateMedication(medication.id, "quantity", e.target.value)}
-                    placeholder="Ex: 21 comprimés"
-                    autoComplete="nope"
-                    spellCheck="false"
-                    autoCapitalize="off"
-                    autoCorrect="off"
-                    data-lpignore="true"
-                    data-form-type="other"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <Label>Indication</Label>
-                  <Input
-                    value={medication.indication}
-                    onChange={(e) => updateMedication(medication.id, "indication", e.target.value)}
-                    placeholder="Ex: Douleur et fièvre"
-                    autoComplete="nope"
-                    spellCheck="false"
-                    autoCapitalize="off"
-                    autoCorrect="off"
-                    data-lpignore="true"
-                    data-form-type="other"
-                  />
-                </div>
-                <div className="col-span-2 flex gap-4">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id={`generic-${medication.id}`}
-                      checked={medication.generic}
-                      onChange={(e) => updateMedication(medication.id, "generic", e.target.checked)}
-                    />
-                    <Label htmlFor={`generic-${medication.id}`}>Droit de substitution</Label>
+              </div>
+
+              {/* Détails prescription */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div className="bg-white p-3 rounded border">
+                    <h4 className="font-semibold text-green-700 mb-1 flex items-center">
+                      <Clock className="h-4 w-4 mr-1" />
+                      Posologie:
+                    </h4>
+                    <p className="text-lg font-semibold">{med.dosage}</p>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id={`urgent-${medication.id}`}
-                      checked={medication.urgent}
-                      onChange={(e) => updateMedication(medication.id, "urgent", e.target.checked)}
-                    />
-                    <Label htmlFor={`urgent-${medication.id}`}>Traitement urgent</Label>
+                  <div className="bg-white p-3 rounded border">
+                    <h4 className="font-semibold text-green-700 mb-1">Durée de traitement:</h4>
+                    <p className="font-semibold">{med.duration}</p>
+                  </div>
+                  <div className="bg-white p-3 rounded border">
+                    <h4 className="font-semibold text-green-700 mb-1">Quantité à délivrer:</h4>
+                    <p className="font-semibold">{med.quantity}</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="space-y-3">
+                  <div className="bg-white p-3 rounded border">
+                    <h4 className="font-semibold text-green-700 mb-1">Instructions:</h4>
+                    <p className="text-sm">{med.instructions}</p>
+                  </div>
+                  <div className="bg-white p-3 rounded border">
+                    <h4 className="font-semibold text-green-700 mb-1">Indication:</h4>
+                    <p className="text-sm">{med.indication}</p>
+                  </div>
+                  {med.monitoring && (
+                    <div className="bg-blue-50 p-3 rounded border border-blue-200">
+                      <h4 className="font-semibold text-blue-700 mb-1">Surveillance:</h4>
+                      <p className="text-sm text-blue-600">{med.monitoring}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Informations pharmacien */}
+              <div className="mt-4 pt-4 border-t border-green-300">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                  <label className="flex items-center">
+                    <input type="checkbox" className="mr-1" />
+                    Générique autorisé
+                  </label>
+                  <label className="flex items-center">
+                    <input type="checkbox" className="mr-1" />
+                    Non substituable
+                  </label>
+                  <label className="flex items-center">
+                    <input type="checkbox" className="mr-1" />
+                    Renouvellement: ___
+                  </label>
+                  <label className="flex items-center">
+                    <input type="checkbox" className="mr-1" />
+                    Délivrance fractionnée
+                  </label>
+                </div>
+              </div>
+
+              {/* Effets secondaires et contre-indications */}
+              {(med.side_effects || med.contraindications) && (
+                <div className="mt-4 pt-4 border-t border-green-300">
+                  {med.side_effects && (
+                    <div className="mb-2">
+                      <h4 className="font-semibold text-orange-700 mb-1 flex items-center">
+                        <AlertTriangle className="h-4 w-4 mr-1" />
+                        Effets secondaires possibles:
+                      </h4>
+                      <ul className="text-xs text-orange-600 list-disc list-inside">
+                        {med.side_effects.map((effect: string, idx: number) => (
+                          <li key={idx}>{effect}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {med.contraindications && (
+                    <div>
+                      <h4 className="font-semibold text-red-700 mb-1 flex items-center">
+                        <Shield className="h-4 w-4 mr-1" />
+                        Contre-indications:
+                      </h4>
+                      <ul className="text-xs text-red-600 list-disc list-inside">
+                        {med.contraindications.map((ci: string, idx: number) => (
+                          <li key={idx}>{ci}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           ))}
         </div>
+      </div>
 
-        {/* Médicaments courants pour aide à la prescription */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Aide à la Prescription</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4">
-              {commonMedications.map((category) => (
-                <div key={category.category}>
-                  <h4 className="font-medium text-sm text-blue-600 mb-2">{category.category}</h4>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    {category.medications.map((med) => (
-                      <div
-                        key={med.name}
-                        className="p-2 border rounded cursor-pointer hover:bg-gray-50"
-                        onClick={() => {
-                          const newMed = {
-                            id: Date.now(),
-                            name: med.name,
-                            dosage: med.dosages[0],
-                            form: med.forms[0],
-                            posology: "",
-                            duration: "",
-                            indication: "",
-                            generic: true,
-                            urgent: false,
-                            quantity: "",
-                            renewals: "0",
-                          }
-                          setPrescribedMedications([...prescribedMedications, newMed])
-                        }}
-                      >
-                        <div className="font-medium">{med.name}</div>
-                        <div className="text-gray-600">
-                          {med.dosages.join(", ")} - {med.forms.join(", ")}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Instructions générales */}
+      <div className="mb-8 bg-blue-50 border border-blue-200 p-6 rounded-lg">
+        <h2 className="text-xl font-bold mb-4 text-blue-800">Instructions Générales</h2>
+        <div className="space-y-2">
+          <p className="flex items-start">
+            <span className="font-semibold mr-2">•</span>
+            Respecter scrupuleusement les posologies et horaires de prise
+          </p>
+          <p className="flex items-start">
+            <span className="font-semibold mr-2">•</span>
+            Ne pas arrêter le traitement sans avis médical
+          </p>
+          <p className="flex items-start">
+            <span className="font-semibold mr-2">•</span>
+            Signaler tout effet indésirable au médecin ou pharmacien
+          </p>
+          <p className="flex items-start">
+            <span className="font-semibold mr-2">•</span>
+            Conserver les médicaments dans leur emballage d'origine
+          </p>
+          <p className="flex items-start">
+            <span className="font-semibold mr-2">•</span>
+            Tenir hors de portée des enfants
+          </p>
+          {prescriptionData?.prescription?.follow_up?.next_visit && (
+            <p className="flex items-start text-blue-600">
+              <Calendar className="h-4 w-4 mr-2 mt-0.5" />
+              <span className="font-semibold">Prochain RDV:</span> {prescriptionData.prescription.follow_up.next_visit}
+            </p>
+          )}
+        </div>
+      </div>
 
-        {/* Aperçu de l'ordonnance */}
-        {prescribedMedications.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Aperçu de l'Ordonnance</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <pre className="text-xs bg-gray-50 p-4 rounded-lg overflow-auto max-h-96 whitespace-pre-wrap">
-                {generatePrescription()}
-              </pre>
-            </CardContent>
-          </Card>
-        )}
-      </CardContent>
-    </Card>
+      {/* Allergies et contre-indications patient */}
+      {patientData.allergies && (
+        <div className="mb-8 bg-red-50 border-2 border-red-300 p-6 rounded-lg">
+          <h2 className="text-xl font-bold mb-4 text-red-800 flex items-center">
+            <AlertTriangle className="h-5 w-5 mr-2" />
+            ALLERGIES CONNUES DU PATIENT
+          </h2>
+          <p className="text-red-700 font-semibold text-lg">{patientData.allergies}</p>
+          <p className="text-sm text-red-600 mt-2">
+            ⚠️ Vérifier la compatibilité de tous les médicaments prescrits avec ces allergies
+          </p>
+        </div>
+      )}
+
+      {/* Suivi et surveillance */}
+      {prescriptionData?.prescription?.follow_up && (
+        <div className="mb-8 bg-orange-50 border border-orange-200 p-6 rounded-lg">
+          <h2 className="text-xl font-bold mb-4 text-orange-800">Suivi et Surveillance</h2>
+          <div className="space-y-3">
+            {prescriptionData.prescription.follow_up.monitoring && (
+              <div>
+                <h3 className="font-semibold text-orange-700 mb-2">Paramètres à surveiller:</h3>
+                <ul className="list-disc list-inside text-sm">
+                  {prescriptionData.prescription.follow_up.monitoring.map((item: string, index: number) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {prescriptionData.prescription.follow_up.warning_signs && (
+              <div>
+                <h3 className="font-semibold text-red-700 mb-2 flex items-center">
+                  <AlertTriangle className="h-4 w-4 mr-1" />
+                  Signes d'alarme - Consulter immédiatement:
+                </h3>
+                <ul className="list-disc list-inside text-sm text-red-600">
+                  {prescriptionData.prescription.follow_up.warning_signs.map((sign: string, index: number) => (
+                    <li key={index}>{sign}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Pied de page avec signature */}
+      <div className="mt-12 pt-8 border-t-2 border-gray-300">
+        <div className="flex justify-between items-end">
+          <div>
+            <p className="text-sm text-gray-600">Ordonnance valable 3 mois (1 an pour les traitements chroniques)</p>
+            <p className="text-sm text-gray-600">Ne pas dépasser la dose prescrite</p>
+            <p className="text-sm text-gray-600 mt-2">Document généré le {currentDate} - Système Médical Expert v2.0</p>
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold mb-8">Signature et cachet du médecin</p>
+            <div className="border-t border-gray-400 w-48 mb-2"></div>
+            <p className="text-sm font-semibold">Dr. Jean MARTIN</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Mentions légales */}
+      <div className="mt-8 pt-4 border-t border-gray-200 text-xs text-gray-500">
+        <p>
+          Cette ordonnance est établie conformément aux dispositions du Code de la Santé Publique. Les médicaments
+          prescrits sont adaptés à l'état clinique du patient et aux recommandations en vigueur. En cas de doute,
+          n'hésitez pas à consulter votre pharmacien ou votre médecin.
+        </p>
+      </div>
+    </div>
   )
 }
-
-export default MedicationPrescriptionComponent

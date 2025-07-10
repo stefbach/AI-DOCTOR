@@ -2524,18 +2524,21 @@ Format JSON REQUIS:
     const [selectedDocument, setSelectedDocument] = useState("consultation")
 
     // Import des composants de documents
-    const ConsultationReportComponent = dynamic(() => import("./components/ConsultationReportComponent"), {
+    const ConsultationReportComponent = dynamic(() => import("@/components/medical-documents/consultation-report"), {
       ssr: false,
     })
-    const BiologyPrescriptionComponent = dynamic(() => import("./components/BiologyPrescriptionComponent"), {
+    const BiologyPrescriptionComponent = dynamic(() => import("@/components/medical-documents/biology-prescription"), {
       ssr: false,
     })
-    const ImagingPrescriptionComponent = dynamic(() => import("./components/ImagingPrescriptionComponent"), {
+    const ImagingPrescriptionComponent = dynamic(() => import("@/components/medical-documents/imaging-prescription"), {
       ssr: false,
     })
-    const MedicationPrescriptionComponent = dynamic(() => import("./components/MedicationPrescriptionComponent"), {
-      ssr: false,
-    })
+    const MedicationPrescriptionComponent = dynamic(
+      () => import("@/components/medical-documents/medication-prescription"),
+      {
+        ssr: false,
+      },
+    )
 
     return (
       <div className="space-y-6">
