@@ -360,10 +360,10 @@ const RealMedicalSystemOpenAI = () => {
       }
 
       const requestBody = {
-        model: "gpt-4-turbo-preview",
+        model: "gpt-4o", // Changed from gpt-4-turbo-preview
         messages: messages,
         temperature: 0.3,
-        max_tokens: 4000,
+        max_tokens: 2000, // Reduced from 4000
       }
 
       if (functions) {
@@ -559,29 +559,29 @@ Format de réponse JSON OBLIGATOIRE:
       const diagnosticMessages = [
         {
           role: "system",
-          content: `Tu es un médecin expert qui doit effectuer un diagnostic différentiel complet. Tu as accès aux vraies bases de données médicales mondiales via des fonctions spécialisées: FDA, RxNorm, PubMed. 
-
-IMPORTANT: Tu DOIS utiliser ces fonctions pour:
-1. Vérifier les informations sur les médicaments actuels du patient
-2. Chercher des interactions médicamenteuses dangereuses  
-3. Consulter la littérature récente pertinente
-`,
+          content: `Tu es un médecin expert qui doit effectuer un diagnostic différentiel complet. Tu as accès aux vraies bases de données médicales mondiales via des fonctions spécialisées: FDA, RxNorm, PubMed.`,
         },
         {
           role: "user",
           content: `
-Effectue un diagnostic complet pour ce patient en utilisant OBLIGATOIREMENT les fonctions disponibles:
+Effectue un diagnostic complet pour ce patient:
 
-PATIENT: ${JSON.stringify(patientData, null, 2)}
-CLINIQUE: ${JSON.stringify(clinicalData, null, 2)}
-ÉVALUATION PRÉLIMINAIRE: ${clinicalQuestions.preliminary_assessment}
-RÉPONSES AUX QUESTIONS:
-${answersText}
+PATIENT: ${patientData.name}, ${patientData.age} ans, ${patientData.gender}
+ANTÉCÉDENTS: ${patientData.medicalHistory?.substring(0, 200) || "Aucun"}
+MÉDICAMENTS: ${patientData.currentMedications?.substring(0, 200) || "Aucun"}
+ALLERGIES: ${patientData.allergies?.substring(0, 100) || "Aucune"}
 
-ÉTAPES OBLIGATOIRES:
-1. Si le patient prend des médicaments, utilise search_fda_database pour chacun
-2. Si plusieurs médicaments, utilise check_drug_interactions
-3. Utilise search_pubmed_literature pour la condition suspectée
+CLINIQUE: 
+- Motif: ${clinicalData.chiefComplaint}
+- Symptômes: ${clinicalData.symptoms?.substring(0, 300)}
+- Durée: ${clinicalData.duration || "Non précisée"}
+- Signes vitaux: TA=${clinicalData.vitals.bp}, FC=${clinicalData.vitals.hr}
+
+ÉVALUATION: ${clinicalQuestions.preliminary_assessment?.substring(0, 200)}
+
+RÉPONSES: ${answersText.substring(0, 500)}
+
+Utilise les fonctions disponibles pour enrichir le diagnostic.
 `,
         },
       ]
@@ -817,19 +817,20 @@ IMPORTANT: Réponds UNIQUEMENT avec le JSON valide, sans texte avant ou après.
       const messages = [
         {
           role: "system",
-          content:
-            "Tu es un médecin expert en prescription avec accès aux dernières données FDA et interactions médicamenteuses. Génère une prescription sûre et efficace.",
+          content: "Tu es un médecin expert en prescription. Génère une prescription sûre et efficace.",
         },
         {
           role: "user",
           content: `
-Génère une prescription détaillée basée sur:
+Génère une prescription pour:
 
-DIAGNOSTIC: ${JSON.stringify(enhancedResults, null, 2)}
-PATIENT: ${JSON.stringify(patientData, null, 2)}
-DONNÉES FDA: ${JSON.stringify(apiInsights.fdaData, null, 2)}
-INTERACTIONS: ${JSON.stringify(apiInsights.interactions, null, 2)}
-ÉVÉNEMENTS INDÉSIRABLES: ${JSON.stringify(apiInsights.adverseEvents.slice(0, 3), null, 2)}
+DIAGNOSTIC PRINCIPAL: ${enhancedResults.diagnostic_analysis?.differential_diagnoses?.[0]?.diagnosis || "En cours"}
+PATIENT: ${patientData.name}, ${patientData.age} ans, ${patientData.weight}kg
+ALLERGIES: ${patientData.allergies || "Aucune"}
+MÉDICAMENTS ACTUELS: ${patientData.currentMedications?.substring(0, 200) || "Aucun"}
+
+INTERACTIONS DÉTECTÉES: ${apiInsights.interactions?.has_interactions ? "Oui" : "Non"}
+RAPPELS FDA: ${apiInsights.recalls?.length || 0} rappels trouvés
 
 Format JSON REQUIS:
 {
@@ -837,30 +838,20 @@ Format JSON REQUIS:
     "medications": [
       {
         "name": "Nom médicament (DCI)",
-        "brand_name": "Nom commercial",
         "strength": "Dosage précis",
-        "form": "Forme galénique",
-        "quantity": "Quantité à dispenser",
         "dosage": "Posologie détaillée",
         "duration": "Durée traitement",
         "instructions": "Instructions patient",
-        "indication": "Indication précise",
-        "contraindications": ["Contre-indication 1"],
-        "side_effects": ["Effet secondaire majeur 1"],
-        "monitoring": "Paramètres à surveiller"
+        "indication": "Indication précise"
       }
     ],
     "follow_up": {
-      "next_visit": "Délai et raison RDV",
-      "monitoring": ["Paramètres surveillance"],
-      "warning_signs": ["Signes d'alarme spécifiques"],
-      "lifestyle_advice": ["Conseil 1", "Conseil 2"]
+      "next_visit": "Délai RDV",
+      "warning_signs": ["Signes d'alarme"]
     }
-  },
-  "clinical_justification": "Justification médicale complète",
-  "safety_considerations": "Considérations sécurité spécifiques"
+  }
 }
-          `,
+`,
         },
       ]
 
