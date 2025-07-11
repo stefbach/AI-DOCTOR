@@ -1,250 +1,281 @@
 "use client"
 
-import { Microscope, Calendar, User, FileText } from "lucide-react"
+import { useState } from "react"
+import { Camera, Download, Printer, Calendar, User, Stethoscope } from "lucide-react"
 
 interface ImagingPrescriptionProps {
   patientData: any
   clinicalData: any
-  enhancedResults: any
   recommendedExams: any
+  onGenerate?: () => void
 }
 
 export default function ImagingPrescription({
   patientData,
   clinicalData,
-  enhancedResults,
   recommendedExams,
+  onGenerate,
 }: ImagingPrescriptionProps) {
-  const currentDate = new Date().toLocaleDateString("fr-FR")
+  const [doctorInfo, setDoctorInfo] = useState({
+    name: "Dr. Jean MARTIN",
+    specialty: "Médecine Interne",
+    rpps: "12345678901",
+    address: "123 Avenue de la Santé, 75000 Paris",
+    phone: "01 23 45 67 89",
+  })
 
-  // Filtrer les examens d'imagerie
-  const imagingExams =
-    recommendedExams?.recommended_exams?.filter(
-      (exam) =>
-        exam.category === "imaging" ||
-        exam.name.toLowerCase().includes("radio") ||
-        exam.name.toLowerCase().includes("scanner") ||
-        exam.name.toLowerCase().includes("irm") ||
-        exam.name.toLowerCase().includes("echo"),
-    ) || []
+  const [selectedExams, setSelectedExams] = useState([])
+  const [urgency, setUrgency] = useState("normal")
+  const [clinicalInfo, setClinicalInfo] = useState("")
+
+  const imagingExams = [
+    {
+      id: "radio_thorax",
+      name: "Radiographie du Thorax",
+      code: "ZBQK002",
+      preparation: "Aucune préparation particulière",
+    },
+    {
+      id: "echo_abdo",
+      name: "Échographie Abdominale",
+      code: "ZCQH001",
+      preparation: "À jeun depuis 6h",
+    },
+    {
+      id: "scanner_thorax",
+      name: "Scanner Thoracique",
+      code: "ZCQK002",
+      preparation: "Injection de produit de contraste possible",
+    },
+    {
+      id: "irm_cerebrale",
+      name: "IRM Cérébrale",
+      code: "ZCQH010",
+      preparation: "Retirer tous objets métalliques",
+    },
+    {
+      id: "echo_cardiaque",
+      name: "Échocardiographie",
+      code: "ZCQK007",
+      preparation: "Aucune préparation particulière",
+    },
+  ]
+
+  const handleExamToggle = (examId) => {
+    setSelectedExams((prev) => (prev.includes(examId) ? prev.filter((id) => id !== examId) : [...prev, examId]))
+  }
+
+  const generatePrescription = () => {
+    const prescription = {
+      doctor: doctorInfo,
+      patient: patientData,
+      exams: selectedExams.map((id) => imagingExams.find((exam) => exam.id === id)),
+      urgency,
+      clinicalInfo,
+      date: new Date().toLocaleDateString("fr-FR"),
+    }
+
+    // Simulation de génération
+    console.log("Prescription générée:", prescription)
+    if (onGenerate) onGenerate()
+  }
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-8 shadow-lg print:shadow-none">
-      {/* En-tête officiel */}
-      <div className="border-b-2 border-blue-600 pb-6 mb-8">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold text-blue-800 mb-2">ORDONNANCE D'EXAMENS D'IMAGERIE</h1>
-            <div className="text-sm text-gray-600">
-              <p>Dr. [Nom du Médecin]</p>
-              <p>[Spécialité]</p>
-              <p>[Adresse du Cabinet]</p>
-              <p>Tél: [Téléphone] - Email: [Email]</p>
+    <div className="bg-white rounded-xl shadow-lg p-6">
+      <h2 className="text-2xl font-bold mb-6 flex items-center">
+        <Camera className="h-6 w-6 mr-3 text-blue-600" />
+        Prescription d'Examens d'Imagerie
+      </h2>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Configuration */}
+        <div className="space-y-6">
+          {/* Informations médecin */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="font-semibold mb-3 flex items-center">
+              <Stethoscope className="h-5 w-5 mr-2" />
+              Médecin Prescripteur
+            </h3>
+            <div className="space-y-2 text-sm">
+              <input
+                type="text"
+                value={doctorInfo.name}
+                onChange={(e) => setDoctorInfo({ ...doctorInfo, name: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded"
+                placeholder="Nom du médecin"
+              />
+              <input
+                type="text"
+                value={doctorInfo.specialty}
+                onChange={(e) => setDoctorInfo({ ...doctorInfo, specialty: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded"
+                placeholder="Spécialité"
+              />
+              <input
+                type="text"
+                value={doctorInfo.rpps}
+                onChange={(e) => setDoctorInfo({ ...doctorInfo, rpps: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded"
+                placeholder="N° RPPS"
+              />
             </div>
           </div>
-          <div className="text-right text-sm text-gray-600">
-            <p>Date: {currentDate}</p>
-            <p>N° RPPS: [Numéro RPPS]</p>
-            <p>N° ADELI: [Numéro ADELI]</p>
-          </div>
-        </div>
-      </div>
 
-      {/* Informations patient */}
-      <div className="bg-gray-50 p-4 rounded-lg mb-6">
-        <h2 className="text-lg font-semibold mb-3 text-gray-800 flex items-center">
-          <User className="h-5 w-5 mr-2" />
-          Informations Patient
-        </h2>
-        <div className="grid grid-cols-2 gap-4 text-sm">
+          {/* Sélection examens */}
           <div>
-            <p>
-              <strong>Nom:</strong> {patientData.name}
-            </p>
-            <p>
-              <strong>Âge:</strong> {patientData.age} ans
-            </p>
-            <p>
-              <strong>Genre:</strong>{" "}
-              {patientData.gender === "M" ? "Masculin" : patientData.gender === "F" ? "Féminin" : patientData.gender}
-            </p>
-          </div>
-          <div>
-            <p>
-              <strong>Poids:</strong> {patientData.weight} kg
-            </p>
-            <p>
-              <strong>Taille:</strong> {patientData.height} cm
-            </p>
-            <p>
-              <strong>Assurance:</strong> {patientData.insurance || "Non renseignée"}
-            </p>
-          </div>
-        </div>
-        {patientData.allergies && (
-          <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded">
-            <p className="text-red-800">
-              <strong>⚠️ Allergies:</strong> {patientData.allergies}
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Indication clinique */}
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-3 text-gray-800 flex items-center">
-          <FileText className="h-5 w-5 mr-2" />
-          Indication Clinique
-        </h2>
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <p>
-            <strong>Motif de consultation:</strong> {clinicalData.chiefComplaint}
-          </p>
-          <p>
-            <strong>Symptômes:</strong> {clinicalData.symptoms?.substring(0, 200)}...
-          </p>
-          {enhancedResults?.diagnostic_analysis?.differential_diagnoses?.[0] && (
-            <p>
-              <strong>Diagnostic suspecté:</strong>{" "}
-              {enhancedResults.diagnostic_analysis.differential_diagnoses[0].diagnosis}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Examens prescrits */}
-      <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-4 text-gray-800 flex items-center">
-          <Microscope className="h-5 w-5 mr-2" />
-          Examens d'Imagerie Prescrits
-        </h2>
-
-        {imagingExams.length > 0 ? (
-          <div className="space-y-4">
-            {imagingExams.map((exam, index) => (
-              <div key={index} className="border border-gray-300 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold text-lg text-blue-800 flex items-center">
-                    <Microscope className="h-5 w-5 mr-2" />
-                    {exam.name}
-                  </h3>
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      exam.priority === "urgent"
-                        ? "bg-red-100 text-red-800"
-                        : exam.priority === "semi-urgent"
-                          ? "bg-orange-100 text-orange-800"
-                          : "bg-green-100 text-green-800"
-                    }`}
-                  >
-                    {exam.priority === "urgent"
-                      ? "URGENT"
-                      : exam.priority === "semi-urgent"
-                        ? "SEMI-URGENT"
-                        : "ROUTINE"}
-                  </span>
-                </div>
-
-                <div className="text-sm space-y-2">
-                  <p>
-                    <strong>Indication:</strong> {exam.indication}
-                  </p>
-                  <p>
-                    <strong>Préparation:</strong> {exam.preparation}
-                  </p>
-
-                  {exam.contrast_required && (
-                    <div className="bg-yellow-50 border border-yellow-200 p-2 rounded">
-                      <p className="text-yellow-800">
-                        <strong>⚠️ Produit de contraste requis</strong>
-                      </p>
-                      <p className="text-xs">Vérifier fonction rénale et allergies avant injection</p>
-                    </div>
-                  )}
-
-                  {exam.special_instructions && (
-                    <div className="bg-blue-50 border border-blue-200 p-2 rounded">
-                      <p className="text-blue-800">
-                        <strong>Instructions spéciales:</strong> {exam.special_instructions}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="border border-gray-300 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-lg text-blue-800 flex items-center">
-                  <Microscope className="h-5 w-5 mr-2" />
-                  Radiographie thoracique
-                </h3>
-                <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
-                  ROUTINE
-                </span>
-              </div>
-              <div className="text-sm space-y-2">
-                <p>
-                  <strong>Indication:</strong> Évaluation pulmonaire et cardiaque selon présentation clinique
-                </p>
-                <p>
-                  <strong>Préparation:</strong> Retirer bijoux et objets métalliques de la région thoracique
-                </p>
-              </div>
+            <h3 className="font-semibold mb-3">Examens à Prescrire</h3>
+            <div className="space-y-2">
+              {imagingExams.map((exam) => (
+                <label
+                  key={exam.id}
+                  className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedExams.includes(exam.id)}
+                    onChange={() => handleExamToggle(exam.id)}
+                    className="mr-3"
+                  />
+                  <div className="flex-1">
+                    <div className="font-medium">{exam.name}</div>
+                    <div className="text-sm text-gray-600">Code: {exam.code}</div>
+                    <div className="text-xs text-gray-500">{exam.preparation}</div>
+                  </div>
+                </label>
+              ))}
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Instructions importantes */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-        <h3 className="font-semibold text-yellow-800 mb-2">📋 Instructions Importantes</h3>
-        <ul className="text-sm text-yellow-700 space-y-1">
-          <li>• Apporter cette ordonnance et votre carte vitale</li>
-          <li>• Respecter les instructions de préparation</li>
-          <li>• Signaler toute allergie ou grossesse</li>
-          <li>• Apporter les examens antérieurs si disponibles</li>
-          <li>• Prendre RDV rapidement si examen urgent</li>
-        </ul>
-      </div>
+          {/* Urgence */}
+          <div>
+            <h3 className="font-semibold mb-3">Degré d'Urgence</h3>
+            <select
+              value={urgency}
+              onChange={(e) => setUrgency(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg"
+            >
+              <option value="normal">Normal (sous 15 jours)</option>
+              <option value="urgent">Urgent (sous 48h)</option>
+              <option value="tres_urgent">Très urgent (dans la journée)</option>
+            </select>
+          </div>
 
-      {/* Suivi */}
-      <div className="mb-8">
-        <h3 className="font-semibold text-gray-800 mb-2 flex items-center">
-          <Calendar className="h-5 w-5 mr-2" />
-          Suivi
-        </h3>
-        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-          <p className="text-sm text-green-700">
-            <strong>Retour consultation:</strong> Prendre RDV avec les résultats dans les 15 jours
-          </p>
-          <p className="text-sm text-green-700">
-            <strong>Urgence:</strong> Contacter le cabinet si symptômes s'aggravent
-          </p>
+          {/* Renseignements cliniques */}
+          <div>
+            <h3 className="font-semibold mb-3">Renseignements Cliniques</h3>
+            <textarea
+              value={clinicalInfo}
+              onChange={(e) => setClinicalInfo(e.target.value)}
+              rows={4}
+              className="w-full p-3 border border-gray-300 rounded-lg"
+              placeholder="Contexte clinique, symptômes, hypothèses diagnostiques..."
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Signature */}
-      <div className="flex justify-between items-end pt-8 border-t border-gray-300">
-        <div className="text-sm text-gray-600">
-          <p>Fait à [Ville], le {currentDate}</p>
-          <p className="mt-2">Cachet et signature du médecin</p>
-        </div>
-        <div className="text-right">
-          <div className="w-32 h-16 border border-gray-300 rounded flex items-center justify-center text-xs text-gray-500">
-            Signature
+        {/* Aperçu prescription */}
+        <div className="bg-gray-50 p-6 rounded-lg">
+          <h3 className="font-semibold mb-4">Aperçu de la Prescription</h3>
+
+          <div className="bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 min-h-96">
+            {/* En-tête */}
+            <div className="text-center mb-6">
+              <h4 className="font-bold text-lg">{doctorInfo.name}</h4>
+              <p className="text-sm">{doctorInfo.specialty}</p>
+              <p className="text-xs text-gray-600">N° RPPS: {doctorInfo.rpps}</p>
+              <p className="text-xs text-gray-600">{doctorInfo.address}</p>
+            </div>
+
+            <hr className="my-4" />
+
+            {/* Patient */}
+            <div className="mb-4">
+              <h5 className="font-semibold flex items-center mb-2">
+                <User className="h-4 w-4 mr-2" />
+                Patient
+              </h5>
+              <p className="text-sm">
+                <strong>{patientData?.name || "Nom Patient"}</strong>
+              </p>
+              <p className="text-sm">
+                {patientData?.age || "XX"} ans - {patientData?.gender || "Genre"}
+              </p>
+            </div>
+
+            {/* Date */}
+            <div className="mb-4">
+              <p className="text-sm flex items-center">
+                <Calendar className="h-4 w-4 mr-2" />
+                Le {new Date().toLocaleDateString("fr-FR")}
+              </p>
+            </div>
+
+            {/* Examens prescrits */}
+            <div className="mb-4">
+              <h5 className="font-semibold mb-2">Examens Prescrits:</h5>
+              {selectedExams.length > 0 ? (
+                <ul className="list-disc list-inside text-sm space-y-1">
+                  {selectedExams.map((examId) => {
+                    const exam = imagingExams.find((e) => e.id === examId)
+                    return (
+                      <li key={examId}>
+                        {exam?.name} ({exam?.code})
+                      </li>
+                    )
+                  })}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-500 italic">Aucun examen sélectionné</p>
+              )}
+            </div>
+
+            {/* Urgence */}
+            {urgency !== "normal" && (
+              <div className="mb-4">
+                <p className="text-sm font-semibold text-red-600">
+                  {urgency === "urgent" ? "URGENT - À réaliser sous 48h" : "TRÈS URGENT - À réaliser dans la journée"}
+                </p>
+              </div>
+            )}
+
+            {/* Renseignements cliniques */}
+            {clinicalInfo && (
+              <div className="mb-4">
+                <h5 className="font-semibold mb-2">Renseignements Cliniques:</h5>
+                <p className="text-sm">{clinicalInfo}</p>
+              </div>
+            )}
+
+            {/* Signature */}
+            <div className="mt-8 text-right">
+              <p className="text-sm">Signature et cachet du médecin</p>
+              <div className="h-16 border-b border-gray-300 mt-2"></div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Mentions légales */}
-      <div className="mt-6 pt-4 border-t border-gray-200 text-xs text-gray-500">
-        <p>
-          Cette ordonnance est valable 1 an. Les examens doivent être réalisés dans un délai approprié selon l'urgence
-          clinique.
-        </p>
+      {/* Actions */}
+      <div className="mt-6 flex justify-between">
+        <button
+          onClick={generatePrescription}
+          disabled={selectedExams.length === 0}
+          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-semibold"
+        >
+          <Camera className="h-5 w-5 mr-2" />
+          Générer Prescription
+        </button>
+
+        <div className="flex space-x-3">
+          <button className="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center">
+            <Download className="h-4 w-4 mr-2" />
+            Télécharger PDF
+          </button>
+          <button className="px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center">
+            <Printer className="h-4 w-4 mr-2" />
+            Imprimer
+          </button>
+        </div>
       </div>
     </div>
   )

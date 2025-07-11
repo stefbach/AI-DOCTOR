@@ -1,7 +1,12 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import { HelpCircle, Brain, Globe, Loader, AlertTriangle } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { HelpCircle, Brain, ArrowLeft, Target, AlertTriangle } from "lucide-react"
 
 interface QuestionsFormProps {
   clinicalQuestions: any
@@ -10,7 +15,7 @@ interface QuestionsFormProps {
   onNext: () => void
   onBack: () => void
   isLoading: boolean
-  error?: string
+  error: string | null
   apiStatus: any
 }
 
@@ -24,121 +29,233 @@ export default function QuestionsForm({
   error,
   apiStatus,
 }: QuestionsFormProps) {
-  const [answers, setAnswers] = useState(initialAnswers)
+  const [answers, setAnswers] = useState(initialAnswers || {})
+  const [errors, setErrors] = useState({})
 
-  const updateAnswer = useCallback(
+  const handleAnswerChange = useCallback(
     (index: number, value: string) => {
       const newAnswers = { ...answers, [index]: value }
       setAnswers(newAnswers)
       onAnswersChange(newAnswers)
+
+      if (errors[index]) {
+        setErrors((prev) => ({ ...prev, [index]: null }))
+      }
     },
-    [answers, onAnswersChange],
+    [answers, onAnswersChange, errors],
   )
+
+  const validateAnswers = () => {
+    const newErrors = {}
+    const questions = clinicalQuestions?.questions || []
+
+    questions.forEach((_, index) => {
+      if (!answers[index]?.trim()) {
+        newErrors[index] = "Réponse requise"
+      }
+    })
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = () => {
+    if (validateAnswers()) {
+      onNext()
+    }
+  }
+
+  const getAnsweredCount = () => {
+    return Object.keys(answers).filter((key) => answers[key]?.trim()).length
+  }
+
+  const getTotalQuestions = () => {
+    return clinicalQuestions?.questions?.length || 0
+  }
+
+  if (!clinicalQuestions) {
+    return (
+      <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+        <HelpCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-gray-700">Questions cliniques en cours de génération...</h3>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
-      <h2 className="text-2xl font-bold mb-6 flex items-center">
-        <HelpCircle className="h-6 w-6 mr-3 text-orange-600" />
-        Questions Cliniques OpenAI
-      </h2>
-
-      {clinicalQuestions?.preliminary_assessment && (
-        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
-          <h3 className="font-semibold text-orange-800 mb-2 flex items-center">
-            <Brain className="h-5 w-5 mr-2" />
-            Impression Clinique Préliminaire
-          </h3>
-          <p className="text-sm text-orange-700">{clinicalQuestions.preliminary_assessment}</p>
-        </div>
-      )}
-
-      {clinicalQuestions?.differential_diagnoses && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <h3 className="font-semibold text-blue-800 mb-2">🎯 Diagnostics Différentiels à Explorer</h3>
-          <div className="flex flex-wrap gap-2">
-            {clinicalQuestions.differential_diagnoses.map((diagnosis, index) => (
-              <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                {diagnosis}
-              </span>
-            ))}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          <HelpCircle className="h-8 w-8 text-orange-600 mr-3" />
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Questions Cliniques IA</h2>
+            <p className="text-gray-600">Questions générées par l'IA pour affiner le diagnostic</p>
           </div>
         </div>
+        <div className="text-right">
+          <div className="text-2xl font-bold text-orange-600">
+            {getAnsweredCount()}/{getTotalQuestions()}
+          </div>
+          <div className="text-sm text-gray-600">Réponses complétées</div>
+        </div>
+      </div>
+
+      {/* Impression clinique préliminaire */}
+      {clinicalQuestions.preliminary_assessment && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Brain className="h-5 w-5 mr-2 text-purple-600" />
+              Impression Clinique Préliminaire
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-purple-50 border border-purple-200 p-4 rounded-lg">
+              <p className="text-purple-800">{clinicalQuestions.preliminary_assessment}</p>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
-      <div className="space-y-4">
-        {clinicalQuestions?.questions?.map((q, index) => (
-          <div key={index} className="border border-gray-200 rounded-lg p-4 hover:border-orange-300 transition-colors">
-            <div className="mb-3">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold text-gray-900">{q.question}</h4>
-                <div className="flex items-center space-x-2">
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-semibold ${
-                      q.priority === "high"
-                        ? "bg-red-100 text-red-800"
-                        : q.priority === "medium"
-                          ? "bg-orange-100 text-orange-800"
-                          : "bg-green-100 text-green-800"
-                    }`}
-                  >
-                    {q.priority}
+      {/* Diagnostics différentiels */}
+      {clinicalQuestions.differential_diagnoses && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Target className="h-5 w-5 mr-2 text-blue-600" />
+              Diagnostics Différentiels Considérés
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {clinicalQuestions.differential_diagnoses.map((diagnosis, index) => (
+                <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800">
+                  {diagnosis}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Questions cliniques */}
+      <div className="space-y-6">
+        {clinicalQuestions.questions?.map((question, index) => (
+          <Card key={index} className="relative">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <CardTitle className="flex items-start">
+                  <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-bold mr-3 mt-1">
+                    Q{index + 1}
                   </span>
-                  <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">{q.category}</span>
+                  <div className="flex-1">
+                    <p className="text-lg font-semibold text-gray-900 leading-relaxed">{question.question}</p>
+                    {question.rationale && <p className="text-sm text-gray-600 mt-2 italic">💡 {question.rationale}</p>}
+                  </div>
+                </CardTitle>
+                <div className="flex items-center space-x-2 ml-4">
+                  <Badge
+                    variant={
+                      question.priority === "high"
+                        ? "destructive"
+                        : question.priority === "medium"
+                          ? "default"
+                          : "secondary"
+                    }
+                  >
+                    {question.priority}
+                  </Badge>
+                  <Badge variant="outline">{question.category}</Badge>
                 </div>
               </div>
-              <div className="text-sm text-gray-600 mb-2">
-                <strong>Justification:</strong> {q.rationale}
-              </div>
-              {q.expected_answers && (
-                <div className="text-xs text-gray-500 mb-2">
-                  <strong>Réponses possibles:</strong> {q.expected_answers.join(", ")}
+            </CardHeader>
+
+            <CardContent>
+              {/* Réponses attendues */}
+              {question.expected_answers && (
+                <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Exemples de réponses :</p>
+                  <div className="flex flex-wrap gap-2">
+                    {question.expected_answers.map((answer, answerIndex) => (
+                      <Badge key={answerIndex} variant="outline" className="text-xs">
+                        {answer}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               )}
-            </div>
 
-            <textarea
-              value={answers[index] || ""}
-              onChange={(e) => updateAnswer(index, e.target.value)}
-              rows={3}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-              placeholder="Réponse détaillée à cette question clinique..."
-            />
-          </div>
+              {/* Zone de réponse */}
+              <div>
+                <Label htmlFor={`answer-${index}`} className="text-sm font-medium">
+                  Votre réponse *
+                </Label>
+                <Textarea
+                  id={`answer-${index}`}
+                  value={answers[index] || ""}
+                  onChange={(e) => handleAnswerChange(index, e.target.value)}
+                  placeholder="Décrivez en détail votre observation ou réponse..."
+                  rows={4}
+                  className={`mt-2 ${errors[index] ? "border-red-500" : ""}`}
+                />
+                {errors[index] && <p className="text-red-500 text-sm mt-1">{errors[index]}</p>}
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
+      {/* Erreurs */}
       {error && (
-        <div className="mt-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
-          <AlertTriangle className="h-5 w-5 inline mr-2" />
-          {error}
+        <div className="mt-6 bg-red-50 border border-red-200 p-4 rounded-lg">
+          <div className="flex items-center">
+            <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
+            <span className="font-semibold text-red-800">Erreur</span>
+          </div>
+          <p className="text-red-700 mt-1">{error}</p>
         </div>
       )}
 
-      <div className="mt-8 flex justify-between">
-        <button
-          onClick={onBack}
-          className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 flex items-center font-semibold transition-colors"
-        >
-          Retour Présentation Clinique
-        </button>
+      {/* Progress bar */}
+      <div className="mt-6 bg-gray-50 border border-gray-200 p-4 rounded-lg">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium text-gray-700">Progression</span>
+          <span className="text-sm text-gray-600">
+            {getAnsweredCount()}/{getTotalQuestions()} questions répondues
+          </span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div
+            className="bg-orange-600 h-2 rounded-full transition-all duration-300"
+            style={{ width: `${(getAnsweredCount() / getTotalQuestions()) * 100}%` }}
+          ></div>
+        </div>
+      </div>
 
-        <button
-          onClick={onNext}
-          disabled={Object.keys(answers).length === 0 || isLoading || !apiStatus.openai}
-          className="px-8 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-semibold transition-colors"
+      {/* Navigation */}
+      <div className="flex justify-between mt-8">
+        <Button onClick={onBack} variant="outline" className="flex items-center bg-transparent">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Retour Clinique
+        </Button>
+
+        <Button
+          onClick={handleSubmit}
+          disabled={getAnsweredCount() === 0 || isLoading}
+          className="px-8 py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold flex items-center"
         >
           {isLoading ? (
             <>
-              <Loader className="animate-spin h-5 w-5 mr-2" />
-              Analyse avec APIs réelles...
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Génération Diagnostic...
             </>
           ) : (
             <>
-              <Globe className="h-5 w-5 mr-2" />
-              Lancer Diagnostic avec APIs Réelles
+              <Brain className="h-5 w-5 mr-2" />
+              Générer Diagnostic IA →
             </>
           )}
-        </button>
+        </Button>
       </div>
     </div>
   )
