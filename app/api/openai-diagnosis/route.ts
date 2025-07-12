@@ -4,240 +4,158 @@ import { openai } from "@ai-sdk/openai"
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { patientData, clinicalData, questionsData } = body
+    const { patientData, clinicalData, questionsData } = await request.json()
 
-    // Construire le prompt médical
-    const medicalPrompt = buildMedicalPrompt(patientData, clinicalData, questionsData)
-
-    // Vérifier si la clé API OpenAI est disponible
+    // Vérification de la clé API OpenAI
     if (!process.env.OPENAI_API_KEY) {
-      // Mode simulation - générer une réponse réaliste
-      const mockResponse = generateMockDiagnosis(patientData, clinicalData, questionsData)
-      return NextResponse.json(mockResponse)
+      return NextResponse.json(
+        { error: "Clé API OpenAI manquante. Veuillez configurer OPENAI_API_KEY dans vos variables d'environnement." },
+        { status: 500 },
+      )
     }
 
-    // Utiliser OpenAI GPT-4 avec la vraie API
-    const { text } = await generateText({
-      model: openai("gpt-4o"),
-      system: `Tu es un médecin expert en diagnostic médical. Tu dois analyser les données cliniques et fournir un diagnostic structuré avec des recommandations basées sur les meilleures pratiques médicales actuelles.
+    // Construction du prompt médical structuré
+    const medicalPrompt = `
+Vous êtes un médecin expert en diagnostic médical. Analysez les données cliniques suivantes et fournissez un diagnostic structuré.
 
-IMPORTANT: 
-- Utilise uniquement des codes ICD-10 valides
-- Base tes recommandations sur des preuves scientifiques
-- Indique le niveau de confiance de manière réaliste (60-95%)
-- Propose des examens appropriés avec codes CCAM/NABM français
-- Suggère des traitements selon les guidelines internationales
-- Fournis des justifications cliniques détaillées
+DONNÉES PATIENT:
+- Âge: ${patientData?.age || "Non spécifié"} ans
+- Sexe: ${patientData?.gender || "Non spécifié"}
+- Allergies: ${patientData?.allergies || "Aucune connue"}
+- Antécédents: ${patientData?.medicalHistory || "Non spécifiés"}
 
-Réponds UNIQUEMENT en JSON valide selon cette structure exacte:
+DONNÉES CLINIQUES:
+- Motif de consultation: ${clinicalData?.chiefComplaint || "Non spécifié"}
+- Symptômes: ${clinicalData?.symptoms?.join(", ") || "Non spécifiés"}
+- Signes vitaux: 
+  * TA: ${clinicalData?.vitalSigns?.bloodPressure || "Non mesurée"}
+  * FC: ${clinicalData?.vitalSigns?.heartRate || "Non mesurée"} bpm
+  * Température: ${clinicalData?.vitalSigns?.temperature || "Non mesurée"}°C
+  * SpO2: ${clinicalData?.vitalSigns?.oxygenSaturation || "Non mesurée"}%
+- Examen physique: ${clinicalData?.physicalExam || "Non réalisé"}
+
+ANAMNÈSE DIRIGÉE:
+${questionsData?.responses?.map((r: any, i: number) => `${i + 1}. ${r.question}: ${r.answer}`).join("\n") || "Aucune réponse"}
+
+Fournissez votre analyse au format JSON suivant:
 {
   "diagnosis": {
     "primary": {
-      "condition": "string",
-      "icd10": "string", 
-      "confidence": number,
-      "rationale": "string",
+      "condition": "Nom du diagnostic principal",
+      "icd10": "Code ICD-10",
+      "confidence": 85,
+      "rationale": "Justification clinique détaillée",
       "severity": "mild|moderate|severe"
     },
     "differential": [
       {
-        "condition": "string",
-        "probability": number,
-        "rationale": "string",
-        "rulOutTests": ["string"]
+        "condition": "Diagnostic différentiel 1",
+        "probability": 25,
+        "rationale": "Justification",
+        "rulOutTests": ["Examen 1", "Examen 2"]
       }
     ]
   },
   "recommendations": {
     "exams": [
       {
-        "name": "string",
-        "code": "string",
+        "name": "Nom de l'examen",
+        "code": "Code CCAM/NABM",
         "category": "biology|imaging|functional",
-        "indication": "string",
+        "indication": "Indication clinique",
         "priority": "high|medium|low"
       }
     ],
     "medications": [
       {
-        "name": "string",
-        "dosage": "string",
-        "frequency": "string",
-        "indication": "string",
-        "contraindications": ["string"]
+        "name": "Nom du médicament",
+        "dosage": "Posologie",
+        "frequency": "Fréquence",
+        "duration": "Durée",
+        "indication": "Indication",
+        "contraindications": ["Contre-indication 1"]
       }
     ]
   },
-  "references": ["string"]
-}`,
+  "riskFactors": ["Facteur de risque 1"],
+  "prognosis": "Pronostic",
+  "followUp": "Suivi recommandé"
+}
+
+Répondez UNIQUEMENT avec le JSON valide, sans texte supplémentaire.`
+
+    // Appel à OpenAI GPT-4
+    const result = await generateText({
+      model: openai("gpt-4o"),
       prompt: medicalPrompt,
+      temperature: 0.3,
+      maxTokens: 2000,
     })
 
-    // Parser la réponse JSON
-    let parsedResponse
+    // Parse de la réponse JSON
+    let diagnosisData
     try {
-      parsedResponse = JSON.parse(text)
+      // Nettoyer la réponse pour extraire le JSON
+      const cleanedResponse = result.text.replace(/```json\n?|\n?```/g, "").trim()
+      diagnosisData = JSON.parse(cleanedResponse)
     } catch (parseError) {
-      console.error("Erreur parsing OpenAI response:", parseError)
-      // Fallback vers une réponse simulée
-      parsedResponse = generateMockDiagnosis(patientData, clinicalData, questionsData)
+      console.error("Erreur parsing JSON:", parseError)
+      console.error("Réponse brute:", result.text)
+
+      // Fallback avec diagnostic basique
+      diagnosisData = {
+        diagnosis: {
+          primary: {
+            condition: "Syndrome clinique nécessitant exploration",
+            icd10: "R69",
+            confidence: 70,
+            rationale: `Analyse basée sur: ${clinicalData?.chiefComplaint || "symptômes rapportés"}. Évaluation clinique approfondie recommandée.`,
+            severity: "moderate",
+          },
+          differential: [],
+        },
+        recommendations: {
+          exams: [
+            {
+              name: "Bilan biologique standard",
+              code: "HQZZ002",
+              category: "biology",
+              indication: "Évaluation générale de l'état de santé",
+              priority: "medium",
+            },
+          ],
+          medications: [],
+        },
+        riskFactors: [],
+        prognosis: "Bon pronostic avec prise en charge adaptée",
+        followUp: "Consultation de suivi dans 7-14 jours",
+      }
     }
 
-    return NextResponse.json(parsedResponse)
-  } catch (error) {
-    console.error("Erreur API OpenAI:", error)
+    // Validation et enrichissement des données
+    if (!diagnosisData.diagnosis?.primary?.condition) {
+      throw new Error("Réponse OpenAI invalide: diagnostic principal manquant")
+    }
 
-    // En cas d'erreur, retourner une réponse simulée
-    const fallbackResponse = generateMockDiagnosis(
-      request.body?.patientData,
-      request.body?.clinicalData,
-      request.body?.questionsData,
-    )
+    // Ajout de métadonnées
+    diagnosisData.metadata = {
+      generatedAt: new Date().toISOString(),
+      model: "gpt-4o",
+      patientAge: patientData?.age,
+      patientGender: patientData?.gender,
+      chiefComplaint: clinicalData?.chiefComplaint,
+    }
 
-    return NextResponse.json(fallbackResponse)
-  }
-}
+    return NextResponse.json(diagnosisData)
+  } catch (error: any) {
+    console.error("Erreur OpenAI diagnosis:", error)
 
-function buildMedicalPrompt(patientData: any, clinicalData: any, questionsData: any): string {
-  return `
-ANALYSE MÉDICALE COMPLÈTE
-
-PATIENT:
-- Âge: ${patientData?.age || "Non renseigné"} ans
-- Sexe: ${patientData?.gender || "Non renseigné"}
-- Antécédents: ${patientData?.medicalHistory || "Non renseignés"}
-- Médicaments actuels: ${patientData?.currentMedications || "Aucun"}
-- Allergies: ${patientData?.allergies || "Aucune connue"}
-
-PRÉSENTATION CLINIQUE:
-- Motif de consultation: ${clinicalData?.chiefComplaint || "Non renseigné"}
-- Histoire de la maladie: ${clinicalData?.historyOfPresentIllness || "Non renseignée"}
-- Signes vitaux: 
-  * TA: ${clinicalData?.vitalSigns?.bloodPressure || "Non mesurée"}
-  * FC: ${clinicalData?.vitalSigns?.heartRate || "Non mesurée"} bpm
-  * Température: ${clinicalData?.vitalSigns?.temperature || "Non mesurée"}°C
-  * SpO2: ${clinicalData?.vitalSigns?.oxygenSaturation || "Non mesurée"}%
-- Examen physique: ${clinicalData?.physicalExamination || "Non renseigné"}
-
-ANAMNÈSE DIRIGÉE:
-${questionsData?.responses?.map((r: any) => `- ${r.question}: ${r.answer}`).join("\n") || "Non disponible"}
-
-DEMANDE:
-Fournir une analyse diagnostique complète avec:
-1. Diagnostic principal avec code ICD-10 et niveau de confiance réaliste
-2. Diagnostics différentiels avec probabilités
-3. Examens complémentaires recommandés avec codes français
-4. Traitements médicamenteux appropriés avec posologies
-5. Références aux guidelines médicales
-
-Format de réponse: JSON structuré selon l'interface OpenAIResponse.
-`
-}
-
-function generateMockDiagnosis(patientData: any, clinicalData: any, questionsData: any): any {
-  const symptoms = clinicalData?.chiefComplaint?.toLowerCase() || ""
-  const age = patientData?.age || 40
-  const gender = patientData?.gender || "Non spécifié"
-
-  // Logique de diagnostic basée sur les symptômes
-  let primaryCondition = "Syndrome clinique nécessitant exploration"
-  let icd10 = "R69"
-  let confidence = 70
-  let severity: "mild" | "moderate" | "severe" = "moderate"
-
-  if (symptoms.includes("fièvre") || symptoms.includes("température")) {
-    primaryCondition = "Syndrome fébrile"
-    icd10 = "R50.9"
-    confidence = 75
-    severity = "moderate"
-  } else if (symptoms.includes("toux") || symptoms.includes("respiratoire")) {
-    primaryCondition = "Infection des voies respiratoires supérieures"
-    icd10 = "J06.9"
-    confidence = 80
-    severity = "mild"
-  } else if (symptoms.includes("douleur") && symptoms.includes("thoracique")) {
-    primaryCondition = "Douleur thoracique non spécifique"
-    icd10 = "R07.89"
-    confidence = 65
-    severity = "moderate"
-  } else if (symptoms.includes("céphalée") || symptoms.includes("mal de tête")) {
-    primaryCondition = "Céphalée de tension"
-    icd10 = "G44.2"
-    confidence = 85
-    severity = "mild"
-  }
-
-  return {
-    diagnosis: {
-      primary: {
-        condition: primaryCondition,
-        icd10: icd10,
-        confidence: confidence,
-        rationale: `Analyse basée sur les symptômes présentés: "${symptoms}". Patient de ${age} ans, ${gender}. Les signes vitaux et l'examen clinique orientent vers ce diagnostic avec un niveau de confiance de ${confidence}%.`,
-        severity: severity,
+    return NextResponse.json(
+      {
+        error: `Erreur lors de la génération du diagnostic: ${error.message}`,
+        details: error.stack,
       },
-      differential: [
-        {
-          condition: "Infection virale commune",
-          probability: 60,
-          rationale: "Présentation clinique compatible avec une infection virale, contexte épidémiologique",
-          rulOutTests: ["CRP", "NFS", "Procalcitonine"],
-        },
-        {
-          condition: "Syndrome inflammatoire",
-          probability: 25,
-          rationale: "Possibilité d'un processus inflammatoire sous-jacent",
-          rulOutTests: ["VS", "CRP", "Fibrinogène"],
-        },
-      ],
-    },
-    recommendations: {
-      exams: [
-        {
-          name: "Numération Formule Sanguine",
-          code: "HQZZ002",
-          category: "biology",
-          indication: "Recherche d'un syndrome inflammatoire ou infectieux",
-          priority: "medium",
-        },
-        {
-          name: "C-Reactive Protein",
-          code: "HQZZ003",
-          category: "biology",
-          indication: "Évaluation de l'inflammation",
-          priority: "medium",
-        },
-        {
-          name: "Radiographie thoracique",
-          code: "ZBQK002",
-          category: "imaging",
-          indication: "Élimination d'une pathologie pulmonaire",
-          priority: "low",
-        },
-      ],
-      medications: [
-        {
-          name: "Paracétamol",
-          dosage: "1000mg",
-          frequency: "3 fois par jour si besoin",
-          indication: "Traitement symptomatique de la fièvre et des douleurs",
-          contraindications: ["Insuffisance hépatique sévère", "Allergie au paracétamol"],
-        },
-        {
-          name: "Ibuprofène",
-          dosage: "400mg",
-          frequency: "3 fois par jour pendant les repas",
-          indication: "Anti-inflammatoire et antalgique",
-          contraindications: ["Insuffisance rénale", "Ulcère gastroduodénal", "Allergie aux AINS"],
-        },
-      ],
-    },
-    references: [
-      "Recommandations HAS 2024 - Prise en charge des syndromes fébriles en médecine générale",
-      "SPILF - Antibiothérapie par voie générale en pratique courante",
-      "Guidelines NICE - Management of common infections",
-      "Collège National des Généralistes Enseignants - Référentiel de médecine générale",
-    ],
+      { status: 500 },
+    )
   }
 }

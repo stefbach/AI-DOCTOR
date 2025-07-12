@@ -1,4 +1,4 @@
-// Services d'intégration des APIs médicales - Client Side
+// Services d'intégration des APIs médicales - VRAIES APIs UNIQUEMENT
 
 interface OpenAIResponse {
   diagnosis: {
@@ -28,11 +28,14 @@ interface OpenAIResponse {
       name: string
       dosage: string
       frequency: string
+      duration?: string
       indication: string
       contraindications: string[]
     }>
   }
-  references: string[]
+  riskFactors?: string[]
+  prognosis?: string
+  followUp?: string
 }
 
 interface FDADrugInfo {
@@ -46,6 +49,7 @@ interface FDADrugInfo {
   contraindications: string[]
   warnings: string[]
   fdaApproved: boolean
+  source: string
 }
 
 interface RxNormResponse {
@@ -54,6 +58,7 @@ interface RxNormResponse {
   synonym: string[]
   tty: string
   suppress: string
+  source: string
 }
 
 interface PubMedArticle {
@@ -64,6 +69,8 @@ interface PubMedArticle {
   year: number
   abstract: string
   relevanceScore: number
+  url?: string
+  source: string
 }
 
 export class MedicalAPIService {
@@ -77,93 +84,83 @@ export class MedicalAPIService {
   }
 
   async generateDiagnosisWithOpenAI(patientData: any, clinicalData: any, questionsData: any): Promise<OpenAIResponse> {
-    try {
-      const response = await fetch("/api/openai-diagnosis", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          patientData,
-          clinicalData,
-          questionsData,
-        }),
-      })
+    const response = await fetch("/api/openai-diagnosis", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        patientData,
+        clinicalData,
+        questionsData,
+      }),
+    })
 
-      if (!response.ok) {
-        throw new Error("Erreur API OpenAI")
-      }
-
-      return await response.json()
-    } catch (error) {
-      console.error("Erreur génération diagnostic:", error)
-      throw error
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || `Erreur API OpenAI: ${response.status}`)
     }
+
+    const result = await response.json()
+    if (result.error) {
+      throw new Error(result.error)
+    }
+
+    return result
   }
 
   async checkDrugInteractionsFDA(medications: string[]): Promise<FDADrugInfo[]> {
-    try {
-      const response = await fetch(`/api/fda-drug-info`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ medications }),
-      })
+    const response = await fetch("/api/fda-drug-info", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ medications }),
+    })
 
-      if (!response.ok) {
-        throw new Error("Erreur FDA API")
-      }
-
-      return await response.json()
-    } catch (error) {
-      console.error("Erreur vérification FDA:", error)
-      throw error
+    if (!response.ok) {
+      throw new Error(`Erreur FDA API: ${response.status}`)
     }
+
+    return await response.json()
   }
 
   async normalizeWithRxNorm(drugName: string): Promise<RxNormResponse> {
-    try {
-      const response = await fetch(`/api/rxnorm-normalize`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ drugName }),
-      })
+    const response = await fetch("/api/rxnorm-normalize", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ drugName }),
+    })
 
-      if (!response.ok) {
-        throw new Error("Erreur RxNorm API")
-      }
-
-      return await response.json()
-    } catch (error) {
-      console.error("Erreur normalisation RxNorm:", error)
-      throw error
+    if (!response.ok) {
+      throw new Error(`Erreur RxNorm API: ${response.status}`)
     }
+
+    return await response.json()
   }
 
   async searchPubMedReferences(diagnosis: string, symptoms: string[]): Promise<PubMedArticle[]> {
-    try {
-      const response = await fetch(`/api/pubmed-search`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          diagnosis,
-          symptoms,
-        }),
-      })
+    const response = await fetch("/api/pubmed-search", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        diagnosis,
+        symptoms,
+        maxResults: 5,
+        yearLimit: 5,
+      }),
+    })
 
-      if (!response.ok) {
-        throw new Error("Erreur PubMed API")
-      }
-
-      return await response.json()
-    } catch (error) {
-      console.error("Erreur recherche PubMed:", error)
-      throw error
+    if (!response.ok) {
+      throw new Error(`Erreur PubMed API: ${response.status}`)
     }
+
+    return await response.json()
   }
 }
+
+export type { OpenAIResponse, FDADrugInfo, RxNormResponse, PubMedArticle }
