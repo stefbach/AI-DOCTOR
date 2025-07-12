@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Brain, ArrowLeft, ArrowRight, Loader2, Target, AlertTriangle, CheckCircle, Lightbulb } from "lucide-react"
+import { Progress } from "@/components/ui/progress"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Brain, AlertTriangle, BookOpen, Loader2 } from "lucide-react"
+import { MedicalAPIService } from "@/lib/api-services"
 
 interface DiagnosisFormProps {
   patientData: any
@@ -16,38 +17,6 @@ interface DiagnosisFormProps {
   onBack: () => void
 }
 
-interface Diagnosis {
-  condition: string
-  icd10: string
-  confidence: number
-  rationale: string
-  severity: "mild" | "moderate" | "severe"
-}
-
-interface DifferentialDiagnosis {
-  condition: string
-  probability: number
-  rationale: string
-  rulOutTests?: string[]
-}
-
-interface ClinicalRecommendation {
-  category: "treatment" | "monitoring" | "lifestyle" | "referral"
-  action: string
-  priority: "high" | "medium" | "low"
-  timeline: string
-}
-
-interface DiagnosisData {
-  primaryDiagnosis: Diagnosis
-  differentialDiagnoses: DifferentialDiagnosis[]
-  clinicalRecommendations: ClinicalRecommendation[]
-  recommendedExams: any[]
-  riskFactors: string[]
-  prognosis: string
-  generatedAt: string
-}
-
 export default function DiagnosisForm({
   patientData,
   clinicalData,
@@ -55,426 +24,355 @@ export default function DiagnosisForm({
   onNext,
   onBack,
 }: DiagnosisFormProps) {
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [diagnosisData, setDiagnosisData] = useState<DiagnosisData | null>(null)
-  const [currentStep, setCurrentStep] = useState<"generating" | "review" | "complete">("generating")
+  const [isLoading, setIsLoading] = useState(false)
+  const [diagnosisResult, setDiagnosisResult] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [apiStatus, setApiStatus] = useState({
+    openai: "idle",
+    fda: "idle",
+    rxnorm: "idle",
+    pubmed: "idle",
+  })
 
-  const generateDiagnosisWithAI = useCallback(async () => {
-    setIsGenerating(true)
-    setCurrentStep("generating")
-
-    // Simulation d'analyse IA avec délai réaliste
-    await new Promise((resolve) => setTimeout(resolve, 3000))
-
-    // Génération du diagnostic basé sur les données collectées
-    const diagnosis: DiagnosisData = {
-      primaryDiagnosis: {
-        condition: "Syndrome coronarien aigu probable",
-        icd10: "I20.9",
-        confidence: 78,
-        rationale: `Basé sur les symptômes de douleur thoracique, les facteurs de risque cardiovasculaires identifiés, 
-        et les réponses à l'anamnèse dirigée. La présentation clinique est compatible avec un syndrome coronarien aigu.`,
-        severity: "moderate",
-      },
-      differentialDiagnoses: [
-        {
-          condition: "Péricardite aiguë",
-          probability: 15,
-          rationale: "Douleur thoracique avec caractéristiques inflammatoires possibles",
-          rulOutTests: ["ECG", "Échocardiographie", "CRP"],
-        },
-        {
-          condition: "Embolie pulmonaire",
-          probability: 12,
-          rationale: "Dyspnée et douleur thoracique, facteurs de risque à évaluer",
-          rulOutTests: ["D-dimères", "Angioscanner pulmonaire"],
-        },
-        {
-          condition: "Reflux gastro-œsophagien",
-          probability: 8,
-          rationale: "Douleur thoracique pouvant mimer une origine cardiaque",
-          rulOutTests: ["Test aux IPP", "Endoscopie si nécessaire"],
-        },
-      ],
-      clinicalRecommendations: [
-        {
-          category: "treatment",
-          action: "Débuter un traitement antiagrégant plaquettaire (Aspirine 75mg/j)",
-          priority: "high",
-          timeline: "Immédiatement",
-        },
-        {
-          category: "monitoring",
-          action: "Surveillance ECG et enzymes cardiaques",
-          priority: "high",
-          timeline: "Dans les 6 heures",
-        },
-        {
-          category: "lifestyle",
-          action: "Arrêt du tabac et modification du régime alimentaire",
-          priority: "medium",
-          timeline: "Dès que possible",
-        },
-        {
-          category: "referral",
-          action: "Consultation cardiologique dans les 48h",
-          priority: "high",
-          timeline: "Sous 48 heures",
-        },
-      ],
-      recommendedExams: [
-        {
-          name: "Électrocardiogramme (ECG)",
-          category: "urgent",
-          indication: "Recherche de signes d'ischémie myocardique",
-          code: "DEQP003",
-        },
-        {
-          name: "Troponines cardiaques",
-          category: "biology",
-          indication: "Marqueurs de nécrose myocardique",
-          code: "B1201",
-        },
-        {
-          name: "Radiographie thoracique",
-          category: "imaging",
-          indication: "Élimination d'autres causes de douleur thoracique",
-          code: "R1101",
-        },
-        {
-          name: "Échocardiographie",
-          category: "imaging",
-          indication: "Évaluation de la fonction cardiaque",
-          code: "R5101",
-        },
-      ],
-      riskFactors: [
-        "Âge > 50 ans",
-        "Antécédents familiaux cardiovasculaires",
-        "Tabagisme actuel ou récent",
-        "Hypertension artérielle",
-        "Dyslipidémie probable",
-      ],
-      prognosis: `Avec une prise en charge appropriée et rapide, le pronostic est généralement favorable. 
-      La confirmation diagnostique par les examens complémentaires permettra d'adapter le traitement.`,
-      generatedAt: new Date().toISOString(),
-    }
-
-    setDiagnosisData(diagnosis)
-    setIsGenerating(false)
-    setCurrentStep("review")
-  }, [])
+  const apiService = MedicalAPIService.getInstance()
 
   useEffect(() => {
-    if (currentStep === "generating") {
-      generateDiagnosisWithAI()
+    // Génération automatique du diagnostic au chargement
+    generateDiagnosis()
+  }, [])
+
+  const generateDiagnosis = async () => {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      // Étape 1: Génération du diagnostic avec OpenAI
+      setApiStatus((prev) => ({ ...prev, openai: "loading" }))
+      const diagnosisResponse = await apiService.generateDiagnosisWithOpenAI(patientData, clinicalData, questionsData)
+      setApiStatus((prev) => ({ ...prev, openai: "success" }))
+
+      // Étape 2: Vérification des médicaments avec FDA
+      if (diagnosisResponse.recommendations?.medications?.length > 0) {
+        setApiStatus((prev) => ({ ...prev, fda: "loading" }))
+        const medicationNames = diagnosisResponse.recommendations.medications.map((m) => m.name)
+        const fdaResults = await apiService.checkDrugInteractionsFDA(medicationNames)
+        setApiStatus((prev) => ({ ...prev, fda: "success" }))
+
+        // Enrichir les médicaments avec les données FDA
+        diagnosisResponse.recommendations.medications = diagnosisResponse.recommendations.medications.map(
+          (med, index) => ({
+            ...med,
+            fdaInfo: fdaResults[index] || null,
+          }),
+        )
+      }
+
+      // Étape 3: Normalisation avec RxNorm
+      setApiStatus((prev) => ({ ...prev, rxnorm: "loading" }))
+      if (diagnosisResponse.recommendations?.medications?.length > 0) {
+        for (const med of diagnosisResponse.recommendations.medications) {
+          const rxNormResult = await apiService.normalizeWithRxNorm(med.name)
+          med.rxNormInfo = rxNormResult
+        }
+      }
+      setApiStatus((prev) => ({ ...prev, rxnorm: "success" }))
+
+      // Étape 4: Recherche de références PubMed
+      setApiStatus((prev) => ({ ...prev, pubmed: "loading" }))
+      const symptoms = [clinicalData.chiefComplaint, ...(clinicalData.symptoms || [])]
+      const pubmedResults = await apiService.searchPubMedReferences(
+        diagnosisResponse.diagnosis.primary.condition,
+        symptoms,
+      )
+      setApiStatus((prev) => ({ ...prev, pubmed: "success" }))
+
+      // Finaliser le résultat
+      const finalResult = {
+        ...diagnosisResponse,
+        pubmedReferences: pubmedResults,
+        analysisTimestamp: new Date().toISOString(),
+        patientContext: {
+          age: patientData.age,
+          gender: patientData.gender,
+          allergies: patientData.allergies,
+        },
+      }
+
+      setDiagnosisResult(finalResult)
+    } catch (err) {
+      console.error("Erreur génération diagnostic:", err)
+      setError("Erreur lors de la génération du diagnostic. Veuillez réessayer.")
+      setApiStatus((prev) => ({
+        ...prev,
+        openai: "error",
+        fda: "error",
+        rxnorm: "error",
+        pubmed: "error",
+      }))
+    } finally {
+      setIsLoading(false)
     }
-  }, [currentStep, generateDiagnosisWithAI])
-
-  const handleConfirmDiagnosis = () => {
-    setCurrentStep("complete")
-  }
-
-  const handleRegenerateDiagnosis = () => {
-    setCurrentStep("generating")
-    setDiagnosisData(null)
   }
 
   const handleNext = () => {
-    onNext(diagnosisData)
-  }
-
-  if (currentStep === "generating" || isGenerating) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <div className="relative mb-6">
-              <Brain className="h-16 w-16 text-blue-600 animate-pulse" />
-              <div className="absolute -top-2 -right-2">
-                <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
-              </div>
-            </div>
-            <h3 className="text-xl font-semibold mb-4">Génération du Diagnostic par IA</h3>
-            <div className="text-center space-y-2 max-w-md">
-              <p className="text-gray-600">
-                L'IA analyse les données de{" "}
-                <strong>
-                  {patientData?.firstName} {patientData?.lastName}
-                </strong>
-              </p>
-              <div className="space-y-1 text-sm text-gray-500">
-                <div>✓ Données cliniques analysées</div>
-                <div>✓ Anamnèse dirigée évaluée ({questionsData?.answeredQuestions} réponses)</div>
-                <div className="animate-pulse">⏳ Génération du diagnostic différentiel...</div>
-                <div className="animate-pulse">⏳ Calcul des probabilités diagnostiques...</div>
-                <div className="animate-pulse">⏳ Recommandations thérapeutiques...</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  if (currentStep === "complete") {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center text-2xl text-green-600">
-              <CheckCircle className="h-6 w-6 mr-3" />
-              Diagnostic Confirmé
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <Alert>
-              <Target className="h-4 w-4" />
-              <AlertDescription>
-                Le diagnostic a été généré et confirmé. Vous pouvez maintenant procéder à la prescription d'examens
-                complémentaires.
-              </AlertDescription>
-            </Alert>
-
-            <div className="bg-green-50 p-4 rounded-lg">
-              <h4 className="font-semibold text-green-800 mb-2">Diagnostic Principal</h4>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">{diagnosisData?.primaryDiagnosis.condition}</p>
-                  <p className="text-sm text-gray-600">Code ICD-10: {diagnosisData?.primaryDiagnosis.icd10}</p>
-                </div>
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
-                  {diagnosisData?.primaryDiagnosis.confidence}% de confiance
-                </Badge>
-              </div>
-            </div>
-
-            <div className="flex justify-between pt-6">
-              <Button onClick={() => setCurrentStep("review")} variant="outline">
-                Revoir le diagnostic
-              </Button>
-              <Button onClick={handleNext} className="bg-blue-600 hover:bg-blue-700">
-                Continuer vers les Examens
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
+    if (diagnosisResult) {
+      onNext(diagnosisResult)
+    }
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center text-2xl">
-            <Target className="h-6 w-6 mr-3 text-blue-600" />
-            Diagnostic Généré par IA
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="w-5 h-5" />
+            Diagnostic IA - Analyse Multi-Sources
           </CardTitle>
-          <p className="text-gray-600">
-            Analyse complète pour {patientData?.firstName} {patientData?.lastName}
-          </p>
+          <CardDescription>
+            Analyse diagnostique complète utilisant OpenAI GPT-4, FDA Database, RxNorm et PubMed
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Diagnostic principal */}
-          <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-l-blue-500">
-            <div className="flex items-start justify-between mb-4">
-              <h3 className="text-lg font-semibold text-blue-900">Diagnostic Principal</h3>
-              <Badge
-                className={`${
-                  diagnosisData?.primaryDiagnosis.confidence! >= 80
-                    ? "bg-green-100 text-green-800"
-                    : diagnosisData?.primaryDiagnosis.confidence! >= 60
-                      ? "bg-orange-100 text-orange-800"
-                      : "bg-red-100 text-red-800"
+        <CardContent>
+          {/* Statut des APIs */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="text-center">
+              <div
+                className={`w-3 h-3 rounded-full mx-auto mb-2 ${
+                  apiStatus.openai === "success"
+                    ? "bg-green-500"
+                    : apiStatus.openai === "loading"
+                      ? "bg-yellow-500"
+                      : apiStatus.openai === "error"
+                        ? "bg-red-500"
+                        : "bg-gray-300"
                 }`}
-              >
-                {diagnosisData?.primaryDiagnosis.confidence}% de confiance
-              </Badge>
+              ></div>
+              <p className="text-sm font-medium">OpenAI GPT-4</p>
+              <p className="text-xs text-gray-500">Diagnostic IA</p>
             </div>
-            <div className="space-y-3">
-              <div>
-                <h4 className="font-medium text-blue-800">{diagnosisData?.primaryDiagnosis.condition}</h4>
-                <p className="text-sm text-blue-700">Code ICD-10: {diagnosisData?.primaryDiagnosis.icd10}</p>
-              </div>
-              <div>
-                <h5 className="font-medium text-blue-800 mb-1">Justification clinique:</h5>
-                <p className="text-sm text-blue-700">{diagnosisData?.primaryDiagnosis.rationale}</p>
-              </div>
-              <div className="flex items-center space-x-4">
-                <Badge
-                  variant={
-                    diagnosisData?.primaryDiagnosis.severity === "severe"
-                      ? "destructive"
-                      : diagnosisData?.primaryDiagnosis.severity === "moderate"
-                        ? "default"
-                        : "secondary"
-                  }
-                >
-                  Sévérité:{" "}
-                  {diagnosisData?.primaryDiagnosis.severity === "severe"
-                    ? "Sévère"
-                    : diagnosisData?.primaryDiagnosis.severity === "moderate"
-                      ? "Modérée"
-                      : "Légère"}
-                </Badge>
-              </div>
+            <div className="text-center">
+              <div
+                className={`w-3 h-3 rounded-full mx-auto mb-2 ${
+                  apiStatus.fda === "success"
+                    ? "bg-green-500"
+                    : apiStatus.fda === "loading"
+                      ? "bg-yellow-500"
+                      : apiStatus.fda === "error"
+                        ? "bg-red-500"
+                        : "bg-gray-300"
+                }`}
+              ></div>
+              <p className="text-sm font-medium">FDA Database</p>
+              <p className="text-xs text-gray-500">Interactions</p>
+            </div>
+            <div className="text-center">
+              <div
+                className={`w-3 h-3 rounded-full mx-auto mb-2 ${
+                  apiStatus.rxnorm === "success"
+                    ? "bg-green-500"
+                    : apiStatus.rxnorm === "loading"
+                      ? "bg-yellow-500"
+                      : apiStatus.rxnorm === "error"
+                        ? "bg-red-500"
+                        : "bg-gray-300"
+                }`}
+              ></div>
+              <p className="text-sm font-medium">RxNorm API</p>
+              <p className="text-xs text-gray-500">Normalisation</p>
+            </div>
+            <div className="text-center">
+              <div
+                className={`w-3 h-3 rounded-full mx-auto mb-2 ${
+                  apiStatus.pubmed === "success"
+                    ? "bg-green-500"
+                    : apiStatus.pubmed === "loading"
+                      ? "bg-yellow-500"
+                      : apiStatus.pubmed === "error"
+                        ? "bg-red-500"
+                        : "bg-gray-300"
+                }`}
+              ></div>
+              <p className="text-sm font-medium">PubMed API</p>
+              <p className="text-xs text-gray-500">Références</p>
             </div>
           </div>
 
-          {/* Diagnostics différentiels */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <AlertTriangle className="h-5 w-5 mr-2 text-orange-600" />
-              Diagnostics Différentiels
-            </h3>
-            <div className="space-y-3">
-              {diagnosisData?.differentialDiagnoses.map((diff, index) => (
-                <Card key={index} className="border-l-4 border-l-orange-500">
-                  <CardContent className="pt-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <h4 className="font-medium">{diff.condition}</h4>
-                      <Badge variant="outline">{diff.probability}% de probabilité</Badge>
+          {isLoading && (
+            <div className="text-center py-8">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+              <p className="text-lg font-medium">Génération du diagnostic en cours...</p>
+              <p className="text-sm text-gray-600">Analyse des données avec intelligence artificielle</p>
+            </div>
+          )}
+
+          {error && (
+            <Alert className="mb-6">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {diagnosisResult && (
+            <div className="space-y-6">
+              {/* Diagnostic Principal */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Diagnostic Principal</span>
+                    <Badge variant="outline">Confiance: {diagnosisResult.diagnosis.primary.confidence}%</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium text-lg">{diagnosisResult.diagnosis.primary.condition}</h4>
+                      <p className="text-sm text-gray-600">Code ICD-10: {diagnosisResult.diagnosis.primary.icd10}</p>
+                      <Badge
+                        variant={
+                          diagnosisResult.diagnosis.primary.severity === "severe"
+                            ? "destructive"
+                            : diagnosisResult.diagnosis.primary.severity === "moderate"
+                              ? "secondary"
+                              : "outline"
+                        }
+                      >
+                        {diagnosisResult.diagnosis.primary.severity}
+                      </Badge>
                     </div>
-                    <p className="text-sm text-gray-600 mb-3">{diff.rationale}</p>
-                    {diff.rulOutTests && (
-                      <div>
-                        <h5 className="text-sm font-medium mb-1">Examens pour éliminer:</h5>
-                        <div className="flex flex-wrap gap-1">
-                          {diff.rulOutTests.map((test, testIndex) => (
+                    <Progress value={diagnosisResult.diagnosis.primary.confidence} className="w-full" />
+                    <p className="text-sm">{diagnosisResult.diagnosis.primary.rationale}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Diagnostics Différentiels */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Diagnostics Différentiels</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {diagnosisResult.diagnosis.differential.map((diff: any, index: number) => (
+                      <div key={index} className="border rounded p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium">{diff.condition}</h4>
+                          <Badge variant="outline">{diff.probability}%</Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{diff.rationale}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {diff.rulOutTests.map((test: string, testIndex: number) => (
                             <Badge key={testIndex} variant="secondary" className="text-xs">
                               {test}
                             </Badge>
                           ))}
                         </div>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* Recommandations cliniques */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Lightbulb className="h-5 w-5 mr-2 text-yellow-600" />
-              Recommandations Cliniques
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {diagnosisData?.clinicalRecommendations.map((rec, index) => (
-                <Card
-                  key={index}
-                  className={`border-l-4 ${
-                    rec.priority === "high"
-                      ? "border-l-red-500"
-                      : rec.priority === "medium"
-                        ? "border-l-orange-500"
-                        : "border-l-gray-500"
-                  }`}
-                >
-                  <CardContent className="pt-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <Badge variant="outline" className="text-xs">
-                        {rec.category === "treatment"
-                          ? "Traitement"
-                          : rec.category === "monitoring"
-                            ? "Surveillance"
-                            : rec.category === "lifestyle"
-                              ? "Mode de vie"
-                              : "Référence"}
-                      </Badge>
-                      <Badge
-                        className={
-                          rec.priority === "high"
-                            ? "bg-red-100 text-red-800"
-                            : rec.priority === "medium"
-                              ? "bg-orange-100 text-orange-800"
-                              : "bg-gray-100 text-gray-800"
-                        }
-                      >
-                        {rec.priority === "high" ? "Urgent" : rec.priority === "medium" ? "Important" : "Routine"}
-                      </Badge>
-                    </div>
-                    <p className="text-sm font-medium mb-1">{rec.action}</p>
-                    <p className="text-xs text-gray-600">Délai: {rec.timeline}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* Examens recommandés */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Examens Complémentaires Recommandés</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {diagnosisData?.recommendedExams.map((exam, index) => (
-                <Card key={index}>
-                  <CardContent className="pt-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <h4 className="font-medium">{exam.name}</h4>
-                      <Badge
-                        variant={
-                          exam.category === "urgent"
-                            ? "destructive"
-                            : exam.category === "biology"
-                              ? "default"
-                              : "secondary"
-                        }
-                      >
-                        {exam.category === "urgent" ? "Urgent" : exam.category === "biology" ? "Biologie" : "Imagerie"}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-1">{exam.indication}</p>
-                    <p className="text-xs text-gray-500">Code: {exam.code}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* Facteurs de risque et pronostic */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Facteurs de Risque Identifiés</h3>
-              <div className="space-y-2">
-                {diagnosisData?.riskFactors.map((factor, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <AlertTriangle className="h-4 w-4 text-orange-500" />
-                    <span className="text-sm">{factor}</span>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Pronostic</h3>
-              <p className="text-sm text-gray-700">{diagnosisData?.prognosis}</p>
-            </div>
-          </div>
+                </CardContent>
+              </Card>
 
-          <Separator />
+              {/* Recommandations Thérapeutiques */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recommandations Thérapeutiques</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {diagnosisResult.recommendations.medications.map((med: any, index: number) => (
+                      <div key={index} className="border rounded p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium">{med.name}</h4>
+                          {med.fdaInfo && (
+                            <Badge variant={med.fdaInfo.fdaApproved ? "default" : "destructive"}>
+                              {med.fdaInfo.fdaApproved ? "FDA Approuvé" : "Non approuvé"}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <p>
+                              <strong>Posologie:</strong> {med.dosage}
+                            </p>
+                            <p>
+                              <strong>Fréquence:</strong> {med.frequency}
+                            </p>
+                          </div>
+                          <div>
+                            <p>
+                              <strong>Indication:</strong> {med.indication}
+                            </p>
+                            {med.rxNormInfo && (
+                              <p>
+                                <strong>RxCUI:</strong> {med.rxNormInfo.rxcui}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        {med.fdaInfo && med.fdaInfo.interactions.length > 0 && (
+                          <div className="mt-3">
+                            <h5 className="font-medium text-sm mb-2">⚠️ Interactions:</h5>
+                            <div className="space-y-1">
+                              {med.fdaInfo.interactions.map((interaction: any, intIndex: number) => (
+                                <div key={intIndex} className="text-xs bg-yellow-50 p-2 rounded">
+                                  <strong>{interaction.drug}:</strong> {interaction.description}
+                                  <Badge variant="outline" className="ml-2 text-xs">
+                                    {interaction.severity}
+                                  </Badge>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
 
-          {/* Actions */}
-          <div className="flex justify-between items-center pt-4">
-            <Button onClick={onBack} variant="outline" className="px-6 py-3 bg-transparent">
-              <ArrowLeft className="h-5 w-5 mr-2" />
-              Retour Questions
-            </Button>
-
-            <div className="flex space-x-3">
-              <Button onClick={handleRegenerateDiagnosis} variant="outline">
-                <Brain className="h-4 w-4 mr-2" />
-                Régénérer
-              </Button>
-              <Button onClick={handleConfirmDiagnosis} className="bg-green-600 hover:bg-green-700">
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Confirmer le Diagnostic
-              </Button>
+              {/* Références Scientifiques */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BookOpen className="w-5 h-5" />
+                    Références Scientifiques (PubMed)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {diagnosisResult.pubmedReferences.map((ref: any, index: number) => (
+                      <div key={index} className="border-l-4 border-blue-500 pl-4">
+                        <h4 className="font-medium text-sm">{ref.title}</h4>
+                        <p className="text-xs text-gray-600">
+                          {ref.authors.join(", ")} - {ref.journal} ({ref.year})
+                        </p>
+                        <p className="text-xs mt-1">{ref.abstract}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Badge variant="outline" className="text-xs">
+                            PMID: {ref.pmid}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            Score: {ref.relevanceScore}%
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
+
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={onBack}>
+          ← Retour
+        </Button>
+        <Button onClick={handleNext} disabled={!diagnosisResult} className="bg-blue-600 hover:bg-blue-700">
+          Continuer vers Examens Paracliniques →
+        </Button>
+      </div>
     </div>
   )
 }
