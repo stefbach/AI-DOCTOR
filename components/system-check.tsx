@@ -291,10 +291,6 @@ export default function SystemCheck() {
     }
   }
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-  }
-
   return (
     <div className="space-y-6">
       <Card>
