@@ -1,25 +1,22 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
-import { Pill, ArrowLeft, ArrowRight, Brain, Plus, AlertTriangle, Download, Printer, Trash2 } from "lucide-react"
+import { Pill, Plus, Trash2, Download, Printer, AlertTriangle, ArrowLeft, ArrowRight, Brain } from "lucide-react"
 
 interface MedicationPrescriptionProps {
-  patientData: any
-  clinicalData: any
-  questionsData: any
-  diagnosisData: any
-  examsData: any
-  onNext: (data: any) => void
-  onBack: () => void
+  data?: any
+  allData?: any
+  onDataChange: (data: any) => void
+  onNext: () => void
+  onPrevious: () => void
 }
 
 interface Medication {
@@ -29,28 +26,19 @@ interface Medication {
   frequency: string
   duration: string
   indication: string
-  contraindications?: string[]
-  interactions?: string[]
-  aiRecommended?: boolean
-  priority?: "high" | "medium" | "low"
-  category: "treatment" | "prevention" | "symptom_relief" | "custom"
-}
-
-interface DrugInteraction {
-  medication1: string
-  medication2: string
-  severity: "major" | "moderate" | "minor"
-  description: string
+  contraindications: string[]
+  sideEffects: string[]
+  interactions: string[]
+  isAIRecommended: boolean
+  priority: "high" | "medium" | "low"
 }
 
 export default function MedicationPrescription({
-  patientData,
-  clinicalData,
-  questionsData,
-  diagnosisData,
-  examsData,
+  data = {},
+  allData,
+  onDataChange,
   onNext,
-  onBack,
+  onPrevious,
 }: MedicationPrescriptionProps) {
   const [medications, setMedications] = useState<Medication[]>([])
   const [customMedication, setCustomMedication] = useState({
@@ -60,143 +48,47 @@ export default function MedicationPrescription({
     duration: "",
     indication: "",
   })
-  const [drugInteractions, setDrugInteractions] = useState<DrugInteraction[]>([])
-  const [isGeneratingPrescription, setIsGeneratingPrescription] = useState(false)
   const [generatedPrescription, setGeneratedPrescription] = useState("")
   const [showPrescription, setShowPrescription] = useState(false)
 
-  // Générer les médicaments recommandés par l'IA basés sur le diagnostic
+  // Initialiser avec les médicaments recommandés par l'IA
   useEffect(() => {
-    if (diagnosisData?.primaryDiagnosis) {
-      const aiMedications: Medication[] = [
-        {
-          id: "ai_1",
-          name: "Aspirine",
-          dosage: "75 mg",
-          frequency: "1 fois par jour",
-          duration: "Au long cours",
-          indication: "Prévention cardiovasculaire secondaire",
-          contraindications: ["Allergie à l'aspirine", "Ulcère gastroduodénal actif", "Troubles de la coagulation"],
-          interactions: ["Anticoagulants", "Méthotrexate"],
-          aiRecommended: true,
-          priority: "high",
-          category: "treatment",
-        },
-        {
-          id: "ai_2",
-          name: "Atorvastatine",
-          dosage: "20 mg",
-          frequency: "1 fois par jour le soir",
-          duration: "Au long cours",
-          indication: "Traitement de la dyslipidémie",
-          contraindications: ["Maladie hépatique active", "Grossesse", "Allaitement"],
-          interactions: ["Ciclosporine", "Gemfibrozil"],
-          aiRecommended: true,
-          priority: "medium",
-          category: "treatment",
-        },
-        {
-          id: "ai_3",
-          name: "Ramipril",
-          dosage: "2.5 mg",
-          frequency: "1 fois par jour",
-          duration: "Au long cours",
-          indication: "Traitement de l'hypertension artérielle",
-          contraindications: ["Sténose artérielle rénale bilatérale", "Grossesse", "Angioedème"],
-          interactions: ["Diurétiques épargneurs de potassium", "Lithium"],
-          aiRecommended: true,
-          priority: "high",
-          category: "treatment",
-        },
-        {
-          id: "ai_4",
-          name: "Paracétamol",
-          dosage: "1000 mg",
-          frequency: "3 fois par jour si besoin",
-          duration: "Maximum 3 jours consécutifs",
-          indication: "Traitement symptomatique de la douleur",
-          contraindications: ["Insuffisance hépatocellulaire sévère"],
-          interactions: ["Warfarine (surveillance INR)"],
-          aiRecommended: true,
-          priority: "low",
-          category: "symptom_relief",
-        },
-      ]
-
+    if (allData?.diagnosisData?.recommendations?.medications) {
+      const aiMedications: Medication[] = allData.diagnosisData.recommendations.medications.map(
+        (med: any, index: number) => ({
+          id: `ai_med_${index}`,
+          name: med.name,
+          dosage: med.dosage,
+          frequency: med.frequency,
+          duration: med.duration || "À définir",
+          indication: med.indication,
+          contraindications: med.contraindications || [],
+          sideEffects: med.sideEffects || [],
+          interactions: med.interactions || [],
+          isAIRecommended: true,
+          priority: med.priority || "medium",
+        }),
+      )
       setMedications(aiMedications)
-      checkDrugInteractions(aiMedications)
     }
-  }, [diagnosisData])
-
-  const checkDrugInteractions = (meds: Medication[]) => {
-    const interactions: DrugInteraction[] = []
-
-    // Vérifier les interactions entre les médicaments prescrits
-    for (let i = 0; i < meds.length; i++) {
-      for (let j = i + 1; j < meds.length; j++) {
-        const med1 = meds[i]
-        const med2 = meds[j]
-
-        // Exemple d'interactions connues
-        if (
-          (med1.name === "Aspirine" && med2.name === "Ramipril") ||
-          (med1.name === "Ramipril" && med2.name === "Aspirine")
-        ) {
-          interactions.push({
-            medication1: "Aspirine",
-            medication2: "Ramipril",
-            severity: "moderate",
-            description:
-              "L'aspirine peut réduire l'effet antihypertenseur des IEC. Surveillance de la tension artérielle recommandée.",
-          })
-        }
-      }
-    }
-
-    // Vérifier les interactions avec les médicaments actuels du patient
-    if (patientData?.currentMedications) {
-      const currentMeds = patientData.currentMedications.toLowerCase()
-      meds.forEach((med) => {
-        if (med.name === "Aspirine" && currentMeds.includes("warfarine")) {
-          interactions.push({
-            medication1: "Aspirine",
-            medication2: "Warfarine",
-            severity: "major",
-            description: "Risque hémorragique majoré. Surveillance étroite de l'INR nécessaire.",
-          })
-        }
-      })
-    }
-
-    setDrugInteractions(interactions)
-  }
-
-  const toggleMedication = (medicationId: string) => {
-    setMedications((prev) =>
-      prev.map((med) =>
-        med.id === medicationId ? { ...med, aiRecommended: med.aiRecommended ? !med.aiRecommended : true } : med,
-      ),
-    )
-  }
+  }, [allData?.diagnosisData])
 
   const addCustomMedication = () => {
     if (customMedication.name.trim()) {
       const newMedication: Medication = {
-        id: `custom_${Date.now()}`,
-        name: customMedication.name.trim(),
-        dosage: customMedication.dosage.trim(),
-        frequency: customMedication.frequency.trim(),
-        duration: customMedication.duration.trim(),
-        indication: customMedication.indication.trim(),
-        aiRecommended: true,
+        id: `custom_med_${Date.now()}`,
+        name: customMedication.name,
+        dosage: customMedication.dosage,
+        frequency: customMedication.frequency,
+        duration: customMedication.duration,
+        indication: customMedication.indication,
+        contraindications: [],
+        sideEffects: [],
+        interactions: [],
+        isAIRecommended: false,
         priority: "medium",
-        category: "custom",
       }
-
-      const updatedMedications = [...medications, newMedication]
-      setMedications(updatedMedications)
-      checkDrugInteractions(updatedMedications)
-
+      setMedications((prev) => [...prev, newMedication])
       setCustomMedication({
         name: "",
         dosage: "",
@@ -207,20 +99,17 @@ export default function MedicationPrescription({
     }
   }
 
-  const removeMedication = (medicationId: string) => {
-    const updatedMedications = medications.filter((med) => med.id !== medicationId)
-    setMedications(updatedMedications)
-    checkDrugInteractions(updatedMedications)
+  const removeMedication = (id: string) => {
+    setMedications((prev) => prev.filter((med) => med.id !== id))
   }
 
-  const generatePrescription = useCallback(async () => {
-    setIsGeneratingPrescription(true)
+  const updateMedication = (id: string, field: keyof Medication, value: any) => {
+    setMedications((prev) => prev.map((med) => (med.id === id ? { ...med, [field]: value } : med)))
+  }
 
-    // Simulation de génération
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    const selectedMedications = medications.filter((med) => med.aiRecommended)
-    const patientName = `${patientData?.firstName || "Prénom"} ${patientData?.lastName || "Nom"}`
+  const generatePrescription = () => {
+    const patientName = `${allData?.patientData?.firstName || "Prénom"} ${allData?.patientData?.lastName || "Nom"}`
+    const patientAge = allData?.patientData?.age || "XX"
     const today = new Date().toLocaleDateString("fr-FR")
 
     const prescription = `ORDONNANCE MÉDICALE
@@ -228,59 +117,60 @@ export default function MedicationPrescription({
 Dr. [Nom du Médecin]
 [Adresse du Cabinet]
 [Téléphone]
-N° RPPS: [Numéro RPPS]
+[Email]
 
 Date: ${today}
 
 PATIENT:
 Nom: ${patientName}
-Âge: ${patientData?.age} ans
-Né(e) le: ${patientData?.birthDate || "XX/XX/XXXX"}
-N° Sécurité Sociale: ${patientData?.socialSecurityNumber || "Non renseigné"}
+Âge: ${patientAge} ans
+Né(e) le: ${allData?.patientData?.birthDate || "XX/XX/XXXX"}
+Poids: ${allData?.patientData?.weight || "XX"} kg
+Taille: ${allData?.patientData?.height || "XXX"} cm
 
 DIAGNOSTIC:
-${diagnosisData?.primaryDiagnosis?.condition || "À préciser"}
-Code ICD-10: ${diagnosisData?.primaryDiagnosis?.icd10 || ""}
+${allData?.diagnosisData?.diagnosis?.primary?.condition || "À préciser"}
+Code ICD-10: ${allData?.diagnosisData?.diagnosis?.primary?.icd10 || ""}
 
-MÉDICAMENTS PRESCRITS:
+ANTÉCÉDENTS:
+${allData?.patientData?.medicalHistory || "Aucun antécédent particulier"}
 
-${selectedMedications
+ALLERGIES CONNUES:
+${allData?.patientData?.allergies || "Aucune allergie connue"}
+
+MÉDICAMENTS ACTUELS:
+${allData?.patientData?.currentMedications || "Aucun traitement en cours"}
+
+PRESCRIPTION:
+
+${medications
   .map(
-    (med, index) => `${index + 1}. ${med.name} ${med.dosage}
-   Posologie: ${med.frequency}
+    (med, index) => `${index + 1}. ${med.name}
+   Posologie: ${med.dosage}
+   Fréquence: ${med.frequency}
    Durée: ${med.duration}
-   Indication: ${med.indication}
-   ${med.aiRecommended ? "[Recommandé par IA]" : ""}
-`,
+   Indication: ${med.indication}${med.isAIRecommended ? " [Recommandé par IA]" : ""}
+   
+   Mode d'emploi: À prendre selon les indications ci-dessus
+   ${med.contraindications.length > 0 ? `Contre-indications: ${med.contraindications.join(", ")}` : ""}
+   ${med.interactions.length > 0 ? `⚠️ Interactions: ${med.interactions.join(", ")}` : ""}`,
   )
-  .join("\n")}
+  .join("\n\n")}
 
-RECOMMANDATIONS:
+CONSEILS:
 - Respecter scrupuleusement les posologies prescrites
-- En cas d'effets indésirables, consulter rapidement
 - Ne pas arrêter le traitement sans avis médical
-${drugInteractions.length > 0 ? `- ATTENTION: Interactions médicamenteuses détectées (voir ci-dessous)` : ""}
+- En cas d'effets indésirables, contacter immédiatement le médecin
+- Conserver les médicaments dans leur emballage d'origine
+- Tenir hors de portée des enfants
 
-${
-  drugInteractions.length > 0
-    ? `
-INTERACTIONS MÉDICAMENTEUSES DÉTECTÉES:
-${drugInteractions
-  .map(
-    (interaction) => `⚠️ ${interaction.medication1} + ${interaction.medication2}
-   Sévérité: ${interaction.severity === "major" ? "MAJEURE" : interaction.severity === "moderate" ? "MODÉRÉE" : "MINEURE"}
-   ${interaction.description}
-`,
-  )
-  .join("\n")}`
-    : ""
-}
+SURVEILLANCE:
+- Contrôle médical dans 15 jours
+- Bilan biologique si nécessaire
+- Consultation en urgence si aggravation
 
-CONTRE-INDICATIONS VÉRIFIÉES:
-${selectedMedications
-  .map((med) => (med.contraindications ? `${med.name}: ${med.contraindications.join(", ")}` : ""))
-  .filter(Boolean)
-  .join("\n")}
+RENOUVELLEMENT:
+${medications.some((med) => med.duration.includes("mois")) ? "Renouvellement possible" : "Non renouvelable"}
 
 Signature et cachet du médecin
 
@@ -289,15 +179,14 @@ Prescription générée avec assistance IA - Medical AI Expert
 Date de génération: ${new Date().toLocaleString("fr-FR")}`
 
     setGeneratedPrescription(prescription)
-    setIsGeneratingPrescription(false)
     setShowPrescription(true)
-  }, [medications, patientData, diagnosisData, drugInteractions])
+  }
 
   const downloadPrescription = () => {
     const element = document.createElement("a")
     const file = new Blob([generatedPrescription], { type: "text/plain" })
     element.href = URL.createObjectURL(file)
-    element.download = `Ordonnance_${patientData?.firstName}_${patientData?.lastName}_${new Date().toISOString().split("T")[0]}.txt`
+    element.download = `Ordonnance_${allData?.patientData?.lastName || "Patient"}_${new Date().toISOString().split("T")[0]}.txt`
     document.body.appendChild(element)
     element.click()
     document.body.removeChild(element)
@@ -311,21 +200,10 @@ Date de génération: ${new Date().toLocaleString("fr-FR")}`
           <head>
             <title>Ordonnance Médicale</title>
             <style>
-              body { 
-                font-family: Arial, sans-serif; 
-                margin: 20px; 
-                line-height: 1.6;
-                font-size: 12px;
-              }
-              pre { 
-                white-space: pre-wrap; 
-                font-family: Arial, sans-serif; 
-              }
-              .header { 
-                text-align: center; 
-                font-weight: bold; 
-                margin-bottom: 20px; 
-              }
+              body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+              pre { white-space: pre-wrap; font-family: Arial, sans-serif; }
+              .header { text-align: center; margin-bottom: 30px; }
+              .patient-info { background: #f5f5f5; padding: 15px; margin: 20px 0; }
             </style>
           </head>
           <body>
@@ -338,36 +216,27 @@ Date de génération: ${new Date().toLocaleString("fr-FR")}`
     }
   }
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case "treatment":
-        return "bg-red-100 text-red-800"
-      case "prevention":
-        return "bg-blue-100 text-blue-800"
-      case "symptom_relief":
-        return "bg-green-100 text-green-800"
-      default:
-        return "bg-gray-100 text-gray-800"
+  const handleSubmit = () => {
+    const prescriptionData = {
+      medications,
+      generatedPrescription,
+      completedAt: new Date().toISOString(),
+      totalMedications: medications.length,
+      aiRecommendedCount: medications.filter((med) => med.isAIRecommended).length,
     }
-  }
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return "bg-red-100 text-red-800"
-      case "medium":
-        return "bg-orange-100 text-orange-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
+    onDataChange(prescriptionData)
+    onNext()
   }
 
   if (showPrescription) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">Ordonnance Générée</h2>
           <div className="flex gap-2">
+            <Button onClick={() => setShowPrescription(false)} variant="outline">
+              Modifier
+            </Button>
             <Button onClick={downloadPrescription} variant="outline">
               <Download className="h-4 w-4 mr-2" />
               Télécharger
@@ -376,29 +245,25 @@ Date de génération: ${new Date().toLocaleString("fr-FR")}`
               <Printer className="h-4 w-4 mr-2" />
               Imprimer
             </Button>
-            <Button onClick={() => setShowPrescription(false)} variant="outline">
-              Modifier
-            </Button>
           </div>
         </div>
 
         <Card>
-          <CardContent className="pt-6">
-            <pre className="whitespace-pre-wrap text-sm bg-gray-50 p-6 rounded-lg border">{generatedPrescription}</pre>
+          <CardHeader>
+            <CardTitle>Ordonnance Médicale</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <pre className="whitespace-pre-wrap text-sm bg-gray-50 p-4 rounded-lg border">{generatedPrescription}</pre>
           </CardContent>
         </Card>
 
         <div className="flex justify-between">
-          <Button onClick={() => setShowPrescription(false)} variant="outline">
+          <Button onClick={onPrevious} variant="outline">
             <ArrowLeft className="h-5 w-5 mr-2" />
-            Modifier la prescription
+            Retour
           </Button>
-          <Button
-            onClick={() =>
-              onNext({ prescription: generatedPrescription, medications: medications.filter((m) => m.aiRecommended) })
-            }
-          >
-            Continuer vers le Compte-rendu
+          <Button onClick={handleSubmit}>
+            Continuer vers le Rapport
             <ArrowRight className="h-5 w-5 ml-2" />
           </Button>
         </div>
@@ -407,291 +272,313 @@ Date de génération: ${new Date().toLocaleString("fr-FR")}`
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center text-2xl">
-            <Pill className="h-6 w-6 mr-3 text-green-600" />
-            Prescription Médicamenteuse
-          </CardTitle>
-          <p className="text-gray-600">
-            Médicaments recommandés pour {patientData?.firstName} {patientData?.lastName} - Diagnostic:{" "}
-            {diagnosisData?.primaryDiagnosis?.condition}
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Alertes d'interactions */}
-          {drugInteractions.length > 0 && (
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold mb-2">Prescription Médicamenteuse</h2>
+        <p className="text-gray-600">
+          Prescription pour {allData?.patientData?.firstName} {allData?.patientData?.lastName} - Diagnostic:{" "}
+          {allData?.diagnosisData?.diagnosis?.primary?.condition}
+        </p>
+      </div>
+
+      {/* Médicaments recommandés par l'IA */}
+      {medications.filter((med) => med.isAIRecommended).length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-purple-600" />
+              Médicaments Recommandés par l'IA
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Alert className="mb-4">
+              <Brain className="h-4 w-4" />
               <AlertDescription>
-                <strong>{drugInteractions.length} interaction(s) médicamenteuse(s) détectée(s)</strong>
-                <div className="mt-2 space-y-1">
-                  {drugInteractions.map((interaction, index) => (
-                    <div key={index} className="text-sm">
-                      • {interaction.medication1} + {interaction.medication2} ({interaction.severity})
-                    </div>
-                  ))}
-                </div>
+                Ces médicaments ont été automatiquement recommandés par l'IA basés sur le diagnostic et les données
+                cliniques.
               </AlertDescription>
             </Alert>
-          )}
-
-          {/* Médicaments recommandés par l'IA */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Brain className="h-5 w-5 mr-2 text-purple-600" />
-              Médicaments Recommandés par l'IA
-            </h3>
             <div className="space-y-4">
               {medications
-                .filter((med) => med.category !== "custom")
+                .filter((med) => med.isAIRecommended)
                 .map((medication) => (
-                  <Card
-                    key={medication.id}
-                    className={`border-l-4 ${
-                      medication.priority === "high"
-                        ? "border-l-red-500"
-                        : medication.priority === "medium"
-                          ? "border-l-orange-500"
-                          : "border-l-gray-500"
-                    }`}
-                  >
-                    <CardContent className="pt-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center space-x-3">
-                          <Checkbox
-                            id={medication.id}
-                            checked={medication.aiRecommended}
-                            onCheckedChange={() => toggleMedication(medication.id)}
-                          />
-                          <div>
-                            <Label htmlFor={medication.id} className="font-medium cursor-pointer text-base">
-                              {medication.name} {medication.dosage}
-                            </Label>
-                            <p className="text-sm text-gray-600">{medication.indication}</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Badge className={getCategoryColor(medication.category)}>
-                            {medication.category === "treatment"
-                              ? "Traitement"
-                              : medication.category === "prevention"
-                                ? "Prévention"
-                                : "Symptomatique"}
-                          </Badge>
-                          <Badge className={getPriorityColor(medication.priority!)}>
-                            {medication.priority === "high"
-                              ? "Priorité haute"
+                  <div key={medication.id} className="border rounded-lg p-4 bg-purple-50">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-purple-900">{medication.name}</h4>
+                      <div className="flex gap-2">
+                        <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                          <Brain className="h-3 w-3 mr-1" />
+                          IA
+                        </Badge>
+                        <Badge
+                          variant={
+                            medication.priority === "high"
+                              ? "destructive"
                               : medication.priority === "medium"
-                                ? "Priorité moyenne"
-                                : "Priorité basse"}
-                          </Badge>
-                        </div>
+                                ? "default"
+                                : "secondary"
+                          }
+                        >
+                          {medication.priority === "high"
+                            ? "Priorité haute"
+                            : medication.priority === "medium"
+                              ? "Priorité moyenne"
+                              : "Priorité basse"}
+                        </Badge>
                       </div>
+                    </div>
 
-                      <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor={`dosage-${medication.id}`}>Posologie</Label>
+                        <Input
+                          id={`dosage-${medication.id}`}
+                          value={medication.dosage}
+                          onChange={(e) => updateMedication(medication.id, "dosage", e.target.value)}
+                          placeholder="Ex: 500mg"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`frequency-${medication.id}`}>Fréquence</Label>
+                        <Input
+                          id={`frequency-${medication.id}`}
+                          value={medication.frequency}
+                          onChange={(e) => updateMedication(medication.id, "frequency", e.target.value)}
+                          placeholder="Ex: 2 fois par jour"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`duration-${medication.id}`}>Durée</Label>
+                        <Input
+                          id={`duration-${medication.id}`}
+                          value={medication.duration}
+                          onChange={(e) => updateMedication(medication.id, "duration", e.target.value)}
+                          placeholder="Ex: 7 jours"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`indication-${medication.id}`}>Indication</Label>
+                        <Input
+                          id={`indication-${medication.id}`}
+                          value={medication.indication}
+                          onChange={(e) => updateMedication(medication.id, "indication", e.target.value)}
+                          placeholder="Indication thérapeutique"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Interactions et contre-indications */}
+                    {(medication.interactions.length > 0 || medication.contraindications.length > 0) && (
+                      <div className="mt-4 space-y-2">
+                        {medication.interactions.length > 0 && (
+                          <Alert variant="destructive">
+                            <AlertTriangle className="h-4 w-4" />
+                            <AlertDescription>
+                              <strong>Interactions:</strong> {medication.interactions.join(", ")}
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                        {medication.contraindications.length > 0 && (
+                          <Alert>
+                            <AlertTriangle className="h-4 w-4" />
+                            <AlertDescription>
+                              <strong>Contre-indications:</strong> {medication.contraindications.join(", ")}
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex justify-end mt-4">
+                      <Button
+                        onClick={() => removeMedication(medication.id)}
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Retirer
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Médicaments personnalisés */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Plus className="h-5 w-5" />
+            Ajouter un Médicament
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="customName">Nom du médicament</Label>
+                <Input
+                  id="customName"
+                  value={customMedication.name}
+                  onChange={(e) => setCustomMedication((prev) => ({ ...prev, name: e.target.value }))}
+                  placeholder="Ex: Paracétamol"
+                />
+              </div>
+              <div>
+                <Label htmlFor="customDosage">Posologie</Label>
+                <Input
+                  id="customDosage"
+                  value={customMedication.dosage}
+                  onChange={(e) => setCustomMedication((prev) => ({ ...prev, dosage: e.target.value }))}
+                  placeholder="Ex: 1000mg"
+                />
+              </div>
+              <div>
+                <Label htmlFor="customFrequency">Fréquence</Label>
+                <Input
+                  id="customFrequency"
+                  value={customMedication.frequency}
+                  onChange={(e) => setCustomMedication((prev) => ({ ...prev, frequency: e.target.value }))}
+                  placeholder="Ex: 3 fois par jour"
+                />
+              </div>
+              <div>
+                <Label htmlFor="customDuration">Durée</Label>
+                <Input
+                  id="customDuration"
+                  value={customMedication.duration}
+                  onChange={(e) => setCustomMedication((prev) => ({ ...prev, duration: e.target.value }))}
+                  placeholder="Ex: 5 jours"
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="customIndication">Indication</Label>
+              <Textarea
+                id="customIndication"
+                value={customMedication.indication}
+                onChange={(e) => setCustomMedication((prev) => ({ ...prev, indication: e.target.value }))}
+                placeholder="Indication thérapeutique..."
+                rows={2}
+              />
+            </div>
+            <Button onClick={addCustomMedication} disabled={!customMedication.name.trim()}>
+              <Plus className="h-4 w-4 mr-2" />
+              Ajouter le Médicament
+            </Button>
+          </div>
+
+          {/* Afficher les médicaments personnalisés ajoutés */}
+          {medications.filter((med) => !med.isAIRecommended).length > 0 && (
+            <div className="mt-6">
+              <h4 className="font-medium mb-3">Médicaments Ajoutés</h4>
+              <div className="space-y-3">
+                {medications
+                  .filter((med) => !med.isAIRecommended)
+                  .map((medication) => (
+                    <div key={medication.id} className="border rounded-lg p-4 bg-gray-50">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold">{medication.name}</h4>
+                        <Button
+                          onClick={() => removeMedication(medication.id)}
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                         <div>
-                          <strong>Posologie:</strong> {medication.frequency}
+                          <strong>Posologie:</strong> {medication.dosage}
+                        </div>
+                        <div>
+                          <strong>Fréquence:</strong> {medication.frequency}
                         </div>
                         <div>
                           <strong>Durée:</strong> {medication.duration}
                         </div>
-                      </div>
-
-                      {medication.contraindications && (
-                        <div className="mb-2">
-                          <strong className="text-sm text-red-600">Contre-indications:</strong>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {medication.contraindications.map((ci, index) => (
-                              <Badge key={index} variant="outline" className="text-xs text-red-600 border-red-200">
-                                {ci}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {medication.interactions && (
                         <div>
-                          <strong className="text-sm text-orange-600">Interactions:</strong>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {medication.interactions.map((interaction, index) => (
-                              <Badge
-                                key={index}
-                                variant="outline"
-                                className="text-xs text-orange-600 border-orange-200"
-                              >
-                                {interaction}
-                              </Badge>
-                            ))}
-                          </div>
+                          <strong>Indication:</strong> {medication.indication}
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-            </div>
-          </div>
-
-          {/* Ajouter un médicament personnalisé */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5" />
-                Ajouter un Médicament
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="medName">Nom du médicament</Label>
-                  <Input
-                    id="medName"
-                    value={customMedication.name}
-                    onChange={(e) => setCustomMedication((prev) => ({ ...prev, name: e.target.value }))}
-                    placeholder="Ex: Doliprane"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="medDosage">Dosage</Label>
-                  <Input
-                    id="medDosage"
-                    value={customMedication.dosage}
-                    onChange={(e) => setCustomMedication((prev) => ({ ...prev, dosage: e.target.value }))}
-                    placeholder="Ex: 1000 mg"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="medFrequency">Fréquence</Label>
-                  <Input
-                    id="medFrequency"
-                    value={customMedication.frequency}
-                    onChange={(e) => setCustomMedication((prev) => ({ ...prev, frequency: e.target.value }))}
-                    placeholder="Ex: 3 fois par jour"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="medDuration">Durée</Label>
-                  <Input
-                    id="medDuration"
-                    value={customMedication.duration}
-                    onChange={(e) => setCustomMedication((prev) => ({ ...prev, duration: e.target.value }))}
-                    placeholder="Ex: 7 jours"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <Label htmlFor="medIndication">Indication</Label>
-                  <Textarea
-                    id="medIndication"
-                    value={customMedication.indication}
-                    onChange={(e) => setCustomMedication((prev) => ({ ...prev, indication: e.target.value }))}
-                    placeholder="Indication thérapeutique"
-                    rows={2}
-                  />
-                </div>
+                      </div>
+                    </div>
+                  ))}
               </div>
-              <Button onClick={addCustomMedication} disabled={!customMedication.name.trim()} className="mt-4">
-                <Plus className="h-4 w-4 mr-2" />
-                Ajouter le médicament
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Médicaments personnalisés ajoutés */}
-          {medications.filter((med) => med.category === "custom").length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Médicaments Personnalisés</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {medications
-                    .filter((med) => med.category === "custom")
-                    .map((medication) => (
-                      <div key={medication.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <Checkbox
-                            id={medication.id}
-                            checked={medication.aiRecommended}
-                            onCheckedChange={() => toggleMedication(medication.id)}
-                          />
-                          <div>
-                            <Label htmlFor={medication.id} className="font-medium cursor-pointer">
-                              {medication.name} {medication.dosage}
-                            </Label>
-                            <p className="text-sm text-gray-600">
-                              {medication.frequency} - {medication.duration}
-                            </p>
-                          </div>
-                        </div>
-                        <Button onClick={() => removeMedication(medication.id)} variant="outline" size="sm">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
+            </div>
           )}
-
-          {/* Résumé de la prescription */}
-          {medications.filter((med) => med.aiRecommended).length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  Résumé de la Prescription ({medications.filter((med) => med.aiRecommended).length} médicaments)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {medications
-                    .filter((med) => med.aiRecommended)
-                    .map((medication) => (
-                      <div key={medication.id} className="flex items-center justify-between p-2 bg-blue-50 rounded">
-                        <span className="font-medium">
-                          {medication.name} {medication.dosage} - {medication.frequency}
-                        </span>
-                        <Badge className={getCategoryColor(medication.category)}>
-                          {medication.category === "treatment"
-                            ? "Traitement"
-                            : medication.category === "prevention"
-                              ? "Prévention"
-                              : medication.category === "symptom_relief"
-                                ? "Symptomatique"
-                                : "Personnalisé"}
-                        </Badge>
-                      </div>
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <Separator />
-
-          <div className="flex justify-between">
-            <Button onClick={onBack} variant="outline">
-              <ArrowLeft className="h-5 w-5 mr-2" />
-              Retour Examens
-            </Button>
-            <Button
-              onClick={generatePrescription}
-              disabled={medications.filter((med) => med.aiRecommended).length === 0 || isGeneratingPrescription}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              {isGeneratingPrescription ? (
-                "Génération en cours..."
-              ) : (
-                <>
-                  <Pill className="h-4 w-4 mr-2" />
-                  Générer l'Ordonnance ({medications.filter((med) => med.aiRecommended).length})
-                </>
-              )}
-            </Button>
-          </div>
         </CardContent>
       </Card>
+
+      {/* Résumé de la prescription */}
+      {medications.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Résumé de la Prescription ({medications.length} médicaments)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {medications.map((medication, index) => (
+                <div key={medication.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                  <div className="flex-1">
+                    <div className="font-medium">
+                      {index + 1}. {medication.name}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {medication.dosage} - {medication.frequency} - {medication.duration}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {medication.isAIRecommended && (
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                        <Brain className="h-3 w-3 mr-1" />
+                        IA
+                      </Badge>
+                    )}
+                    <Badge
+                      variant={
+                        medication.priority === "high"
+                          ? "destructive"
+                          : medication.priority === "medium"
+                            ? "default"
+                            : "secondary"
+                      }
+                    >
+                      {medication.priority === "high"
+                        ? "Urgent"
+                        : medication.priority === "medium"
+                          ? "Normal"
+                          : "Faible"}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Separator />
+
+      <div className="flex justify-between">
+        <Button onClick={onPrevious} variant="outline">
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          Retour Examens
+        </Button>
+        <div className="flex gap-4">
+          <Button
+            onClick={generatePrescription}
+            disabled={medications.length === 0}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            <Pill className="h-4 w-4 mr-2" />
+            Générer Ordonnance ({medications.length})
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,416 +1,439 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   FileText,
   Download,
   Printer,
-  ArrowLeft,
   CheckCircle,
-  User,
   Calendar,
-  MapPin,
-  Phone,
-  Mail,
+  User,
   Stethoscope,
   Brain,
   Pill,
   TestTube,
-  FileCheck,
+  ArrowLeft,
 } from "lucide-react"
 
 interface ConsultationReportProps {
-  patientData: any
-  clinicalData: any
-  questionsData: any
-  diagnosisData: any
-  examsData: any
-  medicationsData: any
-  onBack: () => void
-  onComplete: () => void
+  data?: any
+  allData?: any
+  onDataChange: (data: any) => void
+  onNext: () => void
+  onPrevious: () => void
 }
 
 export default function ConsultationReport({
-  patientData,
-  clinicalData,
-  questionsData,
-  diagnosisData,
-  examsData,
-  medicationsData,
-  onBack,
-  onComplete,
+  data,
+  allData,
+  onDataChange,
+  onNext,
+  onPrevious,
 }: ConsultationReportProps) {
+  const [reportData, setReportData] = useState<any>(null)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [reportGenerated, setReportGenerated] = useState(false)
 
-  const generateReport = async () => {
+  useEffect(() => {
+    if (!reportData && allData) {
+      generateReport()
+    }
+  }, [allData])
+
+  const generateReport = () => {
     setIsGenerating(true)
-    // Simulation de génération de rapport
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    setReportGenerated(true)
+
+    const report = {
+      header: {
+        title: "RAPPORT DE CONSULTATION MÉDICALE",
+        date: new Date().toLocaleDateString("fr-FR"),
+        time: new Date().toLocaleTimeString("fr-FR"),
+        doctorName: "Dr. Medical AI Expert",
+        patientName: `${allData?.patientData?.firstName || ""} ${allData?.patientData?.lastName || ""}`.trim(),
+      },
+      patientInfo: {
+        age: allData?.patientData?.age,
+        gender: allData?.patientData?.gender,
+        weight: allData?.patientData?.weight,
+        height: allData?.patientData?.height,
+        allergies: allData?.patientData?.allergies,
+        medicalHistory: allData?.patientData?.medicalHistory,
+      },
+      consultation: {
+        chiefComplaint: allData?.clinicalData?.chiefComplaint,
+        symptoms: allData?.clinicalData?.symptoms,
+        vitalSigns: allData?.clinicalData?.vitalSigns,
+        physicalExam: allData?.clinicalData?.physicalExam,
+      },
+      anamnesis: allData?.questionsData?.answers || {},
+      diagnosis: allData?.diagnosisData?.diagnosis || null,
+      examinations: allData?.examsData?.selectedExams || [],
+      prescriptions: allData?.prescriptionData?.medications || [],
+      recommendations: allData?.diagnosisData?.recommendations || {},
+      followUp: allData?.diagnosisData?.followUp || "Suivi selon évolution",
+      generatedAt: new Date().toISOString(),
+    }
+
+    setReportData(report)
+    onDataChange(report)
     setIsGenerating(false)
   }
 
-  const downloadReport = () => {
-    const reportContent = generateReportContent()
-    const blob = new Blob([reportContent], { type: "text/plain;charset=utf-8" })
+  const handlePrint = () => {
+    window.print()
+  }
+
+  const handleDownload = () => {
+    const reportText = generateTextReport()
+    const blob = new Blob([reportText], { type: "text/plain" })
     const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `Compte-rendu_${patientData.lastName}_${patientData.firstName}_${new Date().toISOString().split("T")[0]}.txt`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `rapport-consultation-${reportData?.header?.patientName?.replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
     URL.revokeObjectURL(url)
   }
 
-  const printReport = () => {
-    const printContent = generatePrintableReport()
-    const printWindow = window.open("", "_blank")
-    if (printWindow) {
-      printWindow.document.write(printContent)
-      printWindow.document.close()
-      printWindow.print()
-    }
-  }
-
-  const generateReportContent = (): string => {
-    const currentDate = new Date().toLocaleDateString("fr-FR")
-    const currentTime = new Date().toLocaleTimeString("fr-FR")
+  const generateTextReport = () => {
+    if (!reportData) return ""
 
     return `
-COMPTE-RENDU DE CONSULTATION MÉDICALE
-=====================================
+${reportData.header.title}
+${"=".repeat(50)}
 
-Date de consultation: ${currentDate} à ${currentTime}
-Généré par: Medical AI Expert System
+Date: ${reportData.header.date} à ${reportData.header.time}
+Médecin: ${reportData.header.doctorName}
+Patient: ${reportData.header.patientName}
 
 INFORMATIONS PATIENT
--------------------
-Nom: ${patientData.lastName}
-Prénom: ${patientData.firstName}
-Date de naissance: ${patientData.dateOfBirth}
-Âge: ${patientData.age} ans
-Sexe: ${patientData.gender}
-Adresse: ${patientData.address}
-Téléphone: ${patientData.phone}
-Email: ${patientData.email}
-
-Antécédents médicaux: ${patientData.medicalHistory || "Aucun"}
-Médicaments actuels: ${patientData.currentMedications || "Aucun"}
-Allergies: ${patientData.allergies || "Aucune connue"}
+${"=".repeat(20)}
+Âge: ${reportData.patientInfo.age} ans
+Sexe: ${reportData.patientInfo.gender}
+Poids: ${reportData.patientInfo.weight || "Non renseigné"} kg
+Taille: ${reportData.patientInfo.height || "Non renseigné"} cm
+Allergies: ${reportData.patientInfo.allergies || "Aucune connue"}
+Antécédents: ${reportData.patientInfo.medicalHistory || "Aucun"}
 
 MOTIF DE CONSULTATION
---------------------
-${clinicalData.chiefComplaint}
+${"=".repeat(20)}
+${reportData.consultation.chiefComplaint || "Non spécifié"}
 
-HISTOIRE DE LA MALADIE ACTUELLE
--------------------------------
-${clinicalData.historyOfPresentIllness}
+SYMPTÔMES
+${"=".repeat(10)}
+${
+  Array.isArray(reportData.consultation.symptoms)
+    ? reportData.consultation.symptoms.join(", ")
+    : reportData.consultation.symptoms || "Non spécifiés"
+}
 
-EXAMEN CLINIQUE
---------------
-Signes vitaux:
-- Tension artérielle: ${clinicalData.vitalSigns?.bloodPressure || "Non mesurée"}
-- Fréquence cardiaque: ${clinicalData.vitalSigns?.heartRate || "Non mesurée"} bpm
-- Température: ${clinicalData.vitalSigns?.temperature || "Non mesurée"}°C
-- Saturation O2: ${clinicalData.vitalSigns?.oxygenSaturation || "Non mesurée"}%
-- Poids: ${clinicalData.vitalSigns?.weight || "Non mesuré"} kg
-- Taille: ${clinicalData.vitalSigns?.height || "Non mesurée"} cm
+SIGNES VITAUX
+${"=".repeat(12)}
+${
+  reportData.consultation.vitalSigns
+    ? Object.entries(reportData.consultation.vitalSigns)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join("\n")
+    : "Non renseignés"
+}
 
-Examen physique:
-${clinicalData.physicalExamination}
+DIAGNOSTIC
+${"=".repeat(10)}
+${
+  reportData.diagnosis?.primary
+    ? `
+Diagnostic principal: ${reportData.diagnosis.primary.condition}
+Code ICD-10: ${reportData.diagnosis.primary.icd10}
+Confiance: ${reportData.diagnosis.primary.confidence}%
+Justification: ${reportData.diagnosis.primary.rationale}
+`
+    : "Diagnostic en cours d'évaluation"
+}
 
-ANAMNÈSE DIRIGÉE PAR IA
-----------------------
-${questionsData.responses?.map((r: any) => `- ${r.question}: ${r.answer}`).join("\n") || "Non disponible"}
+EXAMENS PRESCRITS
+${"=".repeat(16)}
+${
+  reportData.examinations.length > 0
+    ? reportData.examinations.map((exam: any) => `- ${exam.name}: ${exam.indication}`).join("\n")
+    : "Aucun examen prescrit"
+}
 
-DIAGNOSTIC (Généré par IA)
-=========================
-Diagnostic principal: ${diagnosisData.diagnosis.primary.condition}
-Code ICD-10: ${diagnosisData.diagnosis.primary.icd10}
-Niveau de confiance: ${diagnosisData.diagnosis.primary.confidence}%
-Sévérité: ${diagnosisData.diagnosis.primary.severity}
-
-Justification clinique:
-${diagnosisData.diagnosis.primary.rationale}
-
-Diagnostics différentiels:
-${diagnosisData.diagnosis.differential?.map((d: any) => `- ${d.condition} (${d.probability}%): ${d.rationale}`).join("\n") || "Aucun"}
-
-EXAMENS COMPLÉMENTAIRES PRESCRITS
-=================================
-${examsData?.selectedExams?.map((exam: any) => `- ${exam.name} (${exam.code}): ${exam.indication}`).join("\n") || "Aucun examen prescrit"}
-
-PRESCRIPTIONS MÉDICAMENTEUSES
-=============================
-${medicationsData?.prescriptions?.map((med: any) => `- ${med.name} ${med.dosage} - ${med.frequency}\n  Indication: ${med.indication}\n  Durée: ${med.duration}`).join("\n\n") || "Aucune prescription"}
-
-RECOMMANDATIONS
-==============
-${diagnosisData.recommendations?.medications?.map((rec: any) => `- ${rec.name}: ${rec.indication}`).join("\n") || "Aucune recommandation spécifique"}
-
-RÉFÉRENCES SCIENTIFIQUES
-=======================
-${diagnosisData.pubmedReferences?.map((ref: any) => `- ${ref.title} (${ref.journal}, ${ref.year}) - PMID: ${ref.pmid}`).join("\n") || "Aucune référence"}
+PRESCRIPTIONS
+${"=".repeat(12)}
+${
+  reportData.prescriptions.length > 0
+    ? reportData.prescriptions
+        .map((med: any) => `- ${med.name}: ${med.dosage}, ${med.frequency}, ${med.duration}`)
+        .join("\n")
+    : "Aucune prescription"
+}
 
 SUIVI
-=====
-Prochaine consultation: À programmer selon évolution
-Surveillance: Selon recommandations spécifiques
+${"=".repeat(5)}
+${reportData.followUp}
 
----
-Rapport généré automatiquement par Medical AI Expert
-Système utilisant OpenAI GPT-4, FDA Database, RxNorm et PubMed
-Date de génération: ${currentDate} ${currentTime}
-`
+Rapport généré le ${new Date().toLocaleString("fr-FR")}
+    `.trim()
   }
 
-  const generatePrintableReport = (): string => {
-    const reportContent = generateReportContent()
-    return `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Compte-rendu de consultation</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-        h1 { color: #2563eb; border-bottom: 2px solid #2563eb; }
-        h2 { color: #1e40af; margin-top: 25px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .patient-info { background: #f8fafc; padding: 15px; border-radius: 8px; }
-        .diagnosis { background: #ecfdf5; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981; }
-        pre { white-space: pre-wrap; font-family: Arial, sans-serif; }
-        @media print { body { margin: 0; } }
-    </style>
-</head>
-<body>
-    <pre>${reportContent}</pre>
-</body>
-</html>
-`
+  if (!reportData) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">Génération du rapport en cours...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      {/* Actions */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-2xl">
-            <FileText className="w-6 h-6" />
-            Compte-rendu de Consultation
-          </CardTitle>
-          <p className="text-gray-600">
-            Synthèse complète de la consultation de {patientData.firstName} {patientData.lastName}
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {!reportGenerated ? (
-            <div className="text-center py-8">
-              <Button
-                onClick={generateReport}
-                disabled={isGenerating}
-                className="bg-blue-600 hover:bg-blue-700"
-                size="lg"
-              >
-                {isGenerating ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Génération en cours...
-                  </>
-                ) : (
-                  <>
-                    <Brain className="w-4 h-4 mr-2" />
-                    Générer le Compte-rendu Complet
-                  </>
-                )}
+          <CardTitle className="flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <FileText className="w-6 h-6 text-blue-600" />
+              Rapport de Consultation
+            </span>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={handlePrint}>
+                <Printer className="h-4 w-4 mr-2" />
+                Imprimer
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleDownload}>
+                <Download className="h-4 w-4 mr-2" />
+                Télécharger
               </Button>
             </div>
-          ) : (
-            <div className="space-y-6">
-              <Alert>
-                <CheckCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Compte-rendu généré avec succès. Vous pouvez maintenant le télécharger ou l'imprimer.
-                </AlertDescription>
-              </Alert>
+          </CardTitle>
+        </CardHeader>
+      </Card>
 
-              {/* Informations Patient */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="w-5 h-5" />
-                    Informations Patient
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-gray-500" />
-                        <span className="font-medium">
-                          {patientData.firstName} {patientData.lastName}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-gray-500" />
-                        <span>
-                          {patientData.age} ans ({patientData.gender})
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-gray-500" />
-                        <span>{patientData.address}</span>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4 text-gray-500" />
-                        <span>{patientData.phone}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4 text-gray-500" />
-                        <span>{patientData.email}</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+      {/* Rapport */}
+      <Card className="print:shadow-none">
+        <CardContent className="p-8 space-y-8">
+          {/* En-tête */}
+          <div className="text-center border-b pb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{reportData.header.title}</h1>
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>
+                Date: {reportData.header.date} à {reportData.header.time}
+              </span>
+              <span>Médecin: {reportData.header.doctorName}</span>
+            </div>
+          </div>
 
-              {/* Examen Clinique */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Stethoscope className="w-5 h-5" />
-                    Examen Clinique
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-medium mb-2">Motif de consultation:</h4>
-                      <p className="text-gray-700">{clinicalData.chiefComplaint}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-medium mb-2">Signes vitaux:</h4>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>TA: {clinicalData.vitalSigns?.bloodPressure || "Non mesurée"}</div>
-                        <div>FC: {clinicalData.vitalSigns?.heartRate || "Non mesurée"} bpm</div>
-                        <div>T°: {clinicalData.vitalSigns?.temperature || "Non mesurée"}°C</div>
-                        <div>SpO2: {clinicalData.vitalSigns?.oxygenSaturation || "Non mesurée"}%</div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Diagnostic IA */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Brain className="w-5 h-5" />
-                    Diagnostic IA
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-lg">{diagnosisData.diagnosis.primary.condition}</h4>
-                      <Badge variant="outline">Confiance: {diagnosisData.diagnosis.primary.confidence}%</Badge>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-2">Code ICD-10: {diagnosisData.diagnosis.primary.icd10}</p>
-                    <p className="text-sm">{diagnosisData.diagnosis.primary.rationale}</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Examens Prescrits */}
-              {examsData?.selectedExams && examsData.selectedExams.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <TestTube className="w-5 h-5" />
-                      Examens Complémentaires
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {examsData.selectedExams.map((exam: any, index: number) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                          <div>
-                            <h4 className="font-medium">{exam.name}</h4>
-                            <p className="text-sm text-gray-600">{exam.indication}</p>
-                          </div>
-                          <Badge variant="outline">{exam.code}</Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Prescriptions */}
-              {medicationsData?.prescriptions && medicationsData.prescriptions.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Pill className="w-5 h-5" />
-                      Prescriptions Médicamenteuses
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {medicationsData.prescriptions.map((med: any, index: number) => (
-                        <div key={index} className="p-3 border rounded">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium">{med.name}</h4>
-                            <Badge variant="secondary">{med.dosage}</Badge>
-                          </div>
-                          <div className="text-sm text-gray-600 space-y-1">
-                            <p>Fréquence: {med.frequency}</p>
-                            <p>Durée: {med.duration}</p>
-                            <p>Indication: {med.indication}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              <Separator />
-
-              {/* Actions */}
-              <div className="flex justify-between items-center">
-                <Button variant="outline" onClick={onBack}>
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Retour
-                </Button>
-
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={downloadReport}>
-                    <Download className="w-4 h-4 mr-2" />
-                    Télécharger
-                  </Button>
-                  <Button variant="outline" onClick={printReport}>
-                    <Printer className="w-4 h-4 mr-2" />
-                    Imprimer
-                  </Button>
-                  <Button onClick={onComplete} className="bg-green-600 hover:bg-green-700">
-                    <FileCheck className="w-4 h-4 mr-2" />
-                    Terminer la Consultation
-                  </Button>
+          {/* Informations Patient */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <User className="h-5 w-5 text-blue-600" />
+              Informations Patient
+            </h2>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <strong>Nom:</strong> {reportData.header.patientName}
                 </div>
+                <div>
+                  <strong>Âge:</strong> {reportData.patientInfo.age} ans
+                </div>
+                <div>
+                  <strong>Sexe:</strong> {reportData.patientInfo.gender}
+                </div>
+                <div>
+                  <strong>Poids:</strong> {reportData.patientInfo.weight || "Non renseigné"} kg
+                </div>
+                <div>
+                  <strong>Taille:</strong> {reportData.patientInfo.height || "Non renseigné"} cm
+                </div>
+                <div>
+                  <strong>Allergies:</strong> {reportData.patientInfo.allergies || "Aucune connue"}
+                </div>
+              </div>
+              {reportData.patientInfo.medicalHistory && (
+                <div className="mt-3">
+                  <strong>Antécédents médicaux:</strong>
+                  <p className="mt-1 text-gray-700">{reportData.patientInfo.medicalHistory}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Consultation */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Stethoscope className="h-5 w-5 text-green-600" />
+              Examen Clinique
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <strong>Motif de consultation:</strong>
+                <p className="mt-1 text-gray-700">{reportData.consultation.chiefComplaint}</p>
+              </div>
+              <div>
+                <strong>Symptômes:</strong>
+                <p className="mt-1 text-gray-700">
+                  {Array.isArray(reportData.consultation.symptoms)
+                    ? reportData.consultation.symptoms.join(", ")
+                    : reportData.consultation.symptoms || "Non spécifiés"}
+                </p>
+              </div>
+              {reportData.consultation.vitalSigns && (
+                <div>
+                  <strong>Signes vitaux:</strong>
+                  <div className="mt-1 grid grid-cols-2 gap-2 text-sm">
+                    {Object.entries(reportData.consultation.vitalSigns).map(([key, value]) => (
+                      <div key={key}>
+                        {key}: {value as string}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Diagnostic */}
+          {reportData.diagnosis?.primary && (
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Brain className="h-5 w-5 text-purple-600" />
+                Diagnostic
+              </h2>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-blue-900">{reportData.diagnosis.primary.condition}</h3>
+                  <Badge variant="outline" className="bg-blue-100 text-blue-800">
+                    Confiance: {reportData.diagnosis.primary.confidence}%
+                  </Badge>
+                </div>
+                <p className="text-sm text-gray-700 mb-2">
+                  <strong>Code ICD-10:</strong> {reportData.diagnosis.primary.icd10}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <strong>Justification:</strong> {reportData.diagnosis.primary.rationale}
+                </p>
               </div>
             </div>
           )}
+
+          {/* Examens */}
+          {reportData.examinations.length > 0 && (
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <TestTube className="h-5 w-5 text-orange-600" />
+                Examens Prescrits
+              </h2>
+              <div className="space-y-2">
+                {reportData.examinations.map((exam: any, index: number) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                    <div>
+                      <span className="font-medium">{exam.name}</span>
+                      <p className="text-sm text-gray-600">{exam.indication}</p>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className={`text-xs ${
+                        exam.priority === "high"
+                          ? "bg-red-100 text-red-800"
+                          : exam.priority === "medium"
+                            ? "bg-orange-100 text-orange-800"
+                            : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {exam.priority === "high" ? "Urgent" : exam.priority === "medium" ? "Routine" : "Optionnel"}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Prescriptions */}
+          {reportData.prescriptions.length > 0 && (
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Pill className="h-5 w-5 text-green-600" />
+                Prescriptions Médicamenteuses
+              </h2>
+              <div className="space-y-3">
+                {reportData.prescriptions.map((med: any, index: number) => (
+                  <div key={index} className="border rounded-lg p-4 bg-green-50">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-green-900">{med.name}</h4>
+                      <Badge variant="outline" className="bg-green-100 text-green-800">
+                        {med.category || "Médicament"}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p>
+                          <strong>Posologie:</strong> {med.dosage}
+                        </p>
+                        <p>
+                          <strong>Fréquence:</strong> {med.frequency}
+                        </p>
+                      </div>
+                      <div>
+                        <p>
+                          <strong>Durée:</strong> {med.duration}
+                        </p>
+                        <p>
+                          <strong>Indication:</strong> {med.indication}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Suivi */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-blue-600" />
+              Plan de Suivi
+            </h2>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <p className="text-gray-700">{reportData.followUp}</p>
+            </div>
+          </div>
+
+          {/* Signature */}
+          <div className="border-t pt-6 text-right">
+            <p className="text-sm text-gray-600">
+              Rapport généré le {new Date(reportData.generatedAt).toLocaleString("fr-FR")}
+            </p>
+            <p className="text-sm text-gray-600 mt-2">{reportData.header.doctorName}</p>
+          </div>
         </CardContent>
       </Card>
+
+      {/* Actions de navigation */}
+      <div className="flex justify-between items-center pt-4">
+        <Button variant="outline" onClick={onPrevious} className="px-6 py-3 bg-transparent">
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          Retour Prescription
+        </Button>
+
+        <Alert className="max-w-md">
+          <CheckCircle className="h-4 w-4" />
+          <AlertDescription>
+            Rapport de consultation généré avec succès. Vous pouvez l'imprimer ou le télécharger.
+          </AlertDescription>
+        </Alert>
+      </div>
     </div>
   )
 }

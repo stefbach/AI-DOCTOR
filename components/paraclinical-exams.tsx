@@ -23,12 +23,11 @@ import {
 } from "lucide-react"
 
 interface ParaclinicalExamsProps {
-  patientData: any
-  clinicalData: any
-  questionsData: any
-  diagnosisData: any
-  onNext: (data: any) => void
-  onBack: () => void
+  data?: any
+  allData?: any
+  onDataChange: (data: any) => void
+  onNext: () => void
+  onPrevious: () => void
 }
 
 interface Exam {
@@ -51,12 +50,11 @@ interface GeneratedPrescription {
 }
 
 export default function ParaclinicalExams({
-  patientData,
-  clinicalData,
-  questionsData,
-  diagnosisData,
+  data = {},
+  allData,
+  onDataChange,
   onNext,
-  onBack,
+  onPrevious,
 }: ParaclinicalExamsProps) {
   const [selectedExams, setSelectedExams] = useState<Exam[]>([])
   const [customExam, setCustomExam] = useState("")
@@ -66,8 +64,8 @@ export default function ParaclinicalExams({
 
   // Initialiser les examens basés sur les recommandations IA du diagnostic
   useEffect(() => {
-    if (diagnosisData?.recommendedExams) {
-      const aiExams: Exam[] = diagnosisData.recommendedExams.map((exam: any, index: number) => ({
+    if (allData?.diagnosisData?.recommendedExams) {
+      const aiExams: Exam[] = allData.diagnosisData.recommendedExams.map((exam: any, index: number) => ({
         id: `ai_${index}`,
         name: exam.name,
         code: exam.code,
@@ -200,7 +198,7 @@ export default function ParaclinicalExams({
 
       setSelectedExams([...aiExams, ...biologyExams, ...imagingExams])
     }
-  }, [diagnosisData])
+  }, [allData?.diagnosisData])
 
   const toggleExam = (examId: string) => {
     setSelectedExams((prev) => prev.map((exam) => (exam.id === examId ? { ...exam, selected: !exam.selected } : exam)))
@@ -262,8 +260,8 @@ export default function ParaclinicalExams({
   }
 
   const generateBiologyPrescription = (exams: Exam[]) => {
-    const patientName = `${patientData?.firstName || "Prénom"} ${patientData?.lastName || "Nom"}`
-    const patientAge = patientData?.age || "XX"
+    const patientName = `${allData?.patientData?.firstName || "Prénom"} ${allData?.patientData?.lastName || "Nom"}`
+    const patientAge = allData?.patientData?.age || "XX"
     const today = new Date().toLocaleDateString("fr-FR")
 
     return `ORDONNANCE MÉDICALE - EXAMENS BIOLOGIQUES
@@ -277,11 +275,11 @@ Date: ${today}
 PATIENT:
 Nom: ${patientName}
 Âge: ${patientAge} ans
-Né(e) le: ${patientData?.birthDate || "XX/XX/XXXX"}
+Né(e) le: ${allData?.patientData?.birthDate || "XX/XX/XXXX"}
 
 DIAGNOSTIC SUSPECTÉ:
-${diagnosisData?.primaryDiagnosis?.condition || "À préciser"}
-Code ICD-10: ${diagnosisData?.primaryDiagnosis?.icd10 || ""}
+${allData?.diagnosisData?.diagnosis?.primary?.condition || "À préciser"}
+Code ICD-10: ${allData?.diagnosisData?.diagnosis?.primary?.icd10 || ""}
 
 EXAMENS PRESCRITS:
 
@@ -293,8 +291,8 @@ ${exams
   .join("\n\n")}
 
 RENSEIGNEMENTS CLINIQUES:
-${clinicalData?.chiefComplaint || "Bilan de santé"}
-${clinicalData?.historyOfPresentIllness || ""}
+${allData?.clinicalData?.chiefComplaint || "Bilan de santé"}
+${allData?.clinicalData?.historyOfPresentIllness || ""}
 
 À JEUN: ${exams.some((e) => e.name.toLowerCase().includes("glycémie") || e.name.toLowerCase().includes("lipidique")) ? "OUI (12h)" : "NON"}
 
@@ -304,8 +302,8 @@ Signature et cachet du médecin`
   }
 
   const generateImagingPrescription = (exams: Exam[]) => {
-    const patientName = `${patientData?.firstName || "Prénom"} ${patientData?.lastName || "Nom"}`
-    const patientAge = patientData?.age || "XX"
+    const patientName = `${allData?.patientData?.firstName || "Prénom"} ${allData?.patientData?.lastName || "Nom"}`
+    const patientAge = allData?.patientData?.age || "XX"
     const today = new Date().toLocaleDateString("fr-FR")
 
     return `ORDONNANCE MÉDICALE - EXAMENS COMPLÉMENTAIRES
@@ -319,11 +317,11 @@ Date: ${today}
 PATIENT:
 Nom: ${patientName}
 Âge: ${patientAge} ans
-Né(e) le: ${patientData?.birthDate || "XX/XX/XXXX"}
+Né(e) le: ${allData?.patientData?.birthDate || "XX/XX/XXXX"}
 
 DIAGNOSTIC SUSPECTÉ:
-${diagnosisData?.primaryDiagnosis?.condition || "À préciser"}
-Code ICD-10: ${diagnosisData?.primaryDiagnosis?.icd10 || ""}
+${allData?.diagnosisData?.diagnosis?.primary?.condition || "À préciser"}
+Code ICD-10: ${allData?.diagnosisData?.diagnosis?.primary?.icd10 || ""}
 
 EXAMENS PRESCRITS:
 
@@ -335,9 +333,9 @@ ${exams
   .join("\n\n")}
 
 RENSEIGNEMENTS CLINIQUES:
-${clinicalData?.chiefComplaint || "Exploration diagnostique"}
-${clinicalData?.historyOfPresentIllness || ""}
-${clinicalData?.physicalExamination || ""}
+${allData?.clinicalData?.chiefComplaint || "Exploration diagnostique"}
+${allData?.clinicalData?.historyOfPresentIllness || ""}
+${allData?.clinicalData?.physicalExamination || ""}
 
 URGENT: ${exams.some((e) => e.priority === "high") ? "OUI" : "NON"}
 
@@ -402,6 +400,16 @@ Signature et cachet du médecin`
     }
   }
 
+  const handleSubmit = () => {
+    const examData = {
+      selectedExams: selectedExams.filter((e) => e.selected),
+      prescriptions: generatedPrescriptions,
+      completedAt: new Date().toISOString(),
+    }
+    onDataChange(examData)
+    onNext()
+  }
+
   if (showPrescriptions) {
     return (
       <div className="space-y-6">
@@ -439,15 +447,11 @@ Signature et cachet du médecin`
         ))}
 
         <div className="flex justify-between">
-          <Button onClick={onBack} variant="outline">
+          <Button onClick={onPrevious} variant="outline">
             <ArrowLeft className="h-5 w-5 mr-2" />
             Retour
           </Button>
-          <Button
-            onClick={() =>
-              onNext({ prescriptions: generatedPrescriptions, selectedExams: selectedExams.filter((e) => e.selected) })
-            }
-          >
+          <Button onClick={handleSubmit}>
             Continuer vers les Prescriptions
             <ArrowRight className="h-5 w-5 ml-2" />
           </Button>
@@ -461,8 +465,8 @@ Signature et cachet du médecin`
       <div>
         <h2 className="text-2xl font-bold mb-2">Examens Paracliniques</h2>
         <p className="text-gray-600">
-          Examens recommandés pour {patientData?.firstName} {patientData?.lastName} - Diagnostic:{" "}
-          {diagnosisData?.primaryDiagnosis?.condition}
+          Examens recommandés pour {allData?.patientData?.firstName} {allData?.patientData?.lastName} - Diagnostic:{" "}
+          {allData?.diagnosisData?.diagnosis?.primary?.condition}
         </p>
       </div>
 
@@ -479,7 +483,7 @@ Signature et cachet du médecin`
             <Brain className="h-4 w-4" />
             <AlertDescription>
               Ces examens ont été automatiquement sélectionnés par l'IA basés sur le diagnostic:
-              <strong> {diagnosisData?.primaryDiagnosis?.condition}</strong>
+              <strong> {allData?.diagnosisData?.diagnosis?.primary?.condition}</strong>
             </AlertDescription>
           </Alert>
           <div className="grid gap-3">
@@ -672,7 +676,7 @@ Signature et cachet du médecin`
       <Separator />
 
       <div className="flex justify-between">
-        <Button onClick={onBack} variant="outline">
+        <Button onClick={onPrevious} variant="outline">
           <ArrowLeft className="h-5 w-5 mr-2" />
           Retour Diagnostic
         </Button>

@@ -1,317 +1,404 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { MessageSquare, ArrowLeft, ArrowRight, Brain, Loader2, CheckCircle } from "lucide-react"
-
-interface QuestionsFormProps {
-  patientData: any
-  clinicalData: any
-  initialData?: any
-  onNext: (data: any) => void
-  onBack: () => void
-}
+import { Progress } from "@/components/ui/progress"
+import { Separator } from "@/components/ui/separator"
+import {
+  MessageSquare,
+  Brain,
+  Loader2,
+  CheckCircle,
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  RefreshCw,
+} from "lucide-react"
 
 interface Question {
   id: string
   question: string
+  type: "text" | "boolean" | "scale" | "multiple"
   category: string
   importance: "high" | "medium" | "low"
-  followUp?: string
+  options?: string[]
 }
 
-export default function QuestionsForm({
-  patientData,
-  clinicalData,
-  initialData = {},
-  onNext,
-  onBack,
-}: QuestionsFormProps) {
+interface QuestionsFormProps {
+  data?: any
+  allData?: any
+  onDataChange: (data: any) => void
+  onNext: () => void
+  onPrevious: () => void
+}
+
+export default function QuestionsForm({ data, allData, onDataChange, onNext, onPrevious }: QuestionsFormProps) {
   const [questions, setQuestions] = useState<Question[]>([])
-  const [answers, setAnswers] = useState<Record<string, string>>(initialData?.answers || {})
-  const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false)
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [preliminaryAssessment, setPreliminaryAssessment] = useState("")
-  const [isComplete, setIsComplete] = useState(false)
+  const [answers, setAnswers] = useState<Record<string, string>>({})
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [progress, setProgress] = useState(0)
 
-  // Simulation de génération de questions par IA
-  const generateQuestionsWithAI = useCallback(async () => {
-    setIsGeneratingQuestions(true)
-
-    // Simulation d'appel API avec délai
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    // Questions générées basées sur les données cliniques
-    const generatedQuestions: Question[] = [
-      {
-        id: "q1",
-        question: "Avez-vous des antécédents familiaux de maladies cardiovasculaires ?",
-        category: "Antécédents familiaux",
-        importance: "high",
-        followUp: "Si oui, précisez le type et l'âge de survenue",
-      },
-      {
-        id: "q2",
-        question: "Prenez-vous actuellement des médicaments anticoagulants ou antiagrégants ?",
-        category: "Médicaments",
-        importance: "high",
-        followUp: "Précisez le nom et la posologie",
-      },
-      {
-        id: "q3",
-        question: "Avez-vous remarqué une aggravation des symptômes à l'effort ?",
-        category: "Symptômes",
-        importance: "medium",
-        followUp: "Décrivez le type d'effort et l'intensité des symptômes",
-      },
-      {
-        id: "q4",
-        question: "Avez-vous des troubles du sommeil ou des réveils nocturnes ?",
-        category: "Symptômes associés",
-        importance: "medium",
-        followUp: "Fréquence et nature des troubles",
-      },
-      {
-        id: "q5",
-        question: "Consommez-vous du tabac ou de l'alcool ?",
-        category: "Habitudes de vie",
-        importance: "high",
-        followUp: "Quantité et fréquence",
-      },
-      {
-        id: "q6",
-        question: "Avez-vous voyagé récemment dans des zones à risque ?",
-        category: "Exposition",
-        importance: "low",
-        followUp: "Destination et durée du voyage",
-      },
-    ]
-
-    // Évaluation préliminaire basée sur les données
-    const assessment = `Basé sur le motif de consultation "${clinicalData?.chiefComplaint}" et les symptômes décrits, 
-    une évaluation approfondie est nécessaire pour écarter les diagnostics différentiels importants. 
-    Les questions suivantes permettront d'affiner l'orientation diagnostique.`
-
-    setQuestions(generatedQuestions)
-    setPreliminaryAssessment(assessment)
-    setIsGeneratingQuestions(false)
-  }, [clinicalData])
-
+  // Charger les données existantes
   useEffect(() => {
-    if (questions.length === 0 && !isGeneratingQuestions) {
-      generateQuestionsWithAI()
+    if (data?.questions) {
+      setQuestions(data.questions)
     }
-  }, [generateQuestionsWithAI, questions.length, isGeneratingQuestions])
+    if (data?.answers) {
+      setAnswers(data.answers)
+    }
+  }, [data])
 
-  const handleAnswerChange = useCallback((questionId: string, answer: string) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: answer }))
-  }, [])
+  // Générer les questions automatiquement si pas encore fait
+  useEffect(() => {
+    if (questions.length === 0 && allData?.patientData && allData?.clinicalData) {
+      generateQuestions()
+    }
+  }, [allData])
 
-  const handleNext = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex((prev) => prev + 1)
-    } else {
-      setIsComplete(true)
+  const generateQuestions = async () => {
+    setIsLoading(true)
+    setError(null)
+    setProgress(0)
+
+    try {
+      setProgress(30)
+      console.log("🚀 Génération des questions IA...")
+
+      const response = await fetch("/api/openai-questions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patientData: allData.patientData,
+          clinicalData: allData.clinicalData,
+        }),
+      })
+
+      setProgress(70)
+
+      if (!response.ok) {
+        throw new Error(`Erreur API: ${response.status}`)
+      }
+
+      const result = await response.json()
+      setProgress(100)
+
+      if (result.success && result.data?.questions) {
+        setQuestions(result.data.questions)
+        console.log("✅ Questions générées:", result.data.questions.length)
+      } else {
+        throw new Error(result.error || "Erreur lors de la génération des questions")
+      }
+    } catch (err: any) {
+      console.error("❌ Erreur génération questions:", err)
+      setError(err.message)
+
+      // Questions de fallback
+      const fallbackQuestions: Question[] = [
+        {
+          id: "pain_intensity",
+          question: "Sur une échelle de 1 à 10, comment évaluez-vous l'intensité de vos symptômes ?",
+          type: "scale",
+          category: "Symptômes",
+          importance: "high",
+        },
+        {
+          id: "symptom_duration",
+          question: "Depuis combien de temps ressentez-vous ces symptômes ?",
+          type: "text",
+          category: "Chronologie",
+          importance: "high",
+        },
+        {
+          id: "triggers",
+          question: "Avez-vous identifié des facteurs déclenchants ?",
+          type: "text",
+          category: "Facteurs",
+          importance: "medium",
+        },
+        {
+          id: "family_history",
+          question: "Y a-t-il des antécédents familiaux similaires ?",
+          type: "boolean",
+          category: "Antécédents",
+          importance: "medium",
+        },
+        {
+          id: "current_medications",
+          question: "Prenez-vous actuellement des médicaments ?",
+          type: "text",
+          category: "Traitements",
+          importance: "high",
+        },
+      ]
+
+      setQuestions(fallbackQuestions)
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  const handlePrevious = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex((prev) => prev - 1)
-    }
-  }
+  const handleAnswerChange = (questionId: string, value: string) => {
+    const newAnswers = { ...answers, [questionId]: value }
+    setAnswers(newAnswers)
 
-  const handleSubmit = () => {
+    // Sauvegarder automatiquement
     const questionsData = {
       questions,
-      answers,
-      preliminaryAssessment,
+      answers: newAnswers,
       completedAt: new Date().toISOString(),
-      totalQuestions: questions.length,
-      answeredQuestions: Object.keys(answers).length,
     }
-    onNext(questionsData)
+    onDataChange(questionsData)
   }
 
-  const getAnsweredCount = () => Object.keys(answers).filter((key) => answers[key]?.trim()).length
-  const getProgress = () => (getAnsweredCount() / questions.length) * 100
+  const renderQuestion = (question: Question) => {
+    const currentAnswer = answers[question.id] || ""
 
-  if (isGeneratingQuestions) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Loader2 className="h-12 w-12 animate-spin text-blue-600 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Génération des questions par IA</h3>
-            <p className="text-gray-600 text-center">
-              L'IA analyse les données cliniques de {patientData?.firstName} {patientData?.lastName}
-              pour générer des questions ciblées...
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
+    switch (question.type) {
+      case "text":
+        return (
+          <Textarea
+            value={currentAnswer}
+            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+            placeholder="Votre réponse..."
+            className="min-h-[80px]"
+          />
+        )
 
-  if (isComplete) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center text-2xl text-green-600">
-              <CheckCircle className="h-6 w-6 mr-3" />
-              Anamnèse Terminée
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <Alert>
-              <Brain className="h-4 w-4" />
-              <AlertDescription>
-                L'anamnèse dirigée par IA est terminée. {getAnsweredCount()} questions sur {questions.length} ont été
-                répondues.
-              </AlertDescription>
-            </Alert>
-
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-semibold mb-2">Évaluation Préliminaire</h4>
-              <p className="text-sm text-gray-700">{preliminaryAssessment}</p>
+      case "boolean":
+        return (
+          <RadioGroup
+            value={currentAnswer}
+            onValueChange={(value) => handleAnswerChange(question.id, value)}
+            className="flex gap-6"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="oui" id={`${question.id}-oui`} />
+              <Label htmlFor={`${question.id}-oui`}>Oui</Label>
             </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="non" id={`${question.id}-non`} />
+              <Label htmlFor={`${question.id}-non`}>Non</Label>
+            </div>
+          </RadioGroup>
+        )
 
-            <div className="space-y-3">
-              <h4 className="font-semibold">Résumé des Réponses</h4>
-              {questions.map((question, index) => (
-                <div key={question.id} className="border-l-4 border-l-blue-500 pl-4 py-2">
-                  <div className="font-medium text-sm">{question.question}</div>
-                  <div className="text-sm text-gray-600 mt-1">{answers[question.id] || "Non répondu"}</div>
+      case "scale":
+        return (
+          <div className="space-y-4">
+            <div className="flex justify-between text-sm text-gray-500">
+              <span>1 (Très faible)</span>
+              <span>10 (Très élevé)</span>
+            </div>
+            <RadioGroup
+              value={currentAnswer}
+              onValueChange={(value) => handleAnswerChange(question.id, value)}
+              className="flex justify-between"
+            >
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
+                <div key={num} className="flex flex-col items-center space-y-2">
+                  <RadioGroupItem value={num.toString()} id={`${question.id}-${num}`} />
+                  <Label htmlFor={`${question.id}-${num}`} className="text-xs">
+                    {num}
+                  </Label>
                 </div>
               ))}
-            </div>
+            </RadioGroup>
+          </div>
+        )
 
-            <div className="flex justify-between pt-6">
-              <Button onClick={() => setIsComplete(false)} variant="outline">
-                Modifier les réponses
-              </Button>
-              <Button onClick={handleSubmit} className="bg-green-600 hover:bg-green-700">
-                Continuer vers le Diagnostic IA
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
+      case "multiple":
+        return (
+          <div className="space-y-3">
+            {question.options?.map((option, index) => (
+              <div key={index} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`${question.id}-${index}`}
+                  checked={currentAnswer.includes(option)}
+                  onCheckedChange={(checked) => {
+                    const currentOptions = currentAnswer ? currentAnswer.split(",") : []
+                    let newOptions
+                    if (checked) {
+                      newOptions = [...currentOptions, option]
+                    } else {
+                      newOptions = currentOptions.filter((opt) => opt !== option)
+                    }
+                    handleAnswerChange(question.id, newOptions.join(","))
+                  }}
+                />
+                <Label htmlFor={`${question.id}-${index}`}>{option}</Label>
+              </div>
+            ))}
+          </div>
+        )
+
+      default:
+        return (
+          <Input
+            value={currentAnswer}
+            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+            placeholder="Votre réponse..."
+          />
+        )
+    }
   }
 
-  const currentQuestion = questions[currentQuestionIndex]
+  const getCompletionRate = () => {
+    if (questions.length === 0) return 0
+    const answeredQuestions = Object.keys(answers).filter((key) => answers[key]?.trim()).length
+    return (answeredQuestions / questions.length) * 100
+  }
+
+  const canProceed = () => {
+    const highPriorityQuestions = questions.filter((q) => q.importance === "high")
+    const answeredHighPriority = highPriorityQuestions.filter((q) => answers[q.id]?.trim()).length
+    return answeredHighPriority >= Math.ceil(highPriorityQuestions.length * 0.8) // 80% des questions importantes
+  }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center text-2xl">
-            <MessageSquare className="h-6 w-6 mr-3 text-purple-600" />
+          <CardTitle className="flex items-center gap-2 text-2xl">
+            <MessageSquare className="w-6 h-6 text-blue-600" />
             Anamnèse Dirigée par IA
           </CardTitle>
-          <div className="flex items-center justify-between">
-            <p className="text-gray-600">
-              Question {currentQuestionIndex + 1} sur {questions.length} pour {patientData?.firstName}{" "}
-              {patientData?.lastName}
-            </p>
-            <div className="text-sm text-gray-500">
-              {getAnsweredCount()}/{questions.length} répondues ({Math.round(getProgress())}%)
-            </div>
-          </div>
+          <p className="text-gray-600">
+            Questions personnalisées générées par l'IA basées sur les données cliniques du patient
+          </p>
         </CardHeader>
         <CardContent className="space-y-6">
-          {preliminaryAssessment && (
-            <Alert>
-              <Brain className="h-4 w-4" />
-              <AlertDescription>{preliminaryAssessment}</AlertDescription>
+          {/* Barre de progression */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Progression des réponses</span>
+              <span>{Math.round(getCompletionRate())}% complété</span>
+            </div>
+            <Progress value={getCompletionRate()} className="w-full" />
+          </div>
+
+          {/* Génération en cours */}
+          {isLoading && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-center space-x-3">
+                  <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                  <div>
+                    <p className="font-medium">Génération des questions par IA...</p>
+                    <p className="text-sm text-gray-500">Analyse des données cliniques en cours</p>
+                  </div>
+                </div>
+                <Progress value={progress} className="mt-4" />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Erreur */}
+          {error && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                {error}
+                <Button variant="outline" size="sm" onClick={generateQuestions} className="ml-4 bg-transparent">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Réessayer
+                </Button>
+              </AlertDescription>
             </Alert>
           )}
 
-          {currentQuestion && (
-            <div className="space-y-4">
-              <div className="bg-purple-50 p-6 rounded-lg">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-purple-900 mb-2">{currentQuestion.question}</h3>
-                    {currentQuestion.followUp && <p className="text-sm text-purple-700">{currentQuestion.followUp}</p>}
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span
-                      className={`px-2 py-1 rounded text-xs ${
-                        currentQuestion.importance === "high"
-                          ? "bg-red-100 text-red-800"
-                          : currentQuestion.importance === "medium"
-                            ? "bg-orange-100 text-orange-800"
-                            : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {currentQuestion.importance === "high"
-                        ? "Priorité haute"
-                        : currentQuestion.importance === "medium"
-                          ? "Priorité moyenne"
-                          : "Priorité basse"}
-                    </span>
-                    <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">
-                      {currentQuestion.category}
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor={`answer-${currentQuestion.id}`}>Votre réponse</Label>
-                  <Textarea
-                    id={`answer-${currentQuestion.id}`}
-                    value={answers[currentQuestion.id] || ""}
-                    onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
-                    placeholder="Saisissez votre réponse détaillée..."
-                    rows={4}
-                    className="mt-2"
-                  />
+          {/* Questions */}
+          {questions.length > 0 && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Questions d'anamnèse</h3>
+                <div className="flex gap-2">
+                  <Badge variant="outline">{questions.length} questions</Badge>
+                  <Badge variant="secondary">
+                    {Object.keys(answers).filter((key) => answers[key]?.trim()).length} réponses
+                  </Badge>
                 </div>
               </div>
 
-              <div className="flex justify-between items-center">
-                <Button onClick={handlePrevious} disabled={currentQuestionIndex === 0} variant="outline">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Précédent
-                </Button>
+              {questions.map((question, index) => {
+                const isAnswered = answers[question.id]?.trim()
+                const importanceColor =
+                  question.importance === "high"
+                    ? "text-red-600"
+                    : question.importance === "medium"
+                      ? "text-orange-600"
+                      : "text-gray-600"
 
-                <div className="flex items-center space-x-4">
-                  <div className="text-sm text-gray-500">
-                    {currentQuestionIndex + 1} / {questions.length}
-                  </div>
-                  <div className="w-32 bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-purple-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
-                    />
-                  </div>
-                </div>
-
-                <Button onClick={handleNext} className="bg-purple-600 hover:bg-purple-700">
-                  {currentQuestionIndex === questions.length - 1 ? "Terminer" : "Suivant"}
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </div>
+                return (
+                  <Card key={question.id} className={`${isAnswered ? "border-green-200 bg-green-50" : ""}`}>
+                    <CardHeader className="pb-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <Badge variant="outline" className="text-xs">
+                              Question {index + 1}
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              {question.category}
+                            </Badge>
+                            <Badge variant="outline" className={`text-xs ${importanceColor}`}>
+                              {question.importance === "high"
+                                ? "Importante"
+                                : question.importance === "medium"
+                                  ? "Modérée"
+                                  : "Optionnelle"}
+                            </Badge>
+                          </div>
+                          <h4 className="font-medium text-gray-900">{question.question}</h4>
+                        </div>
+                        {isAnswered && <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />}
+                      </div>
+                    </CardHeader>
+                    <CardContent>{renderQuestion(question)}</CardContent>
+                  </Card>
+                )
+              })}
             </div>
           )}
 
-          <div className="flex justify-between pt-6 border-t">
-            <Button onClick={onBack} variant="outline" className="px-6 py-3 bg-transparent">
+          <Separator />
+
+          {/* Actions */}
+          <div className="flex justify-between items-center pt-4">
+            <Button variant="outline" onClick={onPrevious} className="px-6 py-3 bg-transparent">
               <ArrowLeft className="h-5 w-5 mr-2" />
               Retour Clinique
             </Button>
-            <Button onClick={() => setIsComplete(true)} variant="outline" disabled={getAnsweredCount() === 0}>
-              Passer au diagnostic ({getAnsweredCount()} réponses)
-            </Button>
+
+            <div className="flex space-x-3">
+              <Button variant="outline" onClick={generateQuestions} disabled={isLoading}>
+                <Brain className="h-4 w-4 mr-2" />
+                Régénérer Questions
+              </Button>
+              <Button onClick={onNext} disabled={!canProceed()} className="bg-blue-600 hover:bg-blue-700 px-6 py-3">
+                Continuer vers Diagnostic
+                <ArrowRight className="h-5 w-5 ml-2" />
+              </Button>
+            </div>
           </div>
+
+          {/* Aide */}
+          {!canProceed() && questions.length > 0 && (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                Veuillez répondre à au moins 80% des questions importantes (marquées en rouge) pour continuer.
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
     </div>

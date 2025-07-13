@@ -6,293 +6,249 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { User, Stethoscope, Activity, Brain, Clock, AlertTriangle, CheckCircle, Play, Loader2 } from "lucide-react"
+import { Progress } from "@/components/ui/progress"
+import { CheckCircle, XCircle, AlertCircle, Loader2, Play, FileText, Clock, Target } from "lucide-react"
 
 interface TestCase {
   id: string
-  title: string
-  severity: "léger" | "modéré" | "sévère"
-  category: string
-  patientData: {
-    firstName: string
-    lastName: string
-    age: number
-    gender: string
-    weight: number
-    height: number
-    allergies: string
-    medicalHistory: string
-    currentMedications: string
-  }
-  clinicalData: {
-    chiefComplaint: string
-    symptoms: string[]
-    duration: string
-    severity: string
-    vitalSigns: {
-      temperature: string
-      bloodPressure: string
-      heartRate: string
-      respiratoryRate: string
-      oxygenSaturation: string
-    }
-    physicalExam: string
-  }
-  questionsData: {
-    responses: Array<{
-      question: string
-      answer: string
-      importance: "high" | "medium" | "low"
-    }>
-  }
+  name: string
+  description: string
+  patientData: any
+  clinicalData: any
+  questionsData: any
   expectedDiagnosis: {
-    primary: string
-    differential: string[]
+    condition: string
+    icd10: string
     confidence: number
   }
-  description: string
+  expectedExams: string[]
+  expectedMedications: string[]
+}
+
+interface TestResult {
+  testCase: TestCase
+  actualDiagnosis?: any
+  score: number
+  details: {
+    diagnosisMatch: boolean
+    examMatch: number
+    medicationMatch: number
+    responseTime: number
+  }
+  status: "success" | "partial" | "failed"
+  error?: string
 }
 
 const testCases: TestCase[] = [
   {
-    id: "case-1",
-    title: "Syndrome Fébrile avec Céphalées",
-    severity: "modéré",
-    category: "Infectiologie",
-    description: "Femme de 35 ans présentant une fièvre et des céphalées depuis 3 jours",
+    id: "hypertension-case",
+    name: "Hypertension Artérielle",
+    description: "Patient de 55 ans avec HTA nouvellement diagnostiquée",
     patientData: {
-      firstName: "Marie",
-      lastName: "Dupont",
-      age: 35,
-      gender: "Femme",
-      weight: 65,
-      height: 165,
-      allergies: "Pénicilline",
-      medicalHistory: "Migraines occasionnelles",
-      currentMedications: "Contraceptif oral",
-    },
-    clinicalData: {
-      chiefComplaint: "Fièvre et maux de tête depuis 3 jours",
-      symptoms: ["Fièvre", "Céphalées", "Fatigue", "Frissons", "Photophobie légère"],
-      duration: "3 jours",
-      severity: "Modérée",
-      vitalSigns: {
-        temperature: "38.5",
-        bloodPressure: "125/80",
-        heartRate: "95",
-        respiratoryRate: "18",
-        oxygenSaturation: "98",
-      },
-      physicalExam: "Raideur nucale absente, pas de signes méningés, examen neurologique normal",
-    },
-    questionsData: {
-      responses: [
-        {
-          question: "Avez-vous des nausées ou vomissements ?",
-          answer: "Quelques nausées mais pas de vomissements",
-          importance: "high",
-        },
-        {
-          question: "Avez-vous voyagé récemment ?",
-          answer: "Non",
-          importance: "medium",
-        },
-        {
-          question: "Y a-t-il eu un contact avec une personne malade ?",
-          answer: "Mon enfant a eu de la fièvre la semaine dernière",
-          importance: "high",
-        },
-      ],
-    },
-    expectedDiagnosis: {
-      primary: "Syndrome viral probable",
-      differential: ["Grippe", "Infection virale des voies respiratoires", "Gastro-entérite virale"],
-      confidence: 75,
-    },
-  },
-  {
-    id: "case-2",
-    title: "Douleur Thoracique à l'Effort",
-    severity: "sévère",
-    category: "Cardiologie",
-    description: "Homme de 55 ans avec douleur thoracique survenant à l'effort",
-    patientData: {
-      firstName: "Pierre",
-      lastName: "Martin",
       age: 55,
       gender: "Homme",
-      weight: 85,
-      height: 175,
       allergies: "Aucune",
-      medicalHistory: "Hypertension, diabète type 2, tabagisme",
-      currentMedications: "Metformine, Lisinopril",
+      medicalHistory: "Diabète type 2, surpoids",
     },
     clinicalData: {
-      chiefComplaint: "Douleur thoracique à l'effort depuis 2 semaines",
-      symptoms: ["Douleur thoracique", "Essoufflement", "Fatigue à l'effort"],
-      duration: "2 semaines",
-      severity: "Modérée à sévère",
+      chiefComplaint: "Céphalées matinales et vertiges",
+      symptoms: ["Céphalées", "Vertiges", "Fatigue", "Vision floue"],
       vitalSigns: {
-        temperature: "36.8",
-        bloodPressure: "145/90",
+        bloodPressure: "165/95",
         heartRate: "78",
-        respiratoryRate: "16",
-        oxygenSaturation: "97",
-      },
-      physicalExam: "Auscultation cardiaque normale au repos, pas de souffle, œdèmes des chevilles absents",
-    },
-    questionsData: {
-      responses: [
-        {
-          question: "La douleur irradie-t-elle vers le bras ou la mâchoire ?",
-          answer: "Parfois vers le bras gauche",
-          importance: "high",
-        },
-        {
-          question: "Combien de cigarettes fumez-vous par jour ?",
-          answer: "Un paquet depuis 30 ans",
-          importance: "high",
-        },
-        {
-          question: "Avez-vous des antécédents familiaux de maladie cardiaque ?",
-          answer: "Mon père a fait un infarctus à 60 ans",
-          importance: "high",
-        },
-      ],
-    },
-    expectedDiagnosis: {
-      primary: "Angor stable probable",
-      differential: ["Maladie coronarienne", "Angor instable", "Cardiomyopathie ischémique"],
-      confidence: 85,
-    },
-  },
-  {
-    id: "case-3",
-    title: "Céphalées Récurrentes",
-    severity: "léger",
-    category: "Neurologie",
-    description: "Femme de 28 ans avec céphalées récurrentes et troubles visuels",
-    patientData: {
-      firstName: "Sophie",
-      lastName: "Bernard",
-      age: 28,
-      gender: "Femme",
-      weight: 58,
-      height: 162,
-      allergies: "Aucune",
-      medicalHistory: "Migraines depuis l'adolescence",
-      currentMedications: "Contraceptif oral, Sumatriptan au besoin",
-    },
-    clinicalData: {
-      chiefComplaint: "Céphalées avec troubles visuels depuis 1 semaine",
-      symptoms: ["Céphalées pulsatiles", "Troubles visuels", "Nausées", "Sensibilité à la lumière"],
-      duration: "1 semaine (épisodes récurrents)",
-      severity: "Modérée",
-      vitalSigns: {
-        temperature: "36.7",
-        bloodPressure: "110/70",
-        heartRate: "72",
-        respiratoryRate: "14",
-        oxygenSaturation: "99",
-      },
-      physicalExam: "Examen neurologique normal, pas de signes focaux, fond d'œil normal",
-    },
-    questionsData: {
-      responses: [
-        {
-          question: "Décrivez les troubles visuels",
-          answer: "Aura visuelle avec zigzags lumineux avant la céphalée",
-          importance: "high",
-        },
-        {
-          question: "Y a-t-il des facteurs déclenchants ?",
-          answer: "Stress, manque de sommeil, règles",
-          importance: "medium",
-        },
-        {
-          question: "Les céphalées ont-elles changé récemment ?",
-          answer: "Plus fréquentes depuis 2 mois",
-          importance: "high",
-        },
-      ],
-    },
-    expectedDiagnosis: {
-      primary: "Migraine avec aura",
-      differential: ["Migraine sans aura", "Céphalée de tension", "Céphalée hormonale"],
-      confidence: 90,
-    },
-  },
-  {
-    id: "case-4",
-    title: "Douleur Abdominale Aiguë",
-    severity: "sévère",
-    category: "Gastroentérologie",
-    description: "Homme de 42 ans avec douleur abdominale aiguë et fièvre",
-    patientData: {
-      firstName: "Jean",
-      lastName: "Moreau",
-      age: 42,
-      gender: "Homme",
-      weight: 78,
-      height: 180,
-      allergies: "Aucune",
-      medicalHistory: "Lithiase biliaire connue",
-      currentMedications: "Aucun",
-    },
-    clinicalData: {
-      chiefComplaint: "Douleur abdominale intense depuis 6 heures",
-      symptoms: ["Douleur épigastrique", "Fièvre", "Nausées", "Vomissements"],
-      duration: "6 heures",
-      severity: "Sévère",
-      vitalSigns: {
-        temperature: "38.8",
-        bloodPressure: "130/85",
-        heartRate: "105",
-        respiratoryRate: "20",
+        temperature: "36.8",
         oxygenSaturation: "98",
       },
-      physicalExam: "Douleur à la palpation de l'hypochondre droit, signe de Murphy positif, défense localisée",
+      physicalExam: "Souffle cardiaque léger, pas d'œdème des membres inférieurs",
     },
     questionsData: {
       responses: [
-        {
-          question: "La douleur irradie-t-elle quelque part ?",
-          answer: "Vers l'épaule droite et le dos",
-          importance: "high",
-        },
-        {
-          question: "Avez-vous déjà eu ce type de douleur ?",
-          answer: "Oui, mais moins intense, après des repas gras",
-          importance: "high",
-        },
-        {
-          question: "Avez-vous remarqué une coloration des urines ou selles ?",
-          answer: "Urines foncées depuis hier",
-          importance: "high",
-        },
+        { question: "Antécédents familiaux d'HTA ?", answer: "Oui, père et mère" },
+        { question: "Consommation de sel ?", answer: "Élevée" },
+        { question: "Activité physique ?", answer: "Sédentaire" },
+        { question: "Stress professionnel ?", answer: "Élevé" },
       ],
     },
     expectedDiagnosis: {
-      primary: "Cholécystite aiguë",
-      differential: ["Lithiase biliaire compliquée", "Angiocholite", "Pancréatite aiguë"],
-      confidence: 88,
+      condition: "Hypertension artérielle",
+      icd10: "I10",
+      confidence: 85,
     },
+    expectedExams: ["Bilan lipidique", "Créatininémie", "ECG", "Fond d'œil"],
+    expectedMedications: ["IEC", "Diurétique", "Antihypertenseur"],
+  },
+  {
+    id: "respiratory-infection",
+    name: "Infection Respiratoire",
+    description: "Patiente de 35 ans avec syndrome grippal",
+    patientData: {
+      age: 35,
+      gender: "Femme",
+      allergies: "Pénicilline",
+      medicalHistory: "Asthme léger",
+    },
+    clinicalData: {
+      chiefComplaint: "Toux et fièvre depuis 3 jours",
+      symptoms: ["Toux productive", "Fièvre", "Dyspnée", "Douleurs thoraciques"],
+      vitalSigns: {
+        bloodPressure: "120/75",
+        heartRate: "95",
+        temperature: "38.5",
+        oxygenSaturation: "94",
+      },
+      physicalExam: "Râles crépitants base droite, matité à la percussion",
+    },
+    questionsData: {
+      responses: [
+        { question: "Exposition récente ?", answer: "Collègue malade" },
+        { question: "Vaccination grippe ?", answer: "Non" },
+        { question: "Tabagisme ?", answer: "Non" },
+        { question: "Voyage récent ?", answer: "Non" },
+      ],
+    },
+    expectedDiagnosis: {
+      condition: "Pneumonie communautaire",
+      icd10: "J18",
+      confidence: 80,
+    },
+    expectedExams: ["Radiographie thoracique", "CRP", "Hémocultures", "ECBC"],
+    expectedMedications: ["Macrolide", "Bronchodilatateur", "Antipyrétique"],
+  },
+  {
+    id: "abdominal-pain",
+    name: "Douleurs Abdominales",
+    description: "Patient de 42 ans avec douleurs abdominales aiguës",
+    patientData: {
+      age: 42,
+      gender: "Homme",
+      allergies: "Aucune",
+      medicalHistory: "Lithiase biliaire connue",
+    },
+    clinicalData: {
+      chiefComplaint: "Douleur épigastrique intense depuis 2h",
+      symptoms: ["Douleur épigastrique", "Nausées", "Vomissements", "Irradiation dorsale"],
+      vitalSigns: {
+        bloodPressure: "140/85",
+        heartRate: "105",
+        temperature: "37.8",
+        oxygenSaturation: "98",
+      },
+      physicalExam: "Défense épigastrique, Murphy positif, pas d'ictère",
+    },
+    questionsData: {
+      responses: [
+        { question: "Relation avec les repas ?", answer: "Après repas gras" },
+        { question: "Douleur similaire antérieure ?", answer: "Oui, moins intense" },
+        { question: "Alcool ?", answer: "Occasionnel" },
+        { question: "Perte de poids ?", answer: "Non" },
+      ],
+    },
+    expectedDiagnosis: {
+      condition: "Cholécystite aiguë",
+      icd10: "K80.0",
+      confidence: 85,
+    },
+    expectedExams: ["Échographie abdominale", "Bilan hépatique", "Lipasémie", "NFS"],
+    expectedMedications: ["Antispasmodique", "Antalgique", "Antibiotique"],
+  },
+  {
+    id: "diabetes-followup",
+    name: "Suivi Diabète",
+    description: "Patiente de 60 ans en suivi de diabète type 2",
+    patientData: {
+      age: 60,
+      gender: "Femme",
+      allergies: "Sulfamides",
+      medicalHistory: "Diabète type 2, HTA, dyslipidémie",
+    },
+    clinicalData: {
+      chiefComplaint: "Contrôle diabète et fatigue",
+      symptoms: ["Fatigue", "Polyurie", "Polydipsie", "Vision floue"],
+      vitalSigns: {
+        bloodPressure: "150/90",
+        heartRate: "72",
+        temperature: "36.5",
+        oxygenSaturation: "98",
+      },
+      physicalExam: "IMC 32, pas de signes de complications",
+    },
+    questionsData: {
+      responses: [
+        { question: "Observance traitement ?", answer: "Irrégulière" },
+        { question: "Régime alimentaire ?", answer: "Difficile à suivre" },
+        { question: "Dernière HbA1c ?", answer: "9.2%" },
+        { question: "Activité physique ?", answer: "Nulle" },
+      ],
+    },
+    expectedDiagnosis: {
+      condition: "Diabète type 2 déséquilibré",
+      icd10: "E11.9",
+      confidence: 90,
+    },
+    expectedExams: ["HbA1c", "Bilan lipidique", "Microalbuminurie", "Fond d'œil"],
+    expectedMedications: ["Metformine", "Insuline", "Statine"],
   },
 ]
 
-interface TestCasesProps {
-  onTestCaseLoad?: (testCase: TestCase) => void
-  onComplete?: (data: any) => void
-}
+export default function TestCases() {
+  const [testResults, setTestResults] = useState<TestResult[]>([])
+  const [isRunningTests, setIsRunningTests] = useState(false)
+  const [currentTestIndex, setCurrentTestIndex] = useState(-1)
+  const [selectedTestCase, setSelectedTestCase] = useState<TestCase | null>(null)
 
-export default function TestCases({ onTestCaseLoad, onComplete }: TestCasesProps) {
-  const [selectedCase, setSelectedCase] = useState<TestCase | null>(null)
-  const [isRunningTest, setIsRunningTest] = useState(false)
-  const [testResult, setTestResult] = useState<any>(null)
+  const calculateScore = (testCase: TestCase, actualDiagnosis: any): TestResult => {
+    let score = 0
+    const details = {
+      diagnosisMatch: false,
+      examMatch: 0,
+      medicationMatch: 0,
+      responseTime: 0,
+    }
 
-  const runDiagnosticTest = async (testCase: TestCase) => {
-    setIsRunningTest(true)
-    setTestResult(null)
+    // Vérification du diagnostic (40% du score)
+    if (actualDiagnosis?.diagnosis?.primary?.condition) {
+      const actualCondition = actualDiagnosis.diagnosis.primary.condition.toLowerCase()
+      const expectedCondition = testCase.expectedDiagnosis.condition.toLowerCase()
+
+      if (actualCondition.includes(expectedCondition) || expectedCondition.includes(actualCondition)) {
+        details.diagnosisMatch = true
+        score += 40
+      }
+    }
+
+    // Vérification des examens recommandés (30% du score)
+    if (actualDiagnosis?.recommendations?.exams) {
+      const actualExams = actualDiagnosis.recommendations.exams.map((e: any) => e.name.toLowerCase())
+      const matchedExams = testCase.expectedExams.filter((expectedExam) =>
+        actualExams.some((actualExam) => actualExam.includes(expectedExam.toLowerCase())),
+      )
+      details.examMatch = (matchedExams.length / testCase.expectedExams.length) * 100
+      score += (details.examMatch / 100) * 30
+    }
+
+    // Vérification des médicaments (30% du score)
+    if (actualDiagnosis?.recommendations?.medications) {
+      const actualMeds = actualDiagnosis.recommendations.medications.map((m: any) => m.name.toLowerCase())
+      const matchedMeds = testCase.expectedMedications.filter((expectedMed) =>
+        actualMeds.some((actualMed) => actualMed.includes(expectedMed.toLowerCase())),
+      )
+      details.medicationMatch = (matchedMeds.length / testCase.expectedMedications.length) * 100
+      score += (details.medicationMatch / 100) * 30
+    }
+
+    const status = score >= 80 ? "success" : score >= 50 ? "partial" : "failed"
+
+    return {
+      testCase,
+      actualDiagnosis,
+      score: Math.round(score),
+      details,
+      status,
+    }
+  }
+
+  const runSingleTest = async (testCase: TestCase): Promise<TestResult> => {
+    const startTime = Date.now()
 
     try {
       const response = await fetch("/api/openai-diagnosis", {
@@ -305,282 +261,368 @@ export default function TestCases({ onTestCaseLoad, onComplete }: TestCasesProps
         }),
       })
 
-      if (response.ok) {
-        const result = await response.json()
-        setTestResult({
-          success: true,
-          aiDiagnosis: result,
-          expected: testCase.expectedDiagnosis,
-          testCase: testCase,
-        })
-      } else {
-        const error = await response.json()
-        setTestResult({
-          success: false,
-          error: error.error || "Erreur lors du diagnostic",
-        })
+      const responseTime = Date.now() - startTime
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        return {
+          testCase,
+          score: 0,
+          details: {
+            diagnosisMatch: false,
+            examMatch: 0,
+            medicationMatch: 0,
+            responseTime,
+          },
+          status: "failed",
+          error: errorData.error || `Erreur HTTP ${response.status}`,
+        }
       }
+
+      const actualDiagnosis = await response.json()
+      const result = calculateScore(testCase, actualDiagnosis)
+      result.details.responseTime = responseTime
+
+      return result
     } catch (error: any) {
-      setTestResult({
-        success: false,
-        error: `Erreur de connexion: ${error.message}`,
-      })
-    }
-
-    setIsRunningTest(false)
-  }
-
-  const loadTestCase = (testCase: TestCase) => {
-    if (onTestCaseLoad) {
-      onTestCaseLoad(testCase)
-    }
-  }
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case "léger":
-        return "bg-green-100 text-green-800"
-      case "modéré":
-        return "bg-yellow-100 text-yellow-800"
-      case "sévère":
-        return "bg-red-100 text-red-800"
-      default:
-        return "bg-gray-100 text-gray-800"
+      return {
+        testCase,
+        score: 0,
+        details: {
+          diagnosisMatch: false,
+          examMatch: 0,
+          medicationMatch: 0,
+          responseTime: Date.now() - startTime,
+        },
+        status: "failed",
+        error: error.message,
+      }
     }
   }
+
+  const runAllTests = async () => {
+    setIsRunningTests(true)
+    setTestResults([])
+    setCurrentTestIndex(0)
+
+    const results: TestResult[] = []
+
+    for (let i = 0; i < testCases.length; i++) {
+      setCurrentTestIndex(i)
+      const result = await runSingleTest(testCases[i])
+      results.push(result)
+      setTestResults([...results])
+    }
+
+    setCurrentTestIndex(-1)
+    setIsRunningTests(false)
+  }
+
+  const loadTestCaseIntoWorkflow = (testCase: TestCase) => {
+    // Stocker les données du cas de test dans le localStorage pour le workflow principal
+    localStorage.setItem(
+      "medicalWorkflowData",
+      JSON.stringify({
+        patientData: testCase.patientData,
+        clinicalData: testCase.clinicalData,
+        questionsData: testCase.questionsData,
+        fromTestCase: true,
+        testCaseName: testCase.name,
+      }),
+    )
+
+    // Rediriger vers le workflow principal
+    window.location.href = "/"
+  }
+
+  const getStatusIcon = (status: "success" | "partial" | "failed") => {
+    switch (status) {
+      case "success":
+        return <CheckCircle className="h-4 w-4 text-green-500" />
+      case "partial":
+        return <AlertCircle className="h-4 w-4 text-orange-500" />
+      case "failed":
+        return <XCircle className="h-4 w-4 text-red-500" />
+    }
+  }
+
+  const getStatusBadge = (status: "success" | "partial" | "failed", score: number) => {
+    switch (status) {
+      case "success":
+        return <Badge className="bg-green-500">✓ Réussi ({score}%)</Badge>
+      case "partial":
+        return <Badge variant="secondary">⚠ Partiel ({score}%)</Badge>
+      case "failed":
+        return <Badge variant="destructive">✗ Échec ({score}%)</Badge>
+    }
+  }
+
+  const averageScore =
+    testResults.length > 0
+      ? Math.round(testResults.reduce((sum, result) => sum + result.score, 0) / testResults.length)
+      : 0
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5" />
-            Cas de Test Cliniques
+            <Target className="h-5 w-5" />
+            Tests de Performance IA Médicale
           </CardTitle>
-          <CardDescription>
-            Testez le système avec des cas cliniques réels et comparez les résultats du diagnostic IA
-          </CardDescription>
+          <CardDescription>Évaluez la précision du système avec des cas cliniques prédéfinis</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <div className="flex gap-4">
+            <Button onClick={runAllTests} disabled={isRunningTests} className="flex-1">
+              {isRunningTests ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Test en cours... ({currentTestIndex + 1}/{testCases.length})
+                </>
+              ) : (
+                <>
+                  <Play className="mr-2 h-4 w-4" />
+                  Lancer Tous les Tests
+                </>
+              )}
+            </Button>
+
+            {testResults.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-lg px-3 py-1">
+                  Score Moyen: {averageScore}%
+                </Badge>
+              </div>
+            )}
+          </div>
+
+          {isRunningTests && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Progression des tests</span>
+                <span>
+                  {currentTestIndex + 1}/{testCases.length}
+                </span>
+              </div>
+              <Progress value={((currentTestIndex + 1) / testCases.length) * 100} />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Tabs defaultValue="cases" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="cases">Cas de Test</TabsTrigger>
+          <TabsTrigger value="results">Résultats</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="cases" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {testCases.map((testCase) => (
               <Card key={testCase.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{testCase.title}</CardTitle>
-                    <Badge className={getSeverityColor(testCase.severity)}>{testCase.severity}</Badge>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">{testCase.category}</Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {testCase.patientData.gender}, {testCase.patientData.age} ans
-                    </Badge>
-                  </div>
+                <CardHeader>
+                  <CardTitle className="text-lg">{testCase.name}</CardTitle>
+                  <CardDescription>{testCase.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <p className="text-sm text-muted-foreground">{testCase.description}</p>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <User className="h-4 w-4" />
-                      <span>
-                        {testCase.patientData.firstName} {testCase.patientData.lastName}
-                      </span>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <strong>Patient:</strong> {testCase.patientData.gender}, {testCase.patientData.age} ans
                     </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Stethoscope className="h-4 w-4" />
-                      <span>{testCase.clinicalData.chiefComplaint}</span>
+                    <div>
+                      <strong>Motif:</strong> {testCase.clinicalData.chiefComplaint}
                     </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Clock className="h-4 w-4" />
-                      <span>Durée: {testCase.clinicalData.duration}</span>
+                    <div>
+                      <strong>Diagnostic attendu:</strong> {testCase.expectedDiagnosis.condition}
                     </div>
                   </div>
 
                   <div className="flex gap-2">
                     <Button
+                      variant="outline"
                       size="sm"
-                      onClick={() => {
-                        setSelectedCase(testCase)
-                        runDiagnosticTest(testCase)
-                      }}
-                      disabled={isRunningTest}
+                      onClick={() => setSelectedTestCase(testCase)}
                       className="flex-1"
                     >
-                      {isRunningTest && selectedCase?.id === testCase.id ? (
-                        <>
-                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                          Test en cours...
-                        </>
-                      ) : (
-                        <>
-                          <Play className="h-3 w-3 mr-1" />
-                          Tester avec IA
-                        </>
-                      )}
+                      <FileText className="h-3 w-3 mr-1" />
+                      Détails
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => loadTestCase(testCase)}>
-                      Charger le Cas
+                    <Button size="sm" onClick={() => loadTestCaseIntoWorkflow(testCase)} className="flex-1">
+                      <Play className="h-3 w-3 mr-1" />
+                      Charger
                     </Button>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </TabsContent>
 
-      {testResult && (
+        <TabsContent value="results" className="space-y-4">
+          {testResults.length === 0 ? (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Aucun test n'a encore été exécuté. Lancez les tests pour voir les résultats.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <div className="space-y-4">
+              {testResults.map((result, index) => (
+                <Card
+                  key={index}
+                  className={
+                    result.status === "success"
+                      ? "border-green-200"
+                      : result.status === "partial"
+                        ? "border-orange-200"
+                        : "border-red-200"
+                  }
+                >
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        {getStatusIcon(result.status)}
+                        {result.testCase.name}
+                      </CardTitle>
+                      {getStatusBadge(result.status, result.score)}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {result.error ? (
+                      <Alert className="border-red-200 bg-red-50">
+                        <XCircle className="h-4 w-4 text-red-500" />
+                        <AlertDescription>
+                          <strong>Erreur:</strong> {result.error}
+                        </AlertDescription>
+                      </Alert>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div className="space-y-1">
+                          <div className="font-medium">Diagnostic</div>
+                          <div className={result.details.diagnosisMatch ? "text-green-600" : "text-red-600"}>
+                            {result.details.diagnosisMatch ? "✓ Correct" : "✗ Incorrect"}
+                          </div>
+                          {result.actualDiagnosis?.diagnosis?.primary?.condition && (
+                            <div className="text-muted-foreground">
+                              Reçu: {result.actualDiagnosis.diagnosis.primary.condition}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-1">
+                          <div className="font-medium">Examens</div>
+                          <div className={result.details.examMatch >= 50 ? "text-green-600" : "text-orange-600"}>
+                            {Math.round(result.details.examMatch)}% de correspondance
+                          </div>
+                        </div>
+
+                        <div className="space-y-1">
+                          <div className="font-medium">Médicaments</div>
+                          <div className={result.details.medicationMatch >= 50 ? "text-green-600" : "text-orange-600"}>
+                            {Math.round(result.details.medicationMatch)}% de correspondance
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {result.details.responseTime}ms
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      {selectedTestCase && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              {testResult.success ? (
-                <CheckCircle className="h-5 w-5 text-green-500" />
-              ) : (
-                <AlertTriangle className="h-5 w-5 text-red-500" />
-              )}
-              Résultats du Test
-            </CardTitle>
+            <CardTitle>Détails du Cas: {selectedTestCase.name}</CardTitle>
+            <Button variant="outline" size="sm" onClick={() => setSelectedTestCase(null)} className="w-fit">
+              Fermer
+            </Button>
           </CardHeader>
-          <CardContent>
-            {testResult.success ? (
-              <Tabs defaultValue="comparison" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="comparison">Comparaison</TabsTrigger>
-                  <TabsTrigger value="ai-result">Diagnostic IA</TabsTrigger>
-                  <TabsTrigger value="expected">Diagnostic Attendu</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="comparison" className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg text-blue-600">Diagnostic IA</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          <div>
-                            <span className="font-medium">Principal:</span>
-                            <p className="text-sm">{testResult.aiDiagnosis.primaryDiagnosis}</p>
-                          </div>
-                          <div>
-                            <span className="font-medium">Confiance:</span>
-                            <Badge variant="outline" className="ml-2">
-                              {testResult.aiDiagnosis.confidence}%
-                            </Badge>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg text-green-600">Diagnostic Attendu</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          <div>
-                            <span className="font-medium">Principal:</span>
-                            <p className="text-sm">{testResult.expected.primary}</p>
-                          </div>
-                          <div>
-                            <span className="font-medium">Confiance:</span>
-                            <Badge variant="outline" className="ml-2">
-                              {testResult.expected.confidence}%
-                            </Badge>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium mb-2">Données Patient</h4>
+                  <div className="text-sm space-y-1">
+                    <div>Âge: {selectedTestCase.patientData.age} ans</div>
+                    <div>Sexe: {selectedTestCase.patientData.gender}</div>
+                    <div>Allergies: {selectedTestCase.patientData.allergies}</div>
+                    <div>Antécédents: {selectedTestCase.patientData.medicalHistory}</div>
                   </div>
+                </div>
 
-                  <Alert className="bg-blue-50 border-blue-200">
-                    <Activity className="h-4 w-4" />
-                    <AlertDescription>
-                      <strong>Analyse:</strong> Le diagnostic IA sera comparé automatiquement avec le diagnostic
-                      attendu. Les différences peuvent indiquer des points d'amélioration ou des perspectives
-                      alternatives valides.
-                    </AlertDescription>
-                  </Alert>
-                </TabsContent>
+                <div>
+                  <h4 className="font-medium mb-2">Données Cliniques</h4>
+                  <div className="text-sm space-y-1">
+                    <div>
+                      <strong>Motif:</strong> {selectedTestCase.clinicalData.chiefComplaint}
+                    </div>
+                    <div>
+                      <strong>Symptômes:</strong> {selectedTestCase.clinicalData.symptoms.join(", ")}
+                    </div>
+                    <div>
+                      <strong>Signes vitaux:</strong>
+                    </div>
+                    <div className="ml-4">
+                      <div>TA: {selectedTestCase.clinicalData.vitalSigns.bloodPressure}</div>
+                      <div>FC: {selectedTestCase.clinicalData.vitalSigns.heartRate} bpm</div>
+                      <div>T°: {selectedTestCase.clinicalData.vitalSigns.temperature}°C</div>
+                      <div>SpO2: {selectedTestCase.clinicalData.vitalSigns.oxygenSaturation}%</div>
+                    </div>
+                    <div>
+                      <strong>Examen:</strong> {selectedTestCase.clinicalData.physicalExam}
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                <TabsContent value="ai-result" className="space-y-4">
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
-                        <div>
-                          <h4 className="font-medium">Diagnostic Principal</h4>
-                          <p className="text-sm">{testResult.aiDiagnosis.primaryDiagnosis}</p>
-                        </div>
-
-                        {testResult.aiDiagnosis.differentialDiagnoses && (
-                          <div>
-                            <h4 className="font-medium">Diagnostics Différentiels</h4>
-                            <ul className="text-sm list-disc list-inside">
-                              {testResult.aiDiagnosis.differentialDiagnoses.map((diagnosis: string, index: number) => (
-                                <li key={index}>{diagnosis}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        {testResult.aiDiagnosis.reasoning && (
-                          <div>
-                            <h4 className="font-medium">Raisonnement</h4>
-                            <p className="text-sm">{testResult.aiDiagnosis.reasoning}</p>
-                          </div>
-                        )}
-
-                        {testResult.aiDiagnosis.recommendations && (
-                          <div>
-                            <h4 className="font-medium">Recommandations</h4>
-                            <ul className="text-sm list-disc list-inside">
-                              {testResult.aiDiagnosis.recommendations.map((rec: string, index: number) => (
-                                <li key={index}>{rec}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium mb-2">Questions/Réponses</h4>
+                  <div className="text-sm space-y-1">
+                    {selectedTestCase.questionsData.responses.map((response, index) => (
+                      <div key={index}>
+                        <strong>Q:</strong> {response.question}
+                        <br />
+                        <strong>R:</strong> {response.answer}
                       </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
+                    ))}
+                  </div>
+                </div>
 
-                <TabsContent value="expected" className="space-y-4">
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
-                        <div>
-                          <h4 className="font-medium">Diagnostic Principal Attendu</h4>
-                          <p className="text-sm">{testResult.expected.primary}</p>
-                        </div>
+                <div>
+                  <h4 className="font-medium mb-2">Résultats Attendus</h4>
+                  <div className="text-sm space-y-1">
+                    <div>
+                      <strong>Diagnostic:</strong> {selectedTestCase.expectedDiagnosis.condition} (
+                      {selectedTestCase.expectedDiagnosis.icd10})
+                    </div>
+                    <div>
+                      <strong>Examens:</strong> {selectedTestCase.expectedExams.join(", ")}
+                    </div>
+                    <div>
+                      <strong>Médicaments:</strong> {selectedTestCase.expectedMedications.join(", ")}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-                        <div>
-                          <h4 className="font-medium">Diagnostics Différentiels Attendus</h4>
-                          <ul className="text-sm list-disc list-inside">
-                            {testResult.expected.differential.map((diagnosis: string, index: number) => (
-                              <li key={index}>{diagnosis}</li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        <div>
-                          <h4 className="font-medium">Niveau de Confiance Attendu</h4>
-                          <Badge variant="outline">{testResult.expected.confidence}%</Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
-            ) : (
-              <Alert className="border-red-200 bg-red-50">
-                <AlertTriangle className="h-4 w-4 text-red-600" />
-                <AlertDescription className="text-red-800">
-                  <strong>Erreur lors du test:</strong> {testResult.error}
-                </AlertDescription>
-              </Alert>
-            )}
+            <Button onClick={() => loadTestCaseIntoWorkflow(selectedTestCase)} className="w-full">
+              <Play className="h-4 w-4 mr-2" />
+              Charger ce Cas dans le Workflow
+            </Button>
           </CardContent>
         </Card>
       )}

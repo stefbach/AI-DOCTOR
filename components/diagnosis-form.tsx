@@ -7,53 +7,28 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
-import {
-  Brain,
-  AlertTriangle,
-  BookOpen,
-  Loader2,
-  CheckCircle,
-  Database,
-  Pill,
-  FileText,
-  ArrowLeft,
-  ArrowRight,
-  RefreshCw,
-} from "lucide-react"
-import { MedicalAPIService } from "@/lib/api-services"
+import { Brain, AlertTriangle, BookOpen, Loader2, Pill, FileText, ArrowLeft, ArrowRight, RefreshCw } from "lucide-react"
 
 interface DiagnosisFormProps {
-  patientData: any
-  clinicalData: any
-  questionsData: any
-  onNext: (data: any) => void
-  onBack: () => void
+  data?: any
+  allData?: any
+  onDataChange: (data: any) => void
+  onNext: () => void
+  onPrevious: () => void
 }
 
-export default function DiagnosisForm({
-  patientData,
-  clinicalData,
-  questionsData,
-  onNext,
-  onBack,
-}: DiagnosisFormProps) {
+export default function DiagnosisForm({ data, allData, onDataChange, onNext, onPrevious }: DiagnosisFormProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const [diagnosisResult, setDiagnosisResult] = useState<any>(null)
+  const [diagnosisResult, setDiagnosisResult] = useState<any>(data || null)
   const [error, setError] = useState<string | null>(null)
   const [progress, setProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState("")
-  const [apiStatus, setApiStatus] = useState({
-    openai: "idle",
-    fda: "idle",
-    rxnorm: "idle",
-    pubmed: "idle",
-  })
-
-  const apiService = MedicalAPIService.getInstance()
 
   useEffect(() => {
-    generateCompleteDiagnosis()
-  }, [])
+    if (!diagnosisResult && allData?.patientData && allData?.clinicalData) {
+      generateCompleteDiagnosis()
+    }
+  }, [allData])
 
   const generateCompleteDiagnosis = async () => {
     setIsLoading(true)
@@ -62,126 +37,105 @@ export default function DiagnosisForm({
     setDiagnosisResult(null)
 
     try {
-      // Étape 1: Génération du diagnostic avec OpenAI GPT-4 (VRAIE API)
+      // Étape 1: Génération du diagnostic avec OpenAI GPT-4
       setCurrentStep("Connexion à OpenAI GPT-4 pour analyse diagnostique...")
-      setApiStatus((prev) => ({ ...prev, openai: "loading" }))
-      setProgress(20)
+      setProgress(25)
 
-      const diagnosisResponse = await apiService.generateDiagnosisWithOpenAI(patientData, clinicalData, questionsData)
+      const diagnosisResponse = await fetch("/api/openai-diagnosis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patientData: allData.patientData,
+          clinicalData: allData.clinicalData,
+          questionsData: allData.questionsData,
+        }),
+      })
 
-      setApiStatus((prev) => ({ ...prev, openai: "success" }))
-      setProgress(40)
-
-      // Étape 2: Recherche de références PubMed (VRAIE API)
-      setCurrentStep("Recherche de références scientifiques sur PubMed...")
-      setApiStatus((prev) => ({ ...prev, pubmed: "loading" }))
-
-      const symptoms = [clinicalData.chiefComplaint, ...(clinicalData.symptoms || [])].filter(Boolean)
-      const pubmedResults = await apiService.searchPubMedReferences(
-        diagnosisResponse.diagnosis.primary.condition,
-        symptoms,
-      )
-
-      setApiStatus((prev) => ({ ...prev, pubmed: "success" }))
-      setProgress(60)
-
-      // Étape 3: Vérification des médicaments avec FDA (VRAIE API)
-      setCurrentStep("Vérification des interactions médicamenteuses via FDA...")
-      setApiStatus((prev) => ({ ...prev, fda: "loading" }))
-
-      let fdaResults: any[] = []
-      if (diagnosisResponse.recommendations?.medications?.length > 0) {
-        const medicationNames = diagnosisResponse.recommendations.medications.map((m: any) => m.name)
-        fdaResults = await apiService.checkDrugInteractionsFDA(medicationNames)
+      if (!diagnosisResponse.ok) {
+        throw new Error(`Erreur API diagnostic: ${diagnosisResponse.status}`)
       }
 
-      setApiStatus((prev) => ({ ...prev, fda: "success" }))
-      setProgress(80)
+      const diagnosisData = await diagnosisResponse.json()
+      if (!diagnosisData.success) {
+        throw new Error(diagnosisData.error || "Erreur lors de la génération du diagnostic")
+      }
 
-      // Étape 4: Normalisation avec RxNorm (VRAIE API)
-      setCurrentStep("Normalisation des médicaments via RxNorm...")
-      setApiStatus((prev) => ({ ...prev, rxnorm: "loading" }))
+      setProgress(50)
 
-      const rxnormResults: any[] = []
-      if (diagnosisResponse.recommendations?.medications?.length > 0) {
-        for (const med of diagnosisResponse.recommendations.medications) {
-          const rxnormResult = await apiService.normalizeWithRxNorm(med.name)
-          rxnormResults.push(rxnormResult)
+      // Étape 2: Recherche de références PubMed
+      setCurrentStep("Recherche de références scientifiques sur PubMed...")
+
+      const pubmedResponse = await fetch("/api/pubmed-search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: diagnosisData.data.diagnosis?.primary?.condition || "diagnostic médical",
+          maxResults: 3,
+        }),
+      })
+
+      let pubmedResults = []
+      if (pubmedResponse.ok) {
+        const pubmedData = await pubmedResponse.json()
+        if (pubmedData.success) {
+          pubmedResults = pubmedData.data
         }
       }
 
-      setApiStatus((prev) => ({ ...prev, rxnorm: "success" }))
+      setProgress(75)
+
+      // Étape 3: Vérification des médicaments avec FDA
+      setCurrentStep("Vérification des interactions médicamenteuses via FDA...")
+
+      let fdaResults = []
+      if (diagnosisData.data.recommendations?.medications?.length > 0) {
+        const medicationNames = diagnosisData.data.recommendations.medications.map((m: any) => m.name)
+
+        const fdaResponse = await fetch("/api/fda-drug-info", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ medications: medicationNames }),
+        })
+
+        if (fdaResponse.ok) {
+          const fdaData = await fdaResponse.json()
+          if (fdaData.success) {
+            fdaResults = fdaData.data
+          }
+        }
+      }
+
       setProgress(100)
 
       // Compilation des résultats finaux
       const finalResult = {
-        ...diagnosisResponse,
+        ...diagnosisData.data,
         pubmedReferences: pubmedResults,
         medicationInfo: {
           fdaData: fdaResults,
-          rxnormData: rxnormResults,
-        },
-        apiStatuses: {
-          openai: "success",
-          fda: "success",
-          rxnorm: "success",
-          pubmed: "success",
         },
         generatedAt: new Date().toISOString(),
         patientContext: {
-          age: patientData.age,
-          gender: patientData.gender,
-          chiefComplaint: clinicalData.chiefComplaint,
+          age: allData?.patientData?.age,
+          gender: allData?.patientData?.gender,
+          chiefComplaint: allData?.clinicalData?.chiefComplaint,
         },
       }
 
       setDiagnosisResult(finalResult)
-      setCurrentStep("Analyse terminée - Toutes les APIs connectées avec succès")
+      onDataChange(finalResult)
+      setCurrentStep("Analyse terminée - Diagnostic généré avec succès")
     } catch (err: any) {
       console.error("Erreur génération diagnostic:", err)
       setError(`Erreur lors de la génération du diagnostic: ${err.message || err}`)
-
-      // Marquer les APIs en erreur selon l'étape
-      setApiStatus((prev) => ({
-        openai: currentStep.includes("OpenAI") ? "error" : prev.openai,
-        fda: currentStep.includes("FDA") ? "error" : prev.fda,
-        rxnorm: currentStep.includes("RxNorm") ? "error" : prev.rxnorm,
-        pubmed: currentStep.includes("PubMed") ? "error" : prev.pubmed,
-      }))
     } finally {
       setIsLoading(false)
     }
   }
 
-  const getApiStatusIcon = (status: string) => {
-    switch (status) {
-      case "success":
-        return <CheckCircle className="h-4 w-4 text-green-600" />
-      case "loading":
-        return <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-      case "error":
-        return <AlertTriangle className="h-4 w-4 text-red-600" />
-      default:
-        return <div className="h-4 w-4 rounded-full bg-gray-300" />
-    }
-  }
-
-  const getApiStatusText = (status: string) => {
-    switch (status) {
-      case "success":
-        return "Connecté"
-      case "loading":
-        return "En cours..."
-      case "error":
-        return "Erreur"
-      default:
-        return "En attente"
-    }
-  }
-
   const handleNext = () => {
     if (diagnosisResult) {
-      onNext(diagnosisResult)
+      onNext()
     }
   }
 
@@ -193,53 +147,9 @@ export default function DiagnosisForm({
             <Brain className="w-6 h-6 text-blue-600" />
             Diagnostic IA - Analyse Multi-Sources
           </CardTitle>
-          <p className="text-gray-600">
-            Analyse diagnostique complète utilisant OpenAI GPT-4, FDA Database, RxNorm et PubMed
-          </p>
+          <p className="text-gray-600">Analyse diagnostique complète utilisant OpenAI GPT-4, FDA Database et PubMed</p>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Statut des APIs en temps réel */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Database className="w-5 h-5" />
-                Statut des Intégrations API
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  {getApiStatusIcon(apiStatus.openai)}
-                  <div>
-                    <p className="font-medium text-sm">OpenAI GPT-4</p>
-                    <p className="text-xs text-gray-500">{getApiStatusText(apiStatus.openai)}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  {getApiStatusIcon(apiStatus.fda)}
-                  <div>
-                    <p className="font-medium text-sm">FDA Database</p>
-                    <p className="text-xs text-gray-500">{getApiStatusText(apiStatus.fda)}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  {getApiStatusIcon(apiStatus.rxnorm)}
-                  <div>
-                    <p className="font-medium text-sm">RxNorm API</p>
-                    <p className="text-xs text-gray-500">{getApiStatusText(apiStatus.rxnorm)}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  {getApiStatusIcon(apiStatus.pubmed)}
-                  <div>
-                    <p className="font-medium text-sm">PubMed API</p>
-                    <p className="text-xs text-gray-500">{getApiStatusText(apiStatus.pubmed)}</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Barre de progression */}
           {isLoading && (
             <Card>
@@ -276,7 +186,7 @@ export default function DiagnosisForm({
           )}
 
           {/* Résultats du diagnostic */}
-          {diagnosisResult && (
+          {diagnosisResult && diagnosisResult.diagnosis && (
             <div className="space-y-6">
               {/* Diagnostic Principal */}
               <Card>
@@ -359,19 +269,7 @@ export default function DiagnosisForm({
                               {diff.probability}% de probabilité
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-700 mb-3">{diff.rationale}</p>
-                          {diff.rulOutTests && diff.rulOutTests.length > 0 && (
-                            <div>
-                              <h5 className="text-sm font-medium mb-2">Examens pour éliminer:</h5>
-                              <div className="flex flex-wrap gap-2">
-                                {diff.rulOutTests.map((test: string, testIndex: number) => (
-                                  <Badge key={testIndex} variant="secondary" className="text-xs">
-                                    {test}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+                          <p className="text-sm text-gray-700">{diff.rationale}</p>
                         </div>
                       ))}
                     </div>
@@ -393,7 +291,6 @@ export default function DiagnosisForm({
                       <div className="space-y-4">
                         {diagnosisResult.recommendations.medications.map((med: any, index: number) => {
                           const fdaInfo = diagnosisResult.medicationInfo?.fdaData?.[index]
-                          const rxnormInfo = diagnosisResult.medicationInfo?.rxnormData?.[index]
 
                           return (
                             <div key={index} className="border rounded-lg p-4 bg-green-50">
@@ -403,11 +300,6 @@ export default function DiagnosisForm({
                                   {fdaInfo?.fdaApproved && (
                                     <Badge variant="default" className="bg-green-100 text-green-800">
                                       FDA Approuvé
-                                    </Badge>
-                                  )}
-                                  {rxnormInfo?.rxcui && (
-                                    <Badge variant="outline" className="text-xs">
-                                      RxCUI: {rxnormInfo.rxcui}
                                     </Badge>
                                   )}
                                 </div>
@@ -438,54 +330,6 @@ export default function DiagnosisForm({
                                   )}
                                 </div>
                               </div>
-
-                              {/* Interactions médicamenteuses */}
-                              {fdaInfo?.interactions && fdaInfo.interactions.length > 0 && (
-                                <div className="mt-4">
-                                  <h5 className="font-medium text-sm mb-2 text-red-700">
-                                    ⚠️ Interactions médicamenteuses:
-                                  </h5>
-                                  <div className="space-y-2">
-                                    {fdaInfo.interactions.slice(0, 3).map((interaction: any, intIndex: number) => (
-                                      <div
-                                        key={intIndex}
-                                        className="text-xs bg-red-50 p-2 rounded border-l-2 border-red-300"
-                                      >
-                                        <div className="flex items-center justify-between mb-1">
-                                          <strong className="text-red-800">{interaction.drug}</strong>
-                                          <Badge
-                                            variant={
-                                              interaction.severity === "major"
-                                                ? "destructive"
-                                                : interaction.severity === "moderate"
-                                                  ? "default"
-                                                  : "secondary"
-                                            }
-                                            className="text-xs"
-                                          >
-                                            {interaction.severity}
-                                          </Badge>
-                                        </div>
-                                        <p className="text-red-700">{interaction.description}</p>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Contre-indications */}
-                              {med.contraindications && med.contraindications.length > 0 && (
-                                <div className="mt-3">
-                                  <h5 className="font-medium text-sm mb-2">Contre-indications:</h5>
-                                  <div className="flex flex-wrap gap-1">
-                                    {med.contraindications.map((contra: string, contraIndex: number) => (
-                                      <Badge key={contraIndex} variant="outline" className="text-xs bg-yellow-50">
-                                        {contra}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
                             </div>
                           )
                         })}
@@ -519,9 +363,7 @@ export default function DiagnosisForm({
                           </p>
                           <p className="text-xs text-gray-600 mb-2">
                             <strong>Journal:</strong> {ref.journal} ({ref.year})
-                            {ref.pmid !== "local_ref_1" && ref.pmid !== "local_ref_2" && ref.pmid !== "local_ref_3" && (
-                              <span> - PMID: {ref.pmid}</span>
-                            )}
+                            {ref.pmid && <span> - PMID: {ref.pmid}</span>}
                           </p>
                           {ref.abstract && (
                             <p className="text-xs text-gray-700 mt-2 leading-relaxed">
@@ -529,7 +371,7 @@ export default function DiagnosisForm({
                               {ref.abstract.length > 300 && "..."}
                             </p>
                           )}
-                          {ref.url && ref.url !== "#" && (
+                          {ref.url && (
                             <a
                               href={ref.url}
                               target="_blank"
@@ -550,7 +392,7 @@ export default function DiagnosisForm({
 
               {/* Actions */}
               <div className="flex justify-between items-center pt-4">
-                <Button variant="outline" onClick={onBack} className="px-6 py-3 bg-transparent">
+                <Button variant="outline" onClick={onPrevious} className="px-6 py-3 bg-transparent">
                   <ArrowLeft className="h-5 w-5 mr-2" />
                   Retour Questions
                 </Button>

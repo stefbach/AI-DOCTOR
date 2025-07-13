@@ -72,7 +72,28 @@ export default function SystemCheck() {
       })
 
       const responseTime = Date.now() - startTime
-      const responseData = await response.json()
+
+      // Vérifier si la réponse est du JSON valide
+      let responseData
+      try {
+        const responseText = await response.text()
+        console.log("Réponse brute OpenAI:", responseText.substring(0, 200))
+
+        if (responseText.startsWith("Internal")) {
+          throw new Error("Erreur interne du serveur: " + responseText)
+        }
+
+        responseData = JSON.parse(responseText)
+      } catch (parseError) {
+        console.error("Erreur parsing réponse OpenAI:", parseError)
+        setStatus((prev) => ({ ...prev, openai: "error" }))
+        return {
+          service: "OpenAI GPT-4",
+          status: "error" as const,
+          message: "❌ Erreur de format de réponse",
+          details: "La réponse du serveur n'est pas au format JSON valide",
+        }
+      }
 
       if (response.ok) {
         setStatus((prev) => ({ ...prev, openai: "success" }))
@@ -129,7 +150,7 @@ export default function SystemCheck() {
       const response = await fetch("/api/fda-drug-info", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ drugName: "aspirin" }),
+        body: JSON.stringify({ medications: ["aspirin"] }),
       })
 
       const responseTime = Date.now() - startTime
@@ -142,7 +163,7 @@ export default function SystemCheck() {
           status: "success" as const,
           message: "✅ Service disponible",
           responseTime,
-          details: data.source === "api" ? "API officielle" : "Base locale",
+          details: `${data.length} médicaments trouvés`,
         }
       } else {
         setStatus((prev) => ({ ...prev, fda: "error" }))
@@ -185,7 +206,7 @@ export default function SystemCheck() {
           status: "success" as const,
           message: "✅ Normalisation active",
           responseTime,
-          details: data.source === "api" ? "API officielle" : "Base locale",
+          details: `Médicament normalisé: ${data.name}`,
         }
       } else {
         setStatus((prev) => ({ ...prev, rxnorm: "error" }))
@@ -215,7 +236,7 @@ export default function SystemCheck() {
       const response = await fetch("/api/pubmed-search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: "hypertension", maxResults: 1 }),
+        body: JSON.stringify({ diagnosis: "hypertension", symptoms: ["céphalées"], maxResults: 1 }),
       })
 
       const responseTime = Date.now() - startTime
