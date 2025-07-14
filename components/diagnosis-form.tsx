@@ -1,421 +1,415 @@
 "use client"
 
+import { TabsContent } from "@/components/ui/tabs"
+
+import { TabsTrigger } from "@/components/ui/tabs"
+
+import { TabsList } from "@/components/ui/tabs"
+
+import { Tabs } from "@/components/ui/tabs"
+
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Separator } from "@/components/ui/separator"
-import { Brain, AlertTriangle, BookOpen, Loader2, Pill, FileText, ArrowLeft, ArrowRight, RefreshCw } from "lucide-react"
+import { Brain, CheckCircle, AlertTriangle, Target, BookOpen, Lightbulb } from "lucide-react"
+
+interface DiagnosticHypothesis {
+  condition: string
+  probability: number
+  confidence: number
+  reasoning: string
+  supportingEvidence: string[]
+  contradictingEvidence: string[]
+  nextSteps: string[]
+}
+
+interface DiagnosisData {
+  primaryDiagnosis: DiagnosticHypothesis | null
+  differentialDiagnoses: DiagnosticHypothesis[]
+  recommendedTests: string[]
+  treatmentSuggestions: string[]
+  followUpPlan: string
+  riskFactors: string[]
+  prognosisNotes: string
+  aiConfidence: number
+  generationStatus: "pending" | "generating" | "completed" | "error"
+}
 
 interface DiagnosisFormProps {
-  data?: any
+  data?: DiagnosisData
   allData?: any
-  onDataChange: (data: any) => void
+  onDataChange: (data: DiagnosisData) => void
   onNext: () => void
   onPrevious: () => void
 }
 
 export default function DiagnosisForm({ data, allData, onDataChange, onNext, onPrevious }: DiagnosisFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [diagnosisResult, setDiagnosisResult] = useState<any>(data || null)
-  const [error, setError] = useState<string | null>(null)
-  const [progress, setProgress] = useState(0)
-  const [currentStep, setCurrentStep] = useState("")
+  const [formData, setFormData] = useState<DiagnosisData>({
+    primaryDiagnosis: null,
+    differentialDiagnoses: [],
+    recommendedTests: [],
+    treatmentSuggestions: [],
+    followUpPlan: "",
+    riskFactors: [],
+    prognosisNotes: "",
+    aiConfidence: 0,
+    generationStatus: "pending",
+    ...data,
+  })
+
+  const [isGenerating, setIsGenerating] = useState(false)
 
   useEffect(() => {
-    if (!diagnosisResult && allData?.patientData && allData?.clinicalData) {
-      generateCompleteDiagnosis()
+    if (
+      formData.generationStatus === "pending" &&
+      allData?.patientData &&
+      allData?.clinicalData &&
+      allData?.questionsData
+    ) {
+      generateDiagnosis()
     }
   }, [allData])
 
-  const generateCompleteDiagnosis = async () => {
-    setIsLoading(true)
-    setError(null)
-    setProgress(0)
-    setDiagnosisResult(null)
+  const generateDiagnosis = async () => {
+    setIsGenerating(true)
+    const updatedData = { ...formData, generationStatus: "generating" as const }
+    setFormData(updatedData)
+    onDataChange(updatedData)
 
     try {
-      // Étape 1: Génération du diagnostic avec OpenAI GPT-4
-      setCurrentStep("Connexion à OpenAI GPT-4 pour analyse diagnostique...")
-      setProgress(25)
-
-      const diagnosisResponse = await fetch("/api/openai-diagnosis", {
+      // Utiliser la vraie API OpenAI pour le diagnostic
+      const response = await fetch("/api/openai-diagnosis", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          patientData: allData.patientData,
-          clinicalData: allData.clinicalData,
-          questionsData: allData.questionsData,
+          patientData: allData?.patientData,
+          clinicalData: allData?.clinicalData,
+          questionsData: allData?.questionsData,
         }),
       })
 
-      if (!diagnosisResponse.ok) {
-        throw new Error(`Erreur API diagnostic: ${diagnosisResponse.status}`)
+      if (!response.ok) {
+        throw new Error(`Erreur API: ${response.status}`)
       }
 
-      const diagnosisData = await diagnosisResponse.json()
-      if (!diagnosisData.success) {
-        throw new Error(diagnosisData.error || "Erreur lors de la génération du diagnostic")
+      const result = await response.json()
+
+      const finalData: DiagnosisData = {
+        ...formData,
+        primaryDiagnosis: result.primaryDiagnosis,
+        differentialDiagnoses: result.differentialDiagnoses || [],
+        recommendedTests: result.recommendedTests || [],
+        treatmentSuggestions: result.treatmentSuggestions || [],
+        followUpPlan: result.followUpPlan || "",
+        riskFactors: result.riskFactors || [],
+        prognosisNotes: result.prognosisNotes || "",
+        aiConfidence: result.confidence || 0,
+        generationStatus: "completed",
       }
 
-      setProgress(50)
-
-      // Étape 2: Recherche de références PubMed
-      setCurrentStep("Recherche de références scientifiques sur PubMed...")
-
-      const pubmedResponse = await fetch("/api/pubmed-search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: diagnosisData.data.diagnosis?.primary?.condition || "diagnostic médical",
-          maxResults: 3,
-        }),
-      })
-
-      let pubmedResults = []
-      if (pubmedResponse.ok) {
-        const pubmedData = await pubmedResponse.json()
-        if (pubmedData.success) {
-          pubmedResults = pubmedData.data
-        }
-      }
-
-      setProgress(75)
-
-      // Étape 3: Vérification des médicaments avec FDA
-      setCurrentStep("Vérification des interactions médicamenteuses via FDA...")
-
-      let fdaResults = []
-      if (diagnosisData.data.recommendations?.medications?.length > 0) {
-        const medicationNames = diagnosisData.data.recommendations.medications.map((m: any) => m.name)
-
-        const fdaResponse = await fetch("/api/fda-drug-info", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ medications: medicationNames }),
-        })
-
-        if (fdaResponse.ok) {
-          const fdaData = await fdaResponse.json()
-          if (fdaData.success) {
-            fdaResults = fdaData.data
-          }
-        }
-      }
-
-      setProgress(100)
-
-      // Compilation des résultats finaux
-      const finalResult = {
-        ...diagnosisData.data,
-        pubmedReferences: pubmedResults,
-        medicationInfo: {
-          fdaData: fdaResults,
-        },
-        generatedAt: new Date().toISOString(),
-        patientContext: {
-          age: allData?.patientData?.age,
-          gender: allData?.patientData?.gender,
-          chiefComplaint: allData?.clinicalData?.chiefComplaint,
-        },
-      }
-
-      setDiagnosisResult(finalResult)
-      onDataChange(finalResult)
-      setCurrentStep("Analyse terminée - Diagnostic généré avec succès")
-    } catch (err: any) {
-      console.error("Erreur génération diagnostic:", err)
-      setError(`Erreur lors de la génération du diagnostic: ${err.message || err}`)
+      setFormData(finalData)
+      onDataChange(finalData)
+    } catch (error) {
+      console.error("Erreur génération diagnostic:", error)
+      const errorData = { ...formData, generationStatus: "error" as const }
+      setFormData(errorData)
+      onDataChange(errorData)
     } finally {
-      setIsLoading(false)
+      setIsGenerating(false)
     }
   }
 
-  const handleNext = () => {
-    if (diagnosisResult) {
-      onNext()
-    }
+  const getProbabilityColor = (probability: number) => {
+    if (probability >= 80) return "text-red-600 bg-red-100"
+    if (probability >= 60) return "text-orange-600 bg-orange-100"
+    if (probability >= 40) return "text-yellow-600 bg-yellow-100"
+    return "text-green-600 bg-green-100"
+  }
+
+  const getConfidenceColor = (confidence: number) => {
+    if (confidence >= 80) return "text-green-600"
+    if (confidence >= 60) return "text-yellow-600"
+    return "text-red-600"
+  }
+
+  if (formData.generationStatus === "generating" || isGenerating) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Brain className="h-12 w-12 animate-pulse mx-auto mb-4 text-blue-600" />
+            <h3 className="text-lg font-semibold mb-2">Génération du Diagnostic IA</h3>
+            <p className="text-gray-600 mb-4">
+              L'IA analyse toutes les données collectées pour générer un diagnostic...
+            </p>
+            <div className="space-y-2">
+              <div className="text-sm text-gray-500">Analyse en cours...</div>
+              <Progress value={66} className="w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (formData.generationStatus === "error") {
+    return (
+      <div className="space-y-6">
+        <Alert className="border-red-200 bg-red-50">
+          <AlertTriangle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            Erreur lors de la génération du diagnostic. Veuillez réessayer.
+          </AlertDescription>
+        </Alert>
+        <div className="flex justify-center">
+          <Button onClick={generateDiagnosis}>Régénérer le Diagnostic</Button>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
+    <div className="space-y-6">
+      {/* En-tête avec confiance IA */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-2xl">
-            <Brain className="w-6 h-6 text-blue-600" />
-            Diagnostic IA - Analyse Multi-Sources
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Brain className="h-5 w-5" />
+              Diagnostic Généré par IA
+            </div>
+            <Badge className={`${getConfidenceColor(formData.aiConfidence)} border-current`}>
+              Confiance: {formData.aiConfidence}%
+            </Badge>
           </CardTitle>
-          <p className="text-gray-600">Analyse diagnostique complète utilisant OpenAI GPT-4, FDA Database et PubMed</p>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Barre de progression */}
-          {isLoading && (
+        <CardContent>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Niveau de confiance global</span>
+              <span>{formData.aiConfidence}%</span>
+            </div>
+            <Progress value={formData.aiConfidence} className="h-2" />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Tabs defaultValue="primary" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="primary">Diagnostic Principal</TabsTrigger>
+          <TabsTrigger value="differential">Diagnostics Différentiels</TabsTrigger>
+          <TabsTrigger value="recommendations">Recommandations</TabsTrigger>
+          <TabsTrigger value="followup">Suivi</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="primary" className="space-y-4">
+          {formData.primaryDiagnosis && (
             <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Progression de l'analyse</span>
-                    <span className="text-sm text-gray-500">{progress}%</span>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    {formData.primaryDiagnosis.condition}
                   </div>
-                  <Progress value={progress} className="w-full" />
-                  {currentStep && (
-                    <p className="text-sm text-blue-600 flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      {currentStep}
-                    </p>
-                  )}
+                  <div className="flex gap-2">
+                    <Badge className={getProbabilityColor(formData.primaryDiagnosis.probability)}>
+                      {formData.primaryDiagnosis.probability}% Probabilité
+                    </Badge>
+                    <Badge variant="outline" className={getConfidenceColor(formData.primaryDiagnosis.confidence)}>
+                      {formData.primaryDiagnosis.confidence}% Confiance
+                    </Badge>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Raisonnement Clinique</h4>
+                  <p className="text-gray-700">{formData.primaryDiagnosis.reasoning}</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold mb-2 text-green-700">Éléments Supportant</h4>
+                    <ul className="space-y-1">
+                      {formData.primaryDiagnosis.supportingEvidence.map((evidence, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm">{evidence}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2 text-red-700">Éléments Contradictoires</h4>
+                    <ul className="space-y-1">
+                      {formData.primaryDiagnosis.contradictingEvidence.map((evidence, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm">{evidence}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">Prochaines Étapes</h4>
+                  <ul className="space-y-1">
+                    {formData.primaryDiagnosis.nextSteps.map((step, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                        <span className="text-sm">{step}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </CardContent>
             </Card>
           )}
+        </TabsContent>
 
-          {/* Affichage des erreurs */}
-          {error && (
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                {error}
-                <Button variant="outline" size="sm" onClick={generateCompleteDiagnosis} className="ml-4 bg-transparent">
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Réessayer
-                </Button>
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* Résultats du diagnostic */}
-          {diagnosisResult && diagnosisResult.diagnosis && (
-            <div className="space-y-6">
-              {/* Diagnostic Principal */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span className="flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-blue-600" />
-                      Diagnostic Principal
-                    </span>
-                    <Badge
-                      variant="outline"
-                      className={`${
-                        diagnosisResult.diagnosis.primary.confidence >= 80
-                          ? "bg-green-100 text-green-800"
-                          : diagnosisResult.diagnosis.primary.confidence >= 60
-                            ? "bg-orange-100 text-orange-800"
-                            : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      Confiance: {diagnosisResult.diagnosis.primary.confidence}%
+        <TabsContent value="differential" className="space-y-4">
+          {formData.differentialDiagnoses.map((diagnosis, index) => (
+            <Card key={index}>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between text-base">
+                  <span>{diagnosis.condition}</span>
+                  <div className="flex gap-2">
+                    <Badge className={getProbabilityColor(diagnosis.probability)}>{diagnosis.probability}%</Badge>
+                    <Badge variant="outline" className={getConfidenceColor(diagnosis.confidence)}>
+                      {diagnosis.confidence}% Confiance
                     </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-xl font-semibold text-blue-900">
-                        {diagnosisResult.diagnosis.primary.condition}
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Code ICD-10: {diagnosisResult.diagnosis.primary.icd10}
-                      </p>
-                      <Badge
-                        variant={
-                          diagnosisResult.diagnosis.primary.severity === "severe"
-                            ? "destructive"
-                            : diagnosisResult.diagnosis.primary.severity === "moderate"
-                              ? "default"
-                              : "secondary"
-                        }
-                        className="mt-2"
-                      >
-                        Sévérité:{" "}
-                        {diagnosisResult.diagnosis.primary.severity === "severe"
-                          ? "Sévère"
-                          : diagnosisResult.diagnosis.primary.severity === "moderate"
-                            ? "Modérée"
-                            : "Légère"}
-                      </Badge>
-                    </div>
-
-                    <Progress value={diagnosisResult.diagnosis.primary.confidence} className="w-full" />
-
-                    <div>
-                      <h4 className="font-medium mb-2">Justification clinique:</h4>
-                      <p className="text-sm text-gray-700 bg-blue-50 p-3 rounded">
-                        {diagnosisResult.diagnosis.primary.rationale}
-                      </p>
-                    </div>
                   </div>
-                </CardContent>
-              </Card>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-gray-700">{diagnosis.reasoning}</p>
 
-              {/* Diagnostics Différentiels */}
-              {diagnosisResult.diagnosis.differential && diagnosisResult.diagnosis.differential.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <AlertTriangle className="w-5 h-5 text-orange-600" />
-                      Diagnostics Différentiels
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {diagnosisResult.diagnosis.differential.map((diff: any, index: number) => (
-                        <div key={index} className="border rounded-lg p-4 bg-orange-50">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium text-orange-900">{diff.condition}</h4>
-                            <Badge variant="outline" className="bg-orange-100 text-orange-800">
-                              {diff.probability}% de probabilité
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-gray-700">{diff.rationale}</p>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <h5 className="text-sm font-semibold text-green-700 mb-1">Pour</h5>
+                    <ul className="space-y-1">
+                      {diagnosis.supportingEvidence.map((evidence, idx) => (
+                        <li key={idx} className="flex items-start gap-1">
+                          <CheckCircle className="h-3 w-3 text-green-600 mt-1 flex-shrink-0" />
+                          <span className="text-xs">{evidence}</span>
+                        </li>
                       ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                    </ul>
+                  </div>
 
-              {/* Recommandations Thérapeutiques */}
-              {diagnosisResult.recommendations?.medications &&
-                diagnosisResult.recommendations.medications.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Pill className="w-5 h-5 text-green-600" />
-                        Recommandations Thérapeutiques
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {diagnosisResult.recommendations.medications.map((med: any, index: number) => {
-                          const fdaInfo = diagnosisResult.medicationInfo?.fdaData?.[index]
-
-                          return (
-                            <div key={index} className="border rounded-lg p-4 bg-green-50">
-                              <div className="flex items-center justify-between mb-3">
-                                <h4 className="font-medium text-green-900">{med.name}</h4>
-                                <div className="flex gap-2">
-                                  {fdaInfo?.fdaApproved && (
-                                    <Badge variant="default" className="bg-green-100 text-green-800">
-                                      FDA Approuvé
-                                    </Badge>
-                                  )}
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                <div>
-                                  <p>
-                                    <strong>Posologie:</strong> {med.dosage}
-                                  </p>
-                                  <p>
-                                    <strong>Fréquence:</strong> {med.frequency}
-                                  </p>
-                                  {med.duration && (
-                                    <p>
-                                      <strong>Durée:</strong> {med.duration}
-                                    </p>
-                                  )}
-                                </div>
-                                <div>
-                                  <p>
-                                    <strong>Indication:</strong> {med.indication}
-                                  </p>
-                                  {fdaInfo?.activeIngredient && (
-                                    <p>
-                                      <strong>Principe actif:</strong> {fdaInfo.activeIngredient}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-              {/* Références Scientifiques PubMed */}
-              {diagnosisResult.pubmedReferences && diagnosisResult.pubmedReferences.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <BookOpen className="w-5 h-5 text-purple-600" />
-                      Références Scientifiques (PubMed)
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {diagnosisResult.pubmedReferences.map((ref: any, index: number) => (
-                        <div key={index} className="border-l-4 border-purple-500 pl-4 bg-purple-50 p-3 rounded-r">
-                          <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-medium text-sm text-purple-900 leading-tight">{ref.title}</h4>
-                            <Badge variant="outline" className="text-xs bg-purple-100 text-purple-800 ml-2">
-                              Score: {Math.round(ref.relevanceScore)}%
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-gray-600 mb-2">
-                            <strong>Auteurs:</strong> {ref.authors.slice(0, 3).join(", ")}
-                            {ref.authors.length > 3 && " et al."}
-                          </p>
-                          <p className="text-xs text-gray-600 mb-2">
-                            <strong>Journal:</strong> {ref.journal} ({ref.year})
-                            {ref.pmid && <span> - PMID: {ref.pmid}</span>}
-                          </p>
-                          {ref.abstract && (
-                            <p className="text-xs text-gray-700 mt-2 leading-relaxed">
-                              {ref.abstract.substring(0, 300)}
-                              {ref.abstract.length > 300 && "..."}
-                            </p>
-                          )}
-                          {ref.url && (
-                            <a
-                              href={ref.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-purple-600 hover:text-purple-800 underline mt-2 inline-block"
-                            >
-                              Voir l'article complet →
-                            </a>
-                          )}
-                        </div>
+                  <div>
+                    <h5 className="text-sm font-semibold text-red-700 mb-1">Contre</h5>
+                    <ul className="space-y-1">
+                      {diagnosis.contradictingEvidence.map((evidence, idx) => (
+                        <li key={idx} className="flex items-start gap-1">
+                          <AlertTriangle className="h-3 w-3 text-red-600 mt-1 flex-shrink-0" />
+                          <span className="text-xs">{evidence}</span>
+                        </li>
                       ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              <Separator />
-
-              {/* Actions */}
-              <div className="flex justify-between items-center pt-4">
-                <Button variant="outline" onClick={onPrevious} className="px-6 py-3 bg-transparent">
-                  <ArrowLeft className="h-5 w-5 mr-2" />
-                  Retour Questions
-                </Button>
-
-                <div className="flex space-x-3">
-                  <Button variant="outline" onClick={generateCompleteDiagnosis} disabled={isLoading}>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Régénérer
-                  </Button>
-                  <Button
-                    onClick={handleNext}
-                    disabled={!diagnosisResult}
-                    className="bg-blue-600 hover:bg-blue-700 px-6 py-3"
-                  >
-                    Continuer vers les Examens
-                    <ArrowRight className="h-5 w-5 ml-2" />
-                  </Button>
+                    </ul>
+                  </div>
                 </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+
+        <TabsContent value="recommendations" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <BookOpen className="h-4 w-4" />
+                  Examens Recommandés
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {formData.recommendedTests.map((test, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                      <span className="text-sm">{test}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Lightbulb className="h-4 w-4" />
+                  Suggestions de Traitement
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {formData.treatmentSuggestions.map((suggestion, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0" />
+                      <span className="text-sm">{suggestion}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Facteurs de Risque</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-1">
+                {formData.riskFactors.map((factor, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">{factor}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="followup" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Plan de Suivi</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="text-sm">{formData.followUpPlan}</p>
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Notes Pronostiques</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-green-50 p-4 rounded-lg">
+                <p className="text-sm">{formData.prognosisNotes}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={onPrevious}>
+          Retour aux Questions IA
+        </Button>
+        <Button onClick={onNext}>Continuer vers les Examens</Button>
+      </div>
     </div>
   )
 }

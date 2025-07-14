@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -18,7 +18,7 @@ import {
   ArrowRight,
 } from "lucide-react"
 
-// Import des composants
+// Import des composants fonctionnels
 import PatientForm from "@/components/patient-form"
 import ClinicalForm from "@/components/clinical-form"
 import QuestionsForm from "@/components/questions-form"
@@ -46,48 +46,64 @@ export default function MedicalAIExpert() {
   const [formData, setFormData] = useState<FormData>({})
   const [activeTab, setActiveTab] = useState("workflow")
 
-  const steps = [
+  // ✅ Configuration stable avec useMemo
+  const steps = useMemo(() => [
     { id: "patient", label: "Patient", icon: User, completed: !!formData.patientData },
-    { id: "clinical", label: "Clinique", icon: Stethoscope, completed: !!formData.clinicalData },
+    { id: "clinical", label: "Examen Clinique", icon: Stethoscope, completed: !!formData.clinicalData },
     { id: "questions", label: "Questions IA", icon: MessageSquare, completed: !!formData.questionsData },
     { id: "diagnosis", label: "Diagnostic IA", icon: Brain, completed: !!formData.diagnosisData },
     { id: "exams", label: "Examens", icon: FileText, completed: !!formData.examsData },
     { id: "prescription", label: "Prescription", icon: Pill, completed: !!formData.prescriptionData },
     { id: "report", label: "Rapport", icon: ClipboardList, completed: !!formData.reportData },
-  ]
+  ], [formData])
 
-  const handleStepData = (stepId: Step, data: any) => {
+  // ✅ Fonction stable avec useCallback - CORRECTION PRINCIPALE
+  const handleStepData = useCallback((stepId: Step, data: any) => {
+    console.log(`📝 Updating ${stepId} data:`, data)
     setFormData((prev) => ({ ...prev, [`${stepId}Data`]: data }))
-  }
+  }, [])
 
-  const handleNext = () => {
+  // ✅ Fonctions navigation stables
+  const handleNext = useCallback(() => {
     const currentIndex = steps.findIndex((step) => step.id === currentStep)
     if (currentIndex < steps.length - 1) {
       setCurrentStep(steps[currentIndex + 1].id as Step)
     }
-  }
+  }, [currentStep, steps])
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     const currentIndex = steps.findIndex((step) => step.id === currentStep)
     if (currentIndex > 0) {
       setCurrentStep(steps[currentIndex - 1].id as Step)
     }
-  }
+  }, [currentStep, steps])
 
-  const getStepProgress = () => {
+  // ✅ Fonctions utilitaires stables
+  const getStepProgress = useCallback(() => {
     const completedSteps = steps.filter((step) => step.completed).length
     return (completedSteps / steps.length) * 100
-  }
+  }, [steps])
 
-  const renderCurrentStep = () => {
-    const commonProps = {
-      data: formData[`${currentStep}Data`],
-      allData: formData,
-      onDataChange: (data: any) => handleStepData(currentStep, data),
-      onNext: handleNext,
-      onPrevious: handlePrevious,
-    }
+  const getCurrentStepIndex = useCallback(() => {
+    return steps.findIndex((step) => step.id === currentStep)
+  }, [currentStep, steps])
 
+  // ✅ Callback pour changement d'étape stable
+  const handleStepChange = useCallback((stepId: Step) => {
+    setCurrentStep(stepId)
+  }, [])
+
+  // ✅ Props communes stables avec useMemo - CORRECTION IMPORTANTE
+  const commonProps = useMemo(() => ({
+    data: formData[`${currentStep}Data`],
+    allData: formData,
+    onDataChange: (data: any) => handleStepData(currentStep, data),
+    onNext: handleNext,
+    onPrevious: handlePrevious,
+  }), [formData, currentStep, handleStepData, handleNext, handlePrevious])
+
+  // ✅ Rendu step courant stable
+  const renderCurrentStep = useCallback(() => {
     switch (currentStep) {
       case "patient":
         return <PatientForm {...commonProps} />
@@ -106,7 +122,7 @@ export default function MedicalAIExpert() {
       default:
         return <PatientForm {...commonProps} />
     }
-  }
+  }, [currentStep, commonProps])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -146,7 +162,7 @@ export default function MedicalAIExpert() {
                         key={step.id}
                         variant={isActive ? "default" : isCompleted ? "secondary" : "outline"}
                         size="sm"
-                        onClick={() => setCurrentStep(step.id as Step)}
+                        onClick={() => handleStepChange(step.id as Step)}
                         className={`flex items-center gap-2 ${isActive ? "bg-blue-600 hover:bg-blue-700" : ""}`}
                       >
                         {isCompleted ? <CheckCircle className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
