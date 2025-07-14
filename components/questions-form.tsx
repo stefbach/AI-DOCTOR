@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -9,12 +9,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Brain, CheckCircle, AlertCircle, Loader2, ArrowLeft, ArrowRight } from "lucide-react"
+import { Brain, CheckCircle, AlertCircle, Loader2, ArrowLeft, ArrowRight, RefreshCw } from "lucide-react"
 
 interface Question {
   id: number
   question: string
-  type: "open" | "multiple_choice" | "yes_no" | "scale"
+  type: "open" | "multiple_choice" | "yes_no" | "scale" | "text"
   options?: string[]
   rationale?: string
   priority?: "high" | "medium" | "low"
@@ -52,17 +52,8 @@ export default function QuestionsForm({
   const [isGenerating, setIsGenerating] = useState(false)
   const [generationStatus, setGenerationStatus] = useState("")
 
-  // Génération des questions au chargement
-  useEffect(() => {
-    generateQuestions()
-  }, [patientData, clinicalData])
-
-  // Mise à jour des données parent quand les réponses changent
-  useEffect(() => {
-    onDataChange({ responses })
-  }, [responses, onDataChange])
-
-  const generateQuestions = async () => {
+  // Fonction de génération des questions avec gestion d'erreur robuste
+  const generateQuestions = useCallback(async () => {
     setIsGenerating(true)
     setError(null)
     setGenerationStatus("Analyse du dossier patient...")
@@ -74,49 +65,119 @@ export default function QuestionsForm({
 
       setGenerationStatus("Génération des questions personnalisées...")
 
+      const requestBody = {
+        patientData: patientData || {},
+        clinicalData: clinicalData || {},
+        numberOfQuestions: 8,
+        focusArea: "diagnostic différentiel",
+      }
+
+      console.log("📡 Envoi requête API...")
+
       const response = await fetch("/api/openai-questions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          patientData: patientData || {},
-          clinicalData: clinicalData || {},
-          numberOfQuestions: 10,
-          focusArea: "diagnostic différentiel",
-        }),
+        body: JSON.stringify(requestBody),
       })
 
-      console.log("📡 Réponse API questions:", response.status)
+      console.log("📡 Réponse API reçue:", response.status, response.statusText)
 
+      // Vérification du statut de la réponse
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || `Erreur ${response.status}`)
+        let errorMessage = `Erreur ${response.status}: ${response.statusText}`
+
+        try {
+          const errorText = await response.text()
+          console.error("❌ Réponse d'erreur:", errorText)
+
+          // Tentative de parsing JSON de l'erreur
+          try {
+            const errorData = JSON.parse(errorText)
+            errorMessage = errorData.error || errorMessage
+          } catch {
+            // Si ce n'est pas du JSON, utiliser le texte brut
+            if (errorText.includes("Internal Server Error")) {
+              errorMessage = "Erreur interne du serveur"
+            } else {
+              errorMessage = errorText.substring(0, 100) + "..."
+            }
+          }
+        } catch {
+          // Si on ne peut pas lire la réponse d'erreur
+          errorMessage = `Erreur ${response.status}`
+        }
+
+        throw new Error(errorMessage)
       }
 
-      const data = await response.json()
-      console.log("✅ Questions reçues:", data.questions?.length || 0)
-
-      if (data.success && data.questions && Array.isArray(data.questions)) {
-        setQuestions(data.questions)
-        setGenerationStatus(`${data.questions.length} questions générées avec succès`)
-
-        // Initialiser les réponses
-        const initialResponses = data.questions.map((q: Question) => ({
-          questionId: q.id,
-          question: q.question,
-          answer: "",
-          type: q.type,
-        }))
-        setResponses(initialResponses)
-      } else {
-        throw new Error("Format de réponse invalide")
+      // Lecture de la réponse
+      let responseText: string
+      try {
+        responseText = await response.text()
+        console.log("📄 Réponse brute reçue (premiers 200 chars):", responseText.substring(0, 200))
+      } catch (readError) {
+        console.error("❌ Erreur lecture réponse:", readError)
+        throw new Error("Impossible de lire la réponse du serveur")
       }
+
+      // Parsing JSON
+      let data: any
+      try {
+        data = JSON.parse(responseText)
+        console.log("✅ JSON parsé avec succès")
+      } catch (parseError) {
+        console.error("❌ Erreur parsing JSON:", parseError)
+        console.error("❌ Contenu reçu:", responseText.substring(0, 500))
+        throw new Error("Réponse du serveur invalide (format JSON incorrect)")
+      }
+
+      // Validation de la structure de données
+      if (!data.success) {
+        throw new Error(data.error || "Échec de génération des questions")
+      }
+
+      if (!data.questions || !Array.isArray(data.questions)) {
+        console.error("❌ Structure de données invalide:", data)
+        throw new Error("Format de réponse invalide (questions manquantes)")
+      }
+
+      if (data.questions.length === 0) {
+        throw new Error("Aucune question générée")
+      }
+
+      console.log(`✅ ${data.questions.length} questions reçues`)
+
+      // Validation et nettoyage des questions
+      const validQuestions = data.questions.map((q: any, index: number) => ({
+        id: q.id || index + 1,
+        question: q.question || "Question non définie",
+        type: q.type || "open",
+        options: q.options || undefined,
+        rationale: q.rationale || "Question générée",
+        priority: q.priority || "medium",
+        category: q.category || "general",
+      }))
+
+      setQuestions(validQuestions)
+      setGenerationStatus(`${validQuestions.length} questions générées avec succès`)
+
+      // Initialiser les réponses
+      const initialResponses = validQuestions.map((q: Question) => ({
+        questionId: q.id,
+        question: q.question,
+        answer: "",
+        type: q.type,
+      }))
+      setResponses(initialResponses)
+
+      console.log("✅ Questions initialisées avec succès")
     } catch (error: any) {
       console.error("❌ Erreur génération questions:", error)
       setError(`Erreur lors de la génération des questions: ${error.message}`)
 
-      // Questions de fallback
+      // Questions de fallback en cas d'erreur
       const fallbackQuestions = generateFallbackQuestions()
       setQuestions(fallbackQuestions)
       const initialResponses = fallbackQuestions.map((q) => ({
@@ -126,11 +187,23 @@ export default function QuestionsForm({
         type: q.type,
       }))
       setResponses(initialResponses)
-      setGenerationStatus("Questions de base générées")
+      setGenerationStatus("Questions de base générées (mode dégradé)")
     } finally {
       setIsGenerating(false)
     }
-  }
+  }, [patientData, clinicalData])
+
+  // Génération des questions au chargement
+  useEffect(() => {
+    generateQuestions()
+  }, [generateQuestions])
+
+  // Mise à jour des données parent quand les réponses changent
+  useEffect(() => {
+    if (responses.length > 0) {
+      onDataChange({ responses })
+    }
+  }, [responses, onDataChange])
 
   const generateFallbackQuestions = (): Question[] => {
     return [
@@ -140,6 +213,7 @@ export default function QuestionsForm({
         type: "open",
         priority: "high",
         category: "timeline",
+        rationale: "Établissement de la chronologie",
       },
       {
         id: 2,
@@ -147,35 +221,40 @@ export default function QuestionsForm({
         type: "multiple_choice",
         options: ["Constants", "Intermittents", "Par crises", "Variables"],
         priority: "high",
-        category: "symptom",
+        category: "pattern",
+        rationale: "Caractérisation du pattern symptomatique",
       },
       {
         id: 3,
         question: "Sur une échelle de 1 à 10, quelle est l'intensité de vos symptômes ?",
         type: "scale",
         priority: "medium",
-        category: "symptom",
+        category: "intensity",
+        rationale: "Quantification de l'intensité",
       },
       {
         id: 4,
         question: "Qu'est-ce qui déclenche ou aggrave vos symptômes ?",
         type: "open",
         priority: "high",
-        category: "symptom",
+        category: "triggers",
+        rationale: "Identification des facteurs déclenchants",
       },
       {
         id: 5,
         question: "Qu'est-ce qui soulage vos symptômes ?",
         type: "open",
         priority: "high",
-        category: "symptom",
+        category: "relief",
+        rationale: "Identification des facteurs soulageants",
       },
       {
         id: 6,
         question: "Avez-vous des antécédents familiaux de maladies similaires ?",
         type: "yes_no",
         priority: "medium",
-        category: "history",
+        category: "family_history",
+        rationale: "Évaluation des facteurs héréditaires",
       },
       {
         id: 7,
@@ -184,27 +263,15 @@ export default function QuestionsForm({
         options: ["Pas du tout", "Un peu", "Modérément", "Beaucoup", "Complètement"],
         priority: "medium",
         category: "functional_impact",
+        rationale: "Évaluation de l'impact fonctionnel",
       },
       {
         id: 8,
-        question: "Avez-vous remarqué d'autres symptômes associés ?",
-        type: "open",
-        priority: "medium",
-        category: "symptom",
-      },
-      {
-        id: 9,
-        question: "Avez-vous voyagé récemment ou été en contact avec des personnes malades ?",
-        type: "yes_no",
-        priority: "low",
-        category: "risk_factor",
-      },
-      {
-        id: 10,
         question: "Y a-t-il autre chose d'important que vous souhaitez mentionner ?",
         type: "open",
         priority: "low",
-        category: "general",
+        category: "additional",
+        rationale: "Informations supplémentaires",
       },
     ]
   }
@@ -247,6 +314,7 @@ export default function QuestionsForm({
 
     switch (question.type) {
       case "open":
+      case "text":
         return (
           <Textarea
             value={currentAnswer as string}
@@ -360,7 +428,10 @@ export default function QuestionsForm({
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
-          <Button onClick={generateQuestions}>Réessayer</Button>
+          <Button onClick={generateQuestions}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Réessayer
+          </Button>
         </div>
       </div>
     )
@@ -374,6 +445,7 @@ export default function QuestionsForm({
             <div className="text-center">
               <p>Aucune question générée. Veuillez réessayer.</p>
               <Button onClick={generateQuestions} className="mt-4">
+                <RefreshCw className="h-4 w-4 mr-2" />
                 Générer les questions
               </Button>
             </div>
