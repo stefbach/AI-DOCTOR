@@ -8,10 +8,10 @@ import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Medical AI Expert - Diagnostic IA",
+  title: "TIBOK IA DOCTOR - Diagnostic IA",
   description:
     "Système de diagnostic médical assisté par Intelligence Artificielle utilisant OpenAI GPT-4, FDA Database, RxNorm et PubMed",
-  keywords: "diagnostic médical, intelligence artificielle, OpenAI, FDA, RxNorm, PubMed, médecine",
+  keywords: "diagnostic médical, intelligence artificielle, OpenAI, FDA, RxNorm, PubMed, médecine, TIBOK",
     generator: 'v0.dev'
 }
 

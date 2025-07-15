@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
       success: true,
       timestamp: new Date().toISOString(),
       drugs: drugInfos,
+      medications: drugInfos, // Ajouter cette ligne pour compatibilité
       metadata: {
         totalDrugs: drugInfos.length,
         searchedMedications: drugList,

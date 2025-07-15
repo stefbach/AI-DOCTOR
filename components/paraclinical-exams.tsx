@@ -20,6 +20,8 @@ import {
   Stethoscope,
   ArrowLeft,
   ArrowRight,
+  AlertTriangle,
+  Clock,
 } from "lucide-react"
 
 interface ParaclinicalExamsProps {
@@ -39,6 +41,8 @@ interface Exam {
   aiRecommended?: boolean
   priority?: "high" | "medium" | "low"
   indication?: string
+  timing?: string
+  urgency?: string
 }
 
 interface GeneratedPrescription {
@@ -61,142 +65,305 @@ export default function ParaclinicalExams({
   const [customExamCode, setCustomExamCode] = useState("")
   const [generatedPrescriptions, setGeneratedPrescriptions] = useState<GeneratedPrescription[]>([])
   const [showPrescriptions, setShowPrescriptions] = useState(false)
+  const [pubmedData, setPubmedData] = useState<any>(null)
 
   // Initialiser les examens basés sur les recommandations IA du diagnostic
   useEffect(() => {
-    if (allData?.diagnosisData?.recommendedExams) {
-      const aiExams: Exam[] = allData.diagnosisData.recommendedExams.map((exam: any, index: number) => ({
-        id: `ai_${index}`,
-        name: exam.name,
-        code: exam.code,
-        category: "ai" as const,
-        selected: exam.category === "urgent", // Auto-sélectionner les examens urgents
-        aiRecommended: true,
-        priority: exam.category === "urgent" ? ("high" as const) : ("medium" as const),
-        indication: exam.indication,
-      }))
+    console.log("🔍 Initialisation examens avec données IA complètes:", allData?.diagnosisData)
 
-      // Examens biologiques standards
-      const biologyExams: Exam[] = [
-        {
-          id: "bio1",
-          name: "Numération Formule Sanguine (NFS)",
-          code: "HQZZ002",
-          category: "biology",
-          selected: false,
-          indication: "Recherche d'anémie, infection",
-        },
-        {
-          id: "bio2",
-          name: "Ionogramme sanguin",
-          code: "HQZZ004",
-          category: "biology",
-          selected: false,
-          indication: "Équilibre électrolytique",
-        },
-        {
-          id: "bio3",
-          name: "Bilan lipidique",
-          code: "HQZZ006",
-          category: "biology",
-          selected: false,
-          indication: "Facteurs de risque cardiovasculaire",
-        },
-        {
-          id: "bio4",
-          name: "Glycémie à jeun",
-          code: "HQZZ008",
-          category: "biology",
-          selected: false,
-          indication: "Dépistage diabète",
-        },
-        {
-          id: "bio5",
-          name: "Créatininémie",
-          code: "HQZZ010",
-          category: "biology",
-          selected: false,
-          indication: "Fonction rénale",
-        },
-        {
-          id: "bio6",
-          name: "Transaminases (ALAT, ASAT)",
-          code: "HQZZ012",
-          category: "biology",
-          selected: false,
-          indication: "Fonction hépatique",
-        },
-        {
-          id: "bio7",
-          name: "CRP (Protéine C-Réactive)",
-          code: "HQZZ014",
-          category: "biology",
-          selected: false,
-          indication: "Marqueur inflammatoire",
-        },
-        {
-          id: "bio8",
-          name: "TSH (Thyréostimuline)",
-          code: "HQZZ016",
-          category: "biology",
-          selected: false,
-          indication: "Fonction thyroïdienne",
-        },
-      ]
+    // Récupérer les examens recommandés par l'IA depuis le diagnostic
+    const aiRecommendedExams: Exam[] = []
 
-      // Examens d'imagerie standards
-      const imagingExams: Exam[] = [
-        {
-          id: "img1",
-          name: "Radiographie thoracique",
-          code: "ZCQK002",
-          category: "imaging",
-          selected: false,
-          indication: "Exploration thoracique",
-        },
-        {
-          id: "img2",
-          name: "Échographie abdominale",
-          code: "ZCQH001",
-          category: "imaging",
-          selected: false,
-          indication: "Exploration abdominale",
-        },
-        {
-          id: "img3",
-          name: "Scanner thoraco-abdomino-pelvien",
-          code: "ZCQH096",
-          category: "imaging",
-          selected: false,
-          indication: "Bilan d'extension",
-        },
-        {
-          id: "img4",
-          name: "IRM cérébrale",
-          code: "ZCQH004",
-          category: "imaging",
-          selected: false,
-          indication: "Exploration neurologique",
-        },
-        {
-          id: "img5",
-          name: "Échographie cardiaque",
-          code: "ZCQK007",
-          category: "imaging",
-          selected: false,
-          indication: "Fonction cardiaque",
-        },
-        {
-          id: "img6",
-          name: "Mammographie bilatérale",
-          code: "ZCQH020",
-          category: "imaging",
-          selected: false,
-          indication: "Dépistage mammaire",
-        },
-      ]
+    // Vérifier les différentes sources de recommandations dans la structure correcte
+    if (allData?.diagnosisData?.data?.recommendedExams) {
+      console.log("📋 Examens recommendedExams trouvés:", allData.diagnosisData.data.recommendedExams)
 
-      setSelectedExams([...aiExams, ...biologyExams, ...imagingExams])
+      allData.diagnosisData.data.recommendedExams.forEach((exam: any, index: number) => {
+        aiRecommendedExams.push({
+          id: `ai_recommended_${index}`,
+          name: exam.name || exam.test || "Examen recommandé par IA",
+          code: exam.code || `AI${String(index + 1).padStart(3, "0")}`,
+          category: exam.category === "biology" ? "biology" : exam.category === "imaging" ? "imaging" : "ai",
+          selected: exam.selected || exam.priority === "high" || exam.urgency === "immediate",
+          aiRecommended: true,
+          priority: exam.priority || "medium",
+          indication: exam.indication || "Recommandé par l'analyse diagnostique experte",
+          timing: exam.timing || "24h",
+          urgency: exam.urgency || "routine",
+        })
+      })
+    }
+
+    // Vérifier aussi dans investigationPlan.immediate
+    if (allData?.diagnosisData?.data?.investigationPlan?.immediate) {
+      console.log("📋 Examens immediate trouvés:", allData.diagnosisData.data.investigationPlan.immediate)
+
+      allData.diagnosisData.data.investigationPlan.immediate.forEach((exam: any, index: number) => {
+        aiRecommendedExams.push({
+          id: `ai_immediate_${index}`,
+          name: exam.test || exam.name || "Examen immédiat IA",
+          code: exam.code || `IMM${String(index + 1).padStart(3, "0")}`,
+          category: exam.category === "biology" ? "biology" : exam.category === "imaging" ? "imaging" : "ai",
+          selected: true, // Auto-sélectionner les examens immédiats
+          aiRecommended: true,
+          priority: "high",
+          indication: exam.indication || "Examen immédiat recommandé",
+          timing: exam.timing || "STAT",
+          urgency: exam.urgency || "immediate",
+        })
+      })
+    }
+
+    // Vérifier aussi dans investigationPlan.shortTerm
+    if (allData?.diagnosisData?.data?.investigationPlan?.shortTerm) {
+      console.log("📋 Examens shortTerm trouvés:", allData.diagnosisData.data.investigationPlan.shortTerm)
+
+      allData.diagnosisData.data.investigationPlan.shortTerm.forEach((exam: any, index: number) => {
+        aiRecommendedExams.push({
+          id: `ai_shortterm_${index}`,
+          name: exam.test || exam.name || "Examen court terme IA",
+          code: exam.code || `ST${String(index + 1).padStart(3, "0")}`,
+          category: exam.category === "biology" ? "biology" : exam.category === "imaging" ? "imaging" : "ai",
+          selected: false,
+          aiRecommended: true,
+          priority: "medium",
+          indication: exam.indication || "Examen court terme recommandé",
+          timing: exam.timing || "24h",
+          urgency: exam.urgency || "routine",
+        })
+      })
+    }
+
+    console.log("🤖 Examens IA recommandés:", aiRecommendedExams.length, aiRecommendedExams)
+
+    // Examens biologiques standards COMPLETS
+    const biologyExams: Exam[] = [
+      {
+        id: "bio1",
+        name: "Numération Formule Sanguine (NFS)",
+        code: "HQZZ002",
+        category: "biology",
+        selected: false,
+        indication: "Recherche d'anémie, infection, troubles hématologiques",
+        timing: "24h",
+        urgency: "routine",
+      },
+      {
+        id: "bio2",
+        name: "CRP (Protéine C-Réactive)",
+        code: "HQZZ014",
+        category: "biology",
+        selected: false,
+        indication: "Marqueur inflammatoire principal",
+        timing: "24h",
+        urgency: "routine",
+      },
+      {
+        id: "bio3",
+        name: "Vitesse de Sédimentation (VS)",
+        code: "HQZZ015",
+        category: "biology",
+        selected: false,
+        indication: "Marqueur inflammatoire complémentaire",
+        timing: "24h",
+        urgency: "routine",
+      },
+      {
+        id: "bio4",
+        name: "Ionogramme sanguin complet",
+        code: "HQZZ004",
+        category: "biology",
+        selected: false,
+        indication: "Équilibre électrolytique (Na, K, Cl, CO2)",
+        timing: "24h",
+        urgency: "routine",
+      },
+      {
+        id: "bio5",
+        name: "Glycémie à jeun",
+        code: "HQZZ008",
+        category: "biology",
+        selected: false,
+        indication: "Dépistage diabète et troubles glycémiques",
+        timing: "24h",
+        urgency: "routine",
+      },
+      {
+        id: "bio6",
+        name: "Créatininémie + DFG",
+        code: "HQZZ010",
+        category: "biology",
+        selected: false,
+        indication: "Fonction rénale et filtration glomérulaire",
+        timing: "24h",
+        urgency: "routine",
+      },
+      {
+        id: "bio7",
+        name: "Transaminases (ALAT, ASAT)",
+        code: "HQZZ012",
+        category: "biology",
+        selected: false,
+        indication: "Fonction hépatique",
+        timing: "24h",
+        urgency: "routine",
+      },
+      {
+        id: "bio8",
+        name: "Bilan lipidique complet",
+        code: "HQZZ006",
+        category: "biology",
+        selected: false,
+        indication: "Cholestérol total, HDL, LDL, Triglycérides",
+        timing: "24h",
+        urgency: "routine",
+      },
+      {
+        id: "bio9",
+        name: "TSH (Thyréostimuline)",
+        code: "HQZZ016",
+        category: "biology",
+        selected: false,
+        indication: "Fonction thyroïdienne",
+        timing: "48h",
+        urgency: "routine",
+      },
+      {
+        id: "bio10",
+        name: "Hémoglobine glyquée (HbA1c)",
+        code: "HQZZ018",
+        category: "biology",
+        selected: false,
+        indication: "Équilibre glycémique sur 3 mois",
+        timing: "24h",
+        urgency: "routine",
+      },
+      {
+        id: "bio11",
+        name: "Ferritinémie",
+        code: "HQZZ020",
+        category: "biology",
+        selected: false,
+        indication: "Réserves en fer",
+        timing: "48h",
+        urgency: "routine",
+      },
+      {
+        id: "bio12",
+        name: "Vitamine D (25-OH)",
+        code: "HQZZ022",
+        category: "biology",
+        selected: false,
+        indication: "Statut vitaminique D",
+        timing: "48h",
+        urgency: "routine",
+      },
+      {
+        id: "bio13",
+        name: "Troponine I Ultra-Sensible",
+        code: "HQZZ024",
+        category: "biology",
+        selected: false,
+        indication: "Marqueur de nécrose myocardique",
+        timing: "STAT",
+        urgency: "immediate",
+      },
+      {
+        id: "bio14",
+        name: "D-Dimères",
+        code: "HQZZ026",
+        category: "biology",
+        selected: false,
+        indication: "Dépistage thrombose",
+        timing: "STAT",
+        urgency: "immediate",
+      },
+      {
+        id: "bio15",
+        name: "Procalcitonine (PCT)",
+        code: "HQZZ028",
+        category: "biology",
+        selected: false,
+        indication: "Marqueur d'infection bactérienne",
+        timing: "24h",
+        urgency: "routine",
+      },
+    ]
+
+    // Examens d'imagerie standards
+    const imagingExams: Exam[] = [
+      {
+        id: "img1",
+        name: "Radiographie thoracique",
+        code: "ZCQK002",
+        category: "imaging",
+        selected: false,
+        indication: "Exploration thoracique",
+        timing: "24h",
+        urgency: "routine",
+      },
+      {
+        id: "img2",
+        name: "Échographie abdominale",
+        code: "ZCQH001",
+        category: "imaging",
+        selected: false,
+        indication: "Exploration abdominale",
+        timing: "48h",
+        urgency: "routine",
+      },
+      {
+        id: "img3",
+        name: "Scanner thoraco-abdomino-pelvien",
+        code: "ZCQH096",
+        category: "imaging",
+        selected: false,
+        indication: "Bilan d'extension",
+        timing: "48h",
+        urgency: "routine",
+      },
+      {
+        id: "img4",
+        name: "IRM cérébrale",
+        code: "ZCQH004",
+        category: "imaging",
+        selected: false,
+        indication: "Exploration neurologique",
+        timing: "48h",
+        urgency: "routine",
+      },
+      {
+        id: "img5",
+        name: "Échographie cardiaque",
+        code: "ZCQK007",
+        category: "imaging",
+        selected: false,
+        indication: "Évaluation fonction cardiaque",
+        timing: "24h",
+        urgency: "routine",
+      },
+    ]
+
+    // Fusionner tous les examens en évitant les doublons
+    const allExams = [...aiRecommendedExams, ...biologyExams, ...imagingExams]
+
+    // Éliminer les doublons basés sur le nom
+    const uniqueExams = allExams.filter((exam, index, self) => index === self.findIndex((e) => e.name === exam.name))
+
+    console.log(
+      "✅ Examens initialisés:",
+      uniqueExams.length,
+      "examens dont",
+      aiRecommendedExams.length,
+      "recommandés par IA",
+    )
+    console.log("📊 Examens auto-sélectionnés:", uniqueExams.filter((e) => e.selected).length)
+
+    setSelectedExams(uniqueExams)
+
+    // Charger les données PubMed si disponibles
+    if (allData?.diagnosisData?.data?.externalData?.pubmed) {
+      setPubmedData(allData.diagnosisData.data.externalData.pubmed)
     }
   }, [allData?.diagnosisData])
 
@@ -213,6 +380,8 @@ export default function ParaclinicalExams({
         category: "custom",
         selected: true,
         indication: "Examen personnalisé",
+        timing: "48h",
+        urgency: "routine",
       }
       setSelectedExams((prev) => [...prev, newExam])
       setCustomExam("")
@@ -233,25 +402,34 @@ export default function ParaclinicalExams({
     const customExams = selected.filter((exam) => exam.category === "custom")
 
     // Générer ordonnance biologique
-    if (biologyExams.length > 0) {
+    if (biologyExams.length > 0 || aiExams.filter((e) => e.name.toLowerCase().includes("sang")).length > 0) {
+      const bioExams = [...biologyExams, ...aiExams.filter((e) => e.name.toLowerCase().includes("sang"))]
       prescriptions.push({
         id: "bio_prescription",
         type: "biology",
         title: "Ordonnance - Examens Biologiques",
-        exams: biologyExams,
-        content: generateBiologyPrescription(biologyExams),
+        exams: bioExams,
+        content: generateBiologyPrescription(bioExams),
       })
     }
 
     // Générer ordonnance imagerie et examens IA
-    if (imagingExams.length > 0 || aiExams.length > 0 || customExams.length > 0) {
-      const allImagingExams = [...imagingExams, ...aiExams, ...customExams]
+    if (
+      imagingExams.length > 0 ||
+      aiExams.filter((e) => !e.name.toLowerCase().includes("sang")).length > 0 ||
+      customExams.length > 0
+    ) {
+      const imgExams = [
+        ...imagingExams,
+        ...aiExams.filter((e) => !e.name.toLowerCase().includes("sang")),
+        ...customExams,
+      ]
       prescriptions.push({
         id: "imaging_prescription",
         type: "imaging",
         title: "Ordonnance - Examens Complémentaires",
-        exams: allImagingExams,
-        content: generateImagingPrescription(allImagingExams),
+        exams: imgExams,
+        content: generateImagingPrescription(imgExams),
       })
     }
 
@@ -263,6 +441,10 @@ export default function ParaclinicalExams({
     const patientName = `${allData?.patientData?.firstName || "Prénom"} ${allData?.patientData?.lastName || "Nom"}`
     const patientAge = allData?.patientData?.age || "XX"
     const today = new Date().toLocaleDateString("fr-FR")
+
+    // Séparer les examens urgents et routiniers
+    const urgentExams = exams.filter((e) => e.urgency === "immediate" || e.timing === "STAT")
+    const routineExams = exams.filter((e) => e.urgency !== "immediate" && e.timing !== "STAT")
 
     return `ORDONNANCE MÉDICALE - EXAMENS BIOLOGIQUES
 
@@ -278,25 +460,66 @@ Nom: ${patientName}
 Né(e) le: ${allData?.patientData?.birthDate || "XX/XX/XXXX"}
 
 DIAGNOSTIC SUSPECTÉ:
-${allData?.diagnosisData?.diagnosis?.primary?.condition || "À préciser"}
-Code ICD-10: ${allData?.diagnosisData?.diagnosis?.primary?.icd10 || ""}
+${allData?.diagnosisData?.data?.comprehensiveDiagnosis?.primary?.condition || "À préciser"}
+Code ICD-10: ${allData?.diagnosisData?.data?.comprehensiveDiagnosis?.primary?.icd10 || ""}
 
-EXAMENS PRESCRITS:
-
-${exams
+${
+  urgentExams.length > 0
+    ? `
+EXAMENS URGENTS (STAT):
+${urgentExams
   .map(
     (exam) => `• ${exam.name}${exam.code ? ` (${exam.code})` : ""}
-  Indication: ${exam.indication || "Bilan diagnostique"}`,
+  Indication: ${exam.indication || "Bilan diagnostique"}
+  Timing: ${exam.timing || "STAT"}${exam.aiRecommended ? " [Recommandé par IA]" : ""}`,
   )
   .join("\n\n")}
+`
+    : ""
+}
+
+${
+  routineExams.length > 0
+    ? `
+EXAMENS DE ROUTINE:
+${routineExams
+  .map(
+    (exam) => `• ${exam.name}${exam.code ? ` (${exam.code})` : ""}
+  Indication: ${exam.indication || "Bilan diagnostique"}
+  Timing: ${exam.timing || "24h"}${exam.aiRecommended ? " [Recommandé par IA]" : ""}`,
+  )
+  .join("\n\n")}
+`
+    : ""
+}
 
 RENSEIGNEMENTS CLINIQUES:
 ${allData?.clinicalData?.chiefComplaint || "Bilan de santé"}
-${allData?.clinicalData?.historyOfPresentIllness || ""}
+Symptômes: ${Array.isArray(allData?.clinicalData?.symptoms) ? allData.clinicalData.symptoms.join(", ") : allData?.clinicalData?.symptoms || ""}
 
 À JEUN: ${exams.some((e) => e.name.toLowerCase().includes("glycémie") || e.name.toLowerCase().includes("lipidique")) ? "OUI (12h)" : "NON"}
 
-URGENT: ${exams.some((e) => e.priority === "high") ? "OUI" : "NON"}
+URGENT: ${urgentExams.length > 0 ? "OUI" : "NON"}
+
+${
+  pubmedData?.articles?.length > 0
+    ? `
+RÉFÉRENCES SCIENTIFIQUES (PubMed):
+${pubmedData.articles
+  .slice(0, 2)
+  .map((article: any) => `• ${article.title} - ${article.journal} ${article.year}`)
+  .join("\n")}
+`
+    : ""
+}
+
+${
+  allData?.diagnosisData?.data?.externalData?.apisUsed?.length > 0
+    ? `
+DONNÉES INTÉGRÉES: ${allData.diagnosisData.data.externalData.apisUsed.join(", ")}
+`
+    : ""
+}
 
 Signature et cachet du médecin`
   }
@@ -305,6 +528,10 @@ Signature et cachet du médecin`
     const patientName = `${allData?.patientData?.firstName || "Prénom"} ${allData?.patientData?.lastName || "Nom"}`
     const patientAge = allData?.patientData?.age || "XX"
     const today = new Date().toLocaleDateString("fr-FR")
+
+    // Séparer les examens urgents et routiniers
+    const urgentExams = exams.filter((e) => e.urgency === "immediate" || e.timing === "STAT")
+    const routineExams = exams.filter((e) => e.urgency !== "immediate" && e.timing !== "STAT")
 
     return `ORDONNANCE MÉDICALE - EXAMENS COMPLÉMENTAIRES
 
@@ -320,24 +547,64 @@ Nom: ${patientName}
 Né(e) le: ${allData?.patientData?.birthDate || "XX/XX/XXXX"}
 
 DIAGNOSTIC SUSPECTÉ:
-${allData?.diagnosisData?.diagnosis?.primary?.condition || "À préciser"}
-Code ICD-10: ${allData?.diagnosisData?.diagnosis?.primary?.icd10 || ""}
+${allData?.diagnosisData?.data?.comprehensiveDiagnosis?.primary?.condition || "À préciser"}
+Code ICD-10: ${allData?.diagnosisData?.data?.comprehensiveDiagnosis?.primary?.icd10 || ""}
 
-EXAMENS PRESCRITS:
-
-${exams
+${
+  urgentExams.length > 0
+    ? `
+EXAMENS URGENTS:
+${urgentExams
   .map(
     (exam) => `• ${exam.name}${exam.code ? ` (${exam.code})` : ""}
-  Indication: ${exam.indication || "Exploration diagnostique"}${exam.aiRecommended ? " [Recommandé par IA]" : ""}`,
+  Indication: ${exam.indication || "Exploration diagnostique"}
+  Timing: ${exam.timing || "STAT"}${exam.aiRecommended ? " [Recommandé par IA]" : ""}`,
   )
   .join("\n\n")}
+`
+    : ""
+}
+
+${
+  routineExams.length > 0
+    ? `
+EXAMENS PROGRAMMÉS:
+${routineExams
+  .map(
+    (exam) => `• ${exam.name}${exam.code ? ` (${exam.code})` : ""}
+  Indication: ${exam.indication || "Exploration diagnostique"}
+  Timing: ${exam.timing || "48h"}${exam.aiRecommended ? " [Recommandé par IA]" : ""}`,
+  )
+  .join("\n\n")}
+`
+    : ""
+}
 
 RENSEIGNEMENTS CLINIQUES:
 ${allData?.clinicalData?.chiefComplaint || "Exploration diagnostique"}
-${allData?.clinicalData?.historyOfPresentIllness || ""}
-${allData?.clinicalData?.physicalExamination || ""}
+Symptômes: ${Array.isArray(allData?.clinicalData?.symptoms) ? allData.clinicalData.symptoms.join(", ") : allData?.clinicalData?.symptoms || ""}
 
-URGENT: ${exams.some((e) => e.priority === "high") ? "OUI" : "NON"}
+URGENT: ${urgentExams.length > 0 ? "OUI" : "NON"}
+
+${
+  pubmedData?.articles?.length > 0
+    ? `
+RÉFÉRENCES SCIENTIFIQUES (PubMed):
+${pubmedData.articles
+  .slice(0, 2)
+  .map((article: any) => `• ${article.title} - ${article.journal} ${article.year}`)
+  .join("\n")}
+`
+    : ""
+}
+
+${
+  allData?.diagnosisData?.data?.externalData?.apisUsed?.length > 0
+    ? `
+DONNÉES INTÉGRÉES: ${allData.diagnosisData.data.externalData.apisUsed.join(", ")}
+`
+    : ""
+}
 
 Signature et cachet du médecin`
   }
@@ -400,10 +667,37 @@ Signature et cachet du médecin`
     }
   }
 
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "high":
+        return "bg-red-100 text-red-800"
+      case "medium":
+        return "bg-yellow-100 text-yellow-800"
+      case "low":
+        return "bg-green-100 text-green-800"
+      default:
+        return "bg-gray-100 text-gray-800"
+    }
+  }
+
+  const getUrgencyIcon = (urgency: string) => {
+    switch (urgency) {
+      case "immediate":
+        return <AlertTriangle className="h-3 w-3 text-red-600" />
+      case "urgent":
+        return <Clock className="h-3 w-3 text-orange-600" />
+      default:
+        return <Clock className="h-3 w-3 text-gray-600" />
+    }
+  }
+
   const handleSubmit = () => {
     const examData = {
       selectedExams: selectedExams.filter((e) => e.selected),
       prescriptions: generatedPrescriptions,
+      pubmedEvidence: pubmedData,
+      aiRecommendationsUsed: selectedExams.filter((e) => e.selected && e.aiRecommended).length,
+      totalExamsSelected: selectedExams.filter((e) => e.selected).length,
       completedAt: new Date().toISOString(),
     }
     onDataChange(examData)
@@ -420,101 +714,177 @@ Signature et cachet du médecin`
           </Button>
         </div>
 
-        {generatedPrescriptions.map((prescription) => (
-          <Card key={prescription.id}>
+        {/* Evidence PubMed */}
+        {pubmedData?.articles?.length > 0 && (
+          <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  {prescription.title}
-                </CardTitle>
-                <div className="flex gap-2">
-                  <Button onClick={() => downloadPrescription(prescription)} size="sm" variant="outline">
-                    <Download className="h-4 w-4 mr-2" />
-                    Télécharger
-                  </Button>
-                  <Button onClick={() => printPrescription(prescription)} size="sm" variant="outline">
-                    <Printer className="h-4 w-4 mr-2" />
-                    Imprimer
-                  </Button>
-                </div>
-              </div>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-blue-600" />
+                Références Scientifiques PubMed
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <pre className="whitespace-pre-wrap text-sm bg-gray-50 p-4 rounded-lg">{prescription.content}</pre>
+              <div className="space-y-3">
+                {pubmedData.articles.slice(0, 3).map((article: any, index: number) => (
+                  <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
+                    <h4 className="font-semibold text-sm">{article.title}</h4>
+                    <p className="text-xs text-gray-600">
+                      {article.journal} - {article.year}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">{article.abstract?.substring(0, 200)}...</p>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
-        ))}
+        )}
+
+        {/* Prescriptions générées */}
+        <div className="grid gap-6">
+          {generatedPrescriptions.map((prescription) => (
+            <Card key={prescription.id}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    {prescription.type === "biology" ? (
+                      <TestTube className="h-5 w-5 text-blue-600" />
+                    ) : (
+                      <Camera className="h-5 w-5 text-green-600" />
+                    )}
+                    {prescription.title}
+                  </CardTitle>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => downloadPrescription(prescription)}>
+                      <Download className="h-4 w-4 mr-1" />
+                      Télécharger
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => printPrescription(prescription)}>
+                      <Printer className="h-4 w-4 mr-1" />
+                      Imprimer
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4">
+                  <Badge variant="secondary" className="mr-2">
+                    {prescription.exams.length} examens
+                  </Badge>
+                  <Badge variant="secondary">
+                    {prescription.exams.filter((e) => e.aiRecommended).length} recommandés par IA
+                  </Badge>
+                </div>
+                <pre className="whitespace-pre-wrap text-sm bg-gray-50 p-4 rounded-lg border max-h-96 overflow-y-auto">
+                  {prescription.content}
+                </pre>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
         <div className="flex justify-between">
           <Button onClick={onPrevious} variant="outline">
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Retour
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Précédent
           </Button>
           <Button onClick={handleSubmit}>
-            Continuer vers les Prescriptions
-            <ArrowRight className="h-5 w-5 ml-2" />
+            Continuer vers Médicaments
+            <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
       </div>
     )
   }
 
+  const selectedCount = selectedExams.filter((e) => e.selected).length
+  const aiRecommendedCount = selectedExams.filter((e) => e.aiRecommended).length
+  const aiSelectedCount = selectedExams.filter((e) => e.selected && e.aiRecommended).length
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold mb-2">Examens Paracliniques</h2>
-        <p className="text-gray-600">
-          Examens recommandés pour {allData?.patientData?.firstName} {allData?.patientData?.lastName} - Diagnostic:{" "}
-          {allData?.diagnosisData?.diagnosis?.primary?.condition}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Examens Paracliniques</h2>
+          <p className="text-gray-600">Sélectionnez les examens biologiques et d'imagerie nécessaires au diagnostic</p>
+        </div>
+        <div className="text-right">
+          <div className="text-sm text-gray-600">
+            {selectedCount} examens sélectionnés
+            {aiRecommendedCount > 0 && (
+              <div className="text-purple-600">
+                {aiSelectedCount}/{aiRecommendedCount} recommandations IA utilisées
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Examens recommandés par l'IA */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-purple-600" />
-            Examens Recommandés par l'IA
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Alert className="mb-4">
-            <Brain className="h-4 w-4" />
-            <AlertDescription>
-              Ces examens ont été automatiquement sélectionnés par l'IA basés sur le diagnostic:
-              <strong> {allData?.diagnosisData?.diagnosis?.primary?.condition}</strong>
-            </AlertDescription>
-          </Alert>
-          <div className="grid gap-3">
-            {selectedExams
-              .filter((exam) => exam.aiRecommended)
-              .map((exam) => (
-                <div key={exam.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-                  <Checkbox id={exam.id} checked={exam.selected} onCheckedChange={() => toggleExam(exam.id)} />
-                  <div className="flex-1">
-                    <Label htmlFor={exam.id} className="font-medium cursor-pointer">
-                      {exam.name}
-                    </Label>
-                    {exam.code && <p className="text-sm text-gray-500">Code: {exam.code}</p>}
-                    {exam.indication && <p className="text-sm text-gray-600">{exam.indication}</p>}
+      {/* Diagnostic context */}
+      {allData?.diagnosisData?.data?.comprehensiveDiagnosis?.primary && (
+        <Alert>
+          <Brain className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Diagnostic suspecté:</strong> {allData.diagnosisData.data.comprehensiveDiagnosis.primary.condition}
+            <br />
+            <strong>Confiance:</strong> {allData.diagnosisData.data.comprehensiveDiagnosis.primary.confidence}%
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Examens recommandés par IA */}
+      {selectedExams.filter((e) => e.aiRecommended).length > 0 && (
+        <Card className="border-purple-200 bg-purple-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-purple-800">
+              <Brain className="h-5 w-5" />
+              Examens Recommandés par l'IA Diagnostique ({selectedExams.filter((e) => e.aiRecommended).length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3">
+              {selectedExams
+                .filter((e) => e.aiRecommended)
+                .map((exam) => (
+                  <div key={exam.id} className="flex items-start space-x-3 p-3 bg-white rounded-lg border">
+                    <Checkbox
+                      id={exam.id}
+                      checked={exam.selected}
+                      onCheckedChange={() => toggleExam(exam.id)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        {getCategoryIcon(exam.category)}
+                        <Label htmlFor={exam.id} className="font-medium cursor-pointer">
+                          {exam.name}
+                        </Label>
+                        {exam.code && <Badge variant="outline">{exam.code}</Badge>}
+                        {exam.priority && (
+                          <Badge className={getPriorityColor(exam.priority)} variant="secondary">
+                            {exam.priority}
+                          </Badge>
+                        )}
+                        {exam.urgency && (
+                          <div className="flex items-center gap-1">
+                            {getUrgencyIcon(exam.urgency)}
+                            <span className="text-xs">{exam.urgency}</span>
+                          </div>
+                        )}
+                      </div>
+                      {exam.indication && <p className="text-sm text-gray-600 mb-1">{exam.indication}</p>}
+                      {exam.timing && (
+                        <p className="text-xs text-gray-500">
+                          <Clock className="h-3 w-3 inline mr-1" />
+                          Délai: {exam.timing}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-                      <Brain className="h-3 w-3 mr-1" />
-                      IA
-                    </Badge>
-                    {exam.priority && (
-                      <Badge variant={exam.priority === "high" ? "destructive" : "secondary"}>
-                        {exam.priority === "high" ? "Urgent" : "Recommandé"}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              ))}
-          </div>
-        </CardContent>
-      </Card>
+                ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Examens biologiques */}
       <Card>
@@ -527,21 +897,24 @@ Signature et cachet du médecin`
         <CardContent>
           <div className="grid gap-3">
             {selectedExams
-              .filter((exam) => exam.category === "biology")
+              .filter((e) => e.category === "biology" && !e.aiRecommended)
               .map((exam) => (
-                <div key={exam.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-                  <Checkbox id={exam.id} checked={exam.selected} onCheckedChange={() => toggleExam(exam.id)} />
-                  <div className="flex-1">
-                    <Label htmlFor={exam.id} className="font-medium cursor-pointer">
-                      {exam.name}
-                    </Label>
-                    {exam.code && <p className="text-sm text-gray-500">Code: {exam.code}</p>}
+                <div key={exam.id} className="flex items-start space-x-3 p-2 hover:bg-gray-50 rounded">
+                  <Checkbox
+                    id={exam.id}
+                    checked={exam.selected}
+                    onCheckedChange={() => toggleExam(exam.id)}
+                    className="mt-1"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Label htmlFor={exam.id} className="font-medium cursor-pointer">
+                        {exam.name}
+                      </Label>
+                      {exam.code && <Badge variant="outline">{exam.code}</Badge>}
+                    </div>
                     {exam.indication && <p className="text-sm text-gray-600">{exam.indication}</p>}
                   </div>
-                  <Badge className={getCategoryColor(exam.category)}>
-                    {getCategoryIcon(exam.category)}
-                    <span className="ml-1">Biologie</span>
-                  </Badge>
                 </div>
               ))}
           </div>
@@ -559,21 +932,24 @@ Signature et cachet du médecin`
         <CardContent>
           <div className="grid gap-3">
             {selectedExams
-              .filter((exam) => exam.category === "imaging")
+              .filter((e) => e.category === "imaging" && !e.aiRecommended)
               .map((exam) => (
-                <div key={exam.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-                  <Checkbox id={exam.id} checked={exam.selected} onCheckedChange={() => toggleExam(exam.id)} />
-                  <div className="flex-1">
-                    <Label htmlFor={exam.id} className="font-medium cursor-pointer">
-                      {exam.name}
-                    </Label>
-                    {exam.code && <p className="text-sm text-gray-500">Code: {exam.code}</p>}
+                <div key={exam.id} className="flex items-start space-x-3 p-2 hover:bg-gray-50 rounded">
+                  <Checkbox
+                    id={exam.id}
+                    checked={exam.selected}
+                    onCheckedChange={() => toggleExam(exam.id)}
+                    className="mt-1"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Label htmlFor={exam.id} className="font-medium cursor-pointer">
+                        {exam.name}
+                      </Label>
+                      {exam.code && <Badge variant="outline">{exam.code}</Badge>}
+                    </div>
                     {exam.indication && <p className="text-sm text-gray-600">{exam.indication}</p>}
                   </div>
-                  <Badge className={getCategoryColor(exam.category)}>
-                    {getCategoryIcon(exam.category)}
-                    <span className="ml-1">Imagerie</span>
-                  </Badge>
                 </div>
               ))}
           </div>
@@ -589,105 +965,58 @@ Signature et cachet du médecin`
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-2">
-                <Label htmlFor="customExam">Nom de l'examen</Label>
-                <Input
-                  id="customExam"
-                  value={customExam}
-                  onChange={(e) => setCustomExam(e.target.value)}
-                  placeholder="Ex: Dosage vitamine D"
-                />
-              </div>
-              <div>
-                <Label htmlFor="customExamCode">Code (optionnel)</Label>
-                <Input
-                  id="customExamCode"
-                  value={customExamCode}
-                  onChange={(e) => setCustomExamCode(e.target.value)}
-                  placeholder="Ex: HQZZ020"
-                />
-              </div>
-            </div>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Nom de l'examen"
+              value={customExam}
+              onChange={(e) => setCustomExam(e.target.value)}
+              className="flex-1"
+            />
+            <Input
+              placeholder="Code (optionnel)"
+              value={customExamCode}
+              onChange={(e) => setCustomExamCode(e.target.value)}
+              className="w-32"
+            />
             <Button onClick={addCustomExam} disabled={!customExam.trim()}>
-              <Plus className="h-4 w-4 mr-2" />
-              Ajouter l'Examen
+              <Plus className="h-4 w-4" />
             </Button>
           </div>
 
-          {/* Afficher les examens personnalisés ajoutés */}
-          {selectedExams.filter((exam) => exam.category === "custom").length > 0 && (
-            <div className="mt-6">
-              <h4 className="font-medium mb-3">Examens Personnalisés Ajoutés</h4>
-              <div className="space-y-2">
-                {selectedExams
-                  .filter((exam) => exam.category === "custom")
-                  .map((exam) => (
-                    <div key={exam.id} className="flex items-center space-x-3 p-3 border rounded-lg bg-gray-50">
-                      <Checkbox id={exam.id} checked={exam.selected} onCheckedChange={() => toggleExam(exam.id)} />
-                      <div className="flex-1">
-                        <Label htmlFor={exam.id} className="font-medium cursor-pointer">
-                          {exam.name}
-                        </Label>
-                        {exam.code && <p className="text-sm text-gray-500">Code: {exam.code}</p>}
-                      </div>
-                      <Badge className={getCategoryColor(exam.category)}>
-                        {getCategoryIcon(exam.category)}
-                        <span className="ml-1">Personnalisé</span>
-                      </Badge>
-                    </div>
-                  ))}
-              </div>
+          {/* Examens personnalisés ajoutés */}
+          {selectedExams.filter((e) => e.category === "custom").length > 0 && (
+            <div className="mt-4 space-y-2">
+              <Separator />
+              <h4 className="font-medium">Examens Personnalisés</h4>
+              {selectedExams
+                .filter((e) => e.category === "custom")
+                .map((exam) => (
+                  <div key={exam.id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded">
+                    <Checkbox id={exam.id} checked={exam.selected} onCheckedChange={() => toggleExam(exam.id)} />
+                    <Label htmlFor={exam.id} className="flex-1 cursor-pointer">
+                      {exam.name} {exam.code && `(${exam.code})`}
+                    </Label>
+                  </div>
+                ))}
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Résumé des examens sélectionnés */}
-      {selectedExams.filter((exam) => exam.selected).length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Examens Sélectionnés ({selectedExams.filter((exam) => exam.selected).length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {selectedExams
-                .filter((exam) => exam.selected)
-                .map((exam) => (
-                  <div key={exam.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                    <span className="font-medium">{exam.name}</span>
-                    <div className="flex items-center gap-2">
-                      {exam.code && <span className="text-sm text-gray-500">{exam.code}</span>}
-                      <Badge className={getCategoryColor(exam.category)}>{getCategoryIcon(exam.category)}</Badge>
-                      {exam.aiRecommended && (
-                        <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-                          IA
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <Separator />
-
+      {/* Actions */}
       <div className="flex justify-between">
         <Button onClick={onPrevious} variant="outline">
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Retour Diagnostic
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Précédent
         </Button>
-        <div className="flex gap-4">
-          <Button
-            onClick={generatePrescriptions}
-            disabled={selectedExams.filter((exam) => exam.selected).length === 0}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
+        <div className="flex gap-2">
+          <Button onClick={generatePrescriptions} disabled={selectedCount === 0} variant="outline">
             <FileText className="h-4 w-4 mr-2" />
-            Générer Ordonnances ({selectedExams.filter((exam) => exam.selected).length})
+            Générer Ordonnances ({selectedCount})
+          </Button>
+          <Button onClick={handleSubmit} disabled={selectedCount === 0}>
+            Continuer vers Médicaments
+            <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
       </div>
