@@ -1,134 +1,250 @@
 import { type NextRequest, NextResponse } from "next/server"
-import OpenAI from "openai"
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+import { generateText } from "ai"
+import { openai } from "@ai-sdk/openai"
 
 export async function POST(request: NextRequest) {
   try {
-    const { patientData, clinicalData, numberOfQuestions = 8, focusArea = "diagnostic général" } = await request.json()
+    const { patientData, clinicalData } = await request.json()
 
     if (!patientData || !clinicalData) {
-      return NextResponse.json({ success: false, error: "Données patient et cliniques requises" }, { status: 400 })
+      return NextResponse.json({ error: "Données patient et cliniques requises" }, { status: 400 })
     }
 
-    // Prompt optimisé avec plus de tokens pour des questions ultra-personnalisées
-    const prompt = `Tu es un médecin expert spécialisé dans l'interrogatoire médical personnalisé. 
+    const prompt = `
+Tu es un médecin expert spécialisé dans l'interrogatoire médical. Génère exactement 8 questions personnalisées et pertinentes pour ce patient.
 
 DONNÉES PATIENT:
 - Nom: ${patientData.firstName} ${patientData.lastName}
-- Âge: ${patientData.age} ans, Sexe: ${patientData.gender}
-- Poids: ${patientData.weight}kg, Taille: ${patientData.height}cm
-- Groupe sanguin: ${patientData.bloodType}
-- Antécédents médicaux: ${patientData.medicalHistory?.join(", ") || "Aucun"}
-- Médicaments actuels: ${patientData.currentMedications?.join(", ") || "Aucun"}
+- Âge: ${patientData.age} ans
+- Sexe: ${patientData.gender}
+- Poids: ${patientData.weight} kg
+- Taille: ${patientData.height} cm
+- Antécédents: ${patientData.medicalHistory?.join(", ") || "Aucun"}
 - Allergies: ${patientData.allergies?.join(", ") || "Aucune"}
-- Habitudes de vie: Tabac: ${patientData.lifeHabits?.smoking}, Alcool: ${patientData.lifeHabits?.alcohol}, Activité physique: ${patientData.lifeHabits?.physicalActivity}
+- Médicaments actuels: ${patientData.currentMedications?.join(", ") || "Aucun"}
+- Habitudes de vie:
+  * Tabac: ${patientData.lifeHabits?.smoking || "Non renseigné"}
+  * Alcool: ${patientData.lifeHabits?.alcohol || "Non renseigné"}
+  * Activité physique: ${patientData.lifeHabits?.physicalActivity || "Non renseigné"}
 
 DONNÉES CLINIQUES:
 - Motif de consultation: ${clinicalData.chiefComplaint}
-- Symptômes actuels: ${clinicalData.symptoms?.join(", ")}
+- Symptômes présents: ${clinicalData.symptoms?.join(", ") || "Aucun"}
 - Durée des symptômes: ${clinicalData.symptomDuration}
-- Signes vitaux: T°${clinicalData.vitalSigns?.temperature}°C, FC:${clinicalData.vitalSigns?.heartRate}/min, TA:${clinicalData.vitalSigns?.bloodPressureSystolic}/${clinicalData.vitalSigns?.bloodPressureDiastolic}mmHg
+- Signes vitaux:
+  * Température: ${clinicalData.vitalSigns?.temperature || "Non prise"}°C
+  * Fréquence cardiaque: ${clinicalData.vitalSigns?.heartRate || "Non prise"} bpm
+  * Tension artérielle: ${clinicalData.vitalSigns?.bloodPressureSystolic || "Non prise"}/${clinicalData.vitalSigns?.bloodPressureDiastolic || "Non prise"} mmHg
 - Échelle de douleur: ${clinicalData.painScale}/10
 - Impact fonctionnel: ${clinicalData.functionalStatus}
-- Notes cliniques: ${clinicalData.notes}
+- Notes cliniques: ${clinicalData.notes || "Aucune"}
 
-MISSION: Génère ${numberOfQuestions} questions d'interrogatoire médical ULTRA-PERSONNALISÉES et STRATÉGIQUES pour ce patient spécifique.
-
-CRITÈRES D'EXCELLENCE:
-1. PERSONNALISATION MAXIMALE: Chaque question doit être adaptée à l'âge, sexe, antécédents, médicaments et contexte spécifique
-2. PERTINENCE DIAGNOSTIQUE: Questions orientées vers les hypothèses diagnostiques les plus probables
-3. HIÉRARCHISATION: Questions prioritaires d'abord (urgences, complications)
-4. SPÉCIFICITÉ CLINIQUE: Éviter les questions génériques, privilégier la précision
-5. APPROCHE SYSTÉMIQUE: Couvrir tous les aspects pertinents (symptômes, contexte, facteurs de risque)
+INSTRUCTIONS POUR LES QUESTIONS:
+1. Génère exactement 8 questions spécifiques à ce cas clinique
+2. Adapte les questions à l'âge, au sexe et aux antécédents du patient
+3. Priorise les questions qui aideront au diagnostic différentiel
+4. Inclus des questions sur les facteurs déclenchants, aggravants et améliorants
+5. Pose des questions sur l'évolution temporelle des symptômes
+6. Inclus des questions sur les signes associés non mentionnés
+7. Adapte le vocabulaire à un interrogatoire médical professionnel
+8. Évite les questions redondantes avec les données déjà collectées
 
 TYPES DE QUESTIONS À PRIVILÉGIER:
-- Questions de caractérisation symptomatique précise
-- Questions sur les facteurs déclenchants/aggravants/améliorants
-- Questions sur l'évolution temporelle détaillée
-- Questions sur les signes associés spécifiques
-- Questions sur l'impact fonctionnel et qualité de vie
-- Questions sur les facteurs de risque personnalisés
-- Questions sur l'observance thérapeutique si applicable
-- Questions sur l'environnement et expositions
-- Questions sur les antécédents familiaux pertinents
-- Questions sur les habitudes de vie spécifiques
+- Questions fermées (oui/non) pour les signes spécifiques
+- Questions à choix multiples pour les caractéristiques (intensité, fréquence, etc.)
+- Questions ouvertes courtes pour les descriptions précises
+- Questions sur l'historique familial si pertinent
+- Questions sur les facteurs environnementaux ou professionnels
 
-ADAPTATION SELON LE PROFIL:
-- Patient âgé (>65 ans): Questions sur autonomie, cognition, chutes, polymédication
-- Femme en âge de procréer: Questions gynéco-obstétricales, contraception, grossesse
-- Patient diabétique: Questions sur contrôle glycémique, complications, observance
-- Patient cardiaque: Questions sur tolérance à l'effort, œdèmes, douleurs thoraciques
-- Patient psychiatrique: Questions sur humeur, sommeil, idées suicidaires, traitement
-
-FORMAT DE RÉPONSE OBLIGATOIRE (JSON):
+FORMAT DE RÉPONSE REQUIS (JSON strict):
 {
-  "success": true,
   "questions": [
     {
       "id": 1,
-      "question": "Question ultra-personnalisée et précise",
-      "type": "symptom_characterization|temporal_evolution|associated_signs|functional_impact|risk_factors|medication_compliance|environmental|family_history|lifestyle|emergency_signs",
-      "category": "cardiovascular|respiratory|neurological|digestive|urogenital|musculoskeletal|dermatological|psychiatric|general|emergency",
-      "priority": "high|medium|low",
-      "rationale": "Justification médicale détaillée de pourquoi cette question est cruciale pour ce patient spécifique",
-      "expectedAnswerType": "text|number|boolean|multiple_choice|scale",
-      "options": ["option1", "option2", "option3"] // Si applicable
+      "question": "Question précise et médicalement pertinente?",
+      "type": "yes_no",
+      "category": "symptomatologie",
+      "priority": "high",
+      "rationale": "Justification médicale de cette question"
+    },
+    {
+      "id": 2,
+      "question": "Autre question adaptée au cas?",
+      "type": "multiple_choice",
+      "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+      "category": "antécédents",
+      "priority": "medium",
+      "rationale": "Pourquoi cette question est importante"
+    },
+    {
+      "id": 3,
+      "question": "Question ouverte courte?",
+      "type": "short_text",
+      "category": "évolution",
+      "priority": "high",
+      "rationale": "Justification clinique"
     }
   ],
-  "metadata": {
-    "patientProfile": "Profil clinique synthétique",
-    "diagnosticHypotheses": ["Hypothèse 1", "Hypothèse 2", "Hypothèse 3"],
-    "questioningStrategy": "Stratégie d'interrogatoire adoptée",
-    "priorityFocus": "Focus prioritaire de l'interrogatoire"
+  "clinical_context": {
+    "suspected_conditions": ["Condition 1", "Condition 2"],
+    "key_differentials": ["Diagnostic différentiel 1", "Diagnostic différentiel 2"],
+    "red_flags_to_explore": ["Signe d'alarme 1", "Signe d'alarme 2"]
+  },
+  "personalization_factors": {
+    "age_specific": "Considérations liées à l'âge",
+    "gender_specific": "Considérations liées au sexe",
+    "comorbidity_focus": "Focus sur les comorbidités"
   }
 }
 
-ATTENTION: Les questions doivent être formulées de manière professionnelle mais compréhensible pour le patient, en français médical adapté.`
+TYPES AUTORISÉS: "yes_no", "multiple_choice", "short_text", "scale_1_10"
+CATÉGORIES: "symptomatologie", "antécédents", "évolution", "facteurs_risque", "signes_associés", "impact_fonctionnel"
+PRIORITÉS: "high", "medium", "low"
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content:
-            "Tu es un médecin expert en interrogatoire médical personnalisé. Tu génères des questions ultra-spécifiques et pertinentes selon le profil patient.",
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      max_tokens: 8000, // Augmenté pour des réponses plus détaillées
+Génère maintenant les 8 questions personnalisées pour ce patient en JSON strict.
+`
+
+    const result = await generateText({
+      model: openai("gpt-4o"),
+      prompt,
+      maxTokens: 8000,
       temperature: 0.1,
-      response_format: { type: "json_object" },
     })
 
-    const response = completion.choices[0]?.message?.content
-    if (!response) {
-      throw new Error("Pas de réponse de OpenAI")
+    // Parse du JSON avec gestion d'erreur robuste
+    let questionsData
+    try {
+      // Nettoyer le texte avant parsing
+      const cleanedText = result.text.trim()
+      const jsonMatch = cleanedText.match(/\{[\s\S]*\}/)
+
+      if (jsonMatch) {
+        questionsData = JSON.parse(jsonMatch[0])
+      } else {
+        throw new Error("Format JSON non trouvé")
+      }
+    } catch (parseError) {
+      console.error("Erreur parsing JSON:", parseError)
+
+      // Fallback avec questions génériques
+      questionsData = {
+        questions: [
+          {
+            id: 1,
+            question: "Avez-vous déjà ressenti ces symptômes auparavant?",
+            type: "yes_no",
+            category: "antécédents",
+            priority: "high",
+            rationale: "Évaluer la récurrence des symptômes",
+          },
+          {
+            id: 2,
+            question: "Les symptômes s'aggravent-ils à un moment particulier de la journée?",
+            type: "multiple_choice",
+            options: ["Matin", "Après-midi", "Soir", "Nuit", "Aucun moment particulier"],
+            category: "évolution",
+            priority: "medium",
+            rationale: "Identifier les patterns temporels",
+          },
+          {
+            id: 3,
+            question: "Qu'est-ce qui améliore ou aggrave vos symptômes?",
+            type: "short_text",
+            category: "facteurs_risque",
+            priority: "high",
+            rationale: "Identifier les facteurs modulateurs",
+          },
+          {
+            id: 4,
+            question: "Avez-vous des antécédents familiaux de maladies similaires?",
+            type: "yes_no",
+            category: "antécédents",
+            priority: "medium",
+            rationale: "Évaluer les facteurs génétiques",
+          },
+          {
+            id: 5,
+            question: "Sur une échelle de 1 à 10, comment évaluez-vous l'impact sur votre qualité de vie?",
+            type: "scale_1_10",
+            category: "impact_fonctionnel",
+            priority: "medium",
+            rationale: "Mesurer l'impact fonctionnel",
+          },
+          {
+            id: 6,
+            question: "Avez-vous remarqué d'autres symptômes associés?",
+            type: "short_text",
+            category: "signes_associés",
+            priority: "high",
+            rationale: "Identifier les signes associés non mentionnés",
+          },
+          {
+            id: 7,
+            question: "Avez-vous récemment voyagé ou été exposé à des environnements particuliers?",
+            type: "yes_no",
+            category: "facteurs_risque",
+            priority: "medium",
+            rationale: "Évaluer les expositions environnementales",
+          },
+          {
+            id: 8,
+            question: "Prenez-vous actuellement des médicaments en vente libre ou des suppléments?",
+            type: "yes_no",
+            category: "antécédents",
+            priority: "medium",
+            rationale: "Compléter l'anamnèse médicamenteuse",
+          },
+        ],
+        clinical_context: {
+          suspected_conditions: ["À déterminer selon les symptômes"],
+          key_differentials: ["Diagnostic différentiel à préciser"],
+          red_flags_to_explore: ["Signes d'alarme à surveiller"],
+        },
+        personalization_factors: {
+          age_specific: `Adapté à un patient de ${patientData.age} ans`,
+          gender_specific: `Considérations pour le sexe ${patientData.gender}`,
+          comorbidity_focus: "Basé sur les antécédents mentionnés",
+        },
+      }
     }
 
-    const parsedResponse = JSON.parse(response)
+    // Validation des données
+    if (!questionsData.questions || !Array.isArray(questionsData.questions)) {
+      throw new Error("Format de questions invalide")
+    }
 
-    if (!parsedResponse.success || !parsedResponse.questions) {
-      throw new Error("Format de réponse invalide")
+    // S'assurer qu'on a exactement 8 questions
+    if (questionsData.questions.length !== 8) {
+      questionsData.questions = questionsData.questions.slice(0, 8)
+      while (questionsData.questions.length < 8) {
+        questionsData.questions.push({
+          id: questionsData.questions.length + 1,
+          question: `Question complémentaire ${questionsData.questions.length + 1}?`,
+          type: "yes_no",
+          category: "symptomatologie",
+          priority: "medium",
+          rationale: "Question générée automatiquement",
+        })
+      }
     }
 
     return NextResponse.json({
       success: true,
-      questions: parsedResponse.questions,
-      metadata: parsedResponse.metadata,
-      usage: completion.usage,
+      data: questionsData,
+      metadata: {
+        generatedAt: new Date().toISOString(),
+        patientAge: patientData.age,
+        patientGender: patientData.gender,
+        chiefComplaint: clinicalData.chiefComplaint,
+        tokensUsed: result.usage?.totalTokens || 0,
+      },
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error("Erreur génération questions:", error)
     return NextResponse.json(
       {
-        success: false,
-        error: error.message || "Erreur lors de la génération des questions",
+        error: "Erreur lors de la génération des questions",
+        details: error instanceof Error ? error.message : "Erreur inconnue",
       },
       { status: 500 },
     )

@@ -1,223 +1,285 @@
 import { type NextRequest, NextResponse } from "next/server"
-import OpenAI from "openai"
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+import { generateText } from "ai"
+import { openai } from "@ai-sdk/openai"
 
 export async function POST(request: NextRequest) {
   try {
     const { allData } = await request.json()
 
-    if (!allData) {
-      return NextResponse.json({ success: false, error: "Données complètes requises" }, { status: 400 })
+    if (!allData || !allData.patientData || !allData.clinicalData) {
+      return NextResponse.json({ error: "Données complètes requises pour générer le rapport" }, { status: 400 })
     }
 
     const { patientData, clinicalData, questionsData, diagnosisData, examsData, medicationData } = allData
 
-    // Prompt ultra-détaillé pour un rapport de consultation complet
-    const prompt = `Tu es un médecin expert rédacteur de comptes-rendus de consultation. Tu dois générer un rapport médical complet, structuré et professionnel.
+    // Préparer les données pour le prompt
+    const questionsResponses =
+      questionsData?.responses?.map((r: any) => `${r.question}: ${r.answer}`).join("\n") ||
+      "Aucune question supplémentaire"
 
-DONNÉES COMPLÈTES DE LA CONSULTATION:
+    const selectedExams =
+      examsData?.selectedExams?.map((exam: any) => `${exam.name} - ${exam.justification}`).join("\n") ||
+      "Aucun examen prescrit"
 
-PATIENT:
-- Nom: ${patientData.firstName} ${patientData.lastName}
-- Âge: ${patientData.age} ans, Sexe: ${patientData.gender}
-- Poids: ${patientData.weight}kg, Taille: ${patientData.height}cm
-- Groupe sanguin: ${patientData.bloodType}
-- Antécédents: ${patientData.medicalHistory?.join(", ") || "Aucun"}
-- Traitements: ${patientData.currentMedications?.join(", ") || "Aucun"}
-- Allergies: ${patientData.allergies?.join(", ") || "Aucune"}
-- Habitudes: Tabac: ${patientData.lifeHabits?.smoking}, Alcool: ${patientData.lifeHabits?.alcohol}
+    const selectedMedications =
+      medicationData?.selectedMedications
+        ?.map((med: any) => `${med.name} ${med.dosage} - ${med.indication}`)
+        .join("\n") || "Aucun médicament prescrit"
 
-CONSULTATION:
-- Motif: ${clinicalData.chiefComplaint}
-- Symptômes: ${clinicalData.symptoms?.join(", ")}
-- Durée: ${clinicalData.symptomDuration}
-- Signes vitaux: T°${clinicalData.vitalSigns?.temperature}°C, FC:${clinicalData.vitalSigns?.heartRate}, TA:${clinicalData.vitalSigns?.bloodPressureSystolic}/${clinicalData.vitalSigns?.bloodPressureDiastolic}
-- Douleur: ${clinicalData.painScale}/10
-- Impact: ${clinicalData.functionalStatus}
+    const prompt = `
+Tu es un médecin expert rédigeant un compte-rendu de consultation médical complet et professionnel. Génère un rapport structuré selon les standards hospitaliers français.
+
+DONNÉES COMPLÈTES DU PATIENT:
+
+IDENTITÉ ET DONNÉES DÉMOGRAPHIQUES:
+- Nom: ${patientData.lastName}
+- Prénom: ${patientData.firstName}
+- Date de naissance: ${patientData.dateOfBirth}
+- Âge: ${patientData.age} ans
+- Sexe: ${patientData.gender}
+- Poids: ${patientData.weight} kg
+- Taille: ${patientData.height} cm
+- IMC: ${(patientData.weight / Math.pow(patientData.height / 100, 2)).toFixed(1)} kg/m²
+- Groupe sanguin: ${patientData.bloodType || "Non déterminé"}
+- Assurance: ${patientData.insuranceInfo?.provider || "Non renseigné"} - ${patientData.insuranceInfo?.policyNumber || ""}
+
+ANTÉCÉDENTS ET CONTEXTE MÉDICAL:
+- Antécédents médicaux: ${patientData.medicalHistory?.join(", ") || "Aucun antécédent notable"}
+- Allergies connues: ${patientData.allergies?.join(", ") || "Aucune allergie connue"}
+- Traitements habituels: ${patientData.currentMedications?.join(", ") || "Aucun traitement habituel"}
+- Habitudes de vie:
+  * Tabagisme: ${patientData.lifeHabits?.smoking || "Non renseigné"}
+  * Consommation d'alcool: ${patientData.lifeHabits?.alcohol || "Non renseigné"}
+  * Activité physique: ${patientData.lifeHabits?.physicalActivity || "Non renseigné"}
+
+MOTIF DE CONSULTATION ET ANAMNÈSE:
+- Motif principal: ${clinicalData.chiefComplaint}
+- Symptômes présents: ${clinicalData.symptoms?.join(", ") || "Aucun symptôme spécifique"}
+- Durée d'évolution: ${clinicalData.symptomDuration}
+- Échelle de douleur: ${clinicalData.painScale}/10
+- Retentissement fonctionnel: ${clinicalData.functionalStatus || "Non évalué"}
+- Notes cliniques: ${clinicalData.notes || "Aucune observation particulière"}
+
+EXAMEN CLINIQUE:
+- Température: ${clinicalData.vitalSigns?.temperature || "Non prise"}°C
+- Fréquence cardiaque: ${clinicalData.vitalSigns?.heartRate || "Non prise"} bpm
+- Tension artérielle: ${clinicalData.vitalSigns?.bloodPressureSystolic || "Non prise"}/${clinicalData.vitalSigns?.bloodPressureDiastolic || "Non prise"} mmHg
 
 INTERROGATOIRE COMPLÉMENTAIRE:
-${questionsData?.responses?.map((r: any) => `- ${r.question}: ${r.answer}`).join("\n") || "Non réalisé"}
+${questionsResponses}
 
-DIAGNOSTIC IA:
-- Principal: ${diagnosisData?.data?.diagnosticAnalysis?.primaryDiagnosis?.condition || "Non généré"}
-- Confiance: ${diagnosisData?.data?.diagnosticAnalysis?.primaryDiagnosis?.confidence || 0}%
-- Différentiels: ${diagnosisData?.data?.diagnosticAnalysis?.differentialDiagnoses?.map((d: any) => d.condition).join(", ") || "Non générés"}
+DIAGNOSTIC ET ANALYSE MÉDICALE:
+- Diagnostic principal: ${diagnosisData?.data?.primary_diagnosis?.condition || "En cours d'établissement"}
+- Code CIM-10: ${diagnosisData?.data?.primary_diagnosis?.icd10_code || "À préciser"}
+- Niveau de confiance diagnostique: ${diagnosisData?.data?.quality_indicators?.diagnostic_confidence || 0}%
+- Diagnostics différentiels: ${diagnosisData?.data?.differential_diagnoses?.map((d: any) => d.condition).join(", ") || "À préciser"}
 
-EXAMENS PRESCRITS:
-${examsData?.selectedExams?.map((e: any) => `- ${e.exam}: ${e.indication}`).join("\n") || "Aucun"}
+EXAMENS COMPLÉMENTAIRES PRESCRITS:
+${selectedExams}
 
-TRAITEMENTS PRESCRITS:
-${medicationData?.selectedMedications?.map((m: any) => `- ${m.medication}: ${m.dosage}`).join("\n") || "Aucun"}
+TRAITEMENT PRESCRIT:
+${selectedMedications}
 
-MISSION: Génère un compte-rendu de consultation médical complet, professionnel et structuré selon les standards hospitaliers.
+INSTRUCTIONS POUR LE RAPPORT:
+1. Génère un compte-rendu médical professionnel et structuré
+2. Utilise la terminologie médicale appropriée
+3. Respecte la structure standard des comptes-rendus hospitaliers français
+4. Inclus toutes les sections pertinentes avec détails cliniques
+5. Ajoute des recommandations de suivi et surveillance
+6. Mentionne les éléments de traçabilité et qualité
+7. Adapte le niveau de détail à un rapport de consultation spécialisée
+8. Inclus les références aux examens et traitements prescrits
 
-FORMAT OBLIGATOIRE (JSON):
+FORMAT DE RÉPONSE REQUIS (JSON strict):
 {
-  "success": true,
-  "consultationReport": {
-    "header": {
-      "reportType": "Compte-rendu de consultation",
-      "date": "${new Date().toLocaleDateString("fr-FR")}",
-      "time": "${new Date().toLocaleTimeString("fr-FR")}",
-      "physician": "Dr. TIBOK IA DOCTOR",
-      "service": "Médecine Générale - Diagnostic IA",
-      "reportId": "CR-${Date.now()}"
-    },
-    "patientIdentification": {
-      "lastName": "${patientData.lastName}",
-      "firstName": "${patientData.firstName}",
-      "dateOfBirth": "${patientData.dateOfBirth}",
-      "age": "${patientData.age} ans",
-      "gender": "${patientData.gender}",
-      "bloodType": "${patientData.bloodType}",
-      "insurance": "${patientData.insuranceInfo?.provider} - ${patientData.insuranceInfo?.policyNumber}"
-    },
-    "consultationContext": {
-      "consultationType": "Consultation de médecine générale",
-      "referringPhysician": "Auto-consultation",
-      "consultationReason": "${clinicalData.chiefComplaint}",
-      "consultationDate": "${new Date().toLocaleDateString("fr-FR")}"
-    },
-    "medicalHistory": {
-      "personalHistory": ${JSON.stringify(patientData.medicalHistory || [])},
-      "currentMedications": ${JSON.stringify(patientData.currentMedications || [])},
-      "allergies": ${JSON.stringify(patientData.allergies || [])},
-      "lifeHabits": {
-        "smoking": "${patientData.lifeHabits?.smoking}",
-        "alcohol": "${patientData.lifeHabits?.alcohol}",
-        "physicalActivity": "${patientData.lifeHabits?.physicalActivity}"
-      }
-    },
-    "clinicalExamination": {
-      "chiefComplaint": "${clinicalData.chiefComplaint}",
-      "historyOfPresentIllness": "Synthèse narrative détaillée de l'histoire de la maladie actuelle",
-      "reviewOfSystems": "Revue des systèmes basée sur les symptômes rapportés",
-      "physicalExamination": {
-        "generalAppearance": "Description de l'état général du patient",
-        "vitalSigns": {
-          "temperature": "${clinicalData.vitalSigns?.temperature}°C",
-          "heartRate": "${clinicalData.vitalSigns?.heartRate}/min",
-          "bloodPressure": "${clinicalData.vitalSigns?.bloodPressureSystolic}/${clinicalData.vitalSigns?.bloodPressureDiastolic} mmHg",
-          "bmi": "${(patientData.weight / Math.pow(patientData.height / 100, 2)).toFixed(1)}"
-        },
-        "systemicExamination": "Examen systémique détaillé par appareil",
-        "painAssessment": "${clinicalData.painScale}/10",
-        "functionalStatus": "${clinicalData.functionalStatus}"
-      }
-    },
-    "diagnosticAssessment": {
-      "clinicalImpression": "Impression clinique synthétique",
-      "primaryDiagnosis": {
-        "diagnosis": "${diagnosisData?.data?.diagnosticAnalysis?.primaryDiagnosis?.condition || "À préciser"}",
-        "icd10Code": "${diagnosisData?.data?.diagnosticAnalysis?.primaryDiagnosis?.icd10Code || ""}",
-        "confidence": "${diagnosisData?.data?.diagnosticAnalysis?.primaryDiagnosis?.confidence || 0}%",
-        "severity": "${diagnosisData?.data?.diagnosticAnalysis?.primaryDiagnosis?.severity || "À évaluer"}",
-        "clinicalReasoning": "Raisonnement clinique détaillé justifiant le diagnostic"
-      },
-      "differentialDiagnoses": "Liste des diagnostics différentiels avec probabilités",
-      "riskAssessment": "Évaluation des risques immédiats et à long terme"
-    },
-    "investigationsAndResults": {
-      "orderedTests": "Liste des examens prescrits avec indications",
-      "pendingResults": "Examens en attente de résultats",
-      "interpretations": "Interprétation des résultats disponibles"
-    },
-    "therapeuticPlan": {
-      "immediateManagement": "Prise en charge immédiate",
-      "medications": "Prescriptions médicamenteuses détaillées",
-      "nonPharmacological": "Interventions non médicamenteuses",
-      "lifestyle": "Recommandations hygiéno-diététiques"
-    },
-    "followUpPlan": {
-      "nextAppointment": "Prochaine consultation programmée",
-      "monitoring": "Surveillance nécessaire",
-      "warningSignsToWatch": "Signes d'alarme à surveiller",
-      "emergencyInstructions": "Instructions en cas d'urgence"
-    },
-    "patientEducation": {
-      "diseaseExplanation": "Explication de la pathologie au patient",
-      "treatmentExplanation": "Explication du traitement",
-      "lifestyleAdvice": "Conseils de mode de vie",
-      "resources": "Ressources éducatives fournies"
-    },
-    "professionalNotes": {
-      "clinicalComplexity": "Évaluation de la complexité du cas",
-      "aiAssistance": "Utilisation de l'IA dans le diagnostic",
-      "qualityIndicators": "Indicateurs de qualité de la consultation",
-      "continuityOfCare": "Éléments pour la continuité des soins"
-    },
-    "signatures": {
-      "physician": "Dr. TIBOK IA DOCTOR",
-      "date": "${new Date().toLocaleDateString("fr-FR")}",
-      "electronicSignature": "Signature électronique validée",
-      "medicalLicense": "Système IA certifié médical"
+  "header": {
+    "document_type": "Compte-rendu de consultation médicale",
+    "establishment": "TIBOK IA DOCTOR - Système d'aide au diagnostic",
+    "date": "Date de consultation",
+    "doctor": "Dr. Assistant IA",
+    "specialty": "Médecine générale assistée par IA"
+  },
+  "patient_identification": {
+    "last_name": "Nom du patient",
+    "first_name": "Prénom du patient",
+    "birth_date": "Date de naissance",
+    "age": "Âge en années",
+    "gender": "Sexe",
+    "weight": "Poids en kg",
+    "height": "Taille en cm",
+    "bmi": "IMC calculé",
+    "blood_type": "Groupe sanguin",
+    "insurance": "Informations d'assurance"
+  },
+  "medical_history": {
+    "past_medical_history": "Antécédents médicaux détaillés",
+    "allergies": "Allergies connues",
+    "current_medications": "Traitements en cours",
+    "lifestyle_factors": {
+      "smoking": "Statut tabagique",
+      "alcohol": "Consommation d'alcool",
+      "physical_activity": "Activité physique"
     }
   },
-  "metadata": {
-    "generationTimestamp": "${new Date().toISOString()}",
-    "aiModel": "GPT-4o",
-    "reportVersion": "1.0",
-    "dataIntegrity": "Vérifiée",
-    "confidentiality": "Confidentiel médical"
+  "consultation_details": {
+    "chief_complaint": "Motif principal de consultation",
+    "history_of_present_illness": "Histoire de la maladie actuelle détaillée",
+    "symptom_timeline": "Chronologie des symptômes",
+    "functional_impact": "Impact sur les activités quotidiennes",
+    "pain_assessment": "Évaluation de la douleur"
+  },
+  "physical_examination": {
+    "vital_signs": {
+      "temperature": "Température corporelle",
+      "heart_rate": "Fréquence cardiaque",
+      "blood_pressure": "Tension artérielle",
+      "general_condition": "État général"
+    },
+    "clinical_findings": "Résultats de l'examen physique",
+    "additional_observations": "Observations cliniques supplémentaires"
+  },
+  "complementary_questioning": {
+    "targeted_questions": "Questions spécifiques posées",
+    "patient_responses": "Réponses du patient",
+    "clinical_relevance": "Pertinence clinique des réponses"
+  },
+  "diagnostic_assessment": {
+    "primary_diagnosis": {
+      "condition": "Diagnostic principal",
+      "icd10_code": "Code CIM-10",
+      "confidence_level": "Niveau de certitude",
+      "clinical_rationale": "Justification clinique"
+    },
+    "differential_diagnoses": "Diagnostics différentiels considérés",
+    "clinical_reasoning": "Raisonnement clinique détaillé"
+  },
+  "prescribed_examinations": {
+    "laboratory_tests": "Examens biologiques prescrits",
+    "imaging_studies": "Examens d'imagerie prescrits",
+    "specialized_tests": "Examens spécialisés",
+    "clinical_justifications": "Justifications médicales"
+  },
+  "therapeutic_management": {
+    "immediate_treatment": "Traitement immédiat",
+    "prescribed_medications": "Médicaments prescrits avec posologie",
+    "non_pharmacological_measures": "Mesures non médicamenteuses",
+    "lifestyle_recommendations": "Recommandations hygiéno-diététiques"
+  },
+  "follow_up_plan": {
+    "next_appointment": "Prochaine consultation",
+    "monitoring_parameters": "Paramètres à surveiller",
+    "warning_signs": "Signes d'alarme",
+    "specialist_referral": "Orientation spécialisée si nécessaire"
+  },
+  "prognosis_and_recommendations": {
+    "short_term_prognosis": "Pronostic à court terme",
+    "long_term_outlook": "Perspectives à long terme",
+    "patient_education": "Éducation du patient",
+    "prevention_measures": "Mesures préventives"
+  },
+  "quality_and_traceability": {
+    "ai_assistance_level": "Niveau d'assistance IA utilisé",
+    "diagnostic_confidence": "Confiance diagnostique",
+    "evidence_quality": "Qualité des preuves",
+    "clinical_complexity": "Complexité clinique du cas",
+    "generation_timestamp": "Horodatage de génération",
+    "data_sources": "Sources de données utilisées"
+  },
+  "medical_signatures": {
+    "consulting_physician": "Médecin consultant (IA)",
+    "validation_status": "Statut de validation",
+    "document_version": "Version du document"
   }
 }
 
-EXIGENCES QUALITÉ:
-1. Rapport médical professionnel et structuré
-2. Terminologie médicale appropriée
-3. Synthèse narrative fluide et cohérente
-4. Respect des standards de documentation médicale
-5. Intégration harmonieuse de toutes les données
-6. Recommandations pratiques et réalisables
-7. Considération des aspects médico-légaux
-8. Format adapté à l'archivage et au partage
+Génère maintenant le compte-rendu médical complet en JSON strict.
+`
 
-ATTENTION: Réponse en français médical professionnel, complète et détaillée.`
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content:
-            "Tu es un médecin expert en rédaction de comptes-rendus médicaux. Tu génères des rapports complets, structurés et professionnels.",
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      max_tokens: 16000, // Augmenté pour un rapport complet et détaillé
+    const result = await generateText({
+      model: openai("gpt-4o"),
+      prompt,
+      maxTokens: 16000,
       temperature: 0.1,
-      response_format: { type: "json_object" },
     })
 
-    const response = completion.choices[0]?.message?.content
-    if (!response) {
-      throw new Error("Pas de réponse de OpenAI")
-    }
+    // Parse du JSON avec gestion d'erreur robuste
+    let reportData
+    try {
+      const cleanedText = result.text.trim()
+      const jsonMatch = cleanedText.match(/\{[\s\S]*\}/)
 
-    const parsedResponse = JSON.parse(response)
+      if (jsonMatch) {
+        reportData = JSON.parse(jsonMatch[0])
+      } else {
+        throw new Error("Format JSON non trouvé")
+      }
+    } catch (parseError) {
+      console.error("Erreur parsing JSON rapport:", parseError)
 
-    if (!parsedResponse.success) {
-      throw new Error("Erreur dans la génération du rapport")
+      // Fallback avec rapport générique
+      reportData = {
+        header: {
+          document_type: "Compte-rendu de consultation médicale",
+          establishment: "TIBOK IA DOCTOR - Système d'aide au diagnostic",
+          date: new Date().toLocaleDateString("fr-FR"),
+          doctor: "Dr. Assistant IA",
+          specialty: "Médecine générale assistée par IA",
+        },
+        patient_identification: {
+          last_name: patientData.lastName,
+          first_name: patientData.firstName,
+          birth_date: patientData.dateOfBirth,
+          age: `${patientData.age} ans`,
+          gender: patientData.gender,
+          weight: `${patientData.weight} kg`,
+          height: `${patientData.height} cm`,
+          bmi: `${(patientData.weight / Math.pow(patientData.height / 100, 2)).toFixed(1)} kg/m²`,
+          blood_type: patientData.bloodType || "Non déterminé",
+          insurance: patientData.insuranceInfo?.provider || "Non renseigné",
+        },
+        consultation_details: {
+          chief_complaint: clinicalData.chiefComplaint,
+          history_of_present_illness: `Patient de ${patientData.age} ans consultant pour ${clinicalData.chiefComplaint}`,
+          symptom_timeline: clinicalData.symptomDuration,
+          functional_impact: clinicalData.functionalStatus,
+          pain_assessment: `${clinicalData.painScale}/10`,
+        },
+        diagnostic_assessment: {
+          primary_diagnosis: {
+            condition: diagnosisData?.data?.primary_diagnosis?.condition || "En cours d'établissement",
+            icd10_code: diagnosisData?.data?.primary_diagnosis?.icd10_code || "À préciser",
+            confidence_level: `${diagnosisData?.data?.quality_indicators?.diagnostic_confidence || 0}%`,
+            clinical_rationale: "Diagnostic basé sur l'analyse IA des données cliniques",
+          },
+        },
+        quality_and_traceability: {
+          ai_assistance_level: "Diagnostic expert avec IA avancée",
+          diagnostic_confidence: `${diagnosisData?.data?.quality_indicators?.diagnostic_confidence || 0}%`,
+          evidence_quality: diagnosisData?.data?.quality_indicators?.evidence_quality || "medium",
+          clinical_complexity: diagnosisData?.data?.quality_indicators?.clinical_complexity || "medium",
+          generation_timestamp: new Date().toISOString(),
+          data_sources: ["TIBOK IA DOCTOR", "OpenAI GPT-4o", "Base de données médicales"],
+        },
+      }
     }
 
     return NextResponse.json({
       success: true,
-      ...parsedResponse,
-      usage: completion.usage,
-      timestamp: new Date().toISOString(),
+      data: reportData,
+      metadata: {
+        generatedAt: new Date().toISOString(),
+        patientName: `${patientData.firstName} ${patientData.lastName}`,
+        consultationDate: new Date().toLocaleDateString("fr-FR"),
+        tokensUsed: result.usage?.totalTokens || 0,
+        reportSections: Object.keys(reportData).length,
+      },
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error("Erreur génération rapport:", error)
     return NextResponse.json(
       {
-        success: false,
-        error: error.message || "Erreur lors de la génération du rapport",
+        error: "Erreur lors de la génération du rapport",
+        details: error instanceof Error ? error.message : "Erreur inconnue",
       },
       { status: 500 },
     )

@@ -83,7 +83,7 @@ interface DiagnosisData {
   prognosisNotes: string
   aiConfidence: number
   generationStatus: "pending" | "generating" | "completed" | "error"
-  data?: any // Données complètes de l'API diagnosis-expert
+  data?: any
 }
 
 interface ExamsData {
@@ -327,7 +327,6 @@ export default function TibokIADoctor() {
     setReportData(defaultReportData)
   }
 
-  // Structure des données pour les composants
   const allData = {
     patientData: patientData,
     clinicalData: clinicalData,
