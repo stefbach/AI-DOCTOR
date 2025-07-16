@@ -42,7 +42,15 @@ export async function POST(request: NextRequest) {
     console.log(`🔍 Diagnostic IA pour: ${patientData.firstName} ${patientData.lastName}`)
 
     const prompt = `
-En tant qu'expert médical IA spécialisé en diagnostic, analysez ce cas clinique complet et fournissez un diagnostic structuré.
+En tant qu'expert médical IA spécialisé en médecine tropicale pratiquant à l'île Maurice, analysez ce cas clinique en tenant compte du contexte géographique, climatique et épidémiologique local.
+
+CONTEXTE MÉDICAL MAURICIEN:
+- PATHOLOGIES ENDÉMIQUES: Dengue, chikungunya, paludisme (importé), leptospirose, fièvre typhoïde
+- VECTEURS: Aedes aegypti/albopictus (dengue, chikungunya, Zika)
+- SAISONS: Été cyclonique (nov-avril) = pic arboviroses, Hiver sec (mai-oct) = moins de vecteurs
+- POPULATION: Multiethnique avec prédispositions génétiques variables
+- ENVIRONNEMENT: Île tropicale, eaux stagnantes, forte humidité, cyclones
+- VOYAGES: Proximité Madagascar (paludisme), Inde, Afrique
 
 PATIENT:
 - Identité: ${patientData.firstName} ${patientData.lastName}, ${patientData.age} ans, ${patientData.gender}
@@ -66,63 +74,100 @@ DONNÉES CLINIQUES:
 RÉPONSES AUX QUESTIONS IA:
 ${questionsData?.responses ? JSON.stringify(questionsData.responses, null, 2) : "Aucune réponse disponible"}
 
-ANALYSE DIAGNOSTIQUE REQUISE:
+ANALYSE DIAGNOSTIQUE TROPICALE REQUISE:
 
-Fournissez un diagnostic médical structuré au format JSON suivant:
+Considérez PRIORITAIREMENT les pathologies tropicales mauriciennes:
+
+1. ARBOVIROSES: Dengue (classique/hémorragique), Chikungunya, Zika
+2. PALUDISME: Importé (voyage Madagascar/Afrique)
+3. LEPTOSPIROSE: Contact eau contaminée, saison des pluies
+4. FIÈVRE TYPHOÏDE: Eau/aliments contaminés
+5. PATHOLOGIES MARINES: Intoxications, blessures corail
+6. PATHOLOGIES SAISONNIÈRES: Liées aux cyclones, inondations
+
+Format JSON requis avec focus tropical:
 
 {
   "diagnosis": {
     "primary": {
-      "condition": "Nom exact de la pathologie principale",
+      "condition": "Diagnostic principal (privilégier pathologies tropicales si compatible)",
       "icd10": "Code CIM-10 correspondant",
       "confidence": 85,
-      "rationale": "Raisonnement médical détaillé expliquant pourquoi ce diagnostic est le plus probable",
-      "severity": "mild|moderate|severe"
+      "rationale": "Raisonnement incluant contexte mauricien et épidémiologie tropicale",
+      "severity": "mild|moderate|severe",
+      "tropicalContext": "Spécificités liées au contexte tropical mauricien"
     },
     "differential": [
       {
-        "condition": "Diagnostic différentiel 1",
-        "probability": 15,
-        "rationale": "Pourquoi ce diagnostic est possible mais moins probable",
-        "ruleOutTests": ["Examen 1", "Examen 2"]
+        "condition": "Arbovirose (dengue/chikungunya) si fièvre + arthralgies",
+        "probability": 25,
+        "rationale": "Endémique à Maurice, transmission par Aedes",
+        "ruleOutTests": ["NS1 dengue", "IgM chikungunya", "Plaquettes"]
       },
       {
-        "condition": "Diagnostic différentiel 2", 
+        "condition": "Leptospirose si contact hydrique", 
+        "probability": 15,
+        "rationale": "Fréquente après inondations/cyclones à Maurice",
+        "ruleOutTests": ["Sérologie leptospirose", "Créatinine"]
+      },
+      {
+        "condition": "Paludisme si voyage récent",
         "probability": 10,
-        "rationale": "Arguments pour et contre ce diagnostic",
-        "ruleOutTests": ["Examen 3"]
+        "rationale": "Importé de Madagascar/Afrique",
+        "ruleOutTests": ["Frottis sanguin", "Test rapide paludisme"]
       }
     ]
   },
   "recommendations": {
     "exams": [
       {
-        "name": "Nom de l'examen",
-        "code": "Code NABM si applicable",
-        "category": "biologie|imagerie|fonctionnel|spécialisé",
-        "indication": "Justification médicale",
-        "priority": "high|medium|low"
+        "name": "Tests arboviroses (NS1, IgM dengue/chikungunya)",
+        "code": "ARBO001",
+        "category": "biologie",
+        "indication": "Suspicion arbovirose en contexte tropical",
+        "priority": "high"
+      },
+      {
+        "name": "Numération plaquettaire",
+        "code": "PLAQ001", 
+        "category": "biologie",
+        "indication": "Surveillance dengue (thrombopénie)",
+        "priority": "high"
       }
     ],
     "medications": [
       {
-        "name": "DCI du médicament",
-        "dosage": "Posologie précise",
-        "frequency": "Fréquence de prise",
-        "duration": "Durée de traitement",
-        "indication": "Indication thérapeutique",
-        "contraindications": ["Contre-indication 1", "Contre-indication 2"]
+        "name": "Paracétamol (éviter aspirine si suspicion dengue)",
+        "dosage": "1g x 3/jour",
+        "frequency": "Toutes les 8h",
+        "duration": "Selon symptômes",
+        "indication": "Antalgique/antipyrétique sûr en contexte tropical",
+        "contraindications": ["Allergie paracétamol", "Insuffisance hépatique"]
       }
     ]
   },
-  "riskFactors": ["Facteur de risque 1", "Facteur de risque 2"],
-  "prognosis": "Pronostic détaillé avec évolution attendue",
-  "followUp": "Plan de suivi avec échéances",
+  "tropicalConsiderations": {
+    "seasonalFactors": "Impact saison actuelle sur pathologies vectorielles",
+    "vectorExposure": "Évaluation exposition moustiques Aedes",
+    "travelHistory": "Risque importation pathologies (paludisme)",
+    "environmentalRisks": "Eau stagnante, inondations, cyclones",
+    "endemicDiseases": "Pathologies spécifiques à Maurice"
+  },
+  "riskFactors": ["Facteurs tropicaux spécifiques", "Exposition vectorielle", "Saisonnalité"],
+  "prognosis": "Pronostic adapté aux pathologies tropicales",
+  "followUp": "Suivi spécialisé si pathologie tropicale confirmée",
   "urgencyLevel": 3,
-  "redFlags": ["Signe d'alarme 1", "Signe d'alarme 2"]
+  "redFlags": ["Signes dengue hémorragique", "Ictère (leptospirose)", "Convulsions (paludisme)"]
 }
 
-Analysez méticuleusement tous les éléments fournis et fournissez un diagnostic précis, evidence-based et adapté au contexte mauricien.
+PRIORITÉS DIAGNOSTIQUES MAURICIENNES:
+- Si fièvre + arthralgies = Chikungunya jusqu'à preuve du contraire
+- Si fièvre + thrombopénie = Dengue à éliminer en urgence
+- Si contact eau + fièvre = Leptospirose possible
+- Si voyage récent + fièvre = Paludisme à éliminer
+- Toujours considérer les pathologies tropicales AVANT les diagnostics tempérés
+
+Analysez avec l'expertise d'un médecin tropicaliste mauricien expérimenté.
 `
 
     const result = await generateText({
@@ -132,7 +177,7 @@ Analysez méticuleusement tous les éléments fournis et fournissez un diagnosti
       maxTokens: 3000,
     })
 
-    console.log("🧠 Diagnostic IA généré")
+    console.log("🧠 Diagnostic IA tropical généré")
 
     // Tentative de parsing JSON avec fallback robuste
     let diagnosticData
@@ -153,12 +198,12 @@ Analysez méticuleusement tous les éléments fournis et fournissez un diagnosti
         throw new Error("Structure diagnostic invalide")
       }
 
-      console.log(`✅ Diagnostic parsé: ${diagnosticData.diagnosis.primary.condition}`)
+      console.log(`✅ Diagnostic tropical parsé: ${diagnosticData.diagnosis.primary.condition}`)
     } catch (parseError) {
-      console.warn("⚠️ Erreur parsing JSON diagnostic, génération de fallback")
+      console.warn("⚠️ Erreur parsing JSON diagnostic, génération de fallback tropical")
 
-      // Diagnostic de fallback basé sur les symptômes
-      diagnosticData = generateFallbackDiagnosis(patientData, clinicalData, result.text)
+      // Diagnostic de fallback adapté au contexte mauricien
+      diagnosticData = generateMauritianFallbackDiagnosis(patientData, clinicalData, result.text)
     }
 
     const response = {
@@ -168,6 +213,7 @@ Analysez méticuleusement tous les éléments fournis et fournissez un diagnosti
         exams: [],
         medications: [],
       },
+      tropicalConsiderations: diagnosticData.tropicalConsiderations || {},
       riskFactors: diagnosticData.riskFactors || [],
       prognosis: diagnosticData.prognosis || "Pronostic à évaluer selon l'évolution",
       followUp: diagnosticData.followUp || "Suivi à programmer selon les résultats",
@@ -180,11 +226,14 @@ Analysez méticuleusement tous les éléments fournis et fournissez un diagnosti
         aiModel: "gpt-4o",
         confidence: diagnosticData.diagnosis?.primary?.confidence || 75,
         generatedAt: new Date().toISOString(),
+        location: "Maurice",
+        climate: "tropical",
+        medicalContext: "tropical_medicine",
       },
       rawAiResponse: result.text, // Pour debug
     }
 
-    console.log(`✅ Diagnostic IA retourné: ${diagnosticData.diagnosis.primary.condition}`)
+    console.log(`✅ Diagnostic IA tropical retourné: ${diagnosticData.diagnosis.primary.condition}`)
     return NextResponse.json(response)
   } catch (error: any) {
     console.error("❌ Erreur Diagnostic IA:", error)
@@ -200,40 +249,33 @@ Analysez méticuleusement tous les éléments fournis et fournissez un diagnosti
   }
 }
 
-function generateFallbackDiagnosis(patientData: any, clinicalData: any, aiText: string) {
-  // Diagnostic de fallback basé sur des patterns communs
+function generateMauritianFallbackDiagnosis(patientData: any, clinicalData: any, aiText: string) {
+  // Diagnostic de fallback adapté au contexte tropical mauricien
   const symptoms = clinicalData.symptoms?.toLowerCase() || ""
   const age = patientData.age || 0
 
-  let primaryCondition = "Syndrome clinique à préciser"
-  let icd10 = "R69"
-  let confidence = 60
+  let primaryCondition = "Syndrome fébrile tropical à préciser"
+  let icd10 = "R50.9"
+  let confidence = 70
   const severity = "moderate"
 
-  // Patterns symptomatiques courants
-  if (symptoms.includes("fièvre") && symptoms.includes("toux")) {
-    primaryCondition = "Infection respiratoire haute"
-    icd10 = "J06.9"
+  // Patterns symptomatiques tropicaux mauriciens
+  if (symptoms.includes("fièvre") && symptoms.includes("douleur") && symptoms.includes("articul")) {
+    primaryCondition = "Suspicion chikungunya"
+    icd10 = "A92.0"
+    confidence = 80
+  } else if (symptoms.includes("fièvre") && (symptoms.includes("maux de tête") || symptoms.includes("céphalée"))) {
+    primaryCondition = "Suspicion dengue"
+    icd10 = "A90"
     confidence = 75
-  } else if (symptoms.includes("douleur") && symptoms.includes("abdomen")) {
-    primaryCondition = "Douleur abdominale non spécifique"
-    icd10 = "R10.9"
+  } else if (symptoms.includes("fièvre") && symptoms.includes("diarrhée")) {
+    primaryCondition = "Suspicion fièvre typhoïde"
+    icd10 = "A01.0"
     confidence = 70
-  } else if (symptoms.includes("céphalée") || symptoms.includes("mal de tête")) {
-    primaryCondition = "Céphalée de tension"
-    icd10 = "G44.2"
-    confidence = 65
-  } else if (symptoms.includes("fatigue") || symptoms.includes("asthénie")) {
-    primaryCondition = "Asthénie non spécifique"
-    icd10 = "R53"
-    confidence = 60
-  }
-
-  // Ajustements selon l'âge
-  if (age > 65 && symptoms.includes("confusion")) {
-    primaryCondition = "Syndrome confusionnel du sujet âgé"
-    icd10 = "F05.9"
-    confidence = 70
+  } else if (symptoms.includes("fièvre") && symptoms.includes("ictère")) {
+    primaryCondition = "Suspicion leptospirose"
+    icd10 = "A27.9"
+    confidence = 75
   }
 
   return {
@@ -242,49 +284,70 @@ function generateFallbackDiagnosis(patientData: any, clinicalData: any, aiText: 
         condition: primaryCondition,
         icd10: icd10,
         confidence: confidence,
-        rationale: `Diagnostic de fallback basé sur les symptômes rapportés: ${symptoms.substring(0, 100)}...`,
+        rationale: `Diagnostic de fallback basé sur les symptômes en contexte tropical mauricien: ${symptoms.substring(0, 100)}...`,
         severity: severity,
+        tropicalContext: "Pathologie compatible avec l'épidémiologie mauricienne",
       },
       differential: [
         {
-          condition: "Pathologie organique à éliminer",
-          probability: 25,
-          rationale: "Nécessite des examens complémentaires pour éliminer une cause organique",
-          ruleOutTests: ["Biologie standard", "Imagerie selon orientation"],
+          condition: "Arbovirose (dengue/chikungunya)",
+          probability: 30,
+          rationale: "Endémiques à Maurice, transmission par Aedes aegypti",
+          ruleOutTests: ["NS1 dengue", "IgM chikungunya", "Plaquettes"],
         },
         {
-          condition: "Cause fonctionnelle",
+          condition: "Leptospirose",
+          probability: 20,
+          rationale: "Fréquente après contact avec eau contaminée",
+          ruleOutTests: ["Sérologie leptospirose", "Créatinine"],
+        },
+        {
+          condition: "Paludisme importé",
           probability: 15,
-          rationale: "Possible origine fonctionnelle si examens normaux",
-          ruleOutTests: ["Bilan biologique"],
+          rationale: "Si voyage récent Madagascar/Afrique",
+          ruleOutTests: ["Frottis sanguin", "Test rapide paludisme"],
         },
       ],
     },
     recommendations: {
       exams: [
         {
-          name: "Bilan biologique standard",
-          code: "BIOL001",
+          name: "Tests arboviroses (NS1, IgM dengue/chikungunya)",
+          code: "ARBO001",
           category: "biologie",
-          indication: "Bilan de débrouillage",
-          priority: "medium",
+          indication: "Éliminer arboviroses endémiques",
+          priority: "high",
+        },
+        {
+          name: "Numération plaquettaire",
+          code: "PLAQ001",
+          category: "biologie",
+          indication: "Surveillance dengue (thrombopénie)",
+          priority: "high",
         },
       ],
       medications: [
         {
-          name: "Traitement symptomatique",
-          dosage: "Selon symptômes",
-          frequency: "Selon besoin",
-          duration: "Court terme",
-          indication: "Traitement symptomatique",
-          contraindications: ["Allergie connue"],
+          name: "Paracétamol",
+          dosage: "1g x 3/jour",
+          frequency: "Toutes les 8h",
+          duration: "Selon symptômes",
+          indication: "Antalgique/antipyrétique (éviter aspirine si suspicion dengue)",
+          contraindications: ["Allergie paracétamol"],
         },
       ],
     },
-    riskFactors: ["Âge", "Antécédents médicaux"],
-    prognosis: "Pronostic généralement favorable avec prise en charge adaptée",
-    followUp: "Réévaluation dans 48-72h si pas d'amélioration",
+    tropicalConsiderations: {
+      seasonalFactors: "Considérer la saison actuelle pour les pathologies vectorielles",
+      vectorExposure: "Évaluer l'exposition aux moustiques Aedes",
+      travelHistory: "Rechercher voyage récent (risque paludisme)",
+      environmentalRisks: "Contact avec eau stagnante, inondations",
+      endemicDiseases: "Pathologies tropicales mauriciennes courantes",
+    },
+    riskFactors: ["Exposition vectorielle", "Saison cyclonique", "Contact hydrique"],
+    prognosis: "Pronostic généralement favorable avec prise en charge adaptée aux pathologies tropicales",
+    followUp: "Réévaluation dans 24-48h, surveillance complications spécifiques (dengue hémorragique)",
     urgencyLevel: 3,
-    redFlags: ["Aggravation des symptômes", "Nouveaux symptômes"],
+    redFlags: ["Thrombopénie sévère", "Ictère", "Convulsions", "Hémorragies"],
   }
 }
