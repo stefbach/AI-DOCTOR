@@ -41,14 +41,9 @@ export async function POST(request: NextRequest) {
     console.log(`🔍 Génération questions pour: ${patientData.firstName} ${patientData.lastName}`)
 
     const prompt = `
-En tant qu'expert médical IA spécialisé en médecine tropicale et pratiquant à l'île Maurice, générez des questions diagnostiques pertinentes pour ce cas clinique.
+En tant qu'expert médical, générez des questions diagnostiques PERTINENTES pour ce cas clinique spécifique.
 
-CONTEXTE GÉOGRAPHIQUE ET CLIMATIQUE:
-- Localisation: Île Maurice (océan Indien, climat tropical)
-- Pathologies endémiques: Paludisme, dengue, chikungunya, fièvre typhoïde, leptospirose
-- Saisons: Été chaud et humide (nov-avril), hiver sec (mai-oct)
-- Population: Multiethnique (Indo-mauricien, Créole, Sino-mauricien, Franco-mauricien)
-- Facteurs environnementaux: Moustiques vecteurs, eau stagnante, cyclones
+PRIORITÉ: Questions basées sur les SYMPTÔMES et le DIAGNOSTIC DIFFÉRENTIEL d'abord, puis contexte géographique si pertinent.
 
 PATIENT:
 - ${patientData.firstName} ${patientData.lastName}, ${patientData.age} ans, ${patientData.gender}
@@ -64,39 +59,48 @@ DONNÉES CLINIQUES:
 - Examen physique: ${clinicalData.physicalExam || "Non renseigné"}
 - Signes vitaux: T°${clinicalData.vitalSigns?.temperature || "?"}°C, TA ${clinicalData.vitalSigns?.bloodPressure || "?"}, FC ${clinicalData.vitalSigns?.heartRate || "?"}/min
 
-GÉNÉREZ 5-8 QUESTIONS DIAGNOSTIQUES ADAPTÉES AU CONTEXTE MAURICIEN:
+CONTEXTE GÉOGRAPHIQUE (secondaire):
+- Localisation: Île Maurice (climat tropical)
+- Pathologies possibles selon le contexte: Dengue, chikungunya, paludisme, leptospirose, fièvre typhoïde
 
-Considérez spécifiquement:
-1. PATHOLOGIES TROPICALES: Dengue, chikungunya, paludisme, leptospirose, fièvre typhoïde
-2. FACTEURS ENVIRONNEMENTAUX: Exposition aux moustiques, eau contaminée, saison cyclonique
-3. HABITUDES LOCALES: Alimentation créole, médecine traditionnelle, activités en plein air
-4. VOYAGES: Déplacements inter-îles, Madagascar, Afrique, Inde
-5. SAISON ACTUELLE: Impact du climat tropical sur les symptômes
-6. POPULATION: Prédispositions génétiques selon l'origine ethnique
+LOGIQUE DIAGNOSTIQUE:
+1. ANALYSEZ les symptômes présentés
+2. IDENTIFIEZ le diagnostic différentiel principal
+3. GÉNÉREZ des questions pour distinguer entre les hypothèses diagnostiques
+4. INTÉGREZ le contexte tropical UNIQUEMENT si cliniquement pertinent
+
+GÉNÉREZ 5-8 QUESTIONS ADAPTÉES AU CAS CLINIQUE:
+
+Instructions spécifiques:
+- Si douleur thoracique → questions cardio/pulmonaires d'abord, puis contexte si nécessaire
+- Si fièvre → diagnostic différentiel standard, puis arboviroses si pertinent
+- Si troubles digestifs → causes communes puis pathologies hydriques si approprié
+- Si céphalées → causes neurologiques/vasculaires avant pathologies tropicales
+- Si symptômes dermatologiques → diagnostic dermatologique avant piqûres/vecteurs
 
 Questions ciblées pour:
-- Éliminer les arboviroses (dengue, chikungunya, Zika)
-- Rechercher une exposition paludique
-- Évaluer les risques hydriques (leptospirose, typhoïde)
-- Identifier les facteurs saisonniers
-- Préciser l'exposition aux vecteurs
-- Évaluer les voyages récents
+- Préciser les caractéristiques des symptômes
+- Distinguer les hypothèses diagnostiques principales
+- Identifier les facteurs déclenchants/aggravants
+- Évaluer la chronologie et l'évolution
+- Rechercher les signes associés
+- Contexte tropical UNIQUEMENT si cliniquement justifié
 
 Format JSON requis:
 {
   "questions": [
     {
       "id": 1,
-      "question": "Question précise adaptée au contexte mauricien?",
+      "question": "Question spécifique au diagnostic différentiel?",
       "type": "multiple_choice",
       "options": ["Option A", "Option B", "Option C", "Option D"],
-      "rationale": "Justification médicale incluant le contexte tropical",
-      "category": "tropical|environnemental|saisonnier|voyage|vecteur|hydrique"
+      "rationale": "Justification médicale basée sur le diagnostic différentiel",
+      "category": "symptom|differential|chronology|associated|context"
     }
   ]
 }
 
-Adaptez les questions aux spécificités épidémiologiques de l'île Maurice et aux pathologies tropicales courantes.
+IMPORTANT: Adaptez les questions aux symptômes spécifiques présentés, pas à une liste générale de pathologies tropicales.
 `
 
     const result = await generateText({
@@ -129,10 +133,10 @@ Adaptez les questions aux spécificités épidémiologiques de l'île Maurice et
 
       console.log(`✅ ${questionsData.questions.length} questions parsées avec succès`)
     } catch (parseError) {
-      console.warn("⚠️ Erreur parsing JSON, génération de questions de fallback mauriciennes")
+      console.warn("⚠️ Erreur parsing JSON, génération de questions de fallback ciblées")
 
-      // Questions de fallback adaptées au contexte mauricien
-      questionsData = generateMauritianFallbackQuestions(patientData, clinicalData)
+      // Questions de fallback adaptées au cas clinique
+      questionsData = generateTargetedFallbackQuestions(patientData, clinicalData)
     }
 
     const response = {
@@ -146,11 +150,11 @@ Adaptez les questions aux spécificités épidémiologiques de l'île Maurice et
         generatedAt: new Date().toISOString(),
         aiModel: "gpt-4o",
         location: "Maurice",
-        climate: "tropical",
+        approach: "symptom-based",
       },
     }
 
-    console.log(`✅ Questions IA mauriciennes retournées: ${questionsData.questions.length}`)
+    console.log(`✅ Questions IA ciblées retournées: ${questionsData.questions.length}`)
     return NextResponse.json(response)
   } catch (error: any) {
     console.error("❌ Erreur Questions IA:", error)
@@ -166,74 +170,133 @@ Adaptez les questions aux spécificités épidémiologiques de l'île Maurice et
   }
 }
 
-function generateMauritianFallbackQuestions(patientData: any, clinicalData: any) {
-  const baseQuestions = [
-    {
-      id: 1,
-      question: "Avez-vous été piqué(e) par des moustiques récemment?",
-      type: "multiple_choice",
-      options: ["Oui, beaucoup", "Oui, quelques piqûres", "Non, pas particulièrement", "Je ne sais pas"],
-      rationale: "Les arboviroses (dengue, chikungunya) sont endémiques à Maurice et transmises par Aedes",
-      category: "vecteur",
-    },
-    {
-      id: 2,
-      question: "Avez-vous voyagé récemment (Madagascar, Afrique, Inde)?",
-      type: "multiple_choice",
-      options: ["Oui, dans les 15 derniers jours", "Oui, dans le mois", "Non, pas récemment", "Jamais voyagé"],
-      rationale: "Risque d'importation de paludisme ou autres pathologies tropicales",
-      category: "voyage",
-    },
-    {
-      id: 3,
-      question: "Avez-vous été en contact avec de l'eau stagnante ou des inondations?",
-      type: "multiple_choice",
-      options: ["Oui, contact direct", "Oui, proximité", "Non", "Pendant la saison cyclonique"],
-      rationale: "Risque de leptospirose, fréquente à Maurice après les pluies",
-      category: "hydrique",
-    },
-    {
-      id: 4,
-      question: "Vos symptômes ont-ils commencé pendant la saison chaude et humide?",
-      type: "multiple_choice",
-      options: ["Oui, en été (nov-avril)", "Non, en hiver (mai-oct)", "Je ne sais pas", "Symptômes constants"],
-      rationale: "Saisonnalité des arboviroses et pathologies liées aux moustiques",
-      category: "saisonnier",
-    },
-    {
-      id: 5,
-      question: "Avez-vous consommé de l'eau ou des aliments suspects récemment?",
-      type: "multiple_choice",
-      options: ["Eau non traitée", "Street food", "Fruits de mer", "Rien de suspect"],
-      rationale: "Risque de fièvre typhoïde, gastro-entérites tropicales",
-      category: "hydrique",
-    },
-  ]
-
-  // Questions spécifiques selon les symptômes
+function generateTargetedFallbackQuestions(patientData: any, clinicalData: any) {
   const symptoms = clinicalData.symptoms?.toLowerCase() || ""
+  const chiefComplaint = clinicalData.chiefComplaint?.toLowerCase() || ""
+  const combinedSymptoms = `${symptoms} ${chiefComplaint}`
 
-  if (symptoms.includes("fièvre")) {
-    baseQuestions.push({
-      id: 6,
-      question: "La fièvre s'accompagne-t-elle de douleurs articulaires intenses?",
-      type: "multiple_choice",
-      options: ["Oui, très intenses", "Oui, modérées", "Non", "Douleurs musculaires seulement"],
-      rationale: "Chikungunya typique avec arthralgie sévère, endémique à Maurice",
-      category: "tropical",
-    })
+  let questions = []
+
+  // Questions basées sur les symptômes spécifiques
+  if (combinedSymptoms.includes("douleur") && combinedSymptoms.includes("thorax")) {
+    questions = [
+      {
+        id: 1,
+        question: "La douleur thoracique irradie-t-elle vers le bras gauche, la mâchoire ou le dos?",
+        type: "multiple_choice",
+        options: ["Oui, vers le bras gauche", "Oui, vers la mâchoire", "Oui, vers le dos", "Non, localisée"],
+        rationale: "Distinction entre douleur cardiaque et autres étiologies",
+        category: "differential",
+      },
+      {
+        id: 2,
+        question: "La douleur est-elle déclenchée par l'effort physique?",
+        type: "multiple_choice",
+        options: ["Oui, à chaque effort", "Parfois", "Non", "Je ne sais pas"],
+        rationale: "Recherche d'une origine coronarienne",
+        category: "symptom",
+      },
+      {
+        id: 3,
+        question: "Avez-vous des difficultés respiratoires associées?",
+        type: "multiple_choice",
+        options: ["Oui, dyspnée importante", "Oui, légère", "Non", "Seulement au repos"],
+        rationale: "Évaluation de l'atteinte cardio-pulmonaire",
+        category: "associated",
+      },
+    ]
+  } else if (combinedSymptoms.includes("fièvre")) {
+    questions = [
+      {
+        id: 1,
+        question: "Depuis combien de temps avez-vous de la fièvre?",
+        type: "multiple_choice",
+        options: ["Moins de 24h", "1-3 jours", "3-7 jours", "Plus d'une semaine"],
+        rationale: "Chronologie importante pour le diagnostic différentiel",
+        category: "chronology",
+      },
+      {
+        id: 2,
+        question: "La fièvre s'accompagne-t-elle de frissons?",
+        type: "multiple_choice",
+        options: ["Oui, frissons intenses", "Oui, modérés", "Non", "Sensation de froid"],
+        rationale: "Distinction entre infections bactériennes et virales",
+        category: "symptom",
+      },
+      {
+        id: 3,
+        question: "Avez-vous des courbatures ou douleurs musculaires?",
+        type: "multiple_choice",
+        options: ["Oui, généralisées", "Oui, localisées", "Non", "Douleurs articulaires"],
+        rationale: "Orientation vers syndrome grippal ou arboviroses",
+        category: "associated",
+      },
+      // Contexte tropical UNIQUEMENT après les questions générales
+      {
+        id: 4,
+        question: "Avez-vous été exposé à des moustiques dans les derniers jours?",
+        type: "multiple_choice",
+        options: ["Oui, beaucoup", "Oui, quelques-uns", "Non", "Je ne sais pas"],
+        rationale: "Recherche d'arboviroses (dengue, chikungunya) après exclusion des causes communes",
+        category: "context",
+      },
+    ]
+  } else if (combinedSymptoms.includes("céphal") || combinedSymptoms.includes("tête")) {
+    questions = [
+      {
+        id: 1,
+        question: "Où se situe exactement la douleur dans la tête?",
+        type: "multiple_choice",
+        options: ["Front/tempes", "Vertex", "Occipital", "Hémicrânie"],
+        rationale: "Localisation pour diagnostic différentiel des céphalées",
+        category: "symptom",
+      },
+      {
+        id: 2,
+        question: "La douleur est-elle pulsatile ou constante?",
+        type: "multiple_choice",
+        options: ["Pulsatile", "Constante", "En étau", "Variable"],
+        rationale: "Distinction migraine/céphalée de tension/cause secondaire",
+        category: "symptom",
+      },
+      {
+        id: 3,
+        question: "Y a-t-il des signes neurologiques associés?",
+        type: "multiple_choice",
+        options: ["Troubles visuels", "Nausées/vomissements", "Raideur nuque", "Aucun"],
+        rationale: "Recherche de signes d'alarme neurologique",
+        category: "associated",
+      },
+    ]
+  } else {
+    // Questions générales si symptômes non spécifiques
+    questions = [
+      {
+        id: 1,
+        question: "Depuis quand ces symptômes ont-ils commencé?",
+        type: "multiple_choice",
+        options: ["Moins de 24h", "1-3 jours", "Une semaine", "Plus d'une semaine"],
+        rationale: "Chronologie essentielle pour tout diagnostic",
+        category: "chronology",
+      },
+      {
+        id: 2,
+        question: "Les symptômes s'aggravent-ils, s'améliorent-ils ou restent-ils stables?",
+        type: "multiple_choice",
+        options: ["S'aggravent", "S'améliorent", "Stables", "Fluctuent"],
+        rationale: "Évolution des symptômes guide le diagnostic",
+        category: "chronology",
+      },
+      {
+        id: 3,
+        question: "Avez-vous identifié des facteurs déclenchants?",
+        type: "multiple_choice",
+        options: ["Effort physique", "Stress", "Alimentation", "Aucun identifié"],
+        rationale: "Facteurs déclenchants orientent le diagnostic",
+        category: "symptom",
+      },
+    ]
   }
 
-  if (symptoms.includes("douleur") && symptoms.includes("abdomen")) {
-    baseQuestions.push({
-      id: 7,
-      question: "Avez-vous mangé des fruits de mer ou du poisson récemment?",
-      type: "multiple_choice",
-      options: ["Oui, dans les 24h", "Oui, cette semaine", "Non", "Régulièrement"],
-      rationale: "Intoxication alimentaire marine fréquente dans les îles tropicales",
-      category: "environnemental",
-    })
-  }
-
-  return { questions: baseQuestions }
+  return { questions }
 }
