@@ -5,149 +5,159 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { User, Weight, AlertTriangle, Plus, X, Activity } from "lucide-react"
-
-interface PatientData {
-  firstName: string
-  lastName: string
-  dateOfBirth: string
-  age: number
-  gender: string
-  weight: number
-  height: number
-  bloodType: string
-  allergies: string[]
-  medicalHistory: string[]
-  currentMedications: string[]
-  insuranceInfo: {
-    provider: string
-    policyNumber: string
-  }
-  lifeHabits: {
-    smoking: string
-    alcohol: string
-    physicalActivity: string
-  }
-}
+import { Textarea } from "@/components/ui/textarea"
+import { Checkbox } from "@/components/ui/checkbox"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { ArrowRight, User, Heart, AlertTriangle } from "lucide-react"
 
 interface PatientFormProps {
-  data?: PatientData
-  allData?: any
-  onDataChange: (data: PatientData) => void
+  onDataChange: (data: any) => void
   onNext: () => void
-  onPrevious: () => void
 }
 
-export default function PatientForm({ data, onDataChange, onNext }: PatientFormProps) {
-  const [formData, setFormData] = useState<PatientData>({
+export default function PatientForm({ onDataChange, onNext }: PatientFormProps) {
+  const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    dateOfBirth: "",
-    age: 0,
+    age: "",
     gender: "",
-    weight: 0,
-    height: 0,
-    bloodType: "",
-    allergies: [],
-    medicalHistory: [],
-    currentMedications: [],
-    insuranceInfo: {
-      provider: "",
-      policyNumber: "",
-    },
+    weight: "",
+    height: "",
+    allergies: [] as string[],
+    otherAllergies: "",
+    medicalHistory: [] as string[],
+    otherMedicalHistory: "",
+    currentMedicationsText: "",
     lifeHabits: {
       smoking: "",
       alcohol: "",
       physicalActivity: "",
     },
-    ...data,
   })
 
-  const [newAllergy, setNewAllergy] = useState("")
-  const [newMedicalHistory, setNewMedicalHistory] = useState("")
-  const [newMedication, setNewMedication] = useState("")
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const commonAllergies = [
+    "Pénicilline",
+    "Aspirine",
+    "Anti-inflammatoires (AINS)",
+    "Codéine",
+    "Latex",
+    "Iode",
+    "Anesthésiques locaux",
+    "Sulfamides",
+  ]
+
+  const commonMedicalHistory = [
+    "Hypertension artérielle",
+    "Diabète type 2",
+    "Diabète type 1",
+    "Asthme",
+    "Maladie cardiaque",
+    "Dépression/Anxiété",
+    "Arthrose",
+    "Migraine",
+    "Reflux gastro-œsophagien",
+    "Hypercholestérolémie",
+  ]
 
   const handleInputChange = (field: string, value: any) => {
-    const updatedData = { ...formData, [field]: value }
-    setFormData(updatedData)
-    onDataChange(updatedData)
-  }
+    const newData = { ...formData, [field]: value }
+    setFormData(newData)
+    onDataChange(newData)
 
-  const handleNestedChange = (parent: string, field: string, value: any) => {
-    const updatedData = {
-      ...formData,
-      [parent]: {
-        ...formData[parent as keyof PatientData],
-        [field]: value,
-      },
-    }
-    setFormData(updatedData)
-    onDataChange(updatedData)
-  }
-
-  const addToArray = (field: keyof PatientData, value: string, setter: (value: string) => void) => {
-    if (value.trim()) {
-      const currentArray = formData[field] as string[]
-      const updatedData = {
-        ...formData,
-        [field]: [...currentArray, value.trim()],
-      }
-      setFormData(updatedData)
-      onDataChange(updatedData)
-      setter("")
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors({ ...errors, [field]: "" })
     }
   }
 
-  const removeFromArray = (field: keyof PatientData, index: number) => {
-    const currentArray = formData[field] as string[]
-    const updatedData = {
-      ...formData,
-      [field]: currentArray.filter((_, i) => i !== index),
+  const handleLifeHabitsChange = (field: string, value: string) => {
+    const newLifeHabits = { ...formData.lifeHabits, [field]: value }
+    const newData = { ...formData, lifeHabits: newLifeHabits }
+    setFormData(newData)
+    onDataChange(newData)
+  }
+
+  const handleAllergyChange = (allergy: string, checked: boolean) => {
+    const newAllergies = checked ? [...formData.allergies, allergy] : formData.allergies.filter((a) => a !== allergy)
+
+    const newData = { ...formData, allergies: newAllergies }
+    setFormData(newData)
+    onDataChange(newData)
+  }
+
+  const handleMedicalHistoryChange = (condition: string, checked: boolean) => {
+    const newHistory = checked
+      ? [...formData.medicalHistory, condition]
+      : formData.medicalHistory.filter((h) => h !== condition)
+
+    const newData = { ...formData, medicalHistory: newHistory }
+    setFormData(newData)
+    onDataChange(newData)
+  }
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {}
+
+    if (!formData.firstName.trim()) newErrors.firstName = "Prénom requis"
+    if (!formData.lastName.trim()) newErrors.lastName = "Nom requis"
+    if (!formData.age || Number.parseInt(formData.age) < 0 || Number.parseInt(formData.age) > 120) {
+      newErrors.age = "Âge valide requis (0-120)"
     }
-    setFormData(updatedData)
-    onDataChange(updatedData)
-  }
-
-  const calculateAge = (dateOfBirth: string) => {
-    const today = new Date()
-    const birthDate = new Date(dateOfBirth)
-    let age = today.getFullYear() - birthDate.getFullYear()
-    const monthDiff = today.getMonth() - birthDate.getMonth()
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--
+    if (!formData.gender) newErrors.gender = "Sexe requis"
+    if (!formData.weight || Number.parseFloat(formData.weight) < 1 || Number.parseFloat(formData.weight) > 300) {
+      newErrors.weight = "Poids valide requis (1-300 kg)"
     }
-    return age
+    if (!formData.height || Number.parseFloat(formData.height) < 50 || Number.parseFloat(formData.height) > 250) {
+      newErrors.height = "Taille valide requise (50-250 cm)"
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
-  const handleDateOfBirthChange = (date: string) => {
-    const age = calculateAge(date)
-    const updatedData = { ...formData, dateOfBirth: date, age }
-    setFormData(updatedData)
-    onDataChange(updatedData)
+  const handleSubmit = () => {
+    if (validateForm()) {
+      onNext()
+    }
   }
 
-  const isFormValid = () => {
-    return (
-      formData.firstName &&
-      formData.lastName &&
-      formData.dateOfBirth &&
-      formData.gender &&
-      formData.weight > 0 &&
-      formData.height > 0
-    )
+  const calculateBMI = () => {
+    if (formData.weight && formData.height) {
+      const weight = Number.parseFloat(formData.weight)
+      const height = Number.parseFloat(formData.height) / 100
+      return (weight / (height * height)).toFixed(1)
+    }
+    return null
   }
+
+  const getBMICategory = (bmi: number) => {
+    if (bmi < 18.5) return { text: "Insuffisance pondérale", color: "text-blue-600" }
+    if (bmi < 25) return { text: "Poids normal", color: "text-green-600" }
+    if (bmi < 30) return { text: "Surpoids", color: "text-yellow-600" }
+    return { text: "Obésité", color: "text-red-600" }
+  }
+
+  const bmi = calculateBMI()
+  const bmiCategory = bmi ? getBMICategory(Number.parseFloat(bmi)) : null
 
   return (
     <div className="space-y-6">
-      {/* Informations personnelles */}
+      {/* En-tête */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            Informations Personnelles
+            Informations Patient
           </CardTitle>
+        </CardHeader>
+      </Card>
+
+      {/* Informations personnelles */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Identité</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -158,8 +168,11 @@ export default function PatientForm({ data, onDataChange, onNext }: PatientFormP
                 value={formData.firstName}
                 onChange={(e) => handleInputChange("firstName", e.target.value)}
                 placeholder="Prénom du patient"
+                className={errors.firstName ? "border-red-500" : ""}
               />
+              {errors.firstName && <p className="text-sm text-red-500 mt-1">{errors.firstName}</p>}
             </div>
+
             <div>
               <Label htmlFor="lastName">Nom *</Label>
               <Input
@@ -167,95 +180,86 @@ export default function PatientForm({ data, onDataChange, onNext }: PatientFormP
                 value={formData.lastName}
                 onChange={(e) => handleInputChange("lastName", e.target.value)}
                 placeholder="Nom du patient"
+                className={errors.lastName ? "border-red-500" : ""}
               />
+              {errors.lastName && <p className="text-sm text-red-500 mt-1">{errors.lastName}</p>}
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="dateOfBirth">Date de naissance *</Label>
+              <Label htmlFor="age">Âge *</Label>
               <Input
-                id="dateOfBirth"
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => handleDateOfBirthChange(e.target.value)}
+                id="age"
+                type="number"
+                value={formData.age}
+                onChange={(e) => handleInputChange("age", e.target.value)}
+                placeholder="Âge en années"
+                min="0"
+                max="120"
+                className={errors.age ? "border-red-500" : ""}
               />
+              {errors.age && <p className="text-sm text-red-500 mt-1">{errors.age}</p>}
             </div>
+
             <div>
-              <Label htmlFor="age">Âge</Label>
-              <Input id="age" value={formData.age} readOnly className="bg-gray-50" />
-            </div>
-            <div>
-              <Label htmlFor="gender">Sexe *</Label>
-              <Select value={formData.gender} onValueChange={(value) => handleInputChange("gender", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="M">Masculin</SelectItem>
-                  <SelectItem value="F">Féminin</SelectItem>
-                  <SelectItem value="Autre">Autre</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Sexe *</Label>
+              <RadioGroup
+                value={formData.gender}
+                onValueChange={(value) => handleInputChange("gender", value)}
+                className="flex flex-row space-x-4 mt-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Masculin" id="male" />
+                  <Label htmlFor="male">Masculin</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Féminin" id="female" />
+                  <Label htmlFor="female">Féminin</Label>
+                </div>
+              </RadioGroup>
+              {errors.gender && <p className="text-sm text-red-500 mt-1">{errors.gender}</p>}
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Données physiques */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Weight className="h-5 w-5" />
-            Données Physiques
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="weight">Poids (kg) *</Label>
               <Input
                 id="weight"
                 type="number"
-                value={formData.weight || ""}
-                onChange={(e) => handleInputChange("weight", Number.parseFloat(e.target.value) || 0)}
-                placeholder="70"
+                value={formData.weight}
+                onChange={(e) => handleInputChange("weight", e.target.value)}
+                placeholder="Poids en kg"
+                min="1"
+                max="300"
+                step="0.1"
+                className={errors.weight ? "border-red-500" : ""}
               />
+              {errors.weight && <p className="text-sm text-red-500 mt-1">{errors.weight}</p>}
             </div>
+
             <div>
               <Label htmlFor="height">Taille (cm) *</Label>
               <Input
                 id="height"
                 type="number"
-                value={formData.height || ""}
-                onChange={(e) => handleInputChange("height", Number.parseFloat(e.target.value) || 0)}
-                placeholder="170"
+                value={formData.height}
+                onChange={(e) => handleInputChange("height", e.target.value)}
+                placeholder="Taille en cm"
+                min="50"
+                max="250"
+                className={errors.height ? "border-red-500" : ""}
               />
-            </div>
-            <div>
-              <Label htmlFor="bloodType">Groupe sanguin</Label>
-              <Select value={formData.bloodType} onValueChange={(value) => handleInputChange("bloodType", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="A+">A+</SelectItem>
-                  <SelectItem value="A-">A-</SelectItem>
-                  <SelectItem value="B+">B+</SelectItem>
-                  <SelectItem value="B-">B-</SelectItem>
-                  <SelectItem value="AB+">AB+</SelectItem>
-                  <SelectItem value="AB-">AB-</SelectItem>
-                  <SelectItem value="O+">O+</SelectItem>
-                  <SelectItem value="O-">O-</SelectItem>
-                </SelectContent>
-              </Select>
+              {errors.height && <p className="text-sm text-red-500 mt-1">{errors.height}</p>}
             </div>
           </div>
 
-          {formData.weight > 0 && formData.height > 0 && (
-            <div className="bg-blue-50 p-3 rounded-lg">
+          {bmi && (
+            <div className="p-3 bg-gray-50 rounded-lg">
               <p className="text-sm">
-                <strong>IMC:</strong> {(formData.weight / (formData.height / 100) ** 2 || 0).toFixed(1)} kg/m²
+                <span className="font-medium">IMC calculé:</span> {bmi} kg/m² -{" "}
+                <span className={bmiCategory?.color}>{bmiCategory?.text}</span>
               </p>
             </div>
           )}
@@ -265,206 +269,244 @@ export default function PatientForm({ data, onDataChange, onNext }: PatientFormP
       {/* Allergies */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg">
             <AlertTriangle className="h-5 w-5" />
-            Allergies
+            Allergies Connues
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              value={newAllergy}
-              onChange={(e) => setNewAllergy(e.target.value)}
-              placeholder="Ajouter une allergie"
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  addToArray("allergies", newAllergy, setNewAllergy)
-                }
-              }}
-            />
-            <Button
-              type="button"
-              onClick={() => addToArray("allergies", newAllergy, setNewAllergy)}
-              disabled={!newAllergy.trim()}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {formData.allergies.map((allergy, index) => (
-              <Badge key={index} variant="destructive" className="flex items-center gap-1">
-                {allergy}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 hover:bg-transparent"
-                  onClick={() => removeFromArray("allergies", index)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {commonAllergies.map((allergy) => (
+              <div key={allergy} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`allergy-${allergy}`}
+                  checked={formData.allergies.includes(allergy)}
+                  onCheckedChange={(checked) => handleAllergyChange(allergy, checked as boolean)}
+                />
+                <Label htmlFor={`allergy-${allergy}`} className="text-sm">
+                  {allergy}
+                </Label>
+              </div>
             ))}
           </div>
+
+          <div>
+            <Label htmlFor="otherAllergies">Autres allergies (texte libre)</Label>
+            <Textarea
+              id="otherAllergies"
+              value={formData.otherAllergies}
+              onChange={(e) => handleInputChange("otherAllergies", e.target.value)}
+              placeholder="Décrivez toute autre allergie connue (médicaments, aliments, environnement...)"
+              rows={3}
+            />
+          </div>
+
+          {(formData.allergies.length > 0 || formData.otherAllergies) && (
+            <div className="p-3 bg-red-50 rounded-lg">
+              <p className="text-sm font-medium text-red-800 mb-2">Allergies déclarées:</p>
+              <div className="flex flex-wrap gap-2">
+                {formData.allergies.map((allergy) => (
+                  <span key={allergy} className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">
+                    {allergy}
+                  </span>
+                ))}
+                {formData.otherAllergies && (
+                  <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">{formData.otherAllergies}</span>
+                )}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Antécédents Médicaux et Chirurgicaux */}
+      {/* Antécédents médicaux */}
       <Card>
         <CardHeader>
-          <CardTitle>Antécédents Médicaux et Chirurgicaux</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Heart className="h-5 w-5" />
+            Antécédents Médicaux
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              value={newMedicalHistory}
-              onChange={(e) => setNewMedicalHistory(e.target.value)}
-              placeholder="Ajouter un antécédent médical ou chirurgical"
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  addToArray("medicalHistory", newMedicalHistory, setNewMedicalHistory)
-                }
-              }}
-            />
-            <Button
-              type="button"
-              onClick={() => addToArray("medicalHistory", newMedicalHistory, setNewMedicalHistory)}
-              disabled={!newMedicalHistory.trim()}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {formData.medicalHistory.map((history, index) => (
-              <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                {history}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 hover:bg-transparent"
-                  onClick={() => removeFromArray("medicalHistory", index)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {commonMedicalHistory.map((condition) => (
+              <div key={condition} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`history-${condition}`}
+                  checked={formData.medicalHistory.includes(condition)}
+                  onCheckedChange={(checked) => handleMedicalHistoryChange(condition, checked as boolean)}
+                />
+                <Label htmlFor={`history-${condition}`} className="text-sm">
+                  {condition}
+                </Label>
+              </div>
             ))}
           </div>
+
+          <div>
+            <Label htmlFor="otherMedicalHistory">Autres antécédents médicaux (texte libre)</Label>
+            <Textarea
+              id="otherMedicalHistory"
+              value={formData.otherMedicalHistory}
+              onChange={(e) => handleInputChange("otherMedicalHistory", e.target.value)}
+              placeholder="Décrivez tout autre antécédent médical, chirurgical, familial important..."
+              rows={3}
+            />
+          </div>
+
+          {(formData.medicalHistory.length > 0 || formData.otherMedicalHistory) && (
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <p className="text-sm font-medium text-blue-800 mb-2">Antécédents déclarés:</p>
+              <div className="flex flex-wrap gap-2">
+                {formData.medicalHistory.map((condition) => (
+                  <span key={condition} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                    {condition}
+                  </span>
+                ))}
+                {formData.otherMedicalHistory && (
+                  <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                    Autres: {formData.otherMedicalHistory.substring(0, 50)}...
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
       {/* Médicaments actuels */}
       <Card>
         <CardHeader>
-          <CardTitle>Médicaments Actuels</CardTitle>
+          <CardTitle className="text-lg">Médicaments Actuels</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              value={newMedication}
-              onChange={(e) => setNewMedication(e.target.value)}
-              placeholder="Ajouter un médicament"
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  addToArray("currentMedications", newMedication, setNewMedication)
-                }
-              }}
+        <CardContent>
+          <div>
+            <Label htmlFor="currentMedicationsText">Traitements en cours (texte libre)</Label>
+            <Textarea
+              id="currentMedicationsText"
+              value={formData.currentMedicationsText}
+              onChange={(e) => handleInputChange("currentMedicationsText", e.target.value)}
+              placeholder="Listez tous les médicaments actuels avec posologies si possible.
+Exemple: 
+- Paracétamol 1g 3 fois par jour
+- Lisinopril 10mg 1 fois le matin
+- Oméprazole 20mg avant le petit-déjeuner
+- Vitamines, compléments alimentaires..."
+              rows={6}
+              className="resize-y"
             />
-            <Button
-              type="button"
-              onClick={() => addToArray("currentMedications", newMedication, setNewMedication)}
-              disabled={!newMedication.trim()}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {formData.currentMedications.map((medication, index) => (
-              <Badge key={index} variant="outline" className="flex items-center gap-1">
-                {medication}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 hover:bg-transparent"
-                  onClick={() => removeFromArray("currentMedications", index)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            ))}
-          </div>
+          {formData.currentMedicationsText && (
+            <div className="mt-3 p-3 bg-green-50 rounded-lg">
+              <p className="text-sm font-medium text-green-800">
+                ✓ Traitements renseignés (
+                {formData.currentMedicationsText.split("\n").filter((line) => line.trim()).length} lignes)
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Habitudes de Vie */}
+      {/* Habitudes de vie */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5" />
-            Habitudes de Vie
-          </CardTitle>
+          <CardTitle className="text-lg">Habitudes de Vie</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="smoking">Tabac</Label>
-              <Select
+              <Label>Tabac</Label>
+              <RadioGroup
                 value={formData.lifeHabits.smoking}
-                onValueChange={(value) => handleNestedChange("lifeHabits", "smoking", value)}
+                onValueChange={(value) => handleLifeHabitsChange("smoking", value)}
+                className="mt-2"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="never">Jamais fumé</SelectItem>
-                  <SelectItem value="former">Ancien fumeur</SelectItem>
-                  <SelectItem value="current">Fumeur actuel</SelectItem>
-                </SelectContent>
-              </Select>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Non-fumeur" id="no-smoking" />
+                  <Label htmlFor="no-smoking" className="text-sm">
+                    Non-fumeur
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Fumeur actuel" id="current-smoker" />
+                  <Label htmlFor="current-smoker" className="text-sm">
+                    Fumeur actuel
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Ex-fumeur" id="ex-smoker" />
+                  <Label htmlFor="ex-smoker" className="text-sm">
+                    Ex-fumeur
+                  </Label>
+                </div>
+              </RadioGroup>
             </div>
+
             <div>
-              <Label htmlFor="alcohol">Alcool</Label>
-              <Select
+              <Label>Alcool</Label>
+              <RadioGroup
                 value={formData.lifeHabits.alcohol}
-                onValueChange={(value) => handleNestedChange("lifeHabits", "alcohol", value)}
+                onValueChange={(value) => handleLifeHabitsChange("alcohol", value)}
+                className="mt-2"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="never">Jamais</SelectItem>
-                  <SelectItem value="occasional">Occasionnel</SelectItem>
-                  <SelectItem value="regular">Régulier</SelectItem>
-                  <SelectItem value="heavy">Important</SelectItem>
-                </SelectContent>
-              </Select>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Jamais" id="no-alcohol" />
+                  <Label htmlFor="no-alcohol" className="text-sm">
+                    Jamais
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Occasionnel" id="occasional-alcohol" />
+                  <Label htmlFor="occasional-alcohol" className="text-sm">
+                    Occasionnel
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Régulier" id="regular-alcohol" />
+                  <Label htmlFor="regular-alcohol" className="text-sm">
+                    Régulier
+                  </Label>
+                </div>
+              </RadioGroup>
             </div>
+
             <div>
-              <Label htmlFor="physicalActivity">Activité Physique</Label>
-              <Select
+              <Label>Activité physique</Label>
+              <RadioGroup
                 value={formData.lifeHabits.physicalActivity}
-                onValueChange={(value) => handleNestedChange("lifeHabits", "physicalActivity", value)}
+                onValueChange={(value) => handleLifeHabitsChange("physicalActivity", value)}
+                className="mt-2"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sedentary">Sédentaire</SelectItem>
-                  <SelectItem value="light">Activité légère</SelectItem>
-                  <SelectItem value="moderate">Activité modérée</SelectItem>
-                  <SelectItem value="intense">Activité intense</SelectItem>
-                  <SelectItem value="very-intense">Très intense</SelectItem>
-                </SelectContent>
-              </Select>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Sédentaire" id="sedentary" />
+                  <Label htmlFor="sedentary" className="text-sm">
+                    Sédentaire
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Modérée" id="moderate-activity" />
+                  <Label htmlFor="moderate-activity" className="text-sm">
+                    Modérée
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Intense" id="intense-activity" />
+                  <Label htmlFor="intense-activity" className="text-sm">
+                    Intense
+                  </Label>
+                </div>
+              </RadioGroup>
             </div>
           </div>
         </CardContent>
       </Card>
 
+      {/* Navigation */}
       <div className="flex justify-end">
-        <Button onClick={onNext} disabled={!isFormValid()}>
+        <Button onClick={handleSubmit} size="lg">
           Continuer vers l'Examen Clinique
+          <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
     </div>

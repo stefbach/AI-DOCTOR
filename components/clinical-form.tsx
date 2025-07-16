@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -27,7 +27,8 @@ interface ClinicalData {
 }
 
 interface ClinicalFormProps {
-  data: ClinicalData
+  data?: ClinicalData
+  patientData?: any
   onDataChange: (data: ClinicalData) => void
   onNext: () => void
   onPrevious: () => void
@@ -56,8 +57,42 @@ const commonSymptoms = [
   "Gonflement des jambes",
 ]
 
-export default function ClinicalForm({ data, onDataChange, onNext, onPrevious }: ClinicalFormProps) {
-  const [localData, setLocalData] = useState<ClinicalData>(data)
+const defaultClinicalData: ClinicalData = {
+  chiefComplaint: "",
+  symptoms: [],
+  symptomDuration: "",
+  vitalSigns: {
+    temperature: "",
+    heartRate: "",
+    bloodPressureSystolic: "",
+    bloodPressureDiastolic: "",
+  },
+  painScale: 0,
+  functionalStatus: "",
+  notes: "",
+}
+
+export default function ClinicalForm({ data, patientData, onDataChange, onNext, onPrevious }: ClinicalFormProps) {
+  const [localData, setLocalData] = useState<ClinicalData>(defaultClinicalData)
+
+  useEffect(() => {
+    if (data) {
+      setLocalData({
+        chiefComplaint: data.chiefComplaint || "",
+        symptoms: Array.isArray(data.symptoms) ? data.symptoms : [],
+        symptomDuration: data.symptomDuration || "",
+        vitalSigns: {
+          temperature: data.vitalSigns?.temperature || "",
+          heartRate: data.vitalSigns?.heartRate || "",
+          bloodPressureSystolic: data.vitalSigns?.bloodPressureSystolic || "",
+          bloodPressureDiastolic: data.vitalSigns?.bloodPressureDiastolic || "",
+        },
+        painScale: typeof data.painScale === "number" ? data.painScale : 0,
+        functionalStatus: data.functionalStatus || "",
+        notes: data.notes || "",
+      })
+    }
+  }, [data])
 
   const updateData = (updates: Partial<ClinicalData>) => {
     const newData = { ...localData, ...updates }
@@ -71,7 +106,7 @@ export default function ClinicalForm({ data, onDataChange, onNext, onPrevious }:
   }
 
   const toggleSymptom = (symptom: string) => {
-    const currentSymptoms = localData.symptoms || []
+    const currentSymptoms = Array.isArray(localData.symptoms) ? localData.symptoms : []
     const newSymptoms = currentSymptoms.includes(symptom)
       ? currentSymptoms.filter((s) => s !== symptom)
       : [...currentSymptoms, symptom]
@@ -79,7 +114,11 @@ export default function ClinicalForm({ data, onDataChange, onNext, onPrevious }:
   }
 
   const isFormValid = () => {
-    return localData.chiefComplaint.trim() !== "" && localData.symptoms.length > 0 && localData.symptomDuration !== ""
+    const chiefComplaint = localData.chiefComplaint || ""
+    const symptoms = Array.isArray(localData.symptoms) ? localData.symptoms : []
+    const symptomDuration = localData.symptomDuration || ""
+
+    return chiefComplaint.trim() !== "" && symptoms.length > 0 && symptomDuration !== ""
   }
 
   return (
@@ -104,7 +143,7 @@ export default function ClinicalForm({ data, onDataChange, onNext, onPrevious }:
             <Label htmlFor="chiefComplaint">Motif principal de consultation *</Label>
             <Textarea
               id="chiefComplaint"
-              value={localData.chiefComplaint}
+              value={localData.chiefComplaint || ""}
               onChange={(e) => updateData({ chiefComplaint: e.target.value })}
               placeholder="Décrivez le motif principal de la consultation..."
               rows={3}
@@ -123,22 +162,25 @@ export default function ClinicalForm({ data, onDataChange, onNext, onPrevious }:
           <div>
             <Label>Sélectionnez tous les symptômes présents *</Label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
-              {commonSymptoms.map((symptom) => (
-                <div key={symptom} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={symptom}
-                    checked={localData.symptoms.includes(symptom)}
-                    onCheckedChange={() => toggleSymptom(symptom)}
-                  />
-                  <Label htmlFor={symptom} className="text-sm cursor-pointer">
-                    {symptom}
-                  </Label>
-                </div>
-              ))}
+              {commonSymptoms.map((symptom) => {
+                const currentSymptoms = Array.isArray(localData.symptoms) ? localData.symptoms : []
+                return (
+                  <div key={symptom} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={symptom}
+                      checked={currentSymptoms.includes(symptom)}
+                      onCheckedChange={() => toggleSymptom(symptom)}
+                    />
+                    <Label htmlFor={symptom} className="text-sm cursor-pointer">
+                      {symptom}
+                    </Label>
+                  </div>
+                )
+              })}
             </div>
           </div>
 
-          {localData.symptoms.length > 0 && (
+          {Array.isArray(localData.symptoms) && localData.symptoms.length > 0 && (
             <div>
               <Label>Symptômes sélectionnés :</Label>
               <div className="flex flex-wrap gap-2 mt-2">
@@ -153,7 +195,10 @@ export default function ClinicalForm({ data, onDataChange, onNext, onPrevious }:
 
           <div>
             <Label htmlFor="symptomDuration">Durée des symptômes *</Label>
-            <Select value={localData.symptomDuration} onValueChange={(value) => updateData({ symptomDuration: value })}>
+            <Select
+              value={localData.symptomDuration || ""}
+              onValueChange={(value) => updateData({ symptomDuration: value })}
+            >
               <SelectTrigger className="mt-1">
                 <SelectValue placeholder="Sélectionnez la durée" />
               </SelectTrigger>
@@ -190,7 +235,7 @@ export default function ClinicalForm({ data, onDataChange, onNext, onPrevious }:
                   id="temperature"
                   type="number"
                   step="0.1"
-                  value={localData.vitalSigns.temperature}
+                  value={localData.vitalSigns?.temperature || ""}
                   onChange={(e) => updateVitalSigns("temperature", e.target.value)}
                   placeholder="37.0"
                   className="mt-1"
@@ -205,7 +250,7 @@ export default function ClinicalForm({ data, onDataChange, onNext, onPrevious }:
                 <Input
                   id="heartRate"
                   type="number"
-                  value={localData.vitalSigns.heartRate}
+                  value={localData.vitalSigns?.heartRate || ""}
                   onChange={(e) => updateVitalSigns("heartRate", e.target.value)}
                   placeholder="80"
                   className="mt-1"
@@ -218,7 +263,7 @@ export default function ClinicalForm({ data, onDataChange, onNext, onPrevious }:
               <Input
                 id="bloodPressureSystolic"
                 type="number"
-                value={localData.vitalSigns.bloodPressureSystolic}
+                value={localData.vitalSigns?.bloodPressureSystolic || ""}
                 onChange={(e) => updateVitalSigns("bloodPressureSystolic", e.target.value)}
                 placeholder="120"
                 className="mt-1"
@@ -230,7 +275,7 @@ export default function ClinicalForm({ data, onDataChange, onNext, onPrevious }:
               <Input
                 id="bloodPressureDiastolic"
                 type="number"
-                value={localData.vitalSigns.bloodPressureDiastolic}
+                value={localData.vitalSigns?.bloodPressureDiastolic || ""}
                 onChange={(e) => updateVitalSigns("bloodPressureDiastolic", e.target.value)}
                 placeholder="80"
                 className="mt-1"
@@ -254,7 +299,7 @@ export default function ClinicalForm({ data, onDataChange, onNext, onPrevious }:
                 {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
                   <Button
                     key={value}
-                    variant={localData.painScale === value ? "default" : "outline"}
+                    variant={(localData.painScale || 0) === value ? "default" : "outline"}
                     size="sm"
                     onClick={() => updateData({ painScale: value })}
                     className="w-8 h-8 p-0"
@@ -265,13 +310,13 @@ export default function ClinicalForm({ data, onDataChange, onNext, onPrevious }:
               </div>
               <span className="text-sm">10</span>
             </div>
-            {localData.painScale > 0 && (
+            {(localData.painScale || 0) > 0 && (
               <p className="text-sm text-gray-600 mt-2">
                 Douleur sélectionnée : {localData.painScale}/10
-                {localData.painScale <= 3 && " (Légère)"}
-                {localData.painScale > 3 && localData.painScale <= 6 && " (Modérée)"}
-                {localData.painScale > 6 && localData.painScale <= 8 && " (Sévère)"}
-                {localData.painScale > 8 && " (Très sévère)"}
+                {(localData.painScale || 0) <= 3 && " (Légère)"}
+                {(localData.painScale || 0) > 3 && (localData.painScale || 0) <= 6 && " (Modérée)"}
+                {(localData.painScale || 0) > 6 && (localData.painScale || 0) <= 8 && " (Sévère)"}
+                {(localData.painScale || 0) > 8 && " (Très sévère)"}
               </p>
             )}
           </div>
@@ -287,7 +332,7 @@ export default function ClinicalForm({ data, onDataChange, onNext, onPrevious }:
           <div>
             <Label htmlFor="functionalStatus">Impact sur les activités quotidiennes</Label>
             <Select
-              value={localData.functionalStatus}
+              value={localData.functionalStatus || ""}
               onValueChange={(value) => updateData({ functionalStatus: value })}
             >
               <SelectTrigger className="mt-1">
@@ -315,7 +360,7 @@ export default function ClinicalForm({ data, onDataChange, onNext, onPrevious }:
             <Label htmlFor="notes">Observations et notes supplémentaires</Label>
             <Textarea
               id="notes"
-              value={localData.notes}
+              value={localData.notes || ""}
               onChange={(e) => updateData({ notes: e.target.value })}
               placeholder="Ajoutez toute observation clinique pertinente..."
               rows={4}
