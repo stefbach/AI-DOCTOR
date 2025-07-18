@@ -248,11 +248,38 @@ export default function DiagnosisForm({
           {diagnosis.primaryDiagnosis?.arguments && (
             <div>
               <h4 className="font-medium mb-2">Arguments diagnostiques:</h4>
-              <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
-                {diagnosis.primaryDiagnosis.arguments.map((arg: string, index: number) => (
-                  <li key={index}>{arg}</li>
-                ))}
-              </ul>
+              <div className="space-y-2">
+                {Array.isArray(diagnosis.primaryDiagnosis.arguments) ? (
+                  diagnosis.primaryDiagnosis.arguments.map((arg: any, index: number) => (
+                    <div key={index} className="bg-blue-50 p-3 rounded-lg">
+                      {typeof arg === 'string' ? (
+                        // Si c'est une chaîne simple (ancien format)
+                        <p className="text-sm text-gray-600">{arg}</p>
+                      ) : (
+                        // Si c'est un objet (nouveau format)
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium px-2 py-1 bg-blue-100 rounded">
+                              {arg.type || 'Argument'}
+                            </span>
+                            <span className="text-xs font-medium px-2 py-1 bg-gray-100 rounded">
+                              {arg.weight || 'Modéré'}
+                            </span>
+                          </div>
+                          <p className="text-sm font-medium text-gray-800">
+                            {arg.evidence || 'Élément clinique'}
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            {arg.significance || 'Signification diagnostique'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-600">Arguments non disponibles</p>
+                )}
+              </div>
             </div>
           )}
         </CardContent>
@@ -265,22 +292,69 @@ export default function DiagnosisForm({
             <CardTitle className="text-lg">Raisonnement Clinique</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Sémiologie */}
             {diagnosis.clinicalReasoning.semiology && (
               <div>
                 <h4 className="font-medium mb-2">Analyse sémiologique:</h4>
-                <p className="text-sm text-gray-600">{diagnosis.clinicalReasoning.semiology}</p>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    {diagnosis.clinicalReasoning.semiology}
+                  </p>
+                </div>
               </div>
             )}
 
+            {/* Syndromes */}
             {diagnosis.clinicalReasoning.syndromes && (
               <div>
                 <h4 className="font-medium mb-2">Syndromes identifiés:</h4>
-                <div className="flex flex-wrap gap-2">
-                  {diagnosis.clinicalReasoning.syndromes.map((syndrome: string, index: number) => (
-                    <Badge key={index} variant="outline">
-                      {syndrome}
-                    </Badge>
-                  ))}
+                <div className="space-y-3">
+                  {Array.isArray(diagnosis.clinicalReasoning.syndromes) ? (
+                    diagnosis.clinicalReasoning.syndromes.map((syndrome: any, index: number) => (
+                      <div key={index} className="border rounded-lg p-3">
+                        {typeof syndrome === 'string' ? (
+                          // Format simple (ancien)
+                          <Badge variant="outline">{syndrome}</Badge>
+                        ) : (
+                          // Format objet (nouveau)
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline">{syndrome.name || 'Syndrome'}</Badge>
+                            </div>
+                            {syndrome.description && (
+                              <p className="text-sm text-gray-600">{syndrome.description}</p>
+                            )}
+                            {syndrome.presence && (
+                              <div className="bg-blue-50 p-2 rounded text-xs">
+                                <span className="font-medium">Présence: </span>
+                                {syndrome.presence}
+                              </div>
+                            )}
+                            {syndrome.significance && (
+                              <div className="bg-yellow-50 p-2 rounded text-xs">
+                                <span className="font-medium">Signification: </span>
+                                {syndrome.significance}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500">Syndromes en cours d'analyse</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Physiopathologie */}
+            {diagnosis.clinicalReasoning.pathophysiology && (
+              <div>
+                <h4 className="font-medium mb-2">Physiopathologie:</h4>
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    {diagnosis.clinicalReasoning.pathophysiology}
+                  </p>
                 </div>
               </div>
             )}
@@ -295,14 +369,64 @@ export default function DiagnosisForm({
             <CardTitle className="text-lg">Diagnostics Différentiels</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {diagnosis.differentialDiagnosis.map((diff: any, index: number) => (
                 <div key={index} className="border-l-4 border-gray-200 pl-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium">{diff.condition}</h4>
                     <Badge variant="secondary">{diff.probability}%</Badge>
                   </div>
-                  {diff.arguments && <p className="text-sm text-gray-600 mt-1">{diff.arguments.join(", ")}</p>}
+                  
+                  {/* Description détaillée */}
+                  {diff.detailedDescription && (
+                    <div className="mb-3">
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        {diff.detailedDescription}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Arguments pour */}
+                  {diff.argumentsFor && diff.argumentsFor.length > 0 && (
+                    <div className="mb-2">
+                      <h5 className="text-sm font-medium text-green-700 mb-1">Arguments en faveur:</h5>
+                      <div className="space-y-1">
+                        {diff.argumentsFor.map((arg: any, argIndex: number) => (
+                          <div key={argIndex} className="bg-green-50 p-2 rounded text-xs">
+                            <span className="font-medium">{arg.evidence || arg}</span>
+                            {arg.significance && (
+                              <span className="text-green-600 ml-2">- {arg.significance}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Arguments contre */}
+                  {diff.argumentsAgainst && diff.argumentsAgainst.length > 0 && (
+                    <div className="mb-2">
+                      <h5 className="text-sm font-medium text-red-700 mb-1">Arguments contre:</h5>
+                      <div className="space-y-1">
+                        {diff.argumentsAgainst.map((arg: any, argIndex: number) => (
+                          <div key={argIndex} className="bg-red-50 p-2 rounded text-xs">
+                            <span className="font-medium">{arg.evidence || arg}</span>
+                            {arg.significance && (
+                              <span className="text-red-600 ml-2">- {arg.significance}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Anciens arguments (compatibilité) */}
+                  {diff.arguments && typeof diff.arguments === 'string' && (
+                    <p className="text-sm text-gray-600 mt-1">{diff.arguments}</p>
+                  )}
+                  {diff.arguments && Array.isArray(diff.arguments) && (
+                    <p className="text-sm text-gray-600 mt-1">{diff.arguments.join(", ")}</p>
+                  )}
                 </div>
               ))}
             </div>
@@ -370,11 +494,35 @@ export default function DiagnosisForm({
             <CardTitle className="text-lg text-red-600">Signaux d'Alarme</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {diagnosis.redFlags.map((flag: string, index: number) => (
-                <div key={index} className="flex items-center gap-2 text-red-600">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span className="text-sm">{flag}</span>
+            <div className="space-y-3">
+              {diagnosis.redFlags.map((flag: any, index: number) => (
+                <div key={index} className="flex items-start gap-3 p-3 bg-red-50 rounded-lg">
+                  <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    {typeof flag === 'string' ? (
+                      // Format simple (ancien)
+                      <span className="text-sm text-red-700">{flag}</span>
+                    ) : (
+                      // Format objet (nouveau)
+                      <div className="space-y-1">
+                        <div className="font-medium text-red-800">
+                          {flag.sign || 'Signe d\'alarme'}
+                        </div>
+                        {flag.significance && (
+                          <div className="text-sm text-red-600">
+                            <span className="font-medium">Signification: </span>
+                            {flag.significance}
+                          </div>
+                        )}
+                        {flag.action && (
+                          <div className="text-sm text-red-700 bg-red-100 p-2 rounded">
+                            <span className="font-medium">Action: </span>
+                            {flag.action}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
