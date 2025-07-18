@@ -82,12 +82,25 @@ export default function PatientForm({ onDataChange, onNext }: PatientFormProps) 
     if (tibokPatient && isFromTibok) {
       console.log('Auto-filling form with TIBOK patient data:', tibokPatient)
       
+      // Map gender value
+      let mappedGender = ''
+      if (tibokPatient.gender) {
+        const genderLower = tibokPatient.gender.toLowerCase()
+        if (genderLower === 'm' || genderLower === 'male' || genderLower.includes('mas')) {
+          mappedGender = 'Masculin'
+        } else if (genderLower === 'f' || genderLower === 'female' || genderLower.includes('fem')) {
+          mappedGender = 'Féminin'
+        } else {
+          mappedGender = tibokPatient.gender
+        }
+      }
+      
       const newFormData = {
         ...formData,
         firstName: tibokPatient.first_name || "",
         lastName: tibokPatient.last_name || "",
         age: tibokPatient.age?.toString() || "",
-        gender: mapGenderToForm(tibokPatient.gender),
+        gender: mappedGender, // Use the mapped gender value
         weight: tibokPatient.weight?.toString() || "",
         height: tibokPatient.height?.toString() || "",
       }
