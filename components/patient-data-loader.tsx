@@ -4,119 +4,137 @@ import React, { useEffect, useState } from 'react'
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 
 interface PatientData {
-  id: string
-  first_name: string
-  last_name: string
-  date_of_birth: string
-  gender: string
-  age: number
-  height: number
-  weight: number
-  phone_number: string
-  email: string
-  address: string
-  city: string
-  country: string
-}
-
-interface ConsultationData {
-  id: string
-  patient_id: string
-  doctor_id: string
-  status: string
+  id?: string
+  firstName?: string
+  lastName?: string
+  first_name?: string
+  last_name?: string
+  age?: number
+  gender?: string
+  weight?: number
+  height?: number
 }
 
 export function PatientDataLoader() {
-  const [isLoading, setIsLoading] = useState(false)
   const [notification, setNotification] = useState<{
     type: 'success' | 'error' | null
     message: string
   }>({ type: null, message: '' })
 
   useEffect(() => {
-    const loadPatientData = async () => {
+    const loadPatientData = () => {
       // Check URL parameters
       const urlParams = new URLSearchParams(window.location.search)
       const consultationId = urlParams.get('consultationId')
       const patientId = urlParams.get('patientId')
       const source = urlParams.get('source')
+      const patientDataParam = urlParams.get('patientData')
 
       // Only proceed if coming from TIBOK
       if (source !== 'tibok' || !consultationId || !patientId) {
         return
       }
 
-      setIsLoading(true)
-
       try {
-        console.log('Loading patient data from TIBOK...')
-
-        // Call the API route
-        const response = await fetch(`/api/consultation?consultationId=${consultationId}&patientId=${patientId}&source=tibok`)
+        console.log('Processing TIBOK data...')
         
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.error || 'Failed to fetch data')
+        let patientData: PatientData = { id: patientId }
+        
+        // Try to parse patient data from URL if provided
+        if (patientDataParam) {
+          try {
+            const decodedData = JSON.parse(decodeURIComponent(patientDataParam))
+            patientData = { ...patientData, ...decodedData }
+            console.log('Patient data from URL:', patientData)
+          } catch (e) {
+            console.log('Could not parse patient data from URL')
+          }
         }
 
-        const data = await response.json()
-        console.log('Received data:', data)
-
-        // Dispatch custom event with patient data
+        // Dispatch custom event with whatever data we have
         const event = new CustomEvent('tibok-patient-data', {
           detail: {
-            patient: data.patient,
-            consultation: data.consultation
+            patient: {
+              id: patientId,
+              first_name: patientData.firstName || patientData.first_name || '',
+              last_name: patientData.lastName || patientData.last_name || '',
+              age: patientData.age,
+              gender: patientData.gender,
+              weight: patientData.weight,
+              height: patientData.height
+            },
+            consultation: {
+              id: consultationId,
+              patient_id: patientId
+            },
+            isFromTibok: true
           }
         })
         window.dispatchEvent(event)
 
-        // Try to auto-fill form fields
-        autoFillForm(data.patient)
-
-        setNotification({
-          type: 'success',
-          message: `Données de ${data.patient.first_name} ${data.patient.last_name} chargées avec succès`
-        })
+        // If we have some patient data, try to auto-fill
+        if (patientData.firstName || patientData.lastName || patientData.first_name || patientData.last_name) {
+          autoFillForm({
+            first_name: patientData.firstName || patientData.first_name || '',
+            last_name: patientData.lastName || patientData.last_name || '',
+            age: patientData.age,
+            gender: patientData.gender,
+            weight: patientData.weight,
+            height: patientData.height
+          } as any)
+          
+          setNotification({
+            type: 'success',
+            message: `Consultation TIBOK liée - Patient: ${patientData.firstName || patientData.first_name || 'ID'} ${patientData.lastName || patientData.last_name || patientId}`
+          })
+        } else {
+          setNotification({
+            type: 'success',
+            message: `Consultation TIBOK liée - ID Patient: ${patientId}`
+          })
+        }
 
         // Clear URL parameters
         const cleanUrl = window.location.pathname
         window.history.replaceState({}, document.title, cleanUrl)
 
       } catch (error) {
-        console.error('Error loading patient data:', error)
+        console.error('Error processing TIBOK data:', error)
         setNotification({
           type: 'error',
-          message: error instanceof Error ? error.message : 'Erreur lors du chargement'
+          message: 'Erreur lors du traitement des données TIBOK'
         })
-      } finally {
-        setIsLoading(false)
       }
     }
 
+    // Run immediately
     loadPatientData()
   }, [])
 
-  const autoFillForm = (patient: PatientData) => {
+  const autoFillForm = (patient: any) => {
     console.log('Auto-filling form with patient data:', patient)
     
     // Wait for form to be rendered
     setTimeout(() => {
-      // Try different selector strategies for the patient form
       const fillField = (selectors: string[], value: any) => {
+        if (!value) return
+        
         for (const selector of selectors) {
           const field = document.querySelector(selector) as HTMLInputElement
           if (field) {
             console.log(`Filling field ${selector} with value:`, value)
-            field.value = value || ''
+            field.value = value.toString()
+            
+            // Dispatch multiple events to ensure React components update
             field.dispatchEvent(new Event('input', { bubbles: true }))
             field.dispatchEvent(new Event('change', { bubbles: true }))
-            // Also try React's synthetic event
+            field.dispatchEvent(new Event('blur', { bubbles: true }))
+            
+            // Force React to update
             const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set
             if (nativeInputValueSetter) {
-              nativeInputValueSetter.call(field, value || '')
-              const inputEvent = new Event('input', { bubbles: true })
-              field.dispatchEvent(inputEvent)
+              nativeInputValueSetter.call(field, value.toString())
+              field.dispatchEvent(new Event('input', { bubbles: true }))
             }
             break
           }
@@ -127,93 +145,63 @@ export function PatientDataLoader() {
       fillField([
         'input[name="firstName"]',
         'input[id="firstName"]',
-        'input[placeholder*="Prénom"]',
-        '#firstName'
+        'input[placeholder*="Prénom"]'
       ], patient.first_name)
 
       fillField([
         'input[name="lastName"]',
         'input[id="lastName"]',
-        'input[placeholder*="Nom"]',
-        '#lastName'
+        'input[placeholder*="Nom"]'
       ], patient.last_name)
 
       fillField([
         'input[name="age"]',
         'input[id="age"]',
-        'input[placeholder*="Âge"]',
-        'input[placeholder*="Age"]',
-        'input[type="number"][placeholder*="années"]',
-        '#age'
-      ], patient.age?.toString())
+        'input[type="number"][placeholder*="années"]'
+      ], patient.age)
 
       fillField([
         'input[name="weight"]',
         'input[id="weight"]',
-        'input[placeholder*="Poids"]',
-        '#weight'
-      ], patient.weight?.toString())
+        'input[placeholder*="Poids"]'
+      ], patient.weight)
 
       fillField([
         'input[name="height"]',
         'input[id="height"]',
-        'input[placeholder*="Taille"]',
-        '#height'
-      ], patient.height?.toString())
+        'input[placeholder*="Taille"]'
+      ], patient.height)
 
-      // Handle gender selection with better matching
-      setTimeout(() => {
-        const genderValue = patient.gender?.toLowerCase()
-        console.log('Setting gender:', genderValue)
-        
-        // Try radio buttons with different value formats
-        const genderRadios = document.querySelectorAll('input[type="radio"][name="gender"], input[type="radio"][id*="male"], input[type="radio"][id*="female"]')
-        genderRadios.forEach((radio: any) => {
-          const radioValue = radio.value.toLowerCase()
-          const radioId = radio.id.toLowerCase()
+      // Handle gender
+      if (patient.gender) {
+        setTimeout(() => {
+          const genderValue = patient.gender.toLowerCase()
+          const genderRadios = document.querySelectorAll('input[type="radio"][name="gender"]')
           
-          if ((genderValue === 'male' || genderValue === 'masculin' || genderValue === 'm') && 
-              (radioValue === 'masculin' || radioId === 'male')) {
-            console.log('Checking male radio:', radio)
-            radio.checked = true
-            radio.dispatchEvent(new Event('change', { bubbles: true }))
-            radio.click()
-          } else if ((genderValue === 'female' || genderValue === 'féminin' || genderValue === 'f') && 
-                     (radioValue === 'féminin' || radioId === 'female')) {
-            console.log('Checking female radio:', radio)
-            radio.checked = true
-            radio.dispatchEvent(new Event('change', { bubbles: true }))
-            radio.click()
-          }
-        })
-      }, 500)
+          genderRadios.forEach((radio: any) => {
+            if ((genderValue.includes('mas') || genderValue === 'm') && radio.value === 'Masculin') {
+              radio.checked = true
+              radio.click()
+            } else if ((genderValue.includes('fem') || genderValue === 'f') && radio.value === 'Féminin') {
+              radio.checked = true
+              radio.click()
+            }
+          })
+        }, 500)
+      }
 
-    }, 1500) // Increased timeout to ensure form is loaded
+    }, 1500)
   }
 
   // Auto-hide notification after 5 seconds
   useEffect(() => {
-    if (notification.type === 'success') {
+    if (notification.type) {
       const timer = setTimeout(() => {
         setNotification({ type: null, message: '' })
       }, 5000)
       return () => clearTimeout(timer)
     }
   }, [notification])
-
-  // Loading indicator
-  if (isLoading) {
-    return (
-      <div className="fixed top-4 right-4 z-50">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-lg flex items-center gap-3">
-          <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
-          <span className="text-sm text-blue-700">
-            Chargement des données patient depuis TIBOK...
-          </span>
-        </div>
-      </div>
-    )
-  }
 
   // Success notification
   if (notification.type === 'success') {
@@ -224,7 +212,7 @@ export function PatientDataLoader() {
             <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
             <div className="flex-1">
               <h4 className="font-semibold text-green-900">
-                Données patient chargées
+                Connexion TIBOK établie
               </h4>
               <p className="text-sm text-green-700 mt-1">
                 {notification.message}
