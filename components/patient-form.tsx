@@ -68,13 +68,22 @@ export default function PatientForm({ onDataChange, onNext }: PatientFormProps) 
   // Helper function to map gender
   const mapGenderToForm = (gender: string | null | undefined): string => {
     if (!gender) return ""
-    const lowerGender = gender.toLowerCase()
-    if (lowerGender === 'male' || lowerGender === 'masculin' || lowerGender === 'm') {
+    const genderLower = gender.toLowerCase().trim()
+    
+    // Check for various formats
+    if (genderLower === 'm' || genderLower === 'male' || genderLower === 'masculin' || genderLower.includes('mas')) {
       return "Masculin"
-    } else if (lowerGender === 'female' || lowerGender === 'féminin' || lowerGender === 'f') {
+    } else if (genderLower === 'f' || genderLower === 'female' || genderLower === 'féminin' || genderLower.includes('fem') || genderLower.includes('fém')) {
       return "Féminin"
     }
-    return gender
+    
+    // If the gender is already in the correct format, return it
+    if (gender === "Masculin" || gender === "Féminin") {
+      return gender
+    }
+    
+    // Try to capitalize first letter as fallback
+    return gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase()
   }
 
   // Auto-fill form with TIBOK patient data
@@ -82,28 +91,16 @@ export default function PatientForm({ onDataChange, onNext }: PatientFormProps) 
     if (tibokPatient && isFromTibok) {
       console.log('Auto-filling form with TIBOK patient data:', tibokPatient)
       
-      // Map gender value with proper capitalization
-      let mappedGender = ''
-      if (tibokPatient.gender) {
-        const genderLower = tibokPatient.gender.toLowerCase()
-        if (genderLower === 'm' || genderLower === 'male' || genderLower === 'masculin' || genderLower.includes('mas')) {
-          mappedGender = 'Masculin'  // Capital M
-        } else if (genderLower === 'f' || genderLower === 'female' || genderLower === 'féminin' || genderLower.includes('fem') || genderLower.includes('fém')) {
-          mappedGender = 'Féminin'   // Capital F
-        } else {
-          // If it doesn't match known patterns, try to capitalize first letter
-          mappedGender = tibokPatient.gender.charAt(0).toUpperCase() + tibokPatient.gender.slice(1).toLowerCase()
-        }
-      }
-      
-      console.log('Mapped gender value:', mappedGender)
+      // Map gender value using the helper function
+      const mappedGender = mapGenderToForm(tibokPatient.gender)
+      console.log('Original gender:', tibokPatient.gender, '-> Mapped gender:', mappedGender)
       
       const newFormData = {
         ...formData,
         firstName: tibokPatient.first_name || "",
         lastName: tibokPatient.last_name || "",
         age: tibokPatient.age?.toString() || "",
-        gender: mappedGender, // Use the mapped gender value
+        gender: mappedGender,
         weight: tibokPatient.weight?.toString() || "",
         height: tibokPatient.height?.toString() || "",
       }
@@ -267,7 +264,7 @@ export default function PatientForm({ onDataChange, onNext }: PatientFormProps) 
               <Label htmlFor="gender">Sexe *</Label>
               <Select
                 name="gender"
-                value={formData.gender}
+                value={formData.gender || ""}
                 onValueChange={(value) => handleInputChange("gender", value)}
               >
                 <SelectTrigger id="gender" className={errors.gender ? "border-red-500" : ""}>
