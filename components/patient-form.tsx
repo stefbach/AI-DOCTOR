@@ -82,18 +82,21 @@ export default function PatientForm({ onDataChange, onNext }: PatientFormProps) 
     if (tibokPatient && isFromTibok) {
       console.log('Auto-filling form with TIBOK patient data:', tibokPatient)
       
-      // Map gender value
+      // Map gender value with proper capitalization
       let mappedGender = ''
       if (tibokPatient.gender) {
         const genderLower = tibokPatient.gender.toLowerCase()
-        if (genderLower === 'm' || genderLower === 'male' || genderLower.includes('mas')) {
-          mappedGender = 'Masculin'
-        } else if (genderLower === 'f' || genderLower === 'female' || genderLower.includes('fem')) {
-          mappedGender = 'Féminin'
+        if (genderLower === 'm' || genderLower === 'male' || genderLower === 'masculin' || genderLower.includes('mas')) {
+          mappedGender = 'Masculin'  // Capital M
+        } else if (genderLower === 'f' || genderLower === 'female' || genderLower === 'féminin' || genderLower.includes('fem') || genderLower.includes('fém')) {
+          mappedGender = 'Féminin'   // Capital F
         } else {
-          mappedGender = tibokPatient.gender
+          // If it doesn't match known patterns, try to capitalize first letter
+          mappedGender = tibokPatient.gender.charAt(0).toUpperCase() + tibokPatient.gender.slice(1).toLowerCase()
         }
       }
+      
+      console.log('Mapped gender value:', mappedGender)
       
       const newFormData = {
         ...formData,
