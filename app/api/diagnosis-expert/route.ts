@@ -208,5 +208,95 @@ EXIGENCES :
 
 Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après.
 
+try {
+      console.log("Génération du diagnostic expert...")
 
+      const result = await generateText({
+        model: openai("gpt-4o"),
+        prompt: diagnosticPrompt,
+        maxTokens: 8000,
+        temperature: 0.1,
+      })
+
+      console.log("Réponse diagnostic reçue:", result.text.substring(0, 500) + "...")
+
+      // Extraction et parsing du JSON AMÉLIORÉ
+      let diagnosticData
+      try {
+        // Nettoyer la réponse avant parsing
+        let cleanText = result.text.trim()
+        
+        // Enlever les backticks markdown si présents
+        cleanText = cleanText.replace(/```json/g, '').replace(/```/g, '').trim()
+        
+        diagnosticData = JSON.parse(cleanText)
+      } catch (parseError) {
+        console.log("❌ Parsing direct échoué, tentative extraction JSON...")
+
+        const jsonMatch = result.text.match(/\{[\s\S]*\}/)
+        if (jsonMatch) {
+          try {
+            let cleanMatch = jsonMatch[0].replace(/```json/g, '').replace(/```/g, '').trim()
+            diagnosticData = JSON.parse(cleanMatch)
+          } catch (regexParseError) {
+            console.error("❌ Erreur parsing regex:", regexParseError)
+            console.error("📝 Texte problématique:", result.text.substring(0, 1000))
+            throw new Error("Format JSON invalide dans la réponse IA")
+          }
+        } else {
+          console.error("❌ Aucun JSON trouvé dans:", result.text.substring(0, 1000))
+          throw new Error("Aucun JSON valide trouvé dans la réponse")
+        }
+      }
+
+      // Validation de la structure
+      if (!diagnosticData || !diagnosticData.primaryDiagnosis) {
+        console.error("❌ Structure invalide:", diagnosticData)
+        throw new Error("Structure de diagnostic invalide")
+      }
+
+      console.log("✅ Diagnostic généré avec succès")
+
+      return NextResponse.json({
+        success: true,
+        diagnosis: diagnosticData,
+        metadata: {
+          patientAge: patientData.age,
+          patientGender: patientData.gender,
+          symptomsAnalyzed: (clinicalData.symptoms || []).length,
+          questionsAnswered: questionsData?.responses?.length || 0,
+          generatedAt: new Date().toISOString(),
+          model: "gpt-4o",
+          tokens: 8000,
+        },
+      })
+      
+    } catch (error) {
+      console.error("❌ Erreur lors de la génération du diagnostic:", error)
+
+      // Retourner erreur HTTP 500 avec détails
+      return NextResponse.json({
+        success: false,
+        error: "Erreur lors de la génération du diagnostic",
+        details: error instanceof Error ? error.message : "Erreur inconnue",
+        timestamp: new Date().toISOString()
+      }, { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+    }
+  } catch (error: any) {
+    console.error("❌ Erreur orchestrateur médical:", error)
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Erreur lors du traitement médical",
+        details: error instanceof Error ? error.message : "Erreur inconnue",
+      },
+      { status: 500 },
+    )
+  }
+}
 `
