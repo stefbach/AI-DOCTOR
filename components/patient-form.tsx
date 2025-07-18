@@ -107,6 +107,15 @@ export default function PatientForm({ onDataChange, onNext }: PatientFormProps) 
       
       setFormData(newFormData)
       onDataChange(newFormData)
+      
+      // Force a re-render for the Select component
+      // This is a workaround for shadcn/ui Select not updating properly
+      if (mappedGender) {
+        setTimeout(() => {
+          setFormData(prev => ({ ...prev, gender: mappedGender }))
+          onDataChange({ ...newFormData, gender: mappedGender })
+        }, 100)
+      }
     }
   }, [tibokPatient, isFromTibok])
 
