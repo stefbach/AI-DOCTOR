@@ -49,229 +49,177 @@ ${
     `.trim()
 
     const diagnosticPrompt = `
-Tu es un médecin expert spécialisé en médecine interne. Analyse ce cas clinique complet et fournis un diagnostic expert structuré.
+Tu es un médecin expert en médecine interne avec 20 ans d'expérience hospitalière. 
+Analyse ce cas clinique de manière APPROFONDIE et fournis un diagnostic expert DÉTAILLÉ.
 
 ${fullContext}
 
-INSTRUCTIONS POUR L'ANALYSE DIAGNOSTIQUE:
+INSTRUCTIONS POUR L'ANALYSE DIAGNOSTIQUE COMPLÈTE:
 
-1. RAISONNEMENT CLINIQUE STRUCTURÉ
-   - Analyse sémiologique détaillée
-   - Identification des syndromes cliniques
-   - Corrélations anatomo-cliniques
-
-2. DIAGNOSTIC DIFFÉRENTIEL HIÉRARCHISÉ
-   - Diagnostic principal le plus probable (avec probabilité %)
-   - 3-5 diagnostics différentiels classés par probabilité
-   - Arguments pour et contre chaque diagnostic
-
-3. EXAMENS COMPLÉMENTAIRES CIBLÉS
-   - Examens biologiques spécifiques
-   - Imagerie médicale appropriée
-   - Explorations fonctionnelles si nécessaire
-
-4. STRATÉGIE THÉRAPEUTIQUE BASÉE SUR LES PREUVES
-   - Traitement symptomatique immédiat
-   - Thérapeutique étiologique
-   - Surveillance et suivi
-
-5. PRONOSTIC ET ÉVOLUTION
-   - Facteurs pronostiques
-   - Complications potentielles
-   - Plan de suivi
-
-Réponds UNIQUEMENT avec un objet JSON structuré dans ce format exact:
+GÉNÈRE un diagnostic médical COMPLET et DÉTAILLÉ avec cette structure JSON exacte :
 
 {
   "clinicalReasoning": {
-    "semiology": "Analyse sémiologique détaillée",
-    "syndromes": ["Syndrome 1", "Syndrome 2"],
-    "pathophysiology": "Mécanismes physiopathologiques"
+    "semiology": "Analyse sémiologique DÉTAILLÉE (minimum 200 mots) : description précise de chaque symptôme, sa signification clinique, les corrélations anatomiques, les mécanismes physiopathologiques sous-jacents",
+    "syndromes": [
+      {
+        "name": "Nom du syndrome clinique",
+        "description": "Description complète du syndrome avec définition, critères diagnostiques, signes cardinaux",
+        "presence": "Arguments cliniques précis justifiant la présence de ce syndrome chez ce patient",
+        "significance": "Signification pronostique et thérapeutique de ce syndrome"
+      }
+    ],
+    "pathophysiology": "Explication APPROFONDIE des mécanismes physiopathologiques (minimum 150 mots) : cascade d'événements, voies métaboliques impliquées, facteurs déclenchants, progression de la maladie",
+    "riskFactors": {
+      "present": ["Facteurs de risque identifiés chez ce patient avec justification"],
+      "absent": ["Facteurs de risque classiques non retrouvés"],
+      "protective": ["Facteurs protecteurs éventuels"]
+    }
   },
   "primaryDiagnosis": {
-    "condition": "Diagnostic principal",
-    "icd10": "Code CIM-10",
+    "condition": "Nom précis de la condition médicale",
+    "icd10": "Code CIM-10 exact",
     "probability": 85,
-    "arguments": ["Argument 1", "Argument 2", "Argument 3"],
-    "severity": "Légère/Modérée/Sévère"
+    "detailedDescription": "Description médicale COMPLÈTE de cette pathologie (minimum 250 mots) : définition, épidémiologie, facteurs de risque, physiopathologie, présentation clinique typique, évolution naturelle, complications possibles",
+    "clinicalPresentation": "Description DÉTAILLÉE de comment cette pathologie se manifeste chez CE patient spécifique (minimum 150 mots) : symptômes spécifiques, signes cliniques, chronologie, facteurs aggravants/atténuants",
+    "arguments": [
+      {
+        "type": "Anamnestique",
+        "evidence": "Élément précis de l'histoire",
+        "significance": "Pourquoi cet élément oriente vers ce diagnostic",
+        "weight": "Fort/Modéré/Faible"
+      },
+      {
+        "type": "Clinique", 
+        "evidence": "Signe clinique objectif",
+        "significance": "Valeur diagnostique de ce signe",
+        "weight": "Fort/Modéré/Faible"
+      },
+      {
+        "type": "Épidémiologique",
+        "evidence": "Facteur épidémiologique pertinent",
+        "significance": "Impact sur la probabilité diagnostique",
+        "weight": "Fort/Modéré/Faible"
+      }
+    ],
+    "severity": "Légère/Modérée/Sévère",
+    "severityJustification": "Justification DÉTAILLÉE du degré de sévérité basée sur les critères cliniques objectifs, échelles validées, impact fonctionnel",
+    "prognosis": {
+      "shortTerm": "Évolution attendue à 24-48h avec justification",
+      "mediumTerm": "Évolution à 1-4 semaines avec facteurs influençant",
+      "longTerm": "Pronostic à long terme et facteurs pronostiques",
+      "complications": ["Complications possibles avec probabilité et délai"]
+    }
   },
   "differentialDiagnosis": [
     {
       "condition": "Diagnostic différentiel 1",
       "icd10": "Code CIM-10",
       "probability": 60,
-      "arguments": ["Argument pour", "Argument contre"]
+      "detailedDescription": "Description COMPLÈTE de cette pathologie alternative (minimum 200 mots) : caractéristiques, présentation typique, différences avec le diagnostic principal",
+      "argumentsFor": [
+        {
+          "evidence": "Élément clinique supportant ce diagnostic",
+          "significance": "Pourquoi cet élément est en faveur",
+          "strength": "Argument fort/modéré/faible"
+        }
+      ],
+      "argumentsAgainst": [
+        {
+          "evidence": "Élément clinique ne supportant pas ce diagnostic",
+          "significance": "Pourquoi cet élément va à l'encontre",
+          "strength": "Contre-argument fort/modéré/faible"
+        }
+      ],
+      "differentiatingFeatures": "Éléments clés permettant de distinguer ce diagnostic du diagnostic principal",
+      "additionalTestsNeeded": "Examens spécifiques pour confirmer/infirmer ce diagnostic"
     }
   ],
   "recommendedExams": [
     {
-      "category": "Biologie",
-      "exam": "NFS, CRP, VS",
-      "indication": "Recherche syndrome inflammatoire",
-      "urgency": "Immédiate/Programmée"
-    },
-    {
-      "category": "Imagerie",
-      "exam": "Radiographie thoracique",
-      "indication": "Éliminer pathologie pulmonaire",
-      "urgency": "Immédiate"
+      "category": "Biologie/Imagerie/Fonctionnel/Anatomopathologie",
+      "exam": "Nom précis de l'examen",
+      "indication": "Justification médicale DÉTAILLÉE de pourquoi cet examen est nécessaire dans ce contexte clinique précis",
+      "expectedFindings": {
+        "ifPositive": "Résultats attendus si le diagnostic principal est correct",
+        "ifNegative": "Signification si l'examen est normal/négatif",
+        "alternativeFindings": "Autres résultats possibles et leur interprétation"
+      },
+      "urgency": "Immédiate/Semi-urgente/Programmée/Différée",
+      "urgencyJustification": "Justification précise du degré d'urgence",
+      "practicalConsiderations": "Considérations pratiques : préparation, contre-indications, limites"
     }
   ],
   "therapeuticStrategy": {
     "immediate": [
       {
-        "type": "Symptomatique",
-        "treatment": "Paracétamol 1g x3/j",
-        "indication": "Antalgique",
-        "duration": "5 jours"
+        "type": "Symptomatique/Étiologique/Préventif",
+        "treatment": "Traitement précis avec posologie",
+        "indication": "Justification DÉTAILLÉE du choix thérapeutique",
+        "mechanism": "Mécanisme d'action et pourquoi efficace dans ce cas",
+        "duration": "Durée avec justification",
+        "monitoring": "Surveillance spécifique requise",
+        "contraindications": "Contre-indications à vérifier",
+        "alternatives": "Alternatives thérapeutiques si échec/intolérance"
       }
     ],
     "etiological": [
       {
-        "type": "Étiologique",
-        "treatment": "Selon résultats examens",
-        "indication": "Traitement de la cause",
-        "duration": "À définir"
+        "type": "Traitement de la cause",
+        "rationale": "Justification APPROFONDIE du traitement étiologique",
+        "evidence": "Niveau de preuve (Grade A/B/C) et références",
+        "longTermPlan": "Plan thérapeutique à long terme"
       }
     ]
   },
   "prognosis": {
-    "shortTerm": "Favorable sous traitement",
-    "longTerm": "Excellent avec prise en charge adaptée",
-    "complications": ["Complication 1", "Complication 2"],
-    "followUp": "Consultation de contrôle à 1 semaine"
+    "shortTerm": "Pronostic immédiat DÉTAILLÉ avec facteurs influençant l'évolution à court terme",
+    "longTerm": "Pronostic à long terme avec facteurs pronostiques précis, qualité de vie attendue, impact sur l'espérance de vie",
+    "complications": [
+      {
+        "complication": "Nom de la complication",
+        "probability": "Risque estimé (%)",
+        "timeframe": "Délai d'apparition possible",
+        "prevention": "Mesures préventives spécifiques",
+        "earlyDetection": "Signes d'alerte à surveiller"
+      }
+    ],
+    "followUp": "Plan de suivi DÉTAILLÉ : fréquence des consultations, examens de surveillance, critères d'amélioration/aggravation",
+    "patientEducation": "Points clés d'éducation thérapeutique à transmettre au patient"
   },
   "aiConfidence": 85,
-  "redFlags": ["Signe d'alarme 1", "Signe d'alarme 2"],
+  "redFlags": [
+    {
+      "sign": "Signe d'alarme précis",
+      "significance": "Pourquoi ce signe est préoccupant",
+      "action": "Conduite à tenir immédiate si ce signe apparaît"
+    }
+  ],
+  "clinicalPearls": [
+    "Points cliniques importants à retenir pour ce diagnostic",
+    "Pièges diagnostiques à éviter",
+    "Astuces thérapeutiques basées sur l'expérience clinique"
+  ],
   "metadata": {
     "analysisDate": "${new Date().toISOString()}",
     "model": "gpt-4o",
-    "evidenceLevel": "Grade A/B/C"
+    "evidenceLevel": "Grade A/B/C selon les recommandations",
+    "guidelines": ["Références aux recommandations utilisées"],
+    "confidenceFactors": {
+      "strengths": ["Éléments renforçant la confiance diagnostique"],
+      "limitations": ["Éléments limitant la certitude diagnostique"],
+      "additionalDataNeeded": ["Informations supplémentaires qui amélioreraient le diagnostic"]
+    }
   }
 }
 
-Génère maintenant l'analyse diagnostique complète en JSON:
-    `.trim()
+EXIGENCES DE QUALITÉ :
+- Chaque section doit contenir un minimum de mots indiqué
+- Utilise un langage médical précis et professionnel
+- Référence-toi aux dernières recommandations médicales
+- Adapte l'analyse au contexte géographique (Maurice) si pertinent
+- Reste factuel et basé sur l'evidence-based medicine
+- Évite les généralités, sois spécifique au cas présenté
 
-    console.log("Génération du diagnostic expert...")
-
-    const result = await generateText({
-      model: openai("gpt-4o"),
-      prompt: diagnosticPrompt,
-      maxTokens: 12000,
-      temperature: 0.1,
-    })
-
-    console.log("Réponse diagnostic reçue:", result.text.substring(0, 500) + "...")
-
-    // Extraction et parsing du JSON
-    let diagnosticData
-    try {
-      diagnosticData = JSON.parse(result.text.trim())
-    } catch (parseError) {
-      console.log("Parsing direct échoué, extraction JSON...")
-
-      const jsonMatch = result.text.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        try {
-          diagnosticData = JSON.parse(jsonMatch[0])
-        } catch (regexParseError) {
-          console.error("Erreur parsing regex:", regexParseError)
-          throw new Error("Format JSON invalide")
-        }
-      } else {
-        throw new Error("Aucun JSON trouvé dans la réponse")
-      }
-    }
-
-    // Validation de la structure
-    if (!diagnosticData || !diagnosticData.primaryDiagnosis) {
-      throw new Error("Structure de diagnostic invalide")
-    }
-
-    console.log("Diagnostic généré avec succès")
-
-    return NextResponse.json({
-      success: true,
-      diagnosis: diagnosticData,
-      metadata: {
-        patientAge: patientData.age,
-        patientGender: patientData.gender,
-        symptomsAnalyzed: (clinicalData.symptoms || []).length,
-        questionsAnswered: questionsData?.responses?.length || 0,
-        generatedAt: new Date().toISOString(),
-        model: "gpt-4o",
-        tokens: 12000,
-      },
-    })
-  } catch (error) {
-    console.error("Erreur lors de la génération du diagnostic:", error)
-
-    // Fallback diagnostic générique
-    const fallbackDiagnosis = {
-      clinicalReasoning: {
-        semiology: "Analyse en cours - données insuffisantes pour analyse complète",
-        syndromes: ["Syndrome à préciser"],
-        pathophysiology: "Mécanismes à élucider par examens complémentaires",
-      },
-      primaryDiagnosis: {
-        condition: "Diagnostic à préciser",
-        icd10: "R06.9",
-        probability: 50,
-        arguments: ["Symptômes non spécifiques", "Nécessité d'examens complémentaires"],
-        severity: "À évaluer",
-      },
-      differentialDiagnosis: [
-        {
-          condition: "Pathologie fonctionnelle",
-          icd10: "F45.9",
-          probability: 30,
-          arguments: ["Symptômes sans substrat organique évident"],
-        },
-      ],
-      recommendedExams: [
-        {
-          category: "Biologie",
-          exam: "Bilan biologique standard",
-          indication: "Dépistage anomalies biologiques",
-          urgency: "Programmée",
-        },
-      ],
-      therapeuticStrategy: {
-        immediate: [
-          {
-            type: "Symptomatique",
-            treatment: "Traitement symptomatique adapté",
-            indication: "Soulagement des symptômes",
-            duration: "Selon évolution",
-          },
-        ],
-        etiological: [],
-      },
-      prognosis: {
-        shortTerm: "À réévaluer après examens",
-        longTerm: "Dépendant du diagnostic final",
-        complications: ["À surveiller"],
-        followUp: "Consultation de réévaluation nécessaire",
-      },
-      aiConfidence: 30,
-      redFlags: ["Évolution défavorable", "Nouveaux symptômes"],
-      metadata: {
-        analysisDate: new Date().toISOString(),
-        model: "fallback",
-        evidenceLevel: "Insuffisant",
-      },
-    }
-
-    return NextResponse.json({
-      success: true,
-      diagnosis: fallbackDiagnosis,
-      fallback: true,
-      error: error instanceof Error ? error.message : "Erreur inconnue",
-      metadata: {
-        generatedAt: new Date().toISOString(),
-        fallbackUsed: true,
-      },
-    })
-  }
-}
+Génère maintenant l'analyse diagnostique COMPLÈTE et DÉTAILLÉE en JSON :
+`
