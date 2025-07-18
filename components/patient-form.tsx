@@ -68,22 +68,8 @@ export default function PatientForm({ onDataChange, onNext }: PatientFormProps) 
   // Helper function to map gender
   const mapGenderToForm = (gender: string | null | undefined): string => {
     if (!gender) return ""
-    const genderLower = gender.toLowerCase().trim()
-    
-    // Check for various formats and return lowercase
-    if (genderLower === 'm' || genderLower === 'male' || genderLower === 'masculin' || genderLower.includes('mas')) {
-      return "masculin"
-    } else if (genderLower === 'f' || genderLower === 'female' || genderLower === 'féminin' || genderLower.includes('fem') || genderLower.includes('fém')) {
-      return "féminin"
-    }
-    
-    // If the gender is already in lowercase format, return it
-    if (gender === "masculin" || gender === "féminin") {
-      return gender
-    }
-    
-    // Return lowercase version as fallback
-    return gender.toLowerCase()
+    // Return the gender as-is, letting the user see what was imported
+    return gender
   }
 
   // Auto-fill form with TIBOK patient data
@@ -271,19 +257,13 @@ export default function PatientForm({ onDataChange, onNext }: PatientFormProps) 
 
             <div>
               <Label htmlFor="gender">Sexe *</Label>
-              <Select
-                name="gender"
-                value={formData.gender || ""}
-                onValueChange={(value) => handleInputChange("gender", value)}
-              >
-                <SelectTrigger id="gender" className={errors.gender ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Sélectionner le sexe" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="masculin">Masculin</SelectItem>
-                  <SelectItem value="féminin">Féminin</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input
+                id="gender"
+                value={formData.gender}
+                onChange={(e) => handleInputChange("gender", e.target.value)}
+                placeholder="Masculin ou Féminin"
+                className={errors.gender ? "border-red-500" : ""}
+              />
               {errors.gender && <p className="text-sm text-red-500 mt-1">{errors.gender}</p>}
             </div>
           </div>
