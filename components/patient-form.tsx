@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ArrowRight, User, Heart, AlertTriangle } from "lucide-react"
+import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
 
 interface PatientFormProps {
   onDataChange: (data: any) => void
@@ -16,6 +17,8 @@ interface PatientFormProps {
 }
 
 export default function PatientForm({ onDataChange, onNext }: PatientFormProps) {
+  const { patientData: tibokPatient, isFromTibok } = useTibokPatientData()
+  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -60,6 +63,38 @@ export default function PatientForm({ onDataChange, onNext }: PatientFormProps) 
     "Reflux gastro-œsophagien",
     "Hypercholestérolémie",
   ]
+
+  // Helper function to map gender
+  const mapGenderToForm = (gender: string | null | undefined): string => {
+    if (!gender) return ""
+    const lowerGender = gender.toLowerCase()
+    if (lowerGender === 'male' || lowerGender === 'masculin' || lowerGender === 'm') {
+      return "Masculin"
+    } else if (lowerGender === 'female' || lowerGender === 'féminin' || lowerGender === 'f') {
+      return "Féminin"
+    }
+    return gender
+  }
+
+  // Auto-fill form with TIBOK patient data
+  useEffect(() => {
+    if (tibokPatient && isFromTibok) {
+      console.log('Auto-filling form with TIBOK patient data:', tibokPatient)
+      
+      const newFormData = {
+        ...formData,
+        firstName: tibokPatient.first_name || "",
+        lastName: tibokPatient.last_name || "",
+        age: tibokPatient.age?.toString() || "",
+        gender: mapGenderToForm(tibokPatient.gender),
+        weight: tibokPatient.weight?.toString() || "",
+        height: tibokPatient.height?.toString() || "",
+      }
+      
+      setFormData(newFormData)
+      onDataChange(newFormData)
+    }
+  }, [tibokPatient, isFromTibok])
 
   const handleInputChange = (field: string, value: any) => {
     const newData = { ...formData, [field]: value }
@@ -153,6 +188,15 @@ export default function PatientForm({ onDataChange, onNext }: PatientFormProps) 
           </CardTitle>
         </CardHeader>
       </Card>
+
+      {/* Show indicator if data was auto-filled from TIBOK */}
+      {isFromTibok && tibokPatient && (
+        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <p className="text-sm text-blue-800 dark:text-blue-200">
+            ℹ️ Les informations de base ont été pré-remplies depuis TIBOK. Veuillez vérifier et compléter les données manquantes.
+          </p>
+        </div>
+      )}
 
       {/* Informations personnelles */}
       <Card>
