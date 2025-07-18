@@ -42,126 +42,105 @@ export async function POST(request: NextRequest) {
     console.log(`🔍 Diagnostic IA pour: ${patientData.firstName} ${patientData.lastName}`)
 
     const prompt = `
-En tant qu'expert médical, analysez ce cas clinique en suivant une démarche diagnostique rigoureuse.
+En tant que médecin expert avec expertise en médecine interne et tropicale, analysez ce cas clinique avec un niveau de DÉTAIL HOSPITALIER.
 
-PRIORITÉ: Diagnostic différentiel basé sur les SYMPTÔMES et l'EXAMEN CLINIQUE d'abord, puis contexte géographique si pertinent.
+${/* insérer les données patient/cliniques */}
 
-PATIENT:
-- Identité: ${patientData.firstName} ${patientData.lastName}, ${patientData.age} ans, ${patientData.gender}
-- Morphologie: ${patientData.weight}kg, ${patientData.height}cm (IMC: ${(patientData.weight / (patientData.height / 100) ** 2).toFixed(1)})
-- Allergies: ${patientData.allergies?.join(", ") || "Aucune"} ${patientData.otherAllergies ? "+ " + patientData.otherAllergies : ""}
-- Antécédents: ${patientData.medicalHistory?.join(", ") || "Aucun"} ${patientData.otherMedicalHistory ? "+ " + patientData.otherMedicalHistory : ""}
-- Médicaments actuels: ${patientData.currentMedicationsText || "Aucun"}
-- Habitudes: Tabac: ${patientData.lifeHabits?.smoking || "Non renseigné"}, Alcool: ${patientData.lifeHabits?.alcohol || "Non renseigné"}
+GÉNÈRE un diagnostic médical APPROFONDI et COMPLET :
 
-DONNÉES CLINIQUES:
-- Motif de consultation: ${clinicalData.chiefComplaint || "Non renseigné"}
-- Symptômes détaillés: ${clinicalData.symptoms || "Non renseigné"}
-- Examen physique: ${clinicalData.physicalExam || "Non renseigné"}
-- Signes vitaux: 
-  * Température: ${clinicalData.vitalSigns?.temperature || "?"}°C
-  * Tension artérielle: ${clinicalData.vitalSigns?.bloodPressure || "?"}
-  * Fréquence cardiaque: ${clinicalData.vitalSigns?.heartRate || "?"}/min
-  * Fréquence respiratoire: ${clinicalData.vitalSigns?.respiratoryRate || "?"}/min
-  * Saturation O2: ${clinicalData.vitalSigns?.oxygenSaturation || "?"}%
-
-RÉPONSES AUX QUESTIONS DIAGNOSTIQUES:
-${questionsData?.responses ? JSON.stringify(questionsData.responses, null, 2) : "Aucune réponse disponible"}
-
-CONTEXTE GÉOGRAPHIQUE (secondaire):
-- Localisation: Île Maurice (climat tropical)
-- Pathologies endémiques possibles: Dengue, chikungunya, paludisme (importé), leptospirose, fièvre typhoïde
-- Saisons et vecteurs: Considérer selon pertinence clinique
-
-DÉMARCHE DIAGNOSTIQUE:
-1. ANALYSEZ les symptômes et signes cliniques
-2. ÉTABLISSEZ le diagnostic différentiel classique
-3. INTÉGREZ les réponses aux questions pour affiner
-4. CONSIDÉREZ le contexte géographique UNIQUEMENT si cliniquement pertinent
-5. PRIORISEZ selon la probabilité clinique
-
-Instructions spécifiques:
-- Douleur thoracique → Étiologies cardio-pulmonaires D'ABORD, puis contexte si fièvre associée
-- Fièvre isolée → Causes infectieuses courantes, puis arboviroses si exposition/saisonnalité
-- Troubles digestifs → Causes gastro-entérologiques, puis pathologies hydriques si contexte
-- Céphalées → Causes neurologiques/vasculaires, puis pathologies tropicales si fièvre
-- Symptômes respiratoires → Pneumopathies classiques avant pathologies exotiques
-
-DIAGNOSTIC DIFFÉRENTIEL ADAPTÉ:
-- Prioriser les pathologies FRÉQUENTES correspondant aux symptômes
-- Intégrer les pathologies tropicales SEULEMENT si:
-  * Fièvre + exposition vectorielle documentée
-  * Voyage récent + syndrome compatible
-  * Symptômes évocateurs + saisonnalité
-  * Échec des traitements classiques
-
-Format JSON requis:
 {
   "diagnosis": {
     "primary": {
-      "condition": "Diagnostic le plus probable basé sur les symptômes",
-      "icd10": "Code CIM-10 correspondant",
+      "condition": "Diagnostic principal précis",
+      "icd10": "Code CIM-10 exact",
       "confidence": 85,
-      "rationale": "Raisonnement médical basé sur symptômes → diagnostic différentiel → contexte",
+      "detailedAnalysis": "Analyse APPROFONDIE (minimum 300 mots) : description complète de la pathologie, physiopathologie détaillée, présentation clinique typique vs présentation chez ce patient, facteurs de risque présents, mécanismes déclenchants, évolution naturelle attendue",
+      "clinicalRationale": "Raisonnement clinique DÉTAILLÉ (minimum 250 mots) : pourquoi ce diagnostic est le plus probable, analyse symptôme par symptôme, corrélations anatomo-cliniques, chronologie évocatrice, signes pathognomoniques",
       "severity": "mild|moderate|severe",
-      "clinicalEvidence": "Éléments cliniques supportant ce diagnostic"
+      "severityAnalysis": "Analyse DÉTAILLÉE de la sévérité : critères objectifs utilisés, scores cliniques applicables, impact fonctionnel, retentissement systémique, facteurs de gravité présents/absents",
+      "clinicalEvidence": "Preuves cliniques DÉTAILLÉES supportant ce diagnostic avec analyse critique de chaque élément",
+      "physiopathology": "Mécanismes physiopathologiques COMPLETS : cascade d'événements, voies biochimiques, interaction organes/systèmes, facteurs aggravants",
+      "epidemiology": "Contexte épidémiologique : prévalence, facteurs de risque population, spécificités géographiques (Maurice), variations saisonnières",
+      "prognosis": {
+        "immediate": "Évolution attendue 24-72h avec facteurs influençant",
+        "shortTerm": "Pronostic 1-4 semaines avec critères d'amélioration",
+        "longTerm": "Pronostic à long terme, séquelles potentielles, qualité de vie",
+        "mortality": "Risque vital si applicable avec facteurs pronostiques"
+      }
     },
     "differential": [
       {
         "condition": "Diagnostic différentiel principal",
         "probability": 25,
-        "rationale": "Justification basée sur les symptômes et l'examen",
-        "ruleOutTests": ["Examens pour confirmer/infirmer"]
-      },
-      {
-        "condition": "Pathologie tropicale SI pertinente cliniquement",
-        "probability": 15,
-        "rationale": "Justification du contexte tropical UNIQUEMENT si symptômes compatibles",
-        "ruleOutTests": ["Tests spécifiques si indiqués"]
+        "detailedDescription": "Description COMPLÈTE (minimum 200 mots) : définition, physiopathologie, présentation clinique classique, particularités évolutives",
+        "rationale": "Justification APPROFONDIE : éléments cliniques en faveur, similitudes avec le cas présenté, mécanismes physiopathologiques communs",
+        "distinguishingFeatures": "Caractéristiques SPÉCIFIQUES permettant de différencier ce diagnostic du principal : signes pathognomoniques, chronologie différente, réponse thérapeutique, examens discriminants",
+        "ruleOutStrategy": "Stratégie DÉTAILLÉE pour éliminer ce diagnostic : examens spécifiques, critères d'exclusion, évolution surveillance"
       }
     ]
   },
   "recommendations": {
     "exams": [
       {
-        "name": "Examen ciblé selon symptômes",
+        "name": "Examen spécifique",
         "code": "CODE",
-        "category": "biologie|imagerie|spécialisé",
-        "indication": "Justification clinique précise",
-        "priority": "high|medium|low"
+        "category": "biologie|imagerie|fonctionnel|anatomopathologie",
+        "detailedIndication": "Indication COMPLÈTE (minimum 100 mots) : pourquoi cet examen dans ce contexte précis, objectifs diagnostiques, timing optimal, alternative si non disponible",
+        "expectedResults": {
+          "diagnostic": "Résultats attendus si diagnostic principal correct",
+          "differential": "Résultats orientant vers diagnostics différentiels",
+          "normal": "Signification si examen normal",
+          "pathological": "Interprétation des anomalies possibles"
+        },
+        "priority": "high|medium|low",
+        "urgency": "immediate|urgent|scheduled|elective",
+        "practicalAspects": "Considérations pratiques : préparation, contre-indications, disponibilité, coût, acceptabilité patient"
       }
     ],
     "medications": [
       {
-        "name": "Traitement adapté au diagnostic",
-        "dosage": "Posologie appropriée",
-        "frequency": "Fréquence",
-        "duration": "Durée",
-        "indication": "Justification thérapeutique",
-        "contraindications": ["Contre-indications pertinentes"]
+        "name": "Médicament précis",
+        "dosage": "Posologie exacte adaptée au patient",
+        "frequency": "Fréquence avec justification",
+        "duration": "Durée avec critères d'arrêt",
+        "detailedIndication": "Indication APPROFONDIE : mécanisme thérapeutique, objectifs précis, critères d'efficacité attendus",
+        "mechanism": "Mécanisme d'action DÉTAILLÉ dans ce contexte pathologique spécifique",
+        "monitoring": {
+          "efficacy": "Critères de surveillance de l'efficacité",
+          "safety": "Surveillance des effets indésirables",
+          "laboratory": "Bilans biologiques de suivi",
+          "clinical": "Signes cliniques à surveiller"
+        },
+        "contraindications": "Contre-indications SPÉCIFIQUES à ce patient",
+        "interactions": "Interactions PERTINENTES avec traitements actuels",
+        "alternatives": "Alternatives thérapeutiques si échec/intolérance avec justification"
       }
     ]
   },
   "clinicalConsiderations": {
-    "symptomAnalysis": "Analyse des symptômes principaux",
-    "riskFactors": "Facteurs de risque identifiés",
-    "prognosticFactors": "Éléments pronostiques",
-    "geographicContext": "Contexte géographique SI pertinent",
-    "seasonalFactors": "Facteurs saisonniers SI applicables"
+    "symptomAnalysis": "Analyse EXHAUSTIVE de chaque symptôme : signification sémiologique, valeur diagnostique, mécanismes sous-jacents, corrélations temporelles",
+    "riskFactors": "Analyse DÉTAILLÉE des facteurs de risque : présents, absents, modifiables, impact sur le pronostic, mesures préventives",
+    "prognosticFactors": "Facteurs pronostiques SPÉCIFIQUES : favorables, défavorables, modifiables, impact sur la prise en charge",
+    "geographicContext": "Contexte géographique Maurice PERTINENT : pathologies endémiques, facteurs environnementaux, disponibilité thérapeutique, spécificités populationnelles",
+    "seasonalFactors": "Facteurs saisonniers APPLICABLES : variations épidémiologiques, vecteurs, conditions climatiques influençant la pathologie"
   },
-  "prognosis": "Pronostic basé sur le diagnostic retenu",
-  "followUp": "Suivi adapté au diagnostic",
-  "urgencyLevel": 3,
-  "redFlags": ["Signes d'alarme spécifiques au diagnostic"]
+  "managementPlan": {
+    "immediate": "Plan de prise en charge IMMÉDIATE : mesures urgentes, surveillance rapprochée, critères d'hospitalisation, traitements symptomatiques",
+    "shortTerm": "Prise en charge à COURT TERME : traitements étiologiques, réévaluations programmées, adaptations thérapeutiques, prévention complications",
+    "longTerm": "Suivi à LONG TERME : surveillance évolutive, prévention récidives, réhabilitation, éducation thérapeutique, qualité de vie"
+  }
 }
 
-IMPORTANT: 
-- Priorisez les diagnostics FRÉQUENTS correspondant aux symptômes
-- N'invoquez le contexte tropical que si cliniquement justifié
-- Évitez de forcer les pathologies exotiques pour des symptômes banals
-- Restez dans une démarche médicale classique enrichie du contexte géographique
+EXIGENCES QUALITÉ MAXIMALE :
+- Minimum 200-300 mots par section principale
+- Langage médical expert et précis
+- Références aux recommandations actuelles
+- Spécificité au cas présenté (éviter généralités)
+- Justification de chaque décision diagnostique/thérapeutique
+- Intégration du contexte géographique Maurice si pertinent
+- Evidence-based medicine systématique
 
-Analysez comme un clinicien expérimenté qui considère TOUS les éléments dans l'ordre de pertinence clinique.
+Analysez comme un EXPERT HOSPITALO-UNIVERSITAIRE
 `
 
     const result = await generateText({
