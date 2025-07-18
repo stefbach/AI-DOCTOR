@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowRight, User, Heart, AlertTriangle } from "lucide-react"
 import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
 
@@ -247,21 +248,20 @@ export default function PatientForm({ onDataChange, onNext }: PatientFormProps) 
             </div>
 
             <div>
-              <Label>Sexe *</Label>
-              <RadioGroup
+              <Label htmlFor="gender">Sexe *</Label>
+              <Select
+                name="gender"
                 value={formData.gender}
                 onValueChange={(value) => handleInputChange("gender", value)}
-                className="flex flex-row space-x-4 mt-2"
               >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Masculin" id="male" />
-                  <Label htmlFor="male">Masculin</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Féminin" id="female" />
-                  <Label htmlFor="female">Féminin</Label>
-                </div>
-              </RadioGroup>
+                <SelectTrigger id="gender" className={errors.gender ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Sélectionner le sexe" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Masculin">Masculin</SelectItem>
+                  <SelectItem value="Féminin">Féminin</SelectItem>
+                </SelectContent>
+              </Select>
               {errors.gender && <p className="text-sm text-red-500 mt-1">{errors.gender}</p>}
             </div>
           </div>
