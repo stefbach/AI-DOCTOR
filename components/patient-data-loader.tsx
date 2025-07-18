@@ -2,13 +2,6 @@
 
 import React, { useEffect, useState } from 'react'
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
-import { createClient } from '@supabase/supabase-js'
-
-// Since the app is connected via Vercel, these env vars should be available
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 interface PatientData {
   id: string
@@ -58,27 +51,61 @@ export function PatientDataLoader() {
       try {
         console.log('Loading patient data from TIBOK...')
 
-        // Fetch consultation data
-        const { data: consultation, error: consultError } = await supabase
-          .from('consultations')
-          .select('*')
-          .eq('id', consultationId)
-          .single()
+        // Get Supabase URL and anon key from environment variables
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-        if (consultError || !consultation) {
+        if (!supabaseUrl || !supabaseAnonKey) {
+          throw new Error('Configuration Supabase manquante')
+        }
+
+        // Fetch consultation data using Supabase REST API
+        const consultationResponse = await fetch(
+          `${supabaseUrl}/rest/v1/consultations?id=eq.${consultationId}`,
+          {
+            headers: {
+              'apikey': supabaseAnonKey,
+              'Authorization': `Bearer ${supabaseAnonKey}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=representation'
+            }
+          }
+        )
+
+        if (!consultationResponse.ok) {
+          throw new Error('Failed to fetch consultation')
+        }
+
+        const consultationData = await consultationResponse.json()
+        if (!consultationData || consultationData.length === 0) {
           throw new Error('Consultation non trouvée')
         }
 
-        // Fetch patient data
-        const { data: patient, error: patientError } = await supabase
-          .from('patients')
-          .select('*')
-          .eq('id', patientId)
-          .single()
+        const consultation = consultationData[0]
 
-        if (patientError || !patient) {
+        // Fetch patient data
+        const patientResponse = await fetch(
+          `${supabaseUrl}/rest/v1/patients?id=eq.${patientId}`,
+          {
+            headers: {
+              'apikey': supabaseAnonKey,
+              'Authorization': `Bearer ${supabaseAnonKey}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=representation'
+            }
+          }
+        )
+
+        if (!patientResponse.ok) {
+          throw new Error('Failed to fetch patient')
+        }
+
+        const patientData = await patientResponse.json()
+        if (!patientData || patientData.length === 0) {
           throw new Error('Patient non trouvé')
         }
+
+        const patient = patientData[0]
 
         // Dispatch custom event with patient data
         const event = new CustomEvent('tibok-patient-data', {
@@ -131,7 +158,7 @@ export function PatientDataLoader() {
         }
       }
 
-      // Fill patient information - adjust selectors based on your actual form
+      // Fill patient information
       fillField([
         'input[name="firstName"]',
         'input[name="first_name"]',
