@@ -172,19 +172,42 @@ export function PatientDataLoader() {
         'input[placeholder*="Taille"]'
       ], patient.height)
 
-      // Handle gender
+      // Handle gender with better matching
       if (patient.gender) {
         setTimeout(() => {
           const genderValue = patient.gender.toLowerCase()
-          const genderRadios = document.querySelectorAll('input[type="radio"][name="gender"]')
+          console.log('Setting gender value:', genderValue)
+          
+          // Try to find radio buttons by different selectors
+          const genderRadios = document.querySelectorAll('input[type="radio"][name="gender"], input[type="radio"][id="male"], input[type="radio"][id="female"]')
+          console.log('Found gender radios:', genderRadios.length)
           
           genderRadios.forEach((radio: any) => {
-            if ((genderValue.includes('mas') || genderValue === 'm') && radio.value === 'Masculin') {
+            console.log('Checking radio:', radio.value, radio.id)
+            
+            // Check for Masculin/Male
+            if ((genderValue === 'm' || 
+                 genderValue === 'male' || 
+                 genderValue.includes('mas') || 
+                 genderValue === 'masculin') && 
+                (radio.value === 'Masculin' || radio.id === 'male')) {
+              console.log('Setting male radio')
               radio.checked = true
               radio.click()
-            } else if ((genderValue.includes('fem') || genderValue === 'f') && radio.value === 'Féminin') {
+              // Also dispatch change event
+              radio.dispatchEvent(new Event('change', { bubbles: true }))
+            } 
+            // Check for Féminin/Female
+            else if ((genderValue === 'f' || 
+                      genderValue === 'female' || 
+                      genderValue.includes('fem') || 
+                      genderValue === 'féminin') && 
+                     (radio.value === 'Féminin' || radio.id === 'female')) {
+              console.log('Setting female radio')
               radio.checked = true
               radio.click()
+              // Also dispatch change event
+              radio.dispatchEvent(new Event('change', { bubbles: true }))
             }
           })
         }, 500)
