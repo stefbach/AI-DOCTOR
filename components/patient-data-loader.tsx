@@ -51,77 +51,32 @@ export function PatientDataLoader() {
       try {
         console.log('Loading patient data from TIBOK...')
 
-        // Get Supabase URL and anon key from environment variables
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-        if (!supabaseUrl || !supabaseAnonKey) {
-          throw new Error('Configuration Supabase manquante')
+        // Call the API route
+        const response = await fetch(`/api/consultation?consultationId=${consultationId}&patientId=${patientId}&source=tibok`)
+        
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Failed to fetch data')
         }
 
-        // Fetch consultation data using Supabase REST API
-        const consultationResponse = await fetch(
-          `${supabaseUrl}/rest/v1/consultations?id=eq.${consultationId}`,
-          {
-            headers: {
-              'apikey': supabaseAnonKey,
-              'Authorization': `Bearer ${supabaseAnonKey}`,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=representation'
-            }
-          }
-        )
-
-        if (!consultationResponse.ok) {
-          throw new Error('Failed to fetch consultation')
-        }
-
-        const consultationData = await consultationResponse.json()
-        if (!consultationData || consultationData.length === 0) {
-          throw new Error('Consultation non trouvée')
-        }
-
-        const consultation = consultationData[0]
-
-        // Fetch patient data
-        const patientResponse = await fetch(
-          `${supabaseUrl}/rest/v1/patients?id=eq.${patientId}`,
-          {
-            headers: {
-              'apikey': supabaseAnonKey,
-              'Authorization': `Bearer ${supabaseAnonKey}`,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=representation'
-            }
-          }
-        )
-
-        if (!patientResponse.ok) {
-          throw new Error('Failed to fetch patient')
-        }
-
-        const patientData = await patientResponse.json()
-        if (!patientData || patientData.length === 0) {
-          throw new Error('Patient non trouvé')
-        }
-
-        const patient = patientData[0]
+        const data = await response.json()
+        console.log('Received data:', data)
 
         // Dispatch custom event with patient data
         const event = new CustomEvent('tibok-patient-data', {
           detail: {
-            patient,
-            consultation
+            patient: data.patient,
+            consultation: data.consultation
           }
         })
         window.dispatchEvent(event)
 
         // Try to auto-fill form fields
-        autoFillForm(patient)
+        autoFillForm(data.patient)
 
         setNotification({
           type: 'success',
-          message: `Données de ${patient.first_name} ${patient.last_name} chargées avec succès`
+          message: `Données de ${data.patient.first_name} ${data.patient.last_name} chargées avec succès`
         })
 
         // Clear URL parameters
@@ -143,6 +98,8 @@ export function PatientDataLoader() {
   }, [])
 
   const autoFillForm = (patient: PatientData) => {
+    console.log('Auto-filling form with patient data:', patient)
+    
     // Wait for form to be rendered
     setTimeout(() => {
       // Try different selector strategies for the patient form
@@ -150,9 +107,17 @@ export function PatientDataLoader() {
         for (const selector of selectors) {
           const field = document.querySelector(selector) as HTMLInputElement
           if (field) {
+            console.log(`Filling field ${selector} with value:`, value)
             field.value = value || ''
             field.dispatchEvent(new Event('input', { bubbles: true }))
             field.dispatchEvent(new Event('change', { bubbles: true }))
+            // Also try React's synthetic event
+            const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set
+            if (nativeInputValueSetter) {
+              nativeInputValueSetter.call(field, value || '')
+              const inputEvent = new Event('input', { bubbles: true })
+              field.dispatchEvent(inputEvent)
+            }
             break
           }
         }
@@ -161,54 +126,69 @@ export function PatientDataLoader() {
       // Fill patient information
       fillField([
         'input[name="firstName"]',
-        'input[name="first_name"]',
+        'input[id="firstName"]',
         'input[placeholder*="Prénom"]',
         '#firstName'
       ], patient.first_name)
 
       fillField([
         'input[name="lastName"]',
-        'input[name="last_name"]',
+        'input[id="lastName"]',
         'input[placeholder*="Nom"]',
         '#lastName'
       ], patient.last_name)
 
       fillField([
         'input[name="age"]',
+        'input[id="age"]',
         'input[placeholder*="Âge"]',
         'input[placeholder*="Age"]',
+        'input[type="number"][placeholder*="années"]',
         '#age'
       ], patient.age?.toString())
 
       fillField([
         'input[name="weight"]',
+        'input[id="weight"]',
         'input[placeholder*="Poids"]',
         '#weight'
       ], patient.weight?.toString())
 
       fillField([
         'input[name="height"]',
+        'input[id="height"]',
         'input[placeholder*="Taille"]',
         '#height'
       ], patient.height?.toString())
 
-      // Handle gender selection
-      const genderValue = patient.gender?.toLowerCase() === 'male' || patient.gender?.toLowerCase() === 'masculin' 
-        ? 'Masculin' 
-        : patient.gender?.toLowerCase() === 'female' || patient.gender?.toLowerCase() === 'féminin'
-        ? 'Féminin'
-        : patient.gender
+      // Handle gender selection with better matching
+      setTimeout(() => {
+        const genderValue = patient.gender?.toLowerCase()
+        console.log('Setting gender:', genderValue)
+        
+        // Try radio buttons with different value formats
+        const genderRadios = document.querySelectorAll('input[type="radio"][name="gender"], input[type="radio"][id*="male"], input[type="radio"][id*="female"]')
+        genderRadios.forEach((radio: any) => {
+          const radioValue = radio.value.toLowerCase()
+          const radioId = radio.id.toLowerCase()
+          
+          if ((genderValue === 'male' || genderValue === 'masculin' || genderValue === 'm') && 
+              (radioValue === 'masculin' || radioId === 'male')) {
+            console.log('Checking male radio:', radio)
+            radio.checked = true
+            radio.dispatchEvent(new Event('change', { bubbles: true }))
+            radio.click()
+          } else if ((genderValue === 'female' || genderValue === 'féminin' || genderValue === 'f') && 
+                     (radioValue === 'féminin' || radioId === 'female')) {
+            console.log('Checking female radio:', radio)
+            radio.checked = true
+            radio.dispatchEvent(new Event('change', { bubbles: true }))
+            radio.click()
+          }
+        })
+      }, 500)
 
-      // Try radio buttons
-      const genderRadios = document.querySelectorAll('input[name="gender"], input[name="sexe"]')
-      genderRadios.forEach((radio: any) => {
-        if (radio.value === genderValue || radio.value === patient.gender) {
-          radio.checked = true
-          radio.dispatchEvent(new Event('change', { bubbles: true }))
-        }
-      })
-
-    }, 1000)
+    }, 1500) // Increased timeout to ensure form is loaded
   }
 
   // Auto-hide notification after 5 seconds
