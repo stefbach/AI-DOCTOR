@@ -33,77 +33,129 @@ export default function DiagnosisForm({
   }, [patientData, clinicalData, questionsData])
 
   const generateDiagnosis = async () => {
-    if (!patientData || !clinicalData) return
+  if (!patientData || !clinicalData) return
 
-    setLoading(true)
-    setError(null)
+  setLoading(true)
+  setError(null)
 
+  try {
+    console.log("🩺 Envoi données diagnostic:", { patientData, clinicalData, questionsData })
+
+    const response = await fetch("/api/diagnosis-expert", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        patientData,
+        clinicalData,
+        questionsData,
+      }),
+    })
+
+    console.log("📡 Statut réponse:", response.status)
+
+    // CORRECTION PRINCIPALE : Vérifier le statut AVANT de parser JSON
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error("❌ Erreur API:", response.status, errorText)
+      throw new Error(`Erreur API ${response.status}: ${errorText.substring(0, 100)}`)
+    }
+
+    // Obtenir le texte brut pour debug
+    const responseText = await response.text()
+    console.log("📝 Réponse brute:", responseText.substring(0, 200) + "...")
+
+    // Tenter de parser le JSON
+    let data
     try {
-      const response = await fetch("/api/diagnosis-expert", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          patientData,
-          clinicalData,
-          questionsData,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Erreur lors de la génération du diagnostic")
-      }
-
-      if (data.success && data.diagnosis) {
-        setDiagnosis(data.diagnosis)
-        onDataChange({ diagnosis: data.diagnosis })
+      data = JSON.parse(responseText)
+    } catch (jsonError) {
+      console.error("❌ Erreur parsing JSON:", jsonError)
+      console.error("📝 Contenu reçu:", responseText.substring(0, 500))
+      
+      // Si ce n'est pas du JSON, considérer comme erreur serveur
+      if (responseText.includes("Internal Server Error") || responseText.includes("<html")) {
+        throw new Error("Erreur serveur interne - diagnostic temporairement indisponible")
       } else {
-        throw new Error("Format de réponse invalide")
+        throw new Error("Format de réponse invalide - contenu non-JSON reçu")
       }
-    } catch (err) {
-      console.error("Erreur génération diagnostic:", err)
-      setError(err instanceof Error ? err.message : "Erreur inconnue")
+    }
 
-      // Diagnostic de fallback
-      const fallbackDiagnosis = {
-        primaryDiagnosis: {
-          condition: "Évaluation clinique en cours",
-          probability: 75,
-          severity: "À déterminer",
+    if (data.success && data.diagnosis) {
+      console.log("✅ Diagnostic reçu:", data.diagnosis)
+      setDiagnosis(data.diagnosis)
+      onDataChange({ diagnosis: data.diagnosis })
+    } else {
+      throw new Error(data.error || "Format de réponse invalide")
+    }
+
+  } catch (err) {
+    console.error("❌ Erreur génération diagnostic:", err)
+    setError(err instanceof Error ? err.message : "Erreur inconnue")
+
+    // Diagnostic de fallback amélioré
+    const fallbackDiagnosis = {
+      primaryDiagnosis: {
+        condition: `Évaluation clinique en cours - ${clinicalData.chiefComplaint || "Consultation médicale"}`,
+        probability: 70,
+        severity: "À déterminer",
+        arguments: [
+          "Analyse symptomatique en cours",
+          "Nécessité d'examens complémentaires",
+          "Surveillance clinique recommandée"
+        ]
+      },
+      clinicalReasoning: {
+        semiology: `Analyse des symptômes présentés: ${(clinicalData.symptoms || []).join(", ") || "Symptômes à préciser"}`,
+        syndromes: ["Syndrome clinique à caractériser"],
+        pathophysiology: "Mécanismes physiopathologiques à élucider par examens complémentaires"
+      },
+      recommendedExams: [
+        {
+          category: "Biologie",
+          exam: "Bilan biologique standard (NFS, CRP, ionogramme)",
+          indication: "Évaluation générale et recherche de syndrome inflammatoire",
+          urgency: "Programmée",
         },
-        clinicalReasoning: {
-          semiology: "Analyse des symptômes en cours",
-          syndromes: ["Syndrome à préciser"],
-        },
-        recommendedExams: [
+        {
+          category: "Clinique",
+          exam: "Réévaluation clinique à 24-48h",
+          indication: "Surveillance évolution symptomatique",
+          urgency: "Programmée",
+        }
+      ],
+      therapeuticStrategy: {
+        immediate: [
           {
-            category: "Biologie",
-            exam: "Bilan biologique standard",
-            indication: "Évaluation générale",
-            urgency: "Programmée",
+            type: "Symptomatique",
+            treatment: "Traitement symptomatique adapté selon symptômes",
+            indication: "Soulagement symptomatique en attendant diagnostic",
+            duration: "Selon évolution"
           },
         ],
-        therapeuticStrategy: {
-          immediate: [
-            {
-              type: "Symptomatique",
-              treatment: "Traitement symptomatique adapté",
-              indication: "Soulagement des symptômes",
-            },
-          ],
-        },
-        aiConfidence: 60,
-      }
-
-      setDiagnosis(fallbackDiagnosis)
-      onDataChange({ diagnosis: fallbackDiagnosis })
-    } finally {
-      setLoading(false)
+      },
+      prognosis: {
+        shortTerm: "À réévaluer selon évolution clinique",
+        longTerm: "Dépendant du diagnostic final",
+        complications: ["À surveiller selon évolution"],
+        followUp: "Consultation de réévaluation nécessaire"
+      },
+      aiConfidence: 50,
+      redFlags: [
+        "Aggravation brutale des symptômes",
+        "Apparition de nouveaux signes",
+        "Altération de l'état général"
+      ]
     }
+
+    setDiagnosis(fallbackDiagnosis)
+    onDataChange({ diagnosis: fallbackDiagnosis })
+    
+  } finally {
+    setLoading(false)
   }
+}
 
   if (loading) {
     return (
