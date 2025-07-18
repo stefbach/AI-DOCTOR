@@ -70,20 +70,20 @@ export default function PatientForm({ onDataChange, onNext }: PatientFormProps) 
     if (!gender) return ""
     const genderLower = gender.toLowerCase().trim()
     
-    // Check for various formats
+    // Check for various formats and return lowercase
     if (genderLower === 'm' || genderLower === 'male' || genderLower === 'masculin' || genderLower.includes('mas')) {
-      return "Masculin"
+      return "masculin"
     } else if (genderLower === 'f' || genderLower === 'female' || genderLower === 'féminin' || genderLower.includes('fem') || genderLower.includes('fém')) {
-      return "Féminin"
+      return "féminin"
     }
     
-    // If the gender is already in the correct format, return it
-    if (gender === "Masculin" || gender === "Féminin") {
+    // If the gender is already in lowercase format, return it
+    if (gender === "masculin" || gender === "féminin") {
       return gender
     }
     
-    // Try to capitalize first letter as fallback
-    return gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase()
+    // Return lowercase version as fallback
+    return gender.toLowerCase()
   }
 
   // Auto-fill form with TIBOK patient data
@@ -280,8 +280,8 @@ export default function PatientForm({ onDataChange, onNext }: PatientFormProps) 
                   <SelectValue placeholder="Sélectionner le sexe" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Masculin">Masculin</SelectItem>
-                  <SelectItem value="Féminin">Féminin</SelectItem>
+                  <SelectItem value="masculin">Masculin</SelectItem>
+                  <SelectItem value="féminin">Féminin</SelectItem>
                 </SelectContent>
               </Select>
               {errors.gender && <p className="text-sm text-red-500 mt-1">{errors.gender}</p>}
