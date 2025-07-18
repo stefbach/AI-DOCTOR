@@ -172,44 +172,42 @@ export function PatientDataLoader() {
         'input[placeholder*="Taille"]'
       ], patient.height)
 
-      // Handle gender with better matching
+      // Handle gender with select dropdown
       if (patient.gender) {
         setTimeout(() => {
           const genderValue = patient.gender.toLowerCase()
           console.log('Setting gender value:', genderValue)
           
-          // Try to find radio buttons by different selectors
-          const genderRadios = document.querySelectorAll('input[type="radio"][name="gender"], input[type="radio"][id="male"], input[type="radio"][id="female"]')
-          console.log('Found gender radios:', genderRadios.length)
+          // Map gender values to the expected format
+          let mappedGender = patient.gender
+          if (genderValue === 'm' || genderValue === 'male' || genderValue.includes('mas')) {
+            mappedGender = 'Masculin'
+          } else if (genderValue === 'f' || genderValue === 'female' || genderValue.includes('fem')) {
+            mappedGender = 'Féminin'
+          }
           
-          genderRadios.forEach((radio: any) => {
-            console.log('Checking radio:', radio.value, radio.id)
-            
-            // Check for Masculin/Male
-            if ((genderValue === 'm' || 
-                 genderValue === 'male' || 
-                 genderValue.includes('mas') || 
-                 genderValue === 'masculin') && 
-                (radio.value === 'Masculin' || radio.id === 'male')) {
-              console.log('Setting male radio')
-              radio.checked = true
-              radio.click()
-              // Also dispatch change event
-              radio.dispatchEvent(new Event('change', { bubbles: true }))
-            } 
-            // Check for Féminin/Female
-            else if ((genderValue === 'f' || 
-                      genderValue === 'female' || 
-                      genderValue.includes('fem') || 
-                      genderValue === 'féminin') && 
-                     (radio.value === 'Féminin' || radio.id === 'female')) {
-              console.log('Setting female radio')
-              radio.checked = true
-              radio.click()
-              // Also dispatch change event
-              radio.dispatchEvent(new Event('change', { bubbles: true }))
+          // Fill the select dropdown
+          fillField([
+            'select[name="gender"]',
+            'select[id="gender"]',
+            '#gender',
+            '[name="gender"]'
+          ], mappedGender)
+          
+          // Also try to trigger the select component
+          const selectTrigger = document.querySelector('[id="gender"]') as HTMLElement
+          if (selectTrigger) {
+            // For shadcn/ui Select component, we might need to update the trigger button
+            const triggerButton = selectTrigger.querySelector('button') || selectTrigger
+            if (triggerButton) {
+              console.log('Found select trigger button')
+              // Update the displayed value
+              const valueSpan = triggerButton.querySelector('span')
+              if (valueSpan) {
+                valueSpan.textContent = mappedGender
+              }
             }
-          })
+          }
         }, 500)
       }
 
