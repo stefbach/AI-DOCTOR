@@ -23,51 +23,41 @@ PROFIL PATIENT DÉTAILLÉ POUR PRESCRIPTION:
 - Sexe: ${patientData.gender || "N/A"} ${patientData.gender === "Femme" && patientData.age >= 15 && patientData.age <= 50 ? "(Âge de procréation - Vérifier contraception/grossesse)" : ""}
 - Poids: ${patientData.weight || "N/A"} kg, Taille: ${patientData.height || "N/A"} cm
 - IMC: ${patientData.weight && patientData.height ? (patientData.weight / Math.pow(patientData.height / 100, 2)).toFixed(2) : "N/A"} kg/m²
-- Fonction rénale estimée: ${patientData.age > 65 || patientData.medicalHistory?.includes("Insuffisance rénale") ? "PRÉCAUTION - Ajustement posologique nécessaire" : "Normale supposée"}
-- Fonction hépatique: ${patientData.medicalHistory?.includes("Insuffisance hépatique") || patientData.medicalHistory?.includes("Cirrhose") ? "ALTÉRÉE - Contre-indications à vérifier" : "Normale supposée"}
 
 PROFIL ALLERGIQUE CRITIQUE:
 - Allergies médicamenteuses: ${(patientData.allergies || []).join(", ") || "Aucune allergie médicamenteuse connue"}
 - Allergies additionnelles: ${patientData.otherAllergies || "Aucune"}
-- Type de réactions: ${patientData.allergyType || "Non documenté - À préciser"}
-- Sévérité des réactions: ${patientData.allergySeverity || "Non évaluée - Prudence requise"}
 
 TERRAIN MÉDICAL ET CONTRE-INDICATIONS:
 - Antécédents cardiovasculaires: ${patientData.medicalHistory?.filter((h: string) => h.includes("cardiaque") || h.includes("AVC") || h.includes("infarctus")).join(", ") || "Aucun"}
 - Antécédents gastro-intestinaux: ${patientData.medicalHistory?.filter((h: string) => h.includes("ulcère") || h.includes("gastrite") || h.includes("saignement")).join(", ") || "Aucun"}
-- Antécédents neurologiques: ${patientData.medicalHistory?.filter((h: string) => h.includes("épilepsie") || h.includes("convulsion")).join(", ") || "Aucun"}
 - Pathologies chroniques: ${(patientData.medicalHistory || []).join(", ") || "Aucune pathologie chronique connue"}
 
 THÉRAPEUTIQUES ACTUELLES - INTERACTIONS:
 - Médicaments en cours: ${patientData.currentMedicationsText || "Aucun traitement actuel"}
-- Observance thérapeutique: ${patientData.medicationCompliance || "Non évaluée"}
-- Automédication: ${patientData.selfMedication || "Non documentée - À questionner"}
-- Phytothérapie/Compléments: ${patientData.supplements || "Non renseignés"}
 
 DIAGNOSTIC ET INDICATION THÉRAPEUTIQUE:
 - Diagnostic principal: ${diagnosisData.diagnosis?.primaryDiagnosis?.condition || "Non établi"}
-- Code CIM-10: ${diagnosisData.diagnosis?.primaryDiagnosis?.icd10 || "À coder"}
 - Sévérité: ${diagnosisData.diagnosis?.primaryDiagnosis?.severity || "Non gradée"}
 - Symptômes cibles: ${(clinicalData.symptoms || []).join(", ") || "Aucun symptôme spécifié"}
 - Douleur: ${clinicalData.painScale || 0}/10 (${clinicalData.painScale >= 7 ? "SÉVÈRE - Antalgiques puissants" : clinicalData.painScale >= 4 ? "MODÉRÉE - Antalgiques standards" : "LÉGÈRE - Antalgiques simples"})
 - Fièvre: ${clinicalData.vitalSigns?.temperature > 38.5 ? "HYPERTHERMIE - Antipyrétiques" : "Normale"}
-- Urgence thérapeutique: ${diagnosisData.diagnosis?.urgencyLevel || "Standard"}
     `.trim()
 
     const expertPrescriptionPrompt = `
-Tu es un médecin expert en pharmacologie clinique et thérapeutique avec 25 ans d'expérience. Tu dois établir une ORDONNANCE MÉDICAMENTEUSE SÉCURISÉE et PERSONNALISÉE selon les standards français.
+Tu es un médecin expert en pharmacologie clinique et thérapeutique avec 25 ans d'expérience.
 
 ${prescriptionContext}
 
-EXIGENCES RÉGLEMENTAIRES FRANÇAISES:
-1. Respect du Code de la Santé Publique
-2. DCI obligatoire + nom commercial si nécessaire
-3. Posologie PRÉCISE avec modalités de prise
-4. Durée de traitement avec justification
-5. Vérifications sécuritaires OBLIGATOIRES
-6. Surveillance thérapeutique définie
+INSTRUCTIONS CRITIQUES:
+- Tu DOIS retourner UNIQUEMENT du JSON valide
+- NE PAS écrire de texte avant ou après le JSON
+- NE PAS utiliser de backticks markdown (```)
+- NE PAS commencer par "Voici" ou "Je vous propose"
+- COMMENCER DIRECTEMENT par le caractère {
+- FINIR DIRECTEMENT par le caractère }
 
-Génère une ordonnance EXPERTE au format JSON avec cette structure EXHAUSTIVE:
+Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données médicales appropriées):
 
 {
   "prescriptionHeader": {
@@ -85,221 +75,133 @@ Génère une ordonnance EXPERTE au format JSON avec cette structure EXHAUSTIVE:
       "firstName": "${patientData.firstName || "N/A"}",
       "birthDate": "${patientData.dateOfBirth || "N/A"}",
       "age": "${patientData.age || "N/A"} ans",
-      "weight": "${patientData.weight || "N/A"} kg",
-      "socialSecurityNumber": "Consultation IA - Non communiqué"
+      "weight": "${patientData.weight || "N/A"} kg"
     },
-    "indication": "Indication thérapeutique principale détaillée selon diagnostic établi",
+    "indication": "Prescription thérapeutique selon diagnostic établi",
     "validityPeriod": "Validité 3 mois selon réglementation française"
   },
-
   "medications": [
     {
       "lineNumber": 1,
       "prescriptionType": "MÉDICAMENT",
-      "dci": "Dénomination Commune Internationale EXACTE",
-      "brandName": "Nom commercial principal (exemple: Doliprane)",
-      "dosageForm": "Forme galénique PRÉCISE (cp, gél, sol buv, etc.)",
-      "strength": "Dosage unitaire avec unité (mg, g, mL, etc.)",
-      "atcCode": "Code ATC officiel (ex: N02BE01)",
-      
+      "dci": "Paracétamol",
+      "brandName": "Doliprane",
+      "dosageForm": "Comprimé pelliculé",
+      "strength": "500 mg",
+      "atcCode": "N02BE01",
       "posology": {
-        "dosage": "Posologie PRÉCISE avec calcul personnalisé",
-        "frequency": "Fréquence d'administration détaillée",
-        "timing": "Modalités de prise (avant/pendant/après repas)",
-        "route": "Voie d'administration (per os, IV, IM, etc.)",
-        "maxDailyDose": "Dose maximale quotidienne autorisée",
-        "calculationBasis": "Base de calcul (poids corporel, surface corporelle, etc.)"
+        "dosage": "500 mg à 1 g par prise",
+        "frequency": "Toutes les 6 heures si nécessaire",
+        "timing": "De préférence après les repas",
+        "route": "Voie orale",
+        "maxDailyDose": "4 g maximum par 24 heures"
       },
-      
       "treatment": {
-        "duration": "Durée PRÉCISE du traitement avec justification",
-        "totalQuantity": "Quantité totale à délivrer calculée",
-        "renewals": "Nombre de renouvellements autorisés",
-        "stoppingCriteria": "Critères d'arrêt du traitement",
-        "tapering": "Modalités d'arrêt progressif si nécessaire"
+        "duration": "3 à 5 jours maximum",
+        "totalQuantity": "20 comprimés",
+        "renewals": "Non renouvelable sans consultation",
+        "stoppingCriteria": "Disparition de la douleur ou de la fièvre"
       },
-
       "indication": {
-        "primaryIndication": "Indication principale DÉTAILLÉE (minimum 100 mots)",
-        "therapeuticObjective": "Objectif thérapeutique PRÉCIS",
-        "expectedOutcome": "Résultats attendus avec délais",
-        "evidenceLevel": "Niveau de preuve de l'indication (Grade A/B/C)",
-        "guidelineReference": "Référentiel thérapeutique utilisé"
+        "primaryIndication": "Traitement symptomatique de la douleur légère à modérée et/ou de la fièvre, dans le cadre de la prise en charge du diagnostic établi. Le paracétamol est l'antalgique de première intention recommandé par l'ANSM.",
+        "therapeuticObjective": "Soulagement de la douleur et réduction de la fièvre",
+        "expectedOutcome": "Amélioration symptomatique dans les 30-60 minutes",
+        "evidenceLevel": "Grade A"
       },
-
       "safetyProfile": {
         "contraindications": {
-          "absolute": ["Contre-indications ABSOLUES vérifiées pour ce patient"],
-          "relative": ["Contre-indications RELATIVES avec précautions"],
-          "patientSpecific": "Vérification spécifique selon profil patient"
+          "absolute": ["Allergie au paracétamol", "Insuffisance hépatique sévère"],
+          "relative": ["Insuffisance hépatique modérée", "Alcoolisme chronique"],
+          "patientSpecific": "Vérification allergie effectuée : pas d'allergie connue"
         },
         "interactions": {
-          "majorInteractions": ["Interactions médicamenteuses MAJEURES identifiées"],
-          "moderateInteractions": ["Interactions MODÉRÉES avec surveillance"],
-          "foodInteractions": ["Interactions alimentaires à éviter"],
-          "labInteractions": "Interactions avec examens biologiques"
+          "majorInteractions": ["Warfarine (surveillance INR)", "Alcool (hépatotoxicité)"],
+          "moderateInteractions": ["Isoniazide", "Rifampicine"],
+          "foodInteractions": ["Éviter consommation excessive d'alcool"]
         },
         "sideEffects": {
-          "common": ["Effets secondaires FRÉQUENTS (>10%)"],
-          "serious": ["Effets secondaires GRAVES à surveiller"],
-          "patientEducation": "Points d'éducation patient spécifiques",
-          "warningSignsToReport": "Signes d'alerte à signaler IMMÉDIATEMENT"
-        },
-        "specialPrecautions": {
-          "ageDosing": "Ajustements posologiques selon l'âge",
-          "renalDosing": "Ajustements selon fonction rénale",
-          "hepaticDosing": "Ajustements selon fonction hépatique",
-          "pregnancyCategory": "Catégorie grossesse et contraception",
-          "drivingWarning": "Mise en garde conduite automobile"
+          "common": ["Troubles digestifs mineurs (<1%)"],
+          "serious": ["Hépatotoxicité en cas de surdosage", "Réactions allergiques rares"],
+          "warningSignsToReport": "Nausées, vomissements, douleurs abdominales, ictère"
         }
       },
-
       "monitoring": {
         "clinicalMonitoring": {
-          "parameters": ["Paramètres cliniques à surveiller"],
-          "frequency": "Fréquence de surveillance clinique",
-          "warningThresholds": "Seuils d'alerte à surveiller"
+          "parameters": ["Efficacité antalgique", "Tolérance digestive"],
+          "frequency": "Auto-évaluation quotidienne"
         },
-        "laboratoryMonitoring": {
-          "testsRequired": ["Examens biologiques de surveillance"],
-          "frequency": "Fréquence des contrôles biologiques",
-          "targetValues": "Valeurs cibles à atteindre",
-          "actionThresholds": "Seuils nécessitant action thérapeutique"
-        },
-        "followUpSchedule": "Planning de surveillance DÉTAILLÉ avec échéances"
+        "followUpSchedule": "Réévaluation si pas d'amélioration à 48-72h"
       },
-
       "patientInstructions": {
-        "administrationInstructions": "Instructions CLAIRES d'administration pour le patient",
-        "storageInstructions": "Conditions de conservation du médicament",
-        "missedDoseInstructions": "Conduite à tenir en cas d'oubli",
-        "lifestyleModifications": "Modifications mode de vie associées",
-        "dietaryAdvice": "Conseils diététiques spécifiques"
+        "administrationInstructions": "Prendre avec un grand verre d'eau, de préférence après les repas",
+        "storageInstructions": "Conserver à température ambiante, à l'abri de l'humidité",
+        "missedDoseInstructions": "Si oubli : prendre dès que possible, mais pas de double dose"
       },
-
-      "pharmacoeconomics": {
-        "costEffectiveness": "Analyse coût-efficacité du traitement",
-        "reimbursementStatus": "Statut de remboursement Sécurité Sociale",
-        "genericAlternatives": "Alternatives génériques disponibles",
-        "therapeuticAlternatives": "Alternatives thérapeutiques si échec"
-      },
-
       "prescriptionValidation": {
-        "doseAppropriate": "Validation dose appropriée pour ce patient",
-        "durationJustified": "Justification de la durée de traitement",
+        "doseAppropriate": "Dose standard adaptée à l'adulte",
+        "durationJustified": "Durée courte pour traitement symptomatique",
         "interactionChecked": "Vérification interactions effectuée",
         "allergyChecked": "Vérification allergies réalisée",
-        "safetyScore": "Score de sécurité prescription (0-100)"
+        "safetyScore": 95
       }
     }
   ],
-
   "nonPharmacologicalInterventions": [
     {
-      "intervention": "Mesure non médicamenteuse PRINCIPALE",
-      "description": "Description DÉTAILLÉE de l'intervention (minimum 150 mots)",
-      "indication": "Justification de cette mesure dans la prise en charge",
-      "implementation": "Modalités pratiques de mise en œuvre",
-      "duration": "Durée recommandée avec critères d'évaluation",
-      "expectedBenefits": "Bénéfices attendus avec délais",
-      "contraindications": "Contre-indications ou précautions",
-      "monitoring": "Suivi et évaluation de l'efficacité",
-      "evidenceLevel": "Niveau de preuve de cette intervention"
+      "intervention": "Repos et mesures générales",
+      "description": "Repos relatif conseillé selon les symptômes. Hydratation suffisante recommandée (1,5 à 2 litres d'eau par jour). Application de froid local si douleur inflammatoire, ou de chaleur si douleur musculaire.",
+      "indication": "Mesures d'accompagnement pour optimiser la récupération",
+      "implementation": "À adapter selon les symptômes et la tolérance",
+      "duration": "Pendant toute la durée des symptômes",
+      "expectedBenefits": "Amélioration du confort et accélération de la guérison",
+      "evidenceLevel": "Grade B"
     }
   ],
-
   "patientEducation": {
     "diseaseEducation": {
-      "pathologyExplanation": "Explication ADAPTÉE de la pathologie au patient",
-      "prognosisDiscussion": "Discussion du pronostic et évolution",
-      "lifestyleImpact": "Impact sur le mode de vie et activités",
-      "chronicManagement": "Gestion de la maladie chronique si applicable"
+      "pathologyExplanation": "Explication adaptée de la pathologie au patient",
+      "prognosisDiscussion": "Discussion du pronostic et évolution"
     },
     "medicationEducation": {
       "importanceOfCompliance": "Importance de l'observance thérapeutique",
-      "sideEffectsToReport": "Effets secondaires à signaler",
-      "interactionAwareness": "Sensibilisation aux interactions",
-      "storageAndHandling": "Conservation et manipulation des médicaments"
+      "sideEffectsToReport": "Effets secondaires à signaler"
     },
     "emergencyInstructions": {
-      "warningSignsToReport": "Signes d'alerte nécessitant consultation URGENTE",
-      "emergencyContacts": "Contacts d'urgence et numéros utiles",
-      "whenToStopMedication": "Situations imposant l'arrêt du traitement",
-      "emergencyMedication": "Médicaments d'urgence si applicable"
+      "warningSignsToReport": "Aggravation des symptômes, fièvre persistante >3 jours, apparition nouveaux symptômes",
+      "emergencyContacts": "15 (SAMU) en cas d'urgence vitale",
+      "whenToStopMedication": "En cas de réaction allergique ou effet indésirable grave"
     },
     "followUpInstructions": {
-      "nextAppointment": "Prochaine consultation avec objectifs PRÉCIS",
-      "scheduledReassessment": "Réévaluations programmées",
-      "selfMonitoringInstructions": "Auto-surveillance à domicile",
-      "pharmacistConsultation": "Conseil pharmaceutique recommandé"
+      "nextAppointment": "Reconsulter si pas d'amélioration à 72h ou aggravation",
+      "selfMonitoringInstructions": "Surveiller température et douleur, tenir journal si nécessaire"
     }
   },
-
   "prescriptionSafety": {
     "safetyChecklist": {
       "patientIdentificationVerified": "Vérification identité patient effectuée",
       "allergyHistoryChecked": "Historique allergique vérifié",
       "drugInteractionsChecked": "Interactions médicamenteuses contrôlées",
-      "doseCalculationVerified": "Calculs posologiques vérifiés",
-      "contraindicationsChecked": "Contre-indications vérifiées",
-      "renalFunctionConsidered": "Fonction rénale prise en compte",
-      "hepaticFunctionConsidered": "Fonction hépatique évaluée"
+      "doseCalculationVerified": "Calculs posologiques vérifiés"
     },
     "riskMitigation": {
-      "identifiedRisks": ["Risques identifiés pour ce patient"],
-      "mitigationStrategies": ["Stratégies de réduction des risques"],
-      "monitoringPlan": "Plan de surveillance sécuritaire",
-      "emergencyPlan": "Plan d'urgence en cas d'effet indésirable grave"
-    },
-    "qualityAssurance": {
-      "prescriptionAccuracy": "Précision de la prescription vérifiée",
-      "evidenceBasedPrescribing": "Prescription basée sur les preuves",
-      "guidelineCompliance": "Respect des recommandations officielles",
-      "continuityOfCare": "Continuité des soins assurée"
+      "identifiedRisks": ["Risque hépatotoxicité si surdosage"],
+      "mitigationStrategies": ["Respect dose maximale quotidienne", "Information patient"]
     }
   },
-
-  "legalCompliance": {
-    "prescriptionLegality": {
-      "regulatoryCompliance": "Conformité réglementaire française vérifiée",
-      "narcoticsRegulation": "Réglementation stupéfiants si applicable",
-      "prescriptionDuration": "Durée prescription conforme à la réglementation",
-      "renewalRestrictions": "Restrictions renouvellement respectées"
-    },
-    "documentation": {
-      "clinicalJustification": "Justification clinique documentée",
-      "informedConsentObtained": "Consentement éclairé patient obtenu",
-      "medicalRecordUpdated": "Dossier médical mis à jour",
-      "traceabilityEnsured": "Traçabilité prescription assurée"
-    }
-  },
-
   "metadata": {
     "prescriptionMetrics": {
-      "totalMedications": "Nombre total de médicaments prescrits",
-      "complexityScore": "Score de complexité prescription (1-10)",
-      "safetyScore": "Score global de sécurité (0-100)",
-      "evidenceLevel": "Niveau de preuve global des prescriptions",
-      "costEstimate": "Estimation coût total mensuel",
-      "complianceRisk": "Risque de non-observance évalué"
+      "totalMedications": 1,
+      "complexityScore": 2,
+      "safetyScore": 95,
+      "evidenceLevel": "Grade A"
     },
     "technicalData": {
       "generationDate": "${new Date().toISOString()}",
       "aiModel": "gpt-4o-pharmacology-expert",
-      "validationLevel": "Expert pharmacological validation",
-      "guidelinesUsed": ["Référentiels utilisés pour la prescription"],
-      "lastUpdated": "Dernière mise à jour base de données médicamenteuse"
-    },
-    "qualityAssurance": {
-      "expertValidation": "Validation experte automatisée effectuée",
-      "safetyValidation": "Validation sécuritaire complète",
-      "interactionValidation": "Validation interactions réalisée",
-      "doseValidation": "Validation posologique effectuée"
+      "validationLevel": "Expert pharmacological validation"
     }
   }
 }
-
-Génère maintenant l'ordonnance médicamenteuse EXPERTE et SÉCURISÉE au format JSON strict, en appliquant tous les principes de pharmacologie clinique et de sécurité patient.
 `
 
     console.log("🧠 Génération ordonnance experte avec OpenAI...")
@@ -317,8 +219,11 @@ Génère maintenant l'ordonnance médicamenteuse EXPERTE et SÉCURISÉE au forma
     let prescriptionData
     try {
       let cleanText = result.text.trim()
+      
+      // Enlever les backticks markdown s'ils existent
       cleanText = cleanText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
       
+      // Trouver le début et la fin du JSON
       const startIndex = cleanText.indexOf('{')
       const endIndex = cleanText.lastIndexOf('}')
       
@@ -381,9 +286,9 @@ Génère maintenant l'ordonnance médicamenteuse EXPERTE et SÉCURISÉE au forma
 
     // Fallback sécuritaire
     const fallbackPrescription = generateExpertPrescriptionFallback(
-      request.body?.patientData, 
-      request.body?.diagnosisData, 
-      request.body?.clinicalData
+      request.body?.patientData || {}, 
+      request.body?.diagnosisData || {}, 
+      request.body?.clinicalData || {}
     )
 
     return NextResponse.json({
@@ -403,6 +308,30 @@ Génère maintenant l'ordonnance médicamenteuse EXPERTE et SÉCURISÉE au forma
 }
 
 function generateExpertPrescriptionFallback(patientData: any, diagnosisData: any, clinicalData: any): any {
+  // Vérifier les allergies au paracétamol
+  const hasParacetamolAllergy = (patientData?.allergies || []).some((allergy: string) => 
+    allergy.toLowerCase().includes("paracétamol") || allergy.toLowerCase().includes("paracetamol")
+  )
+
+  // Médicament de base sécurisé
+  const safeMedication = hasParacetamolAllergy ? {
+    dci: "Ibuprofène",
+    brandName: "Advil",
+    dosageForm: "Comprimé pelliculé",
+    strength: "400 mg",
+    atcCode: "M01AE01",
+    contraindications: ["Ulcère gastro-duodénal", "Insuffisance rénale sévère", "Grossesse (3ème trimestre)"],
+    indication: "Anti-inflammatoire et antalgique (patient allergique au paracétamol)"
+  } : {
+    dci: "Paracétamol",
+    brandName: "Doliprane",
+    dosageForm: "Comprimé pelliculé",
+    strength: "500 mg",
+    atcCode: "N02BE01",
+    contraindications: ["Insuffisance hépatique sévère"],
+    indication: "Antalgique et antipyrétique de première intention"
+  }
+
   return {
     prescriptionHeader: {
       prescriptionId: `ORD-FB-${Date.now()}`,
@@ -427,79 +356,71 @@ function generateExpertPrescriptionFallback(patientData: any, diagnosisData: any
       {
         lineNumber: 1,
         prescriptionType: "MÉDICAMENT",
-        dci: "Paracétamol",
-        brandName: "Doliprane",
-        dosageForm: "Comprimé pelliculé",
-        strength: "500 mg",
-        atcCode: "N02BE01",
+        dci: safeMedication.dci,
+        brandName: safeMedication.brandName,
+        dosageForm: safeMedication.dosageForm,
+        strength: safeMedication.strength,
+        atcCode: safeMedication.atcCode,
         
         posology: {
-          dosage: "500 mg à 1 g par prise",
-          frequency: "Toutes les 6 heures si nécessaire",
+          dosage: hasParacetamolAllergy ? "400 mg par prise" : "500 mg à 1 g par prise",
+          frequency: hasParacetamolAllergy ? "Toutes les 8 heures si nécessaire" : "Toutes les 6 heures si nécessaire",
           timing: "De préférence après les repas",
           route: "Voie orale",
-          maxDailyDose: "4 g maximum par 24 heures",
-          calculationBasis: "Posologie standard adulte"
+          maxDailyDose: hasParacetamolAllergy ? "1200 mg maximum par 24 heures" : "4 g maximum par 24 heures"
         },
         
         treatment: {
           duration: "3 à 5 jours maximum",
-          totalQuantity: "20 comprimés",
+          totalQuantity: hasParacetamolAllergy ? "18 comprimés" : "20 comprimés",
           renewals: "Non renouvelable sans consultation",
-          stoppingCriteria: "Disparition de la douleur ou de la fièvre",
-          tapering: "Arrêt possible sans diminution progressive"
+          stoppingCriteria: "Disparition de la douleur ou de la fièvre"
         },
 
         indication: {
-          primaryIndication: "Traitement symptomatique de la douleur légère à modérée et/ou de la fièvre, dans le cadre de la prise en charge du diagnostic établi. Le paracétamol est l'antalgique de première intention recommandé par l'ANSM pour ce type de symptomatologie.",
+          primaryIndication: safeMedication.indication,
           therapeuticObjective: "Soulagement de la douleur et réduction de la fièvre",
           expectedOutcome: "Amélioration symptomatique dans les 30-60 minutes",
-          evidenceLevel: "Grade A",
-          guidelineReference: "Recommandations ANSM 2024"
+          evidenceLevel: "Grade A"
         },
 
         safetyProfile: {
           contraindications: {
-            absolute: ["Allergie au paracétamol", "Insuffisance hépatique sévère"],
-            relative: ["Insuffisance hépatique modérée", "Alcoolisme chronique"],
-            patientSpecific: `Vérification allergie effectuée : ${(patientData?.allergies || []).includes("Paracétamol") ? "ALLERGIE DÉTECTÉE - CONTRE-INDIQUÉ" : "Pas d'allergie connue"}`
+            absolute: safeMedication.contraindications,
+            patientSpecific: hasParacetamolAllergy ? "ALLERGIE PARACÉTAMOL DÉTECTÉE - Alternative prescrite" : "Pas d'allergie connue"
           },
           interactions: {
-            majorInteractions: ["Warfarine (surveillance INR)", "Alcool (hépatotoxicité)"],
-            moderateInteractions: ["Isoniazide", "Rifampicine"],
-            foodInteractions: ["Éviter consommation excessive d'alcool"],
-            labInteractions: "Peut fausser dosage acide urique"
+            majorInteractions: hasParacetamolAllergy ? ["Anticoagulants", "Corticoïdes"] : ["Warfarine", "Alcool"],
+            moderateInteractions: hasParacetamolAllergy ? ["Lithium", "Méthotrexate"] : ["Isoniazide"],
+            foodInteractions: ["Éviter consommation excessive d'alcool"]
           },
           sideEffects: {
-            common: ["Troubles digestifs mineurs (<1%)"],
-            serious: ["Hépatotoxicité en cas de surdosage", "Réactions allergiques rares"],
-            patientEducation: "Ne pas dépasser 4g par jour toutes sources confondues",
-            warningSignsToReport: "Nausées, vomissements, douleurs abdominales, ictère"
+            common: hasParacetamolAllergy ? ["Troubles digestifs", "Nausées"] : ["Troubles digestifs mineurs"],
+            serious: hasParacetamolAllergy ? ["Ulcération gastrique", "Insuffisance rénale"] : ["Hépatotoxicité si surdosage"],
+            warningSignsToReport: hasParacetamolAllergy ? "Douleurs gastriques, selles noires" : "Nausées, vomissements, ictère"
           }
         },
 
         monitoring: {
           clinicalMonitoring: {
             parameters: ["Efficacité antalgique", "Tolérance digestive"],
-            frequency: "Auto-évaluation quotidienne",
-            warningThresholds: "Douleur persistante > 3 jours"
+            frequency: "Auto-évaluation quotidienne"
           },
           followUpSchedule: "Réévaluation si pas d'amélioration à 48-72h"
         },
 
         patientInstructions: {
-          administrationInstructions: "Prendre avec un grand verre d'eau, de préférence après les repas",
+          administrationInstructions: "Prendre avec un grand verre d'eau, pendant ou après les repas",
           storageInstructions: "Conserver à température ambiante, à l'abri de l'humidité",
-          missedDoseInstructions: "Si oubli : prendre dès que possible, mais pas de double dose",
-          lifestyleModifications: "Éviter la consommation d'alcool pendant le traitement"
+          missedDoseInstructions: "Si oubli : prendre dès que possible, mais pas de double dose"
         },
 
         prescriptionValidation: {
-          doseAppropriate: "Dose standard adaptée à l'adulte",
+          doseAppropriate: "Dose adaptée selon allergie patient",
           durationJustified: "Durée courte pour traitement symptomatique",
           interactionChecked: "Vérification interactions effectuée",
-          allergyChecked: "Vérification allergies réalisée",
-          safetyScore: 95
+          allergyChecked: "Vérification allergies réalisée - Alternative prescrite si nécessaire",
+          safetyScore: hasParacetamolAllergy ? 90 : 95
         }
       }
     ],
@@ -518,7 +439,9 @@ function generateExpertPrescriptionFallback(patientData: any, diagnosisData: any
 
     patientEducation: {
       emergencyInstructions: {
-        warningSignsToReport: "Aggravation des symptômes, fièvre persistante >3 jours, apparition nouveaux symptômes",
+        warningSignsToReport: hasParacetamolAllergy ? 
+          "Douleurs gastriques intenses, selles noires, vomissements, essoufflement" :
+          "Aggravation des symptômes, fièvre persistante >3 jours, apparition nouveaux symptômes",
         emergencyContacts: "15 (SAMU) en cas d'urgence vitale",
         whenToStopMedication: "En cas de réaction allergique ou effet indésirable grave"
       },
@@ -532,14 +455,14 @@ function generateExpertPrescriptionFallback(patientData: any, diagnosisData: any
       prescriptionMetrics: {
         totalMedications: 1,
         complexityScore: 2,
-        safetyScore: 95,
+        safetyScore: hasParacetamolAllergy ? 90 : 95,
         evidenceLevel: "Grade A",
-        complianceRisk: "Faible"
+        allergyAdapted: hasParacetamolAllergy
       },
       technicalData: {
         generationDate: new Date().toISOString(),
         aiModel: "Expert-Fallback-System",
-        validationLevel: "Prescription sécuritaire de base"
+        validationLevel: "Prescription sécuritaire de base avec adaptation allergies"
       }
     }
   }
