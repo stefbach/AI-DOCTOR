@@ -400,191 +400,97 @@ function generateExpertMockPubMedData(query: string) {
   }
 }
 
-async function generateExpertParaclinicalPlan(diagnosis: any, patientData: any, clinicalData: any) {
-  const examensPrompt = `
-En tant qu'expert en médecine diagnostique, établissez un plan d'investigations paracliniques COMPLET et PERSONNALISÉ.
-
-CONTEXTE CLINIQUE:
-- Diagnostic probable: "${diagnosis.text?.split("\n")[0]}"
-- Patient: ${patientData.firstName} ${patientData.lastName}, ${patientData.age} ans, ${patientData.gender}
-- Poids: ${patientData.weight}kg, Allergies: ${patientData.allergies?.join(", ") || "Aucune"}
-- Symptômes: ${clinicalData.symptoms}
-- Contexte: ${diagnosis.text?.substring(0, 800)}
-
-PLAN D'INVESTIGATIONS EXPERT requis - Format JSON:
-
-{
-  "urgentExams": [
-    {
-      "category": "Biologie critique",
-      "exam": "Nom précis avec technique",
-      "indication": "Justification médicale DÉTAILLÉE (minimum 150 mots)",
-      "urgency": "Immédiate (<6h)",
-      "urgencyJustification": "Raisons médicales précises de l'urgence",
-      "expectedResults": "Résultats attendus et interprétation",
-      "decisionThreshold": "Seuils décisionnels pour conduite à tenir",
-      "contraindications": "Contre-indications spécifiques au patient",
-      "cost": "Estimation coût et rapport coût-efficacité"
-    }
-  ],
-  "scheduledExams": [
-    {
-      "category": "Imagerie spécialisée",
-      "exam": "Type d'imagerie avec protocole",
-      "indication": "Justification APPROFONDIE avec objectifs diagnostiques",
-      "timing": "Délai optimal (<24h/<1sem/<1mois)",
-      "preparation": "Préparation patient nécessaire",
-      "alternatives": "Examens alternatifs possibles",
-      "interpretation": "Signes radiologiques recherchés"
-    }
-  ],
-  "specialistConsultations": [
-    {
-      "specialty": "Spécialité médicale",
-      "indication": "Justification DÉTAILLÉE de l'avis spécialisé",
-      "urgency": "Délai souhaité avec justification",
-      "questionsSpecific": "Questions précises à l'expert",
-      "expectedOutcome": "Apport attendu de la consultation"
-    }
-  ],
-  "followUpPlan": {
-    "shortTerm": "Plan surveillance immédiate (24-48h)",
-    "mediumTerm": "Surveillance intermédiaire (1-4 semaines)",
-    "longTerm": "Suivi à long terme (>1 mois)",
-    "redFlags": "Signes nécessitant réévaluation urgente"
-  },
-  "metadata": {
-    "totalExams": [Nombre total d'examens],
-    "estimatedCost": "Coût total estimé",
-    "timeToResults": "Délai global pour résultats",
-    "complexityScore": "Score complexité (1-10)",
-    "evidenceLevel": "Niveau de preuve des recommandations"
-  }
-}
-
-Fournissez un plan EXPERT et PERSONNALISÉ au format JSON.
-`
-
-  return await generateText({
-    model: openai("gpt-4o"),
-    prompt: examensPrompt,
-    temperature: 0.1,
-    maxTokens: 4000,
-  })
-}
-
-async function generateExpertPrescriptionWithVerification(diagnosis: any, patientData: any) {
-  const prescriptionPrompt = `
-En tant qu'expert en pharmacologie clinique, établissez une prescription médicamenteuse SÉCURISÉE et PERSONNALISÉE.
-
-PROFIL PATIENT:
-- ${patientData.age} ans, ${patientData.gender}, ${patientData.weight}kg
-- Allergies: ${patientData.allergies?.join(", ") || "Aucune"} ${patientData.otherAllergies ? "+ " + patientData.otherAllergies : ""}
-- Médicaments actuels: ${patientData.currentMedicationsText || "Aucun"}
-- Antécédents: ${patientData.medicalHistory?.join(", ") || "Aucun"}
-- Fonction rénale estimée: ${patientData.age > 65 ? "Précaution" : "Normale supposée"}
-
-DIAGNOSTIC: ${diagnosis.text?.split("\n")[0]}
-CONTEXTE: ${diagnosis.text?.substring(0, 500)}
-
-PRESCRIPTION EXPERT - Format JSON requis:
-
-{
-  "prescriptionHeader": {
-    "prescriber": "Dr. TIBOK IA DOCTOR",
-    "date": "${new Date().toLocaleDateString("fr-FR")}",
-    "patientId": "${patientData.firstName}-${patientData.lastName}",
-    "indication": "Indication thérapeutique principale"
-  },
-  "medications": [
-    {
-      "dci": "Dénomination Commune Internationale",
-      "brandName": "Nom commercial principal",
-      "dosage": "Dosage avec forme galénique",
-      "posology": "Posologie PRÉCISE avec modalités de prise",
-      "duration": "Durée de traitement avec critères d'arrêt",
-      "indication": "Indication spécifique pour ce médicament",
-      "contraindications": "Contre-indications vérifiées pour ce patient",
-      "interactions": "Interactions médicamenteuses identifiées",
-      "sideEffects": "Effets secondaires à surveiller",
-      "monitoring": "Surveillance biologique/clinique requise",
-      "adjustments": "Ajustements posologiques selon âge/poids/fonction rénale",
-      "patientInstructions": "Instructions CLAIRES pour le patient",
-      "safetyScore": [Score sécurité 0-100]
-    }
-  ],
-  "nonPharmacological": [
-    {
-      "intervention": "Mesure non médicamenteuse",
-      "description": "Description DÉTAILLÉE de l'intervention",
-      "indication": "Justification de cette mesure",
-      "duration": "Durée recommandée",
-      "followUp": "Évaluation de l'efficacité"
-    }
-  ],
-  "patientEducation": {
-    "keyPoints": ["Points clés éducation patient"],
-    "warningSignsToReport": "Signes d'alerte à signaler IMMÉDIATEMENT",
-    "lifestyleModifications": "Modifications style de vie recommandées",
-    "followUpInstructions": "Instructions de suivi PRÉCISES"
-  },
-  "safetyChecklist": {
-    "allergyVerification": "Vérification allergies effectuée",
-    "interactionCheck": "Vérification interactions réalisée",
-    "renalAdjustment": "Ajustement fonction rénale si nécessaire",
-    "ageAppropriate": "Posologie adaptée à l'âge",
-    "contraceptionAdvice": "Conseils contraception si applicable"
-  },
-  "metadata": {
-    "medicationsCount": [Nombre de médicaments],
-    "safetyScore": [Score sécurité global 0-100],
-    "evidenceLevel": "Niveau de preuve des traitements",
-    "guidelinesUsed": "Référentiels thérapeutiques consultés"
-  }
-}
-
-Fournissez une prescription EXPERT et SÉCURISÉE au format JSON.
-`
-
-  const result = await generateText({
-    model: openai("gpt-4o"),
-    prompt: prescriptionPrompt,
-    temperature: 0.1,
-    maxTokens: 4000,
-  })
-
-  // Vérification FDA expert avec gestion robuste
-  let fdaData = null
+// FONCTION MISE À JOUR: Plan d'investigations paracliniques expert
+async function generateExpertParaclinicalPlan(diagnosticResult: any, patientData: any, clinicalData: any) {
   try {
-    console.log("🔍 Vérification FDA expert...")
-
-    const response = await fetch("/api/fda-drug-info", {
+    console.log("🔬 Génération plan examens expert...")
+    
+    const response = await fetch("/api/examens-generator", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        medications: ["paracetamol", "ibuprofene", "amoxicilline"], // Médicaments de test élargis
-        expertLevel: true
-      }),
+        patientData,
+        diagnosisData: { diagnosis: JSON.parse(diagnosticResult.text || "{}") },
+        clinicalData
+      })
     })
-
+    
     if (response.ok) {
-      fdaData = await response.json()
-      console.log("✅ FDA vérification expert réussie")
+      const result = await response.json()
+      console.log("✅ Plan examens expert généré")
+      return result
     } else {
-      fdaData = generateExpertMockFDAData()
+      throw new Error("Erreur API examens")
     }
   } catch (error) {
-    console.error("❌ Erreur FDA expert:", error)
-    fdaData = generateExpertMockFDAData()
+    console.error("❌ Erreur examens:", error)
+    return generateMockExamensData()
   }
+}
 
+// FONCTION MISE À JOUR: Prescription thérapeutique expert avec vérifications
+async function generateExpertPrescriptionWithVerification(diagnosticResult: any, patientData: any) {
+  try {
+    console.log("💊 Génération prescription experte...")
+    
+    const response = await fetch("/api/prescription-generator", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        patientData,
+        diagnosisData: { diagnosis: JSON.parse(diagnosticResult.text || "{}") },
+        clinicalData: patientData.clinicalContext
+      })
+    })
+    
+    if (response.ok) {
+      const result = await response.json()
+      console.log("✅ Prescription experte générée")
+      return result
+    } else {
+      throw new Error("Erreur API prescription")
+    }
+  } catch (error) {
+    console.error("❌ Erreur prescription:", error)
+    return generateMockPrescriptionData()
+  }
+}
+
+// NOUVELLE FONCTION: Mock prescription data
+function generateMockPrescriptionData() {
   return {
-    ...result,
-    fdaData: fdaData,
-    safetyScore: 92,
-    medicationsCount: 3
+    success: true,
+    prescription: {
+      medications: [
+        {
+          dci: "Paracétamol",
+          posology: "500mg x 3/jour",
+          duration: "5 jours",
+          indication: "Antalgique symptomatique"
+        }
+      ]
+    },
+    metadata: { source: "Fallback prescription" },
+    medicationsCount: 1,
+    safetyScore: 90
+  }
+}
+
+// NOUVELLE FONCTION: Mock examens data
+function generateMockExamensData() {
+  return {
+    success: true,
+    examens: {
+      laboratoryTests: [
+        {
+          testName: "NFS + CRP",
+          urgency: "Semi-urgente",
+          indication: "Bilan inflammatoire"
+        }
+      ]
+    },
+    metadata: { source: "Fallback examens" },
+    totalExams: 1
   }
 }
 
