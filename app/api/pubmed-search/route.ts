@@ -1,3 +1,7 @@
+import { type NextRequest, NextResponse } from "next/server"
+import { generateText } from "ai"
+import { openai } from "@ai-sdk/openai"
+
 export async function POST(request: NextRequest) {
   try {
     const { query = "", maxResults = 5 } = await request.json()
