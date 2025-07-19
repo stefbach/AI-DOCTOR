@@ -18,12 +18,12 @@ import {
 } from "lucide-react"
 
 interface WorkflowResult {
-  diagnosis: string
-  examens: string
-  prescription: string
+  diagnosis: string | any
+  examens: string | any
+  prescription: string | any
   pubmedEvidence: any
   fdaVerification: any
-  consultationReport: string
+  consultationReport: string | any
 }
 
 interface IntegratedMedicalConsultationProps {
@@ -47,19 +47,19 @@ PATIENT: ${patientData.firstName} ${patientData.lastName}
 ÂGE: ${patientData.age} ans
 DATE: ${new Date().toLocaleDateString("fr-FR")}
 
-${result.consultationReport}
+${extractTextFromData(result.consultationReport)}
 
 DIAGNOSTIC DÉTAILLÉ
 ==================
-${result.diagnosis}
+${extractTextFromData(result.diagnosis)}
 
 EXAMENS COMPLÉMENTAIRES
 ======================
-${result.examens}
+${extractTextFromData(result.examens)}
 
 PRESCRIPTION MÉDICAMENTEUSE
 ==========================
-${result.prescription}
+${extractTextFromData(result.prescription)}
 
 RÉFÉRENCES SCIENTIFIQUES
 ========================
@@ -80,47 +80,299 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
     URL.revokeObjectURL(url)
   }
 
-  const parseDiagnosis = (diagnosisText: string) => {
-    const lines = diagnosisText.split("\n").filter((line) => line.trim())
-    const principal = lines.find((line) => line.includes("principal") || line.includes("probable"))
-    const confidence = lines.find((line) => line.includes("%") || line.includes("confiance"))
-    const differentiels = lines.filter((line) => line.includes("différentiel") || line.match(/^\d+\./))
+  // FONCTION UTILITAIRE : Extraire le texte de données mixtes (string ou objet)
+  const extractTextFromData = (data: any): string => {
+    if (typeof data === 'string') {
+      return data
+    }
+    
+    if (data && typeof data === 'object') {
+      // Si c'est un objet avec un champ text
+      if (data.text) {
+        return data.text
+      }
+      
+      // Si c'est un rapport de consultation structuré
+      if (data.header && data.anamnesis) {
+        return formatConsultationReport(data)
+      }
+      
+      // Fallback : convertir en JSON lisible
+      return JSON.stringify(data, null, 2)
+    }
+    
+    return String(data || 'Données non disponibles')
+  }
 
-    return {
-      principal: principal || lines[0] || "Diagnostic en cours d'analyse",
-      confidence: confidence || "Confiance: En évaluation",
-      differentiels: differentiels.slice(0, 3),
+  // FONCTION CORRIGÉE : Parser le diagnostic
+  const parseDiagnosis = (diagnosisData: any) => {
+    try {
+      console.log('Type de diagnosisData:', typeof diagnosisData)
+      
+      // Nouveau format JSON structuré
+      if (diagnosisData && typeof diagnosisData === 'object') {
+        // Format du rapport de consultation
+        if (diagnosisData.diagnosticAssessment) {
+          return {
+            principal: diagnosisData.diagnosticAssessment.primaryDiagnosis?.condition || "Diagnostic en cours d'analyse",
+            confidence: diagnosisData.diagnosticAssessment.clinicalImpression?.diagnosticConfidence || "Confiance: En évaluation",
+            differentiels: diagnosisData.diagnosticAssessment.differentialDiagnosis?.alternativeDiagnoses ? 
+              [diagnosisData.diagnosticAssessment.differentialDiagnosis.alternativeDiagnoses] : []
+          }
+        }
+        
+        // Format de l'orchestrateur (diagnostic IA)
+        if (diagnosisData.primaryDiagnosis) {
+          return {
+            principal: diagnosisData.primaryDiagnosis.condition || "Diagnostic en cours d'analyse",
+            confidence: `Confiance: ${diagnosisData.primaryDiagnosis.probability || diagnosisData.aiConfidence || 'En évaluation'}%`,
+            differentiels: diagnosisData.differentialDiagnosis?.map((d: any) => d.condition) || []
+          }
+        }
+        
+        // Si objet avec champ text
+        if (diagnosisData.text) {
+          return parseDiagnosis(diagnosisData.text)
+        }
+        
+        // Fallback pour objet non reconnu
+        return {
+          principal: "Diagnostic en analyse (format JSON)",
+          confidence: "Confiance: Données structurées disponibles",
+          differentiels: []
+        }
+      }
+      
+      // Ancien format texte
+      if (typeof diagnosisData === 'string') {
+        const lines = diagnosisData.split("\n").filter((line) => line.trim())
+        const principal = lines.find((line) => line.includes("principal") || line.includes("probable"))
+        const confidence = lines.find((line) => line.includes("%") || line.includes("confiance"))
+        const differentiels = lines.filter((line) => line.includes("différentiel") || line.match(/^\d+\./))
+
+        return {
+          principal: principal || lines[0] || "Diagnostic en cours d'analyse",
+          confidence: confidence || "Confiance: En évaluation",
+          differentiels: differentiels.slice(0, 3),
+        }
+      }
+      
+      // Fallback sécurisé
+      return {
+        principal: "Diagnostic en cours d'analyse",
+        confidence: "Confiance: En évaluation",
+        differentiels: []
+      }
+      
+    } catch (error) {
+      console.error('Erreur parsing diagnostic:', error)
+      return {
+        principal: "Erreur lors de l'analyse diagnostique",
+        confidence: "Confiance: Erreur de traitement",
+        differentiels: []
+      }
     }
   }
 
-  const parseExamens = (examensText: string) => {
-    const sections = examensText.split("\n").filter((line) => line.trim())
-    const biologie = sections.filter(
-      (line) =>
-        line.toLowerCase().includes("biolog") ||
-        line.toLowerCase().includes("sang") ||
-        line.toLowerCase().includes("urine"),
-    )
-    const imagerie = sections.filter(
-      (line) =>
-        line.toLowerCase().includes("radio") ||
-        line.toLowerCase().includes("scanner") ||
-        line.toLowerCase().includes("irm") ||
-        line.toLowerCase().includes("echo"),
-    )
+  // FONCTION CORRIGÉE : Parser les examens
+  const parseExamens = (examensData: any) => {
+    try {
+      console.log('Type de examensData:', typeof examensData)
+      
+      // Nouveau format JSON structuré
+      if (examensData && typeof examensData === 'object') {
+        // Format du rapport de consultation
+        if (examensData.investigationsPlan) {
+          const plan = examensData.investigationsPlan
+          return {
+            biologie: [
+              plan.laboratoryTests?.urgentTests || '',
+              plan.laboratoryTests?.routineTests || '',
+              plan.laboratoryTests?.specializedTests || ''
+            ].filter(Boolean),
+            imagerie: [
+              plan.imagingStudies?.diagnosticImaging || '',
+              plan.imagingStudies?.followUpImaging || ''
+            ].filter(Boolean)
+          }
+        }
+        
+        // Format de l'orchestrateur
+        if (examensData.urgentExams || examensData.scheduledExams || examensData.laboratoryTests) {
+          const biologie = []
+          const imagerie = []
+          
+          // Examens urgents
+          if (examensData.urgentExams && Array.isArray(examensData.urgentExams)) {
+            examensData.urgentExams.forEach((exam: any) => {
+              const examText = exam.name || exam.exam || exam.testName || ''
+              if (examText.toLowerCase().includes('biolog') || examText.toLowerCase().includes('sang')) {
+                biologie.push(examText)
+              } else if (examText.toLowerCase().includes('radio') || examText.toLowerCase().includes('imagerie')) {
+                imagerie.push(examText)
+              }
+            })
+          }
+          
+          // Examens programmés
+          if (examensData.scheduledExams && Array.isArray(examensData.scheduledExams)) {
+            examensData.scheduledExams.forEach((exam: any) => {
+              const examText = exam.name || exam.exam || exam.testName || ''
+              if (examText.toLowerCase().includes('biolog') || examText.toLowerCase().includes('sang')) {
+                biologie.push(examText)
+              } else if (examText.toLowerCase().includes('radio') || examText.toLowerCase().includes('imagerie')) {
+                imagerie.push(examText)
+              }
+            })
+          }
+          
+          // Tests de laboratoire spécifiques
+          if (examensData.laboratoryTests && Array.isArray(examensData.laboratoryTests)) {
+            examensData.laboratoryTests.forEach((test: any) => {
+              biologie.push(test.testName || test.name || 'Test biologique')
+            })
+          }
+          
+          return { biologie, imagerie }
+        }
+        
+        // Si objet avec champ text
+        if (examensData.text) {
+          return parseExamens(examensData.text)
+        }
+        
+        // Fallback pour objet non reconnu
+        return {
+          biologie: ['Examens biologiques (données structurées disponibles)'],
+          imagerie: ['Imagerie médicale (données structurées disponibles)']
+        }
+      }
+      
+      // Ancien format texte
+      if (typeof examensData === 'string') {
+        const sections = examensData.split("\n").filter((line) => line.trim())
+        const biologie = sections.filter(
+          (line) =>
+            line.toLowerCase().includes("biolog") ||
+            line.toLowerCase().includes("sang") ||
+            line.toLowerCase().includes("urine"),
+        )
+        const imagerie = sections.filter(
+          (line) =>
+            line.toLowerCase().includes("radio") ||
+            line.toLowerCase().includes("scanner") ||
+            line.toLowerCase().includes("irm") ||
+            line.toLowerCase().includes("echo"),
+        )
 
-    return { biologie, imagerie }
+        return { biologie, imagerie }
+      }
+      
+      // Fallback sécurisé
+      return { biologie: [], imagerie: [] }
+      
+    } catch (error) {
+      console.error('Erreur parsing examens:', error)
+      return { biologie: [], imagerie: [] }
+    }
   }
 
-  const parsePrescription = (prescriptionText: string) => {
-    const lines = prescriptionText.split("\n").filter((line) => line.trim())
-    const medicaments = lines.filter(
-      (line) => line.includes("mg") || line.includes("comprimé") || line.includes("gélule") || line.match(/^\d+\./),
-    )
+  // FONCTION CORRIGÉE : Parser la prescription
+  const parsePrescription = (prescriptionData: any) => {
+    try {
+      console.log('Type de prescriptionData:', typeof prescriptionData)
+      
+      // Nouveau format JSON structuré
+      if (prescriptionData && typeof prescriptionData === 'object') {
+        // Format du rapport de consultation
+        if (prescriptionData.therapeuticPlan) {
+          const plan = prescriptionData.therapeuticPlan
+          const medicaments = []
+          
+          if (plan.pharmacotherapy?.primaryMedications) {
+            medicaments.push(plan.pharmacotherapy.primaryMedications)
+          }
+          if (plan.immediateManagement?.urgentInterventions) {
+            medicaments.push(plan.immediateManagement.urgentInterventions)
+          }
+          
+          return medicaments.filter(Boolean)
+        }
+        
+        // Format de l'orchestrateur
+        if (prescriptionData.medications && Array.isArray(prescriptionData.medications)) {
+          return prescriptionData.medications.map((med: any) => 
+            `${med.dci || med.name || 'Médicament'} - ${med.posology || med.dosage || 'Posologie à définir'}`
+          )
+        }
+        
+        // Format prescription simple
+        if (prescriptionData.prescription && prescriptionData.prescription.medications) {
+          return prescriptionData.prescription.medications.map((med: any) =>
+            `${med.dci || med.name || 'Médicament'} - ${med.posology || med.dosage || 'Posologie à définir'}`
+          )
+        }
+        
+        // Si objet avec champ text
+        if (prescriptionData.text) {
+          return parsePrescription(prescriptionData.text)
+        }
+        
+        // Fallback pour objet non reconnu
+        return ['Prescription médicamenteuse (données structurées disponibles)']
+      }
+      
+      // Ancien format texte
+      if (typeof prescriptionData === 'string') {
+        const lines = prescriptionData.split("\n").filter((line) => line.trim())
+        const medicaments = lines.filter(
+          (line) => line.includes("mg") || line.includes("comprimé") || line.includes("gélule") || line.match(/^\d+\./),
+        )
 
-    return medicaments.slice(0, 5)
+        return medicaments.slice(0, 5)
+      }
+      
+      // Fallback sécurisé
+      return []
+      
+    } catch (error) {
+      console.error('Erreur parsing prescription:', error)
+      return []
+    }
   }
 
+  // FONCTION UTILITAIRE : Formater un rapport de consultation structuré
+  const formatConsultationReport = (reportData: any): string => {
+    try {
+      let formatted = ''
+      
+      if (reportData.header) {
+        formatted += `${reportData.header.title}\n`
+        formatted += `${reportData.header.subtitle}\n`
+        formatted += `Date: ${reportData.header.date}\n\n`
+      }
+      
+      if (reportData.patientIdentification) {
+        formatted += `PATIENT: ${reportData.patientIdentification.administrativeData?.firstName} ${reportData.patientIdentification.administrativeData?.lastName}\n`
+        formatted += `ÂGE: ${reportData.patientIdentification.administrativeData?.age}\n\n`
+      }
+      
+      if (reportData.anamnesis) {
+        formatted += `ANAMNÈSE:\n${reportData.anamnesis.chiefComplaint?.primaryComplaint || 'Non spécifié'}\n\n`
+      }
+      
+      if (reportData.diagnosticAssessment) {
+        formatted += `DIAGNOSTIC:\n${reportData.diagnosticAssessment.primaryDiagnosis?.condition || 'En cours d\'analyse'}\n\n`
+      }
+      
+      return formatted
+    } catch (error) {
+      console.error('Erreur formatage rapport:', error)
+      return JSON.stringify(reportData, null, 2)
+    }
+  }
+
+  // Parsing des données avec les nouvelles fonctions corrigées
   const diagnosis = parseDiagnosis(result.diagnosis)
   const examens = parseExamens(result.examens)
   const medicaments = parsePrescription(result.prescription)
@@ -193,7 +445,9 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[600px]">
-                <div className="whitespace-pre-wrap text-sm leading-relaxed">{result.consultationReport}</div>
+                <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                  {extractTextFromData(result.consultationReport)}
+                </div>
               </ScrollArea>
             </CardContent>
           </Card>
@@ -225,11 +479,15 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {diagnosis.differentiels.map((diff, index) => (
-                    <div key={index} className="p-3 border rounded-lg">
-                      <p className="text-sm">{diff}</p>
-                    </div>
-                  ))}
+                  {diagnosis.differentiels.length > 0 ? (
+                    diagnosis.differentiels.map((diff, index) => (
+                      <div key={index} className="p-3 border rounded-lg">
+                        <p className="text-sm">{diff}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm">Aucun diagnostic différentiel spécifique</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -240,7 +498,9 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[300px]">
-                  <div className="whitespace-pre-wrap text-sm">{result.diagnosis}</div>
+                  <div className="whitespace-pre-wrap text-sm">
+                    {extractTextFromData(result.diagnosis)}
+                  </div>
                 </ScrollArea>
               </CardContent>
             </Card>
@@ -302,7 +562,9 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[400px]">
-                  <div className="whitespace-pre-wrap text-sm">{result.examens}</div>
+                  <div className="whitespace-pre-wrap text-sm">
+                    {extractTextFromData(result.examens)}
+                  </div>
                 </ScrollArea>
               </CardContent>
             </Card>
@@ -360,7 +622,9 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[400px]">
-                  <div className="whitespace-pre-wrap text-sm">{result.prescription}</div>
+                  <div className="whitespace-pre-wrap text-sm">
+                    {extractTextFromData(result.prescription)}
+                  </div>
                 </ScrollArea>
               </CardContent>
             </Card>
