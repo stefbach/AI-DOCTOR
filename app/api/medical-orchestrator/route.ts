@@ -247,51 +247,22 @@ Tu es un médecin expert sénior avec 25 ans d'expérience en médecine interne.
 CONTEXTE PATIENT:
 ${patientContext}
 
-ANALYSE REQUISE:
-Effectue une analyse diagnostique experte complète. 
+INSTRUCTIONS CRITIQUES:
+- Tu DOIS retourner UNIQUEMENT du JSON valide
+- AUCUN texte avant ou après le JSON
+- AUCUN backticks markdown (\`\`\`)
+- COMMENCER par { et FINIR par }
+- Vérifier que toutes les virgules et guillemets sont corrects
 
-Retourne UNIQUEMENT ce JSON exact (sans backticks, sans texte avant/après):
-{
-  "primaryDiagnosis": {
-    "condition": "Diagnostic le plus probable selon la présentation clinique",
-    "probability": 85,
-    "severity": "Légère/Modérée/Sévère",
-    "icd10": "Code CIM-10 approprié",
-    "urgency": "Faible/Modérée/Élevée"
-  },
-  "differentialDiagnosis": [
-    {
-      "condition": "Alternative diagnostique",
-      "probability": 60,
-      "reasoning": "Arguments pour ce diagnostic"
-    }
-  ],
-  "clinicalReasoning": {
-    "semiology": "Analyse sémiologique détaillée des symptômes",
-    "pathophysiology": "Mécanismes physiopathologiques probables",
-    "riskFactors": ["Facteurs de risque identifiés"],
-    "prognosticFactors": ["Éléments pronostiques"]
-  },
-  "recommendedExams": [
-    {
-      "category": "Biologie/Imagerie/Spécialisé",
-      "exam": "Nom de l'examen",
-      "indication": "Justification médicale précise",
-      "urgency": "Immédiate/Semi-urgente/Programmée",
-      "expectedFindings": "Résultats attendus"
-    }
-  ],
-  "redFlags": ["Signes d'alarme à surveiller"],
-  "aiConfidence": 85,
-  "evidenceLevel": "Grade A/B/C selon niveau de preuve"
-}
+Retourne EXACTEMENT ce JSON (complète avec les vraies valeurs médicales):
+{"primaryDiagnosis":{"condition":"Diagnostic le plus probable","probability":85,"severity":"Modérée","icd10":"Code CIM-10","urgency":"Modérée"},"differentialDiagnosis":[{"condition":"Alternative","probability":60,"reasoning":"Arguments"}],"clinicalReasoning":{"semiology":"Analyse des symptômes","pathophysiology":"Mécanismes probables","riskFactors":["Facteur 1"],"prognosticFactors":["Élément 1"]},"recommendedExams":[{"category":"Biologie","exam":"NFS + CRP","indication":"Justification","urgency":"Semi-urgente","expectedFindings":"Résultats attendus"}],"redFlags":["Signe d'alarme"],"aiConfidence":85,"evidenceLevel":"Grade B"}
 `
 
     const result = await generateText({
       model: openai("gpt-4o"),
       prompt: diagnosticPrompt,
-      temperature: 0.1,
-      maxTokens: 3000,
+      temperature: 0.01, // Très très faible pour maximiser la cohérence JSON
+      maxTokens: 2500,
     })
 
     console.log("✅ Diagnostic expert IA généré avec succès")
@@ -432,8 +403,8 @@ Retourne UNIQUEMENT ce JSON exact:
     const result = await generateText({
       model: openai("gpt-4o"),
       prompt: examensPrompt,
-      temperature: 0.1,
-      maxTokens: 4000,
+      temperature: 0.01, // Très très faible pour JSON cohérent
+      maxTokens: 3000,
     })
 
     const examensData = parseJSONSafely(result.text)
@@ -584,8 +555,8 @@ Retourne UNIQUEMENT ce JSON exact:
     const result = await generateText({
       model: openai("gpt-4o"),
       prompt: prescriptionPrompt,
-      temperature: 0.05, // Très faible pour maximiser la sécurité
-      maxTokens: 4000,
+      temperature: 0.01, // Très très faible pour sécurité maximale
+      maxTokens: 3000,
     })
 
     const prescriptionData = parseJSONSafely(result.text)
@@ -626,126 +597,27 @@ async function generateExpertConsultationReportCore(allData: any) {
     const diagnosis = diagnosisData?.diagnosis || {}
     
     const reportPrompt = `
-Tu es un médecin expert sénior générant un compte-rendu de consultation.
+Tu es un médecin expert générant un rapport de consultation.
 
-DONNÉES PATIENT COMPLÈTES:
-- Identité: ${patientData?.firstName} ${patientData?.lastName}, ${patientData?.age} ans
-- Motif: ${clinicalData?.chiefComplaint || "Consultation"}
-- Symptômes: ${(clinicalData?.symptoms || []).join(", ")}
-- Antécédents: ${(patientData?.medicalHistory || []).join(", ")}
-- Allergies: ${(patientData?.allergies || []).join(", ")}
-- Diagnostic: ${diagnosis.primaryDiagnosis?.condition || "À déterminer"}
+Patient: ${patientData?.firstName} ${patientData?.lastName}, ${patientData?.age} ans
+Motif: ${clinicalData?.chiefComplaint || "Consultation"}
+Diagnostic: ${diagnosis.primaryDiagnosis?.condition || "À déterminer"}
 
-Génère un compte-rendu médical expert complet et professionnel.
+INSTRUCTIONS CRITIQUES:
+- Retourne UNIQUEMENT du JSON valide
+- AUCUN texte avant/après
+- AUCUN backticks  
+- Une seule ligne compacte
 
-Retourne UNIQUEMENT ce JSON exact:
-{
-  "header": {
-    "title": "COMPTE-RENDU DE CONSULTATION MÉDICALE SPÉCIALISÉE",
-    "subtitle": "Médecine Interne - Diagnostic Expert Assisté par IA",
-    "date": "${new Date().toLocaleDateString("fr-FR")}",
-    "time": "${new Date().toLocaleTimeString("fr-FR")}",
-    "physician": {
-      "name": "Dr. TIBOK IA DOCTOR",
-      "title": "Praticien Hospitalier - Médecine Interne",
-      "qualification": "Expert en Diagnostic Assisté par Intelligence Artificielle",
-      "registration": "IA-MD-2024-EXPERT"
-    },
-    "establishment": {
-      "name": "Centre Médical TIBOK - Plateforme IA Expert",
-      "service": "Unité de Médecine Interne et Diagnostic Complexe"
-    },
-    "consultationType": "Consultation initiale expert / Avis spécialisé"
-  },
-  "patientIdentification": {
-    "lastName": "${patientData?.lastName || "N/A"}",
-    "firstName": "${patientData?.firstName || "N/A"}",
-    "age": "${patientData?.age || "N/A"} ans",
-    "gender": "${patientData?.gender || "N/A"}",
-    "weight": "${patientData?.weight || "N/A"} kg",
-    "height": "${patientData?.height || "N/A"} cm",
-    "bmi": "${calculateBMI(patientData)} kg/m²"
-  },
-  "anamnesis": {
-    "chiefComplaint": "${clinicalData?.chiefComplaint || "Motif de consultation à préciser"}",
-    "historyOfPresentIllness": "Histoire détaillée de la maladie actuelle avec chronologie des symptômes, facteurs déclenchants et évolution depuis début. Évaluation impact fonctionnel et recherche éléments orientant diagnostic.",
-    "pastMedicalHistory": "${(patientData?.medicalHistory || []).join(", ") || "Aucun antécédent médical significatif"}",
-    "allergies": "${(patientData?.allergies || []).join(", ") || "Aucune allergie médicamenteuse connue"}",
-    "currentMedications": "${patientData?.currentMedicationsText || "Aucun traitement en cours"}",
-    "familyHistory": "Antécédents familiaux à explorer selon orientation diagnostique",
-    "socialHistory": "Contexte socio-professionnel et facteurs environnementaux"
-  },
-  "physicalExamination": {
-    "vitalSigns": "Constantes vitales - T°: ${clinicalData?.vitalSigns?.temperature || "N/A"}°C, FC: ${clinicalData?.vitalSigns?.heartRate || "N/A"}bpm, TA: ${clinicalData?.vitalSigns?.bloodPressureSystolic || "N/A"}/${clinicalData?.vitalSigns?.bloodPressureDiastolic || "N/A"}mmHg, SpO2: ${clinicalData?.vitalSigns?.oxygenSaturation || "N/A"}%",
-    "generalAppearance": "État général clinique, aspect morphologique, comportement et coopération patient",
-    "painAssessment": "Douleur évaluée à ${clinicalData?.painScale || 0}/10 sur échelle numérique - caractéristiques, localisation, irradiations",
-    "systemicExamination": "Examen physique systématique par appareils avec recherche signes cliniques orientant diagnostic",
-    "functionalAssessment": "${clinicalData?.functionalStatus || "Statut fonctionnel et autonomie à évaluer"}"
-  },
-  "diagnosticAssessment": {
-    "clinicalImpression": "${diagnosis.primaryDiagnosis?.condition || "Impression diagnostique en cours d'établissement sur base analyse clinique"}",
-    "primaryDiagnosis": {
-      "condition": "${diagnosis.primaryDiagnosis?.condition || "Diagnostic principal à confirmer par investigations complémentaires"}",
-      "icdCode": "${diagnosis.primaryDiagnosis?.icd10 || "Code CIM-10 à déterminer"}",
-      "confidence": "${diagnosis.aiConfidence || 75}%",
-      "severity": "${diagnosis.primaryDiagnosis?.severity || "Sévérité à graduer précisément"}",
-      "prognosis": "Pronostic favorable sous réserve prise en charge adaptée"
-    },
-    "differentialDiagnosis": "Hypothèses diagnostiques alternatives à considérer et arguments pour exclusion",
-    "clinicalReasoning": "${diagnosis.clinicalReasoning?.semiology || "Raisonnement clinique basé sur analyse sémiologique des symptômes et signes physiques"}",
-    "riskFactors": ${JSON.stringify(diagnosis.clinicalReasoning?.riskFactors || ["Facteurs de risque à identifier"])},
-    "prognosticFactors": "Éléments influençant évolution et pronostic à surveiller"
-  },
-  "investigationsPlan": {
-    "laboratoryTests": "Examens biologiques orientés selon hypothèses diagnostiques avec justification médicale précise",
-    "imagingStudies": "Imagerie diagnostique adaptée au tableau clinique et disponibilité technique",
-    "specializedTests": "Explorations fonctionnelles spécialisées selon orientation diagnostique",
-    "urgentInvestigations": "Examens urgents ou semi-urgents selon degré de priorité clinique",
-    "followUpTesting": "Surveillance biologique et imagerie programmée selon évolution"
-  },
-  "therapeuticPlan": {
-    "immediateManagement": "Prise en charge immédiate selon urgence et sévérité tableau clinique",
-    "pharmacotherapy": "Thérapeutique médicamenteuse personnalisée avec justification choix et posologie",
-    "nonPharmacological": "Mesures non médicamenteuses complémentaires et hygiéno-diététiques",
-    "patientEducation": "Information patient sur pathologie, traitement et surveillance",
-    "preventiveMeasures": "Mesures préventives spécifiques selon facteurs de risque identifiés"
-  },
-  "followUpPlan": {
-    "nextAppointment": "Prochaine consultation programmée dans 7-15 jours selon évolution clinique",
-    "urgentReassessment": "Critères nécessitant réévaluation médicale urgente ou contact téléphonique",
-    "longTermMonitoring": "Surveillance à long terme et plan de soins chroniques si applicable",
-    "specialistReferrals": "Avis spécialisés programmés selon orientation diagnostique",
-    "emergencyInstructions": "Conduite à tenir en urgence et coordonnées contact"
-  },
-  "clinicalQualityMetrics": {
-    "diagnosticConfidence": "${diagnosis.aiConfidence || 75}%",
-    "evidenceLevel": "${diagnosis.evidenceLevel || "Grade B"}",
-    "safetyScore": "95% - Haut niveau sécurité patient",
-    "comprehensivenessScore": "90% - Évaluation globale et multidimensionnelle",
-    "guidelineCompliance": "Respect recommandations bonnes pratiques médicales actuelles"
-  },
-  "metadata": {
-    "reportInformation": {
-      "reportId": "CR-EXPERT-${Date.now()}",
-      "generationDate": "${new Date().toISOString()}",
-      "reportVersion": "2.0-EXPERT",
-      "generatedBy": "TIBOK IA DOCTOR Expert System v2.0"
-    },
-    "technicalData": {
-      "aiModel": "GPT-4O Expert Medical",
-      "processingTime": "Analyse experte approfondie complétée",
-      "validationLevel": "Expert medical validation automatisée",
-      "dataQuality": "Score qualité données évalué et validé"
-    }
-  }
-}
+Retourne ce JSON exact (complète les valeurs):
+{"header":{"title":"COMPTE-RENDU DE CONSULTATION MÉDICALE SPÉCIALISÉE","date":"${new Date().toLocaleDateString("fr-FR")}","patient":"${patientData?.firstName} ${patientData?.lastName}","physician":{"name":"Dr. TIBOK IA DOCTOR","title":"Praticien Expert"}},"patientIdentification":{"lastName":"${patientData?.lastName || "N/A"}","firstName":"${patientData?.firstName || "N/A"}","age":"${patientData?.age || "N/A"} ans","gender":"${patientData?.gender || "N/A"}"},"anamnesis":{"chiefComplaint":"${clinicalData?.chiefComplaint || "Motif à préciser"}","symptoms":"${(clinicalData?.symptoms || []).join(", ") || "Aucun symptôme spécifique"}","medicalHistory":"${(patientData?.medicalHistory || []).join(", ") || "Aucun antécédent"}","allergies":"${(patientData?.allergies || []).join(", ") || "Aucune allergie connue"}"},"physicalExamination":{"vitalSigns":"T°${clinicalData?.vitalSigns?.temperature || "N/A"}°C, FC ${clinicalData?.vitalSigns?.heartRate || "N/A"}bpm, TA ${clinicalData?.vitalSigns?.bloodPressureSystolic || "N/A"}/${clinicalData?.vitalSigns?.bloodPressureDiastolic || "N/A"}mmHg","painScale":"${clinicalData?.painScale || 0}/10","generalCondition":"${clinicalData?.generalCondition || "À évaluer"}"},"diagnosticAssessment":{"primaryDiagnosis":"${diagnosis.primaryDiagnosis?.condition || "Diagnostic en cours d'établissement"}","confidence":"${diagnosis.aiConfidence || 70}%","severity":"${diagnosis.primaryDiagnosis?.severity || "À évaluer"}"},"treatmentPlan":{"immediateManagement":"Traitement symptomatique adapté","followUp":"Réévaluation dans 7-15 jours","emergencyInstructions":"Consulter en urgence si aggravation"},"conclusion":"Prise en charge adaptée selon tableau clinique","metadata":{"reportId":"CR-${Date.now()}","generatedAt":"${new Date().toISOString()}","aiModel":"Expert Core System"}}
 `
 
     const result = await generateText({
       model: openai("gpt-4o"),
       prompt: reportPrompt,
-      temperature: 0.1,
-      maxTokens: 6000,
+      temperature: 0.01, // Très très faible pour cohérence maximale
+      maxTokens: 4000,
     })
 
     const reportData = parseJSONSafely(result.text)
@@ -777,7 +649,7 @@ Retourne UNIQUEMENT ce JSON exact:
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
- * PARSING JSON SÉCURISÉ AVEC NETTOYAGE AVANCÉ
+ * PARSING JSON ULTRA-ROBUSTE AVEC CORRECTION AUTOMATIQUE
  */
 function parseJSONSafely(text: string): any {
   try {
@@ -791,29 +663,126 @@ function parseJSONSafely(text: string): any {
     // Enlever les backticks markdown
     cleanText = cleanText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
     
-    // Enlever les préfixes textuels
-    cleanText = cleanText.replace(/^.*?(?=\{)/s, '').replace(/\}.*$/s, '}')
-    
-    // Trouver le JSON valide
+    // Enlever les préfixes textuels avant {
     const startIndex = cleanText.indexOf('{')
-    const endIndex = cleanText.lastIndexOf('}')
+    if (startIndex > 0) {
+      cleanText = cleanText.substring(startIndex)
+    }
     
-    if (startIndex >= 0 && endIndex > startIndex) {
-      cleanText = cleanText.substring(startIndex, endIndex + 1)
+    // Trouver la fin du JSON de manière plus intelligente
+    let braceCount = 0
+    let endIndex = -1
+    
+    for (let i = 0; i < cleanText.length; i++) {
+      if (cleanText[i] === '{') {
+        braceCount++
+      } else if (cleanText[i] === '}') {
+        braceCount--
+        if (braceCount === 0) {
+          endIndex = i
+          break
+        }
+      }
+    }
+    
+    if (endIndex > 0) {
+      cleanText = cleanText.substring(0, endIndex + 1)
+    }
+    
+    // Tentative de parsing direct
+    try {
       const parsed = JSON.parse(cleanText)
-      
-      // Vérifier que c'est un objet valide non vide
       if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
         console.log("✅ JSON parsé avec succès, clés:", Object.keys(parsed))
         return parsed
       }
+    } catch (firstError) {
+      console.warn("⚠️ Premier parsing échoué, tentative de correction...")
+      
+      // Tentatives de correction automatique
+      const correctedAttempts = [
+        // Ajouter } manquant à la fin
+        cleanText + '}',
+        // Enlever la dernière virgule avant }
+        cleanText.replace(/,(\s*})$/g, '$1'),
+        // Corriger les guillemets doubles dans les valeurs
+        cleanText.replace(/([^\\])"/g, '$1\\"'),
+        // Enlever les caractères de contrôle
+        cleanText.replace(/[\u0000-\u001F\u007F-\u009F]/g, ''),
+        // Essayer d'extraire juste le premier objet
+        extractFirstValidJSON(cleanText)
+      ]
+      
+      for (const attempt of correctedAttempts) {
+        if (attempt) {
+          try {
+            const parsed = JSON.parse(attempt)
+            if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+              console.log("✅ JSON corrigé et parsé avec succès")
+              return parsed
+            }
+          } catch (correctionError) {
+            // Continue avec la prochaine tentative
+          }
+        }
+      }
+      
+      throw firstError
     }
     
     throw new Error("JSON invalide ou vide")
   } catch (error) {
-    console.warn("⚠️ Erreur parsing JSON:", error)
-    console.warn("⚠️ Texte problématique:", text?.substring(0, 200))
+    console.warn("⚠️ Erreur parsing JSON finale:", error.message)
+    console.warn("⚠️ Texte problématique:", text?.substring(0, 300))
     return {}
+  }
+}
+
+/**
+ * EXTRACTION DU PREMIER JSON VALIDE DANS UN TEXTE
+ */
+function extractFirstValidJSON(text: string): string | null {
+  try {
+    const jsonStart = text.indexOf('{')
+    if (jsonStart === -1) return null
+    
+    let braceCount = 0
+    let inString = false
+    let escaped = false
+    
+    for (let i = jsonStart; i < text.length; i++) {
+      const char = text[i]
+      
+      if (escaped) {
+        escaped = false
+        continue
+      }
+      
+      if (char === '\\') {
+        escaped = true
+        continue
+      }
+      
+      if (char === '"') {
+        inString = !inString
+        continue
+      }
+      
+      if (!inString) {
+        if (char === '{') {
+          braceCount++
+        } else if (char === '}') {
+          braceCount--
+          if (braceCount === 0) {
+            return text.substring(jsonStart, i + 1)
+          }
+        }
+      }
+    }
+    
+    return null
+  } catch {
+    return null
   }
 }
 
