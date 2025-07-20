@@ -44,6 +44,9 @@ export async function POST(request: NextRequest) {
       workflow[0].status = "completed"
       workflow[0].result = diagnosticResult
       workflow[0].confidence = extractConfidenceFromDiagnosis(diagnosticResult)
+      
+      console.log("📊 Debug diagnostic result type:", typeof diagnosticResult)
+      console.log("📊 Debug diagnostic result keys:", Object.keys(diagnosticResult || {}))
 
       // ═══════════════════════════════════════════════════════════════
       // ÉTAPE 2: RECHERCHE EVIDENCE-BASED MEDICINE
@@ -76,6 +79,9 @@ export async function POST(request: NextRequest) {
       workflow[2].status = "completed"
       workflow[2].result = examensResult
       workflow[2].examensRecommended = calculateTotalExaminations(examensResult)
+      
+      console.log("📊 Debug examens result type:", typeof examensResult)
+      console.log("📊 Debug examens result keys:", Object.keys(examensResult || {}))
 
       // ═══════════════════════════════════════════════════════════════
       // ÉTAPE 4: PRESCRIPTION THÉRAPEUTIQUE EXPERT SÉCURISÉE
@@ -92,6 +98,9 @@ export async function POST(request: NextRequest) {
       workflow[3].status = "completed"
       workflow[3].result = prescriptionResult
       workflow[3].medicationsVerified = calculateTotalMedications(prescriptionResult)
+      
+      console.log("📊 Debug prescription result type:", typeof prescriptionResult)
+      console.log("📊 Debug prescription result keys:", Object.keys(prescriptionResult || {}))
 
       // ═══════════════════════════════════════════════════════════════
       // ÉTAPE 5: RAPPORT DE CONSULTATION EXPERT COMPLET
@@ -120,13 +129,13 @@ export async function POST(request: NextRequest) {
       workflow[4].reportQuality = calculateReportQuality(reportResult)
 
       // ═══════════════════════════════════════════════════════════════
-      // ASSEMBLAGE DU RAPPORT FINAL EXPERT
+      // ASSEMBLAGE DU RAPPORT FINAL EXPERT (PARSING JSON CORRECT)
       // ═══════════════════════════════════════════════════════════════
       const expertFinalReport = {
-        diagnosis: extractTextSafely(diagnosticResult),
-        examens: extractTextSafely(examensResult),
-        prescription: extractTextSafely(prescriptionResult),
-        consultationReport: extractTextSafely(reportResult),
+        diagnosis: extractDataSafely(diagnosticResult),
+        examens: extractDataSafely(examensResult),
+        prescription: extractDataSafely(prescriptionResult),
+        consultationReport: extractDataSafely(reportResult),
         pubmedEvidence: pubmedResult,
         fdaVerification: prescriptionResult.prescription?.fdaValidation || null,
         qualityMetrics: {
@@ -286,6 +295,9 @@ Retourne UNIQUEMENT ce JSON exact (sans backticks, sans texte avant/après):
     })
 
     console.log("✅ Diagnostic expert IA généré avec succès")
+    console.log("📊 Debug - result type:", typeof result)
+    console.log("📊 Debug - result keys:", Object.keys(result || {}))
+    console.log("📊 Debug - result.text preview:", result?.text?.substring(0, 100))
     return result
 
   } catch (error) {
@@ -430,6 +442,8 @@ Retourne UNIQUEMENT ce JSON exact:
     const validatedExamens = validateExamensSafety(examensData, patientData)
 
     console.log("✅ Plan examens expert généré avec succès")
+    console.log("📊 Debug - examensData type:", typeof examensData)
+    console.log("📊 Debug - examensData keys:", Object.keys(examensData || {}))
     
     return {
       success: true,
@@ -580,6 +594,8 @@ Retourne UNIQUEMENT ce JSON exact:
     const validatedPrescription = await validatePrescriptionSafety(prescriptionData, patientData)
 
     console.log("✅ Prescription experte générée avec validation sécuritaire")
+    console.log("📊 Debug - prescriptionData type:", typeof prescriptionData)
+    console.log("📊 Debug - prescriptionData keys:", Object.keys(prescriptionData || {}))
     
     return {
       success: true,
@@ -766,7 +782,8 @@ Retourne UNIQUEMENT ce JSON exact:
 function parseJSONSafely(text: string): any {
   try {
     if (!text || typeof text !== 'string') {
-      throw new Error("Texte invalide pour parsing JSON")
+      console.warn("⚠️ Texte invalide pour parsing JSON:", typeof text)
+      return {}
     }
 
     let cleanText = text.trim()
@@ -783,12 +800,19 @@ function parseJSONSafely(text: string): any {
     
     if (startIndex >= 0 && endIndex > startIndex) {
       cleanText = cleanText.substring(startIndex, endIndex + 1)
-      return JSON.parse(cleanText)
-    } else {
-      throw new Error("Pas de JSON valide trouvé dans le texte")
+      const parsed = JSON.parse(cleanText)
+      
+      // Vérifier que c'est un objet valide non vide
+      if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+        console.log("✅ JSON parsé avec succès, clés:", Object.keys(parsed))
+        return parsed
+      }
     }
+    
+    throw new Error("JSON invalide ou vide")
   } catch (error) {
-    console.warn("⚠️ Impossible de parser JSON:", error)
+    console.warn("⚠️ Erreur parsing JSON:", error)
+    console.warn("⚠️ Texte problématique:", text?.substring(0, 200))
     return {}
   }
 }
@@ -996,8 +1020,18 @@ function calculatePrescriptionComplexity(patientData: any): number {
 
 function extractConfidenceFromDiagnosis(diagnosticResult: any): number {
   try {
-    const diagnosis = parseJSONSafely(diagnosticResult.text || "{}")
-    return diagnosis.aiConfidence || diagnosis.primaryDiagnosis?.probability || 75
+    // Si c'est déjà un objet avec confidence directe
+    if (diagnosticResult && typeof diagnosticResult === 'object' && diagnosticResult.aiConfidence) {
+      return diagnosticResult.aiConfidence
+    }
+    
+    // Si c'est un résultat d'IA avec .text
+    if (diagnosticResult && diagnosticResult.text) {
+      const diagnosis = parseJSONSafely(diagnosticResult.text)
+      return diagnosis.aiConfidence || diagnosis.primaryDiagnosis?.probability || 75
+    }
+    
+    return 75
   } catch {
     return 75
   }
@@ -1005,7 +1039,17 @@ function extractConfidenceFromDiagnosis(diagnosticResult: any): number {
 
 function calculateTotalExaminations(examensResult: any): number {
   try {
-    return examensResult.examens?.metadata?.prescriptionMetrics?.totalExaminations || 3
+    // Si c'est un résultat structuré de nos fonctions core
+    if (examensResult && examensResult.examens && examensResult.examens.metadata) {
+      return examensResult.examens.metadata.prescriptionMetrics?.totalExaminations || 3
+    }
+    
+    // Si c'est un objet direct
+    if (examensResult && examensResult.metadata && examensResult.metadata.prescriptionMetrics) {
+      return examensResult.metadata.prescriptionMetrics.totalExaminations || 3
+    }
+    
+    return 3
   } catch {
     return 3
   }
@@ -1013,7 +1057,17 @@ function calculateTotalExaminations(examensResult: any): number {
 
 function calculateTotalMedications(prescriptionResult: any): number {
   try {
-    return prescriptionResult.prescription?.metadata?.prescriptionMetrics?.totalMedications || 1
+    // Si c'est un résultat structuré de nos fonctions core
+    if (prescriptionResult && prescriptionResult.prescription && prescriptionResult.prescription.metadata) {
+      return prescriptionResult.prescription.metadata.prescriptionMetrics?.totalMedications || 1
+    }
+    
+    // Si c'est un objet direct
+    if (prescriptionResult && prescriptionResult.metadata && prescriptionResult.metadata.prescriptionMetrics) {
+      return prescriptionResult.metadata.prescriptionMetrics.totalMedications || 1
+    }
+    
+    return 1
   } catch {
     return 1
   }
@@ -1049,10 +1103,17 @@ function calculateOverallConfidence(workflow: any[]): number {
 
 function calculateSafetyScore(prescriptionResult: any, patientData: any): number {
   try {
-    const baseSafety = prescriptionResult.prescription?.metadata?.prescriptionMetrics?.safetyScore || 90
+    let baseSafety = 90
+    
+    // Essayer d'extraire le score de sécurité des différentes structures possibles
+    if (prescriptionResult && prescriptionResult.prescription && prescriptionResult.prescription.metadata) {
+      baseSafety = prescriptionResult.prescription.metadata.prescriptionMetrics?.safetyScore || 90
+    } else if (prescriptionResult && prescriptionResult.metadata && prescriptionResult.metadata.prescriptionMetrics) {
+      baseSafety = prescriptionResult.metadata.prescriptionMetrics.safetyScore || 90
+    }
     
     // Réduction si allergies détectées
-    if (patientData.allergies?.length > 0) {
+    if (patientData && patientData.allergies && patientData.allergies.length > 0) {
       return Math.max(baseSafety - 5, 70)
     }
     
@@ -1567,6 +1628,36 @@ async function searchExpertPubMedEvidenceSafe(diagnosis: any) {
         totalResults: 1
       }
     }
+  }
+}
+
+/**
+ * EXTRACTION DE DONNÉES AVEC PARSING JSON CORRECT
+ * Retourne l'objet JSON parsé au lieu du texte brut
+ */
+function extractDataSafely(data: any): any {
+  try {
+    // Si c'est déjà un objet (result des fonctions core)
+    if (data && typeof data === 'object' && !data.text) {
+      return data
+    }
+    
+    // Si c'est un résultat d'IA avec .text (diagnostic)
+    if (data && data.text) {
+      const parsed = parseJSONSafely(data.text)
+      return parsed && Object.keys(parsed).length > 0 ? parsed : data.text
+    }
+    
+    // Si c'est une string directe
+    if (typeof data === 'string') {
+      const parsed = parseJSONSafely(data)
+      return parsed && Object.keys(parsed).length > 0 ? parsed : data
+    }
+    
+    return data || "Données non disponibles"
+  } catch (error) {
+    console.warn("⚠️ Erreur extraction données:", error)
+    return data || "Erreur extraction données"
   }
 }
 
