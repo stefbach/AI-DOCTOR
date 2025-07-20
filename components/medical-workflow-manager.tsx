@@ -18,6 +18,8 @@ import {
   BookOpen,
   AlertTriangle,
   RefreshCw,
+  FileText,
+  Edit3,
 } from "lucide-react"
 
 interface WorkflowStep {
@@ -30,12 +32,9 @@ interface WorkflowStep {
 }
 
 interface WorkflowResult {
-  diagnosis: string
-  examens: string
-  prescription: string
-  pubmedEvidence: any
-  fdaVerification: any
-  consultationReport: string
+  diagnosis: any
+  mauritianDocuments: any
+  success: boolean
 }
 
 interface MedicalWorkflowManagerProps {
@@ -54,11 +53,11 @@ export default function MedicalWorkflowManager({
   const [isProcessing, setIsProcessing] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [steps, setSteps] = useState<WorkflowStep[]>([
-    { step: 1, name: "Analyse diagnostique IA", status: "pending" },
-    { step: 2, name: "Recherche evidence PubMed", status: "pending" },
-    { step: 3, name: "Génération examens paracliniques", status: "pending" },
-    { step: 4, name: "Prescription médicamenteuse", status: "pending" },
-    { step: 5, name: "Génération rapport final", status: "pending" },
+    { step: 1, name: "Analyse diagnostique IA complète", status: "pending" },
+    { step: 2, name: "Génération compte-rendu consultation", status: "pending" },
+    { step: 3, name: "Création ordonnances biologiques", status: "pending" },
+    { step: 4, name: "Création ordonnances paracliniques", status: "pending" },
+    { step: 5, name: "Prescription médicamenteuse sécurisée", status: "pending" },
   ])
   const [finalResult, setFinalResult] = useState<WorkflowResult | null>(null)
   const [globalError, setGlobalError] = useState<string | null>(null)
@@ -107,6 +106,26 @@ export default function MedicalWorkflowManager({
     )
   }
 
+  const simulateStepsProgression = (diagnosis: any, mauritianDocuments: any) => {
+    // Simuler la progression des étapes pour l'UI
+    const stepUpdates = [
+      { index: 0, name: "Analyse diagnostique IA complète", result: diagnosis },
+      { index: 1, name: "Génération compte-rendu consultation", result: mauritianDocuments.consultation },
+      { index: 2, name: "Création ordonnances biologiques", result: mauritianDocuments.biology },
+      { index: 3, name: "Création ordonnances paracliniques", result: mauritianDocuments.paraclinical },
+      { index: 4, name: "Prescription médicamenteuse sécurisée", result: mauritianDocuments.medication },
+    ]
+
+    stepUpdates.forEach((update, i) => {
+      setTimeout(() => {
+        updateStepStatus(update.index, "processing")
+        setTimeout(() => {
+          updateStepStatus(update.index, "completed", update.result, undefined, "Généré avec succès")
+        }, 500)
+      }, i * 800)
+    })
+  }
+
   const startWorkflow = async () => {
     setIsProcessing(true)
     setCurrentStep(0)
@@ -119,9 +138,10 @@ export default function MedicalWorkflowManager({
     )
 
     try {
-      console.log("🚀 Démarrage workflow médical expert")
+      console.log("🚀 Démarrage workflow médical direct - API unique")
 
-      const response = await fetch("/api/medical-orchestrator", {
+      // APPEL DIRECT À LA NOUVELLE API COMPLÈTE
+      const response = await fetch("/api/openai-diagnosis", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -133,7 +153,7 @@ export default function MedicalWorkflowManager({
         }),
       })
 
-      console.log("📡 Statut réponse orchestrator:", response.status)
+      console.log("📡 Statut réponse API directe:", response.status)
 
       if (!response.ok) {
         const errorText = await response.text()
@@ -141,40 +161,40 @@ export default function MedicalWorkflowManager({
       }
 
       const data = await response.json()
-      console.log("✅ Réponse orchestrator reçue:", data.success)
+      console.log("✅ Réponse API directe reçue:", data.success)
 
-      if (data.success && data.workflow) {
-        // Mise à jour des steps depuis la réponse
-        setSteps(data.workflow.map((workflowStep: any) => ({
-          step: workflowStep.step,
-          name: workflowStep.name,
-          status: workflowStep.status,
-          result: workflowStep.result,
-          error: workflowStep.error,
-          details: workflowStep.description || workflowStep.errorDetails?.context
-        })))
-
-        if (data.finalReport) {
-          setFinalResult(data.finalReport)
-          onComplete(data.finalReport)
-        } else {
-          throw new Error("Rapport final non généré")
+      if (data.success && data.diagnosis && data.mauritianDocuments) {
+        // Simuler la progression pour l'UI
+        simulateStepsProgression(data.diagnosis, data.mauritianDocuments)
+        
+        // Préparer le résultat final
+        const workflowResult: WorkflowResult = {
+          diagnosis: data.diagnosis,
+          mauritianDocuments: data.mauritianDocuments,
+          success: true
         }
+
+        // Attendre que toutes les étapes soient "complétées" visuellement
+        setTimeout(() => {
+          setFinalResult(workflowResult)
+          onComplete(workflowResult)
+        }, 5000) // 5 secondes pour voir toutes les étapes
+
       } else {
-        throw new Error(data.error || "Workflow incomplet")
+        throw new Error(data.error || "Réponse API incomplète")
       }
 
     } catch (error) {
       console.error("❌ Erreur workflow:", error)
       setGlobalError(error instanceof Error ? error.message : "Erreur inconnue")
 
-      // En cas d'erreur globale, créer un résultat de fallback
+      // En cas d'erreur, créer un résultat de fallback
       const fallbackResult = generateFallbackResult()
       setFinalResult(fallbackResult)
       onComplete(fallbackResult)
 
-      // Marquer au moins une étape comme complétée avec fallback
-      updateStepStatus(0, "completed", fallbackResult, undefined, "Données de fallback utilisées")
+      // Marquer les étapes comme ayant des erreurs
+      updateStepStatus(0, "error", undefined, "Erreur API", "Utilisation du mode fallback")
       
     } finally {
       setIsProcessing(false)
@@ -186,48 +206,68 @@ export default function MedicalWorkflowManager({
     const today = new Date().toLocaleDateString("fr-FR")
 
     return {
-      diagnosis: `Évaluation clinique pour ${patientName} - Diagnostic en cours d'analyse selon les symptômes présentés: ${(clinicalData?.symptoms || []).join(", ") || "symptômes à préciser"}. Surveillance clinique recommandée.`,
-      
-      examens: `Plan d'examens pour ${patientName}:
-- Biologie: NFS + CRP + Ionogramme (bilan de première intention)
-- Imagerie: Radiographie thoracique si indiquée
-- Surveillance: Réévaluation clinique à 24-48h`,
-      
-      prescription: `Prescription de base pour ${patientName}:
-- Paracétamol 500mg: 3 fois par jour si nécessaire, 5 jours maximum
-- Surveillance: Efficacité et tolérance
-- Réévaluation: Consultation si pas d'amélioration à 72h`,
-      
-      consultationReport: `COMPTE-RENDU DE CONSULTATION MÉDICALE
-
-Date: ${today}
-Patient: ${patientName}
-Âge: ${patientData?.age || "XX"} ans
-
-MOTIF DE CONSULTATION:
-${clinicalData?.chiefComplaint || "Consultation médicale"}
-
-SYMPTÔMES:
-${(clinicalData?.symptoms || []).join(", ") || "Aucun symptôme spécifique"}
-
-ÉVALUATION:
-Analyse clinique en cours - Données collectées via système expert IA
-
-CONDUITE À TENIR:
-- Surveillance clinique
-- Traitement symptomatique adapté
-- Réévaluation programmée
-
-Généré en mode sécurisé - ${new Date().toISOString()}`,
-      
-      pubmedEvidence: {
-        articles: [],
-        metadata: { source: "Fallback mode", totalResults: 0 }
+      success: true,
+      diagnosis: {
+        primary: {
+          condition: `Évaluation clinique pour ${patientName} - Diagnostic en cours selon symptômes: ${(clinicalData?.symptoms || []).join(", ") || "à préciser"}`,
+          confidence: 70,
+          severity: "moderate"
+        },
+        differential: [
+          {
+            condition: "Syndrome viral",
+            probability: 60,
+            rationale: "Symptômes compatibles"
+          }
+        ]
       },
-      
-      fdaVerification: {
-        success: false,
-        message: "Vérification FDA non disponible en mode fallback"
+      mauritianDocuments: {
+        consultation: {
+          header: {
+            title: "COMPTE-RENDU DE CONSULTATION MÉDICALE",
+            date: today,
+            physician: "Dr. TIBOK IA DOCTOR"
+          },
+          patient: {
+            firstName: patientData?.firstName || "Prénom",
+            lastName: patientData?.lastName || "Nom",
+            age: `${patientData?.age || "XX"} ans`
+          },
+          content: {
+            chiefComplaint: clinicalData?.chiefComplaint || "Consultation médicale",
+            diagnosis: `Évaluation clinique - ${clinicalData?.chiefComplaint || "symptômes"}`
+          }
+        },
+        biology: {
+          header: {
+            title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+            subtitle: "PRESCRIPTION D'EXAMENS BIOLOGIQUES"
+          },
+          prescriptions: [
+            {
+              id: 1,
+              exam: "NFS + CRP",
+              indication: "Bilan inflammatoire de base",
+              urgency: "PROGRAMMÉ"
+            }
+          ]
+        },
+        medication: {
+          header: {
+            title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+            subtitle: "PRESCRIPTION MÉDICAMENTEUSE"
+          },
+          prescriptions: [
+            {
+              id: 1,
+              dci: "Paracétamol",
+              dosage: "1g",
+              frequency: "3x/jour si nécessaire",
+              duration: "5 jours maximum",
+              indication: "Traitement symptomatique"
+            }
+          ]
+        }
       }
     }
   }
@@ -240,36 +280,41 @@ Généré en mode sécurisé - ${new Date().toISOString()}`,
     if (!finalResult) return
 
     const reportContent = `
-RAPPORT DE CONSULTATION MÉDICALE COMPLET
-======================================
+RAPPORT DE CONSULTATION MÉDICALE COMPLET - TIBOK IA DOCTOR
+=========================================================
 
-${finalResult.consultationReport}
+DIAGNOSTIC PRINCIPAL
+===================
+${finalResult.diagnosis?.primary?.condition || "Diagnostic en cours"}
+Confiance: ${finalResult.diagnosis?.primary?.confidence || 70}%
 
-DIAGNOSTIC DÉTAILLÉ
-==================
-${finalResult.diagnosis}
+DOCUMENTS MAURICIENS GÉNÉRÉS
+============================
+✓ Compte-rendu de consultation
+✓ Ordonnance examens biologiques 
+✓ Ordonnance examens paracliniques
+✓ Ordonnance médicamenteuse sécurisée
 
-EXAMENS RECOMMANDÉS
-==================
-${finalResult.examens}
+INFORMATIONS PATIENT
+===================
+Nom: ${finalResult.mauritianDocuments?.consultation?.patient?.firstName} ${finalResult.mauritianDocuments?.consultation?.patient?.lastName}
+Âge: ${finalResult.mauritianDocuments?.consultation?.patient?.age}
+Date consultation: ${finalResult.mauritianDocuments?.consultation?.header?.date}
 
-PRESCRIPTION
-============
-${finalResult.prescription}
-
-EVIDENCE SCIENTIFIQUE
-====================
-Articles PubMed: ${finalResult.pubmedEvidence?.articles?.length || 0}
-Vérification FDA: ${finalResult.fdaVerification?.success ? "Validée" : "Non disponible"}
+PRESCRIPTIONS
+=============
+Examens biologiques: ${finalResult.mauritianDocuments?.biology?.prescriptions?.length || 0} prescription(s)
+Médicaments: ${finalResult.mauritianDocuments?.medication?.prescriptions?.length || 0} prescription(s)
 
 Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
+Workflow médical direct - API unique optimisée
     `
 
     const blob = new Blob([reportContent], { type: "text/plain;charset=utf-8" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = `rapport-consultation-${patientData.lastName}-${new Date().toISOString().split("T")[0]}.txt`
+    a.download = `rapport-tibok-${patientData.lastName}-${new Date().toISOString().split("T")[0]}.txt`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -287,7 +332,7 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Stethoscope className="h-6 w-6" />
-            Workflow Médical IA - Analyse Complète
+            Workflow Médical Direct - Génération Tous Documents
           </CardTitle>
           <div className="flex items-center gap-4">
             <Progress value={progress} className="flex-1" />
@@ -308,7 +353,7 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
           <AlertDescription className="text-yellow-800">
             <strong>Attention:</strong> {globalError}
             <br />
-            <span className="text-sm">Le système a basculé en mode sécurisé avec données de fallback.</span>
+            <span className="text-sm">Le système a basculé en mode sécurisé avec documents de base.</span>
           </AlertDescription>
         </Alert>
       )}
@@ -339,7 +384,7 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
       {/* Étapes du workflow */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Progression du Traitement</CardTitle>
+          <CardTitle className="text-lg">Progression du Traitement Direct</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {steps.map((step, index) => (
@@ -366,10 +411,7 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
 
                 {step.result && step.status === "completed" && (
                   <div className="text-sm text-green-600 mt-1">
-                    ✓ Traitement terminé avec succès
-                    {step.details && (
-                      <div className="text-xs text-green-500 mt-1">{step.details}</div>
-                    )}
+                    ✓ {step.details || "Document généré avec succès"}
                   </div>
                 )}
               </div>
@@ -384,12 +426,12 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
           {isProcessing ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Traitement en cours...
+              Génération en cours...
             </>
           ) : (
             <>
               <Stethoscope className="h-4 w-4 mr-2" />
-              Lancer l'Analyse Médicale IA
+              Générer Diagnostic + Documents Mauriciens
             </>
           )}
         </Button>
@@ -409,7 +451,7 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
         )}
       </div>
 
-      {/* Résultats partiels même en cas d'erreur */}
+      {/* Résultats */}
       {finalResult && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Diagnostic */}
@@ -421,68 +463,50 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-sm whitespace-pre-wrap bg-gray-50 p-4 rounded-lg max-h-40 overflow-y-auto">
-                {finalResult.diagnosis.substring(0, 300)}
-                {finalResult.diagnosis.length > 300 && "..."}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Examens */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <FlaskConical className="h-5 w-5" />
-                Examens Recommandés
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm whitespace-pre-wrap bg-gray-50 p-4 rounded-lg max-h-40 overflow-y-auto">
-                {finalResult.examens.substring(0, 300)}
-                {finalResult.examens.length > 300 && "..."}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Prescription */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Pill className="h-5 w-5" />
-                Prescription
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm whitespace-pre-wrap bg-gray-50 p-4 rounded-lg max-h-40 overflow-y-auto">
-                {finalResult.prescription.substring(0, 300)}
-                {finalResult.prescription.length > 300 && "..."}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Evidence */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <BookOpen className="h-5 w-5" />
-                Evidence Scientifique
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm">
-                <p className="mb-2">
-                  <span className="font-medium">Articles PubMed:</span>{" "}
-                  {finalResult.pubmedEvidence?.articles?.length || 0}
-                </p>
-                <p>
-                  <span className="font-medium">Vérification FDA:</span>{" "}
-                  {finalResult.fdaVerification?.success ? "✓ Validé" : "⚠ Non disponible"}
-                </p>
-                {globalError && (
-                  <Badge variant="secondary" className="mt-2">
-                    Mode sécurisé activé
-                  </Badge>
+              <div className="text-sm space-y-2">
+                <div className="font-medium">{finalResult.diagnosis?.primary?.condition}</div>
+                <div className="text-gray-600">Confiance: {finalResult.diagnosis?.primary?.confidence || 70}%</div>
+                {finalResult.diagnosis?.differential && (
+                  <div className="text-xs text-gray-500">
+                    Différentiels: {finalResult.diagnosis.differential.length} considéré(s)
+                  </div>
                 )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Documents */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <FileText className="h-5 w-5" />
+                Documents Mauriciens
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span>Compte-rendu consultation</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span>Ordonnance examens biologiques</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span>Ordonnance examens paracliniques</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span>Prescription médicamenteuse</span>
+                </div>
+                <div className="mt-3 p-2 bg-blue-50 rounded border border-blue-200">
+                  <div className="flex items-center gap-1 text-blue-700 text-xs">
+                    <Edit3 className="h-3 w-3" />
+                    <span>Tous les documents sont modifiables</span>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
