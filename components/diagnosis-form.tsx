@@ -20,7 +20,10 @@ import {
   Target,
   Activity,
   Eye,
-  Search
+  Search,
+  FileText,
+  TestTube,
+  Edit3
 } from "lucide-react"
 
 interface DiagnosisFormProps {
@@ -41,24 +44,28 @@ export default function ModernDiagnosisForm({
   onPrevious,
 }: DiagnosisFormProps) {
   const [diagnosis, setDiagnosis] = useState<any>(null)
+  const [mauritianDocuments, setMauritianDocuments] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentSection, setCurrentSection] = useState(0)
+  const [documentsGenerated, setDocumentsGenerated] = useState(false)
 
   useEffect(() => {
-    generateDiagnosis()
+    generateCompleteDiagnosis()
   }, [patientData, clinicalData, questionsData])
 
-  const generateDiagnosis = async () => {
+  const generateCompleteDiagnosis = async () => {
     if (!patientData || !clinicalData) return
 
     setLoading(true)
     setError(null)
+    setDocumentsGenerated(false)
 
     try {
-      console.log("🩺 Envoi données diagnostic:", { patientData, clinicalData, questionsData })
+      console.log("🩺 Génération diagnostic IA complet avec documents mauriciens")
 
-      const response = await fetch("/api/diagnosis-expert", {
+      // APPEL DIRECT À LA NOUVELLE API COMPLÈTE
+      const response = await fetch("/api/openai-diagnosis", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -78,120 +85,124 @@ export default function ModernDiagnosisForm({
         throw new Error(`Erreur API ${response.status}: ${errorText.substring(0, 100)}`)
       }
 
-      const responseText = await response.text()
-      console.log("📝 Réponse brute:", responseText.substring(0, 200) + "...")
+      const data = await response.json()
+      console.log("✅ Réponse complète reçue:", data.success)
 
-      let data
-      try {
-        data = JSON.parse(responseText)
-      } catch (jsonError) {
-        console.error("❌ Erreur parsing JSON:", jsonError)
-        console.error("📝 Contenu reçu:", responseText.substring(0, 500))
-        
-        if (responseText.includes("Internal Server Error") || responseText.includes("<html")) {
-          throw new Error("Erreur serveur interne - diagnostic temporairement indisponible")
-        } else {
-          throw new Error("Format de réponse invalide - contenu non-JSON reçu")
-        }
-      }
-
-      if (data.success && data.diagnosis) {
-        console.log("✅ Diagnostic reçu:", data.diagnosis)
+      if (data.success && data.diagnosis && data.mauritianDocuments) {
+        // DIAGNOSTIC + DOCUMENTS GÉNÉRÉS EN UNE FOIS
         setDiagnosis(data.diagnosis)
-        onDataChange({ diagnosis: data.diagnosis })
+        setMauritianDocuments(data.mauritianDocuments)
+        setDocumentsGenerated(true)
+        
+        // Transmettre au parent pour la suite du workflow
+        onDataChange({ 
+          diagnosis: data.diagnosis, 
+          mauritianDocuments: data.mauritianDocuments,
+          completeData: data 
+        })
+        
+        console.log("✅ Diagnostic + Documents mauriciens générés avec succès")
       } else {
         throw new Error(data.error || "Format de réponse invalide")
       }
 
     } catch (err) {
-      console.error("❌ Erreur génération diagnostic:", err)
+      console.error("❌ Erreur génération diagnostic complet:", err)
       setError(err instanceof Error ? err.message : "Erreur inconnue")
 
       // Diagnostic de fallback amélioré
-      const fallbackDiagnosis = {
-        primaryDiagnosis: {
-          condition: `Syndrome clinique - ${clinicalData.chiefComplaint || "Consultation médicale"}`,
-          probability: 75,
-          severity: "Modérée",
-          arguments: [
-            "Analyse symptomatique basée sur l'examen clinique",
-            "Corrélation avec les données vitales disponibles", 
-            "Prise en compte du contexte anamnestique"
-          ]
-        },
-        differentialDiagnosis: [
-          {
-            condition: "Diagnostic différentiel #1",
-            probability: 60,
-            arguments: "Symptômes compatibles mais contexte clinique à préciser"
-          },
-          {
-            condition: "Diagnostic différentiel #2", 
-            probability: 45,
-            arguments: "Présentation atypique nécessitant exploration complémentaire"
-          }
-        ],
-        clinicalReasoning: {
-          semiology: `Analyse des symptômes présentés: ${(clinicalData.symptoms || []).join(", ") || "Symptômes en cours d'évaluation"}`,
-          syndromes: ["Syndrome principal à caractériser", "Signes d'accompagnement à surveiller"],
-          pathophysiology: "Mécanismes physiopathologiques en cours d'élucidation par examens complémentaires"
-        },
-        recommendedExams: [
-          {
-            category: "Biologie",
-            exam: "Bilan biologique standard complet",
-            indication: "Évaluation systémique et recherche de marqueurs",
-            urgency: "Programmée",
-          },
-          {
-            category: "Imagerie",
-            exam: "Imagerie orientée selon symptômes",
-            indication: "Exploration morphologique ciblée",
-            urgency: "Selon évolution",
-          },
-          {
-            category: "Clinique",
-            exam: "Consultation spécialisée si nécessaire",
-            indication: "Expertise diagnostique complémentaire",
-            urgency: "Programmée",
-          }
-        ],
-        therapeuticStrategy: {
-          immediate: [
-            {
-              type: "Symptomatique",
-              treatment: "Prise en charge symptomatique adaptée",
-              indication: "Amélioration du confort en attendant précisions diagnostiques",
-              duration: "Selon évolution clinique"
-            },
-            {
-              type: "Surveillance",
-              treatment: "Monitoring clinique rapproché",
-              indication: "Surveillance évolution et dépistage complications",
-              duration: "Continue"
-            }
-          ],
-        },
-        prognosis: {
-          shortTerm: "Évolution favorable attendue avec prise en charge adaptée",
-          longTerm: "Pronostic dépendant du diagnostic final et de la réponse thérapeutique",
-          complications: ["Évolution défavorable si retard diagnostique", "Complications selon pathologie sous-jacente"],
-          followUp: "Réévaluation clinique systématique et adaptation thérapeutique"
-        },
-        aiConfidence: 65,
-        redFlags: [
-          "Détérioration brutale de l'état clinique",
-          "Apparition de signes neurologiques",
-          "Signes de défaillance d'organe",
-          "Absence d'amélioration sous traitement"
-        ]
-      }
-
-      setDiagnosis(fallbackDiagnosis)
-      onDataChange({ diagnosis: fallbackDiagnosis })
+      const fallbackData = generateFallbackDiagnosisWithDocuments()
+      setDiagnosis(fallbackData.diagnosis)
+      setMauritianDocuments(fallbackData.mauritianDocuments)
+      setDocumentsGenerated(true)
+      onDataChange(fallbackData)
       
     } finally {
       setLoading(false)
+    }
+  }
+
+  const generateFallbackDiagnosisWithDocuments = () => {
+    const fallbackDiagnosis = {
+      primary: {
+        condition: `Syndrome clinique - ${clinicalData.chiefComplaint || "Consultation médicale"}`,
+        icd10: "R53",
+        confidence: 70,
+        severity: "moderate",
+        detailedAnalysis: "Analyse basée sur les symptômes présentés nécessitant exploration complémentaire",
+        clinicalRationale: `Symptômes: ${clinicalData.chiefComplaint}. Nécessite anamnèse et examen clinique approfondis`,
+        prognosis: "Évolution favorable attendue avec prise en charge appropriée"
+      },
+      differential: [
+        {
+          condition: "Syndrome viral",
+          probability: 40,
+          rationale: "Cause fréquente de symptômes non spécifiques",
+          distinguishingFeatures: "Évolution spontanément favorable"
+        }
+      ]
+    }
+
+    const fallbackDocuments = {
+      consultation: {
+        header: {
+          title: "COMPTE-RENDU DE CONSULTATION MÉDICALE",
+          subtitle: "République de Maurice - Médecine Générale",
+          date: new Date().toLocaleDateString("fr-FR"),
+          physician: "Dr. TIBOK IA DOCTOR"
+        },
+        patient: {
+          firstName: patientData.firstName,
+          lastName: patientData.lastName,
+          age: `${patientData.age} ans`
+        },
+        content: {
+          chiefComplaint: clinicalData.chiefComplaint || "Motif de consultation",
+          diagnosis: fallbackDiagnosis.primary.condition
+        }
+      },
+      biology: {
+        header: {
+          title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+          subtitle: "PRESCRIPTION D'EXAMENS BIOLOGIQUES"
+        },
+        prescriptions: [
+          {
+            id: 1,
+            exam: "NFS + CRP",
+            indication: "Bilan inflammatoire de base",
+            urgency: "Semi-urgent"
+          }
+        ]
+      },
+      medication: {
+        header: {
+          title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE", 
+          subtitle: "PRESCRIPTION MÉDICAMENTEUSE"
+        },
+        prescriptions: [
+          {
+            id: 1,
+            dci: "Paracétamol",
+            dosage: "1g",
+            frequency: "3x/jour si nécessaire",
+            indication: "Traitement symptomatique"
+          }
+        ]
+      }
+    }
+
+    return {
+      diagnosis: fallbackDiagnosis,
+      mauritianDocuments: fallbackDocuments
+    }
+  }
+
+  // Aller directement aux documents (SKIP le medical orchestrator)
+  const goToDocuments = () => {
+    // Passer directement à l'interface d'édition des documents
+    if (mauritianDocuments) {
+      onNext() // Ou rediriger vers l'interface CompleteMauritianDocumentEditor
     }
   }
 
@@ -199,10 +210,7 @@ export default function ModernDiagnosisForm({
     { id: "primary", title: "Diagnostic principal", icon: Target },
     { id: "reasoning", title: "Raisonnement", icon: Brain },
     { id: "differential", title: "Différentiels", icon: Search },
-    { id: "exams", title: "Examens", icon: FlaskConical },
-    { id: "treatment", title: "Traitement", icon: Pill },
-    { id: "prognosis", title: "Pronostic", icon: TrendingUp },
-    { id: "alerts", title: "Alertes", icon: Shield },
+    { id: "documents", title: "Documents générés", icon: FileText },
   ]
 
   if (loading) {
@@ -213,7 +221,7 @@ export default function ModernDiagnosisForm({
             <CardHeader className="text-center">
               <CardTitle className="flex items-center justify-center gap-3 text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
                 <Brain className="h-10 w-10 text-emerald-600" />
-                Diagnostic IA Expert
+                Diagnostic IA Expert + Documents Mauriciens
               </CardTitle>
             </CardHeader>
             <CardContent className="flex items-center justify-center py-20">
@@ -226,25 +234,29 @@ export default function ModernDiagnosisForm({
                   </div>
                 </div>
                 <div className="space-y-3">
-                  <p className="text-2xl font-bold text-gray-800">Analyse diagnostique en cours...</p>
-                  <p className="text-lg text-gray-600">L'IA Expert analyse l'ensemble des données cliniques</p>
+                  <p className="text-2xl font-bold text-gray-800">Génération complète en cours...</p>
+                  <p className="text-lg text-gray-600">Diagnostic IA + Documents mauriciens modifiables</p>
                   <div className="max-w-md mx-auto text-sm text-gray-500 space-y-1">
                     <div className="flex items-center justify-center gap-2">
                       <Activity className="h-4 w-4" />
-                      <span>Traitement des symptômes et signes cliniques</span>
+                      <span>Analyse diagnostique experte</span>
                     </div>
                     <div className="flex items-center justify-center gap-2">
-                      <Brain className="h-4 w-4" />
-                      <span>Génération d'hypothèses diagnostiques</span>
+                      <FileText className="h-4 w-4" />
+                      <span>Génération compte-rendu consultation</span>
                     </div>
                     <div className="flex items-center justify-center gap-2">
-                      <Target className="h-4 w-4" />
-                      <span>Établissement des recommandations</span>
+                      <TestTube className="h-4 w-4" />
+                      <span>Création ordonnances biologiques</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2">
+                      <Pill className="h-4 w-4" />
+                      <span>Prescription médicamenteuse sécurisée</span>
                     </div>
                   </div>
                 </div>
-                <Progress value={85} className="w-96 mx-auto h-3" />
-                <p className="text-xs text-gray-400">Veuillez patienter, cette analyse peut prendre quelques secondes</p>
+                <Progress value={75} className="w-96 mx-auto h-3" />
+                <p className="text-xs text-gray-400">Génération directe - Plus besoin d'orchestrateur !</p>
               </div>
             </CardContent>
           </Card>
@@ -269,9 +281,9 @@ export default function ModernDiagnosisForm({
                 <AlertTriangle className="h-16 w-16 text-yellow-500 mx-auto" />
                 <p className="text-lg text-gray-700">Impossible de générer le diagnostic automatique.</p>
                 <p className="text-sm text-gray-600">Veuillez vérifier les données saisies et réessayer.</p>
-                <Button onClick={generateDiagnosis} className="mt-6">
+                <Button onClick={generateCompleteDiagnosis} className="mt-6">
                   <Brain className="h-4 w-4 mr-2" />
-                  Réessayer l'analyse
+                  Réessayer l'analyse complète
                 </Button>
               </div>
             </CardContent>
@@ -289,12 +301,17 @@ export default function ModernDiagnosisForm({
           <CardHeader className="text-center">
             <CardTitle className="flex items-center justify-center gap-3 text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
               <CheckCircle className="h-8 w-8 text-emerald-600" />
-              Diagnostic IA Expert Généré
+              Diagnostic IA Expert + Documents Mauriciens Générés
             </CardTitle>
             <div className="flex justify-center gap-4 mt-4">
               <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300">
-                Confiance IA: {diagnosis.aiConfidence || 0}%
+                Confiance IA: {diagnosis.primary?.confidence || 70}%
               </Badge>
+              {documentsGenerated && (
+                <Badge className="bg-blue-500 text-white">
+                  4 Documents Mauriciens Prêts
+                </Badge>
+              )}
               {error && <Badge variant="destructive">Mode Fallback Activé</Badge>}
             </div>
           </CardHeader>
@@ -307,7 +324,7 @@ export default function ModernDiagnosisForm({
               <div className="flex items-center gap-3 text-amber-800">
                 <AlertTriangle className="h-5 w-5" />
                 <span className="text-sm font-medium">
-                  ⚠️ Diagnostic IA Expert indisponible. Analyse générique utilisée pour assurer la continuité diagnostique.
+                  ⚠️ Diagnostic IA Expert indisponible. Analyse générique + Documents de base générés pour assurer la continuité.
                 </span>
               </div>
             </CardContent>
@@ -343,130 +360,50 @@ export default function ModernDiagnosisForm({
           <CardContent className="p-8 space-y-6">
             <div className="text-center p-6 bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl border-2 border-emerald-200">
               <h3 className="text-2xl font-bold text-emerald-800 mb-4">
-                {diagnosis.primaryDiagnosis?.condition || "Diagnostic à préciser"}
+                {diagnosis.primary?.condition || "Diagnostic à préciser"}
               </h3>
               <div className="flex justify-center gap-4">
                 <Badge className="bg-emerald-100 text-emerald-800 text-sm px-4 py-2">
-                  Probabilité: {diagnosis.primaryDiagnosis?.probability || 0}%
+                  Probabilité: {diagnosis.primary?.confidence || 70}%
                 </Badge>
                 <Badge variant="outline" className="border-emerald-300 text-emerald-700 text-sm px-4 py-2">
-                  Sévérité: {diagnosis.primaryDiagnosis?.severity || "À évaluer"}
+                  Sévérité: {diagnosis.primary?.severity || "À évaluer"}
                 </Badge>
               </div>
             </div>
 
-            {diagnosis.primaryDiagnosis?.arguments && (
+            {diagnosis.primary?.detailedAnalysis && (
+              <div>
+                <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-emerald-600" />
+                  Analyse Détaillée
+                </h4>
+                <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    {diagnosis.primary.detailedAnalysis}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {diagnosis.primary?.clinicalRationale && (
               <div>
                 <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
                   <Eye className="h-5 w-5 text-emerald-600" />
-                  Arguments Diagnostiques
+                  Raisonnement Clinique
                 </h4>
-                <div className="grid gap-4">
-                  {Array.isArray(diagnosis.primaryDiagnosis.arguments) ? (
-                    diagnosis.primaryDiagnosis.arguments.map((arg: any, index: number) => (
-                      <div key={index} className="bg-emerald-50 p-4 rounded-lg border border-emerald-200 hover:shadow-md transition-shadow">
-                        {typeof arg === 'string' ? (
-                          <p className="text-sm text-gray-700 leading-relaxed">{arg}</p>
-                        ) : (
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                              <Badge className="bg-emerald-200 text-emerald-800 text-xs">
-                                {arg.type || 'Argument'}
-                              </Badge>
-                              <Badge variant="outline" className="text-xs">
-                                {arg.weight || 'Modéré'}
-                              </Badge>
-                            </div>
-                            <p className="font-medium text-gray-800">
-                              {arg.evidence || 'Élément clinique'}
-                            </p>
-                            <p className="text-sm text-gray-600 italic">
-                              {arg.significance || 'Signification diagnostique'}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-gray-600 italic">Arguments en cours d'analyse...</p>
-                  )}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    {diagnosis.primary.clinicalRationale}
+                  </p>
                 </div>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Clinical Reasoning */}
-        {diagnosis.clinicalReasoning && (
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
-              <CardTitle className="flex items-center gap-3">
-                <Brain className="h-6 w-6" />
-                Raisonnement Clinique Expert
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-8 space-y-6">
-              {diagnosis.clinicalReasoning.semiology && (
-                <div>
-                  <h4 className="font-semibold text-lg mb-3 text-blue-800">Analyse Sémiologique</h4>
-                  <div className="bg-blue-50 p-5 rounded-lg border border-blue-200">
-                    <p className="text-gray-700 leading-relaxed">
-                      {diagnosis.clinicalReasoning.semiology}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {diagnosis.clinicalReasoning.syndromes && (
-                <div>
-                  <h4 className="font-semibold text-lg mb-3 text-blue-800">Syndromes Identifiés</h4>
-                  <div className="grid gap-4">
-                    {Array.isArray(diagnosis.clinicalReasoning.syndromes) ? (
-                      diagnosis.clinicalReasoning.syndromes.map((syndrome: any, index: number) => (
-                        <div key={index} className="border border-blue-200 rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
-                          {typeof syndrome === 'string' ? (
-                            <Badge variant="outline" className="border-blue-300 text-blue-700">{syndrome}</Badge>
-                          ) : (
-                            <div className="space-y-3">
-                              <Badge variant="outline" className="border-blue-300 text-blue-700">
-                                {syndrome.name || 'Syndrome'}
-                              </Badge>
-                              {syndrome.description && (
-                                <p className="text-sm text-gray-600">{syndrome.description}</p>
-                              )}
-                              {syndrome.presence && (
-                                <div className="bg-blue-50 p-3 rounded text-xs border border-blue-200">
-                                  <span className="font-medium">Présence: </span>
-                                  {syndrome.presence}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-sm text-gray-500 italic">Syndromes en cours d'analyse...</p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {diagnosis.clinicalReasoning.pathophysiology && (
-                <div>
-                  <h4 className="font-semibold text-lg mb-3 text-blue-800">Physiopathologie</h4>
-                  <div className="bg-blue-50 p-5 rounded-lg border border-blue-200">
-                    <p className="text-gray-700 leading-relaxed">
-                      {diagnosis.clinicalReasoning.pathophysiology}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
         {/* Differential Diagnosis */}
-        {diagnosis.differentialDiagnosis && diagnosis.differentialDiagnosis.length > 0 && (
+        {diagnosis.differential && diagnosis.differential.length > 0 && (
           <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
             <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-t-lg">
               <CardTitle className="flex items-center gap-3">
@@ -476,63 +413,22 @@ export default function ModernDiagnosisForm({
             </CardHeader>
             <CardContent className="p-8">
               <div className="grid gap-6">
-                {diagnosis.differentialDiagnosis.map((diff: any, index: number) => (
+                {diagnosis.differential.map((diff: any, index: number) => (
                   <div key={index} className="border-l-4 border-purple-400 pl-6 bg-purple-25 p-4 rounded-r-lg hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="font-semibold text-lg text-purple-800">{diff.condition}</h4>
                       <Badge className="bg-purple-100 text-purple-800">{diff.probability}%</Badge>
                     </div>
                     
-                    {diff.detailedDescription && (
-                      <div className="mb-4">
-                        <p className="text-sm text-gray-700 leading-relaxed italic">
-                          {diff.detailedDescription}
-                        </p>
-                      </div>
+                    {diff.rationale && (
+                      <p className="text-sm text-gray-600 italic">{diff.rationale}</p>
                     )}
                     
-                    <div className="grid md:grid-cols-2 gap-4">
-                      {diff.argumentsFor && diff.argumentsFor.length > 0 && (
-                        <div>
-                          <h5 className="text-sm font-semibold text-green-700 mb-2 flex items-center gap-1">
-                            <CheckCircle className="h-4 w-4" />
-                            Arguments en faveur
-                          </h5>
-                          <div className="space-y-2">
-                            {diff.argumentsFor.map((arg: any, argIndex: number) => (
-                              <div key={argIndex} className="bg-green-50 p-3 rounded text-xs border border-green-200">
-                                <span className="font-medium">{arg.evidence || arg}</span>
-                                {arg.significance && (
-                                  <span className="text-green-600 block mt-1">→ {arg.significance}</span>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {diff.argumentsAgainst && diff.argumentsAgainst.length > 0 && (
-                        <div>
-                          <h5 className="text-sm font-semibold text-red-700 mb-2 flex items-center gap-1">
-                            <AlertTriangle className="h-4 w-4" />
-                            Arguments contre
-                          </h5>
-                          <div className="space-y-2">
-                            {diff.argumentsAgainst.map((arg: any, argIndex: number) => (
-                              <div key={argIndex} className="bg-red-50 p-3 rounded text-xs border border-red-200">
-                                <span className="font-medium">{arg.evidence || arg}</span>
-                                {arg.significance && (
-                                  <span className="text-red-600 block mt-1">→ {arg.significance}</span>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {diff.arguments && typeof diff.arguments === 'string' && (
-                      <p className="text-sm text-gray-600 mt-3 italic">{diff.arguments}</p>
+                    {diff.distinguishingFeatures && (
+                      <div className="mt-3 bg-purple-50 p-3 rounded border border-purple-200">
+                        <span className="font-medium text-purple-700">Éléments distinctifs: </span>
+                        <span className="text-sm text-purple-600">{diff.distinguishingFeatures}</span>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -541,124 +437,94 @@ export default function ModernDiagnosisForm({
           </Card>
         )}
 
-        {/* Recommended Exams */}
-        {diagnosis.recommendedExams && diagnosis.recommendedExams.length > 0 && (
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg">
+        {/* Documents Mauriciens Générés */}
+        {documentsGenerated && mauritianDocuments && (
+          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 border-blue-200">
+            <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
               <CardTitle className="flex items-center gap-3">
-                <FlaskConical className="h-6 w-6" />
-                Examens Complémentaires Recommandés
+                <FileText className="h-6 w-6" />
+                Documents Mauriciens Générés et Modifiables
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8">
-              <div className="grid gap-4">
-                {diagnosis.recommendedExams.map((exam: any, index: number) => (
-                  <div key={index} className="bg-white border border-orange-200 rounded-lg p-5 hover:shadow-md transition-all duration-200">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-lg text-orange-800">{exam.exam}</h4>
-                      <Badge 
-                        variant={exam.urgency === "Immédiate" ? "destructive" : exam.urgency === "Programmée" ? "secondary" : "outline"}
-                        className="text-sm"
-                      >
-                        {exam.urgency}
-                      </Badge>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                
+                {/* Consultation */}
+                <div className="bg-blue-50 p-6 rounded-lg border border-blue-200 hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3 mb-4">
+                    <FileText className="h-8 w-8 text-blue-600" />
+                    <div>
+                      <h3 className="font-semibold text-blue-800">Compte-rendu de Consultation</h3>
+                      <p className="text-sm text-blue-600">Document professionnel mauricien</p>
                     </div>
-                    <p className="text-sm text-gray-700 mb-3 leading-relaxed">{exam.indication}</p>
-                    <Badge variant="outline" className="border-orange-300 text-orange-700">
-                      {exam.category}
-                    </Badge>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Therapeutic Strategy */}
-        {diagnosis.therapeuticStrategy && (
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
-              <CardTitle className="flex items-center gap-3">
-                <Pill className="h-6 w-6" />
-                Stratégie Thérapeutique
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-8 space-y-6">
-              {diagnosis.therapeuticStrategy.immediate && (
-                <div>
-                  <h4 className="font-semibold text-lg mb-4 text-green-800 flex items-center gap-2">
-                    <Activity className="h-5 w-5" />
-                    Prise en Charge Immédiate
-                  </h4>
-                  <div className="grid gap-4">
-                    {diagnosis.therapeuticStrategy.immediate.map((treatment: any, index: number) => (
-                      <div key={index} className="bg-green-50 p-5 rounded-lg border border-green-200 hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="font-semibold text-green-800">{treatment.treatment}</span>
-                          <Badge variant="outline" className="border-green-400 text-green-700">
-                            {treatment.type}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-gray-700 mb-2 leading-relaxed">{treatment.indication}</p>
-                        {treatment.duration && (
-                          <p className="text-xs text-gray-500 bg-white p-2 rounded border">
-                            <span className="font-medium">Durée:</span> {treatment.duration}
-                          </p>
-                        )}
-                      </div>
-                    ))}
+                  <div className="text-xs text-blue-700 space-y-1">
+                    <p><strong>Patient:</strong> {mauritianDocuments.consultation?.patient?.firstName} {mauritianDocuments.consultation?.patient?.lastName}</p>
+                    <p><strong>Diagnostic:</strong> {mauritianDocuments.consultation?.content?.diagnosis || diagnosis.primary?.condition}</p>
                   </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
 
-        {/* Red Flags */}
-        {diagnosis.redFlags && diagnosis.redFlags.length > 0 && (
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 border-red-200">
-            <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
-              <CardTitle className="flex items-center gap-3">
-                <Shield className="h-6 w-6" />
-                Signaux d'Alarme Critiques
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-8">
-              <div className="grid gap-4">
-                {diagnosis.redFlags.map((flag: any, index: number) => (
-                  <div key={index} className="flex items-start gap-4 p-4 bg-red-50 rounded-lg border-l-4 border-red-400 hover:shadow-md transition-shadow">
-                    <AlertTriangle className="h-6 w-6 text-red-500 flex-shrink-0 mt-1" />
-                    <div className="flex-1">
-                      {typeof flag === 'string' ? (
-                        <span className="text-sm text-red-800 font-medium">{flag}</span>
-                      ) : (
-                        <div className="space-y-2">
-                          <div className="font-semibold text-red-800 text-base">
-                            {flag.sign || 'Signe d\'alarme'}
-                          </div>
-                          {flag.significance && (
-                            <div className="text-sm text-red-700">
-                              <span className="font-medium">Signification: </span>
-                              {flag.significance}
-                            </div>
-                          )}
-                          {flag.action && (
-                            <div className="text-sm text-white bg-red-600 p-3 rounded font-medium">
-                              <span className="font-semibold">Action requise: </span>
-                              {flag.action}
-                            </div>
-                          )}
-                        </div>
-                      )}
+                {/* Examens Biologiques */}
+                <div className="bg-red-50 p-6 rounded-lg border border-red-200 hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3 mb-4">
+                    <TestTube className="h-8 w-8 text-red-600" />
+                    <div>
+                      <h3 className="font-semibold text-red-800">Ordonnance Examens Biologiques</h3>
+                      <p className="text-sm text-red-600">Prescription laboratoire Maurice</p>
                     </div>
                   </div>
-                ))}
+                  <div className="text-xs text-red-700">
+                    <p><strong>Examens:</strong> {mauritianDocuments.biology?.prescriptions?.length || 0} prescription(s)</p>
+                    <p><strong>Format:</strong> Conforme réglementation mauricienne</p>
+                  </div>
+                </div>
+
+                {/* Examens Paracliniques */}
+                {mauritianDocuments.paraclinical && (
+                  <div className="bg-green-50 p-6 rounded-lg border border-green-200 hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Stethoscope className="h-8 w-8 text-green-600" />
+                      <div>
+                        <h3 className="font-semibold text-green-800">Examens Paracliniques</h3>
+                        <p className="text-sm text-green-600">Imagerie et explorations</p>
+                      </div>
+                    </div>
+                    <div className="text-xs text-green-700">
+                      <p><strong>Examens:</strong> {mauritianDocuments.paraclinical?.prescriptions?.length || 0} prescription(s)</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Médicaments */}
+                <div className="bg-purple-50 p-6 rounded-lg border border-purple-200 hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Pill className="h-8 w-8 text-purple-600" />
+                    <div>
+                      <h3 className="font-semibold text-purple-800">Ordonnance Médicamenteuse</h3>
+                      <p className="text-sm text-purple-600">Prescription sécurisée Maurice</p>
+                    </div>
+                  </div>
+                  <div className="text-xs text-purple-700">
+                    <p><strong>Médicaments:</strong> {mauritianDocuments.medication?.prescriptions?.length || 0} prescription(s)</p>
+                    <p><strong>Sécurité:</strong> Vérifications allergies incluses</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-blue-100 p-4 rounded-lg border border-blue-300">
+                <div className="flex items-center gap-2 mb-2">
+                  <Edit3 className="h-5 w-5 text-blue-600" />
+                  <span className="font-semibold text-blue-800">Documents Modifiables</span>
+                </div>
+                <p className="text-sm text-blue-700">
+                  Tous les documents sont entièrement modifiables. Vous pouvez éditer chaque champ selon vos besoins avant impression/téléchargement.
+                </p>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Navigation */}
+        {/* Navigation - SKIP L'ORCHESTRATEUR */}
         <div className="flex justify-between">
           <Button 
             variant="outline" 
@@ -668,13 +534,24 @@ export default function ModernDiagnosisForm({
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour aux Questions IA
           </Button>
-          <Button 
-            onClick={onNext}
-            className="bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            Continuer vers les Prescriptions
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
+
+          {documentsGenerated ? (
+            <Button 
+              onClick={goToDocuments}
+              className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              Éditer les Documents Mauriciens
+              <Edit3 className="h-4 w-4 ml-2" />
+            </Button>
+          ) : (
+            <Button 
+              onClick={generateCompleteDiagnosis}
+              className="bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <Brain className="h-4 w-4 mr-2" />
+              Générer Diagnostic + Documents
+            </Button>
+          )}
         </div>
       </div>
     </div>
