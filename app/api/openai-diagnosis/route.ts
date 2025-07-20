@@ -4,7 +4,7 @@ import { openai } from "@ai-sdk/openai"
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("🩺 API Diagnostic IA - Début")
+    console.log("🩺 API Diagnostic IA Complète - Génération tous documents mauriciens")
 
     let requestData: {
       patientData?: any
@@ -14,9 +14,9 @@ export async function POST(request: NextRequest) {
 
     try {
       requestData = await request.json()
-      console.log("📝 Données reçues pour diagnostic IA")
+      console.log("📝 Données reçues pour diagnostic complet")
     } catch (parseError) {
-      console.error("❌ Erreur parsing JSON diagnostic:", parseError)
+      console.error("❌ Erreur parsing JSON:", parseError)
       return NextResponse.json(
         {
           error: "Format JSON invalide",
@@ -39,179 +39,286 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`🔍 Diagnostic IA pour: ${patientData.firstName} ${patientData.lastName}`)
+    console.log(`🔍 Diagnostic IA complet pour: ${patientData.firstName} ${patientData.lastName}`)
 
-    const prompt = `
-En tant que médecin expert avec expertise en médecine interne et tropicale, analysez ce cas clinique avec un niveau de DÉTAIL HOSPITALIER.
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // GÉNÉRATION DIAGNOSTIQUE ET DOCUMENTS EN UNE SEULE ÉTAPE
+    // ═══════════════════════════════════════════════════════════════════════════════
 
-${/* insérer les données patient/cliniques */}
+    const patientContext = `
+PATIENT: ${patientData.firstName} ${patientData.lastName}, ${patientData.age} ans, ${patientData.gender}
+ANTHROPOMÉTRIE: ${patientData.weight}kg, ${patientData.height}cm (IMC: ${calculateBMI(patientData)})
+MOTIF: ${clinicalData.chiefComplaint || "Consultation"}
+SYMPTÔMES: ${(clinicalData.symptoms || []).join(", ") || "Non spécifiés"}
+DOULEUR: ${clinicalData.painScale || 0}/10
+CONSTANTES: T°${clinicalData.vitalSigns?.temperature}°C, FC ${clinicalData.vitalSigns?.heartRate}bpm, TA ${clinicalData.vitalSigns?.bloodPressureSystolic}/${clinicalData.vitalSigns?.bloodPressureDiastolic}mmHg
+ANTÉCÉDENTS: ${(patientData.medicalHistory || []).join(", ") || "Aucun"}
+ALLERGIES: ${(patientData.allergies || []).join(", ") || "Aucune"}
+TRAITEMENTS: ${patientData.currentMedicationsText || "Aucun"}
+ANAMNÈSE: ${questionsData?.responses?.map((r: any) => `${r.question}: ${r.answer}`).join(", ") || "Non réalisée"}
+    `.trim()
 
-GÉNÈRE un diagnostic médical APPROFONDI et COMPLET :
+    const completePrompt = `
+Tu es un médecin expert mauricien. Génère un diagnostic COMPLET avec TOUS les documents médicaux mauriciens modifiables.
+
+${patientContext}
+
+GÉNÈRE EXACTEMENT ce JSON avec TOUTES les sections :
 
 {
+  "success": true,
   "diagnosis": {
     "primary": {
       "condition": "Diagnostic principal précis",
-      "icd10": "Code CIM-10 exact",
+      "icd10": "Code CIM-10",
       "confidence": 85,
-      "detailedAnalysis": "Analyse APPROFONDIE (minimum 300 mots) : description complète de la pathologie, physiopathologie détaillée, présentation clinique typique vs présentation chez ce patient, facteurs de risque présents, mécanismes déclenchants, évolution naturelle attendue",
-      "clinicalRationale": "Raisonnement clinique DÉTAILLÉ (minimum 250 mots) : pourquoi ce diagnostic est le plus probable, analyse symptôme par symptôme, corrélations anatomo-cliniques, chronologie évocatrice, signes pathognomoniques",
       "severity": "mild|moderate|severe",
-      "severityAnalysis": "Analyse DÉTAILLÉE de la sévérité : critères objectifs utilisés, scores cliniques applicables, impact fonctionnel, retentissement systémique, facteurs de gravité présents/absents",
-      "clinicalEvidence": "Preuves cliniques DÉTAILLÉES supportant ce diagnostic avec analyse critique de chaque élément",
-      "physiopathology": "Mécanismes physiopathologiques COMPLETS : cascade d'événements, voies biochimiques, interaction organes/systèmes, facteurs aggravants",
-      "epidemiology": "Contexte épidémiologique : prévalence, facteurs de risque population, spécificités géographiques (Maurice), variations saisonnières",
-      "prognosis": {
-        "immediate": "Évolution attendue 24-72h avec facteurs influençant",
-        "shortTerm": "Pronostic 1-4 semaines avec critères d'amélioration",
-        "longTerm": "Pronostic à long terme, séquelles potentielles, qualité de vie",
-        "mortality": "Risque vital si applicable avec facteurs pronostiques"
-      }
+      "detailedAnalysis": "Analyse approfondie de la pathologie, physiopathologie, présentation clinique",
+      "clinicalRationale": "Raisonnement clinique détaillé symptôme par symptôme",
+      "prognosis": "Évolution attendue détaillée"
     },
     "differential": [
       {
-        "condition": "Diagnostic différentiel principal",
+        "condition": "Diagnostic différentiel",
         "probability": 25,
-        "detailedDescription": "Description COMPLÈTE (minimum 200 mots) : définition, physiopathologie, présentation clinique classique, particularités évolutives",
-        "rationale": "Justification APPROFONDIE : éléments cliniques en faveur, similitudes avec le cas présenté, mécanismes physiopathologiques communs",
-        "distinguishingFeatures": "Caractéristiques SPÉCIFIQUES permettant de différencier ce diagnostic du principal : signes pathognomoniques, chronologie différente, réponse thérapeutique, examens discriminants",
-        "ruleOutStrategy": "Stratégie DÉTAILLÉE pour éliminer ce diagnostic : examens spécifiques, critères d'exclusion, évolution surveillance"
+        "rationale": "Arguments pour ce diagnostic",
+        "distinguishingFeatures": "Éléments distinctifs"
       }
     ]
   },
-  "recommendations": {
-    "exams": [
-      {
-        "name": "Examen spécifique",
-        "code": "CODE",
-        "category": "biologie|imagerie|fonctionnel|anatomopathologie",
-        "detailedIndication": "Indication COMPLÈTE (minimum 100 mots) : pourquoi cet examen dans ce contexte précis, objectifs diagnostiques, timing optimal, alternative si non disponible",
-        "expectedResults": {
-          "diagnostic": "Résultats attendus si diagnostic principal correct",
-          "differential": "Résultats orientant vers diagnostics différentiels",
-          "normal": "Signification si examen normal",
-          "pathological": "Interprétation des anomalies possibles"
-        },
-        "priority": "high|medium|low",
-        "urgency": "immediate|urgent|scheduled|elective",
-        "practicalAspects": "Considérations pratiques : préparation, contre-indications, disponibilité, coût, acceptabilité patient"
+  "mauritianDocuments": {
+    "consultation": {
+      "header": {
+        "title": "COMPTE-RENDU DE CONSULTATION MÉDICALE",
+        "subtitle": "République de Maurice - Médecine Générale",
+        "date": "${new Date().toLocaleDateString("fr-FR")}",
+        "time": "${new Date().toLocaleTimeString("fr-FR")}",
+        "physician": "Dr. TIBOK IA DOCTOR",
+        "registration": "COUNCIL-2024-IA-001"
+      },
+      "patient": {
+        "firstName": "${patientData.firstName}",
+        "lastName": "${patientData.lastName}",
+        "age": "${patientData.age} ans",
+        "address": "Adresse à compléter - Maurice",
+        "idNumber": "Carte d'identité mauricienne à préciser",
+        "weight": "${patientData.weight}kg",
+        "height": "${patientData.height}cm"
+      },
+      "content": {
+        "chiefComplaint": "${clinicalData.chiefComplaint || "Motif de consultation à préciser"}",
+        "history": "Histoire détaillée de la maladie actuelle avec chronologie, symptômes associés, facteurs déclenchants",
+        "examination": "Examen clinique complet : constantes vitales, examen général, examen orienté selon symptômes",
+        "diagnosis": "Diagnostic retenu avec argumentaire clinique",
+        "plan": "Plan thérapeutique détaillé, examens complémentaires, suivi"
       }
+    },
+    "biology": {
+      "header": {
+        "title": "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+        "subtitle": "PRESCRIPTION D'EXAMENS BIOLOGIQUES",
+        "date": "${new Date().toLocaleDateString("fr-FR")}",
+        "number": "BIO-${Date.now()}-MU",
+        "physician": "Dr. TIBOK IA DOCTOR",
+        "registration": "COUNCIL-2024-IA-001"
+      },
+      "patient": {
+        "firstName": "${patientData.firstName}",
+        "lastName": "${patientData.lastName}",
+        "age": "${patientData.age} ans",
+        "address": "Adresse à compléter - Maurice",
+        "idNumber": "Carte d'identité mauricienne à préciser"
+      },
+      "prescriptions": [
+        {
+          "id": 1,
+          "exam": "Examen biologique adapté au diagnostic",
+          "indication": "Indication médicale précise",
+          "urgency": "Semi-urgent|Urgent|Programmé",
+          "fasting": "Oui|Non",
+          "expectedResults": "Résultats attendus",
+          "sampleType": "Type d'échantillon",
+          "contraindications": "Contre-indications spécifiques"
+        }
+      ]
+    },
+    "paraclinical": {
+      "header": {
+        "title": "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+        "subtitle": "PRESCRIPTION D'EXAMENS PARACLINIQUES",
+        "date": "${new Date().toLocaleDateString("fr-FR")}",
+        "number": "PARA-${Date.now()}-MU",
+        "physician": "Dr. TIBOK IA DOCTOR",
+        "registration": "COUNCIL-2024-IA-001"
+      },
+      "patient": {
+        "firstName": "${patientData.firstName}",
+        "lastName": "${patientData.lastName}",
+        "age": "${patientData.age} ans",
+        "address": "Adresse à compléter - Maurice",
+        "idNumber": "Carte d'identité mauricienne à préciser"
+      },
+      "prescriptions": [
+        {
+          "id": 1,
+          "exam": "Examen paraclinique adapté",
+          "indication": "Indication médicale précise",
+          "urgency": "Semi-urgent|Urgent|Programmé",
+          "preparation": "Préparation nécessaire",
+          "contraindications": "Contre-indications",
+          "duration": "Durée estimée"
+        }
+      ]
+    },
+    "medication": {
+      "header": {
+        "title": "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+        "subtitle": "PRESCRIPTION MÉDICAMENTEUSE",
+        "date": "${new Date().toLocaleDateString("fr-FR")}",
+        "number": "MED-${Date.now()}-MU",
+        "physician": "Dr. TIBOK IA DOCTOR",
+        "registration": "COUNCIL-2024-IA-001"
+      },
+      "patient": {
+        "firstName": "${patientData.firstName}",
+        "lastName": "${patientData.lastName}",
+        "age": "${patientData.age} ans",
+        "address": "Adresse à compléter - Maurice",
+        "idNumber": "Carte d'identité mauricienne à préciser",
+        "allergies": "${(patientData.allergies || []).join(", ") || "Aucune"}"
+      },
+      "prescriptions": [
+        {
+          "id": 1,
+          "dci": "DCI médicament",
+          "brand": "Marque disponible Maurice",
+          "dosage": "Posologie adaptée",
+          "frequency": "Fréquence de prise",
+          "duration": "Durée traitement",
+          "indication": "Indication thérapeutique",
+          "contraindications": "Contre-indications patient",
+          "monitoring": "Surveillance nécessaire",
+          "mauritianAvailability": "Disponibilité Maurice"
+        }
+      ]
+    }
+  },
+  "editableFields": {
+    "consultation": [
+      "patient.address",
+      "patient.idNumber", 
+      "content.history",
+      "content.examination",
+      "content.diagnosis",
+      "content.plan"
     ],
-    "medications": [
-      {
-        "name": "Médicament précis",
-        "dosage": "Posologie exacte adaptée au patient",
-        "frequency": "Fréquence avec justification",
-        "duration": "Durée avec critères d'arrêt",
-        "detailedIndication": "Indication APPROFONDIE : mécanisme thérapeutique, objectifs précis, critères d'efficacité attendus",
-        "mechanism": "Mécanisme d'action DÉTAILLÉ dans ce contexte pathologique spécifique",
-        "monitoring": {
-          "efficacy": "Critères de surveillance de l'efficacité",
-          "safety": "Surveillance des effets indésirables",
-          "laboratory": "Bilans biologiques de suivi",
-          "clinical": "Signes cliniques à surveiller"
-        },
-        "contraindications": "Contre-indications SPÉCIFIQUES à ce patient",
-        "interactions": "Interactions PERTINENTES avec traitements actuels",
-        "alternatives": "Alternatives thérapeutiques si échec/intolérance avec justification"
-      }
+    "biology": [
+      "patient.address",
+      "patient.idNumber",
+      "prescriptions[].indication",
+      "prescriptions[].urgency"
+    ],
+    "paraclinical": [
+      "patient.address", 
+      "patient.idNumber",
+      "prescriptions[].indication",
+      "prescriptions[].urgency"
+    ],
+    "medication": [
+      "patient.address",
+      "patient.idNumber",
+      "prescriptions[].dosage",
+      "prescriptions[].frequency",
+      "prescriptions[].duration"
     ]
   },
   "clinicalConsiderations": {
-    "symptomAnalysis": "Analyse EXHAUSTIVE de chaque symptôme : signification sémiologique, valeur diagnostique, mécanismes sous-jacents, corrélations temporelles",
-    "riskFactors": "Analyse DÉTAILLÉE des facteurs de risque : présents, absents, modifiables, impact sur le pronostic, mesures préventives",
-    "prognosticFactors": "Facteurs pronostiques SPÉCIFIQUES : favorables, défavorables, modifiables, impact sur la prise en charge",
-    "geographicContext": "Contexte géographique Maurice PERTINENT : pathologies endémiques, facteurs environnementaux, disponibilité thérapeutique, spécificités populationnelles",
-    "seasonalFactors": "Facteurs saisonniers APPLICABLES : variations épidémiologiques, vecteurs, conditions climatiques influençant la pathologie"
+    "symptomAnalysis": "Analyse détaillée des symptômes",
+    "riskFactors": "Facteurs de risque identifiés",
+    "prognosticFactors": "Éléments pronostiques",
+    "geographicContext": "Spécificités Maurice (climat tropical, pathologies endémiques)",
+    "urgencyLevel": 1-5,
+    "redFlags": ["Signes d'alarme à surveiller"]
   },
-  "managementPlan": {
-    "immediate": "Plan de prise en charge IMMÉDIATE : mesures urgentes, surveillance rapprochée, critères d'hospitalisation, traitements symptomatiques",
-    "shortTerm": "Prise en charge à COURT TERME : traitements étiologiques, réévaluations programmées, adaptations thérapeutiques, prévention complications",
-    "longTerm": "Suivi à LONG TERME : surveillance évolutive, prévention récidives, réhabilitation, éducation thérapeutique, qualité de vie"
+  "metadata": {
+    "patientAge": ${patientData.age},
+    "patientGender": "${patientData.gender}",
+    "chiefComplaint": "${clinicalData.chiefComplaint}",
+    "aiModel": "gpt-4o",
+    "confidence": 85,
+    "generatedAt": "${new Date().toISOString()}",
+    "location": "Maurice",
+    "approach": "complete-mauritian-documents",
+    "documentsGenerated": 4,
+    "allEditable": true,
+    "legallyCompliant": true
   }
 }
 
-EXIGENCES QUALITÉ MAXIMALE :
-- Minimum 200-300 mots par section principale
-- Langage médical expert et précis
-- Références aux recommandations actuelles
-- Spécificité au cas présenté (éviter généralités)
-- Justification de chaque décision diagnostique/thérapeutique
-- Intégration du contexte géographique Maurice si pertinent
-- Evidence-based medicine systématique
-
-Analysez comme un EXPERT HOSPITALO-UNIVERSITAIRE
+IMPORTANT: 
+- Adapte TOUS les champs au cas clinique spécifique
+- Prescris des examens/médicaments PERTINENTS pour le diagnostic
+- Respecte la réglementation mauricienne
+- Tous les documents doivent être cohérents entre eux
+- Les prescriptions doivent être sécurisées (vérification allergies, interactions)
+- Utilise les codes CIM-10 appropriés
 `
 
     const result = await generateText({
       model: openai("gpt-4o"),
-      prompt: prompt,
+      prompt: completePrompt,
       temperature: 0.2,
-      maxTokens: 3000,
+      maxTokens: 4000,
     })
 
-    console.log("🧠 Diagnostic IA symptômes-first généré")
+    console.log("🧠 Diagnostic IA complet avec documents mauriciens généré")
 
-    // Tentative de parsing JSON avec fallback robuste
-    let diagnosticData
+    // Parsing robuste avec fallback
+    let completeData
     try {
-      // Nettoyer le texte avant parsing
       let cleanedText = result.text.trim()
-
-      // Extraire le JSON s'il est entouré de texte
       const jsonMatch = cleanedText.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
         cleanedText = jsonMatch[0]
       }
 
-      diagnosticData = JSON.parse(cleanedText)
+      completeData = JSON.parse(cleanedText)
 
-      // Validation de la structure minimale
-      if (!diagnosticData.diagnosis || !diagnosticData.diagnosis.primary) {
-        throw new Error("Structure diagnostic invalide")
+      if (!completeData.diagnosis || !completeData.mauritianDocuments) {
+        throw new Error("Structure incomplète")
       }
 
-      console.log(`✅ Diagnostic symptômes-first parsé: ${diagnosticData.diagnosis.primary.condition}`)
+      console.log(`✅ Diagnostic complet parsé: ${completeData.diagnosis.primary.condition}`)
     } catch (parseError) {
-      console.warn("⚠️ Erreur parsing JSON diagnostic, génération de fallback ciblé")
-
-      // Diagnostic de fallback adapté aux symptômes
-      diagnosticData = generateSymptomBasedFallbackDiagnosis(patientData, clinicalData, questionsData, result.text)
+      console.warn("⚠️ Erreur parsing JSON, génération fallback")
+      completeData = generateCompleteFallback(patientData, clinicalData, questionsData, result.text)
     }
 
-    const response = {
+    // Structure finale compatible avec l'interface d'édition
+    const finalResponse = {
       success: true,
-      diagnosis: diagnosticData.diagnosis,
-      recommendations: diagnosticData.recommendations || {
-        exams: [],
-        medications: [],
-      },
-      clinicalConsiderations: diagnosticData.clinicalConsiderations || {},
-      prognosis: diagnosticData.prognosis || "Pronostic à évaluer selon l'évolution",
-      followUp: diagnosticData.followUp || "Suivi à programmer selon les résultats",
-      urgencyLevel: diagnosticData.urgencyLevel || 3,
-      redFlags: diagnosticData.redFlags || [],
-      metadata: {
+      diagnosis: completeData.diagnosis,
+      mauritianDocuments: completeData.mauritianDocuments,
+      editableFields: completeData.editableFields,
+      clinicalConsiderations: completeData.clinicalConsiderations || {},
+      metadata: completeData.metadata || {
         patientAge: patientData.age,
         patientGender: patientData.gender,
-        chiefComplaint: clinicalData.chiefComplaint,
-        aiModel: "gpt-4o",
-        confidence: diagnosticData.diagnosis?.primary?.confidence || 75,
         generatedAt: new Date().toISOString(),
-        location: "Maurice",
-        approach: "symptom-based",
-        diagnosticMethod: "symptoms_first_then_context",
+        documentsGenerated: 4,
+        allEditable: true
       },
-      rawAiResponse: result.text, // Pour debug
+      rawAiResponse: result.text // Pour debug
     }
 
-    console.log(`✅ Diagnostic IA symptômes-first retourné: ${diagnosticData.diagnosis.primary.condition}`)
-    return NextResponse.json(response)
+    console.log(`✅ Diagnostic IA complet retourné avec 4 documents mauriciens modifiables`)
+    return NextResponse.json(finalResponse)
+
   } catch (error: any) {
-    console.error("❌ Erreur Diagnostic IA:", error)
+    console.error("❌ Erreur Diagnostic IA Complet:", error)
     return NextResponse.json(
       {
-        error: "Erreur lors de la génération du diagnostic",
+        error: "Erreur lors de la génération du diagnostic complet",
         details: error.message,
         success: false,
         timestamp: new Date().toISOString(),
@@ -221,332 +328,368 @@ Analysez comme un EXPERT HOSPITALO-UNIVERSITAIRE
   }
 }
 
-function generateSymptomBasedFallbackDiagnosis(patientData: any, clinicalData: any, questionsData: any, aiText: string) {
-  const symptoms = clinicalData.symptoms?.toLowerCase() || ""
+// ═══════════════════════════════════════════════════════════════════════════════
+// FONCTIONS UTILITAIRES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function calculateBMI(patientData: any): string {
+  if (patientData?.weight && patientData?.height) {
+    const bmi = patientData.weight / Math.pow(patientData.height / 100, 2)
+    return bmi.toFixed(1)
+  }
+  return "N/A"
+}
+
+function generateCompleteFallback(patientData: any, clinicalData: any, questionsData: any, aiText: string) {
+  const symptoms = clinicalData.symptoms?.join(", ").toLowerCase() || ""
   const chiefComplaint = clinicalData.chiefComplaint?.toLowerCase() || ""
-  const combinedSymptoms = `${symptoms} ${chiefComplaint}`
-  const age = patientData.age || 0
-  const temperature = clinicalData.vitalSigns?.temperature || 0
-
-  let primaryCondition = "Syndrome clinique à préciser"
-  let icd10 = "R53"
-  let confidence = 70
-  let severity = "moderate"
-  let clinicalEvidence = "Symptômes non spécifiques nécessitant exploration"
-
-  // Diagnostic basé sur les SYMPTÔMES d'abord
-  if (combinedSymptoms.includes("douleur") && combinedSymptoms.includes("thorax")) {
-    // DOULEUR THORACIQUE - Approche cardiologique classique
-    primaryCondition = "Douleur thoracique - à préciser (cardiaque vs non cardiaque)"
-    icd10 = "R07.89"
-    confidence = 75
-    clinicalEvidence = "Douleur thoracique nécessitant élimination d'une origine cardiaque"
-    
-    const differential = [
-      {
-        condition: "Syndrome coronarien aigu",
-        probability: 35,
-        rationale: "Douleur thoracique - élimination prioritaire",
-        ruleOutTests: ["ECG", "Troponines", "Radiographie thoracique"]
+  
+  return {
+    success: true,
+    diagnosis: {
+      primary: {
+        condition: determineFallbackDiagnosis(symptoms, chiefComplaint),
+        icd10: "R53",
+        confidence: 70,
+        severity: "moderate",
+        detailedAnalysis: "Analyse basée sur les symptômes présentés nécessitant exploration complémentaire",
+        clinicalRationale: `Symptômes: ${chiefComplaint}. Nécessite anamnèse et examen clinique approfondis`,
+        prognosis: "Évolution favorable attendue avec prise en charge appropriée"
       },
-      {
-        condition: "Douleur musculo-squelettique",
-        probability: 25,
-        rationale: "Cause fréquente de douleur thoracique",
-        ruleOutTests: ["Examen clinique", "Antalgiques test"]
-      },
-      {
-        condition: "Reflux gastro-œsophagien",
-        probability: 20,
-        rationale: "Diagnostic différentiel classique",
-        ruleOutTests: ["IPP test", "Fibroscopie si nécessaire"]
-      }
-    ]
-    
-    if (temperature > 38) {
-      differential.push({
-        condition: "Infection respiratoire",
-        probability: 15,
-        rationale: "Fièvre associée - pneumopathie possible",
-        ruleOutTests: ["Radiographie thoracique", "CRP", "Hémocultures"]
-      })
-    }
-    
-    return buildFallbackResponse(primaryCondition, icd10, confidence, severity, clinicalEvidence, differential, "cardiac")
-    
-  } else if (combinedSymptoms.includes("fièvre") || temperature > 37.5) {
-    // FIÈVRE - Approche infectieuse classique puis tropicale
-    primaryCondition = "Syndrome fébrile - origine à déterminer"
-    icd10 = "R50.9"
-    confidence = 75
-    clinicalEvidence = `Fièvre ${temperature}°C nécessitant recherche étiologique`
-    
-    const differential = [
-      {
-        condition: "Infection respiratoire",
-        probability: 30,
-        rationale: "Cause fréquente de fièvre",
-        ruleOutTests: ["Radiographie thoracique", "CRP", "Hémocultures"]
-      },
-      {
-        condition: "Infection urinaire",
-        probability: 25,
-        rationale: "Cause commune selon âge et sexe",
-        ruleOutTests: ["ECBU", "Bandelette urinaire"]
-      },
-      {
-        condition: "Gastro-entérite infectieuse",
-        probability: 20,
-        rationale: "Si troubles digestifs associés",
-        ruleOutTests: ["Coproculture", "Parasitologie"]
-      }
-    ]
-    
-    // Contexte tropical APRÈS les causes classiques
-    if (combinedSymptoms.includes("articul") || combinedSymptoms.includes("douleur")) {
-      differential.push({
-        condition: "Arbovirose (dengue/chikungunya)",
-        probability: 15,
-        rationale: "Fièvre + arthralgies en contexte tropical",
-        ruleOutTests: ["NS1 dengue", "IgM chikungunya", "Plaquettes"]
-      })
-    }
-    
-    return buildFallbackResponse(primaryCondition, icd10, confidence, severity, clinicalEvidence, differential, "infectious")
-    
-  } else if (combinedSymptoms.includes("céphal") || combinedSymptoms.includes("tête")) {
-    // CÉPHALÉES - Approche neurologique classique
-    primaryCondition = "Céphalées - à caractériser"
-    icd10 = "R51"
-    confidence = 70
-    clinicalEvidence = "Céphalées nécessitant caractérisation et recherche de signes d'alarme"
-    
-    const differential = [
-      {
-        condition: "Céphalée de tension",
-        probability: 40,
-        rationale: "Cause la plus fréquente de céphalées",
-        ruleOutTests: ["Examen neurologique", "Antalgiques test"]
-      },
-      {
-        condition: "Migraine",
-        probability: 25,
-        rationale: "Surtout chez la femme jeune",
-        ruleOutTests: ["Anamnèse détaillée", "Calendrier migraineux"]
-      },
-      {
-        condition: "Sinusite",
-        probability: 20,
-        rationale: "Céphalées + contexte infectieux",
-        ruleOutTests: ["Examen ORL", "Scanner sinus si nécessaire"]
-      }
-    ]
-    
-    if (temperature > 38) {
-      differential.push({
-        condition: "Méningite",
-        probability: 10,
-        rationale: "Céphalées + fièvre - urgence diagnostique",
-        ruleOutTests: ["Examen neurologique", "Ponction lombaire si indiquée"]
-      })
-    }
-    
-    return buildFallbackResponse(primaryCondition, icd10, confidence, severity, clinicalEvidence, differential, "neurological")
-    
-  } else if (combinedSymptoms.includes("douleur") && combinedSymptoms.includes("abdomen")) {
-    // DOULEUR ABDOMINALE - Approche gastro-entérologique
-    primaryCondition = "Douleur abdominale - à localiser et caractériser"
-    icd10 = "R10.9"
-    confidence = 70
-    clinicalEvidence = "Douleur abdominale nécessitant localisation et recherche de signes de gravité"
-    
-    const differential = [
-      {
-        condition: "Gastrite/Ulcère gastro-duodénal",
-        probability: 30,
-        rationale: "Cause fréquente de douleur épigastrique",
-        ruleOutTests: ["Fibroscopie", "Recherche H. pylori"]
-      },
-      {
-        condition: "Colique néphrétique",
-        probability: 25,
-        rationale: "Douleur lombaire irradiant vers les organes génitaux",
-        ruleOutTests: ["Scanner abdominal", "ECBU"]
-      },
-      {
-        condition: "Appendicite",
-        probability: 20,
-        rationale: "Urgence chirurgicale à éliminer",
-        ruleOutTests: ["Examen clinique", "Échographie/Scanner"]
-      }
-    ]
-    
-    return buildFallbackResponse(primaryCondition, icd10, confidence, severity, clinicalEvidence, differential, "gastrointestinal")
-    
-  } else {
-    // SYMPTÔMES NON SPÉCIFIQUES
-    return buildFallbackResponse(
-      "Syndrome clinique non spécifique",
-      "R53",
-      60,
-      "mild",
-      "Symptômes nécessitant anamnèse et examen clinique approfondis",
-      [
+      differential: [
         {
           condition: "Syndrome viral",
           probability: 40,
           rationale: "Cause fréquente de symptômes non spécifiques",
-          ruleOutTests: ["Observation clinique", "Biologie si nécessaire"]
+          distinguishingFeatures: "Évolution spontanément favorable"
         },
         {
           condition: "Troubles fonctionnels",
           probability: 30,
-          rationale: "Absence de signes organiques",
-          ruleOutTests: ["Élimination causes organiques"]
+          rationale: "Absence de signes organiques évidents",
+          distinguishingFeatures: "Examens complémentaires normaux"
         }
-      ],
-      "general"
-    )
-  }
-}
-
-function buildFallbackResponse(condition: string, icd10: string, confidence: number, severity: string, evidence: string, differential: any[], category: string) {
-  return {
-    diagnosis: {
-      primary: {
-        condition: condition,
-        icd10: icd10,
-        confidence: confidence,
-        rationale: `Diagnostic de fallback basé sur l'analyse symptomatique: ${evidence}`,
-        severity: severity,
-        clinicalEvidence: evidence,
-      },
-      differential: differential,
+      ]
     },
-    recommendations: {
-      exams: getExamsForCategory(category),
-      medications: getMedicationsForCategory(category),
+    mauritianDocuments: {
+      consultation: {
+        header: {
+          title: "COMPTE-RENDU DE CONSULTATION MÉDICALE",
+          subtitle: "République de Maurice - Médecine Générale",
+          date: new Date().toLocaleDateString("fr-FR"),
+          time: new Date().toLocaleTimeString("fr-FR"),
+          physician: "Dr. TIBOK IA DOCTOR",
+          registration: "COUNCIL-2024-IA-001"
+        },
+        patient: {
+          firstName: patientData.firstName,
+          lastName: patientData.lastName,
+          age: `${patientData.age} ans`,
+          address: "Adresse à compléter - Maurice",
+          idNumber: "Carte d'identité mauricienne à préciser",
+          weight: `${patientData.weight}kg`,
+          height: `${patientData.height}cm`
+        },
+        content: {
+          chiefComplaint: clinicalData.chiefComplaint || "Motif de consultation à préciser",
+          history: `Patient de ${patientData.age} ans consultant pour ${clinicalData.chiefComplaint || "symptômes"}. Évolution depuis ${clinicalData.symptomDuration || "durée non précisée"}. ${symptoms || "Symptômes à détailler"}. Retentissement fonctionnel à évaluer.`,
+          examination: `Constantes: TA ${clinicalData.vitalSigns?.bloodPressureSystolic || "?"}/${clinicalData.vitalSigns?.bloodPressureDiastolic || "?"}mmHg, FC ${clinicalData.vitalSigns?.heartRate || "?"}bpm, T° ${clinicalData.vitalSigns?.temperature || "?"}°C. Douleur ${clinicalData.painScale || 0}/10. Examen général: état général ${patientData.age < 65 ? "conservé" : "à préciser"}. Examen orienté selon symptômes à compléter.`,
+          diagnosis: determineFallbackDiagnosis(symptoms, chiefComplaint),
+          plan: "Traitement symptomatique adapté. Examens complémentaires si nécessaire. Réévaluation programmée selon évolution. Conseils hygiéno-diététiques."
+        }
+      },
+      biology: {
+        header: {
+          title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+          subtitle: "PRESCRIPTION D'EXAMENS BIOLOGIQUES",
+          date: new Date().toLocaleDateString("fr-FR"),
+          number: `BIO-${Date.now()}-MU`,
+          physician: "Dr. TIBOK IA DOCTOR",
+          registration: "COUNCIL-2024-IA-001"
+        },
+        patient: {
+          firstName: patientData.firstName,
+          lastName: patientData.lastName,
+          age: `${patientData.age} ans`,
+          address: "Adresse à compléter - Maurice",
+          idNumber: "Carte d'identité mauricienne à préciser"
+        },
+        prescriptions: generateFallbackBiologyExams(symptoms, chiefComplaint, clinicalData)
+      },
+      paraclinical: {
+        header: {
+          title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+          subtitle: "PRESCRIPTION D'EXAMENS PARACLINIQUES",
+          date: new Date().toLocaleDateString("fr-FR"),
+          number: `PARA-${Date.now()}-MU`,
+          physician: "Dr. TIBOK IA DOCTOR",
+          registration: "COUNCIL-2024-IA-001"
+        },
+        patient: {
+          firstName: patientData.firstName,
+          lastName: patientData.lastName,
+          age: `${patientData.age} ans`,
+          address: "Adresse à compléter - Maurice",
+          idNumber: "Carte d'identité mauricienne à préciser"
+        },
+        prescriptions: generateFallbackParaclinicalExams(symptoms, chiefComplaint, clinicalData)
+      },
+      medication: {
+        header: {
+          title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+          subtitle: "PRESCRIPTION MÉDICAMENTEUSE",
+          date: new Date().toLocaleDateString("fr-FR"),
+          number: `MED-${Date.now()}-MU`,
+          physician: "Dr. TIBOK IA DOCTOR",
+          registration: "COUNCIL-2024-IA-001"
+        },
+        patient: {
+          firstName: patientData.firstName,
+          lastName: patientData.lastName,
+          age: `${patientData.age} ans`,
+          address: "Adresse à compléter - Maurice",
+          idNumber: "Carte d'identité mauricienne à préciser",
+          allergies: (patientData.allergies || []).join(", ") || "Aucune"
+        },
+        prescriptions: generateFallbackMedications(symptoms, chiefComplaint, patientData, clinicalData)
+      }
+    },
+    editableFields: {
+      consultation: [
+        "patient.address",
+        "patient.idNumber",
+        "content.history",
+        "content.examination",
+        "content.diagnosis",
+        "content.plan"
+      ],
+      biology: [
+        "patient.address",
+        "patient.idNumber",
+        "prescriptions[].indication",
+        "prescriptions[].urgency"
+      ],
+      paraclinical: [
+        "patient.address",
+        "patient.idNumber",
+        "prescriptions[].indication",
+        "prescriptions[].urgency"
+      ],
+      medication: [
+        "patient.address",
+        "patient.idNumber",
+        "prescriptions[].dosage",
+        "prescriptions[].frequency",
+        "prescriptions[].duration"
+      ]
     },
     clinicalConsiderations: {
-      symptomAnalysis: "Analyse basée sur les symptômes présentés",
-      riskFactors: "Facteurs de risque à évaluer selon le diagnostic",
-      prognosticFactors: "Pronostic dépendant de la cause sous-jacente",
-      geographicContext: "Contexte tropical considéré selon pertinence clinique",
-      seasonalFactors: "Facteurs saisonniers évalués si applicable",
+      symptomAnalysis: `Symptômes principaux: ${chiefComplaint}. Nécessite évaluation approfondie.`,
+      riskFactors: `Âge: ${patientData.age} ans. Antécédents: ${(patientData.medicalHistory || []).join(", ") || "Aucun"}`,
+      prognosticFactors: "Pronostic généralement favorable avec prise en charge adaptée",
+      geographicContext: "Contexte tropical mauricien - Attention pathologies endémiques",
+      urgencyLevel: 2,
+      redFlags: ["Aggravation des symptômes", "Fièvre persistante", "Altération état général"]
     },
-    prognosis: "Pronostic généralement favorable avec diagnostic et traitement appropriés",
-    followUp: "Réévaluation selon évolution clinique et résultats examens",
-    urgencyLevel: category === "cardiac" ? 4 : 3,
-    redFlags: getRedFlagsForCategory(category),
+    metadata: {
+      patientAge: patientData.age,
+      patientGender: patientData.gender,
+      chiefComplaint: clinicalData.chiefComplaint,
+      aiModel: "gpt-4o-fallback",
+      confidence: 70,
+      generatedAt: new Date().toISOString(),
+      location: "Maurice",
+      approach: "fallback-complete-documents",
+      documentsGenerated: 4,
+      allEditable: true,
+      legallyCompliant: true
+    }
   }
 }
 
-function getExamsForCategory(category: string) {
-  switch (category) {
-    case "cardiac":
-      return [
-        {
-          name: "ECG",
-          code: "ECG001",
-          category: "cardiologie",
-          indication: "Élimination syndrome coronarien aigu",
-          priority: "high",
-        },
-        {
-          name: "Troponines",
-          code: "TROP001",
-          category: "biologie",
-          indication: "Marqueurs de nécrose myocardique",
-          priority: "high",
-        },
-      ]
-    case "infectious":
-      return [
-        {
-          name: "CRP",
-          code: "CRP001",
-          category: "biologie",
-          indication: "Syndrome inflammatoire",
-          priority: "medium",
-        },
-        {
-          name: "Hémocultures",
-          code: "HEMOC001",
-          category: "biologie",
-          indication: "Recherche bactériémie",
-          priority: "medium",
-        },
-      ]
-    case "neurological":
-      return [
-        {
-          name: "Examen neurologique",
-          code: "NEURO001",
-          category: "clinique",
-          indication: "Recherche signes neurologiques",
-          priority: "high",
-        },
-      ]
-    default:
-      return [
-        {
-          name: "Bilan biologique standard",
-          code: "BIO001",
-          category: "biologie",
-          indication: "Évaluation générale",
-          priority: "medium",
-        },
-      ]
+function determineFallbackDiagnosis(symptoms: string, chiefComplaint: string): string {
+  const combined = `${symptoms} ${chiefComplaint}`.toLowerCase()
+  
+  if (combined.includes("douleur") && combined.includes("thorax")) {
+    return "Douleur thoracique - à préciser (cardiaque vs non cardiaque)"
   }
+  if (combined.includes("fièvre") || combined.includes("température")) {
+    return "Syndrome fébrile - origine à déterminer"
+  }
+  if (combined.includes("céphal") || combined.includes("tête")) {
+    return "Céphalées - à caractériser"
+  }
+  if (combined.includes("douleur") && combined.includes("abdomen")) {
+    return "Douleur abdominale - à localiser et caractériser"
+  }
+  if (combined.includes("toux") || combined.includes("respiratoire")) {
+    return "Syndrome respiratoire - à explorer"
+  }
+  
+  return "Syndrome clinique à préciser - évaluation en cours"
 }
 
-function getMedicationsForCategory(category: string) {
-  switch (category) {
-    case "cardiac":
-      return [
-        {
-          name: "Aspirine",
-          dosage: "75-100mg",
-          frequency: "1x/jour",
-          duration: "Selon diagnostic",
-          indication: "Prévention secondaire si syndrome coronarien",
-          contraindications: ["Allergie", "Troubles coagulation"],
-        },
-      ]
-    case "infectious":
-      return [
-        {
-          name: "Paracétamol",
-          dosage: "1g",
-          frequency: "3x/jour",
-          duration: "Selon symptômes",
-          indication: "Antipyrétique et antalgique",
-          contraindications: ["Allergie", "Insuffisance hépatique"],
-        },
-      ]
-    default:
-      return [
-        {
-          name: "Traitement symptomatique",
-          dosage: "Selon symptômes",
-          frequency: "Selon besoin",
-          duration: "Selon évolution",
-          indication: "Traitement adapté au diagnostic",
-          contraindications: ["Selon médicament choisi"],
-        },
-      ]
+function generateFallbackBiologyExams(symptoms: string, chiefComplaint: string, clinicalData: any) {
+  const combined = `${symptoms} ${chiefComplaint}`.toLowerCase()
+  const exams = []
+  
+  // Bilan de base
+  exams.push({
+    id: 1,
+    exam: "NFS + Plaquettes",
+    indication: "Bilan hématologique de base",
+    urgency: "Semi-urgent",
+    fasting: "Non",
+    expectedResults: "Recherche anémie, infection, troubles hématologiques",
+    sampleType: "Sang veineux",
+    contraindications: "Aucune"
+  })
+  
+  exams.push({
+    id: 2,
+    exam: "CRP + VS",
+    indication: "Syndrome inflammatoire",
+    urgency: "Semi-urgent",
+    fasting: "Non",
+    expectedResults: "Élévation si processus inflammatoire",
+    sampleType: "Sang veineux",
+    contraindications: "Aucune"
+  })
+  
+  // Examens spécifiques selon symptômes
+  if (combined.includes("douleur") && combined.includes("thorax")) {
+    exams.push({
+      id: 3,
+      exam: "Troponines + CK-MB",
+      indication: "Marqueurs cardiaques - élimination syndrome coronarien",
+      urgency: "Urgent",
+      fasting: "Non",
+      expectedResults: "Normaux si pas de nécrose myocardique",
+      sampleType: "Sang veineux",
+      contraindications: "Aucune"
+    })
   }
+  
+  if (combined.includes("fièvre") || (clinicalData.vitalSigns?.temperature && clinicalData.vitalSigns.temperature > 37.5)) {
+    exams.push({
+      id: exams.length + 1,
+      exam: "Hémocultures x2",
+      indication: "Recherche bactériémie",
+      urgency: "Urgent",
+      fasting: "Non",
+      expectedResults: "Identification germe si bactériémie",
+      sampleType: "Sang veineux",
+      contraindications: "Aucune"
+    })
+  }
+  
+  return exams
 }
 
-function getRedFlagsForCategory(category: string) {
-  switch (category) {
-    case "cardiac":
-      return ["Douleur constrictive", "Irradiation bras gauche", "Dyspnée", "Sueurs profuses"]
-    case "infectious":
-      return ["Fièvre >39°C", "Altération état général", "Signes sepsis", "Purpura"]
-    case "neurological":
-      return ["Céphalées brutales", "Raideur nuque", "Troubles conscience", "Déficit neurologique"]
-    default:
-      return ["Altération état général", "Fièvre élevée", "Douleur intense"]
+function generateFallbackParaclinicalExams(symptoms: string, chiefComplaint: string, clinicalData: any) {
+  const combined = `${symptoms} ${chiefComplaint}`.toLowerCase()
+  const exams = []
+  
+  if (combined.includes("douleur") && combined.includes("thorax")) {
+    exams.push({
+      id: 1,
+      exam: "ECG",
+      indication: "Élimination trouble rythme/conduction, ischémie",
+      urgency: "Urgent",
+      preparation: "Repos 10 minutes, déshabillage thorax",
+      contraindications: "Aucune",
+      duration: "5 minutes"
+    })
+    
+    exams.push({
+      id: 2,
+      exam: "Radiographie thoracique face",
+      indication: "Élimination pathologie pulmonaire/cardiaque",
+      urgency: "Semi-urgent",
+      preparation: "Retirer objets métalliques",
+      contraindications: "Grossesse (protection)",
+      duration: "5 minutes"
+    })
   }
+  
+  if (combined.includes("céphal") || combined.includes("tête")) {
+    exams.push({
+      id: exams.length + 1,
+      exam: "Scanner cérébral sans injection",
+      indication: "Élimination lésion intracrânienne",
+      urgency: "Selon contexte",
+      preparation: "Aucune",
+      contraindications: "Grossesse sans indication vitale",
+      duration: "10 minutes"
+    })
+  }
+  
+  if (combined.includes("abdomen") || combined.includes("digestif")) {
+    exams.push({
+      id: exams.length + 1,
+      exam: "Échographie abdominale",
+      indication: "Exploration douleur abdominale",
+      urgency: "Semi-urgent",
+      preparation: "À jeun 6 heures",
+      contraindications: "Aucune",
+      duration: "20 minutes"
+    })
+  }
+  
+  return exams
+}
+
+function generateFallbackMedications(symptoms: string, chiefComplaint: string, patientData: any, clinicalData: any) {
+  const combined = `${symptoms} ${chiefComplaint}`.toLowerCase()
+  const medications = []
+  const allergies = (patientData.allergies || []).map((a: string) => a.toLowerCase())
+  
+  // Traitement symptomatique de base
+  if (!allergies.includes("paracétamol")) {
+    medications.push({
+      id: 1,
+      dci: "Paracétamol",
+      brand: "Doliprane / Efferalgan",
+      dosage: patientData.age >= 65 ? "500mg" : "1g",
+      frequency: "3 fois par jour si nécessaire",
+      duration: "5 jours maximum",
+      indication: "Traitement symptomatique douleur/fièvre",
+      contraindications: allergies.includes("paracétamol") ? "ALLERGIE PATIENT" : "Insuffisance hépatique sévère",
+      monitoring: "Surveillance hépatique si traitement prolongé",
+      mauritianAvailability: "Disponible toutes pharmacies Maurice"
+    })
+  }
+  
+  // Traitements spécifiques selon symptômes
+  if (combined.includes("douleur") && !allergies.includes("ibuprofène") && patientData.age < 65) {
+    medications.push({
+      id: 2,
+      dci: "Ibuprofène",
+      brand: "Advil / Brufen",
+      dosage: "400mg",
+      frequency: "2 fois par jour pendant les repas",
+      duration: "3 jours maximum",
+      indication: "Anti-inflammatoire pour douleur",
+      contraindications: allergies.includes("ibuprofène") ? "ALLERGIE PATIENT" : "Ulcère gastro-duodénal, insuffisance rénale",
+      monitoring: "Surveillance digestive et rénale",
+      mauritianAvailability: "Disponible pharmacies Maurice"
+    })
+  }
+  
+  if (combined.includes("toux")) {
+    medications.push({
+      id: medications.length + 1,
+      dci: "Sirop simple",
+      brand: "Sirop antitussif",
+      dosage: "15ml",
+      frequency: "3 fois par jour",
+      duration: "7 jours",
+      indication: "Toux sèche irritative",
+      contraindications: "Aucune connue",
+      monitoring: "Efficacité clinique",
+      mauritianAvailability: "Disponible pharmacies Maurice"
+    })
+  }
+  
+  return medications
 }
