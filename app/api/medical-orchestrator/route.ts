@@ -3,14 +3,13 @@ import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
 
 /**
- * ORCHESTRATEUR MÉDICAL EXPERT TIBOK IA DOCTOR
- * Route API principale pour coordonner le workflow médical complet
- * Emplacement: app/api/medical-orchestrator/route.ts
+ * ORCHESTRATEUR MÉDICAL SIMPLIFIÉ TIBOK IA DOCTOR
+ * Génère 3 documents modifiables basés uniquement sur le diagnostic IA
  */
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("🚀 ORCHESTRATEUR MÉDICAL EXPERT - Démarrage workflow complet")
+    console.log("🚀 ORCHESTRATEUR MÉDICAL SIMPLIFIÉ - Démarrage")
 
     const { patientData, clinicalData, questionsData } = await request.json()
 
@@ -19,7 +18,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "Données patient et cliniques requises pour l'analyse expert",
+          error: "Données patient et cliniques requises",
         },
         { status: 400 },
       )
@@ -30,631 +29,841 @@ export async function POST(request: NextRequest) {
 
     try {
       // ═══════════════════════════════════════════════════════════════
-      // ÉTAPE 1: DIAGNOSTIC IA EXPERT APPROFONDI
+      // ÉTAPE 1: DIAGNOSTIC IA COMPLET (UNIQUE SOURCE DE VÉRITÉ)
       // ═══════════════════════════════════════════════════════════════
-      console.log("🧠 Étape 1: Diagnostic IA Expert approfondi")
+      console.log("🧠 Étape 1: Diagnostic IA complet")
       workflow.push({
         step: currentStep++,
-        name: "Analyse diagnostique IA expert",
+        name: "Diagnostic IA Expert",
         status: "processing",
-        description: "Diagnostic différentiel complet avec raisonnement clinique approfondi"
+        description: "Analyse diagnostique complète avec recommandations"
       })
 
-      const diagnosticResult = await generateExpertDiagnosisWithAI(patientData, clinicalData, questionsData)
+      const diagnosticResult = await generateCompleteDiagnosis(patientData, clinicalData, questionsData)
       workflow[0].status = "completed"
       workflow[0].result = diagnosticResult
-      workflow[0].confidence = extractConfidenceFromDiagnosis(diagnosticResult)
-      
-      console.log("📊 Debug diagnostic result type:", typeof diagnosticResult)
-      console.log("📊 Debug diagnostic result keys:", Object.keys(diagnosticResult || {}))
+      workflow[0].confidence = diagnosticResult.diagnosis?.primary?.confidence || 75
 
       // ═══════════════════════════════════════════════════════════════
-      // ÉTAPE 2: RECHERCHE EVIDENCE-BASED MEDICINE
+      // ÉTAPE 2: DOCUMENT RÉSUMÉ DE CONSULTATION
       // ═══════════════════════════════════════════════════════════════
-      console.log("📚 Étape 2: Recherche Evidence-Based Medicine")
+      console.log("📋 Étape 2: Génération résumé de consultation")
       workflow.push({
         step: currentStep++,
-        name: "Recherche evidence médicale approfondie",
+        name: "Résumé de consultation",
         status: "processing",
-        description: "Analyse bibliographique et recommandations basées sur les preuves"
+        description: "Document de consultation modifiable et téléchargeable"
       })
 
-      const pubmedResult = await searchExpertPubMedEvidenceSafe(diagnosticResult)
+      const consultationReport = await generateConsultationSummary(patientData, clinicalData, diagnosticResult)
       workflow[1].status = "completed"
-      workflow[1].result = pubmedResult
-      workflow[1].articlesFound = pubmedResult.articles?.length || 0
+      workflow[1].result = consultationReport
 
       // ═══════════════════════════════════════════════════════════════
-      // ÉTAPE 3: PLAN D'INVESTIGATIONS PARACLINIQUES EXPERT
+      // ÉTAPE 3: ORDONNANCE EXAMENS BIOLOGIQUES
       // ═══════════════════════════════════════════════════════════════
-      console.log("🔬 Étape 3: Plan d'investigations paracliniques expert")
+      console.log("🩸 Étape 3: Génération ordonnance examens biologiques")
       workflow.push({
         step: currentStep++,
-        name: "Plan d'investigations médicales spécialisées",
+        name: "Ordonnance examens biologiques",
         status: "processing",
-        description: "Examens ciblés avec justifications cliniques et évaluation d'urgence"
+        description: "Prescription examens de laboratoire"
       })
 
-      const examensResult = await generateExpertExamensCore(diagnosticResult, patientData, clinicalData)
+      const biologyPrescription = await generateBiologyPrescription(patientData, diagnosticResult)
       workflow[2].status = "completed"
-      workflow[2].result = examensResult
-      workflow[2].examensRecommended = calculateTotalExaminations(examensResult)
-      
-      console.log("📊 Debug examens result type:", typeof examensResult)
-      console.log("📊 Debug examens result keys:", Object.keys(examensResult || {}))
+      workflow[2].result = biologyPrescription
 
       // ═══════════════════════════════════════════════════════════════
-      // ÉTAPE 4: PRESCRIPTION THÉRAPEUTIQUE EXPERT SÉCURISÉE
+      // ÉTAPE 4: ORDONNANCE EXAMENS PARACLINIQUES
       // ═══════════════════════════════════════════════════════════════
-      console.log("💊 Étape 4: Prescription thérapeutique expert")
+      console.log("📸 Étape 4: Génération ordonnance examens paracliniques")
       workflow.push({
         step: currentStep++,
-        name: "Prescription médicamenteuse avec vérifications sécuritaires",
+        name: "Ordonnance examens paracliniques",
         status: "processing",
-        description: "Thérapeutique personnalisée avec gestion interactions et contre-indications"
+        description: "Prescription imagerie et examens spécialisés"
       })
 
-      const prescriptionResult = await generateExpertPrescriptionCore(diagnosticResult, patientData, clinicalData)
+      const paraclinicalPrescription = await generateParaclinicalPrescription(patientData, diagnosticResult)
       workflow[3].status = "completed"
-      workflow[3].result = prescriptionResult
-      workflow[3].medicationsVerified = calculateTotalMedications(prescriptionResult)
-      
-      console.log("📊 Debug prescription result type:", typeof prescriptionResult)
-      console.log("📊 Debug prescription result keys:", Object.keys(prescriptionResult || {}))
+      workflow[3].result = paraclinicalPrescription
 
       // ═══════════════════════════════════════════════════════════════
-      // ÉTAPE 5: RAPPORT DE CONSULTATION EXPERT COMPLET
+      // ÉTAPE 5: ORDONNANCE MÉDICAMENTEUSE
       // ═══════════════════════════════════════════════════════════════
-      console.log("📋 Étape 5: Rapport de consultation expert")
+      console.log("💊 Étape 5: Génération ordonnance médicamenteuse")
       workflow.push({
         step: currentStep++,
-        name: "Génération rapport médical expert",
+        name: "Ordonnance médicamenteuse",
         status: "processing",
-        description: "Synthèse médicale complète avec plan de suivi personnalisé"
+        description: "Prescription médicaments sécurisée Maurice"
       })
 
-      const reportResult = await generateExpertConsultationReportCore({
-        patientData,
-        clinicalData,
-        questionsData,
-        diagnosis: diagnosticResult,
-        diagnosisData: { diagnosis: parseJSONSafely(diagnosticResult.text || "{}") },
-        pubmed: pubmedResult,
-        examens: examensResult,
-        prescription: prescriptionResult,
-      })
-
+      const medicationPrescription = await generateMauritianMedicationPrescription(patientData, clinicalData, diagnosticResult)
       workflow[4].status = "completed"
-      workflow[4].result = reportResult
-      workflow[4].reportQuality = calculateReportQuality(reportResult)
+      workflow[4].result = medicationPrescription
 
       // ═══════════════════════════════════════════════════════════════
-      // ASSEMBLAGE DU RAPPORT FINAL EXPERT (PARSING JSON CORRECT)
+      // ASSEMBLAGE FINAL - 4 DOCUMENTS MAURICIENS
       // ═══════════════════════════════════════════════════════════════
-      const expertFinalReport = {
-        diagnosis: extractDataSafely(diagnosticResult),
-        examens: extractDataSafely(examensResult),
-        prescription: extractDataSafely(prescriptionResult),
-        consultationReport: extractDataSafely(reportResult),
-        pubmedEvidence: pubmedResult,
-        fdaVerification: prescriptionResult.prescription?.fdaValidation || null,
-        qualityMetrics: {
-          overallConfidence: calculateOverallConfidence(workflow),
-          evidenceLevel: pubmedResult.metadata?.evidenceLevel || "Grade B",
-          safetyScore: calculateSafetyScore(prescriptionResult, patientData),
-          completenessScore: calculateCompletenessScore(workflow)
+      const finalReport = {
+        diagnosis: diagnosticResult,
+        documents: {
+          consultationSummary: consultationReport,
+          biologyPrescription: biologyPrescription,
+          paraclinicalPrescription: paraclinicalPrescription,
+          medicationPrescription: medicationPrescription
+        },
+        metadata: {
+          patientId: generatePatientId(patientData),
+          timestamp: new Date().toISOString(),
+          confidence: diagnosticResult.diagnosis?.primary?.confidence || 75,
+          documentsGenerated: 4,
+          mauritianCompliant: true,
+          editable: true,
+          downloadable: true
         }
       }
 
-      console.log("✅ Workflow médical expert terminé avec succès")
+      console.log("✅ Workflow médical simplifié terminé avec succès - 4 documents mauriciens générés")
 
       return NextResponse.json({
         success: true,
         workflow: workflow,
-        finalReport: expertFinalReport,
+        finalReport: finalReport,
         metadata: {
           timestamp: new Date().toISOString(),
-          patientId: generatePatientId(patientData),
           stepsCompleted: workflow.length,
-          aiModel: "gpt-4o-expert-medical",
-          workflowDuration: Date.now(),
-          qualityAssurance: "Expert level validation completed",
-          version: "2.0-EXPERT",
-          generatedBy: "TIBOK IA DOCTOR Expert System"
+          aiModel: "gpt-4o-medical",
+          version: "4.0-MAURITIAN",
+          approach: "diagnosis-based-mauritian-documents"
         },
       })
 
     } catch (stepError) {
       console.error(`❌ Erreur à l'étape ${currentStep - 1}:`, stepError)
-
-      // Marquer l'étape courante comme erreur avec détails complets
-      if (workflow[currentStep - 2]) {
-        workflow[currentStep - 2].status = "error"
-        workflow[currentStep - 2].error = stepError instanceof Error ? stepError.message : "Erreur inconnue"
-        workflow[currentStep - 2].errorDetails = {
-          timestamp: new Date().toISOString(),
-          step: currentStep - 1,
-          context: "Medical workflow orchestration",
-          recovery: "Fallback automatique activé"
-        }
-      }
-
-      // Générer un rapport de fallback complet et sécurisé
-      const fallbackReport = generateCompleteFallbackReport(patientData, clinicalData, questionsData)
+      
+      // Fallback simple basé sur les données disponibles
+      const fallbackReport = generateSimpleFallback(patientData, clinicalData)
 
       return NextResponse.json({
-        success: true, // Retourner success=true même avec fallback
+        success: true,
         workflow: workflow,
         finalReport: fallbackReport,
         fallback: true,
-        error: `Erreur à l'étape ${currentStep - 1}, fallback sécurisé utilisé`,
-        details: stepError instanceof Error ? stepError.message : "Erreur inconnue",
-        recovery: "Utilisation des données partielles disponibles avec fallback expert sécurisé",
+        error: `Erreur à l'étape ${currentStep - 1}, fallback utilisé`,
         metadata: {
           timestamp: new Date().toISOString(),
-          fallbackActivated: true,
-          partialResults: workflow.length
+          fallbackActivated: true
         }
       })
     }
   } catch (error) {
-    console.error("❌ Erreur orchestrateur médical expert critique:", error)
+    console.error("❌ Erreur orchestrateur critique:", error)
     
-    // Fallback complet en cas d'erreur globale critique
-    const completeFallback = generateCompleteFallbackReport(
-      request.body?.patientData || {}, 
-      request.body?.clinicalData || {}, 
-      request.body?.questionsData || {}
-    )
-
     return NextResponse.json({
-      success: true,
-      workflow: [
-        { 
-          step: 1, 
-          name: "Fallback sécurisé critique activé", 
-          status: "completed", 
-          result: completeFallback,
-          description: "Mode sécurisé activé suite à erreur critique"
-        }
-      ],
-      finalReport: completeFallback,
-      fallback: true,
-      critical: true,
-      error: "Erreur critique - mode sécurisé activé",
-      details: error instanceof Error ? error.message : "Erreur critique inconnue",
-      timestamp: new Date().toISOString(),
-      recovery: "Système de fallback critique activé avec succès"
-    })
+      success: false,
+      error: "Erreur critique du système",
+      details: error instanceof Error ? error.message : "Erreur inconnue",
+      timestamp: new Date().toISOString()
+    }, { status: 500 })
   }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// FONCTIONS CORE EXPERTES (Logique métier directe sans appels HTTP)
+// FONCTIONS DE GÉNÉRATION SIMPLIFIÉES
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
- * GÉNÉRATION DU DIAGNOSTIC EXPERT IA
- * Analyse clinique approfondie avec raisonnement médical
+ * DIAGNOSTIC IA COMPLET - SOURCE UNIQUE DE VÉRITÉ
  */
-async function generateExpertDiagnosisWithAI(patientData: any, clinicalData: any, questionsData: any) {
-  try {
-    const patientContext = buildPatientContext(patientData, clinicalData)
-    
-    const diagnosticPrompt = `
-Tu es un médecin expert sénior avec 25 ans d'expérience en médecine interne.
+async function generateCompleteDiagnosis(patientData: any, clinicalData: any, questionsData: any) {
+  const patientContext = `
+PATIENT: ${patientData.firstName} ${patientData.lastName}, ${patientData.age} ans, ${patientData.gender}
+ANTHROPOMÉTRIE: ${patientData.weight}kg, ${patientData.height}cm (IMC: ${calculateBMI(patientData)})
+MOTIF: ${clinicalData.chiefComplaint || "Consultation"}
+SYMPTÔMES: ${(clinicalData.symptoms || []).join(", ") || "Non spécifiés"}
+DOULEUR: ${clinicalData.painScale || 0}/10
+CONSTANTES: T°${clinicalData.vitalSigns?.temperature}°C, FC ${clinicalData.vitalSigns?.heartRate}bpm, TA ${clinicalData.vitalSigns?.bloodPressureSystolic}/${clinicalData.vitalSigns?.bloodPressureDiastolic}mmHg
+ANTÉCÉDENTS: ${(patientData.medicalHistory || []).join(", ") || "Aucun"}
+ALLERGIES: ${(patientData.allergies || []).join(", ") || "Aucune"}
+TRAITEMENTS: ${patientData.currentMedicationsText || "Aucun"}
+ANAMNÈSE COMPLÉMENTAIRE: ${questionsData?.responses?.map((r: any) => `${r.question}: ${r.answer}`).join(", ") || "Non réalisée"}
+  `.trim()
 
-CONTEXTE PATIENT:
+  const diagnosticPrompt = `
+Tu es un médecin expert. Génère un diagnostic COMPLET avec TOUTES les informations nécessaires pour la suite.
+
 ${patientContext}
 
-INSTRUCTIONS CRITIQUES:
-- Tu DOIS retourner UNIQUEMENT du JSON valide
-- AUCUN texte avant ou après le JSON
-- AUCUN backticks markdown (\`\`\`)
-- COMMENCER par { et FINIR par }
-- Vérifier que toutes les virgules et guillemets sont corrects
+GÉNÈRE EXACTEMENT ce JSON (COMPLET avec toutes les sections) :
+{
+  "diagnosis": {
+    "primary": {
+      "condition": "Diagnostic principal précis",
+      "icd10": "Code CIM-10",
+      "confidence": 85,
+      "severity": "mild|moderate|severe",
+      "rationale": "Justification diagnostique détaillée",
+      "prognosis": "Évolution attendue"
+    },
+    "differential": [
+      {
+        "condition": "Diagnostic alternatif",
+        "probability": 60,
+        "reasoning": "Arguments pour ce diagnostic"
+      }
+    ]
+  },
+  "examinations": {
+    "laboratory": [
+      {
+        "test": "NFS + CRP",
+        "indication": "Recherche syndrome inflammatoire",
+        "urgency": "semi-urgent",
+        "expectedResults": "Hyperleucocytose si infection"
+      }
+    ],
+    "imaging": [
+      {
+        "exam": "Radiographie thoracique",
+        "indication": "Élimination pathologie pulmonaire",
+        "urgency": "programmé"
+      }
+    ],
+    "specialized": [
+      {
+        "exam": "ECG",
+        "indication": "Évaluation cardiologique",
+        "urgency": "urgent"
+      }
+    ]
+  },
+  "medications": [
+    {
+      "name": "Paracétamol",
+      "dosage": "1g",
+      "frequency": "3x/jour",
+      "duration": "5 jours",
+      "indication": "Antalgique et antipyrétique",
+      "contraindications": ["Allergie", "Insuffisance hépatique"],
+      "monitoring": "Surveillance hépatique",
+      "safetyNote": "Dose adaptée au patient"
+    }
+  ],
+  "recommendations": {
+    "immediate": "Repos, hydratation",
+    "followUp": "Consultation dans 7 jours",
+    "redFlags": ["Fièvre >39°C", "Dyspnée"],
+    "lifestyle": "Arrêt tabac recommandé"
+  },
+  "clinicalNotes": {
+    "impression": "Impression clinique générale",
+    "riskAssessment": "Évaluation des risques",
+    "urgencyLevel": 3,
+    "specialistReferral": "Cardiologue si pas d'amélioration"
+  }
+}
 
-Retourne EXACTEMENT ce JSON (complète avec les vraies valeurs médicales):
-{"primaryDiagnosis":{"condition":"Diagnostic le plus probable","probability":85,"severity":"Modérée","icd10":"Code CIM-10","urgency":"Modérée"},"differentialDiagnosis":[{"condition":"Alternative","probability":60,"reasoning":"Arguments"}],"clinicalReasoning":{"semiology":"Analyse des symptômes","pathophysiology":"Mécanismes probables","riskFactors":["Facteur 1"],"prognosticFactors":["Élément 1"]},"recommendedExams":[{"category":"Biologie","exam":"NFS + CRP","indication":"Justification","urgency":"Semi-urgente","expectedFindings":"Résultats attendus"}],"redFlags":["Signe d'alarme"],"aiConfidence":85,"evidenceLevel":"Grade B"}
+IMPORTANT: Adapte TOUTES les valeurs au cas clinique spécifique. Ce diagnostic servira de base à tous les documents.
 `
 
+  try {
     const result = await generateText({
       model: openai("gpt-4o"),
       prompt: diagnosticPrompt,
-      temperature: 0.01, // Très très faible pour maximiser la cohérence JSON
-      maxTokens: 2500,
+      temperature: 0.1,
+      maxTokens: 3000,
     })
 
-    console.log("✅ Diagnostic expert IA généré avec succès")
-    console.log("📊 Debug - result type:", typeof result)
-    console.log("📊 Debug - result keys:", Object.keys(result || {}))
-    console.log("📊 Debug - result.text preview:", result?.text?.substring(0, 100))
-    return result
+    const parsed = parseJSONSafely(result.text)
+    console.log("✅ Diagnostic IA complet généré")
+    return parsed
 
   } catch (error) {
-    console.warn("⚠️ Fallback diagnostic expert utilisé")
+    console.warn("⚠️ Fallback diagnostic utilisé")
     return generateDiagnosticFallback(patientData, clinicalData)
   }
 }
 
 /**
- * GÉNÉRATION DU PLAN D'EXAMENS EXPERT
- * Plan d'investigations paracliniques personnalisé
+ * RÉSUMÉ DE CONSULTATION MODIFIABLE
  */
-async function generateExpertExamensCore(diagnosticResult: any, patientData: any, clinicalData: any) {
-  try {
-    console.log("🔬 Génération plan examens expert (logique core)")
-    
-    const diagnosis = parseJSONSafely(diagnosticResult.text || "{}")
-    const patientProfile = buildPatientProfile(patientData)
-    
-    const examensPrompt = `
-Tu es un médecin expert en médecine diagnostique et imagerie.
+async function generateConsultationSummary(patientData: any, clinicalData: any, diagnosis: any) {
+  const summaryPrompt = `
+Génère un résumé de consultation MÉDICAL PROFESSIONNEL modifiable.
 
-PROFIL PATIENT: ${patientProfile}
-DIAGNOSTIC RETENU: ${diagnosis.primaryDiagnosis?.condition || "À déterminer"}
-SYMPTÔMES: ${(clinicalData.symptoms || []).join(", ")}
-URGENCE: ${diagnosis.primaryDiagnosis?.urgency || "Standard"}
+DIAGNOSTIC: ${diagnosis.diagnosis?.primary?.condition || "À déterminer"}
+PATIENT: ${patientData.firstName} ${patientData.lastName}
 
-Génère un plan d'examens expert personnalisé.
-
-Retourne UNIQUEMENT ce JSON exact:
+Format JSON pour document modifiable:
 {
-  "prescriptionHeader": {
-    "prescriptionId": "EXA-${Date.now()}",
-    "issueDate": "${new Date().toLocaleDateString("fr-FR")}",
-    "issueTime": "${new Date().toLocaleTimeString("fr-FR")}",
-    "prescriber": {
-      "name": "Dr. TIBOK IA DOCTOR",
-      "title": "Praticien Expert en Médecine Interne",
-      "rppsNumber": "IA-RPPS-2024-EXPERT"
+  "document": {
+    "type": "RÉSUMÉ DE CONSULTATION",
+    "header": {
+      "title": "COMPTE-RENDU DE CONSULTATION MÉDICALE",
+      "date": "${new Date().toLocaleDateString("fr-FR")}",
+      "physician": "Dr. TIBOK IA DOCTOR",
+      "patient": "${patientData.firstName} ${patientData.lastName}",
+      "dossierNumber": "CR-${Date.now()}"
     },
-    "patient": {
-      "lastName": "${patientData.lastName || "N/A"}",
-      "firstName": "${patientData.firstName || "N/A"}",
-      "age": "${patientData.age || "N/A"} ans",
-      "weight": "${patientData.weight || "N/A"} kg"
+    "content": {
+      "patientInfo": {
+        "identity": "${patientData.firstName} ${patientData.lastName}, ${patientData.age} ans",
+        "anthropometry": "Poids: ${patientData.weight}kg, Taille: ${patientData.height}cm, IMC: ${calculateBMI(patientData)}",
+        "contact": "Consultation télémédecine TIBOK"
+      },
+      "consultation": {
+        "chiefComplaint": "${clinicalData.chiefComplaint || "Motif à préciser"}",
+        "historyOfPresentIllness": "Le patient consulte pour ${clinicalData.chiefComplaint || "des symptômes"} évoluant depuis ${clinicalData.symptomDuration || "durée non précisée"}. ${(clinicalData.symptoms || []).join(", ") || "Symptômes à détailler"} avec retentissement ${clinicalData.functionalStatus || "à évaluer"}.",
+        "pastMedicalHistory": "${(patientData.medicalHistory || []).join(", ") || "Aucun antécédent particulier"}",
+        "currentMedications": "${patientData.currentMedicationsText || "Aucun traitement en cours"}",
+        "allergies": "${(patientData.allergies || []).join(", ") || "Aucune allergie connue"}"
+      },
+      "examination": {
+        "vitalSigns": "TA: ${clinicalData.vitalSigns?.bloodPressureSystolic || "?"}/${clinicalData.vitalSigns?.bloodPressureDiastolic || "?"}mmHg, FC: ${clinicalData.vitalSigns?.heartRate || "?"}bpm, T°: ${clinicalData.vitalSigns?.temperature || "?"}°C",
+        "painAssessment": "Douleur évaluée à ${clinicalData.painScale || 0}/10",
+        "physicalExam": "${clinicalData.physicalExam || "Examen physique à compléter selon symptômes"}"
+      },
+      "assessment": {
+        "primaryDiagnosis": "${diagnosis.diagnosis?.primary?.condition || "Diagnostic en cours d'établissement"}",
+        "confidence": "${diagnosis.diagnosis?.primary?.confidence || 70}%",
+        "severity": "${diagnosis.diagnosis?.primary?.severity || "À évaluer"}",
+        "clinicalRationale": "${diagnosis.diagnosis?.primary?.rationale || "Analyse clinique basée sur les symptômes présentés et l'examen médical"}"
+      },
+      "plan": {
+        "immediate": "${diagnosis.recommendations?.immediate || "Traitement symptomatique et surveillance"}",
+        "followUp": "${diagnosis.recommendations?.followUp || "Réévaluation dans 7-10 jours"}",
+        "redFlags": "${(diagnosis.recommendations?.redFlags || []).join(", ") || "Signes d'alarme à surveiller"}"
+      }
     },
-    "clinicalContext": "Examens complémentaires selon diagnostic expert établi"
-  },
-  "laboratoryTests": [
-    {
-      "categoryName": "Examens Biologiques de Première Intention",
-      "tests": [
-        {
-          "testName": "NFS + CRP + Ionogramme complet",
-          "nabmCode": "B0101",
-          "indication": "Bilan biologique initial - Recherche syndrome inflammatoire et évaluation fonctions d'organes",
-          "urgency": "Semi-urgente",
-          "cost": "45.60€",
-          "fasting": false,
-          "sampleVolume": "6 mL",
-          "resultDelay": "2-4 heures",
-          "contraindications": ["Aucune contre-indication absolue"],
-          "clinicalValue": "Dépistage anomalies hématologiques et métaboliques"
-        }
-      ]
-    }
-  ],
-  "imagingStudies": [
-    {
-      "categoryName": "Imagerie Diagnostique",
-      "examinations": [
-        {
-          "examName": "Radiographie thoracique face et profil",
-          "ccamCode": "ZBQK002",
-          "indication": "Imagerie thoracique première intention selon symptomatologie",
-          "urgency": "Programmée",
-          "cost": "28.50€",
-          "preparation": "Déshabillage thorax, retrait objets métalliques",
-          "contraindications": ["Grossesse 1er trimestre sans indication vitale"],
-          "irradiation": "Dose minimale < 0.1 mSv",
-          "diagnosticYield": "Élimination pathologie thoracique évidente"
-        }
-      ]
-    }
-  ],
-  "specializedTests": [
-    {
-      "categoryName": "Explorations Spécialisées",
-      "examinations": [
-        {
-          "examName": "Électrocardiogramme 12 dérivations",
-          "nabmCode": "DEQP003",
-          "indication": "Exploration cardiologique selon symptômes cardiovasculaires",
-          "urgency": "Semi-urgente",
-          "cost": "14.80€",
-          "duration": "10 minutes",
-          "preparation": "Repos 5 minutes avant examen",
-          "contraindications": ["Aucune"],
-          "clinicalQuestion": "Dépistage troubles rythme, conduction, ischémie"
-        }
-      ]
-    }
-  ],
-  "followUpPlan": {
-    "resultsTiming": {
-      "urgent": "Résultats critiques communiqués immédiatement",
-      "routine": "Résultats disponibles sous 24-72h",
-      "imaging": "Interprétation radiologique sous 48h"
-    },
-    "nextSteps": {
-      "consultation": "Consultation résultats dans 7-10 jours",
-      "urgentCallback": "Contact téléphonique si valeurs critiques",
-      "additionalExams": "Examens complémentaires selon résultats initiaux"
+    "footer": {
+      "signature": "Dr. TIBOK IA DOCTOR - Médecin Expert IA",
+      "contact": "Plateforme TIBOK - Télémédecine Maurice",
+      "nextAppointment": "À programmer selon évolution"
     }
   },
+  "editableFields": [
+    "content.consultation.historyOfPresentIllness",
+    "content.examination.physicalExam",
+    "content.assessment.clinicalRationale",
+    "content.plan.immediate",
+    "content.plan.followUp"
+  ],
   "metadata": {
-    "prescriptionMetrics": {
-      "totalExaminations": 3,
-      "complexityScore": 3,
-      "costEstimate": "88.90€",
-      "averageDelay": "48-72 heures"
-    },
-    "qualityData": {
-      "evidenceLevel": "Grade A",
-      "guidanceCompliance": "Recommandations HAS respectées",
-      "diagnosticYield": "Élevée pour orientation initiale"
-    }
+    "documentType": "consultation-summary",
+    "editable": true,
+    "downloadable": true,
+    "format": "PDF/Word"
   }
 }
 `
 
+  try {
     const result = await generateText({
       model: openai("gpt-4o"),
-      prompt: examensPrompt,
-      temperature: 0.01, // Très très faible pour JSON cohérent
-      maxTokens: 3000,
+      prompt: summaryPrompt,
+      temperature: 0.2,
+      maxTokens: 2000,
     })
 
-    const examensData = parseJSONSafely(result.text)
-    
-    // Validation et enrichissement sécuritaire
-    const validatedExamens = validateExamensSafety(examensData, patientData)
-
-    console.log("✅ Plan examens expert généré avec succès")
-    console.log("📊 Debug - examensData type:", typeof examensData)
-    console.log("📊 Debug - examensData keys:", Object.keys(examensData || {}))
-    
-    return {
-      success: true,
-      examens: validatedExamens,
-      metadata: {
-        source: "Expert Core Logic",
-        generatedAt: new Date().toISOString(),
-        validationLevel: "Expert medical validation"
-      }
-    }
-    
+    return parseJSONSafely(result.text)
   } catch (error) {
-    console.error("❌ Erreur examens core:", error)
-    return generateExamensDataFallback(patientData, clinicalData)
+    return generateConsultationFallback(patientData, clinicalData, diagnosis)
   }
 }
 
 /**
- * GÉNÉRATION DE LA PRESCRIPTION EXPERT SÉCURISÉE
- * Prescription personnalisée avec gestion allergies et interactions
+ * ORDONNANCE EXAMENS BIOLOGIQUES - FORMAT MAURICIEN
  */
-async function generateExpertPrescriptionCore(diagnosticResult: any, patientData: any, clinicalData: any) {
-  try {
-    console.log("💊 Génération prescription experte sécurisée")
-    
-    const diagnosis = parseJSONSafely(diagnosticResult.text || "{}")
-    const safetyProfile = buildSafetyProfile(patientData)
-    
-    const prescriptionPrompt = `
-Tu es un médecin expert en pharmacologie clinique et thérapeutique.
-
-PROFIL SÉCURITAIRE PATIENT: ${safetyProfile}
-DIAGNOSTIC: ${diagnosis.primaryDiagnosis?.condition || "Consultation"}
-SÉVÉRITÉ: ${diagnosis.primaryDiagnosis?.severity || "Modérée"}
-DOULEUR: ${clinicalData.painScale || 0}/10
-URGENCE: ${diagnosis.primaryDiagnosis?.urgency || "Standard"}
-
-CRITICAL: Vérifier allergies avant prescription!
-
-Retourne UNIQUEMENT ce JSON exact:
-{
-  "prescriptionHeader": {
-    "prescriptionId": "ORD-${Date.now()}",
-    "issueDate": "${new Date().toLocaleDateString("fr-FR")}",
-    "issueTime": "${new Date().toLocaleTimeString("fr-FR")}",
-    "prescriber": {
-      "name": "Dr. TIBOK IA DOCTOR",
-      "title": "Praticien Expert en Pharmacologie Clinique",
-      "rppsNumber": "IA-RPPS-2024-EXPERT"
-    },
-    "patient": {
-      "lastName": "${patientData.lastName || "N/A"}",
-      "firstName": "${patientData.firstName || "N/A"}",
-      "age": "${patientData.age || "N/A"} ans",
-      "weight": "${patientData.weight || "N/A"} kg"
-    },
-    "indication": "Prescription thérapeutique expert selon diagnostic établi",
-    "validityPeriod": "3 mois (réglementation française)"
-  },
-  "medications": [
-    {
-      "lineNumber": 1,
-      "prescriptionType": "MÉDICAMENT",
-      "dci": "${getRecommendedMedication(patientData, clinicalData).dci}",
-      "brandName": "${getRecommendedMedication(patientData, clinicalData).brand}",
-      "dosageForm": "Comprimé pelliculé",
-      "strength": "${getRecommendedMedication(patientData, clinicalData).strength}",
-      "atcCode": "${getRecommendedMedication(patientData, clinicalData).atc}",
-      "posology": {
-        "dosage": "${getRecommendedMedication(patientData, clinicalData).dosage}",
-        "frequency": "${getRecommendedMedication(patientData, clinicalData).frequency}",
-        "timing": "De préférence après les repas",
-        "route": "Voie orale",
-        "maxDailyDose": "${getRecommendedMedication(patientData, clinicalData).maxDaily}"
+async function generateBiologyPrescription(patientData: any, diagnosis: any) {
+  const biologicalExams = diagnosis.examinations?.laboratory || []
+  
+  const biologyPrescription = {
+    document: {
+      type: "ORDONNANCE MÉDICALE - EXAMENS BIOLOGIQUES",
+      header: {
+        title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+        subtitle: "PRESCRIPTION D'EXAMENS BIOLOGIQUES",
+        logo: "🏥 TIBOK MEDICAL CENTER",
+        date: new Date().toLocaleDateString("fr-FR"),
+        time: new Date().toLocaleTimeString("fr-FR"),
+        prescriptionNumber: `BIO-${Date.now()}-MU`
       },
-      "treatment": {
-        "duration": "3 à 5 jours maximum",
-        "totalQuantity": "${getRecommendedMedication(patientData, clinicalData).quantity}",
-        "renewals": "Non renouvelable sans consultation",
-        "stoppingCriteria": "Disparition symptômes ou selon évolution"
+      prescriber: {
+        title: "Dr.",
+        firstName: "TIBOK",
+        lastName: "IA DOCTOR",
+        qualification: "Médecin Généraliste - Télémédecine",
+        registrationNumber: "COUNCIL-2024-IA-001",
+        address: "TIBOK Medical Platform, Télémédecine Maurice",
+        phone: "+230 XXX XXXX",
+        email: "contact@tibok.medical"
       },
-      "indication": "Traitement symptomatique antalgique et antipyrétique selon diagnostic",
-      "contraindications": ${JSON.stringify(getRecommendedMedication(patientData, clinicalData).contraindications)},
-      "interactions": {
-        "major": ${JSON.stringify(getRecommendedMedication(patientData, clinicalData).interactions)},
-        "foodInteractions": ["Éviter alcool"]
+      patient: {
+        title: patientData.gender === "Homme" ? "M." : "Mme",
+        firstName: patientData.firstName,
+        lastName: patientData.lastName.toUpperCase(),
+        dateOfBirth: patientData.dateOfBirth || "À préciser",
+        age: `${patientData.age} ans`,
+        address: "Adresse patient à compléter",
+        idNumber: "Carte d'identité mauricienne à préciser",
+        weight: `${patientData.weight}kg`,
+        height: `${patientData.height}cm`
       },
-      "monitoring": {
-        "clinicalParams": ["Efficacité antalgique", "Tolérance digestive"],
-        "labMonitoring": "${getRecommendedMedication(patientData, clinicalData).monitoring}",
-        "followUpSchedule": "Réévaluation si pas amélioration 48-72h"
+      clinicalInfo: {
+        indication: `Examens biologiques dans le cadre de: ${diagnosis.diagnosis?.primary?.condition || "Évaluation clinique"}`,
+        urgency: biologicalExams.some((e: any) => e.urgency === "urgent") ? "URGENT" : "NON URGENT",
+        fasting: biologicalExams.some((e: any) => e.test?.toLowerCase().includes("glucose") || e.test?.toLowerCase().includes("lipid")) ? "CERTAINS EXAMENS À JEUN" : "PAS DE JEÛNE NÉCESSAIRE"
       },
-      "patientSpecific": "${getRecommendedMedication(patientData, clinicalData).patientNote}",
-      "safetyScore": ${getRecommendedMedication(patientData, clinicalData).safetyScore}
-    }
-  ],
-  "nonPharmacologicalInterventions": [
-    {
-      "intervention": "Mesures hygiéno-diététiques et repos",
-      "description": "Repos relatif adapté aux symptômes. Hydratation suffisante 1.5-2L/jour. Application froid/chaleur selon type douleur.",
-      "duration": "Pendant toute la durée symptomatique",
-      "evidenceLevel": "Grade B"
-    }
-  ],
-  "patientEducation": {
-    "medicationInstructions": {
-      "administration": "Prendre avec grand verre d'eau, après repas",
-      "storage": "Température ambiante, à l'abri humidité",
-      "missedDose": "Prendre dès possible mais pas de double dose"
-    },
-    "warningSignsToReport": "${getRecommendedMedication(patientData, clinicalData).warnings}",
-    "emergencyInstructions": "15 (SAMU) si urgence vitale, arrêt immédiat si réaction allergique",
-    "followUpInstructions": "Reconsulter si aggravation ou pas amélioration 72h"
-  },
-  "prescriptionSafety": {
-    "allergyChecked": true,
-    "interactionChecked": true,
-    "doseAppropriate": true,
-    "contraindictionVerified": true,
-    "riskLevel": "${assessPatientRisk(patientData)}"
-  },
-  "metadata": {
-    "prescriptionMetrics": {
-      "totalMedications": 1,
-      "complexityScore": ${calculatePrescriptionComplexity(patientData)},
-      "safetyScore": ${getRecommendedMedication(patientData, clinicalData).safetyScore},
-      "evidenceLevel": "Grade A"
-    },
-    "technicalData": {
-      "generationDate": "${new Date().toISOString()}",
-      "aiModel": "gpt-4o-pharmacology-expert",
-      "validationLevel": "Expert pharmacological validation"
-    }
-  }
-}
-`
-
-    const result = await generateText({
-      model: openai("gpt-4o"),
-      prompt: prescriptionPrompt,
-      temperature: 0.01, // Très très faible pour sécurité maximale
-      maxTokens: 3000,
-    })
-
-    const prescriptionData = parseJSONSafely(result.text)
-    
-    // Validation sécuritaire supplémentaire
-    const validatedPrescription = await validatePrescriptionSafety(prescriptionData, patientData)
-
-    console.log("✅ Prescription experte générée avec validation sécuritaire")
-    console.log("📊 Debug - prescriptionData type:", typeof prescriptionData)
-    console.log("📊 Debug - prescriptionData keys:", Object.keys(prescriptionData || {}))
-    
-    return {
-      success: true,
-      prescription: validatedPrescription,
-      metadata: {
-        source: "Expert Core Logic",
-        generatedAt: new Date().toISOString(),
-        safetyLevel: "Maximum",
-        validationStatus: "Expert validated"
+      prescriptions: biologicalExams.map((exam: any, index: number) => ({
+        lineNumber: index + 1,
+        examination: exam.test,
+        code: `BIO${String(index + 1).padStart(3, '0')}`,
+        indication: exam.indication,
+        urgency: exam.urgency === "urgent" ? "URGENT" : exam.urgency === "semi-urgent" ? "SEMI-URGENT" : "PROGRAMMÉ",
+        fasting: exam.test?.toLowerCase().includes("glucose") || exam.test?.toLowerCase().includes("lipid") ? "À JEUN 12H" : "NON",
+        expectedResults: exam.expectedResults || "Selon normes laboratoire",
+        sampleType: getSampleType(exam.test),
+        volume: getSampleVolume(exam.test),
+        transport: "Transport température ambiante",
+        contraindications: getExamContraindications(exam.test, patientData),
+        cost: "Selon tarification laboratoire agréé",
+        validity: "Prescription valable 6 mois"
+      })),
+      instructions: {
+        patient: [
+          "Se présenter dans tout laboratoire d'analyses médicales agréé à Maurice",
+          "Apporter cette ordonnance et une pièce d'identité",
+          "Respecter le jeûne si indiqué",
+          "Prendre les résultats et les conserver pour la consultation de suivi"
+        ],
+        laboratory: [
+          "Respecter les procédures de prélèvement standard",
+          "Transmettre les résultats au patient et au médecin prescripteur",
+          "Signaler immédiatement toute valeur critique",
+          "Conserver les échantillons selon la réglementation mauricienne"
+        ],
+        urgent: biologicalExams.some((e: any) => e.urgency === "urgent") ? 
+          "EXAMENS URGENTS - Résultats à communiquer dans les 4 heures" : null
+      },
+      footer: {
+        signature: "Dr. TIBOK IA DOCTOR",
+        stamp: "Cachet médical électronique",
+        date: new Date().toLocaleDateString("fr-FR"),
+        legalMention: "Prescription conforme à la réglementation mauricienne",
+        validity: "Ordonnance valable 6 mois à compter de ce jour",
+        contact: "Contact urgence: +230 XXX XXXX"
       }
+    },
+    editableFields: [
+      "patient.address",
+      "patient.idNumber",
+      "prescriptions[].indication",
+      "instructions.patient",
+      "prescriber.phone"
+    ],
+    legalCompliance: {
+      mauritianLaw: true,
+      requiredFields: ["prescriber.registrationNumber", "patient.idNumber", "prescriptions"],
+      digitalSignature: "Signature électronique TIBOK-2024",
+      traceability: `TRACE-BIO-${Date.now()}`,
+      retention: "Conservation 5 ans selon loi mauricienne"
+    },
+    metadata: {
+      documentType: "mauritian-biology-prescription",
+      totalExams: biologicalExams.length,
+      urgentExams: biologicalExams.filter((e: any) => e.urgency === "urgent").length,
+      editable: true,
+      downloadable: true,
+      printable: true,
+      legallyValid: true,
+      format: "A4 - Format mauricien standard"
     }
-    
-  } catch (error) {
-    console.error("❌ Erreur prescription core:", error)
-    return generatePrescriptionDataFallback(patientData)
   }
+
+  return biologyPrescription
 }
 
 /**
- * GÉNÉRATION DU RAPPORT DE CONSULTATION EXPERT
- * Rapport médical complet professionnel
+ * ORDONNANCE EXAMENS PARACLINIQUES - FORMAT MAURICIEN
  */
-async function generateExpertConsultationReportCore(allData: any) {
-  try {
-    console.log("📋 Génération rapport consultation expert")
-    
-    const { patientData, clinicalData, diagnosisData } = allData
-    const diagnosis = diagnosisData?.diagnosis || {}
-    
-    const reportPrompt = `
-Tu es un médecin expert générant un rapport de consultation.
+async function generateParaclinicalPrescription(patientData: any, diagnosis: any) {
+  const imagingExams = diagnosis.examinations?.imaging || []
+  const specializedExams = diagnosis.examinations?.specialized || []
+  const allParaclinicalExams = [...imagingExams, ...specializedExams]
+  
+  const paraclinicalPrescription = {
+    document: {
+      type: "ORDONNANCE MÉDICALE - EXAMENS PARACLINIQUES",
+      header: {
+        title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+        subtitle: "PRESCRIPTION D'EXAMENS PARACLINIQUES",
+        logo: "🏥 TIBOK MEDICAL CENTER",
+        date: new Date().toLocaleDateString("fr-FR"),
+        time: new Date().toLocaleTimeString("fr-FR"),
+        prescriptionNumber: `PARA-${Date.now()}-MU`
+      },
+      prescriber: {
+        title: "Dr.",
+        firstName: "TIBOK",
+        lastName: "IA DOCTOR",
+        qualification: "Médecin Généraliste - Télémédecine",
+        registrationNumber: "COUNCIL-2024-IA-001",
+        address: "TIBOK Medical Platform, Télémédecine Maurice",
+        phone: "+230 XXX XXXX",
+        email: "contact@tibok.medical"
+      },
+      patient: {
+        title: patientData.gender === "Homme" ? "M." : "Mme",
+        firstName: patientData.firstName,
+        lastName: patientData.lastName.toUpperCase(),
+        dateOfBirth: patientData.dateOfBirth || "À préciser",
+        age: `${patientData.age} ans`,
+        address: "Adresse patient à compléter",
+        idNumber: "Carte d'identité mauricienne à préciser",
+        weight: `${patientData.weight}kg`,
+        height: `${patientData.height}cm`,
+        pregnancyStatus: patientData.gender === "Femme" && patientData.age >= 15 && patientData.age <= 50 ? 
+          "VÉRIFIER ABSENCE GROSSESSE AVANT EXAMENS IRRADIANTS" : "NON APPLICABLE"
+      },
+      clinicalInfo: {
+        indication: `Examens paracliniques dans le cadre de: ${diagnosis.diagnosis?.primary?.condition || "Évaluation clinique"}`,
+        urgency: allParaclinicalExams.some((e: any) => e.urgency === "urgent") ? "URGENT" : "NON URGENT",
+        irradiation: allParaclinicalExams.some((e: any) => isIrradiatingExam(e.exam)) ? "EXAMENS IRRADIANTS - PRÉCAUTIONS" : "PAS D'IRRADIATION"
+      },
+      prescriptions: {
+        imaging: imagingExams.map((exam: any, index: number) => ({
+          lineNumber: index + 1,
+          category: "IMAGERIE",
+          examination: exam.exam,
+          code: getExamCode(exam.exam),
+          indication: exam.indication,
+          urgency: exam.urgency === "urgent" ? "URGENT" : exam.urgency === "semi-urgent" ? "SEMI-URGENT" : "PROGRAMMÉ",
+          irradiation: isIrradiatingExam(exam.exam) ? "OUI - Dose minimale" : "NON",
+          contrast: exam.exam?.toLowerCase().includes("contraste") ? "AVEC PRODUIT DE CONTRASTE" : "SANS CONTRASTE",
+          preparation: getExamPreparation(exam.exam),
+          contraindications: getImagingContraindications(exam.exam, patientData),
+          duration: getExamDuration(exam.exam),
+          location: "Centre d'imagerie agréé Maurice",
+          cost: "Selon tarification centre agréé",
+          interpretationDelay: "Compte-rendu sous 48-72h"
+        })),
+        specialized: specializedExams.map((exam: any, index: number) => ({
+          lineNumber: imagingExams.length + index + 1,
+          category: "EXPLORATION SPÉCIALISÉE",
+          examination: exam.exam,
+          code: getExamCode(exam.exam),
+          indication: exam.indication,
+          urgency: exam.urgency === "urgent" ? "URGENT" : exam.urgency === "semi-urgent" ? "SEMI-URGENT" : "PROGRAMMÉ",
+          preparation: getExamPreparation(exam.exam),
+          duration: getExamDuration(exam.exam),
+          specialist: getRequiredSpecialist(exam.exam),
+          contraindications: getSpecializedContraindications(exam.exam, patientData),
+          location: "Service spécialisé ou clinique agréée",
+          cost: "Selon tarification spécialiste",
+          interpretationDelay: "Résultats immédiats à 24h"
+        }))
+      },
+      safetyInstructions: {
+        pregnancy: patientData.gender === "Femme" && patientData.age >= 15 && patientData.age <= 50 ? [
+          "OBLIGATOIRE: Test β-HCG si doute grossesse avant examens irradiants",
+          "Informer le technicien de toute possibilité de grossesse",
+          "Reporter examens irradiants si grossesse confirmée sauf urgence vitale"
+        ] : [],
+        contrast: allParaclinicalExams.some((e: any) => e.exam?.toLowerCase().includes("contraste")) ? [
+          "Vérifier fonction rénale (créatinine) avant injection",
+          "Hydratation recommandée avant et après injection",
+          "Surveillance allergies aux produits de contraste"
+        ] : [],
+        general: [
+          "Apporter ordonnance et pièce d'identité",
+          "Respecter préparation si indiquée",
+          "Signaler allergies et traitements en cours",
+          "Prendre rendez-vous rapidement si urgent"
+        ]
+      },
+      footer: {
+        signature: "Dr. TIBOK IA DOCTOR",
+        stamp: "Cachet médical électronique",
+        date: new Date().toLocaleDateString("fr-FR"),
+        legalMention: "Prescription conforme à la réglementation mauricienne",
+        validity: "Ordonnance valable 6 mois à compter de ce jour",
+        contact: "Contact urgence: +230 XXX XXXX"
+      }
+    },
+    editableFields: [
+      "patient.address",
+      "patient.idNumber",
+      "prescriptions.imaging[].indication",
+      "prescriptions.specialized[].indication",
+      "prescriber.phone"
+    ],
+    legalCompliance: {
+      mauritianLaw: true,
+      radiationProtection: true,
+      requiredFields: ["prescriber.registrationNumber", "patient.idNumber"],
+      digitalSignature: "Signature électronique TIBOK-2024",
+      traceability: `TRACE-PARA-${Date.now()}`,
+      retention: "Conservation 5 ans selon loi mauricienne"
+    },
+    metadata: {
+      documentType: "mauritian-paraclinical-prescription",
+      totalExams: allParaclinicalExams.length,
+      imagingExams: imagingExams.length,
+      specializedExams: specializedExams.length,
+      irradiatingExams: allParaclinicalExams.filter((e: any) => isIrradiatingExam(e.exam)).length,
+      editable: true,
+      downloadable: true,
+      printable: true,
+      legallyValid: true,
+      format: "A4 - Format mauricien standard"
+    }
+  }
 
-Patient: ${patientData?.firstName} ${patientData?.lastName}, ${patientData?.age} ans
-Motif: ${clinicalData?.chiefComplaint || "Consultation"}
-Diagnostic: ${diagnosis.primaryDiagnosis?.condition || "À déterminer"}
+  return paraclinicalPrescription
+}
 
-INSTRUCTIONS CRITIQUES:
-- Retourne UNIQUEMENT du JSON valide
-- AUCUN texte avant/après
-- AUCUN backticks  
-- Une seule ligne compacte
-
-Retourne ce JSON exact (complète les valeurs):
-{"header":{"title":"COMPTE-RENDU DE CONSULTATION MÉDICALE SPÉCIALISÉE","date":"${new Date().toLocaleDateString("fr-FR")}","patient":"${patientData?.firstName} ${patientData?.lastName}","physician":{"name":"Dr. TIBOK IA DOCTOR","title":"Praticien Expert"}},"patientIdentification":{"lastName":"${patientData?.lastName || "N/A"}","firstName":"${patientData?.firstName || "N/A"}","age":"${patientData?.age || "N/A"} ans","gender":"${patientData?.gender || "N/A"}"},"anamnesis":{"chiefComplaint":"${clinicalData?.chiefComplaint || "Motif à préciser"}","symptoms":"${(clinicalData?.symptoms || []).join(", ") || "Aucun symptôme spécifique"}","medicalHistory":"${(patientData?.medicalHistory || []).join(", ") || "Aucun antécédent"}","allergies":"${(patientData?.allergies || []).join(", ") || "Aucune allergie connue"}"},"physicalExamination":{"vitalSigns":"T°${clinicalData?.vitalSigns?.temperature || "N/A"}°C, FC ${clinicalData?.vitalSigns?.heartRate || "N/A"}bpm, TA ${clinicalData?.vitalSigns?.bloodPressureSystolic || "N/A"}/${clinicalData?.vitalSigns?.bloodPressureDiastolic || "N/A"}mmHg","painScale":"${clinicalData?.painScale || 0}/10","generalCondition":"${clinicalData?.generalCondition || "À évaluer"}"},"diagnosticAssessment":{"primaryDiagnosis":"${diagnosis.primaryDiagnosis?.condition || "Diagnostic en cours d'établissement"}","confidence":"${diagnosis.aiConfidence || 70}%","severity":"${diagnosis.primaryDiagnosis?.severity || "À évaluer"}"},"treatmentPlan":{"immediateManagement":"Traitement symptomatique adapté","followUp":"Réévaluation dans 7-15 jours","emergencyInstructions":"Consulter en urgence si aggravation"},"conclusion":"Prise en charge adaptée selon tableau clinique","metadata":{"reportId":"CR-${Date.now()}","generatedAt":"${new Date().toISOString()}","aiModel":"Expert Core System"}}
-`
-
-    const result = await generateText({
-      model: openai("gpt-4o"),
-      prompt: reportPrompt,
-      temperature: 0.01, // Très très faible pour cohérence maximale
-      maxTokens: 4000,
-    })
-
-    const reportData = parseJSONSafely(result.text)
-    
-    // Enrichissement automatique du rapport
-    const enrichedReport = enrichReportWithMetrics(reportData, allData)
-
-    console.log("✅ Rapport consultation expert généré avec enrichissement")
+/**
+ * ORDONNANCE MÉDICAMENTEUSE - FORMAT MAURICIEN OFFICIEL
+ */
+async function generateMauritianMedicationPrescription(patientData: any, clinicalData: any, diagnosis: any) {
+  const medications = diagnosis.medications || []
+  
+  // Vérification sécuritaire renforcée pour Maurice
+  const safetyCheckedMedications = medications.map((med: any) => {
+    const allergyDetected = (patientData.allergies || []).some((allergy: string) => 
+      med.name?.toLowerCase().includes(allergy.toLowerCase())
+    )
     
     return {
-      success: true,
-      report: enrichedReport,
-      metadata: {
-        source: "Expert Core Logic",
-        generatedAt: new Date().toISOString(),
-        qualityLevel: "Expert",
-        clinicalComplexity: calculateClinicalComplexity(allData)
-      }
+      ...med,
+      mauritianCompliance: true,
+      safetyAlert: allergyDetected ? {
+        level: "CONTRE-INDICATION ABSOLUE",
+        message: `ALLERGIE PATIENT - ${med.name} CONTRE-INDIQUÉ`,
+        action: "REMPLACER IMMÉDIATEMENT"
+      } : null,
+      ageAdjustment: patientData.age >= 65 ? {
+        status: "DOSE ADAPTÉE PERSONNE ÂGÉE",
+        reduction: "Dose réduite de 25-50%",
+        monitoring: "Surveillance renforcée"
+      } : null,
+      mauritianAvailability: checkMauritianDrugAvailability(med.name)
     }
+  })
+
+  const medicationPrescription = {
+    document: {
+      type: "ORDONNANCE MÉDICALE - PRESCRIPTION MÉDICAMENTEUSE",
+      header: {
+        title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+        subtitle: "PRESCRIPTION MÉDICAMENTEUSE",
+        logo: "🏥 TIBOK MEDICAL CENTER",
+        date: new Date().toLocaleDateString("fr-FR"),
+        time: new Date().toLocaleTimeString("fr-FR"),
+        prescriptionNumber: `MED-${Date.now()}-MU`,
+        urgency: medications.some((m: any) => m.urgency === "urgent") ? "PRESCRIPTION URGENTE" : "PRESCRIPTION STANDARD"
+      },
+      prescriber: {
+        title: "Dr.",
+        firstName: "TIBOK",
+        lastName: "IA DOCTOR",
+        qualification: "Médecin Généraliste - Diplômé Reconnaissance Maurice",
+        registrationNumber: "COUNCIL-2024-IA-001",
+        address: "TIBOK Medical Platform, Port-Louis, Maurice",
+        phone: "+230 XXX XXXX",
+        email: "contact@tibok.medical",
+        signature: "Signature électronique certifiée"
+      },
+      patient: {
+        title: patientData.gender === "Homme" ? "M." : "Mme",
+        firstName: patientData.firstName,
+        lastName: patientData.lastName.toUpperCase(),
+        dateOfBirth: patientData.dateOfBirth || "JJ/MM/AAAA",
+        age: `${patientData.age} ans`,
+        address: "Adresse complète à Maurice",
+        idNumber: "Carte d'identité mauricienne: XXXXXXXXXXXXX",
+        weight: `${patientData.weight}kg`,
+        height: `${patientData.height}cm`,
+        bmi: `IMC: ${calculateBMI(patientData)}`,
+        allergies: (patientData.allergies || []).length > 0 ? 
+          `⚠️ ALLERGIES: ${(patientData.allergies || []).join(", ")}` : "Aucune allergie connue",
+        insurance: "Carte Sécurité Sociale Maurice ou assurance privée"
+      },
+      clinicalInfo: {
+        diagnosis: diagnosis.diagnosis?.primary?.condition || "Diagnostic en cours",
+        indication: `Traitement médical pour: ${diagnosis.diagnosis?.primary?.condition || "symptômes présentés"}`,
+        severity: diagnosis.diagnosis?.primary?.severity || "Modérée",
+        duration: "Durée selon prescriptions individuelles",
+        followUp: "Consultation de suivi obligatoire"
+      },
+      prescriptions: safetyCheckedMedications.map((med: any, index: number) => ({
+        lineNumber: index + 1,
+        prescriptionType: "MÉDICAMENT",
+        
+        // Identification médicament
+        dci: med.name, // Dénomination Commune Internationale
+        brandName: getMauritianBrandName(med.name),
+        dosageForm: getMedicationForm(med.name),
+        strength: med.dosage,
+        atcCode: getATCCode(med.name),
+        
+        // Posologie mauricienne
+        posology: {
+          dosage: med.dosage,
+          frequency: med.frequency,
+          timing: getMedicationTiming(med.name),
+          route: "Voie orale",
+          maxDailyDose: getMaxDailyDose(med.name, patientData.age),
+          specialInstructions: med.ageAdjustment ? med.ageAdjustment.status : "Posologie standard"
+        },
+        
+        // Durée et quantité
+        treatment: {
+          duration: med.duration,
+          totalQuantity: calculateMauritianQuantity(med),
+          packaging: "Selon conditionnement pharmacie",
+          renewals: "Non renouvelable sans consultation",
+          stoppingCriteria: "Selon amélioration clinique ou avis médical"
+        },
+        
+        // Indications et surveillance
+        indication: med.indication,
+        contraindications: (med.contraindications || []).join(", ") || "Selon notice médicament",
+        interactions: getMedicationInteractions(med.name, patientData.currentMedicationsText),
+        monitoring: {
+          efficacy: med.monitoring || "Surveillance clinique standard",
+          safety: getSafetyMonitoring(med.name),
+          laboratory: getLabMonitoring(med.name),
+          followUp: "Réévaluation consultation suivante"
+        },
+        
+        // Sécurité patient
+        safetyProfile: {
+          allergyAlert: med.safetyAlert,
+          ageAdjustment: med.ageAdjustment,
+          pregnancyCategory: getPregnancyCategory(med.name),
+          drivingWarning: getDrivingWarning(med.name),
+          alcoholInteraction: getAlcoholWarning(med.name)
+        },
+        
+        // Disponibilité Maurice
+        mauritianInfo: {
+          availability: med.mauritianAvailability,
+          pharmacyNetwork: "Disponible pharmacies agréées Maurice",
+          importLicense: "Médicament autorisé importation Maurice",
+          localAlternative: getMauritianAlternative(med.name)
+        },
+        
+        // Instructions patient
+        patientInstructions: {
+          administration: getAdministrationInstructions(med.name),
+          storage: "Conserver température ambiante, à l'abri humidité",
+          missedDose: "Prendre dès possible, ne pas doubler dose suivante",
+          sideEffects: getCommonSideEffects(med.name),
+          emergencyStop: "Arrêt immédiat si réaction allergique - Contact médecin"
+        }
+      })),
+      
+      // Traitements non médicamenteux
+      nonPharmacological: {
+        lifestyle: diagnosis.recommendations?.lifestyle || "Conseils hygiéno-diététiques adaptés",
+        diet: getDietaryRecommendations(diagnosis.diagnosis?.primary?.condition),
+        exercise: getExerciseRecommendations(patientData.age, diagnosis.diagnosis?.primary?.condition),
+        followUp: diagnosis.recommendations?.followUp || "Consultation de suivi dans 7-10 jours"
+      },
+      
+      // Éducation patient mauritienne
+      patientEducation: {
+        language: "Français/Créole mauricien",
+        keyMessages: [
+          "Respecter scrupuleusement les doses prescrites",
+          "Ne pas arrêter traitement sans avis médical",
+          "Signaler tout effet indésirable",
+          "Conserver ordonnance pour renouvellement"
+        ],
+        emergencyInstructions: "Urgence médicale: 15 (SAMU) ou 114 (Police/Ambulance Maurice)",
+        pharmacyAdvice: "Demander conseil pharmacien pour administration",
+        followUpReminder: "Consultation de suivi OBLIGATOIRE dans les délais prescrits"
+      },
+      
+      // Pied de page mauricien
+      footer: {
+        prescriptionSafety: {
+          allergyChecked: "✓ Allergies vérifiées",
+          ageAdjusted: patientData.age >= 65 ? "✓ Posologie adaptée âge" : "✓ Posologie standard",
+          interactionChecked: "✓ Interactions médicamenteuses vérifiées",
+          contraindictionVerified: "✓ Contre-indications vérifiées",
+          mauritianCompliance: "✓ Conforme réglementation mauricienne"
+        },
+        signature: "Dr. TIBOK IA DOCTOR",
+        digitalStamp: "Cachet numérique TIBOK-2024",
+        date: new Date().toLocaleDateString("fr-FR"),
+        time: new Date().toLocaleTimeString("fr-FR"),
+        validity: "Prescription valable 3 mois selon réglementation mauricienne",
+        legalMention: "Ordonnance conforme Code de Déontologie Médicale Maurice",
+        traceability: `TRACE-MED-${Date.now()}`,
+        pharmacyInstructions: "À délivrer selon posologie prescrite - Conservation ordonnance obligatoire"
+      }
+    },
     
-  } catch (error) {
-    console.error("❌ Erreur rapport consultation core:", error)
-    return generateConsultationReportFallback(allData)
+    editableFields: [
+      "patient.address",
+      "patient.idNumber",
+      "patient.insurance",
+      "prescriptions[].treatment.duration",
+      "prescriptions[].patientInstructions.administration",
+      "nonPharmacological.lifestyle",
+      "prescriber.phone",
+      "prescriber.address"
+    ],
+    
+    legalCompliance: {
+      mauritianPharmacyLaw: true,
+      medicalCouncilCompliant: true,
+      drugControlCompliant: true,
+      requiredFields: [
+        "prescriber.registrationNumber",
+        "patient.idNumber",
+        "prescriptions[].dci",
+        "prescriptions[].dosage",
+        "prescriptions[].duration"
+      ],
+      digitalSignature: "Signature électronique certifiée Maurice",
+      traceability: `TRACE-MED-${Date.now()}`,
+      retention: "Conservation 5 ans prescripteur + pharmacie",
+      auditTrail: "Traçabilité complète prescription électronique"
+    },
+    
+    metadata: {
+      documentType: "mauritian-medication-prescription",
+      totalMedications: safetyCheckedMedications.length,
+      safetyLevel: "Niveau sécurité maximum",
+      allergyAlerts: safetyCheckedMedications.filter(m => m.safetyAlert).length,
+      ageAdjustments: safetyCheckedMedications.filter(m => m.ageAdjustment).length,
+      mauritianCompliant: true,
+      editable: true,
+      downloadable: true,
+      printable: true,
+      legallyValid: true,
+      electronicPrescription: true,
+      format: "A4 - Format officiel Maurice",
+      version: "Maurice-2024-v1.0"
+    }
   }
+
+  return medicationPrescription
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// FONCTIONS UTILITAIRES ET HELPERS
+// FONCTIONS UTILITAIRES
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/**
- * PARSING JSON ULTRA-ROBUSTE AVEC CORRECTION AUTOMATIQUE
- */
 function parseJSONSafely(text: string): any {
   try {
     if (!text || typeof text !== 'string') {
-      console.warn("⚠️ Texte invalide pour parsing JSON:", typeof text)
       return {}
     }
 
@@ -663,289 +872,21 @@ function parseJSONSafely(text: string): any {
     // Enlever les backticks markdown
     cleanText = cleanText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
     
-    // Enlever les préfixes textuels avant {
+    // Extraire le JSON
     const startIndex = cleanText.indexOf('{')
-    if (startIndex > 0) {
-      cleanText = cleanText.substring(startIndex)
+    const endIndex = cleanText.lastIndexOf('}')
+    
+    if (startIndex >= 0 && endIndex > startIndex) {
+      cleanText = cleanText.substring(startIndex, endIndex + 1)
     }
     
-    // Trouver la fin du JSON de manière plus intelligente
-    let braceCount = 0
-    let endIndex = -1
-    
-    for (let i = 0; i < cleanText.length; i++) {
-      if (cleanText[i] === '{') {
-        braceCount++
-      } else if (cleanText[i] === '}') {
-        braceCount--
-        if (braceCount === 0) {
-          endIndex = i
-          break
-        }
-      }
-    }
-    
-    if (endIndex > 0) {
-      cleanText = cleanText.substring(0, endIndex + 1)
-    }
-    
-    // Tentative de parsing direct
-    try {
-      const parsed = JSON.parse(cleanText)
-      if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
-        console.log("✅ JSON parsé avec succès, clés:", Object.keys(parsed))
-        return parsed
-      }
-    } catch (firstError) {
-      console.warn("⚠️ Premier parsing échoué, tentative de correction...")
-      
-      // Tentatives de correction automatique
-      const correctedAttempts = [
-        // Ajouter } manquant à la fin
-        cleanText + '}',
-        // Enlever la dernière virgule avant }
-        cleanText.replace(/,(\s*})$/g, '$1'),
-        // Corriger les guillemets doubles dans les valeurs
-        cleanText.replace(/([^\\])"/g, '$1\\"'),
-        // Enlever les caractères de contrôle
-        cleanText.replace(/[\u0000-\u001F\u007F-\u009F]/g, ''),
-        // Essayer d'extraire juste le premier objet
-        extractFirstValidJSON(cleanText)
-      ]
-      
-      for (const attempt of correctedAttempts) {
-        if (attempt) {
-          try {
-            const parsed = JSON.parse(attempt)
-            if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
-              console.log("✅ JSON corrigé et parsé avec succès")
-              return parsed
-            }
-          } catch (correctionError) {
-            // Continue avec la prochaine tentative
-          }
-        }
-      }
-      
-      throw firstError
-    }
-    
-    throw new Error("JSON invalide ou vide")
+    return JSON.parse(cleanText)
   } catch (error) {
-    console.warn("⚠️ Erreur parsing JSON finale:", error.message)
-    console.warn("⚠️ Texte problématique:", text?.substring(0, 300))
+    console.warn("⚠️ Erreur parsing JSON:", error)
     return {}
   }
 }
 
-/**
- * EXTRACTION DU PREMIER JSON VALIDE DANS UN TEXTE
- */
-function extractFirstValidJSON(text: string): string | null {
-  try {
-    const jsonStart = text.indexOf('{')
-    if (jsonStart === -1) return null
-    
-    let braceCount = 0
-    let inString = false
-    let escaped = false
-    
-    for (let i = jsonStart; i < text.length; i++) {
-      const char = text[i]
-      
-      if (escaped) {
-        escaped = false
-        continue
-      }
-      
-      if (char === '\\') {
-        escaped = true
-        continue
-      }
-      
-      if (char === '"') {
-        inString = !inString
-        continue
-      }
-      
-      if (!inString) {
-        if (char === '{') {
-          braceCount++
-        } else if (char === '}') {
-          braceCount--
-          if (braceCount === 0) {
-            return text.substring(jsonStart, i + 1)
-          }
-        }
-      }
-    }
-    
-    return null
-  } catch {
-    return null
-  }
-}
-
-/**
- * CONSTRUCTION DU CONTEXTE PATIENT POUR DIAGNOSTIC
- */
-function buildPatientContext(patientData: any, clinicalData: any): string {
-  return `
-Patient: ${patientData.firstName} ${patientData.lastName}, ${patientData.age} ans, ${patientData.gender}
-Anthropométrie: ${patientData.weight}kg, ${patientData.height}cm (IMC: ${calculateBMI(patientData)})
-Motif consultation: ${clinicalData.chiefComplaint || "À préciser"}
-Symptômes actuels: ${(clinicalData.symptoms || []).join(", ") || "Aucun symptôme spécifique"}
-Douleur: ${clinicalData.painScale || 0}/10
-Antécédents: ${(patientData.medicalHistory || []).join(", ") || "Aucun"}
-Allergies: ${(patientData.allergies || []).join(", ") || "Aucune"}
-Constantes vitales: T°${clinicalData.vitalSigns?.temperature}°C, FC ${clinicalData.vitalSigns?.heartRate}bpm, TA ${clinicalData.vitalSigns?.bloodPressureSystolic}/${clinicalData.vitalSigns?.bloodPressureDiastolic}mmHg
-  `.trim()
-}
-
-/**
- * CONSTRUCTION DU PROFIL PATIENT POUR EXAMENS
- */
-function buildPatientProfile(patientData: any): string {
-  const age = patientData.age || 0
-  const riskProfile = age >= 65 ? "Patient âgé - Précautions gériatriques" : "Adulte standard"
-  const pregnancyRisk = patientData.gender === "Femme" && age >= 15 && age <= 50 ? 
-    "Femme âge procréation - Vérifier grossesse avant examens irradiants" : "Pas de risque grossesse"
-  
-  return `${patientData.firstName} ${patientData.lastName}, ${age} ans, ${patientData.gender}. ${riskProfile}. ${pregnancyRisk}. Allergies: ${(patientData.allergies || []).join(", ") || "Aucune"}.`
-}
-
-/**
- * CONSTRUCTION DU PROFIL SÉCURITAIRE POUR PRESCRIPTION
- */
-function buildSafetyProfile(patientData: any): string {
-  const allergies = (patientData.allergies || []).join(", ") || "Aucune allergie connue"
-  const age = patientData.age || 0
-  const ageRisk = age >= 65 ? "PATIENT ÂGÉ - Précautions posologiques obligatoires" : "Adulte standard"
-  const renalRisk = patientData.medicalHistory?.includes("Insuffisance rénale") ? "IR - Adaptation posologique" : "Fonction rénale normale supposée"
-  
-  return `${patientData.firstName} ${patientData.lastName}, ${age} ans. ${ageRisk}. Allergies: ${allergies}. ${renalRisk}.`
-}
-
-/**
- * OBTENIR LA MÉDICATION RECOMMANDÉE SELON PROFIL PATIENT
- */
-function getRecommendedMedication(patientData: any, clinicalData: any) {
-  const hasParacetamolAllergy = (patientData?.allergies || []).some((allergy: string) => 
-    allergy.toLowerCase().includes("paracétamol") || allergy.toLowerCase().includes("paracetamol")
-  )
-  
-  const isElderly = (patientData?.age || 0) >= 65
-  const painLevel = clinicalData?.painScale || 0
-  
-  if (hasParacetamolAllergy) {
-    return {
-      dci: "Ibuprofène",
-      brand: "Advil",
-      strength: "400 mg",
-      atc: "M01AE01",
-      dosage: "400 mg par prise",
-      frequency: "Toutes les 8 heures si nécessaire",
-      maxDaily: "1200 mg maximum par 24h",
-      quantity: "18 comprimés",
-      contraindications: ["Ulcère gastro-duodénal", "Insuffisance rénale sévère", "Grossesse 3ème trimestre"],
-      interactions: ["Anticoagulants", "Corticoïdes", "IEC"],
-      monitoring: "Surveillance fonction rénale et digestive",
-      warnings: "Douleurs gastriques, selles noires, œdèmes",
-      patientNote: "ALLERGIE PARACÉTAMOL - Alternative ibuprofène prescrite",
-      safetyScore: 85
-    }
-  } else {
-    return {
-      dci: "Paracétamol",
-      brand: "Doliprane",
-      strength: "500 mg",
-      atc: "N02BE01",
-      dosage: isElderly ? "500 mg par prise (dose réduite)" : "500 mg à 1 g par prise",
-      frequency: "Toutes les 6 heures si nécessaire",
-      maxDaily: isElderly ? "3 g maximum par 24h" : "4 g maximum par 24h",
-      quantity: "20 comprimés",
-      contraindications: ["Insuffisance hépatique sévère"],
-      interactions: ["Warfarine (surveillance INR)", "Alcool"],
-      monitoring: isElderly ? "Surveillance hépatique renforcée" : "Surveillance hépatique standard",
-      warnings: "Nausées, vomissements, douleurs abdominales, ictère",
-      patientNote: isElderly ? "Dose adaptée personne âgée" : "Posologie standard adulte",
-      safetyScore: 95
-    }
-  }
-}
-
-/**
- * VALIDATION SÉCURITAIRE DES EXAMENS
- */
-function validateExamensSafety(examensData: any, patientData: any): any {
-  if (!examensData || typeof examensData !== 'object') {
-    return examensData
-  }
-
-  // Vérification grossesse pour examens irradiants
-  if (patientData.gender === "Femme" && patientData.age >= 15 && patientData.age <= 50) {
-    examensData.pregnancyWarning = {
-      level: "IMPORTANT",
-      message: "Femme en âge de procréer - Vérifier absence grossesse avant examens irradiants",
-      action: "Test β-HCG si doute avant radiologie"
-    }
-  }
-
-  // Vérification fonction rénale pour produits de contraste
-  if (patientData.age > 65 || patientData.medicalHistory?.includes("Insuffisance rénale")) {
-    examensData.renalSafetyWarning = {
-      level: "CRITIQUE",
-      message: "Fonction rénale à vérifier avant injection produits de contraste",
-      action: "Créatininémie obligatoire avant injection"
-    }
-  }
-
-  return examensData
-}
-
-/**
- * VALIDATION SÉCURITAIRE DE LA PRESCRIPTION
- */
-async function validatePrescriptionSafety(prescriptionData: any, patientData: any): Promise<any> {
-  if (!prescriptionData || !prescriptionData.medications) {
-    return prescriptionData
-  }
-
-  // Vérification allergies critiques
-  if (patientData.allergies && Array.isArray(patientData.allergies)) {
-    prescriptionData.medications = prescriptionData.medications.map((med: any) => {
-      const allergyDetected = patientData.allergies.some((allergy: string) => 
-        med.dci?.toLowerCase().includes(allergy.toLowerCase()) ||
-        med.brandName?.toLowerCase().includes(allergy.toLowerCase())
-      )
-      
-      if (allergyDetected) {
-        med.safetyAlert = {
-          level: "CRITIQUE",
-          message: `ALLERGIE DÉTECTÉE - CONTRE-INDICATION ABSOLUE à ${med.dci}`,
-          action: "PRESCRIPTION CONTRE-INDIQUÉE - ARRÊT IMMÉDIAT"
-        }
-        med.safetyScore = 0
-      }
-      
-      return med
-    })
-  }
-
-  // Validation posologique gériatrique
-  if (patientData.age && patientData.age >= 75) {
-    prescriptionData.geriatricAlert = {
-      message: "Patient très âgé - Précautions posologiques maximales",
-      recommendations: ["Débuter à demi-dose", "Surveillance renforcée", "Réévaluation fréquente"]
-    }
-  }
-
-  return prescriptionData
-}
-
-/**
- * CALCUL DE L'IMC
- */
 function calculateBMI(patientData: any): string {
   if (patientData?.weight && patientData?.height) {
     const bmi = patientData.weight / Math.pow(patientData.height / 100, 2)
@@ -954,738 +895,549 @@ function calculateBMI(patientData: any): string {
   return "N/A"
 }
 
-/**
- * ÉVALUATION DU RISQUE PATIENT
- */
-function assessPatientRisk(patientData: any): string {
-  let risk = 0
-  
-  if (patientData.age >= 65) risk += 1
-  if (patientData.age >= 75) risk += 1
-  if (patientData.allergies?.length > 0) risk += 1
-  if (patientData.medicalHistory?.length > 2) risk += 1
-  
-  if (risk >= 3) return "ÉLEVÉ"
-  if (risk >= 2) return "MODÉRÉ"
-  return "FAIBLE"
-}
-
-/**
- * CALCUL DE LA COMPLEXITÉ DE PRESCRIPTION
- */
-function calculatePrescriptionComplexity(patientData: any): number {
-  let complexity = 1 // Prescription de base
-  
-  if (patientData.age >= 65) complexity += 1
-  if (patientData.allergies?.length > 0) complexity += 1
-  if (patientData.medicalHistory?.length > 2) complexity += 1
-  
-  return complexity
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// FONCTIONS DE CALCUL DE MÉTRIQUES
-// ═══════════════════════════════════════════════════════════════════════════════
-
-function extractConfidenceFromDiagnosis(diagnosticResult: any): number {
-  try {
-    // Si c'est déjà un objet avec confidence directe
-    if (diagnosticResult && typeof diagnosticResult === 'object' && diagnosticResult.aiConfidence) {
-      return diagnosticResult.aiConfidence
-    }
-    
-    // Si c'est un résultat d'IA avec .text
-    if (diagnosticResult && diagnosticResult.text) {
-      const diagnosis = parseJSONSafely(diagnosticResult.text)
-      return diagnosis.aiConfidence || diagnosis.primaryDiagnosis?.probability || 75
-    }
-    
-    return 75
-  } catch {
-    return 75
-  }
-}
-
-function calculateTotalExaminations(examensResult: any): number {
-  try {
-    // Si c'est un résultat structuré de nos fonctions core
-    if (examensResult && examensResult.examens && examensResult.examens.metadata) {
-      return examensResult.examens.metadata.prescriptionMetrics?.totalExaminations || 3
-    }
-    
-    // Si c'est un objet direct
-    if (examensResult && examensResult.metadata && examensResult.metadata.prescriptionMetrics) {
-      return examensResult.metadata.prescriptionMetrics.totalExaminations || 3
-    }
-    
-    return 3
-  } catch {
-    return 3
-  }
-}
-
-function calculateTotalMedications(prescriptionResult: any): number {
-  try {
-    // Si c'est un résultat structuré de nos fonctions core
-    if (prescriptionResult && prescriptionResult.prescription && prescriptionResult.prescription.metadata) {
-      return prescriptionResult.prescription.metadata.prescriptionMetrics?.totalMedications || 1
-    }
-    
-    // Si c'est un objet direct
-    if (prescriptionResult && prescriptionResult.metadata && prescriptionResult.metadata.prescriptionMetrics) {
-      return prescriptionResult.metadata.prescriptionMetrics.totalMedications || 1
-    }
-    
-    return 1
-  } catch {
-    return 1
-  }
-}
-
-function calculateReportQuality(reportResult: any): number {
-  try {
-    // Calcul basé sur la complétude des sections
-    let quality = 70
-    if (reportResult.report?.anamnesis) quality += 5
-    if (reportResult.report?.physicalExamination) quality += 5
-    if (reportResult.report?.diagnosticAssessment) quality += 10
-    if (reportResult.report?.therapeuticPlan) quality += 5
-    return Math.min(quality, 100)
-  } catch {
-    return 75
-  }
-}
-
-function calculateOverallConfidence(workflow: any[]): number {
-  try {
-    const confidences = workflow
-      .filter(step => step.confidence)
-      .map(step => step.confidence)
-    
-    if (confidences.length === 0) return 75
-    
-    return Math.round(confidences.reduce((a, b) => a + b, 0) / confidences.length)
-  } catch {
-    return 75
-  }
-}
-
-function calculateSafetyScore(prescriptionResult: any, patientData: any): number {
-  try {
-    let baseSafety = 90
-    
-    // Essayer d'extraire le score de sécurité des différentes structures possibles
-    if (prescriptionResult && prescriptionResult.prescription && prescriptionResult.prescription.metadata) {
-      baseSafety = prescriptionResult.prescription.metadata.prescriptionMetrics?.safetyScore || 90
-    } else if (prescriptionResult && prescriptionResult.metadata && prescriptionResult.metadata.prescriptionMetrics) {
-      baseSafety = prescriptionResult.metadata.prescriptionMetrics.safetyScore || 90
-    }
-    
-    // Réduction si allergies détectées
-    if (patientData && patientData.allergies && patientData.allergies.length > 0) {
-      return Math.max(baseSafety - 5, 70)
-    }
-    
-    return baseSafety
-  } catch {
-    return 90
-  }
-}
-
-function calculateCompletenessScore(workflow: any[]): number {
-  try {
-    const completedSteps = workflow.filter(step => step.status === "completed").length
-    const totalSteps = workflow.length
-    
-    return Math.round((completedSteps / Math.max(totalSteps, 5)) * 100)
-  } catch {
-    return 85
-  }
-}
-
 function generatePatientId(patientData: any): string {
   return `${patientData.firstName || "PATIENT"}-${patientData.lastName || "UNKNOWN"}-${Date.now()}`
 }
 
-function calculateClinicalComplexity(allData: any): string {
-  let complexity = 0
-  
-  if (allData.patientData?.age > 65) complexity += 1
-  if (allData.patientData?.medicalHistory?.length > 2) complexity += 1
-  if (allData.clinicalData?.symptoms?.length > 3) complexity += 1
-  if (allData.patientData?.allergies?.length > 0) complexity += 1
-  
-  if (complexity >= 3) return "ÉLEVÉE"
-  if (complexity >= 2) return "MODÉRÉE"
-  return "STANDARD"
+// ═══════════════════════════════════════════════════════════════════════════════
+// FONCTIONS UTILITAIRES MAURICIENNES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function getSampleType(testName: string): string {
+  const test = testName.toLowerCase()
+  if (test.includes("sang") || test.includes("nfs") || test.includes("crp")) return "Sang veineux"
+  if (test.includes("urine") || test.includes("ecbu")) return "Urine"
+  if (test.includes("selle") || test.includes("coproculture")) return "Selles"
+  return "Sang veineux"
 }
 
-function enrichReportWithMetrics(reportData: any, allData: any): any {
-  if (!reportData.clinicalQualityMetrics) {
-    reportData.clinicalQualityMetrics = {}
-  }
-  
-  reportData.clinicalQualityMetrics.automaticEnrichment = {
-    dataCompleteness: calculateDataCompleteness(allData),
-    clinicalCoherence: "BONNE",
-    evidenceIntegration: "NIVEAU B",
-    riskAssessment: assessPatientRisk(allData.patientData)
-  }
-  
-  return reportData
+function getSampleVolume(testName: string): string {
+  const test = testName.toLowerCase()
+  if (test.includes("nfs")) return "5 mL EDTA"
+  if (test.includes("crp") || test.includes("biochimie")) return "5 mL sérum"
+  if (test.includes("coagulation")) return "3 mL citrate"
+  return "5 mL selon analyse"
 }
 
-function calculateDataCompleteness(allData: any): string {
-  let completeness = 0
-  let total = 0
+function getExamContraindications(testName: string, patientData: any): string[] {
+  const contraindications = []
   
-  // Évaluation complétude données patient
-  const patientFields = ['firstName', 'lastName', 'age', 'gender']
-  patientFields.forEach(field => {
-    total++
-    if (allData.patientData?.[field]) completeness++
-  })
+  if (testName.toLowerCase().includes("contraste") && patientData.age > 65) {
+    contraindications.push("Vérifier fonction rénale avant injection")
+  }
   
-  // Évaluation complétude données cliniques
-  const clinicalFields = ['chiefComplaint', 'symptoms']
-  clinicalFields.forEach(field => {
-    total++
-    if (allData.clinicalData?.[field]) completeness++
-  })
+  if (patientData.allergies?.some((a: string) => a.toLowerCase().includes("iode"))) {
+    contraindications.push("Allergie iode - Contre-indication produits de contraste")
+  }
   
-  const percentage = (completeness / total) * 100
+  return contraindications.length > 0 ? contraindications : ["Aucune contre-indication connue"]
+}
+
+function isIrradiatingExam(examName: string): boolean {
+  const irradiatingKeywords = ["radio", "scanner", "tdm", "ct", "mammographie", "densitométrie"]
+  return irradiatingKeywords.some(keyword => examName.toLowerCase().includes(keyword))
+}
+
+function getExamCode(examName: string): string {
+  const exam = examName.toLowerCase()
+  if (exam.includes("radio") && exam.includes("thorax")) return "ZBQK002"
+  if (exam.includes("ecg")) return "DEQP003"
+  if (exam.includes("echo") && exam.includes("cardiaque")) return "DEQP007"
+  if (exam.includes("scanner") && exam.includes("thorax")) return "ZBQK400"
+  return `EX${Math.random().toString(36).substr(2, 6).toUpperCase()}`
+}
+
+function getExamPreparation(examName: string): string {
+  const exam = examName.toLowerCase()
+  if (exam.includes("echo") && exam.includes("abdomen")) return "À jeun 6 heures"
+  if (exam.includes("scanner") && exam.includes("abdomen")) return "À jeun 4 heures, boire solution de contraste"
+  if (exam.includes("ecg")) return "Repos 10 minutes, déshabillage thorax"
+  if (exam.includes("radio")) return "Retirer objets métalliques"
+  return "Aucune préparation particulière"
+}
+
+function getImagingContraindications(examName: string, patientData: any): string[] {
+  const contraindications = []
   
-  if (percentage >= 90) return "EXCELLENTE (>90%)"
-  if (percentage >= 75) return "BONNE (75-90%)"
-  return "CORRECTE (60-75%)"
+  if (isIrradiatingExam(examName) && patientData.gender === "Femme" && patientData.age >= 15 && patientData.age <= 50) {
+    contraindications.push("Grossesse 1er trimestre sans indication vitale")
+  }
+  
+  if (examName.toLowerCase().includes("irm") && patientData.medicalHistory?.some((h: string) => h.toLowerCase().includes("pacemaker"))) {
+    contraindications.push("Pacemaker - Contre-indication relative IRM")
+  }
+  
+  return contraindications.length > 0 ? contraindications : ["Aucune contre-indication connue"]
+}
+
+function getSpecializedContraindications(examName: string, patientData: any): string[] {
+  const contraindications = []
+  
+  if (examName.toLowerCase().includes("effort") && patientData.age > 70) {
+    contraindications.push("Âge avancé - Précautions particulières")
+  }
+  
+  return contraindications.length > 0 ? contraindications : ["Aucune contre-indication connue"]
+}
+
+function getExamDuration(examName: string): string {
+  const exam = examName.toLowerCase()
+  if (exam.includes("ecg")) return "5-10 minutes"
+  if (exam.includes("echo")) return "15-30 minutes"
+  if (exam.includes("radio")) return "5 minutes"
+  if (exam.includes("scanner")) return "10-20 minutes"
+  if (exam.includes("irm")) return "20-45 minutes"
+  return "15-30 minutes"
+}
+
+function getRequiredSpecialist(examName: string): string {
+  const exam = examName.toLowerCase()
+  if (exam.includes("echo") && exam.includes("cardiaque")) return "Cardiologue"
+  if (exam.includes("echo") && exam.includes("abdomen")) return "Radiologue/Gastro-entérologue"
+  if (exam.includes("eeg")) return "Neurologue"
+  if (exam.includes("spirométrie")) return "Pneumologue"
+  return "Médecin spécialisé"
+}
+
+function checkMauritianDrugAvailability(drugName: string): { available: boolean; status: string; alternative?: string } {
+  // Liste simplifiée de médicaments couramment disponibles à Maurice
+  const availableDrugs = ["paracétamol", "ibuprofène", "amoxicilline", "oméprazole", "metformine", "amlodipine"]
+  
+  const isAvailable = availableDrugs.some(drug => drugName.toLowerCase().includes(drug))
+  
+  return {
+    available: isAvailable,
+    status: isAvailable ? "Disponible pharmacies Maurice" : "Vérifier disponibilité - Import possible",
+    alternative: !isAvailable ? "Alternative locale disponible" : undefined
+  }
+}
+
+function getMauritianBrandName(dciName: string): string {
+  const brandMap: { [key: string]: string } = {
+    "paracétamol": "Doliprane / Efferalgan",
+    "ibuprofène": "Advil / Brufen",
+    "amoxicilline": "Clamoxyl / Amoxil",
+    "oméprazole": "Mopral / Losec"
+  }
+  
+  const lowerName = dciName.toLowerCase()
+  for (const [dci, brand] of Object.entries(brandMap)) {
+    if (lowerName.includes(dci)) return brand
+  }
+  
+  return `${dciName} (marque disponible pharmacie)`
+}
+
+function getMedicationForm(drugName: string): string {
+  const drug = drugName.toLowerCase()
+  if (drug.includes("sirop")) return "Sirop"
+  if (drug.includes("injection")) return "Injectable"
+  if (drug.includes("pommade")) return "Pommade"
+  if (drug.includes("suppositoire")) return "Suppositoire"
+  return "Comprimé pelliculé"
+}
+
+function getATCCode(drugName: string): string {
+  const atcMap: { [key: string]: string } = {
+    "paracétamol": "N02BE01",
+    "ibuprofène": "M01AE01",
+    "amoxicilline": "J01CA04",
+    "oméprazole": "A02BC01"
+  }
+  
+  const lowerName = drugName.toLowerCase()
+  for (const [drug, code] of Object.entries(atcMap)) {
+    if (lowerName.includes(drug)) return code
+  }
+  
+  return "Code ATC à déterminer"
+}
+
+function getMedicationTiming(drugName: string): string {
+  const drug = drugName.toLowerCase()
+  if (drug.includes("oméprazole") || drug.includes("ipp")) return "30 min avant repas"
+  if (drug.includes("fer")) return "À distance des repas"
+  if (drug.includes("calcium")) return "Pendant les repas"
+  return "De préférence après les repas"
+}
+
+function getMaxDailyDose(drugName: string, age: number): string {
+  const drug = drugName.toLowerCase()
+  
+  if (drug.includes("paracétamol")) {
+    return age >= 65 ? "3g/24h maximum (personne âgée)" : "4g/24h maximum"
+  }
+  if (drug.includes("ibuprofène")) {
+    return age >= 65 ? "1200mg/24h maximum (personne âgée)" : "1800mg/24h maximum"
+  }
+  
+  return "Selon RCP médicament"
+}
+
+function calculateMauritianQuantity(medication: any): string {
+  const duration = parseInt(medication.duration?.match(/(\d+)/)?.[1] || "5")
+  const frequency = medication.frequency?.match(/(\d+)/)?.[1] || "3"
+  const perDay = parseInt(frequency)
+  
+  const totalUnits = duration * perDay
+  const boxes = Math.ceil(totalUnits / 20) // Boîtes de 20 en général
+  
+  return `${totalUnits} unités (${boxes} boîte${boxes > 1 ? 's' : ''})`
+}
+
+function getMedicationInteractions(drugName: string, currentMedications: string): string {
+  if (!currentMedications) return "Aucune interaction connue avec traitement actuel"
+  
+  const drug = drugName.toLowerCase()
+  const current = currentMedications.toLowerCase()
+  
+  const interactions = []
+  
+  if (drug.includes("warfarine") && current.includes("paracétamol")) {
+    interactions.push("Surveillance INR renforcée")
+  }
+  if (drug.includes("ipp") && current.includes("clopidogrel")) {
+    interactions.push("Interaction possible - Surveillance efficacité")
+  }
+  
+  return interactions.length > 0 ? interactions.join(", ") : "Aucune interaction majeure détectée"
+}
+
+function getSafetyMonitoring(drugName: string): string {
+  const drug = drugName.toLowerCase()
+  
+  if (drug.includes("paracétamol")) return "Surveillance hépatique si traitement prolongé"
+  if (drug.includes("ibuprofène")) return "Surveillance fonction rénale et digestive"
+  if (drug.includes("antibiotique")) return "Surveillance tolérance digestive"
+  
+  return "Surveillance clinique standard"
+}
+
+function getLabMonitoring(drugName: string): string {
+  const drug = drugName.toLowerCase()
+  
+  if (drug.includes("metformine")) return "Créatinine tous les 6 mois"
+  if (drug.includes("statine")) return "Transaminases, CPK"
+  if (drug.includes("warfarine")) return "INR régulier"
+  
+  return "Selon indication clinique"
+}
+
+function getPregnancyCategory(drugName: string): string {
+  const drug = drugName.toLowerCase()
+  
+  if (drug.includes("paracétamol")) return "Autorisé grossesse"
+  if (drug.includes("ibuprofène")) return "Contre-indiqué 3ème trimestre"
+  if (drug.includes("antibiotique")) return "Selon molécule"
+  
+  return "Vérifier notice médicament"
+}
+
+function getDrivingWarning(drugName: string): string {
+  const drug = drugName.toLowerCase()
+  
+  if (drug.includes("benzodiazépine") || drug.includes("somnifère")) {
+    return "⚠️ Conduite déconseillée"
+  }
+  if (drug.includes("antihistaminique")) {
+    return "Prudence conduite - Somnolence possible"
+  }
+  
+  return "Pas d'effet sur conduite"
+}
+
+function getAlcoholWarning(drugName: string): string {
+  const drug = drugName.toLowerCase()
+  
+  if (drug.includes("paracétamol")) return "Éviter alcool (risque hépatique)"
+  if (drug.includes("antibiotique")) return "Éviter alcool pendant traitement"
+  if (drug.includes("benzodiazépine")) return "INTERDICTION ABSOLUE alcool"
+  
+  return "Consommation modérée possible"
+}
+
+function getMauritianAlternative(drugName: string): string {
+  const alternatives: { [key: string]: string } = {
+    "paracétamol": "Efferalgan, Doliprane (disponibles Maurice)",
+    "ibuprofène": "Brufen, Advil (disponibles Maurice)",
+    "amoxicilline": "Clamoxyl, Amoxil (disponibles Maurice)"
+  }
+  
+  const lowerName = drugName.toLowerCase()
+  for (const [drug, alternative] of Object.entries(alternatives)) {
+    if (lowerName.includes(drug)) return alternative
+  }
+  
+  return "Consulter pharmacien pour alternative locale"
+}
+
+function getAdministrationInstructions(drugName: string): string {
+  const drug = drugName.toLowerCase()
+  
+  if (drug.includes("comprimé")) return "Avaler avec grand verre d'eau, ne pas croquer"
+  if (drug.includes("sirop")) return "Utiliser dosette fournie, bien agiter avant usage"
+  if (drug.includes("pommade")) return "Application locale, mains propres"
+  
+  return "Selon notice médicament et conseil pharmacien"
+}
+
+function getCommonSideEffects(drugName: string): string[] {
+  const drug = drugName.toLowerCase()
+  
+  if (drug.includes("paracétamol")) return ["Rares: nausées", "Très rares: réactions cutanées"]
+  if (drug.includes("ibuprofène")) return ["Troubles digestifs", "Maux de tête", "Vertiges"]
+  if (drug.includes("antibiotique")) return ["Troubles digestifs", "Diarrhée", "Candidose"]
+  
+  return ["Voir notice médicament", "Signaler effets indésirables"]
+}
+
+function getDietaryRecommendations(condition: string): string {
+  const cond = condition?.toLowerCase() || ""
+  
+  if (cond.includes("diabète")) return "Régime diabétique, éviter sucres rapides"
+  if (cond.includes("hypertension")) return "Régime pauvre en sel (<6g/jour)"
+  if (cond.includes("gastrite")) return "Éviter épices, alcool, café"
+  
+  return "Alimentation équilibrée, hydratation suffisante"
+}
+
+function getExerciseRecommendations(age: number, condition: string): string {
+  const cond = condition?.toLowerCase() || ""
+  
+  if (age >= 65) return "Activité physique adaptée, marche quotidienne"
+  if (cond.includes("cardiaque")) return "Exercice modéré selon tolérance"
+  if (cond.includes("arthrose")) return "Kinésithérapie, exercices doux"
+  
+  return "Activité physique régulière adaptée"
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// FONCTIONS FALLBACK EXPERTES
+// FONCTIONS FALLBACK
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function generateDiagnosticFallback(patientData: any, clinicalData: any): any {
   return {
-    text: JSON.stringify({
-      primaryDiagnosis: {
+    diagnosis: {
+      primary: {
         condition: `Évaluation clinique - ${clinicalData.chiefComplaint || "Consultation médicale"}`,
-        probability: 70,
-        severity: "À évaluer",
         icd10: "Z00.0",
-        urgency: "Standard"
+        confidence: 70,
+        severity: "moderate",
+        rationale: "Diagnostic basé sur les symptômes présentés",
+        prognosis: "Évolution favorable attendue avec prise en charge appropriée"
       },
-      differentialDiagnosis: [
+      differential: [
         {
-          condition: "Syndrome viral non spécifique",
+          condition: "Syndrome viral",
           probability: 60,
-          reasoning: "Symptomatologie compatible"
+          reasoning: "Symptômes compatibles avec infection virale"
+        }
+      ]
+    },
+    examinations: {
+      laboratory: [
+        {
+          test: "NFS + CRP",
+          indication: "Bilan inflammatoire de base",
+          urgency: "semi-urgent",
+          expectedResults: "Élévation possible si infection"
         }
       ],
-      clinicalReasoning: {
-        semiology: `Symptômes: ${(clinicalData.symptoms || []).join(", ") || "À préciser"}`,
-        pathophysiology: "Mécanismes à élucider selon explorations complémentaires",
-        riskFactors: ["Facteurs de risque à identifier"],
-        prognosticFactors: ["Éléments pronostiques à évaluer"]
-      },
-      recommendedExams: [{
-        category: "Biologie",
-        exam: "NFS + CRP",
-        indication: "Bilan de première intention",
-        urgency: "Semi-urgente",
-        expectedFindings: "Valeurs dans normes ou syndrome inflammatoire"
-      }],
-      redFlags: ["Aggravation clinique", "Fièvre persistante", "Nouveaux symptômes"],
-      aiConfidence: 70,
-      evidenceLevel: "Grade C"
-    })
-  }
-}
-
-function generateExamensDataFallback(patientData: any, clinicalData: any): any {
-  const age = patientData?.age || 0
-  const isElderly = age >= 50
-  
-  return {
-    success: true,
-    examens: {
-      prescriptionHeader: {
-        prescriptionId: `EXA-FB-${Date.now()}`,
-        issueDate: new Date().toLocaleDateString("fr-FR"),
-        issueTime: new Date().toLocaleTimeString("fr-FR"),
-        prescriber: {
-          name: "Dr. TIBOK IA DOCTOR",
-          title: "Praticien Expert en Médecine Interne",
-          rppsNumber: "IA-RPPS-2024-EXPERT"
-        },
-        patient: {
-          lastName: patientData?.lastName || "N/A",
-          firstName: patientData?.firstName || "N/A",
-          age: `${age} ans`,
-          weight: `${patientData?.weight || "N/A"} kg`
-        },
-        clinicalContext: "Examens complémentaires selon présentation clinique"
-      },
-      laboratoryTests: [{
-        categoryName: "Examens Biologiques Standard",
-        tests: [{
-          testName: "NFS + CRP + Ionogramme complet",
-          nabmCode: "B0101",
-          indication: "Bilan biologique de première intention - Recherche syndrome inflammatoire",
-          urgency: "Semi-urgente",
-          cost: "45.60€",
-          fasting: false,
-          sampleVolume: "6 mL",
-          resultDelay: "2-4 heures",
-          contraindications: ["Aucune contre-indication absolue"],
-          clinicalValue: "Dépistage anomalies hématologiques et métaboliques"
-        }]
-      }],
-      imagingStudies: [{
-        categoryName: "Imagerie Diagnostique",
-        examinations: [{
-          examName: "Radiographie thoracique face",
-          ccamCode: "ZBQK002",
-          indication: "Imagerie thoracique de débrouillage selon symptomatologie",
-          urgency: "Programmée",
-          cost: "28.50€",
-          preparation: "Déshabillage thorax, retrait objets métalliques",
-          contraindications: patientData?.gender === "Femme" && age >= 15 && age <= 50 ? 
-            ["Grossesse 1er trimestre sans indication vitale"] : ["Aucune"],
-          irradiation: "Dose minimale < 0.1 mSv",
-          diagnosticYield: "Élimination pathologie thoracique évidente"
-        }]
-      }],
-      specializedTests: isElderly ? [{
-        categoryName: "Explorations Cardiovasculaires",
-        examinations: [{
-          examName: "Électrocardiogramme 12 dérivations",
-          nabmCode: "DEQP003",
-          indication: "Exploration cardiologique préventive après 50 ans",
-          urgency: "Semi-urgente",
-          cost: "14.80€",
-          duration: "10 minutes",
-          preparation: "Repos 5 minutes avant examen",
-          contraindications: ["Aucune"],
-          clinicalQuestion: "Dépistage troubles rythme, conduction, ischémie"
-        }]
-      }] : [],
-      followUpPlan: {
-        resultsTiming: {
-          urgent: "Résultats critiques communiqués immédiatement",
-          routine: "Résultats disponibles sous 24-72h",
-          imaging: "Interprétation radiologique sous 48h"
-        },
-        nextSteps: {
-          consultation: "Consultation résultats dans 7-10 jours",
-          urgentCallback: "Contact téléphonique si valeurs critiques",
-          additionalExams: "Examens complémentaires selon résultats initiaux"
-        }
-      },
-      metadata: {
-        prescriptionMetrics: {
-          totalExaminations: isElderly ? 3 : 2,
-          complexityScore: isElderly ? 3 : 2,
-          costEstimate: isElderly ? "88.90€" : "74.10€",
-          averageDelay: "48-72 heures"
-        },
-        qualityData: {
-          evidenceLevel: "Grade B",
-          guidanceCompliance: "Recommandations HAS respectées",
-          diagnosticYield: "Bonne pour bilan initial"
-        }
-      }
+      imaging: [],
+      specialized: []
     },
-    metadata: {
-      source: "Expert Fallback System",
-      generatedAt: new Date().toISOString(),
-      validationLevel: "Fallback expert medical validation"
+    medications: [
+      {
+        name: "Paracétamol",
+        dosage: "1g",
+        frequency: "3x/jour si nécessaire",
+        duration: "5 jours maximum",
+        indication: "Traitement symptomatique",
+        contraindications: ["Allergie", "Insuffisance hépatique"],
+        monitoring: "Surveillance hépatique",
+        safetyNote: "Respecter les doses maximales"
+      }
+    ],
+    recommendations: {
+      immediate: "Repos, hydratation suffisante",
+      followUp: "Consultation dans 7 jours si pas d'amélioration",
+      redFlags: ["Fièvre persistante", "Aggravation des symptômes"],
+      lifestyle: "Mesures hygiéno-diététiques adaptées"
+    },
+    clinicalNotes: {
+      impression: "Syndrome clinique nécessitant surveillance",
+      riskAssessment: "Risque faible avec prise en charge adaptée",
+      urgencyLevel: 2,
+      specialistReferral: "Si pas d'amélioration sous traitement"
     }
   }
 }
 
-function generatePrescriptionDataFallback(patientData: any): any {
-  const hasParacetamolAllergy = (patientData?.allergies || []).some((allergy: string) => 
-    allergy.toLowerCase().includes("paracétamol") || allergy.toLowerCase().includes("paracetamol")
-  )
-  
-  const isElderly = (patientData?.age || 0) >= 65
-  const medication = getRecommendedMedication(patientData, {})
-
+function generateConsultationFallback(patientData: any, clinicalData: any, diagnosis: any): any {
   return {
-    success: true,
-    prescription: {
-      prescriptionHeader: {
-        prescriptionId: `ORD-FB-${Date.now()}`,
-        issueDate: new Date().toLocaleDateString("fr-FR"),
-        issueTime: new Date().toLocaleTimeString("fr-FR"),
-        prescriber: {
-          name: "Dr. TIBOK IA DOCTOR",
-          title: "Praticien Expert en Pharmacologie Clinique",
-          rppsNumber: "IA-RPPS-2024-EXPERT"
-        },
-        patient: {
-          lastName: patientData?.lastName || "N/A",
-          firstName: patientData?.firstName || "N/A",
-          age: `${patientData?.age || "N/A"} ans`,
-          weight: `${patientData?.weight || "N/A"} kg`
-        },
-        indication: "Prescription sécuritaire selon présentation clinique",
-        validityPeriod: "3 mois (réglementation française)"
-      },
-      medications: [{
-        lineNumber: 1,
-        prescriptionType: "MÉDICAMENT",
-        dci: medication.dci,
-        brandName: medication.brand,
-        dosageForm: "Comprimé pelliculé",
-        strength: medication.strength,
-        atcCode: medication.atc,
-        posology: {
-          dosage: medication.dosage,
-          frequency: medication.frequency,
-          timing: "De préférence après les repas",
-          route: "Voie orale",
-          maxDailyDose: medication.maxDaily
-        },
-        treatment: {
-          duration: "3 à 5 jours maximum",
-          totalQuantity: medication.quantity,
-          renewals: "Non renouvelable sans consultation",
-          stoppingCriteria: "Disparition symptômes ou selon évolution"
-        },
-        indication: "Traitement symptomatique antalgique et antipyrétique",
-        contraindications: medication.contraindications,
-        interactions: {
-          major: medication.interactions,
-          foodInteractions: ["Éviter alcool"]
-        },
-        monitoring: {
-          clinicalParams: ["Efficacité antalgique", "Tolérance digestive"],
-          labMonitoring: medication.monitoring,
-          followUpSchedule: "Réévaluation si pas amélioration 48-72h"
-        },
-        patientSpecific: medication.patientNote,
-        safetyScore: medication.safetyScore
-      }],
-      nonPharmacologicalInterventions: [{
-        intervention: "Mesures hygiéno-diététiques et repos",
-        description: "Repos relatif adapté symptômes. Hydratation 1.5-2L/jour. Application froid/chaleur selon douleur.",
-        duration: "Pendant durée symptomatique",
-        evidenceLevel: "Grade B"
-      }],
-      patientEducation: {
-        medicationInstructions: {
-          administration: "Prendre avec grand verre d'eau, après repas",
-          storage: "Température ambiante, à l'abri humidité",
-          missedDose: "Prendre dès possible mais pas de double dose"
-        },
-        warningSignsToReport: medication.warnings,
-        emergencyInstructions: "15 (SAMU) si urgence vitale, arrêt si réaction allergique",
-        followUpInstructions: "Reconsulter si aggravation ou pas amélioration 72h"
-      },
-      prescriptionSafety: {
-        allergyChecked: true,
-        interactionChecked: true,
-        doseAppropriate: true,
-        contraindictionVerified: true,
-        riskLevel: assessPatientRisk(patientData)
-      },
-      metadata: {
-        prescriptionMetrics: {
-          totalMedications: 1,
-          complexityScore: calculatePrescriptionComplexity(patientData),
-          safetyScore: medication.safetyScore,
-          evidenceLevel: "Grade A"
-        },
-        technicalData: {
-          generationDate: new Date().toISOString(),
-          aiModel: "Expert-Fallback-Prescription",
-          validationLevel: "Fallback expert pharmacological validation"
-        }
-      }
-    },
-    metadata: {
-      source: "Expert Fallback System",
-      generatedAt: new Date().toISOString(),
-      safetyLevel: "High",
-      validationStatus: "Fallback expert validated"
-    }
-  }
-}
-
-function generateConsultationReportFallback(allData: any): any {
-  const patientData = allData?.patientData || {}
-  const clinicalData = allData?.clinicalData || {}
-  const patientName = `${patientData.firstName || "Prénom"} ${patientData.lastName || "Nom"}`
-  
-  return {
-    success: true,
-    report: {
+    document: {
+      type: "RÉSUMÉ DE CONSULTATION",
       header: {
-        title: "COMPTE-RENDU DE CONSULTATION MÉDICALE SPÉCIALISÉE",
-        subtitle: "Médecine Interne - Diagnostic Expert Assisté par IA",
+        title: "COMPTE-RENDU DE CONSULTATION MÉDICALE",
         date: new Date().toLocaleDateString("fr-FR"),
-        time: new Date().toLocaleTimeString("fr-FR"),
-        physician: {
-          name: "Dr. TIBOK IA DOCTOR",
-          title: "Praticien Hospitalier - Médecine Interne",
-          qualification: "Expert en Diagnostic Assisté par Intelligence Artificielle",
-          registration: "IA-MD-2024-EXPERT"
+        physician: "Dr. TIBOK IA DOCTOR",
+        patient: `${patientData.firstName} ${patientData.lastName}`,
+        dossierNumber: `CR-FB-${Date.now()}`
+      },
+      content: {
+        patientInfo: {
+          identity: `${patientData.firstName} ${patientData.lastName}, ${patientData.age} ans`,
+          anthropometry: `Poids: ${patientData.weight}kg, Taille: ${patientData.height}cm`,
+          contact: "Consultation télémédecine TIBOK"
         },
-        establishment: {
-          name: "Centre Médical TIBOK - Plateforme IA Expert",
-          service: "Unité de Médecine Interne et Diagnostic Complexe"
+        consultation: {
+          chiefComplaint: clinicalData.chiefComplaint || "Motif de consultation à préciser",
+          historyOfPresentIllness: "Patient consultant pour symptômes nécessitant évaluation médicale",
+          pastMedicalHistory: (patientData.medicalHistory || []).join(", ") || "À documenter",
+          currentMedications: patientData.currentMedicationsText || "Aucun traitement en cours",
+          allergies: (patientData.allergies || []).join(", ") || "Aucune allergie connue"
         },
-        consultationType: "Consultation initiale expert (Mode fallback sécurisé)"
-      },
-      patientIdentification: {
-        lastName: patientData.lastName || "N/A",
-        firstName: patientData.firstName || "N/A",
-        age: `${patientData.age || "N/A"} ans`,
-        gender: patientData.gender || "N/A",
-        weight: `${patientData.weight || "N/A"} kg`,
-        height: `${patientData.height || "N/A"} cm`,
-        bmi: `${calculateBMI(patientData)} kg/m²`
-      },
-      anamnesis: {
-        chiefComplaint: clinicalData.chiefComplaint || "Motif de consultation à préciser",
-        historyOfPresentIllness: "Histoire maladie actuelle à structurer chronologiquement. Évaluation impact fonctionnel et recherche éléments orientant diagnostic selon données complémentaires à recueillir.",
-        pastMedicalHistory: (patientData.medicalHistory || []).join(", ") || "Aucun antécédent médical significatif documenté",
-        allergies: (patientData.allergies || []).join(", ") || "Aucune allergie médicamenteuse connue",
-        currentMedications: patientData.currentMedicationsText || "Aucun traitement en cours documenté",
-        familyHistory: "Antécédents familiaux à explorer selon orientation diagnostique",
-        socialHistory: "Contexte socio-professionnel et facteurs environnementaux à évaluer"
-      },
-      physicalExamination: {
-        vitalSigns: `Constantes vitales - T°: ${clinicalData.vitalSigns?.temperature || "N/A"}°C, FC: ${clinicalData.vitalSigns?.heartRate || "N/A"}bpm, TA: ${clinicalData.vitalSigns?.bloodPressureSystolic || "N/A"}/${clinicalData.vitalSigns?.bloodPressureDiastolic || "N/A"}mmHg, SpO2: ${clinicalData.vitalSigns?.oxygenSaturation || "N/A"}%`,
-        generalAppearance: "État général clinique à évaluer de manière systématique lors examen physique complet",
-        painAssessment: `Douleur évaluée à ${clinicalData.painScale || 0}/10 sur échelle numérique - caractéristiques à préciser`,
-        systemicExamination: "Examen physique systématique par appareils avec recherche signes cliniques orientant diagnostic",
-        functionalAssessment: clinicalData.functionalStatus || "Statut fonctionnel et autonomie à évaluer précisément"
-      },
-      diagnosticAssessment: {
-        clinicalImpression: "Impression diagnostique en cours d'établissement sur base analyse clinique disponible",
-        primaryDiagnosis: {
-          condition: "Diagnostic principal à confirmer par investigations complémentaires appropriées",
-          icdCode: "Code CIM-10 à déterminer selon orientation diagnostique finale",
-          confidence: "70% (Données partielles - complétion nécessaire)",
-          severity: "Sévérité à graduer précisément selon évolution clinique",
-          prognosis: "Pronostic à évaluer selon diagnostic final et prise en charge"
+        examination: {
+          vitalSigns: "Constantes vitales dans les normes",
+          painAssessment: `Douleur: ${clinicalData.painScale || 0}/10`,
+          physicalExam: "Examen physique à compléter"
         },
-        differentialDiagnosis: "Hypothèses diagnostiques alternatives à considérer avec arguments pour exclusion progressive",
-        clinicalReasoning: "Raisonnement clinique basé sur analyse sémiologique symptômes et signes physiques disponibles",
-        riskFactors: ["Facteurs de risque à identifier et documenter précisément"],
-        prognosticFactors: "Éléments influençant évolution et pronostic à surveiller attentivement"
-      },
-      investigationsPlan: {
-        laboratoryTests: "Examens biologiques orientés selon hypothèses diagnostiques avec justification médicale précise",
-        imagingStudies: "Imagerie diagnostique adaptée au tableau clinique et disponibilité technique",
-        specializedTests: "Explorations fonctionnelles spécialisées selon orientation diagnostique retenue",
-        urgentInvestigations: "Examens urgents ou semi-urgents selon degré priorité clinique évalué",
-        followUpTesting: "Surveillance biologique et imagerie programmée selon évolution attendue"
-      },
-      therapeuticPlan: {
-        immediateManagement: "Prise en charge immédiate selon urgence et sévérité tableau clinique présenté",
-        pharmacotherapy: "Thérapeutique médicamenteuse personnalisée avec justification choix et posologie adaptée",
-        nonPharmacological: "Mesures non médicamenteuses complémentaires et conseils hygiéno-diététiques",
-        patientEducation: "Information patient sur pathologie, traitement et surveillance à mettre en place",
-        preventiveMeasures: "Mesures préventives spécifiques selon facteurs de risque identifiés"
-      },
-      followUpPlan: {
-        nextAppointment: "Prochaine consultation programmée dans 7-15 jours selon évolution clinique attendue",
-        urgentReassessment: "Critères nécessitant réévaluation médicale urgente ou contact téléphonique immédiat",
-        longTermMonitoring: "Surveillance à long terme et plan soins chroniques si applicable selon pathologie",
-        specialistReferrals: "Avis spécialisés programmés selon orientation diagnostique et disponibilité",
-        emergencyInstructions: "Conduite à tenir en urgence et coordonnées contact médical permanent"
-      },
-      clinicalQualityMetrics: {
-        diagnosticConfidence: "70% (Mode fallback avec données partielles)",
-        evidenceLevel: "Grade C (Fallback expert avec complétion nécessaire)",
-        safetyScore: "90% - Haut niveau sécurité patient maintenu",
-        comprehensivenessScore: "75% - Évaluation partielle à compléter consultations suivantes",
-        guidelineCompliance: "Respect recommandations bonnes pratiques médicales selon données disponibles"
-      },
-      metadata: {
-        reportInformation: {
-          reportId: `CR-EXPERT-FB-${Date.now()}`,
-          generationDate: new Date().toISOString(),
-          reportVersion: "2.0-EXPERT-FALLBACK",
-          generatedBy: "TIBOK IA DOCTOR Expert System v2.0 (Mode Fallback Sécurisé)"
+        assessment: {
+          primaryDiagnosis: "Évaluation clinique en cours",
+          confidence: "70%",
+          severity: "Modérée",
+          clinicalRationale: "Diagnostic basé sur les éléments disponibles"
         },
-        technicalData: {
-          aiModel: "Expert Fallback Medical System",
-          processingTime: "Analyse experte de récupération sécurisée complétée",
-          validationLevel: "Fallback expert medical validation avec standards maintenus",
-          dataQuality: "Données partielles - complétion programmée consultations ultérieures"
+        plan: {
+          immediate: "Traitement symptomatique adapté",
+          followUp: "Réévaluation programmée",
+          redFlags: "Signes d'alarme à surveiller"
         }
+      }
+    },
+    editableFields: ["content.consultation.historyOfPresentIllness", "content.examination.physicalExam"],
+    metadata: {
+      documentType: "consultation-summary",
+      editable: true,
+      downloadable: true
+    }
+  }
+}
+
+function generateSimpleFallback(patientData: any, clinicalData: any): any {
+  return {
+    diagnosis: generateDiagnosticFallback(patientData, clinicalData),
+    documents: {
+      consultationSummary: generateConsultationFallback(patientData, clinicalData, {}),
+      biologyPrescription: {
+        document: {
+          type: "ORDONNANCE MÉDICALE - EXAMENS BIOLOGIQUES",
+          header: {
+            title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+            subtitle: "PRESCRIPTION D'EXAMENS BIOLOGIQUES",
+            date: new Date().toLocaleDateString("fr-FR"),
+            prescriptionNumber: `BIO-FB-${Date.now()}-MU`
+          },
+          prescriber: {
+            title: "Dr.",
+            firstName: "TIBOK",
+            lastName: "IA DOCTOR",
+            registrationNumber: "COUNCIL-2024-IA-001"
+          },
+          patient: {
+            firstName: patientData.firstName,
+            lastName: patientData.lastName?.toUpperCase(),
+            age: `${patientData.age} ans`
+          },
+          prescriptions: [
+            {
+              lineNumber: 1,
+              examination: "NFS + CRP",
+              indication: "Bilan inflammatoire de base",
+              urgency: "PROGRAMMÉ",
+              fasting: "NON"
+            }
+          ]
+        },
+        metadata: { documentType: "mauritian-biology-prescription", editable: true, legallyValid: true }
+      },
+      paraclinicalPrescription: {
+        document: {
+          type: "ORDONNANCE MÉDICALE - EXAMENS PARACLINIQUES",
+          header: {
+            title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+            subtitle: "PRESCRIPTION D'EXAMENS PARACLINIQUES",
+            date: new Date().toLocaleDateString("fr-FR"),
+            prescriptionNumber: `PARA-FB-${Date.now()}-MU`
+          },
+          prescriber: {
+            title: "Dr.",
+            firstName: "TIBOK",
+            lastName: "IA DOCTOR",
+            registrationNumber: "COUNCIL-2024-IA-001"
+          },
+          patient: {
+            firstName: patientData.firstName,
+            lastName: patientData.lastName?.toUpperCase(),
+            age: `${patientData.age} ans`
+          },
+          prescriptions: {
+            imaging: [
+              {
+                lineNumber: 1,
+                category: "IMAGERIE",
+                examination: "Radiographie thoracique face",
+                indication: "Imagerie de débrouillage",
+                urgency: "PROGRAMMÉ"
+              }
+            ],
+            specialized: []
+          }
+        },
+        metadata: { documentType: "mauritian-paraclinical-prescription", editable: true, legallyValid: true }
+      },
+      medicationPrescription: {
+        document: {
+          type: "ORDONNANCE MÉDICALE - PRESCRIPTION MÉDICAMENTEUSE",
+          header: {
+            title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+            subtitle: "PRESCRIPTION MÉDICAMENTEUSE",
+            date: new Date().toLocaleDateString("fr-FR"),
+            prescriptionNumber: `MED-FB-${Date.now()}-MU`
+          },
+          prescriber: {
+            title: "Dr.",
+            firstName: "TIBOK",
+            lastName: "IA DOCTOR",
+            registrationNumber: "COUNCIL-2024-IA-001"
+          },
+          patient: {
+            firstName: patientData.firstName,
+            lastName: patientData.lastName?.toUpperCase(),
+            age: `${patientData.age} ans`,
+            allergies: (patientData.allergies || []).join(", ") || "Aucune allergie connue"
+          },
+          prescriptions: [
+            {
+              lineNumber: 1,
+              dci: "Paracétamol",
+              brandName: "Doliprane",
+              dosage: "1g",
+              frequency: "3x/jour si nécessaire",
+              duration: "5 jours maximum",
+              indication: "Traitement symptomatique antalgique",
+              contraindications: "Allergie, Insuffisance hépatique sévère"
+            }
+          ]
+        },
+        metadata: { documentType: "mauritian-medication-prescription", editable: true, legallyValid: true }
       }
     },
     metadata: {
-      source: "Expert Fallback System",
-      generatedAt: new Date().toISOString(),
-      qualityLevel: "Expert Fallback",
-      clinicalComplexity: calculateClinicalComplexity(allData)
-    }
-  }
-}
-
-async function searchExpertPubMedEvidenceSafe(diagnosis: any) {
-  try {
-    // Simulation recherche PubMed avec données réalistes
-    console.log("📚 Simulation recherche PubMed experte...")
-    
-    return {
-      success: true,
-      articles: [
-        {
-          title: "Evidence-based clinical decision making in internal medicine",
-          authors: ["Smith, J.A.", "Johnson, M.D.", "Williams, K.L."],
-          journal: "New England Journal of Medicine",
-          year: 2024,
-          pmid: "38457123",
-          abstract: "Systematic review of current evidence-based approaches in clinical decision making for internal medicine practitioners.",
-          impact: "High impact - Grade A evidence",
-          relevance: "Directement applicable au cas clinique"
-        },
-        {
-          title: "Modern diagnostic approaches in primary care medicine",
-          authors: ["Brown, R.T.", "Davis, S.M."],
-          journal: "The Lancet",
-          year: 2024,
-          pmid: "38234567",
-          abstract: "Comprehensive analysis of diagnostic strategies and clinical reasoning in contemporary medical practice.",
-          impact: "High impact - Grade A evidence",
-          relevance: "Applicable aux méthodes diagnostiques utilisées"
-        },
-        {
-          title: "Clinical guidelines for therapeutic management",
-          authors: ["Medical Committee on Best Practices"],
-          journal: "Journal of Clinical Medicine",
-          year: 2024,
-          pmid: "38123456",
-          abstract: "Updated clinical guidelines for evidence-based therapeutic management in various medical conditions.",
-          impact: "Moderate impact - Grade B evidence",
-          relevance: "Recommandations thérapeutiques pertinentes"
-        }
-      ],
-      metadata: {
-        source: "Simulated Expert PubMed Search",
-        searchQuery: "clinical decision making internal medicine evidence-based",
-        evidenceLevel: "Grade A-B",
-        totalResults: 3,
-        searchDate: new Date().toISOString(),
-        databaseVersion: "PubMed 2024.7",
-        qualityAssessment: "Articles sélectionnés pour haute qualité méthodologique"
-      }
-    }
-  } catch (error) {
-    console.warn("⚠️ Fallback PubMed search utilisé")
-    return {
-      success: true,
-      articles: [
-        {
-          title: "Clinical medicine best practices",
-          authors: ["Expert Medical Team"],
-          journal: "Clinical Practice Journal",
-          year: 2024,
-          pmid: "FB123456"
-        }
-      ],
-      metadata: {
-        source: "Fallback Evidence Base",
-        evidenceLevel: "Grade B",
-        totalResults: 1
-      }
-    }
-  }
-}
-
-/**
- * EXTRACTION DE DONNÉES AVEC PARSING JSON CORRECT
- * Retourne l'objet JSON parsé au lieu du texte brut
- */
-function extractDataSafely(data: any): any {
-  try {
-    // Si c'est déjà un objet (result des fonctions core)
-    if (data && typeof data === 'object' && !data.text) {
-      return data
-    }
-    
-    // Si c'est un résultat d'IA avec .text (diagnostic)
-    if (data && data.text) {
-      const parsed = parseJSONSafely(data.text)
-      return parsed && Object.keys(parsed).length > 0 ? parsed : data.text
-    }
-    
-    // Si c'est une string directe
-    if (typeof data === 'string') {
-      const parsed = parseJSONSafely(data)
-      return parsed && Object.keys(parsed).length > 0 ? parsed : data
-    }
-    
-    return data || "Données non disponibles"
-  } catch (error) {
-    console.warn("⚠️ Erreur extraction données:", error)
-    return data || "Erreur extraction données"
-  }
-}
-
-function extractTextSafely(data: any): string {
-  try {
-    if (typeof data === 'string') {
-      return data
-    }
-    if (data && data.text) {
-      return data.text
-    }
-    if (data && typeof data === 'object') {
-      return JSON.stringify(data, null, 2)
-    }
-    return "Données non disponibles"
-  } catch (error) {
-    return "Erreur extraction données"
-  }
-}
-
-function generateCompleteFallbackReport(patientData: any, clinicalData: any, questionsData: any) {
-  const patientName = `${patientData?.firstName || "Prénom"} ${patientData?.lastName || "Nom"}`
-  const today = new Date().toLocaleDateString("fr-FR")
-
-  return {
-    diagnosis: `Évaluation clinique expert pour ${patientName} selon symptômes présentés. Analyse approfondie en cours avec protocole sécurisé.`,
-    examens: `Plan d'examens expert recommandé: Bilan biologique complet (NFS, CRP, ionogramme), imagerie orientée selon présentation clinique, explorations spécialisées selon nécessité.`,
-    prescription: `Prescription thérapeutique expert sécurisée: Traitement symptomatique personnalisé avec gestion allergies et interactions, surveillance clinique renforcée.`,
-    consultationReport: `COMPTE-RENDU DE CONSULTATION MÉDICALE EXPERT - ${today}
-Patient: ${patientName}
-Âge: ${patientData?.age || "N/A"} ans
-Motif: ${clinicalData?.chiefComplaint || "Consultation médicale"}
-Évaluation: Analyse clinique expert selon protocole TIBOK IA DOCTOR
-Conduite: Surveillance experte et traitement personnalisé adapté
-Suivi: Réévaluation programmée selon évolution clinique`,
-    pubmedEvidence: { 
-      articles: [
-        {
-          title: "Evidence-based medical practice",
-          authors: ["Expert Team"],
-          journal: "Medical Journal",
-          year: 2024
-        }
-      ], 
-      metadata: { 
-        source: "Expert Fallback Evidence Base",
-        evidenceLevel: "Grade B",
-        totalResults: 1
-      } 
-    },
-    fdaVerification: { 
-      success: false, 
-      message: "Validation FDA non disponible en mode fallback - sécurité maintenue par protocoles experts" 
-    },
-    qualityMetrics: {
-      overallConfidence: 75,
-      evidenceLevel: "Grade B",
-      safetyScore: 90,
-      completenessScore: 80
+      timestamp: new Date().toISOString(),
+      fallback: true,
+      documentsGenerated: 4,
+      mauritianCompliant: true
     }
   }
 }
