@@ -84,6 +84,27 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
   const { patientData: tibokPatient, consultationData, isFromTibok } = useTibokPatientData()
   const [isLoadingPatientData, setIsLoadingPatientData] = useState(true)
   const [dataProcessed, setDataProcessed] = useState(false)
+  
+  // Capture URL parameters immediately before they get cleared
+  const [urlData] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const source = urlParams.get('source')
+      const patientDataParam = urlParams.get('patientData')
+      
+      if (source === 'tibok' && patientDataParam) {
+        try {
+          return {
+            source,
+            patientData: JSON.parse(decodeURIComponent(patientDataParam))
+          }
+        } catch (e) {
+          console.error('Error parsing URL data:', e)
+        }
+      }
+    }
+    return null
+  })
 
   const [formData, setFormData] = useState<PatientFormData>({
     firstName: "",
@@ -114,32 +135,24 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
   // Process data from URL or TIBOK hook
   useEffect(() => {
     const processPatientData = () => {
-      // First try URL parameters
-      const urlParams = new URLSearchParams(window.location.search)
-      const source = urlParams.get('source')
-      const patientDataParam = urlParams.get('patientData')
-      
-      console.log('Processing patient data - URL source:', source, 'Has data:', !!patientDataParam)
+      console.log('Starting to process patient data')
+      console.log('URL data captured:', urlData)
+      console.log('Hook data:', tibokPatient)
       
       let patientInfo = null
       let isTibok = false
       
-      // Try to get data from URL first
-      if (source === 'tibok' && patientDataParam) {
-        try {
-          patientInfo = JSON.parse(decodeURIComponent(patientDataParam))
-          isTibok = true
-          console.log('Patient data from URL:', patientInfo)
-        } catch (e) {
-          console.error('Error parsing URL data:', e)
-        }
+      // Use captured URL data first
+      if (urlData && urlData.patientData) {
+        patientInfo = urlData.patientData
+        isTibok = true
+        console.log('Using patient data from captured URL:', patientInfo)
       }
-      
       // If no URL data, try the hook data
-      if (!patientInfo && tibokPatient) {
+      else if (tibokPatient) {
         patientInfo = tibokPatient
         isTibok = isFromTibok
-        console.log('Patient data from hook:', patientInfo)
+        console.log('Using patient data from hook:', patientInfo)
       }
       
       // Process the data if we have it
@@ -190,17 +203,16 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
         console.log('Setting form data:', newFormData)
         setFormData(newFormData)
         setDataProcessed(true)
+        setIsLoadingPatientData(false)
+      } else if (!patientInfo) {
+        console.log('No patient data available')
+        setIsLoadingPatientData(false)
       }
-      
-      setIsLoadingPatientData(false)
     }
     
-    // Process immediately and also with a small delay for safety
+    // Process immediately
     processPatientData()
-    const timer = setTimeout(processPatientData, 200)
-    
-    return () => clearTimeout(timer)
-  }, [tibokPatient, isFromTibok, dataProcessed])
+  }, [tibokPatient, isFromTibok, dataProcessed, urlData])
 
   // Calculate form completion percentage
   const calculateProgress = () => {
@@ -381,7 +393,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
     )
   }
 
-  const showTibokNotification = dataProcessed && (isFromTibok || new URLSearchParams(window.location.search).get('source') === 'tibok')
+  const showTibokNotification = dataProcessed && (isFromTibok || urlData?.source === 'tibok')
 
   return (
     <div className="space-y-6">
