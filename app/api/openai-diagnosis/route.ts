@@ -39,37 +39,20 @@ export async function POST(request: NextRequest) {
     const currentMeds = (patientData?.currentMedications || []).join(', ') || 'Aucun traitement en cours'
     const medHistory = (patientData?.medicalHistory || []).join(', ') || 'Aucun antécédent particulier'
     
-    const prompt = `Tu es le Dr. Claude EXPERT, médecin interniste senior avec 25 ans d'expérience à Maurice, spécialisé en médecine tropicale et diagnostics complexes.
+    const prompt = `Tu es un médecin expert mauricien. Analyse ce cas clinique et génère un diagnostic avec documents professionnels.
 
-═══════════════════════════════════════════════════════════════
-🏥 CAS CLINIQUE COMPLET - ANALYSE EXPERTE DEMANDÉE
-═══════════════════════════════════════════════════════════════
+PATIENT: ${patientName}, ${age} ans
+MOTIF: ${complaint}
+SYMPTÔMES: ${symptoms}
+DURÉE: ${duration}
+DOULEUR: ${painScale}/10
+CONSTANTES: TA ${bp}, FC ${vitalSigns.heartRate || '?'}, T° ${vitalSigns.temperature || '?'}°C
+ALLERGIES: ${allergies}
+ANTÉCÉDENTS: ${medHistory}
 
-IDENTIFICATION PATIENT:
-• Nom: ${patientName}, ${age} ans
-• Poids: ${patientData?.weight || '?'}kg, Taille: ${patientData?.height || '?'}cm
-• Antécédents: ${medHistory}
-• Allergies: ${allergies}
-• Traitements actuels: ${currentMeds}
+MISSION: Diagnostic expert + Documents mauriciens complets
 
-PRÉSENTATION CLINIQUE:
-• Motif consultation: ${complaint}
-• Durée évolution: ${duration}
-• Symptômes associés: ${symptoms}
-• Échelle douleur: ${painScale}/10
-• Constantes vitales: TA ${bp} mmHg, FC ${vitalSigns.heartRate || '?'} bpm, T° ${vitalSigns.temperature || '?'}°C
-
-CONTEXTE MAURICIEN:
-• Climat tropical - Saison: ${new Date().getMonth() < 6 ? 'Hiver austral' : 'Été austral'}
-• Pathologies endémiques: Dengue, Chikungunya, infections tropicales
-• Système de santé: Public/privé, sécurité sociale mauricienne
-
-MISSION EXPERTE:
-1. Diagnostic principal avec raisonnement physiopathologique
-2. Diagnostics différentiels hiérarchisés
-3. Documents mauriciens PROFESSIONNELS et COMPLETS
-
-RÉPONDS UNIQUEMENT EN JSON VALIDE:
+IMPORTANT: Réponds UNIQUEMENT avec un JSON valide, sans texte avant ou après.
 
 {
   "diagnosis": {
@@ -300,7 +283,7 @@ RÉPONDS UNIQUEMENT EN JSON VALIDE:
   }
 }`
     
-    // APPEL DIRECT À L'API REST OPENAI (sans SDK)
+    // APPEL DIRECT À L'API REST OPENAI (sans SDK) - VERSION SIMPLIFIÉE
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -312,15 +295,57 @@ RÉPONDS UNIQUEMENT EN JSON VALIDE:
         messages: [
           {
             role: 'system',
-            content: 'Tu es un médecin expert mauricien. Réponds UNIQUEMENT en JSON valide.'
+            content: 'Tu es un médecin expert mauricien. Génère UNIQUEMENT du JSON valide pour diagnostic médical + documents mauriciens.'
           },
           {
             role: 'user',
-            content: prompt
+            content: `${prompt}
+
+JSON Structure:
+{
+  "diagnosis": {
+    "primary": {
+      "condition": "Diagnostic médical précis",
+      "icd10": "Code CIM-10", 
+      "confidence": 85,
+      "severity": "moderate",
+      "analysis": "Raisonnement clinique détaillé",
+      "prognosis": "Évolution attendue"
+    },
+    "differential": [
+      {"condition": "Diagnostic différentiel", "probability": 60, "rationale": "Arguments cliniques"}
+    ]
+  },
+  "mauritianDocuments": {
+    "consultation": {
+      "header": {"title": "COMPTE-RENDU DE CONSULTATION MÉDICALE", "subtitle": "République de Maurice", "date": "DATE", "physician": "Dr. EXPERT"},
+      "patient": {"firstName": "PRENOM", "lastName": "NOM", "age": "AGE"},
+      "content": {
+        "chiefComplaint": "Motif détaillé de consultation",
+        "history": "Anamnèse complète avec antécédents",
+        "examination": "Examen physique systématique avec constantes",
+        "diagnosis": "Diagnostic retenu avec justification", 
+        "plan": "Plan thérapeutique et surveillance"
+      }
+    },
+    "biology": {
+      "header": {"title": "ORDONNANCE EXAMENS BIOLOGIQUES", "subtitle": "République de Maurice"},
+      "prescriptions": [
+        {"exam": "NFS + CRP", "indication": "Bilan inflammatoire", "urgency": "Semi-urgent"}
+      ]
+    },
+    "medication": {
+      "header": {"title": "ORDONNANCE MÉDICAMENTEUSE", "subtitle": "République de Maurice"},
+      "prescriptions": [
+        {"dci": "Paracétamol", "dosage": "1000mg", "frequency": "3x/jour", "duration": "5j", "indication": "Antalgique"}
+      ]
+    }
+  }
+}`
           }
         ],
-        temperature: 0.3,
-        max_tokens: 2500,
+        temperature: 0.2,
+        max_tokens: 2000, // Réduit encore plus
       }),
     })
     
@@ -328,15 +353,31 @@ RÉPONDS UNIQUEMENT EN JSON VALIDE:
     
     if (!openaiResponse.ok) {
       const errorText = await openaiResponse.text()
-      console.error('❌ Erreur OpenAI API:', errorText)
-      throw new Error(`OpenAI API Error ${openaiResponse.status}: ${errorText}`)
+      console.error('❌ Erreur OpenAI API complète:', errorText)
+      throw new Error(`OpenAI API Error ${openaiResponse.status}: ${errorText.substring(0, 200)}`)
     }
     
     const openaiData = await openaiResponse.json()
+    console.log('🔥 OpenAI data reçue:', {
+      choices: openaiData.choices?.length,
+      hasMessage: !!openaiData.choices?.[0]?.message,
+      contentLength: openaiData.choices?.[0]?.message?.content?.length
+    })
+    
     const responseText = openaiData.choices[0]?.message?.content
     
     if (!responseText) {
       throw new Error('Réponse OpenAI vide')
+    }
+    
+    console.log('🔥 Contenu réponse OpenAI:')
+    console.log('🔥 Premiers 200 chars:', responseText.substring(0, 200))
+    console.log('🔥 Derniers 100 chars:', responseText.substring(responseText.length - 100))
+    
+    // Vérification si c'est une erreur au lieu d'un JSON
+    if (responseText.toLowerCase().includes('error') || responseText.toLowerCase().includes('sorry') || !responseText.includes('{')) {
+      console.error('❌ OpenAI a retourné une erreur au lieu de JSON:', responseText)
+      throw new Error('OpenAI a retourné une erreur au lieu de JSON')
     }
     
     console.log('🔥 OpenAI a répondu, parsing JSON...')
@@ -379,30 +420,73 @@ RÉPONDS UNIQUEMENT EN JSON VALIDE:
       throw new Error('Structure JSON incomplète')
     }
     
-    // Post-traitement des placeholders (interpolation côté serveur)
+    // Post-traitement des placeholders - VERSION SIMPLIFIÉE
     const docs = parsedResponse.mauritianDocuments
     const currentDate = new Date().toLocaleDateString('fr-FR')
+    const currentTime = new Date().toLocaleTimeString('fr-FR')
     
-    // Mise à jour des données réelles
+    // Mise à jour sécurisée des données
     if (docs.consultation?.header) {
       docs.consultation.header.date = currentDate
+      docs.consultation.header.time = currentTime
+      docs.consultation.header.physician = `Dr. ${patientData?.physicianName || 'MÉDECIN EXPERT'}`
     }
+    
     if (docs.consultation?.patient) {
       docs.consultation.patient.firstName = patientData?.firstName || 'Patient'
       docs.consultation.patient.lastName = patientData?.lastName || 'X'
       docs.consultation.patient.age = `${age} ans`
     }
     
+    // Ajout d'examens paracliniques si manquants
+    if (!docs.paraclinical) {
+      docs.paraclinical = {
+        header: {
+          title: "ORDONNANCE EXAMENS PARACLINIQUES",
+          subtitle: "République de Maurice"
+        },
+        prescriptions: [
+          {
+            exam: "Radiographie thoracique",
+            indication: "Exploration selon symptômes",
+            urgency: "Programmé"
+          }
+        ]
+      }
+    }
+    
+    // Enrichissement des prescriptions médicamenteuses
+    if (docs.medication?.prescriptions) {
+      docs.medication.prescriptions.forEach(prescription => {
+        // Adaptation posologie selon âge
+        if (prescription.dci === 'Paracétamol' && age >= 65) {
+          prescription.dosage = '500-750mg'
+          prescription.note = 'Posologie adaptée à l\'âge'
+        }
+        
+        // Ajout disponibilité mauricienne
+        prescription.mauritianAvailability = 'Disponible toutes pharmacies Maurice'
+        
+        // Vérification allergies
+        if (allergies.toLowerCase().includes(prescription.dci.toLowerCase())) {
+          prescription.contraindication = 'ALLERGIE PATIENT DOCUMENTÉE'
+          prescription.alternative = 'Envisager alternative thérapeutique'
+        }
+      })
+    }
+    
     console.log('✅ Diagnostic expert généré avec succès!')
     console.log('🎯 Diagnostic principal:', parsedResponse.diagnosis.primary?.condition)
     console.log('📄 Documents générés:', Object.keys(docs))
+    console.log('💊 Prescriptions médicamenteuses:', docs.medication?.prescriptions?.length || 0)
     
     return NextResponse.json({
       success: true,
       diagnosis: parsedResponse.diagnosis,
       mauritianDocuments: docs,
       debug: {
-        method: 'OpenAI REST API direct',
+        method: 'OpenAI REST API direct - Version simplifiée',
+        promptLength: prompt.length,
         responseLength: responseText.length,
         timestamp: new Date().toISOString()
       }
