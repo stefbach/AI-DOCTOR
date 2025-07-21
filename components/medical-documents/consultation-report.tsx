@@ -41,6 +41,7 @@ import {
   Target,
   FileText
 } from "lucide-react"
+import { useTibokDoctorData } from "@/hooks/use-tibok-doctor-data"
 
 interface CHUMauritiusConsultationReportProps {
   patientMauritianData: any
@@ -73,19 +74,44 @@ export default function CHUMauritiusConsultationReport({
   imagingData,
 }: CHUMauritiusConsultationReportProps) {
 
-  const [mauritianDoctorInfo, setMauritianDoctorInfo] = useState({
-    name: "Prof. Dr. Kavish RAMGOOLAM",
-    title: "Professeur Chef de Service",
-    specialty: "Médecine Interne et Tropicale",
-    chuAffiliation: "CHU Sir Seewoosagur Ramgoolam",
-    mauritianMedicalCouncil: "MMC-2024-004567",
-    department: "Service de Médecine Interne",
-    address: "Pamplemousses, Maurice",
-    phone: "+230 266-4567",
-    email: "k.ramgoolam@chu.maurice.mu",
-    academicTitle: "Professeur des Universités - Praticien Hospitalier",
-    expertise: ["Médecine Tropicale", "Télémédecine", "Evidence-Based Medicine"],
-    universityAffiliation: "University of Mauritius Medical School"
+  // Get doctor data from TIBOK
+  const { doctorData: tibokDoctorData, isFromTibok } = useTibokDoctorData()
+
+  // Initialize doctor info with TIBOK data if available, otherwise use defaults
+  const [mauritianDoctorInfo, setMauritianDoctorInfo] = useState(() => {
+    if (tibokDoctorData) {
+      console.log('Using TIBOK doctor data:', tibokDoctorData)
+      return {
+        name: tibokDoctorData.fullName || "Dr. TIBOK IA DOCTOR",
+        title: tibokDoctorData.experience ? "Dr" : "Dr",
+        specialty: tibokDoctorData.specialty || "Médecine Générale",
+        chuAffiliation: "CHU Sir Seewoosagur Ramgoolam",
+        mauritianMedicalCouncil: tibokDoctorData.medicalCouncilNumber || "MMC-2024-AUTO",
+        department: `Service de ${tibokDoctorData.specialty || "Médecine Générale"}`,
+        address: "Pamplemousses, Maurice",
+        phone: tibokDoctorData.phone || "+230 XXX-XXXX",
+        email: tibokDoctorData.email || "doctor@chu.maurice.mu",
+        academicTitle: "Praticien Hospitalier",
+        expertise: ["Télémédecine", tibokDoctorData.specialty || "Médecine Générale", "Evidence-Based Medicine"],
+        universityAffiliation: "University of Mauritius Medical School"
+      }
+    }
+    
+    // Default values if no TIBOK data
+    return {
+      name: "Dr. TIBOK IA DOCTOR",
+      title: "Dr",
+      specialty: "Médecine Générale",
+      chuAffiliation: "CHU Sir Seewoosagur Ramgoolam",
+      mauritianMedicalCouncil: "MMC-2024-AUTO",
+      department: "Service de Médecine Générale",
+      address: "Pamplemousses, Maurice",
+      phone: "+230 XXX-XXXX",
+      email: "doctor@chu.maurice.mu",
+      academicTitle: "Praticien Hospitalier",
+      expertise: ["Télémédecine", "Médecine Générale", "Evidence-Based Medicine"],
+      universityAffiliation: "University of Mauritius Medical School"
+    }
   })
 
   const [mauritianReportData, setReportData] = useState({
@@ -140,6 +166,29 @@ export default function CHUMauritiusConsultationReport({
     followUpPlan: "",
     evidenceSummary: ""
   })
+
+  // Add a useEffect to show when doctor data is loaded
+  useEffect(() => {
+    if (isFromTibok && tibokDoctorData) {
+      console.log('TIBOK doctor data loaded successfully:', tibokDoctorData)
+      
+      // Update doctor info with TIBOK data
+      setMauritianDoctorInfo({
+        name: tibokDoctorData.fullName || "Dr. TIBOK IA DOCTOR",
+        title: tibokDoctorData.experience ? "Dr" : "Dr",
+        specialty: tibokDoctorData.specialty || "Médecine Générale",
+        chuAffiliation: "CHU Sir Seewoosagur Ramgoolam",
+        mauritianMedicalCouncil: tibokDoctorData.medicalCouncilNumber || "MMC-2024-AUTO",
+        department: `Service de ${tibokDoctorData.specialty || "Médecine Générale"}`,
+        address: "Pamplemousses, Maurice",
+        phone: tibokDoctorData.phone || "+230 XXX-XXXX",
+        email: tibokDoctorData.email || "doctor@chu.maurice.mu",
+        academicTitle: "Praticien Hospitalier",
+        expertise: ["Télémédecine", tibokDoctorData.specialty || "Médecine Générale", "Evidence-Based Medicine"],
+        universityAffiliation: "University of Mauritius Medical School"
+      })
+    }
+  }, [isFromTibok, tibokDoctorData])
 
   // Appel API diagnostic expert pour recommandations intelligentes de rapport
   const callDiagnosisExpertAPI = async () => {
@@ -492,6 +541,11 @@ CONTACTS URGENCE MAURICE:
         processed: diagnosisAPI.success,
         timestamp: new Date().toISOString()
       },
+      tibokIntegration: {
+        isFromTibok: isFromTibok,
+        doctorData: tibokDoctorData,
+        timestamp: new Date().toISOString()
+      },
       timestamp: new Date().toISOString()
     }
 
@@ -521,6 +575,17 @@ CONTACTS URGENCE MAURICE:
           <AlertTriangle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800 font-semibold">
             {emergencyAlert}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* TIBOK Integration Alert */}
+      {isFromTibok && (
+        <Alert className="border-blue-500 bg-blue-50">
+          <CheckCircle className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-blue-800">
+            <div className="font-semibold">Consultation TIBOK intégrée</div>
+            <div className="text-sm">Médecin: {mauritianDoctorInfo.name} • {mauritianDoctorInfo.specialty}</div>
           </AlertDescription>
         </Alert>
       )}
@@ -671,7 +736,7 @@ CONTACTS URGENCE MAURICE:
             <GraduationCap className="h-5 w-5 text-blue-600" />
             Praticien CHU Maurice (Modifiable)
             <Badge variant="outline" className="ml-auto bg-blue-100 text-blue-800">
-              Niveau Universitaire
+              {isFromTibok ? 'TIBOK' : 'Niveau Universitaire'}
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -790,6 +855,11 @@ CONTACTS URGENCE MAURICE:
               {diagnosisAPI.success && (
                 <Badge className="bg-purple-100 text-purple-800 text-xs">
                   IA Enhanced
+                </Badge>
+              )}
+              {isFromTibok && (
+                <Badge className="bg-blue-100 text-blue-800 text-xs">
+                  TIBOK
                 </Badge>
               )}
             </div>
@@ -1392,6 +1462,9 @@ CONTACTS URGENCE MAURICE:
               {diagnosisAPI.success && (
                 <p className="text-purple-600 font-semibold mt-2">🤖 IA Enhanced Report</p>
               )}
+              {isFromTibok && (
+                <p className="text-blue-600 font-semibold">🏥 TIBOK Integration</p>
+              )}
               {emergencyAlert && (
                 <p className="text-red-600 font-semibold mt-2">⚠️ {emergencyAlert}</p>
               )}
@@ -1422,6 +1495,7 @@ CONTACTS URGENCE MAURICE:
           <p className="text-xs text-gray-500 mt-1">
             Traçabilité CHU • Rapport ID: MU-CHU-{Date.now()}
             {diagnosisAPI.success && " • IA Enhanced"}
+            {isFromTibok && " • TIBOK"}
           </p>
         </div>
       </div>
