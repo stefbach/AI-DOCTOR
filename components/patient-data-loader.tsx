@@ -88,9 +88,9 @@ export function PatientDataLoader() {
           })
         }
 
-        // Clear URL parameters
-        const cleanUrl = window.location.pathname
-        window.history.replaceState({}, document.title, cleanUrl)
+        // Don't clear URL parameters so the form can read them
+        // const cleanUrl = window.location.pathname
+        // window.history.replaceState({}, document.title, cleanUrl)
 
       } catch (error) {
         console.error('Error processing TIBOK data:', error)
