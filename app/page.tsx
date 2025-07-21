@@ -12,6 +12,7 @@ import QuestionsForm from "@/components/questions-form"
 import DiagnosisForm from "@/components/diagnosis-form"
 import MedicalWorkflowManager from "@/components/medical-workflow-manager"
 import IntegratedMedicalConsultation from "@/components/integrated-medical-consultation"
+import { PatientDataLoader } from "@/components/patient-data-loader"
 
 export default function MedicalAIExpert() {
   const [currentStep, setCurrentStep] = useState(0)
@@ -137,6 +138,9 @@ export default function MedicalAIExpert() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Include the patient data loader */}
+      <PatientDataLoader />
+      
       <div className="container mx-auto px-4 py-8">
         {/* En-tête */}
         <div className="mb-8">
