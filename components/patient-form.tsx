@@ -24,6 +24,7 @@ import {
   CheckCircle,
   Loader2
 } from "lucide-react"
+import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
 
 // Types
 interface LifeHabits {
@@ -80,8 +81,9 @@ const COMMON_MEDICAL_HISTORY = [
 ]
 
 export default function ModernPatientForm({ onDataChange, onNext }: PatientFormProps) {
-  const [isFromTibok, setIsFromTibok] = useState(false)
+  const { patientData: tibokPatient, consultationData, isFromTibok } = useTibokPatientData()
   const [isLoadingPatientData, setIsLoadingPatientData] = useState(true)
+  const [dataProcessed, setDataProcessed] = useState(false)
 
   const [formData, setFormData] = useState<PatientFormData>({
     firstName: "",
@@ -109,77 +111,96 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
   const [historySearch, setHistorySearch] = useState("")
   const [currentSection, setCurrentSection] = useState(0)
 
-  // Load patient data from URL on component mount
+  // Process data from URL or TIBOK hook
   useEffect(() => {
-    const loadPatientDataFromURL = () => {
-      try {
-        // Get URL params immediately before they're cleared
-        const urlParams = new URLSearchParams(window.location.search)
-        const source = urlParams.get('source')
-        const patientDataParam = urlParams.get('patientData')
-        
-        console.log('URL params:', { source, hasPatientData: !!patientDataParam })
-        console.log('Full URL:', window.location.href)
-        
-        if (source === 'tibok' && patientDataParam) {
-          const decodedData = JSON.parse(decodeURIComponent(patientDataParam))
-          console.log('Decoded patient data:', decodedData)
-          
-          setIsFromTibok(true)
-          
-          // Process birth date
-          let birthDateStr = ""
-          if (decodedData.dateOfBirth) {
-            birthDateStr = decodedData.dateOfBirth.split('T')[0]
-          } else if (decodedData.date_of_birth) {
-            birthDateStr = decodedData.date_of_birth.split('T')[0]
-          }
-          
-          // Process gender
-          const genderArray: string[] = []
-          if (decodedData.gender) {
-            if (decodedData.gender === 'Masculin' || decodedData.gender === 'M' || decodedData.gender.toLowerCase() === 'male') {
-              genderArray.push('Masculin')
-            } else if (decodedData.gender === 'Féminin' || decodedData.gender === 'F' || decodedData.gender.toLowerCase() === 'female') {
-              genderArray.push('Féminin')
-            }
-          }
-          
-          // Update form data
-          const newFormData: PatientFormData = {
-            firstName: decodedData.firstName || "",
-            lastName: decodedData.lastName || "",
-            birthDate: birthDateStr,
-            age: decodedData.age ? decodedData.age.toString() : "",
-            gender: genderArray,
-            otherGender: "",
-            weight: decodedData.weight ? decodedData.weight.toString() : "",
-            height: decodedData.height ? decodedData.height.toString() : "",
-            allergies: [],
-            otherAllergies: "",
-            medicalHistory: [],
-            otherMedicalHistory: "",
-            currentMedicationsText: "",
-            lifeHabits: {
-              smoking: "",
-              alcohol: "", 
-              physicalActivity: "",
-            },
-          }
-          
-          console.log('Setting form data:', newFormData)
-          setFormData(newFormData)
+    const processPatientData = () => {
+      // First try URL parameters
+      const urlParams = new URLSearchParams(window.location.search)
+      const source = urlParams.get('source')
+      const patientDataParam = urlParams.get('patientData')
+      
+      console.log('Processing patient data - URL source:', source, 'Has data:', !!patientDataParam)
+      
+      let patientInfo = null
+      let isTibok = false
+      
+      // Try to get data from URL first
+      if (source === 'tibok' && patientDataParam) {
+        try {
+          patientInfo = JSON.parse(decodeURIComponent(patientDataParam))
+          isTibok = true
+          console.log('Patient data from URL:', patientInfo)
+        } catch (e) {
+          console.error('Error parsing URL data:', e)
         }
-      } catch (error) {
-        console.error('Error loading patient data from URL:', error)
-      } finally {
-        setIsLoadingPatientData(false)
       }
+      
+      // If no URL data, try the hook data
+      if (!patientInfo && tibokPatient) {
+        patientInfo = tibokPatient
+        isTibok = isFromTibok
+        console.log('Patient data from hook:', patientInfo)
+      }
+      
+      // Process the data if we have it
+      if (patientInfo && !dataProcessed) {
+        console.log('Processing patient info:', patientInfo)
+        
+        // Process birth date
+        let birthDateStr = ""
+        if (patientInfo.dateOfBirth) {
+          birthDateStr = patientInfo.dateOfBirth.split('T')[0]
+        } else if (patientInfo.date_of_birth) {
+          birthDateStr = patientInfo.date_of_birth.split('T')[0]
+        }
+        
+        // Process gender
+        const genderArray: string[] = []
+        if (patientInfo.gender) {
+          const gender = patientInfo.gender
+          if (gender === 'Masculin' || gender === 'M' || gender.toLowerCase() === 'male' || gender.toLowerCase() === 'm') {
+            genderArray.push('Masculin')
+          } else if (gender === 'Féminin' || gender === 'F' || gender.toLowerCase() === 'female' || gender.toLowerCase() === 'f') {
+            genderArray.push('Féminin')
+          }
+        }
+        
+        // Create new form data
+        const newFormData: PatientFormData = {
+          firstName: patientInfo.firstName || patientInfo.first_name || "",
+          lastName: patientInfo.lastName || patientInfo.last_name || "",
+          birthDate: birthDateStr,
+          age: patientInfo.age ? patientInfo.age.toString() : "",
+          gender: genderArray,
+          otherGender: "",
+          weight: patientInfo.weight ? patientInfo.weight.toString() : "",
+          height: patientInfo.height ? patientInfo.height.toString() : "",
+          allergies: [],
+          otherAllergies: "",
+          medicalHistory: [],
+          otherMedicalHistory: "",
+          currentMedicationsText: "",
+          lifeHabits: {
+            smoking: "",
+            alcohol: "", 
+            physicalActivity: "",
+          },
+        }
+        
+        console.log('Setting form data:', newFormData)
+        setFormData(newFormData)
+        setDataProcessed(true)
+      }
+      
+      setIsLoadingPatientData(false)
     }
     
-    // Run immediately without delay
-    loadPatientDataFromURL()
-  }, []) // Empty dependency array ensures this runs only once on mount
+    // Process immediately and also with a small delay for safety
+    processPatientData()
+    const timer = setTimeout(processPatientData, 200)
+    
+    return () => clearTimeout(timer)
+  }, [tibokPatient, isFromTibok, dataProcessed])
 
   // Calculate form completion percentage
   const calculateProgress = () => {
@@ -348,6 +369,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
     { id: "habits", title: "Habitudes", icon: Activity },
   ]
 
+  // Show loading state briefly
   if (isLoadingPatientData) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -359,10 +381,12 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
     )
   }
 
+  const showTibokNotification = dataProcessed && (isFromTibok || new URLSearchParams(window.location.search).get('source') === 'tibok')
+
   return (
     <div className="space-y-6">
       {/* Show notification if data is from TIBOK */}
-      {isFromTibok && (
+      {showTibokNotification && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-blue-600" />
