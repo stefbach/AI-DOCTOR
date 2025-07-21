@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { useToast } from "@/components/ui/use-toast"
 import { 
   User, 
   Stethoscope, 
@@ -76,6 +77,7 @@ export default function CHUMauritiusConsultationReport({
 
   // Get doctor data from TIBOK
   const { doctorData: tibokDoctorData, isFromTibok } = useTibokDoctorData()
+  const { toast } = useToast()
 
   // Initialize doctor info with TIBOK data if available, otherwise use defaults
   const [mauritianDoctorInfo, setMauritianDoctorInfo] = useState(() => {
@@ -575,6 +577,75 @@ CONTACTS URGENCE MAURICE:
     // saveReportToSupabase(report)
     
     return report
+  }
+
+  // Function to save report to TIBOK
+  const saveReportToTibok = async () => {
+    try {
+      // Get the report data
+      const report = generateCHUReport()
+      
+      // Get consultation ID from URL or sessionStorage
+      const params = new URLSearchParams(window.location.search)
+      const consultationId = params.get('consultationId') || sessionStorage.getItem('consultationId')
+      const patientId = params.get('patientId') || sessionStorage.getItem('patientId')
+      const doctorId = tibokDoctorData?.id || sessionStorage.getItem('doctorId')
+      
+      if (!consultationId || !patientId || !doctorId) {
+        toast({
+          title: "Erreur",
+          description: "Informations de consultation manquantes",
+          variant: "destructive"
+        })
+        return
+      }
+
+      // Add consultation and patient IDs to report
+      const fullReport = {
+        ...report,
+        consultationId,
+        patientId,
+        doctorId
+      }
+
+      // Determine TIBOK URL (use environment variable or default)
+      const tibokUrl = process.env.NEXT_PUBLIC_TIBOK_URL || 'https://tibok.vercel.app'
+      
+      // Save to TIBOK
+      const response = await fetch(`${tibokUrl}/api/consultations/save-report`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(fullReport)
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save report to TIBOK')
+      }
+
+      const result = await response.json()
+      
+      toast({
+        title: "Succès",
+        description: "Rapport sauvegardé avec succès dans TIBOK",
+      })
+
+      // Store report ID for future reference
+      if (result.reportId) {
+        sessionStorage.setItem('reportId', result.reportId)
+      }
+
+      return result
+      
+    } catch (error) {
+      console.error('Error saving report to TIBOK:', error)
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder le rapport dans TIBOK",
+        variant: "destructive"
+      })
+    }
   }
 
   // Fonctions utilitaires
@@ -1524,16 +1595,28 @@ CONTACTS URGENCE MAURICE:
         </div>
       </div>
 
-      {/* Actions */}
+      {/* Actions - Updated with TIBOK save functionality */}
       <div className="mt-6 flex justify-between">
-        <Button
-          onClick={generateCHUReport}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center font-semibold"
-        >
-          <GraduationCap className="h-5 w-5 mr-2" />
-          Générer Rapport CHU
-          {diagnosisAPI.success && " + IA"}
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            onClick={generateCHUReport}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center font-semibold"
+          >
+            <GraduationCap className="h-5 w-5 mr-2" />
+            Générer Rapport CHU
+            {diagnosisAPI.success && " + IA"}
+          </Button>
+          
+          {isFromTibok && (
+            <Button
+              onClick={saveReportToTibok}
+              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center font-semibold"
+            >
+              <FileText className="h-5 w-5 mr-2" />
+              Sauvegarder dans TIBOK
+            </Button>
+          )}
+        </div>
 
         <div className="flex space-x-3">
           <Button className="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center">
