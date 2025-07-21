@@ -138,8 +138,9 @@ export default function MedicalAIExpert() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Include the patient data loader */}
+      {/* Temporarily disabled to prevent URL clearing
       <PatientDataLoader />
+      */}
       
       <div className="container mx-auto px-4 py-8">
         {/* En-tête */}
