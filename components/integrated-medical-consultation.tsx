@@ -46,6 +46,7 @@ interface WorkflowResult {
 interface IntegratedMedicalConsultationProps {
   patientData: any
   result: WorkflowResult
+  doctorData?: any
 }
 
 interface ValidationState {
@@ -66,7 +67,7 @@ interface EditableContent {
   prescriptionMedicaments: string[]
 }
 
-export default function IntegratedMedicalConsultation({ patientData, result }: IntegratedMedicalConsultationProps) {
+export default function IntegratedMedicalConsultation({ patientData, result, doctorData }: IntegratedMedicalConsultationProps) {
   const [activeTab, setActiveTab] = useState("rapport")
   const [validationDialogOpen, setValidationDialogOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -98,13 +99,24 @@ export default function IntegratedMedicalConsultation({ patientData, result }: I
     prescriptionMedicaments: [],
   })
 
+  // Store original content for cancel functionality
+  const [originalContent, setOriginalContent] = useState<EditableContent>({
+    rapport: "",
+    diagnosticPrincipal: "",
+    diagnosticConfidence: "",
+    diagnosticDifferentiels: [],
+    examensBiologie: [],
+    examensImagerie: [],
+    prescriptionMedicaments: [],
+  })
+
   // Initialize editable content when component mounts or result changes
   useEffect(() => {
     const diagnosis = parseDiagnosis(result.diagnosis)
     const examens = parseExamens(result.examens)
     const medicaments = parsePrescription(result.prescription)
     
-    setEditableContent({
+    const initialContent = {
       rapport: extractTextFromData(result.consultationReport),
       diagnosticPrincipal: diagnosis.principal,
       diagnosticConfidence: diagnosis.confidence,
@@ -112,7 +124,10 @@ export default function IntegratedMedicalConsultation({ patientData, result }: I
       examensBiologie: examens.biologie,
       examensImagerie: examens.imagerie,
       prescriptionMedicaments: medicaments,
-    })
+    }
+    
+    setEditableContent(initialContent)
+    setOriginalContent(initialContent)
   }, [result])
 
   const validationLabels = {
@@ -133,18 +148,71 @@ export default function IntegratedMedicalConsultation({ patientData, result }: I
     }))
   }
 
-  const toggleEdit = (section: string) => {
+  const saveChanges = (section: string) => {
+    // Save current content as the new original
+    setOriginalContent({ ...editableContent })
+    
+    // Exit edit mode
     setIsEditing((prev) => ({
       ...prev,
-      [section]: !prev[section],
+      [section]: false,
     }))
-    // When entering edit mode, clear validation for that section
-    if (!isEditing[section]) {
-      setValidations((prev) => ({
+    
+    // Clear validation for that section since content was modified
+    setValidations((prev) => ({
+      ...prev,
+      [section]: false,
+    }))
+    
+    toast({
+      title: "Modifications enregistrées",
+      description: `Les modifications de la section ${section} ont été enregistrées.`,
+    })
+  }
+
+  const cancelChanges = (section: string) => {
+    // Restore original content
+    if (section === "rapport") {
+      setEditableContent((prev) => ({
         ...prev,
-        [section]: false,
+        rapport: originalContent.rapport,
+      }))
+    } else if (section === "diagnostic") {
+      setEditableContent((prev) => ({
+        ...prev,
+        diagnosticPrincipal: originalContent.diagnosticPrincipal,
+        diagnosticConfidence: originalContent.diagnosticConfidence,
+        diagnosticDifferentiels: [...originalContent.diagnosticDifferentiels],
+      }))
+    } else if (section === "examens") {
+      setEditableContent((prev) => ({
+        ...prev,
+        examensBiologie: [...originalContent.examensBiologie],
+        examensImagerie: [...originalContent.examensImagerie],
+      }))
+    } else if (section === "prescription") {
+      setEditableContent((prev) => ({
+        ...prev,
+        prescriptionMedicaments: [...originalContent.prescriptionMedicaments],
       }))
     }
+    
+    // Exit edit mode
+    setIsEditing((prev) => ({
+      ...prev,
+      [section]: false,
+    }))
+  }
+
+  const startEdit = (section: string) => {
+    // Store current content as original before editing
+    setOriginalContent({ ...editableContent })
+    
+    // Enter edit mode
+    setIsEditing((prev) => ({
+      ...prev,
+      [section]: true,
+    }))
   }
 
   const handleArrayItemChange = (
@@ -188,9 +256,18 @@ export default function IntegratedMedicalConsultation({ patientData, result }: I
   }
 
   const handleDownload = () => {
+    const doctorName = doctorData?.full_name || "Dr. TIBOK IA DOCTOR"
+    const doctorRegistration = doctorData?.medical_council_number || "AI-2024-001"
+    
     const reportContent = `
 CONSULTATION MÉDICALE COMPLÈTE
 ==============================
+
+MÉDECIN TRAITANT: ${doctorName}
+N° CONSEIL MÉDICAL: ${doctorRegistration}
+SPÉCIALITÉ: ${doctorData?.specialty || "Médecine Générale"}
+EMAIL: ${doctorData?.email || "doctor@tibok.com"}
+TÉLÉPHONE: ${doctorData?.phone || "+230 123 4567"}
 
 PATIENT: ${patientData.firstName} ${patientData.lastName}
 ÂGE: ${patientData.age} ans
@@ -225,6 +302,12 @@ RÉFÉRENCES SCIENTIFIQUES
 Articles PubMed consultés: ${result.pubmedEvidence?.articles?.length || 0}
 Vérification FDA: ${result.fdaVerification?.success ? "Validée" : "À vérifier"}
 
+SIGNATURE
+=========
+${doctorName}
+${doctorRegistration}
+${doctorData?.specialty || "Médecine Générale"}
+
 Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
     `
 
@@ -247,6 +330,9 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
       const editedData = {
         patient_id: patientData.id,
         patient_name: `${patientData.firstName} ${patientData.lastName}`,
+        doctor_id: doctorData?.id,
+        doctor_name: doctorData?.full_name,
+        doctor_registration: doctorData?.medical_council_number,
         consultation_date: new Date().toISOString(),
         report: editableContent.rapport,
         diagnosis: {
@@ -688,23 +774,36 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Compte-Rendu de Consultation</CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => toggleEdit("rapport")}
-                >
-                  {isEditing.rapport ? (
-                    <>
+                {isEditing.rapport ? (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => saveChanges("rapport")}
+                      className="bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Enregistrer
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => cancelChanges("rapport")}
+                    >
                       <X className="h-4 w-4 mr-2" />
                       Annuler
-                    </>
-                  ) : (
-                    <>
-                      <Edit2 className="h-4 w-4 mr-2" />
-                      Modifier
-                    </>
-                  )}
-                </Button>
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => startEdit("rapport")}
+                  >
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    Modifier
+                  </Button>
+                )}
               </div>
             </CardHeader>
             <CardContent>
@@ -738,23 +837,36 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">Diagnostic Principal</CardTitle>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => toggleEdit("diagnostic")}
-                  >
-                    {isEditing.diagnostic ? (
-                      <>
+                  {isEditing.diagnostic ? (
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => saveChanges("diagnostic")}
+                        className="bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Enregistrer
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => cancelChanges("diagnostic")}
+                      >
                         <X className="h-4 w-4 mr-2" />
                         Annuler
-                      </>
-                    ) : (
-                      <>
-                        <Edit2 className="h-4 w-4 mr-2" />
-                        Modifier
-                      </>
-                    )}
-                  </Button>
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => startEdit("diagnostic")}
+                    >
+                      <Edit2 className="h-4 w-4 mr-2" />
+                      Modifier
+                    </Button>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
@@ -882,23 +994,36 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
         <TabsContent value="examens">
           <div className="space-y-4">
             <div className="flex justify-end mb-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toggleEdit("examens")}
-              >
-                {isEditing.examens ? (
-                  <>
+              {isEditing.examens ? (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => saveChanges("examens")}
+                    className="bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Enregistrer
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => cancelChanges("examens")}
+                  >
                     <X className="h-4 w-4 mr-2" />
                     Annuler
-                  </>
-                ) : (
-                  <>
-                    <Edit2 className="h-4 w-4 mr-2" />
-                    Modifier
-                  </>
-                )}
-              </Button>
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => startEdit("examens")}
+                >
+                  <Edit2 className="h-4 w-4 mr-2" />
+                  Modifier
+                </Button>
+              )}
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1050,23 +1175,36 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
                     <Pill className="h-5 w-5" />
                     Ordonnance Médicamenteuse
                   </CardTitle>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => toggleEdit("prescription")}
-                  >
-                    {isEditing.prescription ? (
-                      <>
+                  {isEditing.prescription ? (
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => saveChanges("prescription")}
+                        className="bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Enregistrer
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => cancelChanges("prescription")}
+                      >
                         <X className="h-4 w-4 mr-2" />
                         Annuler
-                      </>
-                    ) : (
-                      <>
-                        <Edit2 className="h-4 w-4 mr-2" />
-                        Modifier
-                      </>
-                    )}
-                  </Button>
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => startEdit("prescription")}
+                    >
+                      <Edit2 className="h-4 w-4 mr-2" />
+                      Modifier
+                    </Button>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
