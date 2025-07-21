@@ -1,228 +1,165 @@
 // /app/api/openai-diagnosis/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
-
-function cleanAndParseJSON(text: string) {
-  try {
-    let cleanText = text
-      .replace(/```json\s*/g, '')
-      .replace(/```\s*/g, '')
-      .trim()
-    
-    return JSON.parse(cleanText)
-  } catch (error) {
-    console.error('❌ Erreur parsing JSON:', error)
-    throw new Error('JSON invalide')
-  }
-}
 
 export async function POST(request: NextRequest) {
+  console.log('🔥 API ROUTE ACCESSIBLE - DÉBUT')
+  
   try {
-    console.log('🟡 Début API OpenAI Diagnosis')
-
-    // Validation API Key
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY manquante')
-    }
-
+    console.log('🔥 Tentative de parsing du body...')
     const body = await request.json()
-    const { patientData, clinicalData, questionsData } = body
-
-    console.log('🟡 Données reçues:', {
-      patient: patientData?.firstName || 'undefined',
-      clinical: clinicalData?.chiefComplaint || 'undefined'
-    })
-
-    // Validation données
-    if (!patientData || !clinicalData) {
-      throw new Error('Données manquantes')
-    }
-
-    // Variables simples
-    const patientName = `${patientData.firstName || 'Patient'} ${patientData.lastName || 'X'}`
-    const age = patientData.age || 30
-    const complaint = clinicalData.chiefComplaint || 'Consultation médicale'
+    console.log('🔥 Body parsé avec succès')
     
-    // PROMPT MINIMAL MAIS EXPERT
-    const prompt = `Tu es un médecin expert. Analyse ce cas clinique mauricien.
-
-PATIENT: ${patientName}, ${age} ans
-MOTIF: ${complaint}
-SYMPTÔMES: ${(clinicalData.symptoms || []).join(', ') || 'Non précisés'}
-
-Génère un diagnostic expert avec documents mauriciens.
-
-RÉPONDS UNIQUEMENT EN JSON SANS MARKDOWN:
-
-{
-  "diagnosis": {
-    "primary": {
-      "condition": "Diagnostic médical précis",
-      "icd10": "R50.9", 
-      "confidence": 80,
-      "severity": "moderate",
-      "detailedAnalysis": "Analyse médicale détaillée basée sur les symptômes présentés",
-      "clinicalRationale": "Raisonnement clinique justifiant le diagnostic",
-      "prognosis": "Évolution attendue avec traitement approprié"
-    },
-    "differential": [
-      {
-        "condition": "Syndrome viral", 
-        "probability": 60,
-        "rationale": "Symptômes compatibles avec infection virale"
+    console.log('🔥 Vérification OpenAI import...')
+    
+    // Test import dynamique OpenAI
+    let openai
+    try {
+      const OpenAI = (await import('openai')).default
+      console.log('🔥 OpenAI importé avec succès')
+      
+      console.log('🔥 Vérification API Key...')
+      const apiKey = process.env.OPENAI_API_KEY
+      console.log('🔥 API Key présente:', !!apiKey)
+      
+      if (!apiKey) {
+        return NextResponse.json({
+          error: 'OPENAI_API_KEY manquante',
+          success: false
+        }, { status: 500 })
       }
-    ]
-  },
-  "mauritianDocuments": {
-    "consultation": {
-      "header": {
-        "title": "COMPTE-RENDU DE CONSULTATION MÉDICALE",
-        "subtitle": "République de Maurice - Médecine Générale", 
-        "date": "DATE_PLACEHOLDER",
-        "physician": "Dr. MÉDECIN GÉNÉRALISTE"
-      },
-      "patient": {
-        "firstName": "PRENOM_PLACEHOLDER",
-        "lastName": "NOM_PLACEHOLDER", 
-        "age": "AGE_PLACEHOLDER"
-      },
-      "content": {
-        "chiefComplaint": "Motif de consultation détaillé",
-        "history": "Histoire de la maladie actuelle",
-        "examination": "Examen physique complet", 
-        "diagnosis": "Diagnostic retenu",
-        "plan": "Plan de traitement et suivi"
-      }
-    },
-    "biology": {
-      "header": {
-        "title": "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
-        "subtitle": "PRESCRIPTION D'EXAMENS BIOLOGIQUES"
-      },
-      "prescriptions": [
-        {
-          "exam": "NFS + CRP",
-          "indication": "Bilan inflammatoire",
-          "urgency": "Semi-urgent"
-        }
-      ]
-    },
-    "paraclinical": {
-      "header": {
-        "title": "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE", 
-        "subtitle": "PRESCRIPTION D'EXAMENS PARACLINIQUES"
-      },
-      "prescriptions": [
-        {
-          "exam": "Radiographie thoracique",
-          "indication": "Exploration pulmonaire"
-        }
-      ]
-    },
-    "medication": {
-      "header": {
-        "title": "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
-        "subtitle": "PRESCRIPTION MÉDICAMENTEUSE"
-      },
-      "prescriptions": [
-        {
-          "dci": "Paracétamol",
-          "dosage": "1g",
-          "frequency": "3 fois par jour",
-          "duration": "5 jours"
-        }
-      ]
+      
+      openai = new OpenAI({ apiKey })
+      console.log('🔥 Client OpenAI créé')
+      
+    } catch (importError) {
+      console.error('❌ Erreur import OpenAI:', importError)
+      return NextResponse.json({
+        error: 'Problème import OpenAI',
+        details: importError.message,
+        success: false
+      }, { status: 500 })
     }
-  }
-}`
-
-    console.log('🟡 Appel OpenAI...')
-
+    
+    console.log('🔥 Test appel OpenAI basique...')
+    
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         {
-          role: "system",
-          content: "Tu es médecin expert. Réponds UNIQUEMENT en JSON valide."
-        },
-        {
-          role: "user",
-          content: prompt
+          role: "user", 
+          content: "Réponds juste: OK"
         }
       ],
-      temperature: 0.3,
-      max_tokens: 2500,
+      max_tokens: 10,
     })
-
-    const responseText = completion.choices[0]?.message?.content
-
-    if (!responseText) {
-      throw new Error('Réponse OpenAI vide')
-    }
-
-    console.log('🟡 Réponse OpenAI reçue, longueur:', responseText.length)
-    console.log('🟡 Premiers 150 chars:', responseText.substring(0, 150))
-
-    const parsedResponse = cleanAndParseJSON(responseText)
-
-    if (!parsedResponse.diagnosis || !parsedResponse.mauritianDocuments) {
-      throw new Error('Structure JSON invalide')
-    }
-
-    // REMPLACEMENT DES PLACEHOLDERS APRÈS PARSING RÉUSSI
-    const docs = parsedResponse.mauritianDocuments
-    const currentDate = new Date().toLocaleDateString('fr-FR')
     
-    // Remplacement sécurisé des placeholders
-    if (docs.consultation?.header) {
-      docs.consultation.header.date = currentDate
+    console.log('🔥 OpenAI a répondu:', completion.choices[0]?.message?.content)
+    
+    // FALLBACK SIMPLE SANS OPENAI POUR L'INSTANT
+    const fallbackDiagnosis = {
+      primary: {
+        condition: "Test diagnostic - API fonctionnelle",
+        icd10: "Z00.0",
+        confidence: 95,
+        severity: "mild",
+        detailedAnalysis: "Test réussi - API route accessible et fonctionnelle",
+        clinicalRationale: "Diagnostic de test pour vérifier la connectivité",
+        prognosis: "Excellent - système opérationnel"
+      },
+      differential: [
+        {
+          condition: "Test alternatif",
+          probability: 50,
+          rationale: "Alternative de test"
+        }
+      ]
     }
-    if (docs.consultation?.patient) {
-      docs.consultation.patient.firstName = patientData.firstName || 'Patient'
-      docs.consultation.patient.lastName = patientData.lastName || 'X'
-      docs.consultation.patient.age = `${age} ans`
+    
+    const fallbackDocuments = {
+      consultation: {
+        header: {
+          title: "TEST - COMPTE-RENDU DE CONSULTATION",
+          subtitle: "République de Maurice - Test API",
+          date: new Date().toLocaleDateString('fr-FR'),
+          physician: "Dr. TEST API"
+        },
+        patient: {
+          firstName: body.patientData?.firstName || "TEST",
+          lastName: body.patientData?.lastName || "PATIENT",
+          age: `${body.patientData?.age || 30} ans`
+        },
+        content: {
+          chiefComplaint: body.clinicalData?.chiefComplaint || "Test API",
+          history: "Test de fonctionnement de l'API",
+          examination: "API opérationnelle",
+          diagnosis: "Test réussi",
+          plan: "Continuer les tests"
+        }
+      },
+      biology: {
+        header: {
+          title: "TEST - ORDONNANCE BIOLOGIE",
+          subtitle: "Test API Maurice"
+        },
+        prescriptions: [
+          {
+            exam: "Test NFS",
+            indication: "Test API",
+            urgency: "Test"
+          }
+        ]
+      },
+      paraclinical: {
+        header: {
+          title: "TEST - ORDONNANCE PARACLINIQUE", 
+          subtitle: "Test API Maurice"
+        },
+        prescriptions: [
+          {
+            exam: "Test Radio",
+            indication: "Test API"
+          }
+        ]
+      },
+      medication: {
+        header: {
+          title: "TEST - ORDONNANCE MÉDICAMENTS",
+          subtitle: "Test API Maurice"
+        },
+        prescriptions: [
+          {
+            dci: "Test Paracétamol",
+            dosage: "Test 1g",
+            frequency: "Test 3x/jour",
+            duration: "Test 5j"
+          }
+        ]
+      }
     }
-
-    console.log('✅ Diagnostic généré avec succès!')
-
+    
+    console.log('🔥 Génération réponse de test...')
+    
     return NextResponse.json({
       success: true,
-      diagnosis: parsedResponse.diagnosis,
-      mauritianDocuments: docs,
+      diagnosis: fallbackDiagnosis,
+      mauritianDocuments: fallbackDocuments,
       debug: {
-        responseLength: responseText.length,
-        timestamp: new Date().toISOString()
+        message: "API ROUTE FONCTIONNE - Test réussi !",
+        timestamp: new Date().toISOString(),
+        openaiTest: completion.choices[0]?.message?.content
       }
     })
-
-  } catch (error) {
-    console.error('❌ ERREUR API COMPLÈTE:', error)
     
-    // Log détaillé pour debug
-    if (error instanceof Error) {
-      console.error('❌ Message:', error.message)
-      console.error('❌ Stack:', error.stack?.substring(0, 500))
-    }
-
-    // Si c'est une erreur OpenAI
-    if (error.code === 'insufficient_quota') {
-      console.error('❌ QUOTA OPENAI DÉPASSÉ')
-      return NextResponse.json({
-        error: 'Quota OpenAI dépassé',
-        details: 'Vérifiez votre crédit OpenAI',
-        success: false
-      }, { status: 500 })
-    }
-
+  } catch (error) {
+    console.error('❌ ERREUR DANS API ROUTE:', error)
+    console.error('❌ Message:', error.message)
+    console.error('❌ Stack:', error.stack)
+    
     return NextResponse.json({
-      error: 'Erreur serveur diagnostic',
-      details: error instanceof Error ? error.message : 'Erreur inconnue',
-      success: false,
-      timestamp: new Date().toISOString()
+      error: 'Erreur détectée dans API route',
+      details: error.message,
+      stack: error.stack?.substring(0, 200),
+      success: false
     }, { status: 500 })
   }
 }
