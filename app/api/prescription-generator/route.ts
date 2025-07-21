@@ -52,7 +52,7 @@ ${prescriptionContext}
 INSTRUCTIONS CRITIQUES:
 - Tu DOIS retourner UNIQUEMENT du JSON valide
 - NE PAS écrire de texte avant ou après le JSON
-- NE PAS utiliser de backticks markdown (```)
+- NE PAS utiliser de backticks markdown (\`\`\`)
 - NE PAS commencer par "Voici" ou "Je vous propose"
 - COMMENCER DIRECTEMENT par le caractère {
 - FINIR DIRECTEMENT par le caractère }
