@@ -113,11 +113,13 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
   useEffect(() => {
     const loadPatientDataFromURL = () => {
       try {
+        // Get URL params immediately before they're cleared
         const urlParams = new URLSearchParams(window.location.search)
         const source = urlParams.get('source')
         const patientDataParam = urlParams.get('patientData')
         
         console.log('URL params:', { source, hasPatientData: !!patientDataParam })
+        console.log('Full URL:', window.location.href)
         
         if (source === 'tibok' && patientDataParam) {
           const decodedData = JSON.parse(decodeURIComponent(patientDataParam))
@@ -175,9 +177,9 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
       }
     }
     
-    // Small delay to ensure component is mounted
-    setTimeout(loadPatientDataFromURL, 100)
-  }, [])
+    // Run immediately without delay
+    loadPatientDataFromURL()
+  }, []) // Empty dependency array ensures this runs only once on mount
 
   // Calculate form completion percentage
   const calculateProgress = () => {
