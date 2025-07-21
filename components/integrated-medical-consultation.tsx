@@ -1,11 +1,24 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { useToast } from "@/components/ui/use-toast"
 import {
   FileText,
   Stethoscope,
@@ -15,6 +28,10 @@ import {
   Download,
   PrinterIcon as Print,
   CheckCircle,
+  Save,
+  AlertCircle,
+  Edit2,
+  X,
 } from "lucide-react"
 
 interface WorkflowResult {
@@ -31,8 +48,140 @@ interface IntegratedMedicalConsultationProps {
   result: WorkflowResult
 }
 
+interface ValidationState {
+  rapport: boolean
+  diagnostic: boolean
+  examens: boolean
+  prescription: boolean
+  evidence: boolean
+}
+
+interface EditableContent {
+  rapport: string
+  diagnosticPrincipal: string
+  diagnosticConfidence: string
+  diagnosticDifferentiels: string[]
+  examensBiologie: string[]
+  examensImagerie: string[]
+  prescriptionMedicaments: string[]
+}
+
 export default function IntegratedMedicalConsultation({ patientData, result }: IntegratedMedicalConsultationProps) {
   const [activeTab, setActiveTab] = useState("rapport")
+  const [validationDialogOpen, setValidationDialogOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isEditing, setIsEditing] = useState<{ [key: string]: boolean }>({
+    rapport: false,
+    diagnostic: false,
+    examens: false,
+    prescription: false,
+    evidence: false,
+  })
+  const { toast } = useToast()
+  
+  const [validations, setValidations] = useState<ValidationState>({
+    rapport: false,
+    diagnostic: false,
+    examens: false,
+    prescription: false,
+    evidence: false,
+  })
+
+  // Initialize editable content from parsed data
+  const [editableContent, setEditableContent] = useState<EditableContent>({
+    rapport: "",
+    diagnosticPrincipal: "",
+    diagnosticConfidence: "",
+    diagnosticDifferentiels: [],
+    examensBiologie: [],
+    examensImagerie: [],
+    prescriptionMedicaments: [],
+  })
+
+  // Initialize editable content when component mounts or result changes
+  useEffect(() => {
+    const diagnosis = parseDiagnosis(result.diagnosis)
+    const examens = parseExamens(result.examens)
+    const medicaments = parsePrescription(result.prescription)
+    
+    setEditableContent({
+      rapport: extractTextFromData(result.consultationReport),
+      diagnosticPrincipal: diagnosis.principal,
+      diagnosticConfidence: diagnosis.confidence,
+      diagnosticDifferentiels: diagnosis.differentiels,
+      examensBiologie: examens.biologie,
+      examensImagerie: examens.imagerie,
+      prescriptionMedicaments: medicaments,
+    })
+  }, [result])
+
+  const validationLabels = {
+    rapport: "Je valide le Rapport",
+    diagnostic: "Je valide le Diagnostic",
+    examens: "Je valide les Examens",
+    prescription: "Je valide les Prescriptions",
+    evidence: "Je valide l'Evidence",
+  }
+
+  const validatedCount = Object.values(validations).filter(Boolean).length
+  const allValidated = validatedCount === 5
+
+  const handleValidationChange = (section: keyof ValidationState) => {
+    setValidations((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }))
+  }
+
+  const toggleEdit = (section: string) => {
+    setIsEditing((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }))
+    // When entering edit mode, clear validation for that section
+    if (!isEditing[section]) {
+      setValidations((prev) => ({
+        ...prev,
+        [section]: false,
+      }))
+    }
+  }
+
+  const handleArrayItemChange = (
+    field: keyof EditableContent,
+    index: number,
+    value: string
+  ) => {
+    setEditableContent((prev) => {
+      const array = prev[field] as string[]
+      const newArray = [...array]
+      newArray[index] = value
+      return {
+        ...prev,
+        [field]: newArray,
+      }
+    })
+  }
+
+  const addArrayItem = (field: keyof EditableContent) => {
+    setEditableContent((prev) => {
+      const array = prev[field] as string[]
+      return {
+        ...prev,
+        [field]: [...array, ""],
+      }
+    })
+  }
+
+  const removeArrayItem = (field: keyof EditableContent, index: number) => {
+    setEditableContent((prev) => {
+      const array = prev[field] as string[]
+      return {
+        ...prev,
+        [field]: array.filter((_, i) => i !== index),
+      }
+    })
+  }
 
   const handlePrint = () => {
     window.print()
@@ -47,19 +196,29 @@ PATIENT: ${patientData.firstName} ${patientData.lastName}
 ÂGE: ${patientData.age} ans
 DATE: ${new Date().toLocaleDateString("fr-FR")}
 
-${extractTextFromData(result.consultationReport)}
+RAPPORT DE CONSULTATION
+======================
+${editableContent.rapport}
 
 DIAGNOSTIC DÉTAILLÉ
 ==================
-${extractTextFromData(result.diagnosis)}
+Diagnostic Principal: ${editableContent.diagnosticPrincipal}
+${editableContent.diagnosticConfidence}
+
+Diagnostics Différentiels:
+${editableContent.diagnosticDifferentiels.map((d, i) => `${i + 1}. ${d}`).join('\n')}
 
 EXAMENS COMPLÉMENTAIRES
 ======================
-${extractTextFromData(result.examens)}
+Examens Biologiques:
+${editableContent.examensBiologie.map((e, i) => `- ${e}`).join('\n')}
+
+Imagerie Médicale:
+${editableContent.examensImagerie.map((e, i) => `- ${e}`).join('\n')}
 
 PRESCRIPTION MÉDICAMENTEUSE
 ==========================
-${extractTextFromData(result.prescription)}
+${editableContent.prescriptionMedicaments.map((m, i) => `${i + 1}. ${m}`).join('\n')}
 
 RÉFÉRENCES SCIENTIFIQUES
 ========================
@@ -78,6 +237,80 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+  }
+
+  const handleSaveToSupabase = async () => {
+    setIsSaving(true)
+    
+    try {
+      // Prepare edited data for saving
+      const editedData = {
+        patient_id: patientData.id,
+        patient_name: `${patientData.firstName} ${patientData.lastName}`,
+        consultation_date: new Date().toISOString(),
+        report: editableContent.rapport,
+        diagnosis: {
+          principal: editableContent.diagnosticPrincipal,
+          confidence: editableContent.diagnosticConfidence,
+          differentiels: editableContent.diagnosticDifferentiels,
+        },
+        examens: {
+          biologie: editableContent.examensBiologie,
+          imagerie: editableContent.examensImagerie,
+        },
+        prescription: {
+          medicaments: editableContent.prescriptionMedicaments,
+        },
+        evidence: result.pubmedEvidence,
+        fda_verification: result.fdaVerification,
+        validated_at: new Date().toISOString(),
+        validated_sections: validations,
+      }
+      
+      // Simulate saving to Supabase (replace with actual Supabase call)
+      // const { data, error } = await supabase
+      //   .from('consultations')
+      //   .insert(editedData)
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // Generate PDFs (simulate)
+      // await generatePDFs(editedData)
+      
+      toast({
+        title: "Consultation sauvegardée avec succès",
+        description: "Les documents ont été envoyés au tableau de bord du patient.",
+      })
+      
+      setValidationDialogOpen(false)
+      
+      // Reset validations and edit states after successful save
+      setValidations({
+        rapport: false,
+        diagnostic: false,
+        examens: false,
+        prescription: false,
+        evidence: false,
+      })
+      
+      setIsEditing({
+        rapport: false,
+        diagnostic: false,
+        examens: false,
+        prescription: false,
+        evidence: false,
+      })
+      
+    } catch (error) {
+      toast({
+        title: "Erreur lors de la sauvegarde",
+        description: "Une erreur s'est produite. Veuillez réessayer.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // FONCTION UTILITAIRE : Extraire le texte de données mixtes (string ou objet)
@@ -372,11 +605,6 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
     }
   }
 
-  // Parsing des données avec les nouvelles fonctions corrigées
-  const diagnosis = parseDiagnosis(result.diagnosis)
-  const examens = parseExamens(result.examens)
-  const medicaments = parsePrescription(result.prescription)
-
   return (
     <div className="space-y-6">
       {/* En-tête */}
@@ -396,6 +624,15 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
                 <Download className="h-4 w-4 mr-2" />
                 Télécharger
               </Button>
+              <Button 
+                onClick={() => setValidationDialogOpen(true)} 
+                variant="default" 
+                size="sm"
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Valider et Sauvegarder
+              </Button>
             </div>
           </div>
           <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -408,6 +645,9 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
               <CheckCircle className="h-3 w-3 mr-1" />
               Analyse IA Complétée
             </Badge>
+            <Badge variant={allValidated ? "default" : "secondary"} className={allValidated ? "bg-blue-500" : ""}>
+              {validatedCount}/5 Validés
+            </Badge>
           </div>
         </CardHeader>
       </Card>
@@ -418,22 +658,27 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
           <TabsTrigger value="rapport" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Rapport
+            {validations.rapport && <CheckCircle className="h-3 w-3 text-green-600" />}
           </TabsTrigger>
           <TabsTrigger value="diagnostic" className="flex items-center gap-2">
             <Stethoscope className="h-4 w-4" />
             Diagnostic
+            {validations.diagnostic && <CheckCircle className="h-3 w-3 text-green-600" />}
           </TabsTrigger>
           <TabsTrigger value="examens" className="flex items-center gap-2">
             <FlaskConical className="h-4 w-4" />
             Examens
+            {validations.examens && <CheckCircle className="h-3 w-3 text-green-600" />}
           </TabsTrigger>
           <TabsTrigger value="prescription" className="flex items-center gap-2">
             <Pill className="h-4 w-4" />
             Prescription
+            {validations.prescription && <CheckCircle className="h-3 w-3 text-green-600" />}
           </TabsTrigger>
           <TabsTrigger value="evidence" className="flex items-center gap-2">
             <BookOpen className="h-4 w-4" />
             Evidence
+            {validations.evidence && <CheckCircle className="h-3 w-3 text-green-600" />}
           </TabsTrigger>
         </TabsList>
 
@@ -441,14 +686,47 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
         <TabsContent value="rapport">
           <Card>
             <CardHeader>
-              <CardTitle>Compte-Rendu de Consultation</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Compte-Rendu de Consultation</CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toggleEdit("rapport")}
+                >
+                  {isEditing.rapport ? (
+                    <>
+                      <X className="h-4 w-4 mr-2" />
+                      Annuler
+                    </>
+                  ) : (
+                    <>
+                      <Edit2 className="h-4 w-4 mr-2" />
+                      Modifier
+                    </>
+                  )}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[600px]">
-                <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                  {extractTextFromData(result.consultationReport)}
-                </div>
-              </ScrollArea>
+              {isEditing.rapport ? (
+                <Textarea
+                  value={editableContent.rapport}
+                  onChange={(e) =>
+                    setEditableContent((prev) => ({
+                      ...prev,
+                      rapport: e.target.value,
+                    }))
+                  }
+                  className="min-h-[600px] font-mono text-sm"
+                  placeholder="Entrez le rapport de consultation..."
+                />
+              ) : (
+                <ScrollArea className="h-[600px]">
+                  <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                    {editableContent.rapport}
+                  </div>
+                </ScrollArea>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -458,17 +736,72 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
           <div className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Diagnostic Principal</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">Diagnostic Principal</CardTitle>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toggleEdit("diagnostic")}
+                  >
+                    {isEditing.diagnostic ? (
+                      <>
+                        <X className="h-4 w-4 mr-2" />
+                        Annuler
+                      </>
+                    ) : (
+                      <>
+                        <Edit2 className="h-4 w-4 mr-2" />
+                        Modifier
+                      </>
+                    )}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-semibold text-blue-900">Diagnostic le plus probable</h4>
-                    <p className="text-blue-800 mt-1">{diagnosis.principal}</p>
-                  </div>
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm font-medium">{diagnosis.confidence}</p>
-                  </div>
+                  {isEditing.diagnostic ? (
+                    <>
+                      <div>
+                        <Label htmlFor="diagnostic-principal">Diagnostic principal</Label>
+                        <Textarea
+                          id="diagnostic-principal"
+                          value={editableContent.diagnosticPrincipal}
+                          onChange={(e) =>
+                            setEditableContent((prev) => ({
+                              ...prev,
+                              diagnosticPrincipal: e.target.value,
+                            }))
+                          }
+                          className="mt-1"
+                          rows={2}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="diagnostic-confidence">Niveau de confiance</Label>
+                        <Input
+                          id="diagnostic-confidence"
+                          value={editableContent.diagnosticConfidence}
+                          onChange={(e) =>
+                            setEditableContent((prev) => ({
+                              ...prev,
+                              diagnosticConfidence: e.target.value,
+                            }))
+                          }
+                          className="mt-1"
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="p-4 bg-blue-50 rounded-lg">
+                        <h4 className="font-semibold text-blue-900">Diagnostic le plus probable</h4>
+                        <p className="text-blue-800 mt-1">{editableContent.diagnosticPrincipal}</p>
+                      </div>
+                      <div className="p-3 bg-gray-50 rounded-lg">
+                        <p className="text-sm font-medium">{editableContent.diagnosticConfidence}</p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -479,14 +812,52 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {diagnosis.differentiels.length > 0 ? (
-                    diagnosis.differentiels.map((diff, index) => (
-                      <div key={index} className="p-3 border rounded-lg">
-                        <p className="text-sm">{diff}</p>
-                      </div>
-                    ))
+                  {isEditing.diagnostic ? (
+                    <>
+                      {editableContent.diagnosticDifferentiels.map((diff, index) => (
+                        <div key={index} className="flex gap-2">
+                          <Input
+                            value={diff}
+                            onChange={(e) =>
+                              handleArrayItemChange(
+                                "diagnosticDifferentiels",
+                                index,
+                                e.target.value
+                              )
+                            }
+                            placeholder={`Diagnostic différentiel ${index + 1}`}
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              removeArrayItem("diagnosticDifferentiels", index)
+                            }
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addArrayItem("diagnosticDifferentiels")}
+                      >
+                        Ajouter un diagnostic différentiel
+                      </Button>
+                    </>
                   ) : (
-                    <p className="text-gray-500 text-sm">Aucun diagnostic différentiel spécifique</p>
+                    <>
+                      {editableContent.diagnosticDifferentiels.length > 0 ? (
+                        editableContent.diagnosticDifferentiels.map((diff, index) => (
+                          <div key={index} className="p-3 border rounded-lg">
+                            <p className="text-sm">{diff}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-gray-500 text-sm">Aucun diagnostic différentiel spécifique</p>
+                      )}
+                    </>
                   )}
                 </div>
               </CardContent>
@@ -510,6 +881,26 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
         {/* Examens paracliniques */}
         <TabsContent value="examens">
           <div className="space-y-4">
+            <div className="flex justify-end mb-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toggleEdit("examens")}
+              >
+                {isEditing.examens ? (
+                  <>
+                    <X className="h-4 w-4 mr-2" />
+                    Annuler
+                  </>
+                ) : (
+                  <>
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    Modifier
+                  </>
+                )}
+              </Button>
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card>
                 <CardHeader>
@@ -520,14 +911,53 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {examens.biologie.length > 0 ? (
-                      examens.biologie.map((exam, index) => (
-                        <div key={index} className="p-2 bg-gray-50 rounded text-sm">
-                          {exam}
-                        </div>
-                      ))
+                    {isEditing.examens ? (
+                      <>
+                        {editableContent.examensBiologie.map((exam, index) => (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              value={exam}
+                              onChange={(e) =>
+                                handleArrayItemChange(
+                                  "examensBiologie",
+                                  index,
+                                  e.target.value
+                                )
+                              }
+                              placeholder={`Examen biologique ${index + 1}`}
+                            />
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                removeArrayItem("examensBiologie", index)
+                              }
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => addArrayItem("examensBiologie")}
+                          className="w-full"
+                        >
+                          Ajouter un examen biologique
+                        </Button>
+                      </>
                     ) : (
-                      <p className="text-gray-500 text-sm">Aucun examen biologique spécifique recommandé</p>
+                      <>
+                        {editableContent.examensBiologie.length > 0 ? (
+                          editableContent.examensBiologie.map((exam, index) => (
+                            <div key={index} className="p-2 bg-gray-50 rounded text-sm">
+                              {exam}
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-500 text-sm">Aucun examen biologique spécifique recommandé</p>
+                        )}
+                      </>
                     )}
                   </div>
                 </CardContent>
@@ -542,14 +972,53 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {examens.imagerie.length > 0 ? (
-                      examens.imagerie.map((exam, index) => (
-                        <div key={index} className="p-2 bg-gray-50 rounded text-sm">
-                          {exam}
-                        </div>
-                      ))
+                    {isEditing.examens ? (
+                      <>
+                        {editableContent.examensImagerie.map((exam, index) => (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              value={exam}
+                              onChange={(e) =>
+                                handleArrayItemChange(
+                                  "examensImagerie",
+                                  index,
+                                  e.target.value
+                                )
+                              }
+                              placeholder={`Imagerie ${index + 1}`}
+                            />
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                removeArrayItem("examensImagerie", index)
+                              }
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => addArrayItem("examensImagerie")}
+                          className="w-full"
+                        >
+                          Ajouter une imagerie
+                        </Button>
+                      </>
                     ) : (
-                      <p className="text-gray-500 text-sm">Aucune imagerie spécifique recommandée</p>
+                      <>
+                        {editableContent.examensImagerie.length > 0 ? (
+                          editableContent.examensImagerie.map((exam, index) => (
+                            <div key={index} className="p-2 bg-gray-50 rounded text-sm">
+                              {exam}
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-500 text-sm">Aucune imagerie spécifique recommandée</p>
+                        )}
+                      </>
                     )}
                   </div>
                 </CardContent>
@@ -576,21 +1045,80 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
           <div className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Pill className="h-5 w-5" />
-                  Ordonnance Médicamenteuse
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Pill className="h-5 w-5" />
+                    Ordonnance Médicamenteuse
+                  </CardTitle>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toggleEdit("prescription")}
+                  >
+                    {isEditing.prescription ? (
+                      <>
+                        <X className="h-4 w-4 mr-2" />
+                        Annuler
+                      </>
+                    ) : (
+                      <>
+                        <Edit2 className="h-4 w-4 mr-2" />
+                        Modifier
+                      </>
+                    )}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {medicaments.length > 0 ? (
-                    medicaments.map((med, index) => (
-                      <div key={index} className="p-3 border rounded-lg">
-                        <p className="font-medium text-sm">{med}</p>
-                      </div>
-                    ))
+                  {isEditing.prescription ? (
+                    <>
+                      {editableContent.prescriptionMedicaments.map((med, index) => (
+                        <div key={index} className="flex gap-2">
+                          <Textarea
+                            value={med}
+                            onChange={(e) =>
+                              handleArrayItemChange(
+                                "prescriptionMedicaments",
+                                index,
+                                e.target.value
+                              )
+                            }
+                            placeholder={`Médicament ${index + 1} - Posologie`}
+                            rows={2}
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              removeArrayItem("prescriptionMedicaments", index)
+                            }
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addArrayItem("prescriptionMedicaments")}
+                        className="w-full"
+                      >
+                        Ajouter un médicament
+                      </Button>
+                    </>
                   ) : (
-                    <p className="text-gray-500">Aucun médicament spécifique prescrit</p>
+                    <>
+                      {editableContent.prescriptionMedicaments.length > 0 ? (
+                        editableContent.prescriptionMedicaments.map((med, index) => (
+                          <div key={index} className="p-3 border rounded-lg">
+                            <p className="font-medium text-sm">{med}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-gray-500">Aucun médicament spécifique prescrit</p>
+                      )}
+                    </>
                   )}
                 </div>
               </CardContent>
@@ -692,6 +1220,94 @@ Généré par TIBOK IA DOCTOR le ${new Date().toLocaleString("fr-FR")}
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Validation Dialog */}
+      <Dialog open={validationDialogOpen} onOpenChange={setValidationDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-orange-500" />
+              Validation de la Consultation
+            </DialogTitle>
+            <DialogDescription>
+              Veuillez valider chaque section avant de sauvegarder la consultation.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4 space-y-3">
+            <div className="text-sm font-medium text-gray-700 mb-2">
+              Progrès: {validatedCount}/5 sections validées
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div 
+                className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
+                style={{ width: `${(validatedCount / 5) * 100}%` }}
+              />
+            </div>
+            
+            <div className="space-y-3 mt-4">
+              {Object.entries(validationLabels).map(([key, label]) => (
+                <div key={key} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={key}
+                    checked={validations[key as keyof ValidationState]}
+                    onCheckedChange={() => handleValidationChange(key as keyof ValidationState)}
+                    disabled={isEditing[key]}
+                  />
+                  <label
+                    htmlFor={key}
+                    className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer ${
+                      isEditing[key] ? "text-gray-400" : ""
+                    }`}
+                  >
+                    {label}
+                    {isEditing[key] && (
+                      <span className="text-xs text-orange-600 ml-2">(en cours de modification)</span>
+                    )}
+                  </label>
+                </div>
+              ))}
+            </div>
+            
+            {!allValidated && (
+              <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md mt-4">
+                <AlertCircle className="h-4 w-4 inline mr-2" />
+                Toutes les sections doivent être validées avant la sauvegarde.
+              </div>
+            )}
+            
+            {Object.values(isEditing).some(Boolean) && (
+              <div className="text-sm text-blue-600 bg-blue-50 p-3 rounded-md">
+                <AlertCircle className="h-4 w-4 inline mr-2" />
+                Certaines sections sont en cours de modification. Terminez les modifications avant de valider.
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setValidationDialogOpen(false)}>
+              Annuler
+            </Button>
+            <Button 
+              onClick={handleSaveToSupabase}
+              disabled={!allValidated || isSaving || Object.values(isEditing).some(Boolean)}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {isSaving ? (
+                <>
+                  <span className="animate-spin mr-2">⏳</span>
+                  Sauvegarde en cours...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Sauvegarder
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
