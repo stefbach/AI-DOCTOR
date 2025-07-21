@@ -24,7 +24,6 @@ import {
   CheckCircle,
   Loader2
 } from "lucide-react"
-import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
 
 // Types
 interface LifeHabits {
@@ -81,10 +80,8 @@ const COMMON_MEDICAL_HISTORY = [
 ]
 
 export default function ModernPatientForm({ onDataChange, onNext }: PatientFormProps) {
-  // Use the Tibok patient data hook
-  const { patientData: tibokPatient, consultationData, isFromTibok } = useTibokPatientData()
-  const [isLoadingPatientData, setIsLoadingPatientData] = useState(false)
-  const [patientDataLoaded, setPatientDataLoaded] = useState(false)
+  const [isFromTibok, setIsFromTibok] = useState(false)
+  const [isLoadingPatientData, setIsLoadingPatientData] = useState(true)
 
   const [formData, setFormData] = useState<PatientFormData>({
     firstName: "",
@@ -112,136 +109,75 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
   const [historySearch, setHistorySearch] = useState("")
   const [currentSection, setCurrentSection] = useState(0)
 
-  // Auto-populate form when patient data is received from TIBOK
+  // Load patient data from URL on component mount
   useEffect(() => {
-    if (isFromTibok && tibokPatient && !patientDataLoaded) {
-      console.log('Auto-populating form with TIBOK patient data:', tibokPatient)
-      setIsLoadingPatientData(true)
-      
-      // Handle date_of_birth field
-      let birthDateStr = ""
-      if (tibokPatient.date_of_birth) {
-        // If it's already in YYYY-MM-DD format, use it directly
-        birthDateStr = tibokPatient.date_of_birth.split('T')[0]
-      } else if (tibokPatient.age) {
-        // Calculate approximate birth date from age
-        const currentYear = new Date().getFullYear()
-        const birthYear = currentYear - tibokPatient.age
-        birthDateStr = `${birthYear}-01-01`
-      }
-
-      // Map gender to form format - handle "Masculin" that's already in the correct format
-      let genderArray: string[] = []
-      if (tibokPatient.gender) {
-        const gender = tibokPatient.gender
-        if (gender === 'Masculin' || gender.toLowerCase() === 'm' || gender.toLowerCase() === 'male') {
-          genderArray = ['Masculin']
-        } else if (gender === 'Féminin' || gender.toLowerCase() === 'f' || gender.toLowerCase() === 'female') {
-          genderArray = ['Féminin']
-        }
-      }
-
-      const newFormData: PatientFormData = {
-        firstName: tibokPatient.first_name || "",
-        lastName: tibokPatient.last_name || "",
-        birthDate: birthDateStr,
-        age: tibokPatient.age ? tibokPatient.age.toString() : "",
-        gender: genderArray,
-        otherGender: "",
-        weight: tibokPatient.weight ? tibokPatient.weight.toString() : "",
-        height: tibokPatient.height ? tibokPatient.height.toString() : "",
-        allergies: [],
-        otherAllergies: "",
-        medicalHistory: [],
-        otherMedicalHistory: "",
-        currentMedicationsText: "",
-        lifeHabits: {
-          smoking: "",
-          alcohol: "", 
-          physicalActivity: "",
-        },
-      }
-
-      setFormData(newFormData)
-      setPatientDataLoaded(true)
-      
-      // Clear any existing errors
-      setErrors({})
-      
-      setTimeout(() => {
-        setIsLoadingPatientData(false)
-      }, 500)
-    }
-  }, [isFromTibok, tibokPatient, patientDataLoaded])
-
-  // Also listen for custom events from patient-data-loader
-  useEffect(() => {
-    const handlePatientDataEvent = (event: CustomEvent) => {
-      console.log('Received patient data from loader:', event.detail)
-      if (event.detail && event.detail.patient && !patientDataLoaded) {
-        const patient = event.detail.patient
-        setIsLoadingPatientData(true)
+    const loadPatientDataFromURL = () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search)
+        const source = urlParams.get('source')
+        const patientDataParam = urlParams.get('patientData')
         
-        // Handle date_of_birth or dateOfBirth field
-        let birthDateStr = ""
-        if (patient.date_of_birth) {
-          birthDateStr = patient.date_of_birth.split('T')[0]
-        } else if (patient.dateOfBirth) {
-          birthDateStr = patient.dateOfBirth.split('T')[0]
-        } else if (patient.age) {
-          const currentYear = new Date().getFullYear()
-          const birthYear = currentYear - patient.age
-          birthDateStr = `${birthYear}-01-01`
-        }
-
-        // Map gender - handle when it's already "Masculin" or "Féminin"
-        let genderArray: string[] = []
-        if (patient.gender) {
-          const gender = patient.gender
-          if (gender === 'Masculin' || gender.toLowerCase() === 'm' || gender.toLowerCase() === 'male') {
-            genderArray = ['Masculin']
-          } else if (gender === 'Féminin' || gender.toLowerCase() === 'f' || gender.toLowerCase() === 'female') {
-            genderArray = ['Féminin']
+        console.log('URL params:', { source, hasPatientData: !!patientDataParam })
+        
+        if (source === 'tibok' && patientDataParam) {
+          const decodedData = JSON.parse(decodeURIComponent(patientDataParam))
+          console.log('Decoded patient data:', decodedData)
+          
+          setIsFromTibok(true)
+          
+          // Process birth date
+          let birthDateStr = ""
+          if (decodedData.dateOfBirth) {
+            birthDateStr = decodedData.dateOfBirth.split('T')[0]
+          } else if (decodedData.date_of_birth) {
+            birthDateStr = decodedData.date_of_birth.split('T')[0]
           }
+          
+          // Process gender
+          const genderArray: string[] = []
+          if (decodedData.gender) {
+            if (decodedData.gender === 'Masculin' || decodedData.gender === 'M' || decodedData.gender.toLowerCase() === 'male') {
+              genderArray.push('Masculin')
+            } else if (decodedData.gender === 'Féminin' || decodedData.gender === 'F' || decodedData.gender.toLowerCase() === 'female') {
+              genderArray.push('Féminin')
+            }
+          }
+          
+          // Update form data
+          const newFormData: PatientFormData = {
+            firstName: decodedData.firstName || "",
+            lastName: decodedData.lastName || "",
+            birthDate: birthDateStr,
+            age: decodedData.age ? decodedData.age.toString() : "",
+            gender: genderArray,
+            otherGender: "",
+            weight: decodedData.weight ? decodedData.weight.toString() : "",
+            height: decodedData.height ? decodedData.height.toString() : "",
+            allergies: [],
+            otherAllergies: "",
+            medicalHistory: [],
+            otherMedicalHistory: "",
+            currentMedicationsText: "",
+            lifeHabits: {
+              smoking: "",
+              alcohol: "", 
+              physicalActivity: "",
+            },
+          }
+          
+          console.log('Setting form data:', newFormData)
+          setFormData(newFormData)
         }
-
-        const newFormData: PatientFormData = {
-          firstName: patient.first_name || patient.firstName || "",
-          lastName: patient.last_name || patient.lastName || "",
-          birthDate: birthDateStr,
-          age: patient.age ? patient.age.toString() : "",
-          gender: genderArray,
-          otherGender: "",
-          weight: patient.weight ? patient.weight.toString() : "",
-          height: patient.height ? patient.height.toString() : "",
-          allergies: [],
-          otherAllergies: "",
-          medicalHistory: [],
-          otherMedicalHistory: "",
-          currentMedicationsText: "",
-          lifeHabits: {
-            smoking: "",
-            alcohol: "", 
-            physicalActivity: "",
-          },
-        }
-
-        setFormData(newFormData)
-        setPatientDataLoaded(true)
-        setErrors({})
-        
-        setTimeout(() => {
-          setIsLoadingPatientData(false)
-        }, 500)
+      } catch (error) {
+        console.error('Error loading patient data from URL:', error)
+      } finally {
+        setIsLoadingPatientData(false)
       }
     }
-
-    window.addEventListener('tibok-patient-data', handlePatientDataEvent as EventListener)
     
-    return () => {
-      window.removeEventListener('tibok-patient-data', handlePatientDataEvent as EventListener)
-    }
-  }, [patientDataLoaded])
+    // Small delay to ensure component is mounted
+    setTimeout(loadPatientDataFromURL, 100)
+  }, [])
 
   // Calculate form completion percentage
   const calculateProgress = () => {
@@ -284,7 +220,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
         setFormData(prev => ({ ...prev, age: calculatedAge }))
       }
     }
-  }, [formData.birthDate])
+  }, [formData.birthDate, formData.age])
 
   // Auto-save effect
   useEffect(() => {
@@ -410,6 +346,17 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
     { id: "habits", title: "Habitudes", icon: Activity },
   ]
 
+  if (isLoadingPatientData) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Chargement des données patient...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Show notification if data is from TIBOK */}
@@ -420,16 +367,6 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
             <p className="text-sm font-medium text-blue-800">
               Consultation TIBOK - Patient: {formData.firstName} {formData.lastName}
             </p>
-          </div>
-        </div>
-      )}
-
-      {/* Loading overlay when patient data is being loaded */}
-      {isLoadingPatientData && (
-        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-            <p className="text-gray-600">Chargement des données patient...</p>
           </div>
         </div>
       )}
@@ -485,6 +422,8 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
               </Label>
               <Input
                 id="firstName"
+                name="firstName"
+                type="text"
                 value={formData.firstName}
                 onChange={(e) => handleInputChange("firstName", e.target.value)}
                 className={`transition-all duration-200 ${
@@ -507,6 +446,8 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
               </Label>
               <Input
                 id="lastName"
+                name="lastName"
+                type="text"
                 value={formData.lastName}
                 onChange={(e) => handleInputChange("lastName", e.target.value)}
                 className={`transition-all duration-200 ${
@@ -531,6 +472,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
               </Label>
               <Input
                 id="birthDate"
+                name="birthDate"
                 type="date"
                 value={formData.birthDate}
                 onChange={(e) => handleInputChange("birthDate", e.target.value)}
@@ -592,6 +534,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
               <Label htmlFor="otherGender" className="font-medium">Autre (préciser)</Label>
               <Input
                 id="otherGender"
+                name="otherGender"
                 value={formData.otherGender}
                 onChange={(e) => handleInputChange("otherGender", e.target.value)}
                 className="transition-all duration-200 focus:ring-blue-200"
@@ -634,6 +577,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
               </Label>
               <Input
                 id="weight"
+                name="weight"
                 type="number"
                 value={formData.weight}
                 onChange={(e) => handleInputChange("weight", e.target.value)}
@@ -660,6 +604,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
               </Label>
               <Input
                 id="height"
+                name="height"
                 type="number"
                 value={formData.height}
                 onChange={(e) => handleInputChange("height", e.target.value)}
