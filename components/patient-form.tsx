@@ -91,6 +91,27 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
       const urlParams = new URLSearchParams(window.location.search)
       const source = urlParams.get('source')
       const patientDataParam = urlParams.get('patientData')
+      const doctorDataParam = urlParams.get('doctorData')
+      const doctorId = urlParams.get('doctorId')
+      
+      // Store doctor data in sessionStorage for use by consultation report
+      if (doctorDataParam) {
+        try {
+          const doctorData = JSON.parse(decodeURIComponent(doctorDataParam))
+          console.log('Doctor data received from URL:', doctorData)
+          
+          // Store doctor data with ID if available
+          const doctorInfo = {
+            ...doctorData,
+            id: doctorId || doctorData.id
+          }
+          
+          sessionStorage.setItem('tibokDoctorData', JSON.stringify(doctorInfo))
+          console.log('Doctor data stored in sessionStorage:', doctorInfo)
+        } catch (error) {
+          console.error('Error parsing doctor data from URL:', error)
+        }
+      }
       
       if (source === 'tibok' && patientDataParam) {
         try {
