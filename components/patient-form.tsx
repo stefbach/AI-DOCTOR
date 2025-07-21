@@ -118,24 +118,25 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
       console.log('Auto-populating form with TIBOK patient data:', tibokPatient)
       setIsLoadingPatientData(true)
       
-      // Calculate birthdate from age if not provided
+      // Handle date_of_birth field
       let birthDateStr = ""
       if (tibokPatient.date_of_birth) {
-        birthDateStr = tibokPatient.date_of_birth.split('T')[0] // Format YYYY-MM-DD
+        // If it's already in YYYY-MM-DD format, use it directly
+        birthDateStr = tibokPatient.date_of_birth.split('T')[0]
       } else if (tibokPatient.age) {
         // Calculate approximate birth date from age
         const currentYear = new Date().getFullYear()
         const birthYear = currentYear - tibokPatient.age
-        birthDateStr = `${birthYear}-01-01` // Default to January 1st
+        birthDateStr = `${birthYear}-01-01`
       }
 
-      // Map gender to form format
+      // Map gender to form format - handle "Masculin" that's already in the correct format
       let genderArray: string[] = []
       if (tibokPatient.gender) {
-        const genderLower = tibokPatient.gender.toLowerCase()
-        if (genderLower === 'm' || genderLower === 'male' || genderLower === 'masculin') {
+        const gender = tibokPatient.gender
+        if (gender === 'Masculin' || gender.toLowerCase() === 'm' || gender.toLowerCase() === 'male') {
           genderArray = ['Masculin']
-        } else if (genderLower === 'f' || genderLower === 'female' || genderLower === 'féminin') {
+        } else if (gender === 'Féminin' || gender.toLowerCase() === 'f' || gender.toLowerCase() === 'female') {
           genderArray = ['Féminin']
         }
       }
@@ -181,30 +182,32 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
         const patient = event.detail.patient
         setIsLoadingPatientData(true)
         
-        // Calculate birthdate from age if not provided
+        // Handle date_of_birth or dateOfBirth field
         let birthDateStr = ""
         if (patient.date_of_birth) {
           birthDateStr = patient.date_of_birth.split('T')[0]
+        } else if (patient.dateOfBirth) {
+          birthDateStr = patient.dateOfBirth.split('T')[0]
         } else if (patient.age) {
           const currentYear = new Date().getFullYear()
           const birthYear = currentYear - patient.age
           birthDateStr = `${birthYear}-01-01`
         }
 
-        // Map gender
+        // Map gender - handle when it's already "Masculin" or "Féminin"
         let genderArray: string[] = []
         if (patient.gender) {
-          const genderLower = patient.gender.toLowerCase()
-          if (genderLower === 'm' || genderLower === 'male' || genderLower === 'masculin') {
+          const gender = patient.gender
+          if (gender === 'Masculin' || gender.toLowerCase() === 'm' || gender.toLowerCase() === 'male') {
             genderArray = ['Masculin']
-          } else if (genderLower === 'f' || genderLower === 'female' || genderLower === 'féminin') {
+          } else if (gender === 'Féminin' || gender.toLowerCase() === 'f' || gender.toLowerCase() === 'female') {
             genderArray = ['Féminin']
           }
         }
 
         const newFormData: PatientFormData = {
-          firstName: patient.first_name || "",
-          lastName: patient.last_name || "",
+          firstName: patient.first_name || patient.firstName || "",
+          lastName: patient.last_name || patient.lastName || "",
           birthDate: birthDateStr,
           age: patient.age ? patient.age.toString() : "",
           gender: genderArray,
