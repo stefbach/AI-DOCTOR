@@ -329,7 +329,7 @@ export default function CompleteDiagnosisForm({
     )
   }
 
-  // Interface d'erreur
+  // Interface d'erreur - condition mise à jour pour vérifier diagnosis null
   if (!diagnosis && error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 p-4">
@@ -358,7 +358,35 @@ export default function CompleteDiagnosisForm({
     )
   }
 
-  // Interface principale - Diagnostic généré
+  // Condition supplémentaire: Si pas de loading et pas d'erreur mais diagnosis toujours null
+  if (!loading && !diagnosis) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 p-4">
+        <div className="max-w-4xl mx-auto">
+          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+            <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
+              <CardTitle className="flex items-center gap-3">
+                <Brain className="h-6 w-6" />
+                Préparation du Diagnostic
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-8 text-center">
+              <div className="space-y-4">
+                <Brain className="h-16 w-16 text-blue-500 mx-auto" />
+                <p className="text-lg text-gray-700">Initialisation en cours...</p>
+                <Button onClick={generateCompleteDiagnosisAndDocuments} className="mt-6">
+                  <Brain className="h-4 w-4 mr-2" />
+                  Lancer la génération
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  // Interface principale - Diagnostic généré (seulement si diagnosis existe)
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -372,7 +400,7 @@ export default function CompleteDiagnosisForm({
             </CardTitle>
             <div className="flex justify-center gap-4 mt-4">
               <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300">
-                Confiance IA: {diagnosis.primary?.confidence || 70}%
+                Confiance IA: {diagnosis?.primary?.confidence || 70}%
               </Badge>
               {documentsGenerated && (
                 <Badge className="bg-blue-500 text-white">
@@ -427,16 +455,16 @@ export default function CompleteDiagnosisForm({
           <CardContent className="p-8 space-y-6">
             <div className="text-center p-6 bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl border-2 border-emerald-200">
               <h3 className="text-2xl font-bold text-emerald-800 mb-4">
-                {diagnosis.primary?.condition || "Diagnostic à préciser"}
+                {diagnosis?.primary?.condition || "Diagnostic à préciser"}
               </h3>
               <div className="flex justify-center gap-4">
                 <Badge className="bg-emerald-100 text-emerald-800 text-sm px-4 py-2">
-                  Probabilité: {diagnosis.primary?.confidence || 70}%
+                  Probabilité: {diagnosis?.primary?.confidence || 70}%
                 </Badge>
                 <Badge variant="outline" className="border-emerald-300 text-emerald-700 text-sm px-4 py-2">
-                  Sévérité: {diagnosis.primary?.severity || "À évaluer"}
+                  Sévérité: {diagnosis?.primary?.severity || "À évaluer"}
                 </Badge>
-                {diagnosis.primary?.icd10 && (
+                {diagnosis?.primary?.icd10 && (
                   <Badge variant="outline" className="border-blue-300 text-blue-700 text-sm px-4 py-2">
                     CIM-10: {diagnosis.primary.icd10}
                   </Badge>
@@ -444,7 +472,7 @@ export default function CompleteDiagnosisForm({
               </div>
             </div>
 
-            {diagnosis.primary?.detailedAnalysis && (
+            {diagnosis?.primary?.detailedAnalysis && (
               <div>
                 <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
                   <Brain className="h-5 w-5 text-emerald-600" />
@@ -458,7 +486,7 @@ export default function CompleteDiagnosisForm({
               </div>
             )}
 
-            {diagnosis.primary?.clinicalRationale && (
+            {diagnosis?.primary?.clinicalRationale && (
               <div>
                 <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
                   <Eye className="h-5 w-5 text-emerald-600" />
@@ -475,7 +503,7 @@ export default function CompleteDiagnosisForm({
         </Card>
 
         {/* Diagnostics Différentiels */}
-        {diagnosis.differential && diagnosis.differential.length > 0 && (
+        {diagnosis?.differential && diagnosis.differential.length > 0 && (
           <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
             <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-t-lg">
               <CardTitle className="flex items-center gap-3">
@@ -532,7 +560,7 @@ export default function CompleteDiagnosisForm({
                   </div>
                   <div className="text-xs text-blue-700 space-y-1">
                     <p><strong>Patient:</strong> {mauritianDocuments.consultation?.patient?.firstName} {mauritianDocuments.consultation?.patient?.lastName}</p>
-                    <p><strong>Diagnostic:</strong> {mauritianDocuments.consultation?.content?.diagnosis || diagnosis.primary?.condition}</p>
+                    <p><strong>Diagnostic:</strong> {mauritianDocuments.consultation?.content?.diagnosis || diagnosis?.primary?.condition}</p>
                   </div>
                 </div>
 
