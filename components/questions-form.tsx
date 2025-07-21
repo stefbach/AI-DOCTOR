@@ -17,7 +17,8 @@ import {
   CheckCircle,
   AlertTriangle,
   Search,
-  Lightbulb
+  Lightbulb,
+  Sparkles
 } from "lucide-react"
 
 interface Question {
@@ -193,6 +194,10 @@ export default function ModernQuestionsForm({
       }
       return answer !== "" && answer !== null && answer !== undefined
     })
+  }
+
+  const isLastQuestion = () => {
+    return currentQuestionIndex === questions.length - 1
   }
 
   const renderQuestion = (question: Question) => {
@@ -475,13 +480,40 @@ export default function ModernQuestionsForm({
               <ArrowLeft className="h-4 w-4 mr-2" />
               Question précédente
             </Button>
-            <Button
-              onClick={() => setCurrentQuestionIndex(Math.min(questions.length - 1, currentQuestionIndex + 1))}
-              disabled={currentQuestionIndex === questions.length - 1}
-              className="px-6 py-3"
+            
+            {/* Bouton conditionnel : Question suivante OU Diagnostic IA */}
+            {!isLastQuestion() ? (
+              <Button
+                onClick={() => setCurrentQuestionIndex(Math.min(questions.length - 1, currentQuestionIndex + 1))}
+                className="px-6 py-3"
+              >
+                Question suivante
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            ) : (
+              <Button 
+                onClick={onNext} 
+                disabled={!isFormValid()}
+                className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 font-semibold"
+              >
+                <Sparkles className="h-5 w-5 mr-2" />
+                Lancer le Diagnostic IA
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* Bouton Diagnostic IA fixe quand toutes les questions sont répondues */}
+        {isFormValid() && (
+          <div className="sticky bottom-4 flex justify-center">
+            <Button 
+              onClick={onNext}
+              className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-4 shadow-2xl hover:shadow-3xl transition-all duration-300 font-semibold text-lg rounded-full animate-pulse"
             >
-              Question suivante
-              <ArrowRight className="h-4 w-4 ml-2" />
+              <Sparkles className="h-6 w-6 mr-3" />
+              🚀 Diagnostic IA Prêt - Cliquez ici !
+              <ArrowRight className="h-5 w-5 ml-3" />
             </Button>
           </div>
         )}
