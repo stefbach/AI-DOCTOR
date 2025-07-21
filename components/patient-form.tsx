@@ -20,8 +20,11 @@ import {
   Search,
   Check,
   X,
-  Info
+  Info,
+  CheckCircle,
+  Loader2
 } from "lucide-react"
+import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
 
 // Types
 interface LifeHabits {
@@ -78,6 +81,11 @@ const COMMON_MEDICAL_HISTORY = [
 ]
 
 export default function ModernPatientForm({ onDataChange, onNext }: PatientFormProps) {
+  // Use the Tibok patient data hook
+  const { patientData: tibokPatient, consultationData, isFromTibok } = useTibokPatientData()
+  const [isLoadingPatientData, setIsLoadingPatientData] = useState(false)
+  const [patientDataLoaded, setPatientDataLoaded] = useState(false)
+
   const [formData, setFormData] = useState<PatientFormData>({
     firstName: "",
     lastName: "",
@@ -103,6 +111,134 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
   const [allergySearch, setAllergySearch] = useState("")
   const [historySearch, setHistorySearch] = useState("")
   const [currentSection, setCurrentSection] = useState(0)
+
+  // Auto-populate form when patient data is received from TIBOK
+  useEffect(() => {
+    if (isFromTibok && tibokPatient && !patientDataLoaded) {
+      console.log('Auto-populating form with TIBOK patient data:', tibokPatient)
+      setIsLoadingPatientData(true)
+      
+      // Calculate birthdate from age if not provided
+      let birthDateStr = ""
+      if (tibokPatient.date_of_birth) {
+        birthDateStr = tibokPatient.date_of_birth.split('T')[0] // Format YYYY-MM-DD
+      } else if (tibokPatient.age) {
+        // Calculate approximate birth date from age
+        const currentYear = new Date().getFullYear()
+        const birthYear = currentYear - tibokPatient.age
+        birthDateStr = `${birthYear}-01-01` // Default to January 1st
+      }
+
+      // Map gender to form format
+      let genderArray: string[] = []
+      if (tibokPatient.gender) {
+        const genderLower = tibokPatient.gender.toLowerCase()
+        if (genderLower === 'm' || genderLower === 'male' || genderLower === 'masculin') {
+          genderArray = ['Masculin']
+        } else if (genderLower === 'f' || genderLower === 'female' || genderLower === 'féminin') {
+          genderArray = ['Féminin']
+        }
+      }
+
+      const newFormData: PatientFormData = {
+        firstName: tibokPatient.first_name || "",
+        lastName: tibokPatient.last_name || "",
+        birthDate: birthDateStr,
+        age: tibokPatient.age ? tibokPatient.age.toString() : "",
+        gender: genderArray,
+        otherGender: "",
+        weight: tibokPatient.weight ? tibokPatient.weight.toString() : "",
+        height: tibokPatient.height ? tibokPatient.height.toString() : "",
+        allergies: [],
+        otherAllergies: "",
+        medicalHistory: [],
+        otherMedicalHistory: "",
+        currentMedicationsText: "",
+        lifeHabits: {
+          smoking: "",
+          alcohol: "", 
+          physicalActivity: "",
+        },
+      }
+
+      setFormData(newFormData)
+      setPatientDataLoaded(true)
+      
+      // Clear any existing errors
+      setErrors({})
+      
+      setTimeout(() => {
+        setIsLoadingPatientData(false)
+      }, 500)
+    }
+  }, [isFromTibok, tibokPatient, patientDataLoaded])
+
+  // Also listen for custom events from patient-data-loader
+  useEffect(() => {
+    const handlePatientDataEvent = (event: CustomEvent) => {
+      console.log('Received patient data from loader:', event.detail)
+      if (event.detail && event.detail.patient && !patientDataLoaded) {
+        const patient = event.detail.patient
+        setIsLoadingPatientData(true)
+        
+        // Calculate birthdate from age if not provided
+        let birthDateStr = ""
+        if (patient.date_of_birth) {
+          birthDateStr = patient.date_of_birth.split('T')[0]
+        } else if (patient.age) {
+          const currentYear = new Date().getFullYear()
+          const birthYear = currentYear - patient.age
+          birthDateStr = `${birthYear}-01-01`
+        }
+
+        // Map gender
+        let genderArray: string[] = []
+        if (patient.gender) {
+          const genderLower = patient.gender.toLowerCase()
+          if (genderLower === 'm' || genderLower === 'male' || genderLower === 'masculin') {
+            genderArray = ['Masculin']
+          } else if (genderLower === 'f' || genderLower === 'female' || genderLower === 'féminin') {
+            genderArray = ['Féminin']
+          }
+        }
+
+        const newFormData: PatientFormData = {
+          firstName: patient.first_name || "",
+          lastName: patient.last_name || "",
+          birthDate: birthDateStr,
+          age: patient.age ? patient.age.toString() : "",
+          gender: genderArray,
+          otherGender: "",
+          weight: patient.weight ? patient.weight.toString() : "",
+          height: patient.height ? patient.height.toString() : "",
+          allergies: [],
+          otherAllergies: "",
+          medicalHistory: [],
+          otherMedicalHistory: "",
+          currentMedicationsText: "",
+          lifeHabits: {
+            smoking: "",
+            alcohol: "", 
+            physicalActivity: "",
+          },
+        }
+
+        setFormData(newFormData)
+        setPatientDataLoaded(true)
+        setErrors({})
+        
+        setTimeout(() => {
+          setIsLoadingPatientData(false)
+        }, 500)
+      }
+    }
+
+    window.addEventListener('tibok-patient-data', handlePatientDataEvent as EventListener)
+    
+    return () => {
+      window.removeEventListener('tibok-patient-data', handlePatientDataEvent as EventListener)
+    }
+  }, [patientDataLoaded])
 
   // Calculate form completion percentage
   const calculateProgress = () => {
@@ -273,6 +409,28 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
 
   return (
     <div className="space-y-6">
+      {/* Show notification if data is from TIBOK */}
+      {isFromTibok && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-blue-600" />
+            <p className="text-sm font-medium text-blue-800">
+              Consultation TIBOK - Patient: {formData.firstName} {formData.lastName}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Loading overlay when patient data is being loaded */}
+      {isLoadingPatientData && (
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+            <p className="text-gray-600">Chargement des données patient...</p>
+          </div>
+        </div>
+      )}
+
       {/* Header with Progress */}
       <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader className="text-center">
