@@ -515,9 +515,20 @@ CONTACTS URGENCE MAURICE:
 
   const generateCHUReport = () => {
     const report = {
-      header: mauritianDoctorInfo,
+      header: {
+        ...mauritianDoctorInfo,
+        isFromTibok: isFromTibok,
+        generatedAt: new Date().toISOString(),
+        reportType: 'CHU Consultation Report'
+      },
       patient: patientMauritianData,
-      consultation: mauritianReportData,
+      consultation: {
+        ...mauritianReportData,
+        doctorId: tibokDoctorData?.id || null,
+        doctorName: mauritianDoctorInfo.name,
+        doctorSpecialty: mauritianDoctorInfo.specialty,
+        doctorCouncilNumber: mauritianDoctorInfo.mauritianMedicalCouncil
+      },
       medical: {
         clinical: tropicalClinicalData,
         diagnosis: expertDiagnosisData,
@@ -546,10 +557,23 @@ CONTACTS URGENCE MAURICE:
         doctorData: tibokDoctorData,
         timestamp: new Date().toISOString()
       },
+      doctorSignature: {
+        name: mauritianDoctorInfo.name,
+        title: mauritianDoctorInfo.title,
+        specialty: mauritianDoctorInfo.specialty,
+        councilNumber: mauritianDoctorInfo.mauritianMedicalCouncil,
+        institution: mauritianDoctorInfo.chuAffiliation,
+        signedAt: new Date().toISOString()
+      },
       timestamp: new Date().toISOString()
     }
-
-    console.log("Rapport CHU Maurice généré avec IA:", report)
+    
+    console.log("Rapport CHU Maurice généré avec données médecin TIBOK:", report)
+    
+    // If you need to save this to a database or API, you can do it here
+    // Example:
+    // saveReportToSupabase(report)
+    
     return report
   }
 
