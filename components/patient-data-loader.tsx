@@ -9,6 +9,8 @@ interface PatientData {
   lastName?: string
   first_name?: string
   last_name?: string
+  dateOfBirth?: string
+  date_of_birth?: string
   age?: number
   gender?: string
   weight?: number
@@ -58,6 +60,7 @@ export function PatientDataLoader() {
               id: patientId,
               first_name: patientData.firstName || patientData.first_name || '',
               last_name: patientData.lastName || patientData.last_name || '',
+              date_of_birth: patientData.dateOfBirth || patientData.date_of_birth || null,
               age: patientData.age,
               gender: patientData.gender,
               weight: patientData.weight,
@@ -72,17 +75,8 @@ export function PatientDataLoader() {
         })
         window.dispatchEvent(event)
 
-        // If we have some patient data, try to auto-fill
+        // If we have some patient data, show notification
         if (patientData.firstName || patientData.lastName || patientData.first_name || patientData.last_name) {
-          autoFillForm({
-            first_name: patientData.firstName || patientData.first_name || '',
-            last_name: patientData.lastName || patientData.last_name || '',
-            age: patientData.age,
-            gender: patientData.gender,
-            weight: patientData.weight,
-            height: patientData.height
-          } as any)
-          
           setNotification({
             type: 'success',
             message: `Consultation TIBOK liée - Patient: ${patientData.firstName || patientData.first_name || 'ID'} ${patientData.lastName || patientData.last_name || patientId}`
@@ -110,109 +104,6 @@ export function PatientDataLoader() {
     // Run immediately
     loadPatientData()
   }, [])
-
-  const autoFillForm = (patient: any) => {
-    console.log('Auto-filling form with patient data:', patient)
-    
-    // Wait for form to be rendered
-    setTimeout(() => {
-      const fillField = (selectors: string[], value: any) => {
-        if (!value) return
-        
-        for (const selector of selectors) {
-          const field = document.querySelector(selector) as HTMLInputElement
-          if (field) {
-            console.log(`Filling field ${selector} with value:`, value)
-            field.value = value.toString()
-            
-            // Dispatch multiple events to ensure React components update
-            field.dispatchEvent(new Event('input', { bubbles: true }))
-            field.dispatchEvent(new Event('change', { bubbles: true }))
-            field.dispatchEvent(new Event('blur', { bubbles: true }))
-            
-            // Force React to update
-            const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set
-            if (nativeInputValueSetter) {
-              nativeInputValueSetter.call(field, value.toString())
-              field.dispatchEvent(new Event('input', { bubbles: true }))
-            }
-            break
-          }
-        }
-      }
-
-      // Fill patient information
-      fillField([
-        'input[name="firstName"]',
-        'input[id="firstName"]',
-        'input[placeholder*="Prénom"]'
-      ], patient.first_name)
-
-      fillField([
-        'input[name="lastName"]',
-        'input[id="lastName"]',
-        'input[placeholder*="Nom"]'
-      ], patient.last_name)
-
-      fillField([
-        'input[name="age"]',
-        'input[id="age"]',
-        'input[type="number"][placeholder*="années"]'
-      ], patient.age)
-
-      fillField([
-        'input[name="weight"]',
-        'input[id="weight"]',
-        'input[placeholder*="Poids"]'
-      ], patient.weight)
-
-      fillField([
-        'input[name="height"]',
-        'input[id="height"]',
-        'input[placeholder*="Taille"]'
-      ], patient.height)
-
-      // Handle gender with select dropdown
-      if (patient.gender) {
-        setTimeout(() => {
-          const genderValue = patient.gender.toLowerCase()
-          console.log('Setting gender value:', genderValue)
-          
-          // Map gender values to the expected format
-          let mappedGender = patient.gender
-          if (genderValue === 'm' || genderValue === 'male' || genderValue.includes('mas')) {
-            mappedGender = 'Masculin'
-          } else if (genderValue === 'f' || genderValue === 'female' || genderValue.includes('fem')) {
-            mappedGender = 'Féminin'
-          }
-          
-          // Fill the select dropdown
-          fillField([
-            'select[name="gender"]',
-            'select[id="gender"]',
-            '#gender',
-            '[name="gender"]'
-          ], mappedGender)
-          
-          // Also try to trigger the select component
-          const selectTrigger = document.querySelector('[id="gender"]') as HTMLElement
-          if (selectTrigger) {
-            // For shadcn/ui Select component, we might need to update the trigger button
-            const triggerButton = selectTrigger.querySelector('button') || selectTrigger
-            if (triggerButton) {
-              console.log('Found select trigger button')
-              // Update the displayed value
-              const valueSpan = triggerButton.querySelector('span')
-              if (valueSpan) {
-                valueSpan.textContent = mappedGender
-              }
-            }
-          }
-        }, 500)
-      }
-
-    }, 1500)
-  }
 
   // Auto-hide notification after 5 seconds
   useEffect(() => {
