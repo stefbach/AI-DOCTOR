@@ -14,46 +14,31 @@ export async function POST(request: NextRequest) {
       clinical: clinicalData?.chiefComplaint
     })
     
-    console.log('🔥 Vérification environnement serveur...')
-    console.log('🔥 typeof window:', typeof window)
-    console.log('🔥 Node env:', process.env.NODE_ENV)
-    
     console.log('🔥 Vérification API Key...')
     const apiKey = process.env.OPENAI_API_KEY
-    console.log('🔥 API Key présente:', !!apiKey, apiKey?.substring(0, 10) + '...')
+    console.log('🔥 API Key présente:', !!apiKey)
     
     if (!apiKey) {
       throw new Error('OPENAI_API_KEY manquante dans .env.local')
     }
     
-    // Import et initialisation OpenAI CÔTÉ SERVEUR
-    console.log('🔥 Import OpenAI...')
-    const { OpenAI } = await import('openai')
-    
-    const openai = new OpenAI({
-      apiKey: apiKey,
-      // Force l'exécution côté serveur 
-      dangerouslyAllowBrowser: false
-    })
-    
-    console.log('🔥 Client OpenAI créé côté serveur')
-    
     // Préparation données patient
     const patientName = `${patientData?.firstName || 'Patient'} ${patientData?.lastName || 'X'}`
     const age = patientData?.age || 30
     const complaint = clinicalData?.chiefComplaint || 'Consultation médicale'
+    const symptoms = (clinicalData?.symptoms || []).join(', ') || 'Non précisés'
     
-    console.log('🔥 Appel OpenAI pour diagnostic expert...')
+    console.log('🔥 Appel OpenAI API REST directement...')
     
     const prompt = `Tu es un médecin expert mauricien. Analyse ce cas clinique:
 
 PATIENT: ${patientName}, ${age} ans
 MOTIF: ${complaint}
-SYMPTÔMES: ${(clinicalData?.symptoms || []).join(', ') || 'Non précisés'}
+SYMPTÔMES: ${symptoms}
 
 Génère un diagnostic expert avec documents mauriciens.
 
-RÉPONDS UNIQUEMENT EN JSON VALIDE:
+RÉPONDS UNIQUEMENT EN JSON VALIDE SANS MARKDOWN:
 
 {
   "diagnosis": {
@@ -62,15 +47,15 @@ RÉPONDS UNIQUEMENT EN JSON VALIDE:
       "icd10": "Code CIM-10",
       "confidence": 85,
       "severity": "moderate",
-      "detailedAnalysis": "Analyse médicale détaillée du cas clinique présenté",
-      "clinicalRationale": "Raisonnement clinique justifiant ce diagnostic principal",
-      "prognosis": "Évolution pronostique avec traitement approprié"
+      "detailedAnalysis": "Analyse médicale détaillée du cas clinique",
+      "clinicalRationale": "Raisonnement clinique justifiant ce diagnostic",
+      "prognosis": "Évolution pronostique avec traitement"
     },
     "differential": [
       {
-        "condition": "Premier diagnostic différentiel plausible",
+        "condition": "Premier diagnostic différentiel",
         "probability": 60,
-        "rationale": "Arguments cliniques en faveur de ce diagnostic alternatif"
+        "rationale": "Arguments cliniques pour ce diagnostic"
       }
     ]
   },
@@ -88,11 +73,11 @@ RÉPONDS UNIQUEMENT EN JSON VALIDE:
         "age": "${age} ans"
       },
       "content": {
-        "chiefComplaint": "Motif détaillé de la consultation médicale",
-        "history": "Anamnèse complète avec histoire de la maladie actuelle",
-        "examination": "Examen physique systématique avec constantes vitales",
-        "diagnosis": "Diagnostic médical retenu après analyse",
-        "plan": "Plan thérapeutique et de surveillance adapté"
+        "chiefComplaint": "Motif détaillé de la consultation",
+        "history": "Anamnèse complète avec histoire de la maladie",
+        "examination": "Examen physique avec constantes vitales",
+        "diagnosis": "Diagnostic médical retenu",
+        "plan": "Plan thérapeutique et de surveillance"
       }
     },
     "biology": {
@@ -103,7 +88,7 @@ RÉPONDS UNIQUEMENT EN JSON VALIDE:
       "prescriptions": [
         {
           "exam": "NFS + CRP + VS",
-          "indication": "Bilan inflammatoire et hématologique initial",
+          "indication": "Bilan inflammatoire et hématologique",
           "urgency": "Semi-urgent",
           "fasting": "Non"
         }
@@ -117,7 +102,7 @@ RÉPONDS UNIQUEMENT EN JSON VALIDE:
       "prescriptions": [
         {
           "exam": "Radiographie thoracique de face",
-          "indication": "Exploration thoraco-pulmonaire selon symptomatologie",
+          "indication": "Exploration thoraco-pulmonaire",
           "urgency": "Programmé"
         }
       ]
@@ -140,23 +125,40 @@ RÉPONDS UNIQUEMENT EN JSON VALIDE:
   }
 }`
     
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: "Tu es un médecin expert mauricien. Réponds UNIQUEMENT en JSON valide."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      temperature: 0.3,
-      max_tokens: 2500,
+    // APPEL DIRECT À L'API REST OPENAI (sans SDK)
+    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4',
+        messages: [
+          {
+            role: 'system',
+            content: 'Tu es un médecin expert mauricien. Réponds UNIQUEMENT en JSON valide.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 2500,
+      }),
     })
     
-    const responseText = completion.choices[0]?.message?.content
+    console.log('🔥 Réponse OpenAI reçue, status:', openaiResponse.status)
+    
+    if (!openaiResponse.ok) {
+      const errorText = await openaiResponse.text()
+      console.error('❌ Erreur OpenAI API:', errorText)
+      throw new Error(`OpenAI API Error ${openaiResponse.status}: ${errorText}`)
+    }
+    
+    const openaiData = await openaiResponse.json()
+    const responseText = openaiData.choices[0]?.message?.content
     
     if (!responseText) {
       throw new Error('Réponse OpenAI vide')
@@ -164,35 +166,68 @@ RÉPONDS UNIQUEMENT EN JSON VALIDE:
     
     console.log('🔥 OpenAI a répondu, parsing JSON...')
     console.log('🔥 Longueur réponse:', responseText.length)
+    console.log('🔥 Début réponse:', responseText.substring(0, 100))
     
-    // Parse JSON simple
+    // Parse JSON robuste
     let parsedResponse
     try {
-      // Nettoyer markdown si présent
+      // Nettoyer le JSON de tout markdown ou formatage
       const cleanText = responseText
         .replace(/```json\s*/g, '')
         .replace(/```\s*/g, '')
+        .replace(/^[\s\n]*/, '')
+        .replace(/[\s\n]*$/, '')
         .trim()
       
       parsedResponse = JSON.parse(cleanText)
     } catch (parseError) {
       console.error('❌ Erreur parsing JSON:', parseError)
-      console.error('❌ Réponse OpenAI:', responseText.substring(0, 300))
-      throw new Error('JSON invalide de OpenAI')
+      console.error('❌ Texte à parser:', responseText.substring(0, 500))
+      
+      // Tentative de récupération du JSON dans le texte
+      try {
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/)
+        if (jsonMatch) {
+          parsedResponse = JSON.parse(jsonMatch[0])
+          console.log('🔥 JSON récupéré avec regex')
+        } else {
+          throw new Error('Aucun JSON trouvé dans la réponse')
+        }
+      } catch (regexError) {
+        throw new Error(`JSON invalide: ${parseError.message}`)
+      }
     }
     
+    // Vérification structure
     if (!parsedResponse.diagnosis || !parsedResponse.mauritianDocuments) {
+      console.error('❌ Structure invalide:', Object.keys(parsedResponse))
       throw new Error('Structure JSON incomplète')
     }
     
+    // Post-traitement des placeholders (interpolation côté serveur)
+    const docs = parsedResponse.mauritianDocuments
+    const currentDate = new Date().toLocaleDateString('fr-FR')
+    
+    // Mise à jour des données réelles
+    if (docs.consultation?.header) {
+      docs.consultation.header.date = currentDate
+    }
+    if (docs.consultation?.patient) {
+      docs.consultation.patient.firstName = patientData?.firstName || 'Patient'
+      docs.consultation.patient.lastName = patientData?.lastName || 'X'
+      docs.consultation.patient.age = `${age} ans`
+    }
+    
     console.log('✅ Diagnostic expert généré avec succès!')
-    console.log('🎯 Diagnostic:', parsedResponse.diagnosis.primary?.condition)
+    console.log('🎯 Diagnostic principal:', parsedResponse.diagnosis.primary?.condition)
+    console.log('📄 Documents générés:', Object.keys(docs))
     
     return NextResponse.json({
       success: true,
       diagnosis: parsedResponse.diagnosis,
-      mauritianDocuments: parsedResponse.mauritianDocuments,
+      mauritianDocuments: docs,
       debug: {
+        method: 'OpenAI REST API direct',
         responseLength: responseText.length,
         timestamp: new Date().toISOString()
       }
@@ -203,23 +238,22 @@ RÉPONDS UNIQUEMENT EN JSON VALIDE:
     
     if (error instanceof Error) {
       console.error('❌ Message:', error.message)
-      console.error('❌ Stack:', error.stack?.substring(0, 500))
+      console.error('❌ Stack:', error.stack?.substring(0, 300))
     }
     
-    // Erreurs spécifiques OpenAI
-    if (error.message?.includes('browser-like environment')) {
+    // Gestion erreurs spécifiques
+    if (error.message?.includes('API Error 401')) {
       return NextResponse.json({
-        error: 'Erreur environnement OpenAI',
-        details: 'Configuration serveur Next.js requise',
-        solution: 'Vérifiez que le code s\'exécute côté serveur',
+        error: 'API Key OpenAI invalide',
+        details: 'Vérifiez votre clé API dans .env.local',
         success: false
       }, { status: 500 })
     }
     
-    if (error.message?.includes('API key')) {
+    if (error.message?.includes('API Error 429')) {
       return NextResponse.json({
-        error: 'Problème API Key OpenAI',
-        details: 'Clé API manquante ou invalide',
+        error: 'Quota OpenAI dépassé',
+        details: 'Limite de taux ou crédits insuffisants',
         success: false
       }, { status: 500 })
     }
