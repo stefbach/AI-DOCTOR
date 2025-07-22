@@ -1151,42 +1151,44 @@ Génère UNIQUEMENT le JSON médical expert - Aucun texte avant/après.`
       console.error('❌ Erreur parsing JSON:', parseError)
       console.log('📄 Réponse brute:', responseText)
       
-      // FALLBACK ROBUSTE ENRICHI - Diagnostic expert garanti
-      expertAnalysis = {
-        primary_diagnosis: {
-          condition: `${chiefComplaint} - Syndrome clinique nécessitant évaluation experte`,
-          icd10: "R50.9",
-          confidence: 75,
-          severity: painScale > 7 ? "severe" : painScale > 4 ? "moderate" : "mild",
-          pathophysiology: `Présentation clinique complexe chez patient ${patientAge} ans. Symptômes évoluant depuis ${duration} avec intensité douloureuse ${painScale}/10. Nécessite approche diagnostique structurée tenant compte du contexte mauricien (climat tropical, épidémiologie locale).`,
-          clinical_rationale: `Arguments cliniques: Motif principal ${chiefComplaint}, symptomatologie ${symptoms || 'à préciser'}, durée évolution ${duration}. Antécédents: ${medicalHistory.join(', ') || 'Aucun'}. Constantes vitales orientant l'investigation.`,
-          prognosis: "Pronostic généralement favorable avec diagnostic précoce et prise en charge adaptée. Surveillance évolutive nécessaire.",
-          risk_factors: medicalHistory.length > 0 ? medicalHistory.join(', ') : "Facteurs de risque à évaluer",
-          complications: "Complications potentielles selon évolution naturelle pathologie"
+      // FALLBACK ROBUSTE ENRICHI - Structure compatible diagnosis-form
+      const fallbackPrimary = {
+        condition: `${chiefComplaint} - Syndrome clinique nécessitant évaluation experte`,
+        icd10: "R50.9",
+        confidence: 75,
+        severity: painScale > 7 ? "severe" : painScale > 4 ? "moderate" : "mild",
+        pathophysiology: `Présentation clinique complexe chez patient ${patientAge} ans. Symptômes évoluant depuis ${duration} avec intensité douloureuse ${painScale}/10. Nécessite approche diagnostique structurée tenant compte du contexte mauricien (climat tropical, épidémiologie locale).`,
+        clinical_rationale: `Arguments cliniques: Motif principal ${chiefComplaint}, symptomatologie ${symptoms || 'à préciser'}, durée évolution ${duration}. Antécédents: ${medicalHistory.join(', ') || 'Aucun'}. Constantes vitales orientant l'investigation.`,
+        prognostic_factors: "Pronostic généralement favorable avec diagnostic précoce et prise en charge adaptée. Surveillance évolutive nécessaire."
+      }
+
+      const fallbackDifferential = [
+        {
+          condition: "Syndrome viral tropical",
+          probability: 30,
+          supporting_evidence: "Contexte mauricien, présentation clinique compatible",
+          opposing_evidence: "Évolution atypique, symptômes spécifiques",
+          discriminating_tests: "Sérologies virales, NFS, CRP"
         },
-        differential_diagnoses: [
-          {
-            condition: "Syndrome viral tropical",
-            probability: 30,
-            rationale: "Contexte mauricien, présentation clinique compatible",
-            excluding_factors: "Évolution atypique, symptômes spécifiques",
-            discriminating_tests: "Sérologies virales, NFS, CRP"
-          },
-          {
-            condition: "Syndrome inflammatoire",
-            probability: 25,
-            rationale: "Symptomatologie pouvant évoquer processus inflammatoire",
-            excluding_factors: "Marqueurs inflammatoires normaux",
-            discriminating_tests: "CRP, VS, complément d'investigation"
-          },
-          {
-            condition: "Pathologie spécifique organe",
-            probability: 20,
-            rationale: "Selon localisation symptômes",
-            excluding_factors: "Examens spécialisés normaux",
-            discriminating_tests: "Imagerie orientée, examens fonctionnels"
-          }
-        ],
+        {
+          condition: "Syndrome inflammatoire",
+          probability: 25,
+          supporting_evidence: "Symptomatologie pouvant évoquer processus inflammatoire",
+          opposing_evidence: "Marqueurs inflammatoires normaux",
+          discriminating_tests: "CRP, VS, complément d'investigation"
+        },
+        {
+          condition: "Pathologie spécifique organe",
+          probability: 20,
+          supporting_evidence: "Selon localisation symptômes",
+          opposing_evidence: "Examens spécialisés normaux",
+          discriminating_tests: "Imagerie orientée, examens fonctionnels"
+        }
+      ]
+
+      expertAnalysis = {
+        primary_diagnosis: fallbackPrimary,
+        differential_diagnoses: fallbackDifferential,
         specific_examinations: [
           {
             category: "biology",
@@ -1287,7 +1289,7 @@ Génère UNIQUEMENT le JSON médical expert - Aucun texte avant/après.`
     
     console.log('🔍 VALIDATION ET ENRICHISSEMENT')
     
-    // Conversion format compatible
+    // Conversion format compatible - STRUCTURE PRIMARY/DIFFERENTIAL
     const compatibleAnalysis = {
       clinical_analysis: {
         primary_diagnosis: {
@@ -1297,14 +1299,14 @@ Génère UNIQUEMENT le JSON médical expert - Aucun texte avant/après.`
           severity: expertAnalysis.primary_diagnosis?.severity || 'moderate',
           pathophysiology: expertAnalysis.primary_diagnosis?.pathophysiology || 'Mécanisme à préciser',
           clinical_rationale: expertAnalysis.primary_diagnosis?.clinical_rationale || 'Arguments cliniques',
-          prognostic_factors: expertAnalysis.primary_diagnosis?.prognosis || 'Pronostic à évaluer'
+          prognostic_factors: expertAnalysis.primary_diagnosis?.prognostic_factors || expertAnalysis.primary_diagnosis?.prognosis || 'Pronostic à évaluer'
         },
         differential_diagnoses: (expertAnalysis.differential_diagnoses || []).map((diff: any) => ({
           condition: diff.condition || 'Diagnostic différentiel',
           probability: diff.probability || 20,
-          supporting_evidence: diff.rationale || 'Arguments à préciser',
-          opposing_evidence: 'À évaluer selon examens complémentaires',
-          discriminating_tests: 'Examens cliniques orientés'
+          supporting_evidence: diff.supporting_evidence || diff.rationale || 'Arguments à préciser',
+          opposing_evidence: diff.opposing_evidence || diff.excluding_factors || 'À évaluer selon examens complémentaires',
+          discriminating_tests: diff.discriminating_tests || 'Examens cliniques orientés'
         }))
       },
       expert_investigations: {
@@ -1312,9 +1314,9 @@ Génère UNIQUEMENT le JSON médical expert - Aucun texte avant/après.`
           category: exam.category || 'biology',
           examination: exam.name || 'Examen à préciser',
           specific_indication: exam.indication || 'Investigation clinique',
-          technique_details: 'Modalités techniques standard',
+          technique_details: exam.technique || 'Modalités techniques standard',
           interpretation_keys: exam.interpretation || 'Interprétation clinique',
-          mauritius_availability: {
+          mauritius_availability: exam.mauritian_availability || exam.mauritanian_availability || {
             public_centers: ['Dr Jeetoo Hospital', 'Candos Hospital'],
             private_centers: ['Apollo Bramwell', 'Clinique Darné'],
             estimated_cost: exam.mauritius_cost || 'Rs 500-2000',
@@ -1326,27 +1328,27 @@ Génère UNIQUEMENT le JSON médical expert - Aucun texte avant/après.`
       expert_therapeutics: {
         primary_treatments: (expertAnalysis.specific_treatments || []).map((treatment: any) => ({
           medication_dci: treatment.dci || 'Médicament',
-          therapeutic_class: 'Classe thérapeutique',
+          therapeutic_class: treatment.therapeutic_class || 'Classe thérapeutique',
           precise_indication: treatment.indication || 'Traitement symptomatique',
-          pharmacology: 'Mécanisme d\'action standard',
+          pharmacology: treatment.mechanism || 'Mécanisme d\'action standard',
           dosing_regimen: {
             standard_adult: treatment.adult_dose || 'Selon RCP',
             elderly_adjustment: treatment.elderly_dose || 'Adaptation âge',
-            pediatric_dose: 'Selon poids',
-            renal_adjustment: 'Selon fonction rénale',
-            hepatic_adjustment: 'Selon fonction hépatique',
+            pediatric_dose: treatment.pediatric_dose || 'Selon poids',
+            renal_adjustment: treatment.renal_adjustment || 'Selon fonction rénale',
+            hepatic_adjustment: treatment.hepatic_adjustment || 'Selon fonction hépatique',
             pregnancy_safety: 'Évaluation bénéfice/risque'
           },
-          administration_route: 'Per os',
+          administration_route: treatment.administration || 'Per os',
           contraindications_absolute: [treatment.contraindications || 'Hypersensibilité'],
-          precautions_relative: ['Surveillance clinique'],
+          precautions_relative: [treatment.precautions || 'Surveillance clinique'],
           monitoring_parameters: [treatment.monitoring || 'Tolérance clinique'],
           treatment_duration: treatment.duration || 'Selon évolution',
           mauritius_availability: {
             locally_available: treatment.mauritius_available !== false,
             public_sector_access: true,
-            private_sector_cost: 'Rs 100-1000/mois',
-            therapeutic_alternatives: ['Alternatives disponibles selon indication']
+            private_sector_cost: treatment.local_cost || 'Rs 100-1000/mois',
+            therapeutic_alternatives: treatment.alternatives ? [treatment.alternatives] : ['Alternatives disponibles selon indication']
           }
         }))
       },
@@ -1354,10 +1356,10 @@ Génère UNIQUEMENT le JSON médical expert - Aucun texte avant/après.`
         current_medication: interaction.current_drug || 'Médicament actuel',
         prescribed_medication: interaction.prescribed_drug || 'Médicament prescrit',
         interaction_severity: interaction.severity || 'minor',
-        mechanism: 'Mécanisme interaction',
+        mechanism: interaction.mechanism || 'Mécanisme interaction',
         clinical_consequence: interaction.consequence || 'Conséquence clinique',
         management_strategy: interaction.management || 'Surveillance standard',
-        monitoring_required: 'Surveillance clinique'
+        monitoring_required: interaction.monitoring || 'Surveillance clinique'
       }))
     }
     
@@ -1380,13 +1382,21 @@ Génère UNIQUEMENT le JSON médical expert - Aucun texte avant/après.`
       
       // ========== FORMAT COMPATIBLE DIAGNOSIS-FORM ==========
       diagnosis: {
-        condition: compatibleAnalysis.clinical_analysis.primary_diagnosis.condition,
-        icd10: compatibleAnalysis.clinical_analysis.primary_diagnosis.icd10_code,
-        confidence: compatibleAnalysis.clinical_analysis.primary_diagnosis.confidence_level,
-        severity: compatibleAnalysis.clinical_analysis.primary_diagnosis.severity,
-        detailedAnalysis: compatibleAnalysis.clinical_analysis.primary_diagnosis.pathophysiology,
-        clinicalRationale: compatibleAnalysis.clinical_analysis.primary_diagnosis.clinical_rationale,
-        prognosis: compatibleAnalysis.clinical_analysis.primary_diagnosis.prognostic_factors
+        primary: {
+          condition: compatibleAnalysis.clinical_analysis.primary_diagnosis.condition,
+          icd10: compatibleAnalysis.clinical_analysis.primary_diagnosis.icd10_code,
+          confidence: compatibleAnalysis.clinical_analysis.primary_diagnosis.confidence_level,
+          severity: compatibleAnalysis.clinical_analysis.primary_diagnosis.severity,
+          detailedAnalysis: compatibleAnalysis.clinical_analysis.primary_diagnosis.pathophysiology,
+          clinicalRationale: compatibleAnalysis.clinical_analysis.primary_diagnosis.clinical_rationale,
+          prognosis: compatibleAnalysis.clinical_analysis.primary_diagnosis.prognostic_factors
+        },
+        differential: (compatibleAnalysis.clinical_analysis?.differential_diagnoses || []).map((diff: any) => ({
+          condition: diff.condition,
+          probability: diff.probability,
+          rationale: diff.supporting_evidence || diff.rationale,
+          distinguishingFeatures: diff.opposing_evidence || diff.discriminating_tests
+        }))
       },
       
       mauritianDocuments: {
@@ -1430,13 +1440,23 @@ Génère UNIQUEMENT le JSON médical expert - Aucun texte avant/après.`
     
     // FALLBACK ULTIME - Garantit toujours un diagnostic
     const emergencyDiagnosis = {
-      condition: `Consultation médicale - ${clinicalData?.chiefComplaint || 'Motif à préciser'}`,
-      icd10: 'Z00.0',
-      confidence: 60,
-      severity: 'moderate',
-      detailedAnalysis: 'Évaluation clinique nécessitant anamnèse et examen physique complémentaires',
-      clinicalRationale: 'Patient nécessitant évaluation médicale professionnelle',
-      prognosis: 'Évolution attendue favorable avec prise en charge appropriée'
+      primary: {
+        condition: `Consultation médicale - ${clinicalData?.chiefComplaint || 'Motif à préciser'}`,
+        icd10: 'Z00.0',
+        confidence: 60,
+        severity: 'moderate',
+        detailedAnalysis: 'Évaluation clinique nécessitant anamnèse et examen physique complémentaires',
+        clinicalRationale: 'Patient nécessitant évaluation médicale professionnelle',
+        prognosis: 'Évolution attendue favorable avec prise en charge appropriée'
+      },
+      differential: [
+        {
+          condition: "Syndrome à préciser",
+          probability: 30,
+          rationale: "Nécessite investigation complémentaire",
+          distinguishingFeatures: "Examens cliniques orientés"
+        }
+      ]
     }
     
     const emergencyDocuments = {
