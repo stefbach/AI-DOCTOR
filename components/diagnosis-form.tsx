@@ -61,7 +61,7 @@ export default function EnhancedDiagnosisForm({
 
   useEffect(() => {
     generateCompleteDiagnosisAndDocuments()
-  }, [patientData, clinicalData, questionsData])
+  }, [patientData, clinicalData])
 
   const generateCompleteDiagnosisAndDocuments = async () => {
     if (!patientData || !clinicalData) return
@@ -337,7 +337,7 @@ export default function EnhancedDiagnosisForm({
             <CardContent className="p-8 text-center">
               <Brain className="h-16 w-16 text-blue-500 mx-auto mb-4" />
               <p className="text-lg text-gray-700">Aucun diagnostic disponible</p>
-              <Button onClick={generateDiagnosis} className="mt-4">
+              <Button onClick={generateCompleteDiagnosisAndDocuments} className="mt-4">
                 <Brain className="h-4 w-4 mr-2" />
                 Générer Diagnostic
               </Button>
