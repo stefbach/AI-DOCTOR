@@ -189,7 +189,7 @@ export default function DocumentsWorkflow({
               className="px-6 py-3 shadow-md hover:shadow-lg"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour Diagnostic
+              {onBack ? 'Retour Étape Précédente' : 'Retour Diagnostic'}
             </Button>
 
             <div className="flex gap-3">
