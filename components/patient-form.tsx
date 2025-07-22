@@ -25,6 +25,7 @@ import {
   Loader2
 } from "lucide-react"
 import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
+import { getTranslation, Language } from "@/lib/translations"
 
 // Types
 interface LifeHabits {
@@ -53,37 +54,41 @@ interface PatientFormData {
 interface PatientFormProps {
   onDataChange: (data: PatientFormData) => void
   onNext: () => void
+  language?: Language
 }
 
-// Constants
-const COMMON_ALLERGIES = [
-  "Pénicilline",
-  "Aspirine", 
-  "Anti-inflammatoires (AINS)",
-  "Codéine",
-  "Latex",
-  "Iode",
-  "Anesthésiques locaux",
-  "Sulfamides",
-]
-
-const COMMON_MEDICAL_HISTORY = [
-  "Hypertension artérielle",
-  "Diabète type 2",
-  "Diabète type 1", 
-  "Asthme",
-  "Maladie cardiaque",
-  "Dépression/Anxiété",
-  "Arthrose",
-  "Migraine",
-  "Reflux gastro-œsophagien",
-  "Hypercholestérolémie",
-]
-
-export default function ModernPatientForm({ onDataChange, onNext }: PatientFormProps) {
+export default function ModernPatientForm({ onDataChange, onNext, language = 'fr' }: PatientFormProps) {
   const { patientData: tibokPatient, consultationData, isFromTibok } = useTibokPatientData()
   const [isLoadingPatientData, setIsLoadingPatientData] = useState(true)
   const [dataProcessed, setDataProcessed] = useState(false)
+  
+  // Helper function for translations
+  const t = (key: string) => getTranslation(key, language)
+  
+  // Get translated arrays
+  const COMMON_ALLERGIES = [
+    t('allergies.penicillin'),
+    t('allergies.aspirin'),
+    t('allergies.nsaids'),
+    t('allergies.codeine'),
+    t('allergies.latex'),
+    t('allergies.iodine'),
+    t('allergies.localAnesthetics'),
+    t('allergies.sulfonamides'),
+  ]
+
+  const COMMON_MEDICAL_HISTORY = [
+    t('medicalConditions.hypertension'),
+    t('medicalConditions.type2Diabetes'),
+    t('medicalConditions.type1Diabetes'),
+    t('medicalConditions.asthma'),
+    t('medicalConditions.heartDisease'),
+    t('medicalConditions.depressionAnxiety'),
+    t('medicalConditions.arthritis'),
+    t('medicalConditions.migraine'),
+    t('medicalConditions.gerd'),
+    t('medicalConditions.highCholesterol'),
+  ]
   
   // Capture URL parameters immediately before they get cleared
   const [urlData] = useState(() => {
@@ -193,9 +198,9 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
         if (patientInfo.gender) {
           const gender = patientInfo.gender
           if (gender === 'Masculin' || gender === 'M' || gender.toLowerCase() === 'male' || gender.toLowerCase() === 'm') {
-            genderArray.push('Masculin')
+            genderArray.push(t('patientForm.male'))
           } else if (gender === 'Féminin' || gender === 'F' || gender.toLowerCase() === 'female' || gender.toLowerCase() === 'f') {
-            genderArray.push('Féminin')
+            genderArray.push(t('patientForm.female'))
           }
         }
         
@@ -233,7 +238,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
     
     // Process immediately
     processPatientData()
-  }, [tibokPatient, isFromTibok, dataProcessed, urlData])
+  }, [tibokPatient, isFromTibok, dataProcessed, urlData, t])
 
   // Calculate form completion percentage
   const calculateProgress = () => {
@@ -331,29 +336,29 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!formData.firstName.trim()) newErrors.firstName = "Prénom requis"
-    if (!formData.lastName.trim()) newErrors.lastName = "Nom requis"
+    if (!formData.firstName.trim()) newErrors.firstName = t('patientForm.errors.firstNameRequired')
+    if (!formData.lastName.trim()) newErrors.lastName = t('patientForm.errors.lastNameRequired')
     if (!formData.birthDate) {
-      newErrors.birthDate = "Date de naissance requise"
+      newErrors.birthDate = t('patientForm.errors.birthDateRequired')
     } else {
       const birthDate = new Date(formData.birthDate)
       const today = new Date()
       if (birthDate > today) {
-        newErrors.birthDate = "La date de naissance ne peut pas être dans le futur"
+        newErrors.birthDate = t('patientForm.errors.futureBirthDate')
       }
       const age = parseInt(formData.age)
       if (age < 0 || age > 120) {
-        newErrors.birthDate = "Âge calculé invalide (0-120 ans)"
+        newErrors.birthDate = t('patientForm.errors.invalidAge')
       }
     }
     if (formData.gender.length === 0 && !formData.otherGender.trim()) {
-      newErrors.gender = "Veuillez sélectionner un sexe ou remplir le champ libre"
+      newErrors.gender = t('patientForm.errors.genderRequired')
     }
     if (!formData.weight || Number.parseFloat(formData.weight) < 1 || Number.parseFloat(formData.weight) > 300) {
-      newErrors.weight = "Poids valide requis (1-300 kg)"
+      newErrors.weight = t('patientForm.errors.validWeightRequired')
     }
     if (!formData.height || Number.parseFloat(formData.height) < 50 || Number.parseFloat(formData.height) > 250) {
-      newErrors.height = "Taille valide requise (50-250 cm)"
+      newErrors.height = t('patientForm.errors.validHeightRequired')
     }
 
     setErrors(newErrors)
@@ -376,10 +381,10 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
   }
 
   const getBMICategory = (bmi: number) => {
-    if (bmi < 18.5) return { text: "Insuffisance pondérale", color: "bg-blue-100 text-blue-800", icon: "📉" }
-    if (bmi < 25) return { text: "Poids normal", color: "bg-green-100 text-green-800", icon: "✅" }
-    if (bmi < 30) return { text: "Surpoids", color: "bg-yellow-100 text-yellow-800", icon: "⚠️" }
-    return { text: "Obésité", color: "bg-red-100 text-red-800", icon: "🔴" }
+    if (bmi < 18.5) return { text: t('patientForm.underweight'), color: "bg-blue-100 text-blue-800", icon: "📉" }
+    if (bmi < 25) return { text: t('patientForm.normalWeight'), color: "bg-green-100 text-green-800", icon: "✅" }
+    if (bmi < 30) return { text: t('patientForm.overweight'), color: "bg-yellow-100 text-yellow-800", icon: "⚠️" }
+    return { text: t('patientForm.obesity'), color: "bg-red-100 text-red-800", icon: "🔴" }
   }
 
   const bmi = calculateBMI()
@@ -395,11 +400,11 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
   )
 
   const sections = [
-    { id: "identity", title: "Identité", icon: User },
-    { id: "allergies", title: "Allergies", icon: AlertTriangle },
-    { id: "history", title: "Antécédents", icon: Heart },
-    { id: "medications", title: "Médicaments", icon: Pill },
-    { id: "habits", title: "Habitudes", icon: Activity },
+    { id: "identity", title: t('patientForm.personalInfo'), icon: User },
+    { id: "allergies", title: t('patientForm.knownAllergies'), icon: AlertTriangle },
+    { id: "history", title: t('patientForm.medicalHistory'), icon: Heart },
+    { id: "medications", title: t('patientForm.currentMedications'), icon: Pill },
+    { id: "habits", title: t('patientForm.lifestyle'), icon: Activity },
   ]
 
   // Show loading state briefly
@@ -408,7 +413,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Chargement des données patient...</p>
+          <p className="text-gray-600">{t('patientForm.loadingPatientData')}</p>
         </div>
       </div>
     )
@@ -424,7 +429,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
           <div className="flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-blue-600" />
             <p className="text-sm font-medium text-blue-800">
-              Consultation TIBOK - Patient: {formData.firstName} {formData.lastName}
+              {t('patientForm.tibokNotification')} {formData.firstName} {formData.lastName}
             </p>
           </div>
         </div>
@@ -435,11 +440,11 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
         <CardHeader className="text-center">
           <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
             <User className="h-8 w-8 text-blue-600" />
-            Dossier Patient
+            {t('patientForm.title')}
           </CardTitle>
           <div className="mt-4 space-y-2">
             <div className="flex justify-between text-sm text-gray-600">
-              <span>Progression du formulaire</span>
+              <span>{t('patientForm.formProgress')}</span>
               <span className="font-semibold">{progress}%</span>
             </div>
             <Progress value={progress} className="h-2" />
@@ -470,14 +475,14 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
         <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <User className="h-6 w-6" />
-            Informations Personnelles
+            {t('patientForm.personalInfo')}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="firstName" className="flex items-center gap-2 font-medium">
-                Prénom <span className="text-red-500">*</span>
+                {t('patientForm.firstName')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="firstName"
@@ -501,7 +506,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
 
             <div className="space-y-2">
               <Label htmlFor="lastName" className="flex items-center gap-2 font-medium">
-                Nom <span className="text-red-500">*</span>
+                {t('patientForm.lastName')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="lastName"
@@ -527,7 +532,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <Label htmlFor="birthDate" className="flex items-center gap-2 font-medium">
-                Date de naissance <span className="text-red-500">*</span>
+                {t('patientForm.birthDate')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="birthDate"
@@ -551,11 +556,11 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
 
             <div className="space-y-2">
               <Label className="flex items-center gap-2 font-medium">
-                Âge calculé
+                {t('patientForm.calculatedAge')}
               </Label>
               <div className="flex items-center h-10 px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
                 <span className="text-gray-700 font-medium">
-                  {formData.age ? `${formData.age} ans` : "—"}
+                  {formData.age ? `${formData.age} ${t('patientForm.years')}` : "—"}
                 </span>
               </div>
             </div>
@@ -563,11 +568,11 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
 
           <div className="space-y-4">
             <Label className="flex items-center gap-2 font-medium">
-              Sexe <span className="text-red-500">*</span>
+              {t('patientForm.gender')} <span className="text-red-500">*</span>
             </Label>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {["Masculin", "Féminin"].map((genderOption) => (
+              {[t('patientForm.male'), t('patientForm.female')].map((genderOption) => (
                 <div
                   key={genderOption}
                   className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
@@ -590,7 +595,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="otherGender" className="font-medium">Autre (préciser)</Label>
+              <Label htmlFor="otherGender" className="font-medium">{t('patientForm.otherSpecify')}</Label>
               <Input
                 id="otherGender"
                 name="otherGender"
@@ -604,7 +609,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
               <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                 <div className="flex items-center gap-2 mb-2">
                   <User className="h-4 w-4 text-blue-600" />
-                  <p className="font-semibold text-blue-800">Sexe déclaré:</p>
+                  <p className="font-semibold text-blue-800">{t('patientForm.declaredGender')}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {formData.gender.map((gender) => (
@@ -632,7 +637,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="weight" className="flex items-center gap-2 font-medium">
-                Poids (kg) <span className="text-red-500">*</span>
+                {t('patientForm.weight')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="weight"
@@ -659,7 +664,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
 
             <div className="space-y-2">
               <Label htmlFor="height" className="flex items-center gap-2 font-medium">
-                Taille (cm) <span className="text-red-500">*</span>
+                {t('patientForm.height')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="height"
@@ -689,7 +694,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{bmiCategory?.icon}</span>
                 <div>
-                  <p className="font-semibold">IMC: {bmi} kg/m²</p>
+                  <p className="font-semibold">{t('patientForm.bmi')}: {bmi} kg/m²</p>
                   <p className="text-sm">{bmiCategory?.text}</p>
                 </div>
               </div>
@@ -703,14 +708,14 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
         <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <AlertTriangle className="h-6 w-6" />
-            Allergies Connues
+            {t('patientForm.knownAllergies')}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Rechercher une allergie..."
+              placeholder={t('patientForm.searchAllergy')}
               value={allergySearch}
               onChange={(e) => setAllergySearch(e.target.value)}
               className="pl-10"
@@ -741,7 +746,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="otherAllergies" className="font-medium">Autres allergies</Label>
+            <Label htmlFor="otherAllergies" className="font-medium">{t('patientForm.otherAllergies')}</Label>
             <Textarea
               id="otherAllergies"
               value={formData.otherAllergies}
@@ -755,7 +760,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
             <div className="p-4 bg-red-50 rounded-lg border border-red-200">
               <div className="flex items-center gap-2 mb-3">
                 <AlertTriangle className="h-5 w-5 text-red-600" />
-                <p className="font-semibold text-red-800">Allergies déclarées:</p>
+                <p className="font-semibold text-red-800">{t('patientForm.declaredAllergies')}</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {formData.allergies.map((allergy) => (
@@ -779,14 +784,14 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
         <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <Heart className="h-6 w-6" />
-            Antécédents Médicaux
+            {t('patientForm.medicalHistory')}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Rechercher un antécédent médical..."
+              placeholder={t('patientForm.searchMedicalHistory')}
               value={historySearch}
               onChange={(e) => setHistorySearch(e.target.value)}
               className="pl-10"
@@ -817,7 +822,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="otherMedicalHistory" className="font-medium">Autres antécédents</Label>
+            <Label htmlFor="otherMedicalHistory" className="font-medium">{t('patientForm.otherMedicalHistory')}</Label>
             <Textarea
               id="otherMedicalHistory"
               value={formData.otherMedicalHistory}
@@ -831,7 +836,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
             <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
               <div className="flex items-center gap-2 mb-3">
                 <Heart className="h-5 w-5 text-purple-600" />
-                <p className="font-semibold text-purple-800">Antécédents déclarés:</p>
+                <p className="font-semibold text-purple-800">{t('patientForm.declaredHistory')}</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {formData.medicalHistory.map((condition) => (
@@ -841,7 +846,7 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
                 ))}
                 {formData.otherMedicalHistory && (
                   <Badge className="bg-purple-100 text-purple-800 text-xs">
-                    Autres antécédents
+                    {t('patientForm.otherMedicalHistory')}
                   </Badge>
                 )}
               </div>
@@ -855,22 +860,19 @@ export default function ModernPatientForm({ onDataChange, onNext }: PatientFormP
         <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <Pill className="h-6 w-6" />
-            Médicaments Actuels
+            {t('patientForm.currentMedications')}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="currentMedicationsText" className="font-medium">
-              Traitements en cours
+              {t('patientForm.ongoingTreatments')}
             </Label>
             <Textarea
               id="currentMedicationsText"
               value={formData.currentMedicationsText}
               onChange={(e) => handleInputChange("currentMedicationsText", e.target.value)}
-              placeholder="Listez tous les médicaments actuels avec posologies...
-Exemple: 
-- Paracétamol 1g 3 fois par jour
-- Lisinopril 10mg 1 fois le matin"
+              placeholder={t('patientForm.medicationPlaceholder')}
               rows={6}
               className="resize-y transition-all duration-200 focus:ring-green-200"
             />
@@ -881,7 +883,7 @@ Exemple:
               <div className="flex items-center gap-2">
                 <Check className="h-5 w-5 text-green-600" />
                 <p className="font-semibold text-green-800">
-                  Traitements renseignés ({formData.currentMedicationsText.split("\n").filter((line) => line.trim()).length} lignes)
+                  {t('patientForm.treatmentsEntered')} ({formData.currentMedicationsText.split("\n").filter((line) => line.trim()).length} {t('patientForm.lines')})
                 </p>
               </div>
             </div>
@@ -894,19 +896,19 @@ Exemple:
         <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <Activity className="h-6 w-6" />
-            Habitudes de Vie
+            {t('patientForm.lifestyle')}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="space-y-4">
-              <Label className="font-medium text-lg">🚬 Tabac</Label>
+              <Label className="font-medium text-lg">🚬 {t('patientForm.tobacco')}</Label>
               <RadioGroup
                 value={formData.lifeHabits.smoking}
                 onValueChange={(value) => handleLifeHabitsChange("smoking", value)}
                 className="space-y-3"
               >
-                {["Non-fumeur", "Fumeur actuel", "Ex-fumeur"].map((option) => (
+                {[t('patientForm.nonSmoker'), t('patientForm.currentSmoker'), t('patientForm.exSmoker')].map((option) => (
                   <div
                     key={option}
                     className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
@@ -925,13 +927,13 @@ Exemple:
             </div>
 
             <div className="space-y-4">
-              <Label className="font-medium text-lg">🍷 Alcool</Label>
+              <Label className="font-medium text-lg">🍷 {t('patientForm.alcohol')}</Label>
               <RadioGroup
                 value={formData.lifeHabits.alcohol}
                 onValueChange={(value) => handleLifeHabitsChange("alcohol", value)}
                 className="space-y-3"
               >
-                {["Jamais", "Occasionnel", "Régulier"].map((option) => (
+                {[t('patientForm.never'), t('patientForm.occasional'), t('patientForm.regular')].map((option) => (
                   <div
                     key={option}
                     className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
@@ -950,13 +952,13 @@ Exemple:
             </div>
 
             <div className="space-y-4">
-              <Label className="font-medium text-lg">🏃 Activité physique</Label>
+              <Label className="font-medium text-lg">🏃 {t('patientForm.physicalActivity')}</Label>
               <RadioGroup
                 value={formData.lifeHabits.physicalActivity}
                 onValueChange={(value) => handleLifeHabitsChange("physicalActivity", value)}
                 className="space-y-3"
               >
-                {["Sédentaire", "Modérée", "Intense"].map((option) => (
+                {[t('patientForm.sedentary'), t('patientForm.moderate'), t('patientForm.intense')].map((option) => (
                   <div
                     key={option}
                     className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
@@ -981,7 +983,7 @@ Exemple:
       <div className="flex justify-center">
         <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-sm text-gray-600">Sauvegarde automatique</span>
+          <span className="text-sm text-gray-600">{t('common.autoSave')}</span>
         </div>
       </div>
 
@@ -992,7 +994,7 @@ Exemple:
           size="lg"
           className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
         >
-          Continuer vers l'Examen Clinique
+          {t('patientForm.continueButton')}
           <ArrowRight className="h-5 w-5 ml-2" />
         </Button>
       </div>
