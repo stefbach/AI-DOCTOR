@@ -11,7 +11,7 @@ import PatientForm from "@/components/patient-form"
 import ClinicalForm from "@/components/clinical-form"
 import QuestionsForm from "@/components/questions-form"
 import DiagnosisForm from "@/components/diagnosis-form"
-import MedicalWorkflowManager from "@/components/medical-workflow-manager"
+import MedicalWorkflow from "@/components/medical/main-medical-workflow" // 👈 CHANGÉ
 import IntegratedMedicalConsultation from "@/components/integrated-medical-consultation"
 import { PatientDataLoader } from "@/components/patient-data-loader"
 import { getTranslation, Language } from "@/lib/translations"
@@ -72,10 +72,10 @@ export default function MedicalAIExpert() {
     },
     {
       id: 4,
-      title: t('steps.medicalWorkflow.title'),
-      description: t('steps.medicalWorkflow.description'),
+      title: "Documents Mauriciens", // 👈 NOUVEAU TITRE
+      description: "Édition des 4 documents médicaux mauriciens",
       icon: <Activity className="h-5 w-5" />,
-      component: MedicalWorkflowManager,
+      component: MedicalWorkflow, // 👈 CHANGÉ
     },
     {
       id: 5,
@@ -103,6 +103,13 @@ export default function MedicalAIExpert() {
   const handleWorkflowComplete = (result: any) => {
     setWorkflowResult(result)
     setCurrentStep(5) // Go to complete consultation
+  }
+
+  // 👈 NOUVELLE FONCTION pour gérer la fin du MedicalWorkflow
+  const handleMedicalWorkflowComplete = (result: any) => {
+    setWorkflowResult(result)
+    // Passer automatiquement à l'étape suivante
+    setCurrentStep(5)
   }
 
   const getCurrentStepProps = () => {
@@ -142,13 +149,15 @@ export default function MedicalAIExpert() {
           onNext: handleNext,
           onPrevious: handlePrevious,
         }
-      case 4:
+      case 4: // 👈 MODIFIÉ pour MedicalWorkflow
         return {
           ...commonProps,
           patientData,
           clinicalData,
-          questions: questionsData?.responses || "",
-          onComplete: handleWorkflowComplete,
+          questionsData,
+          diagnosisData, // 👈 Données du diagnostic
+          onComplete: handleMedicalWorkflowComplete, // 👈 Callback quand terminé
+          onBack: handlePrevious, // 👈 Retour au diagnostic
         }
       case 5:
         return {
