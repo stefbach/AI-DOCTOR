@@ -22,10 +22,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" suppressHydrationWarning>
-      <body className={`${inter.className} bg-black text-white`}>
+      <body className={inter.className}>
         <ThemeProvider 
           attribute="class" 
-          defaultTheme="dark" 
+          defaultTheme="light" 
           enableSystem 
           disableTransitionOnChange
         >
