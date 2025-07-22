@@ -20,6 +20,7 @@ import {
   Stethoscope,
   Edit3
 } from "lucide-react"
+import { getTranslation, Language } from "@/lib/translations"
 
 interface DiagnosisFormProps {
   patientData: any
@@ -28,6 +29,7 @@ interface DiagnosisFormProps {
   onDataChange: (data: any) => void
   onNext: () => void
   onPrevious: () => void
+  language?: Language
 }
 
 export default function CompleteDiagnosisForm({
@@ -37,6 +39,7 @@ export default function CompleteDiagnosisForm({
   onDataChange,
   onNext,
   onPrevious,
+  language = 'fr'
 }: DiagnosisFormProps) {
   const [diagnosis, setDiagnosis] = useState<any>(null)
   const [mauritianDocuments, setMauritianDocuments] = useState<any>(null)
@@ -44,6 +47,9 @@ export default function CompleteDiagnosisForm({
   const [error, setError] = useState<string | null>(null)
   const [currentSection, setCurrentSection] = useState(0)
   const [documentsGenerated, setDocumentsGenerated] = useState(false)
+
+  // Helper function for translations
+  const t = (key: string) => getTranslation(key, language)
 
   useEffect(() => {
     generateCompleteDiagnosisAndDocuments()
@@ -57,7 +63,7 @@ export default function CompleteDiagnosisForm({
     setDocumentsGenerated(false)
 
     try {
-      console.log("🩺 Génération diagnostic complet + documents mauriciens")
+      console.log("🩺 Generating complete diagnosis + documents")
 
       const response = await fetch("/api/openai-diagnosis", {
         method: "POST",
@@ -68,12 +74,13 @@ export default function CompleteDiagnosisForm({
           patientData,
           clinicalData,
           questionsData,
+          language, // Pass language for localized generation
         }),
       })
 
       if (!response.ok) {
         const errorText = await response.text()
-        throw new Error(`Erreur API ${response.status}: ${errorText.substring(0, 100)}`)
+        throw new Error(`API Error ${response.status}: ${errorText.substring(0, 100)}`)
       }
 
       const data = await response.json()
@@ -83,29 +90,27 @@ export default function CompleteDiagnosisForm({
         setMauritianDocuments(data.mauritianDocuments)
         setDocumentsGenerated(true)
         
-        // 👈 MODIFICATION PRINCIPALE: Passer les données dans le bon format
+        // Pass complete data to parent
         onDataChange({ 
           diagnosis: data.diagnosis, 
           mauritianDocuments: data.mauritianDocuments,
           completeData: data 
         })
         
-        console.log("✅ Diagnostic + Documents mauriciens générés")
+        console.log("✅ Diagnosis + Documents generated")
       } else {
-        throw new Error(data.error || "Format de réponse invalide")
+        throw new Error(data.error || (language === 'fr' ? "Format de réponse invalide" : "Invalid response format"))
       }
 
     } catch (err) {
-      console.error("❌ Erreur génération complète:", err)
-      setError(err instanceof Error ? err.message : "Erreur inconnue")
+      console.error("❌ Generation error:", err)
+      setError(err instanceof Error ? err.message : (language === 'fr' ? "Erreur inconnue" : "Unknown error"))
 
-      // Diagnostic de fallback avec documents
+      // Generate fallback data
       const fallbackData = generateCompleteFallback()
       setDiagnosis(fallbackData.diagnosis)
       setMauritianDocuments(fallbackData.mauritianDocuments)
       setDocumentsGenerated(true)
-      
-      // 👈 MODIFICATION: Passer aussi les données fallback
       onDataChange(fallbackData)
       
     } finally {
@@ -116,55 +121,87 @@ export default function CompleteDiagnosisForm({
   const generateCompleteFallback = () => {
     const fallbackDiagnosis = {
       primary: {
-        condition: `Syndrome clinique - ${clinicalData.chiefComplaint || "Consultation médicale"}`,
+        condition: language === 'fr' 
+          ? `Syndrome clinique - ${clinicalData.chiefComplaint || "Consultation médicale"}`
+          : `Clinical syndrome - ${clinicalData.chiefComplaint || "Medical consultation"}`,
         icd10: "R53",
         confidence: 70,
         severity: "moderate",
-        detailedAnalysis: "Analyse basée sur les symptômes présentés nécessitant exploration complémentaire",
-        clinicalRationale: `Symptômes: ${clinicalData.chiefComplaint}. Nécessite anamnèse et examen clinique approfondis`,
-        prognosis: "Évolution favorable attendue avec prise en charge appropriée"
+        detailedAnalysis: language === 'fr'
+          ? "Analyse basée sur les symptômes présentés nécessitant exploration complémentaire"
+          : "Analysis based on presented symptoms requiring further investigation",
+        clinicalRationale: language === 'fr'
+          ? `Symptômes: ${clinicalData.chiefComplaint}. Nécessite anamnèse et examen clinique approfondis`
+          : `Symptoms: ${clinicalData.chiefComplaint}. Requires thorough history and clinical examination`,
+        prognosis: language === 'fr'
+          ? "Évolution favorable attendue avec prise en charge appropriée"
+          : "Favorable outcome expected with appropriate management"
       },
       differential: [
         {
-          condition: "Syndrome viral",
+          condition: language === 'fr' ? "Syndrome viral" : "Viral syndrome",
           probability: 40,
-          rationale: "Cause fréquente de symptômes non spécifiques"
+          rationale: language === 'fr' 
+            ? "Cause fréquente de symptômes non spécifiques"
+            : "Common cause of non-specific symptoms"
         }
       ]
     }
 
+    const dateFormat = language === 'fr' 
+      ? new Date().toLocaleDateString("fr-FR")
+      : new Date().toLocaleDateString("en-US")
+
     const fallbackDocuments = {
       consultation: {
         header: {
-          title: "COMPTE-RENDU DE CONSULTATION MÉDICALE",
-          subtitle: "République de Maurice - Médecine Générale",
-          date: new Date().toLocaleDateString("fr-FR"),
-          time: new Date().toLocaleTimeString("fr-FR"),
+          title: language === 'fr' 
+            ? "COMPTE-RENDU DE CONSULTATION MÉDICALE"
+            : "MEDICAL CONSULTATION REPORT",
+          subtitle: language === 'fr'
+            ? "République de Maurice - Médecine Générale"
+            : "Republic of Mauritius - General Medicine",
+          date: dateFormat,
+          time: new Date().toLocaleTimeString(language === 'fr' ? "fr-FR" : "en-US"),
           physician: "Dr. TIBOK IA DOCTOR",
           registration: "COUNCIL-2024-IA-001"
         },
         patient: {
           firstName: patientData.firstName,
           lastName: patientData.lastName,
-          age: `${patientData.age} ans`,
-          address: "Adresse à compléter - Maurice",
-          idNumber: "Carte d'identité mauricienne à préciser",
+          age: `${patientData.age} ${language === 'fr' ? 'ans' : 'years'}`,
+          address: language === 'fr' 
+            ? "Adresse à compléter - Maurice"
+            : "Address to be completed - Mauritius",
+          idNumber: language === 'fr'
+            ? "Carte d'identité mauricienne à préciser"
+            : "Mauritian ID card to be specified",
           weight: `${patientData.weight}kg`,
           height: `${patientData.height}cm`
         },
         content: {
-          chiefComplaint: clinicalData.chiefComplaint || "Motif de consultation à préciser",
-          history: `Patient de ${patientData.age} ans consultant pour ${clinicalData.chiefComplaint || "symptômes"}. Évolution depuis ${clinicalData.symptomDuration || "durée non précisée"}. ${(clinicalData.symptoms || []).join(", ") || "Symptômes à détailler"}. Retentissement fonctionnel à évaluer.`,
-          examination: `Constantes: TA ${clinicalData.vitalSigns?.bloodPressureSystolic || "?"}/${clinicalData.vitalSigns?.bloodPressureDiastolic || "?"}mmHg, FC ${clinicalData.vitalSigns?.heartRate || "?"}bpm, T° ${clinicalData.vitalSigns?.temperature || "?"}°C. Douleur ${clinicalData.painScale || 0}/10. Examen général: état général ${patientData.age < 65 ? "conservé" : "à préciser"}. Examen orienté selon symptômes à compléter.`,
+          chiefComplaint: clinicalData.chiefComplaint || (language === 'fr' ? "Motif de consultation à préciser" : "Chief complaint to be specified"),
+          history: language === 'fr'
+            ? `Patient de ${patientData.age} ans consultant pour ${clinicalData.chiefComplaint || "symptômes"}. Évolution depuis ${clinicalData.symptomDuration || "durée non précisée"}. ${(clinicalData.symptoms || []).join(", ") || "Symptômes à détailler"}. Retentissement fonctionnel à évaluer.`
+            : `${patientData.age}-year-old patient consulting for ${clinicalData.chiefComplaint || "symptoms"}. Evolution since ${clinicalData.symptomDuration || "unspecified duration"}. ${(clinicalData.symptoms || []).join(", ") || "Symptoms to be detailed"}. Functional impact to be evaluated.`,
+          examination: language === 'fr'
+            ? `Constantes: TA ${clinicalData.vitalSigns?.bloodPressureSystolic || "?"}/${clinicalData.vitalSigns?.bloodPressureDiastolic || "?"}mmHg, FC ${clinicalData.vitalSigns?.heartRate || "?"}bpm, T° ${clinicalData.vitalSigns?.temperature || "?"}°C. Douleur ${clinicalData.painScale || 0}/10. Examen général: état général ${patientData.age < 65 ? "conservé" : "à préciser"}. Examen orienté selon symptômes à compléter.`
+            : `Vitals: BP ${clinicalData.vitalSigns?.bloodPressureSystolic || "?"}/${clinicalData.vitalSigns?.bloodPressureDiastolic || "?"}mmHg, HR ${clinicalData.vitalSigns?.heartRate || "?"}bpm, T° ${clinicalData.vitalSigns?.temperature || "?"}°C. Pain ${clinicalData.painScale || 0}/10. General examination: general condition ${patientData.age < 65 ? "preserved" : "to be specified"}. Targeted examination based on symptoms to be completed.`,
           diagnosis: fallbackDiagnosis.primary.condition,
-          plan: "Traitement symptomatique adapté. Examens complémentaires si nécessaire. Réévaluation programmée selon évolution. Conseils hygiéno-diététiques."
+          plan: language === 'fr'
+            ? "Traitement symptomatique adapté. Examens complémentaires si nécessaire. Réévaluation programmée selon évolution. Conseils hygiéno-diététiques."
+            : "Appropriate symptomatic treatment. Additional tests if necessary. Scheduled reevaluation based on evolution. Lifestyle and dietary advice."
         }
       },
       biology: {
         header: {
-          title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
-          subtitle: "PRESCRIPTION D'EXAMENS BIOLOGIQUES",
-          date: new Date().toLocaleDateString("fr-FR"),
+          title: language === 'fr' 
+            ? "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE"
+            : "REPUBLIC OF MAURITIUS - MEDICAL PRESCRIPTION",
+          subtitle: language === 'fr'
+            ? "PRESCRIPTION D'EXAMENS BIOLOGIQUES"
+            : "BIOLOGICAL TESTS PRESCRIPTION",
+          date: dateFormat,
           number: `BIO-${Date.now()}-MU`,
           physician: "Dr. TIBOK IA DOCTOR",
           registration: "COUNCIL-2024-IA-001"
@@ -172,38 +209,52 @@ export default function CompleteDiagnosisForm({
         patient: {
           firstName: patientData.firstName,
           lastName: patientData.lastName,
-          age: `${patientData.age} ans`,
-          address: "Adresse à compléter - Maurice",
-          idNumber: "Carte d'identité mauricienne à préciser"
+          age: `${patientData.age} ${language === 'fr' ? 'ans' : 'years'}`,
+          address: language === 'fr' 
+            ? "Adresse à compléter - Maurice"
+            : "Address to be completed - Mauritius",
+          idNumber: language === 'fr'
+            ? "Carte d'identité mauricienne à préciser"
+            : "Mauritian ID card to be specified"
         },
         prescriptions: [
           {
             id: 1,
-            exam: "NFS + CRP",
-            indication: "Bilan inflammatoire de base",
-            urgency: "Semi-urgent",
-            fasting: "Non",
-            expectedResults: "Recherche anémie, infection, troubles hématologiques",
-            sampleType: "Sang veineux",
-            contraindications: "Aucune"
+            exam: language === 'fr' ? "NFS + CRP" : "CBC + CRP",
+            indication: language === 'fr' 
+              ? "Bilan inflammatoire de base"
+              : "Basic inflammatory panel",
+            urgency: language === 'fr' ? "Semi-urgent" : "Semi-urgent",
+            fasting: language === 'fr' ? "Non" : "No",
+            expectedResults: language === 'fr'
+              ? "Recherche anémie, infection, troubles hématologiques"
+              : "Check for anemia, infection, hematological disorders",
+            sampleType: language === 'fr' ? "Sang veineux" : "Venous blood",
+            contraindications: language === 'fr' ? "Aucune" : "None"
           },
           {
             id: 2,
-            exam: "Ionogramme sanguin",
-            indication: "Bilan métabolique",
-            urgency: "Programmé",
-            fasting: "Non", 
-            expectedResults: "Équilibre électrolytique",
-            sampleType: "Sang veineux",
-            contraindications: "Aucune"
+            exam: language === 'fr' ? "Ionogramme sanguin" : "Electrolyte panel",
+            indication: language === 'fr' ? "Bilan métabolique" : "Metabolic assessment",
+            urgency: language === 'fr' ? "Programmé" : "Scheduled",
+            fasting: language === 'fr' ? "Non" : "No", 
+            expectedResults: language === 'fr' 
+              ? "Équilibre électrolytique"
+              : "Electrolyte balance",
+            sampleType: language === 'fr' ? "Sang veineux" : "Venous blood",
+            contraindications: language === 'fr' ? "Aucune" : "None"
           }
         ]
       },
       paraclinical: {
         header: {
-          title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
-          subtitle: "PRESCRIPTION D'EXAMENS PARACLINIQUES",
-          date: new Date().toLocaleDateString("fr-FR"),
+          title: language === 'fr' 
+            ? "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE"
+            : "REPUBLIC OF MAURITIUS - MEDICAL PRESCRIPTION",
+          subtitle: language === 'fr'
+            ? "PRESCRIPTION D'EXAMENS PARACLINIQUES"
+            : "PARACLINICAL TESTS PRESCRIPTION",
+          date: dateFormat,
           number: `PARA-${Date.now()}-MU`,
           physician: "Dr. TIBOK IA DOCTOR",
           registration: "COUNCIL-2024-IA-001"
@@ -211,27 +262,41 @@ export default function CompleteDiagnosisForm({
         patient: {
           firstName: patientData.firstName,
           lastName: patientData.lastName,
-          age: `${patientData.age} ans`,
-          address: "Adresse à compléter - Maurice",
-          idNumber: "Carte d'identité mauricienne à préciser"
+          age: `${patientData.age} ${language === 'fr' ? 'ans' : 'years'}`,
+          address: language === 'fr' 
+            ? "Adresse à compléter - Maurice"
+            : "Address to be completed - Mauritius",
+          idNumber: language === 'fr'
+            ? "Carte d'identité mauricienne à préciser"
+            : "Mauritian ID card to be specified"
         },
         prescriptions: [
           {
             id: 1,
-            exam: "Radiographie thoracique",
-            indication: "Exploration thoracique selon symptômes",
-            urgency: "Programmé",
-            preparation: "Retirer objets métalliques",
-            contraindications: "Grossesse (protection)",
-            duration: "5 minutes"
+            exam: language === 'fr' ? "Radiographie thoracique" : "Chest X-ray",
+            indication: language === 'fr' 
+              ? "Exploration thoracique selon symptômes"
+              : "Chest exploration based on symptoms",
+            urgency: language === 'fr' ? "Programmé" : "Scheduled",
+            preparation: language === 'fr' 
+              ? "Retirer objets métalliques"
+              : "Remove metallic objects",
+            contraindications: language === 'fr' 
+              ? "Grossesse (protection)"
+              : "Pregnancy (protection)",
+            duration: language === 'fr' ? "5 minutes" : "5 minutes"
           }
         ]
       },
       medication: {
         header: {
-          title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
-          subtitle: "PRESCRIPTION MÉDICAMENTEUSE",
-          date: new Date().toLocaleDateString("fr-FR"),
+          title: language === 'fr' 
+            ? "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE"
+            : "REPUBLIC OF MAURITIUS - MEDICAL PRESCRIPTION",
+          subtitle: language === 'fr'
+            ? "PRESCRIPTION MÉDICAMENTEUSE"
+            : "MEDICATION PRESCRIPTION",
+          date: dateFormat,
           number: `MED-${Date.now()}-MU`,
           physician: "Dr. TIBOK IA DOCTOR",
           registration: "COUNCIL-2024-IA-001"
@@ -239,23 +304,37 @@ export default function CompleteDiagnosisForm({
         patient: {
           firstName: patientData.firstName,
           lastName: patientData.lastName,
-          age: `${patientData.age} ans`,
-          address: "Adresse à compléter - Maurice",
-          idNumber: "Carte d'identité mauricienne à préciser",
-          allergies: (patientData.allergies || []).join(", ") || "Aucune"
+          age: `${patientData.age} ${language === 'fr' ? 'ans' : 'years'}`,
+          address: language === 'fr' 
+            ? "Adresse à compléter - Maurice"
+            : "Address to be completed - Mauritius",
+          idNumber: language === 'fr'
+            ? "Carte d'identité mauricienne à préciser"
+            : "Mauritian ID card to be specified",
+          allergies: (patientData.allergies || []).join(", ") || (language === 'fr' ? "Aucune" : "None")
         },
         prescriptions: [
           {
             id: 1,
-            dci: "Paracétamol",
+            dci: language === 'fr' ? "Paracétamol" : "Paracetamol",
             brand: "Doliprane / Efferalgan",
             dosage: patientData.age >= 65 ? "500mg" : "1g",
-            frequency: "3 fois par jour si nécessaire",
-            duration: "5 jours maximum",
-            indication: "Traitement symptomatique douleur/fièvre",
-            contraindications: (patientData.allergies || []).includes("Paracétamol") ? "ALLERGIE PATIENT" : "Insuffisance hépatique sévère",
-            monitoring: "Surveillance hépatique si traitement prolongé",
-            mauritianAvailability: "Disponible toutes pharmacies Maurice"
+            frequency: language === 'fr' 
+              ? "3 fois par jour si nécessaire"
+              : "3 times daily if needed",
+            duration: language === 'fr' ? "5 jours maximum" : "Maximum 5 days",
+            indication: language === 'fr' 
+              ? "Traitement symptomatique douleur/fièvre"
+              : "Symptomatic treatment pain/fever",
+            contraindications: (patientData.allergies || []).includes("Paracétamol") 
+              ? (language === 'fr' ? "ALLERGIE PATIENT" : "PATIENT ALLERGY")
+              : (language === 'fr' ? "Insuffisance hépatique sévère" : "Severe hepatic impairment"),
+            monitoring: language === 'fr'
+              ? "Surveillance hépatique si traitement prolongé"
+              : "Liver monitoring if prolonged treatment",
+            mauritianAvailability: language === 'fr'
+              ? "Disponible toutes pharmacies Maurice"
+              : "Available all pharmacies Mauritius"
           }
         ]
       }
@@ -267,24 +346,14 @@ export default function CompleteDiagnosisForm({
     }
   }
 
-  // 👈 NOUVELLE FONCTION: Gérer le passage à l'étape suivante
-  const handleNextStep = () => {
-    // S'assurer que les données sont toujours disponibles avant de passer à l'étape suivante
-    if (diagnosis && mauritianDocuments) {
-      onNext()
-    } else {
-      console.warn("Données manquantes pour passer à l'étape suivante")
-    }
-  }
-
   const sections = [
-    { id: "primary", title: "Diagnostic principal", icon: Target },
-    { id: "reasoning", title: "Raisonnement", icon: Brain },
-    { id: "differential", title: "Différentiels", icon: Search },
-    { id: "documents", title: "Documents générés", icon: FileText },
+    { id: "primary", title: t('diagnosisForm.sections.primary'), icon: Target },
+    { id: "reasoning", title: t('diagnosisForm.sections.reasoning'), icon: Brain },
+    { id: "differential", title: t('diagnosisForm.sections.differential'), icon: Search },
+    { id: "documents", title: t('diagnosisForm.sections.documents'), icon: FileText },
   ]
 
-  // Interface de chargement
+  // Loading interface
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 p-4">
@@ -293,7 +362,7 @@ export default function CompleteDiagnosisForm({
             <CardHeader className="text-center">
               <CardTitle className="flex items-center justify-center gap-3 text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
                 <Brain className="h-10 w-10 text-emerald-600" />
-                Diagnostic IA Expert + Documents Mauriciens
+                {t('diagnosisForm.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="flex items-center justify-center py-20">
@@ -306,33 +375,33 @@ export default function CompleteDiagnosisForm({
                   </div>
                 </div>
                 <div className="space-y-3">
-                  <p className="text-2xl font-bold text-gray-800">Génération complète en cours...</p>
-                  <p className="text-lg text-gray-600">Diagnostic IA expert + Documents mauriciens modifiables</p>
+                  <p className="text-2xl font-bold text-gray-800">{t('diagnosisForm.generatingComplete')}</p>
+                  <p className="text-lg text-gray-600">{t('diagnosisForm.generatingDescription')}</p>
                   <div className="max-w-md mx-auto text-sm text-gray-500 space-y-1">
                     <div className="flex items-center justify-center gap-2">
                       <Target className="h-4 w-4" />
-                      <span>Analyse diagnostique experte</span>
+                      <span>{t('diagnosisForm.expertAnalysis')}</span>
                     </div>
                     <div className="flex items-center justify-center gap-2">
                       <FileText className="h-4 w-4" />
-                      <span>Génération compte-rendu consultation</span>
+                      <span>{t('diagnosisForm.reportGeneration')}</span>
                     </div>
                     <div className="flex items-center justify-center gap-2">
                       <TestTube className="h-4 w-4" />
-                      <span>Création ordonnances biologiques</span>
+                      <span>{t('diagnosisForm.biologyPrescriptions')}</span>
                     </div>
                     <div className="flex items-center justify-center gap-2">
                       <Stethoscope className="h-4 w-4" />
-                      <span>Création ordonnances paracliniques</span>
+                      <span>{t('diagnosisForm.paraclinicalPrescriptions')}</span>
                     </div>
                     <div className="flex items-center justify-center gap-2">
                       <Pill className="h-4 w-4" />
-                      <span>Prescription médicamenteuse sécurisée</span>
+                      <span>{t('diagnosisForm.medicationPrescription')}</span>
                     </div>
                   </div>
                 </div>
                 <Progress value={75} className="w-96 mx-auto h-3" />
-                <p className="text-xs text-gray-400">Génération directe complète - Prêt pour édition !</p>
+                <p className="text-xs text-gray-400">{t('diagnosisForm.directGeneration')}</p>
               </div>
             </CardContent>
           </Card>
@@ -341,7 +410,7 @@ export default function CompleteDiagnosisForm({
     )
   }
 
-  // Interface d'erreur - condition mise à jour pour vérifier diagnosis null
+  // Error interface
   if (!diagnosis && error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 p-4">
@@ -350,17 +419,17 @@ export default function CompleteDiagnosisForm({
             <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-600 text-white rounded-t-lg">
               <CardTitle className="flex items-center gap-3">
                 <AlertTriangle className="h-6 w-6" />
-                Diagnostic Temporairement Indisponible
+                {t('diagnosisForm.temporarilyUnavailable')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8 text-center">
               <div className="space-y-4">
                 <AlertTriangle className="h-16 w-16 text-yellow-500 mx-auto" />
-                <p className="text-lg text-gray-700">Impossible de générer le diagnostic automatique.</p>
-                <p className="text-sm text-gray-600">Erreur: {error}</p>
+                <p className="text-lg text-gray-700">{t('diagnosisForm.cannotGenerate')}</p>
+                <p className="text-sm text-gray-600">{t('common.error')}: {error}</p>
                 <Button onClick={generateCompleteDiagnosisAndDocuments} className="mt-6">
                   <Brain className="h-4 w-4 mr-2" />
-                  Réessayer la génération complète
+                  {t('diagnosisForm.retry')}
                 </Button>
               </div>
             </CardContent>
@@ -370,7 +439,7 @@ export default function CompleteDiagnosisForm({
     )
   }
 
-  // Condition supplémentaire: Si pas de loading et pas d'erreur mais diagnosis toujours null
+  // Additional condition: No loading, no error but diagnosis still null
   if (!loading && !diagnosis) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 p-4">
@@ -379,16 +448,16 @@ export default function CompleteDiagnosisForm({
             <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
               <CardTitle className="flex items-center gap-3">
                 <Brain className="h-6 w-6" />
-                Préparation du Diagnostic
+                {t('diagnosisForm.preparingDiagnosis')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8 text-center">
               <div className="space-y-4">
                 <Brain className="h-16 w-16 text-blue-500 mx-auto" />
-                <p className="text-lg text-gray-700">Initialisation en cours...</p>
+                <p className="text-lg text-gray-700">{t('diagnosisForm.initializing')}</p>
                 <Button onClick={generateCompleteDiagnosisAndDocuments} className="mt-6">
                   <Brain className="h-4 w-4 mr-2" />
-                  Lancer la génération
+                  {t('diagnosisForm.startGeneration')}
                 </Button>
               </div>
             </CardContent>
@@ -398,86 +467,47 @@ export default function CompleteDiagnosisForm({
     )
   }
 
-  // Interface principale - Diagnostic généré (seulement si diagnosis existe)
+  // Main interface - Generated diagnosis (only if diagnosis exists)
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
         
-        {/* Header avec succès */}
+        {/* Success header */}
         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
           <CardHeader className="text-center">
             <CardTitle className="flex items-center justify-center gap-3 text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
               <CheckCircle className="h-8 w-8 text-emerald-600" />
-              Diagnostic IA Expert + Documents Mauriciens Générés
+              {t('diagnosisForm.successTitle')}
             </CardTitle>
             <div className="flex justify-center gap-4 mt-4">
               <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300">
-                Confiance IA: {diagnosis?.primary?.confidence || 70}%
+                {t('diagnosisForm.aiConfidence')} {diagnosis?.primary?.confidence || 70}%
               </Badge>
               {documentsGenerated && (
                 <Badge className="bg-blue-500 text-white">
-                  4 Documents Mauriciens Prêts
+                  {t('diagnosisForm.documentsReady')}
                 </Badge>
               )}
-              {error && <Badge variant="destructive">Mode Fallback Activé</Badge>}
+              {error && <Badge variant="destructive">{t('diagnosisForm.fallbackActivated')}</Badge>}
             </div>
           </CardHeader>
         </Card>
 
-        {/* 👈 NOUVELLE SECTION: Alert informatif pour les documents générés */}
-        {documentsGenerated && mauritianDocuments && (
-          <Card className="bg-gradient-to-r from-blue-50 to-emerald-50 border border-blue-200 shadow-md">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-12 h-12 bg-emerald-100 rounded-full">
-                    <CheckCircle className="h-6 w-6 text-emerald-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-800">Diagnostic IA Expert Complété</h3>
-                    <p className="text-sm text-gray-600">
-                      Diagnostic analysé • 4 documents mauriciens générés • Prêt pour édition personnalisée
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-blue-500 text-white flex items-center gap-1">
-                    <FileText className="h-3 w-3" />
-                    Consultation
-                  </Badge>
-                  <Badge className="bg-red-500 text-white flex items-center gap-1">
-                    <TestTube className="h-3 w-3" />
-                    Biologie
-                  </Badge>
-                  <Badge className="bg-green-500 text-white flex items-center gap-1">
-                    <Stethoscope className="h-3 w-3" />
-                    Paraclinique
-                  </Badge>
-                  <Badge className="bg-purple-500 text-white flex items-center gap-1">
-                    <Pill className="h-3 w-3" />
-                    Médicaments
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Alert pour mode fallback */}
+        {/* Alert for fallback mode */}
         {error && (
           <Card className="bg-amber-50/80 backdrop-blur-sm border-amber-200 shadow-md">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3 text-amber-800">
                 <AlertTriangle className="h-5 w-5" />
                 <span className="text-sm font-medium">
-                  ⚠️ Diagnostic IA Expert indisponible. Analyse générique + Documents de base générés pour assurer la continuité.
+                  {t('diagnosisForm.fallbackMessage')}
                 </span>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Navigation par sections */}
+        {/* Section navigation */}
         <div className="flex flex-wrap gap-2 justify-center">
           {sections.map((section, index) => (
             <button
@@ -495,25 +525,25 @@ export default function CompleteDiagnosisForm({
           ))}
         </div>
 
-        {/* Diagnostic Principal */}
+        {/* Primary Diagnosis */}
         <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
           <CardHeader className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-3">
               <Target className="h-6 w-6" />
-              Diagnostic Principal Retenu
+              {t('diagnosisForm.primaryDiagnosis')}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-8 space-y-6">
             <div className="text-center p-6 bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl border-2 border-emerald-200">
               <h3 className="text-2xl font-bold text-emerald-800 mb-4">
-                {diagnosis?.primary?.condition || "Diagnostic à préciser"}
+                {diagnosis?.primary?.condition || (language === 'fr' ? "Diagnostic à préciser" : "Diagnosis to be specified")}
               </h3>
               <div className="flex justify-center gap-4">
                 <Badge className="bg-emerald-100 text-emerald-800 text-sm px-4 py-2">
-                  Probabilité: {diagnosis?.primary?.confidence || 70}%
+                  {t('diagnosisForm.probability')} {diagnosis?.primary?.confidence || 70}%
                 </Badge>
                 <Badge variant="outline" className="border-emerald-300 text-emerald-700 text-sm px-4 py-2">
-                  Sévérité: {diagnosis?.primary?.severity || "À évaluer"}
+                  {t('diagnosisForm.severity')} {diagnosis?.primary?.severity || t('diagnosisForm.toEvaluate')}
                 </Badge>
                 {diagnosis?.primary?.icd10 && (
                   <Badge variant="outline" className="border-blue-300 text-blue-700 text-sm px-4 py-2">
@@ -527,7 +557,7 @@ export default function CompleteDiagnosisForm({
               <div>
                 <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
                   <Brain className="h-5 w-5 text-emerald-600" />
-                  Analyse Détaillée
+                  {t('diagnosisForm.detailedAnalysis')}
                 </h4>
                 <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
                   <p className="text-sm text-gray-700 leading-relaxed">
@@ -541,7 +571,7 @@ export default function CompleteDiagnosisForm({
               <div>
                 <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
                   <Eye className="h-5 w-5 text-emerald-600" />
-                  Raisonnement Clinique
+                  {t('diagnosisForm.clinicalReasoning')}
                 </h4>
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                   <p className="text-sm text-gray-700 leading-relaxed">
@@ -553,13 +583,13 @@ export default function CompleteDiagnosisForm({
           </CardContent>
         </Card>
 
-        {/* Diagnostics Différentiels */}
+        {/* Differential Diagnoses */}
         {diagnosis?.differential && diagnosis.differential.length > 0 && (
           <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
             <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-t-lg">
               <CardTitle className="flex items-center gap-3">
                 <Search className="h-6 w-6" />
-                Diagnostics Différentiels
+                {t('diagnosisForm.differentialDiagnosis')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8">
@@ -577,7 +607,7 @@ export default function CompleteDiagnosisForm({
                     
                     {diff.distinguishingFeatures && (
                       <div className="bg-purple-50 p-3 rounded border border-purple-200">
-                        <span className="font-medium text-purple-700">Éléments distinctifs: </span>
+                        <span className="font-medium text-purple-700">{t('diagnosisForm.distinguishingFeatures')} </span>
                         <span className="text-sm text-purple-600">{diff.distinguishingFeatures}</span>
                       </div>
                     )}
@@ -588,13 +618,13 @@ export default function CompleteDiagnosisForm({
           </Card>
         )}
 
-        {/* Documents Mauriciens Générés */}
+        {/* Generated Mauritian Documents */}
         {documentsGenerated && mauritianDocuments && (
           <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 border-blue-200">
             <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
               <CardTitle className="flex items-center gap-3">
                 <FileText className="h-6 w-6" />
-                Documents Mauriciens Générés et Modifiables
+                {t('diagnosisForm.mauritianDocuments')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8">
@@ -605,57 +635,57 @@ export default function CompleteDiagnosisForm({
                   <div className="flex items-center gap-3 mb-4">
                     <FileText className="h-8 w-8 text-blue-600" />
                     <div>
-                      <h3 className="font-semibold text-blue-800">Compte-rendu de Consultation</h3>
-                      <p className="text-sm text-blue-600">Document professionnel mauricien</p>
+                      <h3 className="font-semibold text-blue-800">{t('diagnosisForm.consultationReport')}</h3>
+                      <p className="text-sm text-blue-600">{t('diagnosisForm.professionalDocument')}</p>
                     </div>
                   </div>
                   <div className="text-xs text-blue-700 space-y-1">
-                    <p><strong>Patient:</strong> {mauritianDocuments.consultation?.patient?.firstName} {mauritianDocuments.consultation?.patient?.lastName}</p>
-                    <p><strong>Diagnostic:</strong> {mauritianDocuments.consultation?.content?.diagnosis || diagnosis?.primary?.condition}</p>
+                    <p><strong>{t('diagnosisForm.patient')}</strong> {mauritianDocuments.consultation?.patient?.firstName} {mauritianDocuments.consultation?.patient?.lastName}</p>
+                    <p><strong>{t('diagnosisForm.diagnosis')}</strong> {mauritianDocuments.consultation?.content?.diagnosis || diagnosis?.primary?.condition}</p>
                   </div>
                 </div>
 
-                {/* Examens Biologiques */}
+                {/* Biological Exams */}
                 <div className="bg-red-50 p-6 rounded-lg border border-red-200 hover:shadow-md transition-shadow">
                   <div className="flex items-center gap-3 mb-4">
                     <TestTube className="h-8 w-8 text-red-600" />
                     <div>
-                      <h3 className="font-semibold text-red-800">Ordonnance Examens Biologiques</h3>
-                      <p className="text-sm text-red-600">Prescription laboratoire Maurice</p>
+                      <h3 className="font-semibold text-red-800">{t('diagnosisForm.biologicalExams')}</h3>
+                      <p className="text-sm text-red-600">{t('diagnosisForm.labPrescription')}</p>
                     </div>
                   </div>
                   <div className="text-xs text-red-700">
-                    <p><strong>Examens:</strong> {mauritianDocuments.biology?.prescriptions?.length || 0} prescription(s)</p>
-                    <p><strong>Format:</strong> Conforme réglementation mauricienne</p>
+                    <p><strong>{t('diagnosisForm.exams')}</strong> {mauritianDocuments.biology?.prescriptions?.length || 0} {t('diagnosisForm.prescriptions')}</p>
+                    <p><strong>{t('diagnosisForm.format')}</strong> {t('diagnosisForm.mauritianCompliant')}</p>
                   </div>
                 </div>
 
-                {/* Examens Paracliniques */}
+                {/* Paraclinical Exams */}
                 <div className="bg-green-50 p-6 rounded-lg border border-green-200 hover:shadow-md transition-shadow">
                   <div className="flex items-center gap-3 mb-4">
                     <Stethoscope className="h-8 w-8 text-green-600" />
                     <div>
-                      <h3 className="font-semibold text-green-800">Examens Paracliniques</h3>
-                      <p className="text-sm text-green-600">Imagerie et explorations</p>
+                      <h3 className="font-semibold text-green-800">{t('diagnosisForm.paraclinicalExams')}</h3>
+                      <p className="text-sm text-green-600">{t('diagnosisForm.imagingExplorations')}</p>
                     </div>
                   </div>
                   <div className="text-xs text-green-700">
-                    <p><strong>Examens:</strong> {mauritianDocuments.paraclinical?.prescriptions?.length || 0} prescription(s)</p>
+                    <p><strong>{t('diagnosisForm.exams')}</strong> {mauritianDocuments.paraclinical?.prescriptions?.length || 0} {t('diagnosisForm.prescriptions')}</p>
                   </div>
                 </div>
 
-                {/* Médicaments */}
+                {/* Medications */}
                 <div className="bg-purple-50 p-6 rounded-lg border border-purple-200 hover:shadow-md transition-shadow">
                   <div className="flex items-center gap-3 mb-4">
                     <Pill className="h-8 w-8 text-purple-600" />
                     <div>
-                      <h3 className="font-semibold text-purple-800">Ordonnance Médicamenteuse</h3>
-                      <p className="text-sm text-purple-600">Prescription sécurisée Maurice</p>
+                      <h3 className="font-semibold text-purple-800">{t('diagnosisForm.medicationPrescriptionTitle')}</h3>
+                      <p className="text-sm text-purple-600">{t('diagnosisForm.securePrescription')}</p>
                     </div>
                   </div>
                   <div className="text-xs text-purple-700">
-                    <p><strong>Médicaments:</strong> {mauritianDocuments.medication?.prescriptions?.length || 0} prescription(s)</p>
-                    <p><strong>Sécurité:</strong> Vérifications allergies incluses</p>
+                    <p><strong>{t('diagnosisForm.medications')}</strong> {mauritianDocuments.medication?.prescriptions?.length || 0} {t('diagnosisForm.prescriptions')}</p>
+                    <p><strong>{t('diagnosisForm.safety')}</strong> {t('diagnosisForm.allergyChecks')}</p>
                   </div>
                 </div>
               </div>
@@ -663,17 +693,17 @@ export default function CompleteDiagnosisForm({
               <div className="bg-blue-100 p-4 rounded-lg border border-blue-300">
                 <div className="flex items-center gap-2 mb-2">
                   <Edit3 className="h-5 w-5 text-blue-600" />
-                  <span className="font-semibold text-blue-800">Documents Entièrement Modifiables</span>
+                  <span className="font-semibold text-blue-800">{t('diagnosisForm.fullyEditable')}</span>
                 </div>
                 <p className="text-sm text-blue-700">
-                  Tous les documents sont entièrement modifiables. Vous pouvez éditer chaque champ selon vos besoins avant impression/téléchargement.
+                  {t('diagnosisForm.editableDescription')}
                 </p>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* 👈 NAVIGATION MODIFIÉE */}
+        {/* Navigation */}
         <div className="flex justify-between">
           <Button 
             variant="outline" 
@@ -681,49 +711,24 @@ export default function CompleteDiagnosisForm({
             className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour aux Questions IA
+            {t('diagnosisForm.backToQuestions')}
           </Button>
 
           {documentsGenerated ? (
-            <div className="flex gap-4 items-center">
-              {/* Badge de statut */}
-              <div className="flex items-center gap-2">
-                <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Diagnostic Complété
-                </Badge>
-                <Badge className="bg-blue-100 text-blue-800 border-blue-300">
-                  <FileText className="h-3 w-3 mr-1" />
-                  4 Documents Prêts
-                </Badge>
-              </div>
-
-              {/* Boutons d'action */}
-              <div className="flex gap-3">
-                <Button 
-                  variant="outline"
-                  className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  Aperçu Diagnostic
-                </Button>
-
-                <Button 
-                  onClick={handleNextStep} // 👈 UTILISER LA NOUVELLE FONCTION
-                  className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  <Edit3 className="h-4 w-4 mr-2" />
-                  Éditer Documents Mauriciens
-                </Button>
-              </div>
-            </div>
+            <Button 
+              onClick={onNext}
+              className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <Edit3 className="h-4 w-4 mr-2" />
+              {t('diagnosisForm.editDocuments')}
+            </Button>
           ) : (
             <Button 
               onClick={generateCompleteDiagnosisAndDocuments}
               className="bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <Brain className="h-4 w-4 mr-2" />
-              Générer Diagnostic + Documents
+              {t('diagnosisForm.generateDiagnosisDocuments')}
             </Button>
           )}
         </div>
