@@ -152,7 +152,7 @@ export default function MedicalAIExpert() {
   const CurrentStepComponent = steps[currentStep]?.component
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Temporarily disabled to prevent URL clearing
       <PatientDataLoader />
       */}
@@ -162,8 +162,8 @@ export default function MedicalAIExpert() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-white">TIBOK IA DOCTOR</h1>
-              <p className="text-gray-400">
+              <h1 className="text-3xl font-bold text-gray-900">TIBOK IA DOCTOR</h1>
+              <p className="text-gray-600">
                 {language === 'fr' 
                   ? "Système Expert de Diagnostic Médical par Intelligence Artificielle"
                   : "Expert Medical Diagnostic System by Artificial Intelligence"
@@ -171,15 +171,15 @@ export default function MedicalAIExpert() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              {/* Language Switcher */}
-              <div className="flex items-center gap-2 mr-4">
+              {/* Language Switcher with black background */}
+              <div className="flex items-center gap-2 mr-4 bg-black rounded-md p-1">
                 <Button
                   variant={language === 'fr' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => handleSetLanguage('fr')}
                   className={language === 'fr' 
                     ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                    : 'text-gray-400 hover:text-white hover:bg-transparent'
                   }
                 >
                   FR
@@ -190,30 +190,30 @@ export default function MedicalAIExpert() {
                   onClick={() => handleSetLanguage('en')}
                   className={language === 'en' 
                     ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                    : 'text-gray-400 hover:text-white hover:bg-transparent'
                   }
                 >
                   EN
                 </Button>
               </div>
-              <Badge variant="outline" className="text-lg px-4 py-2 text-white border-gray-600">
+              <Badge variant="outline" className="text-lg px-4 py-2">
                 GPT-4o + APIs {language === 'fr' ? 'Médicales' : 'Medical'}
               </Badge>
             </div>
           </div>
 
           {/* Barre de progression */}
-          <Card className="bg-gray-900 border-gray-800">
+          <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-300">
+                <span className="text-sm font-medium">
                   {language === 'fr' ? 'Progression' : 'Progress'}
                 </span>
-                <span className="text-sm text-gray-400">
+                <span className="text-sm text-gray-600">
                   {language === 'fr' ? 'Étape' : 'Step'} {currentStep + 1} {language === 'fr' ? 'sur' : 'of'} {steps.length}
                 </span>
               </div>
-              <Progress value={progress} className="mb-4 bg-gray-700" />
+              <Progress value={progress} className="mb-4" />
 
               {/* Étapes */}
               <div className="flex justify-between">
@@ -221,12 +221,12 @@ export default function MedicalAIExpert() {
                   <div
                     key={step.id}
                     className={`flex flex-col items-center text-center ${
-                      index <= currentStep ? "text-blue-400" : "text-gray-500"
+                      index <= currentStep ? "text-blue-600" : "text-gray-400"
                     }`}
                   >
                     <div
                       className={`flex items-center justify-center w-10 h-10 rounded-full mb-2 ${
-                        index <= currentStep ? "bg-blue-900" : "bg-gray-700"
+                        index <= currentStep ? "bg-blue-100" : "bg-gray-100"
                       }`}
                     >
                       {step.icon}
@@ -244,42 +244,40 @@ export default function MedicalAIExpert() {
 
         {/* Étape actuelle */}
         <div className="mb-8">
-          <Card className="bg-gray-900 border-gray-800">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
+              <CardTitle className="flex items-center gap-2">
                 {steps[currentStep]?.icon}
                 {steps[currentStep]?.title}
               </CardTitle>
-              <p className="text-gray-400">{steps[currentStep]?.description}</p>
+              <p className="text-gray-600">{steps[currentStep]?.description}</p>
             </CardHeader>
           </Card>
         </div>
 
         {/* Contenu de l'étape */}
-        <div className="[&_*]:bg-gray-900 [&_*]:border-gray-800 [&_*]:text-white">
-          {CurrentStepComponent && <CurrentStepComponent {...getCurrentStepProps()} />}
-        </div>
+        {CurrentStepComponent && <CurrentStepComponent {...getCurrentStepProps()} />}
 
         {/* Informations système */}
         <div className="mt-8">
-          <Card className="bg-gray-900 border-gray-800">
+          <Card>
             <CardContent className="p-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div>
-                  <div className="text-2xl font-bold text-blue-400">GPT-4o</div>
-                  <div className="text-sm text-gray-400">{language === 'fr' ? 'Modèle IA' : 'AI Model'}</div>
+                  <div className="text-2xl font-bold text-blue-600">GPT-4o</div>
+                  <div className="text-sm text-gray-600">{language === 'fr' ? 'Modèle IA' : 'AI Model'}</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-green-400">5</div>
-                  <div className="text-sm text-gray-400">APIs {language === 'fr' ? 'Intégrées' : 'Integrated'}</div>
+                  <div className="text-2xl font-bold text-green-600">5</div>
+                  <div className="text-sm text-gray-600">APIs {language === 'fr' ? 'Intégrées' : 'Integrated'}</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-purple-400">EBM</div>
-                  <div className="text-sm text-gray-400">Evidence-Based</div>
+                  <div className="text-2xl font-bold text-purple-600">EBM</div>
+                  <div className="text-sm text-gray-600">Evidence-Based</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-orange-400">24/7</div>
-                  <div className="text-sm text-gray-400">{language === 'fr' ? 'Disponible' : 'Available'}</div>
+                  <div className="text-2xl font-bold text-orange-600">24/7</div>
+                  <div className="text-sm text-gray-600">{language === 'fr' ? 'Disponible' : 'Available'}</div>
                 </div>
               </div>
             </CardContent>
