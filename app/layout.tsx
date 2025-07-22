@@ -5,8 +5,6 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { PatientDataLoader } from "@/components/patient-data-loader"
-import { LanguageProvider } from "@/contexts/language-context"
-import { Header } from "@/components/header"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -30,16 +28,10 @@ export default function RootLayout({
           defaultTheme="dark" 
           enableSystem 
           disableTransitionOnChange
-          forcedTheme="dark"
         >
-          <LanguageProvider>
-            <PatientDataLoader />
-            <Header />
-            <main className="min-h-screen bg-black">
-              {children}
-            </main>
-            <Toaster />
-          </LanguageProvider>
+          <PatientDataLoader />
+          {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
