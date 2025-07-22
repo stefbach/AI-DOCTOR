@@ -21,7 +21,7 @@ import {
   Heart,
   Search
 } from "lucide-react"
-import { Language, getTranslation } from "@/lib/translations"
+import { getTranslation, Language } from "@/lib/translations"
 
 interface ClinicalData {
   chiefComplaint: string
@@ -44,18 +44,6 @@ interface ClinicalFormProps {
   language?: Language
 }
 
-const defaultClinicalData: ClinicalData = {
-  chiefComplaint: "",
-  diseaseHistory: "",
-  symptomDuration: "",
-  symptoms: [],
-  vitalSigns: {
-    temperature: "",
-    bloodPressureSystolic: "",
-    bloodPressureDiastolic: "",
-  },
-}
-
 export default function ModernClinicalForm({ 
   data, 
   patientData, 
@@ -64,12 +52,13 @@ export default function ModernClinicalForm({
   onPrevious,
   language = 'fr' 
 }: ClinicalFormProps) {
+  // Helper function for translations
   const t = (key: string) => getTranslation(key, language)
-  
-  // Common symptoms with translations
+
+  // Get translated arrays
   const COMMON_SYMPTOMS = [
     t('symptoms.chestPain'),
-    t('symptoms.shortnessOfBreath'),
+    t('symptoms.shortness'),
     t('symptoms.palpitations'),
     t('symptoms.fatigue'),
     t('symptoms.nausea'),
@@ -85,7 +74,7 @@ export default function ModernClinicalForm({
     t('symptoms.backPain'),
     t('symptoms.insomnia'),
     t('symptoms.anxiety'),
-    t('symptoms.lossOfAppetite'),
+    t('symptoms.lossAppetite'),
     t('symptoms.weightLoss'),
     t('symptoms.legSwelling'),
     t('symptoms.jointPain'),
@@ -94,17 +83,17 @@ export default function ModernClinicalForm({
     t('symptoms.hearingProblems'),
   ]
 
-  // Duration options with translations
-  const DURATION_OPTIONS = [
-    { value: "less_than_1_hour", label: t('duration.lessThan1Hour') },
-    { value: "1_to_6_hours", label: t('duration.1to6Hours') },
-    { value: "6_to_24_hours", label: t('duration.6to24Hours') },
-    { value: "1_to_3_days", label: t('duration.1to3Days') },
-    { value: "3_to_7_days", label: t('duration.3to7Days') },
-    { value: "1_to_4_weeks", label: t('duration.1to4Weeks') },
-    { value: "1_to_6_months", label: t('duration.1to6Months') },
-    { value: "more_than_6_months", label: t('duration.moreThan6Months') },
-  ]
+  const defaultClinicalData: ClinicalData = {
+    chiefComplaint: "",
+    diseaseHistory: "",
+    symptomDuration: "",
+    symptoms: [],
+    vitalSigns: {
+      temperature: "",
+      bloodPressureSystolic: "",
+      bloodPressureDiastolic: "",
+    },
+  }
 
   const [localData, setLocalData] = useState<ClinicalData>(data || defaultClinicalData)
   const [symptomSearch, setSymptomSearch] = useState("")
@@ -179,26 +168,6 @@ export default function ModernClinicalForm({
     { id: "vitals", title: t('clinicalForm.sections.vitals'), icon: Stethoscope },
   ]
 
-  // Helper function to get temperature status
-  const getTemperatureStatus = (temp: string) => {
-    const tempValue = parseFloat(temp)
-    if (tempValue < 36.1) return `🟦 ${t('clinicalForm.vitals.hypothermia')}`
-    if (tempValue >= 36.1 && tempValue <= 37.2) return `✅ ${t('clinicalForm.vitals.normal')}`
-    if (tempValue > 37.2) return `🔴 ${t('clinicalForm.vitals.fever')}`
-    return ""
-  }
-
-  // Helper function to get blood pressure status
-  const getBloodPressureStatus = (systolic: string, diastolic: string) => {
-    const sys = parseInt(systolic)
-    const dia = parseInt(diastolic)
-    
-    if (sys >= 140 || dia >= 90) return `⚠️ ${t('clinicalForm.vitals.hypertension')}`
-    if (sys < 140 && dia < 90 && sys >= 120) return `🟡 ${t('clinicalForm.vitals.preHypertension')}`
-    if (sys < 120 && dia < 80) return `✅ ${t('clinicalForm.vitals.normal')}`
-    return ""
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 p-4">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -211,7 +180,7 @@ export default function ModernClinicalForm({
             </CardTitle>
             <div className="mt-4 space-y-2">
               <div className="flex justify-between text-sm text-gray-600">
-                <span>{t('clinicalForm.progress')}</span>
+                <span>{t('clinicalForm.progressTitle')}</span>
                 <span className="font-semibold">{progress}%</span>
               </div>
               <Progress value={progress} className="h-2" />
@@ -242,24 +211,24 @@ export default function ModernClinicalForm({
           <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-3">
               <FileText className="h-6 w-6" />
-              {t('clinicalForm.chiefComplaint.title')}
+              {t('clinicalForm.chiefComplaint')}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-2">
               <Label htmlFor="chiefComplaint" className="font-medium">
-                {t('clinicalForm.chiefComplaint.label')}
+                {t('clinicalForm.mainReason')}
               </Label>
               <Textarea
                 id="chiefComplaint"
                 value={localData.chiefComplaint || ""}
                 onChange={(e) => updateData({ chiefComplaint: e.target.value })}
-                placeholder={t('clinicalForm.chiefComplaint.placeholder')}
+                placeholder={t('clinicalForm.describePlaceholder')}
                 rows={3}
                 className="transition-all duration-200 focus:ring-purple-200 resize-y"
               />
               <p className="text-xs text-gray-500">
-                {t('clinicalForm.chiefComplaint.helper')}
+                {t('clinicalForm.summaryHint')}
               </p>
             </div>
           </CardContent>
@@ -270,24 +239,24 @@ export default function ModernClinicalForm({
           <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-3">
               <Heart className="h-6 w-6" />
-              {t('clinicalForm.diseaseHistory.title')}
+              {t('clinicalForm.diseaseHistory')}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-2">
               <Label htmlFor="diseaseHistory" className="font-medium">
-                {t('clinicalForm.diseaseHistory.label')}
+                {t('clinicalForm.symptomEvolution')}
               </Label>
               <Textarea
                 id="diseaseHistory"
                 value={localData.diseaseHistory || ""}
                 onChange={(e) => updateData({ diseaseHistory: e.target.value })}
-                placeholder={t('clinicalForm.diseaseHistory.placeholder')}
+                placeholder={t('clinicalForm.historyPlaceholder')}
                 rows={5}
                 className="transition-all duration-200 focus:ring-blue-200 resize-y"
               />
               <p className="text-xs text-gray-500">
-                {t('clinicalForm.diseaseHistory.helper')}
+                {t('clinicalForm.detailedHistory')}
               </p>
             </div>
 
@@ -296,7 +265,7 @@ export default function ModernClinicalForm({
                 <div className="flex items-center gap-2">
                   <Heart className="h-4 w-4 text-blue-600" />
                   <p className="font-semibold text-blue-800">
-                    {t('clinicalForm.diseaseHistory.documented', { count: localData.diseaseHistory.length })}
+                    {t('clinicalForm.documentedHistory')} ({localData.diseaseHistory.length} {t('clinicalForm.characters')})
                   </p>
                 </div>
               </div>
@@ -304,32 +273,35 @@ export default function ModernClinicalForm({
           </CardContent>
         </Card>
 
-        {/* Section 3: Symptom Duration */}
+        {/* Section 3: Duration */}
         <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
           <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-3">
               <Clock className="h-6 w-6" />
-              {t('clinicalForm.duration.title')}
+              {t('clinicalForm.duration')}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-2">
               <Label htmlFor="symptomDuration" className="font-medium">
-                {t('clinicalForm.duration.label')}
+                {t('clinicalForm.symptomDuration')}
               </Label>
               <Select
                 value={localData.symptomDuration || ""}
                 onValueChange={(value) => updateData({ symptomDuration: value })}
               >
                 <SelectTrigger className="transition-all duration-200 focus:ring-green-200">
-                  <SelectValue placeholder={t('clinicalForm.duration.placeholder')} />
+                  <SelectValue placeholder={t('clinicalForm.selectDuration')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {DURATION_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value={t('durationOptions.lessHour')}>{t('durationOptions.lessHour')}</SelectItem>
+                  <SelectItem value={t('durationOptions.oneToSixHours')}>{t('durationOptions.oneToSixHours')}</SelectItem>
+                  <SelectItem value={t('durationOptions.sixToTwentyFourHours')}>{t('durationOptions.sixToTwentyFourHours')}</SelectItem>
+                  <SelectItem value={t('durationOptions.oneToThreeDays')}>{t('durationOptions.oneToThreeDays')}</SelectItem>
+                  <SelectItem value={t('durationOptions.threeToSevenDays')}>{t('durationOptions.threeToSevenDays')}</SelectItem>
+                  <SelectItem value={t('durationOptions.oneToFourWeeks')}>{t('durationOptions.oneToFourWeeks')}</SelectItem>
+                  <SelectItem value={t('durationOptions.oneToSixMonths')}>{t('durationOptions.oneToSixMonths')}</SelectItem>
+                  <SelectItem value={t('durationOptions.moreSixMonths')}>{t('durationOptions.moreSixMonths')}</SelectItem>
                 </SelectContent>
               </Select>
               
@@ -338,7 +310,7 @@ export default function ModernClinicalForm({
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-green-600" />
                     <p className="font-semibold text-green-800">
-                      {t('clinicalForm.duration.since')}: {DURATION_OPTIONS.find(opt => opt.value === localData.symptomDuration)?.label}
+                      {t('clinicalForm.evolutionSince')} {localData.symptomDuration}
                     </p>
                   </div>
                 </div>
@@ -347,19 +319,19 @@ export default function ModernClinicalForm({
           </CardContent>
         </Card>
 
-        {/* Section 4: Present Symptoms */}
+        {/* Section 4: Current Symptoms */}
         <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
           <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-3">
               <Activity className="h-6 w-6" />
-              {t('clinicalForm.symptoms.title')}
+              {t('clinicalForm.currentSymptoms')}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-6">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
-                placeholder={t('clinicalForm.symptoms.search')}
+                placeholder={t('clinicalForm.searchSymptom')}
                 value={symptomSearch}
                 onChange={(e) => setSymptomSearch(e.target.value)}
                 className="pl-10"
@@ -397,7 +369,7 @@ export default function ModernClinicalForm({
                 <div className="flex items-center gap-2 mb-3">
                   <Activity className="h-5 w-5 text-orange-600" />
                   <p className="font-semibold text-orange-800">
-                    {t('clinicalForm.symptoms.selected', { count: localData.symptoms.length })}:
+                    {t('clinicalForm.selectedSymptoms')} ({localData.symptoms.length}) :
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -417,7 +389,7 @@ export default function ModernClinicalForm({
           <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-3">
               <Stethoscope className="h-6 w-6" />
-              {t('clinicalForm.vitals.title')}
+              {t('clinicalForm.vitalSigns')}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -426,7 +398,7 @@ export default function ModernClinicalForm({
                 <div className="flex items-center gap-2">
                   <Thermometer className="h-5 w-5 text-red-500" />
                   <Label htmlFor="temperature" className="font-medium">
-                    {t('clinicalForm.vitals.temperature')}
+                    {t('clinicalForm.temperature')}
                   </Label>
                 </div>
                 <Input
@@ -442,14 +414,16 @@ export default function ModernClinicalForm({
                 />
                 {localData.vitalSigns?.temperature && (
                   <p className="text-xs text-gray-500">
-                    {getTemperatureStatus(localData.vitalSigns.temperature)}
+                    {parseFloat(localData.vitalSigns.temperature) < 36.1 && `🟦 ${t('clinicalForm.hypothermia')}`}
+                    {parseFloat(localData.vitalSigns.temperature) >= 36.1 && parseFloat(localData.vitalSigns.temperature) <= 37.2 && `✅ ${t('clinicalForm.normal')}`}
+                    {parseFloat(localData.vitalSigns.temperature) > 37.2 && `🔴 ${t('clinicalForm.fever')}`}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="bloodPressureSystolic" className="font-medium">
-                  {t('clinicalForm.vitals.systolic')}
+                  {t('clinicalForm.systolicBP')}
                 </Label>
                 <Input
                   id="bloodPressureSystolic"
@@ -465,7 +439,7 @@ export default function ModernClinicalForm({
 
               <div className="space-y-2">
                 <Label htmlFor="bloodPressureDiastolic" className="font-medium">
-                  {t('clinicalForm.vitals.diastolic')}
+                  {t('clinicalForm.diastolicBP')}
                 </Label>
                 <Input
                   id="bloodPressureDiastolic"
@@ -485,12 +459,14 @@ export default function ModernClinicalForm({
                 <div className="flex items-center gap-2">
                   <Activity className="h-4 w-4 text-red-600" />
                   <p className="font-semibold text-red-800">
-                    {t('clinicalForm.vitals.bloodPressure')}: {localData.vitalSigns?.bloodPressureSystolic || "—"} / {localData.vitalSigns?.bloodPressureDiastolic || "—"} mmHg
+                    {t('clinicalForm.bloodPressure')} {localData.vitalSigns?.bloodPressureSystolic || "—"} / {localData.vitalSigns?.bloodPressureDiastolic || "—"} mmHg
                   </p>
                 </div>
                 {localData.vitalSigns?.bloodPressureSystolic && localData.vitalSigns?.bloodPressureDiastolic && (
                   <p className="text-xs text-red-600 mt-1">
-                    {getBloodPressureStatus(localData.vitalSigns.bloodPressureSystolic, localData.vitalSigns.bloodPressureDiastolic)}
+                    {(parseInt(localData.vitalSigns.bloodPressureSystolic) >= 140 || parseInt(localData.vitalSigns.bloodPressureDiastolic) >= 90) && `⚠️ ${t('clinicalForm.hypertension')}`}
+                    {(parseInt(localData.vitalSigns.bloodPressureSystolic) < 140 && parseInt(localData.vitalSigns.bloodPressureDiastolic) < 90 && parseInt(localData.vitalSigns.bloodPressureSystolic) >= 120) && `🟡 ${t('clinicalForm.preHypertension')}`}
+                    {(parseInt(localData.vitalSigns.bloodPressureSystolic) < 120 && parseInt(localData.vitalSigns.bloodPressureDiastolic) < 80) && `✅ ${t('clinicalForm.normal')}`}
                   </p>
                 )}
               </div>
@@ -514,13 +490,13 @@ export default function ModernClinicalForm({
             className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            {t('navigation.backToPatient')}
+            {t('clinicalForm.backButton')}
           </Button>
           <Button 
             onClick={onNext}
             className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            {t('navigation.continueToAI')}
+            {t('clinicalForm.continueToAI')}
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
