@@ -10,8 +10,8 @@ import { Stethoscope, User, ClipboardList, Brain, FileText, Activity } from "luc
 import PatientForm from "@/components/patient-form"
 import ClinicalForm from "@/components/clinical-form"
 import QuestionsForm from "@/components/questions-form"
-import DiagnosisForm from "@/components/diagnosis-form"
-import MedicalWorkflow from "@/components/medical/main-medical-workflow" // 👈 CHANGÉ
+import DiagnosisForm from "@/components/diagnosis-form" // 👈 GARDÉ L'ORIGINAL
+import MedicalWorkflow from "@/components/medical/main-medical-workflow" // 👈 NOUVEAU
 import IntegratedMedicalConsultation from "@/components/integrated-medical-consultation"
 import { PatientDataLoader } from "@/components/patient-data-loader"
 import { getTranslation, Language } from "@/lib/translations"
@@ -68,14 +68,14 @@ export default function MedicalAIExpert() {
       title: t('steps.aiDiagnosis.title'),
       description: t('steps.aiDiagnosis.description'),
       icon: <ClipboardList className="h-5 w-5" />,
-      component: DiagnosisForm,
+      component: DiagnosisForm, // 👈 GARDER L'ORIGINAL
     },
     {
       id: 4,
-      title: "Documents Mauriciens", // 👈 NOUVEAU TITRE
+      title: "Documents Mauriciens",
       description: "Édition des 4 documents médicaux mauriciens",
       icon: <Activity className="h-5 w-5" />,
-      component: MedicalWorkflow, // 👈 CHANGÉ
+      component: MedicalWorkflow, // 👈 NOUVEAU
     },
     {
       id: 5,
@@ -139,7 +139,7 @@ export default function MedicalAIExpert() {
           onNext: handleNext,
           onPrevious: handlePrevious,
         }
-      case 3:
+      case 3: // 👈 DIAGNOSTIC FORM (votre original)
         return {
           ...commonProps,
           patientData,
@@ -149,15 +149,15 @@ export default function MedicalAIExpert() {
           onNext: handleNext,
           onPrevious: handlePrevious,
         }
-      case 4: // 👈 MODIFIÉ pour MedicalWorkflow
+      case 4: // 👈 MEDICAL WORKFLOW (nouveau)
         return {
           ...commonProps,
           patientData,
           clinicalData,
           questionsData,
           diagnosisData, // 👈 Données du diagnostic
-          onComplete: handleMedicalWorkflowComplete, // 👈 Callback quand terminé
-          onBack: handlePrevious, // 👈 Retour au diagnostic
+          onComplete: handleMedicalWorkflowComplete,
+          onBack: handlePrevious,
         }
       case 5:
         return {
