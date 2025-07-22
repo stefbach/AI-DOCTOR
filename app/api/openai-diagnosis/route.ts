@@ -1407,7 +1407,8 @@ Génère UNIQUEMENT le JSON médical expert - Aucun texte avant/après.`
       },
       
       // ========== DONNÉES ENCYCLOPÉDIQUES COMPLÈTES ==========
-      expert_analysis: compatibleAnalysis,
+      expertAnalysis: compatibleAnalysis,  // ← CHANGÉ: expertAnalysis au lieu de expert_analysis
+      expert_analysis: compatibleAnalysis, // ← GARDÉ pour compatibilité
       comprehensive_reports: expertReports,
       
       // ========== MÉTADONNÉES AMÉLIORÉES ==========
