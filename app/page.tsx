@@ -75,8 +75,10 @@ export default function MedicalAIExpert() {
       title: "Documents Mauriciens",
       description: "Édition des 4 documents médicaux mauriciens",
       icon: <Activity className="h-5 w-5" />,
-      component: MedicalWorkflow, // 👈 NOUVEAU
+      component: MedicalWorkflow, // 👈 NOUVEAU - ÉTAPE FINALE
     },
+    // ÉTAPE 6 SUPPRIMÉE - était redondante
+    /*
     {
       id: 5,
       title: t('steps.completeConsultation.title'),
@@ -84,6 +86,7 @@ export default function MedicalAIExpert() {
       icon: <FileText className="h-5 w-5" />,
       component: IntegratedMedicalConsultation,
     },
+    */
   ]
 
   const progress = ((currentStep + 1) / steps.length) * 100
@@ -102,14 +105,20 @@ export default function MedicalAIExpert() {
 
   const handleWorkflowComplete = (result: any) => {
     setWorkflowResult(result)
-    setCurrentStep(5) // Go to complete consultation
+    // Plus besoin de rediriger vers une étape 6 - le workflow se termine ici
+    console.log('Workflow terminé:', result)
   }
 
-  // 👈 NOUVELLE FONCTION pour gérer la fin du MedicalWorkflow
+  // 👈 FONCTION MODIFIÉE - plus besoin de rediriger vers étape 5
   const handleMedicalWorkflowComplete = (result: any) => {
     setWorkflowResult(result)
-    // Passer automatiquement à l'étape suivante
-    setCurrentStep(5)
+    // Le workflow se termine ici - l'étape 4 est maintenant la finale
+    console.log('Workflow médical terminé:', result)
+  }
+
+  // 👈 NOUVELLE FONCTION - Navigation directe vers une étape
+  const handleStepClick = (stepIndex: number) => {
+    setCurrentStep(stepIndex)
   }
 
   const getCurrentStepProps = () => {
@@ -149,7 +158,7 @@ export default function MedicalAIExpert() {
           onNext: handleNext,
           onPrevious: handlePrevious,
         }
-      case 4: // 👈 MEDICAL WORKFLOW (nouveau)
+      case 4: // 👈 MEDICAL WORKFLOW (nouveau) - ÉTAPE FINALE
         return {
           ...commonProps,
           patientData,
@@ -159,12 +168,7 @@ export default function MedicalAIExpert() {
           onComplete: handleMedicalWorkflowComplete,
           onBack: handlePrevious,
         }
-      case 5:
-        return {
-          ...commonProps,
-          patientData,
-          result: workflowResult,
-        }
+      // SUPPRIMÉ: case 5 - Était redondant
       default:
         return commonProps
     }
@@ -231,24 +235,35 @@ export default function MedicalAIExpert() {
               </div>
               <Progress value={progress} className="mb-4" />
 
-              {/* Steps */}
+              {/* Steps - Cliquables pour navigation directe */}
               <div className="flex justify-between">
                 {steps.map((step, index) => (
                   <div
                     key={step.id}
-                    className={`flex flex-col items-center text-center ${
+                    onClick={() => handleStepClick(index)}
+                    className={`flex flex-col items-center text-center cursor-pointer transition-all duration-200 hover:scale-105 ${
                       index <= currentStep ? "text-blue-600" : "text-gray-400"
+                    } ${
+                      index === currentStep ? "transform scale-110" : ""
                     }`}
                   >
                     <div
-                      className={`flex items-center justify-center w-10 h-10 rounded-full mb-2 ${
-                        index <= currentStep ? "bg-blue-100" : "bg-gray-100"
+                      className={`flex items-center justify-center w-10 h-10 rounded-full mb-2 transition-all duration-200 ${
+                        index === currentStep 
+                          ? "bg-blue-600 text-white shadow-lg" 
+                          : index < currentStep 
+                            ? "bg-blue-100 hover:bg-blue-200" 
+                            : "bg-gray-100 hover:bg-gray-200"
                       }`}
                     >
                       {step.icon}
                     </div>
                     <div className="hidden md:block">
-                      <p className="text-xs font-medium">{step.title}</p>
+                      <p className={`text-xs font-medium ${
+                        index === currentStep ? "font-bold" : ""
+                      }`}>
+                        {step.title}
+                      </p>
                       <p className="text-xs text-gray-500">{step.description}</p>
                     </div>
                   </div>
@@ -274,7 +289,8 @@ export default function MedicalAIExpert() {
         {/* Step content */}
         {CurrentStepComponent && <CurrentStepComponent {...getCurrentStepProps()} />}
 
-        {/* System information */}
+        {/* SECTION SYSTEM INFORMATION SUPPRIMÉE - Était redondante */}
+        {/*
         <div className="mt-8">
           <Card>
             <CardContent className="p-4">
@@ -299,6 +315,7 @@ export default function MedicalAIExpert() {
             </CardContent>
           </Card>
         </div>
+        */}
       </div>
     </div>
   )
