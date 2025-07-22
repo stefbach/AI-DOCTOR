@@ -268,17 +268,21 @@ function determineUrgencyLevel(questions: any[]): string {
 
 function suggestWorkup(patientData: any, clinicalData: any): string[] {
   const workup = []
-  const symptoms = `${clinicalData.symptoms || ""} ${clinicalData.chiefComplaint || ""}`.toLowerCase()
   
-  if (symptoms.includes("thorax") || symptoms.includes("poitrine")) {
+  // Utilisation de la fonction helper sécurisée  
+  const symptoms = safeStringConversion(clinicalData.symptoms)
+  const chiefComplaint = safeStringConversion(clinicalData.chiefComplaint)
+  const combinedSymptoms = `${symptoms} ${chiefComplaint}`
+  
+  if (combinedSymptoms.includes("thorax") || combinedSymptoms.includes("poitrine")) {
     workup.push("ECG 12 dérivations + troponines", "Rx thorax", "Écho-cardiographie si clinique évocatrice")
   }
   
-  if (symptoms.includes("fièvre") || (clinicalData.vitalSigns?.temperature && parseFloat(clinicalData.vitalSigns.temperature) > 37.5)) {
+  if (combinedSymptoms.includes("fièvre") || (clinicalData.vitalSigns?.temperature && parseFloat(String(clinicalData.vitalSigns.temperature)) > 37.5)) {
     workup.push("Hémocultures x2", "CRP + PCT", "ECBU", "NFS + CRP + ionogramme")
   }
   
-  if (symptoms.includes("céphal") || symptoms.includes("tête")) {
+  if (combinedSymptoms.includes("céphal") || combinedSymptoms.includes("tête")) {
     workup.push("Fond d'œil + examen neurologique", "TDM cérébrale si red flags", "PL si suspicion méningite")
   }
   
@@ -357,6 +361,20 @@ function getBMICategory(weight: number, height: number): string {
   return "Obésité sévère (très haut risque CV)"
 }
 
+// Helper pour sécuriser les données textuelles
+function safeStringConversion(data: any): string {
+  try {
+    if (!data) return ""
+    if (typeof data === 'string') return data.toLowerCase()
+    if (Array.isArray(data)) return data.join(' ').toLowerCase()
+    if (typeof data === 'object') return Object.values(data).join(' ').toLowerCase()
+    return String(data).toLowerCase()
+  } catch (error) {
+    console.warn("Erreur lors de la conversion de données:", error)
+    return ""
+  }
+}
+
 function getCardiovascularRisk(patientData: any): string {
   const risks = []
   const age = patientData.age
@@ -384,8 +402,10 @@ function getImmuneStatus(patientData: any): string {
   if (patientData.medicalHistory?.includes("Diabète")) immunoRisks.push("Diabète")
   if (patientData.medicalHistory?.includes("Insuffisance rénale")) immunoRisks.push("IRC")
   if (patientData.medicalHistory?.includes("Cancer")) immunoRisks.push("Néoplasie")
-  if (patientData.currentMedicationsText?.toLowerCase().includes("corticoïdes")) immunoRisks.push("Corticothérapie")
-  if (patientData.currentMedicationsText?.toLowerCase().includes("immunosuppresseur")) immunoRisks.push("Immunosuppression")
+  
+  const medications = safeStringConversion(patientData.currentMedicationsText)
+  if (medications.includes("corticoïdes")) immunoRisks.push("Corticothérapie")
+  if (medications.includes("immunosuppresseur")) immunoRisks.push("Immunosuppression")
   
   return immunoRisks.length > 0 ? `Terrain fragilisé: ${immunoRisks.join(", ")}` : "Terrain immunocompétent"
 }
@@ -480,8 +500,9 @@ function assessMedicalExpertLevel(questions: any[]): {
 }
 
 function generateSmartFallbackQuestions(patientData: any, clinicalData: any, askedElements: string[]) {
-  const symptoms = clinicalData.symptoms?.toLowerCase() || ""
-  const chiefComplaint = clinicalData.chiefComplaint?.toLowerCase() || ""
+  // Utilisation de la fonction helper sécurisée
+  const symptoms = safeStringConversion(clinicalData.symptoms)
+  const chiefComplaint = safeStringConversion(clinicalData.chiefComplaint)
   const combinedSymptoms = `${symptoms} ${chiefComplaint}`
 
   let questions = []
