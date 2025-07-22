@@ -216,9 +216,11 @@ export default function MedicalAIExpert() {
                   EN
                 </Button>
               </div>
+              {/* BADGE GPT-4o + APIs SUPPRIMÉ
               <Badge variant="outline" className="text-lg px-4 py-2">
                 GPT-4o + APIs {t('mainPage.medical')}
               </Badge>
+              */}
             </div>
           </div>
 
