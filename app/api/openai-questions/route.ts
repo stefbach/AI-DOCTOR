@@ -44,16 +44,15 @@ export async function POST(request: NextRequest) {
     const askedElements = extractAlreadyAskedElements(patientData, clinicalData)
     
     const prompt = `
-En tant que CLINICIEN EXPERT de haut niveau à l'île Maurice, générez des questions diagnostiques de NIVEAU SPÉCIALISTE basées sur une approche médicale avancée et evidence-based.
+En tant que CLINICIEN EXPERT à l'île Maurice, générez des questions diagnostiques ÉQUILIBRÉES et DIDACTIQUES combinant expertise médicale et accessibilité patient.
 
-APPROCHE EXPERT REQUISE:
-1. **Stratification du risque** immédiate (urgence vitale vs différée)
-2. **Scores cliniques validés** (HEART, SIRS, qSOFA, IHS, Glasgow, ABCD2, etc.)  
-3. **Diagnostic différentiel hiérarchisé** par probabilité et gravité
-4. **Phénotypage précis** des symptômes selon physiopathologie
-5. **Red flags** spécifiques nécessitant prise en charge immédiate
-6. **Corrélations physiopathologiques** avancées
-7. **Guidelines internationales** (ESC, AHA, IHS, IDSA)
+APPROCHE EXPERTE ÉQUILIBRÉE:
+1. **Questions accessibles** (70%) : Compréhensibles par tous, langage simple
+2. **Questions techniques** (30%) : Scores cliniques avec EXPLICATIONS claires
+3. **Pédagogie médicale** : Expliquer POURQUOI chaque question est importante
+4. **Diagnostic différentiel** par probabilité mais expliqué simplement
+5. **Red flags** décrits en termes compréhensibles
+6. **Équilibre** : Pas que des scores, mais aussi ressenti patient
 
 PATIENT (Analyse complète du terrain):
 - ${patientData.firstName} ${patientData.lastName}, ${patientData.age} ans, ${patientData.gender}
@@ -79,32 +78,58 @@ CONTEXTE MAURICIEN (Épidémiologie locale intégrée):
 - Résistances locales connues, patterns épidémiologiques
 - Facteurs environnementaux (climat tropical, saison cyclonique)
 
-EXPERTISE CLINIQUE PAR SYNDROME:
+EXPERTISE CLINIQUE ÉQUILIBRÉE PAR SYNDROME:
 
-**DOULEUR THORACIQUE** (Niveau cardiologique):
-- Score HEART (History, ECG, Age, Risk factors, Troponin)
-- Critères ESC pour SCA: douleur typique/atypique/non-angineuse  
-- Stratification TIMI risk score si SCA
-- Diagnostic différentiel: cardiaque (ICS, péricardite, dissection aortique) vs non-cardiaque
+**DOULEUR THORACIQUE** (Approche mixte):
+- Questions accessibles: intensité, localisation, déclencheurs, ressenti
+- Questions techniques: Score HEART (EXPLIQUÉ = évaluation du risque cardiaque en 5 critères)
+- Explication : "Ce score nous aide à évaluer si votre douleur pourrait venir du cœur"
 
-**SYNDROME FÉBRILE** (Niveau infectiologique):
-- Critères SIRS (Systemic Inflammatory Response Syndrome) 
-- qSOFA score si suspicion sepsis (pression systolique, échelle Glasgow, fréquence respiratoire)
-- Pattern fébrile diagnostique: continu/intermittent/ondulant/récurrent
-- Foyers infectieux selon terrain et contexte mauricien
+**SYNDROME FÉBRILE** (Approche mixte):
+- Questions accessibles: début, évolution, symptômes associés, impact
+- Questions techniques: Critères SIRS (EXPLIQUÉ = signes d'infection générale grave)
+- Explication : "Ces signes nous disent si l'infection s'étend dans votre corps"
 
-**CÉPHALÉES** (Niveau neurologique):
-- Red flags urgents: thunderclap, signes focaux, fièvre + raideur nucale
-- Critères IHS (International Headache Society) pour diagnostic précis
-- Stratification: primaire vs secondaire avec niveau de risque
-- Score ABCD2 si suspicion AIT
+**CÉPHALÉES** (Approche mixte):
+- Questions accessibles: type de douleur, déclencheurs, fréquence
+- Questions techniques: Red flags (EXPLIQUÉS = signes d'urgence neurologique)
+- Explication : "Ces questions identifient les maux de tête qui nécessitent une attention immédiate"
 
-**DYSPNÉE** (Niveau pneumologique/cardiologique):
-- Classification NYHA si origine cardiaque
-- Critères de Wells pour embolie pulmonaire  
-- Scores de gravité selon contexte (CURB-65 si pneumonie)
+GÉNÉRATION ÉQUILIBRÉE - 5-8 QUESTIONS MIXTES:
 
-GÉNÉRATION EXPERT - 5-8 QUESTIONS DE HAUT NIVEAU:
+RÉPARTITION OBLIGATOIRE:
+- 3-4 questions ACCESSIBLES (langage simple, expérience patient)
+- 2-3 questions TECHNIQUES (scores expliqués, orientées diagnostic)
+- 1 question GLOBALE (impact, inquiétudes, attentes)
+
+Format JSON didactique requis:
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "Question en langage accessible ou technique selon le type",
+      "type": "multiple_choice",
+      "options": ["Option claire", "Option compréhensible", "Option explicite", "Option accessible"],
+      "rationale": "Justification SIMPLE et CLAIRE du pourquoi de cette question",
+      "category": "accessible|technical|global",
+      "complexity_level": "simple|moderate|advanced",
+      "medical_explanation": "Explication didactique de l'intérêt médical",
+      "clinical_score": "HEART|SIRS|qSOFA - UNIQUEMENT si question technique",
+      "score_explanation": "Explication claire et simple de ce qu'est ce score",
+      "patient_benefit": "Pourquoi cette question aide le patient",
+      "diagnostic_value": "high|medium|low"
+    }
+  ]
+}
+
+RÈGLES ÉQUILIBRE OBLIGATOIRES:
+✓ 70% questions simples et accessibles
+✓ 30% questions techniques AVEC explications
+✓ Scores cliniques EXPLIQUÉS en termes simples
+✓ Rationale TOUJOURS compréhensible par le patient
+✓ Éviter le jargon médical non expliqué
+✓ Inclure questions sur ressenti/inquiétudes patient
+✓ Équilibrer expertise et humanité
 
 Format JSON expert requis:
 {
@@ -126,25 +151,25 @@ Format JSON expert requis:
   ]
 }
 
-CRITÈRES NIVEAU EXPERT OBLIGATOIRES:
-✓ Questions basées sur scores cliniques validés
-✓ Stratification de risque immédiate (vital/urgent/différé)  
-✓ Terminologie médicale précise de spécialiste
-✓ Red flags spécifiques par syndrome
-✓ Corrélations physiopathologiques avancées
-✓ Clinical pearls et pièges diagnostiques
-✓ Evidence level selon guidelines internationales
-✓ Orientation examens complémentaires si pertinent
-✓ Éléments pronostiques
+CRITÈRES EXPERT ÉQUILIBRÉS OBLIGATOIRES:
+✓ Questions accessibles en langage simple (majorité)
+✓ Questions techniques avec explications didactiques (minorité)
+✓ Scores cliniques EXPLIQUÉS quand utilisés
+✓ Rationale compréhensible par patient non-médecin
+✓ Équilibre expertise/humanité/accessibilité
+✓ Red flags décrits simplement mais précisément
+✓ Éviter jargon médical non expliqué
+✓ Inclure ressenti et impact sur qualité de vie
+✓ Questions pratiques et concrètes
 
-RÈGLES EXPERT:
-- Utiliser OBLIGATOIREMENT des scores cliniques reconnus  
-- Stratifier SYSTÉMATIQUEMENT le risque
-- Intégrer les red flags spécifiques
-- Baser sur guidelines internationales
-- Éviter questions génériques/basiques
-- Niveau spécialiste en terminologie médicale
-- Contexte mauricien intégré sans questions d'exposition
+RÈGLES EXPERT DIDACTIQUE:
+- Utiliser scores cliniques UNIQUEMENT si nécessaire ET expliqués
+- Privilégier questions compréhensibles par tous
+- Expliquer POURQUOI chaque question est utile
+- Équilibrer technique et humain
+- Éviter questions trop complexes sans bénéfice
+- Contexte mauricien intégré naturellement
+- Pas de questions d'exposition tropicale
 `
 
     const result = await generateText({
@@ -215,22 +240,24 @@ RÈGLES EXPERT:
         
         // Contexte et approche
         location: "Maurice",
-        approach: "expert-level-evidence-based",
+        approach: "expert-balanced-didactic",
         medicalLevel: finalAssessment.level,
         medicalScore: finalAssessment.score,
+        questionBalance: finalAssessment.balance,
         
         // Exclusions et filtres
         excludedElements: askedElements,
         tropicalExposureQuestionsExcluded: true,
         
-        // Analyse qualité experte
+        // Analyse qualité experte équilibrée
         expertFeatures: {
+          accessibleQuestions: questionsData.questions.filter(q => q.category === 'accessible').length,
+          technicalQuestionsExplained: questionsData.questions.filter(q => q.category === 'technical' && q.score_explanation).length,
+          globalQuestions: questionsData.questions.filter(q => q.category === 'global').length,
           clinicalScoresUsed: questionsData.questions.filter(q => q.clinical_score).length,
-          redFlagsIdentified: questionsData.questions.filter(q => q.red_flags).length,
-          evidenceLevelA: questionsData.questions.filter(q => q.evidence_level === 'A').length,
-          riskStratificationQuestions: questionsData.questions.filter(q => q.category === 'risk_stratification').length,
-          physiopathologyExplained: questionsData.questions.filter(q => q.physiopathology).length,
-          clinicalPearls: questionsData.questions.filter(q => q.clinical_pearls).length,
+          explainedScores: questionsData.questions.filter(q => q.score_explanation).length,
+          patientBenefitExplained: questionsData.questions.filter(q => q.patient_benefit).length,
+          medicalExplanations: questionsData.questions.filter(q => q.medical_explanation).length,
         },
         
         // Détails de l'évaluation
@@ -250,13 +277,13 @@ RÈGLES EXPERT:
       }
     }
 
-    console.log(`✅ Questions niveau EXPERT générées: ${questionsData.questions.length} - Niveau médical: ${finalAssessment.level}`)
+    console.log(`✅ Questions niveau EXPERT ÉQUILIBRÉ générées: ${questionsData.questions.length} - Niveau: ${finalAssessment.level} - Équilibre: ${finalAssessment.balance.accessible}A/${finalAssessment.balance.technical}T/${finalAssessment.balance.global}G`)
     return NextResponse.json(response)
   } catch (error: any) {
     console.error("❌ Erreur Questions IA:", error)
     return NextResponse.json(
       {
-        error: "Erreur lors de la génération des questions niveau expert",
+        error: "Erreur lors de la génération des questions niveau expert équilibré",
         details: error.message,
         success: false,
         timestamp: new Date().toISOString(),
@@ -383,46 +410,50 @@ function deduplicateExpertQuestions(questions: any[], askedElements: string[]): 
   })
 }
 
-// Fonction d'évaluation du niveau médical des questions générées
+// Fonction d'évaluation du niveau médical des questions générées - approche équilibrée
 function assessMedicalExpertLevel(questions: any[]): {
   level: string;
   score: number;
   details: string[];
+  balance: { accessible: number; technical: number; global: number };
 } {
   let expertScore = 0
   const totalQuestions = questions.length
   const details: string[] = []
+  const balance = { accessible: 0, technical: 0, global: 0 }
 
   questions.forEach((q, index) => {
     let questionScore = 0
     
-    // Critères niveau expert (scoring)
-    if (q.clinical_score) {
+    // Comptage pour équilibre
+    if (q.category === 'accessible') balance.accessible++
+    else if (q.category === 'technical') balance.technical++
+    else if (q.category === 'global') balance.global++
+    
+    // Critères niveau expert équilibré (scoring)
+    if (q.clinical_score && q.score_explanation) {
       questionScore += 3
-      details.push(`Q${index + 1}: Score clinique validé (${q.clinical_score})`)
+      details.push(`Q${index + 1}: Score clinique expliqué (${q.clinical_score})`)
     }
-    if (q.evidence_level) {
+    if (q.medical_explanation) {
       questionScore += 2
-      details.push(`Q${index + 1}: Evidence level ${q.evidence_level}`)
+      details.push(`Q${index + 1}: Explication médicale didactique`)
     }
-    if (q.clinical_pearls) {
+    if (q.patient_benefit) {
       questionScore += 2
-      details.push(`Q${index + 1}: Clinical pearls inclus`)
+      details.push(`Q${index + 1}: Bénéfice patient expliqué`)
     }
-    if (q.red_flags) {
+    if (q.complexity_level === 'simple' && q.rationale) {
       questionScore += 2
-      details.push(`Q${index + 1}: Red flags spécifiés`)
+      details.push(`Q${index + 1}: Question accessible avec rationale claire`)
     }
-    if (q.physiopathology) {
+    if (q.category === 'technical' && q.score_explanation) {
+      questionScore += 2
+      details.push(`Q${index + 1}: Question technique avec explication`)
+    }
+    if (q.category === 'global') {
       questionScore += 1
-      details.push(`Q${index + 1}: Physiopathologie expliquée`)
-    }
-    if (q.category?.includes('risk_stratification')) {
-      questionScore += 2
-      details.push(`Q${index + 1}: Stratification de risque`)
-    }
-    if (q.rationale?.includes('validé') || q.rationale?.includes('guidelines')) {
-      questionScore += 1
+      details.push(`Q${index + 1}: Dimension humaine/globale`)
     }
     if (q.diagnostic_value === 'high') {
       questionScore += 1
@@ -432,18 +463,32 @@ function assessMedicalExpertLevel(questions: any[]): {
   })
 
   const averageScore = expertScore / totalQuestions
+  
+  // Évaluation de l'équilibre
+  const accessibleRatio = balance.accessible / totalQuestions
+  const technicalRatio = balance.technical / totalQuestions
+  const globalRatio = balance.global / totalQuestions
+  
+  // Bonus pour équilibre idéal (70% accessible, 30% technique/global)
+  let balanceBonus = 0
+  if (accessibleRatio >= 0.6 && accessibleRatio <= 0.8) balanceBonus += 1
+  if (technicalRatio >= 0.2 && technicalRatio <= 0.4) balanceBonus += 1
+  if (globalRatio >= 0.1) balanceBonus += 0.5
+
+  const finalScore = averageScore + balanceBonus
 
   let level: string
-  if (averageScore >= 10) level = "Expert+ (niveau professeur/chef de service)"
-  else if (averageScore >= 7) level = "Expert (niveau spécialiste senior)"
-  else if (averageScore >= 5) level = "Avancé (médecin expérimenté/spécialiste junior)"  
-  else if (averageScore >= 3) level = "Intermédiaire (médecin généraliste)"
-  else level = "Basique (médecin junior)"
+  if (finalScore >= 10) level = "Expert équilibré+ (niveau professeur patient-centré)"
+  else if (finalScore >= 8) level = "Expert équilibré (spécialiste didactique)"
+  else if (finalScore >= 6) level = "Avancé équilibré (médecin expérimenté accessible)"  
+  else if (finalScore >= 4) level = "Intermédiaire équilibré (médecin généraliste didactique)"
+  else level = "Basique (questions simples)"
 
   return {
     level,
-    score: Math.round(averageScore * 10) / 10,
-    details
+    score: Math.round(finalScore * 10) / 10,
+    details,
+    balance
   }
 }
 
@@ -456,232 +501,229 @@ function generateSmartFallbackQuestions(patientData: any, clinicalData: any, ask
   let questions = []
 
   if (combinedSymptoms.includes("douleur") && (combinedSymptoms.includes("thorax") || combinedSymptoms.includes("poitrine"))) {
-    // Questions niveau expert cardiologique
+    // Questions équilibrées cardiologiques (accessibles + techniques)
     questions = [
       {
         id: 1,
-        question: "Selon les critères du score HEART, cette douleur thoracique présente-t-elle les caractéristiques d'une douleur angineuse typique?",
+        question: "Comment décririez-vous votre douleur thoracique en quelques mots simples?",
         type: "multiple_choice",
         options: [
-          "Typique: constrictive, rétrosternale, déclenchée par l'effort (2 points)", 
-          "Atypique: 2 critères sur 3 seulement (1 point)",
-          "Non-angineuse: 1 critère ou moins (0 point)",
-          "Douleur pleurétique/positionnelle (0 point)"
+          "Comme un poids ou une pression sur la poitrine", 
+          "Comme une brûlure ou des picotements",
+          "Comme un coup de poignard ou une déchirure",
+          "Difficile à décrire, sensation bizarre"
         ],
-        rationale: "Score HEART validé (History, ECG, Age, Risk, Troponin) pour stratification du risque de SCA avec VPP >95% si score ≥7",
-        category: "risk_stratification",
-        diagnostic_value: "high",
-        clinical_score: "HEART",
-        evidence_level: "A",
-        clinical_pearls: "Douleur typique + FR CV multiples = score HEART élevé → hospitalisation systématique",
-        red_flags: "Douleur déchirante irradiant dans le dos = suspicion dissection aortique",
-        physiopathology: "Ischémie myocardique par déséquilibre offre/demande en O2"
+        rationale: "La façon dont vous décrivez votre douleur nous aide à comprendre d'où elle pourrait venir",
+        category: "accessible",
+        complexity_level: "simple",
+        medical_explanation: "Les différents types de douleur thoracique orientent vers différentes causes possibles",
+        patient_benefit: "Aide le médecin à mieux comprendre votre ressenti et orienter le diagnostic",
+        diagnostic_value: "high"
       },
       {
         id: 2,
-        question: "Y a-t-il des signes cliniques d'insuffisance cardiaque aiguë selon les critères de Framingham modifiés?",
+        question: "Selon l'évaluation HEART (un score médical d'évaluation du risque cardiaque), votre douleur présente-t-elle des caractéristiques inquiétantes?",
         type: "multiple_choice",
         options: [
-          "Critères majeurs: orthopnée + DPN + œdèmes + râles crépitants",
-          "Critères mineurs: tachycardie + galop + turgescence jugulaire", 
-          "Signe isolé: dyspnée d'effort ou œdèmes déclives",
-          "Aucun signe d'insuffisance cardiaque"
+          "Douleur typique: oppressante, au centre, déclenchée par l'effort",
+          "Douleur atypique: quelques caractéristiques seulement", 
+          "Douleur non-cardiaque: localisée, positionnelle",
+          "Je ne sais pas comment la caractériser"
         ],
-        rationale: "IC aiguë sur SCA = facteur pronostique majeur nécessitant prise en charge spécialisée immédiate",
-        category: "prognostic_factors",
-        diagnostic_value: "high",
-        clinical_score: "Framingham",
-        evidence_level: "A",
-        clinical_pearls: "IC + SCA = Killip >II → mortalité >30% sans revascularisation urgente",
-        red_flags: "OAP + douleur thoracique = urgence cardiologique absolue"
+        rationale: "Le score HEART nous aide à évaluer rapidement si votre douleur pourrait venir du cœur",
+        category: "technical",
+        complexity_level: "moderate",
+        clinical_score: "HEART",
+        score_explanation: "HEART est un score simple qui évalue 5 critères pour déterminer le risque que la douleur vienne du cœur",
+        medical_explanation: "Ce score validé permet une évaluation standardisée du risque cardiaque",
+        patient_benefit: "Permet de déterminer rapidement si des examens cardiaques urgents sont nécessaires",
+        diagnostic_value: "high"
       },
       {
         id: 3,
-        question: "Évaluation de la probabilité pré-test d'embolie pulmonaire selon le score de Wells révisé?",
+        question: "Comment cette douleur impacte-t-elle votre vie quotidienne en ce moment?",
         type: "multiple_choice",
         options: [
-          "Probabilité forte >6 points: TVP + tachycardie + hémoptysie",
-          "Probabilité intermédiaire 2-6 points: FR isolés ou symptômes frustes", 
-          "Probabilité faible <2 points: diagnostic alternatif plus probable",
-          "Score non applicable au contexte clinique"
+          "Je peux faire toutes mes activités normalement",
+          "Je dois ralentir ou éviter certains efforts", 
+          "J'ai du mal à faire mes activités habituelles",
+          "Je suis très limité(e) dans mes mouvements"
         ],
-        rationale: "Wells score pour EP validé avec D-dimères pour exclure EP si probabilité faible",
-        category: "differential_diagnosis",
-        diagnostic_value: "high", 
-        clinical_score: "Wells",
-        evidence_level: "A",
-        clinical_pearls: "Wells faible + D-dimères normaux = EP exclue (VPN >99%)"
+        rationale: "Comprendre l'impact sur votre quotidien nous aide à évaluer la gravité et l'urgence",
+        category: "global",
+        complexity_level: "simple",
+        medical_explanation: "L'évaluation fonctionnelle est essentielle pour adapter la prise en charge",
+        patient_benefit: "Assure que votre qualité de vie est prise en compte dans le traitement",
+        diagnostic_value: "medium"
       }
     ]
   } else if (combinedSymptoms.includes("fièvre") || (clinicalData.vitalSigns?.temperature && parseFloat(String(clinicalData.vitalSigns.temperature)) > 37.5)) {
-    // Questions niveau expert infectiologique
+    // Questions équilibrées infectiologiques (accessibles + techniques)
     questions = [
       {
         id: 1,
-        question: "Le patient présente-t-il des critères SIRS (Systemic Inflammatory Response Syndrome) évoquant un sepsis?",
+        question: "Comment votre fièvre évolue-t-elle depuis qu'elle a commencé?",
         type: "multiple_choice",
         options: [
-          "≥2 critères SIRS: T°>38°C ou <36°C, FC>90, FR>20, GB>12000 ou <4000",
-          "1 seul critère SIRS présent",
-          "Aucun critère SIRS (fièvre isolée)", 
-          "SIRS + dysfonction d'organe (sepsis sévère)"
+          "Elle reste haute en permanence",
+          "Elle monte et descend plusieurs fois par jour",
+          "Elle apparaît par épisodes puis disparaît complètement", 
+          "Elle diminue progressivement depuis le début"
         ],
-        rationale: "SIRS ≥2 critères + foyer infectieux suspecté = sepsis nécessitant surveillance rapprochée et antibiothérapie précoce",
-        category: "risk_stratification", 
-        diagnostic_value: "high",
-        clinical_score: "SIRS",
-        evidence_level: "A",
-        clinical_pearls: "SIRS + lactates >2mmol/L ou PAS <90mmHg = sepsis sévère → réanimation",
-        red_flags: "Choc septique si hypotension réfractaire + dysfonction multi-organe",
-        physiopathology: "Réponse inflammatoire systémique à l'infection avec libération de cytokines"
+        rationale: "Le comportement de la fièvre nous donne des indices importants sur le type d'infection",
+        category: "accessible",
+        complexity_level: "simple",
+        medical_explanation: "Les patterns fébriles différents suggèrent différents types d'infections",
+        patient_benefit: "Aide à identifier le type d'infection pour mieux la traiter",
+        diagnostic_value: "high"
       },
       {
         id: 2,
-        question: "Quel pattern temporal fébrile présente le patient (valeur diagnostique différentielle)?",
+        question: "Présentez-vous des signes SIRS (signes d'infection généralisée) qui pourraient indiquer une infection sévère?",
         type: "multiple_choice",
         options: [
-          "Continue (variation <1°C): infections bactériennes, virales classiques",
-          "Intermittente (retour à normale): abcès profonds, paludisme, pyélonéphrite",
-          "Ondulante type Pel-Ebstein: lymphomes, brucellose", 
-          "Récurrente périodique: fièvres héréditaires auto-inflammatoires"
+          "Oui: fièvre élevée + cœur qui bat vite + respiration rapide",
+          "Partiellement: seulement un ou deux de ces signes",
+          "Non: juste de la fièvre sans autres signes", 
+          "Je ne sais pas reconnaître ces signes"
         ],
-        rationale: "Pattern fébrile spécifique oriente vers étiologies précises selon physiopathologie sous-jacente",
-        category: "phenotyping",
-        diagnostic_value: "high",
-        clinical_pearls: "Fièvre ondulante + splénomégalie + adénopathies = suspicion hématologique urgente",
-        evidence_level: "B",
-        physiopathology: "Cinétique de libération des pyrogènes selon le pathogène et l'hôte"
+        rationale: "Les critères SIRS nous aident à détecter rapidement si l'infection devient grave",
+        category: "technical", 
+        complexity_level: "moderate",
+        clinical_score: "SIRS",
+        score_explanation: "SIRS = Syndrome de Réponse Inflammatoire Systémique, soit des signes que l'infection s'étend dans tout le corps",
+        medical_explanation: "Ces critères permettent de détecter précocement un sepsis nécessitant une prise en charge urgente",
+        patient_benefit: "Détection rapide des infections graves pour un traitement adapté",
+        diagnostic_value: "high"
       },
       {
         id: 3,
-        question: "Évaluation qSOFA (quick Sequential Organ Failure Assessment) pour détection rapide du sepsis?",
+        question: "Quelles sont vos principales inquiétudes concernant cette fièvre?",
         type: "multiple_choice",
         options: [
-          "qSOFA ≥2: PAS ≤100mmHg + FR ≥22/min + Glasgow <15",
-          "qSOFA = 1: un seul critère présent",
-          "qSOFA = 0: aucun critère de dysfonction d'organe", 
-          "Évaluation impossible (données manquantes)"
+          "J'ai peur que ce soit grave et que ça s'aggrave",
+          "Je m'inquiète de ne pas pouvoir travailler/m'occuper de ma famille",
+          "Je crains les complications ou la contagion", 
+          "Je ne suis pas particulièrement inquiet(e)"
         ],
-        rationale: "qSOFA ≥2 = risque de mortalité >10% nécessitant prise en charge intensive immédiate",
-        category: "risk_stratification",
-        diagnostic_value: "high",
-        clinical_score: "qSOFA", 
-        evidence_level: "A",
-        clinical_pearls: "qSOFA plus prédictif de mortalité que SIRS chez patient infecté",
-        red_flags: "qSOFA ≥2 = sepsis sévère jusqu'à preuve du contraire"
+        rationale: "Vos inquiétudes nous aident à adapter notre approche et nos explications",
+        category: "global",
+        complexity_level: "simple",
+        medical_explanation: "La dimension psychologique et sociale est importante dans la prise en charge",
+        patient_benefit: "Permet d'adapter les soins à vos préoccupations personnelles",
+        diagnostic_value: "medium"
       }
     ]
   } else if (combinedSymptoms.includes("céphal") || combinedSymptoms.includes("tête")) {
-    // Questions niveau expert neurologique
+    // Questions équilibrées neurologiques (accessibles + techniques)
     questions = [
       {
         id: 1,
-        question: "Cette céphalée présente-t-elle des red flags nécessitant une imagerie cérébrale urgente?",
+        question: "Si vous deviez expliquer votre mal de tête à un proche, comment le décririez-vous?",
         type: "multiple_choice",
         options: [
-          "Thunderclap headache (début brutal maximal) = suspicion HSA",
-          "Céphalée + fièvre + raideur nucale = suspicion méningite",
-          "Céphalée progressive + signes focaux = processus expansif", 
-          "Aucun red flag identifié (céphalée primaire probable)"
+          "Comme si ma tête allait exploser, très intense",
+          "Comme un marteau qui tape régulièrement",
+          "Comme un étau qui serre tout autour", 
+          "Une douleur sourde et constante"
         ],
-        rationale: "Red flags neurologiques = urgence diagnostique avec imagerie cérébrale en urgence selon guidelines internationales",
-        category: "red_flags",
-        diagnostic_value: "high",
-        evidence_level: "A",
-        clinical_pearls: "Thunderclap headache = angioscanner en urgence (HSA jusqu'à preuve du contraire), PL si angioscanner normal",
-        red_flags: "Céphalée inhabituelle chez >50 ans + signes focaux = AVC/processus expansif",
-        physiopathology: "Augmentation pression intracrânienne ou irritation méningée"
+        rationale: "La description de votre douleur nous aide à comprendre quel type de mal de tête vous avez",
+        category: "accessible",
+        complexity_level: "simple",
+        medical_explanation: "Les différents types de céphalées ont des caractéristiques spécifiques",
+        patient_benefit: "Aide à identifier le type de mal de tête pour un traitement adapté",
+        diagnostic_value: "high"
       },
       {
         id: 2, 
-        question: "Classification selon critères IHS (International Headache Society) - type de céphalée primaire?",
+        question: "Votre mal de tête présente-t-il des 'red flags' (signes d'alarme) qui nécessiteraient une attention médicale urgente?",
         type: "multiple_choice",
         options: [
-          "Migraine avec aura: troubles visuels >5min précédant céphalée pulsatile",
-          "Migraine sans aura: 4-72h, pulsatile, unilatérale, phono/photophobie + nausées",
-          "Céphalée de tension: bilatérale, non-pulsatile, pression/serrement", 
-          "Algie vasculaire: périorbitaire, courte (15min-3h), larmoiement + rhinorrhée"
+          "Oui: début très brutal + fièvre + raideur dans la nuque",
+          "Oui: mal de tête inhabituel + troubles de la vision/parole",
+          "Non: mal de tête 'normal' sans signes inquiétants", 
+          "Je ne sais pas identifier ces signes d'alarme"
         ],
-        rationale: "Classification IHS permet diagnostic précis et traitement spécifique adapté selon mécanisme physiopathologique",
-        category: "phenotyping", 
-        diagnostic_value: "high",
-        clinical_score: "IHS",
-        evidence_level: "A",
-        clinical_pearls: "Aura >60min ou déficit moteur = migraine compliquée → imagerie",
-        physiopathology: "Dysfonction neuro-vasculaire avec activation trigémino-vasculaire"
+        rationale: "Ces signes d'alarme nous disent si votre mal de tête nécessite des examens urgents",
+        category: "technical",
+        complexity_level: "moderate",
+        score_explanation: "Red flags = signes qui peuvent indiquer une urgence neurologique nécessitant des examens immédiats",
+        medical_explanation: "Certains maux de tête peuvent révéler des problèmes graves nécessitant une prise en charge urgente",
+        patient_benefit: "Détection rapide des maux de tête dangereux pour un traitement d'urgence si nécessaire",
+        diagnostic_value: "high"
       },
       {
         id: 3,
-        question: "Si suspicion d'AIT (Accident Ischémique Transitoire), évaluation du score ABCD2?",
+        question: "Comment ce mal de tête affecte-t-il votre capacité à fonctionner au quotidien?",
         type: "multiple_choice",
         options: [
-          "Score élevé ≥4: âge ≥60 + TA ≥140/90 + signes focaux unilatéraux + durée ≥60min",
-          "Score modéré 2-3: quelques facteurs de risque présents",
-          "Score faible 0-1: faible risque de récidive AVC", 
-          "Pas de suspicion d'AIT (symptomatologie non compatible)"
+          "Je peux continuer mes activités sans problème",
+          "Je dois adapter ou réduire certaines activités",
+          "J'ai beaucoup de difficultés à faire mes tâches habituelles", 
+          "Je suis complètement bloqué(e), incapable de faire quoi que ce soit"
         ],
-        rationale: "Score ABCD2 stratifie le risque de récidive d'AVC à 48h (score ≥4 = risque >8%)",
-        category: "risk_stratification",
-        diagnostic_value: "high",
-        clinical_score: "ABCD2", 
-        evidence_level: "A",
-        clinical_pearls: "ABCD2 ≥4 = hospitalisation + bilan étiologique urgent + antiagrégant",
-        red_flags: "AIT répétés = urgence neuro-vasculaire (risque AVC constitué très élevé)"
+        rationale: "L'impact sur votre vie quotidienne nous aide à adapter l'intensité du traitement",
+        category: "global",
+        complexity_level: "simple",
+        medical_explanation: "L'évaluation fonctionnelle guide les décisions thérapeutiques",
+        patient_benefit: "S'assure que le traitement prend en compte votre qualité de vie",
+        diagnostic_value: "medium"
       }
     ]
   } else {
-    // Questions expertes générales avec stratification de risque
+    // Questions équilibrées générales (accessibles + techniques)
     questions = [
       {
         id: 1,
-        question: "Stratification de l'urgence selon la gravité clinique et l'évolution temporelle?",
+        question: "Si vous deviez décrire vos symptômes à quelqu'un qui ne vous connaît pas, que diriez-vous?",
         type: "multiple_choice",
         options: [
-          "Urgence vitale: détérioration rapide + signes de choc/détresse",
-          "Urgence vraie: risque d'évolution défavorable sans prise en charge <6h", 
-          "Urgence relative: surveillance possible, risque différé >24h",
-          "Consultation programmée: symptômes stables, pas de red flags"
+          "C'est quelque chose de nouveau et d'inquiétant",
+          "C'est familier, j'ai déjà eu ça avant", 
+          "C'est difficile à expliquer, c'est bizarre",
+          "C'est gênant mais pas dramatique"
         ],
-        rationale: "Triage clinique expert basé sur la cinétique d'évolution et les signes de gravité",
-        category: "risk_stratification",
-        diagnostic_value: "high",
-        evidence_level: "A",
-        clinical_pearls: "Tout changement rapide d'état = réévaluation immédiate du niveau d'urgence",
-        red_flags: "Altération conscience + instabilité hémodynamique = urgence vitale"
+        rationale: "Votre propre perception nous aide à mieux comprendre ce que vous ressentez",
+        category: "accessible",
+        complexity_level: "simple",
+        medical_explanation: "Le ressenti du patient est un élément diagnostique important",
+        patient_benefit: "Permet de partir de votre expérience personnelle",
+        diagnostic_value: "medium"
       },
       {
         id: 2,
-        question: "Évaluation de l'impact fonctionnel selon l'échelle de Karnofsky modifiée?",
+        question: "Selon une évaluation médicale globale de votre état, dans quelle catégorie d'urgence vous situeriez-vous?",
         type: "multiple_choice",
         options: [
-          "Impact majeur: impossibilité activités quotidiennes (score <50)",
-          "Impact modéré: activités limitées mais autonomie préservée (50-70)", 
-          "Impact mineur: gêne occasionnelle, activités normales possibles (70-90)",
-          "Aucun impact fonctionnel: activités habituelles maintenues (90-100)"
+          "Urgence vitale: ça se dégrade vite, j'ai besoin d'aide tout de suite",
+          "Urgent: ça m'inquiète, je ne veux pas que ça empire", 
+          "Peut attendre: c'est gênant mais pas dramatique",
+          "Consultation normale: je veux juste comprendre ce qui se passe"
         ],
-        rationale: "Évaluation fonctionnelle guide l'intensité thérapeutique et le pronostic à court terme",
-        category: "prognostic_factors",
-        diagnostic_value: "medium",
-        clinical_score: "Karnofsky",
-        evidence_level: "B",
-        clinical_pearls: "Déclin fonctionnel rapide = facteur pronostique péjoratif nécessitant bilan étiologique"
+        rationale: "Votre perception de l'urgence nous aide à prioriser votre prise en charge",
+        category: "technical",
+        complexity_level: "moderate",
+        score_explanation: "Classification médicale standard pour évaluer le niveau d'urgence des symptômes",
+        medical_explanation: "L'auto-évaluation du patient complète l'évaluation médicale objective",
+        patient_benefit: "Assure que vos préoccupations sont entendues et prises en compte",
+        diagnostic_value: "high"
       },
       {
         id: 3,
-        question: "Analyse des comorbidités selon l'index de Charlson pour stratification pronostique?",
+        question: "Qu'attendez-vous le plus de cette consultation médicale?",
         type: "multiple_choice",
         options: [
-          "Score élevé ≥5: comorbidités multiples (diabète + IRC + cardiopathie)",
-          "Score modéré 2-4: quelques comorbidités significatives", 
-          "Score faible 0-1: terrain peu fragilisé",
-          "Évaluation non pertinente (patient jeune sans comorbidité)"
+          "Être rassuré(e) que ce n'est rien de grave",
+          "Obtenir un diagnostic clair et des explications", 
+          "Recevoir un traitement efficace rapidement",
+          "Comprendre comment éviter que ça recommence"
         ],
-        rationale: "Index de Charlson prédit la mortalité à 10 ans et guide les décisions thérapeutiques",
-        category: "prognostic_factors",
-        diagnostic_value: "medium",
-        clinical_score: "Charlson",
-        evidence_level: "A", 
-        clinical_pearls: "Charlson élevé modifie le rapport bénéfice/risque des interventions diagnostiques/thérapeutiques"
+        rationale: "Vos attentes nous aident à adapter notre approche pour mieux vous aider",
+        category: "global",
+        complexity_level: "simple",
+        medical_explanation: "La prise en compte des attentes du patient améliore la satisfaction et l'observance",
+        patient_benefit: "Garantit que la consultation répond à vos besoins spécifiques",
+        diagnostic_value: "low"
       }
     ]
   }
