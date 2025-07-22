@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Stethoscope, User, ClipboardList, Brain, FileText, Activity } from "lucide-react"
 
 import PatientForm from "@/components/patient-form"
@@ -21,47 +22,61 @@ export default function MedicalAIExpert() {
   const [questionsData, setQuestionsData] = useState<any>(null)
   const [diagnosisData, setDiagnosisData] = useState<any>(null)
   const [workflowResult, setWorkflowResult] = useState<any>(null)
+  const [language, setLanguage] = useState<'fr' | 'en'>('fr')
+
+  // Load language preference
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('preferred-language') as 'fr' | 'en'
+    if (savedLanguage && (savedLanguage === 'fr' || savedLanguage === 'en')) {
+      setLanguage(savedLanguage)
+    }
+  }, [])
+
+  const handleSetLanguage = (lang: 'fr' | 'en') => {
+    setLanguage(lang)
+    localStorage.setItem('preferred-language', lang)
+  }
 
   const steps = [
     {
       id: 0,
-      title: "Informations Patient",
-      description: "Identité, antécédents, allergies",
+      title: language === 'fr' ? "Informations Patient" : "Patient Information",
+      description: language === 'fr' ? "Identité, antécédents, allergies" : "Identity, history, allergies",
       icon: <User className="h-5 w-5" />,
       component: PatientForm,
     },
     {
       id: 1,
-      title: "Examen Clinique",
-      description: "Symptômes, signes vitaux, examen physique",
+      title: language === 'fr' ? "Examen Clinique" : "Clinical Examination",
+      description: language === 'fr' ? "Symptômes, signes vitaux, examen physique" : "Symptoms, vital signs, physical exam",
       icon: <Stethoscope className="h-5 w-5" />,
       component: ClinicalForm,
     },
     {
       id: 2,
-      title: "Questions IA",
-      description: "Questions personnalisées générées par l'IA",
+      title: language === 'fr' ? "Questions IA" : "AI Questions",
+      description: language === 'fr' ? "Questions personnalisées générées par l'IA" : "Personalized AI-generated questions",
       icon: <Brain className="h-5 w-5" />,
       component: QuestionsForm,
     },
     {
       id: 3,
-      title: "Diagnostic IA",
-      description: "Analyse diagnostique par intelligence artificielle",
+      title: language === 'fr' ? "Diagnostic IA" : "AI Diagnosis",
+      description: language === 'fr' ? "Analyse diagnostique par intelligence artificielle" : "Diagnostic analysis by artificial intelligence",
       icon: <ClipboardList className="h-5 w-5" />,
       component: DiagnosisForm,
     },
     {
       id: 4,
-      title: "Workflow Médical",
-      description: "Traitement complet avec APIs médicales",
+      title: language === 'fr' ? "Workflow Médical" : "Medical Workflow",
+      description: language === 'fr' ? "Traitement complet avec APIs médicales" : "Complete processing with medical APIs",
       icon: <Activity className="h-5 w-5" />,
       component: MedicalWorkflowManager,
     },
     {
       id: 5,
-      title: "Consultation Complète",
-      description: "Rapport final et prescriptions",
+      title: language === 'fr' ? "Consultation Complète" : "Complete Consultation",
+      description: language === 'fr' ? "Rapport final et prescriptions" : "Final report and prescriptions",
       icon: <FileText className="h-5 w-5" />,
       component: IntegratedMedicalConsultation,
     },
@@ -137,34 +152,68 @@ export default function MedicalAIExpert() {
   const CurrentStepComponent = steps[currentStep]?.component
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black text-white">
       {/* Temporarily disabled to prevent URL clearing
       <PatientDataLoader />
       */}
       
       <div className="container mx-auto px-4 py-8">
-        {/* En-tête */}
+        {/* En-tête with Language Switcher */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">TIBOK IA DOCTOR</h1>
-              <p className="text-gray-600">Système Expert de Diagnostic Médical par Intelligence Artificielle</p>
+              <h1 className="text-3xl font-bold text-white">TIBOK IA DOCTOR</h1>
+              <p className="text-gray-400">
+                {language === 'fr' 
+                  ? "Système Expert de Diagnostic Médical par Intelligence Artificielle"
+                  : "Expert Medical Diagnostic System by Artificial Intelligence"
+                }
+              </p>
             </div>
-            <Badge variant="outline" className="text-lg px-4 py-2">
-              GPT-4o + APIs Médicales
-            </Badge>
+            <div className="flex items-center gap-2">
+              {/* Language Switcher */}
+              <div className="flex items-center gap-2 mr-4">
+                <Button
+                  variant={language === 'fr' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => handleSetLanguage('fr')}
+                  className={language === 'fr' 
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                  }
+                >
+                  FR
+                </Button>
+                <Button
+                  variant={language === 'en' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => handleSetLanguage('en')}
+                  className={language === 'en' 
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                  }
+                >
+                  EN
+                </Button>
+              </div>
+              <Badge variant="outline" className="text-lg px-4 py-2 text-white border-gray-600">
+                GPT-4o + APIs {language === 'fr' ? 'Médicales' : 'Medical'}
+              </Badge>
+            </div>
           </div>
 
           {/* Barre de progression */}
-          <Card>
+          <Card className="bg-gray-900 border-gray-800">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Progression</span>
-                <span className="text-sm text-gray-600">
-                  Étape {currentStep + 1} sur {steps.length}
+                <span className="text-sm font-medium text-gray-300">
+                  {language === 'fr' ? 'Progression' : 'Progress'}
+                </span>
+                <span className="text-sm text-gray-400">
+                  {language === 'fr' ? 'Étape' : 'Step'} {currentStep + 1} {language === 'fr' ? 'sur' : 'of'} {steps.length}
                 </span>
               </div>
-              <Progress value={progress} className="mb-4" />
+              <Progress value={progress} className="mb-4 bg-gray-700" />
 
               {/* Étapes */}
               <div className="flex justify-between">
@@ -172,12 +221,12 @@ export default function MedicalAIExpert() {
                   <div
                     key={step.id}
                     className={`flex flex-col items-center text-center ${
-                      index <= currentStep ? "text-blue-600" : "text-gray-400"
+                      index <= currentStep ? "text-blue-400" : "text-gray-500"
                     }`}
                   >
                     <div
                       className={`flex items-center justify-center w-10 h-10 rounded-full mb-2 ${
-                        index <= currentStep ? "bg-blue-100" : "bg-gray-100"
+                        index <= currentStep ? "bg-blue-900" : "bg-gray-700"
                       }`}
                     >
                       {step.icon}
@@ -195,40 +244,42 @@ export default function MedicalAIExpert() {
 
         {/* Étape actuelle */}
         <div className="mb-8">
-          <Card>
+          <Card className="bg-gray-900 border-gray-800">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-white">
                 {steps[currentStep]?.icon}
                 {steps[currentStep]?.title}
               </CardTitle>
-              <p className="text-gray-600">{steps[currentStep]?.description}</p>
+              <p className="text-gray-400">{steps[currentStep]?.description}</p>
             </CardHeader>
           </Card>
         </div>
 
         {/* Contenu de l'étape */}
-        {CurrentStepComponent && <CurrentStepComponent {...getCurrentStepProps()} />}
+        <div className="[&_*]:bg-gray-900 [&_*]:border-gray-800 [&_*]:text-white">
+          {CurrentStepComponent && <CurrentStepComponent {...getCurrentStepProps()} />}
+        </div>
 
         {/* Informations système */}
         <div className="mt-8">
-          <Card>
+          <Card className="bg-gray-900 border-gray-800">
             <CardContent className="p-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div>
-                  <div className="text-2xl font-bold text-blue-600">GPT-4o</div>
-                  <div className="text-sm text-gray-600">Modèle IA</div>
+                  <div className="text-2xl font-bold text-blue-400">GPT-4o</div>
+                  <div className="text-sm text-gray-400">{language === 'fr' ? 'Modèle IA' : 'AI Model'}</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-green-600">5</div>
-                  <div className="text-sm text-gray-600">APIs Intégrées</div>
+                  <div className="text-2xl font-bold text-green-400">5</div>
+                  <div className="text-sm text-gray-400">APIs {language === 'fr' ? 'Intégrées' : 'Integrated'}</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-purple-600">EBM</div>
-                  <div className="text-sm text-gray-600">Evidence-Based</div>
+                  <div className="text-2xl font-bold text-purple-400">EBM</div>
+                  <div className="text-sm text-gray-400">Evidence-Based</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-orange-600">24/7</div>
-                  <div className="text-sm text-gray-600">Disponible</div>
+                  <div className="text-2xl font-bold text-orange-400">24/7</div>
+                  <div className="text-sm text-gray-400">{language === 'fr' ? 'Disponible' : 'Available'}</div>
                 </div>
               </div>
             </CardContent>
