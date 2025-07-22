@@ -83,7 +83,7 @@ export default function CompleteDiagnosisForm({
         setMauritianDocuments(data.mauritianDocuments)
         setDocumentsGenerated(true)
         
-        // Transmettre au parent les données complètes
+        // 👈 MODIFICATION PRINCIPALE: Passer les données dans le bon format
         onDataChange({ 
           diagnosis: data.diagnosis, 
           mauritianDocuments: data.mauritianDocuments,
@@ -104,6 +104,8 @@ export default function CompleteDiagnosisForm({
       setDiagnosis(fallbackData.diagnosis)
       setMauritianDocuments(fallbackData.mauritianDocuments)
       setDocumentsGenerated(true)
+      
+      // 👈 MODIFICATION: Passer aussi les données fallback
       onDataChange(fallbackData)
       
     } finally {
@@ -265,6 +267,16 @@ export default function CompleteDiagnosisForm({
     }
   }
 
+  // 👈 NOUVELLE FONCTION: Gérer le passage à l'étape suivante
+  const handleNextStep = () => {
+    // S'assurer que les données sont toujours disponibles avant de passer à l'étape suivante
+    if (diagnosis && mauritianDocuments) {
+      onNext()
+    } else {
+      console.warn("Données manquantes pour passer à l'étape suivante")
+    }
+  }
+
   const sections = [
     { id: "primary", title: "Diagnostic principal", icon: Target },
     { id: "reasoning", title: "Raisonnement", icon: Brain },
@@ -411,6 +423,45 @@ export default function CompleteDiagnosisForm({
             </div>
           </CardHeader>
         </Card>
+
+        {/* 👈 NOUVELLE SECTION: Alert informatif pour les documents générés */}
+        {documentsGenerated && mauritianDocuments && (
+          <Card className="bg-gradient-to-r from-blue-50 to-emerald-50 border border-blue-200 shadow-md">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-12 h-12 bg-emerald-100 rounded-full">
+                    <CheckCircle className="h-6 w-6 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-800">Diagnostic IA Expert Complété</h3>
+                    <p className="text-sm text-gray-600">
+                      Diagnostic analysé • 4 documents mauriciens générés • Prêt pour édition personnalisée
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-blue-500 text-white flex items-center gap-1">
+                    <FileText className="h-3 w-3" />
+                    Consultation
+                  </Badge>
+                  <Badge className="bg-red-500 text-white flex items-center gap-1">
+                    <TestTube className="h-3 w-3" />
+                    Biologie
+                  </Badge>
+                  <Badge className="bg-green-500 text-white flex items-center gap-1">
+                    <Stethoscope className="h-3 w-3" />
+                    Paraclinique
+                  </Badge>
+                  <Badge className="bg-purple-500 text-white flex items-center gap-1">
+                    <Pill className="h-3 w-3" />
+                    Médicaments
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Alert pour mode fallback */}
         {error && (
@@ -622,7 +673,7 @@ export default function CompleteDiagnosisForm({
           </Card>
         )}
 
-        {/* Navigation */}
+        {/* 👈 NAVIGATION MODIFIÉE */}
         <div className="flex justify-between">
           <Button 
             variant="outline" 
@@ -634,13 +685,38 @@ export default function CompleteDiagnosisForm({
           </Button>
 
           {documentsGenerated ? (
-            <Button 
-              onClick={onNext}
-              className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              <Edit3 className="h-4 w-4 mr-2" />
-              Éditer les Documents Mauriciens
-            </Button>
+            <div className="flex gap-4 items-center">
+              {/* Badge de statut */}
+              <div className="flex items-center gap-2">
+                <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300">
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Diagnostic Complété
+                </Badge>
+                <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+                  <FileText className="h-3 w-3 mr-1" />
+                  4 Documents Prêts
+                </Badge>
+              </div>
+
+              {/* Boutons d'action */}
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline"
+                  className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Aperçu Diagnostic
+                </Button>
+
+                <Button 
+                  onClick={handleNextStep} // 👈 UTILISER LA NOUVELLE FONCTION
+                  className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <Edit3 className="h-4 w-4 mr-2" />
+                  Éditer Documents Mauriciens
+                </Button>
+              </div>
+            </div>
           ) : (
             <Button 
               onClick={generateCompleteDiagnosisAndDocuments}
