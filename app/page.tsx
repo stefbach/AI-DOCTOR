@@ -73,7 +73,7 @@ export default function MedicalAIExpert() {
     {
       id: 4,
       title: "Édition des documents médicaux",
-      description: "Édition des documents médicaux",
+      description: "Génération et personnalisation des rapports",
       icon: <Activity className="h-5 w-5" />,
       component: MedicalWorkflow, // 👈 NOUVEAU - ÉTAPE FINALE
     },
