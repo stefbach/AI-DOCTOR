@@ -5,6 +5,8 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { PatientDataLoader } from "@/components/patient-data-loader"
+import { LanguageProvider } from "@/contexts/language-context"
+import { Header } from "@/components/header"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -22,11 +24,22 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" suppressHydrationWarning>
-      <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-          <PatientDataLoader />
-          {children}
-          <Toaster />
+      <body className={`${inter.className} bg-black text-white`}>
+        <ThemeProvider 
+          attribute="class" 
+          defaultTheme="dark" 
+          enableSystem 
+          disableTransitionOnChange
+          forcedTheme="dark"
+        >
+          <LanguageProvider>
+            <PatientDataLoader />
+            <Header />
+            <main className="min-h-screen bg-black">
+              {children}
+            </main>
+            <Toaster />
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>
