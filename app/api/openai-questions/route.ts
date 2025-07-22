@@ -40,85 +40,126 @@ export async function POST(request: NextRequest) {
 
     console.log(`🔍 Génération questions pour: ${patientData.firstName} ${patientData.lastName}`)
 
+    // Analyser les données pour éviter les redondances
+    const askedElements = extractAlreadyAskedElements(patientData, clinicalData)
+    
     const prompt = `
-En tant qu'expert médical, générez des questions diagnostiques PERTINENTES pour ce cas clinique spécifique.
+En tant que CLINICIEN EXPERT de haut niveau à l'île Maurice, générez des questions diagnostiques de NIVEAU SPÉCIALISTE basées sur une approche médicale avancée et evidence-based.
 
-PRIORITÉ: Questions basées sur les SYMPTÔMES et le DIAGNOSTIC DIFFÉRENTIEL d'abord, puis contexte géographique si pertinent.
+APPROCHE EXPERT REQUISE:
+1. **Stratification du risque** immédiate (urgence vitale vs différée)
+2. **Scores cliniques validés** (HEART, SIRS, qSOFA, IHS, Glasgow, ABCD2, etc.)  
+3. **Diagnostic différentiel hiérarchisé** par probabilité et gravité
+4. **Phénotypage précis** des symptômes selon physiopathologie
+5. **Red flags** spécifiques nécessitant prise en charge immédiate
+6. **Corrélations physiopathologiques** avancées
+7. **Guidelines internationales** (ESC, AHA, IHS, IDSA)
 
-PATIENT:
+PATIENT (Analyse complète du terrain):
 - ${patientData.firstName} ${patientData.lastName}, ${patientData.age} ans, ${patientData.gender}
-- Poids: ${patientData.weight}kg, Taille: ${patientData.height}cm
+- IMC: ${calculateBMI(patientData.weight, patientData.height)} (${getBMICategory(patientData.weight, patientData.height)})
+- Facteurs de risque CV: ${getCardiovascularRisk(patientData)}
+- Terrain immunologique: ${getImmuneStatus(patientData)}
 - Allergies: ${patientData.allergies?.join(", ") || "Aucune"} ${patientData.otherAllergies ? "+ " + patientData.otherAllergies : ""}
-- Antécédents: ${patientData.medicalHistory?.join(", ") || "Aucun"} ${patientData.otherMedicalHistory ? "+ " + patientData.otherMedicalHistory : ""}
-- Médicaments: ${patientData.currentMedicationsText || "Aucun"}
-- Habitudes: Tabac: ${patientData.lifeHabits?.smoking || "Non renseigné"}, Alcool: ${patientData.lifeHabits?.alcohol || "Non renseigné"}
+- Antécédents stratifiés: ${patientData.medicalHistory?.join(", ") || "Aucun"} ${patientData.otherMedicalHistory ? "+ " + patientData.otherMedicalHistory : ""}
+- Thérapeutiques: ${patientData.currentMedicationsText || "Aucun"}
+- Facteurs de risque: Tabac: ${patientData.lifeHabits?.smoking || "Non renseigné"}, Alcool: ${patientData.lifeHabits?.alcohol || "Non renseigné"}
 
-DONNÉES CLINIQUES:
-- Motif: ${clinicalData.chiefComplaint || "Non renseigné"}
-- Symptômes: ${clinicalData.symptoms || "Non renseigné"}
+DONNÉES CLINIQUES (Analyse sémiologique avancée):
+- Motif principal: ${clinicalData.chiefComplaint || "Non renseigné"}
+- Sémiologie: ${clinicalData.symptoms || "Non renseigné"}
 - Examen physique: ${clinicalData.physicalExam || "Non renseigné"}
-- Signes vitaux: T°${clinicalData.vitalSigns?.temperature || "?"}°C, TA ${clinicalData.vitalSigns?.bloodPressure || "?"}, FC ${clinicalData.vitalSigns?.heartRate || "?"}/min
+- Paramètres vitaux: T°${clinicalData.vitalSigns?.temperature || "?"}°C, TA ${clinicalData.vitalSigns?.bloodPressure || "?"}, FC ${clinicalData.vitalSigns?.heartRate || "?"}/min
 
-CONTEXTE GÉOGRAPHIQUE (secondaire):
-- Localisation: Île Maurice (climat tropical)
-- Pathologies possibles selon le contexte: Dengue, chikungunya, paludisme, leptospirose, fièvre typhoïde
+ÉLÉMENTS DOCUMENTÉS (ne pas redemander):
+${askedElements.map(element => `- ${element}`).join('\n')}
 
-LOGIQUE DIAGNOSTIQUE:
-1. ANALYSEZ les symptômes présentés
-2. IDENTIFIEZ le diagnostic différentiel principal
-3. GÉNÉREZ des questions pour distinguer entre les hypothèses diagnostiques
-4. INTÉGREZ le contexte tropical UNIQUEMENT si cliniquement pertinent
+CONTEXTE MAURICIEN (Épidémiologie locale intégrée):
+- Pathologies endémiques dans le diagnostic différentiel: Dengue, chikungunya, paludisme, leptospirose, fièvre typhoïde
+- Résistances locales connues, patterns épidémiologiques
+- Facteurs environnementaux (climat tropical, saison cyclonique)
 
-GÉNÉREZ 5-8 QUESTIONS ADAPTÉES AU CAS CLINIQUE:
+EXPERTISE CLINIQUE PAR SYNDROME:
 
-Instructions spécifiques:
-- Si douleur thoracique → questions cardio/pulmonaires d'abord, puis contexte si nécessaire
-- Si fièvre → diagnostic différentiel standard, puis arboviroses si pertinent
-- Si troubles digestifs → causes communes puis pathologies hydriques si approprié
-- Si céphalées → causes neurologiques/vasculaires avant pathologies tropicales
-- Si symptômes dermatologiques → diagnostic dermatologique avant piqûres/vecteurs
+**DOULEUR THORACIQUE** (Niveau cardiologique):
+- Score HEART (History, ECG, Age, Risk factors, Troponin)
+- Critères ESC pour SCA: douleur typique/atypique/non-angineuse  
+- Stratification TIMI risk score si SCA
+- Diagnostic différentiel: cardiaque (ICS, péricardite, dissection aortique) vs non-cardiaque
 
-Questions ciblées pour:
-- Préciser les caractéristiques des symptômes
-- Distinguer les hypothèses diagnostiques principales
-- Identifier les facteurs déclenchants/aggravants
-- Évaluer la chronologie et l'évolution
-- Rechercher les signes associés
-- Contexte tropical UNIQUEMENT si cliniquement justifié
+**SYNDROME FÉBRILE** (Niveau infectiologique):
+- Critères SIRS (Systemic Inflammatory Response Syndrome) 
+- qSOFA score si suspicion sepsis (pression systolique, échelle Glasgow, fréquence respiratoire)
+- Pattern fébrile diagnostique: continu/intermittent/ondulant/récurrent
+- Foyers infectieux selon terrain et contexte mauricien
 
-Format JSON requis:
+**CÉPHALÉES** (Niveau neurologique):
+- Red flags urgents: thunderclap, signes focaux, fièvre + raideur nucale
+- Critères IHS (International Headache Society) pour diagnostic précis
+- Stratification: primaire vs secondaire avec niveau de risque
+- Score ABCD2 si suspicion AIT
+
+**DYSPNÉE** (Niveau pneumologique/cardiologique):
+- Classification NYHA si origine cardiaque
+- Critères de Wells pour embolie pulmonaire  
+- Scores de gravité selon contexte (CURB-65 si pneumonie)
+
+GÉNÉRATION EXPERT - 5-8 QUESTIONS DE HAUT NIVEAU:
+
+Format JSON expert requis:
 {
   "questions": [
     {
       "id": 1,
-      "question": "Question spécifique au diagnostic différentiel?",
+      "question": "Question diagnostique précise utilisant terminologie médicale appropriée et scores validés",
       "type": "multiple_choice",
-      "options": ["Option A", "Option B", "Option C", "Option D"],
-      "rationale": "Justification médicale basée sur le diagnostic différentiel",
-      "category": "symptom|differential|chronology|associated|context"
+      "options": ["Réponse avec critères précis/scores", "Option basée guidelines", "Critère physiopathologique", "Élément pronostique/red flag"],
+      "rationale": "Justification basée sur littérature médicale, guidelines internationales et scores validés",
+      "category": "risk_stratification|phenotyping|differential_diagnosis|red_flags|prognostic_factors",
+      "diagnostic_value": "high|medium|low",
+      "clinical_score": "HEART|SIRS|qSOFA|IHS|TIMI|ABCD2|Wells|autre_score_validé",
+      "evidence_level": "A|B|C selon guidelines ESC/AHA/IHS/IDSA",
+      "clinical_pearls": "Élément clinique expert spécifique, piège diagnostique à éviter",
+      "red_flags": "Signes d'alarme spécifiques nécessitant prise en charge urgente",
+      "physiopathology": "Mécanisme physiopathologique sous-jacent"
     }
   ]
 }
 
-IMPORTANT: Adaptez les questions aux symptômes spécifiques présentés, pas à une liste générale de pathologies tropicales.
+CRITÈRES NIVEAU EXPERT OBLIGATOIRES:
+✓ Questions basées sur scores cliniques validés
+✓ Stratification de risque immédiate (vital/urgent/différé)  
+✓ Terminologie médicale précise de spécialiste
+✓ Red flags spécifiques par syndrome
+✓ Corrélations physiopathologiques avancées
+✓ Clinical pearls et pièges diagnostiques
+✓ Evidence level selon guidelines internationales
+✓ Orientation examens complémentaires si pertinent
+✓ Éléments pronostiques
+
+RÈGLES EXPERT:
+- Utiliser OBLIGATOIREMENT des scores cliniques reconnus  
+- Stratifier SYSTÉMATIQUEMENT le risque
+- Intégrer les red flags spécifiques
+- Baser sur guidelines internationales
+- Éviter questions génériques/basiques
+- Niveau spécialiste en terminologie médicale
+- Contexte mauricien intégré sans questions d'exposition
 `
 
     const result = await generateText({
       model: openai("gpt-4o"),
       prompt: prompt,
-      temperature: 0.3,
+      temperature: 0.2, // Réduction pour plus de cohérence
       maxTokens: 2000,
     })
 
     console.log("🧠 Questions IA générées")
 
-    // Tentative de parsing JSON avec fallback
+    // Tentative de parsing JSON avec fallback amélioré
     let questionsData
     try {
-      // Nettoyer le texte avant parsing
       let cleanedText = result.text.trim()
-
-      // Extraire le JSON s'il est entouré de texte
       const jsonMatch = cleanedText.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
         cleanedText = jsonMatch[0]
@@ -126,41 +167,86 @@ IMPORTANT: Adaptez les questions aux symptômes spécifiques présentés, pas à
 
       questionsData = JSON.parse(cleanedText)
 
-      // Validation de la structure
       if (!questionsData.questions || !Array.isArray(questionsData.questions)) {
         throw new Error("Structure JSON invalide")
       }
 
-      console.log(`✅ ${questionsData.questions.length} questions parsées avec succès`)
+      // Validation et déduplication
+      questionsData.questions = deduplicateQuestions(questionsData.questions, askedElements)
+      
+      console.log(`✅ ${questionsData.questions.length} questions non-redondantes parsées`)
     } catch (parseError) {
       console.warn("⚠️ Erreur parsing JSON, génération de questions de fallback ciblées")
-
-      // Questions de fallback adaptées au cas clinique
-      questionsData = generateTargetedFallbackQuestions(patientData, clinicalData)
+      questionsData = generateSmartFallbackQuestions(patientData, clinicalData, askedElements)
     }
 
     const response = {
       success: true,
       questions: questionsData.questions,
       metadata: {
+        // Données patient de base
         patientAge: patientData.age,
         patientGender: patientData.gender,
+        patientBMI: calculateBMI(patientData.weight, patientData.height),
+        patientBMICategory: getBMICategory(patientData.weight, patientData.height),
+        
+        // Stratification des risques
+        cardiovascularRisk: getCardiovascularRisk(patientData),
+        immuneStatus: getImmuneStatus(patientData),
+        
+        // Données cliniques
         chiefComplaint: clinicalData.chiefComplaint,
+        vitalSigns: clinicalData.vitalSigns,
+        
+        // Métadonnées de génération
         questionsCount: questionsData.questions.length,
         generatedAt: new Date().toISOString(),
         aiModel: "gpt-4o",
+        
+        // Contexte et approche
         location: "Maurice",
-        approach: "symptom-based",
+        approach: "expert-level-evidence-based",
+        medicalLevel: finalAssessment.level,
+        medicalScore: finalAssessment.score,
+        
+        // Exclusions et filtres
+        excludedElements: askedElements,
+        tropicalExposureQuestionsExcluded: true,
+        
+        // Analyse qualité experte
+        expertFeatures: {
+          clinicalScoresUsed: questionsData.questions.filter(q => q.clinical_score).length,
+          redFlagsIdentified: questionsData.questions.filter(q => q.red_flags).length,
+          evidenceLevelA: questionsData.questions.filter(q => q.evidence_level === 'A').length,
+          riskStratificationQuestions: questionsData.questions.filter(q => q.category === 'risk_stratification').length,
+          physiopathologyExplained: questionsData.questions.filter(q => q.physiopathology).length,
+          clinicalPearls: questionsData.questions.filter(q => q.clinical_pearls).length,
+        },
+        
+        // Détails de l'évaluation
+        qualityAssessment: finalAssessment.details,
+        
+        // Guidelines et scores utilisés
+        clinicalScoresAvailable: ["HEART", "SIRS", "qSOFA", "IHS", "ABCD2", "Wells", "Framingham", "Charlson", "Karnofsky"],
+        guidelinesReferenced: ["ESC", "AHA", "IHS", "IDSA", "European Stroke Organisation"],
       },
+      
+      // Recommandations cliniques pour le médecin
+      clinicalRecommendations: {
+        urgencyLevel: determineUrgencyLevel(questionsData.questions),
+        suggestedWorkup: suggestWorkup(patientData, clinicalData),
+        redFlagAlerts: extractRedFlags(questionsData.questions),
+        followUpRecommendations: generateFollowUpRecommendations(finalAssessment, patientData)
+      }
     }
 
-    console.log(`✅ Questions IA ciblées retournées: ${questionsData.questions.length}`)
+    console.log(`✅ Questions niveau EXPERT générées: ${questionsData.questions.length} - Niveau médical: ${finalAssessment.level}`)
     return NextResponse.json(response)
   } catch (error: any) {
     console.error("❌ Erreur Questions IA:", error)
     return NextResponse.json(
       {
-        error: "Erreur lors de la génération des questions",
+        error: "Erreur lors de la génération des questions niveau expert",
         details: error.message,
         success: false,
         timestamp: new Date().toISOString(),
@@ -170,133 +256,363 @@ IMPORTANT: Adaptez les questions aux symptômes spécifiques présentés, pas à
   }
 }
 
-function generateTargetedFallbackQuestions(patientData: any, clinicalData: any) {
+// Fonctions helper pour les recommandations cliniques expertes
+function determineUrgencyLevel(questions: any[]): string {
+  const redFlagCount = questions.filter(q => q.red_flags).length
+  const riskStratCount = questions.filter(q => q.category === 'risk_stratification').length
+  
+  if (redFlagCount > 0) return "URGENT - Red flags identifiés"
+  if (riskStratCount >= 2) return "PRIORITAIRE - Stratification de risque nécessaire"
+  return "STANDARD - Surveillance clinique"
+}
+
+function suggestWorkup(patientData: any, clinicalData: any): string[] {
+  const workup = []
+  const symptoms = `${clinicalData.symptoms || ""} ${clinicalData.chiefComplaint || ""}`.toLowerCase()
+  
+  if (symptoms.includes("thorax") || symptoms.includes("poitrine")) {
+    workup.push("ECG 12 dérivations + troponines", "Rx thorax", "Écho-cardiographie si clinique évocatrice")
+  }
+  
+  if (symptoms.includes("fièvre") || (clinicalData.vitalSigns?.temperature && parseFloat(clinicalData.vitalSigns.temperature) > 37.5)) {
+    workup.push("Hémocultures x2", "CRP + PCT", "ECBU", "NFS + CRP + ionogramme")
+  }
+  
+  if (symptoms.includes("céphal") || symptoms.includes("tête")) {
+    workup.push("Fond d'œil + examen neurologique", "TDM cérébrale si red flags", "PL si suspicion méningite")
+  }
+  
+  // Bilan selon terrain
+  if (getCardiovascularRisk(patientData).includes("Haut risque")) {
+    workup.push("Bilan lipidique + HbA1c")
+  }
+  
+  return workup.length > 0 ? workup : ["Bilan biologique standard selon orientation clinique"]
+}
+
+function extractRedFlags(questions: any[]): string[] {
+  return questions
+    .filter(q => q.red_flags)
+    .map(q => q.red_flags)
+    .filter((flag, index, array) => array.indexOf(flag) === index) // Déduplication
+}
+
+function generateFollowUpRecommendations(assessment: any, patientData: any): string[] {
+  const recommendations = []
+  
+  if (assessment.score >= 7) {
+    recommendations.push("Avis spécialisé recommandé selon orientation diagnostique")
+  }
+  
+  if (patientData.age > 65 || getCardiovascularRisk(patientData).includes("Haut risque")) {
+    recommendations.push("Surveillance rapprochée - Réévaluation sous 48-72h")
+  }
+  
+  recommendations.push("Documentation complète des réponses aux questions pour suivi longitudinal")
+  recommendations.push("Réévaluation clinique si aggravation des symptômes")
+  
+  return recommendations
+}
+
+function extractAlreadyAskedElements(patientData: any, clinicalData: any): string[] {
+  const askedElements: string[] = []
+
+  // Données patient disponibles
+  if (patientData.age) askedElements.push("âge du patient")
+  if (patientData.gender) askedElements.push("sexe du patient")
+  if (patientData.weight && patientData.height) askedElements.push("poids et taille (IMC calculable)")
+  if (patientData.allergies?.length) askedElements.push("allergies connues")
+  if (patientData.medicalHistory?.length) askedElements.push("antécédents médicaux")
+  if (patientData.currentMedicationsText) askedElements.push("médicaments actuels")
+  if (patientData.lifeHabits?.smoking) askedElements.push("habitudes tabagiques")
+  if (patientData.lifeHabits?.alcohol) askedElements.push("consommation d'alcool")
+
+  // Données cliniques disponibles
+  if (clinicalData.chiefComplaint) askedElements.push("motif de consultation")
+  if (clinicalData.symptoms) askedElements.push("symptômes principaux")
+  if (clinicalData.physicalExam) askedElements.push("données d'examen physique")
+  if (clinicalData.vitalSigns?.temperature) askedElements.push("température")
+  if (clinicalData.vitalSigns?.bloodPressure) askedElements.push("tension artérielle")
+  if (clinicalData.vitalSigns?.heartRate) askedElements.push("fréquence cardiaque")
+
+  return askedElements
+}
+
+function calculateBMI(weight: number, height: number): string {
+  if (!weight || !height) return "non calculable"
+  const heightM = height / 100
+  const bmi = weight / (heightM * heightM)
+  return bmi.toFixed(1)
+}
+
+function getBMICategory(weight: number, height: number): string {
+  if (!weight || !height) return "non évaluable"
+  const heightM = height / 100
+  const bmi = weight / (heightM * heightM)
+  
+  if (bmi < 18.5) return "Insuffisance pondérale (facteur de risque)"
+  if (bmi < 25) return "Poids normal"
+  if (bmi < 30) return "Surpoids (facteur de risque CV)"
+  if (bmi < 35) return "Obésité modérée (haut risque CV)"
+  return "Obésité sévère (très haut risque CV)"
+}
+
+function getCardiovascularRisk(patientData: any): string {
+  const risks = []
+  const age = patientData.age
+  const gender = patientData.gender
+  
+  // Facteurs de risque CV majeurs
+  if (age > 45 && gender === "Masculin") risks.push("Âge + sexe masculin")
+  if (age > 55 && gender === "Féminin") risks.push("Âge + sexe féminin")
+  if (patientData.lifeHabits?.smoking === "Oui") risks.push("Tabagisme actif")
+  if (patientData.medicalHistory?.includes("Diabète")) risks.push("Diabète")
+  if (patientData.medicalHistory?.includes("HTA")) risks.push("HTA")
+  if (patientData.medicalHistory?.includes("Hypercholestérolémie")) risks.push("Dyslipidémie")
+  if (patientData.medicalHistory?.includes("Antécédents familiaux CV")) risks.push("ATCD familiaux CV")
+  
+  const bmi = calculateBMI(patientData.weight, patientData.height)
+  if (parseFloat(bmi) >= 30) risks.push("Obésité")
+  
+  return risks.length > 0 ? risks.join(", ") : "Faible risque CV"
+}
+
+function getImmuneStatus(patientData: any): string {
+  const immunoRisks = []
+  
+  if (patientData.age > 65) immunoRisks.push("Âge > 65 ans")
+  if (patientData.medicalHistory?.includes("Diabète")) immunoRisks.push("Diabète")
+  if (patientData.medicalHistory?.includes("Insuffisance rénale")) immunoRisks.push("IRC")
+  if (patientData.medicalHistory?.includes("Cancer")) immunoRisks.push("Néoplasie")
+  if (patientData.currentMedicationsText?.toLowerCase().includes("corticoïdes")) immunoRisks.push("Corticothérapie")
+  if (patientData.currentMedicationsText?.toLowerCase().includes("immunosuppresseur")) immunoRisks.push("Immunosuppression")
+  
+  return immunoRisks.length > 0 ? `Terrain fragilisé: ${immunoRisks.join(", ")}` : "Terrain immunocompétent"
+}
+
+function deduplicateExpertQuestions(questions: any[], askedElements: string[]): any[] {
+  return questions.filter(question => {
+    const questionText = question.question.toLowerCase()
+    
+    // Éviter les questions redondantes avec approche experte
+    const redundantKeywords = [
+      { keywords: ["âge", "ans"], element: "âge du patient" },
+      { keywords: ["poids", "pèse", "imc"], element: "poids et taille" },
+      { keywords: ["taille", "mesure"], element: "poids et taille" },
+      { keywords: ["allergique", "allergie"], element: "allergies connues" },
+      { keywords: ["médicament", "traitement", "médication"], element: "médicaments actuels" },
+      { keywords: ["fume", "tabac", "cigarette"], element: "habitudes tabagiques" },
+      { keywords: ["boit", "alcool", "boisson"], element: "consommation d'alcool" },
+      { keywords: ["température", "fièvre"], element: "température" },
+      { keywords: ["tension", "pression"], element: "tension artérielle" },
+      { keywords: ["exposition", "moustique", "piqûre", "tropical"], element: "contexte mauricien" },
+    ]
+
+    return !redundantKeywords.some(({ keywords, element }) => 
+      keywords.some(keyword => questionText.includes(keyword)) && 
+      (askedElements.includes(element) || element === "contexte mauricien")
+    )
+  })
+}
+
+// Fonction d'évaluation du niveau médical des questions générées
+function assessMedicalExpertLevel(questions: any[]): {
+  level: string;
+  score: number;
+  details: string[];
+} {
+  let expertScore = 0
+  const totalQuestions = questions.length
+  const details: string[] = []
+
+  questions.forEach((q, index) => {
+    let questionScore = 0
+    
+    // Critères niveau expert (scoring)
+    if (q.clinical_score) {
+      questionScore += 3
+      details.push(`Q${index + 1}: Score clinique validé (${q.clinical_score})`)
+    }
+    if (q.evidence_level) {
+      questionScore += 2
+      details.push(`Q${index + 1}: Evidence level ${q.evidence_level}`)
+    }
+    if (q.clinical_pearls) {
+      questionScore += 2
+      details.push(`Q${index + 1}: Clinical pearls inclus`)
+    }
+    if (q.red_flags) {
+      questionScore += 2
+      details.push(`Q${index + 1}: Red flags spécifiés`)
+    }
+    if (q.physiopathology) {
+      questionScore += 1
+      details.push(`Q${index + 1}: Physiopathologie expliquée`)
+    }
+    if (q.category?.includes('risk_stratification')) {
+      questionScore += 2
+      details.push(`Q${index + 1}: Stratification de risque`)
+    }
+    if (q.rationale?.includes('validé') || q.rationale?.includes('guidelines')) {
+      questionScore += 1
+    }
+    if (q.diagnostic_value === 'high') {
+      questionScore += 1
+    }
+
+    expertScore += questionScore
+  })
+
+  const averageScore = expertScore / totalQuestions
+
+  let level: string
+  if (averageScore >= 10) level = "Expert+ (niveau professeur/chef de service)"
+  else if (averageScore >= 7) level = "Expert (niveau spécialiste senior)"
+  else if (averageScore >= 5) level = "Avancé (médecin expérimenté/spécialiste junior)"  
+  else if (averageScore >= 3) level = "Intermédiaire (médecin généraliste)"
+  else level = "Basique (médecin junior)"
+
+  return {
+    level,
+    score: Math.round(averageScore * 10) / 10,
+    details
+  }
+}
+
+function generateSmartFallbackQuestions(patientData: any, clinicalData: any, askedElements: string[]) {
   const symptoms = clinicalData.symptoms?.toLowerCase() || ""
   const chiefComplaint = clinicalData.chiefComplaint?.toLowerCase() || ""
   const combinedSymptoms = `${symptoms} ${chiefComplaint}`
 
   let questions = []
 
-  // Questions basées sur les symptômes spécifiques
-  if (combinedSymptoms.includes("douleur") && combinedSymptoms.includes("thorax")) {
+  if (combinedSymptoms.includes("douleur") && (combinedSymptoms.includes("thorax") || combinedSymptoms.includes("poitrine"))) {
     questions = [
       {
         id: 1,
-        question: "La douleur thoracique irradie-t-elle vers le bras gauche, la mâchoire ou le dos?",
+        question: "Comment décririez-vous la douleur thoracique (serrement, brûlure, coup de poignard)?",
         type: "multiple_choice",
-        options: ["Oui, vers le bras gauche", "Oui, vers la mâchoire", "Oui, vers le dos", "Non, localisée"],
-        rationale: "Distinction entre douleur cardiaque et autres étiologies",
+        options: ["Serrement/étau", "Brûlure", "Coup de poignard", "Pression"],
+        rationale: "Caractérisation de la douleur pour diagnostic différentiel cardio-pulmonaire",
+        category: "symptom",
+        diagnostic_value: "high"
+      },
+      {
+        id: 2,
+        question: "La douleur irradie-t-elle vers d'autres zones?",
+        type: "multiple_choice",
+        options: ["Bras gauche", "Mâchoire", "Dos/épaules", "Aucune irradiation"],
+        rationale: "Pattern d'irradiation pour distinguer origine cardiaque vs autres",
         category: "differential",
-      },
-      {
-        id: 2,
-        question: "La douleur est-elle déclenchée par l'effort physique?",
-        type: "multiple_choice",
-        options: ["Oui, à chaque effort", "Parfois", "Non", "Je ne sais pas"],
-        rationale: "Recherche d'une origine coronarienne",
-        category: "symptom",
+        diagnostic_value: "high"
       },
       {
         id: 3,
-        question: "Avez-vous des difficultés respiratoires associées?",
+        question: "Qu'est-ce qui améliore ou aggrave la douleur?",
         type: "multiple_choice",
-        options: ["Oui, dyspnée importante", "Oui, légère", "Non", "Seulement au repos"],
-        rationale: "Évaluation de l'atteinte cardio-pulmonaire",
-        category: "associated",
-      },
+        options: ["Repos améliore", "Position améliore", "Effort aggrave", "Aucun facteur"],
+        rationale: "Facteurs modulateurs pour orientation diagnostique",
+        category: "symptom",
+        diagnostic_value: "medium"
+      }
     ]
-  } else if (combinedSymptoms.includes("fièvre")) {
+  } else if (combinedSymptoms.includes("fièvre") || clinicalData.vitalSigns?.temperature > 37.5) {
     questions = [
       {
         id: 1,
-        question: "Depuis combien de temps avez-vous de la fièvre?",
+        question: "La fièvre est-elle continue ou intermittente?",
         type: "multiple_choice",
-        options: ["Moins de 24h", "1-3 jours", "3-7 jours", "Plus d'une semaine"],
-        rationale: "Chronologie importante pour le diagnostic différentiel",
-        category: "chronology",
+        options: ["Continue", "Intermittente/pic", "Ondulante", "Irrégulière"],
+        rationale: "Pattern fébrile aide au diagnostic différentiel des infections",
+        category: "symptom",
+        diagnostic_value: "high"
       },
       {
         id: 2,
-        question: "La fièvre s'accompagne-t-elle de frissons?",
+        question: "Avez-vous des signes associés à la fièvre?",
         type: "multiple_choice",
-        options: ["Oui, frissons intenses", "Oui, modérés", "Non", "Sensation de froid"],
-        rationale: "Distinction entre infections bactériennes et virales",
-        category: "symptom",
+        options: ["Frissons intenses", "Sueurs profuses", "Courbatures", "Maux de tête"],
+        rationale: "Signes associés orientent vers bactérien vs viral vs parasitaire",
+        category: "differential",
+        diagnostic_value: "high"
       },
       {
         id: 3,
-        question: "Avez-vous des courbatures ou douleurs musculaires?",
+        question: "Comment avez-vous répondu aux antipyrétiques (paracétamol)?",
         type: "multiple_choice",
-        options: ["Oui, généralisées", "Oui, localisées", "Non", "Douleurs articulaires"],
-        rationale: "Orientation vers syndrome grippal ou arboviroses",
-        category: "associated",
-      },
-      // Contexte tropical UNIQUEMENT après les questions générales
-      {
-        id: 4,
-        question: "Avez-vous été exposé à des moustiques dans les derniers jours?",
-        type: "multiple_choice",
-        options: ["Oui, beaucoup", "Oui, quelques-uns", "Non", "Je ne sais pas"],
-        rationale: "Recherche d'arboviroses (dengue, chikungunya) après exclusion des causes communes",
-        category: "context",
-      },
+        options: ["Très bien", "Partiellement", "Peu", "Pas pris"],
+        rationale: "Réponse aux antipyrétiques aide au diagnostic différentiel",
+        category: "evolution",
+        diagnostic_value: "medium"
+      }
     ]
   } else if (combinedSymptoms.includes("céphal") || combinedSymptoms.includes("tête")) {
     questions = [
       {
         id: 1,
-        question: "Où se situe exactement la douleur dans la tête?",
+        question: "Décrivez le type de douleur de tête?",
         type: "multiple_choice",
-        options: ["Front/tempes", "Vertex", "Occipital", "Hémicrânie"],
-        rationale: "Localisation pour diagnostic différentiel des céphalées",
+        options: ["Pulsatile/battant", "Serrement/étau", "Coup de marteau", "Brûlure"],
+        rationale: "Type de céphalée oriente vers migraine, tension, ou cause secondaire",
         category: "symptom",
+        diagnostic_value: "high"
       },
       {
         id: 2,
-        question: "La douleur est-elle pulsatile ou constante?",
+        question: "Y a-t-il des signes d'alarme associés?",
         type: "multiple_choice",
-        options: ["Pulsatile", "Constante", "En étau", "Variable"],
-        rationale: "Distinction migraine/céphalée de tension/cause secondaire",
-        category: "symptom",
+        options: ["Troubles vision", "Raideur nuque", "Vomissements", "Aucun"],
+        rationale: "Signes d'alarme pour éliminer urgences neurologiques",
+        category: "differential",
+        diagnostic_value: "high"
       },
       {
         id: 3,
-        question: "Y a-t-il des signes neurologiques associés?",
+        question: "Qu'est-ce qui déclenche ou aggrave les maux de tête?",
         type: "multiple_choice",
-        options: ["Troubles visuels", "Nausées/vomissements", "Raideur nuque", "Aucun"],
-        rationale: "Recherche de signes d'alarme neurologique",
-        category: "associated",
-      },
+        options: ["Stress", "Lumière/bruit", "Mouvement", "Position"],
+        rationale: "Facteurs déclenchants pour diagnostic différentiel",
+        category: "symptom",
+        diagnostic_value: "medium"
+      }
     ]
   } else {
-    // Questions générales si symptômes non spécifiques
+    // Questions générales ciblées
     questions = [
       {
         id: 1,
-        question: "Depuis quand ces symptômes ont-ils commencé?",
+        question: "Comment les symptômes ont-ils évolué depuis le début?",
         type: "multiple_choice",
-        options: ["Moins de 24h", "1-3 jours", "Une semaine", "Plus d'une semaine"],
-        rationale: "Chronologie essentielle pour tout diagnostic",
-        category: "chronology",
+        options: ["Aggravation progressive", "Amélioration", "Stable", "Fluctuant"],
+        rationale: "Évolution des symptômes guide urgence et diagnostic",
+        category: "evolution",
+        diagnostic_value: "high"
       },
       {
         id: 2,
-        question: "Les symptômes s'aggravent-ils, s'améliorent-ils ou restent-ils stables?",
+        question: "Quelle est l'intensité actuelle de vos symptômes sur 10?",
         type: "multiple_choice",
-        options: ["S'aggravent", "S'améliorent", "Stables", "Fluctuent"],
-        rationale: "Évolution des symptômes guide le diagnostic",
-        category: "chronology",
+        options: ["1-3 (léger)", "4-6 (modéré)", "7-8 (intense)", "9-10 (insupportable)"],
+        rationale: "Évaluation de la sévérité pour priorisation thérapeutique",
+        category: "severity",
+        diagnostic_value: "medium"
       },
       {
         id: 3,
-        question: "Avez-vous identifié des facteurs déclenchants?",
+        question: "Ces symptômes impactent-ils vos activités quotidiennes?",
         type: "multiple_choice",
-        options: ["Effort physique", "Stress", "Alimentation", "Aucun identifié"],
-        rationale: "Facteurs déclenchants orientent le diagnostic",
-        category: "symptom",
-      },
+        options: ["Pas d'impact", "Impact léger", "Impact modéré", "Impossibilité d'activité"],
+        rationale: "Évaluation fonctionnelle pour adaptation thérapeutique",
+        category: "functional",
+        diagnostic_value: "medium"
+      }
     ]
   }
+
+  // Filtrer les questions redondantes
+  questions = questions.filter(q => 
+    !deduplicateQuestions([q], askedElements).length === 0
+  )
 
   return { questions }
 }
