@@ -20,6 +20,7 @@ import {
   Lightbulb,
   Sparkles
 } from "lucide-react"
+import { getTranslation, Language } from "@/lib/translations"
 
 interface Question {
   id: number
@@ -45,6 +46,7 @@ interface QuestionsFormProps {
   onDataChange: (data: QuestionsData) => void
   onNext: () => void
   onPrevious: () => void
+  language?: Language
 }
 
 export default function ModernQuestionsForm({
@@ -53,12 +55,16 @@ export default function ModernQuestionsForm({
   onDataChange,
   onNext,
   onPrevious,
+  language = 'fr'
 }: QuestionsFormProps) {
   const [questions, setQuestions] = useState<Question[]>([])
   const [responses, setResponses] = useState<QuestionResponse[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+
+  // Helper function for translations
+  const t = (key: string) => getTranslation(key, language)
 
   useEffect(() => {
     generateQuestions()
@@ -87,13 +93,14 @@ export default function ModernQuestionsForm({
         body: JSON.stringify({
           patientData,
           clinicalData,
+          language, // Pass language to API for localized questions
         }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || "Erreur lors de la génération des questions")
+        throw new Error(data.error || (language === 'fr' ? "Erreur lors de la génération des questions" : "Error generating questions"))
       }
 
       if (data.success && Array.isArray(data.questions)) {
@@ -106,14 +113,14 @@ export default function ModernQuestionsForm({
         }))
         setResponses(initialResponses)
       } else {
-        throw new Error("Format de réponse invalide")
+        throw new Error(language === 'fr' ? "Format de réponse invalide" : "Invalid response format")
       }
     } catch (err) {
-      console.error("Erreur génération questions:", err)
-      setError(err instanceof Error ? err.message : "Erreur inconnue")
+      console.error("Error generating questions:", err)
+      setError(err instanceof Error ? err.message : (language === 'fr' ? "Erreur inconnue" : "Unknown error"))
 
-      // Questions de fallback améliorées
-      const fallbackQuestions = [
+      // Fallback questions - bilingual
+      const fallbackQuestions = language === 'fr' ? [
         {
           id: 1,
           question: "Avez-vous déjà eu des symptômes similaires par le passé ?",
@@ -148,6 +155,42 @@ export default function ModernQuestionsForm({
           question: "Avez-vous des antécédents familiaux de pathologies similaires ?",
           type: "boolean",
           options: ["Oui", "Non"],
+        },
+      ] : [
+        {
+          id: 1,
+          question: "Have you experienced similar symptoms in the past?",
+          type: "boolean",
+          options: ["Yes", "No"],
+        },
+        {
+          id: 2,
+          question: "Do symptoms worsen with physical exertion?",
+          type: "boolean",
+          options: ["Yes", "No"],
+        },
+        {
+          id: 3,
+          question: "At what time of day are symptoms most intense?",
+          type: "multiple_choice",
+          options: ["Morning", "Afternoon", "Evening", "Night", "Variable"],
+        },
+        {
+          id: 4,
+          question: "On a scale of 1 to 5, how would you rate the impact on your quality of life?",
+          type: "scale",
+          options: ["1", "2", "3", "4", "5"],
+        },
+        {
+          id: 5,
+          question: "Are there any factors that relieve your symptoms? If so, which ones?",
+          type: "text",
+        },
+        {
+          id: 6,
+          question: "Do you have a family history of similar conditions?",
+          type: "boolean",
+          options: ["Yes", "No"],
         },
       ]
 
@@ -212,7 +255,7 @@ export default function ModernQuestionsForm({
             onValueChange={(value) => updateResponse(question.id, value)}
             className="flex gap-6"
           >
-            {(question.options || ["Oui", "Non"]).map((option) => (
+            {(question.options || [t('common.yes'), t('common.no')]).map((option) => (
               <div
                 key={option}
                 className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
@@ -283,8 +326,8 @@ export default function ModernQuestionsForm({
               ))}
             </RadioGroup>
             <div className="flex justify-between text-xs text-gray-500 px-4">
-              <span>Faible impact</span>
-              <span>Impact majeur</span>
+              <span>{t('questionsForm.lowImpact')}</span>
+              <span>{t('questionsForm.majorImpact')}</span>
             </div>
           </div>
         )
@@ -294,7 +337,7 @@ export default function ModernQuestionsForm({
           <Textarea
             value={currentAnswer.toString()}
             onChange={(e) => updateResponse(question.id, e.target.value)}
-            placeholder="Décrivez en détail votre réponse..."
+            placeholder={t('questionsForm.describePlaceholder')}
             rows={4}
             className="transition-all duration-200 focus:ring-blue-200 resize-y"
           />
@@ -305,7 +348,7 @@ export default function ModernQuestionsForm({
           <Textarea
             value={currentAnswer.toString()}
             onChange={(e) => updateResponse(question.id, e.target.value)}
-            placeholder="Votre réponse..."
+            placeholder={t('questionsForm.yourAnswerPlaceholder')}
             rows={3}
             className="transition-all duration-200 focus:ring-blue-200"
           />
@@ -323,7 +366,7 @@ export default function ModernQuestionsForm({
             <CardHeader className="text-center">
               <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 <Brain className="h-8 w-8 text-blue-600" />
-                Questions IA Personnalisées
+                {t('questionsForm.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="flex items-center justify-center py-16">
@@ -333,8 +376,8 @@ export default function ModernQuestionsForm({
                   <Brain className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-blue-600" />
                 </div>
                 <div className="space-y-2">
-                  <p className="text-xl font-semibold text-gray-800">Génération des questions personnalisées...</p>
-                  <p className="text-sm text-gray-600">L'IA analyse votre profil pour créer des questions adaptées à votre situation</p>
+                  <p className="text-xl font-semibold text-gray-800">{t('questionsForm.generating')}</p>
+                  <p className="text-sm text-gray-600">{t('questionsForm.analyzingProfile')}</p>
                 </div>
                 <Progress value={75} className="w-80 mx-auto h-2" />
               </div>
@@ -353,20 +396,20 @@ export default function ModernQuestionsForm({
           <CardHeader className="text-center">
             <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               <Brain className="h-8 w-8 text-blue-600" />
-              Questions IA Personnalisées
+              {t('questionsForm.title')}
             </CardTitle>
             <div className="mt-4 space-y-2">
               <div className="flex justify-between text-sm text-gray-600">
-                <span>Progression des questions</span>
+                <span>{t('questionsForm.progressTitle')}</span>
                 <span className="font-semibold">{progress}%</span>
               </div>
               <Progress value={progress} className="h-2" />
             </div>
             <div className="flex justify-center gap-4 mt-4">
               <Badge variant="outline" className="bg-blue-50">
-                {getAnsweredCount()} / {questions.length} répondues
+                {getAnsweredCount()} / {questions.length} {t('questionsForm.answered')}
               </Badge>
-              {error && <Badge variant="destructive">Mode fallback</Badge>}
+              {error && <Badge variant="destructive">{t('questionsForm.fallbackMode')}</Badge>}
             </div>
           </CardHeader>
         </Card>
@@ -378,7 +421,7 @@ export default function ModernQuestionsForm({
               <div className="flex items-center gap-3 text-amber-800">
                 <AlertTriangle className="h-5 w-5" />
                 <span className="text-sm font-medium">
-                  ⚠️ Génération IA indisponible. Questions génériques utilisées pour assurer la continuité du diagnostic.
+                  {t('questionsForm.fallbackWarning')}
                 </span>
               </div>
             </CardContent>
@@ -427,11 +470,11 @@ export default function ModernQuestionsForm({
             <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
               <CardTitle className="flex items-center gap-3">
                 <MessageSquare className="h-6 w-6" />
-                Question {index + 1} / {questions.length}
+                {t('questionsForm.question')} {index + 1} / {questions.length}
               </CardTitle>
               <div className="text-blue-100 text-sm mt-2">
                 <Lightbulb className="h-4 w-4 inline mr-2" />
-                Question générée spécifiquement pour votre profil médical
+                {t('questionsForm.aiGenerated')}
               </div>
             </CardHeader>
             <CardContent className="p-8 space-y-6">
@@ -456,10 +499,10 @@ export default function ModernQuestionsForm({
                   <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                     <div className="flex items-center gap-2 mb-2">
                       <CheckCircle className="h-5 w-5 text-green-600" />
-                      <p className="font-semibold text-green-800">Réponse enregistrée</p>
+                      <p className="font-semibold text-green-800">{t('questionsForm.answerRecorded')}</p>
                     </div>
                     <p className="text-sm text-green-700">
-                      <span className="font-medium">Votre réponse :</span> {currentAnswer}
+                      <span className="font-medium">{t('questionsForm.yourAnswer')}</span> {currentAnswer}
                     </p>
                   </div>
                 )
@@ -478,16 +521,16 @@ export default function ModernQuestionsForm({
               className="px-6 py-3"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Question précédente
+              {t('questionsForm.previousQuestion')}
             </Button>
             
-            {/* Bouton conditionnel : Question suivante OU Diagnostic IA */}
+            {/* Conditional button: Next Question OR AI Diagnosis */}
             {!isLastQuestion() ? (
               <Button
                 onClick={() => setCurrentQuestionIndex(Math.min(questions.length - 1, currentQuestionIndex + 1))}
                 className="px-6 py-3"
               >
-                Question suivante
+                {t('questionsForm.nextQuestion')}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             ) : (
@@ -497,14 +540,14 @@ export default function ModernQuestionsForm({
                 className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 font-semibold"
               >
                 <Sparkles className="h-5 w-5 mr-2" />
-                Lancer le Diagnostic IA
+                {t('questionsForm.launchAIDiagnosis')}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             )}
           </div>
         )}
 
-        {/* Bouton Diagnostic IA fixe quand toutes les questions sont répondues */}
+        {/* Fixed AI Diagnosis button when all questions are answered */}
         {isFormValid() && (
           <div className="sticky bottom-4 flex justify-center">
             <Button 
@@ -512,7 +555,7 @@ export default function ModernQuestionsForm({
               className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-4 shadow-2xl hover:shadow-3xl transition-all duration-300 font-semibold text-lg rounded-full animate-pulse"
             >
               <Sparkles className="h-6 w-6 mr-3" />
-              🚀 Diagnostic IA Prêt - Cliquez ici !
+              {t('questionsForm.aiDiagnosisReady')}
               <ArrowRight className="h-5 w-5 ml-3" />
             </Button>
           </div>
@@ -524,7 +567,7 @@ export default function ModernQuestionsForm({
             <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
               <CardTitle className="flex items-center gap-3">
                 <CheckCircle className="h-6 w-6" />
-                Résumé de vos Réponses
+                {t('questionsForm.summaryAnswers')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -559,7 +602,7 @@ export default function ModernQuestionsForm({
         <div className="flex justify-center">
           <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-sm text-gray-600">Sauvegarde automatique</span>
+            <span className="text-sm text-gray-600">{t('common.autoSave')}</span>
           </div>
         </div>
 
@@ -571,14 +614,14 @@ export default function ModernQuestionsForm({
             className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour à l'Examen Clinique
+            {t('questionsForm.backToClinical')}
           </Button>
           <Button 
             onClick={onNext} 
             disabled={!isFormValid()}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
           >
-            Continuer vers le Diagnostic IA
+            {t('questionsForm.continueToDiagnosis')}
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
