@@ -14,6 +14,7 @@ import DiagnosisForm from "@/components/diagnosis-form"
 import MedicalWorkflowManager from "@/components/medical-workflow-manager"
 import IntegratedMedicalConsultation from "@/components/integrated-medical-consultation"
 import { PatientDataLoader } from "@/components/patient-data-loader"
+import { getTranslation, Language } from "@/lib/translations"
 
 export default function MedicalAIExpert() {
   const [currentStep, setCurrentStep] = useState(0)
@@ -22,61 +23,64 @@ export default function MedicalAIExpert() {
   const [questionsData, setQuestionsData] = useState<any>(null)
   const [diagnosisData, setDiagnosisData] = useState<any>(null)
   const [workflowResult, setWorkflowResult] = useState<any>(null)
-  const [language, setLanguage] = useState<'fr' | 'en'>('fr')
+  const [language, setLanguage] = useState<Language>('fr')
 
   // Load language preference
   useEffect(() => {
-    const savedLanguage = localStorage.getItem('preferred-language') as 'fr' | 'en'
+    const savedLanguage = localStorage.getItem('preferred-language') as Language
     if (savedLanguage && (savedLanguage === 'fr' || savedLanguage === 'en')) {
       setLanguage(savedLanguage)
     }
   }, [])
 
-  const handleSetLanguage = (lang: 'fr' | 'en') => {
+  const handleSetLanguage = (lang: Language) => {
     setLanguage(lang)
     localStorage.setItem('preferred-language', lang)
   }
 
+  // Helper function for translations
+  const t = (key: string) => getTranslation(key, language)
+
   const steps = [
     {
       id: 0,
-      title: language === 'fr' ? "Informations Patient" : "Patient Information",
-      description: language === 'fr' ? "Identité, antécédents, allergies" : "Identity, history, allergies",
+      title: t('steps.patientInfo.title'),
+      description: t('steps.patientInfo.description'),
       icon: <User className="h-5 w-5" />,
       component: PatientForm,
     },
     {
       id: 1,
-      title: language === 'fr' ? "Examen Clinique" : "Clinical Examination",
-      description: language === 'fr' ? "Symptômes, signes vitaux, examen physique" : "Symptoms, vital signs, physical exam",
+      title: t('steps.clinicalExam.title'),
+      description: t('steps.clinicalExam.description'),
       icon: <Stethoscope className="h-5 w-5" />,
       component: ClinicalForm,
     },
     {
       id: 2,
-      title: language === 'fr' ? "Questions IA" : "AI Questions",
-      description: language === 'fr' ? "Questions personnalisées générées par l'IA" : "Personalized AI-generated questions",
+      title: t('steps.aiQuestions.title'),
+      description: t('steps.aiQuestions.description'),
       icon: <Brain className="h-5 w-5" />,
       component: QuestionsForm,
     },
     {
       id: 3,
-      title: language === 'fr' ? "Diagnostic IA" : "AI Diagnosis",
-      description: language === 'fr' ? "Analyse diagnostique par intelligence artificielle" : "Diagnostic analysis by artificial intelligence",
+      title: t('steps.aiDiagnosis.title'),
+      description: t('steps.aiDiagnosis.description'),
       icon: <ClipboardList className="h-5 w-5" />,
       component: DiagnosisForm,
     },
     {
       id: 4,
-      title: language === 'fr' ? "Workflow Médical" : "Medical Workflow",
-      description: language === 'fr' ? "Traitement complet avec APIs médicales" : "Complete processing with medical APIs",
+      title: t('steps.medicalWorkflow.title'),
+      description: t('steps.medicalWorkflow.description'),
       icon: <Activity className="h-5 w-5" />,
       component: MedicalWorkflowManager,
     },
     {
       id: 5,
-      title: language === 'fr' ? "Consultation Complète" : "Complete Consultation",
-      description: language === 'fr' ? "Rapport final et prescriptions" : "Final report and prescriptions",
+      title: t('steps.completeConsultation.title'),
+      description: t('steps.completeConsultation.description'),
       icon: <FileText className="h-5 w-5" />,
       component: IntegratedMedicalConsultation,
     },
@@ -98,18 +102,22 @@ export default function MedicalAIExpert() {
 
   const handleWorkflowComplete = (result: any) => {
     setWorkflowResult(result)
-    setCurrentStep(5) // Aller à la consultation complète
+    setCurrentStep(5) // Go to complete consultation
   }
 
   const getCurrentStepProps = () => {
+    const commonProps = { language }
+    
     switch (currentStep) {
       case 0:
         return {
+          ...commonProps,
           onDataChange: setPatientData,
           onNext: handleNext,
         }
       case 1:
         return {
+          ...commonProps,
           patientData,
           onDataChange: setClinicalData,
           onNext: handleNext,
@@ -117,6 +125,7 @@ export default function MedicalAIExpert() {
         }
       case 2:
         return {
+          ...commonProps,
           patientData,
           clinicalData,
           onDataChange: setQuestionsData,
@@ -125,6 +134,7 @@ export default function MedicalAIExpert() {
         }
       case 3:
         return {
+          ...commonProps,
           patientData,
           clinicalData,
           questionsData,
@@ -134,6 +144,7 @@ export default function MedicalAIExpert() {
         }
       case 4:
         return {
+          ...commonProps,
           patientData,
           clinicalData,
           questions: questionsData?.responses || "",
@@ -141,11 +152,12 @@ export default function MedicalAIExpert() {
         }
       case 5:
         return {
+          ...commonProps,
           patientData,
           result: workflowResult,
         }
       default:
-        return {}
+        return commonProps
     }
   }
 
@@ -158,17 +170,12 @@ export default function MedicalAIExpert() {
       */}
       
       <div className="container mx-auto px-4 py-8">
-        {/* En-tête with Language Switcher */}
+        {/* Header with Language Switcher */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">TIBOK IA DOCTOR</h1>
-              <p className="text-gray-600">
-                {language === 'fr' 
-                  ? "Système Expert de Diagnostic Médical par Intelligence Artificielle"
-                  : "Expert Medical Diagnostic System by Artificial Intelligence"
-                }
-              </p>
+              <h1 className="text-3xl font-bold text-gray-900">{t('mainPage.title')}</h1>
+              <p className="text-gray-600">{t('mainPage.subtitle')}</p>
             </div>
             <div className="flex items-center gap-2">
               {/* Language Switcher with black background */}
@@ -197,25 +204,25 @@ export default function MedicalAIExpert() {
                 </Button>
               </div>
               <Badge variant="outline" className="text-lg px-4 py-2">
-                GPT-4o + APIs {language === 'fr' ? 'Médicales' : 'Medical'}
+                GPT-4o + APIs {t('mainPage.medical')}
               </Badge>
             </div>
           </div>
 
-          {/* Barre de progression */}
+          {/* Progress bar */}
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">
-                  {language === 'fr' ? 'Progression' : 'Progress'}
+                  {t('mainPage.progress')}
                 </span>
                 <span className="text-sm text-gray-600">
-                  {language === 'fr' ? 'Étape' : 'Step'} {currentStep + 1} {language === 'fr' ? 'sur' : 'of'} {steps.length}
+                  {t('mainPage.step')} {currentStep + 1} {t('mainPage.of')} {steps.length}
                 </span>
               </div>
               <Progress value={progress} className="mb-4" />
 
-              {/* Étapes */}
+              {/* Steps */}
               <div className="flex justify-between">
                 {steps.map((step, index) => (
                   <div
@@ -242,7 +249,7 @@ export default function MedicalAIExpert() {
           </Card>
         </div>
 
-        {/* Étape actuelle */}
+        {/* Current step */}
         <div className="mb-8">
           <Card>
             <CardHeader>
@@ -255,21 +262,21 @@ export default function MedicalAIExpert() {
           </Card>
         </div>
 
-        {/* Contenu de l'étape */}
+        {/* Step content */}
         {CurrentStepComponent && <CurrentStepComponent {...getCurrentStepProps()} />}
 
-        {/* Informations système */}
+        {/* System information */}
         <div className="mt-8">
           <Card>
             <CardContent className="p-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div>
                   <div className="text-2xl font-bold text-blue-600">GPT-4o</div>
-                  <div className="text-sm text-gray-600">{language === 'fr' ? 'Modèle IA' : 'AI Model'}</div>
+                  <div className="text-sm text-gray-600">{t('mainPage.aiModel')}</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-green-600">5</div>
-                  <div className="text-sm text-gray-600">APIs {language === 'fr' ? 'Intégrées' : 'Integrated'}</div>
+                  <div className="text-sm text-gray-600">APIs {t('mainPage.integrated')}</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-purple-600">EBM</div>
@@ -277,7 +284,7 @@ export default function MedicalAIExpert() {
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-orange-600">24/7</div>
-                  <div className="text-sm text-gray-600">{language === 'fr' ? 'Disponible' : 'Available'}</div>
+                  <div className="text-sm text-gray-600">{t('mainPage.available')}</div>
                 </div>
               </div>
             </CardContent>
