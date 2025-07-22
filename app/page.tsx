@@ -73,7 +73,7 @@ export default function MedicalAIExpert() {
     {
       id: 4,
       title: "Documents Mauriciens",
-      description: "Édition des 4 documents médicaux mauriciens",
+      description: "Édition des documents médicaux",
       icon: <Activity className="h-5 w-5" />,
       component: MedicalWorkflow, // 👈 NOUVEAU - ÉTAPE FINALE
     },
