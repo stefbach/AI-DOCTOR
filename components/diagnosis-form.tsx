@@ -801,8 +801,8 @@ export default function EnhancedDiagnosisForm({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <ul className="text-sm text-yellow-700 space-y-1">
                     <li>• Aggravation état général</li>
-                    <li>• Fièvre >39°C persistante</li>
-                    <li>• Douleur non contrôlée >8/10</li>
+                    <li>• Fièvre &gt;39°C persistante</li>
+                    <li>• Douleur non contrôlée &gt;8/10</li>
                   </ul>
                   <ul className="text-sm text-yellow-700 space-y-1">
                     <li>• Effets indésirables sévères</li>
