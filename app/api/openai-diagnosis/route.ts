@@ -1525,12 +1525,13 @@ function generateComprehensiveMedicalReports(analysis: any, patientData: any, cl
   const primaryDx = analysis.clinical_analysis?.primary_diagnosis
   const examinations = analysis.expert_investigations?.immediate_priority || []
   const treatments = analysis.expert_therapeutics?.primary_treatments || []
+  const interactions = analysis.drug_interaction_analysis || []
   
   return {
     expert_consultation_report: {
       header: {
-        title: "CONSULTATION MÉDICALE SPÉCIALISÉE",
-        subtitle: "République de Maurice - Médecine Expert",
+        title: "CONSULTATION MÉDICALE SPÉCIALISÉE GPT-4o",
+        subtitle: "République de Maurice - Médecine Expert Intelligence Artificielle",
         date: currentDate,
         time: currentTime,
         physician: `Dr. ${physicianName}`,
@@ -1546,16 +1547,17 @@ function generateComprehensiveMedicalReports(analysis: any, patientData: any, cl
       },
       content: {
         chiefComplaint: clinicalData?.chiefComplaint || 'Motif de consultation',
-        clinicalSynthesis: `DIAGNOSTIC PRINCIPAL : ${primaryDx?.condition || 'En cours d\'évaluation'}\n\nCONFIANCE DIAGNOSTIQUE : ${primaryDx?.confidence_level || 70}%\n\nANALYSE : ${primaryDx?.pathophysiology || 'Évaluation clinique en cours'}`,
-        diagnosticReasoning: `RAISONNEMENT CLINIQUE :\n${primaryDx?.clinical_rationale || 'Arguments cliniques en cours d\'analyse'}\n\nDIAGNOSTICS DIFFÉRENTIELS :\n${(analysis.clinical_analysis?.differential_diagnoses || []).map((diff: any, i: number) => `${i+1}. ${diff.condition} (${diff.probability}%)`).join('\n')}`,
-        therapeuticPlan: `PLAN THÉRAPEUTIQUE :\n\n${treatments.map((treat: any, i: number) => `${i+1}. ${treat.medication_dci}\n   Posologie : ${treat.dosing_regimen?.standard_adult}\n   Indication : ${treat.precise_indication}\n   Surveillance : ${treat.monitoring_parameters?.[0] || 'Clinique'}`).join('\n\n')}`,
-        mauritianRecommendations: `RECOMMANDATIONS MAURICE :\n• Adaptation climat tropical\n• Protection vectorielle (dengue, chikungunya)\n• Suivi système santé mauricien\n• Urgences : 999 (SAMU)`
+        clinicalSynthesis: `DIAGNOSTIC PRINCIPAL : ${primaryDx?.condition || 'En cours d\'évaluation'}\n\nCONFIANCE DIAGNOSTIQUE : ${primaryDx?.confidence_level || 70}%\n\nSÉVÉRITÉ : ${primaryDx?.severity || 'Modérée'}\n\nANALYSE PHYSIOPATHOLOGIQUE :\n${primaryDx?.pathophysiology || 'Évaluation clinique en cours'}\n\nRATIONNEL CLINIQUE :\n${primaryDx?.clinical_rationale || 'Arguments cliniques en cours d\'analyse'}`,
+        diagnosticReasoning: `RAISONNEMENT DIAGNOSTIQUE EXPERT :\n\n${primaryDx?.clinical_rationale || 'Arguments cliniques en cours d\'analyse'}\n\nDIAGNOSTICS DIFFÉRENTIELS :\n${(analysis.clinical_analysis?.differential_diagnoses || []).map((diff: any, i: number) => `${i+1}. ${diff.condition} (${diff.probability}%) - ${diff.supporting_evidence}`).join('\n')}`,
+        therapeuticPlan: `PLAN THÉRAPEUTIQUE EXPERT GPT-4o :\n\n${treatments.map((treat: any, i: number) => `${i+1}. ${treat.medication_dci} (${treat.therapeutic_class})\n   Indication : ${treat.precise_indication}\n   Posologie adulte : ${treat.dosing_regimen?.standard_adult}\n   Posologie âgée : ${treat.dosing_regimen?.elderly_adjustment}\n   Surveillance : ${treat.monitoring_parameters?.join(', ') || 'Clinique'}\n   Durée : ${treat.treatment_duration}\n   Disponibilité Maurice : ${treat.mauritius_availability?.locally_available ? 'Disponible' : 'À commander'}\n   Coût : ${treat.mauritius_availability?.private_sector_cost}`).join('\n\n')}\n\n${interactions.length > 0 ? `INTERACTIONS MÉDICAMENTEUSES DÉTECTÉES :\n${interactions.map((int: any) => `⚠️ ${int.current_medication} + ${int.prescribed_medication} : ${int.clinical_consequence} (${int.interaction_severity})`).join('\n')}` : 'Aucune interaction médicamenteuse majeure détectée.'}`,
+        mauritianRecommendations: `RECOMMANDATIONS SPÉCIFIQUES MAURICE :\n\n• Adaptation climat tropical : Hydratation 2.5-3L/jour, protection solaire\n• Prévention vectorielle : Protection anti-moustiques (dengue, chikungunya)\n• Système santé mauricien : Urgences 999 (SAMU), suivi médecin traitant\n• Surveillance évolutive selon protocole expert GPT-4o\n• Éducation thérapeutique adaptée contexte mauricien`
       }
     },
     specialized_prescriptions: {
       biological_investigations: {
         header: {
-          title: "RÉPUBLIQUE DE MAURICE - PRESCRIPTION EXAMENS BIOLOGIQUES",
+          title: "RÉPUBLIQUE DE MAURICE - PRESCRIPTION EXAMENS BIOLOGIQUES EXPERTS",
+          subtitle: "Examens spécifiques recommandés par analyse GPT-4o",
           date: currentDate,
           physician: `Dr. ${physicianName}`,
           registration: registrationNumber
@@ -1564,9 +1566,16 @@ function generateComprehensiveMedicalReports(analysis: any, patientData: any, cl
           id: i + 1,
           name: exam.examination || exam.name,
           indication: exam.specific_indication || exam.indication,
-          urgency: exam.urgency || 'routine',
-          cost: exam.mauritius_availability?.estimated_cost || 'Rs 500-2000',
-          interpretation: exam.interpretation_keys || exam.interpretation || 'Interprétation clinique'
+          urgency: exam.urgency === 'immediate' ? 'IMMÉDIAT' : exam.urgency === 'urgent' ? 'URGENT' : 'SEMI-URGENT',
+          technique: exam.technique_details || 'Modalités techniques standard',
+          interpretation: exam.interpretation_keys || exam.interpretation || 'Interprétation clinique',
+          mauritian_availability: {
+            public_centers: exam.mauritius_availability?.public_centers?.join(', ') || 'Dr Jeetoo, Candos',
+            private_centers: exam.mauritius_availability?.private_centers?.join(', ') || 'Apollo Bramwell, Lancet',
+            cost: exam.mauritius_availability?.estimated_cost || exam.mauritius_cost || 'Rs 500-2000',
+            waiting_time: exam.mauritius_availability?.waiting_time || 'Selon urgence',
+            expertise_required: exam.mauritius_availability?.local_expertise || 'Biologiste médical'
+          }
         })),
         patient: {
           firstName: patientData?.firstName || 'Patient',
@@ -1576,7 +1585,8 @@ function generateComprehensiveMedicalReports(analysis: any, patientData: any, cl
       },
       imaging_investigations: {
         header: {
-          title: "RÉPUBLIQUE DE MAURICE - PRESCRIPTION IMAGERIE MÉDICALE",
+          title: "RÉPUBLIQUE DE MAURICE - PRESCRIPTION IMAGERIE MÉDICALE EXPERTE",
+          subtitle: "Examens d'imagerie spécifiques selon diagnostic GPT-4o",
           date: currentDate,
           physician: `Dr. ${physicianName}`,
           registration: registrationNumber
@@ -1585,9 +1595,16 @@ function generateComprehensiveMedicalReports(analysis: any, patientData: any, cl
           id: i + 1,
           name: exam.examination || exam.name,
           indication: exam.specific_indication || exam.indication,
-          urgency: exam.urgency || 'routine',
-          cost: exam.mauritius_availability?.estimated_cost || 'Rs 2000-8000',
-          centers: exam.mauritius_availability?.public_centers || ['Dr Jeetoo', 'Candos']
+          urgency: exam.urgency === 'immediate' ? 'IMMÉDIAT' : exam.urgency === 'urgent' ? 'URGENT' : 'SEMI-URGENT',
+          technique: exam.technique_details || 'Protocole technique standard',
+          interpretation: exam.interpretation_keys || exam.interpretation || 'Signes radiologiques recherchés',
+          mauritian_availability: {
+            public_centers: exam.mauritius_availability?.public_centers?.join(', ') || 'Dr Jeetoo Imagerie, Candos',
+            private_centers: exam.mauritius_availability?.private_centers?.join(', ') || 'Apollo Bramwell, Wellkin',
+            cost: exam.mauritius_availability?.estimated_cost || exam.mauritius_cost || 'Rs 2000-8000',
+            waiting_time: exam.mauritius_availability?.waiting_time || 'Selon urgence',
+            contraindications: exam.contraindications || 'Grossesse (protection si applicable)'
+          }
         })),
         patient: {
           firstName: patientData?.firstName || 'Patient',
@@ -1597,12 +1614,12 @@ function generateComprehensiveMedicalReports(analysis: any, patientData: any, cl
       },
       therapeutic_prescriptions: {
         header: {
-          title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
-          subtitle: "Prescription thérapeutique",
+          title: "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE EXPERTE",
+          subtitle: "Prescription thérapeutique basée sur analyse GPT-4o",
           date: currentDate,
           physician: `Dr. ${physicianName}`,
           registration: registrationNumber,
-          validity: "Ordonnance valable 6 mois"
+          validity: "Ordonnance valable 6 mois - Renouvellement selon évolution"
         },
         patient: {
           firstName: patientData?.firstName || 'Patient',
@@ -1614,22 +1631,41 @@ function generateComprehensiveMedicalReports(analysis: any, patientData: any, cl
         prescriptions: treatments.map((treatment: any, index: number) => ({
           id: index + 1,
           dci: treatment.medication_dci || 'Médicament',
+          therapeutic_class: treatment.therapeutic_class || 'Classe thérapeutique',
           indication: treatment.precise_indication || 'Traitement spécialisé',
-          dosage: treatment.dosing_regimen?.standard_adult || 'Selon prescription',
+          posology: {
+            adult: treatment.dosing_regimen?.standard_adult || 'Selon RCP',
+            elderly: treatment.dosing_regimen?.elderly_adjustment || 'Adaptation âge',
+            renal_impairment: treatment.dosing_regimen?.renal_adjustment || 'Selon fonction rénale',
+            hepatic_impairment: treatment.dosing_regimen?.hepatic_adjustment || 'Selon fonction hépatique'
+          },
+          administration: treatment.administration_route || 'Per os',
           duration: treatment.treatment_duration || 'Selon évolution',
-          contraindications: (treatment.contraindications_absolute || []).join(', ') || 'Voir notice',
+          contraindications: (treatment.contraindications_absolute || []).join(', ') || 'Hypersensibilité',
+          precautions: (treatment.precautions_relative || []).join(', ') || 'Surveillance clinique',
           monitoring: (treatment.monitoring_parameters || []).join(', ') || 'Surveillance clinique',
-          mauritianAvailability: treatment.mauritius_availability?.locally_available ? 'Disponible Maurice' : 'À vérifier disponibilité',
-          cost: treatment.mauritius_availability?.private_sector_cost || 'Rs 100-2000/mois'
+          mauritian_details: {
+            availability: treatment.mauritius_availability?.locally_available ? 'DISPONIBLE MAURICE' : 'À COMMANDER',
+            cost: treatment.mauritius_availability?.private_sector_cost || 'Rs 100-2000/mois',
+            alternatives: (treatment.mauritius_availability?.therapeutic_alternatives || []).join(', ') || 'Alternatives selon indication'
+          }
         })),
-        interactions_verified: analysis.drug_interaction_analysis?.length > 0,
-        clinicalAdvice: {
-          hydration: "Hydratation renforcée climat tropical (2.5-3L/jour)",
-          activity: "Adaptation activité selon pathologie et climat",
-          diet: "Alimentation équilibrée mauricienne",
-          mosquitoProtection: "Protection anti-moustiques (dengue/chikungunya)",
-          followUp: "Consultation réévaluation selon évolution clinique",
-          emergency: "Urgences Maurice: 999 (SAMU) - Signes d'alarme à surveiller"
+        drug_interactions: interactions.map((interaction: any) => ({
+          drugs: `${interaction.current_medication} + ${interaction.prescribed_medication}`,
+          severity: interaction.interaction_severity?.toUpperCase() || 'MINEUR',
+          mechanism: interaction.mechanism || 'Mécanisme à préciser',
+          clinical_consequence: interaction.clinical_consequence || 'Conséquence clinique',
+          management: interaction.management_strategy || 'Surveillance standard',
+          monitoring: interaction.monitoring_required || 'Surveillance clinique'
+        })),
+        mauritius_specific_advice: {
+          tropical_adaptations: "Hydratation renforcée climat tropical (2.5-3L/jour minimum)",
+          vector_protection: "Protection anti-moustiques systématique (répulsifs DEET >20%)",
+          activity_recommendations: "Évitement activités 11h-16h (pic chaleur), adaptation selon pathologie",
+          dietary_advice: "Alimentation équilibrée mauricienne, fruits tropicaux, hydratation",
+          follow_up_schedule: "Consultation réévaluation selon protocole surveillance GPT-4o",
+          emergency_contacts: "Urgences Maurice : 999 (SAMU) - Signes d'alarme à surveiller",
+          pharmacy_access: "Pharmacies garde : rotation hebdomadaire, disponibilité médicaments vérifiée"
         }
       }
     }
