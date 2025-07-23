@@ -2,7 +2,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -25,8 +25,19 @@ export default function ConsultationEditor({
   onSave, 
   onNext, 
   onPrevious,
-  patientName 
+  patientName,
+  patientData,
+  diagnosisData
 }) {
+  // Debug log to see what data we're receiving
+  useEffect(() => {
+    console.log('ConsultationEditor received:', {
+      consultationData,
+      patientData,
+      diagnosisData
+    })
+  }, [consultationData, patientData, diagnosisData])
+
   const [formData, setFormData] = useState({
     // Header
     title: consultationData?.header?.title || "COMPTE-RENDU DE CONSULTATION MÉDICALE",
@@ -37,25 +48,60 @@ export default function ConsultationEditor({
     registration: consultationData?.header?.registration || "COUNCIL-MU-2024-001",
     institution: consultationData?.header?.institution || "Centre Médical Maurice",
     
-    // Patient
-    firstName: consultationData?.patient?.firstName || "",
-    lastName: consultationData?.patient?.lastName || "",
-    age: consultationData?.patient?.age || "",
-    sex: consultationData?.patient?.sex || "",
+    // Patient - Use patientData if available
+    firstName: consultationData?.patient?.firstName || patientData?.firstName || "",
+    lastName: consultationData?.patient?.lastName || patientData?.lastName || "",
+    age: consultationData?.patient?.age || patientData?.age || "",
+    sex: consultationData?.patient?.sex || (patientData?.gender?.[0] === 'Masculin' ? 'M' : patientData?.gender?.[0] === 'Féminin' ? 'F' : '') || "",
     address: consultationData?.patient?.address || "Adresse à compléter - Maurice",
     phone: consultationData?.patient?.phone || "Téléphone à renseigner",
     idNumber: consultationData?.patient?.idNumber || "Carte d'identité mauricienne",
-    weight: consultationData?.patient?.weight || "",
-    height: consultationData?.patient?.height || "",
-    allergies: consultationData?.patient?.allergies || "Aucune",
+    weight: consultationData?.patient?.weight || patientData?.weight || "",
+    height: consultationData?.patient?.height || patientData?.height || "",
+    allergies: consultationData?.patient?.allergies || (patientData?.allergies?.length > 0 ? patientData.allergies.join(', ') : "Aucune"),
     
-    // Content
-    chiefComplaint: consultationData?.content?.chiefComplaint || "",
-    history: consultationData?.content?.history || "",
+    // Content - Use data from diagnosis workflow
+    chiefComplaint: consultationData?.content?.chiefComplaint || patientData?.clinicalData?.chiefComplaint || "",
+    history: consultationData?.content?.history || patientData?.clinicalData?.diseaseHistory || "",
     examination: consultationData?.content?.examination || "",
-    diagnosis: consultationData?.content?.diagnosis || "",
+    diagnosis: consultationData?.content?.diagnosis || diagnosisData?.primary?.condition || "",
     plan: consultationData?.content?.plan || ""
   })
+
+  // Update form when data changes
+  useEffect(() => {
+    if (consultationData || patientData || diagnosisData) {
+      setFormData({
+        // Header
+        title: consultationData?.header?.title || formData.title,
+        subtitle: consultationData?.header?.subtitle || formData.subtitle,
+        date: consultationData?.header?.date || formData.date,
+        time: consultationData?.header?.time || formData.time,
+        physician: consultationData?.header?.physician || formData.physician,
+        registration: consultationData?.header?.registration || formData.registration,
+        institution: consultationData?.header?.institution || formData.institution,
+        
+        // Patient
+        firstName: consultationData?.patient?.firstName || patientData?.firstName || formData.firstName,
+        lastName: consultationData?.patient?.lastName || patientData?.lastName || formData.lastName,
+        age: consultationData?.patient?.age || patientData?.age || formData.age,
+        sex: consultationData?.patient?.sex || (patientData?.gender?.[0] === 'Masculin' ? 'M' : patientData?.gender?.[0] === 'Féminin' ? 'F' : formData.sex) || formData.sex,
+        address: consultationData?.patient?.address || formData.address,
+        phone: consultationData?.patient?.phone || formData.phone,
+        idNumber: consultationData?.patient?.idNumber || formData.idNumber,
+        weight: consultationData?.patient?.weight || patientData?.weight || formData.weight,
+        height: consultationData?.patient?.height || patientData?.height || formData.height,
+        allergies: consultationData?.patient?.allergies || (patientData?.allergies?.length > 0 ? patientData.allergies.join(', ') : formData.allergies),
+        
+        // Content
+        chiefComplaint: consultationData?.content?.chiefComplaint || patientData?.clinicalData?.chiefComplaint || formData.chiefComplaint,
+        history: consultationData?.content?.history || patientData?.clinicalData?.diseaseHistory || formData.history,
+        examination: consultationData?.content?.examination || formData.examination,
+        diagnosis: consultationData?.content?.diagnosis || diagnosisData?.primary?.condition || formData.diagnosis,
+        plan: consultationData?.content?.plan || formData.plan
+      })
+    }
+  }, [consultationData, patientData, diagnosisData])
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -96,6 +142,7 @@ export default function ConsultationEditor({
       }
     }
     
+    console.log('Saving consultation data:', updatedConsultation)
     onSave('consultation', updatedConsultation)
   }
 
@@ -229,7 +276,7 @@ export default function ConsultationEditor({
               />
             </div>
             <div>
-              <Label htmlFor="weight">Poids</Label>
+              <Label htmlFor="weight">Poids (kg)</Label>
               <Input
                 id="weight"
                 value={formData.weight}
@@ -239,7 +286,7 @@ export default function ConsultationEditor({
               />
             </div>
             <div>
-              <Label htmlFor="height">Taille</Label>
+              <Label htmlFor="height">Taille (cm)</Label>
               <Input
                 id="height"
                 value={formData.height}
