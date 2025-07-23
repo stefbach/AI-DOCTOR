@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { consultationDataService } from '@/lib/consultation-data-service'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -55,9 +56,17 @@ interface PatientFormProps {
   onDataChange: (data: PatientFormData) => void
   onNext: () => void
   language?: Language
+  consultationId?: string | null
+  initialData?: PatientFormData
 }
 
-export default function ModernPatientForm({ onDataChange, onNext, language = 'fr' }: PatientFormProps) {
+export default function ModernPatientForm({ 
+  onDataChange, 
+  onNext, 
+  language = 'fr',
+  consultationId,
+  initialData
+}: PatientFormProps) {
   const { patientData: tibokPatient, consultationData, isFromTibok } = useTibokPatientData()
   const [isLoadingPatientData, setIsLoadingPatientData] = useState(true)
   const [dataProcessed, setDataProcessed] = useState(false)
@@ -239,6 +248,52 @@ export default function ModernPatientForm({ onDataChange, onNext, language = 'fr
     // Process immediately
     processPatientData()
   }, [tibokPatient, isFromTibok, dataProcessed, urlData, t])
+
+  // Load saved data if available
+  useEffect(() => {
+    const loadSavedData = async () => {
+      try {
+        if (dataProcessed) return
+        
+        const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
+        
+        if (currentConsultationId) {
+          const savedData = await consultationDataService.getAllData()
+          if (savedData?.patientData && !dataProcessed) {
+            setFormData(savedData.patientData)
+            setDataProcessed(true)
+          }
+        }
+      } catch (error) {
+        console.error('Error loading saved patient data:', error)
+      } finally {
+        setIsLoadingPatientData(false)
+      }
+    }
+    
+    if (!urlData && !tibokPatient) {
+      loadSavedData()
+    }
+  }, [consultationId, urlData, tibokPatient, dataProcessed])
+
+  // Save data when form changes
+  useEffect(() => {
+    const saveData = async () => {
+      try {
+        await consultationDataService.saveStepData(0, formData)
+      } catch (error) {
+        console.error('Error saving patient data:', error)
+      }
+    }
+    
+    const timer = setTimeout(() => {
+      if (formData.firstName && formData.lastName) {
+        saveData()
+      }
+    }, 1000)
+    
+    return () => clearTimeout(timer)
+  }, [formData])
 
   // Calculate form completion percentage
   const calculateProgress = () => {
