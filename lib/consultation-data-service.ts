@@ -1,9 +1,5 @@
 // lib/consultation-data-service.ts
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+import { supabase } from '@/lib/supabase'
 
 export interface ConsultationData {
   patientData?: any
@@ -62,7 +58,9 @@ class ConsultationDataService {
       if (error) throw error
 
       // Store consultation ID in session
-      sessionStorage.setItem(this.CONSULTATION_ID_KEY, consultationId)
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        sessionStorage.setItem(this.CONSULTATION_ID_KEY, consultationId)
+      }
       
       return data
     } catch (error) {
@@ -96,10 +94,12 @@ class ConsultationDataService {
       }
       
       // Save to session storage
-      sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(updatedData))
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(updatedData))
+      }
       
       // Save to database if consultation ID exists
-      const consultationId = sessionStorage.getItem(this.CONSULTATION_ID_KEY)
+      const consultationId = this.getCurrentConsultationId()
       if (consultationId) {
         await this.saveToSupabase(consultationId, stepNumber, data)
       }
@@ -157,6 +157,16 @@ class ConsultationDataService {
     }
   }
 
+  // Get all data for the current consultation
+  async getAllData(): Promise<ConsultationData | null> {
+    const consultationId = this.getCurrentConsultationId()
+    if (!consultationId) {
+      return this.getSessionData()
+    }
+    
+    return await this.loadConsultationData(consultationId)
+  }
+
   // Get all data for auto-fill
   getDataForAutoFill(): ConsultationData {
     // First try to get from session storage
@@ -173,6 +183,9 @@ class ConsultationDataService {
   // Get session data
   private getSessionData(): ConsultationData {
     try {
+      if (typeof window === 'undefined' || !window.sessionStorage) {
+        return {}
+      }
       const data = sessionStorage.getItem(this.SESSION_KEY)
       return data ? JSON.parse(data) : {}
     } catch (error) {
@@ -202,8 +215,10 @@ class ConsultationDataService {
         }
 
         // Also save to session storage for quick access
-        sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(consultationData))
-        sessionStorage.setItem(this.CONSULTATION_ID_KEY, consultationId)
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+          sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(consultationData))
+          sessionStorage.setItem(this.CONSULTATION_ID_KEY, consultationId)
+        }
 
         return consultationData
       }
@@ -217,12 +232,17 @@ class ConsultationDataService {
 
   // Clear session data
   clearSession() {
-    sessionStorage.removeItem(this.SESSION_KEY)
-    sessionStorage.removeItem(this.CONSULTATION_ID_KEY)
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      sessionStorage.removeItem(this.SESSION_KEY)
+      sessionStorage.removeItem(this.CONSULTATION_ID_KEY)
+    }
   }
 
   // Get current consultation ID
   getCurrentConsultationId(): string | null {
+    if (typeof window === 'undefined' || !window.sessionStorage) {
+      return null
+    }
     return sessionStorage.getItem(this.CONSULTATION_ID_KEY)
   }
 }
