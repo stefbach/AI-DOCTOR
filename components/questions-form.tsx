@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { consultationDataService } from '@/lib/consultation-data-service'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -47,6 +48,7 @@ interface QuestionsFormProps {
   onNext: () => void
   onPrevious: () => void
   language?: Language
+  consultationId?: string | null
 }
 
 export default function ModernQuestionsForm({
@@ -55,7 +57,8 @@ export default function ModernQuestionsForm({
   onDataChange,
   onNext,
   onPrevious,
-  language = 'fr'
+  language = 'fr',
+  consultationId
 }: QuestionsFormProps) {
   const [questions, setQuestions] = useState<Question[]>([])
   const [responses, setResponses] = useState<QuestionResponse[]>([])
@@ -65,6 +68,45 @@ export default function ModernQuestionsForm({
 
   // Helper function for translations
   const t = (key: string) => getTranslation(key, language)
+
+  // Load saved data on mount
+  useEffect(() => {
+    const loadSavedData = async () => {
+      try {
+        const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
+        
+        if (currentConsultationId) {
+          const savedData = await consultationDataService.getAllData()
+          if (savedData?.questionsData?.responses) {
+            setResponses(savedData.questionsData.responses)
+          }
+        }
+      } catch (error) {
+        console.error('Error loading saved questions data:', error)
+      }
+    }
+    
+    loadSavedData()
+  }, [consultationId])
+
+  // Save data when responses change
+  useEffect(() => {
+    const saveData = async () => {
+      try {
+        await consultationDataService.saveStepData(2, { responses })
+      } catch (error) {
+        console.error('Error saving questions data:', error)
+      }
+    }
+    
+    const timer = setTimeout(() => {
+      if (responses.length > 0) {
+        saveData()
+      }
+    }, 1000)
+    
+    return () => clearTimeout(timer)
+  }, [responses])
 
   useEffect(() => {
     generateQuestions()
