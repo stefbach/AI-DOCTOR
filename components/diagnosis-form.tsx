@@ -154,21 +154,27 @@ export default function EnhancedDiagnosisForm({
 
       if (data.success && data.diagnosis && data.mauritianDocuments) {
         setDiagnosis(data.diagnosis)
-        setExpertAnalysis(data.expertAnalysis || data.expert_analysis)
+        setExpertAnalysis(data.expertAnalysis || data.expert_analysis || {})
         setMauritianDocuments(data.mauritianDocuments)
         setDocumentsGenerated(true)
         
-        onDataChange({ 
+        // Make sure we're passing ALL the data
+        const completeData = { 
           diagnosis: data.diagnosis, 
           mauritianDocuments: data.mauritianDocuments,
-          expertAnalysis: data.expertAnalysis || data.expert_analysis,
+          expertAnalysis: data.expertAnalysis || data.expert_analysis || {},
           completeData: data 
-        })
+        }
+        
+        onDataChange(completeData)
+        
+        // Also save to consultation service immediately
+        await consultationDataService.saveStepData(3, completeData)
         
         console.log("✅ Diagnosis + Documents + Expert Analysis generated")
-        console.log("🔍 Diagnosis set:", diagnosis)
-        console.log("🔍 Expert Analysis set:", expertAnalysis)
-        console.log("🔍 Documents set:", mauritianDocuments)
+        console.log("🔍 Diagnosis set:", data.diagnosis)
+        console.log("🔍 Expert Analysis set:", data.expertAnalysis || data.expert_analysis)
+        console.log("🔍 Documents set:", data.mauritianDocuments)
       } else {
         throw new Error(data.error || "Format de réponse invalide")
       }
