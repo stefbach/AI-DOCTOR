@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { consultationDataService } from '@/lib/consultation-data-service'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -42,6 +43,7 @@ interface ClinicalFormProps {
   onNext: () => void
   onPrevious: () => void
   language?: Language
+  consultationId?: string | null
 }
 
 export default function ModernClinicalForm({ 
@@ -50,7 +52,8 @@ export default function ModernClinicalForm({
   onDataChange, 
   onNext, 
   onPrevious,
-  language = 'fr' 
+  language = 'fr',
+  consultationId
 }: ClinicalFormProps) {
   // Helper function for translations
   const t = (key: string) => getTranslation(key, language)
@@ -98,6 +101,45 @@ export default function ModernClinicalForm({
   const [localData, setLocalData] = useState<ClinicalData>(data || defaultClinicalData)
   const [symptomSearch, setSymptomSearch] = useState("")
   const [currentSection, setCurrentSection] = useState(0)
+
+  // Load saved data on mount
+  useEffect(() => {
+    const loadSavedData = async () => {
+      try {
+        const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
+        
+        if (currentConsultationId) {
+          const savedData = await consultationDataService.getAllData()
+          if (savedData?.clinicalData) {
+            setLocalData(savedData.clinicalData)
+          }
+        }
+      } catch (error) {
+        console.error('Error loading saved clinical data:', error)
+      }
+    }
+    
+    loadSavedData()
+  }, [consultationId])
+
+  // Save data when it changes
+  useEffect(() => {
+    const saveData = async () => {
+      try {
+        await consultationDataService.saveStepData(1, localData)
+      } catch (error) {
+        console.error('Error saving clinical data:', error)
+      }
+    }
+    
+    const timer = setTimeout(() => {
+      if (localData.chiefComplaint || localData.diseaseHistory || localData.symptoms.length > 0) {
+        saveData()
+      }
+    }, 1000)
+    
+    return () => clearTimeout(timer)
+  }, [localData])
 
   useEffect(() => {
     if (data) {
