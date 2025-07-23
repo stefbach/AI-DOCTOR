@@ -2,7 +2,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,8 +29,19 @@ export default function ParaclinicalEditor({
   onSave, 
   onNext, 
   onPrevious,
-  patientName 
+  patientName,
+  patientData,
+  diagnosisData
 }) {
+  // Debug log to see what data we're receiving
+  useEffect(() => {
+    console.log('ParaclinicalEditor received:', {
+      paraclinicalData,
+      patientData,
+      diagnosisData
+    })
+  }, [paraclinicalData, patientData, diagnosisData])
+
   const [formData, setFormData] = useState({
     // Header
     title: paraclinicalData?.header?.title || "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
@@ -40,10 +51,10 @@ export default function ParaclinicalEditor({
     physician: paraclinicalData?.header?.physician || "Dr. MÉDECIN EXPERT",
     registration: paraclinicalData?.header?.registration || "COUNCIL-MU-2024-001",
     
-    // Patient info
-    firstName: paraclinicalData?.patient?.firstName || "",
-    lastName: paraclinicalData?.patient?.lastName || "",
-    age: paraclinicalData?.patient?.age || "",
+    // Patient info - Use patientData if available
+    firstName: paraclinicalData?.patient?.firstName || patientData?.firstName || "",
+    lastName: paraclinicalData?.patient?.lastName || patientData?.lastName || "",
+    age: paraclinicalData?.patient?.age || patientData?.age || "",
     address: paraclinicalData?.patient?.address || "Adresse à compléter - Maurice",
     idNumber: paraclinicalData?.patient?.idNumber || "Carte d'identité mauricienne",
     
@@ -54,7 +65,7 @@ export default function ParaclinicalEditor({
         category: "Imagerie thoracique",
         exam: "Radiographie thoracique de face et profil",
         indication: "Exploration parenchyme pulmonaire selon symptomatologie",
-        urgency: "Programmé",
+        urgency: "Programmé (1-2 semaines)",
         preparation: "Retrait bijoux et objets métalliques",
         contraindications: "Grossesse (radioprotection)",
         duration: "10 minutes",
@@ -63,6 +74,31 @@ export default function ParaclinicalEditor({
       }
     ]
   })
+
+  // Update form when data changes
+  useEffect(() => {
+    if (paraclinicalData || patientData) {
+      setFormData({
+        // Header
+        title: paraclinicalData?.header?.title || formData.title,
+        subtitle: paraclinicalData?.header?.subtitle || formData.subtitle,
+        date: paraclinicalData?.header?.date || formData.date,
+        number: paraclinicalData?.header?.number || formData.number,
+        physician: paraclinicalData?.header?.physician || formData.physician,
+        registration: paraclinicalData?.header?.registration || formData.registration,
+        
+        // Patient info
+        firstName: paraclinicalData?.patient?.firstName || patientData?.firstName || formData.firstName,
+        lastName: paraclinicalData?.patient?.lastName || patientData?.lastName || formData.lastName,
+        age: paraclinicalData?.patient?.age || patientData?.age || formData.age,
+        address: paraclinicalData?.patient?.address || formData.address,
+        idNumber: paraclinicalData?.patient?.idNumber || formData.idNumber,
+        
+        // Prescriptions
+        prescriptions: paraclinicalData?.prescriptions || formData.prescriptions
+      })
+    }
+  }, [paraclinicalData, patientData])
 
   const examCategories = [
     "Imagerie thoracique",
@@ -173,7 +209,7 @@ export default function ParaclinicalEditor({
       category: "",
       exam: "",
       indication: "",
-      urgency: "Programmé",
+      urgency: "Programmé (1-2 semaines)",
       preparation: "Aucune préparation spéciale",
       contraindications: "Aucune",
       duration: "À préciser",
@@ -214,6 +250,7 @@ export default function ParaclinicalEditor({
       prescriptions: formData.prescriptions
     }
     
+    console.log('Saving paraclinical data:', updatedParaclinical)
     onSave('paraclinical', updatedParaclinical)
   }
 
@@ -504,7 +541,7 @@ export default function ParaclinicalEditor({
                 <div className="bg-amber-50 p-3 rounded-lg border border-amber-200">
                   <div className="flex items-start gap-2">
                     <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5" />
-                    <div className="text-sm text-amber-800">
+                    <div className="text-sm text-amber-800 w-full">
                       <strong>Disponibilité Maurice:</strong>
                       <br />
                       <Select
@@ -515,6 +552,8 @@ export default function ParaclinicalEditor({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="Centres publics et privés">Centres publics et privés</SelectItem>
+                          <SelectItem value="Hôpitaux publics et centres privés">Hôpitaux publics et centres privés</SelectItem>
                           {mauritianCenters.map((center) => (
                             <SelectItem key={center} value={center}>
                               {center}
@@ -522,6 +561,9 @@ export default function ParaclinicalEditor({
                           ))}
                         </SelectContent>
                       </Select>
+                      <div className="mt-2">
+                        <strong>Coût estimé:</strong> {prescription.cost}
+                      </div>
                     </div>
                   </div>
                 </div>
