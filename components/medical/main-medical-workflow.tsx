@@ -3,6 +3,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { consultationDataService } from '@/lib/consultation-data-service'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -45,11 +46,16 @@ export default function MedicalWorkflow({
   ]
 
   // Callback du workflow documents
-  const handleDocumentsComplete = (editedDocs) => {
+  const handleDocumentsComplete = async (editedDocs) => {
     console.log('✅ Documents finalisés:', editedDocs)
     setFinalDocuments(editedDocs)
     
-    // Appeler onComplete pour retourner à page.tsx
+    try {
+      await consultationDataService.saveStepData(4, editedDocs)
+    } catch (error) {
+      console.error('Error saving workflow documents:', error)
+    }
+    
     if (onComplete) {
       onComplete(editedDocs)
     } else {
@@ -65,6 +71,27 @@ export default function MedicalWorkflow({
   }
 
   const patientName = `${patientData?.firstName || 'Patient'} ${patientData?.lastName || 'X'}`
+
+  // Load all saved data for auto-fill when component mounts
+  useEffect(() => {
+    const loadAllData = async () => {
+      try {
+        const allData = await consultationDataService.getDataForAutoFill()
+        
+        console.log('Loading data for auto-fill:', allData)
+        
+        if (allData) {
+          if (allData.workflowResult) {
+            setFinalDocuments(allData.workflowResult)
+          }
+        }
+      } catch (error) {
+        console.error('Error loading data for auto-fill:', error)
+      }
+    }
+    
+    loadAllData()
+  }, [])
 
   // Effet pour initialiser les données si diagnosisData arrive
   useEffect(() => {
