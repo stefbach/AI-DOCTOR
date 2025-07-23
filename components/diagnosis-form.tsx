@@ -99,14 +99,14 @@ export default function EnhancedDiagnosisForm({
 
       if (data.success && data.diagnosis && data.mauritianDocuments) {
         setDiagnosis(data.diagnosis)
-        setExpertAnalysis(data.expertAnalysis || data.expert_analysis) // ← CORRECTION: Support les 2 formats
+        setExpertAnalysis(data.expertAnalysis || data.expert_analysis)
         setMauritianDocuments(data.mauritianDocuments)
         setDocumentsGenerated(true)
         
         onDataChange({ 
           diagnosis: data.diagnosis, 
           mauritianDocuments: data.mauritianDocuments,
-          expertAnalysis: data.expertAnalysis || data.expert_analysis, // ← CORRECTION
+          expertAnalysis: data.expertAnalysis || data.expert_analysis,
           completeData: data 
         })
         
@@ -125,7 +125,7 @@ export default function EnhancedDiagnosisForm({
       // Generate fallback data
       const fallbackData = generateCompleteFallback()
       setDiagnosis(fallbackData.diagnosis)
-      setExpertAnalysis(fallbackData.expertAnalysis) // ← CORRECTION
+      setExpertAnalysis(fallbackData.expertAnalysis)
       setMauritianDocuments(fallbackData.mauritianDocuments)
       setDocumentsGenerated(true)
       onDataChange(fallbackData)
@@ -231,7 +231,7 @@ export default function EnhancedDiagnosisForm({
 
     return {
       diagnosis: fallbackDiagnosis,
-      expertAnalysis: fallbackExpertAnalysis, // ← CORRECTION: expertAnalysis au lieu de expert_analysis
+      expertAnalysis: fallbackExpertAnalysis,
       mauritianDocuments: fallbackDocuments
     }
   }
@@ -373,7 +373,31 @@ export default function EnhancedDiagnosisForm({
                 <Badge className="bg-green-500 text-white">
                   Documents Prêts
                 </Badge>
-              {/* DEBUG: Si pas d'examens */}
+              )}
+              {error && <Badge variant="destructive">Mode Fallback</Badge>}
+            </div>
+          </CardHeader>
+        </Card>
+
+        {/* Section navigation */}
+        <div className="flex flex-wrap gap-2 justify-center">
+          {sections.map((section, index) => (
+            <button
+              key={section.id}
+              onClick={() => setCurrentSection(index)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
+                currentSection === index
+                  ? "bg-emerald-600 text-white shadow-lg"
+                  : "bg-white/70 text-gray-600 hover:bg-white hover:shadow-md"
+              }`}
+            >
+              <section.icon className="h-4 w-4" />
+              <span className="text-sm font-medium">{section.title}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* DEBUG: Si pas d'examens */}
         {currentSection === 1 && (!expertAnalysis?.expert_investigations?.immediate_priority || expertAnalysis.expert_investigations.immediate_priority.length === 0) && (
           <Card className="bg-yellow-50 border border-yellow-200">
             <CardContent className="p-6">
@@ -408,28 +432,6 @@ export default function EnhancedDiagnosisForm({
             </CardContent>
           </Card>
         )}
-              {error && <Badge variant="destructive">Mode Fallback</Badge>}
-            </div>
-          </CardHeader>
-        </Card>
-
-        {/* Section navigation */}
-        <div className="flex flex-wrap gap-2 justify-center">
-          {sections.map((section, index) => (
-            <button
-              key={section.id}
-              onClick={() => setCurrentSection(index)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
-                currentSection === index
-                  ? "bg-emerald-600 text-white shadow-lg"
-                  : "bg-white/70 text-gray-600 hover:bg-white hover:shadow-md"
-              }`}
-            >
-              <section.icon className="h-4 w-4" />
-              <span className="text-sm font-medium">{section.title}</span>
-            </button>
-          ))}
-        </div>
 
         {/* PRIMARY DIAGNOSIS */}
         {currentSection === 0 && (
