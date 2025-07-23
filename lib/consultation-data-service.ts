@@ -75,13 +75,13 @@ class ConsultationDataService {
       // Get current session data
       const sessionData = this.getSessionData()
       
-      // Map step number to data field (adjusted for your 5-step workflow)
+      // Map step number to data field
       const fieldMap: { [key: number]: keyof ConsultationData } = {
-        0: 'patientData',      // Your step 0
-        1: 'clinicalData',     // Your step 1
-        2: 'questionsData',    // Your step 2
-        3: 'diagnosisData',    // Your step 3
-        4: 'workflowResult'    // Your step 4 (MedicalWorkflow)
+        0: 'patientData',
+        1: 'clinicalData',
+        2: 'questionsData',
+        3: 'diagnosisData',
+        4: 'workflowResult'
       }
 
       const field = fieldMap[stepNumber]
@@ -119,7 +119,7 @@ class ConsultationDataService {
         1: 'clinical_data',
         2: 'questions_data',
         3: 'diagnosis_data',
-        4: 'documents_data' // Save final workflow data here
+        4: 'documents_data'  // This should save the final documents
       }
 
       const field = fieldMap[stepNumber]
@@ -168,16 +168,31 @@ class ConsultationDataService {
   }
 
   // Get all data for auto-fill
-  getDataForAutoFill(): ConsultationData {
-    // First try to get from session storage
-    const sessionData = this.getSessionData()
-    
-    if (Object.keys(sessionData).length > 0) {
-      return sessionData
-    }
+  async getDataForAutoFill(): Promise<ConsultationData> {
+    try {
+      // First try to get consultation ID
+      const consultationId = this.getCurrentConsultationId()
+      
+      if (consultationId) {
+        // Try to load from database
+        const dbData = await this.loadConsultationData(consultationId)
+        if (dbData && Object.keys(dbData).length > 0) {
+          return dbData
+        }
+      }
+      
+      // Fall back to session storage
+      const sessionData = this.getSessionData()
+      if (Object.keys(sessionData).length > 0) {
+        return sessionData
+      }
 
-    // If no session data, return empty object
-    return {}
+      // If no data anywhere, return empty object
+      return {}
+    } catch (error) {
+      console.error('Error getting data for auto-fill:', error)
+      return {}
+    }
   }
 
   // Get session data
@@ -244,6 +259,48 @@ class ConsultationDataService {
       return null
     }
     return sessionStorage.getItem(this.CONSULTATION_ID_KEY)
+  }
+
+  // Check if all steps are completed
+  async isConsultationComplete(): Promise<boolean> {
+    try {
+      const consultationId = this.getCurrentConsultationId()
+      if (!consultationId) return false
+
+      const { data } = await supabase
+        .from('consultation_records')
+        .select('completed_steps')
+        .eq('consultation_id', consultationId)
+        .single()
+
+      if (!data) return false
+
+      // Check if all 5 steps (0-4) are completed
+      const requiredSteps = [0, 1, 2, 3, 4]
+      return requiredSteps.every(step => data.completed_steps?.includes(step))
+    } catch (error) {
+      console.error('Error checking consultation completion:', error)
+      return false
+    }
+  }
+
+  // Get current workflow step
+  async getCurrentStep(): Promise<number> {
+    try {
+      const consultationId = this.getCurrentConsultationId()
+      if (!consultationId) return 0
+
+      const { data } = await supabase
+        .from('consultation_records')
+        .select('workflow_step')
+        .eq('consultation_id', consultationId)
+        .single()
+
+      return data?.workflow_step || 0
+    } catch (error) {
+      console.error('Error getting current step:', error)
+      return 0
+    }
   }
 }
 
