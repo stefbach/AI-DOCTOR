@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { consultationDataService } from '@/lib/consultation-data-service'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -37,6 +38,7 @@ interface DiagnosisFormProps {
   onNext: () => void
   onPrevious: () => void
   language?: Language
+  consultationId?: string | null
 }
 
 export default function EnhancedDiagnosisForm({
@@ -46,7 +48,8 @@ export default function EnhancedDiagnosisForm({
   onDataChange,
   onNext,
   onPrevious,
-  language = 'fr'
+  language = 'fr',
+  consultationId
 }: DiagnosisFormProps) {
   const [diagnosis, setDiagnosis] = useState<any>(null)
   const [expertAnalysis, setExpertAnalysis] = useState<any>(null)
@@ -58,6 +61,58 @@ export default function EnhancedDiagnosisForm({
 
   // Helper function for translations
   const t = (key: string) => getTranslation(key, language)
+
+  // Load saved data on mount
+  useEffect(() => {
+    const loadSavedData = async () => {
+      try {
+        const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
+        
+        if (currentConsultationId) {
+          const savedData = await consultationDataService.getAllData()
+          if (savedData?.diagnosisData) {
+            if (savedData.diagnosisData.diagnosis) {
+              setDiagnosis(savedData.diagnosisData.diagnosis)
+            }
+            if (savedData.diagnosisData.expertAnalysis) {
+              setExpertAnalysis(savedData.diagnosisData.expertAnalysis)
+            }
+            if (savedData.diagnosisData.mauritianDocuments) {
+              setMauritianDocuments(savedData.diagnosisData.mauritianDocuments)
+              setDocumentsGenerated(true)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading saved diagnosis data:', error)
+      }
+    }
+    
+    if (!diagnosis) {
+      loadSavedData()
+    }
+  }, [consultationId, diagnosis])
+
+  // Save data when diagnosis is generated
+  useEffect(() => {
+    const saveData = async () => {
+      try {
+        const dataToSave = {
+          diagnosis,
+          expertAnalysis,
+          mauritianDocuments,
+          documentsGenerated
+        }
+        await consultationDataService.saveStepData(3, dataToSave)
+      } catch (error) {
+        console.error('Error saving diagnosis data:', error)
+      }
+    }
+    
+    if (diagnosis && mauritianDocuments) {
+      saveData()
+    }
+  }, [diagnosis, expertAnalysis, mauritianDocuments, documentsGenerated])
 
   useEffect(() => {
     generateCompleteDiagnosisAndDocuments()
