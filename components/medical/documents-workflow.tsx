@@ -2,7 +2,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -41,6 +41,27 @@ export default function DocumentsWorkflow({
     medication: mauritianDocuments?.medication || {}
   })
   const [completedSteps, setCompletedSteps] = useState(new Set())
+
+  // Debug log to track received props
+  useEffect(() => {
+    console.log('DocumentsWorkflow received props:', {
+      mauritianDocuments,
+      diagnosisData,
+      patientData
+    })
+  }, [mauritianDocuments, diagnosisData, patientData])
+
+  // Update editedDocuments when mauritianDocuments changes
+  useEffect(() => {
+    if (mauritianDocuments) {
+      setEditedDocuments({
+        consultation: mauritianDocuments.consultation || {},
+        biology: mauritianDocuments.biology || {},
+        paraclinical: mauritianDocuments.paraclinical || {},
+        medication: mauritianDocuments.medication || {}
+      })
+    }
+  }, [mauritianDocuments])
 
   const steps = [
     {
@@ -303,6 +324,8 @@ export default function DocumentsWorkflow({
             onNext={handleNext}
             onPrevious={() => setCurrentStep(-1)}
             patientName={patientName}
+            patientData={patientData}
+            diagnosisData={diagnosisData}
           />
         )}
 
@@ -313,6 +336,8 @@ export default function DocumentsWorkflow({
             onNext={handleNext}
             onPrevious={handlePrevious}
             patientName={patientName}
+            patientData={patientData}
+            diagnosisData={diagnosisData}
           />
         )}
 
@@ -323,6 +348,8 @@ export default function DocumentsWorkflow({
             onNext={handleNext}
             onPrevious={handlePrevious}
             patientName={patientName}
+            patientData={patientData}
+            diagnosisData={diagnosisData}
           />
         )}
 
@@ -335,6 +362,8 @@ export default function DocumentsWorkflow({
             patientName={patientName}
             patientAge={patientData?.age || 30}
             patientAllergies={(patientData?.allergies || []).join(', ') || 'Aucune'}
+            patientData={patientData}
+            diagnosisData={diagnosisData}
           />
         )}
       </div>
