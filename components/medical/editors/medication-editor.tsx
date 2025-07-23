@@ -2,7 +2,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -33,8 +33,20 @@ export default function MedicationEditor({
   onPrevious,
   patientName,
   patientAge = 30,
-  patientAllergies = ""
+  patientAllergies = "",
+  patientData,
+  diagnosisData
 }) {
+  // Debug log to see what data we're receiving
+  useEffect(() => {
+    console.log('MedicationEditor received:', {
+      medicationData,
+      patientData,
+      diagnosisData,
+      patientAllergies
+    })
+  }, [medicationData, patientData, diagnosisData, patientAllergies])
+
   const [formData, setFormData] = useState({
     // Header
     title: medicationData?.header?.title || "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
@@ -45,12 +57,12 @@ export default function MedicationEditor({
     registration: medicationData?.header?.registration || "COUNCIL-MU-2024-001",
     validity: medicationData?.header?.validity || "Ordonnance valable 3 mois",
     
-    // Patient info
-    firstName: medicationData?.patient?.firstName || "",
-    lastName: medicationData?.patient?.lastName || "",
-    age: medicationData?.patient?.age || `${patientAge} ans`,
-    weight: medicationData?.patient?.weight || "",
-    allergies: medicationData?.patient?.allergies || patientAllergies,
+    // Patient info - Use patientData if available
+    firstName: medicationData?.patient?.firstName || patientData?.firstName || "",
+    lastName: medicationData?.patient?.lastName || patientData?.lastName || "",
+    age: medicationData?.patient?.age || `${patientData?.age || patientAge} ans`,
+    weight: medicationData?.patient?.weight || patientData?.weight || "",
+    allergies: medicationData?.patient?.allergies || patientAllergies || (patientData?.allergies?.length > 0 ? patientData.allergies.join(', ') : "Aucune"),
     address: medicationData?.patient?.address || "Adresse à compléter - Maurice",
     idNumber: medicationData?.patient?.idNumber || "Carte d'identité mauricienne",
     pregnancy: medicationData?.patient?.pregnancy || "Non applicable",
@@ -62,7 +74,7 @@ export default function MedicationEditor({
         class: "Antalgique non opioïde",
         dci: "Paracétamol",
         brand: "Efferalgan® / Doliprane® (Maurice)",
-        dosage: patientAge >= 65 ? "500mg" : "1000mg",
+        dosage: (patientData?.age || patientAge) >= 65 ? "500mg" : "1000mg",
         frequency: "3 fois par jour si douleur",
         duration: "5 jours maximum",
         totalQuantity: "15 comprimés",
@@ -86,6 +98,38 @@ export default function MedicationEditor({
       emergency: medicationData?.clinicalAdvice?.emergency || "Urgences Maurice: 999 (SAMU)"
     }
   })
+
+  // Update form when data changes
+  useEffect(() => {
+    if (medicationData || patientData) {
+      setFormData({
+        // Header
+        title: medicationData?.header?.title || formData.title,
+        subtitle: medicationData?.header?.subtitle || formData.subtitle,
+        date: medicationData?.header?.date || formData.date,
+        number: medicationData?.header?.number || formData.number,
+        physician: medicationData?.header?.physician || formData.physician,
+        registration: medicationData?.header?.registration || formData.registration,
+        validity: medicationData?.header?.validity || formData.validity,
+        
+        // Patient info
+        firstName: medicationData?.patient?.firstName || patientData?.firstName || formData.firstName,
+        lastName: medicationData?.patient?.lastName || patientData?.lastName || formData.lastName,
+        age: medicationData?.patient?.age || `${patientData?.age || patientAge} ans`,
+        weight: medicationData?.patient?.weight || patientData?.weight || formData.weight,
+        allergies: medicationData?.patient?.allergies || (patientData?.allergies?.length > 0 ? patientData.allergies.join(', ') : formData.allergies),
+        address: medicationData?.patient?.address || formData.address,
+        idNumber: medicationData?.patient?.idNumber || formData.idNumber,
+        pregnancy: medicationData?.patient?.pregnancy || formData.pregnancy,
+        
+        // Prescriptions
+        prescriptions: medicationData?.prescriptions || formData.prescriptions,
+        
+        // Clinical advice
+        clinicalAdvice: medicationData?.clinicalAdvice || formData.clinicalAdvice
+      })
+    }
+  }, [medicationData, patientData])
 
   const medicationClasses = [
     "Antalgique non opioïde",
@@ -237,6 +281,7 @@ export default function MedicationEditor({
       clinicalAdvice: formData.clinicalAdvice
     }
     
+    console.log('Saving medication data:', updatedMedication)
     onSave('medication', updatedMedication)
   }
 
@@ -350,7 +395,7 @@ export default function MedicationEditor({
               />
             </div>
             <div>
-              <Label htmlFor="weight">Poids</Label>
+              <Label htmlFor="weight">Poids (kg)</Label>
               <Input
                 id="weight"
                 value={formData.weight}
