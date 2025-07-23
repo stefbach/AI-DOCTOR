@@ -2,7 +2,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,8 +28,19 @@ export default function BiologyEditor({
   onSave, 
   onNext, 
   onPrevious,
-  patientName 
+  patientName,
+  patientData,
+  diagnosisData
 }) {
+  // Debug log to see what data we're receiving
+  useEffect(() => {
+    console.log('BiologyEditor received:', {
+      biologyData,
+      patientData,
+      diagnosisData
+    })
+  }, [biologyData, patientData, diagnosisData])
+
   const [formData, setFormData] = useState({
     // Header
     title: biologyData?.header?.title || "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
@@ -39,10 +50,10 @@ export default function BiologyEditor({
     physician: biologyData?.header?.physician || "Dr. MÉDECIN EXPERT",
     registration: biologyData?.header?.registration || "COUNCIL-MU-2024-001",
     
-    // Patient info
-    firstName: biologyData?.patient?.firstName || "",
-    lastName: biologyData?.patient?.lastName || "",
-    age: biologyData?.patient?.age || "",
+    // Patient info - Use patientData if available
+    firstName: biologyData?.patient?.firstName || patientData?.firstName || "",
+    lastName: biologyData?.patient?.lastName || patientData?.lastName || "",
+    age: biologyData?.patient?.age || patientData?.age || "",
     address: biologyData?.patient?.address || "Adresse à compléter - Maurice",
     idNumber: biologyData?.patient?.idNumber || "Carte d'identité mauricienne",
     
@@ -62,6 +73,26 @@ export default function BiologyEditor({
       }
     ]
   })
+
+  // Update form when biologyData changes
+  useEffect(() => {
+    if (biologyData) {
+      setFormData({
+        title: biologyData.header?.title || formData.title,
+        subtitle: biologyData.header?.subtitle || formData.subtitle,
+        date: biologyData.header?.date || formData.date,
+        number: biologyData.header?.number || formData.number,
+        physician: biologyData.header?.physician || formData.physician,
+        registration: biologyData.header?.registration || formData.registration,
+        firstName: biologyData.patient?.firstName || patientData?.firstName || formData.firstName,
+        lastName: biologyData.patient?.lastName || patientData?.lastName || formData.lastName,
+        age: biologyData.patient?.age || patientData?.age || formData.age,
+        address: biologyData.patient?.address || formData.address,
+        idNumber: biologyData.patient?.idNumber || formData.idNumber,
+        prescriptions: biologyData.prescriptions || formData.prescriptions
+      })
+    }
+  }, [biologyData, patientData])
 
   const commonExams = [
     "Hémogramme complet (NFS)",
@@ -118,7 +149,7 @@ export default function BiologyEditor({
       id: Date.now(),
       exam: "",
       indication: "",
-      urgency: "Programmé",
+      urgency: "Programmé (3-7 jours)",
       fasting: "Non",
       expectedResults: "",
       sampleType: "Sang veineux",
@@ -160,6 +191,7 @@ export default function BiologyEditor({
       prescriptions: formData.prescriptions
     }
     
+    console.log('Saving biology data:', updatedBiology)
     onSave('biology', updatedBiology)
   }
 
