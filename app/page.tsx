@@ -10,11 +10,13 @@ import { Stethoscope, User, ClipboardList, Brain, FileText, Activity } from "luc
 import PatientForm from "@/components/patient-form"
 import ClinicalForm from "@/components/clinical-form"
 import QuestionsForm from "@/components/questions-form"
-import DiagnosisForm from "@/components/diagnosis-form" // 👈 GARDÉ L'ORIGINAL
-import MedicalWorkflow from "@/components/medical/main-medical-workflow" // 👈 NOUVEAU
+import DiagnosisForm from "@/components/diagnosis-form"
+import MedicalWorkflow from "@/components/medical/main-medical-workflow"
 import IntegratedMedicalConsultation from "@/components/integrated-medical-consultation"
 import { PatientDataLoader } from "@/components/patient-data-loader"
 import { getTranslation, Language } from "@/lib/translations"
+import { consultationDataService } from '@/lib/consultation-data-service'
+import { supabase } from '@/lib/supabase' // Adjust this path to match your setup
 
 export default function MedicalAIExpert() {
   const [currentStep, setCurrentStep] = useState(0)
@@ -24,6 +26,12 @@ export default function MedicalAIExpert() {
   const [diagnosisData, setDiagnosisData] = useState<any>(null)
   const [workflowResult, setWorkflowResult] = useState<any>(null)
   const [language, setLanguage] = useState<Language>('fr')
+  
+  // Add state to track the consultation
+  const [currentConsultationId, setCurrentConsultationId] = useState<string | null>(null)
+  const [currentPatientId, setCurrentPatientId] = useState<string | null>(null)
+  const [currentDoctorId, setCurrentDoctorId] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   // Load language preference
   useEffect(() => {
@@ -32,6 +40,233 @@ export default function MedicalAIExpert() {
       setLanguage(savedLanguage)
     }
   }, [])
+
+  // Initialize consultation from URL or create new one
+  useEffect(() => {
+    const initializeFromUrl = async () => {
+      try {
+        setIsLoading(true)
+        const urlParams = new URLSearchParams(window.location.search)
+        const consultationId = urlParams.get('consultationId')
+        const patientId = urlParams.get('patientId')
+        
+        if (consultationId) {
+          // Load existing consultation
+          const { data: consultation } = await supabase
+            .from('consultations')
+            .select('*')
+            .eq('id', consultationId)
+            .single()
+          
+          if (consultation) {
+            setCurrentConsultationId(consultation.id)
+            setCurrentPatientId(consultation.patient_id)
+            setCurrentDoctorId(consultation.doctor_id)
+            
+            // Load existing consultation data
+            const loadedData = await consultationDataService.loadConsultationData(consultationId)
+            
+            if (loadedData) {
+              // Restore saved data
+              if (loadedData.patientInfo) setPatientData(loadedData.patientInfo)
+              if (loadedData.clinicalExam) setClinicalData(loadedData.clinicalExam)
+              if (loadedData.aiQuestions) setQuestionsData(loadedData.aiQuestions)
+              if (loadedData.diagnosis) setDiagnosisData(loadedData.diagnosis)
+              if (loadedData.documents) setWorkflowResult(loadedData.documents)
+              
+              // Find the last completed step
+              const stepData = [
+                loadedData.patientInfo,
+                loadedData.clinicalExam,
+                loadedData.aiQuestions,
+                loadedData.diagnosis,
+                loadedData.documents
+              ]
+              
+              let lastCompletedStep = -1
+              stepData.forEach((data, index) => {
+                if (data) {
+                  lastCompletedStep = index
+                }
+              })
+              
+              // Set current step to the next uncompleted step
+              if (lastCompletedStep < stepData.length - 1) {
+                setCurrentStep(lastCompletedStep + 1)
+              } else {
+                setCurrentStep(lastCompletedStep)
+              }
+            }
+          }
+        } else if (patientId) {
+          // Create new consultation for existing patient
+          setCurrentPatientId(patientId)
+          
+          // Get current doctor (from auth or session)
+          const { data: { user } } = await supabase.auth.getUser()
+          if (user) {
+            const { data: doctor } = await supabase
+              .from('doctors')
+              .select('id')
+              .eq('user_id', user.id)
+              .single()
+            
+            if (doctor) {
+              setCurrentDoctorId(doctor.id)
+            }
+          }
+        } else {
+          // Get current doctor for new consultation
+          const { data: { user } } = await supabase.auth.getUser()
+          if (user) {
+            const { data: doctor } = await supabase
+              .from('doctors')
+              .select('id')
+              .eq('user_id', user.id)
+              .single()
+            
+            if (doctor) {
+              setCurrentDoctorId(doctor.id)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing from URL:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    initializeFromUrl()
+  }, [])
+
+  // Create or update consultation when we have patient data
+  useEffect(() => {
+    const handleConsultation = async () => {
+      // Need patient data from form and IDs
+      if (!patientData || !patientData.firstName || isLoading) return
+      
+      let patientId = currentPatientId
+      let consultationId = currentConsultationId
+      
+      try {
+        // If no patient ID, create or find patient
+        if (!patientId) {
+          // Check if patient exists by email
+          if (patientData.email) {
+            const { data: existingPatient } = await supabase
+              .from('patients')
+              .select('id')
+              .eq('email', patientData.email)
+              .single()
+            
+            if (existingPatient) {
+              patientId = existingPatient.id
+            }
+          }
+          
+          // Create new patient if needed
+          if (!patientId) {
+            const { data: newPatient, error } = await supabase
+              .from('patients')
+              .insert({
+                first_name: patientData.firstName,
+                last_name: patientData.lastName,
+                email: patientData.email,
+                phone_number: patientData.phone,
+                date_of_birth: patientData.dateOfBirth,
+                gender: patientData.gender,
+                age: patientData.age,
+                height: patientData.height,
+                weight: patientData.weight,
+                address: patientData.address,
+                city: patientData.city,
+                country: patientData.country || 'Mauritius',
+                emergency_contact_name: patientData.emergencyContact,
+                emergency_contact_phone: patientData.emergencyPhone
+              })
+              .select()
+              .single()
+            
+            if (error) {
+              console.error('Error creating patient:', error)
+              return
+            }
+            
+            if (newPatient) {
+              patientId = newPatient.id
+              setCurrentPatientId(patientId)
+            }
+          }
+        }
+        
+        // If no consultation ID, create new consultation
+        if (!consultationId && patientId && currentDoctorId) {
+          // Get next queue number
+          const { data: lastConsultation } = await supabase
+            .from('consultations')
+            .select('queue_number')
+            .eq('doctor_id', currentDoctorId)
+            .eq('status', 'waiting')
+            .order('queue_number', { ascending: false })
+            .limit(1)
+            .single()
+          
+          const nextQueueNumber = lastConsultation ? lastConsultation.queue_number + 1 : 1
+          
+          // Create new consultation
+          const { data: newConsultation, error } = await supabase
+            .from('consultations')
+            .insert({
+              patient_id: patientId,
+              doctor_id: currentDoctorId,
+              queue_number: nextQueueNumber,
+              status: 'in_progress',
+              patient_first_name: patientData.firstName,
+              patient_last_name: patientData.lastName,
+              patient_age: patientData.age,
+              patient_gender: patientData.gender,
+              patient_height: patientData.height,
+              patient_weight: patientData.weight,
+              patient_date_of_birth: patientData.dateOfBirth
+            })
+            .select()
+            .single()
+          
+          if (error) {
+            console.error('Error creating consultation:', error)
+            return
+          }
+          
+          if (newConsultation) {
+            consultationId = newConsultation.id
+            setCurrentConsultationId(consultationId)
+            
+            // Initialize consultation record
+            await consultationDataService.initializeConsultation(
+              consultationId,
+              patientId,
+              currentDoctorId
+            )
+            
+            // Update URL with consultation ID
+            const newUrl = new URL(window.location.href)
+            newUrl.searchParams.set('consultationId', consultationId)
+            window.history.replaceState({}, '', newUrl.toString())
+          }
+        }
+        
+        // Save current step data
+        if (consultationId) {
+          await consultationDataService.saveStepData(0, patientData)
+        }
+      } catch (error) {
+        console.error('Error handling consultation:', error)
+      }
+    }
+    
+    handleConsultation()
+  }, [patientData, currentPatientId, currentDoctorId, isLoading])
 
   const handleSetLanguage = (lang: Language) => {
     setLanguage(lang)
@@ -68,30 +303,50 @@ export default function MedicalAIExpert() {
       title: t('steps.aiDiagnosis.title'),
       description: t('steps.aiDiagnosis.description'),
       icon: <ClipboardList className="h-5 w-5" />,
-      component: DiagnosisForm, // 👈 GARDER L'ORIGINAL
+      component: DiagnosisForm,
     },
     {
       id: 4,
       title: "Édition des documents médicaux",
       description: "Génération et personnalisation des rapports",
       icon: <Activity className="h-5 w-5" />,
-      component: MedicalWorkflow, // 👈 NOUVEAU - ÉTAPE FINALE
+      component: MedicalWorkflow,
     },
-    // ÉTAPE 6 SUPPRIMÉE - était redondante
-    /*
-    {
-      id: 5,
-      title: t('steps.completeConsultation.title'),
-      description: t('steps.completeConsultation.description'),
-      icon: <FileText className="h-5 w-5" />,
-      component: IntegratedMedicalConsultation,
-    },
-    */
   ]
 
   const progress = ((currentStep + 1) / steps.length) * 100
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    // Save current step data before moving forward
+    if (currentConsultationId) {
+      try {
+        switch (currentStep) {
+          case 0:
+            if (patientData) {
+              await consultationDataService.saveStepData(0, patientData)
+            }
+            break
+          case 1:
+            if (clinicalData) {
+              await consultationDataService.saveStepData(1, clinicalData)
+            }
+            break
+          case 2:
+            if (questionsData) {
+              await consultationDataService.saveStepData(2, questionsData)
+            }
+            break
+          case 3:
+            if (diagnosisData) {
+              await consultationDataService.saveStepData(3, diagnosisData)
+            }
+            break
+        }
+      } catch (error) {
+        console.error('Error saving step data:', error)
+      }
+    }
+    
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
     }
@@ -105,29 +360,86 @@ export default function MedicalAIExpert() {
 
   const handleWorkflowComplete = (result: any) => {
     setWorkflowResult(result)
-    // Plus besoin de rediriger vers une étape 6 - le workflow se termine ici
     console.log('Workflow terminé:', result)
   }
 
-  // 👈 FONCTION MODIFIÉE - plus besoin de rediriger vers étape 5
-  const handleMedicalWorkflowComplete = (result: any) => {
+  const handleMedicalWorkflowComplete = async (result: any) => {
     setWorkflowResult(result)
-    // Le workflow se termine ici - l'étape 4 est maintenant la finale
+    
+    // Save the final workflow result
+    if (currentConsultationId) {
+      try {
+        await consultationDataService.saveStepData(4, result)
+        
+        // Update consultation status to completed
+        await supabase
+          .from('consultations')
+          .update({ 
+            status: 'completed',
+            actual_end_time: new Date().toISOString()
+          })
+          .eq('id', currentConsultationId)
+      } catch (error) {
+        console.error('Error completing workflow:', error)
+      }
+    }
+    
     console.log('Workflow médical terminé:', result)
   }
 
-  // 👈 NOUVELLE FONCTION - Navigation directe vers une étape
-  const handleStepClick = (stepIndex: number) => {
+  // Navigation directe vers une étape
+  const handleStepClick = async (stepIndex: number) => {
+    // Save current step data before navigating
+    if (currentConsultationId) {
+      try {
+        switch (currentStep) {
+          case 0:
+            if (patientData) {
+              await consultationDataService.saveStepData(0, patientData)
+            }
+            break
+          case 1:
+            if (clinicalData) {
+              await consultationDataService.saveStepData(1, clinicalData)
+            }
+            break
+          case 2:
+            if (questionsData) {
+              await consultationDataService.saveStepData(2, questionsData)
+            }
+            break
+          case 3:
+            if (diagnosisData) {
+              await consultationDataService.saveStepData(3, diagnosisData)
+            }
+            break
+          case 4:
+            if (workflowResult) {
+              await consultationDataService.saveStepData(4, workflowResult)
+            }
+            break
+        }
+      } catch (error) {
+        console.error('Error saving current step data:', error)
+      }
+    }
+    
     setCurrentStep(stepIndex)
   }
 
   const getCurrentStepProps = () => {
-    const commonProps = { language }
+    const commonProps = { 
+      language, 
+      consultationId: currentConsultationId,
+      patientId: currentPatientId,
+      doctorId: currentDoctorId
+    }
     
     switch (currentStep) {
       case 0:
         return {
           ...commonProps,
+          initialData: patientData,
           onDataChange: setPatientData,
           onNext: handleNext,
         }
@@ -135,6 +447,7 @@ export default function MedicalAIExpert() {
         return {
           ...commonProps,
           patientData,
+          initialData: clinicalData,
           onDataChange: setClinicalData,
           onNext: handleNext,
           onPrevious: handlePrevious,
@@ -144,37 +457,50 @@ export default function MedicalAIExpert() {
           ...commonProps,
           patientData,
           clinicalData,
+          initialData: questionsData,
           onDataChange: setQuestionsData,
           onNext: handleNext,
           onPrevious: handlePrevious,
         }
-      case 3: // 👈 DIAGNOSTIC FORM (votre original)
+      case 3:
         return {
           ...commonProps,
           patientData,
           clinicalData,
           questionsData,
+          initialData: diagnosisData,
           onDataChange: setDiagnosisData,
           onNext: handleNext,
           onPrevious: handlePrevious,
         }
-      case 4: // 👈 MEDICAL WORKFLOW (nouveau) - ÉTAPE FINALE
+      case 4:
         return {
           ...commonProps,
           patientData,
           clinicalData,
           questionsData,
-          diagnosisData, // 👈 Données du diagnostic
+          diagnosisData,
+          initialData: workflowResult,
           onComplete: handleMedicalWorkflowComplete,
           onBack: handlePrevious,
         }
-      // SUPPRIMÉ: case 5 - Était redondant
       default:
         return commonProps
     }
   }
 
   const CurrentStepComponent = steps[currentStep]?.component
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -216,11 +542,12 @@ export default function MedicalAIExpert() {
                   EN
                 </Button>
               </div>
-              {/* BADGE GPT-4o + APIs SUPPRIMÉ
-              <Badge variant="outline" className="text-lg px-4 py-2">
-                GPT-4o + APIs {t('mainPage.medical')}
-              </Badge>
-              */}
+              {/* Consultation ID Badge */}
+              {currentConsultationId && (
+                <Badge variant="outline" className="text-xs">
+                  ID: {currentConsultationId.slice(-8)}
+                </Badge>
+              )}
             </div>
           </div>
 
@@ -290,34 +617,6 @@ export default function MedicalAIExpert() {
 
         {/* Step content */}
         {CurrentStepComponent && <CurrentStepComponent {...getCurrentStepProps()} />}
-
-        {/* SECTION SYSTEM INFORMATION SUPPRIMÉE - Était redondante */}
-        {/*
-        <div className="mt-8">
-          <Card>
-            <CardContent className="p-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <div>
-                  <div className="text-2xl font-bold text-blue-600">GPT-4o</div>
-                  <div className="text-sm text-gray-600">{t('mainPage.aiModel')}</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-green-600">5</div>
-                  <div className="text-sm text-gray-600">APIs {t('mainPage.integrated')}</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-purple-600">EBM</div>
-                  <div className="text-sm text-gray-600">Evidence-Based</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-orange-600">24/7</div>
-                  <div className="text-sm text-gray-600">{t('mainPage.available')}</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        */}
       </div>
     </div>
   )
