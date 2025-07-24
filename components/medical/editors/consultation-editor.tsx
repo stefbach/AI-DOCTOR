@@ -27,81 +27,221 @@ export default function ConsultationEditor({
   onPrevious,
   patientName,
   patientData,
-  diagnosisData
+  clinicalData,
+  questionsData,
+  diagnosisData,
+  doctorData,
+  mauritianDocuments
 }) {
-  // Debug log to see what data we're receiving
-  useEffect(() => {
-    console.log('ConsultationEditor received:', {
-      consultationData,
-      patientData,
-      diagnosisData
-    })
-  }, [consultationData, patientData, diagnosisData])
+  // Helper function to build complete history/anamnesis
+  const buildCompleteHistory = () => {
+    const parts = []
+    
+    // Chief complaint and duration
+    if (clinicalData?.chiefComplaint) {
+      parts.push(`Motif de consultation: ${clinicalData.chiefComplaint}`)
+    }
+    if (clinicalData?.symptomDuration) {
+      parts.push(`Depuis: ${clinicalData.symptomDuration}`)
+    }
+    
+    // Disease history
+    if (clinicalData?.diseaseHistory) {
+      parts.push(`Histoire de la maladie: ${clinicalData.diseaseHistory}`)
+    }
+    
+    // Current symptoms
+    if (clinicalData?.symptoms && Array.isArray(clinicalData.symptoms) && clinicalData.symptoms.length > 0) {
+      parts.push(`Symptômes présents: ${clinicalData.symptoms.join(', ')}`)
+    }
+    
+    // Medical history from patient data
+    if (patientData?.medicalHistory && Array.isArray(patientData.medicalHistory) && patientData.medicalHistory.length > 0) {
+      parts.push(`Antécédents médicaux: ${patientData.medicalHistory.join(', ')}`)
+    }
+    if (patientData?.otherMedicalHistory) {
+      parts.push(`Autres antécédents: ${patientData.otherMedicalHistory}`)
+    }
+    
+    // Current medications
+    if (patientData?.currentMedicationsText) {
+      parts.push(`Traitements en cours: ${patientData.currentMedicationsText}`)
+    }
+    
+    // Life habits
+    if (patientData?.lifeHabits) {
+      const habits = []
+      if (patientData.lifeHabits.smoking) habits.push(`Tabac: ${patientData.lifeHabits.smoking}`)
+      if (patientData.lifeHabits.alcohol) habits.push(`Alcool: ${patientData.lifeHabits.alcohol}`)
+      if (patientData.lifeHabits.physicalActivity) habits.push(`Activité physique: ${patientData.lifeHabits.physicalActivity}`)
+      if (habits.length > 0) {
+        parts.push(`Habitudes de vie: ${habits.join(', ')}`)
+      }
+    }
+    
+    // Use existing content if nothing else
+    if (parts.length === 0 && consultationData?.content?.history) {
+      return consultationData.content.history
+    }
+    
+    return parts.join('\n\n')
+  }
+
+  // Helper function to build complete examination
+  const buildCompleteExamination = () => {
+    const parts = []
+    
+    // Vital signs
+    if (clinicalData?.vitalSigns) {
+      const vitals = []
+      if (clinicalData.vitalSigns.temperature) {
+        vitals.push(`Température: ${clinicalData.vitalSigns.temperature}°C`)
+      }
+      if (clinicalData.vitalSigns.bloodPressureSystolic && clinicalData.vitalSigns.bloodPressureDiastolic) {
+        vitals.push(`TA: ${clinicalData.vitalSigns.bloodPressureSystolic}/${clinicalData.vitalSigns.bloodPressureDiastolic} mmHg`)
+      }
+      if (vitals.length > 0) {
+        parts.push(`Signes vitaux: ${vitals.join(', ')}`)
+      }
+    }
+    
+    // Physical measurements
+    if (patientData?.weight && patientData?.height) {
+      const bmi = (parseFloat(patientData.weight) / Math.pow(parseFloat(patientData.height) / 100, 2)).toFixed(1)
+      parts.push(`Poids: ${patientData.weight} kg, Taille: ${patientData.height} cm, IMC: ${bmi} kg/m²`)
+    }
+    
+    // General examination placeholder
+    parts.push(`Examen général: État général conservé, conscient et orienté`)
+    parts.push(`Examen cardiovasculaire: Bruits du cœur réguliers, pas de souffle`)
+    parts.push(`Examen pulmonaire: Murmure vésiculaire normal, pas de râles`)
+    parts.push(`Examen abdominal: Souple, dépressible, non douloureux`)
+    
+    // Use existing content if nothing else
+    if (parts.length === 0 && consultationData?.content?.examination) {
+      return consultationData.content.examination
+    }
+    
+    return parts.join('\n')
+  }
+
+  // Helper function to build complete management plan
+  const buildCompletePlan = () => {
+    const parts = []
+    
+    // Treatments from diagnosis
+    if (diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments) {
+      const treatments = diagnosisData.expertAnalysis.expert_therapeutics.primary_treatments
+        .map((t: any) => `- ${t.medication_dci}: ${t.dosing_regimen?.standard_adult || t.precise_indication}`)
+        .join('\n')
+      if (treatments) {
+        parts.push(`Traitements prescrits:\n${treatments}`)
+      }
+    }
+    
+    // Examinations from diagnosis
+    if (diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority) {
+      const exams = diagnosisData.expertAnalysis.expert_investigations.immediate_priority
+        .map((e: any) => `- ${e.examination} (${e.urgency})`)
+        .join('\n')
+      if (exams) {
+        parts.push(`Examens à réaliser:\n${exams}`)
+      }
+    }
+    
+    // Surveillance plan
+    parts.push('Surveillance: Réévaluation clinique selon évolution')
+    parts.push('Conseils: Hydratation, repos, consultation si aggravation')
+    
+    // Use existing content if nothing else
+    if (parts.length === 0 && consultationData?.content?.plan) {
+      return consultationData.content.plan
+    }
+    
+    return parts.join('\n\n')
+  }
 
   const [formData, setFormData] = useState({
     // Header
     title: consultationData?.header?.title || "COMPTE-RENDU DE CONSULTATION MÉDICALE",
     subtitle: consultationData?.header?.subtitle || "République de Maurice - Médecine Générale",
     date: consultationData?.header?.date || new Date().toLocaleDateString('fr-FR'),
-    time: consultationData?.header?.time || new Date().toLocaleTimeString('fr-FR'),
+    time: consultationData?.header?.time || new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
     physician: consultationData?.header?.physician || "Dr. MÉDECIN EXPERT",
     registration: consultationData?.header?.registration || "COUNCIL-MU-2024-001",
     institution: consultationData?.header?.institution || "Centre Médical Maurice",
     
-    // Patient - Use patientData if available
-    firstName: consultationData?.patient?.firstName || patientData?.firstName || "",
-    lastName: consultationData?.patient?.lastName || patientData?.lastName || "",
-    age: consultationData?.patient?.age || patientData?.age || "",
-    sex: consultationData?.patient?.sex || (patientData?.gender?.[0] === 'Masculin' ? 'M' : patientData?.gender?.[0] === 'Féminin' ? 'F' : '') || "",
+    // Patient
+    firstName: consultationData?.patient?.firstName || "",
+    lastName: consultationData?.patient?.lastName || "",
+    age: consultationData?.patient?.age || "",
+    sex: consultationData?.patient?.sex || "",
     address: consultationData?.patient?.address || "Adresse à compléter - Maurice",
     phone: consultationData?.patient?.phone || "Téléphone à renseigner",
     idNumber: consultationData?.patient?.idNumber || "Carte d'identité mauricienne",
-    weight: consultationData?.patient?.weight || patientData?.weight || "",
-    height: consultationData?.patient?.height || patientData?.height || "",
-    allergies: consultationData?.patient?.allergies || (patientData?.allergies?.length > 0 ? patientData.allergies.join(', ') : "Aucune"),
+    weight: consultationData?.patient?.weight || "",
+    height: consultationData?.patient?.height || "",
+    allergies: consultationData?.patient?.allergies || "Aucune",
     
-    // Content - Use data from diagnosis workflow
-    chiefComplaint: consultationData?.content?.chiefComplaint || patientData?.clinicalData?.chiefComplaint || "",
-    history: consultationData?.content?.history || patientData?.clinicalData?.diseaseHistory || "",
+    // Content
+    chiefComplaint: consultationData?.content?.chiefComplaint || "",
+    history: consultationData?.content?.history || "",
     examination: consultationData?.content?.examination || "",
-    diagnosis: consultationData?.content?.diagnosis || diagnosisData?.primary?.condition || "",
+    diagnosis: consultationData?.content?.diagnosis || "",
     plan: consultationData?.content?.plan || ""
   })
 
-  // Update form when data changes
+  // Initialize form with comprehensive auto-fill
   useEffect(() => {
-    if (consultationData || patientData || diagnosisData) {
-      setFormData({
-        // Header
-        title: consultationData?.header?.title || formData.title,
-        subtitle: consultationData?.header?.subtitle || formData.subtitle,
-        date: consultationData?.header?.date || formData.date,
-        time: consultationData?.header?.time || formData.time,
-        physician: consultationData?.header?.physician || formData.physician,
-        registration: consultationData?.header?.registration || formData.registration,
-        institution: consultationData?.header?.institution || formData.institution,
-        
-        // Patient
-        firstName: consultationData?.patient?.firstName || patientData?.firstName || formData.firstName,
-        lastName: consultationData?.patient?.lastName || patientData?.lastName || formData.lastName,
-        age: consultationData?.patient?.age || patientData?.age || formData.age,
-        sex: consultationData?.patient?.sex || (patientData?.gender?.[0] === 'Masculin' ? 'M' : patientData?.gender?.[0] === 'Féminin' ? 'F' : formData.sex) || formData.sex,
-        address: consultationData?.patient?.address || formData.address,
-        phone: consultationData?.patient?.phone || formData.phone,
-        idNumber: consultationData?.patient?.idNumber || formData.idNumber,
-        weight: consultationData?.patient?.weight || patientData?.weight || formData.weight,
-        height: consultationData?.patient?.height || patientData?.height || formData.height,
-        allergies: consultationData?.patient?.allergies || (patientData?.allergies?.length > 0 ? patientData.allergies.join(', ') : formData.allergies),
-        
-        // Content
-        chiefComplaint: consultationData?.content?.chiefComplaint || patientData?.clinicalData?.chiefComplaint || formData.chiefComplaint,
-        history: consultationData?.content?.history || patientData?.clinicalData?.diseaseHistory || formData.history,
-        examination: consultationData?.content?.examination || formData.examination,
-        diagnosis: consultationData?.content?.diagnosis || diagnosisData?.primary?.condition || formData.diagnosis,
-        plan: consultationData?.content?.plan || formData.plan
-      })
+    console.log('📝 ConsultationEditor - Auto-filling with all data:', {
+      consultationData,
+      patientData,
+      clinicalData,
+      questionsData,
+      diagnosisData,
+      doctorData,
+      mauritianDocuments
+    })
+
+    // Build comprehensive form data
+    const autoFilledData = {
+      // Header - with doctor info
+      title: consultationData?.header?.title || "COMPTE-RENDU DE CONSULTATION MÉDICALE",
+      subtitle: consultationData?.header?.subtitle || "République de Maurice - Médecine Générale",
+      date: new Date().toLocaleDateString('fr-FR'),
+      time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+      physician: doctorData?.full_name || doctorData?.fullName || consultationData?.header?.physician || "Dr. MÉDECIN EXPERT",
+      registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || consultationData?.header?.registration || "COUNCIL-MU-2024-001",
+      institution: doctorData?.institution || consultationData?.header?.institution || "Centre Médical Maurice",
+      
+      // Patient - complete info from all sources
+      firstName: patientData?.firstName || consultationData?.patient?.firstName || "",
+      lastName: patientData?.lastName || consultationData?.patient?.lastName || "",
+      age: patientData?.age ? `${patientData.age} ans` : consultationData?.patient?.age || "",
+      sex: patientData?.gender?.[0] === 'Masculin' ? 'M' : 
+           patientData?.gender?.[0] === 'Féminin' ? 'F' : 
+           consultationData?.patient?.sex || "",
+      address: patientData?.address || consultationData?.patient?.address || "Adresse à compléter - Maurice",
+      phone: patientData?.phone || patientData?.phoneNumber || consultationData?.patient?.phone || "Téléphone à renseigner",
+      idNumber: patientData?.idNumber || consultationData?.patient?.idNumber || "Carte d'identité mauricienne",
+      weight: patientData?.weight || consultationData?.patient?.weight || "",
+      height: patientData?.height || consultationData?.patient?.height || "",
+      allergies: Array.isArray(patientData?.allergies) && patientData.allergies.length > 0 
+        ? patientData.allergies.join(', ') 
+        : consultationData?.patient?.allergies || "Aucune",
+      
+      // Content - from clinical data and diagnosis
+      chiefComplaint: clinicalData?.chiefComplaint || consultationData?.content?.chiefComplaint || "",
+      history: buildCompleteHistory(),
+      examination: buildCompleteExamination(),
+      diagnosis: diagnosisData?.diagnosis?.primary?.condition || 
+                diagnosisData?.primary?.condition ||
+                consultationData?.content?.diagnosis || "",
+      plan: buildCompletePlan()
     }
-  }, [consultationData, patientData, diagnosisData])
+
+    setFormData(autoFilledData)
+  }, [consultationData, patientData, clinicalData, questionsData, diagnosisData, doctorData, mauritianDocuments])
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -366,7 +506,7 @@ export default function ConsultationEditor({
               value={formData.history}
               onChange={(e) => handleInputChange('history', e.target.value)}
               className="mt-1"
-              rows={5}
+              rows={8}
               placeholder="Histoire de la maladie actuelle, antécédents médicaux, chirurgicaux, familiaux..."
             />
           </div>
@@ -378,7 +518,7 @@ export default function ConsultationEditor({
               value={formData.examination}
               onChange={(e) => handleInputChange('examination', e.target.value)}
               className="mt-1"
-              rows={5}
+              rows={6}
               placeholder="Constantes vitales, examen général, examen orienté par appareil..."
             />
           </div>
@@ -402,7 +542,7 @@ export default function ConsultationEditor({
               value={formData.plan}
               onChange={(e) => handleInputChange('plan', e.target.value)}
               className="mt-1"
-              rows={4}
+              rows={6}
               placeholder="Examens complémentaires, traitement, surveillance, conseils..."
             />
           </div>
