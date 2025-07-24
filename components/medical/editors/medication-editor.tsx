@@ -35,42 +35,64 @@ export default function MedicationEditor({
   patientAge = 30,
   patientAllergies = "",
   patientData,
-  diagnosisData
+  diagnosisData,
+  doctorData
 }) {
-  // Debug log to see what data we're receiving
-  useEffect(() => {
-    console.log('MedicationEditor received:', {
-      medicationData,
-      patientData,
-      diagnosisData,
-      patientAllergies
-    })
-  }, [medicationData, patientData, diagnosisData, patientAllergies])
-
-  const [formData, setFormData] = useState({
-    // Header
-    title: medicationData?.header?.title || "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
-    subtitle: medicationData?.header?.subtitle || "PRESCRIPTION THÉRAPEUTIQUE",
-    date: medicationData?.header?.date || new Date().toLocaleDateString('fr-FR'),
-    number: medicationData?.header?.number || `MED-MU-${Date.now()}`,
-    physician: medicationData?.header?.physician || "Dr. MÉDECIN EXPERT",
-    registration: medicationData?.header?.registration || "COUNCIL-MU-2024-001",
-    validity: medicationData?.header?.validity || "Ordonnance valable 3 mois",
+  // Initialize prescriptions from diagnosis data
+  const buildInitialPrescriptions = () => {
+    const prescriptions = []
     
-    // Patient info - Use patientData if available
-    firstName: medicationData?.patient?.firstName || patientData?.firstName || "",
-    lastName: medicationData?.patient?.lastName || patientData?.lastName || "",
-    age: medicationData?.patient?.age || `${patientData?.age || patientAge} ans`,
-    weight: medicationData?.patient?.weight || patientData?.weight || "",
-    allergies: medicationData?.patient?.allergies || patientAllergies || (patientData?.allergies?.length > 0 ? patientData.allergies.join(', ') : "Aucune"),
-    address: medicationData?.patient?.address || "Adresse à compléter - Maurice",
-    idNumber: medicationData?.patient?.idNumber || "Carte d'identité mauricienne",
-    pregnancy: medicationData?.patient?.pregnancy || "Non applicable",
+    // Check if we have treatments from diagnosis
+    if (diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments) {
+      const treatments = diagnosisData.expertAnalysis.expert_therapeutics.primary_treatments
+      
+      treatments.forEach((treatment: any, index: number) => {
+        // Determine medication class based on therapeutic class
+        let medClass = "Antibiotique"
+        if (treatment.therapeutic_class?.includes("Antalgique") || treatment.therapeutic_class?.includes("Antipyrétique")) {
+          medClass = "Antalgique non opioïde"
+        } else if (treatment.therapeutic_class?.includes("AINS") || treatment.therapeutic_class?.includes("Anti-inflammatoire")) {
+          medClass = "Anti-inflammatoire non stéroïdien (AINS)"
+        } else if (treatment.therapeutic_class?.includes("Antibiotique") || treatment.therapeutic_class?.includes("Antibactérien")) {
+          medClass = "Antibiotique"
+        } else if (treatment.therapeutic_class?.includes("Corticoïde") || treatment.therapeutic_class?.includes("Corticostéroïde")) {
+          medClass = "Corticoïde"
+        } else if (treatment.therapeutic_class?.includes("Antihistaminique")) {
+          medClass = "Antihistaminique"
+        } else if (treatment.therapeutic_class?.includes("IPP") || treatment.therapeutic_class?.includes("pompe à protons")) {
+          medClass = "Inhibiteur de la pompe à protons"
+        }
+        
+        // Parse dosing regimen for elderly patients
+        const isElderly = (patientData?.age || patientAge) >= 65
+        const dosing = treatment.dosing_regimen?.standard_adult || ""
+        const elderlyDosing = treatment.dosing_regimen?.elderly_adjustment || dosing
+        
+        prescriptions.push({
+          id: Date.now() + index,
+          class: medClass,
+          dci: treatment.medication_dci || "",
+          brand: treatment.mauritius_availability?.brand_names?.join(' / ') || "Marques locales à vérifier",
+          dosage: isElderly && elderlyDosing ? elderlyDosing : dosing,
+          frequency: extractFrequency(dosing),
+          duration: treatment.treatment_duration || "7 jours",
+          totalQuantity: calculateQuantity(dosing, treatment.treatment_duration),
+          indication: treatment.precise_indication || "",
+          administration: treatment.administration_route || "Per os",
+          contraindications: treatment.contraindications_absolute?.join(', ') || "À vérifier",
+          precautions: treatment.precautions || "Respecter posologie",
+          monitoring: treatment.monitoring_parameters?.join(', ') || "Efficacité et tolérance",
+          mauritianAvailability: treatment.mauritius_availability?.locally_available ? 
+            "Disponible toutes pharmacies Maurice" : "À commander",
+          cost: treatment.mauritius_availability?.private_sector_cost || "À préciser"
+        })
+      })
+    }
     
-    // Prescriptions
-    prescriptions: medicationData?.prescriptions || [
-      {
-        id: 1,
+    // If no treatments from diagnosis, add a default one
+    if (prescriptions.length === 0) {
+      prescriptions.push({
+        id: Date.now(),
         class: "Antalgique non opioïde",
         dci: "Paracétamol",
         brand: "Efferalgan® / Doliprane® (Maurice)",
@@ -85,51 +107,116 @@ export default function MedicationEditor({
         monitoring: "Efficacité antalgique",
         mauritianAvailability: "Disponible toutes pharmacies Maurice",
         cost: "Médicament essentiel, prix réglementé"
-      }
-    ],
+      })
+    }
     
-    // Clinical advice
+    return prescriptions
+  }
+
+  // Helper function to extract frequency from dosing regimen
+  const extractFrequency = (dosing: string) => {
+    if (dosing.includes('x 3/jour') || dosing.includes('3 fois')) return "3 fois par jour"
+    if (dosing.includes('x 2/jour') || dosing.includes('2 fois')) return "2 fois par jour"
+    if (dosing.includes('x 4/jour') || dosing.includes('4 fois')) return "4 fois par jour"
+    if (dosing.includes('x 1/jour') || dosing.includes('1 fois')) return "1 fois par jour"
+    if (dosing.includes('matin et soir')) return "Matin et soir"
+    return "3 fois par jour"
+  }
+
+  // Helper function to calculate total quantity
+  const calculateQuantity = (dosing: string, duration: string) => {
+    const daysMatch = duration.match(/(\d+)\s*(jour|day)/i)
+    const days = daysMatch ? parseInt(daysMatch[1]) : 7
+    
+    let dailyDoses = 3 // default
+    if (dosing.includes('x 1/jour')) dailyDoses = 1
+    if (dosing.includes('x 2/jour')) dailyDoses = 2
+    if (dosing.includes('x 3/jour')) dailyDoses = 3
+    if (dosing.includes('x 4/jour')) dailyDoses = 4
+    
+    return `${days * dailyDoses} comprimés`
+  }
+
+  // Debug log to see what data we're receiving
+  useEffect(() => {
+    console.log('MedicationEditor received:', {
+      medicationData,
+      patientData,
+      diagnosisData,
+      doctorData,
+      patientAllergies
+    })
+  }, [medicationData, patientData, diagnosisData, doctorData, patientAllergies])
+
+  const [formData, setFormData] = useState({
+    // Header with doctor info
+    title: medicationData?.header?.title || "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+    subtitle: medicationData?.header?.subtitle || "PRESCRIPTION THÉRAPEUTIQUE",
+    date: new Date().toISOString().split('T')[0], // Fix: Use YYYY-MM-DD format
+    number: medicationData?.header?.number || `MED-MU-${Date.now()}`,
+    physician: doctorData?.full_name || doctorData?.fullName || medicationData?.header?.physician || "Dr. MÉDECIN EXPERT",
+    registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || medicationData?.header?.registration || "COUNCIL-MU-2024-001",
+    validity: medicationData?.header?.validity || "Ordonnance valable 3 mois",
+    
+    // Patient info - Use patientData if available
+    firstName: patientData?.firstName || medicationData?.patient?.firstName || "",
+    lastName: patientData?.lastName || medicationData?.patient?.lastName || "",
+    age: patientData?.age ? `${patientData.age} ans` : medicationData?.patient?.age || `${patientAge} ans`,
+    weight: patientData?.weight || medicationData?.patient?.weight || "",
+    allergies: Array.isArray(patientData?.allergies) && patientData.allergies.length > 0 
+      ? patientData.allergies.join(', ') 
+      : medicationData?.patient?.allergies || patientAllergies || "Aucune",
+    address: patientData?.address || medicationData?.patient?.address || "Adresse à compléter - Maurice",
+    idNumber: patientData?.idNumber || medicationData?.patient?.idNumber || "Carte d'identité mauricienne",
+    pregnancy: medicationData?.patient?.pregnancy || "Non applicable",
+    
+    // Prescriptions - Initialize from diagnosis data
+    prescriptions: medicationData?.prescriptions || buildInitialPrescriptions(),
+    
+    // Clinical advice - Enhanced for Mauritius
     clinicalAdvice: {
-      hydration: medicationData?.clinicalAdvice?.hydration || "Hydratation renforcée (2-3L/jour) climat tropical",
-      activity: medicationData?.clinicalAdvice?.activity || "Repos adapté selon symptômes",
-      diet: medicationData?.clinicalAdvice?.diet || "Alimentation équilibrée",
-      mosquitoProtection: medicationData?.clinicalAdvice?.mosquitoProtection || "Protection anti-moustiques",
-      followUp: medicationData?.clinicalAdvice?.followUp || "Consultation réévaluation si pas d'amélioration",
-      emergency: medicationData?.clinicalAdvice?.emergency || "Urgences Maurice: 999 (SAMU)"
+      hydration: medicationData?.clinicalAdvice?.hydration || "Hydratation renforcée (2-3L/jour) climat tropical Maurice",
+      activity: medicationData?.clinicalAdvice?.activity || "Repos adapté selon symptômes, éviter efforts intenses aux heures chaudes",
+      diet: medicationData?.clinicalAdvice?.diet || "Alimentation équilibrée, éviter aliments épicés si troubles digestifs",
+      mosquitoProtection: medicationData?.clinicalAdvice?.mosquitoProtection || "Protection anti-moustiques indispensable (dengue/chikungunya endémiques)",
+      followUp: medicationData?.clinicalAdvice?.followUp || "Consultation de réévaluation si pas d'amélioration sous 48-72h",
+      emergency: medicationData?.clinicalAdvice?.emergency || "Urgences Maurice: 999 (SAMU) - Cliniques 24h: Apollo Bramwell, Wellkin"
     }
   })
 
   // Update form when data changes
   useEffect(() => {
-    if (medicationData || patientData) {
-      setFormData({
+    if (medicationData || patientData || doctorData || diagnosisData) {
+      setFormData(prev => ({
         // Header
-        title: medicationData?.header?.title || formData.title,
-        subtitle: medicationData?.header?.subtitle || formData.subtitle,
-        date: medicationData?.header?.date || formData.date,
-        number: medicationData?.header?.number || formData.number,
-        physician: medicationData?.header?.physician || formData.physician,
-        registration: medicationData?.header?.registration || formData.registration,
-        validity: medicationData?.header?.validity || formData.validity,
+        title: medicationData?.header?.title || prev.title,
+        subtitle: medicationData?.header?.subtitle || prev.subtitle,
+        date: new Date().toISOString().split('T')[0], // Always use current date in correct format
+        number: medicationData?.header?.number || prev.number,
+        physician: doctorData?.full_name || doctorData?.fullName || medicationData?.header?.physician || prev.physician,
+        registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || medicationData?.header?.registration || prev.registration,
+        validity: medicationData?.header?.validity || prev.validity,
         
         // Patient info
-        firstName: medicationData?.patient?.firstName || patientData?.firstName || formData.firstName,
-        lastName: medicationData?.patient?.lastName || patientData?.lastName || formData.lastName,
-        age: medicationData?.patient?.age || `${patientData?.age || patientAge} ans`,
-        weight: medicationData?.patient?.weight || patientData?.weight || formData.weight,
-        allergies: medicationData?.patient?.allergies || (patientData?.allergies?.length > 0 ? patientData.allergies.join(', ') : formData.allergies),
-        address: medicationData?.patient?.address || formData.address,
-        idNumber: medicationData?.patient?.idNumber || formData.idNumber,
-        pregnancy: medicationData?.patient?.pregnancy || formData.pregnancy,
+        firstName: patientData?.firstName || medicationData?.patient?.firstName || prev.firstName,
+        lastName: patientData?.lastName || medicationData?.patient?.lastName || prev.lastName,
+        age: patientData?.age ? `${patientData.age} ans` : medicationData?.patient?.age || prev.age,
+        weight: patientData?.weight || medicationData?.patient?.weight || prev.weight,
+        allergies: Array.isArray(patientData?.allergies) && patientData.allergies.length > 0 
+          ? patientData.allergies.join(', ') 
+          : medicationData?.patient?.allergies || prev.allergies,
+        address: patientData?.address || medicationData?.patient?.address || prev.address,
+        idNumber: patientData?.idNumber || medicationData?.patient?.idNumber || prev.idNumber,
+        pregnancy: medicationData?.patient?.pregnancy || prev.pregnancy,
         
         // Prescriptions
-        prescriptions: medicationData?.prescriptions || formData.prescriptions,
+        prescriptions: medicationData?.prescriptions || (prev.prescriptions.length === 0 ? buildInitialPrescriptions() : prev.prescriptions),
         
         // Clinical advice
-        clinicalAdvice: medicationData?.clinicalAdvice || formData.clinicalAdvice
-      })
+        clinicalAdvice: medicationData?.clinicalAdvice || prev.clinicalAdvice
+      }))
     }
-  }, [medicationData, patientData])
+  }, [medicationData, patientData, doctorData, diagnosisData])
 
   const medicationClasses = [
     "Antalgique non opioïde",
@@ -138,9 +225,12 @@ export default function MedicationEditor({
     "Antibiotique",
     "Antiviral",
     "Antifongique",
+    "Antiparasitaire",
     "Corticoïde",
     "Antihistaminique",
     "Bronchodilatateur",
+    "Antitussif",
+    "Mucolytique",
     "Antihypertenseur",
     "Diurétique",
     "Antidiabétique",
@@ -151,29 +241,59 @@ export default function MedicationEditor({
     "Antispasmodique",
     "Laxatif",
     "Antidiarrhéique",
+    "Antiémétique",
+    "Psychotrope",
     "Vitamine/Complément",
     "Vaccin"
   ]
 
   const commonMedications = {
     "Antalgique non opioïde": [
-      { dci: "Paracétamol", brands: ["Efferalgan®", "Doliprane®", "Dafalgan®"] },
-      { dci: "Aspirine", brands: ["Aspégic®", "Kardégic®"] }
+      { dci: "Paracétamol", brands: ["Efferalgan®", "Doliprane®", "Dafalgan®", "Panadol®"] },
+      { dci: "Aspirine", brands: ["Aspégic®", "Kardégic®", "Aspirine UPSA®"] }
     ],
     "Anti-inflammatoire non stéroïdien (AINS)": [
-      { dci: "Ibuprofène", brands: ["Brufen®", "Nurofen®", "Advil®"] },
-      { dci: "Diclofénac", brands: ["Voltarène®", "Flector®"] },
-      { dci: "Naproxène", brands: ["Apranax®", "Naprosyne®"] }
+      { dci: "Ibuprofène", brands: ["Brufen®", "Nurofen®", "Advil®", "Spedifen®"] },
+      { dci: "Diclofénac", brands: ["Voltarène®", "Flector®", "Dicloflex®"] },
+      { dci: "Naproxène", brands: ["Apranax®", "Naprosyne®", "Aleve®"] },
+      { dci: "Kétoprofène", brands: ["Profénid®", "Bi-Profénid®", "Ketum®"] }
     ],
     "Antibiotique": [
-      { dci: "Amoxicilline", brands: ["Clamoxyl®", "Amodex®"] },
+      { dci: "Amoxicilline", brands: ["Clamoxyl®", "Amodex®", "Amoxil®"] },
       { dci: "Amoxicilline + Acide clavulanique", brands: ["Augmentin®", "Ciblor®"] },
-      { dci: "Azithromycine", brands: ["Zithromax®", "Azadose®"] },
-      { dci: "Clarithromycine", brands: ["Zeclar®", "Monozeclar®"] }
+      { dci: "Azithromycine", brands: ["Zithromax®", "Azadose®", "Azithral®"] },
+      { dci: "Clarithromycine", brands: ["Zeclar®", "Monozeclar®", "Klacid®"] },
+      { dci: "Ciprofloxacine", brands: ["Ciflox®", "Uniflox®"] },
+      { dci: "Céfixime", brands: ["Oroken®", "Suprax®"] },
+      { dci: "Doxycycline", brands: ["Vibramycine®", "Doxypalu®", "Tolexine®"] }
     ],
     "Corticoïde": [
       { dci: "Prednisolone", brands: ["Solupred®", "Hydrocortancyl®"] },
-      { dci: "Bétaméthasone", brands: ["Célestène®", "Diprostène®"] }
+      { dci: "Prednisone", brands: ["Cortancyl®"] },
+      { dci: "Bétaméthasone", brands: ["Célestène®", "Diprostène®"] },
+      { dci: "Dexaméthasone", brands: ["Dectancyl®", "Soludecadron®"] }
+    ],
+    "Antihistaminique": [
+      { dci: "Cétirizine", brands: ["Zyrtec®", "Virlix®", "Alairgix®"] },
+      { dci: "Loratadine", brands: ["Clarityne®", "Dolopyrane®"] },
+      { dci: "Desloratadine", brands: ["Aerius®", "Dasselta®"] },
+      { dci: "Fexofénadine", brands: ["Telfast®", "Allegra®"] }
+    ],
+    "Inhibiteur de la pompe à protons": [
+      { dci: "Oméprazole", brands: ["Mopral®", "Zoltum®"] },
+      { dci: "Esoméprazole", brands: ["Inexium®", "Nexium®"] },
+      { dci: "Lansoprazole", brands: ["Lanzor®", "Ogast®"] },
+      { dci: "Pantoprazole", brands: ["Eupantol®", "Inipomp®"] }
+    ],
+    "Antiviral": [
+      { dci: "Oseltamivir", brands: ["Tamiflu®"] },
+      { dci: "Aciclovir", brands: ["Zovirax®", "Activir®"] },
+      { dci: "Valaciclovir", brands: ["Zelitrex®", "Valtrex®"] }
+    ],
+    "Antiparasitaire": [
+      { dci: "Ivermectine", brands: ["Stromectol®", "Mectizan®"] },
+      { dci: "Albendazole", brands: ["Zentel®", "Eskazole®"] },
+      { dci: "Métronidazole", brands: ["Flagyl®", "Rozex®"] }
     ]
   }
 
@@ -185,12 +305,14 @@ export default function MedicationEditor({
     "Matin seulement",
     "Soir seulement",
     "Matin et soir",
-    "Si nécessaire",
+    "Si nécessaire (max 3/jour)",
     "3 fois par jour si douleur",
     "Toutes les 4 heures",
     "Toutes les 6 heures",
     "Toutes les 8 heures",
-    "Toutes les 12 heures"
+    "Toutes les 12 heures",
+    "1 fois par semaine",
+    "Selon schéma vaccinal"
   ]
 
   const handleInputChange = (field, value) => {
@@ -534,6 +656,13 @@ export default function MedicationEditor({
                         }
                       </SelectContent>
                     </Select>
+                    {/* Allow manual input if needed */}
+                    <Input
+                      value={prescription.dci}
+                      onChange={(e) => handlePrescriptionChange(index, 'dci', e.target.value)}
+                      className="mt-2"
+                      placeholder="Ou saisir un principe actif personnalisé..."
+                    />
                   </div>
                 </div>
                 
@@ -614,6 +743,42 @@ export default function MedicationEditor({
                       rows={2}
                       placeholder="CI absolues et relatives"
                     />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor={`totalQuantity-${index}`}>Quantité totale</Label>
+                    <Input
+                      id={`totalQuantity-${index}`}
+                      value={prescription.totalQuantity}
+                      onChange={(e) => handlePrescriptionChange(index, 'totalQuantity', e.target.value)}
+                      className="mt-1"
+                      placeholder="Ex: 21 comprimés"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor={`administration-${index}`}>Voie d'administration</Label>
+                    <Select
+                      value={prescription.administration}
+                      onValueChange={(value) => handlePrescriptionChange(index, 'administration', value)}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Per os">Per os (voie orale)</SelectItem>
+                        <SelectItem value="Sublingual">Sublingual</SelectItem>
+                        <SelectItem value="IM">Intramusculaire (IM)</SelectItem>
+                        <SelectItem value="IV">Intraveineux (IV)</SelectItem>
+                        <SelectItem value="SC">Sous-cutané (SC)</SelectItem>
+                        <SelectItem value="Topique">Application locale</SelectItem>
+                        <SelectItem value="Inhalation">Inhalation</SelectItem>
+                        <SelectItem value="Rectal">Voie rectale</SelectItem>
+                        <SelectItem value="Ophtalmique">Collyre ophtalmique</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 
