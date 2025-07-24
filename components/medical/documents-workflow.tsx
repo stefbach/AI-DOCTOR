@@ -3,6 +3,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { consultationDataService } from '@/lib/consultation-data-service'
+import { supabase } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -41,6 +43,108 @@ export default function DocumentsWorkflow({
     medication: mauritianDocuments?.medication || {}
   })
   const [completedSteps, setCompletedSteps] = useState(new Set())
+  
+  // Add comprehensive data states
+  const [completePatientData, setCompletePatientData] = useState<any>(null)
+  const [completeClinicalData, setCompleteClinicalData] = useState<any>(null)
+  const [completeQuestionsData, setCompleteQuestionsData] = useState<any>(null)
+  const [completeDoctorData, setCompleteDoctorData] = useState<any>(null)
+  const [isLoadingData, setIsLoadingData] = useState(true)
+
+  // Load all data for documents auto-fill
+  useEffect(() => {
+    const loadAllDataForDocuments = async () => {
+      try {
+        console.log('📋 Loading all data for documents auto-fill')
+        setIsLoadingData(true)
+        
+        // 1. Get all saved consultation data
+        const allData = await consultationDataService.getDataForAutoFill()
+        console.log('All consultation data:', allData)
+        
+        // 2. Get doctor data from sessionStorage first
+        let doctorInfo = null
+        const doctorDataStr = sessionStorage.getItem('tibokDoctorData')
+        if (doctorDataStr) {
+          doctorInfo = JSON.parse(doctorDataStr)
+          console.log('Doctor data from session:', doctorInfo)
+        }
+        
+        // 3. If no doctor data in session, get from consultation
+        if (!doctorInfo) {
+          const consultationId = consultationDataService.getCurrentConsultationId()
+          if (consultationId) {
+            const { data: consultation } = await supabase
+              .from('consultations')
+              .select('doctor_id')
+              .eq('id', consultationId)
+              .single()
+            
+            if (consultation?.doctor_id) {
+              const { data: doctor } = await supabase
+                .from('doctors')
+                .select('*')
+                .eq('id', consultation.doctor_id)
+                .single()
+              
+              if (doctor) {
+                doctorInfo = doctor
+                console.log('Doctor data from DB:', doctor)
+              }
+            }
+          }
+        }
+        
+        // 4. Get complete patient data including address and phone from DB
+        let fullPatientData = allData?.patientData || patientData || {}
+        
+        const consultationId = consultationDataService.getCurrentConsultationId()
+        if (consultationId) {
+          const { data: consultation } = await supabase
+            .from('consultations')
+            .select('patient_id')
+            .eq('id', consultationId)
+            .single()
+          
+          if (consultation?.patient_id) {
+            const { data: dbPatient } = await supabase
+              .from('patients')
+              .select('*')
+              .eq('id', consultation.patient_id)
+              .single()
+            
+            if (dbPatient) {
+              // Merge database patient data with existing data
+              fullPatientData = {
+                ...fullPatientData,
+                address: dbPatient.address || fullPatientData.address || '',
+                phone: dbPatient.phone_number || fullPatientData.phone || '',
+                phoneNumber: dbPatient.phone_number || fullPatientData.phoneNumber || '',
+                email: dbPatient.email || fullPatientData.email || '',
+                idNumber: dbPatient.id_number || fullPatientData.idNumber || '',
+                city: dbPatient.city || fullPatientData.city || '',
+                country: dbPatient.country || fullPatientData.country || 'Maurice'
+              }
+              console.log('Enhanced patient data:', fullPatientData)
+            }
+          }
+        }
+        
+        // 5. Set all the data
+        setCompletePatientData(fullPatientData)
+        setCompleteClinicalData(allData?.clinicalData || {})
+        setCompleteQuestionsData(allData?.questionsData || {})
+        setCompleteDoctorData(doctorInfo)
+        
+      } catch (error) {
+        console.error('Error loading complete data:', error)
+      } finally {
+        setIsLoadingData(false)
+      }
+    }
+    
+    loadAllDataForDocuments()
+  }, [patientData])
 
   // Debug log to track received props
   useEffect(() => {
@@ -124,8 +228,24 @@ export default function DocumentsWorkflow({
     onComplete && onComplete(editedDocuments)
   }
 
-  const patientName = `${patientData?.firstName || 'Patient'} ${patientData?.lastName || 'X'}`
+  const patientName = `${completePatientData?.firstName || patientData?.firstName || 'Patient'} ${completePatientData?.lastName || patientData?.lastName || 'X'}`
   const progressPercentage = ((completedSteps.size / steps.length) * 100)
+
+  // Loading state while fetching data
+  if (isLoadingData) {
+    return (
+      <div className="space-y-6">
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+          <CardContent className="flex items-center justify-center py-12">
+            <div className="text-center space-y-4">
+              <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+              <p className="text-gray-600">Chargement des données...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   // Vue d'ensemble si pas d'étape spécifique sélectionnée
   if (currentStep === -1) {
@@ -320,8 +440,12 @@ export default function DocumentsWorkflow({
           onNext={handleNext}
           onPrevious={() => setCurrentStep(-1)}
           patientName={patientName}
-          patientData={patientData}
+          patientData={completePatientData}
+          clinicalData={completeClinicalData}
+          questionsData={completeQuestionsData}
           diagnosisData={diagnosisData}
+          doctorData={completeDoctorData}
+          mauritianDocuments={mauritianDocuments}
         />
       )}
 
@@ -332,7 +456,7 @@ export default function DocumentsWorkflow({
           onNext={handleNext}
           onPrevious={handlePrevious}
           patientName={patientName}
-          patientData={patientData}
+          patientData={completePatientData}
           diagnosisData={diagnosisData}
         />
       )}
@@ -344,7 +468,7 @@ export default function DocumentsWorkflow({
           onNext={handleNext}
           onPrevious={handlePrevious}
           patientName={patientName}
-          patientData={patientData}
+          patientData={completePatientData}
           diagnosisData={diagnosisData}
         />
       )}
@@ -356,9 +480,9 @@ export default function DocumentsWorkflow({
           onNext={() => setCurrentStep(-1)}
           onPrevious={handlePrevious}
           patientName={patientName}
-          patientAge={patientData?.age || 30}
-          patientAllergies={(patientData?.allergies || []).join(', ') || 'Aucune'}
-          patientData={patientData}
+          patientAge={completePatientData?.age || patientData?.age || 30}
+          patientAllergies={(completePatientData?.allergies || patientData?.allergies || []).join(', ') || 'Aucune'}
+          patientData={completePatientData}
           diagnosisData={diagnosisData}
         />
       )}
