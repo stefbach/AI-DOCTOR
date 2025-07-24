@@ -104,88 +104,88 @@ export default function MedicalWorkflow({
   // Phase principale : Édition documents (toujours affichée)
   if (currentPhase === 'documents') {
     return (
-      <DocumentsWorkflow
-        diagnosisData={diagnosisResult}
-        mauritianDocuments={mauritianDocuments}
-        patientData={patientData}
-        onBack={handleBackToDiagnosis}
-        onComplete={handleDocumentsComplete}
-      />
+      <div className="space-y-6">
+        <DocumentsWorkflow
+          diagnosisData={diagnosisResult}
+          mauritianDocuments={mauritianDocuments}
+          patientData={patientData}
+          onBack={handleBackToDiagnosis}
+          onComplete={handleDocumentsComplete}
+        />
+      </div>
     )
   }
 
   // Phase complétée (cas rare - normalement géré par page.tsx)
   if (currentPhase === 'completed') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 p-4">
-        <div className="max-w-4xl mx-auto">
-          <Card className="bg-white/90 backdrop-blur-sm shadow-2xl">
-            <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
-              <CardTitle className="flex items-center gap-3 text-2xl">
-                <CheckCircle className="h-8 w-8" />
-                Documents Mauriciens Complétés !
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-8 text-center">
-              <div className="space-y-6">
-                <CheckCircle className="h-24 w-24 text-green-500 mx-auto" />
-                
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-800 mb-2">Documents édités avec succès !</h2>
-                  <p className="text-gray-600">
-                    Les 4 documents mauriciens de {patientName} sont finalisés
-                  </p>
-                </div>
+      <div className="space-y-6">
+        <Card className="bg-white/90 backdrop-blur-sm shadow-2xl">
+          <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
+            <CardTitle className="flex items-center gap-3 text-2xl">
+              <CheckCircle className="h-8 w-8" />
+              Documents Mauriciens Complétés !
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8 text-center">
+            <div className="space-y-6">
+              <CheckCircle className="h-24 w-24 text-green-500 mx-auto" />
+              
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Documents édités avec succès !</h2>
+                <p className="text-gray-600">
+                  Les 4 documents mauriciens de {patientName} sont finalisés
+                </p>
+              </div>
 
-                <div className="bg-green-50 p-6 rounded-lg">
-                  <h3 className="font-semibold text-green-800 mb-3">Documents finalisés :</h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      Compte-rendu consultation
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      Ordonnance examens biologiques
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      Ordonnance examens paracliniques
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      Ordonnance médicamenteuse
-                    </div>
+              <div className="bg-green-50 p-6 rounded-lg">
+                <h3 className="font-semibold text-green-800 mb-3">Documents finalisés :</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Compte-rendu consultation
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Ordonnance examens biologiques
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Ordonnance examens paracliniques
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Ordonnance médicamenteuse
                   </div>
                 </div>
-
-                <div className="flex gap-4 justify-center">
-                  <Button 
-                    variant="outline"
-                    onClick={() => setCurrentPhase('documents')}
-                  >
-                    ← Modifier Documents
-                  </Button>
-                  
-                  <Button className="bg-green-600 text-white">
-                    📥 Télécharger Dossier
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => {
-                      if (onComplete) {
-                        onComplete(finalDocuments)
-                      }
-                    }}
-                    className="bg-blue-600 text-white"
-                  >
-                    🆕 Étape Suivante
-                  </Button>
-                </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+
+              <div className="flex gap-4 justify-center">
+                <Button 
+                  variant="outline"
+                  onClick={() => setCurrentPhase('documents')}
+                >
+                  ← Modifier Documents
+                </Button>
+                
+                <Button className="bg-green-600 text-white">
+                  📥 Télécharger Dossier
+                </Button>
+                
+                <Button 
+                  onClick={() => {
+                    if (onComplete) {
+                      onComplete(finalDocuments)
+                    }
+                  }}
+                  className="bg-blue-600 text-white"
+                >
+                  🆕 Étape Suivante
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
