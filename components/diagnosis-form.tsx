@@ -93,25 +93,28 @@ export default function EnhancedDiagnosisForm({
     }
   }, [consultationId, diagnosis])
 
-  // Save data when diagnosis is generated
+  // Save data when diagnosis is generated or updated
   useEffect(() => {
     const saveData = async () => {
+      if (!diagnosis || !mauritianDocuments) return
+      
       try {
         const dataToSave = {
           diagnosis,
           expertAnalysis,
           mauritianDocuments,
-          documentsGenerated
+          documentsGenerated,
+          timestamp: new Date().toISOString()
         }
         await consultationDataService.saveStepData(3, dataToSave)
+        console.log("💾 Auto-saved diagnosis data to consultation service")
       } catch (error) {
         console.error('Error saving diagnosis data:', error)
       }
     }
     
-    if (diagnosis && mauritianDocuments) {
-      saveData()
-    }
+    // Save whenever key data changes
+    saveData()
   }, [diagnosis, expertAnalysis, mauritianDocuments, documentsGenerated])
 
   useEffect(() => {
@@ -158,23 +161,31 @@ export default function EnhancedDiagnosisForm({
         setMauritianDocuments(data.mauritianDocuments)
         setDocumentsGenerated(true)
         
-        // Make sure we're passing ALL the data
+        // Save complete data with all fields properly structured
         const completeData = { 
           diagnosis: data.diagnosis, 
           mauritianDocuments: data.mauritianDocuments,
           expertAnalysis: data.expertAnalysis || data.expert_analysis || {},
-          completeData: data 
+          completeData: data,
+          documentsGenerated: true
         }
         
+        // Call onDataChange to update parent component
         onDataChange(completeData)
         
-        // Also save to consultation service immediately
-        await consultationDataService.saveStepData(3, completeData)
+        // Save to consultation service immediately for persistence
+        try {
+          await consultationDataService.saveStepData(3, completeData)
+          console.log("✅ Data saved to consultation service")
+        } catch (saveError) {
+          console.error("Error saving to consultation service:", saveError)
+        }
         
         console.log("✅ Diagnosis + Documents + Expert Analysis generated")
         console.log("🔍 Diagnosis set:", data.diagnosis)
         console.log("🔍 Expert Analysis set:", data.expertAnalysis || data.expert_analysis)
         console.log("🔍 Documents set:", data.mauritianDocuments)
+        console.log("💾 Complete data saved:", completeData)
       } else {
         throw new Error(data.error || "Format de réponse invalide")
       }
@@ -189,7 +200,25 @@ export default function EnhancedDiagnosisForm({
       setExpertAnalysis(fallbackData.expertAnalysis)
       setMauritianDocuments(fallbackData.mauritianDocuments)
       setDocumentsGenerated(true)
-      onDataChange(fallbackData)
+      
+      // Save fallback data the same way
+      const completeData = {
+        diagnosis: fallbackData.diagnosis,
+        mauritianDocuments: fallbackData.mauritianDocuments,
+        expertAnalysis: fallbackData.expertAnalysis,
+        completeData: fallbackData,
+        documentsGenerated: true
+      }
+      
+      onDataChange(completeData)
+      
+      // Save fallback data to consultation service
+      try {
+        await consultationDataService.saveStepData(3, completeData)
+        console.log("✅ Fallback data saved to consultation service")
+      } catch (saveError) {
+        console.error("Error saving fallback data:", saveError)
+      }
       
     } finally {
       setLoading(false)
