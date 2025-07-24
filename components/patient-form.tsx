@@ -51,6 +51,14 @@ interface PatientFormData {
   otherMedicalHistory: string
   currentMedicationsText: string
   lifeHabits: LifeHabits
+  // Additional fields for complete patient data
+  address?: string
+  phone?: string
+  phoneNumber?: string
+  city?: string
+  country?: string
+  email?: string
+  idNumber?: string
 }
 
 interface PatientFormProps {
@@ -161,6 +169,14 @@ export default function ModernPatientForm({
       alcohol: "", 
       physicalActivity: "",
     },
+    // Initialize additional fields
+    address: "",
+    phone: "",
+    phoneNumber: "",
+    city: "",
+    country: "Maurice",
+    email: "",
+    idNumber: ""
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -227,8 +243,11 @@ export default function ModernPatientForm({
                   enhancedPatientInfo.weight = consultation.patient_weight || dbPatient.weight || patientInfo.weight || ''
                   enhancedPatientInfo.address = dbPatient.address || patientInfo.address || ''
                   enhancedPatientInfo.phone = dbPatient.phone_number || patientInfo.phone || ''
+                  enhancedPatientInfo.phoneNumber = dbPatient.phone_number || patientInfo.phone || ''
                   enhancedPatientInfo.city = dbPatient.city || patientInfo.city || ''
                   enhancedPatientInfo.country = dbPatient.country || patientInfo.country || ''
+                  enhancedPatientInfo.email = dbPatient.email || patientInfo.email || ''
+                  enhancedPatientInfo.idNumber = dbPatient.id_number || patientInfo.idNumber || patientInfo.id_number || ''
                 }
               }
             }
@@ -276,6 +295,14 @@ export default function ModernPatientForm({
             alcohol: "", 
             physicalActivity: "",
           },
+          // Capture additional fields from TIBOK/database data
+          address: enhancedPatientInfo.address || "",
+          phone: enhancedPatientInfo.phone_number || enhancedPatientInfo.phone || enhancedPatientInfo.phoneNumber || "",
+          phoneNumber: enhancedPatientInfo.phone_number || enhancedPatientInfo.phone || enhancedPatientInfo.phoneNumber || "",
+          city: enhancedPatientInfo.city || "",
+          country: enhancedPatientInfo.country || "Maurice",
+          email: enhancedPatientInfo.email || "",
+          idNumber: enhancedPatientInfo.id_number || enhancedPatientInfo.idNumber || ""
         }
         
         console.log('Setting form data:', newFormData)
@@ -798,6 +825,88 @@ export default function ModernPatientForm({
               </div>
             </div>
           )}
+
+          {/* Contact Information Section */}
+          <div className="space-y-4 mt-6">
+            <h3 className="font-semibold text-lg text-gray-700">{t('patientForm.contactInfo')}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="font-medium">
+                  {t('patientForm.phone')}
+                </Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange("phone", e.target.value)}
+                  placeholder="+230 5XXX XXXX"
+                  className="transition-all duration-200 focus:ring-blue-200 border-gray-300"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email" className="font-medium">
+                  {t('patientForm.email')}
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  placeholder="email@example.com"
+                  className="transition-all duration-200 focus:ring-blue-200 border-gray-300"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="address" className="font-medium">
+                {t('patientForm.address')}
+              </Label>
+              <Textarea
+                id="address"
+                name="address"
+                value={formData.address}
+                onChange={(e) => handleInputChange("address", e.target.value)}
+                placeholder={t('patientForm.addressPlaceholder')}
+                rows={2}
+                className="transition-all duration-200 focus:ring-blue-200 border-gray-300"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="city" className="font-medium">
+                  {t('patientForm.city')}
+                </Label>
+                <Input
+                  id="city"
+                  name="city"
+                  type="text"
+                  value={formData.city}
+                  onChange={(e) => handleInputChange("city", e.target.value)}
+                  placeholder="Port Louis, Curepipe, etc."
+                  className="transition-all duration-200 focus:ring-blue-200 border-gray-300"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="country" className="font-medium">
+                  {t('patientForm.country')}
+                </Label>
+                <Input
+                  id="country"
+                  name="country"
+                  type="text"
+                  value={formData.country}
+                  onChange={(e) => handleInputChange("country", e.target.value)}
+                  className="transition-all duration-200 focus:ring-blue-200 border-gray-300"
+                />
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
