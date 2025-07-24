@@ -70,42 +70,34 @@ export default function DocumentsWorkflow({
           console.log('Doctor data from session:', doctorInfo)
         }
         
-        // 3. If no doctor data in session, get from consultation
-        if (!doctorInfo) {
-          const consultationId = consultationDataService.getCurrentConsultationId()
-          if (consultationId) {
-            const { data: consultation } = await supabase
-              .from('consultations')
-              .select('doctor_id')
-              .eq('id', consultationId)
-              .single()
-            
-            if (consultation?.doctor_id) {
-              const { data: doctor } = await supabase
-                .from('doctors')
-                .select('*')
-                .eq('id', consultation.doctor_id)
-                .single()
-              
-              if (doctor) {
-                doctorInfo = doctor
-                console.log('Doctor data from DB:', doctor)
-              }
-            }
-          }
-        }
+        // 3. Get current consultation ID
+        const consultationId = consultationDataService.getCurrentConsultationId()
         
         // 4. Get complete patient data including address and phone from DB
         let fullPatientData = allData?.patientData || patientData || {}
         
-        const consultationId = consultationDataService.getCurrentConsultationId()
         if (consultationId) {
           const { data: consultation } = await supabase
             .from('consultations')
-            .select('patient_id')
+            .select('patient_id, doctor_id, patient_height, patient_weight')
             .eq('id', consultationId)
             .single()
           
+          // Get doctor data if not already loaded and consultation has doctor_id
+          if (!doctorInfo && consultation?.doctor_id) {
+            const { data: doctor } = await supabase
+              .from('doctors')
+              .select('*')
+              .eq('id', consultation.doctor_id)
+              .single()
+            
+            if (doctor) {
+              doctorInfo = doctor
+              console.log('Doctor data from DB:', doctor)
+            }
+          }
+          
+          // Get complete patient data if consultation has patient_id
           if (consultation?.patient_id) {
             const { data: dbPatient } = await supabase
               .from('patients')
@@ -115,16 +107,43 @@ export default function DocumentsWorkflow({
             
             if (dbPatient) {
               // Merge database patient data with existing data
+              // Priority: consultation form data > database data > default data
               fullPatientData = {
-                ...fullPatientData,
+                // Basic info - prioritize form data
+                firstName: fullPatientData.firstName || dbPatient.first_name || '',
+                lastName: fullPatientData.lastName || dbPatient.last_name || '',
+                birthDate: fullPatientData.birthDate || dbPatient.date_of_birth || '',
+                age: fullPatientData.age || calculateAge(dbPatient.date_of_birth) || '',
+                gender: fullPatientData.gender || [mapGender(dbPatient.gender)] || [],
+                
+                // Physical measurements - prioritize consultation data (most recent)
+                height: consultation.patient_height || fullPatientData.height || dbPatient.height || '',
+                weight: consultation.patient_weight || fullPatientData.weight || dbPatient.weight || '',
+                
+                // Contact info - IMPORTANT: Get from database as form doesn't collect these
                 address: dbPatient.address || fullPatientData.address || '',
                 phone: dbPatient.phone_number || fullPatientData.phone || '',
                 phoneNumber: dbPatient.phone_number || fullPatientData.phoneNumber || '',
                 email: dbPatient.email || fullPatientData.email || '',
-                idNumber: dbPatient.id_number || fullPatientData.idNumber || '',
+                
+                // Location info
                 city: dbPatient.city || fullPatientData.city || '',
-                country: dbPatient.country || fullPatientData.country || 'Maurice'
+                country: dbPatient.country || fullPatientData.country || 'Maurice',
+                
+                // Medical info - prioritize form data
+                allergies: fullPatientData.allergies || [],
+                medicalHistory: fullPatientData.medicalHistory || [],
+                currentMedicationsText: fullPatientData.currentMedicationsText || '',
+                lifeHabits: fullPatientData.lifeHabits || {},
+                
+                // ID info from database
+                idNumber: dbPatient.id_number || fullPatientData.idNumber || '',
+                
+                // Additional fields that might be useful
+                otherAllergies: fullPatientData.otherAllergies || '',
+                otherMedicalHistory: fullPatientData.otherMedicalHistory || ''
               }
+              
               console.log('Enhanced patient data:', fullPatientData)
             }
           }
@@ -145,6 +164,33 @@ export default function DocumentsWorkflow({
     
     loadAllDataForDocuments()
   }, [patientData])
+
+  // Helper function to calculate age from birth date
+  const calculateAge = (birthDate: string) => {
+    if (!birthDate) return ''
+    const today = new Date()
+    const birth = new Date(birthDate)
+    let age = today.getFullYear() - birth.getFullYear()
+    const monthDiff = today.getMonth() - birth.getMonth()
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--
+    }
+    
+    return age.toString()
+  }
+
+  // Helper function to map gender values
+  const mapGender = (gender: string) => {
+    if (!gender) return ''
+    const genderLower = gender.toLowerCase()
+    if (genderLower === 'm' || genderLower === 'male' || genderLower === 'masculin') {
+      return 'Masculin'
+    } else if (genderLower === 'f' || genderLower === 'female' || genderLower === 'féminin') {
+      return 'Féminin'
+    }
+    return gender
+  }
 
   // Debug log to track received props
   useEffect(() => {
