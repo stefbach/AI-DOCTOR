@@ -63,6 +63,14 @@ export default function ConsultationEditor({
       parts.push(`Autres antécédents: ${patientData.otherMedicalHistory}`)
     }
     
+    // Allergies
+    if (patientData?.allergies && Array.isArray(patientData.allergies) && patientData.allergies.length > 0) {
+      parts.push(`Allergies connues: ${patientData.allergies.join(', ')}`)
+    }
+    if (patientData?.otherAllergies) {
+      parts.push(`Autres allergies: ${patientData.otherAllergies}`)
+    }
+    
     // Current medications
     if (patientData?.currentMedicationsText) {
       parts.push(`Traitements en cours: ${patientData.currentMedicationsText}`)
@@ -100,6 +108,15 @@ export default function ConsultationEditor({
       if (clinicalData.vitalSigns.bloodPressureSystolic && clinicalData.vitalSigns.bloodPressureDiastolic) {
         vitals.push(`TA: ${clinicalData.vitalSigns.bloodPressureSystolic}/${clinicalData.vitalSigns.bloodPressureDiastolic} mmHg`)
       }
+      if (clinicalData.vitalSigns.heartRate) {
+        vitals.push(`FC: ${clinicalData.vitalSigns.heartRate} bpm`)
+      }
+      if (clinicalData.vitalSigns.respiratoryRate) {
+        vitals.push(`FR: ${clinicalData.vitalSigns.respiratoryRate} /min`)
+      }
+      if (clinicalData.vitalSigns.oxygenSaturation) {
+        vitals.push(`SpO2: ${clinicalData.vitalSigns.oxygenSaturation}%`)
+      }
       if (vitals.length > 0) {
         parts.push(`Signes vitaux: ${vitals.join(', ')}`)
       }
@@ -108,14 +125,22 @@ export default function ConsultationEditor({
     // Physical measurements
     if (patientData?.weight && patientData?.height) {
       const bmi = (parseFloat(patientData.weight) / Math.pow(parseFloat(patientData.height) / 100, 2)).toFixed(1)
-      parts.push(`Poids: ${patientData.weight} kg, Taille: ${patientData.height} cm, IMC: ${bmi} kg/m²`)
+      parts.push(`Anthropométrie: Poids: ${patientData.weight} kg, Taille: ${patientData.height} cm, IMC: ${bmi} kg/m²`)
     }
     
-    // General examination placeholder
-    parts.push(`Examen général: État général conservé, conscient et orienté`)
-    parts.push(`Examen cardiovasculaire: Bruits du cœur réguliers, pas de souffle`)
-    parts.push(`Examen pulmonaire: Murmure vésiculaire normal, pas de râles`)
-    parts.push(`Examen abdominal: Souple, dépressible, non douloureux`)
+    // Physical examination findings
+    if (clinicalData?.physicalExamDetails) {
+      parts.push(`Examen clinique détaillé: ${clinicalData.physicalExamDetails}`)
+    }
+    
+    // General examination placeholder if no specific data
+    if (parts.length === 0 || !clinicalData?.physicalExamDetails) {
+      parts.push(`Examen général: État général conservé, conscient et orienté`)
+      parts.push(`Examen cardiovasculaire: Bruits du cœur réguliers, pas de souffle`)
+      parts.push(`Examen pulmonaire: Murmure vésiculaire normal, pas de râles`)
+      parts.push(`Examen abdominal: Souple, dépressible, non douloureux`)
+      parts.push(`Examen neurologique: Sans particularité`)
+    }
     
     // Use existing content if nothing else
     if (parts.length === 0 && consultationData?.content?.examination) {
@@ -149,9 +174,20 @@ export default function ConsultationEditor({
       }
     }
     
+    // Preventive measures from diagnosis
+    if (diagnosisData?.expertAnalysis?.expert_preventive_measures) {
+      const preventive = diagnosisData.expertAnalysis.expert_preventive_measures
+      if (preventive.immediate_preventive_actions?.length > 0) {
+        const actions = preventive.immediate_preventive_actions
+          .map((a: any) => `- ${a}`)
+          .join('\n')
+        parts.push(`Mesures préventives:\n${actions}`)
+      }
+    }
+    
     // Surveillance plan
     parts.push('Surveillance: Réévaluation clinique selon évolution')
-    parts.push('Conseils: Hydratation, repos, consultation si aggravation')
+    parts.push('Conseils: Hydratation adéquate, repos, consultation si aggravation')
     
     // Use existing content if nothing else
     if (parts.length === 0 && consultationData?.content?.plan) {
@@ -208,12 +244,11 @@ export default function ConsultationEditor({
       // Header - with doctor info
       title: consultationData?.header?.title || "COMPTE-RENDU DE CONSULTATION MÉDICALE",
       subtitle: consultationData?.header?.subtitle || "République de Maurice - Médecine Générale",
-      // Fix date formatting - convert to YYYY-MM-DD for input[type="date"]
       date: new Date().toISOString().split('T')[0], // This gives YYYY-MM-DD format
       time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
       physician: doctorData?.full_name || doctorData?.fullName || consultationData?.header?.physician || "Dr. MÉDECIN EXPERT",
       registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || consultationData?.header?.registration || "COUNCIL-MU-2024-001",
-      institution: doctorData?.institution || consultationData?.header?.institution || "Centre Médical Maurice",
+      institution: doctorData?.institution || doctorData?.clinic_name || consultationData?.header?.institution || "Centre Médical Maurice",
       
       // Patient - complete info from all sources with fixed sex field
       firstName: patientData?.firstName || consultationData?.patient?.firstName || "",
@@ -228,14 +263,33 @@ export default function ConsultationEditor({
         // Default based on existing data or F
         return consultationData?.patient?.sex || 'F'
       })(),
-      address: patientData?.address || consultationData?.patient?.address || "Adresse à compléter - Maurice",
-      phone: patientData?.phone || patientData?.phoneNumber || consultationData?.patient?.phone || "Téléphone à renseigner",
-      idNumber: patientData?.idNumber || consultationData?.patient?.idNumber || "Carte d'identité mauricienne",
+      // Format complete address from patient data
+      address: (() => {
+        if (patientData?.address || patientData?.city || patientData?.country) {
+          const parts = []
+          if (patientData.address) parts.push(patientData.address)
+          if (patientData.city) parts.push(patientData.city)
+          parts.push(patientData.country || 'Maurice')
+          return parts.filter(Boolean).join(', ')
+        }
+        return consultationData?.patient?.address || "Adresse à compléter - Maurice"
+      })(),
+      // Get phone number from patient data with multiple fallbacks
+      phone: patientData?.phone || patientData?.phoneNumber || patientData?.phone_number || 
+             consultationData?.patient?.phone || "Téléphone à renseigner",
+      idNumber: patientData?.idNumber || patientData?.id_number || consultationData?.patient?.idNumber || "Carte d'identité mauricienne",
       weight: patientData?.weight || consultationData?.patient?.weight || "",
       height: patientData?.height || consultationData?.patient?.height || "",
-      allergies: Array.isArray(patientData?.allergies) && patientData.allergies.length > 0 
-        ? patientData.allergies.join(', ') 
-        : consultationData?.patient?.allergies || "Aucune",
+      allergies: (() => {
+        if (Array.isArray(patientData?.allergies) && patientData.allergies.length > 0) {
+          let allergyList = patientData.allergies.join(', ')
+          if (patientData.otherAllergies) {
+            allergyList += `, ${patientData.otherAllergies}`
+          }
+          return allergyList
+        }
+        return consultationData?.patient?.allergies || "Aucune"
+      })(),
       
       // Content - from clinical data and diagnosis
       chiefComplaint: clinicalData?.chiefComplaint || consultationData?.content?.chiefComplaint || "",
