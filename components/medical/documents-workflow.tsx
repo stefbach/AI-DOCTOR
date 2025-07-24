@@ -458,6 +458,7 @@ export default function DocumentsWorkflow({
           patientName={patientName}
           patientData={completePatientData}
           diagnosisData={diagnosisData}
+          doctorData={completeDoctorData}
         />
       )}
 
@@ -470,6 +471,7 @@ export default function DocumentsWorkflow({
           patientName={patientName}
           patientData={completePatientData}
           diagnosisData={diagnosisData}
+          doctorData={completeDoctorData}
         />
       )}
 
@@ -484,6 +486,7 @@ export default function DocumentsWorkflow({
           patientAllergies={(completePatientData?.allergies || patientData?.allergies || []).join(', ') || 'Aucune'}
           patientData={completePatientData}
           diagnosisData={diagnosisData}
+          doctorData={completeDoctorData}
         />
       )}
     </div>
