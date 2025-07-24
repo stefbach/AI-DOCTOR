@@ -269,6 +269,59 @@ export const translations = {
       fr: "Obésité",
       en: "Obesity"
     },
+    // Contact Information translations
+    contactInfo: {
+      fr: "Informations de Contact",
+      en: "Contact Information"
+    },
+    phone: {
+      fr: "Téléphone",
+      en: "Phone"
+    },
+    phonePlaceholder: {
+      fr: "+230 5XXX XXXX",
+      en: "+230 5XXX XXXX"
+    },
+    email: {
+      fr: "Email",
+      en: "Email"
+    },
+    emailPlaceholder: {
+      fr: "adresse@email.com",
+      en: "email@address.com"
+    },
+    address: {
+      fr: "Adresse",
+      en: "Address"
+    },
+    addressPlaceholder: {
+      fr: "Adresse complète",
+      en: "Full address"
+    },
+    city: {
+      fr: "Ville",
+      en: "City"
+    },
+    cityPlaceholder: {
+      fr: "Port Louis, Curepipe, etc.",
+      en: "Port Louis, Curepipe, etc."
+    },
+    country: {
+      fr: "Pays",
+      en: "Country"
+    },
+    countryPlaceholder: {
+      fr: "Maurice",
+      en: "Mauritius"
+    },
+    idNumber: {
+      fr: "Numéro d'identité",
+      en: "ID Number"
+    },
+    idNumberPlaceholder: {
+      fr: "Numéro d'identité nationale",
+      en: "National ID number"
+    },
     knownAllergies: {
       fr: "Allergies Connues",
       en: "Known Allergies"
