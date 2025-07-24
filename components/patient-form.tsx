@@ -24,7 +24,11 @@ import {
   X,
   Info,
   CheckCircle,
-  Loader2
+  Loader2,
+  Mail,
+  Phone,
+  MapPin,
+  Home
 } from "lucide-react"
 import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
 import { getTranslation, Language } from "@/lib/translations"
@@ -233,7 +237,7 @@ export default function ModernPatientForm({
               if (consultation.patient_id) {
                 const { data: dbPatient } = await supabase
                   .from('patients')
-                  .select('height, weight, address, phone_number, city, country')
+                  .select('height, weight, address, phone_number, city, country, email, id_number')
                   .eq('id', consultation.patient_id)
                   .single()
                 
@@ -275,7 +279,7 @@ export default function ModernPatientForm({
           }
         }
         
-        // Create new form data with enhanced info
+        // Create new form data with enhanced info - FIXED VERSION
         const newFormData: PatientFormData = {
           firstName: enhancedPatientInfo.firstName || enhancedPatientInfo.first_name || "",
           lastName: enhancedPatientInfo.lastName || enhancedPatientInfo.last_name || "",
@@ -285,6 +289,15 @@ export default function ModernPatientForm({
           otherGender: "",
           weight: enhancedPatientInfo.weight ? enhancedPatientInfo.weight.toString() : "",
           height: enhancedPatientInfo.height ? enhancedPatientInfo.height.toString() : "",
+          // Contact information - properly populated
+          phone: enhancedPatientInfo.phone_number || enhancedPatientInfo.phone || enhancedPatientInfo.phoneNumber || "",
+          phoneNumber: enhancedPatientInfo.phone_number || enhancedPatientInfo.phone || enhancedPatientInfo.phoneNumber || "",
+          email: enhancedPatientInfo.email || "",
+          address: enhancedPatientInfo.address || "",
+          city: enhancedPatientInfo.city || "",
+          country: enhancedPatientInfo.country || "Maurice",
+          idNumber: enhancedPatientInfo.id_number || enhancedPatientInfo.idNumber || "",
+          // Medical information
           allergies: [],
           otherAllergies: "",
           medicalHistory: [],
@@ -295,14 +308,6 @@ export default function ModernPatientForm({
             alcohol: "", 
             physicalActivity: "",
           },
-          // Capture additional fields from TIBOK/database data
-          address: enhancedPatientInfo.address || "",
-          phone: enhancedPatientInfo.phone_number || enhancedPatientInfo.phone || enhancedPatientInfo.phoneNumber || "",
-          phoneNumber: enhancedPatientInfo.phone_number || enhancedPatientInfo.phone || enhancedPatientInfo.phoneNumber || "",
-          city: enhancedPatientInfo.city || "",
-          country: enhancedPatientInfo.country || "Maurice",
-          email: enhancedPatientInfo.email || "",
-          idNumber: enhancedPatientInfo.id_number || enhancedPatientInfo.idNumber || ""
         }
         
         console.log('Setting form data:', newFormData)
@@ -526,6 +531,7 @@ export default function ModernPatientForm({
 
   const sections = [
     { id: "identity", title: t('patientForm.personalInfo'), icon: User },
+    { id: "contact", title: t('patientForm.contactInfo'), icon: Phone },
     { id: "allergies", title: t('patientForm.knownAllergies'), icon: AlertTriangle },
     { id: "history", title: t('patientForm.medicalHistory'), icon: Heart },
     { id: "medications", title: t('patientForm.currentMedications'), icon: Pill },
@@ -689,6 +695,21 @@ export default function ModernPatientForm({
                 </span>
               </div>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="idNumber" className="flex items-center gap-2 font-medium">
+                {t('patientForm.idNumber')}
+              </Label>
+              <Input
+                id="idNumber"
+                name="idNumber"
+                type="text"
+                value={formData.idNumber || ''}
+                onChange={(e) => handleInputChange("idNumber", e.target.value)}
+                placeholder={t('patientForm.idNumberPlaceholder')}
+                className="transition-all duration-200 focus:ring-blue-200 border-gray-300"
+              />
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -825,92 +846,104 @@ export default function ModernPatientForm({
               </div>
             </div>
           )}
+        </CardContent>
+      </Card>
 
-          {/* Contact Information Section */}
-          <div className="space-y-4 mt-6">
-            <h3 className="font-semibold text-lg text-gray-700">{t('patientForm.contactInfo')}</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="font-medium">
-                  {t('patientForm.phone')}
-                </Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange("phone", e.target.value)}
-                  placeholder="+230 5XXX XXXX"
-                  className="transition-all duration-200 focus:ring-blue-200 border-gray-300"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email" className="font-medium">
-                  {t('patientForm.email')}
-                </Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                  placeholder="email@example.com"
-                  className="transition-all duration-200 focus:ring-blue-200 border-gray-300"
-                />
-              </div>
-            </div>
-
+      {/* Section 2: Contact Information */}
+      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
+        <CardHeader className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-t-lg">
+          <CardTitle className="flex items-center gap-3">
+            <Phone className="h-6 w-6" />
+            {t('patientForm.contactInfo')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="address" className="font-medium">
-                {t('patientForm.address')}
+              <Label htmlFor="phone" className="flex items-center gap-2 font-medium">
+                <Phone className="h-4 w-4" />
+                {t('patientForm.phone')}
               </Label>
-              <Textarea
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={(e) => handleInputChange("address", e.target.value)}
-                placeholder={t('patientForm.addressPlaceholder')}
-                rows={2}
-                className="transition-all duration-200 focus:ring-blue-200 border-gray-300"
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                value={formData.phone || ''}
+                onChange={(e) => handleInputChange("phone", e.target.value)}
+                placeholder="+230 5XXX XXXX"
+                className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="city" className="font-medium">
-                  {t('patientForm.city')}
-                </Label>
-                <Input
-                  id="city"
-                  name="city"
-                  type="text"
-                  value={formData.city}
-                  onChange={(e) => handleInputChange("city", e.target.value)}
-                  placeholder="Port Louis, Curepipe, etc."
-                  className="transition-all duration-200 focus:ring-blue-200 border-gray-300"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="flex items-center gap-2 font-medium">
+                <Mail className="h-4 w-4" />
+                {t('patientForm.email')}
+              </Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email || ''}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+                placeholder="email@example.com"
+                className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
+              />
+            </div>
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="country" className="font-medium">
-                  {t('patientForm.country')}
-                </Label>
-                <Input
-                  id="country"
-                  name="country"
-                  type="text"
-                  value={formData.country}
-                  onChange={(e) => handleInputChange("country", e.target.value)}
-                  className="transition-all duration-200 focus:ring-blue-200 border-gray-300"
-                />
-              </div>
+          <div className="space-y-2">
+            <Label htmlFor="address" className="flex items-center gap-2 font-medium">
+              <Home className="h-4 w-4" />
+              {t('patientForm.address')}
+            </Label>
+            <Textarea
+              id="address"
+              name="address"
+              value={formData.address || ''}
+              onChange={(e) => handleInputChange("address", e.target.value)}
+              placeholder={t('patientForm.addressPlaceholder')}
+              rows={2}
+              className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="city" className="flex items-center gap-2 font-medium">
+                <MapPin className="h-4 w-4" />
+                {t('patientForm.city')}
+              </Label>
+              <Input
+                id="city"
+                name="city"
+                type="text"
+                value={formData.city || ''}
+                onChange={(e) => handleInputChange("city", e.target.value)}
+                placeholder="Port Louis, Curepipe, etc."
+                className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="country" className="flex items-center gap-2 font-medium">
+                <MapPin className="h-4 w-4" />
+                {t('patientForm.country')}
+              </Label>
+              <Input
+                id="country"
+                name="country"
+                type="text"
+                value={formData.country || ''}
+                onChange={(e) => handleInputChange("country", e.target.value)}
+                className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
+              />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Section 2: Allergies */}
+      {/* Section 3: Allergies */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
         <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
@@ -986,7 +1019,7 @@ export default function ModernPatientForm({
         </CardContent>
       </Card>
 
-      {/* Section 3: Antécédents médicaux */}
+      {/* Section 4: Antécédents médicaux */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
         <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
@@ -1062,7 +1095,7 @@ export default function ModernPatientForm({
         </CardContent>
       </Card>
 
-      {/* Section 4: Médicaments */}
+      {/* Section 5: Médicaments */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
         <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
@@ -1098,7 +1131,7 @@ export default function ModernPatientForm({
         </CardContent>
       </Card>
 
-      {/* Section 5: Habitudes de vie */}
+      {/* Section 6: Habitudes de vie */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
         <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
