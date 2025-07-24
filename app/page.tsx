@@ -570,7 +570,7 @@ export default function MedicalAIExpert() {
                   <div
                     key={step.id}
                     onClick={() => handleStepClick(index)}
-                    className={`flex flex-col items-center text-center cursor-pointer transition-all duration-200 hover:scale-105 ${
+                    className={`flex flex-col items-center text-center cursor-pointer transition-all duration-200 hover:scale-105 flex-1 px-1 ${
                       index <= currentStep ? "text-blue-600" : "text-gray-400"
                     } ${
                       index === currentStep ? "transform scale-110" : ""
@@ -587,13 +587,15 @@ export default function MedicalAIExpert() {
                     >
                       {step.icon}
                     </div>
-                    <div className="hidden md:block">
-                      <p className={`text-xs font-medium ${
+                    <div className="hidden md:block max-w-[120px]">
+                      <p className={`text-xs font-medium leading-tight ${
                         index === currentStep ? "font-bold" : ""
                       }`}>
                         {step.title}
                       </p>
-                      <p className="text-xs text-gray-500">{step.description}</p>
+                      <p className="text-xs text-gray-500 leading-tight mt-1">
+                        {step.description}
+                      </p>
                     </div>
                   </div>
                 ))}
