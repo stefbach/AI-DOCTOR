@@ -21,7 +21,8 @@ import {
   Trash2,
   Eye,
   AlertCircle,
-  Zap
+  Zap,
+  Activity
 } from "lucide-react"
 
 export default function ParaclinicalEditor({ 
@@ -31,37 +32,58 @@ export default function ParaclinicalEditor({
   onPrevious,
   patientName,
   patientData,
-  diagnosisData
+  diagnosisData,
+  doctorData
 }) {
-  // Debug log to see what data we're receiving
-  useEffect(() => {
-    console.log('ParaclinicalEditor received:', {
-      paraclinicalData,
-      patientData,
-      diagnosisData
-    })
-  }, [paraclinicalData, patientData, diagnosisData])
-
-  const [formData, setFormData] = useState({
-    // Header
-    title: paraclinicalData?.header?.title || "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
-    subtitle: paraclinicalData?.header?.subtitle || "PRESCRIPTION D'EXAMENS PARACLINIQUES",
-    date: paraclinicalData?.header?.date || new Date().toLocaleDateString('fr-FR'),
-    number: paraclinicalData?.header?.number || `PARA-MU-${Date.now()}`,
-    physician: paraclinicalData?.header?.physician || "Dr. MÉDECIN EXPERT",
-    registration: paraclinicalData?.header?.registration || "COUNCIL-MU-2024-001",
+  // Initialize prescriptions from diagnosis data
+  const buildInitialPrescriptions = () => {
+    const prescriptions = []
     
-    // Patient info - Use patientData if available
-    firstName: paraclinicalData?.patient?.firstName || patientData?.firstName || "",
-    lastName: paraclinicalData?.patient?.lastName || patientData?.lastName || "",
-    age: paraclinicalData?.patient?.age || patientData?.age || "",
-    address: paraclinicalData?.patient?.address || "Adresse à compléter - Maurice",
-    idNumber: paraclinicalData?.patient?.idNumber || "Carte d'identité mauricienne",
+    // Check if we have imaging/functional examinations from diagnosis
+    if (diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority) {
+      const paraclinicalExams = diagnosisData.expertAnalysis.expert_investigations.immediate_priority
+        .filter((exam: any) => exam.category === 'imaging' || exam.category === 'functional')
+      
+      paraclinicalExams.forEach((exam: any, index: number) => {
+        // Determine category based on examination name
+        let category = "Imagerie thoracique"
+        if (exam.examination?.toLowerCase().includes('echo') || exam.examination?.toLowerCase().includes('écho')) {
+          category = "Échographie"
+        } else if (exam.examination?.toLowerCase().includes('ecg')) {
+          category = "Explorations cardiologiques"
+        } else if (exam.examination?.toLowerCase().includes('scanner') || exam.examination?.toLowerCase().includes('tdm')) {
+          category = "Scanner (TDM)"
+        } else if (exam.examination?.toLowerCase().includes('irm')) {
+          category = "IRM"
+        } else if (exam.examination?.toLowerCase().includes('radio') && exam.examination?.toLowerCase().includes('thorax')) {
+          category = "Imagerie thoracique"
+        } else if (exam.examination?.toLowerCase().includes('abdom')) {
+          category = "Imagerie abdominale"
+        }
+        
+        prescriptions.push({
+          id: Date.now() + index,
+          category: category,
+          exam: exam.examination || "",
+          indication: exam.specific_indication || "",
+          urgency: exam.urgency === 'immediate' ? "Urgent (dans les heures)" :
+                  exam.urgency === 'urgent' ? "Semi-urgent (24-48h)" :
+                  "Programmé (1-2 semaines)",
+          preparation: exam.patient_preparation || "Aucune préparation spéciale",
+          contraindications: exam.contraindications || "Aucune",
+          duration: exam.duration || "15-30 minutes",
+          mauritianAvailability: exam.mauritius_availability ? 
+            `${exam.mauritius_availability.public_centers?.join(', ') || 'Centres publics et privés'}` :
+            "Centres publics et privés",
+          cost: exam.mauritius_availability?.estimated_cost || "Gratuit secteur public / Rs 500-2000 privé"
+        })
+      })
+    }
     
-    // Prescriptions
-    prescriptions: paraclinicalData?.prescriptions || [
-      {
-        id: 1,
+    // If no examinations from diagnosis, add a default one
+    if (prescriptions.length === 0) {
+      prescriptions.push({
+        id: Date.now(),
         category: "Imagerie thoracique",
         exam: "Radiographie thoracique de face et profil",
         indication: "Exploration parenchyme pulmonaire selon symptomatologie",
@@ -71,34 +93,66 @@ export default function ParaclinicalEditor({
         duration: "10 minutes",
         mauritianAvailability: "Hôpitaux publics et centres privés",
         cost: "Gratuit secteur public"
-      }
-    ]
+      })
+    }
+    
+    return prescriptions
+  }
+
+  // Debug log to see what data we're receiving
+  useEffect(() => {
+    console.log('ParaclinicalEditor received:', {
+      paraclinicalData,
+      patientData,
+      diagnosisData,
+      doctorData
+    })
+  }, [paraclinicalData, patientData, diagnosisData, doctorData])
+
+  const [formData, setFormData] = useState({
+    // Header with doctor info
+    title: paraclinicalData?.header?.title || "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+    subtitle: paraclinicalData?.header?.subtitle || "PRESCRIPTION D'EXAMENS PARACLINIQUES",
+    date: new Date().toISOString().split('T')[0], // Fix: Use YYYY-MM-DD format
+    number: paraclinicalData?.header?.number || `PARA-MU-${Date.now()}`,
+    physician: doctorData?.full_name || doctorData?.fullName || paraclinicalData?.header?.physician || "Dr. MÉDECIN EXPERT",
+    registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || paraclinicalData?.header?.registration || "COUNCIL-MU-2024-001",
+    
+    // Patient info - Use patientData if available
+    firstName: patientData?.firstName || paraclinicalData?.patient?.firstName || "",
+    lastName: patientData?.lastName || paraclinicalData?.patient?.lastName || "",
+    age: patientData?.age ? `${patientData.age} ans` : paraclinicalData?.patient?.age || "",
+    address: patientData?.address || paraclinicalData?.patient?.address || "Adresse à compléter - Maurice",
+    idNumber: patientData?.idNumber || paraclinicalData?.patient?.idNumber || "Carte d'identité mauricienne",
+    
+    // Prescriptions - Initialize from diagnosis data
+    prescriptions: paraclinicalData?.prescriptions || buildInitialPrescriptions()
   })
 
   // Update form when data changes
   useEffect(() => {
-    if (paraclinicalData || patientData) {
-      setFormData({
+    if (paraclinicalData || patientData || doctorData || diagnosisData) {
+      setFormData(prev => ({
         // Header
-        title: paraclinicalData?.header?.title || formData.title,
-        subtitle: paraclinicalData?.header?.subtitle || formData.subtitle,
-        date: paraclinicalData?.header?.date || formData.date,
-        number: paraclinicalData?.header?.number || formData.number,
-        physician: paraclinicalData?.header?.physician || formData.physician,
-        registration: paraclinicalData?.header?.registration || formData.registration,
+        title: paraclinicalData?.header?.title || prev.title,
+        subtitle: paraclinicalData?.header?.subtitle || prev.subtitle,
+        date: new Date().toISOString().split('T')[0], // Always use current date in correct format
+        number: paraclinicalData?.header?.number || prev.number,
+        physician: doctorData?.full_name || doctorData?.fullName || paraclinicalData?.header?.physician || prev.physician,
+        registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || paraclinicalData?.header?.registration || prev.registration,
         
         // Patient info
-        firstName: paraclinicalData?.patient?.firstName || patientData?.firstName || formData.firstName,
-        lastName: paraclinicalData?.patient?.lastName || patientData?.lastName || formData.lastName,
-        age: paraclinicalData?.patient?.age || patientData?.age || formData.age,
-        address: paraclinicalData?.patient?.address || formData.address,
-        idNumber: paraclinicalData?.patient?.idNumber || formData.idNumber,
+        firstName: patientData?.firstName || paraclinicalData?.patient?.firstName || prev.firstName,
+        lastName: patientData?.lastName || paraclinicalData?.patient?.lastName || prev.lastName,
+        age: patientData?.age ? `${patientData.age} ans` : paraclinicalData?.patient?.age || prev.age,
+        address: patientData?.address || paraclinicalData?.patient?.address || prev.address,
+        idNumber: patientData?.idNumber || paraclinicalData?.patient?.idNumber || prev.idNumber,
         
         // Prescriptions
-        prescriptions: paraclinicalData?.prescriptions || formData.prescriptions
-      })
+        prescriptions: paraclinicalData?.prescriptions || (prev.prescriptions.length === 0 ? buildInitialPrescriptions() : prev.prescriptions)
+      }))
     }
-  }, [paraclinicalData, patientData])
+  }, [paraclinicalData, patientData, doctorData, diagnosisData])
 
   const examCategories = [
     "Imagerie thoracique",
@@ -110,9 +164,12 @@ export default function ParaclinicalEditor({
     "IRM",
     "Explorations cardiologiques",
     "Explorations pulmonaires",
+    "Explorations neurologiques",
     "Endoscopie digestive",
     "Explorations ORL",
-    "Explorations ophtalmologiques"
+    "Explorations ophtalmologiques",
+    "Explorations urologiques",
+    "Médecine nucléaire"
   ]
 
   const commonExams = {
@@ -121,6 +178,7 @@ export default function ParaclinicalEditor({
       "Radiographie thoracique de face et profil", 
       "Scanner thoracique sans injection",
       "Scanner thoracique avec injection",
+      "Angioscanner thoracique",
       "IRM thoracique"
     ],
     "Imagerie abdominale": [
@@ -128,44 +186,104 @@ export default function ParaclinicalEditor({
       "Échographie abdominopelvienne",
       "Scanner abdominal sans injection",
       "Scanner abdominal avec injection",
-      "IRM abdominale"
+      "Entéroscanner",
+      "IRM abdominale",
+      "Cholangio-IRM"
     ],
     "Imagerie ostéo-articulaire": [
       "Radiographie standard (préciser localisation)",
       "Scanner ostéo-articulaire",
       "IRM ostéo-articulaire",
       "Arthroscanner",
-      "Scintigraphie osseuse"
+      "Arthro-IRM",
+      "Scintigraphie osseuse",
+      "Densitométrie osseuse (DMO)"
+    ],
+    "Imagerie neurologique": [
+      "Scanner cérébral sans injection",
+      "Scanner cérébral avec injection",
+      "IRM cérébrale",
+      "IRM médullaire",
+      "Angio-IRM cérébrale",
+      "EEG (Électroencéphalogramme)",
+      "EMG (Électromyogramme)"
     ],
     "Échographie": [
       "Échographie abdominopelvienne",
       "Échographie thyroïdienne",
       "Échographie cardiaque (ETT)",
-      "Échographie des vaisseaux du cou",
-      "Échographie obstétricale",
-      "Échographie des parties molles"
+      "Échographie cardiaque transoesophagienne (ETO)",
+      "Échographie-Doppler des vaisseaux du cou",
+      "Échographie-Doppler des membres inférieurs",
+      "Échographie rénale et vésicale",
+      "Échographie des parties molles",
+      "Échographie obstétricale"
+    ],
+    "Scanner (TDM)": [
+      "Scanner cérébral",
+      "Scanner thoracique",
+      "Scanner abdomino-pelvien",
+      "Scanner des sinus",
+      "Scanner rachidien",
+      "Coroscanner",
+      "Angioscanner (préciser territoire)",
+      "Scanner corps entier"
+    ],
+    "IRM": [
+      "IRM cérébrale",
+      "IRM médullaire",
+      "IRM abdominale",
+      "IRM pelvienne",
+      "IRM ostéo-articulaire (préciser)",
+      "IRM cardiaque",
+      "Angio-IRM (préciser territoire)",
+      "IRM mammaire"
     ],
     "Explorations cardiologiques": [
       "ECG de repos 12 dérivations",
       "Échographie cardiaque transthoracique",
       "Épreuve d'effort",
       "Holter ECG 24h",
-      "Holter tensionnel 24h",
-      "Coronarographie"
+      "Holter tensionnel 24h (MAPA)",
+      "Coronarographie",
+      "Test d'inclinaison (Tilt test)",
+      "Scintigraphie myocardique"
     ],
     "Explorations pulmonaires": [
       "Spirométrie (EFR)",
+      "Pléthysmographie",
       "Test de marche de 6 minutes",
       "Gazométrie artérielle",
       "Test à la métacholine",
-      "Polysomnographie"
+      "DLCO (Diffusion du CO)",
+      "Polysomnographie",
+      "Polygraphie ventilatoire"
     ],
     "Endoscopie digestive": [
-      "Fibroscopie œso-gastro-duodénale",
+      "Fibroscopie œso-gastro-duodénale (FOGD)",
       "Coloscopie totale",
       "Rectosigmoïdoscopie",
       "CPRE (cholangio-pancréatographie rétrograde)",
-      "Entéroscopie"
+      "Entéroscopie",
+      "Écho-endoscopie",
+      "Vidéocapsule endoscopique"
+    ],
+    "Explorations urologiques": [
+      "Échographie rénale et vésicale",
+      "Uroscanner",
+      "Uro-IRM",
+      "Cystoscopie",
+      "Débitmétrie urinaire",
+      "Bilan urodynamique",
+      "Urétéroscopie"
+    ],
+    "Médecine nucléaire": [
+      "Scintigraphie osseuse",
+      "Scintigraphie thyroïdienne",
+      "Scintigraphie myocardique",
+      "Scintigraphie pulmonaire V/Q",
+      "Scintigraphie rénale (DMSA/MAG3)",
+      "TEP-Scanner (PET-Scan)"
     ]
   }
 
@@ -181,10 +299,15 @@ export default function ParaclinicalEditor({
     "Hôpital Candos (Quatre-Bornes)", 
     "Hôpital Sir Seewoosagur Ramgoolam (Pamplemousses)",
     "Hôpital de Flacq",
+    "Hôpital Jawaharlal Nehru (Rose-Belle)",
     "Clinique Darné (Floréal)",
     "Clinique Wellkin (Moka)",
     "Centre Apollo Bramwell (Moka)",
-    "Fortis Clinique Darné"
+    "Fortis Clinique Darné",
+    "City Clinic (Port-Louis)",
+    "Grand Bay Medical and Diagnostic Centre",
+    "C-Care (Tamarin)",
+    "Centre d'imagerie médicale - St Jean"
   ]
 
   const handleInputChange = (field, value) => {
@@ -212,7 +335,7 @@ export default function ParaclinicalEditor({
       urgency: "Programmé (1-2 semaines)",
       preparation: "Aucune préparation spéciale",
       contraindications: "Aucune",
-      duration: "À préciser",
+      duration: "15-30 minutes",
       mauritianAvailability: "Centres publics et privés",
       cost: "À vérifier selon secteur"
     }
@@ -412,7 +535,8 @@ export default function ParaclinicalEditor({
             <Card key={prescription.id} className="border-l-4 border-green-400 bg-green-50/50">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg text-green-800">
+                  <CardTitle className="text-lg text-green-800 flex items-center gap-2">
+                    <Activity className="h-5 w-5" />
                     Examen #{index + 1}
                   </CardTitle>
                   {formData.prescriptions.length > 1 && (
@@ -468,6 +592,13 @@ export default function ParaclinicalEditor({
                         }
                       </SelectContent>
                     </Select>
+                    {/* Allow manual input if needed */}
+                    <Input
+                      value={prescription.exam}
+                      onChange={(e) => handlePrescriptionChange(index, 'exam', e.target.value)}
+                      className="mt-2"
+                      placeholder="Ou saisir un examen personnalisé..."
+                    />
                   </div>
                 </div>
                 
@@ -553,7 +684,8 @@ export default function ParaclinicalEditor({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Centres publics et privés">Centres publics et privés</SelectItem>
-                          <SelectItem value="Hôpitaux publics et centres privés">Hôpitaux publics et centres privés</SelectItem>
+                          <SelectItem value="Hôpitaux publics uniquement">Hôpitaux publics uniquement</SelectItem>
+                          <SelectItem value="Centres privés uniquement">Centres privés uniquement</SelectItem>
                           {mauritianCenters.map((center) => (
                             <SelectItem key={center} value={center}>
                               {center}
