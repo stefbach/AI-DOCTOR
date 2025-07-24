@@ -30,69 +30,106 @@ export default function BiologyEditor({
   onPrevious,
   patientName,
   patientData,
-  diagnosisData
+  diagnosisData,
+  doctorData
 }) {
-  // Debug log to see what data we're receiving
-  useEffect(() => {
-    console.log('BiologyEditor received:', {
-      biologyData,
-      patientData,
-      diagnosisData
-    })
-  }, [biologyData, patientData, diagnosisData])
-
-  const [formData, setFormData] = useState({
-    // Header
-    title: biologyData?.header?.title || "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
-    subtitle: biologyData?.header?.subtitle || "PRESCRIPTION D'EXAMENS BIOLOGIQUES",
-    date: biologyData?.header?.date || new Date().toLocaleDateString('fr-FR'),
-    number: biologyData?.header?.number || `BIO-MU-${Date.now()}`,
-    physician: biologyData?.header?.physician || "Dr. MÉDECIN EXPERT",
-    registration: biologyData?.header?.registration || "COUNCIL-MU-2024-001",
+  // Initialize prescriptions from diagnosis data
+  const buildInitialPrescriptions = () => {
+    const prescriptions = []
     
-    // Patient info - Use patientData if available
-    firstName: biologyData?.patient?.firstName || patientData?.firstName || "",
-    lastName: biologyData?.patient?.lastName || patientData?.lastName || "",
-    age: biologyData?.patient?.age || patientData?.age || "",
-    address: biologyData?.patient?.address || "Adresse à compléter - Maurice",
-    idNumber: biologyData?.patient?.idNumber || "Carte d'identité mauricienne",
+    // Check if we have biology examinations from diagnosis
+    if (diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority) {
+      const biologyExams = diagnosisData.expertAnalysis.expert_investigations.immediate_priority
+        .filter((exam: any) => exam.category === 'biology')
+      
+      biologyExams.forEach((exam: any, index: number) => {
+        prescriptions.push({
+          id: Date.now() + index,
+          exam: exam.examination || "",
+          indication: exam.specific_indication || "",
+          urgency: exam.urgency === 'immediate' ? "Urgent (dans les heures)" :
+                  exam.urgency === 'urgent' ? "Semi-urgent (24-48h)" :
+                  "Programmé (3-7 jours)",
+          fasting: exam.fasting_required ? "Oui - 8h" : "Non",
+          expectedResults: exam.interpretation_keys || "",
+          sampleType: exam.sample_type || "Sang veineux",
+          contraindications: "Aucune",
+          mauritianAvailability: exam.mauritius_availability ? 
+            `Disponible: ${exam.mauritius_availability.public_centers?.join(', ') || 'Laboratoires Maurice'}` :
+            "Disponible laboratoires Maurice",
+          cost: exam.mauritius_availability?.estimated_cost || "À vérifier"
+        })
+      })
+    }
     
-    // Prescriptions
-    prescriptions: biologyData?.prescriptions || [
-      {
-        id: 1,
+    // If no examinations from diagnosis, add a default one
+    if (prescriptions.length === 0) {
+      prescriptions.push({
+        id: Date.now(),
         exam: "Hémogramme complet (NFS) + CRP",
         indication: "Recherche syndrome anémique, infectieux, inflammatoire",
-        urgency: "Semi-urgent",
+        urgency: "Semi-urgent (24-48h)",
         fasting: "Non",
         expectedResults: "Numération globulaire, formule leucocytaire",
         sampleType: "Sang veineux",
         contraindications: "Aucune",
         mauritianAvailability: "Disponible tous laboratoires Maurice",
         cost: "Pris en charge sécurité sociale"
-      }
-    ]
-  })
-
-  // Update form when biologyData changes
-  useEffect(() => {
-    if (biologyData) {
-      setFormData({
-        title: biologyData.header?.title || formData.title,
-        subtitle: biologyData.header?.subtitle || formData.subtitle,
-        date: biologyData.header?.date || formData.date,
-        number: biologyData.header?.number || formData.number,
-        physician: biologyData.header?.physician || formData.physician,
-        registration: biologyData.header?.registration || formData.registration,
-        firstName: biologyData.patient?.firstName || patientData?.firstName || formData.firstName,
-        lastName: biologyData.patient?.lastName || patientData?.lastName || formData.lastName,
-        age: biologyData.patient?.age || patientData?.age || formData.age,
-        address: biologyData.patient?.address || formData.address,
-        idNumber: biologyData.patient?.idNumber || formData.idNumber,
-        prescriptions: biologyData.prescriptions || formData.prescriptions
       })
     }
-  }, [biologyData, patientData])
+    
+    return prescriptions
+  }
+
+  // Debug log to see what data we're receiving
+  useEffect(() => {
+    console.log('BiologyEditor received:', {
+      biologyData,
+      patientData,
+      diagnosisData,
+      doctorData
+    })
+  }, [biologyData, patientData, diagnosisData, doctorData])
+
+  const [formData, setFormData] = useState({
+    // Header with doctor info
+    title: biologyData?.header?.title || "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+    subtitle: biologyData?.header?.subtitle || "PRESCRIPTION D'EXAMENS BIOLOGIQUES",
+    date: new Date().toISOString().split('T')[0], // Fix: Use YYYY-MM-DD format
+    number: biologyData?.header?.number || `BIO-MU-${Date.now()}`,
+    physician: doctorData?.full_name || doctorData?.fullName || biologyData?.header?.physician || "Dr. MÉDECIN EXPERT",
+    registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || biologyData?.header?.registration || "COUNCIL-MU-2024-001",
+    
+    // Patient info - Use patientData if available
+    firstName: patientData?.firstName || biologyData?.patient?.firstName || "",
+    lastName: patientData?.lastName || biologyData?.patient?.lastName || "",
+    age: patientData?.age ? `${patientData.age} ans` : biologyData?.patient?.age || "",
+    address: patientData?.address || biologyData?.patient?.address || "Adresse à compléter - Maurice",
+    idNumber: patientData?.idNumber || biologyData?.patient?.idNumber || "Carte d'identité mauricienne",
+    
+    // Prescriptions - Initialize from diagnosis data
+    prescriptions: biologyData?.prescriptions || buildInitialPrescriptions()
+  })
+
+  // Update form when data changes
+  useEffect(() => {
+    if (biologyData || patientData || doctorData || diagnosisData) {
+      setFormData(prev => ({
+        title: biologyData?.header?.title || prev.title,
+        subtitle: biologyData?.header?.subtitle || prev.subtitle,
+        date: new Date().toISOString().split('T')[0], // Always use current date in correct format
+        number: biologyData?.header?.number || prev.number,
+        physician: doctorData?.full_name || doctorData?.fullName || biologyData?.header?.physician || prev.physician,
+        registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || biologyData?.header?.registration || prev.registration,
+        firstName: patientData?.firstName || biologyData?.patient?.firstName || prev.firstName,
+        lastName: patientData?.lastName || biologyData?.patient?.lastName || prev.lastName,
+        age: patientData?.age ? `${patientData.age} ans` : biologyData?.patient?.age || prev.age,
+        address: patientData?.address || biologyData?.patient?.address || prev.address,
+        idNumber: patientData?.idNumber || biologyData?.patient?.idNumber || prev.idNumber,
+        prescriptions: biologyData?.prescriptions || (prev.prescriptions.length === 0 ? buildInitialPrescriptions() : prev.prescriptions)
+      }))
+    }
+  }, [biologyData, patientData, doctorData, diagnosisData])
 
   const commonExams = [
     "Hémogramme complet (NFS)",
@@ -101,24 +138,34 @@ export default function BiologyEditor({
     "Ionogramme sanguin complet",
     "Urée + Créatinine",
     "Glycémie à jeun",
-    "Bilan lipidique",
+    "Bilan lipidique complet",
     "Transaminases (ALAT, ASAT)",
     "Gamma GT + Phosphatases alcalines",
     "Bilirubine totale et conjuguée",
     "Protéines totales + Albumine",
     "Calcium + Phosphore",
     "Magnésium",
-    "Fer sérique + Ferritine",
+    "Fer sérique + Ferritine + Transferrine",
     "Vitamines B12 + D + Folates",
     "TSH + T4 libre",
     "HbA1c (Hémoglobine glyquée)",
     "Troponines cardiaques",
     "BNP ou NT-proBNP",
     "D-Dimères",
+    "TP/INR + TCA",
+    "Fibrinogène",
     "Sérologies hépatites B et C",
     "Sérologie VIH",
+    "Sérologie dengue + chikungunya",
     "ECBU (Examen cytobactériologique urine)",
-    "Coproculture + Parasitologie selles"
+    "Coproculture + Parasitologie selles",
+    "Hémocultures (x3 flacons)",
+    "Procalcitonine (PCT)",
+    "LDH (Lactate déshydrogénase)",
+    "CPK (Créatine phosphokinase)",
+    "Acide urique",
+    "Electrophorèse des protéines",
+    "Marqueurs tumoraux (selon indication)"
   ]
 
   const urgencyLevels = [
@@ -377,7 +424,7 @@ export default function BiologyEditor({
                       onValueChange={(value) => handlePrescriptionChange(index, 'exam', value)}
                     >
                       <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Choisir un examen" />
+                        <SelectValue placeholder="Choisir un examen ou saisir manuellement" />
                       </SelectTrigger>
                       <SelectContent>
                         {commonExams.map((exam) => (
@@ -387,6 +434,13 @@ export default function BiologyEditor({
                         ))}
                       </SelectContent>
                     </Select>
+                    {/* Allow manual input if needed */}
+                    <Input
+                      value={prescription.exam}
+                      onChange={(e) => handlePrescriptionChange(index, 'exam', e.target.value)}
+                      className="mt-2"
+                      placeholder="Ou saisir un examen personnalisé..."
+                    />
                   </div>
                   
                   <div className="md:col-span-2">
