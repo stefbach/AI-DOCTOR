@@ -165,7 +165,7 @@ export default function ConsultationEditor({
     // Header
     title: consultationData?.header?.title || "COMPTE-RENDU DE CONSULTATION MÉDICALE",
     subtitle: consultationData?.header?.subtitle || "République de Maurice - Médecine Générale",
-    date: consultationData?.header?.date || new Date().toLocaleDateString('fr-FR'),
+    date: consultationData?.header?.date || new Date().toISOString().split('T')[0],
     time: consultationData?.header?.time || new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
     physician: consultationData?.header?.physician || "Dr. MÉDECIN EXPERT",
     registration: consultationData?.header?.registration || "COUNCIL-MU-2024-001",
@@ -208,19 +208,26 @@ export default function ConsultationEditor({
       // Header - with doctor info
       title: consultationData?.header?.title || "COMPTE-RENDU DE CONSULTATION MÉDICALE",
       subtitle: consultationData?.header?.subtitle || "République de Maurice - Médecine Générale",
-      date: new Date().toLocaleDateString('fr-FR'),
+      // Fix date formatting - convert to YYYY-MM-DD for input[type="date"]
+      date: new Date().toISOString().split('T')[0], // This gives YYYY-MM-DD format
       time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
       physician: doctorData?.full_name || doctorData?.fullName || consultationData?.header?.physician || "Dr. MÉDECIN EXPERT",
       registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || consultationData?.header?.registration || "COUNCIL-MU-2024-001",
       institution: doctorData?.institution || consultationData?.header?.institution || "Centre Médical Maurice",
       
-      // Patient - complete info from all sources
+      // Patient - complete info from all sources with fixed sex field
       firstName: patientData?.firstName || consultationData?.patient?.firstName || "",
       lastName: patientData?.lastName || consultationData?.patient?.lastName || "",
       age: patientData?.age ? `${patientData.age} ans` : consultationData?.patient?.age || "",
-      sex: patientData?.gender?.[0] === 'Masculin' ? 'M' : 
-           patientData?.gender?.[0] === 'Féminin' ? 'F' : 
-           consultationData?.patient?.sex || "",
+      // Fix sex field to show actual value
+      sex: (() => {
+        // Check various possible gender formats
+        const gender = patientData?.gender?.[0] || patientData?.gender || patientData?.sex
+        if (gender === 'Masculin' || gender === 'Male' || gender === 'M' || gender === 'Homme') return 'M'
+        if (gender === 'Féminin' || gender === 'Female' || gender === 'F' || gender === 'Femme') return 'F'
+        // Default based on existing data or F
+        return consultationData?.patient?.sex || 'F'
+      })(),
       address: patientData?.address || consultationData?.patient?.address || "Adresse à compléter - Maurice",
       phone: patientData?.phone || patientData?.phoneNumber || consultationData?.patient?.phone || "Téléphone à renseigner",
       idNumber: patientData?.idNumber || consultationData?.patient?.idNumber || "Carte d'identité mauricienne",
@@ -407,13 +414,16 @@ export default function ConsultationEditor({
             </div>
             <div>
               <Label htmlFor="sex">Sexe</Label>
-              <Input
+              <select
                 id="sex"
                 value={formData.sex}
                 onChange={(e) => handleInputChange('sex', e.target.value)}
-                placeholder="M/F"
-                className="mt-1"
-              />
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+              >
+                <option value="">Sélectionner</option>
+                <option value="M">M (Masculin)</option>
+                <option value="F">F (Féminin)</option>
+              </select>
             </div>
             <div>
               <Label htmlFor="weight">Poids (kg)</Label>
