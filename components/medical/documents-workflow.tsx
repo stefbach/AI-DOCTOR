@@ -130,123 +130,120 @@ export default function DocumentsWorkflow({
   // Vue d'ensemble si pas d'étape spécifique sélectionnée
   if (currentStep === -1) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50 p-4">
-        <div className="max-w-6xl mx-auto space-y-6">
-          
-          {/* Header principal */}
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
-            <CardHeader className="bg-gradient-to-r from-slate-700 to-gray-800 text-white rounded-t-lg">
-              <CardTitle className="flex items-center gap-3 text-2xl">
-                <FileText className="h-8 w-8" />
-                Documents Mauriciens - Vue d'ensemble
-              </CardTitle>
-              <div className="flex justify-between items-center mt-4">
-                <div>
-                  <p className="text-slate-200">Patient: {patientName}</p>
-                  <p className="text-slate-300 text-sm">Diagnostic: {diagnosisData?.primary?.condition}</p>
-                </div>
-                <div className="text-right">
-                  <div className="text-slate-200">Progression</div>
-                  <div className="text-2xl font-bold">{completedSteps.size}/{steps.length}</div>
-                </div>
+      <div className="space-y-6">
+        {/* Header principal */}
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+          <CardHeader className="bg-gradient-to-r from-slate-700 to-gray-800 text-white rounded-t-lg">
+            <CardTitle className="flex items-center gap-3 text-2xl">
+              <FileText className="h-8 w-8" />
+              Documents Mauriciens - Vue d'ensemble
+            </CardTitle>
+            <div className="flex justify-between items-center mt-4">
+              <div>
+                <p className="text-slate-200">Patient: {patientName}</p>
+                <p className="text-slate-300 text-sm">Diagnostic: {diagnosisData?.primary?.condition}</p>
               </div>
-            </CardHeader>
-          </Card>
-
-          {/* Progress global */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="mb-4">
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">Édition des documents</span>
-                  <span className="text-sm text-gray-500">{Math.round(progressPercentage)}%</span>
-                </div>
-                <Progress value={progressPercentage} className="h-3" />
+              <div className="text-right">
+                <div className="text-slate-200">Progression</div>
+                <div className="text-2xl font-bold">{completedSteps.size}/{steps.length}</div>
               </div>
-              <p className="text-sm text-gray-600">
-                {completedSteps.size === 0 ? 'Commencez par éditer le premier document' :
-                 completedSteps.size === steps.length ? 'Tous les documents sont prêts !' :
-                 `${steps.length - completedSteps.size} document(s) restant(s)`}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Grille des documents */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {steps.map((step, index) => (
-              <Card key={step.id} className={`bg-gradient-to-br ${step.bgColor} border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer`}
-                onClick={() => setCurrentStep(index)}>
-                <CardHeader className={`bg-gradient-to-r ${step.color} text-white`}>
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <step.icon className="h-6 w-6" />
-                      {step.title}
-                    </div>
-                    {completedSteps.has(index) && (
-                      <CheckCircle className="h-6 w-6 text-green-200" />
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <p className="text-gray-600 mb-4">{step.description}</p>
-                  <div className="flex justify-between items-center">
-                    <Badge variant={completedSteps.has(index) ? "default" : "outline"}>
-                      {completedSteps.has(index) ? "Complété" : "À éditer"}
-                    </Badge>
-                    <Button variant="outline" size="sm">
-                      {completedSteps.has(index) ? "Modifier" : "Éditer"}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* Actions */}
-          <div className="flex justify-between items-center">
-            <Button 
-              variant="outline" 
-              onClick={onBack}
-              className="px-6 py-3 shadow-md hover:shadow-lg"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              {onBack ? 'Retour Étape Précédente' : 'Retour Diagnostic'}
-            </Button>
-
-            <div className="flex gap-3">
-              {completedSteps.size > 0 && (
-                <>
-                  <Button variant="outline">
-                    <Eye className="h-4 w-4 mr-2" />
-                    Aperçu Global
-                  </Button>
-                  <Button variant="outline">
-                    <Download className="h-4 w-4 mr-2" />
-                    Télécharger
-                  </Button>
-                </>
-              )}
-              
-              {completedSteps.size === steps.length && (
-                <Button 
-                  onClick={handleComplete}
-                  className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-3 shadow-lg"
-                >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Finaliser Dossier
-                </Button>
-              )}
             </div>
+          </CardHeader>
+        </Card>
+
+        {/* Progress global */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="mb-4">
+              <div className="flex justify-between mb-2">
+                <span className="text-sm font-medium">Édition des documents</span>
+                <span className="text-sm text-gray-500">{Math.round(progressPercentage)}%</span>
+              </div>
+              <Progress value={progressPercentage} className="h-3" />
+            </div>
+            <p className="text-sm text-gray-600">
+              {completedSteps.size === 0 ? 'Commencez par éditer le premier document' :
+               completedSteps.size === steps.length ? 'Tous les documents sont prêts !' :
+               `${steps.length - completedSteps.size} document(s) restant(s)`}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Grille des documents */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {steps.map((step, index) => (
+            <Card key={step.id} className={`bg-gradient-to-br ${step.bgColor} border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer`}
+              onClick={() => setCurrentStep(index)}>
+              <CardHeader className={`bg-gradient-to-r ${step.color} text-white`}>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <step.icon className="h-6 w-6" />
+                    {step.title}
+                  </div>
+                  {completedSteps.has(index) && (
+                    <CheckCircle className="h-6 w-6 text-green-200" />
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <p className="text-gray-600 mb-4">{step.description}</p>
+                <div className="flex justify-between items-center">
+                  <Badge variant={completedSteps.has(index) ? "default" : "outline"}>
+                    {completedSteps.has(index) ? "Complété" : "À éditer"}
+                  </Badge>
+                  <Button variant="outline" size="sm">
+                    {completedSteps.has(index) ? "Modifier" : "Éditer"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Actions */}
+        <div className="flex justify-between items-center">
+          <Button 
+            variant="outline" 
+            onClick={onBack}
+            className="px-6 py-3 shadow-md hover:shadow-lg"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {onBack ? 'Retour Étape Précédente' : 'Retour Diagnostic'}
+          </Button>
+
+          <div className="flex gap-3">
+            {completedSteps.size > 0 && (
+              <>
+                <Button variant="outline">
+                  <Eye className="h-4 w-4 mr-2" />
+                  Aperçu Global
+                </Button>
+                <Button variant="outline">
+                  <Download className="h-4 w-4 mr-2" />
+                  Télécharger
+                </Button>
+              </>
+            )}
             
-            {completedSteps.size === 0 && (
+            {completedSteps.size === steps.length && (
               <Button 
-                onClick={() => setCurrentStep(0)}
-                className="bg-gradient-to-r from-blue-600 to-emerald-600 text-white px-6 py-3 shadow-lg"
+                onClick={handleComplete}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-3 shadow-lg"
               >
-                Commencer l'Édition
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Finaliser Dossier
               </Button>
             )}
           </div>
+          
+          {completedSteps.size === 0 && (
+            <Button 
+              onClick={() => setCurrentStep(0)}
+              className="bg-gradient-to-r from-blue-600 to-emerald-600 text-white px-6 py-3 shadow-lg"
+            >
+              Commencer l'Édition
+            </Button>
+          )}
         </div>
       </div>
     )
@@ -311,62 +308,60 @@ export default function DocumentsWorkflow({
 
   // Rendu selon l'étape courante
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50">
-      <div className="max-w-6xl mx-auto p-4 space-y-6">
-        <StepHeader />
-        <TabNavigation />
+    <div className="space-y-6">
+      <StepHeader />
+      <TabNavigation />
 
-        {/* Contenu de l'étape courante */}
-        {currentStep === 0 && (
-          <ConsultationEditor
-            consultationData={editedDocuments.consultation}
-            onSave={handleSaveDocument}
-            onNext={handleNext}
-            onPrevious={() => setCurrentStep(-1)}
-            patientName={patientName}
-            patientData={patientData}
-            diagnosisData={diagnosisData}
-          />
-        )}
+      {/* Contenu de l'étape courante */}
+      {currentStep === 0 && (
+        <ConsultationEditor
+          consultationData={editedDocuments.consultation}
+          onSave={handleSaveDocument}
+          onNext={handleNext}
+          onPrevious={() => setCurrentStep(-1)}
+          patientName={patientName}
+          patientData={patientData}
+          diagnosisData={diagnosisData}
+        />
+      )}
 
-        {currentStep === 1 && (
-          <BiologyEditor
-            biologyData={editedDocuments.biology}
-            onSave={handleSaveDocument}
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-            patientName={patientName}
-            patientData={patientData}
-            diagnosisData={diagnosisData}
-          />
-        )}
+      {currentStep === 1 && (
+        <BiologyEditor
+          biologyData={editedDocuments.biology}
+          onSave={handleSaveDocument}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          patientName={patientName}
+          patientData={patientData}
+          diagnosisData={diagnosisData}
+        />
+      )}
 
-        {currentStep === 2 && (
-          <ParaclinicalEditor
-            paraclinicalData={editedDocuments.paraclinical}
-            onSave={handleSaveDocument}
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-            patientName={patientName}
-            patientData={patientData}
-            diagnosisData={diagnosisData}
-          />
-        )}
+      {currentStep === 2 && (
+        <ParaclinicalEditor
+          paraclinicalData={editedDocuments.paraclinical}
+          onSave={handleSaveDocument}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          patientName={patientName}
+          patientData={patientData}
+          diagnosisData={diagnosisData}
+        />
+      )}
 
-        {currentStep === 3 && (
-          <MedicationEditor
-            medicationData={editedDocuments.medication}
-            onSave={handleSaveDocument}
-            onNext={() => setCurrentStep(-1)}
-            onPrevious={handlePrevious}
-            patientName={patientName}
-            patientAge={patientData?.age || 30}
-            patientAllergies={(patientData?.allergies || []).join(', ') || 'Aucune'}
-            patientData={patientData}
-            diagnosisData={diagnosisData}
-          />
-        )}
-      </div>
+      {currentStep === 3 && (
+        <MedicationEditor
+          medicationData={editedDocuments.medication}
+          onSave={handleSaveDocument}
+          onNext={() => setCurrentStep(-1)}
+          onPrevious={handlePrevious}
+          patientName={patientName}
+          patientAge={patientData?.age || 30}
+          patientAllergies={(patientData?.allergies || []).join(', ') || 'Aucune'}
+          patientData={patientData}
+          diagnosisData={diagnosisData}
+        />
+      )}
     </div>
   )
 }
