@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
+import { supabase } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -169,7 +170,7 @@ export default function ModernPatientForm({
 
   // Process data from URL or TIBOK hook
   useEffect(() => {
-    const processPatientData = () => {
+    const processPatientData = async () => {
       console.log('Starting to process patient data')
       console.log('URL data captured:', urlData)
       console.log('Hook data:', tibokPatient)
@@ -194,18 +195,60 @@ export default function ModernPatientForm({
       if (patientInfo && !dataProcessed) {
         console.log('Processing patient info:', patientInfo)
         
+        // Try to get additional data from database
+        let enhancedPatientInfo = { ...patientInfo }
+        
+        const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
+        if (currentConsultationId) {
+          try {
+            // Get consultation data which includes height/weight
+            const { data: consultation } = await supabase
+              .from('consultations')
+              .select('patient_id, patient_height, patient_weight')
+              .eq('id', currentConsultationId)
+              .single()
+            
+            if (consultation) {
+              // Use consultation data for height/weight if available
+              enhancedPatientInfo.height = consultation.patient_height || patientInfo.height || ''
+              enhancedPatientInfo.weight = consultation.patient_weight || patientInfo.weight || ''
+              
+              // Also get full patient data if we have patient_id
+              if (consultation.patient_id) {
+                const { data: dbPatient } = await supabase
+                  .from('patients')
+                  .select('height, weight, address, phone_number, city, country')
+                  .eq('id', consultation.patient_id)
+                  .single()
+                
+                if (dbPatient) {
+                  // Use consultation data first (most recent), then patient table, then original data
+                  enhancedPatientInfo.height = consultation.patient_height || dbPatient.height || patientInfo.height || ''
+                  enhancedPatientInfo.weight = consultation.patient_weight || dbPatient.weight || patientInfo.weight || ''
+                  enhancedPatientInfo.address = dbPatient.address || patientInfo.address || ''
+                  enhancedPatientInfo.phone = dbPatient.phone_number || patientInfo.phone || ''
+                  enhancedPatientInfo.city = dbPatient.city || patientInfo.city || ''
+                  enhancedPatientInfo.country = dbPatient.country || patientInfo.country || ''
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Error fetching additional patient data:', error)
+          }
+        }
+        
         // Process birth date
         let birthDateStr = ""
-        if (patientInfo.dateOfBirth) {
-          birthDateStr = patientInfo.dateOfBirth.split('T')[0]
-        } else if (patientInfo.date_of_birth) {
-          birthDateStr = patientInfo.date_of_birth.split('T')[0]
+        if (enhancedPatientInfo.dateOfBirth) {
+          birthDateStr = enhancedPatientInfo.dateOfBirth.split('T')[0]
+        } else if (enhancedPatientInfo.date_of_birth) {
+          birthDateStr = enhancedPatientInfo.date_of_birth.split('T')[0]
         }
         
         // Process gender
         const genderArray: string[] = []
-        if (patientInfo.gender) {
-          const gender = patientInfo.gender
+        if (enhancedPatientInfo.gender) {
+          const gender = enhancedPatientInfo.gender
           if (gender === 'Masculin' || gender === 'M' || gender.toLowerCase() === 'male' || gender.toLowerCase() === 'm') {
             genderArray.push(t('patientForm.male'))
           } else if (gender === 'Féminin' || gender === 'F' || gender.toLowerCase() === 'female' || gender.toLowerCase() === 'f') {
@@ -213,16 +256,16 @@ export default function ModernPatientForm({
           }
         }
         
-        // Create new form data
+        // Create new form data with enhanced info
         const newFormData: PatientFormData = {
-          firstName: patientInfo.firstName || patientInfo.first_name || "",
-          lastName: patientInfo.lastName || patientInfo.last_name || "",
+          firstName: enhancedPatientInfo.firstName || enhancedPatientInfo.first_name || "",
+          lastName: enhancedPatientInfo.lastName || enhancedPatientInfo.last_name || "",
           birthDate: birthDateStr,
-          age: patientInfo.age ? patientInfo.age.toString() : "",
+          age: enhancedPatientInfo.age ? enhancedPatientInfo.age.toString() : "",
           gender: genderArray,
           otherGender: "",
-          weight: patientInfo.weight ? patientInfo.weight.toString() : "",
-          height: patientInfo.height ? patientInfo.height.toString() : "",
+          weight: enhancedPatientInfo.weight ? enhancedPatientInfo.weight.toString() : "",
+          height: enhancedPatientInfo.height ? enhancedPatientInfo.height.toString() : "",
           allergies: [],
           otherAllergies: "",
           medicalHistory: [],
@@ -247,7 +290,7 @@ export default function ModernPatientForm({
     
     // Process immediately
     processPatientData()
-  }, [tibokPatient, isFromTibok, dataProcessed, urlData, t])
+  }, [tibokPatient, isFromTibok, dataProcessed, urlData, t, consultationId])
 
   // Load saved data if available
   useEffect(() => {
