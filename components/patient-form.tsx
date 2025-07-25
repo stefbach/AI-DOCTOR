@@ -62,7 +62,6 @@ interface PatientFormData {
   city?: string
   country?: string
   email?: string
-  idNumber?: string
 }
 
 interface PatientFormProps {
@@ -179,8 +178,7 @@ export default function ModernPatientForm({
     phoneNumber: "",
     city: "",
     country: "Maurice",
-    email: "",
-    idNumber: ""
+    email: ""
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -237,7 +235,7 @@ export default function ModernPatientForm({
               if (consultation.patient_id) {
                 const { data: dbPatient } = await supabase
                   .from('patients')
-                  .select('height, weight, address, phone_number, city, country, email, id_number')
+                  .select('height, weight, address, phone_number, city, country, email')
                   .eq('id', consultation.patient_id)
                   .single()
                 
@@ -251,7 +249,6 @@ export default function ModernPatientForm({
                   enhancedPatientInfo.city = dbPatient.city || patientInfo.city || ''
                   enhancedPatientInfo.country = dbPatient.country || patientInfo.country || ''
                   enhancedPatientInfo.email = dbPatient.email || patientInfo.email || ''
-                  enhancedPatientInfo.idNumber = dbPatient.id_number || patientInfo.idNumber || patientInfo.id_number || ''
                 }
               }
             }
@@ -296,7 +293,6 @@ export default function ModernPatientForm({
           address: enhancedPatientInfo.address || "",
           city: enhancedPatientInfo.city || "",
           country: enhancedPatientInfo.country || "Maurice",
-          idNumber: enhancedPatientInfo.id_number || enhancedPatientInfo.idNumber || "",
           // Medical information
           allergies: [],
           otherAllergies: "",
@@ -660,7 +656,7 @@ export default function ModernPatientForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="birthDate" className="flex items-center gap-2 font-medium">
                 {t('patientForm.birthDate')} <span className="text-red-500">*</span>
@@ -694,21 +690,6 @@ export default function ModernPatientForm({
                   {formData.age ? `${formData.age} ${t('patientForm.years')}` : "—"}
                 </span>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="idNumber" className="flex items-center gap-2 font-medium">
-                {t('patientForm.idNumber')}
-              </Label>
-              <Input
-                id="idNumber"
-                name="idNumber"
-                type="text"
-                value={formData.idNumber || ''}
-                onChange={(e) => handleInputChange("idNumber", e.target.value)}
-                placeholder={t('patientForm.idNumberPlaceholder')}
-                className="transition-all duration-200 focus:ring-blue-200 border-gray-300"
-              />
             </div>
           </div>
 
