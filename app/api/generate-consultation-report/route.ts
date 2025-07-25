@@ -114,16 +114,17 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
       "bmiInterpretation": "Classification OMS - évaluation selon normes internationales"
     }
   },
+  "narrativeSummary": "Résumé littéraire complet de la consultation, intégrant le motif, l'histoire, le raisonnement clinique, le diagnostic principal, les diagnostics différentiels et le plan de prise en charge.",
   "anamnesis": {
     "chiefComplaint": {
       "primaryComplaint": "${clinicalData.chiefComplaint || "Motif de consultation à préciser"}",
-      "detailedDescription": "Description exhaustive du motif principal de consultation avec analyse chronologique des symptômes, facteurs déclenchants et évolution depuis le début. Évaluation de l'impact sur les activités quotidiennes et de la gêne fonctionnelle. Recherche de facteurs aggravants ou soulageants.",
+      "detailedDescription": "Description exhaustive et narrative du motif principal de consultation : racontez l'histoire du patient de manière chronologique et littéraire, en décrivant l'apparition, l'intensité et l'évolution des symptômes, les facteurs déclenchants et soulageants, et en détaillant l'impact sur les activités quotidiennes et la qualité de vie.",
       "functionalImpact": "${clinicalData.functionalStatus || "Impact fonctionnel à évaluer de manière approfondie"}",
       "patientConcerns": "Préoccupations spécifiques exprimées par le patient et attentes vis-à-vis de la consultation"
     },
     "historyOfPresentIllness": {
-      "chronology": "Histoire structurée de la maladie actuelle avec timeline précise des événements",
-      "evolutionPattern": "Analyse du pattern évolutif et des variations symptomatiques dans le temps",
+     "chronology": "Histoire structurée et narrative de la maladie actuelle, décrivant de manière fluide la chronologie des événements et des symptômes",
+     "evolutionPattern": "Analyse narrative de l'évolution et des variations des symptômes dans le temps, avec un style descriptif et littéraire",
       "associatedSymptoms": "${(clinicalData.symptoms || []).join(", ") || "Symptômes associés à inventorier"}",
       "previousTreatments": "Traitements antérieurs tentés et évaluation de leur efficacité"
     },
@@ -171,21 +172,23 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
     "primaryDiagnosis": {
       "condition": "${diagnosisData?.diagnosis?.primaryDiagnosis?.condition || "Diagnostic principal à établir par analyse experte"}",
       "icdCode": "${diagnosisData?.diagnosis?.primaryDiagnosis?.icd10 || "Code CIM-10 à déterminer"}",
-      "diagnosticCriteria": "Critères diagnostiques utilisés selon les recommandations internationales",
-      "evidenceSupporting": "Arguments diagnostiques basés sur l'analyse clinique et paraclinique disponible",
-      "pathophysiology": "Mécanismes physiopathologiques détaillés selon les connaissances actuelles"
+      "diagnosticCriteria": "Critères diagnostiques utilisés selon les recommandations internationales, expliqués de manière narrative",
+     "evidenceSupporting": "Arguments diagnostiques basés sur l'analyse clinique et paraclinique disponible, détaillés et contextualisés",
+    "pathophysiology": "Mécanismes physiopathologiques détaillés selon les connaissances actuelles, décrits de façon pédagogique et accessible",
+
     },
     "differentialDiagnosis": {
-      "alternativeDiagnoses": "Diagnostics différentiels principaux avec argumentation pour chacun",
-      "excludedConditions": "Pathologies éliminées avec justification de l'exclusion",
-      "uncertainAreas": "Zones d'incertitude diagnostique nécessitant exploration complémentaire"
+     "alternativeDiagnoses": "Diagnostics différentiels principaux avec argumentation détaillée et justification clinique pour chacun",
+    "excludedConditions": "Pathologies éliminées avec justification et mention des examens cliniques/paracliniques utilisés pour les exclure",
+   "uncertainAreas": "Zones d'incertitude diagnostique et examens complémentaires à réaliser pour lever ces incertitudes",
     }
   },
   "investigationsPlan": {
     "laboratoryTests": {
-      "urgentTests": "Examens biologiques urgents avec justification médicale et délais",
-      "routineTests": "Biologie standard avec objectifs diagnostiques précis et valeurs attendues",
-      "specializedTests": "Examens spécialisés selon orientation diagnostique et disponibilité"
+     "urgentTests": "Examens biologiques urgents avec justification médicale et délais – expliquez pourquoi ces tests sont nécessaires et ce qu’ils peuvent révéler",
+     "routineTests": "Biologie standard avec objectifs diagnostiques précis, valeurs attendues et interprétation",
+     "specializedTests": "Examens spécialisés selon l'orientation diagnostique, avec explication de leur utilité et de leur disponibilité",
+
     },
     "imagingStudies": {
       "diagnosticImaging": "Imagerie diagnostique avec protocoles spécifiques et justification",
@@ -198,9 +201,9 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
   },
   "therapeuticPlan": {
     "immediateManagement": {
-      "urgentInterventions": "Interventions immédiates nécessaires avec justification et modalités",
-      "symptomaticTreatment": "Traitement symptomatique détaillé avec posologies et surveillance",
-      "supportiveCare": "Soins de support et mesures préventives personnalisées"
+      "urgentInterventions": "Interventions immédiates nécessaires avec justification, modalités et objectif visé",
+      "symptomaticTreatment": "Traitement symptomatique détaillé avec posologies, modalités d'administration et surveillance",
+      "supportiveCare": "Soins de support et mesures préventives personnalisées avec explication"
     },
     "pharmacotherapy": {
       "primaryMedications": "Thérapeutique médicamenteuse principale avec rationale et surveillance",
@@ -208,9 +211,9 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
       "monitoringPlan": "Plan de surveillance thérapeutique avec paramètres et échéances"
     },
     "nonPharmacological": {
-      "lifestyleModifications": "Modifications du mode de vie détaillées et personnalisées",
-      "physicalTherapy": "Rééducation et kinésithérapie si indiquées avec objectifs",
-      "patientEducation": "Éducation thérapeutique adaptée au patient et à sa pathologie"
+     "lifestyleModifications": "Modifications du mode de vie détaillées et personnalisées, en expliquant l'intérêt pour la prise en charge",
+    "physicalTherapy": "Rééducation et kinésithérapie si indiquées, avec objectifs et déroulé",
+    "patientEducation": "Éducation thérapeutique adaptée au patient et à sa pathologie, décrite clairement"
     }
   },
   "followUpPlan": {
