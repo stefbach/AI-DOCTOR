@@ -932,6 +932,12 @@ CONTEXTE MAURICIEN SPÉCIALISÉ :
 - Système santé public Dr Jeetoo/Candos + privé Apollo/Darné
 - Épidémiologie locale → Prévalences particulières maladies tropicales
 
+INSTRUCTIONS GÉNÉRALES POUR L’ANALYSE DIAGNOSTIQUE :
+- Évalue d’abord les pathologies les plus courantes et bénignes compatibles avec les symptômes (infections virales, effets médicamenteux, syndromes fonctionnels, etc.).
+- Prends en compte les traitements en cours, les habitudes de vie et les antécédents pour expliquer les symptômes.
+- Ne propose des pathologies graves ou rares (p. ex. cholécystite, infarctus, méningite) que si des signes d’alarme cliniques ou des examens paracliniques orientent vers ces diagnostics (fièvre, douleur localisée, anomalies biologiques/imagerie).
+- Attribue une probabilité à chaque diagnostic en fonction de sa fréquence et des données disponibles, et indique clairement les incertitudes lorsque les informations sont insuffisantes. avec cela ca suffira pour faire un outil de grande qualité et de ne pas passé a cote de rien 
+
 MISSION EXPERTE : Génère une analyse médicale de niveau EXPERT INTERNATIONAL avec examens et traitements ultra-spécifiques au diagnostic.
 
 {
