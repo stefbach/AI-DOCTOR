@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { useToast } from "@/components/ui/use-toast"
 import { 
   ArrowLeft, 
   ArrowRight,
@@ -34,6 +35,7 @@ export default function ConsultationEditor({
   doctorData,
   mauritianDocuments
 }) {
+  const { toast } = useToast()
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   
   // Helper function to build complete history/anamnesis
@@ -351,10 +353,21 @@ export default function ConsultationEditor({
       onSave('consultation', updatedConsultation)
       setHasUnsavedChanges(false)
       
-      // Get consultation ID
-      const consultationId = consultationDataService.getCurrentConsultationId()
+      // Force get consultation ID from URL if not found
+      let consultationId = consultationDataService.getCurrentConsultationId()
       if (!consultationId) {
-        console.error('No consultation ID found')
+        const urlParams = new URLSearchParams(window.location.search)
+        consultationId = urlParams.get('consultationId')
+        console.log('Got consultation ID from URL in save:', consultationId)
+      }
+      
+      if (!consultationId) {
+        console.error('Still no consultation ID found!')
+        toast({
+          title: "Erreur",
+          description: "ID de consultation manquant",
+          variant: "destructive"
+        })
         return
       }
       
@@ -384,12 +397,26 @@ export default function ConsultationEditor({
       
       console.log('Save result:', result)
       
-      if (!result) {
-        console.error('Failed to save to database')
+      if (result) {
+        toast({
+          title: "Succès",
+          description: "Consultation sauvegardée",
+        })
+      } else {
+        toast({
+          title: "Erreur",
+          description: "Échec de la sauvegarde",
+          variant: "destructive"
+        })
       }
       
     } catch (error) {
       console.error('Error saving consultation:', error)
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la sauvegarde",
+        variant: "destructive"
+      })
     }
   }
 
