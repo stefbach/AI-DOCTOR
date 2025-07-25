@@ -331,7 +331,7 @@ class ConsultationDataService {
         }
 
         // Initialize all JSONB fields with empty objects
-        const jsonbFields = ['patient_data', 'clinical_data', 'questions_data', 'diagnosis_data', 'documents_data']
+        const jsonbFields = ['patient_data', 'clinical_data', 'questions_data', 'diagnosis_data', 'documents_data', 'prescription_data']
         jsonbFields.forEach(f => {
           if (!(f in insertData)) {
             insertData[f] = {}
@@ -513,4 +513,33 @@ class ConsultationDataService {
       if (!data) return false
 
       // Check if all 5 steps (0-4) are completed
-      const requiredSteps = [0,
+      const requiredSteps = [0, 1, 2, 3, 4]
+      return requiredSteps.every(step => data.completed_steps?.includes(step))
+    } catch (error) {
+      console.error('Error checking consultation completion:', error)
+      return false
+    }
+  }
+
+  // Get current workflow step
+  async getCurrentStep(): Promise<number> {
+    try {
+      const consultationId = this.getCurrentConsultationId()
+      if (!consultationId) return 0
+
+      const { data } = await supabase
+        .from('consultation_records')
+        .select('workflow_step')
+        .eq('consultation_id', consultationId)
+        .maybeSingle()
+
+      return data?.workflow_step || 0
+    } catch (error) {
+      console.error('Error getting current step:', error)
+      return 0
+    }
+  }
+}
+
+// Export singleton instance
+export const consultationDataService = new ConsultationDataService()
