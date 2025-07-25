@@ -384,8 +384,7 @@ export default function ParaclinicalEditor({
       onSave('paraclinical', updatedParaclinical)
       setHasUnsavedChanges(false)
       
-      const consultationId = consultationDataService.getCurrentConsultationId() || 
-                            new URLSearchParams(window.location.search).get('consultationId')
+      const consultationId = consultationDataService.getCurrentConsultationId()
       
       if (!consultationId) {
         console.error('No consultation ID found')
