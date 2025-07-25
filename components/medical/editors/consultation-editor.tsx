@@ -19,7 +19,7 @@ import {
   Stethoscope,
   Eye
 } from "lucide-react"
-import { consultationDataService } from "@/services/medical/consultation-data-service"
+import { consultationDataService } from "@/lib/consultation-data-service"
 
 export default function ConsultationEditor({ 
   consultationData, 
