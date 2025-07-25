@@ -384,10 +384,36 @@ export default function ParaclinicalEditor({
       onSave('paraclinical', updatedParaclinical)
       setHasUnsavedChanges(false)
       
-      // Save paraclinical/imaging data to database
-      await consultationDataService.saveStepData(4, {
-        imaging: updatedParaclinical
-      })
+      const consultationId = consultationDataService.getCurrentConsultationId() || 
+                            new URLSearchParams(window.location.search).get('consultationId')
+      
+      if (!consultationId) {
+        console.error('No consultation ID found')
+        return
+      }
+      
+      console.log('Saving paraclinical data to DB, ID:', consultationId)
+      
+      const existingData = await consultationDataService.getAllData()
+      
+      const documentsData = {
+        consultation: existingData?.workflowResult?.consultation || {},
+        prescriptions: {
+          medication: existingData?.workflowResult?.prescriptions?.medication || {},
+          biology: existingData?.workflowResult?.prescriptions?.biology || {},
+          imaging: updatedParaclinical // paraclinical maps to imaging
+        },
+        generatedAt: existingData?.workflowResult?.generatedAt || new Date().toISOString(),
+        lastModified: new Date().toISOString()
+      }
+      
+      const result = await consultationDataService.saveToSupabase(
+        consultationId,
+        4,
+        documentsData
+      )
+      
+      console.log('Paraclinical save result:', result)
       
     } catch (error) {
       console.error('Error saving paraclinical:', error)
