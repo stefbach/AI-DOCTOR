@@ -415,40 +415,60 @@ export default function MedicationEditor({
       
       console.log('Saving medication data:', updatedMedication)
       
-      // Keep existing save logic
+      // Save locally
       onSave('medication', updatedMedication)
       setHasUnsavedChanges(false)
       
-      // Get all documents from parent component
-      const completeDocuments = {
-        consultation: editedDocuments?.consultation || {},
+      // Get consultation ID
+      const consultationId = consultationDataService.getCurrentConsultationId()
+      if (!consultationId) {
+        console.error('No consultation ID!')
+        toast({
+          title: "Erreur",
+          description: "ID de consultation manquant",
+          variant: "destructive"
+        })
+        return
+      }
+      
+      // Get all saved data
+      const allData = await consultationDataService.getAllData()
+      
+      // Build complete documents
+      const documentsData = {
+        consultation: allData?.workflowResult?.consultation || editedDocuments?.consultation || {},
         prescriptions: {
           medication: updatedMedication,
-          biology: editedDocuments?.biology || {},
-          imaging: editedDocuments?.paraclinical || {}
+          biology: allData?.workflowResult?.prescriptions?.biology || editedDocuments?.biology || {},
+          imaging: allData?.workflowResult?.prescriptions?.imaging || editedDocuments?.paraclinical || {}
         },
         generatedAt: new Date().toISOString(),
         finalizedAt: new Date().toISOString()
       }
       
-      // Save complete documents to documents_data field
-      await consultationDataService.saveToSupabase(
-        consultationDataService.getCurrentConsultationId(),
-        4, // Step 4 = documents_data
-        completeDocuments
+      console.log('Saving complete documents:', documentsData)
+      
+      // Save to database
+      const result = await consultationDataService.saveToSupabase(
+        consultationId,
+        4,
+        documentsData
       )
       
-      // Show success message
-      toast({
-        title: "Succès",
-        description: "Documents sauvegardés avec succès",
-      })
+      if (result) {
+        toast({
+          title: "Succès",
+          description: "Documents sauvegardés avec succès!",
+        })
+      } else {
+        throw new Error('Save to database failed')
+      }
       
     } catch (error) {
-      console.error('Error saving medication:', error)
+      console.error('Save error:', error)
       toast({
         title: "Erreur",
-        description: "Impossible de sauvegarder",
+        description: "Erreur lors de la sauvegarde",
         variant: "destructive"
       })
     }
