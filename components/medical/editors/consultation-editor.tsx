@@ -347,15 +347,48 @@ export default function ConsultationEditor({
       
       console.log('Saving consultation data:', updatedConsultation)
       
-      // Keep existing save logic
+      // Save locally first
       onSave('consultation', updatedConsultation)
       setHasUnsavedChanges(false)
       
-      // Add: Save to database through consultationDataService
-      // The service already handles consultation_records table
-      await consultationDataService.saveStepData(4, {
-        consultation: updatedConsultation
-      })
+      // Get consultation ID
+      const consultationId = consultationDataService.getCurrentConsultationId() || 
+                            new URLSearchParams(window.location.search).get('consultationId')
+      
+      if (!consultationId) {
+        console.error('No consultation ID found')
+        return
+      }
+      
+      console.log('Saving consultation data to DB, ID:', consultationId)
+      
+      // Get existing data to merge
+      const existingData = await consultationDataService.getAllData()
+      
+      // Build documents structure
+      const documentsData = {
+        consultation: updatedConsultation,
+        prescriptions: existingData?.workflowResult?.prescriptions || {
+          medication: {},
+          biology: {},
+          imaging: {}
+        },
+        generatedAt: existingData?.workflowResult?.generatedAt || new Date().toISOString(),
+        lastModified: new Date().toISOString()
+      }
+      
+      // Save to database
+      const result = await consultationDataService.saveToSupabase(
+        consultationId,
+        4, // documents_data
+        documentsData
+      )
+      
+      console.log('Save result:', result)
+      
+      if (!result) {
+        console.error('Failed to save to database')
+      }
       
     } catch (error) {
       console.error('Error saving consultation:', error)
