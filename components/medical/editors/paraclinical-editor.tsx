@@ -123,7 +123,6 @@ export default function ParaclinicalEditor({
     lastName: patientData?.lastName || paraclinicalData?.patient?.lastName || "",
     age: patientData?.age ? `${patientData.age} ans` : paraclinicalData?.patient?.age || "",
     address: patientData?.address || paraclinicalData?.patient?.address || "Adresse à compléter - Maurice",
-    idNumber: patientData?.idNumber || paraclinicalData?.patient?.idNumber || "Carte d'identité mauricienne",
     
     // Prescriptions - Initialize from diagnosis data
     prescriptions: paraclinicalData?.prescriptions || buildInitialPrescriptions()
@@ -146,7 +145,6 @@ export default function ParaclinicalEditor({
         lastName: patientData?.lastName || paraclinicalData?.patient?.lastName || prev.lastName,
         age: patientData?.age ? `${patientData.age} ans` : paraclinicalData?.patient?.age || prev.age,
         address: patientData?.address || paraclinicalData?.patient?.address || prev.address,
-        idNumber: patientData?.idNumber || paraclinicalData?.patient?.idNumber || prev.idNumber,
         
         // Prescriptions
         prescriptions: paraclinicalData?.prescriptions || (prev.prescriptions.length === 0 ? buildInitialPrescriptions() : prev.prescriptions)
@@ -367,8 +365,7 @@ export default function ParaclinicalEditor({
         firstName: formData.firstName,
         lastName: formData.lastName,
         age: formData.age,
-        address: formData.address,
-        idNumber: formData.idNumber
+        address: formData.address
       },
       prescriptions: formData.prescriptions
     }
@@ -487,26 +484,15 @@ export default function ParaclinicalEditor({
               />
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="address">Adresse</Label>
-              <Textarea
-                id="address"
-                value={formData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
-                className="mt-1"
-                rows={2}
-              />
-            </div>
-            <div>
-              <Label htmlFor="idNumber">N° Carte d'identité</Label>
-              <Input
-                id="idNumber"
-                value={formData.idNumber}
-                onChange={(e) => handleInputChange('idNumber', e.target.value)}
-                className="mt-1"
-              />
-            </div>
+          <div>
+            <Label htmlFor="address">Adresse</Label>
+            <Textarea
+              id="address"
+              value={formData.address}
+              onChange={(e) => handleInputChange('address', e.target.value)}
+              className="mt-1"
+              rows={2}
+            />
           </div>
         </CardContent>
       </Card>
