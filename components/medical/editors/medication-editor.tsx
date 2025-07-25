@@ -419,10 +419,21 @@ export default function MedicationEditor({
       onSave('medication', updatedMedication)
       setHasUnsavedChanges(false)
       
-      const consultationId = consultationDataService.getCurrentConsultationId()
+      // Force get consultation ID from URL if not found
+      let consultationId = consultationDataService.getCurrentConsultationId()
+      if (!consultationId) {
+        const urlParams = new URLSearchParams(window.location.search)
+        consultationId = urlParams.get('consultationId')
+        console.log('Got consultation ID from URL in save:', consultationId)
+      }
       
       if (!consultationId) {
-        console.error('No consultation ID found')
+        console.error('Still no consultation ID found!')
+        toast({
+          title: "Erreur",
+          description: "ID de consultation manquant",
+          variant: "destructive"
+        })
         return
       }
       
@@ -454,13 +465,20 @@ export default function MedicationEditor({
           title: "Succès",
           description: "Ordonnance sauvegardée dans la base de données",
         })
+      } else {
+        console.error('Failed to save medication data to database')
+        toast({
+          title: "Erreur",
+          description: "Échec de la sauvegarde",
+          variant: "destructive"
+        })
       }
       
     } catch (error) {
       console.error('Error saving medication:', error)
       toast({
         title: "Erreur",
-        description: "Erreur lors de la sauvegarde",
+        description: "Une erreur est survenue lors de la sauvegarde",
         variant: "destructive"
       })
     }
