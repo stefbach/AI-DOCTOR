@@ -250,8 +250,7 @@ export default function BiologyEditor({
       setHasUnsavedChanges(false)
       
       // Get consultation ID
-      const consultationId = consultationDataService.getCurrentConsultationId() || 
-                            new URLSearchParams(window.location.search).get('consultationId')
+      const consultationId = consultationDataService.getCurrentConsultationId()
       
       if (!consultationId) {
         console.error('No consultation ID found')
