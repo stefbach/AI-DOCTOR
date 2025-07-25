@@ -28,6 +28,31 @@ class ConsultationDataService {
   private SESSION_KEY = 'consultation_data'
   private CONSULTATION_ID_KEY = 'current_consultation_id'
 
+  // Initialize from URL parameters
+  async initializeFromURL() {
+    if (typeof window === 'undefined') return null
+    
+    const urlParams = new URLSearchParams(window.location.search)
+    const consultationId = urlParams.get('consultationId')
+    const patientId = urlParams.get('patientId')
+    const doctorId = urlParams.get('doctorId')
+    
+    console.log('Initializing from URL:', { consultationId, patientId, doctorId })
+    
+    if (consultationId && patientId && doctorId) {
+      // Store in session
+      sessionStorage.setItem(this.CONSULTATION_ID_KEY, consultationId)
+      sessionStorage.setItem('tibokConsultationId', consultationId)
+      sessionStorage.setItem('tibokPatientId', patientId)
+      sessionStorage.setItem('tibokDoctorId', doctorId)
+      
+      // Initialize consultation
+      return await this.initializeConsultation(consultationId, patientId, doctorId)
+    }
+    
+    return null
+  }
+
   // Initialize consultation record
   async initializeConsultation(consultationId: string, patientId: string, doctorId: string) {
     try {
@@ -39,7 +64,7 @@ class ConsultationDataService {
         .single()
 
       if (consultationError || !consultation) {
-        console.error('Consultation not found')
+        console.error('Consultation not found:', consultationError)
         return null
       }
 
@@ -48,9 +73,10 @@ class ConsultationDataService {
         .from('consultation_records')
         .select('*')
         .eq('consultation_id', consultationId)
-        .single()
+        .maybeSingle()
 
       if (existing) {
+        console.log('Found existing consultation record:', existing.id)
         return existing
       }
 
@@ -61,18 +87,29 @@ class ConsultationDataService {
           consultation_id: consultationId,
           patient_id: patientId,
           doctor_id: doctorId,
-          consultation_date: consultation.created_at, // Add this line
+          consultation_date: consultation.created_at,
           workflow_step: 0,
-          completed_steps: []
+          completed_steps: [],
+          patient_data: {},
+          clinical_data: {},
+          questions_data: {},
+          diagnosis_data: {},
+          documents_data: {}
         })
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Error creating consultation record:', error)
+        throw error
+      }
+
+      console.log('Created new consultation record:', data?.id)
 
       // Store consultation ID in session
       if (typeof window !== 'undefined' && window.sessionStorage) {
         sessionStorage.setItem(this.CONSULTATION_ID_KEY, consultationId)
+        sessionStorage.setItem('tibokConsultationId', consultationId)
       }
       
       return data
@@ -130,7 +167,7 @@ class ConsultationDataService {
       console.log('saveToSupabase called with:', {
         consultationId,
         stepNumber,
-        dataKeys: Object.keys(data)
+        dataKeys: Object.keys(data || {})
       })
 
       const fieldMap: { [key: number]: string } = {
@@ -158,7 +195,7 @@ class ConsultationDataService {
 
       if (consultationError) {
         console.error('Consultation lookup error:', consultationError)
-        if (consultationError.message.includes('401')) {
+        if (consultationError.message?.includes('401')) {
           console.error('Authentication failed - check Supabase keys')
         }
         return false
@@ -190,7 +227,7 @@ class ConsultationDataService {
         }
 
         const updateData: any = {
-          [field]: data,
+          [field]: data || {},
           workflow_step: stepNumber,
           completed_steps: completedSteps,
           updated_at: new Date().toISOString()
@@ -224,16 +261,17 @@ class ConsultationDataService {
           patient_id: consultation.patient_id,
           doctor_id: consultation.doctor_id,
           consultation_date: consultation.created_at,
-          [field]: data,
+          [field]: data || {},
           workflow_step: stepNumber,
           completed_steps: [stepNumber],
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }
 
-        const jsonbFields = ['patient_data', 'clinical_data', 'questions_data', 'diagnosis_data']
+        // Initialize all JSONB fields with empty objects
+        const jsonbFields = ['patient_data', 'clinical_data', 'questions_data', 'diagnosis_data', 'documents_data']
         jsonbFields.forEach(f => {
-          if (f !== field && f !== 'documents_data') {
+          if (!(f in insertData)) {
             insertData[f] = {}
           }
         })
@@ -266,6 +304,7 @@ class ConsultationDataService {
   async getAllData(): Promise<ConsultationData | null> {
     const consultationId = this.getCurrentConsultationId()
     if (!consultationId) {
+      console.log('No consultation ID, returning session data')
       return this.getSessionData()
     }
     
@@ -321,17 +360,20 @@ class ConsultationDataService {
         .from('consultation_records')
         .select('*')
         .eq('consultation_id', consultationId)
-        .single()
+        .maybeSingle()
 
-      if (error) throw error
+      if (error) {
+        console.error('Error loading consultation data:', error)
+        throw error
+      }
 
       if (data) {
         const consultationData: ConsultationData = {
-          patientData: data.patient_data,
-          clinicalData: data.clinical_data,
-          questionsData: data.questions_data,
-          diagnosisData: data.diagnosis_data,
-          workflowResult: data.documents_data // Map to your workflow result
+          patientData: data.patient_data || {},
+          clinicalData: data.clinical_data || {},
+          questionsData: data.questions_data || {},
+          diagnosisData: data.diagnosis_data || {},
+          workflowResult: data.documents_data || {} // Map to your workflow result
         }
 
         // Also save to session storage for quick access
@@ -340,9 +382,11 @@ class ConsultationDataService {
           sessionStorage.setItem(this.CONSULTATION_ID_KEY, consultationId)
         }
 
+        console.log('Loaded consultation data from DB')
         return consultationData
       }
 
+      console.log('No consultation data found in DB')
       return null
     } catch (error) {
       console.error('Error loading consultation data:', error)
@@ -355,15 +399,41 @@ class ConsultationDataService {
     if (typeof window !== 'undefined' && window.sessionStorage) {
       sessionStorage.removeItem(this.SESSION_KEY)
       sessionStorage.removeItem(this.CONSULTATION_ID_KEY)
+      sessionStorage.removeItem('tibokConsultationId')
+      sessionStorage.removeItem('tibokPatientId')
+      sessionStorage.removeItem('tibokDoctorId')
     }
   }
 
-  // Get current consultation ID
+  // Get current consultation ID with multiple fallbacks
   getCurrentConsultationId(): string | null {
-    if (typeof window === 'undefined' || !window.sessionStorage) {
-      return null
+    // Try URL first
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const urlConsultationId = urlParams.get('consultationId')
+      if (urlConsultationId) {
+        console.log('Got consultation ID from URL:', urlConsultationId)
+        // Store it for future use
+        if (window.sessionStorage) {
+          sessionStorage.setItem(this.CONSULTATION_ID_KEY, urlConsultationId)
+          sessionStorage.setItem('tibokConsultationId', urlConsultationId)
+        }
+        return urlConsultationId
+      }
     }
-    return sessionStorage.getItem(this.CONSULTATION_ID_KEY)
+    
+    // Try session storage
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      const sessionId = sessionStorage.getItem(this.CONSULTATION_ID_KEY) || 
+                       sessionStorage.getItem('tibokConsultationId')
+      if (sessionId) {
+        console.log('Got consultation ID from session:', sessionId)
+        return sessionId
+      }
+    }
+    
+    console.warn('No consultation ID found!')
+    return null
   }
 
   // Check if all steps are completed
@@ -376,7 +446,7 @@ class ConsultationDataService {
         .from('consultation_records')
         .select('completed_steps')
         .eq('consultation_id', consultationId)
-        .single()
+        .maybeSingle()
 
       if (!data) return false
 
@@ -399,7 +469,7 @@ class ConsultationDataService {
         .from('consultation_records')
         .select('workflow_step')
         .eq('consultation_id', consultationId)
-        .single()
+        .maybeSingle()
 
       return data?.workflow_step || 0
     } catch (error) {
