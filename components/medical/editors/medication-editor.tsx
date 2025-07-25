@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useToast } from "@/components/ui/use-toast"
 import { 
   ArrowLeft, 
   ArrowRight,
@@ -25,6 +26,7 @@ import {
   Download,
   Heart
 } from "lucide-react"
+import { consultationDataService } from "@/lib/consultation-data-service"
 
 export default function MedicationEditor({ 
   medicationData, 
@@ -36,8 +38,12 @@ export default function MedicationEditor({
   patientAllergies = "",
   patientData,
   diagnosisData,
-  doctorData
+  doctorData,
+  editedDocuments
 }) {
+  const { toast } = useToast()
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  
   // Initialize prescriptions from diagnosis data
   const buildInitialPrescriptions = () => {
     const prescriptions = []
@@ -144,9 +150,10 @@ export default function MedicationEditor({
       patientData,
       diagnosisData,
       doctorData,
-      patientAllergies
+      patientAllergies,
+      editedDocuments
     })
-  }, [medicationData, patientData, diagnosisData, doctorData, patientAllergies])
+  }, [medicationData, patientData, diagnosisData, doctorData, patientAllergies, editedDocuments])
 
   const [formData, setFormData] = useState({
     // Header with doctor info
@@ -158,7 +165,7 @@ export default function MedicationEditor({
     registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || medicationData?.header?.registration || "COUNCIL-MU-2024-001",
     validity: medicationData?.header?.validity || "Ordonnance valable 3 mois",
     
-    // Patient info - Use patientData if available
+    // Patient info - Use patientData if available - REMOVED idNumber
     firstName: patientData?.firstName || medicationData?.patient?.firstName || "",
     lastName: patientData?.lastName || medicationData?.patient?.lastName || "",
     age: patientData?.age ? `${patientData.age} ans` : medicationData?.patient?.age || `${patientAge} ans`,
@@ -167,7 +174,6 @@ export default function MedicationEditor({
       ? patientData.allergies.join(', ') 
       : medicationData?.patient?.allergies || patientAllergies || "Aucune",
     address: patientData?.address || medicationData?.patient?.address || "Adresse à compléter - Maurice",
-    idNumber: patientData?.idNumber || medicationData?.patient?.idNumber || "Carte d'identité mauricienne",
     pregnancy: medicationData?.patient?.pregnancy || "Non applicable",
     
     // Prescriptions - Initialize from diagnosis data
@@ -197,7 +203,7 @@ export default function MedicationEditor({
         registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || medicationData?.header?.registration || prev.registration,
         validity: medicationData?.header?.validity || prev.validity,
         
-        // Patient info
+        // Patient info - REMOVED idNumber
         firstName: patientData?.firstName || medicationData?.patient?.firstName || prev.firstName,
         lastName: patientData?.lastName || medicationData?.patient?.lastName || prev.lastName,
         age: patientData?.age ? `${patientData.age} ans` : medicationData?.patient?.age || prev.age,
@@ -206,7 +212,6 @@ export default function MedicationEditor({
           ? patientData.allergies.join(', ') 
           : medicationData?.patient?.allergies || prev.allergies,
         address: patientData?.address || medicationData?.patient?.address || prev.address,
-        idNumber: patientData?.idNumber || medicationData?.patient?.idNumber || prev.idNumber,
         pregnancy: medicationData?.patient?.pregnancy || prev.pregnancy,
         
         // Prescriptions
@@ -320,6 +325,7 @@ export default function MedicationEditor({
       ...prev,
       [field]: value
     }))
+    setHasUnsavedChanges(true)
   }
 
   const handlePrescriptionChange = (index, field, value) => {
@@ -329,6 +335,7 @@ export default function MedicationEditor({
         i === index ? { ...prescription, [field]: value } : prescription
       )
     }))
+    setHasUnsavedChanges(true)
   }
 
   const handleAdviceChange = (field, value) => {
@@ -339,6 +346,7 @@ export default function MedicationEditor({
         [field]: value
       }
     }))
+    setHasUnsavedChanges(true)
   }
 
   const addPrescription = () => {
@@ -364,6 +372,7 @@ export default function MedicationEditor({
       ...prev,
       prescriptions: [...prev.prescriptions, newPrescription]
     }))
+    setHasUnsavedChanges(true)
   }
 
   const removePrescription = (index) => {
@@ -371,6 +380,7 @@ export default function MedicationEditor({
       ...prev,
       prescriptions: prev.prescriptions.filter((_, i) => i !== index)
     }))
+    setHasUnsavedChanges(true)
   }
 
   const checkAllergyConflict = (medication) => {
@@ -378,33 +388,70 @@ export default function MedicationEditor({
     return allergiesList.includes(medication.dci.toLowerCase())
   }
 
-  const handleSave = () => {
-    const updatedMedication = {
-      header: {
-        title: formData.title,
-        subtitle: formData.subtitle,
-        date: formData.date,
-        number: formData.number,
-        physician: formData.physician,
-        registration: formData.registration,
-        validity: formData.validity
-      },
-      patient: {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        age: formData.age,
-        weight: formData.weight,
-        allergies: formData.allergies,
-        address: formData.address,
-        idNumber: formData.idNumber,
-        pregnancy: formData.pregnancy
-      },
-      prescriptions: formData.prescriptions,
-      clinicalAdvice: formData.clinicalAdvice
+  const handleSave = async () => {
+    try {
+      const updatedMedication = {
+        header: {
+          title: formData.title,
+          subtitle: formData.subtitle,
+          date: formData.date,
+          number: formData.number,
+          physician: formData.physician,
+          registration: formData.registration,
+          validity: formData.validity
+        },
+        patient: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          age: formData.age,
+          weight: formData.weight,
+          allergies: formData.allergies,
+          address: formData.address,
+          pregnancy: formData.pregnancy
+        },
+        prescriptions: formData.prescriptions,
+        clinicalAdvice: formData.clinicalAdvice
+      }
+      
+      console.log('Saving medication data:', updatedMedication)
+      
+      // Keep existing save logic
+      onSave('medication', updatedMedication)
+      setHasUnsavedChanges(false)
+      
+      // Get all documents from parent component
+      const completeDocuments = {
+        consultation: editedDocuments?.consultation || {},
+        prescriptions: {
+          medication: updatedMedication,
+          biology: editedDocuments?.biology || {},
+          imaging: editedDocuments?.paraclinical || {}
+        },
+        generatedAt: new Date().toISOString(),
+        finalizedAt: new Date().toISOString()
+      }
+      
+      // Save complete documents to documents_data field
+      await consultationDataService.saveToSupabase(
+        consultationDataService.getCurrentConsultationId(),
+        4, // Step 4 = documents_data
+        completeDocuments
+      )
+      
+      // Show success message
+      toast({
+        title: "Succès",
+        description: "Documents sauvegardés avec succès",
+      })
+      
+    } catch (error) {
+      console.error('Error saving medication:', error)
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder",
+        variant: "destructive"
+      })
     }
-    
-    console.log('Saving medication data:', updatedMedication)
-    onSave('medication', updatedMedication)
   }
 
   return (
@@ -560,6 +607,16 @@ export default function MedicationEditor({
                 </SelectContent>
               </Select>
             </div>
+          </div>
+          <div>
+            <Label htmlFor="address">Adresse</Label>
+            <Textarea
+              id="address"
+              value={formData.address}
+              onChange={(e) => handleInputChange('address', e.target.value)}
+              className="mt-1"
+              rows={2}
+            />
           </div>
         </CardContent>
       </Card>
