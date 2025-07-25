@@ -31,6 +31,18 @@ class ConsultationDataService {
   // Initialize consultation record
   async initializeConsultation(consultationId: string, patientId: string, doctorId: string) {
     try {
+      // Get consultation details including created_at
+      const { data: consultation, error: consultationError } = await supabase
+        .from('consultations')
+        .select('id, created_at')
+        .eq('id', consultationId)
+        .single()
+
+      if (consultationError || !consultation) {
+        console.error('Consultation not found')
+        return null
+      }
+
       // Check if record already exists
       const { data: existing } = await supabase
         .from('consultation_records')
@@ -42,14 +54,15 @@ class ConsultationDataService {
         return existing
       }
 
-      // Create new record
+      // Create new record with consultation_date
       const { data, error } = await supabase
         .from('consultation_records')
         .insert({
           consultation_id: consultationId,
           patient_id: patientId,
           doctor_id: doctorId,
-          workflow_step: 0, // Start at 0 for your app
+          consultation_date: consultation.created_at, // Add this line
+          workflow_step: 0,
           completed_steps: []
         })
         .select()
@@ -114,45 +127,104 @@ class ConsultationDataService {
   // Save specific step data to Supabase
   async saveToSupabase(consultationId: string, stepNumber: number, data: any) {
     try {
+      console.log('saveToSupabase called with:', {
+        consultationId,
+        stepNumber,
+        data
+      })
+
       const fieldMap: { [key: number]: string } = {
         0: 'patient_data',
         1: 'clinical_data',
         2: 'questions_data',
         3: 'diagnosis_data',
-        4: 'documents_data'  // This should save the final documents
+        4: 'documents_data'
       }
 
       const field = fieldMap[stepNumber]
-      if (!field) return
+      if (!field) {
+        console.error('Invalid step number:', stepNumber)
+        return false
+      }
 
-      // Get current completed steps
-      const { data: current } = await supabase
+      // First check if the consultation exists
+      const { data: consultation, error: consultationError } = await supabase
+        .from('consultations')
+        .select('id, patient_id, doctor_id, created_at') // Add created_at here
+        .eq('id', consultationId)
+        .single()
+
+      console.log('Consultation lookup:', { consultation, consultationError })
+
+      if (consultationError || !consultation) {
+        console.error('Consultation not found:', consultationId)
+        return false
+      }
+
+      // Check if record exists
+      const { data: existingRecord, error: checkError } = await supabase
         .from('consultation_records')
-        .select('completed_steps')
+        .select('id, completed_steps')
         .eq('consultation_id', consultationId)
         .single()
 
-      const completedSteps = current?.completed_steps || []
-      if (!completedSteps.includes(stepNumber)) {
-        completedSteps.push(stepNumber)
+      console.log('Existing record check:', { existingRecord, checkError })
+
+      let result
+      
+      if (existingRecord) {
+        // Update existing record
+        console.log('Updating existing record')
+        
+        const completedSteps = existingRecord.completed_steps || []
+        if (!completedSteps.includes(stepNumber)) {
+          completedSteps.push(stepNumber)
+        }
+
+        const { data: updateData, error: updateError } = await supabase
+          .from('consultation_records')
+          .update({
+            [field]: data,
+            workflow_step: stepNumber,
+            completed_steps: completedSteps,
+            consultation_date: consultation.created_at, // Add this line
+            updated_at: new Date().toISOString()
+          })
+          .eq('consultation_id', consultationId)
+          .select()
+
+        console.log('Update result:', { updateData, updateError })
+        
+        if (updateError) throw updateError
+        result = updateData
+      } else {
+        // Create new record
+        console.log('Creating new record')
+        
+        const { data: insertData, error: insertError } = await supabase
+          .from('consultation_records')
+          .insert({
+            consultation_id: consultationId,
+            patient_id: consultation.patient_id,
+            doctor_id: consultation.doctor_id,
+            consultation_date: consultation.created_at, // Add this line
+            [field]: data,
+            workflow_step: stepNumber,
+            completed_steps: [stepNumber],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .select()
+
+        console.log('Insert result:', { insertData, insertError })
+        
+        if (insertError) throw insertError
+        result = insertData
       }
-
-      // Update record
-      const { error } = await supabase
-        .from('consultation_records')
-        .update({
-          [field]: data,
-          workflow_step: stepNumber,
-          completed_steps: completedSteps,
-          updated_at: new Date().toISOString()
-        })
-        .eq('consultation_id', consultationId)
-
-      if (error) throw error
 
       return true
     } catch (error) {
-      console.error('Error saving to Supabase:', error)
+      console.error('Error in saveToSupabase:', error)
       return false
     }
   }
