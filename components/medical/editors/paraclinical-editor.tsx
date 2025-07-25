@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useToast } from "@/components/ui/use-toast"
 import { 
   ArrowLeft, 
   ArrowRight,
@@ -36,6 +37,7 @@ export default function ParaclinicalEditor({
   diagnosisData,
   doctorData
 }) {
+  const { toast } = useToast()
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   
   // Initialize prescriptions from diagnosis data
@@ -380,14 +382,25 @@ export default function ParaclinicalEditor({
       
       console.log('Saving paraclinical data:', updatedParaclinical)
       
-      // Keep existing save logic
+      // Save locally
       onSave('paraclinical', updatedParaclinical)
       setHasUnsavedChanges(false)
       
-      const consultationId = consultationDataService.getCurrentConsultationId()
+      // Force get consultation ID from URL if not found
+      let consultationId = consultationDataService.getCurrentConsultationId()
+      if (!consultationId) {
+        const urlParams = new URLSearchParams(window.location.search)
+        consultationId = urlParams.get('consultationId')
+        console.log('Got consultation ID from URL in save:', consultationId)
+      }
       
       if (!consultationId) {
-        console.error('No consultation ID found')
+        console.error('Still no consultation ID found!')
+        toast({
+          title: "Erreur",
+          description: "ID de consultation manquant",
+          variant: "destructive"
+        })
         return
       }
       
@@ -414,8 +427,27 @@ export default function ParaclinicalEditor({
       
       console.log('Paraclinical save result:', result)
       
+      if (result) {
+        toast({
+          title: "Succès",
+          description: "Examens paracliniques sauvegardés",
+        })
+      } else {
+        console.error('Failed to save paraclinical data to database')
+        toast({
+          title: "Erreur",
+          description: "Échec de la sauvegarde",
+          variant: "destructive"
+        })
+      }
+      
     } catch (error) {
       console.error('Error saving paraclinical:', error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la sauvegarde",
+        variant: "destructive"
+      })
     }
   }
 
