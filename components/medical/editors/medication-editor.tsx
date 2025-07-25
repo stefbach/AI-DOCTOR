@@ -419,53 +419,46 @@ export default function MedicationEditor({
       onSave('medication', updatedMedication)
       setHasUnsavedChanges(false)
       
-      // Get consultation ID
-      const consultationId = consultationDataService.getCurrentConsultationId()
+      const consultationId = consultationDataService.getCurrentConsultationId() || 
+                            new URLSearchParams(window.location.search).get('consultationId')
+      
       if (!consultationId) {
-        console.error('No consultation ID!')
-        toast({
-          title: "Erreur",
-          description: "ID de consultation manquant",
-          variant: "destructive"
-        })
+        console.error('No consultation ID found')
         return
       }
       
-      // Get all saved data
-      const allData = await consultationDataService.getAllData()
+      console.log('Saving medication data to DB, ID:', consultationId)
       
-      // Build complete documents
+      const existingData = await consultationDataService.getAllData()
+      
       const documentsData = {
-        consultation: allData?.workflowResult?.consultation || editedDocuments?.consultation || {},
+        consultation: existingData?.workflowResult?.consultation || {},
         prescriptions: {
           medication: updatedMedication,
-          biology: allData?.workflowResult?.prescriptions?.biology || editedDocuments?.biology || {},
-          imaging: allData?.workflowResult?.prescriptions?.imaging || editedDocuments?.paraclinical || {}
+          biology: existingData?.workflowResult?.prescriptions?.biology || {},
+          imaging: existingData?.workflowResult?.prescriptions?.imaging || {}
         },
-        generatedAt: new Date().toISOString(),
-        finalizedAt: new Date().toISOString()
+        generatedAt: existingData?.workflowResult?.generatedAt || new Date().toISOString(),
+        finalizedAt: new Date().toISOString() // Mark as finalized on medication save
       }
       
-      console.log('Saving complete documents:', documentsData)
-      
-      // Save to database
       const result = await consultationDataService.saveToSupabase(
         consultationId,
         4,
         documentsData
       )
       
+      console.log('Medication save result:', result)
+      
       if (result) {
         toast({
           title: "Succès",
-          description: "Documents sauvegardés avec succès!",
+          description: "Ordonnance sauvegardée dans la base de données",
         })
-      } else {
-        throw new Error('Save to database failed')
       }
       
     } catch (error) {
-      console.error('Save error:', error)
+      console.error('Error saving medication:', error)
       toast({
         title: "Erreur",
         description: "Erreur lors de la sauvegarde",
