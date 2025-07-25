@@ -95,6 +95,13 @@ EXPERTISE CLINIQUE ÉQUILIBRÉE PAR SYNDROME:
 - Questions techniques: Red flags (EXPLIQUÉS = signes d'urgence neurologique)
 - Explication : "Ces questions identifient les maux de tête qui nécessitent une attention immédiate"
 
+**AUTRES SYNDROMES / SYMPTÔMES** (Approche dynamique) :
+- Identifiez le système concerné (digestif, respiratoire, urinaire, neurologique, musculo‑squelettique, dermatologique, etc.) à partir du motif de consultation et des symptômes.
+- Questions accessibles : localisation du symptôme, nature (douleur, gêne, modification d’une fonction), durée et évolution, facteurs déclenchants ou aggravants, symptômes associés (fièvre, diarrhée, dyspnée, vomissements, éruption, etc.), contexte (voyage, alimentation, prise de médicaments).
+- Questions techniques : scores ou critères spécifiques seulement lorsqu’ils sont pertinents (p. ex. score de Ranson pour pancréatite, qSOFA pour infection sévère), avec explications simples ; n’utilisez un score que si les symptômes en suggèrent la nécessité.
+- Explication : ces questions servent à distinguer les causes fréquentes et bénignes des pathologies graves ; commencez par explorer les causes courantes avant d’évoquer des diagnostics sévères.
+
+
 GÉNÉRATION ÉQUILIBRÉE - 5-8 QUESTIONS MIXTES:
 
 RÉPARTITION OBLIGATOIRE:
@@ -163,6 +170,7 @@ CRITÈRES EXPERT ÉQUILIBRÉS OBLIGATOIRES:
 ✓ Questions pratiques et concrètes
 
 RÈGLES EXPERT DIDACTIQUE:
+- Adapter les questions au syndrome principal : pour chaque symptôme, commencez par explorer les causes courantes et bénignes (infections virales, intoxications alimentaires, effets médicamenteux, troubles fonctionnels, etc.) et n’aborder des pathologies graves que si des signes d’alarme cliniques ou des résultats paracliniques l’exigent.
 - Utiliser scores cliniques UNIQUEMENT si nécessaire ET expliqués
 - Privilégier questions compréhensibles par tous
 - Expliquer POURQUOI chaque question est utile
