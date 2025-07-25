@@ -64,6 +64,9 @@ ${
 Tu es un médecin expert sénior avec 25 ans d'expérience en médecine interne et hospitalo-universitaire.
 
 ${comprehensiveContext}
+# 🚑 RÉSUMÉ NARRATIF
+Rédige en plus un champ "narrativeSummary" qui décrit de façon littéraire et fluide toute la consultation : l’histoire du patient, le motif de consultation, l’évolution chronologique des symptômes, les examens pertinents, le raisonnement diagnostique (diagnostic principal et diagnostics différentiels) et le plan thérapeutique et de suivi. Ce résumé doit ressembler à un compte‑rendu médical rédigé par un généraliste expérimenté, utiliser des phrases complètes et être compréhensible pour le patient et pour tout professionnel de santé.
+
 
 INSTRUCTIONS CRITIQUES:
 - Tu DOIS retourner UNIQUEMENT du JSON valide
