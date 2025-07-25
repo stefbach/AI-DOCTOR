@@ -19,6 +19,7 @@ import {
   Stethoscope,
   Eye
 } from "lucide-react"
+import { consultationDataService } from "@/services/medical/consultation-data-service"
 
 export default function ConsultationEditor({ 
   consultationData, 
@@ -33,6 +34,8 @@ export default function ConsultationEditor({
   doctorData,
   mauritianDocuments
 }) {
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  
   // Helper function to build complete history/anamnesis
   const buildCompleteHistory = () => {
     const parts = []
@@ -207,7 +210,7 @@ export default function ConsultationEditor({
     registration: consultationData?.header?.registration || "COUNCIL-MU-2024-001",
     institution: consultationData?.header?.institution || "Centre Médical Maurice",
     
-    // Patient - REMOVED idNumber
+    // Patient
     firstName: consultationData?.patient?.firstName || "",
     lastName: consultationData?.patient?.lastName || "",
     age: consultationData?.patient?.age || "",
@@ -249,7 +252,7 @@ export default function ConsultationEditor({
       registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || consultationData?.header?.registration || "COUNCIL-MU-2024-001",
       institution: doctorData?.institution || doctorData?.clinic_name || consultationData?.header?.institution || "Centre Médical Maurice",
       
-      // Patient - complete info from all sources with fixed sex field - REMOVED idNumber
+      // Patient - complete info from all sources with fixed sex field
       firstName: patientData?.firstName || consultationData?.patient?.firstName || "",
       lastName: patientData?.lastName || consultationData?.patient?.lastName || "",
       age: patientData?.age ? `${patientData.age} ans` : consultationData?.patient?.age || "",
@@ -307,42 +310,56 @@ export default function ConsultationEditor({
       ...prev,
       [field]: value
     }))
+    setHasUnsavedChanges(true)
   }
 
-  const handleSave = () => {
-    const updatedConsultation = {
-      header: {
-        title: formData.title,
-        subtitle: formData.subtitle,
-        date: formData.date,
-        time: formData.time,
-        physician: formData.physician,
-        registration: formData.registration,
-        institution: formData.institution
-      },
-      patient: {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        age: formData.age,
-        sex: formData.sex,
-        address: formData.address,
-        phone: formData.phone,
-        // REMOVED idNumber from here
-        weight: formData.weight,
-        height: formData.height,
-        allergies: formData.allergies
-      },
-      content: {
-        chiefComplaint: formData.chiefComplaint,
-        history: formData.history,
-        examination: formData.examination,
-        diagnosis: formData.diagnosis,
-        plan: formData.plan
+  const handleSave = async () => {
+    try {
+      const updatedConsultation = {
+        header: {
+          title: formData.title,
+          subtitle: formData.subtitle,
+          date: formData.date,
+          time: formData.time,
+          physician: formData.physician,
+          registration: formData.registration,
+          institution: formData.institution
+        },
+        patient: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          age: formData.age,
+          sex: formData.sex,
+          address: formData.address,
+          phone: formData.phone,
+          weight: formData.weight,
+          height: formData.height,
+          allergies: formData.allergies
+        },
+        content: {
+          chiefComplaint: formData.chiefComplaint,
+          history: formData.history,
+          examination: formData.examination,
+          diagnosis: formData.diagnosis,
+          plan: formData.plan
+        }
       }
+      
+      console.log('Saving consultation data:', updatedConsultation)
+      
+      // Keep existing save logic
+      onSave('consultation', updatedConsultation)
+      setHasUnsavedChanges(false)
+      
+      // Add: Save to database through consultationDataService
+      // The service already handles consultation_records table
+      await consultationDataService.saveStepData(4, {
+        consultation: updatedConsultation
+      })
+      
+    } catch (error) {
+      console.error('Error saving consultation:', error)
     }
-    
-    console.log('Saving consultation data:', updatedConsultation)
-    onSave('consultation', updatedConsultation)
   }
 
   return (
@@ -518,7 +535,6 @@ export default function ConsultationEditor({
                 className="mt-1"
               />
             </div>
-            {/* REMOVED ID Number field */}
             <div className="md:col-span-2">
               <Label htmlFor="allergies">Allergies</Label>
               <Input
