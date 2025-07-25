@@ -45,6 +45,23 @@ export default function MedicalWorkflow({
     }
   ]
 
+  // Initialize consultation when component mounts
+  useEffect(() => {
+    const initConsultation = async () => {
+      const urlParams = new URLSearchParams(window.location.search)
+      const consultationId = urlParams.get('consultationId')
+      const patientId = urlParams.get('patientId')
+      const doctorId = urlParams.get('doctorId')
+      
+      if (consultationId && patientId && doctorId) {
+        console.log('Initializing consultation with:', { consultationId, patientId, doctorId })
+        await consultationDataService.initializeConsultation(consultationId, patientId, doctorId)
+      }
+    }
+    
+    initConsultation()
+  }, [])
+
   // Callback du workflow documents
   const handleDocumentsComplete = async (editedDocs) => {
     console.log('✅ Documents finalisés:', editedDocs)
