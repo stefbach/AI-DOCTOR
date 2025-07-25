@@ -245,14 +245,48 @@ export default function BiologyEditor({
       
       console.log('Saving biology data:', updatedBiology)
       
-      // Keep existing save logic
+      // Save locally first
       onSave('biology', updatedBiology)
       setHasUnsavedChanges(false)
       
-      // Save biology data to database
-      await consultationDataService.saveStepData(4, {
-        biology: updatedBiology
-      })
+      // Get consultation ID
+      const consultationId = consultationDataService.getCurrentConsultationId() || 
+                            new URLSearchParams(window.location.search).get('consultationId')
+      
+      if (!consultationId) {
+        console.error('No consultation ID found')
+        return
+      }
+      
+      console.log('Saving biology data to DB, ID:', consultationId)
+      
+      // Get existing data to merge
+      const existingData = await consultationDataService.getAllData()
+      
+      // Build documents structure
+      const documentsData = {
+        consultation: existingData?.workflowResult?.consultation || {},
+        prescriptions: {
+          medication: existingData?.workflowResult?.prescriptions?.medication || {},
+          biology: updatedBiology,
+          imaging: existingData?.workflowResult?.prescriptions?.imaging || {}
+        },
+        generatedAt: existingData?.workflowResult?.generatedAt || new Date().toISOString(),
+        lastModified: new Date().toISOString()
+      }
+      
+      // Save to database
+      const result = await consultationDataService.saveToSupabase(
+        consultationId,
+        4, // documents_data
+        documentsData
+      )
+      
+      console.log('Biology save result:', result)
+      
+      if (!result) {
+        console.error('Failed to save biology data to database')
+      }
       
     } catch (error) {
       console.error('Error saving biology:', error)
