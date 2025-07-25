@@ -207,14 +207,13 @@ export default function ConsultationEditor({
     registration: consultationData?.header?.registration || "COUNCIL-MU-2024-001",
     institution: consultationData?.header?.institution || "Centre Médical Maurice",
     
-    // Patient
+    // Patient - REMOVED idNumber
     firstName: consultationData?.patient?.firstName || "",
     lastName: consultationData?.patient?.lastName || "",
     age: consultationData?.patient?.age || "",
     sex: consultationData?.patient?.sex || "",
     address: consultationData?.patient?.address || "Adresse à compléter - Maurice",
     phone: consultationData?.patient?.phone || "Téléphone à renseigner",
-    idNumber: consultationData?.patient?.idNumber || "Carte d'identité mauricienne",
     weight: consultationData?.patient?.weight || "",
     height: consultationData?.patient?.height || "",
     allergies: consultationData?.patient?.allergies || "Aucune",
@@ -250,7 +249,7 @@ export default function ConsultationEditor({
       registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || consultationData?.header?.registration || "COUNCIL-MU-2024-001",
       institution: doctorData?.institution || doctorData?.clinic_name || consultationData?.header?.institution || "Centre Médical Maurice",
       
-      // Patient - complete info from all sources with fixed sex field
+      // Patient - complete info from all sources with fixed sex field - REMOVED idNumber
       firstName: patientData?.firstName || consultationData?.patient?.firstName || "",
       lastName: patientData?.lastName || consultationData?.patient?.lastName || "",
       age: patientData?.age ? `${patientData.age} ans` : consultationData?.patient?.age || "",
@@ -277,7 +276,6 @@ export default function ConsultationEditor({
       // Get phone number from patient data with multiple fallbacks
       phone: patientData?.phone || patientData?.phoneNumber || patientData?.phone_number || 
              consultationData?.patient?.phone || "Téléphone à renseigner",
-      idNumber: patientData?.idNumber || patientData?.id_number || consultationData?.patient?.idNumber || "Carte d'identité mauricienne",
       weight: patientData?.weight || consultationData?.patient?.weight || "",
       height: patientData?.height || consultationData?.patient?.height || "",
       allergies: (() => {
@@ -329,7 +327,7 @@ export default function ConsultationEditor({
         sex: formData.sex,
         address: formData.address,
         phone: formData.phone,
-        idNumber: formData.idNumber,
+        // REMOVED idNumber from here
         weight: formData.weight,
         height: formData.height,
         allergies: formData.allergies
@@ -520,16 +518,8 @@ export default function ConsultationEditor({
                 className="mt-1"
               />
             </div>
-            <div>
-              <Label htmlFor="idNumber">N° Carte d'identité</Label>
-              <Input
-                id="idNumber"
-                value={formData.idNumber}
-                onChange={(e) => handleInputChange('idNumber', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
+            {/* REMOVED ID Number field */}
+            <div className="md:col-span-2">
               <Label htmlFor="allergies">Allergies</Label>
               <Input
                 id="allergies"
