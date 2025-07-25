@@ -22,6 +22,7 @@ import {
   Eye,
   AlertCircle
 } from "lucide-react"
+import { consultationDataService } from "@/lib/consultation-data-service"
 
 export default function BiologyEditor({ 
   biologyData, 
@@ -33,6 +34,8 @@ export default function BiologyEditor({
   diagnosisData,
   doctorData
 }) {
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  
   // Initialize prescriptions from diagnosis data
   const buildInitialPrescriptions = () => {
     const prescriptions = []
@@ -178,6 +181,7 @@ export default function BiologyEditor({
       ...prev,
       [field]: value
     }))
+    setHasUnsavedChanges(true)
   }
 
   const handlePrescriptionChange = (index, field, value) => {
@@ -187,6 +191,7 @@ export default function BiologyEditor({
         i === index ? { ...prescription, [field]: value } : prescription
       )
     }))
+    setHasUnsavedChanges(true)
   }
 
   const addPrescription = () => {
@@ -207,6 +212,7 @@ export default function BiologyEditor({
       ...prev,
       prescriptions: [...prev.prescriptions, newPrescription]
     }))
+    setHasUnsavedChanges(true)
   }
 
   const removePrescription = (index) => {
@@ -214,29 +220,43 @@ export default function BiologyEditor({
       ...prev,
       prescriptions: prev.prescriptions.filter((_, i) => i !== index)
     }))
+    setHasUnsavedChanges(true)
   }
 
-  const handleSave = () => {
-    const updatedBiology = {
-      header: {
-        title: formData.title,
-        subtitle: formData.subtitle,
-        date: formData.date,
-        number: formData.number,
-        physician: formData.physician,
-        registration: formData.registration
-      },
-      patient: {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        age: formData.age,
-        address: formData.address
-      },
-      prescriptions: formData.prescriptions
+  const handleSave = async () => {
+    try {
+      const updatedBiology = {
+        header: {
+          title: formData.title,
+          subtitle: formData.subtitle,
+          date: formData.date,
+          number: formData.number,
+          physician: formData.physician,
+          registration: formData.registration
+        },
+        patient: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          age: formData.age,
+          address: formData.address
+        },
+        prescriptions: formData.prescriptions
+      }
+      
+      console.log('Saving biology data:', updatedBiology)
+      
+      // Keep existing save logic
+      onSave('biology', updatedBiology)
+      setHasUnsavedChanges(false)
+      
+      // Save biology data to database
+      await consultationDataService.saveStepData(4, {
+        biology: updatedBiology
+      })
+      
+    } catch (error) {
+      console.error('Error saving biology:', error)
     }
-    
-    console.log('Saving biology data:', updatedBiology)
-    onSave('biology', updatedBiology)
   }
 
   return (
