@@ -130,7 +130,7 @@ class ConsultationDataService {
       console.log('saveToSupabase called with:', {
         consultationId,
         stepNumber,
-        data
+        dataKeys: Object.keys(data)
       })
 
       const fieldMap: { [key: number]: string } = {
@@ -147,26 +147,34 @@ class ConsultationDataService {
         return false
       }
 
-      // First check if the consultation exists
+      // Get consultation details with better error handling
       const { data: consultation, error: consultationError } = await supabase
         .from('consultations')
-        .select('id, patient_id, doctor_id, created_at') // Add created_at here
+        .select('id, patient_id, doctor_id, created_at')
         .eq('id', consultationId)
         .single()
 
-      console.log('Consultation lookup:', { consultation, consultationError })
+      console.log('Consultation lookup result:', { consultation, consultationError })
 
-      if (consultationError || !consultation) {
+      if (consultationError) {
+        console.error('Consultation lookup error:', consultationError)
+        if (consultationError.message.includes('401')) {
+          console.error('Authentication failed - check Supabase keys')
+        }
+        return false
+      }
+
+      if (!consultation) {
         console.error('Consultation not found:', consultationId)
         return false
       }
 
-      // Check if record exists
+      // Check if record exists - use maybeSingle to avoid error
       const { data: existingRecord, error: checkError } = await supabase
         .from('consultation_records')
         .select('id, completed_steps')
         .eq('consultation_id', consultationId)
-        .single()
+        .maybeSingle()
 
       console.log('Existing record check:', { existingRecord, checkError })
 
@@ -181,50 +189,75 @@ class ConsultationDataService {
           completedSteps.push(stepNumber)
         }
 
-        const { data: updateData, error: updateError } = await supabase
+        const updateData: any = {
+          [field]: data,
+          workflow_step: stepNumber,
+          completed_steps: completedSteps,
+          updated_at: new Date().toISOString()
+        }
+
+        if (stepNumber === 4) {
+          updateData.consultation_date = consultation.created_at
+        }
+
+        const { data: updateResult, error: updateError } = await supabase
           .from('consultation_records')
-          .update({
-            [field]: data,
-            workflow_step: stepNumber,
-            completed_steps: completedSteps,
-            consultation_date: consultation.created_at, // Add this line
-            updated_at: new Date().toISOString()
-          })
+          .update(updateData)
           .eq('consultation_id', consultationId)
           .select()
+          .single()
 
-        console.log('Update result:', { updateData, updateError })
+        console.log('Update result:', { updateResult, updateError })
         
-        if (updateError) throw updateError
-        result = updateData
+        if (updateError) {
+          console.error('Update error:', updateError)
+          return false
+        }
+        
+        result = updateResult
       } else {
         // Create new record
         console.log('Creating new record')
         
-        const { data: insertData, error: insertError } = await supabase
-          .from('consultation_records')
-          .insert({
-            consultation_id: consultationId,
-            patient_id: consultation.patient_id,
-            doctor_id: consultation.doctor_id,
-            consultation_date: consultation.created_at, // Add this line
-            [field]: data,
-            workflow_step: stepNumber,
-            completed_steps: [stepNumber],
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          })
-          .select()
+        const insertData: any = {
+          consultation_id: consultationId,
+          patient_id: consultation.patient_id,
+          doctor_id: consultation.doctor_id,
+          consultation_date: consultation.created_at,
+          [field]: data,
+          workflow_step: stepNumber,
+          completed_steps: [stepNumber],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
 
-        console.log('Insert result:', { insertData, insertError })
+        const jsonbFields = ['patient_data', 'clinical_data', 'questions_data', 'diagnosis_data']
+        jsonbFields.forEach(f => {
+          if (f !== field && f !== 'documents_data') {
+            insertData[f] = {}
+          }
+        })
+
+        const { data: insertResult, error: insertError } = await supabase
+          .from('consultation_records')
+          .insert(insertData)
+          .select()
+          .single()
+
+        console.log('Insert result:', { insertResult, insertError })
         
-        if (insertError) throw insertError
-        result = insertData
+        if (insertError) {
+          console.error('Insert error:', insertError)
+          return false
+        }
+        
+        result = insertResult
       }
 
+      console.log('✅ Successfully saved to Supabase')
       return true
     } catch (error) {
-      console.error('Error in saveToSupabase:', error)
+      console.error('❌ Error in saveToSupabase:', error)
       return false
     }
   }
