@@ -935,8 +935,10 @@ CONTEXTE MAURICIEN SPÉCIALISÉ :
 INSTRUCTIONS GÉNÉRALES POUR L’ANALYSE DIAGNOSTIQUE :
 - Évalue d’abord les pathologies les plus courantes et bénignes compatibles avec les symptômes (infections virales, effets médicamenteux, syndromes fonctionnels, etc.).
 - Prends en compte les traitements en cours, les habitudes de vie et les antécédents pour expliquer les symptômes.
-- Ne propose des pathologies graves ou rares (p. ex. cholécystite, infarctus, méningite) que si des signes d’alarme cliniques ou des examens paracliniques orientent vers ces diagnostics (fièvre, douleur localisée, anomalies biologiques/imagerie).
-- Attribue une probabilité à chaque diagnostic en fonction de sa fréquence et des données disponibles, et indique clairement les incertitudes lorsque les informations sont insuffisantes. avec cela ca suffira pour faire un outil de grande qualité et de ne pas passé a cote de rien 
+- Ne propose des pathologies graves ou rares (p. ex. cholécystite, infarctus, méningite) que si des signes d’alarme cliniques ou des examens paracliniques orientent vers ces diagnostics (fièvre, douleur localisée, anomalies biologiques/imagerie).
+- Attribue une probabilité à chaque diagnostic en fonction de sa fréquence et des données disponibles, et indique clairement les incertitudes lorsque les informations sont insuffisantes.
+- **Pour chaque diagnostic différentiel**, indique la **stratégie pour l’écarter** : précisez les éléments cliniques qui jouent contre ce diagnostic, et listez les examens ou tests spécifiques (biologie, imagerie, scores cliniques) permettant de le confirmer ou de l’exclure.
+- Pour le diagnostic principal, fournis une présentation complète : explique la pathophysiologie en détail, décris le tableau clinique typique, mentionne les examens diagnostiques clés à réaliser, résume la prise en charge initiale basée sur les guidelines internationales, et donne des conseils de suivi et d’éducation du patient.
 
 MISSION EXPERTE : Génère une analyse médicale de niveau EXPERT INTERNATIONAL avec examens et traitements ultra-spécifiques au diagnostic.
 
