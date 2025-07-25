@@ -24,6 +24,7 @@ import {
   Zap,
   Activity
 } from "lucide-react"
+import { consultationDataService } from "@/lib/consultation-data-service"
 
 export default function ParaclinicalEditor({ 
   paraclinicalData, 
@@ -35,6 +36,8 @@ export default function ParaclinicalEditor({
   diagnosisData,
   doctorData
 }) {
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  
   // Initialize prescriptions from diagnosis data
   const buildInitialPrescriptions = () => {
     const prescriptions = []
@@ -313,6 +316,7 @@ export default function ParaclinicalEditor({
       ...prev,
       [field]: value
     }))
+    setHasUnsavedChanges(true)
   }
 
   const handlePrescriptionChange = (index, field, value) => {
@@ -322,6 +326,7 @@ export default function ParaclinicalEditor({
         i === index ? { ...prescription, [field]: value } : prescription
       )
     }))
+    setHasUnsavedChanges(true)
   }
 
   const addPrescription = () => {
@@ -342,6 +347,7 @@ export default function ParaclinicalEditor({
       ...prev,
       prescriptions: [...prev.prescriptions, newPrescription]
     }))
+    setHasUnsavedChanges(true)
   }
 
   const removePrescription = (index) => {
@@ -349,29 +355,43 @@ export default function ParaclinicalEditor({
       ...prev,
       prescriptions: prev.prescriptions.filter((_, i) => i !== index)
     }))
+    setHasUnsavedChanges(true)
   }
 
-  const handleSave = () => {
-    const updatedParaclinical = {
-      header: {
-        title: formData.title,
-        subtitle: formData.subtitle,
-        date: formData.date,
-        number: formData.number,
-        physician: formData.physician,
-        registration: formData.registration
-      },
-      patient: {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        age: formData.age,
-        address: formData.address
-      },
-      prescriptions: formData.prescriptions
+  const handleSave = async () => {
+    try {
+      const updatedParaclinical = {
+        header: {
+          title: formData.title,
+          subtitle: formData.subtitle,
+          date: formData.date,
+          number: formData.number,
+          physician: formData.physician,
+          registration: formData.registration
+        },
+        patient: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          age: formData.age,
+          address: formData.address
+        },
+        prescriptions: formData.prescriptions
+      }
+      
+      console.log('Saving paraclinical data:', updatedParaclinical)
+      
+      // Keep existing save logic
+      onSave('paraclinical', updatedParaclinical)
+      setHasUnsavedChanges(false)
+      
+      // Save paraclinical/imaging data to database
+      await consultationDataService.saveStepData(4, {
+        imaging: updatedParaclinical
+      })
+      
+    } catch (error) {
+      console.error('Error saving paraclinical:', error)
     }
-    
-    console.log('Saving paraclinical data:', updatedParaclinical)
-    onSave('paraclinical', updatedParaclinical)
   }
 
   return (
