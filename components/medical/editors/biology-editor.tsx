@@ -105,7 +105,6 @@ export default function BiologyEditor({
     lastName: patientData?.lastName || biologyData?.patient?.lastName || "",
     age: patientData?.age ? `${patientData.age} ans` : biologyData?.patient?.age || "",
     address: patientData?.address || biologyData?.patient?.address || "Adresse à compléter - Maurice",
-    idNumber: patientData?.idNumber || biologyData?.patient?.idNumber || "Carte d'identité mauricienne",
     
     // Prescriptions - Initialize from diagnosis data
     prescriptions: biologyData?.prescriptions || buildInitialPrescriptions()
@@ -125,7 +124,6 @@ export default function BiologyEditor({
         lastName: patientData?.lastName || biologyData?.patient?.lastName || prev.lastName,
         age: patientData?.age ? `${patientData.age} ans` : biologyData?.patient?.age || prev.age,
         address: patientData?.address || biologyData?.patient?.address || prev.address,
-        idNumber: patientData?.idNumber || biologyData?.patient?.idNumber || prev.idNumber,
         prescriptions: biologyData?.prescriptions || (prev.prescriptions.length === 0 ? buildInitialPrescriptions() : prev.prescriptions)
       }))
     }
@@ -232,8 +230,7 @@ export default function BiologyEditor({
         firstName: formData.firstName,
         lastName: formData.lastName,
         age: formData.age,
-        address: formData.address,
-        idNumber: formData.idNumber
+        address: formData.address
       },
       prescriptions: formData.prescriptions
     }
@@ -352,26 +349,15 @@ export default function BiologyEditor({
               />
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="address">Adresse</Label>
-              <Textarea
-                id="address"
-                value={formData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
-                className="mt-1"
-                rows={2}
-              />
-            </div>
-            <div>
-              <Label htmlFor="idNumber">N° Carte d'identité</Label>
-              <Input
-                id="idNumber"
-                value={formData.idNumber}
-                onChange={(e) => handleInputChange('idNumber', e.target.value)}
-                className="mt-1"
-              />
-            </div>
+          <div>
+            <Label htmlFor="address">Adresse</Label>
+            <Textarea
+              id="address"
+              value={formData.address}
+              onChange={(e) => handleInputChange('address', e.target.value)}
+              className="mt-1"
+              rows={2}
+            />
           </div>
         </CardContent>
       </Card>
