@@ -2,190 +2,51 @@ import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
 
-// ===== DIAGNOSTIC ULTRA-DÉTAILLÉ =====
-async function performUltraDetailedDiagnostic() {
-  const diagnostic = {
-    timestamp: new Date().toISOString(),
-    environment: {},
-    openai: {},
-    network: {},
-    errors: []
-  }
-
+// ===== DIAGNOSTIC SIMPLIFIÉ =====
+async function quickOpenAIDiagnostic() {
   try {
-    // 1. DIAGNOSTIC ENVIRONNEMENT
-    console.log("🔍 === DIAGNOSTIC ENVIRONNEMENT ===")
-    
     const apiKey = process.env.OPENAI_API_KEY
-    diagnostic.environment = {
-      nodeVersion: process.version,
-      platform: process.platform,
-      hasOpenAIKey: !!apiKey,
-      keyLength: apiKey?.length || 0,
-      keyFormat: apiKey?.startsWith('sk-') ? 'correct' : 'incorrect',
-      keyPreview: apiKey ? `${apiKey.substring(0, 7)}...${apiKey.substring(apiKey.length - 4)}` : 'none'
-    }
-    
-    console.log("📊 Environnement:", diagnostic.environment)
-
-    // 2. TEST CONFIGURATION OPENAI
-    console.log("🔍 === TEST CONFIGURATION OPENAI ===")
     
     if (!apiKey) {
-      throw new Error("❌ OPENAI_API_KEY non définie")
+      return { working: false, error: "Clé API manquante" }
     }
-
+    
     if (!apiKey.startsWith('sk-')) {
-      throw new Error("❌ OPENAI_API_KEY ne commence pas par 'sk-'")
+      return { working: false, error: "Format clé API invalide" }
     }
 
-    if (apiKey.length < 50) {
-      throw new Error("❌ OPENAI_API_KEY trop courte")
+    // Test simple
+    const { text } = await generateText({
+      model: openai("gpt-4o"),
+      prompt: "Répondez: TEST_OK",
+      temperature: 0,
+      maxTokens: 10,
+    })
+
+    return { 
+      working: true, 
+      response: text,
+      keyPreview: `${apiKey.substring(0, 7)}...${apiKey.substring(apiKey.length - 4)}`
     }
-
-    // 3. TEST INITIALISATION SDK
-    console.log("🔍 === TEST SDK VERCEL AI ===")
     
-    try {
-      const model = openai("gpt-4o")
-      diagnostic.openai.sdkInitialization = "success"
-      console.log("✅ SDK Vercel AI initialisé")
-    } catch (sdkError: any) {
-      diagnostic.openai.sdkInitialization = "failed"
-      diagnostic.errors.push(`SDK Error: ${sdkError.message}`)
-      throw sdkError
-    }
-
-    // 4. TEST CONNEXION SIMPLE
-    console.log("🔍 === TEST CONNEXION SIMPLE ===")
-    
-    const startTime = Date.now()
-    
-    try {
-      const { text, usage, finishReason } = await generateText({
-        model: openai("gpt-4o"),
-        prompt: "Répondez simplement: TEST_OK_2024",
-        temperature: 0,
-        maxTokens: 10,
-      })
-
-      const endTime = Date.now()
-      
-      diagnostic.openai.simpleTest = {
-        success: true,
-        responseTime: endTime - startTime,
-        response: text,
-        usage: usage,
-        finishReason: finishReason,
-        responseLength: text.length
-      }
-      
-      console.log("✅ Test connexion simple réussi:", {
-        response: text,
-        time: endTime - startTime + "ms",
-        usage: usage
-      })
-
-    } catch (connectionError: any) {
-      diagnostic.openai.simpleTest = {
-        success: false,
-        error: connectionError.message,
-        errorType: connectionError.name,
-        errorCode: connectionError.code,
-        responseTime: Date.now() - startTime
-      }
-      
-      console.error("❌ Test connexion simple échoué:", {
-        message: connectionError.message,
-        name: connectionError.name,
-        code: connectionError.code
-      })
-      
-      throw connectionError
-    }
-
-    // 5. TEST GÉNÉRATION COMPLEXE
-    console.log("🔍 === TEST GÉNÉRATION COMPLEXE ===")
-    
-    const complexStartTime = Date.now()
-    
-    try {
-      const complexPrompt = `Générez un JSON simple avec une question médicale:
-      
-[{"id": 1, "question": "Test question", "type": "yes_no"}]
-
-Répondez UNIQUEMENT avec le JSON.`
-
-      const { text: complexText } = await generateText({
-        model: openai("gpt-4o"),
-        prompt: complexPrompt,
-        temperature: 0.1,
-        maxTokens: 200,
-      })
-
-      const complexEndTime = Date.now()
-      
-      // Test parsing JSON
-      let jsonParsed = false
-      let parsedData = null
-      
-      try {
-        const cleanText = complexText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim()
-        const jsonMatch = cleanText.match(/\[[\s\S]*\]/)
-        if (jsonMatch) {
-          parsedData = JSON.parse(jsonMatch[0])
-          jsonParsed = true
-        }
-      } catch (parseError) {
-        console.log("⚠️ Erreur parsing JSON:", parseError)
-      }
-
-      diagnostic.openai.complexTest = {
-        success: true,
-        responseTime: complexEndTime - complexStartTime,
-        response: complexText.substring(0, 200),
-        fullResponseLength: complexText.length,
-        jsonParsed: jsonParsed,
-        parsedQuestions: parsedData?.length || 0
-      }
-      
-      console.log("✅ Test génération complexe réussi:", {
-        time: complexEndTime - complexStartTime + "ms",
-        jsonParsed: jsonParsed,
-        questions: parsedData?.length || 0
-      })
-
-    } catch (complexError: any) {
-      diagnostic.openai.complexTest = {
-        success: false,
-        error: complexError.message,
-        errorType: complexError.name,
-        responseTime: Date.now() - complexStartTime
-      }
-      
-      console.error("❌ Test génération complexe échoué:", complexError.message)
-      throw complexError
-    }
-
-    return diagnostic
-
   } catch (error: any) {
-    diagnostic.errors.push(`Global Error: ${error.message}`)
-    console.error("❌ Diagnostic échoué:", error.message)
-    return diagnostic
+    return { 
+      working: false, 
+      error: error.message,
+      errorType: error.name
+    }
   }
 }
 
 export async function POST(request: NextRequest) {
-  console.log("🚀 === DÉBUT DIAGNOSTIC ULTRA-DÉTAILLÉ ===")
-  
-  // ÉTAPE 0: DIAGNOSTIC COMPLET
-  const diagnostic = await performUltraDetailedDiagnostic()
-  
   try {
+    console.log("🔍 API Questions Ultra-Personnalisées - Début")
+
+    // 1. PARSE REQUEST
     let requestData: {
       patientData?: any
       clinicalData?: any
+      language?: string
     }
 
     try {
@@ -193,236 +54,271 @@ export async function POST(request: NextRequest) {
       console.log("📝 Données reçues:", Object.keys(requestData))
     } catch (parseError) {
       return NextResponse.json({
-        error: "Format JSON invalide",
         success: false,
-        diagnostic: diagnostic
+        error: "Format JSON invalide",
+        ai_suggestions: []
       }, { status: 400 })
     }
 
     const { patientData, clinicalData } = requestData
 
-    // Analyse des données (version simplifiée pour le diagnostic)
-    const knownInfo = {
-      demographics: {
-        hasAge: !!patientData?.age,
-        hasGender: !!patientData?.gender,
-        age: patientData?.age,
-        gender: patientData?.gender
-      },
-      currentSymptoms: {
-        hasChiefComplaint: !!clinicalData?.chiefComplaint,
-        chiefComplaint: clinicalData?.chiefComplaint || ""
-      },
-      medicalHistory: {
-        hasAntecedents: !!(patientData?.medicalHistory?.length > 0),
-        specificConditions: patientData?.medicalHistory || []
-      }
-    }
+    // 2. DIAGNOSTIC OPENAI RAPIDE
+    const aiDiagnostic = await quickOpenAIDiagnostic()
+    console.log("🤖 Diagnostic OpenAI:", aiDiagnostic.working ? "✅ OK" : `❌ ${aiDiagnostic.error}`)
 
+    // 3. ANALYSE DONNÉES PATIENT
+    const knownInfo = analyzePatientData(patientData, clinicalData)
+
+    // 4. GÉNÉRATION QUESTIONS
     let questions = []
-    let generationMethod = "none"
-    let generationError = null
+    let generationMethod = "fallback"
+    let errorDetails = null
 
-    // ÉTAPE 1: Tentative génération IA (seulement si diagnostic OK)
-    if (diagnostic.openai.simpleTest?.success && diagnostic.openai.complexTest?.success) {
+    if (aiDiagnostic.working) {
       try {
-        console.log("🤖 Tentative génération IA (diagnostic OK)...")
-        
-        const prompt = buildSimplePrompt(patientData, clinicalData, knownInfo)
-        
-        const { text } = await generateText({
-          model: openai("gpt-4o"),
-          prompt: prompt,
-          temperature: 0.1,
-          maxTokens: 2000,
-        })
-
-        console.log("📝 Réponse IA reçue:", text.substring(0, 200))
-
-        // Parse JSON
-        const cleanText = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim()
-        const jsonMatch = cleanText.match(/\[[\s\S]*\]/)
-
-        if (jsonMatch) {
-          questions = JSON.parse(jsonMatch[0])
-          generationMethod = "openai_success"
-          console.log(`✅ ${questions.length} questions IA générées`)
-        } else {
-          throw new Error("Pas de JSON valide dans la réponse")
-        }
-
-      } catch (aiGenerationError: any) {
-        console.error("❌ Erreur génération IA:", aiGenerationError.message)
-        generationError = aiGenerationError.message
-        generationMethod = "ai_failed"
-        questions = generateSimpleFallbackQuestions(patientData, clinicalData, knownInfo)
+        console.log("🤖 Génération questions IA...")
+        questions = await generateQuestionsWithAI(patientData, clinicalData, knownInfo)
+        generationMethod = "openai"
+        console.log(`✅ ${questions.length} questions IA générées`)
+      } catch (aiError: any) {
+        console.error("❌ Erreur génération IA:", aiError.message)
+        errorDetails = aiError.message
+        questions = generateFallbackQuestions(patientData, clinicalData, knownInfo)
       }
     } else {
-      console.log("⚠️ Diagnostic IA échoué, utilisation fallback direct")
-      generationMethod = "diagnostic_failed"
-      questions = generateSimpleFallbackQuestions(patientData, clinicalData, knownInfo)
+      console.log("⚠️ OpenAI indisponible, utilisation fallback")
+      errorDetails = aiDiagnostic.error
+      questions = generateFallbackQuestions(patientData, clinicalData, knownInfo)
     }
 
-    // ÉTAPE 2: Assurer un minimum de questions
-    if (questions.length === 0) {
-      console.log("🔄 Génération questions de secours...")
-      questions = [
-        {
-          id: 1,
-          question: "Sur une échelle de 1 à 10, comment évaluez-vous l'intensité de vos symptômes actuels ?",
-          type: "scale",
-          category: "symptom_severity",
-          priority: "high"
-        },
-        {
-          id: 2,
-          question: "Ces symptômes interfèrent-ils avec vos activités quotidiennes ?",
-          type: "yes_no",
-          category: "functional_impact",
-          priority: "high"
-        }
-      ]
-      generationMethod = "emergency_fallback"
-    }
-
+    // 5. FORMATAGE RÉPONSE COMPATIBLE CLIENT
     const response = {
       success: true,
       timestamp: new Date().toISOString(),
-      questions: questions.slice(0, 8),
-      diagnostic: diagnostic,
-      generation: {
-        method: generationMethod,
-        error: generationError,
-        questionCount: questions.length,
-        aiWorking: diagnostic.openai.simpleTest?.success || false
-      },
+      ai_suggestions: questions, // ← FORMAT ATTENDU PAR LE CLIENT
+      questions: questions, // ← Garde aussi l'ancien format
       metadata: {
-        personalizationLevel: generationMethod.includes('openai') ? "IA Ultra-Personnalisé" : "Fallback Structuré",
-        aiGenerated: generationMethod === "openai_success"
+        aiGenerated: generationMethod === "openai",
+        generationMethod: generationMethod,
+        openaiWorking: aiDiagnostic.working,
+        error: errorDetails,
+        questionCount: questions.length,
+        specificityLevel: "Ultra-Personnalisé",
+        diagnostic: {
+          openaiStatus: aiDiagnostic.working ? "✅ Fonctionnel" : `❌ ${aiDiagnostic.error}`,
+          keyPreview: aiDiagnostic.keyPreview
+        }
       }
     }
 
-    console.log(`🎯 RÉSULTAT: ${questions.length} questions générées via ${generationMethod}`)
+    console.log(`🎯 SUCCÈS: ${questions.length} questions générées via ${generationMethod}`)
     
     return NextResponse.json(response)
 
   } catch (globalError: any) {
-    console.error("❌ ERREUR GLOBALE:", globalError)
+    console.error("❌ ERREUR GLOBALE:", globalError.message)
     
     return NextResponse.json({
+      success: false,
       error: "Erreur lors de la génération des questions",
       details: globalError.message,
-      success: false,
-      diagnostic: diagnostic,
+      ai_suggestions: [], // ← FORMAT COMPATIBLE MÊME EN ERREUR
+      questions: [],
       timestamp: new Date().toISOString()
     }, { status: 500 })
   }
 }
 
-// ===== FONCTIONS AUXILIAIRES SIMPLIFIÉES =====
+// ===== FONCTIONS AUXILIAIRES =====
 
-function buildSimplePrompt(patientData: any, clinicalData: any, knownInfo: any): string {
-  const age = patientData?.age || "non spécifié"
-  const gender = patientData?.gender || "non spécifié"
-  const complaint = clinicalData?.chiefComplaint || "non spécifié"
+function analyzePatientData(patientData: any, clinicalData: any) {
+  return {
+    age: patientData?.age || 0,
+    gender: patientData?.gender || "",
+    complaint: clinicalData?.chiefComplaint || "",
+    hasAntecedents: !!(patientData?.medicalHistory?.length > 0),
+    antecedents: patientData?.medicalHistory || [],
+    urgencyLevel: assessUrgency(clinicalData)
+  }
+}
 
-  return `Générez exactement 6 questions médicales ultra-spécifiques pour ce patient:
+function assessUrgency(clinicalData: any): string {
+  const complaint = (clinicalData?.chiefComplaint || "").toLowerCase()
+  
+  if (complaint.includes('douleur thoracique') || 
+      complaint.includes('essoufflement sévère') || 
+      complaint.includes('perte de conscience')) {
+    return "urgent"
+  }
+  
+  if (clinicalData?.painScale > 8) return "urgent"
+  if (clinicalData?.painScale > 6) return "semi-urgent"
+  
+  return "standard"
+}
 
-PROFIL PATIENT:
-- Âge: ${age} ans
-- Sexe: ${gender}  
-- Motif: ${complaint}
+async function generateQuestionsWithAI(patientData: any, clinicalData: any, knownInfo: any) {
+  const prompt = buildPrompt(patientData, clinicalData, knownInfo)
 
-CONSIGNES:
-1. Questions spécifiques à l'âge, sexe et symptôme
-2. Pas de questions génériques
-3. Format JSON uniquement
-4. Réponse UNIQUEMENT le JSON, rien d'autre
+  const { text } = await generateText({
+    model: openai("gpt-4o"),
+    prompt: prompt,
+    temperature: 0.1,
+    maxTokens: 2500,
+  })
 
-FORMAT:
+  // Parse JSON
+  const cleanText = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim()
+  const jsonMatch = cleanText.match(/\[[\s\S]*\]/)
+
+  if (jsonMatch) {
+    const aiQuestions = JSON.parse(jsonMatch[0])
+    
+    // Filtrer et améliorer
+    return aiQuestions
+      .filter(q => q.question && q.question.length > 20) // Éviter questions trop courtes
+      .map((q, index) => ({
+        ...q,
+        id: index + 1,
+        aiGenerated: true,
+        specificityScore: calculateSpecificity(q, knownInfo)
+      }))
+      .slice(0, 8)
+  }
+
+  throw new Error("Aucun JSON valide trouvé dans la réponse IA")
+}
+
+function buildPrompt(patientData: any, clinicalData: any, knownInfo: any): string {
+  const age = knownInfo.age
+  const gender = knownInfo.gender
+  const complaint = knownInfo.complaint
+
+  return `Générez 6 questions médicales ULTRA-SPÉCIFIQUES pour ce patient:
+
+PROFIL UNIQUE:
+- ${gender} de ${age} ans
+- Motif: "${complaint}"
+- Antécédents: ${knownInfo.antecedents.join(', ') || 'Aucun'}
+
+🎯 EXIGENCES ABSOLUES:
+1. Chaque question DOIT mentionner l'âge, le sexe OU le symptôme spécifique
+2. Aucune question générique type "Comment vous sentez-vous ?"
+3. Questions adaptées à l'âge (pédiatrique si <18, gériatrique si >65)
+4. Exploiter le symptôme "${complaint}" pour diagnostic différentiel
+
+EXEMPLES TRANSFORMATION:
+❌ "Avez-vous des douleurs ?"
+✅ "Cette douleur abdominale chez un ${gender.toLowerCase()} de ${age} ans irradie-t-elle vers le dos ?"
+
+❌ "Comment ça va ?"
+✅ "À ${age} ans, cette fatigue vous empêche-t-elle de monter les escaliers ?"
+
+FORMAT JSON STRICT:
 [
   {
     "id": 1,
-    "question": "Question spécifique mentionnant âge/sexe/symptôme",
+    "question": "Question ULTRA-spécifique mentionnant âge/sexe/symptôme précis",
     "type": "multiple_choice",
-    "options": ["Option 1", "Option 2", "Option 3"],
-    "category": "specific_category",
-    "priority": "high"
+    "options": ["Option médicalement précise 1", "Option 2", "Option 3"],
+    "category": "diagnostic_specifique",
+    "priority": "high",
+    "rationale": "Pourquoi cruciale pour CE patient de ${age} ans"
   }
 ]
 
-Générez maintenant le JSON pour ce patient de ${age} ans avec "${complaint}".`
+Générez maintenant pour ce ${gender.toLowerCase()} de ${age} ans avec "${complaint}".
+RÉPONDEZ UNIQUEMENT LE JSON, rien d'autre.`
 }
 
-function generateSimpleFallbackQuestions(patientData: any, clinicalData: any, knownInfo: any) {
-  const age = patientData?.age || 0
-  const gender = patientData?.gender || ""
-  const complaint = clinicalData?.chiefComplaint || ""
+function generateFallbackQuestions(patientData: any, clinicalData: any, knownInfo: any) {
+  const age = knownInfo.age
+  const gender = knownInfo.gender
+  const complaint = knownInfo.complaint
 
   const questions = []
 
-  // Question 1: Adaptée à l'âge
+  // Question 1: Spécifique à l'âge
   if (age > 0) {
     if (age <= 18) {
       questions.push({
         id: 1,
-        question: `À ${age} ans, ces symptômes t'empêchent-ils de jouer ou d'aller à l'école normalement ?`,
+        question: `À ${age} ans, ces symptômes t'empêchent-ils de jouer ou d'aller à l'école ?`,
         type: "yes_no",
         category: "pediatric_impact",
         priority: "high",
-        ageSpecific: `${age} ans`
+        ageSpecific: true,
+        specificityScore: 90
       })
     } else if (age > 65) {
       questions.push({
         id: 1,
-        question: `À ${age} ans, ces symptômes affectent-ils votre autonomie au quotidien ?`,
+        question: `À ${age} ans, ces symptômes affectent-ils votre autonomie quotidienne ?`,
         type: "multiple_choice",
         options: ["Beaucoup", "Modérément", "Peu", "Pas du tout"],
         category: "geriatric_autonomy",
         priority: "high",
-        ageSpecific: `${age} ans`
+        ageSpecific: true,
+        specificityScore: 85
       })
     } else {
       questions.push({
         id: 1,
-        question: `Ces symptômes impactent-ils votre travail ou vos activités habituelles ?`,
+        question: `Ces symptômes limitent-ils votre capacité de travail ou vos activités quotidiennes ?`,
         type: "multiple_choice",
-        options: ["Impossibilité totale", "Limitation importante", "Gêne modérée", "Aucun impact"],
+        options: ["Arrêt complet", "Limitation importante", "Gêne légère", "Aucun impact"],
         category: "functional_impact",
-        priority: "high"
+        priority: "high",
+        specificityScore: 70
       })
     }
   }
 
   // Question 2: Spécifique au symptôme
   if (complaint) {
-    if (complaint.toLowerCase().includes('douleur')) {
+    if (complaint.toLowerCase().includes('douleur thoracique')) {
       questions.push({
         id: 2,
-        question: "Cette douleur est-elle constante ou survient-elle par épisodes ?",
+        question: "Cette douleur thoracique irradie-t-elle vers le bras gauche, la mâchoire ou le dos ?",
         type: "multiple_choice",
-        options: ["Constante", "Par épisodes", "Variable selon l'activité", "Autre pattern"],
-        category: "pain_pattern",
+        options: ["Bras gauche", "Mâchoire", "Dos", "Plusieurs zones", "Aucune irradiation"],
+        category: "chest_pain_radiation",
         priority: "high",
-        symptomSpecific: complaint
+        symptomSpecific: true,
+        specificityScore: 95
+      })
+    } else if (complaint.toLowerCase().includes('douleur abdominale')) {
+      questions.push({
+        id: 2,
+        question: "Cette douleur abdominale est-elle localisée ou diffuse dans tout le ventre ?",
+        type: "multiple_choice",
+        options: ["Très localisée (point précis)", "Zone délimitée", "Diffuse", "Change d'endroit"],
+        category: "abdominal_pain_localization",
+        priority: "high",
+        symptomSpecific: true,
+        specificityScore: 90
       })
     } else if (complaint.toLowerCase().includes('fatigue')) {
       questions.push({
         id: 2,
-        question: "Cette fatigue s'améliore-t-elle avec le repos ?",
-        type: "yes_no",
+        question: "Cette fatigue s'améliore-t-elle avec le repos ou persiste-t-elle même au réveil ?",
+        type: "multiple_choice",
+        options: ["S'améliore avec repos", "Persiste au réveil", "Variable", "Empire avec repos"],
         category: "fatigue_pattern",
         priority: "high",
-        symptomSpecific: complaint
+        symptomSpecific: true,
+        specificityScore: 85
       })
     } else {
       questions.push({
         id: 2,
-        question: `Concernant votre ${complaint.toLowerCase()}, dans quelles circonstances est-ce le plus gênant ?`,
-        type: "text",
-        category: "symptom_context",
+        question: `Concernant votre ${complaint.toLowerCase()}, à quel moment est-ce le plus intense ?`,
+        type: "multiple_choice",
+        options: ["Au réveil", "En journée", "Le soir", "La nuit", "Variable"],
+        category: "symptom_timing",
         priority: "high",
-        symptomSpecific: complaint
+        symptomSpecific: true,
+        specificityScore: 75
       })
     }
   }
@@ -431,59 +327,72 @@ function generateSimpleFallbackQuestions(patientData: any, clinicalData: any, kn
   if (gender === "Féminin" && age >= 18 && age <= 50) {
     questions.push({
       id: 3,
-      question: "Ces symptômes sont-ils liés à votre cycle menstruel ?",
+      question: "Ces symptômes sont-ils liés à votre cycle menstruel ou à des changements hormonaux ?",
       type: "multiple_choice",
-      options: ["Oui, clairement liés", "Possiblement liés", "Aucun lien", "Je ne sais pas"],
+      options: ["Clairement liés au cycle", "Possiblement liés", "Aggravés par hormones", "Aucun lien"],
       category: "hormonal_correlation",
       priority: "medium",
-      genderSpecific: "Féminin"
+      genderSpecific: true,
+      specificityScore: 80
     })
   }
 
-  // Compléter avec des questions génériques de haute qualité si nécessaire
-  while (questions.length < 6) {
-    const genericQuestions = [
-      {
-        id: questions.length + 1,
-        question: "Ces symptômes s'aggravent-ils à des moments particuliers de la journée ?",
-        type: "multiple_choice",
-        options: ["Matin", "Après-midi", "Soir", "Nuit", "Aucun pattern"],
-        category: "temporal_pattern",
-        priority: "medium"
-      },
-      {
-        id: questions.length + 1,
-        question: "Avez-vous identifié des facteurs qui déclenchent ou aggravent ces symptômes ?",
-        type: "text",
-        category: "trigger_factors",
-        priority: "medium"
-      },
-      {
-        id: questions.length + 1,
-        question: "Ces symptômes ressemblent-ils à quelque chose que vous avez déjà vécu ?",
-        type: "yes_no",
-        category: "symptom_history",
-        priority: "low"
-      }
-    ]
-    
-    questions.push(genericQuestions[questions.length - 3] || genericQuestions[0])
-  }
+  // Questions d'approfondissement spécifiques
+  questions.push({
+    id: questions.length + 1,
+    question: "Ces symptômes ressemblent-ils exactement à quelque chose que vous avez déjà vécu ?",
+    type: "multiple_choice",
+    options: ["Identiques à un épisode passé", "Similaires mais différents", "Complètement nouveaux", "Je ne sais pas"],
+    category: "symptom_history_comparison",
+    priority: "medium",
+    specificityScore: 70
+  })
 
-  return questions.slice(0, 6)
+  questions.push({
+    id: questions.length + 1,
+    question: "Y a-t-il des facteurs précis qui déclenchent ou aggravent ces symptômes ?",
+    type: "text",
+    category: "trigger_identification",
+    priority: "medium",
+    specificityScore: 65
+  })
+
+  questions.push({
+    id: questions.length + 1,
+    question: "Sur une échelle de 1 à 10, comment ces symptômes affectent-ils votre qualité de vie ?",
+    type: "scale",
+    category: "quality_of_life_impact",
+    priority: "medium",
+    specificityScore: 60
+  })
+
+  return questions.slice(0, 8)
 }
 
-// ===== ROUTE DE TEST SIMPLE =====
+function calculateSpecificity(question: any, knownInfo: any): number {
+  let score = 50 // Base
+  
+  const questionText = question.question.toLowerCase()
+  
+  // Bonus spécificité
+  if (questionText.includes(`${knownInfo.age} ans`)) score += 20
+  if (questionText.includes(knownInfo.gender.toLowerCase())) score += 15
+  if (questionText.includes(knownInfo.complaint.toLowerCase())) score += 20
+  if (question.options && question.options.length > 2) score += 10
+  
+  return Math.min(score, 100)
+}
+
+// ===== ROUTE DE TEST =====
 export async function GET() {
-  console.log("🧪 Test simple OpenAI...")
-  const diagnostic = await performUltraDetailedDiagnostic()
+  const diagnostic = await quickOpenAIDiagnostic()
   
   return NextResponse.json({
-    status: "Diagnostic OpenAI",
+    status: "Test OpenAI",
     timestamp: new Date().toISOString(),
-    diagnostic: diagnostic,
-    recommendation: diagnostic.openai.simpleTest?.success 
-      ? "✅ OpenAI fonctionne correctement"
-      : "❌ Problème détecté avec OpenAI"
+    openai: diagnostic,
+    recommendation: diagnostic.working 
+      ? "✅ OpenAI fonctionne - Clé API valide"
+      : `❌ Problème OpenAI: ${diagnostic.error}`
   })
 }
