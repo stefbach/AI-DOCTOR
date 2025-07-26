@@ -64,9 +64,6 @@ ${
 Tu es un médecin expert sénior avec 25 ans d'expérience en médecine interne et hospitalo-universitaire.
 
 ${comprehensiveContext}
-# 🚑 RÉSUMÉ NARRATIF
-Rédige en plus un champ "narrativeSummary" qui décrit de façon littéraire et fluide toute la consultation : l’histoire du patient, le motif de consultation, l’évolution chronologique des symptômes, les examens pertinents, le raisonnement diagnostique (diagnostic principal et diagnostics différentiels) et le plan thérapeutique et de suivi. Ce résumé doit ressembler à un compte‑rendu médical rédigé par un généraliste expérimenté, utiliser des phrases complètes et être compréhensible pour le patient et pour tout professionnel de santé.
-
 
 INSTRUCTIONS CRITIQUES:
 - Tu DOIS retourner UNIQUEMENT du JSON valide
@@ -164,31 +161,29 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
   },
   "diagnosticAssessment": {
     "clinicalImpression": {
-      "primaryImpression": "${diagnosisData?.diagnosis?.primaryDiagnosis?.condition || "Évaluation diagnostique en cours - analyse experte requise"}",
-      "diagnosticConfidence": "${diagnosisData?.diagnosis?.aiConfidence || 70}% (Niveau expert d'analyse IA)",
-      "clinicalSeverity": "${diagnosisData?.diagnosis?.primaryDiagnosis?.severity || "Sévérité à graduer précisément"}",
+      "primaryImpression": "${diagnosisData?.diagnosis?.primaryDiagnosis?.condition || diagnosisData?.data?.comprehensiveDiagnosis?.primary?.condition || "Évaluation diagnostique en cours - analyse experte requise"}",
+      "diagnosticConfidence": "${diagnosisData?.diagnosis?.aiConfidence || diagnosisData?.data?.comprehensiveDiagnosis?.primary?.confidence || 70}% (Niveau expert d'analyse IA)",
+      "clinicalSeverity": "${diagnosisData?.diagnosis?.primaryDiagnosis?.severity || diagnosisData?.data?.comprehensiveDiagnosis?.primary?.severity || "Sévérité à graduer précisément"}",
       "urgencyLevel": "Niveau d'urgence thérapeutique évalué selon la présentation clinique"
     },
     "primaryDiagnosis": {
-      "condition": "${diagnosisData?.diagnosis?.primaryDiagnosis?.condition || "Diagnostic principal à établir par analyse experte"}",
-      "icdCode": "${diagnosisData?.diagnosis?.primaryDiagnosis?.icd10 || "Code CIM-10 à déterminer"}",
+      "condition": "${diagnosisData?.diagnosis?.primaryDiagnosis?.condition || diagnosisData?.data?.comprehensiveDiagnosis?.primary?.condition || "Diagnostic principal à établir par analyse experte"}",
+      "icdCode": "${diagnosisData?.diagnosis?.primaryDiagnosis?.icd10 || diagnosisData?.data?.comprehensiveDiagnosis?.primary?.icd10 || "Code CIM-10 à déterminer"}",
       "diagnosticCriteria": "Critères diagnostiques utilisés selon les recommandations internationales, expliqués de manière narrative",
      "evidenceSupporting": "Arguments diagnostiques basés sur l'analyse clinique et paraclinique disponible, détaillés et contextualisés",
-    "pathophysiology": "Mécanismes physiopathologiques détaillés selon les connaissances actuelles, décrits de façon pédagogique et accessible",
-
+    "pathophysiology": "Mécanismes physiopathologiques détaillés selon les connaissances actuelles, décrits de façon pédagogique et accessible"
     },
     "differentialDiagnosis": {
      "alternativeDiagnoses": "Diagnostics différentiels principaux avec argumentation détaillée et justification clinique pour chacun",
     "excludedConditions": "Pathologies éliminées avec justification et mention des examens cliniques/paracliniques utilisés pour les exclure",
-   "uncertainAreas": "Zones d'incertitude diagnostique et examens complémentaires à réaliser pour lever ces incertitudes",
+   "uncertainAreas": "Zones d'incertitude diagnostique et examens complémentaires à réaliser pour lever ces incertitudes"
     }
   },
   "investigationsPlan": {
     "laboratoryTests": {
-     "urgentTests": "Examens biologiques urgents avec justification médicale et délais – expliquez pourquoi ces tests sont nécessaires et ce qu’ils peuvent révéler",
+     "urgentTests": "Examens biologiques urgents avec justification médicale et délais – expliquez pourquoi ces tests sont nécessaires et ce qu'ils peuvent révéler",
      "routineTests": "Biologie standard avec objectifs diagnostiques précis, valeurs attendues et interprétation",
-     "specializedTests": "Examens spécialisés selon l'orientation diagnostique, avec explication de leur utilité et de leur disponibilité",
-
+     "specializedTests": "Examens spécialisés selon l'orientation diagnostique, avec explication de leur utilité et de leur disponibilité"
     },
     "imagingStudies": {
       "diagnosticImaging": "Imagerie diagnostique avec protocoles spécifiques et justification",
@@ -230,7 +225,7 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
   },
   "clinicalQualityMetrics": {
     "diagnosticAccuracy": {
-      "aiConfidence": "${diagnosisData?.diagnosis?.aiConfidence || 75}%",
+      "aiConfidence": "${diagnosisData?.diagnosis?.aiConfidence || diagnosisData?.data?.comprehensiveDiagnosis?.primary?.confidence || 75}%",
       "evidenceLevel": "Grade B (Analyse experte basée sur données disponibles)",
       "guidelineAdherence": "Respect des recommandations de bonnes pratiques médicales"
     },
@@ -314,35 +309,42 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
     // Ajout métriques qualité automatiques
     expertReportData = enrichReportWithQualityMetrics(expertReportData, allData)
 
+    // 🚀 CONVERSION VERS STRUCTURE SIMPLE COMPATIBLE
+    const simpleReport = convertExpertToSimpleReport(expertReportData, allData)
+
     console.log("✅ Rapport de consultation EXPERT généré avec succès")
 
     return NextResponse.json({
       success: true,
-      report: expertReportData,
+      data: simpleReport,           // ✅ Structure attendue par le composant
+      expertReport: expertReportData, // 🎁 Données expertes complètes en bonus
       metadata: {
         reportType: "EXPERT_CONSULTATION",
         patientId: `${patientData.lastName}-${patientData.firstName}`,
         consultationDate: new Date().toISOString(),
-        reportLength: JSON.stringify(expertReportData).length,
+        reportLength: JSON.stringify(simpleReport).length,
         generatedAt: new Date().toISOString(),
         model: "gpt-4o-expert",
         tokens: 24000,
         qualityLevel: "EXPERT",
         clinicalComplexity: calculateClinicalComplexity(allData),
         evidenceLevel: diagnosisData?.diagnosis?.evidenceLevel || "Grade B",
-        validationStatus: "EXPERT_VALIDATED"
+        validationStatus: "EXPERT_VALIDATED",
+        compatibilityMode: "SIMPLE_STRUCTURE" // ✅ Indication de conversion
       },
     })
 
   } catch (error) {
     console.error("❌ Erreur génération rapport expert:", error)
 
-    // Fallback expert avancé
+    // Fallback expert avancé avec conversion
     const expertFallbackReport = generateExpertFallbackReport(allData || {})
+    const simpleFallbackReport = convertExpertToSimpleReport(expertFallbackReport, allData || {})
 
     return NextResponse.json({
       success: true,
-      report: expertFallbackReport,
+      data: simpleFallbackReport,      // ✅ Structure compatible
+      expertReport: expertFallbackReport, // 🎁 Données expertes
       fallback: true,
       fallbackType: "EXPERT_FALLBACK",
       error: error instanceof Error ? error.message : "Erreur inconnue",
@@ -351,10 +353,247 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
         generatedAt: new Date().toISOString(),
         fallbackUsed: true,
         qualityLevel: "EXPERT_FALLBACK",
-        errorRecovery: "Fallback expert utilisé avec succès"
+        errorRecovery: "Fallback expert utilisé avec succès",
+        compatibilityMode: "SIMPLE_STRUCTURE"
       },
     })
   }
+}
+
+// 🚀 NOUVELLE FONCTION DE CONVERSION - SOLUTION DU PROBLÈME
+function convertExpertToSimpleReport(expertData: any, allData: any) {
+  console.log("🔄 Conversion rapport expert vers structure simple...")
+  
+  // Extraction sécurisée des données patient
+  const patientName = `${expertData.patientIdentification?.administrativeData?.firstName || allData.patientData?.firstName || ""} ${expertData.patientIdentification?.administrativeData?.lastName || allData.patientData?.lastName || ""}`.trim()
+  
+  // Extraction sécurisée du diagnostic avec toutes les sources possibles
+  const primaryDiagnosis = expertData.diagnosticAssessment?.primaryDiagnosis?.condition || 
+                          expertData.diagnosticAssessment?.clinicalImpression?.primaryImpression ||
+                          allData.diagnosisData?.diagnosis?.primaryDiagnosis?.condition ||
+                          allData.diagnosisData?.data?.comprehensiveDiagnosis?.primary?.condition ||
+                          "Diagnostic à établir par analyse complémentaire"
+
+  // Génération du contenu texte complet structuré
+  const fullContent = `COMPTE-RENDU DE CONSULTATION MÉDICALE SPÉCIALISÉE
+
+═══════════════════════════════════════════════════════════════════════════════
+CENTRE MÉDICAL TIBOK - PLATEFORME IA EXPERT
+${expertData.header?.establishment?.service || "Unité de Médecine Interne"}
+═══════════════════════════════════════════════════════════════════════════════
+
+PRATICIEN: ${expertData.header?.physician?.name || "Dr. TIBOK IA DOCTOR"}
+TITRE: ${expertData.header?.physician?.title || "Praticien Expert IA"}
+DATE: ${expertData.header?.date || new Date().toLocaleDateString("fr-FR")}
+HEURE: ${expertData.header?.time || new Date().toLocaleTimeString("fr-FR")}
+
+═══════════════════════════════════════════════════════════════════════════════
+IDENTIFICATION PATIENT
+═══════════════════════════════════════════════════════════════════════════════
+
+Nom: ${patientName || "Patient"}
+Âge: ${expertData.patientIdentification?.administrativeData?.age || allData.patientData?.age || "N/A"}
+Sexe: ${expertData.patientIdentification?.administrativeData?.gender || allData.patientData?.gender || "N/A"}
+Poids: ${expertData.patientIdentification?.clinicalData?.weight || allData.patientData?.weight + " kg" || "N/A"}
+Taille: ${expertData.patientIdentification?.clinicalData?.height || allData.patientData?.height + " cm" || "N/A"}
+IMC: ${expertData.patientIdentification?.clinicalData?.bmi || "Non calculé"}
+
+═══════════════════════════════════════════════════════════════════════════════
+MOTIF DE CONSULTATION
+═══════════════════════════════════════════════════════════════════════════════
+
+${expertData.anamnesis?.chiefComplaint?.primaryComplaint || allData.clinicalData?.chiefComplaint || "Motif de consultation à préciser"}
+
+DESCRIPTION DÉTAILLÉE:
+${expertData.anamnesis?.chiefComplaint?.detailedDescription || "Le patient consulte nécessitant une évaluation médicale approfondie selon les données collectées."}
+
+═══════════════════════════════════════════════════════════════════════════════
+HISTOIRE DE LA MALADIE ACTUELLE
+═══════════════════════════════════════════════════════════════════════════════
+
+CHRONOLOGIE:
+${expertData.anamnesis?.historyOfPresentIllness?.chronology || "Histoire de la maladie actuelle à structurer selon les éléments recueillis."}
+
+ÉVOLUTION:
+${expertData.anamnesis?.historyOfPresentIllness?.evolutionPattern || "Pattern évolutif à analyser selon les données complémentaires."}
+
+SYMPTÔMES ASSOCIÉS:
+${expertData.anamnesis?.historyOfPresentIllness?.associatedSymptoms || (allData.clinicalData?.symptoms || []).join(", ") || "Symptômes associés à inventorier"}
+
+═══════════════════════════════════════════════════════════════════════════════
+ANTÉCÉDENTS MÉDICAUX
+═══════════════════════════════════════════════════════════════════════════════
+
+ANTÉCÉDENTS SIGNIFICATIFS:
+${expertData.anamnesis?.pastMedicalHistory?.significantHistory || (allData.patientData?.medicalHistory || []).join(", ") || "Antécédents médicaux à approfondir"}
+
+TRAITEMENTS ACTUELS:
+${expertData.anamnesis?.medications?.currentMedications || allData.patientData?.currentMedicationsText || "Thérapeutiques actuelles à réviser"}
+
+ALLERGIES:
+${expertData.anamnesis?.allergies?.knownAllergies || (allData.patientData?.allergies || []).join(", ") || "Aucune allergie connue actuellement"}
+
+═══════════════════════════════════════════════════════════════════════════════
+EXAMEN PHYSIQUE
+═══════════════════════════════════════════════════════════════════════════════
+
+CONSTANTES VITALES:
+${expertData.physicalExamination?.vitalSigns?.measurements || `T°: ${allData.clinicalData?.vitalSigns?.temperature || "N/A"}°C, FC: ${allData.clinicalData?.vitalSigns?.heartRate || "N/A"}bpm, TA: ${allData.clinicalData?.vitalSigns?.bloodPressureSystolic || "N/A"}/${allData.clinicalData?.vitalSigns?.bloodPressureDiastolic || "N/A"}mmHg`}
+
+ÉVALUATION DOULEUR:
+${expertData.physicalExamination?.vitalSigns?.painAssessment || `Douleur évaluée à ${allData.clinicalData?.painScale || 0}/10 sur échelle numérique`}
+
+ÉTAT GÉNÉRAL:
+${expertData.physicalExamination?.generalAppearance?.overallImpression || "État général clinique à évaluer de manière systématique"}
+
+EXAMEN CARDIOVASCULAIRE:
+${expertData.physicalExamination?.systemicExamination?.cardiovascularExam || "Examen cardiovasculaire systématique requis"}
+
+EXAMEN RESPIRATOIRE:
+${expertData.physicalExamination?.systemicExamination?.respiratoryExam || "Examen respiratoire complet à réaliser"}
+
+EXAMEN ABDOMINAL:
+${expertData.physicalExamination?.systemicExamination?.abdominalExam || "Examen abdominal méthodique nécessaire"}
+
+EXAMEN NEUROLOGIQUE:
+${expertData.physicalExamination?.systemicExamination?.neurologicalExam || "Examen neurologique orienté selon la présentation"}
+
+═══════════════════════════════════════════════════════════════════════════════
+ÉVALUATION DIAGNOSTIQUE
+═══════════════════════════════════════════════════════════════════════════════
+
+DIAGNOSTIC PRINCIPAL:
+${primaryDiagnosis}
+
+CODE CIM-10:
+${expertData.diagnosticAssessment?.primaryDiagnosis?.icdCode || allData.diagnosisData?.diagnosis?.primaryDiagnosis?.icd10 || "Code à déterminer"}
+
+NIVEAU DE CONFIANCE:
+${expertData.diagnosticAssessment?.clinicalImpression?.diagnosticConfidence || allData.diagnosisData?.data?.comprehensiveDiagnosis?.primary?.confidence + "%" || "75%"} (Analyse IA experte)
+
+SÉVÉRITÉ:
+${expertData.diagnosticAssessment?.clinicalImpression?.clinicalSeverity || allData.diagnosisData?.data?.comprehensiveDiagnosis?.primary?.severity || "À graduer précisément"}
+
+ARGUMENTS DIAGNOSTIQUES:
+${expertData.diagnosticAssessment?.primaryDiagnosis?.evidenceSupporting || "Arguments diagnostiques basés sur l'analyse clinique et paraclinique disponible"}
+
+DIAGNOSTICS DIFFÉRENTIELS:
+${expertData.diagnosticAssessment?.differentialDiagnosis?.alternativeDiagnoses || "Diagnostics différentiels principaux à considérer avec argumentation"}
+
+═══════════════════════════════════════════════════════════════════════════════
+EXAMENS COMPLÉMENTAIRES PRESCRITS
+═══════════════════════════════════════════════════════════════════════════════
+
+EXAMENS BIOLOGIQUES URGENTS:
+${expertData.investigationsPlan?.laboratoryTests?.urgentTests || "Examens biologiques urgents selon orientation diagnostique"}
+
+EXAMENS BIOLOGIQUES DE ROUTINE:
+${expertData.investigationsPlan?.laboratoryTests?.routineTests || "Biologie standard avec objectifs diagnostiques précis"}
+
+EXAMENS SPÉCIALISÉS:
+${expertData.investigationsPlan?.laboratoryTests?.specializedTests || "Examens spécialisés selon hypothèses diagnostiques"}
+
+IMAGERIE DIAGNOSTIQUE:
+${expertData.investigationsPlan?.imagingStudies?.diagnosticImaging || "Imagerie diagnostique orientée selon présentation clinique"}
+
+AVIS SPÉCIALISÉS:
+${expertData.investigationsPlan?.specialistReferrals?.urgentReferrals || expertData.investigationsPlan?.specialistReferrals?.routineReferrals || "Consultations spécialisées selon orientation diagnostique"}
+
+═══════════════════════════════════════════════════════════════════════════════
+PLAN THÉRAPEUTIQUE
+═══════════════════════════════════════════════════════════════════════════════
+
+PRISE EN CHARGE IMMÉDIATE:
+${expertData.therapeuticPlan?.immediateManagement?.urgentInterventions || "Interventions immédiates selon degré d'urgence évalué"}
+
+TRAITEMENT SYMPTOMATIQUE:
+${expertData.therapeuticPlan?.immediateManagement?.symptomaticTreatment || "Traitement symptomatique adapté au tableau clinique"}
+
+THÉRAPEUTIQUE MÉDICAMENTEUSE:
+${expertData.therapeuticPlan?.pharmacotherapy?.primaryMedications || "Thérapeutique médicamenteuse selon recommandations actuelles"}
+
+AJUSTEMENTS POSOLOGIQUES:
+${expertData.therapeuticPlan?.pharmacotherapy?.dosageAdjustments || "Ajustements posologiques personnalisés selon le patient"}
+
+MESURES NON PHARMACOLOGIQUES:
+${expertData.therapeuticPlan?.nonPharmacological?.lifestyleModifications || "Modifications du mode de vie recommandées et personnalisées"}
+
+ÉDUCATION THÉRAPEUTIQUE:
+${expertData.therapeuticPlan?.nonPharmacological?.patientEducation || "Éducation thérapeutique adaptée à la pathologie et au patient"}
+
+═══════════════════════════════════════════════════════════════════════════════
+PLAN DE SUIVI
+═══════════════════════════════════════════════════════════════════════════════
+
+PROCHAINE CONSULTATION:
+${expertData.followUpPlan?.immediateFollowUp?.nextAppointment || "Prochaine consultation dans 7-15 jours selon évolution clinique"}
+
+CRITÈRES DE RÉÉVALUATION URGENTE:
+${expertData.followUpPlan?.immediateFollowUp?.urgentReassessment || "Réévaluation urgente si aggravation clinique ou nouveaux symptômes"}
+
+SURVEILLANCE PROGRAMMÉE:
+${expertData.followUpPlan?.immediateFollowUp?.monitoringSchedule || "Surveillance clinique et biologique programmée selon protocole"}
+
+PRISE EN CHARGE À LONG TERME:
+${expertData.followUpPlan?.longTermManagement?.chronicCareManagement || "Prise en charge des pathologies chroniques selon recommandations"}
+
+MESURES PRÉVENTIVES:
+${expertData.followUpPlan?.longTermManagement?.preventiveMeasures || "Mesures préventives personnalisées selon facteurs de risque"}
+
+═══════════════════════════════════════════════════════════════════════════════
+CONCLUSION ET SYNTHÈSE
+═══════════════════════════════════════════════════════════════════════════════
+
+${expertData.narrativeSummary || `Patient de ${allData.patientData?.age || "XX"} ans consultant pour ${allData.clinicalData?.chiefComplaint || "motif médical"}. Diagnostic retenu: ${primaryDiagnosis}. Plan de prise en charge adapté selon recommandations actuelles avec surveillance programmée.`}
+
+═══════════════════════════════════════════════════════════════════════════════
+MÉTRIQUES QUALITÉ
+═══════════════════════════════════════════════════════════════════════════════
+
+NIVEAU DE CONFIANCE IA: ${expertData.clinicalQualityMetrics?.diagnosticAccuracy?.aiConfidence || "75%"}
+NIVEAU DE PREUVE: ${expertData.clinicalQualityMetrics?.diagnosticAccuracy?.evidenceLevel || "Grade B"}
+SCORE SÉCURITÉ PATIENT: ${expertData.clinicalQualityMetrics?.safetyMetrics?.patientSafetyScore || "90%"}
+COMPLEXITÉ CLINIQUE: ${calculateClinicalComplexity(allData)}
+
+═══════════════════════════════════════════════════════════════════════════════
+SIGNATURE ÉLECTRONIQUE
+═══════════════════════════════════════════════════════════════════════════════
+
+Rapport généré par: ${expertData.header?.physician?.name || "TIBOK IA DOCTOR Expert System"}
+Qualification: ${expertData.header?.physician?.qualification || "Expert en Diagnostic Assisté par IA"}
+Date génération: ${expertData.metadata?.reportInformation?.generationDate || new Date().toISOString()}
+Version: ${expertData.metadata?.reportInformation?.reportVersion || "2.0-EXPERT"}
+
+ID Rapport: ${expertData.metadata?.reportInformation?.reportId || `CR-EXPERT-${Date.now()}`}
+
+═══════════════════════════════════════════════════════════════════════════════`
+
+  // Structure simple compatible avec le composant
+  const simpleReport = {
+    title: expertData.header?.title || "Compte-Rendu de Consultation Médicale",
+    content: fullContent,
+    sections: {
+      motifConsultation: expertData.anamnesis?.chiefComplaint?.primaryComplaint || allData.clinicalData?.chiefComplaint || "Motif de consultation à préciser",
+      antecedents: expertData.anamnesis?.pastMedicalHistory?.significantHistory || (allData.patientData?.medicalHistory || []).join(", ") || "Antécédents médicaux à approfondir",
+      examenClinique: expertData.physicalExamination?.vitalSigns?.measurements || `Constantes vitales - T°: ${allData.clinicalData?.vitalSigns?.temperature || "N/A"}°C, FC: ${allData.clinicalData?.vitalSigns?.heartRate || "N/A"}bpm, TA: ${allData.clinicalData?.vitalSigns?.bloodPressureSystolic || "N/A"}/${allData.clinicalData?.vitalSigns?.bloodPressureDiastolic || "N/A"}mmHg`,
+      diagnostic: primaryDiagnosis,
+      examensComplementaires: expertData.investigationsPlan?.laboratoryTests?.urgentTests || expertData.investigationsPlan?.laboratoryTests?.routineTests || "Examens complémentaires selon indication clinique",
+      traitement: expertData.therapeuticPlan?.pharmacotherapy?.primaryMedications || expertData.therapeuticPlan?.immediateManagement?.symptomaticTreatment || "Traitement à définir selon protocole établi",
+      surveillance: expertData.followUpPlan?.immediateFollowUp?.nextAppointment || "Surveillance clinique recommandée avec suivi médical programmé",
+      conclusion: expertData.diagnosticAssessment?.clinicalImpression?.primaryImpression || expertData.narrativeSummary || "Suivi médical nécessaire selon évolution clinique"
+    },
+    medicalReferences: [], // Peut être enrichi avec les références du rapport expert
+    generatedBy: expertData.header?.physician?.name || "TIBOK IA DOCTOR Expert System",
+    generatedAt: expertData.metadata?.reportInformation?.generationDate || new Date().toISOString(),
+    patientInfo: {
+      name: patientName || "Patient",
+      age: expertData.patientIdentification?.administrativeData?.age || allData.patientData?.age?.toString() || "N/A",
+      gender: expertData.patientIdentification?.administrativeData?.gender || allData.patientData?.gender || "N/A"
+    }
+  }
+
+  console.log("✅ Conversion terminée - Structure simple générée")
+  return simpleReport
 }
 
 function generateExpertFallbackReport(allData: any): any {
@@ -446,13 +685,13 @@ function generateExpertFallbackReport(allData: any): any {
 
     diagnosticAssessment: {
       clinicalImpression: {
-        primaryImpression: diagnosisData?.diagnosis?.primaryDiagnosis?.condition || "Évaluation diagnostique en cours - analyse experte requise",
-        diagnosticConfidence: `${diagnosisData?.diagnosis?.aiConfidence || 70}% (Niveau expert avec données partielles)`,
-        clinicalSeverity: diagnosisData?.diagnosis?.primaryDiagnosis?.severity || "Sévérité à graduer précisément"
+        primaryImpression: diagnosisData?.diagnosis?.primaryDiagnosis?.condition || diagnosisData?.data?.comprehensiveDiagnosis?.primary?.condition || "Évaluation diagnostique en cours - analyse experte requise",
+        diagnosticConfidence: `${diagnosisData?.diagnosis?.aiConfidence || diagnosisData?.data?.comprehensiveDiagnosis?.primary?.confidence || 70}% (Niveau expert avec données partielles)`,
+        clinicalSeverity: diagnosisData?.diagnosis?.primaryDiagnosis?.severity || diagnosisData?.data?.comprehensiveDiagnosis?.primary?.severity || "Sévérité à graduer précisément"
       },
       primaryDiagnosis: {
-        condition: diagnosisData?.diagnosis?.primaryDiagnosis?.condition || "Diagnostic principal à établir par analyse experte complémentaire",
-        icdCode: diagnosisData?.diagnosis?.primaryDiagnosis?.icd10 || "Code CIM-10 à déterminer",
+        condition: diagnosisData?.diagnosis?.primaryDiagnosis?.condition || diagnosisData?.data?.comprehensiveDiagnosis?.primary?.condition || "Diagnostic principal à établir par analyse experte complémentaire",
+        icdCode: diagnosisData?.diagnosis?.primaryDiagnosis?.icd10 || diagnosisData?.data?.comprehensiveDiagnosis?.primary?.icd10 || "Code CIM-10 à déterminer",
         diagnosticCriteria: "Critères diagnostiques selon recommandations internationales à appliquer",
         evidenceSupporting: "Arguments diagnostiques basés sur l'analyse clinique et paraclinique disponible",
         pathophysiology: "Physiopathologie détaillée selon les données actuelles de la science médicale"
@@ -512,7 +751,7 @@ function generateExpertFallbackReport(allData: any): any {
 
     clinicalQualityMetrics: {
       diagnosticAccuracy: {
-        aiConfidence: `${diagnosisData?.diagnosis?.aiConfidence || 70}%`,
+        aiConfidence: `${diagnosisData?.diagnosis?.aiConfidence || diagnosisData?.data?.comprehensiveDiagnosis?.primary?.confidence || 70}%`,
         evidenceLevel: "Grade B (Fallback expert avec données partielles)",
         guidelineAdherence: "Respect des bonnes pratiques médicales selon recommandations"
       },
