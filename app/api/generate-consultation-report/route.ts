@@ -1,22 +1,20 @@
-// pages/api/generate-consultation-report.ts
+// app/api/generate-consultation-report/route.ts - Version corrigée pour App Router
 
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest } from 'next/server';
 import { MauritianDocumentsGenerator } from '@/lib/mauritian-documents-generator';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+// ✅ NOUVELLE SYNTAXE APP ROUTER
+export async function POST(request: NextRequest) {
   try {
-    const { patientData, clinicalData, questionsData, diagnosisData } = req.body;
+    const body = await request.json();
+    const { patientData, clinicalData, questionsData, diagnosisData } = body;
 
     // Validation des données requises
     if (!patientData || !diagnosisData) {
-      return res.status(400).json({
+      return Response.json({
         error: 'Missing required data',
         details: 'patientData and diagnosisData are required'
-      });
+      }, { status: 400 });
     }
 
     console.log('🚀 Generating consultation report...');
@@ -31,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('✅ Consultation report generated successfully');
 
-    return res.status(200).json({
+    return Response.json({
       success: true,
       data: consultationReport
     });
@@ -39,12 +37,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (error) {
     console.error('❌ Error generating consultation report:', error);
     
-    return res.status(500).json({
+    return Response.json({
       success: false,
       error: 'Failed to generate consultation report',
       details: error instanceof Error ? error.message : 'Unknown error'
-    });
+    }, { status: 500 });
   }
+}
+
+// ✅ Optionnel : Gérer les autres méthodes HTTP
+export async function GET() {
+  return Response.json({ 
+    error: 'GET method not supported. Use POST.' 
+  }, { status: 405 });
 }
 
 /**
