@@ -1,415 +1,475 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
+// pages/api/generate-consultation-report.ts
 
-export async function POST(request: NextRequest) {
-  try {
-    console.log("📋 Génération consultation report compatible consultation-editor")
-    
-    const requestData = await request.json()
-    console.log("📥 Données reçues:", requestData)
+import { NextApiRequest, NextApiResponse } from 'next';
+import { MauritianDocumentsGenerator } from '@/lib/mauritian-documents-generator';
 
-    if (!requestData || !requestData.patientData || !requestData.clinicalData) {
-      return NextResponse.json(
-        { success: false, error: "Données insuffisantes" },
-        { status: 400 },
-      )
-    }
-
-    const { patientData, clinicalData, questionsData, diagnosisData } = requestData
-
-    // Construction du prompt pour générer des données compatibles
-    const comprehensivePrompt = `
-Tu es un médecin expert mauricien. Génère UNIQUEMENT du JSON valide compatible avec consultation-editor.tsx.
-
-DONNÉES PATIENT:
-- Nom: ${patientData.firstName || "N/A"} ${patientData.lastName || "N/A"}
-- Âge: ${patientData.age || "N/A"} ans, Sexe: ${patientData.gender || "N/A"}
-- Poids: ${patientData.weight || "N/A"}kg, Taille: ${patientData.height || "N/A"}cm
-- Antécédents: ${(patientData.medicalHistory || []).join(", ") || "Aucun"}
-- Traitements: ${patientData.currentMedicationsText || "Aucun"}
-- Allergies: ${(patientData.allergies || []).join(", ") || "Aucune"}
-
-DONNÉES CLINIQUES:
-- Motif: ${clinicalData.chiefComplaint || "Non spécifié"}
-- Symptômes: ${(clinicalData.symptoms || []).join(", ") || "Aucun"}
-- Durée: ${clinicalData.symptomDuration || "Non précisée"}
-- Constantes: T°${clinicalData.vitalSigns?.temperature || "?"}°C, TA ${clinicalData.vitalSigns?.bloodPressureSystolic || "?"}/${clinicalData.vitalSigns?.bloodPressureDiastolic || "?"}mmHg
-
-DIAGNOSTIC IA:
-${diagnosisData?.diagnosis ? `
-- Diagnostic: ${diagnosisData.diagnosis.primary?.condition || "Non déterminé"}
-- Confiance: ${diagnosisData.diagnosis.primary?.confidence || 70}%
-- Examens recommandés: ${diagnosisData.expertAnalysis?.expert_investigations?.immediate_priority?.map(e => e.examination).join(", ") || "À définir"}
-- Traitements: ${diagnosisData.expertAnalysis?.expert_therapeutics?.primary_treatments?.map(t => t.medication_dci).join(", ") || "À définir"}
-` : "Diagnostic non généré"}
-
-GÉNÈRE EXACTEMENT cette structure JSON (remplace les valeurs par des données médicales appropriées):
-
-{
-  "consultationData": {
-    "header": {
-      "title": "COMPTE-RENDU DE CONSULTATION",
-      "date": "${new Date().toLocaleDateString('fr-FR')}",
-      "physician": "Dr. ${patientData.physicianName || 'MÉDECIN EXPERT'}",
-      "patient": {
-        "firstName": "${patientData.firstName || 'Patient'}",
-        "lastName": "${patientData.lastName || 'X'}",
-        "age": "${patientData.age || '?'} ans"
-      }
-    },
-    "anamnesis": {
-      "chiefComplaint": "${clinicalData.chiefComplaint || 'Motif de consultation'}",
-      "historyOfDisease": "Histoire détaillée de la maladie actuelle basée sur les symptômes présentés",
-      "duration": "${clinicalData.symptomDuration || 'Durée non précisée'}",
-      "physicalExam": "Examen physique réalisé avec constantes vitales documentées"
-    },
-    "diagnosticAssessment": {
-      "primaryDiagnosis": {
-        "condition": "${diagnosisData?.diagnosis?.primary?.condition || 'Diagnostic à confirmer'}",
-        "severity": "${diagnosisData?.diagnosis?.primary?.severity || 'modérée'}",
-        "probability": ${diagnosisData?.diagnosis?.primary?.confidence || 75},
-        "clinical_rationale": "Arguments cliniques basés sur la présentation symptomatique et l'examen"
-      },
-      "differentialDiagnosis": [
-        ${diagnosisData?.diagnosis?.differential?.map((diff, i) => `{
-          "condition": "${diff.condition || `Diagnostic différentiel ${i+1}`}",
-          "probability": ${diff.probability || 20},
-          "rationale": "${diff.rationale || 'Arguments à considérer'}"
-        }`).join(',') || `{
-          "condition": "Syndrome à préciser",
-          "probability": 20,
-          "rationale": "Nécessite investigation complémentaire"
-        }`}
-      ]
-    },
-    "investigationsPlan": {
-      "laboratoryTests": {
-        "urgentTests": [${diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority?.filter(e => e.category === 'biology')?.map(e => `"${e.examination}"`).join(',') || '"Hémogramme + CRP"'}],
-        "routineTests": ["Bilan métabolique complet", "Fonction hépatique"]
-      },
-      "imaging": {
-        "urgent": [${diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority?.filter(e => e.category === 'imaging')?.map(e => `"${e.examination}"`).join(',') || '"Radiographie thoracique"'}],
-        "routine": []
-      }
-    },
-    "therapeuticPlan": {
-      "immediateManagement": {
-        "urgentInterventions": [${diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments?.slice(0,1)?.map(t => `"${t.medication_dci} - ${t.dosing_regimen?.standard_adult || 'selon RCP'}"`).join(',') || '"Traitement symptomatique adapté"'}],
-        "symptomaticTreatment": ["Traitement antalgique", "Surveillance clinique"]
-      },
-      "nonPharmacological": {
-        "lifestyleModifications": ["Repos adapté", "Hydratation renforcée"],
-        "patientEducation": ["Information sur la pathologie", "Conseils de surveillance"]
-      }
-    }
-  },
-  "mauritianDocuments": {
-    "consultation": {
-      "header": {
-        "title": "CONSULTATION MÉDICALE - RÉPUBLIQUE DE MAURICE",
-        "date": "${new Date().toLocaleDateString('fr-FR')}",
-        "physician": "Dr. ${patientData.physicianName || 'MÉDECIN EXPERT'}",
-        "registration": "MEDICAL-MU-${new Date().getFullYear()}"
-      },
-      "content": {
-        "chiefComplaint": "${clinicalData.chiefComplaint || 'Motif de consultation'}",
-        "clinicalSynthesis": "Synthèse clinique basée sur l'anamnèse et l'examen physique réalisés",
-        "diagnosticReasoning": "Raisonnement diagnostique expert tenant compte du contexte mauricien",
-        "therapeuticPlan": "Plan thérapeutique adapté aux ressources disponibles à Maurice",
-        "mauritianRecommendations": "Recommandations spécifiques au système de santé mauricien"
-      }
-    },
-    "biological": {
-      "header": { "title": "PRESCRIPTION EXAMENS BIOLOGIQUES" },
-      "examinations": [${diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority?.filter(e => e.category === 'biology')?.map(e => `{
-        "name": "${e.examination}",
-        "indication": "${e.specific_indication || 'Investigation diagnostique'}",
-        "urgency": "${e.urgency || 'routine'}",
-        "mauritianAvailability": {
-          "publicCenters": "Dr Jeetoo, Candos",
-          "privateCenters": "Apollo Bramwell, Lancet",
-          "cost": "Rs 500-2000",
-          "waitingTime": "24-48h"
-        }
-      }`).join(',') || `{
-        "name": "Hémogramme complet + CRP",
-        "indication": "Recherche syndrome inflammatoire",
-        "urgency": "urgent",
-        "mauritianAvailability": {
-          "publicCenters": "Tous centres santé",
-          "privateCenters": "Tous laboratoires",
-          "cost": "Rs 600-1200",
-          "waitingTime": "2-6h"
-        }
-      }`}]
-    },
-    "imaging": {
-      "header": { "title": "PRESCRIPTION IMAGERIE" },
-      "examinations": [${diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority?.filter(e => e.category === 'imaging')?.map(e => `{
-        "name": "${e.examination}",
-        "indication": "${e.specific_indication || 'Investigation diagnostique'}",
-        "urgency": "${e.urgency || 'routine'}",
-        "mauritianAvailability": {
-          "publicCenters": "Dr Jeetoo Imagerie",
-          "privateCenters": "Apollo Bramwell",
-          "cost": "Rs 2000-8000",
-          "waitingTime": "24-72h"
-        }
-      }`).join(',') || `{
-        "name": "Radiographie thoracique",
-        "indication": "Exclusion pathologie pleuro-pulmonaire",
-        "urgency": "semi-urgent",
-        "mauritianAvailability": {
-          "publicCenters": "Dr Jeetoo Imagerie",
-          "privateCenters": "Apollo Bramwell",
-          "cost": "Rs 400-800",
-          "waitingTime": "2-4h"
-        }
-      }`}]
-    },
-    "medication": {
-      "header": { "title": "ORDONNANCE MÉDICALE" },
-      "prescriptions": [${diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments?.map(t => `{
-        "dci": "${t.medication_dci}",
-        "indication": "${t.precise_indication || 'Traitement symptomatique'}",
-        "posology": "${t.dosing_regimen?.standard_adult || 'Selon RCP'}",
-        "duration": "${t.treatment_duration || '5-7 jours'}",
-        "mauritianAvailability": {
-          "available": ${t.mauritius_availability?.locally_available || true},
-          "cost": "${t.mauritius_availability?.private_sector_cost || 'Rs 100-500'}"
-        }
-      }`).join(',') || `{
-        "dci": "Paracétamol",
-        "indication": "Traitement symptomatique douleur/fièvre",
-        "posology": "1000mg x 3/jour",
-        "duration": "3-5 jours",
-        "mauritianAvailability": {
-          "available": true,
-          "cost": "Rs 50-200"
-        }
-      }`}]
-    }
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
-}
-`
 
-    console.log("🧠 Génération avec OpenAI...")
+  try {
+    const { patientData, clinicalData, questionsData, diagnosisData } = req.body;
 
-    const result = await generateText({
-      model: openai("gpt-4o"),
-      prompt: comprehensivePrompt,
-      maxTokens: 12000,
-      temperature: 0.1,
-    })
-
-    console.log("✅ Réponse OpenAI reçue")
-
-    // Parsing JSON robuste
-    let consultationReport
-    try {
-      let cleanText = result.text.trim()
-      cleanText = cleanText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
-      
-      const startIndex = cleanText.indexOf('{')
-      const endIndex = cleanText.lastIndexOf('}')
-      
-      if (startIndex >= 0 && endIndex > startIndex) {
-        cleanText = cleanText.substring(startIndex, endIndex + 1)
-      }
-      
-      consultationReport = JSON.parse(cleanText)
-      console.log("✅ JSON parsé avec succès")
-      
-    } catch (parseError) {
-      console.warn("⚠️ Erreur parsing, génération fallback")
-      consultationReport = generateCompatibleFallback(requestData)
+    // Validation des données requises
+    if (!patientData || !diagnosisData) {
+      return res.status(400).json({
+        error: 'Missing required data',
+        details: 'patientData and diagnosisData are required'
+      });
     }
 
-    // Validation structure
-    if (!consultationReport.consultationData || !consultationReport.mauritianDocuments) {
-      console.warn("⚠️ Structure invalide, utilisation fallback")
-      consultationReport = generateCompatibleFallback(requestData)
-    }
+    console.log('🚀 Generating consultation report...');
 
-    console.log("✅ Consultation report généré avec succès")
+    // ✅ Générer le rapport de consultation complet avec les documents mauriciens
+    const consultationReport = await generateCompleteConsultationReport(
+      patientData,
+      clinicalData,
+      questionsData,
+      diagnosisData
+    );
 
-    return NextResponse.json({
+    console.log('✅ Consultation report generated successfully');
+
+    return res.status(200).json({
       success: true,
-      data: consultationReport, // Structure compatible avec consultation-editor
-      metadata: {
-        generatedAt: new Date().toISOString(),
-        model: "gpt-4o",
-        compatible: "consultation-editor.tsx",
-        patientId: `${patientData.lastName}-${patientData.firstName}`,
-        consultationDate: new Date().toLocaleDateString('fr-FR')
-      },
-    })
+      data: consultationReport
+    });
 
   } catch (error) {
-    console.error("❌ Erreur génération:", error)
-
-    // Fallback ultime
-    const fallbackReport = generateCompatibleFallback(requestData || {})
-
-    return NextResponse.json({
-      success: true,
-      data: fallbackReport,
-      fallback: true,
-      error: error instanceof Error ? error.message : "Erreur inconnue",
-    })
+    console.error('❌ Error generating consultation report:', error);
+    
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to generate consultation report',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 }
 
-function generateCompatibleFallback(requestData: any) {
-  const { patientData = {}, clinicalData = {}, diagnosisData = {} } = requestData
+/**
+ * Génère un rapport de consultation complet avec documents mauriciens
+ */
+async function generateCompleteConsultationReport(
+  patientData: any,
+  clinicalData: any,
+  questionsData: any,
+  diagnosisData: any
+) {
+  try {
+    // 1. Construire les informations du médecin (temporaire - sera remplacé par les vraies données)
+    const doctorInfo = {
+      fullName: "Dr. MÉDECIN EXPERT",
+      specialty: "Médecine générale",
+      address: "Cabinet médical, Rue principale",
+      city: "Port-Louis, Maurice",
+      phone: "+230 xxx xxx xxx",
+      email: "contact@cabinet.mu",
+      registrationNumber: "Medical Council of Mauritius - Reg. No. XXXXX"
+    };
 
-  return {
-    consultationData: {
-      header: {
-        title: "COMPTE-RENDU DE CONSULTATION",
-        date: new Date().toLocaleDateString('fr-FR'),
-        physician: `Dr. ${patientData.physicianName || 'MÉDECIN EXPERT'}`,
-        patient: {
-          firstName: patientData.firstName || 'Patient',
-          lastName: patientData.lastName || 'X',
-          age: `${patientData.age || '?'} ans`
-        }
-      },
+    // 2. Construire le compte-rendu de consultation structuré
+    const consultationReport = {
+      // Métadonnées
+      generatedAt: new Date().toISOString(),
+      patientId: patientData?.id || null,
+      consultationId: null, // sera rempli par le service appelant
+      
+      // Anamnèse structurée
       anamnesis: {
-        chiefComplaint: clinicalData.chiefComplaint || 'Motif de consultation à préciser',
-        historyOfDisease: `Le patient présente ${clinicalData.chiefComplaint || 'des symptômes'} évoluant depuis ${clinicalData.symptomDuration || 'une durée non précisée'}. L'anamnèse révèle ${(clinicalData.symptoms || []).join(', ') || 'une symptomatologie'} nécessitant une évaluation médicale approfondie.`,
-        duration: clinicalData.symptomDuration || 'Durée non précisée',
-        physicalExam: `Examen physique : état général correct, constantes vitales stables. T° ${clinicalData.vitalSigns?.temperature || '37'}°C, TA ${clinicalData.vitalSigns?.bloodPressureSystolic || '120'}/${clinicalData.vitalSigns?.bloodPressureDiastolic || '80'} mmHg. Examen clinique orienté selon la symptomatologie.`
+        chiefComplaint: clinicalData?.chiefComplaint || "Motif de consultation à documenter",
+        historyOfDisease: clinicalData?.historyOfDisease || extractHistoryFromQuestionsData(questionsData),
+        duration: clinicalData?.duration || extractDurationFromSymptoms(questionsData),
+        medicalHistory: formatMedicalHistory(patientData?.medicalHistory),
+        currentMedications: patientData?.currentMedicationsText || patientData?.currentMedications || "Aucun traitement en cours",
+        familyHistory: patientData?.familyHistory || "Non documenté",
+        allergies: formatAllergies(patientData?.allergies),
+        socialHistory: formatSocialHistory(patientData?.lifeHabits)
       },
+
+      // Examen physique structuré
+      physicalExam: {
+        generalExam: buildGeneralExamination(clinicalData, patientData),
+        vitalSigns: buildVitalSigns(clinicalData),
+        systemicExam: buildSystemicExamination(clinicalData)
+      },
+
+      // Évaluation diagnostique
       diagnosticAssessment: {
         primaryDiagnosis: {
-          condition: diagnosisData?.diagnosis?.primary?.condition || `Syndrome clinique - ${clinicalData.chiefComplaint || 'à préciser'}`,
-          severity: diagnosisData?.diagnosis?.primary?.severity || 'modérée',
-          probability: diagnosisData?.diagnosis?.primary?.confidence || 75,
-          clinical_rationale: `Arguments cliniques : présentation compatible avec ${diagnosisData?.diagnosis?.primary?.condition || 'un syndrome clinique'}. Symptomatologie évocatrice avec ${(clinicalData.symptoms || ['symptômes généraux']).join(', ')}. Nécessite investigation complémentaire pour confirmation diagnostique.`
+          condition: diagnosisData?.diagnosis?.primary?.condition || diagnosisData?.primary_diagnosis?.condition || "Diagnostic à préciser",
+          icd10: diagnosisData?.diagnosis?.primary?.icd10 || diagnosisData?.primary_diagnosis?.icd10 || "",
+          confidence: diagnosisData?.diagnosis?.primary?.confidence || diagnosisData?.primary_diagnosis?.confidence || 85,
+          severity: diagnosisData?.diagnosis?.primary?.severity || "Modéré",
+          rationale: diagnosisData?.diagnosis?.primary?.rationale || "Basé sur l'anamnèse et l'examen clinique"
         },
-        differentialDiagnosis: diagnosisData?.diagnosis?.differential || [
-          {
-            condition: "Syndrome viral",
-            probability: 30,
-            rationale: "Présentation clinique compatible, contexte épidémiologique"
-          },
-          {
-            condition: "Syndrome inflammatoire",
-            probability: 25,
-            rationale: "Symptomatologie pouvant évoquer un processus inflammatoire"
-          }
-        ]
+        differentialDiagnosis: formatDifferentialDiagnoses(diagnosisData?.differential_diagnoses || diagnosisData?.diagnosis?.differential || []),
+        clinicalJustification: buildClinicalJustification(diagnosisData, clinicalData)
       },
+
+      // Plan d'investigations
       investigationsPlan: {
         laboratoryTests: {
-          urgentTests: diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority?.filter(e => e.category === 'biology')?.map(e => e.examination) || ["Hémogramme complet + CRP", "Ionogramme sanguin"],
-          routineTests: ["Bilan hépatique", "Fonction rénale", "Glycémie à jeun"]
+          urgentTests: extractUrgentLabTests(diagnosisData),
+          routineTests: extractRoutineLabTests(diagnosisData)
         },
         imaging: {
-          urgent: diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority?.filter(e => e.category === 'imaging')?.map(e => e.examination) || ["Radiographie thoracique"],
-          routine: ["Échographie abdominale si indiquée"]
-        }
+          urgent: extractUrgentImaging(diagnosisData),
+          routine: extractRoutineImaging(diagnosisData)
+        },
+        specialTests: extractSpecialTests(diagnosisData),
+        mauritianAvailability: assessMauritianAvailability(diagnosisData)
       },
+
+      // Plan thérapeutique
       therapeuticPlan: {
         immediateManagement: {
-          urgentInterventions: diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments?.slice(0,2)?.map(t => `${t.medication_dci} - ${t.dosing_regimen?.standard_adult || 'selon RCP'}`) || ["Paracétamol 1000mg x 3/jour", "Surveillance clinique"],
-          symptomaticTreatment: ["Repos", "Hydratation", "Antalgiques selon besoin"]
+          urgentInterventions: extractUrgentInterventions(diagnosisData),
+          symptomaticTreatment: extractSymptomaticTreatments(diagnosisData)
         },
+        medications: formatMedications(diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []),
         nonPharmacological: {
-          lifestyleModifications: ["Repos adapté selon symptômes", "Hydratation renforcée (2-3L/jour)", "Évitement activités intenses"],
-          patientEducation: ["Information sur la pathologie", "Signes d'alarme à surveiller", "Importance du suivi médical"]
-        }
+          lifestyleModifications: extractLifestyleRecommendations(diagnosisData),
+          patientEducation: extractPatientEducation(diagnosisData),
+          mauritianSpecific: [
+            "Hydratation renforcée (climat tropical Maurice)",
+            "Protection anti-moustiques (dengue/chikungunya endémiques)",
+            "Éviter exposition solaire aux heures chaudes"
+          ]
+        },
+        followUp: buildFollowUpPlan(diagnosisData),
+        prognosis: diagnosisData?.prognosis || "Pronostic favorable avec traitement adapté"
       }
-    },
-    mauritianDocuments: {
-      consultation: {
-        header: {
-          title: "CONSULTATION MÉDICALE - RÉPUBLIQUE DE MAURICE",
-          date: new Date().toLocaleDateString('fr-FR'),
-          physician: `Dr. ${patientData.physicianName || 'MÉDECIN EXPERT'}`,
-          registration: `MEDICAL-MU-${new Date().getFullYear()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`
-        },
-        content: {
-          chiefComplaint: clinicalData.chiefComplaint || 'Motif de consultation à préciser',
-          clinicalSynthesis: `Patient de ${patientData.age || '?'} ans consultant pour ${clinicalData.chiefComplaint || 'motif médical'}. Examen clinique compatible avec ${diagnosisData?.diagnosis?.primary?.condition || 'un syndrome clinique'}. Plan de prise en charge adapté selon recommandations.`,
-          diagnosticReasoning: `Diagnostic retenu : ${diagnosisData?.diagnosis?.primary?.condition || 'à confirmer'}. Arguments : présentation clinique évocatrice, contexte anamnestique compatible. Investigation complémentaire programmée selon protocole.`,
-          therapeuticPlan: `Traitement symptomatique instauré. Surveillance clinique programmée. Examens complémentaires selon indication. Réévaluation dans 7-10 jours ou plus tôt si aggravation.`,
-          mauritianRecommendations: "Adaptation aux ressources système santé mauricien. Accès facilité centres publics (Dr Jeetoo, Candos) et privés (Apollo Bramwell). Urgences 999. Suivi médical programmé."
-        }
-      },
-      biological: {
-        header: { 
-          title: "PRESCRIPTION EXAMENS BIOLOGIQUES - RÉPUBLIQUE DE MAURICE",
-          date: new Date().toLocaleDateString('fr-FR'),
-          physician: `Dr. ${patientData.physicianName || 'MÉDECIN EXPERT'}`
-        },
-        examinations: [
-          {
-            name: "Hémogramme complet + CRP + VS",
-            indication: "Recherche syndrome anémique, infectieux, inflammatoire",
-            urgency: "urgent",
-            mauritianAvailability: {
-              publicCenters: "Dr Jeetoo Hospital, Candos Hospital, Tous centres santé",
-              privateCenters: "Lancet Laboratories, Cerba, Apollo Bramwell",
-              cost: "Rs 600-1200",
-              waitingTime: "2-6h urgence, 24h routine"
-            }
-          },
-          {
-            name: "Ionogramme sanguin + Créatinine + Urée",
-            indication: "Bilan métabolique, fonction rénale",
-            urgency: "routine",
-            mauritianAvailability: {
-              publicCenters: "Tous centres santé publics",
-              privateCenters: "Tous laboratoires privés",
-              cost: "Rs 800-1500",
-              waitingTime: "24-48h"
-            }
-          }
-        ]
-      },
-      imaging: {
-        header: { 
-          title: "PRESCRIPTION IMAGERIE MÉDICALE - RÉPUBLIQUE DE MAURICE",
-          date: new Date().toLocaleDateString('fr-FR'),
-          physician: `Dr. ${patientData.physicianName || 'MÉDECIN EXPERT'}`
-        },
-        examinations: [
-          {
-            name: "Radiographie thoracique face + profil",
-            indication: "Exclusion pathologie pleuro-pulmonaire, cardiomégalie",
-            urgency: "semi-urgent",
-            mauritianAvailability: {
-              publicCenters: "Dr Jeetoo Imagerie, Candos, Flacq Hospital",
-              privateCenters: "Apollo Bramwell, Wellkin, Clinique Darné",
-              cost: "Rs 400-800",
-              waitingTime: "2-4h urgence, 1-3 jours routine"
-            }
-          }
-        ]
-      },
-      medication: {
-        header: { 
-          title: "ORDONNANCE MÉDICALE - RÉPUBLIQUE DE MAURICE",
-          date: new Date().toLocaleDateString('fr-FR'),
-          physician: `Dr. ${patientData.physicianName || 'MÉDECIN EXPERT'}`,
-          validity: "Ordonnance valable 6 mois"
-        },
-        prescriptions: [
-          {
-            dci: "Paracétamol",
-            indication: "Traitement symptomatique douleur et fièvre",
-            posology: "1000mg x 3-4/jour per os (max 4g/24h)",
-            duration: "3-5 jours selon symptômes",
-            mauritianAvailability: {
-              available: true,
-              cost: "Rs 50-200/semaine"
-            }
-          }
-        ]
-      }
+    };
+
+    // 3. ✅ Générer automatiquement les documents mauriciens
+    const mauritianDocuments = MauritianDocumentsGenerator.generateMauritianDocuments(
+      consultationReport,
+      doctorInfo,
+      patientData,
+      diagnosisData
+    );
+
+    // 4. Retourner le rapport complet avec les documents
+    return {
+      ...consultationReport,
+      mauritianDocuments,
+      formattedDocuments: MauritianDocumentsGenerator.formatForPrint(mauritianDocuments),
+      doctorInfo
+    };
+
+  } catch (error) {
+    console.error('Error in generateCompleteConsultationReport:', error);
+    throw error;
+  }
+}
+
+// ============================================
+// FONCTIONS UTILITAIRES
+// ============================================
+
+function extractHistoryFromQuestionsData(questionsData: any): string {
+  if (!questionsData?.responses) return "Histoire de la maladie actuelle à documenter";
+  
+  const responses = questionsData.responses;
+  const historyParts: string[] = [];
+  
+  // Extraire les réponses pertinentes pour l'histoire
+  Object.entries(responses).forEach(([question, answer]: [string, any]) => {
+    if (question.toLowerCase().includes('symptôme') || 
+        question.toLowerCase().includes('douleur') ||
+        question.toLowerCase().includes('évolution')) {
+      historyParts.push(`${question}: ${answer}`);
+    }
+  });
+  
+  return historyParts.length > 0 ? historyParts.join('\n') : "Histoire documentée via questionnaire IA";
+}
+
+function extractDurationFromSymptoms(questionsData: any): string {
+  if (!questionsData?.responses) return "Durée non précisée";
+  
+  const responses = questionsData.responses;
+  for (const [question, answer] of Object.entries(responses)) {
+    if (question.toLowerCase().includes('depuis') || 
+        question.toLowerCase().includes('durée') ||
+        question.toLowerCase().includes('début')) {
+      return answer as string;
     }
   }
+  
+  return "Durée à préciser";
+}
+
+function formatMedicalHistory(medicalHistory: any): string {
+  if (!medicalHistory) return "Aucun antécédent particulier";
+  
+  if (Array.isArray(medicalHistory)) {
+    return medicalHistory.length > 0 ? medicalHistory.join(', ') : "Aucun antécédent particulier";
+  }
+  
+  return medicalHistory.toString();
+}
+
+function formatAllergies(allergies: any): string {
+  if (!allergies) return "Aucune allergie connue";
+  
+  if (Array.isArray(allergies)) {
+    return allergies.length > 0 ? allergies.join(', ') : "Aucune allergie connue";
+  }
+  
+  return allergies.toString();
+}
+
+function formatSocialHistory(lifeHabits: any): string {
+  if (!lifeHabits) return "Habitudes de vie non documentées";
+  
+  const habits: string[] = [];
+  
+  if (lifeHabits.smoking) habits.push(`Tabac: ${lifeHabits.smoking}`);
+  if (lifeHabits.alcohol) habits.push(`Alcool: ${lifeHabits.alcohol}`);
+  if (lifeHabits.exercise) habits.push(`Activité physique: ${lifeHabits.exercise}`);
+  if (lifeHabits.diet) habits.push(`Alimentation: ${lifeHabits.diet}`);
+  
+  return habits.length > 0 ? habits.join(', ') : "Habitudes de vie non documentées";
+}
+
+function buildGeneralExamination(clinicalData: any, patientData: any): string {
+  const parts: string[] = [];
+  
+  // État général
+  if (clinicalData?.generalCondition) {
+    parts.push(`État général: ${clinicalData.generalCondition}`);
+  } else {
+    parts.push("Patient en bon état général");
+  }
+  
+  // Données anthropométriques
+  if (patientData?.weight || patientData?.height) {
+    const anthropometry: string[] = [];
+    if (patientData.weight) anthropometry.push(`Poids: ${patientData.weight}kg`);
+    if (patientData.height) anthropometry.push(`Taille: ${patientData.height}cm`);
+    parts.push(anthropometry.join(', '));
+  }
+  
+  return parts.join('\n');
+}
+
+function buildVitalSigns(clinicalData: any): string {
+  const vitals: string[] = [];
+  
+  if (clinicalData?.bloodPressure) vitals.push(`TA: ${clinicalData.bloodPressure}`);
+  if (clinicalData?.heartRate) vitals.push(`FC: ${clinicalData.heartRate}/min`);
+  if (clinicalData?.respiratoryRate) vitals.push(`FR: ${clinicalData.respiratoryRate}/min`);
+  if (clinicalData?.temperature) vitals.push(`T°: ${clinicalData.temperature}°C`);
+  if (clinicalData?.oxygenSaturation) vitals.push(`SpO2: ${clinicalData.oxygenSaturation}%`);
+  
+  return vitals.length > 0 ? vitals.join(', ') : "Signes vitaux stables";
+}
+
+function buildSystemicExamination(clinicalData: any): string {
+  const systems: string[] = [];
+  
+  if (clinicalData?.cardiovascularExam) systems.push(`Cardiovasculaire: ${clinicalData.cardiovascularExam}`);
+  if (clinicalData?.respiratoryExam) systems.push(`Pulmonaire: ${clinicalData.respiratoryExam}`);
+  if (clinicalData?.abdominalExam) systems.push(`Abdominal: ${clinicalData.abdominalExam}`);
+  if (clinicalData?.neurologicalExam) systems.push(`Neurologique: ${clinicalData.neurologicalExam}`);
+  if (clinicalData?.dermatologicalExam) systems.push(`Dermatologique: ${clinicalData.dermatologicalExam}`);
+  
+  return systems.length > 0 ? systems.join('\n') : "Examen systémique selon symptomatologie";
+}
+
+function formatDifferentialDiagnoses(differentials: any[]): any[] {
+  return differentials.map((diff: any) => ({
+    condition: diff.condition || diff.diagnosis || "",
+    probability: diff.probability || diff.likelihood || 0,
+    rationale: diff.rationale || diff.reasoning || "",
+    excludingFactors: diff.excluding_factors || []
+  }));
+}
+
+function buildClinicalJustification(diagnosisData: any, clinicalData: any): string {
+  const justifications: string[] = [];
+  
+  // Arguments cliniques
+  if (diagnosisData?.diagnosis?.primary?.rationale) {
+    justifications.push(diagnosisData.diagnosis.primary.rationale);
+  }
+  
+  // Signes cliniques évocateurs
+  if (clinicalData?.chiefComplaint) {
+    justifications.push(`Symptomatologie évocatrice: ${clinicalData.chiefComplaint}`);
+  }
+  
+  return justifications.join('\n') || "Diagnostic basé sur l'anamnèse et l'examen clinique";
+}
+
+function extractUrgentLabTests(diagnosisData: any): string[] {
+  const urgentTests: string[] = [];
+  
+  const investigations = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority || [];
+  investigations.forEach((inv: any) => {
+    if (inv.category === 'biology' && inv.urgency === 'immediate') {
+      urgentTests.push(inv.examination);
+    }
+  });
+  
+  return urgentTests;
+}
+
+function extractRoutineLabTests(diagnosisData: any): string[] {
+  const routineTests: string[] = [];
+  
+  const investigations = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority || [];
+  investigations.forEach((inv: any) => {
+    if (inv.category === 'biology' && inv.urgency !== 'immediate') {
+      routineTests.push(inv.examination);
+    }
+  });
+  
+  return routineTests;
+}
+
+function extractUrgentImaging(diagnosisData: any): string[] {
+  const urgentImaging: string[] = [];
+  
+  const investigations = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority || [];
+  investigations.forEach((inv: any) => {
+    if (inv.category === 'imaging' && inv.urgency === 'immediate') {
+      urgentImaging.push(inv.examination);
+    }
+  });
+  
+  return urgentImaging;
+}
+
+function extractRoutineImaging(diagnosisData: any): string[] {
+  const routineImaging: string[] = [];
+  
+  const investigations = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority || [];
+  investigations.forEach((inv: any) => {
+    if (inv.category === 'imaging' && inv.urgency !== 'immediate') {
+      routineImaging.push(inv.examination);
+    }
+  });
+  
+  return routineImaging;
+}
+
+function extractSpecialTests(diagnosisData: any): string[] {
+  const specialTests: string[] = [];
+  
+  const investigations = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority || [];
+  investigations.forEach((inv: any) => {
+    if (inv.category === 'functional' || inv.category === 'special') {
+      specialTests.push(inv.examination);
+    }
+  });
+  
+  return specialTests;
+}
+
+function assessMauritianAvailability(diagnosisData: any): any {
+  return {
+    publicSector: "Disponible hôpitaux publics Maurice",
+    privateSector: "Disponible centres privés",
+    estimatedDelay: "24-48h secteur public, immédiat privé",
+    cost: "Gratuit public / Rs 500-2000 privé selon examen"
+  };
+}
+
+function extractUrgentInterventions(diagnosisData: any): string[] {
+  const interventions: string[] = [];
+  
+  const therapeutics = diagnosisData?.expertAnalysis?.expert_therapeutics;
+  if (therapeutics?.emergency_management) {
+    therapeutics.emergency_management.forEach((intervention: any) => {
+      interventions.push(intervention.intervention || intervention);
+    });
+  }
+  
+  return interventions;
+}
+
+function extractSymptomaticTreatments(diagnosisData: any): string[] {
+  const treatments: string[] = [];
+  
+  const therapeutics = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || [];
+  therapeutics.forEach((treatment: any) => {
+    if (treatment.therapeutic_class?.includes('Symptomatique') || 
+        treatment.therapeutic_class?.includes('Antalgique')) {
+      treatments.push(`${treatment.medication_dci} - ${treatment.dosing_regimen?.standard_adult || ''}`);
+    }
+  });
+  
+  return treatments;
+}
+
+function formatMedications(treatments: any[]): any[] {
+  return treatments.map((treatment: any) => ({
+    name: treatment.medication_dci || "",
+    dosage: treatment.dosing_regimen?.standard_adult || "",
+    frequency: extractFrequency(treatment.dosing_regimen?.standard_adult || ""),
+    duration: treatment.treatment_duration || "7 jours",
+    indication: treatment.precise_indication || "",
+    contraindications: treatment.contraindications_absolute || [],
+    mauritianAvailability: treatment.mauritius_availability?.locally_available || false
+  }));
+}
+
+function extractFrequency(dosingRegimen: string): string {
+  if (dosingRegimen.includes('x 3/jour')) return "3 fois par jour";
+  if (dosingRegimen.includes('x 2/jour')) return "2 fois par jour";
+  if (dosingRegimen.includes('x 1/jour')) return "1 fois par jour";
+  return "Selon prescription";
+}
+
+function extractLifestyleRecommendations(diagnosisData: any): string[] {
+  const recommendations: string[] = [];
+  
+  const therapeutics = diagnosisData?.expertAnalysis?.expert_therapeutics;
+  if (therapeutics?.lifestyle_modifications) {
+    therapeutics.lifestyle_modifications.forEach((rec: any) => {
+      recommendations.push(rec.recommendation || rec);
+    });
+  }
+  
+  // Recommandations par défaut
+  if (recommendations.length === 0) {
+    recommendations.push("Repos adapté selon symptomatologie");
+    recommendations.push("Alimentation équilibrée");
+    recommendations.push("Hydratation suffisante");
+  }
+  
+  return recommendations;
+}
+
+function extractPatientEducation(diagnosisData: any): string[] {
+  const education: string[] = [];
+  
+  const therapeutics = diagnosisData?.expertAnalysis?.expert_therapeutics;
+  if (therapeutics?.patient_education) {
+    therapeutics.patient_education.forEach((item: any) => {
+      education.push(item.education_point || item);
+    });
+  }
+  
+  // Éducation par défaut
+  if (education.length === 0) {
+    education.push("Respecter la prescription médicale");
+    education.push("Consulter en urgence si aggravation");
+    education.push("Suivi médical selon recommandations");
+  }
+  
+  return education;
+}
+
+function buildFollowUpPlan(diagnosisData: any): string {
+  const followUp = diagnosisData?.expertAnalysis?.expert_therapeutics?.follow_up;
+  
+  if (followUp?.timeline) {
+    return `Consultation de contrôle dans ${followUp.timeline}. ${followUp.monitoring_parameters || 'Surveillance clinique.'}`;
+  }
+  
+  return "Consultation de réévaluation si pas d'amélioration sous 48-72h";
 }
