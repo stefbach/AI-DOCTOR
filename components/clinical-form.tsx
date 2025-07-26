@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -20,7 +20,10 @@ import {
   FileText,
   Clock,
   Heart,
-  Search
+  Search,
+  Keyboard,
+  CheckCircle,
+  Target
 } from "lucide-react"
 import { getTranslation, Language } from "@/lib/translations"
 
@@ -55,6 +58,11 @@ export default function ModernClinicalForm({
   language = 'fr',
   consultationId
 }: ClinicalFormProps) {
+  // Navigation refs and state
+  const fieldRefs = useRef<Record<string, HTMLElement | null>>({})
+  const [showKeyboardHint, setShowKeyboardHint] = useState(true)
+  const [focusedField, setFocusedField] = useState<string | null>(null)
+  
   // Helper function for translations
   const t = (key: string) => getTranslation(key, language)
 
@@ -86,6 +94,17 @@ export default function ModernClinicalForm({
     t('symptoms.hearingProblems'),
   ]
 
+  // Field navigation order
+  const FIELD_ORDER = [
+    'chiefComplaint',
+    'diseaseHistory', 
+    'symptomDuration',
+    'symptomSearch',
+    'temperature',
+    'bloodPressureSystolic',
+    'bloodPressureDiastolic'
+  ]
+
   const defaultClinicalData: ClinicalData = {
     chiefComplaint: "",
     diseaseHistory: "",
@@ -101,6 +120,70 @@ export default function ModernClinicalForm({
   const [localData, setLocalData] = useState<ClinicalData>(data || defaultClinicalData)
   const [symptomSearch, setSymptomSearch] = useState("")
   const [currentSection, setCurrentSection] = useState(0)
+
+  // NAVIGATION FUNCTIONS
+  const setFieldRef = useCallback((fieldName: string, element: HTMLElement | null) => {
+    fieldRefs.current[fieldName] = element
+  }, [])
+
+  const focusNextField = useCallback((currentField: string) => {
+    const currentIndex = FIELD_ORDER.indexOf(currentField)
+    if (currentIndex >= 0 && currentIndex < FIELD_ORDER.length - 1) {
+      const nextFieldName = FIELD_ORDER[currentIndex + 1]
+      const nextField = fieldRefs.current[nextFieldName]
+      
+      if (nextField) {
+        nextField.focus()
+        setFocusedField(nextFieldName)
+        
+        // Auto-scroll to the field
+        nextField.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        })
+        
+        // Add visual highlight
+        nextField.classList.add('ring-2', 'ring-purple-300', 'ring-opacity-75')
+        setTimeout(() => {
+          nextField.classList.remove('ring-2', 'ring-purple-300', 'ring-opacity-75')
+        }, 1500)
+      }
+    } else if (currentIndex === FIELD_ORDER.length - 1) {
+      // Last field, focus next button
+      const nextButton = document.querySelector('[data-next-button="true"]') as HTMLElement
+      if (nextButton) {
+        nextButton.focus()
+      }
+    }
+  }, [])
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent, fieldName: string) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      
+      // Special handling for textarea fields with Shift+Enter for new lines
+      if (fieldName === 'chiefComplaint' || fieldName === 'diseaseHistory') {
+        // For these fields, allow Shift+Enter for new lines, plain Enter to navigate
+        focusNextField(fieldName)
+      } else {
+        focusNextField(fieldName)
+      }
+      
+      // Hide keyboard hint after first use
+      if (showKeyboardHint) {
+        setShowKeyboardHint(false)
+      }
+    }
+  }, [focusNextField, showKeyboardHint])
+
+  // Special handler for Select component (duration)
+  const handleDurationChange = useCallback((value: string) => {
+    updateData({ symptomDuration: value })
+    // Auto-focus next field after selection
+    setTimeout(() => {
+      focusNextField('symptomDuration')
+    }, 100)
+  }, [])
 
   // Load saved data on mount
   useEffect(() => {
@@ -210,8 +293,33 @@ export default function ModernClinicalForm({
     { id: "vitals", title: t('clinicalForm.sections.vitals'), icon: Stethoscope },
   ]
 
+  // Auto-focus first field on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const firstField = fieldRefs.current['chiefComplaint']
+      if (firstField && !localData.chiefComplaint) {
+        firstField.focus()
+        setFocusedField('chiefComplaint')
+      }
+    }, 500)
+    
+    return () => clearTimeout(timer)
+  }, [localData.chiefComplaint])
+
   return (
     <div className="space-y-6">
+      {/* Navigation Hint */}
+      {showKeyboardHint && (
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+          <div className="flex items-center gap-2">
+            <Keyboard className="h-5 w-5 text-purple-600" />
+            <p className="text-sm font-medium text-purple-800">
+              💡 {t('common.keyboardHint', 'Astuce : Appuyez sur Enter pour passer au champ suivant rapidement')}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header with Progress */}
       <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader className="text-center">
@@ -226,6 +334,14 @@ export default function ModernClinicalForm({
             </div>
             <Progress value={progress} className="h-2" />
           </div>
+          {focusedField && (
+            <div className="flex items-center justify-center gap-2 mt-2">
+              <Target className="h-4 w-4 text-purple-600" />
+              <span className="text-sm text-purple-600 font-medium">
+                Focus: {focusedField}
+              </span>
+            </div>
+          )}
         </CardHeader>
       </Card>
 
@@ -264,12 +380,21 @@ export default function ModernClinicalForm({
               id="chiefComplaint"
               value={localData.chiefComplaint || ""}
               onChange={(e) => updateData({ chiefComplaint: e.target.value })}
+              onKeyDown={(e) => handleKeyDown(e, 'chiefComplaint')}
+              onFocus={() => setFocusedField('chiefComplaint')}
+              onBlur={() => setFocusedField(null)}
+              ref={(el) => setFieldRef('chiefComplaint', el)}
               placeholder={t('clinicalForm.describePlaceholder')}
               rows={3}
-              className="transition-all duration-200 focus:ring-purple-200 resize-y"
+              className={`transition-all duration-200 focus:ring-purple-200 resize-y ${
+                focusedField === 'chiefComplaint' ? 'ring-2 ring-purple-300' : ''
+              }`}
             />
             <p className="text-xs text-gray-500">
               {t('clinicalForm.summaryHint')}
+              <span className="text-purple-600 ml-2">
+                💡 Shift + Enter = nouvelle ligne, Enter = champ suivant
+              </span>
             </p>
           </div>
         </CardContent>
@@ -292,12 +417,21 @@ export default function ModernClinicalForm({
               id="diseaseHistory"
               value={localData.diseaseHistory || ""}
               onChange={(e) => updateData({ diseaseHistory: e.target.value })}
+              onKeyDown={(e) => handleKeyDown(e, 'diseaseHistory')}
+              onFocus={() => setFocusedField('diseaseHistory')}
+              onBlur={() => setFocusedField(null)}
+              ref={(el) => setFieldRef('diseaseHistory', el)}
               placeholder={t('clinicalForm.historyPlaceholder')}
               rows={5}
-              className="transition-all duration-200 focus:ring-blue-200 resize-y"
+              className={`transition-all duration-200 focus:ring-blue-200 resize-y ${
+                focusedField === 'diseaseHistory' ? 'ring-2 ring-blue-300' : ''
+              }`}
             />
             <p className="text-xs text-gray-500">
               {t('clinicalForm.detailedHistory')}
+              <span className="text-blue-600 ml-2">
+                💡 Shift + Enter = nouvelle ligne, Enter = champ suivant
+              </span>
             </p>
           </div>
 
@@ -329,9 +463,16 @@ export default function ModernClinicalForm({
             </Label>
             <Select
               value={localData.symptomDuration || ""}
-              onValueChange={(value) => updateData({ symptomDuration: value })}
+              onValueChange={handleDurationChange}
             >
-              <SelectTrigger className="transition-all duration-200 focus:ring-green-200">
+              <SelectTrigger 
+                className={`transition-all duration-200 focus:ring-green-200 ${
+                  focusedField === 'symptomDuration' ? 'ring-2 ring-green-300' : ''
+                }`}
+                ref={(el) => setFieldRef('symptomDuration', el)}
+                onFocus={() => setFocusedField('symptomDuration')}
+                onBlur={() => setFocusedField(null)}
+              >
                 <SelectValue placeholder={t('clinicalForm.selectDuration')} />
               </SelectTrigger>
               <SelectContent>
@@ -375,8 +516,17 @@ export default function ModernClinicalForm({
               placeholder={t('clinicalForm.searchSymptom')}
               value={symptomSearch}
               onChange={(e) => setSymptomSearch(e.target.value)}
-              className="pl-10"
+              onKeyDown={(e) => handleKeyDown(e, 'symptomSearch')}
+              onFocus={() => setFocusedField('symptomSearch')}
+              onBlur={() => setFocusedField(null)}
+              ref={(el) => setFieldRef('symptomSearch', el)}
+              className={`pl-10 transition-all duration-200 ${
+                focusedField === 'symptomSearch' ? 'ring-2 ring-orange-300' : ''
+              }`}
             />
+            <p className="text-xs text-orange-600 mt-1">
+              💡 Tapez pour filtrer les symptômes, Enter = champ suivant
+            </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -450,8 +600,14 @@ export default function ModernClinicalForm({
                 max="42"
                 value={localData.vitalSigns?.temperature || ""}
                 onChange={(e) => updateVitalSigns("temperature", e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'temperature')}
+                onFocus={() => setFocusedField('temperature')}
+                onBlur={() => setFocusedField(null)}
+                ref={(el) => setFieldRef('temperature', el)}
                 placeholder="37.0"
-                className="transition-all duration-200 focus:ring-red-200"
+                className={`transition-all duration-200 focus:ring-red-200 ${
+                  focusedField === 'temperature' ? 'ring-2 ring-red-300' : ''
+                }`}
               />
               {localData.vitalSigns?.temperature && (
                 <p className="text-xs text-gray-500">
@@ -473,8 +629,14 @@ export default function ModernClinicalForm({
                 max="250"
                 value={localData.vitalSigns?.bloodPressureSystolic || ""}
                 onChange={(e) => updateVitalSigns("bloodPressureSystolic", e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'bloodPressureSystolic')}
+                onFocus={() => setFocusedField('bloodPressureSystolic')}
+                onBlur={() => setFocusedField(null)}
+                ref={(el) => setFieldRef('bloodPressureSystolic', el)}
                 placeholder="120"
-                className="transition-all duration-200 focus:ring-red-200"
+                className={`transition-all duration-200 focus:ring-red-200 ${
+                  focusedField === 'bloodPressureSystolic' ? 'ring-2 ring-red-300' : ''
+                }`}
               />
             </div>
 
@@ -489,8 +651,14 @@ export default function ModernClinicalForm({
                 max="150"
                 value={localData.vitalSigns?.bloodPressureDiastolic || ""}
                 onChange={(e) => updateVitalSigns("bloodPressureDiastolic", e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'bloodPressureDiastolic')}
+                onFocus={() => setFocusedField('bloodPressureDiastolic')}
+                onBlur={() => setFocusedField(null)}
+                ref={(el) => setFieldRef('bloodPressureDiastolic', el)}
                 placeholder="80"
-                className="transition-all duration-200 focus:ring-red-200"
+                className={`transition-all duration-200 focus:ring-red-200 ${
+                  focusedField === 'bloodPressureDiastolic' ? 'ring-2 ring-red-300' : ''
+                }`}
               />
             </div>
           </div>
@@ -515,11 +683,20 @@ export default function ModernClinicalForm({
         </CardContent>
       </Card>
 
-      {/* Auto-save indicator */}
+      {/* Completion status */}
       <div className="flex justify-center">
-        <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-sm text-gray-600">{t('common.autoSave')}</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-sm text-gray-600">{t('common.autoSave')}</span>
+          </div>
+          
+          {progress === 100 && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-full shadow-md">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-sm text-green-600 font-medium">Formulaire complet !</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -535,6 +712,7 @@ export default function ModernClinicalForm({
         </Button>
         <Button 
           onClick={onNext}
+          data-next-button="true"
           className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
         >
           {t('clinicalForm.continueToAI')}
