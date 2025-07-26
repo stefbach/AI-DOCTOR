@@ -20,7 +20,7 @@ export interface ConsultationEditorProps {
   doctorData?: any;
   mauritianDocuments?: any;
   onSave: (data: any) => void;
-  onDiscard: () => void;
+  onDiscard?: () => void;
 }
 
 const ConsultationEditor: React.FC<ConsultationEditorProps> = ({
@@ -356,6 +356,12 @@ const ConsultationEditor: React.FC<ConsultationEditorProps> = ({
     setHasUnsavedChanges(false);
   };
 
+  const handleDiscard = () => {
+    if (onDiscard) {
+      onDiscard();
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Résumé clinique */}
@@ -430,7 +436,7 @@ const ConsultationEditor: React.FC<ConsultationEditorProps> = ({
 
       {/* Boutons d'action */}
       <div className="flex justify-end space-x-3 pt-4">
-        <Button variant="secondary" onClick={onDiscard}>
+        <Button variant="secondary" onClick={handleDiscard}>
           Annuler
         </Button>
         <Button
