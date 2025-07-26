@@ -1,4 +1,4 @@
-// components/medical/main-medical-workflow.tsx
+// components/medical/main-medical-workflow.tsx - Version finale avec aperçu
 
 "use client"
 
@@ -7,6 +7,7 @@ import { consultationDataService } from '@/lib/consultation-data-service'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useToast } from "@/components/ui/use-toast"
 import { 
   Brain, 
   FileText, 
@@ -15,11 +16,15 @@ import {
   User,
   Calendar,
   ArrowLeft,
-  AlertTriangle
+  AlertTriangle,
+  Eye,
+  Download,
+  Zap
 } from "lucide-react"
 
-// Import du DocumentsWorkflow adapté
+// Import des composants
 import DocumentsWorkflow from './documents-workflow'
+import MauritianDocumentsPreview from './mauritian-documents-preview'
 
 interface MedicalWorkflowProps {
   patientData?: any
@@ -42,6 +47,7 @@ export default function MedicalWorkflow({
   onBack,
   language = 'fr'
 }: MedicalWorkflowProps) {
+  const { toast } = useToast()
   const [currentPhase, setCurrentPhase] = useState('documents')
   const [consultationReport, setConsultationReport] = useState<any>(null)
   const [finalDocuments, setFinalDocuments] = useState(null)
@@ -62,11 +68,11 @@ export default function MedicalWorkflow({
           console.log('✅ Found existing consultation report')
           setConsultationReport(allData.consultationReport)
         } else {
-          console.log('⚠️ No consultation report found, need to generate one')
+          console.log('⚠️ No consultation report found, generating one...')
           
-          // If we have all the necessary data, try to generate the report
-          if (patientData && clinicalData && diagnosisData) {
-            await generateConsultationReport()
+          // ✅ Generate using the new API endpoint
+          if (patientData && diagnosisData) {
+            await generateConsultationReportFromAPI()
           } else {
             setError('Données insuffisantes pour générer le rapport de consultation')
           }
@@ -88,42 +94,44 @@ export default function MedicalWorkflow({
     loadExistingReport()
   }, [patientData, clinicalData, diagnosisData])
 
-  // ✅ Generate consultation report if needed
-  const generateConsultationReport = async () => {
+  // ✅ Generate consultation report using the new API
+  const generateConsultationReportFromAPI = async () => {
     try {
-      console.log('🚀 Generating consultation report...')
+      console.log('🚀 Generating consultation report via API...')
       
-      const response = await fetch('/api/generate-consultation-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          patientData,
-          clinicalData,
-          questionsData,
-          diagnosisData,
-        }),
-      })
+      const result = await consultationDataService.generateConsultationReport(
+        patientData,
+        clinicalData,
+        questionsData,
+        diagnosisData
+      )
 
-      if (!response.ok) {
-        throw new Error(`Erreur API: ${response.status}`)
-      }
-
-      const result = await response.json()
       console.log('✅ Consultation report generated:', result)
 
-      if (result.success && result.data) {
-        setConsultationReport(result.data)
+      if (result) {
+        setConsultationReport(result)
         
         // Save the generated report
-        await consultationDataService.saveConsultationReport(result.data)
+        await consultationDataService.saveConsultationReport(result)
         console.log('💾 Report saved to consultation service')
+
+        toast({
+          title: "✅ Rapport généré !",
+          description: "Le rapport de consultation et les documents mauriciens ont été générés automatiquement",
+        })
       } else {
-        throw new Error(result.error || 'Échec génération du rapport')
+        throw new Error('Aucun résultat retourné par l\'API')
       }
 
     } catch (error) {
       console.error('❌ Error generating consultation report:', error)
       setError(`Erreur génération rapport: ${error instanceof Error ? error.message : 'Erreur inconnue'}`)
+      
+      toast({
+        title: "Erreur",
+        description: "Échec de la génération automatique du rapport",
+        variant: "destructive"
+      })
     }
   }
 
@@ -159,27 +167,42 @@ export default function MedicalWorkflow({
       })
       
       console.log('💾 Final documents saved')
+      
+      toast({
+        title: "✅ Documents finalisés !",
+        description: "Tous les documents mauriciens sont prêts",
+      })
     } catch (error) {
       console.error('Error saving workflow documents:', error)
     }
     
     // Mark workflow as completed
-    setCurrentPhase('completed')
-    
-    // Call parent completion handler
-    if (onComplete) {
-      onComplete({
-        documents: editedDocs,
-        consultationReport,
-        type: 'medical_workflow_complete'
-      })
-    }
+    setCurrentPhase('preview')
   }
 
   // ✅ Handle back to previous step
   const handleBackToDiagnosis = () => {
     if (onBack) {
       onBack()
+    }
+  }
+
+  // ✅ Handle preview navigation
+  const handleBackToDocuments = () => {
+    setCurrentPhase('documents')
+  }
+
+  const handleFinalComplete = () => {
+    setCurrentPhase('completed')
+    
+    // Call parent completion handler
+    if (onComplete) {
+      onComplete({
+        documents: finalDocuments,
+        consultationReport,
+        type: 'medical_workflow_complete',
+        completedAt: new Date().toISOString()
+      })
     }
   }
 
@@ -193,7 +216,10 @@ export default function MedicalWorkflow({
           <CardContent className="flex items-center justify-center py-12">
             <div className="text-center space-y-4">
               <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
-              <p className="text-gray-600">Chargement du rapport de consultation...</p>
+              <p className="text-gray-600">Génération automatique du rapport de consultation...</p>
+              <p className="text-sm text-blue-600">
+                ⚡ Création : Compte-rendu • Examens biologiques • Examens paracliniques • Ordonnance
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -219,7 +245,8 @@ export default function MedicalWorkflow({
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Retour Diagnostic
               </Button>
-              <Button onClick={generateConsultationReport}>
+              <Button onClick={generateConsultationReportFromAPI}>
+                <Zap className="h-4 w-4 mr-2" />
                 Réessayer Génération
               </Button>
             </div>
@@ -229,7 +256,7 @@ export default function MedicalWorkflow({
     )
   }
 
-  // ✅ Main phase: Documents editing
+  // ✅ Documents editing phase
   if (currentPhase === 'documents') {
     return (
       <div className="space-y-6">
@@ -242,11 +269,24 @@ export default function MedicalWorkflow({
                 <div>
                   <p className="font-semibold text-blue-800">Workflow Documents Mauriciens</p>
                   <p className="text-sm text-blue-600">Patient: {patientName}</p>
+                  {consultationReport?.mauritianDocuments && (
+                    <p className="text-sm text-green-600">
+                      ✅ Documents auto-générés et prêts à éditer
+                    </p>
+                  )}
                 </div>
               </div>
-              <Badge className="bg-blue-600 text-white">
-                Étape 4/4 - Documents
-              </Badge>
+              <div className="flex gap-2">
+                <Badge className="bg-blue-600 text-white">
+                  Étape 4/4 - Documents
+                </Badge>
+                {consultationReport?.mauritianDocuments && (
+                  <Badge className="bg-green-500 text-white">
+                    <Zap className="h-4 w-4 mr-1" />
+                    Auto-générés
+                  </Badge>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -261,6 +301,88 @@ export default function MedicalWorkflow({
           onBack={handleBackToDiagnosis}
           onComplete={handleDocumentsComplete}
         />
+      </div>
+    )
+  }
+
+  // ✅ Preview phase
+  if (currentPhase === 'preview') {
+    return (
+      <div className="space-y-6">
+        {/* Header info */}
+        <Card className="bg-green-50 border border-green-200">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Eye className="h-6 w-6 text-green-600" />
+                <div>
+                  <p className="font-semibold text-green-800">Aperçu Documents Finalisés</p>
+                  <p className="text-sm text-green-600">Patient: {patientName}</p>
+                  <p className="text-sm text-green-600">Tous les documents sont prêts à imprimer</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Badge className="bg-green-600 text-white">
+                  Documents Finalisés
+                </Badge>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleBackToDocuments}
+                >
+                  ✏️ Modifier
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Documents preview */}
+        <MauritianDocumentsPreview
+          documents={finalDocuments}
+          onBack={handleBackToDocuments}
+          onDownload={(docType) => {
+            console.log(`Downloading ${docType}`)
+            toast({
+              title: "Téléchargement",
+              description: `Téléchargement du document ${docType} en cours...`,
+            })
+          }}
+          onPrint={(docType) => {
+            console.log(`Printing ${docType}`)
+            toast({
+              title: "Impression",
+              description: `Document ${docType} envoyé à l'imprimante`,
+            })
+          }}
+        />
+
+        {/* Final actions */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-center">
+              <p className="text-gray-600">
+                Dossier médical complet prêt pour impression et archivage
+              </p>
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline"
+                  onClick={handleBackToDocuments}
+                >
+                  ✏️ Modifier Documents
+                </Button>
+                
+                <Button 
+                  onClick={handleFinalComplete}
+                  className="bg-green-600 text-white"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Consultation Terminée
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -296,11 +418,11 @@ export default function MedicalWorkflow({
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    Examens biologiques
+                    Ordonnance examens biologiques
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    Examens paracliniques
+                    Ordonnance examens paracliniques
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
@@ -309,20 +431,44 @@ export default function MedicalWorkflow({
                 </div>
               </div>
 
+              {/* Résumé de la consultation */}
+              <div className="bg-blue-50 p-6 rounded-lg text-left">
+                <h3 className="font-semibold text-blue-800 mb-3">Résumé de la consultation :</h3>
+                <div className="text-sm space-y-2">
+                  <p><strong>Patient :</strong> {patientName}</p>
+                  <p><strong>Diagnostic principal :</strong> {diagnosisData?.diagnosis?.primary?.condition || 'Diagnostic établi'}</p>
+                  <p><strong>Date :</strong> {new Date().toLocaleDateString('fr-FR')}</p>
+                  <p><strong>Documents générés :</strong> 4 documents mauriciens complets</p>
+                </div>
+              </div>
+
               <div className="flex gap-4 justify-center">
+                <Button 
+                  variant="outline"
+                  onClick={() => setCurrentPhase('preview')}
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Revoir Documents
+                </Button>
+                
                 <Button 
                   variant="outline"
                   onClick={() => setCurrentPhase('documents')}
                 >
-                  ← Modifier Documents
+                  ✏️ Modifier Documents
                 </Button>
                 
                 <Button className="bg-green-600 text-white">
-                  📥 Télécharger Dossier
+                  <Download className="h-4 w-4 mr-2" />
+                  Télécharger Dossier
                 </Button>
                 
                 <Button 
                   onClick={() => {
+                    toast({
+                      title: "✅ Consultation archivée",
+                      description: "Le dossier a été sauvegardé dans la base de données",
+                    })
                     if (onComplete) {
                       onComplete({
                         documents: finalDocuments,
@@ -334,7 +480,7 @@ export default function MedicalWorkflow({
                   }}
                   className="bg-blue-600 text-white"
                 >
-                  🎯 Consultation Terminée
+                  🎯 Archiver & Terminer
                 </Button>
               </div>
             </div>
