@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import { supabase } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -28,7 +28,8 @@ import {
   Mail,
   Phone,
   MapPin,
-  Home
+  Home,
+  Keyboard
 } from "lucide-react"
 import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
 import { getTranslation, Language } from "@/lib/translations"
@@ -83,6 +84,10 @@ export default function ModernPatientForm({
   const [isLoadingPatientData, setIsLoadingPatientData] = useState(true)
   const [dataProcessed, setDataProcessed] = useState(false)
   
+  // Navigation refs
+  const fieldRefs = useRef<Record<string, HTMLElement | null>>({})
+  const [showKeyboardHint, setShowKeyboardHint] = useState(true)
+  
   // Helper function for translations
   const t = (key: string) => getTranslation(key, language)
   
@@ -109,6 +114,23 @@ export default function ModernPatientForm({
     t('medicalConditions.migraine'),
     t('medicalConditions.gerd'),
     t('medicalConditions.highCholesterol'),
+  ]
+  
+  // Field navigation order
+  const FIELD_ORDER = [
+    'firstName',
+    'lastName', 
+    'birthDate',
+    'weight',
+    'height',
+    'phone',
+    'email',
+    'address',
+    'city',
+    'country',
+    'otherAllergies',
+    'otherMedicalHistory',
+    'currentMedicationsText'
   ]
   
   // Capture URL parameters immediately before they get cleared
@@ -185,6 +207,50 @@ export default function ModernPatientForm({
   const [allergySearch, setAllergySearch] = useState("")
   const [historySearch, setHistorySearch] = useState("")
   const [currentSection, setCurrentSection] = useState(0)
+
+  // NAVIGATION FUNCTIONS
+  const setFieldRef = useCallback((fieldName: string, element: HTMLElement | null) => {
+    fieldRefs.current[fieldName] = element
+  }, [])
+
+  const focusNextField = useCallback((currentField: string) => {
+    const currentIndex = FIELD_ORDER.indexOf(currentField)
+    if (currentIndex >= 0 && currentIndex < FIELD_ORDER.length - 1) {
+      const nextFieldName = FIELD_ORDER[currentIndex + 1]
+      const nextField = fieldRefs.current[nextFieldName]
+      
+      if (nextField) {
+        nextField.focus()
+        
+        // Auto-scroll to the field
+        nextField.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        })
+        
+        // Add visual highlight
+        nextField.classList.add('ring-2', 'ring-blue-300')
+        setTimeout(() => {
+          nextField.classList.remove('ring-2', 'ring-blue-300')
+        }, 1000)
+      }
+    } else if (currentIndex === FIELD_ORDER.length - 1) {
+      // Last field, focus submit button or trigger validation
+      handleSubmit()
+    }
+  }, [])
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent, fieldName: string) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      focusNextField(fieldName)
+      
+      // Hide keyboard hint after first use
+      if (showKeyboardHint) {
+        setShowKeyboardHint(false)
+      }
+    }
+  }, [focusNextField, showKeyboardHint])
 
   // Process data from URL or TIBOK hook
   useEffect(() => {
@@ -550,6 +616,18 @@ export default function ModernPatientForm({
 
   return (
     <div className="space-y-6">
+      {/* Navigation Hint */}
+      {showKeyboardHint && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center gap-2">
+            <Keyboard className="h-5 w-5 text-blue-600" />
+            <p className="text-sm font-medium text-blue-800">
+              💡 {t('common.keyboardHint', 'Astuce : Appuyez sur Enter pour passer au champ suivant')}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Show notification if data is from TIBOK */}
       {showTibokNotification && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -617,6 +695,8 @@ export default function ModernPatientForm({
                 type="text"
                 value={formData.firstName}
                 onChange={(e) => handleInputChange("firstName", e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'firstName')}
+                ref={(el) => setFieldRef('firstName', el)}
                 className={`transition-all duration-200 ${
                   errors.firstName 
                     ? "border-red-500 focus:ring-red-200" 
@@ -641,6 +721,8 @@ export default function ModernPatientForm({
                 type="text"
                 value={formData.lastName}
                 onChange={(e) => handleInputChange("lastName", e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'lastName')}
+                ref={(el) => setFieldRef('lastName', el)}
                 className={`transition-all duration-200 ${
                   errors.lastName 
                     ? "border-red-500 focus:ring-red-200" 
@@ -667,6 +749,8 @@ export default function ModernPatientForm({
                 type="date"
                 value={formData.birthDate}
                 onChange={(e) => handleInputChange("birthDate", e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'birthDate')}
+                ref={(el) => setFieldRef('birthDate', el)}
                 className={`transition-all duration-200 ${
                   errors.birthDate 
                     ? "border-red-500 focus:ring-red-200" 
@@ -728,6 +812,7 @@ export default function ModernPatientForm({
                 name="otherGender"
                 value={formData.otherGender}
                 onChange={(e) => handleInputChange("otherGender", e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'otherGender')}
                 className="transition-all duration-200 focus:ring-blue-200"
               />
             </div>
@@ -772,6 +857,8 @@ export default function ModernPatientForm({
                 type="number"
                 value={formData.weight}
                 onChange={(e) => handleInputChange("weight", e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'weight')}
+                ref={(el) => setFieldRef('weight', el)}
                 min="1"
                 max="300"
                 step="0.1"
@@ -799,6 +886,8 @@ export default function ModernPatientForm({
                 type="number"
                 value={formData.height}
                 onChange={(e) => handleInputChange("height", e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'height')}
+                ref={(el) => setFieldRef('height', el)}
                 min="50"
                 max="250"
                 className={`transition-all duration-200 ${
@@ -851,6 +940,8 @@ export default function ModernPatientForm({
                 type="tel"
                 value={formData.phone || ''}
                 onChange={(e) => handleInputChange("phone", e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'phone')}
+                ref={(el) => setFieldRef('phone', el)}
                 placeholder="+230 5XXX XXXX"
                 className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
               />
@@ -867,6 +958,8 @@ export default function ModernPatientForm({
                 type="email"
                 value={formData.email || ''}
                 onChange={(e) => handleInputChange("email", e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'email')}
+                ref={(el) => setFieldRef('email', el)}
                 placeholder="email@example.com"
                 className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
               />
@@ -883,6 +976,8 @@ export default function ModernPatientForm({
               name="address"
               value={formData.address || ''}
               onChange={(e) => handleInputChange("address", e.target.value)}
+              onKeyDown={(e) => handleKeyDown(e, 'address')}
+              ref={(el) => setFieldRef('address', el)}
               placeholder={t('patientForm.addressPlaceholder')}
               rows={2}
               className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
@@ -901,6 +996,8 @@ export default function ModernPatientForm({
                 type="text"
                 value={formData.city || ''}
                 onChange={(e) => handleInputChange("city", e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'city')}
+                ref={(el) => setFieldRef('city', el)}
                 placeholder="Port Louis, Curepipe, etc."
                 className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
               />
@@ -917,6 +1014,8 @@ export default function ModernPatientForm({
                 type="text"
                 value={formData.country || ''}
                 onChange={(e) => handleInputChange("country", e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'country')}
+                ref={(el) => setFieldRef('country', el)}
                 className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
               />
             </div>
@@ -972,6 +1071,8 @@ export default function ModernPatientForm({
               id="otherAllergies"
               value={formData.otherAllergies}
               onChange={(e) => handleInputChange("otherAllergies", e.target.value)}
+              onKeyDown={(e) => handleKeyDown(e, 'otherAllergies')}
+              ref={(el) => setFieldRef('otherAllergies', el)}
               rows={3}
               className="transition-all duration-200 focus:ring-red-200"
             />
@@ -1048,6 +1149,8 @@ export default function ModernPatientForm({
               id="otherMedicalHistory"
               value={formData.otherMedicalHistory}
               onChange={(e) => handleInputChange("otherMedicalHistory", e.target.value)}
+              onKeyDown={(e) => handleKeyDown(e, 'otherMedicalHistory')}
+              ref={(el) => setFieldRef('otherMedicalHistory', el)}
               rows={3}
               className="transition-all duration-200 focus:ring-purple-200"
             />
@@ -1093,6 +1196,8 @@ export default function ModernPatientForm({
               id="currentMedicationsText"
               value={formData.currentMedicationsText}
               onChange={(e) => handleInputChange("currentMedicationsText", e.target.value)}
+              onKeyDown={(e) => handleKeyDown(e, 'currentMedicationsText')}
+              ref={(el) => setFieldRef('currentMedicationsText', el)}
               placeholder={t('patientForm.medicationPlaceholder')}
               rows={6}
               className="resize-y transition-all duration-200 focus:ring-green-200"
