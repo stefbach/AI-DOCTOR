@@ -35,13 +35,12 @@ export default function DocumentsWorkflow({
   onBack,
   onComplete 
 }) {
-  const [currentStep, setCurrentStep] = useState(0)
   const [editedDocuments, setEditedDocuments] = useState({
-    consultation: mauritianDocuments?.consultation || {},
-    biology: mauritianDocuments?.biology || {},
-    paraclinical: mauritianDocuments?.paraclinical || {},
-    medication: mauritianDocuments?.medication || {}
-  })
+  consultation: report || mauritianDocuments?.consultation || {},
+  biology: mauritianDocuments?.biology || {},
+  paraclinical: mauritianDocuments?.paraclinical || {},
+  medication: mauritianDocuments?.medication || {},
+});
   const [completedSteps, setCompletedSteps] = useState(new Set())
   
   // Add comprehensive data states
