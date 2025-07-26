@@ -127,41 +127,115 @@ export default function ModernQuestionsForm({
     setError(null)
 
     try {
+      console.log('🚀 Appel API questions avec données:', { patientData, clinicalData })
+      
+      // ========== CORRECTION: Format des données pour l'API ==========
+      const patientDiscourse = [
+        clinicalData?.chiefComplaint,
+        clinicalData?.diseaseHistory, 
+        Array.isArray(clinicalData?.symptoms) ? clinicalData.symptoms.join(', ') : '',
+        clinicalData?.symptomDuration
+      ].filter(Boolean).join(' - ')
+
+      console.log('📝 Discourse patient construit:', patientDiscourse)
+
       const response = await fetch("/api/openai-questions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          // ========== CORRECTION: Bon format pour l'API ==========
+          patient_discourse_real_time: patientDiscourse || "Patient consultation médicale",
           patientData,
           clinicalData,
-          language, // Pass language to API for localized questions
+          language,
         }),
       })
 
       const data = await response.json()
+      console.log('📥 Réponse complète API questions:', data)
 
       if (!response.ok) {
+        console.error('❌ Erreur HTTP:', response.status, data)
         throw new Error(data.error || (language === 'fr' ? "Erreur lors de la génération des questions" : "Error generating questions"))
       }
 
-      if (data.success && Array.isArray(data.questions)) {
-        setQuestions(data.questions)
-        const initialResponses = data.questions.map((q: Question) => ({
+      // ========== CORRECTION PRINCIPALE: data.ai_suggestions au lieu de data.questions ==========
+      if (data.success && Array.isArray(data.ai_suggestions)) {
+        console.log('✅ Questions AI reçues:', data.ai_suggestions.length)
+        console.log('📋 Détail questions:', data.ai_suggestions)
+        
+        // Convertir le format API vers le format attendu par l'interface
+        const formattedQuestions = data.ai_suggestions.map((aiQ: any, index: number) => {
+          // Extraire la question selon le format de l'API
+          const questionText = aiQ.patient_formulations?.standard || 
+                              aiQ.patient_formulations?.simple || 
+                              aiQ.physician_prompt || 
+                              `Question ${index + 1} générée par IA`
+
+          // Déterminer le type selon le contenu
+          let questionType = "text"
+          let options: string[] | undefined = undefined
+
+          // Si on a plusieurs formulations, créer des options
+          if (aiQ.patient_formulations?.simple && 
+              aiQ.patient_formulations?.standard && 
+              aiQ.patient_formulations?.simple !== aiQ.patient_formulations?.standard) {
+            questionType = "multiple_choice"
+            options = [
+              aiQ.patient_formulations.simple,
+              aiQ.patient_formulations.standard
+            ]
+          }
+          // Détection automatique du type selon la question
+          else if (questionText.toLowerCase().includes('oui') || 
+                   questionText.toLowerCase().includes('non') ||
+                   questionText.toLowerCase().includes('yes') || 
+                   questionText.toLowerCase().includes('no')) {
+            questionType = "boolean"
+            options = language === 'fr' ? ["Oui", "Non"] : ["Yes", "No"]
+          }
+          else if (questionText.toLowerCase().includes('échelle') || 
+                   questionText.toLowerCase().includes('scale') ||
+                   questionText.toLowerCase().includes('1') && questionText.toLowerCase().includes('5')) {
+            questionType = "scale"
+            options = ["1", "2", "3", "4", "5"]
+          }
+
+          return {
+            id: index + 1,
+            question: questionText,
+            type: questionType,
+            options: options
+          }
+        })
+        
+        console.log('✅ Questions formatées pour interface:', formattedQuestions)
+        
+        setQuestions(formattedQuestions)
+        const initialResponses = formattedQuestions.map((q: Question) => ({
           questionId: q.id,
           question: q.question,
           answer: "",
           type: q.type,
         }))
         setResponses(initialResponses)
+        
+        console.log('✅ Interface mise à jour avec', formattedQuestions.length, 'questions')
+        
       } else {
-        throw new Error(language === 'fr' ? "Format de réponse invalide" : "Invalid response format")
+        console.warn('⚠️ Format réponse API inattendu:', data)
+        console.warn('⚠️ data.success:', data.success)
+        console.warn('⚠️ data.ai_suggestions type:', typeof data.ai_suggestions)
+        console.warn('⚠️ data.ai_suggestions array?:', Array.isArray(data.ai_suggestions))
+        throw new Error(language === 'fr' ? "Format de réponse invalide de l'API" : "Invalid API response format")
       }
     } catch (err) {
-      console.error("Error generating questions:", err)
+      console.error("❌ Erreur génération questions:", err)
       setError(err instanceof Error ? err.message : (language === 'fr' ? "Erreur inconnue" : "Unknown error"))
 
-      // Fallback questions - bilingual
+      // Fallback questions - bilingual amélioré
       const fallbackQuestions = language === 'fr' ? [
         {
           id: 1,
@@ -236,6 +310,7 @@ export default function ModernQuestionsForm({
         },
       ]
 
+      console.log('🔄 Utilisation questions fallback:', fallbackQuestions.length)
       setQuestions(fallbackQuestions)
       const initialResponses = fallbackQuestions.map((q) => ({
         questionId: q.id,
@@ -419,6 +494,7 @@ export default function ModernQuestionsForm({
               <div className="space-y-2">
                 <p className="text-xl font-semibold text-gray-800">{t('questionsForm.generating')}</p>
                 <p className="text-sm text-gray-600">{t('questionsForm.analyzingProfile')}</p>
+                <p className="text-xs text-blue-600">Appel API /openai-questions en cours...</p>
               </div>
               <Progress value={75} className="w-80 mx-auto h-2" />
             </div>
@@ -449,6 +525,7 @@ export default function ModernQuestionsForm({
               {getAnsweredCount()} / {questions.length} {t('questionsForm.answered')}
             </Badge>
             {error && <Badge variant="destructive">{t('questionsForm.fallbackMode')}</Badge>}
+            {!error && questions.length > 0 && <Badge variant="default" className="bg-green-100 text-green-800">IA Générée ✨</Badge>}
           </div>
         </CardHeader>
       </Card>
@@ -459,9 +536,14 @@ export default function ModernQuestionsForm({
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 text-amber-800">
               <AlertTriangle className="h-5 w-5" />
-              <span className="text-sm font-medium">
-                {t('questionsForm.fallbackWarning')}
-              </span>
+              <div>
+                <span className="text-sm font-medium">
+                  {t('questionsForm.fallbackWarning')}
+                </span>
+                <p className="text-xs text-amber-600 mt-1">
+                  Erreur API: {error}
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -513,7 +595,7 @@ export default function ModernQuestionsForm({
             </CardTitle>
             <div className="text-blue-100 text-sm mt-2">
               <Lightbulb className="h-4 w-4 inline mr-2" />
-              {t('questionsForm.aiGenerated')}
+              {error ? t('questionsForm.fallbackMode') : t('questionsForm.aiGenerated')}
             </div>
           </CardHeader>
           <CardContent className="p-8 space-y-6">
