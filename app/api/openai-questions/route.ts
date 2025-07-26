@@ -1,10 +1,8 @@
-// /app/api/openai-questions/route.ts - VERSION ULTRA SIMPLE QUI MARCHE
+// /app/api/openai-questions/route.ts - VERSION CORRIGÉE AVEC FETCH DIRECT
 
 import { NextRequest, NextResponse } from "next/server"
-import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
 
-// ==================== FONCTION SIMPLE GÉNÉRATION IA ====================
+// ==================== FONCTION GÉNÉRATION IA AVEC FETCH DIRECT ====================
 
 async function generateSimpleQuestions(patientText: string): Promise<any[]> {
   
@@ -27,33 +25,61 @@ Réponds SEULEMENT ce JSON :
 }`;
 
   try {
-    console.log("🤖 Appel OpenAI simple...")
+    console.log("🤖 Appel OpenAI avec fetch direct...")
     
-    const result = await generateText({
-      model: openai("gpt-4o"),
-      prompt: prompt,
-      temperature: 0.1,
-      maxTokens: 500
-    });
+    const apiKey = process.env.OPENAI_API_KEY
+    if (!apiKey) throw new Error('OPENAI_API_KEY manquante')
+    
+    // ========== MÊME APPROCHE QUE DIAGNOSIS (QUI MARCHE) ==========
+    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: 'Tu es un médecin assistant expert pour téléconsultation Maurice. Génère UNIQUEMENT du JSON valide.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.1,
+        max_tokens: 800
+      }),
+    })
+    
+    if (!openaiResponse.ok) {
+      const errorText = await openaiResponse.text()
+      throw new Error(`OpenAI Error ${openaiResponse.status}: ${errorText}`)
+    }
+    
+    const openaiData = await openaiResponse.json()
+    const responseText = openaiData.choices[0]?.message?.content
 
-    console.log("📥 Réponse brute:", result.text);
+    console.log("📥 Réponse brute:", responseText?.substring(0, 200));
 
-    // Parse simple
-    let json = result.text.trim();
+    // Parse simple (même logique qu'avant)
+    let json = responseText.trim();
     
     // Trouve le JSON
     const start = json.indexOf('{');
     const end = json.lastIndexOf('}') + 1;
     
     if (start === -1 || end === 0) {
-      throw new Error("Pas de JSON");
+      throw new Error("Pas de JSON trouvé");
     }
     
     json = json.substring(start, end);
     const parsed = JSON.parse(json);
     
     if (!parsed.questions) {
-      throw new Error("Pas de questions");
+      throw new Error("Pas de questions dans la réponse");
     }
 
     console.log("✅ Parse OK:", parsed.questions.length, "questions");
@@ -62,7 +88,7 @@ Réponds SEULEMENT ce JSON :
   } catch (error) {
     console.error("❌ Erreur IA:", error);
     
-    // FALLBACK GARANTI
+    // FALLBACK GARANTI (même qu'avant)
     return [
       {
         medecin: "Question de base - chronologie symptômes",
@@ -175,7 +201,7 @@ function detectSymptoms(text: string): string[] {
 // GET - Test simple
 export async function GET() {
   try {
-    console.log("🧪 Test génération IA...");
+    console.log("🧪 Test génération IA avec fetch direct...");
     
     const testQuestions = await generateSimpleQuestions("mo gagné mal dan ventre depi hier");
     
@@ -183,7 +209,8 @@ export async function GET() {
       success: true,
       test: true,
       questions: testQuestions,
-      message: "Test IA fonctionnel"
+      message: "Test IA fonctionnel avec fetch direct",
+      method: "direct_fetch_like_diagnosis"
     });
     
   } catch (error: any) {
@@ -193,7 +220,8 @@ export async function GET() {
       success: false,
       test: true,
       error: error.message,
-      fallback: getFallbackQuestions(['douleur'])
+      fallback: getFallbackQuestions(['douleur']),
+      method_tried: "direct_fetch"
     });
   }
 }
@@ -201,7 +229,7 @@ export async function GET() {
 // POST - Vraie utilisation
 export async function POST(request: NextRequest) {
   try {
-    console.log("🩺 Début assistant téléconsultation...");
+    console.log("🩺 Début assistant téléconsultation avec fetch direct...");
     
     const body = await request.json();
     const patientText = body.patient_discourse_real_time || body.patientData?.symptoms || "";
@@ -222,20 +250,20 @@ export async function POST(request: NextRequest) {
     const symptoms = detectSymptoms(patientText);
     console.log("🔍 Symptômes:", symptoms);
     
-    // Essai génération IA
+    // Essai génération IA avec fetch direct
     let questions;
     let aiSuccess = false;
     
     try {
       questions = await generateSimpleQuestions(patientText);
       aiSuccess = true;
-      console.log("✅ IA réussie");
+      console.log("✅ IA réussie avec fetch direct");
     } catch (aiError) {
-      console.warn("⚠️ IA échouée, fallback");
+      console.warn("⚠️ IA échouée même avec fetch, fallback:", aiError);
       questions = getFallbackQuestions(symptoms);
     }
     
-    // Formatage final
+    // Formatage final (identique à avant)
     const formattedQuestions = questions.map((q, index) => ({
       id: `q_${Date.now()}_${index}`,
       timing: "immediate",
@@ -266,7 +294,7 @@ export async function POST(request: NextRequest) {
       },
       
       clinical_rationale: q.medecin,
-      ai_reasoning: aiSuccess ? "Génération IA contextuelle" : "Fallback automatique"
+      ai_reasoning: aiSuccess ? "Génération IA fetch direct" : "Fallback automatique"
     }));
     
     return NextResponse.json({
@@ -277,6 +305,7 @@ export async function POST(request: NextRequest) {
       context: {
         symptoms_detected: symptoms,
         ai_generation_success: aiSuccess,
+        ai_method: aiSuccess ? "direct_fetch_openai" : "fallback",
         language_detected: /mo|to|ena/.test(patientText) ? "créole" : "français"
       },
       
@@ -291,7 +320,8 @@ export async function POST(request: NextRequest) {
         ]
       },
       
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      fixed_method: "direct_fetch_like_diagnosis_api"
     });
     
   } catch (error: any) {
@@ -324,6 +354,11 @@ export async function POST(request: NextRequest) {
           "Médicaments pris ?",
           "Signes inquiétants ?"
         ]
+      },
+      
+      debug_info: {
+        method_used: "direct_fetch_attempt",
+        same_as_working_diagnosis_api: true
       }
     }, { status: 500 });
   }
