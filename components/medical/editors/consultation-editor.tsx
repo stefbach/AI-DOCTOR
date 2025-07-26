@@ -1,27 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
 /*
- * ConsultationEditor – éditeur de compte‑rendu de consultation enrichi.
+ * ConsultationEditor – éditeur de compte‑rendu de consultation factuel.
  *
- * Ce composant React est destiné à remplacer/étendre le fichier
- * `components/medical/editors/consultation-editor.tsx` d'origine. Il intègre
- * deux améliorations principales :
- *   1. L'ajout d'un champ `narrativeSummary` qui présente la consultation
- *      sous forme de récit médical littéraire. Cette synthèse est préremplie
- *      à partir du rapport généré par l'API `/api/generate-consultation-report`.
- *   2. L'inclusion d'une section diagnostique détaillée reprenant le
- *      diagnostic principal, les diagnostics différentiels, les arguments
- *      pour/contre et les examens permettant de les confirmer ou de les
- *      écarter. Ce contenu est extrait de `consultationData.diagnosticAssessment`.
- *
- * Le composant propose également des champs pour l'historique complet, l'examen
- * physique complet et le plan de prise en charge. Ces champs sont
- * préremplis à partir des données existantes (rapport de consultation,
- * données cliniques) et peuvent être édités par l'utilisateur.
+ * Ce composant génère un véritable compte-rendu de consultation basé 
+ * uniquement sur les données réellement collectées, sans inventer 
+ * d'informations fictives.
  */
 
-// Import de composants d'interface. Ces importations doivent correspondre
-// aux chemins utilisés dans votre projet. Ajustez‑les si nécessaire.
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 
@@ -48,218 +34,312 @@ const ConsultationEditor: React.FC<ConsultationEditorProps> = ({
   onSave,
   onDiscard,
 }) => {
+  
   /**
-   * Construit l'historique complet du patient en se basant sur le rapport
-   * existant. En l'absence de données, retourne une chaîne vide.
+   * Fonction utilitaire pour extraire uniquement les données réelles
    */
-  const buildCompleteHistory = (): string => {
-    // Priorité au rapport de consultation déjà généré
-    if (consultationData?.anamnesis?.chiefComplaint?.detailedDescription) {
-      return consultationData.anamnesis.chiefComplaint.detailedDescription;
+  const getActualData = (obj: any, path: string): string => {
+    try {
+      const keys = path.split('.');
+      let current = obj;
+      for (const key of keys) {
+        if (!current || typeof current !== 'object' || !(key in current)) {
+          return '';
+        }
+        current = current[key];
+      }
+      return typeof current === 'string' && current.trim() ? current.trim() : '';
+    } catch {
+      return '';
     }
-    // Fallback : utiliser les informations cliniques collectées précédemment
+  };
+
+  /**
+   * Construit l'anamnèse basée uniquement sur les données collectées
+   */
+  const buildAnamnesis = (): string => {
     const sections: string[] = [];
-    if (clinicalData?.chiefComplaint) {
-      sections.push(`Motif de consultation : ${clinicalData.chiefComplaint}`);
+    
+    // Motif de consultation réel
+    const chiefComplaint = getActualData(clinicalData, 'chiefComplaint');
+    if (chiefComplaint) {
+      sections.push(`MOTIF DE CONSULTATION :\n${chiefComplaint}`);
     }
-    if (clinicalData?.duration) {
-      sections.push(`Durée des symptômes : ${clinicalData.duration}`);
+    
+    // Histoire de la maladie actuelle
+    const historyOfDisease = getActualData(clinicalData, 'historyOfDisease');
+    if (historyOfDisease) {
+      sections.push(`HISTOIRE DE LA MALADIE ACTUELLE :\n${historyOfDisease}`);
     }
-    if (clinicalData?.historyOfDisease) {
-      sections.push(`Histoire de la maladie : ${clinicalData.historyOfDisease}`);
+    
+    // Durée des symptômes si mentionnée
+    const duration = getActualData(clinicalData, 'duration');
+    if (duration) {
+      sections.push(`ÉVOLUTION :\nSymptômes évoluant depuis ${duration}`);
     }
-    if (patientData?.medicalHistory) {
-      sections.push(`Antécédents médicaux : ${patientData.medicalHistory}`);
+    
+    // Antécédents médicaux personnels
+    const medicalHistory = getActualData(patientData, 'medicalHistory');
+    if (medicalHistory) {
+      sections.push(`ANTÉCÉDENTS MÉDICAUX PERSONNELS :\n${medicalHistory}`);
     }
-    if (patientData?.currentMedications) {
-      sections.push(`Médications en cours : ${patientData.currentMedications}`);
+    
+    // Traitements en cours
+    const currentMedications = getActualData(patientData, 'currentMedications');
+    if (currentMedications) {
+      sections.push(`TRAITEMENTS EN COURS :\n${currentMedications}`);
     }
+    
     return sections.join('\n\n');
   };
 
   /**
-   * Construit la description de l'examen physique. Si un examen complet est
-   * disponible dans le rapport, l'utiliser. Sinon, générer un examen succinct.
+   * Construit l'examen physique basé uniquement sur ce qui a été réellement examiné
    */
-  const buildCompleteExamination = (): string => {
-    if (consultationData?.anamnesis?.physicalExam) {
-      return consultationData.anamnesis.physicalExam;
+  const buildPhysicalExamination = (): string => {
+    const sections: string[] = [];
+    
+    // Utiliser l'examen physique du rapport s'il existe et n'est pas générique
+    const reportedExam = getActualData(consultationData, 'anamnesis.physicalExam');
+    if (reportedExam && 
+        !reportedExam.includes('conscience claire, bonne coloration') && 
+        !reportedExam.includes('pas de signe de gravité')) {
+      sections.push(reportedExam);
     }
-    // Exemple de fallback : examen général sommaire
-    return 'Examen général : conscience claire, bonne coloration des téguments, pas de signe de gravité clinique.';
+    
+    // Signes vitaux s'ils ont été pris
+    const vitalSigns = getActualData(clinicalData, 'vitalSigns');
+    if (vitalSigns) {
+      sections.push(`SIGNES VITAUX :\n${vitalSigns}`);
+    }
+    
+    // Examens spécifiques seulement s'ils ont été réellement effectués
+    const cardiovascularExam = getActualData(clinicalData, 'cardiovascularExam');
+    if (cardiovascularExam) {
+      sections.push(`EXAMEN CARDIOVASCULAIRE :\n${cardiovascularExam}`);
+    }
+    
+    const respiratoryExam = getActualData(clinicalData, 'respiratoryExam');
+    if (respiratoryExam) {
+      sections.push(`EXAMEN PULMONAIRE :\n${respiratoryExam}`);
+    }
+    
+    const abdominalExam = getActualData(clinicalData, 'abdominalExam');
+    if (abdominalExam) {
+      sections.push(`EXAMEN ABDOMINAL :\n${abdominalExam}`);
+    }
+    
+    const neurologicalExam = getActualData(clinicalData, 'neurologicalExam');
+    if (neurologicalExam) {
+      sections.push(`EXAMEN NEUROLOGIQUE :\n${neurologicalExam}`);
+    }
+    
+    return sections.join('\n\n');
   };
 
   /**
-   * Construit la section diagnostic en détaillant le diagnostic principal
-   * et les diagnostics différentiels. Utilise les informations contenues dans
-   * consultationData.diagnosticAssessment.
+   * Construit la synthèse diagnostique
    */
-  const buildDiagnosticSection = (): string => {
-    const parts: string[] = [];
-    const diag = consultationData?.diagnosticAssessment;
-    if (diag?.primaryDiagnosis) {
-      const pd = diag.primaryDiagnosis;
-      const probabilityStr = pd.probability ? `, confiance ${pd.probability}%` : '';
-      parts.push(
-        `Diagnostic principal : ${pd.condition} (${pd.severity || 'non précisée'}${probabilityStr}).\n` +
-          `Physiopathologie : ${pd.pathophysiology || 'Non spécifiée.'}\n` +
-          `Justification clinique : ${pd.clinical_rationale || pd.rationale || 'Non spécifiée.'}`,
-      );
+  const buildDiagnosticSynthesis = (): string => {
+    const sections: string[] = [];
+    
+    // Diagnostic principal seulement s'il existe
+    const primaryDiag = consultationData?.diagnosticAssessment?.primaryDiagnosis || 
+                       diagnosisData?.primary_diagnosis;
+    
+    if (primaryDiag?.condition) {
+      let diagText = `DIAGNOSTIC RETENU :\n${primaryDiag.condition}`;
+      
+      if (primaryDiag.severity) {
+        diagText += ` (${primaryDiag.severity})`;
+      }
+      
+      if (primaryDiag.probability) {
+        diagText += ` - Degré de certitude : ${primaryDiag.probability}%`;
+      }
+      
+      sections.push(diagText);
+      
+      // Arguments diagnostiques s'ils existent
+      const rationale = primaryDiag.clinical_rationale || primaryDiag.rationale;
+      if (rationale) {
+        sections.push(`ARGUMENTS DIAGNOSTIQUES :\n${rationale}`);
+      }
     }
-    if (Array.isArray(diag?.differentialDiagnosis) && diag.differentialDiagnosis.length > 0) {
-      parts.push('Diagnostics différentiels :');
-      diag.differentialDiagnosis.forEach((dd: any) => {
-        const probability = dd.probability ? `${dd.probability}%` : 'probabilité non précisée';
-        parts.push(
-          `• ${dd.condition} (${probability}) : ${dd.rationale || ''}.` +
-            (dd.discriminating_tests ? ` Tests discriminants : ${dd.discriminating_tests}.` : ''),
-        );
-      });
-    }
-    // Fallback : utiliser les données de diagnosisData si la section diagnostique n'est pas définie
-    if (!diag?.primaryDiagnosis && diagnosisData?.primary_diagnosis) {
-      const pd = diagnosisData.primary_diagnosis;
-      const prob = pd.probability ? `, confiance ${pd.probability}%` : '';
-      parts.push(
-        `Diagnostic principal : ${pd.condition} (${pd.severity || 'non précisée'}${prob}).\n` +
-          `Physiopathologie : ${pd.pathophysiology || 'Non spécifiée.'}\n` +
-          `Justification clinique : ${pd.clinical_rationale || pd.rationale || 'Non spécifiée.'}`,
-      );
-      if (Array.isArray(diagnosisData?.differential_diagnoses) && diagnosisData.differential_diagnoses.length > 0) {
-        parts.push('Diagnostics différentiels :');
-        diagnosisData.differential_diagnoses.forEach((dd: any) => {
-          const p = dd.probability ? `${dd.probability}%` : 'probabilité non précisée';
-          parts.push(
-            `• ${dd.condition} (${p}) : ${dd.rationale || ''}.` +
-              (dd.discriminating_tests ? ` Tests discriminants : ${dd.discriminating_tests}.` : ''),
-          );
+    
+    // Diagnostics différentiels seulement s'ils existent vraiment
+    const differentials = consultationData?.diagnosticAssessment?.differentialDiagnosis || 
+                         diagnosisData?.differential_diagnoses;
+    
+    if (Array.isArray(differentials) && differentials.length > 0) {
+      const validDifferentials = differentials.filter(d => d.condition && d.condition.trim());
+      
+      if (validDifferentials.length > 0) {
+        sections.push('DIAGNOSTICS DIFFÉRENTIELS À CONSIDÉRER :');
+        validDifferentials.forEach((dd: any) => {
+          let diffText = `• ${dd.condition}`;
+          if (dd.probability) {
+            diffText += ` (${dd.probability}%)`;
+          }
+          if (dd.rationale) {
+            diffText += ` - ${dd.rationale}`;
+          }
+          sections.push(diffText);
         });
       }
     }
-    return parts.join('\n\n');
+    
+    return sections.join('\n\n');
   };
 
   /**
-   * Construit le plan de prise en charge en s'appuyant sur la structure
-   * therapeuticPlan du rapport, les champs investigationsPlan et les
-   * recommandations expertes issues du diagnostic (expert_investigations,
-   * expert_therapeutics, expert_preventive_measures). Si aucune information
-   * pertinente n'est trouvée, propose des conseils génériques.
+   * Construit le plan de prise en charge basé sur les recommandations réelles
    */
-  const buildCompletePlan = (): string => {
-    const parts: string[] = [];
-    // Investigations planifiées dans le rapport
+  const buildManagementPlan = (): string => {
+    const sections: string[] = [];
+    
+    // Investigations prévues
     const investigations = consultationData?.investigationsPlan;
     if (investigations) {
-      // Tests biologiques urgents
-      if (investigations.laboratoryTests?.urgentTests?.length) {
-        parts.push(
-          'Examens biologiques urgents :\n' +
-            investigations.laboratoryTests.urgentTests.join(', '),
-        );
+      const plannedTests: string[] = [];
+      
+      // Tests urgents
+      if (investigations.laboratoryTests?.urgentTests?.length > 0) {
+        plannedTests.push(`Examens biologiques urgents : ${investigations.laboratoryTests.urgentTests.join(', ')}`);
       }
-      // Tests biologiques de routine
-      if (investigations.laboratoryTests?.routineTests?.length) {
-        parts.push(
-          'Tests biologiques de routine :\n' +
-            investigations.laboratoryTests.routineTests.join(', '),
-        );
+      
+      // Tests de routine
+      if (investigations.laboratoryTests?.routineTests?.length > 0) {
+        plannedTests.push(`Examens biologiques de routine : ${investigations.laboratoryTests.routineTests.join(', ')}`);
       }
+      
       // Imagerie urgente
-      if (investigations.imaging?.urgent?.length) {
-        parts.push('Imagerie urgente :\n' + investigations.imaging.urgent.join(', '));
+      if (investigations.imaging?.urgent?.length > 0) {
+        plannedTests.push(`Imagerie urgente : ${investigations.imaging.urgent.join(', ')}`);
       }
+      
       // Imagerie de routine
-      if (investigations.imaging?.routine?.length) {
-        parts.push('Imagerie de routine :\n' + investigations.imaging.routine.join(', '));
+      if (investigations.imaging?.routine?.length > 0) {
+        plannedTests.push(`Imagerie de routine : ${investigations.imaging.routine.join(', ')}`);
+      }
+      
+      if (plannedTests.length > 0) {
+        sections.push(`EXAMENS COMPLÉMENTAIRES PRESCRITS :\n${plannedTests.join('\n')}`);
       }
     }
-    // Plan thérapeutique à partir du rapport
-    const tp = consultationData?.therapeuticPlan;
-    if (tp) {
-      const im = tp.immediateManagement;
-      const np = tp.nonPharmacological;
-      if (im?.urgentInterventions?.length) {
-        parts.push('Interventions urgentes :\n' + im.urgentInterventions.join(', '));
+    
+    // Traitement immédiat
+    const therapeuticPlan = consultationData?.therapeuticPlan;
+    if (therapeuticPlan?.immediateManagement) {
+      const treatments: string[] = [];
+      
+      if (therapeuticPlan.immediateManagement.urgentInterventions?.length > 0) {
+        treatments.push(`Mesures urgentes : ${therapeuticPlan.immediateManagement.urgentInterventions.join(', ')}`);
       }
-      if (im?.symptomaticTreatment?.length) {
-        parts.push('Traitement symptomatique :\n' + im.symptomaticTreatment.join(', '));
+      
+      if (therapeuticPlan.immediateManagement.symptomaticTreatment?.length > 0) {
+        treatments.push(`Traitement symptomatique : ${therapeuticPlan.immediateManagement.symptomaticTreatment.join(', ')}`);
       }
-      if (im?.supportiveCare?.length) {
-        parts.push('Soins de support :\n' + im.supportiveCare.join(', '));
-      }
-      if (np?.lifestyleModifications?.length) {
-        parts.push('Modifications du mode de vie :\n' + np.lifestyleModifications.join(', '));
-      }
-      if (np?.physicalTherapy?.length) {
-        parts.push('Physiothérapie :\n' + np.physicalTherapy.join(', '));
-      }
-      if (np?.patientEducation?.length) {
-        parts.push('Éducation du patient :\n' + np.patientEducation.join(', '));
+      
+      if (treatments.length > 0) {
+        sections.push(`PRISE EN CHARGE IMMÉDIATE :\n${treatments.join('\n')}`);
       }
     }
-    // Recommandations expertes provenant du diagnostic (si disponibles)
-    const expert = diagnosisData?.expertAnalysis;
-    if (expert) {
-      if (Array.isArray(expert.expert_investigations) && expert.expert_investigations.length) {
-        parts.push('Examens recommandés par l’IA :\n' + expert.expert_investigations.join(', '));
+    
+    // Recommandations non pharmacologiques
+    if (therapeuticPlan?.nonPharmacological) {
+      const recommendations: string[] = [];
+      
+      if (therapeuticPlan.nonPharmacological.lifestyleModifications?.length > 0) {
+        recommendations.push(`Mesures hygiéno-diététiques : ${therapeuticPlan.nonPharmacological.lifestyleModifications.join(', ')}`);
       }
-      if (Array.isArray(expert.expert_therapeutics) && expert.expert_therapeutics.length) {
-        parts.push('Traitements proposés par l’IA :\n' + expert.expert_therapeutics.join(', '));
+      
+      if (therapeuticPlan.nonPharmacological.patientEducation?.length > 0) {
+        recommendations.push(`Conseils donnés : ${therapeuticPlan.nonPharmacological.patientEducation.join(', ')}`);
       }
-      if (Array.isArray(expert.expert_preventive_measures) && expert.expert_preventive_measures.length) {
-        parts.push(
-          'Mesures préventives recommandées par l’IA :\n' + expert.expert_preventive_measures.join(', '),
-        );
+      
+      if (recommendations.length > 0) {
+        sections.push(`RECOMMANDATIONS :\n${recommendations.join('\n')}`);
       }
     }
-    // Recommandations spécifiques présentes directement sur diagnosisData
-    if (Array.isArray(diagnosisData?.specific_examinations) && diagnosisData.specific_examinations.length) {
-      parts.push(
-        'Examens spécifiques recommandés :\n' + diagnosisData.specific_examinations.join(', '),
-      );
-    }
-    if (Array.isArray(diagnosisData?.specific_treatments) && diagnosisData.specific_treatments.length) {
-      parts.push(
-        'Traitements spécifiques recommandés :\n' + diagnosisData.specific_treatments.join(', '),
-      );
-    }
-    // Fallback : si aucune recommandation spécifique n'a été générée
-    if (parts.length === 0) {
-      parts.push('Hydratation, repos et réévaluation clinique à court terme.');
-    }
-    return parts.join('\n\n');
+    
+    return sections.join('\n\n');
   };
 
   /**
-   * État du formulaire. Chaque champ correspond à une section du rapport.
+   * Construit un résumé clinique factuel
+   */
+  const buildClinicalSummary = (): string => {
+    const parts: string[] = [];
+    
+    // Informations patient de base
+    if (patientData?.age && patientData?.gender) {
+      const genderText = patientData.gender === 'female' ? 'Patiente' : 'Patient';
+      parts.push(`${genderText} de ${patientData.age} ans`);
+    }
+    
+    // Motif principal
+    const chiefComplaint = getActualData(clinicalData, 'chiefComplaint');
+    if (chiefComplaint) {
+      parts.push(`consultant pour ${chiefComplaint.toLowerCase()}`);
+    }
+    
+    // Diagnostic si établi
+    const diagnosis = consultationData?.diagnosticAssessment?.primaryDiagnosis?.condition || 
+                     diagnosisData?.primary_diagnosis?.condition;
+    if (diagnosis) {
+      parts.push(`Diagnostic retenu : ${diagnosis}`);
+    }
+    
+    // Conduites tenues
+    const hasInvestigations = consultationData?.investigationsPlan?.laboratoryTests?.urgentTests?.length > 0 ||
+                             consultationData?.investigationsPlan?.laboratoryTests?.routineTests?.length > 0 ||
+                             consultationData?.investigationsPlan?.imaging?.urgent?.length > 0 ||
+                             consultationData?.investigationsPlan?.imaging?.routine?.length > 0;
+    
+    if (hasInvestigations) {
+      parts.push('Examens complémentaires prescrits');
+    }
+    
+    const hasTreatment = consultationData?.therapeuticPlan?.immediateManagement?.urgentInterventions?.length > 0 ||
+                        consultationData?.therapeuticPlan?.immediateManagement?.symptomaticTreatment?.length > 0;
+    
+    if (hasTreatment) {
+      parts.push('Traitement instauré');
+    }
+    
+    return parts.join('. ') + '.';
+  };
+
+  /**
+   * État du formulaire
    */
   const [formData, setFormData] = useState<any>({
-    narrativeSummary: '',
-    completeHistory: '',
-    completeExamination: '',
-    diagnosticSection: '',
-    completePlan: '',
+    clinicalSummary: '',
+    anamnesis: '',
+    physicalExamination: '',
+    diagnosticSynthesis: '',
+    managementPlan: '',
   });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Auto‑remplissage du formulaire à partir du rapport généré ou des données cliniques
+  // Remplissage du formulaire avec les données réelles uniquement
   useEffect(() => {
-    const autoFilled = {
-      narrativeSummary: consultationData?.narrativeSummary || buildCompleteHistory(),
-      completeHistory: buildCompleteHistory(),
-      completeExamination: buildCompleteExamination(),
-      diagnosticSection: buildDiagnosticSection(),
-      completePlan: buildCompletePlan(),
+    const compiledData = {
+      clinicalSummary: buildClinicalSummary(),
+      anamnesis: buildAnamnesis(),
+      physicalExamination: buildPhysicalExamination(),
+      diagnosticSynthesis: buildDiagnosticSynthesis(),
+      managementPlan: buildManagementPlan(),
     };
-    setFormData((prev: any) => ({ ...prev, ...autoFilled }));
-    // On considère que le formulaire n'a pas de modifications non sauvegardées lors du remplissage initial
+    
+    setFormData(compiledData);
     setHasUnsavedChanges(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [consultationData, diagnosisData]);
+  }, [consultationData, diagnosisData, patientData, clinicalData]);
 
   /**
-   * Gestion des changements dans le formulaire. Marque le formulaire comme modifié.
+   * Gestion des changements
    */
   const handleChange = (field: string, value: string) => {
     setHasUnsavedChanges(true);
@@ -267,7 +347,7 @@ const ConsultationEditor: React.FC<ConsultationEditorProps> = ({
   };
 
   /**
-   * Sauvegarde du formulaire. Appelle le callback onSave transmis en prop.
+   * Sauvegarde
    */
   const handleSave = () => {
     if (onSave) {
@@ -278,31 +358,31 @@ const ConsultationEditor: React.FC<ConsultationEditorProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Résumé narratif */}
+      {/* Résumé clinique */}
       <section>
-        <h2 className="text-lg font-semibold mb-2">Résumé narratif de la consultation</h2>
+        <h2 className="text-lg font-semibold mb-2">Résumé clinique</h2>
         <Textarea
-          id="narrativeSummary"
-          value={formData.narrativeSummary}
+          id="clinicalSummary"
+          value={formData.clinicalSummary}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            handleChange('narrativeSummary', e.target.value)
+            handleChange('clinicalSummary', e.target.value)
           }
-          rows={8}
-          placeholder="Rédigez un résumé fluide de la consultation…"
+          rows={4}
+          placeholder="Résumé factuel de la consultation (patient, motif, diagnostic, conduites)..."
         />
       </section>
 
-      {/* Historique complet */}
+      {/* Anamnèse */}
       <section>
-        <h2 className="text-lg font-semibold mb-2">Historique complet</h2>
+        <h2 className="text-lg font-semibold mb-2">Anamnèse</h2>
         <Textarea
-          id="completeHistory"
-          value={formData.completeHistory}
+          id="anamnesis"
+          value={formData.anamnesis}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            handleChange('completeHistory', e.target.value)
+            handleChange('anamnesis', e.target.value)
           }
-          rows={6}
-          placeholder="Décrivez l'historique de la maladie…"
+          rows={8}
+          placeholder="Motif de consultation, histoire de la maladie actuelle, antécédents, traitements en cours..."
         />
       </section>
 
@@ -310,27 +390,27 @@ const ConsultationEditor: React.FC<ConsultationEditorProps> = ({
       <section>
         <h2 className="text-lg font-semibold mb-2">Examen physique</h2>
         <Textarea
-          id="completeExamination"
-          value={formData.completeExamination}
+          id="physicalExamination"
+          value={formData.physicalExamination}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            handleChange('completeExamination', e.target.value)
+            handleChange('physicalExamination', e.target.value)
           }
           rows={6}
-          placeholder="Décrivez l'examen physique en détail…"
+          placeholder="Décrivez uniquement les examens réellement effectués et leurs résultats..."
         />
       </section>
 
-      {/* Diagnostic */}
+      {/* Synthèse diagnostique */}
       <section>
-        <h2 className="text-lg font-semibold mb-2">Diagnostic</h2>
+        <h2 className="text-lg font-semibold mb-2">Synthèse diagnostique</h2>
         <Textarea
-          id="diagnosticSection"
-          value={formData.diagnosticSection}
+          id="diagnosticSynthesis"
+          value={formData.diagnosticSynthesis}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            handleChange('diagnosticSection', e.target.value)
+            handleChange('diagnosticSynthesis', e.target.value)
           }
-          rows={8}
-          placeholder="Présentez le diagnostic principal et les diagnostics différentiels…"
+          rows={6}
+          placeholder="Diagnostic retenu, arguments diagnostiques, diagnostics différentiels à considérer..."
         />
       </section>
 
@@ -338,13 +418,13 @@ const ConsultationEditor: React.FC<ConsultationEditorProps> = ({
       <section>
         <h2 className="text-lg font-semibold mb-2">Plan de prise en charge</h2>
         <Textarea
-          id="completePlan"
-          value={formData.completePlan}
+          id="managementPlan"
+          value={formData.managementPlan}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            handleChange('completePlan', e.target.value)
+            handleChange('managementPlan', e.target.value)
           }
           rows={8}
-          placeholder="Décrivez le plan d'investigation et de traitement…"
+          placeholder="Examens prescrits, traitements instaurés, recommandations données, suivi prévu..."
         />
       </section>
 
@@ -358,7 +438,7 @@ const ConsultationEditor: React.FC<ConsultationEditorProps> = ({
           onClick={handleSave}
           disabled={!hasUnsavedChanges}
         >
-          Enregistrer
+          Enregistrer le compte-rendu
         </Button>
       </div>
     </div>
