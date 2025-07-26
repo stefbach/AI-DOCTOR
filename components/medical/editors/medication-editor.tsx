@@ -1,4 +1,4 @@
-// src/components/medical/editors/medication-editor.tsx
+// components/medical/editors/medication-editor.tsx - Version corrigée
 
 "use client"
 
@@ -24,7 +24,8 @@ import {
   AlertTriangle,
   ShieldCheck,
   Download,
-  Heart
+  Heart,
+  Activity
 } from "lucide-react"
 import { consultationDataService } from "@/lib/consultation-data-service"
 
@@ -55,6 +56,7 @@ export default function MedicationEditor({
 }: MedicationEditorProps) {
   const { toast } = useToast()
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
   
   // Initialize prescriptions from diagnosis data
   const buildInitialPrescriptions = () => {
@@ -155,28 +157,17 @@ export default function MedicationEditor({
     return `${days * dailyDoses} comprimés`
   }
 
-  // Debug log to see what data we're receiving
-  useEffect(() => {
-    console.log('MedicationEditor received:', {
-      medicationData,
-      patientData,
-      diagnosisData,
-      doctorData,
-      patientAllergies
-    })
-  }, [medicationData, patientData, diagnosisData, doctorData, patientAllergies])
-
   const [formData, setFormData] = useState({
     // Header with doctor info
     title: medicationData?.header?.title || "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
     subtitle: medicationData?.header?.subtitle || "PRESCRIPTION THÉRAPEUTIQUE",
-    date: new Date().toISOString().split('T')[0], // Fix: Use YYYY-MM-DD format
+    date: new Date().toISOString().split('T')[0],
     number: medicationData?.header?.number || `MED-MU-${Date.now()}`,
     physician: doctorData?.full_name || doctorData?.fullName || medicationData?.header?.physician || "Dr. MÉDECIN EXPERT",
     registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || medicationData?.header?.registration || "COUNCIL-MU-2024-001",
     validity: medicationData?.header?.validity || "Ordonnance valable 3 mois",
     
-    // Patient info - Use patientData if available - REMOVED idNumber
+    // Patient info
     firstName: patientData?.firstName || medicationData?.patient?.firstName || "",
     lastName: patientData?.lastName || medicationData?.patient?.lastName || "",
     age: patientData?.age ? `${patientData.age} ans` : medicationData?.patient?.age || `${patientAge} ans`,
@@ -187,10 +178,10 @@ export default function MedicationEditor({
     address: patientData?.address || medicationData?.patient?.address || "Adresse à compléter - Maurice",
     pregnancy: medicationData?.patient?.pregnancy || "Non applicable",
     
-    // Prescriptions - Initialize from diagnosis data
+    // Prescriptions
     prescriptions: medicationData?.prescriptions || buildInitialPrescriptions(),
     
-    // Clinical advice - Enhanced for Mauritius
+    // Clinical advice
     clinicalAdvice: {
       hydration: medicationData?.clinicalAdvice?.hydration || "Hydratation renforcée (2-3L/jour) climat tropical Maurice",
       activity: medicationData?.clinicalAdvice?.activity || "Repos adapté selon symptômes, éviter efforts intenses aux heures chaudes",
@@ -205,16 +196,13 @@ export default function MedicationEditor({
   useEffect(() => {
     if (medicationData || patientData || doctorData || diagnosisData) {
       setFormData(prev => ({
-        // Header
         title: medicationData?.header?.title || prev.title,
         subtitle: medicationData?.header?.subtitle || prev.subtitle,
-        date: new Date().toISOString().split('T')[0], // Always use current date in correct format
+        date: new Date().toISOString().split('T')[0],
         number: medicationData?.header?.number || prev.number,
         physician: doctorData?.full_name || doctorData?.fullName || medicationData?.header?.physician || prev.physician,
         registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || medicationData?.header?.registration || prev.registration,
         validity: medicationData?.header?.validity || prev.validity,
-        
-        // Patient info - REMOVED idNumber
         firstName: patientData?.firstName || medicationData?.patient?.firstName || prev.firstName,
         lastName: patientData?.lastName || medicationData?.patient?.lastName || prev.lastName,
         age: patientData?.age ? `${patientData.age} ans` : medicationData?.patient?.age || prev.age,
@@ -224,11 +212,7 @@ export default function MedicationEditor({
           : medicationData?.patient?.allergies || prev.allergies,
         address: patientData?.address || medicationData?.patient?.address || prev.address,
         pregnancy: medicationData?.patient?.pregnancy || prev.pregnancy,
-        
-        // Prescriptions
         prescriptions: medicationData?.prescriptions || (prev.prescriptions.length === 0 ? buildInitialPrescriptions() : prev.prescriptions),
-        
-        // Clinical advice
         clinicalAdvice: medicationData?.clinicalAdvice || prev.clinicalAdvice
       }))
     }
@@ -282,34 +266,6 @@ export default function MedicationEditor({
       { dci: "Ciprofloxacine", brands: ["Ciflox®", "Uniflox®"] },
       { dci: "Céfixime", brands: ["Oroken®", "Suprax®"] },
       { dci: "Doxycycline", brands: ["Vibramycine®", "Doxypalu®", "Tolexine®"] }
-    ],
-    "Corticoïde": [
-      { dci: "Prednisolone", brands: ["Solupred®", "Hydrocortancyl®"] },
-      { dci: "Prednisone", brands: ["Cortancyl®"] },
-      { dci: "Bétaméthasone", brands: ["Célestène®", "Diprostène®"] },
-      { dci: "Dexaméthasone", brands: ["Dectancyl®", "Soludecadron®"] }
-    ],
-    "Antihistaminique": [
-      { dci: "Cétirizine", brands: ["Zyrtec®", "Virlix®", "Alairgix®"] },
-      { dci: "Loratadine", brands: ["Clarityne®", "Dolopyrane®"] },
-      { dci: "Desloratadine", brands: ["Aerius®", "Dasselta®"] },
-      { dci: "Fexofénadine", brands: ["Telfast®", "Allegra®"] }
-    ],
-    "Inhibiteur de la pompe à protons": [
-      { dci: "Oméprazole", brands: ["Mopral®", "Zoltum®"] },
-      { dci: "Esoméprazole", brands: ["Inexium®", "Nexium®"] },
-      { dci: "Lansoprazole", brands: ["Lanzor®", "Ogast®"] },
-      { dci: "Pantoprazole", brands: ["Eupantol®", "Inipomp®"] }
-    ],
-    "Antiviral": [
-      { dci: "Oseltamivir", brands: ["Tamiflu®"] },
-      { dci: "Aciclovir", brands: ["Zovirax®", "Activir®"] },
-      { dci: "Valaciclovir", brands: ["Zelitrex®", "Valtrex®"] }
-    ],
-    "Antiparasitaire": [
-      { dci: "Ivermectine", brands: ["Stromectol®", "Mectizan®"] },
-      { dci: "Albendazole", brands: ["Zentel®", "Eskazole®"] },
-      { dci: "Métronidazole", brands: ["Flagyl®", "Rozex®"] }
     ]
   }
 
@@ -331,7 +287,7 @@ export default function MedicationEditor({
     "Selon schéma vaccinal"
   ]
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -339,17 +295,17 @@ export default function MedicationEditor({
     setHasUnsavedChanges(true)
   }
 
-  const handlePrescriptionChange = (index, field, value) => {
+  const handlePrescriptionChange = (index: number, field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
-      prescriptions: prev.prescriptions.map((prescription, i) => 
+      prescriptions: prev.prescriptions.map((prescription: any, i: number) => 
         i === index ? { ...prescription, [field]: value } : prescription
       )
     }))
     setHasUnsavedChanges(true)
   }
 
-  const handleAdviceChange = (field, value) => {
+  const handleAdviceChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       clinicalAdvice: {
@@ -386,17 +342,89 @@ export default function MedicationEditor({
     setHasUnsavedChanges(true)
   }
 
-  const removePrescription = (index) => {
+  const removePrescription = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      prescriptions: prev.prescriptions.filter((_, i) => i !== index)
+      prescriptions: prev.prescriptions.filter((_: any, i: number) => i !== index)
     }))
     setHasUnsavedChanges(true)
   }
 
-  const checkAllergyConflict = (medication) => {
+  const checkAllergyConflict = (medication: any) => {
     const allergiesList = formData.allergies.toLowerCase()
     return allergiesList.includes(medication.dci.toLowerCase())
+  }
+
+  // ✅ Generate preview of the formatted document
+  const generatePreview = () => {
+    const updatedMedication = {
+      header: {
+        title: formData.title,
+        subtitle: formData.subtitle,
+        date: formData.date,
+        number: formData.number,
+        physician: formData.physician,
+        registration: formData.registration,
+        validity: formData.validity
+      },
+      patient: {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        age: formData.age,
+        weight: formData.weight,
+        allergies: formData.allergies,
+        address: formData.address,
+        pregnancy: formData.pregnancy
+      },
+      prescriptions: formData.prescriptions,
+      clinicalAdvice: formData.clinicalAdvice
+    }
+
+    return `
+**${updatedMedication.header.title}**
+**${updatedMedication.header.physician}**
+Adresse : Cabinet médical, Maurice
+📞 +230 xxx xxx xxx | 📧 contact@cabinet.mu
+💼 ${updatedMedication.header.registration}
+
+**${updatedMedication.header.subtitle}**
+
+**Nom du patient :** ${updatedMedication.patient.firstName} ${updatedMedication.patient.lastName}
+**Âge :** ${updatedMedication.patient.age}
+**Poids :** ${updatedMedication.patient.weight || 'Non renseigné'}
+**Allergies :** ⚠️ ${updatedMedication.patient.allergies}
+**Adresse :** ${updatedMedication.patient.address}
+**Date de prescription :** ${updatedMedication.header.date}
+
+💊 **Médicaments prescrits :**
+
+${updatedMedication.prescriptions.map((item: any, index: number) => `
+${index + 1}. **${item.dci}** (${item.class})
+   • Marque(s) : ${item.brand}
+   • Dosage : ${item.dosage}
+   • Fréquence : ${item.frequency}
+   • Durée : ${item.duration}
+   • Quantité : ${item.totalQuantity}
+   • Indication : ${item.indication}
+   • Administration : ${item.administration}
+   • Disponibilité Maurice : ${item.mauritianAvailability}
+`).join('\n')}
+
+🏥 **Conseils et surveillance :**
+• Hydratation : ${updatedMedication.clinicalAdvice.hydration}
+• Activité : ${updatedMedication.clinicalAdvice.activity}
+• Alimentation : ${updatedMedication.clinicalAdvice.diet}
+• Protection anti-vectorielle : ${updatedMedication.clinicalAdvice.mosquitoProtection}
+• Suivi : ${updatedMedication.clinicalAdvice.followUp}
+• Urgences : ${updatedMedication.clinicalAdvice.emergency}
+
+═══════════════════════════════════════════════
+
+👨⚕️ **Signature et cachet du médecin :**
+${updatedMedication.header.physician}
+${updatedMedication.header.validity}
+Date : ${updatedMedication.header.date}
+    `.trim()
   }
 
   const handleSave = async () => {
@@ -426,20 +454,19 @@ export default function MedicationEditor({
       
       console.log('Saving medication data:', updatedMedication)
       
-      // Save locally
+      // Save locally first
       onSave('medication', updatedMedication)
       setHasUnsavedChanges(false)
       
-      // Force get consultation ID from URL if not found
+      // ✅ Get consultation ID
       let consultationId = consultationDataService.getCurrentConsultationId()
       if (!consultationId) {
         const urlParams = new URLSearchParams(window.location.search)
         consultationId = urlParams.get('consultationId')
-        console.log('Got consultation ID from URL in save:', consultationId)
       }
       
       if (!consultationId) {
-        console.error('Still no consultation ID found!')
+        console.error('No consultation ID found!')
         toast({
           title: "Erreur",
           description: "ID de consultation manquant",
@@ -448,10 +475,10 @@ export default function MedicationEditor({
         return
       }
       
-      console.log('Saving medication data to DB, ID:', consultationId)
-      
+      // ✅ Get existing data to merge
       const existingData = await consultationDataService.getAllData()
       
+      // ✅ Build documents structure
       const documentsData = {
         consultation: existingData?.workflowResult?.consultation || {},
         prescriptions: {
@@ -460,27 +487,25 @@ export default function MedicationEditor({
           imaging: existingData?.workflowResult?.prescriptions?.imaging || {}
         },
         generatedAt: existingData?.workflowResult?.generatedAt || new Date().toISOString(),
-        finalizedAt: new Date().toISOString() // Mark as finalized on medication save
+        finalizedAt: new Date().toISOString()
       }
       
+      // ✅ Save to database using the new method
       const result = await consultationDataService.saveToSupabase(
         consultationId,
-        4,
+        4, // documents_data
         documentsData
       )
-      
-      console.log('Medication save result:', result)
       
       if (result) {
         toast({
           title: "Succès",
-          description: "Ordonnance sauvegardée dans la base de données",
+          description: "Ordonnance médicamenteuse sauvegardée avec succès",
         })
       } else {
-        console.error('Failed to save medication data to database')
         toast({
           title: "Erreur",
-          description: "Échec de la sauvegarde",
+          description: "Échec de la sauvegarde en base de données",
           variant: "destructive"
         })
       }
@@ -493,6 +518,104 @@ export default function MedicationEditor({
         variant: "destructive"
       })
     }
+  }
+
+  // Preview modal
+  if (showPreview) {
+    return (
+      <div className="space-y-6">
+        <Card className="bg-white/95 backdrop-blur-sm shadow-xl">
+          <CardHeader className="bg-gradient-to-r from-purple-600 to-purple-700 text-white">
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Eye className="h-6 w-6" />
+                Aperçu - Ordonnance Médicamenteuse
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPreview(false)}
+                className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+              >
+                ✏️ Retour à l'édition
+              </Button>
+            </CardTitle>
+          </CardHeader>
+        </Card>
+
+        <Card className="bg-white shadow-xl">
+          <CardContent className="p-8">
+            <div 
+              className="font-mono text-sm leading-relaxed whitespace-pre-wrap border p-6 bg-white min-h-[600px]"
+              style={{
+                fontFamily: 'Arial, sans-serif',
+                fontSize: '12px',
+                lineHeight: '1.4'
+              }}
+              dangerouslySetInnerHTML={{
+                __html: generatePreview()
+                  .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #7c3aed;">$1</strong>')
+                  .replace(/═══.*═══/g, '<hr style="border: 2px solid #7c3aed; margin: 20px 0;">')
+                  .replace(/\n/g, '<br>')
+              }}
+            />
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-between items-center">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowPreview(false)}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour à l'édition
+          </Button>
+
+          <div className="flex gap-3">
+            <Button 
+              variant="outline"
+              onClick={() => {
+                const printWindow = window.open('', '_blank')
+                if (printWindow) {
+                  printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                      <title>Ordonnance Médicamenteuse</title>
+                      <style>
+                        body { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; margin: 2cm; }
+                        strong { color: #7c3aed; }
+                        hr { border: 2px solid #7c3aed; margin: 20px 0; }
+                      </style>
+                    </head>
+                    <body>
+                      ${generatePreview().replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>')}
+                    </body>
+                    </html>
+                  `)
+                  printWindow.document.close()
+                  printWindow.print()
+                }
+              }}
+            >
+              <Activity className="h-4 w-4 mr-2" />
+              Imprimer
+            </Button>
+            
+            <Button 
+              onClick={() => {
+                handleSave()
+                setShowPreview(false)
+              }}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 text-white"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Sauvegarder & Fermer
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -682,7 +805,7 @@ export default function MedicationEditor({
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
-          {formData.prescriptions.map((prescription, index) => (
+          {formData.prescriptions.map((prescription: any, index: number) => (
             <Card key={prescription.id} className={`border-l-4 ${checkAllergyConflict(prescription) ? 'border-red-500 bg-red-50/50' : 'border-purple-400 bg-purple-50/50'}`}>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
@@ -733,8 +856,7 @@ export default function MedicationEditor({
                       value={prescription.dci}
                       onValueChange={(value) => {
                         handlePrescriptionChange(index, 'dci', value)
-                        // Auto-remplir les marques si disponibles
-                        const medInfo = commonMedications[prescription.class]?.find(med => med.dci === value)
+                        const medInfo = commonMedications[prescription.class]?.find((med: any) => med.dci === value)
                         if (medInfo) {
                           handlePrescriptionChange(index, 'brand', medInfo.brands.join(' / '))
                         }
@@ -745,7 +867,7 @@ export default function MedicationEditor({
                       </SelectTrigger>
                       <SelectContent>
                         {prescription.class && commonMedications[prescription.class] ? 
-                          commonMedications[prescription.class].map((med) => (
+                          commonMedications[prescription.class].map((med: any) => (
                             <SelectItem key={med.dci} value={med.dci}>
                               {med.dci}
                             </SelectItem>
@@ -754,7 +876,6 @@ export default function MedicationEditor({
                         }
                       </SelectContent>
                     </Select>
-                    {/* Allow manual input if needed */}
                     <Input
                       value={prescription.dci}
                       onChange={(e) => handlePrescriptionChange(index, 'dci', e.target.value)}
@@ -1001,10 +1122,11 @@ export default function MedicationEditor({
           
           <Button 
             variant="outline"
+            onClick={() => setShowPreview(true)}
             className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
           >
             <Eye className="h-4 w-4 mr-2" />
-            Aperçu Final
+            Aperçu
           </Button>
           
           <Button 
