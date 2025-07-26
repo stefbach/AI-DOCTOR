@@ -35,12 +35,15 @@ export default function DocumentsWorkflow({
   onBack,
   onComplete 
 }) {
+  // CORRECTION: Ajouter currentStep et initialiser correctement
+  const [currentStep, setCurrentStep] = useState(-1)
+  
   const [editedDocuments, setEditedDocuments] = useState({
-  consultation: report || mauritianDocuments?.consultation || {},
-  biology: mauritianDocuments?.biology || {},
-  paraclinical: mauritianDocuments?.paraclinical || {},
-  medication: mauritianDocuments?.medication || {},
-});
+    consultation: mauritianDocuments?.consultation || {},
+    biology: mauritianDocuments?.biology || {},
+    paraclinical: mauritianDocuments?.paraclinical || {},
+    medication: mauritianDocuments?.medication || {},
+  })
   const [completedSteps, setCompletedSteps] = useState(new Set())
   
   // Add comprehensive data states
@@ -481,10 +484,8 @@ export default function DocumentsWorkflow({
       {currentStep === 0 && (
         <ConsultationEditor
           consultationData={editedDocuments.consultation}
-          onSave={handleSaveDocument}
-          onNext={handleNext}
-          onPrevious={() => setCurrentStep(-1)}
-          patientName={patientName}
+          onSave={(data) => handleSaveDocument('consultation', data)}
+          onDiscard={() => setCurrentStep(-1)}
           patientData={completePatientData}
           clinicalData={completeClinicalData}
           questionsData={completeQuestionsData}
@@ -497,7 +498,7 @@ export default function DocumentsWorkflow({
       {currentStep === 1 && (
         <BiologyEditor
           biologyData={editedDocuments.biology}
-          onSave={handleSaveDocument}
+          onSave={(type, data) => handleSaveDocument(type, data)}
           onNext={handleNext}
           onPrevious={handlePrevious}
           patientName={patientName}
@@ -510,7 +511,7 @@ export default function DocumentsWorkflow({
       {currentStep === 2 && (
         <ParaclinicalEditor
           paraclinicalData={editedDocuments.paraclinical}
-          onSave={handleSaveDocument}
+          onSave={(type, data) => handleSaveDocument(type, data)}
           onNext={handleNext}
           onPrevious={handlePrevious}
           patientName={patientName}
@@ -523,7 +524,7 @@ export default function DocumentsWorkflow({
       {currentStep === 3 && (
         <MedicationEditor
           medicationData={editedDocuments.medication}
-          onSave={handleSaveDocument}
+          onSave={(type, data) => handleSaveDocument(type, data)}
           onNext={() => setCurrentStep(-1)}
           onPrevious={handlePrevious}
           patientName={patientName}
