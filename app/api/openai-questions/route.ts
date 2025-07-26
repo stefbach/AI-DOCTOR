@@ -805,33 +805,36 @@ export async function POST(request: NextRequest) {
       // Utiliser IA pour cas complexes ou urgents
       console.log("🧠 Cas complexe - Génération IA avec contexte avancé")
       
-      const advancedPrompt = `Tu es un MÉDECIN EXPERT générant des questions ULTRA-ADAPTÉES au contexte clinique analysé.
+      const advancedPrompt =Tu es un MÉDECIN EXPERT générant des questions ULTRA-ADAPTÉES au contexte clinique analysé.
 
 ANALYSE CONTEXTUELLE AUTOMATISÉE :
 Patient : ${patientData.firstName} ${patientData.lastName}, ${patientData.age} ans
+Antécédents : ${patientData.medicalHistory?.join(", ") || "aucun"}
+Médicaments en cours : ${patientData.currentMedicationsText || "aucun"}
+Motif d'hospitalisation : ${clinicalData.reason || "non précisé"}
 Condition probable : ${contextAnalysis.probableCondition}
-Système primaire : ${contextAnalysis.primarySystem.toUpperCase()}
-Red flags détectés : ${contextAnalysis.redFlags.join(', ') || 'Aucun'}
+Systèmes identifiés : ${contextAnalysis.primarySystem.toUpperCase()}, mais explorer aussi cardiovasculaire, respiratoire, digestif, neurologique, musculosquelettique, génito-urinaire, endocrinien, dermatologique, psychiatrique, hématologique.
+Red flags détectés : ${contextAnalysis.redFlags.join(", ") || "Aucun"}
 Urgence : ${contextAnalysis.urgencyLevel.toUpperCase()}
-Médicaments concernés : ${contextAnalysis.medicationConcerns ? 'OUI' : 'NON'}
-Focus spécifique : ${contextAnalysis.specificFocus.join(', ')}
+Focus spécifique : ${contextAnalysis.specificFocus.join(", ")}
 
 DONNÉES DÉJÀ CONNUES (ne pas redemander) :
-${redundantElements.join(', ')}
+${redundantElements.join(", ")}
 
 INSTRUCTIONS GÉNÉRATION EXPERTE :
-1. Questions SPÉCIFIQUES au diagnostic probable identifié
-2. Si red flags → Questions urgence/gravité prioritaires
-3. Si médicaments concernés → Questions chronologie/relation causale
-4. 70% questions accessibles, 30% techniques expliquées
-5. Maximum 5-6 questions ultra-ciblées
+1. Proposer des questions pour confirmer ou infirmer plusieurs diagnostics possibles et couvrir tous les systèmes pertinents.
+2. Si des drapeaux rouges existent → questions orientées sur la gravité et l'évolution.
+3. Si des médicaments ou antécédents sont en cause → explorer la chronologie et l'interaction avec les symptômes.
+4. 70 % de questions accessibles et pratiques, 30 % techniques avec explications.
+5. Poser au moins une question de dépistage pour les systèmes non encore explorés.
+6. Maximum 6 questions ciblées.
 
 RÈGLES ABSOLUES :
-✓ Questions directement liées au contexte analysé
+✓ Questions directement liées au contexte analysé et aux systèmes restants
 ✓ Éviter toute redondance avec données connues
-✓ Adapter urgence aux red flags détectés
-✓ Intégrer spécificités mauriciennes (tropical, médicaments disponibles)
-✓ Questions pratiques et actionnable
+✓ Adapter l'urgence aux red flags détectés
+✓ Couvrir toutes les spécialités médicales pertinentes
+✓ Questions pratiques et actionnables
 
 {
   "questions": [
@@ -842,7 +845,7 @@ RÈGLES ABSOLUES :
       "options": ["Option ciblée 1", "Option ciblée 2", "Option ciblée 3", "Option alternative"],
       "rationale": "Justification précise pour ce contexte spécifique",
       "category": "accessible|technical|critical",
-      "complexity_level": "simple|moderate|advanced", 
+      "complexity_level": "simple|moderate|advanced",
       "medical_explanation": "Explication médicale adaptée au niveau",
       "patient_benefit": "Bénéfice concret pour le patient",
       "diagnostic_value": "high|medium|low",
@@ -851,6 +854,23 @@ RÈGLES ABSOLUES :
     }
   ]
 }`
+      // Appel à l'API OpenAI avec le prompt étendu
+      const result = await generateText({
+        model: openai("gpt-4o"),
+        prompt: extendedPrompt,
+        temperature: 0.15,
+        maxTokens: 3000,
+      });
+
+      // Parsing du JSON généré par l’IA (inchangé)
+      // …
+    }
+
+    // Évaluation de la qualité et construction de la réponse finale (inchangé)
+    // …
+  } catch (error: any) {
+    // Gestion des erreurs (inchangé)
+  }
 
       try {
         const result = await generateText({
