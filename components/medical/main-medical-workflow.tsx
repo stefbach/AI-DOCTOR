@@ -1,4 +1,4 @@
-// src/components/medical/main-medical-workflow.tsx
+// components/medical/main-medical-workflow.tsx
 
 "use client"
 
@@ -14,10 +14,11 @@ import {
   CheckCircle,
   User,
   Calendar,
-  ArrowLeft
+  ArrowLeft,
+  AlertTriangle
 } from "lucide-react"
 
-// Import seulement du DocumentsWorkflow
+// Import du DocumentsWorkflow adapté
 import DocumentsWorkflow from './documents-workflow'
 
 interface MedicalWorkflowProps {
@@ -41,24 +42,92 @@ export default function MedicalWorkflow({
   onBack,
   language = 'fr'
 }: MedicalWorkflowProps) {
-  // Toujours commencer par les documents car diagnosisData est fourni
   const [currentPhase, setCurrentPhase] = useState('documents')
-  // ✅ CORRECTION 1: Garder toutes les données diagnosisData au lieu de seulement .diagnosis
-  const [diagnosisResult, setDiagnosisResult] = useState(diagnosisData || null)
-  const [mauritianDocuments, setMauritianDocuments] = useState(diagnosisData?.mauritianDocuments || null)
+  const [consultationReport, setConsultationReport] = useState<any>(null)
   const [finalDocuments, setFinalDocuments] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const phases = [
-    {
-      id: 'documents', 
-      title: 'Documents Mauriciens',
-      icon: FileText,
-      color: 'from-blue-600 to-purple-600',
-      description: 'Édition des 4 documents professionnels'
+  // ✅ Load existing consultation report on mount
+  useEffect(() => {
+    const loadExistingReport = async () => {
+      try {
+        setIsLoading(true)
+        
+        // 1. Check if we have a consultation report already
+        const allData = await consultationDataService.getAllData()
+        console.log('MedicalWorkflow - Loaded data:', allData)
+        
+        if (allData?.consultationReport) {
+          console.log('✅ Found existing consultation report')
+          setConsultationReport(allData.consultationReport)
+        } else {
+          console.log('⚠️ No consultation report found, need to generate one')
+          
+          // If we have all the necessary data, try to generate the report
+          if (patientData && clinicalData && diagnosisData) {
+            await generateConsultationReport()
+          } else {
+            setError('Données insuffisantes pour générer le rapport de consultation')
+          }
+        }
+        
+        // Load existing final documents if any
+        if (allData?.workflowResult) {
+          setFinalDocuments(allData.workflowResult)
+        }
+        
+      } catch (error) {
+        console.error('Error loading existing report:', error)
+        setError('Erreur lors du chargement du rapport existant')
+      } finally {
+        setIsLoading(false)
+      }
     }
-  ]
+    
+    loadExistingReport()
+  }, [patientData, clinicalData, diagnosisData])
 
-  // Initialize consultation when component mounts
+  // ✅ Generate consultation report if needed
+  const generateConsultationReport = async () => {
+    try {
+      console.log('🚀 Generating consultation report...')
+      
+      const response = await fetch('/api/generate-consultation-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientData,
+          clinicalData,
+          questionsData,
+          diagnosisData,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Erreur API: ${response.status}`)
+      }
+
+      const result = await response.json()
+      console.log('✅ Consultation report generated:', result)
+
+      if (result.success && result.data) {
+        setConsultationReport(result.data)
+        
+        // Save the generated report
+        await consultationDataService.saveConsultationReport(result.data)
+        console.log('💾 Report saved to consultation service')
+      } else {
+        throw new Error(result.error || 'Échec génération du rapport')
+      }
+
+    } catch (error) {
+      console.error('❌ Error generating consultation report:', error)
+      setError(`Erreur génération rapport: ${error instanceof Error ? error.message : 'Erreur inconnue'}`)
+    }
+  }
+
+  // ✅ Initialize consultation when component mounts
   useEffect(() => {
     const initConsultation = async () => {
       const urlParams = new URLSearchParams(window.location.search)
@@ -75,25 +144,39 @@ export default function MedicalWorkflow({
     initConsultation()
   }, [])
 
-  // Callback du workflow documents
-  const handleDocumentsComplete = async (editedDocs) => {
+  // ✅ Callback when documents workflow is completed
+  const handleDocumentsComplete = async (editedDocs: any) => {
     console.log('✅ Documents finalisés:', editedDocs)
     setFinalDocuments(editedDocs)
     
     try {
-      await consultationDataService.saveStepData(4, editedDocs)
+      // Save the final documents
+      await consultationDataService.saveStepData(4, {
+        type: 'documents_workflow_complete',
+        documents: editedDocs,
+        consultationReport,
+        completedAt: new Date().toISOString()
+      })
+      
+      console.log('💾 Final documents saved')
     } catch (error) {
       console.error('Error saving workflow documents:', error)
     }
     
+    // Mark workflow as completed
+    setCurrentPhase('completed')
+    
+    // Call parent completion handler
     if (onComplete) {
-      onComplete(editedDocs)
-    } else {
-      setCurrentPhase('completed')
+      onComplete({
+        documents: editedDocs,
+        consultationReport,
+        type: 'medical_workflow_complete'
+      })
     }
   }
 
-  // Retour au diagnostic (page.tsx étape 3)
+  // ✅ Handle back to previous step
   const handleBackToDiagnosis = () => {
     if (onBack) {
       onBack()
@@ -102,66 +185,79 @@ export default function MedicalWorkflow({
 
   const patientName = `${patientData?.firstName || 'Patient'} ${patientData?.lastName || 'X'}`
 
-  // Load all saved data for auto-fill when component mounts
-  useEffect(() => {
-    const loadAllData = async () => {
-      try {
-        const allData = await consultationDataService.getDataForAutoFill()
-        
-        console.log('Loading data for auto-fill:', allData)
-        
-        if (allData) {
-          if (allData.workflowResult) {
-            setFinalDocuments(allData.workflowResult)
-          }
-        }
-      } catch (error) {
-        console.error('Error loading data for auto-fill:', error)
-      }
-    }
-    
-    loadAllData()
-  }, [])
+  // ✅ Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+          <CardContent className="flex items-center justify-center py-12">
+            <div className="text-center space-y-4">
+              <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+              <p className="text-gray-600">Chargement du rapport de consultation...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
-  // Effet pour initialiser les données si diagnosisData arrive
-  useEffect(() => {
-    const generateReportIfNeeded = async () => {
-      if (!diagnosisData) return;
-      try {
-        const res = await fetch('/api/generate-consultation-report', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            patientData,
-            clinicalData,
-            questionsData,
-            diagnosisData,
-          }),
-        });
+  // ✅ Error state
+  if (error && !consultationReport) {
+    return (
+      <div className="space-y-6">
+        <Card className="bg-red-50 border border-red-200">
+          <CardHeader className="bg-red-100">
+            <CardTitle className="flex items-center gap-3 text-red-800">
+              <AlertTriangle className="h-6 w-6" />
+              Erreur du Workflow Médical
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <p className="text-red-700 mb-4">{error}</p>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={handleBackToDiagnosis}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Retour Diagnostic
+              </Button>
+              <Button onClick={generateConsultationReport}>
+                Réessayer Génération
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
-        const reportJson = await res.json();
-
-        // Sauvegarder le rapport dans la session
-        await consultationDataService.saveStepData(3, { report: reportJson });
-
-        // Optionnel : mettre à jour localement un état ou mauritianDocuments.consultation
-        // setMauritianDocuments((prev) => ({ ...prev, consultation: reportJson }));
-      } catch (error) {
-        console.error('Erreur lors de la génération du rapport de consultation :', error);
-      }
-    };
-
-    generateReportIfNeeded();
-  }, [diagnosisData, patientData, clinicalData, questionsData]);
-
-  // Phase principale : Édition documents (toujours affichée)
+  // ✅ Main phase: Documents editing
   if (currentPhase === 'documents') {
     return (
       <div className="space-y-6">
+        {/* Header info */}
+        <Card className="bg-blue-50 border border-blue-200">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FileText className="h-6 w-6 text-blue-600" />
+                <div>
+                  <p className="font-semibold text-blue-800">Workflow Documents Mauriciens</p>
+                  <p className="text-sm text-blue-600">Patient: {patientName}</p>
+                </div>
+              </div>
+              <Badge className="bg-blue-600 text-white">
+                Étape 4/4 - Documents
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Documents workflow */}
         <DocumentsWorkflow
+          consultationReport={consultationReport}
           diagnosisData={diagnosisData}
-          mauritianDocuments={mauritianDocuments}
           patientData={patientData}
+          clinicalData={clinicalData}
+          questionsData={questionsData}
           onBack={handleBackToDiagnosis}
           onComplete={handleDocumentsComplete}
         />
@@ -169,7 +265,7 @@ export default function MedicalWorkflow({
     )
   }
 
-  // Phase complétée (cas rare - normalement géré par page.tsx)
+  // ✅ Completion phase
   if (currentPhase === 'completed') {
     return (
       <div className="space-y-6">
@@ -177,7 +273,7 @@ export default function MedicalWorkflow({
           <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-3 text-2xl">
               <CheckCircle className="h-8 w-8" />
-              Documents Mauriciens Complétés !
+              Workflow Médical Complété !
             </CardTitle>
           </CardHeader>
           <CardContent className="p-8 text-center">
@@ -185,14 +281,14 @@ export default function MedicalWorkflow({
               <CheckCircle className="h-24 w-24 text-green-500 mx-auto" />
               
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Documents édités avec succès !</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Documents mauriciens finalisés !</h2>
                 <p className="text-gray-600">
-                  Les 4 documents mauriciens de {patientName} sont finalisés
+                  Le dossier médical complet de {patientName} est prêt
                 </p>
               </div>
 
               <div className="bg-green-50 p-6 rounded-lg">
-                <h3 className="font-semibold text-green-800 mb-3">Documents finalisés :</h3>
+                <h3 className="font-semibold text-green-800 mb-3">Éléments finalisés :</h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
@@ -200,11 +296,11 @@ export default function MedicalWorkflow({
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    Ordonnance examens biologiques
+                    Examens biologiques
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    Ordonnance examens paracliniques
+                    Examens paracliniques
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
@@ -228,12 +324,17 @@ export default function MedicalWorkflow({
                 <Button 
                   onClick={() => {
                     if (onComplete) {
-                      onComplete(finalDocuments)
+                      onComplete({
+                        documents: finalDocuments,
+                        consultationReport,
+                        type: 'workflow_complete',
+                        completedAt: new Date().toISOString()
+                      })
                     }
                   }}
                   className="bg-blue-600 text-white"
                 >
-                  🆕 Étape Suivante
+                  🎯 Consultation Terminée
                 </Button>
               </div>
             </div>
