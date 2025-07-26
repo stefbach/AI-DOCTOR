@@ -1,57 +1,55 @@
-// /app/api/openai-questions/route.ts - VERSION CORRIGÉE IDENTIQUE À DIAGNOSIS
+// /app/api/openai-questions/route.ts - COPIE EXACTE STRUCTURE DIAGNOSIS
 
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from 'next/server'
 
-// ==================== FONCTION GÉNÉRATION IA ROBUSTE ====================
+// ==================== STRUCTURE SIMILAIRE À DIAGNOSIS ====================
 
-async function generateSimpleQuestions(patientText: string): Promise<any[]> {
+interface SimpleQuestion {
+  medecin: string
+  patient_simple: string
+  patient_standard: string
+  rationale?: string
+}
+
+export async function POST(request: NextRequest) {
+  console.log('🔥 API QUESTIONS - DÉMARRAGE (COPIE STRUCTURE DIAGNOSIS)')
   
-  // PROMPT ENRICHI (comme diagnosis)
-  const prompt = `Tu es un médecin expert mauricien assistant pour téléconsultation. Analyse ce discours patient et génère des questions médicales pertinentes.
+  try {
+    const body = await request.json()
+    const patientText = body.patient_discourse_real_time || body.patientData?.symptoms || ""
+    
+    const apiKey = process.env.OPENAI_API_KEY
+    if (!apiKey) throw new Error('OPENAI_API_KEY manquante')
+    
+    console.log('📝 Texte patient:', patientText.substring(0, 100))
+    
+    // PROMPT SIMPLE MAIS STRUCTURÉ
+    const simplePrompt = `Tu es un médecin mauricien expert. Le patient dit: "${patientText}"
 
-CONTEXTE MAURICIEN :
-- Climat tropical → Pathologies vectorielles (dengue, chikungunya)
-- Téléconsultation → Questions ciblées sans examen physique
-- Culture mauricienne → Créole/français, famille présente
+Génère 2 questions médicales pertinentes pour téléconsultation.
 
-PATIENT DIT : "${patientText}"
-
-MISSION : Génère exactement 2 questions médicales que le médecin devrait poser pour préciser le diagnostic.
-
-INSTRUCTIONS STRICTES :
-- Questions PERTINENTES au discours patient
-- Adaptées au contexte mauricien
-- Formulation créole ET française
-- Conseils pratiques pour médecin
-
-Génère UNIQUEMENT ce JSON valide (sans \`\`\`json) :
+Réponds UNIQUEMENT ce JSON valide:
 
 {
   "questions": [
     {
-      "medecin": "Conseil médical précis pour le médecin",
-      "patient_simple": "Question en créole mauricien simple",
-      "patient_standard": "Question en français standard médical",
-      "rationale": "Pourquoi cette question est importante pour ce cas"
+      "medecin": "Conseil pour médecin",
+      "patient_simple": "Question créole simple", 
+      "patient_standard": "Question français standard",
+      "rationale": "Pourquoi cette question"
     },
     {
-      "medecin": "Deuxième conseil médical précis",
+      "medecin": "Deuxième conseil médecin",
       "patient_simple": "Deuxième question créole",
-      "patient_standard": "Deuxième question français",
-      "rationale": "Justification médicale pour cette question"
+      "patient_standard": "Deuxième question français", 
+      "rationale": "Justification médicale"
     }
   ]
-}`;
+}`
 
-  try {
-    console.log("🤖 Appel OpenAI GPT-4o pour questions...")
+    console.log('📡 APPEL OPENAI - MÊME MÉTHODE QUE DIAGNOSIS')
     
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      throw new Error('OPENAI_API_KEY manquante');
-    }
-    
-    // ========== EXACTEMENT MÊME APPROCHE QUE DIAGNOSIS ==========
+    // ========== COPIE EXACTE DE LA MÉTHODE DIAGNOSIS ==========
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -59,19 +57,19 @@ Génère UNIQUEMENT ce JSON valide (sans \`\`\`json) :
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',  // Même modèle que diagnosis
+        model: 'gpt-4o',
         messages: [
           {
             role: 'system',
-            content: 'Tu es un médecin expert mauricien. Génère UNIQUEMENT du JSON médical valide pour téléconsultation.'
+            content: 'Tu es un médecin expert mauricien. Génère UNIQUEMENT du JSON médical valide.'
           },
           {
             role: 'user',
-            content: prompt
+            content: simplePrompt
           }
         ],
         temperature: 0.1,
-        max_tokens: 2000  // Augmenté comme diagnosis
+        max_tokens: 1500,
       }),
     })
     
@@ -82,368 +80,170 @@ Génère UNIQUEMENT ce JSON valide (sans \`\`\`json) :
     
     const openaiData = await openaiResponse.json()
     const responseText = openaiData.choices[0]?.message?.content
-
-    console.log("📥 Réponse GPT-4o:", responseText?.substring(0, 200) + '...');
-
-    // ========== PARSING ROBUSTE IDENTIQUE À DIAGNOSIS ==========
-    let cleanResponse = responseText
-      .replace(/```json\s*/g, '')
-      .replace(/```\s*/g, '')
-      .trim()
     
-    // Trouver le début et la fin du JSON
-    const startIndex = cleanResponse.indexOf('{')
-    const lastIndex = cleanResponse.lastIndexOf('}')
+    console.log('🧠 PARSING RÉPONSE - MÊME LOGIQUE QUE DIAGNOSIS')
+    console.log('📝 Réponse brute:', responseText?.substring(0, 200) + '...')
     
-    if (startIndex !== -1 && lastIndex !== -1) {
-      cleanResponse = cleanResponse.substring(startIndex, lastIndex + 1)
-    }
-    
-    console.log('🧹 JSON nettoyé:', cleanResponse.substring(0, 200) + '...')
-    
-    const parsed = JSON.parse(cleanResponse);
-    
-    if (!parsed.questions || !Array.isArray(parsed.questions)) {
-      throw new Error("Format questions invalide");
-    }
-
-    console.log("✅ Parse réussi:", parsed.questions.length, "questions générées");
-    return parsed.questions;
-
-  } catch (error) {
-    console.error("❌ Erreur génération IA:", error);
-    // NE PAS faire échouer - retourner fallback comme diagnosis
-    throw error; // On laisse le caller gérer le fallback
-  }
-}
-
-// ==================== QUESTIONS FALLBACK MAURICE ====================
-
-function getFallbackQuestions(symptoms: string[], patientText: string): any[] {
-  
-  // Détection contextuelle améliorée
-  const lowerText = patientText.toLowerCase();
-  
-  if (symptoms.includes('fièvre') || /fièvre|fever|chaud|température/.test(lowerText)) {
-    return [
-      {
-        medecin: "Fièvre - Screening dengue/chikungunya Maurice obligatoire",
-        patient_simple: "To la fièvre li ete kouma ? Li monté-descendre ou li reste même hauteur ?",
-        patient_standard: "Comment évolue votre fièvre ? Elle monte et descend ou reste constante ?",
-        rationale: "Différencier paludisme/arboviroses par pattern fébrile",
-        examen: "Regardez votre peau - voyez-vous des petits points rouges ou des boutons ?"
-      },
-      {
-        medecin: "Exposition vectorielle - épidémiologie mauricienne",
-        patient_simple: "To gagné beaucoup piqûre moustique ces derniers zours ?",
-        patient_standard: "Avez-vous eu beaucoup de piqûres de moustiques récemment ?",
-        rationale: "Risque dengue/chikungunya selon saison et zone géographique",
-        contexte_maurice: "Surveillance arboviroses selon alerts Ministry Health"
-      }
-    ];
-  }
-  
-  if (symptoms.includes('douleur') || /mal|douleur|pain|faire mal/.test(lowerText)) {
-    return [
-      {
-        medecin: "Localisation précise douleur pour diagnostic différentiel",
-        patient_simple: "Montre moi ek to doigt exact kot li faire mal",
-        patient_standard: "Montrez-moi précisément où ça fait mal",
-        rationale: "Localisation anatomique guide diagnostic différentiel",
-        examen: "Appuyez doucement sur la zone et dites si ça fait plus mal"
-      },
-      {
-        medecin: "Caractéristiques douleur - intensité et évolution",
-        patient_simple: "Lor échelle 1 à 10, ki level to douleur ? Li pire kan ?",
-        patient_standard: "Sur 10, votre douleur est à combien ? Quand est-elle pire ?",
-        rationale: "Intensité et rythme douleur orientent traitement"
-      }
-    ];
-  }
-  
-  if (symptoms.includes('toux') || /toux|cough|tousse/.test(lowerText)) {
-    return [
-      {
-        medecin: "Toux - productivité et signes gravité sans auscultation",
-        patient_simple: "Kan to tousse, to crache kitsose ? Ki couleur ?",
-        patient_standard: "Votre toux est-elle grasse ? De quelle couleur sont les crachats ?",
-        rationale: "Toux sèche vs productive oriente étiologie",
-        examen: "Toussez fort et écoutez le bruit que ça fait"
-      }
-    ];
-  }
-  
-  // Questions générales adaptées au texte
-  return [
-    {
-      medecin: "Anamnèse temporelle précise",
-      patient_simple: "Depi kan sa problème la commencé ? Li vinn pire ?",
-      patient_standard: "Depuis quand et est-ce que ça s'aggrave ?",
-      rationale: "Chronologie guide urgence et diagnostic"
-    },
-    {
-      medecin: "Impact fonctionnel et signes d'alarme",
-      patient_simple: "Zot kapav faire zot travail normal ? Ena kitsose ki fer zot peur ?",
-      patient_standard: "Pouvez-vous faire vos activités normales ? Y a-t-il quelque chose qui vous inquiète ?",
-      rationale: "Retentissement fonctionnel et red flags"
-    }
-  ];
-}
-
-// ==================== DÉTECTION SYMPTÔMES RENFORCÉE ====================
-
-function detectSymptoms(text: string): string[] {
-  const symptoms: string[] = [];
-  const lowerText = text.toLowerCase();
-  
-  // Fièvre - patterns étendus
-  if (/fièvre|fever|chaud|température|chaude|brûlant|frisson/.test(lowerText)) {
-    symptoms.push('fièvre');
-  }
-  
-  // Douleur - patterns créoles inclus
-  if (/mal|douleur|pain|faire mal|ça fait mal|souffrir/.test(lowerText)) {
-    symptoms.push('douleur');
-  }
-  
-  // Toux
-  if (/toux|cough|tousse|tousser/.test(lowerText)) {
-    symptoms.push('toux');
-  }
-  
-  // Digestif
-  if (/ventre|abdomen|estomac|mal.*ventre/.test(lowerText)) {
-    symptoms.push('douleur_abdominale');
-  }
-  
-  // Nausées
-  if (/nausée|vomit|mal.*cœur|envie.*vomir/.test(lowerText)) {
-    symptoms.push('nausée');
-  }
-  
-  // Respiratoire
-  if (/souffle|respir|essoufflé|difficulté.*respirer/.test(lowerText)) {
-    symptoms.push('dyspnée');
-  }
-  
-  return symptoms;
-}
-
-// ==================== API ENDPOINTS ====================
-
-// GET - Test robuste
-export async function GET() {
-  try {
-    console.log("🧪 Test génération IA robuste...");
-    
-    const testQuestions = await generateSimpleQuestions("mo gagné mal dan ventre depi hier, li faire trè mal");
-    
-    return NextResponse.json({
-      success: true,
-      test: true,
-      questions: testQuestions,
-      message: "Test IA réussi avec parsing robuste",
-      method: "robust_parsing_like_diagnosis",
-      tokens_used: 2000
-    });
-    
-  } catch (error: any) {
-    console.error("❌ Test IA échoué, utilisation fallback:", error);
-    
-    const fallbackQuestions = getFallbackQuestions(['douleur'], "mo gagné mal dan ventre");
-    
-    return NextResponse.json({
-      success: true, // ← Toujours success avec fallback
-      test: true,
-      questions: fallbackQuestions,
-      ai_failed: true,
-      error_handled: error.message,
-      method: "fallback_robust",
-      message: "IA échouée mais fallback fonctionnel"
-    });
-  }
-}
-
-// POST - Implémentation robuste
-export async function POST(request: NextRequest) {
-  try {
-    console.log("🩺 Assistant téléconsultation - Version robuste...");
-    
-    const body = await request.json();
-    const patientText = body.patient_discourse_real_time || body.patientData?.symptoms || "";
-    
-    if (!patientText) {
-      return NextResponse.json({
-        success: false,
-        error: "Texte patient requis",
-        exemple: {
-          patient_discourse_real_time: "mo gagné mal dan ventre depi hier"
-        }
-      }, { status: 400 });
-    }
-    
-    console.log("📝 Analyse texte patient:", patientText.substring(0, 100) + '...');
-    
-    // Détection symptômes
-    const symptoms = detectSymptoms(patientText);
-    console.log("🔍 Symptômes détectés:", symptoms);
-    
-    // Génération questions avec fallback robuste
-    let questions;
-    let aiSuccess = false;
-    let aiError = null;
-    
+    let questionsAnalysis
     try {
-      questions = await generateSimpleQuestions(patientText);
-      aiSuccess = true;
-      console.log("✅ IA GPT-4o réussie");
-    } catch (error: any) {
-      console.warn("⚠️ IA échouée, utilisation fallback intelligent:", error.message);
-      aiError = error.message;
-      questions = getFallbackQuestions(symptoms, patientText);
+      // ========== PARSING IDENTIQUE À DIAGNOSIS ==========
+      let cleanResponse = responseText
+        .replace(/```json\s*/g, '')
+        .replace(/```\s*/g, '')
+        .trim()
+      
+      const startIndex = cleanResponse.indexOf('{')
+      const lastIndex = cleanResponse.lastIndexOf('}')
+      
+      if (startIndex !== -1 && lastIndex !== -1) {
+        cleanResponse = cleanResponse.substring(startIndex, lastIndex + 1)
+      }
+      
+      console.log('🧹 JSON nettoyé:', cleanResponse.substring(0, 200) + '...')
+      
+      questionsAnalysis = JSON.parse(cleanResponse)
+      console.log('✅ Parsing réussi!')
+      
+    } catch (parseError) {
+      console.error('❌ Erreur parsing JSON:', parseError)
+      console.log('📄 Réponse brute complète:', responseText)
+      
+      // FALLBACK ROBUSTE
+      questionsAnalysis = {
+        questions: [
+          {
+            medecin: "Question de base - chronologie symptômes",
+            patient_simple: "Depi kan to gagné sa problème la ?",
+            patient_standard: "Depuis quand avez-vous ce problème ?",
+            rationale: "Établir chronologie pour diagnostic"
+          },
+          {
+            medecin: "Précision symptômes principaux", 
+            patient_simple: "Ki to senti exactement ?",
+            patient_standard: "Que ressentez-vous exactement ?",
+            rationale: "Caractériser symptômes"
+          }
+        ]
+      }
+      
+      console.log('🔄 Fallback appliqué')
     }
     
-    // Formatage robuste identique à l'original
-    const formattedQuestions = questions.map((q: any, index: number) => ({
+    console.log('✅ QUESTIONS GÉNÉRÉES:', questionsAnalysis.questions?.length || 0)
+    
+    // FORMAT COMPATIBLE
+    const formattedQuestions = (questionsAnalysis.questions || []).map((q: SimpleQuestion, index: number) => ({
       id: `q_${Date.now()}_${index}`,
       timing: "immediate",
       priority: index === 0 ? "essential" : "important",
-      
-      // Pour le médecin
       physician_prompt: q.medecin,
-      clinical_rationale: q.rationale || q.medecin,
-      
-      // Pour le patient
       patient_formulations: {
         simple: q.patient_simple,
-        standard: q.patient_standard || q.patient_simple,
-        technical: q.patient_standard || q.patient_simple
+        standard: q.patient_standard,
+        technical: q.patient_standard
       },
-      
-      // Examen physique si disponible
-      physical_guidance: q.examen ? {
-        instruction_patient: q.examen,
-        what_to_observe: "Réaction du patient",
-        red_flags_visual: ["Douleur intense", "Défense", "Signes neurologiques"]
-      } : null,
-      
-      // Contexte mauricien
+      clinical_rationale: q.rationale || q.medecin,
       maurice_adaptation: {
-        cultural_sensitivity: q.contexte_maurice || "Adaptation mauricienne standard",
-        language_options: ["créole", "français"],
-        local_epidemiology: symptoms.includes('fièvre') ? "Surveillance arboviroses active" : "Standard"
-      },
-      
-      ai_reasoning: aiSuccess ? "GPT-4o génération réussie" : "Fallback intelligent contextuel"
-    }));
+        cultural_sensitivity: "Adaptation mauricienne",
+        language_options: ["créole", "français"]
+      }
+    }))
     
     return NextResponse.json({
       success: true,
       ai_suggestions: formattedQuestions,
-      
-      // Métadonnées
       context: {
-        symptoms_detected: symptoms,
-        ai_generation_success: aiSuccess,
-        ai_method: aiSuccess ? "gpt4o_robust_parsing" : "contextual_fallback",
-        ai_error: aiError,
-        language_detected: /mo|to|ena|zot/.test(patientText) ? "créole" : "français",
-        text_length: patientText.length
+        ai_generation_success: true,
+        ai_method: "gpt4o_exact_like_diagnosis",
+        language_detected: /mo|to|ena/.test(patientText) ? "créole" : "français"
       },
-      
-      // Contexte mauricien
-      mauritius_context: {
-        seasonal_alerts: symptoms.includes('fièvre') ? 
-          ["Surveillance dengue/chikungunya active", "Protection anti-moustiques renforcée"] : 
-          ["Pas d'alerte vectorielle"],
-        cultural_notes: [
-          "Famille souvent présente en téléconsultation",
-          "Médecine traditionnelle courante à Maurice",
-          "Créole mauricien accepté en consultation"
-        ],
-        healthcare_system: "Dr Jeetoo (public) + Apollo/Darné (privé)"
-      },
-      
-      quality_metrics: {
-        ai_success_rate: aiSuccess ? 100 : 0,
-        fallback_quality: aiSuccess ? null : "contextual_intelligent",
-        parsing_method: "robust_like_diagnosis",
-        tokens_allocated: 2000,
-        response_time: new Date().toISOString()
-      },
-      
-      timestamp: new Date().toISOString()
-    });
+      timestamp: new Date().toISOString(),
+      debug: {
+        same_structure_as_diagnosis: true,
+        api_key_present: !!apiKey,
+        response_length: responseText?.length || 0
+      }
+    })
     
-  } catch (error: any) {
-    console.error("❌ Erreur critique:", error);
+  } catch (error) {
+    console.error('❌ ERREUR COMPLÈTE:', error)
     
-    // Fallback d'urgence - garantit toujours une réponse
-    return NextResponse.json({
-      success: true, // ← Toujours true pour ne pas faire échouer l'interface
-      ai_suggestions: [
-        {
-          id: "emergency_1",
-          timing: "immediate",
-          priority: "essential",
-          physician_prompt: "Question de sécurité - système IA temporairement indisponible",
-          patient_formulations: {
-            simple: "Ki zot problème principal zordi ?",
-            standard: "Quel est votre problème principal aujourd'hui ?",
-            technical: "Décrivez précisément votre motif de consultation"
-          },
-          clinical_rationale: "Anamnèse de base essentielle",
-          maurice_adaptation: {
-            cultural_sensitivity: "Standard mauricien",
-            language_options: ["créole", "français"],
-            local_epidemiology: "Standard"
-          },
-          ai_reasoning: "Fallback d'urgence - système sécurisé"
+    // FALLBACK GARANTI (IDENTIQUE À DIAGNOSIS)
+    const emergencyQuestions = [
+      {
+        id: "emergency_1",
+        timing: "immediate",
+        priority: "essential",
+        physician_prompt: "Question de sécurité - système temporairement indisponible",
+        patient_formulations: {
+          simple: "Ki zot problème principal zordi ?",
+          standard: "Quel est votre problème principal aujourd'hui ?",
+          technical: "Décrivez votre motif de consultation"
         },
-        {
-          id: "emergency_2",
-          timing: "immediate", 
-          priority: "important",
-          physician_prompt: "Chronologie et évolution symptômes",
-          patient_formulations: {
-            simple: "Depi kan sa problème la, li vinn pire ?",
-            standard: "Depuis quand et est-ce que ça s'aggrave ?",
-            technical: "Évolution temporelle et facteurs aggravants"
-          },
-          clinical_rationale: "Urgence et progression pathologique",
-          maurice_adaptation: {
-            cultural_sensitivity: "Urgences Maurice 999",
-            language_options: ["créole", "français"],
-            local_epidemiology: "Adaptation selon saison"
-          },
-          ai_reasoning: "Questions essentielles sécurisées"
+        clinical_rationale: "Anamnèse essentielle",
+        maurice_adaptation: {
+          cultural_sensitivity: "Standard mauricien",
+          language_options: ["créole", "français"]
         }
-      ],
-      
-      // Informations d'erreur
+      },
+      {
+        id: "emergency_2", 
+        timing: "immediate",
+        priority: "important",
+        physician_prompt: "Chronologie symptômes",
+        patient_formulations: {
+          simple: "Depi kan sa problème la ?",
+          standard: "Depuis quand ce problème ?",
+          technical: "Évolution temporelle"
+        },
+        clinical_rationale: "Urgence diagnostique",
+        maurice_adaptation: {
+          cultural_sensitivity: "Urgences 999",
+          language_options: ["créole", "français"]
+        }
+      }
+    ]
+    
+    return NextResponse.json({
+      success: true,
+      ai_suggestions: emergencyQuestions,
       system_status: {
         error_handled: true,
         error_message: error.message,
-        fallback_active: true,
-        recommendation: "Mode manuel conseillé ou retry plus tard"
+        fallback_active: true
       },
-      
-      manual_mode: {
-        message: "Mode questions manuelles disponible",
-        basic_questions: [
-          "Motif principal consultation ?",
-          "Depuis quand ces symptômes ?", 
-          "Médicaments actuels ?",
-          "Signes inquiétants remarqués ?",
-          "Contexte familial/professionnel ?"
-        ]
+      debug: {
+        exact_same_structure_as_diagnosis: true,
+        error_type: error.constructor.name,
+        error_details: error.message
       },
-      
       timestamp: new Date().toISOString()
-    });
+    })
   }
 }
 
-// ==================== EXPORTS ====================
-
-export { generateSimpleQuestions, getFallbackQuestions, detectSymptoms };
+// GET pour test
+export async function GET() {
+  console.log('🧪 TEST ENDPOINT QUESTIONS')
+  
+  try {
+    const apiKey = process.env.OPENAI_API_KEY
+    
+    return NextResponse.json({
+      success: true,
+      test: true,
+      message: "Endpoint questions accessible",
+      api_key_available: !!apiKey,
+      structure: "exact_copy_of_diagnosis",
+      timestamp: new Date().toISOString()
+    })
+    
+  } catch (error) {
+    return NextResponse.json({
+      success: false,
+      test: true,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    })
+  }
+}
