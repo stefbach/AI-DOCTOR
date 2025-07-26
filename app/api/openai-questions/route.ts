@@ -27,8 +27,13 @@ Réponds SEULEMENT ce JSON :
   try {
     console.log("🤖 Appel OpenAI avec fetch direct...")
     
-    const apiKey = process.env.OPENAI_API_KEY
-    if (!apiKey) throw new Error('OPENAI_API_KEY manquante')
+    const result = await generateText({
+  model: openai("gpt-4o", { apiKey: process.env.OPENAI_API_KEY }),
+  prompt: extendedPrompt,      // ou advancedPrompt selon votre code
+  temperature: 0.15,
+  maxTokens: 3000,
+});
+
     
     // ========== MÊME APPROCHE QUE DIAGNOSIS (QUI MARCHE) ==========
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
