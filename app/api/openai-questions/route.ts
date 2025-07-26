@@ -27,9 +27,20 @@ Réponds SEULEMENT ce JSON :
   try {
     console.log("🤖 Appel OpenAI avec fetch direct...")
     
-    const result = await generateText({
-  model: openai("gpt-4o", { apiKey: process.env.OPENAI_API_KEY }),
-  prompt: extendedPrompt,      // ou advancedPrompt selon votre code
+  import { generateText } from 'ai';
+import { openai } from '@ai-sdk/openai';
+
+// À placer dans votre bloc où vous appelez l’IA
+const apiKey = process.env.OPENAI_API_KEY;
+if (!apiKey) {
+  console.error('Clé API absente');
+  // gérez l’erreur ou retournez un fallback
+}
+
+const model = openai('gpt-4o', { apiKey });
+const result = await generateText({
+  model,
+  prompt: extendedPrompt,   // votre prompt complet
   temperature: 0.15,
   maxTokens: 3000,
 });
