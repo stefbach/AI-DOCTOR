@@ -99,7 +99,6 @@ const ConsultationEditor: React.FC<ConsultationEditorProps> = ({
     const diag = consultationData?.diagnosticAssessment;
     if (diag?.primaryDiagnosis) {
       const pd = diag.primaryDiagnosis;
-      // Champ probabilité ou confiance : s'assurer qu'il existe avant de l'afficher
       const probabilityStr = pd.probability ? `, confiance ${pd.probability}%` : '';
       parts.push(
         `Diagnostic principal : ${pd.condition} (${pd.severity || 'non précisée'}${probabilityStr}).\n` +
@@ -117,15 +116,65 @@ const ConsultationEditor: React.FC<ConsultationEditorProps> = ({
         );
       });
     }
+    // Fallback : utiliser les données de diagnosisData si la section diagnostique n'est pas définie
+    if (!diag?.primaryDiagnosis && diagnosisData?.primary_diagnosis) {
+      const pd = diagnosisData.primary_diagnosis;
+      const prob = pd.probability ? `, confiance ${pd.probability}%` : '';
+      parts.push(
+        `Diagnostic principal : ${pd.condition} (${pd.severity || 'non précisée'}${prob}).\n` +
+          `Physiopathologie : ${pd.pathophysiology || 'Non spécifiée.'}\n` +
+          `Justification clinique : ${pd.clinical_rationale || pd.rationale || 'Non spécifiée.'}`,
+      );
+      if (Array.isArray(diagnosisData?.differential_diagnoses) && diagnosisData.differential_diagnoses.length > 0) {
+        parts.push('Diagnostics différentiels :');
+        diagnosisData.differential_diagnoses.forEach((dd: any) => {
+          const p = dd.probability ? `${dd.probability}%` : 'probabilité non précisée';
+          parts.push(
+            `• ${dd.condition} (${p}) : ${dd.rationale || ''}.` +
+              (dd.discriminating_tests ? ` Tests discriminants : ${dd.discriminating_tests}.` : ''),
+          );
+        });
+      }
+    }
     return parts.join('\n\n');
   };
 
   /**
    * Construit le plan de prise en charge en s'appuyant sur la structure
-   * therapeuticPlan du rapport. Si absent, propose des conseils génériques.
+   * therapeuticPlan du rapport, les champs investigationsPlan et les
+   * recommandations expertes issues du diagnostic (expert_investigations,
+   * expert_therapeutics, expert_preventive_measures). Si aucune information
+   * pertinente n'est trouvée, propose des conseils génériques.
    */
   const buildCompletePlan = (): string => {
     const parts: string[] = [];
+    // Investigations planifiées dans le rapport
+    const investigations = consultationData?.investigationsPlan;
+    if (investigations) {
+      // Tests biologiques urgents
+      if (investigations.laboratoryTests?.urgentTests?.length) {
+        parts.push(
+          'Examens biologiques urgents :\n' +
+            investigations.laboratoryTests.urgentTests.join(', '),
+        );
+      }
+      // Tests biologiques de routine
+      if (investigations.laboratoryTests?.routineTests?.length) {
+        parts.push(
+          'Tests biologiques de routine :\n' +
+            investigations.laboratoryTests.routineTests.join(', '),
+        );
+      }
+      // Imagerie urgente
+      if (investigations.imaging?.urgent?.length) {
+        parts.push('Imagerie urgente :\n' + investigations.imaging.urgent.join(', '));
+      }
+      // Imagerie de routine
+      if (investigations.imaging?.routine?.length) {
+        parts.push('Imagerie de routine :\n' + investigations.imaging.routine.join(', '));
+      }
+    }
+    // Plan thérapeutique à partir du rapport
     const tp = consultationData?.therapeuticPlan;
     if (tp) {
       const im = tp.immediateManagement;
@@ -148,6 +197,32 @@ const ConsultationEditor: React.FC<ConsultationEditorProps> = ({
       if (np?.patientEducation?.length) {
         parts.push('Éducation du patient :\n' + np.patientEducation.join(', '));
       }
+    }
+    // Recommandations expertes provenant du diagnostic (si disponibles)
+    const expert = diagnosisData?.expertAnalysis;
+    if (expert) {
+      if (Array.isArray(expert.expert_investigations) && expert.expert_investigations.length) {
+        parts.push('Examens recommandés par l’IA :\n' + expert.expert_investigations.join(', '));
+      }
+      if (Array.isArray(expert.expert_therapeutics) && expert.expert_therapeutics.length) {
+        parts.push('Traitements proposés par l’IA :\n' + expert.expert_therapeutics.join(', '));
+      }
+      if (Array.isArray(expert.expert_preventive_measures) && expert.expert_preventive_measures.length) {
+        parts.push(
+          'Mesures préventives recommandées par l’IA :\n' + expert.expert_preventive_measures.join(', '),
+        );
+      }
+    }
+    // Recommandations spécifiques présentes directement sur diagnosisData
+    if (Array.isArray(diagnosisData?.specific_examinations) && diagnosisData.specific_examinations.length) {
+      parts.push(
+        'Examens spécifiques recommandés :\n' + diagnosisData.specific_examinations.join(', '),
+      );
+    }
+    if (Array.isArray(diagnosisData?.specific_treatments) && diagnosisData.specific_treatments.length) {
+      parts.push(
+        'Traitements spécifiques recommandés :\n' + diagnosisData.specific_treatments.join(', '),
+      );
     }
     // Fallback : si aucune recommandation spécifique n'a été générée
     if (parts.length === 0) {
@@ -181,7 +256,7 @@ const ConsultationEditor: React.FC<ConsultationEditorProps> = ({
     // On considère que le formulaire n'a pas de modifications non sauvegardées lors du remplissage initial
     setHasUnsavedChanges(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [consultationData]);
+  }, [consultationData, diagnosisData]);
 
   /**
    * Gestion des changements dans le formulaire. Marque le formulaire comme modifié.
