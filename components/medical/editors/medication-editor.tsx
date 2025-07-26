@@ -28,6 +28,19 @@ import {
 } from "lucide-react"
 import { consultationDataService } from "@/lib/consultation-data-service"
 
+interface MedicationEditorProps {
+  medicationData?: any
+  onSave: (type: string, data: any) => void
+  onNext: () => void
+  onPrevious: () => void
+  patientName?: string
+  patientAge?: number
+  patientAllergies?: string
+  patientData?: any
+  diagnosisData?: any
+  doctorData?: any
+}
+
 export default function MedicationEditor({ 
   medicationData, 
   onSave, 
@@ -38,9 +51,8 @@ export default function MedicationEditor({
   patientAllergies = "",
   patientData,
   diagnosisData,
-  doctorData,
-  editedDocuments
-}) {
+  doctorData
+}: MedicationEditorProps) {
   const { toast } = useToast()
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   
@@ -150,10 +162,9 @@ export default function MedicationEditor({
       patientData,
       diagnosisData,
       doctorData,
-      patientAllergies,
-      editedDocuments
+      patientAllergies
     })
-  }, [medicationData, patientData, diagnosisData, doctorData, patientAllergies, editedDocuments])
+  }, [medicationData, patientData, diagnosisData, doctorData, patientAllergies])
 
   const [formData, setFormData] = useState({
     // Header with doctor info
