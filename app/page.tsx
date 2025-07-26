@@ -11,8 +11,7 @@ import PatientForm from "@/components/patient-form"
 import ClinicalForm from "@/components/clinical-form"
 import QuestionsForm from "@/components/questions-form"
 import DiagnosisForm from "@/components/diagnosis-form"
-import MedicalWorkflow from "@/components/medical/main-medical-workflow"
-import IntegratedMedicalConsultation from "@/components/integrated-medical-consultation"
+import ConsultationGenerator from "@/components/consultation-generator"
 import { PatientDataLoader } from "@/components/patient-data-loader"
 import { getTranslation, Language } from "@/lib/translations"
 import { consultationDataService } from '@/lib/consultation-data-service'
@@ -24,10 +23,10 @@ export default function MedicalAIExpert() {
   const [clinicalData, setClinicalData] = useState<any>(null)
   const [questionsData, setQuestionsData] = useState<any>(null)
   const [diagnosisData, setDiagnosisData] = useState<any>(null)
-  const [workflowResult, setWorkflowResult] = useState<any>(null)
+  const [consultationReport, setConsultationReport] = useState<any>(null)
   const [language, setLanguage] = useState<Language>('fr')
   
-  // Add state to track the consultation
+  // États de consultation
   const [currentConsultationId, setCurrentConsultationId] = useState<string | null>(null)
   const [currentPatientId, setCurrentPatientId] = useState<string | null>(null)
   const [currentDoctorId, setCurrentDoctorId] = useState<string | null>(null)
@@ -88,8 +87,8 @@ export default function MedicalAIExpert() {
               if (existingData.diagnosisData) {
                 setDiagnosisData(existingData.diagnosisData)
               }
-              if (existingData.workflowResult) {
-                setWorkflowResult(existingData.workflowResult)
+              if (existingData.consultationReport) {
+                setConsultationReport(existingData.consultationReport)
               }
               
               // Find the last completed step
@@ -98,7 +97,7 @@ export default function MedicalAIExpert() {
                 existingData.clinicalData,
                 existingData.questionsData,
                 existingData.diagnosisData,
-                existingData.workflowResult
+                existingData.consultationReport
               ]
               
               let lastCompletedStep = -1
@@ -332,10 +331,10 @@ export default function MedicalAIExpert() {
     },
     {
       id: 4,
-      title: "Édition des documents médicaux",
-      description: "Génération et personnalisation des rapports",
-      icon: <Activity className="h-5 w-5" />,
-      component: MedicalWorkflow,
+      title: "Compte-Rendu & Documents",
+      description: "Génération et édition des documents médicaux",
+      icon: <FileText className="h-5 w-5" />,
+      component: ConsultationGenerator,
     },
   ]
 
@@ -386,20 +385,15 @@ export default function MedicalAIExpert() {
     }
   }
 
-  const handleWorkflowComplete = (result: any) => {
-    setWorkflowResult(result)
-    console.log('Workflow terminé:', result)
-  }
-
-  const handleMedicalWorkflowComplete = async (result: any) => {
-    setWorkflowResult(result)
+  const handleConsultationComplete = async (result: any) => {
+    setConsultationReport(result)
     
-    // Save the final workflow result
+    // Save the final consultation report
     const consultationId = consultationDataService.getCurrentConsultationId()
     if (consultationId) {
       try {
-        await consultationDataService.saveStepData(4, result)
-        console.log('Saved workflow result to step 4')
+        await consultationDataService.saveConsultationReport(result)
+        console.log('Saved consultation report')
         
         // Update consultation status to completed
         await supabase
@@ -412,11 +406,11 @@ export default function MedicalAIExpert() {
           
         console.log('Consultation marked as completed')
       } catch (error) {
-        console.error('Error completing workflow:', error)
+        console.error('Error completing consultation:', error)
       }
     }
     
-    console.log('Workflow médical terminé:', result)
+    console.log('Consultation complète terminée:', result)
   }
 
   // Navigation directe vers une étape
@@ -448,8 +442,8 @@ export default function MedicalAIExpert() {
             }
             break
           case 4:
-            if (workflowResult) {
-              await consultationDataService.saveStepData(4, workflowResult)
+            if (consultationReport) {
+              await consultationDataService.saveConsultationReport(consultationReport)
             }
             break
         }
@@ -515,9 +509,8 @@ export default function MedicalAIExpert() {
           clinicalData,
           questionsData,
           diagnosisData,
-          initialData: workflowResult,
-          onComplete: handleMedicalWorkflowComplete,
           onBack: handlePrevious,
+          onComplete: handleConsultationComplete,
         }
       default:
         return commonProps
@@ -539,9 +532,7 @@ export default function MedicalAIExpert() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Temporarily disabled to prevent URL clearing
       <PatientDataLoader />
-      */}
       
       <div className="container mx-auto px-4 py-8">
         {/* Header with Language Switcher */}
@@ -552,7 +543,7 @@ export default function MedicalAIExpert() {
               <p className="text-gray-600">{t('mainPage.subtitle')}</p>
             </div>
             <div className="flex items-center gap-2">
-              {/* Language Switcher with black background */}
+              {/* Language Switcher */}
               <div className="flex items-center gap-2 mr-4 bg-black rounded-md p-1">
                 <Button
                   variant={language === 'fr' ? 'default' : 'ghost'}
