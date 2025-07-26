@@ -1,4 +1,4 @@
-// src/components/medical/documents-workflow.tsx
+// components/medical/documents-workflow.tsx
 
 "use client"
 
@@ -28,32 +28,44 @@ import BiologyEditor from './editors/biology-editor'
 import ParaclinicalEditor from './editors/paraclinical-editor'
 import MedicationEditor from './editors/medication-editor'
 
+interface DocumentsWorkflowProps {
+  consultationReport?: any; // Nouveau format de données
+  diagnosisData?: any;
+  patientData?: any;
+  clinicalData?: any;
+  questionsData?: any;
+  onBack?: () => void;
+  onComplete?: (documents: any) => void;
+}
+
 export default function DocumentsWorkflow({ 
+  consultationReport,
   diagnosisData, 
-  mauritianDocuments, 
   patientData,
+  clinicalData,
+  questionsData,
   onBack,
   onComplete 
-}) {
-  // CORRECTION: Ajouter currentStep et initialiser correctement
+}: DocumentsWorkflowProps) {
   const [currentStep, setCurrentStep] = useState(-1)
   
+  // ✅ Adapter pour le nouveau format de données
   const [editedDocuments, setEditedDocuments] = useState({
-    consultation: mauritianDocuments?.consultation || {},
-    biology: mauritianDocuments?.biology || {},
-    paraclinical: mauritianDocuments?.paraclinical || {},
-    medication: mauritianDocuments?.medication || {},
+    consultation: {},
+    biology: {},
+    paraclinical: {},
+    medication: {},
   })
   const [completedSteps, setCompletedSteps] = useState(new Set())
   
-  // Add comprehensive data states
+  // États des données complètes
   const [completePatientData, setCompletePatientData] = useState<any>(null)
   const [completeClinicalData, setCompleteClinicalData] = useState<any>(null)
   const [completeQuestionsData, setCompleteQuestionsData] = useState<any>(null)
   const [completeDoctorData, setCompleteDoctorData] = useState<any>(null)
   const [isLoadingData, setIsLoadingData] = useState(true)
 
-  // Load all data for documents auto-fill
+  // ✅ Load all data for documents auto-fill
   useEffect(() => {
     const loadAllDataForDocuments = async () => {
       try {
@@ -61,7 +73,7 @@ export default function DocumentsWorkflow({
         setIsLoadingData(true)
         
         // 1. Get all saved consultation data
-        const allData = await consultationDataService.getDataForAutoFill()
+        const allData = await consultationDataService.getAllData()
         console.log('All consultation data:', allData)
         
         // 2. Get doctor data from sessionStorage first
@@ -109,7 +121,6 @@ export default function DocumentsWorkflow({
             
             if (dbPatient) {
               // Merge database patient data with existing data
-              // Priority: consultation form data > database data > default data
               fullPatientData = {
                 // Basic info - prioritize form data
                 firstName: fullPatientData.firstName || dbPatient.first_name || '',
@@ -141,7 +152,7 @@ export default function DocumentsWorkflow({
                 // ID info from database
                 idNumber: dbPatient.id_number || fullPatientData.idNumber || '',
                 
-                // Additional fields that might be useful
+                // Additional fields
                 otherAllergies: fullPatientData.otherAllergies || '',
                 otherMedicalHistory: fullPatientData.otherMedicalHistory || ''
               }
@@ -153,8 +164,8 @@ export default function DocumentsWorkflow({
         
         // 5. Set all the data
         setCompletePatientData(fullPatientData)
-        setCompleteClinicalData(allData?.clinicalData || {})
-        setCompleteQuestionsData(allData?.questionsData || {})
+        setCompleteClinicalData(allData?.clinicalData || clinicalData || {})
+        setCompleteQuestionsData(allData?.questionsData || questionsData || {})
         setCompleteDoctorData(doctorInfo)
         
       } catch (error) {
@@ -165,9 +176,26 @@ export default function DocumentsWorkflow({
     }
     
     loadAllDataForDocuments()
-  }, [patientData])
+  }, [patientData, clinicalData, questionsData])
 
-  // Helper function to calculate age from birth date
+  // ✅ Initialize edited documents from consultationReport
+  useEffect(() => {
+    if (consultationReport) {
+      console.log('📋 Initializing documents from consultationReport:', consultationReport)
+      
+      // ✅ Adapter le nouveau format
+      const mauritianDocs = consultationReport.mauritianDocuments || {}
+      
+      setEditedDocuments({
+        consultation: mauritianDocs.consultation || consultationReport.consultationData || {},
+        biology: mauritianDocs.biological || mauritianDocs.biology || {},
+        paraclinical: mauritianDocs.imaging || mauritianDocs.paraclinical || {},
+        medication: mauritianDocs.medication || {}
+      })
+    }
+  }, [consultationReport])
+
+  // Helper functions
   const calculateAge = (birthDate: string) => {
     if (!birthDate) return ''
     const today = new Date()
@@ -182,7 +210,6 @@ export default function DocumentsWorkflow({
     return age.toString()
   }
 
-  // Helper function to map gender values
   const mapGender = (gender: string) => {
     if (!gender) return ''
     const genderLower = gender.toLowerCase()
@@ -193,27 +220,6 @@ export default function DocumentsWorkflow({
     }
     return gender
   }
-
-  // Debug log to track received props
-  useEffect(() => {
-    console.log('DocumentsWorkflow received props:', {
-      mauritianDocuments,
-      diagnosisData,
-      patientData
-    })
-  }, [mauritianDocuments, diagnosisData, patientData])
-
-  // Update editedDocuments when mauritianDocuments changes
-  useEffect(() => {
-    if (mauritianDocuments) {
-      setEditedDocuments({
-        consultation: mauritianDocuments.consultation || {},
-        biology: mauritianDocuments.biology || {},
-        paraclinical: mauritianDocuments.paraclinical || {},
-        medication: mauritianDocuments.medication || {}
-      })
-    }
-  }, [mauritianDocuments])
 
   const steps = [
     {
@@ -250,13 +256,31 @@ export default function DocumentsWorkflow({
     }
   ]
 
-  const handleSaveDocument = (docType, updatedData) => {
+  const handleSaveDocument = async (docType: string, updatedData: any) => {
     setEditedDocuments(prev => ({
       ...prev,
       [docType]: updatedData
     }))
     setCompletedSteps(prev => new Set([...prev, currentStep]))
-    console.log(`✅ ${docType} sauvegardé:`, updatedData)
+    
+    // ✅ Sauvegarder immédiatement les changements
+    try {
+      const updatedDocuments = {
+        ...editedDocuments,
+        [docType]: updatedData
+      }
+      await consultationDataService.saveConsultationReport({
+        ...consultationReport,
+        mauritianDocuments: {
+          ...consultationReport?.mauritianDocuments,
+          [docType]: updatedData
+        },
+        editedDocuments: updatedDocuments
+      })
+      console.log(`✅ ${docType} sauvegardé:`, updatedData)
+    } catch (error) {
+      console.error('Error saving document:', error)
+    }
   }
 
   const handleNext = () => {
@@ -271,8 +295,21 @@ export default function DocumentsWorkflow({
     }
   }
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     console.log('🎯 Documents finaux:', editedDocuments)
+    
+    // Sauvegarder les documents finaux
+    try {
+      await consultationDataService.saveConsultationReport({
+        ...consultationReport,
+        mauritianDocuments: editedDocuments,
+        finalDocuments: editedDocuments,
+        completedAt: new Date().toISOString()
+      })
+    } catch (error) {
+      console.error('Error saving final documents:', error)
+    }
+    
     onComplete && onComplete(editedDocuments)
   }
 
@@ -304,12 +341,12 @@ export default function DocumentsWorkflow({
           <CardHeader className="bg-gradient-to-r from-slate-700 to-gray-800 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-3 text-2xl">
               <FileText className="h-8 w-8" />
-              Documents Mauriciens - Vue d'ensemble
+              Documents Mauriciens - Édition
             </CardTitle>
             <div className="flex justify-between items-center mt-4">
               <div>
                 <p className="text-slate-200">Patient: {patientName}</p>
-                <p className="text-slate-300 text-sm">Diagnostic: {diagnosisData?.primary?.condition}</p>
+                <p className="text-slate-300 text-sm">Diagnostic: {diagnosisData?.diagnosis?.primary?.condition || 'En cours'}</p>
               </div>
               <div className="text-right">
                 <div className="text-slate-200">Progression</div>
@@ -376,7 +413,7 @@ export default function DocumentsWorkflow({
             className="px-6 py-3 shadow-md hover:shadow-lg"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            {onBack ? 'Retour Étape Précédente' : 'Retour Diagnostic'}
+            Retour
           </Button>
 
           <div className="flex gap-3">
@@ -491,14 +528,14 @@ export default function DocumentsWorkflow({
           questionsData={completeQuestionsData}
           diagnosisData={diagnosisData}
           doctorData={completeDoctorData}
-          mauritianDocuments={mauritianDocuments}
+          mauritianDocuments={consultationReport?.mauritianDocuments}
         />
       )}
 
       {currentStep === 1 && (
         <BiologyEditor
           biologyData={editedDocuments.biology}
-          onSave={(type, data) => handleSaveDocument(type, data)}
+          onSave={(type, data) => handleSaveDocument('biology', data)}
           onNext={handleNext}
           onPrevious={handlePrevious}
           patientName={patientName}
@@ -511,7 +548,7 @@ export default function DocumentsWorkflow({
       {currentStep === 2 && (
         <ParaclinicalEditor
           paraclinicalData={editedDocuments.paraclinical}
-          onSave={(type, data) => handleSaveDocument(type, data)}
+          onSave={(type, data) => handleSaveDocument('paraclinical', data)}
           onNext={handleNext}
           onPrevious={handlePrevious}
           patientName={patientName}
@@ -524,7 +561,7 @@ export default function DocumentsWorkflow({
       {currentStep === 3 && (
         <MedicationEditor
           medicationData={editedDocuments.medication}
-          onSave={(type, data) => handleSaveDocument(type, data)}
+          onSave={(type, data) => handleSaveDocument('medication', data)}
           onNext={() => setCurrentStep(-1)}
           onPrevious={handlePrevious}
           patientName={patientName}
