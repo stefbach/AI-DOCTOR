@@ -126,254 +126,200 @@ class TeleconsultationAIAssistant {
     analysis: DiscourseAnalysis
   ): Promise<AIAssistedQuestion[]> {
     
-    const aiPrompt = `Tu es un ASSISTANT IA EXPERT pour médecin en téléconsultation à Maurice.
+    // PROMPT SIMPLIFIÉ QUI MARCHE
+    const aiPrompt = `Tu es un assistant médical pour téléconsultation à Maurice.
 
-CONTEXTE CONSULTATION TEMPS RÉEL :
-- Phase actuelle : ${context.consultation_phase}
-- Durée écoulée : ${context.consultation_duration} minutes
-- Symptômes patient détectés : ${context.symptoms_detected.join(', ')}
-- Niveau technologique patient : ${context.patient_tech_comfort}
-- Phrases clés discours : "${analysis.key_phrases?.join(', ') || 'Non analysé'}"
-- Émotion détectée : ${analysis.emotional_state || 'neutre'}
-- Langue préférée : ${analysis.language_preference || 'français'}
+CONTEXTE :
+- Patient dit : "${context.patient_discourse.join(' ')}"
+- Symptômes détectés : ${context.symptoms_detected.join(', ') || 'aucun'}
+- Phase consultation : ${context.consultation_phase}
 
-GAPS INFORMATIONNELS IDENTIFIÉS :
-${gaps.map(g => `- ${g.category}: ${g.description} (priorité: ${g.priority})`).join('\n')}
+MISSION : Génère 2-3 questions que le médecin devrait poser maintenant.
 
-SPÉCIFICITÉS MAURICE (OBLIGATOIRE) :
-- Épidémiologie actuelle : dengue/chikungunya selon saison
-- Population multiculturelle : créole, français, anglais, hindi
-- Médecine traditionnelle fréquente avant consultation
-- Alimentation de rue = gastro-entérites fréquentes
-- Transport médical difficile selon régions
+RÈGLES :
+- Questions pratiques pour téléconsultation
+- Adaptation Maurice (créole/français)
+- Guidage auto-examen si nécessaire
+- Focus sur diagnostic différentiel
 
-LIMITATIONS TÉLÉCONSULTATION :
-- Examen physique impossible → guidage auto-examen patient nécessaire
-- Qualité vidéo/audio variable → questions visuelles simples
-- Famille souvent présente → utiliser comme aide
-- Urgences = problème évacuation → détection précoce critique
-
-MISSION PRÉCISE :
-Générer 3-4 questions INTELLIGENTES que le médecin devrait poser MAINTENANT pour :
-
-1. ✅ Combler les gaps informationnels critiques détectés
-2. ✅ Clarifier éléments ambigus du discours patient
-3. ✅ Guider auto-examen physique à distance si pertinent  
-4. ✅ Détecter red flags mauriciens spécifiques
-5. ✅ Optimiser temps consultation (max 20min télé)
-
-RÈGLES STRICTES :
-- Questions pour ASSISTER le médecin, pas le remplacer
-- Adaptation niveau éducation patient (simple/standard/technique)
-- 3 formulations par question : créole mauricien / français standard / technique
-- Guidage pratique auto-examen si nécessaire
-- Contexte culturel mauricien obligatoire
-- Focus sur éléments qui CHANGENT la prise en charge
-
-RÉPONSE OBLIGATOIRE - FORMAT JSON EXACT :
-
+RÉPONSE FORMAT JSON SIMPLE :
 {
-  "ai_suggestions": [
+  "questions": [
     {
-      "id": "unique_id_001",
-      "timing": "immediate|after_patient_finishes|before_conclusion",
-      "priority": "essential|important|complementary",
-      "physician_prompt": "Message POUR LE MÉDECIN expliquant pourquoi poser cette question maintenant",
-      "patient_formulations": {
-        "simple": "Question en créole mauricien ou français simple",
-        "standard": "Question français standard Maurice", 
-        "technical": "Question technique/médicale"
-      },
-      "physical_guidance": {
-        "instruction_patient": "Guidage auto-examen si nécessaire",
-        "what_to_observe": "Ce que le médecin doit observer",
-        "red_flags_visual": ["Signes d'alarme visuels"],
-        "alternative_methods": ["Méthodes alternatives télé"]
-      },
-      "maurice_adaptation": {
-        "cultural_sensitivity": "Adaptation culturelle mauricienne",
-        "language_options": ["créole", "français", "anglais"],
-        "local_epidemiology": "Contexte épidémiologique local"
-      },
-      "clinical_rationale": "Pourquoi cette question est cliniquement importante",
-      "ai_reasoning": "Logique IA pour cette suggestion"
+      "id": "q1",
+      "pour_medecin": "Pourquoi poser cette question",
+      "question_simple": "Version créole/simple",
+      "question_standard": "Version française standard",
+      "examen_guide": "Instruction auto-examen si nécessaire"
     }
-  ],
-  "context_analysis": {
-    "urgency_detected": "low|medium|high",
-    "missing_critical_info": ["éléments manquants critiques"],
-    "maurice_specific_risks": ["risques spécifiques détectés"],
-    "next_phase_recommendation": "anamnese|examen_guide|diagnostic|prescription"
-  }
-}
-
-IMPORTANT : Répondre UNIQUEMENT en JSON valide. Aucun texte avant ou après le JSON.`
+  ]
+}`
 
     try {
-      // Appel OpenAI avec la bibliothèque ai
+      console.log("🤖 Appel OpenAI avec prompt simplifié...")
+      
+      // APPEL OPENAI SIMPLIFIÉ
       const result = await generateText({
         model: openai("gpt-4o"),
         prompt: aiPrompt,
-        temperature: 0.3, // Plus bas pour plus de cohérence
-        maxTokens: 2500,
-        topP: 0.9
+        temperature: 0.2,
+        maxTokens: 1000
       })
 
-      console.log("🤖 Réponse IA brute:", result.text.substring(0, 200) + "...")
+      console.log("✅ Réponse OpenAI reçue:", result.text.substring(0, 100) + "...")
 
-      // Parsing sécurisé du JSON
-      return this.parseAIResponse(result.text)
+      // PARSING SIMPLE ET ROBUSTE
+      return this.parseSimpleAIResponse(result.text, context)
 
     } catch (error) {
-      console.error("❌ Erreur appel OpenAI:", error)
+      console.error("❌ Erreur OpenAI:", error)
       
-      // Fallback : questions de base selon contexte
-      return this.generateFallbackQuestions(context, gaps)
+      // FALLBACK IMMÉDIAT
+      return this.generateQuickFallback(context)
     }
   }
 
-  private parseAIResponse(aiResponseText: string): AIAssistedQuestion[] {
+  private parseSimpleAIResponse(aiText: string, context: TeleconsultationContext): AIAssistedQuestion[] {
     try {
-      // Nettoyage de la réponse
-      let cleanedText = aiResponseText.trim()
+      // Nettoyage basique
+      let cleanText = aiText.trim()
       
-      // Recherche du JSON dans la réponse
-      const jsonMatch = cleanedText.match(/\{[\s\S]*\}/)
-      if (!jsonMatch) {
-        throw new Error("Aucun JSON valide trouvé dans la réponse IA")
+      // Extraction JSON
+      const jsonStart = cleanText.indexOf('{')
+      const jsonEnd = cleanText.lastIndexOf('}') + 1
+      
+      if (jsonStart === -1 || jsonEnd === 0) {
+        throw new Error("Pas de JSON trouvé")
       }
       
-      cleanedText = jsonMatch[0]
+      cleanText = cleanText.substring(jsonStart, jsonEnd)
+      const parsed = JSON.parse(cleanText)
       
-      // Nettoyage caractères problématiques
-      cleanedText = cleanedText
-        .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Caractères de contrôle
-        .replace(/,(\s*[}\]])/g, '$1') // Virgules en trop
-        
-      const parsed = JSON.parse(cleanedText)
-      
-      // Validation structure
-      if (!parsed.ai_suggestions || !Array.isArray(parsed.ai_suggestions)) {
-        throw new Error("Structure JSON invalide : ai_suggestions manquant")
+      if (!parsed.questions || !Array.isArray(parsed.questions)) {
+        throw new Error("Format invalide")
       }
-      
-      // Validation chaque suggestion
-      const validatedSuggestions = parsed.ai_suggestions.map((suggestion: any, index: number) => {
-        if (!suggestion.id || !suggestion.physician_prompt || !suggestion.patient_formulations) {
-          console.warn(`⚠️ Suggestion ${index} incomplète, correction automatique`)
-          
-          return {
-            id: suggestion.id || `ai_generated_${Date.now()}_${index}`,
-            timing: suggestion.timing || "immediate",
-            priority: suggestion.priority || "important", 
-            physician_prompt: suggestion.physician_prompt || "Question générée automatiquement",
-            patient_formulations: {
-              simple: suggestion.patient_formulations?.simple || "Question simple non générée",
-              standard: suggestion.patient_formulations?.standard || "Question standard non générée", 
-              technical: suggestion.patient_formulations?.technical || "Question technique non générée"
-            },
-            physical_guidance: suggestion.physical_guidance || null,
-            maurice_adaptation: suggestion.maurice_adaptation || {
-              cultural_sensitivity: "Adaptation mauricienne standard",
-              language_options: ["français"],
-              local_epidemiology: "Contexte général Maurice"
-            },
-            clinical_rationale: suggestion.clinical_rationale || "Rationale médical à préciser",
-            ai_reasoning: suggestion.ai_reasoning || "Logique IA non fournie"
-          }
-        }
-        
-        return suggestion
-      })
-      
-      console.log(`✅ ${validatedSuggestions.length} suggestions IA parsées avec succès`)
-      return validatedSuggestions
-      
+
+      // CONVERSION EN FORMAT ATTENDU
+      return parsed.questions.map((q: any, index: number) => ({
+        id: q.id || `ai_${Date.now()}_${index}`,
+        timing: "immediate" as const,
+        priority: "important" as const,
+        physician_prompt: q.pour_medecin || "Question générée par IA",
+        patient_formulations: {
+          simple: q.question_simple || "Question pas générée", 
+          standard: q.question_standard || "Question pas générée",
+          technical: q.question_standard || "Question pas générée"
+        },
+        physical_guidance: q.examen_guide ? {
+          instruction_patient: q.examen_guide,
+          what_to_observe: "Observer réaction patient",
+          red_flags_visual: ["Douleur intense", "Asymétrie"],
+          alternative_methods: ["Comparaison controlatérale"]
+        } : null,
+        maurice_adaptation: {
+          cultural_sensitivity: "Adaptation Maurice standard",
+          language_options: ["créole", "français"],
+          local_epidemiology: "Contexte épidémiologique mauricien"
+        },
+        clinical_rationale: "Question IA pour téléconsultation",
+        ai_reasoning: "Génération automatique contextuelle"
+      }))
+
     } catch (parseError) {
-      console.error("❌ Erreur parsing JSON IA:", parseError)
-      console.error("Texte problématique:", aiResponseText.substring(0, 500))
+      console.error("❌ Erreur parsing IA:", parseError)
+      return this.generateQuickFallback(context)
+    }
+  }
+
+  private generateQuickFallback(context: TeleconsultationContext): AIAssistedQuestion[] {
+    
+    // QUESTIONS DE BASE SELON CONTEXTE
+    const baseQuestions: { [key: string]: AIAssistedQuestion } = {
       
-      // Fallback en cas d'erreur parsing
-      return [{
-        id: `fallback_${Date.now()}`,
+      // Si fièvre détectée
+      fever: {
+        id: "fallback_fever",
+        timing: "immediate",
+        priority: "essential", 
+        physician_prompt: "Fièvre détectée - Dépistage arboviroses Maurice obligatoire",
+        patient_formulations: {
+          simple: "Depi kan to gagné la fièvre ? Li monté-descendre ?",
+          standard: "Depuis quand avez-vous de la fièvre ? Elle monte et descend ?",
+          technical: "Pattern fébrile : continue, rémittente ou intermittente ?"
+        },
+        physical_guidance: {
+          instruction_patient: "Regardez votre peau : petits points rouges quelque part ?",
+          what_to_observe: "Éruption, pâleur, ictère",
+          red_flags_visual: ["Pétéchies", "Ictère", "Pâleur"],
+          alternative_methods: ["Inspection muqueuses", "Test fragilité capillaire"]
+        },
+        maurice_adaptation: {
+          cultural_sensitivity: "Fièvre = souvent dengue/chikungunya à Maurice",
+          language_options: ["créole", "français"],
+          local_epidemiology: "Surveillance arboviroses active"
+        },
+        clinical_rationale: "Dépistage systématique maladies vectorielles",
+        ai_reasoning: "Fallback contexte mauricien"
+      },
+
+      // Si douleur détectée  
+      pain: {
+        id: "fallback_pain",
         timing: "immediate",
         priority: "important",
-        physician_prompt: "Erreur génération IA - Question de sécurité : Y a-t-il des symptômes qui vous inquiètent particulièrement ?",
+        physician_prompt: "Douleur mentionnée - Localisation précise nécessaire",
         patient_formulations: {
-          simple: "Ena quelque chose ki faire ou peur ?",
-          standard: "Y a-t-il quelque chose qui vous inquiète particulièrement ?",
-          technical: "Identifiez-vous des symptômes préoccupants nécessitant une évaluation urgente ?"
+          simple: "Montre moi exact kot li faire mal",
+          standard: "Montrez-moi exactement où ça fait mal",
+          technical: "Localisation anatomique précise de la douleur"
         },
-        physical_guidance: null,
+        physical_guidance: {
+          instruction_patient: "Placez votre main sur l'endroit qui fait le plus mal",
+          what_to_observe: "Localisation, protection, grimace",
+          red_flags_visual: ["Défense", "Douleur vive", "Position antalgique"],
+          alternative_methods: ["Palpation comparative", "Test mobilisation"]
+        },
         maurice_adaptation: {
-          cultural_sensitivity: "Question de sécurité universelle",
+          cultural_sensitivity: "Douleur souvent minimisée culturellement",
           language_options: ["créole", "français"],
-          local_epidemiology: "Applicable tous contextes"
+          local_epidemiology: "Variable selon cause"
         },
-        clinical_rationale: "Question de sécurité en cas d'échec IA",
-        ai_reasoning: "Fallback automatique"
-      }]
-    }
-  }
+        clinical_rationale: "Localisation oriente diagnostic différentiel",
+        ai_reasoning: "Fallback douleur standard"
+      },
 
-  private generateFallbackQuestions(
-    context: TeleconsultationContext, 
-    gaps: InformationGap[]
-  ): AIAssistedQuestion[] {
-    
-    // Questions de base selon la phase de consultation
-    const fallbackQuestions: { [key: string]: AIAssistedQuestion } = {
-      
-      anamnese: {
-        id: "fallback_anamnese_001",
-        timing: "immediate",
-        priority: "essential",
-        physician_prompt: "Anamnèse - Chronologie des symptômes manquante",
+      // Question générale
+      general: {
+        id: "fallback_general",
+        timing: "immediate", 
+        priority: "important",
+        physician_prompt: "Question de base - Chronologie symptômes",
         patient_formulations: {
-          simple: "Depi kan sa problems la commencer ?",
-          standard: "Depuis quand avez-vous ces symptômes ?", 
-          technical: "Chronologie précise d'apparition des symptômes ?"
+          simple: "Depi kan sa problème la commencer ?",
+          standard: "Depuis quand avez-vous ce problème ?",
+          technical: "Chronologie précise d'apparition des symptômes"
         },
         physical_guidance: null,
         maurice_adaptation: {
           cultural_sensitivity: "Question temporelle universelle",
           language_options: ["créole", "français"],
-          local_epidemiology: "Base pour toute pathologie"
+          local_epidemiology: "Base pour tout diagnostic"
         },
-        clinical_rationale: "Chronologie essentielle pour diagnostic différentiel",
-        ai_reasoning: "Fallback anamnèse standard"
-      },
-      
-      examen_guide: {
-        id: "fallback_examen_001", 
-        timing: "immediate",
-        priority: "essential",
-        physician_prompt: "Examen guidé - Auto-palpation nécessaire",
-        patient_formulations: {
-          simple: "Met to la main lor kot li faire mal et dire moi ki to senti",
-          standard: "Placez votre main sur la zone douloureuse et décrivez ce que vous ressentez",
-          technical: "Palpation guidée de la zone symptomatique avec description tactile"
-        },
-        physical_guidance: {
-          instruction_patient: "Palpation douce puis ferme de la zone symptomatique",
-          what_to_observe: "Expression faciale, protection, localisation précise",
-          red_flags_visual: ["Défense", "Douleur vive", "Asymétrie"],
-          alternative_methods: ["Comparaison controlatérale", "Palpation progressive"]
-        },
-        maurice_adaptation: {
-          cultural_sensitivity: "Auto-examen accepté culturellement", 
-          language_options: ["créole", "français"],
-          local_epidemiology: "Technique universelle"
-        },
-        clinical_rationale: "Compensation absence examen physique direct",
-        ai_reasoning: "Fallback examen télé standard"
+        clinical_rationale: "Chronologie essentielle diagnostic",
+        ai_reasoning: "Fallback sécurité"
       }
     }
+
+    // LOGIQUE DE SÉLECTION
+    if (context.symptoms_detected.includes('fièvre')) {
+      return [baseQuestions.fever]
+    }
     
-    const currentPhase = context.consultation_phase
-    const relevantQuestion = fallbackQuestions[currentPhase] || fallbackQuestions.anamnese
+    if (context.symptoms_detected.includes('douleur')) {
+      return [baseQuestions.pain]
+    }
     
-    return [relevantQuestion]
+    return [baseQuestions.general]
   }
 
   private async analyzePatientDiscourse(transcript: string): Promise<DiscourseAnalysis> {
@@ -842,7 +788,47 @@ class RealTimeTeleconsultationAI {
   }
 }
 
-// =============== FONCTIONS UTILITAIRES ===============
+// =============== FONCTION TEST SIMPLE ===============
+
+export async function testAIGeneration() {
+  console.log("🧪 Test génération IA...")
+  
+  const testContext: TeleconsultationContext = {
+    consultation_phase: 'anamnese',
+    patient_discourse: ["mo gagné mal dan ventre depi hier"],
+    symptoms_detected: ['douleur'],
+    red_flags_potential: [],
+    physical_exam_limitations: [],
+    maurice_specific_risks: [],
+    consultation_duration: 5,
+    patient_tech_comfort: 'medium'
+  }
+  
+  try {
+    const aiAssistant = new TeleconsultationAIAssistant()
+    const questions = await aiAssistant.generateContextualQuestions(
+      testContext,
+      "mo gagné mal dan ventre",
+      "Patient 35 ans"
+    )
+    
+    console.log("✅ Test réussi:", questions.length, "questions générées")
+    console.log("Première question:", questions[0]?.patient_formulations?.simple)
+    
+    return { success: true, questions }
+    
+  } catch (error) {
+    console.error("❌ Test échoué:", error)
+    return { success: false, error: error.message }
+  }
+}
+
+// =============== API ENDPOINT DE TEST ===============
+
+export async function GET(request: NextRequest) {
+  const testResult = await testAIGeneration()
+  return NextResponse.json(testResult)
+}
 
 function extractSymptomsFromDiscourse(discourse: string): string[] {
   const symptom_patterns = {
@@ -904,170 +890,77 @@ function detectMauricianContext(discourse: string): {
 
 export async function POST(request: NextRequest) {
   try {
-    const startTime = Date.now()
+    console.log("🩺 Début assistant IA téléconsultation...")
     
+    const body = await request.json()
     const { 
-      consultation_id,
       patient_discourse_real_time,
-      physician_notes,
-      consultation_phase,
-      maurice_context,
-      patient_metadata 
-    } = await request.json()
+      consultation_phase = 'anamnese',
+      physician_notes = ""
+    } = body
 
-    console.log(`🩺 Assistant IA Télémédecine - Consultation ${consultation_id}`)
-
-    // Validation données requises
-    if (!patient_discourse_real_time || !consultation_phase) {
+    // VALIDATION SIMPLE
+    if (!patient_discourse_real_time) {
       return NextResponse.json({
         success: false,
-        error: "Données consultation manquantes",
-        required_fields: ["patient_discourse_real_time", "consultation_phase"]
+        error: "patient_discourse_real_time requis"
       }, { status: 400 })
     }
 
-    // Initialisation assistant IA
-    const aiAssistant = new TeleconsultationAIAssistant()
-    const realtimeAI = new RealTimeTeleconsultationAI()
-    
-    // Analyse contexte mauricien
-    const mauritian_analysis = detectMauricianContext(patient_discourse_real_time)
-    
-    // Contexte consultation enrichi
-    const enhanced_context: TeleconsultationContext = {
+    console.log("📝 Discours patient:", patient_discourse_real_time.substring(0, 50) + "...")
+
+    // CONTEXTE SIMPLIFIÉ
+    const context: TeleconsultationContext = {
       consultation_phase: consultation_phase as any,
       patient_discourse: [patient_discourse_real_time],
       symptoms_detected: extractSymptomsFromDiscourse(patient_discourse_real_time),
       red_flags_potential: [],
-      physical_exam_limitations: ['no_physical_contact', 'video_quality_variable'],
-      maurice_specific_risks: mauritian_analysis.risk_factors,
-      consultation_duration: Math.floor((Date.now() - (maurice_context?.start_time || Date.now())) / 60000),
-      patient_tech_comfort: patient_metadata?.tech_comfort || 'medium'
+      physical_exam_limitations: ['teleconsultation'],
+      maurice_specific_risks: [],
+      consultation_duration: 0,
+      patient_tech_comfort: 'medium'
     }
-    
-    // Génération suggestions IA contextuelle
+
+    console.log("🔍 Symptômes détectés:", context.symptoms_detected)
+
+    // GÉNÉRATION IA SIMPLIFIÉE
+    const aiAssistant = new TeleconsultationAIAssistant()
     const ai_suggestions = await aiAssistant.generateContextualQuestions(
-      enhanced_context,
+      context,
       patient_discourse_real_time,
-      physician_notes || "Notes en cours"
+      physician_notes
     )
-    
-    // Analyse temps réel
-    const realtime_analysis = await realtimeAI.onPatientSpeak(
-      patient_discourse_real_time,
-      physician_notes || "",
-      maurice_context?.vital_signs
-    )
-    
-    // Interface médecin enrichie
-    const physician_interface = realtimeAI.renderPhysicianInterface()
-    
-    // Calcul métriques performance
-    const processing_time = Date.now() - startTime
-    
-    const response = {
-      success: true,
-      consultation_id,
-      processing_time_ms: processing_time,
-      
-      // Suggestions IA principales
-      ai_suggestions: ai_suggestions.slice(0, 4), // Max 4 suggestions
-      
-      // Analyse temps réel
-      real_time_analysis: {
-        symptoms_detected: enhanced_context.symptoms_detected,
-        emotional_state: realtime_analysis.background_analysis.emotional_state,
-        language_preference: realtime_analysis.background_analysis.language_preference,
-        education_level: realtime_analysis.background_analysis.education_level,
-        urgency_detected: realtime_analysis.red_flags_detected.length > 0 ? 'high' : 'low'
-      },
-      
-      // Interface médecin
-      physician_interface: {
-        immediate_suggestions: realtime_analysis.immediate_suggestions,
-        context_summary: physician_interface.context_analysis,
-        maurice_adaptations: physician_interface.maurice_specific,
-        red_flags_monitoring: realtime_analysis.red_flags_detected
-      },
-      
-      // Contexte mauricien enrichi
-      mauritius_context: {
-        epidemiological_status: physician_interface.maurice_specific.epidemiological_alerts,
-        cultural_factors: mauritian_analysis.cultural_elements,
-        language_recommendations: physician_interface.maurice_specific.language_suggestions,
-        seasonal_risks: physician_interface.maurice_specific.epidemiological_alerts,
-        risk_factors_detected: mauritian_analysis.risk_factors
-      },
-      
-      // Recommandations consultation
-      consultation_guidance: {
-        next_phase_suggestion: enhanced_context.consultation_duration > 15 ? 'diagnostic' : consultation_phase,
-        time_management: {
-          elapsed_minutes: enhanced_context.consultation_duration,
-          suggested_remaining: Math.max(5, 20 - enhanced_context.consultation_duration),
-          efficiency_score: ai_suggestions.length > 0 ? 'good' : 'needs_improvement'
-        },
-        priority_actions: realtime_analysis.red_flags_detected.length > 0 
-          ? ['Évaluer urgence', 'Examens complémentaires', 'Orientation si nécessaire']
-          : ['Compléter anamnèse', 'Examen guidé', 'Synthèse diagnostique']
-      },
-      
-      // Métadonnées système
-      system_metadata: {
-        ai_model: "gpt-4o",
-        assistant_version: "telemedicine_v1.0",
-        mauritius_epidemiology: "real_time_integrated",
-        language_support: ["créole", "français", "anglais"],
-        consultation_quality_score: calculateConsultationQuality(ai_suggestions, realtime_analysis),
-        fallback_available: true
-      }
-    }
 
-    console.log(`✅ Suggestions générées: ${ai_suggestions.length} | Red flags: ${realtime_analysis.red_flags_detected.length} | Temps: ${processing_time}ms`)
-    
-    return NextResponse.json(response)
+    console.log(`✅ ${ai_suggestions.length} suggestions générées`)
 
-  } catch (error: any) {
-    console.error("❌ Erreur assistant IA téléconsultation:", error)
-    
-    // Réponse fallback avec suggestions de base
-    const fallback_suggestions = [
-      {
-        id: `fallback_${Date.now()}`,
-        timing: "immediate",
-        priority: "essential",
-        physician_prompt: "Erreur IA - Question de base recommandée",
-        patient_formulations: {
-          simple: "Ki zot problème principal zordi ?",
-          standard: "Quel est votre problème principal aujourd'hui ?",
-          technical: "Décrivez votre motif de consultation principal"
-        },
-        maurice_adaptation: {
-          cultural_sensitivity: "Question universelle de base",
-          language_options: ["créole", "français"],
-          local_epidemiology: "Applicable tous contextes"
-        },
-        clinical_rationale: "Question de sécurité en cas d'erreur système",
-        ai_reasoning: "Fallback automatique"
-      }
-    ]
-    
+    // RÉPONSE SIMPLIFIÉE
     return NextResponse.json({
-      success: false,
-      error: "Erreur assistant IA téléconsultation",
-      details: error.message,
-      fallback_mode: true,
-      fallback_suggestions,
-      emergency_guidance: {
-        message: "Système IA indisponible - Poursuivre consultation manuelle",
-        basic_questions: [
-          "Motif de consultation principal ?",
-          "Depuis quand ces symptômes ?", 
-          "Avez-vous pris des médicaments ?",
-          "Y a-t-il des signes qui vous inquiètent ?"
-        ]
+      success: true,
+      ai_suggestions: ai_suggestions.slice(0, 3), // Max 3
+      context: {
+        symptoms_detected: context.symptoms_detected,
+        consultation_phase: context.consultation_phase
       },
       timestamp: new Date().toISOString()
+    })
+
+  } catch (error: any) {
+    console.error("❌ Erreur:", error)
+    
+    // FALLBACK SIMPLE
+    return NextResponse.json({
+      success: false,
+      error: error.message,
+      fallback_questions: [
+        {
+          id: "fallback_basic",
+          pour_medecin: "Question de base en cas d'erreur",
+          question_simple: "Ki zot problème principal ?",
+          question_standard: "Quel est votre problème principal ?",
+          timing: "immediate",
+          priority: "important"
+        }
+      ]
     }, { status: 500 })
   }
 }
