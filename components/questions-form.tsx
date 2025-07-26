@@ -129,7 +129,7 @@ export default function ModernQuestionsForm({
     try {
       console.log('🚀 Appel API questions avec données:', { patientData, clinicalData })
       
-      // ========== CORRECTION: Format des données pour l'API ==========
+      // Construction du discourse patient
       const patientDiscourse = [
         clinicalData?.chiefComplaint,
         clinicalData?.diseaseHistory, 
@@ -145,7 +145,6 @@ export default function ModernQuestionsForm({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          // ========== CORRECTION: Bon format pour l'API ==========
           patient_discourse_real_time: patientDiscourse || "Patient consultation médicale",
           patientData,
           clinicalData,
@@ -161,47 +160,48 @@ export default function ModernQuestionsForm({
         throw new Error(data.error || (language === 'fr' ? "Erreur lors de la génération des questions" : "Error generating questions"))
       }
 
-      // ========== CORRECTION PRINCIPALE: data.ai_suggestions au lieu de data.questions ==========
-      if (data.success && Array.isArray(data.ai_suggestions)) {
+      // ========== CORRECTION PRINCIPALE: Utilisation correcte de data.ai_suggestions ==========
+      if (data.success && Array.isArray(data.ai_suggestions) && data.ai_suggestions.length > 0) {
         console.log('✅ Questions AI reçues:', data.ai_suggestions.length)
-        console.log('📋 Détail questions:', data.ai_suggestions)
+        console.log('📋 Détail questions brutes:', data.ai_suggestions)
         
-        // Convertir le format API vers le format attendu par l'interface
+        // ✅ CORRECTION: Utiliser directement les propriétés de l'API
         const formattedQuestions = data.ai_suggestions.map((aiQ: any, index: number) => {
-          // Extraire la question selon le format de l'API
-          const questionText = aiQ.patient_formulations?.standard || 
-                              aiQ.patient_formulations?.simple || 
-                              aiQ.physician_prompt || 
-                              `Question ${index + 1} générée par IA`
+          // Utiliser directement aiQ.question (qui contient la vraie question)
+          const questionText = aiQ.question || `Question ${index + 1} - Données manquantes`
+          
+          // Utiliser directement aiQ.type et aiQ.options de l'API
+          let questionType = aiQ.type || "text"
+          let options: string[] | undefined = aiQ.options || undefined
 
-          // Déterminer le type selon le contenu
-          let questionType = "text"
-          let options: string[] | undefined = undefined
-
-          // Si on a plusieurs formulations, créer des options
-          if (aiQ.patient_formulations?.simple && 
-              aiQ.patient_formulations?.standard && 
-              aiQ.patient_formulations?.simple !== aiQ.patient_formulations?.standard) {
-            questionType = "multiple_choice"
-            options = [
-              aiQ.patient_formulations.simple,
-              aiQ.patient_formulations.standard
-            ]
-          }
-          // Détection automatique du type selon la question
-          else if (questionText.toLowerCase().includes('oui') || 
-                   questionText.toLowerCase().includes('non') ||
-                   questionText.toLowerCase().includes('yes') || 
-                   questionText.toLowerCase().includes('no')) {
+          // Conversion des types pour compatibilité interface
+          if (questionType === "yes_no") {
             questionType = "boolean"
             options = language === 'fr' ? ["Oui", "Non"] : ["Yes", "No"]
+          } else if (questionType === "multiple_choice") {
+            // Utiliser les options de l'API ou créer des options par défaut
+            if (!options || options.length === 0) {
+              options = language === 'fr' ? 
+                ["Option 1", "Option 2", "Option 3", "Autre"] : 
+                ["Option 1", "Option 2", "Option 3", "Other"]
+            }
+          } else if (questionType === "scale") {
+            // Pour les échelles, utiliser les options de l'API ou créer 1-10
+            if (!options || options.length === 0) {
+              if (questionText.toLowerCase().includes('0') && questionText.toLowerCase().includes('10')) {
+                options = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+              } else {
+                options = ["1", "2", "3", "4", "5"]
+              }
+            }
           }
-          else if (questionText.toLowerCase().includes('échelle') || 
-                   questionText.toLowerCase().includes('scale') ||
-                   questionText.toLowerCase().includes('1') && questionText.toLowerCase().includes('5')) {
-            questionType = "scale"
-            options = ["1", "2", "3", "4", "5"]
-          }
+
+          console.log(`📝 Question ${index + 1} formatée:`, {
+            original: aiQ,
+            questionText: questionText,
+            type: questionType,
+            options: options
+          })
 
           return {
             id: index + 1,
@@ -213,98 +213,112 @@ export default function ModernQuestionsForm({
         
         console.log('✅ Questions formatées pour interface:', formattedQuestions)
         
-        setQuestions(formattedQuestions)
-        const initialResponses = formattedQuestions.map((q: Question) => ({
-          questionId: q.id,
-          question: q.question,
-          answer: "",
-          type: q.type,
-        }))
-        setResponses(initialResponses)
-        
-        console.log('✅ Interface mise à jour avec', formattedQuestions.length, 'questions')
+        // Vérifier que les questions ont du contenu
+        const validQuestions = formattedQuestions.filter(q => 
+          q.question && 
+          q.question.trim() !== "" && 
+          !q.question.includes("Question") && 
+          !q.question.includes("générée par IA")
+        )
+
+        if (validQuestions.length > 0) {
+          setQuestions(validQuestions)
+          const initialResponses = validQuestions.map((q: Question) => ({
+            questionId: q.id,
+            question: q.question,
+            answer: "",
+            type: q.type,
+          }))
+          setResponses(initialResponses)
+          
+          console.log('✅ Interface mise à jour avec', validQuestions.length, 'questions valides')
+        } else {
+          console.warn('⚠️ Aucune question valide trouvée, utilisation fallback')
+          throw new Error("Questions générées invalides")
+        }
         
       } else {
         console.warn('⚠️ Format réponse API inattendu:', data)
         console.warn('⚠️ data.success:', data.success)
         console.warn('⚠️ data.ai_suggestions type:', typeof data.ai_suggestions)
         console.warn('⚠️ data.ai_suggestions array?:', Array.isArray(data.ai_suggestions))
+        console.warn('⚠️ data.ai_suggestions length:', data.ai_suggestions?.length)
         throw new Error(language === 'fr' ? "Format de réponse invalide de l'API" : "Invalid API response format")
       }
     } catch (err) {
       console.error("❌ Erreur génération questions:", err)
       setError(err instanceof Error ? err.message : (language === 'fr' ? "Erreur inconnue" : "Unknown error"))
 
-      // Fallback questions - bilingual amélioré
+      // ========== QUESTIONS FALLBACK AMÉLIORÉES ==========
       const fallbackQuestions = language === 'fr' ? [
         {
           id: 1,
+          question: "Sur une échelle de 0 à 10, comment évaluez-vous l'intensité de vos symptômes actuels ?",
+          type: "scale",
+          options: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+        },
+        {
+          id: 2,
+          question: "Ces symptômes vous empêchent-ils de réaliser vos activités quotidiennes habituelles ?",
+          type: "multiple_choice",
+          options: ["Complètement", "Partiellement", "Un peu", "Pas du tout"],
+        },
+        {
+          id: 3,
           question: "Avez-vous déjà eu des symptômes similaires par le passé ?",
           type: "boolean",
           options: ["Oui", "Non"],
         },
         {
-          id: 2,
-          question: "Les symptômes s'aggravent-ils avec l'effort physique ?",
-          type: "boolean",
-          options: ["Oui", "Non"],
-        },
-        {
-          id: 3,
-          question: "À quel moment de la journée les symptômes sont-ils les plus intenses ?",
+          id: 4,
+          question: "À quel moment de la journée vos symptômes sont-ils les plus intenses ?",
           type: "multiple_choice",
           options: ["Matin", "Après-midi", "Soir", "Nuit", "Variable"],
         },
         {
-          id: 4,
-          question: "Sur une échelle de 1 à 5, comment évaluez-vous l'impact sur votre qualité de vie ?",
-          type: "scale",
-          options: ["1", "2", "3", "4", "5"],
-        },
-        {
           id: 5,
-          question: "Y a-t-il des facteurs qui soulagent vos symptômes ? Si oui, lesquels ?",
+          question: "Y a-t-il des facteurs qui soulagent ou aggravent vos symptômes ? Décrivez-les.",
           type: "text",
         },
         {
           id: 6,
-          question: "Avez-vous des antécédents familiaux de pathologies similaires ?",
+          question: "Prenez-vous actuellement des médicaments pour traiter ces symptômes ?",
           type: "boolean",
           options: ["Oui", "Non"],
         },
       ] : [
         {
           id: 1,
+          question: "On a scale of 0 to 10, how would you rate the intensity of your current symptoms?",
+          type: "scale",
+          options: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+        },
+        {
+          id: 2,
+          question: "Do these symptoms prevent you from carrying out your usual daily activities?",
+          type: "multiple_choice",
+          options: ["Completely", "Partially", "A little", "Not at all"],
+        },
+        {
+          id: 3,
           question: "Have you experienced similar symptoms in the past?",
           type: "boolean",
           options: ["Yes", "No"],
         },
         {
-          id: 2,
-          question: "Do symptoms worsen with physical exertion?",
-          type: "boolean",
-          options: ["Yes", "No"],
-        },
-        {
-          id: 3,
-          question: "At what time of day are symptoms most intense?",
+          id: 4,
+          question: "At what time of day are your symptoms most intense?",
           type: "multiple_choice",
           options: ["Morning", "Afternoon", "Evening", "Night", "Variable"],
         },
         {
-          id: 4,
-          question: "On a scale of 1 to 5, how would you rate the impact on your quality of life?",
-          type: "scale",
-          options: ["1", "2", "3", "4", "5"],
-        },
-        {
           id: 5,
-          question: "Are there any factors that relieve your symptoms? If so, which ones?",
+          question: "Are there any factors that relieve or worsen your symptoms? Please describe them.",
           type: "text",
         },
         {
           id: 6,
-          question: "Do you have a family history of similar conditions?",
+          question: "Are you currently taking any medications to treat these symptoms?",
           type: "boolean",
           options: ["Yes", "No"],
         },
@@ -418,17 +432,18 @@ export default function ModernQuestionsForm({
         )
 
       case "scale":
+        const scaleOptions = question.options || ["1", "2", "3", "4", "5"]
         return (
           <div className="space-y-4">
             <RadioGroup
               value={currentAnswer.toString()}
               onValueChange={(value) => updateResponse(question.id, Number.parseInt(value))}
-              className="flex justify-between"
+              className="flex justify-between flex-wrap gap-2"
             >
-              {(question.options || ["1", "2", "3", "4", "5"]).map((option) => (
+              {scaleOptions.map((option) => (
                 <div
                   key={option}
-                  className={`flex flex-col items-center space-y-2 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer min-w-[60px] ${
+                  className={`flex flex-col items-center space-y-2 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer min-w-[50px] ${
                     currentAnswer.toString() === option
                       ? "border-green-300 bg-green-50 shadow-md"
                       : "border-gray-200 hover:border-green-200 hover:bg-green-25"
@@ -443,8 +458,8 @@ export default function ModernQuestionsForm({
               ))}
             </RadioGroup>
             <div className="flex justify-between text-xs text-gray-500 px-4">
-              <span>{t('questionsForm.lowImpact')}</span>
-              <span>{t('questionsForm.majorImpact')}</span>
+              <span>{scaleOptions[0] === "0" ? "Aucun" : "Faible"}</span>
+              <span>{scaleOptions.length > 5 ? "Maximum" : "Élevé"}</span>
             </div>
           </div>
         )
@@ -494,7 +509,7 @@ export default function ModernQuestionsForm({
               <div className="space-y-2">
                 <p className="text-xl font-semibold text-gray-800">{t('questionsForm.generating')}</p>
                 <p className="text-sm text-gray-600">{t('questionsForm.analyzingProfile')}</p>
-                <p className="text-xs text-blue-600">Appel API /openai-questions en cours...</p>
+                <p className="text-xs text-blue-600">Génération questions ultra-spécifiques en cours...</p>
               </div>
               <Progress value={75} className="w-80 mx-auto h-2" />
             </div>
@@ -525,7 +540,7 @@ export default function ModernQuestionsForm({
               {getAnsweredCount()} / {questions.length} {t('questionsForm.answered')}
             </Badge>
             {error && <Badge variant="destructive">{t('questionsForm.fallbackMode')}</Badge>}
-            {!error && questions.length > 0 && <Badge variant="default" className="bg-green-100 text-green-800">IA Générée ✨</Badge>}
+            {!error && questions.length > 0 && <Badge variant="default" className="bg-green-100 text-green-800">IA Ultra-Spécifique ✨</Badge>}
           </div>
         </CardHeader>
       </Card>
@@ -538,10 +553,10 @@ export default function ModernQuestionsForm({
               <AlertTriangle className="h-5 w-5" />
               <div>
                 <span className="text-sm font-medium">
-                  {t('questionsForm.fallbackWarning')}
+                  Mode Questions de Secours Activé
                 </span>
                 <p className="text-xs text-amber-600 mt-1">
-                  Erreur API: {error}
+                  {error}
                 </p>
               </div>
             </div>
@@ -595,7 +610,7 @@ export default function ModernQuestionsForm({
             </CardTitle>
             <div className="text-blue-100 text-sm mt-2">
               <Lightbulb className="h-4 w-4 inline mr-2" />
-              {error ? t('questionsForm.fallbackMode') : t('questionsForm.aiGenerated')}
+              {error ? "Questions de Secours" : "Généré par IA Médicale"}
             </div>
           </CardHeader>
           <CardContent className="p-8 space-y-6">
@@ -676,7 +691,7 @@ export default function ModernQuestionsForm({
             className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-4 shadow-2xl hover:shadow-3xl transition-all duration-300 font-semibold text-lg rounded-full animate-pulse"
           >
             <Sparkles className="h-6 w-6 mr-3" />
-            {t('questionsForm.aiDiagnosisReady')}
+            Diagnostic IA Prêt
             <ArrowRight className="h-5 w-5 ml-3" />
           </Button>
         </div>
