@@ -21,12 +21,13 @@ import {
 import DocumentsWorkflow from './documents-workflow'
 
 export default function MedicalWorkflow({ 
-  patientData, 
-  clinicalData, 
-  questionsData,
-  diagnosisData, // 👈 Reçu de l'étape 3 (page.tsx)
-  onComplete,   // 👈 Callback vers page.tsx
-  onBack,       // 👈 Retour vers étape précédente
+diagnosisData={diagnosisData}
+  mauritianDocuments={mauritianDocuments}
+  patientData={patientData}
+  report={diagnosisData?.report} // ou récupérez-le depuis consultationDataService
+  onBack={handleBackToDiagnosis}
+  onComplete={handleDocumentsComplete}
+/>
   language = 'fr'
 }) {
   // Toujours commencer par les documents car diagnosisData est fourni
@@ -112,11 +113,34 @@ export default function MedicalWorkflow({
 
   // Effet pour initialiser les données si diagnosisData arrive
   useEffect(() => {
-    if (diagnosisData) {
-      setDiagnosisResult(diagnosisData.diagnosis || null)
-      setMauritianDocuments(diagnosisData.mauritianDocuments || null)
+   const generateReportIfNeeded = async () => {
+    if (!diagnosisData) return;
+    try {
+      const res = await fetch('/api/generate-consultation-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientData,
+          clinicalData,
+          questionsData,
+          diagnosisData,
+        }),
+      });
+
+      const reportJson = await res.json();
+
+      // Sauvegarder le rapport dans la session
+      await consultationDataService.saveStepData(3, { report: reportJson });
+
+      // Optionnel : mettre à jour localement un état ou mauritianDocuments.consultation
+      // setMauritianDocuments((prev) => ({ ...prev, consultation: reportJson }));
+    } catch (error) {
+      console.error('Erreur lors de la génération du rapport de consultation :', error);
     }
-  }, [diagnosisData])
+  };
+
+  generateReportIfNeeded();
+}, [diagnosisData]);
 
   // Phase principale : Édition documents (toujours affichée)
   if (currentPhase === 'documents') {
