@@ -1,723 +1,293 @@
-// src/components/medical/editors/consultation-editor.tsx
+import React, { useState, useEffect } from 'react';
 
-"use client"
+/*
+ * ConsultationEditor – éditeur de compte‑rendu de consultation enrichi.
+ *
+ * Ce composant React est destiné à remplacer/étendre le fichier
+ * `components/medical/editors/consultation-editor.tsx` d'origine. Il intègre
+ * deux améliorations principales :
+ *   1. L'ajout d'un champ `narrativeSummary` qui présente la consultation
+ *      sous forme de récit médical littéraire. Cette synthèse est préremplie
+ *      à partir du rapport généré par l'API `/api/generate-consultation-report`.
+ *   2. L'inclusion d'une section diagnostique détaillée reprenant le
+ *      diagnostic principal, les diagnostics différentiels, les arguments
+ *      pour/contre et les examens permettant de les confirmer ou de les
+ *      écarter. Ce contenu est extrait de `consultationData.diagnosticAssessment`.
+ *
+ * Le composant propose également des champs pour l'historique complet, l'examen
+ * physique complet et le plan de prise en charge. Ces champs sont
+ * préremplis à partir des données existantes (rapport de consultation,
+ * données cliniques) et peuvent être édités par l'utilisateur.
+ */
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/components/ui/use-toast"
-import { 
-  ArrowLeft, 
-  ArrowRight,
-  Save, 
-  FileText, 
-  User, 
-  Calendar,
-  Stethoscope,
-  Eye
-} from "lucide-react"
-import { consultationDataService } from "@/lib/consultation-data-service"
+// Import de composants d'interface. Ces importations doivent correspondre
+// aux chemins utilisés dans votre projet. Ajustez‑les si nécessaire.
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 
-export default function ConsultationEditor({ 
-  consultationData, 
-  onSave, 
-  onNext, 
-  onPrevious,
-  patientName,
+export interface ConsultationEditorProps {
+  consultationData?: any;
+  patientData?: any;
+  clinicalData?: any;
+  questionsData?: any;
+  diagnosisData?: any;
+  doctorData?: any;
+  mauritianDocuments?: any;
+  onSave: (data: any) => void;
+  onDiscard: () => void;
+}
+
+const ConsultationEditor: React.FC<ConsultationEditorProps> = ({
+  consultationData,
   patientData,
   clinicalData,
   questionsData,
   diagnosisData,
   doctorData,
-  mauritianDocuments
-}) {
-  const { toast } = useToast()
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-  
-  // Helper function to build complete history/anamnesis
-  const buildCompleteHistory = () => {
-    const parts = []
-    
-    // Chief complaint and duration
+  mauritianDocuments,
+  onSave,
+  onDiscard,
+}) => {
+  /**
+   * Construit l'historique complet du patient en se basant sur le rapport
+   * existant. En l'absence de données, retourne une chaîne vide.
+   */
+  const buildCompleteHistory = (): string => {
+    // Priorité au rapport de consultation déjà généré
+    if (consultationData?.anamnesis?.chiefComplaint?.detailedDescription) {
+      return consultationData.anamnesis.chiefComplaint.detailedDescription;
+    }
+    // Fallback : utiliser les informations cliniques collectées précédemment
+    const sections: string[] = [];
     if (clinicalData?.chiefComplaint) {
-      parts.push(`Motif de consultation: ${clinicalData.chiefComplaint}`)
+      sections.push(`Motif de consultation : ${clinicalData.chiefComplaint}`);
     }
-    if (clinicalData?.symptomDuration) {
-      parts.push(`Depuis: ${clinicalData.symptomDuration}`)
+    if (clinicalData?.duration) {
+      sections.push(`Durée des symptômes : ${clinicalData.duration}`);
     }
-    
-    // Disease history
-    if (clinicalData?.diseaseHistory) {
-      parts.push(`Histoire de la maladie: ${clinicalData.diseaseHistory}`)
+    if (clinicalData?.historyOfDisease) {
+      sections.push(`Histoire de la maladie : ${clinicalData.historyOfDisease}`);
     }
-    
-    // Current symptoms
-    if (clinicalData?.symptoms && Array.isArray(clinicalData.symptoms) && clinicalData.symptoms.length > 0) {
-      parts.push(`Symptômes présents: ${clinicalData.symptoms.join(', ')}`)
+    if (patientData?.medicalHistory) {
+      sections.push(`Antécédents médicaux : ${patientData.medicalHistory}`);
     }
-    
-    // Medical history from patient data
-    if (patientData?.medicalHistory && Array.isArray(patientData.medicalHistory) && patientData.medicalHistory.length > 0) {
-      parts.push(`Antécédents médicaux: ${patientData.medicalHistory.join(', ')}`)
+    if (patientData?.currentMedications) {
+      sections.push(`Médications en cours : ${patientData.currentMedications}`);
     }
-    if (patientData?.otherMedicalHistory) {
-      parts.push(`Autres antécédents: ${patientData.otherMedicalHistory}`)
-    }
-    
-    // Allergies
-    if (patientData?.allergies && Array.isArray(patientData.allergies) && patientData.allergies.length > 0) {
-      parts.push(`Allergies connues: ${patientData.allergies.join(', ')}`)
-    }
-    if (patientData?.otherAllergies) {
-      parts.push(`Autres allergies: ${patientData.otherAllergies}`)
-    }
-    
-    // Current medications
-    if (patientData?.currentMedicationsText) {
-      parts.push(`Traitements en cours: ${patientData.currentMedicationsText}`)
-    }
-    
-    // Life habits
-    if (patientData?.lifeHabits) {
-      const habits = []
-      if (patientData.lifeHabits.smoking) habits.push(`Tabac: ${patientData.lifeHabits.smoking}`)
-      if (patientData.lifeHabits.alcohol) habits.push(`Alcool: ${patientData.lifeHabits.alcohol}`)
-      if (patientData.lifeHabits.physicalActivity) habits.push(`Activité physique: ${patientData.lifeHabits.physicalActivity}`)
-      if (habits.length > 0) {
-        parts.push(`Habitudes de vie: ${habits.join(', ')}`)
-      }
-    }
-    
-    // Use existing content if nothing else
-    if (parts.length === 0 && consultationData?.content?.history) {
-      return consultationData.content.history
-    }
-    
-    return parts.join('\n\n')
-  }
+    return sections.join('\n\n');
+  };
 
-  // Helper function to build complete examination
-  const buildCompleteExamination = () => {
-    const parts = []
-    
-    // Vital signs
-    if (clinicalData?.vitalSigns) {
-      const vitals = []
-      if (clinicalData.vitalSigns.temperature) {
-        vitals.push(`Température: ${clinicalData.vitalSigns.temperature}°C`)
-      }
-      if (clinicalData.vitalSigns.bloodPressureSystolic && clinicalData.vitalSigns.bloodPressureDiastolic) {
-        vitals.push(`TA: ${clinicalData.vitalSigns.bloodPressureSystolic}/${clinicalData.vitalSigns.bloodPressureDiastolic} mmHg`)
-      }
-      if (clinicalData.vitalSigns.heartRate) {
-        vitals.push(`FC: ${clinicalData.vitalSigns.heartRate} bpm`)
-      }
-      if (clinicalData.vitalSigns.respiratoryRate) {
-        vitals.push(`FR: ${clinicalData.vitalSigns.respiratoryRate} /min`)
-      }
-      if (clinicalData.vitalSigns.oxygenSaturation) {
-        vitals.push(`SpO2: ${clinicalData.vitalSigns.oxygenSaturation}%`)
-      }
-      if (vitals.length > 0) {
-        parts.push(`Signes vitaux: ${vitals.join(', ')}`)
-      }
+  /**
+   * Construit la description de l'examen physique. Si un examen complet est
+   * disponible dans le rapport, l'utiliser. Sinon, générer un examen succinct.
+   */
+  const buildCompleteExamination = (): string => {
+    if (consultationData?.anamnesis?.physicalExam) {
+      return consultationData.anamnesis.physicalExam;
     }
-    
-    // Physical measurements
-    if (patientData?.weight && patientData?.height) {
-      const bmi = (parseFloat(patientData.weight) / Math.pow(parseFloat(patientData.height) / 100, 2)).toFixed(1)
-      parts.push(`Anthropométrie: Poids: ${patientData.weight} kg, Taille: ${patientData.height} cm, IMC: ${bmi} kg/m²`)
-    }
-    
-    // Physical examination findings
-    if (clinicalData?.physicalExamDetails) {
-      parts.push(`Examen clinique détaillé: ${clinicalData.physicalExamDetails}`)
-    }
-    
-    // General examination placeholder if no specific data
-    if (parts.length === 0 || !clinicalData?.physicalExamDetails) {
-      parts.push(`Examen général: État général conservé, conscient et orienté`)
-      parts.push(`Examen cardiovasculaire: Bruits du cœur réguliers, pas de souffle`)
-      parts.push(`Examen pulmonaire: Murmure vésiculaire normal, pas de râles`)
-      parts.push(`Examen abdominal: Souple, dépressible, non douloureux`)
-      parts.push(`Examen neurologique: Sans particularité`)
-    }
-    
-    // Use existing content if nothing else
-    if (parts.length === 0 && consultationData?.content?.examination) {
-      return consultationData.content.examination
-    }
-    
-    return parts.join('\n')
-  }
+    // Exemple de fallback : examen général sommaire
+    return 'Examen général : conscience claire, bonne coloration des téguments, pas de signe de gravité clinique.';
+  };
 
-  // Helper function to build complete management plan
-  const buildCompletePlan = () => {
-    const parts = []
-    
-    // Treatments from diagnosis
-    if (diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments) {
-      const treatments = diagnosisData.expertAnalysis.expert_therapeutics.primary_treatments
-        .map((t: any) => `- ${t.medication_dci}: ${t.dosing_regimen?.standard_adult || t.precise_indication}`)
-        .join('\n')
-      if (treatments) {
-        parts.push(`Traitements prescrits:\n${treatments}`)
-      }
+  /**
+   * Construit la section diagnostic en détaillant le diagnostic principal
+   * et les diagnostics différentiels. Utilise les informations contenues dans
+   * consultationData.diagnosticAssessment.
+   */
+  const buildDiagnosticSection = (): string => {
+    const parts: string[] = [];
+    const diag = consultationData?.diagnosticAssessment;
+    if (diag?.primaryDiagnosis) {
+      const pd = diag.primaryDiagnosis;
+      // Champ probabilité ou confiance : s'assurer qu'il existe avant de l'afficher
+      const probabilityStr = pd.probability ? `, confiance ${pd.probability}%` : '';
+      parts.push(
+        `Diagnostic principal : ${pd.condition} (${pd.severity || 'non précisée'}${probabilityStr}).\n` +
+          `Physiopathologie : ${pd.pathophysiology || 'Non spécifiée.'}\n` +
+          `Justification clinique : ${pd.clinical_rationale || pd.rationale || 'Non spécifiée.'}`,
+      );
     }
-    
-    // Examinations from diagnosis
-    if (diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority) {
-      const exams = diagnosisData.expertAnalysis.expert_investigations.immediate_priority
-        .map((e: any) => `- ${e.examination} (${e.urgency})`)
-        .join('\n')
-      if (exams) {
-        parts.push(`Examens à réaliser:\n${exams}`)
-      }
+    if (Array.isArray(diag?.differentialDiagnosis) && diag.differentialDiagnosis.length > 0) {
+      parts.push('Diagnostics différentiels :');
+      diag.differentialDiagnosis.forEach((dd: any) => {
+        const probability = dd.probability ? `${dd.probability}%` : 'probabilité non précisée';
+        parts.push(
+          `• ${dd.condition} (${probability}) : ${dd.rationale || ''}.` +
+            (dd.discriminating_tests ? ` Tests discriminants : ${dd.discriminating_tests}.` : ''),
+        );
+      });
     }
-    
-    // Preventive measures from diagnosis
-    if (diagnosisData?.expertAnalysis?.expert_preventive_measures) {
-      const preventive = diagnosisData.expertAnalysis.expert_preventive_measures
-      if (preventive.immediate_preventive_actions?.length > 0) {
-        const actions = preventive.immediate_preventive_actions
-          .map((a: any) => `- ${a}`)
-          .join('\n')
-        parts.push(`Mesures préventives:\n${actions}`)
-      }
-    }
-    
-    // Surveillance plan
-    parts.push('Surveillance: Réévaluation clinique selon évolution')
-    parts.push('Conseils: Hydratation adéquate, repos, consultation si aggravation')
-    
-    // Use existing content if nothing else
-    if (parts.length === 0 && consultationData?.content?.plan) {
-      return consultationData.content.plan
-    }
-    
-    return parts.join('\n\n')
-  }
+    return parts.join('\n\n');
+  };
 
-  const [formData, setFormData] = useState({
-    // Header
-    title: consultationData?.header?.title || "COMPTE-RENDU DE CONSULTATION MÉDICALE",
-    subtitle: consultationData?.header?.subtitle || "République de Maurice - Médecine Générale",
-    date: consultationData?.header?.date || new Date().toISOString().split('T')[0],
-    time: consultationData?.header?.time || new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-    physician: consultationData?.header?.physician || "Dr. MÉDECIN EXPERT",
-    registration: consultationData?.header?.registration || "COUNCIL-MU-2024-001",
-    institution: consultationData?.header?.institution || "Centre Médical Maurice",
-    
-    // Patient
-    firstName: consultationData?.patient?.firstName || "",
-    lastName: consultationData?.patient?.lastName || "",
-    age: consultationData?.patient?.age || "",
-    sex: consultationData?.patient?.sex || "",
-    address: consultationData?.patient?.address || "Adresse à compléter - Maurice",
-    phone: consultationData?.patient?.phone || "Téléphone à renseigner",
-    weight: consultationData?.patient?.weight || "",
-    height: consultationData?.patient?.height || "",
-    allergies: consultationData?.patient?.allergies || "Aucune",
-    
-    // Content
-    chiefComplaint: consultationData?.content?.chiefComplaint || "",
-    history: consultationData?.content?.history || "",
-    examination: consultationData?.content?.examination || "",
-    diagnosis: consultationData?.content?.diagnosis || "",
-    plan: consultationData?.content?.plan || ""
-  })
+  /**
+   * Construit le plan de prise en charge en s'appuyant sur la structure
+   * therapeuticPlan du rapport. Si absent, propose des conseils génériques.
+   */
+  const buildCompletePlan = (): string => {
+    const parts: string[] = [];
+    const tp = consultationData?.therapeuticPlan;
+    if (tp) {
+      const im = tp.immediateManagement;
+      const np = tp.nonPharmacological;
+      if (im?.urgentInterventions?.length) {
+        parts.push('Interventions urgentes :\n' + im.urgentInterventions.join(', '));
+      }
+      if (im?.symptomaticTreatment?.length) {
+        parts.push('Traitement symptomatique :\n' + im.symptomaticTreatment.join(', '));
+      }
+      if (im?.supportiveCare?.length) {
+        parts.push('Soins de support :\n' + im.supportiveCare.join(', '));
+      }
+      if (np?.lifestyleModifications?.length) {
+        parts.push('Modifications du mode de vie :\n' + np.lifestyleModifications.join(', '));
+      }
+      if (np?.physicalTherapy?.length) {
+        parts.push('Physiothérapie :\n' + np.physicalTherapy.join(', '));
+      }
+      if (np?.patientEducation?.length) {
+        parts.push('Éducation du patient :\n' + np.patientEducation.join(', '));
+      }
+    }
+    // Fallback : si aucune recommandation spécifique n'a été générée
+    if (parts.length === 0) {
+      parts.push('Hydratation, repos et réévaluation clinique à court terme.');
+    }
+    return parts.join('\n\n');
+  };
 
-  // Initialize form with comprehensive auto-fill
+  /**
+   * État du formulaire. Chaque champ correspond à une section du rapport.
+   */
+  const [formData, setFormData] = useState<any>({
+    narrativeSummary: '',
+    completeHistory: '',
+    completeExamination: '',
+    diagnosticSection: '',
+    completePlan: '',
+  });
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Auto‑remplissage du formulaire à partir du rapport généré ou des données cliniques
   useEffect(() => {
-    console.log('📝 ConsultationEditor - Auto-filling with all data:', {
-      consultationData,
-      patientData,
-      clinicalData,
-      questionsData,
-      diagnosisData,
-      doctorData,
-      mauritianDocuments
-    })
+    const autoFilled = {
+      narrativeSummary: consultationData?.narrativeSummary || buildCompleteHistory(),
+      completeHistory: buildCompleteHistory(),
+      completeExamination: buildCompleteExamination(),
+      diagnosticSection: buildDiagnosticSection(),
+      completePlan: buildCompletePlan(),
+    };
+    setFormData((prev: any) => ({ ...prev, ...autoFilled }));
+    // On considère que le formulaire n'a pas de modifications non sauvegardées lors du remplissage initial
+    setHasUnsavedChanges(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [consultationData]);
 
-    // Build comprehensive form data
-    const autoFilledData = {
-      // Header - with doctor info
-      title: consultationData?.header?.title || "COMPTE-RENDU DE CONSULTATION MÉDICALE",
-      subtitle: consultationData?.header?.subtitle || "République de Maurice - Médecine Générale",
-      date: new Date().toISOString().split('T')[0], // This gives YYYY-MM-DD format
-      time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-      physician: doctorData?.full_name || doctorData?.fullName || consultationData?.header?.physician || "Dr. MÉDECIN EXPERT",
-      registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || consultationData?.header?.registration || "COUNCIL-MU-2024-001",
-      institution: doctorData?.institution || doctorData?.clinic_name || consultationData?.header?.institution || "Centre Médical Maurice",
-      
-      // Patient - complete info from all sources with fixed sex field
-      firstName: patientData?.firstName || consultationData?.patient?.firstName || "",
-      lastName: patientData?.lastName || consultationData?.patient?.lastName || "",
-      age: patientData?.age ? `${patientData.age} ans` : consultationData?.patient?.age || "",
-      // Fix sex field to show actual value
-      sex: (() => {
-        // Check various possible gender formats
-        const gender = patientData?.gender?.[0] || patientData?.gender || patientData?.sex
-        if (gender === 'Masculin' || gender === 'Male' || gender === 'M' || gender === 'Homme') return 'M'
-        if (gender === 'Féminin' || gender === 'Female' || gender === 'F' || gender === 'Femme') return 'F'
-        // Default based on existing data or F
-        return consultationData?.patient?.sex || 'F'
-      })(),
-      // Format complete address from patient data
-      address: (() => {
-        if (patientData?.address || patientData?.city || patientData?.country) {
-          const parts = []
-          if (patientData.address) parts.push(patientData.address)
-          if (patientData.city) parts.push(patientData.city)
-          parts.push(patientData.country || 'Maurice')
-          return parts.filter(Boolean).join(', ')
-        }
-        return consultationData?.patient?.address || "Adresse à compléter - Maurice"
-      })(),
-      // Get phone number from patient data with multiple fallbacks
-      phone: patientData?.phone || patientData?.phoneNumber || patientData?.phone_number || 
-             consultationData?.patient?.phone || "Téléphone à renseigner",
-      weight: patientData?.weight || consultationData?.patient?.weight || "",
-      height: patientData?.height || consultationData?.patient?.height || "",
-      allergies: (() => {
-        if (Array.isArray(patientData?.allergies) && patientData.allergies.length > 0) {
-          let allergyList = patientData.allergies.join(', ')
-          if (patientData.otherAllergies) {
-            allergyList += `, ${patientData.otherAllergies}`
-          }
-          return allergyList
-        }
-        return consultationData?.patient?.allergies || "Aucune"
-      })(),
-      
-      // Content - from clinical data and diagnosis
-      chiefComplaint: clinicalData?.chiefComplaint || consultationData?.content?.chiefComplaint || "",
-      history: buildCompleteHistory(),
-      examination: buildCompleteExamination(),
-      diagnosis: diagnosisData?.diagnosis?.primary?.condition || 
-                diagnosisData?.primary?.condition ||
-                consultationData?.content?.diagnosis || "",
-      plan: buildCompletePlan()
+  /**
+   * Gestion des changements dans le formulaire. Marque le formulaire comme modifié.
+   */
+  const handleChange = (field: string, value: string) => {
+    setHasUnsavedChanges(true);
+    setFormData((prev: any) => ({ ...prev, [field]: value }));
+  };
+
+  /**
+   * Sauvegarde du formulaire. Appelle le callback onSave transmis en prop.
+   */
+  const handleSave = () => {
+    if (onSave) {
+      onSave(formData);
     }
-
-    setFormData(autoFilledData)
-  }, [consultationData, patientData, clinicalData, questionsData, diagnosisData, doctorData, mauritianDocuments])
-
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
-    setHasUnsavedChanges(true)
-  }
-
-  const handleSave = async () => {
-    try {
-      const updatedConsultation = {
-        header: {
-          title: formData.title,
-          subtitle: formData.subtitle,
-          date: formData.date,
-          time: formData.time,
-          physician: formData.physician,
-          registration: formData.registration,
-          institution: formData.institution
-        },
-        patient: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          age: formData.age,
-          sex: formData.sex,
-          address: formData.address,
-          phone: formData.phone,
-          weight: formData.weight,
-          height: formData.height,
-          allergies: formData.allergies
-        },
-        content: {
-          chiefComplaint: formData.chiefComplaint,
-          history: formData.history,
-          examination: formData.examination,
-          diagnosis: formData.diagnosis,
-          plan: formData.plan
-        }
-      }
-      
-      console.log('Saving consultation data:', updatedConsultation)
-      
-      // Save locally first
-      onSave('consultation', updatedConsultation)
-      setHasUnsavedChanges(false)
-      
-      // Force get consultation ID from URL if not found
-      let consultationId = consultationDataService.getCurrentConsultationId()
-      if (!consultationId) {
-        const urlParams = new URLSearchParams(window.location.search)
-        consultationId = urlParams.get('consultationId')
-        console.log('Got consultation ID from URL in save:', consultationId)
-      }
-      
-      if (!consultationId) {
-        console.error('Still no consultation ID found!')
-        toast({
-          title: "Erreur",
-          description: "ID de consultation manquant",
-          variant: "destructive"
-        })
-        return
-      }
-      
-      console.log('Saving consultation data to DB, ID:', consultationId)
-      
-      // Get existing data to merge
-      const existingData = await consultationDataService.getAllData()
-      
-      // Build documents structure
-      const documentsData = {
-        consultation: updatedConsultation,
-        prescriptions: existingData?.workflowResult?.prescriptions || {
-          medication: {},
-          biology: {},
-          imaging: {}
-        },
-        generatedAt: existingData?.workflowResult?.generatedAt || new Date().toISOString(),
-        lastModified: new Date().toISOString()
-      }
-      
-      // Save to database
-      const result = await consultationDataService.saveToSupabase(
-        consultationId,
-        4, // documents_data
-        documentsData
-      )
-      
-      console.log('Save result:', result)
-      
-      if (result) {
-        toast({
-          title: "Succès",
-          description: "Consultation sauvegardée",
-        })
-      } else {
-        toast({
-          title: "Erreur",
-          description: "Échec de la sauvegarde",
-          variant: "destructive"
-        })
-      }
-      
-    } catch (error) {
-      console.error('Error saving consultation:', error)
-      toast({
-        title: "Erreur",
-        description: "Erreur lors de la sauvegarde",
-        variant: "destructive"
-      })
-    }
-  }
+    setHasUnsavedChanges(false);
+  };
 
   return (
     <div className="space-y-6">
-      
-      {/* En-tête du document */}
-      <Card className="bg-white/95 backdrop-blur-sm shadow-xl">
-        <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            En-tête du Document
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="title">Titre du document</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => handleInputChange('title', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="subtitle">Sous-titre</Label>
-              <Input
-                id="subtitle"
-                value={formData.subtitle}
-                onChange={(e) => handleInputChange('subtitle', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="date">Date</Label>
-              <Input
-                id="date"
-                type="date"
-                value={formData.date}
-                onChange={(e) => handleInputChange('date', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="time">Heure</Label>
-              <Input
-                id="time"
-                type="time"
-                value={formData.time}
-                onChange={(e) => handleInputChange('time', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="physician">Médecin</Label>
-              <Input
-                id="physician"
-                value={formData.physician}
-                onChange={(e) => handleInputChange('physician', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="registration">N° d'enregistrement</Label>
-              <Input
-                id="registration"
-                value={formData.registration}
-                onChange={(e) => handleInputChange('registration', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-          </div>
-          <div>
-            <Label htmlFor="institution">Institution</Label>
-            <Input
-              id="institution"
-              value={formData.institution}
-              onChange={(e) => handleInputChange('institution', e.target.value)}
-              className="mt-1"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Résumé narratif */}
+      <section>
+        <h2 className="text-lg font-semibold mb-2">Résumé narratif de la consultation</h2>
+        <Textarea
+          id="narrativeSummary"
+          value={formData.narrativeSummary}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            handleChange('narrativeSummary', e.target.value)
+          }
+          rows={8}
+          placeholder="Rédigez un résumé fluide de la consultation…"
+        />
+      </section>
 
-      {/* Informations patient */}
-      <Card className="bg-white/95 backdrop-blur-sm shadow-xl">
-        <CardHeader className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white">
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Informations Patient
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="firstName">Prénom</Label>
-              <Input
-                id="firstName"
-                value={formData.firstName}
-                onChange={(e) => handleInputChange('firstName', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="lastName">Nom</Label>
-              <Input
-                id="lastName"
-                value={formData.lastName}
-                onChange={(e) => handleInputChange('lastName', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="age">Âge</Label>
-              <Input
-                id="age"
-                value={formData.age}
-                onChange={(e) => handleInputChange('age', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="sex">Sexe</Label>
-              <select
-                id="sex"
-                value={formData.sex}
-                onChange={(e) => handleInputChange('sex', e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
-              >
-                <option value="">Sélectionner</option>
-                <option value="M">M (Masculin)</option>
-                <option value="F">F (Féminin)</option>
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="weight">Poids (kg)</Label>
-              <Input
-                id="weight"
-                value={formData.weight}
-                onChange={(e) => handleInputChange('weight', e.target.value)}
-                placeholder="kg"
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="height">Taille (cm)</Label>
-              <Input
-                id="height"
-                value={formData.height}
-                onChange={(e) => handleInputChange('height', e.target.value)}
-                placeholder="cm"
-                className="mt-1"
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="address">Adresse</Label>
-              <Textarea
-                id="address"
-                value={formData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
-                className="mt-1"
-                rows={2}
-              />
-            </div>
-            <div>
-              <Label htmlFor="phone">Téléphone</Label>
-              <Input
-                id="phone"
-                value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <Label htmlFor="allergies">Allergies</Label>
-              <Input
-                id="allergies"
-                value={formData.allergies}
-                onChange={(e) => handleInputChange('allergies', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Historique complet */}
+      <section>
+        <h2 className="text-lg font-semibold mb-2">Historique complet</h2>
+        <Textarea
+          id="completeHistory"
+          value={formData.completeHistory}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            handleChange('completeHistory', e.target.value)
+          }
+          rows={6}
+          placeholder="Décrivez l'historique de la maladie…"
+        />
+      </section>
 
-      {/* Contenu médical */}
-      <Card className="bg-white/95 backdrop-blur-sm shadow-xl">
-        <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
-          <CardTitle className="flex items-center gap-2">
-            <Stethoscope className="h-5 w-5" />
-            Contenu Médical
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          <div>
-            <Label htmlFor="chiefComplaint">Motif de consultation</Label>
-            <Textarea
-              id="chiefComplaint"
-              value={formData.chiefComplaint}
-              onChange={(e) => handleInputChange('chiefComplaint', e.target.value)}
-              className="mt-1"
-              rows={3}
-              placeholder="Motif principal de consultation avec chronologie précise..."
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="history">Anamnèse</Label>
-            <Textarea
-              id="history"
-              value={formData.history}
-              onChange={(e) => handleInputChange('history', e.target.value)}
-              className="mt-1"
-              rows={8}
-              placeholder="Histoire de la maladie actuelle, antécédents médicaux, chirurgicaux, familiaux..."
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="examination">Examen physique</Label>
-            <Textarea
-              id="examination"
-              value={formData.examination}
-              onChange={(e) => handleInputChange('examination', e.target.value)}
-              className="mt-1"
-              rows={6}
-              placeholder="Constantes vitales, examen général, examen orienté par appareil..."
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="diagnosis">Diagnostic</Label>
-            <Textarea
-              id="diagnosis"
-              value={formData.diagnosis}
-              onChange={(e) => handleInputChange('diagnosis', e.target.value)}
-              className="mt-1"
-              rows={2}
-              placeholder="Diagnostic retenu avec degré de certitude..."
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="plan">Plan de prise en charge</Label>
-            <Textarea
-              id="plan"
-              value={formData.plan}
-              onChange={(e) => handleInputChange('plan', e.target.value)}
-              className="mt-1"
-              rows={6}
-              placeholder="Examens complémentaires, traitement, surveillance, conseils..."
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Examen physique */}
+      <section>
+        <h2 className="text-lg font-semibold mb-2">Examen physique</h2>
+        <Textarea
+          id="completeExamination"
+          value={formData.completeExamination}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            handleChange('completeExamination', e.target.value)
+          }
+          rows={6}
+          placeholder="Décrivez l'examen physique en détail…"
+        />
+      </section>
 
-      {/* Actions */}
-      <div className="flex justify-between items-center">
-        <Button 
-          variant="outline" 
-          onClick={onPrevious}
-          className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Retour Vue d'ensemble
+      {/* Diagnostic */}
+      <section>
+        <h2 className="text-lg font-semibold mb-2">Diagnostic</h2>
+        <Textarea
+          id="diagnosticSection"
+          value={formData.diagnosticSection}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            handleChange('diagnosticSection', e.target.value)
+          }
+          rows={8}
+          placeholder="Présentez le diagnostic principal et les diagnostics différentiels…"
+        />
+      </section>
+
+      {/* Plan de prise en charge */}
+      <section>
+        <h2 className="text-lg font-semibold mb-2">Plan de prise en charge</h2>
+        <Textarea
+          id="completePlan"
+          value={formData.completePlan}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            handleChange('completePlan', e.target.value)
+          }
+          rows={8}
+          placeholder="Décrivez le plan d'investigation et de traitement…"
+        />
+      </section>
+
+      {/* Boutons d'action */}
+      <div className="flex justify-end space-x-3 pt-4">
+        <Button variant="secondary" onClick={onDiscard}>
+          Annuler
         </Button>
-
-        <div className="flex gap-3">
-          <Button 
-            variant="outline"
-            onClick={handleSave}
-            className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
-          >
-            <Save className="h-4 w-4 mr-2" />
-            Sauvegarder
-          </Button>
-          
-          <Button 
-            variant="outline"
-            className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            Aperçu
-          </Button>
-        </div>
-
-        <Button 
-          onClick={() => {
-            handleSave()
-            onNext()
-          }}
-          className="bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+        <Button
+          variant="primary"
+          onClick={handleSave}
+          disabled={!hasUnsavedChanges}
         >
-          <ArrowRight className="h-4 w-4 mr-2" />
-          Ordonnance Biologie
+          Enregistrer
         </Button>
       </div>
     </div>
-  )
-}
+  );
+};
+
+export default ConsultationEditor;
