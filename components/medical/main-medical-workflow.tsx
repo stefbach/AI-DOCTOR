@@ -17,19 +17,30 @@ import {
   ArrowLeft
 } from "lucide-react"
 
-// Import seulement du DocumentsWorkflow - PAS de DiagnosisForm
+// Import seulement du DocumentsWorkflow
 import DocumentsWorkflow from './documents-workflow'
 
+interface MedicalWorkflowProps {
+  patientData?: any
+  clinicalData?: any
+  questionsData?: any
+  diagnosisData?: any
+  initialData?: any
+  onComplete?: (data: any) => void
+  onBack?: () => void
+  language?: string
+}
+
 export default function MedicalWorkflow({ 
-diagnosisData={diagnosisData}
-  mauritianDocuments={mauritianDocuments}
-  patientData={patientData}
-  report={diagnosisData?.report} // ou récupérez-le depuis consultationDataService
-  onBack={handleBackToDiagnosis}
-  onComplete={handleDocumentsComplete}
-/>
+  patientData,
+  clinicalData,
+  questionsData,
+  diagnosisData,
+  initialData,
+  onComplete,
+  onBack,
   language = 'fr'
-}) {
+}: MedicalWorkflowProps) {
   // Toujours commencer par les documents car diagnosisData est fourni
   const [currentPhase, setCurrentPhase] = useState('documents')
   const [diagnosisResult, setDiagnosisResult] = useState(diagnosisData?.diagnosis || null)
@@ -113,41 +124,41 @@ diagnosisData={diagnosisData}
 
   // Effet pour initialiser les données si diagnosisData arrive
   useEffect(() => {
-   const generateReportIfNeeded = async () => {
-    if (!diagnosisData) return;
-    try {
-      const res = await fetch('/api/generate-consultation-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          patientData,
-          clinicalData,
-          questionsData,
-          diagnosisData,
-        }),
-      });
+    const generateReportIfNeeded = async () => {
+      if (!diagnosisData) return;
+      try {
+        const res = await fetch('/api/generate-consultation-report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            patientData,
+            clinicalData,
+            questionsData,
+            diagnosisData,
+          }),
+        });
 
-      const reportJson = await res.json();
+        const reportJson = await res.json();
 
-      // Sauvegarder le rapport dans la session
-      await consultationDataService.saveStepData(3, { report: reportJson });
+        // Sauvegarder le rapport dans la session
+        await consultationDataService.saveStepData(3, { report: reportJson });
 
-      // Optionnel : mettre à jour localement un état ou mauritianDocuments.consultation
-      // setMauritianDocuments((prev) => ({ ...prev, consultation: reportJson }));
-    } catch (error) {
-      console.error('Erreur lors de la génération du rapport de consultation :', error);
-    }
-  };
+        // Optionnel : mettre à jour localement un état ou mauritianDocuments.consultation
+        // setMauritianDocuments((prev) => ({ ...prev, consultation: reportJson }));
+      } catch (error) {
+        console.error('Erreur lors de la génération du rapport de consultation :', error);
+      }
+    };
 
-  generateReportIfNeeded();
-}, [diagnosisData]);
+    generateReportIfNeeded();
+  }, [diagnosisData, patientData, clinicalData, questionsData]);
 
   // Phase principale : Édition documents (toujours affichée)
   if (currentPhase === 'documents') {
     return (
       <div className="space-y-6">
         <DocumentsWorkflow
-          diagnosisData={diagnosisResult}
+          diagnosisData={diagnosisResult || diagnosisData}
           mauritianDocuments={mauritianDocuments}
           patientData={patientData}
           onBack={handleBackToDiagnosis}
