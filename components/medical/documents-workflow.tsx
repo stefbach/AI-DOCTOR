@@ -1,14 +1,16 @@
-// components/medical/documents-workflow.tsx
+// components/medical/documents-workflow.tsx - Version avec génération automatique
 
 "use client"
 
 import { useState, useEffect } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
+import { MauritianDocumentsGenerator } from '@/lib/mauritian-documents-generator'
 import { supabase } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import { useToast } from "@/components/ui/use-toast"
 import { 
   ArrowLeft, 
   FileText, 
@@ -19,7 +21,10 @@ import {
   Eye,
   Download,
   Save,
-  User
+  User,
+  RefreshCw,
+  Zap,
+  AlertTriangle
 } from "lucide-react"
 
 // Import des composants d'édition
@@ -29,13 +34,13 @@ import ParaclinicalEditor from './editors/paraclinical-editor'
 import MedicationEditor from './editors/medication-editor'
 
 interface DocumentsWorkflowProps {
-  consultationReport?: any; // Nouveau format de données
-  diagnosisData?: any;
-  patientData?: any;
-  clinicalData?: any;
-  questionsData?: any;
-  onBack?: () => void;
-  onComplete?: (documents: any) => void;
+  consultationReport?: any
+  diagnosisData?: any
+  patientData?: any
+  clinicalData?: any
+  questionsData?: any
+  onBack?: () => void
+  onComplete?: (documents: any) => void
 }
 
 export default function DocumentsWorkflow({ 
@@ -47,9 +52,11 @@ export default function DocumentsWorkflow({
   onBack,
   onComplete 
 }: DocumentsWorkflowProps) {
+  const { toast } = useToast()
   const [currentStep, setCurrentStep] = useState(-1)
   
-  // ✅ Adapter pour le nouveau format de données
+  // ✅ États pour les documents générés et édités
+  const [generatedDocuments, setGeneratedDocuments] = useState<any>(null)
   const [editedDocuments, setEditedDocuments] = useState({
     consultation: {},
     biology: {},
@@ -64,6 +71,7 @@ export default function DocumentsWorkflow({
   const [completeQuestionsData, setCompleteQuestionsData] = useState<any>(null)
   const [completeDoctorData, setCompleteDoctorData] = useState<any>(null)
   const [isLoadingData, setIsLoadingData] = useState(true)
+  const [isGenerating, setIsGenerating] = useState(false)
 
   // ✅ Load all data for documents auto-fill
   useEffect(() => {
@@ -168,6 +176,11 @@ export default function DocumentsWorkflow({
         setCompleteQuestionsData(allData?.questionsData || questionsData || {})
         setCompleteDoctorData(doctorInfo)
         
+        // 6. ✅ AUTO-GENERATE documents if we have all necessary data
+        if (consultationReport && fullPatientData && doctorInfo && diagnosisData) {
+          await generateMauritianDocuments(consultationReport, fullPatientData, doctorInfo, diagnosisData)
+        }
+        
       } catch (error) {
         console.error('Error loading complete data:', error)
       } finally {
@@ -176,24 +189,94 @@ export default function DocumentsWorkflow({
     }
     
     loadAllDataForDocuments()
-  }, [patientData, clinicalData, questionsData])
+  }, [patientData, clinicalData, questionsData, consultationReport, diagnosisData])
 
-  // ✅ Initialize edited documents from consultationReport
-  useEffect(() => {
-    if (consultationReport) {
-      console.log('📋 Initializing documents from consultationReport:', consultationReport)
+  // ✅ AUTO-GENERATE Mauritian documents
+  const generateMauritianDocuments = async (
+    consultationReport: any,
+    patientData: any,
+    doctorData: any,
+    diagnosisData: any,
+    forceRegenerate = false
+  ) => {
+    try {
+      console.log('🚀 Generating Mauritian documents automatically...')
+      setIsGenerating(true)
+
+      // Check if already generated (unless forcing regeneration)
+      if (generatedDocuments && !forceRegenerate) {
+        console.log('✅ Documents already generated, skipping')
+        return
+      }
+
+      // Prepare doctor info for generator
+      const doctorInfo = {
+        fullName: doctorData?.full_name || doctorData?.fullName || "Dr. MÉDECIN EXPERT",
+        specialty: doctorData?.specialty || "Médecine générale",
+        address: doctorData?.address || "Cabinet médical, Maurice",
+        city: doctorData?.city || "Port-Louis, Maurice",
+        phone: doctorData?.phone || "+230 xxx xxx xxx",
+        email: doctorData?.email || "contact@cabinet.mu",
+        registrationNumber: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || "Medical Council of Mauritius - Reg. No. XXXXX"
+      }
+
+      // ✅ Generate all 4 documents using the generator
+      const mauritianDocs = MauritianDocumentsGenerator.generateMauritianDocuments(
+        consultationReport,
+        doctorInfo,
+        patientData,
+        diagnosisData
+      )
+
+      console.log('✅ Generated Mauritian documents:', mauritianDocs)
+
+      // Set the generated documents
+      setGeneratedDocuments(mauritianDocs)
       
-      // ✅ Adapter le nouveau format
-      const mauritianDocs = consultationReport.mauritianDocuments || {}
-      
+      // Initialize edited documents with generated ones
       setEditedDocuments({
-        consultation: mauritianDocs.consultation || consultationReport.consultationData || {},
-        biology: mauritianDocs.biological || mauritianDocs.biology || {},
-        paraclinical: mauritianDocs.imaging || mauritianDocs.paraclinical || {},
-        medication: mauritianDocs.medication || {}
+        consultation: mauritianDocs.consultation,
+        biology: mauritianDocs.biology,
+        paraclinical: mauritianDocs.paraclinical,
+        medication: mauritianDocs.medication
       })
+
+      // Save to consultation service
+      await consultationDataService.saveConsultationReport({
+        ...consultationReport,
+        mauritianDocuments: mauritianDocs,
+        generatedAt: new Date().toISOString()
+      })
+
+      toast({
+        title: "✅ Documents générés !",
+        description: "Les 4 documents mauriciens ont été générés automatiquement",
+      })
+
+    } catch (error) {
+      console.error('❌ Error generating documents:', error)
+      toast({
+        title: "Erreur",
+        description: "Échec de la génération automatique des documents",
+        variant: "destructive"
+      })
+    } finally {
+      setIsGenerating(false)
     }
-  }, [consultationReport])
+  }
+
+  // Force regeneration of documents
+  const handleRegenerateDocuments = async () => {
+    if (consultationReport && completePatientData && completeDoctorData && diagnosisData) {
+      await generateMauritianDocuments(
+        consultationReport, 
+        completePatientData, 
+        completeDoctorData, 
+        diagnosisData,
+        true // Force regeneration
+      )
+    }
+  }
 
   // Helper functions
   const calculateAge = (birthDate: string) => {
@@ -272,7 +355,7 @@ export default function DocumentsWorkflow({
       await consultationDataService.saveConsultationReport({
         ...consultationReport,
         mauritianDocuments: {
-          ...consultationReport?.mauritianDocuments,
+          ...generatedDocuments,
           [docType]: updatedData
         },
         editedDocuments: updatedDocuments
@@ -316,15 +399,22 @@ export default function DocumentsWorkflow({
   const patientName = `${completePatientData?.firstName || patientData?.firstName || 'Patient'} ${completePatientData?.lastName || patientData?.lastName || 'X'}`
   const progressPercentage = ((completedSteps.size / steps.length) * 100)
 
-  // Loading state while fetching data
-  if (isLoadingData) {
+  // Loading state while fetching data or generating
+  if (isLoadingData || isGenerating) {
     return (
       <div className="space-y-6">
         <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
           <CardContent className="flex items-center justify-center py-12">
             <div className="text-center space-y-4">
               <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
-              <p className="text-gray-600">Chargement des données...</p>
+              <p className="text-gray-600">
+                {isGenerating ? 'Génération automatique des documents mauriciens...' : 'Chargement des données...'}
+              </p>
+              {isGenerating && (
+                <p className="text-sm text-blue-600">
+                  ⚡ Création automatique : Compte-rendu • Examens biologiques • Examens paracliniques • Ordonnance
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -336,17 +426,28 @@ export default function DocumentsWorkflow({
   if (currentStep === -1) {
     return (
       <div className="space-y-6">
-        {/* Header principal */}
+        {/* Header principal avec indicateur de génération automatique */}
         <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
           <CardHeader className="bg-gradient-to-r from-slate-700 to-gray-800 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-3 text-2xl">
               <FileText className="h-8 w-8" />
-              Documents Mauriciens - Édition
+              Documents Mauriciens
+              {generatedDocuments && (
+                <Badge className="bg-green-500 text-white ml-2">
+                  <Zap className="h-4 w-4 mr-1" />
+                  Générés automatiquement
+                </Badge>
+              )}
             </CardTitle>
             <div className="flex justify-between items-center mt-4">
               <div>
                 <p className="text-slate-200">Patient: {patientName}</p>
                 <p className="text-slate-300 text-sm">Diagnostic: {diagnosisData?.diagnosis?.primary?.condition || 'En cours'}</p>
+                {generatedDocuments && (
+                  <p className="text-green-200 text-sm">
+                    ✅ 4 documents générés et prêts à éditer
+                  </p>
+                )}
               </div>
               <div className="text-right">
                 <div className="text-slate-200">Progression</div>
@@ -355,6 +456,33 @@ export default function DocumentsWorkflow({
             </div>
           </CardHeader>
         </Card>
+
+        {/* Bouton de régénération */}
+        {generatedDocuments && (
+          <Card className="bg-amber-50 border border-amber-200">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className="h-5 w-5 text-amber-600" />
+                  <div>
+                    <p className="font-medium text-amber-800">Documents générés automatiquement</p>
+                    <p className="text-sm text-amber-700">Basés sur le diagnostic IA et les données patient</p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRegenerateDocuments}
+                  disabled={isGenerating}
+                  className="border-amber-300 text-amber-700 hover:bg-amber-100"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Régénérer
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Progress global */}
         <Card>
@@ -367,9 +495,12 @@ export default function DocumentsWorkflow({
               <Progress value={progressPercentage} className="h-3" />
             </div>
             <p className="text-sm text-gray-600">
-              {completedSteps.size === 0 ? 'Commencez par éditer le premier document' :
-               completedSteps.size === steps.length ? 'Tous les documents sont prêts !' :
-               `${steps.length - completedSteps.size} document(s) restant(s)`}
+              {generatedDocuments ? 
+                (completedSteps.size === 0 ? 'Documents générés automatiquement - Vous pouvez les éditer si nécessaire' :
+                 completedSteps.size === steps.length ? 'Tous les documents sont finalisés !' :
+                 `${steps.length - completedSteps.size} document(s) à réviser`) :
+                'En attente de génération automatique...'
+              }
             </p>
           </CardContent>
         </Card>
@@ -385,19 +516,26 @@ export default function DocumentsWorkflow({
                     <step.icon className="h-6 w-6" />
                     {step.title}
                   </div>
-                  {completedSteps.has(index) && (
-                    <CheckCircle className="h-6 w-6 text-green-200" />
-                  )}
+                  <div className="flex gap-2">
+                    {generatedDocuments && (
+                      <Badge className="bg-green-500 text-white text-xs">
+                        Généré
+                      </Badge>
+                    )}
+                    {completedSteps.has(index) && (
+                      <CheckCircle className="h-6 w-6 text-green-200" />
+                    )}
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <p className="text-gray-600 mb-4">{step.description}</p>
                 <div className="flex justify-between items-center">
-                  <Badge variant={completedSteps.has(index) ? "default" : "outline"}>
-                    {completedSteps.has(index) ? "Complété" : "À éditer"}
+                  <Badge variant={generatedDocuments ? "default" : "outline"} className={generatedDocuments ? "bg-green-600" : ""}>
+                    {generatedDocuments ? "Prêt à éditer" : "En attente"}
                   </Badge>
-                  <Button variant="outline" size="sm">
-                    {completedSteps.has(index) ? "Modifier" : "Éditer"}
+                  <Button variant="outline" size="sm" disabled={!generatedDocuments}>
+                    {generatedDocuments ? "Éditer" : "Générer d'abord"}
                   </Button>
                 </div>
               </CardContent>
@@ -425,7 +563,7 @@ export default function DocumentsWorkflow({
                 </Button>
                 <Button variant="outline">
                   <Download className="h-4 w-4 mr-2" />
-                  Télécharger
+                  Télécharger PDF
                 </Button>
               </>
             )}
@@ -441,12 +579,23 @@ export default function DocumentsWorkflow({
             )}
           </div>
           
-          {completedSteps.size === 0 && (
+          {generatedDocuments && completedSteps.size === 0 && (
             <Button 
               onClick={() => setCurrentStep(0)}
               className="bg-gradient-to-r from-blue-600 to-emerald-600 text-white px-6 py-3 shadow-lg"
             >
-              Commencer l'Édition
+              Réviser Documents
+            </Button>
+          )}
+
+          {!generatedDocuments && (
+            <Button 
+              onClick={handleRegenerateDocuments}
+              disabled={isGenerating}
+              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 shadow-lg"
+            >
+              <Zap className="h-4 w-4 mr-2" />
+              Générer Documents
             </Button>
           )}
         </div>
@@ -454,7 +603,7 @@ export default function DocumentsWorkflow({
     )
   }
 
-  // Rendu des composants d'édition spécifiques
+  // Rendu des composants d'édition spécifiques avec documents pré-remplis
   const currentStepData = steps[currentStep]
   
   // Header pour toutes les étapes
@@ -468,6 +617,12 @@ export default function DocumentsWorkflow({
             <Badge className="bg-white/20 text-white">
               Étape {currentStep + 1}/4
             </Badge>
+            {generatedDocuments && (
+              <Badge className="bg-green-500 text-white">
+                <Zap className="h-4 w-4 mr-1" />
+                Auto-généré
+              </Badge>
+            )}
           </div>
           <Button
             variant="outline"
@@ -503,6 +658,9 @@ export default function DocumentsWorkflow({
         >
           <step.icon className="h-4 w-4" />
           <span className="text-sm font-medium">{step.title}</span>
+          {generatedDocuments && (
+            <Badge className="bg-green-500 text-white text-xs">Auto</Badge>
+          )}
           {completedSteps.has(index) && (
             <CheckCircle className="h-4 w-4" />
           )}
@@ -511,7 +669,7 @@ export default function DocumentsWorkflow({
     </div>
   )
 
-  // Rendu selon l'étape courante
+  // Rendu selon l'étape courante avec documents pré-remplis
   return (
     <div className="space-y-6">
       <StepHeader />
@@ -528,7 +686,7 @@ export default function DocumentsWorkflow({
           questionsData={completeQuestionsData}
           diagnosisData={diagnosisData}
           doctorData={completeDoctorData}
-          mauritianDocuments={consultationReport?.mauritianDocuments}
+          mauritianDocuments={generatedDocuments}
         />
       )}
 
