@@ -43,7 +43,8 @@ export default function MedicalWorkflow({
 }: MedicalWorkflowProps) {
   // Toujours commencer par les documents car diagnosisData est fourni
   const [currentPhase, setCurrentPhase] = useState('documents')
-  const [diagnosisResult, setDiagnosisResult] = useState(diagnosisData?.diagnosis || null)
+  // ✅ CORRECTION 1: Garder toutes les données diagnosisData au lieu de seulement .diagnosis
+  const [diagnosisResult, setDiagnosisResult] = useState(diagnosisData || null)
   const [mauritianDocuments, setMauritianDocuments] = useState(diagnosisData?.mauritianDocuments || null)
   const [finalDocuments, setFinalDocuments] = useState(null)
 
@@ -158,7 +159,7 @@ export default function MedicalWorkflow({
     return (
       <div className="space-y-6">
         <DocumentsWorkflow
-          diagnosisData={diagnosisResult || diagnosisData}
+          diagnosisData={diagnosisData}
           mauritianDocuments={mauritianDocuments}
           patientData={patientData}
           onBack={handleBackToDiagnosis}
