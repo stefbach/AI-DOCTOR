@@ -4,9 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, FileText, Download, Edit3, CheckCircle, AlertTriangle } from 'lucide-react';
 
-// Import conditionnel pour éviter les erreurs
-// import ConsultationEditor from '@/components/medical/editors/consultation-editor';
-
 interface ConsultationGeneratorProps {
   patientData?: any;
   clinicalData?: any;
@@ -14,7 +11,7 @@ interface ConsultationGeneratorProps {
   diagnosisData?: any;
   consultationId?: string | null;
   onBack?: () => void;
-  onComplete?: (result: any) => void; // Ajout de la prop manquante
+  onComplete?: (result: any) => void;
 }
 
 const ConsultationGenerator: React.FC<ConsultationGeneratorProps> = ({
@@ -39,19 +36,26 @@ const ConsultationGenerator: React.FC<ConsultationGeneratorProps> = ({
   const loadExistingData = async () => {
     try {
       const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId();
+      console.log("📌 Loading existing data for consultation:", currentConsultationId);
       
       if (currentConsultationId) {
+        // Forcer le rechargement depuis Supabase
+        const loadedData = await consultationDataService.loadFromSupabase(currentConsultationId);
+        console.log("🔄 Data loaded from Supabase:", loadedData);
+        
+        // Sinon, récupérer depuis le cache local
         const savedData = await consultationDataService.getAllData();
+        console.log("📦 All saved data:", savedData);
         
         // Vérifier s'il y a déjà un rapport de consultation généré
-        if (savedData?.consultationReport) {
-          console.log("📋 Rapport de consultation existant trouvé");
-          setConsultationReport(savedData.consultationReport);
+        if (savedData?.consultationReport || loadedData?.consultationReport) {
+          console.log("📋 Existing consultation report found");
+          setConsultationReport(savedData.consultationReport || loadedData.consultationReport);
           setShowEditor(true);
         }
       }
     } catch (error) {
-      console.error('Erreur chargement données existantes:', error);
+      console.error('Error loading existing data:', error);
       setError('Erreur lors du chargement des données existantes');
     }
   };
@@ -61,117 +65,66 @@ const ConsultationGenerator: React.FC<ConsultationGeneratorProps> = ({
     setError(null);
 
     try {
-      console.log("🚀 Génération rapport de consultation...");
+      console.log("🚀 Starting consultation report generation...");
       
-      // Récupérer toutes les données si pas passées en props
-      let allData = {
-        patientData,
-        clinicalData, 
-        questionsData,
-        diagnosisData
+      // Récupérer TOUTES les données disponibles
+      const savedData = await consultationDataService.getAllData();
+      console.log("📦 All available data:", savedData);
+      
+      // Prioriser les données sauvegardées sur les props
+      let completeData = {
+        patientData: patientData || savedData?.patientData || savedData?.step_0,
+        clinicalData: clinicalData || savedData?.clinicalData || savedData?.step_1,
+        questionsData: questionsData || savedData?.questionsData || savedData?.step_2,
+        diagnosisData: diagnosisData || savedData?.diagnosisData || savedData?.step_3
       };
 
-      // Si certaines données manquent, les récupérer du service
-      if (!patientData || !clinicalData || !diagnosisData) {
-        const savedData = await consultationDataService.getAllData();
-        console.log("📦 Données récupérées du service:", savedData);
-        
-        allData = {
-          patientData: patientData || savedData?.patientData,
-          clinicalData: clinicalData || savedData?.clinicalData,
-          questionsData: questionsData || savedData?.questionsData,
-          diagnosisData: diagnosisData || savedData?.diagnosisData
-        };
-      }
-
-      // Validation des données requises
-      if (!allData.patientData || !allData.clinicalData) {
-        throw new Error("Données patient et cliniques requises pour générer le rapport");
-      }
-
-      console.log("📋 Données à envoyer:", {
-        hasPatient: !!allData.patientData,
-        hasClinical: !!allData.clinicalData,
-        hasQuestions: !!allData.questionsData,
-        hasDiagnosis: !!allData.diagnosisData,
-        patientName: allData.patientData?.firstName,
-        chiefComplaint: allData.clinicalData?.chiefComplaint,
-        diagnosisCondition: allData.diagnosisData?.diagnosis?.primary?.condition
+      console.log("📋 Complete data for generation:", {
+        hasPatient: !!completeData.patientData,
+        hasClinical: !!completeData.clinicalData,
+        hasQuestions: !!completeData.questionsData,
+        hasDiagnosis: !!completeData.diagnosisData,
+        patientName: completeData.patientData?.firstName + ' ' + completeData.patientData?.lastName,
+        patientAge: completeData.patientData?.age,
+        chiefComplaint: completeData.clinicalData?.chiefComplaint,
+        diagnosis: completeData.diagnosisData?.diagnosis?.primary?.condition
       });
 
-      // Simulation d'un rapport pour éviter l'erreur d'API
-      // TODO: Remplacer par l'appel API réel quand l'endpoint sera créé
-      const mockReport = {
-        success: true,
-        data: {
-          consultationData: {
-            patientInfo: {
-              name: `${allData.patientData.firstName} ${allData.patientData.lastName}`,
-              age: allData.patientData.age,
-              gender: allData.patientData.gender,
-              date: new Date().toLocaleDateString('fr-FR')
-            },
-            chiefComplaint: allData.clinicalData.chiefComplaint || 'Consultation de contrôle',
-            examination: allData.clinicalData.examination || 'Examen normal',
-            diagnosis: allData.diagnosisData?.diagnosis?.primary?.condition || 'À déterminer',
-            treatment: 'Plan thérapeutique à définir',
-            followUp: 'Suivi à prévoir'
-          },
-          mauritianDocuments: {
-            prescription: 'Prescription générée',
-            medicalCertificate: 'Certificat médical si nécessaire'
-          },
-          generatedAt: new Date().toISOString()
-        }
-      };
-
-      // Tentative d'appel API avec fallback
-      let result;
-      try {
-        const response = await fetch("/api/generate-consultation-report", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(allData),
-        });
-
-        if (response.ok) {
-          result = await response.json();
-        } else {
-          console.warn("API indisponible, utilisation du rapport de simulation");
-          result = mockReport;
-        }
-      } catch (apiError) {
-        console.warn("Erreur API, utilisation du rapport de simulation:", apiError);
-        result = mockReport;
+      // Validation des données requises
+      if (!completeData.patientData || !completeData.clinicalData || !completeData.diagnosisData) {
+        throw new Error("Données insuffisantes pour générer le rapport (patient, clinique et diagnostic requis)");
       }
 
-      console.log("✅ Rapport généré:", result);
+      // Utiliser la génération locale via consultationDataService
+      console.log("🔧 Using local generation method...");
+      const generatedReport = await consultationDataService.generateConsultationReport(
+        completeData.patientData,
+        completeData.clinicalData,
+        completeData.questionsData,
+        completeData.diagnosisData
+      );
 
-      if (result.success && result.data) {
-        setConsultationReport(result.data);
+      console.log("✅ Report generated successfully:", generatedReport);
+
+      if (generatedReport) {
+        setConsultationReport(generatedReport);
         
         // Sauvegarder le rapport généré
-        try {
-          await consultationDataService.saveConsultationReport(result.data);
-          console.log("💾 Rapport sauvegardé");
-        } catch (saveError) {
-          console.error("Erreur sauvegarde:", saveError);
-        }
+        await consultationDataService.saveConsultationReport(generatedReport);
+        console.log("💾 Report saved");
         
         // Appeler onComplete si fourni
         if (onComplete) {
-          onComplete(result.data);
+          onComplete(generatedReport);
         }
         
         setShowEditor(true);
       } else {
-        throw new Error(result.error || "Échec génération du rapport");
+        throw new Error("Échec de la génération du rapport");
       }
 
     } catch (err) {
-      console.error("❌ Erreur génération rapport:", err);
+      console.error("❌ Error generating report:", err);
       setError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
       setLoading(false);
@@ -180,7 +133,7 @@ const ConsultationGenerator: React.FC<ConsultationGeneratorProps> = ({
 
   const handleSaveReport = async (editedData: any) => {
     try {
-      console.log("💾 Sauvegarde rapport édité:", editedData);
+      console.log("💾 Saving edited report:", editedData);
       
       // Mise à jour des données du rapport
       const updatedReport = {
@@ -194,16 +147,19 @@ const ConsultationGenerator: React.FC<ConsultationGeneratorProps> = ({
       // Sauvegarder via le service
       await consultationDataService.saveConsultationReport(updatedReport);
       
-      console.log("✅ Rapport sauvegardé avec succès");
+      console.log("✅ Report saved successfully");
+      
+      if (onComplete) {
+        onComplete(updatedReport);
+      }
       
     } catch (error) {
-      console.error("❌ Erreur sauvegarde:", error);
+      console.error("❌ Error saving:", error);
       setError("Erreur lors de la sauvegarde");
     }
   };
 
   const handleDiscardChanges = () => {
-    // Retour à la vue principale
     setShowEditor(false);
   };
 
@@ -213,12 +169,10 @@ const ConsultationGenerator: React.FC<ConsultationGeneratorProps> = ({
 
   const handleDownloadReport = () => {
     if (consultationReport) {
-      // Créer un blob avec le contenu du rapport
       const reportContent = JSON.stringify(consultationReport, null, 2);
       const blob = new Blob([reportContent], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       
-      // Télécharger le fichier
       const a = document.createElement('a');
       a.href = url;
       a.download = `consultation-report-${new Date().toISOString().split('T')[0]}.json`;
@@ -227,6 +181,42 @@ const ConsultationGenerator: React.FC<ConsultationGeneratorProps> = ({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
+  };
+
+  // Debug button pour tester avec des données
+  const handleGenerateWithTestData = () => {
+    const testData = {
+      patientData: {
+        firstName: "Test",
+        lastName: "Patient",
+        age: 30,
+        gender: "Masculin",
+        weight: 70,
+        height: 175,
+        address: "123 Rue Test, Port-Louis",
+        phone: "+230 5555 5555"
+      },
+      clinicalData: {
+        chiefComplaint: "Douleur thoracique",
+        examination: "Examen cardiovasculaire normal"
+      },
+      diagnosisData: {
+        diagnosis: {
+          primary: {
+            condition: "Angine de poitrine stable",
+            confidence: 85
+          }
+        }
+      }
+    };
+    
+    // Sauvegarder les données de test
+    consultationDataService.saveStepData(0, testData.patientData);
+    consultationDataService.saveStepData(1, testData.clinicalData);
+    consultationDataService.saveStepData(3, testData.diagnosisData);
+    
+    // Générer le rapport
+    generateConsultationReport();
   };
 
   // Interface de génération
@@ -259,7 +249,7 @@ const ConsultationGenerator: React.FC<ConsultationGeneratorProps> = ({
                 </div>
                 <div>
                   <p className="text-lg font-semibold text-blue-800">Génération en cours...</p>
-                  <p className="text-sm text-blue-600">Analyse des données et création du rapport</p>
+                  <p className="text-sm text-blue-600">Création des documents mauriciens</p>
                 </div>
               </div>
             </CardContent>
@@ -277,13 +267,20 @@ const ConsultationGenerator: React.FC<ConsultationGeneratorProps> = ({
                   <p className="text-sm text-red-600 mt-1">{error}</p>
                 </div>
               </div>
-              <div className="mt-4">
+              <div className="mt-4 flex gap-2">
                 <Button 
                   variant="outline" 
                   onClick={() => setError(null)}
                   className="text-red-600 border-red-300 hover:bg-red-50"
                 >
                   Réessayer
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={handleGenerateWithTestData}
+                  className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                >
+                  Générer avec données test
                 </Button>
               </div>
             </CardContent>
@@ -305,7 +302,11 @@ const ConsultationGenerator: React.FC<ConsultationGeneratorProps> = ({
                 {/* État des données */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    {patientData ? (
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <div className="h-5 w-5 border-2 border-gray-300 rounded-full" />
+                    )}
                     <span className="font-medium">Données Patient</span>
                     <span className="text-sm text-gray-500">
                       {patientData?.firstName || 'Non renseigné'} {patientData?.lastName || ''}
@@ -313,10 +314,14 @@ const ConsultationGenerator: React.FC<ConsultationGeneratorProps> = ({
                   </div>
                   
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    {clinicalData ? (
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <div className="h-5 w-5 border-2 border-gray-300 rounded-full" />
+                    )}
                     <span className="font-medium">Données Cliniques</span>
                     <span className="text-sm text-gray-500">
-                      {clinicalData?.chiefComplaint || "Motif renseigné"}
+                      {clinicalData?.chiefComplaint || "Non renseigné"}
                     </span>
                   </div>
                   
@@ -340,7 +345,7 @@ const ConsultationGenerator: React.FC<ConsultationGeneratorProps> = ({
                     )}
                     <span className="font-medium">Diagnostic IA</span>
                     <span className="text-sm text-gray-500">
-                      {diagnosisData?.diagnosis?.primary?.condition || "Optionnel"}
+                      {diagnosisData?.diagnosis?.primary?.condition || "Non renseigné"}
                     </span>
                   </div>
                 </div>
@@ -370,7 +375,7 @@ const ConsultationGenerator: React.FC<ConsultationGeneratorProps> = ({
                 
                 <Button 
                   onClick={generateConsultationReport}
-                  disabled={loading || !patientData || !clinicalData}
+                  disabled={loading}
                   className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white px-8 py-3"
                 >
                   {loading ? (
@@ -393,8 +398,10 @@ const ConsultationGenerator: React.FC<ConsultationGeneratorProps> = ({
     );
   }
 
-  // Interface d'affichage du rapport généré (sans éditeur complexe)
+  // Interface d'affichage du rapport généré
   if (consultationReport) {
+    const patientInfo = consultationReport.consultationData?.patientInfo || {};
+    
     return (
       <div className="space-y-6">
         {/* En-tête du rapport généré */}
@@ -422,28 +429,28 @@ const ConsultationGenerator: React.FC<ConsultationGeneratorProps> = ({
             {/* Informations patient */}
             <div className="mb-6 p-4 bg-blue-50 rounded-lg">
               <h3 className="font-semibold text-blue-800 mb-2">Informations Patient</h3>
-              <p><strong>Nom :</strong> {consultationReport.consultationData?.patientInfo?.name}</p>
-              <p><strong>Âge :</strong> {consultationReport.consultationData?.patientInfo?.age} ans</p>
-              <p><strong>Sexe :</strong> {consultationReport.consultationData?.patientInfo?.gender}</p>
-              <p><strong>Date :</strong> {consultationReport.consultationData?.patientInfo?.date}</p>
+              <p><strong>Nom :</strong> {patientInfo.name || `${patientInfo.firstName || ''} ${patientInfo.lastName || ''}`}</p>
+              <p><strong>Âge :</strong> {patientInfo.age || 'Non renseigné'} ans</p>
+              <p><strong>Sexe :</strong> {patientInfo.gender || 'Non renseigné'}</p>
+              <p><strong>Date :</strong> {patientInfo.date || new Date().toLocaleDateString('fr-FR')}</p>
             </div>
 
             {/* Motif de consultation */}
             <div className="mb-6 p-4 bg-yellow-50 rounded-lg">
               <h3 className="font-semibold text-yellow-800 mb-2">Motif de Consultation</h3>
-              <p>{consultationReport.consultationData?.chiefComplaint}</p>
+              <p>{consultationReport.consultationData?.chiefComplaint || 'Non renseigné'}</p>
             </div>
 
             {/* Examen */}
             <div className="mb-6 p-4 bg-green-50 rounded-lg">
               <h3 className="font-semibold text-green-800 mb-2">Examen Clinique</h3>
-              <p>{consultationReport.consultationData?.examination}</p>
+              <p>{consultationReport.consultationData?.examination || 'Non renseigné'}</p>
             </div>
 
             {/* Diagnostic */}
             <div className="mb-6 p-4 bg-purple-50 rounded-lg">
               <h3 className="font-semibold text-purple-800 mb-2">Diagnostic</h3>
-              <p>{consultationReport.consultationData?.diagnosis}</p>
+              <p>{consultationReport.consultationData?.diagnosis || 'Non renseigné'}</p>
             </div>
 
             {/* Actions */}
@@ -566,7 +573,7 @@ const ConsultationGenerator: React.FC<ConsultationGeneratorProps> = ({
     );
   }
 
-  // Fallback - ne devrait jamais arriver
+  // Fallback
   return (
     <div className="space-y-6">
       <Card>
