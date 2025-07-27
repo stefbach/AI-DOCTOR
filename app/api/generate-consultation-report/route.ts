@@ -486,38 +486,21 @@ async function generateCompleteConsultationReport(
       }
     };
 
-    // Préparation des données pour le générateur mauricien
-    const consultationDataForGenerator = {
-      patientInfo: {
-        firstName: patientData.firstName,
-        lastName: patientData.lastName,
-        age: patientData.age,
-        gender: safeString(patientData.gender),
-        address: safeString(patientData.address),
-        phone: safeString(patientData.phone),
-        allergies: formatAllergies(patientData.allergies),
-        weight: patientData.weight || null,
-        height: patientData.height || null,
-        bmi: calculateBMI(patientData.weight, patientData.height)
+    // ================================
+    // 1. REFORMATER diagnosisData SELON LA STRUCTURE ATTENDUE
+    // ================================
+    
+    const diagnosisDataForGenerator = {
+      diagnosis: {
+        primary: {
+          condition: diagnosticCondition,
+          confidence: consultationReport.diagnosticAssessment.primaryDiagnosis.confidence,
+          rationale: consultationReport.diagnosticAssessment.primaryDiagnosis.rationale,
+          icd10: consultationReport.diagnosticAssessment.primaryDiagnosis.icd10,
+          severity: consultationReport.diagnosticAssessment.primaryDiagnosis.severity
+        },
+        differential: consultationReport.diagnosticAssessment.differentialDiagnosis
       },
-      chiefComplaint: consultationReport.anamnesis.chiefComplaint,
-      diseaseHistory: consultationReport.anamnesis.historyOfDisease,
-      symptoms,
-      symptomDuration: consultationReport.anamnesis.duration,
-      diagnosis: consultationReport.diagnosticAssessment.primaryDiagnosis.condition,
-      diagnosticConfidence: consultationReport.diagnosticAssessment.primaryDiagnosis.confidence,
-      diagnosticReasoning: consultationReport.diagnosticAssessment.primaryDiagnosis.rationale,
-      differentialDiagnoses: consultationReport.diagnosticAssessment.differentialDiagnosis,
-      examination: `${consultationReport.physicalExam.generalExam}\n${consultationReport.physicalExam.vitalSigns}`,
-      treatment: consultationReport.therapeuticPlan.medications
-        .map(med => `${med.name} ${med.dosage} - ${med.frequency}`)
-        .join('; ') || 'Traitement selon protocole',
-      followUpPlan: consultationReport.therapeuticPlan.followUp
-    };
-
-    // Données enrichies pour le générateur
-    const enrichedDiagnosisData = {
-      ...diagnosisData,
       suggestedExams: {
         lab: [
           ...consultationReport.investigationsPlan.laboratoryTests.urgentTests.map(test => ({
@@ -556,26 +539,94 @@ async function generateCompleteConsultationReport(
           ...consultationReport.therapeuticPlan.nonPharmacological.mauritianSpecific
         ]
       },
-      symptoms,
       followUp: {
         nextVisit: consultationReport.therapeuticPlan.followUp
       }
     };
 
-    // Génération sécurisée des documents mauriciens avec timeout
-    console.log('📋 Génération documents mauriciens...');
+    // ================================
+    // 2. CONSTRUIRE consultationData COMPLET AVANT L'APPEL
+    // ================================
+    
+    const consultationData = {
+      patientInfo: {
+        firstName: patientData.firstName,
+        lastName: patientData.lastName,
+        age: patientData.age,
+        gender: safeString(patientData.gender),
+        weight: patientData.weight,
+        height: patientData.height,
+        bmi: calculateBMI(patientData.weight, patientData.height),
+        address: safeString(patientData.address),
+        phone: safeString(patientData.phone),
+        allergies: formatAllergies(patientData.allergies),
+        medicalHistory: formatMedicalHistory(patientData.medicalHistory),
+        currentMedications: safeString(
+          patientData.currentMedicationsText || patientData.currentMedications, 
+          'Aucun'
+        )
+      },
+      chiefComplaint: consultationReport.anamnesis.chiefComplaint,
+      diseaseHistory: consultationReport.anamnesis.historyOfDisease,
+      symptoms: symptoms,
+      symptomDuration: consultationReport.anamnesis.duration,
+      diagnosis: diagnosisDataForGenerator.diagnosis.primary.condition,
+      diagnosticConfidence: diagnosisDataForGenerator.diagnosis.primary.confidence,
+      diagnosticReasoning: diagnosisDataForGenerator.diagnosis.primary.rationale,
+      differentialDiagnoses: diagnosisDataForGenerator.diagnosis.differential,
+      medications: diagnosisDataForGenerator.treatmentPlan.medications,
+      recommendations: diagnosisDataForGenerator.treatmentPlan.recommendations,
+      followUp: diagnosisDataForGenerator.followUp,
+      examination: `${consultationReport.physicalExam.generalExam}\n${consultationReport.physicalExam.vitalSigns}`
+    };
+
+    // ================================
+    // 3. VALIDATION DES DONNÉES CRITIQUES AVANT GÉNÉRATION
+    // ================================
+    
+    console.log('🔍 Validation données pour générateur...');
+    
+    // Vérifier que les données critiques sont présentes
+    if (!diagnosisDataForGenerator.diagnosis.primary.condition) {
+      throw new Error('diagnosisData.diagnosis.primary.condition manquant');
+    }
+    
+    if (!patientData.firstName || !patientData.lastName) {
+      throw new Error('patientData.firstName et lastName requis');
+    }
+    
+    if (!doctorInfo.fullName || !doctorInfo.registrationNumber) {
+      throw new Error('doctorInfo incomplet');
+    }
+
+    console.log('✅ Validation réussie, génération en cours...');
+    console.log('📋 Données diagnostic:', {
+      condition: diagnosisDataForGenerator.diagnosis.primary.condition,
+      confidence: diagnosisDataForGenerator.diagnosis.primary.confidence
+    });
+
+    // ================================
+    // 4. APPELER EXPLICITEMENT LE GÉNÉRATEUR
+    // ================================
     
     const mauritianDocuments = await Promise.race([
       Promise.resolve(MauritianDocumentsGenerator.generateMauritianDocuments(
-        { consultationData: consultationDataForGenerator },
-        doctorInfo,
-        patientData,
-        enrichedDiagnosisData
+        { consultationData }, // 1er paramètre : objet contenant consultationData
+        doctorInfo,           // 2e paramètre : informations du médecin
+        patientData,          // 3e paramètre : données patient
+        diagnosisDataForGenerator // 4e paramètre : diagnostic formatté
       )),
       new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Timeout génération documents')), TIMEOUT_MS)
       )
     ]);
+
+    // Vérifier que les documents ont été générés
+    if (!mauritianDocuments || Object.keys(mauritianDocuments).length === 0) {
+      console.warn('⚠️ Documents mauriciens vides générés');
+    } else {
+      console.log('✅ Documents mauriciens générés:', Object.keys(mauritianDocuments));
+    }
 
     console.log('✅ Rapport consultation généré avec succès');
 
@@ -662,3 +713,99 @@ export async function GET() {
     }
   }, { status: 405 });
 }
+
+// ================================
+// FONCTION DE TEST MINIMAL (à utiliser pour débugger)
+// ================================
+
+export async function testMinimalGeneration() {
+  console.log('🧪 Test minimal génération documents...');
+  
+  try {
+    // Données minimales de test
+    const patientData = { 
+      firstName: 'Jean', 
+      lastName: 'Dupont', 
+      age: 45, 
+      gender: 'M' 
+    };
+    
+    const diagnosisDataForGenerator = {
+      diagnosis: { 
+        primary: { 
+          condition: 'Hypertension', 
+          confidence: 80,
+          rationale: 'Diagnostic basé sur les symptômes cliniques'
+        }, 
+        differential: [] 
+      },
+      suggestedExams: { 
+        lab: [{ name: 'NFS', indication: 'Bilan de routine' }], 
+        imaging: [{ name: 'ECG', indication: 'Évaluation cardiaque' }] 
+      },
+      treatmentPlan: { 
+        medications: [{ 
+          name: 'Amlodipine', 
+          dosage: '5 mg', 
+          frequency: '1 fois/j', 
+          duration: '30 j' 
+        }], 
+        recommendations: ['Régime pauvre en sel'] 
+      },
+      followUp: { nextVisit: '2025-08-30' }
+    };
+    
+    const consultationData = {
+      patientInfo: patientData,
+      chiefComplaint: 'Hypertension', 
+      diagnosis: 'Hypertension',
+      diagnosticConfidence: 80,
+      diagnosticReasoning: 'Diagnostic basé sur les symptômes cliniques',
+      differentialDiagnoses: [], 
+      medications: diagnosisDataForGenerator.treatmentPlan.medications,
+      recommendations: diagnosisDataForGenerator.treatmentPlan.recommendations, 
+      followUp: { nextVisit: '2025-08-30' },
+      symptoms: ['Céphalées', 'Fatigue'],
+      diseaseHistory: 'Hypertension récente',
+      symptomDuration: '2 semaines'
+    };
+    
+    const doctorInfo = validateDoctorInfo();
+    if (!doctorInfo) {
+      throw new Error('Variables d\'environnement médecin manquantes');
+    }
+    
+    console.log('📋 Appel générateur avec données minimales...');
+    
+    const docs = MauritianDocumentsGenerator.generateMauritianDocuments(
+      { consultationData }, // 1er paramètre : objet contenant consultationData
+      doctorInfo,           // 2e paramètre : informations du médecin
+      patientData,          // 3e paramètre : données patient
+      diagnosisDataForGenerator // 4e paramètre : diagnostic formatté
+    );
+    
+    console.log('✅ Test réussi ! Documents générés:', Object.keys(docs));
+    console.log('📄 Aperçu consultation:', docs.consultation?.header?.substring(0, 100) + '...');
+    
+    return {
+      success: true,
+      documentsGenerated: Object.keys(docs),
+      preview: {
+        consultation: docs.consultation?.header?.substring(0, 200),
+        biology: docs.biology?.prescriptions?.length || 0,
+        medication: docs.medication?.prescriptions?.length || 0
+      }
+    };
+    
+  } catch (error) {
+    console.error('❌ Test minimal échoué:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Erreur inconnue',
+      recommendation: 'Vérifiez les variables d\'environnement médecin et le fichier MauritianDocumentsGenerator'
+    };
+  }
+}
+
+// Uncomment cette ligne pour tester au démarrage du serveur
+// testMinimalGeneration().then(console.log);
