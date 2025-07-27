@@ -402,6 +402,7 @@ async function generateCompleteConsultationReport(
     
     // Récupération sécurisée des informations médecin
     const doctorInfo = validateDoctorInfo();
+    console.log("✅ DOCTOR INFO =", doctorInfo)
     if (!doctorInfo) {
       throw new Error('Informations médecin manquantes - vérifiez les variables d\'environnement');
     }
