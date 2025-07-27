@@ -55,34 +55,52 @@ export default function MedicalWorkflow({
   const [error, setError] = useState<string | null>(null)
 
   // ✅ Generate consultation report using local generator
-  const generateConsultationReportLocally = async () => {
+  const generateConsultationReportLocally = async (
+    pData?: any,
+    cData?: any,
+    qData?: any,
+    dData?: any
+  ) => {
     try {
       console.log('🚀 Generating consultation report locally...')
       
-      // Ensure we have all required data
+      // Use provided data or fetch from service
       const allData = await consultationDataService.getAllData()
-      const pData = patientData || allData?.patientData
-      const cData = clinicalData || allData?.clinicalData
-      const qData = questionsData || allData?.questionsData
-      const dData = diagnosisData || allData?.diagnosisData
+      const patientDataToUse = pData || patientData || allData?.patientData || allData?.step_0
+      const clinicalDataToUse = cData || clinicalData || allData?.clinicalData || allData?.step_1
+      const questionsDataToUse = qData || questionsData || allData?.questionsData || allData?.step_2
+      const diagnosisDataToUse = dData || diagnosisData || allData?.diagnosisData || allData?.step_3
 
-      console.log('Data check:', { 
-        hasPatient: !!pData, 
-        hasClinical: !!cData, 
-        hasQuestions: !!qData, 
-        hasDiagnosis: !!dData 
+      console.log('Data for generation:', { 
+        hasPatient: !!patientDataToUse, 
+        hasClinical: !!clinicalDataToUse, 
+        hasQuestions: !!questionsDataToUse, 
+        hasDiagnosis: !!diagnosisDataToUse,
+        patientDetails: {
+          name: `${patientDataToUse?.firstName} ${patientDataToUse?.lastName}`,
+          age: patientDataToUse?.age
+        },
+        clinicalDetails: {
+          complaint: clinicalDataToUse?.chiefComplaint,
+          symptoms: clinicalDataToUse?.symptoms?.length || 0
+        },
+        diagnosisDetails: {
+          primary: diagnosisDataToUse?.diagnosis?.primary?.condition,
+          differential: diagnosisDataToUse?.diagnosis?.differential?.length || 0,
+          hasExams: !!diagnosisDataToUse?.suggestedExams
+        }
       })
 
-      if (!pData || !cData || !dData) {
+      if (!patientDataToUse || !clinicalDataToUse || !diagnosisDataToUse) {
         throw new Error('Données insuffisantes pour générer le rapport (patient, clinique et diagnostic requis)')
       }
 
       // Use the local generation method
       const result = await consultationDataService.generateConsultationReport(
-        pData,
-        cData,
-        qData,
-        dData
+        patientDataToUse,
+        clinicalDataToUse,
+        questionsDataToUse,
+        diagnosisDataToUse
       )
 
       console.log('✅ Consultation report generated:', result)
@@ -110,7 +128,7 @@ export default function MedicalWorkflow({
       
       toast({
         title: "Erreur",
-        description: "Échec de la génération automatique du rapport",
+        description: error instanceof Error ? error.message : "Échec de la génération automatique du rapport",
         variant: "destructive"
       })
       
@@ -124,23 +142,51 @@ export default function MedicalWorkflow({
       try {
         setIsLoading(true)
         
-        // 1. Check if we have a consultation report already
+        // 1. Get ALL saved data first
         const allData = await consultationDataService.getAllData()
-        console.log('MedicalWorkflow - Loaded data:', allData)
+        console.log('MedicalWorkflow - All saved data:', allData)
         
+        // 2. Ensure we have all required data
+        const completePatientData = patientData || allData?.patientData || allData?.step_0
+        const completeClinicalData = clinicalData || allData?.clinicalData || allData?.step_1
+        const completeQuestionsData = questionsData || allData?.questionsData || allData?.step_2
+        const completeDiagnosisData = diagnosisData || allData?.diagnosisData || allData?.step_3
+        
+        console.log('Complete data check:', {
+          hasPatient: !!completePatientData,
+          hasClinical: !!completeClinicalData,
+          hasQuestions: !!completeQuestionsData,
+          hasDiagnosis: !!completeDiagnosisData,
+          patientName: completePatientData?.firstName,
+          diagnosis: completeDiagnosisData?.diagnosis?.primary?.condition
+        })
+        
+        // 3. Check if we have a consultation report already
         if (allData?.consultationReport) {
           console.log('✅ Found existing consultation report')
           setConsultationReport(allData.consultationReport)
-        } else {
+        } else if (completePatientData && completeClinicalData && completeDiagnosisData) {
           console.log('⚠️ No consultation report found, generating one locally...')
           
-          // ✅ Generate using local generator
-          await generateConsultationReportLocally()
+          // ✅ Generate using local generator with complete data
+          await generateConsultationReportLocally(
+            completePatientData,
+            completeClinicalData,
+            completeQuestionsData,
+            completeDiagnosisData
+          )
+        } else {
+          setError('Données insuffisantes pour générer le rapport. Veuillez compléter toutes les étapes précédentes.')
+          console.error('Missing data:', {
+            patient: !completePatientData,
+            clinical: !completeClinicalData,
+            diagnosis: !completeDiagnosisData
+          })
         }
         
         // Load existing final documents if any
-        if (allData?.workflowResult) {
-          setFinalDocuments(allData.workflowResult)
+        if (allData?.workflowResult || allData?.step_4) {
+          setFinalDocuments(allData.workflowResult || allData.step_4)
         }
         
       } catch (error) {
@@ -152,7 +198,7 @@ export default function MedicalWorkflow({
     }
     
     loadExistingReport()
-  }, [patientData, clinicalData, diagnosisData])
+  }, []) // Remove dependencies to avoid re-running
 
   // ✅ Initialize consultation when component mounts
   useEffect(() => {
