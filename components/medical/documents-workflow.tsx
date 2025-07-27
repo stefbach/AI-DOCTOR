@@ -224,6 +224,8 @@ console.log("👤 patientData =", JSON.stringify(patientData, null, 2));
 console.log("🧠 diagnosisData =", JSON.stringify(diagnosisData?.diagnosis, null, 2));
 console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
 
+      console.log("🚀 GÉNÉRATION MANUELLE LANCÉE");
+
       // ✅ Generate all 4 documents using the generator
       const mauritianDocs = MauritianDocumentsGenerator.generateMauritianDocuments(
         consultationReport,
