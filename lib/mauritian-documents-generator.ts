@@ -1,571 +1,631 @@
-// lib/mauritian-documents-generator.ts
-
-export interface DoctorInfo {
-  fullName: string
-  specialty: string
-  address: string
-  city: string
-  phone: string
-  email: string
-  registrationNumber: string
-}
-
-export interface PatientInfo {
-  firstName: string
-  lastName: string
-  dateOfBirth: string
-  address: string
-  age: string
-  weight?: string
-  height?: string
-  allergies?: string
-}
-
-export interface MauritianDocuments {
-  consultation: ConsultationReport
-  biology: BiologyPrescription
-  paraclinical: ParaclinicalPrescription
-  medication: MedicationPrescription
-}
-
-interface ConsultationReport {
-  header: DocumentHeader
-  patient: PatientInfo
-  anamnesis: {
-    chiefComplaint: string
-    historyOfDisease: string
-    medicalHistory: string
-    currentMedications: string
-  }
-  physicalExam: {
-    generalExam: string
-    vitalSigns: string
-    systemicExam: string
-  }
-  diagnosticAssessment: {
-    primaryDiagnosis: string
-    differentialDiagnosis: string[]
-    icd10Code?: string
-  }
-  investigationsPlan: {
-    laboratoryTests: string[]
-    imaging: string[]
-    specialTests: string[]
-  }
-  therapeuticPlan: {
-    medications: string[]
-    nonPharmacological: string[]
-    followUp: string
-  }
-  footer: {
-    physicianSignature: string
-    date: string
-    nextAppointment?: string
-  }
-}
-
-interface BiologyPrescription {
-  header: DocumentHeader
-  patient: PatientInfo
-  prescriptions: Array<{
-    exam: string
-    indication: string
-    urgency: string
-    fasting: string
-    sampleType: string
-    expectedResults: string
-    mauritianAvailability: string
-  }>
-}
-
-interface ParaclinicalPrescription {
-  header: DocumentHeader
-  patient: PatientInfo
-  prescriptions: Array<{
-    category: string
-    exam: string
-    indication: string
-    urgency: string
-    preparation: string
-    contraindications: string
-    mauritianAvailability: string
-  }>
-}
-
-interface MedicationPrescription {
-  header: DocumentHeader
-  patient: PatientInfo
-  prescriptions: Array<{
-    medication: string
-    dci: string
-    dosage: string
-    frequency: string
-    duration: string
-    indication: string
-    contraindications: string
-    mauritianAvailability: string
-  }>
-  clinicalAdvice: {
-    hydration: string
-    activity: string
-    diet: string
-    mosquitoProtection: string
-    followUp: string
-    emergency: string
-  }
-}
-
-interface DocumentHeader {
-  title: string
-  doctorName: string
-  specialty: string
-  address: string
-  city: string
-  phone: string
-  email: string
-  registrationNumber: string
-  date: string
-  documentNumber: string
-}
+// lib/mauritian-documents-generator.ts - Version améliorée avec ordonnances basées sur le diagnostic
 
 export class MauritianDocumentsGenerator {
-  
-  /**
-   * Génère automatiquement les 4 documents mauriciens à partir du compte-rendu
-   */
   static generateMauritianDocuments(
     consultationReport: any,
-    doctorInfo: DoctorInfo,
+    doctorInfo: any,
     patientData: any,
     diagnosisData: any
-  ): MauritianDocuments {
+  ) {
+    console.log('🚀 Generating Mauritian documents with diagnosis data:', diagnosisData)
     
-    const baseHeader = this.createBaseHeader(doctorInfo)
-    const patientInfo = this.extractPatientInfo(patientData, consultationReport)
-    
-    return {
-      consultation: this.generateConsultationReport(consultationReport, baseHeader, patientInfo, diagnosisData),
-      biology: this.generateBiologyPrescription(consultationReport, baseHeader, patientInfo, diagnosisData),
-      paraclinical: this.generateParaclinicalPrescription(consultationReport, baseHeader, patientInfo, diagnosisData),
-      medication: this.generateMedicationPrescription(consultationReport, baseHeader, patientInfo, diagnosisData)
-    }
-  }
-
-  /**
-   * Crée l'en-tête de base pour tous les documents
-   */
-  private static createBaseHeader(doctorInfo: DoctorInfo): DocumentHeader {
     const currentDate = new Date().toLocaleDateString('fr-FR')
     
+    // 1. Generate consultation report
+    const consultation = this.generateConsultationReport(
+      consultationReport.consultationData,
+      doctorInfo,
+      currentDate
+    )
+    
+    // 2. Generate biology prescriptions based on diagnosis
+    const biology = this.generateBiologyPrescription(
+      patientData,
+      diagnosisData,
+      doctorInfo,
+      currentDate
+    )
+    
+    // 3. Generate paraclinical prescriptions based on diagnosis
+    const paraclinical = this.generateParaclinicalPrescription(
+      patientData,
+      diagnosisData,
+      doctorInfo,
+      currentDate
+    )
+    
+    // 4. Generate medication prescriptions based on diagnosis
+    const medication = this.generateMedicationPrescription(
+      patientData,
+      diagnosisData,
+      doctorInfo,
+      currentDate
+    )
+    
     return {
-      title: "CABINET MÉDICAL",
-      doctorName: `Dr ${doctorInfo.fullName}`,
-      specialty: doctorInfo.specialty || "Médecine générale",
-      address: doctorInfo.address || "Adresse à compléter",
-      city: doctorInfo.city || "Maurice",
-      phone: doctorInfo.phone || "+230 xxx xxx xxx",
-      email: doctorInfo.email || "email@cabinet.mu",
-      registrationNumber: doctorInfo.registrationNumber || "Medical Council of Mauritius - Reg. No. XXXXX",
-      date: currentDate,
-      documentNumber: `DOC-${Date.now().toString().slice(-8)}`
+      consultation,
+      biology,
+      paraclinical,
+      medication
     }
   }
 
-  /**
-   * Extrait les informations patient
-   */
-  private static extractPatientInfo(patientData: any, consultationReport: any): PatientInfo {
-    return {
-      firstName: patientData?.firstName || "Prénom",
-      lastName: patientData?.lastName || "Nom",
-      dateOfBirth: patientData?.dateOfBirth || patientData?.birthDate || "__/__/____",
-      address: patientData?.address || "Adresse à compléter, Maurice",
-      age: patientData?.age ? `${patientData.age} ans` : "__ ans",
-      weight: patientData?.weight || "",
-      height: patientData?.height || "",
-      allergies: Array.isArray(patientData?.allergies) 
-        ? patientData.allergies.join(', ') 
-        : patientData?.allergies || "Aucune allergie connue"
-    }
-  }
-
-  /**
-   * Génère le compte-rendu de consultation
-   */
-  private static generateConsultationReport(
-    consultationReport: any, 
-    header: DocumentHeader, 
-    patient: PatientInfo,
-    diagnosisData: any
-  ): ConsultationReport {
-    
-    const primary = diagnosisData?.diagnosis?.primary || consultationReport?.diagnosticAssessment?.primaryDiagnosis
-    const investigations = consultationReport?.investigationsPlan || diagnosisData?.recommendations
-    
+  // 1. CONSULTATION REPORT (unchanged)
+  static generateConsultationReport(consultationData: any, doctorInfo: any, date: string) {
     return {
       header: {
-        ...header,
-        title: "COMPTE-RENDU DE CONSULTATION",
-        documentNumber: `CR-${header.documentNumber}`
+        title: "COMPTE-RENDU DE CONSULTATION MÉDICALE",
+        doctorName: doctorInfo.fullName,
+        specialty: doctorInfo.specialty,
+        address: doctorInfo.address,
+        city: doctorInfo.city,
+        phone: doctorInfo.phone,
+        email: doctorInfo.email,
+        registrationNumber: doctorInfo.registrationNumber,
+        date: date,
+        time: new Date().toLocaleTimeString('fr-FR')
       },
-      patient,
-      anamnesis: {
-        chiefComplaint: consultationReport?.anamnesis?.chiefComplaint || "Motif de consultation à documenter",
-        historyOfDisease: consultationReport?.anamnesis?.historyOfDisease || "Histoire de la maladie actuelle",
-        medicalHistory: consultationReport?.anamnesis?.medicalHistory || "Antécédents médicaux",
-        currentMedications: consultationReport?.anamnesis?.currentMedications || "Traitements en cours"
+      patient: {
+        firstName: consultationData.patientInfo.firstName,
+        lastName: consultationData.patientInfo.lastName,
+        age: consultationData.patientInfo.age,
+        gender: consultationData.patientInfo.gender,
+        address: consultationData.patientInfo.address,
+        phone: consultationData.patientInfo.phone,
+        allergies: consultationData.patientInfo.allergies,
+        weight: consultationData.patientInfo.weight,
+        height: consultationData.patientInfo.height,
+        bmi: consultationData.patientInfo.bmi
       },
-      physicalExam: {
-        generalExam: consultationReport?.physicalExam?.generalExam || "Examen général : patient en bon état général",
-        vitalSigns: consultationReport?.physicalExam?.vitalSigns || "Signes vitaux dans les normes",
-        systemicExam: consultationReport?.physicalExam?.systemicExam || "Examen systémique selon symptomatologie"
-      },
-      diagnosticAssessment: {
-        primaryDiagnosis: primary?.condition || "Diagnostic à préciser",
-        differentialDiagnosis: consultationReport?.diagnosticAssessment?.differentialDiagnosis || [],
-        icd10Code: primary?.icd10 || ""
-      },
-      investigationsPlan: {
-        laboratoryTests: investigations?.exams?.filter((e: any) => e.category === 'laboratory')?.map((e: any) => e.name) || [],
-        imaging: investigations?.exams?.filter((e: any) => e.category === 'imaging')?.map((e: any) => e.name) || [],
-        specialTests: investigations?.exams?.filter((e: any) => e.category === 'special')?.map((e: any) => e.name) || []
-      },
-      therapeuticPlan: {
-        medications: investigations?.medications?.map((m: any) => `${m.name} - ${m.dosage} - ${m.frequency}`) || [],
-        nonPharmacological: consultationReport?.therapeuticPlan?.nonPharmacological || [
-          "Repos adapté",
-          "Hydratation renforcée (climat tropical Maurice)",
-          "Consultation de réévaluation si pas d'amélioration"
-        ],
-        followUp: consultationReport?.therapeuticPlan?.followUp || "Suivi selon évolution clinique"
-      },
-      footer: {
-        physicianSignature: header.doctorName,
-        date: header.date,
-        nextAppointment: "À programmer selon évolution"
+      anamnesis: `
+MOTIF DE CONSULTATION:
+${consultationData.chiefComplaint}
+
+HISTOIRE DE LA MALADIE:
+${consultationData.diseaseHistory}
+
+SYMPTÔMES RAPPORTÉS:
+${consultationData.symptoms?.join(', ') || 'Non spécifiés'}
+
+DURÉE DES SYMPTÔMES:
+${consultationData.symptomDuration || 'Non précisée'}
+      `.trim(),
+      physicalExam: consultationData.examination || 'Examen clinique complet effectué',
+      diagnosticAssessment: `
+DIAGNOSTIC PRINCIPAL:
+${consultationData.diagnosis} (Confiance: ${consultationData.diagnosticConfidence}%)
+
+RAISONNEMENT DIAGNOSTIQUE:
+${consultationData.diagnosticReasoning || 'Basé sur l\'anamnèse et l\'examen clinique'}
+
+DIAGNOSTICS DIFFÉRENTIELS:
+${consultationData.differentialDiagnoses?.map((d: any) => 
+  `- ${d.condition} (${d.confidence}%)`
+).join('\n') || 'Aucun'}
+      `.trim(),
+      therapeuticPlan: consultationData.treatment || 'Plan thérapeutique détaillé ci-dessous',
+      followUp: consultationData.followUpPlan || 'Suivi selon évolution',
+      signature: {
+        physician: doctorInfo.fullName,
+        date: date
       }
     }
   }
 
-  /**
-   * Génère l'ordonnance d'examens biologiques
-   */
-  private static generateBiologyPrescription(
-    consultationReport: any,
-    header: DocumentHeader,
-    patient: PatientInfo,
-    diagnosisData: any
-  ): BiologyPrescription {
+  // 2. BIOLOGY PRESCRIPTIONS - Based on diagnosis
+  static generateBiologyPrescription(
+    patientData: any,
+    diagnosisData: any,
+    doctorInfo: any,
+    date: string
+  ) {
+    const prescriptions = []
     
-    const biologyExams = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority
-      ?.filter((exam: any) => exam.category === 'biology') || []
-
-    const defaultExams = biologyExams.length === 0 ? [{
-      exam: "Hémogramme complet (NFS) + CRP",
-      indication: "Recherche syndrome anémique, infectieux, inflammatoire",
-      urgency: "Semi-urgent (24-48h)",
-      fasting: "Non",
-      sampleType: "Sang veineux",
-      expectedResults: "Numération globulaire, formule leucocytaire, CRP",
-      mauritianAvailability: "Disponible tous laboratoires Maurice - Pris en charge sécurité sociale"
-    }] : []
-
-    const prescriptions = [...biologyExams.map((exam: any) => ({
-      exam: exam.examination || "",
-      indication: exam.specific_indication || "",
-      urgency: exam.urgency === 'immediate' ? "Urgent (dans les heures)" : "Semi-urgent (24-48h)",
-      fasting: exam.fasting_required ? "Oui - 8h" : "Non",
-      sampleType: exam.sample_type || "Sang veineux",
-      expectedResults: exam.interpretation_keys || "",
-      mauritianAvailability: exam.mauritius_availability ? 
-        `Disponible: ${exam.mauritius_availability.public_centers?.join(', ') || 'Laboratoires Maurice'}` :
-        "Disponible laboratoires Maurice"
-    })), ...defaultExams]
-
+    // Extract lab tests from diagnosis data
+    if (diagnosisData?.suggestedExams?.lab && diagnosisData.suggestedExams.lab.length > 0) {
+      diagnosisData.suggestedExams.lab.forEach((exam: any) => {
+        prescriptions.push({
+          exam: exam.name || exam,
+          indication: exam.indication || `Pour ${diagnosisData.diagnosis?.primary?.condition || 'diagnostic'}`,
+          urgency: exam.urgency || "Dans les 48h",
+          fasting: exam.fasting || this.determineFastingRequirement(exam.name),
+          mauritianAvailability: this.getMauritianLabAvailability(exam.name)
+        })
+      })
+    } else {
+      // Default lab tests based on diagnosis
+      prescriptions.push(...this.getDefaultLabTests(diagnosisData))
+    }
+    
     return {
       header: {
-        ...header,
-        title: "ORDONNANCE MÉDICALE - EXAMENS BIOLOGIQUES",
-        documentNumber: `BIO-${header.documentNumber}`
+        title: "ORDONNANCE D'EXAMENS BIOLOGIQUES",
+        subtitle: "Prescription for Laboratory Tests",
+        physician: doctorInfo.fullName,
+        registration: doctorInfo.registrationNumber,
+        date: date,
+        validity: "Valable 3 mois"
       },
-      patient,
-      prescriptions
+      patient: {
+        firstName: patientData.firstName,
+        lastName: patientData.lastName,
+        age: patientData.age,
+        gender: Array.isArray(patientData.gender) ? patientData.gender[0] : patientData.gender,
+        idNumber: patientData.idNumber || "À compléter"
+      },
+      prescriptions,
+      instructions: {
+        general: "Examens à réaliser dans un laboratoire agréé",
+        preparation: "Respecter les conditions de prélèvement indiquées",
+        results: "Résultats à communiquer au médecin prescripteur"
+      }
     }
   }
 
-  /**
-   * Génère l'ordonnance d'examens paracliniques
-   */
-  private static generateParaclinicalPrescription(
-    consultationReport: any,
-    header: DocumentHeader,
-    patient: PatientInfo,
-    diagnosisData: any
-  ): ParaclinicalPrescription {
+  // 3. PARACLINICAL PRESCRIPTIONS - Based on diagnosis
+  static generateParaclinicalPrescription(
+    patientData: any,
+    diagnosisData: any,
+    doctorInfo: any,
+    date: string
+  ) {
+    const prescriptions = []
     
-    const imagingExams = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority
-      ?.filter((exam: any) => exam.category === 'imaging' || exam.category === 'functional') || []
-
-    const defaultExams = imagingExams.length === 0 ? [{
-      category: "Imagerie thoracique",
-      exam: "Radiographie thoracique de face et profil",
-      indication: "Exploration parenchyme pulmonaire selon symptomatologie",
-      urgency: "Programmé (1-2 semaines)",
-      preparation: "Retrait bijoux et objets métalliques",
-      contraindications: "Grossesse (radioprotection)",
-      mauritianAvailability: "Hôpitaux publics et centres privés - Gratuit secteur public"
-    }] : []
-
-    const prescriptions = [...imagingExams.map((exam: any) => ({
-      category: this.determineParaclinicalCategory(exam.examination),
-      exam: exam.examination || "",
-      indication: exam.specific_indication || "",
-      urgency: exam.urgency === 'immediate' ? "Urgent (dans les heures)" : "Programmé (1-2 semaines)",
-      preparation: exam.patient_preparation || "Aucune préparation spéciale",
-      contraindications: exam.contraindications || "Aucune",
-      mauritianAvailability: exam.mauritius_availability ? 
-        `${exam.mauritius_availability.public_centers?.join(', ') || 'Centres publics et privés'}` :
-        "Centres publics et privés"
-    })), ...defaultExams]
-
+    // Extract imaging tests from diagnosis data
+    if (diagnosisData?.suggestedExams?.imaging && diagnosisData.suggestedExams.imaging.length > 0) {
+      diagnosisData.suggestedExams.imaging.forEach((exam: any) => {
+        prescriptions.push({
+          exam: exam.name || exam,
+          category: this.determineImagingCategory(exam.name),
+          indication: exam.indication || `Évaluation ${diagnosisData.diagnosis?.primary?.condition || 'diagnostique'}`,
+          urgency: exam.urgency || "Dans la semaine",
+          preparation: exam.preparation || this.getImagingPreparation(exam.name),
+          mauritianAvailability: this.getMauritianImagingCenters(exam.name)
+        })
+      })
+    } else {
+      // Default imaging based on diagnosis
+      prescriptions.push(...this.getDefaultImagingTests(diagnosisData))
+    }
+    
+    // Add other paraclinical exams if needed
+    if (diagnosisData?.suggestedExams?.other) {
+      diagnosisData.suggestedExams.other.forEach((exam: any) => {
+        prescriptions.push({
+          exam: exam.name || exam,
+          category: "Exploration fonctionnelle",
+          indication: exam.indication || "Complément diagnostic",
+          urgency: "Programmé",
+          preparation: exam.preparation || "Aucune",
+          mauritianAvailability: "Centres spécialisés"
+        })
+      })
+    }
+    
     return {
       header: {
-        ...header,
-        title: "ORDONNANCE MÉDICALE - EXAMENS PARACLINIQUES",
-        documentNumber: `PARA-${header.documentNumber}`
+        title: "ORDONNANCE D'EXAMENS PARACLINIQUES",
+        subtitle: "Prescription for Medical Imaging & Functional Tests",
+        physician: doctorInfo.fullName,
+        registration: doctorInfo.registrationNumber,
+        date: date,
+        validity: "Valable 3 mois"
       },
-      patient,
-      prescriptions
+      patient: {
+        firstName: patientData.firstName,
+        lastName: patientData.lastName,
+        age: patientData.age,
+        gender: Array.isArray(patientData.gender) ? patientData.gender[0] : patientData.gender,
+        weight: patientData.weight + " kg",
+        allergies: patientData.allergies?.join(', ') || 'Aucune'
+      },
+      prescriptions,
+      specialInstructions: {
+        contrast: prescriptions.some(p => p.exam.includes('Scanner') || p.exam.includes('IRM')) 
+          ? "Vérifier créatinine si injection de produit de contraste"
+          : null,
+        pregnancy: "Signaler toute grossesse en cours ou suspectée",
+        metalImplants: prescriptions.some(p => p.exam.includes('IRM'))
+          ? "Signaler tout implant métallique ou pacemaker"
+          : null
+      }
     }
   }
 
-  /**
-   * Génère l'ordonnance de médicaments
-   */
-  private static generateMedicationPrescription(
-    consultationReport: any,
-    header: DocumentHeader,
-    patient: PatientInfo,
-    diagnosisData: any
-  ): MedicationPrescription {
+  // 4. MEDICATION PRESCRIPTIONS - Based on diagnosis treatment plan
+  static generateMedicationPrescription(
+    patientData: any,
+    diagnosisData: any,
+    doctorInfo: any,
+    date: string
+  ) {
+    const prescriptions = []
     
-    const treatments = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []
-
-    const defaultMedications = treatments.length === 0 ? [{
-      medication: "Paracétamol 1000mg",
-      dci: "Paracétamol",
-      dosage: "1000mg",
-      frequency: "3 fois par jour si douleur",
-      duration: "5 jours maximum",
-      indication: "Traitement symptomatique douleur/fièvre",
-      contraindications: "Insuffisance hépatique sévère",
-      mauritianAvailability: "Disponible toutes pharmacies Maurice - Médicament essentiel"
-    }] : []
-
-    const prescriptions = [...treatments.map((treatment: any) => ({
-      medication: `${treatment.medication_dci} ${treatment.dosing_regimen?.standard_adult || ''}`,
-      dci: treatment.medication_dci || "",
-      dosage: this.extractDosage(treatment.dosing_regimen?.standard_adult),
-      frequency: this.extractFrequency(treatment.dosing_regimen?.standard_adult),
-      duration: treatment.treatment_duration || "7 jours",
-      indication: treatment.precise_indication || "",
-      contraindications: treatment.contraindications_absolute?.join(', ') || "À vérifier",
-      mauritianAvailability: treatment.mauritius_availability?.locally_available ? 
-        "Disponible toutes pharmacies Maurice" : "À commander"
-    })), ...defaultMedications]
-
+    // Extract medications from treatment plan
+    if (diagnosisData?.treatmentPlan?.medications && diagnosisData.treatmentPlan.medications.length > 0) {
+      diagnosisData.treatmentPlan.medications.forEach((med: any) => {
+        prescriptions.push({
+          dci: med.name || med.dci,
+          brand: med.brand || this.getMauritianBrand(med.name),
+          class: med.class || this.getMedicationClass(med.name),
+          dosage: med.dosage || "À adapter",
+          frequency: med.frequency || "Selon prescription",
+          duration: med.duration || "Selon évolution",
+          totalQuantity: this.calculateQuantity(med),
+          indication: med.indication || diagnosisData.diagnosis?.primary?.condition,
+          administration: med.route || "Voie orale",
+          specialInstructions: med.instructions || this.getMedicationInstructions(med.name)
+        })
+      })
+    } else {
+      // Generate default medications based on diagnosis
+      prescriptions.push(...this.getDefaultMedications(diagnosisData))
+    }
+    
+    // Add symptomatic treatments if needed
+    if (diagnosisData?.symptoms || diagnosisData?.diagnosis?.primary?.symptoms) {
+      prescriptions.push(...this.getSymptomaticTreatments(diagnosisData))
+    }
+    
     return {
       header: {
-        ...header,
-        title: "ORDONNANCE MÉDICALE - MÉDICAMENTS",
-        documentNumber: `MED-${header.documentNumber}`
+        title: "ORDONNANCE MÉDICAMENTEUSE",
+        subtitle: "Medical Prescription / Prescription Médicale",
+        physician: doctorInfo.fullName,
+        registration: doctorInfo.registrationNumber,
+        date: date,
+        validity: "Ordonnance valable 1 mois sauf mention contraire",
+        renewability: "Non renouvelable sauf mention"
       },
-      patient,
+      patient: {
+        firstName: patientData.firstName,
+        lastName: patientData.lastName,
+        age: patientData.age,
+        gender: Array.isArray(patientData.gender) ? patientData.gender[0] : patientData.gender,
+        weight: patientData.weight + " kg",
+        allergies: patientData.allergies?.join(', ') || 'AUCUNE ALLERGIE CONNUE'
+      },
       prescriptions,
       clinicalAdvice: {
-        hydration: "Hydratation renforcée (2-3L/jour) - climat tropical Maurice",
-        activity: "Repos adapté selon symptômes, éviter efforts intenses aux heures chaudes",
-        diet: "Alimentation équilibrée, éviter aliments épicés si troubles digestifs",
-        mosquitoProtection: "Protection anti-moustiques indispensable (dengue/chikungunya endémiques)",
-        followUp: "Consultation de réévaluation si pas d'amélioration sous 48-72h",
-        emergency: "Urgences Maurice: 999 (SAMU) - Cliniques 24h: Apollo Bramwell, Wellkin"
+        hydration: "Maintenir une bonne hydratation (1.5-2L/jour)",
+        activity: diagnosisData?.treatmentPlan?.recommendations?.find((r: string) => 
+          r.toLowerCase().includes('repos') || r.toLowerCase().includes('activité')
+        ) || "Activité selon tolérance",
+        diet: diagnosisData?.treatmentPlan?.recommendations?.find((r: string) => 
+          r.toLowerCase().includes('régime') || r.toLowerCase().includes('alimentation')
+        ) || "Alimentation équilibrée",
+        followUp: diagnosisData?.followUp?.nextVisit || "Revoir si pas d'amélioration dans 72h",
+        emergency: "Si aggravation des symptômes, consulter en urgence",
+        additionalRecommendations: diagnosisData?.treatmentPlan?.recommendations || []
       }
     }
   }
 
-  /**
-   * Helpers pour extraction de données
-   */
-  private static determineParaclinicalCategory(examName: string): string {
-    const name = examName?.toLowerCase() || ""
-    if (name.includes('echo') || name.includes('écho')) return "Échographie"
-    if (name.includes('scanner') || name.includes('tdm')) return "Scanner (TDM)"
-    if (name.includes('irm')) return "IRM"
-    if (name.includes('radio') && name.includes('thorax')) return "Imagerie thoracique"
-    if (name.includes('ecg')) return "Explorations cardiologiques"
-    return "Imagerie thoracique"
+  // HELPER METHODS
+
+  static determineFastingRequirement(examName: string): string {
+    const fastingExams = ['glycémie', 'cholestérol', 'triglycérides', 'bilan lipidique']
+    return fastingExams.some(exam => examName.toLowerCase().includes(exam))
+      ? "À jeun 12h"
+      : "Non à jeun"
   }
 
-  private static extractDosage(dosingRegimen: string): string {
-    if (!dosingRegimen) return ""
-    const match = dosingRegimen.match(/(\d+\s*mg|\d+\s*g|\d+\s*cp)/i)
-    return match ? match[1] : ""
-  }
-
-  private static extractFrequency(dosingRegimen: string): string {
-    if (!dosingRegimen) return "3 fois par jour"
-    if (dosingRegimen.includes('x 3/jour') || dosingRegimen.includes('3 fois')) return "3 fois par jour"
-    if (dosingRegimen.includes('x 2/jour') || dosingRegimen.includes('2 fois')) return "2 fois par jour"
-    if (dosingRegimen.includes('x 4/jour') || dosingRegimen.includes('4 fois')) return "4 fois par jour"
-    if (dosingRegimen.includes('x 1/jour') || dosingRegimen.includes('1 fois')) return "1 fois par jour"
-    return "3 fois par jour"
-  }
-
-  /**
-   * Convertit les documents en format d'impression
-   */
-  static formatForPrint(documents: MauritianDocuments): {
-    consultation: string
-    biology: string
-    paraclinical: string
-    medication: string
-  } {
-    return {
-      consultation: this.formatConsultationForPrint(documents.consultation),
-      biology: this.formatPrescriptionForPrint(documents.biology, 'BIOLOGIE'),
-      paraclinical: this.formatPrescriptionForPrint(documents.paraclinical, 'PARACLINIQUE'),
-      medication: this.formatMedicationForPrint(documents.medication)
+  static getMauritianLabAvailability(examName: string): string {
+    const commonExams = ['NFS', 'CRP', 'glycémie', 'créatinine', 'ASAT', 'ALAT']
+    if (commonExams.some(exam => examName.includes(exam))) {
+      return "Tous laboratoires (Lancet, BioMed, City Clinic Lab)"
     }
+    return "Laboratoires spécialisés - Se renseigner"
   }
 
-  private static formatConsultationForPrint(report: ConsultationReport): string {
-    return `
-**${report.header.title}**
-**${report.header.doctorName}**
-Spécialité : ${report.header.specialty}
-Adresse : ${report.header.address}
-Localité : ${report.header.city}
-📞 ${report.header.phone} | 📧 ${report.header.email}
-💼 ${report.header.registrationNumber}
-
-═══════════════════════════════════════════════
-
-**COMPTE-RENDU DE CONSULTATION**
-
-**Patient :** ${report.patient.firstName} ${report.patient.lastName}
-**Date de naissance :** ${report.patient.dateOfBirth}
-**Âge :** ${report.patient.age}
-**Date de consultation :** ${report.header.date}
-
-**ANAMNÈSE :**
-• Motif de consultation : ${report.anamnesis.chiefComplaint}
-• Histoire de la maladie : ${report.anamnesis.historyOfDisease}
-• Antécédents médicaux : ${report.anamnesis.medicalHistory}
-• Traitements actuels : ${report.anamnesis.currentMedications}
-
-**EXAMEN PHYSIQUE :**
-• État général : ${report.physicalExam.generalExam}
-• Signes vitaux : ${report.physicalExam.vitalSigns}
-• Examen systémique : ${report.physicalExam.systemicExam}
-
-**DIAGNOSTIC :**
-• Diagnostic principal : ${report.diagnosticAssessment.primaryDiagnosis}
-${report.diagnosticAssessment.icd10Code ? `• Code CIM-10 : ${report.diagnosticAssessment.icd10Code}` : ''}
-
-**PLAN DE PRISE EN CHARGE :**
-• Examens complémentaires prescrits
-• Traitement instauré selon ordonnances jointes
-• ${report.therapeuticPlan.followUp}
-
-═══════════════════════════════════════════════
-
-👨⚕️ **${report.footer.physicianSignature}**
-Date : ${report.footer.date}
-    `.trim()
+  static getDefaultLabTests(diagnosisData: any): any[] {
+    const condition = diagnosisData?.diagnosis?.primary?.condition?.toLowerCase() || ''
+    const tests = []
+    
+    // Common baseline tests
+    tests.push({
+      exam: "NFS (Numération Formule Sanguine)",
+      indication: "Bilan de base",
+      urgency: "48h",
+      fasting: "Non à jeun",
+      mauritianAvailability: "Tous laboratoires"
+    })
+    
+    tests.push({
+      exam: "CRP (Protéine C-Réactive)",
+      indication: "Recherche syndrome inflammatoire",
+      urgency: "48h",
+      fasting: "Non à jeun",
+      mauritianAvailability: "Tous laboratoires"
+    })
+    
+    // Condition-specific tests
+    if (condition.includes('diabète') || condition.includes('glyc')) {
+      tests.push({
+        exam: "Glycémie à jeun + HbA1c",
+        indication: "Évaluation diabète",
+        urgency: "48h",
+        fasting: "À jeun 12h",
+        mauritianAvailability: "Tous laboratoires"
+      })
+    }
+    
+    if (condition.includes('cardiaque') || condition.includes('cœur') || condition.includes('angine')) {
+      tests.push({
+        exam: "Troponine I",
+        indication: "Marqueur cardiaque",
+        urgency: "URGENT",
+        fasting: "Non à jeun",
+        mauritianAvailability: "Urgences hospitalières"
+      })
+      
+      tests.push({
+        exam: "BNP ou NT-proBNP",
+        indication: "Insuffisance cardiaque",
+        urgency: "24h",
+        fasting: "Non à jeun",
+        mauritianAvailability: "Laboratoires spécialisés"
+      })
+    }
+    
+    if (condition.includes('infection') || condition.includes('fièvre')) {
+      tests.push({
+        exam: "Hémocultures x2",
+        indication: "Recherche bactériémie",
+        urgency: "URGENT avant antibiotiques",
+        fasting: "Non à jeun",
+        mauritianAvailability: "Hôpitaux et cliniques"
+      })
+    }
+    
+    return tests
   }
 
-  private static formatPrescriptionForPrint(prescription: any, type: string): string {
-    return `
-**CABINET MÉDICAL DU ${prescription.header.doctorName}**
-Spécialité : ${prescription.header.specialty}
-Adresse : ${prescription.header.address}
-Localité : ${prescription.header.city}
-📞 ${prescription.header.phone} | 📧 ${prescription.header.email}
-💼 ${prescription.header.registrationNumber}
-
-**ORDONNANCE MÉDICALE / PRESCRIPTION - ${type}**
-
-**Nom du patient :** ${prescription.patient.firstName} ${prescription.patient.lastName}
-**Date de naissance :** ${prescription.patient.dateOfBirth}
-**Adresse du patient :** ${prescription.patient.address}
-**Date de prescription :** ${prescription.header.date}
-
-🧪 **Examens demandés :**
-
-${prescription.prescriptions.map((item: any, index: number) => `
-${index + 1}. **${item.exam || item.medication}**
-   • ${item.indication}
-   • Urgence : ${item.urgency}
-   ${item.fasting ? `• Jeûne : ${item.fasting}` : ''}
-   ${item.contraindications ? `• Contre-indications : ${item.contraindications}` : ''}
-   • Disponibilité Maurice : ${item.mauritianAvailability}
-`).join('\n')}
-
-💬 **Remarques complémentaires :**
-À faire en laboratoire agréé / centre médical reconnu
-${type === 'BIOLOGIE' ? 'Résultats à rapporter à la prochaine consultation' : ''}
-
-═══════════════════════════════════════════════
-
-👨⚕️ **Signature et cachet du médecin :**
-${prescription.header.doctorName}
-Date : ${prescription.header.date}
-    `.trim()
+  static determineImagingCategory(examName: string): string {
+    if (examName.toLowerCase().includes('radio') || examName.toLowerCase().includes('rx')) {
+      return "Radiologie conventionnelle"
+    } else if (examName.toLowerCase().includes('scanner') || examName.toLowerCase().includes('ct')) {
+      return "Tomodensitométrie"
+    } else if (examName.toLowerCase().includes('irm') || examName.toLowerCase().includes('mri')) {
+      return "Imagerie par résonance magnétique"
+    } else if (examName.toLowerCase().includes('écho') || examName.toLowerCase().includes('doppler')) {
+      return "Échographie"
+    }
+    return "Imagerie médicale"
   }
 
-  private static formatMedicationForPrint(prescription: MedicationPrescription): string {
-    return `
-**CABINET MÉDICAL DU ${prescription.header.doctorName}**
-Spécialité : ${prescription.header.specialty}
-Adresse : ${prescription.header.address}
-Localité : ${prescription.header.city}
-📞 ${prescription.header.phone} | 📧 ${prescription.header.email}
-💼 ${prescription.header.registrationNumber}
+  static getImagingPreparation(examName: string): string {
+    if (examName.toLowerCase().includes('abdomin')) {
+      return "À jeun 6h, vessie pleine"
+    } else if (examName.toLowerCase().includes('pelvi')) {
+      return "Vessie pleine (boire 1L d'eau 1h avant)"
+    } else if (examName.toLowerCase().includes('scanner') && examName.toLowerCase().includes('thorax')) {
+      return "Pas de préparation particulière"
+    }
+    return "Selon protocole du centre"
+  }
 
-**ORDONNANCE MÉDICALE / PRESCRIPTION**
+  static getMauritianImagingCenters(examName: string): string {
+    if (examName.toLowerCase().includes('irm')) {
+      return "Apollo Bramwell, Wellkin, City Clinic"
+    } else if (examName.toLowerCase().includes('scanner')) {
+      return "Tous hôpitaux privés et publics"
+    } else if (examName.toLowerCase().includes('radio')) {
+      return "Tous centres de radiologie"
+    }
+    return "Centres d'imagerie agréés"
+  }
 
-**Nom du patient :** ${prescription.patient.firstName} ${prescription.patient.lastName}
-**Date de naissance :** ${prescription.patient.dateOfBirth}
-**Adresse du patient :** ${prescription.patient.address}
-**Allergies :** ${prescription.patient.allergies}
-**Date de prescription :** ${prescription.header.date}
+  static getDefaultImagingTests(diagnosisData: any): any[] {
+    const condition = diagnosisData?.diagnosis?.primary?.condition?.toLowerCase() || ''
+    const tests = []
+    
+    if (condition.includes('thorax') || condition.includes('poumon') || condition.includes('angine')) {
+      tests.push({
+        exam: "Radiographie thoracique face",
+        category: "Radiologie conventionnelle",
+        indication: "Bilan thoracique de base",
+        urgency: "48h",
+        preparation: "Retirer bijoux et objets métalliques",
+        mauritianAvailability: "Tous centres de radiologie"
+      })
+    }
+    
+    if (condition.includes('cardiaque') || condition.includes('cœur')) {
+      tests.push({
+        exam: "ECG 12 dérivations",
+        category: "Exploration fonctionnelle",
+        indication: "Évaluation fonction cardiaque",
+        urgency: "URGENT",
+        preparation: "Aucune",
+        mauritianAvailability: "Tous centres médicaux"
+      })
+      
+      tests.push({
+        exam: "Échocardiographie transthoracique",
+        category: "Échographie",
+        indication: "Évaluation morphologie et fonction cardiaque",
+        urgency: "Dans la semaine",
+        preparation: "Aucune",
+        mauritianAvailability: "Cardiologues et centres spécialisés"
+      })
+    }
+    
+    if (condition.includes('abdomin')) {
+      tests.push({
+        exam: "Échographie abdominale complète",
+        category: "Échographie",
+        indication: "Exploration abdominale",
+        urgency: "48-72h",
+        preparation: "À jeun 6h",
+        mauritianAvailability: "Tous centres d'imagerie"
+      })
+    }
+    
+    return tests
+  }
 
-💊 **Médicaments prescrits :**
+  static getMauritianBrand(dciName: string): string {
+    const brandMap: Record<string, string> = {
+      'paracétamol': 'Panadol, Doliprane',
+      'ibuprofène': 'Brufen, Nurofen',
+      'amoxicilline': 'Amoxil, Clamoxyl',
+      'oméprazole': 'Losec, Mopral',
+      'métformine': 'Glucophage',
+      'amlodipine': 'Amlor, Norvasc',
+      'aspirine': 'Aspirin Protect',
+      'atorvastatine': 'Lipitor, Tahor'
+    }
+    
+    return brandMap[dciName.toLowerCase()] || 'Générique disponible'
+  }
 
-${prescription.prescriptions.map((med: any, index: number) => `
-${index + 1}. **${med.medication}** (DCI : ${med.dci})
-   • Posologie : ${med.dosage} - ${med.frequency}
-   • Durée : ${med.duration}
-   • Indication : ${med.indication}
-   • Disponible : ${med.mauritianAvailability}
-`).join('\n')}
+  static getMedicationClass(medicationName: string): string {
+    const name = medicationName.toLowerCase()
+    
+    if (name.includes('cilline') || name.includes('mycine') || name.includes('floxacine')) {
+      return 'Antibiotique'
+    } else if (name.includes('azole') || name.includes('prazole')) {
+      return 'Inhibiteur pompe à protons'
+    } else if (name.includes('statine')) {
+      return 'Hypolipémiant'
+    } else if (name.includes('pril') || name.includes('sartan')) {
+      return 'Antihypertenseur'
+    } else if (name.includes('formine')) {
+      return 'Antidiabétique'
+    } else if (name.includes('doliprane') || name.includes('paracétamol')) {
+      return 'Antalgique/Antipyrétique'
+    }
+    
+    return 'Médicament'
+  }
 
-💬 **Conseils au patient :**
-• ${prescription.clinicalAdvice.hydration}
-• ${prescription.clinicalAdvice.activity}
-• ${prescription.clinicalAdvice.diet}
-• ${prescription.clinicalAdvice.mosquitoProtection}
-• ${prescription.clinicalAdvice.followUp}
-• **URGENCES :** ${prescription.clinicalAdvice.emergency}
+  static calculateQuantity(medication: any): string {
+    if (!medication.dosage || !medication.frequency || !medication.duration) {
+      return "QSP traitement"
+    }
+    
+    // Simple calculation logic
+    const freq = medication.frequency.toLowerCase()
+    const duration = medication.duration.toLowerCase()
+    
+    let dailyDoses = 1
+    if (freq.includes('2') || freq.includes('deux')) dailyDoses = 2
+    if (freq.includes('3') || freq.includes('trois')) dailyDoses = 3
+    if (freq.includes('4') || freq.includes('quatre')) dailyDoses = 4
+    
+    let days = 7
+    if (duration.includes('10')) days = 10
+    if (duration.includes('14')) days = 14
+    if (duration.includes('21')) days = 21
+    if (duration.includes('mois') || duration.includes('30')) days = 30
+    
+    const total = dailyDoses * days
+    return `${total} comprimés`
+  }
 
-⚠️ **Respecter les posologies prescrites**
-⚠️ **Consulter en urgence si aggravation**
+  static getMedicationInstructions(medicationName: string): string {
+    const name = medicationName.toLowerCase()
+    
+    if (name.includes('antibio') || name.includes('cilline')) {
+      return "À prendre pendant toute la durée prescrite même si amélioration"
+    } else if (name.includes('prazole')) {
+      return "À prendre 30 min avant le repas"
+    } else if (name.includes('aspirine')) {
+      return "À prendre pendant le repas"
+    } else if (name.includes('metformine')) {
+      return "À prendre pendant ou après le repas"
+    }
+    
+    return "Selon prescription"
+  }
 
-═══════════════════════════════════════════════
+  static getDefaultMedications(diagnosisData: any): any[] {
+    const condition = diagnosisData?.diagnosis?.primary?.condition?.toLowerCase() || ''
+    const medications = []
+    
+    // Pain management (common)
+    medications.push({
+      dci: "Paracétamol",
+      brand: "Panadol, Doliprane",
+      class: "Antalgique/Antipyrétique",
+      dosage: "500mg",
+      frequency: "1-2 cp 3 fois par jour",
+      duration: "5 jours",
+      totalQuantity: "30 comprimés",
+      indication: "Douleur et/ou fièvre",
+      administration: "Voie orale",
+      specialInstructions: "Maximum 4g/jour. Espacer les prises de 6h"
+    })
+    
+    // Condition-specific medications
+    if (condition.includes('infection') || condition.includes('angine')) {
+      medications.push({
+        dci: "Amoxicilline",
+        brand: "Amoxil, Clamoxyl",
+        class: "Antibiotique β-lactamine",
+        dosage: "1g",
+        frequency: "2 fois par jour",
+        duration: "7 jours",
+        totalQuantity: "14 comprimés",
+        indication: "Infection bactérienne probable",
+        administration: "Voie orale",
+        specialInstructions: "À prendre pendant les repas. Traitement complet obligatoire"
+      })
+    }
+    
+    if (condition.includes('gastro') || condition.includes('reflux')) {
+      medications.push({
+        dci: "Oméprazole",
+        brand: "Losec, Mopral",
+        class: "IPP",
+        dosage: "20mg",
+        frequency: "1 fois par jour le matin",
+        duration: "14 jours",
+        totalQuantity: "14 gélules",
+        indication: "Protection gastrique",
+        administration: "Voie orale",
+        specialInstructions: "À jeun 30 min avant petit-déjeuner"
+      })
+    }
+    
+    return medications
+  }
 
-👨⚕️ **Signature et cachet du médecin :**
-${prescription.header.doctorName}
-Date : ${prescription.header.date}
-    `.trim()
+  static getSymptomaticTreatments(diagnosisData: any): any[] {
+    const treatments = []
+    const symptoms = diagnosisData?.symptoms || []
+    
+    if (symptoms.some((s: string) => s.toLowerCase().includes('nausée'))) {
+      treatments.push({
+        dci: "Métoclopramide",
+        brand: "Primpéran",
+        class: "Antiémétique",
+        dosage: "10mg",
+        frequency: "3 fois par jour si nausées",
+        duration: "3 jours maximum",
+        totalQuantity: "9 comprimés",
+        indication: "Nausées",
+        administration: "Voie orale",
+        specialInstructions: "30 min avant repas. Attention somnolence"
+      })
+    }
+    
+    if (symptoms.some((s: string) => s.toLowerCase().includes('toux'))) {
+      treatments.push({
+        dci: "Dextrométhorphane",
+        brand: "Tussidane",
+        class: "Antitussif",
+        dosage: "15mg",
+        frequency: "3 fois par jour",
+        duration: "5 jours",
+        totalQuantity: "15 comprimés",
+        indication: "Toux sèche",
+        administration: "Voie orale",
+        specialInstructions: "Ne pas associer avec expectorants"
+      })
+    }
+    
+    return treatments
   }
 }
