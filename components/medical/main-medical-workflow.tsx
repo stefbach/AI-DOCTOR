@@ -1,4 +1,4 @@
-// components/medical/main-medical-workflow.tsx - Version finale avec aperçu
+// components/medical/main-medical-workflow.tsx - Version corrigée avec génération locale
 
 "use client"
 
@@ -54,6 +54,70 @@ export default function MedicalWorkflow({
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // ✅ Generate consultation report using local generator
+  const generateConsultationReportLocally = async () => {
+    try {
+      console.log('🚀 Generating consultation report locally...')
+      
+      // Ensure we have all required data
+      const allData = await consultationDataService.getAllData()
+      const pData = patientData || allData?.patientData
+      const cData = clinicalData || allData?.clinicalData
+      const qData = questionsData || allData?.questionsData
+      const dData = diagnosisData || allData?.diagnosisData
+
+      console.log('Data check:', { 
+        hasPatient: !!pData, 
+        hasClinical: !!cData, 
+        hasQuestions: !!qData, 
+        hasDiagnosis: !!dData 
+      })
+
+      if (!pData || !cData || !dData) {
+        throw new Error('Données insuffisantes pour générer le rapport (patient, clinique et diagnostic requis)')
+      }
+
+      // Use the local generation method
+      const result = await consultationDataService.generateConsultationReport(
+        pData,
+        cData,
+        qData,
+        dData
+      )
+
+      console.log('✅ Consultation report generated:', result)
+
+      if (result) {
+        setConsultationReport(result)
+        
+        // Save the generated report
+        await consultationDataService.saveConsultationReport(result)
+        console.log('💾 Report saved to consultation service')
+
+        toast({
+          title: "✅ Rapport généré !",
+          description: "Le rapport de consultation et les documents mauriciens ont été générés automatiquement",
+        })
+
+        return result
+      } else {
+        throw new Error('Aucun résultat retourné par le générateur')
+      }
+
+    } catch (error) {
+      console.error('❌ Error generating consultation report:', error)
+      setError(`Erreur génération rapport: ${error instanceof Error ? error.message : 'Erreur inconnue'}`)
+      
+      toast({
+        title: "Erreur",
+        description: "Échec de la génération automatique du rapport",
+        variant: "destructive"
+      })
+      
+      return null
+    }
+  }
+
   // ✅ Load existing consultation report on mount
   useEffect(() => {
     const loadExistingReport = async () => {
@@ -68,14 +132,10 @@ export default function MedicalWorkflow({
           console.log('✅ Found existing consultation report')
           setConsultationReport(allData.consultationReport)
         } else {
-          console.log('⚠️ No consultation report found, generating one...')
+          console.log('⚠️ No consultation report found, generating one locally...')
           
-          // ✅ Generate using the new API endpoint
-          if (patientData && diagnosisData) {
-            await generateConsultationReportFromAPI()
-          } else {
-            setError('Données insuffisantes pour générer le rapport de consultation')
-          }
+          // ✅ Generate using local generator
+          await generateConsultationReportLocally()
         }
         
         // Load existing final documents if any
@@ -93,47 +153,6 @@ export default function MedicalWorkflow({
     
     loadExistingReport()
   }, [patientData, clinicalData, diagnosisData])
-
-  // ✅ Generate consultation report using the new API
-  const generateConsultationReportFromAPI = async () => {
-    try {
-      console.log('🚀 Generating consultation report via API...')
-      
-      const result = await consultationDataService.generateConsultationReport(
-        patientData,
-        clinicalData,
-        questionsData,
-        diagnosisData
-      )
-
-      console.log('✅ Consultation report generated:', result)
-
-      if (result) {
-        setConsultationReport(result)
-        
-        // Save the generated report
-        await consultationDataService.saveConsultationReport(result)
-        console.log('💾 Report saved to consultation service')
-
-        toast({
-          title: "✅ Rapport généré !",
-          description: "Le rapport de consultation et les documents mauriciens ont été générés automatiquement",
-        })
-      } else {
-        throw new Error('Aucun résultat retourné par l\'API')
-      }
-
-    } catch (error) {
-      console.error('❌ Error generating consultation report:', error)
-      setError(`Erreur génération rapport: ${error instanceof Error ? error.message : 'Erreur inconnue'}`)
-      
-      toast({
-        title: "Erreur",
-        description: "Échec de la génération automatique du rapport",
-        variant: "destructive"
-      })
-    }
-  }
 
   // ✅ Initialize consultation when component mounts
   useEffect(() => {
@@ -227,7 +246,7 @@ export default function MedicalWorkflow({
     )
   }
 
-  // ✅ Error state
+  // ✅ Error state with retry button
   if (error && !consultationReport) {
     return (
       <div className="space-y-6">
@@ -245,7 +264,12 @@ export default function MedicalWorkflow({
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Retour Diagnostic
               </Button>
-              <Button onClick={generateConsultationReportFromAPI}>
+              <Button onClick={async () => {
+                setError(null)
+                setIsLoading(true)
+                await generateConsultationReportLocally()
+                setIsLoading(false)
+              }}>
                 <Zap className="h-4 w-4 mr-2" />
                 Réessayer Génération
               </Button>
