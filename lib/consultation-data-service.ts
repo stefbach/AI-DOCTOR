@@ -1,13 +1,47 @@
-// lib/consultation-data-service.ts - Version corrigée avec meilleure gestion des erreurs
+// lib/consultation-data-service.ts - Version améliorée avec Cache API
 
 import { MauritianDocumentsGenerator } from './mauritian-documents-generator'
 import { supabase } from './supabase'
+
+// Cache configuration
+const CACHE_NAME = 'consultation-cache-v1'
+const CACHE_EXPIRY_HOURS = 24 // Cache expires after 24 hours
+
+interface CachedData {
+  data: any
+  timestamp: number
+  consultationId: string
+  version: string
+}
 
 class ConsultationDataService {
   private consultationId: string | null = null
   private patientId: string | null = null  
   private doctorId: string | null = null
   private currentData: Record<string, any> = {}
+  private cacheAvailable: boolean = false
+
+  constructor() {
+    // Check if Cache API is available
+    this.checkCacheAvailability()
+  }
+
+  // Check if Cache API is available
+  private async checkCacheAvailability() {
+    if ('caches' in window) {
+      try {
+        await caches.open(CACHE_NAME)
+        this.cacheAvailable = true
+        console.log('✅ Cache API available')
+      } catch (error) {
+        console.warn('⚠️ Cache API not available:', error)
+        this.cacheAvailable = false
+      }
+    } else {
+      console.warn('⚠️ Cache API not supported')
+      this.cacheAvailable = false
+    }
+  }
 
   // ✅ Safe localStorage operations
   private safeLocalStorage = {
@@ -73,6 +107,76 @@ class ConsultationDataService {
     }
   }
 
+  // ✅ Cache API operations
+  private async saveToCache(key: string, data: any): Promise<boolean> {
+    if (!this.cacheAvailable) return false
+
+    try {
+      const cache = await caches.open(CACHE_NAME)
+      
+      const cachedData: CachedData = {
+        data,
+        timestamp: Date.now(),
+        consultationId: this.consultationId || '',
+        version: '1.0'
+      }
+
+      const response = new Response(JSON.stringify(cachedData), {
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      await cache.put(key, response)
+      console.log(`✅ Data saved to cache: ${key}`)
+      return true
+    } catch (error) {
+      console.error('❌ Error saving to cache:', error)
+      return false
+    }
+  }
+
+  private async getFromCache(key: string): Promise<any | null> {
+    if (!this.cacheAvailable) return null
+
+    try {
+      const cache = await caches.open(CACHE_NAME)
+      const response = await cache.match(key)
+      
+      if (!response) {
+        console.log(`❌ No cache entry found for: ${key}`)
+        return null
+      }
+
+      const cachedData: CachedData = await response.json()
+      
+      // Check if cache is expired
+      const hoursOld = (Date.now() - cachedData.timestamp) / (1000 * 60 * 60)
+      if (hoursOld > CACHE_EXPIRY_HOURS) {
+        console.log(`⚠️ Cache expired for: ${key}`)
+        await cache.delete(key)
+        return null
+      }
+
+      console.log(`✅ Data retrieved from cache: ${key}`)
+      return cachedData.data
+    } catch (error) {
+      console.error('❌ Error getting from cache:', error)
+      return null
+    }
+  }
+
+  private async clearCache(): Promise<boolean> {
+    if (!this.cacheAvailable) return false
+
+    try {
+      await caches.delete(CACHE_NAME)
+      console.log('✅ Cache cleared')
+      return true
+    } catch (error) {
+      console.error('❌ Error clearing cache:', error)
+      return false
+    }
+  }
+
   // Initialize consultation with IDs
   initializeConsultation(consultationId: string, patientId: string, doctorId: string) {
     this.consultationId = consultationId
@@ -114,7 +218,7 @@ class ConsultationDataService {
     return null
   }
 
-  // ✅ Enhanced data saving with validation
+  // ✅ Enhanced data saving with cache support
   async saveStepData(step: number, data: any) {
     try {
       if (!data) {
@@ -134,7 +238,7 @@ class ConsultationDataService {
         console.log('💾 Clinical data saved:', data.chiefComplaint ? 'with complaint' : 'basic')
       } else if (step === 2 && data) {
         this.currentData.questionsData = data
-        console.log('💾 Questions data saved:', Object.keys(data.responses || {}).length, 'responses')
+        console.log('💾 Questions data saved:', data.responses?.length || 0, 'responses')
       } else if (step === 3 && data) {
         this.currentData.diagnosisData = data
         console.log('💾 Diagnosis data saved:', data.diagnosis?.primary?.condition || 'unknown diagnosis')
@@ -143,17 +247,25 @@ class ConsultationDataService {
         console.log('💾 Workflow result saved')
       }
       
-      // Persist to localStorage with error handling
       const consultationId = this.getCurrentConsultationId()
       if (consultationId) {
-        const key = `consultation_${consultationId}_data`
+        // Save to localStorage
+        const localKey = `consultation_${consultationId}_data`
         const serializedData = JSON.stringify(this.currentData)
-        const saved = this.safeLocalStorage.setItem(key, serializedData)
+        const localSaved = this.safeLocalStorage.setItem(localKey, serializedData)
         
-        if (saved) {
-          console.log(`✅ Step ${step} data persisted to localStorage`)
+        // Save to Cache API
+        const cacheKey = `/api/consultation/${consultationId}/data`
+        const cacheSaved = await this.saveToCache(cacheKey, this.currentData)
+        
+        // Save individual step to cache for quick access
+        const stepCacheKey = `/api/consultation/${consultationId}/step/${step}`
+        await this.saveToCache(stepCacheKey, data)
+        
+        if (localSaved || cacheSaved) {
+          console.log(`✅ Step ${step} data persisted (localStorage: ${localSaved}, cache: ${cacheSaved})`)
         } else {
-          console.warn(`⚠️ Failed to persist step ${step} data to localStorage`)
+          console.warn(`⚠️ Failed to persist step ${step} data`)
         }
       }
       
@@ -164,8 +276,8 @@ class ConsultationDataService {
     }
   }
 
-  // ✅ Enhanced data loading with validation
-  getAllData(): any {
+  // ✅ Enhanced data loading with cache support
+  async getAllData(): Promise<any> {
     try {
       const consultationId = this.getCurrentConsultationId()
       if (!consultationId) {
@@ -173,15 +285,28 @@ class ConsultationDataService {
         return this.currentData
       }
       
-      // Try to load from localStorage first
-      const key = `consultation_${consultationId}_data`
-      const saved = this.safeLocalStorage.getItem(key)
+      // Try Cache API first
+      const cacheKey = `/api/consultation/${consultationId}/data`
+      const cachedData = await this.getFromCache(cacheKey)
+      
+      if (cachedData) {
+        this.currentData = { ...this.currentData, ...cachedData }
+        console.log('✅ Data loaded from cache:', Object.keys(cachedData))
+        return this.currentData
+      }
+      
+      // Fallback to localStorage
+      const localKey = `consultation_${consultationId}_data`
+      const saved = this.safeLocalStorage.getItem(localKey)
       
       if (saved) {
         try {
           const parsedData = JSON.parse(saved)
           this.currentData = { ...this.currentData, ...parsedData }
           console.log('✅ Data loaded from localStorage:', Object.keys(parsedData))
+          
+          // Save to cache for next time
+          await this.saveToCache(cacheKey, this.currentData)
         } catch (parseError) {
           console.error('❌ Error parsing saved data:', parseError)
         }
@@ -201,14 +326,96 @@ class ConsultationDataService {
     }
   }
 
-  // ✅ Enhanced doctor data retrieval
-  getDoctorData(): any {
-    // Try sessionStorage first
+  // ✅ Get specific step data from cache
+  async getStepData(step: number): Promise<any | null> {
+    const consultationId = this.getCurrentConsultationId()
+    if (!consultationId) return null
+    
+    const stepCacheKey = `/api/consultation/${consultationId}/step/${step}`
+    const cachedStepData = await this.getFromCache(stepCacheKey)
+    
+    if (cachedStepData) {
+      return cachedStepData
+    }
+    
+    // Fallback to complete data
+    const allData = await this.getAllData()
+    return allData[`step_${step}`] || null
+  }
+
+  // ✅ Export all consultation data for backup
+  async exportConsultationData(): Promise<Blob> {
+    const allData = await this.getAllData()
+    const exportData = {
+      ...allData,
+      exportDate: new Date().toISOString(),
+      consultationId: this.getCurrentConsultationId(),
+      version: '1.0'
+    }
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { 
+      type: 'application/json' 
+    })
+    
+    return blob
+  }
+
+  // ✅ Import consultation data from backup
+  async importConsultationData(jsonData: string): Promise<boolean> {
+    try {
+      const importedData = JSON.parse(jsonData)
+      
+      // Validate imported data
+      if (!importedData.consultationId) {
+        throw new Error('Invalid consultation data: missing consultationId')
+      }
+      
+      // Set consultation ID
+      this.consultationId = importedData.consultationId
+      this.safeLocalStorage.setItem('currentConsultationId', importedData.consultationId)
+      
+      // Remove metadata
+      delete importedData.exportDate
+      delete importedData.consultationId
+      delete importedData.version
+      
+      // Import the data
+      this.currentData = importedData
+      
+      // Save to all storage locations
+      const localKey = `consultation_${this.consultationId}_data`
+      this.safeLocalStorage.setItem(localKey, JSON.stringify(this.currentData))
+      
+      const cacheKey = `/api/consultation/${this.consultationId}/data`
+      await this.saveToCache(cacheKey, this.currentData)
+      
+      console.log('✅ Consultation data imported successfully')
+      return true
+    } catch (error) {
+      console.error('❌ Error importing consultation data:', error)
+      return false
+    }
+  }
+
+  // ✅ Enhanced doctor data retrieval with cache
+  async getDoctorData(): Promise<any> {
+    // Try cache first
+    const cacheKey = '/api/doctor/current'
+    const cachedDoctor = await this.getFromCache(cacheKey)
+    if (cachedDoctor) {
+      console.log('👨‍⚕️ Doctor data from cache')
+      return cachedDoctor
+    }
+    
+    // Try sessionStorage
     const sessionData = this.safeSessionStorage.getItem('tibokDoctorData')
     if (sessionData) {
       try {
         const doctorInfo = JSON.parse(sessionData)
         console.log('👨‍⚕️ Doctor data from session:', doctorInfo.full_name || doctorInfo.fullName)
+        
+        // Save to cache
+        await this.saveToCache(cacheKey, doctorInfo)
         return doctorInfo
       } catch (error) {
         console.error('❌ Error parsing doctor data from session:', error)
@@ -221,6 +428,9 @@ class ConsultationDataService {
       try {
         const doctorInfo = JSON.parse(localData)
         console.log('👨‍⚕️ Doctor data from localStorage:', doctorInfo.full_name || doctorInfo.fullName)
+        
+        // Save to cache
+        await this.saveToCache(cacheKey, doctorInfo)
         return doctorInfo
       } catch (error) {
         console.error('❌ Error parsing doctor data from localStorage:', error)
@@ -281,6 +491,10 @@ class ConsultationDataService {
       
       if (result && result.length > 0) {
         console.log('✅ Successfully saved to Supabase')
+        
+        // Update cache with latest data
+        await this.refreshCacheFromSupabase(consultationId)
+        
         return true
       } else {
         console.warn('⚠️ No rows updated in Supabase')
@@ -293,7 +507,7 @@ class ConsultationDataService {
     }
   }
 
-  // ✅ Load from Supabase with error handling
+  // ✅ Load from Supabase with cache update
   async loadFromSupabase(consultationId: string): Promise<any> {
     try {
       if (!consultationId) {
@@ -328,6 +542,11 @@ class ConsultationDataService {
         }
         
         this.currentData = { ...this.currentData, ...mergedData }
+        
+        // Update cache with fresh data
+        const cacheKey = `/api/consultation/${consultationId}/data`
+        await this.saveToCache(cacheKey, this.currentData)
+        
         return mergedData
       }
       
@@ -338,7 +557,15 @@ class ConsultationDataService {
     }
   }
 
-  // ✅ Enhanced consultation report generation with better error handling
+  // ✅ Refresh cache from Supabase
+  private async refreshCacheFromSupabase(consultationId: string): Promise<void> {
+    const data = await this.loadFromSupabase(consultationId)
+    if (data) {
+      console.log('✅ Cache refreshed from Supabase')
+    }
+  }
+
+  // ✅ Enhanced consultation report generation with caching
   async generateConsultationReport(
     patientData: any,
     clinicalData: any,
@@ -347,6 +574,18 @@ class ConsultationDataService {
   ): Promise<any> {
     try {
       console.log('🚀 Starting consultation report generation...')
+      
+      // Check cache first
+      const consultationId = this.getCurrentConsultationId()
+      if (consultationId) {
+        const cacheKey = `/api/consultation/${consultationId}/report`
+        const cachedReport = await this.getFromCache(cacheKey)
+        
+        if (cachedReport) {
+          console.log('✅ Using cached consultation report')
+          return cachedReport
+        }
+      }
       
       // Validate required data
       if (!patientData || !diagnosisData) {
@@ -366,7 +605,7 @@ class ConsultationDataService {
       console.log('🏥 Primary diagnosis:', diagnosisData.diagnosis.primary.condition)
 
       // Get doctor data with fallbacks
-      let doctorInfo = this.getDoctorData()
+      let doctorInfo = await this.getDoctorData()
       
       if (!doctorInfo) {
         console.warn('⚠️ No doctor data found, using defaults')
@@ -494,6 +733,12 @@ class ConsultationDataService {
 
       console.log('✅ Consultation report generated successfully')
 
+      // Save the report to cache
+      if (consultationId) {
+        const cacheKey = `/api/consultation/${consultationId}/report`
+        await this.saveToCache(cacheKey, consultationReport)
+      }
+
       // Save the report
       await this.saveConsultationReport(consultationReport)
 
@@ -505,17 +750,25 @@ class ConsultationDataService {
     }
   }
 
-  // Save consultation report
+  // Save consultation report with cache
   async saveConsultationReport(reportData: any) {
     try {
       this.currentData.consultationReport = reportData
       
-      // Persist to localStorage
       const consultationId = this.getCurrentConsultationId()
       if (consultationId) {
-        const key = `consultation_${consultationId}_data`
+        // Save to localStorage
+        const localKey = `consultation_${consultationId}_data`
         const serializedData = JSON.stringify(this.currentData)
-        this.safeLocalStorage.setItem(key, serializedData)
+        this.safeLocalStorage.setItem(localKey, serializedData)
+        
+        // Save to cache
+        const cacheKey = `/api/consultation/${consultationId}/data`
+        await this.saveToCache(cacheKey, this.currentData)
+        
+        // Save report specifically to cache
+        const reportCacheKey = `/api/consultation/${consultationId}/report`
+        await this.saveToCache(reportCacheKey, reportData)
         
         // Also try to save to Supabase
         await this.saveToSupabase(consultationId, 4, {
@@ -524,19 +777,56 @@ class ConsultationDataService {
         })
       }
       
-      console.log('💾 Consultation report saved')
+      console.log('💾 Consultation report saved to all storage locations')
     } catch (error) {
       console.error('❌ Error saving consultation report:', error)
     }
   }
 
-  // Helper methods remain the same...
+  // Helper methods
   private generateExaminationText(clinicalData: any, questionsData: any): string {
     let exam = 'EXAMEN CLINIQUE COMPLET\n'
     exam += '======================\n\n'
     
-    // Add implementation as in original
-    // ... (keep existing implementation)
+    // État général
+    exam += 'ÉTAT GÉNÉRAL:\n'
+    exam += '- Patient conscient, orienté dans le temps et l\'espace\n'
+    exam += '- État nutritionnel satisfaisant\n'
+    exam += '- Pas de signe de déshydratation\n\n'
+    
+    // Constantes vitales si disponibles
+    if (clinicalData?.vitalSigns) {
+      exam += 'CONSTANTES VITALES:\n'
+      if (clinicalData.vitalSigns.temperature) {
+        exam += `- Température: ${clinicalData.vitalSigns.temperature}°C\n`
+      }
+      if (clinicalData.vitalSigns.bloodPressureSystolic && clinicalData.vitalSigns.bloodPressureDiastolic) {
+        exam += `- Tension artérielle: ${clinicalData.vitalSigns.bloodPressureSystolic}/${clinicalData.vitalSigns.bloodPressureDiastolic} mmHg\n`
+      }
+      exam += '\n'
+    }
+    
+    // Examen par appareil basé sur les symptômes
+    if (clinicalData?.symptoms && clinicalData.symptoms.length > 0) {
+      exam += 'EXAMEN PAR APPAREIL:\n'
+      
+      // Cardiovasculaire
+      if (clinicalData.symptoms.some((s: string) => s.toLowerCase().includes('cardia') || s.toLowerCase().includes('chest'))) {
+        exam += '- Cardiovasculaire: Bruits du cœur réguliers, pas de souffle audible\n'
+      }
+      
+      // Respiratoire
+      if (clinicalData.symptoms.some((s: string) => s.toLowerCase().includes('toux') || s.toLowerCase().includes('respir'))) {
+        exam += '- Respiratoire: Murmure vésiculaire bilatéral symétrique, pas de râles\n'
+      }
+      
+      // Digestif
+      if (clinicalData.symptoms.some((s: string) => s.toLowerCase().includes('abdom') || s.toLowerCase().includes('digest'))) {
+        exam += '- Digestif: Abdomen souple, dépressible, indolore à la palpation\n'
+      }
+      
+      exam += '\n'
+    }
     
     return exam || 'Examen physique normal'
   }
@@ -545,8 +835,22 @@ class ConsultationDataService {
     let plan = 'PLAN THÉRAPEUTIQUE DÉTAILLÉ\n'
     plan += '==========================\n\n'
     
-    // Add implementation as in original
-    // ... (keep existing implementation)
+    if (diagnosisData?.treatmentPlan?.medications && diagnosisData.treatmentPlan.medications.length > 0) {
+      plan += 'TRAITEMENT MÉDICAMENTEUX:\n'
+      diagnosisData.treatmentPlan.medications.forEach((med: any, index: number) => {
+        plan += `${index + 1}. ${med.name || med}\n`
+        if (med.dosage) plan += `   Posologie: ${med.dosage}\n`
+        if (med.duration) plan += `   Durée: ${med.duration}\n`
+        plan += '\n'
+      })
+    }
+    
+    if (diagnosisData?.treatmentPlan?.recommendations && diagnosisData.treatmentPlan.recommendations.length > 0) {
+      plan += '\nMESURES GÉNÉRALES:\n'
+      diagnosisData.treatmentPlan.recommendations.forEach((rec: string, index: number) => {
+        plan += `${index + 1}. ${rec}\n`
+      })
+    }
     
     return plan || 'Plan thérapeutique à définir selon les résultats des examens complémentaires'
   }
@@ -555,14 +859,31 @@ class ConsultationDataService {
     let followUp = 'PLAN DE SUIVI ET EXAMENS\n'
     followUp += '========================\n\n'
     
-    // Add implementation as in original  
-    // ... (keep existing implementation)
+    if (diagnosisData?.suggestedExams?.lab && diagnosisData.suggestedExams.lab.length > 0) {
+      followUp += 'EXAMENS BIOLOGIQUES:\n'
+      diagnosisData.suggestedExams.lab.forEach((exam: string, index: number) => {
+        followUp += `${index + 1}. ${exam}\n`
+      })
+      followUp += '\n'
+    }
+    
+    if (diagnosisData?.suggestedExams?.imaging && diagnosisData.suggestedExams.imaging.length > 0) {
+      followUp += 'EXAMENS D\'IMAGERIE:\n'
+      diagnosisData.suggestedExams.imaging.forEach((exam: string, index: number) => {
+        followUp += `${index + 1}. ${exam}\n`
+      })
+      followUp += '\n'
+    }
+    
+    if (diagnosisData?.followUp?.nextVisit) {
+      followUp += `\nPROCHAINE CONSULTATION: ${diagnosisData.followUp.nextVisit}\n`
+    }
     
     return followUp || 'Suivi à prévoir selon l\'évolution clinique'
   }
 
-  // Clear consultation data
-  clearConsultation() {
+  // Clear consultation data and cache
+  async clearConsultation() {
     this.consultationId = null
     this.patientId = null
     this.doctorId = null
@@ -572,7 +893,66 @@ class ConsultationDataService {
     this.safeLocalStorage.removeItem('currentPatientId') 
     this.safeLocalStorage.removeItem('currentDoctorId')
     
-    console.log('🧹 Consultation data cleared')
+    // Clear cache
+    await this.clearCache()
+    
+    console.log('🧹 Consultation data and cache cleared')
+  }
+
+  // ✅ Preload all consultation data into cache
+  async preloadConsultationData(consultationId: string): Promise<boolean> {
+    try {
+      console.log('⏳ Preloading consultation data into cache...')
+      
+      // Load from Supabase
+      const data = await this.loadFromSupabase(consultationId)
+      
+      if (data) {
+        // Cache is already updated by loadFromSupabase
+        console.log('✅ Consultation data preloaded into cache')
+        return true
+      }
+      
+      return false
+    } catch (error) {
+      console.error('❌ Error preloading consultation data:', error)
+      return false
+    }
+  }
+
+  // ✅ Get cache status
+  async getCacheStatus(): Promise<{
+    available: boolean
+    consultationsCached: number
+    sizeEstimate?: number
+  }> {
+    if (!this.cacheAvailable) {
+      return { available: false, consultationsCached: 0 }
+    }
+
+    try {
+      const cache = await caches.open(CACHE_NAME)
+      const keys = await cache.keys()
+      
+      // Estimate size (rough calculation)
+      let totalSize = 0
+      for (const request of keys) {
+        const response = await cache.match(request)
+        if (response) {
+          const blob = await response.blob()
+          totalSize += blob.size
+        }
+      }
+
+      return {
+        available: true,
+        consultationsCached: keys.length,
+        sizeEstimate: totalSize
+      }
+    } catch (error) {
+      console.error('❌ Error getting cache status:', error)
+      return { available: false, consultationsCached: 0 }
+    }
   }
 }
 
