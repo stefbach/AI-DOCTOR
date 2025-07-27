@@ -62,6 +62,8 @@ export default function ModernClinicalForm({
   const fieldRefs = useRef<Record<string, HTMLElement | null>>({})
   const [showKeyboardHint, setShowKeyboardHint] = useState(true)
   const [focusedField, setFocusedField] = useState<string | null>(null)
+  const isMountedRef = useRef(false)
+  const isUpdatingRef = useRef(false)
   
   // Helper function for translations
   const t = (key: string) => getTranslation(key, language)
@@ -176,18 +178,26 @@ export default function ModernClinicalForm({
     }
   }, [focusNextField, showKeyboardHint])
 
-  // Special handler for Select component (duration)
+  // Special handler for Select component (duration) - FIXED
   const handleDurationChange = useCallback((value: string) => {
-    updateData({ symptomDuration: value })
+    isUpdatingRef.current = true
+    setLocalData(prev => ({
+      ...prev,
+      symptomDuration: value
+    }))
+    
     // Auto-focus next field after selection
     setTimeout(() => {
+      isUpdatingRef.current = false
       focusNextField('symptomDuration')
     }, 100)
-  }, [])
+  }, [focusNextField])
 
   // Load saved data on mount
   useEffect(() => {
     const loadSavedData = async () => {
+      if (!isMountedRef.current || isUpdatingRef.current) return
+      
       try {
         const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
         
@@ -202,11 +212,16 @@ export default function ModernClinicalForm({
       }
     }
     
-    loadSavedData()
+    if (!isMountedRef.current) {
+      isMountedRef.current = true
+      loadSavedData()
+    }
   }, [consultationId])
 
-  // Save data when it changes
+  // Save data when it changes - FIXED
   useEffect(() => {
+    if (isUpdatingRef.current) return
+    
     const saveData = async () => {
       try {
         await consultationDataService.saveStepData(1, localData)
@@ -262,13 +277,14 @@ export default function ModernClinicalForm({
   }
 
   const updateData = (updates: Partial<ClinicalData>) => {
-    const newData = { ...localData, ...updates }
-    setLocalData(newData)
+    setLocalData(prev => ({ ...prev, ...updates }))
   }
 
   const updateVitalSigns = (field: string, value: string) => {
-    const newVitalSigns = { ...localData.vitalSigns, [field]: value }
-    updateData({ vitalSigns: newVitalSigns })
+    setLocalData(prev => ({
+      ...prev,
+      vitalSigns: { ...prev.vitalSigns, [field]: value }
+    }))
   }
 
   const toggleSymptom = (symptom: string) => {
@@ -277,6 +293,28 @@ export default function ModernClinicalForm({
       ? currentSymptoms.filter((s) => s !== symptom)
       : [...currentSymptoms, symptom]
     updateData({ symptoms: newSymptoms })
+  }
+
+  // Helper function for blood pressure classification - FIXED
+  const getBloodPressureStatus = (systolic: string, diastolic: string) => {
+    const sys = parseInt(systolic)
+    const dia = parseInt(diastolic)
+    
+    if (isNaN(sys) || isNaN(dia)) return null
+    
+    if (sys >= 180 || dia >= 120) {
+      return { status: 'hypertensiveCrisis', icon: '🚨', color: 'text-red-800' }
+    } else if (sys >= 140 || dia >= 90) {
+      return { status: 'hypertension2', icon: '🔴', color: 'text-red-600' }
+    } else if ((sys >= 130 && sys <= 139) || (dia >= 80 && dia <= 89)) {
+      return { status: 'hypertension1', icon: '⚠️', color: 'text-orange-600' }
+    } else if (sys >= 120 && sys <= 129 && dia < 80) {
+      return { status: 'elevated', icon: '🟡', color: 'text-yellow-600' }
+    } else if (sys < 120 && dia < 80) {
+      return { status: 'normal', icon: '✅', color: 'text-green-600' }
+    }
+    
+    return null
   }
 
   const progress = calculateProgress()
@@ -304,7 +342,7 @@ export default function ModernClinicalForm({
     }, 500)
     
     return () => clearTimeout(timer)
-  }, [localData.chiefComplaint])
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -671,13 +709,40 @@ export default function ModernClinicalForm({
                   {t('clinicalForm.bloodPressure')} {localData.vitalSigns?.bloodPressureSystolic || "—"} / {localData.vitalSigns?.bloodPressureDiastolic || "—"} mmHg
                 </p>
               </div>
-              {localData.vitalSigns?.bloodPressureSystolic && localData.vitalSigns?.bloodPressureDiastolic && (
-                <p className="text-xs text-red-600 mt-1">
-                  {(parseInt(localData.vitalSigns.bloodPressureSystolic) >= 140 || parseInt(localData.vitalSigns.bloodPressureDiastolic) >= 90) && `⚠️ ${t('clinicalForm.hypertension')}`}
-                  {(parseInt(localData.vitalSigns.bloodPressureSystolic) < 140 && parseInt(localData.vitalSigns.bloodPressureDiastolic) < 90 && parseInt(localData.vitalSigns.bloodPressureSystolic) >= 120) && `🟡 ${t('clinicalForm.preHypertension')}`}
-                  {(parseInt(localData.vitalSigns.bloodPressureSystolic) < 120 && parseInt(localData.vitalSigns.bloodPressureDiastolic) < 80) && `✅ ${t('clinicalForm.normal')}`}
-                </p>
-              )}
+              {localData.vitalSigns?.bloodPressureSystolic && localData.vitalSigns?.bloodPressureDiastolic && (() => {
+                const bpStatus = getBloodPressureStatus(
+                  localData.vitalSigns.bloodPressureSystolic,
+                  localData.vitalSigns.bloodPressureDiastolic
+                )
+                
+                if (bpStatus) {
+                  let message = ''
+                  switch (bpStatus.status) {
+                    case 'normal':
+                      message = t('clinicalForm.normal')
+                      break
+                    case 'elevated':
+                      message = t('clinicalForm.elevated', 'Tension élevée')
+                      break
+                    case 'hypertension1':
+                      message = t('clinicalForm.hypertension1', 'Hypertension stade 1')
+                      break
+                    case 'hypertension2':
+                      message = t('clinicalForm.hypertension2', 'Hypertension stade 2')
+                      break
+                    case 'hypertensiveCrisis':
+                      message = t('clinicalForm.hypertensiveCrisis', 'Crise hypertensive - Consulter en urgence!')
+                      break
+                  }
+                  
+                  return (
+                    <p className={`text-xs mt-1 ${bpStatus.color}`}>
+                      {bpStatus.icon} {message}
+                    </p>
+                  )
+                }
+                return null
+              })()}
             </div>
           )}
         </CardContent>
