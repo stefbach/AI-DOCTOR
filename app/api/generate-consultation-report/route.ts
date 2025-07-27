@@ -147,19 +147,104 @@ async function generateCompleteConsultationReport(
       }
     };
 
-    // 3. ✅ Générer automatiquement les documents mauriciens
+    // 3. ✅ Préparer les données dans le format attendu par le générateur
+    const consultationDataForGenerator = {
+      patientInfo: {
+        firstName: patientData?.firstName || '',
+        lastName: patientData?.lastName || '',
+        age: patientData?.age || 0,
+        gender: patientData?.gender || '',
+        address: patientData?.address || '',
+        phone: patientData?.phone || '',
+        allergies: Array.isArray(patientData?.allergies) 
+          ? patientData.allergies.join(', ') 
+          : (patientData?.allergies || ''),
+        weight: patientData?.weight || null,
+        height: patientData?.height || null,
+        bmi: patientData?.weight && patientData?.height 
+          ? (patientData.weight / ((patientData.height / 100) ** 2)).toFixed(1) 
+          : null,
+      },
+      chiefComplaint: clinicalData?.chiefComplaint || '',
+      diseaseHistory: consultationReport.anamnesis?.historyOfDisease || '',
+      symptoms: extractSymptomsArray(questionsData, clinicalData), // Extraire les symptômes sous forme de tableau
+      symptomDuration: consultationReport.anamnesis?.duration || '',
+      diagnosis: consultationReport.diagnosticAssessment.primaryDiagnosis.condition,
+      diagnosticConfidence: consultationReport.diagnosticAssessment.primaryDiagnosis.confidence,
+      diagnosticReasoning: consultationReport.diagnosticAssessment.primaryDiagnosis.rationale,
+      differentialDiagnoses: consultationReport.diagnosticAssessment.differentialDiagnosis,
+      examination: consultationReport.physicalExam ? 
+        `${consultationReport.physicalExam.generalExam}\n${consultationReport.physicalExam.vitalSigns}\n${consultationReport.physicalExam.systemicExam}` 
+        : 'Examen clinique complet effectué',
+      treatment: consultationReport.therapeuticPlan?.medications?.map((med: any) => 
+        `${med.name} ${med.dosage} - ${med.frequency}`
+      ).join('; ') || 'Traitement selon protocole',
+      followUpPlan: consultationReport.therapeuticPlan?.followUp || 'Suivi médical recommandé',
+    };
+
+    // Préparer les données enrichies pour le générateur (avec structure pour prescriptions)
+    const enrichedDiagnosisData = {
+      ...diagnosisData,
+      // Mapper les examens suggérés dans le format attendu par le générateur
+      suggestedExams: {
+        lab: consultationReport.investigationsPlan?.laboratoryTests ? [
+          ...consultationReport.investigationsPlan.laboratoryTests.urgentTests.map((test: string) => ({
+            name: test,
+            indication: `Urgent - ${consultationReport.diagnosticAssessment.primaryDiagnosis.condition}`,
+            urgency: 'URGENT'
+          })),
+          ...consultationReport.investigationsPlan.laboratoryTests.routineTests.map((test: string) => ({
+            name: test,
+            indication: consultationReport.diagnosticAssessment.primaryDiagnosis.condition,
+            urgency: '48h'
+          }))
+        ] : [],
+        imaging: consultationReport.investigationsPlan?.imaging ? [
+          ...consultationReport.investigationsPlan.imaging.urgent.map((exam: string) => ({
+            name: exam,
+            indication: `Urgent - ${consultationReport.diagnosticAssessment.primaryDiagnosis.condition}`,
+            urgency: 'URGENT'
+          })),
+          ...consultationReport.investigationsPlan.imaging.routine.map((exam: string) => ({
+            name: exam,
+            indication: consultationReport.diagnosticAssessment.primaryDiagnosis.condition,
+            urgency: 'Dans la semaine'
+          }))
+        ] : [],
+        other: consultationReport.investigationsPlan?.specialTests?.map((test: string) => ({
+          name: test,
+          indication: 'Complément diagnostic'
+        })) || []
+      },
+      // Mapper le plan thérapeutique
+      treatmentPlan: {
+        medications: consultationReport.therapeuticPlan?.medications || [],
+        recommendations: [
+          ...consultationReport.therapeuticPlan?.nonPharmacological?.lifestyleModifications || [],
+          ...consultationReport.therapeuticPlan?.nonPharmacological?.patientEducation || [],
+          ...consultationReport.therapeuticPlan?.nonPharmacological?.mauritianSpecific || []
+        ]
+      },
+      // Ajouter les symptômes si disponibles
+      symptoms: extractSymptomsArray(questionsData, clinicalData),
+      // Informations de suivi
+      followUp: {
+        nextVisit: consultationReport.therapeuticPlan?.followUp || 'Revoir si pas d\'amélioration dans 72h'
+      }
+    };
+
+    // 4. ✅ Générer automatiquement les documents mauriciens avec la structure adaptée
     const mauritianDocuments = MauritianDocumentsGenerator.generateMauritianDocuments(
-      consultationReport,
+      { consultationData: consultationDataForGenerator }, // Structure attendue par le générateur
       doctorInfo,
       patientData,
-      diagnosisData
+      enrichedDiagnosisData // Données enrichies pour les prescriptions
     );
 
-    // 4. Retourner le rapport complet avec les documents
+    // 4. ✅ CORRECTION : Retourner le rapport complet sans formattedDocuments
     return {
       ...consultationReport,
       mauritianDocuments,
-      formattedDocuments: MauritianDocumentsGenerator.formatForPrint(mauritianDocuments),
       doctorInfo
     };
 
@@ -172,6 +257,32 @@ async function generateCompleteConsultationReport(
 // ============================================
 // FONCTIONS UTILITAIRES
 // ============================================
+
+function extractSymptomsArray(questionsData: any, clinicalData: any): string[] {
+  const symptoms: string[] = [];
+  
+  // Extraire les symptômes depuis questionsData
+  if (questionsData?.responses) {
+    Object.entries(questionsData.responses).forEach(([question, answer]: [string, any]) => {
+      if (question.toLowerCase().includes('symptôme') || 
+          question.toLowerCase().includes('ressent') ||
+          question.toLowerCase().includes('douleur') ||
+          question.toLowerCase().includes('mal') ||
+          question.toLowerCase().includes('problème')) {
+        if (typeof answer === 'string' && answer.trim()) {
+          symptoms.push(answer.trim());
+        }
+      }
+    });
+  }
+  
+  // Ajouter le motif principal si disponible
+  if (clinicalData?.chiefComplaint && !symptoms.includes(clinicalData.chiefComplaint)) {
+    symptoms.push(clinicalData.chiefComplaint);
+  }
+  
+  return symptoms.length > 0 ? symptoms : ['Symptômes à documenter'];
+}
 
 function extractHistoryFromQuestionsData(questionsData: any): string {
   if (!questionsData?.responses) return "Histoire de la maladie actuelle à documenter";
