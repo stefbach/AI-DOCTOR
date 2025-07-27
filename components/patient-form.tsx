@@ -116,11 +116,13 @@ export default function ModernPatientForm({
     t('medicalConditions.highCholesterol'),
   ]
   
-  // Field navigation order
+  // Field navigation order - FIXED
   const FIELD_ORDER = [
     'firstName',
     'lastName', 
     'birthDate',
+    'gender-male',  // Focus on first gender checkbox
+    'otherGender',
     'weight',
     'height',
     'phone',
@@ -217,22 +219,46 @@ export default function ModernPatientForm({
     const currentIndex = FIELD_ORDER.indexOf(currentField)
     if (currentIndex >= 0 && currentIndex < FIELD_ORDER.length - 1) {
       const nextFieldName = FIELD_ORDER[currentIndex + 1]
-      const nextField = fieldRefs.current[nextFieldName]
       
-      if (nextField) {
-        nextField.focus()
+      // Special handling for gender checkbox
+      if (nextFieldName.startsWith('gender-')) {
+        const genderCheckbox = document.getElementById(nextFieldName) as HTMLElement
+        if (genderCheckbox) {
+          genderCheckbox.focus()
+          
+          // Auto-scroll to the checkbox
+          genderCheckbox.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          })
+          
+          // Add visual highlight to parent div
+          const parentDiv = genderCheckbox.closest('.border-2')
+          if (parentDiv) {
+            parentDiv.classList.add('ring-2', 'ring-blue-300')
+            setTimeout(() => {
+              parentDiv.classList.remove('ring-2', 'ring-blue-300')
+            }, 1000)
+          }
+        }
+      } else {
+        const nextField = fieldRefs.current[nextFieldName]
         
-        // Auto-scroll to the field
-        nextField.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center' 
-        })
-        
-        // Add visual highlight
-        nextField.classList.add('ring-2', 'ring-blue-300')
-        setTimeout(() => {
-          nextField.classList.remove('ring-2', 'ring-blue-300')
-        }, 1000)
+        if (nextField) {
+          nextField.focus()
+          
+          // Auto-scroll to the field
+          nextField.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          })
+          
+          // Add visual highlight
+          nextField.classList.add('ring-2', 'ring-blue-300')
+          setTimeout(() => {
+            nextField.classList.remove('ring-2', 'ring-blue-300')
+          }, 1000)
+        }
       }
     } else if (currentIndex === FIELD_ORDER.length - 1) {
       // Last field, focus submit button or trigger validation
@@ -783,7 +809,7 @@ export default function ModernPatientForm({
             </Label>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[t('patientForm.male'), t('patientForm.female')].map((genderOption) => (
+              {[t('patientForm.male'), t('patientForm.female')].map((genderOption, index) => (
                 <div
                   key={genderOption}
                   className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
@@ -794,11 +820,17 @@ export default function ModernPatientForm({
                   onClick={() => handleGenderChange(genderOption, !formData.gender.includes(genderOption))}
                 >
                   <Checkbox
-                    id={`gender-${genderOption}`}
+                    id={`gender-${index === 0 ? 'male' : 'female'}`}
                     checked={formData.gender.includes(genderOption)}
                     onCheckedChange={(checked) => handleGenderChange(genderOption, checked as boolean)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        focusNextField(`gender-${index === 0 ? 'male' : 'female'}`)
+                      }
+                    }}
                   />
-                  <Label htmlFor={`gender-${genderOption}`} className="text-sm font-medium cursor-pointer">
+                  <Label htmlFor={`gender-${index === 0 ? 'male' : 'female'}`} className="text-sm font-medium cursor-pointer">
                     {genderOption}
                   </Label>
                 </div>
@@ -813,6 +845,7 @@ export default function ModernPatientForm({
                 value={formData.otherGender}
                 onChange={(e) => handleInputChange("otherGender", e.target.value)}
                 onKeyDown={(e) => handleKeyDown(e, 'otherGender')}
+                ref={(el) => setFieldRef('otherGender', el)}
                 className="transition-all duration-200 focus:ring-blue-200"
               />
             </div>
