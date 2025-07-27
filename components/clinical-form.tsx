@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
+import { useConsultationCache } from '@/hooks/useConsultationCache'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,7 +24,15 @@ import {
   Search,
   Keyboard,
   CheckCircle,
-  Target
+  Target,
+  RefreshCw,
+  Cloud,
+  CloudOff,
+  AlertTriangle,
+  Save,
+  Database,
+  Wifi,
+  WifiOff
 } from "lucide-react"
 import { getTranslation, Language } from "@/lib/translations"
 
@@ -49,6 +58,23 @@ interface ClinicalFormProps {
   consultationId?: string | null
 }
 
+// Custom hook for debouncing
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay])
+
+  return debouncedValue
+}
+
 export default function ModernClinicalForm({ 
   data, 
   patientData, 
@@ -62,11 +88,13 @@ export default function ModernClinicalForm({
   const fieldRefs = useRef<Record<string, HTMLElement | null>>({})
   const [showKeyboardHint, setShowKeyboardHint] = useState(true)
   const [focusedField, setFocusedField] = useState<string | null>(null)
-  const isMountedRef = useRef(false)
-  const isUpdatingRef = useRef(false)
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null)
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [localErrors, setLocalErrors] = useState<string[]>([])
   
   // Helper function for translations
-  const t = (key: string) => getTranslation(key, language)
+  const t = (key: string, fallback?: string) => getTranslation(key, language) || fallback || key
 
   // Get translated arrays
   const COMMON_SYMPTOMS = [
@@ -123,6 +151,79 @@ export default function ModernClinicalForm({
   const [symptomSearch, setSymptomSearch] = useState("")
   const [currentSection, setCurrentSection] = useState(0)
 
+  // Use consultation cache hook
+  const {
+    data: cachedData,
+    loading: cacheLoading,
+    error: cacheError,
+    lastSync,
+    isSyncing,
+    setData: setCacheData,
+    refresh: refreshCache,
+    sync: syncCache,
+    clear: clearCache,
+    cacheStats
+  } = useConsultationCache({
+    key: `clinical_form_${consultationId || 'current'}`,
+    ttl: 30 * 60 * 1000, // 30 minutes
+    autoSync: true,
+    syncInterval: 3 * 60 * 1000, // 3 minutes for clinical form
+    onSync: async (data) => {
+      try {
+        setSaveStatus('saving')
+        const currentId = consultationId || consultationDataService.getCurrentConsultationId()
+        
+        if (currentId) {
+          // Save to consultation data service
+          await consultationDataService.saveStepData(1, data)
+          
+          // Sync with Supabase if online
+          if (isOnline) {
+            await consultationDataService.saveToSupabase(currentId)
+          }
+        }
+        
+        setSaveStatus('saved')
+        setLastSaveTime(new Date())
+        setLocalErrors([])
+      } catch (error) {
+        console.error('Sync error:', error)
+        setSaveStatus('error')
+        setLocalErrors(prev => [...prev, 'Erreur de synchronisation'])
+        throw error
+      }
+    },
+    onError: (error) => {
+      console.error('Cache error:', error)
+      setSaveStatus('error')
+      setLocalErrors(prev => [...prev, error.message])
+    }
+  })
+
+  // Debounced form data for auto-save
+  const debouncedLocalData = useDebounce(localData, 1000)
+
+  // Monitor online/offline status
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true)
+      // Auto sync when coming back online
+      syncCache()
+    }
+    const handleOffline = () => {
+      setIsOnline(false)
+      setLocalErrors(prev => [...prev, 'Mode hors ligne - Les données seront synchronisées au retour de la connexion'])
+    }
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [syncCache])
+
   // NAVIGATION FUNCTIONS
   const setFieldRef = useCallback((fieldName: string, element: HTMLElement | null) => {
     fieldRefs.current[fieldName] = element
@@ -178,9 +279,8 @@ export default function ModernClinicalForm({
     }
   }, [focusNextField, showKeyboardHint])
 
-  // Special handler for Select component (duration) - FIXED
+  // Special handler for Select component (duration)
   const handleDurationChange = useCallback((value: string) => {
-    isUpdatingRef.current = true
     setLocalData(prev => ({
       ...prev,
       symptomDuration: value
@@ -188,80 +288,48 @@ export default function ModernClinicalForm({
     
     // Auto-focus next field after selection
     setTimeout(() => {
-      isUpdatingRef.current = false
       focusNextField('symptomDuration')
     }, 100)
   }, [focusNextField])
 
-  // Load saved data on mount
+  // Load cached data on mount
   useEffect(() => {
-    const loadSavedData = async () => {
-      if (!isMountedRef.current || isUpdatingRef.current) return
-      
-      try {
-        const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
-        
-        if (currentConsultationId) {
-          const savedData = await consultationDataService.getAllData()
-          if (savedData?.clinicalData) {
-            setLocalData(savedData.clinicalData)
-          }
-        }
-      } catch (error) {
-        console.error('Error loading saved clinical data:', error)
-      }
+    if (cachedData && !data) {
+      console.log('Loading clinical data from cache')
+      setLocalData(cachedData)
+    } else if (data) {
+      console.log('Loading clinical data from props')
+      setLocalData(data)
     }
-    
-    if (!isMountedRef.current) {
-      isMountedRef.current = true
-      loadSavedData()
-    }
-  }, [consultationId])
+  }, [cachedData, data])
 
-  // Save data when it changes - FIXED
+  // Auto-save when debounced data changes
   useEffect(() => {
-    if (isUpdatingRef.current) return
-    
     const saveData = async () => {
-      try {
-        await consultationDataService.saveStepData(1, localData)
-      } catch (error) {
-        console.error('Error saving clinical data:', error)
+      if (debouncedLocalData.chiefComplaint || debouncedLocalData.diseaseHistory || debouncedLocalData.symptoms.length > 0) {
+        setSaveStatus('saving')
+        
+        try {
+          // Save to cache
+          await setCacheData(debouncedLocalData)
+          
+          // Save to consultation data service
+          await consultationDataService.saveStepData(1, debouncedLocalData)
+          
+          // Call parent callback
+          onDataChange(debouncedLocalData)
+          
+          setSaveStatus('saved')
+          setLastSaveTime(new Date())
+        } catch (error) {
+          console.error('Error saving clinical data:', error)
+          setSaveStatus('error')
+        }
       }
     }
     
-    const timer = setTimeout(() => {
-      if (localData.chiefComplaint || localData.diseaseHistory || localData.symptoms.length > 0) {
-        saveData()
-      }
-    }, 1000)
-    
-    return () => clearTimeout(timer)
-  }, [localData])
-
-  useEffect(() => {
-    if (data) {
-      setLocalData({
-        chiefComplaint: data.chiefComplaint || "",
-        diseaseHistory: data.diseaseHistory || "",
-        symptomDuration: data.symptomDuration || "",
-        symptoms: Array.isArray(data.symptoms) ? data.symptoms : [],
-        vitalSigns: {
-          temperature: data.vitalSigns?.temperature || "",
-          bloodPressureSystolic: data.vitalSigns?.bloodPressureSystolic || "",
-          bloodPressureDiastolic: data.vitalSigns?.bloodPressureDiastolic || "",
-        },
-      })
-    }
-  }, [data])
-
-  // Auto-save effect
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onDataChange(localData)
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [localData, onDataChange])
+    saveData()
+  }, [debouncedLocalData, setCacheData, onDataChange])
 
   // Calculate progress
   const calculateProgress = () => {
@@ -295,7 +363,7 @@ export default function ModernClinicalForm({
     updateData({ symptoms: newSymptoms })
   }
 
-  // Helper function for blood pressure classification - FIXED
+  // Helper function for blood pressure classification
   const getBloodPressureStatus = (systolic: string, diastolic: string) => {
     const sys = parseInt(systolic)
     const dia = parseInt(diastolic)
@@ -317,8 +385,25 @@ export default function ModernClinicalForm({
     return null
   }
 
-  const progress = calculateProgress()
+  // Manual refresh function
+  const handleRefresh = async () => {
+    setLocalErrors([])
+    await refreshCache()
+    if (isOnline) {
+      await syncCache()
+    }
+  }
 
+  // Handle navigation with sync
+  const handleNext = async () => {
+    // Force sync before navigation
+    if (isOnline) {
+      await syncCache()
+    }
+    onNext()
+  }
+
+  const progress = calculateProgress()
   const filteredSymptoms = COMMON_SYMPTOMS.filter(symptom =>
     symptom.toLowerCase().includes(symptomSearch.toLowerCase())
   )
@@ -344,8 +429,122 @@ export default function ModernClinicalForm({
     return () => clearTimeout(timer)
   }, [])
 
+  // Status bar component
+  const StatusBar = () => (
+    <div className="flex items-center justify-between bg-white/80 backdrop-blur-sm rounded-lg px-4 py-2 shadow-md">
+      <div className="flex items-center gap-4">
+        {/* Online/Offline status */}
+        <div className="flex items-center gap-2">
+          {isOnline ? (
+            <>
+              <Wifi className="h-4 w-4 text-green-600" />
+              <span className="text-sm font-medium text-green-600">En ligne</span>
+            </>
+          ) : (
+            <>
+              <WifiOff className="h-4 w-4 text-red-600" />
+              <span className="text-sm font-medium text-red-600">Hors ligne</span>
+            </>
+          )}
+        </div>
+
+        {/* Save status */}
+        <div className="flex items-center gap-2">
+          {saveStatus === 'saving' && (
+            <>
+              <RefreshCw className="h-4 w-4 animate-spin text-purple-600" />
+              <span className="text-sm text-purple-600">Sauvegarde...</span>
+            </>
+          )}
+          {saveStatus === 'saved' && (
+            <>
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-sm text-green-600">Sauvegardé</span>
+            </>
+          )}
+          {saveStatus === 'error' && (
+            <>
+              <AlertTriangle className="h-4 w-4 text-red-600" />
+              <span className="text-sm text-red-600">Erreur</span>
+            </>
+          )}
+        </div>
+
+        {/* Last save time */}
+        {lastSaveTime && (
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Clock className="h-4 w-4" />
+            <span>{lastSaveTime.toLocaleTimeString('fr-FR')}</span>
+          </div>
+        )}
+
+        {/* Sync status */}
+        {isSyncing && (
+          <div className="flex items-center gap-2">
+            <Cloud className="h-4 w-4 text-blue-600 animate-pulse" />
+            <span className="text-sm text-blue-600">Synchronisation...</span>
+          </div>
+        )}
+      </div>
+
+      {/* Cache info and actions */}
+      <div className="flex items-center gap-4">
+        {cacheStats.isStale && (
+          <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+            Cache périmé
+          </Badge>
+        )}
+        
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={handleRefresh}
+          disabled={isSyncing || cacheLoading}
+        >
+          <RefreshCw className={`h-4 w-4 ${isSyncing || cacheLoading ? 'animate-spin' : ''}`} />
+        </Button>
+      </div>
+    </div>
+  )
+
+  // Show loading state
+  if (cacheLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <RefreshCw className="h-8 w-8 animate-spin text-purple-600 mx-auto mb-4" />
+          <p className="text-gray-600">Chargement des données cliniques...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
+      {/* Status Bar */}
+      <StatusBar />
+
+      {/* Error display */}
+      {(cacheError || localErrors.length > 0) && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              {cacheError && (
+                <p className="text-sm font-medium text-red-800">
+                  Erreur de cache : {cacheError.message}
+                </p>
+              )}
+              {localErrors.map((error, index) => (
+                <p key={index} className="text-sm text-red-700">
+                  {error}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Navigation Hint */}
       {showKeyboardHint && (
         <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
@@ -776,12 +975,22 @@ export default function ModernClinicalForm({
           {t('clinicalForm.backButton')}
         </Button>
         <Button 
-          onClick={onNext}
+          onClick={handleNext}
           data-next-button="true"
+          disabled={isSyncing}
           className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
         >
-          {t('clinicalForm.continueToAI')}
-          <ArrowRight className="h-4 w-4 ml-2" />
+          {isSyncing ? (
+            <>
+              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              {t('common.syncing', 'Synchronisation...')}
+            </>
+          ) : (
+            <>
+              {t('clinicalForm.continueToAI')}
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </>
+          )}
         </Button>
       </div>
     </div>
