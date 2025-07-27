@@ -219,6 +219,10 @@ export default function DocumentsWorkflow({
         email: doctorData?.email || "contact@cabinet.mu",
         registrationNumber: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || "Medical Council of Mauritius - Reg. No. XXXXX"
       }
+console.log("🧪 Vérification des données AVANT génération :");
+console.log("👤 patientData =", JSON.stringify(patientData, null, 2));
+console.log("🧠 diagnosisData =", JSON.stringify(diagnosisData?.diagnosis, null, 2));
+console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
 
       // ✅ Generate all 4 documents using the generator
       const mauritianDocs = MauritianDocumentsGenerator.generateMauritianDocuments(
