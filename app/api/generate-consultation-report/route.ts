@@ -609,7 +609,10 @@ async function generateCompleteConsultationReport(
     // ================================
     // 4. APPELER EXPLICITEMENT LE GÉNÉRATEUR
     // ================================
-    
+    console.log("🔍 DIAG = ", diagnosisData?.diagnosis?.primary?.condition);
+console.log("👤 DOCTOR = ", doctorInfo?.fullName);
+console.log("🧑‍🦱 PATIENT = ", patientData?.firstName, patientData?.lastName);
+
     const mauritianDocuments = await Promise.race([
       Promise.resolve(MauritianDocumentsGenerator.generateMauritianDocuments(
         { consultationData }, // 1er paramètre : objet contenant consultationData
