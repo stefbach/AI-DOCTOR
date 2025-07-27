@@ -292,7 +292,78 @@ export class MauritianDocumentsGenerator {
         sections.push(`RAISONNEMENT DIAGNOSTIQUE:\n${consultationData.diagnosticReasoning}`)
       }
     }
-    
+    if (data.success && data.diagnosis) {
+  setDiagnosis(data.diagnosis)
+  setExpertAnalysis(data.expertAnalysis || data.expert_analysis || {})
+
+  // Reformatage du diagnostic pour le générateur
+  const diagnosisDataForGenerator = {
+    diagnosis: {
+      primary: data.diagnosis.primary,
+      differential: data.diagnosis.differential,
+    },
+  }
+
+  // Construction minimale de consultationData
+  const consultationData = {
+    patientInfo: {
+      firstName: patientData.firstName,
+      lastName: patientData.lastName,
+      age: patientData.age,
+      gender: patientData.gender,
+      address: patientData.address,
+      phone: patientData.phone,
+      allergies: Array.isArray(patientData.allergies)
+        ? patientData.allergies.join(', ')
+        : patientData.allergies,
+      weight: patientData.weight,
+      height: patientData.height,
+      bmi:
+        patientData.weight && patientData.height
+          ? (
+              patientData.weight /
+              ((patientData.height / 100) ** 2)
+            ).toFixed(1)
+          : null,
+    },
+    chiefComplaint: clinicalData.chiefComplaint || '',
+    diseaseHistory: clinicalData.historyOfDisease || '',
+    symptoms: clinicalData.symptoms || [],
+    symptomDuration: clinicalData.duration || '',
+    diagnosis: data.diagnosis.primary.condition,
+    diagnosticConfidence: data.diagnosis.primary.confidence,
+    diagnosticReasoning:
+      data.diagnosis.primary.clinicalRationale ||
+      data.diagnosis.primary.rationale ||
+      '',
+    differentialDiagnoses: data.diagnosis.differential || [],
+    treatment: '',
+    followUpPlan: '',
+  }
+
+  // Récupération des informations du médecin
+  const doctorInfo = consultationDataService.getDoctorInfo()
+
+  // Si les documents renvoyés par l’API sont vides, on les génère
+  let docs = data.mauritianDocuments
+  if (
+    !docs ||
+    !docs.consultation ||
+    Object.keys(docs.consultation).length === 0
+  ) {
+    docs = MauritianDocumentsGenerator.generateMauritianDocuments(
+      { consultationData },
+      doctorInfo,
+      patientData,
+      diagnosisDataForGenerator
+    )
+  }
+
+  setMauritianDocuments(docs)
+  setDocumentsGenerated(true)
+  setDiagnosisGeneratedAt(new Date().toISOString())
+  setGenerationMethod('openai_gpt4o')
+}
     // Differential diagnoses
     if (consultationData.differentialDiagnoses && consultationData.differentialDiagnoses.length > 0) {
       const diffDiagnoses = consultationData.differentialDiagnoses.map((d: any, index: number) => 
