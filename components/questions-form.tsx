@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
+import { useConsultationCache } from '@/hooks/useConsultationCache'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -22,7 +23,16 @@ import {
   Sparkles,
   Stethoscope,
   Clock,
-  Target
+  Target,
+  RefreshCw,
+  Cloud,
+  CloudOff,
+  Save,
+  Database,
+  Wifi,
+  WifiOff,
+  Shield,
+  Zap
 } from "lucide-react"
 import { getTranslation, Language } from "@/lib/translations"
 
@@ -46,6 +56,9 @@ interface QuestionResponse {
 
 interface QuestionsData {
   responses: QuestionResponse[]
+  questions?: Question[]
+  generationMethod?: string
+  generatedAt?: string
 }
 
 interface QuestionsFormProps {
@@ -56,6 +69,23 @@ interface QuestionsFormProps {
   onPrevious: () => void
   language?: Language
   consultationId?: string | null
+}
+
+// Custom hook for debouncing
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay])
+
+  return debouncedValue
 }
 
 export default function ModernQuestionsForm({
@@ -73,69 +103,173 @@ export default function ModernQuestionsForm({
   const [error, setError] = useState<string | null>(null)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [generationMethod, setGenerationMethod] = useState<string>("")
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null)
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [localErrors, setLocalErrors] = useState<string[]>([])
+  const [questionsGeneratedAt, setQuestionsGeneratedAt] = useState<string | null>(null)
+  const [isRegenerating, setIsRegenerating] = useState(false)
 
   // Helper function for translations
-  const t = (key: string) => getTranslation(key, language)
+  const t = (key: string, fallback?: string) => getTranslation(key, language) || fallback || key
 
-  // Load saved data on mount
-  useEffect(() => {
-    const loadSavedData = async () => {
+  // Full questions data including responses
+  const fullQuestionsData = useMemo<QuestionsData>(() => ({
+    responses,
+    questions,
+    generationMethod,
+    generatedAt: questionsGeneratedAt || new Date().toISOString()
+  }), [responses, questions, generationMethod, questionsGeneratedAt])
+
+  // Use consultation cache hook
+  const {
+    data: cachedData,
+    loading: cacheLoading,
+    error: cacheError,
+    lastSync,
+    isSyncing,
+    setData: setCacheData,
+    refresh: refreshCache,
+    sync: syncCache,
+    clear: clearCache,
+    cacheStats
+  } = useConsultationCache({
+    key: `questions_form_${consultationId || 'current'}`,
+    ttl: 45 * 60 * 1000, // 45 minutes for questions (longer due to AI generation)
+    autoSync: true,
+    syncInterval: 5 * 60 * 1000, // 5 minutes for questions form
+    onSync: async (data) => {
       try {
-        const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
+        setSaveStatus('saving')
+        const currentId = consultationId || consultationDataService.getCurrentConsultationId()
         
-        if (currentConsultationId) {
-          const savedData = await consultationDataService.getAllData()
-          if (savedData?.questionsData?.responses) {
-            setResponses(savedData.questionsData.responses)
+        if (currentId) {
+          // Save complete questions data
+          await consultationDataService.saveStepData(2, data)
+          
+          // Sync with Supabase if online
+          if (isOnline) {
+            await consultationDataService.saveToSupabase(currentId)
           }
         }
+        
+        setSaveStatus('saved')
+        setLastSaveTime(new Date())
+        setLocalErrors([])
       } catch (error) {
-        console.error('Error loading saved questions data:', error)
+        console.error('Sync error:', error)
+        setSaveStatus('error')
+        setLocalErrors(prev => [...prev, 'Erreur de synchronisation'])
+        throw error
+      }
+    },
+    onError: (error) => {
+      console.error('Cache error:', error)
+      setSaveStatus('error')
+      setLocalErrors(prev => [...prev, error.message])
+    }
+  })
+
+  // Debounced questions data for auto-save
+  const debouncedQuestionsData = useDebounce(fullQuestionsData, 1500)
+
+  // Monitor online/offline status
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true)
+      // Auto sync when coming back online
+      syncCache()
+    }
+    const handleOffline = () => {
+      setIsOnline(false)
+      setLocalErrors(prev => [...prev, 'Mode hors ligne - Les données seront synchronisées au retour de la connexion'])
+    }
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [syncCache])
+
+  // Load cached data on mount
+  useEffect(() => {
+    if (cachedData && !questions.length) {
+      console.log('Loading questions from cache')
+      
+      if (cachedData.questions && cachedData.questions.length > 0) {
+        setQuestions(cachedData.questions)
+        setResponses(cachedData.responses || [])
+        setGenerationMethod(cachedData.generationMethod || '')
+        setQuestionsGeneratedAt(cachedData.generatedAt || null)
       }
     }
-    
-    loadSavedData()
-  }, [consultationId])
+  }, [cachedData, questions.length])
 
-  // Save data when responses change
+  // Generate questions if needed
+  useEffect(() => {
+    // Don't generate if we already have questions from cache
+    if (questions.length > 0 || loading) return
+    
+    // Only generate if we have patient and clinical data
+    if (patientData && clinicalData) {
+      generateQuestions()
+    }
+  }, [patientData, clinicalData, questions.length, loading])
+
+  // Auto-save when debounced data changes
   useEffect(() => {
     const saveData = async () => {
-      try {
-        await consultationDataService.saveStepData(2, { responses })
-      } catch (error) {
-        console.error('Error saving questions data:', error)
+      if (debouncedQuestionsData.responses.length > 0 || debouncedQuestionsData.questions?.length) {
+        setSaveStatus('saving')
+        
+        try {
+          // Save to cache
+          await setCacheData(debouncedQuestionsData)
+          
+          // Save to consultation data service
+          await consultationDataService.saveStepData(2, debouncedQuestionsData)
+          
+          // Call parent callback
+          onDataChange(debouncedQuestionsData)
+          
+          setSaveStatus('saved')
+          setLastSaveTime(new Date())
+        } catch (error) {
+          console.error('Error saving questions data:', error)
+          setSaveStatus('error')
+        }
       }
     }
     
-    const timer = setTimeout(() => {
-      if (responses.length > 0) {
-        saveData()
-      }
-    }, 1000)
-    
-    return () => clearTimeout(timer)
-  }, [responses])
+    saveData()
+  }, [debouncedQuestionsData, setCacheData, onDataChange])
 
-  useEffect(() => {
-    generateQuestions()
-  }, [patientData, clinicalData])
-
-  // Auto-save effect
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onDataChange({ responses })
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [responses, onDataChange])
-
-  const generateQuestions = async () => {
+  const generateQuestions = async (forceRegenerate = false) => {
     if (!patientData || !clinicalData) return
 
     setLoading(true)
     setError(null)
+    setLocalErrors([])
+    
+    if (forceRegenerate) {
+      setIsRegenerating(true)
+    }
 
     try {
       console.log('🚀 Génération questions avec données:', { patientData, clinicalData })
+      
+      // Check if we should use cached questions
+      if (!forceRegenerate && cachedData?.questions && cachedData.questions.length > 0) {
+        console.log('✅ Using cached questions')
+        setQuestions(cachedData.questions)
+        setResponses(cachedData.responses || [])
+        setGenerationMethod(cachedData.generationMethod || '')
+        setQuestionsGeneratedAt(cachedData.generatedAt || null)
+        return
+      }
       
       // Construction du payload pour l'API
       const apiPayload = {
@@ -215,7 +349,8 @@ export default function ModernQuestionsForm({
           
           // Mise à jour de l'état
           setQuestions(validQuestions)
-          setGenerationMethod(data.metadata?.generationMethod || "unknown")
+          setGenerationMethod(data.metadata?.generationMethod || "openai_medical")
+          setQuestionsGeneratedAt(new Date().toISOString())
           
           // Initialisation des réponses
           const initialResponses = validQuestions.map((q: Question) => ({
@@ -228,10 +363,6 @@ export default function ModernQuestionsForm({
           setResponses(initialResponses)
           
           console.log('✅ Interface mise à jour avec succès')
-          console.log('📋 Questions affichées:')
-          validQuestions.forEach((q, i) => {
-            console.log(`  ${i+1}. ${q.question.substring(0, 100)}...`)
-          })
           
         } else {
           console.warn('⚠️ Aucune question valide trouvée')
@@ -239,12 +370,7 @@ export default function ModernQuestionsForm({
         }
         
       } else {
-        console.error('❌ Format réponse API invalide:', {
-          success: data.success,
-          ai_suggestions: data.ai_suggestions,
-          type: typeof data.ai_suggestions,
-          isArray: Array.isArray(data.ai_suggestions)
-        })
+        console.error('❌ Format réponse API invalide:', data)
         throw new Error("Format de réponse API invalide")
       }
 
@@ -318,6 +444,7 @@ export default function ModernQuestionsForm({
 
       console.log('🔄 Utilisation questions fallback:', fallbackQuestions.length)
       setQuestions(fallbackQuestions)
+      setQuestionsGeneratedAt(new Date().toISOString())
       
       const initialResponses = fallbackQuestions.map((q) => ({
         questionId: q.id,
@@ -329,6 +456,7 @@ export default function ModernQuestionsForm({
       
     } finally {
       setLoading(false)
+      setIsRegenerating(false)
     }
   }
 
@@ -366,6 +494,34 @@ export default function ModernQuestionsForm({
 
   const isLastQuestion = () => {
     return currentQuestionIndex === questions.length - 1
+  }
+
+  // Manual refresh function
+  const handleRefresh = async () => {
+    setLocalErrors([])
+    await refreshCache()
+    if (isOnline) {
+      await syncCache()
+    }
+  }
+
+  // Handle regenerate questions
+  const handleRegenerateQuestions = async () => {
+    if (confirm('Êtes-vous sûr de vouloir régénérer les questions ? Vos réponses actuelles seront perdues.')) {
+      await clearCache()
+      setQuestions([])
+      setResponses([])
+      await generateQuestions(true)
+    }
+  }
+
+  // Handle navigation with sync
+  const handleNext = async () => {
+    // Force sync before navigation
+    if (isOnline) {
+      await syncCache()
+    }
+    onNext()
   }
 
   const renderQuestion = (question: Question) => {
@@ -486,10 +642,103 @@ export default function ModernQuestionsForm({
 
   const progress = calculateProgress()
 
+  // Status bar component
+  const StatusBar = () => (
+    <div className="flex items-center justify-between bg-white/80 backdrop-blur-sm rounded-lg px-4 py-2 shadow-md">
+      <div className="flex items-center gap-4">
+        {/* Online/Offline status */}
+        <div className="flex items-center gap-2">
+          {isOnline ? (
+            <>
+              <Wifi className="h-4 w-4 text-green-600" />
+              <span className="text-sm font-medium text-green-600">En ligne</span>
+            </>
+          ) : (
+            <>
+              <WifiOff className="h-4 w-4 text-red-600" />
+              <span className="text-sm font-medium text-red-600">Hors ligne</span>
+            </>
+          )}
+        </div>
+
+        {/* Save status */}
+        <div className="flex items-center gap-2">
+          {saveStatus === 'saving' && (
+            <>
+              <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
+              <span className="text-sm text-blue-600">Sauvegarde...</span>
+            </>
+          )}
+          {saveStatus === 'saved' && (
+            <>
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-sm text-green-600">Sauvegardé</span>
+            </>
+          )}
+          {saveStatus === 'error' && (
+            <>
+              <AlertTriangle className="h-4 w-4 text-red-600" />
+              <span className="text-sm text-red-600">Erreur</span>
+            </>
+          )}
+        </div>
+
+        {/* Last save time */}
+        {lastSaveTime && (
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Clock className="h-4 w-4" />
+            <span>{lastSaveTime.toLocaleTimeString('fr-FR')}</span>
+          </div>
+        )}
+
+        {/* Sync status */}
+        {isSyncing && (
+          <div className="flex items-center gap-2">
+            <Cloud className="h-4 w-4 text-blue-600 animate-pulse" />
+            <span className="text-sm text-blue-600">Synchronisation...</span>
+          </div>
+        )}
+      </div>
+
+      {/* Cache info and actions */}
+      <div className="flex items-center gap-4">
+        {cacheStats.isStale && (
+          <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+            Cache périmé
+          </Badge>
+        )}
+        
+        {questions.length > 0 && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleRegenerateQuestions}
+            disabled={isRegenerating}
+            className="text-purple-600"
+          >
+            <Sparkles className={`h-4 w-4 mr-1 ${isRegenerating ? 'animate-spin' : ''}`} />
+            Régénérer
+          </Button>
+        )}
+        
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={handleRefresh}
+          disabled={isSyncing || cacheLoading}
+        >
+          <RefreshCw className={`h-4 w-4 ${isSyncing || cacheLoading ? 'animate-spin' : ''}`} />
+        </Button>
+      </div>
+    </div>
+  )
+
   // ÉCRAN DE CHARGEMENT
-  if (loading) {
+  if (loading || cacheLoading) {
     return (
       <div className="space-y-6">
+        <StatusBar />
+        
         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
           <CardHeader className="text-center">
             <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -504,8 +753,12 @@ export default function ModernQuestionsForm({
                 <Stethoscope className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-8 w-8 text-blue-600" />
               </div>
               <div className="space-y-3">
-                <p className="text-xl font-semibold text-gray-800">Analyse de votre profil médical</p>
-                <p className="text-sm text-gray-600">Génération de questions ultra-spécifiques...</p>
+                <p className="text-xl font-semibold text-gray-800">
+                  {cacheLoading ? 'Chargement des questions sauvegardées' : 'Analyse de votre profil médical'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {cacheLoading ? 'Récupération depuis le cache...' : 'Génération de questions ultra-spécifiques...'}
+                </p>
                 <div className="flex items-center justify-center gap-2 text-xs text-blue-600">
                   <Clock className="h-4 w-4" />
                   <span>IA médicale en cours d'analyse</span>
@@ -522,6 +775,30 @@ export default function ModernQuestionsForm({
   // INTERFACE PRINCIPALE
   return (
     <div className="space-y-6">
+      {/* Status Bar */}
+      <StatusBar />
+
+      {/* Error display */}
+      {(cacheError || localErrors.length > 0) && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              {cacheError && (
+                <p className="text-sm font-medium text-red-800">
+                  Erreur de cache : {cacheError.message}
+                </p>
+              )}
+              {localErrors.map((error, index) => (
+                <p key={index} className="text-sm text-red-700">
+                  {error}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header with Progress */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="text-center">
@@ -547,10 +824,16 @@ export default function ModernQuestionsForm({
                 IA Médicale Ultra-Spécifique
               </Badge>
             )}
-            {error && (
-              <Badge variant="destructive">
-                <AlertTriangle className="h-3 w-3 mr-1" />
-                Mode Secours
+            {generationMethod === "fallback" && (
+              <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                <Shield className="h-3 w-3 mr-1" />
+                Questions de Secours
+              </Badge>
+            )}
+            {questionsGeneratedAt && (
+              <Badge variant="outline" className="bg-gray-50 text-gray-600">
+                <Clock className="h-3 w-3 mr-1" />
+                Généré {new Date(questionsGeneratedAt).toLocaleTimeString('fr-FR')}
               </Badge>
             )}
           </div>
@@ -696,23 +979,32 @@ export default function ModernQuestionsForm({
             </Button>
           ) : (
             <Button 
-              onClick={onNext} 
-              disabled={!isFormValid()}
+              onClick={handleNext}
+              disabled={!isFormValid() || isSyncing}
               className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 font-semibold"
             >
-              <Sparkles className="h-5 w-5 mr-2" />
-              Lancer le Diagnostic IA
-              <ArrowRight className="h-4 w-4 ml-2" />
+              {isSyncing ? (
+                <>
+                  <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                  Synchronisation...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-5 w-5 mr-2" />
+                  Lancer le Diagnostic IA
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </>
+              )}
             </Button>
           )}
         </div>
       )}
 
       {/* Bouton Diagnostic IA fixe quand toutes questions répondues */}
-      {isFormValid() && (
+      {isFormValid() && !isSyncing && (
         <div className="sticky bottom-4 flex justify-center">
           <Button 
-            onClick={onNext}
+            onClick={handleNext}
             className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-4 shadow-2xl hover:shadow-3xl transition-all duration-300 font-semibold text-lg rounded-full animate-pulse"
           >
             <Sparkles className="h-6 w-6 mr-3" />
@@ -778,12 +1070,21 @@ export default function ModernQuestionsForm({
           Retour aux données cliniques
         </Button>
         <Button 
-          onClick={onNext} 
-          disabled={!isFormValid()}
+          onClick={handleNext}
+          disabled={!isFormValid() || isSyncing}
           className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
         >
-          Continuer vers le diagnostic
-          <ArrowRight className="h-4 w-4 ml-2" />
+          {isSyncing ? (
+            <>
+              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              {t('common.syncing', 'Synchronisation...')}
+            </>
+          ) : (
+            <>
+              Continuer vers le diagnostic
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </>
+          )}
         </Button>
       </div>
     </div>
