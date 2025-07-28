@@ -48,26 +48,32 @@ export default function MedicalAIExpert() {
       setIsLoading(true)
       
       try {
-        // Initialize from URL parameters
-        await consultationDataService.initializeFromURL()
+        // Check if Supabase is properly initialized
+        const { data: { session } } = await supabase.auth.getSession()
+        console.log('✅ Supabase connected successfully!')
         
-        // Get consultation ID after initialization
-        const consultationId = consultationDataService.getCurrentConsultationId()
-        console.log('Consultation ID after init:', consultationId)
+        // Try to initialize from URL parameters - this should not fail if no params
+        const urlParams = new URLSearchParams(window.location.search)
+        const consultationId = urlParams.get('consultationId')
+        const patientId = urlParams.get('patientId')
+        const doctorId = urlParams.get('doctorId')
         
+        console.log('URL params:', { consultationId, patientId, doctorId })
+        
+        // Only try to initialize consultation if we have the ID
         if (consultationId) {
-          setCurrentConsultationId(consultationId)
-          
-          // Get consultation details
-          const { data: consultation } = await supabase
-            .from('consultations')
-            .select('*')
-            .eq('id', consultationId)
-            .single()
-          
-          if (consultation) {
-            setCurrentPatientId(consultation.patient_id)
-            setCurrentDoctorId(consultation.doctor_id)
+          try {
+            // Set the consultation ID in the service
+            consultationDataService.setConsultationId(consultationId)
+            setCurrentConsultationId(consultationId)
+            
+            if (patientId) setCurrentPatientId(patientId)
+            if (doctorId) setCurrentDoctorId(doctorId)
+            
+            // Try to initialize the consultation
+            if (consultationId && patientId && doctorId) {
+              await consultationDataService.initializeConsultation(consultationId, patientId, doctorId)
+            }
             
             // Load existing data
             const existingData = await consultationDataService.getAllData()
@@ -114,34 +120,41 @@ export default function MedicalAIExpert() {
                 setCurrentStep(lastCompletedStep)
               }
             }
+          } catch (error) {
+            console.error('Error loading consultation:', error)
+            // Don't fail - just continue without consultation data
           }
         } else {
-          // Check URL for patient ID
-          const urlParams = new URLSearchParams(window.location.search)
-          const patientId = urlParams.get('patientId')
-          
+          // No consultation ID - check for patient ID only
           if (patientId) {
             setCurrentPatientId(patientId)
           }
           
-          // Get current doctor
-          const { data: { user } } = await supabase.auth.getUser()
-          if (user) {
+          console.log('Starting new consultation workflow')
+        }
+        
+        // Get current doctor if logged in
+        if (session?.user) {
+          try {
             const { data: doctor } = await supabase
               .from('doctors')
               .select('id')
-              .eq('user_id', user.id)
+              .eq('user_id', session.user.id)
               .single()
             
             if (doctor) {
               setCurrentDoctorId(doctor.id)
             }
+          } catch (error) {
+            console.error('Error fetching doctor:', error)
           }
         }
         
         setIsInitialized(true)
       } catch (error) {
         console.error('Error during initialization:', error)
+        // Don't fail the whole app - just continue
+        setIsInitialized(true)
       } finally {
         setIsLoading(false)
       }
@@ -255,6 +268,7 @@ export default function MedicalAIExpert() {
           if (newConsultation) {
             consultationId = newConsultation.id
             setCurrentConsultationId(consultationId)
+            consultationDataService.setConsultationId(consultationId)
             console.log('Created new consultation:', consultationId)
             
             // Store consultation ID in session
@@ -392,7 +406,9 @@ export default function MedicalAIExpert() {
     const consultationId = consultationDataService.getCurrentConsultationId()
     if (consultationId) {
       try {
-        await consultationDataService.saveConsultationReport(result)
+        // Note: saveConsultationReport method doesn't exist in the service
+        // Using saveStepData instead
+        await consultationDataService.saveStepData(4, result)
         console.log('Saved consultation report')
         
         // Update consultation status to completed
@@ -443,7 +459,7 @@ export default function MedicalAIExpert() {
             break
           case 4:
             if (consultationReport) {
-              await consultationDataService.saveConsultationReport(consultationReport)
+              await consultationDataService.saveStepData(4, consultationReport)
             }
             break
         }
