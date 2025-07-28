@@ -20,6 +20,10 @@ class ConsultationDataService {
   private doctorId: string | null = null
   private currentData: Record<string, any> = {}
   private cacheAvailable: boolean = false
+  
+  // In-memory storage for browser compatibility
+  private memoryStorage: Record<string, string> = {}
+  private CONSULTATION_ID_KEY = 'tibokConsultationId'
 
   constructor() {
     // Check if Cache API is available
@@ -43,67 +47,20 @@ class ConsultationDataService {
     }
   }
 
-  // ✅ Safe localStorage operations
-  private safeLocalStorage = {
+  // ✅ Safe in-memory storage operations (replacement for localStorage/sessionStorage)
+  private safeMemoryStorage = {
     getItem: (key: string): string | null => {
-      try {
-        if (typeof window !== 'undefined' && window.localStorage) {
-          return localStorage.getItem(key)
-        }
-      } catch (error) {
-        console.warn('localStorage not available:', error)
-      }
-      return null
+      return this.memoryStorage[key] || null
     },
     
     setItem: (key: string, value: string): boolean => {
-      try {
-        if (typeof window !== 'undefined' && window.localStorage) {
-          localStorage.setItem(key, value)
-          return true
-        }
-      } catch (error) {
-        console.warn('localStorage not available:', error)
-      }
-      return false
+      this.memoryStorage[key] = value
+      return true
     },
     
     removeItem: (key: string): boolean => {
-      try {
-        if (typeof window !== 'undefined' && window.localStorage) {
-          localStorage.removeItem(key)
-          return true
-        }
-      } catch (error) {
-        console.warn('localStorage not available:', error)
-      }
-      return false
-    }
-  }
-
-  // ✅ Safe sessionStorage operations
-  private safeSessionStorage = {
-    getItem: (key: string): string | null => {
-      try {
-        if (typeof window !== 'undefined' && window.sessionStorage) {
-          return sessionStorage.getItem(key)
-        }
-      } catch (error) {
-        console.warn('sessionStorage not available:', error)
-      }
-      return null
-    },
-    
-    setItem: (key: string, value: string): boolean => {
-      try {
-        if (typeof window !== 'undefined' && window.sessionStorage) {
-          sessionStorage.setItem(key, value)
-          return true
-        }
-      } catch (error) {
-        console.warn('sessionStorage not available:', error)
-      }
-      return false
+      delete this.memoryStorage[key]
+      return true
     }
   }
 
@@ -178,17 +135,48 @@ class ConsultationDataService {
   }
 
   // Initialize consultation with IDs
-  initializeConsultation(consultationId: string, patientId: string, doctorId: string) {
+  async initializeConsultation(consultationId: string, patientId: string, doctorId: string) {
     this.consultationId = consultationId
     this.patientId = patientId
     this.doctorId = doctorId
     
-    // Store in localStorage for persistence
-    this.safeLocalStorage.setItem('currentConsultationId', consultationId)
-    this.safeLocalStorage.setItem('currentPatientId', patientId)
-    this.safeLocalStorage.setItem('currentDoctorId', doctorId)
+    // Store in memory storage for persistence during session
+    this.safeMemoryStorage.setItem('currentConsultationId', consultationId)
+    this.safeMemoryStorage.setItem('currentPatientId', patientId)
+    this.safeMemoryStorage.setItem('currentDoctorId', doctorId)
     
     console.log('✅ Consultation initialized:', { consultationId, patientId, doctorId })
+    
+    // Return the initialized data
+    return { consultationId, patientId, doctorId }
+  }
+
+  // ✅ New method: Initialize from URL parameters
+  async initializeFromURL() {
+    if (typeof window === 'undefined') return null
+    
+    const urlParams = new URLSearchParams(window.location.search)
+    const consultationId = urlParams.get('consultationId')
+    const patientId = urlParams.get('patientId')
+    const doctorId = urlParams.get('doctorId')
+    
+    console.log('Initializing from URL:', { consultationId, patientId, doctorId })
+    
+    // Make this optional - don't require all three
+    if (consultationId && patientId && doctorId) {
+      // Store in memory
+      this.safeMemoryStorage.setItem(this.CONSULTATION_ID_KEY, consultationId)
+      this.safeMemoryStorage.setItem('tibokConsultationId', consultationId)
+      this.safeMemoryStorage.setItem('tibokPatientId', patientId)
+      this.safeMemoryStorage.setItem('tibokDoctorId', doctorId)
+      
+      // Initialize consultation
+      return await this.initializeConsultation(consultationId, patientId, doctorId)
+    }
+    
+    // Return null instead of failing - this is OK!
+    console.log('No consultation ID in URL, starting fresh')
+    return null
   }
 
   // Get current consultation ID with multiple fallbacks
@@ -196,25 +184,31 @@ class ConsultationDataService {
     // Try memory first
     if (this.consultationId) return this.consultationId
     
-    // Try localStorage
-    const storedId = this.safeLocalStorage.getItem('currentConsultationId')
-    if (storedId) {
-      this.consultationId = storedId
-      return storedId
-    }
-    
-    // Try URL params as fallback
+    // Try URL params
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search)
       const urlConsultationId = urlParams.get('consultationId')
       if (urlConsultationId) {
+        console.log('Got consultation ID from URL:', urlConsultationId)
+        // Store it for future use
         this.consultationId = urlConsultationId
-        this.safeLocalStorage.setItem('currentConsultationId', urlConsultationId)
+        this.safeMemoryStorage.setItem(this.CONSULTATION_ID_KEY, urlConsultationId)
+        this.safeMemoryStorage.setItem('tibokConsultationId', urlConsultationId)
         return urlConsultationId
       }
     }
     
-    console.warn('⚠️ No consultation ID found in any location')
+    // Try memory storage
+    const storedId = this.safeMemoryStorage.getItem('currentConsultationId') || 
+                    this.safeMemoryStorage.getItem(this.CONSULTATION_ID_KEY) ||
+                    this.safeMemoryStorage.getItem('tibokConsultationId')
+    if (storedId) {
+      console.log('Got consultation ID from memory:', storedId)
+      this.consultationId = storedId
+      return storedId
+    }
+    
+    // Don't warn - it's OK to not have a consultation ID when starting fresh
     return null
   }
 
@@ -249,10 +243,10 @@ class ConsultationDataService {
       
       const consultationId = this.getCurrentConsultationId()
       if (consultationId) {
-        // Save to localStorage
+        // Save to memory storage
         const localKey = `consultation_${consultationId}_data`
         const serializedData = JSON.stringify(this.currentData)
-        const localSaved = this.safeLocalStorage.setItem(localKey, serializedData)
+        const memorySaved = this.safeMemoryStorage.setItem(localKey, serializedData)
         
         // Save to Cache API
         const cacheKey = `/api/consultation/${consultationId}/data`
@@ -262,8 +256,8 @@ class ConsultationDataService {
         const stepCacheKey = `/api/consultation/${consultationId}/step/${step}`
         await this.saveToCache(stepCacheKey, data)
         
-        if (localSaved || cacheSaved) {
-          console.log(`✅ Step ${step} data persisted (localStorage: ${localSaved}, cache: ${cacheSaved})`)
+        if (memorySaved || cacheSaved) {
+          console.log(`✅ Step ${step} data persisted (memory: ${memorySaved}, cache: ${cacheSaved})`)
         } else {
           console.warn(`⚠️ Failed to persist step ${step} data`)
         }
@@ -281,7 +275,7 @@ class ConsultationDataService {
     try {
       const consultationId = this.getCurrentConsultationId()
       if (!consultationId) {
-        console.warn('⚠️ No consultation ID, returning memory data only')
+        console.log('ℹ️ No consultation ID, returning memory data only')
         return this.currentData
       }
       
@@ -295,15 +289,15 @@ class ConsultationDataService {
         return this.currentData
       }
       
-      // Fallback to localStorage
+      // Fallback to memory storage
       const localKey = `consultation_${consultationId}_data`
-      const saved = this.safeLocalStorage.getItem(localKey)
+      const saved = this.safeMemoryStorage.getItem(localKey)
       
       if (saved) {
         try {
           const parsedData = JSON.parse(saved)
           this.currentData = { ...this.currentData, ...parsedData }
-          console.log('✅ Data loaded from localStorage:', Object.keys(parsedData))
+          console.log('✅ Data loaded from memory:', Object.keys(parsedData))
           
           // Save to cache for next time
           await this.saveToCache(cacheKey, this.currentData)
@@ -372,7 +366,7 @@ class ConsultationDataService {
       
       // Set consultation ID
       this.consultationId = importedData.consultationId
-      this.safeLocalStorage.setItem('currentConsultationId', importedData.consultationId)
+      this.safeMemoryStorage.setItem('currentConsultationId', importedData.consultationId)
       
       // Remove metadata
       delete importedData.exportDate
@@ -384,7 +378,7 @@ class ConsultationDataService {
       
       // Save to all storage locations
       const localKey = `consultation_${this.consultationId}_data`
-      this.safeLocalStorage.setItem(localKey, JSON.stringify(this.currentData))
+      this.safeMemoryStorage.setItem(localKey, JSON.stringify(this.currentData))
       
       const cacheKey = `/api/consultation/${this.consultationId}/data`
       await this.saveToCache(cacheKey, this.currentData)
@@ -407,37 +401,22 @@ class ConsultationDataService {
       return cachedDoctor
     }
     
-    // Try sessionStorage
-    const sessionData = this.safeSessionStorage.getItem('tibokDoctorData')
-    if (sessionData) {
+    // Try memory storage
+    const memoryData = this.safeMemoryStorage.getItem('tibokDoctorData')
+    if (memoryData) {
       try {
-        const doctorInfo = JSON.parse(sessionData)
-        console.log('👨‍⚕️ Doctor data from session:', doctorInfo.full_name || doctorInfo.fullName)
+        const doctorInfo = JSON.parse(memoryData)
+        console.log('👨‍⚕️ Doctor data from memory:', doctorInfo.full_name || doctorInfo.fullName)
         
         // Save to cache
         await this.saveToCache(cacheKey, doctorInfo)
         return doctorInfo
       } catch (error) {
-        console.error('❌ Error parsing doctor data from session:', error)
+        console.error('❌ Error parsing doctor data from memory:', error)
       }
     }
     
-    // Try localStorage as fallback
-    const localData = this.safeLocalStorage.getItem('tibokDoctorData')
-    if (localData) {
-      try {
-        const doctorInfo = JSON.parse(localData)
-        console.log('👨‍⚕️ Doctor data from localStorage:', doctorInfo.full_name || doctorInfo.fullName)
-        
-        // Save to cache
-        await this.saveToCache(cacheKey, doctorInfo)
-        return doctorInfo
-      } catch (error) {
-        console.error('❌ Error parsing doctor data from localStorage:', error)
-      }
-    }
-    
-    console.warn('⚠️ No doctor data found')
+    console.log('ℹ️ No doctor data found, using defaults')
     return null
   }
 
@@ -608,7 +587,7 @@ class ConsultationDataService {
       let doctorInfo = await this.getDoctorData()
       
       if (!doctorInfo) {
-        console.warn('⚠️ No doctor data found, using defaults')
+        console.log('ℹ️ No doctor data found, using defaults')
         doctorInfo = {
           full_name: "Dr. MÉDECIN EXPERT",
           specialty: "Médecine générale",
@@ -757,10 +736,10 @@ class ConsultationDataService {
       
       const consultationId = this.getCurrentConsultationId()
       if (consultationId) {
-        // Save to localStorage
+        // Save to memory storage
         const localKey = `consultation_${consultationId}_data`
         const serializedData = JSON.stringify(this.currentData)
-        this.safeLocalStorage.setItem(localKey, serializedData)
+        this.safeMemoryStorage.setItem(localKey, serializedData)
         
         // Save to cache
         const cacheKey = `/api/consultation/${consultationId}/data`
@@ -889,9 +868,9 @@ class ConsultationDataService {
     this.doctorId = null
     this.currentData = {}
     
-    this.safeLocalStorage.removeItem('currentConsultationId')
-    this.safeLocalStorage.removeItem('currentPatientId') 
-    this.safeLocalStorage.removeItem('currentDoctorId')
+    this.safeMemoryStorage.removeItem('currentConsultationId')
+    this.safeMemoryStorage.removeItem('currentPatientId') 
+    this.safeMemoryStorage.removeItem('currentDoctorId')
     
     // Clear cache
     await this.clearCache()
