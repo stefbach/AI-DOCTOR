@@ -11,7 +11,8 @@ import PatientForm from "@/components/patient-form"
 import ClinicalForm from "@/components/clinical-form"
 import QuestionsForm from "@/components/questions-form"
 import DiagnosisForm from "@/components/diagnosis-form"
-import ConsultationGenerator from "@/components/consultation-generator"
+import MedicalWorkflow from "@/components/medical/main-medical-workflow"
+import IntegratedMedicalConsultation from "@/components/integrated-medical-consultation"
 import { PatientDataLoader } from "@/components/patient-data-loader"
 import { getTranslation, Language } from "@/lib/translations"
 import { consultationDataService } from '@/lib/consultation-data-service'
@@ -23,10 +24,10 @@ export default function MedicalAIExpert() {
   const [clinicalData, setClinicalData] = useState<any>(null)
   const [questionsData, setQuestionsData] = useState<any>(null)
   const [diagnosisData, setDiagnosisData] = useState<any>(null)
-  const [consultationReport, setConsultationReport] = useState<any>(null)
+  const [workflowResult, setWorkflowResult] = useState<any>(null)
   const [language, setLanguage] = useState<Language>('fr')
   
-  // États de consultation
+  // Add state to track the consultation
   const [currentConsultationId, setCurrentConsultationId] = useState<string | null>(null)
   const [currentPatientId, setCurrentPatientId] = useState<string | null>(null)
   const [currentDoctorId, setCurrentDoctorId] = useState<string | null>(null)
@@ -48,32 +49,26 @@ export default function MedicalAIExpert() {
       setIsLoading(true)
       
       try {
-        // Check if Supabase is properly initialized
-        const { data: { session } } = await supabase.auth.getSession()
-        console.log('✅ Supabase connected successfully!')
+        // Initialize from URL parameters
+        await consultationDataService.initializeFromURL()
         
-        // Try to initialize from URL parameters - this should not fail if no params
-        const urlParams = new URLSearchParams(window.location.search)
-        const consultationId = urlParams.get('consultationId')
-        const patientId = urlParams.get('patientId')
-        const doctorId = urlParams.get('doctorId')
+        // Get consultation ID after initialization
+        const consultationId = consultationDataService.getCurrentConsultationId()
+        console.log('Consultation ID after init:', consultationId)
         
-        console.log('URL params:', { consultationId, patientId, doctorId })
-        
-        // Only try to initialize consultation if we have the ID
         if (consultationId) {
-          try {
-            // Set the consultation ID in the service
-            consultationDataService.setConsultationId(consultationId)
-            setCurrentConsultationId(consultationId)
-            
-            if (patientId) setCurrentPatientId(patientId)
-            if (doctorId) setCurrentDoctorId(doctorId)
-            
-            // Try to initialize the consultation
-            if (consultationId && patientId && doctorId) {
-              await consultationDataService.initializeConsultation(consultationId, patientId, doctorId)
-            }
+          setCurrentConsultationId(consultationId)
+          
+          // Get consultation details
+          const { data: consultation } = await supabase
+            .from('consultations')
+            .select('*')
+            .eq('id', consultationId)
+            .single()
+          
+          if (consultation) {
+            setCurrentPatientId(consultation.patient_id)
+            setCurrentDoctorId(consultation.doctor_id)
             
             // Load existing data
             const existingData = await consultationDataService.getAllData()
@@ -93,8 +88,8 @@ export default function MedicalAIExpert() {
               if (existingData.diagnosisData) {
                 setDiagnosisData(existingData.diagnosisData)
               }
-              if (existingData.consultationReport) {
-                setConsultationReport(existingData.consultationReport)
+              if (existingData.workflowResult) {
+                setWorkflowResult(existingData.workflowResult)
               }
               
               // Find the last completed step
@@ -103,7 +98,7 @@ export default function MedicalAIExpert() {
                 existingData.clinicalData,
                 existingData.questionsData,
                 existingData.diagnosisData,
-                existingData.consultationReport
+                existingData.workflowResult
               ]
               
               let lastCompletedStep = -1
@@ -120,41 +115,34 @@ export default function MedicalAIExpert() {
                 setCurrentStep(lastCompletedStep)
               }
             }
-          } catch (error) {
-            console.error('Error loading consultation:', error)
-            // Don't fail - just continue without consultation data
           }
         } else {
-          // No consultation ID - check for patient ID only
+          // Check URL for patient ID
+          const urlParams = new URLSearchParams(window.location.search)
+          const patientId = urlParams.get('patientId')
+          
           if (patientId) {
             setCurrentPatientId(patientId)
           }
           
-          console.log('Starting new consultation workflow')
-        }
-        
-        // Get current doctor if logged in
-        if (session?.user) {
-          try {
+          // Get current doctor
+          const { data: { user } } = await supabase.auth.getUser()
+          if (user) {
             const { data: doctor } = await supabase
               .from('doctors')
               .select('id')
-              .eq('user_id', session.user.id)
+              .eq('user_id', user.id)
               .single()
             
             if (doctor) {
               setCurrentDoctorId(doctor.id)
             }
-          } catch (error) {
-            console.error('Error fetching doctor:', error)
           }
         }
         
         setIsInitialized(true)
       } catch (error) {
         console.error('Error during initialization:', error)
-        // Don't fail the whole app - just continue
-        setIsInitialized(true)
       } finally {
         setIsLoading(false)
       }
@@ -268,7 +256,6 @@ export default function MedicalAIExpert() {
           if (newConsultation) {
             consultationId = newConsultation.id
             setCurrentConsultationId(consultationId)
-            consultationDataService.setConsultationId(consultationId)
             console.log('Created new consultation:', consultationId)
             
             // Store consultation ID in session
@@ -345,10 +332,10 @@ export default function MedicalAIExpert() {
     },
     {
       id: 4,
-      title: "Compte-Rendu & Documents",
-      description: "Génération et édition des documents médicaux",
-      icon: <FileText className="h-5 w-5" />,
-      component: ConsultationGenerator,
+      title: "Édition des documents médicaux",
+      description: "Génération et personnalisation des rapports",
+      icon: <Activity className="h-5 w-5" />,
+      component: MedicalWorkflow,
     },
   ]
 
@@ -399,17 +386,20 @@ export default function MedicalAIExpert() {
     }
   }
 
-  const handleConsultationComplete = async (result: any) => {
-    setConsultationReport(result)
+  const handleWorkflowComplete = (result: any) => {
+    setWorkflowResult(result)
+    console.log('Workflow terminé:', result)
+  }
+
+  const handleMedicalWorkflowComplete = async (result: any) => {
+    setWorkflowResult(result)
     
-    // Save the final consultation report
+    // Save the final workflow result
     const consultationId = consultationDataService.getCurrentConsultationId()
     if (consultationId) {
       try {
-        // Note: saveConsultationReport method doesn't exist in the service
-        // Using saveStepData instead
         await consultationDataService.saveStepData(4, result)
-        console.log('Saved consultation report')
+        console.log('Saved workflow result to step 4')
         
         // Update consultation status to completed
         await supabase
@@ -422,11 +412,11 @@ export default function MedicalAIExpert() {
           
         console.log('Consultation marked as completed')
       } catch (error) {
-        console.error('Error completing consultation:', error)
+        console.error('Error completing workflow:', error)
       }
     }
     
-    console.log('Consultation complète terminée:', result)
+    console.log('Workflow médical terminé:', result)
   }
 
   // Navigation directe vers une étape
@@ -458,8 +448,8 @@ export default function MedicalAIExpert() {
             }
             break
           case 4:
-            if (consultationReport) {
-              await consultationDataService.saveStepData(4, consultationReport)
+            if (workflowResult) {
+              await consultationDataService.saveStepData(4, workflowResult)
             }
             break
         }
@@ -525,8 +515,9 @@ export default function MedicalAIExpert() {
           clinicalData,
           questionsData,
           diagnosisData,
+          initialData: workflowResult,
+          onComplete: handleMedicalWorkflowComplete,
           onBack: handlePrevious,
-          onComplete: handleConsultationComplete,
         }
       default:
         return commonProps
@@ -548,7 +539,9 @@ export default function MedicalAIExpert() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Temporarily disabled to prevent URL clearing
       <PatientDataLoader />
+      */}
       
       <div className="container mx-auto px-4 py-8">
         {/* Header with Language Switcher */}
@@ -559,7 +552,7 @@ export default function MedicalAIExpert() {
               <p className="text-gray-600">{t('mainPage.subtitle')}</p>
             </div>
             <div className="flex items-center gap-2">
-              {/* Language Switcher */}
+              {/* Language Switcher with black background */}
               <div className="flex items-center gap-2 mr-4 bg-black rounded-md p-1">
                 <Button
                   variant={language === 'fr' ? 'default' : 'ghost'}
