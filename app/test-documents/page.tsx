@@ -81,4 +81,3 @@ import DocumentsTest from '@/components/medical/DocumentsTest'
 export default function Page() {
   return <DocumentsTest />
 }
-

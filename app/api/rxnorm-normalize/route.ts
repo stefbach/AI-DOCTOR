@@ -99,5 +99,3 @@ Répondez UNIQUEMENT avec du JSON valide.
     }, { status: 500 })
   }
 }
-
-   

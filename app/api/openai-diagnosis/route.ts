@@ -1680,4 +1680,3 @@ function generateComprehensiveMedicalReports(analysis: any, patientData: any, cl
     }
   }
 }
-
