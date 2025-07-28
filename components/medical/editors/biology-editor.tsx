@@ -1,4 +1,4 @@
-// components/medical/editors/biology-editor.tsx - Version corrigée
+// src/components/medical/editors/biology-editor.tsx
 
 "use client"
 
@@ -21,21 +21,9 @@ import {
   Plus,
   Trash2,
   Eye,
-  AlertCircle,
-  Activity
+  AlertCircle
 } from "lucide-react"
 import { consultationDataService } from "@/lib/consultation-data-service"
-
-interface BiologyEditorProps {
-  biologyData?: any
-  onSave: (type: string, data: any) => void
-  onNext: () => void
-  onPrevious: () => void
-  patientName?: string
-  patientData?: any
-  diagnosisData?: any
-  doctorData?: any
-}
 
 export default function BiologyEditor({ 
   biologyData, 
@@ -46,10 +34,9 @@ export default function BiologyEditor({
   patientData,
   diagnosisData,
   doctorData
-}: BiologyEditorProps) {
+}) {
   const { toast } = useToast()
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-  const [showPreview, setShowPreview] = useState(false)
   
   // Initialize prescriptions from diagnosis data
   const buildInitialPrescriptions = () => {
@@ -99,22 +86,32 @@ export default function BiologyEditor({
     return prescriptions
   }
 
+  // Debug log to see what data we're receiving
+  useEffect(() => {
+    console.log('BiologyEditor received:', {
+      biologyData,
+      patientData,
+      diagnosisData,
+      doctorData
+    })
+  }, [biologyData, patientData, diagnosisData, doctorData])
+
   const [formData, setFormData] = useState({
     // Header with doctor info
     title: biologyData?.header?.title || "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
     subtitle: biologyData?.header?.subtitle || "PRESCRIPTION D'EXAMENS BIOLOGIQUES",
-    date: new Date().toISOString().split('T')[0],
+    date: new Date().toISOString().split('T')[0], // Fix: Use YYYY-MM-DD format
     number: biologyData?.header?.number || `BIO-MU-${Date.now()}`,
     physician: doctorData?.full_name || doctorData?.fullName || biologyData?.header?.physician || "Dr. MÉDECIN EXPERT",
     registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || biologyData?.header?.registration || "COUNCIL-MU-2024-001",
     
-    // Patient info
+    // Patient info - Use patientData if available
     firstName: patientData?.firstName || biologyData?.patient?.firstName || "",
     lastName: patientData?.lastName || biologyData?.patient?.lastName || "",
     age: patientData?.age ? `${patientData.age} ans` : biologyData?.patient?.age || "",
     address: patientData?.address || biologyData?.patient?.address || "Adresse à compléter - Maurice",
     
-    // Prescriptions
+    // Prescriptions - Initialize from diagnosis data
     prescriptions: biologyData?.prescriptions || buildInitialPrescriptions()
   })
 
@@ -124,7 +121,7 @@ export default function BiologyEditor({
       setFormData(prev => ({
         title: biologyData?.header?.title || prev.title,
         subtitle: biologyData?.header?.subtitle || prev.subtitle,
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString().split('T')[0], // Always use current date in correct format
         number: biologyData?.header?.number || prev.number,
         physician: doctorData?.full_name || doctorData?.fullName || biologyData?.header?.physician || prev.physician,
         registration: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || biologyData?.header?.registration || prev.registration,
@@ -181,7 +178,7 @@ export default function BiologyEditor({
     "Différé (selon disponibilité)"
   ]
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -189,10 +186,10 @@ export default function BiologyEditor({
     setHasUnsavedChanges(true)
   }
 
-  const handlePrescriptionChange = (index: number, field: string, value: string) => {
+  const handlePrescriptionChange = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
-      prescriptions: prev.prescriptions.map((prescription: any, i: number) => 
+      prescriptions: prev.prescriptions.map((prescription, i) => 
         i === index ? { ...prescription, [field]: value } : prescription
       )
     }))
@@ -220,69 +217,12 @@ export default function BiologyEditor({
     setHasUnsavedChanges(true)
   }
 
-  const removePrescription = (index: number) => {
+  const removePrescription = (index) => {
     setFormData(prev => ({
       ...prev,
-      prescriptions: prev.prescriptions.filter((_: any, i: number) => i !== index)
+      prescriptions: prev.prescriptions.filter((_, i) => i !== index)
     }))
     setHasUnsavedChanges(true)
-  }
-
-  // ✅ Generate preview of the formatted document
-  const generatePreview = () => {
-    const updatedBiology = {
-      header: {
-        title: formData.title,
-        subtitle: formData.subtitle,
-        date: formData.date,
-        number: formData.number,
-        physician: formData.physician,
-        registration: formData.registration
-      },
-      patient: {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        age: formData.age,
-        address: formData.address
-      },
-      prescriptions: formData.prescriptions
-    }
-
-    return `
-**${updatedBiology.header.title}**
-**${updatedBiology.header.physician}**
-Adresse : Cabinet médical, Maurice
-📞 +230 xxx xxx xxx | 📧 contact@cabinet.mu
-💼 ${updatedBiology.header.registration}
-
-**${updatedBiology.header.subtitle}**
-
-**Nom du patient :** ${updatedBiology.patient.firstName} ${updatedBiology.patient.lastName}
-**Âge :** ${updatedBiology.patient.age}
-**Adresse :** ${updatedBiology.patient.address}
-**Date de prescription :** ${updatedBiology.header.date}
-
-🧪 **Examens demandés :**
-
-${updatedBiology.prescriptions.map((item: any, index: number) => `
-${index + 1}. **${item.exam}**
-   • Indication : ${item.indication}
-   • Urgence : ${item.urgency}
-   • Jeûne : ${item.fasting}
-   • Type d'échantillon : ${item.sampleType}
-   • Disponibilité Maurice : ${item.mauritianAvailability}
-`).join('\n')}
-
-💬 **Remarques complémentaires :**
-À faire en laboratoire agréé / centre médical reconnu Maurice
-Résultats à rapporter à la prochaine consultation
-
-═══════════════════════════════════════════════
-
-👨⚕️ **Signature et cachet du médecin :**
-${updatedBiology.header.physician}
-Date : ${updatedBiology.header.date}
-    `.trim()
   }
 
   const handleSave = async () => {
@@ -311,15 +251,16 @@ Date : ${updatedBiology.header.date}
       onSave('biology', updatedBiology)
       setHasUnsavedChanges(false)
       
-      // ✅ Get consultation ID
+      // Force get consultation ID from URL if not found
       let consultationId = consultationDataService.getCurrentConsultationId()
       if (!consultationId) {
         const urlParams = new URLSearchParams(window.location.search)
         consultationId = urlParams.get('consultationId')
+        console.log('Got consultation ID from URL in save:', consultationId)
       }
       
       if (!consultationId) {
-        console.error('No consultation ID found!')
+        console.error('Still no consultation ID found!')
         toast({
           title: "Erreur",
           description: "ID de consultation manquant",
@@ -328,10 +269,12 @@ Date : ${updatedBiology.header.date}
         return
       }
       
-      // ✅ Get existing data to merge
+      console.log('Saving biology data to DB, ID:', consultationId)
+      
+      // Get existing data to merge
       const existingData = await consultationDataService.getAllData()
       
-      // ✅ Build documents structure
+      // Build documents structure
       const documentsData = {
         consultation: existingData?.workflowResult?.consultation || {},
         prescriptions: {
@@ -343,22 +286,25 @@ Date : ${updatedBiology.header.date}
         lastModified: new Date().toISOString()
       }
       
-      // ✅ Save to database using the new method
+      // Save to database
       const result = await consultationDataService.saveToSupabase(
         consultationId,
         4, // documents_data
         documentsData
       )
       
+      console.log('Biology save result:', result)
+      
       if (result) {
         toast({
           title: "Succès",
-          description: "Examens biologiques sauvegardés avec succès",
+          description: "Examens biologiques sauvegardés",
         })
       } else {
+        console.error('Failed to save biology data to database')
         toast({
           title: "Erreur",
-          description: "Échec de la sauvegarde en base de données",
+          description: "Échec de la sauvegarde",
           variant: "destructive"
         })
       }
@@ -371,104 +317,6 @@ Date : ${updatedBiology.header.date}
         variant: "destructive"
       })
     }
-  }
-
-  // Preview modal
-  if (showPreview) {
-    return (
-      <div className="space-y-6">
-        <Card className="bg-white/95 backdrop-blur-sm shadow-xl">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Eye className="h-6 w-6" />
-                Aperçu - Ordonnance Examens Biologiques
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowPreview(false)}
-                className="bg-white/20 border-white/30 text-white hover:bg-white/30"
-              >
-                ✏️ Retour à l'édition
-              </Button>
-            </CardTitle>
-          </CardHeader>
-        </Card>
-
-        <Card className="bg-white shadow-xl">
-          <CardContent className="p-8">
-            <div 
-              className="font-mono text-sm leading-relaxed whitespace-pre-wrap border p-6 bg-white min-h-[600px]"
-              style={{
-                fontFamily: 'Arial, sans-serif',
-                fontSize: '12px',
-                lineHeight: '1.4'
-              }}
-              dangerouslySetInnerHTML={{
-                __html: generatePreview()
-                  .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #2563eb;">$1</strong>')
-                  .replace(/═══.*═══/g, '<hr style="border: 2px solid #2563eb; margin: 20px 0;">')
-                  .replace(/\n/g, '<br>')
-              }}
-            />
-          </CardContent>
-        </Card>
-
-        <div className="flex justify-between items-center">
-          <Button 
-            variant="outline" 
-            onClick={() => setShowPreview(false)}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour à l'édition
-          </Button>
-
-          <div className="flex gap-3">
-            <Button 
-              variant="outline"
-              onClick={() => {
-                const printWindow = window.open('', '_blank')
-                if (printWindow) {
-                  printWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                      <title>Ordonnance Examens Biologiques</title>
-                      <style>
-                        body { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; margin: 2cm; }
-                        strong { color: #2563eb; }
-                        hr { border: 2px solid #2563eb; margin: 20px 0; }
-                      </style>
-                    </head>
-                    <body>
-                      ${generatePreview().replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>')}
-                    </body>
-                    </html>
-                  `)
-                  printWindow.document.close()
-                  printWindow.print()
-                }
-              }}
-            >
-              <Activity className="h-4 w-4 mr-2" />
-              Imprimer
-            </Button>
-            
-            <Button 
-              onClick={() => {
-                handleSave()
-                setShowPreview(false)
-              }}
-              className="bg-gradient-to-r from-green-600 to-emerald-600 text-white"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              Sauvegarder & Fermer
-            </Button>
-          </div>
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -614,7 +462,7 @@ Date : ${updatedBiology.header.date}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
-          {formData.prescriptions.map((prescription: any, index: number) => (
+          {formData.prescriptions.map((prescription, index) => (
             <Card key={prescription.id} className="border-l-4 border-purple-400 bg-purple-50/50">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
@@ -652,6 +500,7 @@ Date : ${updatedBiology.header.date}
                         ))}
                       </SelectContent>
                     </Select>
+                    {/* Allow manual input if needed */}
                     <Input
                       value={prescription.exam}
                       onChange={(e) => handlePrescriptionChange(index, 'exam', e.target.value)}
@@ -770,7 +619,6 @@ Date : ${updatedBiology.header.date}
           
           <Button 
             variant="outline"
-            onClick={() => setShowPreview(true)}
             className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
           >
             <Eye className="h-4 w-4 mr-2" />

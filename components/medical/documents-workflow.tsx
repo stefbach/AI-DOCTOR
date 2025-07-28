@@ -1,16 +1,14 @@
-// components/medical/documents-workflow.tsx - Version avec génération automatique
+// src/components/medical/documents-workflow.tsx
 
 "use client"
 
 import { useState, useEffect } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
-import { MauritianDocumentsGenerator } from '@/lib/mauritian-documents-generator'
 import { supabase } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { useToast } from "@/components/ui/use-toast"
 import { 
   ArrowLeft, 
   FileText, 
@@ -21,10 +19,7 @@ import {
   Eye,
   Download,
   Save,
-  User,
-  RefreshCw,
-  Zap,
-  AlertTriangle
+  User
 } from "lucide-react"
 
 // Import des composants d'édition
@@ -33,47 +28,32 @@ import BiologyEditor from './editors/biology-editor'
 import ParaclinicalEditor from './editors/paraclinical-editor'
 import MedicationEditor from './editors/medication-editor'
 
-interface DocumentsWorkflowProps {
-  consultationReport?: any
-  diagnosisData?: any
-  patientData?: any
-  clinicalData?: any
-  questionsData?: any
-  onBack?: () => void
-  onComplete?: (documents: any) => void
-}
-
 export default function DocumentsWorkflow({ 
-  consultationReport,
   diagnosisData, 
+  mauritianDocuments, 
   patientData,
-  clinicalData,
-  questionsData,
   onBack,
   onComplete 
-}: DocumentsWorkflowProps) {
-  const { toast } = useToast()
+}) {
+  // CORRECTION: Ajouter currentStep et initialiser correctement
   const [currentStep, setCurrentStep] = useState(-1)
   
-  // ✅ États pour les documents générés et édités
-  const [generatedDocuments, setGeneratedDocuments] = useState<any>(null)
   const [editedDocuments, setEditedDocuments] = useState({
-    consultation: {},
-    biology: {},
-    paraclinical: {},
-    medication: {},
+    consultation: mauritianDocuments?.consultation || {},
+    biology: mauritianDocuments?.biology || {},
+    paraclinical: mauritianDocuments?.paraclinical || {},
+    medication: mauritianDocuments?.medication || {},
   })
   const [completedSteps, setCompletedSteps] = useState(new Set())
   
-  // États des données complètes
+  // Add comprehensive data states
   const [completePatientData, setCompletePatientData] = useState<any>(null)
   const [completeClinicalData, setCompleteClinicalData] = useState<any>(null)
   const [completeQuestionsData, setCompleteQuestionsData] = useState<any>(null)
   const [completeDoctorData, setCompleteDoctorData] = useState<any>(null)
   const [isLoadingData, setIsLoadingData] = useState(true)
-  const [isGenerating, setIsGenerating] = useState(false)
 
-  // ✅ Load all data for documents auto-fill
+  // Load all data for documents auto-fill
   useEffect(() => {
     const loadAllDataForDocuments = async () => {
       try {
@@ -81,7 +61,7 @@ export default function DocumentsWorkflow({
         setIsLoadingData(true)
         
         // 1. Get all saved consultation data
-        const allData = await consultationDataService.getAllData()
+        const allData = await consultationDataService.getDataForAutoFill()
         console.log('All consultation data:', allData)
         
         // 2. Get doctor data from sessionStorage first
@@ -129,6 +109,7 @@ export default function DocumentsWorkflow({
             
             if (dbPatient) {
               // Merge database patient data with existing data
+              // Priority: consultation form data > database data > default data
               fullPatientData = {
                 // Basic info - prioritize form data
                 firstName: fullPatientData.firstName || dbPatient.first_name || '',
@@ -160,7 +141,7 @@ export default function DocumentsWorkflow({
                 // ID info from database
                 idNumber: dbPatient.id_number || fullPatientData.idNumber || '',
                 
-                // Additional fields
+                // Additional fields that might be useful
                 otherAllergies: fullPatientData.otherAllergies || '',
                 otherMedicalHistory: fullPatientData.otherMedicalHistory || ''
               }
@@ -172,14 +153,9 @@ export default function DocumentsWorkflow({
         
         // 5. Set all the data
         setCompletePatientData(fullPatientData)
-        setCompleteClinicalData(allData?.clinicalData || clinicalData || {})
-        setCompleteQuestionsData(allData?.questionsData || questionsData || {})
+        setCompleteClinicalData(allData?.clinicalData || {})
+        setCompleteQuestionsData(allData?.questionsData || {})
         setCompleteDoctorData(doctorInfo)
-        
-        // 6. ✅ AUTO-GENERATE documents if we have all necessary data
-        if (consultationReport && fullPatientData && doctorInfo && diagnosisData) {
-          await generateMauritianDocuments(consultationReport, fullPatientData, doctorInfo, diagnosisData)
-        }
         
       } catch (error) {
         console.error('Error loading complete data:', error)
@@ -189,102 +165,9 @@ export default function DocumentsWorkflow({
     }
     
     loadAllDataForDocuments()
-  }, [patientData, clinicalData, questionsData, consultationReport, diagnosisData])
+  }, [patientData])
 
-  // ✅ AUTO-GENERATE Mauritian documents
-  const generateMauritianDocuments = async (
-    consultationReport: any,
-    patientData: any,
-    doctorData: any,
-    diagnosisData: any,
-    forceRegenerate = false
-  ) => {
-    try {
-      console.log('🚀 Generating Mauritian documents automatically...')
-      setIsGenerating(true)
-
-      // Check if already generated (unless forcing regeneration)
-      if (generatedDocuments && !forceRegenerate) {
-        console.log('✅ Documents already generated, skipping')
-        return
-      }
-
-      // Prepare doctor info for generator
-      const doctorInfo = {
-        fullName: doctorData?.full_name || doctorData?.fullName || "Dr. MÉDECIN EXPERT",
-        specialty: doctorData?.specialty || "Médecine générale",
-        address: doctorData?.address || "Cabinet médical, Maurice",
-        city: doctorData?.city || "Port-Louis, Maurice",
-        phone: doctorData?.phone || "+230 xxx xxx xxx",
-        email: doctorData?.email || "contact@cabinet.mu",
-        registrationNumber: doctorData?.medical_council_number || doctorData?.medicalCouncilNumber || "Medical Council of Mauritius - Reg. No. XXXXX"
-      }
-console.log("🧪 Vérification des données AVANT génération :");
-console.log("👤 patientData =", JSON.stringify(patientData, null, 2));
-console.log("🧠 diagnosisData =", JSON.stringify(diagnosisData?.diagnosis, null, 2));
-console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
-
-      console.log("🚀 GÉNÉRATION MANUELLE LANCÉE");
-
-      // ✅ Generate all 4 documents using the generator
-      const mauritianDocs = MauritianDocumentsGenerator.generateMauritianDocuments(
-        consultationReport,
-        doctorInfo,
-        patientData,
-        diagnosisData
-      )
-
-      console.log('✅ Generated Mauritian documents:', mauritianDocs)
-
-      // Set the generated documents
-      setGeneratedDocuments(mauritianDocs)
-      
-      // Initialize edited documents with generated ones
-      setEditedDocuments({
-        consultation: mauritianDocs.consultation,
-        biology: mauritianDocs.biology,
-        paraclinical: mauritianDocs.paraclinical,
-        medication: mauritianDocs.medication
-      })
-
-      // Save to consultation service
-      await consultationDataService.saveConsultationReport({
-        ...consultationReport,
-        mauritianDocuments: mauritianDocs,
-        generatedAt: new Date().toISOString()
-      })
-
-      toast({
-        title: "✅ Documents générés !",
-        description: "Les 4 documents mauriciens ont été générés automatiquement",
-      })
-
-    } catch (error) {
-      console.error('❌ Error generating documents:', error)
-      toast({
-        title: "Erreur",
-        description: "Échec de la génération automatique des documents",
-        variant: "destructive"
-      })
-    } finally {
-      setIsGenerating(false)
-    }
-  }
-
-  // Force regeneration of documents
-  const handleRegenerateDocuments = async () => {
-    if (consultationReport && completePatientData && completeDoctorData && diagnosisData) {
-      await generateMauritianDocuments(
-        consultationReport, 
-        completePatientData, 
-        completeDoctorData, 
-        diagnosisData,
-        true // Force regeneration
-      )
-    }
-  }
-
-  // Helper functions
+  // Helper function to calculate age from birth date
   const calculateAge = (birthDate: string) => {
     if (!birthDate) return ''
     const today = new Date()
@@ -299,6 +182,7 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
     return age.toString()
   }
 
+  // Helper function to map gender values
   const mapGender = (gender: string) => {
     if (!gender) return ''
     const genderLower = gender.toLowerCase()
@@ -309,6 +193,27 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
     }
     return gender
   }
+
+  // Debug log to track received props
+  useEffect(() => {
+    console.log('DocumentsWorkflow received props:', {
+      mauritianDocuments,
+      diagnosisData,
+      patientData
+    })
+  }, [mauritianDocuments, diagnosisData, patientData])
+
+  // Update editedDocuments when mauritianDocuments changes
+  useEffect(() => {
+    if (mauritianDocuments) {
+      setEditedDocuments({
+        consultation: mauritianDocuments.consultation || {},
+        biology: mauritianDocuments.biology || {},
+        paraclinical: mauritianDocuments.paraclinical || {},
+        medication: mauritianDocuments.medication || {}
+      })
+    }
+  }, [mauritianDocuments])
 
   const steps = [
     {
@@ -345,31 +250,13 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
     }
   ]
 
-  const handleSaveDocument = async (docType: string, updatedData: any) => {
+  const handleSaveDocument = (docType, updatedData) => {
     setEditedDocuments(prev => ({
       ...prev,
       [docType]: updatedData
     }))
     setCompletedSteps(prev => new Set([...prev, currentStep]))
-    
-    // ✅ Sauvegarder immédiatement les changements
-    try {
-      const updatedDocuments = {
-        ...editedDocuments,
-        [docType]: updatedData
-      }
-      await consultationDataService.saveConsultationReport({
-        ...consultationReport,
-        mauritianDocuments: {
-          ...generatedDocuments,
-          [docType]: updatedData
-        },
-        editedDocuments: updatedDocuments
-      })
-      console.log(`✅ ${docType} sauvegardé:`, updatedData)
-    } catch (error) {
-      console.error('Error saving document:', error)
-    }
+    console.log(`✅ ${docType} sauvegardé:`, updatedData)
   }
 
   const handleNext = () => {
@@ -384,43 +271,23 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
     }
   }
 
-  const handleComplete = async () => {
+  const handleComplete = () => {
     console.log('🎯 Documents finaux:', editedDocuments)
-    
-    // Sauvegarder les documents finaux
-    try {
-      await consultationDataService.saveConsultationReport({
-        ...consultationReport,
-        mauritianDocuments: editedDocuments,
-        finalDocuments: editedDocuments,
-        completedAt: new Date().toISOString()
-      })
-    } catch (error) {
-      console.error('Error saving final documents:', error)
-    }
-    
     onComplete && onComplete(editedDocuments)
   }
 
   const patientName = `${completePatientData?.firstName || patientData?.firstName || 'Patient'} ${completePatientData?.lastName || patientData?.lastName || 'X'}`
   const progressPercentage = ((completedSteps.size / steps.length) * 100)
 
-  // Loading state while fetching data or generating
-  if (isLoadingData || isGenerating) {
+  // Loading state while fetching data
+  if (isLoadingData) {
     return (
       <div className="space-y-6">
         <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
           <CardContent className="flex items-center justify-center py-12">
             <div className="text-center space-y-4">
               <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
-              <p className="text-gray-600">
-                {isGenerating ? 'Génération automatique des documents mauriciens...' : 'Chargement des données...'}
-              </p>
-              {isGenerating && (
-                <p className="text-sm text-blue-600">
-                  ⚡ Création automatique : Compte-rendu • Examens biologiques • Examens paracliniques • Ordonnance
-                </p>
-              )}
+              <p className="text-gray-600">Chargement des données...</p>
             </div>
           </CardContent>
         </Card>
@@ -432,28 +299,17 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
   if (currentStep === -1) {
     return (
       <div className="space-y-6">
-        {/* Header principal avec indicateur de génération automatique */}
+        {/* Header principal */}
         <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
           <CardHeader className="bg-gradient-to-r from-slate-700 to-gray-800 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-3 text-2xl">
               <FileText className="h-8 w-8" />
-              Documents Mauriciens
-              {generatedDocuments && (
-                <Badge className="bg-green-500 text-white ml-2">
-                  <Zap className="h-4 w-4 mr-1" />
-                  Générés automatiquement
-                </Badge>
-              )}
+              Documents Mauriciens - Vue d'ensemble
             </CardTitle>
             <div className="flex justify-between items-center mt-4">
               <div>
                 <p className="text-slate-200">Patient: {patientName}</p>
-                <p className="text-slate-300 text-sm">Diagnostic: {diagnosisData?.diagnosis?.primary?.condition || 'En cours'}</p>
-                {generatedDocuments && (
-                  <p className="text-green-200 text-sm">
-                    ✅ 4 documents générés et prêts à éditer
-                  </p>
-                )}
+                <p className="text-slate-300 text-sm">Diagnostic: {diagnosisData?.primary?.condition}</p>
               </div>
               <div className="text-right">
                 <div className="text-slate-200">Progression</div>
@@ -462,33 +318,6 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
             </div>
           </CardHeader>
         </Card>
-
-        {/* Bouton de régénération */}
-        {generatedDocuments && (
-          <Card className="bg-amber-50 border border-amber-200">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="h-5 w-5 text-amber-600" />
-                  <div>
-                    <p className="font-medium text-amber-800">Documents générés automatiquement</p>
-                    <p className="text-sm text-amber-700">Basés sur le diagnostic IA et les données patient</p>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRegenerateDocuments}
-                  disabled={isGenerating}
-                  className="border-amber-300 text-amber-700 hover:bg-amber-100"
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Régénérer
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Progress global */}
         <Card>
@@ -501,12 +330,9 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
               <Progress value={progressPercentage} className="h-3" />
             </div>
             <p className="text-sm text-gray-600">
-              {generatedDocuments ? 
-                (completedSteps.size === 0 ? 'Documents générés automatiquement - Vous pouvez les éditer si nécessaire' :
-                 completedSteps.size === steps.length ? 'Tous les documents sont finalisés !' :
-                 `${steps.length - completedSteps.size} document(s) à réviser`) :
-                'En attente de génération automatique...'
-              }
+              {completedSteps.size === 0 ? 'Commencez par éditer le premier document' :
+               completedSteps.size === steps.length ? 'Tous les documents sont prêts !' :
+               `${steps.length - completedSteps.size} document(s) restant(s)`}
             </p>
           </CardContent>
         </Card>
@@ -522,26 +348,19 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
                     <step.icon className="h-6 w-6" />
                     {step.title}
                   </div>
-                  <div className="flex gap-2">
-                    {generatedDocuments && (
-                      <Badge className="bg-green-500 text-white text-xs">
-                        Généré
-                      </Badge>
-                    )}
-                    {completedSteps.has(index) && (
-                      <CheckCircle className="h-6 w-6 text-green-200" />
-                    )}
-                  </div>
+                  {completedSteps.has(index) && (
+                    <CheckCircle className="h-6 w-6 text-green-200" />
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <p className="text-gray-600 mb-4">{step.description}</p>
                 <div className="flex justify-between items-center">
-                  <Badge variant={generatedDocuments ? "default" : "outline"} className={generatedDocuments ? "bg-green-600" : ""}>
-                    {generatedDocuments ? "Prêt à éditer" : "En attente"}
+                  <Badge variant={completedSteps.has(index) ? "default" : "outline"}>
+                    {completedSteps.has(index) ? "Complété" : "À éditer"}
                   </Badge>
-                  <Button variant="outline" size="sm" disabled={!generatedDocuments}>
-                    {generatedDocuments ? "Éditer" : "Générer d'abord"}
+                  <Button variant="outline" size="sm">
+                    {completedSteps.has(index) ? "Modifier" : "Éditer"}
                   </Button>
                 </div>
               </CardContent>
@@ -557,7 +376,7 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
             className="px-6 py-3 shadow-md hover:shadow-lg"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour
+            {onBack ? 'Retour Étape Précédente' : 'Retour Diagnostic'}
           </Button>
 
           <div className="flex gap-3">
@@ -569,7 +388,7 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
                 </Button>
                 <Button variant="outline">
                   <Download className="h-4 w-4 mr-2" />
-                  Télécharger PDF
+                  Télécharger
                 </Button>
               </>
             )}
@@ -585,23 +404,12 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
             )}
           </div>
           
-          {generatedDocuments && completedSteps.size === 0 && (
+          {completedSteps.size === 0 && (
             <Button 
               onClick={() => setCurrentStep(0)}
               className="bg-gradient-to-r from-blue-600 to-emerald-600 text-white px-6 py-3 shadow-lg"
             >
-              Réviser Documents
-            </Button>
-          )}
-
-          {!generatedDocuments && (
-            <Button 
-              onClick={handleRegenerateDocuments}
-              disabled={isGenerating}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 shadow-lg"
-            >
-              <Zap className="h-4 w-4 mr-2" />
-              Générer Documents
+              Commencer l'Édition
             </Button>
           )}
         </div>
@@ -609,7 +417,7 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
     )
   }
 
-  // Rendu des composants d'édition spécifiques avec documents pré-remplis
+  // Rendu des composants d'édition spécifiques
   const currentStepData = steps[currentStep]
   
   // Header pour toutes les étapes
@@ -623,12 +431,6 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
             <Badge className="bg-white/20 text-white">
               Étape {currentStep + 1}/4
             </Badge>
-            {generatedDocuments && (
-              <Badge className="bg-green-500 text-white">
-                <Zap className="h-4 w-4 mr-1" />
-                Auto-généré
-              </Badge>
-            )}
           </div>
           <Button
             variant="outline"
@@ -664,9 +466,6 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
         >
           <step.icon className="h-4 w-4" />
           <span className="text-sm font-medium">{step.title}</span>
-          {generatedDocuments && (
-            <Badge className="bg-green-500 text-white text-xs">Auto</Badge>
-          )}
           {completedSteps.has(index) && (
             <CheckCircle className="h-4 w-4" />
           )}
@@ -675,7 +474,7 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
     </div>
   )
 
-  // Rendu selon l'étape courante avec documents pré-remplis
+  // Rendu selon l'étape courante
   return (
     <div className="space-y-6">
       <StepHeader />
@@ -692,14 +491,14 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
           questionsData={completeQuestionsData}
           diagnosisData={diagnosisData}
           doctorData={completeDoctorData}
-          mauritianDocuments={generatedDocuments}
+          mauritianDocuments={mauritianDocuments}
         />
       )}
 
       {currentStep === 1 && (
         <BiologyEditor
           biologyData={editedDocuments.biology}
-          onSave={(type, data) => handleSaveDocument('biology', data)}
+          onSave={(type, data) => handleSaveDocument(type, data)}
           onNext={handleNext}
           onPrevious={handlePrevious}
           patientName={patientName}
@@ -712,7 +511,7 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
       {currentStep === 2 && (
         <ParaclinicalEditor
           paraclinicalData={editedDocuments.paraclinical}
-          onSave={(type, data) => handleSaveDocument('paraclinical', data)}
+          onSave={(type, data) => handleSaveDocument(type, data)}
           onNext={handleNext}
           onPrevious={handlePrevious}
           patientName={patientName}
@@ -725,7 +524,7 @@ console.log("🩺 doctorInfo =", JSON.stringify(doctorInfo, null, 2));
       {currentStep === 3 && (
         <MedicationEditor
           medicationData={editedDocuments.medication}
-          onSave={(type, data) => handleSaveDocument('medication', data)}
+          onSave={(type, data) => handleSaveDocument(type, data)}
           onNext={() => setCurrentStep(-1)}
           onPrevious={handlePrevious}
           patientName={patientName}

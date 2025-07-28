@@ -1,4 +1,4 @@
-// components/medical/main-medical-workflow.tsx - Version corrigée avec génération locale
+// src/components/medical/main-medical-workflow.tsx
 
 "use client"
 
@@ -7,7 +7,6 @@ import { consultationDataService } from '@/lib/consultation-data-service'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/components/ui/use-toast"
 import { 
   Brain, 
   FileText, 
@@ -15,16 +14,11 @@ import {
   CheckCircle,
   User,
   Calendar,
-  ArrowLeft,
-  AlertTriangle,
-  Eye,
-  Download,
-  Zap
+  ArrowLeft
 } from "lucide-react"
 
-// Import des composants
+// Import seulement du DocumentsWorkflow
 import DocumentsWorkflow from './documents-workflow'
-import MauritianDocumentsPreview from './mauritian-documents-preview'
 
 interface MedicalWorkflowProps {
   patientData?: any
@@ -47,160 +41,24 @@ export default function MedicalWorkflow({
   onBack,
   language = 'fr'
 }: MedicalWorkflowProps) {
-  const { toast } = useToast()
+  // Toujours commencer par les documents car diagnosisData est fourni
   const [currentPhase, setCurrentPhase] = useState('documents')
-  const [consultationReport, setConsultationReport] = useState<any>(null)
+  // ✅ CORRECTION 1: Garder toutes les données diagnosisData au lieu de seulement .diagnosis
+  const [diagnosisResult, setDiagnosisResult] = useState(diagnosisData || null)
+  const [mauritianDocuments, setMauritianDocuments] = useState(diagnosisData?.mauritianDocuments || null)
   const [finalDocuments, setFinalDocuments] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
-  // ✅ Generate consultation report using local generator
-  const generateConsultationReportLocally = async (
-    pData?: any,
-    cData?: any,
-    qData?: any,
-    dData?: any
-  ) => {
-    try {
-      console.log('🚀 Generating consultation report locally...')
-      
-      // Use provided data or fetch from service
-      const allData = await consultationDataService.getAllData()
-      const patientDataToUse = pData || patientData || allData?.patientData || allData?.step_0
-      const clinicalDataToUse = cData || clinicalData || allData?.clinicalData || allData?.step_1
-      const questionsDataToUse = qData || questionsData || allData?.questionsData || allData?.step_2
-      const diagnosisDataToUse = dData || diagnosisData || allData?.diagnosisData || allData?.step_3
-
-      console.log('Data for generation:', { 
-        hasPatient: !!patientDataToUse, 
-        hasClinical: !!clinicalDataToUse, 
-        hasQuestions: !!questionsDataToUse, 
-        hasDiagnosis: !!diagnosisDataToUse,
-        patientDetails: {
-          name: `${patientDataToUse?.firstName} ${patientDataToUse?.lastName}`,
-          age: patientDataToUse?.age
-        },
-        clinicalDetails: {
-          complaint: clinicalDataToUse?.chiefComplaint,
-          symptoms: clinicalDataToUse?.symptoms?.length || 0
-        },
-        diagnosisDetails: {
-          primary: diagnosisDataToUse?.diagnosis?.primary?.condition,
-          differential: diagnosisDataToUse?.diagnosis?.differential?.length || 0,
-          hasExams: !!diagnosisDataToUse?.suggestedExams
-        }
-      })
-
-      if (!patientDataToUse || !clinicalDataToUse || !diagnosisDataToUse) {
-        throw new Error('Données insuffisantes pour générer le rapport (patient, clinique et diagnostic requis)')
-      }
-
-      // Use the local generation method
-      const result = await consultationDataService.generateConsultationReport(
-        patientDataToUse,
-        clinicalDataToUse,
-        questionsDataToUse,
-        diagnosisDataToUse
-      )
-
-      console.log('✅ Consultation report generated:', result)
-
-      if (result) {
-        setConsultationReport(result)
-        
-        // Save the generated report
-        await consultationDataService.saveConsultationReport(result)
-        console.log('💾 Report saved to consultation service')
-
-        toast({
-          title: "✅ Rapport généré !",
-          description: "Le rapport de consultation et les documents mauriciens ont été générés automatiquement",
-        })
-
-        return result
-      } else {
-        throw new Error('Aucun résultat retourné par le générateur')
-      }
-
-    } catch (error) {
-      console.error('❌ Error generating consultation report:', error)
-      setError(`Erreur génération rapport: ${error instanceof Error ? error.message : 'Erreur inconnue'}`)
-      
-      toast({
-        title: "Erreur",
-        description: error instanceof Error ? error.message : "Échec de la génération automatique du rapport",
-        variant: "destructive"
-      })
-      
-      return null
+  const phases = [
+    {
+      id: 'documents', 
+      title: 'Documents Mauriciens',
+      icon: FileText,
+      color: 'from-blue-600 to-purple-600',
+      description: 'Édition des 4 documents professionnels'
     }
-  }
+  ]
 
-  // ✅ Load existing consultation report on mount
-  useEffect(() => {
-    const loadExistingReport = async () => {
-      try {
-        setIsLoading(true)
-        
-        // 1. Get ALL saved data first
-        const allData = await consultationDataService.getAllData()
-        console.log('MedicalWorkflow - All saved data:', allData)
-        
-        // 2. Ensure we have all required data
-        const completePatientData = patientData || allData?.patientData || allData?.step_0
-        const completeClinicalData = clinicalData || allData?.clinicalData || allData?.step_1
-        const completeQuestionsData = questionsData || allData?.questionsData || allData?.step_2
-        const completeDiagnosisData = diagnosisData || allData?.diagnosisData || allData?.step_3
-        
-        console.log('Complete data check:', {
-          hasPatient: !!completePatientData,
-          hasClinical: !!completeClinicalData,
-          hasQuestions: !!completeQuestionsData,
-          hasDiagnosis: !!completeDiagnosisData,
-          patientName: completePatientData?.firstName,
-          diagnosis: completeDiagnosisData?.diagnosis?.primary?.condition
-        })
-        
-        // 3. Check if we have a consultation report already
-        if (allData?.consultationReport) {
-          console.log('✅ Found existing consultation report')
-          setConsultationReport(allData.consultationReport)
-        } else if (completePatientData && completeClinicalData && completeDiagnosisData) {
-          console.log('⚠️ No consultation report found, generating one locally...')
-          
-          // ✅ Generate using local generator with complete data
-          await generateConsultationReportLocally(
-            completePatientData,
-            completeClinicalData,
-            completeQuestionsData,
-            completeDiagnosisData
-          )
-        } else {
-          setError('Données insuffisantes pour générer le rapport. Veuillez compléter toutes les étapes précédentes.')
-          console.error('Missing data:', {
-            patient: !completePatientData,
-            clinical: !completeClinicalData,
-            diagnosis: !completeDiagnosisData
-          })
-        }
-        
-        // Load existing final documents if any
-        if (allData?.workflowResult || allData?.step_4) {
-          setFinalDocuments(allData.workflowResult || allData.step_4)
-        }
-        
-      } catch (error) {
-        console.error('Error loading existing report:', error)
-        setError('Erreur lors du chargement du rapport existant')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    
-    loadExistingReport()
-  }, []) // Remove dependencies to avoid re-running
-
-  // ✅ Initialize consultation when component mounts
+  // Initialize consultation when component mounts
   useEffect(() => {
     const initConsultation = async () => {
       const urlParams = new URLSearchParams(window.location.search)
@@ -217,157 +75,93 @@ export default function MedicalWorkflow({
     initConsultation()
   }, [])
 
-  // ✅ Callback when documents workflow is completed
-  const handleDocumentsComplete = async (editedDocs: any) => {
+  // Callback du workflow documents
+  const handleDocumentsComplete = async (editedDocs) => {
     console.log('✅ Documents finalisés:', editedDocs)
     setFinalDocuments(editedDocs)
     
     try {
-      // Save the final documents
-      await consultationDataService.saveStepData(4, {
-        type: 'documents_workflow_complete',
-        documents: editedDocs,
-        consultationReport,
-        completedAt: new Date().toISOString()
-      })
-      
-      console.log('💾 Final documents saved')
-      
-      toast({
-        title: "✅ Documents finalisés !",
-        description: "Tous les documents mauriciens sont prêts",
-      })
+      await consultationDataService.saveStepData(4, editedDocs)
     } catch (error) {
       console.error('Error saving workflow documents:', error)
     }
     
-    // Mark workflow as completed
-    setCurrentPhase('preview')
+    if (onComplete) {
+      onComplete(editedDocs)
+    } else {
+      setCurrentPhase('completed')
+    }
   }
 
-  // ✅ Handle back to previous step
+  // Retour au diagnostic (page.tsx étape 3)
   const handleBackToDiagnosis = () => {
     if (onBack) {
       onBack()
     }
   }
 
-  // ✅ Handle preview navigation
-  const handleBackToDocuments = () => {
-    setCurrentPhase('documents')
-  }
-
-  const handleFinalComplete = () => {
-    setCurrentPhase('completed')
-    
-    // Call parent completion handler
-    if (onComplete) {
-      onComplete({
-        documents: finalDocuments,
-        consultationReport,
-        type: 'medical_workflow_complete',
-        completedAt: new Date().toISOString()
-      })
-    }
-  }
-
   const patientName = `${patientData?.firstName || 'Patient'} ${patientData?.lastName || 'X'}`
 
-  // ✅ Loading state
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-          <CardContent className="flex items-center justify-center py-12">
-            <div className="text-center space-y-4">
-              <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
-              <p className="text-gray-600">Génération automatique du rapport de consultation...</p>
-              <p className="text-sm text-blue-600">
-                ⚡ Création : Compte-rendu • Examens biologiques • Examens paracliniques • Ordonnance
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
+  // Load all saved data for auto-fill when component mounts
+  useEffect(() => {
+    const loadAllData = async () => {
+      try {
+        const allData = await consultationDataService.getDataForAutoFill()
+        
+        console.log('Loading data for auto-fill:', allData)
+        
+        if (allData) {
+          if (allData.workflowResult) {
+            setFinalDocuments(allData.workflowResult)
+          }
+        }
+      } catch (error) {
+        console.error('Error loading data for auto-fill:', error)
+      }
+    }
+    
+    loadAllData()
+  }, [])
 
-  // ✅ Error state with retry button
-  if (error && !consultationReport) {
-    return (
-      <div className="space-y-6">
-        <Card className="bg-red-50 border border-red-200">
-          <CardHeader className="bg-red-100">
-            <CardTitle className="flex items-center gap-3 text-red-800">
-              <AlertTriangle className="h-6 w-6" />
-              Erreur du Workflow Médical
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <p className="text-red-700 mb-4">{error}</p>
-            <div className="flex gap-3">
-              <Button variant="outline" onClick={handleBackToDiagnosis}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Retour Diagnostic
-              </Button>
-              <Button onClick={async () => {
-                setError(null)
-                setIsLoading(true)
-                await generateConsultationReportLocally()
-                setIsLoading(false)
-              }}>
-                <Zap className="h-4 w-4 mr-2" />
-                Réessayer Génération
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
+  // Effet pour initialiser les données si diagnosisData arrive
+  useEffect(() => {
+    const generateReportIfNeeded = async () => {
+      if (!diagnosisData) return;
+      try {
+        const res = await fetch('/api/generate-consultation-report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            patientData,
+            clinicalData,
+            questionsData,
+            diagnosisData,
+          }),
+        });
 
-  // ✅ Documents editing phase
+        const reportJson = await res.json();
+
+        // Sauvegarder le rapport dans la session
+        await consultationDataService.saveStepData(3, { report: reportJson });
+
+        // Optionnel : mettre à jour localement un état ou mauritianDocuments.consultation
+        // setMauritianDocuments((prev) => ({ ...prev, consultation: reportJson }));
+      } catch (error) {
+        console.error('Erreur lors de la génération du rapport de consultation :', error);
+      }
+    };
+
+    generateReportIfNeeded();
+  }, [diagnosisData, patientData, clinicalData, questionsData]);
+
+  // Phase principale : Édition documents (toujours affichée)
   if (currentPhase === 'documents') {
     return (
       <div className="space-y-6">
-        {/* Header info */}
-        <Card className="bg-blue-50 border border-blue-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <FileText className="h-6 w-6 text-blue-600" />
-                <div>
-                  <p className="font-semibold text-blue-800">Workflow Documents Mauriciens</p>
-                  <p className="text-sm text-blue-600">Patient: {patientName}</p>
-                  {consultationReport?.mauritianDocuments && (
-                    <p className="text-sm text-green-600">
-                      ✅ Documents auto-générés et prêts à éditer
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Badge className="bg-blue-600 text-white">
-                  Étape 4/4 - Documents
-                </Badge>
-                {consultationReport?.mauritianDocuments && (
-                  <Badge className="bg-green-500 text-white">
-                    <Zap className="h-4 w-4 mr-1" />
-                    Auto-générés
-                  </Badge>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Documents workflow */}
         <DocumentsWorkflow
-          consultationReport={consultationReport}
           diagnosisData={diagnosisData}
+          mauritianDocuments={mauritianDocuments}
           patientData={patientData}
-          clinicalData={clinicalData}
-          questionsData={questionsData}
           onBack={handleBackToDiagnosis}
           onComplete={handleDocumentsComplete}
         />
@@ -375,89 +169,7 @@ export default function MedicalWorkflow({
     )
   }
 
-  // ✅ Preview phase
-  if (currentPhase === 'preview') {
-    return (
-      <div className="space-y-6">
-        {/* Header info */}
-        <Card className="bg-green-50 border border-green-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Eye className="h-6 w-6 text-green-600" />
-                <div>
-                  <p className="font-semibold text-green-800">Aperçu Documents Finalisés</p>
-                  <p className="text-sm text-green-600">Patient: {patientName}</p>
-                  <p className="text-sm text-green-600">Tous les documents sont prêts à imprimer</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Badge className="bg-green-600 text-white">
-                  Documents Finalisés
-                </Badge>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleBackToDocuments}
-                >
-                  ✏️ Modifier
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Documents preview */}
-        <MauritianDocumentsPreview
-          documents={finalDocuments}
-          onBack={handleBackToDocuments}
-          onDownload={(docType) => {
-            console.log(`Downloading ${docType}`)
-            toast({
-              title: "Téléchargement",
-              description: `Téléchargement du document ${docType} en cours...`,
-            })
-          }}
-          onPrint={(docType) => {
-            console.log(`Printing ${docType}`)
-            toast({
-              title: "Impression",
-              description: `Document ${docType} envoyé à l'imprimante`,
-            })
-          }}
-        />
-
-        {/* Final actions */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex justify-between items-center">
-              <p className="text-gray-600">
-                Dossier médical complet prêt pour impression et archivage
-              </p>
-              <div className="flex gap-3">
-                <Button 
-                  variant="outline"
-                  onClick={handleBackToDocuments}
-                >
-                  ✏️ Modifier Documents
-                </Button>
-                
-                <Button 
-                  onClick={handleFinalComplete}
-                  className="bg-green-600 text-white"
-                >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Consultation Terminée
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  // ✅ Completion phase
+  // Phase complétée (cas rare - normalement géré par page.tsx)
   if (currentPhase === 'completed') {
     return (
       <div className="space-y-6">
@@ -465,7 +177,7 @@ export default function MedicalWorkflow({
           <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-3 text-2xl">
               <CheckCircle className="h-8 w-8" />
-              Workflow Médical Complété !
+              Documents Mauriciens Complétés !
             </CardTitle>
           </CardHeader>
           <CardContent className="p-8 text-center">
@@ -473,14 +185,14 @@ export default function MedicalWorkflow({
               <CheckCircle className="h-24 w-24 text-green-500 mx-auto" />
               
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Documents mauriciens finalisés !</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Documents édités avec succès !</h2>
                 <p className="text-gray-600">
-                  Le dossier médical complet de {patientName} est prêt
+                  Les 4 documents mauriciens de {patientName} sont finalisés
                 </p>
               </div>
 
               <div className="bg-green-50 p-6 rounded-lg">
-                <h3 className="font-semibold text-green-800 mb-3">Éléments finalisés :</h3>
+                <h3 className="font-semibold text-green-800 mb-3">Documents finalisés :</h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
@@ -501,56 +213,27 @@ export default function MedicalWorkflow({
                 </div>
               </div>
 
-              {/* Résumé de la consultation */}
-              <div className="bg-blue-50 p-6 rounded-lg text-left">
-                <h3 className="font-semibold text-blue-800 mb-3">Résumé de la consultation :</h3>
-                <div className="text-sm space-y-2">
-                  <p><strong>Patient :</strong> {patientName}</p>
-                  <p><strong>Diagnostic principal :</strong> {diagnosisData?.diagnosis?.primary?.condition || 'Diagnostic établi'}</p>
-                  <p><strong>Date :</strong> {new Date().toLocaleDateString('fr-FR')}</p>
-                  <p><strong>Documents générés :</strong> 4 documents mauriciens complets</p>
-                </div>
-              </div>
-
               <div className="flex gap-4 justify-center">
-                <Button 
-                  variant="outline"
-                  onClick={() => setCurrentPhase('preview')}
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  Revoir Documents
-                </Button>
-                
                 <Button 
                   variant="outline"
                   onClick={() => setCurrentPhase('documents')}
                 >
-                  ✏️ Modifier Documents
+                  ← Modifier Documents
                 </Button>
                 
                 <Button className="bg-green-600 text-white">
-                  <Download className="h-4 w-4 mr-2" />
-                  Télécharger Dossier
+                  📥 Télécharger Dossier
                 </Button>
                 
                 <Button 
                   onClick={() => {
-                    toast({
-                      title: "✅ Consultation archivée",
-                      description: "Le dossier a été sauvegardé dans la base de données",
-                    })
                     if (onComplete) {
-                      onComplete({
-                        documents: finalDocuments,
-                        consultationReport,
-                        type: 'workflow_complete',
-                        completedAt: new Date().toISOString()
-                      })
+                      onComplete(finalDocuments)
                     }
                   }}
                   className="bg-blue-600 text-white"
                 >
-                  🎯 Archiver & Terminer
+                  🆕 Étape Suivante
                 </Button>
               </div>
             </div>

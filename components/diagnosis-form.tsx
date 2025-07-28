@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
-import { useConsultationCache } from '@/hooks/useConsultationCache'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -27,29 +26,9 @@ import {
   Activity,
   Monitor,
   Calendar,
-  DollarSign,
-  RefreshCw,
-  Cloud,
-  CloudOff,
-  Save,
-  Database,
-  Wifi,
-  WifiOff,
-  Shield,
-  Sparkles,
-  Download,
-  Zap
+  DollarSign
 } from "lucide-react"
 import { getTranslation, Language } from "@/lib/translations"
-
-interface DiagnosisData {
-  diagnosis: any
-  expertAnalysis?: any
-  mauritianDocuments?: any
-  documentsGenerated?: boolean
-  generatedAt?: string
-  generationMethod?: string
-}
 
 interface DiagnosisFormProps {
   patientData: any
@@ -60,23 +39,6 @@ interface DiagnosisFormProps {
   onPrevious: () => void
   language?: Language
   consultationId?: string | null
-}
-
-// Custom hook for debouncing
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value)
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value)
-    }, delay)
-
-    return () => {
-      clearTimeout(handler)
-    }
-  }, [value, delay])
-
-  return debouncedValue
 }
 
 export default function EnhancedDiagnosisForm({
@@ -96,181 +58,78 @@ export default function EnhancedDiagnosisForm({
   const [error, setError] = useState<string | null>(null)
   const [currentSection, setCurrentSection] = useState(0)
   const [documentsGenerated, setDocumentsGenerated] = useState(false)
-  const [isOnline, setIsOnline] = useState(navigator.onLine)
-  const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null)
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
-  const [localErrors, setLocalErrors] = useState<string[]>([])
-  const [diagnosisGeneratedAt, setDiagnosisGeneratedAt] = useState<string | null>(null)
-  const [isRegenerating, setIsRegenerating] = useState(false)
-  const [generationMethod, setGenerationMethod] = useState<string>("")
 
   // Helper function for translations
-  const t = (key: string, fallback?: string) => getTranslation(key, language) || fallback || key
+  const t = (key: string) => getTranslation(key, language)
 
-  // Full diagnosis data including all components
-  const fullDiagnosisData = useMemo<DiagnosisData>(() => ({
-    diagnosis,
-    expertAnalysis,
-    mauritianDocuments,
-    documentsGenerated,
-    generatedAt: diagnosisGeneratedAt || new Date().toISOString(),
-    generationMethod
-  }), [diagnosis, expertAnalysis, mauritianDocuments, documentsGenerated, diagnosisGeneratedAt, generationMethod])
-
-  // Use consultation cache hook
-  const {
-    data: cachedData,
-    loading: cacheLoading,
-    error: cacheError,
-    lastSync,
-    isSyncing,
-    setData: setCacheData,
-    refresh: refreshCache,
-    sync: syncCache,
-    clear: clearCache,
-    cacheStats
-  } = useConsultationCache({
-    key: `diagnosis_form_${consultationId || 'current'}`,
-    ttl: 60 * 60 * 1000, // 60 minutes for diagnosis (longer due to API cost)
-    autoSync: true,
-    syncInterval: 10 * 60 * 1000, // 10 minutes for diagnosis form
-    onSync: async (data) => {
+  // Load saved data on mount
+  useEffect(() => {
+    const loadSavedData = async () => {
       try {
-        setSaveStatus('saving')
-        const currentId = consultationId || consultationDataService.getCurrentConsultationId()
+        const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
         
-        if (currentId) {
-          // Save complete diagnosis data
-          await consultationDataService.saveStepData(3, data)
-          
-          // Sync with Supabase if online
-          if (isOnline) {
-            await consultationDataService.saveToSupabase(currentId)
+        if (currentConsultationId) {
+          const savedData = await consultationDataService.getAllData()
+          if (savedData?.diagnosisData) {
+            if (savedData.diagnosisData.diagnosis) {
+              setDiagnosis(savedData.diagnosisData.diagnosis)
+            }
+            if (savedData.diagnosisData.expertAnalysis) {
+              setExpertAnalysis(savedData.diagnosisData.expertAnalysis)
+            }
+            if (savedData.diagnosisData.mauritianDocuments) {
+              setMauritianDocuments(savedData.diagnosisData.mauritianDocuments)
+              setDocumentsGenerated(true)
+            }
           }
         }
-        
-        setSaveStatus('saved')
-        setLastSaveTime(new Date())
-        setLocalErrors([])
       } catch (error) {
-        console.error('Sync error:', error)
-        setSaveStatus('error')
-        setLocalErrors(prev => [...prev, 'Erreur de synchronisation'])
-        throw error
-      }
-    },
-    onError: (error) => {
-      console.error('Cache error:', error)
-      setSaveStatus('error')
-      setLocalErrors(prev => [...prev, error.message])
-    }
-  })
-
-  // Debounced diagnosis data for auto-save
-  const debouncedDiagnosisData = useDebounce(fullDiagnosisData, 2000)
-
-  // Monitor online/offline status
-  useEffect(() => {
-    const handleOnline = () => {
-      setIsOnline(true)
-      // Auto sync when coming back online
-      syncCache()
-    }
-    const handleOffline = () => {
-      setIsOnline(false)
-      setLocalErrors(prev => [...prev, 'Mode hors ligne - Les données seront synchronisées au retour de la connexion'])
-    }
-
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-
-    return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-    }
-  }, [syncCache])
-
-  // Load cached data on mount
-  useEffect(() => {
-    if (cachedData && !diagnosis) {
-      console.log('Loading diagnosis from cache')
-      
-      if (cachedData.diagnosis) {
-        setDiagnosis(cachedData.diagnosis)
-        setExpertAnalysis(cachedData.expertAnalysis || null)
-        setMauritianDocuments(cachedData.mauritianDocuments || null)
-        setDocumentsGenerated(cachedData.documentsGenerated || false)
-        setDiagnosisGeneratedAt(cachedData.generatedAt || null)
-        setGenerationMethod(cachedData.generationMethod || '')
+        console.error('Error loading saved diagnosis data:', error)
       }
     }
-  }, [cachedData, diagnosis])
-
-  // Generate diagnosis if needed
-  useEffect(() => {
-    // Don't generate if we already have diagnosis from cache
-    if (diagnosis || loading) return
     
-    // Only generate if we have all required data
-    if (patientData && clinicalData) {
-      generateCompleteDiagnosisAndDocuments()
+    if (!diagnosis) {
+      loadSavedData()
     }
-  }, [patientData, clinicalData, diagnosis, loading])
+  }, [consultationId, diagnosis])
 
-  // Auto-save when debounced data changes
+  // Save data when diagnosis is generated or updated
   useEffect(() => {
     const saveData = async () => {
-      if (debouncedDiagnosisData.diagnosis) {
-        setSaveStatus('saving')
-        
-        try {
-          // Save to cache
-          await setCacheData(debouncedDiagnosisData)
-          
-          // Save to consultation data service
-          await consultationDataService.saveStepData(3, debouncedDiagnosisData)
-          
-          // Call parent callback
-          onDataChange(debouncedDiagnosisData)
-          
-          setSaveStatus('saved')
-          setLastSaveTime(new Date())
-        } catch (error) {
-          console.error('Error saving diagnosis data:', error)
-          setSaveStatus('error')
+      if (!diagnosis || !mauritianDocuments) return
+      
+      try {
+        const dataToSave = {
+          diagnosis,
+          expertAnalysis,
+          mauritianDocuments,
+          documentsGenerated,
+          timestamp: new Date().toISOString()
         }
+        await consultationDataService.saveStepData(3, dataToSave)
+        console.log("💾 Auto-saved diagnosis data to consultation service")
+      } catch (error) {
+        console.error('Error saving diagnosis data:', error)
       }
     }
     
+    // Save whenever key data changes
     saveData()
-  }, [debouncedDiagnosisData, setCacheData, onDataChange])
+  }, [diagnosis, expertAnalysis, mauritianDocuments, documentsGenerated])
 
-  const generateCompleteDiagnosisAndDocuments = async (forceRegenerate = false) => {
+  useEffect(() => {
+    generateCompleteDiagnosisAndDocuments()
+  }, [patientData, clinicalData])
+
+  const generateCompleteDiagnosisAndDocuments = async () => {
     if (!patientData || !clinicalData) return
 
     setLoading(true)
     setError(null)
-    setLocalErrors([])
     setDocumentsGenerated(false)
-    
-    if (forceRegenerate) {
-      setIsRegenerating(true)
-    }
 
     try {
       console.log("🩺 Generating complete diagnosis + documents")
-
-      // Check if we should use cached diagnosis
-      if (!forceRegenerate && cachedData?.diagnosis) {
-        console.log('✅ Using cached diagnosis')
-        setDiagnosis(cachedData.diagnosis)
-        setExpertAnalysis(cachedData.expertAnalysis || null)
-        setMauritianDocuments(cachedData.mauritianDocuments || null)
-        setDocumentsGenerated(cachedData.documentsGenerated || false)
-        setDiagnosisGeneratedAt(cachedData.generatedAt || null)
-        setGenerationMethod(cachedData.generationMethod || '')
-        return
-      }
 
       const response = await fetch("/api/openai-diagnosis", {
         method: "POST",
@@ -292,16 +151,41 @@ export default function EnhancedDiagnosisForm({
 
       const data = await response.json()
       console.log("📦 API Response COMPLETE:", data)
+      console.log("🎯 Diagnosis data:", data.diagnosis)
+      console.log("🧪 Expert Analysis data:", data.expertAnalysis || data.expert_analysis)
+      console.log("📋 Mauritian Documents:", data.mauritianDocuments)
 
       if (data.success && data.diagnosis && data.mauritianDocuments) {
         setDiagnosis(data.diagnosis)
         setExpertAnalysis(data.expertAnalysis || data.expert_analysis || {})
         setMauritianDocuments(data.mauritianDocuments)
         setDocumentsGenerated(true)
-        setDiagnosisGeneratedAt(new Date().toISOString())
-        setGenerationMethod("openai_gpt4o")
+        
+        // Save complete data with all fields properly structured
+        const completeData = { 
+          diagnosis: data.diagnosis, 
+          mauritianDocuments: data.mauritianDocuments,
+          expertAnalysis: data.expertAnalysis || data.expert_analysis || {},
+          completeData: data,
+          documentsGenerated: true
+        }
+        
+        // Call onDataChange to update parent component
+        onDataChange(completeData)
+        
+        // Save to consultation service immediately for persistence
+        try {
+          await consultationDataService.saveStepData(3, completeData)
+          console.log("✅ Data saved to consultation service")
+        } catch (saveError) {
+          console.error("Error saving to consultation service:", saveError)
+        }
         
         console.log("✅ Diagnosis + Documents + Expert Analysis generated")
+        console.log("🔍 Diagnosis set:", data.diagnosis)
+        console.log("🔍 Expert Analysis set:", data.expertAnalysis || data.expert_analysis)
+        console.log("🔍 Documents set:", data.mauritianDocuments)
+        console.log("💾 Complete data saved:", completeData)
       } else {
         throw new Error(data.error || "Format de réponse invalide")
       }
@@ -309,7 +193,6 @@ export default function EnhancedDiagnosisForm({
     } catch (err) {
       console.error("❌ Generation error:", err)
       setError(err instanceof Error ? err.message : "Erreur inconnue")
-      setGenerationMethod("fallback")
 
       // Generate fallback data
       const fallbackData = generateCompleteFallback()
@@ -317,11 +200,28 @@ export default function EnhancedDiagnosisForm({
       setExpertAnalysis(fallbackData.expertAnalysis)
       setMauritianDocuments(fallbackData.mauritianDocuments)
       setDocumentsGenerated(true)
-      setDiagnosisGeneratedAt(new Date().toISOString())
+      
+      // Save fallback data the same way
+      const completeData = {
+        diagnosis: fallbackData.diagnosis,
+        mauritianDocuments: fallbackData.mauritianDocuments,
+        expertAnalysis: fallbackData.expertAnalysis,
+        completeData: fallbackData,
+        documentsGenerated: true
+      }
+      
+      onDataChange(completeData)
+      
+      // Save fallback data to consultation service
+      try {
+        await consultationDataService.saveStepData(3, completeData)
+        console.log("✅ Fallback data saved to consultation service")
+      } catch (saveError) {
+        console.error("Error saving fallback data:", saveError)
+      }
       
     } finally {
       setLoading(false)
-      setIsRegenerating(false)
     }
   }
 
@@ -426,36 +326,6 @@ export default function EnhancedDiagnosisForm({
     }
   }
 
-  // Manual refresh function
-  const handleRefresh = async () => {
-    setLocalErrors([])
-    await refreshCache()
-    if (isOnline) {
-      await syncCache()
-    }
-  }
-
-  // Handle regenerate diagnosis
-  const handleRegenerateDiagnosis = async () => {
-    if (confirm('Êtes-vous sûr de vouloir régénérer le diagnostic ? Cela remplacera l\'analyse actuelle.')) {
-      await clearCache()
-      setDiagnosis(null)
-      setExpertAnalysis(null)
-      setMauritianDocuments(null)
-      setDocumentsGenerated(false)
-      await generateCompleteDiagnosisAndDocuments(true)
-    }
-  }
-
-  // Handle navigation with sync
-  const handleNext = async () => {
-    // Force sync before navigation
-    if (isOnline) {
-      await syncCache()
-    }
-    onNext()
-  }
-
   const sections = [
     { id: "primary", title: "Diagnostic Principal", icon: Target },
     { id: "examinations", title: "Examens Recommandés", icon: TestTube },
@@ -465,103 +335,10 @@ export default function EnhancedDiagnosisForm({
     { id: "documents", title: "Documents Maurice", icon: FileText },
   ]
 
-  // Status bar component
-  const StatusBar = () => (
-    <div className="flex items-center justify-between bg-white/80 backdrop-blur-sm rounded-lg px-4 py-2 shadow-md">
-      <div className="flex items-center gap-4">
-        {/* Online/Offline status */}
-        <div className="flex items-center gap-2">
-          {isOnline ? (
-            <>
-              <Wifi className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-medium text-green-600">En ligne</span>
-            </>
-          ) : (
-            <>
-              <WifiOff className="h-4 w-4 text-red-600" />
-              <span className="text-sm font-medium text-red-600">Hors ligne</span>
-            </>
-          )}
-        </div>
-
-        {/* Save status */}
-        <div className="flex items-center gap-2">
-          {saveStatus === 'saving' && (
-            <>
-              <RefreshCw className="h-4 w-4 animate-spin text-emerald-600" />
-              <span className="text-sm text-emerald-600">Sauvegarde...</span>
-            </>
-          )}
-          {saveStatus === 'saved' && (
-            <>
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <span className="text-sm text-green-600">Sauvegardé</span>
-            </>
-          )}
-          {saveStatus === 'error' && (
-            <>
-              <AlertTriangle className="h-4 w-4 text-red-600" />
-              <span className="text-sm text-red-600">Erreur</span>
-            </>
-          )}
-        </div>
-
-        {/* Last save time */}
-        {lastSaveTime && (
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Clock className="h-4 w-4" />
-            <span>{lastSaveTime.toLocaleTimeString('fr-FR')}</span>
-          </div>
-        )}
-
-        {/* Sync status */}
-        {isSyncing && (
-          <div className="flex items-center gap-2">
-            <Cloud className="h-4 w-4 text-blue-600 animate-pulse" />
-            <span className="text-sm text-blue-600">Synchronisation...</span>
-          </div>
-        )}
-      </div>
-
-      {/* Cache info and actions */}
-      <div className="flex items-center gap-4">
-        {cacheStats.isStale && (
-          <Badge variant="outline" className="text-yellow-600 border-yellow-600">
-            Cache périmé
-          </Badge>
-        )}
-        
-        {diagnosis && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleRegenerateDiagnosis}
-            disabled={isRegenerating}
-            className="text-emerald-600"
-          >
-            <Sparkles className={`h-4 w-4 mr-1 ${isRegenerating ? 'animate-spin' : ''}`} />
-            Régénérer
-          </Button>
-        )}
-        
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={handleRefresh}
-          disabled={isSyncing || cacheLoading}
-        >
-          <RefreshCw className={`h-4 w-4 ${isSyncing || cacheLoading ? 'animate-spin' : ''}`} />
-        </Button>
-      </div>
-    </div>
-  )
-
   // Loading interface
-  if (loading || cacheLoading) {
+  if (loading) {
     return (
       <div className="space-y-6">
-        <StatusBar />
-        
         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
           <CardHeader className="text-center">
             <CardTitle className="flex items-center justify-center gap-3 text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
@@ -579,12 +356,8 @@ export default function EnhancedDiagnosisForm({
                 </div>
               </div>
               <div className="space-y-3">
-                <p className="text-2xl font-bold text-gray-800">
-                  {cacheLoading ? 'Chargement du diagnostic sauvegardé' : 'Génération Analyse Complète'}
-                </p>
-                <p className="text-lg text-gray-600">
-                  {cacheLoading ? 'Récupération depuis le cache...' : 'Diagnostic + Examens + Traitements + Documents'}
-                </p>
+                <p className="text-2xl font-bold text-gray-800">Génération Analyse Complète</p>
+                <p className="text-lg text-gray-600">Diagnostic + Examens + Traitements + Documents</p>
                 <div className="max-w-md mx-auto text-sm text-gray-500 space-y-1">
                   <div className="flex items-center justify-center gap-2">
                     <Target className="h-4 w-4" />
@@ -617,8 +390,6 @@ export default function EnhancedDiagnosisForm({
   if (!diagnosis && error) {
     return (
       <div className="space-y-6">
-        <StatusBar />
-        
         <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
           <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-3">
@@ -631,7 +402,7 @@ export default function EnhancedDiagnosisForm({
               <AlertTriangle className="h-16 w-16 text-yellow-500 mx-auto" />
               <p className="text-lg text-gray-700">Impossible de générer l'analyse médicale</p>
               <p className="text-sm text-gray-600">Erreur: {error}</p>
-              <Button onClick={() => generateCompleteDiagnosisAndDocuments(true)} className="mt-6">
+              <Button onClick={generateCompleteDiagnosisAndDocuments} className="mt-6">
                 <Brain className="h-4 w-4 mr-2" />
                 Réessayer
               </Button>
@@ -647,13 +418,11 @@ export default function EnhancedDiagnosisForm({
     console.log("⚠️ Pas de diagnosis disponible")
     return (
       <div className="space-y-6">
-        <StatusBar />
-        
         <Card>
           <CardContent className="p-8 text-center">
             <Brain className="h-16 w-16 text-blue-500 mx-auto mb-4" />
             <p className="text-lg text-gray-700">Aucun diagnostic disponible</p>
-            <Button onClick={() => generateCompleteDiagnosisAndDocuments(true)} className="mt-4">
+            <Button onClick={generateCompleteDiagnosisAndDocuments} className="mt-4">
               <Brain className="h-4 w-4 mr-2" />
               Générer Diagnostic
             </Button>
@@ -668,30 +437,6 @@ export default function EnhancedDiagnosisForm({
 
   return (
     <div className="space-y-6">
-      {/* Status Bar */}
-      <StatusBar />
-
-      {/* Error display */}
-      {(cacheError || localErrors.length > 0) && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              {cacheError && (
-                <p className="text-sm font-medium text-red-800">
-                  Erreur de cache : {cacheError.message}
-                </p>
-              )}
-              {localErrors.map((error, index) => (
-                <p key={index} className="text-sm text-red-700">
-                  {error}
-                </p>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Success header */}
       <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader className="text-center">
@@ -699,34 +444,19 @@ export default function EnhancedDiagnosisForm({
             <CheckCircle className="h-8 w-8 text-emerald-600" />
             Analyse Médicale Experte Complète
           </CardTitle>
-          <div className="flex justify-center gap-4 mt-4 flex-wrap">
+          <div className="flex justify-center gap-4 mt-4">
             <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300">
               Confiance IA: {diagnosis?.primary?.confidence || 70}%
             </Badge>
-            {generationMethod === "openai_gpt4o" && (
-              <Badge className="bg-blue-500 text-white">
-                <Zap className="h-3 w-3 mr-1" />
-                GPT-4o Expert
-              </Badge>
-            )}
-            {generationMethod === "fallback" && (
-              <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
-                <Shield className="h-3 w-3 mr-1" />
-                Mode Secours
-              </Badge>
-            )}
+            <Badge className="bg-blue-500 text-white">
+              GPT-4o Expert
+            </Badge>
             {documentsGenerated && (
               <Badge className="bg-green-500 text-white">
-                <FileText className="h-3 w-3 mr-1" />
                 Documents Prêts
               </Badge>
             )}
-            {diagnosisGeneratedAt && (
-              <Badge variant="outline" className="bg-gray-50 text-gray-600">
-                <Clock className="h-3 w-3 mr-1" />
-                Généré {new Date(diagnosisGeneratedAt).toLocaleTimeString('fr-FR')}
-              </Badge>
-            )}
+            {error && <Badge variant="destructive">Mode Fallback</Badge>}
           </div>
         </CardHeader>
       </Card>
@@ -748,6 +478,42 @@ export default function EnhancedDiagnosisForm({
           </button>
         ))}
       </div>
+
+      {/* DEBUG: Si pas d'examens */}
+      {currentSection === 1 && (!expertAnalysis?.expert_investigations?.immediate_priority || expertAnalysis.expert_investigations.immediate_priority.length === 0) && (
+        <Card className="bg-yellow-50 border border-yellow-200">
+          <CardContent className="p-6">
+            <div className="text-center">
+              <AlertTriangle className="h-12 w-12 text-yellow-600 mx-auto mb-3" />
+              <h3 className="text-lg font-semibold text-yellow-800 mb-2">Examens en cours de génération</h3>
+              <p className="text-yellow-700">Les examens recommandés seront disponibles sous peu.</p>
+              <div className="mt-4 space-y-2 text-sm text-yellow-600">
+                <p><strong>Debug:</strong> expertAnalysis = {expertAnalysis ? 'Présent' : 'Absent'}</p>
+                <p><strong>Expert investigations:</strong> {expertAnalysis?.expert_investigations ? 'Présent' : 'Absent'}</p>
+                <p><strong>Immediate priority:</strong> {expertAnalysis?.expert_investigations?.immediate_priority ? `${expertAnalysis.expert_investigations.immediate_priority.length} éléments` : 'Absent'}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* DEBUG: Si pas de traitements */}
+      {currentSection === 2 && (!expertAnalysis?.expert_therapeutics?.primary_treatments || expertAnalysis.expert_therapeutics.primary_treatments.length === 0) && (
+        <Card className="bg-yellow-50 border border-yellow-200">
+          <CardContent className="p-6">
+            <div className="text-center">
+              <AlertTriangle className="h-12 w-12 text-yellow-600 mx-auto mb-3" />
+              <h3 className="text-lg font-semibold text-yellow-800 mb-2">Traitements en cours de génération</h3>
+              <p className="text-yellow-700">Les traitements recommandés seront disponibles sous peu.</p>
+              <div className="mt-4 space-y-2 text-sm text-yellow-600">
+                <p><strong>Debug:</strong> expertAnalysis = {expertAnalysis ? 'Présent' : 'Absent'}</p>
+                <p><strong>Expert therapeutics:</strong> {expertAnalysis?.expert_therapeutics ? 'Présent' : 'Absent'}</p>
+                <p><strong>Primary treatments:</strong> {expertAnalysis?.expert_therapeutics?.primary_treatments ? `${expertAnalysis.expert_therapeutics.primary_treatments.length} éléments` : 'Absent'}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* PRIMARY DIAGNOSIS */}
       {currentSection === 0 && (
@@ -1205,14 +971,6 @@ export default function EnhancedDiagnosisForm({
         </Card>
       )}
 
-      {/* Indicateur de sauvegarde automatique */}
-      <div className="flex justify-center">
-        <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-sm text-gray-600">Sauvegarde automatique</span>
-        </div>
-      </div>
-
       {/* Navigation */}
       <div className="flex justify-between">
         <Button 
@@ -1226,39 +984,19 @@ export default function EnhancedDiagnosisForm({
 
         {documentsGenerated ? (
           <Button 
-            onClick={handleNext}
-            disabled={isSyncing}
+            onClick={onNext}
             className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            {isSyncing ? (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                {t('common.syncing', 'Synchronisation...')}
-              </>
-            ) : (
-              <>
-                <Edit3 className="h-4 w-4 mr-2" />
-                Éditer Documents
-              </>
-            )}
+            <Edit3 className="h-4 w-4 mr-2" />
+            Éditer Documents
           </Button>
         ) : (
           <Button 
-            onClick={() => generateCompleteDiagnosisAndDocuments(true)}
-            disabled={loading || isRegenerating}
+            onClick={generateCompleteDiagnosisAndDocuments}
             className="bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            {loading || isRegenerating ? (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Génération en cours...
-              </>
-            ) : (
-              <>
-                <Brain className="h-4 w-4 mr-2" />
-                Générer Analyse Complète
-              </>
-            )}
+            <Brain className="h-4 w-4 mr-2" />
+            Générer Analyse Complète
           </Button>
         )}
       </div>

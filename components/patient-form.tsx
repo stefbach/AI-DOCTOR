@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
-import { useConsultationCache } from '@/hooks/useConsultationCache'
 import { supabase } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -29,14 +28,7 @@ import {
   Mail,
   Phone,
   MapPin,
-  Home,
-  Keyboard,
-  RefreshCw,
-  Database,
-  Clock,
-  Save,
-  CloudOff,
-  Cloud
+  Home
 } from "lucide-react"
 import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
 import { getTranslation, Language } from "@/lib/translations"
@@ -80,23 +72,6 @@ interface PatientFormProps {
   initialData?: PatientFormData
 }
 
-// Custom hook for debouncing
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value)
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value)
-    }, delay)
-
-    return () => {
-      clearTimeout(handler)
-    }
-  }, [value, delay])
-
-  return debouncedValue
-}
-
 export default function ModernPatientForm({ 
   onDataChange, 
   onNext, 
@@ -107,11 +82,6 @@ export default function ModernPatientForm({
   const { patientData: tibokPatient, consultationData, isFromTibok } = useTibokPatientData()
   const [isLoadingPatientData, setIsLoadingPatientData] = useState(true)
   const [dataProcessed, setDataProcessed] = useState(false)
-  const [isOnline, setIsOnline] = useState(navigator.onLine)
-  
-  // Navigation refs
-  const fieldRefs = useRef<Record<string, HTMLElement | null>>({})
-  const [showKeyboardHint, setShowKeyboardHint] = useState(true)
   
   // Helper function for translations
   const t = (key: string) => getTranslation(key, language)
@@ -141,25 +111,6 @@ export default function ModernPatientForm({
     t('medicalConditions.highCholesterol'),
   ]
   
-  // Field navigation order
-  const FIELD_ORDER = [
-    'firstName',
-    'lastName', 
-    'birthDate',
-    'gender-male',
-    'otherGender',
-    'weight',
-    'height',
-    'phone',
-    'email',
-    'address',
-    'city',
-    'country',
-    'otherAllergies',
-    'otherMedicalHistory',
-    'currentMedicationsText'
-  ]
-  
   // Capture URL parameters immediately before they get cleared
   const [urlData] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -175,6 +126,7 @@ export default function ModernPatientForm({
           const doctorData = JSON.parse(decodeURIComponent(doctorDataParam))
           console.log('Doctor data received from URL:', doctorData)
           
+          // Store doctor data with ID if available
           const doctorInfo = {
             ...doctorData,
             id: doctorId || doctorData.id
@@ -201,8 +153,7 @@ export default function ModernPatientForm({
     return null
   })
 
-  // Initialize form data with default values
-  const defaultFormData: PatientFormData = {
+  const [formData, setFormData] = useState<PatientFormData>({
     firstName: "",
     lastName: "",
     birthDate: "",
@@ -221,175 +172,44 @@ export default function ModernPatientForm({
       alcohol: "", 
       physicalActivity: "",
     },
+    // Initialize additional fields
     address: "",
     phone: "",
     phoneNumber: "",
     city: "",
     country: "Maurice",
     email: ""
-  }
+  })
 
-  const [formData, setFormData] = useState<PatientFormData>(defaultFormData)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [allergySearch, setAllergySearch] = useState("")
   const [historySearch, setHistorySearch] = useState("")
   const [currentSection, setCurrentSection] = useState(0)
-  const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null)
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
-  // Use consultation cache hook
-  const {
-    data: cachedData,
-    loading: cacheLoading,
-    error: cacheError,
-    lastSync,
-    isSyncing,
-    setData: setCacheData,
-    refresh: refreshCache,
-    sync: syncCache,
-    clear: clearCache,
-    cacheStats
-  } = useConsultationCache({
-    key: `patient_form_${consultationId || 'current'}`,
-    ttl: 30 * 60 * 1000, // 30 minutes
-    autoSync: true,
-    syncInterval: 2 * 60 * 1000, // 2 minutes for patient form
-    onSync: async (data) => {
-      try {
-        setSaveStatus('saving')
-        const currentId = consultationId || consultationDataService.getCurrentConsultationId()
-        
-        if (currentId) {
-          // Save to consultation data service
-          await consultationDataService.saveStepData(0, data)
-          
-          // Sync with Supabase if online
-          if (isOnline) {
-            await consultationDataService.saveToSupabase(currentId)
-          }
-        }
-        
-        setSaveStatus('saved')
-        setLastSaveTime(new Date())
-      } catch (error) {
-        console.error('Sync error:', error)
-        setSaveStatus('error')
-        throw error
-      }
-    },
-    onError: (error) => {
-      console.error('Cache error:', error)
-      setSaveStatus('error')
-    }
-  })
-
-  // Debounced form data for auto-save
-  const debouncedFormData = useDebounce(formData, 1000)
-
-  // Monitor online/offline status
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true)
-    const handleOffline = () => setIsOnline(false)
-
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-
-    return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-    }
-  }, [])
-
-  // NAVIGATION FUNCTIONS
-  const setFieldRef = useCallback((fieldName: string, element: HTMLElement | null) => {
-    fieldRefs.current[fieldName] = element
-  }, [])
-
-  const focusNextField = useCallback((currentField: string) => {
-    const currentIndex = FIELD_ORDER.indexOf(currentField)
-    if (currentIndex >= 0 && currentIndex < FIELD_ORDER.length - 1) {
-      const nextFieldName = FIELD_ORDER[currentIndex + 1]
-      
-      // Special handling for gender checkbox
-      if (nextFieldName.startsWith('gender-')) {
-        const genderCheckbox = document.getElementById(nextFieldName) as HTMLElement
-        if (genderCheckbox) {
-          genderCheckbox.focus()
-          genderCheckbox.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
-          })
-          
-          const parentDiv = genderCheckbox.closest('.border-2')
-          if (parentDiv) {
-            parentDiv.classList.add('ring-2', 'ring-blue-300')
-            setTimeout(() => {
-              parentDiv.classList.remove('ring-2', 'ring-blue-300')
-            }, 1000)
-          }
-        }
-      } else {
-        const nextField = fieldRefs.current[nextFieldName]
-        
-        if (nextField) {
-          nextField.focus()
-          nextField.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
-          })
-          
-          nextField.classList.add('ring-2', 'ring-blue-300')
-          setTimeout(() => {
-            nextField.classList.remove('ring-2', 'ring-blue-300')
-          }, 1000)
-        }
-      }
-    } else if (currentIndex === FIELD_ORDER.length - 1) {
-      handleSubmit()
-    }
-  }, [])
-
-  const handleKeyDown = useCallback((e: React.KeyboardEvent, fieldName: string) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      focusNextField(fieldName)
-      
-      if (showKeyboardHint) {
-        setShowKeyboardHint(false)
-      }
-    }
-  }, [focusNextField, showKeyboardHint])
-
-  // Process data from various sources
+  // Process data from URL or TIBOK hook
   useEffect(() => {
     const processPatientData = async () => {
       console.log('Starting to process patient data')
+      console.log('URL data captured:', urlData)
+      console.log('Hook data:', tibokPatient)
       
-      // Priority order: cached data > URL data > TIBOK hook > saved data
-      
-      // 1. Try cached data first
-      if (cachedData && !dataProcessed) {
-        console.log('Using cached patient data:', cachedData)
-        setFormData(cachedData)
-        setDataProcessed(true)
-        setIsLoadingPatientData(false)
-        return
-      }
-      
-      // 2. Process URL data or TIBOK hook data
       let patientInfo = null
       let isTibok = false
       
+      // Use captured URL data first
       if (urlData && urlData.patientData) {
         patientInfo = urlData.patientData
         isTibok = true
-        console.log('Using patient data from URL:', patientInfo)
-      } else if (tibokPatient) {
+        console.log('Using patient data from captured URL:', patientInfo)
+      }
+      // If no URL data, try the hook data
+      else if (tibokPatient) {
         patientInfo = tibokPatient
         isTibok = isFromTibok
         console.log('Using patient data from hook:', patientInfo)
       }
       
+      // Process the data if we have it
       if (patientInfo && !dataProcessed) {
         console.log('Processing patient info:', patientInfo)
         
@@ -397,8 +217,9 @@ export default function ModernPatientForm({
         let enhancedPatientInfo = { ...patientInfo }
         
         const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
-        if (currentConsultationId && isOnline) {
+        if (currentConsultationId) {
           try {
+            // Get consultation data which includes height/weight
             const { data: consultation } = await supabase
               .from('consultations')
               .select('patient_id, patient_height, patient_weight')
@@ -406,9 +227,11 @@ export default function ModernPatientForm({
               .single()
             
             if (consultation) {
+              // Use consultation data for height/weight if available
               enhancedPatientInfo.height = consultation.patient_height || patientInfo.height || ''
               enhancedPatientInfo.weight = consultation.patient_weight || patientInfo.weight || ''
               
+              // Also get full patient data if we have patient_id
               if (consultation.patient_id) {
                 const { data: dbPatient } = await supabase
                   .from('patients')
@@ -417,6 +240,7 @@ export default function ModernPatientForm({
                   .single()
                 
                 if (dbPatient) {
+                  // Use consultation data first (most recent), then patient table, then original data
                   enhancedPatientInfo.height = consultation.patient_height || dbPatient.height || patientInfo.height || ''
                   enhancedPatientInfo.weight = consultation.patient_weight || dbPatient.weight || patientInfo.weight || ''
                   enhancedPatientInfo.address = dbPatient.address || patientInfo.address || ''
@@ -452,7 +276,7 @@ export default function ModernPatientForm({
           }
         }
         
-        // Create new form data with enhanced info
+        // Create new form data with enhanced info - FIXED VERSION
         const newFormData: PatientFormData = {
           firstName: enhancedPatientInfo.firstName || enhancedPatientInfo.first_name || "",
           lastName: enhancedPatientInfo.lastName || enhancedPatientInfo.last_name || "",
@@ -462,12 +286,14 @@ export default function ModernPatientForm({
           otherGender: "",
           weight: enhancedPatientInfo.weight ? enhancedPatientInfo.weight.toString() : "",
           height: enhancedPatientInfo.height ? enhancedPatientInfo.height.toString() : "",
+          // Contact information - properly populated
           phone: enhancedPatientInfo.phone_number || enhancedPatientInfo.phone || enhancedPatientInfo.phoneNumber || "",
           phoneNumber: enhancedPatientInfo.phone_number || enhancedPatientInfo.phone || enhancedPatientInfo.phoneNumber || "",
           email: enhancedPatientInfo.email || "",
           address: enhancedPatientInfo.address || "",
           city: enhancedPatientInfo.city || "",
           country: enhancedPatientInfo.country || "Maurice",
+          // Medical information
           allergies: [],
           otherAllergies: "",
           medicalHistory: [],
@@ -482,66 +308,63 @@ export default function ModernPatientForm({
         
         console.log('Setting form data:', newFormData)
         setFormData(newFormData)
-        
-        // Save to cache
-        await setCacheData(newFormData)
-        
         setDataProcessed(true)
         setIsLoadingPatientData(false)
       } else if (!patientInfo) {
-        // 3. Try to load from saved data
-        try {
-          const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
-          
-          if (currentConsultationId) {
-            const savedData = await consultationDataService.getAllData()
-            if (savedData?.patientData && !dataProcessed) {
-              setFormData(savedData.patientData)
-              
-              // Save to cache
-              await setCacheData(savedData.patientData)
-              
-              setDataProcessed(true)
-            }
-          }
-        } catch (error) {
-          console.error('Error loading saved patient data:', error)
-        } finally {
-          setIsLoadingPatientData(false)
-        }
+        console.log('No patient data available')
+        setIsLoadingPatientData(false)
       }
     }
     
+    // Process immediately
     processPatientData()
-  }, [tibokPatient, isFromTibok, dataProcessed, urlData, t, consultationId, cachedData, setCacheData, isOnline])
+  }, [tibokPatient, isFromTibok, dataProcessed, urlData, t, consultationId])
 
-  // Auto-save when form data changes
+  // Load saved data if available
+  useEffect(() => {
+    const loadSavedData = async () => {
+      try {
+        if (dataProcessed) return
+        
+        const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
+        
+        if (currentConsultationId) {
+          const savedData = await consultationDataService.getAllData()
+          if (savedData?.patientData && !dataProcessed) {
+            setFormData(savedData.patientData)
+            setDataProcessed(true)
+          }
+        }
+      } catch (error) {
+        console.error('Error loading saved patient data:', error)
+      } finally {
+        setIsLoadingPatientData(false)
+      }
+    }
+    
+    if (!urlData && !tibokPatient) {
+      loadSavedData()
+    }
+  }, [consultationId, urlData, tibokPatient, dataProcessed])
+
+  // Save data when form changes
   useEffect(() => {
     const saveData = async () => {
-      if (debouncedFormData.firstName || debouncedFormData.lastName) {
-        setSaveStatus('saving')
-        
-        try {
-          // Save to cache
-          await setCacheData(debouncedFormData)
-          
-          // Save to consultation data service
-          await consultationDataService.saveStepData(0, debouncedFormData)
-          
-          // Call parent callback
-          onDataChange(debouncedFormData)
-          
-          setSaveStatus('saved')
-          setLastSaveTime(new Date())
-        } catch (error) {
-          console.error('Error saving patient data:', error)
-          setSaveStatus('error')
-        }
+      try {
+        await consultationDataService.saveStepData(0, formData)
+      } catch (error) {
+        console.error('Error saving patient data:', error)
       }
     }
     
-    saveData()
-  }, [debouncedFormData, setCacheData, onDataChange])
+    const timer = setTimeout(() => {
+      if (formData.firstName && formData.lastName) {
+        saveData()
+      }
+    }, 1000)
+    
+    return () => clearTimeout(timer)
+  }, [formData])
 
   // Calculate form completion percentage
   const calculateProgress = () => {
@@ -585,6 +408,14 @@ export default function ModernPatientForm({
       }
     }
   }, [formData.birthDate, formData.age])
+
+  // Auto-save effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onDataChange(formData)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [formData, onDataChange])
 
   const handleInputChange = (field: keyof PatientFormData, value: any) => {
     const newData = { ...formData, [field]: value }
@@ -660,12 +491,8 @@ export default function ModernPatientForm({
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (validateForm()) {
-      // Force sync before navigation
-      if (isOnline) {
-        await syncCache()
-      }
       onNext()
     }
   }
@@ -684,14 +511,6 @@ export default function ModernPatientForm({
     if (bmi < 25) return { text: t('patientForm.normalWeight'), color: "bg-green-100 text-green-800", icon: "✅" }
     if (bmi < 30) return { text: t('patientForm.overweight'), color: "bg-yellow-100 text-yellow-800", icon: "⚠️" }
     return { text: t('patientForm.obesity'), color: "bg-red-100 text-red-800", icon: "🔴" }
-  }
-
-  // Manual refresh function
-  const handleRefresh = async () => {
-    await refreshCache()
-    if (isOnline) {
-      await syncCache()
-    }
   }
 
   const bmi = calculateBMI()
@@ -716,7 +535,7 @@ export default function ModernPatientForm({
   ]
 
   // Show loading state briefly
-  if (isLoadingPatientData || cacheLoading) {
+  if (isLoadingPatientData) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -729,93 +548,8 @@ export default function ModernPatientForm({
 
   const showTibokNotification = dataProcessed && (isFromTibok || urlData?.source === 'tibok')
 
-  // Status bar component
-  const StatusBar = () => (
-    <div className="flex items-center justify-between bg-white/80 backdrop-blur-sm rounded-lg px-4 py-2 shadow-md">
-      <div className="flex items-center gap-4">
-        {/* Online/Offline status */}
-        <div className="flex items-center gap-2">
-          {isOnline ? (
-            <>
-              <Cloud className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-medium text-green-600">En ligne</span>
-            </>
-          ) : (
-            <>
-              <CloudOff className="h-4 w-4 text-red-600" />
-              <span className="text-sm font-medium text-red-600">Hors ligne</span>
-            </>
-          )}
-        </div>
-
-        {/* Save status */}
-        <div className="flex items-center gap-2">
-          {saveStatus === 'saving' && (
-            <>
-              <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
-              <span className="text-sm text-blue-600">Sauvegarde...</span>
-            </>
-          )}
-          {saveStatus === 'saved' && (
-            <>
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <span className="text-sm text-green-600">Sauvegardé</span>
-            </>
-          )}
-          {saveStatus === 'error' && (
-            <>
-              <AlertTriangle className="h-4 w-4 text-red-600" />
-              <span className="text-sm text-red-600">Erreur</span>
-            </>
-          )}
-        </div>
-
-        {/* Last save time */}
-        {lastSaveTime && (
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Clock className="h-4 w-4" />
-            <span>{lastSaveTime.toLocaleTimeString('fr-FR')}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Cache info */}
-      <div className="flex items-center gap-4">
-        {cacheStats.isStale && (
-          <Badge variant="outline" className="text-yellow-600 border-yellow-600">
-            Cache périmé
-          </Badge>
-        )}
-        
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={handleRefresh}
-          disabled={isSyncing}
-        >
-          <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-        </Button>
-      </div>
-    </div>
-  )
-
   return (
     <div className="space-y-6">
-      {/* Status Bar */}
-      <StatusBar />
-
-      {/* Navigation Hint */}
-      {showKeyboardHint && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center gap-2">
-            <Keyboard className="h-5 w-5 text-blue-600" />
-            <p className="text-sm font-medium text-blue-800">
-              💡 {t('common.keyboardHint', 'Astuce : Appuyez sur Enter pour passer au champ suivant')}
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Show notification if data is from TIBOK */}
       {showTibokNotification && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -823,18 +557,6 @@ export default function ModernPatientForm({
             <CheckCircle className="h-5 w-5 text-blue-600" />
             <p className="text-sm font-medium text-blue-800">
               {t('patientForm.tibokNotification')} {formData.firstName} {formData.lastName}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Show cache error if any */}
-      {cacheError && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-red-600" />
-            <p className="text-sm font-medium text-red-800">
-              Erreur de cache : {cacheError.message}
             </p>
           </div>
         </div>
@@ -895,8 +617,6 @@ export default function ModernPatientForm({
                 type="text"
                 value={formData.firstName}
                 onChange={(e) => handleInputChange("firstName", e.target.value)}
-                onKeyDown={(e) => handleKeyDown(e, 'firstName')}
-                ref={(el) => setFieldRef('firstName', el)}
                 className={`transition-all duration-200 ${
                   errors.firstName 
                     ? "border-red-500 focus:ring-red-200" 
@@ -921,8 +641,6 @@ export default function ModernPatientForm({
                 type="text"
                 value={formData.lastName}
                 onChange={(e) => handleInputChange("lastName", e.target.value)}
-                onKeyDown={(e) => handleKeyDown(e, 'lastName')}
-                ref={(el) => setFieldRef('lastName', el)}
                 className={`transition-all duration-200 ${
                   errors.lastName 
                     ? "border-red-500 focus:ring-red-200" 
@@ -949,8 +667,6 @@ export default function ModernPatientForm({
                 type="date"
                 value={formData.birthDate}
                 onChange={(e) => handleInputChange("birthDate", e.target.value)}
-                onKeyDown={(e) => handleKeyDown(e, 'birthDate')}
-                ref={(el) => setFieldRef('birthDate', el)}
                 className={`transition-all duration-200 ${
                   errors.birthDate 
                     ? "border-red-500 focus:ring-red-200" 
@@ -983,7 +699,7 @@ export default function ModernPatientForm({
             </Label>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[t('patientForm.male'), t('patientForm.female')].map((genderOption, index) => (
+              {[t('patientForm.male'), t('patientForm.female')].map((genderOption) => (
                 <div
                   key={genderOption}
                   className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
@@ -994,17 +710,11 @@ export default function ModernPatientForm({
                   onClick={() => handleGenderChange(genderOption, !formData.gender.includes(genderOption))}
                 >
                   <Checkbox
-                    id={`gender-${index === 0 ? 'male' : 'female'}`}
+                    id={`gender-${genderOption}`}
                     checked={formData.gender.includes(genderOption)}
                     onCheckedChange={(checked) => handleGenderChange(genderOption, checked as boolean)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault()
-                        focusNextField(`gender-${index === 0 ? 'male' : 'female'}`)
-                      }
-                    }}
                   />
-                  <Label htmlFor={`gender-${index === 0 ? 'male' : 'female'}`} className="text-sm font-medium cursor-pointer">
+                  <Label htmlFor={`gender-${genderOption}`} className="text-sm font-medium cursor-pointer">
                     {genderOption}
                   </Label>
                 </div>
@@ -1018,8 +728,6 @@ export default function ModernPatientForm({
                 name="otherGender"
                 value={formData.otherGender}
                 onChange={(e) => handleInputChange("otherGender", e.target.value)}
-                onKeyDown={(e) => handleKeyDown(e, 'otherGender')}
-                ref={(el) => setFieldRef('otherGender', el)}
                 className="transition-all duration-200 focus:ring-blue-200"
               />
             </div>
@@ -1064,8 +772,6 @@ export default function ModernPatientForm({
                 type="number"
                 value={formData.weight}
                 onChange={(e) => handleInputChange("weight", e.target.value)}
-                onKeyDown={(e) => handleKeyDown(e, 'weight')}
-                ref={(el) => setFieldRef('weight', el)}
                 min="1"
                 max="300"
                 step="0.1"
@@ -1093,8 +799,6 @@ export default function ModernPatientForm({
                 type="number"
                 value={formData.height}
                 onChange={(e) => handleInputChange("height", e.target.value)}
-                onKeyDown={(e) => handleKeyDown(e, 'height')}
-                ref={(el) => setFieldRef('height', el)}
                 min="50"
                 max="250"
                 className={`transition-all duration-200 ${
@@ -1147,8 +851,6 @@ export default function ModernPatientForm({
                 type="tel"
                 value={formData.phone || ''}
                 onChange={(e) => handleInputChange("phone", e.target.value)}
-                onKeyDown={(e) => handleKeyDown(e, 'phone')}
-                ref={(el) => setFieldRef('phone', el)}
                 placeholder="+230 5XXX XXXX"
                 className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
               />
@@ -1165,8 +867,6 @@ export default function ModernPatientForm({
                 type="email"
                 value={formData.email || ''}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                onKeyDown={(e) => handleKeyDown(e, 'email')}
-                ref={(el) => setFieldRef('email', el)}
                 placeholder="email@example.com"
                 className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
               />
@@ -1183,8 +883,6 @@ export default function ModernPatientForm({
               name="address"
               value={formData.address || ''}
               onChange={(e) => handleInputChange("address", e.target.value)}
-              onKeyDown={(e) => handleKeyDown(e, 'address')}
-              ref={(el) => setFieldRef('address', el)}
               placeholder={t('patientForm.addressPlaceholder')}
               rows={2}
               className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
@@ -1203,8 +901,6 @@ export default function ModernPatientForm({
                 type="text"
                 value={formData.city || ''}
                 onChange={(e) => handleInputChange("city", e.target.value)}
-                onKeyDown={(e) => handleKeyDown(e, 'city')}
-                ref={(el) => setFieldRef('city', el)}
                 placeholder="Port Louis, Curepipe, etc."
                 className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
               />
@@ -1221,8 +917,6 @@ export default function ModernPatientForm({
                 type="text"
                 value={formData.country || ''}
                 onChange={(e) => handleInputChange("country", e.target.value)}
-                onKeyDown={(e) => handleKeyDown(e, 'country')}
-                ref={(el) => setFieldRef('country', el)}
                 className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
               />
             </div>
@@ -1278,8 +972,6 @@ export default function ModernPatientForm({
               id="otherAllergies"
               value={formData.otherAllergies}
               onChange={(e) => handleInputChange("otherAllergies", e.target.value)}
-              onKeyDown={(e) => handleKeyDown(e, 'otherAllergies')}
-              ref={(el) => setFieldRef('otherAllergies', el)}
               rows={3}
               className="transition-all duration-200 focus:ring-red-200"
             />
@@ -1356,8 +1048,6 @@ export default function ModernPatientForm({
               id="otherMedicalHistory"
               value={formData.otherMedicalHistory}
               onChange={(e) => handleInputChange("otherMedicalHistory", e.target.value)}
-              onKeyDown={(e) => handleKeyDown(e, 'otherMedicalHistory')}
-              ref={(el) => setFieldRef('otherMedicalHistory', el)}
               rows={3}
               className="transition-all duration-200 focus:ring-purple-200"
             />
@@ -1403,8 +1093,6 @@ export default function ModernPatientForm({
               id="currentMedicationsText"
               value={formData.currentMedicationsText}
               onChange={(e) => handleInputChange("currentMedicationsText", e.target.value)}
-              onKeyDown={(e) => handleKeyDown(e, 'currentMedicationsText')}
-              ref={(el) => setFieldRef('currentMedicationsText', el)}
               placeholder={t('patientForm.medicationPlaceholder')}
               rows={6}
               className="resize-y transition-all duration-200 focus:ring-green-200"
@@ -1526,19 +1214,9 @@ export default function ModernPatientForm({
           onClick={handleSubmit} 
           size="lg"
           className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
-          disabled={isSyncing}
         >
-          {isSyncing ? (
-            <>
-              <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-              {t('common.syncing')}
-            </>
-          ) : (
-            <>
-              {t('patientForm.continueButton')}
-              <ArrowRight className="h-5 w-5 ml-2" />
-            </>
-          )}
+          {t('patientForm.continueButton')}
+          <ArrowRight className="h-5 w-5 ml-2" />
         </Button>
       </div>
     </div>

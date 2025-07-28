@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
-import { useConsultationCache } from '@/hooks/useConsultationCache'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -20,19 +19,7 @@ import {
   AlertTriangle,
   Search,
   Lightbulb,
-  Sparkles,
-  Stethoscope,
-  Clock,
-  Target,
-  RefreshCw,
-  Cloud,
-  CloudOff,
-  Save,
-  Database,
-  Wifi,
-  WifiOff,
-  Shield,
-  Zap
+  Sparkles
 } from "lucide-react"
 import { getTranslation, Language } from "@/lib/translations"
 
@@ -41,10 +28,6 @@ interface Question {
   question: string
   type: string
   options?: string[]
-  category?: string
-  priority?: string
-  isSpecific?: boolean
-  aiGenerated?: boolean
 }
 
 interface QuestionResponse {
@@ -56,9 +39,6 @@ interface QuestionResponse {
 
 interface QuestionsData {
   responses: QuestionResponse[]
-  questions?: Question[]
-  generationMethod?: string
-  generatedAt?: string
 }
 
 interface QuestionsFormProps {
@@ -69,23 +49,6 @@ interface QuestionsFormProps {
   onPrevious: () => void
   language?: Language
   consultationId?: string | null
-}
-
-// Custom hook for debouncing
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value)
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value)
-    }, delay)
-
-    return () => {
-      clearTimeout(handler)
-    }
-  }, [value, delay])
-
-  return debouncedValue
 }
 
 export default function ModernQuestionsForm({
@@ -102,350 +65,253 @@ export default function ModernQuestionsForm({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [generationMethod, setGenerationMethod] = useState<string>("")
-  const [isOnline, setIsOnline] = useState(navigator.onLine)
-  const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null)
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
-  const [localErrors, setLocalErrors] = useState<string[]>([])
-  const [questionsGeneratedAt, setQuestionsGeneratedAt] = useState<string | null>(null)
-  const [isRegenerating, setIsRegenerating] = useState(false)
 
   // Helper function for translations
-  const t = (key: string, fallback?: string) => getTranslation(key, language) || fallback || key
+  const t = (key: string) => getTranslation(key, language)
 
-  // Full questions data including responses
-  const fullQuestionsData = useMemo<QuestionsData>(() => ({
-    responses,
-    questions,
-    generationMethod,
-    generatedAt: questionsGeneratedAt || new Date().toISOString()
-  }), [responses, questions, generationMethod, questionsGeneratedAt])
-
-  // Use consultation cache hook
-  const {
-    data: cachedData,
-    loading: cacheLoading,
-    error: cacheError,
-    lastSync,
-    isSyncing,
-    setData: setCacheData,
-    refresh: refreshCache,
-    sync: syncCache,
-    clear: clearCache,
-    cacheStats
-  } = useConsultationCache({
-    key: `questions_form_${consultationId || 'current'}`,
-    ttl: 45 * 60 * 1000, // 45 minutes for questions (longer due to AI generation)
-    autoSync: true,
-    syncInterval: 5 * 60 * 1000, // 5 minutes for questions form
-    onSync: async (data) => {
+  // Load saved data on mount
+  useEffect(() => {
+    const loadSavedData = async () => {
       try {
-        setSaveStatus('saving')
-        const currentId = consultationId || consultationDataService.getCurrentConsultationId()
+        const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
         
-        if (currentId) {
-          // Save complete questions data
-          await consultationDataService.saveStepData(2, data)
-          
-          // Sync with Supabase if online
-          if (isOnline) {
-            await consultationDataService.saveToSupabase(currentId)
+        if (currentConsultationId) {
+          const savedData = await consultationDataService.getAllData()
+          if (savedData?.questionsData?.responses) {
+            setResponses(savedData.questionsData.responses)
           }
         }
-        
-        setSaveStatus('saved')
-        setLastSaveTime(new Date())
-        setLocalErrors([])
       } catch (error) {
-        console.error('Sync error:', error)
-        setSaveStatus('error')
-        setLocalErrors(prev => [...prev, 'Erreur de synchronisation'])
-        throw error
-      }
-    },
-    onError: (error) => {
-      console.error('Cache error:', error)
-      setSaveStatus('error')
-      setLocalErrors(prev => [...prev, error.message])
-    }
-  })
-
-  // Debounced questions data for auto-save
-  const debouncedQuestionsData = useDebounce(fullQuestionsData, 1500)
-
-  // Monitor online/offline status
-  useEffect(() => {
-    const handleOnline = () => {
-      setIsOnline(true)
-      // Auto sync when coming back online
-      syncCache()
-    }
-    const handleOffline = () => {
-      setIsOnline(false)
-      setLocalErrors(prev => [...prev, 'Mode hors ligne - Les données seront synchronisées au retour de la connexion'])
-    }
-
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-
-    return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-    }
-  }, [syncCache])
-
-  // Load cached data on mount
-  useEffect(() => {
-    if (cachedData && !questions.length) {
-      console.log('Loading questions from cache')
-      
-      if (cachedData.questions && cachedData.questions.length > 0) {
-        setQuestions(cachedData.questions)
-        setResponses(cachedData.responses || [])
-        setGenerationMethod(cachedData.generationMethod || '')
-        setQuestionsGeneratedAt(cachedData.generatedAt || null)
+        console.error('Error loading saved questions data:', error)
       }
     }
-  }, [cachedData, questions.length])
-
-  // Generate questions if needed
-  useEffect(() => {
-    // Don't generate if we already have questions from cache
-    if (questions.length > 0 || loading) return
     
-    // Only generate if we have patient and clinical data
-    if (patientData && clinicalData) {
-      generateQuestions()
-    }
-  }, [patientData, clinicalData, questions.length, loading])
+    loadSavedData()
+  }, [consultationId])
 
-  // Auto-save when debounced data changes
+  // Save data when responses change
   useEffect(() => {
     const saveData = async () => {
-      if (debouncedQuestionsData.responses.length > 0 || debouncedQuestionsData.questions?.length) {
-        setSaveStatus('saving')
-        
-        try {
-          // Save to cache
-          await setCacheData(debouncedQuestionsData)
-          
-          // Save to consultation data service
-          await consultationDataService.saveStepData(2, debouncedQuestionsData)
-          
-          // Call parent callback
-          onDataChange(debouncedQuestionsData)
-          
-          setSaveStatus('saved')
-          setLastSaveTime(new Date())
-        } catch (error) {
-          console.error('Error saving questions data:', error)
-          setSaveStatus('error')
-        }
+      try {
+        await consultationDataService.saveStepData(2, { responses })
+      } catch (error) {
+        console.error('Error saving questions data:', error)
       }
     }
     
-    saveData()
-  }, [debouncedQuestionsData, setCacheData, onDataChange])
+    const timer = setTimeout(() => {
+      if (responses.length > 0) {
+        saveData()
+      }
+    }, 1000)
+    
+    return () => clearTimeout(timer)
+  }, [responses])
 
-  const generateQuestions = async (forceRegenerate = false) => {
+  useEffect(() => {
+    generateQuestions()
+  }, [patientData, clinicalData])
+
+  // Auto-save effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onDataChange({ responses })
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [responses, onDataChange])
+
+  const generateQuestions = async () => {
     if (!patientData || !clinicalData) return
 
     setLoading(true)
     setError(null)
-    setLocalErrors([])
-    
-    if (forceRegenerate) {
-      setIsRegenerating(true)
-    }
 
     try {
-      console.log('🚀 Génération questions avec données:', { patientData, clinicalData })
+      console.log('🚀 Appel API questions avec données:', { patientData, clinicalData })
       
-      // Check if we should use cached questions
-      if (!forceRegenerate && cachedData?.questions && cachedData.questions.length > 0) {
-        console.log('✅ Using cached questions')
-        setQuestions(cachedData.questions)
-        setResponses(cachedData.responses || [])
-        setGenerationMethod(cachedData.generationMethod || '')
-        setQuestionsGeneratedAt(cachedData.generatedAt || null)
-        return
-      }
-      
-      // Construction du payload pour l'API
-      const apiPayload = {
-        patientData: {
-          age: patientData.age || 0,
-          gender: patientData.gender || "",
-          medicalHistory: patientData.medicalHistory || [],
-          currentMedications: patientData.currentMedications || []
-        },
-        clinicalData: {
-          chiefComplaint: clinicalData.chiefComplaint || "",
-          symptomDuration: clinicalData.symptomDuration || "",
-          symptoms: clinicalData.symptoms || [],
-          painScale: clinicalData.painScale || 0
-        },
-        language: language
-      }
+      // ========== CORRECTION: Format des données pour l'API ==========
+      const patientDiscourse = [
+        clinicalData?.chiefComplaint,
+        clinicalData?.diseaseHistory, 
+        Array.isArray(clinicalData?.symptoms) ? clinicalData.symptoms.join(', ') : '',
+        clinicalData?.symptomDuration
+      ].filter(Boolean).join(' - ')
 
-      console.log('📤 Payload API:', JSON.stringify(apiPayload, null, 2))
+      console.log('📝 Discourse patient construit:', patientDiscourse)
 
       const response = await fetch("/api/openai-questions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(apiPayload),
+        body: JSON.stringify({
+          // ========== CORRECTION: Bon format pour l'API ==========
+          patient_discourse_real_time: patientDiscourse || "Patient consultation médicale",
+          patientData,
+          clinicalData,
+          language,
+        }),
       })
 
       const data = await response.json()
-      console.log('📥 Réponse API complète:', data)
+      console.log('📥 Réponse complète API questions:', data)
 
       if (!response.ok) {
         console.error('❌ Erreur HTTP:', response.status, data)
-        throw new Error(data.error || "Erreur lors de la génération des questions")
+        throw new Error(data.error || (language === 'fr' ? "Erreur lors de la génération des questions" : "Error generating questions"))
       }
 
-      // TRAITEMENT DE LA RÉPONSE API
-      if (data.success && data.ai_suggestions && Array.isArray(data.ai_suggestions)) {
-        console.log('✅ Questions reçues de l\'API:', data.ai_suggestions.length)
+      // ========== CORRECTION PRINCIPALE: data.ai_suggestions au lieu de data.questions ==========
+      if (data.success && Array.isArray(data.ai_suggestions)) {
+        console.log('✅ Questions AI reçues:', data.ai_suggestions.length)
+        console.log('📋 Détail questions:', data.ai_suggestions)
         
-        // Validation et formatage des questions
-        const validQuestions = data.ai_suggestions
-          .filter((q: any) => q && typeof q === 'object')
-          .map((apiQuestion: any, index: number) => {
-            console.log(`🔍 Traitement question ${index + 1}:`, apiQuestion)
-            
-            // Extraction sécurisée des propriétés
-            const questionText = apiQuestion.question || `Question ${index + 1} - Veuillez décrire vos symptômes`
-            const questionType = apiQuestion.type || "text"
-            const questionOptions = Array.isArray(apiQuestion.options) ? apiQuestion.options : []
-            
-            // Validation du contenu de la question
-            if (!questionText || questionText.trim().length < 10) {
-              console.warn(`⚠️ Question ${index + 1} trop courte:`, questionText)
-              return null
-            }
+        // Convertir le format API vers le format attendu par l'interface
+        const formattedQuestions = data.ai_suggestions.map((aiQ: any, index: number) => {
+          // Extraire la question selon le format de l'API
+          const questionText = aiQ.patient_formulations?.standard || 
+                              aiQ.patient_formulations?.simple || 
+                              aiQ.physician_prompt || 
+                              `Question ${index + 1} générée par IA`
 
-            // Construction de la question formatée
-            const formattedQuestion: Question = {
-              id: index + 1,
-              question: questionText.trim(),
-              type: questionType,
-              options: questionOptions.length > 0 ? questionOptions : undefined,
-              category: apiQuestion.category || "general",
-              priority: apiQuestion.priority || "medium",
-              isSpecific: apiQuestion.isSpecific || false,
-              aiGenerated: apiQuestion.aiGenerated || false
-            }
+          // Déterminer le type selon le contenu
+          let questionType = "text"
+          let options: string[] | undefined = undefined
 
-            console.log(`✅ Question ${index + 1} formatée:`, formattedQuestion)
-            return formattedQuestion
-          })
-          .filter((q: Question | null) => q !== null) as Question[]
+          // Si on a plusieurs formulations, créer des options
+          if (aiQ.patient_formulations?.simple && 
+              aiQ.patient_formulations?.standard && 
+              aiQ.patient_formulations?.simple !== aiQ.patient_formulations?.standard) {
+            questionType = "multiple_choice"
+            options = [
+              aiQ.patient_formulations.simple,
+              aiQ.patient_formulations.standard
+            ]
+          }
+          // Détection automatique du type selon la question
+          else if (questionText.toLowerCase().includes('oui') || 
+                   questionText.toLowerCase().includes('non') ||
+                   questionText.toLowerCase().includes('yes') || 
+                   questionText.toLowerCase().includes('no')) {
+            questionType = "boolean"
+            options = language === 'fr' ? ["Oui", "Non"] : ["Yes", "No"]
+          }
+          else if (questionText.toLowerCase().includes('échelle') || 
+                   questionText.toLowerCase().includes('scale') ||
+                   questionText.toLowerCase().includes('1') && questionText.toLowerCase().includes('5')) {
+            questionType = "scale"
+            options = ["1", "2", "3", "4", "5"]
+          }
 
-        if (validQuestions.length > 0) {
-          console.log(`🎯 ${validQuestions.length} questions valides extraites`)
-          
-          // Mise à jour de l'état
-          setQuestions(validQuestions)
-          setGenerationMethod(data.metadata?.generationMethod || "openai_medical")
-          setQuestionsGeneratedAt(new Date().toISOString())
-          
-          // Initialisation des réponses
-          const initialResponses = validQuestions.map((q: Question) => ({
-            questionId: q.id,
-            question: q.question,
-            answer: "",
-            type: q.type,
-          }))
-          
-          setResponses(initialResponses)
-          
-          console.log('✅ Interface mise à jour avec succès')
-          
-        } else {
-          console.warn('⚠️ Aucune question valide trouvée')
-          throw new Error("Questions reçues invalides")
-        }
+          return {
+            id: index + 1,
+            question: questionText,
+            type: questionType,
+            options: options
+          }
+        })
+        
+        console.log('✅ Questions formatées pour interface:', formattedQuestions)
+        
+        setQuestions(formattedQuestions)
+        const initialResponses = formattedQuestions.map((q: Question) => ({
+          questionId: q.id,
+          question: q.question,
+          answer: "",
+          type: q.type,
+        }))
+        setResponses(initialResponses)
+        
+        console.log('✅ Interface mise à jour avec', formattedQuestions.length, 'questions')
         
       } else {
-        console.error('❌ Format réponse API invalide:', data)
-        throw new Error("Format de réponse API invalide")
+        console.warn('⚠️ Format réponse API inattendu:', data)
+        console.warn('⚠️ data.success:', data.success)
+        console.warn('⚠️ data.ai_suggestions type:', typeof data.ai_suggestions)
+        console.warn('⚠️ data.ai_suggestions array?:', Array.isArray(data.ai_suggestions))
+        throw new Error(language === 'fr' ? "Format de réponse invalide de l'API" : "Invalid API response format")
       }
-
     } catch (err) {
       console.error("❌ Erreur génération questions:", err)
-      setError(err instanceof Error ? err.message : "Erreur inconnue")
-      setGenerationMethod("fallback")
+      setError(err instanceof Error ? err.message : (language === 'fr' ? "Erreur inconnue" : "Unknown error"))
 
-      // QUESTIONS FALLBACK GARANTIES
-      const fallbackQuestions: Question[] = [
+      // Fallback questions - bilingual amélioré
+      const fallbackQuestions = language === 'fr' ? [
         {
           id: 1,
-          question: "Sur une échelle de 0 à 10, comment évaluez-vous l'intensité de vos symptômes actuels ?",
-          type: "scale",
-          options: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-          category: "intensity_assessment",
-          priority: "high",
-          isSpecific: false,
-          aiGenerated: false
-        },
-        {
-          id: 2,
-          question: "Ces symptômes vous empêchent-ils de réaliser vos activités quotidiennes habituelles ?",
-          type: "multiple_choice",
-          options: ["Complètement", "Partiellement", "Un peu", "Pas du tout"],
-          category: "functional_impact",
-          priority: "high",
-          isSpecific: false,
-          aiGenerated: false
-        },
-        {
-          id: 3,
-          question: "À quel moment de la journée vos symptômes sont-ils les plus intenses ?",
-          type: "multiple_choice",
-          options: ["Matin", "Après-midi", "Soir", "Nuit", "Variable"],
-          category: "timing_pattern",
-          priority: "medium",
-          isSpecific: false,
-          aiGenerated: false
-        },
-        {
-          id: 4,
-          question: "Depuis combien de temps ressentez-vous ces symptômes ?",
-          type: "multiple_choice",
-          options: ["Quelques heures", "1-2 jours", "Une semaine", "Plus longtemps"],
-          category: "duration",
-          priority: "medium",
-          isSpecific: false,
-          aiGenerated: false
-        },
-        {
-          id: 5,
-          question: "Y a-t-il des facteurs qui soulagent ou aggravent vos symptômes ? Décrivez-les.",
-          type: "text",
-          category: "modifying_factors",
-          priority: "medium",
-          isSpecific: false,
-          aiGenerated: false
-        },
-        {
-          id: 6,
           question: "Avez-vous déjà eu des symptômes similaires par le passé ?",
           type: "boolean",
           options: ["Oui", "Non"],
-          category: "previous_episodes",
-          priority: "low",
-          isSpecific: false,
-          aiGenerated: false
-        }
+        },
+        {
+          id: 2,
+          question: "Les symptômes s'aggravent-ils avec l'effort physique ?",
+          type: "boolean",
+          options: ["Oui", "Non"],
+        },
+        {
+          id: 3,
+          question: "À quel moment de la journée les symptômes sont-ils les plus intenses ?",
+          type: "multiple_choice",
+          options: ["Matin", "Après-midi", "Soir", "Nuit", "Variable"],
+        },
+        {
+          id: 4,
+          question: "Sur une échelle de 1 à 5, comment évaluez-vous l'impact sur votre qualité de vie ?",
+          type: "scale",
+          options: ["1", "2", "3", "4", "5"],
+        },
+        {
+          id: 5,
+          question: "Y a-t-il des facteurs qui soulagent vos symptômes ? Si oui, lesquels ?",
+          type: "text",
+        },
+        {
+          id: 6,
+          question: "Avez-vous des antécédents familiaux de pathologies similaires ?",
+          type: "boolean",
+          options: ["Oui", "Non"],
+        },
+      ] : [
+        {
+          id: 1,
+          question: "Have you experienced similar symptoms in the past?",
+          type: "boolean",
+          options: ["Yes", "No"],
+        },
+        {
+          id: 2,
+          question: "Do symptoms worsen with physical exertion?",
+          type: "boolean",
+          options: ["Yes", "No"],
+        },
+        {
+          id: 3,
+          question: "At what time of day are symptoms most intense?",
+          type: "multiple_choice",
+          options: ["Morning", "Afternoon", "Evening", "Night", "Variable"],
+        },
+        {
+          id: 4,
+          question: "On a scale of 1 to 5, how would you rate the impact on your quality of life?",
+          type: "scale",
+          options: ["1", "2", "3", "4", "5"],
+        },
+        {
+          id: 5,
+          question: "Are there any factors that relieve your symptoms? If so, which ones?",
+          type: "text",
+        },
+        {
+          id: 6,
+          question: "Do you have a family history of similar conditions?",
+          type: "boolean",
+          options: ["Yes", "No"],
+        },
       ]
 
       console.log('🔄 Utilisation questions fallback:', fallbackQuestions.length)
       setQuestions(fallbackQuestions)
-      setQuestionsGeneratedAt(new Date().toISOString())
-      
       const initialResponses = fallbackQuestions.map((q) => ({
         questionId: q.id,
         question: q.question,
@@ -453,10 +319,8 @@ export default function ModernQuestionsForm({
         type: q.type,
       }))
       setResponses(initialResponses)
-      
     } finally {
       setLoading(false)
-      setIsRegenerating(false)
     }
   }
 
@@ -483,7 +347,7 @@ export default function ModernQuestionsForm({
   }
 
   const isFormValid = () => {
-    return responses.length > 0 && responses.every((response) => {
+    return responses.every((response) => {
       const answer = response.answer
       if (typeof answer === "string") {
         return answer.trim() !== ""
@@ -494,34 +358,6 @@ export default function ModernQuestionsForm({
 
   const isLastQuestion = () => {
     return currentQuestionIndex === questions.length - 1
-  }
-
-  // Manual refresh function
-  const handleRefresh = async () => {
-    setLocalErrors([])
-    await refreshCache()
-    if (isOnline) {
-      await syncCache()
-    }
-  }
-
-  // Handle regenerate questions
-  const handleRegenerateQuestions = async () => {
-    if (confirm('Êtes-vous sûr de vouloir régénérer les questions ? Vos réponses actuelles seront perdues.')) {
-      await clearCache()
-      setQuestions([])
-      setResponses([])
-      await generateQuestions(true)
-    }
-  }
-
-  // Handle navigation with sync
-  const handleNext = async () => {
-    // Force sync before navigation
-    if (isOnline) {
-      await syncCache()
-    }
-    onNext()
   }
 
   const renderQuestion = (question: Question) => {
@@ -536,7 +372,7 @@ export default function ModernQuestionsForm({
             onValueChange={(value) => updateResponse(question.id, value)}
             className="flex gap-6"
           >
-            {(question.options || ["Oui", "Non"]).map((option) => (
+            {(question.options || [t('common.yes'), t('common.no')]).map((option) => (
               <div
                 key={option}
                 className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
@@ -565,15 +401,15 @@ export default function ModernQuestionsForm({
             {(question.options || []).map((option) => (
               <div
                 key={option}
-                className={`flex items-start space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
+                className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
                   currentAnswer === option
                     ? "border-purple-300 bg-purple-50 shadow-md"
                     : "border-gray-200 hover:border-purple-200 hover:bg-purple-25"
                 }`}
                 onClick={() => updateResponse(question.id, option)}
               >
-                <RadioGroupItem value={option} id={`${question.id}-${option}`} className="mt-1" />
-                <Label htmlFor={`${question.id}-${option}`} className="font-medium cursor-pointer leading-relaxed">
+                <RadioGroupItem value={option} id={`${question.id}-${option}`} />
+                <Label htmlFor={`${question.id}-${option}`} className="font-medium cursor-pointer">
                   {option}
                 </Label>
               </div>
@@ -582,20 +418,17 @@ export default function ModernQuestionsForm({
         )
 
       case "scale":
-        const scaleOptions = question.options || ["1", "2", "3", "4", "5"]
-        const isZeroToTen = scaleOptions.length === 11 && scaleOptions[0] === "0"
-        
         return (
           <div className="space-y-4">
             <RadioGroup
               value={currentAnswer.toString()}
               onValueChange={(value) => updateResponse(question.id, Number.parseInt(value))}
-              className="flex justify-between flex-wrap gap-2"
+              className="flex justify-between"
             >
-              {scaleOptions.map((option) => (
+              {(question.options || ["1", "2", "3", "4", "5"]).map((option) => (
                 <div
                   key={option}
-                  className={`flex flex-col items-center space-y-2 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer min-w-[50px] ${
+                  className={`flex flex-col items-center space-y-2 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer min-w-[60px] ${
                     currentAnswer.toString() === option
                       ? "border-green-300 bg-green-50 shadow-md"
                       : "border-gray-200 hover:border-green-200 hover:bg-green-25"
@@ -610,8 +443,8 @@ export default function ModernQuestionsForm({
               ))}
             </RadioGroup>
             <div className="flex justify-between text-xs text-gray-500 px-4">
-              <span>{isZeroToTen ? "Aucun symptôme" : "Très faible"}</span>
-              <span>{isZeroToTen ? "Symptôme maximum" : "Très fort"}</span>
+              <span>{t('questionsForm.lowImpact')}</span>
+              <span>{t('questionsForm.majorImpact')}</span>
             </div>
           </div>
         )
@@ -621,7 +454,7 @@ export default function ModernQuestionsForm({
           <Textarea
             value={currentAnswer.toString()}
             onChange={(e) => updateResponse(question.id, e.target.value)}
-            placeholder="Décrivez en détail vos symptômes, sensations, et tout ce qui vous semble important..."
+            placeholder={t('questionsForm.describePlaceholder')}
             rows={4}
             className="transition-all duration-200 focus:ring-blue-200 resize-y"
           />
@@ -632,7 +465,7 @@ export default function ModernQuestionsForm({
           <Textarea
             value={currentAnswer.toString()}
             onChange={(e) => updateResponse(question.id, e.target.value)}
-            placeholder="Votre réponse..."
+            placeholder={t('questionsForm.yourAnswerPlaceholder')}
             rows={3}
             className="transition-all duration-200 focus:ring-blue-200"
           />
@@ -642,129 +475,28 @@ export default function ModernQuestionsForm({
 
   const progress = calculateProgress()
 
-  // Status bar component
-  const StatusBar = () => (
-    <div className="flex items-center justify-between bg-white/80 backdrop-blur-sm rounded-lg px-4 py-2 shadow-md">
-      <div className="flex items-center gap-4">
-        {/* Online/Offline status */}
-        <div className="flex items-center gap-2">
-          {isOnline ? (
-            <>
-              <Wifi className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-medium text-green-600">En ligne</span>
-            </>
-          ) : (
-            <>
-              <WifiOff className="h-4 w-4 text-red-600" />
-              <span className="text-sm font-medium text-red-600">Hors ligne</span>
-            </>
-          )}
-        </div>
-
-        {/* Save status */}
-        <div className="flex items-center gap-2">
-          {saveStatus === 'saving' && (
-            <>
-              <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
-              <span className="text-sm text-blue-600">Sauvegarde...</span>
-            </>
-          )}
-          {saveStatus === 'saved' && (
-            <>
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <span className="text-sm text-green-600">Sauvegardé</span>
-            </>
-          )}
-          {saveStatus === 'error' && (
-            <>
-              <AlertTriangle className="h-4 w-4 text-red-600" />
-              <span className="text-sm text-red-600">Erreur</span>
-            </>
-          )}
-        </div>
-
-        {/* Last save time */}
-        {lastSaveTime && (
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Clock className="h-4 w-4" />
-            <span>{lastSaveTime.toLocaleTimeString('fr-FR')}</span>
-          </div>
-        )}
-
-        {/* Sync status */}
-        {isSyncing && (
-          <div className="flex items-center gap-2">
-            <Cloud className="h-4 w-4 text-blue-600 animate-pulse" />
-            <span className="text-sm text-blue-600">Synchronisation...</span>
-          </div>
-        )}
-      </div>
-
-      {/* Cache info and actions */}
-      <div className="flex items-center gap-4">
-        {cacheStats.isStale && (
-          <Badge variant="outline" className="text-yellow-600 border-yellow-600">
-            Cache périmé
-          </Badge>
-        )}
-        
-        {questions.length > 0 && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleRegenerateQuestions}
-            disabled={isRegenerating}
-            className="text-purple-600"
-          >
-            <Sparkles className={`h-4 w-4 mr-1 ${isRegenerating ? 'animate-spin' : ''}`} />
-            Régénérer
-          </Button>
-        )}
-        
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={handleRefresh}
-          disabled={isSyncing || cacheLoading}
-        >
-          <RefreshCw className={`h-4 w-4 ${isSyncing || cacheLoading ? 'animate-spin' : ''}`} />
-        </Button>
-      </div>
-    </div>
-  )
-
-  // ÉCRAN DE CHARGEMENT
-  if (loading || cacheLoading) {
+  if (loading) {
     return (
       <div className="space-y-6">
-        <StatusBar />
-        
         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
           <CardHeader className="text-center">
             <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              <Brain className="h-8 w-8 text-blue-600 animate-pulse" />
-              Génération Questions Médicales IA
+              <Brain className="h-8 w-8 text-blue-600" />
+              {t('questionsForm.title')}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-center py-16">
-            <div className="text-center space-y-6">
+            <div className="text-center space-y-4">
               <div className="relative">
-                <div className="w-20 h-20 mx-auto border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-                <Stethoscope className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-8 w-8 text-blue-600" />
+                <div className="w-16 h-16 mx-auto border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                <Brain className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-blue-600" />
               </div>
-              <div className="space-y-3">
-                <p className="text-xl font-semibold text-gray-800">
-                  {cacheLoading ? 'Chargement des questions sauvegardées' : 'Analyse de votre profil médical'}
-                </p>
-                <p className="text-sm text-gray-600">
-                  {cacheLoading ? 'Récupération depuis le cache...' : 'Génération de questions ultra-spécifiques...'}
-                </p>
-                <div className="flex items-center justify-center gap-2 text-xs text-blue-600">
-                  <Clock className="h-4 w-4" />
-                  <span>IA médicale en cours d'analyse</span>
-                </div>
+              <div className="space-y-2">
+                <p className="text-xl font-semibold text-gray-800">{t('questionsForm.generating')}</p>
+                <p className="text-sm text-gray-600">{t('questionsForm.analyzingProfile')}</p>
+                <p className="text-xs text-blue-600">Appel API /openai-questions en cours...</p>
               </div>
-              <Progress value={85} className="w-80 mx-auto h-3" />
+              <Progress value={75} className="w-80 mx-auto h-2" />
             </div>
           </CardContent>
         </Card>
@@ -772,75 +504,33 @@ export default function ModernQuestionsForm({
     )
   }
 
-  // INTERFACE PRINCIPALE
   return (
     <div className="space-y-6">
-      {/* Status Bar */}
-      <StatusBar />
-
-      {/* Error display */}
-      {(cacheError || localErrors.length > 0) && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              {cacheError && (
-                <p className="text-sm font-medium text-red-800">
-                  Erreur de cache : {cacheError.message}
-                </p>
-              )}
-              {localErrors.map((error, index) => (
-                <p key={index} className="text-sm text-red-700">
-                  {error}
-                </p>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Header with Progress */}
-      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+      <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             <Brain className="h-8 w-8 text-blue-600" />
-            Questions Médicales Personnalisées
+            {t('questionsForm.title')}
           </CardTitle>
-          <div className="mt-4 space-y-3">
+          <div className="mt-4 space-y-2">
             <div className="flex justify-between text-sm text-gray-600">
-              <span>Progression</span>
-              <span className="font-semibold">{getAnsweredCount()} / {questions.length} répondues ({progress}%)</span>
+              <span>{t('questionsForm.progressTitle')}</span>
+              <span className="font-semibold">{progress}%</span>
             </div>
-            <Progress value={progress} className="h-3" />
+            <Progress value={progress} className="h-2" />
           </div>
-          <div className="flex justify-center gap-3 mt-4 flex-wrap">
-            <Badge variant="outline" className="bg-blue-50 border-blue-200">
-              <Target className="h-3 w-3 mr-1" />
-              {questions.length} questions ciblées
+          <div className="flex justify-center gap-4 mt-4">
+            <Badge variant="outline" className="bg-blue-50">
+              {getAnsweredCount()} / {questions.length} {t('questionsForm.answered')}
             </Badge>
-            {generationMethod === "openai_medical" && (
-              <Badge variant="default" className="bg-green-100 text-green-800">
-                <Sparkles className="h-3 w-3 mr-1" />
-                IA Médicale Ultra-Spécifique
-              </Badge>
-            )}
-            {generationMethod === "fallback" && (
-              <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
-                <Shield className="h-3 w-3 mr-1" />
-                Questions de Secours
-              </Badge>
-            )}
-            {questionsGeneratedAt && (
-              <Badge variant="outline" className="bg-gray-50 text-gray-600">
-                <Clock className="h-3 w-3 mr-1" />
-                Généré {new Date(questionsGeneratedAt).toLocaleTimeString('fr-FR')}
-              </Badge>
-            )}
+            {error && <Badge variant="destructive">{t('questionsForm.fallbackMode')}</Badge>}
+            {!error && questions.length > 0 && <Badge variant="default" className="bg-green-100 text-green-800">IA Générée ✨</Badge>}
           </div>
         </CardHeader>
       </Card>
 
-      {/* Alert pour mode fallback */}
+      {/* Alert for fallback mode */}
       {error && (
         <Card className="bg-amber-50/80 backdrop-blur-sm border-amber-200 shadow-md">
           <CardContent className="pt-6">
@@ -848,10 +538,10 @@ export default function ModernQuestionsForm({
               <AlertTriangle className="h-5 w-5" />
               <div>
                 <span className="text-sm font-medium">
-                  Questions de secours activées
+                  {t('questionsForm.fallbackWarning')}
                 </span>
                 <p className="text-xs text-amber-600 mt-1">
-                  L'IA médicale n'est pas disponible. Questions génériques utilisées.
+                  Erreur API: {error}
                 </p>
               </div>
             </div>
@@ -859,7 +549,7 @@ export default function ModernQuestionsForm({
         </Card>
       )}
 
-      {/* Navigation entre questions */}
+      {/* Question Navigation */}
       {questions.length > 0 && (
         <div className="flex flex-wrap gap-2 justify-center">
           {questions.map((_, index) => {
@@ -875,7 +565,7 @@ export default function ModernQuestionsForm({
               <button
                 key={index}
                 onClick={() => setCurrentQuestionIndex(index)}
-                className={`w-12 h-12 rounded-full transition-all duration-200 font-semibold ${
+                className={`w-10 h-10 rounded-full transition-all duration-200 font-semibold ${
                   currentQuestionIndex === index
                     ? "bg-blue-600 text-white shadow-lg scale-110"
                     : isAnswered
@@ -883,7 +573,7 @@ export default function ModernQuestionsForm({
                     : "bg-white/70 text-gray-600 border-2 border-gray-200 hover:bg-white hover:shadow-md"
                 }`}
               >
-                {isAnswered ? <CheckCircle className="h-5 w-5 mx-auto" /> : index + 1}
+                {isAnswered ? <CheckCircle className="h-4 w-4 mx-auto" /> : index + 1}
               </button>
             )
           })}
@@ -894,37 +584,23 @@ export default function ModernQuestionsForm({
       {questions.map((question, index) => (
         <Card 
           key={question.id} 
-          className={`bg-white/95 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 ${
+          className={`bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 ${
             index !== currentQuestionIndex ? 'hidden' : ''
           }`}
         >
           <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-3">
               <MessageSquare className="h-6 w-6" />
-              Question {index + 1} sur {questions.length}
+              {t('questionsForm.question')} {index + 1} / {questions.length}
             </CardTitle>
-            <div className="text-blue-100 text-sm mt-2 flex items-center gap-2">
-              {question.aiGenerated ? (
-                <>
-                  <Sparkles className="h-4 w-4" />
-                  Générée par IA médicale
-                </>
-              ) : (
-                <>
-                  <Stethoscope className="h-4 w-4" />
-                  Question médicale standard
-                </>
-              )}
-              {question.priority === "high" && (
-                <Badge variant="secondary" className="bg-red-100 text-red-800 text-xs">
-                  Priorité élevée
-                </Badge>
-              )}
+            <div className="text-blue-100 text-sm mt-2">
+              <Lightbulb className="h-4 w-4 inline mr-2" />
+              {error ? t('questionsForm.fallbackMode') : t('questionsForm.aiGenerated')}
             </div>
           </CardHeader>
           <CardContent className="p-8 space-y-6">
             <div>
-              <Label className="text-lg font-semibold text-gray-800 leading-relaxed block mb-6">
+              <Label className="text-lg font-semibold text-gray-800 leading-relaxed">
                 {question.question}
               </Label>
               <div className="mt-6">
@@ -932,7 +608,7 @@ export default function ModernQuestionsForm({
               </div>
             </div>
 
-            {/* Confirmation de réponse */}
+            {/* Answer confirmation */}
             {(() => {
               const response = responses.find((r) => r.questionId === question.id)
               const currentAnswer = response?.answer || ""
@@ -944,10 +620,10 @@ export default function ModernQuestionsForm({
                 <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                   <div className="flex items-center gap-2 mb-2">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <p className="font-semibold text-green-800">Réponse enregistrée</p>
+                    <p className="font-semibold text-green-800">{t('questionsForm.answerRecorded')}</p>
                   </div>
                   <p className="text-sm text-green-700">
-                    <span className="font-medium">Votre réponse :</span> {currentAnswer}
+                    <span className="font-medium">{t('questionsForm.yourAnswer')}</span> {currentAnswer}
                   </p>
                 </div>
               )
@@ -956,7 +632,7 @@ export default function ModernQuestionsForm({
         </Card>
       ))}
 
-      {/* Navigation entre questions */}
+      {/* Navigation between questions */}
       {questions.length > 0 && (
         <div className="flex justify-between">
           <Button
@@ -966,61 +642,53 @@ export default function ModernQuestionsForm({
             className="px-6 py-3"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Question précédente
+            {t('questionsForm.previousQuestion')}
           </Button>
           
+          {/* Conditional button: Next Question OR AI Diagnosis */}
           {!isLastQuestion() ? (
             <Button
               onClick={() => setCurrentQuestionIndex(Math.min(questions.length - 1, currentQuestionIndex + 1))}
               className="px-6 py-3"
             >
-              Question suivante
+              {t('questionsForm.nextQuestion')}
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           ) : (
             <Button 
-              onClick={handleNext}
-              disabled={!isFormValid() || isSyncing}
+              onClick={onNext} 
+              disabled={!isFormValid()}
               className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 font-semibold"
             >
-              {isSyncing ? (
-                <>
-                  <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-                  Synchronisation...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-5 w-5 mr-2" />
-                  Lancer le Diagnostic IA
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </>
-              )}
+              <Sparkles className="h-5 w-5 mr-2" />
+              {t('questionsForm.launchAIDiagnosis')}
+              <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           )}
         </div>
       )}
 
-      {/* Bouton Diagnostic IA fixe quand toutes questions répondues */}
-      {isFormValid() && !isSyncing && (
+      {/* Fixed AI Diagnosis button when all questions are answered */}
+      {isFormValid() && (
         <div className="sticky bottom-4 flex justify-center">
           <Button 
-            onClick={handleNext}
+            onClick={onNext}
             className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-4 shadow-2xl hover:shadow-3xl transition-all duration-300 font-semibold text-lg rounded-full animate-pulse"
           >
             <Sparkles className="h-6 w-6 mr-3" />
-            Diagnostic IA Prêt ({getAnsweredCount()}/{questions.length})
+            {t('questionsForm.aiDiagnosisReady')}
             <ArrowRight className="h-5 w-5 ml-3" />
           </Button>
         </div>
       )}
 
-      {/* Résumé des réponses */}
+      {/* Summary of answers */}
       {getAnsweredCount() > 0 && (
-        <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-xl">
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
           <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-3">
               <CheckCircle className="h-6 w-6" />
-              Résumé de vos réponses ({getAnsweredCount()}/{questions.length})
+              {t('questionsForm.summaryAnswers')}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -1039,7 +707,7 @@ export default function ModernQuestionsForm({
                       <Badge variant="secondary" className="mt-1">Q{response.questionId}</Badge>
                       <div className="flex-1">
                         <p className="font-medium text-gray-800 mb-2">{response.question}</p>
-                        <p className="text-sm text-gray-600 bg-white p-3 rounded border">
+                        <p className="text-sm text-gray-600 bg-white p-2 rounded border">
                           {response.answer}
                         </p>
                       </div>
@@ -1051,15 +719,15 @@ export default function ModernQuestionsForm({
         </Card>
       )}
 
-      {/* Indicateur de sauvegarde automatique */}
+      {/* Auto-save indicator */}
       <div className="flex justify-center">
         <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-sm text-gray-600">Sauvegarde automatique</span>
+          <span className="text-sm text-gray-600">{t('common.autoSave')}</span>
         </div>
       </div>
 
-      {/* Navigation principale */}
+      {/* Main Navigation */}
       <div className="flex justify-between">
         <Button 
           variant="outline" 
@@ -1067,24 +735,15 @@ export default function ModernQuestionsForm({
           className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Retour aux données cliniques
+          {t('questionsForm.backToClinical')}
         </Button>
         <Button 
-          onClick={handleNext}
-          disabled={!isFormValid() || isSyncing}
+          onClick={onNext} 
+          disabled={!isFormValid()}
           className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
         >
-          {isSyncing ? (
-            <>
-              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-              {t('common.syncing', 'Synchronisation...')}
-            </>
-          ) : (
-            <>
-              Continuer vers le diagnostic
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </>
-          )}
+          {t('questionsForm.continueToDiagnosis')}
+          <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
     </div>

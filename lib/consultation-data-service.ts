@@ -1,959 +1,545 @@
-// lib/consultation-data-service.ts - Version améliorée avec Cache API
+// lib/consultation-data-service.ts
+import { supabase } from '@/lib/supabase'
 
-import { MauritianDocumentsGenerator } from './mauritian-documents-generator'
-import { supabase } from './supabase'
+export interface ConsultationData {
+  patientData?: any
+  clinicalData?: any
+  questionsData?: any
+  diagnosisData?: any
+  workflowResult?: any // Instead of separate prescription and documents
+}
 
-// Cache configuration
-const CACHE_NAME = 'consultation-cache-v1'
-const CACHE_EXPIRY_HOURS = 24 // Cache expires after 24 hours
-
-interface CachedData {
-  data: any
-  timestamp: number
-  consultationId: string
-  version: string
+export interface ConsultationRecord {
+  id?: string
+  consultation_id?: string
+  patient_id?: string
+  doctor_id?: string
+  patient_data: any
+  clinical_data: any
+  questions_data: any
+  diagnosis_data: any
+  prescription_data: any
+  documents_data: any
+  workflow_step: number
+  completed_steps: number[]
 }
 
 class ConsultationDataService {
-  private consultationId: string | null = null
-  private patientId: string | null = null  
-  private doctorId: string | null = null
-  private currentData: Record<string, any> = {}
-  private cacheAvailable: boolean = false
+  private SESSION_KEY = 'consultation_data'
+  private CONSULTATION_ID_KEY = 'current_consultation_id'
 
-  constructor() {
-    // Check if Cache API is available
-    this.checkCacheAvailability()
-  }
-
-  // Check if Cache API is available
-  private async checkCacheAvailability() {
-    if ('caches' in window) {
-      try {
-        await caches.open(CACHE_NAME)
-        this.cacheAvailable = true
-        console.log('✅ Cache API available')
-      } catch (error) {
-        console.warn('⚠️ Cache API not available:', error)
-        this.cacheAvailable = false
-      }
-    } else {
-      console.warn('⚠️ Cache API not supported')
-      this.cacheAvailable = false
-    }
-  }
-
-  // ✅ Safe localStorage operations
-  private safeLocalStorage = {
-    getItem: (key: string): string | null => {
-      try {
-        if (typeof window !== 'undefined' && window.localStorage) {
-          return localStorage.getItem(key)
-        }
-      } catch (error) {
-        console.warn('localStorage not available:', error)
-      }
-      return null
-    },
-    
-    setItem: (key: string, value: string): boolean => {
-      try {
-        if (typeof window !== 'undefined' && window.localStorage) {
-          localStorage.setItem(key, value)
-          return true
-        }
-      } catch (error) {
-        console.warn('localStorage not available:', error)
-      }
-      return false
-    },
-    
-    removeItem: (key: string): boolean => {
-      try {
-        if (typeof window !== 'undefined' && window.localStorage) {
-          localStorage.removeItem(key)
-          return true
-        }
-      } catch (error) {
-        console.warn('localStorage not available:', error)
-      }
+  // Check authentication status
+  async checkAuth() {
+    const { data: { session }, error } = await supabase.auth.getSession()
+    if (error || !session) {
+      console.error('Not authenticated:', error)
       return false
     }
+    return true
   }
 
-  // ✅ Safe sessionStorage operations
-  private safeSessionStorage = {
-    getItem: (key: string): string | null => {
-      try {
-        if (typeof window !== 'undefined' && window.sessionStorage) {
-          return sessionStorage.getItem(key)
-        }
-      } catch (error) {
-        console.warn('sessionStorage not available:', error)
-      }
-      return null
-    },
+  // Initialize from URL parameters
+  async initializeFromURL() {
+    if (typeof window === 'undefined') return null
     
-    setItem: (key: string, value: string): boolean => {
-      try {
-        if (typeof window !== 'undefined' && window.sessionStorage) {
-          sessionStorage.setItem(key, value)
-          return true
-        }
-      } catch (error) {
-        console.warn('sessionStorage not available:', error)
-      }
-      return false
-    }
-  }
-
-  // ✅ Cache API operations
-  private async saveToCache(key: string, data: any): Promise<boolean> {
-    if (!this.cacheAvailable) return false
-
-    try {
-      const cache = await caches.open(CACHE_NAME)
+    const urlParams = new URLSearchParams(window.location.search)
+    const consultationId = urlParams.get('consultationId')
+    const patientId = urlParams.get('patientId')
+    const doctorId = urlParams.get('doctorId')
+    
+    console.log('Initializing from URL:', { consultationId, patientId, doctorId })
+    
+    if (consultationId && patientId && doctorId) {
+      // Store in session
+      sessionStorage.setItem(this.CONSULTATION_ID_KEY, consultationId)
+      sessionStorage.setItem('tibokConsultationId', consultationId)
+      sessionStorage.setItem('tibokPatientId', patientId)
+      sessionStorage.setItem('tibokDoctorId', doctorId)
       
-      const cachedData: CachedData = {
-        data,
-        timestamp: Date.now(),
-        consultationId: this.consultationId || '',
-        version: '1.0'
+      // Initialize consultation
+      return await this.initializeConsultation(consultationId, patientId, doctorId)
+    }
+    
+    return null
+  }
+
+  // Check if consultation exists in consultations table
+  async checkConsultationExists(consultationId: string) {
+    try {
+      const { data: existing, error: checkError } = await supabase
+        .from('consultations')
+        .select('id, created_at, patient_id, doctor_id')
+        .eq('id', consultationId)
+        .maybeSingle()
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        // Only log real errors, not "no rows" errors
+        console.error('Error checking consultation:', checkError)
+        return { exists: false, error: checkError }
       }
 
-      const response = new Response(JSON.stringify(cachedData), {
-        headers: { 'Content-Type': 'application/json' }
+      if (existing) {
+        console.log('Consultation found:', existing.id)
+        return { exists: true, consultation: existing }
+      }
+
+      console.error('Consultation not found:', consultationId)
+      return { exists: false, error: new Error('Consultation not found') }
+    } catch (error) {
+      console.error('Error in checkConsultationExists:', error)
+      return { exists: false, error }
+    }
+  }
+
+  // Initialize consultation record
+  async initializeConsultation(consultationId: string, patientId: string, doctorId: string) {
+    try {
+      // Check if the consultation exists first - use maybeSingle to avoid 406
+      const { data: consultation, error: consultationError } = await supabase
+        .from('consultations')
+        .select('id, created_at, patient_id, doctor_id')
+        .eq('id', consultationId)
+        .maybeSingle()
+
+      if (consultationError && consultationError.code !== 'PGRST116') {
+        console.error('Error fetching consultation:', consultationError)
+        if (consultationError.message?.includes('401')) {
+          console.error('Authentication error - check if user is logged in')
+        }
+        return null
+      }
+      
+      if (!consultation) {
+        console.error('Consultation does not exist in database:', consultationId)
+        console.error('The consultation must be created by TIBOK before starting the medical workflow')
+        return null
+      }
+
+      console.log('Consultation found:', consultation)
+
+      // Check if record already exists
+      const { data: existing, error: existingError } = await supabase
+        .from('consultation_records')
+        .select('*')
+        .eq('consultation_id', consultationId)
+        .maybeSingle()
+
+      if (existingError && existingError.code !== 'PGRST116') {
+        console.error('Error checking existing record:', existingError)
+      }
+
+      if (existing) {
+        console.log('Found existing consultation record:', existing.id)
+        return existing
+      }
+
+      // Create new record with consultation_date
+      console.log('Creating new consultation record...')
+      const { data, error } = await supabase
+        .from('consultation_records')
+        .insert({
+          consultation_id: consultationId,
+          patient_id: consultation.patient_id || patientId,
+          doctor_id: consultation.doctor_id || doctorId,
+          consultation_date: consultation.created_at,
+          workflow_step: 0,
+          completed_steps: [],
+          patient_data: {},
+          clinical_data: {},
+          questions_data: {},
+          diagnosis_data: {},
+          documents_data: {},
+          prescription_data: {} // Add this field as it's in your schema
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error creating consultation record:', error)
+        if (error.code === '23505') {
+          console.error('Record already exists - this might be a race condition')
+        }
+        throw error
+      }
+
+      console.log('Created new consultation record:', data?.id)
+
+      // Store consultation ID in session
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        sessionStorage.setItem(this.CONSULTATION_ID_KEY, consultationId)
+        sessionStorage.setItem('tibokConsultationId', consultationId)
+      }
+      
+      return data
+    } catch (error) {
+      console.error('Error initializing consultation:', error)
+      return null
+    }
+  }
+
+  // Save step data to both session storage and database
+  async saveStepData(stepNumber: number, data: any) {
+    try {
+      // Get current session data
+      const sessionData = this.getSessionData()
+      
+      // Map step number to data field
+      const fieldMap: { [key: number]: keyof ConsultationData } = {
+        0: 'patientData',
+        1: 'clinicalData',
+        2: 'questionsData',
+        3: 'diagnosisData',
+        4: 'workflowResult'
+      }
+
+      const field = fieldMap[stepNumber]
+      if (!field) return
+
+      // Update session data
+      const updatedData = {
+        ...sessionData,
+        [field]: data
+      }
+      
+      // Save to session storage
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(updatedData))
+      }
+      
+      // Save to database if consultation ID exists
+      const consultationId = this.getCurrentConsultationId()
+      if (consultationId) {
+        await this.saveToSupabase(consultationId, stepNumber, data)
+      }
+      
+      return updatedData
+    } catch (error) {
+      console.error('Error saving step data:', error)
+      return null
+    }
+  }
+
+  // Save specific step data to Supabase
+  async saveToSupabase(consultationId: string, stepNumber: number, data: any) {
+    try {
+      console.log('saveToSupabase called with:', {
+        consultationId,
+        stepNumber,
+        dataKeys: Object.keys(data || {})
       })
 
-      await cache.put(key, response)
-      console.log(`✅ Data saved to cache: ${key}`)
+      const fieldMap: { [key: number]: string } = {
+        0: 'patient_data',
+        1: 'clinical_data',
+        2: 'questions_data',
+        3: 'diagnosis_data',
+        4: 'documents_data'
+      }
+
+      const field = fieldMap[stepNumber]
+      if (!field) {
+        console.error('Invalid step number:', stepNumber)
+        return false
+      }
+
+      // First check if the consultation exists - use maybeSingle() to avoid 406 error
+      const { data: consultationCheck, error: consultationCheckError } = await supabase
+        .from('consultations')
+        .select('id, patient_id, doctor_id, created_at')
+        .eq('id', consultationId)
+        .maybeSingle()
+
+      if (consultationCheckError && consultationCheckError.code !== 'PGRST116') {
+        // Only log real errors, not "no rows" errors
+        console.error('Error checking consultation:', consultationCheckError)
+        return false
+      }
+
+      if (!consultationCheck) {
+        console.error('Consultation does not exist:', consultationId)
+        console.error('Please ensure the consultation is created in TIBOK before starting the medical workflow')
+        return false
+      }
+
+      console.log('Consultation found:', consultationCheck)
+
+      // Use the patient and doctor IDs from the consultation
+      const patientId = consultationCheck.patient_id
+      const doctorId = consultationCheck.doctor_id
+      const consultation = consultationCheck
+
+      // Check if record exists - use maybeSingle to avoid error
+      const { data: existingRecord, error: checkError } = await supabase
+        .from('consultation_records')
+        .select('id, completed_steps')
+        .eq('consultation_id', consultationId)
+        .maybeSingle()
+
+      console.log('Existing record check:', { existingRecord, checkError })
+
+      let result
+      
+      if (existingRecord) {
+        // Update existing record
+        console.log('Updating existing record')
+        
+        const completedSteps = existingRecord.completed_steps || []
+        if (!completedSteps.includes(stepNumber)) {
+          completedSteps.push(stepNumber)
+        }
+
+        const updateData: any = {
+          [field]: data || {},
+          workflow_step: stepNumber,
+          completed_steps: completedSteps,
+          updated_at: new Date().toISOString()
+        }
+
+        if (stepNumber === 4) {
+          updateData.consultation_date = consultation.created_at
+        }
+
+        const { data: updateResult, error: updateError } = await supabase
+          .from('consultation_records')
+          .update(updateData)
+          .eq('consultation_id', consultationId)
+          .select()
+          .single()
+
+        console.log('Update result:', { updateResult, updateError })
+        
+        if (updateError) {
+          console.error('Update error:', updateError)
+          return false
+        }
+        
+        result = updateResult
+      } else {
+        // Create new record
+        console.log('Creating new record')
+        
+        const insertData: any = {
+          consultation_id: consultationId,
+          patient_id: patientId,
+          doctor_id: doctorId,
+          consultation_date: consultation.created_at,
+          [field]: data || {},
+          workflow_step: stepNumber,
+          completed_steps: [stepNumber],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+
+        // Initialize all JSONB fields with empty objects
+        const jsonbFields = ['patient_data', 'clinical_data', 'questions_data', 'diagnosis_data', 'documents_data', 'prescription_data']
+        jsonbFields.forEach(f => {
+          if (!(f in insertData)) {
+            insertData[f] = {}
+          }
+        })
+
+        const { data: insertResult, error: insertError } = await supabase
+          .from('consultation_records')
+          .insert(insertData)
+          .select()
+          .single()
+
+        console.log('Insert result:', { insertResult, insertError })
+        
+        if (insertError) {
+          console.error('Insert error:', insertError)
+          return false
+        }
+        
+        result = insertResult
+      }
+
+      console.log('✅ Successfully saved to Supabase')
       return true
     } catch (error) {
-      console.error('❌ Error saving to cache:', error)
+      console.error('❌ Error in saveToSupabase:', error)
       return false
     }
   }
 
-  private async getFromCache(key: string): Promise<any | null> {
-    if (!this.cacheAvailable) return null
+  // Get all data for the current consultation
+  async getAllData(): Promise<ConsultationData | null> {
+    const consultationId = this.getCurrentConsultationId()
+    if (!consultationId) {
+      console.log('No consultation ID, returning session data')
+      return this.getSessionData()
+    }
+    
+    return await this.loadConsultationData(consultationId)
+  }
 
+  // Get all data for auto-fill
+  async getDataForAutoFill(): Promise<ConsultationData> {
     try {
-      const cache = await caches.open(CACHE_NAME)
-      const response = await cache.match(key)
+      // First try to get consultation ID
+      const consultationId = this.getCurrentConsultationId()
       
-      if (!response) {
-        console.log(`❌ No cache entry found for: ${key}`)
-        return null
+      if (consultationId) {
+        // Try to load from database
+        const dbData = await this.loadConsultationData(consultationId)
+        if (dbData && Object.keys(dbData).length > 0) {
+          return dbData
+        }
+      }
+      
+      // Fall back to session storage
+      const sessionData = this.getSessionData()
+      if (Object.keys(sessionData).length > 0) {
+        return sessionData
       }
 
-      const cachedData: CachedData = await response.json()
-      
-      // Check if cache is expired
-      const hoursOld = (Date.now() - cachedData.timestamp) / (1000 * 60 * 60)
-      if (hoursOld > CACHE_EXPIRY_HOURS) {
-        console.log(`⚠️ Cache expired for: ${key}`)
-        await cache.delete(key)
-        return null
-      }
-
-      console.log(`✅ Data retrieved from cache: ${key}`)
-      return cachedData.data
+      // If no data anywhere, return empty object
+      return {}
     } catch (error) {
-      console.error('❌ Error getting from cache:', error)
+      console.error('Error getting data for auto-fill:', error)
+      return {}
+    }
+  }
+
+  // Get session data
+  private getSessionData(): ConsultationData {
+    try {
+      if (typeof window === 'undefined' || !window.sessionStorage) {
+        return {}
+      }
+      const data = sessionStorage.getItem(this.SESSION_KEY)
+      return data ? JSON.parse(data) : {}
+    } catch (error) {
+      console.error('Error getting session data:', error)
+      return {}
+    }
+  }
+
+  // Load consultation data from database
+  async loadConsultationData(consultationId: string): Promise<ConsultationData | null> {
+    try {
+      const { data, error } = await supabase
+        .from('consultation_records')
+        .select('*')
+        .eq('consultation_id', consultationId)
+        .maybeSingle()
+
+      if (error) {
+        console.error('Error loading consultation data:', error)
+        throw error
+      }
+
+      if (data) {
+        const consultationData: ConsultationData = {
+          patientData: data.patient_data || {},
+          clinicalData: data.clinical_data || {},
+          questionsData: data.questions_data || {},
+          diagnosisData: data.diagnosis_data || {},
+          workflowResult: data.documents_data || {} // Map to your workflow result
+        }
+
+        // Also save to session storage for quick access
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+          sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(consultationData))
+          sessionStorage.setItem(this.CONSULTATION_ID_KEY, consultationId)
+        }
+
+        console.log('Loaded consultation data from DB')
+        return consultationData
+      }
+
+      console.log('No consultation data found in DB')
+      return null
+    } catch (error) {
+      console.error('Error loading consultation data:', error)
       return null
     }
   }
 
-  private async clearCache(): Promise<boolean> {
-    if (!this.cacheAvailable) return false
-
-    try {
-      await caches.delete(CACHE_NAME)
-      console.log('✅ Cache cleared')
-      return true
-    } catch (error) {
-      console.error('❌ Error clearing cache:', error)
-      return false
+  // Clear session data
+  clearSession() {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      sessionStorage.removeItem(this.SESSION_KEY)
+      sessionStorage.removeItem(this.CONSULTATION_ID_KEY)
+      sessionStorage.removeItem('tibokConsultationId')
+      sessionStorage.removeItem('tibokPatientId')
+      sessionStorage.removeItem('tibokDoctorId')
     }
-  }
-
-  // Initialize consultation with IDs
-  initializeConsultation(consultationId: string, patientId: string, doctorId: string) {
-    this.consultationId = consultationId
-    this.patientId = patientId
-    this.doctorId = doctorId
-    
-    // Store in localStorage for persistence
-    this.safeLocalStorage.setItem('currentConsultationId', consultationId)
-    this.safeLocalStorage.setItem('currentPatientId', patientId)
-    this.safeLocalStorage.setItem('currentDoctorId', doctorId)
-    
-    console.log('✅ Consultation initialized:', { consultationId, patientId, doctorId })
   }
 
   // Get current consultation ID with multiple fallbacks
   getCurrentConsultationId(): string | null {
-    // Try memory first
-    if (this.consultationId) return this.consultationId
-    
-    // Try localStorage
-    const storedId = this.safeLocalStorage.getItem('currentConsultationId')
-    if (storedId) {
-      this.consultationId = storedId
-      return storedId
-    }
-    
-    // Try URL params as fallback
+    // Try URL first
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search)
       const urlConsultationId = urlParams.get('consultationId')
       if (urlConsultationId) {
-        this.consultationId = urlConsultationId
-        this.safeLocalStorage.setItem('currentConsultationId', urlConsultationId)
+        console.log('Got consultation ID from URL:', urlConsultationId)
+        // Store it for future use
+        if (window.sessionStorage) {
+          sessionStorage.setItem(this.CONSULTATION_ID_KEY, urlConsultationId)
+          sessionStorage.setItem('tibokConsultationId', urlConsultationId)
+        }
         return urlConsultationId
       }
     }
     
-    console.warn('⚠️ No consultation ID found in any location')
+    // Try session storage
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      const sessionId = sessionStorage.getItem(this.CONSULTATION_ID_KEY) || 
+                       sessionStorage.getItem('tibokConsultationId')
+      if (sessionId) {
+        console.log('Got consultation ID from session:', sessionId)
+        return sessionId
+      }
+    }
+    
+    console.warn('No consultation ID found!')
     return null
   }
 
-  // ✅ Enhanced data saving with cache support
-  async saveStepData(step: number, data: any) {
-    try {
-      if (!data) {
-        console.warn(`⚠️ No data provided for step ${step}`)
-        return false
-      }
-
-      const stepKey = `step_${step}`
-      this.currentData[stepKey] = data
-      
-      // Also save specific data types with validation
-      if (step === 0 && data) {
-        this.currentData.patientData = data
-        console.log('💾 Patient data saved:', data.firstName, data.lastName)
-      } else if (step === 1 && data) {
-        this.currentData.clinicalData = data
-        console.log('💾 Clinical data saved:', data.chiefComplaint ? 'with complaint' : 'basic')
-      } else if (step === 2 && data) {
-        this.currentData.questionsData = data
-        console.log('💾 Questions data saved:', data.responses?.length || 0, 'responses')
-      } else if (step === 3 && data) {
-        this.currentData.diagnosisData = data
-        console.log('💾 Diagnosis data saved:', data.diagnosis?.primary?.condition || 'unknown diagnosis')
-      } else if (step === 4 && data) {
-        this.currentData.workflowResult = data
-        console.log('💾 Workflow result saved')
-      }
-      
-      const consultationId = this.getCurrentConsultationId()
-      if (consultationId) {
-        // Save to localStorage
-        const localKey = `consultation_${consultationId}_data`
-        const serializedData = JSON.stringify(this.currentData)
-        const localSaved = this.safeLocalStorage.setItem(localKey, serializedData)
-        
-        // Save to Cache API
-        const cacheKey = `/api/consultation/${consultationId}/data`
-        const cacheSaved = await this.saveToCache(cacheKey, this.currentData)
-        
-        // Save individual step to cache for quick access
-        const stepCacheKey = `/api/consultation/${consultationId}/step/${step}`
-        await this.saveToCache(stepCacheKey, data)
-        
-        if (localSaved || cacheSaved) {
-          console.log(`✅ Step ${step} data persisted (localStorage: ${localSaved}, cache: ${cacheSaved})`)
-        } else {
-          console.warn(`⚠️ Failed to persist step ${step} data`)
-        }
-      }
-      
-      return true
-    } catch (error) {
-      console.error(`❌ Error saving step ${step} data:`, error)
-      return false
-    }
-  }
-
-  // ✅ Enhanced data loading with cache support
-  async getAllData(): Promise<any> {
+  // Check if all steps are completed
+  async isConsultationComplete(): Promise<boolean> {
     try {
       const consultationId = this.getCurrentConsultationId()
-      if (!consultationId) {
-        console.warn('⚠️ No consultation ID, returning memory data only')
-        return this.currentData
-      }
-      
-      // Try Cache API first
-      const cacheKey = `/api/consultation/${consultationId}/data`
-      const cachedData = await this.getFromCache(cacheKey)
-      
-      if (cachedData) {
-        this.currentData = { ...this.currentData, ...cachedData }
-        console.log('✅ Data loaded from cache:', Object.keys(cachedData))
-        return this.currentData
-      }
-      
-      // Fallback to localStorage
-      const localKey = `consultation_${consultationId}_data`
-      const saved = this.safeLocalStorage.getItem(localKey)
-      
-      if (saved) {
-        try {
-          const parsedData = JSON.parse(saved)
-          this.currentData = { ...this.currentData, ...parsedData }
-          console.log('✅ Data loaded from localStorage:', Object.keys(parsedData))
-          
-          // Save to cache for next time
-          await this.saveToCache(cacheKey, this.currentData)
-        } catch (parseError) {
-          console.error('❌ Error parsing saved data:', parseError)
-        }
-      }
-      
-      // Validate essential data
-      const hasPatient = !!(this.currentData.patientData || this.currentData.step_0)
-      const hasClinical = !!(this.currentData.clinicalData || this.currentData.step_1)
-      const hasDiagnosis = !!(this.currentData.diagnosisData || this.currentData.step_3)
-      
-      console.log('📋 Data status:', { hasPatient, hasClinical, hasDiagnosis })
-      
-      return this.currentData
+      if (!consultationId) return false
+
+      const { data } = await supabase
+        .from('consultation_records')
+        .select('completed_steps')
+        .eq('consultation_id', consultationId)
+        .maybeSingle()
+
+      if (!data) return false
+
+      // Check if all 5 steps (0-4) are completed
+      const requiredSteps = [0, 1, 2, 3, 4]
+      return requiredSteps.every(step => data.completed_steps?.includes(step))
     } catch (error) {
-      console.error('❌ Error loading all data:', error)
-      return this.currentData
-    }
-  }
-
-  // ✅ Get specific step data from cache
-  async getStepData(step: number): Promise<any | null> {
-    const consultationId = this.getCurrentConsultationId()
-    if (!consultationId) return null
-    
-    const stepCacheKey = `/api/consultation/${consultationId}/step/${step}`
-    const cachedStepData = await this.getFromCache(stepCacheKey)
-    
-    if (cachedStepData) {
-      return cachedStepData
-    }
-    
-    // Fallback to complete data
-    const allData = await this.getAllData()
-    return allData[`step_${step}`] || null
-  }
-
-  // ✅ Export all consultation data for backup
-  async exportConsultationData(): Promise<Blob> {
-    const allData = await this.getAllData()
-    const exportData = {
-      ...allData,
-      exportDate: new Date().toISOString(),
-      consultationId: this.getCurrentConsultationId(),
-      version: '1.0'
-    }
-    
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { 
-      type: 'application/json' 
-    })
-    
-    return blob
-  }
-
-  // ✅ Import consultation data from backup
-  async importConsultationData(jsonData: string): Promise<boolean> {
-    try {
-      const importedData = JSON.parse(jsonData)
-      
-      // Validate imported data
-      if (!importedData.consultationId) {
-        throw new Error('Invalid consultation data: missing consultationId')
-      }
-      
-      // Set consultation ID
-      this.consultationId = importedData.consultationId
-      this.safeLocalStorage.setItem('currentConsultationId', importedData.consultationId)
-      
-      // Remove metadata
-      delete importedData.exportDate
-      delete importedData.consultationId
-      delete importedData.version
-      
-      // Import the data
-      this.currentData = importedData
-      
-      // Save to all storage locations
-      const localKey = `consultation_${this.consultationId}_data`
-      this.safeLocalStorage.setItem(localKey, JSON.stringify(this.currentData))
-      
-      const cacheKey = `/api/consultation/${this.consultationId}/data`
-      await this.saveToCache(cacheKey, this.currentData)
-      
-      console.log('✅ Consultation data imported successfully')
-      return true
-    } catch (error) {
-      console.error('❌ Error importing consultation data:', error)
+      console.error('Error checking consultation completion:', error)
       return false
     }
   }
 
-  // ✅ Enhanced doctor data retrieval with cache
-  async getDoctorData(): Promise<any> {
-    // Try cache first
-    const cacheKey = '/api/doctor/current'
-    const cachedDoctor = await this.getFromCache(cacheKey)
-    if (cachedDoctor) {
-      console.log('👨‍⚕️ Doctor data from cache')
-      return cachedDoctor
-    }
-    
-    // Try sessionStorage
-    const sessionData = this.safeSessionStorage.getItem('tibokDoctorData')
-    if (sessionData) {
-      try {
-        const doctorInfo = JSON.parse(sessionData)
-        console.log('👨‍⚕️ Doctor data from session:', doctorInfo.full_name || doctorInfo.fullName)
-        
-        // Save to cache
-        await this.saveToCache(cacheKey, doctorInfo)
-        return doctorInfo
-      } catch (error) {
-        console.error('❌ Error parsing doctor data from session:', error)
-      }
-    }
-    
-    // Try localStorage as fallback
-    const localData = this.safeLocalStorage.getItem('tibokDoctorData')
-    if (localData) {
-      try {
-        const doctorInfo = JSON.parse(localData)
-        console.log('👨‍⚕️ Doctor data from localStorage:', doctorInfo.full_name || doctorInfo.fullName)
-        
-        // Save to cache
-        await this.saveToCache(cacheKey, doctorInfo)
-        return doctorInfo
-      } catch (error) {
-        console.error('❌ Error parsing doctor data from localStorage:', error)
-      }
-    }
-    
-    console.warn('⚠️ No doctor data found')
-    return null
-  }
-
-  // ✅ Enhanced Supabase saving method
-  async saveToSupabase(consultationId: string, stepNumber: number, data: any): Promise<boolean> {
+  // Get current workflow step
+  async getCurrentStep(): Promise<number> {
     try {
-      if (!consultationId || !data) {
-        console.error('❌ Missing consultationId or data for Supabase save')
-        return false
-      }
-
-      console.log(`💾 Saving to Supabase - Consultation: ${consultationId}, Step: ${stepNumber}`)
-      
-      // Prepare the data based on step number
-      let updateData: any = {}
-      
-      switch (stepNumber) {
-        case 0:
-          updateData.patient_data = data
-          break
-        case 1:
-          updateData.clinical_data = data
-          break
-        case 2:
-          updateData.questions_data = data
-          break
-        case 3:
-          updateData.diagnosis_data = data
-          break
-        case 4:
-          updateData.documents_data = data
-          break
-        default:
-          updateData.additional_data = data
-      }
-      
-      // Add timestamp
-      updateData.updated_at = new Date().toISOString()
-      
-      // Save to Supabase
-      const { data: result, error } = await supabase
-        .from('consultations')
-        .update(updateData)
-        .eq('id', consultationId)
-        .select()
-      
-      if (error) {
-        console.error('❌ Supabase save error:', error)
-        return false
-      }
-      
-      if (result && result.length > 0) {
-        console.log('✅ Successfully saved to Supabase')
-        
-        // Update cache with latest data
-        await this.refreshCacheFromSupabase(consultationId)
-        
-        return true
-      } else {
-        console.warn('⚠️ No rows updated in Supabase')
-        return false
-      }
-      
-    } catch (error) {
-      console.error('❌ Error saving to Supabase:', error)
-      return false
-    }
-  }
-
-  // ✅ Load from Supabase with cache update
-  async loadFromSupabase(consultationId: string): Promise<any> {
-    try {
-      if (!consultationId) {
-        console.error('❌ No consultation ID provided for Supabase load')
-        return null
-      }
-
-      console.log(`📥 Loading from Supabase - Consultation: ${consultationId}`)
-      
-      const { data, error } = await supabase
-        .from('consultations')
-        .select('*')
-        .eq('id', consultationId)
-        .single()
-      
-      if (error) {
-        console.error('❌ Supabase load error:', error)
-        return null
-      }
-      
-      if (data) {
-        console.log('✅ Successfully loaded from Supabase')
-        
-        // Merge the loaded data into current data
-        const mergedData = {
-          patientData: data.patient_data,
-          clinicalData: data.clinical_data,
-          questionsData: data.questions_data,
-          diagnosisData: data.diagnosis_data,
-          workflowResult: data.documents_data,
-          consultationReport: data.consultation_report
-        }
-        
-        this.currentData = { ...this.currentData, ...mergedData }
-        
-        // Update cache with fresh data
-        const cacheKey = `/api/consultation/${consultationId}/data`
-        await this.saveToCache(cacheKey, this.currentData)
-        
-        return mergedData
-      }
-      
-      return null
-    } catch (error) {
-      console.error('❌ Error loading from Supabase:', error)
-      return null
-    }
-  }
-
-  // ✅ Refresh cache from Supabase
-  private async refreshCacheFromSupabase(consultationId: string): Promise<void> {
-    const data = await this.loadFromSupabase(consultationId)
-    if (data) {
-      console.log('✅ Cache refreshed from Supabase')
-    }
-  }
-
-  // ✅ Enhanced consultation report generation with caching
-  async generateConsultationReport(
-    patientData: any,
-    clinicalData: any,
-    questionsData: any,
-    diagnosisData: any
-  ): Promise<any> {
-    try {
-      console.log('🚀 Starting consultation report generation...')
-      
-      // Check cache first
       const consultationId = this.getCurrentConsultationId()
-      if (consultationId) {
-        const cacheKey = `/api/consultation/${consultationId}/report`
-        const cachedReport = await this.getFromCache(cacheKey)
-        
-        if (cachedReport) {
-          console.log('✅ Using cached consultation report')
-          return cachedReport
-        }
-      }
-      
-      // Validate required data
-      if (!patientData || !diagnosisData) {
-        throw new Error('Patient data and diagnosis data are required for report generation')
-      }
+      if (!consultationId) return 0
 
-      if (!patientData.firstName || !patientData.lastName) {
-        throw new Error('Patient first name and last name are required')
-      }
+      const { data } = await supabase
+        .from('consultation_records')
+        .select('workflow_step')
+        .eq('consultation_id', consultationId)
+        .maybeSingle()
 
-      if (!diagnosisData.diagnosis?.primary?.condition) {
-        throw new Error('Primary diagnosis is required')
-      }
-
-      console.log('✅ Data validation passed')
-      console.log('📋 Generating for patient:', `${patientData.firstName} ${patientData.lastName}`)
-      console.log('🏥 Primary diagnosis:', diagnosisData.diagnosis.primary.condition)
-
-      // Get doctor data with fallbacks
-      let doctorInfo = await this.getDoctorData()
-      
-      if (!doctorInfo) {
-        console.warn('⚠️ No doctor data found, using defaults')
-        doctorInfo = {
-          full_name: "Dr. MÉDECIN EXPERT",
-          specialty: "Médecine générale",
-          address: "Cabinet médical, Maurice",
-          city: "Port-Louis, Maurice",
-          phone: "+230 xxx xxx xxx",
-          email: "contact@cabinet.mu",
-          medical_council_number: "Medical Council of Mauritius - Reg. No. XXXXX"
-        }
-      }
-
-      // Prepare doctor info for generator
-      const doctor = {
-        fullName: doctorInfo.full_name || doctorInfo.fullName || "Dr. MÉDECIN EXPERT",
-        specialty: doctorInfo.specialty || "Médecine générale",
-        address: doctorInfo.address || "Cabinet médical, Maurice",
-        city: doctorInfo.city || "Port-Louis, Maurice",
-        phone: doctorInfo.phone || "+230 xxx xxx xxx",
-        email: doctorInfo.email || "contact@cabinet.mu",
-        registrationNumber: doctorInfo.medical_council_number || doctorInfo.medicalCouncilNumber || "Medical Council of Mauritius - Reg. No. XXXXX"
-      }
-
-      // Create comprehensive consultation data structure
-      const consultationData = {
-        // Patient information
-        patientInfo: {
-          name: `${patientData.firstName} ${patientData.lastName}`,
-          firstName: patientData.firstName,
-          lastName: patientData.lastName,
-          age: patientData.age,
-          birthDate: patientData.birthDate,
-          gender: Array.isArray(patientData.gender) ? patientData.gender[0] : patientData.gender,
-          weight: patientData.weight,
-          height: patientData.height,
-          bmi: patientData.weight && patientData.height ? 
-            (patientData.weight / Math.pow(patientData.height/100, 2)).toFixed(1) : null,
-          date: new Date().toLocaleDateString('fr-FR'),
-          address: patientData.address || '',
-          phone: patientData.phone || patientData.phoneNumber || '',
-          email: patientData.email || '',
-          allergies: Array.isArray(patientData.allergies) ? patientData.allergies.join(', ') : (patientData.allergies || 'Aucune'),
-          medicalHistory: Array.isArray(patientData.medicalHistory) ? patientData.medicalHistory.join(', ') : (patientData.medicalHistory || 'Aucun'),
-          currentMedications: patientData.currentMedicationsText || 'Aucun',
-          lifeHabits: patientData.lifeHabits || {}
-        },
-        
-        // Clinical information
-        chiefComplaint: clinicalData?.chiefComplaint || 'Consultation de contrôle',
-        diseaseHistory: clinicalData?.diseaseHistory || '',
-        symptomDuration: clinicalData?.symptomDuration || '',
-        symptoms: clinicalData?.symptoms || [],
-        vitalSigns: {
-          temperature: clinicalData?.vitalSigns?.temperature || '',
-          bloodPressureSystolic: clinicalData?.vitalSigns?.bloodPressureSystolic || '',
-          bloodPressureDiastolic: clinicalData?.vitalSigns?.bloodPressureDiastolic || '',
-          bloodPressure: clinicalData?.vitalSigns?.bloodPressureSystolic && 
-                        clinicalData?.vitalSigns?.bloodPressureDiastolic ? 
-                        `${clinicalData.vitalSigns.bloodPressureSystolic}/${clinicalData.vitalSigns.bloodPressureDiastolic} mmHg` : ''
-        },
-        
-        // AI Questions responses
-        questionsResponses: questionsData?.responses || {},
-        questionsAnswered: questionsData?.questions || [],
-        
-        // Complete diagnosis information
-        diagnosis: diagnosisData.diagnosis.primary.condition,
-        diagnosticConfidence: diagnosisData.diagnosis.primary.confidence || 0,
-        diagnosticReasoning: diagnosisData.diagnosis.primary.reasoning || '',
-        
-        // Differential diagnoses
-        differentialDiagnoses: diagnosisData.diagnosis.differential || [],
-        
-        // Treatment plan
-        treatmentPlan: diagnosisData.treatmentPlan || {},
-        medications: diagnosisData.treatmentPlan?.medications || [],
-        recommendations: diagnosisData.treatmentPlan?.recommendations || [],
-        
-        // Examinations
-        suggestedExams: diagnosisData.suggestedExams || {},
-        labTests: diagnosisData.suggestedExams?.lab || [],
-        imagingTests: diagnosisData.suggestedExams?.imaging || [],
-        
-        // Red flags and monitoring
-        redFlags: diagnosisData.redFlags || [],
-        monitoring: diagnosisData.monitoring || [],
-        
-        // Follow-up
-        followUp: diagnosisData.followUp || {},
-        nextVisit: diagnosisData.followUp?.nextVisit || '',
-        
-        // Generated examination text
-        examination: this.generateExaminationText(clinicalData, questionsData),
-        treatment: this.generateTreatmentPlan(diagnosisData),
-        followUpPlan: this.generateFollowUpPlan(diagnosisData)
-      }
-
-      console.log('📋 Consultation data prepared successfully')
-
-      // Generate Mauritian documents using the generator
-      const mauritianDocuments = MauritianDocumentsGenerator.generateMauritianDocuments(
-        { consultationData },
-        doctor,
-        patientData,
-        diagnosisData
-      )
-
-      // Create complete consultation report
-      const consultationReport = {
-        consultationData,
-        mauritianDocuments,
-        generatedAt: new Date().toISOString(),
-        doctorInfo: doctor,
-        // Include original data for reference
-        originalData: {
-          patientData,
-          clinicalData,
-          questionsData,
-          diagnosisData
-        },
-        success: true
-      }
-
-      console.log('✅ Consultation report generated successfully')
-
-      // Save the report to cache
-      if (consultationId) {
-        const cacheKey = `/api/consultation/${consultationId}/report`
-        await this.saveToCache(cacheKey, consultationReport)
-      }
-
-      // Save the report
-      await this.saveConsultationReport(consultationReport)
-
-      return consultationReport
-
+      return data?.workflow_step || 0
     } catch (error) {
-      console.error('❌ Error generating consultation report:', error)
-      throw error
-    }
-  }
-
-  // Save consultation report with cache
-  async saveConsultationReport(reportData: any) {
-    try {
-      this.currentData.consultationReport = reportData
-      
-      const consultationId = this.getCurrentConsultationId()
-      if (consultationId) {
-        // Save to localStorage
-        const localKey = `consultation_${consultationId}_data`
-        const serializedData = JSON.stringify(this.currentData)
-        this.safeLocalStorage.setItem(localKey, serializedData)
-        
-        // Save to cache
-        const cacheKey = `/api/consultation/${consultationId}/data`
-        await this.saveToCache(cacheKey, this.currentData)
-        
-        // Save report specifically to cache
-        const reportCacheKey = `/api/consultation/${consultationId}/report`
-        await this.saveToCache(reportCacheKey, reportData)
-        
-        // Also try to save to Supabase
-        await this.saveToSupabase(consultationId, 4, {
-          consultationReport: reportData,
-          updatedAt: new Date().toISOString()
-        })
-      }
-      
-      console.log('💾 Consultation report saved to all storage locations')
-    } catch (error) {
-      console.error('❌ Error saving consultation report:', error)
-    }
-  }
-
-  // Helper methods
-  private generateExaminationText(clinicalData: any, questionsData: any): string {
-    let exam = 'EXAMEN CLINIQUE COMPLET\n'
-    exam += '======================\n\n'
-    
-    // État général
-    exam += 'ÉTAT GÉNÉRAL:\n'
-    exam += '- Patient conscient, orienté dans le temps et l\'espace\n'
-    exam += '- État nutritionnel satisfaisant\n'
-    exam += '- Pas de signe de déshydratation\n\n'
-    
-    // Constantes vitales si disponibles
-    if (clinicalData?.vitalSigns) {
-      exam += 'CONSTANTES VITALES:\n'
-      if (clinicalData.vitalSigns.temperature) {
-        exam += `- Température: ${clinicalData.vitalSigns.temperature}°C\n`
-      }
-      if (clinicalData.vitalSigns.bloodPressureSystolic && clinicalData.vitalSigns.bloodPressureDiastolic) {
-        exam += `- Tension artérielle: ${clinicalData.vitalSigns.bloodPressureSystolic}/${clinicalData.vitalSigns.bloodPressureDiastolic} mmHg\n`
-      }
-      exam += '\n'
-    }
-    
-    // Examen par appareil basé sur les symptômes
-    if (clinicalData?.symptoms && clinicalData.symptoms.length > 0) {
-      exam += 'EXAMEN PAR APPAREIL:\n'
-      
-      // Cardiovasculaire
-      if (clinicalData.symptoms.some((s: string) => s.toLowerCase().includes('cardia') || s.toLowerCase().includes('chest'))) {
-        exam += '- Cardiovasculaire: Bruits du cœur réguliers, pas de souffle audible\n'
-      }
-      
-      // Respiratoire
-      if (clinicalData.symptoms.some((s: string) => s.toLowerCase().includes('toux') || s.toLowerCase().includes('respir'))) {
-        exam += '- Respiratoire: Murmure vésiculaire bilatéral symétrique, pas de râles\n'
-      }
-      
-      // Digestif
-      if (clinicalData.symptoms.some((s: string) => s.toLowerCase().includes('abdom') || s.toLowerCase().includes('digest'))) {
-        exam += '- Digestif: Abdomen souple, dépressible, indolore à la palpation\n'
-      }
-      
-      exam += '\n'
-    }
-    
-    return exam || 'Examen physique normal'
-  }
-
-  private generateTreatmentPlan(diagnosisData: any): string {
-    let plan = 'PLAN THÉRAPEUTIQUE DÉTAILLÉ\n'
-    plan += '==========================\n\n'
-    
-    if (diagnosisData?.treatmentPlan?.medications && diagnosisData.treatmentPlan.medications.length > 0) {
-      plan += 'TRAITEMENT MÉDICAMENTEUX:\n'
-      diagnosisData.treatmentPlan.medications.forEach((med: any, index: number) => {
-        plan += `${index + 1}. ${med.name || med}\n`
-        if (med.dosage) plan += `   Posologie: ${med.dosage}\n`
-        if (med.duration) plan += `   Durée: ${med.duration}\n`
-        plan += '\n'
-      })
-    }
-    
-    if (diagnosisData?.treatmentPlan?.recommendations && diagnosisData.treatmentPlan.recommendations.length > 0) {
-      plan += '\nMESURES GÉNÉRALES:\n'
-      diagnosisData.treatmentPlan.recommendations.forEach((rec: string, index: number) => {
-        plan += `${index + 1}. ${rec}\n`
-      })
-    }
-    
-    return plan || 'Plan thérapeutique à définir selon les résultats des examens complémentaires'
-  }
-
-  private generateFollowUpPlan(diagnosisData: any): string {
-    let followUp = 'PLAN DE SUIVI ET EXAMENS\n'
-    followUp += '========================\n\n'
-    
-    if (diagnosisData?.suggestedExams?.lab && diagnosisData.suggestedExams.lab.length > 0) {
-      followUp += 'EXAMENS BIOLOGIQUES:\n'
-      diagnosisData.suggestedExams.lab.forEach((exam: string, index: number) => {
-        followUp += `${index + 1}. ${exam}\n`
-      })
-      followUp += '\n'
-    }
-    
-    if (diagnosisData?.suggestedExams?.imaging && diagnosisData.suggestedExams.imaging.length > 0) {
-      followUp += 'EXAMENS D\'IMAGERIE:\n'
-      diagnosisData.suggestedExams.imaging.forEach((exam: string, index: number) => {
-        followUp += `${index + 1}. ${exam}\n`
-      })
-      followUp += '\n'
-    }
-    
-    if (diagnosisData?.followUp?.nextVisit) {
-      followUp += `\nPROCHAINE CONSULTATION: ${diagnosisData.followUp.nextVisit}\n`
-    }
-    
-    return followUp || 'Suivi à prévoir selon l\'évolution clinique'
-  }
-
-  // Clear consultation data and cache
-  async clearConsultation() {
-    this.consultationId = null
-    this.patientId = null
-    this.doctorId = null
-    this.currentData = {}
-    
-    this.safeLocalStorage.removeItem('currentConsultationId')
-    this.safeLocalStorage.removeItem('currentPatientId') 
-    this.safeLocalStorage.removeItem('currentDoctorId')
-    
-    // Clear cache
-    await this.clearCache()
-    
-    console.log('🧹 Consultation data and cache cleared')
-  }
-
-  // ✅ Preload all consultation data into cache
-  async preloadConsultationData(consultationId: string): Promise<boolean> {
-    try {
-      console.log('⏳ Preloading consultation data into cache...')
-      
-      // Load from Supabase
-      const data = await this.loadFromSupabase(consultationId)
-      
-      if (data) {
-        // Cache is already updated by loadFromSupabase
-        console.log('✅ Consultation data preloaded into cache')
-        return true
-      }
-      
-      return false
-    } catch (error) {
-      console.error('❌ Error preloading consultation data:', error)
-      return false
-    }
-  }
-
-  // ✅ Get cache status
-  async getCacheStatus(): Promise<{
-    available: boolean
-    consultationsCached: number
-    sizeEstimate?: number
-  }> {
-    if (!this.cacheAvailable) {
-      return { available: false, consultationsCached: 0 }
-    }
-
-    try {
-      const cache = await caches.open(CACHE_NAME)
-      const keys = await cache.keys()
-      
-      // Estimate size (rough calculation)
-      let totalSize = 0
-      for (const request of keys) {
-        const response = await cache.match(request)
-        if (response) {
-          const blob = await response.blob()
-          totalSize += blob.size
-        }
-      }
-
-      return {
-        available: true,
-        consultationsCached: keys.length,
-        sizeEstimate: totalSize
-      }
-    } catch (error) {
-      console.error('❌ Error getting cache status:', error)
-      return { available: false, consultationsCached: 0 }
+      console.error('Error getting current step:', error)
+      return 0
     }
   }
 }
 
+// Export singleton instance
 export const consultationDataService = new ConsultationDataService()
