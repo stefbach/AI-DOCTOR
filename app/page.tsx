@@ -1,5 +1,7 @@
 // app/page.tsx - Version complète avec intégration du système de test
 
+<div>TEXTE DE TEST 123</div>
+
 "use client"
 
 import { useState, useEffect } from "react"
