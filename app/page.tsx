@@ -258,11 +258,12 @@ export default function MedicalAIExpert() {
             <div className="flex items-center gap-2">
               
               {/* 🆕 BOUTON DE SÉLECTION DE PATIENT TEST */}
-              {!isTestMode && (
-                <TestPatientSelector 
-                  onSelectPatient={setTestPatient}
-                />
-              )}
+              <button 
+  style={{ background: 'blue', color: 'white', padding: '10px', marginRight: '10px' }}
+  onClick={() => alert('Test!')}
+>
+  🧪 Test
+</button>
               
               {/* Language Switcher with black background */}
               <div className="flex items-center gap-2 mr-4 bg-black rounded-md p-1">
