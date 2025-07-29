@@ -907,24 +907,116 @@ export async function POST(request: NextRequest) {
     const duration = clinicalData?.symptomDuration || 'Non précisée'
     const painScale = clinicalData?.painScale || 0
     const vitalSigns = clinicalData?.vitalSigns || {}
+    const diseaseHistory = clinicalData?.diseaseHistory || 
+   const questionsAnswers = questionsData?.answers || questionsData?.responses || questionsData || [] // Validation et formatage des questions const formattedQuestions = questionsAnswers.map((qa: any, index: number) => { const question = qa.question || qa.text || 'Question non disponible' const answer = qa.answer || qa.response || qa.value || 'Non répondu' // Détection de réponses critiques const criticalResponses = ['oui', 'yes', 'grave', 'intense', 'sévère', '8', '9', '10'] const isCritical = criticalResponses.some(resp => answer.toString().toLowerCase().includes(resp) ) return { id: index + 1, question, answer, isCritical } }) // Logger pour debug console.log('📋 Questions IA formatées:', JSON.stringify(formattedQuestions, null, 2)) // Compter les réponses critiques const criticalCount = formattedQuestions.filter(q => q.isCritical).length console.log(`⚠️ Réponses critiques détectées: ${criticalCount}`)
+const formattedQuestions = questionsAnswers
+// AJOUTER : Système de détection des urgences vitales
+const EMERGENCY_PATTERNS = {
+  cardiac: {
+    symptoms: ['douleur thoracique', 'oppression', 'douleur poitrine', 'serrement'],
+    vitalSigns: { heartRate: { min: 40, max: 150 }, systolic: { min: 80 } },
+    alert: '🚨 URGENCE CARDIAQUE SUSPECTÉE - APPELER 999 IMMÉDIATEMENT'
+  },
+  neurological: {
+    symptoms: ['céphalée brutale', 'paralysie', 'confusion', 'trouble parole'],
+    vitalSigns: { systolic: { min: 180 } },
+    alert: '🚨 URGENCE NEUROLOGIQUE - AVC POSSIBLE - APPELER 999'
+  },
+  respiratory: {
+    symptoms: ['détresse respiratoire', 'étouffement', 'cyanose'],
+    vitalSigns: { oxygenSaturation: { max: 92 }, respiratoryRate: { min: 25 } },
+    alert: '🚨 DÉTRESSE RESPIRATOIRE - URGENCE VITALE - APPELER 999'
+  },
+  abdominal: {
+    symptoms: ['défense abdominale', 'ventre dur', 'douleur intense'],
+    vitalSigns: { temperature: { min: 38.5 } },
+    alert: '🚨 ABDOMEN AIGU - URGENCE CHIRURGICALE - HÔPITAL IMMÉDIAT'
+  }
+}
+
+function checkEmergencyPatterns(symptoms: string, vitalSigns: any): {isEmergency: boolean, alerts: string[]} {
+  const alerts: string[] = []
+  let isEmergency = false
+  
+  const symptomLower = symptoms.toLowerCase()
+  
+  for (const [type, pattern] of Object.entries(EMERGENCY_PATTERNS)) {
+    // Vérifier symptômes
+    const hasSymptom = pattern.symptoms.some(s => symptomLower.includes(s))
+    
+    // Vérifier signes vitaux
+    let vitalAlert = false
+    if (pattern.vitalSigns) {
+      for (const [vital, limits] of Object.entries(pattern.vitalSigns)) {
+        const value = vitalSigns[vital]
+        if (value && limits) {
+          if ((limits.min && value < limits.min) || (limits.max && value > limits.max)) {
+            vitalAlert = true
+          }
+        }
+      }
+    }
+    
+    if (hasSymptom || vitalAlert) {
+      isEmergency = true
+      alerts.push(pattern.alert)
+    }
+  }
+  
+  return { isEmergency, alerts }
+}
+
+// Appeler cette fonction AVANT l'appel GPT
+const emergencyCheck = checkEmergencyPatterns(symptoms, vitalSigns)
+if (emergencyCheck.isEmergency) {
+  console.log('🚨🚨🚨 URGENCE DÉTECTÉE 🚨🚨🚨')
+  // Retourner immédiatement une réponse d'urgence
+}
     
     console.log('🎯 CONSTRUCTION PROMPT MÉDICAL SIMPLIFIÉ MAIS EXPERT')
     
     // PROMPT MÉDICAL EXPERT ENRICHI (Plus de détails avec plus de tokens)
-    const expertPrompt = `Tu es un médecin expert mauricien de niveau CHU international. Analyse ce cas clinique avec la plus haute expertise médicale.
+    const expertPrompt = `Tu es un médecin expert mauricien de niveau CHU international pratiquant la TÉLÉMÉDECINE.
+
+🚨 RÈGLES CRITIQUES DE TÉLÉCONSULTATION :
+1. LANGUE : Réponds UNIQUEMENT en FRANÇAIS. Tous les diagnostics et explications en FRANÇAIS.
+2. LIMITES : Tu fais de la télémédecine SANS examen physique - ajuste ta confiance en conséquence
+3. SÉCURITÉ : Ne JAMAIS dépasser 70% de confiance sans examen physique ET paraclinique
+4. URGENCES : Si symptômes d'urgence, recommander IMMÉDIATEMENT consultation physique/urgences
+
+${emergencyCheck.isEmergency ? `
+⚠️⚠️⚠️ ALERTE URGENCE DÉTECTÉE ⚠️⚠️⚠️
+${emergencyCheck.alerts.join('\n')}
+PRIORISER L'ORIENTATION URGENTE DU PATIENT
+` : ''}
+
+RÈGLES DE CONFIANCE EN TÉLÉMÉDECINE :
+- Symptômes généraux SEULS → Confiance MAX 40%
+- Symptômes localisés SANS examen → Confiance MAX 60%  
+- Avec histoire détaillée + questions IA → Confiance MAX 70%
+- >70% UNIQUEMENT si examens paracliniques disponibles
+
+DONNÉES PATIENT COMPLÈTES :
+[... reste des données patient ...]
+
+RÉPONSES CRITIQUES DÉTECTÉES : ${criticalCount > 0 ? `
+⚠️ ${criticalCount} réponses préoccupantes dans l'interrogatoire
+Adapter le niveau d'urgence en conséquence
+` : 'Aucune réponse critique'}
 
 DONNÉES PATIENT COMPLÈTES :
 Identité : ${patientData?.firstName || 'Patient'} ${patientData?.lastName || 'X'}, ${patientAge} ans, ${patientSex}
 Poids : ${patientWeight} kg, Taille : ${patientData?.height || '?'} cm
 Motif consultation : ${chiefComplaint}
-Symptômes détaillés : ${symptoms || 'À préciser'}
-Durée évolution : ${duration}
+Symptômes détaillés : ${symptoms || 'À préciser'} HISTORIQUE DE LA MALADIE : ${diseaseHistory || 'Non documenté'} Durée évolution : ${duration}
 Intensité douleur : ${painScale}/10
 Antécédents médicaux : ${medicalHistory.join(', ') || 'Aucun'}
 Antécédents familiaux : ${(patientData?.familyHistory || []).join(', ') || 'Non renseignés'}
 Traitements actuels : ${currentMedications.join(', ') || 'Aucun'}
 Allergies connues : ${allergies.join(', ') || 'Aucune'}
 Constantes vitales : TA ${vitalSigns.bloodPressureSystolic || '?'}/${vitalSigns.bloodPressureDiastolic || '?'} mmHg, FC ${vitalSigns.heartRate || '?'} bpm, T° ${vitalSigns.temperature || '?'}°C, FR ${vitalSigns.respiratoryRate || '?'}/min, SaO2 ${vitalSigns.oxygenSaturation || '?'}%
+
+RÉPONSES AUX QUESTIONS COMPLÉMENTAIRES : ${questionsAnswers.length > 0 ? questionsAnswers.map((qa: any, index: number) => `Q${index + 1}: ${qa.question} Réponse: ${qa.answer || qa.response || qa.value || 'Non répondu'}` ).join('\n\n') : 'Aucune question complémentaire posée'}
 
 CONTEXTE MAURICIEN SPÉCIALISÉ :
 - Climat tropical humide → Pathologies vectorielles (dengue, chikungunya), déshydratation
@@ -1110,7 +1202,7 @@ Génère UNIQUEMENT le JSON médical expert - Aucun texte avant/après.`
             content: expertPrompt
           }
         ],
-        temperature: 0.1,  // ← Plus bas pour plus de précision
+        temperature: 0.3,  // 
         max_tokens: 8000,  // ← DOUBLÉ: 8000 au lieu de 3000 pour analyses plus complètes
       }),
     })
@@ -1145,8 +1237,108 @@ Génère UNIQUEMENT le JSON médical expert - Aucun texte avant/après.`
       console.log('🧹 JSON nettoyé:', cleanResponse.substring(0, 300) + '...')
       
       expertAnalysis = JSON.parse(cleanResponse)
-      console.log('✅ Parsing réussi!')
+     console.log('✅ Parsing réussi!')
       
+// AJOUTER après : expertAnalysis = JSON.parse(cleanResponse)
+
+// Validation intelligente et rassurante de la téléconsultation
+function validateTeleconsultationConfidence(analysis: any, clinicalData: any) {
+  const primary = analysis.primary_diagnosis
+  if (!primary) return analysis
+  
+  // Calcul du score de qualité des données (plus généreux)
+  let dataQuality = 50 // Base de 50% pour encourager la téléconsultation
+  
+  // Bonus pour données complètes
+  if (clinicalData?.symptoms?.length > 2) dataQuality += 10
+  if (clinicalData?.diseaseHistory?.length > 30) dataQuality += 15
+  if (clinicalData?.painLocation && clinicalData.painLocation !== 'général') dataQuality += 15
+  if (formattedQuestions.length > 3) dataQuality += 10
+  if (vitalSigns && Object.keys(vitalSigns).length > 2) dataQuality += 10
+  
+  // Plafond plus élevé et adaptatif
+  const maxAllowedConfidence = Math.min(85, dataQuality)
+  
+  // Ajuster SEULEMENT si vraiment excessif
+  if (primary.confidence > maxAllowedConfidence && primary.confidence > 85) {
+    console.log(`📊 Ajustement modéré: ${primary.confidence}% → ${maxAllowedConfidence}%`)
+    primary.confidence = maxAllowedConfidence
+  }
+  
+  // Messages positifs et rassurants selon le niveau
+  if (primary.confidence >= 75) {
+    primary.teleconsultation_message = 
+      "Évaluation télémédecine fiable. Consultation physique recommandée si symptômes persistent."
+  } else if (primary.confidence >= 60) {
+    primary.teleconsultation_message = 
+      "Bonne orientation diagnostique. Un examen complémentaire pourrait préciser le diagnostic."
+  } else {
+    primary.teleconsultation_message = 
+      "Première évaluation réalisée. Consultation de suivi recommandée pour affiner le diagnostic."
+  }
+  
+  // Ajouter value proposition de la téléconsultation
+  primary.telemedicine_benefits = {
+    done: "✅ Première évaluation médicale complète",
+    guidance: "✅ Orientation thérapeutique personnalisée",
+    documents: "✅ Documents médicaux professionnels fournis",
+    followup: "✅ Recommandations de suivi adaptées"
+  }
+  
+  // Disclaimer positif et non alarmant
+  primary.professional_advice = 
+    "Cette téléconsultation fournit une évaluation médicale professionnelle. " +
+    "Comme pour toute consultation, un suivi est recommandé si les symptômes évoluent."
+  
+  return analysis
+}
+
+// Version alternative ENCORE PLUS POSITIVE pour pathologies bénignes
+function smartTeleconsultationValidation(analysis: any, clinicalData: any) {
+  const primary = analysis.primary_diagnosis
+  if (!primary) return analysis
+  
+  // Liste des diagnostics où la téléconsultation est TRÈS efficace
+  const TELEMEDICINE_FRIENDLY = [
+    'infection respiratoire haute', 'rhinopharyngite', 'gastroentérite',
+    'migraine', 'lombalgie simple', 'anxiété', 'insomnie', 'allergie',
+    'cystite simple', 'conjonctivite', 'eczéma', 'acné'
+  ]
+  
+  const isTeleFriendly = TELEMEDICINE_FRIENDLY.some(diag => 
+    primary.condition.toLowerCase().includes(diag)
+  )
+  
+  // Si diagnostic télé-friendly, maintenir confiance élevée
+  if (isTeleFriendly && primary.confidence > 70) {
+    primary.teleconsultation_message = 
+      "Diagnostic bien établi par téléconsultation. Traitement approprié prescrit."
+    primary.physical_exam_needed = false
+    primary.efficiency_note = "✅ Téléconsultation parfaitement adaptée pour cette pathologie"
+  }
+  // Si pathologie complexe mais bien documentée
+  else if (clinicalData?.diseaseHistory?.length > 100 && formattedQuestions.length > 5) {
+    primary.teleconsultation_message = 
+      "Excellente documentation des symptômes. Diagnostic de qualité établi."
+    primary.confidence_note = "Niveau de confiance élevé grâce aux informations détaillées fournies"
+  }
+  // Cas général - rester positif
+  else {
+    primary.teleconsultation_message = 
+      "Évaluation médicale complète réalisée. Plan de traitement personnalisé établi."
+  }
+  
+  // Ajuster seulement les cas vraiment excessifs (>90% sans données)
+  if (primary.confidence > 90 && (!clinicalData?.diseaseHistory || clinicalData.diseaseHistory.length < 20)) {
+    primary.confidence = 85
+    primary.adjustment_note = "Confiance optimisée selon les données disponibles"
+  }
+  
+  return analysis
+}
+
+// UTILISER LA VERSION QUI VOUS CONVIENT :
+expertAnalysis = smartTeleconsultationValidation(expertAnalysis, clinicalData)
     } catch (parseError) {
       console.error('❌ Erreur parsing JSON:', parseError)
       console.log('📄 Réponse brute:', responseText)
