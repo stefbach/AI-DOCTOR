@@ -41,6 +41,14 @@ export default function MedicalAIExpert() {
   const [currentDoctorId, setCurrentDoctorId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isInitialized, setIsInitialized] = useState(false)
+  const {
+  isTestMode,
+  currentTestPatient,
+  setTestPatient,
+  clearTestMode,
+  getTestDataForStep,
+  testPatients,
+} = useTestMode()
 
   // 🆕 HOOK DU SYSTÈME DE TEST
   <Button onClick={() => {
@@ -260,12 +268,19 @@ export default function MedicalAIExpert() {
             <div className="flex items-center gap-2">
               
               {/* 🆕 BOUTON DE SÉLECTION DE PATIENT TEST */}
-              <button 
-  style={{ background: 'blue', color: 'white', padding: '10px', marginRight: '10px' }}
-  onClick={() => alert('Test!')}
->
-  🧪 Test
-</button>
+             {!isTestMode && testPatients?.length > 0 && (
+  <Button
+    onClick={() => {
+      const testPatient = testPatients[0]
+      setTestPatient(testPatient)
+      alert(`🧪 Mode test activé avec : ${testPatient.patientData.firstName}`)
+    }}
+    variant="default"
+  >
+    🧪 Activer Mode Test
+  </Button>
+)}
+
               
               {/* Language Switcher with black background */}
               <div className="flex items-center gap-2 mr-4 bg-black rounded-md p-1">
