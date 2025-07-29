@@ -12,9 +12,10 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import { testPatients } from '@/lib/test-patients-data'
 import { 
-  import { testPatients } from '@/lib/test-patients-data'
-  ArrowRight, 
+  ArrowRight,
+  
   User, 
   Heart, 
   AlertTriangle, 
