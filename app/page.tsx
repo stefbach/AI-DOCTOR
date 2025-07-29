@@ -1,6 +1,5 @@
 // app/page.tsx - Version complète avec intégration du système de test
 
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -40,27 +39,15 @@ export default function MedicalAIExpert() {
   const [currentDoctorId, setCurrentDoctorId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isInitialized, setIsInitialized] = useState(false)
+  
   const {
-  isTestMode,
-  currentTestPatient,
-  setTestPatient,
-  clearTestMode,
-  getTestDataForStep,
-  testPatients,
-} = useTestMode()
-
-{!isTestMode && testPatients?.length > 0 && (
-  <Button
-    onClick={() => {
-      const testPatient = testPatients[0]
-      setTestPatient(testPatient)
-      alert(`🧪 Mode test activé avec : ${testPatient.patientData.firstName}`)
-    }}
-    className="bg-blue-600 text-white hover:bg-blue-700 mr-4"
-  >
-    🧪 Activer Mode Test
-  </Button>
-)}
+    isTestMode,
+    currentTestPatient,
+    setTestPatient,
+    clearTestMode,
+    getTestDataForStep,
+    testPatients,
+  } = useTestMode()
 
   // Load language preference
   useEffect(() => {
@@ -87,9 +74,68 @@ export default function MedicalAIExpert() {
         }
       }
     }
-  }, [isTestMode, currentTestPatient, currentStep, patientData, clinicalData])
+  }, [isTestMode, currentTestPatient, currentStep, patientData, clinicalData, getTestDataForStep])
 
-  // ... (tous vos autres useEffect existants restent identiques) ...
+  // Initialize consultation
+  useEffect(() => {
+    const initializeConsultation = async () => {
+      try {
+        setIsLoading(true)
+        
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        
+        if (authError || !user) {
+          console.log('No authenticated user, proceeding without user context')
+          setCurrentDoctorId(null)
+        } else {
+          setCurrentDoctorId(user.id)
+        }
+        
+        let consultationId = consultationDataService.getCurrentConsultationId()
+        
+        if (!consultationId) {
+          const newConsultation = consultationDataService.createNewConsultation(user?.id || null)
+          consultationId = newConsultation.id
+          setCurrentConsultationId(consultationId)
+          console.log('Created new consultation:', consultationId)
+        } else {
+          setCurrentConsultationId(consultationId)
+          console.log('Using existing consultation:', consultationId)
+          
+          const savedData = consultationDataService.getConsultationData()
+          if (savedData && savedData.steps) {
+            if (savedData.steps[0]) setPatientData(savedData.steps[0])
+            if (savedData.steps[1]) setClinicalData(savedData.steps[1])
+            if (savedData.steps[2]) setQuestionsData(savedData.steps[2])
+            if (savedData.steps[3]) setDiagnosisData(savedData.steps[3])
+            if (savedData.steps[4]) setWorkflowResult(savedData.steps[4])
+            
+            const lastCompletedStep = Object.keys(savedData.steps)
+              .map(Number)
+              .filter(step => savedData.steps[step] !== null)
+              .sort((a, b) => b - a)[0]
+            
+            if (lastCompletedStep !== undefined) {
+              setCurrentStep(Math.min(lastCompletedStep + 1, 4))
+            }
+          }
+        }
+        
+        if (user?.id) {
+          const patientId = await consultationDataService.getOrCreatePatientId(user.id)
+          setCurrentPatientId(patientId)
+        }
+        
+        setIsInitialized(true)
+      } catch (error) {
+        console.error('Error initializing consultation:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    initializeConsultation()
+  }, [])
 
   const handleSetLanguage = (lang: Language) => {
     setLanguage(lang)
@@ -106,7 +152,34 @@ export default function MedicalAIExpert() {
       icon: <User className="h-5 w-5" />,
       component: PatientForm,
     },
-    // ... (reste des steps identique) ...
+    {
+      id: 1,
+      title: t('steps.clinicalData.title'),
+      description: t('steps.clinicalData.description'),
+      icon: <Stethoscope className="h-5 w-5" />,
+      component: ClinicalForm,
+    },
+    {
+      id: 2,
+      title: t('steps.aiQuestions.title'),
+      description: t('steps.aiQuestions.description'),
+      icon: <Brain className="h-5 w-5" />,
+      component: QuestionsForm,
+    },
+    {
+      id: 3,
+      title: t('steps.diagnosis.title'),
+      description: t('steps.diagnosis.description'),
+      icon: <ClipboardList className="h-5 w-5" />,
+      component: DiagnosisForm,
+    },
+    {
+      id: 4,
+      title: t('steps.documents.title'),
+      description: t('steps.documents.description'),
+      icon: <FileText className="h-5 w-5" />,
+      component: MedicalWorkflow,
+    },
   ]
 
   const progress = ((currentStep + 1) / steps.length) * 100
@@ -170,10 +243,33 @@ export default function MedicalAIExpert() {
     }
   }
 
-  // ... (handleWorkflowComplete et handleMedicalWorkflowComplete restent identiques) ...
+  const handleWorkflowComplete = async (data: any) => {
+    console.log('Medical workflow completed:', data)
+    setWorkflowResult(data)
+    
+    const consultationId = consultationDataService.getCurrentConsultationId()
+    if (consultationId) {
+      try {
+        await consultationDataService.saveStepData(4, data)
+        await consultationDataService.markConsultationComplete()
+        console.log('Consultation marked as complete')
+      } catch (error) {
+        console.error('Error saving workflow data:', error)
+      }
+    }
+  }
+
+  const handleMedicalWorkflowComplete = async (data: any) => {
+    console.log('Medical workflow completed with data:', data)
+    await handleWorkflowComplete(data)
+  }
 
   const handleStepClick = async (stepIndex: number) => {
-    // ... (reste identique) ...
+    if (stepIndex < currentStep) {
+      setCurrentStep(stepIndex)
+    } else if (stepIndex === currentStep + 1) {
+      await handleNext()
+    }
   }
 
   // 🆕 MODIFICATION DE getCurrentStepProps
@@ -271,20 +367,19 @@ export default function MedicalAIExpert() {
             <div className="flex items-center gap-2">
               
               {/* 🆕 BOUTON DE SÉLECTION DE PATIENT TEST */}
-             {!isTestMode && testPatients?.length > 0 && (
-  <Button
-    onClick={() => {
-      const testPatient = testPatients[0]
-      setTestPatient(testPatient)
-      alert(`🧪 Mode test activé avec : ${testPatient.patientData.firstName}`)
-    }}
-    variant="default"
-  >
-    🧪 Activer Mode Test
-  </Button>
-)}
+              {!isTestMode && testPatients?.length > 0 && (
+                <Button
+                  onClick={() => {
+                    const testPatient = testPatients[0]
+                    setTestPatient(testPatient)
+                    alert(`🧪 Mode test activé avec : ${testPatient.patientData.firstName}`)
+                  }}
+                  variant="default"
+                >
+                  🧪 Activer Mode Test
+                </Button>
+              )}
 
-              
               {/* Language Switcher with black background */}
               <div className="flex items-center gap-2 mr-4 bg-black rounded-md p-1">
                 <Button
@@ -322,4 +417,63 @@ export default function MedicalAIExpert() {
 
           {/* 🆕 BARRE D'OUTILS DU MODE TEST */}
           {isTestMode && (
-       
+            <TestModeToolbar
+              testPatient={currentTestPatient}
+              onSelectPatient={setTestPatient}
+              onClearTestMode={clearTestMode}
+              currentStep={currentStep}
+            />
+          )}
+
+          {/* Progress and Steps */}
+          <div className="mb-8">
+            <Progress value={progress} className="mb-4 h-2" />
+            
+            <div className="flex items-center justify-between">
+              {steps.map((step, index) => (
+                <div
+                  key={step.id}
+                  onClick={() => handleStepClick(index)}
+                  className={`flex flex-col items-center cursor-pointer transition-all ${
+                    index <= currentStep
+                      ? 'cursor-pointer'
+                      : 'cursor-not-allowed opacity-50'
+                  }`}
+                >
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-colors ${
+                      index < currentStep
+                        ? 'bg-green-600 text-white'
+                        : index === currentStep
+                        ? 'bg-blue-600 text-white animate-pulse'
+                        : 'bg-gray-300 text-gray-600'
+                    }`}
+                  >
+                    {step.icon}
+                  </div>
+                  <span className="text-xs text-center font-medium hidden md:block">
+                    {step.title}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Current Step Content */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3">
+              {steps[currentStep]?.icon}
+              <span>{steps[currentStep]?.title}</span>
+            </CardTitle>
+            <p className="text-gray-600">{steps[currentStep]?.description}</p>
+          </CardHeader>
+          <CardContent>
+            {CurrentStepComponent && <CurrentStepComponent {...getCurrentStepProps()} />}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
