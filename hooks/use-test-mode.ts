@@ -1,7 +1,5 @@
-// hooks/use-test-mode.ts
-
 import { useState, useEffect } from 'react'
-import { TestPatient } from '@/lib/test-patients-data'
+import { TestPatient, testPatients } from '@/lib/test-patients-data'
 
 interface UseTestModeReturn {
   isTestMode: boolean
@@ -9,6 +7,7 @@ interface UseTestModeReturn {
   setTestPatient: (patient: TestPatient | null) => void
   clearTestMode: () => void
   getTestDataForStep: (step: number) => any
+  testPatients: TestPatient[]
 }
 
 export function useTestMode(): UseTestModeReturn {
@@ -49,35 +48,27 @@ export function useTestMode(): UseTestModeReturn {
     if (!currentTestPatient) return null
 
     switch (step) {
-      case 0: // Patient Form
+      case 0:
         return currentTestPatient.patientData
-      
-      case 1: // Clinical Form
+      case 1:
         return currentTestPatient.clinicalData
-      
-      case 2: // Questions Form
-        // Les questions seront générées par l'IA en fonction des données cliniques
-        return {
-          patientData: currentTestPatient.patientData,
-          clinicalData: currentTestPatient.clinicalData
-        }
-      
-      case 3: // Diagnosis Form
-        // Le diagnostic sera généré par l'IA
+      case 2:
         return {
           patientData: currentTestPatient.patientData,
           clinicalData: currentTestPatient.clinicalData,
-          expectedConditions: currentTestPatient.expectedConditions
         }
-      
-      case 4: // Medical Workflow
-        // Documents générés en fonction de toutes les données
+      case 3:
         return {
           patientData: currentTestPatient.patientData,
           clinicalData: currentTestPatient.clinicalData,
-          expectedConditions: currentTestPatient.expectedConditions
+          expectedConditions: currentTestPatient.expectedConditions,
         }
-      
+      case 4:
+        return {
+          patientData: currentTestPatient.patientData,
+          clinicalData: currentTestPatient.clinicalData,
+          expectedConditions: currentTestPatient.expectedConditions,
+        }
       default:
         return null
     }
@@ -88,6 +79,8 @@ export function useTestMode(): UseTestModeReturn {
     currentTestPatient,
     setTestPatient,
     clearTestMode,
-    getTestDataForStep
+    getTestDataForStep,
+    testPatients, // ✅ Ajouté ici pour affichage du bouton de test
   }
 }
+
