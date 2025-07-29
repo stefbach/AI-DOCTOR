@@ -41,13 +41,13 @@ export default function MedicalAIExpert() {
   const [isInitialized, setIsInitialized] = useState(false)
 
   // 🆕 HOOK DU SYSTÈME DE TEST
-  const { 
-    isTestMode, 
-    currentTestPatient, 
-    setTestPatient, 
-    clearTestMode, 
-    getTestDataForStep 
-  } = useTestMode()
+  <Button onClick={() => {
+  const testPatient = testPatients[0] // Premier patient
+  setTestPatient(testPatient)
+  alert(`Mode test activé avec: ${testPatient.patientData.firstName}`)
+}}>
+  🧪 Activer Mode Test
+</Button>
 
   // Load language preference
   useEffect(() => {
