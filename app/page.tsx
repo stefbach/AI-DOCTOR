@@ -49,6 +49,19 @@ export default function MedicalAIExpert() {
     testPatients,
   } = useTestMode()
 
+  {!isTestMode && testPatients?.length > 0 && (
+  <Button
+    onClick={() => {
+      const testPatient = testPatients[0]
+      setTestPatient(testPatient)
+      alert(`🧪 Mode test activé avec : ${testPatient.patientData.firstName}`)
+    }}
+    className="bg-blue-600 text-white hover:bg-blue-700 mr-4"
+  >
+    🧪 Activer Mode Test
+  </Button>
+)}
+
   // Load language preference
   useEffect(() => {
     const savedLanguage = localStorage.getItem('preferred-language') as Language
