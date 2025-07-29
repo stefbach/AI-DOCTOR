@@ -147,16 +147,44 @@ function ScoreEducationCard({ question }: { question: EnhancedQuestion }) {
           </div>
         )}
 
-        {question.score_interpretation && (
-          <div className="p-4 bg-purple-50 rounded-lg">
-            <h4 className="font-semibold text-purple-800 mb-2">Interprétation</h4>
-            <p className="text-purple-700 whitespace-pre-wrap">
-              {typeof question.score_interpretation === 'string' 
-                ? question.score_interpretation 
-                : JSON.stringify(JSON.parse(question.score_interpretation), null, 2)}
-            </p>
-          </div>
-        )}
+      {question.score_interpretation && (
+  <div className="p-4 bg-purple-50 rounded-lg">
+    <h4 className="font-semibold text-purple-800 mb-2">Interprétation</h4>
+    <div className="text-purple-700">
+      {typeof question.score_interpretation === 'string' ? (
+        // Si c'est une string, essayer de parser ou afficher tel quel
+        (() => {
+          try {
+            const parsed = JSON.parse(question.score_interpretation)
+            return (
+              <div className="space-y-1">
+                {Object.entries(parsed).map(([key, value]) => (
+                  <div key={key} className="flex justify-between">
+                    <span className="font-medium">{key}:</span>
+                    <span>{value as string}</span>
+                  </div>
+                ))}
+              </div>
+            )
+          } catch {
+            // Si ce n'est pas du JSON, afficher tel quel
+            return <p className="whitespace-pre-wrap">{question.score_interpretation}</p>
+          }
+        })()
+      ) : (
+        // Si c'est déjà un objet
+        <div className="space-y-1">
+          {Object.entries(question.score_interpretation).map(([key, value]) => (
+            <div key={key} className="flex justify-between">
+              <span className="font-medium">{key}:</span>
+              <span>{value as string}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+)}
 
         {question.score_clinical_action && (
           <div className="p-4 bg-orange-50 rounded-lg">
@@ -646,6 +674,15 @@ export default function QuestionsForm({
                     <Stethoscope className="h-3 w-3 mr-1" />
                     {specialty}
                   </Badge>
+{metadata?.generationMethod && (
+  <div className="mt-2 flex items-center justify-center gap-2 text-xs text-gray-500">
+    <Sparkles className="h-3 w-3" />
+    <span>Méthode: {metadata.generationMethod}</span>
+    {metadata.cacheUtilization && (
+      <span>• Cache: {metadata.cacheUtilization.cacheHits} hits</span>
+    )}
+  </div>
+)}
                 ))}
                 <Badge variant="outline">
                   {metadata.approach || "multi-specialty-expert"}
@@ -730,6 +767,20 @@ export default function QuestionsForm({
           </Card>
         )}
 
+{error && metadata?.parseErrors?.length > 0 && (
+  <details className="mt-2">
+    <summary className="text-xs text-amber-700 cursor-pointer">
+      Détails techniques ({metadata.parseErrors.length} erreurs)
+    </summary>
+    <div className="mt-2 text-xs text-amber-600">
+      {metadata.parseErrors.map((err: any, idx: number) => (
+        <div key={idx}>
+          {err.type} - {err.specialty}: {err.error}
+        </div>
+      ))}
+    </div>
+  </details>
+)}
         {/* Question Navigation */}
         {questions.length > 0 && (
           <div className="flex flex-wrap gap-2 justify-center">
@@ -822,6 +873,20 @@ export default function QuestionsForm({
                   </div>
                 )}
 
+{question.guidelines_reference && (
+  <Tooltip>
+    <TooltipTrigger>
+      <Badge variant="outline" className="flex items-center gap-1">
+        <BookOpen className="h-3 w-3" />
+        Guidelines
+      </Badge>
+    </TooltipTrigger>
+    <TooltipContent>
+      <p>{question.guidelines_reference}</p>
+    </TooltipContent>
+  </Tooltip>
+)}
+
                 {/* Show patient benefit if available */}
                 {question.patient_benefit && (
                   <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
@@ -838,6 +903,35 @@ export default function QuestionsForm({
                   {renderQuestion(question)}
                 </div>
               </div>
+{question.differential_diagnosis && question.differential_diagnosis.length > 0 && (
+  <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+    <div className="flex items-start gap-2">
+      <Search className="h-4 w-4 text-yellow-600 mt-0.5" />
+      <div>
+        <p className="text-sm font-semibold text-yellow-800 mb-1">
+          Diagnostics différentiels possibles :
+        </p>
+        <ul className="text-sm text-yellow-700 list-disc list-inside">
+          {question.differential_diagnosis.map((diagnosis, idx) => (
+            <li key={idx}>{diagnosis}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+)}
+
+{question.next_steps && (
+  <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+    <div className="flex items-start gap-2">
+      <ArrowRight className="h-4 w-4 text-indigo-600 mt-0.5" />
+      <div>
+        <p className="text-sm font-semibold text-indigo-800 mb-1">Prochaines étapes :</p>
+        <p className="text-sm text-indigo-700">{question.next_steps}</p>
+      </div>
+    </div>
+  </div>
+)}
 
               {/* Clinical Score Education Card */}
               <ScoreEducationCard question={question} />
@@ -1004,35 +1098,83 @@ export default function QuestionsForm({
           </Card>
         )}
 
-        {/* Clinical recommendations preview if available */}
-        {metadata?.clinicalRecommendations && isFormValid() && (
-          <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-0 shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Activity className="h-5 w-5 text-purple-600" />
-                Aperçu des recommandations cliniques
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Badge 
-                    className={
-                      metadata.clinicalRecommendations.urgencyLevel?.includes('URGENT') 
-                        ? 'bg-red-100 text-red-800' 
-                        : 'bg-green-100 text-green-800'
-                    }
-                  >
-                    {metadata.clinicalRecommendations.urgencyLevel}
-                  </Badge>
-                </div>
-                <p className="text-sm text-gray-600">
-                  Une analyse complète sera générée après validation de toutes les réponses.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      {metadata?.clinicalRecommendations && isFormValid() && (
+  <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-0 shadow-md">
+    <CardHeader>
+      <CardTitle className="flex items-center gap-2 text-lg">
+        <Activity className="h-5 w-5 text-purple-600" />
+        Aperçu des recommandations cliniques
+      </CardTitle>
+    </CardHeader>
+    <CardContent className="space-y-4">
+      {/* Niveau d'urgence */}
+      <div className="flex items-center gap-2">
+        <Badge 
+          className={
+            metadata.clinicalRecommendations.urgencyLevel?.includes('URGENCE ABSOLUE') 
+              ? 'bg-red-600 text-white' 
+              : metadata.clinicalRecommendations.urgencyLevel?.includes('URGENT')
+              ? 'bg-orange-100 text-orange-800'
+              : metadata.clinicalRecommendations.urgencyLevel?.includes('PRIORITAIRE')
+              ? 'bg-yellow-100 text-yellow-800'
+              : 'bg-green-100 text-green-800'
+          }
+        >
+          {metadata.clinicalRecommendations.urgencyLevel}
+        </Badge>
+      </div>
+
+      {/* Red flags s'il y en a */}
+      {metadata.clinicalRecommendations.redFlagAlerts?.length > 0 && (
+        <div className="p-3 bg-red-50 rounded-lg border border-red-200">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-red-800 mb-1">Signes d'alerte détectés :</p>
+              <ul className="text-sm text-red-700 list-disc list-inside">
+                {metadata.clinicalRecommendations.redFlagAlerts.map((flag: string, idx: number) => (
+                  <li key={idx}>{flag}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Examens suggérés */}
+      {metadata.clinicalRecommendations.suggestedWorkup?.length > 0 && (
+        <div>
+          <p className="text-sm font-semibold text-gray-700 mb-2">Examens recommandés :</p>
+          <div className="flex flex-wrap gap-2">
+            {metadata.clinicalRecommendations.suggestedWorkup.map((exam: string, idx: number) => (
+              <Badge key={idx} variant="outline">
+                {exam}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Diagnostics différentiels globaux */}
+      {metadata.clinicalRecommendations.differentialDiagnosis?.length > 0 && (
+        <div>
+          <p className="text-sm font-semibold text-gray-700 mb-2">Hypothèses diagnostiques :</p>
+          <div className="flex flex-wrap gap-2">
+            {metadata.clinicalRecommendations.differentialDiagnosis.map((diagnosis: string, idx: number) => (
+              <Badge key={idx} className="bg-purple-100 text-purple-800">
+                {diagnosis}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <p className="text-sm text-gray-600 italic">
+        Une analyse complète sera générée après validation de toutes les réponses.
+      </p>
+    </CardContent>
+  </Card>
+)}
 
         {/* Toggle for medical explanations */}
         <div className="flex justify-center">
