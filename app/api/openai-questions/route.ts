@@ -484,6 +484,8 @@ const SPECIALTY_KEYWORDS = {
   orthopedics: ["fracture", "entorse", "trauma", "chute", "douleur osseuse", "boiterie"],
 }
 
+// Cache pour les scores cliniques const CLINICAL_SCORES_CACHE = new Map<string, any>() // Fonction pour obtenir les détails d'un score function getScoreDetails(scoreName: string): any { // Vérifier le cache d'abord if (CLINICAL_SCORES_CACHE.has(scoreName)) { return CLINICAL_SCORES_CACHE.get(scoreName) } // Parcourir toutes les spécialités pour trouver le score for (const [specialty, scores] of Object.entries(CLINICAL_SCORES_DETAILED)) { if (scores[scoreName]) { CLINICAL_SCORES_CACHE.set(scoreName, scores[scoreName]) return scores[scoreName] } } return null }
+
 // Fonction améliorée de détection de spécialité
 function detectMedicalSpecialties(patientData: any, clinicalData: any): string[] {
   const detectedSpecialties: string[] = []
@@ -832,7 +834,7 @@ function generateSpecialtyFallbackQuestions(
         category: "accessible",
         specialty: "cardiology",
         medical_explanation: "Une douleur rétrosternale est plus évocatrice d'origine cardiaque",
-        diagnostic_value: "high"
+        diagnostic_value: "high’’,
         differential_diagnosis: []
       },
       {
@@ -856,8 +858,9 @@ function generateSpecialtyFallbackQuestions(
         score_reference: "Backus BE et al. Chest 2013",
         score_calculator_link: "https://www.mdcalc.com/heart-score-major-cardiac-events",
         patient_benefit: "Permet d'adapter rapidement la prise en charge selon votre niveau de risque",
-        diagnostic_value: "high"
-      }
+        diagnostic_value: "high’’,
+differential_diagnosis: ["Syndrome coronarien aigu", "Angor stable", "Douleur non cardiaque"] }
+      
     ],
     neurology: [
       {
@@ -874,8 +877,8 @@ function generateSpecialtyFallbackQuestions(
         category: "technical",
         specialty: "neurology",
         red_flags: "Céphalée brutale = suspicion hémorragie méningée",
-        diagnostic_value: "high"
-        differential_diagnosis: []
+        diagnostic_value: "high’’,
+        differential_diagnosis: ["Hémorragie méningée", "Migraine", "Céphalée de tension", "AVC"]
       },
       {
         id: 2,
@@ -898,8 +901,9 @@ function generateSpecialtyFallbackQuestions(
         score_reference: "Johnston SC et al. Lancet 2007",
         score_calculator_link: "https://www.mdcalc.com/abcd2-score-tia",
         specialty: "neurology",
-        diagnostic_value: "high"
-      }
+        diagnostic_value: "high’’,
+differential_diagnosis: ["AIT", "AVC constitué", "Migraine avec aura", "Crise d'épilepsie"] }
+      
     ],
     psychiatry: [
       {
@@ -925,8 +929,9 @@ function generateSpecialtyFallbackQuestions(
         score_critical_info: "Question 9 évalue le risque suicidaire - si positive, évaluation immédiate",
         specialty: "psychiatry",
         patient_benefit: "Permet de mesurer objectivement la sévérité de vos symptômes et suivre l'évolution",
-        diagnostic_value: "high"
-      }
+        diagnostic_value: "high’’,
+differential_diagnosis: ["Dépression majeure", "Dysthymie", "Trouble bipolaire", "Burn-out"] }
+      
     ],
     pediatrics: [
       {
@@ -943,8 +948,8 @@ function generateSpecialtyFallbackQuestions(
         category: "accessible",
         specialty: "pediatrics",
         red_flags: "Léthargie = urgence pédiatrique",
-        diagnostic_value: "high"
-        differential_diagnosis: []
+        diagnostic_value: "high’’,
+differential_diagnosis: ["Infection virale bénigne", "Méningite", "Déshydratation", "Sepsis"]
       },
       {
         id: 2,
@@ -967,7 +972,8 @@ function generateSpecialtyFallbackQuestions(
         score_reference: "Monaghan A. Arch Dis Child 2005",
         specialty: "pediatrics",
         patient_benefit: "Permet de détecter rapidement si l'état de votre enfant se dégrade",
-        diagnostic_value: "high"
+        diagnostic_value: "high’’,
+differential_diagnosis: ["État septique", "Déshydratation sévère", "Choc", "Détresse respiratoire"]
       }
     ],
     emergency: [
@@ -993,8 +999,8 @@ function generateSpecialtyFallbackQuestions(
         score_calculator_link: "https://www.mdcalc.com/national-early-warning-score-news-2",
         specialty: "emergency",
         patient_benefit: "Assure une surveillance adaptée à votre état clinique",
-        diagnostic_value: "high"
-        differential_diagnosis: []
+        diagnostic_value: "high’’,
+        differential_diagnosis: ["Pneumonie", "Embolie pulmonaire", "Décompensation BPCO", "Sepsis"]
       }
     ],
     gastroenterology: [
@@ -1019,8 +1025,8 @@ function generateSpecialtyFallbackQuestions(
         score_reference: "Child CG, Turcotte JG. Surgery 1964",
         score_calculator_link: "https://www.mdcalc.com/child-pugh-score-cirrhosis-mortality",
         specialty: "gastroenterology",
-        diagnostic_value: "high"
-        differential_diagnosis: []
+        diagnostic_value: "high’’,
+       differential_diagnosis: ["Cirrhose compensée", "Cirrhose décompensée", "Hypertension portale", "Carcinome hépatocellulaire"]
       }
     ]
     // Ajouter plus de spécialités selon les besoins...
@@ -1518,7 +1524,7 @@ function generateSmartFallbackQuestions(patientData: any, clinicalData: any, ask
       complexity_level: "simple",
       medical_explanation: "L'inquiétude du patient est un facteur important dans l'évaluation globale",
       patient_benefit: "Assure que vos préoccupations sont entendues et prises en compte",
-      diagnostic_value: "medium"
+       "medium"" ,
       differential_diagnosis: []
     },
     {
@@ -1552,7 +1558,7 @@ function generateSmartFallbackQuestions(patientData: any, clinicalData: any, ask
       category: "accessible",
       complexity_level: "simple",
       medical_explanation: "Le terrain du patient oriente la probabilité diagnostique",
-      diagnostic_value: "medium"
+      diagnostic_value: "medium" ,
       differential_diagnosis: []
     }
   ]
