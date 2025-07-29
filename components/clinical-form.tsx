@@ -29,6 +29,7 @@ interface ClinicalData {
   diseaseHistory: string
   symptomDuration: string
   symptoms: string[]
+  painScale: string
   vitalSigns: {
     temperature: string
     bloodPressureSystolic: string
@@ -91,6 +92,7 @@ export default function ModernClinicalForm({
     diseaseHistory: "",
     symptomDuration: "",
     symptoms: [],
+    painScale: "",
     vitalSigns: {
       temperature: "",
       bloodPressureSystolic: "",
@@ -148,6 +150,7 @@ export default function ModernClinicalForm({
         diseaseHistory: data.diseaseHistory || "",
         symptomDuration: data.symptomDuration || "",
         symptoms: Array.isArray(data.symptoms) ? data.symptoms : [],
+        painScale: data.painScale || "",
         vitalSigns: {
           temperature: data.vitalSigns?.temperature || "",
           bloodPressureSystolic: data.vitalSigns?.bloodPressureSystolic || "",
@@ -172,6 +175,7 @@ export default function ModernClinicalForm({
       localData.diseaseHistory,
       localData.symptomDuration,
       localData.symptoms.length > 0 ? "filled" : "",
+      localData.painScale,
     ]
     
     const completed = fields.filter(field => field && field.toString().trim()).length
@@ -354,6 +358,62 @@ export default function ModernClinicalForm({
                     {t('clinicalForm.evolutionSince')} {localData.symptomDuration}
                   </p>
                 </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Section 3.5: Intensité de la douleur */}
+      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
+        <CardHeader className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-t-lg">
+          <CardTitle className="flex items-center gap-3">
+            <Activity className="h-6 w-6" />
+            Intensité de la douleur
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <Label className="font-medium">
+              Sur une échelle de 0 à 10, quelle est l'intensité de votre douleur ?
+            </Label>
+            <div className="space-y-2">
+              <input
+                type="range"
+                min="0"
+                max="10"
+                step="1"
+                value={localData.painScale || "0"}
+                onChange={(e) => updateData({ painScale: e.target.value })}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+              <div className="flex justify-between text-xs text-gray-600">
+                <span>0</span>
+                <span>1</span>
+                <span>2</span>
+                <span>3</span>
+                <span>4</span>
+                <span>5</span>
+                <span>6</span>
+                <span>7</span>
+                <span>8</span>
+                <span>9</span>
+                <span>10</span>
+              </div>
+            </div>
+            {localData.painScale && (
+              <div className={`mt-3 p-3 rounded-lg border ${
+                parseInt(localData.painScale) <= 3 ? "bg-green-50 border-green-200" :
+                parseInt(localData.painScale) <= 6 ? "bg-orange-50 border-orange-200" :
+                "bg-red-50 border-red-200"
+              }`}>
+                <p className="font-semibold">
+                  Niveau de douleur: {localData.painScale}/10
+                  {parseInt(localData.painScale) === 0 && " - Aucune douleur"}
+                  {parseInt(localData.painScale) >= 1 && parseInt(localData.painScale) <= 3 && " - Douleur légère"}
+                  {parseInt(localData.painScale) >= 4 && parseInt(localData.painScale) <= 6 && " - Douleur modérée"}
+                  {parseInt(localData.painScale) >= 7 && " - Douleur sévère"}
+                </p>
               </div>
             )}
           </div>
