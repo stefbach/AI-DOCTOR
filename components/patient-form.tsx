@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { 
+  import { testPatients } from '@/lib/test-patients-data'
   ArrowRight, 
   User, 
   Heart, 
@@ -604,6 +605,22 @@ export default function ModernPatientForm({
             <User className="h-6 w-6" />
             {t('patientForm.personalInfo')}
           </CardTitle>
+          <button 
+        type="button"
+        onClick={() => alert('Bouton trouvé dans PatientForm!')}
+        style={{ 
+          backgroundColor: '#3B82F6',
+          color: 'white',
+          padding: '8px 16px',
+          borderRadius: '6px',
+          marginBottom: '10px',
+          cursor: 'pointer',
+          border: 'none'
+        }}
+      >
+        🧪 Test Patient Form
+      </button>
+      {/* FIN DU BOUTON */}
         </CardHeader>
         <CardContent className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
