@@ -49,6 +49,16 @@ export default function MedicalAIExpert() {
     testPatients = [],
   } = useTestMode() || {}
 
+  // Debug - à supprimer après résolution
+  useEffect(() => {
+    console.log('Test Mode Debug:', {
+      isTestMode,
+      testPatients: testPatients?.length || 0,
+      hasTestPatients: Array.isArray(testPatients),
+      currentTestPatient: !!currentTestPatient
+    })
+  }, [isTestMode, testPatients, currentTestPatient])
+
   // Load language preference
   useEffect(() => {
     const savedLanguage = localStorage.getItem('preferred-language') as Language
