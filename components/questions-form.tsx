@@ -33,17 +33,6 @@ import {
   AlertCircle
 } from "lucide-react"
 import { getTranslation, Language } from "@/lib/translations"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
 
 // Enhanced interfaces to match the new API structure
 interface ClinicalScore {
@@ -106,125 +95,127 @@ interface QuestionsFormProps {
   consultationId?: string | null
 }
 
-// Helper component for score education
+// Helper component for score education - simplified without Collapsible
 function ScoreEducationCard({ question }: { question: EnhancedQuestion }) {
   const [isOpen, setIsOpen] = useState(false)
 
   if (!question.clinical_score) return null
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger asChild>
-        <Button variant="outline" className="w-full justify-between mt-4 bg-blue-50 hover:bg-blue-100">
-          <div className="flex items-center gap-2">
-            <Calculator className="h-4 w-4" />
-            <span className="font-semibold">Score {question.clinical_score}</span>
-          </div>
-          <span className="text-sm text-gray-600">
-            {isOpen ? "Masquer" : "En savoir plus"}
-          </span>
-        </Button>
-      </CollapsibleTrigger>
-      <CollapsibleContent className="mt-4 space-y-4">
-        {question.score_full_name && (
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h4 className="font-semibold text-gray-800 mb-2">Nom complet</h4>
-            <p className="text-gray-700">{question.score_full_name}</p>
-          </div>
-        )}
-
-        {question.score_explanation && (
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-semibold text-blue-800 mb-2">Qu'est-ce que ce score ?</h4>
-            <p className="text-blue-700">{question.score_explanation}</p>
-          </div>
-        )}
-
-        {question.score_calculation && (
-          <div className="p-4 bg-green-50 rounded-lg">
-            <h4 className="font-semibold text-green-800 mb-2">Comment le calculer ?</h4>
-            <p className="text-green-700">{question.score_calculation}</p>
-          </div>
-        )}
-
-      {question.score_interpretation && (
-  <div className="p-4 bg-purple-50 rounded-lg">
-    <h4 className="font-semibold text-purple-800 mb-2">Interprétation</h4>
-    <div className="text-purple-700">
-      {typeof question.score_interpretation === 'string' ? (
-        // Si c'est une string, essayer de parser ou afficher tel quel
-        (() => {
-          try {
-            const parsed = JSON.parse(question.score_interpretation)
-            return (
-              <div className="space-y-1">
-                {Object.entries(parsed).map(([key, value]) => (
-                  <div key={key} className="flex justify-between">
-                    <span className="font-medium">{key}:</span>
-                    <span>{value as string}</span>
-                  </div>
-                ))}
-              </div>
-            )
-          } catch {
-            // Si ce n'est pas du JSON, afficher tel quel
-            return <p className="whitespace-pre-wrap">{question.score_interpretation}</p>
-          }
-        })()
-      ) : (
-        // Si c'est déjà un objet
-        <div className="space-y-1">
-          {Object.entries(question.score_interpretation).map(([key, value]) => (
-            <div key={key} className="flex justify-between">
-              <span className="font-medium">{key}:</span>
-              <span>{value as string}</span>
+    <div className="mt-4">
+      <Button 
+        variant="outline" 
+        className="w-full justify-between bg-blue-50 hover:bg-blue-100"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="flex items-center gap-2">
+          <Calculator className="h-4 w-4" />
+          <span className="font-semibold">Score {question.clinical_score}</span>
+        </div>
+        <span className="text-sm text-gray-600">
+          {isOpen ? "Masquer" : "En savoir plus"}
+        </span>
+      </Button>
+      
+      {isOpen && (
+        <div className="mt-4 space-y-4">
+          {question.score_full_name && (
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <h4 className="font-semibold text-gray-800 mb-2">Nom complet</h4>
+              <p className="text-gray-700">{question.score_full_name}</p>
             </div>
-          ))}
+          )}
+
+          {question.score_explanation && (
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <h4 className="font-semibold text-blue-800 mb-2">Qu'est-ce que ce score ?</h4>
+              <p className="text-blue-700">{question.score_explanation}</p>
+            </div>
+          )}
+
+          {question.score_calculation && (
+            <div className="p-4 bg-green-50 rounded-lg">
+              <h4 className="font-semibold text-green-800 mb-2">Comment le calculer ?</h4>
+              <p className="text-green-700">{question.score_calculation}</p>
+            </div>
+          )}
+
+          {question.score_interpretation && (
+            <div className="p-4 bg-purple-50 rounded-lg">
+              <h4 className="font-semibold text-purple-800 mb-2">Interprétation</h4>
+              <div className="text-purple-700">
+                {typeof question.score_interpretation === 'string' ? (
+                  (() => {
+                    try {
+                      const parsed = JSON.parse(question.score_interpretation)
+                      return (
+                        <div className="space-y-1">
+                          {Object.entries(parsed).map(([key, value]) => (
+                            <div key={key} className="flex justify-between">
+                              <span className="font-medium">{key}:</span>
+                              <span>{value as string}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    } catch {
+                      return <p className="whitespace-pre-wrap">{question.score_interpretation}</p>
+                    }
+                  })()
+                ) : (
+                  <div className="space-y-1">
+                    {Object.entries(question.score_interpretation).map(([key, value]) => (
+                      <div key={key} className="flex justify-between">
+                        <span className="font-medium">{key}:</span>
+                        <span>{value as string}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {question.score_clinical_action && (
+            <div className="p-4 bg-orange-50 rounded-lg">
+              <h4 className="font-semibold text-orange-800 mb-2">Action clinique</h4>
+              <p className="text-orange-700">{question.score_clinical_action}</p>
+            </div>
+          )}
+
+          {question.score_critical_info && (
+            <Alert className="border-red-200 bg-red-50">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertTitle className="text-red-800">Information critique</AlertTitle>
+              <AlertDescription className="text-red-700">
+                {question.score_critical_info}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <div className="flex gap-4">
+            {question.score_calculator_link && (
+              <a
+                href={question.score_calculator_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium"
+              >
+                <Calculator className="h-4 w-4" />
+                Calculateur en ligne
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            )}
+            {question.score_reference && (
+              <div className="flex items-center gap-2 text-gray-600 text-sm">
+                <FileText className="h-4 w-4" />
+                {question.score_reference}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
-  </div>
-)}
-
-        {question.score_clinical_action && (
-          <div className="p-4 bg-orange-50 rounded-lg">
-            <h4 className="font-semibold text-orange-800 mb-2">Action clinique</h4>
-            <p className="text-orange-700">{question.score_clinical_action}</p>
-          </div>
-        )}
-
-        {question.score_critical_info && (
-          <Alert className="border-red-200 bg-red-50">
-            <AlertCircle className="h-4 w-4 text-red-600" />
-            <AlertTitle className="text-red-800">Information critique</AlertTitle>
-            <AlertDescription className="text-red-700">
-              {question.score_critical_info}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <div className="flex gap-4">
-          {question.score_calculator_link && (
-            <a
-              href={question.score_calculator_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium"
-            >
-              <Calculator className="h-4 w-4" />
-              Calculateur en ligne
-              <ExternalLink className="h-3 w-3" />
-            </a>
-          )}
-          {question.score_reference && (
-            <div className="flex items-center gap-2 text-gray-600 text-sm">
-              <FileText className="h-4 w-4" />
-              {question.score_reference}
-            </div>
-          )}
-        </div>
-      </CollapsibleContent>
-    </Collapsible>
   )
 }
 
@@ -277,6 +268,30 @@ function QuestionMetadataBadges({ question }: { question: EnhancedQuestion }) {
           <Calculator className="h-3 w-3 mr-1" />
           Score clinique
         </Badge>
+      )}
+    </div>
+  )
+}
+
+// Simple Tooltip replacement
+function SimpleTooltip({ children, content }: { children: React.ReactNode, content: string }) {
+  const [show, setShow] = useState(false)
+  
+  return (
+    <div className="relative inline-block">
+      <div
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+      >
+        {children}
+      </div>
+      {show && (
+        <div className="absolute z-10 px-3 py-1 text-sm text-white bg-gray-900 rounded-md shadow-lg -top-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+          {content}
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
+            <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+          </div>
+        </div>
       )}
     </div>
   )
@@ -656,567 +671,552 @@ export default function QuestionsForm({
   }
 
   return (
-    <TooltipProvider>
-      <div className="space-y-6">
-        {/* Header with Progress and Metadata */}
-        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-          <CardHeader className="text-center">
-            <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              <Brain className="h-8 w-8 text-blue-600" />
-              {t('questionsForm.title')}
-            </CardTitle>
-            
-            {/* Display detected specialties and approach */}
-            {metadata && (
-              <div className="mt-4 flex flex-wrap justify-center gap-2">
-                {metadata.detectedSpecialties?.map((specialty: string) => (
-                  <Badge key={specialty} className="bg-purple-100 text-purple-800">
-                    <Stethoscope className="h-3 w-3 mr-1" />
-                    {specialty}
-                  </Badge>
-{metadata?.generationMethod && (
-  <div className="mt-2 flex items-center justify-center gap-2 text-xs text-gray-500">
-    <Sparkles className="h-3 w-3" />
-    <span>Méthode: {metadata.generationMethod}</span>
-    {metadata.cacheUtilization && (
-      <span>• Cache: {metadata.cacheUtilization.cacheHits} hits</span>
-    )}
-  </div>
-)}
-                ))}
-                <Badge variant="outline">
-                  {metadata.approach || "multi-specialty-expert"}
+    <div className="space-y-6">
+      {/* Header with Progress and Metadata */}
+      <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+        <CardHeader className="text-center">
+          <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <Brain className="h-8 w-8 text-blue-600" />
+            {t('questionsForm.title')}
+          </CardTitle>
+          
+          {/* Display detected specialties and approach */}
+          {metadata && (
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              {metadata.detectedSpecialties?.map((specialty: string) => (
+                <Badge key={specialty} className="bg-purple-100 text-purple-800">
+                  <Stethoscope className="h-3 w-3 mr-1" />
+                  {specialty}
                 </Badge>
-              </div>
-            )}
-
-            <div className="mt-4 space-y-2">
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>{t('questionsForm.progressTitle')}</span>
-                <span className="font-semibold">{progress}%</span>
-              </div>
-              <Progress value={progress} className="h-2" />
-            </div>
-            <div className="flex justify-center gap-4 mt-4">
-              <Badge variant="outline" className="bg-blue-50">
-                {getAnsweredCount()} / {questions.length} {t('questionsForm.answered')}
-              </Badge>
-              {metadata?.expertFeatures?.clinicalScoresUsed?.length > 0 && (
-                <Badge variant="outline" className="bg-green-50">
-                  <Calculator className="h-3 w-3 mr-1" />
-                  {metadata.expertFeatures.clinicalScoresUsed.length} scores cliniques
-                </Badge>
+              ))}
+              {metadata?.generationMethod && (
+                <div className="mt-2 flex items-center justify-center gap-2 text-xs text-gray-500">
+                  <Sparkles className="h-3 w-3" />
+                  <span>Méthode: {metadata.generationMethod}</span>
+                  {metadata.cacheUtilization && (
+                    <span>• Cache: {metadata.cacheUtilization.cacheHits} hits</span>
+                  )}
+                </div>
               )}
-              {error && <Badge variant="destructive">{t('questionsForm.fallbackMode')}</Badge>}
+              <Badge variant="outline">
+                {metadata.approach || "multi-specialty-expert"}
+              </Badge>
+            </div>
+          )}
+
+          <div className="mt-4 space-y-2">
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>{t('questionsForm.progressTitle')}</span>
+              <span className="font-semibold">{progress}%</span>
+            </div>
+            <Progress value={progress} className="h-2" />
+          </div>
+          <div className="flex justify-center gap-4 mt-4">
+            <Badge variant="outline" className="bg-blue-50">
+              {getAnsweredCount()} / {questions.length} {t('questionsForm.answered')}
+            </Badge>
+            {metadata?.expertFeatures?.clinicalScoresUsed?.length > 0 && (
+              <Badge variant="outline" className="bg-green-50">
+                <Calculator className="h-3 w-3 mr-1" />
+                {metadata.expertFeatures.clinicalScoresUsed.length} scores cliniques
+              </Badge>
+            )}
+            {error && <Badge variant="destructive">{t('questionsForm.fallbackMode')}</Badge>}
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* Clinical Scores Summary if any */}
+      {metadata?.scoreEducation?.scoresUsed?.length > 0 && (
+        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-0 shadow-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <GraduationCap className="h-5 w-5 text-blue-600" />
+              Scores cliniques utilisés dans cette consultation
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4">
+              {metadata.scoreEducation.scoresUsed.map((score: ClinicalScore, index: number) => (
+                <div key={index} className="p-4 bg-white rounded-lg shadow-sm">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-800">{score.name}</h4>
+                      <p className="text-sm text-gray-600 mt-1">{score.explanation}</p>
+                    </div>
+                    {score.calculator && (
+                      <a
+                        href={score.calculator}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-4 flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
+                        <Calculator className="h-4 w-4" />
+                        Calculer
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-sm text-gray-600 mt-4 italic">
+              {metadata.scoreEducation.clinicalTip}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Alert for fallback mode */}
+      {error && (
+        <Card className="bg-amber-50/80 backdrop-blur-sm border-amber-200 shadow-md">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 text-amber-800">
+              <AlertTriangle className="h-5 w-5" />
+              <span className="text-sm font-medium">
+                {t('questionsForm.fallbackWarning')}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {error && metadata?.parseErrors?.length > 0 && (
+        <details className="mt-2">
+          <summary className="text-xs text-amber-700 cursor-pointer">
+            Détails techniques ({metadata.parseErrors.length} erreurs)
+          </summary>
+          <div className="mt-2 text-xs text-amber-600">
+            {metadata.parseErrors.map((err: any, idx: number) => (
+              <div key={idx}>
+                {err.type} - {err.specialty}: {err.error}
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
+
+      {/* Question Navigation */}
+      {questions.length > 0 && (
+        <div className="flex flex-wrap gap-2 justify-center">
+          {questions.map((_, index) => {
+            const isAnswered = responses[index] && (() => {
+              const answer = responses[index].answer
+              if (typeof answer === "string") {
+                return answer.trim() !== ""
+              }
+              return answer !== "" && answer !== null && answer !== undefined
+            })()
+            
+            return (
+              <button
+                key={index}
+                onClick={() => setCurrentQuestionIndex(index)}
+                className={`w-10 h-10 rounded-full transition-all duration-200 font-semibold ${
+                  currentQuestionIndex === index
+                    ? "bg-blue-600 text-white shadow-lg scale-110"
+                    : isAnswered
+                    ? "bg-green-100 text-green-800 border-2 border-green-300"
+                    : "bg-white/70 text-gray-600 border-2 border-gray-200 hover:bg-white hover:shadow-md"
+                }`}
+              >
+                {isAnswered ? <CheckCircle className="h-4 w-4 mx-auto" /> : index + 1}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Enhanced Questions Cards */}
+      {questions.map((question, index) => (
+        <Card 
+          key={question.id} 
+          className={`bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 ${
+            index !== currentQuestionIndex ? 'hidden' : ''
+          }`}
+        >
+          <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-3">
+                <MessageSquare className="h-6 w-6" />
+                {t('questionsForm.question')} {index + 1} / {questions.length}
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                {question.clinical_score && (
+                  <SimpleTooltip content={`Cette question utilise le score ${question.clinical_score}`}>
+                    <Badge className="bg-white/20 text-white border-white/30">
+                      <Calculator className="h-3 w-3 mr-1" />
+                      Score clinique
+                    </Badge>
+                  </SimpleTooltip>
+                )}
+                <SimpleTooltip content={t('questionsForm.aiGenerated')}>
+                  <Badge className="bg-white/20 text-white border-white/30">
+                    <Lightbulb className="h-3 w-3" />
+                  </Badge>
+                </SimpleTooltip>
+              </div>
             </div>
           </CardHeader>
-        </Card>
+          <CardContent className="p-8 space-y-6">
+            {/* Question Metadata Badges */}
+            <QuestionMetadataBadges question={question} />
 
-        {/* Clinical Scores Summary if any */}
-        {metadata?.scoreEducation?.scoresUsed?.length > 0 && (
-          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-0 shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <GraduationCap className="h-5 w-5 text-blue-600" />
-                Scores cliniques utilisés dans cette consultation
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4">
-                {metadata.scoreEducation.scoresUsed.map((score: ClinicalScore, index: number) => (
-                  <div key={index} className="p-4 bg-white rounded-lg shadow-sm">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-800">{score.name}</h4>
-                        <p className="text-sm text-gray-600 mt-1">{score.explanation}</p>
-                      </div>
-                      {score.calculator && (
-                        <a
-                          href={score.calculator}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="ml-4 flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
-                        >
-                          <Calculator className="h-4 w-4" />
-                          Calculer
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <p className="text-sm text-gray-600 mt-4 italic">
-                {metadata.scoreEducation.clinicalTip}
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Alert for fallback mode */}
-        {error && (
-          <Card className="bg-amber-50/80 backdrop-blur-sm border-amber-200 shadow-md">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3 text-amber-800">
-                <AlertTriangle className="h-5 w-5" />
-                <span className="text-sm font-medium">
-                  {t('questionsForm.fallbackWarning')}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-{error && metadata?.parseErrors?.length > 0 && (
-  <details className="mt-2">
-    <summary className="text-xs text-amber-700 cursor-pointer">
-      Détails techniques ({metadata.parseErrors.length} erreurs)
-    </summary>
-    <div className="mt-2 text-xs text-amber-600">
-      {metadata.parseErrors.map((err: any, idx: number) => (
-        <div key={idx}>
-          {err.type} - {err.specialty}: {err.error}
-        </div>
-      ))}
-    </div>
-  </details>
-)}
-        {/* Question Navigation */}
-        {questions.length > 0 && (
-          <div className="flex flex-wrap gap-2 justify-center">
-            {questions.map((_, index) => {
-              const isAnswered = responses[index] && (() => {
-                const answer = responses[index].answer
-                if (typeof answer === "string") {
-                  return answer.trim() !== ""
-                }
-                return answer !== "" && answer !== null && answer !== undefined
-              })()
+            {/* Question with rationale */}
+            <div>
+              <Label className="text-lg font-semibold text-gray-800 leading-relaxed">
+                {question.question}
+              </Label>
               
-              return (
-                <button
-                  key={index}
-                  onClick={() => setCurrentQuestionIndex(index)}
-                  className={`w-10 h-10 rounded-full transition-all duration-200 font-semibold ${
-                    currentQuestionIndex === index
-                      ? "bg-blue-600 text-white shadow-lg scale-110"
-                      : isAnswered
-                      ? "bg-green-100 text-green-800 border-2 border-green-300"
-                      : "bg-white/70 text-gray-600 border-2 border-gray-200 hover:bg-white hover:shadow-md"
-                  }`}
-                >
-                  {isAnswered ? <CheckCircle className="h-4 w-4 mx-auto" /> : index + 1}
-                </button>
-              )
-            })}
-          </div>
-        )}
-
-        {/* Enhanced Questions Cards */}
-        {questions.map((question, index) => (
-          <Card 
-            key={question.id} 
-            className={`bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 ${
-              index !== currentQuestionIndex ? 'hidden' : ''
-            }`}
-          >
-            <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-3">
-                  <MessageSquare className="h-6 w-6" />
-                  {t('questionsForm.question')} {index + 1} / {questions.length}
-                </CardTitle>
-                <div className="flex items-center gap-2">
-                  {question.clinical_score && (
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Badge className="bg-white/20 text-white border-white/30">
-                          <Calculator className="h-3 w-3 mr-1" />
-                          Score clinique
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Cette question utilise le score {question.clinical_score}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Badge className="bg-white/20 text-white border-white/30">
-                        <Lightbulb className="h-3 w-3" />
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{t('questionsForm.aiGenerated')}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-8 space-y-6">
-              {/* Question Metadata Badges */}
-              <QuestionMetadataBadges question={question} />
-
-              {/* Question with rationale */}
-              <div>
-                <Label className="text-lg font-semibold text-gray-800 leading-relaxed">
-                  {question.question}
-                </Label>
-                
-                {/* Show rationale if available */}
-                {question.rationale && (
-                  <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="flex items-start gap-2">
-                      <Info className="h-4 w-4 text-blue-600 mt-0.5" />
-                      <p className="text-sm text-blue-800">{question.rationale}</p>
-                    </div>
-                  </div>
-                )}
-
-{question.guidelines_reference && (
-  <Tooltip>
-    <TooltipTrigger>
-      <Badge variant="outline" className="flex items-center gap-1">
-        <BookOpen className="h-3 w-3" />
-        Guidelines
-      </Badge>
-    </TooltipTrigger>
-    <TooltipContent>
-      <p>{question.guidelines_reference}</p>
-    </TooltipContent>
-  </Tooltip>
-)}
-
-                {/* Show patient benefit if available */}
-                {question.patient_benefit && (
-                  <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                    <div className="flex items-start gap-2">
-                      <Heart className="h-4 w-4 text-green-600 mt-0.5" />
-                      <p className="text-sm text-green-800">
-                        <strong>Pour vous :</strong> {question.patient_benefit}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-6">
-                  {renderQuestion(question)}
-                </div>
-              </div>
-{question.differential_diagnosis && question.differential_diagnosis.length > 0 && (
-  <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-    <div className="flex items-start gap-2">
-      <Search className="h-4 w-4 text-yellow-600 mt-0.5" />
-      <div>
-        <p className="text-sm font-semibold text-yellow-800 mb-1">
-          Diagnostics différentiels possibles :
-        </p>
-        <ul className="text-sm text-yellow-700 list-disc list-inside">
-          {question.differential_diagnosis.map((diagnosis, idx) => (
-            <li key={idx}>{diagnosis}</li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  </div>
-)}
-
-{question.next_steps && (
-  <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
-    <div className="flex items-start gap-2">
-      <ArrowRight className="h-4 w-4 text-indigo-600 mt-0.5" />
-      <div>
-        <p className="text-sm font-semibold text-indigo-800 mb-1">Prochaines étapes :</p>
-        <p className="text-sm text-indigo-700">{question.next_steps}</p>
-      </div>
-    </div>
-  </div>
-)}
-
-              {/* Clinical Score Education Card */}
-              <ScoreEducationCard question={question} />
-
-              {/* Medical explanation for healthcare providers */}
-              {question.medical_explanation && showEducation && (
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+              {/* Show rationale if available */}
+              {question.rationale && (
+                <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="flex items-start gap-2">
-                    <Stethoscope className="h-4 w-4 text-gray-600 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-semibold text-gray-700 mb-1">Pour le médecin :</p>
-                      <p className="text-sm text-gray-600">{question.medical_explanation}</p>
-                    </div>
+                    <Info className="h-4 w-4 text-blue-600 mt-0.5" />
+                    <p className="text-sm text-blue-800">{question.rationale}</p>
                   </div>
                 </div>
               )}
 
-              {/* Red flags alert */}
-              {question.red_flags && (
-                <Alert className="border-red-200 bg-red-50">
-                  <AlertCircle className="h-4 w-4 text-red-600" />
-                  <AlertTitle className="text-red-800">Signes d'alerte</AlertTitle>
-                  <AlertDescription className="text-red-700">
-                    {question.red_flags}
-                  </AlertDescription>
-                </Alert>
+              {question.guidelines_reference && (
+                <SimpleTooltip content={question.guidelines_reference}>
+                  <Badge variant="outline" className="flex items-center gap-1 mt-2">
+                    <BookOpen className="h-3 w-3" />
+                    Guidelines
+                  </Badge>
+                </SimpleTooltip>
               )}
 
-              {/* Answer confirmation */}
-              {(() => {
-                const response = responses.find((r) => r.questionId === question.id)
-                const currentAnswer = response?.answer || ""
-                const isAnswered = typeof currentAnswer === "string" ? 
-                  currentAnswer.trim() !== "" : 
-                  currentAnswer !== "" && currentAnswer !== null && currentAnswer !== undefined
-
-                return isAnswered && (
-                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                      <p className="font-semibold text-green-800">{t('questionsForm.answerRecorded')}</p>
-                    </div>
-                    <p className="text-sm text-green-700">
-                      <span className="font-medium">{t('questionsForm.yourAnswer')}</span> {currentAnswer}
+              {/* Show patient benefit if available */}
+              {question.patient_benefit && (
+                <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex items-start gap-2">
+                    <Heart className="h-4 w-4 text-green-600 mt-0.5" />
+                    <p className="text-sm text-green-800">
+                      <strong>Pour vous :</strong> {question.patient_benefit}
                     </p>
                   </div>
-                )
-              })()}
-            </CardContent>
-          </Card>
-        ))}
-
-        {/* Navigation between questions */}
-        {questions.length > 0 && (
-          <div className="flex justify-between">
-            <Button
-              variant="outline"
-              onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
-              disabled={currentQuestionIndex === 0}
-              className="px-6 py-3"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              {t('questionsForm.previousQuestion')}
-            </Button>
-            
-            {/* Conditional button: Next Question OR AI Diagnosis */}
-            {!isLastQuestion() ? (
-              <Button
-                onClick={() => setCurrentQuestionIndex(Math.min(questions.length - 1, currentQuestionIndex + 1))}
-                className="px-6 py-3"
-              >
-                {t('questionsForm.nextQuestion')}
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            ) : (
-              <Button 
-                onClick={onNext} 
-                disabled={!isFormValid()}
-                className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 font-semibold"
-              >
-                <Sparkles className="h-5 w-5 mr-2" />
-                {t('questionsForm.launchAIDiagnosis')}
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            )}
-          </div>
-        )}
-
-        {/* Fixed AI Diagnosis button when all questions are answered */}
-        {isFormValid() && (
-          <div className="sticky bottom-4 flex justify-center">
-            <Button 
-              onClick={onNext}
-              className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-4 shadow-2xl hover:shadow-3xl transition-all duration-300 font-semibold text-lg rounded-full animate-pulse"
-            >
-              <Sparkles className="h-6 w-6 mr-3" />
-              {t('questionsForm.aiDiagnosisReady')}
-              <ArrowRight className="h-5 w-5 ml-3" />
-            </Button>
-          </div>
-        )}
-
-        {/* Enhanced Summary of answers with metadata */}
-        {getAnsweredCount() > 0 && (
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
-            <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
-              <CardTitle className="flex items-center gap-3">
-                <CheckCircle className="h-6 w-6" />
-                {t('questionsForm.summaryAnswers')}
-              </CardTitle>
-              {metadata && (
-                <div className="mt-2 text-green-100 text-sm">
-                  {metadata.questionsCount} questions • {metadata.expertFeatures?.accessibleQuestions || 0} accessibles • 
-                  {metadata.expertFeatures?.technicalQuestionsExplained || 0} techniques • 
-                  {metadata.expertFeatures?.globalQuestions || 0} globales
                 </div>
               )}
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="grid gap-4">
-                {responses
-                  .filter((response) => {
-                    const answer = response.answer
-                    if (typeof answer === "string") {
-                      return answer.trim() !== ""
-                    }
-                    return answer !== "" && answer !== null && answer !== undefined
-                  })
-                  .map((response, index) => {
-                    const question = questions.find(q => q.id === response.questionId)
-                    return (
-                      <div key={response.questionId} className="p-4 bg-gray-50 rounded-lg border">
-                        <div className="flex items-start gap-3">
-                          <Badge variant="secondary" className="mt-1">Q{response.questionId}</Badge>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              {question?.category && (
-                                <Badge variant="outline" className="text-xs">
-                                  {question.category}
-                                </Badge>
-                              )}
-                              {question?.clinical_score && (
-                                <Badge className="bg-blue-100 text-blue-800 text-xs">
-                                  {question.clinical_score}
-                                </Badge>
-                              )}
-                              {question?.specialty && (
-                                <Badge className="bg-purple-100 text-purple-800 text-xs">
-                                  {question.specialty}
-                                </Badge>
-                              )}
-                            </div>
-                            <p className="font-medium text-gray-800 mb-2">{response.question}</p>
-                            <p className="text-sm text-gray-600 bg-white p-2 rounded border">
-                              {response.answer}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
+
+              <div className="mt-6">
+                {renderQuestion(question)}
               </div>
-            </CardContent>
-          </Card>
-        )}
-
-      {metadata?.clinicalRecommendations && isFormValid() && (
-  <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-0 shadow-md">
-    <CardHeader>
-      <CardTitle className="flex items-center gap-2 text-lg">
-        <Activity className="h-5 w-5 text-purple-600" />
-        Aperçu des recommandations cliniques
-      </CardTitle>
-    </CardHeader>
-    <CardContent className="space-y-4">
-      {/* Niveau d'urgence */}
-      <div className="flex items-center gap-2">
-        <Badge 
-          className={
-            metadata.clinicalRecommendations.urgencyLevel?.includes('URGENCE ABSOLUE') 
-              ? 'bg-red-600 text-white' 
-              : metadata.clinicalRecommendations.urgencyLevel?.includes('URGENT')
-              ? 'bg-orange-100 text-orange-800'
-              : metadata.clinicalRecommendations.urgencyLevel?.includes('PRIORITAIRE')
-              ? 'bg-yellow-100 text-yellow-800'
-              : 'bg-green-100 text-green-800'
-          }
-        >
-          {metadata.clinicalRecommendations.urgencyLevel}
-        </Badge>
-      </div>
-
-      {/* Red flags s'il y en a */}
-      {metadata.clinicalRecommendations.redFlagAlerts?.length > 0 && (
-        <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5" />
-            <div>
-              <p className="text-sm font-semibold text-red-800 mb-1">Signes d'alerte détectés :</p>
-              <ul className="text-sm text-red-700 list-disc list-inside">
-                {metadata.clinicalRecommendations.redFlagAlerts.map((flag: string, idx: number) => (
-                  <li key={idx}>{flag}</li>
-                ))}
-              </ul>
             </div>
-          </div>
-        </div>
-      )}
 
-      {/* Examens suggérés */}
-      {metadata.clinicalRecommendations.suggestedWorkup?.length > 0 && (
-        <div>
-          <p className="text-sm font-semibold text-gray-700 mb-2">Examens recommandés :</p>
-          <div className="flex flex-wrap gap-2">
-            {metadata.clinicalRecommendations.suggestedWorkup.map((exam: string, idx: number) => (
-              <Badge key={idx} variant="outline">
-                {exam}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
+            {question.differential_diagnosis && question.differential_diagnosis.length > 0 && (
+              <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <div className="flex items-start gap-2">
+                  <Search className="h-4 w-4 text-yellow-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-yellow-800 mb-1">
+                      Diagnostics différentiels possibles :
+                    </p>
+                    <ul className="text-sm text-yellow-700 list-disc list-inside">
+                      {question.differential_diagnosis.map((diagnosis, idx) => (
+                        <li key={idx}>{diagnosis}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
 
-      {/* Diagnostics différentiels globaux */}
-      {metadata.clinicalRecommendations.differentialDiagnosis?.length > 0 && (
-        <div>
-          <p className="text-sm font-semibold text-gray-700 mb-2">Hypothèses diagnostiques :</p>
-          <div className="flex flex-wrap gap-2">
-            {metadata.clinicalRecommendations.differentialDiagnosis.map((diagnosis: string, idx: number) => (
-              <Badge key={idx} className="bg-purple-100 text-purple-800">
-                {diagnosis}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
+            {question.next_steps && (
+              <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                <div className="flex items-start gap-2">
+                  <ArrowRight className="h-4 w-4 text-indigo-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-indigo-800 mb-1">Prochaines étapes :</p>
+                    <p className="text-sm text-indigo-700">{question.next_steps}</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
-      <p className="text-sm text-gray-600 italic">
-        Une analyse complète sera générée après validation de toutes les réponses.
-      </p>
-    </CardContent>
-  </Card>
-)}
+            {/* Clinical Score Education Card */}
+            <ScoreEducationCard question={question} />
 
-        {/* Toggle for medical explanations */}
-        <div className="flex justify-center">
+            {/* Medical explanation for healthcare providers */}
+            {question.medical_explanation && showEducation && (
+              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-start gap-2">
+                  <Stethoscope className="h-4 w-4 text-gray-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700 mb-1">Pour le médecin :</p>
+                    <p className="text-sm text-gray-600">{question.medical_explanation}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Red flags alert */}
+            {question.red_flags && (
+              <Alert className="border-red-200 bg-red-50">
+                <AlertCircle className="h-4 w-4 text-red-600" />
+                <AlertTitle className="text-red-800">Signes d'alerte</AlertTitle>
+                <AlertDescription className="text-red-700">
+                  {question.red_flags}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Answer confirmation */}
+            {(() => {
+              const response = responses.find((r) => r.questionId === question.id)
+              const currentAnswer = response?.answer || ""
+              const isAnswered = typeof currentAnswer === "string" ? 
+                currentAnswer.trim() !== "" : 
+                currentAnswer !== "" && currentAnswer !== null && currentAnswer !== undefined
+
+              return isAnswered && (
+                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <p className="font-semibold text-green-800">{t('questionsForm.answerRecorded')}</p>
+                  </div>
+                  <p className="text-sm text-green-700">
+                    <span className="font-medium">{t('questionsForm.yourAnswer')}</span> {currentAnswer}
+                  </p>
+                </div>
+              )
+            })()}
+          </CardContent>
+        </Card>
+      ))}
+
+      {/* Navigation between questions */}
+      {questions.length > 0 && (
+        <div className="flex justify-between">
           <Button
             variant="outline"
-            size="sm"
-            onClick={() => setShowEducation(!showEducation)}
-            className="flex items-center gap-2"
-          >
-            <GraduationCap className="h-4 w-4" />
-            {showEducation ? "Masquer" : "Afficher"} les explications médicales
-          </Button>
-        </div>
-
-        {/* Auto-save indicator */}
-        <div className="flex justify-center">
-          <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-sm text-gray-600">{t('common.autoSave')}</span>
-          </div>
-        </div>
-
-        {/* Main Navigation */}
-        <div className="flex justify-between">
-          <Button 
-            variant="outline" 
-            onClick={onPrevious}
-            className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
+            onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
+            disabled={currentQuestionIndex === 0}
+            className="px-6 py-3"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            {t('questionsForm.backToClinical')}
+            {t('questionsForm.previousQuestion')}
           </Button>
+          
+          {/* Conditional button: Next Question OR AI Diagnosis */}
+          {!isLastQuestion() ? (
+            <Button
+              onClick={() => setCurrentQuestionIndex(Math.min(questions.length - 1, currentQuestionIndex + 1))}
+              className="px-6 py-3"
+            >
+              {t('questionsForm.nextQuestion')}
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          ) : (
+            <Button 
+              onClick={onNext} 
+              disabled={!isFormValid()}
+              className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 font-semibold"
+            >
+              <Sparkles className="h-5 w-5 mr-2" />
+              {t('questionsForm.launchAIDiagnosis')}
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Fixed AI Diagnosis button when all questions are answered */}
+      {isFormValid() && (
+        <div className="sticky bottom-4 flex justify-center">
           <Button 
-            onClick={onNext} 
-            disabled={!isFormValid()}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
+            onClick={onNext}
+            className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-4 shadow-2xl hover:shadow-3xl transition-all duration-300 font-semibold text-lg rounded-full animate-pulse"
           >
-            {t('questionsForm.continueToDiagnosis')}
-            <ArrowRight className="h-4 w-4 ml-2" />
+            <Sparkles className="h-6 w-6 mr-3" />
+            {t('questionsForm.aiDiagnosisReady')}
+            <ArrowRight className="h-5 w-5 ml-3" />
           </Button>
         </div>
+      )}
+
+      {/* Enhanced Summary of answers with metadata */}
+      {getAnsweredCount() > 0 && (
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+          <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
+            <CardTitle className="flex items-center gap-3">
+              <CheckCircle className="h-6 w-6" />
+              {t('questionsForm.summaryAnswers')}
+            </CardTitle>
+            {metadata && (
+              <div className="mt-2 text-green-100 text-sm">
+                {metadata.questionsCount} questions • {metadata.expertFeatures?.accessibleQuestions || 0} accessibles • 
+                {metadata.expertFeatures?.technicalQuestionsExplained || 0} techniques • 
+                {metadata.expertFeatures?.globalQuestions || 0} globales
+              </div>
+            )}
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid gap-4">
+              {responses
+                .filter((response) => {
+                  const answer = response.answer
+                  if (typeof answer === "string") {
+                    return answer.trim() !== ""
+                  }
+                  return answer !== "" && answer !== null && answer !== undefined
+                })
+                .map((response, index) => {
+                  const question = questions.find(q => q.id === response.questionId)
+                  return (
+                    <div key={response.questionId} className="p-4 bg-gray-50 rounded-lg border">
+                      <div className="flex items-start gap-3">
+                        <Badge variant="secondary" className="mt-1">Q{response.questionId}</Badge>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            {question?.category && (
+                              <Badge variant="outline" className="text-xs">
+                                {question.category}
+                              </Badge>
+                            )}
+                            {question?.clinical_score && (
+                              <Badge className="bg-blue-100 text-blue-800 text-xs">
+                                {question.clinical_score}
+                              </Badge>
+                            )}
+                            {question?.specialty && (
+                              <Badge className="bg-purple-100 text-purple-800 text-xs">
+                                {question.specialty}
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="font-medium text-gray-800 mb-2">{response.question}</p>
+                          <p className="text-sm text-gray-600 bg-white p-2 rounded border">
+                            {response.answer}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {metadata?.clinicalRecommendations && isFormValid() && (
+        <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-0 shadow-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Activity className="h-5 w-5 text-purple-600" />
+              Aperçu des recommandations cliniques
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Niveau d'urgence */}
+            <div className="flex items-center gap-2">
+              <Badge 
+                className={
+                  metadata.clinicalRecommendations.urgencyLevel?.includes('URGENCE ABSOLUE') 
+                    ? 'bg-red-600 text-white' 
+                    : metadata.clinicalRecommendations.urgencyLevel?.includes('URGENT')
+                    ? 'bg-orange-100 text-orange-800'
+                    : metadata.clinicalRecommendations.urgencyLevel?.includes('PRIORITAIRE')
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : 'bg-green-100 text-green-800'
+                }
+              >
+                {metadata.clinicalRecommendations.urgencyLevel}
+              </Badge>
+            </div>
+
+            {/* Red flags s'il y en a */}
+            {metadata.clinicalRecommendations.redFlagAlerts?.length > 0 && (
+              <div className="p-3 bg-red-50 rounded-lg border border-red-200">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-red-800 mb-1">Signes d'alerte détectés :</p>
+                    <ul className="text-sm text-red-700 list-disc list-inside">
+                      {metadata.clinicalRecommendations.redFlagAlerts.map((flag: string, idx: number) => (
+                        <li key={idx}>{flag}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Examens suggérés */}
+            {metadata.clinicalRecommendations.suggestedWorkup?.length > 0 && (
+              <div>
+                <p className="text-sm font-semibold text-gray-700 mb-2">Examens recommandés :</p>
+                <div className="flex flex-wrap gap-2">
+                  {metadata.clinicalRecommendations.suggestedWorkup.map((exam: string, idx: number) => (
+                    <Badge key={idx} variant="outline">
+                      {exam}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Diagnostics différentiels globaux */}
+            {metadata.clinicalRecommendations.differentialDiagnosis?.length > 0 && (
+              <div>
+                <p className="text-sm font-semibold text-gray-700 mb-2">Hypothèses diagnostiques :</p>
+                <div className="flex flex-wrap gap-2">
+                  {metadata.clinicalRecommendations.differentialDiagnosis.map((diagnosis: string, idx: number) => (
+                    <Badge key={idx} className="bg-purple-100 text-purple-800">
+                      {diagnosis}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <p className="text-sm text-gray-600 italic">
+              Une analyse complète sera générée après validation de toutes les réponses.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Toggle for medical explanations */}
+      <div className="flex justify-center">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowEducation(!showEducation)}
+          className="flex items-center gap-2"
+        >
+          <GraduationCap className="h-4 w-4" />
+          {showEducation ? "Masquer" : "Afficher"} les explications médicales
+        </Button>
       </div>
-    </TooltipProvider>
+
+      {/* Auto-save indicator */}
+      <div className="flex justify-center">
+        <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <span className="text-sm text-gray-600">{t('common.autoSave')}</span>
+        </div>
+      </div>
+
+      {/* Main Navigation */}
+      <div className="flex justify-between">
+        <Button 
+          variant="outline" 
+          onClick={onPrevious}
+          className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          {t('questionsForm.backToClinical')}
+        </Button>
+        <Button 
+          onClick={onNext} 
+          disabled={!isFormValid()}
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
+        >
+          {t('questionsForm.continueToDiagnosis')}
+          <ArrowRight className="h-4 w-4 ml-2" />
+        </Button>
+      </div>
+    </div>
   )
 }
