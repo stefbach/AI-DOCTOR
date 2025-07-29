@@ -1,4 +1,4 @@
-// app/page.tsx - Version complète avec intégration du système de test
+// app/page.tsx - Version complète sans système de test
 
 "use client"
 
@@ -20,11 +20,6 @@ import { getTranslation, Language } from "@/lib/translations"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import { supabase } from '@/lib/supabase'
 
-// 🆕 IMPORTS AJOUTÉS POUR LE SYSTÈME DE TEST
-import { useTestMode } from '@/hooks/use-test-mode'
-import TestModeToolbar from '@/components/test-mode-toolbar'
-import TestPatientSelector from '@/components/test-patient-selector'
-
 export default function MedicalAIExpert() {
   const [currentStep, setCurrentStep] = useState(0)
   const [patientData, setPatientData] = useState<any>(null)
@@ -39,25 +34,6 @@ export default function MedicalAIExpert() {
   const [currentDoctorId, setCurrentDoctorId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isInitialized, setIsInitialized] = useState(false)
-  
-  const {
-    isTestMode = false,
-    currentTestPatient = null,
-    setTestPatient = () => {},
-    clearTestMode = () => {},
-    getTestDataForStep = () => null,
-    testPatients = [],
-  } = useTestMode() || {}
-
-  // Debug - à supprimer après résolution
-  useEffect(() => {
-    console.log('Test Mode Debug:', {
-      isTestMode,
-      testPatients: testPatients?.length || 0,
-      hasTestPatients: Array.isArray(testPatients),
-      currentTestPatient: !!currentTestPatient
-    })
-  }, [isTestMode, testPatients, currentTestPatient])
 
   // Load language preference
   useEffect(() => {
@@ -66,25 +42,6 @@ export default function MedicalAIExpert() {
       setLanguage(savedLanguage)
     }
   }, [])
-
-  // 🆕 PRÉ-REMPLISSAGE AUTOMATIQUE DES DONNÉES DE TEST
-  useEffect(() => {
-    if (isTestMode && currentTestPatient) {
-      if (currentStep === 0 && !patientData) {
-        const testData = getTestDataForStep(0)
-        if (testData) {
-          setPatientData(testData)
-        }
-      }
-      
-      if (currentStep === 1 && !clinicalData) {
-        const testData = getTestDataForStep(1)
-        if (testData) {
-          setClinicalData(testData)
-        }
-      }
-    }
-  }, [isTestMode, currentTestPatient, currentStep, patientData, clinicalData, getTestDataForStep])
 
   // Initialize consultation
   useEffect(() => {
@@ -194,7 +151,6 @@ export default function MedicalAIExpert() {
 
   const progress = ((currentStep + 1) / steps.length) * 100
 
-  // 🆕 MODIFICATION DE handleNext POUR LE MODE TEST
   const handleNext = async () => {
     // Save current step data before moving forward
     const consultationId = consultationDataService.getCurrentConsultationId()
@@ -226,19 +182,6 @@ export default function MedicalAIExpert() {
         console.log(`Data saved for step ${currentStep}`)
       } catch (error) {
         console.error('Error saving step data:', error)
-      }
-    }
-    
-    // 🆕 EN MODE TEST, PRÉ-REMPLIR L'ÉTAPE SUIVANTE
-    if (isTestMode && currentStep < steps.length - 1) {
-      const nextStepData = getTestDataForStep(currentStep + 1)
-      
-      if (nextStepData) {
-        switch (currentStep + 1) {
-          case 1:
-            setClinicalData(nextStepData)
-            break
-        }
       }
     }
     
@@ -282,7 +225,6 @@ export default function MedicalAIExpert() {
     }
   }
 
-  // 🆕 MODIFICATION DE getCurrentStepProps
   const getCurrentStepProps = () => {
     const consultationId = consultationDataService.getCurrentConsultationId() || currentConsultationId
     const commonProps = { 
@@ -292,14 +234,11 @@ export default function MedicalAIExpert() {
       doctorId: currentDoctorId
     }
     
-    // 🆕 RÉCUPÉRER LES DONNÉES DE TEST
-    const testData = isTestMode ? getTestDataForStep(currentStep) : null
-    
     switch (currentStep) {
       case 0:
         return {
           ...commonProps,
-          initialData: testData || patientData, // 🆕 MODIFIÉ
+          initialData: patientData,
           onDataChange: setPatientData,
           onNext: handleNext,
         }
@@ -307,7 +246,7 @@ export default function MedicalAIExpert() {
         return {
           ...commonProps,
           patientData,
-          initialData: testData || clinicalData, // 🆕 MODIFIÉ
+          initialData: clinicalData,
           onDataChange: setClinicalData,
           onNext: handleNext,
           onPrevious: handlePrevious,
@@ -321,7 +260,6 @@ export default function MedicalAIExpert() {
           onDataChange: setQuestionsData,
           onNext: handleNext,
           onPrevious: handlePrevious,
-          expectedConditions: currentTestPatient?.expectedConditions // 🆕 AJOUTÉ
         }
       case 3:
         return {
@@ -333,7 +271,6 @@ export default function MedicalAIExpert() {
           onDataChange: setDiagnosisData,
           onNext: handleNext,
           onPrevious: handlePrevious,
-          expectedConditions: currentTestPatient?.expectedConditions // 🆕 AJOUTÉ
         }
       case 4:
         return {
@@ -375,23 +312,6 @@ export default function MedicalAIExpert() {
               <p className="text-gray-600">{t('mainPage.subtitle')}</p>
             </div>
             <div className="flex items-center gap-2">
-              
-              {/* 🆕 BOUTON DE SÉLECTION DE PATIENT TEST - UNIQUEMENT EN DEV */}
-              {process.env.NODE_ENV === 'development' && !isTestMode && testPatients && testPatients.length > 0 && (
-                <Button
-                  onClick={() => {
-                    if (testPatients && testPatients[0]) {
-                      const testPatient = testPatients[0]
-                      setTestPatient(testPatient)
-                      alert(`🧪 Mode test activé avec : ${testPatient.patientData?.firstName || 'Patient Test'}`)
-                    }
-                  }}
-                  variant="default"
-                >
-                  🧪 Activer Mode Test
-                </Button>
-              )}
-
               {/* Language Switcher with black background */}
               <div className="flex items-center gap-2 mr-4 bg-black rounded-md p-1">
                 <Button
@@ -426,16 +346,6 @@ export default function MedicalAIExpert() {
               )}
             </div>
           </div>
-
-          {/* 🆕 BARRE D'OUTILS DU MODE TEST */}
-          {isTestMode && (
-            <TestModeToolbar
-              testPatient={currentTestPatient}
-              onSelectPatient={setTestPatient}
-              onClearTestMode={clearTestMode}
-              currentStep={currentStep}
-            />
-          )}
 
           {/* Progress and Steps */}
           <div className="mb-8">
