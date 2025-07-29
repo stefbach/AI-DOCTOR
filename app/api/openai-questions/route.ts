@@ -834,7 +834,7 @@ function generateSpecialtyFallbackQuestions(
         category: "accessible",
         specialty: "cardiology",
         medical_explanation: "Une douleur rétrosternale est plus évocatrice d'origine cardiaque",
-        diagnostic_value: "high’’,
+        diagnostic_value: "high",
         differential_diagnosis: []
       },
       {
