@@ -1,4 +1,4 @@
-// app/page.tsx - Version avec rapport professionnel intégré
+// app/page.tsx - Version modifiée avec seulement 5 étapes
 
 "use client"
 
@@ -13,24 +13,18 @@ import {
   User,
   ClipboardList,
   Brain,
-  FileText,
-  Activity,
-  Edit3,
-  FileSignature // Nouvelle icône pour le rapport final
+  FileSignature
 } from "lucide-react"
 
 import PatientForm from "@/components/patient-form"
 import ClinicalForm from "@/components/clinical-form"
 import QuestionsForm from "@/components/questions-form"
 import DiagnosisForm from "@/components/diagnosis-form"
-import MedicalWorkflow from "@/components/medical/main-medical-workflow"
-import ProfessionalReport from "@/components/professional-report" // NOUVEAU
+import ProfessionalReport from "@/components/professional-report"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import { supabase } from '@/lib/supabase'
 
 export type Language = 'fr' | 'en'
-
-// ...
 
 export default function MedicalAIExpert() {
   const [currentStep, setCurrentStep] = useState(0)
@@ -38,29 +32,21 @@ export default function MedicalAIExpert() {
   const [clinicalData, setClinicalData] = useState<any>(null)
   const [questionsData, setQuestionsData] = useState<any>(null)
   const [diagnosisData, setDiagnosisData] = useState<any>(null)
-  const [workflowResult, setWorkflowResult] = useState<any>(null)
-  const [finalReport, setFinalReport] = useState<any>(null) // NOUVEAU
+  const [finalReport, setFinalReport] = useState<any>(null)
   const [language, setLanguage] = useState<Language>('fr')
   
-  // ... (gardez tous les autres states)
-
-  // Local loading state; adjust as needed to reflect asynchronous operations
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  // Placeholder identifiers for the current consultation, patient and doctor.
-  // In a real application these values would come from props, context or another service.
   const currentConsultationId: string | null = null
   const currentPatientId: string | null = null
   const currentDoctorId: string | null = null
 
-  // Allow clicking on previous steps to navigate back. Disallow forward navigation by default.
   const handleStepClick = (index: number) => {
     if (index <= currentStep) {
       setCurrentStep(index)
     }
   }
 
-  // Simple translation helper. Uses the current `language` state to retrieve translations.
   const t = (key: string): string => {
     const translations: Record<string, any> = {
       fr: {
@@ -81,9 +67,9 @@ export default function MedicalAIExpert() {
             title: "Diagnostic",
             description: "Analyse et diagnostic différentiel"
           },
-          documents: {
-            title: "Documents",
-            description: "Prescriptions et examens"
+          finalReport: {
+            title: "Dossier Médical Complet",
+            description: "Compte rendu et ordonnances"
           }
         },
         mainPage: {
@@ -98,7 +84,6 @@ export default function MedicalAIExpert() {
       }
     };
     const keys = key.split('.');
-    // start with the dictionary for current language; fallback to french if undefined
     let value: any = translations[language] ?? translations['fr'];
     for (const k of keys) {
       value = value?.[k];
@@ -135,28 +120,19 @@ export default function MedicalAIExpert() {
       icon: <ClipboardList className="h-5 w-5" />,
       component: DiagnosisForm,
     },
-        {
-          // Étape 4 : génération du compte rendu final avant l'édition des documents
-          id: 4,
-          title: "Compte Rendu Final", // À traduire
-          description: "Rapport médical professionnel complet", // À traduire
-          icon: <FileSignature className="h-5 w-5" />, // Nouvelle icône pour le compte rendu
-          component: ProfessionalReport,
-        },
-        {
-          // Étape 5 : édition des documents après le compte rendu
-          id: 5,
-          title: t('steps.documents.title'),
-          description: t('steps.documents.description'),
-          icon: <Activity className="h-5 w-5" />, // Icône des documents
-          component: MedicalWorkflow,
-        },
+    {
+      // Étape 4 : Dossier médical complet (compte rendu + ordonnances)
+      id: 4,
+      title: t('steps.finalReport.title'),
+      description: t('steps.finalReport.description'),
+      icon: <FileSignature className="h-5 w-5" />,
+      component: ProfessionalReport,
+    }
   ]
 
   const progress = ((currentStep + 1) / steps.length) * 100
 
   const handleNext = async () => {
-    // Save current step data before moving forward
     const consultationId = consultationDataService.getCurrentConsultationId()
     if (consultationId) {
       try {
@@ -183,15 +159,10 @@ export default function MedicalAIExpert() {
             }
             break
           case 4:
-            // Étape 4 : enregistrement du compte rendu final
             if (finalReport) {
               await consultationDataService.saveStepData(4, finalReport)
-            }
-            break
-          case 5:
-            // Étape 5 : enregistrement des documents édités
-            if (workflowResult) {
-              await consultationDataService.saveStepData(5, workflowResult)
+              // Marquer la consultation comme complète
+              await consultationDataService.markConsultationComplete()
             }
             break
         }
@@ -212,36 +183,20 @@ export default function MedicalAIExpert() {
     }
   }
 
-  const handleWorkflowComplete = async (data: any) => {
-    console.log('Medical workflow completed:', data)
-    setWorkflowResult(data)
+  const handleFinalReportComplete = async (data: any) => {
+    console.log('Final report and documents completed:', data)
+    setFinalReport(data)
     
     const consultationId = consultationDataService.getCurrentConsultationId()
     if (consultationId) {
       try {
-        // Étape 5 : sauvegarde des documents édités
-        await consultationDataService.saveStepData(5, data)
-        // Marquer la consultation comme complète après l'édition des documents
+        // Sauvegarder tout le dossier médical
+        await consultationDataService.saveStepData(4, data)
+        // Marquer la consultation comme complète
         await consultationDataService.markConsultationComplete()
-        console.log('Workflow documents saved and consultation completed')
-      } catch (error) {
-        console.error('Error saving workflow data:', error)
-      }
-    }
-  }
-
-  const handleFinalReportComplete = async (reportData: any) => {
-    console.log('Final professional report completed:', reportData)
-    setFinalReport(reportData)
-    
-    const consultationId = consultationDataService.getCurrentConsultationId()
-    if (consultationId) {
-      try {
-        // Étape 4 : sauvegarde du compte rendu final
-        await consultationDataService.saveStepData(4, reportData)
-        console.log('Final report data saved')
-        // La finalisation de la consultation se fait lors de la sauvegarde des documents (étape 5)
-        // Optionnel : rediriger vers une page de confirmation après la génération du compte rendu
+        console.log('Consultation completed successfully')
+        
+        // Optionnel : redirection ou message de succès
         // router.push('/consultation-complete')
       } catch (error) {
         console.error('Error saving final report:', error)
@@ -296,42 +251,23 @@ export default function MedicalAIExpert() {
           onNext: handleNext,
           onPrevious: handlePrevious,
         }
-          case 4:
-            // Étape 4 : génération du compte rendu final
-            return {
-              ...commonProps,
-              patientData,
-              clinicalData,
-              questionsData,
-              diagnosisData,
-              // Documents édités disponibles à ce stade. Si aucun document n'a encore été édité,
-              // fournir un objet vide pour que l'API accepte la requête.
-              editedDocuments: workflowResult || {},
-              onComplete: handleFinalReportComplete,
-              onPrevious: handlePrevious,
-            }
-          case 5:
-            // Étape 5 : édition des documents
-            return {
-              ...commonProps,
-              patientData,
-              clinicalData,
-              questionsData,
-              diagnosisData,
-              initialData: workflowResult,
-              onComplete: handleWorkflowComplete,
-              onBack: handlePrevious,
-            }
+      case 4:
+        // Étape finale : génération et édition du dossier complet
+        return {
+          ...commonProps,
+          patientData,
+          clinicalData,
+          questionsData,
+          diagnosisData,
+          onComplete: handleFinalReportComplete,
+          onPrevious: handlePrevious,
+        }
       default:
         return commonProps
     }
   }
 
-  // ... (gardez tout le reste du code existant pour l'interface utilisateur, tel que le header, la progression et l'affichage des étapes)
-
   const CurrentStepComponent = steps[currentStep]?.component
-
-  // Suppose isLoading, handleStepClick, currentConsultationId, currentPatientId and currentDoctorId are defined elsewhere in your codebase.
 
   if (isLoading) {
     return (
@@ -347,10 +283,7 @@ export default function MedicalAIExpert() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        {/* Header with Language Switcher */}
-        {/* ... */}
-
-        {/* Progress Section - Mise à jour pour 6 étapes */}
+        {/* Progress Section - Mise à jour pour 5 étapes */}
         <Card className="bg-white shadow-lg p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">{t('progress.title')}</h2>
@@ -361,7 +294,7 @@ export default function MedicalAIExpert() {
           
           <Progress value={progress} className="mb-6 h-3" />
           
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {steps.map((step, index) => (
               <div
                 key={step.id}
@@ -374,7 +307,6 @@ export default function MedicalAIExpert() {
                     : 'bg-gray-50 border-2 border-gray-300 opacity-60 cursor-not-allowed'
                   }`}
               >
-                {/* Step indicator */}
                 <div className={`absolute -top-3 -right-3 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
                   ${index === currentStep 
                     ? 'bg-blue-600 text-white' 
@@ -385,7 +317,6 @@ export default function MedicalAIExpert() {
                   {index < currentStep ? '✓' : index + 1}
                 </div>
                 
-                {/* Icon */}
                 <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3
                   ${index === currentStep 
                     ? 'bg-blue-600 text-white' 
@@ -396,7 +327,6 @@ export default function MedicalAIExpert() {
                   {React.cloneElement(step.icon, { className: "h-8 w-8" })}
                 </div>
                 
-                {/* Title */}
                 <h3 className={`font-semibold mb-1 text-sm
                   ${index === currentStep 
                     ? 'text-blue-900' 
@@ -407,7 +337,6 @@ export default function MedicalAIExpert() {
                   {step.title}
                 </h3>
                 
-                {/* Description */}
                 <p className={`text-xs
                   ${index === currentStep 
                     ? 'text-blue-700' 
