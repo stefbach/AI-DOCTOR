@@ -1,757 +1,1335 @@
-// /app/api/openai-diagnosis/route.ts - VERSION INTELLIGENTE ENRICHIE
-import { NextRequest, NextResponse } from 'next/server'
+"use client"
 
-// ==================== CONTEXTE MINIMAL MAURICE ====================
+import { useState, useEffect } from "react"
+import { consultationDataService } from '@/lib/consultation-data-service'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { 
+  ArrowLeft, 
+  Brain, 
+  Loader2, 
+  CheckCircle, 
+  AlertTriangle,
+  Target,
+  Search,
+  Eye,
+  FileText,
+  TestTube,
+  Pill,
+  Stethoscope,
+  Edit3,
+  Clock,
+  MapPin,
+  AlertCircle,
+  Activity,
+  Monitor,
+  Calendar,
+  DollarSign,
+  Lightbulb,
+  Shield,
+  Zap,
+  FlaskConical,
+  ClipboardCheck
+} from "lucide-react"
+import { getTranslation, Language } from "@/lib/translations"
 
-const MAURITIUS_HEALTHCARE_CONTEXT = {
-  // Infrastructure essentielle seulement
-  laboratories: {
-    everywhere: "C-Lab (29 centres), Green Cross (36 centres), Biosanté (48 points)",
-    specialized: "ProCare Medical (oncology/genetics), C-Lab (PCR/NGS)",
-    public: "Central Health Lab, tous hôpitaux régionaux",
-    home_service: "C-Lab gratuit >70 ans, Hans Biomedical mobile",
-    results_time: "STAT: 1-2h, Urgent: 2-6h, Routine: 24-48h",
-    online_results: "C-Lab, Green Cross"
-  },
-  
-  imaging: {
-    basic: "Radiographie/Échographie disponibles partout",
-    ct_scan: "Apollo Bramwell, Wellkin, Victoria Hospital, Dr Jeetoo",
-    mri: "Apollo, Wellkin (délais 1-2 semaines)",
-    cardiac: {
-      echo: "Disponible tous hôpitaux + privés",
-      coronary_ct: "Apollo, Cardiac Centre Pamplemousses",
-      angiography: "Cardiac Centre (public), Apollo Cath Lab (privé)"
-    }
-  },
-  
-  hospitals: {
-    emergency_24_7: "Dr Jeetoo (Port Louis), SSRN (Pamplemousses), Victoria (Candos), Apollo, Wellkin",
-    cardiac_emergencies: "Cardiac Centre Pamplemousses, Apollo Bramwell",
-    specialists: "Généralement 1-3 semaines délai, urgences vues plus rapidement"
-  },
-  
-  costs: {
-    consultation: "Public: gratuit, Privé: Rs 1500-3000",
-    blood_tests: "Rs 400-3000 selon complexité",
-    imaging: "Radio: Rs 800-1500, CT: Rs 8000-15000, MRI: Rs 15000-25000",
-    procedures: "Coronarographie: Rs 50000-80000, Chirurgie: Rs 100000+"
-  },
-  
-  medications: {
-    public_free: "Liste médicaments essentiels gratuits hôpitaux publics",
-    private: "Pharmacies partout, prix variables selon marque"
-  },
-  
-  emergency_numbers: {
-    samu: "114",
-    police_fire: "999", 
-    private_ambulance: "132"
-  }
+interface DiagnosisFormProps {
+  patientData: any
+  clinicalData: any
+  questionsData: any
+  onDataChange: (data: any) => void
+  onNext: () => void
+  onPrevious: () => void
+  language?: Language
+  consultationId?: string | null
 }
 
-// ==================== FONCTION PRINCIPALE INTELLIGENTE ENRICHIE ====================
+export default function EnhancedDiagnosisForm({
+  patientData,
+  clinicalData,
+  questionsData,
+  onDataChange,
+  onNext,
+  onPrevious,
+  language = 'fr',
+  consultationId
+}: DiagnosisFormProps) {
+  const [diagnosis, setDiagnosis] = useState<any>(null)
+  const [diagnosticReasoning, setDiagnosticReasoning] = useState<any>(null)
+  const [expertAnalysis, setExpertAnalysis] = useState<any>(null)
+  const [mauritianDocuments, setMauritianDocuments] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [currentSection, setCurrentSection] = useState(0)
+  const [documentsGenerated, setDocumentsGenerated] = useState(false)
+  const [hasInitialized, setHasInitialized] = useState(false)
 
-export async function POST(request: NextRequest) {
-  console.log('🏥 MAURITIUS INTELLIGENT MEDICAL AI - STARTING')
-  console.log('🧠 Model: GPT-4o | Approach: Enhanced Diagnostic Logic')
-  
-  try {
-    const body = await request.json()
-    const { patientData, clinicalData, questionsData, language = 'bilingual' } = body
-    
-    const apiKey = process.env.OPENAI_API_KEY
-    if (!apiKey) throw new Error('OPENAI_API_KEY missing')
-    
-    // Données patient essentielles
-    const patientContext = {
-      age: patientData?.age || 'unknown',
-      sex: patientData?.sex || 'unknown',
-      weight: patientData?.weight || 'unknown',
-      medical_history: patientData?.medicalHistory || [],
-      current_medications: patientData?.currentMedications || [],
-      allergies: patientData?.allergies || [],
-      chief_complaint: clinicalData?.chiefComplaint || '',
-      symptoms: clinicalData?.symptoms || [],
-      duration: clinicalData?.symptomDuration || '',
-      vital_signs: clinicalData?.vitalSigns || {},
-      disease_history: clinicalData?.diseaseHistory || '',
-      ai_questions: questionsData || []
-    }
-    
-    console.log('🎯 GENERATING INTELLIGENT DIAGNOSIS WITH ENHANCED LOGIC')
-    
-    // PROMPT ENRICHI AVEC LA LOGIQUE DIAGNOSTIQUE AMÉLIORÉE
-    const enhancedDiagnosticPrompt = `
-You are an expert physician practicing telemedicine in Mauritius using systematic diagnostic reasoning.
+  // Helper function for translations
+  const t = (key: string) => getTranslation(key, language)
 
-🏥 YOUR MEDICAL EXPERTISE:
-- You know international medical guidelines (ESC, AHA, WHO, NICE)
-- You understand pathophysiology and clinical reasoning
-- You can select appropriate investigations based on presentation
-- You prescribe according to evidence-based medicine
-- You use systematic diagnostic reasoning to analyze patient data
-
-🇲🇺 MAURITIUS HEALTHCARE CONTEXT:
-${JSON.stringify(MAURITIUS_HEALTHCARE_CONTEXT, null, 2)}
-
-📋 PATIENT PRESENTATION:
-${JSON.stringify(patientContext, null, 2)}
-
-🔍 DIAGNOSTIC REASONING PROCESS:
-
-1. ANALYZE ALL DATA:
-   - Chief complaint: ${patientContext.chief_complaint}
-   - Key symptoms: ${patientContext.symptoms.join(', ')}
-   - Vital signs abnormalities: [Identify any abnormal values]
-   - Disease evolution: ${patientContext.disease_history}
-   - AI questionnaire responses: [CRITICAL - these often contain key diagnostic clues]
-     ${patientContext.ai_questions.map((q: any) => `Q: ${q.question} → A: ${q.answer}`).join('\n')}
-
-2. FORMULATE DIAGNOSTIC HYPOTHESES:
-   Based on the above, generate:
-   - Primary diagnosis (most likely)
-   - 3-4 differential diagnoses (alternatives to rule out)
-
-3. DESIGN INVESTIGATION STRATEGY:
-   For EACH diagnosis (primary + differentials), determine:
-   - What test would CONFIRM this diagnosis?
-   - What test would EXCLUDE this diagnosis?
-   - Priority order based on:
-     * Dangerous conditions to rule out first
-     * Most likely conditions
-     * Cost-effectiveness in Mauritius
-
-🎯 YOUR TASK:
-Based on this presentation and using systematic diagnostic reasoning, generate a COMPLETE analysis in the following JSON structure.
-
-⚠️ CRITICAL REQUIREMENTS:
-1. BILINGUAL: Provide ALL text in both French and English
-2. DETAILED: Each section minimum 150-200 words per language
-3. EVIDENCE-BASED: Follow current medical guidelines
-4. MAURITIUS-ADAPTED: Consider local resources and tropical context
-5. PERSONALIZED: Adapt to THIS specific patient
-6. DIAGNOSTIC LOGIC: Use systematic reasoning to justify every decision
-
-GENERATE THIS EXACT JSON STRUCTURE:
-
-{
-  "diagnostic_reasoning": {
-    "key_findings": {
-      "from_history": "[What stands out from patient history]",
-      "from_symptoms": "[Pattern recognition from symptoms]",
-      "from_ai_questions": "[CRITICAL findings from questionnaire responses]",
-      "red_flags": "[Any concerning features requiring urgent action]"
-    },
-    
-    "syndrome_identification": {
-      "clinical_syndrome": "[e.g., Acute coronary syndrome, Viral syndrome, etc.]",
-      "supporting_features": "[List features supporting this syndrome]",
-      "inconsistent_features": "[Any features that don't fit]"
-    }
-  },
-  
-  "clinical_analysis": {
-    "primary_diagnosis": {
-      "condition": {
-        "fr": "[Diagnostic précis avec classification/stade si applicable]",
-        "en": "[Precise diagnosis with classification/stage if applicable]"
-      },
-      "icd10_code": "[Appropriate ICD-10 code]",
-      "confidence_level": [60-85 max for teleconsultation],
-      "severity": {
-        "fr": "légère/modérée/sévère/critique",
-        "en": "mild/moderate/severe/critical"
-      },
-      "diagnostic_criteria_met": [
-        "Criterion 1: [How patient meets this]",
-        "Criterion 2: [How patient meets this]"
-      ],
-      "certainty_level": "[High/Moderate/Low based on available data]",
-      
-      "pathophysiology": {
-        "fr": "[MINIMUM 200 MOTS] Mécanisme expliquant TOUS les symptômes du patient...",
-        "en": "[MINIMUM 200 WORDS] Mechanism explaining ALL patient's symptoms..."
-      },
-      
-      "clinical_reasoning": {
-        "fr": "[MINIMUM 150 MOTS] Raisonnement diagnostique basé sur les symptômes...",
-        "en": "[MINIMUM 150 WORDS] Diagnostic reasoning based on symptoms..."
-      },
-      
-      "prognosis": {
-        "fr": "[MINIMUM 100 MOTS] Évolution attendue à court, moyen et long terme...",
-        "en": "[MINIMUM 100 WORDS] Expected evolution short, medium and long term..."
+  // Load saved data on mount - FIXED to prevent loops
+  useEffect(() => {
+    const loadSavedData = async () => {
+      console.log('📂 Loading saved diagnosis data...')
+      try {
+        const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
+        
+        if (currentConsultationId) {
+          const savedData = await consultationDataService.getAllData()
+          console.log('💾 Saved data found:', {
+            hasDiagnosisData: !!savedData?.diagnosisData,
+            hasDiagnosis: !!savedData?.diagnosisData?.diagnosis,
+            hasDocuments: !!savedData?.diagnosisData?.mauritianDocuments
+          })
+          
+          if (savedData?.diagnosisData) {
+            if (savedData.diagnosisData.diagnosis) {
+              setDiagnosis(savedData.diagnosisData.diagnosis)
+              setHasInitialized(true) // Prevent auto-generation if data exists
+            }
+            if (savedData.diagnosisData.diagnosticReasoning) {
+              setDiagnosticReasoning(savedData.diagnosisData.diagnosticReasoning)
+            }
+            if (savedData.diagnosisData.expertAnalysis) {
+              setExpertAnalysis(savedData.diagnosisData.expertAnalysis)
+            }
+            if (savedData.diagnosisData.mauritianDocuments) {
+              setMauritianDocuments(savedData.diagnosisData.mauritianDocuments)
+              setDocumentsGenerated(true)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error loading saved diagnosis data:', error)
       }
-    },
+    }
     
-    "differential_diagnoses": [
-      {
-        "condition": { "fr": "[Alternative 1]", "en": "[Alternative 1]" },
-        "probability": [percentage],
-        "supporting_features": "[What symptoms support this]",
-        "against_features": "[What makes this less likely]",
-        "discriminating_test": {
-          "fr": "[Quel examen permettrait de confirmer/exclure]",
-          "en": "[Which test would confirm/exclude this]"
+    loadSavedData()
+  }, [consultationId]) // Only depend on consultationId
+
+  // Auto-generate ONLY if not already initialized and data is complete
+  useEffect(() => {
+    console.log('🔄 Checking if should auto-generate:', {
+      hasInitialized,
+      hasDiagnosis: !!diagnosis,
+      hasPatientData: !!patientData,
+      hasClinicalData: !!clinicalData,
+      patientDataKeys: patientData ? Object.keys(patientData).length : 0,
+      clinicalDataKeys: clinicalData ? Object.keys(clinicalData).length : 0
+    })
+
+    // Check if we should auto-generate
+    if (!hasInitialized && 
+        !diagnosis && 
+        patientData && 
+        clinicalData && 
+        Object.keys(patientData).length > 0 &&
+        Object.keys(clinicalData).length > 0 &&
+        clinicalData.chiefComplaint) { // Ensure we have at least a chief complaint
+      
+      console.log('🚀 Auto-generating diagnosis...')
+      setHasInitialized(true) // Prevent multiple calls
+      generateCompleteDiagnosisAndDocuments()
+    }
+  }, [hasInitialized, diagnosis, patientData, clinicalData])
+
+  // Save data when diagnosis is generated or updated
+  useEffect(() => {
+    const saveData = async () => {
+      if (!diagnosis || !mauritianDocuments) return
+      
+      try {
+        const dataToSave = {
+          diagnosis,
+          diagnosticReasoning,
+          expertAnalysis,
+          mauritianDocuments,
+          documentsGenerated,
+          timestamp: new Date().toISOString()
+        }
+        await consultationDataService.saveStepData(3, dataToSave)
+        console.log("💾 Auto-saved enhanced diagnosis data to consultation service")
+      } catch (error) {
+        console.error('❌ Error saving diagnosis data:', error)
+      }
+    }
+    
+    saveData()
+  }, [diagnosis, diagnosticReasoning, expertAnalysis, mauritianDocuments, documentsGenerated])
+
+  const generateCompleteDiagnosisAndDocuments = async () => {
+    console.log('🩺 ========== STARTING DIAGNOSIS GENERATION ==========')
+    console.log('📋 Patient Data:', {
+      hasData: !!patientData,
+      age: patientData?.age,
+      sex: patientData?.sex,
+      chiefComplaint: clinicalData?.chiefComplaint
+    })
+
+    // More thorough validation
+    if (!patientData || !clinicalData) {
+      console.error('❌ Missing required data:', { patientData: !!patientData, clinicalData: !!clinicalData })
+      setError("Données patient ou cliniques manquantes")
+      return
+    }
+
+    if (!clinicalData.chiefComplaint) {
+      console.error('❌ Missing chief complaint')
+      setError("Motif de consultation manquant")
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+    setDocumentsGenerated(false)
+
+    try {
+      console.log("📡 Sending request to /api/openai-diagnosis...")
+      
+      const requestBody = {
+        patientData,
+        clinicalData,
+        questionsData,
+        language,
+      }
+      
+      console.log("📦 Request body:", {
+        patientDataKeys: Object.keys(patientData),
+        clinicalDataKeys: Object.keys(clinicalData),
+        questionsCount: questionsData?.length || 0,
+        language
+      })
+
+      const response = await fetch("/api/openai-diagnosis", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        "reasoning": {
-          "fr": "[MINIMUM 80 MOTS] Pourquoi considérer et comment différencier...",
-          "en": "[MINIMUM 80 WORDS] Why consider and how to differentiate..."
-        }
+        body: JSON.stringify(requestBody),
+      })
+
+      console.log("📨 Response received:", {
+        status: response.status,
+        ok: response.ok,
+        statusText: response.statusText
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ API Error Response:', errorText)
+        throw new Error(`API Error ${response.status}: ${errorText.substring(0, 100)}`)
       }
-      // 2-3 more differentials
-    ]
-  },
-  
-  "investigation_strategy": {
-    "diagnostic_approach": {
-      "fr": "Pour confirmer ${primary_diagnosis} et exclure ${differentials}, voici la stratégie:",
-      "en": "To confirm ${primary_diagnosis} and exclude ${differentials}, here's the strategy:"
-    },
+
+      const data = await response.json()
+      console.log("📦 API Response:", {
+        success: data.success,
+        hasError: !!data.error,
+        hasDiagnosis: !!data.diagnosis,
+        hasDiagnosticReasoning: !!data.diagnosticReasoning,
+        hasExpertAnalysis: !!data.expertAnalysis,
+        hasDocuments: !!data.mauritianDocuments
+      })
+
+      if (data.success && data.diagnosis && data.mauritianDocuments) {
+        console.log("✅ Setting diagnosis data...")
+        
+        setDiagnosis(data.diagnosis)
+        setDiagnosticReasoning(data.diagnosticReasoning || null)
+        setExpertAnalysis(data.expertAnalysis || data.expert_analysis || {})
+        setMauritianDocuments(data.mauritianDocuments)
+        setDocumentsGenerated(true)
+        
+        // Save complete enhanced data
+        const completeData = { 
+          diagnosis: data.diagnosis,
+          diagnosticReasoning: data.diagnosticReasoning,
+          mauritianDocuments: data.mauritianDocuments,
+          expertAnalysis: data.expertAnalysis || data.expert_analysis || {},
+          completeData: data,
+          documentsGenerated: true
+        }
+        
+        // Call onDataChange to update parent component
+        onDataChange(completeData)
+        
+        // Save to consultation service
+        try {
+          await consultationDataService.saveStepData(3, completeData)
+          console.log("✅ Data saved to consultation service")
+        } catch (saveError) {
+          console.error("❌ Error saving to consultation service:", saveError)
+        }
+        
+      } else {
+        console.error("❌ Invalid response format:", data)
+        throw new Error(data.error || "Format de réponse invalide")
+      }
+
+    } catch (err) {
+      console.error("❌ Generation error:", err)
+      setError(err instanceof Error ? err.message : "Erreur inconnue")
+
+      // Generate fallback data
+      console.log("⚠️ Generating fallback data...")
+      const fallbackData = generateCompleteFallback()
+      setDiagnosis(fallbackData.diagnosis)
+      setDiagnosticReasoning(fallbackData.diagnosticReasoning)
+      setExpertAnalysis(fallbackData.expertAnalysis)
+      setMauritianDocuments(fallbackData.mauritianDocuments)
+      setDocumentsGenerated(true)
+      
+      const completeData = {
+        diagnosis: fallbackData.diagnosis,
+        diagnosticReasoning: fallbackData.diagnosticReasoning,
+        mauritianDocuments: fallbackData.mauritianDocuments,
+        expertAnalysis: fallbackData.expertAnalysis,
+        completeData: fallbackData,
+        documentsGenerated: true
+      }
+      
+      onDataChange(completeData)
+      
+    } finally {
+      setLoading(false)
+      console.log('🩺 ========== DIAGNOSIS GENERATION COMPLETE ==========')
+    }
+  }
+
+  const generateCompleteFallback = () => {
+    console.log('🔧 Generating fallback diagnosis...')
     
-    "tests_by_purpose": {
-      "to_confirm_primary": [
+    const fallbackDiagnosis = {
+      primary: {
+        condition: `Syndrome clinique - ${clinicalData?.chiefComplaint || "Consultation médicale"}`,
+        condition_bilingual: {
+          fr: `Syndrome clinique - ${clinicalData?.chiefComplaint || "Consultation médicale"}`,
+          en: `Clinical syndrome - ${clinicalData?.chiefComplaint || "Medical consultation"}`
+        },
+        icd10: "R53",
+        confidence: 70,
+        severity: "moderate",
+        severity_bilingual: { fr: "modérée", en: "moderate" },
+        detailedAnalysis: "Analyse basée sur les symptômes présentés nécessitant exploration complémentaire",
+        detailedAnalysis_bilingual: {
+          fr: "Analyse basée sur les symptômes présentés nécessitant exploration complémentaire",
+          en: "Analysis based on presented symptoms requiring further investigation"
+        },
+        clinicalRationale: `Symptômes: ${clinicalData?.chiefComplaint}. Nécessite anamnèse et examen clinique approfondis`,
+        clinicalRationale_bilingual: {
+          fr: `Symptômes: ${clinicalData?.chiefComplaint}. Nécessite anamnèse et examen clinique approfondis`,
+          en: `Symptoms: ${clinicalData?.chiefComplaint}. Requires thorough history and clinical examination`
+        },
+        prognosis: "Évolution favorable attendue avec prise en charge appropriée",
+        prognosis_bilingual: {
+          fr: "Évolution favorable attendue avec prise en charge appropriée",
+          en: "Favorable evolution expected with appropriate management"
+        },
+        diagnosticCriteriaMet: ["Symptômes compatibles", "Contexte clinique évocateur"],
+        certaintyLevel: "Moderate"
+      },
+      differential: [
         {
-          "test": { "fr": "[Test name]", "en": "[Test name]" },
-          "rationale": {
-            "fr": "Ce test confirmera ${diagnosis} si ${expected_result}",
-            "en": "This test will confirm ${diagnosis} if ${expected_result}"
+          condition: { fr: "Syndrome viral", en: "Viral syndrome" },
+          condition_bilingual: { fr: "Syndrome viral", en: "Viral syndrome" },
+          probability: 40,
+          reasoning: { 
+            fr: "Cause fréquente de symptômes non spécifiques",
+            en: "Common cause of non-specific symptoms"
           },
-          "expected_if_positive": "[Specific values/findings]",
-          "expected_if_negative": "[Values that would exclude]"
-        }
-      ],
-      
-      "to_exclude_differentials": [
-        {
-          "differential": "[Which differential diagnosis]",
-          "test": { "fr": "[Test name]", "en": "[Test name]" },
-          "rationale": {
-            "fr": "Normal → exclut ${differential}",
-            "en": "Normal → excludes ${differential}"
-          }
-        }
-      ],
-      
-      "to_assess_severity": [
-        {
-          "test": { "fr": "[Test name]", "en": "[Test name]" },
-          "purpose": {
-            "fr": "Évaluer retentissement/complications",
-            "en": "Assess impact/complications"
-          }
+          reasoning_bilingual: { 
+            fr: "Cause fréquente de symptômes non spécifiques",
+            en: "Common cause of non-specific symptoms"
+          },
+          discriminating_test: { fr: "Sérologie virale", en: "Viral serology" }
         }
       ]
-    },
-    
-    "test_sequence": {
-      "immediate": "[Tests needed NOW - usually to exclude dangerous conditions]",
-      "urgent": "[Tests within 24-48h to confirm diagnosis]",
-      "routine": "[Tests for monitoring or complete assessment]"
-    },
-    
-    "rationale": {
-      "fr": "Stratégie diagnostique adaptée pour confirmer [diagnostic] et exclure [différentiels]",
-      "en": "Diagnostic strategy adapted to confirm [diagnosis] and exclude [differentials]"
-    },
-    
-    "laboratory_tests": [
-      // GENERATE APPROPRIATE TESTS BASED ON DIAGNOSTIC STRATEGY
-      {
-        "test_name": {
-          "fr": "[Nom français du test]",
-          "en": "[English test name]"
-        },
-        "clinical_justification": {
-          "fr": "[Pourquoi ce test pour ce patient spécifiquement]",
-          "en": "[Why this test for this specific patient]"
-        },
-        "urgency": "STAT/urgent/routine",
-        "expected_results": {
-          "fr": "[Valeurs attendues et interprétation]",
-          "en": "[Expected values and interpretation]"
-        },
-        "mauritius_logistics": {
-          "where": "[Use context: C-Lab, Green Cross, Biosanté, etc.]",
-          "cost": "[Estimate from context: Rs 400-3000]",
-          "turnaround": "[From context: 2-6h urgent, 24-48h routine]"
-        }
+    }
+
+    const fallbackDiagnosticReasoning = {
+      key_findings: {
+        from_history: "Données cliniques de base disponibles",
+        from_symptoms: clinicalData?.chiefComplaint || "Symptômes à préciser",
+        from_ai_questions: "Réponses du questionnaire IA",
+        red_flags: "Aucun signe d'alarme identifié"
+      },
+      syndrome_identification: {
+        clinical_syndrome: "Syndrome à préciser",
+        supporting_features: ["Symptômes rapportés"],
+        inconsistent_features: ["À évaluer"]
       }
-    ],
-    
-    "imaging_studies": [
-      // ONLY IF CLINICALLY INDICATED
-      {
-        "study_name": {
-          "fr": "[Nom de l'examen d'imagerie]",
-          "en": "[Imaging study name]"
-        },
-        "indication": {
-          "fr": "[Indication clinique spécifique]",
-          "en": "[Specific clinical indication]"
-        },
-        "findings_sought": {
-          "fr": "[Ce qu'on recherche]",
-          "en": "[What we're looking for]"
-        },
-        "mauritius_availability": {
-          "centers": "[From context: Apollo, Wellkin, etc.]",
-          "cost": "[From context: Rs 800-25000]",
-          "wait_time": "[Realistic timeline]"
-        }
-      }
-    ],
-    
-    "specialized_tests": [
-      // ONLY IF TRULY NEEDED (cardiac cath, endoscopy, etc.)
-    ]
-  },
-  
-  "treatment_plan": {
-    "approach": {
-      "fr": "[MINIMUM 100 MOTS] Stratégie thérapeutique globale...",
-      "en": "[MINIMUM 100 WORDS] Overall therapeutic strategy..."
-    },
-    
-    "medications": [
-      // PRESCRIBE BASED ON GUIDELINES AND CLINICAL JUDGMENT
-      {
-        "drug": {
-          "fr": "[DCI + dosage]",
-          "en": "[INN + dosage]"
-        },
-        "indication": {
-          "fr": "[Indication spécifique pour ce patient]",
-          "en": "[Specific indication for this patient]"
-        },
-        "mechanism": {
-          "fr": "[MINIMUM 50 MOTS] Comment ce médicament aide...",
-          "en": "[MINIMUM 50 WORDS] How this medication helps..."
-        },
-        "dosing": {
-          "adult": { "fr": "[Posologie]", "en": "[Dosing]" },
-          "adjustments": {
-            "elderly": { "fr": "[Si >65 ans]", "en": "[If >65 years]" },
-            "renal": { "fr": "[Si IRC]", "en": "[If CKD]" },
-            "hepatic": { "fr": "[Si IH]", "en": "[If liver disease]" }
+    }
+
+    const fallbackExpertAnalysis = {
+      expert_investigations: {
+        investigation_strategy: {
+          diagnostic_approach: { 
+            fr: "Approche diagnostique systématique", 
+            en: "Systematic diagnostic approach" 
+          },
+          tests_by_purpose: {
+            to_confirm_primary: [],
+            to_exclude_differentials: [],
+            to_assess_severity: []
+          },
+          test_sequence: {
+            immediate: "Tests urgents si nécessaire",
+            urgent: "Bilan dans 24-48h",
+            routine: "Suivi selon évolution"
           }
         },
-        "duration": { "fr": "[Durée]", "en": "[Duration]" },
-        "monitoring": {
-          "fr": "[Surveillance nécessaire]",
-          "en": "[Required monitoring]"
-        },
-        "mauritius_availability": {
-          "public_free": [true/false],
-          "estimated_cost": "[If not free: Rs XXX]",
-          "alternatives": { "fr": "[Si non disponible]", "en": "[If unavailable]" }
-        }
-      }
-    ],
-    
-    "non_pharmacological": {
-      "fr": "[MINIMUM 100 MOTS] Mesures hygiéno-diététiques, repos, hydratation tropicale...",
-      "en": "[MINIMUM 100 WORDS] Lifestyle measures, rest, tropical hydration..."
-    }
-  },
-  
-  "follow_up_plan": {
-    "immediate": {
-      "fr": "[Que faire dans les 24-48h]",
-      "en": "[What to do in 24-48h]"
-    },
-    "short_term": {
-      "fr": "[Suivi à J3-J7]",
-      "en": "[Follow-up D3-D7]"
-    },
-    "red_flags": {
-      "fr": "[CRITICAL] Signes nécessitant consultation urgente",
-      "en": "[CRITICAL] Signs requiring urgent consultation"
-    },
-    "next_consultation": {
-      "fr": "Téléconsultation de suivi pour résultats / Consultation physique si...",
-      "en": "Follow-up teleconsultation for results / Physical consultation if..."
-    }
-  },
-  
-  "patient_education": {
-    "understanding_condition": {
-      "fr": "[MINIMUM 150 MOTS] Explication simple de votre condition...",
-      "en": "[MINIMUM 150 WORDS] Simple explanation of your condition..."
-    },
-    "treatment_importance": {
-      "fr": "[MINIMUM 100 MOTS] Pourquoi suivre ce traitement...",
-      "en": "[MINIMUM 100 WORDS] Why follow this treatment..."
-    },
-    "mauritius_specific": {
-      "tropical_advice": {
-        "fr": "Hydratation 3L/jour, éviter soleil 10h-16h, conservation médicaments...",
-        "en": "Hydration 3L/day, avoid sun 10am-4pm, medication storage..."
-      },
-      "local_diet": {
-        "fr": "[Adaptations alimentaires locales]",
-        "en": "[Local dietary adaptations]"
-      }
-    },
-    "warning_signs": {
-      "fr": "[Signes d'alarme expliqués simplement]",
-      "en": "[Warning signs explained simply]"
-    }
-  },
-  
-  "quality_metrics": {
-    "word_counts": {
-      "pathophysiology": { "fr": [count], "en": [count] },
-      "clinical_reasoning": { "fr": [count], "en": [count] },
-      "total_words": [total]
-    },
-    "guidelines_followed": "[Which international guidelines applied]",
-    "mauritius_adaptations": "[How adapted to local context]"
-  }
-}
-
-🎯 CRITICAL RULES:
-1. EVERY test must have a SPECIFIC diagnostic purpose
-2. Don't order "routine panels" - each test must be justified
-3. Consider pre-test probability based on clinical presentation
-4. Adapt to Mauritius resources (costs, availability)
-5. AI questionnaire responses often contain DIAGNOSTIC KEYS - analyze carefully!
-6. Use systematic diagnostic reasoning for every decision
-7. Keep teleconsultation limitations in mind (max 85% confidence)
-
-EXAMPLE OF DIAGNOSTIC REASONING:
-Patient: 45yo male, chest pain, diabetic
-AI Question: "Pain worse with exertion?" → "Yes"
-AI Question: "Relief with rest?" → "Yes"
-→ High probability of angina
-→ Need: Troponins (exclude MI), ECG (ischemia), Stress test or CT coronary
-
-Generate a complete, professional medical analysis NOW.`
-
-    console.log('📡 CALLING GPT-4o FOR ENHANCED DIAGNOSTIC GENERATION')
-    
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [
+        immediate_priority: [
           {
-            role: 'system',
-            content: 'You are an expert physician with deep knowledge of international medical guidelines, systematic diagnostic reasoning, and the Mauritius healthcare system. Generate detailed, evidence-based medical analyses using logical diagnostic approaches.'
-          },
-          {
-            role: 'user',
-            content: enhancedDiagnosticPrompt
+            category: "biology",
+            examination: "Hémogramme complet + CRP",
+            examination_bilingual: { fr: "Hémogramme complet + CRP", en: "Complete blood count + CRP" },
+            specific_indication: "Recherche syndrome inflammatoire",
+            indication_bilingual: { 
+              fr: "Recherche syndrome inflammatoire",
+              en: "Search for inflammatory syndrome"
+            },
+            urgency: "urgent",
+            mauritius_availability: {
+              where: "C-Lab, Green Cross",
+              cost: "Rs 600-1200",
+              turnaround: "2-6h urgent"
+            }
           }
         ],
-        temperature: 0.4,  // Low enough for medical consistency
-        max_tokens: 10000,  // Increased for more detailed content with diagnostic reasoning
-        response_format: { type: "json_object" }  // Force JSON response
-      }),
-    })
-    
-    if (!openaiResponse.ok) {
-      throw new Error(`OpenAI Error ${openaiResponse.status}: ${await openaiResponse.text()}`)
+        tests_by_purpose: {},
+        test_sequence: {}
+      },
+      expert_therapeutics: {
+        primary_treatments: [
+          {
+            medication_dci: "Paracétamol",
+            medication_bilingual: { fr: "Paracétamol", en: "Paracetamol" },
+            therapeutic_class: "Antalgique-Antipyrétique",
+            precise_indication: "Traitement symptomatique",
+            indication_bilingual: { 
+              fr: "Traitement symptomatique douleur/fièvre",
+              en: "Symptomatic treatment pain/fever"
+            },
+            mechanism: "Inhibition synthèse prostaglandines",
+            mechanism_bilingual: {
+              fr: "Inhibition de la synthèse des prostaglandines au niveau central",
+              en: "Inhibition of prostaglandin synthesis at central level"
+            },
+            dosing_regimen: {
+              adult: { fr: "1g x 3-4/jour", en: "1g x 3-4/day" }
+            },
+            mauritius_availability: {
+              public_free: true,
+              estimated_cost: "Rs 50-100"
+            }
+          }
+        ]
+      }
     }
+
+    const dateFormat = new Date().toLocaleDateString("fr-FR")
     
-    const openaiData = await openaiResponse.json()
-    const medicalAnalysis = JSON.parse(openaiData.choices[0]?.message?.content || '{}')
-    
-    console.log('✅ Enhanced diagnostic analysis generated')
-    console.log(`📊 Quality check - Total words: ${medicalAnalysis.quality_metrics?.total_words || 'calculating...'}`)
-    console.log(`🔍 Diagnostic reasoning applied: ${medicalAnalysis.diagnostic_reasoning?.syndrome_identification?.clinical_syndrome || 'N/A'}`)
-    
-    // Generate professional documents from the analysis
-    const professionalDocuments = generateMedicalDocuments(
-      medicalAnalysis,
-      patientContext,
-      MAURITIUS_HEALTHCARE_CONTEXT
+    const fallbackDocuments = {
+      consultation: {
+        header: {
+          title: { fr: "COMPTE-RENDU DE CONSULTATION", en: "CONSULTATION REPORT" },
+          date: dateFormat,
+          physician: "Dr. MÉDECIN EXPERT"
+        },
+        patient: {
+          firstName: patientData?.firstName || "Patient",
+          lastName: patientData?.lastName || "",
+          age: `${patientData?.age || "?"} ans`
+        },
+        diagnostic_reasoning: fallbackDiagnosticReasoning,
+        clinical_summary: {
+          chief_complaint: clinicalData?.chiefComplaint || "À préciser",
+          diagnosis: fallbackDiagnosis.primary.condition_bilingual
+        }
+      }
+    }
+
+    return {
+      diagnosis: fallbackDiagnosis,
+      diagnosticReasoning: fallbackDiagnosticReasoning,
+      expertAnalysis: fallbackExpertAnalysis,
+      mauritianDocuments: fallbackDocuments
+    }
+  }
+
+  const sections = [
+    { id: "reasoning", title: "Raisonnement Diagnostique", icon: Brain },
+    { id: "primary", title: "Diagnostic Principal", icon: Target },
+    { id: "examinations", title: "Stratégie d'Investigation", icon: TestTube },
+    { id: "treatments", title: "Traitements Prescrits", icon: Pill },
+    { id: "differential", title: "Diagnostics Différentiels", icon: Search },
+    { id: "monitoring", title: "Surveillance", icon: Monitor },
+    { id: "documents", title: "Documents Maurice", icon: FileText },
+  ]
+
+  // Loading interface
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+          <CardHeader className="text-center">
+            <CardTitle className="flex items-center justify-center gap-3 text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+              <Brain className="h-10 w-10 text-emerald-600" />
+              Analyse Médicale Expert GPT-4o
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center justify-center py-20">
+            <div className="text-center space-y-6">
+              <div className="relative">
+                <div className="w-20 h-20 mx-auto">
+                  <div className="absolute inset-0 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div>
+                  <div className="absolute inset-2 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin animate-reverse"></div>
+                  <Brain className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-8 w-8 text-emerald-600" />
+                </div>
+              </div>
+              <div className="space-y-3">
+                <p className="text-2xl font-bold text-gray-800">Génération Analyse Complète</p>
+                <p className="text-lg text-gray-600">Raisonnement Diagnostique + Stratégie Investigation</p>
+                <div className="max-w-md mx-auto text-sm text-gray-500 space-y-1">
+                  <div className="flex items-center justify-center gap-2">
+                    <Brain className="h-4 w-4" />
+                    <span>Raisonnement diagnostique systématique</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2">
+                    <Target className="h-4 w-4" />
+                    <span>Critères diagnostiques validés</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2">
+                    <TestTube className="h-4 w-4" />
+                    <span>Tests organisés par objectif</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2">
+                    <Shield className="h-4 w-4" />
+                    <span>Protocoles sécurité intégrés</span>
+                  </div>
+                </div>
+              </div>
+              <Progress value={75} className="w-96 mx-auto h-3" />
+              <p className="text-xs text-gray-400">Powered by GPT-4o Enhanced - 10000 tokens</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     )
-    
-    console.log('✅ COMPLETE MEDICAL PACKAGE READY WITH ENHANCED DIAGNOSTIC LOGIC')
-    
-    // Return in format compatible with existing UI
-    return NextResponse.json({
-      success: true,
-      
-      // NEW: Diagnostic reasoning data
-      diagnosticReasoning: medicalAnalysis.diagnostic_reasoning,
-      
-      // Compatible with diagnosis-form.tsx
-      diagnosis: {
-        primary: {
-          condition: medicalAnalysis.clinical_analysis.primary_diagnosis.condition.fr,
-          condition_bilingual: medicalAnalysis.clinical_analysis.primary_diagnosis.condition,
-          icd10: medicalAnalysis.clinical_analysis.primary_diagnosis.icd10_code,
-          confidence: medicalAnalysis.clinical_analysis.primary_diagnosis.confidence_level,
-          severity: medicalAnalysis.clinical_analysis.primary_diagnosis.severity.fr,
-          severity_bilingual: medicalAnalysis.clinical_analysis.primary_diagnosis.severity,
-          detailedAnalysis: medicalAnalysis.clinical_analysis.primary_diagnosis.pathophysiology.fr,
-          detailedAnalysis_bilingual: medicalAnalysis.clinical_analysis.primary_diagnosis.pathophysiology,
-          clinicalRationale: medicalAnalysis.clinical_analysis.primary_diagnosis.clinical_reasoning.fr,
-          clinicalRationale_bilingual: medicalAnalysis.clinical_analysis.primary_diagnosis.clinical_reasoning,
-          prognosis: medicalAnalysis.clinical_analysis.primary_diagnosis.prognosis.fr,
-          prognosis_bilingual: medicalAnalysis.clinical_analysis.primary_diagnosis.prognosis,
-          diagnosticCriteriaMet: medicalAnalysis.clinical_analysis.primary_diagnosis.diagnostic_criteria_met,
-          certaintyLevel: medicalAnalysis.clinical_analysis.primary_diagnosis.certainty_level
-        },
-        differential: medicalAnalysis.clinical_analysis.differential_diagnoses
-      },
-      
-      // Expert analysis with investigations and treatments
-      expertAnalysis: {
-        expert_investigations: {
-          investigation_strategy: medicalAnalysis.investigation_strategy,
-          immediate_priority: [
-            ...medicalAnalysis.investigation_strategy.laboratory_tests.map((test: any) => ({
-              category: 'biology',
-              examination: test.test_name.en,
-              examination_bilingual: test.test_name,
-              specific_indication: test.clinical_justification.en,
-              indication_bilingual: test.clinical_justification,
-              urgency: test.urgency,
-              mauritius_availability: test.mauritius_logistics
-            })),
-            ...medicalAnalysis.investigation_strategy.imaging_studies.map((img: any) => ({
-              category: 'imaging',
-              examination: img.study_name.en,
-              examination_bilingual: img.study_name,
-              specific_indication: img.indication.en,
-              indication_bilingual: img.indication,
-              mauritius_availability: img.mauritius_availability
-            }))
-          ],
-          tests_by_purpose: medicalAnalysis.investigation_strategy.tests_by_purpose,
-          test_sequence: medicalAnalysis.investigation_strategy.test_sequence
-        },
-        expert_therapeutics: {
-          primary_treatments: medicalAnalysis.treatment_plan.medications.map((med: any) => ({
-            medication_dci: med.drug.en,
-            medication_bilingual: med.drug,
-            therapeutic_class: med.indication.en,
-            precise_indication: med.indication.en,
-            indication_bilingual: med.indication,
-            mechanism: med.mechanism.en,
-            mechanism_bilingual: med.mechanism,
-            dosing_regimen: med.dosing,
-            mauritius_availability: med.mauritius_availability
-          }))
-        }
-      },
-      
-      // Generated medical documents
-      mauritianDocuments: professionalDocuments,
-      
-      // Metadata
-      metadata: {
-        ai_model: 'GPT-4o',
-        approach: 'Enhanced Diagnostic Reasoning',
-        medical_guidelines: medicalAnalysis.quality_metrics?.guidelines_followed,
-        mauritius_adapted: true,
-        generation_timestamp: new Date().toISOString(),
-        quality_metrics: medicalAnalysis.quality_metrics,
-        diagnostic_logic_applied: true
-      }
-    })
-    
-  } catch (error) {
-    console.error('❌ ERROR:', error)
-    
-    // Fallback response
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      diagnosis: generateEmergencyFallbackDiagnosis(patientData, clinicalData)
-    })
   }
-}
 
-// ==================== DOCUMENT GENERATION (SIMPLIFIED) ====================
+  // Error interface
+  if (!diagnosis && error) {
+    return (
+      <div className="space-y-6">
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+          <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-600 text-white rounded-t-lg">
+            <CardTitle className="flex items-center gap-3">
+              <AlertTriangle className="h-6 w-6" />
+              Erreur de Génération
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8 text-center">
+            <div className="space-y-4">
+              <AlertTriangle className="h-16 w-16 text-yellow-500 mx-auto" />
+              <p className="text-lg text-gray-700">Impossible de générer l'analyse médicale</p>
+              <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                <p className="text-sm text-red-700 font-mono">{error}</p>
+              </div>
+              <div className="space-y-2 text-sm text-gray-600">
+                <p>Vérifiez que :</p>
+                <ul className="list-disc list-inside text-left max-w-md mx-auto">
+                  <li>Les données patient sont complètes</li>
+                  <li>Le motif de consultation est renseigné</li>
+                  <li>La clé API OpenAI est configurée</li>
+                  <li>Votre connexion internet est stable</li>
+                </ul>
+              </div>
+              <Button 
+                onClick={generateCompleteDiagnosisAndDocuments} 
+                className="mt-6"
+                size="lg"
+              >
+                <Brain className="h-4 w-4 mr-2" />
+                Réessayer
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
-function generateMedicalDocuments(
-  analysis: any,
-  patient: any,
-  infrastructure: any
-): any {
-  const currentDate = new Date()
-  const consultationId = `TC-MU-${currentDate.getFullYear()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+  // Main interface - No diagnosis available
+  if (!diagnosis) {
+    return (
+      <div className="space-y-6">
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+          <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
+            <CardTitle className="flex items-center gap-3">
+              <Brain className="h-6 w-6" />
+              Analyse Médicale Non Disponible
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8 text-center">
+            <div className="space-y-6">
+              <Brain className="h-20 w-20 text-blue-500 mx-auto" />
+              <div className="space-y-2">
+                <p className="text-xl font-semibold text-gray-800">
+                  Aucune analyse médicale générée
+                </p>
+                <p className="text-gray-600">
+                  Cliquez sur le bouton ci-dessous pour lancer l'analyse
+                </p>
+              </div>
+              
+              {/* Debug info */}
+              <div className="bg-gray-50 p-4 rounded-lg text-left max-w-md mx-auto">
+                <p className="text-sm font-semibold text-gray-700 mb-2">État actuel :</p>
+                <ul className="text-xs text-gray-600 space-y-1">
+                  <li>• Données patient : {patientData ? '✅ Disponibles' : '❌ Manquantes'}</li>
+                  <li>• Données cliniques : {clinicalData ? '✅ Disponibles' : '❌ Manquantes'}</li>
+                  <li>• Motif consultation : {clinicalData?.chiefComplaint ? '✅ ' + clinicalData.chiefComplaint : '❌ Manquant'}</li>
+                  <li>• Questions IA : {questionsData?.length || 0} réponses</li>
+                </ul>
+              </div>
+              
+              <Button 
+                onClick={generateCompleteDiagnosisAndDocuments} 
+                className="bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700"
+                size="lg"
+                disabled={!patientData || !clinicalData}
+              >
+                <Brain className="h-5 w-5 mr-2" />
+                Générer l'Analyse Médicale
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Rest of your component code remains the same...
+  // (The rendering of the actual diagnosis sections)
   
-  return {
-    // CONSULTATION REPORT
-    consultation: {
-      header: {
-        title: {
-          fr: "RAPPORT DE TÉLÉCONSULTATION MÉDICALE",
-          en: "MEDICAL TELECONSULTATION REPORT"
-        },
-        id: consultationId,
-        date: currentDate.toLocaleDateString('fr-FR'),
-        type: "Teleconsultation",
-        disclaimer: {
-          fr: "Évaluation basée sur téléconsultation - Examen physique non réalisé",
-          en: "Assessment based on teleconsultation - Physical examination not performed"
-        }
-      },
-      
-      patient: {
-        name: `${patient.firstName || 'Patient'} ${patient.lastName || ''}`,
-        age: patient.age,
-        sex: patient.sex
-      },
-      
-      // NEW: Include diagnostic reasoning in report
-      diagnostic_reasoning: analysis.diagnostic_reasoning,
-      
-      clinical_summary: {
-        chief_complaint: {
-          fr: patient.chief_complaint,
-          en: patient.chief_complaint  // Could translate if needed
-        },
-        diagnosis: analysis.clinical_analysis.primary_diagnosis.condition,
-        severity: analysis.clinical_analysis.primary_diagnosis.severity,
-        confidence: analysis.clinical_analysis.primary_diagnosis.confidence_level + '%',
-        clinical_reasoning: analysis.clinical_analysis.primary_diagnosis.clinical_reasoning,
-        prognosis: analysis.clinical_analysis.primary_diagnosis.prognosis,
-        diagnostic_criteria: analysis.clinical_analysis.primary_diagnosis.diagnostic_criteria_met
-      },
-      
-      management_plan: {
-        investigations: analysis.investigation_strategy,
-        treatment: analysis.treatment_plan,
-        follow_up: analysis.follow_up_plan
-      },
-      
-      patient_education: analysis.patient_education
-    },
-    
-    // LAB PRESCRIPTION
-    biological: {
-      header: {
-        title: {
-          fr: "DEMANDE D'EXAMENS BIOLOGIQUES",
-          en: "LABORATORY TEST REQUEST"
-        },
-        validity: {
-          fr: "Valide 30 jours - Tous laboratoires agréés Maurice",
-          en: "Valid 30 days - All accredited laboratories Mauritius"
-        }
-      },
-      
-      patient: {
-        name: `${patient.firstName || ''} ${patient.lastName || ''}`,
-        age: patient.age,
-        id: patient.id || 'N/A'
-      },
-      
-      examinations: analysis.investigation_strategy.laboratory_tests.map((test: any, idx: number) => ({
-        number: idx + 1,
-        test: test.test_name,
-        justification: test.clinical_justification,
-        urgency: test.urgency,
-        preparation: {
-          fr: test.urgency === 'STAT' ? 'Aucune' : 'Selon protocole laboratoire',
-          en: test.urgency === 'STAT' ? 'None' : 'As per laboratory protocol'
-        },
-        where_to_go: {
-          recommended: test.mauritius_logistics.where,
-          cost_estimate: test.mauritius_logistics.cost,
-          turnaround: test.mauritius_logistics.turnaround
-        }
-      }))
-    },
-    
-    // IMAGING REQUESTS (if any)
-    imaging: analysis.investigation_strategy.imaging_studies.length > 0 ? {
-      header: {
-        title: {
-          fr: "DEMANDE D'EXAMENS D'IMAGERIE",
-          en: "IMAGING REQUEST"
-        }
-      },
-      studies: analysis.investigation_strategy.imaging_studies
-    } : null,
-    
-    // MEDICATION PRESCRIPTION
-    medication: {
-      header: {
-        title: {
-          fr: "ORDONNANCE MÉDICALE / MEDICAL PRESCRIPTION",
-          en: "MEDICAL PRESCRIPTION / ORDONNANCE MÉDICALE"
-        },
-        prescriber: {
-          name: "Dr. Expert Physician",
-          registration: "MCM-TELE-2024",
-          qualification: "MD, Telemedicine Certified"
-        }
-      },
-      
-      patient: {
-        name: `${patient.firstName || ''} ${patient.lastName || ''}`,
-        age: patient.age,
-        weight: patient.weight ? `${patient.weight}kg` : 'N/A',
-        allergies: patient.allergies?.join(', ') || 'None reported'
-      },
-      
-      prescriptions: analysis.treatment_plan.medications.map((med: any, idx: number) => ({
-        number: idx + 1,
-        medication: med.drug,
-        indication: med.indication,
-        dosing: med.dosing,
-        duration: med.duration,
-        instructions: {
-          fr: "Prendre selon prescription. Ne pas arrêter sans avis médical.",
-          en: "Take as prescribed. Do not stop without medical advice."
-        },
-        availability: med.mauritius_availability
-      })),
-      
-      non_pharmacological: analysis.treatment_plan.non_pharmacological,
-      
-      footer: {
-        validity: {
-          fr: "Ordonnance valide 30 jours",
-          en: "Prescription valid 30 days"
-        },
-        legal: {
-          fr: "Prescription téléconsultation conforme Medical Council Mauritius",
-          en: "Teleconsultation prescription compliant with Medical Council Mauritius"
-        }
-      }
-    }
-  }
-}
+  return (
+    <div className="space-y-6">
+      {/* Success header */}
+      <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+        <CardHeader className="text-center">
+          <CardTitle className="flex items-center justify-center gap-3 text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+            <CheckCircle className="h-8 w-8 text-emerald-600" />
+            Analyse Médicale Experte Enrichie
+          </CardTitle>
+          <div className="flex justify-center gap-4 mt-4">
+            <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300">
+              Confiance: {diagnosis?.primary?.confidence || 70}%
+            </Badge>
+            <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-300">
+              Certitude: {diagnosis?.primary?.certaintyLevel || "Modérée"}
+            </Badge>
+            <Badge className="bg-blue-500 text-white">
+              GPT-4o Enhanced
+            </Badge>
+            {documentsGenerated && (
+              <Badge className="bg-green-500 text-white">
+                Documents Prêts
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+      </Card>
 
-// ==================== EMERGENCY FALLBACK ====================
+      {/* Section navigation */}
+      <div className="flex flex-wrap gap-2 justify-center">
+        {sections.map((section, index) => (
+          <button
+            key={section.id}
+            onClick={() => setCurrentSection(index)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
+              currentSection === index
+                ? "bg-emerald-600 text-white shadow-lg"
+                : "bg-white/70 text-gray-600 hover:bg-white hover:shadow-md"
+            }`}
+          >
+            <section.icon className="h-4 w-4" />
+            <span className="text-sm font-medium">{section.title}</span>
+          </button>
+        ))}
+      </div>
 
-function generateEmergencyFallbackDiagnosis(patient: any, clinical: any): any {
-  return {
-    primary: {
-      condition: "Évaluation médicale requise",
-      condition_bilingual: {
-        fr: "Évaluation médicale requise",
-        en: "Medical evaluation required"
-      },
-      icd10: "R69",
-      confidence: 60,
-      severity: "moderate",
-      detailedAnalysis: "Analyse en cours. Consultation physique recommandée pour évaluation complète.",
-      clinicalRationale: "Données insuffisantes pour diagnostic définitif en téléconsultation."
-    },
-    differential: []
-  }
-}
+      {/* DIAGNOSTIC REASONING (NEW SECTION) */}
+      {currentSection === 0 && diagnosticReasoning && (
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
+          <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-t-lg">
+            <CardTitle className="flex items-center gap-3">
+              <Brain className="h-6 w-6" />
+              Raisonnement Diagnostique Systématique
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8 space-y-6">
+            {/* Key Findings */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                <h4 className="font-semibold text-purple-800 mb-3 flex items-center gap-2">
+                  <Lightbulb className="h-5 w-5" />
+                  Éléments Clés Identifiés
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div>
+                    <span className="font-medium text-purple-700">Histoire clinique:</span>
+                    <p className="text-gray-700">{diagnosticReasoning.key_findings?.from_history}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-purple-700">Pattern symptomatique:</span>
+                    <p className="text-gray-700">{diagnosticReasoning.key_findings?.from_symptoms}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-purple-700">Questionnaire IA:</span>
+                    <p className="text-gray-700">{diagnosticReasoning.key_findings?.from_ai_questions}</p>
+                  </div>
+                </div>
+              </div>
 
-// ==================== EXPORTS ====================
+              <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                <h4 className="font-semibold text-red-800 mb-3 flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  Signaux d'Alerte
+                </h4>
+                <p className="text-sm text-gray-700">
+                  {diagnosticReasoning.key_findings?.red_flags || "Aucun signal d'alerte identifié"}
+                </p>
+              </div>
+            </div>
 
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
+            {/* Syndrome Identification */}
+            {diagnosticReasoning.syndrome_identification && (
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border border-blue-200">
+                <h4 className="font-semibold text-blue-800 mb-4 flex items-center gap-2">
+                  <Zap className="h-5 w-5" />
+                  Syndrome Clinique Identifié
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <span className="font-medium text-blue-700">Syndrome:</span>
+                    <p className="text-lg font-semibold text-gray-800">
+                      {diagnosticReasoning.syndrome_identification.clinical_syndrome}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-green-700">Éléments concordants:</span>
+                    <p className="text-sm text-gray-700">
+                      {diagnosticReasoning.syndrome_identification.supporting_features}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-orange-700">Éléments discordants:</span>
+                    <p className="text-sm text-gray-700">
+                      {diagnosticReasoning.syndrome_identification.inconsistent_features || "Aucun"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* PRIMARY DIAGNOSIS (Enhanced with criteria) */}
+      {currentSection === 1 && (
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
+          <CardHeader className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-t-lg">
+            <CardTitle className="flex items-center gap-3">
+              <Target className="h-6 w-6" />
+              Diagnostic Principal
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8 space-y-6">
+            <div className="text-center p-6 bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl border-2 border-emerald-200">
+              <h3 className="text-2xl font-bold text-emerald-800 mb-4">
+                {language === 'fr' && diagnosis?.primary?.condition_bilingual?.fr 
+                  ? diagnosis.primary.condition_bilingual.fr
+                  : diagnosis?.primary?.condition || "Diagnostic à préciser"}
+              </h3>
+              <div className="flex justify-center gap-4">
+                <Badge className="bg-emerald-100 text-emerald-800 text-sm px-4 py-2">
+                  Probabilité: {diagnosis?.primary?.confidence || 70}%
+                </Badge>
+                <Badge variant="outline" className="border-emerald-300 text-emerald-700 text-sm px-4 py-2">
+                  Sévérité: {language === 'fr' && diagnosis?.primary?.severity_bilingual?.fr 
+                    ? diagnosis.primary.severity_bilingual.fr
+                    : diagnosis?.primary?.severity || "À évaluer"}
+                </Badge>
+                {diagnosis?.primary?.icd10 && (
+                  <Badge variant="outline" className="border-blue-300 text-blue-700 text-sm px-4 py-2">
+                    CIM-10: {diagnosis.primary.icd10}
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            {/* Diagnostic Criteria Met (NEW) */}
+            {diagnosis?.primary?.diagnosticCriteriaMet && diagnosis.primary.diagnosticCriteriaMet.length > 0 && (
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                  <ClipboardCheck className="h-5 w-5" />
+                  Critères Diagnostiques Validés
+                </h4>
+                <ul className="space-y-2">
+                  {diagnosis.primary.diagnosticCriteriaMet.map((criterion: string, index: number) => (
+                    <li key={index} className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
+                      <span>{criterion}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {diagnosis?.primary?.detailedAnalysis && (
+              <div>
+                <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-emerald-600" />
+                  Analyse Physiopathologique Détaillée
+                </h4>
+                <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    {language === 'fr' && diagnosis.primary.detailedAnalysis_bilingual?.fr 
+                      ? diagnosis.primary.detailedAnalysis_bilingual.fr
+                      : diagnosis.primary.detailedAnalysis}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {diagnosis?.primary?.clinicalRationale && (
+              <div>
+                <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                  <Eye className="h-5 w-5 text-emerald-600" />
+                  Raisonnement Clinique
+                </h4>
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    {language === 'fr' && diagnosis.primary.clinicalRationale_bilingual?.fr 
+                      ? diagnosis.primary.clinicalRationale_bilingual.fr
+                      : diagnosis.primary.clinicalRationale}
+                  </p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* INVESTIGATION STRATEGY (Enhanced with test purposes) */}
+      {currentSection === 2 && expertAnalysis?.expert_investigations && (
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+          <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
+            <CardTitle className="flex items-center gap-3">
+              <TestTube className="h-6 w-6" />
+              Stratégie d'Investigation Complète
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8 space-y-6">
+            {/* Diagnostic Approach */}
+            {expertAnalysis.expert_investigations.investigation_strategy?.diagnostic_approach && (
+              <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-6">
+                <p className="text-center font-medium text-red-800">
+                  {language === 'fr' 
+                    ? expertAnalysis.expert_investigations.investigation_strategy.diagnostic_approach.fr
+                    : expertAnalysis.expert_investigations.investigation_strategy.diagnostic_approach.en}
+                </p>
+              </div>
+            )}
+
+            {/* Tests by Purpose (NEW) */}
+            {expertAnalysis.expert_investigations.tests_by_purpose && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {/* To Confirm Primary */}
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    Confirmer Diagnostic
+                  </h4>
+                  <div className="space-y-3">
+                    {expertAnalysis.expert_investigations.tests_by_purpose.to_confirm_primary?.map((test: any, idx: number) => (
+                      <div key={idx} className="text-sm">
+                        <p className="font-medium text-green-700">
+                          {language === 'fr' ? test.test.fr : test.test.en}
+                        </p>
+                        <p className="text-gray-600 text-xs mt-1">
+                          {language === 'fr' ? test.rationale.fr : test.rationale.en}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* To Exclude Differentials */}
+                <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                  <h4 className="font-semibold text-orange-800 mb-3 flex items-center gap-2">
+                    <Search className="h-5 w-5" />
+                    Exclure Différentiels
+                  </h4>
+                  <div className="space-y-3">
+                    {expertAnalysis.expert_investigations.tests_by_purpose.to_exclude_differentials?.map((test: any, idx: number) => (
+                      <div key={idx} className="text-sm">
+                        <p className="font-medium text-orange-700">
+                          {language === 'fr' ? test.test.fr : test.test.en}
+                        </p>
+                        <p className="text-gray-600 text-xs mt-1">
+                          Exclut: {test.differential}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* To Assess Severity */}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                    <Activity className="h-5 w-5" />
+                    Évaluer Sévérité
+                  </h4>
+                  <div className="space-y-3">
+                    {expertAnalysis.expert_investigations.tests_by_purpose.to_assess_severity?.map((test: any, idx: number) => (
+                      <div key={idx} className="text-sm">
+                        <p className="font-medium text-blue-700">
+                          {language === 'fr' ? test.test.fr : test.test.en}
+                        </p>
+                        <p className="text-gray-600 text-xs mt-1">
+                          {language === 'fr' ? test.purpose.fr : test.purpose.en}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Test Sequence Timeline (NEW) */}
+            {expertAnalysis.expert_investigations.test_sequence && (
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6">
+                <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  Séquence Temporelle des Examens
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="flex items-center gap-3">
+                    <Badge className="bg-red-100 text-red-800">IMMÉDIAT</Badge>
+                    <p className="text-sm">{expertAnalysis.expert_investigations.test_sequence.immediate}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Badge className="bg-orange-100 text-orange-800">24-48H</Badge>
+                    <p className="text-sm">{expertAnalysis.expert_investigations.test_sequence.urgent}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Badge className="bg-yellow-100 text-yellow-800">ROUTINE</Badge>
+                    <p className="text-sm">{expertAnalysis.expert_investigations.test_sequence.routine}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Detailed Test List */}
+            <div className="grid gap-6">
+              {expertAnalysis.expert_investigations.immediate_priority?.map((exam: any, index: number) => (
+                <div key={index} className="border rounded-lg p-6 hover:shadow-md transition-shadow bg-gradient-to-r from-gray-50 to-red-50">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      {exam.category === 'biology' && <FlaskConical className="h-6 w-6 text-red-600" />}
+                      {exam.category === 'imaging' && <Activity className="h-6 w-6 text-blue-600" />}
+                      {exam.category === 'functional' && <Stethoscope className="h-6 w-6 text-green-600" />}
+                      <div>
+                        <h3 className="font-bold text-lg text-gray-800">
+                          {language === 'fr' && exam.examination_bilingual?.fr 
+                            ? exam.examination_bilingual.fr
+                            : exam.examination}
+                        </h3>
+                        <Badge className={`mt-1 ${
+                          exam.urgency === 'immediate' ? 'bg-red-100 text-red-800' :
+                          exam.urgency === 'urgent' ? 'bg-orange-100 text-orange-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {exam.urgency === 'immediate' ? 'IMMÉDIAT' :
+                           exam.urgency === 'urgent' ? 'URGENT' : 'SEMI-URGENT'}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="font-semibold text-sm text-gray-700 mb-1">INDICATION :</h4>
+                      <p className="text-sm text-gray-600">
+                        {language === 'fr' && exam.indication_bilingual?.fr 
+                          ? exam.indication_bilingual.fr
+                          : exam.specific_indication}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 p-4 bg-white rounded border">
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700 mb-2 flex items-center gap-1">
+                          <MapPin className="h-4 w-4" />
+                          DISPONIBILITÉ MAURICE :
+                        </h4>
+                        <p className="text-xs text-gray-600">
+                          {exam.mauritius_availability?.where || 'À vérifier'}
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700 mb-2 flex items-center gap-1">
+                          <DollarSign className="h-4 w-4" />
+                          COÛT & DÉLAI :
+                        </h4>
+                        <div className="space-y-1">
+                          <p className="text-xs text-green-600">
+                            <strong>Coût:</strong> {exam.mauritius_availability?.cost || 'À vérifier'}
+                          </p>
+                          <p className="text-xs text-orange-600">
+                            <strong>Délai:</strong> {exam.mauritius_availability?.turnaround || 'À vérifier'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* TREATMENTS */}
+      {currentSection === 3 && expertAnalysis?.expert_therapeutics?.primary_treatments && expertAnalysis.expert_therapeutics.primary_treatments.length > 0 && (
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
+          <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-t-lg">
+            <CardTitle className="flex items-center gap-3">
+              <Pill className="h-6 w-6" />
+              Traitements Prescrits ({expertAnalysis.expert_therapeutics.primary_treatments.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8">
+            <div className="grid gap-6">
+              {expertAnalysis.expert_therapeutics.primary_treatments.map((treatment: any, index: number) => (
+                <div key={index} className="border rounded-lg p-6 hover:shadow-md transition-shadow bg-gradient-to-r from-gray-50 to-purple-50">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <Pill className="h-6 w-6 text-purple-600" />
+                      <div>
+                        <h3 className="font-bold text-lg text-gray-800">
+                          {language === 'fr' && treatment.medication_bilingual?.fr 
+                            ? treatment.medication_bilingual.fr
+                            : treatment.medication_dci}
+                        </h3>
+                        <Badge variant="outline" className="mt-1 border-purple-300 text-purple-700">
+                          {treatment.therapeutic_class}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-sm text-gray-700 mb-1">INDICATION :</h4>
+                      <p className="text-sm text-gray-600">
+                        {language === 'fr' && treatment.indication_bilingual?.fr 
+                          ? treatment.indication_bilingual.fr
+                          : treatment.precise_indication}
+                      </p>
+                    </div>
+
+                    {treatment.mechanism_bilingual && (
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700 mb-1">MÉCANISME D'ACTION :</h4>
+                        <p className="text-sm text-gray-600">
+                          {language === 'fr' ? treatment.mechanism_bilingual.fr : treatment.mechanism_bilingual.en}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700 mb-2">POSOLOGIE :</h4>
+                        <div className="space-y-1 text-sm">
+                          <p><strong>Adulte:</strong> {treatment.dosing_regimen?.adult?.fr || 'À préciser'}</p>
+                          {treatment.dosing_regimen?.adjustments?.elderly && (
+                            <p><strong>Sujet âgé:</strong> {treatment.dosing_regimen.adjustments.elderly.fr}</p>
+                          )}
+                          {treatment.dosing_regimen?.adjustments?.renal && (
+                            <p><strong>Insuff. rénale:</strong> {treatment.dosing_regimen.adjustments.renal.fr}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700 mb-2">DURÉE & COÛT :</h4>
+                        <div className="space-y-1 text-sm">
+                          <p><strong>Durée:</strong> {treatment.dosing_regimen?.duration?.fr || 'Selon évolution'}</p>
+                          <p><strong>Disponible:</strong> {treatment.mauritius_availability?.public_free ? 'Gratuit (public)' : 'Payant'}</p>
+                          {treatment.mauritius_availability?.estimated_cost && (
+                            <p><strong>Coût estimé:</strong> {treatment.mauritius_availability.estimated_cost}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* DIFFERENTIAL DIAGNOSES */}
+      {currentSection === 4 && diagnosis?.differential && diagnosis.differential.length > 0 && (
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
+          <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
+            <CardTitle className="flex items-center gap-3">
+              <Search className="h-6 w-6" />
+              Diagnostics Différentiels ({diagnosis.differential.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8">
+            <div className="grid gap-6">
+              {diagnosis.differential.map((diff: any, index: number) => (
+                <div key={index} className="border-l-4 border-blue-400 pl-6 bg-blue-25 p-4 rounded-r-lg hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-lg text-blue-800">
+                      {language === 'fr' && diff.condition?.fr 
+                        ? diff.condition.fr 
+                        : diff.condition?.en || diff.condition || "Diagnostic différentiel"}
+                    </h4>
+                    <Badge className="bg-blue-100 text-blue-800">{diff.probability || 30}%</Badge>
+                  </div>
+                  
+                  {diff.reasoning && (
+                    <div className="mb-3">
+                      <p className="text-sm text-gray-600 italic">
+                        {language === 'fr' && diff.reasoning.fr 
+                          ? diff.reasoning.fr 
+                          : diff.reasoning.en || diff.reasoning}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {diff.supporting_features && (
+                    <div className="mb-2">
+                      <span className="font-medium text-green-700 text-sm">Arguments pour: </span>
+                      <span className="text-sm text-gray-600">{diff.supporting_features}</span>
+                    </div>
+                  )}
+                  
+                  {diff.against_features && (
+                    <div className="mb-2">
+                      <span className="font-medium text-red-700 text-sm">Arguments contre: </span>
+                      <span className="text-sm text-gray-600">{diff.against_features}</span>
+                    </div>
+                  )}
+                  
+                  {diff.discriminating_test && (
+                    <div className="bg-blue-50 p-3 rounded border border-blue-200 mt-3">
+                      <span className="font-medium text-blue-700">
+                        <TestTube className="h-4 w-4 inline mr-1" />
+                        Test discriminant: 
+                      </span>
+                      <span className="text-sm text-blue-600 ml-2">
+                        {language === 'fr' ? diff.discriminating_test.fr : diff.discriminating_test.en}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* MONITORING */}
+      {currentSection === 5 && (
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
+          <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
+            <CardTitle className="flex items-center gap-3">
+              <Monitor className="h-6 w-6" />
+              Plan de Surveillance
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                <div className="flex items-center gap-2 mb-3">
+                  <Clock className="h-5 w-5 text-red-600" />
+                  <h3 className="font-semibold text-red-800">Surveillance Immédiate (24h)</h3>
+                </div>
+                <ul className="text-sm text-red-700 space-y-1">
+                  <li>• Efficacité traitement symptomatique</li>
+                  <li>• Tolérance médicamenteuse</li>
+                  <li>• Évolution symptômes</li>
+                  <li>• Signes complications</li>
+                </ul>
+              </div>
+
+              <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                <div className="flex items-center gap-2 mb-3">
+                  <Calendar className="h-5 w-5 text-orange-600" />
+                  <h3 className="font-semibold text-orange-800">Suivi Court Terme (1 semaine)</h3>
+                </div>
+                <ul className="text-sm text-orange-700 space-y-1">
+                  <li>• Réévaluation clinique</li>
+                  <li>• Résultats examens biologiques</li>
+                  <li>• Adaptation thérapeutique si besoin</li>
+                  <li>• Observance traitement</li>
+                </ul>
+              </div>
+
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <div className="flex items-center gap-2 mb-3">
+                  <Activity className="h-5 w-5 text-green-600" />
+                  <h3 className="font-semibold text-green-800">Suivi Long Terme</h3>
+                </div>
+                <ul className="text-sm text-green-700 space-y-1">
+                  <li>• Prévention récidives</li>
+                  <li>• Surveillance fonction organes</li>
+                  <li>• Éducation thérapeutique</li>
+                  <li>• Adaptation style de vie</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <h3 className="font-bold text-yellow-800 mb-2 flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5" />
+                Signes d'Alarme - Consultation Urgente
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <ul className="text-sm text-yellow-700 space-y-1">
+                  <li>• Aggravation état général</li>
+                  <li>• Fièvre &gt;39°C persistante</li>
+                  <li>• Douleur non contrôlée &gt;8/10</li>
+                </ul>
+                <ul className="text-sm text-yellow-700 space-y-1">
+                  <li>• Effets indésirables sévères</li>
+                  <li>• Symptômes neurologiques nouveaux</li>
+                  <li>• Urgences Maurice: 114 (SAMU)</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* DOCUMENTS */}
+      {currentSection === 6 && documentsGenerated && mauritianDocuments && (
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 border-blue-200">
+          <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
+            <CardTitle className="flex items-center gap-3">
+              <FileText className="h-6 w-6" />
+              Documents Médicaux Mauriciens Enrichis
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              
+              {/* Consultation avec Raisonnement */}
+              <div className="bg-blue-50 p-6 rounded-lg border border-blue-200 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3 mb-4">
+                  <FileText className="h-8 w-8 text-blue-600" />
+                  <div>
+                    <h3 className="font-semibold text-blue-800">Compte Rendu Consultation</h3>
+                    <p className="text-sm text-blue-600">Avec raisonnement diagnostique</p>
+                  </div>
+                </div>
+                <div className="text-xs text-blue-700 space-y-1">
+                  <p><strong>Patient:</strong> {mauritianDocuments.consultation?.patient?.firstName} {mauritianDocuments.consultation?.patient?.lastName}</p>
+                  <p><strong>Diagnostic:</strong> {
+                    language === 'fr' && mauritianDocuments.consultation?.clinical_summary?.diagnosis?.fr
+                      ? mauritianDocuments.consultation.clinical_summary.diagnosis.fr
+                      : diagnosis?.primary?.condition
+                  }</p>
+                  <p className="text-green-600"><strong>Nouveau:</strong> Raisonnement diagnostique inclus</p>
+                </div>
+              </div>
+
+              {/* Autres documents */}
+              <div className="bg-red-50 p-6 rounded-lg border border-red-200 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3 mb-4">
+                  <TestTube className="h-8 w-8 text-red-600" />
+                  <div>
+                    <h3 className="font-semibold text-red-800">Examens Structurés</h3>
+                    <p className="text-sm text-red-600">Par objectif diagnostique</p>
+                  </div>
+                </div>
+                <div className="text-xs text-red-700">
+                  <p className="text-green-600"><strong>Nouveau:</strong> Tests organisés par objectif</p>
+                </div>
+              </div>
+
+              <div className="bg-green-50 p-6 rounded-lg border border-green-200 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3 mb-4">
+                  <Stethoscope className="h-8 w-8 text-green-600" />
+                  <div>
+                    <h3 className="font-semibold text-green-800">Séquence Temporelle</h3>
+                    <p className="text-sm text-green-600">Examens priorisés</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-purple-50 p-6 rounded-lg border border-purple-200 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3 mb-4">
+                  <Pill className="h-8 w-8 text-purple-600" />
+                  <div>
+                    <h3 className="font-semibold text-purple-800">Prescription Détaillée</h3>
+                    <p className="text-sm text-purple-600">Mécanismes d'action inclus</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-blue-100 to-purple-100 p-4 rounded-lg border border-blue-300">
+              <div className="flex items-center gap-2 mb-2">
+                <Brain className="h-5 w-5 text-purple-600" />
+                <span className="font-semibold text-purple-800">Documents Enrichis avec Logique Diagnostique</span>
+              </div>
+              <p className="text-sm text-purple-700">
+                Tous les documents incluent maintenant le raisonnement diagnostique systématique 
+                et la stratégie d'investigation structurée pour une meilleure traçabilité médicale.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Navigation */}
+      <div className="flex justify-between">
+        <Button 
+          variant="outline" 
+          onClick={onPrevious}
+          className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Retour Questions IA
+        </Button>
+
+        {documentsGenerated ? (
+          <Button 
+            onClick={onNext}
+            className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            <Edit3 className="h-4 w-4 mr-2" />
+            Éditer Documents
+          </Button>
+        ) : (
+          <Button 
+            onClick={generateCompleteDiagnosisAndDocuments}
+            className="bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            <Brain className="h-4 w-4 mr-2" />
+            Générer Analyse Enrichie
+          </Button>
+        )}
+      </div>
+    </div>
+  )
 }
