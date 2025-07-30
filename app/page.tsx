@@ -135,20 +135,22 @@ export default function MedicalAIExpert() {
       icon: <ClipboardList className="h-5 w-5" />,
       component: DiagnosisForm,
     },
-    {
-      id: 4,
-      title: t('steps.documents.title'),
-      description: t('steps.documents.description'),
-      icon: <Activity className="h-5 w-5" />,
-      component: MedicalWorkflow,
-    },
-    {
-      id: 5,
-      title: "Compte Rendu Final", // À traduire
-      description: "Rapport médical professionnel complet", // À traduire
-      icon: <FileSignature className="h-5 w-5" />,
-      component: ProfessionalReport,
-    },
+        {
+          // Étape 4 : génération du compte rendu final avant l'édition des documents
+          id: 4,
+          title: "Compte Rendu Final", // À traduire
+          description: "Rapport médical professionnel complet", // À traduire
+          icon: <FileSignature className="h-5 w-5" />, // Nouvelle icône pour le compte rendu
+          component: ProfessionalReport,
+        },
+        {
+          // Étape 5 : édition des documents après le compte rendu
+          id: 5,
+          title: t('steps.documents.title'),
+          description: t('steps.documents.description'),
+          icon: <Activity className="h-5 w-5" />, // Icône des documents
+          component: MedicalWorkflow,
+        },
   ]
 
   const progress = ((currentStep + 1) / steps.length) * 100
@@ -181,13 +183,15 @@ export default function MedicalAIExpert() {
             }
             break
           case 4:
-            if (workflowResult) {
-              await consultationDataService.saveStepData(4, workflowResult)
+            // Étape 4 : enregistrement du compte rendu final
+            if (finalReport) {
+              await consultationDataService.saveStepData(4, finalReport)
             }
             break
           case 5:
-            if (finalReport) {
-              await consultationDataService.saveStepData(5, finalReport)
+            // Étape 5 : enregistrement des documents édités
+            if (workflowResult) {
+              await consultationDataService.saveStepData(5, workflowResult)
             }
             break
         }
@@ -215,8 +219,11 @@ export default function MedicalAIExpert() {
     const consultationId = consultationDataService.getCurrentConsultationId()
     if (consultationId) {
       try {
-        await consultationDataService.saveStepData(4, data)
-        console.log('Workflow data saved')
+        // Étape 5 : sauvegarde des documents édités
+        await consultationDataService.saveStepData(5, data)
+        // Marquer la consultation comme complète après l'édition des documents
+        await consultationDataService.markConsultationComplete()
+        console.log('Workflow documents saved and consultation completed')
       } catch (error) {
         console.error('Error saving workflow data:', error)
       }
@@ -230,14 +237,14 @@ export default function MedicalAIExpert() {
     const consultationId = consultationDataService.getCurrentConsultationId()
     if (consultationId) {
       try {
-        await consultationDataService.saveStepData(5, reportData)
-        await consultationDataService.markConsultationComplete()
-        console.log('Consultation fully completed and archived')
-        
-        // Optionnel : rediriger vers une page de confirmation
+        // Étape 4 : sauvegarde du compte rendu final
+        await consultationDataService.saveStepData(4, reportData)
+        console.log('Final report data saved')
+        // La finalisation de la consultation se fait lors de la sauvegarde des documents (étape 5)
+        // Optionnel : rediriger vers une page de confirmation après la génération du compte rendu
         // router.push('/consultation-complete')
       } catch (error) {
-        console.error('Error finalizing consultation:', error)
+        console.error('Error saving final report:', error)
       }
     }
   }
@@ -289,28 +296,31 @@ export default function MedicalAIExpert() {
           onNext: handleNext,
           onPrevious: handlePrevious,
         }
-      case 4:
-        return {
-          ...commonProps,
-          patientData,
-          clinicalData,
-          questionsData,
-          diagnosisData,
-          initialData: workflowResult,
-          onComplete: handleWorkflowComplete,
-          onBack: handlePrevious,
-        }
-      case 5: // NOUVELLE ÉTAPE
-        return {
-          ...commonProps,
-          patientData,
-          clinicalData,
-          questionsData,
-          diagnosisData,
-          editedDocuments: workflowResult, // Documents édités à l'étape 4
-          onComplete: handleFinalReportComplete,
-          onPrevious: handlePrevious,
-        }
+          case 4:
+            // Étape 4 : génération du compte rendu final
+            return {
+              ...commonProps,
+              patientData,
+              clinicalData,
+              questionsData,
+              diagnosisData,
+              // Documents édités disponibles à ce stade (probablement null)
+              editedDocuments: workflowResult,
+              onComplete: handleFinalReportComplete,
+              onPrevious: handlePrevious,
+            }
+          case 5:
+            // Étape 5 : édition des documents
+            return {
+              ...commonProps,
+              patientData,
+              clinicalData,
+              questionsData,
+              diagnosisData,
+              initialData: workflowResult,
+              onComplete: handleWorkflowComplete,
+              onBack: handlePrevious,
+            }
       default:
         return commonProps
     }
