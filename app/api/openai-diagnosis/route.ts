@@ -907,8 +907,8 @@ export async function POST(request: NextRequest) {
     const duration = clinicalData?.symptomDuration || 'Non précisée'
     const painScale = clinicalData?.painScale || 0
     const vitalSigns = clinicalData?.vitalSigns || {}
-    const diseaseHistory = clinicalData?.diseaseHistory || 
-   const questionsAnswers = questionsData?.answers || questionsData?.responses || questionsData || [] // Validation et formatage des questions const formattedQuestions = questionsAnswers.map((qa: any, index: number) => { const question = qa.question || qa.text || 'Question non disponible' const answer = qa.answer || qa.response || qa.value || 'Non répondu' // Détection de réponses critiques const criticalResponses = ['oui', 'yes', 'grave', 'intense', 'sévère', '8', '9', '10'] const isCritical = criticalResponses.some(resp => answer.toString().toLowerCase().includes(resp) ) return { id: index + 1, question, answer, isCritical } }) // Logger pour debug console.log('📋 Questions IA formatées:', JSON.stringify(formattedQuestions, null, 2)) // Compter les réponses critiques const criticalCount = formattedQuestions.filter(q => q.isCritical).length console.log(`⚠️ Réponses critiques détectées: ${criticalCount}`)
+   const diseaseHistory = clinicalData?.diseaseHistory || ''
+   const questionsAnswers = questionsData?.answers || questionsData?.responses || questionsData || []
 const formattedQuestions = questionsAnswers
 // AJOUTER : Système de détection des urgences vitales
 const EMERGENCY_PATTERNS = {
