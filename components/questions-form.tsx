@@ -30,11 +30,13 @@ import {
   FileText,
   ExternalLink,
   BookOpen,
-  AlertCircle
+  AlertCircle,
+  RefreshCw,
+  Zap
 } from "lucide-react"
 import { getTranslation, Language } from "@/lib/translations"
 
-// Enhanced interfaces to match the new API structure
+// Enhanced interfaces
 interface ClinicalScore {
   name: string
   fullName: string
@@ -51,7 +53,6 @@ interface EnhancedQuestion {
   question: string
   type: string
   options?: string[]
-  // New fields from enhanced API
   rationale?: string
   category?: 'accessible' | 'technical' | 'global'
   complexity_level?: 'simple' | 'moderate' | 'advanced'
@@ -95,7 +96,7 @@ interface QuestionsFormProps {
   consultationId?: string | null
 }
 
-// Helper component for score education - simplified without Collapsible
+// Helper Components
 function ScoreEducationCard({ question }: { question: EnhancedQuestion }) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -145,23 +146,7 @@ function ScoreEducationCard({ question }: { question: EnhancedQuestion }) {
               <h4 className="font-semibold text-purple-800 mb-2">Interprétation</h4>
               <div className="text-purple-700">
                 {typeof question.score_interpretation === 'string' ? (
-                  (() => {
-                    try {
-                      const parsed = JSON.parse(question.score_interpretation)
-                      return (
-                        <div className="space-y-1">
-                          {Object.entries(parsed).map(([key, value]) => (
-                            <div key={key} className="flex justify-between">
-                              <span className="font-medium">{key}:</span>
-                              <span>{value as string}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )
-                    } catch {
-                      return <p className="whitespace-pre-wrap">{question.score_interpretation}</p>
-                    }
-                  })()
+                  <p className="whitespace-pre-wrap">{question.score_interpretation}</p>
                 ) : (
                   <div className="space-y-1">
                     {Object.entries(question.score_interpretation).map(([key, value]) => (
@@ -219,7 +204,6 @@ function ScoreEducationCard({ question }: { question: EnhancedQuestion }) {
   )
 }
 
-// Helper component for question metadata badges
 function QuestionMetadataBadges({ question }: { question: EnhancedQuestion }) {
   return (
     <div className="flex flex-wrap gap-2 mb-4">
@@ -273,7 +257,6 @@ function QuestionMetadataBadges({ question }: { question: EnhancedQuestion }) {
   )
 }
 
-// Simple Tooltip replacement
 function SimpleTooltip({ children, content }: { children: React.ReactNode, content: string }) {
   const [show, setShow] = useState(false)
   
@@ -297,6 +280,7 @@ function SimpleTooltip({ children, content }: { children: React.ReactNode, conte
   )
 }
 
+// Main Component
 export default function QuestionsForm({
   patientData,
   clinicalData,
@@ -313,6 +297,7 @@ export default function QuestionsForm({
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [showEducation, setShowEducation] = useState(true)
   const [metadata, setMetadata] = useState<any>(null)
+  const [hasGenerated, setHasGenerated] = useState(false)
 
   // Helper function for translations
   const t = (key: string) => getTranslation(key, language)
@@ -320,17 +305,20 @@ export default function QuestionsForm({
   // Load saved data on mount
   useEffect(() => {
     const loadSavedData = async () => {
+      console.log('📂 Loading saved questions data...')
       try {
         const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
         
         if (currentConsultationId) {
           const savedData = await consultationDataService.getAllData()
-          if (savedData?.questionsData?.responses) {
+          if (savedData?.questionsData?.responses && savedData.questionsData.responses.length > 0) {
+            console.log('💾 Found saved responses:', savedData.questionsData.responses.length)
             setResponses(savedData.questionsData.responses)
+            setHasGenerated(true)
           }
         }
       } catch (error) {
-        console.error('Error loading saved questions data:', error)
+        console.error('❌ Error loading saved questions data:', error)
       }
     }
     
@@ -340,25 +328,36 @@ export default function QuestionsForm({
   // Save data when responses change
   useEffect(() => {
     const saveData = async () => {
+      if (responses.length === 0) return
+      
       try {
         await consultationDataService.saveStepData(2, { responses })
+        console.log('💾 Auto-saved questions data')
       } catch (error) {
-        console.error('Error saving questions data:', error)
+        console.error('❌ Error saving questions data:', error)
       }
     }
     
     const timer = setTimeout(() => {
-      if (responses.length > 0) {
-        saveData()
-      }
+      saveData()
     }, 1000)
     
     return () => clearTimeout(timer)
   }, [responses])
 
+  // SYSTEMATIC GENERATION - Main trigger
   useEffect(() => {
-    generateQuestions()
-  }, [patientData, clinicalData])
+    // Generate questions SYSTEMATICALLY when data is available
+    if (patientData && clinicalData && !hasGenerated) {
+      console.log('🎯 SYSTEMATIC GENERATION TRIGGERED')
+      console.log('📋 Patient:', patientData?.firstName, patientData?.lastName)
+      console.log('🏥 Chief Complaint:', clinicalData?.chiefComplaint)
+      console.log('📊 Has generated before:', hasGenerated)
+      
+      generateQuestions()
+      setHasGenerated(true)
+    }
+  }, [patientData, clinicalData, hasGenerated])
 
   // Auto-save effect
   useEffect(() => {
@@ -369,12 +368,21 @@ export default function QuestionsForm({
   }, [responses, onDataChange])
 
   const generateQuestions = async () => {
-    if (!patientData || !clinicalData) return
+    console.log('🚀 generateQuestions() called')
+    console.log('📊 Patient data:', !!patientData, patientData?.firstName)
+    console.log('📊 Clinical data:', !!clinicalData, clinicalData?.chiefComplaint)
+    
+    if (!patientData || !clinicalData) {
+      console.log('⚠️ Missing required data for question generation')
+      return
+    }
 
     setLoading(true)
     setError(null)
 
     try {
+      console.log('📡 Calling API /api/openai-questions...')
+      
       const response = await fetch("/api/openai-questions", {
         method: "POST",
         headers: {
@@ -387,15 +395,18 @@ export default function QuestionsForm({
         }),
       })
 
+      console.log('📨 Response status:', response.status)
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || (language === 'fr' ? "Erreur lors de la génération des questions" : "Error generating questions"))
+        throw new Error(data.error || `Error ${response.status}`)
       }
 
       if (data.success && Array.isArray(data.questions)) {
+        console.log(`✅ Generated ${data.questions.length} questions successfully`)
         setQuestions(data.questions)
         setMetadata(data.metadata)
+        
         const initialResponses = data.questions.map((q: EnhancedQuestion) => ({
           questionId: q.id,
           question: q.question,
@@ -404,14 +415,14 @@ export default function QuestionsForm({
         }))
         setResponses(initialResponses)
       } else {
-        throw new Error(language === 'fr' ? "Format de réponse invalide" : "Invalid response format")
+        throw new Error('Invalid response format')
       }
     } catch (err) {
-      console.error("Error generating questions:", err)
-      setError(err instanceof Error ? err.message : (language === 'fr' ? "Erreur inconnue" : "Unknown error"))
+      console.error("❌ Error generating questions:", err)
+      setError(err instanceof Error ? err.message : "Erreur inconnue")
 
-      // Enhanced fallback questions
-      const fallbackQuestions = language === 'fr' ? [
+      // Fallback questions
+      const fallbackQuestions = [
         {
           id: 1,
           question: "Avez-vous déjà eu des symptômes similaires par le passé ?",
@@ -443,38 +454,6 @@ export default function QuestionsForm({
           patient_benefit: "Permet d'adapter le traitement à vos besoins réels",
           diagnostic_value: "medium" as const
         }
-      ] : [
-        {
-          id: 1,
-          question: "Have you experienced similar symptoms in the past?",
-          type: "boolean",
-          options: ["Yes", "No"],
-          category: "accessible" as const,
-          complexity_level: "simple" as const,
-          rationale: "History of similar symptoms guides diagnosis",
-          diagnostic_value: "high" as const
-        },
-        {
-          id: 2,
-          question: "Do symptoms worsen with physical exertion?",
-          type: "boolean",
-          options: ["Yes", "No"],
-          category: "accessible" as const,
-          complexity_level: "simple" as const,
-          rationale: "Exertional symptoms suggest cardiac or respiratory causes",
-          diagnostic_value: "high" as const
-        },
-        {
-          id: 3,
-          question: "On a scale of 1 to 5, how would you rate the impact on your quality of life?",
-          type: "scale",
-          options: ["1", "2", "3", "4", "5"],
-          category: "global" as const,
-          complexity_level: "simple" as const,
-          rationale: "Functional impact guides urgency and treatment intensity",
-          patient_benefit: "Helps tailor treatment to your actual needs",
-          diagnostic_value: "medium" as const
-        }
       ]
 
       setQuestions(fallbackQuestions)
@@ -488,6 +467,12 @@ export default function QuestionsForm({
     } finally {
       setLoading(false)
     }
+  }
+
+  const forceRegenerate = () => {
+    console.log('🔄 Force regenerate questions')
+    setHasGenerated(false)
+    generateQuestions()
   }
 
   const updateResponse = (questionId: number, answer: string | number) => {
@@ -641,6 +626,7 @@ export default function QuestionsForm({
 
   const progress = calculateProgress()
 
+  // Loading state
   if (loading) {
     return (
       <div className="space-y-6">
@@ -672,7 +658,7 @@ export default function QuestionsForm({
 
   return (
     <div className="space-y-6">
-      {/* Header with Progress and Metadata */}
+      {/* Header with Progress */}
       <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -680,7 +666,7 @@ export default function QuestionsForm({
             {t('questionsForm.title')}
           </CardTitle>
           
-          {/* Display detected specialties and approach */}
+          {/* Metadata badges */}
           {metadata && (
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               {metadata.detectedSpecialties?.map((specialty: string) => (
@@ -689,21 +675,13 @@ export default function QuestionsForm({
                   {specialty}
                 </Badge>
               ))}
-              {metadata?.generationMethod && (
-                <div className="mt-2 flex items-center justify-center gap-2 text-xs text-gray-500">
-                  <Sparkles className="h-3 w-3" />
-                  <span>Méthode: {metadata.generationMethod}</span>
-                  {metadata.cacheUtilization && (
-                    <span>• Cache: {metadata.cacheUtilization.cacheHits} hits</span>
-                  )}
-                </div>
-              )}
               <Badge variant="outline">
                 {metadata.approach || "multi-specialty-expert"}
               </Badge>
             </div>
           )}
 
+          {/* Progress bar */}
           <div className="mt-4 space-y-2">
             <div className="flex justify-between text-sm text-gray-600">
               <span>{t('questionsForm.progressTitle')}</span>
@@ -711,63 +689,31 @@ export default function QuestionsForm({
             </div>
             <Progress value={progress} className="h-2" />
           </div>
+
+          {/* Status badges */}
           <div className="flex justify-center gap-4 mt-4">
             <Badge variant="outline" className="bg-blue-50">
               {getAnsweredCount()} / {questions.length} {t('questionsForm.answered')}
             </Badge>
-            {metadata?.expertFeatures?.clinicalScoresUsed?.length > 0 && (
-              <Badge variant="outline" className="bg-green-50">
-                <Calculator className="h-3 w-3 mr-1" />
-                {metadata.expertFeatures.clinicalScoresUsed.length} scores cliniques
-              </Badge>
-            )}
             {error && <Badge variant="destructive">{t('questionsForm.fallbackMode')}</Badge>}
+          </div>
+          
+          {/* Regenerate button */}
+          <div className="mt-4 flex justify-center">
+            <Button
+              onClick={forceRegenerate}
+              variant="outline"
+              size="sm"
+              disabled={loading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              {loading ? 'Génération...' : 'Régénérer les questions'}
+            </Button>
           </div>
         </CardHeader>
       </Card>
 
-      {/* Clinical Scores Summary if any */}
-      {metadata?.scoreEducation?.scoresUsed?.length > 0 && (
-        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-0 shadow-md">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <GraduationCap className="h-5 w-5 text-blue-600" />
-              Scores cliniques utilisés dans cette consultation
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4">
-              {metadata.scoreEducation.scoresUsed.map((score: ClinicalScore, index: number) => (
-                <div key={index} className="p-4 bg-white rounded-lg shadow-sm">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-800">{score.name}</h4>
-                      <p className="text-sm text-gray-600 mt-1">{score.explanation}</p>
-                    </div>
-                    {score.calculator && (
-                      <a
-                        href={score.calculator}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="ml-4 flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
-                      >
-                        <Calculator className="h-4 w-4" />
-                        Calculer
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <p className="text-sm text-gray-600 mt-4 italic">
-              {metadata.scoreEducation.clinicalTip}
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Alert for fallback mode */}
+      {/* Error alert */}
       {error && (
         <Card className="bg-amber-50/80 backdrop-blur-sm border-amber-200 shadow-md">
           <CardContent className="pt-6">
@@ -779,21 +725,6 @@ export default function QuestionsForm({
             </div>
           </CardContent>
         </Card>
-      )}
-
-      {error && metadata?.parseErrors?.length > 0 && (
-        <details className="mt-2">
-          <summary className="text-xs text-amber-700 cursor-pointer">
-            Détails techniques ({metadata.parseErrors.length} erreurs)
-          </summary>
-          <div className="mt-2 text-xs text-amber-600">
-            {metadata.parseErrors.map((err: any, idx: number) => (
-              <div key={idx}>
-                {err.type} - {err.specialty}: {err.error}
-              </div>
-            ))}
-          </div>
-        </details>
       )}
 
       {/* Question Navigation */}
@@ -827,7 +758,7 @@ export default function QuestionsForm({
         </div>
       )}
 
-      {/* Enhanced Questions Cards */}
+      {/* Questions Cards */}
       {questions.map((question, index) => (
         <Card 
           key={question.id} 
@@ -859,16 +790,16 @@ export default function QuestionsForm({
             </div>
           </CardHeader>
           <CardContent className="p-8 space-y-6">
-            {/* Question Metadata Badges */}
+            {/* Question Metadata */}
             <QuestionMetadataBadges question={question} />
 
-            {/* Question with rationale */}
+            {/* Question */}
             <div>
               <Label className="text-lg font-semibold text-gray-800 leading-relaxed">
                 {question.question}
               </Label>
               
-              {/* Show rationale if available */}
+              {/* Rationale */}
               {question.rationale && (
                 <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="flex items-start gap-2">
@@ -878,16 +809,7 @@ export default function QuestionsForm({
                 </div>
               )}
 
-              {question.guidelines_reference && (
-                <SimpleTooltip content={question.guidelines_reference}>
-                  <Badge variant="outline" className="flex items-center gap-1 mt-2">
-                    <BookOpen className="h-3 w-3" />
-                    Guidelines
-                  </Badge>
-                </SimpleTooltip>
-              )}
-
-              {/* Show patient benefit if available */}
+              {/* Patient benefit */}
               {question.patient_benefit && (
                 <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
                   <div className="flex items-start gap-2">
@@ -899,45 +821,16 @@ export default function QuestionsForm({
                 </div>
               )}
 
+              {/* Question input */}
               <div className="mt-6">
                 {renderQuestion(question)}
               </div>
             </div>
 
-            {question.differential_diagnosis && question.differential_diagnosis.length > 0 && (
-              <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <div className="flex items-start gap-2">
-                  <Search className="h-4 w-4 text-yellow-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold text-yellow-800 mb-1">
-                      Diagnostics différentiels possibles :
-                    </p>
-                    <ul className="text-sm text-yellow-700 list-disc list-inside">
-                      {question.differential_diagnosis.map((diagnosis, idx) => (
-                        <li key={idx}>{diagnosis}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {question.next_steps && (
-              <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
-                <div className="flex items-start gap-2">
-                  <ArrowRight className="h-4 w-4 text-indigo-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold text-indigo-800 mb-1">Prochaines étapes :</p>
-                    <p className="text-sm text-indigo-700">{question.next_steps}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Clinical Score Education Card */}
+            {/* Clinical Score Education */}
             <ScoreEducationCard question={question} />
 
-            {/* Medical explanation for healthcare providers */}
+            {/* Medical explanation */}
             {question.medical_explanation && showEducation && (
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="flex items-start gap-2">
@@ -950,7 +843,7 @@ export default function QuestionsForm({
               </div>
             )}
 
-            {/* Red flags alert */}
+            {/* Red flags */}
             {question.red_flags && (
               <Alert className="border-red-200 bg-red-50">
                 <AlertCircle className="h-4 w-4 text-red-600" />
@@ -998,7 +891,6 @@ export default function QuestionsForm({
             {t('questionsForm.previousQuestion')}
           </Button>
           
-          {/* Conditional button: Next Question OR AI Diagnosis */}
           {!isLastQuestion() ? (
             <Button
               onClick={() => setCurrentQuestionIndex(Math.min(questions.length - 1, currentQuestionIndex + 1))}
@@ -1021,163 +913,21 @@ export default function QuestionsForm({
         </div>
       )}
 
-      {/* Fixed AI Diagnosis button when all questions are answered */}
+      {/* Fixed AI Diagnosis button */}
       {isFormValid() && (
         <div className="sticky bottom-4 flex justify-center">
           <Button 
             onClick={onNext}
             className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-4 shadow-2xl hover:shadow-3xl transition-all duration-300 font-semibold text-lg rounded-full animate-pulse"
           >
-            <Sparkles className="h-6 w-6 mr-3" />
+            <Zap className="h-6 w-6 mr-3" />
             {t('questionsForm.aiDiagnosisReady')}
             <ArrowRight className="h-5 w-5 ml-3" />
           </Button>
         </div>
       )}
 
-      {/* Enhanced Summary of answers with metadata */}
-      {getAnsweredCount() > 0 && (
-        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
-          <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
-            <CardTitle className="flex items-center gap-3">
-              <CheckCircle className="h-6 w-6" />
-              {t('questionsForm.summaryAnswers')}
-            </CardTitle>
-            {metadata && (
-              <div className="mt-2 text-green-100 text-sm">
-                {metadata.questionsCount} questions • {metadata.expertFeatures?.accessibleQuestions || 0} accessibles • 
-                {metadata.expertFeatures?.technicalQuestionsExplained || 0} techniques • 
-                {metadata.expertFeatures?.globalQuestions || 0} globales
-              </div>
-            )}
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="grid gap-4">
-              {responses
-                .filter((response) => {
-                  const answer = response.answer
-                  if (typeof answer === "string") {
-                    return answer.trim() !== ""
-                  }
-                  return answer !== "" && answer !== null && answer !== undefined
-                })
-                .map((response, index) => {
-                  const question = questions.find(q => q.id === response.questionId)
-                  return (
-                    <div key={response.questionId} className="p-4 bg-gray-50 rounded-lg border">
-                      <div className="flex items-start gap-3">
-                        <Badge variant="secondary" className="mt-1">Q{response.questionId}</Badge>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            {question?.category && (
-                              <Badge variant="outline" className="text-xs">
-                                {question.category}
-                              </Badge>
-                            )}
-                            {question?.clinical_score && (
-                              <Badge className="bg-blue-100 text-blue-800 text-xs">
-                                {question.clinical_score}
-                              </Badge>
-                            )}
-                            {question?.specialty && (
-                              <Badge className="bg-purple-100 text-purple-800 text-xs">
-                                {question.specialty}
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="font-medium text-gray-800 mb-2">{response.question}</p>
-                          <p className="text-sm text-gray-600 bg-white p-2 rounded border">
-                            {response.answer}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {metadata?.clinicalRecommendations && isFormValid() && (
-        <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-0 shadow-md">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Activity className="h-5 w-5 text-purple-600" />
-              Aperçu des recommandations cliniques
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Niveau d'urgence */}
-            <div className="flex items-center gap-2">
-              <Badge 
-                className={
-                  metadata.clinicalRecommendations.urgencyLevel?.includes('URGENCE ABSOLUE') 
-                    ? 'bg-red-600 text-white' 
-                    : metadata.clinicalRecommendations.urgencyLevel?.includes('URGENT')
-                    ? 'bg-orange-100 text-orange-800'
-                    : metadata.clinicalRecommendations.urgencyLevel?.includes('PRIORITAIRE')
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-green-100 text-green-800'
-                }
-              >
-                {metadata.clinicalRecommendations.urgencyLevel}
-              </Badge>
-            </div>
-
-            {/* Red flags s'il y en a */}
-            {metadata.clinicalRecommendations.redFlagAlerts?.length > 0 && (
-              <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold text-red-800 mb-1">Signes d'alerte détectés :</p>
-                    <ul className="text-sm text-red-700 list-disc list-inside">
-                      {metadata.clinicalRecommendations.redFlagAlerts.map((flag: string, idx: number) => (
-                        <li key={idx}>{flag}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Examens suggérés */}
-            {metadata.clinicalRecommendations.suggestedWorkup?.length > 0 && (
-              <div>
-                <p className="text-sm font-semibold text-gray-700 mb-2">Examens recommandés :</p>
-                <div className="flex flex-wrap gap-2">
-                  {metadata.clinicalRecommendations.suggestedWorkup.map((exam: string, idx: number) => (
-                    <Badge key={idx} variant="outline">
-                      {exam}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Diagnostics différentiels globaux */}
-            {metadata.clinicalRecommendations.differentialDiagnosis?.length > 0 && (
-              <div>
-                <p className="text-sm font-semibold text-gray-700 mb-2">Hypothèses diagnostiques :</p>
-                <div className="flex flex-wrap gap-2">
-                  {metadata.clinicalRecommendations.differentialDiagnosis.map((diagnosis: string, idx: number) => (
-                    <Badge key={idx} className="bg-purple-100 text-purple-800">
-                      {diagnosis}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <p className="text-sm text-gray-600 italic">
-              Une analyse complète sera générée après validation de toutes les réponses.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Toggle for medical explanations */}
+      {/* Toggle education */}
       <div className="flex justify-center">
         <Button
           variant="outline"
