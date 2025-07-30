@@ -61,6 +61,12 @@ export default function ProfessionalReport({
         diagnosisData,
         editedDocuments
       })
+      const contentType = response.headers.get("content-type") || "";
+if (!response.ok || !contentType.includes("application/json")) {
+  const text = await response.text();
+  throw new Error(text || `Erreur HTTP ${response.status}`);
+}
+
     })
 
     // Vérifiez le code de statut et le type de contenu.
