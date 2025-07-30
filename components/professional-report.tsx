@@ -51,7 +51,7 @@ export default function ProfessionalReport({
     setError(null)
 
     try {
-      const response = await fetch("/api/generate-professional-report", {
+      const response = await fetch("/api/generate-consultation-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
