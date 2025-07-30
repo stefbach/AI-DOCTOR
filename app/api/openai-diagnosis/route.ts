@@ -1,10 +1,9 @@
-// /app/api/openai-diagnosis/route.ts - VERSION CORRIGÉE ET FONCTIONNELLE
+// /app/api/openai-diagnosis/route.ts - VERSION COMPLÈTE CORRIGÉE
 import { NextRequest, NextResponse } from 'next/server'
 
-// ==================== CONTEXTE MINIMAL MAURICE ====================
-
+// ==================== CONTEXTE MEDICAL MAURICE ====================
 const MAURITIUS_HEALTHCARE_CONTEXT = {
-  // Infrastructure essentielle seulement
+  // Infrastructure médicale essentielle
   laboratories: {
     everywhere: "C-Lab (29 centres), Green Cross (36 centres), Biosanté (48 points)",
     specialized: "ProCare Medical (oncology/genetics), C-Lab (PCR/NGS)",
@@ -50,63 +49,72 @@ const MAURITIUS_HEALTHCARE_CONTEXT = {
   }
 }
 
-// ==================== FONCTION PRINCIPALE CORRIGÉE ====================
-
+// ==================== FONCTION PRINCIPALE API ====================
 export async function POST(request: NextRequest) {
-  console.log('🏥 ========== MAURITIUS MEDICAL AI - STARTING ==========')
-  console.log('🧠 Model: GPT-4o | Approach: Enhanced Diagnostic Logic')
+  console.log('🏥 ========== MAURITIUS MEDICAL AI - DÉMARRAGE ==========')
+  console.log('🧠 Modèle: GPT-4o | Approche: Raisonnement Diagnostique Amélioré')
   console.log('📅 Timestamp:', new Date().toISOString())
   
+  let patientData: any = null
+  let clinicalData: any = null
+  let questionsData: any = null
+  let language: string = 'bilingual'
+  
   try {
-    // Parse body with error handling
-    let body;
+    // 1. Parse et validation du body
+    let body
     try {
       body = await request.json()
-      console.log('📦 REQUEST RECEIVED:', {
+      console.log('📦 REQUÊTE REÇUE:', {
         hasPatientData: !!body.patientData,
         hasClinicalData: !!body.clinicalData,
         hasQuestionsData: !!body.questionsData,
         language: body.language || 'bilingual'
       })
+      
+      // Extraction des données
+      patientData = body.patientData
+      clinicalData = body.clinicalData
+      questionsData = body.questionsData
+      language = body.language || 'bilingual'
+      
     } catch (parseError) {
-      console.error('❌ JSON Parse Error:', parseError)
+      console.error('❌ Erreur parsing JSON:', parseError)
       return NextResponse.json({
         success: false,
-        error: 'Invalid JSON in request body'
+        error: 'Format JSON invalide dans la requête'
       }, { status: 400 })
     }
     
-    const { patientData, clinicalData, questionsData, language = 'bilingual' } = body
-    
-    // Validate required data
+    // 2. Validation des données requises
     if (!patientData || !clinicalData) {
-      console.error('❌ Missing required data:', { 
+      console.error('❌ Données manquantes:', { 
         hasPatientData: !!patientData, 
         hasClinicalData: !!clinicalData 
       })
       return NextResponse.json({
         success: false,
-        error: 'Missing required patient or clinical data'
+        error: 'Données patient ou cliniques manquantes'
       }, { status: 400 })
     }
     
-    // Check API key
+    // 3. Vérification de la clé API
     const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey) {
-      console.error('❌ OPENAI_API_KEY is not configured')
+      console.error('❌ OPENAI_API_KEY non configurée')
       return NextResponse.json({
         success: false,
-        error: 'API configuration error - Please contact administrator'
+        error: 'Configuration API manquante - Contactez l\'administrateur'
       }, { status: 500 })
     }
     
-    console.log('✅ API Key found, length:', apiKey.length)
+    console.log('✅ Clé API trouvée, longueur:', apiKey.length)
     
-    // Prepare patient context
+    // 4. Préparation du contexte patient
     const patientContext = {
-      age: patientData?.age || 'unknown',
-      sex: patientData?.sex || 'unknown',
-      weight: patientData?.weight || 'unknown',
+      age: patientData?.age || 'inconnu',
+      sex: patientData?.sex || 'inconnu',
+      weight: patientData?.weight || 'inconnu',
       medical_history: patientData?.medicalHistory || [],
       current_medications: patientData?.currentMedications || [],
       allergies: patientData?.allergies || [],
@@ -118,7 +126,7 @@ export async function POST(request: NextRequest) {
       ai_questions: questionsData || []
     }
     
-    console.log('📋 PATIENT CONTEXT PREPARED:', {
+    console.log('📋 CONTEXTE PATIENT PRÉPARÉ:', {
       age: patientContext.age,
       sex: patientContext.sex,
       chiefComplaint: patientContext.chief_complaint,
@@ -126,7 +134,7 @@ export async function POST(request: NextRequest) {
       aiQuestionsCount: patientContext.ai_questions.length
     })
     
-    // PROMPT ENRICHI AVEC LA LOGIQUE DIAGNOSTIQUE AMÉLIORÉE
+    // 5. Construction du prompt enrichi
     const enhancedDiagnosticPrompt = `
 You are an expert physician practicing telemedicine in Mauritius using systematic diagnostic reasoning.
 
@@ -151,7 +159,7 @@ ${JSON.stringify(patientContext, null, 2)}
    - Vital signs abnormalities: [Identify any abnormal values]
    - Disease evolution: ${patientContext.disease_history}
    - AI questionnaire responses: [CRITICAL - these often contain key diagnostic clues]
-     ${patientContext.ai_questions.map((q: any) => `Q: ${q.question} → A: ${q.answer}`).join('\n')}
+     ${patientContext.ai_questions.map((q: any) => `Q: ${q.question} → A: ${q.answer}`).join('\n     ')}
 
 2. FORMULATE DIAGNOSTIC HYPOTHESES:
    Based on the above, generate:
@@ -245,14 +253,13 @@ GENERATE THIS EXACT JSON STRUCTURE:
           "en": "[MINIMUM 80 WORDS] Why consider and how to differentiate..."
         }
       }
-      // 2-3 more differentials
     ]
   },
   
   "investigation_strategy": {
     "diagnostic_approach": {
-      "fr": "Pour confirmer ${primary_diagnosis} et exclure ${differentials}, voici la stratégie:",
-      "en": "To confirm ${primary_diagnosis} and exclude ${differentials}, here's the strategy:"
+      "fr": "Pour confirmer le diagnostic principal et exclure les diagnostics différentiels, voici la stratégie:",
+      "en": "To confirm the primary diagnosis and exclude differential diagnoses, here's the strategy:"
     },
     
     "tests_by_purpose": {
@@ -260,8 +267,8 @@ GENERATE THIS EXACT JSON STRUCTURE:
         {
           "test": { "fr": "[Test name]", "en": "[Test name]" },
           "rationale": {
-            "fr": "Ce test confirmera ${diagnosis} si ${expected_result}",
-            "en": "This test will confirm ${diagnosis} if ${expected_result}"
+            "fr": "Ce test confirmera le diagnostic si [résultat attendu]",
+            "en": "This test will confirm the diagnosis if [expected result]"
           },
           "expected_if_positive": "[Specific values/findings]",
           "expected_if_negative": "[Values that would exclude]"
@@ -273,8 +280,8 @@ GENERATE THIS EXACT JSON STRUCTURE:
           "differential": "[Which differential diagnosis]",
           "test": { "fr": "[Test name]", "en": "[Test name]" },
           "rationale": {
-            "fr": "Normal → exclut ${differential}",
-            "en": "Normal → excludes ${differential}"
+            "fr": "Normal → exclut le diagnostic différentiel",
+            "en": "Normal → excludes the differential diagnosis"
           }
         }
       ],
@@ -297,8 +304,8 @@ GENERATE THIS EXACT JSON STRUCTURE:
     },
     
     "rationale": {
-      "fr": "Stratégie diagnostique adaptée pour confirmer [diagnostic] et exclure [différentiels]",
-      "en": "Diagnostic strategy adapted to confirm [diagnosis] and exclude [differentials]"
+      "fr": "Stratégie diagnostique adaptée pour confirmer le diagnostic principal et exclure les différentiels",
+      "en": "Diagnostic strategy adapted to confirm primary diagnosis and exclude differentials"
     },
     
     "laboratory_tests": [
@@ -469,10 +476,11 @@ AI Question: "Relief with rest?" → "Yes"
 
 Generate a complete, professional medical analysis NOW.`
 
-    console.log('📡 CALLING GPT-4o API...')
-    console.log('🔑 Using API Key:', apiKey.substring(0, 10) + '...')
+    console.log('📡 APPEL API GPT-4o...')
+    console.log('🔑 Utilisation clé API:', apiKey.substring(0, 10) + '...')
     
-    let openaiResponse;
+    // 6. Appel à l'API OpenAI
+    let openaiResponse
     try {
       openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -498,69 +506,72 @@ Generate a complete, professional medical analysis NOW.`
         }),
       })
       
-      console.log('📨 OpenAI Response Status:', openaiResponse.status)
-      console.log('📨 OpenAI Response OK:', openaiResponse.ok)
+      console.log('📨 Statut réponse OpenAI:', openaiResponse.status)
+      console.log('📨 Réponse OK:', openaiResponse.ok)
       
     } catch (fetchError) {
-      console.error('❌ Fetch Error:', fetchError)
-      throw new Error(`Network error calling OpenAI: ${fetchError}`)
+      console.error('❌ Erreur réseau:', fetchError)
+      throw new Error(`Erreur réseau appel OpenAI: ${fetchError}`)
     }
     
+    // 7. Gestion de la réponse OpenAI
     if (!openaiResponse.ok) {
       const errorText = await openaiResponse.text()
-      console.error('❌ OpenAI API Error:', {
+      console.error('❌ Erreur API OpenAI:', {
         status: openaiResponse.status,
         errorText: errorText.substring(0, 500)
       })
-      throw new Error(`OpenAI Error ${openaiResponse.status}: ${errorText.substring(0, 200)}`)
+      throw new Error(`Erreur OpenAI ${openaiResponse.status}: ${errorText.substring(0, 200)}`)
     }
     
-    let openaiData;
+    // 8. Parse de la réponse
+    let openaiData
     try {
       openaiData = await openaiResponse.json()
-      console.log('✅ OpenAI Response Parsed Successfully')
+      console.log('✅ Réponse OpenAI parsée avec succès')
       console.log('📊 Usage:', openaiData.usage)
     } catch (parseError) {
-      console.error('❌ Error parsing OpenAI response:', parseError)
-      throw new Error('Invalid response from OpenAI')
+      console.error('❌ Erreur parsing réponse OpenAI:', parseError)
+      throw new Error('Réponse invalide de OpenAI')
     }
     
-    let medicalAnalysis;
+    // 9. Extraction de l'analyse médicale
+    let medicalAnalysis
     try {
       const content = openaiData.choices[0]?.message?.content
       if (!content) {
-        throw new Error('No content in OpenAI response')
+        throw new Error('Pas de contenu dans la réponse OpenAI')
       }
       medicalAnalysis = JSON.parse(content)
-      console.log('✅ Medical Analysis Parsed Successfully')
-      console.log('🔍 Analysis includes:', {
+      console.log('✅ Analyse médicale parsée avec succès')
+      console.log('🔍 L\'analyse inclut:', {
         hasDiagnosticReasoning: !!medicalAnalysis.diagnostic_reasoning,
         hasClinicalAnalysis: !!medicalAnalysis.clinical_analysis,
         hasInvestigationStrategy: !!medicalAnalysis.investigation_strategy,
         hasTreatmentPlan: !!medicalAnalysis.treatment_plan
       })
     } catch (parseError) {
-      console.error('❌ Error parsing medical analysis:', parseError)
-      throw new Error('Invalid medical analysis format from AI')
+      console.error('❌ Erreur parsing analyse médicale:', parseError)
+      throw new Error('Format d\'analyse médicale invalide de l\'IA')
     }
     
-    // Generate professional documents
+    // 10. Génération des documents professionnels
     const professionalDocuments = generateMedicalDocuments(
       medicalAnalysis,
       patientContext,
       MAURITIUS_HEALTHCARE_CONTEXT
     )
     
-    console.log('✅ Documents Generated Successfully')
+    console.log('✅ Documents générés avec succès')
     
-    // Prepare final response
+    // 11. Préparation de la réponse finale
     const finalResponse = {
       success: true,
       
-      // Diagnostic reasoning data
+      // Données de raisonnement diagnostique
       diagnosticReasoning: medicalAnalysis.diagnostic_reasoning || null,
       
-      // Compatible diagnosis format
+      // Format diagnostic compatible
       diagnosis: {
         primary: {
           condition: medicalAnalysis.clinical_analysis?.primary_diagnosis?.condition?.fr || "Diagnostic en cours",
@@ -581,7 +592,7 @@ Generate a complete, professional medical analysis NOW.`
         differential: medicalAnalysis.clinical_analysis?.differential_diagnoses || []
       },
       
-      // Expert analysis
+      // Analyse experte
       expertAnalysis: {
         expert_investigations: {
           investigation_strategy: medicalAnalysis.investigation_strategy || {},
@@ -622,10 +633,10 @@ Generate a complete, professional medical analysis NOW.`
         }
       },
       
-      // Generated documents
+      // Documents générés
       mauritianDocuments: professionalDocuments,
       
-      // Metadata
+      // Métadonnées
       metadata: {
         ai_model: 'GPT-4o',
         approach: 'Enhanced Diagnostic Reasoning',
@@ -637,8 +648,8 @@ Generate a complete, professional medical analysis NOW.`
       }
     }
     
-    console.log('✅ ========== API RESPONSE READY ==========')
-    console.log('📊 Response Summary:', {
+    console.log('✅ ========== RÉPONSE API PRÊTE ==========')
+    console.log('📊 Résumé réponse:', {
       success: finalResponse.success,
       hasDiagnosis: !!finalResponse.diagnosis,
       hasExpertAnalysis: !!finalResponse.expertAnalysis,
@@ -649,18 +660,18 @@ Generate a complete, professional medical analysis NOW.`
     return NextResponse.json(finalResponse)
     
   } catch (error) {
-    console.error('❌ ========== CRITICAL ERROR ==========')
-    console.error('Error details:', error)
-    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+    console.error('❌ ========== ERREUR CRITIQUE ==========')
+    console.error('Détails erreur:', error)
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'Pas de stack trace')
     
-    // Return a more detailed error response
+    // Retourner une réponse d'erreur détaillée avec fallback
     const errorResponse = {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
+      error: error instanceof Error ? error.message : 'Erreur inconnue',
       errorType: error instanceof Error ? error.name : 'UnknownError',
       timestamp: new Date().toISOString(),
-      // Provide fallback data so the UI doesn't break
-      diagnosis: generateEmergencyFallbackDiagnosis(body?.patientData, body?.clinicalData),
+      // Fournir des données de fallback pour que l'UI ne plante pas
+      diagnosis: generateEmergencyFallbackDiagnosis(patientData, clinicalData),
       expertAnalysis: {
         expert_investigations: {
           immediate_priority: [],
@@ -686,8 +697,7 @@ Generate a complete, professional medical analysis NOW.`
   }
 }
 
-// ==================== DOCUMENT GENERATION ====================
-
+// ==================== GÉNÉRATION DES DOCUMENTS ====================
 function generateMedicalDocuments(
   analysis: any,
   patient: any,
@@ -696,10 +706,10 @@ function generateMedicalDocuments(
   const currentDate = new Date()
   const consultationId = `TC-MU-${currentDate.getFullYear()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
   
-  console.log('📄 Generating medical documents...')
+  console.log('📄 Génération des documents médicaux...')
   
   return {
-    // CONSULTATION REPORT
+    // RAPPORT DE CONSULTATION
     consultation: {
       header: {
         title: {
@@ -721,7 +731,7 @@ function generateMedicalDocuments(
         sex: patient.sex
       },
       
-      // Include diagnostic reasoning
+      // Inclure le raisonnement diagnostique
       diagnostic_reasoning: analysis.diagnostic_reasoning || {},
       
       clinical_summary: {
@@ -746,7 +756,7 @@ function generateMedicalDocuments(
       patient_education: analysis.patient_education || {}
     },
     
-    // LAB PRESCRIPTION
+    // PRESCRIPTION BIOLOGIE
     biological: {
       header: {
         title: {
@@ -782,7 +792,7 @@ function generateMedicalDocuments(
       }))
     },
     
-    // IMAGING REQUESTS
+    // DEMANDES IMAGERIE
     imaging: (analysis.investigation_strategy?.imaging_studies?.length || 0) > 0 ? {
       header: {
         title: {
@@ -793,7 +803,7 @@ function generateMedicalDocuments(
       studies: analysis.investigation_strategy.imaging_studies
     } : null,
     
-    // MEDICATION PRESCRIPTION
+    // PRESCRIPTION MÉDICAMENTEUSE
     medication: {
       header: {
         title: {
@@ -843,10 +853,9 @@ function generateMedicalDocuments(
   }
 }
 
-// ==================== EMERGENCY FALLBACK ====================
-
+// ==================== DIAGNOSTIC DE SECOURS ====================
 function generateEmergencyFallbackDiagnosis(patient: any, clinical: any): any {
-  console.log('⚠️ Generating fallback diagnosis...')
+  console.log('⚠️ Génération diagnostic de secours...')
   
   return {
     primary: {
@@ -884,8 +893,7 @@ function generateEmergencyFallbackDiagnosis(patient: any, clinical: any): any {
   }
 }
 
-// ==================== EXPORTS ====================
-
+// ==================== CONFIGURATION ====================
 export const config = {
   api: {
     bodyParser: {
