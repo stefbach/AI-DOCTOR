@@ -42,25 +42,51 @@ export default function ProfessionalReport({
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    generateProfessionalReport()
-  }, [])
+  if (typeof window === 'undefined') return;
+  generateProfessionalReport();
+}, []);
 
   const generateProfessionalReport = async () => {
-    setLoading(true)
-    setError(null)
+  setLoading(true)
+  setError(null)
 
-    try {
-      const response = await fetch("/api/generate-professional-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          patientData,
-          clinicalData,
-          questionsData,
-          diagnosisData,
-          editedDocuments
-        })
+  try {
+    const response = await fetch("/api/generate-professional-report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        patientData,
+        clinicalData,
+        questionsData,
+        diagnosisData,
+        editedDocuments
       })
+    })
+
+    // Vérifiez le code de statut et le type de contenu.
+    // Si ce n’est pas du JSON ou que la requête a échoué, récupérez le corps brut.
+    const contentType = response.headers.get("content-type") ?? ""
+    if (!response.ok || !contentType.includes("application/json")) {
+      const text = await response.text()
+      throw new Error(text || `Erreur HTTP ${response.status}`)
+    }
+
+    // Si la réponse est OK et au format JSON, on peut la parser sans risque.
+    const data = await response.json()
+
+    if (data.success) {
+      setReport(data.report)
+      // si nécessaire : onComplete?.(data.report)
+    } else {
+      throw new Error(data.error)
+    }
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Erreur inconnue")
+  } finally {
+    setLoading(false)
+  }
+}
+
 
       const data = await response.json()
 
