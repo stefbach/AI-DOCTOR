@@ -31,7 +31,8 @@ import {
   Shield,
   Zap,
   FlaskConical,
-  ClipboardCheck
+  ClipboardCheck,
+  RefreshCw
 } from "lucide-react"
 import { getTranslation, Language } from "@/lib/translations"
 
@@ -64,12 +65,12 @@ export default function EnhancedDiagnosisForm({
   const [error, setError] = useState<string | null>(null)
   const [currentSection, setCurrentSection] = useState(0)
   const [documentsGenerated, setDocumentsGenerated] = useState(false)
-  const [hasInitialized, setHasInitialized] = useState(false)
+  const [apiTestResult, setApiTestResult] = useState<string | null>(null)
 
   // Helper function for translations
   const t = (key: string) => getTranslation(key, language)
 
-  // Load saved data on mount - FIXED to prevent loops
+  // Load saved data on mount
   useEffect(() => {
     const loadSavedData = async () => {
       console.log('📂 Loading saved diagnosis data...')
@@ -87,7 +88,6 @@ export default function EnhancedDiagnosisForm({
           if (savedData?.diagnosisData) {
             if (savedData.diagnosisData.diagnosis) {
               setDiagnosis(savedData.diagnosisData.diagnosis)
-              setHasInitialized(true) // Prevent auto-generation if data exists
             }
             if (savedData.diagnosisData.diagnosticReasoning) {
               setDiagnosticReasoning(savedData.diagnosisData.diagnosticReasoning)
@@ -107,33 +107,27 @@ export default function EnhancedDiagnosisForm({
     }
     
     loadSavedData()
-  }, [consultationId]) // Only depend on consultationId
+  }, [consultationId])
 
-  // Auto-generate ONLY if not already initialized and data is complete
+  // Auto-generate avec conditions simplifiées
   useEffect(() => {
     console.log('🔄 Checking if should auto-generate:', {
-      hasInitialized,
       hasDiagnosis: !!diagnosis,
       hasPatientData: !!patientData,
       hasClinicalData: !!clinicalData,
-      patientDataKeys: patientData ? Object.keys(patientData).length : 0,
-      clinicalDataKeys: clinicalData ? Object.keys(clinicalData).length : 0
+      chiefComplaint: clinicalData?.chiefComplaint
     })
 
-    // Check if we should auto-generate
-    if (!hasInitialized && 
-        !diagnosis && 
+    // Générer automatiquement si on a les données nécessaires et pas de diagnostic
+    if (!diagnosis && 
         patientData && 
         clinicalData && 
-        Object.keys(patientData).length > 0 &&
-        Object.keys(clinicalData).length > 0 &&
-        clinicalData.chiefComplaint) { // Ensure we have at least a chief complaint
+        clinicalData.chiefComplaint) {
       
       console.log('🚀 Auto-generating diagnosis...')
-      setHasInitialized(true) // Prevent multiple calls
       generateCompleteDiagnosisAndDocuments()
     }
-  }, [hasInitialized, diagnosis, patientData, clinicalData])
+  }, [patientData, clinicalData]) // Retirer diagnosis des dépendances pour éviter les boucles
 
   // Save data when diagnosis is generated or updated
   useEffect(() => {
@@ -159,6 +153,30 @@ export default function EnhancedDiagnosisForm({
     saveData()
   }, [diagnosis, diagnosticReasoning, expertAnalysis, mauritianDocuments, documentsGenerated])
 
+  // Test API function
+  const testAPI = async () => {
+    console.log('🧪 Testing API...')
+    setApiTestResult('Testing...')
+    try {
+      const res = await fetch('/api/openai-diagnosis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientData: { age: 30, sex: 'M', firstName: 'Test', lastName: 'Patient' },
+          clinicalData: { chiefComplaint: 'Test douleur thoracique' },
+          questionsData: [],
+          language: 'fr'
+        })
+      })
+      const data = await res.json()
+      console.log('🧪 API Test Response:', data)
+      setApiTestResult(data.success ? '✅ API fonctionne!' : `❌ Erreur: ${data.error}`)
+    } catch (error) {
+      console.error('🧪 API Test Error:', error)
+      setApiTestResult(`❌ Erreur: ${error}`)
+    }
+  }
+
   const generateCompleteDiagnosisAndDocuments = async () => {
     console.log('🩺 ========== STARTING DIAGNOSIS GENERATION ==========')
     console.log('📋 Patient Data:', {
@@ -168,16 +186,10 @@ export default function EnhancedDiagnosisForm({
       chiefComplaint: clinicalData?.chiefComplaint
     })
 
-    // More thorough validation
+    // Validation plus souple
     if (!patientData || !clinicalData) {
       console.error('❌ Missing required data:', { patientData: !!patientData, clinicalData: !!clinicalData })
       setError("Données patient ou cliniques manquantes")
-      return
-    }
-
-    if (!clinicalData.chiefComplaint) {
-      console.error('❌ Missing chief complaint')
-      setError("Motif de consultation manquant")
       return
     }
 
@@ -196,8 +208,8 @@ export default function EnhancedDiagnosisForm({
       }
       
       console.log("📦 Request body:", {
-        patientDataKeys: Object.keys(patientData),
-        clinicalDataKeys: Object.keys(clinicalData),
+        patientDataKeys: Object.keys(patientData || {}),
+        clinicalDataKeys: Object.keys(clinicalData || {}),
         questionsCount: questionsData?.length || 0,
         language
       })
@@ -519,7 +531,7 @@ export default function EnhancedDiagnosisForm({
     )
   }
 
-  // Error interface
+  // Error interface with retry button
   if (!diagnosis && error) {
     return (
       <div className="space-y-6">
@@ -546,14 +558,30 @@ export default function EnhancedDiagnosisForm({
                   <li>Votre connexion internet est stable</li>
                 </ul>
               </div>
-              <Button 
-                onClick={generateCompleteDiagnosisAndDocuments} 
-                className="mt-6"
-                size="lg"
-              >
-                <Brain className="h-4 w-4 mr-2" />
-                Réessayer
-              </Button>
+              <div className="flex gap-4 justify-center">
+                <Button 
+                  onClick={generateCompleteDiagnosisAndDocuments} 
+                  className="mt-6"
+                  size="lg"
+                >
+                  <Brain className="h-4 w-4 mr-2" />
+                  Réessayer
+                </Button>
+                <Button 
+                  onClick={testAPI}
+                  variant="outline"
+                  className="mt-6"
+                  size="lg"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Tester l'API
+                </Button>
+              </div>
+              {apiTestResult && (
+                <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+                  <p className="text-sm font-mono">{apiTestResult}</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -561,7 +589,7 @@ export default function EnhancedDiagnosisForm({
     )
   }
 
-  // Main interface - No diagnosis available
+  // Main interface - Enhanced with force generation button
   if (!diagnosis) {
     return (
       <div className="space-y-6">
@@ -569,7 +597,7 @@ export default function EnhancedDiagnosisForm({
           <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-3">
               <Brain className="h-6 w-6" />
-              Analyse Médicale Non Disponible
+              Générer l'Analyse Médicale
             </CardTitle>
           </CardHeader>
           <CardContent className="p-8 text-center">
@@ -577,33 +605,69 @@ export default function EnhancedDiagnosisForm({
               <Brain className="h-20 w-20 text-blue-500 mx-auto" />
               <div className="space-y-2">
                 <p className="text-xl font-semibold text-gray-800">
-                  Aucune analyse médicale générée
+                  Prêt à générer l'analyse médicale
                 </p>
                 <p className="text-gray-600">
-                  Cliquez sur le bouton ci-dessous pour lancer l'analyse
+                  L'IA va analyser les données et générer un diagnostic complet
                 </p>
               </div>
               
-              {/* Debug info */}
+              {/* État des données */}
               <div className="bg-gray-50 p-4 rounded-lg text-left max-w-md mx-auto">
                 <p className="text-sm font-semibold text-gray-700 mb-2">État actuel :</p>
                 <ul className="text-xs text-gray-600 space-y-1">
-                  <li>• Données patient : {patientData ? '✅ Disponibles' : '❌ Manquantes'}</li>
-                  <li>• Données cliniques : {clinicalData ? '✅ Disponibles' : '❌ Manquantes'}</li>
-                  <li>• Motif consultation : {clinicalData?.chiefComplaint ? '✅ ' + clinicalData.chiefComplaint : '❌ Manquant'}</li>
+                  <li>• Patient : {patientData ? '✅' : '❌'} {patientData?.firstName} {patientData?.lastName}</li>
+                  <li>• Âge/Sexe : {patientData?.age || '?'} ans - {patientData?.sex || '?'}</li>
+                  <li>• Clinique : {clinicalData ? '✅' : '❌'} {clinicalData?.chiefComplaint || 'Non renseigné'}</li>
                   <li>• Questions IA : {questionsData?.length || 0} réponses</li>
+                  <li>• API Status : <span className="font-mono">{process.env.NEXT_PUBLIC_API_STATUS || 'À vérifier'}</span></li>
                 </ul>
               </div>
               
-              <Button 
-                onClick={generateCompleteDiagnosisAndDocuments} 
-                className="bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700"
-                size="lg"
-                disabled={!patientData || !clinicalData}
-              >
-                <Brain className="h-5 w-5 mr-2" />
-                Générer l'Analyse Médicale
-              </Button>
+              <div className="flex flex-col gap-4 items-center">
+                <Button 
+                  onClick={generateCompleteDiagnosisAndDocuments} 
+                  className="bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700"
+                  size="lg"
+                  disabled={!patientData || !clinicalData || loading}
+                >
+                  <Brain className="h-5 w-5 mr-2" />
+                  {loading ? 'Génération en cours...' : 'Générer l\'Analyse Médicale'}
+                </Button>
+                
+                <Button 
+                  onClick={testAPI}
+                  variant="outline"
+                  size="sm"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Tester la connexion API
+                </Button>
+              </div>
+              
+              {apiTestResult && (
+                <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+                  <p className="text-sm font-mono">{apiTestResult}</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Debug Panel */}
+        <Card className="bg-gray-50 border-gray-200">
+          <CardHeader>
+            <CardTitle className="text-sm font-mono">Debug Info</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-xs font-mono space-y-1">
+              <p>hasPatientData: {String(!!patientData)}</p>
+              <p>hasClinicalData: {String(!!clinicalData)}</p>
+              <p>chiefComplaint: {clinicalData?.chiefComplaint || 'null'}</p>
+              <p>questionsCount: {questionsData?.length || 0}</p>
+              <p>diagnosis: {String(!!diagnosis)}</p>
+              <p>loading: {String(loading)}</p>
+              <p>error: {error || 'null'}</p>
             </div>
           </CardContent>
         </Card>
@@ -638,6 +702,16 @@ export default function EnhancedDiagnosisForm({
                 Documents Prêts
               </Badge>
             )}
+          </div>
+          <div className="mt-4 flex justify-center">
+            <Button
+              onClick={generateCompleteDiagnosisAndDocuments}
+              variant="outline"
+              size="sm"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Régénérer l'analyse
+            </Button>
           </div>
         </CardHeader>
       </Card>
@@ -1329,6 +1403,23 @@ export default function EnhancedDiagnosisForm({
             Générer Analyse Enrichie
           </Button>
         )}
+      </div>
+
+      {/* Debug footer */}
+      <div className="mt-8 p-4 bg-gray-100 rounded-lg">
+        <details>
+          <summary className="cursor-pointer text-xs font-mono text-gray-600">Debug Info</summary>
+          <pre className="mt-2 text-xs overflow-auto">
+            {JSON.stringify({
+              hasDiagnosis: !!diagnosis,
+              hasPatientData: !!patientData,
+              hasClinicalData: !!clinicalData,
+              chiefComplaint: clinicalData?.chiefComplaint,
+              documentsGenerated,
+              apiKey: process.env.NEXT_PUBLIC_API_STATUS || 'Check server logs'
+            }, null, 2)}
+          </pre>
+        </details>
       </div>
     </div>
   )
