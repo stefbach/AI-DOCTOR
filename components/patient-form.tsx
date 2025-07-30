@@ -87,6 +87,92 @@ export default function ModernPatientForm({
   
   // Helper function for translations
   const t = (key: string) => getTranslation(key, language)
+
+  // Fonction pour transformer les données du formulaire au format attendu par l'API
+  const transformDataForAPI = (formData: PatientFormData) => {
+    // Transformation du genre en format simple - CORRIGÉ
+    let sexe = 'Non renseigné'
+    
+    console.log('Transformation du genre:', {
+      gender: formData.gender,
+      otherGender: formData.otherGender
+    })
+    
+    if (formData.gender && formData.gender.length > 0) {
+      const firstGender = formData.gender[0]
+      // Vérifier toutes les variantes possibles
+      if (firstGender === 'Masculin' || 
+          firstGender === 'Male' || 
+          firstGender.toLowerCase() === 'masculin' ||
+          firstGender.toLowerCase() === 'male' ||
+          firstGender === t('patientForm.male')) {
+        sexe = 'Masculin'
+      } else if (firstGender === 'Féminin' || 
+                 firstGender === 'Female' || 
+                 firstGender.toLowerCase() === 'féminin' ||
+                 firstGender.toLowerCase() === 'female' ||
+                 firstGender === t('patientForm.female')) {
+        sexe = 'Féminin'
+      }
+    } else if (formData.otherGender && formData.otherGender.trim() !== '') {
+      sexe = formData.otherGender
+    }
+    
+    console.log('Genre transformé:', sexe)
+
+    // Transformation des allergies
+    const allergiesText = [
+      ...(formData.allergies || []),
+      ...(formData.otherAllergies ? [formData.otherAllergies] : [])
+    ].filter(Boolean).join(', ') || 'Aucune allergie connue'
+
+    // Transformation des antécédents
+    const antecedentsText = [
+      ...(formData.medicalHistory || []),
+      ...(formData.otherMedicalHistory ? [formData.otherMedicalHistory] : [])
+    ].filter(Boolean).join(', ') || 'Aucun antécédent notable'
+
+    // Format compatible avec l'API (fichier 2)
+    return {
+      // Noms français pour l'API
+      nom: formData.lastName || '',
+      prenom: formData.firstName || '',
+      dateNaissance: formData.birthDate || '',
+      age: formData.age || '',
+      sexe: sexe, // Utiliser la valeur transformée
+      sex: sexe, // Ajouter aussi 'sex' au cas où l'API utilise ce nom
+      gender: sexe, // Et 'gender' pour être sûr
+      profession: '', // À ajouter si nécessaire
+      telephone: formData.phone || formData.phoneNumber || '',
+      email: formData.email || '',
+      adresse: formData.address || '',
+      numeroSecuriteSociale: '',
+      medecinTraitant: '',
+      
+      // Données cliniques
+      poids: formData.weight,
+      taille: formData.height,
+      allergies: allergiesText || 'Aucune allergie connue',
+      antecedents: {
+        medicaux: antecedentsText || 'Aucun antécédent notable',
+        chirurgicaux: '',
+        familiaux: ''
+      },
+      medicamentsActuels: formData.currentMedicationsText || 'Aucun',
+      
+      // Habitudes de vie
+      habitudes: {
+        tabac: formData.lifeHabits.smoking || 'Non renseigné',
+        alcool: formData.lifeHabits.alcohol || 'Non renseigné',
+        activitePhysique: formData.lifeHabits.physicalActivity || 'Non renseignée',
+        alimentation: 'Non renseignée',
+        sommeil: 'Non renseigné'
+      },
+      
+      // Garde aussi le format original pour compatibilité
+      ...formData
+    }
+  }
   
   // Get translated arrays
   const COMMON_ALLERGIES = [
@@ -299,14 +385,17 @@ export default function ModernPatientForm({
           birthDateStr = enhancedPatientInfo.date_of_birth.split('T')[0]
         }
         
-        // Process gender
+        // Process gender - Fixed to use proper translations
         const genderArray: string[] = []
         if (enhancedPatientInfo.gender) {
           const gender = enhancedPatientInfo.gender
           if (gender === 'Masculin' || gender === 'M' || gender.toLowerCase() === 'male' || gender.toLowerCase() === 'm') {
-            genderArray.push(t('patientForm.male'))
+            genderArray.push('Masculin') // Use French directly for API compatibility
           } else if (gender === 'Féminin' || gender === 'F' || gender.toLowerCase() === 'female' || gender.toLowerCase() === 'f') {
-            genderArray.push(t('patientForm.female'))
+            genderArray.push('Féminin') // Use French directly for API compatibility
+          } else {
+            // Si c'est une autre valeur, la garder telle quelle
+            genderArray.push(gender)
           }
         }
         
@@ -381,18 +470,43 @@ export default function ModernPatientForm({
     }
   }, [consultationId, urlData, tibokPatient, dataProcessed])
 
-  // Save data when form changes
+  // Save data when form changes - MODIFIÉ pour sauvegarder dans les deux formats
   useEffect(() => {
     const saveData = async () => {
       try {
+        // Sauvegarder les données du formulaire original
         await consultationDataService.saveStepData(0, formData)
+        
+        // Transformer et sauvegarder les données pour l'API
+        const transformedData = transformDataForAPI(formData)
+        
+        // Vérifier que le sexe est bien défini
+        if (!transformedData.sexe || transformedData.sexe === '') {
+          console.warn('Sexe non défini, utilisation de la valeur par défaut')
+          transformedData.sexe = 'Non renseigné'
+        }
+        
+        // Log pour debug
+        console.log('Données transformées pour l\'API:', {
+          nom: transformedData.nom,
+          prenom: transformedData.prenom,
+          age: transformedData.age,
+          sexe: transformedData.sexe
+        })
+        
+        // Sauvegarder dans un format spécifique pour l'API
+        const currentData = await consultationDataService.getAllData()
+        await consultationDataService.saveAllData({
+          ...currentData,
+          patientDataAPI: transformedData
+        })
       } catch (error) {
         console.error('Error saving patient data:', error)
       }
     }
     
     const timer = setTimeout(() => {
-      if (formData.firstName && formData.lastName) {
+      if (formData.firstName || formData.lastName) {
         saveData()
       }
     }, 1000)
@@ -443,10 +557,22 @@ export default function ModernPatientForm({
     }
   }, [formData.birthDate, formData.age])
 
-  // Auto-save effect
+  // Auto-save effect - MODIFIÉ pour envoyer les données transformées
   useEffect(() => {
     const timer = setTimeout(() => {
+      // Toujours envoyer les données originales ET transformées
       onDataChange(formData)
+      
+      // Sauvegarder aussi les données transformées séparément
+      const transformedData = transformDataForAPI(formData)
+      
+      // Log pour debug
+      if (formData.gender.length > 0 || formData.otherGender) {
+        console.log('Genre détecté:', {
+          original: formData.gender,
+          transformed: transformedData.sexe
+        })
+      }
     }, 500)
     return () => clearTimeout(timer)
   }, [formData, onDataChange])
@@ -461,9 +587,18 @@ export default function ModernPatientForm({
   }
 
   const handleGenderChange = (genderOption: string, checked: boolean) => {
-    const newGender = checked 
-      ? [...formData.gender, genderOption] 
-      : formData.gender.filter((g) => g !== genderOption)
+    // Déterminer la valeur française à stocker
+    let frenchGender = ''
+    if (genderOption === t('patientForm.male') || genderOption === 'Male' || genderOption === 'Masculin') {
+      frenchGender = 'Masculin'
+    } else if (genderOption === t('patientForm.female') || genderOption === 'Female' || genderOption === 'Féminin') {
+      frenchGender = 'Féminin'
+    } else {
+      frenchGender = genderOption
+    }
+    
+    // Si on coche, on remplace tout par cette nouvelle valeur (radio behavior)
+    const newGender = checked ? [frenchGender] : []
 
     const newData = { ...formData, gender: newGender }
     setFormData(newData)
@@ -736,31 +871,37 @@ export default function ModernPatientForm({
             </Label>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[t('patientForm.male'), t('patientForm.female')].map((genderOption, index) => (
-                <div
-                  key={genderOption}
-                  className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
-                    formData.gender.includes(genderOption)
-                      ? "border-blue-300 bg-blue-50 shadow-md"
-                      : "border-gray-200 hover:border-blue-200 hover:bg-blue-25"
-                  }`}
-                  onClick={() => handleGenderChange(genderOption, !formData.gender.includes(genderOption))}
-                  onDoubleClick={() => handleCheckboxDoubleClick(
-                    !formData.gender.includes(genderOption),
-                    () => handleGenderChange(genderOption, !formData.gender.includes(genderOption)),
-                    index === 0 ? "otherGender" : "weight"
-                  )}
-                >
-                  <Checkbox
-                    id={`gender-${genderOption}`}
-                    checked={formData.gender.includes(genderOption)}
-                    onCheckedChange={(checked) => handleGenderChange(genderOption, checked as boolean)}
-                  />
-                  <Label htmlFor={`gender-${genderOption}`} className="text-sm font-medium cursor-pointer">
-                    {genderOption}
-                  </Label>
-                </div>
-              ))}
+              {[t('patientForm.male'), t('patientForm.female')].map((genderOption, index) => {
+                // Vérifier si ce genre est sélectionné
+                const isSelected = formData.gender.includes('Masculin') && (genderOption === t('patientForm.male') || genderOption === 'Masculin') ||
+                                 formData.gender.includes('Féminin') && (genderOption === t('patientForm.female') || genderOption === 'Féminin')
+                
+                return (
+                  <div
+                    key={genderOption}
+                    className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
+                      isSelected
+                        ? "border-blue-300 bg-blue-50 shadow-md"
+                        : "border-gray-200 hover:border-blue-200 hover:bg-blue-25"
+                    }`}
+                    onClick={() => handleGenderChange(genderOption, !isSelected)}
+                    onDoubleClick={() => handleCheckboxDoubleClick(
+                      !isSelected,
+                      () => handleGenderChange(genderOption, !isSelected),
+                      index === 0 ? "otherGender" : "weight"
+                    )}
+                  >
+                    <Checkbox
+                      id={`gender-${genderOption}`}
+                      checked={isSelected}
+                      onCheckedChange={(checked) => handleGenderChange(genderOption, checked as boolean)}
+                    />
+                    <Label htmlFor={`gender-${genderOption}`} className="text-sm font-medium cursor-pointer">
+                      {genderOption}
+                    </Label>
+                  </div>
+                )
+              })}
             </div>
 
             <div className="space-y-2">
@@ -784,7 +925,8 @@ export default function ModernPatientForm({
                 <div className="flex flex-wrap gap-2">
                   {formData.gender.map((gender) => (
                     <Badge key={gender} className="bg-blue-100 text-blue-800 text-xs">
-                      {gender}
+                      {gender === 'Masculin' ? t('patientForm.male') : 
+                       gender === 'Féminin' ? t('patientForm.female') : gender}
                     </Badge>
                   ))}
                   {formData.otherGender && (
