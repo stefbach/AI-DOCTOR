@@ -68,7 +68,7 @@ export default function MedicalWorkflow({
     setFinalDocuments(editedDocs)
     
     try {
-      await consultationDataService.saveStepData(4, editedDocs)
+      await consultationDataService.saveStepData(5, editedDocs)
     } catch (error) {
       console.error('Error saving workflow documents:', error)
     }
