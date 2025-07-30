@@ -304,8 +304,9 @@ export default function MedicalAIExpert() {
               clinicalData,
               questionsData,
               diagnosisData,
-              // Documents édités disponibles à ce stade (probablement null)
-              editedDocuments: workflowResult,
+              // Documents édités disponibles à ce stade. Si aucun document n'a encore été édité,
+              // fournir un objet vide pour que l'API accepte la requête.
+              editedDocuments: workflowResult || {},
               onComplete: handleFinalReportComplete,
               onPrevious: handlePrevious,
             }
