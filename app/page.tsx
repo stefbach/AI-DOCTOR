@@ -44,6 +44,22 @@ export default function MedicalAIExpert() {
   
   // ... (gardez tous les autres states)
 
+  // Local loading state; adjust as needed to reflect asynchronous operations
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  // Placeholder identifiers for the current consultation, patient and doctor.
+  // In a real application these values would come from props, context or another service.
+  const currentConsultationId: string | null = null
+  const currentPatientId: string | null = null
+  const currentDoctorId: string | null = null
+
+  // Allow clicking on previous steps to navigate back. Disallow forward navigation by default.
+  const handleStepClick = (index: number) => {
+    if (index <= currentStep) {
+      setCurrentStep(index)
+    }
+  }
+
   // Simple translation helper. Uses the current `language` state to retrieve translations.
   const t = (key: string): string => {
     const translations: Record<string, any> = {
