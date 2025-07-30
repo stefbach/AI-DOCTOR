@@ -20,7 +20,8 @@ import {
   FileText,
   Clock,
   Heart,
-  Search
+  Search,
+  XCircle
 } from "lucide-react"
 import { getTranslation, Language } from "@/lib/translations"
 
@@ -94,7 +95,7 @@ export default function ModernClinicalForm({
     symptoms: [],
     painScale: "",
     vitalSigns: {
-      temperature: "",
+      temperature: "37",
       bloodPressureSystolic: "",
       bloodPressureDiastolic: "",
     },
@@ -103,6 +104,39 @@ export default function ModernClinicalForm({
   const [localData, setLocalData] = useState<ClinicalData>(data || defaultClinicalData)
   const [symptomSearch, setSymptomSearch] = useState("")
   const [currentSection, setCurrentSection] = useState(0)
+  const [bpNotApplicable, setBpNotApplicable] = useState(false)
+
+  // Function to handle Enter key navigation
+  const handleEnterKeyNavigation = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && e.currentTarget.tagName !== 'TEXTAREA') {
+      e.preventDefault()
+      
+      // Get all focusable elements
+      const focusableElements = document.querySelectorAll(
+        'input:not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+      
+      const currentIndex = Array.from(focusableElements).indexOf(e.currentTarget)
+      
+      if (currentIndex !== -1 && currentIndex < focusableElements.length - 1) {
+        const nextElement = focusableElements[currentIndex + 1] as HTMLElement
+        nextElement.focus()
+      }
+    }
+  }
+
+  // Function to handle double click on checkboxes
+  const handleCheckboxDoubleClick = (symptom: string, nextFocusId?: string) => {
+    toggleSymptom(symptom)
+    if (nextFocusId) {
+      setTimeout(() => {
+        const nextElement = document.getElementById(nextFocusId)
+        if (nextElement) {
+          nextElement.focus()
+        }
+      }, 100)
+    }
+  }
 
   // Load saved data on mount
   useEffect(() => {
@@ -113,7 +147,13 @@ export default function ModernClinicalForm({
         if (currentConsultationId) {
           const savedData = await consultationDataService.getAllData()
           if (savedData?.clinicalData) {
-            setLocalData(savedData.clinicalData)
+            setLocalData({
+              ...savedData.clinicalData,
+              vitalSigns: {
+                ...savedData.clinicalData.vitalSigns,
+                temperature: savedData.clinicalData.vitalSigns?.temperature || "37"
+              }
+            })
           }
         }
       } catch (error) {
@@ -152,7 +192,7 @@ export default function ModernClinicalForm({
         symptoms: Array.isArray(data.symptoms) ? data.symptoms : [],
         painScale: data.painScale || "",
         vitalSigns: {
-          temperature: data.vitalSigns?.temperature || "",
+          temperature: data.vitalSigns?.temperature || "37",
           bloodPressureSystolic: data.vitalSigns?.bloodPressureSystolic || "",
           bloodPressureDiastolic: data.vitalSigns?.bloodPressureDiastolic || "",
         },
@@ -198,6 +238,19 @@ export default function ModernClinicalForm({
       ? currentSymptoms.filter((s) => s !== symptom)
       : [...currentSymptoms, symptom]
     updateData({ symptoms: newSymptoms })
+  }
+
+  const toggleBPNotApplicable = () => {
+    const newBpNotApplicable = !bpNotApplicable
+    setBpNotApplicable(newBpNotApplicable)
+    
+    if (newBpNotApplicable) {
+      updateVitalSigns("bloodPressureSystolic", "N/A")
+      updateVitalSigns("bloodPressureDiastolic", "N/A")
+    } else {
+      updateVitalSigns("bloodPressureSystolic", "")
+      updateVitalSigns("bloodPressureDiastolic", "")
+    }
   }
 
   const progress = calculateProgress()
@@ -268,6 +321,7 @@ export default function ModernClinicalForm({
               id="chiefComplaint"
               value={localData.chiefComplaint || ""}
               onChange={(e) => updateData({ chiefComplaint: e.target.value })}
+              onKeyDown={handleEnterKeyNavigation}
               placeholder={t('clinicalForm.describePlaceholder')}
               rows={3}
               className="transition-all duration-200 focus:ring-purple-200 resize-y"
@@ -296,6 +350,7 @@ export default function ModernClinicalForm({
               id="diseaseHistory"
               value={localData.diseaseHistory || ""}
               onChange={(e) => updateData({ diseaseHistory: e.target.value })}
+              onKeyDown={handleEnterKeyNavigation}
               placeholder={t('clinicalForm.historyPlaceholder')}
               rows={5}
               className="transition-all duration-200 focus:ring-blue-200 resize-y"
@@ -385,6 +440,7 @@ export default function ModernClinicalForm({
                 step="1"
                 value={localData.painScale || "0"}
                 onChange={(e) => updateData({ painScale: e.target.value })}
+                onKeyDown={handleEnterKeyNavigation}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               />
               <div className="flex justify-between text-xs text-gray-600">
@@ -435,12 +491,13 @@ export default function ModernClinicalForm({
               placeholder={t('clinicalForm.searchSymptom')}
               value={symptomSearch}
               onChange={(e) => setSymptomSearch(e.target.value)}
+              onKeyDown={handleEnterKeyNavigation}
               className="pl-10"
             />
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {filteredSymptoms.map((symptom) => {
+            {filteredSymptoms.map((symptom, index) => {
               const currentSymptoms = Array.isArray(localData.symptoms) ? localData.symptoms : []
               return (
                 <div
@@ -451,13 +508,17 @@ export default function ModernClinicalForm({
                       : "border-gray-200 hover:border-orange-200 hover:bg-orange-25"
                   }`}
                   onClick={() => toggleSymptom(symptom)}
+                  onDoubleClick={() => handleCheckboxDoubleClick(
+                    symptom,
+                    index < filteredSymptoms.length - 1 ? `symptom-${filteredSymptoms[index + 1]}` : "temperature"
+                  )}
                 >
                   <Checkbox
-                    id={symptom}
+                    id={`symptom-${symptom}`}
                     checked={currentSymptoms.includes(symptom)}
                     onCheckedChange={() => toggleSymptom(symptom)}
                   />
-                  <Label htmlFor={symptom} className="text-sm font-medium cursor-pointer">
+                  <Label htmlFor={`symptom-${symptom}`} className="text-sm font-medium cursor-pointer">
                     {symptom}
                   </Label>
                 </div>
@@ -508,8 +569,9 @@ export default function ModernClinicalForm({
                 step="0.1"
                 min="35"
                 max="42"
-                value={localData.vitalSigns?.temperature || ""}
+                value={localData.vitalSigns?.temperature || "37"}
                 onChange={(e) => updateVitalSigns("temperature", e.target.value)}
+                onKeyDown={handleEnterKeyNavigation}
                 placeholder="37.0"
                 className="transition-all duration-200 focus:ring-red-200"
               />
@@ -526,36 +588,58 @@ export default function ModernClinicalForm({
               <Label htmlFor="bloodPressureSystolic" className="font-medium">
                 {t('clinicalForm.systolicBP')}
               </Label>
-              <Input
-                id="bloodPressureSystolic"
-                type="number"
-                min="70"
-                max="250"
-                value={localData.vitalSigns?.bloodPressureSystolic || ""}
-                onChange={(e) => updateVitalSigns("bloodPressureSystolic", e.target.value)}
-                placeholder="120"
-                className="transition-all duration-200 focus:ring-red-200"
-              />
+              <div className="space-y-2">
+                <Input
+                  id="bloodPressureSystolic"
+                  type="number"
+                  min="70"
+                  max="250"
+                  value={localData.vitalSigns?.bloodPressureSystolic || ""}
+                  onChange={(e) => updateVitalSigns("bloodPressureSystolic", e.target.value)}
+                  onKeyDown={handleEnterKeyNavigation}
+                  placeholder="120"
+                  disabled={bpNotApplicable}
+                  className={`transition-all duration-200 focus:ring-red-200 ${bpNotApplicable ? 'opacity-50' : ''}`}
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="bloodPressureDiastolic" className="font-medium">
                 {t('clinicalForm.diastolicBP')}
               </Label>
-              <Input
-                id="bloodPressureDiastolic"
-                type="number"
-                min="40"
-                max="150"
-                value={localData.vitalSigns?.bloodPressureDiastolic || ""}
-                onChange={(e) => updateVitalSigns("bloodPressureDiastolic", e.target.value)}
-                placeholder="80"
-                className="transition-all duration-200 focus:ring-red-200"
-              />
+              <div className="space-y-2">
+                <Input
+                  id="bloodPressureDiastolic"
+                  type="number"
+                  min="40"
+                  max="150"
+                  value={localData.vitalSigns?.bloodPressureDiastolic || ""}
+                  onChange={(e) => updateVitalSigns("bloodPressureDiastolic", e.target.value)}
+                  onKeyDown={handleEnterKeyNavigation}
+                  placeholder="80"
+                  disabled={bpNotApplicable}
+                  className={`transition-all duration-200 focus:ring-red-200 ${bpNotApplicable ? 'opacity-50' : ''}`}
+                />
+              </div>
             </div>
           </div>
 
-          {(localData.vitalSigns?.bloodPressureSystolic || localData.vitalSigns?.bloodPressureDiastolic) && (
+          {/* Not Applicable Button for Blood Pressure */}
+          <div className="mt-4">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={toggleBPNotApplicable}
+              className={`${bpNotApplicable ? 'bg-gray-100' : ''}`}
+            >
+              <XCircle className="h-4 w-4 mr-2" />
+              Tension artérielle non applicable
+            </Button>
+          </div>
+
+          {(localData.vitalSigns?.bloodPressureSystolic || localData.vitalSigns?.bloodPressureDiastolic) && !bpNotApplicable && (
             <div className="mt-4 p-3 bg-red-50 rounded-lg border border-red-200">
               <div className="flex items-center gap-2">
                 <Activity className="h-4 w-4 text-red-600" />
@@ -570,6 +654,17 @@ export default function ModernClinicalForm({
                   {(parseInt(localData.vitalSigns.bloodPressureSystolic) < 120 && parseInt(localData.vitalSigns.bloodPressureDiastolic) < 80) && `✅ ${t('clinicalForm.normal')}`}
                 </p>
               )}
+            </div>
+          )}
+
+          {bpNotApplicable && (
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center gap-2">
+                <XCircle className="h-4 w-4 text-gray-600" />
+                <p className="font-semibold text-gray-800">
+                  Tension artérielle non mesurée
+                </p>
+              </div>
             </div>
           )}
         </CardContent>
