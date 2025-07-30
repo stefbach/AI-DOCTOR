@@ -188,6 +188,38 @@ export default function ModernPatientForm({
   const [historySearch, setHistorySearch] = useState("")
   const [currentSection, setCurrentSection] = useState(0)
 
+  // Function to handle Enter key navigation
+  const handleEnterKeyNavigation = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      
+      // Get all focusable elements
+      const focusableElements = document.querySelectorAll(
+        'input:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+      
+      const currentIndex = Array.from(focusableElements).indexOf(e.currentTarget)
+      
+      if (currentIndex !== -1 && currentIndex < focusableElements.length - 1) {
+        const nextElement = focusableElements[currentIndex + 1] as HTMLElement
+        nextElement.focus()
+      }
+    }
+  }
+
+  // Function to handle double click on checkboxes
+  const handleCheckboxDoubleClick = (checked: boolean, onChange: () => void, nextFocusId?: string) => {
+    onChange()
+    if (nextFocusId) {
+      setTimeout(() => {
+        const nextElement = document.getElementById(nextFocusId)
+        if (nextElement) {
+          nextElement.focus()
+        }
+      }, 100)
+    }
+  }
+
   // Process data from URL or TIBOK hook
   useEffect(() => {
     const processPatientData = async () => {
@@ -606,22 +638,6 @@ export default function ModernPatientForm({
             <User className="h-6 w-6" />
             {t('patientForm.personalInfo')}
           </CardTitle>
-          <button 
-        type="button"
-        onClick={() => alert('Bouton trouvé dans PatientForm!')}
-        style={{ 
-          backgroundColor: '#3B82F6',
-          color: 'white',
-          padding: '8px 16px',
-          borderRadius: '6px',
-          marginBottom: '10px',
-          cursor: 'pointer',
-          border: 'none'
-        }}
-      >
-        🧪 Test Patient Form
-      </button>
-      {/* FIN DU BOUTON */}
         </CardHeader>
         <CardContent className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -635,6 +651,7 @@ export default function ModernPatientForm({
                 type="text"
                 value={formData.firstName}
                 onChange={(e) => handleInputChange("firstName", e.target.value)}
+                onKeyDown={handleEnterKeyNavigation}
                 className={`transition-all duration-200 ${
                   errors.firstName 
                     ? "border-red-500 focus:ring-red-200" 
@@ -659,6 +676,7 @@ export default function ModernPatientForm({
                 type="text"
                 value={formData.lastName}
                 onChange={(e) => handleInputChange("lastName", e.target.value)}
+                onKeyDown={handleEnterKeyNavigation}
                 className={`transition-all duration-200 ${
                   errors.lastName 
                     ? "border-red-500 focus:ring-red-200" 
@@ -685,6 +703,7 @@ export default function ModernPatientForm({
                 type="date"
                 value={formData.birthDate}
                 onChange={(e) => handleInputChange("birthDate", e.target.value)}
+                onKeyDown={handleEnterKeyNavigation}
                 className={`transition-all duration-200 ${
                   errors.birthDate 
                     ? "border-red-500 focus:ring-red-200" 
@@ -717,7 +736,7 @@ export default function ModernPatientForm({
             </Label>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[t('patientForm.male'), t('patientForm.female')].map((genderOption) => (
+              {[t('patientForm.male'), t('patientForm.female')].map((genderOption, index) => (
                 <div
                   key={genderOption}
                   className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
@@ -726,6 +745,11 @@ export default function ModernPatientForm({
                       : "border-gray-200 hover:border-blue-200 hover:bg-blue-25"
                   }`}
                   onClick={() => handleGenderChange(genderOption, !formData.gender.includes(genderOption))}
+                  onDoubleClick={() => handleCheckboxDoubleClick(
+                    !formData.gender.includes(genderOption),
+                    () => handleGenderChange(genderOption, !formData.gender.includes(genderOption)),
+                    index === 0 ? "otherGender" : "weight"
+                  )}
                 >
                   <Checkbox
                     id={`gender-${genderOption}`}
@@ -746,6 +770,7 @@ export default function ModernPatientForm({
                 name="otherGender"
                 value={formData.otherGender}
                 onChange={(e) => handleInputChange("otherGender", e.target.value)}
+                onKeyDown={handleEnterKeyNavigation}
                 className="transition-all duration-200 focus:ring-blue-200"
               />
             </div>
@@ -790,6 +815,7 @@ export default function ModernPatientForm({
                 type="number"
                 value={formData.weight}
                 onChange={(e) => handleInputChange("weight", e.target.value)}
+                onKeyDown={handleEnterKeyNavigation}
                 min="1"
                 max="300"
                 step="0.1"
@@ -817,6 +843,7 @@ export default function ModernPatientForm({
                 type="number"
                 value={formData.height}
                 onChange={(e) => handleInputChange("height", e.target.value)}
+                onKeyDown={handleEnterKeyNavigation}
                 min="50"
                 max="250"
                 className={`transition-all duration-200 ${
@@ -869,6 +896,7 @@ export default function ModernPatientForm({
                 type="tel"
                 value={formData.phone || ''}
                 onChange={(e) => handleInputChange("phone", e.target.value)}
+                onKeyDown={handleEnterKeyNavigation}
                 placeholder="+230 5XXX XXXX"
                 className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
               />
@@ -885,6 +913,7 @@ export default function ModernPatientForm({
                 type="email"
                 value={formData.email || ''}
                 onChange={(e) => handleInputChange("email", e.target.value)}
+                onKeyDown={handleEnterKeyNavigation}
                 placeholder="email@example.com"
                 className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
               />
@@ -901,6 +930,7 @@ export default function ModernPatientForm({
               name="address"
               value={formData.address || ''}
               onChange={(e) => handleInputChange("address", e.target.value)}
+              onKeyDown={handleEnterKeyNavigation}
               placeholder={t('patientForm.addressPlaceholder')}
               rows={2}
               className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
@@ -919,6 +949,7 @@ export default function ModernPatientForm({
                 type="text"
                 value={formData.city || ''}
                 onChange={(e) => handleInputChange("city", e.target.value)}
+                onKeyDown={handleEnterKeyNavigation}
                 placeholder="Port Louis, Curepipe, etc."
                 className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
               />
@@ -935,6 +966,7 @@ export default function ModernPatientForm({
                 type="text"
                 value={formData.country || ''}
                 onChange={(e) => handleInputChange("country", e.target.value)}
+                onKeyDown={handleEnterKeyNavigation}
                 className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
               />
             </div>
@@ -957,12 +989,13 @@ export default function ModernPatientForm({
               placeholder={t('patientForm.searchAllergy')}
               value={allergySearch}
               onChange={(e) => setAllergySearch(e.target.value)}
+              onKeyDown={handleEnterKeyNavigation}
               className="pl-10"
             />
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {filteredAllergies.map((allergy) => (
+            {filteredAllergies.map((allergy, index) => (
               <div
                 key={allergy}
                 className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
@@ -971,6 +1004,11 @@ export default function ModernPatientForm({
                     : "border-gray-200 hover:border-red-200 hover:bg-red-25"
                 }`}
                 onClick={() => handleAllergyChange(allergy, !formData.allergies.includes(allergy))}
+                onDoubleClick={() => handleCheckboxDoubleClick(
+                  !formData.allergies.includes(allergy),
+                  () => handleAllergyChange(allergy, !formData.allergies.includes(allergy)),
+                  index < filteredAllergies.length - 1 ? `allergy-${filteredAllergies[index + 1]}` : "otherAllergies"
+                )}
               >
                 <Checkbox
                   id={`allergy-${allergy}`}
@@ -990,6 +1028,7 @@ export default function ModernPatientForm({
               id="otherAllergies"
               value={formData.otherAllergies}
               onChange={(e) => handleInputChange("otherAllergies", e.target.value)}
+              onKeyDown={handleEnterKeyNavigation}
               rows={3}
               className="transition-all duration-200 focus:ring-red-200"
             />
@@ -1033,12 +1072,13 @@ export default function ModernPatientForm({
               placeholder={t('patientForm.searchMedicalHistory')}
               value={historySearch}
               onChange={(e) => setHistorySearch(e.target.value)}
+              onKeyDown={handleEnterKeyNavigation}
               className="pl-10"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredHistory.map((condition) => (
+            {filteredHistory.map((condition, index) => (
               <div
                 key={condition}
                 className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
@@ -1047,6 +1087,11 @@ export default function ModernPatientForm({
                     : "border-gray-200 hover:border-purple-200 hover:bg-purple-25"
                 }`}
                 onClick={() => handleMedicalHistoryChange(condition, !formData.medicalHistory.includes(condition))}
+                onDoubleClick={() => handleCheckboxDoubleClick(
+                  !formData.medicalHistory.includes(condition),
+                  () => handleMedicalHistoryChange(condition, !formData.medicalHistory.includes(condition)),
+                  index < filteredHistory.length - 1 ? `history-${filteredHistory[index + 1]}` : "otherMedicalHistory"
+                )}
               >
                 <Checkbox
                   id={`history-${condition}`}
@@ -1066,6 +1111,7 @@ export default function ModernPatientForm({
               id="otherMedicalHistory"
               value={formData.otherMedicalHistory}
               onChange={(e) => handleInputChange("otherMedicalHistory", e.target.value)}
+              onKeyDown={handleEnterKeyNavigation}
               rows={3}
               className="transition-all duration-200 focus:ring-purple-200"
             />
@@ -1111,6 +1157,7 @@ export default function ModernPatientForm({
               id="currentMedicationsText"
               value={formData.currentMedicationsText}
               onChange={(e) => handleInputChange("currentMedicationsText", e.target.value)}
+              onKeyDown={handleEnterKeyNavigation}
               placeholder={t('patientForm.medicationPlaceholder')}
               rows={6}
               className="resize-y transition-all duration-200 focus:ring-green-200"
