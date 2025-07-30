@@ -1,4 +1,4 @@
-// app/api/generate-professional-report/route.ts
+// app/api/generate-consultation-report/route.ts
 
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
@@ -46,6 +46,8 @@ INSTRUCTIONS CRITIQUES :
 5. Utilise la terminologie médicale appropriée
 6. Sois précis, concis et exhaustif
 
+IMPORTANT : Retourne UNIQUEMENT un objet JSON valide, sans aucun formatage markdown, sans backticks, sans préfixe "json".
+
 GÉNÈRE LE COMPTE RENDU SUIVANT :
 
 {
@@ -67,59 +69,21 @@ GÉNÈRE LE COMPTE RENDU SUIVANT :
   "rapport": {
     "motifConsultation": "[PROSE] Rédige un paragraphe fluide décrivant pourquoi le patient consulte, en intégrant le motif principal et le contexte",
     
-    "anamnese": "[PROSE NARRATIVE] Raconte l'histoire de la maladie actuelle de manière chronologique et détaillée, en intégrant :
-    - L'apparition des symptômes et leur évolution
-    - Les facteurs déclenchants ou aggravants
-    - Les traitements déjà tentés
-    - L'impact sur la vie quotidienne
-    - Les réponses aux questions de l'IA qui apportent des précisions diagnostiques",
+    "anamnese": "[PROSE NARRATIVE] Raconte l'histoire de la maladie actuelle de manière chronologique et détaillée, en intégrant : L'apparition des symptômes et leur évolution, Les facteurs déclenchants ou aggravants, Les traitements déjà tentés, L'impact sur la vie quotidienne, Les réponses aux questions de l'IA qui apportent des précisions diagnostiques",
     
-    "antecedents": "[PROSE] Décris les antécédents pertinents du patient de manière narrative, incluant :
-    - Antécédents médicaux : ${patientData.medicalHistory}
-    - Antécédents chirurgicaux
-    - Allergies : ${patientData.allergies}
-    - Traitements en cours : ${patientData.currentMedicationsText}
-    - Habitudes de vie : tabac ${patientData.lifeHabits?.smoking}, alcool ${patientData.lifeHabits?.alcohol}",
+    "antecedents": "[PROSE] Décris les antécédents pertinents du patient de manière narrative",
     
-    "examenClinique": "[PROSE MÉDICALE AU PRÉSENT] Décris l'examen physique de manière systématique :
-    - État général du patient
-    - Constantes vitales : T° ${clinicalData.vitalSigns?.temperature}°C, TA ${clinicalData.vitalSigns?.bloodPressureSystolic}/${clinicalData.vitalSigns?.bloodPressureDiastolic} mmHg
-    - Examen par système selon la symptomatologie
-    - Findings positifs et négatifs pertinents",
+    "examenClinique": "[PROSE MÉDICALE AU PRÉSENT] Décris l'examen physique de manière systématique",
     
-    "syntheseDiagnostique": "[PROSE] Synthèse du raisonnement diagnostique :
-    - Analyse des éléments clés : ${diagnosisData.diagnosticReasoning?.key_findings?.from_history}
-    - Syndrome identifié : ${diagnosisData.diagnosticReasoning?.syndrome_identification?.clinical_syndrome}
-    - Arguments pour le diagnostic principal
-    - Discussion des diagnostics différentiels écartés",
+    "syntheseDiagnostique": "[PROSE] Synthèse du raisonnement diagnostique",
     
-    "conclusionDiagnostique": "[PROSE] Au terme de cette consultation, je retiens le diagnostic de ${diagnosisData.diagnosis?.primary?.condition} (CIM-10 : ${diagnosisData.diagnosis?.primary?.icd10}). 
-    Explique pourquoi ce diagnostic est retenu avec les critères diagnostiques remplis.",
+    "conclusionDiagnostique": "[PROSE] Au terme de cette consultation, je retiens le diagnostic principal avec les critères diagnostiques",
     
-    "priseEnCharge": "[PROSE STRUCTURÉE] La prise en charge comprend :
+    "priseEnCharge": "[PROSE STRUCTURÉE] La prise en charge comprend les examens, traitements et mesures associées",
     
-    1. EXAMENS COMPLÉMENTAIRES :
-    ${formatExamsList(editedDocuments)}
+    "surveillance": "[PROSE] Plan de surveillance incluant le suivi et les signes d'alerte",
     
-    2. TRAITEMENT MÉDICAMENTEUX :
-    ${formatMedicationsList(editedDocuments)}
-    
-    3. MESURES ASSOCIÉES :
-    - Conseils hygiéno-diététiques adaptés
-    - Repos selon nécessité
-    - Mesures préventives",
-    
-    "surveillance": "[PROSE] Plan de surveillance incluant :
-    - Suivi des symptômes à court terme
-    - Réévaluation avec résultats des examens
-    - Signes d'alerte nécessitant une consultation urgente : ${diagnosisData.follow_up_plan?.red_flags?.fr}
-    - Prochaine consultation prévue",
-    
-    "conclusion": "[PROSE] Paragraphe de conclusion résumant :
-    - Le diagnostic retenu
-    - Les points clés de la prise en charge
-    - Le pronostic attendu
-    - L'importance du suivi"
+    "conclusion": "[PROSE] Paragraphe de conclusion résumant le diagnostic, la prise en charge et le pronostic"
   },
   
   "prescriptions": {
@@ -149,6 +113,7 @@ RÈGLES DE RÉDACTION :
 - Assure la cohérence entre toutes les sections
 - Intègre naturellement les données techniques dans la prose
 - N'invente aucune donnée - utilise uniquement les informations fournies
+- RETOURNE UNIQUEMENT LE JSON, SANS FORMATAGE MARKDOWN
 `
 
     console.log("🤖 Génération avec GPT-4...")
@@ -165,7 +130,17 @@ RÈGLES DE RÉDACTION :
     // Parse et enrichissement du rapport
     let reportData
     try {
-      reportData = JSON.parse(result.text.trim())
+      // Nettoyer la réponse de tout formatage markdown
+      let cleanedResponse = result.text.trim()
+      
+      // Retirer les backticks et le préfixe json si présents
+      cleanedResponse = cleanedResponse.replace(/^```json\s*/i, '')
+      cleanedResponse = cleanedResponse.replace(/^```\s*/i, '')
+      cleanedResponse = cleanedResponse.replace(/\s*```$/i, '')
+      cleanedResponse = cleanedResponse.trim()
+      
+      // Parser le JSON nettoyé
+      reportData = JSON.parse(cleanedResponse)
       
       // Enrichir avec les prescriptions formatées
       reportData.prescriptionsFormatees = {
@@ -176,9 +151,14 @@ RÈGLES DE RÉDACTION :
       // Ajouter le texte complet formaté pour PDF
       reportData.texteComplet = generateFullReportText(reportData)
       
+      // Calculer le nombre de mots
+      reportData.metadata = reportData.metadata || {}
+      reportData.metadata.wordCount = countWords(reportData.texteComplet)
+      
     } catch (error) {
       console.error("❌ Erreur parsing:", error)
-      throw new Error("Erreur de génération du rapport")
+      console.error("Réponse brute:", result.text)
+      throw new Error("Erreur de génération du rapport - Format JSON invalide")
     }
 
     return NextResponse.json({
@@ -186,7 +166,7 @@ RÈGLES DE RÉDACTION :
       report: reportData,
       metadata: {
         type: "professional_narrative",
-        wordCount: countWords(reportData.texteComplet),
+        wordCount: reportData.metadata.wordCount,
         generatedAt: new Date().toISOString()
       }
     })
@@ -323,7 +303,7 @@ function formatPrescriptionsExamens(editedDocuments: any): string {
     })
   }
   
-  return output
+  return output || "Aucun examen complémentaire prescrit"
 }
 
 function formatPrescriptionsMedicaments(editedDocuments: any): string {
@@ -341,6 +321,8 @@ function formatPrescriptionsMedicaments(editedDocuments: any): string {
       }
       output += "\n"
     })
+  } else {
+    output += "Aucun traitement médicamenteux prescrit\n"
   }
   
   return output
