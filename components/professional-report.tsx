@@ -1,16 +1,15 @@
-// components/professional-report.tsx - Version complète avec génération et édition de tous les documents
+// components/professional-report.tsx
+"use client";
 
-"use client"
-
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   FileText, 
   Download, 
@@ -31,16 +30,28 @@ import {
   Activity,
   Plus,
   Trash2
-} from "lucide-react"
+} from "lucide-react";
 
 interface ProfessionalReportProps {
-  patientData: any
-  clinicalData: any
-  questionsData: any
-  diagnosisData: any
-  editedDocuments?: any
-  onComplete?: (data: any) => void
-  onPrevious?: () => void
+  patientData: any;
+  clinicalData: any;
+  questionsData: any;
+  diagnosisData: any;
+  editedDocuments?: any;
+  onComplete?: (data: any) => void;
+  onPrevious?: () => void;
+}
+
+interface Prescription {
+  id: number;
+  exam?: string;
+  medication?: string;
+  dosage?: string;
+  duration?: string;
+  indication: string;
+  urgency?: string;
+  fasting?: string;
+  mauritianAvailability?: string;
 }
 
 export default function ProfessionalReport({
@@ -52,22 +63,22 @@ export default function ProfessionalReport({
   onComplete,
   onPrevious
 }: ProfessionalReportProps) {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // État pour le compte rendu
-  const [report, setReport] = useState<any>(null)
-  const [editedReport, setEditedReport] = useState<any>(null)
-  const [isEditingReport, setIsEditingReport] = useState(false)
+  const [report, setReport] = useState<any>(null);
+  const [editedReport, setEditedReport] = useState<any>(null);
+  const [isEditingReport, setIsEditingReport] = useState(false);
   
   // États pour les ordonnances
-  const [consultation, setConsultation] = useState<any>(null)
-  const [biology, setBiology] = useState<any>(null)
-  const [paraclinical, setParaclinical] = useState<any>(null)
-  const [medication, setMedication] = useState<any>(null)
+  const [consultation, setConsultation] = useState<any>(null);
+  const [biology, setBiology] = useState<any>(null);
+  const [paraclinical, setParaclinical] = useState<any>(null);
+  const [medication, setMedication] = useState<any>(null);
   
   // Tab actif
-  const [activeTab, setActiveTab] = useState("report")
+  const [activeTab, setActiveTab] = useState("report");
   
   // État de validation
   const [validationStatus, setValidationStatus] = useState({
@@ -76,7 +87,7 @@ export default function ProfessionalReport({
     biology: false,
     paraclinical: false,
     medication: false
-  })
+  });
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -84,8 +95,8 @@ export default function ProfessionalReport({
   }, []);
 
   const generateAllDocuments = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
     try {
       const response = await fetch("/api/generate-consultation-report", {
@@ -97,35 +108,34 @@ export default function ProfessionalReport({
           questionsData,
           diagnosisData,
           editedDocuments: editedDocuments || {},
-          generateAllDocuments: true // Flag pour générer TOUT
+          generateAllDocuments: true
         })
-      })
+      });
 
-      const contentType = response.headers.get("content-type") || ""
+      const contentType = response.headers.get("content-type") || "";
       if (!response.ok || !contentType.includes("application/json")) {
-        const text = await response.text()
-        throw new Error(text || `Erreur HTTP ${response.status}`)
+        const text = await response.text();
+        throw new Error(text || `Erreur HTTP ${response.status}`);
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        // Initialiser tous les documents
-        setReport(data.report)
-        setEditedReport(data.report)
-        setConsultation(data.documents.consultation)
-        setBiology(data.documents.biology)
-        setParaclinical(data.documents.paraclinical)
-        setMedication(data.documents.medication)
+        setReport(data.report);
+        setEditedReport(data.report);
+        setConsultation(data.documents.consultation);
+        setBiology(data.documents.biology);
+        setParaclinical(data.documents.paraclinical);
+        setMedication(data.documents.medication);
       } else {
-        throw new Error(data.error || "Erreur lors de la génération")
+        throw new Error(data.error || "Erreur lors de la génération");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inconnue")
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Handlers pour l'édition du rapport
   const handleReportFieldChange = (field: string, value: string) => {
@@ -135,8 +145,8 @@ export default function ProfessionalReport({
         ...prev.rapport,
         [field]: value
       }
-    }))
-  }
+    }));
+  };
 
   // Handlers pour la consultation
   const handleConsultationChange = (section: string, field: string, value: string) => {
@@ -146,8 +156,8 @@ export default function ProfessionalReport({
         ...prev[section],
         [field]: value
       }
-    }))
-  }
+    }));
+  };
 
   // Handlers pour la biologie
   const handleBiologyPrescriptionChange = (index: number, field: string, value: string) => {
@@ -156,8 +166,8 @@ export default function ProfessionalReport({
       prescriptions: prev.prescriptions.map((p: any, i: number) => 
         i === index ? { ...p, [field]: value } : p
       )
-    }))
-  }
+    }));
+  };
 
   const addBiologyPrescription = () => {
     setBiology((prev: any) => ({
@@ -170,45 +180,89 @@ export default function ProfessionalReport({
         fasting: "Non",
         mauritianAvailability: "Disponible laboratoires Maurice"
       }]
-    }))
-  }
+    }));
+  };
 
   const removeBiologyPrescription = (index: number) => {
     setBiology((prev: any) => ({
       ...prev,
       prescriptions: prev.prescriptions.filter((_: any, i: number) => i !== index)
-    }))
-  }
+    }));
+  };
 
-  // Handlers similaires pour paraclinical et medication...
+  // Handlers pour paraclinique
   const handleParaclinicalPrescriptionChange = (index: number, field: string, value: string) => {
     setParaclinical((prev: any) => ({
       ...prev,
       prescriptions: prev.prescriptions.map((p: any, i: number) => 
         i === index ? { ...p, [field]: value } : p
       )
-    }))
-  }
+    }));
+  };
 
+  const addParaclinicalPrescription = () => {
+    setParaclinical((prev: any) => ({
+      ...prev,
+      prescriptions: [...prev.prescriptions, {
+        id: Date.now(),
+        exam: "",
+        indication: "",
+        urgency: "Programmé (3-7 jours)",
+        preparation: "",
+        mauritianAvailability: "Disponible"
+      }]
+    }));
+  };
+
+  const removeParaclinicalPrescription = (index: number) => {
+    setParaclinical((prev: any) => ({
+      ...prev,
+      prescriptions: prev.prescriptions.filter((_: any, i: number) => i !== index)
+    }));
+  };
+
+  // Handlers pour médicaments
   const handleMedicationPrescriptionChange = (index: number, field: string, value: string) => {
     setMedication((prev: any) => ({
       ...prev,
       prescriptions: prev.prescriptions.map((p: any, i: number) => 
         i === index ? { ...p, [field]: value } : p
       )
-    }))
-  }
+    }));
+  };
+
+  const addMedicationPrescription = () => {
+    setMedication((prev: any) => ({
+      ...prev,
+      prescriptions: [...prev.prescriptions, {
+        id: Date.now(),
+        medication: "",
+        dosage: "",
+        frequency: "",
+        duration: "",
+        indication: "",
+        specialInstructions: ""
+      }]
+    }));
+  };
+
+  const removeMedicationPrescription = (index: number) => {
+    setMedication((prev: any) => ({
+      ...prev,
+      prescriptions: prev.prescriptions.filter((_: any, i: number) => i !== index)
+    }));
+  };
 
   // Validation handlers
   const validateReport = () => {
-    setReport(editedReport)
-    setIsEditingReport(false)
-    setValidationStatus(prev => ({ ...prev, report: true }))
-  }
+    setReport(editedReport);
+    setIsEditingReport(false);
+    setValidationStatus(prev => ({ ...prev, report: true }));
+  };
 
   const validateDocument = (docType: string) => {
-    setValidationStatus(prev => ({ ...prev, [docType]: true }))
-  }
+    setValidationStatus(prev => ({ ...prev, [docType]: true }));
+  };
 
   // Finalisation
   const handleFinalComplete = () => {
@@ -221,15 +275,16 @@ export default function ProfessionalReport({
         medication: medication
       },
       completedAt: new Date().toISOString()
-    }
+    };
     
     if (onComplete) {
-      onComplete(finalData)
+      onComplete(finalData);
     }
-  }
+  };
 
-  const isAllValidated = Object.values(validationStatus).every(status => status)
+  const isAllValidated = Object.values(validationStatus).every(status => status);
 
+  // Gestion du loading
   if (loading) {
     return (
       <Card>
@@ -241,9 +296,10 @@ export default function ProfessionalReport({
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
+  // Gestion de l'erreur
   if (error) {
     return (
       <Card className="border-red-200">
@@ -254,11 +310,15 @@ export default function ProfessionalReport({
           </Button>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  if (!report) return null
+  // Si pas de rapport, retourner null
+  if (!report) {
+    return null;
+  }
 
+  // Rendu principal
   return (
     <div className="space-y-6">
       {/* Header avec statut global */}
@@ -312,7 +372,7 @@ export default function ProfessionalReport({
             Médicaments
             {validationStatus.medication && <CheckCircle className="h-3 w-3 text-green-600" />}
           </TabsTrigger>
-        </Tabs>
+        </TabsList>
 
         {/* Tab Compte Rendu */}
         <TabsContent value="report">
@@ -337,8 +397,8 @@ export default function ProfessionalReport({
                   ) : (
                     <>
                       <Button variant="outline" size="sm" onClick={() => {
-                        setEditedReport(report)
-                        setIsEditingReport(false)
+                        setEditedReport(report);
+                        setIsEditingReport(false);
                       }}>
                         <X className="h-4 w-4 mr-2" />
                         Annuler
@@ -354,14 +414,32 @@ export default function ProfessionalReport({
             </CardHeader>
             <CardContent>
               {!isEditingReport ? (
-                // Mode lecture - Affichage du rapport
+                // Mode lecture
                 <div className="prose prose-lg max-w-none space-y-6">
-                  {/* ... contenu du rapport en lecture seule ... */}
                   <section>
                     <h2 className="text-xl font-bold text-gray-900 mb-3">MOTIF DE CONSULTATION</h2>
-                    <p className="text-gray-700 leading-relaxed">{report.rapport.motifConsultation}</p>
+                    <p className="text-gray-700 leading-relaxed">{report?.rapport?.motifConsultation || "Non renseigné"}</p>
                   </section>
-                  {/* ... autres sections ... */}
+                  
+                  <section>
+                    <h2 className="text-xl font-bold text-gray-900 mb-3">ANAMNÈSE</h2>
+                    <p className="text-gray-700 leading-relaxed">{report?.rapport?.anamnese || "Non renseigné"}</p>
+                  </section>
+                  
+                  <section>
+                    <h2 className="text-xl font-bold text-gray-900 mb-3">EXAMEN CLINIQUE</h2>
+                    <p className="text-gray-700 leading-relaxed">{report?.rapport?.examenClinique || "Non renseigné"}</p>
+                  </section>
+                  
+                  <section>
+                    <h2 className="text-xl font-bold text-gray-900 mb-3">DIAGNOSTIC</h2>
+                    <p className="text-gray-700 leading-relaxed">{report?.rapport?.diagnostic || "Non renseigné"}</p>
+                  </section>
+                  
+                  <section>
+                    <h2 className="text-xl font-bold text-gray-900 mb-3">PLAN DE PRISE EN CHARGE</h2>
+                    <p className="text-gray-700 leading-relaxed">{report?.rapport?.plan || "Non renseigné"}</p>
+                  </section>
                 </div>
               ) : (
                 // Mode édition
@@ -370,13 +448,56 @@ export default function ProfessionalReport({
                     <Label htmlFor="motifConsultation">Motif de consultation</Label>
                     <Textarea
                       id="motifConsultation"
-                      value={editedReport.rapport.motifConsultation}
+                      value={editedReport?.rapport?.motifConsultation || ""}
                       onChange={(e) => handleReportFieldChange('motifConsultation', e.target.value)}
                       rows={3}
                       className="mt-2"
                     />
                   </div>
-                  {/* ... autres champs éditables ... */}
+                  
+                  <div>
+                    <Label htmlFor="anamnese">Anamnèse</Label>
+                    <Textarea
+                      id="anamnese"
+                      value={editedReport?.rapport?.anamnese || ""}
+                      onChange={(e) => handleReportFieldChange('anamnese', e.target.value)}
+                      rows={6}
+                      className="mt-2"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="examenClinique">Examen clinique</Label>
+                    <Textarea
+                      id="examenClinique"
+                      value={editedReport?.rapport?.examenClinique || ""}
+                      onChange={(e) => handleReportFieldChange('examenClinique', e.target.value)}
+                      rows={4}
+                      className="mt-2"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="diagnostic">Diagnostic</Label>
+                    <Textarea
+                      id="diagnostic"
+                      value={editedReport?.rapport?.diagnostic || ""}
+                      onChange={(e) => handleReportFieldChange('diagnostic', e.target.value)}
+                      rows={2}
+                      className="mt-2"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="plan">Plan de prise en charge</Label>
+                    <Textarea
+                      id="plan"
+                      value={editedReport?.rapport?.plan || ""}
+                      onChange={(e) => handleReportFieldChange('plan', e.target.value)}
+                      rows={4}
+                      className="mt-2"
+                    />
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -398,7 +519,6 @@ export default function ProfessionalReport({
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Édition directe des champs de consultation */}
               <div>
                 <Label>Motif principal</Label>
                 <Textarea
@@ -492,7 +612,7 @@ export default function ProfessionalReport({
                       <div>
                         <Label>Examen</Label>
                         <Input
-                          value={prescription.exam}
+                          value={prescription.exam || ''}
                           onChange={(e) => handleBiologyPrescriptionChange(index, 'exam', e.target.value)}
                           placeholder="Ex: NFS, CRP..."
                         />
@@ -501,7 +621,7 @@ export default function ProfessionalReport({
                       <div>
                         <Label>Urgence</Label>
                         <Select
-                          value={prescription.urgency}
+                          value={prescription.urgency || 'Semi-urgent (24-48h)'}
                           onValueChange={(value) => handleBiologyPrescriptionChange(index, 'urgency', value)}
                         >
                           <SelectTrigger>
@@ -519,11 +639,46 @@ export default function ProfessionalReport({
                     <div>
                       <Label>Indication</Label>
                       <Textarea
-                        value={prescription.indication}
+                        value={prescription.indication || ''}
                         onChange={(e) => handleBiologyPrescriptionChange(index, 'indication', e.target.value)}
                         rows={2}
                         placeholder="Justification médicale"
                       />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>À jeun ?</Label>
+                        <Select
+                          value={prescription.fasting || 'Non'}
+                          onValueChange={(value) => handleBiologyPrescriptionChange(index, 'fasting', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Oui">Oui</SelectItem>
+                            <SelectItem value="Non">Non</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div>
+                        <Label>Disponibilité Maurice</Label>
+                        <Select
+                          value={prescription.mauritianAvailability || 'Disponible laboratoires Maurice'}
+                          onValueChange={(value) => handleBiologyPrescriptionChange(index, 'mauritianAvailability', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Disponible laboratoires Maurice">Disponible</SelectItem>
+                            <SelectItem value="Envoi étranger nécessaire">Envoi étranger</SelectItem>
+                            <SelectItem value="Non disponible">Non disponible</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
                 </Card>
@@ -536,11 +691,88 @@ export default function ProfessionalReport({
         <TabsContent value="paraclinical">
           <Card>
             <CardHeader>
-              <CardTitle>Ordonnance - Examens Paracliniques</CardTitle>
-              {/* Actions similaires */}
+              <div className="flex justify-between items-center">
+                <CardTitle>Ordonnance - Examens Paracliniques</CardTitle>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={addParaclinicalPrescription}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Ajouter
+                  </Button>
+                  {!validationStatus.paraclinical && (
+                    <Button size="sm" onClick={() => validateDocument('paraclinical')}>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Valider
+                    </Button>
+                  )}
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
-              {/* Contenu similaire à biologie */}
+            <CardContent className="space-y-4">
+              {paraclinical?.prescriptions?.map((prescription: any, index: number) => (
+                <Card key={prescription.id} className="p-4 border-l-4 border-blue-400">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-semibold">Examen #{index + 1}</h4>
+                      {paraclinical.prescriptions.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeParaclinicalPrescription(index)}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Examen</Label>
+                        <Input
+                          value={prescription.exam || ''}
+                          onChange={(e) => handleParaclinicalPrescriptionChange(index, 'exam', e.target.value)}
+                          placeholder="Ex: Radiographie, IRM, Scanner..."
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label>Urgence</Label>
+                        <Select
+                          value={prescription.urgency || 'Programmé (3-7 jours)'}
+                          onValueChange={(value) => handleParaclinicalPrescriptionChange(index, 'urgency', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Urgent (dans les heures)">Urgent</SelectItem>
+                            <SelectItem value="Semi-urgent (24-48h)">Semi-urgent</SelectItem>
+                            <SelectItem value="Programmé (3-7 jours)">Programmé</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label>Indication</Label>
+                      <Textarea
+                        value={prescription.indication || ''}
+                        onChange={(e) => handleParaclinicalPrescriptionChange(index, 'indication', e.target.value)}
+                        rows={2}
+                        placeholder="Justification médicale"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label>Préparation spéciale</Label>
+                      <Input
+                        value={prescription.preparation || ''}
+                        onChange={(e) => handleParaclinicalPrescriptionChange(index, 'preparation', e.target.value)}
+                        placeholder="Ex: À jeun, vessie pleine..."
+                      />
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </CardContent>
           </Card>
         </TabsContent>
@@ -549,11 +781,91 @@ export default function ProfessionalReport({
         <TabsContent value="medication">
           <Card>
             <CardHeader>
-              <CardTitle>Ordonnance Médicamenteuse</CardTitle>
-              {/* Actions similaires */}
+              <div className="flex justify-between items-center">
+                <CardTitle>Ordonnance Médicamenteuse</CardTitle>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={addMedicationPrescription}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Ajouter
+                  </Button>
+                  {!validationStatus.medication && (
+                    <Button size="sm" onClick={() => validateDocument('medication')}>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Valider
+                    </Button>
+                  )}
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
-              {/* Contenu pour éditer les médicaments */}
+            <CardContent className="space-y-4">
+              {medication?.prescriptions?.map((prescription: any, index: number) => (
+                <Card key={prescription.id} className="p-4 border-l-4 border-green-400">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-semibold">Médicament #{index + 1}</h4>
+                      {medication.prescriptions.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeMedicationPrescription(index)}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Médicament</Label>
+                        <Input
+                          value={prescription.medication || ''}
+                          onChange={(e) => handleMedicationPrescriptionChange(index, 'medication', e.target.value)}
+                          placeholder="Nom du médicament"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label>Dosage</Label>
+                        <Input
+                          value={prescription.dosage || ''}
+                          onChange={(e) => handleMedicationPrescriptionChange(index, 'dosage', e.target.value)}
+                          placeholder="Ex: 500mg"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Fréquence</Label>
+                        <Input
+                          value={prescription.frequency || ''}
+                          onChange={(e) => handleMedicationPrescriptionChange(index, 'frequency', e.target.value)}
+                          placeholder="Ex: 2 fois/jour"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label>Durée</Label>
+                        <Input
+                          value={prescription.duration || ''}
+                          onChange={(e) => handleMedicationPrescriptionChange(index, 'duration', e.target.value)}
+                          placeholder="Ex: 7 jours"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label>Instructions spéciales</Label>
+                      <Textarea
+                        value={prescription.specialInstructions || ''}
+                        onChange={(e) => handleMedicationPrescriptionChange(index, 'specialInstructions', e.target.value)}
+                        rows={2}
+                        placeholder="Ex: Pendant les repas, éviter l'alcool..."
+                      />
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </CardContent>
           </Card>
         </TabsContent>
@@ -596,5 +908,5 @@ export default function ProfessionalReport({
         )}
       </div>
     </div>
-  )
+  );
 }
