@@ -1,11 +1,7 @@
 // app/api/generate-consultation-report/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
-
-// Configuration OpenAI
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-});
+import { generateText } from "ai"
+import { openai } from "@ai-sdk/openai"
 
 // Types pour une meilleure structure
 interface MedicalData {
@@ -15,6 +11,65 @@ interface MedicalData {
   diagnosisData: any;
   editedDocuments?: any;
   generateAllDocuments?: boolean;
+}
+
+interface PatientInfo {
+  nom: string
+  prenom: string
+  dateNaissance: string
+  age: number | null
+  sexe: string
+  profession: string
+  telephone: string
+  email: string
+  adresse: string
+  numeroSecuriteSociale: string
+  medecinTraitant: string
+}
+
+interface ClinicalInfo {
+  motifConsultation: string
+  symptomes: string
+  dureeSymptomes: string
+  intensiteDouleur: string
+  facteursDeclenchants: string
+  facteursAmeliorants: string
+  antecedents: {
+    medicaux: string
+    chirurgicaux: string
+    familiaux: string
+  }
+  allergies: string
+  medicamentsActuels: string
+  habitudes: {
+    tabac: string
+    alcool: string
+    activitePhysique: string
+    alimentation: string
+    sommeil: string
+  }
+  signesVitaux: {
+    tension: string
+    pouls: string
+    temperature: string
+    saturation: string
+    poids: string
+    taille: string
+    imc: string
+  }
+}
+
+interface DiagnosticInfo {
+  diagnosticPrincipal: string
+  diagnosticsSecondaires: string
+  diagnosticsDifferentiels: string
+  examensComplementaires: string
+  bilanBiologique: string
+  imagerie: string
+  conduite: string
+  surveillance: string
+  pronostic: string
+  education: string
 }
 
 export async function POST(request: NextRequest) {
@@ -38,18 +93,15 @@ export async function POST(request: NextRequest) {
     console.log('📊 Préparation des données pour génération complète');
 
     // ==================== FONCTIONS HELPER CRITIQUES ====================
-    // Ces fonctions corrigent l'erreur "e.join is not a function"
     
     /**
      * S'assure qu'une valeur est un tableau
-     * CRITIQUE: Corrige l'erreur principale
      */
     const ensureArray = (value: any): any[] => {
       if (Array.isArray(value)) return value;
       if (value === null || value === undefined) return [];
       if (typeof value === 'string') return value.split(',').map(s => s.trim());
       if (typeof value === 'object' && value.value) {
-        // Cas spécial pour les objets avec propriété value
         return ensureArray(value.value);
       }
       return [value];
@@ -57,7 +109,6 @@ export async function POST(request: NextRequest) {
 
     /**
      * Joint des valeurs de manière sûre
-     * CRITIQUE: Évite les erreurs de type
      */
     const safeJoin = (value: any, separator: string = ', '): string => {
       try {
@@ -97,7 +148,7 @@ export async function POST(request: NextRequest) {
 
     // ==================== EXTRACTION DES DONNÉES ====================
     
-    const extractPatientData = () => {
+    const extractPatientData = (): PatientInfo => {
       try {
         const calculateAge = (birthDate: string): number => {
           if (!birthDate) return 0;
@@ -142,7 +193,7 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    const extractClinicalData = () => {
+    const extractClinicalData = (): ClinicalInfo => {
       try {
         // Traitement spécial pour le motif de consultation
         let motifConsultation = '';
@@ -153,7 +204,6 @@ export async function POST(request: NextRequest) {
           } else if (Array.isArray(motif)) {
             motifConsultation = safeJoin(motif);
           } else if (typeof motif === 'object') {
-            // Gestion des objets complexes
             if (motif.value) {
               motifConsultation = safeJoin(motif.value);
             } else if (motif.text) {
@@ -275,7 +325,7 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    const extractDiagnosisData = () => {
+    const extractDiagnosisData = (): DiagnosticInfo => {
       try {
         // Gestion des diagnostics multiples
         const processDiagnostics = (diag: any): string => {
@@ -332,32 +382,25 @@ export async function POST(request: NextRequest) {
           return '';
         }
 
-        const completion = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [
-            {
-              role: "system",
-              content: `Vous êtes un médecin généraliste senior avec 20 ans d'expérience, spécialisé dans la rédaction de comptes rendus médicaux détaillés et professionnels. 
-              
-              Vos comptes rendus doivent:
-              - Être structurés de manière claire et professionnelle
-              - Utiliser la terminologie médicale appropriée
-              - Inclure tous les détails pertinents pour la continuité des soins
-              - Respecter les standards médicaux internationaux
-              - Être adaptés au contexte mauricien (système de santé, médicaments disponibles localement)
-              - Maintenir un niveau de détail élevé tout en restant concis
-              - Suivre une approche systématique: anamnèse complète, examen clinique détaillé, raisonnement diagnostique, plan thérapeutique clair`
-            },
-            {
-              role: "user",
-              content: prompt
-            }
-          ],
+        const systemPrompt = `Vous êtes un médecin généraliste senior avec 20 ans d'expérience, spécialisé dans la rédaction de comptes rendus médicaux détaillés et professionnels. 
+        
+        Vos comptes rendus doivent:
+        - Être structurés de manière claire et professionnelle
+        - Utiliser la terminologie médicale appropriée
+        - Inclure tous les détails pertinents pour la continuité des soins
+        - Respecter les standards médicaux internationaux
+        - Être adaptés au contexte mauricien (système de santé, médicaments disponibles localement)
+        - Maintenir un niveau de détail élevé tout en restant concis
+        - Suivre une approche systématique: anamnèse complète, examen clinique détaillé, raisonnement diagnostique, plan thérapeutique clair`;
+
+        const result = await generateText({
+          model: openai("gpt-4o"),
+          prompt: `${systemPrompt}\n\n${prompt}`,
+          maxTokens: maxTokens,
           temperature: 0.3,
-          max_tokens: maxTokens
         });
 
-        return completion.choices[0].message.content || '';
+        return result.text || '';
       } catch (error) {
         console.error('Erreur génération AI:', error);
         return '';
@@ -1382,7 +1425,7 @@ export async function GET() {
     version: '3.0',
     features: {
       aiGeneration: hasOpenAI,
-      model: hasOpenAI ? 'gpt-4o' : 'none',
+      model: hasOpenAI ? 'gpt-4o (via Vercel AI SDK)' : 'none',
       temperature: 0.3,
       maxTokens: 10000,
       multipleDocuments: true,
