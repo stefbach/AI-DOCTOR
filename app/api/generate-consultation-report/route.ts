@@ -577,7 +577,7 @@ ${diagnosis.surveillance || 'Surveillance clinique selon évolution'}
 ${diagnosis.education || 'Éducation thérapeutique réalisée'}
 
 11. PRONOSTIC
-${diagnosis.pronostic || 'Bon pronostic sous réserve d'une bonne observance thérapeutique'}
+${diagnosis.pronostic || "Bon pronostic sous réserve d'une bonne observance thérapeutique"}
 
 Dr. ${editedDocuments?.praticien || '[Nom du praticien]'}
 ${editedDocuments?.rpps ? `RPPS: ${editedDocuments.rpps}` : ''}
@@ -731,7 +731,7 @@ ${editedDocuments?.rpps ? `RPPS: ${editedDocuments.rpps}` : ''}
               ${diagnosis.diagnosticPrincipal}
               
               Argumentation diagnostique:
-              ${editedDocuments?.argumentationDiagnostic || 'Basé sur l\'anamnèse et l\'examen clinique'}
+              ${editedDocuments?.argumentationDiagnostic || "Basé sur l'anamnèse et l'examen clinique"}
               
               ${diagnosis.diagnosticsSecondaires ? `Diagnostics associés:\n${diagnosis.diagnosticsSecondaires}` : ''}
               
@@ -753,7 +753,7 @@ ${editedDocuments?.rpps ? `RPPS: ${editedDocuments.rpps}` : ''}
               - Activité physique selon tolérance`}
               
               3. EXAMENS COMPLÉMENTAIRES:
-              ${diagnosis.examensComplementaires || 'Aucun examen complémentaire nécessaire dans l\'immédiat'}
+              ${diagnosis.examensComplementaires || "Aucun examen complémentaire nécessaire dans l'immédiat"}
               
               4. SURVEILLANCE:
               ${diagnosis.surveillance || `
@@ -774,7 +774,7 @@ ${editedDocuments?.rpps ? `RPPS: ${editedDocuments.rpps}` : ''}
             followUp: `
               SUIVI PROPOSÉ:
               
-              Prochain rendez-vous: ${editedDocuments?.prochainRdv || 'Dans 1 semaine si pas d\'amélioration'}
+              Prochain rendez-vous: ${editedDocuments?.prochainRdv || "Dans 1 semaine si pas d'amélioration"}
               
               Modalités de suivi:
               - ${editedDocuments?.modalitesSuivi || 'Consultation de contrôle'}
@@ -892,7 +892,7 @@ ${editedDocuments?.rpps ? `RPPS: ${editedDocuments.rpps}` : ''}
             },
             {
               exam: 'Créatinine + DFG',
-              indication: 'Function rénale',
+              indication: 'Fonction rénale',
               valeurNormale: 'Créat: 60-110 μmol/L, DFG > 90 mL/min'
             }
           ];
@@ -1353,7 +1353,7 @@ ${editedDocuments?.rpps ? `RPPS: ${editedDocuments.rpps}` : ''}
     let errorDetails = 'Erreur inconnue';
     if (error instanceof Error) {
       if (error.message.includes('join is not a function')) {
-        errorDetails = 'Erreur de type de données: tentative d\'utilisation de join sur une non-array';
+        errorDetails = "Erreur de type de données: tentative d'utilisation de join sur une non-array";
       } else if (error.message.includes('OpenAI')) {
         errorDetails = 'Erreur API OpenAI - Vérifiez votre clé API';
       } else if (error.message.includes('JSON')) {
@@ -1403,7 +1403,7 @@ export async function GET() {
       inputFormat: {
         patientData: 'Données patient complètes',
         clinicalData: 'Données cliniques avec antécédents',
-        questionsData: 'Réponses aux questions d\'examen',
+        questionsData: "Réponses aux questions d'examen",
         diagnosisData: 'Diagnostic et plan thérapeutique',
         editedDocuments: 'Documents édités (optionnel)',
         generateAllDocuments: 'Boolean pour génération complète'
