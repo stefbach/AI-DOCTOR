@@ -61,6 +61,13 @@ class ConsultationDataService {
   }
 
   /**
+   * Vérifie si on est côté client
+   */
+  private isClient(): boolean {
+    return typeof window !== 'undefined' && typeof localStorage !== 'undefined'
+  }
+
+  /**
    * Génère une clé de stockage pour une consultation
    */
   private getStorageKey(consultationId: string): string {
@@ -71,6 +78,8 @@ class ConsultationDataService {
    * Définit l'ID de consultation actuel
    */
   setCurrentConsultationId(consultationId: string | null) {
+    if (!this.isClient()) return
+    
     if (consultationId) {
       localStorage.setItem(this.currentConsultationKey, consultationId)
     } else {
@@ -82,6 +91,7 @@ class ConsultationDataService {
    * Récupère l'ID de consultation actuel
    */
   getCurrentConsultationId(): string | null {
+    if (!this.isClient()) return null
     return localStorage.getItem(this.currentConsultationKey)
   }
 
@@ -101,8 +111,10 @@ class ConsultationDataService {
         timestamp: new Date().toISOString()
       }
 
-      // Sauvegarder dans localStorage
-      localStorage.setItem(this.getStorageKey(consultationId), JSON.stringify(dataWithTimestamp))
+      // Sauvegarder dans localStorage si disponible
+      if (this.isClient()) {
+        localStorage.setItem(this.getStorageKey(consultationId), JSON.stringify(dataWithTimestamp))
+      }
 
       // Sauvegarder dans Supabase si disponible
       if (this.supabase) {
@@ -148,7 +160,9 @@ class ConsultationDataService {
 
           if (!error && data) {
             // Mettre à jour localStorage avec les données de Supabase
-            localStorage.setItem(this.getStorageKey(consultationId), JSON.stringify(data.data))
+            if (this.isClient()) {
+              localStorage.setItem(this.getStorageKey(consultationId), JSON.stringify(data.data))
+            }
             return data.data
           }
         } catch (supabaseError) {
@@ -157,9 +171,11 @@ class ConsultationDataService {
       }
 
       // Fallback sur localStorage
-      const localData = localStorage.getItem(this.getStorageKey(consultationId))
-      if (localData) {
-        return JSON.parse(localData)
+      if (this.isClient()) {
+        const localData = localStorage.getItem(this.getStorageKey(consultationId))
+        if (localData) {
+          return JSON.parse(localData)
+        }
       }
 
       return null
@@ -390,7 +406,9 @@ class ConsultationDataService {
       if (!consultationId) return
 
       // Effacer de localStorage
-      localStorage.removeItem(this.getStorageKey(consultationId))
+      if (this.isClient()) {
+        localStorage.removeItem(this.getStorageKey(consultationId))
+      }
 
       // Effacer de Supabase si disponible
       if (this.supabase) {
@@ -464,6 +482,40 @@ class ConsultationDataService {
     fixed.gender = fixed.sexe // Ajout pour compatibilité
     
     return fixed as PatientDataAPI
+  }
+
+  /**
+   * Initialise un nouvel ID de consultation
+   */
+  initializeNewConsultation(): string {
+    const newId = `consultation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    this.setCurrentConsultationId(newId)
+    return newId
+  }
+
+  /**
+   * Obtient l'ID de consultation depuis Supabase
+   */
+  async getConsultationIdFromSupabase(patientId?: string): Promise<string | null> {
+    if (!this.supabase || !patientId) return null
+
+    try {
+      const { data, error } = await this.supabase
+        .from('consultations')
+        .select('id')
+        .eq('patient_id', patientId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (!error && data) {
+        return data.id
+      }
+    } catch (error) {
+      console.error('Error getting consultation from Supabase:', error)
+    }
+
+    return null
   }
 }
 
