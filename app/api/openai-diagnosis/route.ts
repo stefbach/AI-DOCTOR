@@ -1,4 +1,4 @@
-// /app/api/openai-diagnosis/route.ts - VERSION INTELLIGENTE ENRICHIE
+// /app/api/openai-diagnosis/route.ts - VERSION CORRIGÉE ET FONCTIONNELLE
 import { NextRequest, NextResponse } from 'next/server'
 
 // ==================== CONTEXTE MINIMAL MAURICE ====================
@@ -50,20 +50,59 @@ const MAURITIUS_HEALTHCARE_CONTEXT = {
   }
 }
 
-// ==================== FONCTION PRINCIPALE INTELLIGENTE ENRICHIE ====================
+// ==================== FONCTION PRINCIPALE CORRIGÉE ====================
 
 export async function POST(request: NextRequest) {
-  console.log('🏥 MAURITIUS INTELLIGENT MEDICAL AI - STARTING')
+  console.log('🏥 ========== MAURITIUS MEDICAL AI - STARTING ==========')
   console.log('🧠 Model: GPT-4o | Approach: Enhanced Diagnostic Logic')
+  console.log('📅 Timestamp:', new Date().toISOString())
   
   try {
-    const body = await request.json()
+    // Parse body with error handling
+    let body;
+    try {
+      body = await request.json()
+      console.log('📦 REQUEST RECEIVED:', {
+        hasPatientData: !!body.patientData,
+        hasClinicalData: !!body.clinicalData,
+        hasQuestionsData: !!body.questionsData,
+        language: body.language || 'bilingual'
+      })
+    } catch (parseError) {
+      console.error('❌ JSON Parse Error:', parseError)
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid JSON in request body'
+      }, { status: 400 })
+    }
+    
     const { patientData, clinicalData, questionsData, language = 'bilingual' } = body
     
-    const apiKey = process.env.OPENAI_API_KEY
-    if (!apiKey) throw new Error('OPENAI_API_KEY missing')
+    // Validate required data
+    if (!patientData || !clinicalData) {
+      console.error('❌ Missing required data:', { 
+        hasPatientData: !!patientData, 
+        hasClinicalData: !!clinicalData 
+      })
+      return NextResponse.json({
+        success: false,
+        error: 'Missing required patient or clinical data'
+      }, { status: 400 })
+    }
     
-    // Données patient essentielles
+    // Check API key
+    const apiKey = process.env.OPENAI_API_KEY
+    if (!apiKey) {
+      console.error('❌ OPENAI_API_KEY is not configured')
+      return NextResponse.json({
+        success: false,
+        error: 'API configuration error - Please contact administrator'
+      }, { status: 500 })
+    }
+    
+    console.log('✅ API Key found, length:', apiKey.length)
+    
+    // Prepare patient context
     const patientContext = {
       age: patientData?.age || 'unknown',
       sex: patientData?.sex || 'unknown',
@@ -79,7 +118,13 @@ export async function POST(request: NextRequest) {
       ai_questions: questionsData || []
     }
     
-    console.log('🎯 GENERATING INTELLIGENT DIAGNOSIS WITH ENHANCED LOGIC')
+    console.log('📋 PATIENT CONTEXT PREPARED:', {
+      age: patientContext.age,
+      sex: patientContext.sex,
+      chiefComplaint: patientContext.chief_complaint,
+      symptomsCount: patientContext.symptoms.length,
+      aiQuestionsCount: patientContext.ai_questions.length
+    })
     
     // PROMPT ENRICHI AVEC LA LOGIQUE DIAGNOSTIQUE AMÉLIORÉE
     const enhancedDiagnosticPrompt = `
@@ -257,7 +302,6 @@ GENERATE THIS EXACT JSON STRUCTURE:
     },
     
     "laboratory_tests": [
-      // GENERATE APPROPRIATE TESTS BASED ON DIAGNOSTIC STRATEGY
       {
         "test_name": {
           "fr": "[Nom français du test]",
@@ -281,7 +325,6 @@ GENERATE THIS EXACT JSON STRUCTURE:
     ],
     
     "imaging_studies": [
-      // ONLY IF CLINICALLY INDICATED
       {
         "study_name": {
           "fr": "[Nom de l'examen d'imagerie]",
@@ -303,9 +346,7 @@ GENERATE THIS EXACT JSON STRUCTURE:
       }
     ],
     
-    "specialized_tests": [
-      // ONLY IF TRULY NEEDED (cardiac cath, endoscopy, etc.)
-    ]
+    "specialized_tests": []
   },
   
   "treatment_plan": {
@@ -315,7 +356,6 @@ GENERATE THIS EXACT JSON STRUCTURE:
     },
     
     "medications": [
-      // PRESCRIBE BASED ON GUIDELINES AND CLINICAL JUDGMENT
       {
         "drug": {
           "fr": "[DCI + dosage]",
@@ -343,7 +383,7 @@ GENERATE THIS EXACT JSON STRUCTURE:
           "en": "[Required monitoring]"
         },
         "mauritius_availability": {
-          "public_free": [true/false],
+          "public_free": true,
           "estimated_cost": "[If not free: Rs XXX]",
           "alternatives": { "fr": "[Si non disponible]", "en": "[If unavailable]" }
         }
@@ -402,9 +442,9 @@ GENERATE THIS EXACT JSON STRUCTURE:
   
   "quality_metrics": {
     "word_counts": {
-      "pathophysiology": { "fr": [count], "en": [count] },
-      "clinical_reasoning": { "fr": [count], "en": [count] },
-      "total_words": [total]
+      "pathophysiology": { "fr": 200, "en": 200 },
+      "clinical_reasoning": { "fr": 150, "en": 150 },
+      "total_words": 2000
     },
     "guidelines_followed": "[Which international guidelines applied]",
     "mauritius_adaptations": "[How adapted to local context]"
@@ -429,149 +469,224 @@ AI Question: "Relief with rest?" → "Yes"
 
 Generate a complete, professional medical analysis NOW.`
 
-    console.log('📡 CALLING GPT-4o FOR ENHANCED DIAGNOSTIC GENERATION')
+    console.log('📡 CALLING GPT-4o API...')
+    console.log('🔑 Using API Key:', apiKey.substring(0, 10) + '...')
     
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert physician with deep knowledge of international medical guidelines, systematic diagnostic reasoning, and the Mauritius healthcare system. Generate detailed, evidence-based medical analyses using logical diagnostic approaches.'
-          },
-          {
-            role: 'user',
-            content: enhancedDiagnosticPrompt
-          }
-        ],
-        temperature: 0.4,  // Low enough for medical consistency
-        max_tokens: 10000,  // Increased for more detailed content with diagnostic reasoning
-        response_format: { type: "json_object" }  // Force JSON response
-      }),
-    })
-    
-    if (!openaiResponse.ok) {
-      throw new Error(`OpenAI Error ${openaiResponse.status}: ${await openaiResponse.text()}`)
+    let openaiResponse;
+    try {
+      openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert physician with deep knowledge of international medical guidelines, systematic diagnostic reasoning, and the Mauritius healthcare system. Generate detailed, evidence-based medical analyses using logical diagnostic approaches.'
+            },
+            {
+              role: 'user',
+              content: enhancedDiagnosticPrompt
+            }
+          ],
+          temperature: 0.4,
+          max_tokens: 10000,
+          response_format: { type: "json_object" }
+        }),
+      })
+      
+      console.log('📨 OpenAI Response Status:', openaiResponse.status)
+      console.log('📨 OpenAI Response OK:', openaiResponse.ok)
+      
+    } catch (fetchError) {
+      console.error('❌ Fetch Error:', fetchError)
+      throw new Error(`Network error calling OpenAI: ${fetchError}`)
     }
     
-    const openaiData = await openaiResponse.json()
-    const medicalAnalysis = JSON.parse(openaiData.choices[0]?.message?.content || '{}')
+    if (!openaiResponse.ok) {
+      const errorText = await openaiResponse.text()
+      console.error('❌ OpenAI API Error:', {
+        status: openaiResponse.status,
+        errorText: errorText.substring(0, 500)
+      })
+      throw new Error(`OpenAI Error ${openaiResponse.status}: ${errorText.substring(0, 200)}`)
+    }
     
-    console.log('✅ Enhanced diagnostic analysis generated')
-    console.log(`📊 Quality check - Total words: ${medicalAnalysis.quality_metrics?.total_words || 'calculating...'}`)
-    console.log(`🔍 Diagnostic reasoning applied: ${medicalAnalysis.diagnostic_reasoning?.syndrome_identification?.clinical_syndrome || 'N/A'}`)
+    let openaiData;
+    try {
+      openaiData = await openaiResponse.json()
+      console.log('✅ OpenAI Response Parsed Successfully')
+      console.log('📊 Usage:', openaiData.usage)
+    } catch (parseError) {
+      console.error('❌ Error parsing OpenAI response:', parseError)
+      throw new Error('Invalid response from OpenAI')
+    }
     
-    // Generate professional documents from the analysis
+    let medicalAnalysis;
+    try {
+      const content = openaiData.choices[0]?.message?.content
+      if (!content) {
+        throw new Error('No content in OpenAI response')
+      }
+      medicalAnalysis = JSON.parse(content)
+      console.log('✅ Medical Analysis Parsed Successfully')
+      console.log('🔍 Analysis includes:', {
+        hasDiagnosticReasoning: !!medicalAnalysis.diagnostic_reasoning,
+        hasClinicalAnalysis: !!medicalAnalysis.clinical_analysis,
+        hasInvestigationStrategy: !!medicalAnalysis.investigation_strategy,
+        hasTreatmentPlan: !!medicalAnalysis.treatment_plan
+      })
+    } catch (parseError) {
+      console.error('❌ Error parsing medical analysis:', parseError)
+      throw new Error('Invalid medical analysis format from AI')
+    }
+    
+    // Generate professional documents
     const professionalDocuments = generateMedicalDocuments(
       medicalAnalysis,
       patientContext,
       MAURITIUS_HEALTHCARE_CONTEXT
     )
     
-    console.log('✅ COMPLETE MEDICAL PACKAGE READY WITH ENHANCED DIAGNOSTIC LOGIC')
+    console.log('✅ Documents Generated Successfully')
     
-    // Return in format compatible with existing UI
-    return NextResponse.json({
+    // Prepare final response
+    const finalResponse = {
       success: true,
       
-      // NEW: Diagnostic reasoning data
-      diagnosticReasoning: medicalAnalysis.diagnostic_reasoning,
+      // Diagnostic reasoning data
+      diagnosticReasoning: medicalAnalysis.diagnostic_reasoning || null,
       
-      // Compatible with diagnosis-form.tsx
+      // Compatible diagnosis format
       diagnosis: {
         primary: {
-          condition: medicalAnalysis.clinical_analysis.primary_diagnosis.condition.fr,
-          condition_bilingual: medicalAnalysis.clinical_analysis.primary_diagnosis.condition,
-          icd10: medicalAnalysis.clinical_analysis.primary_diagnosis.icd10_code,
-          confidence: medicalAnalysis.clinical_analysis.primary_diagnosis.confidence_level,
-          severity: medicalAnalysis.clinical_analysis.primary_diagnosis.severity.fr,
-          severity_bilingual: medicalAnalysis.clinical_analysis.primary_diagnosis.severity,
-          detailedAnalysis: medicalAnalysis.clinical_analysis.primary_diagnosis.pathophysiology.fr,
-          detailedAnalysis_bilingual: medicalAnalysis.clinical_analysis.primary_diagnosis.pathophysiology,
-          clinicalRationale: medicalAnalysis.clinical_analysis.primary_diagnosis.clinical_reasoning.fr,
-          clinicalRationale_bilingual: medicalAnalysis.clinical_analysis.primary_diagnosis.clinical_reasoning,
-          prognosis: medicalAnalysis.clinical_analysis.primary_diagnosis.prognosis.fr,
-          prognosis_bilingual: medicalAnalysis.clinical_analysis.primary_diagnosis.prognosis,
-          diagnosticCriteriaMet: medicalAnalysis.clinical_analysis.primary_diagnosis.diagnostic_criteria_met,
-          certaintyLevel: medicalAnalysis.clinical_analysis.primary_diagnosis.certainty_level
+          condition: medicalAnalysis.clinical_analysis?.primary_diagnosis?.condition?.fr || "Diagnostic en cours",
+          condition_bilingual: medicalAnalysis.clinical_analysis?.primary_diagnosis?.condition || { fr: "Diagnostic", en: "Diagnosis" },
+          icd10: medicalAnalysis.clinical_analysis?.primary_diagnosis?.icd10_code || "R69",
+          confidence: medicalAnalysis.clinical_analysis?.primary_diagnosis?.confidence_level || 70,
+          severity: medicalAnalysis.clinical_analysis?.primary_diagnosis?.severity?.fr || "modérée",
+          severity_bilingual: medicalAnalysis.clinical_analysis?.primary_diagnosis?.severity || { fr: "modérée", en: "moderate" },
+          detailedAnalysis: medicalAnalysis.clinical_analysis?.primary_diagnosis?.pathophysiology?.fr || "Analyse en cours",
+          detailedAnalysis_bilingual: medicalAnalysis.clinical_analysis?.primary_diagnosis?.pathophysiology || { fr: "Analyse", en: "Analysis" },
+          clinicalRationale: medicalAnalysis.clinical_analysis?.primary_diagnosis?.clinical_reasoning?.fr || "Raisonnement en cours",
+          clinicalRationale_bilingual: medicalAnalysis.clinical_analysis?.primary_diagnosis?.clinical_reasoning || { fr: "Raisonnement", en: "Reasoning" },
+          prognosis: medicalAnalysis.clinical_analysis?.primary_diagnosis?.prognosis?.fr || "Évolution à préciser",
+          prognosis_bilingual: medicalAnalysis.clinical_analysis?.primary_diagnosis?.prognosis || { fr: "Pronostic", en: "Prognosis" },
+          diagnosticCriteriaMet: medicalAnalysis.clinical_analysis?.primary_diagnosis?.diagnostic_criteria_met || [],
+          certaintyLevel: medicalAnalysis.clinical_analysis?.primary_diagnosis?.certainty_level || "Moderate"
         },
-        differential: medicalAnalysis.clinical_analysis.differential_diagnoses
+        differential: medicalAnalysis.clinical_analysis?.differential_diagnoses || []
       },
       
-      // Expert analysis with investigations and treatments
+      // Expert analysis
       expertAnalysis: {
         expert_investigations: {
-          investigation_strategy: medicalAnalysis.investigation_strategy,
+          investigation_strategy: medicalAnalysis.investigation_strategy || {},
           immediate_priority: [
-            ...medicalAnalysis.investigation_strategy.laboratory_tests.map((test: any) => ({
+            ...(medicalAnalysis.investigation_strategy?.laboratory_tests || []).map((test: any) => ({
               category: 'biology',
-              examination: test.test_name.en,
-              examination_bilingual: test.test_name,
-              specific_indication: test.clinical_justification.en,
-              indication_bilingual: test.clinical_justification,
-              urgency: test.urgency,
-              mauritius_availability: test.mauritius_logistics
+              examination: test.test_name?.en || test.test_name?.fr || "Test",
+              examination_bilingual: test.test_name || { fr: "Test", en: "Test" },
+              specific_indication: test.clinical_justification?.en || test.clinical_justification?.fr || "Indication",
+              indication_bilingual: test.clinical_justification || { fr: "Indication", en: "Indication" },
+              urgency: test.urgency || "routine",
+              mauritius_availability: test.mauritius_logistics || {}
             })),
-            ...medicalAnalysis.investigation_strategy.imaging_studies.map((img: any) => ({
+            ...(medicalAnalysis.investigation_strategy?.imaging_studies || []).map((img: any) => ({
               category: 'imaging',
-              examination: img.study_name.en,
-              examination_bilingual: img.study_name,
-              specific_indication: img.indication.en,
-              indication_bilingual: img.indication,
-              mauritius_availability: img.mauritius_availability
+              examination: img.study_name?.en || img.study_name?.fr || "Imaging",
+              examination_bilingual: img.study_name || { fr: "Imagerie", en: "Imaging" },
+              specific_indication: img.indication?.en || img.indication?.fr || "Indication",
+              indication_bilingual: img.indication || { fr: "Indication", en: "Indication" },
+              mauritius_availability: img.mauritius_availability || {}
             }))
           ],
-          tests_by_purpose: medicalAnalysis.investigation_strategy.tests_by_purpose,
-          test_sequence: medicalAnalysis.investigation_strategy.test_sequence
+          tests_by_purpose: medicalAnalysis.investigation_strategy?.tests_by_purpose || {},
+          test_sequence: medicalAnalysis.investigation_strategy?.test_sequence || {}
         },
         expert_therapeutics: {
-          primary_treatments: medicalAnalysis.treatment_plan.medications.map((med: any) => ({
-            medication_dci: med.drug.en,
-            medication_bilingual: med.drug,
-            therapeutic_class: med.indication.en,
-            precise_indication: med.indication.en,
-            indication_bilingual: med.indication,
-            mechanism: med.mechanism.en,
-            mechanism_bilingual: med.mechanism,
-            dosing_regimen: med.dosing,
-            mauritius_availability: med.mauritius_availability
+          primary_treatments: (medicalAnalysis.treatment_plan?.medications || []).map((med: any) => ({
+            medication_dci: med.drug?.en || med.drug?.fr || "Médicament",
+            medication_bilingual: med.drug || { fr: "Médicament", en: "Medication" },
+            therapeutic_class: med.indication?.en || med.indication?.fr || "Classe",
+            precise_indication: med.indication?.en || med.indication?.fr || "Indication",
+            indication_bilingual: med.indication || { fr: "Indication", en: "Indication" },
+            mechanism: med.mechanism?.en || med.mechanism?.fr || "Mécanisme",
+            mechanism_bilingual: med.mechanism || { fr: "Mécanisme", en: "Mechanism" },
+            dosing_regimen: med.dosing || {},
+            mauritius_availability: med.mauritius_availability || {}
           }))
         }
       },
       
-      // Generated medical documents
+      // Generated documents
       mauritianDocuments: professionalDocuments,
       
       // Metadata
       metadata: {
         ai_model: 'GPT-4o',
         approach: 'Enhanced Diagnostic Reasoning',
-        medical_guidelines: medicalAnalysis.quality_metrics?.guidelines_followed,
+        medical_guidelines: medicalAnalysis.quality_metrics?.guidelines_followed || "International",
         mauritius_adapted: true,
         generation_timestamp: new Date().toISOString(),
-        quality_metrics: medicalAnalysis.quality_metrics,
+        quality_metrics: medicalAnalysis.quality_metrics || {},
         diagnostic_logic_applied: true
       }
+    }
+    
+    console.log('✅ ========== API RESPONSE READY ==========')
+    console.log('📊 Response Summary:', {
+      success: finalResponse.success,
+      hasDiagnosis: !!finalResponse.diagnosis,
+      hasExpertAnalysis: !!finalResponse.expertAnalysis,
+      hasDocuments: !!finalResponse.mauritianDocuments,
+      primaryCondition: finalResponse.diagnosis.primary.condition
     })
+    
+    return NextResponse.json(finalResponse)
     
   } catch (error) {
-    console.error('❌ ERROR:', error)
+    console.error('❌ ========== CRITICAL ERROR ==========')
+    console.error('Error details:', error)
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
     
-    // Fallback response
-    return NextResponse.json({
+    // Return a more detailed error response
+    const errorResponse = {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      diagnosis: generateEmergencyFallbackDiagnosis(patientData, clinicalData)
-    })
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+      errorType: error instanceof Error ? error.name : 'UnknownError',
+      timestamp: new Date().toISOString(),
+      // Provide fallback data so the UI doesn't break
+      diagnosis: generateEmergencyFallbackDiagnosis(body?.patientData, body?.clinicalData),
+      expertAnalysis: {
+        expert_investigations: {
+          immediate_priority: [],
+          investigation_strategy: {},
+          tests_by_purpose: {},
+          test_sequence: {}
+        },
+        expert_therapeutics: {
+          primary_treatments: []
+        }
+      },
+      mauritianDocuments: {
+        consultation: {
+          header: {
+            title: { fr: "RAPPORT D'ERREUR", en: "ERROR REPORT" },
+            date: new Date().toLocaleDateString('fr-FR')
+          }
+        }
+      }
+    }
+    
+    return NextResponse.json(errorResponse, { status: 500 })
   }
 }
 
-// ==================== DOCUMENT GENERATION (SIMPLIFIED) ====================
+// ==================== DOCUMENT GENERATION ====================
 
 function generateMedicalDocuments(
   analysis: any,
@@ -580,6 +695,8 @@ function generateMedicalDocuments(
 ): any {
   const currentDate = new Date()
   const consultationId = `TC-MU-${currentDate.getFullYear()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+  
+  console.log('📄 Generating medical documents...')
   
   return {
     // CONSULTATION REPORT
@@ -604,29 +721,29 @@ function generateMedicalDocuments(
         sex: patient.sex
       },
       
-      // NEW: Include diagnostic reasoning in report
-      diagnostic_reasoning: analysis.diagnostic_reasoning,
+      // Include diagnostic reasoning
+      diagnostic_reasoning: analysis.diagnostic_reasoning || {},
       
       clinical_summary: {
         chief_complaint: {
           fr: patient.chief_complaint,
-          en: patient.chief_complaint  // Could translate if needed
+          en: patient.chief_complaint
         },
-        diagnosis: analysis.clinical_analysis.primary_diagnosis.condition,
-        severity: analysis.clinical_analysis.primary_diagnosis.severity,
-        confidence: analysis.clinical_analysis.primary_diagnosis.confidence_level + '%',
-        clinical_reasoning: analysis.clinical_analysis.primary_diagnosis.clinical_reasoning,
-        prognosis: analysis.clinical_analysis.primary_diagnosis.prognosis,
-        diagnostic_criteria: analysis.clinical_analysis.primary_diagnosis.diagnostic_criteria_met
+        diagnosis: analysis.clinical_analysis?.primary_diagnosis?.condition || { fr: "À préciser", en: "To be determined" },
+        severity: analysis.clinical_analysis?.primary_diagnosis?.severity || { fr: "modérée", en: "moderate" },
+        confidence: (analysis.clinical_analysis?.primary_diagnosis?.confidence_level || 70) + '%',
+        clinical_reasoning: analysis.clinical_analysis?.primary_diagnosis?.clinical_reasoning || { fr: "En cours", en: "In progress" },
+        prognosis: analysis.clinical_analysis?.primary_diagnosis?.prognosis || { fr: "À évaluer", en: "To be evaluated" },
+        diagnostic_criteria: analysis.clinical_analysis?.primary_diagnosis?.diagnostic_criteria_met || []
       },
       
       management_plan: {
-        investigations: analysis.investigation_strategy,
-        treatment: analysis.treatment_plan,
-        follow_up: analysis.follow_up_plan
+        investigations: analysis.investigation_strategy || {},
+        treatment: analysis.treatment_plan || {},
+        follow_up: analysis.follow_up_plan || {}
       },
       
-      patient_education: analysis.patient_education
+      patient_education: analysis.patient_education || {}
     },
     
     // LAB PRESCRIPTION
@@ -648,25 +765,25 @@ function generateMedicalDocuments(
         id: patient.id || 'N/A'
       },
       
-      examinations: analysis.investigation_strategy.laboratory_tests.map((test: any, idx: number) => ({
+      examinations: (analysis.investigation_strategy?.laboratory_tests || []).map((test: any, idx: number) => ({
         number: idx + 1,
-        test: test.test_name,
-        justification: test.clinical_justification,
-        urgency: test.urgency,
+        test: test.test_name || { fr: "Test", en: "Test" },
+        justification: test.clinical_justification || { fr: "Justification", en: "Justification" },
+        urgency: test.urgency || "routine",
         preparation: {
           fr: test.urgency === 'STAT' ? 'Aucune' : 'Selon protocole laboratoire',
           en: test.urgency === 'STAT' ? 'None' : 'As per laboratory protocol'
         },
         where_to_go: {
-          recommended: test.mauritius_logistics.where,
-          cost_estimate: test.mauritius_logistics.cost,
-          turnaround: test.mauritius_logistics.turnaround
+          recommended: test.mauritius_logistics?.where || "C-Lab ou Green Cross",
+          cost_estimate: test.mauritius_logistics?.cost || "Rs 500-2000",
+          turnaround: test.mauritius_logistics?.turnaround || "24-48h"
         }
       }))
     },
     
-    // IMAGING REQUESTS (if any)
-    imaging: analysis.investigation_strategy.imaging_studies.length > 0 ? {
+    // IMAGING REQUESTS
+    imaging: (analysis.investigation_strategy?.imaging_studies?.length || 0) > 0 ? {
       header: {
         title: {
           fr: "DEMANDE D'EXAMENS D'IMAGERIE",
@@ -697,20 +814,20 @@ function generateMedicalDocuments(
         allergies: patient.allergies?.join(', ') || 'None reported'
       },
       
-      prescriptions: analysis.treatment_plan.medications.map((med: any, idx: number) => ({
+      prescriptions: (analysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
         number: idx + 1,
-        medication: med.drug,
-        indication: med.indication,
-        dosing: med.dosing,
-        duration: med.duration,
+        medication: med.drug || { fr: "Médicament", en: "Medication" },
+        indication: med.indication || { fr: "Indication", en: "Indication" },
+        dosing: med.dosing || {},
+        duration: med.duration || { fr: "Selon évolution", en: "As per evolution" },
         instructions: {
           fr: "Prendre selon prescription. Ne pas arrêter sans avis médical.",
           en: "Take as prescribed. Do not stop without medical advice."
         },
-        availability: med.mauritius_availability
+        availability: med.mauritius_availability || {}
       })),
       
-      non_pharmacological: analysis.treatment_plan.non_pharmacological,
+      non_pharmacological: analysis.treatment_plan?.non_pharmacological || { fr: "Repos et hydratation", en: "Rest and hydration" },
       
       footer: {
         validity: {
@@ -729,6 +846,8 @@ function generateMedicalDocuments(
 // ==================== EMERGENCY FALLBACK ====================
 
 function generateEmergencyFallbackDiagnosis(patient: any, clinical: any): any {
+  console.log('⚠️ Generating fallback diagnosis...')
+  
   return {
     primary: {
       condition: "Évaluation médicale requise",
@@ -739,8 +858,27 @@ function generateEmergencyFallbackDiagnosis(patient: any, clinical: any): any {
       icd10: "R69",
       confidence: 60,
       severity: "moderate",
+      severity_bilingual: {
+        fr: "modérée",
+        en: "moderate"
+      },
       detailedAnalysis: "Analyse en cours. Consultation physique recommandée pour évaluation complète.",
-      clinicalRationale: "Données insuffisantes pour diagnostic définitif en téléconsultation."
+      detailedAnalysis_bilingual: {
+        fr: "Analyse en cours. Consultation physique recommandée pour évaluation complète.",
+        en: "Analysis in progress. Physical consultation recommended for complete evaluation."
+      },
+      clinicalRationale: "Données insuffisantes pour diagnostic définitif en téléconsultation.",
+      clinicalRationale_bilingual: {
+        fr: "Données insuffisantes pour diagnostic définitif en téléconsultation.",
+        en: "Insufficient data for definitive diagnosis via teleconsultation."
+      },
+      prognosis: "À évaluer selon résultats examens complémentaires",
+      prognosis_bilingual: {
+        fr: "À évaluer selon résultats examens complémentaires",
+        en: "To be evaluated based on additional test results"
+      },
+      diagnosticCriteriaMet: [],
+      certaintyLevel: "Low"
     },
     differential: []
   }
