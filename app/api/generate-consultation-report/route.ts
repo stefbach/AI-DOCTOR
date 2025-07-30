@@ -6,326 +6,541 @@ import { openai } from "@ai-sdk/openai"
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("📋 Génération du compte rendu médical professionnel")
+    console.log("📋 Génération du dossier médical complet")
     
     const { 
       patientData, 
       clinicalData, 
       questionsData, 
       diagnosisData,
-      editedDocuments // Documents édités à l'étape 4
+      editedDocuments,
+      generateAllDocuments = false
     } = await request.json()
 
-    if (!patientData || !clinicalData || !diagnosisData || !editedDocuments) {
+    if (!patientData || !clinicalData || !diagnosisData) {
       return NextResponse.json(
         { success: false, error: "Données incomplètes" },
         { status: 400 }
       )
     }
 
-    // Préparation du contexte médical complet
-    const medicalContext = prepareMedicalContext({
-      patientData,
-      clinicalData,
-      questionsData,
-      diagnosisData,
-      editedDocuments
-    })
+    // Si on doit générer tous les documents
+    if (generateAllDocuments) {
+      console.log("🤖 Génération complète : compte rendu + ordonnances")
+      
+      // Extraire les informations clés pour le prompt
+      const patientInfo = {
+        nom: `${patientData.firstName} ${patientData.lastName}`,
+        age: patientData.age,
+        sexe: patientData.gender?.[0] || patientData.gender,
+        poids: patientData.weight,
+        taille: patientData.height,
+        allergies: Array.isArray(patientData.allergies) ? patientData.allergies.join(', ') : 'Aucune',
+        antecedents: patientData.medicalHistory?.join(', ') || 'Aucun',
+        adresse: patientData.address || 'Non renseignée',
+        telephone: patientData.phone || patientData.phoneNumber || 'Non renseigné'
+      }
 
-    const professionalReportPrompt = `
-Tu es un médecin senior expérimenté rédigeant un compte rendu de consultation professionnel.
+      const clinicalInfo = {
+        motif: clinicalData.chiefComplaint,
+        duree: clinicalData.symptomDuration,
+        symptomes: clinicalData.symptoms?.join(', '),
+        signesVitaux: clinicalData.vitalSigns,
+        examenPhysique: clinicalData.physicalExamDetails
+      }
 
-CONTEXTE MÉDICAL COMPLET :
-${JSON.stringify(medicalContext, null, 2)}
+      const diagnosticInfo = {
+        principal: diagnosisData?.diagnosis?.primary?.condition || diagnosisData?.primary?.condition,
+        differentiel: diagnosisData?.diagnosis?.differential || [],
+        investigations: diagnosisData?.expertAnalysis?.expert_investigations,
+        traitements: diagnosisData?.expertAnalysis?.expert_therapeutics
+      }
 
-INSTRUCTIONS CRITIQUES :
-1. Rédige un compte rendu médical en PROSE NARRATIVE fluide et professionnelle
-2. Utilise le style médical français standard (passé composé pour l'anamnèse, présent pour l'examen)
-3. Intègre TOUTES les données fournies de manière cohérente
-4. Structure le rapport selon les standards hospitaliers
-5. Utilise la terminologie médicale appropriée
-6. Sois précis, concis et exhaustif
+      const completePrompt = `
+Tu es un médecin senior expérimenté à Maurice créant un dossier médical complet.
 
-IMPORTANT : Retourne UNIQUEMENT un objet JSON valide, sans aucun formatage markdown, sans backticks, sans préfixe "json".
+CONTEXTE PATIENT:
+${JSON.stringify(patientInfo, null, 2)}
 
-GÉNÈRE LE COMPTE RENDU SUIVANT :
+DONNÉES CLINIQUES:
+${JSON.stringify(clinicalInfo, null, 2)}
+
+DIAGNOSTIC ET ANALYSE:
+${JSON.stringify(diagnosticInfo, null, 2)}
+
+INSTRUCTIONS:
+1. Génère un compte rendu professionnel en PROSE NARRATIVE fluide
+2. Génère les 4 ordonnances complètes basées sur le diagnostic
+3. Utilise la terminologie médicale française appropriée
+4. Adapte au contexte mauricien (disponibilités, centres, etc.)
+5. Intègre TOUTES les recommandations du diagnostic
+
+RETOURNE UNIQUEMENT UN JSON VALIDE (sans markdown, sans backticks):
 
 {
-  "header": {
-    "title": "COMPTE-RENDU DE CONSULTATION MÉDICALE",
-    "subtitle": "Médecine Générale - Consultation du ${new Date().toLocaleDateString('fr-FR')}",
-    "reference": "CR-${Date.now()}"
+  "report": {
+    "header": {
+      "title": "COMPTE-RENDU DE CONSULTATION MÉDICALE",
+      "subtitle": "Médecine Générale - Consultation du ${new Date().toLocaleDateString('fr-FR')}",
+      "reference": "CR-${Date.now()}"
+    },
+    "identification": {
+      "patient": "${patientInfo.nom}",
+      "age": "${patientInfo.age} ans",
+      "dateNaissance": "${patientData.birthDate || 'Non renseignée'}",
+      "sexe": "${patientInfo.sexe}",
+      "adresse": "${patientInfo.adresse}",
+      "telephone": "${patientInfo.telephone}"
+    },
+    "rapport": {
+      "motifConsultation": "[PROSE fluide décrivant pourquoi le patient consulte, intégrant le motif et le contexte]",
+      "anamnese": "[PROSE NARRATIVE détaillée racontant l'histoire de la maladie de manière chronologique, incluant l'apparition des symptômes, leur évolution, les facteurs aggravants, l'impact sur la vie quotidienne]",
+      "antecedents": "[PROSE décrivant les antécédents médicaux, chirurgicaux, familiaux, allergies, habitudes de vie de manière narrative]",
+      "examenClinique": "[PROSE MÉDICALE AU PRÉSENT décrivant l'examen physique de manière systématique : état général, signes vitaux, examen par appareil]",
+      "syntheseDiagnostique": "[PROSE exposant le raisonnement diagnostique, les hypothèses envisagées et écartées]",
+      "conclusionDiagnostique": "[PROSE concluant sur le diagnostic retenu avec les arguments cliniques]",
+      "priseEnCharge": "[PROSE détaillant le plan thérapeutique : examens, traitements, mesures associées]",
+      "surveillance": "[PROSE décrivant le plan de surveillance, les signes d'alerte, le suivi recommandé]",
+      "conclusion": "[PROSE résumant la consultation, le pronostic et les perspectives]"
+    },
+    "signature": {
+      "medecin": "Dr. MÉDECIN EXPERT",
+      "qualification": "Médecin Généraliste",
+      "rpps": "",
+      "etablissement": "Cabinet Médical - Maurice"
+    },
+    "metadata": {
+      "dateGeneration": "${new Date().toISOString()}",
+      "dureeConsultation": "30 minutes",
+      "typeConsultation": "Consultation initiale"
+    }
   },
   
-  "identification": {
-    "patient": "${patientData.firstName} ${patientData.lastName}",
-    "age": "${patientData.age} ans",
-    "dateNaissance": "${patientData.birthDate}",
-    "sexe": "${patientData.gender}",
-    "adresse": "${editedDocuments.consultation?.patient?.address || patientData.address || 'Non renseignée'}",
-    "telephone": "${editedDocuments.consultation?.patient?.phone || patientData.phone || 'Non renseigné'}"
-  },
-  
-  "rapport": {
-    "motifConsultation": "[PROSE] Rédige un paragraphe fluide décrivant pourquoi le patient consulte, en intégrant le motif principal et le contexte",
+  "documents": {
+    "consultation": {
+      "header": {
+        "title": "COMPTE-RENDU DE CONSULTATION",
+        "subtitle": "Médecine Générale",
+        "date": "${new Date().toISOString().split('T')[0]}",
+        "time": "${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}",
+        "physician": "Dr. MÉDECIN EXPERT",
+        "registration": "COUNCIL-MU-2024-001",
+        "institution": "Centre Médical Maurice"
+      },
+      "patient": {
+        "firstName": "${patientData.firstName}",
+        "lastName": "${patientData.lastName}",
+        "age": "${patientInfo.age} ans",
+        "sex": "${patientInfo.sexe === 'Masculin' ? 'M' : 'F'}",
+        "address": "${patientInfo.adresse}",
+        "phone": "${patientInfo.telephone}",
+        "weight": "${patientInfo.poids}",
+        "height": "${patientInfo.taille}",
+        "allergies": "${patientInfo.allergies}"
+      },
+      "content": {
+        "chiefComplaint": "${clinicalInfo.motif}",
+        "history": "[Anamnèse complète intégrant tous les éléments cliniques]",
+        "examination": "[Examen physique détaillé avec constantes et examen par appareil]",
+        "diagnosis": "[Diagnostic principal retenu]",
+        "plan": "[Plan de prise en charge détaillé]"
+      }
+    },
     
-    "anamnese": "[PROSE NARRATIVE] Raconte l'histoire de la maladie actuelle de manière chronologique et détaillée, en intégrant : L'apparition des symptômes et leur évolution, Les facteurs déclenchants ou aggravants, Les traitements déjà tentés, L'impact sur la vie quotidienne, Les réponses aux questions de l'IA qui apportent des précisions diagnostiques",
+    "biology": {
+      "header": {
+        "title": "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+        "subtitle": "PRESCRIPTION D'EXAMENS BIOLOGIQUES",
+        "date": "${new Date().toISOString().split('T')[0]}",
+        "number": "BIO-MU-${Date.now()}",
+        "physician": "Dr. MÉDECIN EXPERT",
+        "registration": "COUNCIL-MU-2024-001"
+      },
+      "patient": {
+        "firstName": "${patientData.firstName}",
+        "lastName": "${patientData.lastName}",
+        "age": "${patientInfo.age} ans",
+        "address": "${patientInfo.adresse}"
+      },
+      "prescriptions": [
+        ${generateBiologyPrescriptions(diagnosticInfo)}
+      ]
+    },
     
-    "antecedents": "[PROSE] Décris les antécédents pertinents du patient de manière narrative",
+    "paraclinical": {
+      "header": {
+        "title": "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+        "subtitle": "PRESCRIPTION D'EXAMENS PARACLINIQUES",
+        "date": "${new Date().toISOString().split('T')[0]}",
+        "number": "PARA-MU-${Date.now()}",
+        "physician": "Dr. MÉDECIN EXPERT",
+        "registration": "COUNCIL-MU-2024-001"
+      },
+      "patient": {
+        "firstName": "${patientData.firstName}",
+        "lastName": "${patientData.lastName}",
+        "age": "${patientInfo.age} ans",
+        "address": "${patientInfo.adresse}"
+      },
+      "prescriptions": [
+        ${generateParaclinicalPrescriptions(diagnosticInfo)}
+      ]
+    },
     
-    "examenClinique": "[PROSE MÉDICALE AU PRÉSENT] Décris l'examen physique de manière systématique",
-    
-    "syntheseDiagnostique": "[PROSE] Synthèse du raisonnement diagnostique",
-    
-    "conclusionDiagnostique": "[PROSE] Au terme de cette consultation, je retiens le diagnostic principal avec les critères diagnostiques",
-    
-    "priseEnCharge": "[PROSE STRUCTURÉE] La prise en charge comprend les examens, traitements et mesures associées",
-    
-    "surveillance": "[PROSE] Plan de surveillance incluant le suivi et les signes d'alerte",
-    
-    "conclusion": "[PROSE] Paragraphe de conclusion résumant le diagnostic, la prise en charge et le pronostic"
-  },
-  
-  "prescriptions": {
-    "examens": ${JSON.stringify(editedDocuments.biology?.examinations || [])},
-    "medicaments": ${JSON.stringify(editedDocuments.medication?.prescriptions || [])}
-  },
-  
-  "metadata": {
-    "dateGeneration": "${new Date().toISOString()}",
-    "dureeConsultation": "30 minutes",
-    "typeConsultation": "Consultation initiale",
-    "prochainRDV": "${editedDocuments.consultation?.followUp?.nextAppointment || 'À définir selon évolution'}"
-  },
-  
-  "signature": {
-    "medecin": "${editedDocuments.consultation?.physician?.name || 'Dr. MEDECIN'}",
-    "qualification": "${editedDocuments.consultation?.physician?.qualification || 'Médecin Généraliste'}",
-    "rpps": "${editedDocuments.consultation?.physician?.rpps || ''}",
-    "etablissement": "${editedDocuments.consultation?.establishment?.name || 'Cabinet Médical'}"
+    "medication": {
+      "header": {
+        "title": "RÉPUBLIQUE DE MAURICE - ORDONNANCE MÉDICALE",
+        "subtitle": "PRESCRIPTION THÉRAPEUTIQUE",
+        "date": "${new Date().toISOString().split('T')[0]}",
+        "number": "MED-MU-${Date.now()}",
+        "physician": "Dr. MÉDECIN EXPERT",
+        "registration": "COUNCIL-MU-2024-001",
+        "validity": "Ordonnance valable 3 mois"
+      },
+      "patient": {
+        "firstName": "${patientData.firstName}",
+        "lastName": "${patientData.lastName}",
+        "age": "${patientInfo.age} ans",
+        "weight": "${patientInfo.poids}",
+        "allergies": "${patientInfo.allergies}",
+        "address": "${patientInfo.adresse}",
+        "pregnancy": "Non applicable"
+      },
+      "prescriptions": [
+        ${generateMedicationPrescriptions(diagnosticInfo, patientInfo)}
+      ],
+      "clinicalAdvice": {
+        "hydration": "Hydratation renforcée (2-3L/jour) adaptée au climat tropical de Maurice",
+        "activity": "Repos relatif selon symptômes, éviter efforts intenses aux heures chaudes (10h-16h)",
+        "diet": "Alimentation équilibrée, privilégier fruits et légumes locaux, éviter aliments épicés si troubles digestifs",
+        "mosquitoProtection": "Protection anti-moustiques INDISPENSABLE (dengue/chikungunya endémiques) : répulsifs, vêtements longs, moustiquaire",
+        "followUp": "Consultation de contrôle si pas d'amélioration sous 48-72h ou si aggravation des symptômes",
+        "emergency": "Urgences Maurice: 999 (SAMU) ou 114 - Cliniques 24h: Apollo Bramwell (Moka), Wellkin (Moka), C-Care Darné"
+      }
+    }
   }
 }
-
-RÈGLES DE RÉDACTION :
-- Utilise des phrases complètes et fluides
-- Évite les listes à puces dans le corps du texte
-- Maintiens un ton professionnel mais accessible
-- Assure la cohérence entre toutes les sections
-- Intègre naturellement les données techniques dans la prose
-- N'invente aucune donnée - utilise uniquement les informations fournies
-- RETOURNE UNIQUEMENT LE JSON, SANS FORMATAGE MARKDOWN
 `
 
-    console.log("🤖 Génération avec GPT-4...")
-    
-    const result = await generateText({
-      model: openai("gpt-4o"),
-      prompt: professionalReportPrompt,
-      maxTokens: 8000,
-      temperature: 0.3, // Basse température pour cohérence
-    })
+      console.log("🤖 Appel GPT-4 pour génération complète...")
+      
+      const result = await generateText({
+        model: openai("gpt-4o"),
+        prompt: completePrompt,
+        maxTokens: 10000,
+        temperature: 0.3,
+      })
 
-    console.log("✅ Compte rendu généré")
+      console.log("✅ Génération terminée, parsing du résultat...")
 
-    // Parse et enrichissement du rapport
-    let reportData
-    try {
-      // Nettoyer la réponse de tout formatage markdown
-      let cleanedResponse = result.text.trim()
-      
-      // Retirer les backticks et le préfixe json si présents
-      cleanedResponse = cleanedResponse.replace(/^```json\s*/i, '')
-      cleanedResponse = cleanedResponse.replace(/^```\s*/i, '')
-      cleanedResponse = cleanedResponse.replace(/\s*```$/i, '')
-      cleanedResponse = cleanedResponse.trim()
-      
-      // Parser le JSON nettoyé
-      reportData = JSON.parse(cleanedResponse)
-      
-      // Enrichir avec les prescriptions formatées
-      reportData.prescriptionsFormatees = {
-        examens: formatPrescriptionsExamens(editedDocuments),
-        medicaments: formatPrescriptionsMedicaments(editedDocuments)
+      // Parser et valider la réponse
+      let responseData
+      try {
+        let cleanedResponse = result.text.trim()
+        
+        // Nettoyer toute trace de markdown
+        cleanedResponse = cleanedResponse.replace(/^```json\s*/i, '')
+        cleanedResponse = cleanedResponse.replace(/^```\s*/i, '')
+        cleanedResponse = cleanedResponse.replace(/\s*```$/i, '')
+        cleanedResponse = cleanedResponse.trim()
+        
+        responseData = JSON.parse(cleanedResponse)
+        
+        // Ajouter les métadonnées
+        if (responseData.report) {
+          responseData.report.metadata = responseData.report.metadata || {}
+          responseData.report.metadata.wordCount = countWords(JSON.stringify(responseData.report.rapport))
+          responseData.report.metadata.generatedAt = new Date().toISOString()
+        }
+        
+      } catch (error) {
+        console.error("❌ Erreur parsing JSON:", error)
+        console.error("Réponse brute (premiers 500 caractères):", result.text.substring(0, 500))
+        throw new Error("Erreur de format dans la réponse générée")
       }
+
+      return NextResponse.json({
+        success: true,
+        report: responseData.report,
+        documents: responseData.documents
+      })
+
+    } else {
+      // Génération simple du rapport seul (comportement original)
+      console.log("📄 Génération du compte rendu seul")
       
-      // Ajouter le texte complet formaté pour PDF
-      reportData.texteComplet = generateFullReportText(reportData)
-      
-      // Calculer le nombre de mots
-      reportData.metadata = reportData.metadata || {}
-      reportData.metadata.wordCount = countWords(reportData.texteComplet)
-      
-    } catch (error) {
-      console.error("❌ Erreur parsing:", error)
-      console.error("Réponse brute:", result.text)
-      throw new Error("Erreur de génération du rapport - Format JSON invalide")
+      const simplePrompt = `
+Tu es un médecin senior rédigeant un compte rendu professionnel.
+
+CONTEXTE:
+${JSON.stringify({ patientData, clinicalData, questionsData, diagnosisData }, null, 2)}
+
+Génère UNIQUEMENT le compte rendu narratif (sans les ordonnances).
+
+RETOURNE UN JSON VALIDE:
+{
+  "header": {...},
+  "identification": {...},
+  "rapport": {
+    "motifConsultation": "[PROSE]",
+    "anamnese": "[PROSE NARRATIVE]",
+    "antecedents": "[PROSE]",
+    "examenClinique": "[PROSE AU PRÉSENT]",
+    "syntheseDiagnostique": "[PROSE]",
+    "conclusionDiagnostique": "[PROSE]",
+    "priseEnCharge": "[PROSE]",
+    "surveillance": "[PROSE]",
+    "conclusion": "[PROSE]"
+  },
+  "signature": {...}
+}
+`
+
+      const result = await generateText({
+        model: openai("gpt-4o"),
+        prompt: simplePrompt,
+        maxTokens: 6000,
+        temperature: 0.3,
+      })
+
+      let reportData = JSON.parse(result.text.trim())
+
+      return NextResponse.json({
+        success: true,
+        report: reportData
+      })
     }
 
-    return NextResponse.json({
-      success: true,
-      report: reportData,
-      metadata: {
-        type: "professional_narrative",
-        wordCount: reportData.metadata.wordCount,
-        generatedAt: new Date().toISOString()
-      }
-    })
-
   } catch (error) {
-    console.error("❌ Erreur génération rapport professionnel:", error)
+    console.error("❌ Erreur génération:", error)
     return NextResponse.json(
       { 
         success: false, 
-        error: error instanceof Error ? error.message : "Erreur inconnue"
+        error: error instanceof Error ? error.message : "Erreur inconnue lors de la génération"
       },
       { status: 500 }
     )
   }
 }
 
-// Fonctions helper pour formater les prescriptions
-function formatExamsList(editedDocuments: any): string {
-  const exams = []
+// Fonctions helper pour générer les prescriptions depuis le diagnostic
+
+function generateBiologyPrescriptions(diagnosticInfo: any): string {
+  const prescriptions = []
   
-  // Examens biologiques
-  if (editedDocuments.biology?.examinations?.length > 0) {
-    editedDocuments.biology.examinations.forEach((exam: any) => {
-      exams.push(`- ${exam.name} : ${exam.justification} (${exam.urgency})`)
+  if (diagnosticInfo.investigations?.immediate_priority) {
+    const biologyExams = diagnosticInfo.investigations.immediate_priority
+      .filter((exam: any) => exam.category === 'biology')
+    
+    biologyExams.forEach((exam: any, index: number) => {
+      prescriptions.push(`{
+        "id": ${Date.now() + index},
+        "exam": "${exam.examination || 'Examen biologique'}",
+        "indication": "${exam.specific_indication || 'Selon contexte clinique'}",
+        "urgency": "${mapUrgency(exam.urgency)}",
+        "fasting": "${exam.fasting_required ? 'Oui - 8h' : 'Non'}",
+        "expectedResults": "${exam.interpretation_keys || 'Résultats à interpréter selon contexte'}",
+        "sampleType": "${exam.sample_type || 'Sang veineux'}",
+        "contraindications": "Aucune",
+        "mauritianAvailability": "${formatAvailability(exam.mauritius_availability)}",
+        "cost": "${exam.mauritius_availability?.estimated_cost || 'À vérifier'}"
+      }`)
     })
   }
   
-  // Examens paracliniques
-  if (editedDocuments.paraclinical?.examinations?.length > 0) {
-    editedDocuments.paraclinical.examinations.forEach((exam: any) => {
-      exams.push(`- ${exam.type} : ${exam.indication}`)
+  // Si pas d'examens, ajouter un template basique
+  if (prescriptions.length === 0) {
+    prescriptions.push(`{
+      "id": ${Date.now()},
+      "exam": "À définir selon évolution",
+      "indication": "Selon contexte clinique",
+      "urgency": "Semi-urgent (24-48h)",
+      "fasting": "Non",
+      "expectedResults": "",
+      "sampleType": "Sang veineux",
+      "contraindications": "Aucune",
+      "mauritianAvailability": "Disponible laboratoires Maurice",
+      "cost": "À vérifier"
+    }`)
+  }
+  
+  return prescriptions.join(',\n        ')
+}
+
+function generateParaclinicalPrescriptions(diagnosticInfo: any): string {
+  const prescriptions = []
+  
+  if (diagnosticInfo.investigations?.immediate_priority) {
+    const paraclinicalExams = diagnosticInfo.investigations.immediate_priority
+      .filter((exam: any) => exam.category === 'imaging' || exam.category === 'functional')
+    
+    paraclinicalExams.forEach((exam: any, index: number) => {
+      prescriptions.push(`{
+        "id": ${Date.now() + index + 100},
+        "category": "${mapExamCategory(exam.examination)}",
+        "exam": "${exam.examination || 'Examen paraclinique'}",
+        "indication": "${exam.specific_indication || 'Exploration complémentaire'}",
+        "urgency": "${mapUrgency(exam.urgency)}",
+        "preparation": "${exam.patient_preparation || 'Aucune préparation spéciale'}",
+        "contraindications": "${exam.contraindications || 'Aucune'}",
+        "duration": "${exam.duration || '15-30 minutes'}",
+        "mauritianAvailability": "${formatAvailability(exam.mauritius_availability)}",
+        "cost": "${exam.mauritius_availability?.estimated_cost || 'Variable selon secteur'}"
+      }`)
     })
   }
   
-  return exams.join('\n') || "Aucun examen complémentaire prescrit"
-}
-
-function formatMedicationsList(editedDocuments: any): string {
-  if (!editedDocuments.medication?.prescriptions?.length) {
-    return "Aucun traitement médicamenteux institué"
+  if (prescriptions.length === 0) {
+    prescriptions.push(`{
+      "id": ${Date.now() + 100},
+      "category": "",
+      "exam": "À définir selon évolution",
+      "indication": "Si nécessaire",
+      "urgency": "Programmé (1-2 semaines)",
+      "preparation": "Aucune",
+      "contraindications": "Aucune",
+      "duration": "Variable",
+      "mauritianAvailability": "Centres publics et privés",
+      "cost": "À vérifier"
+    }`)
   }
   
-  return editedDocuments.medication.prescriptions.map((med: any) => 
-    `- ${med.medication} : ${med.dosage}, ${med.duration} - ${med.instructions}`
-  ).join('\n')
+  return prescriptions.join(',\n        ')
 }
 
-// Générer le texte complet du rapport pour export
-function generateFullReportText(reportData: any): string {
-  return `
-${reportData.header.title}
-${reportData.header.subtitle}
-Référence : ${reportData.header.reference}
-
-PATIENT : ${reportData.identification.patient}
-Âge : ${reportData.identification.age}
-Sexe : ${reportData.identification.sexe}
-Adresse : ${reportData.identification.adresse}
-Téléphone : ${reportData.identification.telephone}
-
-════════════════════════════════════════════════════════════════════
-
-MOTIF DE CONSULTATION
-${reportData.rapport.motifConsultation}
-
-ANAMNÈSE
-${reportData.rapport.anamnese}
-
-ANTÉCÉDENTS
-${reportData.rapport.antecedents}
-
-EXAMEN CLINIQUE
-${reportData.rapport.examenClinique}
-
-SYNTHÈSE DIAGNOSTIQUE
-${reportData.rapport.syntheseDiagnostique}
-
-CONCLUSION DIAGNOSTIQUE
-${reportData.rapport.conclusionDiagnostique}
-
-PRISE EN CHARGE
-${reportData.rapport.priseEnCharge}
-
-SURVEILLANCE ET SUIVI
-${reportData.rapport.surveillance}
-
-CONCLUSION
-${reportData.rapport.conclusion}
-
-════════════════════════════════════════════════════════════════════
-
-${reportData.signature.medecin}
-${reportData.signature.qualification}
-${reportData.signature.etablissement}
-
-Document généré le ${new Date().toLocaleString('fr-FR')}
-`
-}
-
-function prepareMedicalContext(data: any): any {
-  // Préparer et nettoyer toutes les données pour le contexte
-  return {
-    patient: {
-      ...data.patientData,
-      // Intégrer les modifications de l'étape 4
-      address: data.editedDocuments?.consultation?.patient?.address || data.patientData.address,
-      phone: data.editedDocuments?.consultation?.patient?.phone || data.patientData.phone
-    },
-    clinical: data.clinicalData,
-    aiQuestions: data.questionsData?.responses || [],
-    diagnosis: data.diagnosisData,
-    editedDocuments: data.editedDocuments
-  }
-}
-
-function formatPrescriptionsExamens(editedDocuments: any): string {
-  // Formater les prescriptions d'examens pour impression
-  let output = "ORDONNANCE - EXAMENS COMPLÉMENTAIRES\n\n"
+function generateMedicationPrescriptions(diagnosticInfo: any, patientInfo: any): string {
+  const prescriptions = []
+  const isElderly = parseInt(patientInfo.age) >= 65
   
-  if (editedDocuments.biology?.examinations?.length > 0) {
-    output += "BIOLOGIE :\n"
-    editedDocuments.biology.examinations.forEach((exam: any, idx: number) => {
-      output += `${idx + 1}. ${exam.name}\n`
-      output += `   Indication : ${exam.justification}\n`
-      output += `   Urgence : ${exam.urgency}\n\n`
+  if (diagnosticInfo.traitements?.primary_treatments) {
+    diagnosticInfo.traitements.primary_treatments.forEach((treatment: any, index: number) => {
+      const dosing = treatment.dosing_regimen?.standard_adult || ""
+      const elderlyDosing = treatment.dosing_regimen?.elderly_adjustment || dosing
+      
+      prescriptions.push(`{
+        "id": ${Date.now() + index + 200},
+        "class": "${mapTherapeuticClass(treatment.therapeutic_class)}",
+        "dci": "${treatment.medication_dci || ''}",
+        "brand": "${treatment.mauritius_availability?.brand_names?.join(' / ') || 'Marques locales'}",
+        "dosage": "${isElderly && elderlyDosing ? elderlyDosing : dosing}",
+        "frequency": "${extractFrequency(dosing)}",
+        "duration": "${treatment.treatment_duration || '7 jours'}",
+        "totalQuantity": "${calculateQuantity(dosing, treatment.treatment_duration)}",
+        "indication": "${treatment.precise_indication || ''}",
+        "administration": "${treatment.administration_route || 'Per os'}",
+        "contraindications": "${treatment.contraindications_absolute?.join(', ') || 'À vérifier'}",
+        "precautions": "${treatment.precautions || 'Respecter posologie'}",
+        "monitoring": "${treatment.monitoring_parameters?.join(', ') || 'Efficacité et tolérance'}",
+        "mauritianAvailability": "${treatment.mauritius_availability?.locally_available ? 'Disponible' : 'À commander'}",
+        "cost": "${treatment.mauritius_availability?.private_sector_cost || 'À préciser'}"
+      }`)
     })
   }
   
-  if (editedDocuments.paraclinical?.examinations?.length > 0) {
-    output += "\nIMAGERIE ET EXPLORATIONS :\n"
-    editedDocuments.paraclinical.examinations.forEach((exam: any, idx: number) => {
-      output += `${idx + 1}. ${exam.type}\n`
-      output += `   Indication : ${exam.indication}\n\n`
-    })
+  if (prescriptions.length === 0) {
+    prescriptions.push(`{
+      "id": ${Date.now() + 200},
+      "class": "",
+      "dci": "",
+      "brand": "",
+      "dosage": "",
+      "frequency": "À définir",
+      "duration": "",
+      "totalQuantity": "",
+      "indication": "",
+      "administration": "Per os",
+      "contraindications": "À vérifier",
+      "precautions": "Respecter posologie",
+      "monitoring": "Efficacité et tolérance",
+      "mauritianAvailability": "À vérifier",
+      "cost": "À préciser"
+    }`)
   }
   
-  return output || "Aucun examen complémentaire prescrit"
+  return prescriptions.join(',\n        ')
 }
 
-function formatPrescriptionsMedicaments(editedDocuments: any): string {
-  // Formater l'ordonnance médicamenteuse pour impression
-  let output = "ORDONNANCE MÉDICAMENTEUSE\n\n"
+// Fonctions utilitaires
+
+function mapUrgency(urgency: string): string {
+  switch(urgency?.toLowerCase()) {
+    case 'immediate': return "Urgent (dans les heures)"
+    case 'urgent': return "Semi-urgent (24-48h)"
+    case 'routine': return "Programmé (1-2 semaines)"
+    default: return "Programmé (1-2 semaines)"
+  }
+}
+
+function mapExamCategory(examName: string): string {
+  const name = examName?.toLowerCase() || ""
+  if (name.includes('echo') || name.includes('écho')) return "Échographie"
+  if (name.includes('ecg')) return "Explorations cardiologiques"
+  if (name.includes('scanner') || name.includes('tdm')) return "Scanner (TDM)"
+  if (name.includes('irm')) return "IRM"
+  if (name.includes('radio')) {
+    if (name.includes('thorax')) return "Imagerie thoracique"
+    if (name.includes('abdom')) return "Imagerie abdominale"
+    return "Imagerie standard"
+  }
+  return "Autres examens"
+}
+
+function mapTherapeuticClass(classes: string[]): string {
+  if (!classes || classes.length === 0) return "Autre"
+  const classStr = classes.join(' ').toLowerCase()
   
-  if (editedDocuments.medication?.prescriptions?.length > 0) {
-    editedDocuments.medication.prescriptions.forEach((med: any, idx: number) => {
-      output += `${idx + 1}. ${med.medication}\n`
-      output += `   ${med.dosage}\n`
-      output += `   ${med.frequency}\n`
-      output += `   Durée : ${med.duration}\n`
-      if (med.instructions) {
-        output += `   Instructions : ${med.instructions}\n`
-      }
-      output += "\n"
-    })
-  } else {
-    output += "Aucun traitement médicamenteux prescrit\n"
+  if (classStr.includes('antalgique') || classStr.includes('antipyrétique')) {
+    return "Antalgique non opioïde"
+  }
+  if (classStr.includes('ains') || classStr.includes('anti-inflammatoire')) {
+    return "Anti-inflammatoire non stéroïdien (AINS)"
+  }
+  if (classStr.includes('antibiotique') || classStr.includes('antibactérien')) {
+    return "Antibiotique"
+  }
+  if (classStr.includes('corticoïde')) {
+    return "Corticoïde"
+  }
+  if (classStr.includes('antihistaminique')) {
+    return "Antihistaminique"
+  }
+  return "Autre"
+}
+
+function formatAvailability(availability: any): string {
+  if (!availability) return "Disponible Maurice"
+  
+  if (availability.public_centers?.length > 0) {
+    return `Disponible: ${availability.public_centers.slice(0, 3).join(', ')}`
   }
   
-  return output
+  return availability.locally_available ? 
+    "Disponible secteur public et privé" : 
+    "À commander / Centres spécialisés"
+}
+
+function extractFrequency(dosing: string): string {
+  if (!dosing) return "3 fois par jour"
+  
+  if (dosing.includes('x 1/jour') || dosing.includes('1 fois')) return "1 fois par jour"
+  if (dosing.includes('x 2/jour') || dosing.includes('2 fois')) return "2 fois par jour"
+  if (dosing.includes('x 3/jour') || dosing.includes('3 fois')) return "3 fois par jour"
+  if (dosing.includes('x 4/jour') || dosing.includes('4 fois')) return "4 fois par jour"
+  if (dosing.includes('matin et soir')) return "Matin et soir"
+  
+  return "3 fois par jour"
+}
+
+function calculateQuantity(dosing: string, duration: string): string {
+  const daysMatch = duration?.match(/(\d+)\s*(jour|day)/i)
+  const days = daysMatch ? parseInt(daysMatch[1]) : 7
+  
+  let dailyDoses = 3
+  if (dosing?.includes('x 1/jour')) dailyDoses = 1
+  if (dosing?.includes('x 2/jour')) dailyDoses = 2
+  if (dosing?.includes('x 4/jour')) dailyDoses = 4
+  
+  return `${days * dailyDoses} comprimés`
 }
 
 function countWords(text: string): number {
