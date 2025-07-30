@@ -5,8 +5,8 @@ import { supabase } from './supabase'
 
 // Types pour les données de consultation
 export interface ConsultationData {
-  patientData?: any
-  patientDataAPI?: any // Données transformées pour l'API
+  patientData?: any          // Format UI (firstName, lastName, etc.)
+  patientDataAPI?: any       // Format API (nom, prenom, etc.)
   clinicalData?: any
   questionsData?: any
   diagnosisData?: any
@@ -268,13 +268,18 @@ class ConsultationDataService {
    * Transforme les données du formulaire patient au format attendu par l'API
    */
   transformPatientDataForAPI(formData: any): PatientDataAPI {
-    // Transformation du genre
+    // Transformation du genre - Toujours en français pour l'API
     let sexe = 'Non renseigné'
     if (formData.gender && formData.gender.length > 0) {
       const gender = formData.gender[0]
-      if (gender === 'Masculin' || gender === 'Male' || gender.toLowerCase() === 'masculin' || gender.toLowerCase() === 'male') {
+      // Gérer toutes les variantes possibles
+      if (gender === 'Masculin' || gender === 'Male' || gender.toLowerCase() === 'masculin' || 
+          gender.toLowerCase() === 'male' || gender.toLowerCase() === 'homme' || 
+          gender === 'Homme' || gender === 'M' || gender.toLowerCase() === 'm') {
         sexe = 'Masculin'
-      } else if (gender === 'Féminin' || gender === 'Female' || gender.toLowerCase() === 'féminin' || gender.toLowerCase() === 'female') {
+      } else if (gender === 'Féminin' || gender === 'Female' || gender.toLowerCase() === 'féminin' || 
+                 gender.toLowerCase() === 'female' || gender.toLowerCase() === 'femme' || 
+                 gender === 'Femme' || gender === 'F' || gender.toLowerCase() === 'f') {
         sexe = 'Féminin'
       } else {
         sexe = gender
@@ -294,6 +299,47 @@ class ConsultationDataService {
       ...(formData.medicalHistory || []),
       ...(formData.otherMedicalHistory ? [formData.otherMedicalHistory] : [])
     ].filter(Boolean).join(', ') || 'Aucun antécédent notable'
+
+    // Transformation des habitudes de vie - mapper les valeurs traduites vers le français
+    const mapLifeHabit = (habit: string): string => {
+      if (!habit) return 'Non renseigné'
+      
+      // Mapping complet des traductions possibles vers français
+      const mappings: Record<string, string> = {
+        // Tabac - toutes les langues
+        'Non-smoker': 'Non fumeur',
+        'Non fumeur': 'Non fumeur',
+        'Current smoker': 'Fumeur actuel',
+        'Fumeur actuel': 'Fumeur actuel',
+        'Ex-smoker': 'Ex-fumeur',
+        'Ex-fumeur': 'Ex-fumeur',
+        'Never smoked': 'Non fumeur',
+        'Jamais fumé': 'Non fumeur',
+        
+        // Alcool - toutes les langues
+        'Never': 'Jamais',
+        'Jamais': 'Jamais',
+        'Occasional': 'Occasionnel',
+        'Occasionnel': 'Occasionnel',
+        'Regular': 'Régulier',
+        'Régulier': 'Régulier',
+        'Daily': 'Quotidien',
+        'Quotidien': 'Quotidien',
+        
+        // Activité physique - toutes les langues
+        'Sedentary': 'Sédentaire',
+        'Sédentaire': 'Sédentaire',
+        'Moderate': 'Modérée',
+        'Modérée': 'Modérée',
+        'Intense': 'Intense',
+        'Intensive': 'Intense',
+        'Active': 'Active',
+        'Very active': 'Très active',
+        'Très active': 'Très active'
+      }
+      
+      return mappings[habit] || habit
+    }
 
     return {
       // Format attendu par l'API (noms en français)
@@ -324,14 +370,49 @@ class ConsultationDataService {
       },
       medicamentsActuels: formData.currentMedicationsText || 'Aucun',
       
-      // Habitudes de vie
+      // Habitudes de vie - toujours en français pour l'API
       habitudes: {
-        tabac: formData.lifeHabits?.smoking || 'Non renseigné',
-        alcool: formData.lifeHabits?.alcohol || 'Non renseigné',
-        activitePhysique: formData.lifeHabits?.physicalActivity || 'Non renseignée',
+        tabac: mapLifeHabit(formData.lifeHabits?.smoking),
+        alcool: mapLifeHabit(formData.lifeHabits?.alcohol),
+        activitePhysique: mapLifeHabit(formData.lifeHabits?.physicalActivity),
         alimentation: formData.lifeHabits?.diet || 'Non renseignée',
         sommeil: formData.lifeHabits?.sleep || 'Non renseigné'
       }
+    }
+  }
+
+  /**
+   * Récupère toutes les données nécessaires pour générer le rapport
+   * IMPORTANT: Cette fonction récupère les données AU FORMAT API
+   */
+  async getDataForReportGeneration(): Promise<any> {
+    try {
+      const allData = await this.getAllData()
+      if (!allData) {
+        throw new Error('Aucune donnée de consultation trouvée')
+      }
+
+      // IMPORTANT: Utiliser patientDataAPI pour la génération du rapport
+      const patientDataForReport = allData.patientDataAPI || this.transformPatientDataForAPI(allData.patientData)
+
+      // Log pour debug
+      console.log('📊 Données pour génération du rapport:')
+      console.log('- Patient (format API):', patientDataForReport)
+      console.log('- Clinical:', allData.clinicalData)
+      console.log('- Questions:', allData.questionsData)
+      console.log('- Diagnosis:', allData.diagnosisData)
+
+      return {
+        patientData: patientDataForReport, // Utiliser le format API
+        clinicalData: allData.clinicalData || {},
+        questionsData: allData.questionsData || {},
+        diagnosisData: allData.diagnosisData || {},
+        editedDocuments: allData.editedDocuments || {},
+        generateAllDocuments: true
+      }
+    } catch (error) {
+      console.error('Error getting data for report generation:', error)
+      throw error
     }
   }
 
@@ -457,31 +538,37 @@ class ConsultationDataService {
   }
 
   /**
-   * Valide et corrige les données patient pour l'API
+   * Valide que toutes les données nécessaires sont présentes pour générer le rapport
    */
-  validateAndFixPatientDataForAPI(data: any): PatientDataAPI {
-    const fixed = { ...data }
+  validateDataForReport(data: any): { isValid: boolean; errors: string[] } {
+    const errors: string[] = []
     
-    // Corriger le sexe si nécessaire
-    if (!fixed.sexe || fixed.sexe === 'inconnu' || fixed.sexe === '') {
-      if (fixed.gender && Array.isArray(fixed.gender) && fixed.gender.length > 0) {
-        const gender = fixed.gender[0].toLowerCase()
-        if (gender.includes('mas') || gender === 'male' || gender === 'm') {
-          fixed.sexe = 'Masculin'
-        } else if (gender.includes('fém') || gender === 'female' || gender === 'f') {
-          fixed.sexe = 'Féminin'
-        }
+    // Vérifier les données patient
+    if (!data.patientData) {
+      errors.push('Données patient manquantes')
+    } else {
+      if (!data.patientData.nom) errors.push('Nom du patient manquant')
+      if (!data.patientData.prenom) errors.push('Prénom du patient manquant')
+      if (!data.patientData.dateNaissance) errors.push('Date de naissance manquante')
+      if (!data.patientData.sexe || data.patientData.sexe === 'Non renseigné') {
+        errors.push('Sexe du patient non renseigné')
       }
     }
     
-    // S'assurer que les champs requis sont présents
-    fixed.nom = fixed.nom || fixed.lastName || 'Non renseigné'
-    fixed.prenom = fixed.prenom || fixed.firstName || 'Non renseigné'
-    fixed.age = fixed.age || '0'
-    fixed.sex = fixed.sexe // Ajout pour compatibilité
-    fixed.gender = fixed.sexe // Ajout pour compatibilité
+    // Vérifier les données cliniques
+    if (!data.clinicalData) {
+      errors.push('Données cliniques manquantes')
+    }
     
-    return fixed as PatientDataAPI
+    // Vérifier les données de diagnostic
+    if (!data.diagnosisData) {
+      errors.push('Données de diagnostic manquantes')
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      errors
+    }
   }
 
   /**
