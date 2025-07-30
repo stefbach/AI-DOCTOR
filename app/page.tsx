@@ -8,13 +8,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { 
-  Stethoscope, 
-  User, 
-  ClipboardList, 
-  Brain, 
-  FileText, 
-  Activity, 
+import {
+  Stethoscope,
+  User,
+  ClipboardList,
+  Brain,
+  FileText,
+  Activity,
   Edit3,
   FileSignature // Nouvelle icône pour le rapport final
 } from "lucide-react"
@@ -30,7 +30,7 @@ import { supabase } from '@/lib/supabase'
 
 export type Language = 'fr' | 'en'
 
-// ... (gardez toutes les translations existantes)
+// ...
 
 export default function MedicalAIExpert() {
   const [currentStep, setCurrentStep] = useState(0)
@@ -254,9 +254,11 @@ export default function MedicalAIExpert() {
     }
   }
 
-  // ... (gardez tout le reste du code existant)
+  // ... (gardez tout le reste du code existant pour l'interface utilisateur, tel que le header, la progression et l'affichage des étapes)
 
   const CurrentStepComponent = steps[currentStep]?.component
+
+  // Suppose isLoading, handleStepClick, currentConsultationId, currentPatientId and currentDoctorId are defined elsewhere in your codebase.
 
   if (isLoading) {
     return (
@@ -273,87 +275,79 @@ export default function MedicalAIExpert() {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header with Language Switcher */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{t('mainPage.title')}</h1>
-              <p className="text-gray-600">{t('mainPage.subtitle')}</p>
-            </div>
-            {/* ... (gardez le language switcher et badges) */}
-          </div>
+        {/* ... */}
 
-          {/* Progress Section - Mise à jour pour 6 étapes */}
-          <Card className="bg-white shadow-lg p-6 mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">{t('progress.title')}</h2>
-              <span className="text-sm text-gray-600">
-                {t('progress.stepOf').replace('{current}', String(currentStep + 1)).replace('{total}', String(steps.length))}
-              </span>
-            </div>
-            
-            <Progress value={progress} className="mb-6 h-3" />
-            
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-              {steps.map((step, index) => (
-                <div
-                  key={step.id}
-                  onClick={() => handleStepClick(index)}
-                  className={`relative flex flex-col items-center text-center p-4 rounded-lg transition-all cursor-pointer
-                    ${index === currentStep 
-                      ? 'bg-blue-50 border-2 border-blue-500' 
-                      : index < currentStep 
-                      ? 'bg-green-50 border-2 border-green-500 hover:bg-green-100' 
-                      : 'bg-gray-50 border-2 border-gray-300 opacity-60 cursor-not-allowed'
-                    }`}
-                >
-                  {/* Step indicator */}
-                  <div className={`absolute -top-3 -right-3 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                    ${index === currentStep 
-                      ? 'bg-blue-600 text-white' 
-                      : index < currentStep 
-                      ? 'bg-green-600 text-white' 
-                      : 'bg-gray-400 text-white'
-                    }`}>
-                    {index < currentStep ? '✓' : index + 1}
-                  </div>
-                  
-                  {/* Icon */}
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3
-                    ${index === currentStep 
-                      ? 'bg-blue-600 text-white' 
-                      : index < currentStep 
-                      ? 'bg-green-600 text-white' 
-                      : 'bg-gray-300 text-gray-600'
-                    }`}>
-                    {React.cloneElement(step.icon, { className: "h-8 w-8" })}
-                  </div>
-                  
-                  {/* Title */}
-                  <h3 className={`font-semibold mb-1 text-sm
-                    ${index === currentStep 
-                      ? 'text-blue-900' 
-                      : index < currentStep 
-                      ? 'text-green-900' 
-                      : 'text-gray-600'
-                    }`}>
-                    {step.title}
-                  </h3>
-                  
-                  {/* Description */}
-                  <p className={`text-xs
-                    ${index === currentStep 
-                      ? 'text-blue-700' 
-                      : index < currentStep 
-                      ? 'text-green-700' 
-                      : 'text-gray-500'
-                    }`}>
-                    {step.description}
-                  </p>
+        {/* Progress Section - Mise à jour pour 6 étapes */}
+        <Card className="bg-white shadow-lg p-6 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">{t('progress.title')}</h2>
+            <span className="text-sm text-gray-600">
+              {t('progress.stepOf').replace('{current}', String(currentStep + 1)).replace('{total}', String(steps.length))}
+            </span>
+          </div>
+          
+          <Progress value={progress} className="mb-6 h-3" />
+          
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+            {steps.map((step, index) => (
+              <div
+                key={step.id}
+                onClick={() => handleStepClick(index)}
+                className={`relative flex flex-col items-center text-center p-4 rounded-lg transition-all cursor-pointer
+                  ${index === currentStep 
+                    ? 'bg-blue-50 border-2 border-blue-500' 
+                    : index < currentStep 
+                    ? 'bg-green-50 border-2 border-green-500 hover:bg-green-100' 
+                    : 'bg-gray-50 border-2 border-gray-300 opacity-60 cursor-not-allowed'
+                  }`}
+              >
+                {/* Step indicator */}
+                <div className={`absolute -top-3 -right-3 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
+                  ${index === currentStep 
+                    ? 'bg-blue-600 text-white' 
+                    : index < currentStep 
+                    ? 'bg-green-600 text-white' 
+                    : 'bg-gray-400 text-white'
+                  }`}>
+                  {index < currentStep ? '✓' : index + 1}
                 </div>
-              ))}
-            </div>
-          </Card>
-        </div>
+                
+                {/* Icon */}
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3
+                  ${index === currentStep 
+                    ? 'bg-blue-600 text-white' 
+                    : index < currentStep 
+                    ? 'bg-green-600 text-white' 
+                    : 'bg-gray-300 text-gray-600'
+                  }`}>
+                  {React.cloneElement(step.icon, { className: "h-8 w-8" })}
+                </div>
+                
+                {/* Title */}
+                <h3 className={`font-semibold mb-1 text-sm
+                  ${index === currentStep 
+                    ? 'text-blue-900' 
+                    : index < currentStep 
+                    ? 'text-green-900' 
+                    : 'text-gray-600'
+                  }`}>
+                  {step.title}
+                </h3>
+                
+                {/* Description */}
+                <p className={`text-xs
+                  ${index === currentStep 
+                    ? 'text-blue-700' 
+                    : index < currentStep 
+                    ? 'text-green-700' 
+                    : 'text-gray-500'
+                  }`}>
+                  {step.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </Card>
 
         {/* Current Step Content */}
         <Card className="mb-8">
