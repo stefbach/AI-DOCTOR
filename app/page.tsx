@@ -44,6 +44,52 @@ export default function MedicalAIExpert() {
   
   // ... (gardez tous les autres states)
 
+  // Simple translation helper. Uses the current `language` state to retrieve translations.
+  const t = (key: string): string => {
+    const translations: Record<string, any> = {
+      fr: {
+        steps: {
+          patientInfo: {
+            title: "Informations Patient",
+            description: "Données administratives et antécédents"
+          },
+          clinicalData: {
+            title: "Données Cliniques",
+            description: "Examen physique et symptômes"
+          },
+          aiQuestions: {
+            title: "Questions IA",
+            description: "Questions diagnostiques ciblées"
+          },
+          diagnosis: {
+            title: "Diagnostic",
+            description: "Analyse et diagnostic différentiel"
+          },
+          documents: {
+            title: "Documents",
+            description: "Prescriptions et examens"
+          }
+        },
+        mainPage: {
+          title: "Expert Médical IA",
+          subtitle: "Assistant de consultation"
+        },
+        progress: {
+          title: "Progression",
+          stepOf: "Étape {current} sur {total}"
+        },
+        loading: "Chargement..."
+      }
+    };
+    const keys = key.split('.');
+    // start with the dictionary for current language; fallback to french if undefined
+    let value: any = translations[language] ?? translations['fr'];
+    for (const k of keys) {
+      value = value?.[k];
+    }
+    return value || key;
+  };
+
   const steps = [
     {
       id: 0,
