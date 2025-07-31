@@ -79,6 +79,7 @@ export async function POST(request: NextRequest) {
 
     // Log pour debug de la structure
     console.log("📊 Structure diagnosisData:", JSON.stringify(diagnosisData, null, 2))
+    console.log("📋 Structure editedDocuments:", JSON.stringify(editedDocuments, null, 2))
 
     // Préparation du contexte médical unifié
     const medicalContext = prepareMedicalContext({
@@ -93,13 +94,18 @@ export async function POST(request: NextRequest) {
     const prompt = generateProfessionalReportPrompt(medicalContext, patientData)
 
     console.log("🤖 Génération du rapport avec GPT-4...")
+    console.log("📝 Longueur du prompt:", prompt.length, "caractères")
     
     const result = await generateText({
       model: openai("gpt-4o"),
       prompt,
       maxTokens: 8000,
-      temperature: 0.3,
+      temperature: 0.2, // Réduit pour une sortie plus déterministe
+      systemPrompt: "Tu es un assistant médical qui génère UNIQUEMENT du JSON valide sans aucun formatage markdown. Ne jamais utiliser de backticks ou de formatage de code."
     })
+
+    console.log("✅ Réponse GPT-4 reçue, longueur:", result.text.length, "caractères")
+    console.log("📄 Début de la réponse:", result.text.substring(0, 200))
 
     console.log("✅ Rapport généré avec succès")
 
@@ -182,31 +188,58 @@ function generateProfessionalReportPrompt(medicalContext: any, patientData: Pati
   
   // Extraire les informations pertinentes du contexte
   const motifConsultation = medicalContext.clinical?.chiefComplaint || 
-                          medicalContext.clinical?.symptoms || 
+                          medicalContext.clinical?.symptoms?.join(', ') || 
+                          medicalContext.diagnosis?.chiefComplaint ||
                           "Consultation médicale"
   
-  const symptomes = medicalContext.clinical?.symptoms || []
-  const vitalSigns = medicalContext.clinical?.vitalSigns || {}
-  const examenPhysique = medicalContext.clinical?.physicalExam || {}
+  const symptomes = medicalContext.clinical?.symptoms || 
+                   medicalContext.diagnosis?.symptoms || []
   
-  // Données du diagnostic
+  const vitalSigns = medicalContext.clinical?.vitalSigns || {}
+  
+  const examenPhysique = medicalContext.clinical?.physicalExam || 
+                        medicalContext.diagnosis?.physicalExamination || {}
+  
+  // Données du diagnostic - gérer les différentes structures possibles
   const diagnosticPrincipal = medicalContext.diagnosis?.primaryDiagnosis || 
                              medicalContext.diagnosis?.diagnosis || 
-                             medicalContext.diagnosis?.diagnosticHypothesis || ""
+                             medicalContext.diagnosis?.diagnosticHypothesis?.primary || 
+                             medicalContext.diagnosis?.diagnosticHypothesis || 
+                             medicalContext.diagnosis?.mainDiagnosis || ""
   
-  const diagnosticsSecondaires = medicalContext.diagnosis?.secondaryDiagnoses || []
-  const examensRealises = medicalContext.diagnosis?.performedExams || []
-  const analyseDiagnostique = medicalContext.diagnosis?.analysis || ""
+  const diagnosticsSecondaires = medicalContext.diagnosis?.secondaryDiagnoses || 
+                                 medicalContext.diagnosis?.diagnosticHypothesis?.secondary || []
   
-  // Traitement proposé
+  const examensRealises = medicalContext.diagnosis?.performedExams || 
+                         medicalContext.diagnosis?.examsPerformed || []
+  
+  const analyseDiagnostique = medicalContext.diagnosis?.analysis || 
+                             medicalContext.diagnosis?.clinicalAnalysis || 
+                             medicalContext.diagnosis?.diagnosticAnalysis || ""
+  
+  // Traitement proposé - vérifier toutes les structures possibles
   const medicaments = medicalContext.editedDocuments?.medication?.prescriptions || 
-                     medicalContext.diagnosis?.treatment?.medications || []
+                     medicalContext.diagnosis?.treatment?.medications || 
+                     medicalContext.diagnosis?.prescriptions?.medications || []
   
   const examsBio = medicalContext.editedDocuments?.biology?.examinations || 
-                   medicalContext.diagnosis?.examinations?.laboratory || []
+                   medicalContext.diagnosis?.examinations?.laboratory || 
+                   medicalContext.diagnosis?.examinations?.biology || 
+                   medicalContext.diagnosis?.prescriptions?.laboratory || []
   
   const examsImaging = medicalContext.editedDocuments?.paraclinical?.examinations || 
-                      medicalContext.diagnosis?.examinations?.imaging || []
+                      medicalContext.diagnosis?.examinations?.imaging || 
+                      medicalContext.diagnosis?.examinations?.radiology || 
+                      medicalContext.diagnosis?.prescriptions?.imaging || []
+  
+  
+  // Log des données extraites pour debug
+  console.log("📊 Données extraites pour le rapport:")
+  console.log("- Motif consultation:", motifConsultation)
+  console.log("- Diagnostic principal:", diagnosticPrincipal)
+  console.log("- Médicaments:", medicaments.length)
+  console.log("- Examens bio:", examsBio.length)
+  console.log("- Examens imagerie:", examsImaging.length)
   
   const prompt = `Tu es un médecin senior expérimenté rédigeant un compte rendu de consultation professionnel et détaillé.
 
@@ -249,31 +282,31 @@ Génère le rapport au format JSON suivant, en t'assurant que CHAQUE section con
   "header": {
     "title": "COMPTE-RENDU DE CONSULTATION MÉDICALE",
     "subtitle": "Document médical confidentiel",
-    "reference": "CR-${patientId}"
+    "reference": "CR-${escapeJsonString(patientId)}"
   },
   
   "identification": {
-    "patient": "${formatPatientName(medicalContext.patient)}",
-    "age": "${medicalContext.patient.age} ans",
-    "sexe": "${medicalContext.patient.sexe}",
-    "dateNaissance": "${formatDate(medicalContext.patient.dateNaissance)}",
-    "adresse": "${medicalContext.patient.adresse || 'Non renseignée'}",
-    "telephone": "${medicalContext.patient.telephone || 'Non renseigné'}",
-    "email": "${medicalContext.patient.email || 'Non renseigné'}"
+    "patient": "${escapeJsonString(formatPatientName(medicalContext.patient))}",
+    "age": "${escapeJsonString(String(medicalContext.patient.age || ''))} ans",
+    "sexe": "${escapeJsonString(medicalContext.patient.sexe)}",
+    "dateNaissance": "${escapeJsonString(formatDate(medicalContext.patient.dateNaissance))}",
+    "adresse": "${escapeJsonString(medicalContext.patient.adresse || 'Non renseignée')}",
+    "telephone": "${escapeJsonString(medicalContext.patient.telephone || 'Non renseigné')}",
+    "email": "${escapeJsonString(medicalContext.patient.email || 'Non renseigné')}"
   },
   
   "rapport": {
-    "motifConsultation": "Rédige ici un paragraphe complet décrivant le motif principal de consultation basé sur : ${motifConsultation}",
+    "motifConsultation": "Rédige ici un paragraphe complet décrivant le motif principal de consultation basé sur : ${escapeJsonString(motifConsultation)}",
     
-    "anamnese": "Rédige ici l'histoire détaillée de la maladie actuelle en intégrant les symptômes (${JSON.stringify(symptomes)}), leur évolution, leur impact sur la vie quotidienne du patient",
+    "anamnese": "Rédige ici l'histoire détaillée de la maladie actuelle en intégrant les symptômes (${escapeJsonString(JSON.stringify(symptomes))}), leur évolution, leur impact sur la vie quotidienne du patient",
     
-    "antecedents": "Décris ici les antécédents médicaux pertinents du patient : ${JSON.stringify(medicalContext.patient.antecedents)}, ses allergies : ${JSON.stringify(medicalContext.patient.allergies)}, et tout autre élément du contexte médical",
+    "antecedents": "Décris ici les antécédents médicaux pertinents du patient : ${escapeJsonString(JSON.stringify(medicalContext.patient.antecedents))}, ses allergies : ${escapeJsonString(JSON.stringify(medicalContext.patient.allergies))}, et tout autre élément du contexte médical",
     
-    "examenClinique": "Décris ici l'examen clinique complet incluant l'état général, les signes vitaux (${JSON.stringify(vitalSigns)}), et l'examen physique systématique (${JSON.stringify(examenPhysique)})",
+    "examenClinique": "Décris ici l'examen clinique complet incluant l'état général, les signes vitaux (${escapeJsonString(JSON.stringify(vitalSigns))}), et l'examen physique systématique (${escapeJsonString(JSON.stringify(examenPhysique))})",
     
-    "syntheseDiagnostique": "Rédige ici l'analyse diagnostique complète basée sur : ${analyseDiagnostique}, en expliquant le raisonnement médical et les hypothèses envisagées",
+    "syntheseDiagnostique": "Rédige ici l'analyse diagnostique complète basée sur : ${escapeJsonString(analyseDiagnostique)}, en expliquant le raisonnement médical et les hypothèses envisagées",
     
-    "conclusionDiagnostique": "Énonce clairement le diagnostic principal retenu : ${diagnosticPrincipal}${diagnosticsSecondaires.length > 0 ? ' et les diagnostics secondaires : ' + JSON.stringify(diagnosticsSecondaires) : ''}",
+    "conclusionDiagnostique": "Énonce clairement le diagnostic principal retenu : ${escapeJsonString(diagnosticPrincipal)}${diagnosticsSecondaires.length > 0 ? ' et les diagnostics secondaires : ' + escapeJsonString(JSON.stringify(diagnosticsSecondaires)) : ''}",
     
     "priseEnCharge": "Détaille ici la stratégie thérapeutique complète incluant les médicaments prescrits, les examens demandés, et les mesures non médicamenteuses recommandées",
     
@@ -286,14 +319,14 @@ Génère le rapport au format JSON suivant, en t'assurant que CHAQUE section con
     "medicaments": {
       "items": [
         ${medicaments.map((med: Medication) => `{
-          "nom": "${med.medication || med.name || ''}",
-          "dci": "${extractDCI(med.medication || med.name || '')}",
-          "dosage": "${med.dosage || ''}",
-          "forme": "${detectMedicationForm(med.medication || med.name || '')}",
-          "posologie": "${med.frequency || med.posology || ''}",
-          "duree": "${med.duration || ''}",
-          "quantite": "${calculateQuantity(med)}",
-          "remarques": "${med.instructions || ''}",
+          "nom": "${escapeJsonString(med.medication || med.name || '')}",
+          "dci": "${escapeJsonString(extractDCI(med.medication || med.name || ''))}",
+          "dosage": "${escapeJsonString(med.dosage || '')}",
+          "forme": "${escapeJsonString(detectMedicationForm(med.medication || med.name || ''))}",
+          "posologie": "${escapeJsonString(med.frequency || med.posology || '')}",
+          "duree": "${escapeJsonString(med.duration || '')}",
+          "quantite": "${escapeJsonString(calculateQuantity(med))}",
+          "remarques": "${escapeJsonString(med.instructions || '')}",
           "nonSubstituable": false
         }`).join(',\n        ')}
       ],
@@ -303,11 +336,11 @@ Génère le rapport au format JSON suivant, en t'assurant que CHAQUE section con
     "biologie": {
       "examens": [
         ${examsBio.map((exam: Examination) => `{
-          "type": "${exam.name || exam.type || ''}",
-          "code": "${getBiologyCode(exam.name || exam.type || '')}",
+          "type": "${escapeJsonString(exam.name || exam.type || '')}",
+          "code": "${escapeJsonString(getBiologyCode(exam.name || exam.type || ''))}",
           "urgence": ${exam.urgency === 'Urgent'},
           "jeun": ${requiresFasting(exam.name || exam.type || '')},
-          "remarques": "${exam.justification || ''}"
+          "remarques": "${escapeJsonString(exam.justification || '')}"
         }`).join(',\n        ')}
       ],
       "laboratoireRecommande": "Laboratoire d'analyses médicales agréé"
@@ -315,12 +348,12 @@ Génère le rapport au format JSON suivant, en t'assurant que CHAQUE section con
     "imagerie": {
       "examens": [
         ${examsImaging.map((exam: Examination) => `{
-          "type": "${exam.type || ''}",
-          "region": "${exam.region || detectAnatomicalRegion(exam.type || '')}",
-          "indication": "${exam.indication || exam.justification || ''}",
+          "type": "${escapeJsonString(exam.type || '')}",
+          "region": "${escapeJsonString(exam.region || detectAnatomicalRegion(exam.type || ''))}",
+          "indication": "${escapeJsonString(exam.indication || exam.justification || '')}",
           "urgence": ${exam.urgency === 'Urgent'},
           "contraste": ${requiresContrast(exam.type || '')},
-          "remarques": "${exam.details || ''}"
+          "remarques": "${escapeJsonString(exam.details || '')}"
         }`).join(',\n        ')}
       ],
       "centreRecommande": "Centre d'imagerie médicale"
@@ -344,16 +377,31 @@ RAPPEL CRITIQUE :
 - Ne retourne QU'UN SEUL objet JSON valide
 - Remplis TOUTES les sections avec du texte médical complet et naturel
 - N'utilise AUCUN placeholder comme [PROSE] ou [À COMPLÉTER]
-- Intègre TOUTES les données fournies dans le contexte`
+- Intègre TOUTES les données fournies dans le contexte
+- NE PAS UTILISER DE FORMATAGE MARKDOWN (pas de \`\`\`json)
+- Utilise des espaces au lieu de retours à la ligne dans les textes
+- Assure-toi que le JSON est valide et peut être parsé directement`
 
   return prompt
 }
 
+// Fonction utilitaire pour échapper les caractères spéciaux dans les chaînes JSON
+function escapeJsonString(str: string): string {
+  if (!str) return ''
+  return str
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, ' ')
+    .replace(/\r/g, '')
+    .replace(/\t/g, ' ')
+}
+
 // Fonctions utilitaires
 function formatPatientName(patient: any): string {
-  const nom = patient.nom || ''
-  const prenom = patient.prenom || ''
-  return `${nom} ${prenom}`.trim() || 'Patient'
+  const nom = (patient.nom || patient.lastName || '').toUpperCase()
+  const prenom = (patient.prenom || patient.firstName || '')
+  const fullName = `${nom} ${prenom}`.trim()
+  return fullName || 'PATIENT'
 }
 
 function formatDate(dateString: string): string {
@@ -597,44 +645,128 @@ function parseAndValidateReport(responseText: string): any {
   try {
     // Nettoyer la réponse de tout formatage markdown
     let cleanedResponse = responseText.trim()
-    cleanedResponse = cleanedResponse.replace(/^```json\s*/i, '')
-    cleanedResponse = cleanedResponse.replace(/^```\s*/i, '')
+    
+    // Supprimer les backticks du début et de la fin
+    cleanedResponse = cleanedResponse.replace(/^```(?:json)?\s*/i, '')
     cleanedResponse = cleanedResponse.replace(/\s*```$/i, '')
     
-    // Remplacer les retours à la ligne dans les chaînes JSON
-    cleanedResponse = cleanedResponse.replace(/\n/g, '\\n')
+    // Méthode plus robuste pour corriger le JSON avec retours à la ligne
+    // On va parser ligne par ligne et reconstruire le JSON proprement
+    const lines = cleanedResponse.split('\n')
+    let inString = false
+    let escapeNext = false
+    let result = ''
+    let currentQuoteChar = ''
     
-    // Parser le JSON
-    const parsed = JSON.parse(cleanedResponse)
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      
+      for (let j = 0; j < line.length; j++) {
+        const char = line[j]
+        const prevChar = j > 0 ? line[j - 1] : ''
+        
+        if (escapeNext) {
+          result += char
+          escapeNext = false
+          continue
+        }
+        
+        if (char === '\\') {
+          escapeNext = true
+          result += char
+          continue
+        }
+        
+        if ((char === '"' || char === "'") && !inString) {
+          inString = true
+          currentQuoteChar = char
+          result += char
+        } else if (char === currentQuoteChar && inString && prevChar !== '\\') {
+          inString = false
+          currentQuoteChar = ''
+          result += char
+        } else {
+          result += char
+        }
+      }
+      
+      // Si on est dans une chaîne, ajouter un espace au lieu d'un retour à la ligne
+      if (inString && i < lines.length - 1) {
+        result += ' '
+      } else if (!inString && i < lines.length - 1) {
+        result += '\n'
+      }
+    }
+    
+    // Tenter de parser le JSON nettoyé
+    let parsed
+    try {
+      parsed = JSON.parse(result)
+    } catch (firstError) {
+      // Si ça échoue encore, essayer une approche plus agressive
+      console.warn('Premier parsing échoué, tentative de correction supplémentaire')
+      
+      // Méthode alternative : utiliser une regex plus robuste pour nettoyer le JSON
+      let correctedJson = result
+      
+      // Supprimer les commentaires JavaScript
+      correctedJson = correctedJson.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+      
+      // Corriger les virgules en trop
+      correctedJson = correctedJson.replace(/,(\s*[}\]])/g, '$1')
+      
+      // Remplacer tous les retours à la ligne non échappés dans les valeurs
+      correctedJson = correctedJson.replace(
+        /"([^"\\]*(\\.[^"\\]*)*)"/g,
+        (match, content) => {
+          // Remplacer les retours à la ligne non échappés par des espaces
+          const cleaned = content
+            .replace(/\n/g, ' ')
+            .replace(/\r/g, '')
+            .replace(/\t/g, ' ')
+            .replace(/\s+/g, ' ') // Normaliser les espaces multiples
+          return `"${cleaned}"`
+        }
+      )
+      
+      // Tenter de parser à nouveau
+      try {
+        parsed = JSON.parse(correctedJson)
+      } catch (secondError) {
+        // En dernier recours, essayer d'extraire le JSON avec une regex
+        console.error('Deuxième parsing échoué, tentative d\'extraction forcée')
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/)
+        if (jsonMatch) {
+          const extractedJson = jsonMatch[0]
+          // Appliquer les mêmes corrections
+          const finalJson = extractedJson.replace(
+            /"([^"\\]*(\\.[^"\\]*)*)"/g,
+            (match, content) => {
+              const cleaned = content
+                .replace(/\n/g, ' ')
+                .replace(/\r/g, '')
+                .replace(/\t/g, ' ')
+                .replace(/\s+/g, ' ')
+              return `"${cleaned}"`
+            }
+          )
+          parsed = JSON.parse(finalJson)
+        } else {
+          throw new Error('Impossible d\'extraire un objet JSON valide de la réponse')
+        }
+      }
+    }
     
     // Validation de la structure minimale
     if (!parsed.header || !parsed.identification || !parsed.rapport) {
       throw new Error('Structure du rapport invalide')
     }
     
-    // Nettoyer les retours à la ligne échappés
-    const cleanObject = (obj: any): any => {
-      if (typeof obj === 'string') {
-        return obj.replace(/\\n/g, '\n')
-      }
-      if (Array.isArray(obj)) {
-        return obj.map(cleanObject)
-      }
-      if (typeof obj === 'object' && obj !== null) {
-        const cleaned: any = {}
-        for (const key in obj) {
-          cleaned[key] = cleanObject(obj[key])
-        }
-        return cleaned
-      }
-      return obj
-    }
-    
-    return cleanObject(parsed)
+    return parsed
   } catch (error) {
     console.error('Erreur de parsing:', error)
-    console.error('Réponse brute:', responseText.substring(0, 500))
-    throw new Error('Impossible de parser le rapport généré')
+    console.error('Réponse brute (début):', responseText.substring(0, 1000))
+    throw new Error('Impossible de parser le rapport généré. Le format JSON est invalide.')
   }
 }
 
