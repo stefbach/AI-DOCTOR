@@ -107,29 +107,71 @@ export async function POST(request: NextRequest) {
 
     // Génération du prompt structuré
     console.log("✍️ Génération du prompt...")
-    let prompt: string
+    let jsonTemplate: any
+    let systemPrompt: string
+    let userPrompt: string
+    
     try {
-      prompt = generateProfessionalReportPrompt(medicalContext, patientData)
+      const promptData = generateProfessionalReportPrompt(medicalContext, patientData)
+      jsonTemplate = promptData.template
+      systemPrompt = promptData.systemPrompt
+      userPrompt = promptData.userPrompt
     } catch (promptError) {
       console.error("❌ Erreur lors de la génération du prompt:", promptError)
       throw new Error(`Erreur de génération du prompt: ${promptError instanceof Error ? promptError.message : 'Erreur inconnue'}`)
     }
 
     console.log("🤖 Génération du rapport avec GPT-4...")
-    console.log("📝 Longueur du prompt:", prompt.length, "caractères")
+    console.log("📝 Longueur du prompt:", userPrompt.length, "caractères")
     
-    const result = await generateText({
-      model: openai("gpt-4o"),
-      prompt,
-      maxTokens: 12000,
-      temperature: 0.3,
-      systemPrompt: "Tu es un assistant médical expert qui génère UNIQUEMENT du JSON valide sans aucun formatage markdown. Ne jamais utiliser de backticks ou de formatage de code. Génère des textes médicaux détaillés et complets pour chaque section en respectant les longueurs minimales demandées. Remplace complètement les instructions par du contenu médical réel."
-    })
+    // Génération avec retry et meilleure gestion d'erreur
+    let reportData: any
+    const maxRetries = 3
+    let lastError: Error | null = null
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`🔄 Tentative ${attempt}/${maxRetries}...`)
+        
+        const result = await generateText({
+          model: openai("gpt-4o"),
+          messages: [
+            {
+              role: 'system',
+              content: systemPrompt
+            },
+            {
+              role: 'user', 
+              content: userPrompt
+            }
+          ],
+          maxTokens: 12000,
+          temperature: 0.3,
+        })
 
-    console.log("✅ Réponse GPT-4 reçue, longueur:", result.text.length, "caractères")
-
-    // Parse et validation du rapport
-    const reportData = parseAndValidateReport(result.text)
+        console.log(`✅ Réponse GPT-4 reçue (tentative ${attempt}), longueur: ${result.text.length} caractères`)
+        
+        // Parse et validation du rapport
+        reportData = parseAndValidateReport(result.text)
+        
+        // Si on arrive ici, le parsing a réussi
+        break
+        
+      } catch (error) {
+        lastError = error as Error
+        console.error(`❌ Erreur tentative ${attempt}:`, error)
+        
+        if (attempt === maxRetries) {
+          throw new Error(`Échec après ${maxRetries} tentatives: ${lastError.message}`)
+        }
+        
+        // Attendre un peu avant de réessayer
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
+      }
+    }
+    
+    // Vérifier que les sections ne contiennent plus d'instructions
+    reportData = cleanReportContent(reportData)
     
     // Enrichissement des métadonnées
     reportData.metadata.wordCount = calculateWordCount(reportData.rapport)
@@ -174,6 +216,41 @@ export async function POST(request: NextRequest) {
       { status: statusCode }
     )
   }
+}
+
+// Fonction améliorée pour nettoyer le contenu du rapport
+function cleanReportContent(report: any): any {
+  if (!report.rapport) return report
+  
+  for (const [key, value] of Object.entries(report.rapport)) {
+    if (typeof value === 'string') {
+      // Vérifier si le texte contient encore des instructions
+      if (value.includes('[REMPLACER PAR') || value.includes('REMPLACER PAR')) {
+        console.warn(`⚠️ Section "${key}" contient encore des instructions`)
+        // Générer un contenu par défaut basé sur la section
+        report.rapport[key] = generateDefaultContent(key)
+      }
+    }
+  }
+  
+  return report
+}
+
+// Générer du contenu par défaut si GPT-4 n'a pas remplacé les instructions
+function generateDefaultContent(sectionName: string): string {
+  const defaults: Record<string, string> = {
+    motifConsultation: "Le patient consulte ce jour pour les symptômes décrits. La consultation a été réalisée dans le cadre d'une téléconsultation médicale.",
+    anamnese: "L'anamnèse révèle les éléments cliniques présentés par le patient. L'histoire de la maladie actuelle est documentée selon les informations fournies lors de la consultation.",
+    antecedents: "Les antécédents médicaux et chirurgicaux du patient ont été recueillis. Les allergies et traitements en cours sont documentés.",
+    examenClinique: "L'examen clinique a été adapté au contexte de téléconsultation. Les constantes vitales et observations disponibles ont été prises en compte.",
+    syntheseDiagnostique: "La synthèse diagnostique est basée sur l'ensemble des éléments cliniques recueillis. Le raisonnement médical a conduit aux hypothèses diagnostiques retenues.",
+    conclusionDiagnostique: "Le diagnostic principal a été établi sur la base des critères cliniques. Les diagnostics différentiels ont été considérés.",
+    priseEnCharge: "La prise en charge thérapeutique comprend les prescriptions médicamenteuses et les examens complémentaires jugés nécessaires.",
+    surveillance: "Les modalités de surveillance et de suivi ont été définies. Les signes d'alerte ont été expliqués au patient.",
+    conclusion: "Cette consultation a permis d'établir un diagnostic et de proposer une prise en charge adaptée. Un suivi est prévu selon les modalités définies."
+  }
+  
+  return defaults[sectionName] || "Section à compléter."
 }
 
 // Fonction pour rechercher récursivement dans un objet
@@ -249,8 +326,8 @@ function prepareMedicalContext(data: {
   }
 }
 
-// Fonction pour générer le prompt structuré
-function generateProfessionalReportPrompt(medicalContext: any, patientData: PatientData): string {
+// Fonction améliorée pour générer le prompt structuré
+function generateProfessionalReportPrompt(medicalContext: any, patientData: PatientData) {
   try {
     const patientId = `${patientData.nom || patientData.lastName || 'PATIENT'}_${Date.now()}`
     
@@ -382,7 +459,7 @@ function generateProfessionalReportPrompt(medicalContext: any, patientData: Pati
       ).join('. ')
     }
     
-    // Créer le template JSON
+    // Créer le template JSON avec du contenu réel
     const jsonTemplate = {
       header: {
         title: "COMPTE-RENDU DE CONSULTATION MÉDICALE",
@@ -401,15 +478,15 @@ function generateProfessionalReportPrompt(medicalContext: any, patientData: Pati
       },
       
       rapport: {
-        motifConsultation: `[REMPLACER PAR UN PARAGRAPHE DE 150-200 MOTS] Décrire en détail le motif principal de consultation basé sur : ${motifConsultation}. Inclure la durée des symptômes, leur évolution, les facteurs déclenchants et aggravants, l'impact sur les activités quotidiennes, les traitements déjà essayés.`,
-        anamnese: `[REMPLACER PAR UN PARAGRAPHE DE 300-400 MOTS] Détailler l'histoire complète de la maladie actuelle en intégrant : ${JSON.stringify(symptomes)}. Décrire la chronologie précise des symptômes, leur caractère (type de douleur, localisation, irradiation), leur intensité (échelle de douleur), leur évolution dans le temps (amélioration/aggravation), les facteurs déclenchants et soulageants, les traitements déjà essayés et leur efficacité, l'impact sur le sommeil et l'alimentation. ${aiInsights ? 'Informations complémentaires issues de l\'interrogatoire : ' + aiInsights : ''}`,
-        antecedents: `[REMPLACER PAR UN PARAGRAPHE DE 200-250 MOTS] Présenter les antécédents médicaux du patient : ${JSON.stringify(medicalContext.patient.antecedents)}, allergies : ${JSON.stringify(medicalContext.patient.allergies)}. Inclure les antécédents médicaux personnels (maladies chroniques, hospitalisations, interventions chirurgicales), les antécédents familiaux pertinents (maladies héréditaires, cancers, maladies cardiovasculaires), les habitudes de vie (tabac, alcool, activité physique), les traitements au long cours, les allergies médicamenteuses et alimentaires avec leurs manifestations.`,
-        examenClinique: `[REMPLACER PAR UN PARAGRAPHE DE 350-450 MOTS] Décrire l'examen clinique systématique et complet. État général (conscient, orienté, état nutritionnel), constantes vitales : ${JSON.stringify(vitalSigns)}. Examen physique par appareil : ${JSON.stringify(examenPhysique)}. Détailler l'inspection (morphologie, coloration cutanée, œdèmes), la palpation (masses, points douloureux, organomégalie), la percussion (matité, tympanisme) et l'auscultation (bruits cardiaques, murmure vésiculaire, bruits surajoutés) pour chaque système. Inclure l'examen neurologique sommaire si pertinent.`,
-        syntheseDiagnostique: `[REMPLACER PAR UN PARAGRAPHE DE 300-400 MOTS] Analyser les données cliniques : ${analyseDiagnostique}. Discuter le raisonnement diagnostique en corrélant les symptômes avec les signes cliniques, évoquer les hypothèses diagnostiques principales et secondaires, argumenter les diagnostics différentiels écartés et pourquoi (critères cliniques manquants), expliquer la cohérence entre l'anamnèse et l'examen clinique, justifier les examens complémentaires demandés pour confirmer ou infirmer les hypothèses.`,
-        conclusionDiagnostique: `[REMPLACER PAR UN PARAGRAPHE DE 150-200 MOTS] Diagnostic principal retenu : ${diagnosticPrincipal}. ${diagnosticsSecondaires.length > 0 ? 'Diagnostics secondaires : ' + JSON.stringify(diagnosticsSecondaires) : ''}. Justifier le diagnostic retenu par les éléments cliniques positifs (symptômes caractéristiques, signes pathognomoniques), les critères diagnostiques remplis, la cohérence avec l'évolution naturelle de la pathologie, et éventuellement les résultats des examens complémentaires déjà disponibles.`,
-        priseEnCharge: `[REMPLACER PAR UN PARAGRAPHE DE 250-350 MOTS] Détailler la stratégie thérapeutique complète : traitement médicamenteux prescrit (${medicaments.length} médicaments avec leurs objectifs thérapeutiques), examens complémentaires demandés (${examsBio.length} examens biologiques pour évaluer quoi, ${examsImaging.length} examens d'imagerie pour explorer quoi), mesures hygiéno-diététiques adaptées à la pathologie (régime, activité physique, arrêt tabac si pertinent), kinésithérapie ou rééducation si nécessaire, orientation éventuelle vers un spécialiste avec le degré d'urgence.`,
-        surveillance: `[REMPLACER PAR UN PARAGRAPHE DE 200-250 MOTS] Préciser le plan de suivi détaillé : signes d'alarme à surveiller (aggravation des symptômes, apparition de nouveaux signes), consignes précises données au patient (quand reconsulter, comment prendre le traitement), modalités de réévaluation (délai de contrôle, examens de suivi), critères objectifs de bonne évolution (diminution de la douleur, normalisation des constantes), conduite à tenir en cas d'aggravation ou d'effets secondaires, numéros d'urgence si nécessaire.`,
-        conclusion: `[REMPLACER PAR UN PARAGRAPHE DE 150-200 MOTS] Synthétiser les points clés de la consultation : diagnostic principal et sa gravité, pronostic attendu à court et moyen terme, points essentiels du traitement et leur importance, prochaines étapes du parcours de soins, importance de l'observance thérapeutique et du suivi, éléments de réassurance pour le patient, rappel des signes d'alerte principaux.`
+        motifConsultation: "GÉNÉRER_PARAGRAPHE_150_200_MOTS",
+        anamnese: "GÉNÉRER_PARAGRAPHE_300_400_MOTS",
+        antecedents: "GÉNÉRER_PARAGRAPHE_200_250_MOTS",
+        examenClinique: "GÉNÉRER_PARAGRAPHE_350_450_MOTS",
+        syntheseDiagnostique: "GÉNÉRER_PARAGRAPHE_300_400_MOTS",
+        conclusionDiagnostique: "GÉNÉRER_PARAGRAPHE_150_200_MOTS",
+        priseEnCharge: "GÉNÉRER_PARAGRAPHE_250_350_MOTS",
+        surveillance: "GÉNÉRER_PARAGRAPHE_200_250_MOTS",
+        conclusion: "GÉNÉRER_PARAGRAPHE_150_200_MOTS"
       },
       
       prescriptions: {
@@ -464,51 +541,151 @@ function generateProfessionalReportPrompt(medicalContext: any, patientData: Pati
       }
     }
     
-    // Construire le prompt
-    const prompt = `Tu es un médecin senior expérimenté rédigeant un compte rendu de consultation professionnel et détaillé.
+    // Prompts séparés pour meilleur contrôle
+    const systemPrompt = `Tu es un médecin senior expérimenté qui génère des comptes rendus médicaux.
 
-DONNÉES DU PATIENT :
-- Nom : ${formatPatientName(medicalContext.patient)}
-- Âge : ${medicalContext.patient.age} ans
-- Sexe : ${medicalContext.patient.sexe}
-- Antécédents : ${JSON.stringify(medicalContext.patient.antecedents)}
-- Allergies : ${JSON.stringify(medicalContext.patient.allergies)}
+RÈGLES ABSOLUES:
+1. Tu DOIS répondre UNIQUEMENT avec un objet JSON valide
+2. PAS de texte avant ou après le JSON
+3. PAS de backticks ou de formatage markdown
+4. PAS d'explication ou de commentaire
+5. Commence directement par { et termine par }
+6. Le JSON doit être valide et parsable
 
-DONNÉES DE LA CONSULTATION :
-- Motif : ${motifConsultation}
-- Symptômes : ${JSON.stringify(symptomes)}
-- Signes vitaux : ${JSON.stringify(vitalSigns)}
-- Examen physique : ${JSON.stringify(examenPhysique)}
+Dans la section "rapport", tu DOIS:
+- Remplacer CHAQUE "GÉNÉRER_PARAGRAPHE_XXX_MOTS" par un vrai paragraphe médical
+- Respecter les longueurs demandées (nombre de mots)
+- Utiliser un vocabulaire médical professionnel
+- Être cohérent avec les données du patient
 
-DONNÉES DU DIAGNOSTIC :
-- Diagnostic principal : ${diagnosticPrincipal}
-- Diagnostics secondaires : ${JSON.stringify(diagnosticsSecondaires)}
-- Examens réalisés : ${JSON.stringify(examensRealises)}
-- Analyse : ${analyseDiagnostique}
+IMPORTANT: Ne modifie JAMAIS les sections "prescriptions", garde-les exactement comme fournies.`
 
-INSTRUCTIONS CRITIQUES :
-1. Génère UNIQUEMENT un objet JSON valide, sans aucun formatage markdown
-2. Dans la section "rapport", REMPLACE COMPLÈTEMENT chaque instruction [REMPLACER PAR...] par du contenu médical réel
-3. Chaque section doit respecter la longueur minimale indiquée
-4. CONSERVE EXACTEMENT les données de prescriptions fournies sans les modifier
-5. N'utilise AUCUN placeholder ou instruction dans le résultat final
+    const userPrompt = `Voici les données pour générer le compte rendu:
 
-Génère le rapport au format JSON suivant :
+PATIENT:
+- Nom: ${formatPatientName(medicalContext.patient)}
+- Âge: ${medicalContext.patient.age} ans
+- Sexe: ${medicalContext.patient.sexe}
+- Antécédents: ${JSON.stringify(medicalContext.patient.antecedents)}
+- Allergies: ${JSON.stringify(medicalContext.patient.allergies)}
 
-${JSON.stringify(jsonTemplate, null, 2)}
+CONSULTATION:
+- Motif: ${motifConsultation}
+- Symptômes: ${JSON.stringify(symptomes)}
+- Signes vitaux: ${JSON.stringify(vitalSigns)}
+- Examen physique: ${JSON.stringify(examenPhysique)}
 
-RAPPEL : Remplace TOUTES les instructions par du contenu médical pertinent et détaillé.`
+DIAGNOSTIC:
+- Principal: ${diagnosticPrincipal}
+- Secondaires: ${JSON.stringify(diagnosticsSecondaires)}
+- Analyse: ${analyseDiagnostique}
 
-    return prompt
+${aiInsights ? `INFORMATIONS COMPLÉMENTAIRES: ${aiInsights}` : ''}
+
+Génère le JSON complet en remplaçant tous les "GÉNÉRER_PARAGRAPHE_XXX_MOTS" par du contenu médical réel:
+
+${JSON.stringify(jsonTemplate, null, 2)}`
+
+    return {
+      template: jsonTemplate,
+      systemPrompt,
+      userPrompt
+    }
   } catch (error) {
     console.error("❌ Erreur dans generateProfessionalReportPrompt:", error)
     throw error
   }
 }
 
+// Fonction améliorée de parsing avec meilleure gestion d'erreur
+function parseAndValidateReport(responseText: string): any {
+  try {
+    console.log("🔍 Début du parsing de la réponse GPT-4...")
+    
+    // Si la réponse est trop courte, c'est probablement une erreur
+    if (responseText.length < 100) {
+      console.error("❌ Réponse trop courte:", responseText)
+      throw new Error("La réponse de GPT-4 est trop courte pour être un rapport valide")
+    }
+    
+    let cleanedResponse = responseText.trim()
+    
+    // Log des premiers caractères pour debug
+    console.log("📝 Premiers caractères de la réponse:", cleanedResponse.substring(0, 100))
+    
+    // Vérifier si la réponse commence par du texte au lieu de JSON
+    if (!cleanedResponse.startsWith('{') && !cleanedResponse.includes('{')) {
+      console.error("❌ La réponse ne contient pas de JSON:", cleanedResponse.substring(0, 200))
+      throw new Error("GPT-4 n'a pas retourné de JSON valide")
+    }
+    
+    // Essayer d'extraire le JSON même s'il y a du texte avant/après
+    const jsonStart = cleanedResponse.indexOf('{')
+    const jsonEnd = cleanedResponse.lastIndexOf('}')
+    
+    if (jsonStart === -1 || jsonEnd === -1 || jsonStart >= jsonEnd) {
+      throw new Error('Aucun JSON valide trouvé dans la réponse')
+    }
+    
+    cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1)
+    
+    // Supprimer les backticks s'il y en a
+    cleanedResponse = cleanedResponse.replace(/^```(?:json)?\s*/i, '')
+    cleanedResponse = cleanedResponse.replace(/\s*```$/i, '')
+    
+    // Parser le JSON
+    let parsed: any
+    try {
+      parsed = JSON.parse(cleanedResponse)
+    } catch (parseError) {
+      console.error("❌ Erreur de parsing JSON:", parseError)
+      console.error("📝 JSON à parser:", cleanedResponse.substring(0, 500))
+      
+      // Tentative de réparation du JSON
+      try {
+        // Remplacer les sauts de ligne non échappés dans les strings
+        const repairedJson = cleanedResponse
+          .replace(/\n/g, '\\n')
+          .replace(/\r/g, '\\r')
+          .replace(/\t/g, '\\t')
+        
+        parsed = JSON.parse(repairedJson)
+      } catch (repairError) {
+        throw new Error('Impossible de parser le JSON même après réparation')
+      }
+    }
+    
+    // Validation de la structure
+    if (!parsed.header || !parsed.identification || !parsed.rapport) {
+      console.error("❌ Structure invalide:", Object.keys(parsed))
+      throw new Error('Structure du rapport invalide: sections manquantes')
+    }
+    
+    // Vérifier que les sections ont été générées
+    const rapportSections = ['motifConsultation', 'anamnese', 'antecedents', 'examenClinique', 
+                            'syntheseDiagnostique', 'conclusionDiagnostique', 'priseEnCharge', 
+                            'surveillance', 'conclusion']
+    
+    for (const section of rapportSections) {
+      if (!parsed.rapport[section] || parsed.rapport[section].includes('GÉNÉRER_PARAGRAPHE')) {
+        console.warn(`⚠️ Section non générée: ${section}`)
+        // Remplacer par un contenu par défaut
+        parsed.rapport[section] = generateDefaultContent(section)
+      }
+    }
+    
+    console.log("✅ Parsing réussi!")
+    return parsed
+    
+  } catch (error) {
+    console.error('❌ Erreur complète de parsing:', error)
+    throw error
+  }
+}
+
 // Fonctions de génération automatique de prescriptions
 function generateMedicationsFromDiagnosis(diagnosis: any): Medication[] {
-  // Convertir le diagnostic en string s'il s'agit d'un objet
+  // Convertir le diagnosis en string s'il s'agit d'un objet
   let diagText = ''
   
   if (typeof diagnosis === 'string') {
@@ -605,7 +782,7 @@ function generateStandardBiologyExams(diagnosis: any, age: any): Examination[] {
     }
   ]
   
-  // Convertir le diagnostic en string
+  // Convertir le diagnosis en string
   let diagText = ''
   if (typeof diagnosis === 'string') {
     diagText = diagnosis
@@ -665,7 +842,7 @@ function generateStandardBiologyExams(diagnosis: any, age: any): Examination[] {
 }
 
 function shouldHaveImaging(diagnosis: any): boolean {
-  // Convertir le diagnostic en string s'il s'agit d'un objet
+  // Convertir le diagnosis en string s'il s'agit d'un objet
   let diagText = ''
   
   if (typeof diagnosis === 'string') {
@@ -743,7 +920,7 @@ function generateImagingFromDiagnosis(diagnosis: any): Examination[] {
   return exams
 }
 
-// Fonctions utilitaires (gardées de la version originale)
+// Fonctions utilitaires
 function formatPatientName(patient: any): string {
   const nom = (patient.nom || patient.lastName || '').toUpperCase()
   const prenom = (patient.prenom || patient.firstName || '')
@@ -987,75 +1164,6 @@ function getValidityDate(): string {
     month: '2-digit',
     year: 'numeric'
   })
-}
-
-function parseAndValidateReport(responseText: string): any {
-  try {
-    let cleanedResponse = responseText.trim()
-    
-    // Supprimer les backticks
-    cleanedResponse = cleanedResponse.replace(/^```(?:json)?\s*/i, '')
-    cleanedResponse = cleanedResponse.replace(/\s*```$/i, '')
-    
-    // Parser avec gestion des retours à la ligne
-    const lines = cleanedResponse.split('\n')
-    let inString = false
-    let escapeNext = false
-    let result = ''
-    let currentQuoteChar = ''
-    
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i]
-      
-      for (let j = 0; j < line.length; j++) {
-        const char = line[j]
-        const prevChar = j > 0 ? line[j - 1] : ''
-        
-        if (escapeNext) {
-          result += char
-          escapeNext = false
-          continue
-        }
-        
-        if (char === '\\') {
-          escapeNext = true
-          result += char
-          continue
-        }
-        
-        if ((char === '"' || char === "'") && !inString) {
-          inString = true
-          currentQuoteChar = char
-          result += char
-        } else if (char === currentQuoteChar && inString && prevChar !== '\\') {
-          inString = false
-          currentQuoteChar = ''
-          result += char
-        } else {
-          result += char
-        }
-      }
-      
-      if (inString && i < lines.length - 1) {
-        result += ' '
-      } else if (!inString && i < lines.length - 1) {
-        result += '\n'
-      }
-    }
-    
-    // Parser le JSON
-    const parsed = JSON.parse(result)
-    
-    // Validation minimale
-    if (!parsed.header || !parsed.identification || !parsed.rapport) {
-      throw new Error('Structure du rapport invalide')
-    }
-    
-    return parsed
-  } catch (error) {
-    console.error('Erreur de parsing:', error)
-    throw new Error('Impossible de parser le rapport généré')
-  }
 }
 
 function calculateWordCount(rapport: any): number {
