@@ -194,101 +194,70 @@ function prepareMedicalContext(data: {
 
 // Fonction pour générer le prompt structuré
 function generateProfessionalReportPrompt(medicalContext: any, patientData: PatientData): string {
-  const patientId = `${patientData.nom || patientData.lastName || 'PATIENT'}_${Date.now()}`
-  
-  // Extraire les informations pertinentes du contexte
-  const motifConsultation = medicalContext.clinical?.chiefComplaint || 
-                          (Array.isArray(medicalContext.clinical?.symptoms) ? medicalContext.clinical.symptoms.join(', ') : medicalContext.clinical?.symptoms) || 
-                          medicalContext.diagnosis?.chiefComplaint ||
-                          "Consultation médicale"
-  
-  const symptomes = Array.isArray(medicalContext.clinical?.symptoms) ? medicalContext.clinical.symptoms :
-                   Array.isArray(medicalContext.diagnosis?.symptoms) ? medicalContext.diagnosis.symptoms : []
-  
-  const vitalSigns = medicalContext.clinical?.vitalSigns || {}
-  
-  const examenPhysique = medicalContext.clinical?.physicalExam || 
-                        medicalContext.diagnosis?.physicalExamination || {}
-  
-  // Données du diagnostic - gérer les différentes structures possibles
-  const diagnosticPrincipal = medicalContext.diagnosis?.primaryDiagnosis || 
-                             medicalContext.diagnosis?.diagnosis || 
-                             medicalContext.diagnosis?.diagnosticHypothesis?.primary || 
-                             medicalContext.diagnosis?.diagnosticHypothesis || 
-                             medicalContext.diagnosis?.mainDiagnosis || ""
-  
-  const diagnosticsSecondaires = Array.isArray(medicalContext.diagnosis?.secondaryDiagnoses) ? medicalContext.diagnosis.secondaryDiagnoses :
-                                 Array.isArray(medicalContext.diagnosis?.diagnosticHypothesis?.secondary) ? medicalContext.diagnosis.diagnosticHypothesis.secondary : []
-  
-  const examensRealises = Array.isArray(medicalContext.diagnosis?.performedExams) ? medicalContext.diagnosis.performedExams :
-                         Array.isArray(medicalContext.diagnosis?.examsPerformed) ? medicalContext.diagnosis.examsPerformed : []
-  
-  const analyseDiagnostique = medicalContext.diagnosis?.analysis || 
-                             medicalContext.diagnosis?.clinicalAnalysis || 
-                             medicalContext.diagnosis?.diagnosticAnalysis || ""
-  
-  // Traitement proposé - vérifier toutes les structures possibles
-  const medicaments = Array.isArray(medicalContext.editedDocuments?.medication?.prescriptions) ? medicalContext.editedDocuments.medication.prescriptions :
-                     Array.isArray(medicalContext.diagnosis?.treatment?.medications) ? medicalContext.diagnosis.treatment.medications :
-                     Array.isArray(medicalContext.diagnosis?.prescriptions?.medications) ? medicalContext.diagnosis.prescriptions.medications : []
-  
-  const examsBio = Array.isArray(medicalContext.editedDocuments?.biology?.examinations) ? medicalContext.editedDocuments.biology.examinations :
-                   Array.isArray(medicalContext.diagnosis?.examinations?.laboratory) ? medicalContext.diagnosis.examinations.laboratory :
-                   Array.isArray(medicalContext.diagnosis?.examinations?.biology) ? medicalContext.diagnosis.examinations.biology :
-                   Array.isArray(medicalContext.diagnosis?.prescriptions?.laboratory) ? medicalContext.diagnosis.prescriptions.laboratory : []
-  
-  const examsImaging = Array.isArray(medicalContext.editedDocuments?.paraclinical?.examinations) ? medicalContext.editedDocuments.paraclinical.examinations :
-                      Array.isArray(medicalContext.diagnosis?.examinations?.imaging) ? medicalContext.diagnosis.examinations.imaging :
-                      Array.isArray(medicalContext.diagnosis?.examinations?.radiology) ? medicalContext.diagnosis.examinations.radiology :
-                      Array.isArray(medicalContext.diagnosis?.prescriptions?.imaging) ? medicalContext.diagnosis.prescriptions.imaging : []
-  
-  
-  // Log des données extraites pour debug
-  console.log("📊 Données extraites pour le rapport:")
-  console.log("- Motif consultation:", motifConsultation)
-  console.log("- Diagnostic principal:", diagnosticPrincipal)
-  console.log("- Médicaments:", medicaments.length)
-  console.log("- Examens bio:", examsBio.length)
-  console.log("- Examens imagerie:", examsImaging.length)
-  
-  const prompt = `Tu es un médecin senior expérimenté rédigeant un compte rendu de consultation professionnel et détaillé.
-
-DONNÉES DU PATIENT :
-- Nom : ${escapeJsonString(formatPatientName(medicalContext.patient))}
-- Âge : ${escapeJsonString(medicalContext.patient.age)} ans
-- Sexe : ${escapeJsonString(medicalContext.patient.sexe)}
-- Antécédents : ${escapeJsonString(JSON.stringify(medicalContext.patient.antecedents))}
-- Allergies : ${escapeJsonString(JSON.stringify(medicalContext.patient.allergies))}
-
-DONNÉES DE LA CONSULTATION :
-- Motif : ${escapeJsonString(motifConsultation)}
-- Symptômes : ${escapeJsonString(JSON.stringify(symptomes))}
-- Signes vitaux : ${escapeJsonString(JSON.stringify(vitalSigns))}
-- Examen physique : ${escapeJsonString(JSON.stringify(examenPhysique))}
-
-DONNÉES DU DIAGNOSTIC :
-- Diagnostic principal : ${escapeJsonString(diagnosticPrincipal)}
-- Diagnostics secondaires : ${escapeJsonString(JSON.stringify(diagnosticsSecondaires))}
-- Examens réalisés : ${escapeJsonString(JSON.stringify(examensRealises))}
-- Analyse : ${escapeJsonString(analyseDiagnostique)}
-
-QUESTIONS/RÉPONSES DE L'IA :
-${escapeJsonString(JSON.stringify(medicalContext.aiQuestions))}
-
-DOCUMENTS ÉDITÉS :
-${escapeJsonString(JSON.stringify(medicalContext.editedDocuments))}
-
-INSTRUCTIONS IMPORTANTES :
-1. Rédige un compte rendu COMPLET en prose narrative fluide et naturelle
-2. Intègre TOUTES les données fournies de manière cohérente
-3. Utilise un style médical professionnel mais clair
-4. Pour chaque section du rapport, écris des paragraphes détaillés et complets
-5. Remplis TOUTES les prescriptions avec les données réelles fournies
-6. NE LAISSE AUCUN PLACEHOLDER - génère du contenu médical réaliste et pertinent
-
-Génère le rapport au format JSON suivant, en t'assurant que CHAQUE section contient du texte narratif complet :
-
-{
+  try {
+    const patientId = `${patientData.nom || patientData.lastName || 'PATIENT'}_${Date.now()}`
+    
+    console.log("🔍 Début de generateProfessionalReportPrompt")
+    console.log("- Type de medicalContext:", typeof medicalContext)
+    console.log("- Type de patientData:", typeof patientData)
+    
+    // Extraire les informations pertinentes du contexte
+    const motifConsultation = medicalContext.clinical?.chiefComplaint || 
+                            (Array.isArray(medicalContext.clinical?.symptoms) ? medicalContext.clinical.symptoms.join(', ') : medicalContext.clinical?.symptoms) || 
+                            medicalContext.diagnosis?.chiefComplaint ||
+                            "Consultation médicale"
+    
+    const symptomes = Array.isArray(medicalContext.clinical?.symptoms) ? medicalContext.clinical.symptoms :
+                     Array.isArray(medicalContext.diagnosis?.symptoms) ? medicalContext.diagnosis.symptoms : []
+    
+    const vitalSigns = medicalContext.clinical?.vitalSigns || {}
+    
+    const examenPhysique = medicalContext.clinical?.physicalExam || 
+                          medicalContext.diagnosis?.physicalExamination || {}
+    
+    // Données du diagnostic - gérer les différentes structures possibles
+    const diagnosticPrincipal = medicalContext.diagnosis?.primaryDiagnosis || 
+                               medicalContext.diagnosis?.diagnosis || 
+                               medicalContext.diagnosis?.diagnosticHypothesis?.primary || 
+                               medicalContext.diagnosis?.diagnosticHypothesis || 
+                               medicalContext.diagnosis?.mainDiagnosis || ""
+    
+    const diagnosticsSecondaires = Array.isArray(medicalContext.diagnosis?.secondaryDiagnoses) ? medicalContext.diagnosis.secondaryDiagnoses :
+                                   Array.isArray(medicalContext.diagnosis?.diagnosticHypothesis?.secondary) ? medicalContext.diagnosis.diagnosticHypothesis.secondary : []
+    
+    const examensRealises = Array.isArray(medicalContext.diagnosis?.performedExams) ? medicalContext.diagnosis.performedExams :
+                           Array.isArray(medicalContext.diagnosis?.examsPerformed) ? medicalContext.diagnosis.examsPerformed : []
+    
+    const analyseDiagnostique = medicalContext.diagnosis?.analysis || 
+                               medicalContext.diagnosis?.clinicalAnalysis || 
+                               medicalContext.diagnosis?.diagnosticAnalysis || ""
+    
+    // Traitement proposé - vérifier toutes les structures possibles
+    const medicaments = Array.isArray(medicalContext.editedDocuments?.medication?.prescriptions) ? medicalContext.editedDocuments.medication.prescriptions :
+                       Array.isArray(medicalContext.diagnosis?.treatment?.medications) ? medicalContext.diagnosis.treatment.medications :
+                       Array.isArray(medicalContext.diagnosis?.prescriptions?.medications) ? medicalContext.diagnosis.prescriptions.medications : []
+    
+    const examsBio = Array.isArray(medicalContext.editedDocuments?.biology?.examinations) ? medicalContext.editedDocuments.biology.examinations :
+                     Array.isArray(medicalContext.diagnosis?.examinations?.laboratory) ? medicalContext.diagnosis.examinations.laboratory :
+                     Array.isArray(medicalContext.diagnosis?.examinations?.biology) ? medicalContext.diagnosis.examinations.biology :
+                     Array.isArray(medicalContext.diagnosis?.prescriptions?.laboratory) ? medicalContext.diagnosis.prescriptions.laboratory : []
+    
+    const examsImaging = Array.isArray(medicalContext.editedDocuments?.paraclinical?.examinations) ? medicalContext.editedDocuments.paraclinical.examinations :
+                        Array.isArray(medicalContext.diagnosis?.examinations?.imaging) ? medicalContext.diagnosis.examinations.imaging :
+                        Array.isArray(medicalContext.diagnosis?.examinations?.radiology) ? medicalContext.diagnosis.examinations.radiology :
+                        Array.isArray(medicalContext.diagnosis?.prescriptions?.imaging) ? medicalContext.diagnosis.prescriptions.imaging : []
+    
+    // Log des données extraites pour debug
+    console.log("📊 Données extraites pour le rapport:")
+    console.log("- Motif consultation:", motifConsultation)
+    console.log("- Diagnostic principal:", diagnosticPrincipal)
+    console.log("- Médicaments:", medicaments.length)
+    console.log("- Examens bio:", examsBio.length)
+    console.log("- Examens imagerie:", examsImaging.length)
+    
+    console.log("🔨 Construction du prompt...")
+    
+    // Créer le template JSON AVANT de construire le prompt
     const jsonTemplate = {
       header: {
         title: "COMPTE-RENDU DE CONSULTATION MÉDICALE",
@@ -373,8 +342,53 @@ Génère le rapport au format JSON suivant, en t'assurant que CHAQUE section con
     // Stringifier le template avec une indentation pour la lisibilité
     const jsonTemplateString = JSON.stringify(jsonTemplate, null, 2)
     
-    // Construire le prompt final
-    const prompt = promptPrefix + jsonTemplateString + `
+    // Construire le prompt
+    const prompt = `Tu es un médecin senior expérimenté rédigeant un compte rendu de consultation professionnel et détaillé.
+
+DONNÉES DU PATIENT :
+- Nom : ${formatPatientName(medicalContext.patient)}
+- Âge : ${medicalContext.patient.age} ans
+- Sexe : ${medicalContext.patient.sexe}
+- Antécédents : ${JSON.stringify(medicalContext.patient.antecedents)}
+- Allergies : ${JSON.stringify(medicalContext.patient.allergies)}
+
+DONNÉES DE LA CONSULTATION :
+- Motif : ${motifConsultation}
+- Symptômes : ${JSON.stringify(symptomes)}
+- Signes vitaux : ${JSON.stringify(vitalSigns)}
+- Examen physique : ${JSON.stringify(examenPhysique)}
+
+DONNÉES DU DIAGNOSTIC :
+- Diagnostic principal : ${diagnosticPrincipal}
+- Diagnostics secondaires : ${JSON.stringify(diagnosticsSecondaires)}
+- Examens réalisés : ${JSON.stringify(examensRealises)}
+- Analyse : ${analyseDiagnostique}
+
+QUESTIONS/RÉPONSES DE L'IA :
+${JSON.stringify(medicalContext.aiQuestions)}
+
+DOCUMENTS ÉDITÉS :
+${JSON.stringify(medicalContext.editedDocuments)}
+
+INSTRUCTIONS CRITIQUES POUR LE FORMAT JSON :
+1. Génère UNIQUEMENT un objet JSON valide, sans aucun formatage markdown
+2. N'utilise PAS de backticks (\`\`\`) avant ou après le JSON
+3. Pour les textes longs dans le rapport, utilise des espaces au lieu de retours à la ligne
+4. Si tu dois absolument utiliser des retours à la ligne, échappe-les avec \\n
+5. Assure-toi que toutes les chaînes de caractères sont correctement fermées avec des guillemets
+6. N'utilise JAMAIS de guillemets non échappés à l'intérieur des valeurs de chaînes
+
+INSTRUCTIONS POUR LE CONTENU :
+1. Rédige un compte rendu COMPLET en prose narrative fluide et naturelle
+2. Intègre TOUTES les données fournies de manière cohérente
+3. Utilise un style médical professionnel mais clair
+4. Pour chaque section du rapport, écris des paragraphes détaillés et complets
+5. Remplis TOUTES les prescriptions avec les données réelles fournies
+6. NE LAISSE AUCUN PLACEHOLDER - génère du contenu médical réaliste et pertinent
+
+Génère le rapport au format JSON suivant (SANS AUCUN FORMATAGE MARKDOWN). Utilise le template JSON fourni et remplace UNIQUEMENT les instructions de rédaction par du contenu médical réel et complet :
+
+${jsonTemplateString}
 
 RAPPEL CRITIQUE : 
 - Ne retourne QU'UN SEUL objet JSON valide
@@ -385,7 +399,7 @@ RAPPEL CRITIQUE :
 - Utilise des espaces au lieu de retours à la ligne dans les textes
 - Assure-toi que le JSON est valide et peut être parsé directement`
 
-  return prompt
+    return prompt
   } catch (error) {
     console.error("❌ Erreur dans generateProfessionalReportPrompt:", error)
     console.error("Stack trace:", error instanceof Error ? error.stack : 'No stack trace')
@@ -393,7 +407,7 @@ RAPPEL CRITIQUE :
   }
 }
 
-// Fonction utilitaire pour échapper les caractères spéciaux dans les chaînes JSON
+// Fonction utilitaire - Pas utilisée mais gardée au cas où
 function escapeJsonString(value: any): string {
   try {
     // Convertir en string si ce n'est pas déjà le cas
