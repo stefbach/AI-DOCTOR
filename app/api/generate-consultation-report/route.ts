@@ -4,19 +4,72 @@ import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
 
+// Types pour une meilleure structure
+interface PatientData {
+  nom?: string
+  lastName?: string
+  prenom?: string
+  firstName?: string
+  age?: number | string
+  sexe?: string
+  gender?: string
+  dateNaissance?: string
+  birthDate?: string
+  telephone?: string
+  phone?: string
+  adresse?: string
+  address?: string
+  email?: string
+  allergies?: string[]
+  antecedents?: string[]
+  medicalHistory?: string[]
+}
+
+interface Medication {
+  medication?: string
+  name?: string
+  dosage?: string
+  frequency?: string
+  posology?: string
+  duration?: string
+  instructions?: string
+}
+
+interface Examination {
+  name?: string
+  type?: string
+  urgency?: string
+  justification?: string
+  indication?: string
+  region?: string
+  details?: string
+}
+
+interface RequestBody {
+  patientData: PatientData
+  clinicalData: any
+  questionsData?: any
+  diagnosisData: any
+  editedDocuments?: any
+  includeFullPrescriptions?: boolean
+}
+
 export async function POST(request: NextRequest) {
   try {
     console.log("📋 Génération du compte rendu médical professionnel")
     
+    // Parse et validation des données
+    const body: RequestBody = await request.json()
     const { 
       patientData, 
       clinicalData, 
       questionsData, 
       diagnosisData,
       editedDocuments,
-      includeFullPrescriptions = false // Nouveau paramètre
-    } = await request.json()
+      includeFullPrescriptions = false
+    } = body
 
+    // Validation des données requises
     if (!patientData || !clinicalData || !diagnosisData) {
       return NextResponse.json(
         { success: false, error: "Données incomplètes" },
@@ -24,7 +77,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Préparation du contexte médical complet
+    // Log pour debug de la structure
+    console.log("📊 Structure diagnosisData:", JSON.stringify(diagnosisData, null, 2))
+
+    // Préparation du contexte médical unifié
     const medicalContext = prepareMedicalContext({
       patientData,
       clinicalData,
@@ -33,167 +89,33 @@ export async function POST(request: NextRequest) {
       editedDocuments
     })
 
-    // Prompt pour générer le rapport narratif ET les prescriptions structurées
-    const professionalReportPrompt = `
-Tu es un médecin senior expérimenté rédigeant un compte rendu de consultation professionnel avec ordonnances détaillées.
+    // Génération du prompt structuré
+    const prompt = generateProfessionalReportPrompt(medicalContext, patientData)
 
-CONTEXTE MÉDICAL COMPLET :
-${JSON.stringify(medicalContext, null, 2)}
-
-INSTRUCTIONS CRITIQUES :
-1. Rédige un compte rendu médical en PROSE NARRATIVE fluide et professionnelle
-2. Génère des prescriptions STRUCTURÉES et DÉTAILLÉES
-3. Pour chaque médicament, fournis TOUS les détails nécessaires
-4. Pour chaque examen, fournis les codes et informations pratiques
-5. Utilise la terminologie médicale française appropriée
-
-IMPORTANT : Retourne UNIQUEMENT un objet JSON valide, sans aucun formatage markdown, sans backticks.
-
-GÉNÈRE LE RAPPORT SUIVANT :
-
-{
-  "header": {
-    "title": "COMPTE-RENDU DE CONSULTATION MÉDICALE",
-    "subtitle": "Document médical confidentiel",
-    "reference": "CR-${Date.now()}-${patientData.lastName?.toUpperCase() || 'PATIENT'}"
-  },
-  
-  "identification": {
-    "patient": "${patientData.nom || patientData.lastName} ${patientData.prenom || patientData.firstName}",
-    "age": "${patientData.age} ans",
-    "sexe": "${patientData.sexe || patientData.gender || 'Non renseigné'}",
-    "dateNaissance": "${formatDate(patientData.dateNaissance || patientData.birthDate)}",
-    "adresse": "${patientData.adresse || patientData.address || 'Non renseignée'}",
-    "telephone": "${patientData.telephone || patientData.phone || 'Non renseigné'}",
-    "email": "${patientData.email || ''}"
-  },
-  
-  "rapport": {
-    "motifConsultation": "[PROSE] Le patient consulte ce jour pour... (intégrer le motif principal)",
-    
-    "anamnese": "[PROSE NARRATIVE DÉTAILLÉE] Histoire de la maladie actuelle, chronologie des symptômes, facteurs déclenchants, traitements essayés, réponses aux questions de l'IA",
-    
-    "antecedents": "[PROSE] Antécédents médicaux, chirurgicaux, familiaux, allergies, habitudes de vie",
-    
-    "examenClinique": "[PROSE AU PRÉSENT] État général, constantes vitales, examen systématique par appareil",
-    
-    "syntheseDiagnostique": "[PROSE] Analyse et raisonnement diagnostique, hypothèses évoquées",
-    
-    "conclusionDiagnostique": "[PROSE] Diagnostic principal retenu avec justification",
-    
-    "priseEnCharge": "[PROSE] Description de la stratégie thérapeutique globale",
-    
-    "surveillance": "[PROSE] Plan de suivi, signes d'alerte, consignes",
-    
-    "conclusion": "[PROSE] Synthèse finale avec pronostic"
-  },
-  
-  "prescriptions": {
-    "medicaments": {
-      "items": [
-        ${generateMedicationsPrescription(diagnosisData, editedDocuments)}
-      ],
-      "renouvellement": ${shouldAllowRenewal(diagnosisData)},
-      "dateValidite": "${getValidityDate()}"
-    },
-    "biologie": {
-      "examens": [
-        ${generateBiologyPrescription(diagnosisData, editedDocuments)}
-      ],
-      "laboratoireRecommande": "Laboratoire d'analyses médicales agréé"
-    },
-    "imagerie": {
-      "examens": [
-        ${generateImagingPrescription(diagnosisData, editedDocuments)}
-      ],
-      "centreRecommande": "Centre d'imagerie médicale"
-    }
-  },
-  
-  "signature": {
-    "medecin": "${getDoctorName()}",
-    "qualification": "${getDoctorQualification()}",
-    "rpps": "${getDoctorRPPS()}",
-    "etablissement": "${getEstablishment()}"
-  },
-  
-  "metadata": {
-    "dateGeneration": "${new Date().toISOString()}",
-    "wordCount": 0
-  }
-}
-
-POUR CHAQUE MÉDICAMENT, génère :
-{
-  "nom": "Nom commercial du médicament",
-  "dci": "Dénomination Commune Internationale",
-  "dosage": "Ex: 500mg",
-  "forme": "comprimé, gélule, sirop, etc.",
-  "posologie": "Ex: 1 comprimé 3 fois par jour",
-  "duree": "Ex: 7 jours",
-  "quantite": "Ex: 1 boîte de 21 comprimés",
-  "remarques": "Pendant les repas, effets secondaires possibles, etc.",
-  "nonSubstituable": false
-}
-
-POUR CHAQUE EXAMEN BIOLOGIQUE, génère :
-{
-  "type": "Nom de l'examen (NFS, Glycémie, etc.)",
-  "code": "Code NABM si applicable",
-  "urgence": true/false,
-  "jeun": true/false,
-  "remarques": "Instructions spécifiques"
-}
-
-POUR CHAQUE EXAMEN D'IMAGERIE, génère :
-{
-  "type": "Type d'examen (Radio, Echo, Scanner, IRM)",
-  "region": "Zone anatomique",
-  "indication": "Justification clinique",
-  "urgence": true/false,
-  "contraste": true/false,
-  "remarques": "Précautions particulières"
-}
-`
-
-    console.log("🤖 Génération avec GPT-4...")
+    console.log("🤖 Génération du rapport avec GPT-4...")
     
     const result = await generateText({
       model: openai("gpt-4o"),
-      prompt: professionalReportPrompt,
+      prompt,
       maxTokens: 8000,
       temperature: 0.3,
     })
 
-    console.log("✅ Compte rendu généré")
+    console.log("✅ Rapport généré avec succès")
 
-    // Parse et enrichissement du rapport
-    let reportData
-    try {
-      // Nettoyer la réponse
-      let cleanedResponse = result.text.trim()
-      cleanedResponse = cleanedResponse.replace(/^```json\s*/i, '')
-      cleanedResponse = cleanedResponse.replace(/^```\s*/i, '')
-      cleanedResponse = cleanedResponse.replace(/\s*```$/i, '')
-      
-      reportData = JSON.parse(cleanedResponse)
-      
-      // Calculer le nombre de mots du rapport narratif
-      const narrativeText = Object.values(reportData.rapport).join(' ')
-      reportData.metadata.wordCount = narrativeText.split(/\s+/).length
-      
-      // Si les prescriptions détaillées ne sont pas demandées, les simplifier
-      if (!includeFullPrescriptions) {
-        reportData.prescriptionsFormatees = {
-          examens: formatSimplePrescriptionsExamens(reportData),
-          medicaments: formatSimplePrescriptionsMedicaments(reportData)
-        }
-        delete reportData.prescriptions
+    // Parse et validation du rapport
+    const reportData = parseAndValidateReport(result.text)
+    
+    // Enrichissement des métadonnées
+    reportData.metadata.wordCount = calculateWordCount(reportData.rapport)
+    
+    // Gestion des prescriptions selon le format demandé
+    if (!includeFullPrescriptions) {
+      reportData.prescriptionsSimplifiees = {
+        examens: formatSimplifiedExamsPrescription(reportData),
+        medicaments: formatSimplifiedMedicationsPrescription(reportData)
       }
-      
-    } catch (error) {
-      console.error("❌ Erreur parsing:", error)
-      throw new Error("Erreur de génération du rapport")
+      delete reportData.prescriptions
     }
 
     return NextResponse.json({
@@ -207,71 +129,200 @@ POUR CHAQUE EXAMEN D'IMAGERIE, génère :
     })
 
   } catch (error) {
-    console.error("❌ Erreur génération rapport:", error)
+    console.error("❌ Erreur lors de la génération du rapport:", error)
+    
+    const errorMessage = error instanceof Error ? error.message : "Erreur inconnue"
+    const statusCode = error instanceof SyntaxError ? 422 : 500
+    
     return NextResponse.json(
       { 
         success: false, 
-        error: error instanceof Error ? error.message : "Erreur inconnue"
+        error: errorMessage,
+        details: process.env.NODE_ENV === 'development' ? error : undefined
       },
-      { status: 500 }
+      { status: statusCode }
     )
   }
 }
 
-// Fonctions helper pour générer les prescriptions
-function generateMedicationsPrescription(diagnosisData: any, editedDocuments: any): string {
-  if (!diagnosisData?.treatment?.medications?.length && 
-      !editedDocuments?.medication?.prescriptions?.length) {
-    return ""
+// Fonction pour préparer le contexte médical unifié
+function prepareMedicalContext(data: {
+  patientData: PatientData
+  clinicalData: any
+  questionsData?: any
+  diagnosisData: any
+  editedDocuments?: any
+}) {
+  // Normalisation des données patient
+  const normalizedPatient = {
+    nom: data.patientData.nom || data.patientData.lastName || '',
+    prenom: data.patientData.prenom || data.patientData.firstName || '',
+    age: data.patientData.age || '',
+    sexe: data.patientData.sexe || data.patientData.gender || 'Non renseigné',
+    dateNaissance: data.patientData.dateNaissance || data.patientData.birthDate || '',
+    telephone: data.patientData.telephone || data.patientData.phone || '',
+    adresse: data.patientData.adresse || data.patientData.address || '',
+    email: data.patientData.email || '',
+    allergies: data.patientData.allergies || data.patientData.medicalHistory?.allergies || [],
+    antecedents: data.patientData.antecedents || data.patientData.medicalHistory || []
   }
 
-  // Utiliser les données éditées si disponibles
-  const medications = editedDocuments?.medication?.prescriptions || 
-                     diagnosisData?.treatment?.medications || []
-
-  return medications.map((med: any) => `{
-    "nom": "${med.medication || med.name}",
-    "dci": "[DCI appropriée]",
-    "dosage": "${med.dosage}",
-    "forme": "${detectMedicationForm(med.medication || med.name)}",
-    "posologie": "${med.frequency || med.posology}",
-    "duree": "${med.duration}",
-    "quantite": "[Calculer selon durée]",
-    "remarques": "${med.instructions || ''}",
-    "nonSubstituable": false
-  }`).join(',\n')
+  return {
+    patient: normalizedPatient,
+    clinical: data.clinicalData,
+    aiQuestions: data.questionsData?.responses || [],
+    diagnosis: data.diagnosisData,
+    editedDocuments: data.editedDocuments || {}
+  }
 }
 
-function generateBiologyPrescription(diagnosisData: any, editedDocuments: any): string {
-  const exams = editedDocuments?.biology?.examinations || 
-                diagnosisData?.examinations?.laboratory || []
+// Fonction pour générer le prompt structuré
+function generateProfessionalReportPrompt(medicalContext: any, patientData: PatientData): string {
+  const patientId = `${patientData.nom || patientData.lastName || 'PATIENT'}_${Date.now()}`
+  
+  return `Tu es un médecin senior expérimenté rédigeant un compte rendu de consultation professionnel.
 
-  return exams.map((exam: any) => `{
-    "type": "${exam.name || exam.type}",
-    "code": "[Code NABM]",
-    "urgence": ${exam.urgency === 'Urgent'},
-    "jeun": ${requiresFasting(exam.name || exam.type)},
-    "remarques": "${exam.justification || ''}"
-  }`).join(',\n')
+CONTEXTE MÉDICAL COMPLET :
+${JSON.stringify(medicalContext, null, 2)}
+
+INSTRUCTIONS CRITIQUES :
+1. Rédige un compte rendu en PROSE NARRATIVE fluide et professionnelle
+2. Utilise la terminologie médicale française appropriée
+3. Structure les prescriptions de manière détaillée et complète
+4. Ne retourne QU'UN SEUL objet JSON valide, sans formatage markdown
+
+GÉNÈRE LE RAPPORT SUIVANT :
+
+{
+  "header": {
+    "title": "COMPTE-RENDU DE CONSULTATION MÉDICALE",
+    "subtitle": "Document médical confidentiel",
+    "reference": "CR-${patientId}"
+  },
+  
+  "identification": {
+    "patient": "${formatPatientName(medicalContext.patient)}",
+    "age": "${medicalContext.patient.age} ans",
+    "sexe": "${medicalContext.patient.sexe}",
+    "dateNaissance": "${formatDate(medicalContext.patient.dateNaissance)}",
+    "adresse": "${medicalContext.patient.adresse || 'Non renseignée'}",
+    "telephone": "${medicalContext.patient.telephone || 'Non renseigné'}",
+    "email": "${medicalContext.patient.email || 'Non renseigné'}"
+  },
+  
+  "rapport": {
+    "motifConsultation": "[PROSE] Décrire le motif principal de consultation",
+    "anamnese": "[PROSE NARRATIVE] Histoire détaillée de la maladie actuelle",
+    "antecedents": "[PROSE] Antécédents médicaux et contexte du patient",
+    "examenClinique": "[PROSE AU PRÉSENT] Description de l'examen clinique",
+    "syntheseDiagnostique": "[PROSE] Analyse et raisonnement diagnostique",
+    "conclusionDiagnostique": "[PROSE] Diagnostic principal retenu",
+    "priseEnCharge": "[PROSE] Stratégie thérapeutique détaillée",
+    "surveillance": "[PROSE] Plan de suivi et consignes",
+    "conclusion": "[PROSE] Synthèse finale"
+  },
+  
+  "prescriptions": {
+    "medicaments": {
+      "items": [${generateMedicationItems(medicalContext)}],
+      "renouvellement": ${shouldAllowRenewal(medicalContext.diagnosis)},
+      "dateValidite": "${getValidityDate()}"
+    },
+    "biologie": {
+      "examens": [${generateBiologyItems(medicalContext)}],
+      "laboratoireRecommande": "Laboratoire d'analyses médicales agréé"
+    },
+    "imagerie": {
+      "examens": [${generateImagingItems(medicalContext)}],
+      "centreRecommande": "Centre d'imagerie médicale"
+    }
+  },
+  
+  "signature": {
+    "medecin": "Dr. [NOM DU MÉDECIN]",
+    "qualification": "Médecin Généraliste",
+    "rpps": "[NUMÉRO RPPS]",
+    "etablissement": "Cabinet Médical"
+  },
+  
+  "metadata": {
+    "dateGeneration": "${new Date().toISOString()}",
+    "wordCount": 0
+  }
+}`
 }
 
-function generateImagingPrescription(diagnosisData: any, editedDocuments: any): string {
-  const exams = editedDocuments?.paraclinical?.examinations || 
-                diagnosisData?.examinations?.imaging || []
+// Génération des items de médicaments
+function generateMedicationItems(context: any): string {
+  const medications = context.editedDocuments?.medication?.prescriptions || 
+                     context.diagnosis?.treatment?.medications || []
 
-  return exams.map((exam: any) => `{
-    "type": "${exam.type}",
-    "region": "${exam.region || detectAnatomicalRegion(exam.type)}",
-    "indication": "${exam.indication || exam.justification}",
-    "urgence": ${exam.urgency === 'Urgent'},
-    "contraste": ${requiresContrast(exam.type)},
-    "remarques": "${exam.details || ''}"
-  }`).join(',\n')
+  if (medications.length === 0) return ''
+
+  return medications.map((med: Medication) => {
+    const medicationName = med.medication || med.name || ''
+    return `{
+      "nom": "${medicationName}",
+      "dci": "${extractDCI(medicationName)}",
+      "dosage": "${med.dosage || ''}",
+      "forme": "${detectMedicationForm(medicationName)}",
+      "posologie": "${med.frequency || med.posology || ''}",
+      "duree": "${med.duration || ''}",
+      "quantite": "${calculateQuantity(med)}",
+      "remarques": "${med.instructions || ''}",
+      "nonSubstituable": false
+    }`
+  }).join(',\n        ')
+}
+
+// Génération des examens biologiques
+function generateBiologyItems(context: any): string {
+  const exams = context.editedDocuments?.biology?.examinations || 
+                context.diagnosis?.examinations?.laboratory || []
+
+  if (exams.length === 0) return ''
+
+  return exams.map((exam: Examination) => {
+    const examName = exam.name || exam.type || ''
+    return `{
+      "type": "${examName}",
+      "code": "${getBiologyCode(examName)}",
+      "urgence": ${exam.urgency === 'Urgent'},
+      "jeun": ${requiresFasting(examName)},
+      "remarques": "${exam.justification || ''}"
+    }`
+  }).join(',\n        ')
+}
+
+// Génération des examens d'imagerie
+function generateImagingItems(context: any): string {
+  const exams = context.editedDocuments?.paraclinical?.examinations || 
+                context.diagnosis?.examinations?.imaging || []
+
+  if (exams.length === 0) return ''
+
+  return exams.map((exam: Examination) => {
+    const examType = exam.type || ''
+    return `{
+      "type": "${examType}",
+      "region": "${exam.region || detectAnatomicalRegion(examType)}",
+      "indication": "${exam.indication || exam.justification || ''}",
+      "urgence": ${exam.urgency === 'Urgent'},
+      "contraste": ${requiresContrast(examType)},
+      "remarques": "${exam.details || ''}"
+    }`
+  }).join(',\n        ')
 }
 
 // Fonctions utilitaires
+function formatPatientName(patient: any): string {
+  const nom = patient.nom || ''
+  const prenom = patient.prenom || ''
+  return `${nom} ${prenom}`.trim() || 'Patient'
+}
+
 function formatDate(dateString: string): string {
-  if (!dateString) return ""
+  if (!dateString) return 'Non renseignée'
   try {
     const date = new Date(dateString)
     return date.toLocaleDateString('fr-FR')
@@ -280,111 +331,209 @@ function formatDate(dateString: string): string {
   }
 }
 
+function extractDCI(medicationName: string): string {
+  // Logique simplifiée - en production, utiliser une base de données
+  const commonDCIs: Record<string, string> = {
+    'doliprane': 'Paracétamol',
+    'efferalgan': 'Paracétamol',
+    'advil': 'Ibuprofène',
+    'augmentin': 'Amoxicilline + Acide clavulanique'
+  }
+  
+  const lowerName = medicationName.toLowerCase()
+  for (const [brand, dci] of Object.entries(commonDCIs)) {
+    if (lowerName.includes(brand)) return dci
+  }
+  
+  return 'À préciser'
+}
+
 function detectMedicationForm(name: string): string {
   const lowerName = name.toLowerCase()
   if (lowerName.includes('sirop')) return 'sirop'
   if (lowerName.includes('gel') || lowerName.includes('gélule')) return 'gélule'
   if (lowerName.includes('injectable')) return 'solution injectable'
+  if (lowerName.includes('crème')) return 'crème'
+  if (lowerName.includes('pommade')) return 'pommade'
+  if (lowerName.includes('collyre')) return 'collyre'
+  if (lowerName.includes('spray')) return 'spray'
   return 'comprimé'
 }
 
+function calculateQuantity(med: Medication): string {
+  // Calcul basique de la quantité nécessaire
+  const duration = med.duration || ''
+  const frequency = med.frequency || med.posology || ''
+  
+  // Logique simplifiée - à améliorer selon les besoins
+  if (duration.includes('7 jours') && frequency.includes('3 fois')) {
+    return '1 boîte de 21 comprimés'
+  }
+  
+  return '1 boîte'
+}
+
+function getBiologyCode(examName: string): string {
+  // Codes NABM simplifiés
+  const codes: Record<string, string> = {
+    'nfs': '1104',
+    'glycémie': '1106',
+    'crp': '1803',
+    'tsh': '1234'
+  }
+  
+  const lowerName = examName.toLowerCase()
+  for (const [exam, code] of Object.entries(codes)) {
+    if (lowerName.includes(exam)) return code
+  }
+  
+  return ''
+}
+
 function requiresFasting(examName: string): boolean {
-  const fastingExams = ['glycémie', 'bilan lipidique', 'cholestérol', 'triglycérides']
-  return fastingExams.some(exam => examName.toLowerCase().includes(exam))
+  const fastingExams = ['glycémie', 'bilan lipidique', 'cholestérol', 'triglycérides', 'hdl', 'ldl']
+  const lowerName = examName.toLowerCase()
+  return fastingExams.some(exam => lowerName.includes(exam))
 }
 
 function requiresContrast(examType: string): boolean {
-  const contrastExams = ['scanner', 'angioscanner', 'irm avec injection']
-  return contrastExams.some(exam => examType.toLowerCase().includes(exam))
+  const contrastExams = ['scanner', 'angioscanner', 'irm avec injection', 'arthroscanner']
+  const lowerType = examType.toLowerCase()
+  return contrastExams.some(exam => lowerType.includes(exam))
 }
 
 function detectAnatomicalRegion(examType: string): string {
   const lowerType = examType.toLowerCase()
-  if (lowerType.includes('thorax') || lowerType.includes('poumon')) return 'Thorax'
-  if (lowerType.includes('abdom')) return 'Abdomen'
-  if (lowerType.includes('crân') || lowerType.includes('cérébr')) return 'Crâne'
+  
+  const regions: Record<string, string> = {
+    'thorax': 'Thorax',
+    'poumon': 'Thorax',
+    'thoracique': 'Thorax',
+    'abdom': 'Abdomen',
+    'ventre': 'Abdomen',
+    'crân': 'Crâne',
+    'cérébr': 'Crâne',
+    'tête': 'Crâne',
+    'rachis': 'Rachis',
+    'colonne': 'Rachis',
+    'genou': 'Genou',
+    'épaule': 'Épaule',
+    'hanche': 'Hanche',
+    'cheville': 'Cheville'
+  }
+  
+  for (const [key, value] of Object.entries(regions)) {
+    if (lowerType.includes(key)) return value
+  }
+  
   return 'À préciser'
 }
 
 function shouldAllowRenewal(diagnosisData: any): boolean {
-  // Logique pour déterminer si l'ordonnance est renouvelable
-  const chronicConditions = ['hypertension', 'diabète', 'asthme']
-  const diagnosis = diagnosisData?.diagnosis?.toLowerCase() || ''
-  return chronicConditions.some(condition => diagnosis.includes(condition))
+  const chronicConditions = ['hypertension', 'diabète', 'asthme', 'bpco', 'insuffisance cardiaque']
+  
+  // Recherche du diagnostic dans différentes propriétés possibles
+  const possibleDiagnosisFields = [
+    diagnosisData?.diagnosis,
+    diagnosisData?.primaryDiagnosis,
+    diagnosisData?.finalDiagnosis,
+    diagnosisData?.diagnosticHypothesis,
+    diagnosisData?.mainDiagnosis
+  ]
+  
+  // Convertir en string et vérifier
+  const diagnosisText = possibleDiagnosisFields
+    .filter(field => field != null)
+    .map(field => String(field).toLowerCase())
+    .join(' ')
+  
+  return chronicConditions.some(condition => diagnosisText.includes(condition))
 }
 
 function getValidityDate(): string {
   const date = new Date()
-  date.setMonth(date.getMonth() + 3) // 3 mois de validité
+  date.setMonth(date.getMonth() + 3) // 3 mois de validité standard
   return date.toLocaleDateString('fr-FR')
 }
 
-function getDoctorName(): string {
-  // Récupérer depuis session ou configuration
-  return "Dr. [NOM DU MÉDECIN]"
+function parseAndValidateReport(responseText: string): any {
+  try {
+    // Nettoyer la réponse de tout formatage markdown
+    let cleanedResponse = responseText.trim()
+    cleanedResponse = cleanedResponse.replace(/^```json\s*/i, '')
+    cleanedResponse = cleanedResponse.replace(/^```\s*/i, '')
+    cleanedResponse = cleanedResponse.replace(/\s*```$/i, '')
+    
+    const parsed = JSON.parse(cleanedResponse)
+    
+    // Validation de la structure minimale
+    if (!parsed.header || !parsed.identification || !parsed.rapport) {
+      throw new Error('Structure du rapport invalide')
+    }
+    
+    return parsed
+  } catch (error) {
+    console.error('Erreur de parsing:', error)
+    throw new Error('Impossible de parser le rapport généré')
+  }
 }
 
-function getDoctorQualification(): string {
-  return "Médecin Généraliste"
-}
-
-function getDoctorRPPS(): string {
-  return "[NUMÉRO RPPS]"
-}
-
-function getEstablishment(): string {
-  return "Cabinet Médical"
-}
-
-// Formatage simple pour compatibilité
-function formatSimplePrescriptionsExamens(reportData: any): string {
-  let output = "ORDONNANCE - EXAMENS COMPLÉMENTAIRES\n\n"
+function calculateWordCount(rapport: any): number {
+  const allText = Object.values(rapport)
+    .filter(value => typeof value === 'string')
+    .join(' ')
   
+  return allText.split(/\s+/).filter(word => word.length > 0).length
+}
+
+function formatSimplifiedExamsPrescription(reportData: any): string {
+  const lines: string[] = ["ORDONNANCE - EXAMENS COMPLÉMENTAIRES\n"]
+  
+  // Examens biologiques
   if (reportData.prescriptions?.biologie?.examens?.length > 0) {
-    output += "BIOLOGIE :\n"
+    lines.push("EXAMENS BIOLOGIQUES :")
     reportData.prescriptions.biologie.examens.forEach((exam: any, idx: number) => {
-      output += `${idx + 1}. ${exam.type}\n`
-      if (exam.urgence) output += "   URGENT\n"
-      if (exam.jeun) output += "   À JEUN\n"
+      lines.push(`${idx + 1}. ${exam.type}`)
+      if (exam.urgence) lines.push("   → URGENT")
+      if (exam.jeun) lines.push("   → À JEUN")
+      if (exam.remarques) lines.push(`   → ${exam.remarques}`)
+    })
+    lines.push("")
+  }
+  
+  // Examens d'imagerie
+  if (reportData.prescriptions?.imagerie?.examens?.length > 0) {
+    lines.push("EXAMENS D'IMAGERIE :")
+    reportData.prescriptions.imagerie.examens.forEach((exam: any, idx: number) => {
+      lines.push(`${idx + 1}. ${exam.type} - ${exam.region}`)
+      if (exam.urgence) lines.push("   → URGENT")
+      if (exam.contraste) lines.push("   → AVEC INJECTION DE PRODUIT DE CONTRASTE")
+      if (exam.indication) lines.push(`   → Indication : ${exam.indication}`)
     })
   }
   
-  return output
+  return lines.join("\n")
 }
 
-function formatSimplePrescriptionsMedicaments(reportData: any): string {
-  let output = "ORDONNANCE MÉDICAMENTEUSE\n\n"
+function formatSimplifiedMedicationsPrescription(reportData: any): string {
+  const lines: string[] = ["ORDONNANCE MÉDICAMENTEUSE\n"]
   
   if (reportData.prescriptions?.medicaments?.items?.length > 0) {
     reportData.prescriptions.medicaments.items.forEach((med: any, idx: number) => {
-      output += `${idx + 1}. ${med.nom} ${med.dosage}\n`
-      output += `   ${med.posologie}\n`
-      output += `   Durée : ${med.duree}\n\n`
+      lines.push(`${idx + 1}. ${med.nom} ${med.dosage}`)
+      lines.push(`   ${med.posologie}`)
+      lines.push(`   Durée : ${med.duree}`)
+      if (med.quantite) lines.push(`   Quantité : ${med.quantite}`)
+      if (med.remarques) lines.push(`   Remarques : ${med.remarques}`)
+      lines.push("")
     })
+    
+    if (reportData.prescriptions.medicaments.renouvellement) {
+      lines.push("Cette ordonnance peut être renouvelée")
+    }
+    
+    lines.push(`\nOrdonnance valable jusqu'au : ${reportData.prescriptions.medicaments.dateValidite}`)
   }
   
-  return output
-}
-
-function prepareMedicalContext(data: any): any {
-  // Utiliser les données au format API si disponibles
-  const patientDataForContext = data.patientData.nom ? data.patientData : {
-    nom: data.patientData.lastName,
-    prenom: data.patientData.firstName,
-    age: data.patientData.age,
-    sexe: data.patientData.gender,
-    dateNaissance: data.patientData.birthDate,
-    telephone: data.patientData.phone,
-    adresse: data.patientData.address,
-    allergies: data.patientData.allergies,
-    antecedents: data.patientData.medicalHistory
-  }
-
-  return {
-    patient: patientDataForContext,
-    clinical: data.clinicalData,
-    aiQuestions: data.questionsData?.responses || [],
-    diagnosis: data.diagnosisData,
-    editedDocuments: data.editedDocuments
-  }
+  return lines.join("\n")
 }
