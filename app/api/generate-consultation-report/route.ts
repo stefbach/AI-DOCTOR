@@ -507,8 +507,22 @@ RAPPEL : Remplace TOUTES les instructions par du contenu médical pertinent et d
 }
 
 // Fonctions de génération automatique de prescriptions
-function generateMedicationsFromDiagnosis(diagnosis: string): Medication[] {
-  const diag = diagnosis.toLowerCase()
+function generateMedicationsFromDiagnosis(diagnosis: any): Medication[] {
+  // Convertir le diagnostic en string s'il s'agit d'un objet
+  let diagText = ''
+  
+  if (typeof diagnosis === 'string') {
+    diagText = diagnosis
+  } else if (diagnosis && typeof diagnosis === 'object') {
+    diagText = [
+      diagnosis.condition,
+      diagnosis.primary?.condition,
+      diagnosis.diagnosis,
+      diagnosis.detailedAnalysis
+    ].filter(Boolean).join(' ')
+  }
+  
+  const diag = diagText.toLowerCase()
   const medications: Medication[] = []
   
   // Infections
@@ -582,7 +596,7 @@ function generateMedicationsFromDiagnosis(diagnosis: string): Medication[] {
   return medications
 }
 
-function generateStandardBiologyExams(diagnosis: string, age: any): Examination[] {
+function generateStandardBiologyExams(diagnosis: any, age: any): Examination[] {
   const exams: Examination[] = [
     {
       name: "NFS (Numération Formule Sanguine)",
@@ -591,7 +605,19 @@ function generateStandardBiologyExams(diagnosis: string, age: any): Examination[
     }
   ]
   
-  const diag = diagnosis.toLowerCase()
+  // Convertir le diagnostic en string
+  let diagText = ''
+  if (typeof diagnosis === 'string') {
+    diagText = diagnosis
+  } else if (diagnosis && typeof diagnosis === 'object') {
+    diagText = [
+      diagnosis.condition,
+      diagnosis.primary?.condition,
+      diagnosis.diagnosis
+    ].filter(Boolean).join(' ')
+  }
+  
+  const diag = diagText.toLowerCase()
   const patientAge = parseInt(String(age)) || 0
   
   // Marqueurs inflammatoires
@@ -638,8 +664,24 @@ function generateStandardBiologyExams(diagnosis: string, age: any): Examination[
   return exams
 }
 
-function shouldHaveImaging(diagnosis: string): boolean {
-  const diag = diagnosis.toLowerCase()
+function shouldHaveImaging(diagnosis: any): boolean {
+  // Convertir le diagnostic en string s'il s'agit d'un objet
+  let diagText = ''
+  
+  if (typeof diagnosis === 'string') {
+    diagText = diagnosis
+  } else if (diagnosis && typeof diagnosis === 'object') {
+    // Extraire le texte de toutes les propriétés possibles
+    diagText = [
+      diagnosis.condition,
+      diagnosis.primary?.condition,
+      diagnosis.diagnosis,
+      diagnosis.detailedAnalysis,
+      diagnosis.clinicalRationale
+    ].filter(Boolean).join(' ')
+  }
+  
+  const diag = diagText.toLowerCase()
   const imagingKeywords = [
     'thorax', 'poumon', 'pneumonie', 'bronchite', 'toux',
     'abdomen', 'ventre', 'douleur abdominale',
@@ -651,8 +693,20 @@ function shouldHaveImaging(diagnosis: string): boolean {
   return imagingKeywords.some(keyword => diag.includes(keyword))
 }
 
-function generateImagingFromDiagnosis(diagnosis: string): Examination[] {
-  const diag = diagnosis.toLowerCase()
+function generateImagingFromDiagnosis(diagnosis: any): Examination[] {
+  // Convertir le diagnosis en string
+  let diagText = ''
+  if (typeof diagnosis === 'string') {
+    diagText = diagnosis
+  } else if (diagnosis && typeof diagnosis === 'object') {
+    diagText = [
+      diagnosis.condition,
+      diagnosis.primary?.condition,
+      diagnosis.diagnosis
+    ].filter(Boolean).join(' ')
+  }
+  
+  const diag = diagText.toLowerCase()
   const exams: Examination[] = []
   
   // Pathologies thoraciques
