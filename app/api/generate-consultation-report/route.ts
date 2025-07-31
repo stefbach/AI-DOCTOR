@@ -88,12 +88,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Log détaillé pour debug
+    // Log détaillé pour debug (limité pour éviter la surcharge)
     console.log("📊 DONNÉES REÇUES PAR L'API:")
-    console.log("- Patient:", JSON.stringify(patientData, null, 2))
-    console.log("- Clinical:", JSON.stringify(clinicalData, null, 2))
-    console.log("- Diagnosis:", JSON.stringify(diagnosisData, null, 2))
-    console.log("- EditedDocuments COMPLET:", JSON.stringify(editedDocuments, null, 2))
+    console.log("- Patient:", JSON.stringify(patientData, null, 2).substring(0, 500) + "...")
+    console.log("- Clinical:", JSON.stringify(clinicalData, null, 2).substring(0, 500) + "...")
+    console.log("- Diagnosis data présent:", !!diagnosisData)
+    console.log("- EditedDocuments présent:", !!editedDocuments)
 
     // Préparation du contexte médical unifié
     console.log("🔧 Préparation du contexte médical...")
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
               content: userPrompt
             }
           ],
-          maxTokens: 12000,
+          maxTokens: 8000, // Réduit pour éviter les timeouts
           temperature: 0.3,
         })
 
@@ -176,6 +176,15 @@ export async function POST(request: NextRequest) {
     // Enrichissement des métadonnées
     reportData.metadata.wordCount = calculateWordCount(reportData.rapport)
     
+    // Vérifier la taille du rapport
+    const reportSize = JSON.stringify(reportData).length
+    console.log(`📏 Taille du rapport: ${reportSize} octets`)
+    
+    if (reportSize > 100000) {
+      console.warn("⚠️ Rapport volumineux, optimisation nécessaire")
+      // Optionnel : compresser ou paginer le rapport
+    }
+    
     // Gestion des prescriptions selon le format demandé
     if (!includeFullPrescriptions) {
       reportData.prescriptionsSimplifiees = {
@@ -197,7 +206,8 @@ export async function POST(request: NextRequest) {
       metadata: {
         type: "professional_narrative",
         includesFullPrescriptions: includeFullPrescriptions,
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
+        reportSize: reportSize
       }
     })
 
@@ -225,7 +235,7 @@ function cleanReportContent(report: any): any {
   for (const [key, value] of Object.entries(report.rapport)) {
     if (typeof value === 'string') {
       // Vérifier si le texte contient encore des instructions
-      if (value.includes('[REMPLACER PAR') || value.includes('REMPLACER PAR')) {
+      if (value.includes('[REMPLACER PAR') || value.includes('REMPLACER PAR') || value.includes('GÉNÉRER_PARAGRAPHE')) {
         console.warn(`⚠️ Section "${key}" contient encore des instructions`)
         // Générer un contenu par défaut basé sur la section
         report.rapport[key] = generateDefaultContent(key)
@@ -253,44 +263,122 @@ function generateDefaultContent(sectionName: string): string {
   return defaults[sectionName] || "Section à compléter."
 }
 
-// Fonction pour rechercher récursivement dans un objet
-function findInObject(obj: any, searchKeys: string[], path: string = ''): any[] {
-  const results: any[] = []
+// Fonction optimisée pour trouver les médicaments
+function findMedications(data: any): Medication[] {
+  const medications: Medication[] = []
+  const uniqueMeds = new Set<string>()
   
-  if (!obj || typeof obj !== 'object') return results
+  // Chemins spécifiques où chercher
+  const paths = [
+    data.editedDocuments?.medication?.prescriptions,
+    data.editedDocuments?.medicaments?.items,
+    data.diagnosis?.mauritianDocuments?.medication?.prescriptions,
+    data.diagnosis?.mauritianDocuments?.consultation?.management_plan?.treatment?.medications,
+    data.diagnosis?.expertAnalysis?.expert_therapeutics?.primary_treatments,
+    data.diagnosis?.completeData?.mauritianDocuments?.medication?.prescriptions
+  ]
   
-  // Si c'est un tableau, le retourner directement
-  if (Array.isArray(obj)) {
-    console.log(`  ✓ Tableau trouvé à ${path || 'racine'}: ${obj.length} éléments`)
-    return obj
-  }
-  
-  // Parcourir les clés de l'objet
-  for (const [key, value] of Object.entries(obj)) {
-    const currentPath = path ? `${path}.${key}` : key
-    
-    // Vérifier si la clé correspond à l'un des patterns recherchés
-    if (searchKeys.some(searchKey => key.toLowerCase().includes(searchKey))) {
-      if (Array.isArray(value) && value.length > 0) {
-        console.log(`  ✓ Données trouvées à ${currentPath}: ${value.length} éléments`)
-        results.push(...value)
-      } else if (typeof value === 'object' && value !== null) {
-        // Explorer récursivement
-        const nested = findInObject(value, searchKeys, currentPath)
-        if (nested.length > 0) {
-          results.push(...nested)
+  paths.forEach(path => {
+    if (Array.isArray(path)) {
+      path.forEach((med: any) => {
+        const medName = med.medication?.fr || med.medication || med.drug?.fr || med.name || med.medicament || ''
+        const medKey = medName.toLowerCase().trim()
+        
+        if (medName && !uniqueMeds.has(medKey)) {
+          uniqueMeds.add(medKey)
+          medications.push({
+            medication: medName,
+            name: medName,
+            dosage: med.dosage || med.dosing?.adult?.fr || '',
+            frequency: med.frequency || med.posology || med.dosing?.adult?.fr || '',
+            duration: med.duration?.fr || med.duration || '',
+            instructions: med.instructions?.fr || med.instructions || med.remarques || ''
+          })
         }
-      }
-    } else if (typeof value === 'object' && value !== null) {
-      // Continuer la recherche récursive même si la clé ne correspond pas
-      const nested = findInObject(value, searchKeys, currentPath)
-      if (nested.length > 0) {
-        results.push(...nested)
-      }
+      })
     }
-  }
+  })
   
-  return results
+  console.log(`✓ ${medications.length} médicaments uniques trouvés`)
+  return medications
+}
+
+// Fonction optimisée pour trouver les examens biologiques
+function findExamsBio(data: any): Examination[] {
+  const examsBio: Examination[] = []
+  const uniqueExams = new Set<string>()
+  
+  // Chemins spécifiques où chercher les examens bio
+  const paths = [
+    data.editedDocuments?.biological?.examinations,
+    data.editedDocuments?.biologie?.examens,
+    data.diagnosis?.mauritianDocuments?.biological?.examinations,
+    data.diagnosis?.mauritianDocuments?.consultation?.management_plan?.investigations?.laboratory_tests,
+    data.diagnosis?.expertAnalysis?.expert_investigations?.investigation_strategy?.laboratory_tests,
+    data.diagnosis?.completeData?.mauritianDocuments?.biological?.examinations
+  ]
+  
+  // Parcourir uniquement les chemins pertinents
+  paths.forEach(path => {
+    if (Array.isArray(path)) {
+      path.forEach((exam: any) => {
+        const examName = exam.test_name?.fr || exam.test?.fr || exam.name || exam.type || exam.examen || ''
+        const examKey = examName.toLowerCase().trim()
+        
+        // Éviter les doublons
+        if (examName && !uniqueExams.has(examKey)) {
+          uniqueExams.add(examKey)
+          examsBio.push({
+            name: examName,
+            type: exam.type || examName,
+            urgency: exam.urgency || 'Normal',
+            justification: exam.justification?.fr || exam.clinical_justification?.fr || exam.indication || ''
+          })
+        }
+      })
+    }
+  })
+  
+  console.log(`✓ ${examsBio.length} examens biologiques uniques trouvés`)
+  return examsBio
+}
+
+// Fonction optimisée pour trouver les examens d'imagerie
+function findImagingExams(data: any): Examination[] {
+  const examsImaging: Examination[] = []
+  const uniqueExams = new Set<string>()
+  
+  const paths = [
+    data.editedDocuments?.imaging?.studies,
+    data.editedDocuments?.imagerie?.examens,
+    data.diagnosis?.mauritianDocuments?.imaging?.studies,
+    data.diagnosis?.mauritianDocuments?.consultation?.management_plan?.investigations?.imaging_studies,
+    data.diagnosis?.expertAnalysis?.expert_investigations?.investigation_strategy?.imaging_studies,
+    data.diagnosis?.completeData?.mauritianDocuments?.imaging?.studies
+  ]
+  
+  paths.forEach(path => {
+    if (Array.isArray(path)) {
+      path.forEach((exam: any) => {
+        const examName = exam.study_name?.fr || exam.type || exam.name || exam.examen || ''
+        const examKey = examName.toLowerCase().trim()
+        
+        if (examName && !uniqueExams.has(examKey)) {
+          uniqueExams.add(examKey)
+          examsImaging.push({
+            type: examName,
+            region: exam.region || detectAnatomicalRegion(examName),
+            indication: exam.indication?.fr || exam.indication || '',
+            urgency: exam.urgency || 'Normal',
+            details: exam.findings_sought?.fr || exam.details || exam.remarques || ''
+          })
+        }
+      })
+    }
+  })
+  
+  console.log(`✓ ${examsImaging.length} examens d'imagerie uniques trouvés`)
+  return examsImaging
 }
 
 // Fonction pour préparer le contexte médical unifié
@@ -351,98 +439,68 @@ function generateProfessionalReportPrompt(medicalContext: any, patientData: Pati
                           medicalContext.diagnosis?.physicalExamination || 
                           medicalContext.diagnosis?.clinicalExamination || {}
     
-    // Données du diagnostic
-    const diagnosticPrincipal = medicalContext.diagnosis?.primaryDiagnosis || 
-                               medicalContext.diagnosis?.diagnosis || 
-                               medicalContext.diagnosis?.mainDiagnosis ||
-                               medicalContext.diagnosis?.principal ||
-                               medicalContext.diagnosis?.diagnosticHypothesis?.primary || 
-                               medicalContext.diagnosis?.diagnosticHypothesis || 
-                               (typeof medicalContext.diagnosis === 'string' ? medicalContext.diagnosis : "") ||
-                               ""
+    // Données du diagnostic (extraction améliorée)
+    const diagnosticData = medicalContext.diagnosis?.diagnosis || 
+                          medicalContext.diagnosis?.completeData?.diagnosis || 
+                          medicalContext.diagnosis
+    
+    let diagnosticPrincipal = ""
+    
+    // Extraction du diagnostic principal
+    if (typeof diagnosticData === 'object' && diagnosticData.primary) {
+      diagnosticPrincipal = diagnosticData.primary.condition || 
+                           diagnosticData.primary.condition_bilingual?.fr || 
+                           ""
+    } else {
+      diagnosticPrincipal = medicalContext.diagnosis?.primaryDiagnosis || 
+                           medicalContext.diagnosis?.mainDiagnosis ||
+                           medicalContext.diagnosis?.principal ||
+                           medicalContext.diagnosis?.diagnosticHypothesis?.primary || 
+                           (typeof medicalContext.diagnosis === 'string' ? medicalContext.diagnosis : "") ||
+                           ""
+    }
     
     const diagnosticsSecondaires = Array.isArray(medicalContext.diagnosis?.secondaryDiagnoses) ? medicalContext.diagnosis.secondaryDiagnoses :
-                                   Array.isArray(medicalContext.diagnosis?.diagnosticHypothesis?.secondary) ? medicalContext.diagnosis.diagnosticHypothesis.secondary : []
+                                   Array.isArray(medicalContext.diagnosis?.diagnosticHypothesis?.secondary) ? medicalContext.diagnosis.diagnosticHypothesis.secondary :
+                                   Array.isArray(diagnosticData?.differential) ? diagnosticData.differential.map((d: any) => d.condition?.fr || d.condition) : []
     
     const examensRealises = Array.isArray(medicalContext.diagnosis?.performedExams) ? medicalContext.diagnosis.performedExams :
                            Array.isArray(medicalContext.diagnosis?.examsPerformed) ? medicalContext.diagnosis.examsPerformed : []
     
     const analyseDiagnostique = medicalContext.diagnosis?.analysis || 
                                medicalContext.diagnosis?.clinicalAnalysis || 
-                               medicalContext.diagnosis?.diagnosticAnalysis || ""
+                               medicalContext.diagnosis?.diagnosticAnalysis || 
+                               diagnosticData?.primary?.clinicalRationale || ""
     
-    // EXTRACTION ROBUSTE DES PRESCRIPTIONS
+    // EXTRACTION OPTIMISÉE DES PRESCRIPTIONS
     console.log("🔍 RECHERCHE DES PRESCRIPTIONS...")
     
     // 1. Recherche des médicaments
     console.log("💊 Recherche des médicaments...")
-    let medicaments = findInObject(
-      { editedDocuments: medicalContext.editedDocuments, diagnosis: medicalContext.diagnosis },
-      ['medic', 'prescr', 'treatment', 'traitement', 'drug', 'therap']
-    )
-    
-    // Normaliser les médicaments trouvés
-    medicaments = medicaments.map((med: any) => ({
-      medication: med.medication || med.name || med.medicament || med.nom || '',
-      name: med.name || med.medication || med.medicament || med.nom || '',
-      dosage: med.dosage || med.dose || med.posologie || '',
-      frequency: med.frequency || med.posology || med.posologie || med.frequence || '',
-      posology: med.posology || med.frequency || med.posologie || med.frequence || '',
-      duration: med.duration || med.duree || '',
-      instructions: med.instructions || med.remarques || med.conseil || ''
-    })).filter((med: any) => med.medication || med.name)
-    
-    console.log(`✓ ${medicaments.length} médicaments trouvés`)
+    let medicaments = findMedications({ editedDocuments: medicalContext.editedDocuments, diagnosis: medicalContext.diagnosis })
     
     // 2. Recherche des examens biologiques
     console.log("🔬 Recherche des examens biologiques...")
-    let examsBio = findInObject(
-      { editedDocuments: medicalContext.editedDocuments, diagnosis: medicalContext.diagnosis },
-      ['bio', 'lab', 'sang', 'urin', 'analy']
-    )
-    
-    // Normaliser les examens bio
-    examsBio = examsBio.map((exam: any) => ({
-      name: exam.name || exam.type || exam.examen || exam.test || '',
-      type: exam.type || exam.name || exam.examen || exam.test || '',
-      urgency: exam.urgency || exam.urgent || 'Normal',
-      justification: exam.justification || exam.indication || exam.remarques || ''
-    })).filter((exam: any) => exam.name || exam.type)
-    
-    console.log(`✓ ${examsBio.length} examens biologiques trouvés`)
+    let examsBio = findExamsBio({ editedDocuments: medicalContext.editedDocuments, diagnosis: medicalContext.diagnosis })
     
     // 3. Recherche des examens d'imagerie
     console.log("🏥 Recherche des examens d'imagerie...")
-    let examsImaging = findInObject(
-      { editedDocuments: medicalContext.editedDocuments, diagnosis: medicalContext.diagnosis },
-      ['imag', 'radio', 'scan', 'irm', 'echo', 'paraclin', 'rx', 'tdm']
-    )
+    let examsImaging = findImagingExams({ editedDocuments: medicalContext.editedDocuments, diagnosis: medicalContext.diagnosis })
     
-    // Normaliser les examens imagerie
-    examsImaging = examsImaging.map((exam: any) => ({
-      type: exam.type || exam.name || exam.examen || exam.modalite || '',
-      region: exam.region || exam.zone || exam.localisation || detectAnatomicalRegion(exam.type || exam.name || ''),
-      indication: exam.indication || exam.justification || exam.motif || '',
-      urgency: exam.urgency || exam.urgent || 'Normal',
-      details: exam.details || exam.remarques || exam.precisions || ''
-    })).filter((exam: any) => exam.type)
-    
-    console.log(`✓ ${examsImaging.length} examens d'imagerie trouvés`)
-    
-    // GÉNÉRATION AUTOMATIQUE SI AUCUNE PRESCRIPTION
+    // GÉNÉRATION AUTOMATIQUE SI AUCUNE PRESCRIPTION (avec limites)
     if (medicaments.length === 0 && diagnosticPrincipal) {
       console.log("⚠️ Aucun médicament trouvé, génération basée sur le diagnostic...")
-      medicaments = generateMedicationsFromDiagnosis(diagnosticPrincipal)
+      medicaments = generateMedicationsFromDiagnosis(diagnosticPrincipal).slice(0, 3) // Max 3
     }
     
     if (examsBio.length === 0) {
-      console.log("⚠️ Aucun examen biologique trouvé, génération d'un bilan standard...")
-      examsBio = generateStandardBiologyExams(diagnosticPrincipal, medicalContext.patient.age)
+      console.log("⚠️ Aucun examen biologique trouvé, génération d'un bilan minimal...")
+      examsBio = generateStandardBiologyExams(diagnosticPrincipal, medicalContext.patient.age).slice(0, 5) // Max 5
     }
     
     if (examsImaging.length === 0 && shouldHaveImaging(diagnosticPrincipal)) {
       console.log("⚠️ Aucun examen d'imagerie trouvé, génération basée sur le diagnostic...")
-      examsImaging = generateImagingFromDiagnosis(diagnosticPrincipal)
+      examsImaging = generateImagingFromDiagnosis(diagnosticPrincipal).slice(0, 2) // Max 2
     }
     
     // Log final
@@ -509,7 +567,7 @@ function generateProfessionalReportPrompt(medicalContext: any, patientData: Pati
           examens: examsBio.map((exam: Examination) => ({
             type: exam.name || exam.type || '',
             code: getBiologyCode(exam.name || exam.type || ''),
-            urgence: exam.urgency === 'Urgent' || exam.urgency === true,
+            urgence: exam.urgency === 'Urgent' || exam.urgency === 'STAT',
             jeun: requiresFasting(exam.name || exam.type || ''),
             remarques: exam.justification || ''
           })),
@@ -520,7 +578,7 @@ function generateProfessionalReportPrompt(medicalContext: any, patientData: Pati
             type: exam.type || '',
             region: exam.region || detectAnatomicalRegion(exam.type || ''),
             indication: exam.indication || exam.justification || '',
-            urgence: exam.urgency === 'Urgent' || exam.urgency === true,
+            urgence: exam.urgency === 'Urgent' || exam.urgency === 'STAT',
             contraste: requiresContrast(exam.type || ''),
             remarques: exam.details || ''
           })),
@@ -557,6 +615,7 @@ Dans la section "rapport", tu DOIS:
 - Respecter les longueurs demandées (nombre de mots)
 - Utiliser un vocabulaire médical professionnel
 - Être cohérent avec les données du patient
+- NE PAS laisser d'instructions dans le texte final
 
 IMPORTANT: Ne modifie JAMAIS les sections "prescriptions", garde-les exactement comme fournies.`
 
@@ -582,7 +641,8 @@ DIAGNOSTIC:
 
 ${aiInsights ? `INFORMATIONS COMPLÉMENTAIRES: ${aiInsights}` : ''}
 
-Génère le JSON complet en remplaçant tous les "GÉNÉRER_PARAGRAPHE_XXX_MOTS" par du contenu médical réel:
+Génère le JSON complet en remplaçant tous les "GÉNÉRER_PARAGRAPHE_XXX_MOTS" par du contenu médical réel et pertinent. 
+Assure-toi que chaque paragraphe respecte la longueur demandée.
 
 ${JSON.stringify(jsonTemplate, null, 2)}`
 
@@ -639,20 +699,8 @@ function parseAndValidateReport(responseText: string): any {
       parsed = JSON.parse(cleanedResponse)
     } catch (parseError) {
       console.error("❌ Erreur de parsing JSON:", parseError)
-      console.error("📝 JSON à parser:", cleanedResponse.substring(0, 500))
-      
-      // Tentative de réparation du JSON
-      try {
-        // Remplacer les sauts de ligne non échappés dans les strings
-        const repairedJson = cleanedResponse
-          .replace(/\n/g, '\\n')
-          .replace(/\r/g, '\\r')
-          .replace(/\t/g, '\\t')
-        
-        parsed = JSON.parse(repairedJson)
-      } catch (repairError) {
-        throw new Error('Impossible de parser le JSON même après réparation')
-      }
+      console.error("📝 JSON à parser (premiers 500 car.):", cleanedResponse.substring(0, 500))
+      throw new Error('Impossible de parser le JSON')
     }
     
     // Validation de la structure
@@ -683,7 +731,7 @@ function parseAndValidateReport(responseText: string): any {
   }
 }
 
-// Fonctions de génération automatique de prescriptions
+// Fonctions de génération automatique de prescriptions (limitées)
 function generateMedicationsFromDiagnosis(diagnosis: any): Medication[] {
   // Convertir le diagnosis en string s'il s'agit d'un objet
   let diagText = ''
@@ -704,7 +752,7 @@ function generateMedicationsFromDiagnosis(diagnosis: any): Medication[] {
   
   // Infections
   if (diag.includes('infection') || diag.includes('angine') || diag.includes('otite') || 
-      diag.includes('sinusite') || diag.includes('bronchite')) {
+      diag.includes('sinusite') || diag.includes('bronchite') || diag.includes('pneumonie')) {
     medications.push({
       medication: "Amoxicilline",
       dosage: "1g",
@@ -734,28 +782,6 @@ function generateMedicationsFromDiagnosis(diagnosis: any): Medication[] {
       frequency: "3 fois par jour",
       duration: "5 jours",
       instructions: "Pendant les repas. Contre-indiqué si ulcère"
-    })
-  }
-  
-  // Hypertension
-  if (diag.includes('hypertension') || diag.includes('hta')) {
-    medications.push({
-      medication: "Ramipril",
-      dosage: "5mg",
-      frequency: "1 comprimé le matin",
-      duration: "3 mois",
-      instructions: "Surveillance tension et fonction rénale"
-    })
-  }
-  
-  // Diabète
-  if (diag.includes('diabète') || diag.includes('diabete')) {
-    medications.push({
-      medication: "Metformine",
-      dosage: "500mg",
-      frequency: "2 fois par jour",
-      duration: "3 mois",
-      instructions: "Pendant ou après les repas"
     })
   }
   
@@ -813,11 +839,6 @@ function generateStandardBiologyExams(diagnosis: any, age: any): Examination[] {
       urgency: "Normal",
       justification: "Évaluation de la fonction rénale"
     })
-    exams.push({
-      name: "Transaminases (ASAT/ALAT)",
-      urgency: "Normal",
-      justification: "Bilan hépatique de base"
-    })
   }
   
   // Glycémie
@@ -826,15 +847,6 @@ function generateStandardBiologyExams(diagnosis: any, age: any): Examination[] {
       name: "Glycémie à jeun",
       urgency: "Normal",
       justification: "Dépistage ou suivi diabétique"
-    })
-  }
-  
-  // Bilan lipidique
-  if (diag.includes('cardio') || diag.includes('vasculaire') || patientAge > 50) {
-    exams.push({
-      name: "Bilan lipidique complet",
-      urgency: "Normal",
-      justification: "Évaluation du risque cardiovasculaire"
     })
   }
   
@@ -860,7 +872,7 @@ function shouldHaveImaging(diagnosis: any): boolean {
   
   const diag = diagText.toLowerCase()
   const imagingKeywords = [
-    'thorax', 'poumon', 'pneumonie', 'bronchite', 'toux',
+    'thorax', 'poumon', 'pneumonie', 'bronchite', 'toux', 'essouflement',
     'abdomen', 'ventre', 'douleur abdominale',
     'trauma', 'fracture', 'entorse',
     'céphalée', 'migraine', 'vertige',
@@ -888,31 +900,11 @@ function generateImagingFromDiagnosis(diagnosis: any): Examination[] {
   
   // Pathologies thoraciques
   if (diag.includes('thorax') || diag.includes('poumon') || diag.includes('toux') || 
-      diag.includes('dyspnée') || diag.includes('pneumonie')) {
+      diag.includes('dyspnée') || diag.includes('pneumonie') || diag.includes('essouflement')) {
     exams.push({
       type: "Radiographie thoracique",
       region: "Thorax",
       indication: "Recherche de pathologie pulmonaire",
-      urgency: "Normal"
-    })
-  }
-  
-  // Pathologies abdominales
-  if (diag.includes('abdom') || diag.includes('ventre')) {
-    exams.push({
-      type: "Échographie abdominale",
-      region: "Abdomen",
-      indication: "Exploration douleur abdominale",
-      urgency: "Normal"
-    })
-  }
-  
-  // Pathologies ostéo-articulaires
-  if (diag.includes('fracture') || diag.includes('trauma') || diag.includes('entorse')) {
-    exams.push({
-      type: "Radiographie standard",
-      region: "Zone douloureuse",
-      indication: "Recherche de lésion osseuse",
       urgency: "Normal"
     })
   }
@@ -964,6 +956,7 @@ function extractDCI(medicationName: any): string {
     'nurofen': 'Ibuprofène',
     'augmentin': 'Amoxicilline + Acide clavulanique',
     'clamoxyl': 'Amoxicilline',
+    'amoxicilline': 'Amoxicilline',
     'ventoline': 'Salbutamol',
     'spasfon': 'Phloroglucinol',
     'levothyrox': 'Lévothyroxine',
@@ -1072,7 +1065,8 @@ function getBiologyCode(examName: any): string {
     'vitamine d': '1810',
     'hba1c': '0997',
     'inr': '1605',
-    'ionogramme': '1610-1611'
+    'ionogramme': '1610-1611',
+    'gaz du sang': '5301'
   }
   
   for (const [exam, code] of Object.entries(codes)) {
@@ -1147,11 +1141,18 @@ function shouldAllowRenewal(diagnosisData: any): boolean {
     'dépression', 'anxiété', 'cholestérol', 'migraine chronique'
   ]
   
-  const diagnosisText = [
-    diagnosisData?.diagnosis,
-    diagnosisData?.primaryDiagnosis,
-    diagnosisData?.mainDiagnosis
-  ].filter(Boolean).join(' ').toLowerCase()
+  let diagnosisText = ''
+  
+  // Extraction du texte de diagnostic
+  if (diagnosisData?.diagnosis?.primary?.condition) {
+    diagnosisText = diagnosisData.diagnosis.primary.condition
+  } else if (diagnosisData?.primaryDiagnosis) {
+    diagnosisText = diagnosisData.primaryDiagnosis
+  } else if (typeof diagnosisData === 'string') {
+    diagnosisText = diagnosisData
+  }
+  
+  diagnosisText = diagnosisText.toLowerCase()
   
   return chronicConditions.some(condition => diagnosisText.includes(condition))
 }
