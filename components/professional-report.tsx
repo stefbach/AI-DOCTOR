@@ -1,1292 +1,858 @@
+// components/professional-report.tsx - Version améliorée
+
 "use client"
 
 import { useState, useEffect } from "react"
-import { consultationDataService } from '@/lib/consultation-data-service'
-import { supabase } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { 
-  ArrowRight,
-  User, 
-  Heart, 
-  AlertTriangle, 
-  Pill, 
-  Activity, 
-  Search,
-  Check,
-  X,
+  FileText, 
+  Download, 
+  Printer, 
   CheckCircle,
   Loader2,
-  Mail,
-  Phone,
-  MapPin,
-  Home
+  Eye,
+  Share2,
+  Calendar,
+  User,
+  Stethoscope,
+  FileSignature,
+  Pill,
+  TestTube,
+  Scan,
+  AlertTriangle,
+  ExternalLink,
+  Clipboard
 } from "lucide-react"
-import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
-import { getTranslation, Language } from "@/lib/translations"
+import { jsPDF } from "jspdf"
+import html2canvas from "html2canvas"
 
-// Types
-interface LifeHabits {
-  smoking: string
-  alcohol: string
-  physicalActivity: string
+// Types pour les prescriptions
+interface MedicationItem {
+  nom: string
+  dci?: string // Dénomination Commune Internationale
+  dosage: string
+  forme: string // comprimé, gélule, sirop, etc.
+  posologie: string
+  duree: string
+  quantite?: string
+  remarques?: string
+  nonSubstituable?: boolean
 }
 
-interface PatientFormData {
-  firstName: string
-  lastName: string
-  birthDate: string
-  age: string
-  gender: string[]
-  otherGender: string
-  weight: string
-  height: string
-  allergies: string[]
-  otherAllergies: string
-  medicalHistory: string[]
-  otherMedicalHistory: string
-  currentMedicationsText: string
-  lifeHabits: LifeHabits
-  // Additional fields for complete patient data
-  address?: string
-  phone?: string
-  phoneNumber?: string
-  city?: string
-  country?: string
-  email?: string
+interface BiologyExam {
+  type: string
+  code?: string // Code de l'acte
+  urgence: boolean
+  jeun: boolean
+  remarques?: string
 }
 
-interface PatientFormProps {
-  onDataChange: (data: PatientFormData) => void
-  onNext: () => void
-  language?: Language
-  consultationId?: string | null
-  initialData?: PatientFormData
+interface ImagingExam {
+  type: string
+  region: string
+  indication: string
+  urgence: boolean
+  contraste?: boolean
+  remarques?: string
 }
 
-export default function ModernPatientForm({ 
-  onDataChange, 
-  onNext, 
-  language = 'fr',
-  consultationId,
-  initialData
-}: PatientFormProps) {
-  const { patientData: tibokPatient, consultationData, isFromTibok } = useTibokPatientData()
-  const [isLoadingPatientData, setIsLoadingPatientData] = useState(true)
-  const [dataProcessed, setDataProcessed] = useState(false)
-  
-  // Helper function for translations
-  const t = (key: string) => getTranslation(key, language)
-  
-  // Get translated arrays
-  const COMMON_ALLERGIES = [
-    t('allergies.penicillin'),
-    t('allergies.aspirin'),
-    t('allergies.nsaids'),
-    t('allergies.codeine'),
-    t('allergies.latex'),
-    t('allergies.iodine'),
-    t('allergies.localAnesthetics'),
-    t('allergies.sulfonamides'),
-  ]
+interface PrescriptionData {
+  medicaments?: {
+    items: MedicationItem[]
+    renouvellement?: boolean
+    dateValidite?: string
+  }
+  biologie?: {
+    examens: BiologyExam[]
+    laboratoireRecommande?: string
+  }
+  imagerie?: {
+    examens: ImagingExam[]
+    centreRecommande?: string
+  }
+}
 
-  const COMMON_MEDICAL_HISTORY = [
-    t('medicalConditions.hypertension'),
-    t('medicalConditions.type2Diabetes'),
-    t('medicalConditions.type1Diabetes'),
-    t('medicalConditions.asthma'),
-    t('medicalConditions.heartDisease'),
-    t('medicalConditions.depressionAnxiety'),
-    t('medicalConditions.arthritis'),
-    t('medicalConditions.migraine'),
-    t('medicalConditions.gerd'),
-    t('medicalConditions.highCholesterol'),
-  ]
-  
-  // Capture URL parameters immediately before they get cleared
-  const [urlData] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search)
-      const source = urlParams.get('source')
-      const patientDataParam = urlParams.get('patientData')
-      const doctorDataParam = urlParams.get('doctorData')
-      const doctorId = urlParams.get('doctorId')
-      
-      // Store doctor data in sessionStorage for use by consultation report
-      if (doctorDataParam) {
-        try {
-          const doctorData = JSON.parse(decodeURIComponent(doctorDataParam))
-          console.log('Doctor data received from URL:', doctorData)
-          
-          // Store doctor data with ID if available
-          const doctorInfo = {
-            ...doctorData,
-            id: doctorId || doctorData.id
+interface DrugInteraction {
+  drug1: string
+  drug2: string
+  severity: 'majeure' | 'modérée' | 'mineure'
+  description: string
+  recommendation: string
+}
+
+interface ProfessionalReportProps {
+  patientData: any
+  clinicalData: any
+  questionsData: any
+  diagnosisData: any
+  editedDocuments: any
+  onComplete?: () => void
+}
+
+export default function ProfessionalReport({
+  patientData,
+  clinicalData,
+  questionsData,
+  diagnosisData,
+  editedDocuments,
+  onComplete
+}: ProfessionalReportProps) {
+  const [report, setReport] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState("consultation")
+  const [drugInteractions, setDrugInteractions] = useState<DrugInteraction[]>([])
+  const [checkingInteractions, setCheckingInteractions] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    generateProfessionalReport();
+  }, []);
+
+  // Vérifier les interactions médicamenteuses
+  const checkDrugInteractions = async (medications: MedicationItem[]) => {
+    setCheckingInteractions(true)
+    try {
+      // Appel à une API de vérification des interactions (exemple)
+      const response = await fetch("/api/check-drug-interactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          medications: medications.map(m => ({
+            name: m.nom,
+            dci: m.dci,
+            dosage: m.dosage
+          })),
+          patientData: {
+            age: patientData.age,
+            weight: patientData.weight,
+            allergies: patientData.allergies,
+            conditions: patientData.medicalHistory
           }
-          
-          sessionStorage.setItem('tibokDoctorData', JSON.stringify(doctorInfo))
-          console.log('Doctor data stored in sessionStorage:', doctorInfo)
-        } catch (error) {
-          console.error('Error parsing doctor data from URL:', error)
-        }
-      }
-      
-      if (source === 'tibok' && patientDataParam) {
-        try {
-          return {
-            source,
-            patientData: JSON.parse(decodeURIComponent(patientDataParam))
-          }
-        } catch (e) {
-          console.error('Error parsing URL data:', e)
-        }
-      }
-    }
-    return null
-  })
+        })
+      })
 
-  const [formData, setFormData] = useState<PatientFormData>({
-    firstName: "",
-    lastName: "",
-    birthDate: "",
-    age: "",
-    gender: [],
-    otherGender: "",
-    weight: "",
-    height: "",
-    allergies: [],
-    otherAllergies: "",
-    medicalHistory: [],
-    otherMedicalHistory: "",
-    currentMedicationsText: "",
-    lifeHabits: {
-      smoking: "",
-      alcohol: "", 
-      physicalActivity: "",
-    },
-    // Initialize additional fields
-    address: "",
-    phone: "",
-    phoneNumber: "",
-    city: "",
-    country: "Maurice",
-    email: ""
-  })
-
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [allergySearch, setAllergySearch] = useState("")
-  const [historySearch, setHistorySearch] = useState("")
-  const [currentSection, setCurrentSection] = useState(0)
-
-  // Function to handle Enter key navigation
-  const handleEnterKeyNavigation = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      
-      // Get all focusable elements
-      const focusableElements = document.querySelectorAll(
-        'input:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      )
-      
-      const currentIndex = Array.from(focusableElements).indexOf(e.currentTarget)
-      
-      if (currentIndex !== -1 && currentIndex < focusableElements.length - 1) {
-        const nextElement = focusableElements[currentIndex + 1] as HTMLElement
-        nextElement.focus()
+      if (response.ok) {
+        const data = await response.json()
+        setDrugInteractions(data.interactions || [])
       }
+    } catch (error) {
+      console.error("Erreur lors de la vérification des interactions:", error)
+    } finally {
+      setCheckingInteractions(false)
     }
   }
 
-  // Function to handle double click on checkboxes
-  const handleCheckboxDoubleClick = (checked: boolean, onChange: () => void, nextFocusId?: string) => {
-    onChange()
-    if (nextFocusId) {
-      setTimeout(() => {
-        const nextElement = document.getElementById(nextFocusId)
-        if (nextElement) {
-          nextElement.focus()
+  const generateProfessionalReport = async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch("/api/generate-consultation-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patientData,
+          clinicalData,
+          questionsData,
+          diagnosisData,
+          editedDocuments,
+          includeFullPrescriptions: true // Nouveau paramètre pour demander les prescriptions complètes
+        })
+      })
+
+      const contentType = response.headers.get("content-type") || ""
+      if (!response.ok || !contentType.includes("application/json")) {
+        const text = await response.text()
+        throw new Error(text || `Erreur HTTP ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        setReport(data.report)
+        
+        // Vérifier les interactions si des médicaments sont prescrits
+        if (data.report.prescriptions?.medicaments?.items?.length > 0) {
+          await checkDrugInteractions(data.report.prescriptions.medicaments.items)
         }
-      }, 100)
+        
+        if (onComplete && data.report) {
+          onComplete()
+        }
+      } else {
+        throw new Error(data.error || "Erreur lors de la génération du rapport")
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue")
+    } finally {
+      setLoading(false)
     }
   }
 
-  // Process data from URL or TIBOK hook
-  useEffect(() => {
-    const processPatientData = async () => {
-      console.log('Starting to process patient data')
-      console.log('URL data captured:', urlData)
-      console.log('Hook data:', tibokPatient)
-      
-      let patientInfo = null
-      let isTibok = false
-      
-      // Use captured URL data first
-      if (urlData && urlData.patientData) {
-        patientInfo = urlData.patientData
-        isTibok = true
-        console.log('Using patient data from captured URL:', patientInfo)
-      }
-      // If no URL data, try the hook data
-      else if (tibokPatient) {
-        patientInfo = tibokPatient
-        isTibok = isFromTibok
-        console.log('Using patient data from hook:', patientInfo)
-      }
-      
-      // Process the data if we have it
-      if (patientInfo && !dataProcessed) {
-        console.log('Processing patient info:', patientInfo)
-        
-        // Try to get additional data from database
-        let enhancedPatientInfo = { ...patientInfo }
-        
-        const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
-        if (currentConsultationId) {
-          try {
-            // Get consultation data which includes height/weight
-            const { data: consultation } = await supabase
-              .from('consultations')
-              .select('patient_id, patient_height, patient_weight')
-              .eq('id', currentConsultationId)
-              .single()
-            
-            if (consultation) {
-              // Use consultation data for height/weight if available
-              enhancedPatientInfo.height = consultation.patient_height || patientInfo.height || ''
-              enhancedPatientInfo.weight = consultation.patient_weight || patientInfo.weight || ''
-              
-              // Also get full patient data if we have patient_id
-              if (consultation.patient_id) {
-                const { data: dbPatient } = await supabase
-                  .from('patients')
-                  .select('height, weight, address, phone_number, city, country, email')
-                  .eq('id', consultation.patient_id)
-                  .single()
-                
-                if (dbPatient) {
-                  // Use consultation data first (most recent), then patient table, then original data
-                  enhancedPatientInfo.height = consultation.patient_height || dbPatient.height || patientInfo.height || ''
-                  enhancedPatientInfo.weight = consultation.patient_weight || dbPatient.weight || patientInfo.weight || ''
-                  enhancedPatientInfo.address = dbPatient.address || patientInfo.address || ''
-                  enhancedPatientInfo.phone = dbPatient.phone_number || patientInfo.phone || ''
-                  enhancedPatientInfo.phoneNumber = dbPatient.phone_number || patientInfo.phone || ''
-                  enhancedPatientInfo.city = dbPatient.city || patientInfo.city || ''
-                  enhancedPatientInfo.country = dbPatient.country || patientInfo.country || ''
-                  enhancedPatientInfo.email = dbPatient.email || patientInfo.email || ''
-                }
-              }
-            }
-          } catch (error) {
-            console.error('Error fetching additional patient data:', error)
-          }
-        }
-        
-        // Process birth date
-        let birthDateStr = ""
-        if (enhancedPatientInfo.dateOfBirth) {
-          birthDateStr = enhancedPatientInfo.dateOfBirth.split('T')[0]
-        } else if (enhancedPatientInfo.date_of_birth) {
-          birthDateStr = enhancedPatientInfo.date_of_birth.split('T')[0]
-        }
-        
-        // Process gender - Store in UI format (translated)
-        const genderArray: string[] = []
-        if (enhancedPatientInfo.gender) {
-          const gender = enhancedPatientInfo.gender
-          if (gender === 'Masculin' || gender === 'M' || gender.toLowerCase() === 'male' || gender.toLowerCase() === 'm') {
-            genderArray.push(t('patientForm.male')) // Use translated value for UI
-          } else if (gender === 'Féminin' || gender === 'F' || gender.toLowerCase() === 'female' || gender.toLowerCase() === 'f') {
-            genderArray.push(t('patientForm.female')) // Use translated value for UI
-          }
-        }
-        
-        // Create new form data with enhanced info
-        const newFormData: PatientFormData = {
-          firstName: enhancedPatientInfo.firstName || enhancedPatientInfo.first_name || "",
-          lastName: enhancedPatientInfo.lastName || enhancedPatientInfo.last_name || "",
-          birthDate: birthDateStr,
-          age: enhancedPatientInfo.age ? enhancedPatientInfo.age.toString() : "",
-          gender: genderArray,
-          otherGender: "",
-          weight: enhancedPatientInfo.weight ? enhancedPatientInfo.weight.toString() : "",
-          height: enhancedPatientInfo.height ? enhancedPatientInfo.height.toString() : "",
-          // Contact information - properly populated
-          phone: enhancedPatientInfo.phone_number || enhancedPatientInfo.phone || enhancedPatientInfo.phoneNumber || "",
-          phoneNumber: enhancedPatientInfo.phone_number || enhancedPatientInfo.phone || enhancedPatientInfo.phoneNumber || "",
-          email: enhancedPatientInfo.email || "",
-          address: enhancedPatientInfo.address || "",
-          city: enhancedPatientInfo.city || "",
-          country: enhancedPatientInfo.country || "Maurice",
-          // Medical information
-          allergies: [],
-          otherAllergies: "",
-          medicalHistory: [],
-          otherMedicalHistory: "",
-          currentMedicationsText: "",
-          lifeHabits: {
-            smoking: "",
-            alcohol: "", 
-            physicalActivity: "",
-          },
-        }
-        
-        console.log('Setting form data:', newFormData)
-        setFormData(newFormData)
-        setDataProcessed(true)
-        setIsLoadingPatientData(false)
-      } else if (!patientInfo) {
-        console.log('No patient data available')
-        setIsLoadingPatientData(false)
-      }
-    }
-    
-    // Process immediately
-    processPatientData()
-  }, [tibokPatient, isFromTibok, dataProcessed, urlData, t, consultationId])
+  // Export PDF pour une section spécifique
+  const exportSectionToPDF = async (sectionId: string, filename: string) => {
+    const element = document.getElementById(sectionId)
+    if (!element) return
 
-  // Load saved data if available
-  useEffect(() => {
-    const loadSavedData = async () => {
-      try {
-        if (dataProcessed) return
-        
-        const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
-        
-        if (currentConsultationId) {
-          const savedData = await consultationDataService.getAllData()
-          if (savedData?.patientData && !dataProcessed) {
-            setFormData(savedData.patientData)
-            setDataProcessed(true)
-          }
-        }
-      } catch (error) {
-        console.error('Error loading saved patient data:', error)
-      } finally {
-        setIsLoadingPatientData(false)
-      }
-    }
-    
-    if (!urlData && !tibokPatient) {
-      loadSavedData()
-    }
-  }, [consultationId, urlData, tibokPatient, dataProcessed])
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false
+      })
 
-  // Save data when form changes
-  useEffect(() => {
-    const saveData = async () => {
-      try {
-        // Sauvegarder les données du formulaire original (format UI)
-        await consultationDataService.saveStepData(0, formData)
-        
-        // Transformer et sauvegarder aussi pour l'API
-        const transformedData = consultationDataService.transformPatientDataForAPI(formData)
-        await consultationDataService.savePatientDataForAPI(transformedData)
-        
-        console.log('✅ Données sauvegardées - Format UI:', formData)
-        console.log('✅ Données sauvegardées - Format API:', transformedData)
-      } catch (error) {
-        console.error('Error saving patient data:', error)
-      }
-    }
-    
-    const timer = setTimeout(() => {
-      if (formData.firstName && formData.lastName) {
-        saveData()
-      }
-    }, 1000)
-    
-    return () => clearTimeout(timer)
-  }, [formData])
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      })
 
-  // Calculate form completion percentage
-  const calculateProgress = () => {
-    const fields = [
-      formData.firstName,
-      formData.lastName, 
-      formData.birthDate,
-      formData.gender.length > 0 ? "filled" : "",
-      formData.weight,
-      formData.height,
-      formData.lifeHabits.smoking,
-      formData.lifeHabits.alcohol,
-      formData.lifeHabits.physicalActivity,
+      const imgWidth = 210 // A4 width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+      
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight)
+      pdf.save(filename)
+    } catch (error) {
+      console.error("Erreur lors de l'export PDF:", error)
+    }
+  }
+
+  // Export de toutes les ordonnances en un seul PDF
+  const exportAllPrescriptionsToPDF = async () => {
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    })
+
+    const sections = [
+      { id: 'prescription-medicaments', name: 'Ordonnance médicamenteuse' },
+      { id: 'prescription-biologie', name: 'Ordonnance biologie' },
+      { id: 'prescription-imagerie', name: 'Ordonnance imagerie' }
     ]
-    
-    const completed = fields.filter(field => field && field.toString().trim()).length
-    return Math.round((completed / fields.length) * 100)
-  }
 
-  // Calculate age from birth date
-  const calculateAge = (birthDate: string) => {
-    if (!birthDate) return ""
-    const today = new Date()
-    const birth = new Date(birthDate)
-    let age = today.getFullYear() - birth.getFullYear()
-    const monthDiff = today.getMonth() - birth.getMonth()
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--
-    }
-    
-    return age.toString()
-  }
+    for (let i = 0; i < sections.length; i++) {
+      const element = document.getElementById(sections[i].id)
+      if (element) {
+        if (i > 0) pdf.addPage()
+        
+        const canvas = await html2canvas(element, {
+          scale: 2,
+          useCORS: true,
+          logging: false
+        })
 
-  // Update age when birth date changes
-  useEffect(() => {
-    if (formData.birthDate) {
-      const calculatedAge = calculateAge(formData.birthDate)
-      if (calculatedAge !== formData.age) {
-        setFormData(prev => ({ ...prev, age: calculatedAge }))
+        const imgWidth = 210
+        const imgHeight = (canvas.height * imgWidth) / canvas.width
+        
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight)
       }
     }
-  }, [formData.birthDate, formData.age])
 
-  // Auto-save effect - IMPORTANT: Pass original form data, not transformed
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onDataChange(formData) // Pass original form data
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [formData, onDataChange])
-
-  const handleInputChange = (field: keyof PatientFormData, value: any) => {
-    const newData = { ...formData, [field]: value }
-    setFormData(newData)
-
-    if (errors[field]) {
-      setErrors({ ...errors, [field]: "" })
-    }
+    pdf.save(`ordonnances_${patientData.lastName}_${patientData.firstName}_${new Date().toISOString().split('T')[0]}.pdf`)
   }
 
-  const handleGenderChange = (genderOption: string, checked: boolean) => {
-    const newGender = checked 
-      ? [...formData.gender, genderOption] 
-      : formData.gender.filter((g) => g !== genderOption)
-
-    const newData = { ...formData, gender: newGender }
-    setFormData(newData)
+  const handlePrint = () => {
+    window.print()
   }
 
-  const handleLifeHabitsChange = (field: keyof LifeHabits, value: string) => {
-    const newLifeHabits = { ...formData.lifeHabits, [field]: value }
-    const newData = { ...formData, lifeHabits: newLifeHabits }
-    setFormData(newData)
+  const handleShare = () => {
+    console.log("Partage du rapport...")
   }
 
-  const handleAllergyChange = (allergy: string, checked: boolean) => {
-    const newAllergies = checked 
-      ? [...formData.allergies, allergy] 
-      : formData.allergies.filter((a) => a !== allergy)
-
-    const newData = { ...formData, allergies: newAllergies }
-    setFormData(newData)
-  }
-
-  const handleMedicalHistoryChange = (condition: string, checked: boolean) => {
-    const newHistory = checked
-      ? [...formData.medicalHistory, condition]
-      : formData.medicalHistory.filter((h) => h !== condition)
-
-    const newData = { ...formData, medicalHistory: newHistory }
-    setFormData(newData)
-  }
-
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {}
-
-    if (!formData.firstName.trim()) newErrors.firstName = t('patientForm.errors.firstNameRequired')
-    if (!formData.lastName.trim()) newErrors.lastName = t('patientForm.errors.lastNameRequired')
-    if (!formData.birthDate) {
-      newErrors.birthDate = t('patientForm.errors.birthDateRequired')
-    } else {
-      const birthDate = new Date(formData.birthDate)
-      const today = new Date()
-      if (birthDate > today) {
-        newErrors.birthDate = t('patientForm.errors.futureBirthDate')
-      }
-      const age = parseInt(formData.age)
-      if (age < 0 || age > 120) {
-        newErrors.birthDate = t('patientForm.errors.invalidAge')
-      }
-    }
-    if (formData.gender.length === 0 && !formData.otherGender.trim()) {
-      newErrors.gender = t('patientForm.errors.genderRequired')
-    }
-    if (!formData.weight || Number.parseFloat(formData.weight) < 1 || Number.parseFloat(formData.weight) > 300) {
-      newErrors.weight = t('patientForm.errors.validWeightRequired')
-    }
-    if (!formData.height || Number.parseFloat(formData.height) < 50 || Number.parseFloat(formData.height) > 250) {
-      newErrors.height = t('patientForm.errors.validHeightRequired')
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = () => {
-    if (validateForm()) {
-      onNext()
-    }
-  }
-
-  const calculateBMI = () => {
-    if (formData.weight && formData.height) {
-      const weight = Number.parseFloat(formData.weight)
-      const height = Number.parseFloat(formData.height) / 100
-      return (weight / (height * height)).toFixed(1)
-    }
-    return null
-  }
-
-  const getBMICategory = (bmi: number) => {
-    if (bmi < 18.5) return { text: t('patientForm.underweight'), color: "bg-blue-100 text-blue-800", icon: "📉" }
-    if (bmi < 25) return { text: t('patientForm.normalWeight'), color: "bg-green-100 text-green-800", icon: "✅" }
-    if (bmi < 30) return { text: t('patientForm.overweight'), color: "bg-yellow-100 text-yellow-800", icon: "⚠️" }
-    return { text: t('patientForm.obesity'), color: "bg-red-100 text-red-800", icon: "🔴" }
-  }
-
-  const bmi = calculateBMI()
-  const bmiCategory = bmi ? getBMICategory(Number.parseFloat(bmi)) : null
-  const progress = calculateProgress()
-
-  const filteredAllergies = COMMON_ALLERGIES.filter(allergy =>
-    allergy.toLowerCase().includes(allergySearch.toLowerCase())
-  )
-
-  const filteredHistory = COMMON_MEDICAL_HISTORY.filter(condition =>
-    condition.toLowerCase().includes(historySearch.toLowerCase())
-  )
-
-  const sections = [
-    { id: "identity", title: t('patientForm.personalInfo'), icon: User },
-    { id: "contact", title: t('patientForm.contactInfo'), icon: Phone },
-    { id: "allergies", title: t('patientForm.knownAllergies'), icon: AlertTriangle },
-    { id: "history", title: t('patientForm.medicalHistory'), icon: Heart },
-    { id: "medications", title: t('patientForm.currentMedications'), icon: Pill },
-    { id: "habits", title: t('patientForm.lifestyle'), icon: Activity },
-  ]
-
-  // Show loading state briefly
-  if (isLoadingPatientData) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">{t('patientForm.loadingPatientData')}</p>
+      <Card>
+        <CardContent className="flex items-center justify-center py-20">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto" />
+            <p className="text-lg font-semibold">Génération du compte rendu professionnel...</p>
+            <p className="text-sm text-gray-600">Analyse des données en cours</p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card className="border-red-200">
+        <CardContent className="text-center py-10">
+          <p className="text-red-600">Erreur : {error}</p>
+          <Button onClick={generateProfessionalReport} className="mt-4">
+            Réessayer
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!report) return null
+
+  // Composant pour afficher les interactions médicamenteuses
+  const DrugInteractionsAlert = () => {
+    if (!drugInteractions.length) return null
+
+    const severeInteractions = drugInteractions.filter(i => i.severity === 'majeure')
+    const moderateInteractions = drugInteractions.filter(i => i.severity === 'modérée')
+
+    return (
+      <Alert className={`mb-6 ${severeInteractions.length > 0 ? 'border-red-500' : 'border-yellow-500'}`}>
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          <div className="font-semibold mb-2">
+            ⚠️ Interactions médicamenteuses détectées
+          </div>
+          {severeInteractions.length > 0 && (
+            <div className="mb-3">
+              <p className="font-medium text-red-700">Interactions majeures :</p>
+              {severeInteractions.map((interaction, idx) => (
+                <div key={idx} className="ml-4 mt-1 text-sm">
+                  <p>• {interaction.drug1} ↔ {interaction.drug2}</p>
+                  <p className="text-gray-600 ml-4">{interaction.description}</p>
+                  <p className="text-blue-600 ml-4 font-medium">→ {interaction.recommendation}</p>
+                </div>
+              ))}
+            </div>
+          )}
+          {moderateInteractions.length > 0 && (
+            <div>
+              <p className="font-medium text-yellow-700">Interactions modérées :</p>
+              {moderateInteractions.map((interaction, idx) => (
+                <div key={idx} className="ml-4 mt-1 text-sm">
+                  <p>• {interaction.drug1} ↔ {interaction.drug2}</p>
+                  <p className="text-gray-600 ml-4">{interaction.description}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </AlertDescription>
+      </Alert>
+    )
+  }
+
+  // Composant pour l'ordonnance médicamenteuse
+  const MedicationPrescription = () => {
+    if (!report.prescriptions?.medicaments) return null
+
+    return (
+      <div id="prescription-medicaments" className="bg-white p-8 rounded-lg shadow print:shadow-none">
+        <div className="border-b-2 border-blue-600 pb-4 mb-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-2xl font-bold">ORDONNANCE MÉDICAMENTEUSE</h2>
+              <p className="text-gray-600 mt-1">
+                Date : {new Date().toLocaleDateString('fr-FR')}
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => exportSectionToPDF('prescription-medicaments', `ordonnance_medicaments_${patientData.lastName}.pdf`)}
+              className="print:hidden"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Exporter PDF
+            </Button>
+          </div>
+        </div>
+
+        {checkingInteractions && (
+          <div className="mb-4 text-center text-gray-600">
+            <Loader2 className="h-4 w-4 animate-spin inline mr-2" />
+            Vérification des interactions médicamenteuses...
+          </div>
+        )}
+
+        <DrugInteractionsAlert />
+
+        <div className="space-y-6">
+          {report.prescriptions.medicaments.items.map((med: MedicationItem, index: number) => (
+            <div key={index} className="border-l-4 border-green-500 pl-4 py-2">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <div className="font-bold text-lg">
+                    {index + 1}. {med.nom}
+                    {med.nonSubstituable && (
+                      <Badge className="ml-2 bg-red-100 text-red-800">Non substituable</Badge>
+                    )}
+                  </div>
+                  {med.dci && (
+                    <p className="text-sm text-gray-600">DCI : {med.dci}</p>
+                  )}
+                  <p className="mt-1">
+                    <span className="font-medium">Forme :</span> {med.forme} - {med.dosage}
+                  </p>
+                  <p className="mt-1">
+                    <span className="font-medium">Posologie :</span> {med.posologie}
+                  </p>
+                  <p className="mt-1">
+                    <span className="font-medium">Durée :</span> {med.duree}
+                  </p>
+                  {med.quantite && (
+                    <p className="mt-1">
+                      <span className="font-medium">Quantité :</span> {med.quantite}
+                    </p>
+                  )}
+                  {med.remarques && (
+                    <p className="mt-2 text-sm text-gray-600 italic">
+                      ℹ️ {med.remarques}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {report.prescriptions.medicaments.renouvellement && (
+          <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded">
+            <p className="text-sm font-medium">
+              ✓ Ordonnance renouvelable jusqu'au {report.prescriptions.medicaments.dateValidite}
+            </p>
+          </div>
+        )}
+
+        <div className="mt-8 pt-6 border-t border-gray-300">
+          <div className="text-right">
+            <p className="font-semibold">{report.signature.medecin}</p>
+            <p className="text-sm text-gray-600">{report.signature.qualification}</p>
+            {report.signature.rpps && (
+              <p className="text-sm text-gray-600">RPPS : {report.signature.rpps}</p>
+            )}
+          </div>
         </div>
       </div>
     )
   }
 
-  const showTibokNotification = dataProcessed && (isFromTibok || urlData?.source === 'tibok')
+  // Composant pour l'ordonnance biologie
+  const BiologyPrescription = () => {
+    if (!report.prescriptions?.biologie) return null
+
+    return (
+      <div id="prescription-biologie" className="bg-white p-8 rounded-lg shadow print:shadow-none">
+        <div className="border-b-2 border-blue-600 pb-4 mb-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-2xl font-bold">ORDONNANCE - EXAMENS BIOLOGIQUES</h2>
+              <p className="text-gray-600 mt-1">
+                Date : {new Date().toLocaleDateString('fr-FR')}
+              </p>
+            </div>
+            <div className="flex gap-2 print:hidden">
+              {report.prescriptions.biologie.examens.some((e: BiologyExam) => e.urgence) && (
+                <Badge variant="destructive">URGENT</Badge>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => exportSectionToPDF('prescription-biologie', `ordonnance_biologie_${patientData.lastName}.pdf`)}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Exporter PDF
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <p className="font-medium mb-3">Examens à réaliser :</p>
+          <div className="space-y-3">
+            {report.prescriptions.biologie.examens.map((exam: BiologyExam, index: number) => (
+              <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded">
+                <div className="mt-1">□</div>
+                <div className="flex-1">
+                  <div className="font-medium">
+                    {exam.type}
+                    {exam.code && <span className="text-gray-600 ml-2">(Code: {exam.code})</span>}
+                  </div>
+                  <div className="flex gap-2 mt-1">
+                    {exam.jeun && (
+                      <Badge className="bg-orange-100 text-orange-800 text-xs">
+                        À jeun (12h)
+                      </Badge>
+                    )}
+                    {exam.urgence && (
+                      <Badge variant="destructive" className="text-xs">
+                        Urgent
+                      </Badge>
+                    )}
+                  </div>
+                  {exam.remarques && (
+                    <p className="text-sm text-gray-600 mt-1">{exam.remarques}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="border-t pt-4 mt-6 text-sm text-gray-600">
+          <p className="flex items-center gap-2">
+            <TestTube className="h-4 w-4" />
+            Prélèvement à réaliser dans un laboratoire d'analyses médicales agréé
+          </p>
+          {report.prescriptions.biologie.laboratoireRecommande && (
+            <p className="mt-2">
+              Laboratoire recommandé : <span className="font-medium">{report.prescriptions.biologie.laboratoireRecommande}</span>
+            </p>
+          )}
+        </div>
+
+        <div className="mt-8 pt-6 border-t border-gray-300">
+          <div className="text-right">
+            <p className="font-semibold">{report.signature.medecin}</p>
+            <p className="text-sm text-gray-600">{report.signature.qualification}</p>
+            {report.signature.rpps && (
+              <p className="text-sm text-gray-600">RPPS : {report.signature.rpps}</p>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Composant pour l'ordonnance imagerie
+  const ImagingPrescription = () => {
+    if (!report.prescriptions?.imagerie) return null
+
+    return (
+      <div id="prescription-imagerie" className="bg-white p-8 rounded-lg shadow print:shadow-none">
+        <div className="border-b-2 border-blue-600 pb-4 mb-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-2xl font-bold">ORDONNANCE - IMAGERIE MÉDICALE</h2>
+              <p className="text-gray-600 mt-1">
+                Date : {new Date().toLocaleDateString('fr-FR')}
+              </p>
+            </div>
+            <div className="flex gap-2 print:hidden">
+              {report.prescriptions.imagerie.examens.some((e: ImagingExam) => e.urgence) && (
+                <Badge variant="destructive">URGENT</Badge>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => exportSectionToPDF('prescription-imagerie', `ordonnance_imagerie_${patientData.lastName}.pdf`)}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Exporter PDF
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {report.prescriptions.imagerie.examens.map((exam: ImagingExam, index: number) => (
+            <div key={index} className="border rounded-lg p-4 bg-gray-50">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <h4 className="font-bold text-lg flex items-center gap-2">
+                    <Scan className="h-5 w-5" />
+                    {exam.type}
+                  </h4>
+                  <p className="mt-2">
+                    <span className="font-medium">Région anatomique :</span> {exam.region}
+                  </p>
+                  <p className="mt-1">
+                    <span className="font-medium">Indication clinique :</span> {exam.indication}
+                  </p>
+                  {exam.contraste && (
+                    <Alert className="mt-3 border-yellow-200 bg-yellow-50">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription className="text-sm">
+                        Injection de produit de contraste prévue - Vérifier la fonction rénale
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  {exam.remarques && (
+                    <p className="text-sm text-gray-600 mt-2 italic">{exam.remarques}</p>
+                  )}
+                </div>
+                {exam.urgence && (
+                  <Badge variant="destructive">URGENT</Badge>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 p-4 bg-blue-50 rounded text-sm">
+          <p className="flex items-center gap-2 font-medium">
+            <Scan className="h-4 w-4" />
+            Instructions pour le patient :
+          </p>
+          <ul className="mt-2 ml-6 space-y-1 text-gray-700">
+            <li>• Prendre rendez-vous dans un centre d'imagerie médicale</li>
+            <li>• Apporter cette ordonnance et votre carte vitale</li>
+            <li>• Signaler toute allergie ou grossesse</li>
+            <li>• Suivre les consignes de préparation spécifiques à l'examen</li>
+          </ul>
+          {report.prescriptions.imagerie.centreRecommande && (
+            <p className="mt-3">
+              Centre recommandé : <span className="font-medium">{report.prescriptions.imagerie.centreRecommande}</span>
+            </p>
+          )}
+        </div>
+
+        <div className="mt-8 pt-6 border-t border-gray-300">
+          <div className="text-right">
+            <p className="font-semibold">{report.signature.medecin}</p>
+            <p className="text-sm text-gray-600">{report.signature.qualification}</p>
+            {report.signature.rpps && (
+              <p className="text-sm text-gray-600">RPPS : {report.signature.rpps}</p>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Show notification if data is from TIBOK */}
-      {showTibokNotification && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="h-5 w-5 text-blue-600" />
-            <p className="text-sm font-medium text-blue-800">
-              {t('patientForm.tibokNotification')} {formData.firstName} {formData.lastName}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Header with Progress */}
-      <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-        <CardHeader className="text-center">
-          <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-            <User className="h-8 w-8 text-blue-600" />
-            {t('patientForm.title')}
-          </CardTitle>
-          <div className="mt-4 space-y-2">
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>{t('patientForm.formProgress')}</span>
-              <span className="font-semibold">{progress}%</span>
+    <div className="space-y-6 print:space-y-4">
+      {/* Actions Bar - Hidden in print */}
+      <Card className="print:hidden">
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <Badge className="bg-green-100 text-green-800">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Dossier médical complet
+              </Badge>
+              <span className="text-sm text-gray-600">
+                {report.metadata?.wordCount || 0} mots
+              </span>
             </div>
-            <Progress value={progress} className="h-2" />
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={handlePrint}>
+                <Printer className="h-4 w-4 mr-2" />
+                Tout imprimer
+              </Button>
+              <Button variant="outline" size="sm" onClick={exportAllPrescriptionsToPDF}>
+                <Download className="h-4 w-4 mr-2" />
+                Toutes les ordonnances (PDF)
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleShare}>
+                <Share2 className="h-4 w-4 mr-2" />
+                Partager
+              </Button>
+            </div>
           </div>
-        </CardHeader>
+        </CardContent>
       </Card>
 
-      {/* Quick Navigation */}
-      <div className="flex flex-wrap gap-2 justify-center">
-        {sections.map((section, index) => (
-          <button
-            key={section.id}
-            onClick={() => setCurrentSection(index)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
-              currentSection === index
-                ? "bg-blue-600 text-white shadow-lg"
-                : "bg-white/70 text-gray-600 hover:bg-white hover:shadow-md"
-            }`}
-          >
-            <section.icon className="h-4 w-4" />
-            <span className="text-sm font-medium">{section.title}</span>
-          </button>
-        ))}
+      {/* Tabs pour naviguer entre les sections */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="consultation" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Compte rendu
+          </TabsTrigger>
+          <TabsTrigger value="medicaments" className="flex items-center gap-2">
+            <Pill className="h-4 w-4" />
+            Médicaments
+            {report.prescriptions?.medicaments && (
+              <Badge variant="secondary" className="ml-1">
+                {report.prescriptions.medicaments.items.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="biologie" className="flex items-center gap-2">
+            <TestTube className="h-4 w-4" />
+            Biologie
+            {report.prescriptions?.biologie && (
+              <Badge variant="secondary" className="ml-1">
+                {report.prescriptions.biologie.examens.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="imagerie" className="flex items-center gap-2">
+            <Scan className="h-4 w-4" />
+            Imagerie
+            {report.prescriptions?.imagerie && (
+              <Badge variant="secondary" className="ml-1">
+                {report.prescriptions.imagerie.examens.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="consultation" className="mt-6">
+          {/* Compte rendu de consultation original */}
+          <Card className="shadow-xl print:shadow-none">
+            <CardContent className="p-8 print:p-12">
+              {/* Header */}
+              <div className="text-center mb-8 print:mb-12">
+                <h1 className="text-2xl font-bold mb-2">{report.header.title}</h1>
+                <p className="text-gray-600">{report.header.subtitle}</p>
+                <p className="text-sm text-gray-500 mt-2">Référence : {report.header.reference}</p>
+              </div>
+
+              {/* Patient Identification */}
+              <div className="bg-gray-50 p-6 rounded-lg mb-8 print:border print:border-gray-300">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="font-semibold">PATIENT</p>
+                    <p className="text-lg">{report.identification.patient}</p>
+                    <p className="text-sm text-gray-600">
+                      {report.identification.age} - {report.identification.sexe}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Né(e) le {report.identification.dateNaissance}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-semibold">COORDONNÉES</p>
+                    <p className="text-sm">{report.identification.adresse}</p>
+                    <p className="text-sm">Tél : {report.identification.telephone}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Medical Report Content */}
+              <div className="prose prose-lg max-w-none space-y-6 print:text-black">
+                <section>
+                  <h2 className="text-xl font-bold text-gray-900 mb-3">MOTIF DE CONSULTATION</h2>
+                  <p className="text-gray-700 leading-relaxed">{report.rapport.motifConsultation}</p>
+                </section>
+
+                <section>
+                  <h2 className="text-xl font-bold text-gray-900 mb-3">ANAMNÈSE</h2>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                    {report.rapport.anamnese}
+                  </p>
+                </section>
+
+                <section>
+                  <h2 className="text-xl font-bold text-gray-900 mb-3">ANTÉCÉDENTS</h2>
+                  <p className="text-gray-700 leading-relaxed">{report.rapport.antecedents}</p>
+                </section>
+
+                <section>
+                  <h2 className="text-xl font-bold text-gray-900 mb-3">EXAMEN CLINIQUE</h2>
+                  <p className="text-gray-700 leading-relaxed">{report.rapport.examenClinique}</p>
+                </section>
+
+                <section>
+                  <h2 className="text-xl font-bold text-gray-900 mb-3">SYNTHÈSE DIAGNOSTIQUE</h2>
+                  <p className="text-gray-700 leading-relaxed">{report.rapport.syntheseDiagnostique}</p>
+                </section>
+
+                <section className="bg-blue-50 p-4 rounded-lg print:border print:border-blue-300">
+                  <h2 className="text-xl font-bold text-blue-900 mb-3">CONCLUSION DIAGNOSTIQUE</h2>
+                  <p className="text-blue-800 leading-relaxed font-medium">
+                    {report.rapport.conclusionDiagnostique}
+                  </p>
+                </section>
+
+                <section>
+                  <h2 className="text-xl font-bold text-gray-900 mb-3">PRISE EN CHARGE</h2>
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                    {report.rapport.priseEnCharge}
+                  </div>
+                </section>
+
+                <section>
+                  <h2 className="text-xl font-bold text-gray-900 mb-3">SURVEILLANCE ET SUIVI</h2>
+                  <p className="text-gray-700 leading-relaxed">{report.rapport.surveillance}</p>
+                </section>
+
+                <section>
+                  <h2 className="text-xl font-bold text-gray-900 mb-3">CONCLUSION</h2>
+                  <p className="text-gray-700 leading-relaxed">{report.rapport.conclusion}</p>
+                </section>
+              </div>
+
+              {/* Signature Block */}
+              <div className="mt-12 pt-8 border-t border-gray-300">
+                <div className="grid grid-cols-2">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-8">
+                      Fait à {report.signature.etablissement}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Le {new Date().toLocaleDateString('fr-FR', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="inline-block text-left">
+                      <p className="font-semibold">{report.signature.medecin}</p>
+                      <p className="text-sm text-gray-600">{report.signature.qualification}</p>
+                      {report.signature.rpps && (
+                        <p className="text-sm text-gray-600">RPPS : {report.signature.rpps}</p>
+                      )}
+                      <div className="mt-8 pt-8 border-t border-gray-400 w-48">
+                        <p className="text-sm text-gray-600">Signature</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="medicaments" className="mt-6">
+          <MedicationPrescription />
+        </TabsContent>
+
+        <TabsContent value="biologie" className="mt-6">
+          <BiologyPrescription />
+        </TabsContent>
+
+        <TabsContent value="imagerie" className="mt-6">
+          <ImagingPrescription />
+        </TabsContent>
+      </Tabs>
+
+      {/* Version imprimable - toutes les sections */}
+      <div className="hidden print:block">
+        {/* Compte rendu */}
+        <Card className="shadow-none mb-8">
+          <CardContent className="p-12">
+            {/* Contenu du compte rendu (même que dans l'onglet) */}
+            {/* ... */}
+          </CardContent>
+        </Card>
+
+        {/* Page break avant les ordonnances */}
+        <div className="break-before-page">
+          {report.prescriptions?.medicaments && <MedicationPrescription />}
+        </div>
+
+        {report.prescriptions?.biologie && (
+          <div className="break-before-page mt-8">
+            <BiologyPrescription />
+          </div>
+        )}
+
+        {report.prescriptions?.imagerie && (
+          <div className="break-before-page mt-8">
+            <ImagingPrescription />
+          </div>
+        )}
       </div>
 
-      {/* Section 1: Identité */}
-      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
-        <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
-          <CardTitle className="flex items-center gap-3">
-            <User className="h-6 w-6" />
-            {t('patientForm.personalInfo')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="firstName" className="flex items-center gap-2 font-medium">
-                {t('patientForm.firstName')} <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="firstName"
-                name="firstName"
-                type="text"
-                value={formData.firstName}
-                onChange={(e) => handleInputChange("firstName", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
-                className={`transition-all duration-200 ${
-                  errors.firstName 
-                    ? "border-red-500 focus:ring-red-200" 
-                    : "focus:ring-blue-200 border-gray-300"
-                }`}
-              />
-              {errors.firstName && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <X className="h-3 w-3" />
-                  {errors.firstName}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="lastName" className="flex items-center gap-2 font-medium">
-                {t('patientForm.lastName')} <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="lastName"
-                name="lastName"
-                type="text"
-                value={formData.lastName}
-                onChange={(e) => handleInputChange("lastName", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
-                className={`transition-all duration-200 ${
-                  errors.lastName 
-                    ? "border-red-500 focus:ring-red-200" 
-                    : "focus:ring-blue-200 border-gray-300"
-                }`}
-              />
-              {errors.lastName && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <X className="h-3 w-3" />
-                  {errors.lastName}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="birthDate" className="flex items-center gap-2 font-medium">
-                {t('patientForm.birthDate')} <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="birthDate"
-                name="birthDate"
-                type="date"
-                value={formData.birthDate}
-                onChange={(e) => handleInputChange("birthDate", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
-                className={`transition-all duration-200 ${
-                  errors.birthDate 
-                    ? "border-red-500 focus:ring-red-200" 
-                    : "focus:ring-blue-200 border-gray-300"
-                }`}
-              />
-              {errors.birthDate && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <X className="h-3 w-3" />
-                  {errors.birthDate}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2 font-medium">
-                {t('patientForm.calculatedAge')}
-              </Label>
-              <div className="flex items-center h-10 px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
-                <span className="text-gray-700 font-medium">
-                  {formData.age ? `${formData.age} ${t('patientForm.years')}` : "—"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <Label className="flex items-center gap-2 font-medium">
-              {t('patientForm.gender')} <span className="text-red-500">*</span>
-            </Label>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[t('patientForm.male'), t('patientForm.female')].map((genderOption, index) => (
-                <div
-                  key={genderOption}
-                  className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
-                    formData.gender.includes(genderOption)
-                      ? "border-blue-300 bg-blue-50 shadow-md"
-                      : "border-gray-200 hover:border-blue-200 hover:bg-blue-25"
-                  }`}
-                  onClick={() => handleGenderChange(genderOption, !formData.gender.includes(genderOption))}
-                  onDoubleClick={() => handleCheckboxDoubleClick(
-                    !formData.gender.includes(genderOption),
-                    () => handleGenderChange(genderOption, !formData.gender.includes(genderOption)),
-                    index === 0 ? "otherGender" : "weight"
-                  )}
-                >
-                  <Checkbox
-                    id={`gender-${genderOption}`}
-                    checked={formData.gender.includes(genderOption)}
-                    onCheckedChange={(checked) => handleGenderChange(genderOption, checked as boolean)}
-                  />
-                  <Label htmlFor={`gender-${genderOption}`} className="text-sm font-medium cursor-pointer">
-                    {genderOption}
-                  </Label>
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="otherGender" className="font-medium">{t('patientForm.otherSpecify')}</Label>
-              <Input
-                id="otherGender"
-                name="otherGender"
-                value={formData.otherGender}
-                onChange={(e) => handleInputChange("otherGender", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
-                className="transition-all duration-200 focus:ring-blue-200"
-              />
-            </div>
-
-            {(formData.gender.length > 0 || formData.otherGender) && (
-              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <User className="h-4 w-4 text-blue-600" />
-                  <p className="font-semibold text-blue-800">{t('patientForm.declaredGender')}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {formData.gender.map((gender) => (
-                    <Badge key={gender} className="bg-blue-100 text-blue-800 text-xs">
-                      {gender}
-                    </Badge>
-                  ))}
-                  {formData.otherGender && (
-                    <Badge className="bg-blue-100 text-blue-800 text-xs">
-                      {formData.otherGender}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {errors.gender && (
-              <p className="text-sm text-red-500 flex items-center gap-1">
-                <X className="h-3 w-3" />
-                {errors.gender}
-              </p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="weight" className="flex items-center gap-2 font-medium">
-                {t('patientForm.weight')} <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="weight"
-                name="weight"
-                type="number"
-                value={formData.weight}
-                onChange={(e) => handleInputChange("weight", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
-                min="1"
-                max="300"
-                step="0.1"
-                className={`transition-all duration-200 ${
-                  errors.weight 
-                    ? "border-red-500 focus:ring-red-200" 
-                    : "focus:ring-blue-200 border-gray-300"
-                }`}
-              />
-              {errors.weight && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <X className="h-3 w-3" />
-                  {errors.weight}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="height" className="flex items-center gap-2 font-medium">
-                {t('patientForm.height')} <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="height"
-                name="height"
-                type="number"
-                value={formData.height}
-                onChange={(e) => handleInputChange("height", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
-                min="50"
-                max="250"
-                className={`transition-all duration-200 ${
-                  errors.height 
-                    ? "border-red-500 focus:ring-red-200" 
-                    : "focus:ring-blue-200 border-gray-300"
-                }`}
-              />
-              {errors.height && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <X className="h-3 w-3" />
-                  {errors.height}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {bmi && (
-            <div className={`p-4 rounded-lg border-2 ${bmiCategory?.color} transition-all duration-300`}>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{bmiCategory?.icon}</span>
-                <div>
-                  <p className="font-semibold">{t('patientForm.bmi')}: {bmi} kg/m²</p>
-                  <p className="text-sm">{bmiCategory?.text}</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Section 2: Contact Information */}
-      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
-        <CardHeader className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-t-lg">
-          <CardTitle className="flex items-center gap-3">
-            <Phone className="h-6 w-6" />
-            {t('patientForm.contactInfo')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="phone" className="flex items-center gap-2 font-medium">
-                <Phone className="h-4 w-4" />
-                {t('patientForm.phone')}
-              </Label>
-              <Input
-                id="phone"
-                name="phone"
-                type="tel"
-                value={formData.phone || ''}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
-                placeholder="+230 5XXX XXXX"
-                className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email" className="flex items-center gap-2 font-medium">
-                <Mail className="h-4 w-4" />
-                {t('patientForm.email')}
-              </Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email || ''}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
-                placeholder="email@example.com"
-                className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="address" className="flex items-center gap-2 font-medium">
-              <Home className="h-4 w-4" />
-              {t('patientForm.address')}
-            </Label>
-            <Textarea
-              id="address"
-              name="address"
-              value={formData.address || ''}
-              onChange={(e) => handleInputChange("address", e.target.value)}
-              onKeyDown={handleEnterKeyNavigation}
-              placeholder={t('patientForm.addressPlaceholder')}
-              rows={2}
-              className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="city" className="flex items-center gap-2 font-medium">
-                <MapPin className="h-4 w-4" />
-                {t('patientForm.city')}
-              </Label>
-              <Input
-                id="city"
-                name="city"
-                type="text"
-                value={formData.city || ''}
-                onChange={(e) => handleInputChange("city", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
-                placeholder="Port Louis, Curepipe, etc."
-                className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="country" className="flex items-center gap-2 font-medium">
-                <MapPin className="h-4 w-4" />
-                {t('patientForm.country')}
-              </Label>
-              <Input
-                id="country"
-                name="country"
-                type="text"
-                value={formData.country || ''}
-                onChange={(e) => handleInputChange("country", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
-                className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Section 3: Allergies */}
-      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
-        <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
-          <CardTitle className="flex items-center gap-3">
-            <AlertTriangle className="h-6 w-6" />
-            {t('patientForm.knownAllergies')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder={t('patientForm.searchAllergy')}
-              value={allergySearch}
-              onChange={(e) => setAllergySearch(e.target.value)}
-              onKeyDown={handleEnterKeyNavigation}
-              className="pl-10"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {filteredAllergies.map((allergy, index) => (
-              <div
-                key={allergy}
-                className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
-                  formData.allergies.includes(allergy)
-                    ? "border-red-300 bg-red-50 shadow-md"
-                    : "border-gray-200 hover:border-red-200 hover:bg-red-25"
-                }`}
-                onClick={() => handleAllergyChange(allergy, !formData.allergies.includes(allergy))}
-                onDoubleClick={() => handleCheckboxDoubleClick(
-                  !formData.allergies.includes(allergy),
-                  () => handleAllergyChange(allergy, !formData.allergies.includes(allergy)),
-                  index < filteredAllergies.length - 1 ? `allergy-${filteredAllergies[index + 1]}` : "otherAllergies"
-                )}
-              >
-                <Checkbox
-                  id={`allergy-${allergy}`}
-                  checked={formData.allergies.includes(allergy)}
-                  onCheckedChange={(checked) => handleAllergyChange(allergy, checked as boolean)}
-                />
-                <Label htmlFor={`allergy-${allergy}`} className="text-sm font-medium cursor-pointer">
-                  {allergy}
-                </Label>
-              </div>
-            ))}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="otherAllergies" className="font-medium">{t('patientForm.otherAllergies')}</Label>
-            <Textarea
-              id="otherAllergies"
-              value={formData.otherAllergies}
-              onChange={(e) => handleInputChange("otherAllergies", e.target.value)}
-              onKeyDown={handleEnterKeyNavigation}
-              rows={3}
-              className="transition-all duration-200 focus:ring-red-200"
-            />
-          </div>
-
-          {(formData.allergies.length > 0 || formData.otherAllergies) && (
-            <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-              <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
-                <p className="font-semibold text-red-800">{t('patientForm.declaredAllergies')}</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {formData.allergies.map((allergy) => (
-                  <Badge key={allergy} variant="destructive" className="text-xs">
-                    {allergy}
-                  </Badge>
-                ))}
-                {formData.otherAllergies && (
-                  <Badge variant="destructive" className="text-xs">
-                    {formData.otherAllergies}
-                  </Badge>
-                )}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Section 4: Antécédents médicaux */}
-      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
-        <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-t-lg">
-          <CardTitle className="flex items-center gap-3">
-            <Heart className="h-6 w-6" />
-            {t('patientForm.medicalHistory')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder={t('patientForm.searchMedicalHistory')}
-              value={historySearch}
-              onChange={(e) => setHistorySearch(e.target.value)}
-              onKeyDown={handleEnterKeyNavigation}
-              className="pl-10"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredHistory.map((condition, index) => (
-              <div
-                key={condition}
-                className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
-                  formData.medicalHistory.includes(condition)
-                    ? "border-purple-300 bg-purple-50 shadow-md"
-                    : "border-gray-200 hover:border-purple-200 hover:bg-purple-25"
-                }`}
-                onClick={() => handleMedicalHistoryChange(condition, !formData.medicalHistory.includes(condition))}
-                onDoubleClick={() => handleCheckboxDoubleClick(
-                  !formData.medicalHistory.includes(condition),
-                  () => handleMedicalHistoryChange(condition, !formData.medicalHistory.includes(condition)),
-                  index < filteredHistory.length - 1 ? `history-${filteredHistory[index + 1]}` : "otherMedicalHistory"
-                )}
-              >
-                <Checkbox
-                  id={`history-${condition}`}
-                  checked={formData.medicalHistory.includes(condition)}
-                  onCheckedChange={(checked) => handleMedicalHistoryChange(condition, checked as boolean)}
-                />
-                <Label htmlFor={`history-${condition}`} className="text-sm font-medium cursor-pointer">
-                  {condition}
-                </Label>
-              </div>
-            ))}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="otherMedicalHistory" className="font-medium">{t('patientForm.otherMedicalHistory')}</Label>
-            <Textarea
-              id="otherMedicalHistory"
-              value={formData.otherMedicalHistory}
-              onChange={(e) => handleInputChange("otherMedicalHistory", e.target.value)}
-              onKeyDown={handleEnterKeyNavigation}
-              rows={3}
-              className="transition-all duration-200 focus:ring-purple-200"
-            />
-          </div>
-
-          {(formData.medicalHistory.length > 0 || formData.otherMedicalHistory) && (
-            <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-              <div className="flex items-center gap-2 mb-3">
-                <Heart className="h-5 w-5 text-purple-600" />
-                <p className="font-semibold text-purple-800">{t('patientForm.declaredHistory')}</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {formData.medicalHistory.map((condition) => (
-                  <Badge key={condition} className="bg-purple-100 text-purple-800 text-xs">
-                    {condition}
-                  </Badge>
-                ))}
-                {formData.otherMedicalHistory && (
-                  <Badge className="bg-purple-100 text-purple-800 text-xs">
-                    {t('patientForm.otherMedicalHistory')}
-                  </Badge>
-                )}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Section 5: Médicaments */}
-      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
-        <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
-          <CardTitle className="flex items-center gap-3">
-            <Pill className="h-6 w-6" />
-            {t('patientForm.currentMedications')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="currentMedicationsText" className="font-medium">
-              {t('patientForm.ongoingTreatments')}
-            </Label>
-            <Textarea
-              id="currentMedicationsText"
-              value={formData.currentMedicationsText}
-              onChange={(e) => handleInputChange("currentMedicationsText", e.target.value)}
-              onKeyDown={handleEnterKeyNavigation}
-              placeholder={t('patientForm.medicationPlaceholder')}
-              rows={6}
-              className="resize-y transition-all duration-200 focus:ring-green-200"
-            />
-          </div>
-
-          {formData.currentMedicationsText && (
-            <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-              <div className="flex items-center gap-2">
-                <Check className="h-5 w-5 text-green-600" />
-                <p className="font-semibold text-green-800">
-                  {t('patientForm.treatmentsEntered')} ({formData.currentMedicationsText.split("\n").filter((line) => line.trim()).length} {t('patientForm.lines')})
-                </p>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Section 6: Habitudes de vie */}
-      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
-        <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg">
-          <CardTitle className="flex items-center gap-3">
-            <Activity className="h-6 w-6" />
-            {t('patientForm.lifestyle')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="space-y-4">
-              <Label className="font-medium text-lg">🚬 {t('patientForm.tobacco')}</Label>
-              <RadioGroup
-                value={formData.lifeHabits.smoking}
-                onValueChange={(value) => handleLifeHabitsChange("smoking", value)}
-                className="space-y-3"
-              >
-                {[t('patientForm.nonSmoker'), t('patientForm.currentSmoker'), t('patientForm.exSmoker')].map((option) => (
-                  <div
-                    key={option}
-                    className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
-                      formData.lifeHabits.smoking === option
-                        ? "border-orange-300 bg-orange-50 shadow-md"
-                        : "border-gray-200 hover:border-orange-200"
-                    }`}
-                  >
-                    <RadioGroupItem value={option} id={`smoking-${option}`} />
-                    <Label htmlFor={`smoking-${option}`} className="text-sm font-medium cursor-pointer">
-                      {option}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
-
-            <div className="space-y-4">
-              <Label className="font-medium text-lg">🍷 {t('patientForm.alcohol')}</Label>
-              <RadioGroup
-                value={formData.lifeHabits.alcohol}
-                onValueChange={(value) => handleLifeHabitsChange("alcohol", value)}
-                className="space-y-3"
-              >
-                {[t('patientForm.never'), t('patientForm.occasional'), t('patientForm.regular')].map((option) => (
-                  <div
-                    key={option}
-                    className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
-                      formData.lifeHabits.alcohol === option
-                        ? "border-orange-300 bg-orange-50 shadow-md"
-                        : "border-gray-200 hover:border-orange-200"
-                    }`}
-                  >
-                    <RadioGroupItem value={option} id={`alcohol-${option}`} />
-                    <Label htmlFor={`alcohol-${option}`} className="text-sm font-medium cursor-pointer">
-                      {option}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
-
-            <div className="space-y-4">
-              <Label className="font-medium text-lg">🏃 {t('patientForm.physicalActivity')}</Label>
-              <RadioGroup
-                value={formData.lifeHabits.physicalActivity}
-                onValueChange={(value) => handleLifeHabitsChange("physicalActivity", value)}
-                className="space-y-3"
-              >
-                {[t('patientForm.sedentary'), t('patientForm.moderate'), t('patientForm.intense')].map((option) => (
-                  <div
-                    key={option}
-                    className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
-                      formData.lifeHabits.physicalActivity === option
-                        ? "border-orange-300 bg-orange-50 shadow-md"
-                        : "border-gray-200 hover:border-orange-200"
-                    }`}
-                  >
-                    <RadioGroupItem value={option} id={`activity-${option}`} />
-                    <Label htmlFor={`activity-${option}`} className="text-sm font-medium cursor-pointer">
-                      {option}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Auto-save indicator */}
-      <div className="flex justify-center">
-        <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-sm text-gray-600">{t('common.autoSave')}</span>
-        </div>
-      </div>
-
-      {/* Navigation */}
-      <div className="flex justify-center">
+      {/* Complete Button */}
+      <div className="flex justify-center print:hidden">
         <Button 
-          onClick={handleSubmit} 
           size="lg"
-          className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+          onClick={onComplete}
+          className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
         >
-          {t('patientForm.continueButton')}
-          <ArrowRight className="h-5 w-5 ml-2" />
+          <CheckCircle className="h-5 w-5 mr-2" />
+          Finaliser et Archiver la Consultation
         </Button>
       </div>
     </div>
