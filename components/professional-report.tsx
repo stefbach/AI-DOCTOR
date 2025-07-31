@@ -1,4 +1,4 @@
-// components/professional-report.tsx - Version corrigée
+// components/professional-report.tsx - Version corrigée pour afficher toutes les données
 
 "use client"
 
@@ -18,6 +18,8 @@ import {
   Scan,
   AlertTriangle,
   XCircle,
+  Eye,
+  EyeOff,
 } from "lucide-react"
 
 // Types pour les prescriptions
@@ -81,19 +83,23 @@ export default function ProfessionalReport({
   const [activeTab, setActiveTab] = useState("consultation")
   const [drugInteractions, setDrugInteractions] = useState<DrugInteraction[]>([])
   const [checkingInteractions, setCheckingInteractions] = useState(false)
-
-  // Log pour debug
-  const logDebug = (message: string, data?: any) => {
-    console.log(`[ProfessionalReport] ${message}`, data || '')
-  }
+  const [showFullReport, setShowFullReport] = useState(false)
+  const [showInteractionsDemo, setShowInteractionsDemo] = useState(false) // Pour la démo
 
   useEffect(() => {
-    logDebug("Component mounted, generating report...")
+    console.log("🚀 ProfessionalReport mounted")
     generateProfessionalReport()
-  }, []) // Dépendances vides pour ne générer qu'une fois
+  }, [])
 
-  // Vérifier les interactions médicamenteuses
+  // Vérifier les interactions médicamenteuses (optionnel)
   const checkDrugInteractions = async (medications: MedicationItem[]) => {
+    // Fonctionnalité désactivée si l'API n'existe pas
+    console.log("ℹ️ Vérification des interactions médicamenteuses désactivée (API non disponible)")
+    
+    // Si vous souhaitez implémenter cette fonctionnalité plus tard,
+    // décommentez le code ci-dessous et créez l'endpoint correspondant
+    
+    /*
     setCheckingInteractions(true)
     try {
       const response = await fetch("/api/check-drug-interactions", {
@@ -123,6 +129,7 @@ export default function ProfessionalReport({
     } finally {
       setCheckingInteractions(false)
     }
+    */
   }
 
   const generateProfessionalReport = async () => {
@@ -130,12 +137,11 @@ export default function ProfessionalReport({
     setError(null)
 
     try {
-      logDebug("Sending request to API with data:", {
-        patientData,
-        clinicalData,
-        diagnosisData,
-        editedDocuments
-      })
+      console.log("📤 Envoi des données à l'API:")
+      console.log("- Patient:", patientData)
+      console.log("- Clinical:", clinicalData)
+      console.log("- Diagnosis:", diagnosisData)
+      console.log("- Edited Documents:", editedDocuments)
 
       const response = await fetch("/api/generate-consultation-report", {
         method: "POST",
@@ -150,39 +156,39 @@ export default function ProfessionalReport({
         })
       })
 
-      logDebug("Response status:", response.status)
-      logDebug("Response headers:", response.headers)
-
-      // Vérifier le content-type
       const contentType = response.headers.get("content-type") || ""
       
       if (!response.ok) {
         const errorText = await response.text()
-        logDebug("Error response text:", errorText)
+        console.error("❌ Erreur API:", errorText)
         throw new Error(`Erreur HTTP ${response.status}: ${errorText}`)
       }
 
       if (!contentType.includes("application/json")) {
         const text = await response.text()
-        logDebug("Non-JSON response:", text)
+        console.error("❌ Réponse non-JSON:", text)
         throw new Error("La réponse n'est pas au format JSON")
       }
 
       const data = await response.json()
-      logDebug("Parsed response data:", data)
+      console.log("📥 Données reçues de l'API:", data)
 
       if (data.success && data.report) {
-        logDebug("Report generated successfully:", data.report)
+        console.log("✅ Rapport généré avec succès")
+        console.log("📊 Structure du rapport:")
+        console.log("- Sections rapport:", Object.keys(data.report.rapport || {}))
+        console.log("- Médicaments:", data.report.prescriptions?.medicaments?.items?.length || 0)
+        console.log("- Examens bio:", data.report.prescriptions?.biologie?.examens?.length || 0)
+        console.log("- Examens imagerie:", data.report.prescriptions?.imagerie?.examens?.length || 0)
+        
         setReport(data.report)
         
-        // Vérifier les interactions médicamenteuses si nécessaire
-        if (data.report.prescriptions?.medicaments?.items?.length > 0) {
-          await checkDrugInteractions(data.report.prescriptions.medicaments.items)
-        }
+        // Vérifier les interactions médicamenteuses (désactivé - API non disponible)
+        // if (data.report.prescriptions?.medicaments?.items?.length > 0) {
+        //   await checkDrugInteractions(data.report.prescriptions.medicaments.items)
+        // }
         
-        // Appeler onComplete si fourni
         if (onComplete) {
-          logDebug("Calling onComplete callback")
           onComplete()
         }
       } else {
@@ -190,26 +196,20 @@ export default function ProfessionalReport({
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Erreur inconnue"
-      logDebug("Error generating report:", errorMessage)
+      console.error("❌ Erreur génération rapport:", errorMessage)
       setError(errorMessage)
     } finally {
       setLoading(false)
     }
   }
 
-  // Export simplifié - utilise window.print avec CSS spécifique
+  // Fonction pour exporter une section
   const exportSectionToPDF = (sectionId: string, filename: string) => {
     const element = document.getElementById(sectionId)
-    if (!element) {
-      logDebug("Element not found for export:", sectionId)
-      return
-    }
+    if (!element) return
 
     const printWindow = window.open('', '_blank')
-    if (!printWindow) {
-      logDebug("Could not open print window")
-      return
-    }
+    if (!printWindow) return
 
     const content = `
       <!DOCTYPE html>
@@ -217,15 +217,22 @@ export default function ProfessionalReport({
         <head>
           <title>${filename}</title>
           <style>
-            @media print {
-              @page { margin: 20mm; }
-              body { 
-                font-family: Arial, sans-serif;
-                line-height: 1.6;
-              }
-              h1, h2 { color: #333; }
-              .section { margin-bottom: 20px; }
+            @page { margin: 20mm; }
+            body { 
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
             }
+            h1, h2, h3 { color: #2c3e50; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .section { margin-bottom: 20px; }
+            .prescription-item { 
+              border-left: 4px solid #3498db; 
+              padding-left: 15px; 
+              margin: 15px 0;
+            }
+            .urgent { color: #e74c3c; font-weight: bold; }
+            .info { color: #7f8c8d; font-style: italic; }
           </style>
         </head>
         <body>
@@ -236,14 +243,10 @@ export default function ProfessionalReport({
 
     printWindow.document.write(content)
     printWindow.document.close()
-    setTimeout(() => {
-      printWindow.print()
-    }, 250)
+    setTimeout(() => printWindow.print(), 250)
   }
 
-  const handlePrint = () => {
-    window.print()
-  }
+  const handlePrint = () => window.print()
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -253,14 +256,12 @@ export default function ProfessionalReport({
           text: `Compte rendu de ${patientData.lastName || patientData.nom} ${patientData.firstName || patientData.prenom}`
         })
       } catch (err) {
-        logDebug("Share failed:", err)
+        console.log("Partage annulé")
       }
-    } else {
-      alert("Le partage n'est pas disponible sur ce navigateur")
     }
   }
 
-  // États de chargement
+  // États de chargement et erreur
   if (loading) {
     return (
       <Card className="w-full">
@@ -275,7 +276,6 @@ export default function ProfessionalReport({
     )
   }
 
-  // État d'erreur
   if (error) {
     return (
       <Card className="border-red-200 w-full">
@@ -291,21 +291,17 @@ export default function ProfessionalReport({
     )
   }
 
-  // État initial (pas encore de rapport)
   if (!report) {
     return (
       <Card className="w-full">
         <CardContent className="text-center py-10">
           <p className="text-gray-600">En attente de génération du rapport...</p>
-          <Button onClick={generateProfessionalReport} className="mt-4">
-            Générer le rapport
-          </Button>
         </CardContent>
       </Card>
     )
   }
 
-  // Composant Alert pour les interactions médicamenteuses
+  // Composant pour les interactions médicamenteuses
   const DrugInteractionsAlert = () => {
     if (!drugInteractions.length) return null
 
@@ -353,12 +349,123 @@ export default function ProfessionalReport({
     )
   }
 
+  // Composant pour le compte rendu de consultation
+  const ConsultationReport = () => {
+    const sections = [
+      { key: 'motifConsultation', title: 'MOTIF DE CONSULTATION' },
+      { key: 'anamnese', title: 'ANAMNÈSE' },
+      { key: 'antecedents', title: 'ANTÉCÉDENTS' },
+      { key: 'examenClinique', title: 'EXAMEN CLINIQUE' },
+      { key: 'syntheseDiagnostique', title: 'SYNTHÈSE DIAGNOSTIQUE' },
+      { key: 'conclusionDiagnostique', title: 'CONCLUSION DIAGNOSTIQUE' },
+      { key: 'priseEnCharge', title: 'PRISE EN CHARGE' },
+      { key: 'surveillance', title: 'SURVEILLANCE' },
+      { key: 'conclusion', title: 'CONCLUSION' }
+    ]
+
+    return (
+      <Card className="shadow-xl print:shadow-none">
+        <CardContent className="p-8 print:p-12">
+          {/* En-tête */}
+          <div className="text-center mb-8 print:mb-12">
+            <h1 className="text-2xl font-bold mb-2">{report.header.title}</h1>
+            <p className="text-gray-600">{report.header.subtitle}</p>
+            <p className="text-sm text-gray-500 mt-2">Référence : {report.header.reference}</p>
+          </div>
+
+          {/* Identification du patient */}
+          <div className="mb-8 p-4 bg-gray-50 rounded-lg">
+            <h3 className="font-bold mb-2">Identification du patient</h3>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div><span className="font-medium">Patient :</span> {report.identification.patient}</div>
+              <div><span className="font-medium">Âge :</span> {report.identification.age}</div>
+              <div><span className="font-medium">Sexe :</span> {report.identification.sexe}</div>
+              <div><span className="font-medium">Date de naissance :</span> {report.identification.dateNaissance}</div>
+              {report.identification.telephone && (
+                <div><span className="font-medium">Téléphone :</span> {report.identification.telephone}</div>
+              )}
+              {report.identification.email && (
+                <div><span className="font-medium">Email :</span> {report.identification.email}</div>
+              )}
+            </div>
+            {report.identification.adresse && (
+              <div className="mt-2">
+                <span className="font-medium">Adresse :</span> {report.identification.adresse}
+              </div>
+            )}
+          </div>
+
+          {/* Bouton pour afficher/masquer le rapport complet */}
+          <div className="mb-4 print:hidden">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFullReport(!showFullReport)}
+            >
+              {showFullReport ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+              {showFullReport ? "Masquer le rapport détaillé" : "Afficher le rapport complet"}
+            </Button>
+          </div>
+
+          {/* Contenu du rapport médical */}
+          <div className={`prose prose-lg max-w-none space-y-6 print:text-black ${
+            !showFullReport ? 'max-h-96 overflow-hidden relative' : ''
+          }`}>
+            {sections.map((section) => (
+              report.rapport[section.key] && (
+                <section key={section.key}>
+                  <h2 className="text-xl font-bold text-gray-900 mb-3">{section.title}</h2>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    {report.rapport[section.key]}
+                  </p>
+                </section>
+              )
+            ))}
+            
+            {!showFullReport && (
+              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent print:hidden" />
+            )}
+          </div>
+
+          {/* Afficher toujours en impression */}
+          <div className="hidden print:block">
+            {sections.map((section) => (
+              report.rapport[section.key] && (
+                <section key={section.key} className="mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-3">{section.title}</h2>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    {report.rapport[section.key]}
+                  </p>
+                </section>
+              )
+            ))}
+          </div>
+
+          {/* Signature */}
+          <div className="mt-12 pt-8 border-t border-gray-300">
+            <div className="text-right">
+              <p className="font-semibold">{report.signature.medecin}</p>
+              <p className="text-sm text-gray-600">{report.signature.qualification}</p>
+              {report.signature.rpps && (
+                <p className="text-sm text-gray-600">RPPS : {report.signature.rpps}</p>
+              )}
+              <p className="text-sm text-gray-600">{report.signature.etablissement}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   // Composant pour l'ordonnance médicamenteuse
   const MedicationPrescription = () => {
-    if (!report.prescriptions?.medicaments?.items?.length) {
+    const medications = report.prescriptions?.medicaments?.items || []
+    
+    if (medications.length === 0) {
       return (
         <Card>
           <CardContent className="text-center py-10">
+            <Pill className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600">Aucune prescription médicamenteuse</p>
           </CardContent>
         </Card>
@@ -374,6 +481,9 @@ export default function ProfessionalReport({
               <p className="text-gray-600 mt-1">
                 Date : {new Date().toLocaleDateString('fr-FR')}
               </p>
+              <p className="text-sm text-gray-500 mt-1">
+                {medications.length} médicament{medications.length > 1 ? 's' : ''} prescrit{medications.length > 1 ? 's' : ''}
+              </p>
             </div>
             <Button
               variant="outline"
@@ -387,6 +497,7 @@ export default function ProfessionalReport({
           </div>
         </div>
 
+        {/* Commenté car l'API check-drug-interactions n'existe pas
         {checkingInteractions && (
           <div className="mb-4 text-center text-gray-600">
             <Loader2 className="h-4 w-4 animate-spin inline mr-2" />
@@ -395,9 +506,10 @@ export default function ProfessionalReport({
         )}
 
         <DrugInteractionsAlert />
+        */}
 
         <div className="space-y-6">
-          {report.prescriptions.medicaments.items.map((med: MedicationItem, index: number) => (
+          {medications.map((med: MedicationItem, index: number) => (
             <div key={index} className="border-l-4 border-green-500 pl-4 py-2">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
@@ -458,10 +570,15 @@ export default function ProfessionalReport({
 
   // Composant pour les examens biologiques
   const BiologyPrescription = () => {
-    if (!report.prescriptions?.biologie?.examens?.length) {
+    const exams = report.prescriptions?.biologie?.examens || []
+    
+    console.log("🔬 Rendu BiologyPrescription, examens:", exams)
+    
+    if (exams.length === 0) {
       return (
         <Card>
           <CardContent className="text-center py-10">
+            <TestTube className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600">Aucun examen biologique prescrit</p>
           </CardContent>
         </Card>
@@ -477,6 +594,9 @@ export default function ProfessionalReport({
               <p className="text-gray-600 mt-1">
                 Date : {new Date().toLocaleDateString('fr-FR')}
               </p>
+              <p className="text-sm text-gray-500 mt-1">
+                {exams.length} examen{exams.length > 1 ? 's' : ''} prescrit{exams.length > 1 ? 's' : ''}
+              </p>
             </div>
             <Button
               variant="outline"
@@ -491,7 +611,7 @@ export default function ProfessionalReport({
         </div>
 
         <div className="space-y-4">
-          {report.prescriptions.biologie.examens.map((exam: BiologyExam, index: number) => (
+          {exams.map((exam: BiologyExam, index: number) => (
             <div key={index} className="border-l-4 border-purple-500 pl-4 py-2">
               <div className="font-bold text-lg">
                 {index + 1}. {exam.type}
@@ -519,16 +639,31 @@ export default function ProfessionalReport({
             <strong>Laboratoire recommandé :</strong> {report.prescriptions.biologie.laboratoireRecommande}
           </p>
         </div>
+
+        <div className="mt-8 pt-6 border-t border-gray-300">
+          <div className="text-right">
+            <p className="font-semibold">{report.signature.medecin}</p>
+            <p className="text-sm text-gray-600">{report.signature.qualification}</p>
+            {report.signature.rpps && (
+              <p className="text-sm text-gray-600">RPPS : {report.signature.rpps}</p>
+            )}
+          </div>
+        </div>
       </div>
     )
   }
 
   // Composant pour les examens d'imagerie
   const ImagingPrescription = () => {
-    if (!report.prescriptions?.imagerie?.examens?.length) {
+    const exams = report.prescriptions?.imagerie?.examens || []
+    
+    console.log("🏥 Rendu ImagingPrescription, examens:", exams)
+    
+    if (exams.length === 0) {
       return (
         <Card>
           <CardContent className="text-center py-10">
+            <Scan className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600">Aucun examen d'imagerie prescrit</p>
           </CardContent>
         </Card>
@@ -544,6 +679,9 @@ export default function ProfessionalReport({
               <p className="text-gray-600 mt-1">
                 Date : {new Date().toLocaleDateString('fr-FR')}
               </p>
+              <p className="text-sm text-gray-500 mt-1">
+                {exams.length} examen{exams.length > 1 ? 's' : ''} prescrit{exams.length > 1 ? 's' : ''}
+              </p>
             </div>
             <Button
               variant="outline"
@@ -558,7 +696,7 @@ export default function ProfessionalReport({
         </div>
 
         <div className="space-y-4">
-          {report.prescriptions.imagerie.examens.map((exam: ImagingExam, index: number) => (
+          {exams.map((exam: ImagingExam, index: number) => (
             <div key={index} className="border-l-4 border-indigo-500 pl-4 py-2">
               <div className="font-bold text-lg">
                 {index + 1}. {exam.type} - {exam.region}
@@ -590,11 +728,21 @@ export default function ProfessionalReport({
             <strong>Centre recommandé :</strong> {report.prescriptions.imagerie.centreRecommande}
           </p>
         </div>
+
+        <div className="mt-8 pt-6 border-t border-gray-300">
+          <div className="text-right">
+            <p className="font-semibold">{report.signature.medecin}</p>
+            <p className="text-sm text-gray-600">{report.signature.qualification}</p>
+            {report.signature.rpps && (
+              <p className="text-sm text-gray-600">RPPS : {report.signature.rpps}</p>
+            )}
+          </div>
+        </div>
       </div>
     )
   }
 
-  // Onglets simplifiés
+  // Onglets
   const TabButton = ({ value, label, icon, count }: any) => (
     <button
       onClick={() => setActiveTab(value)}
@@ -624,7 +772,7 @@ export default function ProfessionalReport({
             <div className="flex items-center gap-4">
               <Badge className="bg-green-100 text-green-800">
                 <CheckCircle className="h-3 w-3 mr-1" />
-                Dossier médical complet
+                Dossier médical généré
               </Badge>
               <span className="text-sm text-gray-600">
                 {report.metadata?.wordCount || 0} mots
@@ -633,7 +781,7 @@ export default function ProfessionalReport({
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={handlePrint}>
                 <Printer className="h-4 w-4 mr-2" />
-                Imprimer
+                Imprimer tout
               </Button>
               <Button variant="outline" size="sm" onClick={handleShare}>
                 <Share2 className="h-4 w-4 mr-2" />
@@ -675,119 +823,23 @@ export default function ProfessionalReport({
 
         {/* Contenu des onglets */}
         <div className="mt-6">
-          {activeTab === "consultation" && (
-            <Card className="shadow-xl print:shadow-none">
-              <CardContent className="p-8 print:p-12">
-                {/* En-tête du rapport */}
-                <div className="text-center mb-8 print:mb-12">
-                  <h1 className="text-2xl font-bold mb-2">{report.header.title}</h1>
-                  <p className="text-gray-600">{report.header.subtitle}</p>
-                  <p className="text-sm text-gray-500 mt-2">Référence : {report.header.reference}</p>
-                </div>
-
-                {/* Identification du patient */}
-                <div className="mb-8 p-4 bg-gray-50 rounded-lg">
-                  <h3 className="font-bold mb-2">Identification du patient</h3>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div><span className="font-medium">Patient :</span> {report.identification.patient}</div>
-                    <div><span className="font-medium">Âge :</span> {report.identification.age}</div>
-                    <div><span className="font-medium">Sexe :</span> {report.identification.sexe}</div>
-                    <div><span className="font-medium">Date de naissance :</span> {report.identification.dateNaissance}</div>
-                    {report.identification.telephone && (
-                      <div><span className="font-medium">Téléphone :</span> {report.identification.telephone}</div>
-                    )}
-                    {report.identification.email && (
-                      <div><span className="font-medium">Email :</span> {report.identification.email}</div>
-                    )}
-                  </div>
-                  {report.identification.adresse && (
-                    <div className="mt-2">
-                      <span className="font-medium">Adresse :</span> {report.identification.adresse}
-                    </div>
-                  )}
-                </div>
-
-                {/* Contenu du rapport médical */}
-                <div className="prose prose-lg max-w-none space-y-6 print:text-black">
-                  <section>
-                    <h2 className="text-xl font-bold text-gray-900 mb-3">MOTIF DE CONSULTATION</h2>
-                    <p className="text-gray-700 leading-relaxed">{report.rapport.motifConsultation}</p>
-                  </section>
-
-                  <section>
-                    <h2 className="text-xl font-bold text-gray-900 mb-3">ANAMNÈSE</h2>
-                    <p className="text-gray-700 leading-relaxed">{report.rapport.anamnese}</p>
-                  </section>
-
-                  <section>
-                    <h2 className="text-xl font-bold text-gray-900 mb-3">ANTÉCÉDENTS</h2>
-                    <p className="text-gray-700 leading-relaxed">{report.rapport.antecedents}</p>
-                  </section>
-
-                  <section>
-                    <h2 className="text-xl font-bold text-gray-900 mb-3">EXAMEN CLINIQUE</h2>
-                    <p className="text-gray-700 leading-relaxed">{report.rapport.examenClinique}</p>
-                  </section>
-
-                  <section>
-                    <h2 className="text-xl font-bold text-gray-900 mb-3">SYNTHÈSE DIAGNOSTIQUE</h2>
-                    <p className="text-gray-700 leading-relaxed">{report.rapport.syntheseDiagnostique}</p>
-                  </section>
-
-                  <section>
-                    <h2 className="text-xl font-bold text-gray-900 mb-3">CONCLUSION DIAGNOSTIQUE</h2>
-                    <p className="text-gray-700 leading-relaxed font-medium">{report.rapport.conclusionDiagnostique}</p>
-                  </section>
-
-                  <section>
-                    <h2 className="text-xl font-bold text-gray-900 mb-3">PRISE EN CHARGE</h2>
-                    <p className="text-gray-700 leading-relaxed">{report.rapport.priseEnCharge}</p>
-                  </section>
-
-                  <section>
-                    <h2 className="text-xl font-bold text-gray-900 mb-3">SURVEILLANCE</h2>
-                    <p className="text-gray-700 leading-relaxed">{report.rapport.surveillance}</p>
-                  </section>
-
-                  <section>
-                    <h2 className="text-xl font-bold text-gray-900 mb-3">CONCLUSION</h2>
-                    <p className="text-gray-700 leading-relaxed">{report.rapport.conclusion}</p>
-                  </section>
-                </div>
-
-                {/* Signature */}
-                <div className="mt-12 pt-8 border-t border-gray-300">
-                  <div className="text-right">
-                    <p className="font-semibold">{report.signature.medecin}</p>
-                    <p className="text-sm text-gray-600">{report.signature.qualification}</p>
-                    {report.signature.rpps && (
-                      <p className="text-sm text-gray-600">RPPS : {report.signature.rpps}</p>
-                    )}
-                    <p className="text-sm text-gray-600">{report.signature.etablissement}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
+          {activeTab === "consultation" && <ConsultationReport />}
           {activeTab === "medicaments" && <MedicationPrescription />}
           {activeTab === "biologie" && <BiologyPrescription />}
           {activeTab === "imagerie" && <ImagingPrescription />}
         </div>
       </div>
 
-      {/* Version d'impression complète */}
+      {/* Version d'impression complète - toutes les sections */}
       <div className="hidden print:block">
-        <div className="page-break-after">
-          {/* Compte rendu complet */}
-        </div>
-        <div className="page-break-after">
+        <ConsultationReport />
+        <div className="page-break-before mt-8">
           <MedicationPrescription />
         </div>
-        <div className="page-break-after">
+        <div className="page-break-before mt-8">
           <BiologyPrescription />
         </div>
-        <div>
+        <div className="page-break-before mt-8">
           <ImagingPrescription />
         </div>
       </div>
@@ -798,10 +850,29 @@ export default function ProfessionalReport({
           size="lg"
           onClick={onComplete}
           className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+          disabled={!report}
         >
           <CheckCircle className="h-5 w-5 mr-2" />
           Finaliser et Archiver la Consultation
         </Button>
+      </div>
+
+      {/* Debug info pour vérification */}
+      <div className="text-xs text-gray-500 mt-4 print:hidden">
+        <details>
+          <summary>Debug Info (cliquer pour voir)</summary>
+          <pre className="mt-2 p-2 bg-gray-100 rounded overflow-auto">
+            {JSON.stringify({
+              hasReport: !!report,
+              hasPrescriptions: !!report?.prescriptions,
+              medicationsCount: report?.prescriptions?.medicaments?.items?.length || 0,
+              biologyCount: report?.prescriptions?.biologie?.examens?.length || 0,
+              imagingCount: report?.prescriptions?.imagerie?.examens?.length || 0,
+              reportSections: report?.rapport ? Object.keys(report.rapport) : [],
+              reportLength: report?.rapport ? JSON.stringify(report.rapport).length : 0
+            }, null, 2)}
+          </pre>
+        </details>
       </div>
     </div>
   )
