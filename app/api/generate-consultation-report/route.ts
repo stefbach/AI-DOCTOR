@@ -82,6 +82,7 @@ export async function POST(request: NextRequest) {
     console.log("📋 Structure editedDocuments:", JSON.stringify(editedDocuments, null, 2))
 
     // Préparation du contexte médical unifié
+    console.log("🔧 Préparation du contexte médical...")
     const medicalContext = prepareMedicalContext({
       patientData,
       clinicalData,
@@ -91,7 +92,14 @@ export async function POST(request: NextRequest) {
     })
 
     // Génération du prompt structuré
-    const prompt = generateProfessionalReportPrompt(medicalContext, patientData)
+    console.log("✍️ Génération du prompt...")
+    let prompt: string
+    try {
+      prompt = generateProfessionalReportPrompt(medicalContext, patientData)
+    } catch (promptError) {
+      console.error("❌ Erreur lors de la génération du prompt:", promptError)
+      throw new Error(`Erreur de génération du prompt: ${promptError instanceof Error ? promptError.message : 'Erreur inconnue'}`)
+    }
 
     console.log("🤖 Génération du rapport avec GPT-4...")
     console.log("📝 Longueur du prompt:", prompt.length, "caractères")
@@ -169,8 +177,10 @@ function prepareMedicalContext(data: {
     telephone: data.patientData.telephone || data.patientData.phone || '',
     adresse: data.patientData.adresse || data.patientData.address || '',
     email: data.patientData.email || '',
-    allergies: data.patientData.allergies || data.patientData.medicalHistory?.allergies || [],
-    antecedents: data.patientData.antecedents || data.patientData.medicalHistory || []
+    allergies: Array.isArray(data.patientData.allergies) ? data.patientData.allergies :
+               Array.isArray(data.patientData.medicalHistory?.allergies) ? data.patientData.medicalHistory.allergies : [],
+    antecedents: Array.isArray(data.patientData.antecedents) ? data.patientData.antecedents :
+                 Array.isArray(data.patientData.medicalHistory) ? data.patientData.medicalHistory : []
   }
 
   return {
@@ -188,12 +198,12 @@ function generateProfessionalReportPrompt(medicalContext: any, patientData: Pati
   
   // Extraire les informations pertinentes du contexte
   const motifConsultation = medicalContext.clinical?.chiefComplaint || 
-                          medicalContext.clinical?.symptoms?.join(', ') || 
+                          (Array.isArray(medicalContext.clinical?.symptoms) ? medicalContext.clinical.symptoms.join(', ') : medicalContext.clinical?.symptoms) || 
                           medicalContext.diagnosis?.chiefComplaint ||
                           "Consultation médicale"
   
-  const symptomes = medicalContext.clinical?.symptoms || 
-                   medicalContext.diagnosis?.symptoms || []
+  const symptomes = Array.isArray(medicalContext.clinical?.symptoms) ? medicalContext.clinical.symptoms :
+                   Array.isArray(medicalContext.diagnosis?.symptoms) ? medicalContext.diagnosis.symptoms : []
   
   const vitalSigns = medicalContext.clinical?.vitalSigns || {}
   
@@ -207,30 +217,30 @@ function generateProfessionalReportPrompt(medicalContext: any, patientData: Pati
                              medicalContext.diagnosis?.diagnosticHypothesis || 
                              medicalContext.diagnosis?.mainDiagnosis || ""
   
-  const diagnosticsSecondaires = medicalContext.diagnosis?.secondaryDiagnoses || 
-                                 medicalContext.diagnosis?.diagnosticHypothesis?.secondary || []
+  const diagnosticsSecondaires = Array.isArray(medicalContext.diagnosis?.secondaryDiagnoses) ? medicalContext.diagnosis.secondaryDiagnoses :
+                                 Array.isArray(medicalContext.diagnosis?.diagnosticHypothesis?.secondary) ? medicalContext.diagnosis.diagnosticHypothesis.secondary : []
   
-  const examensRealises = medicalContext.diagnosis?.performedExams || 
-                         medicalContext.diagnosis?.examsPerformed || []
+  const examensRealises = Array.isArray(medicalContext.diagnosis?.performedExams) ? medicalContext.diagnosis.performedExams :
+                         Array.isArray(medicalContext.diagnosis?.examsPerformed) ? medicalContext.diagnosis.examsPerformed : []
   
   const analyseDiagnostique = medicalContext.diagnosis?.analysis || 
                              medicalContext.diagnosis?.clinicalAnalysis || 
                              medicalContext.diagnosis?.diagnosticAnalysis || ""
   
   // Traitement proposé - vérifier toutes les structures possibles
-  const medicaments = medicalContext.editedDocuments?.medication?.prescriptions || 
-                     medicalContext.diagnosis?.treatment?.medications || 
-                     medicalContext.diagnosis?.prescriptions?.medications || []
+  const medicaments = Array.isArray(medicalContext.editedDocuments?.medication?.prescriptions) ? medicalContext.editedDocuments.medication.prescriptions :
+                     Array.isArray(medicalContext.diagnosis?.treatment?.medications) ? medicalContext.diagnosis.treatment.medications :
+                     Array.isArray(medicalContext.diagnosis?.prescriptions?.medications) ? medicalContext.diagnosis.prescriptions.medications : []
   
-  const examsBio = medicalContext.editedDocuments?.biology?.examinations || 
-                   medicalContext.diagnosis?.examinations?.laboratory || 
-                   medicalContext.diagnosis?.examinations?.biology || 
-                   medicalContext.diagnosis?.prescriptions?.laboratory || []
+  const examsBio = Array.isArray(medicalContext.editedDocuments?.biology?.examinations) ? medicalContext.editedDocuments.biology.examinations :
+                   Array.isArray(medicalContext.diagnosis?.examinations?.laboratory) ? medicalContext.diagnosis.examinations.laboratory :
+                   Array.isArray(medicalContext.diagnosis?.examinations?.biology) ? medicalContext.diagnosis.examinations.biology :
+                   Array.isArray(medicalContext.diagnosis?.prescriptions?.laboratory) ? medicalContext.diagnosis.prescriptions.laboratory : []
   
-  const examsImaging = medicalContext.editedDocuments?.paraclinical?.examinations || 
-                      medicalContext.diagnosis?.examinations?.imaging || 
-                      medicalContext.diagnosis?.examinations?.radiology || 
-                      medicalContext.diagnosis?.prescriptions?.imaging || []
+  const examsImaging = Array.isArray(medicalContext.editedDocuments?.paraclinical?.examinations) ? medicalContext.editedDocuments.paraclinical.examinations :
+                      Array.isArray(medicalContext.diagnosis?.examinations?.imaging) ? medicalContext.diagnosis.examinations.imaging :
+                      Array.isArray(medicalContext.diagnosis?.examinations?.radiology) ? medicalContext.diagnosis.examinations.radiology :
+                      Array.isArray(medicalContext.diagnosis?.prescriptions?.imaging) ? medicalContext.diagnosis.prescriptions.imaging : []
   
   
   // Log des données extraites pour debug
@@ -244,29 +254,29 @@ function generateProfessionalReportPrompt(medicalContext: any, patientData: Pati
   const prompt = `Tu es un médecin senior expérimenté rédigeant un compte rendu de consultation professionnel et détaillé.
 
 DONNÉES DU PATIENT :
-- Nom : ${formatPatientName(medicalContext.patient)}
-- Âge : ${medicalContext.patient.age} ans
-- Sexe : ${medicalContext.patient.sexe}
-- Antécédents : ${JSON.stringify(medicalContext.patient.antecedents)}
-- Allergies : ${JSON.stringify(medicalContext.patient.allergies)}
+- Nom : ${escapeJsonString(formatPatientName(medicalContext.patient))}
+- Âge : ${escapeJsonString(medicalContext.patient.age)} ans
+- Sexe : ${escapeJsonString(medicalContext.patient.sexe)}
+- Antécédents : ${escapeJsonString(JSON.stringify(medicalContext.patient.antecedents))}
+- Allergies : ${escapeJsonString(JSON.stringify(medicalContext.patient.allergies))}
 
 DONNÉES DE LA CONSULTATION :
-- Motif : ${motifConsultation}
-- Symptômes : ${JSON.stringify(symptomes)}
-- Signes vitaux : ${JSON.stringify(vitalSigns)}
-- Examen physique : ${JSON.stringify(examenPhysique)}
+- Motif : ${escapeJsonString(motifConsultation)}
+- Symptômes : ${escapeJsonString(JSON.stringify(symptomes))}
+- Signes vitaux : ${escapeJsonString(JSON.stringify(vitalSigns))}
+- Examen physique : ${escapeJsonString(JSON.stringify(examenPhysique))}
 
 DONNÉES DU DIAGNOSTIC :
-- Diagnostic principal : ${diagnosticPrincipal}
-- Diagnostics secondaires : ${JSON.stringify(diagnosticsSecondaires)}
-- Examens réalisés : ${JSON.stringify(examensRealises)}
-- Analyse : ${analyseDiagnostique}
+- Diagnostic principal : ${escapeJsonString(diagnosticPrincipal)}
+- Diagnostics secondaires : ${escapeJsonString(JSON.stringify(diagnosticsSecondaires))}
+- Examens réalisés : ${escapeJsonString(JSON.stringify(examensRealises))}
+- Analyse : ${escapeJsonString(analyseDiagnostique)}
 
 QUESTIONS/RÉPONSES DE L'IA :
-${JSON.stringify(medicalContext.aiQuestions)}
+${escapeJsonString(JSON.stringify(medicalContext.aiQuestions))}
 
 DOCUMENTS ÉDITÉS :
-${JSON.stringify(medicalContext.editedDocuments)}
+${escapeJsonString(JSON.stringify(medicalContext.editedDocuments))}
 
 INSTRUCTIONS IMPORTANTES :
 1. Rédige un compte rendu COMPLET en prose narrative fluide et naturelle
@@ -279,99 +289,92 @@ INSTRUCTIONS IMPORTANTES :
 Génère le rapport au format JSON suivant, en t'assurant que CHAQUE section contient du texte narratif complet :
 
 {
-  "header": {
-    "title": "COMPTE-RENDU DE CONSULTATION MÉDICALE",
-    "subtitle": "Document médical confidentiel",
-    "reference": "CR-${escapeJsonString(patientId)}"
-  },
-  
-  "identification": {
-    "patient": "${escapeJsonString(formatPatientName(medicalContext.patient))}",
-    "age": "${escapeJsonString(String(medicalContext.patient.age || ''))} ans",
-    "sexe": "${escapeJsonString(medicalContext.patient.sexe)}",
-    "dateNaissance": "${escapeJsonString(formatDate(medicalContext.patient.dateNaissance))}",
-    "adresse": "${escapeJsonString(medicalContext.patient.adresse || 'Non renseignée')}",
-    "telephone": "${escapeJsonString(medicalContext.patient.telephone || 'Non renseigné')}",
-    "email": "${escapeJsonString(medicalContext.patient.email || 'Non renseigné')}"
-  },
-  
-  "rapport": {
-    "motifConsultation": "Rédige ici un paragraphe complet décrivant le motif principal de consultation basé sur : ${escapeJsonString(motifConsultation)}",
-    
-    "anamnese": "Rédige ici l'histoire détaillée de la maladie actuelle en intégrant les symptômes (${escapeJsonString(JSON.stringify(symptomes))}), leur évolution, leur impact sur la vie quotidienne du patient",
-    
-    "antecedents": "Décris ici les antécédents médicaux pertinents du patient : ${escapeJsonString(JSON.stringify(medicalContext.patient.antecedents))}, ses allergies : ${escapeJsonString(JSON.stringify(medicalContext.patient.allergies))}, et tout autre élément du contexte médical",
-    
-    "examenClinique": "Décris ici l'examen clinique complet incluant l'état général, les signes vitaux (${escapeJsonString(JSON.stringify(vitalSigns))}), et l'examen physique systématique (${escapeJsonString(JSON.stringify(examenPhysique))})",
-    
-    "syntheseDiagnostique": "Rédige ici l'analyse diagnostique complète basée sur : ${escapeJsonString(analyseDiagnostique)}, en expliquant le raisonnement médical et les hypothèses envisagées",
-    
-    "conclusionDiagnostique": "Énonce clairement le diagnostic principal retenu : ${escapeJsonString(diagnosticPrincipal)}${diagnosticsSecondaires.length > 0 ? ' et les diagnostics secondaires : ' + escapeJsonString(JSON.stringify(diagnosticsSecondaires)) : ''}",
-    
-    "priseEnCharge": "Détaille ici la stratégie thérapeutique complète incluant les médicaments prescrits, les examens demandés, et les mesures non médicamenteuses recommandées",
-    
-    "surveillance": "Décris le plan de suivi, les signes à surveiller, les consignes données au patient, et les modalités de réévaluation",
-    
-    "conclusion": "Rédige une synthèse finale résumant les points clés de la consultation et les prochaines étapes"
-  },
-  
-  "prescriptions": {
-    "medicaments": {
-      "items": [
-        ${medicaments.map((med: Medication) => `{
-          "nom": "${escapeJsonString(med.medication || med.name || '')}",
-          "dci": "${escapeJsonString(extractDCI(med.medication || med.name || ''))}",
-          "dosage": "${escapeJsonString(med.dosage || '')}",
-          "forme": "${escapeJsonString(detectMedicationForm(med.medication || med.name || ''))}",
-          "posologie": "${escapeJsonString(med.frequency || med.posology || '')}",
-          "duree": "${escapeJsonString(med.duration || '')}",
-          "quantite": "${escapeJsonString(calculateQuantity(med))}",
-          "remarques": "${escapeJsonString(med.instructions || '')}",
-          "nonSubstituable": false
-        }`).join(',\n        ')}
-      ],
-      "renouvellement": ${shouldAllowRenewal(medicalContext.diagnosis)},
-      "dateValidite": "${getValidityDate()}"
-    },
-    "biologie": {
-      "examens": [
-        ${examsBio.map((exam: Examination) => `{
-          "type": "${escapeJsonString(exam.name || exam.type || '')}",
-          "code": "${escapeJsonString(getBiologyCode(exam.name || exam.type || ''))}",
-          "urgence": ${exam.urgency === 'Urgent'},
-          "jeun": ${requiresFasting(exam.name || exam.type || '')},
-          "remarques": "${escapeJsonString(exam.justification || '')}"
-        }`).join(',\n        ')}
-      ],
-      "laboratoireRecommande": "Laboratoire d'analyses médicales agréé"
-    },
-    "imagerie": {
-      "examens": [
-        ${examsImaging.map((exam: Examination) => `{
-          "type": "${escapeJsonString(exam.type || '')}",
-          "region": "${escapeJsonString(exam.region || detectAnatomicalRegion(exam.type || ''))}",
-          "indication": "${escapeJsonString(exam.indication || exam.justification || '')}",
-          "urgence": ${exam.urgency === 'Urgent'},
-          "contraste": ${requiresContrast(exam.type || '')},
-          "remarques": "${escapeJsonString(exam.details || '')}"
-        }`).join(',\n        ')}
-      ],
-      "centreRecommande": "Centre d'imagerie médicale"
+    const jsonTemplate = {
+      header: {
+        title: "COMPTE-RENDU DE CONSULTATION MÉDICALE",
+        subtitle: "Document médical confidentiel",
+        reference: `CR-${patientId}`
+      },
+      
+      identification: {
+        patient: formatPatientName(medicalContext.patient),
+        age: `${medicalContext.patient.age} ans`,
+        sexe: medicalContext.patient.sexe,
+        dateNaissance: formatDate(medicalContext.patient.dateNaissance),
+        adresse: medicalContext.patient.adresse || 'Non renseignée',
+        telephone: medicalContext.patient.telephone || 'Non renseigné',
+        email: medicalContext.patient.email || 'Non renseigné'
+      },
+      
+      rapport: {
+        motifConsultation: `Rédige ici un paragraphe complet décrivant le motif principal de consultation basé sur : ${motifConsultation}`,
+        anamnese: `Rédige ici l'histoire détaillée de la maladie actuelle en intégrant les symptômes (${JSON.stringify(symptomes)}), leur évolution, leur impact sur la vie quotidienne du patient`,
+        antecedents: `Décris ici les antécédents médicaux pertinents du patient : ${JSON.stringify(medicalContext.patient.antecedents)}, ses allergies : ${JSON.stringify(medicalContext.patient.allergies)}, et tout autre élément du contexte médical`,
+        examenClinique: `Décris ici l'examen clinique complet incluant l'état général, les signes vitaux (${JSON.stringify(vitalSigns)}), et l'examen physique systématique (${JSON.stringify(examenPhysique)})`,
+        syntheseDiagnostique: `Rédige ici l'analyse diagnostique complète basée sur : ${analyseDiagnostique}, en expliquant le raisonnement médical et les hypothèses envisagées`,
+        conclusionDiagnostique: `Énonce clairement le diagnostic principal retenu : ${diagnosticPrincipal}${diagnosticsSecondaires.length > 0 ? ' et les diagnostics secondaires : ' + JSON.stringify(diagnosticsSecondaires) : ''}`,
+        priseEnCharge: "Détaille ici la stratégie thérapeutique complète incluant les médicaments prescrits, les examens demandés, et les mesures non médicamenteuses recommandées",
+        surveillance: "Décris le plan de suivi, les signes à surveiller, les consignes données au patient, et les modalités de réévaluation",
+        conclusion: "Rédige une synthèse finale résumant les points clés de la consultation et les prochaines étapes"
+      },
+      
+      prescriptions: {
+        medicaments: {
+          items: medicaments.map((med: Medication) => ({
+            nom: med.medication || med.name || '',
+            dci: extractDCI(med.medication || med.name || ''),
+            dosage: med.dosage || '',
+            forme: detectMedicationForm(med.medication || med.name || ''),
+            posologie: med.frequency || med.posology || '',
+            duree: med.duration || '',
+            quantite: calculateQuantity(med),
+            remarques: med.instructions || '',
+            nonSubstituable: false
+          })),
+          renouvellement: shouldAllowRenewal(medicalContext.diagnosis),
+          dateValidite: getValidityDate()
+        },
+        biologie: {
+          examens: examsBio.map((exam: Examination) => ({
+            type: exam.name || exam.type || '',
+            code: getBiologyCode(exam.name || exam.type || ''),
+            urgence: exam.urgency === 'Urgent',
+            jeun: requiresFasting(exam.name || exam.type || ''),
+            remarques: exam.justification || ''
+          })),
+          laboratoireRecommande: "Laboratoire d'analyses médicales agréé"
+        },
+        imagerie: {
+          examens: examsImaging.map((exam: Examination) => ({
+            type: exam.type || '',
+            region: exam.region || detectAnatomicalRegion(exam.type || ''),
+            indication: exam.indication || exam.justification || '',
+            urgence: exam.urgency === 'Urgent',
+            contraste: requiresContrast(exam.type || ''),
+            remarques: exam.details || ''
+          })),
+          centreRecommande: "Centre d'imagerie médicale"
+        }
+      },
+      
+      signature: {
+        medecin: "Dr. [NOM DU MÉDECIN]",
+        qualification: "Médecin Généraliste",
+        rpps: "[NUMÉRO RPPS]",
+        etablissement: "Cabinet Médical"
+      },
+      
+      metadata: {
+        dateGeneration: new Date().toISOString(),
+        wordCount: 0
+      }
     }
-  },
-  
-  "signature": {
-    "medecin": "Dr. [NOM DU MÉDECIN]",
-    "qualification": "Médecin Généraliste",
-    "rpps": "[NUMÉRO RPPS]",
-    "etablissement": "Cabinet Médical"
-  },
-  
-  "metadata": {
-    "dateGeneration": "${new Date().toISOString()}",
-    "wordCount": 0
-  }
-}
+    
+    // Stringifier le template avec une indentation pour la lisibilité
+    const jsonTemplateString = JSON.stringify(jsonTemplate, null, 2)
+    
+    // Construire le prompt final
+    const prompt = promptPrefix + jsonTemplateString + `
 
 RAPPEL CRITIQUE : 
 - Ne retourne QU'UN SEUL objet JSON valide
@@ -383,17 +386,41 @@ RAPPEL CRITIQUE :
 - Assure-toi que le JSON est valide et peut être parsé directement`
 
   return prompt
+  } catch (error) {
+    console.error("❌ Erreur dans generateProfessionalReportPrompt:", error)
+    console.error("Stack trace:", error instanceof Error ? error.stack : 'No stack trace')
+    throw error
+  }
 }
 
 // Fonction utilitaire pour échapper les caractères spéciaux dans les chaînes JSON
-function escapeJsonString(str: string): string {
-  if (!str) return ''
-  return str
-    .replace(/\\/g, '\\\\')
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, ' ')
-    .replace(/\r/g, '')
-    .replace(/\t/g, ' ')
+function escapeJsonString(value: any): string {
+  try {
+    // Convertir en string si ce n'est pas déjà le cas
+    if (value === null || value === undefined) return ''
+    
+    let strValue: string
+    
+    // Si c'est un objet ou un tableau, le stringifier d'abord
+    if (typeof value === 'object') {
+      strValue = JSON.stringify(value)
+    } else if (typeof value === 'string') {
+      strValue = value
+    } else {
+      strValue = String(value)
+    }
+    
+    // Maintenant on peut appliquer les remplacements
+    return strValue
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"')
+      .replace(/\n/g, ' ')
+      .replace(/\r/g, '')
+      .replace(/\t/g, ' ')
+  } catch (error) {
+    console.error('Erreur dans escapeJsonString:', error, 'Valeur:', value)
+    return ''
+  }
 }
 
 // Fonctions utilitaires
@@ -404,17 +431,37 @@ function formatPatientName(patient: any): string {
   return fullName || 'PATIENT'
 }
 
-function formatDate(dateString: string): string {
-  if (!dateString) return 'Non renseignée'
+function formatDate(dateValue: any): string {
+  if (!dateValue) return 'Non renseignée'
+  
   try {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('fr-FR')
+    // Si c'est déjà une chaîne formatée française, la retourner
+    const dateString = String(dateValue)
+    if (dateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+      return dateString
+    }
+    
+    // Sinon, essayer de parser et formater
+    const date = new Date(dateValue)
+    if (isNaN(date.getTime())) {
+      return dateString // Retourner la valeur originale si non parsable
+    }
+    
+    return date.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
   } catch {
-    return dateString
+    return String(dateValue)
   }
 }
 
-function extractDCI(medicationName: string): string {
+function extractDCI(medicationName: any): string {
+  // S'assurer qu'on a une chaîne
+  const name = String(medicationName || '')
+  if (!name) return 'À préciser'
+  
   // Logique simplifiée - en production, utiliser une base de données
   const commonDCIs: Record<string, string> = {
     'doliprane': 'Paracétamol',
@@ -429,7 +476,7 @@ function extractDCI(medicationName: string): string {
     'metformine': 'Metformine'
   }
   
-  const lowerName = medicationName.toLowerCase()
+  const lowerName = name.toLowerCase()
   for (const [brand, dci] of Object.entries(commonDCIs)) {
     if (lowerName.includes(brand)) return dci
   }
@@ -439,11 +486,13 @@ function extractDCI(medicationName: string): string {
   if (lowerName.includes('ibuprofène')) return 'Ibuprofène'
   if (lowerName.includes('amoxicilline')) return 'Amoxicilline'
   
-  return medicationName // Retourner le nom original si pas de DCI trouvée
+  return name // Retourner le nom original si pas de DCI trouvée
 }
 
-function detectMedicationForm(name: string): string {
-  const lowerName = name.toLowerCase()
+function detectMedicationForm(name: any): string {
+  const lowerName = String(name || '').toLowerCase()
+  if (!lowerName) return 'comprimé'
+  
   if (lowerName.includes('sirop')) return 'sirop'
   if (lowerName.includes('gel') || lowerName.includes('gélule')) return 'gélule'
   if (lowerName.includes('injectable')) return 'solution injectable'
@@ -460,8 +509,8 @@ function detectMedicationForm(name: string): string {
 
 function calculateQuantity(med: Medication): string {
   // Calcul basique de la quantité nécessaire
-  const duration = med.duration || ''
-  const frequency = med.frequency || med.posology || ''
+  const duration = String(med.duration || '')
+  const frequency = String(med.frequency || med.posology || '')
   
   // Extraire le nombre de jours
   const daysMatch = duration.match(/(\d+)\s*(jours?|days?|semaines?|weeks?|mois|months?)/i)
@@ -500,7 +549,10 @@ function calculateQuantity(med: Medication): string {
   return '1 boîte'
 }
 
-function getBiologyCode(examName: string): string {
+function getBiologyCode(examName: any): string {
+  const name = String(examName || '').toLowerCase()
+  if (!name) return ''
+  
   // Codes NABM simplifiés
   const codes: Record<string, string> = {
     'nfs': '1104',
@@ -526,36 +578,40 @@ function getBiologyCode(examName: string): string {
     'ionogramme': '1110-1111'
   }
   
-  const lowerName = examName.toLowerCase()
   for (const [exam, code] of Object.entries(codes)) {
-    if (lowerName.includes(exam)) return code
+    if (name.includes(exam)) return code
   }
   
   return ''
 }
 
-function requiresFasting(examName: string): boolean {
+function requiresFasting(examName: any): boolean {
+  const name = String(examName || '').toLowerCase()
+  if (!name) return false
+  
   const fastingExams = [
     'glycémie', 'glucose', 'bilan lipidique', 'cholestérol', 
     'triglycérides', 'hdl', 'ldl', 'glycémie à jeun',
     'insuline', 'peptide c', 'homa', 'bilan glucidique'
   ]
-  const lowerName = examName.toLowerCase()
-  return fastingExams.some(exam => lowerName.includes(exam))
+  return fastingExams.some(exam => name.includes(exam))
 }
 
-function requiresContrast(examType: string): boolean {
+function requiresContrast(examType: any): boolean {
+  const type = String(examType || '').toLowerCase()
+  if (!type) return false
+  
   const contrastExams = [
     'scanner', 'tdm', 'tomodensitométrie', 'angioscanner', 
     'irm avec injection', 'arthroscanner', 'uroscanner',
     'coroscanner', 'angio-irm', 'bili-irm'
   ]
-  const lowerType = examType.toLowerCase()
-  return contrastExams.some(exam => lowerType.includes(exam))
+  return contrastExams.some(exam => type.includes(exam))
 }
 
-function detectAnatomicalRegion(examType: string): string {
-  const lowerType = examType.toLowerCase()
+function detectAnatomicalRegion(examType: any): string {
+  const type = String(examType || '').toLowerCase()
+  if (!type) return 'Corps entier'
   
   const regions: Record<string, string> = {
     'thorax': 'Thorax',
@@ -598,7 +654,7 @@ function detectAnatomicalRegion(examType: string): string {
   }
   
   for (const [key, value] of Object.entries(regions)) {
-    if (lowerType.includes(key)) return value
+    if (type.includes(key)) return value
   }
   
   return 'Corps entier'
