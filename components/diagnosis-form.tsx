@@ -39,6 +39,7 @@ import {
   Circle
 } from "lucide-react"
 import { getTranslation, Language } from "@/lib/translations"
+import PatientAdviceCarousel from './patient-advice-carousel'
 
 interface DiagnosisFormProps {
   patientData: any
@@ -735,109 +736,49 @@ export default function DiagnosisForm({
     { id: "documents", title: "Documents Maurice", icon: FileText, status: sectionStatus.documents },
   ]
 
-  // Interface de chargement améliorée
+  // Interface de chargement avec conseils personnalisés
   if (loading) {
     return (
       <div className="space-y-6">
+        {/* NOUVEAU : Carousel de conseils personnalisés qui apparaît IMMÉDIATEMENT */}
+        <PatientAdviceCarousel 
+          patientData={patientData}
+          clinicalData={clinicalData}
+          analysisProgress={analysisProgress}
+          progressMessage={progressMessage}
+        />
+        
+        {/* Card d'analyse IA en cours (plus compacte) */}
         <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
           <CardHeader className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white">
-            <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold">
-              <Brain className="h-8 w-8" />
-              Analyse Diagnostique par Intelligence Artificielle
+            <CardTitle className="flex items-center justify-center gap-3 text-xl font-bold">
+              <Brain className="h-6 w-6 animate-pulse" />
+              Intelligence Artificielle GPT-4o en Action
             </CardTitle>
-            <p className="text-center text-white/90 text-sm mt-2">
-              Analyse médicale complète basée sur les guidelines internationaux
-            </p>
           </CardHeader>
-          <CardContent className="p-8">
-            {/* SECTION 1 : Résumé des données patient */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              {/* Carte Patient */}
-              <div className="bg-emerald-50 p-5 rounded-lg border border-emerald-200">
-                <h3 className="font-bold text-emerald-800 mb-3 flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Données Patient
-                </h3>
-                <div className="space-y-2 text-sm text-gray-700">
-                  <div className="flex justify-between">
-                    <span className="font-medium">Âge/Sexe:</span>
-                    <span>{patientData?.age} ans, {patientData?.sex === 'M' ? 'Homme' : 'Femme'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium">Poids:</span>
-                    <span>{patientData?.weight || 'Non renseigné'} kg</span>
-                  </div>
-                  {patientData?.medicalHistory && patientData.medicalHistory.length > 0 && (
-                    <div>
-                      <span className="font-medium">Antécédents:</span>
-                      <p className="text-xs mt-1 text-gray-600">{patientData.medicalHistory.join(', ')}</p>
-                    </div>
-                  )}
-                  {patientData?.currentMedications && patientData.currentMedications.length > 0 && (
-                    <div>
-                      <span className="font-medium">Traitements:</span>
-                      <p className="text-xs mt-1 text-gray-600">{patientData.currentMedications.join(', ')}</p>
-                    </div>
-                  )}
-                  {patientData?.allergies && patientData.allergies.length > 0 && (
-                    <div>
-                      <span className="font-medium">Allergies:</span>
-                      <p className="text-xs mt-1 text-red-600">{patientData.allergies.join(', ')}</p>
-                    </div>
-                  )}
-                </div>
+          <CardContent className="p-6">
+            {/* Indicateurs de qualité en grille compacte */}
+            <div className="grid grid-cols-4 gap-3 mb-6">
+              <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                <Shield className="h-6 w-6 text-emerald-600 mx-auto mb-1" />
+                <p className="text-xs font-medium text-gray-700">Guidelines Int.</p>
               </div>
-              
-              {/* Carte Présentation Clinique */}
-              <div className="bg-blue-50 p-5 rounded-lg border border-blue-200">
-                <h3 className="font-bold text-blue-800 mb-3 flex items-center gap-2">
-                  <Stethoscope className="h-5 w-5" />
-                  Présentation Clinique
-                </h3>
-                <div className="space-y-2 text-sm text-gray-700">
-                  <div>
-                    <span className="font-medium">Motif principal:</span>
-                    <p className="text-base font-semibold text-blue-800 mt-1">{clinicalData?.chiefComplaint}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium">Symptômes associés:</span>
-                    <p className="text-xs mt-1">{clinicalData?.symptoms?.join(', ') || 'Aucun'}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium">Durée d'évolution:</span>
-                    <p className="text-xs mt-1">{clinicalData?.symptomDuration || 'Non précisée'}</p>
-                  </div>
-                  {clinicalData?.vitalSigns && Object.keys(clinicalData.vitalSigns).length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-blue-200">
-                      <span className="font-medium text-xs">Signes vitaux:</span>
-                      <div className="grid grid-cols-2 gap-2 mt-2">
-                        {Object.entries(clinicalData.vitalSigns).map(([key, value]) => (
-                          <div key={key} className="text-xs">
-                            <span className="text-gray-600">{key}:</span> 
-                            <span className="font-medium ml-1">{value}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+              <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                <MapPin className="h-6 w-6 text-blue-600 mx-auto mb-1" />
+                <p className="text-xs font-medium text-gray-700">Maurice</p>
+              </div>
+              <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                <Brain className="h-6 w-6 text-purple-600 mx-auto mb-1" />
+                <p className="text-xs font-medium text-gray-700">GPT-4o</p>
+              </div>
+              <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                <Sparkles className="h-6 w-6 text-yellow-600 mx-auto mb-1" />
+                <p className="text-xs font-medium text-gray-700">Expert</p>
               </div>
             </div>
 
-            {/* SECTION 2 : Barre de progression détaillée */}
-            <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-6 rounded-lg mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-gray-800">Analyse en cours</h3>
-                <span className="text-sm text-gray-600">
-                  {analysisProgress}% - Environ {Math.max(60 - Math.floor(analysisProgress * 0.6), 5)}s restantes
-                </span>
-              </div>
-              
-              <Progress value={analysisProgress} className="h-3 mb-4" />
-              
-              <p className="text-sm font-medium text-blue-700 mb-4">{progressMessage}</p>
-              
-              {/* Checklist des étapes */}
+            {/* Checklist des étapes avec animation */}
+            <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-4 rounded-lg">
               <div className="space-y-2">
                 <ProgressStep completed={analysisProgress > 10} active={analysisProgress <= 10}>
                   Analyse des données patient
@@ -860,32 +801,12 @@ export default function DiagnosisForm({
               </div>
             </div>
 
-            {/* SECTION 3 : Indicateurs de qualité */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-                <Shield className="h-8 w-8 text-emerald-600 mx-auto mb-2" />
-                <p className="text-xs font-medium text-gray-700">Guidelines Internationaux</p>
-                <p className="text-xs text-gray-500 mt-1">ESC, WHO, NICE</p>
-              </div>
-              <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-                <MapPin className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                <p className="text-xs font-medium text-gray-700">Contexte Maurice</p>
-                <p className="text-xs text-gray-500 mt-1">Disponibilité locale</p>
-              </div>
-              <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-                <Brain className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                <p className="text-xs font-medium text-gray-700">IA Médicale GPT-4o</p>
-                <p className="text-xs text-gray-500 mt-1">Analyse experte</p>
-              </div>
-            </div>
-
-            {/* Animation de chargement */}
-            <div className="flex justify-center">
+            {/* Animation de chargement centrée */}
+            <div className="flex justify-center mt-6">
               <div className="relative">
-                <div className="w-16 h-16">
-                  <div className="absolute inset-0 border-4 border-emerald-200 rounded-full"></div>
-                  <div className="absolute inset-0 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
-                  <Brain className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-8 w-8 text-emerald-600" />
+                <div className="w-12 h-12">
+                  <div className="absolute inset-0 border-3 border-emerald-200 rounded-full"></div>
+                  <div className="absolute inset-0 border-3 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
                 </div>
               </div>
             </div>
