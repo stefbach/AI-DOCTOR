@@ -410,4 +410,4 @@ export default function PatientAdviceCarousel({
       </div>
     </div>
   )
-}-
+}
