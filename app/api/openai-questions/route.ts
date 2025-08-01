@@ -170,7 +170,60 @@ const FALLBACK_QUESTIONS = {
       options: ["Très inquiet", "Modérément", "Peu inquiet", "Pas du tout"],
       priority: "medium"
     }
+  ],
+  chest_pain: [
+    {
+      id: 1,
+      question: "Où ressentez-vous exactement la douleur?",
+      options: ["Centre de la poitrine", "Côté gauche", "Dos", "Partout"],
+      priority: "high"
+    },
+    {
+      id: 2,
+      question: "La douleur apparaît-elle à l'effort?",
+      options: ["Oui", "Non", "Parfois", "Je ne sais pas"],
+      priority: "high"
+    },
+    {
+      id: 3,
+      question: "La douleur irradie-t-elle?",
+      options: ["Vers le bras gauche", "Vers la mâchoire", "Vers le dos", "Non"],
+      priority: "high"
+    }
+  ],
+  headache: [
+    {
+      id: 1,
+      question: "Comment décririez-vous votre mal de tête?",
+      options: ["Pulsatile (battements)", "En étau", "Comme un coup de poignard", "Diffus"],
+      priority: "high"
+    },
+    {
+      id: 2,
+      question: "Avez-vous des symptômes associés?",
+      options: ["Nausées", "Sensibilité à la lumière", "Troubles visuels", "Aucun"],
+      priority: "high"
+    }
   ]
+}
+
+// Configuration des modèles IA
+const AI_CONFIGS = {
+  fast: {
+    model: "gpt-3.5-turbo",
+    temperature: 0.1,
+    maxTokens: 800
+  },
+  balanced: {
+    model: "gpt-4o-mini",
+    temperature: 0.2,
+    maxTokens: 1500
+  },
+  intelligent: {
+    model: "gpt-4o",
+    temperature: 0.3,
+    maxTokens: 2500
+  }
 }
 
 // Fonction principale
@@ -200,8 +253,11 @@ export async function POST(request: NextRequest) {
       console.log(`✅ Cache hit: ${Date.now() - startTime}ms`)
       return NextResponse.json({
         ...cached,
-        fromCache: true,
-        responseTime: Date.now() - startTime
+        metadata: {
+          ...cached.metadata,
+          fromCache: true,
+          responseTime: Date.now() - startTime
+        }
       })
     }
 
@@ -213,24 +269,8 @@ export async function POST(request: NextRequest) {
     // Générer le prompt selon le mode
     const prompt = generatePromptByMode(mode, patientData, clinicalData, pattern)
 
-    // Configuration selon le mode
-    const aiConfig = {
-      fast: {
-        model: "gpt-3.5-turbo",
-        temperature: 0.1,
-        maxTokens: 800
-      },
-      balanced: {
-        model: "gpt-4o-mini",
-        temperature: 0.2,
-        maxTokens: 1500
-      },
-      intelligent: {
-        model: "gpt-4o",
-        temperature: 0.3,
-        maxTokens: 2500
-      }
-    }[mode] || aiConfig.balanced
+    // Configuration selon le mode (corrigé)
+    const aiConfig = AI_CONFIGS[mode as keyof typeof AI_CONFIGS] || AI_CONFIGS.balanced
 
     // Timeout pour forcer fallback si trop lent
     const timeoutPromise = new Promise((_, reject) => 
@@ -251,17 +291,22 @@ export async function POST(request: NextRequest) {
 
       // Parser la réponse
       let questions
+      let reasoning = null
+      let differential = null
+      
       try {
         const jsonMatch = result.text.match(/\{[\s\S]*\}/)
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0])
           questions = parsed.questions || []
+          reasoning = parsed.reasoning || null
+          differential = parsed.differential || null
         } else {
           throw new Error("Pas de JSON trouvé")
         }
       } catch (parseError) {
         console.warn("Erreur parsing, utilisation fallback")
-        questions = FALLBACK_QUESTIONS.general
+        questions = FALLBACK_QUESTIONS[pattern as keyof typeof FALLBACK_QUESTIONS] || FALLBACK_QUESTIONS.general
       }
 
       // Préparer la réponse
@@ -274,7 +319,9 @@ export async function POST(request: NextRequest) {
           patientAge: patientData.age,
           responseTime: Date.now() - startTime,
           fromCache: false,
-          model: aiConfig.model
+          model: aiConfig.model,
+          reasoning,
+          differential
         }
       }
 
@@ -291,12 +338,13 @@ export async function POST(request: NextRequest) {
       console.warn(`⚠️ Timeout, utilisation fallback`)
       return NextResponse.json({
         success: true,
-        questions: FALLBACK_QUESTIONS[pattern] || FALLBACK_QUESTIONS.general,
+        questions: FALLBACK_QUESTIONS[pattern as keyof typeof FALLBACK_QUESTIONS] || FALLBACK_QUESTIONS.general,
         metadata: {
           mode,
           pattern,
           responseTime: Date.now() - startTime,
-          fallback: true
+          fallback: true,
+          model: 'fallback'
         }
       })
     }
@@ -308,7 +356,10 @@ export async function POST(request: NextRequest) {
         error: "Erreur génération questions",
         success: false,
         questions: FALLBACK_QUESTIONS.general,
-        fallback: true
+        metadata: {
+          fallback: true,
+          error: error.message
+        }
       },
       { status: 500 }
     )
