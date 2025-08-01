@@ -1,5 +1,4 @@
 // lib/consultation-data-service.ts
-import { v4 as uuidv4 } from 'uuid'
 
 interface ConsultationData {
   consultationId: string
@@ -23,6 +22,20 @@ class ConsultationDataService {
   constructor() {
     // Initialiser ou récupérer l'ID de consultation au démarrage
     this.initializeConsultationId()
+  }
+
+  // Générer un ID unique sans dépendance externe
+  private generateUniqueId(): string {
+    // Méthode 1: Utiliser crypto.randomUUID si disponible (navigateurs modernes)
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID) {
+      return window.crypto.randomUUID()
+    }
+    
+    // Méthode 2: Fallback avec timestamp et random
+    const timestamp = Date.now().toString(36)
+    const randomStr = Math.random().toString(36).substring(2, 15)
+    const randomStr2 = Math.random().toString(36).substring(2, 15)
+    return `${timestamp}-${randomStr}-${randomStr2}`
   }
 
   // Initialiser l'ID de consultation
@@ -64,7 +77,7 @@ class ConsultationDataService {
 
   // Créer une nouvelle consultation
   createNewConsultation(): string {
-    const newId = uuidv4()
+    const newId = this.generateUniqueId()
     this.currentConsultationId = newId
     this.storeConsultationId(newId)
     
