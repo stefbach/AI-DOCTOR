@@ -72,8 +72,9 @@ const DIAGNOSTIC_PATTERNS = {
 }
 
 // Détection rapide du pattern principal
-function detectMainPattern(symptoms: string): string {
-  const symptomsLower = symptoms.toLowerCase()
+function detectMainPattern(symptoms: string | undefined | null): string {
+  // S'assurer que symptoms est une string valide
+  const symptomsLower = String(symptoms || '').toLowerCase()
   
   for (const [pattern, data] of Object.entries(DIAGNOSTIC_PATTERNS)) {
     if (data.keywords.some(keyword => symptomsLower.includes(keyword))) {
@@ -91,9 +92,14 @@ function generatePromptByMode(
   clinicalData: any,
   pattern: string
 ): string {
+  // S'assurer que toutes les valeurs sont des strings valides
+  const age = patientData?.age || 'Âge inconnu'
+  const gender = patientData?.gender || 'Genre non spécifié'
+  const symptoms = String(clinicalData?.symptoms || clinicalData?.chiefComplaint || 'Symptômes non spécifiés')
+  
   const baseInfo = `
-Patient: ${patientData.age}ans, ${patientData.gender}
-Symptômes: ${clinicalData.symptoms || clinicalData.chiefComplaint}
+Patient: ${age}ans, ${gender}
+Symptômes: ${symptoms}
 Pattern: ${pattern}`
 
   switch (mode) {
@@ -239,6 +245,7 @@ export async function POST(request: NextRequest) {
       mode = 'balanced' // Par défaut: mode équilibré
     } = body
 
+    // Validation des données avec gestion des valeurs nulles
     if (!patientData || !clinicalData) {
       return NextResponse.json(
         { error: "Données patient et cliniques requises", success: false },
@@ -246,8 +253,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // S'assurer que les données critiques sont présentes
+    const validatedPatientData = {
+      age: patientData.age || 'Non spécifié',
+      gender: patientData.gender || 'Non spécifié',
+      ...patientData
+    }
+
+    const validatedClinicalData = {
+      symptoms: clinicalData.symptoms || '',
+      chiefComplaint: clinicalData.chiefComplaint || '',
+      ...clinicalData
+    }
+
     // Vérifier le cache
-    const cacheKey = `${clinicalData.symptoms}_${patientData.age}_${patientData.gender}_${mode}`
+    const symptomsString = String(validatedClinicalData.symptoms || validatedClinicalData.chiefComplaint || '')
+    const ageString = String(validatedPatientData.age)
+    const genderString = String(validatedPatientData.gender)
+    const cacheKey = `${symptomsString}_${ageString}_${genderString}_${mode}`
     const cached = patternCache.get(cacheKey)
     if (cached) {
       console.log(`✅ Cache hit: ${Date.now() - startTime}ms`)
@@ -263,11 +286,11 @@ export async function POST(request: NextRequest) {
 
     // Détecter le pattern principal
     const pattern = detectMainPattern(
-      clinicalData.symptoms || clinicalData.chiefComplaint || ""
+      validatedClinicalData.symptoms || validatedClinicalData.chiefComplaint || ""
     )
 
     // Générer le prompt selon le mode
-    const prompt = generatePromptByMode(mode, patientData, clinicalData, pattern)
+    const prompt = generatePromptByMode(mode, validatedPatientData, validatedClinicalData, pattern)
 
     // Configuration selon le mode (corrigé)
     const aiConfig = AI_CONFIGS[mode as keyof typeof AI_CONFIGS] || AI_CONFIGS.balanced
@@ -316,7 +339,7 @@ export async function POST(request: NextRequest) {
         metadata: {
           mode,
           pattern,
-          patientAge: patientData.age,
+          patientAge: validatedPatientData.age,
           responseTime: Date.now() - startTime,
           fromCache: false,
           model: aiConfig.model,
