@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // ==================== CLÉ API QUI FONCTIONNE ====================
-const WORKING_API_KEY = "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"
+const WORKING_API_KEY = "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"
 
 // ==================== CONTEXTE MEDICAL MAURICE ====================
 const MAURITIUS_HEALTHCARE_CONTEXT = {
