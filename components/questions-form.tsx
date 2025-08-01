@@ -32,11 +32,15 @@ import {
   BookOpen,
   AlertCircle,
   RefreshCw,
-  Zap
+  Zap,
+  Timer,
+  Gauge
 } from "lucide-react"
 import { getTranslation, Language } from "@/lib/translations"
 
-// Enhanced interfaces
+// Types et interfaces
+type GenerationMode = 'fast' | 'balanced' | 'intelligent'
+
 interface ClinicalScore {
   name: string
   fullName: string
@@ -96,7 +100,38 @@ interface QuestionsFormProps {
   consultationId?: string | null
 }
 
-// Helper Components
+// Configuration des modes
+const MODE_CONFIGS = {
+  fast: {
+    label: 'Rapide',
+    duration: '1-2s',
+    icon: Zap,
+    color: 'text-green-600',
+    bgColor: 'bg-green-50',
+    borderColor: 'border-green-200',
+    description: 'Triage initial, urgences'
+  },
+  balanced: {
+    label: 'Équilibré',
+    duration: '2-3s',
+    icon: Activity,
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-200',
+    description: 'Usage standard'
+  },
+  intelligent: {
+    label: 'Intelligent',
+    duration: '3-5s',
+    icon: Brain,
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-50',
+    borderColor: 'border-purple-200',
+    description: 'Cas complexes'
+  }
+}
+
+// Composants helpers
 function ScoreEducationCard({ question }: { question: EnhancedQuestion }) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -180,7 +215,7 @@ function ScoreEducationCard({ question }: { question: EnhancedQuestion }) {
 
           <div className="flex gap-4">
             {question.score_calculator_link && (
-              <a
+              
                 href={question.score_calculator_link}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -280,7 +315,7 @@ function SimpleTooltip({ children, content }: { children: React.ReactNode, conte
   )
 }
 
-// Main Component
+// Composant principal
 export default function QuestionsForm({
   patientData,
   clinicalData,
@@ -290,6 +325,7 @@ export default function QuestionsForm({
   language = 'fr',
   consultationId
 }: QuestionsFormProps) {
+  // États
   const [questions, setQuestions] = useState<EnhancedQuestion[]>([])
   const [responses, setResponses] = useState<QuestionResponse[]>([])
   const [loading, setLoading] = useState(false)
@@ -298,11 +334,37 @@ export default function QuestionsForm({
   const [showEducation, setShowEducation] = useState(true)
   const [metadata, setMetadata] = useState<any>(null)
   const [hasGenerated, setHasGenerated] = useState(false)
+  
+  // Nouveaux états pour les modes
+  const [generationMode, setGenerationMode] = useState<GenerationMode>('balanced')
+  const [generationTime, setGenerationTime] = useState<number | null>(null)
+  const [performanceMetrics, setPerformanceMetrics] = useState<any>(null)
 
-  // Helper function for translations
+  // Helper pour les traductions
   const t = (key: string) => getTranslation(key, language)
 
-  // Load saved data on mount
+  // Détection automatique du mode selon l'urgence
+  const detectUrgencyMode = (): GenerationMode => {
+    const symptoms = clinicalData?.symptoms?.toLowerCase() || ''
+    const chiefComplaint = clinicalData?.chiefComplaint?.toLowerCase() || ''
+    const combined = `${symptoms} ${chiefComplaint}`
+    
+    // Mots-clés d'urgence = mode rapide
+    const urgentKeywords = ['douleur thoracique', 'dyspnée', 'syncope', 'confusion', 'malaise']
+    if (urgentKeywords.some(keyword => combined.includes(keyword))) {
+      return 'fast'
+    }
+    
+    // Cas complexes = mode intelligent
+    const complexKeywords = ['multiple', 'chronique', 'récidivant', 'plusieurs']
+    if (complexKeywords.some(keyword => combined.includes(keyword))) {
+      return 'intelligent'
+    }
+    
+    return 'balanced'
+  }
+
+  // Chargement des données sauvegardées
   useEffect(() => {
     const loadSavedData = async () => {
       console.log('📂 Loading saved questions data...')
@@ -325,7 +387,7 @@ export default function QuestionsForm({
     loadSavedData()
   }, [consultationId])
 
-  // Save data when responses change
+  // Sauvegarde automatique
   useEffect(() => {
     const saveData = async () => {
       if (responses.length === 0) return
@@ -345,21 +407,23 @@ export default function QuestionsForm({
     return () => clearTimeout(timer)
   }, [responses])
 
-  // SYSTEMATIC GENERATION - Main trigger
+  // Génération automatique systématique
   useEffect(() => {
-    // Generate questions SYSTEMATICALLY when data is available
     if (patientData && clinicalData && !hasGenerated) {
+      const detectedMode = detectUrgencyMode()
+      setGenerationMode(detectedMode)
+      
       console.log('🎯 SYSTEMATIC GENERATION TRIGGERED')
       console.log('📋 Patient:', patientData?.firstName, patientData?.lastName)
       console.log('🏥 Chief Complaint:', clinicalData?.chiefComplaint)
-      console.log('📊 Has generated before:', hasGenerated)
+      console.log('⚡ Auto-detected mode:', detectedMode)
       
-      generateQuestions()
+      generateQuestions(detectedMode)
       setHasGenerated(true)
     }
   }, [patientData, clinicalData, hasGenerated])
 
-  // Auto-save effect
+  // Auto-save effet
   useEffect(() => {
     const timer = setTimeout(() => {
       onDataChange({ responses })
@@ -367,8 +431,9 @@ export default function QuestionsForm({
     return () => clearTimeout(timer)
   }, [responses, onDataChange])
 
-  const generateQuestions = async () => {
-    console.log('🚀 generateQuestions() called')
+  // Fonction de génération optimisée
+  const generateQuestions = async (mode: GenerationMode = generationMode) => {
+    console.log(`🚀 generateQuestions() called with mode: ${mode}`)
     console.log('📊 Patient data:', !!patientData, patientData?.firstName)
     console.log('📊 Clinical data:', !!clinicalData, clinicalData?.chiefComplaint)
     
@@ -379,9 +444,10 @@ export default function QuestionsForm({
 
     setLoading(true)
     setError(null)
+    const startTime = Date.now()
 
     try {
-      console.log('📡 Calling API /api/openai-questions...')
+      console.log(`📡 Calling API /api/openai-questions in ${mode} mode...`)
       
       const response = await fetch("/api/openai-questions", {
         method: "POST",
@@ -392,6 +458,7 @@ export default function QuestionsForm({
           patientData,
           clinicalData,
           language,
+          mode, // Mode de génération
         }),
       })
 
@@ -403,9 +470,26 @@ export default function QuestionsForm({
       }
 
       if (data.success && Array.isArray(data.questions)) {
-        console.log(`✅ Generated ${data.questions.length} questions successfully`)
+        const endTime = Date.now()
+        const totalTime = endTime - startTime
+        
+        setGenerationTime(totalTime)
+        setPerformanceMetrics({
+          mode,
+          totalTime,
+          questionsCount: data.questions.length,
+          cacheHit: data.metadata?.fromCache || false,
+          model: data.metadata?.model || 'unknown'
+        })
+        
+        console.log(`✅ Generated ${data.questions.length} questions in ${totalTime}ms (${mode} mode)`)
+        
         setQuestions(data.questions)
-        setMetadata(data.metadata)
+        setMetadata({
+          ...data.metadata,
+          mode,
+          generationTime: totalTime
+        })
         
         const initialResponses = data.questions.map((q: EnhancedQuestion) => ({
           questionId: q.id,
@@ -421,7 +505,7 @@ export default function QuestionsForm({
       console.error("❌ Error generating questions:", err)
       setError(err instanceof Error ? err.message : "Erreur inconnue")
 
-      // Fallback questions
+      // Questions de fallback
       const fallbackQuestions = [
         {
           id: 1,
@@ -467,12 +551,6 @@ export default function QuestionsForm({
     } finally {
       setLoading(false)
     }
-  }
-
-  const forceRegenerate = () => {
-    console.log('🔄 Force regenerate questions')
-    setHasGenerated(false)
-    generateQuestions()
   }
 
   const updateResponse = (questionId: number, answer: string | number) => {
@@ -626,7 +704,7 @@ export default function QuestionsForm({
 
   const progress = calculateProgress()
 
-  // Loading state
+  // État de chargement
   if (loading) {
     return (
       <div className="space-y-6">
@@ -636,6 +714,12 @@ export default function QuestionsForm({
               <Brain className="h-8 w-8 text-blue-600" />
               {t('questionsForm.title')}
             </CardTitle>
+            <div className="mt-4">
+              <Badge className={`${MODE_CONFIGS[generationMode].bgColor} ${MODE_CONFIGS[generationMode].color}`}>
+                {React.createElement(MODE_CONFIGS[generationMode].icon, { className: "h-3 w-3 mr-1" })}
+                Mode {MODE_CONFIGS[generationMode].label}
+              </Badge>
+            </div>
           </CardHeader>
           <CardContent className="flex items-center justify-center py-16">
             <div className="text-center space-y-4">
@@ -645,8 +729,14 @@ export default function QuestionsForm({
               </div>
               <div className="space-y-2">
                 <p className="text-xl font-semibold text-gray-800">{t('questionsForm.generating')}</p>
-                <p className="text-sm text-gray-600">Analyse multi-spécialités en cours...</p>
-                <p className="text-xs text-gray-500">Détection des scores cliniques pertinents</p>
+                <p className="text-sm text-gray-600">
+                  {generationMode === 'fast' && "Génération rapide pour triage..."}
+                  {generationMode === 'balanced' && "Analyse équilibrée en cours..."}
+                  {generationMode === 'intelligent' && "Analyse approfondie multi-spécialités..."}
+                </p>
+                <p className="text-xs text-gray-500">
+                  Temps estimé : {MODE_CONFIGS[generationMode].duration}
+                </p>
               </div>
               <Progress value={75} className="w-80 mx-auto h-2" />
             </div>
@@ -658,7 +748,7 @@ export default function QuestionsForm({
 
   return (
     <div className="space-y-6">
-      {/* Header with Progress */}
+      {/* Header avec Progress et Mode Selector */}
       <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -678,6 +768,27 @@ export default function QuestionsForm({
               <Badge variant="outline">
                 {metadata.approach || "multi-specialty-expert"}
               </Badge>
+              {/* Badge du mode */}
+              <Badge 
+                className={`${MODE_CONFIGS[metadata.mode || 'balanced'].bgColor} ${MODE_CONFIGS[metadata.mode || 'balanced'].color}`}
+              >
+                {React.createElement(MODE_CONFIGS[metadata.mode || 'balanced'].icon, { className: "h-3 w-3 mr-1" })}
+                Mode {MODE_CONFIGS[metadata.mode || 'balanced'].label}
+              </Badge>
+              {/* Temps de génération */}
+              {metadata.generationTime && (
+                <Badge variant="outline">
+                  <Timer className="h-3 w-3 mr-1" />
+                  {(metadata.generationTime / 1000).toFixed(1)}s
+                </Badge>
+              )}
+              {/* Cache hit */}
+              {metadata.fromCache && (
+                <Badge className="bg-green-100 text-green-800">
+                  <Gauge className="h-3 w-3 mr-1" />
+                  Cache
+                </Badge>
+              )}
             </div>
           )}
 
@@ -698,22 +809,58 @@ export default function QuestionsForm({
             {error && <Badge variant="destructive">{t('questionsForm.fallbackMode')}</Badge>}
           </div>
           
-          {/* Regenerate button */}
-          <div className="mt-4 flex justify-center">
+          {/* Mode selector et bouton régénérer */}
+          <div className="mt-6 space-y-4">
+            {/* Sélecteur de mode */}
+            <div className="flex justify-center gap-2">
+              {Object.entries(MODE_CONFIGS).map(([mode, config]) => (
+                <Button
+                  key={mode}
+                  variant={generationMode === mode ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setGenerationMode(mode as GenerationMode)}
+                  className={generationMode === mode ? config.bgColor : ''}
+                >
+                  {React.createElement(config.icon, { className: "h-3 w-3 mr-1" })}
+                  <span className="font-medium">{config.label}</span>
+                  <span className="text-xs ml-1 opacity-70">({config.duration})</span>
+                </Button>
+              ))}
+            </div>
+
+            {/* Description du mode sélectionné */}
+            <p className="text-sm text-gray-600">
+              {MODE_CONFIGS[generationMode].description}
+            </p>
+
+            {/* Bouton régénérer */}
             <Button
-              onClick={forceRegenerate}
+              onClick={() => generateQuestions(generationMode)}
               variant="outline"
               size="sm"
               disabled={loading}
+              className="mx-auto"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              {loading ? 'Génération...' : 'Régénérer les questions'}
+              {loading ? 'Génération...' : `Régénérer (mode ${MODE_CONFIGS[generationMode].label})`}
             </Button>
+
+            {/* Métriques de performance */}
+            {performanceMetrics && (
+              <div className="text-center space-y-1 text-xs text-gray-500">
+                <p>
+                  Généré {performanceMetrics.questionsCount} questions en {(performanceMetrics.totalTime / 1000).toFixed(1)}s
+                </p>
+                <p>
+                  Modèle : {performanceMetrics.model} {performanceMetrics.cacheHit && '(depuis cache)'}
+                </p>
+              </div>
+            )}
           </div>
         </CardHeader>
       </Card>
 
-      {/* Error alert */}
+      {/* Alerte d'erreur */}
       {error && (
         <Card className="bg-amber-50/80 backdrop-blur-sm border-amber-200 shadow-md">
           <CardContent className="pt-6">
@@ -727,7 +874,7 @@ export default function QuestionsForm({
         </Card>
       )}
 
-      {/* Question Navigation */}
+      {/* Navigation des questions */}
       {questions.length > 0 && (
         <div className="flex flex-wrap gap-2 justify-center">
           {questions.map((_, index) => {
@@ -758,7 +905,7 @@ export default function QuestionsForm({
         </div>
       )}
 
-      {/* Questions Cards */}
+      {/* Cartes de questions */}
       {questions.map((question, index) => (
         <Card 
           key={question.id} 
@@ -790,7 +937,7 @@ export default function QuestionsForm({
             </div>
           </CardHeader>
           <CardContent className="p-8 space-y-6">
-            {/* Question Metadata */}
+            {/* Métadonnées de la question */}
             <QuestionMetadataBadges question={question} />
 
             {/* Question */}
@@ -809,7 +956,7 @@ export default function QuestionsForm({
                 </div>
               )}
 
-              {/* Patient benefit */}
+              {/* Bénéfice patient */}
               {question.patient_benefit && (
                 <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
                   <div className="flex items-start gap-2">
@@ -821,16 +968,16 @@ export default function QuestionsForm({
                 </div>
               )}
 
-              {/* Question input */}
+              {/* Input de la question */}
               <div className="mt-6">
                 {renderQuestion(question)}
               </div>
             </div>
 
-            {/* Clinical Score Education */}
+            {/* Éducation sur le score clinique */}
             <ScoreEducationCard question={question} />
 
-            {/* Medical explanation */}
+            {/* Explication médicale */}
             {question.medical_explanation && showEducation && (
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="flex items-start gap-2">
@@ -854,7 +1001,7 @@ export default function QuestionsForm({
               </Alert>
             )}
 
-            {/* Answer confirmation */}
+            {/* Confirmation de réponse */}
             {(() => {
               const response = responses.find((r) => r.questionId === question.id)
               const currentAnswer = response?.answer || ""
@@ -878,7 +1025,7 @@ export default function QuestionsForm({
         </Card>
       ))}
 
-      {/* Navigation between questions */}
+      {/* Navigation entre questions */}
       {questions.length > 0 && (
         <div className="flex justify-between">
           <Button
@@ -913,7 +1060,7 @@ export default function QuestionsForm({
         </div>
       )}
 
-      {/* Fixed AI Diagnosis button */}
+      {/* Bouton diagnostic IA fixe */}
       {isFormValid() && (
         <div className="sticky bottom-4 flex justify-center">
           <Button 
@@ -927,7 +1074,7 @@ export default function QuestionsForm({
         </div>
       )}
 
-      {/* Toggle education */}
+      {/* Basculer l'éducation */}
       <div className="flex justify-center">
         <Button
           variant="outline"
@@ -940,7 +1087,7 @@ export default function QuestionsForm({
         </Button>
       </div>
 
-      {/* Auto-save indicator */}
+      {/* Indicateur de sauvegarde automatique */}
       <div className="flex justify-center">
         <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -948,7 +1095,7 @@ export default function QuestionsForm({
         </div>
       </div>
 
-      {/* Main Navigation */}
+      {/* Navigation principale */}
       <div className="flex justify-between">
         <Button 
           variant="outline" 
