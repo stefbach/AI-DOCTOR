@@ -4,7 +4,7 @@ import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
 
 // Configuration pour différents modes de vitesse
-export const runtime = 'edge' // Pour des réponses plus rapides
+export const runtime = 'edge'
 export const preferredRegion = 'auto'
 
 // Types
@@ -73,7 +73,6 @@ const DIAGNOSTIC_PATTERNS = {
 
 // Détection rapide du pattern principal
 function detectMainPattern(symptoms: string | undefined | null): string {
-  // S'assurer que symptoms est une string valide
   const symptomsLower = String(symptoms || '').toLowerCase()
   
   for (const [pattern, data] of Object.entries(DIAGNOSTIC_PATTERNS)) {
@@ -85,14 +84,13 @@ function detectMainPattern(symptoms: string | undefined | null): string {
   return 'general'
 }
 
-// Génération de prompt selon le mode
+// Génération de prompt selon le mode - AMÉLIORÉ
 function generatePromptByMode(
   mode: string,
   patientData: any,
   clinicalData: any,
   pattern: string
 ): string {
-  // S'assurer que toutes les valeurs sont des strings valides
   const age = patientData?.age || 'Âge inconnu'
   const gender = patientData?.gender || 'Genre non spécifié'
   const symptoms = String(clinicalData?.symptoms || clinicalData?.chiefComplaint || 'Symptômes non spécifiés')
@@ -102,41 +100,65 @@ Patient: ${age}ans, ${gender}
 Symptômes: ${symptoms}
 Pattern: ${pattern}`
 
+  // Ajout d'instructions plus claires pour obtenir UNIQUEMENT du JSON
+  const jsonInstruction = "\n\nIMPORTANT: Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après."
+
   switch (mode) {
     case 'fast':
       return `${baseInfo}
 Génère 5 questions diagnostiques télémédecine.
-Format JSON: {"questions":[{"id":1,"question":"...","options":["..."],"priority":"high"}]}
-JSON uniquement.`
+
+Format JSON EXACT à retourner:
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "...",
+      "options": ["option1", "option2", "option3", "option4"],
+      "priority": "high"
+    }
+  ]
+}${jsonInstruction}`
 
     case 'balanced':
       return `${baseInfo}
 Génère 6 questions diagnostiques avec raisonnement clinique.
-Inclure: questions discriminantes, red flags, chronologie.
-Format JSON avec rationale pour chaque question.
-{"questions":[{"id":1,"question":"...","options":["..."],"rationale":"...","priority":"..."}]}`
+
+Format JSON EXACT à retourner:
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "...",
+      "options": ["option1", "option2", "option3", "option4"],
+      "rationale": "...",
+      "priority": "high"
+    }
+  ]
+}${jsonInstruction}`
 
     case 'intelligent':
       return `${baseInfo}
 MISSION: Questions diagnostiques intelligentes maximisant le gain d'information.
-Utilise le raisonnement bayésien pour discriminer entre diagnostics possibles.
 
-Format JSON complet:
+Format JSON EXACT à retourner:
 {
   "reasoning": "Raisonnement clinique",
   "differential": ["diagnostic1", "diagnostic2"],
-  "questions": [{
-    "id": 1,
-    "question": "...",
-    "options": ["..."],
-    "clinical_reasoning": "...",
-    "diagnostic_impact": {
-      "if_positive": "...",
-      "if_negative": "..."
-    },
-    "priority": "critical|high|medium"
-  }]
-}`
+  "questions": [
+    {
+      "id": 1,
+      "question": "...",
+      "options": ["option1", "option2", "option3", "option4"],
+      "clinical_reasoning": "...",
+      "diagnostic_impact": {
+        "if_positive": "...",
+        "if_negative": "..."
+      },
+      "priority": "high"
+    }
+  ]
+}${jsonInstruction}`
 
     default:
       return generatePromptByMode('balanced', patientData, clinicalData, pattern)
@@ -213,22 +235,56 @@ const FALLBACK_QUESTIONS = {
   ]
 }
 
-// Configuration des modèles IA
+// Configuration des modèles IA - TIMEOUTS AUGMENTÉS
 const AI_CONFIGS = {
   fast: {
     model: "gpt-3.5-turbo",
     temperature: 0.1,
-    maxTokens: 800
+    maxTokens: 800,
+    timeout: 5000 // Augmenté de 3s à 5s
   },
   balanced: {
     model: "gpt-4o-mini",
     temperature: 0.2,
-    maxTokens: 1500
+    maxTokens: 1500,
+    timeout: 8000 // Augmenté de 5s à 8s
   },
   intelligent: {
     model: "gpt-4o",
     temperature: 0.3,
-    maxTokens: 2500
+    maxTokens: 2500,
+    timeout: 12000 // Augmenté de 5s à 12s
+  }
+}
+
+// Fonction de parsing JSON améliorée
+function parseAIResponse(text: string, mode: string): any {
+  try {
+    // Essayer de parser directement
+    return JSON.parse(text)
+  } catch (e) {
+    // Si échec, essayer d'extraire le JSON
+    console.log("Première tentative de parsing échouée, extraction du JSON...")
+    
+    // Nettoyer le texte
+    let cleanedText = text.trim()
+    
+    // Rechercher le premier { et le dernier }
+    const firstBrace = cleanedText.indexOf('{')
+    const lastBrace = cleanedText.lastIndexOf('}')
+    
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      const jsonString = cleanedText.substring(firstBrace, lastBrace + 1)
+      try {
+        return JSON.parse(jsonString)
+      } catch (parseError) {
+        console.error("Échec du parsing après extraction:", parseError)
+        console.log("Texte reçu:", text.substring(0, 500) + "...")
+        throw parseError
+      }
+    }
+    
+    throw new Error("Aucun JSON valide trouvé dans la réponse")
   }
 }
 
@@ -242,10 +298,10 @@ export async function POST(request: NextRequest) {
     const { 
       patientData, 
       clinicalData, 
-      mode = 'balanced' // Par défaut: mode équilibré
+      mode = 'balanced'
     } = body
 
-    // Validation des données avec gestion des valeurs nulles
+    // Validation des données
     if (!patientData || !clinicalData) {
       return NextResponse.json(
         { error: "Données patient et cliniques requises", success: false },
@@ -253,7 +309,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // S'assurer que les données critiques sont présentes
+    // Validation et normalisation des données
     const validatedPatientData = {
       age: patientData.age || 'Non spécifié',
       gender: patientData.gender || 'Non spécifié',
@@ -292,15 +348,17 @@ export async function POST(request: NextRequest) {
     // Générer le prompt selon le mode
     const prompt = generatePromptByMode(mode, validatedPatientData, validatedClinicalData, pattern)
 
-    // Configuration selon le mode (corrigé)
+    // Configuration selon le mode
     const aiConfig = AI_CONFIGS[mode as keyof typeof AI_CONFIGS] || AI_CONFIGS.balanced
 
-    // Timeout pour forcer fallback si trop lent
+    // Timeout avec durée adaptée au mode
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout')), mode === 'fast' ? 3000 : 5000)
+      setTimeout(() => reject(new Error('Timeout')), aiConfig.timeout)
     )
 
     try {
+      console.log(`🚀 Appel OpenAI ${mode} (timeout: ${aiConfig.timeout}ms)`)
+      
       // Génération IA avec timeout
       const result = await Promise.race([
         generateText({
@@ -312,30 +370,32 @@ export async function POST(request: NextRequest) {
         timeoutPromise
       ]) as any
 
-      // Parser la réponse
-      let questions
-      let reasoning = null
-      let differential = null
-      
+      console.log("✅ Réponse OpenAI reçue")
+
+      // Parser la réponse avec fonction améliorée
+      let parsed
       try {
-        const jsonMatch = result.text.match(/\{[\s\S]*\}/)
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0])
-          questions = parsed.questions || []
-          reasoning = parsed.reasoning || null
-          differential = parsed.differential || null
-        } else {
-          throw new Error("Pas de JSON trouvé")
-        }
+        parsed = parseAIResponse(result.text, mode)
       } catch (parseError) {
-        console.warn("Erreur parsing, utilisation fallback")
-        questions = FALLBACK_QUESTIONS[pattern as keyof typeof FALLBACK_QUESTIONS] || FALLBACK_QUESTIONS.general
+        console.error("❌ Erreur de parsing JSON:", parseError)
+        throw parseError
+      }
+
+      // Extraire les données selon le mode
+      const questions = parsed.questions || []
+      const reasoning = parsed.reasoning || null
+      const differential = parsed.differential || null
+
+      // Valider que nous avons des questions
+      if (!Array.isArray(questions) || questions.length === 0) {
+        console.warn("⚠️ Pas de questions valides dans la réponse")
+        throw new Error("Pas de questions valides")
       }
 
       // Préparer la réponse
       const response = {
         success: true,
-        questions: questions.slice(0, 8), // Limiter à 8 questions
+        questions: questions.slice(0, 8),
         metadata: {
           mode,
           pattern,
@@ -349,16 +409,19 @@ export async function POST(request: NextRequest) {
       }
 
       // Mettre en cache si réponse rapide
-      if (response.metadata.responseTime < 4000) {
+      if (response.metadata.responseTime < 10000) {
         patternCache.set(cacheKey, response)
       }
 
       console.log(`✅ Succès ${mode}: ${response.metadata.responseTime}ms`)
       return NextResponse.json(response)
 
-    } catch (timeoutError) {
-      // Fallback si timeout
-      console.warn(`⚠️ Timeout, utilisation fallback`)
+    } catch (error: any) {
+      // Log détaillé de l'erreur
+      console.error(`❌ Erreur dans génération ${mode}:`, error.message)
+      
+      // Utiliser fallback
+      console.log("📌 Utilisation du fallback")
       return NextResponse.json({
         success: true,
         questions: FALLBACK_QUESTIONS[pattern as keyof typeof FALLBACK_QUESTIONS] || FALLBACK_QUESTIONS.general,
@@ -367,13 +430,14 @@ export async function POST(request: NextRequest) {
           pattern,
           responseTime: Date.now() - startTime,
           fallback: true,
+          fallbackReason: error.message,
           model: 'fallback'
         }
       })
     }
 
   } catch (error: any) {
-    console.error("❌ Erreur:", error)
+    console.error("❌ Erreur générale:", error)
     return NextResponse.json(
       { 
         error: "Erreur génération questions",
@@ -396,17 +460,20 @@ export async function GET(request: NextRequest) {
       fast: {
         description: "Ultra-rapide (1-2s)",
         model: "gpt-3.5-turbo",
-        useCase: "Triage initial, urgences"
+        useCase: "Triage initial, urgences",
+        timeout: "5s"
       },
       balanced: {
-        description: "Équilibré (2-3s)",
+        description: "Équilibré (2-4s)",
         model: "gpt-4o-mini",
-        useCase: "Usage standard"
+        useCase: "Usage standard",
+        timeout: "8s"
       },
       intelligent: {
-        description: "Intelligence maximale (3-5s)",
+        description: "Intelligence maximale (3-8s)",
         model: "gpt-4o",
-        useCase: "Cas complexes"
+        useCase: "Cas complexes",
+        timeout: "12s"
       }
     },
     defaultMode: "balanced",
