@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -105,6 +105,11 @@ const MODE_CONFIGS = {
     borderColor: 'border-purple-200',
     description: 'Cas complexes'
   }
+}
+
+// Composant helper pour les icônes dynamiques
+function DynamicIcon({ icon: Icon, className }: { icon: any, className?: string }) {
+  return <Icon className={className} />
 }
 
 // Composants helpers
@@ -551,7 +556,7 @@ export default function QuestionsForm({
             </CardTitle>
             <div className="mt-4">
               <Badge className={`${MODE_CONFIGS[generationMode].bgColor} ${MODE_CONFIGS[generationMode].color}`}>
-                {React.createElement(MODE_CONFIGS[generationMode].icon, { className: "h-3 w-3 mr-1" })}
+                <DynamicIcon icon={MODE_CONFIGS[generationMode].icon} className="h-3 w-3 mr-1" />
                 Mode {MODE_CONFIGS[generationMode].label}
               </Badge>
             </div>
@@ -600,7 +605,7 @@ export default function QuestionsForm({
               <Badge 
                 className={`${MODE_CONFIGS[metadata.mode || 'balanced'].bgColor} ${MODE_CONFIGS[metadata.mode || 'balanced'].color}`}
               >
-                {React.createElement(MODE_CONFIGS[metadata.mode || 'balanced'].icon, { className: "h-3 w-3 mr-1" })}
+                <DynamicIcon icon={MODE_CONFIGS[metadata.mode || 'balanced'].icon} className="h-3 w-3 mr-1" />
                 Mode {MODE_CONFIGS[metadata.mode || 'balanced'].label}
               </Badge>
               {metadata.responseTime && (
@@ -650,7 +655,7 @@ export default function QuestionsForm({
                   onClick={() => setGenerationMode(mode as GenerationMode)}
                   className={generationMode === mode ? config.bgColor : ''}
                 >
-                  {React.createElement(config.icon, { className: "h-3 w-3 mr-1" })}
+                  <DynamicIcon icon={config.icon} className="h-3 w-3 mr-1" />
                   <span className="font-medium">{config.label}</span>
                   <span className="text-xs ml-1 opacity-70">({config.duration})</span>
                 </Button>
