@@ -170,26 +170,30 @@ function getDefaultValueForType(type: string): string {
 
 // Fonction helper pour valider et nettoyer une valeur selon son type
 function validateAndCleanValue(value: any, type: string): string {
+  // Gestion des valeurs nullish ou invalides
   if (value === undefined || value === null || value === 'N/A') {
     return getDefaultValueForType(type)
   }
   
+  // S'assurer que c'est une string avant toute manipulation
+  const stringValue = String(value)
+  
   switch (type) {
     case 'number':
-      const numValue = Number(value)
+      const numValue = Number(stringValue)
       if (isNaN(numValue)) {
         return ''
       }
-      return value.toString()
+      return stringValue
     case 'date':
       // Vérifier si c'est une date valide
-      const dateValue = new Date(value)
+      const dateValue = new Date(stringValue)
       if (isNaN(dateValue.getTime())) {
         return new Date().toISOString().split('T')[0]
       }
-      return value.toString()
+      return stringValue
     default:
-      return value.toString()
+      return stringValue
   }
 }
 
@@ -221,8 +225,9 @@ export default function QuestionsForm({
 
   // Détection automatique du mode selon l'urgence
   const detectUrgencyMode = (): GenerationMode => {
-    const symptoms = clinicalData?.symptoms?.toLowerCase() || ''
-    const chiefComplaint = clinicalData?.chiefComplaint?.toLowerCase() || ''
+    // S'assurer que les valeurs sont des strings avant d'appeler toLowerCase
+    const symptoms = String(clinicalData?.symptoms || '').toLowerCase()
+    const chiefComplaint = String(clinicalData?.chiefComplaint || '').toLowerCase()
     const combined = `${symptoms} ${chiefComplaint}`
     
     const urgentKeywords = ['douleur thoracique', 'dyspnée', 'syncope', 'confusion', 'malaise']
@@ -298,8 +303,8 @@ export default function QuestionsForm({
       setGenerationMode(detectedMode)
       
       console.log('🎯 SYSTEMATIC GENERATION TRIGGERED')
-      console.log('📋 Patient:', patientData?.firstName, patientData?.lastName)
-      console.log('🏥 Chief Complaint:', clinicalData?.chiefComplaint)
+      console.log('📋 Patient:', patientData?.firstName || 'N/A', patientData?.lastName || 'N/A')
+      console.log('🏥 Chief Complaint:', clinicalData?.chiefComplaint || 'N/A')
       console.log('⚡ Auto-detected mode:', detectedMode)
       
       generateQuestions(detectedMode)
@@ -475,13 +480,13 @@ export default function QuestionsForm({
 
   const renderQuestion = (question: Question) => {
     const response = responses.find((r) => r.questionId === question.id)
-    const currentAnswer = response?.answer || ""
+    const currentAnswer = String(response?.answer || "")
 
     // Si la question a des options, c'est un choix multiple
     if (question.options && question.options.length > 0) {
       return (
         <RadioGroup
-          value={currentAnswer.toString()}
+          value={currentAnswer}
           onValueChange={(value) => updateResponse(question.id, value)}
           className="grid grid-cols-1 md:grid-cols-2 gap-4"
         >
@@ -510,7 +515,7 @@ export default function QuestionsForm({
       return (
         <input
           type="number"
-          value={currentAnswer.toString()}
+          value={currentAnswer}
           onChange={(e) => updateResponse(question.id, e.target.value)}
           placeholder="Entrez un nombre"
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
@@ -523,7 +528,7 @@ export default function QuestionsForm({
       return (
         <input
           type="date"
-          value={currentAnswer.toString()}
+          value={currentAnswer}
           onChange={(e) => updateResponse(question.id, e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
         />
@@ -533,7 +538,7 @@ export default function QuestionsForm({
     // Sinon, c'est un champ texte
     return (
       <Textarea
-        value={currentAnswer.toString()}
+        value={currentAnswer}
         onChange={(e) => updateResponse(question.id, e.target.value)}
         placeholder={t('questionsForm.yourAnswerPlaceholder')}
         rows={3}
@@ -815,7 +820,7 @@ export default function QuestionsForm({
             {/* Confirmation de réponse */}
             {(() => {
               const response = responses.find((r) => r.questionId === question.id)
-              const currentAnswer = response?.answer || ""
+              const currentAnswer = String(response?.answer || "")
               const isAnswered = currentAnswer !== ""
 
               return isAnswered && (
