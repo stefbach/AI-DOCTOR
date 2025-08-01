@@ -510,13 +510,13 @@ export async function POST(request: NextRequest) {
             content: finalPrompt
           }
         ],
-        temperature: 0.5,      // Plus déterministe = plus cohérent et rapide
-        max_tokens: 4500,      // Suffisant pour le contenu complet
+        temperature: 0.3,      // Plus déterministe = plus cohérent et rapide
+        max_tokens: 8000,      // Suffisant pour le contenu complet
         response_format: { type: "json_object" },
         // Optimisations OpenAI
         top_p: 0.95,           // Limite légèrement l'espace de recherche
         frequency_penalty: 0,   // Pas de pénalité pour garder le style médical
-        presence_penalty: 0.3,    // Force la concision
+        presence_penalty: 0,    // Force la concision
         seed: 12345            // Pour des résultats plus cohérents
       }),
     })
