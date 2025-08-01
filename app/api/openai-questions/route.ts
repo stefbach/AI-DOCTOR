@@ -84,7 +84,7 @@ function detectMainPattern(symptoms: string | undefined | null): string {
   return 'general'
 }
 
-// Génération de prompt selon le mode - AMÉLIORÉ
+// Génération de prompt selon le mode - SIMPLIFIÉ
 function generatePromptByMode(
   mode: string,
   patientData: any,
@@ -95,74 +95,15 @@ function generatePromptByMode(
   const gender = patientData?.gender || 'Genre non spécifié'
   const symptoms = String(clinicalData?.symptoms || clinicalData?.chiefComplaint || 'Symptômes non spécifiés')
   
-  const baseInfo = `
-Patient: ${age}ans, ${gender}
-Symptômes: ${symptoms}
-Pattern: ${pattern}`
+  // Prompt TRÈS SIMPLE pour faciliter le parsing
+  const simplePrompt = `Patient: ${age} ans, ${gender}. Symptômes: ${symptoms}.
 
-  // Ajout d'instructions plus claires pour obtenir UNIQUEMENT du JSON
-  const jsonInstruction = "\n\nIMPORTANT: Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après."
+Génère un JSON avec 5 questions diagnostiques. Format:
+{"questions":[{"id":1,"question":"...","options":["...","...","...","..."],"priority":"high"}]}
 
-  switch (mode) {
-    case 'fast':
-      return `${baseInfo}
-Génère 5 questions diagnostiques télémédecine.
+Réponds UNIQUEMENT avec le JSON, rien d'autre.`
 
-Format JSON EXACT à retourner:
-{
-  "questions": [
-    {
-      "id": 1,
-      "question": "...",
-      "options": ["option1", "option2", "option3", "option4"],
-      "priority": "high"
-    }
-  ]
-}${jsonInstruction}`
-
-    case 'balanced':
-      return `${baseInfo}
-Génère 6 questions diagnostiques avec raisonnement clinique.
-
-Format JSON EXACT à retourner:
-{
-  "questions": [
-    {
-      "id": 1,
-      "question": "...",
-      "options": ["option1", "option2", "option3", "option4"],
-      "rationale": "...",
-      "priority": "high"
-    }
-  ]
-}${jsonInstruction}`
-
-    case 'intelligent':
-      return `${baseInfo}
-MISSION: Questions diagnostiques intelligentes maximisant le gain d'information.
-
-Format JSON EXACT à retourner:
-{
-  "reasoning": "Raisonnement clinique",
-  "differential": ["diagnostic1", "diagnostic2"],
-  "questions": [
-    {
-      "id": 1,
-      "question": "...",
-      "options": ["option1", "option2", "option3", "option4"],
-      "clinical_reasoning": "...",
-      "diagnostic_impact": {
-        "if_positive": "...",
-        "if_negative": "..."
-      },
-      "priority": "high"
-    }
-  ]
-}${jsonInstruction}`
-
-    default:
-      return generatePromptByMode('balanced', patientData, clinicalData, pattern)
-  }
+  return simplePrompt
 }
 
 // Questions de fallback pré-générées
@@ -235,66 +176,35 @@ const FALLBACK_QUESTIONS = {
   ]
 }
 
-// Configuration des modèles IA - TIMEOUTS AUGMENTÉS
+// Configuration des modèles IA
 const AI_CONFIGS = {
   fast: {
     model: "gpt-3.5-turbo",
     temperature: 0.1,
-    maxTokens: 800,
-    timeout: 5000 // Augmenté de 3s à 5s
+    maxTokens: 500
   },
   balanced: {
-    model: "gpt-4o-mini",
+    model: "gpt-4o-mini", 
     temperature: 0.2,
-    maxTokens: 1500,
-    timeout: 8000 // Augmenté de 5s à 8s
+    maxTokens: 800
   },
   intelligent: {
     model: "gpt-4o",
     temperature: 0.3,
-    maxTokens: 2500,
-    timeout: 12000 // Augmenté de 5s à 12s
+    maxTokens: 1200
   }
 }
 
-// Fonction de parsing JSON améliorée
-function parseAIResponse(text: string, mode: string): any {
-  try {
-    // Essayer de parser directement
-    return JSON.parse(text)
-  } catch (e) {
-    // Si échec, essayer d'extraire le JSON
-    console.log("Première tentative de parsing échouée, extraction du JSON...")
-    
-    // Nettoyer le texte
-    let cleanedText = text.trim()
-    
-    // Rechercher le premier { et le dernier }
-    const firstBrace = cleanedText.indexOf('{')
-    const lastBrace = cleanedText.lastIndexOf('}')
-    
-    if (firstBrace !== -1 && lastBrace !== -1) {
-      const jsonString = cleanedText.substring(firstBrace, lastBrace + 1)
-      try {
-        return JSON.parse(jsonString)
-      } catch (parseError) {
-        console.error("Échec du parsing après extraction:", parseError)
-        console.log("Texte reçu:", text.substring(0, 500) + "...")
-        throw parseError
-      }
-    }
-    
-    throw new Error("Aucun JSON valide trouvé dans la réponse")
-  }
-}
-
-// Fonction principale
+// Fonction principale avec DÉBOGAGE COMPLET
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
+  console.log("🚀 Début requête POST /api/openai-questions")
   
   try {
     // Parser la requête
     const body = await request.json()
+    console.log("📝 Body reçu:", JSON.stringify(body, null, 2))
+    
     const { 
       patientData, 
       clinicalData, 
@@ -303,6 +213,7 @@ export async function POST(request: NextRequest) {
 
     // Validation des données
     if (!patientData || !clinicalData) {
+      console.error("❌ Données manquantes")
       return NextResponse.json(
         { error: "Données patient et cliniques requises", success: false },
         { status: 400 }
@@ -324,9 +235,7 @@ export async function POST(request: NextRequest) {
 
     // Vérifier le cache
     const symptomsString = String(validatedClinicalData.symptoms || validatedClinicalData.chiefComplaint || '')
-    const ageString = String(validatedPatientData.age)
-    const genderString = String(validatedPatientData.gender)
-    const cacheKey = `${symptomsString}_${ageString}_${genderString}_${mode}`
+    const cacheKey = `${symptomsString}_${validatedPatientData.age}_${validatedPatientData.gender}_${mode}`
     const cached = patternCache.get(cacheKey)
     if (cached) {
       console.log(`✅ Cache hit: ${Date.now() - startTime}ms`)
@@ -341,54 +250,66 @@ export async function POST(request: NextRequest) {
     }
 
     // Détecter le pattern principal
-    const pattern = detectMainPattern(
-      validatedClinicalData.symptoms || validatedClinicalData.chiefComplaint || ""
-    )
+    const pattern = detectMainPattern(symptomsString)
+    console.log(`🔍 Pattern détecté: ${pattern}`)
 
-    // Générer le prompt selon le mode
+    // Générer le prompt
     const prompt = generatePromptByMode(mode, validatedPatientData, validatedClinicalData, pattern)
+    console.log(`📄 Prompt généré (${prompt.length} caractères)`)
 
     // Configuration selon le mode
     const aiConfig = AI_CONFIGS[mode as keyof typeof AI_CONFIGS] || AI_CONFIGS.balanced
-
-    // Timeout avec durée adaptée au mode
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout')), aiConfig.timeout)
-    )
+    console.log(`⚙️ Config IA: ${JSON.stringify(aiConfig)}`)
 
     try {
-      console.log(`🚀 Appel OpenAI ${mode} (timeout: ${aiConfig.timeout}ms)`)
+      console.log(`🤖 Appel OpenAI ${aiConfig.model}...`)
+      const aiStartTime = Date.now()
       
-      // Génération IA avec timeout
-      const result = await Promise.race([
-        generateText({
-          model: openai(aiConfig.model),
-          prompt,
-          temperature: aiConfig.temperature,
-          maxTokens: aiConfig.maxTokens,
-        }),
-        timeoutPromise
-      ]) as any
+      // APPEL SANS TIMEOUT pour voir le temps réel
+      const result = await generateText({
+        model: openai(aiConfig.model),
+        prompt,
+        temperature: aiConfig.temperature,
+        maxTokens: aiConfig.maxTokens,
+      })
+      
+      const aiTime = Date.now() - aiStartTime
+      console.log(`✅ Réponse OpenAI en ${aiTime}ms`)
+      console.log(`📄 Réponse brute (${result.text.length} caractères):`)
+      console.log(result.text.substring(0, 500) + (result.text.length > 500 ? '...' : ''))
 
-      console.log("✅ Réponse OpenAI reçue")
-
-      // Parser la réponse avec fonction améliorée
-      let parsed
+      // Parser la réponse
+      let questions = []
       try {
-        parsed = parseAIResponse(result.text, mode)
+        // Nettoyer et parser
+        const cleanText = result.text.trim()
+        // Essayer de parser directement
+        let parsed
+        try {
+          parsed = JSON.parse(cleanText)
+        } catch (e) {
+          // Si échec, extraire entre { et }
+          const start = cleanText.indexOf('{')
+          const end = cleanText.lastIndexOf('}')
+          if (start !== -1 && end !== -1) {
+            const jsonPart = cleanText.substring(start, end + 1)
+            parsed = JSON.parse(jsonPart)
+          } else {
+            throw new Error("Pas de JSON trouvé")
+          }
+        }
+        
+        questions = parsed.questions || []
+        console.log(`✅ ${questions.length} questions extraites`)
+        
       } catch (parseError) {
-        console.error("❌ Erreur de parsing JSON:", parseError)
+        console.error("❌ Erreur parsing:", parseError)
+        console.error("Texte complet reçu:", result.text)
         throw parseError
       }
 
-      // Extraire les données selon le mode
-      const questions = parsed.questions || []
-      const reasoning = parsed.reasoning || null
-      const differential = parsed.differential || null
-
-      // Valider que nous avons des questions
+      // Valider les questions
       if (!Array.isArray(questions) || questions.length === 0) {
-        console.warn("⚠️ Pas de questions valides dans la réponse")
         throw new Error("Pas de questions valides")
       }
 
@@ -401,27 +322,23 @@ export async function POST(request: NextRequest) {
           pattern,
           patientAge: validatedPatientData.age,
           responseTime: Date.now() - startTime,
+          aiResponseTime: aiTime,
           fromCache: false,
-          model: aiConfig.model,
-          reasoning,
-          differential
+          model: aiConfig.model
         }
       }
 
-      // Mettre en cache si réponse rapide
-      if (response.metadata.responseTime < 10000) {
-        patternCache.set(cacheKey, response)
-      }
+      // Mettre en cache
+      patternCache.set(cacheKey, response)
 
-      console.log(`✅ Succès ${mode}: ${response.metadata.responseTime}ms`)
+      console.log(`✅ Succès total: ${response.metadata.responseTime}ms`)
       return NextResponse.json(response)
 
     } catch (error: any) {
-      // Log détaillé de l'erreur
-      console.error(`❌ Erreur dans génération ${mode}:`, error.message)
+      console.error(`❌ Erreur OpenAI:`, error)
+      console.error("Stack:", error.stack)
       
-      // Utiliser fallback
-      console.log("📌 Utilisation du fallback")
+      // Retourner fallback avec détails d'erreur
       return NextResponse.json({
         success: true,
         questions: FALLBACK_QUESTIONS[pattern as keyof typeof FALLBACK_QUESTIONS] || FALLBACK_QUESTIONS.general,
@@ -431,6 +348,7 @@ export async function POST(request: NextRequest) {
           responseTime: Date.now() - startTime,
           fallback: true,
           fallbackReason: error.message,
+          errorType: error.name,
           model: 'fallback'
         }
       })
@@ -445,7 +363,8 @@ export async function POST(request: NextRequest) {
         questions: FALLBACK_QUESTIONS.general,
         metadata: {
           fallback: true,
-          error: error.message
+          error: error.message,
+          errorType: error.name
         }
       },
       { status: 500 }
@@ -453,30 +372,49 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Endpoint pour obtenir les modes disponibles
+// Endpoint de test pour vérifier la connexion OpenAI
 export async function GET(request: NextRequest) {
-  return NextResponse.json({
-    modes: {
-      fast: {
-        description: "Ultra-rapide (1-2s)",
-        model: "gpt-3.5-turbo",
-        useCase: "Triage initial, urgences",
-        timeout: "5s"
-      },
-      balanced: {
-        description: "Équilibré (2-4s)",
-        model: "gpt-4o-mini",
-        useCase: "Usage standard",
-        timeout: "8s"
-      },
-      intelligent: {
-        description: "Intelligence maximale (3-8s)",
-        model: "gpt-4o",
-        useCase: "Cas complexes",
-        timeout: "12s"
+  console.log("🧪 Test connexion OpenAI...")
+  
+  try {
+    // Test simple
+    const testStart = Date.now()
+    const result = await generateText({
+      model: openai("gpt-3.5-turbo"),
+      prompt: "Réponds uniquement avec le JSON: {\"test\":\"ok\"}",
+      temperature: 0,
+      maxTokens: 50,
+    })
+    const testTime = Date.now() - testStart
+    
+    return NextResponse.json({
+      status: "✅ OpenAI connecté",
+      responseTime: `${testTime}ms`,
+      response: result.text,
+      modes: {
+        fast: {
+          description: "Ultra-rapide",
+          model: "gpt-3.5-turbo",
+          useCase: "Triage initial"
+        },
+        balanced: {
+          description: "Équilibré",
+          model: "gpt-4o-mini",
+          useCase: "Usage standard"
+        },
+        intelligent: {
+          description: "Intelligence maximale",
+          model: "gpt-4o",
+          useCase: "Cas complexes"
+        }
       }
-    },
-    defaultMode: "balanced",
-    cacheEnabled: true
-  })
+    })
+  } catch (error: any) {
+    console.error("❌ Erreur test:", error)
+    return NextResponse.json({
+      status: "❌ Erreur OpenAI",
+      error: error.message,
+      errorType: error.name
+    }, { status: 500 })
+  }
 }
