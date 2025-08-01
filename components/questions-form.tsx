@@ -151,6 +151,43 @@ function SimpleTooltip({ children, content }: { children: React.ReactNode, conte
   )
 }
 
+// Fonction helper pour obtenir la valeur par défaut selon le type
+function getDefaultValueForType(type: string): string {
+  switch (type) {
+    case 'number':
+      return ''
+    case 'date':
+      return new Date().toISOString().split('T')[0]
+    default:
+      return ''
+  }
+}
+
+// Fonction helper pour valider et nettoyer une valeur selon son type
+function validateAndCleanValue(value: any, type: string): string {
+  if (value === undefined || value === null || value === 'N/A') {
+    return getDefaultValueForType(type)
+  }
+  
+  switch (type) {
+    case 'number':
+      const numValue = Number(value)
+      if (isNaN(numValue)) {
+        return ''
+      }
+      return value.toString()
+    case 'date':
+      // Vérifier si c'est une date valide
+      const dateValue = new Date(value)
+      if (isNaN(dateValue.getTime())) {
+        return new Date().toISOString().split('T')[0]
+      }
+      return value.toString()
+    default:
+      return value.toString()
+  }
+}
+
 // Composant principal
 export default function QuestionsForm({
   patientData,
@@ -206,8 +243,18 @@ export default function QuestionsForm({
         if (currentConsultationId) {
           const savedData = await consultationDataService.getAllData()
           if (savedData?.questionsData?.responses && savedData.questionsData.responses.length > 0) {
-            console.log('💾 Found saved responses:', savedData.questionsData.responses.length)
-            setResponses(savedData.questionsData.responses)
+            // Valider et nettoyer les réponses
+            const cleanedResponses = savedData.questionsData.responses.map((response: QuestionResponse) => {
+              const cleanAnswer = validateAndCleanValue(response.answer, response.type)
+              
+              return {
+                ...response,
+                answer: cleanAnswer
+              }
+            })
+            
+            console.log('💾 Found saved responses:', cleanedResponses.length)
+            setResponses(cleanedResponses)
             setHasGenerated(true)
           }
         }
@@ -318,12 +365,19 @@ export default function QuestionsForm({
           generationTime: totalTime
         })
         
-        const initialResponses = normalizedQuestions.map((q: Question) => ({
-          questionId: q.id,
-          question: q.question,
-          answer: "",
-          type: q.type || 'text',
-        }))
+        // Initialiser les réponses avec les bonnes valeurs par défaut
+        const initialResponses = normalizedQuestions.map((q: Question) => {
+          const type = q.type || 'text'
+          const defaultAnswer = getDefaultValueForType(type)
+          
+          return {
+            questionId: q.id,
+            question: q.question,
+            answer: defaultAnswer,
+            type: type,
+          }
+        })
+        
         setResponses(initialResponses)
       } else {
         throw new Error('Invalid response format')
@@ -361,7 +415,7 @@ export default function QuestionsForm({
       const initialResponses = fallbackQuestions.map((q) => ({
         questionId: q.id,
         question: q.question,
-        answer: "",
+        answer: getDefaultValueForType(q.type || 'text'),
         type: q.type || 'text',
       }))
       setResponses(initialResponses)
@@ -371,8 +425,16 @@ export default function QuestionsForm({
   }
 
   const updateResponse = (questionId: number, answer: string | number) => {
+    const question = questions.find(q => q.id === questionId)
+    const type = question?.type || 'text'
+    
+    // Valider et nettoyer la valeur selon le type
+    const validatedAnswer = validateAndCleanValue(answer, type)
+    
     const newResponses = responses.map((response) =>
-      response.questionId === questionId ? { ...response, answer } : response,
+      response.questionId === questionId 
+        ? { ...response, answer: validatedAnswer } 
+        : response
     )
     setResponses(newResponses)
   }
@@ -435,6 +497,31 @@ export default function QuestionsForm({
             </div>
           ))}
         </RadioGroup>
+      )
+    }
+
+    // Champ numérique
+    if (question.type === 'number') {
+      return (
+        <input
+          type="number"
+          value={currentAnswer.toString()}
+          onChange={(e) => updateResponse(question.id, e.target.value)}
+          placeholder="Entrez un nombre"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+        />
+      )
+    }
+
+    // Champ date
+    if (question.type === 'date') {
+      return (
+        <input
+          type="date"
+          value={currentAnswer.toString()}
+          onChange={(e) => updateResponse(question.id, e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+        />
       )
     }
 
