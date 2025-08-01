@@ -1,7 +1,10 @@
-// /app/api/openai-diagnosis/route.ts - VERSION OPTIMISÉE POUR VITESSE (CONTENU COMPLET)
+// /app/api/openai-diagnosis/route.ts - VERSION AVEC CLÉ QUI FONCTIONNE
 import { NextRequest, NextResponse } from 'next/server'
 
-// ==================== CONTEXTE MEDICAL MAURICE (INCHANGÉ) ====================
+// ==================== CLÉ API QUI FONCTIONNE ====================
+const WORKING_API_KEY = "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"
+
+// ==================== CONTEXTE MEDICAL MAURICE ====================
 const MAURITIUS_HEALTHCARE_CONTEXT = {
   laboratories: {
     everywhere: "C-Lab (29 centres), Green Cross (36 centres), Biosanté (48 points)",
@@ -43,7 +46,7 @@ const MAURITIUS_HEALTHCARE_CONTEXT = {
   }
 }
 
-// ==================== PROMPT COMPLET (IDENTIQUE MAIS OPTIMISÉ) ====================
+// ==================== PROMPT COMPLET ====================
 const COMPLETE_DIAGNOSTIC_PROMPT = `You are an expert physician practicing telemedicine in Mauritius using systematic diagnostic reasoning.
 
 🏥 YOUR MEDICAL EXPERTISE:
@@ -280,13 +283,6 @@ GENERATE THIS EXACT JSON STRUCTURE:
     },
     
     "medications": [
-      // CRITICAL: Prescribe ALL necessary medications:
-      // - Primary treatment (main drug for the condition)
-      // - Adjuvant therapies (supporting medications)
-      // - Symptomatic relief (for symptoms)
-      // - Preventive medications (if needed)
-      // - PRN medications (as needed basis)
-      // Most conditions require 2-5 medications for optimal management
       {
         "drug": {
           "fr": "[DCI + dosage] - MÉDICAMENT PRINCIPAL",
@@ -317,44 +313,6 @@ GENERATE THIS EXACT JSON STRUCTURE:
           "public_free": true,
           "estimated_cost": "[If not free: Rs XXX]",
           "alternatives": { "fr": "[Si non disponible]", "en": "[If unavailable]" }
-        }
-      },
-      {
-        "drug": {
-          "fr": "[DCI + dosage] - MÉDICAMENT ADJUVANT/SYMPTOMATIQUE",
-          "en": "[INN + dosage] - ADJUVANT/SYMPTOMATIC"
-        },
-        "indication": {
-          "fr": "[Pourquoi ce médicament en complément]",
-          "en": "[Why this medication as complement]"
-        },
-        "mechanism": {
-          "fr": "[MINIMUM 50 MOTS] Mécanisme d'action...",
-          "en": "[MINIMUM 50 WORDS] Mechanism of action..."
-        },
-        "dosing": {
-          "adult": { "fr": "[Posologie]", "en": "[Dosing]" }
-        },
-        "duration": { "fr": "[Durée]", "en": "[Duration]" },
-        "mauritius_availability": {
-          "public_free": true/false
-        }
-      },
-      {
-        "drug": {
-          "fr": "[DCI + dosage] - SI NÉCESSAIRE",
-          "en": "[INN + dosage] - IF NEEDED"
-        },
-        "indication": {
-          "fr": "[Indication PRN/si besoin]",
-          "en": "[PRN indication/as needed]"
-        },
-        "mechanism": {
-          "fr": "[Mécanisme]",
-          "en": "[Mechanism]"
-        },
-        "dosing": {
-          "adult": { "fr": "[Posologie PRN]", "en": "[PRN dosing]" }
         }
       }
     ],
@@ -422,11 +380,7 @@ GENERATE THIS EXACT JSON STRUCTURE:
 
 Generate complete medical analysis NOW.`
 
-// ==================== OPTIMISATIONS TECHNIQUES SEULEMENT ====================
-// Cache du contexte Mauritius stringifié (évite de le refaire à chaque fois)
-const MAURITIUS_CONTEXT_STRING = JSON.stringify(MAURITIUS_HEALTHCARE_CONTEXT, null, 2)
-
-// Fonction pour préparer le prompt avec substitutions
+// ==================== FONCTION POUR PRÉPARER LE PROMPT ====================
 function preparePrompt(patientContext: any): string {
   const aiQuestionsFormatted = patientContext.ai_questions
     .map((q: any) => `Q: ${q.question} → A: ${q.answer}`)
@@ -440,19 +394,18 @@ function preparePrompt(patientContext: any): string {
     .replace('{{AI_QUESTIONS}}', aiQuestionsFormatted)
 }
 
-// ==================== FONCTION PRINCIPALE OPTIMISÉE ====================
+// ==================== FONCTION PRINCIPALE AVEC CLÉ HARDCODÉE ====================
 export async function POST(request: NextRequest) {
-  console.log('🚀 MAURITIUS MEDICAL AI - DÉMARRAGE OPTIMISÉ')
+  console.log('🚀 MAURITIUS MEDICAL AI - DÉMARRAGE (CLÉ HARDCODÉE)')
+  console.log('✅ Utilisation de la clé API qui fonctionne')
   const startTime = Date.now()
   
   try {
-    // 1. Parse parallèle du body et vérification API key
-    const [body, apiKey] = await Promise.all([
-      request.json(),
-      Promise.resolve(process.env.OPENAI_API_KEY)
-    ])
+    // 1. Parse du body de la requête
+    const body = await request.json()
+    console.log('📋 Body reçu avec succès')
     
-    // 2. Validation rapide
+    // 2. Validation des données
     if (!body.patientData || !body.clinicalData) {
       return NextResponse.json({
         success: false,
@@ -460,17 +413,10 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
     
-    if (!apiKey) {
-      return NextResponse.json({
-        success: false,
-        error: 'Configuration API manquante'
-      }, { status: 500 })
-    }
-    
-    // 3. Préparation du contexte patient (structure identique)
+    // 3. Préparation du contexte patient
     const patientContext = {
       age: body.patientData?.age || 'inconnu',
-      sex: body.patientData?.sex || 'inconnu',
+      sex: body.patientData?.sex || body.patientData?.gender || 'inconnu',
       weight: body.patientData?.weight || 'inconnu',
       medical_history: body.patientData?.medicalHistory || [],
       current_medications: body.patientData?.currentMedications || [],
@@ -487,15 +433,16 @@ export async function POST(request: NextRequest) {
     
     // 4. Préparer le prompt final
     const finalPrompt = preparePrompt(patientContext)
+    console.log('📝 Prompt préparé, longueur:', finalPrompt.length)
     
-    // 5. Appel OpenAI avec optimisations
-    console.log('📡 Appel API GPT-4o...')
+    // 5. Appel OpenAI avec la clé hardcodée
+    console.log('📡 Appel API GPT-4o avec clé hardcodée...')
     const openaiStart = Date.now()
     
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': `Bearer ${WORKING_API_KEY}`, // <-- CLÉ HARDCODÉE
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -510,14 +457,13 @@ export async function POST(request: NextRequest) {
             content: finalPrompt
           }
         ],
-        temperature: 0.3,      // Plus déterministe = plus cohérent et rapide
-        max_tokens: 8000,      // Suffisant pour le contenu complet
+        temperature: 0.3,
+        max_tokens: 8000,
         response_format: { type: "json_object" },
-        // Optimisations OpenAI
-        top_p: 0.95,           // Limite légèrement l'espace de recherche
-        frequency_penalty: 0,   // Pas de pénalité pour garder le style médical
-        presence_penalty: 0,    // Force la concision
-        seed: 12345            // Pour des résultats plus cohérents
+        top_p: 0.95,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+        seed: 12345
       }),
     })
     
@@ -532,37 +478,22 @@ export async function POST(request: NextRequest) {
     const openaiData = await openaiResponse.json()
     const medicalAnalysis = JSON.parse(openaiData.choices[0]?.message?.content || '{}')
     
-    // Validation des prescriptions multiples
+    // Validation des prescriptions
     const medications = medicalAnalysis.treatment_plan?.medications || []
-    if (medications.length === 1) {
-      console.warn('⚠️ ATTENTION: Un seul médicament prescrit')
-      const diagnosis = medicalAnalysis.clinical_analysis?.primary_diagnosis?.condition?.en || ''
-      console.warn(`Pour le diagnostic: ${diagnosis}`)
-      console.warn('Vérifier si c\'est approprié ou si des médicaments manquent')
-    } else {
-      console.log(`✅ ${medications.length} médicaments prescrits`)
-    }
+    console.log(`✅ ${medications.length} médicaments prescrits`)
     
-    console.log('✅ Analyse parsée, génération des documents...')
-    
-    // 7. Génération des documents (fonction identique à l'original)
+    // 7. Génération des documents
     const professionalDocuments = generateMedicalDocuments(
       medicalAnalysis,
       patientContext,
       MAURITIUS_HEALTHCARE_CONTEXT
     )
     
-    // 8. Préparation de la réponse finale (structure identique)
+    // 8. Préparation de la réponse finale
     const finalResponse = {
       success: true,
-      
-      // Temps de traitement
       processingTime: `${Date.now() - startTime}ms`,
-      
-      // Données de raisonnement diagnostique
       diagnosticReasoning: medicalAnalysis.diagnostic_reasoning || null,
-      
-      // Format diagnostic compatible
       diagnosis: {
         primary: {
           condition: medicalAnalysis.clinical_analysis?.primary_diagnosis?.condition?.fr || "Diagnostic en cours",
@@ -582,8 +513,6 @@ export async function POST(request: NextRequest) {
         },
         differential: medicalAnalysis.clinical_analysis?.differential_diagnoses || []
       },
-      
-      // Analyse experte
       expertAnalysis: {
         expert_investigations: {
           investigation_strategy: medicalAnalysis.investigation_strategy || {},
@@ -623,20 +552,16 @@ export async function POST(request: NextRequest) {
           }))
         }
       },
-      
-      // Documents générés
       mauritianDocuments: professionalDocuments,
-      
-      // Métadonnées
       metadata: {
         ai_model: 'GPT-4o',
-        approach: 'Enhanced Diagnostic Reasoning - Optimized',
+        approach: 'Enhanced Diagnostic Reasoning - Hardcoded Key',
         medical_guidelines: medicalAnalysis.quality_metrics?.guidelines_followed || "International",
         mauritius_adapted: true,
         generation_timestamp: new Date().toISOString(),
         quality_metrics: medicalAnalysis.quality_metrics || {},
         diagnostic_logic_applied: true,
-        optimization_applied: true,
+        usingHardcodedKey: true,
         total_processing_time_ms: Date.now() - startTime
       }
     }
@@ -655,11 +580,7 @@ export async function POST(request: NextRequest) {
       errorType: error instanceof Error ? error.name : 'UnknownError',
       timestamp: new Date().toISOString(),
       processingTime: `${errorTime}ms`,
-      // Données de fallback identiques à l'original
-      diagnosis: generateEmergencyFallbackDiagnosis(
-        request.body ? (await request.body.getReader().read()).value : null,
-        null
-      ),
+      diagnosis: generateEmergencyFallbackDiagnosis(null, null),
       expertAnalysis: {
         expert_investigations: {
           immediate_priority: [],
@@ -683,7 +604,43 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// ==================== GÉNÉRATION DES DOCUMENTS (IDENTIQUE) ====================
+// ==================== ENDPOINT DE TEST ====================
+export async function GET(request: NextRequest) {
+  console.log('🧪 Test connexion OpenAI avec clé hardcodée...')
+  
+  try {
+    const response = await fetch('https://api.openai.com/v1/models', {
+      headers: {
+        'Authorization': `Bearer ${WORKING_API_KEY}`
+      }
+    })
+    
+    if (response.ok) {
+      const data = await response.json()
+      return NextResponse.json({
+        status: '✅ OpenAI connecté avec clé hardcodée',
+        usingHardcodedKey: true,
+        availableModels: data.data.map((m: any) => m.id).filter((id: string) => 
+          id.includes('gpt-4') || id.includes('gpt-3.5')
+        )
+      })
+    } else {
+      const error = await response.text()
+      return NextResponse.json({
+        status: '❌ Clé invalide',
+        error,
+        statusCode: response.status
+      }, { status: 401 })
+    }
+  } catch (error) {
+    return NextResponse.json({
+      status: '❌ Erreur réseau',
+      error: String(error)
+    }, { status: 500 })
+  }
+}
+
+// ==================== GÉNÉRATION DES DOCUMENTS ====================
 function generateMedicalDocuments(
   analysis: any,
   patient: any,
@@ -692,10 +649,7 @@ function generateMedicalDocuments(
   const currentDate = new Date()
   const consultationId = `TC-MU-${currentDate.getFullYear()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
   
-  console.log('📄 Génération des documents médicaux...')
-  
   return {
-    // RAPPORT DE CONSULTATION
     consultation: {
       header: {
         title: {
@@ -710,16 +664,12 @@ function generateMedicalDocuments(
           en: "Assessment based on teleconsultation - Physical examination not performed"
         }
       },
-      
       patient: {
         name: `${patient.firstName || 'Patient'} ${patient.lastName || ''}`,
         age: patient.age,
         sex: patient.sex
       },
-      
-      // Inclure le raisonnement diagnostique
       diagnostic_reasoning: analysis.diagnostic_reasoning || {},
-      
       clinical_summary: {
         chief_complaint: {
           fr: patient.chief_complaint,
@@ -732,17 +682,13 @@ function generateMedicalDocuments(
         prognosis: analysis.clinical_analysis?.primary_diagnosis?.prognosis || { fr: "À évaluer", en: "To be evaluated" },
         diagnostic_criteria: analysis.clinical_analysis?.primary_diagnosis?.diagnostic_criteria_met || []
       },
-      
       management_plan: {
         investigations: analysis.investigation_strategy || {},
         treatment: analysis.treatment_plan || {},
         follow_up: analysis.follow_up_plan || {}
       },
-      
       patient_education: analysis.patient_education || {}
     },
-    
-    // PRESCRIPTION BIOLOGIE
     biological: {
       header: {
         title: {
@@ -754,13 +700,11 @@ function generateMedicalDocuments(
           en: "Valid 30 days - All accredited laboratories Mauritius"
         }
       },
-      
       patient: {
         name: `${patient.firstName || ''} ${patient.lastName || ''}`,
         age: patient.age,
         id: patient.id || 'N/A'
       },
-      
       examinations: (analysis.investigation_strategy?.laboratory_tests || []).map((test: any, idx: number) => ({
         number: idx + 1,
         test: test.test_name || { fr: "Test", en: "Test" },
@@ -777,8 +721,6 @@ function generateMedicalDocuments(
         }
       }))
     },
-    
-    // DEMANDES IMAGERIE
     imaging: (analysis.investigation_strategy?.imaging_studies?.length || 0) > 0 ? {
       header: {
         title: {
@@ -788,8 +730,6 @@ function generateMedicalDocuments(
       },
       studies: analysis.investigation_strategy.imaging_studies
     } : null,
-    
-    // PRESCRIPTION MÉDICAMENTEUSE
     medication: {
       header: {
         title: {
@@ -802,14 +742,12 @@ function generateMedicalDocuments(
           qualification: "MD, Telemedicine Certified"
         }
       },
-      
       patient: {
         name: `${patient.firstName || ''} ${patient.lastName || ''}`,
         age: patient.age,
         weight: patient.weight ? `${patient.weight}kg` : 'N/A',
         allergies: patient.allergies?.join(', ') || 'None reported'
       },
-      
       prescriptions: (analysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
         number: idx + 1,
         medication: med.drug || { fr: "Médicament", en: "Medication" },
@@ -822,9 +760,7 @@ function generateMedicalDocuments(
         },
         availability: med.mauritius_availability || {}
       })),
-      
       non_pharmacological: analysis.treatment_plan?.non_pharmacological || { fr: "Repos et hydratation", en: "Rest and hydration" },
-      
       footer: {
         validity: {
           fr: "Ordonnance valide 30 jours",
@@ -839,10 +775,8 @@ function generateMedicalDocuments(
   }
 }
 
-// ==================== DIAGNOSTIC DE SECOURS (IDENTIQUE) ====================
+// ==================== DIAGNOSTIC DE SECOURS ====================
 function generateEmergencyFallbackDiagnosis(patient: any, clinical: any): any {
-  console.log('⚠️ Génération diagnostic de secours...')
-  
   return {
     primary: {
       condition: "Évaluation médicale requise",
@@ -878,32 +812,6 @@ function generateEmergencyFallbackDiagnosis(patient: any, clinical: any): any {
     differential: []
   }
 }
-
-// ==================== OPTIMISATIONS FUTURES À IMPLÉMENTER ====================
-/*
-PROCHAINES ÉTAPES POUR ENCORE PLUS DE VITESSE:
-
-1. **Streaming Response** (réduction perçue de 50%)
-   - Afficher les résultats au fur et à mesure
-   - L'utilisateur voit le diagnostic apparaître progressivement
-
-2. **Edge Function Deployment**
-   - Déployer sur Vercel Edge Runtime
-   - Réduction de latence de 20-30%
-
-3. **Parallel Processing**
-   - Diviser l'analyse en 3 appels parallèles
-   - Diagnostic + Traitement + Investigations en parallèle
-   - Gain de 30-40%
-
-4. **Smart Caching**
-   - Cache des cas similaires
-   - Réponse instantanée pour patterns répétés
-
-5. **Connection Keep-Alive**
-   - Réutiliser la connexion HTTP
-   - Gain de 100-200ms par requête
-*/
 
 export const config = {
   api: {

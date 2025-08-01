@@ -1,11 +1,18 @@
 // app/api/generate-consultation-report/route.ts
-// VERSION OPTIMISÉE ET CORRIGÉE
+// VERSION AVEC CLÉ QUI FONCTIONNE
 
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
+import { openai, createOpenAI } from "@ai-sdk/openai"
+
+// ==================== CRÉATION DU CLIENT OPENAI AVEC LA CLÉ QUI MARCHE ====================
+const openaiClient = createOpenAI({
+  apiKey: "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"
+})
 
 export async function POST(request: NextRequest) {
+  console.log("🚀 Génération du compte-rendu avec clé hardcodée")
+  
   try {
     const body = await request.json()
     const { patientData, clinicalData, questionsData, diagnosisData, editedDocuments, includeFullPrescriptions = false } = body
@@ -235,11 +242,12 @@ Antécédents: ${JSON.stringify(patientData.antecedents || patientData.medicalHi
 Génère le compte rendu en remplaçant tous les [GÉNÉRER_XXX_MOTS] :
 ${JSON.stringify(jsonTemplate)}`
 
-    // Génération avec GPT-4
+    // Génération avec GPT-4 en utilisant le client avec clé hardcodée
+    console.log("🤖 Appel GPT-4o avec clé hardcodée...")
     let reportData
     try {
       const result = await generateText({
-        model: openai("gpt-4o"),
+        model: openaiClient("gpt-4o"), // <-- UTILISE openaiClient AU LIEU DE openai
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
@@ -247,6 +255,8 @@ ${JSON.stringify(jsonTemplate)}`
         maxTokens: 5000,
         temperature: 0.3,
       })
+
+      console.log("✅ Réponse GPT-4o reçue")
 
       // Parse sécurisé
       const jsonMatch = result.text.match(/\{[\s\S]*\}/)
@@ -295,7 +305,8 @@ ${JSON.stringify(jsonTemplate)}`
       metadata: {
         type: "professional_narrative",
         includesFullPrescriptions: includeFullPrescriptions,
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
+        usingHardcodedKey: true
       }
     })
 
@@ -355,4 +366,30 @@ function formatSimplifiedPrescriptions(reportData: any, type: string): string {
   }
   
   return ''
+}
+
+// Endpoint de test
+export async function GET(request: NextRequest) {
+  console.log("🧪 Test connexion pour generate-consultation-report...")
+  
+  try {
+    // Test simple avec le client configuré
+    const testResult = await generateText({
+      model: openaiClient("gpt-3.5-turbo"),
+      prompt: "Dis simplement: OK",
+      maxTokens: 10,
+      temperature: 0
+    })
+    
+    return NextResponse.json({
+      status: "✅ API generate-consultation-report connectée",
+      usingHardcodedKey: true,
+      response: testResult.text
+    })
+  } catch (error: any) {
+    return NextResponse.json({
+      status: "❌ Erreur",
+      error: error.message
+    }, { status: 500 })
+  }
 }

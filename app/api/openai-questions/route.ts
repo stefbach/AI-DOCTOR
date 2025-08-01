@@ -1,11 +1,16 @@
-// app/api/openai-questions/route.ts
+// app/api/openai-questions/route.ts - VERSION AVEC CLÉ QUI FONCTIONNE
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
+import { openai, createOpenAI } from "@ai-sdk/openai"
 
 // Configuration pour différents modes de vitesse
 export const runtime = 'edge'
 export const preferredRegion = 'auto'
+
+// ==================== CRÉATION DU CLIENT OPENAI AVEC LA CLÉ QUI MARCHE ====================
+const openaiClient = createOpenAI({
+  apiKey: "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"
+})
 
 // Types
 interface QuestionMode {
@@ -92,7 +97,7 @@ function generatePromptByMode(
   pattern: string
 ): string {
   const age = patientData?.age || 'Âge inconnu'
-  const gender = patientData?.gender || 'Genre non spécifié'
+  const gender = patientData?.gender || patientData?.sex || 'Genre non spécifié'
   const symptoms = String(clinicalData?.symptoms || clinicalData?.chiefComplaint || 'Symptômes non spécifiés')
   
   // Prompt TRÈS SIMPLE pour faciliter le parsing
@@ -199,6 +204,7 @@ const AI_CONFIGS = {
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
   console.log("🚀 Début requête POST /api/openai-questions")
+  console.log("✅ Utilisation de la clé API hardcodée qui fonctionne")
   
   try {
     // Parser la requête
@@ -223,7 +229,7 @@ export async function POST(request: NextRequest) {
     // Validation et normalisation des données
     const validatedPatientData = {
       age: patientData.age || 'Non spécifié',
-      gender: patientData.gender || 'Non spécifié',
+      gender: patientData.gender || patientData.sex || 'Non spécifié',
       ...patientData
     }
 
@@ -262,12 +268,12 @@ export async function POST(request: NextRequest) {
     console.log(`⚙️ Config IA: ${JSON.stringify(aiConfig)}`)
 
     try {
-      console.log(`🤖 Appel OpenAI ${aiConfig.model}...`)
+      console.log(`🤖 Appel OpenAI ${aiConfig.model} avec la clé hardcodée...`)
       const aiStartTime = Date.now()
       
-      // APPEL SANS TIMEOUT pour voir le temps réel
+      // UTILISATION DU CLIENT AVEC LA CLÉ QUI MARCHE
       const result = await generateText({
-        model: openai(aiConfig.model),
+        model: openaiClient(aiConfig.model), // <-- Utilise openaiClient au lieu de openai
         prompt,
         temperature: aiConfig.temperature,
         maxTokens: aiConfig.maxTokens,
@@ -324,7 +330,8 @@ export async function POST(request: NextRequest) {
           responseTime: Date.now() - startTime,
           aiResponseTime: aiTime,
           fromCache: false,
-          model: aiConfig.model
+          model: aiConfig.model,
+          usingHardcodedKey: true
         }
       }
 
@@ -374,13 +381,13 @@ export async function POST(request: NextRequest) {
 
 // Endpoint de test pour vérifier la connexion OpenAI
 export async function GET(request: NextRequest) {
-  console.log("🧪 Test connexion OpenAI...")
+  console.log("🧪 Test connexion OpenAI avec clé hardcodée...")
   
   try {
-    // Test simple
+    // Test simple avec le client configuré
     const testStart = Date.now()
     const result = await generateText({
-      model: openai("gpt-3.5-turbo"),
+      model: openaiClient("gpt-3.5-turbo"),
       prompt: "Réponds uniquement avec le JSON: {\"test\":\"ok\"}",
       temperature: 0,
       maxTokens: 50,
@@ -388,9 +395,10 @@ export async function GET(request: NextRequest) {
     const testTime = Date.now() - testStart
     
     return NextResponse.json({
-      status: "✅ OpenAI connecté",
+      status: "✅ OpenAI connecté avec clé hardcodée",
       responseTime: `${testTime}ms`,
       response: result.text,
+      usingHardcodedKey: true,
       modes: {
         fast: {
           description: "Ultra-rapide",
