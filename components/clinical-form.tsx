@@ -57,7 +57,7 @@ interface ValidationErrors {
   [key: string]: string
 }
 
-// ==================== CONSTANTES ====================
+// ==================== CONSTANTS ====================
 const INITIAL_CLINICAL_DATA: ClinicalData = {
   chiefComplaint: "",
   diseaseHistory: "",
@@ -72,17 +72,17 @@ const INITIAL_CLINICAL_DATA: ClinicalData = {
 }
 
 const PAIN_SCALE_LABELS = {
-  0: { label: "Aucune douleur", color: "bg-green-50 border-green-200 text-green-800" },
-  1: { label: "Douleur légère", color: "bg-green-50 border-green-200 text-green-800" },
-  2: { label: "Douleur légère", color: "bg-green-50 border-green-200 text-green-800" },
-  3: { label: "Douleur légère", color: "bg-green-50 border-green-200 text-green-800" },
-  4: { label: "Douleur modérée", color: "bg-yellow-50 border-yellow-200 text-yellow-800" },
-  5: { label: "Douleur modérée", color: "bg-yellow-50 border-yellow-200 text-yellow-800" },
-  6: { label: "Douleur modérée", color: "bg-yellow-50 border-yellow-200 text-yellow-800" },
-  7: { label: "Douleur sévère", color: "bg-orange-50 border-orange-200 text-orange-800" },
-  8: { label: "Douleur sévère", color: "bg-orange-50 border-orange-200 text-orange-800" },
-  9: { label: "Douleur très sévère", color: "bg-red-50 border-red-200 text-red-800" },
-  10: { label: "Douleur insupportable", color: "bg-red-50 border-red-200 text-red-800" }
+  0: { label: "No pain", color: "bg-green-50 border-green-200 text-green-800" },
+  1: { label: "Mild pain", color: "bg-green-50 border-green-200 text-green-800" },
+  2: { label: "Mild pain", color: "bg-green-50 border-green-200 text-green-800" },
+  3: { label: "Mild pain", color: "bg-green-50 border-green-200 text-green-800" },
+  4: { label: "Moderate pain", color: "bg-yellow-50 border-yellow-200 text-yellow-800" },
+  5: { label: "Moderate pain", color: "bg-yellow-50 border-yellow-200 text-yellow-800" },
+  6: { label: "Moderate pain", color: "bg-yellow-50 border-yellow-200 text-yellow-800" },
+  7: { label: "Severe pain", color: "bg-orange-50 border-orange-200 text-orange-800" },
+  8: { label: "Severe pain", color: "bg-orange-50 border-orange-200 text-orange-800" },
+  9: { label: "Very severe pain", color: "bg-red-50 border-red-200 text-red-800" },
+  10: { label: "Unbearable pain", color: "bg-red-50 border-red-200 text-red-800" }
 }
 
 const SECTIONS = [
@@ -93,26 +93,26 @@ const SECTIONS = [
   { id: "vitals", titleKey: 'clinicalForm.sections.vitals', icon: Stethoscope },
 ]
 
-// ==================== COMPOSANT PRINCIPAL ====================
+// ==================== MAIN COMPONENT ====================
 export default function ModernClinicalForm({ 
   data, 
   patientData, 
   onDataChange, 
   onNext, 
   onPrevious,
-  language = 'fr',
+  language = 'en',
   consultationId
 }: ClinicalFormProps) {
   // ========== Hooks ==========
   const t = useCallback((key: string) => getTranslation(key, language), [language])
   
-  // ========== États ==========
+  // ========== States ==========
   const [localData, setLocalData] = useState<ClinicalData>(() => ({
     ...INITIAL_CLINICAL_DATA,
     ...data,
-    // S'assurer que symptoms est toujours un tableau
+    // Ensure symptoms is always an array
     symptoms: Array.isArray(data?.symptoms) ? data.symptoms : INITIAL_CLINICAL_DATA.symptoms,
-    // S'assurer que vitalSigns est correctement initialisé
+    // Ensure vitalSigns is properly initialized
     vitalSigns: {
       ...INITIAL_CLINICAL_DATA.vitalSigns,
       ...data?.vitalSigns
@@ -126,52 +126,52 @@ export default function ModernClinicalForm({
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  // ========== Mémoïsation des listes traduites ==========
+  // ========== Memoization of translated lists ==========
   const COMMON_SYMPTOMS = useMemo(() => [
-    t('symptoms.chestPain'),
-    t('symptoms.shortness'),
-    t('symptoms.palpitations'),
-    t('symptoms.fatigue'),
-    t('symptoms.nausea'),
-    t('symptoms.vomiting'),
-    t('symptoms.diarrhea'),
-    t('symptoms.constipation'),
-    t('symptoms.headache'),
-    t('symptoms.dizziness'),
-    t('symptoms.fever'),
-    t('symptoms.chills'),
-    t('symptoms.cough'),
-    t('symptoms.abdominalPain'),
-    t('symptoms.backPain'),
-    t('symptoms.insomnia'),
-    t('symptoms.anxiety'),
-    t('symptoms.lossAppetite'),
-    t('symptoms.weightLoss'),
-    t('symptoms.legSwelling'),
-    t('symptoms.jointPain'),
-    t('symptoms.rash'),
-    t('symptoms.blurredVision'),
-    t('symptoms.hearingProblems'),
-  ], [t])
+    "Chest pain",
+    "Shortness of breath",
+    "Palpitations",
+    "Fatigue",
+    "Nausea",
+    "Vomiting",
+    "Diarrhea",
+    "Constipation",
+    "Headache",
+    "Dizziness",
+    "Fever",
+    "Chills",
+    "Cough",
+    "Abdominal pain",
+    "Back pain",
+    "Insomnia",
+    "Anxiety",
+    "Loss of appetite",
+    "Weight loss",
+    "Leg swelling",
+    "Joint pain",
+    "Rash",
+    "Blurred vision",
+    "Hearing problems",
+  ], [])
 
   const DURATION_OPTIONS = useMemo(() => [
-    { value: 'less_hour', label: t('durationOptions.lessHour') },
-    { value: '1_6_hours', label: t('durationOptions.oneToSixHours') },
-    { value: '6_24_hours', label: t('durationOptions.sixToTwentyFourHours') },
-    { value: '1_3_days', label: t('durationOptions.oneToThreeDays') },
-    { value: '3_7_days', label: t('durationOptions.threeToSevenDays') },
-    { value: '1_4_weeks', label: t('durationOptions.oneToFourWeeks') },
-    { value: '1_6_months', label: t('durationOptions.oneToSixMonths') },
-    { value: 'more_6_months', label: t('durationOptions.moreSixMonths') }
-  ], [t])
+    { value: 'less_hour', label: 'Less than 1 hour' },
+    { value: '1_6_hours', label: '1 to 6 hours' },
+    { value: '6_24_hours', label: '6 to 24 hours' },
+    { value: '1_3_days', label: '1 to 3 days' },
+    { value: '3_7_days', label: '3 to 7 days' },
+    { value: '1_4_weeks', label: '1 to 4 weeks' },
+    { value: '1_6_months', label: '1 to 6 months' },
+    { value: 'more_6_months', label: 'More than 6 months' }
+  ], [])
 
-  // ========== Fonctions utilitaires ==========
+  // ========== Utility functions ==========
   const calculateProgress = useCallback((): number => {
     const fields = [
       localData.chiefComplaint,
       localData.diseaseHistory,
       localData.symptomDuration,
-      localData.symptoms?.length > 0 ? "filled" : "", // Protection contre undefined
+      localData.symptoms?.length > 0 ? "filled" : "", // Protection against undefined
       localData.painScale && localData.painScale !== "0" ? "filled" : ""
     ]
     
@@ -183,13 +183,13 @@ export default function ModernClinicalForm({
     const temperature = parseFloat(temp)
     if (isNaN(temperature)) return ""
     
-    if (temperature < 36.1) return t('clinicalForm.hypothermia')
-    if (temperature >= 36.1 && temperature <= 37.2) return t('clinicalForm.normal')
-    if (temperature > 37.2 && temperature <= 38) return t('clinicalForm.mildFever')
-    if (temperature > 38) return t('clinicalForm.fever')
+    if (temperature < 36.1) return "Hypothermia"
+    if (temperature >= 36.1 && temperature <= 37.2) return "Normal"
+    if (temperature > 37.2 && temperature <= 38) return "Mild fever"
+    if (temperature > 38) return "Fever"
     
     return ""
-  }, [t])
+  }, [])
 
   const validateBloodPressure = useCallback((systolic: string, diastolic: string): string => {
     const sys = parseInt(systolic)
@@ -197,26 +197,26 @@ export default function ModernClinicalForm({
     
     if (isNaN(sys) || isNaN(dia)) return ""
     
-    if (sys < 90 || dia < 60) return t('clinicalForm.hypotension')
-    if (sys < 120 && dia < 80) return t('clinicalForm.normal')
-    if (sys >= 120 && sys < 140 && dia < 90) return t('clinicalForm.preHypertension')
-    if (sys >= 140 || dia >= 90) return t('clinicalForm.hypertension')
+    if (sys < 90 || dia < 60) return "Hypotension"
+    if (sys < 120 && dia < 80) return "Normal"
+    if (sys >= 120 && sys < 140 && dia < 90) return "Pre-hypertension"
+    if (sys >= 140 || dia >= 90) return "Hypertension"
     
     return ""
-  }, [t])
+  }, [])
 
-  // ========== Gestionnaires d'événements ==========
+  // ========== Event handlers ==========
   const updateData = useCallback((updates: Partial<ClinicalData>) => {
     setLocalData(prev => {
       const newData = { ...prev, ...updates }
-      // S'assurer que symptoms est toujours un tableau
+      // Ensure symptoms is always an array
       if ('symptoms' in updates && !Array.isArray(newData.symptoms)) {
         newData.symptoms = []
       }
       return newData
     })
     
-    // Effacer les erreurs associées
+    // Clear associated errors
     if (updates.chiefComplaint) setErrors(prev => ({ ...prev, chiefComplaint: "" }))
     if (updates.diseaseHistory) setErrors(prev => ({ ...prev, diseaseHistory: "" }))
   }, [])
@@ -275,31 +275,31 @@ export default function ModernClinicalForm({
     const newErrors: ValidationErrors = {}
     
     if (!localData.chiefComplaint.trim()) {
-      newErrors.chiefComplaint = t('clinicalForm.errors.chiefComplaintRequired')
+      newErrors.chiefComplaint = "Chief complaint is required"
     }
     
     if (!localData.diseaseHistory.trim()) {
-      newErrors.diseaseHistory = t('clinicalForm.errors.diseaseHistoryRequired')
+      newErrors.diseaseHistory = "Disease history is required"
     }
     
     if (!localData.symptomDuration) {
-      newErrors.symptomDuration = t('clinicalForm.errors.durationRequired')
+      newErrors.symptomDuration = "Symptom duration is required"
     }
     
     const symptoms = Array.isArray(localData.symptoms) ? localData.symptoms : []
     if (symptoms.length === 0) {
-      newErrors.symptoms = t('clinicalForm.errors.symptomsRequired')
+      newErrors.symptoms = "At least one symptom must be selected"
     }
     
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
-  }, [localData, t])
+  }, [localData])
 
   const handleSubmit = useCallback(() => {
     if (validateForm()) {
       onNext()
     } else {
-      // Faire défiler jusqu'à la première erreur
+      // Scroll to the first error
       const firstErrorField = Object.keys(errors)[0]
       const element = document.getElementById(firstErrorField)
       if (element) {
@@ -309,9 +309,9 @@ export default function ModernClinicalForm({
     }
   }, [validateForm, onNext, errors])
 
-  // ========== Effets ==========
+  // ========== Effects ==========
   
-  // Chargement initial des données sauvegardées
+  // Initial loading of saved data
   useEffect(() => {
     const loadSavedData = async () => {
       if (!consultationId) return
@@ -324,7 +324,7 @@ export default function ModernClinicalForm({
           setLocalData(prev => ({
             ...prev,
             ...savedData.clinicalData,
-            // S'assurer que les tableaux et objets sont correctement initialisés
+            // Ensure arrays and objects are properly initialized
             symptoms: Array.isArray(savedData.clinicalData.symptoms) 
               ? savedData.clinicalData.symptoms 
               : [],
@@ -335,7 +335,7 @@ export default function ModernClinicalForm({
           }))
         }
       } catch (error) {
-        console.error('Erreur chargement données cliniques:', error)
+        console.error('Error loading clinical data:', error)
       } finally {
         setIsLoading(false)
       }
@@ -344,7 +344,7 @@ export default function ModernClinicalForm({
     loadSavedData()
   }, [consultationId])
 
-  // Mise à jour quand les props changent
+  // Update when props change
   useEffect(() => {
     if (data) {
       setLocalData(prev => ({
@@ -359,7 +359,7 @@ export default function ModernClinicalForm({
     }
   }, [data])
 
-  // Sauvegarde automatique
+  // Auto-save
   useEffect(() => {
     const timer = setTimeout(async () => {
       if (localData.chiefComplaint || localData.diseaseHistory || localData.symptoms.length > 0) {
@@ -368,7 +368,7 @@ export default function ModernClinicalForm({
           setLastSaved(new Date())
           onDataChange(localData)
         } catch (error) {
-          console.error('Erreur sauvegarde données cliniques:', error)
+          console.error('Error saving clinical data:', error)
         }
       }
     }, 1000)
@@ -376,7 +376,7 @@ export default function ModernClinicalForm({
     return () => clearTimeout(timer)
   }, [localData, onDataChange])
 
-  // ========== Variables calculées ==========
+  // ========== Calculated variables ==========
   const progress = calculateProgress()
   const painLevel = parseInt(localData.painScale || "0")
   const painInfo = PAIN_SCALE_LABELS[painLevel as keyof typeof PAIN_SCALE_LABELS]
@@ -391,19 +391,19 @@ export default function ModernClinicalForm({
     localData.vitalSigns.bloodPressureDiastolic
   )
 
-  // ========== Rendu ==========
+  // ========== Render ==========
   return (
     <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-      {/* En-tête avec progression */}
+      {/* Header with progress */}
       <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             <Stethoscope className="h-8 w-8 text-purple-600" />
-            {t('clinicalForm.title')}
+            Clinical Information
           </CardTitle>
           <div className="mt-4 space-y-2">
             <div className="flex justify-between text-sm text-gray-600">
-              <span>{t('clinicalForm.progressTitle')}</span>
+              <span>Progress</span>
               <span className="font-semibold">{progress}%</span>
             </div>
             <Progress value={progress} className="h-2" />
@@ -411,7 +411,7 @@ export default function ModernClinicalForm({
         </CardHeader>
       </Card>
 
-      {/* Navigation rapide */}
+      {/* Quick navigation */}
       <div className="flex flex-wrap gap-2 justify-center">
         {SECTIONS.map((section, index) => (
           <button
@@ -430,25 +430,25 @@ export default function ModernClinicalForm({
         ))}
       </div>
 
-      {/* Section 1: Motif de consultation */}
+      {/* Section 1: Chief complaint */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <FileText className="h-6 w-6" />
-            {t('clinicalForm.chiefComplaint')}
+            Chief Complaint
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-2">
             <Label htmlFor="chiefComplaint" className="font-medium">
-              {t('clinicalForm.mainReason')}
+              What is the main reason for your consultation?
             </Label>
             <Textarea
               id="chiefComplaint"
               value={localData.chiefComplaint}
               onChange={(e) => updateData({ chiefComplaint: e.target.value })}
               onKeyDown={handleKeyDown}
-              placeholder={t('clinicalForm.describePlaceholder')}
+              placeholder="Describe your main concern or symptom..."
               rows={3}
               className={`resize-none ${errors.chiefComplaint ? 'border-red-500' : ''}`}
             />
@@ -459,30 +459,30 @@ export default function ModernClinicalForm({
               </p>
             )}
             <p className="text-xs text-gray-500">
-              {t('clinicalForm.summaryHint')}
+              Please provide a clear and concise summary of your main health concern.
             </p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Section 2: Histoire de la maladie */}
+      {/* Section 2: Disease history */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <Heart className="h-6 w-6" />
-            {t('clinicalForm.diseaseHistory')}
+            Disease History
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-2">
             <Label htmlFor="diseaseHistory" className="font-medium">
-              {t('clinicalForm.symptomEvolution')}
+              How have your symptoms evolved?
             </Label>
             <Textarea
               id="diseaseHistory"
               value={localData.diseaseHistory}
               onChange={(e) => updateData({ diseaseHistory: e.target.value })}
-              placeholder={t('clinicalForm.historyPlaceholder')}
+              placeholder="Describe how your symptoms started and how they have progressed over time..."
               rows={5}
               className={`resize-none ${errors.diseaseHistory ? 'border-red-500' : ''}`}
             />
@@ -493,7 +493,7 @@ export default function ModernClinicalForm({
               </p>
             )}
             <p className="text-xs text-gray-500">
-              {t('clinicalForm.detailedHistory')}
+              Include details about when symptoms started, what makes them better or worse, and any treatments you've tried.
             </p>
           </div>
 
@@ -502,7 +502,7 @@ export default function ModernClinicalForm({
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-blue-600" />
                 <p className="font-semibold text-blue-800">
-                  {t('clinicalForm.documentedHistory')} ({localData.diseaseHistory.length} {t('clinicalForm.characters')})
+                  History documented ({localData.diseaseHistory.length} characters)
                 </p>
               </div>
             </div>
@@ -510,25 +510,25 @@ export default function ModernClinicalForm({
         </CardContent>
       </Card>
 
-      {/* Section 3: Durée des symptômes */}
+      {/* Section 3: Symptom duration */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <Clock className="h-6 w-6" />
-            {t('clinicalForm.duration')}
+            Duration
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-2">
             <Label htmlFor="symptomDuration" className="font-medium">
-              {t('clinicalForm.symptomDuration')}
+              How long have you been experiencing these symptoms?
             </Label>
             <Select
               value={localData.symptomDuration}
               onValueChange={(value) => updateData({ symptomDuration: value })}
             >
               <SelectTrigger className={errors.symptomDuration ? 'border-red-500' : ''}>
-                <SelectValue placeholder={t('clinicalForm.selectDuration')} />
+                <SelectValue placeholder="Select duration" />
               </SelectTrigger>
               <SelectContent>
                 {DURATION_OPTIONS.map(option => (
@@ -550,8 +550,8 @@ export default function ModernClinicalForm({
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-green-600" />
                   <p className="font-semibold text-green-800">
-                    {t('clinicalForm.evolutionSince')} {
-                      DURATION_OPTIONS.find(opt => opt.value === localData.symptomDuration)?.label
+                    Symptoms present for {
+                      DURATION_OPTIONS.find(opt => opt.value === localData.symptomDuration)?.label.toLowerCase()
                     }
                   </p>
                 </div>
@@ -561,18 +561,18 @@ export default function ModernClinicalForm({
         </CardContent>
       </Card>
 
-      {/* Section 3.5: Intensité de la douleur */}
+      {/* Section 3.5: Pain intensity */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <Activity className="h-6 w-6" />
-            {t('clinicalForm.painIntensity')}
+            Pain Intensity
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-4">
             <Label className="font-medium">
-              {t('clinicalForm.painScaleQuestion')}
+              Rate your pain on a scale from 0 to 10
             </Label>
             <div className="space-y-4">
               <input
@@ -597,7 +597,7 @@ export default function ModernClinicalForm({
             {painLevel > 0 && (
               <div className={`mt-3 p-4 rounded-lg border-2 ${painInfo.color}`}>
                 <p className="font-semibold text-lg">
-                  {t('clinicalForm.painLevel')}: {localData.painScale}/10
+                  Pain level: {localData.painScale}/10
                 </p>
                 <p className="text-sm mt-1">
                   {painInfo.label}
@@ -608,19 +608,19 @@ export default function ModernClinicalForm({
         </CardContent>
       </Card>
 
-      {/* Section 4: Symptômes actuels */}
+      {/* Section 4: Current symptoms */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <Activity className="h-6 w-6" />
-            {t('clinicalForm.currentSymptoms')}
+            Current Symptoms
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
-              placeholder={t('clinicalForm.searchSymptom')}
+              placeholder="Search symptoms..."
               value={symptomSearch}
               onChange={(e) => setSymptomSearch(e.target.value)}
               className="pl-10"
@@ -663,7 +663,7 @@ export default function ModernClinicalForm({
               <div className="flex items-center gap-2 mb-3">
                 <Activity className="h-5 w-5 text-orange-600" />
                 <p className="font-semibold text-orange-800">
-                  {t('clinicalForm.selectedSymptoms')} ({localData.symptoms.length})
+                  Selected symptoms ({localData.symptoms.length})
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -678,22 +678,22 @@ export default function ModernClinicalForm({
         </CardContent>
       </Card>
 
-      {/* Section 5: Signes vitaux */}
+      {/* Section 5: Vital signs */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <Stethoscope className="h-6 w-6" />
-            {t('clinicalForm.vitalSigns')}
+            Vital Signs
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Température */}
+            {/* Temperature */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Thermometer className="h-5 w-5 text-red-500" />
                 <Label htmlFor="temperature" className="font-medium">
-                  {t('clinicalForm.temperature')}
+                  Temperature (°C)
                 </Label>
               </div>
               <Input
@@ -709,20 +709,20 @@ export default function ModernClinicalForm({
               />
               {temperatureStatus && (
                 <p className={`text-xs font-medium ${
-                  temperatureStatus === t('clinicalForm.normal') ? 'text-green-600' :
-                  temperatureStatus === t('clinicalForm.hypothermia') ? 'text-blue-600' :
+                  temperatureStatus === 'Normal' ? 'text-green-600' :
+                  temperatureStatus === 'Hypothermia' ? 'text-blue-600' :
                   'text-red-600'
                 }`}>
-                  {temperatureStatus === t('clinicalForm.normal') ? '✅' : 
-                   temperatureStatus === t('clinicalForm.hypothermia') ? '🟦' : '🔴'} {temperatureStatus}
+                  {temperatureStatus === 'Normal' ? '✅' : 
+                   temperatureStatus === 'Hypothermia' ? '🟦' : '🔴'} {temperatureStatus}
                 </p>
               )}
             </div>
 
-            {/* Tension systolique */}
+            {/* Systolic blood pressure */}
             <div className="space-y-2">
               <Label htmlFor="bloodPressureSystolic" className="font-medium">
-                {t('clinicalForm.systolicBP')}
+                Systolic BP (mmHg)
               </Label>
               <Input
                 id="bloodPressureSystolic"
@@ -738,10 +738,10 @@ export default function ModernClinicalForm({
               />
             </div>
 
-            {/* Tension diastolique */}
+            {/* Diastolic blood pressure */}
             <div className="space-y-2">
               <Label htmlFor="bloodPressureDiastolic" className="font-medium">
-                {t('clinicalForm.diastolicBP')}
+                Diastolic BP (mmHg)
               </Label>
               <Input
                 id="bloodPressureDiastolic"
@@ -758,7 +758,7 @@ export default function ModernClinicalForm({
             </div>
           </div>
 
-          {/* Bouton Non applicable */}
+          {/* Not applicable button */}
           <div className="mt-4">
             <Button
               type="button"
@@ -768,34 +768,34 @@ export default function ModernClinicalForm({
               className={bpNotApplicable ? 'bg-gray-100' : ''}
             >
               <XCircle className="h-4 w-4 mr-2" />
-              {t('clinicalForm.bpNotApplicable')}
+              Blood pressure not available
             </Button>
           </div>
 
-          {/* Affichage de la tension */}
+          {/* Blood pressure display */}
           {(localData.vitalSigns.bloodPressureSystolic && localData.vitalSigns.bloodPressureDiastolic && !bpNotApplicable) && (
             <div className={`mt-4 p-3 rounded-lg border ${
-              bpStatus === t('clinicalForm.normal') ? 'bg-green-50 border-green-200' :
-              bpStatus === t('clinicalForm.hypotension') ? 'bg-blue-50 border-blue-200' :
-              bpStatus === t('clinicalForm.preHypertension') ? 'bg-yellow-50 border-yellow-200' :
+              bpStatus === 'Normal' ? 'bg-green-50 border-green-200' :
+              bpStatus === 'Hypotension' ? 'bg-blue-50 border-blue-200' :
+              bpStatus === 'Pre-hypertension' ? 'bg-yellow-50 border-yellow-200' :
               'bg-red-50 border-red-200'
             }`}>
               <div className="flex items-center gap-2">
                 <Activity className={`h-4 w-4 ${
-                  bpStatus === t('clinicalForm.normal') ? 'text-green-600' :
-                  bpStatus === t('clinicalForm.hypotension') ? 'text-blue-600' :
-                  bpStatus === t('clinicalForm.preHypertension') ? 'text-yellow-600' :
+                  bpStatus === 'Normal' ? 'text-green-600' :
+                  bpStatus === 'Hypotension' ? 'text-blue-600' :
+                  bpStatus === 'Pre-hypertension' ? 'text-yellow-600' :
                   'text-red-600'
                 }`} />
                 <p className="font-semibold">
-                  {t('clinicalForm.bloodPressure')}: {localData.vitalSigns.bloodPressureSystolic}/{localData.vitalSigns.bloodPressureDiastolic} mmHg
+                  Blood pressure: {localData.vitalSigns.bloodPressureSystolic}/{localData.vitalSigns.bloodPressureDiastolic} mmHg
                 </p>
               </div>
               {bpStatus && (
                 <p className="text-sm mt-1">
-                  {bpStatus === t('clinicalForm.normal') ? '✅' :
-                   bpStatus === t('clinicalForm.hypotension') ? '🟦' :
-                   bpStatus === t('clinicalForm.preHypertension') ? '🟡' : '⚠️'} {bpStatus}
+                  {bpStatus === 'Normal' ? '✅' :
+                   bpStatus === 'Hypotension' ? '🟦' :
+                   bpStatus === 'Pre-hypertension' ? '🟡' : '⚠️'} {bpStatus}
                 </p>
               )}
             </div>
@@ -806,7 +806,7 @@ export default function ModernClinicalForm({
               <div className="flex items-center gap-2">
                 <XCircle className="h-4 w-4 text-gray-600" />
                 <p className="font-semibold text-gray-800">
-                  {t('clinicalForm.bpNotMeasured')}
+                  Blood pressure not measured
                 </p>
               </div>
             </div>
@@ -814,12 +814,12 @@ export default function ModernClinicalForm({
         </CardContent>
       </Card>
 
-      {/* Indicateur de sauvegarde automatique */}
+      {/* Auto-save indicator */}
       <div className="flex justify-center">
         <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           <span className="text-sm text-gray-600">
-            {t('common.autoSave')}
+            Auto-saving
             {lastSaved && (
               <span className="ml-2 text-xs text-gray-500">
                 ({new Date(lastSaved).toLocaleTimeString()})
@@ -838,13 +838,13 @@ export default function ModernClinicalForm({
           className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          {t('clinicalForm.backButton')}
+          Previous
         </Button>
         <Button 
           type="submit"
           className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
         >
-          {t('clinicalForm.continueToAI')}
+          Continue to AI Analysis
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </div>

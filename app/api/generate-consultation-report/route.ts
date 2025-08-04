@@ -1,35 +1,31 @@
-// app/api/generate-consultation-report/route.ts
-// VERSION AVEC EXTRACTION AMÉLIORÉE DES EXAMENS BIOLOGIQUES ET PARACLINIQUES
-
+/// app/api/generate-consultation-report/route.ts
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
 
-// ==================== FONCTIONS DE PROTECTION DES DONNÉES ====================
+// ==================== DATA PROTECTION FUNCTIONS ====================
 function anonymizePatientData(patientData: any): {
   anonymized: any,
   originalIdentity: any,
   anonymousId: string
 } {
   const originalIdentity = {
-    nom: patientData?.nom || patientData?.lastName || '',
-    prenom: patientData?.prenom || patientData?.firstName || '',
+    lastName: patientData?.lastName || patientData?.nom || '',
+    firstName: patientData?.firstName || patientData?.prenom || '',
     name: patientData?.name || '',
-    firstName: patientData?.firstName || '',
-    lastName: patientData?.lastName || '',
-    nomComplet: `${(patientData.nom || patientData.lastName || '').toUpperCase()} ${patientData.prenom || patientData.firstName || ''}`.trim(),
-    adresse: patientData?.adresse || patientData?.address || '',
-    telephone: patientData?.telephone || patientData?.phone || '',
+    fullName: `${(patientData.lastName || patientData.nom || '').toUpperCase()} ${patientData.firstName || patientData.prenom || ''}`.trim(),
+    address: patientData?.address || patientData?.adresse || '',
+    phone: patientData?.phone || patientData?.telephone || '',
     email: patientData?.email || '',
-    identifiantNational: patientData?.nid || patientData?.nationalId || '',
-    dateNaissance: patientData?.dateNaissance || patientData?.birthDate || ''
+    nationalId: patientData?.nationalId || patientData?.nid || '',
+    birthDate: patientData?.birthDate || patientData?.dateNaissance || ''
   }
   
   const anonymized = { ...patientData }
   const sensitiveFields = [
-    'nom', 'prenom', 'name', 'firstName', 'lastName',
-    'adresse', 'address', 'telephone', 'phone', 'email',
-    'nid', 'nationalId', 'identifiantNational', 'dateNaissance', 'birthDate'
+    'lastName', 'firstName', 'name', 'nom', 'prenom',
+    'address', 'adresse', 'phone', 'telephone', 'email',
+    'nationalId', 'nid', 'birthDate', 'dateNaissance'
   ]
   
   sensitiveFields.forEach(field => {
@@ -39,38 +35,37 @@ function anonymizePatientData(patientData: any): {
   const anonymousId = `ANON-RPT-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
   anonymized.anonymousId = anonymousId
   
-  console.log('🔒 Données patient anonymisées pour le rapport')
+  console.log('🔒 Patient data anonymized for report')
   
   return { anonymized, originalIdentity, anonymousId }
 }
 
-// Fonction helper pour gérer les objets bilingues
+// Helper function to handle bilingual objects
 function getString(field: any): string {
   if (!field) return ''
   if (typeof field === 'string') return field
   if (typeof field === 'object' && !Array.isArray(field)) {
-    if (field.fr) return field.fr
     if (field.en) return field.en
+    if (field.fr) return field.fr
     return Object.values(field)[0]?.toString() || ''
   }
   return String(field)
 }
 
-// ==================== FONCTION D'EXTRACTION DES PRESCRIPTIONS AMÉLIORÉE ====================
+// ==================== IMPROVED PRESCRIPTIONS EXTRACTION FUNCTION ====================
 function extractPrescriptions(diagnosisData: any) {
-  const medicaments: any[] = []
-  const examsBio: any[] = []
-  const examsImaging: any[] = []
+  const medications: any[] = []
+  const labTests: any[] = []
+  const imagingStudies: any[] = []
   const seen = new Set<string>()
   
-  console.log("🔍 DÉBUT EXTRACTION DES PRESCRIPTIONS - VERSION AMÉLIORÉE")
-  console.log("📋 Structure complète diagnosisData:", JSON.stringify(diagnosisData, null, 2))
+  console.log("🔍 START PRESCRIPTIONS EXTRACTION - IMPROVED VERSION")
   
-  // Fonction pour extraire les examens biologiques de n'importe quelle structure
+  // Function to extract biological tests from any structure
   function extractBiologyTests(obj: any, path: string = '') {
     if (!obj || typeof obj !== 'object') return
     
-    // Rechercher dans toutes les clés possibles pour les examens bio
+    // Search in all possible keys for lab tests
     const bioKeys = [
       'tests', 'test', 'analyses', 'analysis', 'exams', 'examens',
       'laboratory_tests', 'laboratory_request', 'lab_tests', 'labTests',
@@ -84,13 +79,13 @@ function extractPrescriptions(diagnosisData: any) {
       const currentPath = path ? `${path}.${key}` : key
       const lowerKey = key.toLowerCase()
       
-      // Vérifier si c'est une clé qui pourrait contenir des tests bio
+      // Check if this is a key that could contain lab tests
       if (bioKeys.some(bioKey => lowerKey.includes(bioKey.toLowerCase()))) {
-        console.log(`🧪 Potentiels tests bio trouvés à: ${currentPath}`)
+        console.log(`🧪 Potential lab tests found at: ${currentPath}`)
         
         if (Array.isArray(value)) {
           value.forEach((item: any, index: number) => {
-            // Essayer plusieurs structures possibles
+            // Try multiple possible structures
             const testName = getString(item.test_name) || 
                            getString(item.testName) ||
                            getString(item.name) || 
@@ -114,33 +109,33 @@ function extractPrescriptions(diagnosisData: any) {
               
               if (!seen.has(uniqueKey)) {
                 seen.add(uniqueKey)
-                examsBio.push({
-                  nom: testName,
-                  categorie: category,
-                  urgence: item.urgency === 'Urgent' || item.urgent || item.stat || false,
-                  aJeun: item.fasting || item.fasting_required || item.aJeun || false,
-                  conditionsPrelevement: getString(item.special_requirements) || getString(item.conditions) || '',
-                  motifClinique: getString(item.clinical_indication) || getString(item.indication) || '',
-                  renseignementsCliniques: getString(item.clinical_info) || getString(item.clinical_information) || '',
-                  tubePrelevement: getString(item.tube_type) || getString(item.tube) || 'Selon protocole laboratoire',
-                  delaiResultat: getString(item.turnaround_time) || getString(item.tat) || 'Standard'
+                labTests.push({
+                  name: testName,
+                  category: category,
+                  urgent: item.urgency === 'Urgent' || item.urgent || item.stat || false,
+                  fasting: item.fasting || item.fasting_required || item.aJeun || false,
+                  sampleConditions: getString(item.special_requirements) || getString(item.conditions) || '',
+                  clinicalIndication: getString(item.clinical_indication) || getString(item.indication) || '',
+                  clinicalInformation: getString(item.clinical_info) || getString(item.clinical_information) || '',
+                  sampleTube: getString(item.tube_type) || getString(item.tube) || 'As per laboratory protocol',
+                  turnaroundTime: getString(item.turnaround_time) || getString(item.tat) || 'Standard'
                 })
-                console.log(`✅ Test bio ajouté: ${testName} (${category})`)
+                console.log(`✅ Lab test added: ${testName} (${category})`)
               }
             }
           })
         } else if (typeof value === 'object' && value !== null) {
-          // Si c'est un objet, explorer récursivement
+          // If it's an object, explore recursively
           extractBiologyTests(value, currentPath)
         }
       } else if (typeof value === 'object' && value !== null) {
-        // Continuer la recherche récursive
+        // Continue recursive search
         extractBiologyTests(value, currentPath)
       }
     }
   }
   
-  // Fonction pour extraire les examens d'imagerie de n'importe quelle structure
+  // Function to extract imaging studies from any structure
   function extractImagingStudies(obj: any, path: string = '') {
     if (!obj || typeof obj !== 'object') return
     
@@ -156,7 +151,7 @@ function extractPrescriptions(diagnosisData: any) {
       const lowerKey = key.toLowerCase()
       
       if (imagingKeys.some(imgKey => lowerKey.includes(imgKey.toLowerCase()))) {
-        console.log(`📷 Potentielle imagerie trouvée à: ${currentPath}`)
+        console.log(`📷 Potential imaging found at: ${currentPath}`)
         
         if (Array.isArray(value)) {
           value.forEach((item: any) => {
@@ -182,20 +177,20 @@ function extractPrescriptions(diagnosisData: any) {
               
               if (!seen.has(uniqueKey)) {
                 seen.add(uniqueKey)
-                examsImaging.push({
+                imagingStudies.push({
                   type: studyType,
-                  modalite: getString(item.modality) || studyType,
-                  region: region || 'À préciser',
-                  indicationClinique: getString(item.clinical_indication) || getString(item.indication) || '',
-                  questionDiagnostique: getString(item.clinical_question) || getString(item.question) || '',
-                  urgence: item.urgency === 'Urgent' || item.urgent || item.stat || false,
-                  contraste: item.contrast_required || item.contrast || item.avec_contraste || false,
-                  contreIndications: getString(item.contraindications) || '',
-                  renseignementsCliniques: getString(item.findings_sought) || getString(item.clinical_info) || '',
-                  antecedentsPertinents: getString(item.relevant_history) || '',
-                  protocoleSpecifique: getString(item.protocol) || ''
+                  modality: getString(item.modality) || studyType,
+                  region: region || 'To be specified',
+                  clinicalIndication: getString(item.clinical_indication) || getString(item.indication) || '',
+                  clinicalQuestion: getString(item.clinical_question) || getString(item.question) || '',
+                  urgent: item.urgency === 'Urgent' || item.urgent || item.stat || false,
+                  contrast: item.contrast_required || item.contrast || item.avec_contraste || false,
+                  contraindications: getString(item.contraindications) || '',
+                  clinicalInformation: getString(item.findings_sought) || getString(item.clinical_info) || '',
+                  relevantHistory: getString(item.relevant_history) || '',
+                  specificProtocol: getString(item.protocol) || ''
                 })
-                console.log(`✅ Imagerie ajoutée: ${studyType} - ${region}`)
+                console.log(`✅ Imaging added: ${studyType} - ${region}`)
               }
             }
           })
@@ -208,7 +203,7 @@ function extractPrescriptions(diagnosisData: any) {
     }
   }
   
-  // Fonction pour extraire les médicaments (inchangée mais avec plus de logs)
+  // Function to extract medications (unchanged but with more logs)
   function extractMedications(obj: any, path: string = '') {
     if (!obj || typeof obj !== 'object') return
     
@@ -223,7 +218,7 @@ function extractPrescriptions(diagnosisData: any) {
       const lowerKey = key.toLowerCase()
       
       if (medKeys.some(medKey => lowerKey.includes(medKey.toLowerCase())) && Array.isArray(value)) {
-        console.log(`💊 Potentiels médicaments trouvés à: ${currentPath}`)
+        console.log(`💊 Potential medications found at: ${currentPath}`)
         value.forEach((med: any) => {
           const name = getString(med.medication) || 
                       getString(med.name) || 
@@ -243,22 +238,22 @@ function extractPrescriptions(diagnosisData: any) {
           
           if (name && !seen.has(uniqueKey)) {
             seen.add(uniqueKey)
-            medicaments.push({
-              nom: name,
-              denominationCommune: getString(med.generic_name) || getString(med.genericName) || getString(med.dci) || getString(med.inn) || name,
+            medications.push({
+              name: name,
+              genericName: getString(med.generic_name) || getString(med.genericName) || getString(med.dci) || getString(med.inn) || name,
               dosage: dosage,
-              forme: getString(med.form) || getString(med.dosageForm) || getString(med.forme) || 'comprimé',
-              posologie: getString(med.frequency) || getString(med.posologie) || getString(med.sig) || getString(med.directions) || '1 fois par jour',
-              modeAdministration: getString(med.route) || getString(med.routeOfAdministration) || getString(med.voie) || 'Voie orale',
-              dureeTraitement: getString(med.duration) || getString(med.duree) || getString(med.treatmentDuration) || '7 jours',
-              quantite: getString(med.quantity) || getString(med.quantite) || getString(med.amount) || '1 boîte',
+              form: getString(med.form) || getString(med.dosageForm) || getString(med.forme) || 'tablet',
+              frequency: getString(med.frequency) || getString(med.posologie) || getString(med.sig) || getString(med.directions) || 'Once daily',
+              route: getString(med.route) || getString(med.routeOfAdministration) || getString(med.voie) || 'Oral',
+              duration: getString(med.duration) || getString(med.duree) || getString(med.treatmentDuration) || '7 days',
+              quantity: getString(med.quantity) || getString(med.quantite) || getString(med.amount) || '1 box',
               instructions: getString(med.instructions) || getString(med.notes) || getString(med.specialInstructions) || '',
-              justification: getString(med.indication) || getString(med.reason) || getString(med.justification) || '',
-              surveillanceParticuliere: getString(med.monitoring) || getString(med.surveillance) || '',
-              nonSubstituable: med.non_substitutable || med.nonSubstitutable || med.doNotSubstitute || false,
-              ligneComplete: `${name} ${dosage ? `- ${dosage}` : ''}\n${getString(med.frequency) || '1 fois par jour'} - ${getString(med.route) || 'Voie orale'}\nDurée : ${getString(med.duration) || '7 jours'} - Quantité : ${getString(med.quantity) || '1 boîte'}`
+              indication: getString(med.indication) || getString(med.reason) || getString(med.justification) || '',
+              monitoring: getString(med.monitoring) || getString(med.surveillance) || '',
+              doNotSubstitute: med.non_substitutable || med.nonSubstitutable || med.doNotSubstitute || false,
+              completeLine: `${name} ${dosage ? `- ${dosage}` : ''}\n${getString(med.frequency) || 'Once daily'} - ${getString(med.route) || 'Oral'}\nDuration: ${getString(med.duration) || '7 days'} - Quantity: ${getString(med.quantity) || '1 box'}`
             })
-            console.log(`✅ Médicament ajouté: ${name} ${dosage}`)
+            console.log(`✅ Medication added: ${name} ${dosage}`)
           }
         })
       } else if (typeof value === 'object' && value !== null) {
@@ -267,180 +262,180 @@ function extractPrescriptions(diagnosisData: any) {
     }
   }
   
-  // 1. Extraction depuis toute la structure
-  console.log("\n🔍 PHASE 1: Extraction récursive complète")
+  // 1. Extraction from entire structure
+  console.log("\n🔍 PHASE 1: Complete recursive extraction")
   extractMedications(diagnosisData)
   extractBiologyTests(diagnosisData)
   extractImagingStudies(diagnosisData)
   
-  // 2. Recherche spécifique dans certains chemins connus
-  console.log("\n🔍 PHASE 2: Recherche dans chemins spécifiques")
-  
-  // Chemins possibles pour les tests biologiques
-  const possibleBioPaths = [
-    diagnosisData?.paraclinicalExams,
-    diagnosisData?.paraclinical_exams,
-    diagnosisData?.paraclinicalTests,
-    diagnosisData?.labTests,
-    diagnosisData?.laboratory,
-    diagnosisData?.labs,
-    diagnosisData?.biologicalExams,
-    diagnosisData?.biological_exams,
-    diagnosisData?.examensBiologiques,
-    diagnosisData?.examens_biologiques,
-    diagnosisData?.tests?.biological,
-    diagnosisData?.tests?.laboratory,
-    diagnosisData?.examinations?.laboratory,
-    diagnosisData?.examinations?.biological
-  ]
-  
-  possibleBioPaths.forEach((path, index) => {
-    if (path) {
-      console.log(`🧪 Vérification chemin bio ${index + 1}:`, path)
-      extractBiologyTests({ tests: path })
-    }
-  })
-  
-  // 3. Extraction depuis mauritianDocuments (spécifique)
+  // 2. Extraction from mauritianDocuments (specific)
   if (diagnosisData?.mauritianDocuments) {
-    console.log("\n🔍 PHASE 3: Extraction depuis mauritianDocuments")
+    console.log("\n🔍 PHASE 2: Extraction from mauritianDocuments")
     
-    // Essayer toutes les variantes possibles dans mauritianDocuments
-    const mauritianPaths = [
-      diagnosisData.mauritianDocuments.laboratory_request,
-      diagnosisData.mauritianDocuments.laboratoryRequest,
-      diagnosisData.mauritianDocuments.lab_request,
-      diagnosisData.mauritianDocuments.labRequest,
-      diagnosisData.mauritianDocuments.biological_tests,
-      diagnosisData.mauritianDocuments.biologicalTests,
-      diagnosisData.mauritianDocuments.lab_tests,
-      diagnosisData.mauritianDocuments.labTests
-    ]
-    
-    mauritianPaths.forEach((path, index) => {
-      if (path) {
-        console.log(`🧪 Vérification mauritianDocuments path ${index + 1}:`, path)
-        extractBiologyTests(path)
-      }
-    })
-  }
-  
-  // 4. Si toujours aucun examen bio trouvé, chercher dans TOUTE la structure avec une approche différente
-  if (examsBio.length === 0) {
-    console.log("\n⚠️ Aucun examen bio trouvé, recherche approfondie...")
-    
-    // Fonction pour chercher n'importe quel tableau qui pourrait contenir des tests
-    function deepSearchForTests(obj: any, depth: number = 0): void {
-      if (!obj || typeof obj !== 'object' || depth > 10) return
-      
-      for (const [key, value] of Object.entries(obj)) {
-        if (Array.isArray(value) && value.length > 0) {
-          // Vérifier si le premier élément ressemble à un test
-          const firstItem = value[0]
-          if (firstItem && typeof firstItem === 'object') {
-            // Chercher des indices qu'il s'agit de tests
-            const hasTestIndicators = 
-              firstItem.test_name || firstItem.testName || firstItem.name ||
-              firstItem.test || firstItem.exam || firstItem.analysis ||
-              (key.toLowerCase().includes('test') || key.toLowerCase().includes('exam') || 
-               key.toLowerCase().includes('lab') || key.toLowerCase().includes('bio'))
-            
-            if (hasTestIndicators) {
-              console.log(`🔬 Tableau suspect trouvé à la clé: ${key}`)
-              console.log(`   Premier élément:`, JSON.stringify(firstItem, null, 2))
-              extractBiologyTests({ tests: value })
-            }
-          }
-        } else if (typeof value === 'object' && value !== null) {
-          deepSearchForTests(value, depth + 1)
+    // Medications from mauritianDocuments
+    if (diagnosisData.mauritianDocuments.consultation?.management_plan?.treatment?.medications) {
+      diagnosisData.mauritianDocuments.consultation.management_plan.treatment.medications.forEach((med: any) => {
+        const name = med.medication || med.name || ''
+        const dosage = med.dosing?.adult || med.dosage || ''
+        const uniqueKey = `med:${name}_${dosage}`.toLowerCase()
+        
+        if (name && !seen.has(uniqueKey)) {
+          seen.add(uniqueKey)
+          medications.push({
+            name: name,
+            genericName: name,
+            dosage: dosage,
+            form: 'tablet',
+            frequency: med.dosing?.adult || 'As directed',
+            route: 'Oral',
+            duration: med.duration || '7 days',
+            quantity: '1 box',
+            instructions: med.instructions || '',
+            indication: med.indication || '',
+            monitoring: med.monitoring || '',
+            doNotSubstitute: false,
+            completeLine: `${name} ${dosage}\n${med.dosing?.adult || 'As directed'} - Oral\nDuration: ${med.duration || '7 days'}`
+          })
+          console.log(`✅ Med from mauritianDocuments: ${name} ${dosage}`)
         }
-      }
+      })
     }
     
-    deepSearchForTests(diagnosisData)
-  }
-  
-  // 5. Ajout d'exemples si vraiment rien n'est trouvé
-  if (medicaments.length === 0 && examsBio.length === 0 && examsImaging.length === 0) {
-    console.log("\n⚠️ AUCUNE PRESCRIPTION TROUVÉE - Ajout d'exemples de démonstration")
+    // Lab tests from mauritianDocuments
+    if (diagnosisData.mauritianDocuments.consultation?.management_plan?.investigations?.laboratory_tests) {
+      diagnosisData.mauritianDocuments.consultation.management_plan.investigations.laboratory_tests.forEach((test: any) => {
+        const testName = test.test || test.name || ''
+        const uniqueKey = `bio:${testName}`.toLowerCase()
+        
+        if (testName && !seen.has(uniqueKey)) {
+          seen.add(uniqueKey)
+          labTests.push({
+            name: testName,
+            category: test.category || 'Clinical Chemistry',
+            urgent: test.urgency === 'Urgent' || false,
+            fasting: test.fasting_required || false,
+            sampleConditions: test.special_requirements || '',
+            clinicalIndication: test.clinical_indication || '',
+            clinicalInformation: '',
+            sampleTube: test.tube_type || 'As per laboratory protocol',
+            turnaroundTime: test.turnaround_time || 'Standard'
+          })
+          console.log(`✅ Lab test from mauritianDocuments: ${testName}`)
+        }
+      })
+    }
     
-    // Médicament exemple
-    medicaments.push({
-      nom: "Paracetamol",
-      denominationCommune: "Paracetamol",
-      dosage: "500mg",
-      forme: "comprimé",
-      posologie: "1 comprimé 3 fois par jour",
-      modeAdministration: "Voie orale",
-      dureeTraitement: "5 jours",
-      quantite: "15 comprimés",
-      instructions: "À prendre pendant les repas",
-      justification: "Antalgique antipyrétique",
-      surveillanceParticuliere: "",
-      nonSubstituable: false,
-      ligneComplete: "Paracetamol - 500mg\n1 comprimé 3 fois par jour - Voie orale\nDurée : 5 jours - Quantité : 15 comprimés"
-    })
-    
-    // Tests bio exemples
-    examsBio.push({
-      nom: "Numération Formule Sanguine (NFS)",
-      categorie: "Haematology",
-      urgence: false,
-      aJeun: false,
-      conditionsPrelevement: "",
-      motifClinique: "Bilan de contrôle",
-      renseignementsCliniques: "",
-      tubePrelevement: "EDTA (tube violet)",
-      delaiResultat: "24h"
-    })
-    
-    examsBio.push({
-      nom: "Glycémie à jeun",
-      categorie: "Clinical Chemistry",
-      urgence: false,
-      aJeun: true,
-      conditionsPrelevement: "Patient à jeun depuis 8h minimum",
-      motifClinique: "Dépistage diabète",
-      renseignementsCliniques: "",
-      tubePrelevement: "Fluorure (tube gris)",
-      delaiResultat: "24h"
-    })
+    // Imaging from mauritianDocuments
+    if (diagnosisData.mauritianDocuments.consultation?.management_plan?.investigations?.imaging_studies) {
+      diagnosisData.mauritianDocuments.consultation.management_plan.investigations.imaging_studies.forEach((study: any) => {
+        const studyType = study.study_type || study.type || ''
+        const region = study.body_region || study.region || ''
+        const uniqueKey = `img:${studyType}_${region}`.toLowerCase()
+        
+        if (studyType && !seen.has(uniqueKey)) {
+          seen.add(uniqueKey)
+          imagingStudies.push({
+            type: studyType,
+            modality: study.modality || studyType,
+            region: region || 'To be specified',
+            clinicalIndication: study.clinical_indication || '',
+            clinicalQuestion: study.clinical_question || '',
+            urgent: study.urgency === 'Urgent' || false,
+            contrast: study.contrast_required || false,
+            contraindications: study.contraindications || '',
+            clinicalInformation: study.findings_sought || '',
+            relevantHistory: study.relevant_history || '',
+            specificProtocol: study.protocol || ''
+          })
+          console.log(`✅ Imaging from mauritianDocuments: ${studyType} - ${region}`)
+        }
+      })
+    }
   }
   
-  console.log(`\n📊 RÉSUMÉ EXTRACTION FINALE:`)
-  console.log(`   - Médicaments: ${medicaments.length}`)
-  console.log(`   - Examens bio: ${examsBio.length}`)
-  console.log(`   - Imagerie: ${examsImaging.length}`)
+  console.log(`\n📊 FINAL EXTRACTION SUMMARY:`)
+  console.log(`   - Medications: ${medications.length}`)
+  console.log(`   - Lab tests: ${labTests.length}`)
+  console.log(`   - Imaging: ${imagingStudies.length}`)
   
-  // Debug détaillé final
-  if (medicaments.length > 0) {
-    console.log("\n💊 DÉTAIL MÉDICAMENTS:")
-    medicaments.forEach((med, i) => {
-      console.log(`   ${i+1}. ${med.nom} ${med.dosage} - ${med.posologie}`)
-    })
-  }
-  
-  if (examsBio.length > 0) {
-    console.log("\n🧪 DÉTAIL EXAMENS BIO:")
-    examsBio.forEach((test, i) => {
-      console.log(`   ${i+1}. ${test.nom} (${test.categorie})`)
-    })
-  }
-  
-  if (examsImaging.length > 0) {
-    console.log("\n📷 DÉTAIL IMAGERIE:")
-    examsImaging.forEach((exam, i) => {
-      console.log(`   ${i+1}. ${exam.type} - ${exam.region}`)
-    })
-  }
-  
-  return { medicaments, examsBio, examsImaging }
+  return { medications, labTests, imagingStudies }
 }
 
-// ==================== FONCTION PRINCIPALE ====================
+// Function to extract real data from diagnosis
+function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any) {
+  // Extract chief complaint
+  const chiefComplaint = 
+    clinicalData?.chiefComplaint ||
+    diagnosisData?.mauritianDocuments?.consultation?.patient_interview?.chief_complaint ||
+    diagnosisData?.expertAnalysis?.clinical_case_summary?.chief_complaint ||
+    "Patient presents for medical consultation"
+
+  // Extract history of present illness
+  const historyOfPresentIllness = 
+    diagnosisData?.mauritianDocuments?.consultation?.patient_interview?.history_present_illness ||
+    diagnosisData?.expertAnalysis?.clinical_reasoning?.history_analysis ||
+    diagnosisData?.clinical_case_summary?.clinical_presentation ||
+    ""
+
+  // Extract past medical history
+  const medicalHistory = 
+    diagnosisData?.mauritianDocuments?.consultation?.patient_interview?.past_medical_history ||
+    diagnosisData?.mauritianDocuments?.consultation?.medical_history ||
+    diagnosisData?.expertAnalysis?.clinical_reasoning?.relevant_history ||
+    ""
+
+  // Extract physical examination findings
+  const clinicalExamination = 
+    diagnosisData?.mauritianDocuments?.consultation?.patient_interview?.physical_examination ||
+    diagnosisData?.mauritianDocuments?.consultation?.physical_examination?.findings ||
+    diagnosisData?.expertAnalysis?.clinical_reasoning?.examination_findings ||
+    ""
+
+  // Extract diagnostic synthesis
+  const diagnosticSynthesis = 
+    diagnosisData?.mauritianDocuments?.consultation?.diagnostic_summary?.clinical_reasoning ||
+    diagnosisData?.expertAnalysis?.clinical_reasoning?.diagnostic_synthesis ||
+    diagnosisData?.diagnosis?.diagnostic_reasoning ||
+    ""
+
+  // Extract primary diagnosis
+  const diagnosticConclusion = 
+    diagnosisData?.mauritianDocuments?.consultation?.diagnostic_summary?.final_diagnosis ||
+    diagnosisData?.diagnosis?.primary?.name ||
+    diagnosisData?.diagnosis?.primary?.condition ||
+    diagnosisData?.expertAnalysis?.final_assessment?.primary_diagnosis ||
+    ""
+
+  // Extract management plan
+  const managementPlan = 
+    diagnosisData?.mauritianDocuments?.consultation?.management_plan?.treatment_strategy ||
+    diagnosisData?.mauritianDocuments?.consultation?.management_plan?.treatment?.approach ||
+    diagnosisData?.expertAnalysis?.expert_therapeutics?.treatment_strategy ||
+    ""
+
+  // Extract follow-up plan
+  const followUp = 
+    diagnosisData?.mauritianDocuments?.consultation?.management_plan?.follow_up?.schedule ||
+    diagnosisData?.mauritianDocuments?.consultation?.follow_up_plan ||
+    diagnosisData?.expertAnalysis?.management_strategy?.follow_up ||
+    ""
+
+  return {
+    chiefComplaint,
+    historyOfPresentIllness,
+    medicalHistory,
+    clinicalExamination,
+    diagnosticSynthesis,
+    diagnosticConclusion,
+    managementPlan,
+    followUp
+  }
+}
+
+// ==================== MAIN FUNCTION ====================
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
-  console.log("🚀 Début génération rapport (VERSION AVEC EXTRACTION AMÉLIORÉE)")
+  console.log("🚀 Starting report generation (VERSION WITH ENGLISH CONTENT)")
   
   try {
     const body = await request.json()
@@ -453,247 +448,294 @@ export async function POST(request: NextRequest) {
       includeFullPrescriptions = true
     } = body
 
-    // LOG COMPLET DES DONNÉES REÇUES
-    console.log("\n📥 DONNÉES REÇUES:")
-    console.log("- patientData présent:", !!patientData)
-    console.log("- clinicalData présent:", !!clinicalData)
-    console.log("- questionsData présent:", !!questionsData)
-    console.log("- diagnosisData présent:", !!diagnosisData)
-    console.log("- editedDocuments présent:", !!editedDocuments)
-    
-    if (diagnosisData) {
-      console.log("\n📊 STRUCTURE diagnosisData (clés de premier niveau):")
-      Object.keys(diagnosisData).forEach(key => {
-        const value = diagnosisData[key]
-        console.log(`  - ${key}: ${typeof value} ${Array.isArray(value) ? `[${value.length} éléments]` : ''}`)
-      })
-    }
+    // COMPLETE LOG OF RECEIVED DATA
+    console.log("\n📥 RECEIVED DATA:")
+    console.log("- patientData present:", !!patientData)
+    console.log("- clinicalData present:", !!clinicalData)
+    console.log("- questionsData present:", !!questionsData)
+    console.log("- diagnosisData present:", !!diagnosisData)
+    console.log("- editedDocuments present:", !!editedDocuments)
 
     if (!patientData || !clinicalData || !diagnosisData) {
-      return NextResponse.json({ success: false, error: "Données incomplètes" }, { status: 400 })
+      return NextResponse.json({ success: false, error: "Incomplete data" }, { status: 400 })
     }
 
-    // Protection des données
+    // Data protection
     const { anonymized: anonymizedPatientData, originalIdentity, anonymousId } = anonymizePatientData(patientData)
     
-    // EXTRACTION DES PRESCRIPTIONS AVEC LA FONCTION AMÉLIORÉE
-    const { medicaments, examsBio, examsImaging } = extractPrescriptions(diagnosisData)
+    // PRESCRIPTIONS EXTRACTION WITH IMPROVED FUNCTION
+    const { medications, labTests, imagingStudies } = extractPrescriptions(diagnosisData)
     
-    // Données patient pour le document final
-    const patient = {
-      nom: originalIdentity.nomComplet || 'PATIENT',
-      nomComplet: originalIdentity.nomComplet,
-      age: `${anonymizedPatientData.age || ''} ans`,
-      dateNaissance: originalIdentity.dateNaissance || 'Non renseignée',
-      sexe: anonymizedPatientData.sexe || anonymizedPatientData.gender || 'Non renseigné',
-      adresse: originalIdentity.adresse || 'Non renseignée',
-      telephone: originalIdentity.telephone || 'Non renseigné',
-      email: originalIdentity.email || 'Non renseigné',
-      poids: anonymizedPatientData.poids || anonymizedPatientData.weight || 'Non renseigné',
-      taille: anonymizedPatientData.taille || anonymizedPatientData.height || 'Non renseignée',
-      identifiantNational: originalIdentity.identifiantNational || ''
-    }
-
-    // Informations du médecin
-    const medecin = {
-      nom: "Dr. [NOM DU MÉDECIN]",
-      qualifications: "MBBS, MD (Medicine)",
-      specialite: "Médecine Générale",
-      adresseCabinet: "[Adresse complète du cabinet]",
-      telephone: "[+230 XXX XXXX]",
-      email: "[Email professionnel]",
-      heuresConsultation: "Lun-Ven: 8h30-17h30, Sam: 8h30-12h30",
-      numeroEnregistrement: "[Medical Council Registration No.]",
-      licencePratique: "[Practice License No.]"
-    }
-
-    const dateExamen = new Date().toLocaleDateString('fr-FR', {
+    // Extract real data from diagnosis
+    const realData = extractRealDataFromDiagnosis(diagnosisData, clinicalData)
+    
+    // Current date
+    const currentDate = new Date()
+    const examDate = currentDate.toLocaleDateString('fr-FR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
     })
 
-    // Extraction du diagnostic et motif
-    const diagnosticPrincipal = 
-      diagnosisData?.diagnosis?.primary?.condition ||
-      diagnosisData?.diagnosis?.primary?.condition_bilingual?.fr ||
-      diagnosisData?.primaryDiagnosis ||
-      diagnosisData?.principal ||
-      diagnosisData?.finalDiagnosis ||
-      "Diagnostic en cours d'établissement"
+    // Doctor information (French structure but can contain English content)
+    const praticien = {
+      nom: "Dr. [PHYSICIAN NAME]",
+      qualifications: "MBBS, MD (Medicine)",
+      specialite: "General Medicine",
+      adresseCabinet: "[Complete practice address]",
+      telephone: "[+230 XXX XXXX]",
+      email: "[Professional email]",
+      heuresConsultation: "Mon-Fri: 8:30 AM-5:30 PM, Sat: 8:30 AM-12:30 PM",
+      numeroEnregistrement: "[Medical Council Registration No.]",
+      licencePratique: "[Practice License No.]"
+    }
 
-    const motifConsultation = 
-      clinicalData?.chiefComplaint || 
-      clinicalData?.presentingComplaint ||
-      "Consultation médicale"
+    // Patient information (French structure)
+    const patient = {
+      nom: originalIdentity.name || originalIdentity.fullName || 'PATIENT',
+      nomComplet: originalIdentity.fullName || originalIdentity.name || 'PATIENT',
+      age: `${anonymizedPatientData.age || ''} years`,
+      dateNaissance: originalIdentity.birthDate || 'Not provided',
+      sexe: anonymizedPatientData.gender || anonymizedPatientData.sexe || 'Not specified',
+      adresse: originalIdentity.address || 'Not provided',
+      telephone: originalIdentity.phone || 'Not provided',
+      email: originalIdentity.email || 'Not provided',
+      poids: anonymizedPatientData.weight || anonymizedPatientData.poids || 'Not provided',
+      taille: anonymizedPatientData.height || anonymizedPatientData.taille || '',
+      identifiantNational: originalIdentity.nationalId || '',
+      dateExamen: examDate
+    }
 
-    // Création du template avec prescriptions TOUJOURS GARANTIES
-    const jsonTemplate = {
+    // Create French structure with English content
+    const reportStructure = {
       compteRendu: {
         header: {
-          title: "MEDICAL CONSULTATION REPORT / COMPTE-RENDU DE CONSULTATION MÉDICALE",
-          subtitle: "Confidential Medical Document / Document médical confidentiel",
-          reference: `MCR-${patient.nom.replace(/\s+/g, '')}_${Date.now()}`
+          title: "MEDICAL CONSULTATION REPORT",
+          subtitle: "Professional Medical Document",
+          reference: `REF-${Date.now()}`
         },
-        praticien: medecin,
-        patient: {
-          ...patient,
-          dateExamen: dateExamen
-        },
+        praticien: praticien,
+        patient: patient,
         rapport: {
-          motifConsultation: "[À_RÉDIGER]",
-          anamnese: "[À_RÉDIGER]",
-          antecedents: "[À_RÉDIGER]",
-          examenClinique: "[À_RÉDIGER]",
-          syntheseDiagnostique: "[À_RÉDIGER]",
-          conclusionDiagnostique: "[À_RÉDIGER]",
-          priseEnCharge: "[À_RÉDIGER]",
-          surveillance: "[À_RÉDIGER]",
-          conclusion: "[À_RÉDIGER]"
+          motifConsultation: "",
+          anamnese: "",
+          antecedents: "",
+          examenClinique: "",
+          syntheseDiagnostique: "",
+          conclusionDiagnostique: "",
+          priseEnCharge: "",
+          surveillance: "",
+          conclusion: ""
         },
-        metadata: { 
-          dateGeneration: new Date().toISOString(), 
+        metadata: {
+          dateGeneration: currentDate.toISOString(),
           wordCount: 0,
+          validationStatus: 'draft',
           complianceNote: "This document complies with Medical Council of Mauritius regulations"
         }
       },
-      
-      // ORDONNANCES TOUJOURS INCLUSES AVEC STRUCTURE GARANTIE
       ordonnances: {
-        // MÉDICAMENTS
-        medicaments: {
-          enTete: medecin,
+        medicaments: medications.length > 0 ? {
+          enTete: praticien,
           patient: patient,
           prescription: {
-            datePrescription: dateExamen,
-            medicaments: medicaments,
+            datePrescription: examDate,
+            medicaments: medications.map((med, idx) => ({
+              numero: idx + 1,
+              nom: med.name,
+              denominationCommune: med.genericName || med.name,
+              dosage: med.dosage,
+              forme: med.form || 'tablet',
+              posologie: med.frequency,
+              modeAdministration: med.route,
+              dureeTraitement: med.duration,
+              quantite: med.quantity,
+              instructions: med.instructions,
+              justification: med.indication,
+              surveillanceParticuliere: med.monitoring,
+              nonSubstituable: med.doNotSubstitute || false,
+              ligneComplete: med.completeLine
+            })),
             validite: "3 months unless otherwise specified",
             dispensationNote: "For pharmaceutical use only"
           },
           authentification: {
             signature: "Medical Practitioner's Signature",
-            nomEnCapitales: medecin.nom.toUpperCase(),
-            numeroEnregistrement: medecin.numeroEnregistrement,
+            nomEnCapitales: praticien.nom.toUpperCase(),
+            numeroEnregistrement: praticien.numeroEnregistrement,
             cachetProfessionnel: "Official Medical Stamp",
-            date: dateExamen
+            date: examDate
           }
-        },
+        } : null,
         
-        // BIOLOGIE
-        biologie: {
-          enTete: medecin,
+        biologie: labTests.length > 0 ? {
+          enTete: praticien,
           patient: patient,
           prescription: {
-            datePrescription: dateExamen,
-            motifClinique: diagnosticPrincipal,
+            datePrescription: examDate,
+            motifClinique: realData.diagnosticConclusion || "Diagnostic evaluation",
             analyses: {
-              haematology: examsBio.filter(e => e.categorie.toLowerCase().includes('haem')),
-              clinicalChemistry: examsBio.filter(e => 
-                e.categorie.toLowerCase().includes('chem') || 
-                e.categorie === 'Clinical Chemistry' ||
-                e.categorie.toLowerCase().includes('biochim')
-              ),
-              immunology: examsBio.filter(e => 
-                e.categorie.toLowerCase().includes('immun') || 
-                e.categorie.toLowerCase().includes('sero')
-              ),
-              microbiology: examsBio.filter(e => 
-                e.categorie.toLowerCase().includes('micro') ||
-                e.categorie.toLowerCase().includes('bacterio')
-              ),
-              endocrinology: examsBio.filter(e => 
-                e.categorie.toLowerCase().includes('endo') ||
-                e.categorie.toLowerCase().includes('hormon')
-              ),
-              other: examsBio.filter(e => 
-                !e.categorie.toLowerCase().includes('haem') &&
-                !e.categorie.toLowerCase().includes('chem') &&
-                !e.categorie.toLowerCase().includes('immun') &&
-                !e.categorie.toLowerCase().includes('micro') &&
-                !e.categorie.toLowerCase().includes('endo') &&
-                e.categorie !== 'Clinical Chemistry'
-              )
+              haematology: labTests.filter(t => 
+                t.category.toLowerCase().includes('haem')
+              ).map(t => ({
+                nom: t.name,
+                categorie: t.category,
+                urgence: t.urgent,
+                aJeun: t.fasting,
+                conditionsPrelevement: t.sampleConditions,
+                motifClinique: t.clinicalIndication,
+                renseignementsCliniques: t.clinicalInformation,
+                tubePrelevement: t.sampleTube,
+                delaiResultat: t.turnaroundTime
+              })),
+              clinicalChemistry: labTests.filter(t => 
+                t.category === 'Clinical Chemistry' || 
+                t.category.toLowerCase().includes('chem') ||
+                t.category.toLowerCase().includes('biochim')
+              ).map(t => ({
+                nom: t.name,
+                categorie: t.category,
+                urgence: t.urgent,
+                aJeun: t.fasting,
+                conditionsPrelevement: t.sampleConditions,
+                motifClinique: t.clinicalIndication,
+                renseignementsCliniques: t.clinicalInformation,
+                tubePrelevement: t.sampleTube,
+                delaiResultat: t.turnaroundTime
+              })),
+              immunology: labTests.filter(t => 
+                t.category.toLowerCase().includes('immun') ||
+                t.category.toLowerCase().includes('sero')
+              ).map(t => ({
+                nom: t.name,
+                categorie: t.category,
+                urgence: t.urgent,
+                aJeun: t.fasting,
+                conditionsPrelevement: t.sampleConditions,
+                motifClinique: t.clinicalIndication,
+                renseignementsCliniques: t.clinicalInformation,
+                tubePrelevement: t.sampleTube,
+                delaiResultat: t.turnaroundTime
+              })),
+              microbiology: labTests.filter(t => 
+                t.category.toLowerCase().includes('micro') ||
+                t.category.toLowerCase().includes('bacterio')
+              ).map(t => ({
+                nom: t.name,
+                categorie: t.category,
+                urgence: t.urgent,
+                aJeun: t.fasting,
+                conditionsPrelevement: t.sampleConditions,
+                motifClinique: t.clinicalIndication,
+                renseignementsCliniques: t.clinicalInformation,
+                tubePrelevement: t.sampleTube,
+                delaiResultat: t.turnaroundTime
+              })),
+              endocrinology: labTests.filter(t => 
+                t.category.toLowerCase().includes('endo') ||
+                t.category.toLowerCase().includes('hormon')
+              ).map(t => ({
+                nom: t.name,
+                categorie: t.category,
+                urgence: t.urgent,
+                aJeun: t.fasting,
+                conditionsPrelevement: t.sampleConditions,
+                motifClinique: t.clinicalIndication,
+                renseignementsCliniques: t.clinicalInformation,
+                tubePrelevement: t.sampleTube,
+                delaiResultat: t.turnaroundTime
+              }))
             },
-            instructionsSpeciales: examsBio
-              .filter(e => e.aJeun || e.conditionsPrelevement)
-              .map(e => `${e.nom}: ${e.aJeun ? 'Fasting required' : ''} ${e.conditionsPrelevement}`.trim())
+            instructionsSpeciales: labTests
+              .filter(t => t.fasting || t.sampleConditions)
+              .map(t => `${t.name}: ${t.fasting ? 'Fasting required' : ''} ${t.sampleConditions}`.trim())
               .filter(Boolean),
             laboratoireRecommande: "Any MoH approved laboratory"
           },
           authentification: {
             signature: "Requesting Physician's Signature",
-            nomEnCapitales: medecin.nom.toUpperCase(),
-            numeroEnregistrement: medecin.numeroEnregistrement,
-            date: dateExamen
+            nomEnCapitales: praticien.nom.toUpperCase(),
+            numeroEnregistrement: praticien.numeroEnregistrement,
+            date: examDate
           }
-        },
+        } : null,
         
-        // IMAGERIE
-        imagerie: {
-          enTete: medecin,
-          patient: {
-            ...patient,
-            poids: patient.poids
-          },
+        imagerie: imagingStudies.length > 0 ? {
+          enTete: praticien,
+          patient: patient,
           prescription: {
-            datePrescription: dateExamen,
-            examens: examsImaging,
-            renseignementsCliniques: `Clinical diagnosis: ${diagnosticPrincipal}`,
+            datePrescription: examDate,
+            examens: imagingStudies.map(exam => ({
+              type: exam.type,
+              modalite: exam.modality,
+              region: exam.region || 'To be specified',
+              indicationClinique: exam.clinicalIndication || 'Diagnostic evaluation',
+              questionDiagnostique: exam.clinicalQuestion || '',
+              urgence: exam.urgent || false,
+              contraste: exam.contrast || false,
+              contreIndications: exam.contraindications || '',
+              renseignementsCliniques: exam.clinicalInformation || '',
+              antecedentsPertinents: exam.relevantHistory || '',
+              protocoleSpecifique: exam.specificProtocol || ''
+            })),
+            renseignementsCliniques: `Clinical diagnosis: ${realData.diagnosticConclusion}`,
             centreImagerie: "Any MoH approved imaging center"
           },
           authentification: {
             signature: "Requesting Physician's Signature",
-            nomEnCapitales: medecin.nom.toUpperCase(),
-            numeroEnregistrement: medecin.numeroEnregistrement,
-            date: dateExamen
+            nomEnCapitales: praticien.nom.toUpperCase(),
+            numeroEnregistrement: praticien.numeroEnregistrement,
+            date: examDate
           }
-        }
+        } : null
       }
     }
-    
-    // LOG DE VÉRIFICATION
-    console.log("\n🔍 VÉRIFICATION STRUCTURE ORDONNANCES:")
-    console.log("   - ordonnances.medicaments:", jsonTemplate.ordonnances.medicaments ? "✅ PRÉSENT" : "❌ ABSENT")
-    console.log("   - ordonnances.biologie:", jsonTemplate.ordonnances.biologie ? "✅ PRÉSENT" : "❌ ABSENT")
-    console.log("   - ordonnances.imagerie:", jsonTemplate.ordonnances.imagerie ? "✅ PRÉSENT" : "❌ ABSENT")
-    console.log("   - medicaments.prescription.medicaments.length:", jsonTemplate.ordonnances.medicaments.prescription.medicaments.length)
-    console.log("   - biologie.prescription.analyses keys:", Object.keys(jsonTemplate.ordonnances.biologie.prescription.analyses))
-    
-    // Compter le total des examens bio
-    const totalExamsBio = Object.values(jsonTemplate.ordonnances.biologie.prescription.analyses)
-      .reduce((acc: number, arr: any) => acc + (Array.isArray(arr) ? arr.length : 0), 0)
-    console.log("   - Total examens bio dans analyses:", totalExamsBio)
-    console.log("   - imagerie.prescription.examens.length:", jsonTemplate.ordonnances.imagerie.prescription.examens.length)
 
-    // Données anonymisées pour GPT-4
-    const donneesAnonymisees = {
+    // Prepare data for GPT-4 with REAL extracted information
+    const gptData = {
       patient: {
-        age: `${anonymizedPatientData.age || ''} ans`,
-        sexe: anonymizedPatientData.sexe || 'Non renseigné',
-        poids: anonymizedPatientData.poids || 'Non renseigné'
+        age: `${anonymizedPatientData.age || ''} years`,
+        gender: anonymizedPatientData.gender || 'Not specified',
+        weight: anonymizedPatientData.weight || 'Not provided'
       },
-      motifConsultation: motifConsultation,
-      symptomes: clinicalData?.symptoms || [],
-      diagnostic: diagnosticPrincipal,
-      medicamentsCount: medicaments.length,
-      examsBioCount: examsBio.length,
-      examsImagingCount: examsImaging.length
+      chiefComplaint: realData.chiefComplaint,
+      historyOfPresentIllness: realData.historyOfPresentIllness,
+      medicalHistory: realData.medicalHistory,
+      clinicalExamination: realData.clinicalExamination,
+      diagnosticSynthesis: realData.diagnosticSynthesis,
+      diagnosticConclusion: realData.diagnosticConclusion,
+      managementPlan: realData.managementPlan,
+      followUp: realData.followUp,
+      medicationsCount: medications.length,
+      labTestsCount: labTests.length,
+      imagingStudiesCount: imagingStudies.length
     }
 
-    // Génération du rapport narratif avec GPT-4
-    const systemPrompt = `Tu es un médecin rédacteur à Maurice. 
-Rédige UNIQUEMENT le contenu narratif en remplaçant les [À_RÉDIGER].
-NE PAS modifier les sections ordonnances.
-Chaque section doit contenir 150-200 mots minimum.`
+    // Generate narrative report with GPT-4 IN ENGLISH
+    const systemPrompt = `You are a medical report writer for Mauritius. 
+Write professional medical reports in ENGLISH.
+Use the provided real patient data, do not invent information.
+Each section must contain minimum 150-200 words.
+If data is missing for a section, expand professionally on available information.`
 
-    const userPrompt = `Données patient (anonymisées): ${JSON.stringify(donneesAnonymisees, null, 2)}
+    const userPrompt = `Based on this REAL patient data, generate a professional medical report in ENGLISH:
+${JSON.stringify(gptData, null, 2)}
 
-Complète UNIQUEMENT les sections narratives du rapport suivant en remplaçant [À_RÉDIGER]:
-${JSON.stringify(jsonTemplate, null, 2)}`
+Generate content for these sections IN ENGLISH:
+1. motifConsultation (Chief Complaint) - Use: ${gptData.chiefComplaint}
+2. anamnese (History of Present Illness) - Use: ${gptData.historyOfPresentIllness}
+3. antecedents (Past Medical History) - Use: ${gptData.medicalHistory}
+4. examenClinique (Physical Examination) - Use: ${gptData.clinicalExamination}
+5. syntheseDiagnostique (Diagnostic Synthesis) - Use: ${gptData.diagnosticSynthesis}
+6. conclusionDiagnostique (Diagnostic Conclusion) - Use: ${gptData.diagnosticConclusion}
+7. priseEnCharge (Management Plan) - Use: ${gptData.managementPlan} and mention ${gptData.medicationsCount} medications, ${gptData.labTestsCount} lab tests, ${gptData.imagingStudiesCount} imaging studies
+8. surveillance (Follow-up Plan) - Use: ${gptData.followUp}
+9. conclusion (Final Conclusion) - Summarize the case
 
-    console.log("🤖 Appel GPT-4...")
-    let reportData = jsonTemplate
+Return ONLY a JSON object with these 9 keys and their content in ENGLISH.`
 
+    console.log("🤖 Calling GPT-4 for ENGLISH content...")
+    
     try {
       const result = await generateText({
         model: openai("gpt-4o"),
@@ -701,82 +743,92 @@ ${JSON.stringify(jsonTemplate, null, 2)}`
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        maxTokens: 6000,
+        maxTokens: 4000,
         temperature: 0.2,
       })
 
-      // Parse et fusion avec le template
-      const cleanedText = result.text.replace(/```json\s*/g, '').replace(/```\s*/g, '')
+      // Parse and extract narrative content
+      const cleanedText = result.text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
       const firstBrace = cleanedText.indexOf('{')
       const lastBrace = cleanedText.lastIndexOf('}')
       
       if (firstBrace !== -1 && lastBrace !== -1) {
         const jsonString = cleanedText.substring(firstBrace, lastBrace + 1)
-        const gptResponse = JSON.parse(jsonString)
-        
-        // Fusionner uniquement le rapport narratif
-        if (gptResponse?.compteRendu?.rapport) {
-          reportData.compteRendu.rapport = gptResponse.compteRendu.rapport
+        try {
+          const narrativeContent = JSON.parse(jsonString)
+          
+          // Merge narrative content
+          Object.keys(narrativeContent).forEach(key => {
+            if (reportStructure.compteRendu.rapport.hasOwnProperty(key)) {
+              reportStructure.compteRendu.rapport[key as keyof typeof reportStructure.compteRendu.rapport] = narrativeContent[key]
+            }
+          })
+        } catch (parseError) {
+          console.error("JSON parse error:", parseError)
+          // Use fallback content with real data
+          useRealDataFallback(reportStructure, gptData)
         }
+      } else {
+        // Use fallback content with real data
+        useRealDataFallback(reportStructure, gptData)
       }
     } catch (error) {
-      console.error("❌ Erreur GPT-4:", error)
-      // Utiliser un contenu par défaut
-      Object.keys(reportData.compteRendu.rapport).forEach(key => {
-        reportData.compteRendu.rapport[key] = getDefaultContent(key, donneesAnonymisees)
-      })
+      console.error("❌ GPT-4 Error:", error)
+      // Use fallback content with real data
+      useRealDataFallback(reportStructure, gptData)
     }
 
-    // Calcul du wordCount
-    const wordCount = Object.values(reportData.compteRendu.rapport)
+    // Calculate word count
+    const wordCount = Object.values(reportStructure.compteRendu.rapport)
       .filter(v => typeof v === 'string')
       .join(' ')
       .split(/\s+/)
       .filter(Boolean)
       .length
     
-    reportData.compteRendu.metadata.wordCount = wordCount
+    reportStructure.compteRendu.metadata.wordCount = wordCount
 
-    // Retour avec structure garantie
-    const response = {
+    // VERIFICATION LOG
+    console.log("\n🔍 FINAL STRUCTURE VERIFICATION:")
+    console.log("   - report.compteRendu:", !!reportStructure.compteRendu)
+    console.log("   - report.ordonnances:", !!reportStructure.ordonnances)
+    console.log("   - report.ordonnances.medicaments:", !!reportStructure.ordonnances.medicaments)
+    console.log("   - report.ordonnances.biologie:", !!reportStructure.ordonnances.biologie)
+    console.log("   - report.ordonnances.imagerie:", !!reportStructure.ordonnances.imagerie)
+
+    const endTime = Date.now()
+    const processingTime = endTime - startTime
+
+    console.log("\n✅ REPORT GENERATED SUCCESSFULLY")
+    console.log("📊 Final summary:")
+    console.log(`   - Medications: ${medications.length}`)
+    console.log(`   - Lab tests: ${labTests.length}`)
+    console.log(`   - Imaging: ${imagingStudies.length}`)
+    console.log(`   - Processing time: ${processingTime}ms`)
+
+    return NextResponse.json({
       success: true,
-      report: reportData,
+      report: reportStructure,
       metadata: {
         type: "professional_narrative_mauritius_compliant",
         includesFullPrescriptions: true,
-        generatedAt: new Date().toISOString(),
-        processingTimeMs: Date.now() - startTime,
+        generatedAt: currentDate.toISOString(),
+        processingTimeMs: processingTime,
         prescriptionsSummary: {
-          medications: medicaments.length,
-          laboratoryTests: examsBio.length,
-          imagingStudies: examsImaging.length
+          medications: medications.length,
+          laboratoryTests: labTests.length,
+          imagingStudies: imagingStudies.length
         }
       }
-    }
-
-    // VÉRIFICATION FINALE DE LA STRUCTURE
-    console.log("\n🔍 VÉRIFICATION FINALE AVANT RETOUR:")
-    console.log("   - report.ordonnances existe:", !!response.report.ordonnances)
-    console.log("   - report.ordonnances.medicaments existe:", !!response.report.ordonnances?.medicaments)
-    console.log("   - report.ordonnances.biologie existe:", !!response.report.ordonnances?.biologie)
-    console.log("   - report.ordonnances.imagerie existe:", !!response.report.ordonnances?.imagerie)
-    
-    console.log("\n✅ RAPPORT GÉNÉRÉ AVEC SUCCÈS")
-    console.log("📊 Résumé final:")
-    console.log(`   - Médicaments: ${medicaments.length}`)
-    console.log(`   - Examens bio: ${examsBio.length}`)
-    console.log(`   - Imagerie: ${examsImaging.length}`)
-    console.log(`   - Temps: ${response.metadata.processingTimeMs}ms`)
-
-    return NextResponse.json(response)
+    })
 
   } catch (error) {
-    console.error("❌ Erreur API:", error)
+    console.error("❌ API Error:", error)
     
     return NextResponse.json(
       { 
         success: false, 
-        error: error instanceof Error ? error.message : "Erreur inconnue",
+        error: error instanceof Error ? error.message : "Unknown error",
         stack: process.env.NODE_ENV === 'development' ? (error as Error).stack : undefined
       },
       { status: 500 }
@@ -784,27 +836,25 @@ ${JSON.stringify(jsonTemplate, null, 2)}`
   }
 }
 
-// Fonction pour générer un contenu par défaut
-function getDefaultContent(section: string, data: any): string {
-  const contents: Record<string, string> = {
-    motifConsultation: `Le patient se présente ce jour en consultation médicale pour ${data.motifConsultation || "évaluation clinique"}. Cette consultation s'inscrit dans le cadre d'une démarche de soins primaires visant à évaluer, diagnostiquer et prendre en charge les symptômes rapportés. L'approche clinique adoptée vise à identifier les causes sous-jacentes des symptômes présentés.`,
+// Function to use fallback content with real data
+function useRealDataFallback(reportStructure: any, data: any) {
+  reportStructure.compteRendu.rapport = {
+    motifConsultation: data.chiefComplaint || "The patient presents today for medical consultation. This consultation is part of a primary care approach aimed at evaluating, diagnosing, and managing the reported symptoms. The clinical approach adopted aims to identify the underlying causes of the presented symptoms while ensuring comprehensive and personalized patient care.",
     
-    anamnese: `L'interrogatoire médical approfondi a permis de recueillir des informations détaillées concernant l'histoire de la maladie actuelle. Le patient décrit une évolution progressive des manifestations cliniques. L'ensemble de ces éléments anamnestiques a été soigneusement analysé et intégré dans le raisonnement clinique global.`,
+    anamnese: data.historyOfPresentIllness || "The comprehensive medical interview allowed for the collection of detailed information regarding the current illness history. The patient describes a progressive evolution of clinical manifestations. The temporal analysis of symptoms reveals a presentation compatible with the observed clinical picture. All these anamnestic elements have been carefully analyzed and integrated into the overall clinical reasoning.",
     
-    antecedents: `L'exploration détaillée des antécédents du patient constitue un élément crucial de l'évaluation médicale globale. Cette section documente l'ensemble des éléments pertinents de l'histoire médicale personnelle et familiale du patient.`,
+    antecedents: data.medicalHistory || "The detailed exploration of the patient's medical history constitutes a crucial element of the comprehensive medical evaluation. This section documents all relevant elements of the patient's personal and family medical history, including previous pathologies, surgical interventions, drug allergies, and identified risk factors. This retrospective analysis helps establish a complete medical profile essential to understanding the current clinical context.",
     
-    examenClinique: `L'examen clinique a été réalisé de manière systématique et approfondie. Cette évaluation clinique objective constitue, avec l'anamnèse, le fondement du raisonnement diagnostique. L'ensemble des constatations de l'examen physique a été intégré au raisonnement diagnostique global.`,
+    examenClinique: data.clinicalExamination || "The clinical examination was performed systematically and thoroughly, covering all physiological systems. Vital parameters were measured and documented. Inspection, palpation, percussion, and auscultation were performed according to clinical practice standards. This objective clinical evaluation constitutes, along with the history, the foundation of diagnostic reasoning. All findings from the physical examination have been integrated into the overall diagnostic reasoning.",
     
-    syntheseDiagnostique: `L'analyse minutieuse de l'ensemble des éléments cliniques permet d'établir une synthèse diagnostique cohérente. Le diagnostic de ${data.diagnostic || "la condition identifiée"} est retenu sur la base des éléments cliniques recueillis.`,
+    syntheseDiagnostique: data.diagnosticSynthesis || `The careful analysis of all clinical elements allows for the establishment of a coherent diagnostic synthesis. ${data.diagnosticConclusion ? `The diagnosis of ${data.diagnosticConclusion} is retained based on the collected clinical elements.` : 'The diagnostic evaluation is ongoing based on the available clinical data.'} This synthesis integrates the history data, physical examination results, and risk factor analysis. The diagnostic approach follows a methodical approach to exclude relevant differential diagnoses.`,
     
-    conclusionDiagnostique: `Au terme de cette évaluation clinique complète, le diagnostic retenu est celui de ${data.diagnostic || "la pathologie identifiée"}. Cette conclusion diagnostique représente la synthèse d'un processus de raisonnement médical structuré.`,
+    conclusionDiagnostique: data.diagnosticConclusion || "Following this comprehensive clinical evaluation, the diagnostic conclusion is being established. This diagnostic conclusion represents the synthesis of structured medical reasoning integrating all available clinical data. The diagnostic certainty will be enhanced with the results of the requested complementary examinations.",
     
-    priseEnCharge: `La stratégie thérapeutique mise en place a été élaborée de manière personnalisée. ${data.medicamentsCount > 0 ? `${data.medicamentsCount} médicament(s) ont été prescrits.` : ''} ${data.examsBioCount > 0 || data.examsImagingCount > 0 ? `Des examens complémentaires ont été demandés.` : ''}`,
+    priseEnCharge: data.managementPlan || `The therapeutic strategy implemented has been developed in a personalized manner, taking into account the patient's specific clinical profile. ${data.medicationsCount > 0 ? `A medication regimen comprising ${data.medicationsCount} medication(s) has been prescribed.` : ''} ${data.labTestsCount > 0 || data.imagingStudiesCount > 0 ? `Complementary examinations have been requested to refine the diagnosis and adapt the management (${data.labTestsCount} laboratory tests, ${data.imagingStudiesCount} imaging studies).` : ''} The adopted therapeutic approach aims to effectively treat the pathology while minimizing the risks of adverse effects.`,
     
-    surveillance: `Le plan de surveillance mis en place vise à assurer un suivi médical optimal. Les modalités de suivi ont été clairement définies et communiquées au patient.`,
+    surveillance: data.followUp || "The follow-up plan implemented aims to ensure optimal medical monitoring of clinical evolution. The monitoring modalities have been clearly defined and communicated to the patient, including warning signs requiring urgent consultation. A follow-up appointment has been scheduled to evaluate the therapeutic response and adjust the management strategy if necessary. The patient has been informed of the importance of therapeutic adherence.",
     
-    conclusion: `Cette consultation a permis d'établir un diagnostic et de mettre en place une stratégie de prise en charge globale. Le pronostic est considéré comme favorable sous réserve d'une adhésion thérapeutique optimale.`
+    conclusion: `This consultation has allowed for ${data.diagnosticConclusion ? `the establishment of a diagnosis of ${data.diagnosticConclusion}` : 'a comprehensive clinical evaluation'} and the implementation of a complete and adapted management strategy. The prognosis is considered favorable subject to optimal therapeutic adherence. The patient has been fully informed of their medical condition and treatment modalities. Care coordination with other involved healthcare professionals will be ensured according to identified needs.`
   }
-  
-  return contents[section] || "Section en cours de rédaction."
 }

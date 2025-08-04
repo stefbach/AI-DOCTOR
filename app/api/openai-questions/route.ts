@@ -1,18 +1,18 @@
-// app/api/openai-questions/route.ts - VERSION AVEC PROTECTION DES DONNÉES
+// app/api/openai-questions/route.ts - VERSION WITH DATA PROTECTION
 import { type NextRequest, NextResponse } from "next/server"
 import crypto from 'crypto'
 
-// Configuration pour différents modes de vitesse
+// Configuration for different speed modes
 export const runtime = 'edge'
 export const preferredRegion = 'auto'
 
-// ==================== FONCTIONS DE PROTECTION DES DONNÉES ====================
+// ==================== DATA PROTECTION FUNCTIONS ====================
 function anonymizePatientData(patientData: any): {
   anonymized: any,
   originalIdentity: any,
   anonymousId: string
 } {
-  // Sauvegarder l'identité originale
+  // Save original identity
   const originalIdentity = {
     firstName: patientData?.firstName,
     lastName: patientData?.lastName,
@@ -21,7 +21,7 @@ function anonymizePatientData(patientData: any): {
     phone: patientData?.phone
   }
   
-  // Créer une copie sans les données sensibles
+  // Create a copy without sensitive data
   const anonymized = { ...patientData }
   const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'idNumber', 'ssn']
   
@@ -29,18 +29,18 @@ function anonymizePatientData(patientData: any): {
     delete anonymized[field]
   })
   
-  // Ajouter un ID anonyme pour le suivi
+  // Add anonymous ID for tracking
   const anonymousId = `ANON-Q-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
   anonymized.anonymousId = anonymousId
   
-  console.log('🔒 Données patient anonymisées pour les questions')
-  console.log(`   - ID anonyme: ${anonymousId}`)
-  console.log('   - Champs protégés:', sensitiveFields.filter(f => originalIdentity[f]).join(', '))
+  console.log('🔒 Patient data anonymized for questions')
+  console.log(`   - Anonymous ID: ${anonymousId}`)
+  console.log('   - Protected fields:', sensitiveFields.filter(f => originalIdentity[f]).join(', '))
   
   return { anonymized, originalIdentity, anonymousId }
 }
 
-// Fonction de logging sécurisé
+// Secure logging function
 function secureLog(message: string, data?: any) {
   if (data && typeof data === 'object') {
     const safeData = { ...data }
@@ -48,7 +48,7 @@ function secureLog(message: string, data?: any) {
     
     sensitiveFields.forEach(field => {
       if (safeData[field]) {
-        safeData[field] = '[PROTÉGÉ]'
+        safeData[field] = '[PROTECTED]'
       }
     })
     
@@ -58,7 +58,7 @@ function secureLog(message: string, data?: any) {
   }
 }
 
-// ==================== FONCTION DE DEBUG ====================
+// ==================== DEBUG FUNCTION ====================
 function debugApiKey(apiKey: string | undefined): void {
   console.log('🔑 DEBUG OPENAI_API_KEY:', {
     exists: !!apiKey,
@@ -72,7 +72,7 @@ function debugApiKey(apiKey: string | undefined): void {
   })
 }
 
-// ==================== CACHE SIMPLE ====================
+// ==================== SIMPLE CACHE ====================
 class SimpleCache {
   private cache = new Map<string, any>()
   private maxSize = 50
@@ -92,152 +92,152 @@ class SimpleCache {
 
 const patternCache = new SimpleCache()
 
-// ==================== PATTERNS DE DIAGNOSTIC ====================
+// ==================== DIAGNOSTIC PATTERNS ====================
 const DIAGNOSTIC_PATTERNS = {
   chest_pain: {
-    keywords: ["thorax", "poitrine", "cardiaque", "oppression", "chest", "cardiac"],
+    keywords: ["chest", "thorax", "cardiac", "heart", "pressure", "tightness"],
     questions: [
       {
         id: 1,
-        question: "Où ressentez-vous exactement la douleur?",
-        options: ["Centre de la poitrine", "Côté gauche", "Dos", "Partout"],
+        question: "Where exactly do you feel the pain?",
+        options: ["Center of chest", "Left side", "Back", "All over"],
         priority: "high"
       },
       {
         id: 2,
-        question: "La douleur apparaît-elle à l'effort?",
-        options: ["Oui", "Non", "Parfois", "Je ne sais pas"],
+        question: "Does the pain occur with exertion?",
+        options: ["Yes", "No", "Sometimes", "I don't know"],
         priority: "high"
       },
       {
         id: 3,
-        question: "La douleur irradie-t-elle?",
-        options: ["Vers le bras gauche", "Vers la mâchoire", "Vers le dos", "Non"],
+        question: "Does the pain radiate?",
+        options: ["To left arm", "To jaw", "To back", "No"],
         priority: "high"
       },
       {
         id: 4,
-        question: "Depuis combien de temps avez-vous cette douleur?",
-        options: ["Moins de 30 minutes", "30 min - 2h", "Plus de 2h", "Intermittent"],
+        question: "How long have you had this pain?",
+        options: ["Less than 30 minutes", "30 min - 2h", "More than 2h", "Intermittent"],
         priority: "high"
       },
       {
         id: 5,
-        question: "Avez-vous des symptômes associés?",
-        options: ["Essoufflement", "Sueurs", "Nausées", "Aucun"],
+        question: "Do you have any associated symptoms?",
+        options: ["Shortness of breath", "Sweating", "Nausea", "None"],
         priority: "medium"
       }
     ]
   },
   headache: {
-    keywords: ["tête", "céphalée", "migraine", "mal de tête", "head", "cephalalgia"],
+    keywords: ["head", "headache", "migraine", "cephalalgia", "head pain"],
     questions: [
       {
         id: 1,
-        question: "Comment décririez-vous votre mal de tête?",
-        options: ["Pulsatile (battements)", "En étau", "Comme un coup de poignard", "Diffus"],
+        question: "How would you describe your headache?",
+        options: ["Pulsating (throbbing)", "Tight band", "Stabbing", "Diffuse"],
         priority: "high"
       },
       {
         id: 2,
-        question: "Avez-vous des symptômes associés?",
-        options: ["Nausées", "Sensibilité à la lumière", "Troubles visuels", "Aucun"],
+        question: "Do you have any associated symptoms?",
+        options: ["Nausea", "Light sensitivity", "Visual disturbances", "None"],
         priority: "high"
       },
       {
         id: 3,
-        question: "Qu'est-ce qui déclenche votre mal de tête?",
-        options: ["Stress", "Certains aliments", "Manque de sommeil", "Rien de particulier"],
+        question: "What triggers your headache?",
+        options: ["Stress", "Certain foods", "Lack of sleep", "Nothing specific"],
         priority: "medium"
       },
       {
         id: 4,
-        question: "À quelle fréquence avez-vous ces maux de tête?",
-        options: ["Première fois", "Occasionnels", "Fréquents (>1/semaine)", "Quotidiens"],
+        question: "How often do you get these headaches?",
+        options: ["First time", "Occasional", "Frequent (>1/week)", "Daily"],
         priority: "high"
       },
       {
         id: 5,
-        question: "Votre mal de tête est-il accompagné de fièvre?",
-        options: ["Oui", "Non", "Je ne sais pas", "Parfois"],
+        question: "Is your headache accompanied by fever?",
+        options: ["Yes", "No", "I don't know", "Sometimes"],
         priority: "high"
       }
     ]
   },
   abdominal_pain: {
-    keywords: ["ventre", "abdomen", "estomac", "douleur abdominale", "stomach", "belly"],
+    keywords: ["stomach", "abdomen", "belly", "abdominal pain", "tummy"],
     questions: [
       {
         id: 1,
-        question: "Où se situe précisément la douleur?",
-        options: ["Haut du ventre", "Autour du nombril", "Bas du ventre", "Tout l'abdomen"],
+        question: "Where is the pain located?",
+        options: ["Upper abdomen", "Around navel", "Lower abdomen", "All over"],
         priority: "high"
       },
       {
         id: 2,
-        question: "Comment décririez-vous la douleur?",
-        options: ["Crampes", "Brûlure", "Coup de poignard", "Lourdeur"],
+        question: "How would you describe the pain?",
+        options: ["Cramping", "Burning", "Stabbing", "Heavy feeling"],
         priority: "high"
       },
       {
         id: 3,
-        question: "La douleur est-elle liée aux repas?",
-        options: ["Avant les repas", "Après les repas", "Pendant", "Pas de lien"],
+        question: "Is the pain related to meals?",
+        options: ["Before meals", "After meals", "During meals", "No relation"],
         priority: "high"
       },
       {
         id: 4,
-        question: "Avez-vous des troubles digestifs associés?",
-        options: ["Nausées/vomissements", "Diarrhée", "Constipation", "Aucun"],
+        question: "Do you have any digestive symptoms?",
+        options: ["Nausea/vomiting", "Diarrhea", "Constipation", "None"],
         priority: "high"
       },
       {
         id: 5,
-        question: "Avez-vous de la fièvre?",
-        options: ["Oui (>38°C)", "Sensation de fièvre", "Non", "Je ne sais pas"],
+        question: "Do you have a fever?",
+        options: ["Yes (>100.4°F)", "Feel feverish", "No", "I don't know"],
         priority: "high"
       }
     ]
   }
 }
 
-// ==================== QUESTIONS FALLBACK ====================
+// ==================== FALLBACK QUESTIONS ====================
 const FALLBACK_QUESTIONS = {
   general: [
     {
       id: 1,
-      question: "Depuis combien de temps avez-vous ces symptômes?",
-      options: ["Moins de 24h", "2-7 jours", "1-4 semaines", "Plus d'un mois"],
+      question: "How long have you had these symptoms?",
+      options: ["Less than 24h", "2-7 days", "1-4 weeks", "More than a month"],
       priority: "high"
     },
     {
       id: 2,
-      question: "Comment vos symptômes évoluent-ils?",
-      options: ["S'aggravent", "Stables", "S'améliorent", "Varient"],
+      question: "How are your symptoms evolving?",
+      options: ["Getting worse", "Stable", "Improving", "Variable"],
       priority: "high"
     },
     {
       id: 3,
-      question: "Qu'est-ce qui déclenche ou aggrave vos symptômes?",
-      options: ["Effort/mouvement", "Stress", "Alimentation", "Rien de particulier"],
+      question: "What triggers or worsens your symptoms?",
+      options: ["Exertion/movement", "Stress", "Food", "Nothing specific"],
       priority: "medium"
     },
     {
       id: 4,
-      question: "Avez-vous de la fièvre?",
-      options: ["Oui, mesurée >38°C", "Je me sens fiévreux", "Non", "Je ne sais pas"],
+      question: "Do you have a fever?",
+      options: ["Yes, measured >100.4°F", "Feel feverish", "No", "I don't know"],
       priority: "high"
     },
     {
       id: 5,
-      question: "Votre état général vous inquiète-t-il?",
-      options: ["Très inquiet", "Modérément", "Peu inquiet", "Pas du tout"],
+      question: "How concerned are you about your condition?",
+      options: ["Very concerned", "Moderately", "Slightly concerned", "Not at all"],
       priority: "medium"
     }
   ]
 }
 
-// ==================== DÉTECTION DE PATTERN ====================
+// ==================== PATTERN DETECTION ====================
 function detectMainPattern(symptoms: string | undefined | null): string {
   const symptomsLower = String(symptoms || '').toLowerCase()
   
@@ -250,7 +250,7 @@ function detectMainPattern(symptoms: string | undefined | null): string {
   return 'general'
 }
 
-// ==================== CONFIGURATION DES MODÈLES ====================
+// ==================== MODEL CONFIGURATION ====================
 const AI_CONFIGS = {
   fast: {
     model: "gpt-3.5-turbo",
@@ -269,27 +269,27 @@ const AI_CONFIGS = {
   }
 }
 
-// ==================== FONCTION PRINCIPALE AVEC PROTECTION ====================
+// ==================== MAIN FUNCTION WITH PROTECTION ====================
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
-  console.log("🚀 Début requête POST /api/openai-questions (VERSION PROTÉGÉE)")
+  console.log("🚀 Starting POST request /api/openai-questions (PROTECTED VERSION)")
   
   try {
-    // 1. Récupération et validation de la clé API
+    // 1. Retrieve and validate API key
     const apiKey = process.env.OPENAI_API_KEY
     debugApiKey(apiKey)
     
     if (!apiKey) {
-      throw new Error('OPENAI_API_KEY manquante dans les variables d\'environnement')
+      throw new Error('OPENAI_API_KEY missing in environment variables')
     }
     
     if (!apiKey.startsWith('sk-')) {
-      throw new Error('Format de clé API invalide (doit commencer par sk-)')
+      throw new Error('Invalid API key format (must start with sk-)')
     }
     
-    // 2. Parser la requête
+    // 2. Parse request
     const body = await request.json()
-    console.log("📝 Body reçu, parsing des données...")
+    console.log("📝 Body received, parsing data...")
     
     const { 
       patientData, 
@@ -297,22 +297,22 @@ export async function POST(request: NextRequest) {
       mode = 'balanced'
     } = body
 
-    // 3. Validation des données
+    // 3. Validate data
     if (!patientData || !clinicalData) {
-      console.error("❌ Données manquantes dans la requête")
+      console.error("❌ Missing data in request")
       return NextResponse.json(
-        { error: "Données patient et cliniques requises", success: false },
+        { error: "Patient and clinical data required", success: false },
         { status: 400 }
       )
     }
 
-    // ========== PROTECTION DES DONNÉES : ANONYMISATION ==========
+    // ========== DATA PROTECTION: ANONYMIZATION ==========
     const { anonymized: anonymizedPatientData, originalIdentity, anonymousId } = anonymizePatientData(patientData)
 
-    // 4. Normalisation des données AVEC DONNÉES ANONYMISÉES
+    // 4. Data normalization WITH ANONYMIZED DATA
     const validatedPatientData = {
-      age: anonymizedPatientData.age || 'Non spécifié',
-      gender: anonymizedPatientData.gender || anonymizedPatientData.sex || 'Non spécifié',
+      age: anonymizedPatientData.age || 'Not specified',
+      gender: anonymizedPatientData.gender || anonymizedPatientData.sex || 'Not specified',
       ...anonymizedPatientData
     }
 
@@ -322,10 +322,10 @@ export async function POST(request: NextRequest) {
       ...clinicalData
     }
 
-    // Log sécurisé des données patient
-    secureLog('📊 Données patient (anonymisées):', validatedPatientData)
+    // Secure log of patient data
+    secureLog('📊 Patient data (anonymized):', validatedPatientData)
 
-    // 5. Vérifier le cache
+    // 5. Check cache
     const symptomsString = String(validatedClinicalData.symptoms || validatedClinicalData.chiefComplaint || '')
     const cacheKey = `${symptomsString}_${validatedPatientData.age}_${validatedPatientData.gender}_${mode}`
     const cached = patternCache.get(cacheKey)
@@ -348,13 +348,13 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // 6. Détecter le pattern principal
+    // 6. Detect main pattern
     const pattern = detectMainPattern(symptomsString)
-    console.log(`🔍 Pattern détecté: ${pattern}`)
+    console.log(`🔍 Pattern detected: ${pattern}`)
 
-    // 7. Utiliser les questions prédéfinies si disponibles
+    // 7. Use predefined questions if available
     if (pattern !== 'general' && DIAGNOSTIC_PATTERNS[pattern as keyof typeof DIAGNOSTIC_PATTERNS]) {
-      console.log(`✅ Utilisation des questions prédéfinies pour: ${pattern}`)
+      console.log(`✅ Using predefined questions for: ${pattern}`)
       const response = {
         success: true,
         questions: DIAGNOSTIC_PATTERNS[pattern as keyof typeof DIAGNOSTIC_PATTERNS].questions,
@@ -379,18 +379,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response)
     }
 
-    // 8. Générer le prompt pour OpenAI SANS DONNÉES PERSONNELLES
-    const prompt = `Patient: ${validatedPatientData.age} ans, ${validatedPatientData.gender}. 
-Symptômes: ${symptomsString}.
+    // 8. Generate prompt for OpenAI WITHOUT PERSONAL DATA
+    const prompt = `Patient: ${validatedPatientData.age} years old, ${validatedPatientData.gender}. 
+Symptoms: ${symptomsString}.
 
-Génère exactement 5 questions diagnostiques pertinentes pour évaluer ce patient.
+Generate exactly 5 relevant diagnostic questions to assess this patient.
 
-Format JSON requis:
+Required JSON format:
 {
   "questions": [
     {
       "id": 1,
-      "question": "Question claire et simple en français",
+      "question": "Clear and simple question in English",
       "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
       "priority": "high"
     }
@@ -398,20 +398,20 @@ Format JSON requis:
 }
 
 IMPORTANT: 
-- Réponds UNIQUEMENT avec le JSON, sans texte supplémentaire
-- Exactement 5 questions
-- Chaque question doit avoir exactement 4 options
-- Les questions doivent être pertinentes pour les symptômes mentionnés
-- Utilise un français simple et clair
-- Ne mentionne JAMAIS de noms ou d'informations personnelles`
+- Respond ONLY with JSON, no additional text
+- Exactly 5 questions
+- Each question must have exactly 4 options
+- Questions must be relevant to the mentioned symptoms
+- Use simple and clear English
+- NEVER mention names or personal information`
 
-    // 9. Configuration selon le mode
+    // 9. Configuration based on mode
     const aiConfig = AI_CONFIGS[mode as keyof typeof AI_CONFIGS] || AI_CONFIGS.balanced
-    console.log(`⚙️ Config IA: ${aiConfig.model}`)
-    console.log(`🔒 Protection activée: Aucune donnée personnelle envoyée`)
+    console.log(`⚙️ AI Config: ${aiConfig.model}`)
+    console.log(`🔒 Protection enabled: No personal data sent`)
 
-    // 10. Appel OpenAI avec retry
-    console.log(`🤖 Appel OpenAI ${aiConfig.model}...`)
+    // 10. OpenAI call with retry
+    console.log(`🤖 Calling OpenAI ${aiConfig.model}...`)
     const aiStartTime = Date.now()
     
     let openaiResponse
@@ -431,7 +431,7 @@ IMPORTANT:
             messages: [
               {
                 role: 'system',
-                content: 'Tu es un médecin expert en télémédecine. Génère des questions diagnostiques pertinentes en format JSON. IMPORTANT: Ne jamais inclure ou demander de noms ou informations personnelles identifiables.'
+                content: 'You are an expert telemedicine physician. Generate relevant diagnostic questions in JSON format. IMPORTANT: Never include or ask for names or personally identifiable information.'
               },
               {
                 role: 'user',
@@ -448,34 +448,34 @@ IMPORTANT:
           break
         } else if (openaiResponse.status === 401) {
           const errorBody = await openaiResponse.text()
-          console.error('❌ Erreur 401 - Clé API invalide:', errorBody)
-          throw new Error(`Clé API invalide: ${errorBody}`)
+          console.error('❌ Error 401 - Invalid API key:', errorBody)
+          throw new Error(`Invalid API key: ${errorBody}`)
         } else if (openaiResponse.status === 429 && retryCount < maxRetries) {
           console.warn(`⚠️ Rate limit, retry ${retryCount + 1}/${maxRetries}`)
           await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)))
           retryCount++
         } else {
           const errorText = await openaiResponse.text()
-          throw new Error(`Erreur OpenAI ${openaiResponse.status}: ${errorText}`)
+          throw new Error(`OpenAI error ${openaiResponse.status}: ${errorText}`)
         }
       } catch (error) {
         if (retryCount >= maxRetries) {
           throw error
         }
-        console.warn(`⚠️ Erreur, retry ${retryCount + 1}/${maxRetries}`)
+        console.warn(`⚠️ Error, retry ${retryCount + 1}/${maxRetries}`)
         await new Promise(resolve => setTimeout(resolve, 1000))
         retryCount++
       }
     }
     
     if (!openaiResponse || !openaiResponse.ok) {
-      throw new Error('Impossible de contacter OpenAI')
+      throw new Error('Unable to contact OpenAI')
     }
     
     const aiTime = Date.now() - aiStartTime
-    console.log(`✅ Réponse OpenAI en ${aiTime}ms`)
+    console.log(`✅ OpenAI response in ${aiTime}ms`)
     
-    // 11. Parser la réponse
+    // 11. Parse response
     const openaiData = await openaiResponse.json()
     const content = openaiData.choices[0]?.message?.content || '{}'
     
@@ -483,19 +483,19 @@ IMPORTANT:
     try {
       const parsed = JSON.parse(content)
       questions = parsed.questions || []
-      console.log(`✅ ${questions.length} questions extraites`)
+      console.log(`✅ ${questions.length} questions extracted`)
     } catch (parseError) {
-      console.error("❌ Erreur parsing JSON:", parseError)
-      console.error("Contenu reçu:", content)
-      throw new Error('Réponse OpenAI invalide')
+      console.error("❌ JSON parsing error:", parseError)
+      console.error("Content received:", content)
+      throw new Error('Invalid OpenAI response')
     }
 
-    // 12. Valider les questions
+    // 12. Validate questions
     if (!Array.isArray(questions) || questions.length === 0) {
-      throw new Error("Pas de questions valides générées")
+      throw new Error("No valid questions generated")
     }
 
-    // 13. Préparer la réponse AVEC INDICATEUR DE PROTECTION
+    // 13. Prepare response WITH PROTECTION INDICATOR
     const response = {
       success: true,
       questions: questions.slice(0, 5), // Maximum 5 questions
@@ -523,19 +523,19 @@ IMPORTANT:
       }
     }
 
-    // 14. Mettre en cache
+    // 14. Cache response
     patternCache.set(cacheKey, response)
 
-    console.log(`✅ Succès total: ${response.metadata.responseTime}ms`)
-    console.log(`🔒 Protection des données: ACTIVE - Aucune donnée personnelle envoyée à OpenAI`)
+    console.log(`✅ Total success: ${response.metadata.responseTime}ms`)
+    console.log(`🔒 Data protection: ACTIVE - No personal data sent to OpenAI`)
     
     return NextResponse.json(response)
 
   } catch (error: any) {
-    console.error(`❌ Erreur:`, error)
+    console.error(`❌ Error:`, error)
     console.error("Stack:", error.stack)
     
-    // Retourner les questions fallback AVEC PROTECTION
+    // Return fallback questions WITH PROTECTION
     const pattern = 'general'
     return NextResponse.json({
       success: true,
@@ -567,18 +567,18 @@ IMPORTANT:
   }
 }
 
-// ==================== ENDPOINT DE TEST ====================
+// ==================== TEST ENDPOINT ====================
 export async function GET(request: NextRequest) {
-  console.log("🧪 Test connexion OpenAI...")
+  console.log("🧪 Testing OpenAI connection...")
   
   const apiKey = process.env.OPENAI_API_KEY
   debugApiKey(apiKey)
   
   if (!apiKey) {
     return NextResponse.json({
-      status: '❌ Pas de clé API',
-      error: 'OPENAI_API_KEY non définie',
-      help: 'Ajoutez OPENAI_API_KEY dans vos variables d\'environnement',
+      status: '❌ No API key',
+      error: 'OPENAI_API_KEY not defined',
+      help: 'Add OPENAI_API_KEY to your environment variables',
       dataProtection: {
         status: 'N/A - No API key'
       }
@@ -586,7 +586,7 @@ export async function GET(request: NextRequest) {
   }
   
   try {
-    // Test simple avec l'API
+    // Simple API test
     const testStart = Date.now()
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -599,7 +599,7 @@ export async function GET(request: NextRequest) {
         messages: [
           {
             role: 'user',
-            content: 'Réponds avec le JSON: {"test":"ok"}'
+            content: 'Respond with JSON: {"test":"ok"}'
           }
         ],
         temperature: 0,
@@ -611,7 +611,7 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       const error = await response.text()
       return NextResponse.json({
-        status: '❌ Erreur OpenAI',
+        status: '❌ OpenAI error',
         error,
         statusCode: response.status,
         dataProtection: {
@@ -624,37 +624,37 @@ export async function GET(request: NextRequest) {
     const testTime = Date.now() - testStart
     
     return NextResponse.json({
-      status: "✅ OpenAI connecté",
+      status: "✅ OpenAI connected",
       responseTime: `${testTime}ms`,
       response: data.choices[0]?.message?.content,
       dataProtection: {
-        status: '✅ Activée',
+        status: '✅ Enabled',
         method: 'anonymization',
-        compliance: ['RGPD', 'HIPAA'],
+        compliance: ['GDPR', 'HIPAA'],
         features: [
-          'Anonymisation automatique des données patient',
-          'Aucun nom/email/téléphone envoyé à OpenAI',
-          'ID anonyme pour le tracking',
-          'Logging sécurisé'
+          'Automatic patient data anonymization',
+          'No names/emails/phones sent to OpenAI',
+          'Anonymous ID for tracking',
+          'Secure logging'
         ]
       },
       modes: {
         fast: {
-          description: "Ultra-rapide",
+          description: "Ultra-fast",
           model: "gpt-3.5-turbo",
-          useCase: "Triage initial",
+          useCase: "Initial triage",
           dataProtected: true
         },
         balanced: {
-          description: "Équilibré",
+          description: "Balanced",
           model: "gpt-4o-mini",
-          useCase: "Usage standard",
+          useCase: "Standard usage",
           dataProtected: true
         },
         intelligent: {
-          description: "Intelligence maximale",
+          description: "Maximum intelligence",
           model: "gpt-4o",
-          useCase: "Cas complexes",
+          useCase: "Complex cases",
           dataProtected: true
         }
       },
@@ -665,9 +665,9 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error: any) {
-    console.error("❌ Erreur test:", error)
+    console.error("❌ Test error:", error)
     return NextResponse.json({
-      status: "❌ Erreur",
+      status: "❌ Error",
       error: error.message,
       errorType: error.name,
       dataProtection: {

@@ -44,311 +44,311 @@ interface DoctorAction {
   color: 'blue' | 'green' | 'red' | 'orange' | 'purple' | 'yellow' | 'indigo'
 }
 
-// Fonction pour générer des actions pour le médecin pendant l'attente
+// Function to generate actions for the doctor during wait time
 const generateDoctorActions = (patientData: any, clinicalData: any): DoctorAction[] => {
   const actions: DoctorAction[] = []
   
-  // Actions basées sur le motif de consultation
+  // Actions based on chief complaint
   const chiefComplaint = clinicalData?.chiefComplaint?.toLowerCase() || ""
   const symptoms = clinicalData?.symptoms || []
   
-  // Actions d'examen physique guidé
+  // Guided physical examination actions
   actions.push({
     icon: Stethoscope,
-    title: "Examen Physique Guidé",
-    action: "Demandez au patient de réaliser ces gestes sous votre supervision",
+    title: "Guided Physical Examination",
+    action: "Ask the patient to perform these gestures under your supervision",
     tips: [
-      "Palpation du cou pour ganglions",
-      "Vérification de la gorge avec lampe téléphone",
-      "Observation de la peau (éruptions, coloration)",
-      "Test de mobilité si douleurs articulaires"
+      "Neck palpation for lymph nodes",
+      "Throat inspection with phone flashlight",
+      "Skin observation (rashes, discoloration)",
+      "Mobility test if joint pain present"
     ],
     color: "blue"
   })
   
-  // Prise de constantes
+  // Vital signs measurement
   actions.push({
     icon: Thermometer,
-    title: "Mesure des Constantes",
-    action: "Guidez le patient pour mesurer ses signes vitaux",
+    title: "Vital Signs Measurement",
+    action: "Guide the patient to measure their vital signs",
     tips: [
-      "Température (sous le bras 3 min)",
-      "Fréquence cardiaque (pouls radial 1 min)",
-      "Fréquence respiratoire (compter 30 sec x2)",
-      "Tension si tensiomètre disponible"
+      "Temperature (underarm for 3 minutes)",
+      "Heart rate (radial pulse for 1 minute)",
+      "Respiratory rate (count for 30 sec x2)",
+      "Blood pressure if device available"
     ],
     color: "red"
   })
   
-  // Questions d'anamnèse approfondie
+  // Detailed history questions
   actions.push({
     icon: MessageCircle,
-    title: "Anamnèse Détaillée",
-    action: "Explorez ces aspects pendant l'attente",
+    title: "Detailed History Taking",
+    action: "Explore these aspects during the wait",
     tips: [
-      "Chronologie précise des symptômes",
-      "Facteurs déclenchants/soulageants",
-      "Antécédents familiaux similaires",
-      "Voyage récent ou contact malade"
+      "Precise timeline of symptoms",
+      "Triggering/relieving factors",
+      "Similar family history",
+      "Recent travel or sick contacts"
     ],
     color: "green"
   })
   
-  // Observation visuelle
+  // Visual observation
   actions.push({
     icon: Eye,
-    title: "Inspection Visuelle",
-    action: "Observez attentivement via la caméra",
+    title: "Visual Inspection",
+    action: "Carefully observe via camera",
     tips: [
-      "Faciès et expression du patient",
-      "Position antalgique éventuelle",
-      "Coloration peau et muqueuses",
-      "Signes de détresse respiratoire"
+      "Patient's facial expression",
+      "Any protective posturing",
+      "Skin and mucous membrane color",
+      "Signs of respiratory distress"
     ],
     color: "purple"
   })
   
-  // Exploration de l'environnement
+  // Environmental exploration
   actions.push({
     icon: Home,
-    title: "Contexte Environnemental",
-    action: "Questionnez sur l'environnement du patient",
+    title: "Environmental Context",
+    action: "Ask about the patient's environment",
     tips: [
-      "Conditions de logement (humidité, moisissures)",
-      "Animaux domestiques",
-      "Exposition professionnelle",
-      "Qualité du sommeil et literie"
+      "Living conditions (dampness, mold)",
+      "Pets in the home",
+      "Occupational exposures",
+      "Sleep quality and bedding"
     ],
     color: "yellow"
   })
   
-  // Vérification médicaments
+  // Medication verification
   actions.push({
     icon: Pill,
-    title: "Inventaire Pharmaceutique",
-    action: "Faites montrer au patient ses médicaments",
+    title: "Medication Inventory",
+    action: "Have patient show their medications",
     tips: [
-      "Médicaments actuels avec boîtes",
-      "Vérifier dates de péremption",
-      "Observance du traitement",
-      "Automédication récente"
+      "Current medications with packaging",
+      "Check expiration dates",
+      "Treatment compliance",
+      "Recent self-medication"
     ],
     color: "orange"
   })
   
-  // Tests simples
+  // Simple tests
   actions.push({
     icon: Activity,
-    title: "Tests Cliniques Simples",
-    action: "Réalisez ces tests via vidéo",
+    title: "Simple Clinical Tests",
+    action: "Perform these tests via video",
     tips: [
-      "Test du verre (blanchit si non purpura)",
-      "Mobilité cervicale (méningisme)",
-      "Toux provoquée (caractère)",
-      "Marche si possible (boiterie)"
+      "Glass test (blanches if not purpura)",
+      "Neck mobility (meningismus)",
+      "Provoked cough (character)",
+      "Walking if possible (limping)"
     ],
     color: "indigo"
   })
   
-  // Éducation thérapeutique
+  // Therapeutic education
   actions.push({
     icon: Lightbulb,
-    title: "Éducation Pendant l'Attente",
-    action: "Profitez pour éduquer le patient",
+    title: "Education During Wait Time",
+    action: "Take this time to educate the patient",
     tips: [
-      "Expliquer le processus de téléconsultation",
-      "Importance du suivi médical",
-      "Signes d'alerte à surveiller",
-      "Mesures d'hygiène préventives"
+      "Explain teleconsultation process",
+      "Importance of medical follow-up",
+      "Warning signs to monitor",
+      "Preventive hygiene measures"
     ],
     color: "blue"
   })
   
-  // Documentation photo
+  // Photo documentation
   actions.push({
     icon: Camera,
-    title: "Documentation Visuelle",
-    action: "Demandez des photos si pertinent",
+    title: "Visual Documentation",
+    action: "Request photos if relevant",
     tips: [
-      "Lésions cutanées en gros plan",
-      "Œdèmes des membres",
-      "Coloration des urines si anormale",
-      "État de la gorge avec flash"
+      "Close-up of skin lesions",
+      "Limb swelling",
+      "Urine color if abnormal",
+      "Throat condition with flash"
     ],
     color: "green"
   })
   
-  // Exploration psychosociale
+  // Psychosocial exploration
   actions.push({
     icon: HandHeart,
-    title: "Dimension Psychosociale",
-    action: "Explorez l'impact sur la vie quotidienne",
+    title: "Psychosocial Dimension",
+    action: "Explore impact on daily life",
     tips: [
-      "Retentissement sur le travail",
-      "Qualité de vie et moral",
-      "Support familial disponible",
-      "Anxiété liée aux symptômes"
+      "Impact on work activities",
+      "Quality of life and mood",
+      "Available family support",
+      "Symptom-related anxiety"
     ],
     color: "purple"
   })
   
-  // Recherche allergies
+  // Allergy screening
   actions.push({
     icon: Shield,
-    title: "Dépistage Allergies/Intolérances",
-    action: "Questionnez sur les réactions",
+    title: "Allergy/Intolerance Screening",
+    action: "Ask about reactions",
     tips: [
-      "Allergies médicamenteuses connues",
-      "Intolérances alimentaires",
-      "Réactions cutanées antérieures",
-      "Allergies saisonnières"
+      "Known drug allergies",
+      "Food intolerances",
+      "Previous skin reactions",
+      "Seasonal allergies"
     ],
     color: "red"
   })
   
-  // Habitudes de vie
+  // Lifestyle habits
   actions.push({
     icon: Heart,
-    title: "Habitudes et Mode de Vie",
-    action: "Évaluez les facteurs de risque",
+    title: "Lifestyle and Habits",
+    action: "Assess risk factors",
     tips: [
-      "Alimentation (sel, sucre, gras)",
-      "Activité physique hebdomadaire",
-      "Consommation tabac/alcool",
-      "Gestion du stress"
+      "Diet (salt, sugar, fat)",
+      "Weekly physical activity",
+      "Tobacco/alcohol consumption",
+      "Stress management"
     ],
     color: "orange"
   })
   
-  // Localisation Maurice
+  // Mauritius location
   actions.push({
     icon: MapPin,
-    title: "Ressources Locales Maurice",
-    action: "Informez sur les ressources disponibles",
+    title: "Local Resources Mauritius",
+    action: "Inform about available resources",
     tips: [
-      "Laboratoires proches du patient",
-      "Pharmacies de garde",
-      "Services d'urgence les plus proches",
-      "Spécialistes dans la région"
+      "Laboratories near patient",
+      "On-call pharmacies",
+      "Nearest emergency services",
+      "Specialists in the region"
     ],
     color: "blue"
   })
   
-  // Préparation examens
+  // Exam preparation
   actions.push({
     icon: TestTube,
-    title: "Anticiper les Examens",
-    action: "Préparez le patient aux examens probables",
+    title: "Anticipate Examinations",
+    action: "Prepare patient for likely tests",
     tips: [
-      "Expliquer le jeûne si bilan sanguin",
-      "Préparation pour radiographie",
-      "Documents nécessaires",
-      "Coûts approximatifs à Maurice"
+      "Explain fasting for blood tests",
+      "X-ray preparation",
+      "Required documents",
+      "Approximate costs in Mauritius"
     ],
     color: "yellow"
   })
   
-  // Symptômes associés
+  // Associated symptoms
   actions.push({
     icon: Search,
-    title: "Recherche Symptômes Associés",
-    action: "Interrogez sur les signes connexes",
+    title: "Search for Associated Symptoms",
+    action: "Ask about related signs",
     tips: [
-      "Troubles du transit",
-      "Modifications urinaires",
-      "Troubles du sommeil",
-      "Changements d'appétit/poids"
+      "Bowel movement changes",
+      "Urinary modifications",
+      "Sleep disturbances",
+      "Appetite/weight changes"
     ],
     color: "indigo"
   })
   
-  // Communication non-verbale
+  // Non-verbal communication
   actions.push({
     icon: Volume2,
-    title: "Analyse Non-Verbale",
-    action: "Observez la communication du patient",
+    title: "Non-Verbal Analysis",
+    action: "Observe patient's communication",
     tips: [
-      "Ton de voix (enroué, faible)",
-      "Débit de parole",
-      "Cohérence du discours",
-      "Signes d'anxiété/dépression"
+      "Voice tone (hoarse, weak)",
+      "Speech rate",
+      "Speech coherence",
+      "Signs of anxiety/depression"
     ],
     color: "green"
   })
   
-  // Planification suivi
+  // Follow-up planning
   actions.push({
     icon: Calendar,
-    title: "Organiser le Suivi",
-    action: "Planifiez les prochaines étapes",
+    title: "Organize Follow-up",
+    action: "Plan next steps",
     tips: [
-      "Disponibilités pour examens",
-      "Préférences horaires du patient",
-      "Contraintes professionnelles",
-      "Accompagnant disponible si besoin"
+      "Availability for examinations",
+      "Patient's time preferences",
+      "Work constraints",
+      "Companion available if needed"
     ],
     color: "purple"
   })
   
-  // Actions spécifiques selon symptômes
-  if (chiefComplaint.includes("fièvre") || symptoms.includes("fièvre")) {
+  // Specific actions based on symptoms
+  if (chiefComplaint.includes("fever") || symptoms.includes("fever")) {
     actions.push({
       icon: Thermometer,
-      title: "Protocole Fièvre",
-      action: "Actions spécifiques pour état fébrile",
+      title: "Fever Protocol",
+      action: "Specific actions for febrile state",
       tips: [
-        "Courbe thermique des derniers jours",
-        "Sudation nocturne",
-        "Frissons associés",
-        "Hydratation actuelle"
+        "Temperature curve last few days",
+        "Night sweats",
+        "Associated chills",
+        "Current hydration"
       ],
       color: "red"
     })
   }
   
-  if (chiefComplaint.includes("douleur")) {
+  if (chiefComplaint.includes("pain")) {
     actions.push({
       icon: Brain,
-      title: "Évaluation Douleur",
-      action: "Caractérisez précisément la douleur",
+      title: "Pain Assessment",
+      action: "Precisely characterize the pain",
       tips: [
-        "Échelle EVA 0-10",
-        "Type: brûlure, piqûre, écrasement",
-        "Irradiation éventuelle",
-        "Positions antalgiques"
+        "VAS scale 0-10",
+        "Type: burning, stabbing, crushing",
+        "Possible radiation",
+        "Pain-relieving positions"
       ],
       color: "orange"
     })
   }
   
-  if (chiefComplaint.includes("toux")) {
+  if (chiefComplaint.includes("cough")) {
     actions.push({
       icon: Volume2,
-      title: "Analyse de la Toux",
-      action: "Faites tousser le patient pour évaluer",
+      title: "Cough Analysis",
+      action: "Have patient cough to evaluate",
       tips: [
-        "Toux sèche ou productive",
-        "Aspect des expectorations",
-        "Horaire préférentiel",
-        "Facteurs déclenchants"
+        "Dry or productive cough",
+        "Sputum appearance",
+        "Preferred timing",
+        "Triggering factors"
       ],
       color: "blue"
     })
   }
   
-  // Conseils selon l'âge
+  // Age-specific advice
   const age = parseInt(patientData?.age) || 0
   
   if (age > 65) {
     actions.push({
       icon: User,
-      title: "Spécificités Gériatriques",
-      action: "Adaptez votre approche au patient âgé",
+      title: "Geriatric Specificities",
+      action: "Adapt your approach to elderly patient",
       tips: [
-        "Vérifier l'autonomie",
-        "Évaluer risque de chute",
-        "Polymédication éventuelle",
-        "Support social disponible"
+        "Check autonomy level",
+        "Assess fall risk",
+        "Possible polypharmacy",
+        "Available social support"
       ],
       color: "indigo"
     })
@@ -357,19 +357,19 @@ const generateDoctorActions = (patientData: any, clinicalData: any): DoctorActio
   if (age < 18) {
     actions.push({
       icon: User,
-      title: "Approche Pédiatrique",
-      action: "Techniques adaptées aux jeunes patients",
+      title: "Pediatric Approach",
+      action: "Techniques adapted for young patients",
       tips: [
-        "Impliquer les parents",
-        "Utiliser un langage adapté",
-        "Observer le comportement",
-        "Courbe de croissance"
+        "Involve the parents",
+        "Use age-appropriate language",
+        "Observe behavior",
+        "Growth curve"
       ],
       color: "green"
     })
   }
   
-  // Mélanger pour varier
+  // Mix for variety
   return actions.sort(() => Math.random() - 0.5)
 }
 
@@ -383,13 +383,13 @@ export default function PatientAdviceCarousel({
   const [autoPlay, setAutoPlay] = useState(true)
   const actions = generateDoctorActions(patientData, clinicalData)
   
-  // Auto-défilement
+  // Auto-scroll
   useEffect(() => {
     if (!autoPlay) return
     
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % actions.length)
-    }, 10000) // Change toutes les 10 secondes
+    }, 10000) // Change every 10 seconds
     
     return () => clearInterval(timer)
   }, [autoPlay, actions.length])
@@ -429,7 +429,7 @@ export default function PatientAdviceCarousel({
   
   return (
     <div className="space-y-6">
-      {/* Header avec infos patient et progression */}
+      {/* Header with patient info and progress */}
       <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -441,17 +441,17 @@ export default function PatientAdviceCarousel({
                 {patientData?.firstName} {patientData?.lastName}
               </h3>
               <p className="text-sm text-gray-600">
-                {patientData?.age} ans • {patientData?.sex === 'M' ? 'Homme' : 'Femme'} • {clinicalData?.chiefComplaint}
+                {patientData?.age} years • {patientData?.sex === 'M' ? 'Male' : 'Female'} • {clinicalData?.chiefComplaint}
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-sm font-medium text-gray-700">Analyse IA GPT-4o</p>
+            <p className="text-sm font-medium text-gray-700">AI Analysis GPT-4o</p>
             <p className="text-lg font-bold text-blue-600">{analysisProgress}%</p>
           </div>
         </div>
         
-        {/* Barre de progression */}
+        {/* Progress bar */}
         <div className="space-y-2">
           <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
             <div 
@@ -463,17 +463,17 @@ export default function PatientAdviceCarousel({
         </div>
       </div>
       
-      {/* Titre pour le médecin */}
+      {/* Title for doctor */}
       <div className="text-center">
         <h2 className="text-xl font-bold text-gray-800 mb-2">
-          Actions Suggérées Pendant l'Analyse IA
+          Suggested Actions During AI Analysis
         </h2>
         <p className="text-sm text-gray-600">
-          Optimisez le temps d'attente avec ces activités cliniques
+          Optimize waiting time with these clinical activities
         </p>
       </div>
       
-      {/* Carousel d'actions pour le médecin */}
+      {/* Doctor actions carousel */}
       <div className="relative">
         <div className={`${bgColorClasses[currentAction.color]} rounded-xl p-8 shadow-xl transform transition-all duration-500 border-2 border-white`}>
           {/* Navigation */}
@@ -490,7 +490,7 @@ export default function PatientAdviceCarousel({
             <ChevronRight className="h-6 w-6 text-gray-700" />
           </button>
           
-          {/* Contenu */}
+          {/* Content */}
           <div className="max-w-3xl mx-auto">
             <div className="flex items-center justify-center gap-4 mb-6">
               <div className={`bg-gradient-to-r ${colorClasses[currentAction.color]} rounded-full p-4`}>
@@ -516,7 +516,7 @@ export default function PatientAdviceCarousel({
           </div>
         </div>
         
-        {/* Indicateurs */}
+        {/* Indicators */}
         <div className="flex justify-center gap-2 mt-4">
           {actions.slice(0, 10).map((_, index) => (
             <button
@@ -538,13 +538,13 @@ export default function PatientAdviceCarousel({
         </div>
       </div>
       
-      {/* Info complémentaire pour le médecin */}
+      {/* Additional info for doctor */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <div className="flex items-start gap-3">
           <Brain className="h-5 w-5 text-blue-600 mt-0.5" />
           <div className="text-sm text-blue-800">
-            <p className="font-medium mb-1">Maximisez l'efficacité de la téléconsultation</p>
-            <p>Ces suggestions vous aident à recueillir des informations cliniques précieuses pendant que l'IA GPT-4o analyse le cas. L'analyse complète sera disponible dans {Math.ceil((100 - analysisProgress) * 0.6)} secondes environ.</p>
+            <p className="font-medium mb-1">Maximize teleconsultation efficiency</p>
+            <p>These suggestions help you gather valuable clinical information while GPT-4o AI analyzes the case. The complete analysis will be available in approximately {Math.ceil((100 - analysisProgress) * 0.6)} seconds.</p>
           </div>
         </div>
       </div>

@@ -40,14 +40,14 @@ interface LifeHabits {
 }
 
 interface PatientFormData {
-  // Informations personnelles
+  // Personal information
   firstName: string
   lastName: string
   birthDate: string
   age: string
   gender: string
   
-  // Données physiques
+  // Physical data
   weight: string
   height: string
   
@@ -58,14 +58,14 @@ interface PatientFormData {
   city: string
   country: string
   
-  // Informations médicales
+  // Medical information
   allergies: string[]
   otherAllergies: string
   medicalHistory: string[]
   otherMedicalHistory: string
   currentMedicationsText: string
   
-  // Habitudes de vie
+  // Life habits
   lifeHabits: LifeHabits
 }
 
@@ -81,7 +81,7 @@ interface ValidationErrors {
   [key: string]: string
 }
 
-// ==================== CONSTANTES ====================
+// ==================== CONSTANTS ====================
 const INITIAL_FORM_DATA: PatientFormData = {
   firstName: "",
   lastName: "",
@@ -94,7 +94,7 @@ const INITIAL_FORM_DATA: PatientFormData = {
   email: "",
   address: "",
   city: "",
-  country: "Maurice",
+  country: "Mauritius",
   allergies: [],
   otherAllergies: "",
   medicalHistory: [],
@@ -116,11 +116,11 @@ const SECTIONS = [
   { id: "habits", titleKey: 'patientForm.lifestyle', icon: Activity },
 ]
 
-// ==================== COMPOSANT PRINCIPAL ====================
+// ==================== MAIN COMPONENT ====================
 export default function ModernPatientForm({ 
   onDataChange, 
   onNext, 
-  language = 'fr',
+  language = 'en',
   consultationId,
   initialData
 }: PatientFormProps) {
@@ -128,7 +128,7 @@ export default function ModernPatientForm({
   const { patientData: tibokPatient, isFromTibok } = useTibokPatientData()
   const t = useCallback((key: string) => getTranslation(key, language), [language])
   
-  // ========== États ==========
+  // ========== States ==========
   const [isLoading, setIsLoading] = useState(true)
   const [dataInitialized, setDataInitialized] = useState(false)
   const [formData, setFormData] = useState<PatientFormData>(() => ({
@@ -141,32 +141,32 @@ export default function ModernPatientForm({
   const [currentSection, setCurrentSection] = useState(0)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
 
-  // ========== Mémoïsation des listes traduites ==========
+  // ========== Memoization of translated lists ==========
   const COMMON_ALLERGIES = useMemo(() => [
-    t('allergies.penicillin'),
-    t('allergies.aspirin'),
-    t('allergies.nsaids'),
-    t('allergies.codeine'),
-    t('allergies.latex'),
-    t('allergies.iodine'),
-    t('allergies.localAnesthetics'),
-    t('allergies.sulfonamides'),
-  ], [t])
+    "Penicillin",
+    "Aspirin",
+    "NSAIDs (Ibuprofen, Diclofenac)",
+    "Codeine",
+    "Latex",
+    "Iodine",
+    "Local anesthetics",
+    "Sulfonamides",
+  ], [])
 
   const COMMON_MEDICAL_HISTORY = useMemo(() => [
-    t('medicalConditions.hypertension'),
-    t('medicalConditions.type2Diabetes'),
-    t('medicalConditions.type1Diabetes'),
-    t('medicalConditions.asthma'),
-    t('medicalConditions.heartDisease'),
-    t('medicalConditions.depressionAnxiety'),
-    t('medicalConditions.arthritis'),
-    t('medicalConditions.migraine'),
-    t('medicalConditions.gerd'),
-    t('medicalConditions.highCholesterol'),
-  ], [t])
+    "Hypertension",
+    "Type 2 Diabetes",
+    "Type 1 Diabetes",
+    "Asthma",
+    "Heart disease",
+    "Depression/Anxiety",
+    "Arthritis",
+    "Migraine",
+    "GERD (Gastroesophageal reflux)",
+    "High cholesterol",
+  ], [])
 
-  // ========== Fonctions utilitaires ==========
+  // ========== Utility functions ==========
   const calculateAge = useCallback((birthDate: string): string => {
     if (!birthDate) return ""
     
@@ -197,26 +197,26 @@ export default function ModernPatientForm({
 
   const getBMICategory = useCallback((bmi: number) => {
     if (bmi < 18.5) return { 
-      text: t('patientForm.underweight'), 
+      text: "Underweight", 
       color: "bg-blue-100 text-blue-800 border-blue-200", 
       icon: "📉" 
     }
     if (bmi < 25) return { 
-      text: t('patientForm.normalWeight'), 
+      text: "Normal weight", 
       color: "bg-green-100 text-green-800 border-green-200", 
       icon: "✅" 
     }
     if (bmi < 30) return { 
-      text: t('patientForm.overweight'), 
+      text: "Overweight", 
       color: "bg-yellow-100 text-yellow-800 border-yellow-200", 
       icon: "⚠️" 
     }
     return { 
-      text: t('patientForm.obesity'), 
+      text: "Obesity", 
       color: "bg-red-100 text-red-800 border-red-200", 
       icon: "🔴" 
     }
-  }, [t])
+  }, [])
 
   const calculateProgress = useCallback((): number => {
     const requiredFields = [
@@ -252,16 +252,16 @@ export default function ModernPatientForm({
     const maleVariants = ['m', 'male', 'masculin', 'homme', 'man']
     const femaleVariants = ['f', 'female', 'féminin', 'femme', 'woman']
     
-    if (maleVariants.includes(g)) return 'Masculin'
-    if (femaleVariants.includes(g)) return 'Féminin'
+    if (maleVariants.includes(g)) return 'Male'
+    if (femaleVariants.includes(g)) return 'Female'
     
     return gender
   }, [])
 
   const transformDataForAPI = useCallback((data: PatientFormData) => {
-    const sexe = data.gender === 'Masculin' ? 'Masculin' : 
-                 data.gender === 'Féminin' ? 'Féminin' : 
-                 data.gender || 'Non renseigné'
+    const sexe = data.gender === 'Male' ? 'Male' : 
+                 data.gender === 'Female' ? 'Female' : 
+                 data.gender || 'Not specified'
 
     const allergiesArray = [...data.allergies]
     if (data.otherAllergies?.trim()) {
@@ -274,7 +274,7 @@ export default function ModernPatientForm({
     }
 
     return {
-      // Informations personnelles
+      // Personal information
       nom: data.lastName || '',
       prenom: data.firstName || '',
       dateNaissance: data.birthDate || '',
@@ -288,25 +288,25 @@ export default function ModernPatientForm({
       email: data.email || '',
       adresse: data.address || '',
       ville: data.city || '',
-      pays: data.country || 'Maurice',
+      pays: data.country || 'Mauritius',
       
-      // Données médicales
+      // Medical data
       poids: data.weight || '',
       taille: data.height || '',
-      allergies: allergiesArray.join(', ') || 'Aucune allergie connue',
-      antecedents: historyArray.join(', ') || 'Aucun antécédent notable',
-      medicamentsActuels: data.currentMedicationsText || 'Aucun',
+      allergies: allergiesArray.join(', ') || 'No known allergies',
+      antecedents: historyArray.join(', ') || 'No significant history',
+      medicamentsActuels: data.currentMedicationsText || 'None',
       
-      // Habitudes de vie
+      // Life habits
       habitudes: {
-        tabac: data.lifeHabits.smoking || 'Non renseigné',
-        alcool: data.lifeHabits.alcohol || 'Non renseigné',
-        activitePhysique: data.lifeHabits.physicalActivity || 'Non renseignée'
+        tabac: data.lifeHabits.smoking || 'Not specified',
+        alcool: data.lifeHabits.alcohol || 'Not specified',
+        activitePhysique: data.lifeHabits.physicalActivity || 'Not specified'
       }
     }
   }, [])
 
-  // ========== Gestionnaires d'événements ==========
+  // ========== Event handlers ==========
   const handleInputChange = useCallback((field: keyof PatientFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     
@@ -363,53 +363,53 @@ export default function ModernPatientForm({
   const validateForm = useCallback((): boolean => {
     const newErrors: ValidationErrors = {}
 
-    // Champs obligatoires
+    // Required fields
     if (!formData.firstName.trim()) {
-      newErrors.firstName = t('patientForm.errors.firstNameRequired')
+      newErrors.firstName = "First name is required"
     }
     
     if (!formData.lastName.trim()) {
-      newErrors.lastName = t('patientForm.errors.lastNameRequired')
+      newErrors.lastName = "Last name is required"
     }
     
     if (!formData.birthDate) {
-      newErrors.birthDate = t('patientForm.errors.birthDateRequired')
+      newErrors.birthDate = "Birth date is required"
     } else {
       const birthDate = new Date(formData.birthDate)
       const today = new Date()
       if (birthDate > today) {
-        newErrors.birthDate = t('patientForm.errors.futureBirthDate')
+        newErrors.birthDate = "Birth date cannot be in the future"
       }
     }
     
     if (!formData.gender) {
-      newErrors.gender = t('patientForm.errors.genderRequired')
+      newErrors.gender = "Gender is required"
     }
     
     const weight = parseFloat(formData.weight)
     if (!formData.weight || isNaN(weight) || weight < 1 || weight > 500) {
-      newErrors.weight = t('patientForm.errors.validWeightRequired')
+      newErrors.weight = "Valid weight is required (1-500 kg)"
     }
     
     const height = parseFloat(formData.height)
     if (!formData.height || isNaN(height) || height < 50 || height > 250) {
-      newErrors.height = t('patientForm.errors.validHeightRequired')
+      newErrors.height = "Valid height is required (50-250 cm)"
     }
 
-    // Email validation si fourni
+    // Email validation if provided
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = t('patientForm.errors.invalidEmail')
+      newErrors.email = "Invalid email format"
     }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
-  }, [formData, t])
+  }, [formData])
 
   const handleSubmit = useCallback(() => {
     if (validateForm()) {
       onNext()
     } else {
-      // Faire défiler jusqu'à la première erreur
+      // Scroll to first error
       const firstErrorField = Object.keys(errors)[0]
       const element = document.getElementById(firstErrorField)
       if (element) {
@@ -419,9 +419,9 @@ export default function ModernPatientForm({
     }
   }, [validateForm, onNext, errors])
 
-  // ========== Effets ==========
+  // ========== Effects ==========
   
-  // Mise à jour de l'âge quand la date de naissance change
+  // Update age when birth date changes
   useEffect(() => {
     if (formData.birthDate) {
       const newAge = calculateAge(formData.birthDate)
@@ -431,7 +431,7 @@ export default function ModernPatientForm({
     }
   }, [formData.birthDate, formData.age, calculateAge])
 
-  // Initialisation des données
+  // Initialize data
   useEffect(() => {
     const initializeData = async () => {
       if (dataInitialized) return
@@ -439,25 +439,25 @@ export default function ModernPatientForm({
       try {
         setIsLoading(true)
         
-        // 1. Vérifier les données de l'URL
+        // 1. Check URL data
         const urlParams = new URLSearchParams(window.location.search)
         const source = urlParams.get('source')
         const patientDataParam = urlParams.get('patientData')
         
         let patientInfo = null
         
-        // 2. Récupérer les données patient (URL ou TIBOK)
+        // 2. Retrieve patient data (URL or TIBOK)
         if (source === 'tibok' && patientDataParam) {
           try {
             patientInfo = JSON.parse(decodeURIComponent(patientDataParam))
           } catch (e) {
-            console.error('Erreur parsing données URL:', e)
+            console.error('Error parsing URL data:', e)
           }
         } else if (tibokPatient) {
           patientInfo = tibokPatient
         }
         
-        // 3. Si on a des données patient, les utiliser
+        // 3. If we have patient data, use it
         if (patientInfo) {
           const newFormData: PatientFormData = {
             firstName: patientInfo.firstName || patientInfo.first_name || "",
@@ -471,7 +471,7 @@ export default function ModernPatientForm({
             email: patientInfo.email || "",
             address: patientInfo.address || "",
             city: patientInfo.city || "",
-            country: patientInfo.country || "Maurice",
+            country: patientInfo.country || "Mauritius",
             allergies: [],
             otherAllergies: "",
             medicalHistory: [],
@@ -487,7 +487,7 @@ export default function ModernPatientForm({
           setFormData(newFormData)
           setDataInitialized(true)
         }
-        // 4. Sinon charger depuis la base de données
+        // 4. Otherwise load from database
         else if (consultationId) {
           const savedData = await consultationDataService.getAllData()
           if (savedData?.patientData) {
@@ -500,7 +500,7 @@ export default function ModernPatientForm({
         }
         
       } catch (error) {
-        console.error('Erreur initialisation données:', error)
+        console.error('Error initializing data:', error)
       } finally {
         setIsLoading(false)
       }
@@ -509,19 +509,19 @@ export default function ModernPatientForm({
     initializeData()
   }, [consultationId, tibokPatient, dataInitialized, normalizeGender])
 
-  // Sauvegarde automatique
+  // Auto-save
   useEffect(() => {
     const timer = setTimeout(async () => {
       if (formData.firstName || formData.lastName) {
         try {
-          // Sauvegarder les données
+          // Save data
           await consultationDataService.saveStepData(0, formData)
           setLastSaved(new Date())
           
-          // Notifier le parent
+          // Notify parent
           onDataChange(formData)
         } catch (error) {
-          console.error('Erreur sauvegarde:', error)
+          console.error('Error saving:', error)
         }
       }
     }, 1000)
@@ -529,19 +529,19 @@ export default function ModernPatientForm({
     return () => clearTimeout(timer)
   }, [formData, onDataChange])
 
-  // ========== Rendu conditionnel ==========
+  // ========== Conditional rendering ==========
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">{t('patientForm.loadingPatientData')}</p>
+          <p className="text-gray-600">Loading patient data...</p>
         </div>
       </div>
     )
   }
 
-  // ========== Variables calculées ==========
+  // ========== Calculated variables ==========
   const bmi = calculateBMI()
   const bmiCategory = bmi ? getBMICategory(parseFloat(bmi)) : null
   const progress = calculateProgress()
@@ -555,31 +555,31 @@ export default function ModernPatientForm({
     condition.toLowerCase().includes(historySearch.toLowerCase())
   )
 
-  // ========== Rendu principal ==========
+  // ========== Main render ==========
   return (
     <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-      {/* Notification TIBOK */}
+      {/* TIBOK Notification */}
       {showTibokNotification && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-blue-600" />
             <p className="text-sm font-medium text-blue-800">
-              {t('patientForm.tibokNotification')} {formData.firstName} {formData.lastName}
+              Patient information retrieved from TIBOK for {formData.firstName} {formData.lastName}
             </p>
           </div>
         </div>
       )}
 
-      {/* En-tête avec progression */}
+      {/* Header with progress */}
       <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
             <User className="h-8 w-8 text-blue-600" />
-            {t('patientForm.title')}
+            Patient Information
           </CardTitle>
           <div className="mt-4 space-y-2">
             <div className="flex justify-between text-sm text-gray-600">
-              <span>{t('patientForm.formProgress')}</span>
+              <span>Form Progress</span>
               <span className="font-semibold">{progress}%</span>
             </div>
             <Progress value={progress} className="h-2" />
@@ -587,7 +587,7 @@ export default function ModernPatientForm({
         </CardHeader>
       </Card>
 
-      {/* Navigation rapide */}
+      {/* Quick navigation */}
       <div className="flex flex-wrap gap-2 justify-center">
         {SECTIONS.map((section, index) => (
           <button
@@ -606,19 +606,19 @@ export default function ModernPatientForm({
         ))}
       </div>
 
-      {/* Section 1: Identité */}
+      {/* Section 1: Identity */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <User className="h-6 w-6" />
-            {t('patientForm.personalInfo')}
+            Personal Information
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="firstName" className="flex items-center gap-2 font-medium">
-                {t('patientForm.firstName')} <span className="text-red-500">*</span>
+                First Name <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="firstName"
@@ -626,7 +626,7 @@ export default function ModernPatientForm({
                 onChange={(e) => handleInputChange("firstName", e.target.value)}
                 onKeyDown={handleKeyDown}
                 className={errors.firstName ? "border-red-500" : ""}
-                placeholder={t('patientForm.firstNamePlaceholder')}
+                placeholder="John"
               />
               {errors.firstName && (
                 <p className="text-sm text-red-500 flex items-center gap-1">
@@ -638,7 +638,7 @@ export default function ModernPatientForm({
 
             <div className="space-y-2">
               <Label htmlFor="lastName" className="flex items-center gap-2 font-medium">
-                {t('patientForm.lastName')} <span className="text-red-500">*</span>
+                Last Name <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="lastName"
@@ -646,7 +646,7 @@ export default function ModernPatientForm({
                 onChange={(e) => handleInputChange("lastName", e.target.value)}
                 onKeyDown={handleKeyDown}
                 className={errors.lastName ? "border-red-500" : ""}
-                placeholder={t('patientForm.lastNamePlaceholder')}
+                placeholder="Doe"
               />
               {errors.lastName && (
                 <p className="text-sm text-red-500 flex items-center gap-1">
@@ -660,7 +660,7 @@ export default function ModernPatientForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="birthDate" className="flex items-center gap-2 font-medium">
-                {t('patientForm.birthDate')} <span className="text-red-500">*</span>
+                Birth Date <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="birthDate"
@@ -680,10 +680,10 @@ export default function ModernPatientForm({
             </div>
 
             <div className="space-y-2">
-              <Label className="font-medium">{t('patientForm.calculatedAge')}</Label>
+              <Label className="font-medium">Calculated Age</Label>
               <div className="flex items-center h-10 px-3 py-2 border rounded-md bg-gray-50">
                 <span className="text-gray-700 font-medium">
-                  {formData.age ? `${formData.age} ${t('patientForm.years')}` : "—"}
+                  {formData.age ? `${formData.age} years` : "—"}
                 </span>
               </div>
             </div>
@@ -691,7 +691,7 @@ export default function ModernPatientForm({
 
           <div className="space-y-4">
             <Label className="flex items-center gap-2 font-medium">
-              {t('patientForm.gender')} <span className="text-red-500">*</span>
+              Gender <span className="text-red-500">*</span>
             </Label>
             
             <RadioGroup
@@ -702,25 +702,25 @@ export default function ModernPatientForm({
                 <label 
                   htmlFor="gender-male"
                   className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                    formData.gender === 'Masculin' 
+                    formData.gender === 'Male' 
                       ? "border-blue-500 bg-blue-50" 
                       : "border-gray-200 hover:border-blue-300"
                   }`}
                 >
-                  <RadioGroupItem value="Masculin" id="gender-male" />
-                  <span className="text-sm font-medium">{t('patientForm.male')}</span>
+                  <RadioGroupItem value="Male" id="gender-male" />
+                  <span className="text-sm font-medium">Male</span>
                 </label>
 
                 <label 
                   htmlFor="gender-female"
                   className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                    formData.gender === 'Féminin' 
+                    formData.gender === 'Female' 
                       ? "border-pink-500 bg-pink-50" 
                       : "border-gray-200 hover:border-pink-300"
                   }`}
                 >
-                  <RadioGroupItem value="Féminin" id="gender-female" />
-                  <span className="text-sm font-medium">{t('patientForm.female')}</span>
+                  <RadioGroupItem value="Female" id="gender-female" />
+                  <span className="text-sm font-medium">Female</span>
                 </label>
               </div>
             </RadioGroup>
@@ -736,7 +736,7 @@ export default function ModernPatientForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="weight" className="flex items-center gap-2 font-medium">
-                {t('patientForm.weight')} <span className="text-red-500">*</span>
+                Weight (kg) <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="weight"
@@ -760,7 +760,7 @@ export default function ModernPatientForm({
 
             <div className="space-y-2">
               <Label htmlFor="height" className="flex items-center gap-2 font-medium">
-                {t('patientForm.height')} <span className="text-red-500">*</span>
+                Height (cm) <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="height"
@@ -787,7 +787,7 @@ export default function ModernPatientForm({
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{bmiCategory.icon}</span>
                 <div>
-                  <p className="font-semibold">{t('patientForm.bmi')}: {bmi} kg/m²</p>
+                  <p className="font-semibold">BMI: {bmi} kg/m²</p>
                   <p className="text-sm">{bmiCategory.text}</p>
                 </div>
               </div>
@@ -801,7 +801,7 @@ export default function ModernPatientForm({
         <CardHeader className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <Phone className="h-6 w-6" />
-            {t('patientForm.contactInfo')}
+            Contact Information
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
@@ -809,7 +809,7 @@ export default function ModernPatientForm({
             <div className="space-y-2">
               <Label htmlFor="phone" className="flex items-center gap-2 font-medium">
                 <Phone className="h-4 w-4" />
-                {t('patientForm.phone')}
+                Phone Number
               </Label>
               <Input
                 id="phone"
@@ -824,7 +824,7 @@ export default function ModernPatientForm({
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center gap-2 font-medium">
                 <Mail className="h-4 w-4" />
-                {t('patientForm.email')}
+                Email Address
               </Label>
               <Input
                 id="email"
@@ -847,13 +847,13 @@ export default function ModernPatientForm({
           <div className="space-y-2">
             <Label htmlFor="address" className="flex items-center gap-2 font-medium">
               <Home className="h-4 w-4" />
-              {t('patientForm.address')}
+              Address
             </Label>
             <Textarea
               id="address"
               value={formData.address}
               onChange={(e) => handleInputChange("address", e.target.value)}
-              placeholder={t('patientForm.addressPlaceholder')}
+              placeholder="Enter your full address..."
               rows={2}
               className="resize-none"
             />
@@ -863,7 +863,7 @@ export default function ModernPatientForm({
             <div className="space-y-2">
               <Label htmlFor="city" className="flex items-center gap-2 font-medium">
                 <MapPin className="h-4 w-4" />
-                {t('patientForm.city')}
+                City
               </Label>
               <Input
                 id="city"
@@ -877,14 +877,14 @@ export default function ModernPatientForm({
             <div className="space-y-2">
               <Label htmlFor="country" className="flex items-center gap-2 font-medium">
                 <MapPin className="h-4 w-4" />
-                {t('patientForm.country')}
+                Country
               </Label>
               <Input
                 id="country"
                 value={formData.country}
                 onChange={(e) => handleInputChange("country", e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Maurice"
+                placeholder="Mauritius"
               />
             </div>
           </div>
@@ -896,14 +896,14 @@ export default function ModernPatientForm({
         <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <AlertTriangle className="h-6 w-6" />
-            {t('patientForm.knownAllergies')}
+            Known Allergies
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
-              placeholder={t('patientForm.searchAllergy')}
+              placeholder="Search allergies..."
               value={allergySearch}
               onChange={(e) => setAllergySearch(e.target.value)}
               className="pl-10"
@@ -930,12 +930,12 @@ export default function ModernPatientForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="otherAllergies">{t('patientForm.otherAllergies')}</Label>
+            <Label htmlFor="otherAllergies">Other Allergies</Label>
             <Textarea
               id="otherAllergies"
               value={formData.otherAllergies}
               onChange={(e) => handleInputChange("otherAllergies", e.target.value)}
-              placeholder={t('patientForm.otherAllergiesPlaceholder')}
+              placeholder="List any other allergies not mentioned above..."
               rows={3}
               className="resize-none"
             />
@@ -945,7 +945,7 @@ export default function ModernPatientForm({
             <div className="p-4 bg-red-50 rounded-lg border border-red-200">
               <div className="flex items-center gap-2 mb-3">
                 <AlertTriangle className="h-5 w-5 text-red-600" />
-                <p className="font-semibold text-red-800">{t('patientForm.declaredAllergies')}</p>
+                <p className="font-semibold text-red-800">Declared Allergies</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {formData.allergies.map((allergy) => (
@@ -964,19 +964,19 @@ export default function ModernPatientForm({
         </CardContent>
       </Card>
 
-      {/* Section 4: Antécédents médicaux */}
+      {/* Section 4: Medical History */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <Heart className="h-6 w-6" />
-            {t('patientForm.medicalHistory')}
+            Medical History
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
-              placeholder={t('patientForm.searchMedicalHistory')}
+              placeholder="Search medical conditions..."
               value={historySearch}
               onChange={(e) => setHistorySearch(e.target.value)}
               className="pl-10"
@@ -1003,12 +1003,12 @@ export default function ModernPatientForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="otherMedicalHistory">{t('patientForm.otherMedicalHistory')}</Label>
+            <Label htmlFor="otherMedicalHistory">Other Medical History</Label>
             <Textarea
               id="otherMedicalHistory"
               value={formData.otherMedicalHistory}
               onChange={(e) => handleInputChange("otherMedicalHistory", e.target.value)}
-              placeholder={t('patientForm.otherMedicalHistoryPlaceholder')}
+              placeholder="List any other medical conditions, surgeries, or hospitalizations..."
               rows={3}
               className="resize-none"
             />
@@ -1018,7 +1018,7 @@ export default function ModernPatientForm({
             <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
               <div className="flex items-center gap-2 mb-3">
                 <Heart className="h-5 w-5 text-purple-600" />
-                <p className="font-semibold text-purple-800">{t('patientForm.declaredHistory')}</p>
+                <p className="font-semibold text-purple-800">Declared Medical History</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {formData.medicalHistory.map((condition) => (
@@ -1028,7 +1028,7 @@ export default function ModernPatientForm({
                 ))}
                 {formData.otherMedicalHistory && (
                   <Badge className="bg-purple-100 text-purple-800 text-xs">
-                    {t('patientForm.other')}
+                    Other
                   </Badge>
                 )}
               </div>
@@ -1037,26 +1037,29 @@ export default function ModernPatientForm({
         </CardContent>
       </Card>
 
-      {/* Section 5: Médicaments actuels */}
+      {/* Section 5: Current Medications */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <Pill className="h-6 w-6" />
-            {t('patientForm.currentMedications')}
+            Current Medications
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="currentMedicationsText">{t('patientForm.ongoingTreatments')}</Label>
+            <Label htmlFor="currentMedicationsText">Ongoing Treatments</Label>
             <Textarea
               id="currentMedicationsText"
               value={formData.currentMedicationsText}
               onChange={(e) => handleInputChange("currentMedicationsText", e.target.value)}
-              placeholder={t('patientForm.medicationPlaceholder')}
+              placeholder="List all medications you are currently taking...
+Example:
+- Aspirin 100mg - once daily
+- Metformin 500mg - twice daily"
               rows={6}
               className="font-mono text-sm"
             />
-            <p className="text-xs text-gray-500">{t('patientForm.medicationHelp')}</p>
+            <p className="text-xs text-gray-500">Please include medication name, dosage, and frequency</p>
           </div>
 
           {formData.currentMedicationsText && (
@@ -1064,9 +1067,9 @@ export default function ModernPatientForm({
               <div className="flex items-center gap-2">
                 <Check className="h-5 w-5 text-green-600" />
                 <p className="font-semibold text-green-800">
-                  {t('patientForm.treatmentsEntered')} (
+                  Treatments entered (
                   {formData.currentMedicationsText.split('\n').filter(line => line.trim()).length} 
-                  {' '}{t('patientForm.lines')})
+                  {' '}lines)
                 </p>
               </div>
             </div>
@@ -1074,29 +1077,29 @@ export default function ModernPatientForm({
         </CardContent>
       </Card>
 
-      {/* Section 6: Habitudes de vie */}
+      {/* Section 6: Lifestyle */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <Activity className="h-6 w-6" />
-            {t('patientForm.lifestyle')}
+            Lifestyle
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Tabac */}
+            {/* Tobacco */}
             <div className="space-y-4">
               <Label className="font-medium text-lg flex items-center gap-2">
-                🚬 {t('patientForm.tobacco')}
+                🚬 Tobacco Use
               </Label>
               <RadioGroup
                 value={formData.lifeHabits.smoking}
                 onValueChange={(value) => handleLifeHabitsChange("smoking", value)}
               >
                 {[
-                  { value: 'non', label: t('patientForm.nonSmoker') },
-                  { value: 'actuel', label: t('patientForm.currentSmoker') },
-                  { value: 'ancien', label: t('patientForm.exSmoker') }
+                  { value: 'non', label: 'Non-smoker' },
+                  { value: 'actuel', label: 'Current smoker' },
+                  { value: 'ancien', label: 'Ex-smoker' }
                 ].map(option => (
                   <label 
                     key={option.value}
@@ -1113,19 +1116,19 @@ export default function ModernPatientForm({
               </RadioGroup>
             </div>
 
-            {/* Alcool */}
+            {/* Alcohol */}
             <div className="space-y-4">
               <Label className="font-medium text-lg flex items-center gap-2">
-                🍷 {t('patientForm.alcohol')}
+                🍷 Alcohol Consumption
               </Label>
               <RadioGroup
                 value={formData.lifeHabits.alcohol}
                 onValueChange={(value) => handleLifeHabitsChange("alcohol", value)}
               >
                 {[
-                  { value: 'jamais', label: t('patientForm.never') },
-                  { value: 'occasionnel', label: t('patientForm.occasional') },
-                  { value: 'regulier', label: t('patientForm.regular') }
+                  { value: 'jamais', label: 'Never' },
+                  { value: 'occasionnel', label: 'Occasional' },
+                  { value: 'regulier', label: 'Regular' }
                 ].map(option => (
                   <label 
                     key={option.value}
@@ -1142,19 +1145,19 @@ export default function ModernPatientForm({
               </RadioGroup>
             </div>
 
-            {/* Activité physique */}
+            {/* Physical Activity */}
             <div className="space-y-4">
               <Label className="font-medium text-lg flex items-center gap-2">
-                🏃 {t('patientForm.physicalActivity')}
+                🏃 Physical Activity
               </Label>
               <RadioGroup
                 value={formData.lifeHabits.physicalActivity}
                 onValueChange={(value) => handleLifeHabitsChange("physicalActivity", value)}
               >
                 {[
-                  { value: 'sedentaire', label: t('patientForm.sedentary') },
-                  { value: 'moderee', label: t('patientForm.moderate') },
-                  { value: 'intense', label: t('patientForm.intense') }
+                  { value: 'sedentaire', label: 'Sedentary' },
+                  { value: 'moderee', label: 'Moderate' },
+                  { value: 'intense', label: 'Intense' }
                 ].map(option => (
                   <label 
                     key={option.value}
@@ -1174,12 +1177,12 @@ export default function ModernPatientForm({
         </CardContent>
       </Card>
 
-      {/* Indicateur de sauvegarde automatique */}
+      {/* Auto-save indicator */}
       <div className="flex justify-center">
         <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           <span className="text-sm text-gray-600">
-            {t('common.autoSave')}
+            Auto-saving
             {lastSaved && (
               <span className="ml-2 text-xs text-gray-500">
                 ({new Date(lastSaved).toLocaleTimeString()})
@@ -1189,14 +1192,14 @@ export default function ModernPatientForm({
         </div>
       </div>
 
-      {/* Bouton de soumission */}
+      {/* Submit button */}
       <div className="flex justify-center pt-4">
         <Button 
           type="submit"
           size="lg"
           className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
         >
-          {t('patientForm.continueButton')}
+          Continue to Clinical Information
           <ArrowRight className="h-5 w-5 ml-2" />
         </Button>
       </div>

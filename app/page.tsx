@@ -1,4 +1,4 @@
-// app/page.tsx - Version modifiée avec seulement 5 étapes
+// app/page.tsx - Modified version with only 5 steps
 
 "use client"
 
@@ -33,7 +33,7 @@ export default function MedicalAIExpert() {
   const [questionsData, setQuestionsData] = useState<any>(null)
   const [diagnosisData, setDiagnosisData] = useState<any>(null)
   const [finalReport, setFinalReport] = useState<any>(null)
-  const [language, setLanguage] = useState<Language>('fr')
+  const [language, setLanguage] = useState<Language>('en')
   
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -49,42 +49,42 @@ export default function MedicalAIExpert() {
 
   const t = (key: string): string => {
     const translations: Record<string, any> = {
-      fr: {
+      en: {
         steps: {
           patientInfo: {
-            title: "Informations Patient",
-            description: "Données administratives et antécédents"
+            title: "Patient Information",
+            description: "Administrative data and medical history"
           },
           clinicalData: {
-            title: "Données Cliniques",
-            description: "Examen physique et symptômes"
+            title: "Clinical Data",
+            description: "Physical examination and symptoms"
           },
           aiQuestions: {
-            title: "Questions IA",
-            description: "Questions diagnostiques ciblées"
+            title: "AI Questions",
+            description: "Targeted diagnostic questions"
           },
           diagnosis: {
-            title: "Diagnostic",
-            description: "Analyse et diagnostic différentiel"
+            title: "Diagnosis",
+            description: "Analysis and differential diagnosis"
           },
           finalReport: {
-            title: "Dossier Médical Complet",
-            description: "Compte rendu et ordonnances"
+            title: "Complete Medical Record",
+            description: "Report and prescriptions"
           }
         },
         mainPage: {
-          title: "Expert Médical IA",
-          subtitle: "Assistant de consultation"
+          title: "Medical AI Expert",
+          subtitle: "Consultation assistant"
         },
         progress: {
-          title: "Progression",
-          stepOf: "Étape {current} sur {total}"
+          title: "Progress",
+          stepOf: "Step {current} of {total}"
         },
-        loading: "Chargement..."
+        loading: "Loading..."
       }
     };
     const keys = key.split('.');
-    let value: any = translations[language] ?? translations['fr'];
+    let value: any = translations[language] ?? translations['en'];
     for (const k of keys) {
       value = value?.[k];
     }
@@ -121,7 +121,7 @@ export default function MedicalAIExpert() {
       component: DiagnosisForm,
     },
     {
-      // Étape 4 : Dossier médical complet (compte rendu + ordonnances)
+      // Step 4: Complete medical record (report + prescriptions)
       id: 4,
       title: t('steps.finalReport.title'),
       description: t('steps.finalReport.description'),
@@ -161,7 +161,7 @@ export default function MedicalAIExpert() {
           case 4:
             if (finalReport) {
               await consultationDataService.saveStepData(4, finalReport)
-              // Marquer la consultation comme complète
+              // Mark consultation as complete
               await consultationDataService.markConsultationComplete()
             }
             break
@@ -190,13 +190,13 @@ export default function MedicalAIExpert() {
     const consultationId = consultationDataService.getCurrentConsultationId()
     if (consultationId) {
       try {
-        // Sauvegarder tout le dossier médical
+        // Save complete medical record
         await consultationDataService.saveStepData(4, data)
-        // Marquer la consultation comme complète
+        // Mark consultation as complete
         await consultationDataService.markConsultationComplete()
         console.log('Consultation completed successfully')
         
-        // Optionnel : redirection ou message de succès
+        // Optional: redirect or success message
         // router.push('/consultation-complete')
       } catch (error) {
         console.error('Error saving final report:', error)
@@ -252,7 +252,7 @@ export default function MedicalAIExpert() {
           onPrevious: handlePrevious,
         }
       case 4:
-        // Étape finale : génération et édition du dossier complet
+        // Final step: generation and editing of complete record
         return {
           ...commonProps,
           patientData,
@@ -283,7 +283,7 @@ export default function MedicalAIExpert() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        {/* Progress Section - Mise à jour pour 5 étapes */}
+        {/* Progress Section - Updated for 5 steps */}
         <Card className="bg-white shadow-lg p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">{t('progress.title')}</h2>

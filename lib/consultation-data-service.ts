@@ -13,26 +13,26 @@ class ConsultationDataService {
   private currentConsultationId: string | null = null
   
   constructor() {
-    // Charger les données existantes au démarrage
+    // Load existing data on startup
     this.loadFromStorage()
   }
 
-  // Obtenir l'ID de la consultation en cours
+  // Get current consultation ID
   getCurrentConsultationId(): string | null {
     if (!this.currentConsultationId) {
-      // Générer un nouvel ID si nécessaire
+      // Generate a new ID if necessary
       this.currentConsultationId = `consultation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     }
     return this.currentConsultationId
   }
 
-  // Définir l'ID de la consultation en cours
+  // Set current consultation ID
   setCurrentConsultationId(id: string): void {
     this.currentConsultationId = id
-    console.log(`📋 ID de consultation défini: ${id}`)
+    console.log(`📋 Consultation ID set: ${id}`)
   }
 
-  // Sauvegarder les données d'une étape
+  // Save step data
   async saveStepData(step: number, data: any): Promise<void> {
     const consultationData: ConsultationData = {
       step,
@@ -43,20 +43,20 @@ class ConsultationDataService {
     this.currentConsultation.set(step, consultationData)
     await this.persistToStorage()
     
-    console.log(`✅ Données sauvegardées pour l'étape ${step}`)
+    console.log(`✅ Data saved for step ${step}`)
   }
 
-  // Récupérer les données d'une étape
+  // Retrieve step data
   getStepData(step: number): any {
     const consultationData = this.currentConsultation.get(step)
     return consultationData?.data || null
   }
 
-  // Récupérer toutes les données de la consultation
+  // Get all consultation data
   getAllData(): Record<string, any> {
     const allData: Record<string, any> = {}
     
-    // Mapper les étapes aux noms de données
+    // Map steps to data names
     const stepMapping: Record<number, string> = {
       1: 'patientData',
       2: 'clinicalData',
@@ -72,11 +72,11 @@ class ConsultationDataService {
     return allData
   }
 
-  // Marquer la consultation comme complète
+  // Mark consultation as complete
   async markConsultationComplete(): Promise<void> {
     const allData = this.getAllData()
     
-    // Sauvegarder avec un timestamp de complétion
+    // Save with completion timestamp
     const completedConsultation = {
       id: this.getCurrentConsultationId(),
       ...allData,
@@ -84,55 +84,55 @@ class ConsultationDataService {
       status: 'completed'
     }
     
-    // Sauvegarder dans l'historique
+    // Save to history
     await this.saveToHistory(completedConsultation)
     
-    // Nettoyer la consultation en cours
+    // Clear current consultation
     await this.clearCurrentConsultation()
     
-    console.log('✅ Consultation marquée comme complète et archivée')
+    console.log('✅ Consultation marked as complete and archived')
   }
 
-  // Sauvegarder dans l'historique des consultations
+  // Save to consultation history
   private async saveToHistory(consultation: any): Promise<void> {
     const historyKey = 'mauritius_medical_consultation_history'
     
     try {
-      // Récupérer l'historique existant
+      // Retrieve existing history
       const existingHistory = localStorage.getItem(historyKey)
       const history = existingHistory ? JSON.parse(existingHistory) : []
       
-      // Ajouter la nouvelle consultation (elle a déjà un ID)
+      // Add new consultation (it already has an ID)
       history.push(consultation)
       
-      // Limiter l'historique aux 50 dernières consultations
+      // Limit history to last 50 consultations
       if (history.length > 50) {
         history.splice(0, history.length - 50)
       }
       
-      // Sauvegarder
+      // Save
       localStorage.setItem(historyKey, JSON.stringify(history))
       
-      console.log(`📋 Consultation ${consultation.id} ajoutée à l'historique (${history.length} consultations au total)`)
+      console.log(`📋 Consultation ${consultation.id} added to history (${history.length} consultations total)`)
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde dans l\'historique:', error)
+      console.error('Error saving to history:', error)
     }
   }
 
-  // Nettoyer la consultation en cours
+  // Clear current consultation
   async clearCurrentConsultation(): Promise<void> {
     this.currentConsultation.clear()
     this.currentConsultationId = null
     localStorage.removeItem(this.storageKey)
-    console.log('🧹 Consultation en cours nettoyée')
+    console.log('🧹 Current consultation cleared')
   }
 
-  // Vérifier si une étape est complétée
+  // Check if a step is completed
   isStepCompleted(step: number): boolean {
     return this.currentConsultation.has(step)
   }
 
-  // Obtenir l'état de progression
+  // Get progress status
   getProgress(): {
     currentStep: number
     completedSteps: number[]
@@ -141,7 +141,7 @@ class ConsultationDataService {
   } {
     const completedSteps = Array.from(this.currentConsultation.keys()).sort()
     const currentStep = completedSteps.length > 0 ? Math.max(...completedSteps) + 1 : 1
-    const totalSteps = 4 // Nombre total d'étapes
+    const totalSteps = 4 // Total number of steps
     const percentage = (completedSteps.length / totalSteps) * 100
 
     return {
@@ -152,7 +152,7 @@ class ConsultationDataService {
     }
   }
 
-  // Persister les données dans le localStorage
+  // Persist data to localStorage
   private async persistToStorage(): Promise<void> {
     try {
       const dataToStore = {
@@ -163,14 +163,14 @@ class ConsultationDataService {
       
       localStorage.setItem(this.storageKey, JSON.stringify(dataToStore))
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error)
+      console.error('Error saving:', error)
       
-      // Si le localStorage est plein, essayer de nettoyer
+      // If localStorage is full, try to clean up
       if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-        console.log('⚠️ localStorage plein, nettoyage en cours...')
+        console.log('⚠️ localStorage full, cleaning up...')
         this.cleanupOldData()
         
-        // Réessayer
+        // Retry
         try {
           const dataToStore = {
             consultationId: this.currentConsultationId,
@@ -179,13 +179,13 @@ class ConsultationDataService {
           }
           localStorage.setItem(this.storageKey, JSON.stringify(dataToStore))
         } catch (retryError) {
-          console.error('Impossible de sauvegarder même après nettoyage:', retryError)
+          console.error('Unable to save even after cleanup:', retryError)
         }
       }
     }
   }
 
-  // Charger les données depuis le localStorage
+  // Load data from localStorage
   private loadFromStorage(): void {
     try {
       const storedData = localStorage.getItem(this.storageKey)
@@ -193,29 +193,29 @@ class ConsultationDataService {
       if (storedData) {
         const parsed = JSON.parse(storedData)
         
-        // Récupérer l'ID de consultation
+        // Retrieve consultation ID
         if (parsed.consultationId) {
           this.currentConsultationId = parsed.consultationId
         }
         
-        // Reconstruire la Map depuis les données stockées
+        // Rebuild Map from stored data
         if (parsed.consultationData && Array.isArray(parsed.consultationData)) {
           this.currentConsultation = new Map(parsed.consultationData)
-          console.log(`📂 ${this.currentConsultation.size} étape(s) chargée(s) depuis le stockage`)
-          console.log(`📋 ID de consultation chargé: ${this.currentConsultationId}`)
+          console.log(`📂 ${this.currentConsultation.size} step(s) loaded from storage`)
+          console.log(`📋 Consultation ID loaded: ${this.currentConsultationId}`)
         }
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des données:', error)
+      console.error('Error loading data:', error)
       this.currentConsultation = new Map()
       this.currentConsultationId = null
     }
   }
 
-  // Nettoyer les anciennes données
+  // Clean up old data
   private cleanupOldData(): void {
     try {
-      // Nettoyer l'historique en gardant seulement les 20 dernières consultations
+      // Clean history keeping only last 20 consultations
       const historyKey = 'mauritius_medical_consultation_history'
       const existingHistory = localStorage.getItem(historyKey)
       
@@ -224,54 +224,54 @@ class ConsultationDataService {
         if (history.length > 20) {
           const reducedHistory = history.slice(-20)
           localStorage.setItem(historyKey, JSON.stringify(reducedHistory))
-          console.log(`🧹 Historique réduit à ${reducedHistory.length} consultations`)
+          console.log(`🧹 History reduced to ${reducedHistory.length} consultations`)
         }
       }
       
-      // Nettoyer d'autres clés potentiellement volumineuses
+      // Clean other potentially large keys
       const keysToCheck = ['medical_reports_cache', 'diagnosis_cache', 'temp_medical_data']
       keysToCheck.forEach(key => {
         if (localStorage.getItem(key)) {
           localStorage.removeItem(key)
-          console.log(`🧹 Clé ${key} supprimée`)
+          console.log(`🧹 Key ${key} removed`)
         }
       })
     } catch (error) {
-      console.error('Erreur lors du nettoyage:', error)
+      console.error('Error during cleanup:', error)
     }
   }
 
-  // Créer une nouvelle consultation
+  // Create a new consultation
   createNewConsultation(): string {
-    // Sauvegarder l'ancienne consultation si elle existe
+    // Save old consultation if it exists
     if (this.currentConsultation.size > 0) {
-      console.log('⚠️ Consultation en cours détectée, sauvegarde automatique...')
+      console.log('⚠️ Current consultation detected, auto-saving...')
       this.markConsultationComplete()
     }
     
-    // Créer un nouvel ID
+    // Create new ID
     this.currentConsultationId = `consultation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     this.currentConsultation.clear()
     
-    console.log(`📋 Nouvelle consultation créée: ${this.currentConsultationId}`)
+    console.log(`📋 New consultation created: ${this.currentConsultationId}`)
     return this.currentConsultationId
   }
 
-  // Charger une consultation depuis l'historique
+  // Load consultation from history
   async loadConsultationFromHistory(consultationId: string): Promise<boolean> {
     try {
       const consultation = this.getConsultationFromHistory(consultationId)
       
       if (!consultation) {
-        console.error(`❌ Consultation ${consultationId} non trouvée dans l'historique`)
+        console.error(`❌ Consultation ${consultationId} not found in history`)
         return false
       }
       
-      // Nettoyer la consultation actuelle
+      // Clear current consultation
       this.currentConsultation.clear()
       this.currentConsultationId = consultationId
       
-      // Charger les données par étape
+      // Load data by step
       if (consultation.patientData) {
         await this.saveStepData(1, consultation.patientData)
       }
@@ -285,15 +285,15 @@ class ConsultationDataService {
         await this.saveStepData(4, consultation.reportData)
       }
       
-      console.log(`✅ Consultation ${consultationId} chargée depuis l'historique`)
+      console.log(`✅ Consultation ${consultationId} loaded from history`)
       return true
     } catch (error) {
-      console.error('Erreur lors du chargement de la consultation:', error)
+      console.error('Error loading consultation:', error)
       return false
     }
   }
 
-  // Obtenir un résumé de la consultation en cours
+  // Get current consultation summary
   getConsultationSummary(): {
     id: string | null
     progress: number
@@ -304,7 +304,7 @@ class ConsultationDataService {
     const patientData = this.getStepData(1)
     let lastUpdate: Date | null = null
     
-    // Trouver la dernière mise à jour
+    // Find last update
     this.currentConsultation.forEach((data) => {
       if (!lastUpdate || data.timestamp > lastUpdate) {
         lastUpdate = data.timestamp
@@ -319,15 +319,15 @@ class ConsultationDataService {
     }
   }
 
-  // Exporter les données de consultation
+  // Export consultation data
   exportConsultationData(consultationId?: string): string {
     let dataToExport: any
     
     if (consultationId) {
-      // Exporter une consultation spécifique de l'historique
+      // Export specific consultation from history
       dataToExport = this.getConsultationFromHistory(consultationId)
     } else {
-      // Exporter la consultation en cours
+      // Export current consultation
       dataToExport = {
         id: this.getCurrentConsultationId(),
         ...this.getAllData(),
@@ -336,21 +336,21 @@ class ConsultationDataService {
     }
     
     if (!dataToExport) {
-      throw new Error('Aucune donnée à exporter')
+      throw new Error('No data to export')
     }
     
     return JSON.stringify(dataToExport, null, 2)
   }
 
-  // Importer des données de consultation
+  // Import consultation data
   async importConsultationData(jsonData: string): Promise<void> {
     try {
       const parsedData = JSON.parse(jsonData)
       
-      // Réinitialiser la consultation en cours
+      // Reset current consultation
       this.currentConsultation.clear()
       
-      // Importer les données par étape
+      // Import data by step
       if (parsedData.patientData) {
         await this.saveStepData(1, parsedData.patientData)
       }
@@ -364,15 +364,15 @@ class ConsultationDataService {
         await this.saveStepData(4, parsedData.reportData)
       }
       
-      console.log('✅ Données importées avec succès')
+      console.log('✅ Data imported successfully')
     } catch (error) {
-      console.error('Erreur lors de l\'importation:', error)
-      throw new Error('Format de données invalide')
+      console.error('Error during import:', error)
+      throw new Error('Invalid data format')
     }
   }
 }
 
-// Instance singleton
+// Singleton instance
 const consultationDataService = new ConsultationDataService()
 
 export { consultationDataService, type ConsultationData }

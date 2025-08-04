@@ -1,4 +1,4 @@
-// Services d'intégration des APIs médicales - VRAIES APIs UNIQUEMENT
+// Medical APIs Integration Services - REAL APIs ONLY
 
 interface OpenAIResponse {
   diagnosis: {
@@ -98,7 +98,7 @@ export class MedicalAPIService {
 
     if (!response.ok) {
       const errorData = await response.json()
-      throw new Error(errorData.error || `Erreur API OpenAI: ${response.status}`)
+      throw new Error(errorData.error || `OpenAI API Error: ${response.status}`)
     }
 
     const result = await response.json()
@@ -119,7 +119,7 @@ export class MedicalAPIService {
     })
 
     if (!response.ok) {
-      throw new Error(`Erreur FDA API: ${response.status}`)
+      throw new Error(`FDA API Error: ${response.status}`)
     }
 
     return await response.json()
@@ -135,7 +135,7 @@ export class MedicalAPIService {
     })
 
     if (!response.ok) {
-      throw new Error(`Erreur RxNorm API: ${response.status}`)
+      throw new Error(`RxNorm API Error: ${response.status}`)
     }
 
     return await response.json()
@@ -156,7 +156,7 @@ export class MedicalAPIService {
     })
 
     if (!response.ok) {
-      throw new Error(`Erreur PubMed API: ${response.status}`)
+      throw new Error(`PubMed API Error: ${response.status}`)
     }
 
     return await response.json()

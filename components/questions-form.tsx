@@ -76,25 +76,25 @@ interface QuestionsFormProps {
   consultationId?: string | null
 }
 
-// Configuration des modes
+// Mode configuration
 const MODE_CONFIGS = {
   fast: {
-    label: 'Rapide',
+    label: 'Fast',
     duration: '1-2s',
     icon: Zap,
     color: 'text-green-600',
     bgColor: 'bg-green-50',
     borderColor: 'border-green-200',
-    description: 'Triage initial, urgences'
+    description: 'Initial triage, emergencies'
   },
   balanced: {
-    label: 'Équilibré',
+    label: 'Balanced',
     duration: '2-3s',
     icon: Activity,
     color: 'text-blue-600',
     bgColor: 'bg-blue-50',
     borderColor: 'border-blue-200',
-    description: 'Usage standard'
+    description: 'Standard usage'
   },
   intelligent: {
     label: 'Intelligent',
@@ -103,16 +103,16 @@ const MODE_CONFIGS = {
     color: 'text-purple-600',
     bgColor: 'bg-purple-50',
     borderColor: 'border-purple-200',
-    description: 'Cas complexes'
+    description: 'Complex cases'
   }
 }
 
-// Composant helper pour les icônes dynamiques
+// Helper component for dynamic icons
 function DynamicIcon({ icon: Icon, className }: { icon: any, className?: string }) {
   return <Icon className={className} />
 }
 
-// Composants helpers
+// Helper components
 function QuestionBadges({ question }: { question: Question }) {
   return (
     <div className="flex flex-wrap gap-2 mb-4">
@@ -120,13 +120,13 @@ function QuestionBadges({ question }: { question: Question }) {
         <Badge 
           variant={question.priority === 'critical' || question.priority === 'high' ? 'destructive' : 'outline'}
         >
-          Priorité: {question.priority}
+          Priority: {question.priority}
         </Badge>
       )}
       {question.diagnostic_impact && (
         <Badge className="bg-blue-100 text-blue-800">
           <Brain className="h-3 w-3 mr-1" />
-          Impact diagnostique
+          Diagnostic impact
         </Badge>
       )}
     </div>
@@ -156,7 +156,7 @@ function SimpleTooltip({ children, content }: { children: React.ReactNode, conte
   )
 }
 
-// Fonction helper pour obtenir la valeur par défaut selon le type
+// Helper function to get default value by type
 function getDefaultValueForType(type: string): string {
   switch (type) {
     case 'number':
@@ -168,14 +168,14 @@ function getDefaultValueForType(type: string): string {
   }
 }
 
-// Fonction helper pour valider et nettoyer une valeur selon son type
+// Helper function to validate and clean value by type
 function validateAndCleanValue(value: any, type: string): string {
-  // Gestion des valeurs nullish ou invalides
+  // Handle nullish or invalid values
   if (value === undefined || value === null || value === 'N/A') {
     return getDefaultValueForType(type)
   }
   
-  // S'assurer que c'est une string avant toute manipulation
+  // Ensure it's a string before any manipulation
   const stringValue = String(value)
   
   switch (type) {
@@ -186,7 +186,7 @@ function validateAndCleanValue(value: any, type: string): string {
       }
       return stringValue
     case 'date':
-      // Vérifier si c'est une date valide
+      // Check if it's a valid date
       const dateValue = new Date(stringValue)
       if (isNaN(dateValue.getTime())) {
         return new Date().toISOString().split('T')[0]
@@ -197,17 +197,17 @@ function validateAndCleanValue(value: any, type: string): string {
   }
 }
 
-// Composant principal
+// Main component
 export default function QuestionsForm({
   patientData,
   clinicalData,
   onDataChange,
   onNext,
   onPrevious,
-  language = 'fr',
+  language = 'en',
   consultationId
 }: QuestionsFormProps) {
-  // États
+  // States
   const [questions, setQuestions] = useState<Question[]>([])
   const [responses, setResponses] = useState<QuestionResponse[]>([])
   const [loading, setLoading] = useState(false)
@@ -216,26 +216,26 @@ export default function QuestionsForm({
   const [metadata, setMetadata] = useState<any>(null)
   const [hasGenerated, setHasGenerated] = useState(false)
   
-  // États pour les modes
+  // States for modes
   const [generationMode, setGenerationMode] = useState<GenerationMode>('balanced')
   const [generationTime, setGenerationTime] = useState<number | null>(null)
 
-  // Helper pour les traductions
+  // Helper for translations
   const t = (key: string) => getTranslation(key, language)
 
-  // Détection automatique du mode selon l'urgence
+  // Automatic urgency mode detection
   const detectUrgencyMode = (): GenerationMode => {
-    // S'assurer que les valeurs sont des strings avant d'appeler toLowerCase
+    // Ensure values are strings before calling toLowerCase
     const symptoms = String(clinicalData?.symptoms || '').toLowerCase()
     const chiefComplaint = String(clinicalData?.chiefComplaint || '').toLowerCase()
     const combined = `${symptoms} ${chiefComplaint}`
     
-    const urgentKeywords = ['douleur thoracique', 'dyspnée', 'syncope', 'confusion', 'malaise']
+    const urgentKeywords = ['chest pain', 'dyspnea', 'syncope', 'confusion', 'distress']
     if (urgentKeywords.some(keyword => combined.includes(keyword))) {
       return 'fast'
     }
     
-    const complexKeywords = ['multiple', 'chronique', 'récidivant', 'plusieurs']
+    const complexKeywords = ['multiple', 'chronic', 'recurrent', 'several']
     if (complexKeywords.some(keyword => combined.includes(keyword))) {
       return 'intelligent'
     }
@@ -243,7 +243,7 @@ export default function QuestionsForm({
     return 'balanced'
   }
 
-  // Chargement des données sauvegardées
+  // Load saved data
   useEffect(() => {
     const loadSavedData = async () => {
       console.log('📂 Loading saved questions data...')
@@ -253,7 +253,7 @@ export default function QuestionsForm({
         if (currentConsultationId) {
           const savedData = await consultationDataService.getAllData()
           if (savedData?.questionsData?.responses && savedData.questionsData.responses.length > 0) {
-            // Valider et nettoyer les réponses
+            // Validate and clean responses
             const cleanedResponses = savedData.questionsData.responses.map((response: QuestionResponse) => {
               const cleanAnswer = validateAndCleanValue(response.answer, response.type)
               
@@ -276,7 +276,7 @@ export default function QuestionsForm({
     loadSavedData()
   }, [consultationId])
 
-  // Sauvegarde automatique
+  // Auto-save
   useEffect(() => {
     const saveData = async () => {
       if (responses.length === 0) return
@@ -296,7 +296,7 @@ export default function QuestionsForm({
     return () => clearTimeout(timer)
   }, [responses])
 
-  // Génération automatique systématique
+  // Systematic automatic generation
   useEffect(() => {
     if (patientData && clinicalData && !hasGenerated) {
       const detectedMode = detectUrgencyMode()
@@ -312,7 +312,7 @@ export default function QuestionsForm({
     }
   }, [patientData, clinicalData, hasGenerated])
 
-  // Auto-save effet
+  // Auto-save effect
   useEffect(() => {
     const timer = setTimeout(() => {
       onDataChange({ responses })
@@ -320,7 +320,7 @@ export default function QuestionsForm({
     return () => clearTimeout(timer)
   }, [responses, onDataChange])
 
-  // Fonction de génération optimisée
+  // Optimized generation function
   const generateQuestions = async (mode: GenerationMode = generationMode) => {
     console.log(`🚀 generateQuestions() called with mode: ${mode}`)
     
@@ -363,7 +363,7 @@ export default function QuestionsForm({
         
         console.log(`✅ Generated ${data.questions.length} questions in ${totalTime}ms (${mode} mode)`)
         
-        // Normaliser les questions pour avoir toujours un type
+        // Normalize questions to always have a type
         const normalizedQuestions = data.questions.map((q: any) => ({
           ...q,
           type: q.type || (q.options ? 'multiple_choice' : 'text')
@@ -375,7 +375,7 @@ export default function QuestionsForm({
           generationTime: totalTime
         })
         
-        // Initialiser les réponses avec les bonnes valeurs par défaut
+        // Initialize responses with proper default values
         const initialResponses = normalizedQuestions.map((q: Question) => {
           const type = q.type || 'text'
           const defaultAnswer = getDefaultValueForType(type)
@@ -394,29 +394,29 @@ export default function QuestionsForm({
       }
     } catch (err) {
       console.error("❌ Error generating questions:", err)
-      setError(err instanceof Error ? err.message : "Erreur inconnue")
+      setError(err instanceof Error ? err.message : "Unknown error")
 
-      // Questions de fallback
+      // Fallback questions
       const fallbackQuestions: Question[] = [
         {
           id: 1,
-          question: "Depuis combien de temps avez-vous ces symptômes?",
+          question: "How long have you had these symptoms?",
           type: "multiple_choice",
-          options: ["Moins de 24h", "2-7 jours", "1-4 semaines", "Plus d'un mois"],
+          options: ["Less than 24h", "2-7 days", "1-4 weeks", "More than a month"],
           priority: "high"
         },
         {
           id: 2,
-          question: "Comment vos symptômes évoluent-ils?",
+          question: "How are your symptoms evolving?",
           type: "multiple_choice",
-          options: ["S'aggravent", "Stables", "S'améliorent", "Varient"],
+          options: ["Getting worse", "Stable", "Improving", "Variable"],
           priority: "high"
         },
         {
           id: 3,
-          question: "Votre état général vous inquiète-t-il?",
+          question: "How concerned are you about your condition?",
           type: "multiple_choice",
-          options: ["Très inquiet", "Modérément", "Peu inquiet", "Pas du tout"],
+          options: ["Very concerned", "Moderately", "Slightly concerned", "Not at all"],
           priority: "medium"
         }
       ]
@@ -438,7 +438,7 @@ export default function QuestionsForm({
     const question = questions.find(q => q.id === questionId)
     const type = question?.type || 'text'
     
-    // Valider et nettoyer la valeur selon le type
+    // Validate and clean value by type
     const validatedAnswer = validateAndCleanValue(answer, type)
     
     const newResponses = responses.map((response) =>
@@ -482,7 +482,7 @@ export default function QuestionsForm({
     const response = responses.find((r) => r.questionId === question.id)
     const currentAnswer = String(response?.answer || "")
 
-    // Si la question a des options, c'est un choix multiple
+    // If question has options, it's multiple choice
     if (question.options && question.options.length > 0) {
       return (
         <RadioGroup
@@ -510,20 +510,20 @@ export default function QuestionsForm({
       )
     }
 
-    // Champ numérique
+    // Number field
     if (question.type === 'number') {
       return (
         <input
           type="number"
           value={currentAnswer}
           onChange={(e) => updateResponse(question.id, e.target.value)}
-          placeholder="Entrez un nombre"
+          placeholder="Enter a number"
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
         />
       )
     }
 
-    // Champ date
+    // Date field
     if (question.type === 'date') {
       return (
         <input
@@ -535,12 +535,12 @@ export default function QuestionsForm({
       )
     }
 
-    // Sinon, c'est un champ texte
+    // Otherwise, it's a text field
     return (
       <Textarea
         value={currentAnswer}
         onChange={(e) => updateResponse(question.id, e.target.value)}
-        placeholder={t('questionsForm.yourAnswerPlaceholder')}
+        placeholder="Enter your answer here..."
         rows={3}
         className="transition-all duration-200 focus:ring-blue-200"
       />
@@ -549,7 +549,7 @@ export default function QuestionsForm({
 
   const progress = calculateProgress()
 
-  // État de chargement
+  // Loading state
   if (loading) {
     return (
       <div className="space-y-6">
@@ -557,12 +557,12 @@ export default function QuestionsForm({
           <CardHeader className="text-center">
             <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               <Brain className="h-8 w-8 text-blue-600" />
-              {t('questionsForm.title')}
+              Clinical Questions
             </CardTitle>
             <div className="mt-4">
               <Badge className={`${MODE_CONFIGS[generationMode].bgColor} ${MODE_CONFIGS[generationMode].color}`}>
                 <DynamicIcon icon={MODE_CONFIGS[generationMode].icon} className="h-3 w-3 mr-1" />
-                Mode {MODE_CONFIGS[generationMode].label}
+                {MODE_CONFIGS[generationMode].label} Mode
               </Badge>
             </div>
           </CardHeader>
@@ -573,14 +573,14 @@ export default function QuestionsForm({
                 <Brain className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-blue-600" />
               </div>
               <div className="space-y-2">
-                <p className="text-xl font-semibold text-gray-800">{t('questionsForm.generating')}</p>
+                <p className="text-xl font-semibold text-gray-800">Generating Questions...</p>
                 <p className="text-sm text-gray-600">
-                  {generationMode === 'fast' && "Génération rapide pour triage..."}
-                  {generationMode === 'balanced' && "Analyse équilibrée en cours..."}
-                  {generationMode === 'intelligent' && "Analyse approfondie..."}
+                  {generationMode === 'fast' && "Fast generation for triage..."}
+                  {generationMode === 'balanced' && "Balanced analysis in progress..."}
+                  {generationMode === 'intelligent' && "Deep analysis..."}
                 </p>
                 <p className="text-xs text-gray-500">
-                  Temps estimé : {MODE_CONFIGS[generationMode].duration}
+                  Estimated time: {MODE_CONFIGS[generationMode].duration}
                 </p>
               </div>
               <Progress value={75} className="w-80 mx-auto h-2" />
@@ -593,25 +593,25 @@ export default function QuestionsForm({
 
   return (
     <div className="space-y-6">
-      {/* Header avec Progress et Mode Selector */}
+      {/* Header with Progress and Mode Selector */}
       <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             <Brain className="h-8 w-8 text-blue-600" />
-            {t('questionsForm.title')}
+            Clinical Questions
           </CardTitle>
           
           {/* Metadata badges */}
           {metadata && (
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               <Badge variant="outline">
-                Pattern: {metadata.pattern || 'général'}
+                Pattern: {metadata.pattern || 'general'}
               </Badge>
               <Badge 
                 className={`${MODE_CONFIGS[metadata.mode || 'balanced'].bgColor} ${MODE_CONFIGS[metadata.mode || 'balanced'].color}`}
               >
                 <DynamicIcon icon={MODE_CONFIGS[metadata.mode || 'balanced'].icon} className="h-3 w-3 mr-1" />
-                Mode {MODE_CONFIGS[metadata.mode || 'balanced'].label}
+                {MODE_CONFIGS[metadata.mode || 'balanced'].label} Mode
               </Badge>
               {metadata.responseTime && (
                 <Badge variant="outline">
@@ -626,7 +626,7 @@ export default function QuestionsForm({
                 </Badge>
               )}
               {metadata.fallback && (
-                <Badge variant="secondary">Mode fallback</Badge>
+                <Badge variant="secondary">Fallback mode</Badge>
               )}
             </div>
           )}
@@ -634,7 +634,7 @@ export default function QuestionsForm({
           {/* Progress bar */}
           <div className="mt-4 space-y-2">
             <div className="flex justify-between text-sm text-gray-600">
-              <span>{t('questionsForm.progressTitle')}</span>
+              <span>Progress</span>
               <span className="font-semibold">{progress}%</span>
             </div>
             <Progress value={progress} className="h-2" />
@@ -643,14 +643,14 @@ export default function QuestionsForm({
           {/* Status badges */}
           <div className="flex justify-center gap-4 mt-4">
             <Badge variant="outline" className="bg-blue-50">
-              {getAnsweredCount()} / {questions.length} {t('questionsForm.answered')}
+              {getAnsweredCount()} / {questions.length} answered
             </Badge>
-            {error && <Badge variant="destructive">{t('questionsForm.fallbackMode')}</Badge>}
+            {error && <Badge variant="destructive">Fallback mode</Badge>}
           </div>
           
-          {/* Mode selector et bouton régénérer */}
+          {/* Mode selector and regenerate button */}
           <div className="mt-6 space-y-4">
-            {/* Sélecteur de mode */}
+            {/* Mode selector */}
             <div className="flex justify-center gap-2">
               {Object.entries(MODE_CONFIGS).map(([mode, config]) => (
                 <Button
@@ -667,12 +667,12 @@ export default function QuestionsForm({
               ))}
             </div>
 
-            {/* Description du mode sélectionné */}
+            {/* Selected mode description */}
             <p className="text-sm text-gray-600">
               {MODE_CONFIGS[generationMode].description}
             </p>
 
-            {/* Bouton régénérer */}
+            {/* Regenerate button */}
             <Button
               onClick={() => generateQuestions(generationMode)}
               variant="outline"
@@ -681,34 +681,34 @@ export default function QuestionsForm({
               className="mx-auto"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              {loading ? 'Génération...' : `Régénérer (mode ${MODE_CONFIGS[generationMode].label})`}
+              {loading ? 'Generating...' : `Regenerate (${MODE_CONFIGS[generationMode].label} mode)`}
             </Button>
 
-            {/* Temps de génération */}
+            {/* Generation time */}
             {generationTime && (
               <p className="text-center text-sm text-gray-500">
-                Généré en {(generationTime / 1000).toFixed(1)}s
+                Generated in {(generationTime / 1000).toFixed(1)}s
               </p>
             )}
           </div>
         </CardHeader>
       </Card>
 
-      {/* Alerte d'erreur */}
+      {/* Error alert */}
       {error && (
         <Card className="bg-amber-50/80 backdrop-blur-sm border-amber-200 shadow-md">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 text-amber-800">
               <AlertTriangle className="h-5 w-5" />
               <span className="text-sm font-medium">
-                {error} - {t('questionsForm.fallbackWarning')}
+                {error} - Using fallback questions
               </span>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Navigation des questions */}
+      {/* Question navigation */}
       {questions.length > 0 && (
         <div className="flex flex-wrap gap-2 justify-center">
           {questions.map((_, index) => {
@@ -733,7 +733,7 @@ export default function QuestionsForm({
         </div>
       )}
 
-      {/* Cartes de questions */}
+      {/* Question cards */}
       {questions.map((question, index) => (
         <Card 
           key={question.id} 
@@ -745,10 +745,10 @@ export default function QuestionsForm({
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-3">
                 <MessageSquare className="h-6 w-6" />
-                {t('questionsForm.question')} {index + 1} / {questions.length}
+                Question {index + 1} / {questions.length}
               </CardTitle>
               <div className="flex items-center gap-2">
-                <SimpleTooltip content={t('questionsForm.aiGenerated')}>
+                <SimpleTooltip content="AI-generated">
                   <Badge className="bg-white/20 text-white border-white/30">
                     <Lightbulb className="h-3 w-3" />
                   </Badge>
@@ -757,7 +757,7 @@ export default function QuestionsForm({
             </div>
           </CardHeader>
           <CardContent className="p-8 space-y-6">
-            {/* Badges de la question */}
+            {/* Question badges */}
             <QuestionBadges question={question} />
 
             {/* Question */}
@@ -766,7 +766,7 @@ export default function QuestionsForm({
                 {question.question}
               </Label>
               
-              {/* Rationale (mode balanced) */}
+              {/* Rationale (balanced mode) */}
               {question.rationale && (
                 <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="flex items-start gap-2">
@@ -776,34 +776,34 @@ export default function QuestionsForm({
                 </div>
               )}
 
-              {/* Clinical reasoning (mode intelligent) */}
+              {/* Clinical reasoning (intelligent mode) */}
               {question.clinical_reasoning && (
                 <div className="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
                   <div className="flex items-start gap-2">
                     <Brain className="h-4 w-4 text-purple-600 mt-0.5" />
                     <div>
-                      <p className="text-sm font-semibold text-purple-800 mb-1">Raisonnement clinique :</p>
+                      <p className="text-sm font-semibold text-purple-800 mb-1">Clinical reasoning:</p>
                       <p className="text-sm text-purple-700">{question.clinical_reasoning}</p>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Diagnostic impact (mode intelligent) */}
+              {/* Diagnostic impact (intelligent mode) */}
               {question.diagnostic_impact && (
                 <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
                   <div className="flex items-start gap-2">
                     <Activity className="h-4 w-4 text-green-600 mt-0.5" />
                     <div className="text-sm">
-                      <p className="font-semibold text-green-800 mb-1">Impact diagnostique :</p>
+                      <p className="font-semibold text-green-800 mb-1">Diagnostic impact:</p>
                       {question.diagnostic_impact.if_positive && (
                         <p className="text-green-700">
-                          <span className="font-medium">Si positif :</span> {question.diagnostic_impact.if_positive}
+                          <span className="font-medium">If positive:</span> {question.diagnostic_impact.if_positive}
                         </p>
                       )}
                       {question.diagnostic_impact.if_negative && (
                         <p className="text-green-700">
-                          <span className="font-medium">Si négatif :</span> {question.diagnostic_impact.if_negative}
+                          <span className="font-medium">If negative:</span> {question.diagnostic_impact.if_negative}
                         </p>
                       )}
                     </div>
@@ -811,13 +811,13 @@ export default function QuestionsForm({
                 </div>
               )}
 
-              {/* Input de la question */}
+              {/* Question input */}
               <div className="mt-6">
                 {renderQuestion(question)}
               </div>
             </div>
 
-            {/* Confirmation de réponse */}
+            {/* Answer confirmation */}
             {(() => {
               const response = responses.find((r) => r.questionId === question.id)
               const currentAnswer = String(response?.answer || "")
@@ -827,10 +827,10 @@ export default function QuestionsForm({
                 <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                   <div className="flex items-center gap-2 mb-2">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <p className="font-semibold text-green-800">{t('questionsForm.answerRecorded')}</p>
+                    <p className="font-semibold text-green-800">Answer recorded</p>
                   </div>
                   <p className="text-sm text-green-700">
-                    <span className="font-medium">{t('questionsForm.yourAnswer')}</span> {currentAnswer}
+                    <span className="font-medium">Your answer:</span> {currentAnswer}
                   </p>
                 </div>
               )
@@ -839,7 +839,7 @@ export default function QuestionsForm({
         </Card>
       ))}
 
-      {/* Navigation entre questions */}
+      {/* Question navigation */}
       {questions.length > 0 && (
         <div className="flex justify-between">
           <Button
@@ -849,7 +849,7 @@ export default function QuestionsForm({
             className="px-6 py-3"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            {t('questionsForm.previousQuestion')}
+            Previous question
           </Button>
           
           {!isLastQuestion() ? (
@@ -857,7 +857,7 @@ export default function QuestionsForm({
               onClick={() => setCurrentQuestionIndex(Math.min(questions.length - 1, currentQuestionIndex + 1))}
               className="px-6 py-3"
             >
-              {t('questionsForm.nextQuestion')}
+              Next question
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           ) : (
@@ -867,14 +867,14 @@ export default function QuestionsForm({
               className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 font-semibold"
             >
               <Sparkles className="h-5 w-5 mr-2" />
-              {t('questionsForm.launchAIDiagnosis')}
+              Launch AI Diagnosis
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           )}
         </div>
       )}
 
-      {/* Bouton diagnostic IA fixe */}
+      {/* Fixed AI diagnosis button */}
       {isFormValid() && (
         <div className="sticky bottom-4 flex justify-center">
           <Button 
@@ -882,21 +882,21 @@ export default function QuestionsForm({
             className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-4 shadow-2xl hover:shadow-3xl transition-all duration-300 font-semibold text-lg rounded-full animate-pulse"
           >
             <Zap className="h-6 w-6 mr-3" />
-            {t('questionsForm.aiDiagnosisReady')}
+            AI Diagnosis Ready
             <ArrowRight className="h-5 w-5 ml-3" />
           </Button>
         </div>
       )}
 
-      {/* Indicateur de sauvegarde automatique */}
+      {/* Auto-save indicator */}
       <div className="flex justify-center">
         <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-sm text-gray-600">{t('common.autoSave')}</span>
+          <span className="text-sm text-gray-600">Auto-save enabled</span>
         </div>
       </div>
 
-      {/* Navigation principale */}
+      {/* Main navigation */}
       <div className="flex justify-between">
         <Button 
           variant="outline" 
@@ -904,14 +904,14 @@ export default function QuestionsForm({
           className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          {t('questionsForm.backToClinical')}
+          Back to Clinical Info
         </Button>
         <Button 
           onClick={onNext} 
           disabled={!isFormValid()}
           className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
         >
-          {t('questionsForm.continueToDiagnosis')}
+          Continue to Diagnosis
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
