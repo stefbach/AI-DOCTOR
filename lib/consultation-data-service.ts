@@ -1,341 +1,378 @@
 // lib/consultation-data-service.ts
 
 interface ConsultationData {
-  consultationId: string
-  timestamp: string
-  currentStep: number
-  completedSteps: number[]
-  patientData?: any
-  clinicalData?: any
-  questionsData?: any
-  aiDiagnosisData?: any
-  consultationReportData?: any
-  treatmentData?: any
-  prescriptionData?: any
+  step: number
+  data: any
+  timestamp: Date
+  completed?: boolean
 }
 
 class ConsultationDataService {
-  private readonly STORAGE_KEY = 'consultation_data'
-  private readonly CONSULTATION_ID_KEY = 'current_consultation_id'
+  private storageKey = 'mauritius_medical_consultation'
+  private currentConsultation: Map<number, ConsultationData> = new Map()
   private currentConsultationId: string | null = null
-
+  
   constructor() {
-    // Initialiser ou récupérer l'ID de consultation au démarrage
-    this.initializeConsultationId()
+    // Charger les données existantes au démarrage
+    this.loadFromStorage()
   }
 
-  // Générer un ID unique sans dépendance externe
-  private generateUniqueId(): string {
-    // Méthode 1: Utiliser crypto.randomUUID si disponible (navigateurs modernes)
-    if (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID) {
-      return window.crypto.randomUUID()
+  // Obtenir l'ID de la consultation en cours
+  getCurrentConsultationId(): string | null {
+    if (!this.currentConsultationId) {
+      // Générer un nouvel ID si nécessaire
+      this.currentConsultationId = `consultation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    }
+    return this.currentConsultationId
+  }
+
+  // Définir l'ID de la consultation en cours
+  setCurrentConsultationId(id: string): void {
+    this.currentConsultationId = id
+    console.log(`📋 ID de consultation défini: ${id}`)
+  }
+
+  // Sauvegarder les données d'une étape
+  async saveStepData(step: number, data: any): Promise<void> {
+    const consultationData: ConsultationData = {
+      step,
+      data,
+      timestamp: new Date()
     }
     
-    // Méthode 2: Fallback avec timestamp et random
-    const timestamp = Date.now().toString(36)
-    const randomStr = Math.random().toString(36).substring(2, 15)
-    const randomStr2 = Math.random().toString(36).substring(2, 15)
-    return `${timestamp}-${randomStr}-${randomStr2}`
-  }
-
-  // Initialiser l'ID de consultation
-  private initializeConsultationId(): void {
-    // D'abord, essayer de récupérer depuis localStorage
-    const storedId = this.getStoredConsultationId()
+    this.currentConsultation.set(step, consultationData)
+    await this.persistToStorage()
     
-    if (storedId) {
-      this.currentConsultationId = storedId
-      console.log('📋 Consultation ID récupéré:', storedId)
-    } else {
-      // Si pas d'ID, en créer un nouveau
-      this.createNewConsultation()
-    }
+    console.log(`✅ Données sauvegardées pour l'étape ${step}`)
   }
 
-  // Récupérer l'ID stocké
-  private getStoredConsultationId(): string | null {
-    if (typeof window === 'undefined') return null
+  // Récupérer les données d'une étape
+  getStepData(step: number): any {
+    const consultationData = this.currentConsultation.get(step)
+    return consultationData?.data || null
+  }
+
+  // Récupérer toutes les données de la consultation
+  getAllData(): Record<string, any> {
+    const allData: Record<string, any> = {}
+    
+    // Mapper les étapes aux noms de données
+    const stepMapping: Record<number, string> = {
+      1: 'patientData',
+      2: 'clinicalData',
+      3: 'diagnosisData',
+      4: 'reportData'
+    }
+    
+    this.currentConsultation.forEach((consultationData, step) => {
+      const dataKey = stepMapping[step] || `step${step}`
+      allData[dataKey] = consultationData.data
+    })
+    
+    return allData
+  }
+
+  // Marquer la consultation comme complète
+  async markConsultationComplete(): Promise<void> {
+    const allData = this.getAllData()
+    
+    // Sauvegarder avec un timestamp de complétion
+    const completedConsultation = {
+      id: this.getCurrentConsultationId(),
+      ...allData,
+      completedAt: new Date().toISOString(),
+      status: 'completed'
+    }
+    
+    // Sauvegarder dans l'historique
+    await this.saveToHistory(completedConsultation)
+    
+    // Nettoyer la consultation en cours
+    await this.clearCurrentConsultation()
+    
+    console.log('✅ Consultation marquée comme complète et archivée')
+  }
+
+  // Sauvegarder dans l'historique des consultations
+  private async saveToHistory(consultation: any): Promise<void> {
+    const historyKey = 'mauritius_medical_consultation_history'
     
     try {
-      return localStorage.getItem(this.CONSULTATION_ID_KEY)
+      // Récupérer l'historique existant
+      const existingHistory = localStorage.getItem(historyKey)
+      const history = existingHistory ? JSON.parse(existingHistory) : []
+      
+      // Ajouter la nouvelle consultation (elle a déjà un ID)
+      history.push(consultation)
+      
+      // Limiter l'historique aux 50 dernières consultations
+      if (history.length > 50) {
+        history.splice(0, history.length - 50)
+      }
+      
+      // Sauvegarder
+      localStorage.setItem(historyKey, JSON.stringify(history))
+      
+      console.log(`📋 Consultation ${consultation.id} ajoutée à l'historique (${history.length} consultations au total)`)
     } catch (error) {
-      console.error('Erreur lors de la récupération de l\'ID de consultation:', error)
-      return null
+      console.error('Erreur lors de la sauvegarde dans l\'historique:', error)
     }
   }
 
-  // Stocker l'ID de consultation
-  private storeConsultationId(id: string): void {
-    if (typeof window === 'undefined') return
-    
+  // Nettoyer la consultation en cours
+  async clearCurrentConsultation(): Promise<void> {
+    this.currentConsultation.clear()
+    this.currentConsultationId = null
+    localStorage.removeItem(this.storageKey)
+    console.log('🧹 Consultation en cours nettoyée')
+  }
+
+  // Vérifier si une étape est complétée
+  isStepCompleted(step: number): boolean {
+    return this.currentConsultation.has(step)
+  }
+
+  // Obtenir l'état de progression
+  getProgress(): {
+    currentStep: number
+    completedSteps: number[]
+    totalSteps: number
+    percentage: number
+  } {
+    const completedSteps = Array.from(this.currentConsultation.keys()).sort()
+    const currentStep = completedSteps.length > 0 ? Math.max(...completedSteps) + 1 : 1
+    const totalSteps = 4 // Nombre total d'étapes
+    const percentage = (completedSteps.length / totalSteps) * 100
+
+    return {
+      currentStep,
+      completedSteps,
+      totalSteps,
+      percentage
+    }
+  }
+
+  // Persister les données dans le localStorage
+  private async persistToStorage(): Promise<void> {
     try {
-      localStorage.setItem(this.CONSULTATION_ID_KEY, id)
+      const dataToStore = {
+        consultationId: this.currentConsultationId,
+        consultationData: Array.from(this.currentConsultation.entries()),
+        lastUpdated: new Date().toISOString()
+      }
+      
+      localStorage.setItem(this.storageKey, JSON.stringify(dataToStore))
     } catch (error) {
-      console.error('Erreur lors du stockage de l\'ID de consultation:', error)
+      console.error('Erreur lors de la sauvegarde:', error)
+      
+      // Si le localStorage est plein, essayer de nettoyer
+      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+        console.log('⚠️ localStorage plein, nettoyage en cours...')
+        this.cleanupOldData()
+        
+        // Réessayer
+        try {
+          const dataToStore = {
+            consultationId: this.currentConsultationId,
+            consultationData: Array.from(this.currentConsultation.entries()),
+            lastUpdated: new Date().toISOString()
+          }
+          localStorage.setItem(this.storageKey, JSON.stringify(dataToStore))
+        } catch (retryError) {
+          console.error('Impossible de sauvegarder même après nettoyage:', retryError)
+        }
+      }
+    }
+  }
+
+  // Charger les données depuis le localStorage
+  private loadFromStorage(): void {
+    try {
+      const storedData = localStorage.getItem(this.storageKey)
+      
+      if (storedData) {
+        const parsed = JSON.parse(storedData)
+        
+        // Récupérer l'ID de consultation
+        if (parsed.consultationId) {
+          this.currentConsultationId = parsed.consultationId
+        }
+        
+        // Reconstruire la Map depuis les données stockées
+        if (parsed.consultationData && Array.isArray(parsed.consultationData)) {
+          this.currentConsultation = new Map(parsed.consultationData)
+          console.log(`📂 ${this.currentConsultation.size} étape(s) chargée(s) depuis le stockage`)
+          console.log(`📋 ID de consultation chargé: ${this.currentConsultationId}`)
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des données:', error)
+      this.currentConsultation = new Map()
+      this.currentConsultationId = null
+    }
+  }
+
+  // Nettoyer les anciennes données
+  private cleanupOldData(): void {
+    try {
+      // Nettoyer l'historique en gardant seulement les 20 dernières consultations
+      const historyKey = 'mauritius_medical_consultation_history'
+      const existingHistory = localStorage.getItem(historyKey)
+      
+      if (existingHistory) {
+        const history = JSON.parse(existingHistory)
+        if (history.length > 20) {
+          const reducedHistory = history.slice(-20)
+          localStorage.setItem(historyKey, JSON.stringify(reducedHistory))
+          console.log(`🧹 Historique réduit à ${reducedHistory.length} consultations`)
+        }
+      }
+      
+      // Nettoyer d'autres clés potentiellement volumineuses
+      const keysToCheck = ['medical_reports_cache', 'diagnosis_cache', 'temp_medical_data']
+      keysToCheck.forEach(key => {
+        if (localStorage.getItem(key)) {
+          localStorage.removeItem(key)
+          console.log(`🧹 Clé ${key} supprimée`)
+        }
+      })
+    } catch (error) {
+      console.error('Erreur lors du nettoyage:', error)
     }
   }
 
   // Créer une nouvelle consultation
   createNewConsultation(): string {
-    const newId = this.generateUniqueId()
-    this.currentConsultationId = newId
-    this.storeConsultationId(newId)
-    
-    // Initialiser les données de base
-    const initialData: ConsultationData = {
-      consultationId: newId,
-      timestamp: new Date().toISOString(),
-      currentStep: 0,
-      completedSteps: []
+    // Sauvegarder l'ancienne consultation si elle existe
+    if (this.currentConsultation.size > 0) {
+      console.log('⚠️ Consultation en cours détectée, sauvegarde automatique...')
+      this.markConsultationComplete()
     }
     
-    this.saveAllData(initialData)
-    console.log('✨ Nouvelle consultation créée:', newId)
+    // Créer un nouvel ID
+    this.currentConsultationId = `consultation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    this.currentConsultation.clear()
     
-    return newId
-  }
-
-  // Obtenir l'ID de consultation actuel
-  getCurrentConsultationId(): string | null {
-    // Si pas d'ID en mémoire, essayer de le récupérer ou en créer un
-    if (!this.currentConsultationId) {
-      this.initializeConsultationId()
-    }
+    console.log(`📋 Nouvelle consultation créée: ${this.currentConsultationId}`)
     return this.currentConsultationId
   }
 
-  // Définir un ID de consultation spécifique
-  setConsultationId(id: string): void {
-    this.currentConsultationId = id
-    this.storeConsultationId(id)
-    console.log('📋 Consultation ID défini:', id)
-  }
-
-  // Charger les données d'une consultation
-  async loadConsultation(consultationId: string): Promise<ConsultationData | null> {
-    if (typeof window === 'undefined') return null
-    
+  // Charger une consultation depuis l'historique
+  async loadConsultationFromHistory(consultationId: string): Promise<boolean> {
     try {
-      const stored = localStorage.getItem(`${this.STORAGE_KEY}_${consultationId}`)
-      if (stored) {
-        const data = JSON.parse(stored)
-        this.currentConsultationId = consultationId
-        this.storeConsultationId(consultationId)
-        console.log('📂 Consultation chargée:', consultationId)
-        return data
+      const consultation = this.getConsultationFromHistory(consultationId)
+      
+      if (!consultation) {
+        console.error(`❌ Consultation ${consultationId} non trouvée dans l'historique`)
+        return false
       }
+      
+      // Nettoyer la consultation actuelle
+      this.currentConsultation.clear()
+      this.currentConsultationId = consultationId
+      
+      // Charger les données par étape
+      if (consultation.patientData) {
+        await this.saveStepData(1, consultation.patientData)
+      }
+      if (consultation.clinicalData) {
+        await this.saveStepData(2, consultation.clinicalData)
+      }
+      if (consultation.diagnosisData) {
+        await this.saveStepData(3, consultation.diagnosisData)
+      }
+      if (consultation.reportData) {
+        await this.saveStepData(4, consultation.reportData)
+      }
+      
+      console.log(`✅ Consultation ${consultationId} chargée depuis l'historique`)
+      return true
     } catch (error) {
       console.error('Erreur lors du chargement de la consultation:', error)
+      return false
     }
-    
-    return null
   }
 
-  // Sauvegarder toutes les données
-  async saveAllData(data: Partial<ConsultationData>): Promise<void> {
-    if (typeof window === 'undefined') return
+  // Obtenir un résumé de la consultation en cours
+  getConsultationSummary(): {
+    id: string | null
+    progress: number
+    patient: string | null
+    lastUpdate: Date | null
+  } {
+    const progress = this.getProgress()
+    const patientData = this.getStepData(1)
+    let lastUpdate: Date | null = null
     
-    // S'assurer qu'on a un ID de consultation
-    const consultationId = this.currentConsultationId || this.createNewConsultation()
-    
-    try {
-      // Récupérer les données existantes
-      const existingData = await this.getAllData() || {}
-      
-      // Fusionner avec les nouvelles données
-      const updatedData: ConsultationData = {
-        ...existingData,
-        ...data,
-        consultationId,
-        timestamp: new Date().toISOString()
+    // Trouver la dernière mise à jour
+    this.currentConsultation.forEach((data) => {
+      if (!lastUpdate || data.timestamp > lastUpdate) {
+        lastUpdate = data.timestamp
       }
-      
-      // Sauvegarder
-      localStorage.setItem(
-        `${this.STORAGE_KEY}_${consultationId}`,
-        JSON.stringify(updatedData)
-      )
-      
-      console.log('💾 Données sauvegardées pour consultation:', consultationId)
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error)
-      throw error
-    }
-  }
-
-  // Sauvegarder les données d'une étape spécifique
-  async saveStepData(step: number, data: any): Promise<void> {
-    const stepDataMap: { [key: number]: keyof ConsultationData } = {
-      0: 'patientData',
-      1: 'clinicalData',
-      2: 'questionsData',
-      3: 'aiDiagnosisData',
-      4: 'consultationReportData',
-      5: 'treatmentData',
-      6: 'prescriptionData'
-    }
-    
-    const dataKey = stepDataMap[step]
-    if (!dataKey) {
-      console.error('Étape invalide:', step)
-      return
-    }
-    
-    await this.saveAllData({ [dataKey]: data })
-    await this.updateProgress(step)
-  }
-
-  // Mettre à jour la progression
-  async updateProgress(completedStep: number): Promise<void> {
-    const currentData = await this.getAllData() || {}
-    const completedSteps = currentData.completedSteps || []
-    
-    if (!completedSteps.includes(completedStep)) {
-      completedSteps.push(completedStep)
-    }
-    
-    await this.saveAllData({
-      currentStep: completedStep + 1,
-      completedSteps
     })
-  }
-
-  // Récupérer toutes les données
-  async getAllData(): Promise<ConsultationData | null> {
-    if (typeof window === 'undefined') return null
     
-    const consultationId = this.getCurrentConsultationId()
-    if (!consultationId) {
-      console.warn('⚠️ Pas d\'ID de consultation disponible')
-      return null
-    }
-    
-    try {
-      const stored = localStorage.getItem(`${this.STORAGE_KEY}_${consultationId}`)
-      return stored ? JSON.parse(stored) : null
-    } catch (error) {
-      console.error('Erreur lors de la récupération des données:', error)
-      return null
+    return {
+      id: this.currentConsultationId,
+      progress: progress.percentage,
+      patient: patientData ? `${patientData.nom || ''} ${patientData.prenom || ''}`.trim() : null,
+      lastUpdate
     }
   }
 
-  // Récupérer les données d'une étape
-  async getStepData(step: number): Promise<any> {
-    const allData = await this.getAllData()
-    if (!allData) return null
+  // Exporter les données de consultation
+  exportConsultationData(consultationId?: string): string {
+    let dataToExport: any
     
-    const stepDataMap: { [key: number]: keyof ConsultationData } = {
-      0: 'patientData',
-      1: 'clinicalData',
-      2: 'questionsData',
-      3: 'aiDiagnosisData',
-      4: 'consultationReportData',
-      5: 'treatmentData',
-      6: 'prescriptionData'
-    }
-    
-    const dataKey = stepDataMap[step]
-    return dataKey ? allData[dataKey] : null
-  }
-
-  // Réinitialiser la consultation actuelle
-  clearCurrentConsultation(): void {
-    if (typeof window === 'undefined') return
-    
-    try {
-      // Supprimer l'ID de consultation actuel
-      localStorage.removeItem(this.CONSULTATION_ID_KEY)
-      
-      // Supprimer les données de la consultation si elle existe
-      if (this.currentConsultationId) {
-        localStorage.removeItem(`${this.STORAGE_KEY}_${this.currentConsultationId}`)
+    if (consultationId) {
+      // Exporter une consultation spécifique de l'historique
+      dataToExport = this.getConsultationFromHistory(consultationId)
+    } else {
+      // Exporter la consultation en cours
+      dataToExport = {
+        id: this.getCurrentConsultationId(),
+        ...this.getAllData(),
+        exportedAt: new Date().toISOString()
       }
-      
-      // Réinitialiser l'ID en mémoire
-      this.currentConsultationId = null
-      
-      console.log('🗑️ Consultation réinitialisée')
-    } catch (error) {
-      console.error('Erreur lors de la réinitialisation:', error)
-    }
-  }
-
-  // Lister toutes les consultations
-  getAllConsultations(): string[] {
-    if (typeof window === 'undefined') return []
-    
-    const consultations: string[] = []
-    const prefix = `${this.STORAGE_KEY}_`
-    
-    try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i)
-        if (key && key.startsWith(prefix)) {
-          const consultationId = key.replace(prefix, '')
-          consultations.push(consultationId)
-        }
-      }
-    } catch (error) {
-      console.error('Erreur lors de la récupération des consultations:', error)
     }
     
-    return consultations
-  }
-
-  // Supprimer une consultation
-  deleteConsultation(consultationId: string): void {
-    if (typeof window === 'undefined') return
-    
-    try {
-      localStorage.removeItem(`${this.STORAGE_KEY}_${consultationId}`)
-      
-      // Si c'est la consultation actuelle, réinitialiser
-      if (this.currentConsultationId === consultationId) {
-        this.clearCurrentConsultation()
-      }
-      
-      console.log('🗑️ Consultation supprimée:', consultationId)
-    } catch (error) {
-      console.error('Erreur lors de la suppression:', error)
+    if (!dataToExport) {
+      throw new Error('Aucune donnée à exporter')
     }
-  }
-
-  // Exporter les données d'une consultation
-  async exportConsultation(consultationId?: string): Promise<string> {
-    const id = consultationId || this.getCurrentConsultationId()
-    if (!id) throw new Error('Aucune consultation à exporter')
     
-    const data = await this.loadConsultation(id)
-    if (!data) throw new Error('Données de consultation non trouvées')
-    
-    return JSON.stringify(data, null, 2)
+    return JSON.stringify(dataToExport, null, 2)
   }
 
   // Importer des données de consultation
-  async importConsultation(jsonData: string): Promise<string> {
+  async importConsultationData(jsonData: string): Promise<void> {
     try {
-      const data = JSON.parse(jsonData) as ConsultationData
+      const parsedData = JSON.parse(jsonData)
       
-      // Valider que c'est bien des données de consultation
-      if (!data.consultationId || !data.timestamp) {
-        throw new Error('Format de données invalide')
+      // Réinitialiser la consultation en cours
+      this.currentConsultation.clear()
+      
+      // Importer les données par étape
+      if (parsedData.patientData) {
+        await this.saveStepData(1, parsedData.patientData)
+      }
+      if (parsedData.clinicalData) {
+        await this.saveStepData(2, parsedData.clinicalData)
+      }
+      if (parsedData.diagnosisData) {
+        await this.saveStepData(3, parsedData.diagnosisData)
+      }
+      if (parsedData.reportData) {
+        await this.saveStepData(4, parsedData.reportData)
       }
       
-      // Sauvegarder les données
-      const consultationId = data.consultationId
-      this.setConsultationId(consultationId)
-      await this.saveAllData(data)
-      
-      return consultationId
+      console.log('✅ Données importées avec succès')
     } catch (error) {
-      console.error('Erreur lors de l\'import:', error)
-      throw new Error('Impossible d\'importer les données')
+      console.error('Erreur lors de l\'importation:', error)
+      throw new Error('Format de données invalide')
     }
   }
 }
 
-// Export d'une instance unique (singleton)
-export const consultationDataService = new ConsultationDataService()
+// Instance singleton
+const consultationDataService = new ConsultationDataService()
 
-// Export du type pour TypeScript
-export type { ConsultationData }
+export { consultationDataService, type ConsultationData }

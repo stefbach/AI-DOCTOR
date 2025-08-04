@@ -1,6 +1,7 @@
+// components/professional-report-editable.tsx
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -13,92 +14,36 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
 import { 
-  FileText, Download, Printer, CheckCircle, Loader2, Share2,
-  Pill, TestTube, Scan, AlertTriangle, XCircle, Eye, EyeOff,
-  Edit, Save, FileCheck, Plus, Trash2, AlertCircle, Lock,
-  Unlock, Copy, ClipboardCheck, Stethoscope, Calendar, User,
-  Building, Info
+  FileText, 
+  Download, 
+  Printer, 
+  CheckCircle,
+  Loader2,
+  Share2,
+  Pill,
+  TestTube,
+  Scan,
+  AlertTriangle,
+  XCircle,
+  Eye,
+  EyeOff,
+  Edit,
+  Save,
+  FileCheck,
+  Plus,
+  Trash2,
+  AlertCircle,
+  Lock,
+  Unlock,
+  Copy,
+  ClipboardCheck,
+  Stethoscope,
+  Calendar,
+  User,
+  Building
 } from "lucide-react"
 
-// ========== TYPES ET INTERFACES ==========
-interface PraticienInfo {
-  nom: string
-  qualifications: string
-  specialite: string
-  adresseCabinet: string
-  telephone: string
-  email: string
-  heuresConsultation: string
-  numeroEnregistrement: string
-  licencePratique: string
-}
-
-interface PatientInfo {
-  nom: string
-  nomComplet: string
-  age: string
-  dateNaissance: string
-  sexe: string
-  adresse: string
-  telephone: string
-  email: string
-  poids: string
-  taille?: string
-  identifiantNational?: string
-  dateExamen: string
-}
-
-interface RapportNarratif {
-  motifConsultation: string
-  anamnese: string
-  antecedents: string
-  examenClinique: string
-  syntheseDiagnostique: string
-  conclusionDiagnostique: string
-  priseEnCharge: string
-  surveillance: string
-  conclusion: string
-}
-
-interface Medicament {
-  nom: string
-  denominationCommune: string
-  dosage: string
-  forme: string
-  posologie: string
-  modeAdministration: string
-  dureeTraitement: string
-  quantite: string
-  instructions: string
-  justification: string
-  surveillanceParticuliere: string
-  nonSubstituable: boolean
-  ligneComplete: string
-}
-
-interface TestBiologique {
-  nom: string
-  categorie: string
-  urgence: boolean
-  aJeun: boolean
-  conditionsPrelevement: string
-  motifClinique: string
-  renseignementsCliniques: string
-  tubePrelevement: string
-  delaiResultat: string
-}
-
-interface ExamenImagerie {
-  type: string
-  modalite: string
-  region: string
-  indicationClinique: string
-  urgence: boolean
-  contraste: boolean
-  protocoleSpecifique: string
-  questionDiagnostique: string
-}
-
+// Types pour le format mauricien
 interface MauritianReport {
   compteRendu: {
     header: {
@@ -106,9 +51,42 @@ interface MauritianReport {
       subtitle: string
       reference: string
     }
-    praticien: PraticienInfo
-    patient: PatientInfo
-    rapport: RapportNarratif
+    praticien: {
+      nom: string
+      qualifications: string
+      specialite: string
+      adresseCabinet: string
+      telephone: string
+      email: string
+      heuresConsultation: string
+      numeroEnregistrement: string // Remplace RPPS
+      licencePratique: string
+    }
+    patient: {
+      nom: string
+      nomComplet: string
+      age: string
+      dateNaissance: string
+      sexe: string
+      adresse: string
+      telephone: string
+      email: string
+      poids: string
+      taille?: string
+      identifiantNational?: string // NID
+      dateExamen: string
+    }
+    rapport: {
+      motifConsultation: string
+      anamnese: string
+      antecedents: string
+      examenClinique: string
+      syntheseDiagnostique: string
+      conclusionDiagnostique: string
+      priseEnCharge: string
+      surveillance: string
+      conclusion: string
+    }
     metadata: {
       dateGeneration: string
       wordCount: number
@@ -126,7 +104,7 @@ interface MauritianReport {
       patient: any
       prescription: {
         datePrescription: string
-        medicaments: Medicament[]
+        medicaments: any[]
         validite: string
         dispensationNote?: string
       }
@@ -139,7 +117,11 @@ interface MauritianReport {
         datePrescription: string
         motifClinique: string
         analyses: {
-          [key: string]: TestBiologique[]
+          haematology?: any[]
+          clinicalChemistry?: any[]
+          immunology?: any[]
+          microbiology?: any[]
+          endocrinology?: any[]
         }
         instructionsSpeciales: string[]
         laboratoireRecommande?: string
@@ -151,7 +133,7 @@ interface MauritianReport {
       patient: any
       prescription: {
         datePrescription: string
-        examens: ExamenImagerie[]
+        examens: any[]
         renseignementsCliniques: string
         centreImagerie?: string
       }
@@ -174,40 +156,6 @@ interface ProfessionalReportProps {
   onComplete?: () => void
 }
 
-// ========== CONSTANTES ==========
-const DOCTOR_INFO_DEFAULT: PraticienInfo = {
-  nom: "Dr. [NOM DU MÉDECIN]",
-  qualifications: "MBBS, MD (Medicine)",
-  specialite: "Médecine Générale",
-  adresseCabinet: "[Adresse complète du cabinet]",
-  telephone: "[+230 XXX XXXX]",
-  email: "[Email professionnel]",
-  heuresConsultation: "Lun-Ven: 8h30-17h30, Sam: 8h30-12h30",
-  numeroEnregistrement: "[Medical Council Registration No.]",
-  licencePratique: "[Practice License No.]"
-}
-
-const RAPPORT_SECTIONS = [
-  { key: 'motifConsultation', title: 'MOTIF DE CONSULTATION / CHIEF COMPLAINT' },
-  { key: 'anamnese', title: 'ANAMNÈSE / HISTORY OF PRESENT ILLNESS' },
-  { key: 'antecedents', title: 'ANTÉCÉDENTS / PAST MEDICAL HISTORY' },
-  { key: 'examenClinique', title: 'EXAMEN CLINIQUE / PHYSICAL EXAMINATION' },
-  { key: 'syntheseDiagnostique', title: 'SYNTHÈSE DIAGNOSTIQUE / DIAGNOSTIC SYNTHESIS' },
-  { key: 'conclusionDiagnostique', title: 'CONCLUSION DIAGNOSTIQUE / DIAGNOSTIC CONCLUSION' },
-  { key: 'priseEnCharge', title: 'PRISE EN CHARGE / MANAGEMENT PLAN' },
-  { key: 'surveillance', title: 'SURVEILLANCE / FOLLOW-UP PLAN' },
-  { key: 'conclusion', title: 'CONCLUSION / FINAL REMARKS' }
-]
-
-const BIOLOGY_CATEGORIES = [
-  { key: 'haematology', label: 'HAEMATOLOGY / HÉMATOLOGIE' },
-  { key: 'clinicalChemistry', label: 'CLINICAL CHEMISTRY / BIOCHIMIE' },
-  { key: 'immunology', label: 'IMMUNOLOGY / IMMUNOLOGIE' },
-  { key: 'microbiology', label: 'MICROBIOLOGY / MICROBIOLOGIE' },
-  { key: 'endocrinology', label: 'ENDOCRINOLOGY / ENDOCRINOLOGIE' }
-]
-
-// ========== COMPOSANT PRINCIPAL ==========
 export default function ProfessionalReportEditable({
   patientData,
   clinicalData,
@@ -229,139 +177,45 @@ export default function ProfessionalReportEditable({
   const [modifiedSections, setModifiedSections] = useState<Set<string>>(new Set())
   const [saving, setSaving] = useState(false)
   const [showFullReport, setShowFullReport] = useState(false)
+  
+  // États pour l'affichage
   const [includeFullPrescriptions, setIncludeFullPrescriptions] = useState(true)
   
   // États pour les informations du médecin
-  const [doctorInfo, setDoctorInfo] = useState<PraticienInfo>(DOCTOR_INFO_DEFAULT)
+  const [doctorInfo, setDoctorInfo] = useState({
+    nom: "Dr. [NOM DU MÉDECIN]",
+    qualifications: "MBBS, MD (Medicine)",
+    specialite: "Médecine Générale",
+    adresseCabinet: "[Adresse complète du cabinet]",
+    telephone: "[+230 XXX XXXX]",
+    email: "[Email professionnel]",
+    heuresConsultation: "Lun-Ven: 8h30-17h30, Sam: 8h30-12h30",
+    numeroEnregistrement: "[Medical Council Registration No.]",
+    licencePratique: "[Practice License No.]"
+  })
   const [editingDoctor, setEditingDoctor] = useState(false)
-  
-  // État pour le debug
-  const [showDebugInfo, setShowDebugInfo] = useState(false)
 
-  // ========== FONCTIONS UTILITAIRES ==========
-  
-  // Fonction pour garantir la structure complète du rapport
-  const ensureReportStructure = (reportData: any): MauritianReport => {
-    console.log("🔧 Garantie de la structure du rapport...")
+  // Fonction helper pour gérer les objets bilingues
+  const getString = (value: any): string => {
+    if (!value) return ''
     
-    // Extraire les infos de base
-    const praticien = {
-      ...DOCTOR_INFO_DEFAULT,
-      ...(reportData?.compteRendu?.praticien || {})
+    // Si c'est déjà une chaîne
+    if (typeof value === 'string') return value
+    
+    // Si c'est un objet bilingue
+    if (typeof value === 'object') {
+      // Priorité au français
+      if (value.fr) return value.fr
+      if (value.en) return value.en
+      
+      // Si c'est un autre type d'objet, essayer de le convertir
+      return JSON.stringify(value)
     }
     
-    const patient = {
-      nom: reportData?.compteRendu?.patient?.nom || patientData?.nom || 'PATIENT',
-      nomComplet: reportData?.compteRendu?.patient?.nomComplet || `${patientData?.nom || ''} ${patientData?.prenom || ''}`.trim(),
-      age: reportData?.compteRendu?.patient?.age || `${patientData?.age || ''} ans`,
-      dateNaissance: reportData?.compteRendu?.patient?.dateNaissance || patientData?.dateNaissance || '',
-      sexe: reportData?.compteRendu?.patient?.sexe || patientData?.sexe || '',
-      adresse: reportData?.compteRendu?.patient?.adresse || patientData?.adresse || '',
-      telephone: reportData?.compteRendu?.patient?.telephone || patientData?.telephone || '',
-      email: reportData?.compteRendu?.patient?.email || patientData?.email || '',
-      poids: reportData?.compteRendu?.patient?.poids || patientData?.poids || '',
-      taille: reportData?.compteRendu?.patient?.taille || patientData?.taille || '',
-      identifiantNational: reportData?.compteRendu?.patient?.identifiantNational || patientData?.nid || '',
-      dateExamen: reportData?.compteRendu?.patient?.dateExamen || new Date().toLocaleDateString('fr-FR')
-    }
-    
-    // Structure garantie avec toutes les sections
-    const structuredReport: MauritianReport = {
-      compteRendu: {
-        header: reportData?.compteRendu?.header || {
-          title: "MEDICAL CONSULTATION REPORT / COMPTE-RENDU DE CONSULTATION MÉDICALE",
-          subtitle: "Confidential Medical Document / Document médical confidentiel",
-          reference: `MCR-${Date.now()}`
-        },
-        praticien,
-        patient,
-        rapport: reportData?.compteRendu?.rapport || {
-          motifConsultation: "",
-          anamnese: "",
-          antecedents: "",
-          examenClinique: "",
-          syntheseDiagnostique: "",
-          conclusionDiagnostique: "",
-          priseEnCharge: "",
-          surveillance: "",
-          conclusion: ""
-        },
-        metadata: {
-          dateGeneration: new Date().toISOString(),
-          wordCount: 0,
-          complianceNote: "This document complies with Medical Council of Mauritius regulations",
-          ...(reportData?.compteRendu?.metadata || {})
-        }
-      },
-      ordonnances: {
-        medicaments: {
-          enTete: praticien,
-          patient: patient,
-          prescription: {
-            datePrescription: patient.dateExamen,
-            medicaments: reportData?.ordonnances?.medicaments?.prescription?.medicaments || [],
-            validite: "3 months unless otherwise specified",
-            dispensationNote: "For pharmaceutical use only"
-          },
-          authentification: {
-            signature: "Medical Practitioner's Signature",
-            nomEnCapitales: praticien.nom.toUpperCase(),
-            numeroEnregistrement: praticien.numeroEnregistrement,
-            cachetProfessionnel: "Official Medical Stamp",
-            date: patient.dateExamen
-          }
-        },
-        biologie: {
-          enTete: praticien,
-          patient: patient,
-          prescription: {
-            datePrescription: patient.dateExamen,
-            motifClinique: '',
-            analyses: reportData?.ordonnances?.biologie?.prescription?.analyses || {},
-            instructionsSpeciales: reportData?.ordonnances?.biologie?.prescription?.instructionsSpeciales || [],
-            laboratoireRecommande: "Any MoH approved laboratory"
-          },
-          authentification: {
-            signature: "Requesting Physician's Signature",
-            nomEnCapitales: praticien.nom.toUpperCase(),
-            numeroEnregistrement: praticien.numeroEnregistrement,
-            date: patient.dateExamen
-          }
-        },
-        imagerie: {
-          enTete: praticien,
-          patient: patient,
-          prescription: {
-            datePrescription: patient.dateExamen,
-            examens: reportData?.ordonnances?.imagerie?.prescription?.examens || [],
-            renseignementsCliniques: '',
-            centreImagerie: "Any MoH approved imaging center"
-          },
-          authentification: {
-            signature: "Requesting Physician's Signature",
-            nomEnCapitales: praticien.nom.toUpperCase(),
-            numeroEnregistrement: praticien.numeroEnregistrement,
-            date: patient.dateExamen
-          }
-        }
-      }
-    }
-    
-    console.log("✅ Structure garantie avec:")
-    console.log(`   - Médicaments: ${structuredReport.ordonnances?.medicaments?.prescription?.medicaments?.length || 0}`)
-    console.log(`   - Analyses bio: ${Object.values(structuredReport.ordonnances?.biologie?.prescription?.analyses || {}).flat().length}`)
-    console.log(`   - Imagerie: ${structuredReport.ordonnances?.imagerie?.prescription?.examens?.length || 0}`)
-    
-    return structuredReport
+    // Pour tout autre type
+    return String(value)
   }
 
-  // Suivre les modifications
-  const trackModification = useCallback((section: string) => {
-    if (validationStatus === 'validated') return
-    setModifiedSections(prev => new Set(prev).add(section))
-  }, [validationStatus])
-
-  // ========== EFFETS ==========
   useEffect(() => {
     console.log("🚀 ProfessionalReportEditable mounted")
     console.log("📋 Données reçues:", {
@@ -370,15 +224,9 @@ export default function ProfessionalReportEditable({
       diagnosisData,
       editedDocuments
     })
-    
-    // DEBUG: Afficher la structure complète de diagnosisData
-    console.log("🔍 DEBUG - Structure diagnosisData:", JSON.stringify(diagnosisData, null, 2))
-    
     checkExistingReport()
   }, [])
 
-  // ========== FONCTIONS PRINCIPALES ==========
-  
   // Vérifier s'il existe déjà un rapport
   const checkExistingReport = async () => {
     try {
@@ -386,17 +234,19 @@ export default function ProfessionalReportEditable({
       const result = await response.json()
       
       if (result.success && result.data) {
-        const structuredReport = ensureReportStructure(result.data.content)
-        setReport(structuredReport)
+        setReport(result.data.content)
         setReportId(result.data.id)
         setValidationStatus(result.data.status || 'draft')
-        setDoctorInfo(structuredReport.compteRendu.praticien)
-        
+        // Récupérer les infos du médecin si disponibles
+        if (result.data.content.compteRendu.praticien) {
+          setDoctorInfo(result.data.content.compteRendu.praticien)
+        }
         toast({
           title: "Rapport existant trouvé",
           description: "Chargement du rapport précédent"
         })
       } else {
+        // Pas de rapport existant, générer un nouveau
         generateProfessionalReport()
       }
     } catch (error) {
@@ -405,23 +255,19 @@ export default function ProfessionalReportEditable({
     }
   }
 
+  // Suivre les modifications
+  const trackModification = (section: string) => {
+    if (validationStatus === 'validated') return
+    setModifiedSections(prev => new Set(prev).add(section))
+  }
+
   // Générer le rapport initial
   const generateProfessionalReport = async () => {
     setLoading(true)
     setError(null)
 
     try {
-      console.log("📤 Génération du rapport...")
-      
-      // DEBUG: Log des données envoyées
-      console.log("🔍 DEBUG - Données envoyées à l'API:", {
-        patientData,
-        clinicalData,
-        questionsData,
-        diagnosisData: JSON.stringify(diagnosisData, null, 2),
-        editedDocuments,
-        includeFullPrescriptions
-      })
+      console.log("📤 Génération du rapport avec format mauricien")
       
       const response = await fetch("/api/generate-consultation-report", {
         method: "POST",
@@ -443,36 +289,31 @@ export default function ProfessionalReportEditable({
 
       const data = await response.json()
       console.log("📥 Rapport reçu:", data)
-      
-      // DEBUG: Log de la structure reçue
-      console.log("🔍 DEBUG - Structure reçue de l'API:")
-      console.log("- data.report:", data.report)
-      console.log("- data.report.ordonnances:", data.report?.ordonnances)
-      if (data.report?.ordonnances) {
-        console.log("- medicaments:", data.report.ordonnances.medicaments?.prescription?.medicaments)
-        console.log("- biologie:", data.report.ordonnances.biologie?.prescription?.analyses)
-        console.log("- imagerie:", data.report.ordonnances.imagerie?.prescription?.examens)
-      }
 
       if (data.success && data.report) {
-        const structuredReport = ensureReportStructure(data.report)
-        setReport(structuredReport)
-        setDoctorInfo(structuredReport.compteRendu.praticien)
+        const reportData = data.report
+        
+        // Mettre à jour les infos du médecin avec les données sauvegardées
+        if (reportData.compteRendu?.praticien) {
+          reportData.compteRendu.praticien = {
+            ...doctorInfo,
+            ...reportData.compteRendu.praticien
+          }
+        }
+        
+        setReport(reportData)
         setValidationStatus('draft')
         
-        // Vérification finale
-        const medsCount = structuredReport.ordonnances?.medicaments?.prescription?.medicaments?.length || 0
-        const bioCount = Object.values(structuredReport.ordonnances?.biologie?.prescription?.analyses || {}).flat().length
-        const imgCount = structuredReport.ordonnances?.imagerie?.prescription?.examens?.length || 0
-        
-        console.log("📊 Prescriptions dans le rapport final:")
-        console.log(`   - Médicaments: ${medsCount}`)
-        console.log(`   - Analyses bio: ${bioCount}`)
-        console.log(`   - Imagerie: ${imgCount}`)
+        // Log pour debug
+        console.log("📊 Prescriptions dans le rapport:", {
+          medicaments: reportData.ordonnances?.medicaments?.prescription?.medicaments,
+          biologie: reportData.ordonnances?.biologie?.prescription?.analyses,
+          imagerie: reportData.ordonnances?.imagerie?.prescription?.examens
+        })
         
         toast({
           title: "Rapport généré avec succès",
-          description: `${medsCount} médicaments, ${bioCount} analyses, ${imgCount} imageries`
+          description: `${data.metadata?.prescriptionsSummary?.medications || 0} médicaments, ${data.metadata?.prescriptionsSummary?.laboratoryTests || 0} analyses, ${data.metadata?.prescriptionsSummary?.imagingStudies || 0} imageries`
         })
       } else {
         throw new Error(data.error || "Erreur de génération")
@@ -490,11 +331,9 @@ export default function ProfessionalReportEditable({
     }
   }
 
-  // ========== FONCTIONS DE MISE À JOUR ==========
-  
   // Mise à jour du rapport narratif
-  const updateRapportSection = useCallback((section: string, value: string) => {
-    if (validationStatus === 'validated' || !report) return
+  const updateRapportSection = (section: string, value: string) => {
+    if (validationStatus === 'validated') return
     
     setReport(prev => {
       if (!prev) return null
@@ -510,51 +349,47 @@ export default function ProfessionalReportEditable({
       }
     })
     trackModification(`rapport.${section}`)
-  }, [validationStatus, report, trackModification])
+  }
 
   // Mise à jour des informations du médecin
-  const updateDoctorInfo = useCallback((field: string, value: string) => {
+  const updateDoctorInfo = (field: string, value: string) => {
     setDoctorInfo(prev => ({
       ...prev,
       [field]: value
     }))
     trackModification(`praticien.${field}`)
-  }, [trackModification])
+  }
 
   // Mise à jour des médicaments
-  const updateMedicament = useCallback((index: number, field: string, value: string) => {
-    if (validationStatus === 'validated' || !report) return
+  const updateMedicament = (index: number, field: string, value: string) => {
+    if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
     
     setReport(prev => {
-      if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
+      if (!prev?.ordonnances?.medicaments) return prev
       
       const newReport = { ...prev }
-      const medicaments = [...newReport.ordonnances.medicaments.prescription.medicaments]
+      const meds = [...newReport.ordonnances.medicaments.prescription.medicaments]
+      const med = meds[index]
+      if (!med) return prev
       
-      if (!medicaments[index]) return prev
+      med[field] = value
       
-      medicaments[index] = {
-        ...medicaments[index],
-        [field]: value
-      }
-      
-      // Reconstruire la ligne complète
-      const med = medicaments[index]
+      // Reconstruire la ligne complète pour l'affichage
       med.ligneComplete = `${med.nom} ${med.dosage ? `- ${med.dosage}` : ''}\n` +
                          `${med.posologie} - ${med.modeAdministration}\n` +
                          `Durée : ${med.dureeTraitement} - Quantité : ${med.quantite}`
       
-      newReport.ordonnances.medicaments.prescription.medicaments = medicaments
+      newReport.ordonnances.medicaments.prescription.medicaments = meds
       return newReport
     })
     trackModification(`medicament.${index}.${field}`)
-  }, [validationStatus, report, trackModification])
+  }
 
   // Ajouter un médicament
-  const addMedicament = useCallback(() => {
-    if (validationStatus === 'validated' || !report) return
+  const addMedicament = () => {
+    if (validationStatus === 'validated') return
     
-    const newMed: Medicament = {
+    const newMed = {
       nom: '',
       denominationCommune: '',
       dosage: '',
@@ -573,31 +408,51 @@ export default function ProfessionalReportEditable({
     setReport(prev => {
       if (!prev) return null
       
-      const medicaments = prev.ordonnances?.medicaments?.prescription?.medicaments || []
+      // S'assurer que la structure existe
+      if (!prev.ordonnances) {
+        prev.ordonnances = {
+          medicaments: {
+            enTete: prev.compteRendu.praticien,
+            patient: prev.compteRendu.patient,
+            prescription: { 
+              datePrescription: prev.compteRendu.patient.dateExamen,
+              medicaments: [],
+              validite: "3 months unless otherwise specified"
+            },
+            authentification: {
+              signature: "Medical Practitioner's Signature",
+              nomEnCapitales: prev.compteRendu.praticien.nom.toUpperCase(),
+              numeroEnregistrement: prev.compteRendu.praticien.numeroEnregistrement,
+              cachetProfessionnel: "Official Medical Stamp",
+              date: prev.compteRendu.patient.dateExamen
+            }
+          }
+        }
+      }
       
       return {
         ...prev,
         ordonnances: {
           ...prev.ordonnances,
           medicaments: {
-            ...prev.ordonnances!.medicaments!,
+            ...prev.ordonnances.medicaments,
             prescription: {
-              ...prev.ordonnances!.medicaments!.prescription,
-              medicaments: [...medicaments, newMed]
+              ...prev.ordonnances.medicaments.prescription,
+              medicaments: [...(prev.ordonnances.medicaments.prescription.medicaments || []), newMed]
             }
           }
         }
       }
     })
     trackModification('medicaments.new')
-  }, [validationStatus, report, trackModification])
+  }
 
   // Supprimer un médicament
-  const removeMedicament = useCallback((index: number) => {
-    if (validationStatus === 'validated' || !report) return
+  const removeMedicament = (index: number) => {
+    if (validationStatus === 'validated') return
     
     setReport(prev => {
-      if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
+      if (!prev?.ordonnances?.medicaments) return prev
       
       return {
         ...prev,
@@ -614,15 +469,15 @@ export default function ProfessionalReportEditable({
       }
     })
     trackModification(`medicament.remove.${index}`)
-  }, [validationStatus, report, trackModification])
+  }
 
   // Ajouter un examen biologique
-  const addBiologyTest = useCallback((category: string) => {
-    if (validationStatus === 'validated' || !report) return
+  const addBiologyTest = () => {
+    if (validationStatus === 'validated') return
     
-    const newTest: TestBiologique = {
+    const newTest = {
       nom: '',
-      categorie: category,
+      categorie: 'Clinical Chemistry',
       urgence: false,
       aJeun: false,
       conditionsPrelevement: '',
@@ -632,176 +487,20 @@ export default function ProfessionalReportEditable({
       delaiResultat: 'Standard'
     }
     
-    setReport(prev => {
-      if (!prev) return null
-      
-      const analyses = { ...prev.ordonnances?.biologie?.prescription?.analyses } || {}
-      if (!analyses[category]) {
-        analyses[category] = []
-      }
-      analyses[category] = [...analyses[category], newTest]
-      
-      return {
-        ...prev,
-        ordonnances: {
-          ...prev.ordonnances,
-          biologie: {
-            ...prev.ordonnances!.biologie!,
-            prescription: {
-              ...prev.ordonnances!.biologie!.prescription,
-              analyses
-            }
-          }
-        }
-      }
+    // Implémenter l'ajout...
+    toast({
+      title: "Fonction en développement",
+      description: "L'ajout d'examens biologiques sera disponible prochainement"
     })
-    trackModification(`biologie.new.${category}`)
-  }, [validationStatus, report, trackModification])
+  }
 
-  // Mettre à jour un test biologique
-  const updateBiologyTest = useCallback((category: string, index: number, field: string, value: any) => {
-    if (validationStatus === 'validated' || !report) return
-    
-    setReport(prev => {
-      if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
-      
-      const newReport = { ...prev }
-      const analyses = { ...newReport.ordonnances.biologie.prescription.analyses }
-      const tests = [...analyses[category]]
-      
-      if (tests[index]) {
-        tests[index] = {
-          ...tests[index],
-          [field]: value
-        }
-      }
-      
-      analyses[category] = tests
-      newReport.ordonnances.biologie.prescription.analyses = analyses
-      return newReport
-    })
-    trackModification(`biologie.${category}.${index}.${field}`)
-  }, [validationStatus, report, trackModification])
-
-  // Supprimer un test biologique
-  const removeBiologyTest = useCallback((category: string, index: number) => {
-    if (validationStatus === 'validated' || !report) return
-    
-    setReport(prev => {
-      if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
-      
-      const analyses = { ...prev.ordonnances.biologie.prescription.analyses }
-      analyses[category] = analyses[category].filter((_, i) => i !== index)
-      
-      return {
-        ...prev,
-        ordonnances: {
-          ...prev.ordonnances,
-          biologie: {
-            ...prev.ordonnances.biologie,
-            prescription: {
-              ...prev.ordonnances.biologie.prescription,
-              analyses
-            }
-          }
-        }
-      }
-    })
-    trackModification(`biologie.remove.${category}.${index}`)
-  }, [validationStatus, report, trackModification])
-
-  // Ajouter un examen d'imagerie
-  const addImagingExam = useCallback(() => {
-    if (validationStatus === 'validated' || !report) return
-    
-    const newExam: ExamenImagerie = {
-      type: '',
-      modalite: '',
-      region: '',
-      indicationClinique: '',
-      urgence: false,
-      contraste: false,
-      protocoleSpecifique: '',
-      questionDiagnostique: ''
-    }
-    
-    setReport(prev => {
-      if (!prev) return null
-      
-      const examens = prev.ordonnances?.imagerie?.prescription?.examens || []
-      
-      return {
-        ...prev,
-        ordonnances: {
-          ...prev.ordonnances,
-          imagerie: {
-            ...prev.ordonnances!.imagerie!,
-            prescription: {
-              ...prev.ordonnances!.imagerie!.prescription,
-              examens: [...examens, newExam]
-            }
-          }
-        }
-      }
-    })
-    trackModification('imagerie.new')
-  }, [validationStatus, report, trackModification])
-
-  // Mettre à jour un examen d'imagerie
-  const updateImagingExam = useCallback((index: number, field: string, value: any) => {
-    if (validationStatus === 'validated' || !report) return
-    
-    setReport(prev => {
-      if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
-      
-      const newReport = { ...prev }
-      const examens = [...newReport.ordonnances.imagerie.prescription.examens]
-      
-      if (examens[index]) {
-        examens[index] = {
-          ...examens[index],
-          [field]: value
-        }
-      }
-      
-      newReport.ordonnances.imagerie.prescription.examens = examens
-      return newReport
-    })
-    trackModification(`imagerie.${index}.${field}`)
-  }, [validationStatus, report, trackModification])
-
-  // Supprimer un examen d'imagerie
-  const removeImagingExam = useCallback((index: number) => {
-    if (validationStatus === 'validated' || !report) return
-    
-    setReport(prev => {
-      if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
-      
-      return {
-        ...prev,
-        ordonnances: {
-          ...prev.ordonnances,
-          imagerie: {
-            ...prev.ordonnances.imagerie,
-            prescription: {
-              ...prev.ordonnances.imagerie.prescription,
-              examens: prev.ordonnances.imagerie.prescription.examens.filter((_, i) => i !== index)
-            }
-          }
-        }
-      }
-    })
-    trackModification(`imagerie.remove.${index}`)
-  }, [validationStatus, report, trackModification])
-
-  // ========== FONCTIONS D'ACTIONS ==========
-  
   // Sauvegarder le rapport
   const handleSave = async () => {
     if (!report) return
     
     setSaving(true)
     try {
+      // Mettre à jour les infos du médecin dans le rapport
       const updatedReport = {
         ...report,
         compteRendu: {
@@ -935,38 +634,77 @@ export default function ProfessionalReportEditable({
     const printWindow = window.open('', '_blank')
     if (!printWindow) return
 
-    const styles = `
-      <style>
-        @page { margin: 15mm; size: A4 portrait; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-          line-height: 1.6;
-          color: #333;
-          font-size: 12pt;
-        }
-        h1 { font-size: 20pt; margin-bottom: 10pt; }
-        h2 { font-size: 16pt; margin-bottom: 8pt; }
-        h3 { font-size: 14pt; margin-bottom: 6pt; }
-        p { margin-bottom: 8pt; }
-        .header { text-align: center; margin-bottom: 20pt; border-bottom: 2pt solid #3498db; padding-bottom: 15pt; }
-        .section { margin-bottom: 15pt; page-break-inside: avoid; }
-        .info-box { background: #f8f9fa; padding: 10pt; border-radius: 4pt; margin-bottom: 15pt; }
-        .prescription-item { border-left: 3pt solid #3498db; padding-left: 10pt; margin: 10pt 0; }
-        .signature { margin-top: 40pt; text-align: right; }
-        button, input, select, textarea { display: none !important; }
-        .print\\:hidden { display: none !important; }
-        .no-print { display: none !important; }
-      </style>
-    `
-
     const content = `
       <!DOCTYPE html>
-      <html lang="fr">
+      <html>
         <head>
-          <meta charset="UTF-8">
           <title>${filename}</title>
-          ${styles}
+          <style>
+            @page { 
+              margin: 20mm; 
+              size: A4 portrait;
+            }
+            body { 
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+              max-width: 210mm;
+              margin: 0 auto;
+              padding: 20px;
+            }
+            h1, h2, h3 { color: #2c3e50; }
+            .header { 
+              text-align: center; 
+              margin-bottom: 30px;
+              border-bottom: 2px solid #3498db;
+              padding-bottom: 20px;
+            }
+            .section { 
+              margin-bottom: 20px;
+              text-align: justify;
+            }
+            .prescription-item { 
+              border-left: 4px solid #3498db; 
+              padding-left: 15px; 
+              margin: 15px 0;
+              page-break-inside: avoid;
+            }
+            .urgent { 
+              color: #e74c3c; 
+              font-weight: bold; 
+              text-transform: uppercase;
+            }
+            .info { 
+              color: #7f8c8d; 
+              font-style: italic; 
+            }
+            .patient-info {
+              background: #f8f9fa;
+              padding: 15px;
+              border-radius: 5px;
+              margin-bottom: 20px;
+            }
+            .doctor-info {
+              background: #e3f2fd;
+              padding: 15px;
+              border-radius: 5px;
+              margin-bottom: 20px;
+            }
+            .signature {
+              margin-top: 50px;
+              text-align: right;
+              border-top: 1px solid #ddd;
+              padding-top: 20px;
+            }
+            .bilingual {
+              font-style: italic;
+              color: #666;
+            }
+            @media print {
+              body { margin: 0; }
+              .no-print { display: none; }
+            }
+          </style>
         </head>
         <body>
           ${element.innerHTML}
@@ -976,50 +714,43 @@ export default function ProfessionalReportEditable({
 
     printWindow.document.write(content)
     printWindow.document.close()
-    
-    printWindow.onload = () => {
-      setTimeout(() => {
-        printWindow.print()
-      }, 500)
-    }
+    setTimeout(() => printWindow.print(), 250)
   }
 
   const handlePrint = () => window.print()
 
-  // ========== COMPOSANTS INTERNES ==========
-  
-  // Panel de debug
-  const DebugPanel = () => {
-    if (!showDebugInfo || !report) return null
-    
+  // États de chargement et erreur
+  if (loading) {
     return (
-      <Card className="mb-4 border-orange-200 print:hidden">
-        <CardHeader>
-          <CardTitle className="text-sm flex items-center">
-            <Info className="h-4 w-4 mr-2" />
-            Debug Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-xs font-mono space-y-2">
-            <div>Report ID: {reportId || 'Non sauvegardé'}</div>
-            <div>Status: {validationStatus}</div>
-            <div>Ordonnances: {report.ordonnances ? '✅' : '❌'}</div>
-            <div>Médicaments: {report.ordonnances?.medicaments?.prescription?.medicaments?.length || 0}</div>
-            <div>Analyses bio: {Object.values(report.ordonnances?.biologie?.prescription?.analyses || {}).flat().length}</div>
-            <div>Imagerie: {report.ordonnances?.imagerie?.prescription?.examens?.length || 0}</div>
-            <details className="mt-2">
-              <summary className="cursor-pointer">Structure complète</summary>
-              <pre className="mt-2 p-2 bg-gray-100 rounded overflow-auto max-h-60">
-                {JSON.stringify(report, null, 2)}
-              </pre>
-            </details>
+      <Card className="w-full">
+        <CardContent className="flex items-center justify-center py-20">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto" />
+            <p className="text-lg font-semibold">Génération du compte rendu professionnel...</p>
+            <p className="text-sm text-gray-600">Format conforme aux réglementations du Medical Council of Mauritius</p>
           </div>
         </CardContent>
       </Card>
     )
   }
-  
+
+  if (error && !report) {
+    return (
+      <Card className="border-red-200 w-full">
+        <CardContent className="text-center py-10">
+          <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-red-600 font-semibold mb-2">Erreur lors de la génération</p>
+          <p className="text-gray-600 text-sm mb-4">{error}</p>
+          <Button onClick={generateProfessionalReport} variant="outline">
+            Réessayer
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!report) return null
+
   // Composant pour l'édition des informations du médecin
   const DoctorInfoEditor = () => (
     <Card className="mb-6 print:hidden">
@@ -1113,39 +844,59 @@ export default function ProfessionalReportEditable({
     </Card>
   )
 
-  // Composant pour le rapport de consultation
+  // Composant pour l'édition du rapport narratif
   const ConsultationReport = () => {
-    if (!report) return null
-    
+    const sections = [
+      { key: 'motifConsultation', title: 'MOTIF DE CONSULTATION / CHIEF COMPLAINT' },
+      { key: 'anamnese', title: 'ANAMNÈSE / HISTORY OF PRESENT ILLNESS' },
+      { key: 'antecedents', title: 'ANTÉCÉDENTS / PAST MEDICAL HISTORY' },
+      { key: 'examenClinique', title: 'EXAMEN CLINIQUE / PHYSICAL EXAMINATION' },
+      { key: 'syntheseDiagnostique', title: 'SYNTHÈSE DIAGNOSTIQUE / DIAGNOSTIC SYNTHESIS' },
+      { key: 'conclusionDiagnostique', title: 'CONCLUSION DIAGNOSTIQUE / DIAGNOSTIC CONCLUSION' },
+      { key: 'priseEnCharge', title: 'PRISE EN CHARGE / MANAGEMENT PLAN' },
+      { key: 'surveillance', title: 'SURVEILLANCE / FOLLOW-UP PLAN' },
+      { key: 'conclusion', title: 'CONCLUSION / FINAL REMARKS' }
+    ]
+
     return (
       <Card className="shadow-xl print:shadow-none">
         <CardContent className="p-8 print:p-12" id="consultation-report">
-          <div className="text-center mb-8 print:mb-12 header">
+          {/* En-tête bilingue */}
+          <div className="text-center mb-8 print:mb-12">
             <h1 className="text-2xl font-bold mb-2">{report.compteRendu.header.title}</h1>
             <p className="text-gray-600">{report.compteRendu.header.subtitle}</p>
             <p className="text-sm text-gray-500 mt-2">Reference / Référence : {report.compteRendu.header.reference}</p>
           </div>
 
-          <div className="mb-6 p-4 bg-blue-50 rounded-lg print:bg-transparent print:border print:border-gray-300 info-box">
+          {/* Informations praticien */}
+          <div className="mb-6 p-4 bg-blue-50 rounded-lg print:bg-transparent print:border print:border-gray-300 doctor-info">
             <h3 className="font-bold mb-2">Medical Practitioner / Praticien</h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div>{report.compteRendu.praticien.nom}</div>
               <div>{report.compteRendu.praticien.qualifications}</div>
               <div>{report.compteRendu.praticien.specialite}</div>
               <div>Medical Council Reg: {report.compteRendu.praticien.numeroEnregistrement}</div>
+              <div>Practice License: {report.compteRendu.praticien.licencePratique}</div>
+              <div>{report.compteRendu.praticien.telephone}</div>
             </div>
           </div>
 
-          <div className="mb-8 p-4 bg-gray-50 rounded-lg info-box">
+          {/* Identification du patient */}
+          <div className="mb-8 p-4 bg-gray-50 rounded-lg patient-info">
             <h3 className="font-bold mb-2">Patient Identification / Identification du patient</h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div><span className="font-medium">Patient :</span> {report.compteRendu.patient.nomComplet}</div>
               <div><span className="font-medium">Age / Âge :</span> {report.compteRendu.patient.age}</div>
               <div><span className="font-medium">Gender / Sexe :</span> {report.compteRendu.patient.sexe}</div>
-              <div><span className="font-medium">Date :</span> {report.compteRendu.patient.dateExamen}</div>
+              <div><span className="font-medium">DOB / Date de naissance :</span> {report.compteRendu.patient.dateNaissance}</div>
+              {report.compteRendu.patient.identifiantNational && (
+                <div><span className="font-medium">NID :</span> {report.compteRendu.patient.identifiantNational}</div>
+              )}
+              <div><span className="font-medium">Examination Date / Date d'examen :</span> {report.compteRendu.patient.dateExamen}</div>
             </div>
           </div>
 
+          {/* Bouton pour afficher/masquer le rapport complet */}
           <div className="mb-4 print:hidden">
             <Button
               variant="outline"
@@ -1157,17 +908,15 @@ export default function ProfessionalReportEditable({
             </Button>
           </div>
 
+          {/* Contenu du rapport médical */}
           <div className={`space-y-6 ${!showFullReport && !editMode ? 'max-h-96 overflow-hidden relative' : ''} print:max-h-none`}>
-            {RAPPORT_SECTIONS.map((section) => {
-              const content = report.compteRendu.rapport[section.key as keyof RapportNarratif]
-              if (!content) return null
-              
-              return (
-                <section key={section.key} className="space-y-2 section">
+            {sections.map((section) => (
+              report.compteRendu.rapport[section.key] && (
+                <section key={section.key} className="space-y-2">
                   <h2 className="text-xl font-bold text-gray-900">{section.title}</h2>
                   {editMode && validationStatus !== 'validated' ? (
                     <Textarea
-                      value={content}
+                      value={report.compteRendu.rapport[section.key]}
                       onChange={(e) => updateRapportSection(section.key, e.target.value)}
                       className="min-h-[200px] font-sans text-gray-700"
                       placeholder="Saisir le texte..."
@@ -1175,24 +924,33 @@ export default function ProfessionalReportEditable({
                   ) : (
                     <div className="prose prose-lg max-w-none">
                       <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                        {content}
+                        {report.compteRendu.rapport[section.key]}
                       </p>
                     </div>
                   )}
                 </section>
               )
-            })}
+            ))}
             
             {!showFullReport && !editMode && (
               <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent print:hidden" />
             )}
           </div>
 
+          {/* Métadonnées */}
+          <div className="mt-8 pt-4 border-t border-gray-200 text-sm text-gray-600">
+            <p>{report.compteRendu.metadata.complianceNote}</p>
+            <p>Word count / Nombre de mots : {report.compteRendu.metadata.wordCount}</p>
+          </div>
+
+          {/* Signature */}
           <div className="mt-12 pt-8 border-t border-gray-300 signature">
             <div className="text-right">
               <p className="font-semibold">{report.compteRendu.praticien.nom}</p>
               <p className="text-sm text-gray-600">{report.compteRendu.praticien.qualifications}</p>
               <p className="text-sm text-gray-600">Medical Council Reg: {report.compteRendu.praticien.numeroEnregistrement}</p>
+              <p className="text-sm text-gray-600">License: {report.compteRendu.praticien.licencePratique}</p>
+              <p className="text-sm text-gray-600">{report.compteRendu.praticien.adresseCabinet}</p>
               <div className="mt-8">
                 <p className="text-sm">_______________________________</p>
                 <p className="text-sm">Signature & Official Stamp</p>
@@ -1205,33 +963,30 @@ export default function ProfessionalReportEditable({
     )
   }
 
-  // Composant pour les médicaments
+  // Composant pour l'édition des médicaments
   const MedicationPrescription = () => {
-    if (!report || !report.ordonnances?.medicaments) {
+    const medications = report.ordonnances?.medicaments?.prescription?.medicaments || []
+    
+    if (!includeFullPrescriptions && report.prescriptionsResume) {
       return (
         <Card>
-          <CardContent className="p-6 text-center">
-            <Pill className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p className="text-gray-500">Structure des prescriptions médicamenteuses non disponible</p>
-            <Button onClick={generateProfessionalReport} className="mt-4" variant="outline">
-              Regénérer le rapport
-            </Button>
+          <CardContent className="p-6">
+            <h3 className="font-bold mb-4">Prescription Summary / Résumé des prescriptions</h3>
+            <p>{report.prescriptionsResume.medicaments}</p>
           </CardContent>
         </Card>
       )
     }
-    
-    const medications = report.ordonnances.medicaments.prescription.medicaments || []
-    
+
     return (
       <div id="prescription-medicaments" className="bg-white p-8 rounded-lg shadow print:shadow-none">
-        <div className="border-b-2 border-green-600 pb-4 mb-6 header">
+        <div className="border-b-2 border-blue-600 pb-4 mb-6">
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-2xl font-bold">MEDICAL PRESCRIPTION / ORDONNANCE MÉDICAMENTEUSE</h2>
               <p className="text-gray-600 mt-1">Compliant with Medical Council & Pharmacy Act of Mauritius</p>
               <p className="text-sm text-gray-500 mt-1">
-                {medications.length} medication{medications.length !== 1 ? 's' : ''} prescribed
+                {medications.length} medication{medications.length > 1 ? 's' : ''} prescribed
               </p>
             </div>
             <div className="flex gap-2 print:hidden">
@@ -1253,16 +1008,21 @@ export default function ProfessionalReportEditable({
           </div>
         </div>
 
-        <div className="mb-6 p-4 bg-gray-50 rounded info-box">
+        {/* Informations patient pour l'ordonnance */}
+        <div className="mb-6 p-4 bg-gray-50 rounded">
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div><strong>Patient :</strong> {report.compteRendu.patient.nomComplet}</div>
             <div><strong>Date :</strong> {report.compteRendu.patient.dateExamen}</div>
+            <div><strong>Address / Adresse :</strong> {report.compteRendu.patient.adresse}</div>
+            {report.compteRendu.patient.identifiantNational && (
+              <div><strong>NID :</strong> {report.compteRendu.patient.identifiantNational}</div>
+            )}
           </div>
         </div>
 
         <div className="space-y-6">
           {medications.length > 0 ? (
-            medications.map((med: Medicament, index: number) => (
+            medications.map((med: any, index: number) => (
               <div key={index} className="border-l-4 border-green-500 pl-4 py-2 prescription-item">
                 {editMode && validationStatus !== 'validated' ? (
                   <div className="space-y-3">
@@ -1270,23 +1030,50 @@ export default function ProfessionalReportEditable({
                       <div>
                         <Label>Medication Name / Nom du médicament</Label>
                         <Input
-                          value={med.nom}
+                          value={getString(med.nom)}
                           onChange={(e) => updateMedicament(index, 'nom', e.target.value)}
+                          placeholder="Ex: Paracetamol"
+                        />
+                      </div>
+                      <div>
+                        <Label>Generic Name / DCI</Label>
+                        <Input
+                          value={getString(med.denominationCommune)}
+                          onChange={(e) => updateMedicament(index, 'denominationCommune', e.target.value)}
                           placeholder="Ex: Paracetamol"
                         />
                       </div>
                       <div>
                         <Label>Dosage / Dosage</Label>
                         <Input
-                          value={med.dosage}
+                          value={getString(med.dosage)}
                           onChange={(e) => updateMedicament(index, 'dosage', e.target.value)}
                           placeholder="Ex: 500mg"
                         />
                       </div>
                       <div>
+                        <Label>Form / Forme</Label>
+                        <Select
+                          value={getString(med.forme)}
+                          onValueChange={(value) => updateMedicament(index, 'forme', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="comprimé">Tablet / Comprimé</SelectItem>
+                            <SelectItem value="gélule">Capsule / Gélule</SelectItem>
+                            <SelectItem value="sirop">Syrup / Sirop</SelectItem>
+                            <SelectItem value="injection">Injection</SelectItem>
+                            <SelectItem value="crème">Cream / Crème</SelectItem>
+                            <SelectItem value="pommade">Ointment / Pommade</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
                         <Label>Frequency / Posologie</Label>
                         <Input
-                          value={med.posologie}
+                          value={getString(med.posologie)}
                           onChange={(e) => updateMedicament(index, 'posologie', e.target.value)}
                           placeholder="Ex: 1 tablet 3 times daily"
                         />
@@ -1294,11 +1081,45 @@ export default function ProfessionalReportEditable({
                       <div>
                         <Label>Duration / Durée</Label>
                         <Input
-                          value={med.dureeTraitement}
+                          value={getString(med.dureeTraitement)}
                           onChange={(e) => updateMedicament(index, 'dureeTraitement', e.target.value)}
                           placeholder="Ex: 7 days"
                         />
                       </div>
+                      <div>
+                        <Label>Quantity / Quantité</Label>
+                        <Input
+                          value={getString(med.quantite)}
+                          onChange={(e) => updateMedicament(index, 'quantite', e.target.value)}
+                          placeholder="Ex: 1 box"
+                        />
+                      </div>
+                      <div>
+                        <Label>Route / Voie d'administration</Label>
+                        <Select
+                          value={getString(med.modeAdministration)}
+                          onValueChange={(value) => updateMedicament(index, 'modeAdministration', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Voie orale">Oral / Voie orale</SelectItem>
+                            <SelectItem value="Voie sublinguale">Sublingual / Voie sublinguale</SelectItem>
+                            <SelectItem value="Voie topique">Topical / Voie topique</SelectItem>
+                            <SelectItem value="Voie parentérale">Parenteral / Voie parentérale</SelectItem>
+                            <SelectItem value="Voie rectale">Rectal / Voie rectale</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Special Instructions / Instructions spéciales</Label>
+                      <Input
+                        value={getString(med.instructions)}
+                        onChange={(e) => updateMedicament(index, 'instructions', e.target.value)}
+                        placeholder="Ex: Take with food"
+                      />
                     </div>
                     <div className="flex justify-between items-center">
                       <div className="flex items-center space-x-2">
@@ -1306,7 +1127,7 @@ export default function ProfessionalReportEditable({
                           checked={med.nonSubstituable}
                           onCheckedChange={(checked) => updateMedicament(index, 'nonSubstituable', checked.toString())}
                         />
-                        <Label>Non-substitutable</Label>
+                        <Label>Non-substitutable / Non substituable</Label>
                       </div>
                       <Button
                         variant="destructive"
@@ -1320,20 +1141,41 @@ export default function ProfessionalReportEditable({
                 ) : (
                   <div>
                     <div className="font-bold text-lg">
-                      {index + 1}. {med.nom}
+                      {index + 1}. {getString(med.nom)}
                       {med.nonSubstituable && (
                         <Badge className="ml-2 bg-red-100 text-red-800">Non-substitutable</Badge>
                       )}
                     </div>
+                    {med.denominationCommune && getString(med.denominationCommune) !== getString(med.nom) && (
+                      <p className="text-sm text-gray-600">Generic / DCI : {getString(med.denominationCommune)}</p>
+                    )}
                     <p className="mt-1">
-                      <span className="font-medium">Dosage :</span> {med.dosage}
+                      <span className="font-medium">Form / Forme :</span> {getString(med.forme)} - {getString(med.dosage)}
                     </p>
                     <p className="mt-1">
-                      <span className="font-medium">Posologie :</span> {med.posologie}
+                      <span className="font-medium">Frequency / Posologie :</span> {getString(med.posologie)}
                     </p>
                     <p className="mt-1">
-                      <span className="font-medium">Durée :</span> {med.dureeTraitement}
+                      <span className="font-medium">Route / Voie :</span> {getString(med.modeAdministration)}
                     </p>
+                    <p className="mt-1">
+                      <span className="font-medium">Duration / Durée :</span> {getString(med.dureeTraitement)}
+                    </p>
+                    {med.quantite && (
+                      <p className="mt-1">
+                        <span className="font-medium">Quantity / Quantité :</span> {getString(med.quantite)}
+                      </p>
+                    )}
+                    {med.instructions && (
+                      <p className="mt-2 text-sm text-gray-600 italic">
+                        ℹ️ {getString(med.instructions)}
+                      </p>
+                    )}
+                    {med.justification && (
+                      <p className="mt-1 text-sm text-gray-600">
+                        <span className="font-medium">Indication :</span> {getString(med.justification)}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -1352,13 +1194,20 @@ export default function ProfessionalReportEditable({
           )}
         </div>
 
+        {/* Validity and signature */}
         <div className="mt-8 pt-6 border-t border-gray-300">
+          <p className="text-sm text-gray-600 mb-4">
+            Validity / Validité : {report.ordonnances?.medicaments?.prescription?.validite || "3 months unless otherwise specified"}
+          </p>
           <div className="text-right signature">
             <p className="font-semibold">{report.compteRendu.praticien.nom}</p>
+            <p className="text-sm text-gray-600">{report.compteRendu.praticien.qualifications}</p>
             <p className="text-sm text-gray-600">Medical Council Reg: {report.compteRendu.praticien.numeroEnregistrement}</p>
+            <p className="text-sm text-gray-600">License: {report.compteRendu.praticien.licencePratique}</p>
             <div className="mt-8">
               <p className="text-sm">_______________________________</p>
               <p className="text-sm">Medical Practitioner's Signature</p>
+              <p className="text-sm">Official Medical Stamp</p>
               <p className="text-sm">Date: {report.compteRendu.patient.dateExamen}</p>
             </div>
           </div>
@@ -1369,23 +1218,23 @@ export default function ProfessionalReportEditable({
 
   // Composant pour les examens biologiques
   const BiologyPrescription = () => {
-    if (!report || !report.ordonnances?.biologie) {
+    const analyses = report.ordonnances?.biologie?.prescription?.analyses || {}
+    const hasTests = Object.values(analyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
+    
+    if (!includeFullPrescriptions && report.prescriptionsResume) {
       return (
         <Card>
-          <CardContent className="p-6 text-center">
-            <TestTube className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p className="text-gray-500">Structure des analyses biologiques non disponible</p>
+          <CardContent className="p-6">
+            <h3 className="font-bold mb-4">Laboratory Tests Summary</h3>
+            <p>{report.prescriptionsResume.examens}</p>
           </CardContent>
         </Card>
       )
     }
-    
-    const analyses = report.ordonnances.biologie.prescription.analyses || {}
-    const hasTests = Object.values(analyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
-    
+
     return (
       <div id="prescription-biologie" className="bg-white p-8 rounded-lg shadow print:shadow-none">
-        <div className="border-b-2 border-purple-600 pb-4 mb-6 header">
+        <div className="border-b-2 border-purple-600 pb-4 mb-6">
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-2xl font-bold">LABORATORY REQUEST FORM / DEMANDE D'ANALYSES</h2>
@@ -1393,18 +1242,10 @@ export default function ProfessionalReportEditable({
             </div>
             <div className="flex gap-2 print:hidden">
               {editMode && validationStatus !== 'validated' && (
-                <Select onValueChange={(value) => addBiologyTest(value)}>
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Add Test Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BIOLOGY_CATEGORIES.map(cat => (
-                      <SelectItem key={cat.key} value={cat.key}>
-                        {cat.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Button onClick={addBiologyTest} size="sm" variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Test
+                </Button>
               )}
               <Button
                 variant="outline"
@@ -1418,142 +1259,115 @@ export default function ProfessionalReportEditable({
           </div>
         </div>
 
+        {/* Patient info */}
+        <div className="mb-6 p-4 bg-purple-50 rounded">
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div><strong>Patient :</strong> {report.compteRendu.patient.nomComplet}</div>
+            <div><strong>Date :</strong> {report.compteRendu.patient.dateExamen}</div>
+            <div><strong>Clinical Information :</strong> {getString(report.ordonnances?.biologie?.patient?.diagnosticProvisoire) || report.compteRendu.rapport.conclusionDiagnostique.substring(0, 100) + '...'}</div>
+          </div>
+        </div>
+
         {hasTests ? (
           <div className="space-y-6">
-            {BIOLOGY_CATEGORIES.map(({ key, label }) => {
-              const tests = analyses[key]
+            {Object.entries(analyses).map(([category, tests]: [string, any]) => {
               if (!Array.isArray(tests) || tests.length === 0) return null
               
               return (
-                <div key={key} className="border-l-4 border-purple-500 pl-4">
+                <div key={category} className="border-l-4 border-purple-500 pl-4">
                   <h3 className="font-bold text-lg mb-3 text-purple-800">
-                    {label}
+                    {category.toUpperCase()}
                   </h3>
                   <div className="space-y-2">
-                    {tests.map((test: TestBiologique, idx: number) => (
-                      <div key={idx} className="prescription-item">
-                        {editMode && validationStatus !== 'validated' ? (
-                          <div className="space-y-3 p-3">
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <Label>Test Name / Nom de l'analyse</Label>
-                                <Input
-                                  value={test.nom}
-                                  onChange={(e) => updateBiologyTest(key, idx, 'nom', e.target.value)}
-                                  placeholder="Ex: Complete Blood Count"
-                                />
-                              </div>
-                              <div>
-                                <Label>Clinical Indication / Motif clinique</Label>
-                                <Input
-                                  value={test.motifClinique}
-                                  onChange={(e) => updateBiologyTest(key, idx, 'motifClinique', e.target.value)}
-                                  placeholder="Ex: Anemia evaluation"
-                                />
-                              </div>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <div className="flex items-center gap-4">
-                                <div className="flex items-center space-x-2">
-                                  <Switch
-                                    checked={test.urgence}
-                                    onCheckedChange={(checked) => updateBiologyTest(key, idx, 'urgence', checked)}
-                                  />
-                                  <Label>Urgent</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <Switch
-                                    checked={test.aJeun}
-                                    onCheckedChange={(checked) => updateBiologyTest(key, idx, 'aJeun', checked)}
-                                  />
-                                  <Label>Fasting / À jeun</Label>
-                                </div>
-                              </div>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => removeBiologyTest(key, idx)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex items-start justify-between p-2 hover:bg-gray-50 rounded">
-                            <div className="flex-1">
-                              <p className="font-medium">
-                                {test.nom}
-                                {test.urgence && <Badge className="ml-2 bg-red-100 text-red-800">URGENT</Badge>}
-                              </p>
-                              {test.aJeun && (
-                                <p className="text-sm text-orange-600 mt-1">⚠️ Fasting required / À jeun requis</p>
-                              )}
-                            </div>
-                          </div>
-                        )}
+                    {tests.map((test: any, idx: number) => (
+                      <div key={idx} className="flex items-start justify-between p-2 hover:bg-gray-50 rounded">
+                        <div className="flex-1">
+                          <p className="font-medium">
+                            {getString(test.nom)}
+                            {test.urgence && <Badge className="ml-2 bg-red-100 text-red-800">URGENT</Badge>}
+                          </p>
+                          {test.aJeun && (
+                            <p className="text-sm text-orange-600 mt-1">⚠️ Fasting required / À jeun requis</p>
+                          )}
+                          {test.conditionsPrelevement && (
+                            <p className="text-sm text-gray-600 mt-1">
+                              Conditions: {getString(test.conditionsPrelevement)}
+                            </p>
+                          )}
+                          {test.motifClinique && (
+                            <p className="text-sm text-gray-600 mt-1">
+                              Indication: {getString(test.motifClinique)}
+                            </p>
+                          )}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          <p>Tube: {getString(test.tubePrelevement)}</p>
+                          <p>TAT: {getString(test.delaiResultat)}</p>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
               )
             })}
+            
+            {/* Special instructions */}
+            {report.ordonnances?.biologie?.prescription?.instructionsSpeciales?.length > 0 && (
+              <div className="mt-6 p-4 bg-yellow-50 rounded">
+                <h4 className="font-bold mb-2">Special Instructions / Instructions spéciales</h4>
+                <ul className="list-disc list-inside text-sm">
+                  {report.ordonnances.biologie.prescription.instructionsSpeciales.map((instruction: string, idx: number) => (
+                    <li key={idx}>{getString(instruction)}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500">
             <TestTube className="h-12 w-12 mx-auto mb-4 text-gray-300" />
             <p>No laboratory tests ordered / Aucune analyse prescrite</p>
             {editMode && (
-              <div className="mt-4">
-                <Select onValueChange={(value) => addBiologyTest(value)}>
-                  <SelectTrigger className="w-[250px] mx-auto">
-                    <SelectValue placeholder="Select test category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BIOLOGY_CATEGORIES.map(cat => (
-                      <SelectItem key={cat.key} value={cat.key}>
-                        {cat.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <Button onClick={addBiologyTest} className="mt-4" variant="outline">
+                <Plus className="h-4 w-4 mr-2" />
+                Add First Test
+              </Button>
             )}
           </div>
         )}
+
+        {/* Signature */}
+        <div className="mt-8 pt-6 border-t border-gray-300">
+          <p className="text-sm text-gray-600 mb-4">
+            Laboratory / Laboratoire : {getString(report.ordonnances?.biologie?.prescription?.laboratoireRecommande) || "Any MoH approved laboratory"}
+          </p>
+          <div className="text-right signature">
+            <p className="font-semibold">{report.compteRendu.praticien.nom}</p>
+            <p className="text-sm text-gray-600">Medical Council Reg: {report.compteRendu.praticien.numeroEnregistrement}</p>
+            <div className="mt-8">
+              <p className="text-sm">_______________________________</p>
+              <p className="text-sm">Requesting Physician's Signature</p>
+              <p className="text-sm">Date: {report.compteRendu.patient.dateExamen}</p>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
 
   // Composant pour l'imagerie
   const ImagingPrescription = () => {
-    if (!report || !report.ordonnances?.imagerie) {
-      return (
-        <Card>
-          <CardContent className="p-6 text-center">
-            <Scan className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p className="text-gray-500">Structure des examens d'imagerie non disponible</p>
-          </CardContent>
-        </Card>
-      )
-    }
-    
-    const examens = report.ordonnances.imagerie.prescription.examens || []
+    const examens = report.ordonnances?.imagerie?.prescription?.examens || []
     
     return (
       <div id="prescription-imagerie" className="bg-white p-8 rounded-lg shadow print:shadow-none">
-        <div className="border-b-2 border-indigo-600 pb-4 mb-6 header">
+        <div className="border-b-2 border-indigo-600 pb-4 mb-6">
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-2xl font-bold">RADIOLOGY REQUEST FORM / DEMANDE D'IMAGERIE</h2>
               <p className="text-gray-600 mt-1">Compliant with MoH Radiology Standards</p>
             </div>
             <div className="flex gap-2 print:hidden">
-              {editMode && validationStatus !== 'validated' && (
-                <Button onClick={addImagingExam} size="sm" variant="outline">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Imaging
-                </Button>
-              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -1566,80 +1380,46 @@ export default function ProfessionalReportEditable({
           </div>
         </div>
 
+        {/* Patient info */}
+        <div className="mb-6 p-4 bg-indigo-50 rounded">
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div><strong>Patient :</strong> {report.compteRendu.patient.nomComplet}</div>
+            <div><strong>Weight / Poids :</strong> {report.compteRendu.patient.poids}</div>
+            <div><strong>Clinical Diagnosis :</strong> {report.ordonnances?.imagerie?.prescription?.renseignementsCliniques}</div>
+            {report.ordonnances?.imagerie?.patient?.allergiesConnues && (
+              <div><strong>Known Allergies :</strong> {report.ordonnances.imagerie.patient.allergiesConnues}</div>
+            )}
+          </div>
+        </div>
+
         {examens.length > 0 ? (
           <div className="space-y-6">
-            {examens.map((exam: ExamenImagerie, index: number) => (
-              <div key={index} className="border-l-4 border-indigo-500 pl-4 py-2 prescription-item">
-                {editMode && validationStatus !== 'validated' ? (
-                  <div className="space-y-3 p-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label>Imaging Type / Type d'imagerie</Label>
-                        <Select
-                          value={exam.type || exam.modalite}
-                          onValueChange={(value) => updateImagingExam(index, 'type', value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="X-Ray">X-Ray / Radiographie</SelectItem>
-                            <SelectItem value="CT Scan">CT Scan / Tomodensitométrie</SelectItem>
-                            <SelectItem value="MRI">MRI / IRM</SelectItem>
-                            <SelectItem value="Ultrasound">Ultrasound / Échographie</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label>Region / Région anatomique</Label>
-                        <Input
-                          value={exam.region}
-                          onChange={(e) => updateImagingExam(index, 'region', e.target.value)}
-                          placeholder="Ex: Chest PA/Lateral"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={exam.urgence}
-                            onCheckedChange={(checked) => updateImagingExam(index, 'urgence', checked)}
-                          />
-                          <Label>Urgent</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={exam.contraste}
-                            onCheckedChange={(checked) => updateImagingExam(index, 'contraste', checked)}
-                          />
-                          <Label>Contrast / Contraste</Label>
-                        </div>
-                      </div>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => removeImagingExam(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="font-bold text-lg">
-                      {index + 1}. {exam.type || exam.modalite}
-                      {exam.urgence && <Badge className="ml-2 bg-red-100 text-red-800">URGENT</Badge>}
-                    </div>
-                    <p className="mt-1">
-                      <span className="font-medium">Region / Région :</span> {exam.region}
-                    </p>
-                    {exam.contraste && (
-                      <p className="mt-1 text-orange-600">
-                        ⚠️ <span className="font-medium">Contrast required / Contraste requis</span>
-                      </p>
-                    )}
-                  </div>
+            {examens.map((exam: any, index: number) => (
+              <div key={index} className="border-l-4 border-indigo-500 pl-4 py-2">
+                <div className="font-bold text-lg">
+                  {index + 1}. {getString(exam.type || exam.modalite)}
+                  {exam.urgence && <Badge className="ml-2 bg-red-100 text-red-800">URGENT</Badge>}
+                </div>
+                <p className="mt-1">
+                  <span className="font-medium">Region / Région :</span> {getString(exam.region)}
+                </p>
+                <p className="mt-1">
+                  <span className="font-medium">Clinical Indication :</span> {getString(exam.indicationClinique)}
+                </p>
+                {exam.contraste && (
+                  <p className="mt-1 text-orange-600">
+                    ⚠️ <span className="font-medium">Contrast required / Contraste requis</span>
+                  </p>
+                )}
+                {exam.protocoleSpecifique && (
+                  <p className="mt-1">
+                    <span className="font-medium">Protocol :</span> {getString(exam.protocoleSpecifique)}
+                  </p>
+                )}
+                {exam.questionDiagnostique && (
+                  <p className="mt-1 text-sm text-gray-600">
+                    <span className="font-medium">Clinical Question :</span> {getString(exam.questionDiagnostique)}
+                  </p>
                 )}
               </div>
             ))}
@@ -1648,19 +1428,29 @@ export default function ProfessionalReportEditable({
           <div className="text-center py-8 text-gray-500">
             <Scan className="h-12 w-12 mx-auto mb-4 text-gray-300" />
             <p>No imaging studies ordered / Aucun examen d'imagerie prescrit</p>
-            {editMode && (
-              <Button onClick={addImagingExam} className="mt-4" variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                Add First Imaging Study
-              </Button>
-            )}
           </div>
         )}
+
+        {/* Signature */}
+        <div className="mt-8 pt-6 border-t border-gray-300">
+          <p className="text-sm text-gray-600 mb-4">
+            Imaging Center / Centre d'imagerie : {report.ordonnances?.imagerie?.prescription?.centreImagerie || "Any MoH approved imaging center"}
+          </p>
+          <div className="text-right signature">
+            <p className="font-semibold">{report.compteRendu.praticien.nom}</p>
+            <p className="text-sm text-gray-600">Medical Council Reg: {report.compteRendu.praticien.numeroEnregistrement}</p>
+            <div className="mt-8">
+              <p className="text-sm">_______________________________</p>
+              <p className="text-sm">Requesting Physician's Signature</p>
+              <p className="text-sm">Date: {report.compteRendu.patient.dateExamen}</p>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
 
-  // Actions Bar
+  // Actions Bar avec statut de validation
   const ActionsBar = () => (
     <Card className="print:hidden">
       <CardContent className="p-4">
@@ -1685,13 +1475,9 @@ export default function ProfessionalReportEditable({
                 {modifiedSections.size} modification(s) non sauvegardée(s)
               </Badge>
             )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowDebugInfo(!showDebugInfo)}
-            >
-              <Info className="h-4 w-4" />
-            </Button>
+            <span className="text-sm text-gray-600">
+              {report.compteRendu.metadata?.wordCount || 0} mots
+            </span>
           </div>
           <div className="flex gap-2">
             <Button
@@ -1738,10 +1524,23 @@ export default function ProfessionalReportEditable({
     </Card>
   )
 
+  // Avertissement modifications non sauvegardées
+  const UnsavedChangesAlert = () => {
+    if (modifiedSections.size === 0) return null
+
+    return (
+      <Alert className="print:hidden">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          Vous avez des modifications non sauvegardées. 
+          Pensez à sauvegarder avant de valider ou quitter.
+        </AlertDescription>
+      </Alert>
+    )
+  }
+
   // Stats des prescriptions
   const PrescriptionStats = () => {
-    if (!report) return null
-    
     const medicamentCount = report.ordonnances?.medicaments?.prescription?.medicaments?.length || 0
     const bioCount = Object.values(report.ordonnances?.biologie?.prescription?.analyses || {})
       .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)
@@ -1775,57 +1574,15 @@ export default function ProfessionalReportEditable({
     )
   }
 
-  // ========== RENDU PRINCIPAL ==========
-  
-  if (loading) {
-    return (
-      <Card className="w-full">
-        <CardContent className="flex items-center justify-center py-20">
-          <div className="text-center space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto" />
-            <p className="text-lg font-semibold">Génération du compte rendu professionnel...</p>
-            <p className="text-sm text-gray-600">Format conforme aux réglementations du Medical Council of Mauritius</p>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  if (error && !report) {
-    return (
-      <Card className="border-red-200 w-full">
-        <CardContent className="text-center py-10">
-          <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <p className="text-red-600 font-semibold mb-2">Erreur lors de la génération</p>
-          <p className="text-gray-600 text-sm mb-4">{error}</p>
-          <Button onClick={generateProfessionalReport} variant="outline">
-            Réessayer
-          </Button>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  if (!report) return null
-
+  // Rendu principal
   return (
     <div className="space-y-6 print:space-y-4">
       <ActionsBar />
-      
-      {modifiedSections.size > 0 && (
-        <Alert className="print:hidden">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            Vous avez des modifications non sauvegardées. 
-            Pensez à sauvegarder avant de valider ou quitter.
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      <DebugPanel />
+      <UnsavedChangesAlert />
       <DoctorInfoEditor />
       <PrescriptionStats />
 
+      {/* Navigation par onglets */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="consultation">
@@ -1844,9 +1601,9 @@ export default function ProfessionalReportEditable({
           <TabsTrigger value="biologie">
             <TestTube className="h-4 w-4 mr-2" />
             Biologie
-            {Object.keys(report.ordonnances?.biologie?.prescription?.analyses || {}).length > 0 && (
+            {report.ordonnances?.biologie && (
               <Badge variant="secondary" className="ml-2">
-                {Object.values(report.ordonnances.biologie.prescription.analyses)
+                {Object.values(report.ordonnances.biologie.prescription.analyses || {})
                   .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)}
               </Badge>
             )}
@@ -1879,6 +1636,7 @@ export default function ProfessionalReportEditable({
         </TabsContent>
       </Tabs>
 
+      {/* Version d'impression complète */}
       <div className="hidden print:block">
         <ConsultationReport />
         {includeFullPrescriptions && report.ordonnances && (
@@ -1902,6 +1660,7 @@ export default function ProfessionalReportEditable({
         )}
       </div>
 
+      {/* Bouton de finalisation */}
       {validationStatus === 'validated' && (
         <div className="flex justify-center print:hidden mt-8">
           <Button 

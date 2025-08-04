@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import { supabase } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,10 +12,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { testPatients } from '@/lib/test-patients-data'
 import { 
   ArrowRight,
-  
   User, 
   Heart, 
   AlertTriangle, 
@@ -24,7 +22,6 @@ import {
   Search,
   Check,
   X,
-  Info,
   CheckCircle,
   Loader2,
   Mail,
@@ -35,7 +32,7 @@ import {
 import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
 import { getTranslation, Language } from "@/lib/translations"
 
-// Types
+// ==================== INTERFACES & TYPES ====================
 interface LifeHabits {
   smoking: string
   alcohol: string
@@ -43,27 +40,33 @@ interface LifeHabits {
 }
 
 interface PatientFormData {
+  // Informations personnelles
   firstName: string
   lastName: string
   birthDate: string
   age: string
-  gender: string[]
-  otherGender: string
+  gender: string
+  
+  // Données physiques
   weight: string
   height: string
+  
+  // Contact
+  phone: string
+  email: string
+  address: string
+  city: string
+  country: string
+  
+  // Informations médicales
   allergies: string[]
   otherAllergies: string
   medicalHistory: string[]
   otherMedicalHistory: string
   currentMedicationsText: string
+  
+  // Habitudes de vie
   lifeHabits: LifeHabits
-  // Additional fields for complete patient data
-  address?: string
-  phone?: string
-  phoneNumber?: string
-  city?: string
-  country?: string
-  email?: string
 }
 
 interface PatientFormProps {
@@ -71,9 +74,49 @@ interface PatientFormProps {
   onNext: () => void
   language?: Language
   consultationId?: string | null
-  initialData?: PatientFormData
+  initialData?: Partial<PatientFormData>
 }
 
+interface ValidationErrors {
+  [key: string]: string
+}
+
+// ==================== CONSTANTES ====================
+const INITIAL_FORM_DATA: PatientFormData = {
+  firstName: "",
+  lastName: "",
+  birthDate: "",
+  age: "",
+  gender: "",
+  weight: "",
+  height: "",
+  phone: "",
+  email: "",
+  address: "",
+  city: "",
+  country: "Maurice",
+  allergies: [],
+  otherAllergies: "",
+  medicalHistory: [],
+  otherMedicalHistory: "",
+  currentMedicationsText: "",
+  lifeHabits: {
+    smoking: "",
+    alcohol: "",
+    physicalActivity: ""
+  }
+}
+
+const SECTIONS = [
+  { id: "identity", titleKey: 'patientForm.personalInfo', icon: User },
+  { id: "contact", titleKey: 'patientForm.contactInfo', icon: Phone },
+  { id: "allergies", titleKey: 'patientForm.knownAllergies', icon: AlertTriangle },
+  { id: "history", titleKey: 'patientForm.medicalHistory', icon: Heart },
+  { id: "medications", titleKey: 'patientForm.currentMedications', icon: Pill },
+  { id: "habits", titleKey: 'patientForm.lifestyle', icon: Activity },
+]
+
+// ==================== COMPOSANT PRINCIPAL ====================
 export default function ModernPatientForm({ 
   onDataChange, 
   onNext, 
@@ -81,101 +124,25 @@ export default function ModernPatientForm({
   consultationId,
   initialData
 }: PatientFormProps) {
-  const { patientData: tibokPatient, consultationData, isFromTibok } = useTibokPatientData()
-  const [isLoadingPatientData, setIsLoadingPatientData] = useState(true)
-  const [dataProcessed, setDataProcessed] = useState(false)
+  // ========== Hooks ==========
+  const { patientData: tibokPatient, isFromTibok } = useTibokPatientData()
+  const t = useCallback((key: string) => getTranslation(key, language), [language])
   
-  // Helper function for translations
-  const t = (key: string) => getTranslation(key, language)
+  // ========== États ==========
+  const [isLoading, setIsLoading] = useState(true)
+  const [dataInitialized, setDataInitialized] = useState(false)
+  const [formData, setFormData] = useState<PatientFormData>(() => ({
+    ...INITIAL_FORM_DATA,
+    ...initialData
+  }))
+  const [errors, setErrors] = useState<ValidationErrors>({})
+  const [allergySearch, setAllergySearch] = useState("")
+  const [historySearch, setHistorySearch] = useState("")
+  const [currentSection, setCurrentSection] = useState(0)
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
 
-  // Fonction pour transformer les données du formulaire au format attendu par l'API
-  const transformDataForAPI = (formData: PatientFormData) => {
-    // Transformation du genre en format simple - CORRIGÉ
-    let sexe = 'Non renseigné'
-    
-    console.log('Transformation du genre:', {
-      gender: formData.gender,
-      otherGender: formData.otherGender
-    })
-    
-    if (formData.gender && formData.gender.length > 0) {
-      const firstGender = formData.gender[0]
-      // Vérifier toutes les variantes possibles
-      if (firstGender === 'Masculin' || 
-          firstGender === 'Male' || 
-          firstGender.toLowerCase() === 'masculin' ||
-          firstGender.toLowerCase() === 'male' ||
-          firstGender === t('patientForm.male')) {
-        sexe = 'Masculin'
-      } else if (firstGender === 'Féminin' || 
-                 firstGender === 'Female' || 
-                 firstGender.toLowerCase() === 'féminin' ||
-                 firstGender.toLowerCase() === 'female' ||
-                 firstGender === t('patientForm.female')) {
-        sexe = 'Féminin'
-      }
-    } else if (formData.otherGender && formData.otherGender.trim() !== '') {
-      sexe = formData.otherGender
-    }
-    
-    console.log('Genre transformé:', sexe)
-
-    // Transformation des allergies
-    const allergiesText = [
-      ...(formData.allergies || []),
-      ...(formData.otherAllergies ? [formData.otherAllergies] : [])
-    ].filter(Boolean).join(', ') || 'Aucune allergie connue'
-
-    // Transformation des antécédents
-    const antecedentsText = [
-      ...(formData.medicalHistory || []),
-      ...(formData.otherMedicalHistory ? [formData.otherMedicalHistory] : [])
-    ].filter(Boolean).join(', ') || 'Aucun antécédent notable'
-
-    // Format compatible avec l'API (fichier 2)
-    return {
-      // Noms français pour l'API
-      nom: formData.lastName || '',
-      prenom: formData.firstName || '',
-      dateNaissance: formData.birthDate || '',
-      age: formData.age || '',
-      sexe: sexe, // Utiliser la valeur transformée
-      sex: sexe, // Ajouter aussi 'sex' au cas où l'API utilise ce nom
-      gender: sexe, // Et 'gender' pour être sûr
-      profession: '', // À ajouter si nécessaire
-      telephone: formData.phone || formData.phoneNumber || '',
-      email: formData.email || '',
-      adresse: formData.address || '',
-      numeroSecuriteSociale: '',
-      medecinTraitant: '',
-      
-      // Données cliniques
-      poids: formData.weight,
-      taille: formData.height,
-      allergies: allergiesText || 'Aucune allergie connue',
-      antecedents: {
-        medicaux: antecedentsText || 'Aucun antécédent notable',
-        chirurgicaux: '',
-        familiaux: ''
-      },
-      medicamentsActuels: formData.currentMedicationsText || 'Aucun',
-      
-      // Habitudes de vie
-      habitudes: {
-        tabac: formData.lifeHabits.smoking || 'Non renseigné',
-        alcool: formData.lifeHabits.alcohol || 'Non renseigné',
-        activitePhysique: formData.lifeHabits.physicalActivity || 'Non renseignée',
-        alimentation: 'Non renseignée',
-        sommeil: 'Non renseigné'
-      },
-      
-      // Garde aussi le format original pour compatibilité
-      ...formData
-    }
-  }
-  
-  // Get translated arrays
-  const COMMON_ALLERGIES = [
+  // ========== Mémoïsation des listes traduites ==========
+  const COMMON_ALLERGIES = useMemo(() => [
     t('allergies.penicillin'),
     t('allergies.aspirin'),
     t('allergies.nsaids'),
@@ -184,9 +151,9 @@ export default function ModernPatientForm({
     t('allergies.iodine'),
     t('allergies.localAnesthetics'),
     t('allergies.sulfonamides'),
-  ]
+  ], [t])
 
-  const COMMON_MEDICAL_HISTORY = [
+  const COMMON_MEDICAL_HISTORY = useMemo(() => [
     t('medicalConditions.hypertension'),
     t('medicalConditions.type2Diabetes'),
     t('medicalConditions.type1Diabetes'),
@@ -197,344 +164,12 @@ export default function ModernPatientForm({
     t('medicalConditions.migraine'),
     t('medicalConditions.gerd'),
     t('medicalConditions.highCholesterol'),
-  ]
-  
-  // Capture URL parameters immediately before they get cleared
-  const [urlData] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search)
-      const source = urlParams.get('source')
-      const patientDataParam = urlParams.get('patientData')
-      const doctorDataParam = urlParams.get('doctorData')
-      const doctorId = urlParams.get('doctorId')
-      
-      // Store doctor data in sessionStorage for use by consultation report
-      if (doctorDataParam) {
-        try {
-          const doctorData = JSON.parse(decodeURIComponent(doctorDataParam))
-          console.log('Doctor data received from URL:', doctorData)
-          
-          // Store doctor data with ID if available
-          const doctorInfo = {
-            ...doctorData,
-            id: doctorId || doctorData.id
-          }
-          
-          sessionStorage.setItem('tibokDoctorData', JSON.stringify(doctorInfo))
-          console.log('Doctor data stored in sessionStorage:', doctorInfo)
-        } catch (error) {
-          console.error('Error parsing doctor data from URL:', error)
-        }
-      }
-      
-      if (source === 'tibok' && patientDataParam) {
-        try {
-          return {
-            source,
-            patientData: JSON.parse(decodeURIComponent(patientDataParam))
-          }
-        } catch (e) {
-          console.error('Error parsing URL data:', e)
-        }
-      }
-    }
-    return null
-  })
+  ], [t])
 
-  const [formData, setFormData] = useState<PatientFormData>({
-    firstName: "",
-    lastName: "",
-    birthDate: "",
-    age: "",
-    gender: [],
-    otherGender: "",
-    weight: "",
-    height: "",
-    allergies: [],
-    otherAllergies: "",
-    medicalHistory: [],
-    otherMedicalHistory: "",
-    currentMedicationsText: "",
-    lifeHabits: {
-      smoking: "",
-      alcohol: "", 
-      physicalActivity: "",
-    },
-    // Initialize additional fields
-    address: "",
-    phone: "",
-    phoneNumber: "",
-    city: "",
-    country: "Maurice",
-    email: ""
-  })
-
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [allergySearch, setAllergySearch] = useState("")
-  const [historySearch, setHistorySearch] = useState("")
-  const [currentSection, setCurrentSection] = useState(0)
-
-  // Function to handle Enter key navigation
-  const handleEnterKeyNavigation = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      
-      // Get all focusable elements
-      const focusableElements = document.querySelectorAll(
-        'input:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      )
-      
-      const currentIndex = Array.from(focusableElements).indexOf(e.currentTarget)
-      
-      if (currentIndex !== -1 && currentIndex < focusableElements.length - 1) {
-        const nextElement = focusableElements[currentIndex + 1] as HTMLElement
-        nextElement.focus()
-      }
-    }
-  }
-
-  // Function to handle double click on checkboxes
-  const handleCheckboxDoubleClick = (checked: boolean, onChange: () => void, nextFocusId?: string) => {
-    onChange()
-    if (nextFocusId) {
-      setTimeout(() => {
-        const nextElement = document.getElementById(nextFocusId)
-        if (nextElement) {
-          nextElement.focus()
-        }
-      }, 100)
-    }
-  }
-
-  // Process data from URL or TIBOK hook
-  useEffect(() => {
-    const processPatientData = async () => {
-      console.log('Starting to process patient data')
-      console.log('URL data captured:', urlData)
-      console.log('Hook data:', tibokPatient)
-      
-      let patientInfo = null
-      let isTibok = false
-      
-      // Use captured URL data first
-      if (urlData && urlData.patientData) {
-        patientInfo = urlData.patientData
-        isTibok = true
-        console.log('Using patient data from captured URL:', patientInfo)
-      }
-      // If no URL data, try the hook data
-      else if (tibokPatient) {
-        patientInfo = tibokPatient
-        isTibok = isFromTibok
-        console.log('Using patient data from hook:', patientInfo)
-      }
-      
-      // Process the data if we have it
-      if (patientInfo && !dataProcessed) {
-        console.log('Processing patient info:', patientInfo)
-        
-        // Try to get additional data from database
-        let enhancedPatientInfo = { ...patientInfo }
-        
-        const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
-        if (currentConsultationId) {
-          try {
-            // Get consultation data which includes height/weight
-            const { data: consultation } = await supabase
-              .from('consultations')
-              .select('patient_id, patient_height, patient_weight')
-              .eq('id', currentConsultationId)
-              .single()
-            
-            if (consultation) {
-              // Use consultation data for height/weight if available
-              enhancedPatientInfo.height = consultation.patient_height || patientInfo.height || ''
-              enhancedPatientInfo.weight = consultation.patient_weight || patientInfo.weight || ''
-              
-              // Also get full patient data if we have patient_id
-              if (consultation.patient_id) {
-                const { data: dbPatient } = await supabase
-                  .from('patients')
-                  .select('height, weight, address, phone_number, city, country, email')
-                  .eq('id', consultation.patient_id)
-                  .single()
-                
-                if (dbPatient) {
-                  // Use consultation data first (most recent), then patient table, then original data
-                  enhancedPatientInfo.height = consultation.patient_height || dbPatient.height || patientInfo.height || ''
-                  enhancedPatientInfo.weight = consultation.patient_weight || dbPatient.weight || patientInfo.weight || ''
-                  enhancedPatientInfo.address = dbPatient.address || patientInfo.address || ''
-                  enhancedPatientInfo.phone = dbPatient.phone_number || patientInfo.phone || ''
-                  enhancedPatientInfo.phoneNumber = dbPatient.phone_number || patientInfo.phone || ''
-                  enhancedPatientInfo.city = dbPatient.city || patientInfo.city || ''
-                  enhancedPatientInfo.country = dbPatient.country || patientInfo.country || ''
-                  enhancedPatientInfo.email = dbPatient.email || patientInfo.email || ''
-                }
-              }
-            }
-          } catch (error) {
-            console.error('Error fetching additional patient data:', error)
-          }
-        }
-        
-        // Process birth date
-        let birthDateStr = ""
-        if (enhancedPatientInfo.dateOfBirth) {
-          birthDateStr = enhancedPatientInfo.dateOfBirth.split('T')[0]
-        } else if (enhancedPatientInfo.date_of_birth) {
-          birthDateStr = enhancedPatientInfo.date_of_birth.split('T')[0]
-        }
-        
-        // Process gender - Fixed to use proper translations
-        const genderArray: string[] = []
-        if (enhancedPatientInfo.gender) {
-          const gender = enhancedPatientInfo.gender
-          if (gender === 'Masculin' || gender === 'M' || gender.toLowerCase() === 'male' || gender.toLowerCase() === 'm') {
-            genderArray.push('Masculin') // Use French directly for API compatibility
-          } else if (gender === 'Féminin' || gender === 'F' || gender.toLowerCase() === 'female' || gender.toLowerCase() === 'f') {
-            genderArray.push('Féminin') // Use French directly for API compatibility
-          } else {
-            // Si c'est une autre valeur, la garder telle quelle
-            genderArray.push(gender)
-          }
-        }
-        
-        // Create new form data with enhanced info - FIXED VERSION
-        const newFormData: PatientFormData = {
-          firstName: enhancedPatientInfo.firstName || enhancedPatientInfo.first_name || "",
-          lastName: enhancedPatientInfo.lastName || enhancedPatientInfo.last_name || "",
-          birthDate: birthDateStr,
-          age: enhancedPatientInfo.age ? enhancedPatientInfo.age.toString() : "",
-          gender: genderArray,
-          otherGender: "",
-          weight: enhancedPatientInfo.weight ? enhancedPatientInfo.weight.toString() : "",
-          height: enhancedPatientInfo.height ? enhancedPatientInfo.height.toString() : "",
-          // Contact information - properly populated
-          phone: enhancedPatientInfo.phone_number || enhancedPatientInfo.phone || enhancedPatientInfo.phoneNumber || "",
-          phoneNumber: enhancedPatientInfo.phone_number || enhancedPatientInfo.phone || enhancedPatientInfo.phoneNumber || "",
-          email: enhancedPatientInfo.email || "",
-          address: enhancedPatientInfo.address || "",
-          city: enhancedPatientInfo.city || "",
-          country: enhancedPatientInfo.country || "Maurice",
-          // Medical information
-          allergies: [],
-          otherAllergies: "",
-          medicalHistory: [],
-          otherMedicalHistory: "",
-          currentMedicationsText: "",
-          lifeHabits: {
-            smoking: "",
-            alcohol: "", 
-            physicalActivity: "",
-          },
-        }
-        
-        console.log('Setting form data:', newFormData)
-        setFormData(newFormData)
-        setDataProcessed(true)
-        setIsLoadingPatientData(false)
-      } else if (!patientInfo) {
-        console.log('No patient data available')
-        setIsLoadingPatientData(false)
-      }
-    }
-    
-    // Process immediately
-    processPatientData()
-  }, [tibokPatient, isFromTibok, dataProcessed, urlData, t, consultationId])
-
-  // Load saved data if available
-  useEffect(() => {
-    const loadSavedData = async () => {
-      try {
-        if (dataProcessed) return
-        
-        const currentConsultationId = consultationId || consultationDataService.getCurrentConsultationId()
-        
-        if (currentConsultationId) {
-          const savedData = await consultationDataService.getAllData()
-          if (savedData?.patientData && !dataProcessed) {
-            setFormData(savedData.patientData)
-            setDataProcessed(true)
-          }
-        }
-      } catch (error) {
-        console.error('Error loading saved patient data:', error)
-      } finally {
-        setIsLoadingPatientData(false)
-      }
-    }
-    
-    if (!urlData && !tibokPatient) {
-      loadSavedData()
-    }
-  }, [consultationId, urlData, tibokPatient, dataProcessed])
-
-  // Save data when form changes - MODIFIÉ pour sauvegarder dans les deux formats
-  useEffect(() => {
-    const saveData = async () => {
-      try {
-        // Sauvegarder les données du formulaire original
-        await consultationDataService.saveStepData(0, formData)
-        
-        // Transformer et sauvegarder les données pour l'API
-        const transformedData = transformDataForAPI(formData)
-        
-        // Vérifier que le sexe est bien défini
-        if (!transformedData.sexe || transformedData.sexe === '') {
-          console.warn('Sexe non défini, utilisation de la valeur par défaut')
-          transformedData.sexe = 'Non renseigné'
-        }
-        
-        // Log pour debug
-        console.log('Données transformées pour l\'API:', {
-          nom: transformedData.nom,
-          prenom: transformedData.prenom,
-          age: transformedData.age,
-          sexe: transformedData.sexe
-        })
-        
-        // Sauvegarder dans un format spécifique pour l'API
-        const currentData = await consultationDataService.getAllData()
-        await consultationDataService.saveAllData({
-          ...currentData,
-          patientDataAPI: transformedData
-        })
-      } catch (error) {
-        console.error('Error saving patient data:', error)
-      }
-    }
-    
-    const timer = setTimeout(() => {
-      if (formData.firstName || formData.lastName) {
-        saveData()
-      }
-    }, 1000)
-    
-    return () => clearTimeout(timer)
-  }, [formData])
-
-  // Calculate form completion percentage
-  const calculateProgress = () => {
-    const fields = [
-      formData.firstName,
-      formData.lastName, 
-      formData.birthDate,
-      formData.gender.length > 0 ? "filled" : "",
-      formData.weight,
-      formData.height,
-      formData.lifeHabits.smoking,
-      formData.lifeHabits.alcohol,
-      formData.lifeHabits.physicalActivity,
-    ]
-    
-    const completed = fields.filter(field => field && field.toString().trim()).length
-    return Math.round((completed / fields.length) * 100)
-  }
-
-  // Calculate age from birth date
-  const calculateAge = (birthDate: string) => {
+  // ========== Fonctions utilitaires ==========
+  const calculateAge = useCallback((birthDate: string): string => {
     if (!birthDate) return ""
+    
     const today = new Date()
     const birth = new Date(birthDate)
     let age = today.getFullYear() - birth.getFullYear()
@@ -544,95 +179,199 @@ export default function ModernPatientForm({
       age--
     }
     
-    return age.toString()
-  }
+    return age >= 0 ? age.toString() : ""
+  }, [])
 
-  // Update age when birth date changes
-  useEffect(() => {
-    if (formData.birthDate) {
-      const calculatedAge = calculateAge(formData.birthDate)
-      if (calculatedAge !== formData.age) {
-        setFormData(prev => ({ ...prev, age: calculatedAge }))
-      }
-    }
-  }, [formData.birthDate, formData.age])
-
-  // Auto-save effect - MODIFIÉ pour envoyer les données transformées
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      // Toujours envoyer les données originales ET transformées
-      onDataChange(formData)
-      
-      // Sauvegarder aussi les données transformées séparément
-      const transformedData = transformDataForAPI(formData)
-      
-      // Log pour debug
-      if (formData.gender.length > 0 || formData.otherGender) {
-        console.log('Genre détecté:', {
-          original: formData.gender,
-          transformed: transformedData.sexe
-        })
-      }
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [formData, onDataChange])
-
-  const handleInputChange = (field: keyof PatientFormData, value: any) => {
-    const newData = { ...formData, [field]: value }
-    setFormData(newData)
-
-    if (errors[field]) {
-      setErrors({ ...errors, [field]: "" })
-    }
-  }
-
-  const handleGenderChange = (genderOption: string, checked: boolean) => {
-    // Déterminer la valeur française à stocker
-    let frenchGender = ''
-    if (genderOption === t('patientForm.male') || genderOption === 'Male' || genderOption === 'Masculin') {
-      frenchGender = 'Masculin'
-    } else if (genderOption === t('patientForm.female') || genderOption === 'Female' || genderOption === 'Féminin') {
-      frenchGender = 'Féminin'
-    } else {
-      frenchGender = genderOption
+  const calculateBMI = useCallback((): string | null => {
+    const weight = parseFloat(formData.weight)
+    const height = parseFloat(formData.height)
+    
+    if (!isNaN(weight) && !isNaN(height) && height > 0) {
+      const heightInMeters = height / 100
+      const bmi = weight / (heightInMeters * heightInMeters)
+      return bmi.toFixed(1)
     }
     
-    // Si on coche, on remplace tout par cette nouvelle valeur (radio behavior)
-    const newGender = checked ? [frenchGender] : []
+    return null
+  }, [formData.weight, formData.height])
 
-    const newData = { ...formData, gender: newGender }
-    setFormData(newData)
-  }
+  const getBMICategory = useCallback((bmi: number) => {
+    if (bmi < 18.5) return { 
+      text: t('patientForm.underweight'), 
+      color: "bg-blue-100 text-blue-800 border-blue-200", 
+      icon: "📉" 
+    }
+    if (bmi < 25) return { 
+      text: t('patientForm.normalWeight'), 
+      color: "bg-green-100 text-green-800 border-green-200", 
+      icon: "✅" 
+    }
+    if (bmi < 30) return { 
+      text: t('patientForm.overweight'), 
+      color: "bg-yellow-100 text-yellow-800 border-yellow-200", 
+      icon: "⚠️" 
+    }
+    return { 
+      text: t('patientForm.obesity'), 
+      color: "bg-red-100 text-red-800 border-red-200", 
+      icon: "🔴" 
+    }
+  }, [t])
 
-  const handleLifeHabitsChange = (field: keyof LifeHabits, value: string) => {
-    const newLifeHabits = { ...formData.lifeHabits, [field]: value }
-    const newData = { ...formData, lifeHabits: newLifeHabits }
-    setFormData(newData)
-  }
+  const calculateProgress = useCallback((): number => {
+    const requiredFields = [
+      formData.firstName,
+      formData.lastName,
+      formData.birthDate,
+      formData.gender,
+      formData.weight,
+      formData.height
+    ]
+    
+    const optionalFields = [
+      formData.phone,
+      formData.email,
+      formData.lifeHabits.smoking,
+      formData.lifeHabits.alcohol,
+      formData.lifeHabits.physicalActivity
+    ]
+    
+    const requiredCompleted = requiredFields.filter(field => field && field.trim()).length
+    const optionalCompleted = optionalFields.filter(field => field && field.trim()).length
+    
+    const totalFields = requiredFields.length + optionalFields.length
+    const totalCompleted = requiredCompleted + optionalCompleted
+    
+    return Math.round((totalCompleted / totalFields) * 100)
+  }, [formData])
 
-  const handleAllergyChange = (allergy: string, checked: boolean) => {
-    const newAllergies = checked 
-      ? [...formData.allergies, allergy] 
-      : formData.allergies.filter((a) => a !== allergy)
+  const normalizeGender = useCallback((gender: any): string => {
+    if (!gender) return ""
+    
+    const g = String(gender).toLowerCase().trim()
+    const maleVariants = ['m', 'male', 'masculin', 'homme', 'man']
+    const femaleVariants = ['f', 'female', 'féminin', 'femme', 'woman']
+    
+    if (maleVariants.includes(g)) return 'Masculin'
+    if (femaleVariants.includes(g)) return 'Féminin'
+    
+    return gender
+  }, [])
 
-    const newData = { ...formData, allergies: newAllergies }
-    setFormData(newData)
-  }
+  const transformDataForAPI = useCallback((data: PatientFormData) => {
+    const sexe = data.gender === 'Masculin' ? 'Masculin' : 
+                 data.gender === 'Féminin' ? 'Féminin' : 
+                 data.gender || 'Non renseigné'
 
-  const handleMedicalHistoryChange = (condition: string, checked: boolean) => {
-    const newHistory = checked
-      ? [...formData.medicalHistory, condition]
-      : formData.medicalHistory.filter((h) => h !== condition)
+    const allergiesArray = [...data.allergies]
+    if (data.otherAllergies?.trim()) {
+      allergiesArray.push(data.otherAllergies.trim())
+    }
 
-    const newData = { ...formData, medicalHistory: newHistory }
-    setFormData(newData)
-  }
+    const historyArray = [...data.medicalHistory]
+    if (data.otherMedicalHistory?.trim()) {
+      historyArray.push(data.otherMedicalHistory.trim())
+    }
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {}
+    return {
+      // Informations personnelles
+      nom: data.lastName || '',
+      prenom: data.firstName || '',
+      dateNaissance: data.birthDate || '',
+      age: data.age || '',
+      sexe: sexe,
+      sex: sexe,
+      gender: sexe,
+      
+      // Contact
+      telephone: data.phone || '',
+      email: data.email || '',
+      adresse: data.address || '',
+      ville: data.city || '',
+      pays: data.country || 'Maurice',
+      
+      // Données médicales
+      poids: data.weight || '',
+      taille: data.height || '',
+      allergies: allergiesArray.join(', ') || 'Aucune allergie connue',
+      antecedents: historyArray.join(', ') || 'Aucun antécédent notable',
+      medicamentsActuels: data.currentMedicationsText || 'Aucun',
+      
+      // Habitudes de vie
+      habitudes: {
+        tabac: data.lifeHabits.smoking || 'Non renseigné',
+        alcool: data.lifeHabits.alcohol || 'Non renseigné',
+        activitePhysique: data.lifeHabits.physicalActivity || 'Non renseignée'
+      }
+    }
+  }, [])
 
-    if (!formData.firstName.trim()) newErrors.firstName = t('patientForm.errors.firstNameRequired')
-    if (!formData.lastName.trim()) newErrors.lastName = t('patientForm.errors.lastNameRequired')
+  // ========== Gestionnaires d'événements ==========
+  const handleInputChange = useCallback((field: keyof PatientFormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[field]
+        return newErrors
+      })
+    }
+  }, [errors])
+
+  const handleLifeHabitsChange = useCallback((field: keyof LifeHabits, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      lifeHabits: { ...prev.lifeHabits, [field]: value }
+    }))
+  }, [])
+
+  const handleAllergyToggle = useCallback((allergy: string) => {
+    setFormData(prev => ({
+      ...prev,
+      allergies: prev.allergies.includes(allergy)
+        ? prev.allergies.filter(a => a !== allergy)
+        : [...prev.allergies, allergy]
+    }))
+  }, [])
+
+  const handleMedicalHistoryToggle = useCallback((condition: string) => {
+    setFormData(prev => ({
+      ...prev,
+      medicalHistory: prev.medicalHistory.includes(condition)
+        ? prev.medicalHistory.filter(h => h !== condition)
+        : [...prev.medicalHistory, condition]
+    }))
+  }, [])
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+      e.preventDefault()
+      const form = e.currentTarget.form
+      if (form) {
+        const elements = Array.from(form.elements) as HTMLElement[]
+        const currentIndex = elements.indexOf(e.currentTarget as HTMLElement)
+        const nextElement = elements[currentIndex + 1]
+        if (nextElement && 'focus' in nextElement) {
+          nextElement.focus()
+        }
+      }
+    }
+  }, [])
+
+  // ========== Validation ==========
+  const validateForm = useCallback((): boolean => {
+    const newErrors: ValidationErrors = {}
+
+    // Champs obligatoires
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = t('patientForm.errors.firstNameRequired')
+    }
+    
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = t('patientForm.errors.lastNameRequired')
+    }
+    
     if (!formData.birthDate) {
       newErrors.birthDate = t('patientForm.errors.birthDateRequired')
     } else {
@@ -641,70 +380,157 @@ export default function ModernPatientForm({
       if (birthDate > today) {
         newErrors.birthDate = t('patientForm.errors.futureBirthDate')
       }
-      const age = parseInt(formData.age)
-      if (age < 0 || age > 120) {
-        newErrors.birthDate = t('patientForm.errors.invalidAge')
-      }
     }
-    if (formData.gender.length === 0 && !formData.otherGender.trim()) {
+    
+    if (!formData.gender) {
       newErrors.gender = t('patientForm.errors.genderRequired')
     }
-    if (!formData.weight || Number.parseFloat(formData.weight) < 1 || Number.parseFloat(formData.weight) > 300) {
+    
+    const weight = parseFloat(formData.weight)
+    if (!formData.weight || isNaN(weight) || weight < 1 || weight > 500) {
       newErrors.weight = t('patientForm.errors.validWeightRequired')
     }
-    if (!formData.height || Number.parseFloat(formData.height) < 50 || Number.parseFloat(formData.height) > 250) {
+    
+    const height = parseFloat(formData.height)
+    if (!formData.height || isNaN(height) || height < 50 || height > 250) {
       newErrors.height = t('patientForm.errors.validHeightRequired')
+    }
+
+    // Email validation si fourni
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = t('patientForm.errors.invalidEmail')
     }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
-  }
+  }, [formData, t])
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (validateForm()) {
       onNext()
+    } else {
+      // Faire défiler jusqu'à la première erreur
+      const firstErrorField = Object.keys(errors)[0]
+      const element = document.getElementById(firstErrorField)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        element.focus()
+      }
     }
-  }
+  }, [validateForm, onNext, errors])
 
-  const calculateBMI = () => {
-    if (formData.weight && formData.height) {
-      const weight = Number.parseFloat(formData.weight)
-      const height = Number.parseFloat(formData.height) / 100
-      return (weight / (height * height)).toFixed(1)
+  // ========== Effets ==========
+  
+  // Mise à jour de l'âge quand la date de naissance change
+  useEffect(() => {
+    if (formData.birthDate) {
+      const newAge = calculateAge(formData.birthDate)
+      if (newAge !== formData.age) {
+        setFormData(prev => ({ ...prev, age: newAge }))
+      }
     }
-    return null
-  }
+  }, [formData.birthDate, formData.age, calculateAge])
 
-  const getBMICategory = (bmi: number) => {
-    if (bmi < 18.5) return { text: t('patientForm.underweight'), color: "bg-blue-100 text-blue-800", icon: "📉" }
-    if (bmi < 25) return { text: t('patientForm.normalWeight'), color: "bg-green-100 text-green-800", icon: "✅" }
-    if (bmi < 30) return { text: t('patientForm.overweight'), color: "bg-yellow-100 text-yellow-800", icon: "⚠️" }
-    return { text: t('patientForm.obesity'), color: "bg-red-100 text-red-800", icon: "🔴" }
-  }
+  // Initialisation des données
+  useEffect(() => {
+    const initializeData = async () => {
+      if (dataInitialized) return
+      
+      try {
+        setIsLoading(true)
+        
+        // 1. Vérifier les données de l'URL
+        const urlParams = new URLSearchParams(window.location.search)
+        const source = urlParams.get('source')
+        const patientDataParam = urlParams.get('patientData')
+        
+        let patientInfo = null
+        
+        // 2. Récupérer les données patient (URL ou TIBOK)
+        if (source === 'tibok' && patientDataParam) {
+          try {
+            patientInfo = JSON.parse(decodeURIComponent(patientDataParam))
+          } catch (e) {
+            console.error('Erreur parsing données URL:', e)
+          }
+        } else if (tibokPatient) {
+          patientInfo = tibokPatient
+        }
+        
+        // 3. Si on a des données patient, les utiliser
+        if (patientInfo) {
+          const newFormData: PatientFormData = {
+            firstName: patientInfo.firstName || patientInfo.first_name || "",
+            lastName: patientInfo.lastName || patientInfo.last_name || "",
+            birthDate: (patientInfo.dateOfBirth || patientInfo.date_of_birth || "").split('T')[0],
+            age: patientInfo.age?.toString() || "",
+            gender: normalizeGender(patientInfo.gender),
+            weight: patientInfo.weight?.toString() || "",
+            height: patientInfo.height?.toString() || "",
+            phone: patientInfo.phone || patientInfo.phone_number || patientInfo.phoneNumber || "",
+            email: patientInfo.email || "",
+            address: patientInfo.address || "",
+            city: patientInfo.city || "",
+            country: patientInfo.country || "Maurice",
+            allergies: [],
+            otherAllergies: "",
+            medicalHistory: [],
+            otherMedicalHistory: "",
+            currentMedicationsText: "",
+            lifeHabits: {
+              smoking: "",
+              alcohol: "",
+              physicalActivity: ""
+            }
+          }
+          
+          setFormData(newFormData)
+          setDataInitialized(true)
+        }
+        // 4. Sinon charger depuis la base de données
+        else if (consultationId) {
+          const savedData = await consultationDataService.getAllData()
+          if (savedData?.patientData) {
+            setFormData(prev => ({
+              ...prev,
+              ...savedData.patientData
+            }))
+            setDataInitialized(true)
+          }
+        }
+        
+      } catch (error) {
+        console.error('Erreur initialisation données:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    initializeData()
+  }, [consultationId, tibokPatient, dataInitialized, normalizeGender])
 
-  const bmi = calculateBMI()
-  const bmiCategory = bmi ? getBMICategory(Number.parseFloat(bmi)) : null
-  const progress = calculateProgress()
+  // Sauvegarde automatique
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (formData.firstName || formData.lastName) {
+        try {
+          // Sauvegarder les données
+          await consultationDataService.saveStepData(0, formData)
+          setLastSaved(new Date())
+          
+          // Notifier le parent
+          onDataChange(formData)
+        } catch (error) {
+          console.error('Erreur sauvegarde:', error)
+        }
+      }
+    }, 1000)
+    
+    return () => clearTimeout(timer)
+  }, [formData, onDataChange])
 
-  const filteredAllergies = COMMON_ALLERGIES.filter(allergy =>
-    allergy.toLowerCase().includes(allergySearch.toLowerCase())
-  )
-
-  const filteredHistory = COMMON_MEDICAL_HISTORY.filter(condition =>
-    condition.toLowerCase().includes(historySearch.toLowerCase())
-  )
-
-  const sections = [
-    { id: "identity", title: t('patientForm.personalInfo'), icon: User },
-    { id: "contact", title: t('patientForm.contactInfo'), icon: Phone },
-    { id: "allergies", title: t('patientForm.knownAllergies'), icon: AlertTriangle },
-    { id: "history", title: t('patientForm.medicalHistory'), icon: Heart },
-    { id: "medications", title: t('patientForm.currentMedications'), icon: Pill },
-    { id: "habits", title: t('patientForm.lifestyle'), icon: Activity },
-  ]
-
-  // Show loading state briefly
-  if (isLoadingPatientData) {
+  // ========== Rendu conditionnel ==========
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -715,11 +541,24 @@ export default function ModernPatientForm({
     )
   }
 
-  const showTibokNotification = dataProcessed && (isFromTibok || urlData?.source === 'tibok')
+  // ========== Variables calculées ==========
+  const bmi = calculateBMI()
+  const bmiCategory = bmi ? getBMICategory(parseFloat(bmi)) : null
+  const progress = calculateProgress()
+  const showTibokNotification = dataInitialized && isFromTibok
 
+  const filteredAllergies = COMMON_ALLERGIES.filter(allergy =>
+    allergy.toLowerCase().includes(allergySearch.toLowerCase())
+  )
+
+  const filteredHistory = COMMON_MEDICAL_HISTORY.filter(condition =>
+    condition.toLowerCase().includes(historySearch.toLowerCase())
+  )
+
+  // ========== Rendu principal ==========
   return (
-    <div className="space-y-6">
-      {/* Show notification if data is from TIBOK */}
+    <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+      {/* Notification TIBOK */}
       {showTibokNotification && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center gap-2">
@@ -731,7 +570,7 @@ export default function ModernPatientForm({
         </div>
       )}
 
-      {/* Header with Progress */}
+      {/* En-tête avec progression */}
       <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
@@ -748,11 +587,12 @@ export default function ModernPatientForm({
         </CardHeader>
       </Card>
 
-      {/* Quick Navigation */}
+      {/* Navigation rapide */}
       <div className="flex flex-wrap gap-2 justify-center">
-        {sections.map((section, index) => (
+        {SECTIONS.map((section, index) => (
           <button
             key={section.id}
+            type="button"
             onClick={() => setCurrentSection(index)}
             className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
               currentSection === index
@@ -761,13 +601,13 @@ export default function ModernPatientForm({
             }`}
           >
             <section.icon className="h-4 w-4" />
-            <span className="text-sm font-medium">{section.title}</span>
+            <span className="text-sm font-medium">{t(section.titleKey)}</span>
           </button>
         ))}
       </div>
 
       {/* Section 1: Identité */}
-      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
+      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <User className="h-6 w-6" />
@@ -782,16 +622,11 @@ export default function ModernPatientForm({
               </Label>
               <Input
                 id="firstName"
-                name="firstName"
-                type="text"
                 value={formData.firstName}
                 onChange={(e) => handleInputChange("firstName", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
-                className={`transition-all duration-200 ${
-                  errors.firstName 
-                    ? "border-red-500 focus:ring-red-200" 
-                    : "focus:ring-blue-200 border-gray-300"
-                }`}
+                onKeyDown={handleKeyDown}
+                className={errors.firstName ? "border-red-500" : ""}
+                placeholder={t('patientForm.firstNamePlaceholder')}
               />
               {errors.firstName && (
                 <p className="text-sm text-red-500 flex items-center gap-1">
@@ -807,16 +642,11 @@ export default function ModernPatientForm({
               </Label>
               <Input
                 id="lastName"
-                name="lastName"
-                type="text"
                 value={formData.lastName}
                 onChange={(e) => handleInputChange("lastName", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
-                className={`transition-all duration-200 ${
-                  errors.lastName 
-                    ? "border-red-500 focus:ring-red-200" 
-                    : "focus:ring-blue-200 border-gray-300"
-                }`}
+                onKeyDown={handleKeyDown}
+                className={errors.lastName ? "border-red-500" : ""}
+                placeholder={t('patientForm.lastNamePlaceholder')}
               />
               {errors.lastName && (
                 <p className="text-sm text-red-500 flex items-center gap-1">
@@ -834,16 +664,12 @@ export default function ModernPatientForm({
               </Label>
               <Input
                 id="birthDate"
-                name="birthDate"
                 type="date"
                 value={formData.birthDate}
                 onChange={(e) => handleInputChange("birthDate", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
-                className={`transition-all duration-200 ${
-                  errors.birthDate 
-                    ? "border-red-500 focus:ring-red-200" 
-                    : "focus:ring-blue-200 border-gray-300"
-                }`}
+                onKeyDown={handleKeyDown}
+                className={errors.birthDate ? "border-red-500" : ""}
+                max={new Date().toISOString().split('T')[0]}
               />
               {errors.birthDate && (
                 <p className="text-sm text-red-500 flex items-center gap-1">
@@ -854,10 +680,8 @@ export default function ModernPatientForm({
             </div>
 
             <div className="space-y-2">
-              <Label className="flex items-center gap-2 font-medium">
-                {t('patientForm.calculatedAge')}
-              </Label>
-              <div className="flex items-center h-10 px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
+              <Label className="font-medium">{t('patientForm.calculatedAge')}</Label>
+              <div className="flex items-center h-10 px-3 py-2 border rounded-md bg-gray-50">
                 <span className="text-gray-700 font-medium">
                   {formData.age ? `${formData.age} ${t('patientForm.years')}` : "—"}
                 </span>
@@ -870,73 +694,36 @@ export default function ModernPatientForm({
               {t('patientForm.gender')} <span className="text-red-500">*</span>
             </Label>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[t('patientForm.male'), t('patientForm.female')].map((genderOption, index) => {
-                // Vérifier si ce genre est sélectionné
-                const isSelected = formData.gender.includes('Masculin') && (genderOption === t('patientForm.male') || genderOption === 'Masculin') ||
-                                 formData.gender.includes('Féminin') && (genderOption === t('patientForm.female') || genderOption === 'Féminin')
-                
-                return (
-                  <div
-                    key={genderOption}
-                    className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
-                      isSelected
-                        ? "border-blue-300 bg-blue-50 shadow-md"
-                        : "border-gray-200 hover:border-blue-200 hover:bg-blue-25"
-                    }`}
-                    onClick={() => handleGenderChange(genderOption, !isSelected)}
-                    onDoubleClick={() => handleCheckboxDoubleClick(
-                      !isSelected,
-                      () => handleGenderChange(genderOption, !isSelected),
-                      index === 0 ? "otherGender" : "weight"
-                    )}
-                  >
-                    <Checkbox
-                      id={`gender-${genderOption}`}
-                      checked={isSelected}
-                      onCheckedChange={(checked) => handleGenderChange(genderOption, checked as boolean)}
-                    />
-                    <Label htmlFor={`gender-${genderOption}`} className="text-sm font-medium cursor-pointer">
-                      {genderOption}
-                    </Label>
-                  </div>
-                )
-              })}
-            </div>
+            <RadioGroup
+              value={formData.gender}
+              onValueChange={(value) => handleInputChange("gender", value)}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label 
+                  htmlFor="gender-male"
+                  className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                    formData.gender === 'Masculin' 
+                      ? "border-blue-500 bg-blue-50" 
+                      : "border-gray-200 hover:border-blue-300"
+                  }`}
+                >
+                  <RadioGroupItem value="Masculin" id="gender-male" />
+                  <span className="text-sm font-medium">{t('patientForm.male')}</span>
+                </label>
 
-            <div className="space-y-2">
-              <Label htmlFor="otherGender" className="font-medium">{t('patientForm.otherSpecify')}</Label>
-              <Input
-                id="otherGender"
-                name="otherGender"
-                value={formData.otherGender}
-                onChange={(e) => handleInputChange("otherGender", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
-                className="transition-all duration-200 focus:ring-blue-200"
-              />
-            </div>
-
-            {(formData.gender.length > 0 || formData.otherGender) && (
-              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <User className="h-4 w-4 text-blue-600" />
-                  <p className="font-semibold text-blue-800">{t('patientForm.declaredGender')}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {formData.gender.map((gender) => (
-                    <Badge key={gender} className="bg-blue-100 text-blue-800 text-xs">
-                      {gender === 'Masculin' ? t('patientForm.male') : 
-                       gender === 'Féminin' ? t('patientForm.female') : gender}
-                    </Badge>
-                  ))}
-                  {formData.otherGender && (
-                    <Badge className="bg-blue-100 text-blue-800 text-xs">
-                      {formData.otherGender}
-                    </Badge>
-                  )}
-                </div>
+                <label 
+                  htmlFor="gender-female"
+                  className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                    formData.gender === 'Féminin' 
+                      ? "border-pink-500 bg-pink-50" 
+                      : "border-gray-200 hover:border-pink-300"
+                  }`}
+                >
+                  <RadioGroupItem value="Féminin" id="gender-female" />
+                  <span className="text-sm font-medium">{t('patientForm.female')}</span>
+                </label>
               </div>
-            )}
+            </RadioGroup>
 
             {errors.gender && (
               <p className="text-sm text-red-500 flex items-center gap-1">
@@ -953,19 +740,15 @@ export default function ModernPatientForm({
               </Label>
               <Input
                 id="weight"
-                name="weight"
                 type="number"
                 value={formData.weight}
                 onChange={(e) => handleInputChange("weight", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
+                onKeyDown={handleKeyDown}
                 min="1"
-                max="300"
+                max="500"
                 step="0.1"
-                className={`transition-all duration-200 ${
-                  errors.weight 
-                    ? "border-red-500 focus:ring-red-200" 
-                    : "focus:ring-blue-200 border-gray-300"
-                }`}
+                className={errors.weight ? "border-red-500" : ""}
+                placeholder="70.5"
               />
               {errors.weight && (
                 <p className="text-sm text-red-500 flex items-center gap-1">
@@ -981,18 +764,14 @@ export default function ModernPatientForm({
               </Label>
               <Input
                 id="height"
-                name="height"
                 type="number"
                 value={formData.height}
                 onChange={(e) => handleInputChange("height", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
+                onKeyDown={handleKeyDown}
                 min="50"
                 max="250"
-                className={`transition-all duration-200 ${
-                  errors.height 
-                    ? "border-red-500 focus:ring-red-200" 
-                    : "focus:ring-blue-200 border-gray-300"
-                }`}
+                className={errors.height ? "border-red-500" : ""}
+                placeholder="175"
               />
               {errors.height && (
                 <p className="text-sm text-red-500 flex items-center gap-1">
@@ -1003,13 +782,13 @@ export default function ModernPatientForm({
             </div>
           </div>
 
-          {bmi && (
-            <div className={`p-4 rounded-lg border-2 ${bmiCategory?.color} transition-all duration-300`}>
+          {bmi && bmiCategory && (
+            <div className={`p-4 rounded-lg border-2 ${bmiCategory.color} transition-all`}>
               <div className="flex items-center gap-3">
-                <span className="text-2xl">{bmiCategory?.icon}</span>
+                <span className="text-2xl">{bmiCategory.icon}</span>
                 <div>
                   <p className="font-semibold">{t('patientForm.bmi')}: {bmi} kg/m²</p>
-                  <p className="text-sm">{bmiCategory?.text}</p>
+                  <p className="text-sm">{bmiCategory.text}</p>
                 </div>
               </div>
             </div>
@@ -1017,8 +796,8 @@ export default function ModernPatientForm({
         </CardContent>
       </Card>
 
-      {/* Section 2: Contact Information */}
-      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
+      {/* Section 2: Contact */}
+      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <Phone className="h-6 w-6" />
@@ -1034,13 +813,11 @@ export default function ModernPatientForm({
               </Label>
               <Input
                 id="phone"
-                name="phone"
                 type="tel"
-                value={formData.phone || ''}
+                value={formData.phone}
                 onChange={(e) => handleInputChange("phone", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
+                onKeyDown={handleKeyDown}
                 placeholder="+230 5XXX XXXX"
-                className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
               />
             </div>
 
@@ -1051,14 +828,19 @@ export default function ModernPatientForm({
               </Label>
               <Input
                 id="email"
-                name="email"
                 type="email"
-                value={formData.email || ''}
+                value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
-                placeholder="email@example.com"
-                className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
+                onKeyDown={handleKeyDown}
+                placeholder="patient@example.com"
+                className={errors.email ? "border-red-500" : ""}
               />
+              {errors.email && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <X className="h-3 w-3" />
+                  {errors.email}
+                </p>
+              )}
             </div>
           </div>
 
@@ -1069,13 +851,11 @@ export default function ModernPatientForm({
             </Label>
             <Textarea
               id="address"
-              name="address"
-              value={formData.address || ''}
+              value={formData.address}
               onChange={(e) => handleInputChange("address", e.target.value)}
-              onKeyDown={handleEnterKeyNavigation}
               placeholder={t('patientForm.addressPlaceholder')}
               rows={2}
-              className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
+              className="resize-none"
             />
           </div>
 
@@ -1087,13 +867,10 @@ export default function ModernPatientForm({
               </Label>
               <Input
                 id="city"
-                name="city"
-                type="text"
-                value={formData.city || ''}
+                value={formData.city}
                 onChange={(e) => handleInputChange("city", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
-                placeholder="Port Louis, Curepipe, etc."
-                className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
+                onKeyDown={handleKeyDown}
+                placeholder="Port Louis"
               />
             </div>
 
@@ -1104,12 +881,10 @@ export default function ModernPatientForm({
               </Label>
               <Input
                 id="country"
-                name="country"
-                type="text"
-                value={formData.country || ''}
+                value={formData.country}
                 onChange={(e) => handleInputChange("country", e.target.value)}
-                onKeyDown={handleEnterKeyNavigation}
-                className="transition-all duration-200 focus:ring-indigo-200 border-gray-300"
+                onKeyDown={handleKeyDown}
+                placeholder="Maurice"
               />
             </div>
           </div>
@@ -1117,7 +892,7 @@ export default function ModernPatientForm({
       </Card>
 
       {/* Section 3: Allergies */}
-      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
+      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <AlertTriangle className="h-6 w-6" />
@@ -1131,48 +906,38 @@ export default function ModernPatientForm({
               placeholder={t('patientForm.searchAllergy')}
               value={allergySearch}
               onChange={(e) => setAllergySearch(e.target.value)}
-              onKeyDown={handleEnterKeyNavigation}
               className="pl-10"
             />
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {filteredAllergies.map((allergy, index) => (
-              <div
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {filteredAllergies.map((allergy) => (
+              <label
                 key={allergy}
-                className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
+                className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
                   formData.allergies.includes(allergy)
-                    ? "border-red-300 bg-red-50 shadow-md"
-                    : "border-gray-200 hover:border-red-200 hover:bg-red-25"
+                    ? "border-red-400 bg-red-50"
+                    : "border-gray-200 hover:border-red-300 hover:bg-red-50/50"
                 }`}
-                onClick={() => handleAllergyChange(allergy, !formData.allergies.includes(allergy))}
-                onDoubleClick={() => handleCheckboxDoubleClick(
-                  !formData.allergies.includes(allergy),
-                  () => handleAllergyChange(allergy, !formData.allergies.includes(allergy)),
-                  index < filteredAllergies.length - 1 ? `allergy-${filteredAllergies[index + 1]}` : "otherAllergies"
-                )}
               >
                 <Checkbox
-                  id={`allergy-${allergy}`}
                   checked={formData.allergies.includes(allergy)}
-                  onCheckedChange={(checked) => handleAllergyChange(allergy, checked as boolean)}
+                  onCheckedChange={() => handleAllergyToggle(allergy)}
                 />
-                <Label htmlFor={`allergy-${allergy}`} className="text-sm font-medium cursor-pointer">
-                  {allergy}
-                </Label>
-              </div>
+                <span className="text-sm font-medium">{allergy}</span>
+              </label>
             ))}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="otherAllergies" className="font-medium">{t('patientForm.otherAllergies')}</Label>
+            <Label htmlFor="otherAllergies">{t('patientForm.otherAllergies')}</Label>
             <Textarea
               id="otherAllergies"
               value={formData.otherAllergies}
               onChange={(e) => handleInputChange("otherAllergies", e.target.value)}
-              onKeyDown={handleEnterKeyNavigation}
+              placeholder={t('patientForm.otherAllergiesPlaceholder')}
               rows={3}
-              className="transition-all duration-200 focus:ring-red-200"
+              className="resize-none"
             />
           </div>
 
@@ -1200,7 +965,7 @@ export default function ModernPatientForm({
       </Card>
 
       {/* Section 4: Antécédents médicaux */}
-      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
+      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <Heart className="h-6 w-6" />
@@ -1214,48 +979,38 @@ export default function ModernPatientForm({
               placeholder={t('patientForm.searchMedicalHistory')}
               value={historySearch}
               onChange={(e) => setHistorySearch(e.target.value)}
-              onKeyDown={handleEnterKeyNavigation}
               className="pl-10"
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredHistory.map((condition, index) => (
-              <div
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {filteredHistory.map((condition) => (
+              <label
                 key={condition}
-                className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
+                className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
                   formData.medicalHistory.includes(condition)
-                    ? "border-purple-300 bg-purple-50 shadow-md"
-                    : "border-gray-200 hover:border-purple-200 hover:bg-purple-25"
+                    ? "border-purple-400 bg-purple-50"
+                    : "border-gray-200 hover:border-purple-300 hover:bg-purple-50/50"
                 }`}
-                onClick={() => handleMedicalHistoryChange(condition, !formData.medicalHistory.includes(condition))}
-                onDoubleClick={() => handleCheckboxDoubleClick(
-                  !formData.medicalHistory.includes(condition),
-                  () => handleMedicalHistoryChange(condition, !formData.medicalHistory.includes(condition)),
-                  index < filteredHistory.length - 1 ? `history-${filteredHistory[index + 1]}` : "otherMedicalHistory"
-                )}
               >
                 <Checkbox
-                  id={`history-${condition}`}
                   checked={formData.medicalHistory.includes(condition)}
-                  onCheckedChange={(checked) => handleMedicalHistoryChange(condition, checked as boolean)}
+                  onCheckedChange={() => handleMedicalHistoryToggle(condition)}
                 />
-                <Label htmlFor={`history-${condition}`} className="text-sm font-medium cursor-pointer">
-                  {condition}
-                </Label>
-              </div>
+                <span className="text-sm font-medium">{condition}</span>
+              </label>
             ))}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="otherMedicalHistory" className="font-medium">{t('patientForm.otherMedicalHistory')}</Label>
+            <Label htmlFor="otherMedicalHistory">{t('patientForm.otherMedicalHistory')}</Label>
             <Textarea
               id="otherMedicalHistory"
               value={formData.otherMedicalHistory}
               onChange={(e) => handleInputChange("otherMedicalHistory", e.target.value)}
-              onKeyDown={handleEnterKeyNavigation}
+              placeholder={t('patientForm.otherMedicalHistoryPlaceholder')}
               rows={3}
-              className="transition-all duration-200 focus:ring-purple-200"
+              className="resize-none"
             />
           </div>
 
@@ -1273,7 +1028,7 @@ export default function ModernPatientForm({
                 ))}
                 {formData.otherMedicalHistory && (
                   <Badge className="bg-purple-100 text-purple-800 text-xs">
-                    {t('patientForm.otherMedicalHistory')}
+                    {t('patientForm.other')}
                   </Badge>
                 )}
               </div>
@@ -1282,8 +1037,8 @@ export default function ModernPatientForm({
         </CardContent>
       </Card>
 
-      {/* Section 5: Médicaments */}
-      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
+      {/* Section 5: Médicaments actuels */}
+      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <Pill className="h-6 w-6" />
@@ -1292,18 +1047,16 @@ export default function ModernPatientForm({
         </CardHeader>
         <CardContent className="p-6 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="currentMedicationsText" className="font-medium">
-              {t('patientForm.ongoingTreatments')}
-            </Label>
+            <Label htmlFor="currentMedicationsText">{t('patientForm.ongoingTreatments')}</Label>
             <Textarea
               id="currentMedicationsText"
               value={formData.currentMedicationsText}
               onChange={(e) => handleInputChange("currentMedicationsText", e.target.value)}
-              onKeyDown={handleEnterKeyNavigation}
               placeholder={t('patientForm.medicationPlaceholder')}
               rows={6}
-              className="resize-y transition-all duration-200 focus:ring-green-200"
+              className="font-mono text-sm"
             />
+            <p className="text-xs text-gray-500">{t('patientForm.medicationHelp')}</p>
           </div>
 
           {formData.currentMedicationsText && (
@@ -1311,7 +1064,9 @@ export default function ModernPatientForm({
               <div className="flex items-center gap-2">
                 <Check className="h-5 w-5 text-green-600" />
                 <p className="font-semibold text-green-800">
-                  {t('patientForm.treatmentsEntered')} ({formData.currentMedicationsText.split("\n").filter((line) => line.trim()).length} {t('patientForm.lines')})
+                  {t('patientForm.treatmentsEntered')} (
+                  {formData.currentMedicationsText.split('\n').filter(line => line.trim()).length} 
+                  {' '}{t('patientForm.lines')})
                 </p>
               </div>
             </div>
@@ -1320,7 +1075,7 @@ export default function ModernPatientForm({
       </Card>
 
       {/* Section 6: Habitudes de vie */}
-      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
+      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
             <Activity className="h-6 w-6" />
@@ -1329,77 +1084,89 @@ export default function ModernPatientForm({
         </CardHeader>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Tabac */}
             <div className="space-y-4">
-              <Label className="font-medium text-lg">🚬 {t('patientForm.tobacco')}</Label>
+              <Label className="font-medium text-lg flex items-center gap-2">
+                🚬 {t('patientForm.tobacco')}
+              </Label>
               <RadioGroup
                 value={formData.lifeHabits.smoking}
                 onValueChange={(value) => handleLifeHabitsChange("smoking", value)}
-                className="space-y-3"
               >
-                {[t('patientForm.nonSmoker'), t('patientForm.currentSmoker'), t('patientForm.exSmoker')].map((option) => (
-                  <div
-                    key={option}
-                    className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
-                      formData.lifeHabits.smoking === option
-                        ? "border-orange-300 bg-orange-50 shadow-md"
-                        : "border-gray-200 hover:border-orange-200"
+                {[
+                  { value: 'non', label: t('patientForm.nonSmoker') },
+                  { value: 'actuel', label: t('patientForm.currentSmoker') },
+                  { value: 'ancien', label: t('patientForm.exSmoker') }
+                ].map(option => (
+                  <label 
+                    key={option.value}
+                    className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
+                      formData.lifeHabits.smoking === option.value
+                        ? "border-orange-400 bg-orange-50"
+                        : "border-gray-200 hover:border-orange-300"
                     }`}
                   >
-                    <RadioGroupItem value={option} id={`smoking-${option}`} />
-                    <Label htmlFor={`smoking-${option}`} className="text-sm font-medium cursor-pointer">
-                      {option}
-                    </Label>
-                  </div>
+                    <RadioGroupItem value={option.value} id={`smoking-${option.value}`} />
+                    <span className="text-sm font-medium">{option.label}</span>
+                  </label>
                 ))}
               </RadioGroup>
             </div>
 
+            {/* Alcool */}
             <div className="space-y-4">
-              <Label className="font-medium text-lg">🍷 {t('patientForm.alcohol')}</Label>
+              <Label className="font-medium text-lg flex items-center gap-2">
+                🍷 {t('patientForm.alcohol')}
+              </Label>
               <RadioGroup
                 value={formData.lifeHabits.alcohol}
                 onValueChange={(value) => handleLifeHabitsChange("alcohol", value)}
-                className="space-y-3"
               >
-                {[t('patientForm.never'), t('patientForm.occasional'), t('patientForm.regular')].map((option) => (
-                  <div
-                    key={option}
-                    className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
-                      formData.lifeHabits.alcohol === option
-                        ? "border-orange-300 bg-orange-50 shadow-md"
-                        : "border-gray-200 hover:border-orange-200"
+                {[
+                  { value: 'jamais', label: t('patientForm.never') },
+                  { value: 'occasionnel', label: t('patientForm.occasional') },
+                  { value: 'regulier', label: t('patientForm.regular') }
+                ].map(option => (
+                  <label 
+                    key={option.value}
+                    className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
+                      formData.lifeHabits.alcohol === option.value
+                        ? "border-orange-400 bg-orange-50"
+                        : "border-gray-200 hover:border-orange-300"
                     }`}
                   >
-                    <RadioGroupItem value={option} id={`alcohol-${option}`} />
-                    <Label htmlFor={`alcohol-${option}`} className="text-sm font-medium cursor-pointer">
-                      {option}
-                    </Label>
-                  </div>
+                    <RadioGroupItem value={option.value} id={`alcohol-${option.value}`} />
+                    <span className="text-sm font-medium">{option.label}</span>
+                  </label>
                 ))}
               </RadioGroup>
             </div>
 
+            {/* Activité physique */}
             <div className="space-y-4">
-              <Label className="font-medium text-lg">🏃 {t('patientForm.physicalActivity')}</Label>
+              <Label className="font-medium text-lg flex items-center gap-2">
+                🏃 {t('patientForm.physicalActivity')}
+              </Label>
               <RadioGroup
                 value={formData.lifeHabits.physicalActivity}
                 onValueChange={(value) => handleLifeHabitsChange("physicalActivity", value)}
-                className="space-y-3"
               >
-                {[t('patientForm.sedentary'), t('patientForm.moderate'), t('patientForm.intense')].map((option) => (
-                  <div
-                    key={option}
-                    className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
-                      formData.lifeHabits.physicalActivity === option
-                        ? "border-orange-300 bg-orange-50 shadow-md"
-                        : "border-gray-200 hover:border-orange-200"
+                {[
+                  { value: 'sedentaire', label: t('patientForm.sedentary') },
+                  { value: 'moderee', label: t('patientForm.moderate') },
+                  { value: 'intense', label: t('patientForm.intense') }
+                ].map(option => (
+                  <label 
+                    key={option.value}
+                    className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
+                      formData.lifeHabits.physicalActivity === option.value
+                        ? "border-orange-400 bg-orange-50"
+                        : "border-gray-200 hover:border-orange-300"
                     }`}
                   >
-                    <RadioGroupItem value={option} id={`activity-${option}`} />
-                    <Label htmlFor={`activity-${option}`} className="text-sm font-medium cursor-pointer">
-                      {option}
-                    </Label>
-                  </div>
+                    <RadioGroupItem value={option.value} id={`activity-${option.value}`} />
+                    <span className="text-sm font-medium">{option.label}</span>
+                  </label>
                 ))}
               </RadioGroup>
             </div>
@@ -1407,18 +1174,25 @@ export default function ModernPatientForm({
         </CardContent>
       </Card>
 
-      {/* Auto-save indicator */}
+      {/* Indicateur de sauvegarde automatique */}
       <div className="flex justify-center">
         <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-sm text-gray-600">{t('common.autoSave')}</span>
+          <span className="text-sm text-gray-600">
+            {t('common.autoSave')}
+            {lastSaved && (
+              <span className="ml-2 text-xs text-gray-500">
+                ({new Date(lastSaved).toLocaleTimeString()})
+              </span>
+            )}
+          </span>
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className="flex justify-center">
+      {/* Bouton de soumission */}
+      <div className="flex justify-center pt-4">
         <Button 
-          onClick={handleSubmit} 
+          type="submit"
           size="lg"
           className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
         >
@@ -1426,6 +1200,6 @@ export default function ModernPatientForm({
           <ArrowRight className="h-5 w-5 ml-2" />
         </Button>
       </div>
-    </div>
+    </form>
   )
 }
