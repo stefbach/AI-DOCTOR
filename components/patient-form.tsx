@@ -459,6 +459,15 @@ export default function ModernPatientForm({
         
         // 3. If we have patient data, use it
         if (patientInfo) {
+          console.log('🔄 Auto-filling patient form with TIBOK data:', {
+            allergies: patientInfo.allergies,
+            medicalHistory: patientInfo.medicalHistory, 
+            currentMedications: patientInfo.currentMedications,
+            smokingStatus: patientInfo.smokingStatus,
+            alcoholConsumption: patientInfo.alcoholConsumption,
+            physicalActivity: patientInfo.physicalActivity
+          })
+
           const newFormData: PatientFormData = {
             firstName: patientInfo.firstName || patientInfo.first_name || "",
             lastName: patientInfo.lastName || patientInfo.last_name || "",
@@ -472,17 +481,28 @@ export default function ModernPatientForm({
             address: patientInfo.address || "",
             city: patientInfo.city || "",
             country: patientInfo.country || "Mauritius",
-            allergies: [],
-            otherAllergies: "",
-            medicalHistory: [],
-            otherMedicalHistory: "",
-            currentMedicationsText: "",
+            
+            // 🎯 AUTO-FILL MEDICAL DATA FROM TIBOK
+            allergies: Array.isArray(patientInfo.allergies) ? patientInfo.allergies : [],
+            otherAllergies: patientInfo.otherAllergies || "",
+            medicalHistory: Array.isArray(patientInfo.medicalHistory) ? patientInfo.medicalHistory : [],
+            otherMedicalHistory: patientInfo.otherMedicalHistory || "",
+            currentMedicationsText: patientInfo.currentMedications || "",
+            
+            // 🎯 AUTO-FILL LIFESTYLE DATA FROM TIBOK
             lifeHabits: {
-              smoking: "",
-              alcohol: "",
-              physicalActivity: ""
+              smoking: patientInfo.smokingStatus || "",
+              alcohol: patientInfo.alcoholConsumption || "", 
+              physicalActivity: patientInfo.physicalActivity || ""
             }
           }
+          
+          console.log('✅ Patient form auto-filled successfully:', {
+            allergiesCount: newFormData.allergies.length,
+            medicalHistoryCount: newFormData.medicalHistory.length,
+            hasMedications: !!newFormData.currentMedicationsText,
+            hasLifestyle: !!(newFormData.lifeHabits.smoking || newFormData.lifeHabits.alcohol || newFormData.lifeHabits.physicalActivity)
+          })
           
           setFormData(newFormData)
           setDataInitialized(true)
