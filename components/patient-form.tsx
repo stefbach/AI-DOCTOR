@@ -517,6 +517,65 @@ export default function ModernPatientForm({
             physicalActivity: patientInfo.physicalActivity
           })
 
+          // ✅ NORMALIZE ALLERGIES - Map TIBOK values to form values
+          const normalizedAllergies = Array.isArray(patientInfo.allergies) 
+            ? patientInfo.allergies.map(allergy => {
+                // Map TIBOK allergy values to form values
+                switch(allergy.toLowerCase()) {
+                  case 'aspirin': return 'Aspirin'
+                  case 'aspirine': return 'Aspirin'
+                  case 'penicillin': return 'Penicillin'
+                  case 'pénicilline': return 'Penicillin'
+                  case 'ibuprofen': return 'NSAIDs (Ibuprofen, Diclofenac)'
+                  case 'ibuprofène': return 'NSAIDs (Ibuprofen, Diclofenac)'
+                  case 'nsaids (ibuprofen, diclofenac)': return 'NSAIDs (Ibuprofen, Diclofenac)'
+                  case 'anti-inflammatoires (ibuprofène, diclofénac)': return 'NSAIDs (Ibuprofen, Diclofenac)'
+                  case 'codeine': return 'Codeine'
+                  case 'codéine': return 'Codeine'
+                  case 'latex': return 'Latex'
+                  case 'iodine': return 'Iodine'
+                  case 'iode': return 'Iodine'
+                  case 'local anesthetics': return 'Local anesthetics'
+                  case 'anesthésiques locaux': return 'Local anesthetics'
+                  case 'sulfonamides': return 'Sulfonamides'
+                  case 'sulfamides': return 'Sulfonamides'
+                  default: return allergy // Keep original if no mapping found
+                }
+              })
+            : []
+
+          // ✅ NORMALIZE MEDICAL HISTORY - Map TIBOK values to form values  
+          const normalizedMedicalHistory = Array.isArray(patientInfo.medicalHistory)
+            ? patientInfo.medicalHistory.map(condition => {
+                // Map TIBOK medical history values to form values
+                switch(condition.toLowerCase()) {
+                  case 'type 1 diabetes': return 'Type 1 Diabetes'
+                  case 'diabète de type 1': return 'Type 1 Diabetes'
+                  case 'type 2 diabetes': return 'Type 2 Diabetes'
+                  case 'diabète de type 2': return 'Type 2 Diabetes'
+                  case 'hypertension': return 'Hypertension'
+                  case 'asthma': return 'Asthma'
+                  case 'asthme': return 'Asthma'
+                  case 'heart disease': return 'Heart disease'
+                  case 'maladie cardiaque': return 'Heart disease'
+                  case 'depression/anxiety': return 'Depression/Anxiety'
+                  case 'dépression/anxiété': return 'Depression/Anxiety'
+                  case 'depression': return 'Depression/Anxiety'
+                  case 'dépression': return 'Depression/Anxiety'
+                  case 'anxiety': return 'Depression/Anxiety'
+                  case 'anxiété': return 'Depression/Anxiety'
+                  case 'arthritis': return 'Arthritis'
+                  case 'arthrite': return 'Arthritis'
+                  case 'migraine': return 'Migraine'
+                  case 'gerd (gastroesophageal reflux)': return 'GERD (Gastroesophageal reflux)'
+                  case 'reflux gastro-œsophagien': return 'GERD (Gastroesophageal reflux)'
+                  case 'high cholesterol': return 'High cholesterol'
+                  case 'cholestérol élevé': return 'High cholesterol'
+                  default: return condition // Keep original if no mapping found
+                }
+              })
+            : []
+
           // ✅ FIXED: Map lifestyle data properly
           const mappedLifestyle = {
             smoking: mapSmokingStatus(patientInfo.smokingStatus),
@@ -524,13 +583,17 @@ export default function ModernPatientForm({
             physicalActivity: mapPhysicalActivity(patientInfo.physicalActivity)
           }
 
-          console.log('🎯 Mapped lifestyle data:', {
-            original: {
+          console.log('🔧 NORMALIZED DATA:', {
+            originalAllergies: patientInfo.allergies,
+            normalizedAllergies: normalizedAllergies,
+            originalMedicalHistory: patientInfo.medicalHistory,
+            normalizedMedicalHistory: normalizedMedicalHistory,
+            originalLifestyle: {
               smoking: patientInfo.smokingStatus,
               alcohol: patientInfo.alcoholConsumption,
               activity: patientInfo.physicalActivity
             },
-            mapped: mappedLifestyle
+            mappedLifestyle: mappedLifestyle
           })
 
           const newFormData: PatientFormData = {
@@ -547,10 +610,10 @@ export default function ModernPatientForm({
             city: patientInfo.city || "",
             country: patientInfo.country || "Mauritius",
             
-            // 🎯 AUTO-FILL MEDICAL DATA FROM TIBOK
-            allergies: Array.isArray(patientInfo.allergies) ? patientInfo.allergies : [],
+            // ✅ FIXED AUTO-FILL MEDICAL DATA FROM TIBOK
+            allergies: normalizedAllergies, // Use normalized allergies
             otherAllergies: patientInfo.otherAllergies || "",
-            medicalHistory: Array.isArray(patientInfo.medicalHistory) ? patientInfo.medicalHistory : [],
+            medicalHistory: normalizedMedicalHistory, // Use normalized medical history
             otherMedicalHistory: patientInfo.otherMedicalHistory || "",
             currentMedicationsText: patientInfo.currentMedications || "",
             
