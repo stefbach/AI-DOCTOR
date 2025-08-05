@@ -92,6 +92,157 @@ interface ConsultationData {
   status: string
 }
 
+// ✅ ADD: Data normalization function to translate French to English
+function normalizeLifestyleData(data: any): any {
+  // Translation mappings
+  const smokingMap: Record<string, string> = {
+    'non-smoker': 'non-smoker',
+    'current-smoker': 'current smoker',
+    'ex-smoker': 'former smoker',
+    'Non-fumeur': 'non-smoker',
+    'Fumeur actuel': 'current smoker',
+    'Ex-fumeur': 'former smoker'
+  }
+
+  const alcoholMap: Record<string, string> = {
+    'never': 'never',
+    'occasional': 'occasional',
+    'regular': 'regular',
+    'Jamais': 'never',
+    'Occasionnel': 'occasional',
+    'Régulier': 'regular'
+  }
+
+  const activityMap: Record<string, string> = {
+    'sedentary': 'sedentary',
+    'moderate': 'moderate',
+    'intense': 'intense',
+    'Sédentaire': 'sedentary',
+    'Modéré': 'moderate',
+    'Intense': 'intense'
+  }
+
+  const medicalConditionsMap: Record<string, string> = {
+    'Hypertension': 'Hypertension',
+    'Diabète de type 2': 'Type 2 Diabetes',
+    'Diabète de type 1': 'Type 1 Diabetes',
+    'Asthme': 'Asthma',
+    'Maladie cardiaque': 'Heart disease',
+    'Dépression/Anxiété': 'Depression/Anxiety',
+    'Arthrite': 'Arthritis',
+    'Migraine': 'Migraine',
+    'Reflux gastro-œsophagien': 'GERD (Gastroesophageal reflux)',
+    'Cholestérol élevé': 'High cholesterol'
+  }
+
+  const allergiesMap: Record<string, string> = {
+    'Pénicilline': 'Penicillin',
+    'Aspirine': 'Aspirin',
+    'Anti-inflammatoires (Ibuprofène, Diclofénac)': 'NSAIDs (Ibuprofen, Diclofenac)',
+    'Codéine': 'Codeine',
+    'Latex': 'Latex',
+    'Iode': 'Iodine',
+    'Anesthésiques locaux': 'Local anesthetics',
+    'Sulfamides': 'Sulfonamides'
+  }
+
+  const symptomsMap: Record<string, string> = {
+    'Douleur thoracique': 'Chest pain',
+    'Essoufflement': 'Shortness of breath',
+    'Palpitations': 'Palpitations',
+    'Fatigue': 'Fatigue',
+    'Nausées': 'Nausea',
+    'Vomissements': 'Vomiting',
+    'Diarrhée': 'Diarrhea',
+    'Constipation': 'Constipation',
+    'Maux de tête': 'Headache',
+    'Vertiges': 'Dizziness',
+    'Fièvre': 'Fever',
+    'Frissons': 'Chills',
+    'Toux': 'Cough',
+    'Douleur abdominale': 'Abdominal pain',
+    'Mal de dos': 'Back pain',
+    'Insomnie': 'Insomnia',
+    'Anxiété': 'Anxiety',
+    'Perte d\'appétit': 'Loss of appetite',
+    'Perte de poids': 'Weight loss',
+    'Gonflement des jambes': 'Leg swelling',
+    'Douleur articulaire': 'Joint pain',
+    'Éruption cutanée': 'Rash',
+    'Vision floue': 'Blurred vision',
+    'Problèmes d\'audition': 'Hearing problems'
+  }
+
+  const symptomDurationMap: Record<string, string> = {
+    'quelques-heures': 'a few hours',
+    '1-jour': '1 day',
+    '2-3-jours': '2-3 days',
+    '1-semaine': '1 week',
+    '2-semaines': '2 weeks',
+    '1-mois': '1 month',
+    'plusieurs-mois': 'several months',
+    'plus-6-mois': 'more than 6 months'
+  }
+
+  // Helper function to translate array values
+  const translateArray = (arr: string[], map: Record<string, string>): string[] => {
+    return arr.map(item => map[item] || item).filter(item => item.trim() !== '')
+  }
+
+  // Normalize the data
+  const normalized = { ...data }
+
+  // Lifestyle factors
+  if (data.smokingStatus) {
+    normalized.smokingStatus = smokingMap[data.smokingStatus] || data.smokingStatus
+  }
+  if (data.alcoholConsumption) {
+    normalized.alcoholConsumption = alcoholMap[data.alcoholConsumption] || data.alcoholConsumption
+  }
+  if (data.physicalActivity) {
+    normalized.physicalActivity = activityMap[data.physicalActivity] || data.physicalActivity
+  }
+
+  // Medical history
+  if (Array.isArray(data.medicalHistory)) {
+    normalized.medicalHistory = translateArray(data.medicalHistory, medicalConditionsMap)
+  }
+
+  // Allergies
+  if (Array.isArray(data.allergies)) {
+    normalized.allergies = translateArray(data.allergies, allergiesMap)
+  }
+
+  // Current symptoms
+  if (Array.isArray(data.currentSymptoms)) {
+    normalized.currentSymptoms = translateArray(data.currentSymptoms, symptomsMap)
+  }
+
+  // Symptom duration
+  if (data.symptomDuration) {
+    normalized.symptomDuration = symptomDurationMap[data.symptomDuration] || data.symptomDuration
+  }
+
+  console.log('🔄 Data normalization completed:', {
+    original: {
+      smoking: data.smokingStatus,
+      alcohol: data.alcoholConsumption,
+      activity: data.physicalActivity,
+      symptoms: data.currentSymptoms,
+      duration: data.symptomDuration
+    },
+    normalized: {
+      smoking: normalized.smokingStatus,
+      alcohol: normalized.alcoholConsumption,
+      activity: normalized.physicalActivity,
+      symptoms: normalized.currentSymptoms,
+      duration: normalized.symptomDuration
+    }
+  })
+
+  return normalized
+}
+
 export function useTibokPatientData() {
   const [patientData, setPatientData] = useState<PatientData | null>(null)
   const [doctorData, setDoctorData] = useState<DoctorData | null>(null)
@@ -122,7 +273,11 @@ export function useTibokPatientData() {
       try {
         // Parse patient data
         const parsedPatientData = JSON.parse(decodeURIComponent(patientDataParam))
-        console.log('📋 Parsed TIBOK Patient Data:', parsedPatientData)
+        console.log('📋 Parsed TIBOK Patient Data (before normalization):', parsedPatientData)
+        
+        // ✅ APPLY NORMALIZATION: Translate French values to English
+        const normalizedPatientData = normalizeLifestyleData(parsedPatientData)
+        console.log('🔄 Normalized Patient Data (after translation):', normalizedPatientData)
         
         // Parse doctor data
         const parsedDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
@@ -137,28 +292,34 @@ export function useTibokPatientData() {
         }
 
         // Validate critical patient data
-        if (!parsedPatientData.firstName || !parsedPatientData.lastName) {
+        if (!normalizedPatientData.firstName || !normalizedPatientData.lastName) {
           console.error('❌ Missing critical patient data (name)')
           setLoading(false)
           return
         }
 
-        // Log medical data specifically
-        console.log('🏥 Medical Data Received:', {
-          symptoms: parsedPatientData.currentSymptoms,
-          medicalHistory: parsedPatientData.medicalHistory,
-          allergies: parsedPatientData.allergies,
-          consultationReason: parsedPatientData.consultationReason,
-          vitalSigns: parsedPatientData.vitalSigns,
-          currentMedications: parsedPatientData.currentMedications
+        // Log medical data specifically (now in English)
+        console.log('🏥 Medical Data Received (English):', {
+          symptoms: normalizedPatientData.currentSymptoms,
+          medicalHistory: normalizedPatientData.medicalHistory,
+          allergies: normalizedPatientData.allergies,
+          consultationReason: normalizedPatientData.consultationReason,
+          vitalSigns: normalizedPatientData.vitalSigns,
+          currentMedications: normalizedPatientData.currentMedications,
+          lifestyle: {
+            smoking: normalizedPatientData.smokingStatus,
+            alcohol: normalizedPatientData.alcoholConsumption,
+            activity: normalizedPatientData.physicalActivity
+          }
         })
 
-        setPatientData(parsedPatientData)
+        // Use normalized data
+        setPatientData(normalizedPatientData)
         setDoctorData(parsedDoctorData)
         setConsultationData(consultation)
         setIsFromTibok(true)
         
-        console.log('✅ TIBOK data loaded successfully')
+        console.log('✅ TIBOK data loaded and normalized successfully')
         
       } catch (error) {
         console.error('❌ Error parsing TIBOK data:', error)
@@ -174,9 +335,16 @@ export function useTibokPatientData() {
     // Also listen for custom events (fallback)
     const handlePatientData = (event: CustomEvent) => {
       console.log('📡 Received patient data via custom event:', event.detail)
-      if (event.detail.patient) setPatientData(event.detail.patient)
-      if (event.detail.doctor) setDoctorData(event.detail.doctor)
-      if (event.detail.consultation) setConsultationData(event.detail.consultation)
+      
+      // Apply normalization to event data as well
+      let normalizedEventData = event.detail
+      if (event.detail.patient) {
+        normalizedEventData.patient = normalizeLifestyleData(event.detail.patient)
+      }
+      
+      if (normalizedEventData.patient) setPatientData(normalizedEventData.patient)
+      if (normalizedEventData.doctor) setDoctorData(normalizedEventData.doctor)
+      if (normalizedEventData.consultation) setConsultationData(normalizedEventData.consultation)
       setIsFromTibok(true)
     }
 
