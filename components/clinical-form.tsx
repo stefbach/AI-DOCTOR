@@ -66,7 +66,7 @@ const INITIAL_CLINICAL_DATA: ClinicalData = {
   symptoms: [],
   painScale: "0",
   vitalSigns: {
-    temperature: "37.0",
+    temperature: "",
     bloodPressureSystolic: "",
     bloodPressureDiastolic: ""
   }
@@ -167,6 +167,25 @@ export default function ModernClinicalForm({
     { value: '1_6_months', label: '1 to 6 months' },
     { value: 'more_6_months', label: 'More than 6 months' }
   ], [])
+
+  // ✅ ADD: Symptom duration mapping function
+  const mapSymptomDuration = useCallback((duration: string): string => {
+    if (!duration) return ''
+    
+    const durationLower = duration.toLowerCase()
+    
+    // Map TIBOK French values to form values
+    if (durationLower.includes('quelques-heures') || durationLower.includes('few hours')) return 'less_hour'
+    if (durationLower.includes('1-jour') || durationLower.includes('1 day')) return '6_24_hours'
+    if (durationLower.includes('2-3-jours') || durationLower.includes('2-3 days')) return '1_3_days'
+    if (durationLower.includes('1-semaine') || durationLower.includes('1 week')) return '3_7_days'
+    if (durationLower.includes('2-semaines') || durationLower.includes('2 weeks')) return '1_4_weeks'
+    if (durationLower.includes('1-mois') || durationLower.includes('1 month')) return '1_6_months'
+    if (durationLower.includes('plusieurs-mois') || durationLower.includes('several months')) return '1_6_months'
+    if (durationLower.includes('plus-6-mois') || durationLower.includes('more than 6 months')) return 'more_6_months'
+    
+    return ''
+  }, [])
 
   // ========== Utility functions ==========
   const calculateProgress = useCallback((): number => {
@@ -328,7 +347,17 @@ export default function ModernClinicalForm({
             symptoms: tibokPatient.currentSymptoms,
             consultationReason: tibokPatient.consultationReason,
             vitalSigns: tibokPatient.vitalSigns,
-            currentMedications: tibokPatient.currentMedications
+            painLevel: tibokPatient.painLevel,
+            symptomDuration: tibokPatient.symptomDuration
+          })
+
+          // ✅ FIXED: Map symptom duration properly
+          const mappedDuration = mapSymptomDuration(tibokPatient.symptomDuration)
+          
+          console.log('🔧 MAPPED DURATION:', {
+            original: tibokPatient.symptomDuration,
+            mapped: mappedDuration,
+            foundOption: DURATION_OPTIONS.find(opt => opt.value === mappedDuration)?.label
           })
 
           const tibokClinicalData = {
@@ -338,18 +367,31 @@ export default function ModernClinicalForm({
             // 🎯 AUTO-FILL CONSULTATION REASON FROM TIBOK
             chiefComplaint: tibokPatient.consultationReason || "",
             
-            // 🎯 AUTO-FILL VITAL SIGNS FROM TIBOK  
+            // ✅ FIXED: AUTO-FILL SYMPTOM DURATION WITH PROPER MAPPING
+            symptomDuration: mappedDuration,
+            
+            // 🎯 AUTO-FILL PAIN LEVEL FROM TIBOK
+            painScale: tibokPatient.painLevel?.toString() || "0",
+            
+            // ✅ FIXED: AUTO-FILL VITAL SIGNS FROM TIBOK (don't default to 37.0)  
             vitalSigns: {
-              temperature: tibokPatient.vitalSigns?.temperature?.toString() || "37.0",
-              bloodPressureSystolic: tibokPatient.vitalSigns?.bloodPressureSystolic?.toString() || "",
-              bloodPressureDiastolic: tibokPatient.vitalSigns?.bloodPressureDiastolic?.toString() || ""
+              temperature: tibokPatient.vitalSigns?.temperature ? tibokPatient.vitalSigns.temperature.toString() : "",
+              bloodPressureSystolic: tibokPatient.vitalSigns?.bloodPressureSystolic ? tibokPatient.vitalSigns.bloodPressureSystolic.toString() : "",
+              bloodPressureDiastolic: tibokPatient.vitalSigns?.bloodPressureDiastolic ? tibokPatient.vitalSigns.bloodPressureDiastolic.toString() : ""
             },
             
             // Keep existing values or defaults for other fields
             diseaseHistory: "",
-            symptomDuration: "",
-            painScale: "0"
           }
+
+          console.log('🎯 FINAL TIBOK CLINICAL DATA:', {
+            symptoms: tibokClinicalData.symptoms,
+            chiefComplaint: tibokClinicalData.chiefComplaint,
+            symptomDuration: tibokClinicalData.symptomDuration,
+            painScale: tibokClinicalData.painScale,
+            temperature: tibokClinicalData.vitalSigns.temperature,
+            bloodPressure: `${tibokClinicalData.vitalSigns.bloodPressureSystolic}/${tibokClinicalData.vitalSigns.bloodPressureDiastolic}`
+          })
 
           setLocalData(prev => ({
             ...prev,
@@ -359,7 +401,10 @@ export default function ModernClinicalForm({
           console.log('✅ Clinical form auto-filled successfully:', {
             symptomsCount: tibokClinicalData.symptoms.length,
             hasComplaint: !!tibokClinicalData.chiefComplaint,
-            hasVitalSigns: !!(tibokClinicalData.vitalSigns.temperature && tibokClinicalData.vitalSigns.temperature !== "37.0")
+            hasDuration: !!tibokClinicalData.symptomDuration,
+            hasPainLevel: tibokClinicalData.painScale !== '0',
+            hasTemperature: !!tibokClinicalData.vitalSigns.temperature,
+            hasBP: !!(tibokClinicalData.vitalSigns.bloodPressureSystolic && tibokClinicalData.vitalSigns.bloodPressureDiastolic)
           })
 
           setDataInitialized(true)
@@ -392,7 +437,7 @@ export default function ModernClinicalForm({
     }
     
     loadSavedData()
-  }, [consultationId, tibokPatient, dataInitialized])
+  }, [consultationId, tibokPatient, dataInitialized, mapSymptomDuration, DURATION_OPTIONS])
 
   // Update when props change
   useEffect(() => {
@@ -457,6 +502,11 @@ export default function ModernClinicalForm({
               {localData.symptoms.length > 0 && (
                 <span className="ml-2">
                   • {localData.symptoms.length} symptoms auto-filled
+                </span>
+              )}
+              {localData.symptomDuration && (
+                <span className="ml-2">
+                  • Duration: {DURATION_OPTIONS.find(opt => opt.value === localData.symptomDuration)?.label}
                 </span>
               )}
             </p>
