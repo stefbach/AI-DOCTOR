@@ -170,6 +170,39 @@ export default function ModernClinicalForm({
     { value: 'more_6_months', label: 'More than 6 months' } // Must match mapping
   ], [])
 
+  // UPDATE 1: ✅ COMPREHENSIVE DURATION MAPPING FUNCTION
+  const mapSymptomDuration = useCallback((duration: string): string => {
+    if (!duration) return ''
+    
+    const durationLower = duration.toLowerCase().trim()
+    console.log('🔧 Mapping symptom duration:', duration, '→', durationLower)
+    
+    // Handle TIBOK normalized English values (after hook processing)
+    switch(durationLower) {
+      case 'several months':  // ✅ This is what TIBOK sends after normalization
+        return 'more_6_months'
+      case 'more than 6 months':
+        return 'more_6_months'
+      case '1 to 6 months':
+        return '1_6_months'
+      case '1 to 4 weeks':
+        return '1_4_weeks'
+      case '3 to 7 days':
+        return '3_7_days'
+      case '1 to 3 days':
+        return '1_3_days'
+      case '6 to 24 hours':
+        return '6_24_hours'
+      case '1 to 6 hours':
+        return '1_6_hours'
+      case 'less than 1 hour':
+        return 'less_hour'
+      default:
+        console.warn('⚠️ Unknown symptom duration:', duration)
+        return ""
+    }
+  }, [])
+
   // ========== Utility functions ==========
   const calculateProgress = useCallback((): number => {
     const fields = [
@@ -334,44 +367,34 @@ export default function ModernClinicalForm({
             symptomDuration: tibokPatient.symptomDuration
           })
 
-          // ✅ FIXED SYMPTOM DURATION: Complete mapping
           const tibokClinicalData = {
-            // ✅ FIX SYMPTOMS: Ensure symptoms array is properly set
-            symptoms: Array.isArray(tibokPatient.currentSymptoms) ? tibokPatient.currentSymptoms : [],
+            // UPDATE 3: ✅ FIX SYMPTOMS: Ensure symptoms array with proper case matching
+            symptoms: Array.isArray(tibokPatient.currentSymptoms) 
+              ? tibokPatient.currentSymptoms.map(symptom => {
+                  console.log('🔧 Mapping symptom:', symptom)
+                  
+                  // Find exact match (case-insensitive)
+                  const matchedSymptom = COMMON_SYMPTOMS.find(commonSymptom => 
+                    commonSymptom.toLowerCase() === symptom.toLowerCase().trim()
+                  )
+                  
+                  if (matchedSymptom) {
+                    console.log('✅ Symptom matched:', symptom, '→', matchedSymptom)
+                    return matchedSymptom
+                  } else {
+                    console.warn('⚠️ Symptom not found in COMMON_SYMPTOMS:', symptom)
+                    return symptom
+                  }
+                })
+              : [],
             
             // ✅ FIX CHIEF COMPLAINT: Keep as-is  
             chiefComplaint: tibokPatient.consultationReason || "",
             
-            // ✅ FIX SYMPTOM DURATION: Complete mapping
-            symptomDuration: (() => {
-              console.log('🔧 Mapping symptom duration:', tibokPatient.symptomDuration)
-              switch(tibokPatient.symptomDuration?.toLowerCase().trim()) {
-                case 'plusieurs-mois': return 'more_6_months'
-                case 'more than 6 months': return 'more_6_months'
-                case '1-6-mois': return '1_6_months' 
-                case '1 to 6 months': return '1_6_months'
-                case '1-mois': return '1_6_months'
-                case '1-4-semaines': return '1_4_weeks'
-                case '1 to 4 weeks': return '1_4_weeks'
-                case '1-semaine': return '1_4_weeks'
-                case '3-7-jours': return '3_7_days'
-                case '3 to 7 days': return '3_7_days'
-                case '2-3-jours': return '1_3_days'
-                case '1 to 3 days': return '1_3_days'
-                case '1-jour': return '6_24_hours'
-                case '6 to 24 hours': return '6_24_hours'
-                case '1-6-heures': return '1_6_hours'
-                case '1 to 6 hours': return '1_6_hours'
-                case 'quelques-heures': return '1_6_hours'
-                case 'moins-1-heure': return 'less_hour'
-                case 'less than 1 hour': return 'less_hour'
-                default:
-                  console.warn('⚠️ Unknown symptom duration:', tibokPatient.symptomDuration)
-                  return ""
-              }
-            })(),
+            // UPDATE 2: ✅ FIX SYMPTOM DURATION: Use the mapping function
+            symptomDuration: mapSymptomDuration(tibokPatient.symptomDuration || ""),
             
-            // ✅ FIX VITAL SIGNS: Use actual temperature value (not default 37.0)
+            // UPDATE 5: ✅ FIX VITAL SIGNS: Use actual temperature value (not default 37.0)
             vitalSigns: {
               temperature: tibokPatient.vitalSigns?.temperature ? 
                 tibokPatient.vitalSigns.temperature.toString() : 
@@ -382,7 +405,8 @@ export default function ModernClinicalForm({
             
             // Keep existing values for other fields
             diseaseHistory: "",
-            painLevel: tibokPatient.painLevel?.toString() || "0"
+            // UPDATE 4: ✅ FIX PAIN SCALE: Use correct field name (painScale, not painLevel)
+            painScale: tibokPatient.painLevel?.toString() || "0"
           }
 
           // ✅ ADD DEBUGGING TO VERIFY MAPPING:
@@ -402,7 +426,7 @@ export default function ModernClinicalForm({
             
             // Pain level
             receivedPainLevel: tibokPatient.painLevel,
-            mappedPainLevel: tibokClinicalData.painLevel
+            mappedPainLevel: tibokClinicalData.painScale
           })
 
           setLocalData(prev => ({
@@ -414,7 +438,7 @@ export default function ModernClinicalForm({
             symptomsCount: tibokClinicalData.symptoms.length,
             hasComplaint: !!tibokClinicalData.chiefComplaint,
             hasDuration: !!tibokClinicalData.symptomDuration,
-            hasPainLevel: tibokClinicalData.painLevel !== '0',
+            hasPainLevel: tibokClinicalData.painScale !== '0',
             hasTemperature: !!tibokClinicalData.vitalSigns.temperature,
             hasBP: !!(tibokClinicalData.vitalSigns.bloodPressureSystolic && tibokClinicalData.vitalSigns.bloodPressureDiastolic)
           })
@@ -449,7 +473,7 @@ export default function ModernClinicalForm({
     }
     
     loadSavedData()
-  }, [consultationId, tibokPatient, dataInitialized, DURATION_OPTIONS])
+  }, [consultationId, tibokPatient, dataInitialized, COMMON_SYMPTOMS, mapSymptomDuration])
 
   // Update when props change
   useEffect(() => {
