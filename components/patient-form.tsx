@@ -520,8 +520,11 @@ export default function ModernPatientForm({
           // ✅ NORMALIZE ALLERGIES - Map TIBOK values to form values
           const normalizedAllergies = Array.isArray(patientInfo.allergies) 
             ? patientInfo.allergies.map(allergy => {
+                // DEBUG: Log what we're trying to map
+                console.log('🔧 Mapping allergy:', allergy)
+                
                 // Map TIBOK allergy values to form values
-                switch(allergy.toLowerCase()) {
+                switch(allergy.toLowerCase().trim()) {
                   case 'aspirin': return 'Aspirin'
                   case 'aspirine': return 'Aspirin'
                   case 'penicillin': return 'Penicillin'
@@ -539,16 +542,22 @@ export default function ModernPatientForm({
                   case 'anesthésiques locaux': return 'Local anesthetics'
                   case 'sulfonamides': return 'Sulfonamides'
                   case 'sulfamides': return 'Sulfonamides'
-                  default: return allergy // Keep original if no mapping found
+                  default: 
+                    console.warn('⚠️ Unknown allergy:', allergy)
+                    return allergy // Keep original if no mapping found
                 }
               })
             : []
 
-          // ✅ NORMALIZE MEDICAL HISTORY - Map TIBOK values to form values  
+          // ✅ FIXED MEDICAL HISTORY MAPPING - Handle diabete-t1 and other conditions
           const normalizedMedicalHistory = Array.isArray(patientInfo.medicalHistory)
             ? patientInfo.medicalHistory.map(condition => {
-                // Map TIBOK medical history values to form values
-                switch(condition.toLowerCase()) {
+                // DEBUG: Log what we're trying to map
+                console.log('🔧 Mapping medical condition:', condition)
+                
+                switch(condition.toLowerCase().trim()) {
+                  case 'diabete-t1': return 'Type 1 Diabetes'
+                  case 'diabete-t2': return 'Type 2 Diabetes'  
                   case 'type 1 diabetes': return 'Type 1 Diabetes'
                   case 'diabète de type 1': return 'Type 1 Diabetes'
                   case 'type 2 diabetes': return 'Type 2 Diabetes'
@@ -558,29 +567,73 @@ export default function ModernPatientForm({
                   case 'asthme': return 'Asthma'
                   case 'heart disease': return 'Heart disease'
                   case 'maladie cardiaque': return 'Heart disease'
-                  case 'depression/anxiety': return 'Depression/Anxiety'
-                  case 'dépression/anxiété': return 'Depression/Anxiety'
                   case 'depression': return 'Depression/Anxiety'
                   case 'dépression': return 'Depression/Anxiety'
                   case 'anxiety': return 'Depression/Anxiety'
                   case 'anxiété': return 'Depression/Anxiety'
+                  case 'depression/anxiety': return 'Depression/Anxiety'
+                  case 'dépression/anxiété': return 'Depression/Anxiety'
                   case 'arthritis': return 'Arthritis'
                   case 'arthrite': return 'Arthritis'
                   case 'migraine': return 'Migraine'
+                  case 'gerd': return 'GERD (Gastroesophageal reflux)'
+                  case 'reflux': return 'GERD (Gastroesophageal reflux)'
                   case 'gerd (gastroesophageal reflux)': return 'GERD (Gastroesophageal reflux)'
                   case 'reflux gastro-œsophagien': return 'GERD (Gastroesophageal reflux)'
                   case 'high cholesterol': return 'High cholesterol'
                   case 'cholestérol élevé': return 'High cholesterol'
-                  default: return condition // Keep original if no mapping found
+                  default: 
+                    console.warn('⚠️ Unknown medical condition:', condition)
+                    return condition // Keep original if no mapping found
                 }
               })
             : []
 
-          // ✅ FIXED: Map lifestyle data properly
+          // ✅ FIXED LIFESTYLE MAPPING with proper debugging
           const mappedLifestyle = {
-            smoking: mapSmokingStatus(patientInfo.smokingStatus),
-            alcohol: mapAlcoholConsumption(patientInfo.alcoholConsumption),
-            physicalActivity: mapPhysicalActivity(patientInfo.physicalActivity)
+            smoking: (() => {
+              console.log('🔧 Mapping smoking status:', patientInfo.smokingStatus)
+              switch(patientInfo.smokingStatus?.toLowerCase().trim()) {
+                case 'fumeur-actuel': return 'actuel'
+                case 'current-smoker': return 'actuel'
+                case 'non-smoker': return 'non'
+                case 'non': return 'non'
+                case 'ex-smoker': return 'ancien'
+                case 'ancien': return 'ancien'
+                default: 
+                  console.warn('⚠️ Unknown smoking status:', patientInfo.smokingStatus)
+                  return patientInfo.smokingStatus || ""
+              }
+            })(),
+            
+            alcohol: (() => {
+              console.log('🔧 Mapping alcohol consumption:', patientInfo.alcoholConsumption)
+              switch(patientInfo.alcoholConsumption?.toLowerCase().trim()) {
+                case 'occasional': return 'occasionnel'
+                case 'occasionnel': return 'occasionnel'
+                case 'never': return 'jamais'
+                case 'jamais': return 'jamais'
+                case 'regular': return 'regulier'
+                case 'regulier': return 'regulier'
+                default:
+                  console.warn('⚠️ Unknown alcohol consumption:', patientInfo.alcoholConsumption)
+                  return patientInfo.alcoholConsumption || ""
+              }
+            })(),
+            
+            physicalActivity: (() => {
+              console.log('🔧 Mapping physical activity:', patientInfo.physicalActivity)
+              switch(patientInfo.physicalActivity?.toLowerCase().trim()) {
+                case 'sedentaire': return 'sedentaire'
+                case 'sedentary': return 'sedentaire'
+                case 'moderate': return 'moderee'
+                case 'moderee': return 'moderee'
+                case 'intense': return 'intense'
+                default:
+                  console.warn('⚠️ Unknown physical activity:', patientInfo.physicalActivity)
+                  return patientInfo.physicalActivity || ""
+              }
+            })()
           }
 
           console.log('🔧 NORMALIZED DATA:', {
