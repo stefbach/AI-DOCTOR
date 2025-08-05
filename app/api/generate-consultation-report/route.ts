@@ -1,4 +1,3 @@
-/// app/api/generate-consultation-report/route.ts
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
@@ -688,6 +687,63 @@ export async function POST(request: NextRequest) {
             date: examDate
           }
         } : null
+      },
+      // NEW: Add invoice data
+      invoice: {
+        header: {
+          invoiceNumber: `TIBOK-${currentDate.getFullYear()}-${String(Date.now()).slice(-6)}`,
+          consultationDate: examDate,
+          invoiceDate: examDate
+        },
+        provider: {
+          companyName: "Digital Data Solutions Ltd",
+          tradeName: "Tibok",
+          registrationNumber: "C20173522",
+          vatNumber: "27816949",
+          registeredOffice: "Bourdet Road, Grand Baie, Mauritius",
+          phone: "+230 4687377/78",
+          email: "contact@tibok.mu",
+          website: "www.tibok.mu"
+        },
+        patient: {
+          name: patient.nomComplet || patient.nom,
+          email: patient.email || "[Email Address]",
+          phone: patient.telephone || "[Phone Number]",
+          patientId: patientData?.id || anonymousId
+        },
+        services: {
+          items: [{
+            description: "Online medical consultation via Tibok",
+            quantity: 1,
+            unitPrice: 1150,
+            total: 1150
+          }],
+          subtotal: 1150,
+          vatRate: 0.15,
+          vatAmount: 0, // Exempt for medical services
+          totalDue: 1150
+        },
+        payment: {
+          method: "[Credit Card / MCB Juice / MyT Money / Other]",
+          receivedDate: examDate,
+          status: "pending" as const
+        },
+        physician: {
+          name: praticien.nom,
+          registrationNumber: praticien.numeroEnregistrement
+        },
+        notes: [
+          "This invoice corresponds to a remote medical consultation performed via the Tibok platform.",
+          "The service was delivered by a registered medical professional.",
+          "No audio or video recording was made. All data is securely hosted on a health data certified server (OVH – HDS compliant).",
+          "Service available from 08:00 to 00:00 (Mauritius time), 7 days a week.",
+          "Medication delivery included during daytime, with possible extra charges after 17:00 depending on on-call pharmacy availability."
+        ],
+        signature: {
+          entity: "Digital Data Solutions Ltd",
+          onBehalfOf: praticien.nom,
+          title: "Registered Medical Practitioner (Mauritius)"
+        }
       }
     }
 
@@ -795,6 +851,7 @@ Return ONLY a JSON object with these 9 keys and their content in ENGLISH.`
     console.log("   - report.ordonnances.medicaments:", !!reportStructure.ordonnances.medicaments)
     console.log("   - report.ordonnances.biologie:", !!reportStructure.ordonnances.biologie)
     console.log("   - report.ordonnances.imagerie:", !!reportStructure.ordonnances.imagerie)
+    console.log("   - report.invoice:", !!reportStructure.invoice)
 
     const endTime = Date.now()
     const processingTime = endTime - startTime

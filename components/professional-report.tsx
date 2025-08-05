@@ -1,4 +1,3 @@
-// components/professional-report-editable.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -40,7 +39,9 @@ import {
   Stethoscope,
   Calendar,
   User,
-  Building
+  Building,
+  CreditCard,
+  Receipt
 } from "lucide-react"
 
 // Types for Mauritian format
@@ -138,6 +139,56 @@ interface MauritianReport {
         centreImagerie?: string
       }
       authentification: any
+    }
+  }
+  invoice?: {
+    header: {
+      invoiceNumber: string
+      consultationDate: string
+      invoiceDate: string
+    }
+    provider: {
+      companyName: string
+      tradeName: string
+      registrationNumber: string
+      vatNumber: string
+      registeredOffice: string
+      phone: string
+      email: string
+      website: string
+    }
+    patient: {
+      name: string
+      email: string
+      phone: string
+      patientId: string
+    }
+    services: {
+      items: Array<{
+        description: string
+        quantity: number
+        unitPrice: number
+        total: number
+      }>
+      subtotal: number
+      vatRate: number
+      vatAmount: number
+      totalDue: number
+    }
+    payment: {
+      method: string
+      receivedDate: string
+      status: 'pending' | 'paid' | 'cancelled'
+    }
+    physician: {
+      name: string
+      registrationNumber: string
+    }
+    notes: string[]
+    signature: {
+      entity: string
+      onBehalfOf: string
+      title: string
     }
   }
   prescriptionsResume?: {
@@ -421,6 +472,44 @@ export default function ProfessionalReportEditable({
       [field]: value
     }))
     trackModification(`praticien.${field}`)
+  }
+
+  // Update invoice
+  const updateInvoice = (field: string, value: any) => {
+    if (validationStatus === 'validated') return
+    
+    setReport(prev => {
+      if (!prev) return null
+      
+      return {
+        ...prev,
+        invoice: {
+          ...prev.invoice!,
+          [field]: value
+        }
+      }
+    })
+    trackModification(`invoice.${field}`)
+  }
+
+  // Update payment status
+  const updatePaymentStatus = (status: 'pending' | 'paid' | 'cancelled') => {
+    if (!report?.invoice) return
+    
+    updateInvoice('payment', {
+      ...report.invoice.payment,
+      status: status
+    })
+  }
+
+  // Update payment method
+  const updatePaymentMethod = (method: string) => {
+    if (!report?.invoice) return
+    
+    updateInvoice('payment', {
+      ...report.invoice.payment,
+      method: method
+    })
   }
 
   // Update medications
@@ -984,6 +1073,23 @@ export default function ProfessionalReportEditable({
           border: 1pt solid #fcc;
         }
         
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 10pt 0;
+        }
+        
+        th, td {
+          padding: 8pt;
+          text-align: left;
+          border-bottom: 1pt solid #ddd;
+        }
+        
+        th {
+          font-weight: bold;
+          background: #f5f5f5;
+        }
+        
         /* Hide interface elements */
         button, .button, input, select, textarea { display: none !important; }
         
@@ -1028,6 +1134,24 @@ export default function ProfessionalReportEditable({
           }
           .header { border-bottom-color: #3498db; }
         `
+      } else if (sectionId === 'invoice-document') {
+        return baseStyles + `
+          .header { border-bottom-color: #e67e22; }
+          .invoice-table {
+            margin: 20pt 0;
+          }
+          .invoice-total {
+            text-align: right;
+            font-weight: bold;
+            font-size: 14pt;
+          }
+          .payment-info {
+            background: #e8f5e9;
+            padding: 10pt;
+            border-radius: 4pt;
+            margin: 15pt 0;
+          }
+        `
       }
       
       return baseStyles
@@ -1037,7 +1161,7 @@ export default function ProfessionalReportEditable({
     const cleanHTML = clonedElement.innerHTML
       .replace(/class="[^"]*"/g, (match) => {
         // Keep only important classes for styling
-        const importantClasses = ['header', 'section', 'prescription-item', 'signature', 'info-box', 'urgent', 'badge', 'badge-red', 'grid', 'grid-row', 'grid-cell', 'category-header']
+        const importantClasses = ['header', 'section', 'prescription-item', 'signature', 'info-box', 'urgent', 'badge', 'badge-red', 'grid', 'grid-row', 'grid-cell', 'category-header', 'invoice-table', 'invoice-total', 'payment-info']
         const classes = match.match(/class="([^"]*)"/)?.[1].split(' ') || []
         const filtered = classes.filter(c => importantClasses.some(ic => c.includes(ic)))
         return filtered.length > 0 ? `class="${filtered.join(' ')}"` : ''
@@ -2040,6 +2164,188 @@ export default function ProfessionalReportEditable({
     )
   }
 
+  // Invoice Component
+  const InvoiceComponent = () => {
+    const invoice = report?.invoice
+    if (!invoice) return null
+
+    return (
+      <div id="invoice-document" className="bg-white p-8 rounded-lg shadow print:shadow-none">
+        <div className="text-center mb-8 header">
+          <h1 className="text-2xl font-bold mb-2">INVOICE</h1>
+          <p className="text-lg">No.: {invoice.header.invoiceNumber}</p>
+          <p className="text-sm text-gray-600">
+            Consultation Date: {invoice.header.consultationDate} | 
+            Invoice Date: {invoice.header.invoiceDate}
+          </p>
+        </div>
+
+        <div className="mb-6 p-4 bg-blue-50 rounded-lg info-box">
+          <h3 className="font-bold mb-2">Service Provider</h3>
+          <p className="font-bold">{invoice.provider.companyName}</p>
+          <p className="text-sm">Private company incorporated under Mauritian law</p>
+          <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+            <div>Company Reg. No.: {invoice.provider.registrationNumber}</div>
+            <div>VAT No.: {invoice.provider.vatNumber}</div>
+            <div className="col-span-2">Registered Office: {invoice.provider.registeredOffice}</div>
+            <div>Phone: {invoice.provider.phone}</div>
+            <div>Email: {invoice.provider.email}</div>
+            <div>Website: {invoice.provider.website}</div>
+            <div className="col-span-2 font-medium">Trade Name: {invoice.provider.tradeName}</div>
+          </div>
+          <p className="text-sm mt-2 italic">
+            Medical consultations provided by licensed physicians registered with the Medical Council of Mauritius
+          </p>
+        </div>
+
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg info-box">
+          <h3 className="font-bold mb-2">Patient Information</h3>
+          <div className="grid grid-cols-1 gap-1 text-sm">
+            <div><strong>Name:</strong> {invoice.patient.name}</div>
+            <div><strong>Email:</strong> {invoice.patient.email}</div>
+            <div><strong>Phone Number:</strong> {invoice.patient.phone}</div>
+            <div><strong>Tibok Patient ID:</strong> {invoice.patient.patientId}</div>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <h3 className="font-bold mb-4">Service Details</h3>
+          <table className="w-full border-collapse invoice-table">
+            <thead>
+              <tr className="border-b-2 border-gray-300">
+                <th className="text-left py-2">Description</th>
+                <th className="text-center py-2">Quantity</th>
+                <th className="text-right py-2">Unit Price (MUR)</th>
+                <th className="text-right py-2">Total (MUR)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invoice.services.items.map((item, idx) => (
+                <tr key={idx} className="border-b border-gray-200">
+                  <td className="py-2">{item.description}</td>
+                  <td className="text-center py-2">{item.quantity}</td>
+                  <td className="text-right py-2">{item.unitPrice.toLocaleString()}</td>
+                  <td className="text-right py-2 font-medium">{item.total.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-gray-300">
+                <td colSpan={3} className="text-right py-2">Subtotal (Excl. VAT):</td>
+                <td className="text-right py-2">MUR {invoice.services.subtotal.toLocaleString()}</td>
+              </tr>
+              <tr>
+                <td colSpan={3} className="text-right py-2">
+                  VAT ({(invoice.services.vatRate * 100).toFixed(0)}%):
+                </td>
+                <td className="text-right py-2">
+                  MUR {invoice.services.vatAmount.toLocaleString()}
+                  {invoice.services.vatAmount === 0 && (
+                    <span className="text-xs text-gray-600 block">
+                      (Exempt - medical services)
+                    </span>
+                  )}
+                </td>
+              </tr>
+              <tr className="font-bold text-lg invoice-total">
+                <td colSpan={3} className="text-right py-2">Total Due:</td>
+                <td className="text-right py-2">MUR {invoice.services.totalDue.toLocaleString()}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div className="mb-6 p-4 bg-green-50 rounded-lg payment-info">
+          <h3 className="font-bold mb-2">Payment Information</h3>
+          {editMode && validationStatus !== 'validated' ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Payment Method</Label>
+                  <Select value={invoice.payment.method} onValueChange={updatePaymentMethod}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Credit Card">Credit Card</SelectItem>
+                      <SelectItem value="MCB Juice">MCB Juice</SelectItem>
+                      <SelectItem value="MyT Money">MyT Money</SelectItem>
+                      <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                      <SelectItem value="Cash">Cash</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Payment Status</Label>
+                  <Select value={invoice.payment.status} onValueChange={updatePaymentStatus}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="paid">Paid</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div><strong>Payment Method:</strong> {invoice.payment.method}</div>
+              <div><strong>Payment Received On:</strong> {invoice.payment.receivedDate}</div>
+              <div className="col-span-2">
+                <strong>Status:</strong> 
+                <Badge className={`ml-2 ${
+                  invoice.payment.status === 'paid' ? 'bg-green-100 text-green-800' :
+                  invoice.payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {invoice.payment.status.toUpperCase()}
+                </Badge>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="mb-6 p-4 bg-purple-50 rounded-lg">
+          <h3 className="font-bold mb-2">Consulting Physician</h3>
+          <div className="text-sm">
+            <div><strong>Name:</strong> {invoice.physician.name}</div>
+            <div><strong>Medical Council Registration No.:</strong> {invoice.physician.registrationNumber}</div>
+          </div>
+        </div>
+
+        <div className="mb-8">
+          <h3 className="font-bold mb-2">Notes</h3>
+          <ul className="list-disc list-inside text-sm space-y-1">
+            {invoice.notes.map((note, idx) => (
+              <li key={idx}>{note}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mt-12 pt-8 border-t border-gray-300 text-center">
+          <p className="font-bold">Electronic Signature:</p>
+          <p className="mt-2">{invoice.signature.entity}</p>
+          <p>on behalf of {invoice.signature.onBehalfOf}</p>
+          <p className="text-sm text-gray-600">{invoice.signature.title}</p>
+        </div>
+
+        <div className="mt-6 flex justify-center print:hidden">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exportSectionToPDF('invoice-document', `invoice_${invoice.header.invoiceNumber}.pdf`)}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export Invoice
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   // Actions Bar with validation status
   const ActionsBar = () => {
     const metadata = getReportMetadata()
@@ -2177,7 +2483,7 @@ export default function ProfessionalReportEditable({
       <PrescriptionStats />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="consultation">
             <FileText className="h-4 w-4 mr-2" />
             Report
@@ -2210,6 +2516,10 @@ export default function ProfessionalReportEditable({
               </Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="invoice">
+            <Receipt className="h-4 w-4 mr-2" />
+            Invoice
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="consultation">
@@ -2226,6 +2536,10 @@ export default function ProfessionalReportEditable({
         
         <TabsContent value="imagerie">
           <ImagingPrescription />
+        </TabsContent>
+
+        <TabsContent value="invoice">
+          <InvoiceComponent />
         </TabsContent>
       </Tabs>
 
@@ -2249,6 +2563,11 @@ export default function ProfessionalReportEditable({
               </div>
             )}
           </>
+        )}
+        {report?.invoice && (
+          <div className="page-break-before mt-8">
+            <InvoiceComponent />
+          </div>
         )}
       </div>
 
