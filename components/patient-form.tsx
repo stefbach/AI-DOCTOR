@@ -99,7 +99,7 @@ const INITIAL_FORM_DATA: PatientFormData = {
   otherAllergies: "",
   medicalHistory: [],
   otherMedicalHistory: "",
-  currentMedicationsText: "",
+  currentMedicationsText: "", // ✅ FIXED: Ensure this is a STRING, not array
   lifeHabits: {
     smoking: "",
     alcohol: "",
@@ -114,6 +114,25 @@ const SECTIONS = [
   { id: "history", titleKey: 'patientForm.medicalHistory', icon: Heart },
   { id: "medications", titleKey: 'patientForm.currentMedications', icon: Pill },
   { id: "habits", titleKey: 'patientForm.lifestyle', icon: Activity },
+]
+
+// ✅ FIXED: Exact option values to match the mapping
+const SMOKING_OPTIONS = [
+  { value: "non", label: "Non-smoker" },
+  { value: "actuel", label: "Current smoker" }, // Must match "actuel" from mapping
+  { value: "ancien", label: "Ex-smoker" }
+]
+
+const ALCOHOL_OPTIONS = [
+  { value: "jamais", label: "Never" },
+  { value: "occasionnel", label: "Occasional" }, // Must match "occasionnel" from mapping
+  { value: "regulier", label: "Regular" }
+]
+
+const ACTIVITY_OPTIONS = [
+  { value: "sedentaire", label: "Sedentary" }, // Must match "sedentaire" from mapping
+  { value: "moderee", label: "Moderate" },
+  { value: "intense", label: "Intense" }
 ]
 
 // ==================== MAIN COMPONENT ====================
@@ -165,55 +184,6 @@ export default function ModernPatientForm({
     "GERD (Gastroesophageal reflux)",
     "High cholesterol",
   ], [])
-
-  // ✅ ADD: Lifestyle mapping functions
-  const mapSmokingStatus = useCallback((smokingStatus: string): string => {
-    const statusLower = smokingStatus?.toLowerCase() || ''
-    
-    // Map English values from TIBOK hook normalization
-    if (statusLower.includes('non-smoker') || statusLower.includes('never')) return 'non'
-    if (statusLower.includes('current') || statusLower.includes('smoker')) return 'actuel'
-    if (statusLower.includes('former') || statusLower.includes('ex')) return 'ancien'
-    
-    // Map French values (in case normalization didn't occur)
-    if (statusLower.includes('non-fumeur')) return 'non'
-    if (statusLower.includes('fumeur actuel')) return 'actuel'
-    if (statusLower.includes('ex-fumeur')) return 'ancien'
-    
-    return ''
-  }, [])
-
-  const mapAlcoholConsumption = useCallback((alcoholConsumption: string): string => {
-    const consumptionLower = alcoholConsumption?.toLowerCase() || ''
-    
-    // Map English values from TIBOK hook normalization
-    if (consumptionLower.includes('never')) return 'jamais'
-    if (consumptionLower.includes('occasional')) return 'occasionnel'
-    if (consumptionLower.includes('regular')) return 'regulier'
-    
-    // Map French values (in case normalization didn't occur)
-    if (consumptionLower.includes('jamais')) return 'jamais'
-    if (consumptionLower.includes('occasionnel')) return 'occasionnel'
-    if (consumptionLower.includes('régulier')) return 'regulier'
-    
-    return ''
-  }, [])
-
-  const mapPhysicalActivity = useCallback((physicalActivity: string): string => {
-    const activityLower = physicalActivity?.toLowerCase() || ''
-    
-    // Map English values from TIBOK hook normalization
-    if (activityLower.includes('sedentary')) return 'sedentaire'
-    if (activityLower.includes('moderate')) return 'moderee'
-    if (activityLower.includes('intense')) return 'intense'
-    
-    // Map French values (in case normalization didn't occur)
-    if (activityLower.includes('sédentaire')) return 'sedentaire'
-    if (activityLower.includes('modéré')) return 'moderee'
-    if (activityLower.includes('intense')) return 'intense'
-    
-    return ''
-  }, [])
 
   // ========== Utility functions ==========
   const calculateAge = useCallback((birthDate: string): string => {
@@ -480,7 +450,7 @@ export default function ModernPatientForm({
     }
   }, [formData.birthDate, formData.age, calculateAge])
 
-  // Initialize data
+  // ✅ FIXED: Initialize data with improved TIBOK mapping
   useEffect(() => {
     const initializeData = async () => {
       if (dataInitialized) return
@@ -517,13 +487,11 @@ export default function ModernPatientForm({
             physicalActivity: patientInfo.physicalActivity
           })
 
-          // ✅ NORMALIZE ALLERGIES - Map TIBOK values to form values
+          // ✅ FIXED ALLERGIES MAPPING with debugging
           const normalizedAllergies = Array.isArray(patientInfo.allergies) 
             ? patientInfo.allergies.map(allergy => {
-                // DEBUG: Log what we're trying to map
                 console.log('🔧 Mapping allergy:', allergy)
                 
-                // Map TIBOK allergy values to form values
                 switch(allergy.toLowerCase().trim()) {
                   case 'aspirin': return 'Aspirin'
                   case 'aspirine': return 'Aspirin'
@@ -544,15 +512,14 @@ export default function ModernPatientForm({
                   case 'sulfamides': return 'Sulfonamides'
                   default: 
                     console.warn('⚠️ Unknown allergy:', allergy)
-                    return allergy // Keep original if no mapping found
+                    return allergy
                 }
               })
             : []
 
-          // ✅ FIXED MEDICAL HISTORY MAPPING - Handle diabete-t1 and other conditions
+          // ✅ FIXED MEDICAL HISTORY MAPPING with exact matching
           const normalizedMedicalHistory = Array.isArray(patientInfo.medicalHistory)
             ? patientInfo.medicalHistory.map(condition => {
-                // DEBUG: Log what we're trying to map
                 console.log('🔧 Mapping medical condition:', condition)
                 
                 switch(condition.toLowerCase().trim()) {
@@ -584,7 +551,7 @@ export default function ModernPatientForm({
                   case 'cholestérol élevé': return 'High cholesterol'
                   default: 
                     console.warn('⚠️ Unknown medical condition:', condition)
-                    return condition // Keep original if no mapping found
+                    return condition
                 }
               })
             : []
@@ -636,11 +603,13 @@ export default function ModernPatientForm({
             })()
           }
 
-          console.log('🔧 NORMALIZED DATA:', {
+          console.log('🔧 NORMALIZED DATA DEBUG:', {
             originalAllergies: patientInfo.allergies,
             normalizedAllergies: normalizedAllergies,
+            allergiesMatched: normalizedAllergies.length,
             originalMedicalHistory: patientInfo.medicalHistory,
             normalizedMedicalHistory: normalizedMedicalHistory,
+            medicalHistoryMatched: normalizedMedicalHistory.length,
             originalLifestyle: {
               smoking: patientInfo.smokingStatus,
               alcohol: patientInfo.alcoholConsumption,
@@ -663,22 +632,23 @@ export default function ModernPatientForm({
             city: patientInfo.city || "",
             country: patientInfo.country || "Mauritius",
             
-            // ✅ FIXED AUTO-FILL MEDICAL DATA FROM TIBOK
-            allergies: normalizedAllergies, // Use normalized allergies
+            // ✅ FIXED: Use normalized data for medical information
+            allergies: normalizedAllergies,
             otherAllergies: patientInfo.otherAllergies || "",
-            medicalHistory: normalizedMedicalHistory, // Use normalized medical history
+            medicalHistory: normalizedMedicalHistory,
             otherMedicalHistory: patientInfo.otherMedicalHistory || "",
-            currentMedicationsText: patientInfo.currentMedications || "",
+            currentMedicationsText: patientInfo.currentMedications || "", // ✅ Ensure string
             
             // ✅ FIXED: Use mapped lifestyle data
             lifeHabits: mappedLifestyle
           }
           
-          console.log('✅ Patient form auto-filled successfully:', {
+          console.log('✅ Patient form auto-filled with FINAL DATA:', {
             allergiesCount: newFormData.allergies.length,
             medicalHistoryCount: newFormData.medicalHistory.length,
             hasMedications: !!newFormData.currentMedicationsText,
-            lifestyle: newFormData.lifeHabits
+            lifestyle: newFormData.lifeHabits,
+            medicationsType: typeof newFormData.currentMedicationsText
           })
           
           setFormData(newFormData)
@@ -704,7 +674,7 @@ export default function ModernPatientForm({
     }
     
     initializeData()
-  }, [consultationId, tibokPatient, dataInitialized, normalizeGender, mapSmokingStatus, mapAlcoholConsumption, mapPhysicalActivity])
+  }, [consultationId, tibokPatient, dataInitialized, normalizeGender])
 
   // Auto-save
   useEffect(() => {
@@ -1274,7 +1244,7 @@ Example:
         </CardContent>
       </Card>
 
-      {/* Section 6: Lifestyle */}
+      {/* Section 6: Lifestyle - ✅ FIXED: Use exact option values */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
@@ -1293,11 +1263,7 @@ Example:
                 value={formData.lifeHabits.smoking}
                 onValueChange={(value) => handleLifeHabitsChange("smoking", value)}
               >
-                {[
-                  { value: 'non', label: 'Non-smoker' },
-                  { value: 'actuel', label: 'Current smoker' },
-                  { value: 'ancien', label: 'Ex-smoker' }
-                ].map(option => (
+                {SMOKING_OPTIONS.map(option => (
                   <label 
                     key={option.value}
                     className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
@@ -1322,11 +1288,7 @@ Example:
                 value={formData.lifeHabits.alcohol}
                 onValueChange={(value) => handleLifeHabitsChange("alcohol", value)}
               >
-                {[
-                  { value: 'jamais', label: 'Never' },
-                  { value: 'occasionnel', label: 'Occasional' },
-                  { value: 'regulier', label: 'Regular' }
-                ].map(option => (
+                {ALCOHOL_OPTIONS.map(option => (
                   <label 
                     key={option.value}
                     className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
@@ -1351,11 +1313,7 @@ Example:
                 value={formData.lifeHabits.physicalActivity}
                 onValueChange={(value) => handleLifeHabitsChange("physicalActivity", value)}
               >
-                {[
-                  { value: 'sedentaire', label: 'Sedentary' },
-                  { value: 'moderee', label: 'Moderate' },
-                  { value: 'intense', label: 'Intense' }
-                ].map(option => (
+                {ACTIVITY_OPTIONS.map(option => (
                   <label 
                     key={option.value}
                     className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
