@@ -166,6 +166,55 @@ export default function ModernPatientForm({
     "High cholesterol",
   ], [])
 
+  // ✅ ADD: Lifestyle mapping functions
+  const mapSmokingStatus = useCallback((smokingStatus: string): string => {
+    const statusLower = smokingStatus?.toLowerCase() || ''
+    
+    // Map English values from TIBOK hook normalization
+    if (statusLower.includes('non-smoker') || statusLower.includes('never')) return 'non'
+    if (statusLower.includes('current') || statusLower.includes('smoker')) return 'actuel'
+    if (statusLower.includes('former') || statusLower.includes('ex')) return 'ancien'
+    
+    // Map French values (in case normalization didn't occur)
+    if (statusLower.includes('non-fumeur')) return 'non'
+    if (statusLower.includes('fumeur actuel')) return 'actuel'
+    if (statusLower.includes('ex-fumeur')) return 'ancien'
+    
+    return ''
+  }, [])
+
+  const mapAlcoholConsumption = useCallback((alcoholConsumption: string): string => {
+    const consumptionLower = alcoholConsumption?.toLowerCase() || ''
+    
+    // Map English values from TIBOK hook normalization
+    if (consumptionLower.includes('never')) return 'jamais'
+    if (consumptionLower.includes('occasional')) return 'occasionnel'
+    if (consumptionLower.includes('regular')) return 'regulier'
+    
+    // Map French values (in case normalization didn't occur)
+    if (consumptionLower.includes('jamais')) return 'jamais'
+    if (consumptionLower.includes('occasionnel')) return 'occasionnel'
+    if (consumptionLower.includes('régulier')) return 'regulier'
+    
+    return ''
+  }, [])
+
+  const mapPhysicalActivity = useCallback((physicalActivity: string): string => {
+    const activityLower = physicalActivity?.toLowerCase() || ''
+    
+    // Map English values from TIBOK hook normalization
+    if (activityLower.includes('sedentary')) return 'sedentaire'
+    if (activityLower.includes('moderate')) return 'moderee'
+    if (activityLower.includes('intense')) return 'intense'
+    
+    // Map French values (in case normalization didn't occur)
+    if (activityLower.includes('sédentaire')) return 'sedentaire'
+    if (activityLower.includes('modéré')) return 'moderee'
+    if (activityLower.includes('intense')) return 'intense'
+    
+    return ''
+  }, [])
+
   // ========== Utility functions ==========
   const calculateAge = useCallback((birthDate: string): string => {
     if (!birthDate) return ""
@@ -468,6 +517,22 @@ export default function ModernPatientForm({
             physicalActivity: patientInfo.physicalActivity
           })
 
+          // ✅ FIXED: Map lifestyle data properly
+          const mappedLifestyle = {
+            smoking: mapSmokingStatus(patientInfo.smokingStatus),
+            alcohol: mapAlcoholConsumption(patientInfo.alcoholConsumption),
+            physicalActivity: mapPhysicalActivity(patientInfo.physicalActivity)
+          }
+
+          console.log('🎯 Mapped lifestyle data:', {
+            original: {
+              smoking: patientInfo.smokingStatus,
+              alcohol: patientInfo.alcoholConsumption,
+              activity: patientInfo.physicalActivity
+            },
+            mapped: mappedLifestyle
+          })
+
           const newFormData: PatientFormData = {
             firstName: patientInfo.firstName || patientInfo.first_name || "",
             lastName: patientInfo.lastName || patientInfo.last_name || "",
@@ -489,19 +554,15 @@ export default function ModernPatientForm({
             otherMedicalHistory: patientInfo.otherMedicalHistory || "",
             currentMedicationsText: patientInfo.currentMedications || "",
             
-            // 🎯 AUTO-FILL LIFESTYLE DATA FROM TIBOK
-            lifeHabits: {
-              smoking: patientInfo.smokingStatus || "",
-              alcohol: patientInfo.alcoholConsumption || "", 
-              physicalActivity: patientInfo.physicalActivity || ""
-            }
+            // ✅ FIXED: Use mapped lifestyle data
+            lifeHabits: mappedLifestyle
           }
           
           console.log('✅ Patient form auto-filled successfully:', {
             allergiesCount: newFormData.allergies.length,
             medicalHistoryCount: newFormData.medicalHistory.length,
             hasMedications: !!newFormData.currentMedicationsText,
-            hasLifestyle: !!(newFormData.lifeHabits.smoking || newFormData.lifeHabits.alcohol || newFormData.lifeHabits.physicalActivity)
+            lifestyle: newFormData.lifeHabits
           })
           
           setFormData(newFormData)
@@ -527,7 +588,7 @@ export default function ModernPatientForm({
     }
     
     initializeData()
-  }, [consultationId, tibokPatient, dataInitialized, normalizeGender])
+  }, [consultationId, tibokPatient, dataInitialized, normalizeGender, mapSmokingStatus, mapAlcoholConsumption, mapPhysicalActivity])
 
   // Auto-save
   useEffect(() => {
