@@ -25,6 +25,7 @@ import {
   CheckCircle,
   AlertCircle
 } from "lucide-react"
+import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
 import { getTranslation, Language } from "@/lib/translations"
 
 // ==================== INTERFACES & TYPES ====================
@@ -104,6 +105,7 @@ export default function ModernClinicalForm({
   consultationId
 }: ClinicalFormProps) {
   // ========== Hooks ==========
+  const { patientData: tibokPatient, isFromTibok } = useTibokPatientData()
   const t = useCallback((key: string) => getTranslation(key, language), [language])
   
   // ========== States ==========
@@ -125,6 +127,7 @@ export default function ModernClinicalForm({
   const [bpNotApplicable, setBpNotApplicable] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [dataInitialized, setDataInitialized] = useState(false)
 
   // ========== Memoization of translated lists ==========
   const COMMON_SYMPTOMS = useMemo(() => [
@@ -318,6 +321,53 @@ export default function ModernClinicalForm({
       
       try {
         setIsLoading(true)
+        
+        // 🎯 FIRST: Check for TIBOK data and auto-fill
+        if (tibokPatient && !dataInitialized) {
+          console.log('🔄 Auto-filling clinical form with TIBOK data:', {
+            symptoms: tibokPatient.currentSymptoms,
+            consultationReason: tibokPatient.consultationReason,
+            vitalSigns: tibokPatient.vitalSigns,
+            currentMedications: tibokPatient.currentMedications
+          })
+
+          const tibokClinicalData = {
+            // 🎯 AUTO-FILL SYMPTOMS FROM TIBOK
+            symptoms: Array.isArray(tibokPatient.currentSymptoms) ? tibokPatient.currentSymptoms : [],
+            
+            // 🎯 AUTO-FILL CONSULTATION REASON FROM TIBOK
+            chiefComplaint: tibokPatient.consultationReason || "",
+            
+            // 🎯 AUTO-FILL VITAL SIGNS FROM TIBOK  
+            vitalSigns: {
+              temperature: tibokPatient.vitalSigns?.temperature?.toString() || "37.0",
+              bloodPressureSystolic: tibokPatient.vitalSigns?.bloodPressureSystolic?.toString() || "",
+              bloodPressureDiastolic: tibokPatient.vitalSigns?.bloodPressureDiastolic?.toString() || ""
+            },
+            
+            // Keep existing values or defaults for other fields
+            diseaseHistory: "",
+            symptomDuration: "",
+            painScale: "0"
+          }
+
+          setLocalData(prev => ({
+            ...prev,
+            ...tibokClinicalData
+          }))
+
+          console.log('✅ Clinical form auto-filled successfully:', {
+            symptomsCount: tibokClinicalData.symptoms.length,
+            hasComplaint: !!tibokClinicalData.chiefComplaint,
+            hasVitalSigns: !!(tibokClinicalData.vitalSigns.temperature && tibokClinicalData.vitalSigns.temperature !== "37.0")
+          })
+
+          setDataInitialized(true)
+          setIsLoading(false)
+          return
+        }
+        
+        // SECOND: Try to load saved data from database
         const savedData = await consultationDataService.getAllData()
         
         if (savedData?.clinicalData) {
@@ -342,7 +392,7 @@ export default function ModernClinicalForm({
     }
     
     loadSavedData()
-  }, [consultationId])
+  }, [consultationId, tibokPatient, dataInitialized])
 
   // Update when props change
   useEffect(() => {
@@ -391,9 +441,29 @@ export default function ModernClinicalForm({
     localData.vitalSigns.bloodPressureDiastolic
   )
 
+  // Show TIBOK notification when data was auto-filled
+  const showTibokNotification = dataInitialized && isFromTibok && tibokPatient
+
   // ========== Render ==========
   return (
     <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+      {/* TIBOK Notification */}
+      {showTibokNotification && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-blue-600" />
+            <p className="text-sm font-medium text-blue-800">
+              Clinical information retrieved from TIBOK for {tibokPatient.firstName} {tibokPatient.lastName}
+              {localData.symptoms.length > 0 && (
+                <span className="ml-2">
+                  • {localData.symptoms.length} symptoms auto-filled
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header with progress */}
       <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader className="text-center">
