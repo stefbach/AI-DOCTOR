@@ -141,11 +141,57 @@ export default function ModernClinicalForm({
   const { patientData: tibokPatient, isFromTibok } = useTibokPatientData()
   const t = useCallback((key: string) => getTranslation(key, language), [language])
   
-  // CRITICAL FIX: Use a single initialization flag
-  const [isInitialized, setIsInitialized] = useState(false)
+  // CRITICAL FIX: Track if component has mounted to prevent initial render issues
+  const isMounted = useRef(false)
+  const hasLoadedTibokData = useRef(false)
   
   // ========== States ==========
-  const [localData, setLocalData] = useState<ClinicalData>(INITIAL_CLINICAL_DATA)
+  // Initialize with TIBOK data if available immediately
+  const getInitialData = useCallback((): ClinicalData => {
+    if (tibokPatient && isFromTibok && !hasLoadedTibokData.current) {
+      console.log('🚀 Initializing with TIBOK data immediately')
+      
+      const mappedSymptoms = Array.isArray(tibokPatient.currentSymptoms) 
+        ? tibokPatient.currentSymptoms.map(symptom => {
+            const mapped = symptom === 'constipation' ? 'Constipation' : symptom
+            return mapped
+          }).filter(Boolean)
+        : []
+
+      const validatedTemperature = validateTemperatureValue(tibokPatient.vitalSigns?.temperature)
+
+      hasLoadedTibokData.current = true
+      
+      return {
+        chiefComplaint: tibokPatient.consultationReason || "",
+        diseaseHistory: "",
+        symptomDuration: tibokPatient.symptomDuration || "",
+        symptoms: mappedSymptoms,
+        painScale: tibokPatient.painLevel?.toString() || "0",
+        vitalSigns: {
+          temperature: validatedTemperature,
+          bloodPressureSystolic: tibokPatient.vitalSigns?.bloodPressureSystolic?.toString() || "",
+          bloodPressureDiastolic: tibokPatient.vitalSigns?.bloodPressureDiastolic?.toString() || ""
+        }
+      }
+    }
+    
+    if (data) {
+      return {
+        ...INITIAL_CLINICAL_DATA,
+        ...data,
+        symptoms: Array.isArray(data.symptoms) ? data.symptoms : [],
+        vitalSigns: {
+          ...INITIAL_CLINICAL_DATA.vitalSigns,
+          ...data.vitalSigns
+        }
+      }
+    }
+    
+    return INITIAL_CLINICAL_DATA
+  }, [tibokPatient, isFromTibok, data])
+  
+  const [localData, setLocalData] = useState<ClinicalData>(getInitialData)
   const [errors, setErrors] = useState<ValidationErrors>({})
   const [symptomSearch, setSymptomSearch] = useState("")
   const [currentSection, setCurrentSection] = useState(0)
@@ -239,6 +285,12 @@ export default function ModernClinicalForm({
 
   // ========== Event handlers ==========
   const updateData = useCallback((updates: Partial<ClinicalData>) => {
+    // CRITICAL: Don't update if we're trying to clear TIBOK data
+    if (hasLoadedTibokData.current && !isMounted.current) {
+      console.warn('⚠️ Preventing early state clear of TIBOK data')
+      return
+    }
+    
     setLocalData(prev => {
       const newData = { ...prev, ...updates }
       if ('symptoms' in updates && !Array.isArray(newData.symptoms)) {
@@ -339,90 +391,72 @@ export default function ModernClinicalForm({
     }
   }, [validateForm, onNext, errors])
 
-  // ========== CRITICAL FIX: Single initialization effect ==========
+  // ========== Effects ==========
+  
+  // Track mounted state
   useEffect(() => {
-    // Prevent re-initialization
-    if (isInitialized) {
-      return
+    isMounted.current = true
+    return () => {
+      isMounted.current = false
     }
+  }, [])
 
-    const initializeFormData = async () => {
-      console.log('🔄 Initializing clinical form data...')
-      
-      // PRIORITY 1: Check for TIBOK data
-      if (tibokPatient && isFromTibok) {
-        console.log('🔄 Loading TIBOK data into clinical form:', {
-          patient: tibokPatient.firstName + ' ' + tibokPatient.lastName,
-          hasSymptoms: !!tibokPatient.currentSymptoms,
-          symptomCount: tibokPatient.currentSymptoms?.length,
-          hasDuration: !!tibokPatient.symptomDuration,
-          hasTemperature: !!tibokPatient.vitalSigns?.temperature,
-          duration: tibokPatient.symptomDuration,
-          temperature: tibokPatient.vitalSigns?.temperature
-        })
+  // Load TIBOK data if it arrives after initial render
+  useEffect(() => {
+    if (tibokPatient && isFromTibok && !hasLoadedTibokData.current && isMounted.current) {
+      console.log('🔄 Loading TIBOK data after mount:', {
+        patient: tibokPatient.firstName + ' ' + tibokPatient.lastName,
+        hasSymptoms: !!tibokPatient.currentSymptoms,
+        symptomCount: tibokPatient.currentSymptoms?.length,
+        hasDuration: !!tibokPatient.symptomDuration,
+        hasTemperature: !!tibokPatient.vitalSigns?.temperature
+      })
 
-        // Map TIBOK data to clinical form structure
-        const mappedSymptoms = Array.isArray(tibokPatient.currentSymptoms) 
-          ? tibokPatient.currentSymptoms.map(symptom => 
-              mapSymptomToCommonStatic(symptom, COMMON_SYMPTOMS)
-            ).filter(Boolean)
-          : []
+      const mappedSymptoms = Array.isArray(tibokPatient.currentSymptoms) 
+        ? tibokPatient.currentSymptoms.map(symptom => 
+            mapSymptomToCommonStatic(symptom, COMMON_SYMPTOMS)
+          ).filter(Boolean)
+        : []
 
-        // Validate temperature value
-        const validatedTemperature = validateTemperatureValue(tibokPatient.vitalSigns?.temperature)
+      const validatedTemperature = validateTemperatureValue(tibokPatient.vitalSigns?.temperature)
 
-        const tibokClinicalData: ClinicalData = {
-          chiefComplaint: tibokPatient.consultationReason || "",
-          diseaseHistory: "",
-          symptomDuration: tibokPatient.symptomDuration || "",
-          symptoms: mappedSymptoms,
-          painScale: tibokPatient.painLevel?.toString() || "0",
-          vitalSigns: {
-            temperature: validatedTemperature,
-            bloodPressureSystolic: tibokPatient.vitalSigns?.bloodPressureSystolic?.toString() || "",
-            bloodPressureDiastolic: tibokPatient.vitalSigns?.bloodPressureDiastolic?.toString() || ""
-          }
+      const tibokClinicalData: ClinicalData = {
+        chiefComplaint: tibokPatient.consultationReason || "",
+        diseaseHistory: "",
+        symptomDuration: tibokPatient.symptomDuration || "",
+        symptoms: mappedSymptoms,
+        painScale: tibokPatient.painLevel?.toString() || "0",
+        vitalSigns: {
+          temperature: validatedTemperature,
+          bloodPressureSystolic: tibokPatient.vitalSigns?.bloodPressureSystolic?.toString() || "",
+          bloodPressureDiastolic: tibokPatient.vitalSigns?.bloodPressureDiastolic?.toString() || ""
         }
-
-        console.log('✅ TIBOK data mapped to clinical form:', {
-          duration: tibokClinicalData.symptomDuration,
-          symptomsCount: tibokClinicalData.symptoms.length,
-          symptoms: tibokClinicalData.symptoms,
-          temperature: tibokClinicalData.vitalSigns.temperature,
-          painScale: tibokClinicalData.painScale
-        })
-
-        // Set the data
-        setLocalData(tibokClinicalData)
-        setIsInitialized(true)
-        return // Exit early - don't load from database
       }
-      
-      // PRIORITY 2: Check for passed props data
-      if (data && Object.keys(data).length > 0) {
-        console.log('📋 Loading data from props')
-        setLocalData(prev => ({
-          ...prev,
-          ...data,
-          symptoms: Array.isArray(data.symptoms) ? data.symptoms : prev.symptoms,
-          vitalSigns: {
-            ...prev.vitalSigns,
-            ...data.vitalSigns
-          }
-        }))
-        setIsInitialized(true)
-        return
-      }
-      
-      // PRIORITY 3: Load from database only if no other data source
-      if (consultationId && !tibokPatient && !data) {
+
+      console.log('✅ Setting TIBOK data to state:', {
+        duration: tibokClinicalData.symptomDuration,
+        symptomsCount: tibokClinicalData.symptoms.length,
+        symptoms: tibokClinicalData.symptoms,
+        temperature: tibokClinicalData.vitalSigns.temperature,
+        painScale: tibokClinicalData.painScale
+      })
+
+      setLocalData(tibokClinicalData)
+      hasLoadedTibokData.current = true
+    }
+  }, [tibokPatient, isFromTibok, COMMON_SYMPTOMS])
+
+  // Load from database only if no TIBOK data and no props data
+  useEffect(() => {
+    if (!hasLoadedTibokData.current && !data && consultationId && isMounted.current) {
+      const loadFromDatabase = async () => {
         try {
           setIsLoading(true)
           console.log('📂 Loading saved clinical data from database')
           
           const savedData = await consultationDataService.getAllData()
           
-          if (savedData?.clinicalData) {
+          if (savedData?.clinicalData && !hasLoadedTibokData.current) {
             setLocalData(prev => ({
               ...prev,
               ...savedData.clinicalData,
@@ -442,24 +476,13 @@ export default function ModernClinicalForm({
         }
       }
       
-      setIsInitialized(true)
+      loadFromDatabase()
     }
-    
-    initializeFormData()
-  }, [tibokPatient, isFromTibok, consultationId, data, COMMON_SYMPTOMS, isInitialized])
+  }, [consultationId, data])
 
-  // Update age when birth date changes
+  // Auto-save effect
   useEffect(() => {
-    if (localData.vitalSigns.temperature) {
-      const temp = validateTemperature(localData.vitalSigns.temperature)
-      // Additional validation logic if needed
-    }
-  }, [localData.vitalSigns.temperature, validateTemperature])
-
-  // Auto-save effect (separate from initialization)
-  useEffect(() => {
-    // Don't save until initialized
-    if (!isInitialized) {
+    if (!isMounted.current || !hasLoadedTibokData.current) {
       return
     }
 
@@ -477,20 +500,21 @@ export default function ModernClinicalForm({
     }, 1000)
     
     return () => clearTimeout(timer)
-  }, [localData, onDataChange, isInitialized])
+  }, [localData, onDataChange])
 
   // Debug: Log state changes
   useEffect(() => {
-    if (isInitialized) {
+    if (isMounted.current) {
       console.log('📊 Clinical Form State Updated:', {
         symptomDuration: localData.symptomDuration,
         symptomsCount: localData.symptoms.length,
         symptoms: localData.symptoms,
         temperature: localData.vitalSigns.temperature,
-        isInitialized: isInitialized
+        hasLoadedTibokData: hasLoadedTibokData.current,
+        isMounted: isMounted.current
       })
     }
-  }, [localData, isInitialized])
+  }, [localData])
 
   // ========== Calculated variables ==========
   const progress = calculateProgress()
@@ -507,7 +531,7 @@ export default function ModernClinicalForm({
     localData.vitalSigns.bloodPressureDiastolic
   )
 
-  const showTibokNotification = isInitialized && isFromTibok && tibokPatient
+  const showTibokNotification = hasLoadedTibokData.current && isFromTibok && tibokPatient
 
   // ========== Render ==========
   return (
@@ -658,7 +682,7 @@ export default function ModernClinicalForm({
         </CardContent>
       </Card>
 
-      {/* Section 3: Symptom duration */}
+      {/* Section 3: Symptom duration - FIXED WITH SAFEGUARD */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
@@ -672,10 +696,13 @@ export default function ModernClinicalForm({
               How long have you been experiencing these symptoms?
             </Label>
             <Select
-              value={localData.symptomDuration}
+              value={localData.symptomDuration || ""}
               onValueChange={(value) => {
-                console.log('Duration select changed to:', value)
-                updateData({ symptomDuration: value })
+                // CRITICAL: Prevent empty value from clearing TIBOK data
+                if (value || !hasLoadedTibokData.current) {
+                  console.log('Duration select changed to:', value)
+                  updateData({ symptomDuration: value })
+                }
               }}
             >
               <SelectTrigger className={errors.symptomDuration ? 'border-red-500' : ''}>
