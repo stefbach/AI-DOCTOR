@@ -168,7 +168,7 @@ export default function ModernClinicalForm({
     { value: 'more_6_months', label: 'More than 6 months' }
   ], [])
 
-  // FIX: Helper function to get duration label
+  // Helper function to get duration label
   const getDurationLabel = useCallback((value: string) => {
     const option = DURATION_OPTIONS.find(opt => opt.value === value)
     return option?.label || ""
@@ -191,39 +191,6 @@ export default function ModernClinicalForm({
       return symptom
     }
   }, [COMMON_SYMPTOMS])
-
-  // Duration mapping function
-  const mapSymptomDuration = useCallback((duration: string): string => {
-    if (!duration) return ''
-    
-    const durationLower = duration.toLowerCase().trim()
-    console.log('🔧 Mapping symptom duration:', duration, '→', durationLower)
-    
-    // Handle TIBOK normalized English values (after hook processing)
-    switch(durationLower) {
-      case 'several months':
-        return 'more_6_months'
-      case 'more than 6 months':
-        return 'more_6_months'
-      case '1 to 6 months':
-        return '1_6_months'
-      case '1 to 4 weeks':
-        return '1_4_weeks'
-      case '3 to 7 days':
-        return '3_7_days'
-      case '1 to 3 days':
-        return '1_3_days'
-      case '6 to 24 hours':
-        return '6_24_hours'
-      case '1 to 6 hours':
-        return '1_6_hours'
-      case 'less than 1 hour':
-        return 'less_hour'
-      default:
-        console.warn('⚠️ Unknown symptom duration:', duration)
-        return ""
-    }
-  }, [])
 
   // ========== Utility functions ==========
   const calculateProgress = useCallback((): number => {
@@ -371,7 +338,7 @@ export default function ModernClinicalForm({
 
   // ========== Effects ==========
   
-  // CRITICAL FIX: Updated useEffect with proper state handling
+  // CRITICAL FIX: Updated useEffect without dataInitialized in dependencies
   useEffect(() => {
     const loadSavedData = async () => {
       if (!consultationId) return
@@ -470,7 +437,7 @@ export default function ModernClinicalForm({
     }
     
     loadSavedData()
-  }, [consultationId, tibokPatient]) // Removed dataInitialized from dependencies
+  }, [consultationId, tibokPatient]) // Removed dataInitialized and mapSymptomToCommon from dependencies
 
   // Update when props change
   useEffect(() => {
