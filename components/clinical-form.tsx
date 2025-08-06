@@ -539,32 +539,7 @@ export default function ModernClinicalForm({
       className="space-y-6" 
       onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
     >
-      {/* TIBOK Notification */}
-      {showTibokNotification && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="h-5 w-5 text-blue-600" />
-            <p className="text-sm font-medium text-blue-800">
-              Clinical information retrieved from TIBOK for {tibokPatient.firstName} {tibokPatient.lastName}
-              {localData.symptoms.length > 0 && (
-                <span className="ml-2">
-                  • {localData.symptoms.length} symptoms auto-filled
-                </span>
-              )}
-              {localData.symptomDuration && (
-                <span className="ml-2">
-                  • Duration: {getDurationLabel(localData.symptomDuration)}
-                </span>
-              )}
-              {localData.vitalSigns.temperature && (
-                <span className="ml-2">
-                  • Temperature: {localData.vitalSigns.temperature}°C
-                </span>
-              )}
-            </p>
-          </div>
-        </div>
-      )}
+      {/* TIBOK Notification - Removed per request */}
 
       {/* Header with progress */}
       <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
