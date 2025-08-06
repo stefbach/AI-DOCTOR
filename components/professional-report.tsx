@@ -298,24 +298,58 @@ export default function ProfessionalReportEditable({
   const [editingDoctor, setEditingDoctor] = useState(false)
 
   useEffect(() => {
-    console.log("🚀 ProfessionalReportEditable mounted")
-    console.log("📋 Data received:", {
-      patientData,
-      clinicalData,
-      diagnosisData,
-      editedDocuments
+    console.log("🚀 ProfessionalReportEditable mounted with data:", {
+      hasPatientData: !!patientData,
+      patientName: patientData?.name || `${patientData?.firstName} ${patientData?.lastName}`,
+      hasClinicalData: !!clinicalData,
+      hasDiagnosisData: !!diagnosisData,
+      hasQuestionsData: !!questionsData
     })
-    checkExistingReport()
-  }, [])
+    
+    // Check if we have minimum required data
+    if (patientData && (patientData.name || (patientData.firstName && patientData.lastName))) {
+      checkExistingReport()
+    } else {
+      console.warn("Insufficient patient data, creating empty report")
+      const emptyReport = createEmptyReport()
+      if (patientData) {
+        emptyReport.compteRendu.patient = {
+          ...emptyReport.compteRendu.patient,
+          nom: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
+          nomComplet: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
+          age: patientData.age?.toString() || '',
+          dateNaissance: patientData.dateOfBirth || '',
+          sexe: patientData.gender || '',
+          adresse: patientData.address || '',
+          telephone: patientData.phone || '',
+          email: patientData.email || '',
+          poids: patientData.weight?.toString() || ''
+        }
+      }
+      setReport(emptyReport)
+      setLoading(false)
+    }
+  }, [patientData, clinicalData, questionsData, diagnosisData])
 
   // Check for existing report
   const checkExistingReport = async () => {
     try {
-      const response = await fetch(`/api/save-medical-report?patientId=${patientData?.id || 'temp'}`)
+      // Get the actual patient ID from props or URL
+      const params = new URLSearchParams(window.location.search)
+      const patientIdFromUrl = params.get('patientId')
+      const actualPatientId = patientData?.id || patientIdFromUrl || (patientData ? 'patient_' + Date.now() : 'temp')
+      
+      // Don't check for existing report if no real patient data
+      if (!patientData || actualPatientId === 'temp') {
+        console.log("No patient data, generating new report")
+        generateProfessionalReport()
+        return
+      }
+      
+      const response = await fetch(`/api/save-medical-report?patientId=${actualPatientId}`)
       const result = await response.json()
       
       if (result.success && result.data?.content) {
-        // Vérifier que la structure est complète
         const reportContent = result.data.content
         if (reportContent?.compteRendu) {
           setReport(reportContent)
@@ -354,23 +388,42 @@ export default function ProfessionalReportEditable({
     setError(null)
 
     try {
-      console.log("📤 Generating report with Mauritian format")
+      console.log("📤 Generating report with data:", {
+        hasPatientData: !!patientData,
+        patientName: patientData?.name || `${patientData?.firstName} ${patientData?.lastName}`,
+        hasClinicalData: !!clinicalData,
+        hasQuestionsData: !!questionsData,
+        hasDiagnosisData: !!diagnosisData
+      })
+      
+      // Create a valid patient data object even if some data is missing
+      const validPatientData = patientData || {
+        name: 'Patient',
+        age: '',
+        gender: '',
+        dateOfBirth: '',
+        address: '',
+        phone: '',
+        email: '',
+        weight: ''
+      }
       
       const response = await fetch("/api/generate-consultation-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          patientData,
-          clinicalData,
-          questionsData,
-          diagnosisData,
-          editedDocuments,
+          patientData: validPatientData,
+          clinicalData: clinicalData || {},
+          questionsData: questionsData || {},
+          diagnosisData: diagnosisData || {},
+          editedDocuments: editedDocuments || {},
           includeFullPrescriptions
         })
       })
 
       if (!response.ok) {
         const errorText = await response.text()
+        console.error("API Error:", errorText)
         throw new Error(`HTTP Error ${response.status}: ${errorText}`)
       }
 
@@ -380,12 +433,12 @@ export default function ProfessionalReportEditable({
       if (data.success && data.report) {
         const reportData = data.report
         
-        // S'assurer que la structure est complète
+        // Ensure structure is complete
         if (!reportData.compteRendu) {
           reportData.compteRendu = createEmptyReport().compteRendu
         }
         
-        // Fusionner les informations du praticien
+        // Merge practitioner information
         if (reportData.compteRendu?.praticien) {
           reportData.compteRendu.praticien = {
             ...doctorInfo,
@@ -395,43 +448,64 @@ export default function ProfessionalReportEditable({
           reportData.compteRendu.praticien = doctorInfo
         }
         
+        // Ensure patient data is properly set
+        if (validPatientData) {
+          reportData.compteRendu.patient = {
+            nom: validPatientData.name || `${validPatientData.firstName || ''} ${validPatientData.lastName || ''}`.trim() || 'Patient',
+            nomComplet: validPatientData.name || `${validPatientData.firstName || ''} ${validPatientData.lastName || ''}`.trim() || 'Patient',
+            age: validPatientData.age?.toString() || '',
+            dateNaissance: validPatientData.dateOfBirth || '',
+            sexe: validPatientData.gender || '',
+            adresse: validPatientData.address || '',
+            telephone: validPatientData.phone || '',
+            email: validPatientData.email || '',
+            poids: validPatientData.weight?.toString() || '',
+            dateExamen: new Date().toISOString().split('T')[0]
+          }
+        }
+        
         setReport(reportData)
         setValidationStatus('draft')
         
         toast({
           title: "Report generated successfully",
-          description: `${data.metadata?.prescriptionsSummary?.medications || 0} medications, ${data.metadata?.prescriptionsSummary?.laboratoryTests || 0} tests, ${data.metadata?.prescriptionsSummary?.imagingStudies || 0} imaging studies`
+          description: "Report is ready for editing"
         })
       } else {
         throw new Error(data.error || "Generation error")
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error"
+      console.error("Report generation error:", errorMessage)
       setError(errorMessage)
       
-      // En cas d'erreur, créer un rapport vide
+      // Create an empty report with available data
       const emptyReport = createEmptyReport()
       if (patientData) {
         emptyReport.compteRendu.patient = {
           ...emptyReport.compteRendu.patient,
-          nom: patientData.name || '',
-          nomComplet: patientData.name || '',
-          age: patientData.age || '',
+          nom: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim() || 'Patient',
+          nomComplet: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim() || 'Patient',
+          age: patientData.age?.toString() || '',
           dateNaissance: patientData.dateOfBirth || '',
           sexe: patientData.gender || '',
           adresse: patientData.address || '',
           telephone: patientData.phone || '',
           email: patientData.email || '',
-          poids: patientData.weight || ''
+          poids: patientData.weight?.toString() || ''
         }
       }
+      emptyReport.compteRendu.praticien = doctorInfo
       setReport(emptyReport)
       
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive"
-      })
+      // Don't show error toast for expected scenarios
+      if (!errorMessage.includes("404")) {
+        toast({
+          title: "Note",
+          description: "Using default template. Please fill in the required information.",
+          variant: "default"
+        })
+      }
     } finally {
       setLoading(false)
     }
@@ -837,6 +911,12 @@ export default function ProfessionalReportEditable({
     
     setSaving(true)
     try {
+      // Get IDs from URL or session
+      const params = new URLSearchParams(window.location.search)
+      const consultationId = params.get('consultationId') || sessionStorage.getItem('consultationId')
+      const patientIdFromUrl = params.get('patientId')
+      const actualPatientId = patientData?.id || patientIdFromUrl || (patientData ? 'patient_' + Date.now() : 'temp')
+      
       const updatedReport = {
         ...report,
         compteRendu: {
@@ -856,9 +936,10 @@ export default function ProfessionalReportEditable({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           reportId,
-          patientId: patientData?.id || 'temp',
+          patientId: actualPatientId,
           report: updatedReport,
           action: 'save',
+          consultationId,
           metadata: {
             lastModified: new Date().toISOString(),
             modifiedSections: Array.from(modifiedSections),
@@ -1211,6 +1292,37 @@ export default function ProfessionalReportEditable({
             <p className="text-lg font-semibold">Generating professional medical report...</p>
             <p className="text-sm text-gray-600">Format compliant with Medical Council of Mauritius regulations</p>
           </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Add debug information display
+  if (!loading && !report && !error && !patientData) {
+    return (
+      <Card className="w-full">
+        <CardContent className="p-6">
+          <AlertCircle className="h-12 w-12 text-orange-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-center mb-4">No Patient Data Available</h3>
+          <p className="text-center text-gray-600 mb-4">
+            Patient information is required to generate the medical report.
+          </p>
+          <div className="text-sm text-gray-500 space-y-1">
+            <p>Debug Info:</p>
+            <p>• Patient Data: {patientData ? 'Present' : 'Missing'}</p>
+            <p>• Clinical Data: {clinicalData ? 'Present' : 'Missing'}</p>
+            <p>• Questions Data: {questionsData ? 'Present' : 'Missing'}</p>
+            <p>• Diagnosis Data: {diagnosisData ? 'Present' : 'Missing'}</p>
+          </div>
+          <Button 
+            onClick={() => {
+              const emptyReport = createEmptyReport()
+              setReport(emptyReport)
+            }}
+            className="mt-4 w-full"
+          >
+            Create Empty Report Template
+          </Button>
         </CardContent>
       </Card>
     )
