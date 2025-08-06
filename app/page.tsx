@@ -1,4 +1,4 @@
-// app/page.tsx - Modified version with only 5 steps
+// app/page.tsx - Modified version with only 5 steps - FIXED
 
 "use client"
 
@@ -204,6 +204,7 @@ export default function MedicalAIExpert() {
     }
   }
 
+  // CRITICAL FIX: Changed all 'initialData' to 'data' to match component prop expectations
   const getCurrentStepProps = () => {
     const consultationId = consultationDataService.getCurrentConsultationId() || currentConsultationId
     const commonProps = { 
@@ -217,7 +218,7 @@ export default function MedicalAIExpert() {
       case 0:
         return {
           ...commonProps,
-          initialData: patientData,
+          data: patientData,  // ✅ FIXED: Changed from initialData to data
           onDataChange: setPatientData,
           onNext: handleNext,
         }
@@ -225,7 +226,7 @@ export default function MedicalAIExpert() {
         return {
           ...commonProps,
           patientData,
-          initialData: clinicalData,
+          data: clinicalData,  // ✅ FIXED: Changed from initialData to data
           onDataChange: setClinicalData,
           onNext: handleNext,
           onPrevious: handlePrevious,
@@ -235,7 +236,7 @@ export default function MedicalAIExpert() {
           ...commonProps,
           patientData,
           clinicalData,
-          initialData: questionsData,
+          data: questionsData,  // ✅ FIXED: Changed from initialData to data
           onDataChange: setQuestionsData,
           onNext: handleNext,
           onPrevious: handlePrevious,
@@ -246,7 +247,7 @@ export default function MedicalAIExpert() {
           patientData,
           clinicalData,
           questionsData,
-          initialData: diagnosisData,
+          data: diagnosisData,  // ✅ FIXED: Changed from initialData to data
           onDataChange: setDiagnosisData,
           onNext: handleNext,
           onPrevious: handlePrevious,
