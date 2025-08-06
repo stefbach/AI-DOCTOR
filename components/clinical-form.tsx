@@ -130,25 +130,24 @@ export default function ModernClinicalForm({
   const [dataInitialized, setDataInitialized] = useState(false)
 
   // ========== Memoization of translated lists ==========
-  // ✅ STEP 2: Verify COMMON_SYMPTOMS includes all TIBOK symptoms
   const COMMON_SYMPTOMS = useMemo(() => [
     "Chest pain",
     "Shortness of breath",
     "Palpitations",
-    "Fatigue",        // Must match TIBOK's "Fatigue"
+    "Fatigue",
     "Nausea",
     "Vomiting",
     "Diarrhea",
     "Constipation",
-    "Headache",       // Must match TIBOK's "Headache"
+    "Headache",
     "Dizziness",
-    "Fever",          // Must match TIBOK's "Fever"
-    "Chills",         // Must match TIBOK's "Chills"
+    "Fever",
+    "Chills",
     "Cough",
     "Abdominal pain",
     "Back pain",
-    "Insomnia",       // Must match TIBOK's "Insomnia"
-    "Anxiety",        // Must match TIBOK's "Anxiety"
+    "Insomnia",
+    "Anxiety",
     "Loss of appetite",
     "Weight loss",
     "Leg swelling",
@@ -158,7 +157,6 @@ export default function ModernClinicalForm({
     "Hearing problems",
   ], [])
 
-  // ✅ UPDATED: Duration options now match the standardized values
   const DURATION_OPTIONS = useMemo(() => [
     { value: 'less_hour', label: 'Less than 1 hour' },
     { value: '1_6_hours', label: '1 to 6 hours' },
@@ -170,7 +168,13 @@ export default function ModernClinicalForm({
     { value: 'more_6_months', label: 'More than 6 months' }
   ], [])
 
-  // ✅ STEP 1: Add symptom mapping helper function
+  // FIX: Helper function to get duration label
+  const getDurationLabel = useCallback((value: string) => {
+    const option = DURATION_OPTIONS.find(opt => opt.value === value)
+    return option?.label || ""
+  }, [DURATION_OPTIONS])
+
+  // Add symptom mapping helper function
   const mapSymptomToCommon = useCallback((symptom: string): string => {
     console.log('🔧 Mapping symptom:', symptom)
     
@@ -188,7 +192,7 @@ export default function ModernClinicalForm({
     }
   }, [COMMON_SYMPTOMS])
 
-  // PRESERVED: Original duration mapping function
+  // Duration mapping function
   const mapSymptomDuration = useCallback((duration: string): string => {
     if (!duration) return ''
     
@@ -197,7 +201,7 @@ export default function ModernClinicalForm({
     
     // Handle TIBOK normalized English values (after hook processing)
     switch(durationLower) {
-      case 'several months':  // ✅ This is what TIBOK sends after normalization
+      case 'several months':
         return 'more_6_months'
       case 'more than 6 months':
         return 'more_6_months'
@@ -227,7 +231,7 @@ export default function ModernClinicalForm({
       localData.chiefComplaint,
       localData.diseaseHistory,
       localData.symptomDuration,
-      localData.symptoms?.length > 0 ? "filled" : "", // Protection against undefined
+      localData.symptoms?.length > 0 ? "filled" : "",
       localData.painScale && localData.painScale !== "0" ? "filled" : ""
     ]
     
@@ -367,7 +371,7 @@ export default function ModernClinicalForm({
 
   // ========== Effects ==========
   
-  // ✅ STEP 3: Replace the entire useEffect that loads saved data
+  // CRITICAL FIX: Updated useEffect with proper state handling
   useEffect(() => {
     const loadSavedData = async () => {
       if (!consultationId) return
@@ -385,37 +389,35 @@ export default function ModernClinicalForm({
           })
 
           const tibokClinicalData = {
-            // FIX 1: DURATION - Now direct assignment with standardized values!
-            // Since TIBOK now sends standardized values like "more_6_months"
+            // Duration - direct assignment (already normalized by hook)
             symptomDuration: tibokPatient.symptomDuration || "",
             
-            // FIX 2: SYMPTOMS - Case-insensitive matching
+            // Symptoms - ensure proper case-insensitive matching
             symptoms: Array.isArray(tibokPatient.currentSymptoms) 
               ? tibokPatient.currentSymptoms.map(symptom => mapSymptomToCommon(symptom))
-                  .filter(Boolean) // Remove any null/undefined values
+                  .filter(Boolean)
               : [],
             
-            // FIX 3: TEMPERATURE - Use actual value, not default
+            // Temperature - ensure string conversion
             vitalSigns: {
               temperature: tibokPatient.vitalSigns?.temperature 
-                ? tibokPatient.vitalSigns.temperature.toString() 
-                : "", // Empty string, NOT "37.0"!
+                ? String(tibokPatient.vitalSigns.temperature)
+                : "",
               bloodPressureSystolic: tibokPatient.vitalSigns?.bloodPressureSystolic?.toString() || "",
               bloodPressureDiastolic: tibokPatient.vitalSigns?.bloodPressureDiastolic?.toString() || ""
             },
             
             // Other fields
             chiefComplaint: tibokPatient.consultationReason || "",
-            diseaseHistory: "", // Empty for new consultation
+            diseaseHistory: "",
             painScale: tibokPatient.painLevel?.toString() || "0"
           }
 
-          // Detailed debug logging
           console.log('✅ Clinical data mapped successfully:', {
             duration: {
               received: tibokPatient.symptomDuration,
               mapped: tibokClinicalData.symptomDuration,
-              isValid: ['less_hour', '1_6_hours', '6_24_hours', '1_3_days', '3_7_days', '1_4_weeks', '1_6_months', 'more_6_months'].includes(tibokClinicalData.symptomDuration)
+              isValid: DURATION_OPTIONS.some(opt => opt.value === tibokClinicalData.symptomDuration)
             },
             symptoms: {
               received: tibokPatient.currentSymptoms,
@@ -429,12 +431,17 @@ export default function ModernClinicalForm({
             painScale: tibokClinicalData.painScale
           })
 
-          setLocalData(prev => ({
-            ...prev,
+          // Force complete state update
+          setLocalData({
+            ...INITIAL_CLINICAL_DATA,
             ...tibokClinicalData
-          }))
+          })
 
-          setDataInitialized(true)
+          // Force re-render after state update
+          setTimeout(() => {
+            setDataInitialized(true)
+          }, 0)
+          
           setIsLoading(false)
           return
         }
@@ -463,7 +470,7 @@ export default function ModernClinicalForm({
     }
     
     loadSavedData()
-  }, [consultationId, tibokPatient, dataInitialized, mapSymptomToCommon])
+  }, [consultationId, tibokPatient]) // Removed dataInitialized from dependencies
 
   // Update when props change
   useEffect(() => {
@@ -517,7 +524,11 @@ export default function ModernClinicalForm({
 
   // ========== Render ==========
   return (
-    <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+    <form 
+      className="space-y-6" 
+      onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
+      key={dataInitialized ? 'initialized' : 'not-initialized'} // Force re-render on initialization
+    >
       {/* TIBOK Notification */}
       {showTibokNotification && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -532,7 +543,7 @@ export default function ModernClinicalForm({
               )}
               {localData.symptomDuration && (
                 <span className="ml-2">
-                  • Duration: {DURATION_OPTIONS.find(opt => opt.value === localData.symptomDuration)?.label}
+                  • Duration: {getDurationLabel(localData.symptomDuration)}
                 </span>
               )}
               {localData.vitalSigns.temperature && (
@@ -545,38 +556,18 @@ export default function ModernClinicalForm({
         </div>
       )}
 
-      {/* ✅ STEP 4: DEBUG INFO - Remove after testing */}
-      {showTibokNotification && process.env.NODE_ENV === 'development' && (
+      {/* Debug Info - Remove in production */}
+      {process.env.NODE_ENV === 'development' && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-          <h4 className="font-bold text-yellow-900 mb-2">🔍 Auto-fill Debug Status:</h4>
-          <div className="grid grid-cols-3 gap-4 text-sm">
-            <div>
-              <strong>Duration:</strong>
-              <div className={localData.symptomDuration ? 'text-green-600' : 'text-red-600'}>
-                {localData.symptomDuration || 'NOT SET'}
-                {localData.symptomDuration ? ' ✅' : ' ❌'}
-              </div>
-            </div>
-            <div>
-              <strong>Symptoms:</strong>
-              <div className={localData.symptoms.length > 0 ? 'text-green-600' : 'text-red-600'}>
-                {localData.symptoms.length} selected
-                {localData.symptoms.length > 0 ? ' ✅' : ' ❌'}
-              </div>
-            </div>
-            <div>
-              <strong>Temperature:</strong>
-              <div className={localData.vitalSigns.temperature ? 'text-green-600' : 'text-red-600'}>
-                {localData.vitalSigns.temperature || 'NOT SET'}°C
-                {localData.vitalSigns.temperature ? ' ✅' : ' ❌'}
-              </div>
-            </div>
-          </div>
-          {localData.symptoms.length > 0 && (
-            <div className="mt-2 text-xs">
-              <strong>Selected symptoms:</strong> {localData.symptoms.join(', ')}
-            </div>
-          )}
+          <h4 className="font-bold text-yellow-900 mb-2">🔍 State Debug:</h4>
+          <pre className="text-xs overflow-auto">
+            {JSON.stringify({
+              symptomDuration: localData.symptomDuration,
+              symptoms: localData.symptoms,
+              temperature: localData.vitalSigns.temperature,
+              dataInitialized
+            }, null, 2)}
+          </pre>
         </div>
       )}
 
@@ -696,7 +687,7 @@ export default function ModernClinicalForm({
         </CardContent>
       </Card>
 
-      {/* Section 3: Symptom duration */}
+      {/* Section 3: Symptom duration - FIXED */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
@@ -710,11 +701,16 @@ export default function ModernClinicalForm({
               How long have you been experiencing these symptoms?
             </Label>
             <Select
-              value={localData.symptomDuration}
-              onValueChange={(value) => updateData({ symptomDuration: value })}
+              value={localData.symptomDuration || ""}
+              onValueChange={(value) => {
+                console.log('Duration select changed to:', value)
+                updateData({ symptomDuration: value })
+              }}
             >
               <SelectTrigger className={errors.symptomDuration ? 'border-red-500' : ''}>
-                <SelectValue placeholder="Select duration" />
+                <SelectValue>
+                  {localData.symptomDuration ? getDurationLabel(localData.symptomDuration) : "Select duration"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {DURATION_OPTIONS.map(option => (
@@ -736,9 +732,7 @@ export default function ModernClinicalForm({
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-green-600" />
                   <p className="font-semibold text-green-800">
-                    Symptoms present for {
-                      DURATION_OPTIONS.find(opt => opt.value === localData.symptomDuration)?.label.toLowerCase()
-                    }
+                    Symptoms present for {getDurationLabel(localData.symptomDuration).toLowerCase()}
                   </p>
                 </div>
               </div>
@@ -794,7 +788,7 @@ export default function ModernClinicalForm({
         </CardContent>
       </Card>
 
-      {/* Section 4: Current symptoms */}
+      {/* Section 4: Current symptoms - FIXED */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
@@ -824,7 +818,11 @@ export default function ModernClinicalForm({
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {filteredSymptoms.map((symptom) => {
-              const isSelected = localData.symptoms.includes(symptom)
+              // FIX: Case-insensitive comparison for symptoms
+              const isSelected = localData.symptoms.some(s => 
+                s.toLowerCase() === symptom.toLowerCase()
+              )
+              
               return (
                 <label
                   key={symptom}
@@ -864,7 +862,7 @@ export default function ModernClinicalForm({
         </CardContent>
       </Card>
 
-      {/* Section 5: Vital signs */}
+      {/* Section 5: Vital signs - FIXED */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
@@ -874,7 +872,7 @@ export default function ModernClinicalForm({
         </CardHeader>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Temperature */}
+            {/* Temperature - FIXED */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Thermometer className="h-5 w-5 text-red-500" />
@@ -888,7 +886,7 @@ export default function ModernClinicalForm({
                 step="0.1"
                 min="35"
                 max="42"
-                value={localData.vitalSigns.temperature}
+                value={localData.vitalSigns.temperature || ""}
                 onChange={(e) => updateVitalSigns("temperature", e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="37.0"
