@@ -69,12 +69,13 @@ interface PatientFormData {
   lifeHabits: LifeHabits
 }
 
+// ✅ FIXED: Changed prop from 'initialData' to 'data' for consistency
 interface PatientFormProps {
   onDataChange: (data: PatientFormData) => void
   onNext: () => void
   language?: Language
   consultationId?: string | null
-  initialData?: Partial<PatientFormData>
+  data?: Partial<PatientFormData>  // ← Changed from 'initialData' to 'data'
 }
 
 interface ValidationErrors {
@@ -136,12 +137,13 @@ const ACTIVITY_OPTIONS = [
 ]
 
 // ==================== MAIN COMPONENT ====================
+// ✅ FIXED: Changed parameter from 'initialData' to 'data'
 export default function ModernPatientForm({ 
   onDataChange, 
   onNext, 
   language = 'en',
   consultationId,
-  initialData
+  data  // ← Changed from 'initialData' to 'data'
 }: PatientFormProps) {
   // ========== Hooks ==========
   const { patientData: tibokPatient, isFromTibok } = useTibokPatientData()
@@ -150,9 +152,10 @@ export default function ModernPatientForm({
   // ========== States ==========
   const [isLoading, setIsLoading] = useState(true)
   const [dataInitialized, setDataInitialized] = useState(false)
+  // ✅ FIXED: Changed from 'initialData' to 'data' in useState initialization
   const [formData, setFormData] = useState<PatientFormData>(() => ({
     ...INITIAL_FORM_DATA,
-    ...initialData
+    ...data  // ← Changed from 'initialData' to 'data'
   }))
   const [errors, setErrors] = useState<ValidationErrors>({})
   const [allergySearch, setAllergySearch] = useState("")
