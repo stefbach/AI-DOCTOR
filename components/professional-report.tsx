@@ -43,7 +43,6 @@ import {
   CreditCard,
   Receipt
 } from "lucide-react"
-import { useDoctorInfo } from "@/hooks/use-doctor-info"
 
 // Types for Mauritian format
 interface MauritianReport {
@@ -297,24 +296,6 @@ export default function ProfessionalReportEditable({
     licencePratique: "[Practice License No.]"
   })
   const [editingDoctor, setEditingDoctor] = useState(false)
-  
-  // Signature and validation states
-  const [signatures, setSignatures] = useState<{
-    consultation?: string
-    prescription?: string
-    laboratory?: string
-    imaging?: string
-  }>({})
-  const [documentValidations, setDocumentValidations] = useState({
-    consultation: false,
-    prescription: false,
-    laboratory: false,
-    imaging: false,
-    invoice: false
-  })
-  
-  // Get TIBOK doctor data
-  const { doctorInfo: tibokDoctorInfo, loading: doctorLoading } = useDoctorInfo()
 
   useEffect(() => {
     console.log("🚀 ProfessionalReportEditable mounted")
@@ -324,24 +305,8 @@ export default function ProfessionalReportEditable({
       diagnosisData,
       editedDocuments
     })
-    
-    // Auto-fill doctor info from TIBOK
-    if (tibokDoctorInfo && !doctorLoading) {
-      setDoctorInfo({
-        nom: `Dr. ${tibokDoctorInfo.fullName}`,
-        qualifications: tibokDoctorInfo.qualifications || "MBBS, MD (Medicine)",
-        specialite: tibokDoctorInfo.specialty || "General Medicine",
-        adresseCabinet: tibokDoctorInfo.clinicAddress || "[Complete clinic address]",
-        telephone: tibokDoctorInfo.phone || "[+230 XXX XXXX]",
-        email: tibokDoctorInfo.email || "[Professional email]",
-        heuresConsultation: tibokDoctorInfo.consultationHours || "Mon-Fri: 8:30am-5:30pm",
-        numeroEnregistrement: tibokDoctorInfo.medicalCouncilNumber || "[Medical Council Registration No.]",
-        licencePratique: tibokDoctorInfo.licenseNumber || "[Practice License No.]"
-      })
-    }
-    
     checkExistingReport()
-  }, [tibokDoctorInfo, doctorLoading])
+  }, [])
 
   // Check for existing report
   const checkExistingReport = async () => {
@@ -997,81 +962,6 @@ export default function ProfessionalReportEditable({
     }
   }
 
-  // Individual document validation
-  const validateDocument = async (documentType: string) => {
-    if (!report) return
-    
-    setSaving(true)
-    try {
-      const signatureData = `SIGNED:${doctorInfo.nom}:${new Date().toISOString()}`
-      
-      const newSignatures = {
-        ...signatures,
-        [documentType]: signatureData
-      }
-      
-      const newValidations = {
-        ...documentValidations,
-        [documentType]: true
-      }
-      
-      setSignatures(newSignatures)
-      setDocumentValidations(newValidations)
-      
-      const response = await fetch('/api/save-medical-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reportId,
-          patientId: patientData?.id || 'temp',
-          consultationId: `consultation_${Date.now()}`,
-          doctorId: tibokDoctorInfo?.id || 'default-doctor',
-          doctorName: doctorInfo.nom,
-          patientName: patientData?.name,
-          report: report,
-          signatures: newSignatures,
-          documentValidations: newValidations,
-          action: 'save',
-          metadata: {
-            signatures: newSignatures,
-            documentValidations: newValidations,
-            lastModified: new Date().toISOString()
-          }
-        })
-      })
-      
-      const result = await response.json()
-      
-      if (result.success) {
-        setReportId(result.data.reportId)
-        toast({
-          title: "Document Validated",
-          description: `${documentType} has been validated and signed`
-        })
-        
-        const requiredDocs = ['consultation', 'prescription', 'laboratory', 'imaging']
-        const allValidated = requiredDocs.every(doc => newValidations[doc as keyof typeof newValidations])
-        
-        if (allValidated) {
-          setValidationStatus('validated')
-          toast({
-            title: "All Documents Validated", 
-            description: "Medical record is complete"
-          })
-          if (onComplete) onComplete()
-        }
-      }
-    } catch (error) {
-      toast({
-        title: "Validation Error",
-        description: error instanceof Error ? error.message : "Failed to validate",
-        variant: "destructive"
-      })
-    } finally {
-      setSaving(false)
-    }
-  }
-
   // Enhanced PDF export - extracts only specific content
   const exportSectionToPDF = (sectionId: string, filename: string) => {
     const element = document.getElementById(sectionId)
@@ -1553,28 +1443,6 @@ export default function ProfessionalReportEditable({
             <p>Word count: {metadata.wordCount}</p>
           </div>
 
-          {(!validationStatus || validationStatus === 'draft') && (
-            <div className="mt-6 flex justify-center print:hidden">
-              <Button
-                onClick={() => validateDocument('consultation')}
-                disabled={documentValidations.consultation || saving}
-                className={documentValidations.consultation ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"}
-              >
-                {documentValidations.consultation ? (
-                  <>
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Validated
-                  </>
-                ) : (
-                  <>
-                    <FileCheck className="h-4 w-4 mr-2" />
-                    Validate Report
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
-
           <div className="mt-12 pt-8 border-t border-gray-300 signature">
             <div className="text-right">
               <p className="font-semibold">{praticien.nom}</p>
@@ -1825,28 +1693,6 @@ export default function ProfessionalReportEditable({
             </div>
           )}
         </div>
-
-        {(!validationStatus || validationStatus === 'draft') && (
-          <div className="mt-6 flex justify-center print:hidden">
-            <Button
-              onClick={() => validateDocument('prescription')}
-              disabled={documentValidations.prescription || saving}
-              className={documentValidations.prescription ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"}
-            >
-              {documentValidations.prescription ? (
-                <>
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Validated
-                </>
-              ) : (
-                <>
-                  <FileCheck className="h-4 w-4 mr-2" />
-                  Validate Prescription
-                </>
-              )}
-            </Button>
-          </div>
-        )}
 
         <div className="mt-8 pt-6 border-t border-gray-300">
           <p className="text-sm text-gray-600 mb-4">
@@ -2109,28 +1955,6 @@ export default function ProfessionalReportEditable({
           </div>
         )}
 
-        {(!validationStatus || validationStatus === 'draft') && (
-          <div className="mt-6 flex justify-center print:hidden">
-            <Button
-              onClick={() => validateDocument('laboratory')}
-              disabled={documentValidations.laboratory || saving}
-              className={documentValidations.laboratory ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"}
-            >
-              {documentValidations.laboratory ? (
-                <>
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Validated
-                </>
-              ) : (
-                <>
-                  <FileCheck className="h-4 w-4 mr-2" />
-                  Validate Lab Request
-                </>
-              )}
-            </Button>
-          </div>
-        )}
-
         <div className="mt-8 pt-6 border-t border-gray-300">
           <p className="text-sm text-gray-600 mb-4">
             Laboratory: {report?.ordonnances?.biologie?.prescription?.laboratoireRecommande || "Any MoH approved laboratory"}
@@ -2319,28 +2143,6 @@ export default function ProfessionalReportEditable({
                 Add First Imaging Study
               </Button>
             )}
-          </div>
-        )}
-
-        {(!validationStatus || validationStatus === 'draft') && (
-          <div className="mt-6 flex justify-center print:hidden">
-            <Button
-              onClick={() => validateDocument('imaging')}
-              disabled={documentValidations.imaging || saving}
-              className={documentValidations.imaging ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"}
-            >
-              {documentValidations.imaging ? (
-                <>
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Validated
-                </>
-              ) : (
-                <>
-                  <FileCheck className="h-4 w-4 mr-2" />
-                  Validate Imaging
-                </>
-              )}
-            </Button>
           </div>
         )}
 
@@ -2585,6 +2387,20 @@ export default function ProfessionalReportEditable({
               >
                 {editMode ? <Eye className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
                 {editMode ? 'Preview' : 'Edit'}
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSave}
+                disabled={saving || modifiedSections.size === 0}
+              >
+                {saving ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
+                Save
               </Button>
               
               <Button
