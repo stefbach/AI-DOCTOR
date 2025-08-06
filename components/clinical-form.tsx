@@ -130,25 +130,25 @@ export default function ModernClinicalForm({
   const [dataInitialized, setDataInitialized] = useState(false)
 
   // ========== Memoization of translated lists ==========
-  // ✅ FIXED: Ensure symptoms array contains the exact symptoms from TIBOK
+  // ✅ STEP 2: Verify COMMON_SYMPTOMS includes all TIBOK symptoms
   const COMMON_SYMPTOMS = useMemo(() => [
     "Chest pain",
     "Shortness of breath",
     "Palpitations",
-    "Fatigue",
+    "Fatigue",        // Must match TIBOK's "Fatigue"
     "Nausea",
     "Vomiting",
     "Diarrhea",
     "Constipation",
-    "Headache",
+    "Headache",       // Must match TIBOK's "Headache"
     "Dizziness",
-    "Fever", // ✅ Must match TIBOK symptom
-    "Chills", // ✅ Must match TIBOK symptom
+    "Fever",          // Must match TIBOK's "Fever"
+    "Chills",         // Must match TIBOK's "Chills"
     "Cough",
     "Abdominal pain",
     "Back pain",
-    "Insomnia", // ✅ Must match TIBOK symptom
-    "Anxiety",
+    "Insomnia",       // Must match TIBOK's "Insomnia"
+    "Anxiety",        // Must match TIBOK's "Anxiety"
     "Loss of appetite",
     "Weight loss",
     "Leg swelling",
@@ -158,7 +158,7 @@ export default function ModernClinicalForm({
     "Hearing problems",
   ], [])
 
-  // ✅ FIXED: Ensure DURATION_OPTIONS match the mapped values
+  // ✅ UPDATED: Duration options now match the standardized values
   const DURATION_OPTIONS = useMemo(() => [
     { value: 'less_hour', label: 'Less than 1 hour' },
     { value: '1_6_hours', label: '1 to 6 hours' },
@@ -167,10 +167,28 @@ export default function ModernClinicalForm({
     { value: '3_7_days', label: '3 to 7 days' },
     { value: '1_4_weeks', label: '1 to 4 weeks' },
     { value: '1_6_months', label: '1 to 6 months' },
-    { value: 'more_6_months', label: 'More than 6 months' } // Must match mapping
+    { value: 'more_6_months', label: 'More than 6 months' }
   ], [])
 
-  // UPDATE 1: ✅ COMPREHENSIVE DURATION MAPPING FUNCTION
+  // ✅ STEP 1: Add symptom mapping helper function
+  const mapSymptomToCommon = useCallback((symptom: string): string => {
+    console.log('🔧 Mapping symptom:', symptom)
+    
+    // Case-insensitive matching to handle 'fatigue' -> 'Fatigue'
+    const matchedSymptom = COMMON_SYMPTOMS.find(commonSymptom => 
+      commonSymptom.toLowerCase().trim() === symptom.toLowerCase().trim()
+    )
+    
+    if (matchedSymptom) {
+      console.log('✅ Symptom matched:', symptom, '→', matchedSymptom)
+      return matchedSymptom
+    } else {
+      console.warn('⚠️ Symptom not found, keeping original:', symptom)
+      return symptom
+    }
+  }, [COMMON_SYMPTOMS])
+
+  // PRESERVED: Original duration mapping function
   const mapSymptomDuration = useCallback((duration: string): string => {
     if (!duration) return ''
     
@@ -349,7 +367,7 @@ export default function ModernClinicalForm({
 
   // ========== Effects ==========
   
-  // ✅ FIXED: Initial loading of saved data with improved TIBOK mapping
+  // ✅ STEP 3: Replace the entire useEffect that loads saved data
   useEffect(() => {
     const loadSavedData = async () => {
       if (!consultationId) return
@@ -357,76 +375,58 @@ export default function ModernClinicalForm({
       try {
         setIsLoading(true)
         
-        // 🎯 FIRST: Check for TIBOK data and auto-fill
+        // Check for TIBOK data and auto-fill
         if (tibokPatient && !dataInitialized) {
           console.log('🔄 Auto-filling clinical form with TIBOK data:', {
+            rawData: tibokPatient,
             symptoms: tibokPatient.currentSymptoms,
-            consultationReason: tibokPatient.consultationReason,
-            vitalSigns: tibokPatient.vitalSigns,
-            painLevel: tibokPatient.painLevel,
-            symptomDuration: tibokPatient.symptomDuration
+            duration: tibokPatient.symptomDuration,
+            temperature: tibokPatient.vitalSigns?.temperature
           })
 
           const tibokClinicalData = {
-            // UPDATE 3: ✅ FIX SYMPTOMS: Ensure symptoms array with proper case matching
+            // FIX 1: DURATION - Now direct assignment with standardized values!
+            // Since TIBOK now sends standardized values like "more_6_months"
+            symptomDuration: tibokPatient.symptomDuration || "",
+            
+            // FIX 2: SYMPTOMS - Case-insensitive matching
             symptoms: Array.isArray(tibokPatient.currentSymptoms) 
-              ? tibokPatient.currentSymptoms.map(symptom => {
-                  console.log('🔧 Mapping symptom:', symptom)
-                  
-                  // Find exact match (case-insensitive)
-                  const matchedSymptom = COMMON_SYMPTOMS.find(commonSymptom => 
-                    commonSymptom.toLowerCase() === symptom.toLowerCase().trim()
-                  )
-                  
-                  if (matchedSymptom) {
-                    console.log('✅ Symptom matched:', symptom, '→', matchedSymptom)
-                    return matchedSymptom
-                  } else {
-                    console.warn('⚠️ Symptom not found in COMMON_SYMPTOMS:', symptom)
-                    return symptom
-                  }
-                })
+              ? tibokPatient.currentSymptoms.map(symptom => mapSymptomToCommon(symptom))
+                  .filter(Boolean) // Remove any null/undefined values
               : [],
             
-            // ✅ FIX CHIEF COMPLAINT: Keep as-is  
-            chiefComplaint: tibokPatient.consultationReason || "",
-            
-            // UPDATE 2: ✅ FIX SYMPTOM DURATION: Use the mapping function
-            symptomDuration: mapSymptomDuration(tibokPatient.symptomDuration || ""),
-            
-            // UPDATE 5: ✅ FIX VITAL SIGNS: Use actual temperature value (not default 37.0)
+            // FIX 3: TEMPERATURE - Use actual value, not default
             vitalSigns: {
-              temperature: tibokPatient.vitalSigns?.temperature ? 
-                tibokPatient.vitalSigns.temperature.toString() : 
-                "", // ✅ Only use empty string as fallback if no temperature provided
+              temperature: tibokPatient.vitalSigns?.temperature 
+                ? tibokPatient.vitalSigns.temperature.toString() 
+                : "", // Empty string, NOT "37.0"!
               bloodPressureSystolic: tibokPatient.vitalSigns?.bloodPressureSystolic?.toString() || "",
               bloodPressureDiastolic: tibokPatient.vitalSigns?.bloodPressureDiastolic?.toString() || ""
             },
             
-            // Keep existing values for other fields
-            diseaseHistory: "",
-            // UPDATE 4: ✅ FIX PAIN SCALE: Use correct field name (painScale, not painLevel)
+            // Other fields
+            chiefComplaint: tibokPatient.consultationReason || "",
+            diseaseHistory: "", // Empty for new consultation
             painScale: tibokPatient.painLevel?.toString() || "0"
           }
 
-          // ✅ ADD DEBUGGING TO VERIFY MAPPING:
-          console.log('🔧 DEBUGGING CLINICAL AUTO-FILL:', {
-            // Symptoms
-            receivedSymptoms: tibokPatient.currentSymptoms,
-            mappedSymptoms: tibokClinicalData.symptoms,
-            symptomsCount: tibokClinicalData.symptoms?.length || 0,
-            
-            // Duration  
-            receivedDuration: tibokPatient.symptomDuration,
-            mappedDuration: tibokClinicalData.symptomDuration,
-            
-            // Temperature
-            receivedTemp: tibokPatient.vitalSigns?.temperature,
-            mappedTemp: tibokClinicalData.vitalSigns.temperature,
-            
-            // Pain level
-            receivedPainLevel: tibokPatient.painLevel,
-            mappedPainLevel: tibokClinicalData.painScale
+          // Detailed debug logging
+          console.log('✅ Clinical data mapped successfully:', {
+            duration: {
+              received: tibokPatient.symptomDuration,
+              mapped: tibokClinicalData.symptomDuration,
+              isValid: ['less_hour', '1_6_hours', '6_24_hours', '1_3_days', '3_7_days', '1_4_weeks', '1_6_months', 'more_6_months'].includes(tibokClinicalData.symptomDuration)
+            },
+            symptoms: {
+              received: tibokPatient.currentSymptoms,
+              mapped: tibokClinicalData.symptoms,
+              count: tibokClinicalData.symptoms.length
+            },
+            temperature: {
+              received: tibokPatient.vitalSigns?.temperature,
+              mapped: tibokClinicalData.vitalSigns.temperature
+            },
+            painScale: tibokClinicalData.painScale
           })
 
           setLocalData(prev => ({
@@ -434,28 +434,18 @@ export default function ModernClinicalForm({
             ...tibokClinicalData
           }))
 
-          console.log('✅ Clinical form auto-filled successfully:', {
-            symptomsCount: tibokClinicalData.symptoms.length,
-            hasComplaint: !!tibokClinicalData.chiefComplaint,
-            hasDuration: !!tibokClinicalData.symptomDuration,
-            hasPainLevel: tibokClinicalData.painScale !== '0',
-            hasTemperature: !!tibokClinicalData.vitalSigns.temperature,
-            hasBP: !!(tibokClinicalData.vitalSigns.bloodPressureSystolic && tibokClinicalData.vitalSigns.bloodPressureDiastolic)
-          })
-
           setDataInitialized(true)
           setIsLoading(false)
           return
         }
         
-        // SECOND: Try to load saved data from database
+        // Load saved data from database if no TIBOK data
         const savedData = await consultationDataService.getAllData()
         
         if (savedData?.clinicalData) {
           setLocalData(prev => ({
             ...prev,
             ...savedData.clinicalData,
-            // Ensure arrays and objects are properly initialized
             symptoms: Array.isArray(savedData.clinicalData.symptoms) 
               ? savedData.clinicalData.symptoms 
               : [],
@@ -473,7 +463,7 @@ export default function ModernClinicalForm({
     }
     
     loadSavedData()
-  }, [consultationId, tibokPatient, dataInitialized, COMMON_SYMPTOMS, mapSymptomDuration])
+  }, [consultationId, tibokPatient, dataInitialized, mapSymptomToCommon])
 
   // Update when props change
   useEffect(() => {
@@ -552,6 +542,41 @@ export default function ModernClinicalForm({
               )}
             </p>
           </div>
+        </div>
+      )}
+
+      {/* ✅ STEP 4: DEBUG INFO - Remove after testing */}
+      {showTibokNotification && process.env.NODE_ENV === 'development' && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+          <h4 className="font-bold text-yellow-900 mb-2">🔍 Auto-fill Debug Status:</h4>
+          <div className="grid grid-cols-3 gap-4 text-sm">
+            <div>
+              <strong>Duration:</strong>
+              <div className={localData.symptomDuration ? 'text-green-600' : 'text-red-600'}>
+                {localData.symptomDuration || 'NOT SET'}
+                {localData.symptomDuration ? ' ✅' : ' ❌'}
+              </div>
+            </div>
+            <div>
+              <strong>Symptoms:</strong>
+              <div className={localData.symptoms.length > 0 ? 'text-green-600' : 'text-red-600'}>
+                {localData.symptoms.length} selected
+                {localData.symptoms.length > 0 ? ' ✅' : ' ❌'}
+              </div>
+            </div>
+            <div>
+              <strong>Temperature:</strong>
+              <div className={localData.vitalSigns.temperature ? 'text-green-600' : 'text-red-600'}>
+                {localData.vitalSigns.temperature || 'NOT SET'}°C
+                {localData.vitalSigns.temperature ? ' ✅' : ' ❌'}
+              </div>
+            </div>
+          </div>
+          {localData.symptoms.length > 0 && (
+            <div className="mt-2 text-xs">
+              <strong>Selected symptoms:</strong> {localData.symptoms.join(', ')}
+            </div>
+          )}
         </div>
       )}
 
