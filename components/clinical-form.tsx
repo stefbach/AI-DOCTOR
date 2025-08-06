@@ -94,6 +94,24 @@ const SECTIONS = [
   { id: "vitals", titleKey: 'clinicalForm.sections.vitals', icon: Stethoscope },
 ]
 
+// ==================== HELPER FUNCTIONS (Outside component to avoid re-creation) ====================
+const mapSymptomToCommonStatic = (symptom: string, commonSymptoms: string[]): string => {
+  console.log('🔧 Mapping symptom:', symptom)
+  
+  // Case-insensitive matching to handle 'fatigue' -> 'Fatigue'
+  const matchedSymptom = commonSymptoms.find(commonSymptom => 
+    commonSymptom.toLowerCase().trim() === symptom.toLowerCase().trim()
+  )
+  
+  if (matchedSymptom) {
+    console.log('✅ Symptom matched:', symptom, '→', matchedSymptom)
+    return matchedSymptom
+  } else {
+    console.warn('⚠️ Symptom not found, keeping original:', symptom)
+    return symptom
+  }
+}
+
 // ==================== MAIN COMPONENT ====================
 export default function ModernClinicalForm({ 
   data, 
@@ -173,24 +191,6 @@ export default function ModernClinicalForm({
     const option = DURATION_OPTIONS.find(opt => opt.value === value)
     return option?.label || ""
   }, [DURATION_OPTIONS])
-
-  // Add symptom mapping helper function
-  const mapSymptomToCommon = useCallback((symptom: string): string => {
-    console.log('🔧 Mapping symptom:', symptom)
-    
-    // Case-insensitive matching to handle 'fatigue' -> 'Fatigue'
-    const matchedSymptom = COMMON_SYMPTOMS.find(commonSymptom => 
-      commonSymptom.toLowerCase().trim() === symptom.toLowerCase().trim()
-    )
-    
-    if (matchedSymptom) {
-      console.log('✅ Symptom matched:', symptom, '→', matchedSymptom)
-      return matchedSymptom
-    } else {
-      console.warn('⚠️ Symptom not found, keeping original:', symptom)
-      return symptom
-    }
-  }, [COMMON_SYMPTOMS])
 
   // ========== Utility functions ==========
   const calculateProgress = useCallback((): number => {
@@ -338,82 +338,84 @@ export default function ModernClinicalForm({
 
   // ========== Effects ==========
   
-  // CRITICAL FIX: Updated useEffect without dataInitialized in dependencies
+  // CRITICAL FIX: Proper TIBOK data initialization
+  useEffect(() => {
+    const initializeTibokData = async () => {
+      // Only initialize once and only if we have TIBOK data
+      if (dataInitialized || !tibokPatient) {
+        return
+      }
+      
+      console.log('🔄 Auto-filling clinical form with TIBOK data:', {
+        rawData: tibokPatient,
+        symptoms: tibokPatient.currentSymptoms,
+        duration: tibokPatient.symptomDuration,
+        temperature: tibokPatient.vitalSigns?.temperature
+      })
+
+      const tibokClinicalData: ClinicalData = {
+        // Chief complaint
+        chiefComplaint: tibokPatient.consultationReason || "",
+        
+        // Disease history
+        diseaseHistory: "",
+        
+        // Duration - direct assignment (already normalized by hook)
+        symptomDuration: tibokPatient.symptomDuration || "",
+        
+        // Symptoms - ensure proper case-insensitive matching
+        symptoms: Array.isArray(tibokPatient.currentSymptoms) 
+          ? tibokPatient.currentSymptoms.map(symptom => 
+              mapSymptomToCommonStatic(symptom, COMMON_SYMPTOMS)
+            ).filter(Boolean)
+          : [],
+        
+        // Pain scale
+        painScale: tibokPatient.painLevel?.toString() || "0",
+        
+        // Temperature and vital signs
+        vitalSigns: {
+          temperature: tibokPatient.vitalSigns?.temperature 
+            ? String(tibokPatient.vitalSigns.temperature)
+            : "",
+          bloodPressureSystolic: tibokPatient.vitalSigns?.bloodPressureSystolic?.toString() || "",
+          bloodPressureDiastolic: tibokPatient.vitalSigns?.bloodPressureDiastolic?.toString() || ""
+        }
+      }
+
+      console.log('✅ Clinical data mapped successfully:', {
+        duration: {
+          received: tibokPatient.symptomDuration,
+          mapped: tibokClinicalData.symptomDuration,
+          isValid: DURATION_OPTIONS.some(opt => opt.value === tibokClinicalData.symptomDuration)
+        },
+        symptoms: {
+          received: tibokPatient.currentSymptoms,
+          mapped: tibokClinicalData.symptoms,
+          count: tibokClinicalData.symptoms.length
+        },
+        temperature: {
+          received: tibokPatient.vitalSigns?.temperature,
+          mapped: tibokClinicalData.vitalSigns.temperature
+        },
+        painScale: tibokClinicalData.painScale
+      })
+
+      // Update state with TIBOK data
+      setLocalData(tibokClinicalData)
+      setDataInitialized(true)
+    }
+    
+    initializeTibokData()
+  }, [tibokPatient, dataInitialized, COMMON_SYMPTOMS, DURATION_OPTIONS])
+
+  // Load saved data from database
   useEffect(() => {
     const loadSavedData = async () => {
-      if (!consultationId) return
+      if (!consultationId || dataInitialized) return
       
       try {
         setIsLoading(true)
-        
-        // Check for TIBOK data and auto-fill
-        if (tibokPatient && !dataInitialized) {
-          console.log('🔄 Auto-filling clinical form with TIBOK data:', {
-            rawData: tibokPatient,
-            symptoms: tibokPatient.currentSymptoms,
-            duration: tibokPatient.symptomDuration,
-            temperature: tibokPatient.vitalSigns?.temperature
-          })
-
-          const tibokClinicalData = {
-            // Duration - direct assignment (already normalized by hook)
-            symptomDuration: tibokPatient.symptomDuration || "",
-            
-            // Symptoms - ensure proper case-insensitive matching
-            symptoms: Array.isArray(tibokPatient.currentSymptoms) 
-              ? tibokPatient.currentSymptoms.map(symptom => mapSymptomToCommon(symptom))
-                  .filter(Boolean)
-              : [],
-            
-            // Temperature - ensure string conversion
-            vitalSigns: {
-              temperature: tibokPatient.vitalSigns?.temperature 
-                ? String(tibokPatient.vitalSigns.temperature)
-                : "",
-              bloodPressureSystolic: tibokPatient.vitalSigns?.bloodPressureSystolic?.toString() || "",
-              bloodPressureDiastolic: tibokPatient.vitalSigns?.bloodPressureDiastolic?.toString() || ""
-            },
-            
-            // Other fields
-            chiefComplaint: tibokPatient.consultationReason || "",
-            diseaseHistory: "",
-            painScale: tibokPatient.painLevel?.toString() || "0"
-          }
-
-          console.log('✅ Clinical data mapped successfully:', {
-            duration: {
-              received: tibokPatient.symptomDuration,
-              mapped: tibokClinicalData.symptomDuration,
-              isValid: DURATION_OPTIONS.some(opt => opt.value === tibokClinicalData.symptomDuration)
-            },
-            symptoms: {
-              received: tibokPatient.currentSymptoms,
-              mapped: tibokClinicalData.symptoms,
-              count: tibokClinicalData.symptoms.length
-            },
-            temperature: {
-              received: tibokPatient.vitalSigns?.temperature,
-              mapped: tibokClinicalData.vitalSigns.temperature
-            },
-            painScale: tibokClinicalData.painScale
-          })
-
-          // Force complete state update
-          setLocalData({
-            ...INITIAL_CLINICAL_DATA,
-            ...tibokClinicalData
-          })
-
-          // Force re-render after state update
-          setTimeout(() => {
-            setDataInitialized(true)
-          }, 0)
-          
-          setIsLoading(false)
-          return
-        }
-        
-        // Load saved data from database if no TIBOK data
         const savedData = await consultationDataService.getAllData()
         
         if (savedData?.clinicalData) {
@@ -437,11 +439,11 @@ export default function ModernClinicalForm({
     }
     
     loadSavedData()
-  }, [consultationId, tibokPatient]) // Removed dataInitialized and mapSymptomToCommon from dependencies
+  }, [consultationId, dataInitialized])
 
   // Update when props change
   useEffect(() => {
-    if (data) {
+    if (data && !dataInitialized) {
       setLocalData(prev => ({
         ...prev,
         ...data,
@@ -452,7 +454,7 @@ export default function ModernClinicalForm({
         }
       }))
     }
-  }, [data])
+  }, [data, dataInitialized])
 
   // Auto-save
   useEffect(() => {
@@ -470,6 +472,17 @@ export default function ModernClinicalForm({
     
     return () => clearTimeout(timer)
   }, [localData, onDataChange])
+
+  // Debug: Log state changes
+  useEffect(() => {
+    console.log('📊 Clinical Form State Updated:', {
+      symptomDuration: localData.symptomDuration,
+      symptomsCount: localData.symptoms.length,
+      symptoms: localData.symptoms,
+      temperature: localData.vitalSigns.temperature,
+      dataInitialized
+    })
+  }, [localData, dataInitialized])
 
   // ========== Calculated variables ==========
   const progress = calculateProgress()
@@ -494,7 +507,6 @@ export default function ModernClinicalForm({
     <form 
       className="space-y-6" 
       onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
-      key={dataInitialized ? 'initialized' : 'not-initialized'} // Force re-render on initialization
     >
       {/* TIBOK Notification */}
       {showTibokNotification && (
@@ -654,7 +666,7 @@ export default function ModernClinicalForm({
         </CardContent>
       </Card>
 
-      {/* Section 3: Symptom duration - FIXED */}
+      {/* Section 3: Symptom duration */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
@@ -755,7 +767,7 @@ export default function ModernClinicalForm({
         </CardContent>
       </Card>
 
-      {/* Section 4: Current symptoms - FIXED */}
+      {/* Section 4: Current symptoms */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
@@ -829,7 +841,7 @@ export default function ModernClinicalForm({
         </CardContent>
       </Card>
 
-      {/* Section 5: Vital signs - FIXED */}
+      {/* Section 5: Vital signs */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
@@ -839,7 +851,7 @@ export default function ModernClinicalForm({
         </CardHeader>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Temperature - FIXED */}
+            {/* Temperature */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Thermometer className="h-5 w-5 text-red-500" />
