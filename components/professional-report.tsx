@@ -311,7 +311,7 @@ export default function ProfessionalReportEditable({
     return `Digital Signature: ${doctorName} - ${new Date().toISOString()}`
   }
 
-// UPDATED: Load doctor information from Tibok with better field mapping
+// UPDATED: Load doctor information from Tibok with better field mapping and debugging
 useEffect(() => {
   const urlParams = new URLSearchParams(window.location.search)
   const doctorDataParam = urlParams.get('doctorData')
@@ -320,6 +320,16 @@ useEffect(() => {
     try {
       const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
       console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
+      
+      // Debug: Check what fields are actually present
+      console.log('🔍 Doctor data fields:', {
+        hasLicenseNumber: 'licenseNumber' in tibokDoctorData,
+        hasLicense_number: 'license_number' in tibokDoctorData,
+        licenseNumberValue: tibokDoctorData.licenseNumber,
+        license_numberValue: tibokDoctorData.license_number,
+        typeOfLicenseNumber: typeof tibokDoctorData.licenseNumber,
+        typeOfLicense_number: typeof tibokDoctorData.license_number
+      })
       
       // Map all possible field names from database
       const doctorInfoFromTibok = {
@@ -333,13 +343,27 @@ useEffect(() => {
         email: tibokDoctorData.email || '[Email Required]',
         heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
         numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]'),
-        licencePratique: String(tibokDoctorData.licenseNumber || tibokDoctorData.license_number || '[License Required]')
+        // Check all possible fields and ensure conversion to string
+        licencePratique: (() => {
+          const license = tibokDoctorData.license_number || 
+                         tibokDoctorData.licenseNumber || 
+                         tibokDoctorData.licence_number || 
+                         tibokDoctorData.licenceNumber;
+          
+          console.log('🔍 License extraction:', {
+            rawValue: license,
+            type: typeof license,
+            converted: license ? String(license) : '[License Required]'
+          });
+          
+          return license ? String(license) : '[License Required]';
+        })()
       }
+      
+      console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
       
       setDoctorInfo(doctorInfoFromTibok)
       sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
-      
-      console.log('✅ Doctor information loaded:', doctorInfoFromTibok)
       
     } catch (error) {
       console.error('Error parsing Tibok doctor data:', error)
