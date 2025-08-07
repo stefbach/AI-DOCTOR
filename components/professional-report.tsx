@@ -582,6 +582,151 @@ export default function ProfessionalReportEditable({
     }
   }
 
+  // Add this function after handleValidation function in components/professional-report.tsx
+
+const handleSendDocuments = async () => {
+  // Check if report is validated
+  if (!report || validationStatus !== 'validated') {
+    toast({
+      title: "Cannot send documents",
+      description: "Please validate the documents first",
+      variant: "destructive"
+    })
+    return
+  }
+
+  try {
+    // Show loading state
+    toast({
+      title: "📤 Sending documents...",
+      description: "Preparing documents for patient dashboard"
+    })
+
+    // Get necessary IDs from URL parameters
+    const params = new URLSearchParams(window.location.search)
+    const consultationId = params.get('consultationId')
+    const patientId = params.get('patientId') || patientData?.id
+    const doctorId = params.get('doctorId')
+
+    if (!consultationId || !patientId) {
+      toast({
+        title: "Error",
+        description: "Missing consultation or patient information",
+        variant: "destructive"
+      })
+      return
+    }
+
+    // Prepare documents payload with all validated documents
+    const documentsPayload = {
+      consultationId,
+      patientId,
+      doctorId,
+      doctorName: doctorInfo.nom,
+      patientName: getReportPatient().nomComplet || getReportPatient().nom,
+      generatedAt: new Date().toISOString(),
+      documents: {
+        // Main consultation report
+        consultationReport: report.compteRendu ? {
+          type: 'consultation_report',
+          title: 'Medical Consultation Report',
+          content: report.compteRendu,
+          validated: true,
+          validatedAt: report.compteRendu.metadata.validatedAt,
+          signature: documentSignatures.consultation
+        } : null,
+        
+        // Prescriptions (if any)
+        prescriptions: report.ordonnances?.medicaments ? {
+          type: 'prescription',
+          title: 'Medical Prescription',
+          medications: report.ordonnances.medicaments.prescription.medicaments,
+          validity: report.ordonnances.medicaments.prescription.validite,
+          signature: documentSignatures.prescription,
+          content: report.ordonnances.medicaments
+        } : null,
+        
+        // Laboratory requests (if any)
+        laboratoryRequests: report.ordonnances?.biologie ? {
+          type: 'laboratory_request',
+          title: 'Laboratory Request Form',
+          tests: report.ordonnances.biologie.prescription.analyses,
+          signature: documentSignatures.laboratory,
+          content: report.ordonnances.biologie
+        } : null,
+        
+        // Imaging requests (if any)
+        imagingRequests: report.ordonnances?.imagerie ? {
+          type: 'imaging_request',
+          title: 'Radiology Request Form',
+          examinations: report.ordonnances.imagerie.prescription.examens,
+          signature: documentSignatures.imaging,
+          content: report.ordonnances.imagerie
+        } : null,
+        
+        // Invoice
+        invoice: report.invoice ? {
+          type: 'invoice',
+          title: `Invoice ${report.invoice.header.invoiceNumber}`,
+          content: report.invoice,
+          signature: documentSignatures.invoice
+        } : null
+      }
+    }
+
+    console.log('📦 Sending documents payload:', documentsPayload)
+
+    // Send to Tibok patient dashboard
+    const response = await fetch('/api/send-to-patient-dashboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(documentsPayload)
+    })
+
+    const result = await response.json()
+
+    if (result.success) {
+      toast({
+        title: "✅ Documents sent successfully",
+        description: "Documents are now available in the patient's dashboard"
+      })
+
+      // Clear any stored report data
+      sessionStorage.removeItem('currentDoctorInfo')
+      
+      // Wait a moment for user to see the success message
+      setTimeout(() => {
+        // Option 1: If onComplete callback exists, call it
+        if (onComplete) {
+          onComplete()
+        } 
+        // Option 2: Redirect to Tibok dashboard
+        else if (consultationId) {
+          window.location.href = `/dashboard/consultations/${consultationId}?status=completed`
+        }
+        // Option 3: Close the Medical AI window if it was opened as a popup
+        else if (window.opener) {
+          window.close()
+        }
+        // Option 4: Redirect to a success page
+        else {
+          window.location.href = '/consultation-complete'
+        }
+      }, 2000)
+      
+    } else {
+      throw new Error(result.error || "Failed to send documents")
+    }
+  } catch (error) {
+    console.error("❌ Error sending documents:", error)
+    toast({
+      title: "Error sending documents",
+      description: error instanceof Error ? error.message : "An error occurred while sending documents",
+      variant: "destructive"
+    })
+  }
+}
+
   // Safe getter functions
   const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
   const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
