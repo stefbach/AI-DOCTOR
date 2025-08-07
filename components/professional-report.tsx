@@ -283,7 +283,7 @@ export default function ProfessionalReportEditable({
   // Display states
   const [includeFullPrescriptions, setIncludeFullPrescriptions] = useState(true)
   
-  // Doctor information states - UPDATED: removed telephone field
+  // Doctor information states
   const [doctorInfo, setDoctorInfo] = useState({
     nom: "Dr. [Name Required]",
     qualifications: "MBBS",
@@ -311,9 +311,8 @@ export default function ProfessionalReportEditable({
     return `Digital Signature: ${doctorName} - ${new Date().toISOString()}`
   }
 
-  // UPDATED: Load doctor information from Tibok with better handling - FIX 2
+  // UPDATED: Load doctor information from Tibok with better field mapping
   useEffect(() => {
-    // Check URL parameters for doctor data from Tibok
     const urlParams = new URLSearchParams(window.location.search)
     const doctorDataParam = urlParams.get('doctorData')
     
@@ -322,84 +321,32 @@ export default function ProfessionalReportEditable({
         const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
         console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
         
-        // Auto-fill doctor information from Tibok
+        // Map all possible field names from database
         const doctorInfoFromTibok = {
-          nom: tibokDoctorData.fullName ? 
-            (tibokDoctorData.fullName.startsWith('Dr.') ? tibokDoctorData.fullName : `Dr. ${tibokDoctorData.fullName}`) : 
+          nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
+            `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
             'Dr. [Name Required]',
           qualifications: tibokDoctorData.qualifications || 'MBBS',
           specialite: tibokDoctorData.specialty || 'General Medicine',
-          adresseCabinet: tibokDoctorData.clinicAddress || tibokDoctorData.clinic_address || 'Tibok Teleconsultation Platform',
+          adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
           email: tibokDoctorData.email || '[Email Required]',
-          heuresConsultation: tibokDoctorData.consultationHours || tibokDoctorData.consultation_hours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
-          numeroEnregistrement: tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]',
-          licencePratique: tibokDoctorData.licenseNumber || tibokDoctorData.license_number || '[License Required]' // FIX: Added license_number field
+          heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+          numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]'),
+          licencePratique: String(tibokDoctorData.licenseNumber || tibokDoctorData.license_number || '[License Required]')
         }
         
         setDoctorInfo(doctorInfoFromTibok)
-        
-        // Update the report if it already exists
-        if (report) {
-          setReport(prev => ({
-            ...prev!,
-            compteRendu: {
-              ...prev!.compteRendu,
-              praticien: doctorInfoFromTibok
-            }
-          }))
-        }
-        
-        // Store in session for persistence
         sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
         
-        // Check if essential fields are missing and notify
-        const missingFields = []
-        if (!tibokDoctorData.fullName && !tibokDoctorData.full_name) missingFields.push('name')
-        if (!tibokDoctorData.medicalCouncilNumber && !tibokDoctorData.medical_council_number) missingFields.push('registration number')
-        if (!tibokDoctorData.email) missingFields.push('email')
-        
-        if (missingFields.length > 0) {
-          console.warn('⚠️ Missing doctor fields:', missingFields.join(', '))
-          toast({
-            title: "Incomplete Doctor Profile",
-            description: `Please update doctor profile in Tibok: missing ${missingFields.join(', ')}`,
-            variant: "warning" as any
-          })
-        } else {
-          console.log('✅ Doctor information loaded successfully')
-        }
+        console.log('✅ Doctor information loaded:', doctorInfoFromTibok)
         
       } catch (error) {
         console.error('Error parsing Tibok doctor data:', error)
       }
     }
-    
-    // Also check sessionStorage as fallback
-    const storedDoctorInfo = sessionStorage.getItem('currentDoctorInfo')
-    if (!doctorDataParam && storedDoctorInfo) {
-      try {
-        const doctorData = JSON.parse(storedDoctorInfo)
-        setDoctorInfo(doctorData)
-        
-        // Update the report if it already exists
-        if (report) {
-          setReport(prev => ({
-            ...prev!,
-            compteRendu: {
-              ...prev!.compteRendu,
-              praticien: doctorData
-            }
-          }))
-        }
-        
-        console.log('✅ Doctor information loaded from session')
-      } catch (error) {
-        console.error('Error loading doctor data from storage:', error)
-      }
-    }
-  }, []) // Remove 'report' from dependencies to avoid infinite loop
+  }, [])
 
-  // FIX 3: Add another useEffect to update report when doctor info changes
+  // Update report when doctor info changes
   useEffect(() => {
     if (report && doctorInfo && doctorInfo.nom !== 'Dr. [DOCTOR NAME]') {
       setReport(prev => ({
@@ -448,7 +395,7 @@ export default function ProfessionalReportEditable({
       }))
       console.log('📝 Report updated with doctor information')
     }
-  }, [doctorInfo, report?.compteRendu?.header]) // Only update when doctor info changes, not the whole report
+  }, [doctorInfo, report?.compteRendu?.header])
 
   useEffect(() => {
     console.log("🚀 ProfessionalReportEditable mounted with data:", {
@@ -486,12 +433,10 @@ export default function ProfessionalReportEditable({
   // Check for existing report
   const checkExistingReport = async () => {
     try {
-      // Get the actual patient ID from props or URL
       const params = new URLSearchParams(window.location.search)
       const patientIdFromUrl = params.get('patientId')
       const actualPatientId = patientData?.id || patientIdFromUrl || (patientData ? 'patient_' + Date.now() : 'temp')
       
-      // Don't check for existing report if no real patient data
       if (!patientData || actualPatientId === 'temp') {
         console.log("No patient data, generating new report")
         generateProfessionalReport()
@@ -534,22 +479,25 @@ export default function ProfessionalReportEditable({
     setModifiedSections(prev => new Set(prev).add(section))
   }
 
-  // FIX 1: Updated generate initial report with doctor data
+  // UPDATED: Generate report with doctor data and auto-save
   const generateProfessionalReport = async () => {
     setLoading(true)
     setError(null)
 
     try {
-      console.log("📤 Generating report with data:", {
-        hasPatientData: !!patientData,
-        patientName: patientData?.name || `${patientData?.firstName} ${patientData?.lastName}`,
-        hasClinicalData: !!clinicalData,
-        hasQuestionsData: !!questionsData,
-        hasDiagnosisData: !!diagnosisData,
-        hasDoctorData: !!doctorInfo // Add this log
-      })
+      // Wait for doctor info to be loaded
+      let currentDoctorInfo = doctorInfo
+      if (currentDoctorInfo.nom === 'Dr. [DOCTOR NAME]' || currentDoctorInfo.nom === 'Dr. [Name Required]') {
+        // Try to get from session if not loaded yet
+        const storedInfo = sessionStorage.getItem('currentDoctorInfo')
+        if (storedInfo) {
+          currentDoctorInfo = JSON.parse(storedInfo)
+          setDoctorInfo(currentDoctorInfo)
+        }
+      }
       
-      // Create a valid patient data object even if some data is missing
+      console.log("📤 Generating report with doctor info:", currentDoctorInfo)
+      
       const validPatientData = patientData || {
         name: 'Patient',
         age: '',
@@ -561,16 +509,16 @@ export default function ProfessionalReportEditable({
         weight: ''
       }
       
-      // ADD THIS: Prepare doctor data for API
+      // Prepare doctor data for API
       const doctorDataForAPI = {
-        fullName: doctorInfo.nom.replace('Dr. ', ''),
-        qualifications: doctorInfo.qualifications,
-        specialty: doctorInfo.specialite,
-        clinicAddress: doctorInfo.adresseCabinet,
-        email: doctorInfo.email,
-        consultationHours: doctorInfo.heuresConsultation,
-        medicalCouncilNumber: doctorInfo.numeroEnregistrement,
-        licenseNumber: doctorInfo.licencePratique
+        fullName: currentDoctorInfo.nom.replace('Dr. ', ''),
+        qualifications: currentDoctorInfo.qualifications,
+        specialty: currentDoctorInfo.specialite,
+        clinicAddress: currentDoctorInfo.adresseCabinet,
+        email: currentDoctorInfo.email,
+        consultationHours: currentDoctorInfo.heuresConsultation,
+        medicalCouncilNumber: currentDoctorInfo.numeroEnregistrement,
+        licenseNumber: currentDoctorInfo.licencePratique
       }
       
       const response = await fetch("/api/generate-consultation-report", {
@@ -582,7 +530,7 @@ export default function ProfessionalReportEditable({
           questionsData: questionsData || {},
           diagnosisData: diagnosisData || {},
           editedDocuments: editedDocuments || {},
-          doctorData: doctorDataForAPI, // ADD THIS LINE
+          doctorData: doctorDataForAPI,
           includeFullPrescriptions
         })
       })
@@ -599,43 +547,70 @@ export default function ProfessionalReportEditable({
       if (data.success && data.report) {
         const reportData = data.report
         
-        // Ensure structure is complete
-        if (!reportData.compteRendu) {
-          reportData.compteRendu = createEmptyReport().compteRendu
+        // Override the praticien data with actual doctor info
+        reportData.compteRendu.praticien = currentDoctorInfo
+        
+        // Also update all prescription headers
+        if (reportData.ordonnances?.medicaments) {
+          reportData.ordonnances.medicaments.enTete = currentDoctorInfo
+          reportData.ordonnances.medicaments.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
+          reportData.ordonnances.medicaments.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
         }
         
-        // Merge practitioner information
-        if (reportData.compteRendu?.praticien) {
-          reportData.compteRendu.praticien = {
-            ...doctorInfo,
-            ...reportData.compteRendu.praticien
-          }
-        } else {
-          reportData.compteRendu.praticien = doctorInfo
+        if (reportData.ordonnances?.biologie) {
+          reportData.ordonnances.biologie.enTete = currentDoctorInfo
+          reportData.ordonnances.biologie.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
+          reportData.ordonnances.biologie.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
         }
         
-        // Ensure patient data is properly set
-        if (validPatientData) {
-          reportData.compteRendu.patient = {
-            nom: validPatientData.name || `${validPatientData.firstName || ''} ${validPatientData.lastName || ''}`.trim() || 'Patient',
-            nomComplet: validPatientData.name || `${validPatientData.firstName || ''} ${validPatientData.lastName || ''}`.trim() || 'Patient',
-            age: validPatientData.age?.toString() || '',
-            dateNaissance: validPatientData.dateOfBirth || '',
-            sexe: validPatientData.gender || '',
-            adresse: validPatientData.address || '',
-            telephone: validPatientData.phone || '',
-            email: validPatientData.email || '',
-            poids: validPatientData.weight?.toString() || '',
-            dateExamen: new Date().toISOString().split('T')[0]
-          }
+        if (reportData.ordonnances?.imagerie) {
+          reportData.ordonnances.imagerie.enTete = currentDoctorInfo
+          reportData.ordonnances.imagerie.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
+          reportData.ordonnances.imagerie.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
+        }
+        
+        if (reportData.invoice?.physician) {
+          reportData.invoice.physician.name = currentDoctorInfo.nom
+          reportData.invoice.physician.registrationNumber = currentDoctorInfo.numeroEnregistrement
         }
         
         setReport(reportData)
         setValidationStatus('draft')
         
+        // Auto-save the report immediately after generation
+        const newReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        setReportId(newReportId)
+        
+        // Save to storage
+        const params = new URLSearchParams(window.location.search)
+        const consultationId = params.get('consultationId')
+        const patientId = params.get('patientId') || patientData?.id
+        
+        if (consultationId && patientId) {
+          const saveResponse = await fetch('/api/save-medical-report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              reportId: newReportId,
+              patientId,
+              report: reportData,
+              action: 'save',
+              consultationId,
+              metadata: {
+                lastModified: new Date().toISOString(),
+                validationStatus: 'draft'
+              }
+            })
+          })
+          
+          if (saveResponse.ok) {
+            console.log('✅ Report auto-saved with ID:', newReportId)
+          }
+        }
+        
         toast({
           title: "Report generated successfully",
-          description: "Report is ready for editing"
+          description: "Report is ready for editing and validation"
         })
       } else {
         throw new Error(data.error || "Generation error")
@@ -645,8 +620,9 @@ export default function ProfessionalReportEditable({
       console.error("Report generation error:", errorMessage)
       setError(errorMessage)
       
-      // Create an empty report with available data
+      // Create fallback report with doctor info
       const emptyReport = createEmptyReport()
+      emptyReport.compteRendu.praticien = doctorInfo
       if (patientData) {
         emptyReport.compteRendu.patient = {
           ...emptyReport.compteRendu.patient,
@@ -661,17 +637,13 @@ export default function ProfessionalReportEditable({
           poids: patientData.weight?.toString() || ''
         }
       }
-      emptyReport.compteRendu.praticien = doctorInfo
       setReport(emptyReport)
       
-      // Don't show error toast for expected scenarios
-      if (!errorMessage.includes("404")) {
-        toast({
-          title: "Note",
-          description: "Using default template. Please fill in the required information.",
-          variant: "default"
-        })
-      }
+      toast({
+        title: "Note",
+        description: "Using default template. Please fill in the required information.",
+        variant: "default"
+      })
     } finally {
       setLoading(false)
     }
@@ -712,11 +684,10 @@ export default function ProfessionalReportEditable({
       [field]: value
     }))
     trackModification(`praticien.${field}`)
-    // Also save to session storage
     const updatedInfo = { ...doctorInfo, [field]: value }
     sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
   }
-  // UPDATED: Validation function with required field checks
+  // UPDATED: Enhanced validation with better report ID handling
   const handleValidation = async () => {
     // Check if doctor info is complete
     const requiredFieldsMissing = []
@@ -730,7 +701,7 @@ export default function ProfessionalReportEditable({
         description: `Please complete doctor profile. Missing: ${requiredFieldsMissing.join(', ')}`,
         variant: "destructive"
       })
-      setEditingDoctor(true) // Open the editor
+      setEditingDoctor(true)
       return
     }
     
@@ -743,9 +714,41 @@ export default function ProfessionalReportEditable({
       return
     }
     
-    // Auto-save any pending changes before validation
-    if (modifiedSections.size > 0) {
-      await handleSave()
+    // Ensure we have a report ID
+    let currentReportId = reportId
+    if (!currentReportId) {
+      currentReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      setReportId(currentReportId)
+      
+      // Save the report first
+      const params = new URLSearchParams(window.location.search)
+      const consultationId = params.get('consultationId')
+      const patientId = params.get('patientId') || patientData?.id
+      
+      const saveResponse = await fetch('/api/save-medical-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reportId: currentReportId,
+          patientId: patientId || 'temp',
+          report: report,
+          action: 'save',
+          consultationId,
+          metadata: {
+            lastModified: new Date().toISOString(),
+            validationStatus: 'draft'
+          }
+        })
+      })
+      
+      if (!saveResponse.ok) {
+        toast({
+          title: "Error",
+          description: "Failed to save report before validation",
+          variant: "destructive"
+        })
+        return
+      }
     }
     
     setSaving(true)
@@ -780,17 +783,16 @@ export default function ProfessionalReportEditable({
       }
       
       const params = new URLSearchParams(window.location.search)
-      const consultationId = params.get('consultationId') || sessionStorage.getItem('consultationId')
-      const patientIdFromUrl = params.get('patientId')
-      const doctorId = params.get('doctorId') || sessionStorage.getItem('doctorId')
-      const actualPatientId = patientData?.id || patientIdFromUrl || 'temp'
+      const consultationId = params.get('consultationId')
+      const patientId = params.get('patientId') || patientData?.id
+      const doctorId = params.get('doctorId')
       
       const response = await fetch('/api/save-medical-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          reportId: reportId || `report_${Date.now()}`,
-          patientId: actualPatientId,
+          reportId: currentReportId,
+          patientId: patientId || 'temp',
           consultationId,
           doctorId,
           doctorName: doctorInfo.nom,
@@ -819,22 +821,11 @@ export default function ProfessionalReportEditable({
         setValidationStatus('validated')
         setEditMode(false)
         setReport(updatedReport)
-        setReportId(result.data.reportId)
         
         toast({
           title: "✅ Validation successful",
           description: "The report has been validated and digitally signed"
         })
-        
-        // Prepare to send to Tibok
-        if (consultationId) {
-          console.log('📤 Ready to send to Tibok patient dashboard:', {
-            consultationId,
-            reportId: result.data.reportId,
-            signatures
-          })
-          // TODO: Implement sending to Tibok patient dashboard
-        }
         
         if (onComplete) {
           onComplete()
@@ -1531,7 +1522,7 @@ export default function ProfessionalReportEditable({
       </Card>
     )
   }
-  // UPDATED Doctor info editor component - removed phone field
+  // Doctor info editor component
   const DoctorInfoEditor = () => {
     const hasRequiredFields = doctorInfo.nom !== 'Dr. [Name Required]' && 
                              !doctorInfo.numeroEnregistrement.includes('[') &&
@@ -1633,6 +1624,14 @@ export default function ProfessionalReportEditable({
                 />
               </div>
               <div className="col-span-2">
+                <Label>Consultation Hours</Label>
+                <Input
+                  value={doctorInfo.heuresConsultation}
+                  onChange={(e) => updateDoctorInfo('heuresConsultation', e.target.value)}
+                  placeholder="Teleconsultation Hours: 8:00 AM - 8:00 PM"
+                />
+              </div>
+              <div className="col-span-2">
                 <p className="text-sm text-red-600">* Required fields must be completed before validation</p>
               </div>
             </div>
@@ -1644,6 +1643,8 @@ export default function ProfessionalReportEditable({
               <div><strong>Medical Council No.:</strong> {doctorInfo.numeroEnregistrement}</div>
               <div><strong>License No.:</strong> {doctorInfo.licencePratique}</div>
               <div><strong>Email:</strong> {doctorInfo.email}</div>
+              <div className="col-span-2"><strong>Clinic Address:</strong> {doctorInfo.adresseCabinet}</div>
+              <div className="col-span-2"><strong>Consultation Hours:</strong> {doctorInfo.heuresConsultation}</div>
             </div>
           )}
         </CardContent>
@@ -1651,7 +1652,7 @@ export default function ProfessionalReportEditable({
     )
   }
 
-  // Narrative report editing component - UPDATED to not show phone
+  // Narrative report editing component
   const ConsultationReport = () => {
     const sections = [
       { key: 'motifConsultation', title: 'CHIEF COMPLAINT' },
@@ -1689,7 +1690,8 @@ export default function ProfessionalReportEditable({
               <div>Medical Council Reg: {praticien.numeroEnregistrement}</div>
               <div>Practice License: {praticien.licencePratique}</div>
               <div>{praticien.email}</div>
-              {/* Phone removed - no longer displayed */}
+              <div className="col-span-2">{praticien.adresseCabinet}</div>
+              <div className="col-span-2">{praticien.heuresConsultation}</div>
             </div>
           </div>
 
@@ -2734,7 +2736,7 @@ export default function ProfessionalReportEditable({
       </div>
     )
   }
-  // Updated Actions Bar component (removed Save button)
+  // Actions Bar component
   const ActionsBar = () => {
     const metadata = getReportMetadata()
     
@@ -2771,8 +2773,6 @@ export default function ProfessionalReportEditable({
                 {editMode ? 'Preview' : 'Edit'}
               </Button>
               
-              {/* REMOVED SAVE BUTTON - Only validate button remains */}
-              
               <Button
                 variant="default"
                 size="sm"
@@ -2798,7 +2798,7 @@ export default function ProfessionalReportEditable({
     )
   }
 
-  // Unsaved changes warning - Modified to be less intrusive
+  // Unsaved changes warning
   const UnsavedChangesAlert = () => {
     if (modifiedSections.size === 0 || validationStatus === 'validated') return null
 
