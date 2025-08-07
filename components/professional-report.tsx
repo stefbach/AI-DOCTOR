@@ -99,6 +99,7 @@ interface MauritianReport {
       validatedBy?: string
       complianceNote?: string
       signatures?: any
+      signatureDataUrl?: string
     }
   }
   ordonnances?: {
@@ -191,6 +192,8 @@ interface MauritianReport {
       entity: string
       onBehalfOf: string
       title: string
+      signatureImage?: string
+      signedAt?: string
     }
   }
   prescriptionsResume?: {
@@ -258,6 +261,7 @@ const createEmptyReport = (): MauritianReport => ({
     }
   }
 })
+
 export default function ProfessionalReportEditable({
   patientData,
   clinicalData,
@@ -305,78 +309,389 @@ export default function ProfessionalReportEditable({
     invoice?: string
   }>({})
 
-  // Function to generate doctor signature
-  const generateDoctorSignature = async (doctorName: string): Promise<string> => {
-    // This is a placeholder - implement actual signature generation
-    return `Digital Signature: ${doctorName} - ${new Date().toISOString()}`
-  }
-
-// UPDATED: Load doctor information from Tibok with better field mapping and debugging
-useEffect(() => {
-  const urlParams = new URLSearchParams(window.location.search)
-  const doctorDataParam = urlParams.get('doctorData')
-  
-  if (doctorDataParam) {
-    try {
-      const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
-      console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
-      
-      // Debug: Check what fields are actually present
-      console.log('🔍 Doctor data fields:', {
-        hasLicenseNumber: 'licenseNumber' in tibokDoctorData,
-        hasLicense_number: 'license_number' in tibokDoctorData,
-        licenseNumberValue: tibokDoctorData.licenseNumber,
-        license_numberValue: tibokDoctorData.license_number,
-        typeOfLicenseNumber: typeof tibokDoctorData.licenseNumber,
-        typeOfLicense_number: typeof tibokDoctorData.license_number
+  // UPDATED: Enhanced validation with digital signature integration
+  const handleValidation = async () => {
+    // Check if doctor info is complete
+    const requiredFieldsMissing = []
+    if (doctorInfo.nom.includes('[')) requiredFieldsMissing.push('Doctor name')
+    if (doctorInfo.numeroEnregistrement.includes('[')) requiredFieldsMissing.push('Registration number')
+    if (doctorInfo.email.includes('[')) requiredFieldsMissing.push('Email')
+    
+    if (requiredFieldsMissing.length > 0) {
+      toast({
+        title: "Cannot Validate",
+        description: `Please complete doctor profile. Missing: ${requiredFieldsMissing.join(', ')}`,
+        variant: "destructive"
       })
+      setEditingDoctor(true)
+      return
+    }
+    
+    if (!report) {
+      toast({
+        title: "Error",
+        description: "No report to validate",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    // Ensure we have a report ID
+    let currentReportId = reportId
+    if (!currentReportId) {
+      currentReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      setReportId(currentReportId)
+    }
+    
+    setSaving(true)
+    try {
+      // Generate a unique signature seed for this doctor
+      // This ensures consistency across documents but uniqueness per doctor
+      const signatureSeed = `${doctorInfo.nom}_${doctorInfo.numeroEnregistrement}_signature`
       
-      // Map all possible field names from database
-      const doctorInfoFromTibok = {
-        nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
-          `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
-          'Dr. [Name Required]',
-        qualifications: tibokDoctorData.qualifications || 'MBBS',
-        specialite: tibokDoctorData.specialty || 'General Medicine',
-        adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
-        telephone: '', // Keep this empty as requested
-        email: tibokDoctorData.email || '[Email Required]',
-        heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
-        numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]'),
-        // FIXED: Directly assign the license_number field
-        licencePratique: tibokDoctorData.license_number ? 
-          String(tibokDoctorData.license_number) : 
-          '[License Required]'
+      // Create signature data URL using the existing component logic
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 80
+      const ctx = canvas.getContext('2d')
+      
+      if (ctx) {
+        // Generate signature using the same logic as DoctorSignature component
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(0, 0, 300, 80)
+        
+        const nameParts = doctorInfo.nom.replace('Dr. ', '').split(' ')
+        const fullName = nameParts.join(' ')
+        
+        // Create unique but consistent signature based on name
+        const nameHash = doctorInfo.nom.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+        const signatureStyle = nameHash % 3
+        
+        ctx.save()
+        ctx.translate(50, 40)
+        
+        // Dark ink color
+        ctx.strokeStyle = '#1a1a2e'
+        ctx.fillStyle = '#1a1a2e'
+        ctx.lineWidth = 2.2
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        
+        // Apply signature style (same as in DoctorSignature component)
+        if (signatureStyle === 0) {
+          ctx.font = 'italic 28px "Brush Script MT", "Lucida Handwriting", cursive'
+          ctx.fillText(fullName, 0, 0)
+          ctx.beginPath()
+          ctx.moveTo(-5, 12)
+          ctx.quadraticCurveTo(100, 16, 205, 10)
+          ctx.lineWidth = 1.8
+          ctx.stroke()
+        } else if (signatureStyle === 1) {
+          ctx.font = 'italic bold 32px "Brush Script MT", cursive'
+          const firstLetter = nameParts[0]?.[0] || 'D'
+          ctx.fillText(firstLetter, 0, 0)
+          ctx.font = 'italic 26px "Lucida Handwriting", cursive'
+          const restOfName = nameParts[0]?.substring(1) + ' ' + (nameParts[1] || '')
+          ctx.fillText(restOfName, 28, 2)
+          ctx.beginPath()
+          ctx.moveTo(0, 14)
+          ctx.bezierCurveTo(50, 16, 150, 14, 200, 12)
+          ctx.lineWidth = 1.5
+          ctx.stroke()
+        } else {
+          ctx.font = 'italic 30px "Segoe Script", "Brush Script MT", cursive'
+          let xOffset = 0
+          for (let i = 0; i < fullName.length; i++) {
+            const char = fullName[i]
+            const charWidth = ctx.measureText(char).width
+            const yOffset = Math.sin(i * 0.5) * 2
+            ctx.fillText(char, xOffset, yOffset)
+            xOffset += charWidth * 0.85
+          }
+          ctx.beginPath()
+          ctx.moveTo(0, 15)
+          ctx.quadraticCurveTo(xOffset/2, 18, xOffset, 13)
+          ctx.lineWidth = 1.6
+          ctx.stroke()
+        }
+        
+        // Add date
+        ctx.font = '9px Arial'
+        ctx.fillStyle = '#9ca3af'
+        ctx.textAlign = 'left'
+        const date = new Date().toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        })
+        ctx.fillText(`Signed: ${date}`, 0, 35)
+        ctx.restore()
       }
       
-      console.log('🔍 License extraction:', {
-        rawValue: tibokDoctorData.license_number,
-        type: typeof tibokDoctorData.license_number,
-        hasLicense: !!tibokDoctorData.license_number
-      });
+      // Convert canvas to data URL
+      const signatureDataUrl = canvas.toDataURL('image/png')
       
-      console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
+      // Create signatures object for all document types
+      const signatures = {
+        consultation: signatureDataUrl,
+        prescription: signatureDataUrl,
+        laboratory: signatureDataUrl,
+        imaging: signatureDataUrl,
+        invoice: signatureDataUrl
+      }
       
-      setDoctorInfo(doctorInfoFromTibok)
-      sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
+      // Update the document signatures state
+      setDocumentSignatures(signatures)
       
+      // Create the updated report with signatures embedded
+      const updatedReport = {
+        ...report,
+        compteRendu: {
+          ...report.compteRendu,
+          praticien: doctorInfo,
+          metadata: {
+            ...getReportMetadata(),
+            validatedAt: new Date().toISOString(),
+            validatedBy: doctorInfo.nom,
+            validationStatus: 'validated' as const,
+            signatures: signatures,
+            signatureDataUrl: signatureDataUrl // Store the actual signature image
+          }
+        },
+        // Add signature references to each document section
+        ordonnances: report.ordonnances ? {
+          ...report.ordonnances,
+          medicaments: report.ordonnances.medicaments ? {
+            ...report.ordonnances.medicaments,
+            authentification: {
+              ...report.ordonnances.medicaments.authentification,
+              signatureImage: signatureDataUrl,
+              signedAt: new Date().toISOString()
+            }
+          } : null,
+          biologie: report.ordonnances.biologie ? {
+            ...report.ordonnances.biologie,
+            authentification: {
+              ...report.ordonnances.biologie.authentification,
+              signatureImage: signatureDataUrl,
+              signedAt: new Date().toISOString()
+            }
+          } : null,
+          imagerie: report.ordonnances.imagerie ? {
+            ...report.ordonnances.imagerie,
+            authentification: {
+              ...report.ordonnances.imagerie.authentification,
+              signatureImage: signatureDataUrl,
+              signedAt: new Date().toISOString()
+            }
+          } : null
+        } : report.ordonnances,
+        invoice: report.invoice ? {
+          ...report.invoice,
+          signature: {
+            ...report.invoice.signature,
+            signatureImage: signatureDataUrl,
+            signedAt: new Date().toISOString()
+          }
+        } : report.invoice
+      }
+      
+      // Get URL parameters
+      const params = new URLSearchParams(window.location.search)
+      const consultationId = params.get('consultationId')
+      const patientId = params.get('patientId') || patientData?.id
+      const doctorId = params.get('doctorId')
+      
+      // Save the validated report with signatures
+      const response = await fetch('/api/save-medical-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reportId: currentReportId,
+          patientId: patientId || 'temp',
+          consultationId,
+          doctorId,
+          doctorName: doctorInfo.nom,
+          patientName: getReportPatient().nomComplet || getReportPatient().nom,
+          report: updatedReport,
+          action: 'validate',
+          metadata: {
+            validatedAt: new Date().toISOString(),
+            validatedBy: doctorInfo.nom,
+            validationStatus: 'validated',
+            signatures: signatures,
+            signatureDataUrl: signatureDataUrl,
+            documentValidations: {
+              consultation: true,
+              prescription: !!report?.ordonnances?.medicaments,
+              laboratory: !!report?.ordonnances?.biologie,
+              imaging: !!report?.ordonnances?.imagerie,
+              invoice: !!report?.invoice
+            }
+          }
+        })
+      })
+
+      const result = await response.json()
+      
+      if (result.success) {
+        // Update states to reflect validation
+        setValidationStatus('validated')
+        setEditMode(false)
+        setReport(updatedReport)
+        
+        // Optional: Store signature in Supabase doctors table for future use
+        // This allows reusing the same signature for future documents
+        if (doctorId) {
+          try {
+            await fetch('/api/update-doctor-signature', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                doctorId: doctorId,
+                signatureDataUrl: signatureDataUrl,
+                lastSignedAt: new Date().toISOString()
+              })
+            })
+          } catch (err) {
+            console.log('Could not store signature for future use:', err)
+            // Non-critical error, continue
+          }
+        }
+        
+        toast({
+          title: "✅ Validation successful",
+          description: "All documents have been validated and digitally signed"
+        })
+        
+        if (onComplete) {
+          onComplete()
+        }
+      } else {
+        throw new Error(result.error || "Validation failed")
+      }
     } catch (error) {
-      console.error('Error parsing Tibok doctor data:', error)
-    }
-  }  // <-- THIS WAS MISSING! Added closing bracket for if (doctorDataParam)
-  
-  // Also check sessionStorage as fallback
-  const storedDoctorInfo = sessionStorage.getItem('currentDoctorInfo')
-  if (!doctorDataParam && storedDoctorInfo) {
-    try {
-      const doctorData = JSON.parse(storedDoctorInfo)
-      setDoctorInfo(doctorData)
-      console.log('✅ Doctor information loaded from session')
-    } catch (error) {
-      console.error('Error loading doctor data from storage:', error)
+      console.error("Validation error:", error)
+      toast({
+        title: "Validation error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive"
+      })
+    } finally {
+      setSaving(false)
     }
   }
-}, [])
+
+  // Safe getter functions
+  const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
+  const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
+  const getReportPatient = () => report?.compteRendu?.patient || createEmptyReport().compteRendu.patient
+  const getReportRapport = () => report?.compteRendu?.rapport || createEmptyReport().compteRendu.rapport
+  const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
+
+  // Track modifications
+  const trackModification = (section: string) => {
+    if (validationStatus === 'validated') return
+    setModifiedSections(prev => new Set(prev).add(section))
+  }
+
+  // Update narrative report section
+  const updateRapportSection = (section: string, value: string) => {
+    if (validationStatus === 'validated') return
+    
+    setReport(prev => {
+      if (!prev) return null
+      
+      return {
+        ...prev,
+        compteRendu: {
+          ...prev.compteRendu,
+          rapport: {
+            ...prev.compteRendu.rapport,
+            [section]: value
+          }
+        }
+      }
+    })
+    trackModification(`rapport.${section}`)
+  }
+
+  // Update doctor information
+  const updateDoctorInfo = (field: string, value: string) => {
+    setDoctorInfo(prev => ({
+      ...prev,
+      [field]: value
+    }))
+    trackModification(`praticien.${field}`)
+    const updatedInfo = { ...doctorInfo, [field]: value }
+    sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
+  }
+  // UPDATED: Load doctor information from Tibok with better field mapping and debugging
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const doctorDataParam = urlParams.get('doctorData')
+    
+    if (doctorDataParam) {
+      try {
+        const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
+        console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
+        
+        // Debug: Check what fields are actually present
+        console.log('🔍 Doctor data fields:', {
+          hasLicenseNumber: 'licenseNumber' in tibokDoctorData,
+          hasLicense_number: 'license_number' in tibokDoctorData,
+          licenseNumberValue: tibokDoctorData.licenseNumber,
+          license_numberValue: tibokDoctorData.license_number,
+          typeOfLicenseNumber: typeof tibokDoctorData.licenseNumber,
+          typeOfLicense_number: typeof tibokDoctorData.license_number
+        })
+        
+        // Map all possible field names from database
+        const doctorInfoFromTibok = {
+          nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
+            `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
+            'Dr. [Name Required]',
+          qualifications: tibokDoctorData.qualifications || 'MBBS',
+          specialite: tibokDoctorData.specialty || 'General Medicine',
+          adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
+          telephone: '', // Keep this empty as requested
+          email: tibokDoctorData.email || '[Email Required]',
+          heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+          numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]'),
+          // FIXED: Directly assign the license_number field
+          licencePratique: tibokDoctorData.license_number ? 
+            String(tibokDoctorData.license_number) : 
+            '[License Required]'
+        }
+        
+        console.log('🔍 License extraction:', {
+          rawValue: tibokDoctorData.license_number,
+          type: typeof tibokDoctorData.license_number,
+          hasLicense: !!tibokDoctorData.license_number
+        });
+        
+        console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
+        
+        setDoctorInfo(doctorInfoFromTibok)
+        sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
+        
+      } catch (error) {
+        console.error('Error parsing Tibok doctor data:', error)
+      }
+    }
+    
+    // Also check sessionStorage as fallback
+    const storedDoctorInfo = sessionStorage.getItem('currentDoctorInfo')
+    if (!doctorDataParam && storedDoctorInfo) {
+      try {
+        const doctorData = JSON.parse(storedDoctorInfo)
+        setDoctorInfo(doctorData)
+        console.log('✅ Doctor information loaded from session')
+      } catch (error) {
+        console.error('Error loading doctor data from storage:', error)
+      }
+    }
+  }, [])
 
   // Update report when doctor info changes
   useEffect(() => {
@@ -462,6 +777,7 @@ useEffect(() => {
       setLoading(false)
     }
   }, [patientData, clinicalData, questionsData, diagnosisData])
+
   // Check for existing report
   const checkExistingReport = async () => {
     try {
@@ -503,12 +819,6 @@ useEffect(() => {
       console.log("No existing report, generating new one")
       generateProfessionalReport()
     }
-  }
-
-  // Track modifications
-  const trackModification = (section: string) => {
-    if (validationStatus === 'validated') return
-    setModifiedSections(prev => new Set(prev).add(section))
   }
 
   // UPDATED: Generate report with doctor data and auto-save
@@ -678,202 +988,6 @@ useEffect(() => {
       })
     } finally {
       setLoading(false)
-    }
-  }
-
-  // Safe getter functions
-  const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
-  const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
-  const getReportPatient = () => report?.compteRendu?.patient || createEmptyReport().compteRendu.patient
-  const getReportRapport = () => report?.compteRendu?.rapport || createEmptyReport().compteRendu.rapport
-  const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
-
-  // Update narrative report section
-  const updateRapportSection = (section: string, value: string) => {
-    if (validationStatus === 'validated') return
-    
-    setReport(prev => {
-      if (!prev) return null
-      
-      return {
-        ...prev,
-        compteRendu: {
-          ...prev.compteRendu,
-          rapport: {
-            ...prev.compteRendu.rapport,
-            [section]: value
-          }
-        }
-      }
-    })
-    trackModification(`rapport.${section}`)
-  }
-
-  // Update doctor information
-  const updateDoctorInfo = (field: string, value: string) => {
-    setDoctorInfo(prev => ({
-      ...prev,
-      [field]: value
-    }))
-    trackModification(`praticien.${field}`)
-    const updatedInfo = { ...doctorInfo, [field]: value }
-    sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
-  }
-  // UPDATED: Enhanced validation with better report ID handling
-  const handleValidation = async () => {
-    // Check if doctor info is complete
-    const requiredFieldsMissing = []
-    if (doctorInfo.nom.includes('[')) requiredFieldsMissing.push('Doctor name')
-    if (doctorInfo.numeroEnregistrement.includes('[')) requiredFieldsMissing.push('Registration number')
-    if (doctorInfo.email.includes('[')) requiredFieldsMissing.push('Email')
-    
-    if (requiredFieldsMissing.length > 0) {
-      toast({
-        title: "Cannot Validate",
-        description: `Please complete doctor profile. Missing: ${requiredFieldsMissing.join(', ')}`,
-        variant: "destructive"
-      })
-      setEditingDoctor(true)
-      return
-    }
-    
-    if (!report) {
-      toast({
-        title: "Error",
-        description: "No report to validate",
-        variant: "destructive"
-      })
-      return
-    }
-    
-    // Ensure we have a report ID
-    let currentReportId = reportId
-    if (!currentReportId) {
-      currentReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      setReportId(currentReportId)
-      
-      // Save the report first
-      const params = new URLSearchParams(window.location.search)
-      const consultationId = params.get('consultationId')
-      const patientId = params.get('patientId') || patientData?.id
-      
-      const saveResponse = await fetch('/api/save-medical-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reportId: currentReportId,
-          patientId: patientId || 'temp',
-          report: report,
-          action: 'save',
-          consultationId,
-          metadata: {
-            lastModified: new Date().toISOString(),
-            validationStatus: 'draft'
-          }
-        })
-      })
-      
-      if (!saveResponse.ok) {
-        toast({
-          title: "Error",
-          description: "Failed to save report before validation",
-          variant: "destructive"
-        })
-        return
-      }
-    }
-    
-    setSaving(true)
-    try {
-      // Generate signature for the doctor
-      const doctorSignature = await generateDoctorSignature(doctorInfo.nom)
-      
-      // Add signatures to all documents
-      const signatures = {
-        consultation: doctorSignature,
-        prescription: doctorSignature,
-        laboratory: doctorSignature,
-        imaging: doctorSignature,
-        invoice: doctorSignature
-      }
-      
-      setDocumentSignatures(signatures)
-      
-      const updatedReport = {
-        ...report,
-        compteRendu: {
-          ...report.compteRendu,
-          praticien: doctorInfo,
-          metadata: {
-            ...getReportMetadata(),
-            validatedAt: new Date().toISOString(),
-            validatedBy: doctorInfo.nom,
-            validationStatus: 'validated' as const,
-            signatures
-          }
-        }
-      }
-      
-      const params = new URLSearchParams(window.location.search)
-      const consultationId = params.get('consultationId')
-      const patientId = params.get('patientId') || patientData?.id
-      const doctorId = params.get('doctorId')
-      
-      const response = await fetch('/api/save-medical-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reportId: currentReportId,
-          patientId: patientId || 'temp',
-          consultationId,
-          doctorId,
-          doctorName: doctorInfo.nom,
-          patientName: getReportPatient().nomComplet || getReportPatient().nom,
-          report: updatedReport,
-          action: 'validate',
-          metadata: {
-            validatedAt: new Date().toISOString(),
-            validatedBy: doctorInfo.nom,
-            validationStatus: 'validated',
-            signatures,
-            documentValidations: {
-              consultation: true,
-              prescription: !!report?.ordonnances?.medicaments,
-              laboratory: !!report?.ordonnances?.biologie,
-              imaging: !!report?.ordonnances?.imagerie,
-              invoice: !!report?.invoice
-            }
-          }
-        })
-      })
-
-      const result = await response.json()
-      
-      if (result.success) {
-        setValidationStatus('validated')
-        setEditMode(false)
-        setReport(updatedReport)
-        
-        toast({
-          title: "✅ Validation successful",
-          description: "The report has been validated and digitally signed"
-        })
-        
-        if (onComplete) {
-          onComplete()
-        }
-      } else {
-        throw new Error(result.error || "Validation failed")
-      }
-    } catch (error) {
-      console.error("Validation error:", error)
-      toast({
-        title: "Validation error",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive"
-      })
-    } finally {
-      setSaving(false)
     }
   }
 
@@ -1238,6 +1352,7 @@ useEffect(() => {
     })
     trackModification(`imagerie.remove.${index}`)
   }
+
   // Enhanced PDF export - extracts only specific content
   const exportSectionToPDF = (sectionId: string, filename: string) => {
     const element = document.getElementById(sectionId)
@@ -1309,6 +1424,12 @@ useEffect(() => {
           margin-top: 40pt;
           text-align: right;
           page-break-inside: avoid;
+        }
+        
+        .signature img {
+          max-width: 300px;
+          height: auto;
+          margin-top: 10pt;
         }
         
         .grid {
@@ -1476,7 +1597,6 @@ useEffect(() => {
   }
 
   const handlePrint = () => window.print()
-
   // Loading and error states
   if (loading) {
     return (
@@ -1554,6 +1674,7 @@ useEffect(() => {
       </Card>
     )
   }
+
   // Doctor info editor component
   const DoctorInfoEditor = () => {
     const hasRequiredFields = doctorInfo.nom !== 'Dr. [Name Required]' && 
@@ -1683,7 +1804,6 @@ useEffect(() => {
       </Card>
     )
   }
-
   // Narrative report editing component
   const ConsultationReport = () => {
     const sections = [
@@ -1795,29 +1915,25 @@ useEffect(() => {
               <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
               <p className="text-sm text-gray-600">License: {praticien.licencePratique}</p>
               <p className="text-sm text-gray-600">{praticien.adresseCabinet}</p>
-              <div className="mt-8">
-                <p className="text-sm">_______________________________</p>
-                <p className="text-sm">Signature & Official Stamp</p>
-                <p className="text-sm">Date: {patient.dateExamen || new Date().toLocaleDateString()}</p>
-              </div>
               
-              {validationStatus === 'validated' && (
+              {/* UPDATED: Enhanced signature display */}
+              {validationStatus === 'validated' && documentSignatures.consultation ? (
                 <div className="mt-4">
-                  <DoctorSignature
-                    doctorName={praticien.nom.replace('Dr. ', '')}
-                    readonly={true}
-                    existingSignature={documentSignatures.consultation}
-                    documentType="consultation"
+                  <img 
+                    src={documentSignatures.consultation} 
+                    alt="Doctor's Signature" 
+                    className="ml-auto h-20 w-auto"
+                    style={{ maxWidth: '300px' }}
                   />
+                  <p className="text-sm text-gray-600 mt-2">
+                    Digitally signed on {new Date().toLocaleDateString()}
+                  </p>
                 </div>
-              )}
-              {validationStatus !== 'validated' && editMode && (
-                <div className="mt-4">
-                  <DoctorSignature
-                    doctorName={praticien.nom.replace('Dr. ', '')}
-                    onSignatureGenerated={(sig) => setDocumentSignatures(prev => ({ ...prev, consultation: sig }))}
-                    documentType="consultation"
-                  />
+              ) : (
+                <div className="mt-8">
+                  <p className="text-sm">_______________________________</p>
+                  <p className="text-sm">Signature & Official Stamp</p>
+                  <p className="text-sm">Date: {patient.dateExamen || new Date().toLocaleDateString()}</p>
                 </div>
               )}
             </div>
@@ -2067,30 +2183,26 @@ useEffect(() => {
             <p className="text-sm text-gray-600">{praticien.qualifications}</p>
             <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
             <p className="text-sm text-gray-600">License: {praticien.licencePratique}</p>
-            <div className="mt-8">
-              <p className="text-sm">_______________________________</p>
-              <p className="text-sm">Medical Practitioner's Signature</p>
-              <p className="text-sm">Official Medical Stamp</p>
-              <p className="text-sm">Date: {patient.dateExamen}</p>
-            </div>
             
-            {validationStatus === 'validated' && (
+            {/* UPDATED: Enhanced signature display for prescriptions */}
+            {validationStatus === 'validated' && documentSignatures.prescription ? (
               <div className="mt-4">
-                <DoctorSignature
-                  doctorName={praticien.nom.replace('Dr. ', '')}
-                  readonly={true}
-                  existingSignature={documentSignatures.prescription}
-                  documentType="prescription"
+                <img 
+                  src={documentSignatures.prescription} 
+                  alt="Doctor's Signature" 
+                  className="ml-auto h-20 w-auto"
+                  style={{ maxWidth: '300px' }}
                 />
+                <p className="text-sm text-gray-600 mt-2">
+                  Digitally signed on {new Date().toLocaleDateString()}
+                </p>
               </div>
-            )}
-            {validationStatus !== 'validated' && editMode && (
-              <div className="mt-4">
-                <DoctorSignature
-                  doctorName={praticien.nom.replace('Dr. ', '')}
-                  onSignatureGenerated={(sig) => setDocumentSignatures(prev => ({ ...prev, prescription: sig }))}
-                  documentType="prescription"
-                />
+            ) : (
+              <div className="mt-8">
+                <p className="text-sm">_______________________________</p>
+                <p className="text-sm">Medical Practitioner's Signature</p>
+                <p className="text-sm">Official Medical Stamp</p>
+                <p className="text-sm">Date: {patient.dateExamen}</p>
               </div>
             )}
           </div>
@@ -2098,7 +2210,6 @@ useEffect(() => {
       </div>
     )
   }
-
   // Biology tests editing component
   const BiologyPrescription = () => {
     const analyses = report?.ordonnances?.biologie?.prescription?.analyses || {}
@@ -2346,29 +2457,25 @@ useEffect(() => {
           <div className="text-right signature">
             <p className="font-semibold">{praticien.nom}</p>
             <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
-            <div className="mt-8">
-              <p className="text-sm">_______________________________</p>
-              <p className="text-sm">Requesting Physician's Signature</p>
-              <p className="text-sm">Date: {patient.dateExamen}</p>
-            </div>
             
-            {validationStatus === 'validated' && (
+            {/* UPDATED: Enhanced signature display for laboratory */}
+            {validationStatus === 'validated' && documentSignatures.laboratory ? (
               <div className="mt-4">
-                <DoctorSignature
-                  doctorName={praticien.nom.replace('Dr. ', '')}
-                  readonly={true}
-                  existingSignature={documentSignatures.laboratory}
-                  documentType="laboratory"
+                <img 
+                  src={documentSignatures.laboratory} 
+                  alt="Doctor's Signature" 
+                  className="ml-auto h-20 w-auto"
+                  style={{ maxWidth: '300px' }}
                 />
+                <p className="text-sm text-gray-600 mt-2">
+                  Digitally signed on {new Date().toLocaleDateString()}
+                </p>
               </div>
-            )}
-            {validationStatus !== 'validated' && editMode && (
-              <div className="mt-4">
-                <DoctorSignature
-                  doctorName={praticien.nom.replace('Dr. ', '')}
-                  onSignatureGenerated={(sig) => setDocumentSignatures(prev => ({ ...prev, laboratory: sig }))}
-                  documentType="laboratory"
-                />
+            ) : (
+              <div className="mt-8">
+                <p className="text-sm">_______________________________</p>
+                <p className="text-sm">Requesting Physician's Signature</p>
+                <p className="text-sm">Date: {patient.dateExamen}</p>
               </div>
             )}
           </div>
@@ -2376,6 +2483,7 @@ useEffect(() => {
       </div>
     )
   }
+
   // Imaging prescription editing component
   const ImagingPrescription = () => {
     const examens = report?.ordonnances?.imagerie?.prescription?.examens || []
@@ -2556,29 +2664,25 @@ useEffect(() => {
           <div className="text-right signature">
             <p className="font-semibold">{praticien.nom}</p>
             <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
-            <div className="mt-8">
-              <p className="text-sm">_______________________________</p>
-              <p className="text-sm">Requesting Physician's Signature</p>
-              <p className="text-sm">Date: {patient.dateExamen}</p>
-            </div>
             
-            {validationStatus === 'validated' && (
+            {/* UPDATED: Enhanced signature display for imaging */}
+            {validationStatus === 'validated' && documentSignatures.imaging ? (
               <div className="mt-4">
-                <DoctorSignature
-                  doctorName={praticien.nom.replace('Dr. ', '')}
-                  readonly={true}
-                  existingSignature={documentSignatures.imaging}
-                  documentType="imaging"
+                <img 
+                  src={documentSignatures.imaging} 
+                  alt="Doctor's Signature" 
+                  className="ml-auto h-20 w-auto"
+                  style={{ maxWidth: '300px' }}
                 />
+                <p className="text-sm text-gray-600 mt-2">
+                  Digitally signed on {new Date().toLocaleDateString()}
+                </p>
               </div>
-            )}
-            {validationStatus !== 'validated' && editMode && (
-              <div className="mt-4">
-                <DoctorSignature
-                  doctorName={praticien.nom.replace('Dr. ', '')}
-                  onSignatureGenerated={(sig) => setDocumentSignatures(prev => ({ ...prev, imaging: sig }))}
-                  documentType="imaging"
-                />
+            ) : (
+              <div className="mt-8">
+                <p className="text-sm">_______________________________</p>
+                <p className="text-sm">Requesting Physician's Signature</p>
+                <p className="text-sm">Date: {patient.dateExamen}</p>
               </div>
             )}
           </div>
@@ -2586,7 +2690,6 @@ useEffect(() => {
       </div>
     )
   }
-
   // Invoice Component
   const InvoiceComponent = () => {
     const invoice = report?.invoice
@@ -2750,9 +2853,30 @@ useEffect(() => {
 
         <div className="mt-12 pt-8 border-t border-gray-300 text-center">
           <p className="font-bold">Electronic Signature:</p>
-          <p className="mt-2">{invoice.signature.entity}</p>
-          <p>on behalf of {invoice.signature.onBehalfOf}</p>
-          <p className="text-sm text-gray-600">{invoice.signature.title}</p>
+          
+          {/* UPDATED: Enhanced signature display for invoice */}
+          {validationStatus === 'validated' && documentSignatures.invoice ? (
+            <div className="mt-4 flex flex-col items-center">
+              <img 
+                src={documentSignatures.invoice} 
+                alt="Electronic Signature" 
+                className="h-20 w-auto"
+                style={{ maxWidth: '300px' }}
+              />
+              <p className="mt-2">{invoice.signature.entity}</p>
+              <p>on behalf of {invoice.signature.onBehalfOf}</p>
+              <p className="text-sm text-gray-600">{invoice.signature.title}</p>
+              <p className="text-sm text-gray-600 mt-2">
+                Digitally signed on {new Date().toLocaleDateString()}
+              </p>
+            </div>
+          ) : (
+            <>
+              <p className="mt-2">{invoice.signature.entity}</p>
+              <p>on behalf of {invoice.signature.onBehalfOf}</p>
+              <p className="text-sm text-gray-600">{invoice.signature.title}</p>
+            </>
+          )}
         </div>
 
         <div className="mt-6 flex justify-center print:hidden">
@@ -2768,6 +2892,7 @@ useEffect(() => {
       </div>
     )
   }
+
   // Actions Bar component
   const ActionsBar = () => {
     const metadata = getReportMetadata()
