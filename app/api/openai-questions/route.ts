@@ -1,10 +1,8 @@
-// app/api/openai-questions/route.ts - VERSION WITH DATA PROTECTION
+// app/api/openai-questions/route.ts - VERSION OPTIMISÉE SANS EDGE
 import { type NextRequest, NextResponse } from "next/server"
-import crypto from 'crypto'
 
-// Configuration for different speed modes
-export const runtime = 'edge'
-export const preferredRegion = 'auto'
+// ❌ SUPPRIMÉ: export const runtime = 'edge'
+// ❌ SUPPRIMÉ: export const preferredRegion = 'auto'
 
 // ==================== DATA PROTECTION FUNCTIONS ====================
 function anonymizePatientData(patientData: any): {
@@ -12,7 +10,6 @@ function anonymizePatientData(patientData: any): {
   originalIdentity: any,
   anonymousId: string
 } {
-  // Save original identity
   const originalIdentity = {
     firstName: patientData?.firstName,
     lastName: patientData?.lastName,
@@ -21,7 +18,6 @@ function anonymizePatientData(patientData: any): {
     phone: patientData?.phone
   }
   
-  // Create a copy without sensitive data
   const anonymized = { ...patientData }
   const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'idNumber', 'ssn']
   
@@ -29,7 +25,6 @@ function anonymizePatientData(patientData: any): {
     delete anonymized[field]
   })
   
-  // Add anonymous ID for tracking
   const anonymousId = `ANON-Q-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
   anonymized.anonymousId = anonymousId
   
@@ -38,38 +33,6 @@ function anonymizePatientData(patientData: any): {
   console.log('   - Protected fields:', sensitiveFields.filter(f => originalIdentity[f]).join(', '))
   
   return { anonymized, originalIdentity, anonymousId }
-}
-
-// Secure logging function
-function secureLog(message: string, data?: any) {
-  if (data && typeof data === 'object') {
-    const safeData = { ...data }
-    const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'apiKey', 'password']
-    
-    sensitiveFields.forEach(field => {
-      if (safeData[field]) {
-        safeData[field] = '[PROTECTED]'
-      }
-    })
-    
-    console.log(message, safeData)
-  } else {
-    console.log(message, data)
-  }
-}
-
-// ==================== DEBUG FUNCTION ====================
-function debugApiKey(apiKey: string | undefined): void {
-  console.log('🔑 DEBUG OPENAI_API_KEY:', {
-    exists: !!apiKey,
-    length: apiKey?.length || 0,
-    prefix: apiKey?.substring(0, 20) || 'UNDEFINED',
-    suffix: apiKey?.substring((apiKey?.length || 4) - 4) || 'UNDEFINED',
-    isValidFormat: apiKey?.startsWith('sk-proj-') || false,
-    environment: process.env.NODE_ENV,
-    vercel: !!process.env.VERCEL,
-    allEnvKeys: Object.keys(process.env).filter(k => k.includes('OPENAI')).join(', ')
-  })
 }
 
 // ==================== SIMPLE CACHE ====================
@@ -269,27 +232,28 @@ const AI_CONFIGS = {
   }
 }
 
-// ==================== MAIN FUNCTION WITH PROTECTION ====================
+// ==================== MAIN POST FUNCTION ====================
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
-  console.log("🚀 Starting POST request /api/openai-questions (PROTECTED VERSION)")
+  console.log("🚀 Starting POST request /api/openai-questions")
   
   try {
-    // 1. Retrieve and validate API key
+    // 1. Validate API key
     const apiKey = process.env.OPENAI_API_KEY
-    debugApiKey(apiKey)
     
     if (!apiKey) {
-      throw new Error('OPENAI_API_KEY missing in environment variables')
+      console.error('❌ OPENAI_API_KEY missing')
+      throw new Error('API configuration error')
     }
     
     if (!apiKey.startsWith('sk-')) {
-      throw new Error('Invalid API key format (must start with sk-)')
+      console.error('❌ Invalid API key format')
+      throw new Error('Invalid API key format')
     }
     
-    // 2. Parse request
+    // 2. Parse request body
     const body = await request.json()
-    console.log("📝 Body received, parsing data...")
+    console.log("📝 Request received for questions generation")
     
     const { 
       patientData, 
@@ -297,19 +261,26 @@ export async function POST(request: NextRequest) {
       mode = 'balanced'
     } = body
 
-    // 3. Validate data
+    // 3. Validate required data
     if (!patientData || !clinicalData) {
-      console.error("❌ Missing data in request")
+      console.error("❌ Missing required data")
       return NextResponse.json(
-        { error: "Patient and clinical data required", success: false },
+        { 
+          error: "Patient and clinical data required", 
+          success: false 
+        },
         { status: 400 }
       )
     }
 
-    // ========== DATA PROTECTION: ANONYMIZATION ==========
-    const { anonymized: anonymizedPatientData, originalIdentity, anonymousId } = anonymizePatientData(patientData)
+    // 4. Anonymize patient data
+    const { 
+      anonymized: anonymizedPatientData, 
+      originalIdentity, 
+      anonymousId 
+    } = anonymizePatientData(patientData)
 
-    // 4. Data normalization WITH ANONYMIZED DATA
+    // 5. Normalize data
     const validatedPatientData = {
       age: anonymizedPatientData.age || 'Not specified',
       gender: anonymizedPatientData.gender || anonymizedPatientData.sex || 'Not specified',
@@ -322,10 +293,13 @@ export async function POST(request: NextRequest) {
       ...clinicalData
     }
 
-    // Secure log of patient data
-    secureLog('📊 Patient data (anonymized):', validatedPatientData)
+    console.log('📊 Processing:', {
+      age: validatedPatientData.age,
+      symptoms: validatedClinicalData.symptoms,
+      mode: mode
+    })
 
-    // 5. Check cache
+    // 6. Check cache
     const symptomsString = String(validatedClinicalData.symptoms || validatedClinicalData.chiefComplaint || '')
     const cacheKey = `${symptomsString}_${validatedPatientData.age}_${validatedPatientData.gender}_${mode}`
     const cached = patternCache.get(cacheKey)
@@ -338,7 +312,7 @@ export async function POST(request: NextRequest) {
           enabled: true,
           anonymousId,
           method: 'anonymization',
-          message: 'Patient data protected during processing'
+          message: 'Patient data protected'
         },
         metadata: {
           ...cached.metadata,
@@ -348,11 +322,11 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // 6. Detect main pattern
+    // 7. Detect pattern
     const pattern = detectMainPattern(symptomsString)
     console.log(`🔍 Pattern detected: ${pattern}`)
 
-    // 7. Use predefined questions if available
+    // 8. Use predefined questions if available
     if (pattern !== 'general' && DIAGNOSTIC_PATTERNS[pattern as keyof typeof DIAGNOSTIC_PATTERNS]) {
       console.log(`✅ Using predefined questions for: ${pattern}`)
       const response = {
@@ -362,7 +336,7 @@ export async function POST(request: NextRequest) {
           enabled: true,
           anonymousId,
           method: 'predefined-patterns',
-          message: 'No personal data sent to AI - using predefined patterns'
+          message: 'No personal data sent to AI'
         },
         metadata: {
           mode,
@@ -379,7 +353,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response)
     }
 
-    // 8. Generate prompt for OpenAI WITHOUT PERSONAL DATA
+    // 9. Generate prompt
     const prompt = `Patient: ${validatedPatientData.age} years old, ${validatedPatientData.gender}. 
 Symptoms: ${symptomsString}.
 
@@ -405,12 +379,11 @@ IMPORTANT:
 - Use simple and clear English
 - NEVER mention names or personal information`
 
-    // 9. Configuration based on mode
+    // 10. Get AI configuration
     const aiConfig = AI_CONFIGS[mode as keyof typeof AI_CONFIGS] || AI_CONFIGS.balanced
-    console.log(`⚙️ AI Config: ${aiConfig.model}`)
-    console.log(`🔒 Protection enabled: No personal data sent`)
+    console.log(`⚙️ Using ${aiConfig.model} model`)
 
-    // 10. OpenAI call with retry
+    // 11. Call OpenAI API with retry logic
     console.log(`🤖 Calling OpenAI ${aiConfig.model}...`)
     const aiStartTime = Date.now()
     
@@ -431,7 +404,7 @@ IMPORTANT:
             messages: [
               {
                 role: 'system',
-                content: 'You are an expert telemedicine physician. Generate relevant diagnostic questions in JSON format. IMPORTANT: Never include or ask for names or personally identifiable information.'
+                content: 'You are an expert telemedicine physician. Generate relevant diagnostic questions in JSON format.'
               },
               {
                 role: 'user',
@@ -446,23 +419,28 @@ IMPORTANT:
         
         if (openaiResponse.ok) {
           break
-        } else if (openaiResponse.status === 401) {
-          const errorBody = await openaiResponse.text()
-          console.error('❌ Error 401 - Invalid API key:', errorBody)
-          throw new Error(`Invalid API key: ${errorBody}`)
-        } else if (openaiResponse.status === 429 && retryCount < maxRetries) {
+        }
+        
+        // Handle specific error codes
+        if (openaiResponse.status === 401) {
+          throw new Error('Invalid API key')
+        }
+        
+        if (openaiResponse.status === 429 && retryCount < maxRetries) {
           console.warn(`⚠️ Rate limit, retry ${retryCount + 1}/${maxRetries}`)
           await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)))
           retryCount++
-        } else {
-          const errorText = await openaiResponse.text()
-          throw new Error(`OpenAI error ${openaiResponse.status}: ${errorText}`)
+          continue
         }
+        
+        const errorText = await openaiResponse.text()
+        throw new Error(`OpenAI error ${openaiResponse.status}: ${errorText.substring(0, 100)}`)
+        
       } catch (error) {
         if (retryCount >= maxRetries) {
           throw error
         }
-        console.warn(`⚠️ Error, retry ${retryCount + 1}/${maxRetries}`)
+        console.warn(`⚠️ Retry ${retryCount + 1}/${maxRetries}`)
         await new Promise(resolve => setTimeout(resolve, 1000))
         retryCount++
       }
@@ -475,7 +453,7 @@ IMPORTANT:
     const aiTime = Date.now() - aiStartTime
     console.log(`✅ OpenAI response in ${aiTime}ms`)
     
-    // 11. Parse response
+    // 12. Parse OpenAI response
     const openaiData = await openaiResponse.json()
     const content = openaiData.choices[0]?.message?.content || '{}'
     
@@ -486,25 +464,24 @@ IMPORTANT:
       console.log(`✅ ${questions.length} questions extracted`)
     } catch (parseError) {
       console.error("❌ JSON parsing error:", parseError)
-      console.error("Content received:", content)
-      throw new Error('Invalid OpenAI response')
+      throw new Error('Invalid OpenAI response format')
     }
 
-    // 12. Validate questions
+    // 13. Validate questions
     if (!Array.isArray(questions) || questions.length === 0) {
       throw new Error("No valid questions generated")
     }
 
-    // 13. Prepare response WITH PROTECTION INDICATOR
+    // 14. Prepare response
     const response = {
       success: true,
-      questions: questions.slice(0, 5), // Maximum 5 questions
+      questions: questions.slice(0, 5),
       dataProtection: {
         enabled: true,
         anonymousId,
         method: 'anonymization',
-        fieldsProtected: Object.keys(originalIdentity).filter(k => originalIdentity[k]),
-        message: 'Patient identity was protected during AI processing',
+        fieldsProtected: Object.keys(originalIdentity).filter(k => originalIdentity[k as keyof typeof originalIdentity]),
+        message: 'Patient identity protected',
         compliance: {
           rgpd: true,
           hipaa: true,
@@ -523,19 +500,17 @@ IMPORTANT:
       }
     }
 
-    // 14. Cache response
+    // 15. Cache response
     patternCache.set(cacheKey, response)
 
-    console.log(`✅ Total success: ${response.metadata.responseTime}ms`)
-    console.log(`🔒 Data protection: ACTIVE - No personal data sent to OpenAI`)
+    console.log(`✅ Success: ${response.metadata.responseTime}ms`)
     
     return NextResponse.json(response)
 
   } catch (error: any) {
-    console.error(`❌ Error:`, error)
-    console.error("Stack:", error.stack)
+    console.error(`❌ Error:`, error.message)
     
-    // Return fallback questions WITH PROTECTION
+    // Return fallback questions on error
     const pattern = 'general'
     return NextResponse.json({
       success: true,
@@ -543,7 +518,7 @@ IMPORTANT:
       dataProtection: {
         enabled: true,
         method: 'fallback',
-        message: 'Using fallback questions - no AI processing needed',
+        message: 'Using fallback questions',
         compliance: {
           rgpd: true,
           hipaa: true
@@ -557,36 +532,27 @@ IMPORTANT:
         fallbackReason: error.message,
         errorType: error.name,
         model: 'fallback',
-        dataProtected: true,
-        debugInfo: {
-          hasApiKey: !!process.env.OPENAI_API_KEY,
-          apiKeyLength: process.env.OPENAI_API_KEY?.length || 0
-        }
+        dataProtected: true
       }
     })
   }
 }
 
-// ==================== TEST ENDPOINT ====================
+// ==================== GET ENDPOINT FOR TESTING ====================
 export async function GET(request: NextRequest) {
   console.log("🧪 Testing OpenAI connection...")
   
   const apiKey = process.env.OPENAI_API_KEY
-  debugApiKey(apiKey)
   
   if (!apiKey) {
     return NextResponse.json({
       status: '❌ No API key',
       error: 'OPENAI_API_KEY not defined',
-      help: 'Add OPENAI_API_KEY to your environment variables',
-      dataProtection: {
-        status: 'N/A - No API key'
-      }
+      help: 'Add OPENAI_API_KEY to your environment variables'
     }, { status: 500 })
   }
   
   try {
-    // Simple API test
     const testStart = Date.now()
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -613,10 +579,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         status: '❌ OpenAI error',
         error,
-        statusCode: response.status,
-        dataProtection: {
-          status: 'Error - API not accessible'
-        }
+        statusCode: response.status
       }, { status: response.status })
     }
     
@@ -669,10 +632,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       status: "❌ Error",
       error: error.message,
-      errorType: error.name,
-      dataProtection: {
-        status: 'Error during test'
-      }
+      errorType: error.name
     }, { status: 500 })
   }
 }
