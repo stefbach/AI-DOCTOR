@@ -10,6 +10,14 @@ interface DoctorData {
   experience: string
   languages: string[]
   description: string
+  // Add optional fields that might come from database
+  licenseNumber?: string
+  license_number?: string  // Database field name
+  qualifications?: string
+  clinicAddress?: string
+  clinic_address?: string  // Database field name
+  consultationHours?: string
+  consultation_hours?: string  // Database field name
 }
 
 export function useTibokDoctorData() {
@@ -17,34 +25,43 @@ export function useTibokDoctorData() {
   const [isFromTibok, setIsFromTibok] = useState(false)
 
   useEffect(() => {
-    // Check sessionStorage for doctor data
-    const storedDoctorData = sessionStorage.getItem('tibokDoctorData')
-    if (storedDoctorData) {
-      try {
-        const parsedData = JSON.parse(storedDoctorData)
-        console.log('👨‍⚕️ Doctor data from sessionStorage:', parsedData)
-        setDoctorData(parsedData)
-        setIsFromTibok(true)
-      } catch (error) {
-        console.error('Error parsing stored doctor data:', error)
-      }
-    }
-
-    // Also check URL parameters (as backup)
+    // Check URL parameters first
     const params = new URLSearchParams(window.location.search)
     const doctorDataParam = params.get('doctorData')
     
-    if (doctorDataParam && !doctorData) {
+    if (doctorDataParam) {
       try {
         const parsedData = JSON.parse(decodeURIComponent(doctorDataParam))
         console.log('👨‍⚕️ Doctor data from URL:', parsedData)
-        setDoctorData(parsedData)
+        
+        // Normalize field names from database
+        const normalizedData = {
+          ...parsedData,
+          licenseNumber: parsedData.licenseNumber || parsedData.license_number,
+          clinicAddress: parsedData.clinicAddress || parsedData.clinic_address,
+          consultationHours: parsedData.consultationHours || parsedData.consultation_hours
+        }
+        
+        setDoctorData(normalizedData)
         setIsFromTibok(true)
         
         // Store in sessionStorage for persistence
-        sessionStorage.setItem('tibokDoctorData', JSON.stringify(parsedData))
+        sessionStorage.setItem('tibokDoctorData', JSON.stringify(normalizedData))
       } catch (error) {
         console.error('Error parsing doctor data from URL:', error)
+      }
+    } else {
+      // Check sessionStorage as fallback
+      const storedDoctorData = sessionStorage.getItem('tibokDoctorData')
+      if (storedDoctorData) {
+        try {
+          const parsedData = JSON.parse(storedDoctorData)
+          console.log('👨‍⚕️ Doctor data from sessionStorage:', parsedData)
+          setDoctorData(parsedData)
+          setIsFromTibok(true)
+        } catch (error) {
+          console.error('Error parsing stored doctor data:', error)
+        }
       }
     }
   }, [])
