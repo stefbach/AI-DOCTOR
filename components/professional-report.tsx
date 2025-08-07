@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
+import { DoctorSignature } from "@/components/doctor-signature"
+import { useTibokDoctorData } from "@/hooks/use-tibok-doctor-data"
 import { 
   FileText, 
   Download, 
@@ -97,6 +99,7 @@ interface MauritianReport {
       validatedAt?: string
       validatedBy?: string
       complianceNote?: string
+      signatures?: any
     }
   }
   ordonnances?: {
@@ -296,6 +299,72 @@ export default function ProfessionalReportEditable({
     licencePratique: "[Practice License No.]"
   })
   const [editingDoctor, setEditingDoctor] = useState(false)
+
+  // Add state for signatures
+  const [documentSignatures, setDocumentSignatures] = useState<{
+    consultation?: string
+    prescription?: string
+    laboratory?: string
+    imaging?: string
+    invoice?: string
+  }>({})
+
+  // Load doctor information from Tibok
+  useEffect(() => {
+    // Check URL parameters for doctor data from Tibok
+    const urlParams = new URLSearchParams(window.location.search)
+    const doctorDataParam = urlParams.get('doctorData')
+    
+    if (doctorDataParam) {
+      try {
+        const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
+        console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
+        
+        // Auto-fill doctor information from Tibok
+        const doctorInfoFromTibok = {
+          nom: `Dr. ${tibokDoctorData.fullName || tibokDoctorData.name || '[DOCTOR NAME]'}`,
+          qualifications: tibokDoctorData.qualifications || "MBBS, MD (Medicine)",
+          specialite: tibokDoctorData.specialty || "General Medicine",
+          adresseCabinet: tibokDoctorData.clinicAddress || "[Complete clinic address]",
+          telephone: tibokDoctorData.phone || "[+230 XXX XXXX]",
+          email: tibokDoctorData.email || "[Professional email]",
+          heuresConsultation: tibokDoctorData.consultationHours || "Mon-Fri: 8:30am-5:30pm, Sat: 8:30am-12:30pm",
+          numeroEnregistrement: tibokDoctorData.medicalCouncilNumber || "[Medical Council Registration No.]",
+          licencePratique: tibokDoctorData.licenseNumber || "[Practice License No.]"
+        }
+        
+        setDoctorInfo(doctorInfoFromTibok)
+        console.log('✅ Doctor information auto-filled from Tibok')
+      } catch (error) {
+        console.error('Error parsing Tibok doctor data:', error)
+      }
+    }
+    
+    // Also check sessionStorage as fallback
+    const storedDoctorData = sessionStorage.getItem('tibokDoctorData')
+    if (!doctorDataParam && storedDoctorData) {
+      try {
+        const tibokDoctorData = JSON.parse(storedDoctorData)
+        
+        const doctorInfoFromStorage = {
+          nom: `Dr. ${tibokDoctorData.fullName || '[DOCTOR NAME]'}`,
+          qualifications: tibokDoctorData.qualifications || "MBBS, MD (Medicine)",
+          specialite: tibokDoctorData.specialty || "General Medicine",
+          adresseCabinet: tibokDoctorData.clinicAddress || "[Complete clinic address]",
+          telephone: tibokDoctorData.phone || "[+230 XXX XXXX]",
+          email: tibokDoctorData.email || "[Professional email]",
+          heuresConsultation: "Mon-Fri: 8:30am-5:30pm, Sat: 8:30am-12:30pm",
+          numeroEnregistrement: tibokDoctorData.medicalCouncilNumber || "[Medical Council Registration No.]",
+          licencePratique: tibokDoctorData.licenseNumber || "[Practice License No.]"
+        }
+        
+        setDoctorInfo(doctorInfoFromStorage)
+        console.log('✅ Doctor information loaded from session storage')
+      } catch (error) {
+        console.error('Error loading doctor data from storage:', error)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     console.log("🚀 ProfessionalReportEditable mounted with data:", {
@@ -511,7 +580,7 @@ export default function ProfessionalReportEditable({
     }
   }
 
-  // Safe getter functions
+// Safe getter functions
   const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
   const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
   const getReportPatient = () => report?.compteRendu?.patient || createEmptyReport().compteRendu.patient
@@ -905,79 +974,33 @@ export default function ProfessionalReportEditable({
     trackModification(`imagerie.remove.${index}`)
   }
 
-  // Save report
+  // Save report - REMOVED BUT KEPT FOR LEGACY COMPATIBILITY
   const handleSave = async () => {
-    if (!report) return
-    
-    setSaving(true)
-    try {
-      // Get IDs from URL or session
-      const params = new URLSearchParams(window.location.search)
-      const consultationId = params.get('consultationId') || sessionStorage.getItem('consultationId')
-      const patientIdFromUrl = params.get('patientId')
-      const actualPatientId = patientData?.id || patientIdFromUrl || (patientData ? 'patient_' + Date.now() : 'temp')
-      
-      const updatedReport = {
-        ...report,
-        compteRendu: {
-          ...report.compteRendu,
-          praticien: doctorInfo,
-          metadata: {
-            ...getReportMetadata(),
-            lastModified: new Date().toISOString(),
-            modifiedSections: Array.from(modifiedSections),
-            validationStatus
-          }
-        }
-      }
-      
-      const response = await fetch('/api/save-medical-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reportId,
-          patientId: actualPatientId,
-          report: updatedReport,
-          action: 'save',
-          consultationId,
-          metadata: {
-            lastModified: new Date().toISOString(),
-            modifiedSections: Array.from(modifiedSections),
-            validationStatus
-          }
-        })
-      })
+    // Auto-save is handled by validation now
+    await handleValidation()
+  }
 
-      const result = await response.json()
-      
-      if (result.success) {
-        setReportId(result.data.reportId)
-        setModifiedSections(new Set())
-        setReport(updatedReport)
-        toast({
-          title: "Save successful",
-          description: "Changes have been saved"
-        })
-      } else {
-        throw new Error(result.error)
-      }
-    } catch (error) {
-      toast({
-        title: "Save error",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive"
+  // Add function to send to patient dashboard
+  const sendToPatientDashboard = async (report: any, signatures: any, consultationId: string) => {
+    try {
+      // This will be implemented in phase 2
+      console.log('Ready to send to patient dashboard:', {
+        consultationId,
+        report,
+        signatures
       })
-    } finally {
-      setSaving(false)
+      // TODO: Call Tibok API to save documents to patient dashboard
+    } catch (error) {
+      console.error('Error sending to patient dashboard:', error)
     }
   }
 
-  // Validate report
+  // Updated validate report function with auto-save
   const handleValidation = async () => {
-    if (!report || modifiedSections.size > 0) {
+    if (!report) {
       toast({
         title: "Warning",
-        description: "Please save changes before validating",
+        description: "No report to validate",
         variant: "destructive"
       })
       return
@@ -985,6 +1008,65 @@ export default function ProfessionalReportEditable({
     
     setSaving(true)
     try {
+      // Auto-save any pending changes first
+      if (modifiedSections.size > 0) {
+        // Save the current state
+        const params = new URLSearchParams(window.location.search)
+        const consultationId = params.get('consultationId') || sessionStorage.getItem('consultationId')
+        const patientIdFromUrl = params.get('patientId')
+        const actualPatientId = patientData?.id || patientIdFromUrl || (patientData ? 'patient_' + Date.now() : 'temp')
+        
+        const saveReport = {
+          ...report,
+          compteRendu: {
+            ...report.compteRendu,
+            praticien: doctorInfo,
+            metadata: {
+              ...getReportMetadata(),
+              lastModified: new Date().toISOString(),
+              modifiedSections: Array.from(modifiedSections),
+              validationStatus
+            }
+          }
+        }
+        
+        const saveResponse = await fetch('/api/save-medical-report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reportId,
+            patientId: actualPatientId,
+            report: saveReport,
+            action: 'save',
+            consultationId,
+            metadata: {
+              lastModified: new Date().toISOString(),
+              modifiedSections: Array.from(modifiedSections),
+              validationStatus
+            }
+          })
+        })
+
+        const saveResult = await saveResponse.json()
+        
+        if (saveResult.success) {
+          setReportId(saveResult.data.reportId)
+          setModifiedSections(new Set())
+          setReport(saveReport)
+        } else {
+          throw new Error(saveResult.error || "Failed to save changes")
+        }
+      }
+      
+      // Generate signatures for all documents
+      const signatures = {
+        consultation: documentSignatures.consultation || '',
+        prescription: documentSignatures.prescription || '',
+        laboratory: documentSignatures.laboratory || '',
+        imaging: documentSignatures.imaging || '',
+        invoice: documentSignatures.invoice || ''
+      }
+      
       const updatedReport = {
         ...report,
         compteRendu: {
@@ -994,23 +1076,42 @@ export default function ProfessionalReportEditable({
             ...getReportMetadata(),
             validatedAt: new Date().toISOString(),
             validatedBy: doctorInfo.nom,
-            validationStatus: 'validated' as const
+            validationStatus: 'validated' as const,
+            signatures // Add signatures to metadata
           }
         }
       }
+      
+      const params = new URLSearchParams(window.location.search)
+      const consultationId = params.get('consultationId') || sessionStorage.getItem('consultationId')
+      const patientIdFromUrl = params.get('patientId')
+      const doctorId = params.get('doctorId') || sessionStorage.getItem('doctorId')
+      const patient = getReportPatient()
       
       const response = await fetch('/api/save-medical-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           reportId,
-          patientId: patientData?.id || 'temp',
+          patientId: patientData?.id || patientIdFromUrl || 'temp',
+          consultationId,
+          doctorId,
+          doctorName: doctorInfo.nom,
+          patientName: patient.nomComplet || patient.nom,
           report: updatedReport,
           action: 'validate',
           metadata: {
             validatedAt: new Date().toISOString(),
             validatedBy: doctorInfo.nom,
-            validationStatus: 'validated'
+            validationStatus: 'validated',
+            signatures,
+            documentValidations: {
+              consultation: true,
+              prescription: !!report?.ordonnances?.medicaments,
+              laboratory: !!report?.ordonnances?.biologie,
+              imaging: !!report?.ordonnances?.imagerie,
+              invoice: !!report?.invoice
+            }
           }
         })
       })
@@ -1023,8 +1124,13 @@ export default function ProfessionalReportEditable({
         setReport(updatedReport)
         toast({
           title: "Validation successful",
-          description: "The report has been validated and finalized"
+          description: "The report has been validated and signed"
         })
+        
+        // Send to Tibok patient dashboard
+        if (consultationId) {
+          await sendToPatientDashboard(updatedReport, signatures, consultationId)
+        }
         
         if (onComplete) {
           onComplete()
@@ -1282,7 +1388,7 @@ export default function ProfessionalReportEditable({
 
   const handlePrint = () => window.print()
 
-  // Loading and error states
+// Loading and error states
   if (loading) {
     return (
       <Card className="w-full">
@@ -1567,7 +1673,28 @@ export default function ProfessionalReportEditable({
                 <p className="text-sm">Signature & Official Stamp</p>
                 <p className="text-sm">Date: {patient.dateExamen || new Date().toLocaleDateString()}</p>
               </div>
-            </div>
+              
+              {validationStatus === 'validated' && (
+                <div className="mt-4">
+                  <DoctorSignature
+                    doctorName={praticien.nom.replace('Dr. ', '')}
+                    readonly={true}
+                    existingSignature={documentSignatures.consultation}
+                    documentType="consultation"
+                  />
+                </div>
+              )}
+              {validationStatus !== 'validated' && editMode && (
+                <div className="mt-4">
+                  <DoctorSignature
+                    doctorName={praticien.nom.replace('Dr. ', '')}
+                    onSignatureGenerated={(sig) => setDocumentSignatures(prev => ({ ...prev, consultation: sig }))}
+                    documentType="consultation"
+                  />
+                </div>
+              )}
+
+              </div>
           </div>
         </CardContent>
       </Card>
@@ -1821,6 +1948,26 @@ export default function ProfessionalReportEditable({
               <p className="text-sm">Official Medical Stamp</p>
               <p className="text-sm">Date: {patient.dateExamen}</p>
             </div>
+            
+            {validationStatus === 'validated' && (
+              <div className="mt-4">
+                <DoctorSignature
+                  doctorName={praticien.nom.replace('Dr. ', '')}
+                  readonly={true}
+                  existingSignature={documentSignatures.prescription}
+                  documentType="prescription"
+                />
+              </div>
+            )}
+            {validationStatus !== 'validated' && editMode && (
+              <div className="mt-4">
+                <DoctorSignature
+                  doctorName={praticien.nom.replace('Dr. ', '')}
+                  onSignatureGenerated={(sig) => setDocumentSignatures(prev => ({ ...prev, prescription: sig }))}
+                  documentType="prescription"
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -2079,13 +2226,33 @@ export default function ProfessionalReportEditable({
               <p className="text-sm">Requesting Physician's Signature</p>
               <p className="text-sm">Date: {patient.dateExamen}</p>
             </div>
+            
+            {validationStatus === 'validated' && (
+              <div className="mt-4">
+                <DoctorSignature
+                  doctorName={praticien.nom.replace('Dr. ', '')}
+                  readonly={true}
+                  existingSignature={documentSignatures.laboratory}
+                  documentType="laboratory"
+                />
+              </div>
+            )}
+            {validationStatus !== 'validated' && editMode && (
+              <div className="mt-4">
+                <DoctorSignature
+                  doctorName={praticien.nom.replace('Dr. ', '')}
+                  onSignatureGenerated={(sig) => setDocumentSignatures(prev => ({ ...prev, laboratory: sig }))}
+                  documentType="laboratory"
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
     )
   }
 
-  // Imaging prescription editing component
+// Imaging prescription editing component
   const ImagingPrescription = () => {
     const examens = report?.ordonnances?.imagerie?.prescription?.examens || []
     const patient = getReportPatient()
@@ -2270,6 +2437,26 @@ export default function ProfessionalReportEditable({
               <p className="text-sm">Requesting Physician's Signature</p>
               <p className="text-sm">Date: {patient.dateExamen}</p>
             </div>
+            
+            {validationStatus === 'validated' && (
+              <div className="mt-4">
+                <DoctorSignature
+                  doctorName={praticien.nom.replace('Dr. ', '')}
+                  readonly={true}
+                  existingSignature={documentSignatures.imaging}
+                  documentType="imaging"
+                />
+              </div>
+            )}
+            {validationStatus !== 'validated' && editMode && (
+              <div className="mt-4">
+                <DoctorSignature
+                  doctorName={praticien.nom.replace('Dr. ', '')}
+                  onSignatureGenerated={(sig) => setDocumentSignatures(prev => ({ ...prev, imaging: sig }))}
+                  documentType="imaging"
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -2458,7 +2645,7 @@ export default function ProfessionalReportEditable({
     )
   }
 
-  // Actions Bar with validation status
+  // Updated Actions Bar component (removed Save button)
   const ActionsBar = () => {
     const metadata = getReportMetadata()
     
@@ -2471,21 +2658,15 @@ export default function ProfessionalReportEditable({
                 {validationStatus === 'validated' ? (
                   <>
                     <Lock className="h-3 w-3 mr-1" />
-                    Document validated
+                    Document validated & signed
                   </>
                 ) : (
                   <>
                     <Unlock className="h-3 w-3 mr-1" />
-                    Draft
+                    Draft - awaiting validation
                   </>
                 )}
               </Badge>
-              {modifiedSections.size > 0 && (
-                <Badge variant="outline" className="text-orange-600">
-                  <AlertCircle className="h-3 w-3 mr-1" />
-                  {modifiedSections.size} unsaved change{modifiedSections.size > 1 ? 's' : ''}
-                </Badge>
-              )}
               <span className="text-sm text-gray-600">
                 {metadata.wordCount} words
               </span>
@@ -2501,28 +2682,20 @@ export default function ProfessionalReportEditable({
                 {editMode ? 'Preview' : 'Edit'}
               </Button>
               
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSave}
-                disabled={saving || modifiedSections.size === 0}
-              >
-                {saving ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4 mr-2" />
-                )}
-                Save
-              </Button>
+              {/* REMOVED SAVE BUTTON - Only validate button remains */}
               
               <Button
                 variant="default"
                 size="sm"
                 onClick={handleValidation}
-                disabled={saving || validationStatus === 'validated' || modifiedSections.size > 0}
+                disabled={saving || validationStatus === 'validated'}
               >
-                <FileCheck className="h-4 w-4 mr-2" />
-                Validate
+                {saving ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <FileCheck className="h-4 w-4 mr-2" />
+                )}
+                {validationStatus === 'validated' ? 'Validated' : 'Validate & Sign'}
               </Button>
               
               <Button variant="outline" size="sm" onClick={handlePrint}>
@@ -2536,16 +2709,15 @@ export default function ProfessionalReportEditable({
     )
   }
 
-  // Unsaved changes warning
+  // Unsaved changes warning - Modified to be less intrusive
   const UnsavedChangesAlert = () => {
-    if (modifiedSections.size === 0) return null
+    if (modifiedSections.size === 0 || validationStatus === 'validated') return null
 
     return (
       <Alert className="print:hidden">
         <AlertTriangle className="h-4 w-4" />
         <AlertDescription>
-          You have unsaved changes. 
-          Remember to save before validating or leaving.
+          Changes will be saved automatically when you validate the document.
         </AlertDescription>
       </Alert>
     )
