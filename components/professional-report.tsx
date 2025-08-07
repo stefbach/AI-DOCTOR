@@ -311,40 +311,53 @@ export default function ProfessionalReportEditable({
     return `Digital Signature: ${doctorName} - ${new Date().toISOString()}`
   }
 
-  // UPDATED: Load doctor information from Tibok with better field mapping
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const doctorDataParam = urlParams.get('doctorData')
-    
-    if (doctorDataParam) {
-      try {
-        const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
-        console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
-        
-        // Map all possible field names from database
-        const doctorInfoFromTibok = {
-          nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
-            `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
-            'Dr. [Name Required]',
-          qualifications: tibokDoctorData.qualifications || 'MBBS',
-          specialite: tibokDoctorData.specialty || 'General Medicine',
-          adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
-          email: tibokDoctorData.email || '[Email Required]',
-          heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
-          numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]'),
-          licencePratique: String(tibokDoctorData.licenseNumber || tibokDoctorData.license_number || '[License Required]')
-        }
-        
-        setDoctorInfo(doctorInfoFromTibok)
-        sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
-        
-        console.log('✅ Doctor information loaded:', doctorInfoFromTibok)
-        
-      } catch (error) {
-        console.error('Error parsing Tibok doctor data:', error)
+// UPDATED: Load doctor information from Tibok with better field mapping
+useEffect(() => {
+  const urlParams = new URLSearchParams(window.location.search)
+  const doctorDataParam = urlParams.get('doctorData')
+  
+  if (doctorDataParam) {
+    try {
+      const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
+      console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
+      
+      // Map all possible field names from database
+      const doctorInfoFromTibok = {
+        nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
+          `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
+          'Dr. [Name Required]',
+        qualifications: tibokDoctorData.qualifications || 'MBBS',
+        specialite: tibokDoctorData.specialty || 'General Medicine',
+        adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
+        telephone: '', // Keep this empty as requested
+        email: tibokDoctorData.email || '[Email Required]',
+        heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+        numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]'),
+        licencePratique: String(tibokDoctorData.licenseNumber || tibokDoctorData.license_number || '[License Required]')
       }
+      
+      setDoctorInfo(doctorInfoFromTibok)
+      sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
+      
+      console.log('✅ Doctor information loaded:', doctorInfoFromTibok)
+      
+    } catch (error) {
+      console.error('Error parsing Tibok doctor data:', error)
     }
-  }, [])
+  }
+  
+  // Also check sessionStorage as fallback
+  const storedDoctorInfo = sessionStorage.getItem('currentDoctorInfo')
+  if (!doctorDataParam && storedDoctorInfo) {
+    try {
+      const doctorData = JSON.parse(storedDoctorInfo)
+      setDoctorInfo(doctorData)
+      console.log('✅ Doctor information loaded from session')
+    } catch (error) {
+      console.error('Error loading doctor data from storage:', error)
+    }
+  }
+}, [])
 
   // Update report when doctor info changes
   useEffect(() => {
