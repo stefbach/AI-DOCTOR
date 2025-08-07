@@ -19,7 +19,7 @@ export function DoctorSignature({
   doctorName,
   onSignatureGenerated,
   width = 300,
-  height = 100,
+  height = 80,
   readonly = false,
   existingSignature,
   documentType = ''
@@ -28,6 +28,94 @@ export function DoctorSignature({
   const [signature, setSignature] = useState<string>('')
   const [isConfirmed, setIsConfirmed] = useState(false)
 
+  const drawRealisticSignature = (ctx: CanvasRenderingContext2D, name: string) => {
+    // Clear canvas
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, width, height)
+    
+    const nameParts = name.replace('Dr. ', '').split(' ')
+    const fullName = nameParts.join(' ')
+    
+    // Create unique but consistent signature based on name
+    const nameHash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+    const signatureStyle = nameHash % 3
+    
+    ctx.save()
+    ctx.translate(50, 40)
+    
+    // Dark ink color (like a pen)
+    ctx.strokeStyle = '#1a1a2e'
+    ctx.fillStyle = '#1a1a2e'
+    ctx.lineWidth = 2.2
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    
+    // Different signature styles
+    if (signatureStyle === 0) {
+      // Style 1: Clean cursive with underline
+      ctx.font = 'italic 28px "Brush Script MT", "Lucida Handwriting", cursive'
+      ctx.fillText(fullName, 0, 0)
+      
+      // Clean underline with slight curve
+      ctx.beginPath()
+      ctx.moveTo(-5, 12)
+      ctx.quadraticCurveTo(100, 16, 205, 10)
+      ctx.lineWidth = 1.8
+      ctx.stroke()
+      
+    } else if (signatureStyle === 1) {
+      // Style 2: Stylized initials + flowing signature
+      ctx.font = 'italic bold 32px "Brush Script MT", cursive'
+      
+      const firstLetter = nameParts[0]?.[0] || 'D'
+      ctx.fillText(firstLetter, 0, 0)
+      
+      ctx.font = 'italic 26px "Lucida Handwriting", cursive'
+      const restOfName = nameParts[0]?.substring(1) + ' ' + (nameParts[1] || '')
+      ctx.fillText(restOfName, 28, 2)
+      
+      // Elegant underline
+      ctx.beginPath()
+      ctx.moveTo(0, 14)
+      ctx.bezierCurveTo(50, 16, 150, 14, 200, 12)
+      ctx.lineWidth = 1.5
+      ctx.stroke()
+      
+    } else {
+      // Style 3: Artistic connected letters
+      ctx.font = 'italic 30px "Segoe Script", "Brush Script MT", cursive'
+      
+      let xOffset = 0
+      for (let i = 0; i < fullName.length; i++) {
+        const char = fullName[i]
+        const charWidth = ctx.measureText(char).width
+        const yOffset = Math.sin(i * 0.5) * 2
+        ctx.fillText(char, xOffset, yOffset)
+        xOffset += charWidth * 0.85
+      }
+      
+      // Simple curved underline
+      ctx.beginPath()
+      ctx.moveTo(0, 15)
+      ctx.quadraticCurveTo(xOffset/2, 18, xOffset, 13)
+      ctx.lineWidth = 1.6
+      ctx.stroke()
+    }
+    
+    // Add date at the bottom
+    ctx.font = '9px Arial'
+    ctx.fillStyle = '#9ca3af'
+    ctx.textAlign = 'left'
+    const date = new Date().toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
+    ctx.fillText(`Signed: ${date}`, 0, 35)
+    
+    ctx.restore()
+  }
+
   const generateSignature = () => {
     if (!canvasRef.current || !doctorName) return
 
@@ -35,57 +123,7 @@ export function DoctorSignature({
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    ctx.clearRect(0, 0, width, height)
-    ctx.fillStyle = 'white'
-    ctx.fillRect(0, 0, width, height)
-
-    const seedString = doctorName + documentType
-    const seed = seedString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-    const random = (min: number, max: number) => {
-      const x = Math.sin(seed + min) * 10000
-      return Math.floor((x - Math.floor(x)) * (max - min + 1)) + min
-    }
-
-    ctx.strokeStyle = '#1e3a5f'
-    ctx.lineWidth = 2
-    ctx.lineCap = 'round'
-    ctx.lineJoin = 'round'
-
-    ctx.beginPath()
-    
-    const initial = doctorName.charAt(0).toUpperCase()
-    ctx.font = `${random(35, 45)}px "Brush Script MT", cursive`
-    ctx.fillStyle = '#1e3a5f'
-    ctx.fillText(initial, 20, height * 0.7)
-
-    ctx.beginPath()
-    ctx.moveTo(40, height * 0.6)
-    
-    for (let i = 0; i < 3; i++) {
-      const cp1x = 60 + i * 50 + random(-10, 10)
-      const cp1y = height * 0.4 + random(-10, 10)
-      const cp2x = 80 + i * 50 + random(-10, 10)
-      const cp2y = height * 0.7 + random(-10, 10)
-      const endX = 100 + i * 50
-      const endY = height * 0.6 + random(-5, 5)
-      
-      ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, endX, endY)
-    }
-    
-    ctx.stroke()
-
-    ctx.beginPath()
-    ctx.moveTo(20, height * 0.85)
-    ctx.lineTo(width - 20, height * 0.85)
-    ctx.lineWidth = 1
-    ctx.stroke()
-
-    ctx.font = '10px Arial'
-    ctx.fillStyle = '#666'
-    ctx.fillText(`Dr. ${doctorName}`, 20, height * 0.95)
-
-    const date = new Date().toLocaleDateString()
-    ctx.fillText(date, width - 80, height * 0.95)
+    drawRealisticSignature(ctx, doctorName)
 
     const signatureData = canvas.toDataURL('image/png')
     setSignature(signatureData)
