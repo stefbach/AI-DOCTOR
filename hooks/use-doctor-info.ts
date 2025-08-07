@@ -36,10 +36,10 @@ export function useDoctorInfo() {
         experience: tibokDoctorData.experience,
         languages: tibokDoctorData.languages,
         description: tibokDoctorData.description,
-        qualifications: 'MBBS, MD (Medicine)',
-        clinicAddress: 'Medical Center, Port Louis',
-        consultationHours: 'Mon-Fri: 8:30am-5:30pm',
-        licenseNumber: tibokDoctorData.medicalCouncilNumber || 'PL/2024/123'
+        qualifications: tibokDoctorData.qualifications || 'MBBS, MD (Medicine)',
+        clinicAddress: tibokDoctorData.clinicAddress || 'Medical Center, Port Louis',
+        consultationHours: tibokDoctorData.consultationHours || 'Mon-Fri: 8:30am-5:30pm',
+        licenseNumber: tibokDoctorData.licenseNumber || tibokDoctorData.license_number || 'PL/2024/123' // FIX: Check for license_number field
       }
       setDoctorInfo(doctorData)
     } else {
