@@ -582,8 +582,6 @@ export default function ProfessionalReportEditable({
     }
   }
 
-  // Add this function after handleValidation function in components/professional-report.tsx
-
 const handleSendDocuments = async () => {
   // Check if report is validated
   if (!report || validationStatus !== 'validated') {
@@ -616,6 +614,43 @@ const handleSendDocuments = async () => {
       })
       return
     }
+
+    // Smart Tibok URL detection
+    const getTibokUrl = () => {
+      // 1. Check URL parameter
+      const urlParam = params.get('tibokUrl')
+      if (urlParam) {
+        console.log('📍 Using Tibok URL from parameter:', decodeURIComponent(urlParam))
+        return decodeURIComponent(urlParam)
+      }
+
+      // 2. Check referrer
+      if (document.referrer) {
+        try {
+          const referrerUrl = new URL(document.referrer)
+          // Only use referrer if it's a known Tibok domain
+          const knownTibokDomains = ['tibok.mu', 'v0-tibokmain2.vercel.app', 'localhost']
+          if (knownTibokDomains.some(domain => referrerUrl.hostname.includes(domain))) {
+            console.log('📍 Using Tibok URL from referrer:', referrerUrl.origin)
+            return referrerUrl.origin
+          }
+        } catch (e) {
+          console.log('Could not parse referrer')
+        }
+      }
+
+      // 3. Check environment variable
+      if (process.env.NEXT_PUBLIC_TIBOK_URL) {
+        console.log('📍 Using Tibok URL from environment:', process.env.NEXT_PUBLIC_TIBOK_URL)
+        return process.env.NEXT_PUBLIC_TIBOK_URL
+      }
+
+      // 4. Default to production
+      console.log('📍 Using default Tibok URL: https://tibok.mu')
+      return 'https://tibok.mu'
+    }
+
+    const tibokUrl = getTibokUrl()
 
     // Prepare documents payload with all validated documents
     const documentsPayload = {
@@ -674,16 +709,25 @@ const handleSendDocuments = async () => {
       }
     }
 
-    console.log('📦 Sending documents payload:', documentsPayload)
+    console.log('📦 Sending documents payload to:', tibokUrl)
+    console.log('📦 Payload:', documentsPayload)
 
     // Send to Tibok patient dashboard
-    const response = await fetch('/api/send-to-patient-dashboard', {
+    const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(documentsPayload)
     })
 
+    // Check if response is ok before parsing JSON
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('❌ Tibok API error:', errorText)
+      throw new Error(`Failed to send documents: ${response.status} - ${errorText}`)
+    }
+
     const result = await response.json()
+    console.log('✅ API Response:', result)
 
     if (result.success) {
       toast({
@@ -702,15 +746,15 @@ const handleSendDocuments = async () => {
         } 
         // Option 2: Redirect to Tibok dashboard
         else if (consultationId) {
-          window.location.href = `/dashboard/consultations/${consultationId}?status=completed`
+          window.location.href = `${tibokUrl}/dashboard?tab=prescriptions`
         }
         // Option 3: Close the Medical AI window if it was opened as a popup
         else if (window.opener) {
           window.close()
         }
-        // Option 4: Redirect to a success page
+        // Option 4: Stay on the same page
         else {
-          window.location.href = '/consultation-complete'
+          console.log('Documents sent, staying on current page')
         }
       }, 2000)
       
