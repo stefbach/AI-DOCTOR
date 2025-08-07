@@ -59,7 +59,6 @@ interface MauritianReport {
       qualifications: string
       specialite: string
       adresseCabinet: string
-      telephone: string
       email: string
       heuresConsultation: string
       numeroEnregistrement: string
@@ -219,15 +218,14 @@ const createEmptyReport = (): MauritianReport => ({
       reference: `REF-${new Date().getTime()}`
     },
     praticien: {
-      nom: "Dr. [DOCTOR NAME]",
-      qualifications: "MBBS, MD (Medicine)",
+      nom: "Dr. [Name Required]",
+      qualifications: "MBBS",
       specialite: "General Medicine",
-      adresseCabinet: "[Complete clinic address]",
-      telephone: "[+230 XXX XXXX]",
-      email: "[Professional email]",
-      heuresConsultation: "Mon-Fri: 8:30am-5:30pm, Sat: 8:30am-12:30pm",
-      numeroEnregistrement: "[Medical Council Registration No.]",
-      licencePratique: "[Practice License No.]"
+      adresseCabinet: "Tibok Teleconsultation Platform",
+      email: "[Email Required]",
+      heuresConsultation: "Teleconsultation Hours: 8:00 AM - 8:00 PM",
+      numeroEnregistrement: "[MCM Registration Required]",
+      licencePratique: "[License Required]"
     },
     patient: {
       nom: "",
@@ -286,17 +284,16 @@ export default function ProfessionalReportEditable({
   // Display states
   const [includeFullPrescriptions, setIncludeFullPrescriptions] = useState(true)
   
-  // Doctor information states
+  // Doctor information states - UPDATED: removed telephone field
   const [doctorInfo, setDoctorInfo] = useState({
-    nom: "Dr. [DOCTOR NAME]",
-    qualifications: "MBBS, MD (Medicine)",
+    nom: "Dr. [Name Required]",
+    qualifications: "MBBS",
     specialite: "General Medicine",
-    adresseCabinet: "[Complete clinic address]",
-    telephone: "[+230 XXX XXXX]",
-    email: "[Professional email]",
-    heuresConsultation: "Mon-Fri: 8:30am-5:30pm, Sat: 8:30am-12:30pm",
-    numeroEnregistrement: "[Medical Council Registration No.]",
-    licencePratique: "[Practice License No.]"
+    adresseCabinet: "Tibok Teleconsultation Platform",
+    email: "[Email Required]",
+    heuresConsultation: "Teleconsultation Hours: 8:00 AM - 8:00 PM",
+    numeroEnregistrement: "[MCM Registration Required]",
+    licencePratique: "[License Required]"
   })
   const [editingDoctor, setEditingDoctor] = useState(false)
 
@@ -309,7 +306,13 @@ export default function ProfessionalReportEditable({
     invoice?: string
   }>({})
 
-  // Load doctor information from Tibok
+  // Function to generate doctor signature
+  const generateDoctorSignature = async (doctorName: string): Promise<string> => {
+    // This is a placeholder - implement actual signature generation
+    return `Digital Signature: ${doctorName} - ${new Date().toISOString()}`
+  }
+
+  // UPDATED: Load doctor information from Tibok with better handling
   useEffect(() => {
     // Check URL parameters for doctor data from Tibok
     const urlParams = new URLSearchParams(window.location.search)
@@ -321,52 +324,59 @@ export default function ProfessionalReportEditable({
         console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
         
         // Auto-fill doctor information from Tibok
+        // Use the actual doctor's data, with placeholders ONLY for missing required fields
         const doctorInfoFromTibok = {
-          nom: `Dr. ${tibokDoctorData.fullName || tibokDoctorData.name || '[DOCTOR NAME]'}`,
-          qualifications: tibokDoctorData.qualifications || "MBBS, MD (Medicine)",
-          specialite: tibokDoctorData.specialty || "General Medicine",
-          adresseCabinet: tibokDoctorData.clinicAddress || "[Complete clinic address]",
-          telephone: tibokDoctorData.phone || "[+230 XXX XXXX]",
-          email: tibokDoctorData.email || "[Professional email]",
-          heuresConsultation: tibokDoctorData.consultationHours || "Mon-Fri: 8:30am-5:30pm, Sat: 8:30am-12:30pm",
-          numeroEnregistrement: tibokDoctorData.medicalCouncilNumber || "[Medical Council Registration No.]",
-          licencePratique: tibokDoctorData.licenseNumber || "[Practice License No.]"
+          nom: tibokDoctorData.fullName ? 
+            (tibokDoctorData.fullName.startsWith('Dr.') ? tibokDoctorData.fullName : `Dr. ${tibokDoctorData.fullName}`) : 
+            'Dr. [Name Required]',
+          qualifications: tibokDoctorData.qualifications || 'MBBS',
+          specialite: tibokDoctorData.specialty || 'General Medicine',
+          adresseCabinet: tibokDoctorData.clinicAddress || tibokDoctorData.address || 'Tibok Teleconsultation Platform',
+          email: tibokDoctorData.email || '[Email Required]',
+          heuresConsultation: tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+          numeroEnregistrement: tibokDoctorData.medicalCouncilNumber || tibokDoctorData.registrationNumber || '[MCM Registration Required]',
+          licencePratique: tibokDoctorData.licenseNumber || tibokDoctorData.practiceNumber || '[License Required]'
         }
         
         setDoctorInfo(doctorInfoFromTibok)
-        console.log('✅ Doctor information auto-filled from Tibok')
+        // Store in session for persistence
+        sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
+        
+        // Check if essential fields are missing and notify
+        const missingFields = []
+        if (!tibokDoctorData.fullName) missingFields.push('name')
+        if (!tibokDoctorData.medicalCouncilNumber && !tibokDoctorData.registrationNumber) missingFields.push('registration number')
+        if (!tibokDoctorData.email) missingFields.push('email')
+        
+        if (missingFields.length > 0) {
+          console.warn('⚠️ Missing doctor fields:', missingFields.join(', '))
+          toast({
+            title: "Incomplete Doctor Profile",
+            description: `Please update doctor profile in Tibok: missing ${missingFields.join(', ')}`,
+            variant: "warning" as any
+          })
+        } else {
+          console.log('✅ Doctor information loaded successfully')
+        }
       } catch (error) {
         console.error('Error parsing Tibok doctor data:', error)
       }
     }
     
     // Also check sessionStorage as fallback
-    const storedDoctorData = sessionStorage.getItem('tibokDoctorData')
-    if (!doctorDataParam && storedDoctorData) {
+    const storedDoctorInfo = sessionStorage.getItem('currentDoctorInfo')
+    if (!doctorDataParam && storedDoctorInfo) {
       try {
-        const tibokDoctorData = JSON.parse(storedDoctorData)
-        
-        const doctorInfoFromStorage = {
-          nom: `Dr. ${tibokDoctorData.fullName || '[DOCTOR NAME]'}`,
-          qualifications: tibokDoctorData.qualifications || "MBBS, MD (Medicine)",
-          specialite: tibokDoctorData.specialty || "General Medicine",
-          adresseCabinet: tibokDoctorData.clinicAddress || "[Complete clinic address]",
-          telephone: tibokDoctorData.phone || "[+230 XXX XXXX]",
-          email: tibokDoctorData.email || "[Professional email]",
-          heuresConsultation: "Mon-Fri: 8:30am-5:30pm, Sat: 8:30am-12:30pm",
-          numeroEnregistrement: tibokDoctorData.medicalCouncilNumber || "[Medical Council Registration No.]",
-          licencePratique: tibokDoctorData.licenseNumber || "[Practice License No.]"
-        }
-        
-        setDoctorInfo(doctorInfoFromStorage)
-        console.log('✅ Doctor information loaded from session storage')
+        const doctorData = JSON.parse(storedDoctorInfo)
+        setDoctorInfo(doctorData)
+        console.log('✅ Doctor information loaded from session')
       } catch (error) {
         console.error('Error loading doctor data from storage:', error)
       }
     }
   }, [])
 
-  useEffect(() => {
+useEffect(() => {
     console.log("🚀 ProfessionalReportEditable mounted with data:", {
       hasPatientData: !!patientData,
       patientName: patientData?.name || `${patientData?.firstName} ${patientData?.lastName}`,
@@ -580,7 +590,7 @@ export default function ProfessionalReportEditable({
     }
   }
 
-// Safe getter functions
+  // Safe getter functions
   const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
   const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
   const getReportPatient = () => report?.compteRendu?.patient || createEmptyReport().compteRendu.patient
@@ -615,6 +625,153 @@ export default function ProfessionalReportEditable({
       [field]: value
     }))
     trackModification(`praticien.${field}`)
+    // Also save to session storage
+    const updatedInfo = { ...doctorInfo, [field]: value }
+    sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
+  }
+
+// UPDATED: Validation function with required field checks
+  const handleValidation = async () => {
+    // Check if doctor info is complete
+    const requiredFieldsMissing = []
+    if (doctorInfo.nom.includes('[')) requiredFieldsMissing.push('Doctor name')
+    if (doctorInfo.numeroEnregistrement.includes('[')) requiredFieldsMissing.push('Registration number')
+    if (doctorInfo.email.includes('[')) requiredFieldsMissing.push('Email')
+    
+    if (requiredFieldsMissing.length > 0) {
+      toast({
+        title: "Cannot Validate",
+        description: `Please complete doctor profile. Missing: ${requiredFieldsMissing.join(', ')}`,
+        variant: "destructive"
+      })
+      setEditingDoctor(true) // Open the editor
+      return
+    }
+    
+    if (!report) {
+      toast({
+        title: "Error",
+        description: "No report to validate",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    // Auto-save any pending changes before validation
+    if (modifiedSections.size > 0) {
+      await handleSave()
+    }
+    
+    setSaving(true)
+    try {
+      // Generate signature for the doctor
+      const doctorSignature = await generateDoctorSignature(doctorInfo.nom)
+      
+      // Add signatures to all documents
+      const signatures = {
+        consultation: doctorSignature,
+        prescription: doctorSignature,
+        laboratory: doctorSignature,
+        imaging: doctorSignature,
+        invoice: doctorSignature
+      }
+      
+      setDocumentSignatures(signatures)
+      
+      const updatedReport = {
+        ...report,
+        compteRendu: {
+          ...report.compteRendu,
+          praticien: doctorInfo,
+          metadata: {
+            ...getReportMetadata(),
+            validatedAt: new Date().toISOString(),
+            validatedBy: doctorInfo.nom,
+            validationStatus: 'validated' as const,
+            signatures
+          }
+        }
+      }
+      
+      const params = new URLSearchParams(window.location.search)
+      const consultationId = params.get('consultationId') || sessionStorage.getItem('consultationId')
+      const patientIdFromUrl = params.get('patientId')
+      const doctorId = params.get('doctorId') || sessionStorage.getItem('doctorId')
+      const actualPatientId = patientData?.id || patientIdFromUrl || 'temp'
+      
+      const response = await fetch('/api/save-medical-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reportId: reportId || `report_${Date.now()}`,
+          patientId: actualPatientId,
+          consultationId,
+          doctorId,
+          doctorName: doctorInfo.nom,
+          patientName: getReportPatient().nomComplet || getReportPatient().nom,
+          report: updatedReport,
+          action: 'validate',
+          metadata: {
+            validatedAt: new Date().toISOString(),
+            validatedBy: doctorInfo.nom,
+            validationStatus: 'validated',
+            signatures,
+            documentValidations: {
+              consultation: true,
+              prescription: !!report?.ordonnances?.medicaments,
+              laboratory: !!report?.ordonnances?.biologie,
+              imaging: !!report?.ordonnances?.imagerie,
+              invoice: !!report?.invoice
+            }
+          }
+        })
+      })
+
+      const result = await response.json()
+      
+      if (result.success) {
+        setValidationStatus('validated')
+        setEditMode(false)
+        setReport(updatedReport)
+        setReportId(result.data.reportId)
+        
+        toast({
+          title: "✅ Validation successful",
+          description: "The report has been validated and digitally signed"
+        })
+        
+        // Prepare to send to Tibok
+        if (consultationId) {
+          console.log('📤 Ready to send to Tibok patient dashboard:', {
+            consultationId,
+            reportId: result.data.reportId,
+            signatures
+          })
+          // TODO: Implement sending to Tibok patient dashboard
+        }
+        
+        if (onComplete) {
+          onComplete()
+        }
+      } else {
+        throw new Error(result.error || "Validation failed")
+      }
+    } catch (error) {
+      console.error("Validation error:", error)
+      toast({
+        title: "Validation error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive"
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Save report (for backward compatibility but redirects to validation)
+  const handleSave = async () => {
+    // Auto-save is handled by validation now
+    await handleValidation()
   }
 
   // Update invoice
@@ -765,7 +922,7 @@ export default function ProfessionalReportEditable({
     trackModification(`medicament.remove.${index}`)
   }
 
-  // Add biology test
+// Add biology test
   const addBiologyTest = (category: string = 'clinicalChemistry') => {
     if (validationStatus === 'validated') return
     
@@ -972,181 +1129,6 @@ export default function ProfessionalReportEditable({
       }
     })
     trackModification(`imagerie.remove.${index}`)
-  }
-
-  // Save report - REMOVED BUT KEPT FOR LEGACY COMPATIBILITY
-  const handleSave = async () => {
-    // Auto-save is handled by validation now
-    await handleValidation()
-  }
-
-  // Add function to send to patient dashboard
-  const sendToPatientDashboard = async (report: any, signatures: any, consultationId: string) => {
-    try {
-      // This will be implemented in phase 2
-      console.log('Ready to send to patient dashboard:', {
-        consultationId,
-        report,
-        signatures
-      })
-      // TODO: Call Tibok API to save documents to patient dashboard
-    } catch (error) {
-      console.error('Error sending to patient dashboard:', error)
-    }
-  }
-
-  // Updated validate report function with auto-save
-  const handleValidation = async () => {
-    if (!report) {
-      toast({
-        title: "Warning",
-        description: "No report to validate",
-        variant: "destructive"
-      })
-      return
-    }
-    
-    setSaving(true)
-    try {
-      // Auto-save any pending changes first
-      if (modifiedSections.size > 0) {
-        // Save the current state
-        const params = new URLSearchParams(window.location.search)
-        const consultationId = params.get('consultationId') || sessionStorage.getItem('consultationId')
-        const patientIdFromUrl = params.get('patientId')
-        const actualPatientId = patientData?.id || patientIdFromUrl || (patientData ? 'patient_' + Date.now() : 'temp')
-        
-        const saveReport = {
-          ...report,
-          compteRendu: {
-            ...report.compteRendu,
-            praticien: doctorInfo,
-            metadata: {
-              ...getReportMetadata(),
-              lastModified: new Date().toISOString(),
-              modifiedSections: Array.from(modifiedSections),
-              validationStatus
-            }
-          }
-        }
-        
-        const saveResponse = await fetch('/api/save-medical-report', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            reportId,
-            patientId: actualPatientId,
-            report: saveReport,
-            action: 'save',
-            consultationId,
-            metadata: {
-              lastModified: new Date().toISOString(),
-              modifiedSections: Array.from(modifiedSections),
-              validationStatus
-            }
-          })
-        })
-
-        const saveResult = await saveResponse.json()
-        
-        if (saveResult.success) {
-          setReportId(saveResult.data.reportId)
-          setModifiedSections(new Set())
-          setReport(saveReport)
-        } else {
-          throw new Error(saveResult.error || "Failed to save changes")
-        }
-      }
-      
-      // Generate signatures for all documents
-      const signatures = {
-        consultation: documentSignatures.consultation || '',
-        prescription: documentSignatures.prescription || '',
-        laboratory: documentSignatures.laboratory || '',
-        imaging: documentSignatures.imaging || '',
-        invoice: documentSignatures.invoice || ''
-      }
-      
-      const updatedReport = {
-        ...report,
-        compteRendu: {
-          ...report.compteRendu,
-          praticien: doctorInfo,
-          metadata: {
-            ...getReportMetadata(),
-            validatedAt: new Date().toISOString(),
-            validatedBy: doctorInfo.nom,
-            validationStatus: 'validated' as const,
-            signatures // Add signatures to metadata
-          }
-        }
-      }
-      
-      const params = new URLSearchParams(window.location.search)
-      const consultationId = params.get('consultationId') || sessionStorage.getItem('consultationId')
-      const patientIdFromUrl = params.get('patientId')
-      const doctorId = params.get('doctorId') || sessionStorage.getItem('doctorId')
-      const patient = getReportPatient()
-      
-      const response = await fetch('/api/save-medical-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reportId,
-          patientId: patientData?.id || patientIdFromUrl || 'temp',
-          consultationId,
-          doctorId,
-          doctorName: doctorInfo.nom,
-          patientName: patient.nomComplet || patient.nom,
-          report: updatedReport,
-          action: 'validate',
-          metadata: {
-            validatedAt: new Date().toISOString(),
-            validatedBy: doctorInfo.nom,
-            validationStatus: 'validated',
-            signatures,
-            documentValidations: {
-              consultation: true,
-              prescription: !!report?.ordonnances?.medicaments,
-              laboratory: !!report?.ordonnances?.biologie,
-              imaging: !!report?.ordonnances?.imagerie,
-              invoice: !!report?.invoice
-            }
-          }
-        })
-      })
-
-      const result = await response.json()
-      
-      if (result.success) {
-        setValidationStatus('validated')
-        setEditMode(false)
-        setReport(updatedReport)
-        toast({
-          title: "Validation successful",
-          description: "The report has been validated and signed"
-        })
-        
-        // Send to Tibok patient dashboard
-        if (consultationId) {
-          await sendToPatientDashboard(updatedReport, signatures, consultationId)
-        }
-        
-        if (onComplete) {
-          onComplete()
-        }
-      } else {
-        throw new Error(result.error)
-      }
-    } catch (error) {
-      toast({
-        title: "Validation error",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive"
-      })
-    } finally {
-      setSaving(false)
-    }
   }
 
   // Enhanced PDF export - extracts only specific content
@@ -1449,7 +1431,7 @@ export default function ProfessionalReportEditable({
     )
   }
 
-  // Toujours vérifier que report existe
+  // Always check that report exists
   if (!report) {
     return (
       <Card className="w-full">
@@ -1466,100 +1448,127 @@ export default function ProfessionalReportEditable({
     )
   }
 
-  // Doctor info editor component
-  const DoctorInfoEditor = () => (
-    <Card className="mb-6 print:hidden">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span className="flex items-center">
-            <Stethoscope className="h-5 w-5 mr-2" />
-            Doctor Information
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setEditingDoctor(!editingDoctor)}
-          >
-            {editingDoctor ? <Eye className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
-            {editingDoctor ? 'Done' : 'Edit'}
-          </Button>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {editingDoctor ? (
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Full name</Label>
-              <Input
-                value={doctorInfo.nom}
-                onChange={(e) => updateDoctorInfo('nom', e.target.value)}
-                placeholder="Dr. John DOE"
-              />
+  // UPDATED Doctor info editor component - removed phone field
+  const DoctorInfoEditor = () => {
+    const hasRequiredFields = doctorInfo.nom !== 'Dr. [Name Required]' && 
+                             !doctorInfo.numeroEnregistrement.includes('[') &&
+                             !doctorInfo.email.includes('[')
+    
+    return (
+      <Card className="mb-6 print:hidden">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span className="flex items-center">
+              <Stethoscope className="h-5 w-5 mr-2" />
+              Doctor Information
+              {!hasRequiredFields && (
+                <Badge variant="destructive" className="ml-2">
+                  Incomplete Profile
+                </Badge>
+              )}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setEditingDoctor(!editingDoctor)}
+            >
+              {editingDoctor ? <Eye className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
+              {editingDoctor ? 'Done' : 'Complete Profile'}
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!hasRequiredFields && !editingDoctor && (
+            <Alert className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Doctor profile is incomplete. Please click "Complete Profile" to add required information.
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {editingDoctor ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Full name *</Label>
+                <Input
+                  value={doctorInfo.nom}
+                  onChange={(e) => updateDoctorInfo('nom', e.target.value)}
+                  placeholder="Dr. Full Name"
+                  className={doctorInfo.nom.includes('[') ? 'border-red-500' : ''}
+                />
+              </div>
+              <div>
+                <Label>Qualifications</Label>
+                <Input
+                  value={doctorInfo.qualifications}
+                  onChange={(e) => updateDoctorInfo('qualifications', e.target.value)}
+                  placeholder="MBBS, MD"
+                />
+              </div>
+              <div>
+                <Label>Speciality</Label>
+                <Input
+                  value={doctorInfo.specialite}
+                  onChange={(e) => updateDoctorInfo('specialite', e.target.value)}
+                  placeholder="General Medicine"
+                />
+              </div>
+              <div>
+                <Label>Medical Council Registration No. *</Label>
+                <Input
+                  value={doctorInfo.numeroEnregistrement}
+                  onChange={(e) => updateDoctorInfo('numeroEnregistrement', e.target.value)}
+                  placeholder="MCM/12345"
+                  className={doctorInfo.numeroEnregistrement.includes('[') ? 'border-red-500' : ''}
+                />
+              </div>
+              <div>
+                <Label>Practice License No.</Label>
+                <Input
+                  value={doctorInfo.licencePratique}
+                  onChange={(e) => updateDoctorInfo('licencePratique', e.target.value)}
+                  placeholder="PL/2024/123"
+                  className={doctorInfo.licencePratique.includes('[') ? 'border-red-500' : ''}
+                />
+              </div>
+              <div>
+                <Label>Email *</Label>
+                <Input
+                  value={doctorInfo.email}
+                  onChange={(e) => updateDoctorInfo('email', e.target.value)}
+                  placeholder="doctor@email.com"
+                  className={doctorInfo.email.includes('[') ? 'border-red-500' : ''}
+                />
+              </div>
+              <div className="col-span-2">
+                <Label>Clinic Address</Label>
+                <Input
+                  value={doctorInfo.adresseCabinet}
+                  onChange={(e) => updateDoctorInfo('adresseCabinet', e.target.value)}
+                  placeholder="Clinic address or Teleconsultation"
+                />
+              </div>
+              <div className="col-span-2">
+                <p className="text-sm text-red-600">* Required fields must be completed before validation</p>
+              </div>
             </div>
-            <div>
-              <Label>Qualifications</Label>
-              <Input
-                value={doctorInfo.qualifications}
-                onChange={(e) => updateDoctorInfo('qualifications', e.target.value)}
-                placeholder="MBBS, MD (Medicine)"
-              />
+          ) : (
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div><strong>Name:</strong> {doctorInfo.nom}</div>
+              <div><strong>Qualifications:</strong> {doctorInfo.qualifications}</div>
+              <div><strong>Speciality:</strong> {doctorInfo.specialite}</div>
+              <div><strong>Medical Council No.:</strong> {doctorInfo.numeroEnregistrement}</div>
+              <div><strong>License No.:</strong> {doctorInfo.licencePratique}</div>
+              <div><strong>Email:</strong> {doctorInfo.email}</div>
             </div>
-            <div>
-              <Label>Speciality</Label>
-              <Input
-                value={doctorInfo.specialite}
-                onChange={(e) => updateDoctorInfo('specialite', e.target.value)}
-                placeholder="General Medicine"
-              />
-            </div>
-            <div>
-              <Label>Medical Council Registration No.</Label>
-              <Input
-                value={doctorInfo.numeroEnregistrement}
-                onChange={(e) => updateDoctorInfo('numeroEnregistrement', e.target.value)}
-                placeholder="MC/MD/12345"
-              />
-            </div>
-            <div>
-              <Label>Practice License No.</Label>
-              <Input
-                value={doctorInfo.licencePratique}
-                onChange={(e) => updateDoctorInfo('licencePratique', e.target.value)}
-                placeholder="PL/2024/123"
-              />
-            </div>
-            <div>
-              <Label>Phone</Label>
-              <Input
-                value={doctorInfo.telephone}
-                onChange={(e) => updateDoctorInfo('telephone', e.target.value)}
-                placeholder="+230 XXX XXXX"
-              />
-            </div>
-            <div className="col-span-2">
-              <Label>Clinic Address</Label>
-              <Input
-                value={doctorInfo.adresseCabinet}
-                onChange={(e) => updateDoctorInfo('adresseCabinet', e.target.value)}
-                placeholder="123 Royal Road, Port Louis"
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div><strong>Name:</strong> {doctorInfo.nom}</div>
-            <div><strong>Qualifications:</strong> {doctorInfo.qualifications}</div>
-            <div><strong>Speciality:</strong> {doctorInfo.specialite}</div>
-            <div><strong>Medical Council No.:</strong> {doctorInfo.numeroEnregistrement}</div>
-            <div><strong>License No.:</strong> {doctorInfo.licencePratique}</div>
-            <div><strong>Phone:</strong> {doctorInfo.telephone}</div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  )
+          )}
+        </CardContent>
+      </Card>
+    )
+  }
 
-  // Narrative report editing component
+// Narrative report editing component - UPDATED to not show phone
   const ConsultationReport = () => {
     const sections = [
       { key: 'motifConsultation', title: 'CHIEF COMPLAINT' },
@@ -1596,7 +1605,8 @@ export default function ProfessionalReportEditable({
               <div>{praticien.specialite}</div>
               <div>Medical Council Reg: {praticien.numeroEnregistrement}</div>
               <div>Practice License: {praticien.licencePratique}</div>
-              <div>{praticien.telephone}</div>
+              <div>{praticien.email}</div>
+              {/* Phone removed - no longer displayed */}
             </div>
           </div>
 
@@ -1693,15 +1703,14 @@ export default function ProfessionalReportEditable({
                   />
                 </div>
               )}
-
-              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
     )
   }
 
-  // Medication editing component
+// Medication editing component
   const MedicationPrescription = () => {
     const medications = report?.ordonnances?.medicaments?.prescription?.medicaments || []
     const patient = getReportPatient()
@@ -1974,7 +1983,7 @@ export default function ProfessionalReportEditable({
     )
   }
 
-  // Biology tests editing component
+// Biology tests editing component
   const BiologyPrescription = () => {
     const analyses = report?.ordonnances?.biologie?.prescription?.analyses || {}
     const hasTests = Object.values(analyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
@@ -2463,7 +2472,7 @@ export default function ProfessionalReportEditable({
     )
   }
 
-  // Invoice Component
+// Invoice Component
   const InvoiceComponent = () => {
     const invoice = report?.invoice
     if (!invoice) return null
@@ -2758,7 +2767,7 @@ export default function ProfessionalReportEditable({
     )
   }
 
-  // Main render
+// Main render
   return (
     <div className="space-y-6 print:space-y-4">
       <ActionsBar />
