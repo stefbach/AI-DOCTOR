@@ -496,7 +496,7 @@ export default function ProfessionalReportEditable({
         } : report.invoice
       }
       
-      // Get URL parameters
+// Get URL parameters
       const params = new URLSearchParams(window.location.search)
       const consultationId = params.get('consultationId')
       const patientId = params.get('patientId') || patientData?.id
@@ -531,62 +531,72 @@ export default function ProfessionalReportEditable({
           }
         })
       })
-const result = await response.json()
 
-if (result.success) {
-  // Update states to reflect validation
-  setValidationStatus('validated')
-  setEditMode(false)
-  setReport(updatedReport)
-  
-  // Optional: Store signature in Supabase doctors table for future use
-  // This allows reusing the same signature for future documents
-  if (doctorId) {
-    try {
-      await fetch('/api/update-doctor-signature', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          doctorId: doctorId,
-          signatureDataUrl: signatureDataUrl,
-          lastSignedAt: new Date().toISOString()
+      const result = await response.json()
+      
+      if (result.success) {
+        // Update states to reflect validation
+        setValidationStatus('validated')
+        setEditMode(false)
+        setReport(updatedReport)
+        
+        // Optional: Store signature in Supabase doctors table for future use
+        // This allows reusing the same signature for future documents
+        if (doctorId) {
+          try {
+            await fetch('/api/update-doctor-signature', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                doctorId: doctorId,
+                signatureDataUrl: signatureDataUrl,
+                lastSignedAt: new Date().toISOString()
+              })
+            })
+          } catch (err) {
+            console.log('Could not store signature for future use:', err)
+            // Non-critical error, continue
+          }
+        }
+        
+        toast({
+          title: "✅ Validation successful",
+          description: "All documents have been validated and digitally signed. You can now send them to the patient dashboard."
         })
+        
+      } else {
+        throw new Error(result.error || "Validation failed")
+      }
+    } catch (error) {
+      console.error("Validation error:", error)
+      toast({
+        title: "Validation error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive"
       })
-    } catch (err) {
-      console.log('Could not store signature for future use:', err)
-      // Non-critical error, continue
+    } finally {
+      setSaving(false)
     }
-  }
-  
-  toast({
-    title: "✅ Validation successful",
-    description: "All documents have been validated and digitally signed. You can now send them to the patient dashboard."
-  })
-  
-  // REMOVED: if (onComplete) { onComplete() }
-  
-} else {
-  throw new Error(result.error || "Validation failed")
-}
+  }  // This closes the handleValidation function
 
-const handleSendDocuments = async () => {
-  // Check if report is validated
-  if (!report || validationStatus !== 'validated') {
-    toast({
-      title: "Cannot send documents",
-      description: "Please validate the documents first",
-      variant: "destructive"
-    })
-    return
-  }
-
-  try {
-    // Show loading state
-    toast({
-      title: "📤 Sending documents...",
-      description: "Preparing documents for patient dashboard"
-    })
-
+  const handleSendDocuments = async () => {
+    // Check if report is validated
+    if (!report || validationStatus !== 'validated') {
+      toast({
+        title: "Cannot send documents",
+        description: "Please validate the documents first",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    try {
+      // Show loading state
+      toast({
+        title: "📤 Sending documents...",
+        description: "Preparing documents for patient dashboard"
+      })
+      // ... rest of handleSendDocuments function continues ...
     // Get necessary IDs from URL parameters
     const params = new URLSearchParams(window.location.search)
     const consultationId = params.get('consultationId')
