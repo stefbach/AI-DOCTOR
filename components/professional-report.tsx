@@ -3109,7 +3109,7 @@ export default function ProfessionalReportEditable({
             className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
           >
             <CheckCircle className="h-5 w-5 mr-2" />
-            Finalize and Archive Consultation
+            Finalize and Send documents
           </Button>
         </div>
       )}
