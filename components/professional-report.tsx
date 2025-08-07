@@ -258,7 +258,6 @@ const createEmptyReport = (): MauritianReport => ({
     }
   }
 })
-
 export default function ProfessionalReportEditable({
   patientData,
   clinicalData,
@@ -312,7 +311,7 @@ export default function ProfessionalReportEditable({
     return `Digital Signature: ${doctorName} - ${new Date().toISOString()}`
   }
 
-  // UPDATED: Load doctor information from Tibok with better handling
+  // UPDATED: Load doctor information from Tibok with better handling - FIX 2
   useEffect(() => {
     // Check URL parameters for doctor data from Tibok
     const urlParams = new URLSearchParams(window.location.search)
@@ -324,28 +323,39 @@ export default function ProfessionalReportEditable({
         console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
         
         // Auto-fill doctor information from Tibok
-        // Use the actual doctor's data, with placeholders ONLY for missing required fields
         const doctorInfoFromTibok = {
           nom: tibokDoctorData.fullName ? 
             (tibokDoctorData.fullName.startsWith('Dr.') ? tibokDoctorData.fullName : `Dr. ${tibokDoctorData.fullName}`) : 
             'Dr. [Name Required]',
           qualifications: tibokDoctorData.qualifications || 'MBBS',
           specialite: tibokDoctorData.specialty || 'General Medicine',
-          adresseCabinet: tibokDoctorData.clinicAddress || tibokDoctorData.address || 'Tibok Teleconsultation Platform',
+          adresseCabinet: tibokDoctorData.clinicAddress || tibokDoctorData.clinic_address || 'Tibok Teleconsultation Platform',
           email: tibokDoctorData.email || '[Email Required]',
-          heuresConsultation: tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
-          numeroEnregistrement: tibokDoctorData.medicalCouncilNumber || tibokDoctorData.registrationNumber || '[MCM Registration Required]',
-          licencePratique: tibokDoctorData.licenseNumber || tibokDoctorData.practiceNumber || '[License Required]'
+          heuresConsultation: tibokDoctorData.consultationHours || tibokDoctorData.consultation_hours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+          numeroEnregistrement: tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]',
+          licencePratique: tibokDoctorData.licenseNumber || tibokDoctorData.license_number || '[License Required]' // FIX: Added license_number field
         }
         
         setDoctorInfo(doctorInfoFromTibok)
+        
+        // Update the report if it already exists
+        if (report) {
+          setReport(prev => ({
+            ...prev!,
+            compteRendu: {
+              ...prev!.compteRendu,
+              praticien: doctorInfoFromTibok
+            }
+          }))
+        }
+        
         // Store in session for persistence
         sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
         
         // Check if essential fields are missing and notify
         const missingFields = []
-        if (!tibokDoctorData.fullName) missingFields.push('name')
-        if (!tibokDoctorData.medicalCouncilNumber && !tibokDoctorData.registrationNumber) missingFields.push('registration number')
+        if (!tibokDoctorData.fullName && !tibokDoctorData.full_name) missingFields.push('name')
+        if (!tibokDoctorData.medicalCouncilNumber && !tibokDoctorData.medical_council_number) missingFields.push('registration number')
         if (!tibokDoctorData.email) missingFields.push('email')
         
         if (missingFields.length > 0) {
@@ -358,6 +368,7 @@ export default function ProfessionalReportEditable({
         } else {
           console.log('✅ Doctor information loaded successfully')
         }
+        
       } catch (error) {
         console.error('Error parsing Tibok doctor data:', error)
       }
@@ -369,14 +380,77 @@ export default function ProfessionalReportEditable({
       try {
         const doctorData = JSON.parse(storedDoctorInfo)
         setDoctorInfo(doctorData)
+        
+        // Update the report if it already exists
+        if (report) {
+          setReport(prev => ({
+            ...prev!,
+            compteRendu: {
+              ...prev!.compteRendu,
+              praticien: doctorData
+            }
+          }))
+        }
+        
         console.log('✅ Doctor information loaded from session')
       } catch (error) {
         console.error('Error loading doctor data from storage:', error)
       }
     }
-  }, [])
+  }, []) // Remove 'report' from dependencies to avoid infinite loop
 
-useEffect(() => {
+  // FIX 3: Add another useEffect to update report when doctor info changes
+  useEffect(() => {
+    if (report && doctorInfo && doctorInfo.nom !== 'Dr. [DOCTOR NAME]') {
+      setReport(prev => ({
+        ...prev!,
+        compteRendu: {
+          ...prev!.compteRendu,
+          praticien: doctorInfo
+        },
+        ordonnances: prev!.ordonnances ? {
+          ...prev!.ordonnances,
+          medicaments: prev!.ordonnances.medicaments ? {
+            ...prev!.ordonnances.medicaments,
+            enTete: doctorInfo,
+            authentification: {
+              ...prev!.ordonnances.medicaments.authentification,
+              nomEnCapitales: doctorInfo.nom.toUpperCase(),
+              numeroEnregistrement: doctorInfo.numeroEnregistrement
+            }
+          } : null,
+          biologie: prev!.ordonnances.biologie ? {
+            ...prev!.ordonnances.biologie,
+            enTete: doctorInfo,
+            authentification: {
+              ...prev!.ordonnances.biologie.authentification,
+              nomEnCapitales: doctorInfo.nom.toUpperCase(),
+              numeroEnregistrement: doctorInfo.numeroEnregistrement
+            }
+          } : null,
+          imagerie: prev!.ordonnances.imagerie ? {
+            ...prev!.ordonnances.imagerie,
+            enTete: doctorInfo,
+            authentification: {
+              ...prev!.ordonnances.imagerie.authentification,
+              nomEnCapitales: doctorInfo.nom.toUpperCase(),
+              numeroEnregistrement: doctorInfo.numeroEnregistrement
+            }
+          } : null
+        } : prev!.ordonnances,
+        invoice: prev!.invoice ? {
+          ...prev!.invoice,
+          physician: {
+            name: doctorInfo.nom,
+            registrationNumber: doctorInfo.numeroEnregistrement
+          }
+        } : prev!.invoice
+      }))
+      console.log('📝 Report updated with doctor information')
+    }
+  }, [doctorInfo, report?.compteRendu?.header]) // Only update when doctor info changes, not the whole report
+
+  useEffect(() => {
     console.log("🚀 ProfessionalReportEditable mounted with data:", {
       hasPatientData: !!patientData,
       patientName: patientData?.name || `${patientData?.firstName} ${patientData?.lastName}`,
@@ -409,7 +483,6 @@ useEffect(() => {
       setLoading(false)
     }
   }, [patientData, clinicalData, questionsData, diagnosisData])
-
   // Check for existing report
   const checkExistingReport = async () => {
     try {
@@ -461,7 +534,7 @@ useEffect(() => {
     setModifiedSections(prev => new Set(prev).add(section))
   }
 
-  // Generate initial report
+  // FIX 1: Updated generate initial report with doctor data
   const generateProfessionalReport = async () => {
     setLoading(true)
     setError(null)
@@ -472,7 +545,8 @@ useEffect(() => {
         patientName: patientData?.name || `${patientData?.firstName} ${patientData?.lastName}`,
         hasClinicalData: !!clinicalData,
         hasQuestionsData: !!questionsData,
-        hasDiagnosisData: !!diagnosisData
+        hasDiagnosisData: !!diagnosisData,
+        hasDoctorData: !!doctorInfo // Add this log
       })
       
       // Create a valid patient data object even if some data is missing
@@ -487,6 +561,18 @@ useEffect(() => {
         weight: ''
       }
       
+      // ADD THIS: Prepare doctor data for API
+      const doctorDataForAPI = {
+        fullName: doctorInfo.nom.replace('Dr. ', ''),
+        qualifications: doctorInfo.qualifications,
+        specialty: doctorInfo.specialite,
+        clinicAddress: doctorInfo.adresseCabinet,
+        email: doctorInfo.email,
+        consultationHours: doctorInfo.heuresConsultation,
+        medicalCouncilNumber: doctorInfo.numeroEnregistrement,
+        licenseNumber: doctorInfo.licencePratique
+      }
+      
       const response = await fetch("/api/generate-consultation-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -496,6 +582,7 @@ useEffect(() => {
           questionsData: questionsData || {},
           diagnosisData: diagnosisData || {},
           editedDocuments: editedDocuments || {},
+          doctorData: doctorDataForAPI, // ADD THIS LINE
           includeFullPrescriptions
         })
       })
@@ -629,8 +716,7 @@ useEffect(() => {
     const updatedInfo = { ...doctorInfo, [field]: value }
     sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
   }
-
-// UPDATED: Validation function with required field checks
+  // UPDATED: Validation function with required field checks
   const handleValidation = async () => {
     // Check if doctor info is complete
     const requiredFieldsMissing = []
@@ -811,7 +897,6 @@ useEffect(() => {
       method: method
     })
   }
-
   // Update medications
   const updateMedicament = (index: number, field: string, value: string) => {
     if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
@@ -922,7 +1007,7 @@ useEffect(() => {
     trackModification(`medicament.remove.${index}`)
   }
 
-// Add biology test
+  // Add biology test
   const addBiologyTest = (category: string = 'clinicalChemistry') => {
     if (validationStatus === 'validated') return
     
@@ -1130,7 +1215,6 @@ useEffect(() => {
     })
     trackModification(`imagerie.remove.${index}`)
   }
-
   // Enhanced PDF export - extracts only specific content
   const exportSectionToPDF = (sectionId: string, filename: string) => {
     const element = document.getElementById(sectionId)
@@ -1370,7 +1454,7 @@ useEffect(() => {
 
   const handlePrint = () => window.print()
 
-// Loading and error states
+  // Loading and error states
   if (loading) {
     return (
       <Card className="w-full">
@@ -1447,7 +1531,6 @@ useEffect(() => {
       </Card>
     )
   }
-
   // UPDATED Doctor info editor component - removed phone field
   const DoctorInfoEditor = () => {
     const hasRequiredFields = doctorInfo.nom !== 'Dr. [Name Required]' && 
@@ -1568,7 +1651,7 @@ useEffect(() => {
     )
   }
 
-// Narrative report editing component - UPDATED to not show phone
+  // Narrative report editing component - UPDATED to not show phone
   const ConsultationReport = () => {
     const sections = [
       { key: 'motifConsultation', title: 'CHIEF COMPLAINT' },
@@ -1709,8 +1792,7 @@ useEffect(() => {
       </Card>
     )
   }
-
-// Medication editing component
+  // Medication editing component
   const MedicationPrescription = () => {
     const medications = report?.ordonnances?.medicaments?.prescription?.medicaments || []
     const patient = getReportPatient()
@@ -1983,7 +2065,7 @@ useEffect(() => {
     )
   }
 
-// Biology tests editing component
+  // Biology tests editing component
   const BiologyPrescription = () => {
     const analyses = report?.ordonnances?.biologie?.prescription?.analyses || {}
     const hasTests = Object.values(analyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
@@ -2260,8 +2342,7 @@ useEffect(() => {
       </div>
     )
   }
-
-// Imaging prescription editing component
+  // Imaging prescription editing component
   const ImagingPrescription = () => {
     const examens = report?.ordonnances?.imagerie?.prescription?.examens || []
     const patient = getReportPatient()
@@ -2472,7 +2553,7 @@ useEffect(() => {
     )
   }
 
-// Invoice Component
+  // Invoice Component
   const InvoiceComponent = () => {
     const invoice = report?.invoice
     if (!invoice) return null
@@ -2653,7 +2734,6 @@ useEffect(() => {
       </div>
     )
   }
-
   // Updated Actions Bar component (removed Save button)
   const ActionsBar = () => {
     const metadata = getReportMetadata()
@@ -2767,7 +2847,7 @@ useEffect(() => {
     )
   }
 
-// Main render
+  // Main render
   return (
     <div className="space-y-6 print:space-y-4">
       <ActionsBar />
