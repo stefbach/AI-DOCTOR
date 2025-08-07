@@ -331,44 +331,38 @@ useEffect(() => {
         typeOfLicense_number: typeof tibokDoctorData.license_number
       })
       
-      // Map all possible field names from database
-      const doctorInfoFromTibok = {
-        nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
-          `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
-          'Dr. [Name Required]',
-        qualifications: tibokDoctorData.qualifications || 'MBBS',
-        specialite: tibokDoctorData.specialty || 'General Medicine',
-        adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
-        telephone: '', // Keep this empty as requested
-        email: tibokDoctorData.email || '[Email Required]',
-        heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
-        numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]'),
-        // Check all possible fields and ensure conversion to string
-        licencePratique: (() => {
-          const license = tibokDoctorData.license_number || 
-                         tibokDoctorData.licenseNumber || 
-                         tibokDoctorData.licence_number || 
-                         tibokDoctorData.licenceNumber;
-          
-          console.log('🔍 License extraction:', {
-            rawValue: license,
-            type: typeof license,
-            converted: license ? String(license) : '[License Required]'
-          });
-          
-          return license ? String(license) : '[License Required]';
-        })()
-      }
-      
-      console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
-      
-      setDoctorInfo(doctorInfoFromTibok)
-      sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
-      
-    } catch (error) {
-      console.error('Error parsing Tibok doctor data:', error)
-    }
-  }
+// Map all possible field names from database
+const doctorInfoFromTibok = {
+  nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
+    `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
+    'Dr. [Name Required]',
+  qualifications: tibokDoctorData.qualifications || 'MBBS',
+  specialite: tibokDoctorData.specialty || 'General Medicine',
+  adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
+  telephone: '', // Keep this empty as requested
+  email: tibokDoctorData.email || '[Email Required]',
+  heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+  numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]'),
+  // FIXED: Directly assign the license_number field
+  licencePratique: tibokDoctorData.license_number ? 
+    String(tibokDoctorData.license_number) : 
+    '[License Required]'
+}
+
+console.log('🔍 License extraction:', {
+  rawValue: tibokDoctorData.license_number,
+  type: typeof tibokDoctorData.license_number,
+  hasLicense: !!tibokDoctorData.license_number
+});
+
+console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
+
+setDoctorInfo(doctorInfoFromTibok)
+sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
+
+} catch (error) {
+  console.error('Error parsing Tibok doctor data:', error)
+}
   
   // Also check sessionStorage as fallback
   const storedDoctorInfo = sessionStorage.getItem('currentDoctorInfo')
