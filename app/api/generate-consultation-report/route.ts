@@ -476,18 +476,18 @@ export async function POST(request: NextRequest) {
       year: 'numeric'
     })
 
-    // Doctor information (French structure but can contain English content)
-    const praticien = {
-      nom: "Dr. [PHYSICIAN NAME]",
-      qualifications: "MBBS, MD (Medicine)",
-      specialite: "General Medicine",
-      adresseCabinet: "[Complete practice address]",
-      telephone: "[+230 XXX XXXX]",
-      email: "[Professional email]",
-      heuresConsultation: "Mon-Fri: 8:30 AM-5:30 PM, Sat: 8:30 AM-12:30 PM",
-      numeroEnregistrement: "[Medical Council Registration No.]",
-      licencePratique: "[Practice License No.]"
-    }
+// Doctor information (French structure but can contain English content)
+const praticien = {
+  nom: body.doctorData?.fullName ? `Dr. ${body.doctorData.fullName}` : "Dr. [PHYSICIAN NAME]",
+  qualifications: body.doctorData?.qualifications || "MBBS, MD (Medicine)",
+  specialite: body.doctorData?.specialty || "General Medicine",
+  adresseCabinet: body.doctorData?.clinicAddress || "[Complete practice address]",
+  telephone: "", // Removed as per your requirement
+  email: body.doctorData?.email || "[Professional email]",
+  heuresConsultation: body.doctorData?.consultationHours || "Mon-Fri: 8:30 AM-5:30 PM, Sat: 8:30 AM-12:30 PM",
+  numeroEnregistrement: body.doctorData?.medicalCouncilNumber || "[Medical Council Registration No.]",
+  licencePratique: body.doctorData?.licenseNumber || "[Practice License No.]"
+}
 
     // Patient information (French structure)
     const patient = {
