@@ -1,17 +1,6 @@
-// /app/api/openai-diagnosis/route.ts - VERSION GPT-5 ENHANCED WITH DATA PROTECTION
+// /app/api/openai-diagnosis/route.ts - VERSION 2 ENHANCED WITH DATA PROTECTION
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
-
-// ==================== GPT-5 OPTIMIZED PARAMETERS ====================
-const GPT5_CONFIG = {
-  model: 'gpt-5',  // ONLY GPT-5, NO TURBO
-  temperature: 1,   // GPT-5 only supports default temperature
-  max_completion_tokens: 1200,
-  top_p: 1.0,
-  frequency_penalty: 0.0,  // Using default values for GPT-5
-  presence_penalty: 0.0,
-  seed: 42  // For reproducibility
-}
 
 // ==================== TYPES AND INTERFACES ====================
 interface PatientContext {
@@ -662,8 +651,7 @@ async function callOpenAIWithRetry(
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`📡 OpenAI call to ${GPT5_CONFIG.model} (attempt ${attempt + 1}/${maxRetries + 1})...`)
-      console.log(`⚙️ Parameters: temp=${GPT5_CONFIG.temperature}, max_tokens=${GPT5_CONFIG.max_completion_tokens}`)
+      console.log(`📡 OpenAI call (attempt ${attempt + 1}/${maxRetries + 1})...`)
       
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -672,7 +660,7 @@ async function callOpenAIWithRetry(
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: GPT5_CONFIG.model,
+          model: 'gpt-4o',
           messages: [
             {
               role: 'system',
@@ -683,10 +671,13 @@ async function callOpenAIWithRetry(
               content: prompt
             }
           ],
-          temperature: GPT5_CONFIG.temperature,
-          max_completion_tokens: GPT5_CONFIG.max_completion_tokens,
+          temperature: 0.3,
+          max_tokens: 8000,
           response_format: { type: "json_object" },
-          seed: GPT5_CONFIG.seed
+          top_p: 0.95,
+          frequency_penalty: 0,
+          presence_penalty: 0.1,
+          seed: 12345
         }),
       })
       
@@ -927,8 +918,7 @@ function generateMedicalDocuments(
 
 // ==================== MAIN FUNCTION ====================
 export async function POST(request: NextRequest) {
-  console.log('🚀 MAURITIUS MEDICAL AI - GPT-5 WITH DEFAULT PARAMETERS (DATA PROTECTION ENABLED)')
-  console.log('📊 GPT-5 Config:', GPT5_CONFIG)
+  console.log('🚀 MAURITIUS MEDICAL AI - VERSION 2 ENHANCED (DATA PROTECTION ENABLED)')
   const startTime = Date.now()
   
   try {
@@ -999,13 +989,13 @@ export async function POST(request: NextRequest) {
     // 4. Prepare prompt
     const finalPrompt = preparePrompt(patientContext)
     
-    // 5. Call OpenAI with GPT-5 and intelligent retry
+    // 5. OpenAI call with intelligent retry
     const { data: openaiData, analysis: medicalAnalysis } = await callOpenAIWithRetry(
       apiKey,
       finalPrompt
     )
     
-    console.log('✅ Medical analysis generated successfully with GPT-5')
+    console.log('✅ Medical analysis generated successfully')
     
     // 6. Validate response
     const validation = validateMedicalAnalysis(medicalAnalysis, patientContext)
@@ -1142,12 +1132,8 @@ export async function POST(request: NextRequest) {
       
       // Metadata
       metadata: {
-        ai_model: GPT5_CONFIG.model,
-        model_parameters: {
-          temperature: GPT5_CONFIG.temperature,
-          max_completion_tokens: GPT5_CONFIG.max_completion_tokens
-        },
-        system_version: '2.0-GPT5',
+        ai_model: 'GPT-4o',
+        system_version: '2.0-Enhanced-Protected',
         approach: 'Flexible Evidence-Based Medicine with Data Protection',
         medical_guidelines: medicalAnalysis.quality_metrics?.guidelines_followed || ["WHO", "ESC", "NICE"],
         evidence_level: medicalAnalysis.quality_metrics?.evidence_level || "High",
@@ -1211,8 +1197,8 @@ export async function POST(request: NextRequest) {
       },
       
       metadata: {
-        ai_model: GPT5_CONFIG.model,
-        system_version: '2.0-GPT5',
+        ai_model: 'GPT-4o',
+        system_version: '2.0-Enhanced-Protected',
         error_logged: true,
         support_contact: 'support@telemedecine.mu'
       }
@@ -1300,9 +1286,8 @@ export async function GET(request: NextRequest) {
   })
   
   return NextResponse.json({
-    status: '✅ Mauritius Medical AI - GPT-5 Version',
-    version: '2.0-GPT5',
-    model_configuration: GPT5_CONFIG,
+    status: '✅ Mauritius Medical AI - Version 2.0 Enhanced (Data Protection Enabled)',
+    version: '2.0-Enhanced-Protected',
     features: [
       'Patient data anonymization',
       'RGPD/HIPAA compliant',
@@ -1311,8 +1296,7 @@ export async function GET(request: NextRequest) {
       'Retry mechanism for robustness',
       'Prescription monitoring and analytics',
       'Enhanced error handling',
-      'Complete medical reasoning',
-      'GPT-5 with optimized parameters'
+      'Complete medical reasoning'
     ],
     dataProtection: {
       enabled: true,
@@ -1335,10 +1319,9 @@ export async function GET(request: NextRequest) {
       approach: 'Evidence-based medicine with tropical adaptations'
     },
     performance: {
-      averageResponseTime: '3-5 seconds',
-      maxCompletionTokens: GPT5_CONFIG.max_completion_tokens,
-      model: GPT5_CONFIG.model,
-      temperature: GPT5_CONFIG.temperature
+      averageResponseTime: '4-6 seconds',
+      maxTokens: 8000,
+      model: 'GPT-4o'
     }
   })
 }
