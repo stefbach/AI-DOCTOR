@@ -12,8 +12,6 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
-import { DoctorSignature } from "@/components/doctor-signature"
-import { useTibokDoctorData } from "@/hooks/use-tibok-doctor-data"
 import { 
   FileText, 
   Download, 
@@ -309,260 +307,259 @@ export default function ProfessionalReportEditable({
     invoice?: string
   }>({})
 
-// UPDATED: Enhanced validation with digital signature integration
+  // UPDATED: Enhanced validation with digital signature integration
   const handleValidation = async () => {
-  // Check if doctor info is complete
-  const requiredFieldsMissing = []
-  if (doctorInfo.nom.includes('[')) requiredFieldsMissing.push('Doctor name')
-  if (doctorInfo.numeroEnregistrement.includes('[')) requiredFieldsMissing.push('Registration number')
-  if (doctorInfo.email.includes('[')) requiredFieldsMissing.push('Email')
-  
-  if (requiredFieldsMissing.length > 0) {
-    toast({
-      title: "Cannot Validate",
-      description: `Please complete doctor profile. Missing: ${requiredFieldsMissing.join(', ')}`,
-      variant: "destructive"
-    })
-    setEditingDoctor(true)
-    return
-  }
-  
-  if (!report) {
-    toast({
-      title: "Error",
-      description: "No report to validate",
-      variant: "destructive"
-    })
-    return
-  }
-  
-  // Ensure we have a report ID
-  let currentReportId = reportId
-  if (!currentReportId) {
-    currentReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    setReportId(currentReportId)
-  }
-  
-  setSaving(true)
-  try {
-    // Generate a unique signature seed for this doctor
-    const signatureSeed = `${doctorInfo.nom}_${doctorInfo.numeroEnregistrement}_signature`
+    // Check if doctor info is complete
+    const requiredFieldsMissing = []
+    if (doctorInfo.nom.includes('[')) requiredFieldsMissing.push('Doctor name')
+    if (doctorInfo.numeroEnregistrement.includes('[')) requiredFieldsMissing.push('Registration number')
+    if (doctorInfo.email.includes('[')) requiredFieldsMissing.push('Email')
     
-    // Create signature data URL using the existing component logic
-    const canvas = document.createElement('canvas')
-    canvas.width = 300
-    canvas.height = 80
-    const ctx = canvas.getContext('2d')
-    
-    if (ctx) {
-      // Generate signature using the same logic as DoctorSignature component
-      ctx.fillStyle = '#ffffff'
-      ctx.fillRect(0, 0, 300, 80)
-      
-      const nameParts = doctorInfo.nom.replace('Dr. ', '').split(' ')
-      const fullName = nameParts.join(' ')
-      
-      // Create unique but consistent signature based on name
-      const nameHash = doctorInfo.nom.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-      const signatureStyle = nameHash % 3
-      
-      ctx.save()
-      ctx.translate(50, 40)
-      
-      // Dark ink color
-      ctx.strokeStyle = '#1a1a2e'
-      ctx.fillStyle = '#1a1a2e'
-      ctx.lineWidth = 2.2
-      ctx.lineCap = 'round'
-      ctx.lineJoin = 'round'
-      
-      // Apply signature style
-      if (signatureStyle === 0) {
-        ctx.font = 'italic 28px "Brush Script MT", "Lucida Handwriting", cursive'
-        ctx.fillText(fullName, 0, 0)
-        ctx.beginPath()
-        ctx.moveTo(-5, 12)
-        ctx.quadraticCurveTo(100, 16, 205, 10)
-        ctx.lineWidth = 1.8
-        ctx.stroke()
-      } else if (signatureStyle === 1) {
-        ctx.font = 'italic bold 32px "Brush Script MT", cursive'
-        const firstLetter = nameParts[0]?.[0] || 'D'
-        ctx.fillText(firstLetter, 0, 0)
-        ctx.font = 'italic 26px "Lucida Handwriting", cursive'
-        const restOfName = nameParts[0]?.substring(1) + ' ' + (nameParts[1] || '')
-        ctx.fillText(restOfName, 28, 2)
-        ctx.beginPath()
-        ctx.moveTo(0, 14)
-        ctx.bezierCurveTo(50, 16, 150, 14, 200, 12)
-        ctx.lineWidth = 1.5
-        ctx.stroke()
-      } else {
-        ctx.font = 'italic 30px "Segoe Script", "Brush Script MT", cursive'
-        let xOffset = 0
-        for (let i = 0; i < fullName.length; i++) {
-          const char = fullName[i]
-          const charWidth = ctx.measureText(char).width
-          const yOffset = Math.sin(i * 0.5) * 2
-          ctx.fillText(char, xOffset, yOffset)
-          xOffset += charWidth * 0.85
-        }
-        ctx.beginPath()
-        ctx.moveTo(0, 15)
-        ctx.quadraticCurveTo(xOffset/2, 18, xOffset, 13)
-        ctx.lineWidth = 1.6
-        ctx.stroke()
-      }
-      
-      // Add date
-      ctx.font = '9px Arial'
-      ctx.fillStyle = '#9ca3af'
-      ctx.textAlign = 'left'
-      const date = new Date().toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
+    if (requiredFieldsMissing.length > 0) {
+      toast({
+        title: "Cannot Validate",
+        description: `Please complete doctor profile. Missing: ${requiredFieldsMissing.join(', ')}`,
+        variant: "destructive"
       })
-      ctx.fillText(`Signed: ${date}`, 0, 35)
-      ctx.restore()
+      setEditingDoctor(true)
+      return
     }
     
-    // Convert canvas to data URL
-    const signatureDataUrl = canvas.toDataURL('image/png')
-    
-    // Create signatures object for all document types
-    const signatures = {
-      consultation: signatureDataUrl,
-      prescription: signatureDataUrl,
-      laboratory: signatureDataUrl,
-      imaging: signatureDataUrl,
-      invoice: signatureDataUrl
+    if (!report) {
+      toast({
+        title: "Error",
+        description: "No report to validate",
+        variant: "destructive"
+      })
+      return
     }
     
-    // Update the document signatures state
-    setDocumentSignatures(signatures)
+    // Ensure we have a report ID
+    let currentReportId = reportId
+    if (!currentReportId) {
+      currentReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      setReportId(currentReportId)
+    }
     
-    // Create the updated report with signatures embedded
-    const updatedReport = {
-      ...report,
-      compteRendu: {
-        ...report.compteRendu,
-        praticien: doctorInfo,
-        metadata: {
-          ...getReportMetadata(),
-          validatedAt: new Date().toISOString(),
-          validatedBy: doctorInfo.nom,
-          validationStatus: 'validated' as const,
-          signatures: signatures,
-          signatureDataUrl: signatureDataUrl
+    setSaving(true)
+    try {
+      // Generate a unique signature seed for this doctor
+      const signatureSeed = `${doctorInfo.nom}_${doctorInfo.numeroEnregistrement}_signature`
+      
+      // Create signature data URL using the existing component logic
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 80
+      const ctx = canvas.getContext('2d')
+      
+      if (ctx) {
+        // Generate signature using the same logic as DoctorSignature component
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(0, 0, 300, 80)
+        
+        const nameParts = doctorInfo.nom.replace('Dr. ', '').split(' ')
+        const fullName = nameParts.join(' ')
+        
+        // Create unique but consistent signature based on name
+        const nameHash = doctorInfo.nom.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+        const signatureStyle = nameHash % 3
+        
+        ctx.save()
+        ctx.translate(50, 40)
+        
+        // Dark ink color
+        ctx.strokeStyle = '#1a1a2e'
+        ctx.fillStyle = '#1a1a2e'
+        ctx.lineWidth = 2.2
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        
+        // Apply signature style
+        if (signatureStyle === 0) {
+          ctx.font = 'italic 28px "Brush Script MT", "Lucida Handwriting", cursive'
+          ctx.fillText(fullName, 0, 0)
+          ctx.beginPath()
+          ctx.moveTo(-5, 12)
+          ctx.quadraticCurveTo(100, 16, 205, 10)
+          ctx.lineWidth = 1.8
+          ctx.stroke()
+        } else if (signatureStyle === 1) {
+          ctx.font = 'italic bold 32px "Brush Script MT", cursive'
+          const firstLetter = nameParts[0]?.[0] || 'D'
+          ctx.fillText(firstLetter, 0, 0)
+          ctx.font = 'italic 26px "Lucida Handwriting", cursive'
+          const restOfName = nameParts[0]?.substring(1) + ' ' + (nameParts[1] || '')
+          ctx.fillText(restOfName, 28, 2)
+          ctx.beginPath()
+          ctx.moveTo(0, 14)
+          ctx.bezierCurveTo(50, 16, 150, 14, 200, 12)
+          ctx.lineWidth = 1.5
+          ctx.stroke()
+        } else {
+          ctx.font = 'italic 30px "Segoe Script", "Brush Script MT", cursive'
+          let xOffset = 0
+          for (let i = 0; i < fullName.length; i++) {
+            const char = fullName[i]
+            const charWidth = ctx.measureText(char).width
+            const yOffset = Math.sin(i * 0.5) * 2
+            ctx.fillText(char, xOffset, yOffset)
+            xOffset += charWidth * 0.85
+          }
+          ctx.beginPath()
+          ctx.moveTo(0, 15)
+          ctx.quadraticCurveTo(xOffset/2, 18, xOffset, 13)
+          ctx.lineWidth = 1.6
+          ctx.stroke()
         }
-      },
-      // Add signature references to each document section
-      ordonnances: report.ordonnances ? {
-        ...report.ordonnances,
-        medicaments: report.ordonnances.medicaments ? {
-          ...report.ordonnances.medicaments,
-          authentification: {
-            ...report.ordonnances.medicaments.authentification,
-            signatureImage: signatureDataUrl,
-            signedAt: new Date().toISOString()
-          }
-        } : null,
-        biologie: report.ordonnances.biologie ? {
-          ...report.ordonnances.biologie,
-          authentification: {
-            ...report.ordonnances.biologie.authentification,
-            signatureImage: signatureDataUrl,
-            signedAt: new Date().toISOString()
-          }
-        } : null,
-        imagerie: report.ordonnances.imagerie ? {
-          ...report.ordonnances.imagerie,
-          authentification: {
-            ...report.ordonnances.imagerie.authentification,
-            signatureImage: signatureDataUrl,
-            signedAt: new Date().toISOString()
-          }
-        } : null
-      } : report.ordonnances,
-      invoice: report.invoice ? {
-        ...report.invoice,
-        signature: {
-          ...report.invoice.signature,
-          signatureImage: signatureDataUrl,
-          signedAt: new Date().toISOString()
-        }
-      } : report.invoice
-    }
-    
-    // Get URL parameters for logging
-    const params = new URLSearchParams(window.location.search)
-    const consultationId = params.get('consultationId')
-    const patientId = params.get('patientId') || patientData?.id
-    const doctorId = params.get('doctorId')
-    
-    // REMOVED: API calls to save-medical-report and update-doctor-signature
-    // Validation is now handled locally without server persistence
-    
-    console.log('✅ Report validated locally (API calls removed):', {
-      reportId: currentReportId,
-      patientId: patientId || 'temp',
-      consultationId,
-      doctorId,
-      doctorName: doctorInfo.nom,
-      patientName: getReportPatient().nomComplet || getReportPatient().nom,
-      validatedAt: new Date().toISOString(),
-      validatedBy: doctorInfo.nom,
-      documentValidations: {
-        consultation: true,
-        prescription: !!report?.ordonnances?.medicaments,
-        laboratory: !!report?.ordonnances?.biologie,
-        imaging: !!report?.ordonnances?.imagerie,
-        invoice: !!report?.invoice
+        
+        // Add date
+        ctx.font = '9px Arial'
+        ctx.fillStyle = '#9ca3af'
+        ctx.textAlign = 'left'
+        const date = new Date().toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        })
+        ctx.fillText(`Signed: ${date}`, 0, 35)
+        ctx.restore()
       }
-    })
-    
-    // Update states to reflect validation
-    setValidationStatus('validated')
-    setEditMode(false)
-    setReport(updatedReport)
-    setModifiedSections(new Set())
-    
-    // Store signature in localStorage for session persistence (optional)
-    if (doctorId && signatureDataUrl) {
-      try {
-        const signatureData = {
-          doctorId: doctorId,
-          doctorName: doctorInfo.nom,
-          signatureDataUrl: signatureDataUrl,
-          lastSignedAt: new Date().toISOString()
-        }
-        localStorage.setItem(`doctor_signature_${doctorId}`, JSON.stringify(signatureData))
-        console.log('📝 Signature stored locally for session')
-      } catch (err) {
-        console.log('Could not store signature locally:', err)
-        // Non-critical error, continue
+      
+      // Convert canvas to data URL
+      const signatureDataUrl = canvas.toDataURL('image/png')
+      
+      // Create signatures object for all document types
+      const signatures = {
+        consultation: signatureDataUrl,
+        prescription: signatureDataUrl,
+        laboratory: signatureDataUrl,
+        imaging: signatureDataUrl,
+        invoice: signatureDataUrl
       }
+      
+      // Update the document signatures state
+      setDocumentSignatures(signatures)
+      
+      // Create the updated report with signatures embedded
+      const updatedReport = {
+        ...report,
+        compteRendu: {
+          ...report.compteRendu,
+          praticien: doctorInfo,
+          metadata: {
+            ...getReportMetadata(),
+            validatedAt: new Date().toISOString(),
+            validatedBy: doctorInfo.nom,
+            validationStatus: 'validated' as const,
+            signatures: signatures,
+            signatureDataUrl: signatureDataUrl
+          }
+        },
+        // Add signature references to each document section
+        ordonnances: report.ordonnances ? {
+          ...report.ordonnances,
+          medicaments: report.ordonnances.medicaments ? {
+            ...report.ordonnances.medicaments,
+            authentification: {
+              ...report.ordonnances.medicaments.authentification,
+              signatureImage: signatureDataUrl,
+              signedAt: new Date().toISOString()
+            }
+          } : null,
+          biologie: report.ordonnances.biologie ? {
+            ...report.ordonnances.biologie,
+            authentification: {
+              ...report.ordonnances.biologie.authentification,
+              signatureImage: signatureDataUrl,
+              signedAt: new Date().toISOString()
+            }
+          } : null,
+          imagerie: report.ordonnances.imagerie ? {
+            ...report.ordonnances.imagerie,
+            authentification: {
+              ...report.ordonnances.imagerie.authentification,
+              signatureImage: signatureDataUrl,
+              signedAt: new Date().toISOString()
+            }
+          } : null
+        } : report.ordonnances,
+        invoice: report.invoice ? {
+          ...report.invoice,
+          signature: {
+            ...report.invoice.signature,
+            signatureImage: signatureDataUrl,
+            signedAt: new Date().toISOString()
+          }
+        } : report.invoice
+      }
+      
+      // Get URL parameters for logging
+      const params = new URLSearchParams(window.location.search)
+      const consultationId = params.get('consultationId')
+      const patientId = params.get('patientId') || patientData?.id
+      const doctorId = params.get('doctorId')
+      
+      // REMOVED: API calls to save-medical-report and update-doctor-signature
+      // Validation is now handled locally without server persistence
+      
+      console.log('✅ Report validated locally (API calls removed):', {
+        reportId: currentReportId,
+        patientId: patientId || 'temp',
+        consultationId,
+        doctorId,
+        doctorName: doctorInfo.nom,
+        patientName: getReportPatient().nomComplet || getReportPatient().nom,
+        validatedAt: new Date().toISOString(),
+        validatedBy: doctorInfo.nom,
+        documentValidations: {
+          consultation: true,
+          prescription: !!report?.ordonnances?.medicaments,
+          laboratory: !!report?.ordonnances?.biologie,
+          imaging: !!report?.ordonnances?.imagerie,
+          invoice: !!report?.invoice
+        }
+      })
+      
+      // Update states to reflect validation
+      setValidationStatus('validated')
+      setEditMode(false)
+      setReport(updatedReport)
+      setModifiedSections(new Set())
+      
+      // Store signature in localStorage for session persistence (optional)
+      if (doctorId && signatureDataUrl) {
+        try {
+          const signatureData = {
+            doctorId: doctorId,
+            doctorName: doctorInfo.nom,
+            signatureDataUrl: signatureDataUrl,
+            lastSignedAt: new Date().toISOString()
+          }
+          localStorage.setItem(`doctor_signature_${doctorId}`, JSON.stringify(signatureData))
+          console.log('📝 Signature stored locally for session')
+        } catch (err) {
+          console.log('Could not store signature locally:', err)
+          // Non-critical error, continue
+        }
+      }
+      
+      // Show success toast
+      toast({
+        title: "✅ Validation successful",
+        description: "All documents have been validated and digitally signed. You can now send them to the patient dashboard."
+      })
+      
+    } catch (error) {
+      console.error('Validation error:', error)
+      toast({
+        title: "Validation Error",
+        description: error instanceof Error ? error.message : "Failed to validate document",
+        variant: "destructive"
+      })
+    } finally {
+      setSaving(false)
     }
-    
-    // Show success toast
-    toast({
-      title: "✅ Validation successful",
-      description: "All documents have been validated and digitally signed. You can now send them to the patient dashboard."
-    })
-    
-  } catch (error) {
-    console.error('Validation error:', error)
-    toast({
-      title: "Validation Error",
-      description: error instanceof Error ? error.message : "Failed to validate document",
-      variant: "destructive"
-    })
-  } finally {
-    setSaving(false)
   }
-}
-  }  // Closing brace for handleValidation
 
   // handleSendDocuments should be a SEPARATE function
   const handleSendDocuments = async () => {
@@ -697,7 +694,7 @@ export default function ProfessionalReportEditable({
       const result = await response.json()
       console.log('✅ API Response:', result)
 
-if (result.success) {
+      if (result.success) {
         // Show initial success toast
         toast({
           title: "✅ Documents envoyés avec succès",
@@ -949,7 +946,7 @@ if (result.success) {
         variant: "destructive"
       })
     }
-  }  // Closing brace for handleSendDocuments
+  }
   
   // Safe getter functions
   const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
@@ -995,6 +992,7 @@ if (result.success) {
     const updatedInfo = { ...doctorInfo, [field]: value }
     sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
   }
+  
   // UPDATED: Load doctor information from Tibok with better field mapping and debugging
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
@@ -1147,29 +1145,31 @@ if (result.success) {
     }
   }, [patientData, clinicalData, questionsData, diagnosisData])
 
-// Check for existing report
- const checkExistingReport = async () => {
-  try {
-    const params = new URLSearchParams(window.location.search)
-    const patientIdFromUrl = params.get('patientId')
-    const actualPatientId = patientData?.id || patientIdFromUrl || (patientData ? 'patient_' + Date.now() : 'temp')
-    
-    if (!patientData || actualPatientId === 'temp') {
-      console.log("No patient data, generating new report")
+  // Check for existing report
+  const checkExistingReport = async () => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      const patientIdFromUrl = params.get('patientId')
+      const actualPatientId = patientData?.id || patientIdFromUrl || (patientData ? 'patient_' + Date.now() : 'temp')
+      
+      if (!patientData || actualPatientId === 'temp') {
+        console.log("No patient data, generating new report")
+        generateProfessionalReport()
+        return
+      }
+      
+      // REMOVED: Check for existing report via save-medical-report API
+      // const response = await fetch(`/api/save-medical-report?patientId=${actualPatientId}`)
+      // Go directly to generate report since we can't check for existing reports anymore
+      
+      console.log("Skipping existing report check (save-medical-report API removed), generating new report")
       generateProfessionalReport()
-      return
+      
+    } catch (error) {
+      console.log("Error in checkExistingReport, generating new one:", error)
+      generateProfessionalReport()
     }
-    
-    // REMOVED: Check for existing report via save-medical-report API
-    // Go directly to generate report since we can't check for existing
-    console.log("Skipping existing report check (save-medical-report API removed), generating new report")
-    generateProfessionalReport()
-    
-  } catch (error) {
-    console.log("Error in checkExistingReport, generating new one:", error)
-    generateProfessionalReport()
   }
-}
 
   // UPDATED: Generate report with doctor data and auto-save
   const generateProfessionalReport = async () => {
@@ -1297,19 +1297,19 @@ if (result.success) {
         setDocumentSignatures({}) // Clear any signatures
         
         // Auto-save the report immediately after generation
-const newReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-setReportId(newReportId)
-
-// REMOVED: Auto-save via save-medical-report API
-// Report is now only stored in local state
-const params = new URLSearchParams(window.location.search)
-const consultationId = params.get('consultationId')
-const patientId = params.get('patientId') || patientData?.id
-
-console.log('✅ Report generated locally with ID:', newReportId, {
-  consultationId,
-  patientId
-})
+        const newReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        setReportId(newReportId)
+        
+        // REMOVED: Auto-save via save-medical-report API
+        // Report is now only stored in local state
+        const params = new URLSearchParams(window.location.search)
+        const consultationId = params.get('consultationId')
+        const patientId = params.get('patientId') || patientData?.id
+        
+        console.log('✅ Report generated locally with ID:', newReportId, {
+          consultationId,
+          patientId
+        })
         
         toast({
           title: "Report generated successfully",
@@ -1353,6 +1353,7 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       setLoading(false)
     }
   }
+  
   // Save report (for backward compatibility but redirects to validation)
   const handleSave = async () => {
     // Auto-save is handled by validation now
@@ -1396,6 +1397,7 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       method: method
     })
   }
+
   // Update medications
   const updateMedicament = (index: number, field: string, value: string) => {
     if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
@@ -1959,6 +1961,7 @@ console.log('✅ Report generated locally with ID:', newReportId, {
   }
 
   const handlePrint = () => window.print()
+
   // Loading and error states
   if (loading) {
     return (
@@ -2166,7 +2169,8 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       </Card>
     )
   }
-  // Narrative report editing component
+
+  // Consultation report component
   const ConsultationReport = () => {
     const sections = [
       { key: 'motifConsultation', title: 'CHIEF COMPLAINT' },
@@ -2304,7 +2308,8 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       </Card>
     )
   }
-  // Medication editing component
+
+  // Medication prescription component
   const MedicationPrescription = () => {
     const medications = report?.ordonnances?.medicaments?.prescription?.medicaments || []
     const patient = getReportPatient()
@@ -2572,7 +2577,8 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       </div>
     )
   }
-  // Biology tests editing component
+
+  // Biology prescription component
   const BiologyPrescription = () => {
     const analyses = report?.ordonnances?.biologie?.prescription?.analyses || {}
     const hasTests = Object.values(analyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
@@ -2846,7 +2852,7 @@ console.log('✅ Report generated locally with ID:', newReportId, {
     )
   }
 
-  // Imaging prescription editing component
+  // Imaging prescription component
   const ImagingPrescription = () => {
     const examens = report?.ordonnances?.imagerie?.prescription?.examens || []
     const patient = getReportPatient()
@@ -2949,532 +2955,4 @@ console.log('✅ Report generated locally with ID:', newReportId, {
                       </div>
                     </div>
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={exam.urgence}
-                            onCheckedChange={(checked) => updateImagingExam(index, 'urgence', checked)}
-                          />
-                          <Label>Urgent</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={exam.contraste}
-                            onCheckedChange={(checked) => updateImagingExam(index, 'contraste', checked)}
-                          />
-                          <Label>Contrast required</Label>
-                        </div>
-                      </div>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => removeImagingExam(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="font-bold text-lg">
-                      {index + 1}. {exam.type || exam.modalite}
-                      {exam.urgence && <Badge className="ml-2 bg-red-100 text-red-800 urgent badge badge-red">URGENT</Badge>}
-                    </div>
-                    <p className="mt-1">
-                      <span className="font-medium">Region:</span> {exam.region}
-                    </p>
-                    <p className="mt-1">
-                      <span className="font-medium">Clinical Indication:</span> {exam.indicationClinique}
-                    </p>
-                    {exam.contraste && (
-                      <p className="mt-1 text-orange-600">
-                        ⚠️ <span className="font-medium">Contrast required</span>
-                      </p>
-                    )}
-                    {exam.protocoleSpecifique && (
-                      <p className="mt-1">
-                        <span className="font-medium">Protocol:</span> {exam.protocoleSpecifique}
-                      </p>
-                    )}
-                    {exam.questionDiagnostique && (
-                      <p className="mt-1 text-sm text-gray-600">
-                        <span className="font-medium">Clinical Question:</span> {exam.questionDiagnostique}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            <Scan className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p>No imaging studies ordered</p>
-            {editMode && (
-              <Button onClick={addImagingExam} className="mt-4" variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                Add First Imaging Study
-              </Button>
-            )}
-          </div>
-        )}
-
-        <div className="mt-8 pt-6 border-t border-gray-300">
-          <p className="text-sm text-gray-600 mb-4">
-            Imaging Center: {report?.ordonnances?.imagerie?.prescription?.centreImagerie || "Any MoH approved imaging center"}
-          </p>
-          <div className="text-right signature">
-            <p className="font-semibold">{praticien.nom}</p>
-            <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
-            
-            {/* UPDATED: Enhanced signature display for imaging */}
-            {validationStatus === 'validated' && documentSignatures.imaging ? (
-              <div className="mt-4">
-                <img 
-                  src={documentSignatures.imaging} 
-                  alt="Doctor's Signature" 
-                  className="ml-auto h-20 w-auto"
-                  style={{ maxWidth: '300px' }}
-                />
-                <p className="text-sm text-gray-600 mt-2">
-                  Digitally signed on {new Date().toLocaleDateString()}
-                </p>
-              </div>
-            ) : (
-              <div className="mt-8">
-                <p className="text-sm">_______________________________</p>
-                <p className="text-sm">Requesting Physician's Signature</p>
-                <p className="text-sm">Date: {patient.dateExamen}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    )
-  }
-  // Invoice Component
-  const InvoiceComponent = () => {
-    const invoice = report?.invoice
-    if (!invoice) return null
-
-    return (
-      <div id="invoice-document" className="bg-white p-8 rounded-lg shadow print:shadow-none">
-        <div className="text-center mb-8 header">
-          <h1 className="text-2xl font-bold mb-2">INVOICE</h1>
-          <p className="text-lg">No.: {invoice.header.invoiceNumber}</p>
-          <p className="text-sm text-gray-600">
-            Consultation Date: {invoice.header.consultationDate} | 
-            Invoice Date: {invoice.header.invoiceDate}
-          </p>
-        </div>
-
-        <div className="mb-6 p-4 bg-blue-50 rounded-lg info-box">
-          <h3 className="font-bold mb-2">Service Provider</h3>
-          <p className="font-bold">{invoice.provider.companyName}</p>
-          <p className="text-sm">Private company incorporated under Mauritian law</p>
-          <div className="grid grid-cols-2 gap-2 text-sm mt-2">
-            <div>Company Reg. No.: {invoice.provider.registrationNumber}</div>
-            <div>VAT No.: {invoice.provider.vatNumber}</div>
-            <div className="col-span-2">Registered Office: {invoice.provider.registeredOffice}</div>
-            <div>Phone: {invoice.provider.phone}</div>
-            <div>Email: {invoice.provider.email}</div>
-            <div>Website: {invoice.provider.website}</div>
-            <div className="col-span-2 font-medium">Trade Name: {invoice.provider.tradeName}</div>
-          </div>
-          <p className="text-sm mt-2 italic">
-            Medical consultations provided by licensed physicians registered with the Medical Council of Mauritius
-          </p>
-        </div>
-
-        <div className="mb-6 p-4 bg-gray-50 rounded-lg info-box">
-          <h3 className="font-bold mb-2">Patient Information</h3>
-          <div className="grid grid-cols-1 gap-1 text-sm">
-            <div><strong>Name:</strong> {invoice.patient.name}</div>
-            <div><strong>Email:</strong> {invoice.patient.email}</div>
-            <div><strong>Phone Number:</strong> {invoice.patient.phone}</div>
-            <div><strong>Tibok Patient ID:</strong> {invoice.patient.patientId}</div>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <h3 className="font-bold mb-4">Service Details</h3>
-          <table className="w-full border-collapse invoice-table">
-            <thead>
-              <tr className="border-b-2 border-gray-300">
-                <th className="text-left py-2">Description</th>
-                <th className="text-center py-2">Quantity</th>
-                <th className="text-right py-2">Unit Price (MUR)</th>
-                <th className="text-right py-2">Total (MUR)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoice.services.items.map((item, idx) => (
-                <tr key={idx} className="border-b border-gray-200">
-                  <td className="py-2">{item.description}</td>
-                  <td className="text-center py-2">{item.quantity}</td>
-                  <td className="text-right py-2">{item.unitPrice.toLocaleString()}</td>
-                  <td className="text-right py-2 font-medium">{item.total.toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-gray-300">
-                <td colSpan={3} className="text-right py-2">Subtotal (Excl. VAT):</td>
-                <td className="text-right py-2">MUR {invoice.services.subtotal.toLocaleString()}</td>
-              </tr>
-              <tr>
-                <td colSpan={3} className="text-right py-2">
-                  VAT ({(invoice.services.vatRate * 100).toFixed(0)}%):
-                </td>
-                <td className="text-right py-2">
-                  MUR {invoice.services.vatAmount.toLocaleString()}
-                  {invoice.services.vatAmount === 0 && (
-                    <span className="text-xs text-gray-600 block">
-                      (Exempt - medical services)
-                    </span>
-                  )}
-                </td>
-              </tr>
-              <tr className="font-bold text-lg invoice-total">
-                <td colSpan={3} className="text-right py-2">Total Due:</td>
-                <td className="text-right py-2">MUR {invoice.services.totalDue.toLocaleString()}</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-
-        <div className="mb-6 p-4 bg-green-50 rounded-lg payment-info">
-          <h3 className="font-bold mb-2">Payment Information</h3>
-          {editMode && validationStatus !== 'validated' ? (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Payment Method</Label>
-                  <Select value={invoice.payment.method} onValueChange={updatePaymentMethod}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Credit Card">Credit Card</SelectItem>
-                      <SelectItem value="MCB Juice">MCB Juice</SelectItem>
-                      <SelectItem value="MyT Money">MyT Money</SelectItem>
-                      <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
-                      <SelectItem value="Cash">Cash</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Payment Status</Label>
-                  <Select value={invoice.payment.status} onValueChange={updatePaymentStatus}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="paid">Paid</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div><strong>Payment Method:</strong> {invoice.payment.method}</div>
-              <div><strong>Payment Received On:</strong> {invoice.payment.receivedDate}</div>
-              <div className="col-span-2">
-                <strong>Status:</strong> 
-                <Badge className={`ml-2 ${
-                  invoice.payment.status === 'paid' ? 'bg-green-100 text-green-800' :
-                  invoice.payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'
-                }`}>
-                  {invoice.payment.status.toUpperCase()}
-                </Badge>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="mb-6 p-4 bg-purple-50 rounded-lg">
-          <h3 className="font-bold mb-2">Consulting Physician</h3>
-          <div className="text-sm">
-            <div><strong>Name:</strong> {invoice.physician.name}</div>
-            <div><strong>Medical Council Registration No.:</strong> {invoice.physician.registrationNumber}</div>
-          </div>
-        </div>
-
-        <div className="mb-8">
-          <h3 className="font-bold mb-2">Notes</h3>
-          <ul className="list-disc list-inside text-sm space-y-1">
-            {invoice.notes.map((note, idx) => (
-              <li key={idx}>{note}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="mt-12 pt-8 border-t border-gray-300 text-center">
-          <p className="font-bold">Electronic Signature:</p>
-          
-          {/* UPDATED: Enhanced signature display for invoice */}
-          {validationStatus === 'validated' && documentSignatures.invoice ? (
-            <div className="mt-4 flex flex-col items-center">
-              <img 
-                src={documentSignatures.invoice} 
-                alt="Electronic Signature" 
-                className="h-20 w-auto"
-                style={{ maxWidth: '300px' }}
-              />
-              <p className="mt-2">{invoice.signature.entity}</p>
-              <p>on behalf of {invoice.signature.onBehalfOf}</p>
-              <p className="text-sm text-gray-600">{invoice.signature.title}</p>
-              <p className="text-sm text-gray-600 mt-2">
-                Digitally signed on {new Date().toLocaleDateString()}
-              </p>
-            </div>
-          ) : (
-            <>
-              <p className="mt-2">{invoice.signature.entity}</p>
-              <p>on behalf of {invoice.signature.onBehalfOf}</p>
-              <p className="text-sm text-gray-600">{invoice.signature.title}</p>
-            </>
-          )}
-        </div>
-
-        <div className="mt-6 flex justify-center print:hidden">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => exportSectionToPDF('invoice-document', `invoice_${invoice.header.invoiceNumber}.pdf`)}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Export Invoice
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
-  // Actions Bar component
-  const ActionsBar = () => {
-    const metadata = getReportMetadata()
-    
-    return (
-      <Card className="print:hidden">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <Badge className={validationStatus === 'validated' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                {validationStatus === 'validated' ? (
-                  <>
-                    <Lock className="h-3 w-3 mr-1" />
-                    Document validated & signed
-                  </>
-                ) : (
-                  <>
-                    <Unlock className="h-3 w-3 mr-1" />
-                    Draft - awaiting validation
-                  </>
-                )}
-              </Badge>
-              <span className="text-sm text-gray-600">
-                {metadata.wordCount} words
-              </span>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant={editMode ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setEditMode(!editMode)}
-                disabled={validationStatus === 'validated'}
-              >
-                {editMode ? <Eye className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
-                {editMode ? 'Preview' : 'Edit'}
-              </Button>
-              
-              <Button
-                variant="default"
-                size="sm"
-                onClick={handleValidation}
-                disabled={saving || validationStatus === 'validated'}
-              >
-                {saving ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <FileCheck className="h-4 w-4 mr-2" />
-                )}
-                {validationStatus === 'validated' ? 'Validated' : 'Validate & Sign'}
-              </Button>
-              
-              <Button variant="outline" size="sm" onClick={handlePrint}>
-                <Printer className="h-4 w-4 mr-2" />
-                Print all
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  // Unsaved changes warning
-  const UnsavedChangesAlert = () => {
-    if (modifiedSections.size === 0 || validationStatus === 'validated') return null
-
-    return (
-      <Alert className="print:hidden">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>
-          Changes will be saved automatically when you validate the document.
-        </AlertDescription>
-      </Alert>
-    )
-  }
-
-  // Prescription stats
-  const PrescriptionStats = () => {
-    const medicamentCount = report?.ordonnances?.medicaments?.prescription?.medicaments?.length || 0
-    const bioCount = Object.values(report?.ordonnances?.biologie?.prescription?.analyses || {})
-      .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)
-    const imagingCount = report?.ordonnances?.imagerie?.prescription?.examens?.length || 0
-
-    return (
-      <Card className="print:hidden">
-        <CardHeader>
-          <CardTitle className="text-lg">Prescription Summary</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="p-4 bg-green-50 rounded">
-              <Pill className="h-8 w-8 mx-auto mb-2 text-green-600" />
-              <p className="text-2xl font-bold text-green-600">{medicamentCount}</p>
-              <p className="text-sm text-gray-600">Medications</p>
-            </div>
-            <div className="p-4 bg-purple-50 rounded">
-              <TestTube className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-              <p className="text-2xl font-bold text-purple-600">{bioCount}</p>
-              <p className="text-sm text-gray-600">Lab Tests</p>
-            </div>
-            <div className="p-4 bg-indigo-50 rounded">
-              <Scan className="h-8 w-8 mx-auto mb-2 text-indigo-600" />
-              <p className="text-2xl font-bold text-indigo-600">{imagingCount}</p>
-              <p className="text-sm text-gray-600">Imaging</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  // Main render
-  return (
-    <div className="space-y-6 print:space-y-4">
-      <ActionsBar />
-      <UnsavedChangesAlert />
-      <DoctorInfoEditor />
-      <PrescriptionStats />
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="consultation">
-            <FileText className="h-4 w-4 mr-2" />
-            Report
-          </TabsTrigger>
-          <TabsTrigger value="medicaments">
-            <Pill className="h-4 w-4 mr-2" />
-            Medications
-            {report?.ordonnances?.medicaments?.prescription?.medicaments?.length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {report.ordonnances.medicaments.prescription.medicaments.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="biologie">
-            <TestTube className="h-4 w-4 mr-2" />
-            Laboratory
-            {report?.ordonnances?.biologie && (
-              <Badge variant="secondary" className="ml-2">
-                {Object.values(report.ordonnances.biologie.prescription.analyses || {})
-                  .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="imagerie">
-            <Scan className="h-4 w-4 mr-2" />
-            Imaging
-            {report?.ordonnances?.imagerie?.prescription?.examens?.length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {report.ordonnances.imagerie.prescription.examens.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="invoice">
-            <Receipt className="h-4 w-4 mr-2" />
-            Invoice
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="consultation">
-          <ConsultationReport />
-        </TabsContent>
-        
-        <TabsContent value="medicaments">
-          <MedicationPrescription />
-        </TabsContent>
-        
-        <TabsContent value="biologie">
-          <BiologyPrescription />
-        </TabsContent>
-        
-        <TabsContent value="imagerie">
-          <ImagingPrescription />
-        </TabsContent>
-
-        <TabsContent value="invoice">
-          <InvoiceComponent />
-        </TabsContent>
-      </Tabs>
-
-      <div className="hidden print:block">
-        <ConsultationReport />
-        {includeFullPrescriptions && report?.ordonnances && (
-          <>
-            {report.ordonnances.medicaments && (
-              <div className="page-break-before mt-8">
-                <MedicationPrescription />
-              </div>
-            )}
-            {report.ordonnances.biologie && (
-              <div className="page-break-before mt-8">
-                <BiologyPrescription />
-              </div>
-            )}
-            {report.ordonnances.imagerie && (
-              <div className="page-break-before mt-8">
-                <ImagingPrescription />
-              </div>
-            )}
-          </>
-        )}
-        {report?.invoice && (
-          <div className="page-break-before mt-8">
-            <InvoiceComponent />
-          </div>
-        )}
-      </div>
-
-      {validationStatus === 'validated' && (
-        <div className="flex justify-center print:hidden mt-8">
-          <Button 
-            size="lg"
-            onClick={handleSendDocuments}
-            className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
-          >
-            <CheckCircle className="h-5 w-5 mr-2" />
-            Finalize and Send documents
-          </Button>
-        </div>
-      )}
-    </div>
-  )
-}
+                      <div className="flex items
