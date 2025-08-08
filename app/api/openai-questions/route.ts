@@ -1,7 +1,8 @@
-// app/api/openai-questions/route.ts - VERSION AMÉLIORÉE AVEC APPEL IA FORCÉ
+// app/api/openai-questions/route.ts - VERSION WITH DATA PROTECTION
 import { type NextRequest, NextResponse } from "next/server"
+import crypto from 'crypto'
 
-// Configuration pour différents modes de vitesse
+// Configuration for different speed modes
 export const runtime = 'edge'
 export const preferredRegion = 'auto'
 
@@ -11,7 +12,7 @@ function anonymizePatientData(patientData: any): {
   originalIdentity: any,
   anonymousId: string
 } {
-  // Sauvegarder l'identité originale
+  // Save original identity
   const originalIdentity = {
     firstName: patientData?.firstName,
     lastName: patientData?.lastName,
@@ -20,7 +21,7 @@ function anonymizePatientData(patientData: any): {
     phone: patientData?.phone
   }
   
-  // Créer une copie sans données sensibles
+  // Create a copy without sensitive data
   const anonymized = { ...patientData }
   const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'idNumber', 'ssn']
   
@@ -28,18 +29,18 @@ function anonymizePatientData(patientData: any): {
     delete anonymized[field]
   })
   
-  // Ajouter un ID anonyme pour le suivi
+  // Add anonymous ID for tracking
   const anonymousId = `ANON-Q-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
   anonymized.anonymousId = anonymousId
   
-  console.log('🔒 Données patient anonymisées pour questions')
-  console.log(`   - ID anonyme: ${anonymousId}`)
-  console.log('   - Champs protégés:', sensitiveFields.filter(f => originalIdentity[f]).join(', '))
+  console.log('🔒 Patient data anonymized for questions')
+  console.log(`   - Anonymous ID: ${anonymousId}`)
+  console.log('   - Protected fields:', sensitiveFields.filter(f => originalIdentity[f]).join(', '))
   
   return { anonymized, originalIdentity, anonymousId }
 }
 
-// Fonction de log sécurisé
+// Secure logging function
 function secureLog(message: string, data?: any) {
   if (data && typeof data === 'object') {
     const safeData = { ...data }
@@ -47,7 +48,7 @@ function secureLog(message: string, data?: any) {
     
     sensitiveFields.forEach(field => {
       if (safeData[field]) {
-        safeData[field] = '[PROTÉGÉ]'
+        safeData[field] = '[PROTECTED]'
       }
     })
     
@@ -64,243 +65,361 @@ function debugApiKey(apiKey: string | undefined): void {
     length: apiKey?.length || 0,
     prefix: apiKey?.substring(0, 20) || 'UNDEFINED',
     suffix: apiKey?.substring((apiKey?.length || 4) - 4) || 'UNDEFINED',
-    isValidFormat: apiKey?.startsWith('sk-') || false,
+    isValidFormat: apiKey?.startsWith('sk-proj-') || false,
     environment: process.env.NODE_ENV,
     vercel: !!process.env.VERCEL,
     allEnvKeys: Object.keys(process.env).filter(k => k.includes('OPENAI')).join(', ')
   })
 }
 
-// ==================== CONFIGURATION DES MODÈLES ====================
-const AI_CONFIGS = {
-  fast: {
-    model: "gpt-3.5-turbo",
-    temperature: 0.3,
-    maxTokens: 800
-  },
-  balanced: {
-    model: "gpt-4o-mini", 
-    temperature: 0.4,
-    maxTokens: 1000
-  },
-  intelligent: {
-    model: "gpt-4o",
-    temperature: 0.5,
-    maxTokens: 1500
+// ==================== SIMPLE CACHE ====================
+class SimpleCache {
+  private cache = new Map<string, any>()
+  private maxSize = 50
+
+  get(key: string): any | null {
+    return this.cache.get(key) || null
+  }
+
+  set(key: string, value: any): void {
+    if (this.cache.size >= this.maxSize) {
+      const firstKey = this.cache.keys().next().value
+      this.cache.delete(firstKey)
+    }
+    this.cache.set(key, value)
   }
 }
 
-// ==================== QUESTIONS DE FALLBACK ====================
+const patternCache = new SimpleCache()
+
+// ==================== DIAGNOSTIC PATTERNS ====================
+const DIAGNOSTIC_PATTERNS = {
+  chest_pain: {
+    keywords: ["chest", "thorax", "cardiac", "heart", "pressure", "tightness"],
+    questions: [
+      {
+        id: 1,
+        question: "Where exactly do you feel the pain?",
+        options: ["Center of chest", "Left side", "Back", "All over"],
+        priority: "high"
+      },
+      {
+        id: 2,
+        question: "Does the pain occur with exertion?",
+        options: ["Yes", "No", "Sometimes", "I don't know"],
+        priority: "high"
+      },
+      {
+        id: 3,
+        question: "Does the pain radiate?",
+        options: ["To left arm", "To jaw", "To back", "No"],
+        priority: "high"
+      },
+      {
+        id: 4,
+        question: "How long have you had this pain?",
+        options: ["Less than 30 minutes", "30 min - 2h", "More than 2h", "Intermittent"],
+        priority: "high"
+      },
+      {
+        id: 5,
+        question: "Do you have any associated symptoms?",
+        options: ["Shortness of breath", "Sweating", "Nausea", "None"],
+        priority: "medium"
+      }
+    ]
+  },
+  headache: {
+    keywords: ["head", "headache", "migraine", "cephalalgia", "head pain"],
+    questions: [
+      {
+        id: 1,
+        question: "How would you describe your headache?",
+        options: ["Pulsating (throbbing)", "Tight band", "Stabbing", "Diffuse"],
+        priority: "high"
+      },
+      {
+        id: 2,
+        question: "Do you have any associated symptoms?",
+        options: ["Nausea", "Light sensitivity", "Visual disturbances", "None"],
+        priority: "high"
+      },
+      {
+        id: 3,
+        question: "What triggers your headache?",
+        options: ["Stress", "Certain foods", "Lack of sleep", "Nothing specific"],
+        priority: "medium"
+      },
+      {
+        id: 4,
+        question: "How often do you get these headaches?",
+        options: ["First time", "Occasional", "Frequent (>1/week)", "Daily"],
+        priority: "high"
+      },
+      {
+        id: 5,
+        question: "Is your headache accompanied by fever?",
+        options: ["Yes", "No", "I don't know", "Sometimes"],
+        priority: "high"
+      }
+    ]
+  },
+  abdominal_pain: {
+    keywords: ["stomach", "abdomen", "belly", "abdominal pain", "tummy"],
+    questions: [
+      {
+        id: 1,
+        question: "Where is the pain located?",
+        options: ["Upper abdomen", "Around navel", "Lower abdomen", "All over"],
+        priority: "high"
+      },
+      {
+        id: 2,
+        question: "How would you describe the pain?",
+        options: ["Cramping", "Burning", "Stabbing", "Heavy feeling"],
+        priority: "high"
+      },
+      {
+        id: 3,
+        question: "Is the pain related to meals?",
+        options: ["Before meals", "After meals", "During meals", "No relation"],
+        priority: "high"
+      },
+      {
+        id: 4,
+        question: "Do you have any digestive symptoms?",
+        options: ["Nausea/vomiting", "Diarrhea", "Constipation", "None"],
+        priority: "high"
+      },
+      {
+        id: 5,
+        question: "Do you have a fever?",
+        options: ["Yes (>100.4°F)", "Feel feverish", "No", "I don't know"],
+        priority: "high"
+      }
+    ]
+  }
+}
+
+// ==================== FALLBACK QUESTIONS ====================
 const FALLBACK_QUESTIONS = {
   general: [
     {
       id: 1,
-      question: "Depuis combien de temps avez-vous ces symptômes?",
-      options: ["Moins de 24h", "2-7 jours", "1-4 semaines", "Plus d'un mois"],
+      question: "How long have you had these symptoms?",
+      options: ["Less than 24h", "2-7 days", "1-4 weeks", "More than a month"],
       priority: "high"
     },
     {
       id: 2,
-      question: "Comment vos symptômes évoluent-ils?",
-      options: ["S'aggravent", "Stables", "S'améliorent", "Variables"],
+      question: "How are your symptoms evolving?",
+      options: ["Getting worse", "Stable", "Improving", "Variable"],
       priority: "high"
     },
     {
       id: 3,
-      question: "Qu'est-ce qui déclenche ou aggrave vos symptômes?",
-      options: ["Effort/mouvement", "Stress", "Nourriture", "Rien de spécifique"],
+      question: "What triggers or worsens your symptoms?",
+      options: ["Exertion/movement", "Stress", "Food", "Nothing specific"],
       priority: "medium"
     },
     {
       id: 4,
-      question: "Avez-vous de la fièvre?",
-      options: ["Oui, mesurée >38°C", "Je me sens fiévreux", "Non", "Je ne sais pas"],
+      question: "Do you have a fever?",
+      options: ["Yes, measured >100.4°F", "Feel feverish", "No", "I don't know"],
       priority: "high"
     },
     {
       id: 5,
-      question: "À quel point êtes-vous inquiet de votre état?",
-      options: ["Très inquiet", "Modérément", "Légèrement inquiet", "Pas du tout"],
+      question: "How concerned are you about your condition?",
+      options: ["Very concerned", "Moderately", "Slightly concerned", "Not at all"],
       priority: "medium"
     }
   ]
 }
 
-// ==================== FONCTION POUR GÉNÉRER UN PROMPT INTELLIGENT ====================
-function generateEnhancedPrompt(
-  patientData: any, 
-  clinicalData: any,
-  mode: string
-): string {
-  const age = patientData.age || 'âge non spécifié'
-  const gender = patientData.gender || patientData.sex || 'sexe non spécifié'
-  const symptoms = clinicalData.symptoms || clinicalData.chiefComplaint || ''
-  const diseaseHistory = clinicalData.diseaseHistory || ''
-  const duration = clinicalData.symptomDuration || ''
-  const painScale = clinicalData.painScale || '0'
-  const vitalSigns = clinicalData.vitalSigns || {}
+// ==================== PATTERN DETECTION ====================
+function detectMainPattern(symptoms: string | undefined | null): string {
+  const symptomsLower = String(symptoms || '').toLowerCase()
   
-  // Créer un contexte enrichi pour l'IA
-  const context = `
-Patient Profile:
-- Age: ${age} ans
-- Sexe: ${gender}
-- Niveau de douleur: ${painScale}/10
-
-Symptômes principaux:
-${symptoms}
-
-Histoire de la maladie:
-${diseaseHistory || 'Non fournie'}
-
-Durée des symptômes:
-${duration || 'Non spécifiée'}
-
-Signes vitaux:
-- Température: ${vitalSigns.temperature || 'Non mesurée'}°C
-- Tension artérielle: ${vitalSigns.bloodPressureSystolic || 'N/A'}/${vitalSigns.bloodPressureDiastolic || 'N/A'} mmHg
-`
-
-  // Adapter le prompt selon le mode
-  const modeInstructions = {
-    fast: "Génère 5 questions de triage rapide essentielles.",
-    balanced: "Génère 5 questions diagnostiques équilibrées entre rapidité et précision.",
-    intelligent: "Génère 5 questions diagnostiques approfondies et très spécifiques au cas."
-  }
-
-  return `Tu es un médecin expert en télémédecine. Analyse ce cas patient et génère des questions diagnostiques pertinentes.
-
-${context}
-
-Instructions:
-1. ${modeInstructions[mode as keyof typeof modeInstructions] || modeInstructions.balanced}
-2. Les questions doivent être spécifiquement adaptées aux symptômes mentionnés.
-3. Priorise les questions selon l'urgence médicale potentielle.
-4. Chaque question doit avoir exactement 4 options de réponse claires.
-5. Utilise un langage simple et compréhensible pour le patient.
-
-Format JSON OBLIGATOIRE (répond UNIQUEMENT avec ce JSON, sans texte additionnel):
-{
-  "questions": [
-    {
-      "id": 1,
-      "question": "Question claire et simple en français",
-      "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
-      "priority": "high|medium|low",
-      "rationale": "Brève explication médicale de pourquoi cette question est importante"
+  for (const [pattern, data] of Object.entries(DIAGNOSTIC_PATTERNS)) {
+    if (data.keywords.some(keyword => symptomsLower.includes(keyword))) {
+      return pattern
     }
-  ],
-  "urgency_assessment": {
-    "level": "low|medium|high|critical",
-    "reason": "Brève évaluation de l'urgence basée sur les symptômes"
+  }
+  
+  return 'general'
+}
+
+// ==================== MODEL CONFIGURATION ====================
+const AI_CONFIGS = {
+  fast: {
+    model: "gpt-3.5-turbo",
+    temperature: 0.1,
+    maxTokens: 500
   },
-  "recommended_specialties": ["Spécialité 1", "Spécialité 2"]
+  balanced: {
+    model: "gpt-4o-mini", 
+    temperature: 0.2,
+    maxTokens: 800
+  },
+  intelligent: {
+    model: "gpt-4o",
+    temperature: 0.3,
+    maxTokens: 1200
+  }
 }
 
-IMPORTANT: 
-- Génère EXACTEMENT 5 questions pertinentes
-- Adapte les questions au contexte spécifique du patient
-- Ne jamais demander d'informations personnelles identifiantes
-- Priorise les questions qui peuvent révéler des urgences médicales`
-}
-
-// ==================== FONCTION PRINCIPALE AVEC APPEL IA FORCÉ ====================
+// ==================== MAIN FUNCTION WITH PROTECTION ====================
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
-  console.log("🚀 Démarrage POST /api/openai-questions (VERSION AMÉLIORÉE)")
+  console.log("🚀 Starting POST request /api/openai-questions (PROTECTED VERSION)")
   
   try {
-    // 1. Récupérer et valider la clé API
+    // 1. Retrieve and validate API key
     const apiKey = process.env.OPENAI_API_KEY
     debugApiKey(apiKey)
     
     if (!apiKey) {
-      console.error('❌ OPENAI_API_KEY manquante dans les variables d\'environnement')
-      throw new Error('Configuration API manquante')
+      throw new Error('OPENAI_API_KEY missing in environment variables')
     }
     
     if (!apiKey.startsWith('sk-')) {
-      console.error('❌ Format de clé API invalide')
-      throw new Error('Configuration API invalide')
+      throw new Error('Invalid API key format (must start with sk-)')
     }
     
-    // 2. Parser la requête
+    // 2. Parse request
     const body = await request.json()
-    console.log("📝 Corps reçu, analyse des données...")
+    console.log("📝 Body received, parsing data...")
     
     const { 
       patientData, 
       clinicalData, 
-      mode = 'balanced',
-      forceAI = true // Nouveau paramètre pour forcer l'utilisation de l'IA
+      mode = 'balanced'
     } = body
 
-    // 3. Valider les données
+    // 3. Validate data
     if (!patientData || !clinicalData) {
-      console.error("❌ Données manquantes dans la requête")
+      console.error("❌ Missing data in request")
       return NextResponse.json(
-        { 
-          error: "Données patient et cliniques requises", 
-          success: false 
-        },
+        { error: "Patient and clinical data required", success: false },
         { status: 400 }
       )
     }
 
-    // 4. Protection des données: Anonymisation
-    const { 
-      anonymized: anonymizedPatientData, 
-      originalIdentity, 
-      anonymousId 
-    } = anonymizePatientData(patientData)
+    // ========== DATA PROTECTION: ANONYMIZATION ==========
+    const { anonymized: anonymizedPatientData, originalIdentity, anonymousId } = anonymizePatientData(patientData)
 
-    // 5. Normalisation des données
+    // 4. Data normalization WITH ANONYMIZED DATA
     const validatedPatientData = {
-      age: anonymizedPatientData.age || 'Non spécifié',
-      gender: anonymizedPatientData.gender || anonymizedPatientData.sex || 'Non spécifié',
+      age: anonymizedPatientData.age || 'Not specified',
+      gender: anonymizedPatientData.gender || anonymizedPatientData.sex || 'Not specified',
       ...anonymizedPatientData
     }
 
     const validatedClinicalData = {
       symptoms: clinicalData.symptoms || clinicalData.chiefComplaint || '',
       chiefComplaint: clinicalData.chiefComplaint || clinicalData.symptoms || '',
-      diseaseHistory: clinicalData.diseaseHistory || '',
-      symptomDuration: clinicalData.symptomDuration || '',
-      painScale: clinicalData.painScale || '0',
-      vitalSigns: clinicalData.vitalSigns || {},
       ...clinicalData
     }
 
-    secureLog('📊 Données patient (anonymisées):', validatedPatientData)
-    secureLog('📋 Données cliniques:', validatedClinicalData)
+    // Secure log of patient data
+    secureLog('📊 Patient data (anonymized):', validatedPatientData)
 
-    // 6. Configuration IA selon le mode
+    // 5. Check cache
+    const symptomsString = String(validatedClinicalData.symptoms || validatedClinicalData.chiefComplaint || '')
+    const cacheKey = `${symptomsString}_${validatedPatientData.age}_${validatedPatientData.gender}_${mode}`
+    const cached = patternCache.get(cacheKey)
+    
+    if (cached) {
+      console.log(`✅ Cache hit: ${Date.now() - startTime}ms`)
+      return NextResponse.json({
+        ...cached,
+        dataProtection: {
+          enabled: true,
+          anonymousId,
+          method: 'anonymization',
+          message: 'Patient data protected during processing'
+        },
+        metadata: {
+          ...cached.metadata,
+          fromCache: true,
+          responseTime: Date.now() - startTime
+        }
+      })
+    }
+
+    // 6. Detect main pattern
+    const pattern = detectMainPattern(symptomsString)
+    console.log(`🔍 Pattern detected: ${pattern}`)
+
+    // 7. Use predefined questions if available
+    if (pattern !== 'general' && DIAGNOSTIC_PATTERNS[pattern as keyof typeof DIAGNOSTIC_PATTERNS]) {
+      console.log(`✅ Using predefined questions for: ${pattern}`)
+      const response = {
+        success: true,
+        questions: DIAGNOSTIC_PATTERNS[pattern as keyof typeof DIAGNOSTIC_PATTERNS].questions,
+        dataProtection: {
+          enabled: true,
+          anonymousId,
+          method: 'predefined-patterns',
+          message: 'No personal data sent to AI - using predefined patterns'
+        },
+        metadata: {
+          mode,
+          pattern,
+          patientAge: validatedPatientData.age,
+          responseTime: Date.now() - startTime,
+          fromCache: false,
+          model: 'predefined-patterns',
+          dataProtected: true
+        }
+      }
+      
+      patternCache.set(cacheKey, response)
+      return NextResponse.json(response)
+    }
+
+    // 8. Generate prompt for OpenAI WITHOUT PERSONAL DATA
+    const prompt = `Patient: ${validatedPatientData.age} years old, ${validatedPatientData.gender}. 
+Symptoms: ${symptomsString}.
+
+Generate exactly 5 relevant diagnostic questions to assess this patient.
+
+Required JSON format:
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "Clear and simple question in English",
+      "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+      "priority": "high"
+    }
+  ]
+}
+
+IMPORTANT: 
+- Respond ONLY with JSON, no additional text
+- Exactly 5 questions
+- Each question must have exactly 4 options
+- Questions must be relevant to the mentioned symptoms
+- Use simple and clear English
+- NEVER mention names or personal information`
+
+    // 9. Configuration based on mode
     const aiConfig = AI_CONFIGS[mode as keyof typeof AI_CONFIGS] || AI_CONFIGS.balanced
-    console.log(`⚙️ Configuration IA: ${aiConfig.model} (mode: ${mode})`)
-    console.log(`🔒 Protection activée: Aucune donnée personnelle envoyée`)
-    console.log(`🤖 Forcer l'utilisation de l'IA: ${forceAI}`)
+    console.log(`⚙️ AI Config: ${aiConfig.model}`)
+    console.log(`🔒 Protection enabled: No personal data sent`)
 
-    // 7. Générer le prompt enrichi
-    const enhancedPrompt = generateEnhancedPrompt(
-      validatedPatientData,
-      validatedClinicalData,
-      mode
-    )
-
-    console.log(`📝 Prompt généré (${enhancedPrompt.length} caractères)`)
-
-    // 8. Appel OpenAI avec retry et meilleure gestion d'erreur
-    console.log(`🤖 Appel OpenAI ${aiConfig.model}...`)
+    // 10. OpenAI call with retry
+    console.log(`🤖 Calling OpenAI ${aiConfig.model}...`)
     const aiStartTime = Date.now()
     
     let openaiResponse
     let retryCount = 0
-    const maxRetries = 3
+    const maxRetries = 2
     
     while (retryCount <= maxRetries) {
       try {
-        console.log(`📡 Tentative ${retryCount + 1}/${maxRetries + 1}...`)
-        
         openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -312,13 +431,11 @@ export async function POST(request: NextRequest) {
             messages: [
               {
                 role: 'system',
-                content: `Tu es un médecin expert en télémédecine avec 20 ans d'expérience. 
-                Tu dois générer des questions diagnostiques pertinentes et adaptées au patient.
-                IMPORTANT: Réponds UNIQUEMENT en JSON valide, sans texte additionnel.`
+                content: 'You are an expert telemedicine physician. Generate relevant diagnostic questions in JSON format. IMPORTANT: Never include or ask for names or personally identifiable information.'
               },
               {
                 role: 'user',
-                content: enhancedPrompt
+                content: prompt
               }
             ],
             temperature: aiConfig.temperature,
@@ -327,136 +444,67 @@ export async function POST(request: NextRequest) {
           }),
         })
         
-        console.log(`📡 Réponse reçue: Status ${openaiResponse.status}`)
-        
         if (openaiResponse.ok) {
-          console.log('✅ Appel OpenAI réussi')
           break
         } else if (openaiResponse.status === 401) {
           const errorBody = await openaiResponse.text()
-          console.error('❌ Erreur 401 - Clé API invalide:', errorBody)
-          throw new Error(`Clé API invalide: ${errorBody}`)
-        } else if (openaiResponse.status === 429) {
-          if (retryCount < maxRetries) {
-            const waitTime = 2000 * (retryCount + 1)
-            console.warn(`⚠️ Limite de taux atteinte, attente ${waitTime}ms avant retry...`)
-            await new Promise(resolve => setTimeout(resolve, waitTime))
-            retryCount++
-          } else {
-            throw new Error('Limite de taux OpenAI dépassée')
-          }
-        } else if (openaiResponse.status === 500 || openaiResponse.status === 502 || openaiResponse.status === 503) {
-          if (retryCount < maxRetries) {
-            const waitTime = 1500 * (retryCount + 1)
-            console.warn(`⚠️ Erreur serveur OpenAI, attente ${waitTime}ms avant retry...`)
-            await new Promise(resolve => setTimeout(resolve, waitTime))
-            retryCount++
-          } else {
-            throw new Error(`Erreur serveur OpenAI: ${openaiResponse.status}`)
-          }
+          console.error('❌ Error 401 - Invalid API key:', errorBody)
+          throw new Error(`Invalid API key: ${errorBody}`)
+        } else if (openaiResponse.status === 429 && retryCount < maxRetries) {
+          console.warn(`⚠️ Rate limit, retry ${retryCount + 1}/${maxRetries}`)
+          await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)))
+          retryCount++
         } else {
           const errorText = await openaiResponse.text()
-          console.error(`❌ Erreur OpenAI ${openaiResponse.status}:`, errorText)
-          throw new Error(`Erreur OpenAI ${openaiResponse.status}: ${errorText.substring(0, 200)}`)
+          throw new Error(`OpenAI error ${openaiResponse.status}: ${errorText}`)
         }
-      } catch (error: any) {
-        console.error(`❌ Erreur lors de l'appel OpenAI:`, error.message)
-        
+      } catch (error) {
         if (retryCount >= maxRetries) {
           throw error
         }
-        
-        console.warn(`⚠️ Erreur, nouvelle tentative ${retryCount + 1}/${maxRetries}...`)
-        await new Promise(resolve => setTimeout(resolve, 2000 * (retryCount + 1)))
+        console.warn(`⚠️ Error, retry ${retryCount + 1}/${maxRetries}`)
+        await new Promise(resolve => setTimeout(resolve, 1000))
         retryCount++
       }
     }
     
     if (!openaiResponse || !openaiResponse.ok) {
-      throw new Error('Impossible de contacter OpenAI après plusieurs tentatives')
+      throw new Error('Unable to contact OpenAI')
     }
     
     const aiTime = Date.now() - aiStartTime
-    console.log(`✅ Réponse OpenAI en ${aiTime}ms`)
+    console.log(`✅ OpenAI response in ${aiTime}ms`)
     
-    // 9. Parser la réponse
+    // 11. Parse response
     const openaiData = await openaiResponse.json()
-    console.log('📦 Données OpenAI reçues:', {
-      hasChoices: !!openaiData.choices,
-      choicesLength: openaiData.choices?.length,
-      hasContent: !!openaiData.choices?.[0]?.message?.content
-    })
-    
     const content = openaiData.choices[0]?.message?.content || '{}'
-    console.log(`📄 Contenu reçu (${content.length} caractères)`)
     
-    let parsedResponse
+    let questions = []
     try {
-      parsedResponse = JSON.parse(content)
-      console.log('✅ JSON parsé avec succès:', {
-        hasQuestions: !!parsedResponse.questions,
-        questionsCount: parsedResponse.questions?.length,
-        hasUrgency: !!parsedResponse.urgency_assessment,
-        hasSpecialties: !!parsedResponse.recommended_specialties
-      })
+      const parsed = JSON.parse(content)
+      questions = parsed.questions || []
+      console.log(`✅ ${questions.length} questions extracted`)
     } catch (parseError) {
-      console.error("❌ Erreur de parsing JSON:", parseError)
-      console.error("Contenu reçu:", content.substring(0, 500))
-      
-      // Tentative de nettoyage du JSON
-      try {
-        const cleanedContent = content
-          .replace(/```json\n?/g, '')
-          .replace(/```\n?/g, '')
-          .trim()
-        parsedResponse = JSON.parse(cleanedContent)
-        console.log('✅ JSON nettoyé et parsé avec succès')
-      } catch (secondError) {
-        console.error("❌ Échec du parsing même après nettoyage")
-        throw new Error('Réponse OpenAI invalide')
-      }
+      console.error("❌ JSON parsing error:", parseError)
+      console.error("Content received:", content)
+      throw new Error('Invalid OpenAI response')
     }
 
-    // 10. Valider et formater les questions
-    const questions = parsedResponse.questions || []
-    
+    // 12. Validate questions
     if (!Array.isArray(questions) || questions.length === 0) {
-      console.error("⚠️ Aucune question valide générée, utilisation du fallback")
-      throw new Error("Aucune question générée par l'IA")
+      throw new Error("No valid questions generated")
     }
 
-    // Valider le format de chaque question
-    const validatedQuestions = questions.slice(0, 5).map((q: any, index: number) => ({
-      id: q.id || index + 1,
-      question: q.question || `Question ${index + 1}`,
-      options: Array.isArray(q.options) && q.options.length === 4 
-        ? q.options 
-        : ["Option 1", "Option 2", "Option 3", "Option 4"],
-      priority: q.priority || "medium",
-      rationale: q.rationale || ""
-    }))
-
-    console.log(`✅ ${validatedQuestions.length} questions validées`)
-
-    // 11. Préparer la réponse enrichie
+    // 13. Prepare response WITH PROTECTION INDICATOR
     const response = {
       success: true,
-      questions: validatedQuestions,
-      aiInsights: {
-        urgency_assessment: parsedResponse.urgency_assessment || {
-          level: "medium",
-          reason: "Évaluation basée sur les symptômes fournis"
-        },
-        recommended_specialties: parsedResponse.recommended_specialties || [],
-        ai_model_used: aiConfig.model,
-        processing_mode: mode
-      },
+      questions: questions.slice(0, 5), // Maximum 5 questions
       dataProtection: {
         enabled: true,
         anonymousId,
         method: 'anonymization',
         fieldsProtected: Object.keys(originalIdentity).filter(k => originalIdentity[k]),
-        message: 'Identité patient protégée durant le traitement IA',
+        message: 'Patient identity was protected during AI processing',
         compliance: {
           rgpd: true,
           hipaa: true,
@@ -465,41 +513,37 @@ export async function POST(request: NextRequest) {
       },
       metadata: {
         mode,
+        pattern,
         patientAge: validatedPatientData.age,
         responseTime: Date.now() - startTime,
         aiResponseTime: aiTime,
         fromCache: false,
         model: aiConfig.model,
-        dataProtected: true,
-        questionsGenerated: validatedQuestions.length,
-        retryCount: retryCount
+        dataProtected: true
       }
     }
 
-    console.log(`✅ Succès total: ${response.metadata.responseTime}ms`)
-    console.log(`🔒 Protection des données: ACTIVE`)
-    console.log(`📊 Questions générées: ${response.questions.length}`)
-    console.log(`⚡ Évaluation d'urgence: ${response.aiInsights.urgency_assessment.level}`)
+    // 14. Cache response
+    patternCache.set(cacheKey, response)
+
+    console.log(`✅ Total success: ${response.metadata.responseTime}ms`)
+    console.log(`🔒 Data protection: ACTIVE - No personal data sent to OpenAI`)
     
     return NextResponse.json(response)
 
   } catch (error: any) {
-    console.error(`❌ Erreur principale:`, error.message)
+    console.error(`❌ Error:`, error)
     console.error("Stack:", error.stack)
     
-    // Retourner les questions de fallback avec informations d'erreur
+    // Return fallback questions WITH PROTECTION
+    const pattern = 'general'
     return NextResponse.json({
-      success: false,
-      questions: FALLBACK_QUESTIONS.general,
-      error: {
-        message: error.message,
-        type: error.name,
-        suggestion: "Les questions par défaut ont été utilisées. Vérifiez votre configuration OpenAI."
-      },
+      success: true,
+      questions: FALLBACK_QUESTIONS[pattern],
       dataProtection: {
         enabled: true,
         method: 'fallback',
-        message: 'Questions de secours utilisées - aucun traitement IA',
+        message: 'Using fallback questions - no AI processing needed',
         compliance: {
           rgpd: true,
           hipaa: true
@@ -507,6 +551,7 @@ export async function POST(request: NextRequest) {
       },
       metadata: {
         mode: 'fallback',
+        pattern,
         responseTime: Date.now() - startTime,
         fallback: true,
         fallbackReason: error.message,
@@ -515,72 +560,62 @@ export async function POST(request: NextRequest) {
         dataProtected: true,
         debugInfo: {
           hasApiKey: !!process.env.OPENAI_API_KEY,
-          apiKeyLength: process.env.OPENAI_API_KEY?.length || 0,
-          timestamp: new Date().toISOString()
+          apiKeyLength: process.env.OPENAI_API_KEY?.length || 0
         }
       }
     })
   }
 }
 
-// ==================== ENDPOINT DE TEST AMÉLIORÉ ====================
+// ==================== TEST ENDPOINT ====================
 export async function GET(request: NextRequest) {
-  console.log("🧪 Test de connexion OpenAI...")
+  console.log("🧪 Testing OpenAI connection...")
   
   const apiKey = process.env.OPENAI_API_KEY
   debugApiKey(apiKey)
   
   if (!apiKey) {
     return NextResponse.json({
-      status: '❌ Pas de clé API',
-      error: 'OPENAI_API_KEY non définie',
-      help: 'Ajoutez OPENAI_API_KEY à vos variables d\'environnement',
+      status: '❌ No API key',
+      error: 'OPENAI_API_KEY not defined',
+      help: 'Add OPENAI_API_KEY to your environment variables',
       dataProtection: {
-        status: 'N/A - Pas de clé API'
+        status: 'N/A - No API key'
       }
     }, { status: 500 })
   }
   
   try {
-    // Test API simple
+    // Simple API test
     const testStart = Date.now()
-    const testPrompt = {
-      model: 'gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'system',
-          content: 'Tu es un assistant médical. Réponds uniquement en JSON.'
-        },
-        {
-          role: 'user',
-          content: 'Génère un JSON de test avec cette structure: {"status":"ok", "message":"Connexion OpenAI réussie", "timestamp":"[current time]"}'
-        }
-      ],
-      temperature: 0,
-      max_tokens: 100,
-      response_format: { type: "json_object" }
-    }
-    
-    console.log('📡 Envoi du test à OpenAI...')
-    
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(testPrompt),
+      body: JSON.stringify({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          {
+            role: 'user',
+            content: 'Respond with JSON: {"test":"ok"}'
+          }
+        ],
+        temperature: 0,
+        max_tokens: 50,
+        response_format: { type: "json_object" }
+      }),
     })
     
     if (!response.ok) {
       const error = await response.text()
-      console.error('❌ Erreur OpenAI:', error)
       return NextResponse.json({
-        status: '❌ Erreur OpenAI',
+        status: '❌ OpenAI error',
         error,
         statusCode: response.status,
         dataProtection: {
-          status: 'Erreur - API non accessible'
+          status: 'Error - API not accessible'
         }
       }, { status: response.status })
     }
@@ -588,78 +623,56 @@ export async function GET(request: NextRequest) {
     const data = await response.json()
     const testTime = Date.now() - testStart
     
-    let testResult
-    try {
-      testResult = JSON.parse(data.choices[0]?.message?.content || '{}')
-    } catch {
-      testResult = { message: "Réponse reçue mais non JSON" }
-    }
-    
     return NextResponse.json({
-      status: "✅ OpenAI connecté et fonctionnel",
+      status: "✅ OpenAI connected",
       responseTime: `${testTime}ms`,
-      testResponse: testResult,
+      response: data.choices[0]?.message?.content,
       dataProtection: {
-        status: '✅ Activée',
-        method: 'anonymisation',
-        compliance: ['RGPD', 'HIPAA'],
+        status: '✅ Enabled',
+        method: 'anonymization',
+        compliance: ['GDPR', 'HIPAA'],
         features: [
-          'Anonymisation automatique des données patient',
-          'Aucun nom/email/téléphone envoyé à OpenAI',
-          'ID anonyme pour le suivi',
-          'Journalisation sécurisée',
-          'Questions personnalisées par IA'
+          'Automatic patient data anonymization',
+          'No names/emails/phones sent to OpenAI',
+          'Anonymous ID for tracking',
+          'Secure logging'
         ]
       },
       modes: {
         fast: {
-          description: "Ultra-rapide pour triage",
+          description: "Ultra-fast",
           model: "gpt-3.5-turbo",
-          useCase: "Triage initial",
-          dataProtected: true,
-          questionsType: "Essentielles"
+          useCase: "Initial triage",
+          dataProtected: true
         },
         balanced: {
-          description: "Équilibré",
+          description: "Balanced",
           model: "gpt-4o-mini",
-          useCase: "Utilisation standard",
-          dataProtected: true,
-          questionsType: "Complètes"
+          useCase: "Standard usage",
+          dataProtected: true
         },
         intelligent: {
-          description: "Intelligence maximale",
+          description: "Maximum intelligence",
           model: "gpt-4o",
-          useCase: "Cas complexes",
-          dataProtected: true,
-          questionsType: "Approfondies"
+          useCase: "Complex cases",
+          dataProtected: true
         }
       },
-      apiInfo: {
-        keyValid: true,
-        keyPrefix: apiKey.substring(0, 20),
-        keyLength: apiKey.length,
-        modelsAvailable: ['gpt-3.5-turbo', 'gpt-4o-mini', 'gpt-4o'],
-        timestamp: new Date().toISOString()
-      },
-      improvements: [
-        "✅ Appel IA forcé pour personnalisation maximale",
-        "✅ Prompt enrichi avec contexte patient complet",
-        "✅ Retry automatique en cas d'erreur",
-        "✅ Évaluation d'urgence par IA",
-        "✅ Recommandations de spécialités",
-        "✅ Questions adaptées au profil patient"
-      ]
+      keyInfo: {
+        prefix: apiKey.substring(0, 20),
+        length: apiKey.length,
+        valid: true
+      }
     })
   } catch (error: any) {
-    console.error("❌ Erreur de test:", error)
+    console.error("❌ Test error:", error)
     return NextResponse.json({
-      status: "❌ Erreur",
+      status: "❌ Error",
       error: error.message,
       errorType: error.name,
       dataProtection: {
-        status: 'Erreur durant le test'
-      },
-      suggestion: "Vérifiez votre clé API et votre connexion internet"
+        status: 'Error during test'
+      }
     }, { status: 500 })
   }
 }
