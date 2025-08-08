@@ -641,17 +641,36 @@ function validateMedicalAnalysis(
   }
 }
 
+// ==================== GPT-5 SETTINGS ====================
+// Default sampling parameters tuned for GPT-5
+const DEFAULT_TEMPERATURE = 0.2;
+const DEFAULT_MAX_TOKENS = 1500;
+
+/**
+ * Heuristic to select GPT-5 model based on case complexity or explicit user request.
+ * If `body.modelChoice` is 'full' or 'turbo', override. Otherwise, use number
+ * of symptoms + AI questions to decide (≥5 → gpt-5, else gpt-5-turbo).
+ */
+function chooseModel(body: any, patientContext: PatientContext): string {
+  const requested = body?.modelChoice
+  if (requested === 'full') return 'gpt-5'
+  if (requested === 'turbo') return 'gpt-5-turbo'
+  const score = (patientContext.symptoms?.length || 0) + (patientContext.ai_questions?.length || 0)
+  return score >= 5 ? 'gpt-5' : 'gpt-5-turbo'
+}
+
 // ==================== INTELLIGENT RETRY ====================
 async function callOpenAIWithRetry(
   apiKey: string,
   prompt: string,
+  model: string,
   maxRetries: number = 2
 ): Promise<any> {
   let lastError: Error | null = null
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`📡 OpenAI call (attempt ${attempt + 1}/${maxRetries + 1})...`)
+      console.log(`📡 OpenAI call to ${model} (attempt ${attempt + 1}/${maxRetries + 1})...`)
       
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -660,7 +679,7 @@ async function callOpenAIWithRetry(
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o',
+          model: model,
           messages: [
             {
               role: 'system',
@@ -671,13 +690,13 @@ async function callOpenAIWithRetry(
               content: prompt
             }
           ],
-          temperature: 0.3,
-          max_tokens: 8000,
+          temperature: DEFAULT_TEMPERATURE,
+          max_tokens: DEFAULT_MAX_TOKENS,
           response_format: { type: "json_object" },
-          top_p: 0.95,
-          frequency_penalty: 0,
+          top_p: 1.0,
+          frequency_penalty: 0.0,
           presence_penalty: 0.1,
-          seed: 12345
+          seed: 42
         }),
       })
       
@@ -989,11 +1008,13 @@ export async function POST(request: NextRequest) {
     // 4. Prepare prompt
     const finalPrompt = preparePrompt(patientContext)
     
-    // 5. OpenAI call with intelligent retry
-    const { data: openaiData, analysis: medicalAnalysis } = await callOpenAIWithRetry(
-      apiKey,
-      finalPrompt
-    )
+    // 5. Determine model and call OpenAI with intelligent retry
+const model = chooseModel(body, patientContext)
+const { data: openaiData, analysis: medicalAnalysis } = await callOpenAIWithRetry(
+  apiKey,
+  finalPrompt,
+  model
+)
     
     console.log('✅ Medical analysis generated successfully')
     
@@ -1132,8 +1153,8 @@ export async function POST(request: NextRequest) {
       
       // Metadata
       metadata: {
-        ai_model: 'GPT-4o',
-        system_version: '2.0-Enhanced-Protected',
+        ai_model: model,  // Utilise la variable model,
+        system_version: '2.0-Enhanced-Protected-GPT5',
         approach: 'Flexible Evidence-Based Medicine with Data Protection',
         medical_guidelines: medicalAnalysis.quality_metrics?.guidelines_followed || ["WHO", "ESC", "NICE"],
         evidence_level: medicalAnalysis.quality_metrics?.evidence_level || "High",
