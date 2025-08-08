@@ -1143,7 +1143,7 @@ if (result.success) {
     }
   }, [patientData, clinicalData, questionsData, diagnosisData])
 
-  // Check for existing report
+// Check for existing report
   const checkExistingReport = async () => {
     try {
       const params = new URLSearchParams(window.location.search)
@@ -1162,9 +1162,43 @@ if (result.success) {
       if (result.success && result.data?.content) {
         const reportContent = result.data.content
         if (reportContent?.compteRendu) {
+          // CRITICAL FIX: Always reset to draft when loading a report
+          // This ensures the validate button is always available for re-validation
+          setValidationStatus('draft')
+          setDocumentSignatures({}) // Clear any existing signatures
+          
+          // Clean the report content to remove any validation artifacts
+          if (reportContent.compteRendu.metadata) {
+            reportContent.compteRendu.metadata.validationStatus = 'draft'
+            delete reportContent.compteRendu.metadata.signatures
+            delete reportContent.compteRendu.metadata.signatureDataUrl
+            delete reportContent.compteRendu.metadata.validatedAt
+            delete reportContent.compteRendu.metadata.validatedBy
+          }
+          
+          // Remove signatures from prescriptions if they exist
+          if (reportContent.ordonnances?.medicaments?.authentification) {
+            delete reportContent.ordonnances.medicaments.authentification.signatureImage
+            delete reportContent.ordonnances.medicaments.authentification.signedAt
+          }
+          
+          if (reportContent.ordonnances?.biologie?.authentification) {
+            delete reportContent.ordonnances.biologie.authentification.signatureImage
+            delete reportContent.ordonnances.biologie.authentification.signedAt
+          }
+          
+          if (reportContent.ordonnances?.imagerie?.authentification) {
+            delete reportContent.ordonnances.imagerie.authentification.signatureImage
+            delete reportContent.ordonnances.imagerie.authentification.signedAt
+          }
+          
+          if (reportContent.invoice?.signature) {
+            delete reportContent.invoice.signature.signatureImage
+            delete reportContent.invoice.signature.signedAt
+          }
+          
           setReport(reportContent)
           setReportId(result.data.id)
-          setValidationStatus(result.data.status || 'draft')
           
           if (reportContent.compteRendu.praticien) {
             setDoctorInfo(reportContent.compteRendu.praticien)
@@ -1172,7 +1206,7 @@ if (result.success) {
           
           toast({
             title: "Existing report found",
-            description: "Loading previous report"
+            description: "Loading previous report - ready for validation"
           })
         } else {
           generateProfessionalReport()
@@ -1190,6 +1224,9 @@ if (result.success) {
   const generateProfessionalReport = async () => {
     setLoading(true)
     setError(null)
+    // CRITICAL: Always reset validation status when generating a new report
+    setValidationStatus('draft')
+    setDocumentSignatures({})
 
     try {
       // Wait for doctor info to be loaded
@@ -1257,32 +1294,56 @@ if (result.success) {
         // Override the praticien data with actual doctor info
         reportData.compteRendu.praticien = currentDoctorInfo
         
-        // Also update all prescription headers
+        // CRITICAL: Ensure the report is set as draft, not validated
+        if (reportData.compteRendu.metadata) {
+          reportData.compteRendu.metadata.validationStatus = 'draft'
+          delete reportData.compteRendu.metadata.signatures
+          delete reportData.compteRendu.metadata.signatureDataUrl
+          delete reportData.compteRendu.metadata.validatedAt
+          delete reportData.compteRendu.metadata.validatedBy
+        }
+        
+        // Also update all prescription headers and remove any signatures
         if (reportData.ordonnances?.medicaments) {
           reportData.ordonnances.medicaments.enTete = currentDoctorInfo
           reportData.ordonnances.medicaments.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
           reportData.ordonnances.medicaments.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
+          // Remove any existing signatures
+          delete reportData.ordonnances.medicaments.authentification.signatureImage
+          delete reportData.ordonnances.medicaments.authentification.signedAt
         }
         
         if (reportData.ordonnances?.biologie) {
           reportData.ordonnances.biologie.enTete = currentDoctorInfo
           reportData.ordonnances.biologie.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
           reportData.ordonnances.biologie.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
+          // Remove any existing signatures
+          delete reportData.ordonnances.biologie.authentification.signatureImage
+          delete reportData.ordonnances.biologie.authentification.signedAt
         }
         
         if (reportData.ordonnances?.imagerie) {
           reportData.ordonnances.imagerie.enTete = currentDoctorInfo
           reportData.ordonnances.imagerie.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
           reportData.ordonnances.imagerie.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
+          // Remove any existing signatures
+          delete reportData.ordonnances.imagerie.authentification.signatureImage
+          delete reportData.ordonnances.imagerie.authentification.signedAt
         }
         
         if (reportData.invoice?.physician) {
           reportData.invoice.physician.name = currentDoctorInfo.nom
           reportData.invoice.physician.registrationNumber = currentDoctorInfo.numeroEnregistrement
+          // Remove any existing signatures
+          if (reportData.invoice.signature) {
+            delete reportData.invoice.signature.signatureImage
+            delete reportData.invoice.signature.signedAt
+          }
         }
         
         setReport(reportData)
-        setValidationStatus('draft')
+        setValidationStatus('draft') // Ensure it's set to draft
+        setDocumentSignatures({}) // Clear any signatures
         
         // Auto-save the report immediately after generation
         const newReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -1305,7 +1366,7 @@ if (result.success) {
               consultationId,
               metadata: {
                 lastModified: new Date().toISOString(),
-                validationStatus: 'draft'
+                validationStatus: 'draft' // Explicitly set as draft
               }
             })
           })
@@ -1345,6 +1406,8 @@ if (result.success) {
         }
       }
       setReport(emptyReport)
+      setValidationStatus('draft') // Ensure it's set to draft even on error
+      setDocumentSignatures({}) // Clear any signatures
       
       toast({
         title: "Note",
@@ -1355,7 +1418,6 @@ if (result.success) {
       setLoading(false)
     }
   }
-
   // Save report (for backward compatibility but redirects to validation)
   const handleSave = async () => {
     // Auto-save is handled by validation now
