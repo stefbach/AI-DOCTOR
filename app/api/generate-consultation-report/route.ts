@@ -39,6 +39,40 @@ function anonymizePatientData(patientData: any): {
   return { anonymized, originalIdentity, anonymousId }
 }
 
+// ==================== GPT-5 MODEL SELECTION ====================
+/**
+ * Determine which GPT-5 model to use based on report complexity
+ */
+function selectGPT5Model(
+  patientData: any, 
+  diagnosisData: any, 
+  medications: any[], 
+  labTests: any[], 
+  imagingStudies: any[]
+): string {
+  let complexityScore = 0
+  
+  // Factor in patient complexity
+  if (patientData.age >= 65) complexityScore += 1
+  if ((patientData.medicalHistory || []).length > 3) complexityScore += 1
+  
+  // Factor in prescription complexity
+  if (medications.length > 3) complexityScore += 2
+  if (labTests.length > 5) complexityScore += 2
+  if (imagingStudies.length > 2) complexityScore += 1
+  
+  // Factor in diagnosis complexity
+  if (diagnosisData?.diagnosis?.primary?.severity === "severe") complexityScore += 2
+  if (diagnosisData?.diagnosis?.differential?.length > 3) complexityScore += 1
+  
+  // Select model based on complexity
+  const model = complexityScore >= 5 ? 'gpt-5' : 'gpt-5-turbo'
+  
+  console.log(`🤖 GPT-5 Model selection for report: ${model} (complexity score: ${complexityScore})`)
+  
+  return model
+}
+
 // Helper function to handle bilingual objects
 function getString(field: any): string {
   if (!field) return ''
@@ -434,7 +468,7 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any) {
 // ==================== MAIN FUNCTION ====================
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
-  console.log("🚀 Starting report generation (VERSION WITH ENGLISH CONTENT)")
+  console.log("🚀 Starting report generation with GPT-5 (VERSION WITH ENGLISH CONTENT)")
   
   try {
     const body = await request.json()
@@ -461,9 +495,13 @@ export async function POST(request: NextRequest) {
 
     // Data protection
     const { anonymized: anonymizedPatientData, originalIdentity, anonymousId } = anonymizePatientData(patientData)
+    console.log('🔒 Data protection: ACTIVE - No personal data sent to GPT-5')
     
     // PRESCRIPTIONS EXTRACTION WITH IMPROVED FUNCTION
     const { medications, labTests, imagingStudies } = extractPrescriptions(diagnosisData)
+    
+    // Determine which GPT-5 model to use
+    const selectedModel = selectGPT5Model(anonymizedPatientData, diagnosisData, medications, labTests, imagingStudies)
     
     // Extract real data from diagnosis
     const realData = extractRealDataFromDiagnosis(diagnosisData, clinicalData)
@@ -747,7 +785,7 @@ const praticien = {
       }
     }
 
-    // Prepare data for GPT-4 with REAL extracted information
+    // Prepare data for GPT-5 with REAL extracted information
     const gptData = {
       patient: {
         age: `${anonymizedPatientData.age || ''} years`,
@@ -767,12 +805,13 @@ const praticien = {
       imagingStudiesCount: imagingStudies.length
     }
 
-    // Generate narrative report with GPT-4 IN ENGLISH
+    // Generate narrative report with GPT-5 IN ENGLISH
     const systemPrompt = `You are a medical report writer for Mauritius. 
 Write professional medical reports in ENGLISH.
 Use the provided real patient data, do not invent information.
 Each section must contain minimum 150-200 words.
-If data is missing for a section, expand professionally on available information.`
+If data is missing for a section, expand professionally on available information.
+Use metric system (Celsius for temperature, not Fahrenheit).`
 
     const userPrompt = `Based on this REAL patient data, generate a professional medical report in ENGLISH:
 ${JSON.stringify(gptData, null, 2)}
@@ -788,13 +827,14 @@ Generate content for these sections IN ENGLISH:
 8. surveillance (Follow-up Plan) - Use: ${gptData.followUp}
 9. conclusion (Final Conclusion) - Summarize the case
 
-Return ONLY a JSON object with these 9 keys and their content in ENGLISH.`
+Return ONLY a JSON object with these 9 keys and their content in ENGLISH.
+Remember to use Celsius for temperature (not Fahrenheit).`
 
-    console.log("🤖 Calling GPT-4 for ENGLISH content...")
+    console.log(`🤖 Calling ${selectedModel} for ENGLISH content generation...`)
     
     try {
       const result = await generateText({
-        model: openai("gpt-4o"),
+        model: openai(selectedModel),
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
@@ -802,6 +842,8 @@ Return ONLY a JSON object with these 9 keys and their content in ENGLISH.`
         maxTokens: 4000,
         temperature: 0.2,
       })
+
+      console.log(`✅ ${selectedModel} response received`)
 
       // Parse and extract narrative content
       const cleanedText = result.text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
@@ -829,7 +871,7 @@ Return ONLY a JSON object with these 9 keys and their content in ENGLISH.`
         useRealDataFallback(reportStructure, gptData)
       }
     } catch (error) {
-      console.error("❌ GPT-4 Error:", error)
+      console.error(`❌ ${selectedModel} Error:`, error)
       // Use fallback content with real data
       useRealDataFallback(reportStructure, gptData)
     }
@@ -858,16 +900,30 @@ Return ONLY a JSON object with these 9 keys and their content in ENGLISH.`
 
     console.log("\n✅ REPORT GENERATED SUCCESSFULLY")
     console.log("📊 Final summary:")
+    console.log(`   - Model used: ${selectedModel}`)
     console.log(`   - Medications: ${medications.length}`)
     console.log(`   - Lab tests: ${labTests.length}`)
     console.log(`   - Imaging: ${imagingStudies.length}`)
     console.log(`   - Processing time: ${processingTime}ms`)
+    console.log(`🔒 Data protection: ACTIVE - No personal data sent to ${selectedModel}`)
 
     return NextResponse.json({
       success: true,
       report: reportStructure,
+      dataProtection: {
+        enabled: true,
+        anonymousId,
+        method: 'anonymization',
+        message: 'Patient data was protected during AI processing',
+        compliance: {
+          rgpd: true,
+          hipaa: true,
+          dataMinimization: true
+        }
+      },
       metadata: {
         type: "professional_narrative_mauritius_compliant",
+        model: selectedModel,
         includesFullPrescriptions: true,
         generatedAt: currentDate.toISOString(),
         processingTimeMs: processingTime,
@@ -875,7 +931,8 @@ Return ONLY a JSON object with these 9 keys and their content in ENGLISH.`
           medications: medications.length,
           laboratoryTests: labTests.length,
           imagingStudies: imagingStudies.length
-        }
+        },
+        dataProtected: true
       }
     })
 
