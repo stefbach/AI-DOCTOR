@@ -644,7 +644,7 @@ function validateMedicalAnalysis(
 // ==================== GPT-5 SETTINGS ====================
 // Default sampling parameters tuned for GPT-5
 const DEFAULT_TEMPERATURE = 0.2;
-const DEFAULT_MAX_TOKENS = 1500;
+const DEFAULT_MAX_COMPLETION_TOKENS = 1500;
 
 /**
  * Heuristic to select GPT-5 model based on case complexity or explicit user request.
@@ -691,7 +691,7 @@ async function callOpenAIWithRetry(
             }
           ],
           temperature: DEFAULT_TEMPERATURE,
-          max_tokens: DEFAULT_MAX_TOKENS,
+          max_completion_tokens: DEFAULT_MAX_COMPLETION_TOKENS,  // FIXED: Changed from max_tokens to max_completion_tokens
           response_format: { type: "json_object" },
           top_p: 1.0,
           frequency_penalty: 0.0,
@@ -1341,8 +1341,8 @@ export async function GET(request: NextRequest) {
     },
     performance: {
       averageResponseTime: '4-6 seconds',
-      maxTokens: 8000,
-      model: 'GPT-4o'
+      maxCompletionTokens: DEFAULT_MAX_COMPLETION_TOKENS,
+      model: 'GPT-4o / GPT-5 / GPT-5-turbo'
     }
   })
 }
