@@ -693,15 +693,16 @@ export default function ProfessionalReportEditable({
       const result = await response.json()
       console.log('✅ API Response:', result)
 
-      if (result.success) {
+if (result.success) {
         // Show initial success toast
         toast({
           title: "✅ Documents envoyés avec succès",
           description: "Les documents sont maintenant disponibles dans le tableau de bord du patient"
         })
 
-        // Create and show enhanced success modal (WITHOUT auto-close)
+        // Create and show enhanced success modal
         const showSuccessModal = () => {
+          // Create modal container
           const modalContainer = document.createElement('div')
           modalContainer.id = 'success-modal'
           modalContainer.style.cssText = `
@@ -715,6 +716,7 @@ export default function ProfessionalReportEditable({
             animation: fadeIn 0.3s ease-out;
           `
 
+          // Create modal content
           const modalContent = document.createElement('div')
           modalContent.style.cssText = `
             background: white;
@@ -790,39 +792,33 @@ export default function ProfessionalReportEditable({
                 </p>
               </div>
               
-              <!-- Buttons -->
-              <div style="display: flex; gap: 0.75rem; justify-content: center;">
-                <button id="continue-btn" style="
-                  padding: 0.5rem 1.5rem;
-                  background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
-                  color: white;
-                  border: none;
-                  border-radius: 0.5rem;
-                  font-weight: 500;
-                  cursor: pointer;
-                  transition: all 0.2s;
-                " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                  Continuer mon travail
-                </button>
-                
-                <button id="dashboard-btn" style="
-                  padding: 0.5rem 1.5rem;
-                  background: white;
-                  color: #3b82f6;
-                  border: 1px solid #3b82f6;
-                  border-radius: 0.5rem;
-                  font-weight: 500;
-                  cursor: pointer;
-                  transition: all 0.2s;
-                " onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='white'">
-                  Voir le tableau de bord patient
-                </button>
-              </div>
+              <!-- Single Button to Close Tab -->
+              <button id="close-tab-btn" style="
+                width: 100%;
+                padding: 0.75rem 1.5rem;
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+                color: white;
+                border: none;
+                border-radius: 0.5rem;
+                font-weight: 600;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+              " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+                Cliquez ici pour fermer cet onglet si vous avez terminé
+              </button>
               
-              <!-- Optional Actions -->
-              <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+              <!-- Optional Note -->
+              <div style="margin-top: 1rem;">
                 <p style="font-size: 0.75rem; color: #9ca3af; margin: 0;">
-                  Vous pouvez maintenant traiter une nouvelle consultation ou fermer cette fenêtre.
+                  Vous pouvez également garder cet onglet ouvert pour traiter d'autres consultations
                 </p>
               </div>
             </div>
@@ -859,27 +855,75 @@ export default function ProfessionalReportEditable({
           `
           document.head.appendChild(style)
 
-          // Close modal function (only closes modal, no window closing)
+          // Function to close the tab
+          const closeTab = () => {
+            // Clear session storage
+            sessionStorage.removeItem('currentDoctorInfo')
+            
+            // Try to close the window/tab
+            if (window.opener) {
+              // If opened as popup
+              window.close()
+            } else {
+              // If regular tab, try to close (may not work in all browsers)
+              window.close()
+              
+              // If window.close() doesn't work, show a message
+              setTimeout(() => {
+                const modal = document.getElementById('success-modal')
+                if (modal) {
+                  modal.innerHTML = `
+                    <div style="background: white; padding: 2rem; border-radius: 1rem; max-width: 400px; margin: auto;">
+                      <div style="text-align: center;">
+                        <div style="width: 60px; height: 60px; background: #fbbf24; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                          <svg width="30" height="30" fill="white" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                          </svg>
+                        </div>
+                        <h3 style="font-size: 1.25rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
+                          Impossible de fermer automatiquement
+                        </h3>
+                        <p style="color: #6b7280; margin-bottom: 1rem;">
+                          Votre navigateur empêche la fermeture automatique des onglets.
+                        </p>
+                        <p style="color: #4b5563; font-weight: 500;">
+                          Veuillez fermer manuellement cet onglet.
+                        </p>
+                        <button onclick="document.getElementById('success-modal').remove()" style="
+                          margin-top: 1rem;
+                          padding: 0.5rem 1rem;
+                          background: #3b82f6;
+                          color: white;
+                          border: none;
+                          border-radius: 0.5rem;
+                          cursor: pointer;
+                        ">
+                          OK, Compris
+                        </button>
+                      </div>
+                    </div>
+                  `
+                }
+              }, 100)
+            }
+          }
+
+          // Close modal function (only closes the modal, not the tab)
           const closeModal = () => {
             const modal = document.getElementById('success-modal')
             if (modal) {
               modal.style.animation = 'fadeOut 0.3s ease-out'
               setTimeout(() => {
                 modal.remove()
-                sessionStorage.removeItem('currentDoctorInfo')
               }, 300)
             }
           }
 
           // Button event listeners
           document.getElementById('close-x-btn')?.addEventListener('click', closeModal)
-          document.getElementById('continue-btn')?.addEventListener('click', closeModal)
-          document.getElementById('dashboard-btn')?.addEventListener('click', () => {
-            window.open(`${tibokUrl}/dashboard?tab=prescriptions`, '_blank')
-            closeModal()
-          })
+          document.getElementById('close-tab-btn')?.addEventListener('click', closeTab)
 
-          // Allow clicking outside to close
+          // Optional: Allow clicking outside to close modal only (not tab)
           modalContainer.addEventListener('click', (e) => {
             if (e.target === modalContainer) {
               closeModal()
@@ -887,7 +931,7 @@ export default function ProfessionalReportEditable({
           })
         }
 
-        // Show the modal
+        // Show the modal after a brief delay to ensure DOM is ready
         setTimeout(showSuccessModal, 100)
         
       } else {
