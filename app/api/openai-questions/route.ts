@@ -295,18 +295,18 @@ function chooseModel(mode: string, symptomsString: string, patientData: any): st
     return 'gpt-5'
   }
   
-  return 'gpt-5-turbo'
+  return 'gpt-5'
 }
 
 // ==================== MODEL CONFIGURATION ====================
 const AI_CONFIGS = {
   fast: {
-    model: "gpt-5-turbo",  // Changed from gpt-3.5-turbo
+    model: "gpt-5",  // Changed from gpt-3.5-turbo
     temperature: 0.1,
     maxTokens: 500
   },
   balanced: {
-    model: "gpt-5-turbo",  // Changed from gpt-4o-mini
+    model: "gpt-5",  // Changed from gpt-4o-mini
     temperature: 0.15,
     maxTokens: 800
   },
@@ -381,7 +381,7 @@ export async function POST(request: NextRequest) {
     
     // Determine which GPT-5 model to use
     const selectedModel = modelChoice 
-      ? (modelChoice === 'full' ? 'gpt-5' : 'gpt-5-turbo')
+      ? (modelChoice === 'full' ? 'gpt-5' : 'gpt-5')
       : chooseModel(mode, symptomsString, validatedPatientData)
     
     console.log(`🤖 Selected model: ${selectedModel} (mode: ${mode})`)
@@ -738,13 +738,13 @@ export async function GET(request: NextRequest) {
       modes: {
         fast: {
           description: "Ultra-fast with GPT-5 Turbo",
-          model: "gpt-5-turbo",
+          model: "gpt-5",
           useCase: "Initial triage",
           dataProtected: true
         },
         balanced: {
           description: "Balanced with GPT-5 Turbo",
-          model: "gpt-5-turbo",
+          model: "gpt-5",
           useCase: "Standard usage",
           dataProtected: true
         },
