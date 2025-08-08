@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
+import { DoctorSignature } from "@/components/doctor-signature"
+import { useTibokDoctorData } from "@/hooks/use-tibok-doctor-data"
 import { 
   FileText, 
   Download, 
@@ -307,7 +309,7 @@ export default function ProfessionalReportEditable({
     invoice?: string
   }>({})
 
-  // UPDATED: Enhanced validation with digital signature integration
+// UPDATED: Enhanced validation with digital signature integration
   const handleValidation = async () => {
     // Check if doctor info is complete
     const requiredFieldsMissing = []
@@ -493,62 +495,59 @@ export default function ProfessionalReportEditable({
         } : report.invoice
       }
       
-      // Get URL parameters for logging
+      // Get URL parameters
       const params = new URLSearchParams(window.location.search)
       const consultationId = params.get('consultationId')
       const patientId = params.get('patientId') || patientData?.id
       const doctorId = params.get('doctorId')
       
-      // REMOVED: API calls to save-medical-report and update-doctor-signature
-      // Validation is now handled locally without server persistence
-      
-      console.log('✅ Report validated locally (API calls removed):', {
-        reportId: currentReportId,
-        patientId: patientId || 'temp',
-        consultationId,
-        doctorId,
-        doctorName: doctorInfo.nom,
-        patientName: getReportPatient().nomComplet || getReportPatient().nom,
-        validatedAt: new Date().toISOString(),
-        validatedBy: doctorInfo.nom,
-        documentValidations: {
-          consultation: true,
-          prescription: !!report?.ordonnances?.medicaments,
-          laboratory: !!report?.ordonnances?.biologie,
-          imaging: !!report?.ordonnances?.imagerie,
-          invoice: !!report?.invoice
-        }
-      })
-      
-      // Update states to reflect validation
-      setValidationStatus('validated')
-      setEditMode(false)
-      setReport(updatedReport)
-      setModifiedSections(new Set())
-      
-      // Store signature in localStorage for session persistence (optional)
-      if (doctorId && signatureDataUrl) {
-        try {
-          const signatureData = {
-            doctorId: doctorId,
-            doctorName: doctorInfo.nom,
+      // Save the validated report with signatures
+      const response = await fetch('/api/save-medical-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reportId: currentReportId,
+          patientId: patientId || 'temp',
+          consultationId,
+          doctorId,
+          doctorName: doctorInfo.nom,
+          patientName: getReportPatient().nomComplet || getReportPatient().nom,
+          report: updatedReport,
+          action: 'validate',
+          metadata: {
+            validatedAt: new Date().toISOString(),
+            validatedBy: doctorInfo.nom,
+            validationStatus: 'validated',
+            signatures: signatures,
             signatureDataUrl: signatureDataUrl,
-            lastSignedAt: new Date().toISOString()
+            documentValidations: {
+              consultation: true,
+              prescription: !!report?.ordonnances?.medicaments,
+              laboratory: !!report?.ordonnances?.biologie,
+              imaging: !!report?.ordonnances?.imagerie,
+              invoice: !!report?.invoice
+            }
           }
-          localStorage.setItem(`doctor_signature_${doctorId}`, JSON.stringify(signatureData))
-          console.log('📝 Signature stored locally for session')
-        } catch (err) {
-          console.log('Could not store signature locally:', err)
-          // Non-critical error, continue
-        }
-      }
-      
-      // Show success toast
-      toast({
-        title: "✅ Validation successful",
-        description: "All documents have been validated and digitally signed. You can now send them to the patient dashboard."
+        })
       })
-      
+
+      // Handle the response properly
+      if (response.ok) {
+        const result = await response.json()
+        console.log('✅ Report validated and saved:', result)
+        
+        // Update the local state
+        setReport(updatedReport)
+        setValidationStatus('validated')
+        setModifiedSections(new Set())
+        
+        toast({
+          title: "✅ Document Validated",
+          description: "All documents have been validated and digitally signed"
+        })
+      } else {
+        throw new Error('Failed to save validated report')
+      }
     } catch (error) {
       console.error('Validation error:', error)
       toast({
@@ -559,7 +558,7 @@ export default function ProfessionalReportEditable({
     } finally {
       setSaving(false)
     }
-  }
+  }  // Closing brace for handleValidation
 
   // handleSendDocuments should be a SEPARATE function
   const handleSendDocuments = async () => {
@@ -694,7 +693,7 @@ export default function ProfessionalReportEditable({
       const result = await response.json()
       console.log('✅ API Response:', result)
 
-      if (result.success) {
+if (result.success) {
         // Show initial success toast
         toast({
           title: "✅ Documents envoyés avec succès",
@@ -946,7 +945,7 @@ export default function ProfessionalReportEditable({
         variant: "destructive"
       })
     }
-  }
+  }  // Closing brace for handleSendDocuments
   
   // Safe getter functions
   const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
@@ -992,7 +991,6 @@ export default function ProfessionalReportEditable({
     const updatedInfo = { ...doctorInfo, [field]: value }
     sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
   }
-  
   // UPDATED: Load doctor information from Tibok with better field mapping and debugging
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
@@ -1145,7 +1143,7 @@ export default function ProfessionalReportEditable({
     }
   }, [patientData, clinicalData, questionsData, diagnosisData])
 
-  // Check for existing report
+// Check for existing report
   const checkExistingReport = async () => {
     try {
       const params = new URLSearchParams(window.location.search)
@@ -1158,15 +1156,66 @@ export default function ProfessionalReportEditable({
         return
       }
       
-      // REMOVED: Check for existing report via save-medical-report API
-      // const response = await fetch(`/api/save-medical-report?patientId=${actualPatientId}`)
-      // Go directly to generate report since we can't check for existing reports anymore
+      const response = await fetch(`/api/save-medical-report?patientId=${actualPatientId}`)
+      const result = await response.json()
       
-      console.log("Skipping existing report check (save-medical-report API removed), generating new report")
-      generateProfessionalReport()
-      
+      if (result.success && result.data?.content) {
+        const reportContent = result.data.content
+        if (reportContent?.compteRendu) {
+          // CRITICAL FIX: Always reset to draft when loading a report
+          // This ensures the validate button is always available for re-validation
+          setValidationStatus('draft')
+          setDocumentSignatures({}) // Clear any existing signatures
+          
+          // Clean the report content to remove any validation artifacts
+          if (reportContent.compteRendu.metadata) {
+            reportContent.compteRendu.metadata.validationStatus = 'draft'
+            delete reportContent.compteRendu.metadata.signatures
+            delete reportContent.compteRendu.metadata.signatureDataUrl
+            delete reportContent.compteRendu.metadata.validatedAt
+            delete reportContent.compteRendu.metadata.validatedBy
+          }
+          
+          // Remove signatures from prescriptions if they exist
+          if (reportContent.ordonnances?.medicaments?.authentification) {
+            delete reportContent.ordonnances.medicaments.authentification.signatureImage
+            delete reportContent.ordonnances.medicaments.authentification.signedAt
+          }
+          
+          if (reportContent.ordonnances?.biologie?.authentification) {
+            delete reportContent.ordonnances.biologie.authentification.signatureImage
+            delete reportContent.ordonnances.biologie.authentification.signedAt
+          }
+          
+          if (reportContent.ordonnances?.imagerie?.authentification) {
+            delete reportContent.ordonnances.imagerie.authentification.signatureImage
+            delete reportContent.ordonnances.imagerie.authentification.signedAt
+          }
+          
+          if (reportContent.invoice?.signature) {
+            delete reportContent.invoice.signature.signatureImage
+            delete reportContent.invoice.signature.signedAt
+          }
+          
+          setReport(reportContent)
+          setReportId(result.data.id)
+          
+          if (reportContent.compteRendu.praticien) {
+            setDoctorInfo(reportContent.compteRendu.praticien)
+          }
+          
+          toast({
+            title: "Existing report found",
+            description: "Loading previous report - ready for validation"
+          })
+        } else {
+          generateProfessionalReport()
+        }
+      } else {
+        generateProfessionalReport()
+      }
     } catch (error) {
-      console.log("Error in checkExistingReport, generating new one:", error)
+      console.log("No existing report, generating new one")
       generateProfessionalReport()
     }
   }
@@ -1300,16 +1349,32 @@ export default function ProfessionalReportEditable({
         const newReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
         setReportId(newReportId)
         
-        // REMOVED: Auto-save via save-medical-report API
-        // Report is now only stored in local state
+        // Save to storage
         const params = new URLSearchParams(window.location.search)
         const consultationId = params.get('consultationId')
         const patientId = params.get('patientId') || patientData?.id
         
-        console.log('✅ Report generated locally with ID:', newReportId, {
-          consultationId,
-          patientId
-        })
+        if (consultationId && patientId) {
+          const saveResponse = await fetch('/api/save-medical-report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              reportId: newReportId,
+              patientId,
+              report: reportData,
+              action: 'save',
+              consultationId,
+              metadata: {
+                lastModified: new Date().toISOString(),
+                validationStatus: 'draft' // Explicitly set as draft
+              }
+            })
+          })
+          
+          if (saveResponse.ok) {
+            console.log('✅ Report auto-saved with ID:', newReportId)
+          }
+        }
         
         toast({
           title: "Report generated successfully",
@@ -1353,7 +1418,6 @@ export default function ProfessionalReportEditable({
       setLoading(false)
     }
   }
-  
   // Save report (for backward compatibility but redirects to validation)
   const handleSave = async () => {
     // Auto-save is handled by validation now
@@ -1397,7 +1461,6 @@ export default function ProfessionalReportEditable({
       method: method
     })
   }
-
   // Update medications
   const updateMedicament = (index: number, field: string, value: string) => {
     if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
@@ -1961,7 +2024,6 @@ export default function ProfessionalReportEditable({
   }
 
   const handlePrint = () => window.print()
-
   // Loading and error states
   if (loading) {
     return (
@@ -2169,8 +2231,7 @@ export default function ProfessionalReportEditable({
       </Card>
     )
   }
-
-  // Consultation report component
+  // Narrative report editing component
   const ConsultationReport = () => {
     const sections = [
       { key: 'motifConsultation', title: 'CHIEF COMPLAINT' },
@@ -2308,8 +2369,7 @@ export default function ProfessionalReportEditable({
       </Card>
     )
   }
-
-  // Medication prescription component
+  // Medication editing component
   const MedicationPrescription = () => {
     const medications = report?.ordonnances?.medicaments?.prescription?.medicaments || []
     const patient = getReportPatient()
@@ -2577,8 +2637,7 @@ export default function ProfessionalReportEditable({
       </div>
     )
   }
-
-  // Biology prescription component
+  // Biology tests editing component
   const BiologyPrescription = () => {
     const analyses = report?.ordonnances?.biologie?.prescription?.analyses || {}
     const hasTests = Object.values(analyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
@@ -2852,7 +2911,7 @@ export default function ProfessionalReportEditable({
     )
   }
 
-  // Imaging prescription component
+  // Imaging prescription editing component
   const ImagingPrescription = () => {
     const examens = report?.ordonnances?.imagerie?.prescription?.examens || []
     const patient = getReportPatient()
@@ -2955,4 +3014,532 @@ export default function ProfessionalReportEditable({
                       </div>
                     </div>
                     <div className="flex justify-between items-center">
-                      <div className="flex items
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={exam.urgence}
+                            onCheckedChange={(checked) => updateImagingExam(index, 'urgence', checked)}
+                          />
+                          <Label>Urgent</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={exam.contraste}
+                            onCheckedChange={(checked) => updateImagingExam(index, 'contraste', checked)}
+                          />
+                          <Label>Contrast required</Label>
+                        </div>
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => removeImagingExam(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="font-bold text-lg">
+                      {index + 1}. {exam.type || exam.modalite}
+                      {exam.urgence && <Badge className="ml-2 bg-red-100 text-red-800 urgent badge badge-red">URGENT</Badge>}
+                    </div>
+                    <p className="mt-1">
+                      <span className="font-medium">Region:</span> {exam.region}
+                    </p>
+                    <p className="mt-1">
+                      <span className="font-medium">Clinical Indication:</span> {exam.indicationClinique}
+                    </p>
+                    {exam.contraste && (
+                      <p className="mt-1 text-orange-600">
+                        ⚠️ <span className="font-medium">Contrast required</span>
+                      </p>
+                    )}
+                    {exam.protocoleSpecifique && (
+                      <p className="mt-1">
+                        <span className="font-medium">Protocol:</span> {exam.protocoleSpecifique}
+                      </p>
+                    )}
+                    {exam.questionDiagnostique && (
+                      <p className="mt-1 text-sm text-gray-600">
+                        <span className="font-medium">Clinical Question:</span> {exam.questionDiagnostique}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <Scan className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <p>No imaging studies ordered</p>
+            {editMode && (
+              <Button onClick={addImagingExam} className="mt-4" variant="outline">
+                <Plus className="h-4 w-4 mr-2" />
+                Add First Imaging Study
+              </Button>
+            )}
+          </div>
+        )}
+
+        <div className="mt-8 pt-6 border-t border-gray-300">
+          <p className="text-sm text-gray-600 mb-4">
+            Imaging Center: {report?.ordonnances?.imagerie?.prescription?.centreImagerie || "Any MoH approved imaging center"}
+          </p>
+          <div className="text-right signature">
+            <p className="font-semibold">{praticien.nom}</p>
+            <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
+            
+            {/* UPDATED: Enhanced signature display for imaging */}
+            {validationStatus === 'validated' && documentSignatures.imaging ? (
+              <div className="mt-4">
+                <img 
+                  src={documentSignatures.imaging} 
+                  alt="Doctor's Signature" 
+                  className="ml-auto h-20 w-auto"
+                  style={{ maxWidth: '300px' }}
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Digitally signed on {new Date().toLocaleDateString()}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-8">
+                <p className="text-sm">_______________________________</p>
+                <p className="text-sm">Requesting Physician's Signature</p>
+                <p className="text-sm">Date: {patient.dateExamen}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+  // Invoice Component
+  const InvoiceComponent = () => {
+    const invoice = report?.invoice
+    if (!invoice) return null
+
+    return (
+      <div id="invoice-document" className="bg-white p-8 rounded-lg shadow print:shadow-none">
+        <div className="text-center mb-8 header">
+          <h1 className="text-2xl font-bold mb-2">INVOICE</h1>
+          <p className="text-lg">No.: {invoice.header.invoiceNumber}</p>
+          <p className="text-sm text-gray-600">
+            Consultation Date: {invoice.header.consultationDate} | 
+            Invoice Date: {invoice.header.invoiceDate}
+          </p>
+        </div>
+
+        <div className="mb-6 p-4 bg-blue-50 rounded-lg info-box">
+          <h3 className="font-bold mb-2">Service Provider</h3>
+          <p className="font-bold">{invoice.provider.companyName}</p>
+          <p className="text-sm">Private company incorporated under Mauritian law</p>
+          <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+            <div>Company Reg. No.: {invoice.provider.registrationNumber}</div>
+            <div>VAT No.: {invoice.provider.vatNumber}</div>
+            <div className="col-span-2">Registered Office: {invoice.provider.registeredOffice}</div>
+            <div>Phone: {invoice.provider.phone}</div>
+            <div>Email: {invoice.provider.email}</div>
+            <div>Website: {invoice.provider.website}</div>
+            <div className="col-span-2 font-medium">Trade Name: {invoice.provider.tradeName}</div>
+          </div>
+          <p className="text-sm mt-2 italic">
+            Medical consultations provided by licensed physicians registered with the Medical Council of Mauritius
+          </p>
+        </div>
+
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg info-box">
+          <h3 className="font-bold mb-2">Patient Information</h3>
+          <div className="grid grid-cols-1 gap-1 text-sm">
+            <div><strong>Name:</strong> {invoice.patient.name}</div>
+            <div><strong>Email:</strong> {invoice.patient.email}</div>
+            <div><strong>Phone Number:</strong> {invoice.patient.phone}</div>
+            <div><strong>Tibok Patient ID:</strong> {invoice.patient.patientId}</div>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <h3 className="font-bold mb-4">Service Details</h3>
+          <table className="w-full border-collapse invoice-table">
+            <thead>
+              <tr className="border-b-2 border-gray-300">
+                <th className="text-left py-2">Description</th>
+                <th className="text-center py-2">Quantity</th>
+                <th className="text-right py-2">Unit Price (MUR)</th>
+                <th className="text-right py-2">Total (MUR)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invoice.services.items.map((item, idx) => (
+                <tr key={idx} className="border-b border-gray-200">
+                  <td className="py-2">{item.description}</td>
+                  <td className="text-center py-2">{item.quantity}</td>
+                  <td className="text-right py-2">{item.unitPrice.toLocaleString()}</td>
+                  <td className="text-right py-2 font-medium">{item.total.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-gray-300">
+                <td colSpan={3} className="text-right py-2">Subtotal (Excl. VAT):</td>
+                <td className="text-right py-2">MUR {invoice.services.subtotal.toLocaleString()}</td>
+              </tr>
+              <tr>
+                <td colSpan={3} className="text-right py-2">
+                  VAT ({(invoice.services.vatRate * 100).toFixed(0)}%):
+                </td>
+                <td className="text-right py-2">
+                  MUR {invoice.services.vatAmount.toLocaleString()}
+                  {invoice.services.vatAmount === 0 && (
+                    <span className="text-xs text-gray-600 block">
+                      (Exempt - medical services)
+                    </span>
+                  )}
+                </td>
+              </tr>
+              <tr className="font-bold text-lg invoice-total">
+                <td colSpan={3} className="text-right py-2">Total Due:</td>
+                <td className="text-right py-2">MUR {invoice.services.totalDue.toLocaleString()}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div className="mb-6 p-4 bg-green-50 rounded-lg payment-info">
+          <h3 className="font-bold mb-2">Payment Information</h3>
+          {editMode && validationStatus !== 'validated' ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Payment Method</Label>
+                  <Select value={invoice.payment.method} onValueChange={updatePaymentMethod}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Credit Card">Credit Card</SelectItem>
+                      <SelectItem value="MCB Juice">MCB Juice</SelectItem>
+                      <SelectItem value="MyT Money">MyT Money</SelectItem>
+                      <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                      <SelectItem value="Cash">Cash</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Payment Status</Label>
+                  <Select value={invoice.payment.status} onValueChange={updatePaymentStatus}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="paid">Paid</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div><strong>Payment Method:</strong> {invoice.payment.method}</div>
+              <div><strong>Payment Received On:</strong> {invoice.payment.receivedDate}</div>
+              <div className="col-span-2">
+                <strong>Status:</strong> 
+                <Badge className={`ml-2 ${
+                  invoice.payment.status === 'paid' ? 'bg-green-100 text-green-800' :
+                  invoice.payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {invoice.payment.status.toUpperCase()}
+                </Badge>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="mb-6 p-4 bg-purple-50 rounded-lg">
+          <h3 className="font-bold mb-2">Consulting Physician</h3>
+          <div className="text-sm">
+            <div><strong>Name:</strong> {invoice.physician.name}</div>
+            <div><strong>Medical Council Registration No.:</strong> {invoice.physician.registrationNumber}</div>
+          </div>
+        </div>
+
+        <div className="mb-8">
+          <h3 className="font-bold mb-2">Notes</h3>
+          <ul className="list-disc list-inside text-sm space-y-1">
+            {invoice.notes.map((note, idx) => (
+              <li key={idx}>{note}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mt-12 pt-8 border-t border-gray-300 text-center">
+          <p className="font-bold">Electronic Signature:</p>
+          
+          {/* UPDATED: Enhanced signature display for invoice */}
+          {validationStatus === 'validated' && documentSignatures.invoice ? (
+            <div className="mt-4 flex flex-col items-center">
+              <img 
+                src={documentSignatures.invoice} 
+                alt="Electronic Signature" 
+                className="h-20 w-auto"
+                style={{ maxWidth: '300px' }}
+              />
+              <p className="mt-2">{invoice.signature.entity}</p>
+              <p>on behalf of {invoice.signature.onBehalfOf}</p>
+              <p className="text-sm text-gray-600">{invoice.signature.title}</p>
+              <p className="text-sm text-gray-600 mt-2">
+                Digitally signed on {new Date().toLocaleDateString()}
+              </p>
+            </div>
+          ) : (
+            <>
+              <p className="mt-2">{invoice.signature.entity}</p>
+              <p>on behalf of {invoice.signature.onBehalfOf}</p>
+              <p className="text-sm text-gray-600">{invoice.signature.title}</p>
+            </>
+          )}
+        </div>
+
+        <div className="mt-6 flex justify-center print:hidden">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exportSectionToPDF('invoice-document', `invoice_${invoice.header.invoiceNumber}.pdf`)}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export Invoice
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // Actions Bar component
+  const ActionsBar = () => {
+    const metadata = getReportMetadata()
+    
+    return (
+      <Card className="print:hidden">
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <Badge className={validationStatus === 'validated' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                {validationStatus === 'validated' ? (
+                  <>
+                    <Lock className="h-3 w-3 mr-1" />
+                    Document validated & signed
+                  </>
+                ) : (
+                  <>
+                    <Unlock className="h-3 w-3 mr-1" />
+                    Draft - awaiting validation
+                  </>
+                )}
+              </Badge>
+              <span className="text-sm text-gray-600">
+                {metadata.wordCount} words
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant={editMode ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setEditMode(!editMode)}
+                disabled={validationStatus === 'validated'}
+              >
+                {editMode ? <Eye className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
+                {editMode ? 'Preview' : 'Edit'}
+              </Button>
+              
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleValidation}
+                disabled={saving || validationStatus === 'validated'}
+              >
+                {saving ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <FileCheck className="h-4 w-4 mr-2" />
+                )}
+                {validationStatus === 'validated' ? 'Validated' : 'Validate & Sign'}
+              </Button>
+              
+              <Button variant="outline" size="sm" onClick={handlePrint}>
+                <Printer className="h-4 w-4 mr-2" />
+                Print all
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Unsaved changes warning
+  const UnsavedChangesAlert = () => {
+    if (modifiedSections.size === 0 || validationStatus === 'validated') return null
+
+    return (
+      <Alert className="print:hidden">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          Changes will be saved automatically when you validate the document.
+        </AlertDescription>
+      </Alert>
+    )
+  }
+
+  // Prescription stats
+  const PrescriptionStats = () => {
+    const medicamentCount = report?.ordonnances?.medicaments?.prescription?.medicaments?.length || 0
+    const bioCount = Object.values(report?.ordonnances?.biologie?.prescription?.analyses || {})
+      .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)
+    const imagingCount = report?.ordonnances?.imagerie?.prescription?.examens?.length || 0
+
+    return (
+      <Card className="print:hidden">
+        <CardHeader>
+          <CardTitle className="text-lg">Prescription Summary</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="p-4 bg-green-50 rounded">
+              <Pill className="h-8 w-8 mx-auto mb-2 text-green-600" />
+              <p className="text-2xl font-bold text-green-600">{medicamentCount}</p>
+              <p className="text-sm text-gray-600">Medications</p>
+            </div>
+            <div className="p-4 bg-purple-50 rounded">
+              <TestTube className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+              <p className="text-2xl font-bold text-purple-600">{bioCount}</p>
+              <p className="text-sm text-gray-600">Lab Tests</p>
+            </div>
+            <div className="p-4 bg-indigo-50 rounded">
+              <Scan className="h-8 w-8 mx-auto mb-2 text-indigo-600" />
+              <p className="text-2xl font-bold text-indigo-600">{imagingCount}</p>
+              <p className="text-sm text-gray-600">Imaging</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Main render
+  return (
+    <div className="space-y-6 print:space-y-4">
+      <ActionsBar />
+      <UnsavedChangesAlert />
+      <DoctorInfoEditor />
+      <PrescriptionStats />
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="consultation">
+            <FileText className="h-4 w-4 mr-2" />
+            Report
+          </TabsTrigger>
+          <TabsTrigger value="medicaments">
+            <Pill className="h-4 w-4 mr-2" />
+            Medications
+            {report?.ordonnances?.medicaments?.prescription?.medicaments?.length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {report.ordonnances.medicaments.prescription.medicaments.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="biologie">
+            <TestTube className="h-4 w-4 mr-2" />
+            Laboratory
+            {report?.ordonnances?.biologie && (
+              <Badge variant="secondary" className="ml-2">
+                {Object.values(report.ordonnances.biologie.prescription.analyses || {})
+                  .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="imagerie">
+            <Scan className="h-4 w-4 mr-2" />
+            Imaging
+            {report?.ordonnances?.imagerie?.prescription?.examens?.length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {report.ordonnances.imagerie.prescription.examens.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="invoice">
+            <Receipt className="h-4 w-4 mr-2" />
+            Invoice
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="consultation">
+          <ConsultationReport />
+        </TabsContent>
+        
+        <TabsContent value="medicaments">
+          <MedicationPrescription />
+        </TabsContent>
+        
+        <TabsContent value="biologie">
+          <BiologyPrescription />
+        </TabsContent>
+        
+        <TabsContent value="imagerie">
+          <ImagingPrescription />
+        </TabsContent>
+
+        <TabsContent value="invoice">
+          <InvoiceComponent />
+        </TabsContent>
+      </Tabs>
+
+      <div className="hidden print:block">
+        <ConsultationReport />
+        {includeFullPrescriptions && report?.ordonnances && (
+          <>
+            {report.ordonnances.medicaments && (
+              <div className="page-break-before mt-8">
+                <MedicationPrescription />
+              </div>
+            )}
+            {report.ordonnances.biologie && (
+              <div className="page-break-before mt-8">
+                <BiologyPrescription />
+              </div>
+            )}
+            {report.ordonnances.imagerie && (
+              <div className="page-break-before mt-8">
+                <ImagingPrescription />
+              </div>
+            )}
+          </>
+        )}
+        {report?.invoice && (
+          <div className="page-break-before mt-8">
+            <InvoiceComponent />
+          </div>
+        )}
+      </div>
+
+      {validationStatus === 'validated' && (
+        <div className="flex justify-center print:hidden mt-8">
+          <Button 
+            size="lg"
+            onClick={handleSendDocuments}
+            className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+          >
+            <CheckCircle className="h-5 w-5 mr-2" />
+            Finalize and Send documents
+          </Button>
+        </div>
+      )}
+    </div>
+  )
+}
