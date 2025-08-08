@@ -1,6 +1,6 @@
 // app/api/openai-questions/route.ts - VERSION WITH DATA PROTECTION
 import { type NextRequest, NextResponse } from "next/server"
-import crypto from 'crypto'
+
 
 // Configuration for different speed modes
 export const runtime = 'edge'
