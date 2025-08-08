@@ -5,10 +5,10 @@ import crypto from 'crypto'
 // ==================== GPT-5 OPTIMIZED PARAMETERS ====================
 const GPT5_CONFIG = {
   model: 'gpt-5',  // ONLY GPT-5, NO TURBO
-  temperature: 0.2,
+  temperature: 1,   // GPT-5 only supports default temperature
   max_completion_tokens: 1200,
   top_p: 1.0,
-  frequency_penalty: 0.1,
+  frequency_penalty: 0.0,  // Using default values for GPT-5
   presence_penalty: 0.0,
   seed: 42  // For reproducibility
 }
@@ -686,9 +686,6 @@ async function callOpenAIWithRetry(
           temperature: GPT5_CONFIG.temperature,
           max_completion_tokens: GPT5_CONFIG.max_completion_tokens,
           response_format: { type: "json_object" },
-          top_p: GPT5_CONFIG.top_p,
-          frequency_penalty: GPT5_CONFIG.frequency_penalty,
-          presence_penalty: GPT5_CONFIG.presence_penalty,
           seed: GPT5_CONFIG.seed
         }),
       })
@@ -930,7 +927,7 @@ function generateMedicalDocuments(
 
 // ==================== MAIN FUNCTION ====================
 export async function POST(request: NextRequest) {
-  console.log('🚀 MAURITIUS MEDICAL AI - GPT-5 OPTIMIZED (DATA PROTECTION ENABLED)')
+  console.log('🚀 MAURITIUS MEDICAL AI - GPT-5 WITH DEFAULT PARAMETERS (DATA PROTECTION ENABLED)')
   console.log('📊 GPT-5 Config:', GPT5_CONFIG)
   const startTime = Date.now()
   
@@ -1148,12 +1145,9 @@ export async function POST(request: NextRequest) {
         ai_model: GPT5_CONFIG.model,
         model_parameters: {
           temperature: GPT5_CONFIG.temperature,
-          max_completion_tokens: GPT5_CONFIG.max_completion_tokens,
-          top_p: GPT5_CONFIG.top_p,
-          frequency_penalty: GPT5_CONFIG.frequency_penalty,
-          presence_penalty: GPT5_CONFIG.presence_penalty
+          max_completion_tokens: GPT5_CONFIG.max_completion_tokens
         },
-        system_version: '2.0-GPT5-Optimized',
+        system_version: '2.0-GPT5',
         approach: 'Flexible Evidence-Based Medicine with Data Protection',
         medical_guidelines: medicalAnalysis.quality_metrics?.guidelines_followed || ["WHO", "ESC", "NICE"],
         evidence_level: medicalAnalysis.quality_metrics?.evidence_level || "High",
@@ -1218,7 +1212,7 @@ export async function POST(request: NextRequest) {
       
       metadata: {
         ai_model: GPT5_CONFIG.model,
-        system_version: '2.0-GPT5-Optimized',
+        system_version: '2.0-GPT5',
         error_logged: true,
         support_contact: 'support@telemedecine.mu'
       }
@@ -1306,8 +1300,8 @@ export async function GET(request: NextRequest) {
   })
   
   return NextResponse.json({
-    status: '✅ Mauritius Medical AI - GPT-5 Optimized Version',
-    version: '2.0-GPT5-Optimized',
+    status: '✅ Mauritius Medical AI - GPT-5 Version',
+    version: '2.0-GPT5',
     model_configuration: GPT5_CONFIG,
     features: [
       'Patient data anonymization',
@@ -1344,12 +1338,7 @@ export async function GET(request: NextRequest) {
       averageResponseTime: '3-5 seconds',
       maxCompletionTokens: GPT5_CONFIG.max_completion_tokens,
       model: GPT5_CONFIG.model,
-      temperature: GPT5_CONFIG.temperature,
-      parameters: {
-        top_p: GPT5_CONFIG.top_p,
-        frequency_penalty: GPT5_CONFIG.frequency_penalty,
-        presence_penalty: GPT5_CONFIG.presence_penalty
-      }
+      temperature: GPT5_CONFIG.temperature
     }
   })
 }
