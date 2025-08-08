@@ -309,7 +309,7 @@ export default function ProfessionalReportEditable({
     invoice?: string
   }>({})
 
-  // UPDATED: Enhanced validation with digital signature integration
+// UPDATED: Enhanced validation with digital signature integration
   const handleValidation = async () => {
     // Check if doctor info is complete
     const requiredFieldsMissing = []
@@ -496,7 +496,7 @@ export default function ProfessionalReportEditable({
         } : report.invoice
       }
       
-// Get URL parameters
+      // Get URL parameters
       const params = new URLSearchParams(window.location.search)
       const consultationId = params.get('consultationId')
       const patientId = params.get('patientId') || patientData?.id
@@ -532,348 +532,378 @@ export default function ProfessionalReportEditable({
         })
       })
 
-const handleSendDocuments = async () => {
-  // Check if report is validated
-  if (!report || validationStatus !== 'validated') {
-    toast({
-      title: "Cannot send documents",
-      description: "Please validate the documents first",
-      variant: "destructive"
-    })
-    return
-  }
-  
-  try {
-    // Show loading state
-    toast({
-      title: "📤 Sending documents...",
-      description: "Preparing documents for patient dashboard"
-    })
-    
-    // Get necessary IDs from URL parameters
-    const params = new URLSearchParams(window.location.search)
-    const consultationId = params.get('consultationId')
-    const patientId = params.get('patientId') || patientData?.id
-    const doctorId = params.get('doctorId')
-
-    if (!consultationId || !patientId) {
+      // CRITICAL FIX: Handle the response properly
+      if (response.ok) {
+        const result = await response.json()
+        console.log('✅ Report validated and saved:', result)
+        
+        // Update the local state
+        setReport(updatedReport)
+        setValidationStatus('validated')
+        setModifiedSections(new Set())
+        
+        toast({
+          title: "✅ Document Validated",
+          description: "All documents have been validated and digitally signed"
+        })
+      } else {
+        throw new Error('Failed to save validated report')
+      }
+    } catch (error) {
+      console.error('Validation error:', error)
       toast({
-        title: "Error",
-        description: "Missing consultation or patient information",
+        title: "Validation Error",
+        description: error instanceof Error ? error.message : "Failed to validate document",
+        variant: "destructive"
+      })
+    } finally {
+      setSaving(false)
+    }
+  } // THIS CLOSING BRACE WAS MISSING!
+
+  // CRITICAL FIX: handleSendDocuments should be a SEPARATE function, not inside handleValidation
+  const handleSendDocuments = async () => {
+    // Check if report is validated
+    if (!report || validationStatus !== 'validated') {
+      toast({
+        title: "Cannot send documents",
+        description: "Please validate the documents first",
         variant: "destructive"
       })
       return
     }
+    
+    try {
+      // Show loading state
+      toast({
+        title: "📤 Sending documents...",
+        description: "Preparing documents for patient dashboard"
+      })
+      
+      // Get necessary IDs from URL parameters
+      const params = new URLSearchParams(window.location.search)
+      const consultationId = params.get('consultationId')
+      const patientId = params.get('patientId') || patientData?.id
+      const doctorId = params.get('doctorId')
 
-    // Smart Tibok URL detection
-    const getTibokUrl = () => {
-      // 1. Check URL parameter
-      const urlParam = params.get('tibokUrl')
-      if (urlParam) {
-        console.log('📍 Using Tibok URL from parameter:', decodeURIComponent(urlParam))
-        return decodeURIComponent(urlParam)
+      if (!consultationId || !patientId) {
+        toast({
+          title: "Error",
+          description: "Missing consultation or patient information",
+          variant: "destructive"
+        })
+        return
       }
 
-      // 2. Check referrer
-      if (document.referrer) {
-        try {
-          const referrerUrl = new URL(document.referrer)
-          // Only use referrer if it's a known Tibok domain
-          const knownTibokDomains = ['tibok.mu', 'v0-tibokmain2.vercel.app', 'localhost']
-          if (knownTibokDomains.some(domain => referrerUrl.hostname.includes(domain))) {
-            console.log('📍 Using Tibok URL from referrer:', referrerUrl.origin)
-            return referrerUrl.origin
+      // Smart Tibok URL detection
+      const getTibokUrl = () => {
+        // 1. Check URL parameter
+        const urlParam = params.get('tibokUrl')
+        if (urlParam) {
+          console.log('📍 Using Tibok URL from parameter:', decodeURIComponent(urlParam))
+          return decodeURIComponent(urlParam)
+        }
+
+        // 2. Check referrer
+        if (document.referrer) {
+          try {
+            const referrerUrl = new URL(document.referrer)
+            // Only use referrer if it's a known Tibok domain
+            const knownTibokDomains = ['tibok.mu', 'v0-tibokmain2.vercel.app', 'localhost']
+            if (knownTibokDomains.some(domain => referrerUrl.hostname.includes(domain))) {
+              console.log('📍 Using Tibok URL from referrer:', referrerUrl.origin)
+              return referrerUrl.origin
+            }
+          } catch (e) {
+            console.log('Could not parse referrer')
           }
-        } catch (e) {
-          console.log('Could not parse referrer')
+        }
+
+        // 3. Check environment variable
+        if (process.env.NEXT_PUBLIC_TIBOK_URL) {
+          console.log('📍 Using Tibok URL from environment:', process.env.NEXT_PUBLIC_TIBOK_URL)
+          return process.env.NEXT_PUBLIC_TIBOK_URL
+        }
+
+        // 4. Default to production
+        console.log('📍 Using default Tibok URL: https://tibok.mu')
+        return 'https://tibok.mu'
+      }
+
+      const tibokUrl = getTibokUrl()
+
+      // Prepare documents payload with all validated documents
+      const documentsPayload = {
+        consultationId,
+        patientId,
+        doctorId,
+        doctorName: doctorInfo.nom,
+        patientName: getReportPatient().nomComplet || getReportPatient().nom,
+        generatedAt: new Date().toISOString(),
+        documents: {
+          // Main consultation report
+          consultationReport: report.compteRendu ? {
+            type: 'consultation_report',
+            title: 'Medical Consultation Report',
+            content: report.compteRendu,
+            validated: true,
+            validatedAt: report.compteRendu.metadata.validatedAt,
+            signature: documentSignatures.consultation
+          } : null,
+          
+          // Prescriptions (if any)
+          prescriptions: report.ordonnances?.medicaments ? {
+            type: 'prescription',
+            title: 'Medical Prescription',
+            medications: report.ordonnances.medicaments.prescription.medicaments,
+            validity: report.ordonnances.medicaments.prescription.validite,
+            signature: documentSignatures.prescription,
+            content: report.ordonnances.medicaments
+          } : null,
+          
+          // Laboratory requests (if any)
+          laboratoryRequests: report.ordonnances?.biologie ? {
+            type: 'laboratory_request',
+            title: 'Laboratory Request Form',
+            tests: report.ordonnances.biologie.prescription.analyses,
+            signature: documentSignatures.laboratory,
+            content: report.ordonnances.biologie
+          } : null,
+          
+          // Imaging requests (if any)
+          imagingRequests: report.ordonnances?.imagerie ? {
+            type: 'imaging_request',
+            title: 'Radiology Request Form',
+            examinations: report.ordonnances.imagerie.prescription.examens,
+            signature: documentSignatures.imaging,
+            content: report.ordonnances.imagerie
+          } : null,
+          
+          // Invoice
+          invoice: report.invoice ? {
+            type: 'invoice',
+            title: `Invoice ${report.invoice.header.invoiceNumber}`,
+            content: report.invoice,
+            signature: documentSignatures.invoice
+          } : null
         }
       }
 
-      // 3. Check environment variable
-      if (process.env.NEXT_PUBLIC_TIBOK_URL) {
-        console.log('📍 Using Tibok URL from environment:', process.env.NEXT_PUBLIC_TIBOK_URL)
-        return process.env.NEXT_PUBLIC_TIBOK_URL
-      }
+      console.log('📦 Sending documents payload to:', tibokUrl)
+      console.log('📦 Payload:', documentsPayload)
 
-      // 4. Default to production
-      console.log('📍 Using default Tibok URL: https://tibok.mu')
-      return 'https://tibok.mu'
-    }
-
-    const tibokUrl = getTibokUrl()
-
-    // Prepare documents payload with all validated documents
-    const documentsPayload = {
-      consultationId,
-      patientId,
-      doctorId,
-      doctorName: doctorInfo.nom,
-      patientName: getReportPatient().nomComplet || getReportPatient().nom,
-      generatedAt: new Date().toISOString(),
-      documents: {
-        // Main consultation report
-        consultationReport: report.compteRendu ? {
-          type: 'consultation_report',
-          title: 'Medical Consultation Report',
-          content: report.compteRendu,
-          validated: true,
-          validatedAt: report.compteRendu.metadata.validatedAt,
-          signature: documentSignatures.consultation
-        } : null,
-        
-        // Prescriptions (if any)
-        prescriptions: report.ordonnances?.medicaments ? {
-          type: 'prescription',
-          title: 'Medical Prescription',
-          medications: report.ordonnances.medicaments.prescription.medicaments,
-          validity: report.ordonnances.medicaments.prescription.validite,
-          signature: documentSignatures.prescription,
-          content: report.ordonnances.medicaments
-        } : null,
-        
-        // Laboratory requests (if any)
-        laboratoryRequests: report.ordonnances?.biologie ? {
-          type: 'laboratory_request',
-          title: 'Laboratory Request Form',
-          tests: report.ordonnances.biologie.prescription.analyses,
-          signature: documentSignatures.laboratory,
-          content: report.ordonnances.biologie
-        } : null,
-        
-        // Imaging requests (if any)
-        imagingRequests: report.ordonnances?.imagerie ? {
-          type: 'imaging_request',
-          title: 'Radiology Request Form',
-          examinations: report.ordonnances.imagerie.prescription.examens,
-          signature: documentSignatures.imaging,
-          content: report.ordonnances.imagerie
-        } : null,
-        
-        // Invoice
-        invoice: report.invoice ? {
-          type: 'invoice',
-          title: `Invoice ${report.invoice.header.invoiceNumber}`,
-          content: report.invoice,
-          signature: documentSignatures.invoice
-        } : null
-      }
-    }
-
-    console.log('📦 Sending documents payload to:', tibokUrl)
-    console.log('📦 Payload:', documentsPayload)
-
-    // Send to Tibok patient dashboard
-    const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(documentsPayload)
-    })
-
-    // Check if response is ok before parsing JSON
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('❌ Tibok API error:', errorText)
-      throw new Error(`Failed to send documents: ${response.status} - ${errorText}`)
-    }
-
-    const result = await response.json()
-    console.log('✅ API Response:', result)
-
-    if (result.success) {
-      // Show initial success toast
-      toast({
-        title: "✅ Documents envoyés avec succès",
-        description: "Les documents sont maintenant disponibles dans le tableau de bord du patient"
+      // Send to Tibok patient dashboard
+      const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(documentsPayload)
       })
 
-      // Create and show enhanced success modal
-      const showSuccessModal = () => {
-        // Create modal container
-        const modalContainer = document.createElement('div')
-        modalContainer.id = 'success-modal'
-        modalContainer.style.cssText = `
-          position: fixed;
-          inset: 0;
-          background: rgba(0, 0, 0, 0.5);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 9999;
-          animation: fadeIn 0.3s ease-out;
-        `
-
-        // Create modal content
-        const modalContent = document.createElement('div')
-        modalContent.style.cssText = `
-          background: white;
-          padding: 2rem;
-          border-radius: 1rem;
-          max-width: 500px;
-          margin: 1rem;
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-          animation: slideUp 0.3s ease-out;
-        `
-
-        modalContent.innerHTML = `
-          <div style="text-align: center;">
-            <!-- Success Icon -->
-            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; animation: scaleIn 0.5s ease-out;">
-              <svg width="40" height="40" fill="white" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-            </div>
-            
-            <!-- Title -->
-            <h2 style="font-size: 1.5rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
-              Documents envoyés avec succès!
-            </h2>
-            
-            <!-- Description -->
-            <p style="color: #6b7280; margin-bottom: 1.5rem; line-height: 1.5;">
-              Les documents médicaux ont été transmis au tableau de bord du patient.<br>
-              Le patient recevra une notification pour valider son ordonnance.
-            </p>
-            
-            <!-- Info Box -->
-            <div style="background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e7eb;">
-              <p style="font-size: 0.875rem; color: #4b5563; margin: 0 0 0.5rem 0;">
-                <strong>Prochaines étapes:</strong>
-              </p>
-              <ul style="text-align: left; font-size: 0.875rem; color: #6b7280; margin: 0; padding-left: 1.5rem;">
-                <li>Le patient validera son ordonnance</li>
-                <li>La pharmacie préparera les médicaments</li>
-                <li>Livraison selon l'option choisie par le patient</li>
-              </ul>
-            </div>
-            
-            <!-- Countdown -->
-            <div style="background: #fef3c7; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #fde68a;">
-              <p style="font-size: 0.875rem; color: #92400e; margin: 0;">
-                ⏱️ Cette fenêtre se fermera automatiquement dans <span id="countdown" style="font-weight: bold;">5</span> secondes
-              </p>
-            </div>
-            
-            <!-- Buttons -->
-            <div style="display: flex; gap: 0.75rem; justify-content: center;">
-              <button id="close-now-btn" style="
-                padding: 0.5rem 1.5rem;
-                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-                color: white;
-                border: none;
-                border-radius: 0.5rem;
-                font-weight: 500;
-                cursor: pointer;
-                transition: all 0.2s;
-              " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                Fermer maintenant
-              </button>
-              
-              <button id="dashboard-btn" style="
-                padding: 0.5rem 1.5rem;
-                background: white;
-                color: #3b82f6;
-                border: 1px solid #3b82f6;
-                border-radius: 0.5rem;
-                font-weight: 500;
-                cursor: pointer;
-                transition: all 0.2s;
-              " onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='white'">
-                Voir le tableau de bord
-              </button>
-            </div>
-          </div>
-        `
-
-        modalContainer.appendChild(modalContent)
-        document.body.appendChild(modalContainer)
-
-        // Add CSS animations
-        const style = document.createElement('style')
-        style.textContent = `
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-          @keyframes slideUp {
-            from {
-              transform: translateY(20px);
-              opacity: 0;
-            }
-            to {
-              transform: translateY(0);
-              opacity: 1;
-            }
-          }
-          @keyframes scaleIn {
-            from { transform: scale(0); }
-            to { transform: scale(1); }
-          }
-          @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-          }
-        `
-        document.head.appendChild(style)
-
-        // Countdown timer
-        let countdown = 5
-        const countdownElement = document.getElementById('countdown')
-        const countdownInterval = setInterval(() => {
-          countdown--
-          if (countdownElement) {
-            countdownElement.textContent = countdown.toString()
-          }
-          if (countdown <= 0) {
-            clearInterval(countdownInterval)
-            closeModal()
-          }
-        }, 1000)
-
-        // Close modal function
-        const closeModal = () => {
-          clearInterval(countdownInterval)
-          const modal = document.getElementById('success-modal')
-          if (modal) {
-            modal.style.animation = 'fadeOut 0.3s ease-out'
-            setTimeout(() => {
-              modal.remove()
-              // Clear session storage
-              sessionStorage.removeItem('currentDoctorInfo')
-              
-              // Close window or redirect
-              if (window.opener) {
-                window.close()
-              } else if (consultationId) {
-                window.location.href = `${tibokUrl}/dashboard?tab=prescriptions`
-              }
-            }, 300)
-          }
-        }
-
-        // Button event listeners
-        document.getElementById('close-now-btn')?.addEventListener('click', closeModal)
-        document.getElementById('dashboard-btn')?.addEventListener('click', () => {
-          window.open(`${tibokUrl}/dashboard?tab=prescriptions`, '_blank')
-          closeModal()
-        })
+      // Check if response is ok before parsing JSON
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ Tibok API error:', errorText)
+        throw new Error(`Failed to send documents: ${response.status} - ${errorText}`)
       }
 
-      // Show the modal after a brief delay to ensure DOM is ready
-      setTimeout(showSuccessModal, 100)
-      
-    } else {
-      throw new Error(result.error || "Failed to send documents")
-    }
-  } catch (error) {
-    console.error("❌ Error sending documents:", error)
-    toast({
-      title: "Error sending documents",
-      description: error instanceof Error ? error.message : "An error occurred while sending documents",
-      variant: "destructive"
-    })
-  }
-}
+      const result = await response.json()
+      console.log('✅ API Response:', result)
 
+      if (result.success) {
+        // Show initial success toast
+        toast({
+          title: "✅ Documents envoyés avec succès",
+          description: "Les documents sont maintenant disponibles dans le tableau de bord du patient"
+        })
+
+        // Create and show enhanced success modal
+        const showSuccessModal = () => {
+          // Create modal container
+          const modalContainer = document.createElement('div')
+          modalContainer.id = 'success-modal'
+          modalContainer.style.cssText = `
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease-out;
+          `
+
+          // Create modal content
+          const modalContent = document.createElement('div')
+          modalContent.style.cssText = `
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 500px;
+            margin: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: slideUp 0.3s ease-out;
+          `
+
+          modalContent.innerHTML = `
+            <div style="text-align: center;">
+              <!-- Success Icon -->
+              <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; animation: scaleIn 0.5s ease-out;">
+                <svg width="40" height="40" fill="white" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              
+              <!-- Title -->
+              <h2 style="font-size: 1.5rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
+                Documents envoyés avec succès!
+              </h2>
+              
+              <!-- Description -->
+              <p style="color: #6b7280; margin-bottom: 1.5rem; line-height: 1.5;">
+                Les documents médicaux ont été transmis au tableau de bord du patient.<br>
+                Le patient recevra une notification pour valider son ordonnance.
+              </p>
+              
+              <!-- Info Box -->
+              <div style="background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e7eb;">
+                <p style="font-size: 0.875rem; color: #4b5563; margin: 0 0 0.5rem 0;">
+                  <strong>Prochaines étapes:</strong>
+                </p>
+                <ul style="text-align: left; font-size: 0.875rem; color: #6b7280; margin: 0; padding-left: 1.5rem;">
+                  <li>Le patient validera son ordonnance</li>
+                  <li>La pharmacie préparera les médicaments</li>
+                  <li>Livraison selon l'option choisie par le patient</li>
+                </ul>
+              </div>
+              
+              <!-- Countdown -->
+              <div style="background: #fef3c7; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #fde68a;">
+                <p style="font-size: 0.875rem; color: #92400e; margin: 0;">
+                  ⏱️ Cette fenêtre se fermera automatiquement dans <span id="countdown" style="font-weight: bold;">5</span> secondes
+                </p>
+              </div>
+              
+              <!-- Buttons -->
+              <div style="display: flex; gap: 0.75rem; justify-content: center;">
+                <button id="close-now-btn" style="
+                  padding: 0.5rem 1.5rem;
+                  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                  color: white;
+                  border: none;
+                  border-radius: 0.5rem;
+                  font-weight: 500;
+                  cursor: pointer;
+                  transition: all 0.2s;
+                " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                  Fermer maintenant
+                </button>
+                
+                <button id="dashboard-btn" style="
+                  padding: 0.5rem 1.5rem;
+                  background: white;
+                  color: #3b82f6;
+                  border: 1px solid #3b82f6;
+                  border-radius: 0.5rem;
+                  font-weight: 500;
+                  cursor: pointer;
+                  transition: all 0.2s;
+                " onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='white'">
+                  Voir le tableau de bord
+                </button>
+              </div>
+            </div>
+          `
+
+          modalContainer.appendChild(modalContent)
+          document.body.appendChild(modalContainer)
+
+          // Add CSS animations
+          const style = document.createElement('style')
+          style.textContent = `
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+            @keyframes slideUp {
+              from {
+                transform: translateY(20px);
+                opacity: 0;
+              }
+              to {
+                transform: translateY(0);
+                opacity: 1;
+              }
+            }
+            @keyframes scaleIn {
+              from { transform: scale(0); }
+              to { transform: scale(1); }
+            }
+            @keyframes fadeOut {
+              from { opacity: 1; }
+              to { opacity: 0; }
+            }
+          `
+          document.head.appendChild(style)
+
+          // Countdown timer
+          let countdown = 5
+          const countdownElement = document.getElementById('countdown')
+          const countdownInterval = setInterval(() => {
+            countdown--
+            if (countdownElement) {
+              countdownElement.textContent = countdown.toString()
+            }
+            if (countdown <= 0) {
+              clearInterval(countdownInterval)
+              closeModal()
+            }
+          }, 1000)
+
+          // Close modal function
+          const closeModal = () => {
+            clearInterval(countdownInterval)
+            const modal = document.getElementById('success-modal')
+            if (modal) {
+              modal.style.animation = 'fadeOut 0.3s ease-out'
+              setTimeout(() => {
+                modal.remove()
+                // Clear session storage
+                sessionStorage.removeItem('currentDoctorInfo')
+                
+                // Close window or redirect
+                if (window.opener) {
+                  window.close()
+                } else if (consultationId) {
+                  window.location.href = `${tibokUrl}/dashboard?tab=prescriptions`
+                }
+              }, 300)
+            }
+          }
+
+          // Button event listeners
+          document.getElementById('close-now-btn')?.addEventListener('click', closeModal)
+          document.getElementById('dashboard-btn')?.addEventListener('click', () => {
+            window.open(`${tibokUrl}/dashboard?tab=prescriptions`, '_blank')
+            closeModal()
+          })
+        }
+
+        // Show the modal after a brief delay to ensure DOM is ready
+        setTimeout(showSuccessModal, 100)
+        
+      } else {
+        throw new Error(result.error || "Failed to send documents")
+      }
+    } catch (error) {
+      console.error("❌ Error sending documents:", error)
+      toast({
+        title: "Error sending documents",
+        description: error instanceof Error ? error.message : "An error occurred while sending documents",
+        variant: "destructive"
+      })
+    }
+  } // Proper closing brace for handleSendDocuments
+  
   // Safe getter functions
   const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
   const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
