@@ -346,7 +346,6 @@ export default function ProfessionalReportEditable({
     setSaving(true)
     try {
       // Generate a unique signature seed for this doctor
-      // This ensures consistency across documents but uniqueness per doctor
       const signatureSeed = `${doctorInfo.nom}_${doctorInfo.numeroEnregistrement}_signature`
       
       // Create signature data URL using the existing component logic
@@ -377,7 +376,7 @@ export default function ProfessionalReportEditable({
         ctx.lineCap = 'round'
         ctx.lineJoin = 'round'
         
-        // Apply signature style (same as in DoctorSignature component)
+        // Apply signature style
         if (signatureStyle === 0) {
           ctx.font = 'italic 28px "Brush Script MT", "Lucida Handwriting", cursive'
           ctx.fillText(fullName, 0, 0)
@@ -455,7 +454,7 @@ export default function ProfessionalReportEditable({
             validatedBy: doctorInfo.nom,
             validationStatus: 'validated' as const,
             signatures: signatures,
-            signatureDataUrl: signatureDataUrl // Store the actual signature image
+            signatureDataUrl: signatureDataUrl
           }
         },
         // Add signature references to each document section
@@ -532,16 +531,177 @@ export default function ProfessionalReportEditable({
         })
       })
 
-if (result.success) {
+      // Handle the response properly
+      if (response.ok) {
+        const result = await response.json()
+        console.log('✅ Report validated and saved:', result)
+        
+        // Update the local state
+        setReport(updatedReport)
+        setValidationStatus('validated')
+        setModifiedSections(new Set())
+        
+        toast({
+          title: "✅ Document Validated",
+          description: "All documents have been validated and digitally signed"
+        })
+      } else {
+        throw new Error('Failed to save validated report')
+      }
+    } catch (error) {
+      console.error('Validation error:', error)
+      toast({
+        title: "Validation Error",
+        description: error instanceof Error ? error.message : "Failed to validate document",
+        variant: "destructive"
+      })
+    } finally {
+      setSaving(false)
+    }
+  }  // Closing brace for handleValidation
+
+  // handleSendDocuments should be a SEPARATE function
+  const handleSendDocuments = async () => {
+    // Check if report is validated
+    if (!report || validationStatus !== 'validated') {
+      toast({
+        title: "Cannot send documents",
+        description: "Please validate the documents first",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    try {
+      // Show loading state
+      toast({
+        title: "📤 Sending documents...",
+        description: "Preparing documents for patient dashboard"
+      })
+      
+      // Get necessary IDs from URL parameters
+      const params = new URLSearchParams(window.location.search)
+      const consultationId = params.get('consultationId')
+      const patientId = params.get('patientId') || patientData?.id
+      const doctorId = params.get('doctorId')
+
+      if (!consultationId || !patientId) {
+        toast({
+          title: "Error",
+          description: "Missing consultation or patient information",
+          variant: "destructive"
+        })
+        return
+      }
+
+      // Smart Tibok URL detection
+      const getTibokUrl = () => {
+        const urlParam = params.get('tibokUrl')
+        if (urlParam) {
+          console.log('📍 Using Tibok URL from parameter:', decodeURIComponent(urlParam))
+          return decodeURIComponent(urlParam)
+        }
+
+        if (document.referrer) {
+          try {
+            const referrerUrl = new URL(document.referrer)
+            const knownTibokDomains = ['tibok.mu', 'v0-tibokmain2.vercel.app', 'localhost']
+            if (knownTibokDomains.some(domain => referrerUrl.hostname.includes(domain))) {
+              console.log('📍 Using Tibok URL from referrer:', referrerUrl.origin)
+              return referrerUrl.origin
+            }
+          } catch (e) {
+            console.log('Could not parse referrer')
+          }
+        }
+
+        if (process.env.NEXT_PUBLIC_TIBOK_URL) {
+          console.log('📍 Using Tibok URL from environment:', process.env.NEXT_PUBLIC_TIBOK_URL)
+          return process.env.NEXT_PUBLIC_TIBOK_URL
+        }
+
+        console.log('📍 Using default Tibok URL: https://tibok.mu')
+        return 'https://tibok.mu'
+      }
+
+      const tibokUrl = getTibokUrl()
+
+      // Prepare documents payload
+      const documentsPayload = {
+        consultationId,
+        patientId,
+        doctorId,
+        doctorName: doctorInfo.nom,
+        patientName: getReportPatient().nomComplet || getReportPatient().nom,
+        generatedAt: new Date().toISOString(),
+        documents: {
+          consultationReport: report.compteRendu ? {
+            type: 'consultation_report',
+            title: 'Medical Consultation Report',
+            content: report.compteRendu,
+            validated: true,
+            validatedAt: report.compteRendu.metadata.validatedAt,
+            signature: documentSignatures.consultation
+          } : null,
+          prescriptions: report.ordonnances?.medicaments ? {
+            type: 'prescription',
+            title: 'Medical Prescription',
+            medications: report.ordonnances.medicaments.prescription.medicaments,
+            validity: report.ordonnances.medicaments.prescription.validite,
+            signature: documentSignatures.prescription,
+            content: report.ordonnances.medicaments
+          } : null,
+          laboratoryRequests: report.ordonnances?.biologie ? {
+            type: 'laboratory_request',
+            title: 'Laboratory Request Form',
+            tests: report.ordonnances.biologie.prescription.analyses,
+            signature: documentSignatures.laboratory,
+            content: report.ordonnances.biologie
+          } : null,
+          imagingRequests: report.ordonnances?.imagerie ? {
+            type: 'imaging_request',
+            title: 'Radiology Request Form',
+            examinations: report.ordonnances.imagerie.prescription.examens,
+            signature: documentSignatures.imaging,
+            content: report.ordonnances.imagerie
+          } : null,
+          invoice: report.invoice ? {
+            type: 'invoice',
+            title: `Invoice ${report.invoice.header.invoiceNumber}`,
+            content: report.invoice,
+            signature: documentSignatures.invoice
+          } : null
+        }
+      }
+
+      console.log('📦 Sending documents payload to:', tibokUrl)
+      console.log('📦 Payload:', documentsPayload)
+
+      // Send to Tibok patient dashboard
+      const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(documentsPayload)
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ Tibok API error:', errorText)
+        throw new Error(`Failed to send documents: ${response.status} - ${errorText}`)
+      }
+
+      const result = await response.json()
+      console.log('✅ API Response:', result)
+
+      if (result.success) {
         // Show initial success toast
         toast({
           title: "✅ Documents envoyés avec succès",
           description: "Les documents sont maintenant disponibles dans le tableau de bord du patient"
         })
 
-        // Create and show enhanced success modal
+        // Create and show enhanced success modal (WITHOUT auto-close)
         const showSuccessModal = () => {
-          // Create modal container
           const modalContainer = document.createElement('div')
           modalContainer.id = 'success-modal'
           modalContainer.style.cssText = `
@@ -555,7 +715,6 @@ if (result.success) {
             animation: fadeIn 0.3s ease-out;
           `
 
-          // Create modal content
           const modalContent = document.createElement('div')
           modalContent.style.cssText = `
             background: white;
@@ -700,14 +859,13 @@ if (result.success) {
           `
           document.head.appendChild(style)
 
-          // Close modal function (only closes the modal, not the window)
+          // Close modal function (only closes modal, no window closing)
           const closeModal = () => {
             const modal = document.getElementById('success-modal')
             if (modal) {
               modal.style.animation = 'fadeOut 0.3s ease-out'
               setTimeout(() => {
                 modal.remove()
-                // Clear session storage
                 sessionStorage.removeItem('currentDoctorInfo')
               }, 300)
             }
@@ -721,7 +879,7 @@ if (result.success) {
             closeModal()
           })
 
-          // Optional: Allow clicking outside to close
+          // Allow clicking outside to close
           modalContainer.addEventListener('click', (e) => {
             if (e.target === modalContainer) {
               closeModal()
@@ -729,12 +887,21 @@ if (result.success) {
           })
         }
 
-        // Show the modal after a brief delay to ensure DOM is ready
+        // Show the modal
         setTimeout(showSuccessModal, 100)
         
       } else {
         throw new Error(result.error || "Failed to send documents")
       }
+    } catch (error) {
+      console.error("❌ Error sending documents:", error)
+      toast({
+        title: "Error sending documents",
+        description: error instanceof Error ? error.message : "An error occurred while sending documents",
+        variant: "destructive"
+      })
+    }
+  }  // Closing brace for handleSendDocuments
   
   // Safe getter functions
   const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
