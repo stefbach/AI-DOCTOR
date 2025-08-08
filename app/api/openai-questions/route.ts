@@ -1,14 +1,3 @@
-// /app/api/openai-diagnosis/route.ts — FULL REWRITE
-// Edge runtime, GPT‑5 compliant (Responses API), no unsupported sampling params for gpt‑5
-// Feature parity with your original file + fixes:
-// - Uses /v1/responses (not /v1/chat/completions)
-// - Strips temperature/top_p/penalties automatically for gpt‑5
-// - Keeps optional routing to gpt‑4o where sampling is allowed
-// - End‑to‑end anonymization; secure logs; retry with backoff
-// - Validation (flexible, no rigid minimums) + prescription monitoring
-// - Document generators (consultation, biology, imaging, prescription, patient advice)
-// - Health GET endpoint with telemetry
-
 import { NextRequest, NextResponse } from 'next/server'
 
 export const runtime = 'edge'
