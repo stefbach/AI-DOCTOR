@@ -5,11 +5,69 @@ import { openai } from "@ai-sdk/openai"
 // ==================== GPT-5 PARAMETERS CONFIGURATION ====================
 const GPT5_CONFIG = {
   model: 'gpt-5', // ONLY GPT-5, NO TURBO
-  temperature: 0.2,
+  temperature: 1,    // GPT-5 only supports default temperature
   topP: 1.0,
   presencePenalty: 0.0,
-  frequencyPenalty: 0.1,
+  frequencyPenalty: 0.0,  // Using default values for GPT-5
   maxTokens: 1200
+}
+
+// ==================== OPENAI API CALL WITH RETRY ====================
+async function callOpenAIWithRetry(
+  apiKey: string,
+  messages: any[],
+  maxRetries: number = 2
+): Promise<any> {
+  let lastError: Error | null = null
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`📡 OpenAI call to ${GPT5_CONFIG.model} (attempt ${attempt + 1}/${maxRetries + 1})...`)
+      console.log(`⚙️ Parameters: temp=${GPT5_CONFIG.temperature}, max_tokens=${GPT5_CONFIG.max_completion_tokens}`)
+      
+      const callStart = Date.now()
+      
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: GPT5_CONFIG.model,
+          messages: messages,
+          temperature: GPT5_CONFIG.temperature,
+          max_completion_tokens: GPT5_CONFIG.max_completion_tokens,
+          response_format: { type: "json_object" },
+          seed: GPT5_CONFIG.seed
+        }),
+      })
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`OpenAI API error (${response.status}): ${errorText.substring(0, 200)}`)
+      }
+      
+      const data = await response.json()
+      const callTime = Date.now() - callStart
+      console.log(`✅ OpenAI responded in ${callTime}ms`)
+      
+      return data
+      
+    } catch (error) {
+      lastError = error as Error
+      console.error(`❌ Error attempt ${attempt + 1}:`, error)
+      
+      if (attempt < maxRetries) {
+        // Exponential backoff
+        const waitTime = Math.pow(2, attempt) * 1000
+        console.log(`⏳ Retrying in ${waitTime}ms...`)
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+      }
+    }
+  }
+  
+  throw lastError || new Error('Failed after multiple attempts')
 }
 
 // ==================== DATA PROTECTION FUNCTIONS ====================
@@ -444,10 +502,11 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any) {
 // ==================== MAIN FUNCTION ====================
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
-  console.log("🚀 Starting report generation with GPT-5 (OPTIMIZED PARAMETERS)")
+  console.log("🚀 Starting report generation with GPT-5 (DEFAULT PARAMETERS)")
   console.log("📊 GPT-5 Config:", GPT5_CONFIG)
   
   try {
+    // Parse request body
     const body = await request.json()
     const { 
       patientData, 
@@ -779,6 +838,9 @@ const praticien = {
       imagingStudiesCount: imagingStudies.length
     }
 
+    // Initialize tokensUsed
+    let tokensUsed: any = {}
+
     // Generate narrative report with GPT-5 IN ENGLISH
     const systemPrompt = `You are a medical report writer for Mauritius. 
 Write professional medical reports in ENGLISH.
@@ -815,9 +877,6 @@ Remember to use Celsius for temperature (not Fahrenheit).`
         ],
         maxTokens: GPT5_CONFIG.maxTokens,
         temperature: GPT5_CONFIG.temperature,
-        topP: GPT5_CONFIG.topP,
-        presencePenalty: GPT5_CONFIG.presencePenalty,
-        frequencyPenalty: GPT5_CONFIG.frequencyPenalty,
       })
 
       console.log(`✅ GPT-5 response received`)
@@ -878,7 +937,7 @@ Remember to use Celsius for temperature (not Fahrenheit).`
     console.log("\n✅ REPORT GENERATED SUCCESSFULLY")
     console.log("📊 Final summary:")
     console.log(`   - Model used: ${GPT5_CONFIG.model}`)
-    console.log(`   - Temperature: ${GPT5_CONFIG.temperature}`)
+    console.log(`   - Temperature: ${GPT5_CONFIG.temperature} (GPT-5 default)`)
     console.log(`   - Max tokens: ${GPT5_CONFIG.maxTokens}`)
     console.log(`   - Medications: ${medications.length}`)
     console.log(`   - Lab tests: ${labTests.length}`)
@@ -905,9 +964,6 @@ Remember to use Celsius for temperature (not Fahrenheit).`
         model: GPT5_CONFIG.model,
         modelParameters: {
           temperature: GPT5_CONFIG.temperature,
-          topP: GPT5_CONFIG.topP,
-          presencePenalty: GPT5_CONFIG.presencePenalty,
-          frequencyPenalty: GPT5_CONFIG.frequencyPenalty,
           maxTokens: GPT5_CONFIG.maxTokens
         },
         includesFullPrescriptions: true,
@@ -918,6 +974,7 @@ Remember to use Celsius for temperature (not Fahrenheit).`
           laboratoryTests: labTests.length,
           imagingStudies: imagingStudies.length
         },
+        tokensUsed: tokensUsed,
         dataProtected: true
       }
     })
@@ -925,11 +982,19 @@ Remember to use Celsius for temperature (not Fahrenheit).`
   } catch (error) {
     console.error("❌ API Error:", error)
     
+    // Get error details
+    const errorMessage = error instanceof Error ? error.message : "Unknown error"
+    const errorStack = process.env.NODE_ENV === 'development' ? (error as Error).stack : undefined
+    
     return NextResponse.json(
       { 
         success: false, 
-        error: error instanceof Error ? error.message : "Unknown error",
-        stack: process.env.NODE_ENV === 'development' ? (error as Error).stack : undefined
+        error: errorMessage,
+        stack: errorStack,
+        metadata: {
+          model: GPT5_CONFIG.model,
+          timestamp: new Date().toISOString()
+        }
       },
       { status: 500 }
     )
@@ -956,5 +1021,110 @@ function useRealDataFallback(reportStructure: any, data: any) {
     surveillance: data.followUp || "The follow-up plan implemented aims to ensure optimal medical monitoring of clinical evolution. The monitoring modalities have been clearly defined and communicated to the patient, including warning signs requiring urgent consultation. A follow-up appointment has been scheduled to evaluate the therapeutic response and adjust the management strategy if necessary. The patient has been informed of the importance of therapeutic adherence.",
     
     conclusion: `This consultation has allowed for ${data.diagnosticConclusion ? `the establishment of a diagnosis of ${data.diagnosticConclusion}` : 'a comprehensive clinical evaluation'} and the implementation of a complete and adapted management strategy. The prognosis is considered favorable subject to optimal therapeutic adherence. The patient has been fully informed of their medical condition and treatment modalities. Care coordination with other involved healthcare professionals will be ensured according to identified needs.`
+  }
+}
+
+// ==================== TEST ENDPOINT ====================
+export async function GET(request: NextRequest) {
+  console.log("🧪 Testing OpenAI GPT-5 connection for report generation...")
+  console.log("📊 GPT-5 Configuration:", GPT5_CONFIG)
+  
+  const apiKey = process.env.OPENAI_API_KEY
+  
+  if (!apiKey) {
+    return NextResponse.json({
+      status: '❌ No API key',
+      error: 'OPENAI_API_KEY not defined',
+      help: 'Add OPENAI_API_KEY to your environment variables'
+    }, { status: 500 })
+  }
+  
+  if (!apiKey.startsWith('sk-')) {
+    return NextResponse.json({
+      status: '❌ Invalid API key format',
+      error: 'API key must start with sk-',
+      help: 'Check your OPENAI_API_KEY format'
+    }, { status: 500 })
+  }
+  
+  try {
+    // Test GPT-5 model
+    const testStart = Date.now()
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: GPT5_CONFIG.model,
+        messages: [
+          {
+            role: 'user',
+            content: 'Respond with JSON: {"test":"ok","model":"' + GPT5_CONFIG.model + '"}'
+          }
+        ],
+        temperature: GPT5_CONFIG.temperature,
+        max_completion_tokens: 50,
+        response_format: { type: "json_object" }
+      }),
+    })
+    
+    const testResult = response.ok 
+      ? {
+          status: '✅ Connected',
+          responseTime: `${Date.now() - testStart}ms`,
+          response: (await response.json()).choices[0]?.message?.content
+        }
+      : {
+          status: '❌ Error',
+          error: (await response.text()).substring(0, 100),
+          statusCode: response.status
+        }
+    
+    return NextResponse.json({
+      status: "✅ OpenAI GPT-5 Report Generation System Ready",
+      endpoint: "/api/generate-consultation-report",
+      modelConfiguration: GPT5_CONFIG,
+      testResult,
+      functionality: {
+        purpose: 'Generate comprehensive medical consultation reports',
+        features: [
+          'Extract prescriptions from diagnosis',
+          'Generate narrative report sections',
+          'Create prescription documents',
+          'Generate invoices',
+          'Full data anonymization'
+        ]
+      },
+      dataProtection: {
+        status: '✅ Enabled',
+        method: 'anonymization',
+        compliance: ['GDPR', 'HIPAA'],
+        features: [
+          'Automatic patient data anonymization',
+          'No names/emails/phones sent to OpenAI',
+          'Anonymous ID for tracking',
+          'Secure data handling'
+        ]
+      },
+      performanceParameters: {
+        temperature: GPT5_CONFIG.temperature,
+        max_completion_tokens: GPT5_CONFIG.max_completion_tokens,
+        seed: GPT5_CONFIG.seed
+      },
+      keyInfo: {
+        prefix: apiKey.substring(0, 20),
+        length: apiKey.length,
+        valid: true
+      }
+    })
+  } catch (error: any) {
+    console.error("❌ Test error:", error)
+    return NextResponse.json({
+      status: "❌ Error",
+      error: error.message,
+      errorType: error.name
+    }, { status: 500 })
   }
 }
