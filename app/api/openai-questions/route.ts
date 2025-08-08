@@ -1,10 +1,21 @@
-// app/api/openai-questions/route.ts - VERSION WITH GPT-5 AND DATA PROTECTION
+// app/api/openai-questions/route.ts - VERSION WITH GPT-5 OPTIMIZED PARAMETERS
 import { type NextRequest, NextResponse } from "next/server"
 import crypto from 'crypto'
 
 // Configuration for different speed modes
 export const runtime = 'edge'
 export const preferredRegion = 'auto'
+
+// ==================== GPT-5 OPTIMIZED PARAMETERS ====================
+const GPT5_CONFIG = {
+  model: 'gpt-5',  // ONLY GPT-5, NO TURBO
+  temperature: 0.2,
+  max_completion_tokens: 1200,
+  top_p: 1.0,
+  frequency_penalty: 0.1,
+  presence_penalty: 0.0,
+  seed: 42  // For reproducibility
+}
 
 // ==================== MAURITIUS MEDICAL UNITS ====================
 const MAURITIUS_UNITS = {
@@ -271,56 +282,11 @@ function detectMainPattern(symptoms: string | undefined | null): string {
   return 'general'
 }
 
-// ==================== GPT-5 SETTINGS ====================
-// Default sampling parameters tuned for GPT-5
-const DEFAULT_TEMPERATURE = 0.15  // Slightly lower for questions (more focused)
-const DEFAULT_MAX_TOKENS = 800    // Less tokens needed for questions
-
-/**
- * Heuristic to select GPT-5 model based on case complexity or explicit user request.
- * For questions: simpler heuristic based on symptoms complexity
- */
-function chooseModel(mode: string, symptomsString: string, patientData: any): string {
-  // Explicit mode selection
-  if (mode === 'intelligent' || mode === 'full') return 'gpt-5'
-  if (mode === 'fast' || mode === 'turbo') return 'gpt-5-turbo'
-  
-  // Auto-selection based on complexity
-  const symptoms = symptomsString.split(/[,;]/).length
-  const hasComplexHistory = (patientData.medicalHistory?.length || 0) > 3
-  const hasManyMedications = (patientData.currentMedications?.length || 0) > 3
-  
-  // Complex cases get full GPT-5
-  if (symptoms >= 3 || hasComplexHistory || hasManyMedications) {
-    return 'gpt-5'
-  }
-  
-  return 'gpt-5'
-}
-
-// ==================== MODEL CONFIGURATION ====================
-const AI_CONFIGS = {
-  fast: {
-    model: "gpt-5",  // Changed from gpt-3.5-turbo
-    temperature: 0.1,
-    maxTokens: 500
-  },
-  balanced: {
-    model: "gpt-5",  // Changed from gpt-4o-mini
-    temperature: 0.15,
-    maxTokens: 800
-  },
-  intelligent: {
-    model: "gpt-5",  // Changed from gpt-4o
-    temperature: 0.2,
-    maxTokens: 1200
-  }
-}
-
 // ==================== MAIN FUNCTION WITH PROTECTION ====================
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
-  console.log("🚀 Starting POST request /api/openai-questions (GPT-5 PROTECTED VERSION)")
+  console.log("🚀 Starting POST request /api/openai-questions (GPT-5 OPTIMIZED VERSION)")
+  console.log("📊 GPT-5 Config:", GPT5_CONFIG)
   
   try {
     // 1. Retrieve and validate API key
@@ -342,8 +308,7 @@ export async function POST(request: NextRequest) {
     const { 
       patientData, 
       clinicalData, 
-      mode = 'balanced',
-      modelChoice  // New field for explicit model choice
+      mode = 'balanced'
     } = body
 
     // 3. Validate data
@@ -376,18 +341,13 @@ export async function POST(request: NextRequest) {
     // Secure log of patient data
     secureLog('📊 Patient data (anonymized):', validatedPatientData)
 
-    // 5. Determine symptoms string and model
+    // 5. Determine symptoms string
     const symptomsString = String(validatedClinicalData.symptoms || validatedClinicalData.chiefComplaint || '')
     
-    // Determine which GPT-5 model to use
-    const selectedModel = modelChoice 
-      ? (modelChoice === 'full' ? 'gpt-5' : 'gpt-5')
-      : chooseModel(mode, symptomsString, validatedPatientData)
-    
-    console.log(`🤖 Selected model: ${selectedModel} (mode: ${mode})`)
+    console.log(`🤖 Using model: ${GPT5_CONFIG.model} with optimized parameters`)
 
     // 6. Check cache
-    const cacheKey = `${symptomsString}_${validatedPatientData.age}_${validatedPatientData.gender}_${selectedModel}`
+    const cacheKey = `${symptomsString}_${validatedPatientData.age}_${validatedPatientData.gender}_${GPT5_CONFIG.model}`
     const cached = patternCache.get(cacheKey)
     
     if (cached) {
@@ -404,7 +364,14 @@ export async function POST(request: NextRequest) {
           ...cached.metadata,
           fromCache: true,
           responseTime: Date.now() - startTime,
-          model: selectedModel
+          model: GPT5_CONFIG.model,
+          modelParameters: {
+            temperature: GPT5_CONFIG.temperature,
+            max_completion_tokens: GPT5_CONFIG.max_completion_tokens,
+            top_p: GPT5_CONFIG.top_p,
+            frequency_penalty: GPT5_CONFIG.frequency_penalty,
+            presence_penalty: GPT5_CONFIG.presence_penalty
+          }
         }
       })
     }
@@ -473,16 +440,17 @@ IMPORTANT:
 - Use metric system (Celsius for temperature, not Fahrenheit)
 - NEVER mention names or personal information`
 
-    // 10. Configuration based on selected model
-    const aiConfig = selectedModel === 'gpt-5' 
-      ? { model: 'gpt-5', temperature: DEFAULT_TEMPERATURE, maxTokens: DEFAULT_MAX_TOKENS * 1.5 }
-      : { model: 'gpt-5-turbo', temperature: DEFAULT_TEMPERATURE, maxTokens: DEFAULT_MAX_TOKENS }
-    
-    console.log(`⚙️ AI Config: ${aiConfig.model}, temp: ${aiConfig.temperature}, tokens: ${aiConfig.maxTokens}`)
+    console.log(`⚙️ AI Config: ${GPT5_CONFIG.model}, parameters:`, {
+      temperature: GPT5_CONFIG.temperature,
+      max_completion_tokens: GPT5_CONFIG.max_completion_tokens,
+      top_p: GPT5_CONFIG.top_p,
+      frequency_penalty: GPT5_CONFIG.frequency_penalty,
+      presence_penalty: GPT5_CONFIG.presence_penalty
+    })
     console.log(`🔒 Protection enabled: No personal data sent`)
 
-    // 11. OpenAI call with retry
-    console.log(`🤖 Calling OpenAI ${aiConfig.model}...`)
+    // 10. OpenAI call with retry
+    console.log(`🤖 Calling OpenAI ${GPT5_CONFIG.model}...`)
     const aiStartTime = Date.now()
     
     let openaiResponse
@@ -498,7 +466,7 @@ IMPORTANT:
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: aiConfig.model,
+            model: GPT5_CONFIG.model,
             messages: [
               {
                 role: 'system',
@@ -509,13 +477,13 @@ IMPORTANT:
                 content: prompt
               }
             ],
-            temperature: aiConfig.temperature,
-            max_tokens: aiConfig.maxTokens,
+            temperature: GPT5_CONFIG.temperature,
+            max_completion_tokens: GPT5_CONFIG.max_completion_tokens,
             response_format: { type: "json_object" },
-            top_p: 1.0,
-            frequency_penalty: 0.0,
-            presence_penalty: 0.1,
-            seed: 42  // For reproducibility
+            top_p: GPT5_CONFIG.top_p,
+            frequency_penalty: GPT5_CONFIG.frequency_penalty,
+            presence_penalty: GPT5_CONFIG.presence_penalty,
+            seed: GPT5_CONFIG.seed
           }),
         })
         
@@ -550,7 +518,7 @@ IMPORTANT:
     const aiTime = Date.now() - aiStartTime
     console.log(`✅ OpenAI response in ${aiTime}ms`)
     
-    // 12. Parse response
+    // 11. Parse response
     const openaiData = await openaiResponse.json()
     const content = openaiData.choices[0]?.message?.content || '{}'
     
@@ -565,12 +533,12 @@ IMPORTANT:
       throw new Error('Invalid OpenAI response')
     }
 
-    // 13. Validate questions
+    // 12. Validate questions
     if (!Array.isArray(questions) || questions.length === 0) {
       throw new Error("No valid questions generated")
     }
 
-    // 14. Prepare response WITH PROTECTION INDICATOR
+    // 13. Prepare response WITH PROTECTION INDICATOR
     const response = {
       success: true,
       questions: questions.slice(0, 5), // Maximum 5 questions
@@ -593,8 +561,14 @@ IMPORTANT:
         responseTime: Date.now() - startTime,
         aiResponseTime: aiTime,
         fromCache: false,
-        model: aiConfig.model,
-        actualModel: selectedModel,
+        model: GPT5_CONFIG.model,
+        modelParameters: {
+          temperature: GPT5_CONFIG.temperature,
+          max_completion_tokens: GPT5_CONFIG.max_completion_tokens,
+          top_p: GPT5_CONFIG.top_p,
+          frequency_penalty: GPT5_CONFIG.frequency_penalty,
+          presence_penalty: GPT5_CONFIG.presence_penalty
+        },
         dataProtected: true,
         complexity: {
           symptoms: symptomsString.split(/[,;]/).length,
@@ -605,12 +579,12 @@ IMPORTANT:
       }
     }
 
-    // 15. Cache response
+    // 14. Cache response
     patternCache.set(cacheKey, response)
 
     console.log(`✅ Total success: ${response.metadata.responseTime}ms`)
     console.log(`🔒 Data protection: ACTIVE - No personal data sent to OpenAI`)
-    console.log(`🤖 Model used: ${selectedModel}`)
+    console.log(`🤖 Model used: ${GPT5_CONFIG.model}`)
     
     return NextResponse.json(response)
 
@@ -653,6 +627,7 @@ IMPORTANT:
 // ==================== TEST ENDPOINT ====================
 export async function GET(request: NextRequest) {
   console.log("🧪 Testing OpenAI GPT-5 connection...")
+  console.log("📊 GPT-5 Configuration:", GPT5_CONFIG)
   
   const apiKey = process.env.OPENAI_API_KEY
   debugApiKey(apiKey)
@@ -669,115 +644,110 @@ export async function GET(request: NextRequest) {
   }
   
   try {
-    // Test both GPT-5 models
-    const models = ['gpt-5-turbo', 'gpt-5']
-    const testResults: any = {}
-    
-    for (const model of models) {
-      const testStart = Date.now()
-      try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: model,
-            messages: [
-              {
-                role: 'user',
-                content: 'Respond with JSON: {"test":"ok","model":"' + model + '"}'
-              }
-            ],
-            temperature: 0,
-            max_tokens: 50,
-            response_format: { type: "json_object" }
-          }),
-        })
-        
-        if (response.ok) {
-          const data = await response.json()
-          testResults[model] = {
+    // Test GPT-5 model
+    const testStart = Date.now()
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: GPT5_CONFIG.model,
+          messages: [
+            {
+              role: 'user',
+              content: 'Respond with JSON: {"test":"ok","model":"' + GPT5_CONFIG.model + '"}'
+            }
+          ],
+          temperature: GPT5_CONFIG.temperature,
+          max_completion_tokens: 50,
+          response_format: { type: "json_object" },
+          top_p: GPT5_CONFIG.top_p,
+          frequency_penalty: GPT5_CONFIG.frequency_penalty,
+          presence_penalty: GPT5_CONFIG.presence_penalty
+        }),
+      })
+      
+      const testResult = response.ok 
+        ? {
             status: '✅ Connected',
             responseTime: `${Date.now() - testStart}ms`,
-            response: data.choices[0]?.message?.content
+            response: (await response.json()).choices[0]?.message?.content
           }
-        } else {
-          const error = await response.text()
-          testResults[model] = {
+        : {
             status: '❌ Error',
-            error: error.substring(0, 100),
+            error: (await response.text()).substring(0, 100),
             statusCode: response.status
           }
+      
+      return NextResponse.json({
+        status: "✅ OpenAI GPT-5 System Ready",
+        modelConfiguration: GPT5_CONFIG,
+        testResult,
+        dataProtection: {
+          status: '✅ Enabled',
+          method: 'anonymization',
+          compliance: ['GDPR', 'HIPAA'],
+          features: [
+            'Automatic patient data anonymization',
+            'No names/emails/phones sent to OpenAI',
+            'Anonymous ID for tracking',
+            'Secure logging',
+            'GPT-5 integration with optimized parameters',
+            'Metric system (Celsius, kg, cm) as used in Mauritius'
+          ]
+        },
+        modes: {
+          fast: {
+            description: "Fast with predefined patterns or GPT-5",
+            model: GPT5_CONFIG.model,
+            useCase: "Initial triage",
+            dataProtected: true
+          },
+          balanced: {
+            description: "Balanced with GPT-5",
+            model: GPT5_CONFIG.model,
+            useCase: "Standard usage",
+            dataProtected: true
+          },
+          intelligent: {
+            description: "Maximum intelligence with GPT-5",
+            model: GPT5_CONFIG.model,
+            useCase: "Complex cases",
+            dataProtected: true
+          }
+        },
+        medicalUnits: {
+          system: "Metric (SI)",
+          temperature: "Celsius (°C)",
+          weight: "Kilograms (kg)",
+          height: "Centimeters (cm)",
+          feverThreshold: "38°C (normal: 37°C)",
+          location: "Mauritius"
+        },
+        performanceParameters: {
+          temperature: GPT5_CONFIG.temperature,
+          max_completion_tokens: GPT5_CONFIG.max_completion_tokens,
+          top_p: GPT5_CONFIG.top_p,
+          frequency_penalty: GPT5_CONFIG.frequency_penalty,
+          presence_penalty: GPT5_CONFIG.presence_penalty,
+          seed: GPT5_CONFIG.seed
+        },
+        keyInfo: {
+          prefix: apiKey.substring(0, 20),
+          length: apiKey.length,
+          valid: true
         }
-      } catch (error: any) {
-        testResults[model] = {
-          status: '❌ Connection failed',
-          error: error.message
-        }
-      }
+      })
+    } catch (error: any) {
+      return NextResponse.json({
+        status: '❌ Connection failed',
+        error: error.message,
+        model: GPT5_CONFIG.model
+      }, { status: 500 })
     }
-    
-    return NextResponse.json({
-      status: "✅ OpenAI GPT-5 System Ready",
-      testResults,
-      dataProtection: {
-        status: '✅ Enabled',
-        method: 'anonymization',
-        compliance: ['GDPR', 'HIPAA'],
-        features: [
-          'Automatic patient data anonymization',
-          'No names/emails/phones sent to OpenAI',
-          'Anonymous ID for tracking',
-          'Secure logging',
-          'GPT-5 integration',
-          'Metric system (Celsius, kg, cm) as used in Mauritius'
-        ]
-      },
-      modes: {
-        fast: {
-          description: "Ultra-fast with GPT-5 Turbo",
-          model: "gpt-5",
-          useCase: "Initial triage",
-          dataProtected: true
-        },
-        balanced: {
-          description: "Balanced with GPT-5 Turbo",
-          model: "gpt-5",
-          useCase: "Standard usage",
-          dataProtected: true
-        },
-        intelligent: {
-          description: "Maximum intelligence with GPT-5",
-          model: "gpt-5",
-          useCase: "Complex cases",
-          dataProtected: true
-        }
-      },
-      modelSelection: {
-        method: "Automatic based on complexity",
-        factors: [
-          "Number of symptoms",
-          "Medical history complexity",
-          "Current medications",
-          "Explicit mode selection"
-        ]
-      },
-      medicalUnits: {
-        system: "Metric (SI)",
-        temperature: "Celsius (°C)",
-        weight: "Kilograms (kg)",
-        height: "Centimeters (cm)",
-        feverThreshold: "38°C (normal: 37°C)",
-        location: "Mauritius"
-      },
-      keyInfo: {
-        prefix: apiKey.substring(0, 20),
-        length: apiKey.length,
-        valid: true
-      }
-    })
   } catch (error: any) {
     console.error("❌ Test error:", error)
     return NextResponse.json({
