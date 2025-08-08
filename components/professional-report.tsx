@@ -532,184 +532,7 @@ export default function ProfessionalReportEditable({
         })
       })
 
-      // CRITICAL FIX: Handle the response properly
-      if (response.ok) {
-        const result = await response.json()
-        console.log('✅ Report validated and saved:', result)
-        
-        // Update the local state
-        setReport(updatedReport)
-        setValidationStatus('validated')
-        setModifiedSections(new Set())
-        
-        toast({
-          title: "✅ Document Validated",
-          description: "All documents have been validated and digitally signed"
-        })
-      } else {
-        throw new Error('Failed to save validated report')
-      }
-    } catch (error) {
-      console.error('Validation error:', error)
-      toast({
-        title: "Validation Error",
-        description: error instanceof Error ? error.message : "Failed to validate document",
-        variant: "destructive"
-      })
-    } finally {
-      setSaving(false)
-    }
-  } // THIS CLOSING BRACE WAS MISSING!
-
-  // CRITICAL FIX: handleSendDocuments should be a SEPARATE function, not inside handleValidation
-  const handleSendDocuments = async () => {
-    // Check if report is validated
-    if (!report || validationStatus !== 'validated') {
-      toast({
-        title: "Cannot send documents",
-        description: "Please validate the documents first",
-        variant: "destructive"
-      })
-      return
-    }
-    
-    try {
-      // Show loading state
-      toast({
-        title: "📤 Sending documents...",
-        description: "Preparing documents for patient dashboard"
-      })
-      
-      // Get necessary IDs from URL parameters
-      const params = new URLSearchParams(window.location.search)
-      const consultationId = params.get('consultationId')
-      const patientId = params.get('patientId') || patientData?.id
-      const doctorId = params.get('doctorId')
-
-      if (!consultationId || !patientId) {
-        toast({
-          title: "Error",
-          description: "Missing consultation or patient information",
-          variant: "destructive"
-        })
-        return
-      }
-
-      // Smart Tibok URL detection
-      const getTibokUrl = () => {
-        // 1. Check URL parameter
-        const urlParam = params.get('tibokUrl')
-        if (urlParam) {
-          console.log('📍 Using Tibok URL from parameter:', decodeURIComponent(urlParam))
-          return decodeURIComponent(urlParam)
-        }
-
-        // 2. Check referrer
-        if (document.referrer) {
-          try {
-            const referrerUrl = new URL(document.referrer)
-            // Only use referrer if it's a known Tibok domain
-            const knownTibokDomains = ['tibok.mu', 'v0-tibokmain2.vercel.app', 'localhost']
-            if (knownTibokDomains.some(domain => referrerUrl.hostname.includes(domain))) {
-              console.log('📍 Using Tibok URL from referrer:', referrerUrl.origin)
-              return referrerUrl.origin
-            }
-          } catch (e) {
-            console.log('Could not parse referrer')
-          }
-        }
-
-        // 3. Check environment variable
-        if (process.env.NEXT_PUBLIC_TIBOK_URL) {
-          console.log('📍 Using Tibok URL from environment:', process.env.NEXT_PUBLIC_TIBOK_URL)
-          return process.env.NEXT_PUBLIC_TIBOK_URL
-        }
-
-        // 4. Default to production
-        console.log('📍 Using default Tibok URL: https://tibok.mu')
-        return 'https://tibok.mu'
-      }
-
-      const tibokUrl = getTibokUrl()
-
-      // Prepare documents payload with all validated documents
-      const documentsPayload = {
-        consultationId,
-        patientId,
-        doctorId,
-        doctorName: doctorInfo.nom,
-        patientName: getReportPatient().nomComplet || getReportPatient().nom,
-        generatedAt: new Date().toISOString(),
-        documents: {
-          // Main consultation report
-          consultationReport: report.compteRendu ? {
-            type: 'consultation_report',
-            title: 'Medical Consultation Report',
-            content: report.compteRendu,
-            validated: true,
-            validatedAt: report.compteRendu.metadata.validatedAt,
-            signature: documentSignatures.consultation
-          } : null,
-          
-          // Prescriptions (if any)
-          prescriptions: report.ordonnances?.medicaments ? {
-            type: 'prescription',
-            title: 'Medical Prescription',
-            medications: report.ordonnances.medicaments.prescription.medicaments,
-            validity: report.ordonnances.medicaments.prescription.validite,
-            signature: documentSignatures.prescription,
-            content: report.ordonnances.medicaments
-          } : null,
-          
-          // Laboratory requests (if any)
-          laboratoryRequests: report.ordonnances?.biologie ? {
-            type: 'laboratory_request',
-            title: 'Laboratory Request Form',
-            tests: report.ordonnances.biologie.prescription.analyses,
-            signature: documentSignatures.laboratory,
-            content: report.ordonnances.biologie
-          } : null,
-          
-          // Imaging requests (if any)
-          imagingRequests: report.ordonnances?.imagerie ? {
-            type: 'imaging_request',
-            title: 'Radiology Request Form',
-            examinations: report.ordonnances.imagerie.prescription.examens,
-            signature: documentSignatures.imaging,
-            content: report.ordonnances.imagerie
-          } : null,
-          
-          // Invoice
-          invoice: report.invoice ? {
-            type: 'invoice',
-            title: `Invoice ${report.invoice.header.invoiceNumber}`,
-            content: report.invoice,
-            signature: documentSignatures.invoice
-          } : null
-        }
-      }
-
-      console.log('📦 Sending documents payload to:', tibokUrl)
-      console.log('📦 Payload:', documentsPayload)
-
-      // Send to Tibok patient dashboard
-      const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(documentsPayload)
-      })
-
-      // Check if response is ok before parsing JSON
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('❌ Tibok API error:', errorText)
-        throw new Error(`Failed to send documents: ${response.status} - ${errorText}`)
-      }
-
-      const result = await response.json()
-      console.log('✅ API Response:', result)
-
-      if (result.success) {
+if (result.success) {
         // Show initial success toast
         toast({
           title: "✅ Documents envoyés avec succès",
@@ -742,9 +565,31 @@ export default function ProfessionalReportEditable({
             margin: 1rem;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
             animation: slideUp 0.3s ease-out;
+            position: relative;
           `
 
           modalContent.innerHTML = `
+            <!-- Close X button -->
+            <button id="close-x-btn" style="
+              position: absolute;
+              top: 1rem;
+              right: 1rem;
+              width: 32px;
+              height: 32px;
+              border-radius: 50%;
+              border: none;
+              background: #f3f4f6;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition: all 0.2s;
+            " onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+              <svg width="20" height="20" fill="#6b7280" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            
             <div style="text-align: center;">
               <!-- Success Icon -->
               <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; animation: scaleIn 0.5s ease-out;">
@@ -776,18 +621,21 @@ export default function ProfessionalReportEditable({
                 </ul>
               </div>
               
-              <!-- Countdown -->
-              <div style="background: #fef3c7; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #fde68a;">
-                <p style="font-size: 0.875rem; color: #92400e; margin: 0;">
-                  ⏱️ Cette fenêtre se fermera automatiquement dans <span id="countdown" style="font-weight: bold;">5</span> secondes
+              <!-- Success Status -->
+              <div style="background: #d1fae5; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #a7f3d0;">
+                <p style="font-size: 0.875rem; color: #065f46; margin: 0; font-weight: 500;">
+                  ✅ Tous les documents ont été envoyés avec succès
+                </p>
+                <p style="font-size: 0.75rem; color: #047857; margin: 0.25rem 0 0 0;">
+                  Consultation ID: ${consultationId}
                 </p>
               </div>
               
               <!-- Buttons -->
               <div style="display: flex; gap: 0.75rem; justify-content: center;">
-                <button id="close-now-btn" style="
+                <button id="continue-btn" style="
                   padding: 0.5rem 1.5rem;
-                  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                  background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
                   color: white;
                   border: none;
                   border-radius: 0.5rem;
@@ -795,7 +643,7 @@ export default function ProfessionalReportEditable({
                   cursor: pointer;
                   transition: all 0.2s;
                 " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                  Fermer maintenant
+                  Continuer mon travail
                 </button>
                 
                 <button id="dashboard-btn" style="
@@ -808,8 +656,15 @@ export default function ProfessionalReportEditable({
                   cursor: pointer;
                   transition: all 0.2s;
                 " onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='white'">
-                  Voir le tableau de bord
+                  Voir le tableau de bord patient
                 </button>
+              </div>
+              
+              <!-- Optional Actions -->
+              <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                <p style="font-size: 0.75rem; color: #9ca3af; margin: 0;">
+                  Vous pouvez maintenant traiter une nouvelle consultation ou fermer cette fenêtre.
+                </p>
               </div>
             </div>
           `
@@ -845,23 +700,8 @@ export default function ProfessionalReportEditable({
           `
           document.head.appendChild(style)
 
-          // Countdown timer
-          let countdown = 5
-          const countdownElement = document.getElementById('countdown')
-          const countdownInterval = setInterval(() => {
-            countdown--
-            if (countdownElement) {
-              countdownElement.textContent = countdown.toString()
-            }
-            if (countdown <= 0) {
-              clearInterval(countdownInterval)
-              closeModal()
-            }
-          }, 1000)
-
-          // Close modal function
+          // Close modal function (only closes the modal, not the window)
           const closeModal = () => {
-            clearInterval(countdownInterval)
             const modal = document.getElementById('success-modal')
             if (modal) {
               modal.style.animation = 'fadeOut 0.3s ease-out'
@@ -869,22 +709,23 @@ export default function ProfessionalReportEditable({
                 modal.remove()
                 // Clear session storage
                 sessionStorage.removeItem('currentDoctorInfo')
-                
-                // Close window or redirect
-                if (window.opener) {
-                  window.close()
-                } else if (consultationId) {
-                  window.location.href = `${tibokUrl}/dashboard?tab=prescriptions`
-                }
               }, 300)
             }
           }
 
           // Button event listeners
-          document.getElementById('close-now-btn')?.addEventListener('click', closeModal)
+          document.getElementById('close-x-btn')?.addEventListener('click', closeModal)
+          document.getElementById('continue-btn')?.addEventListener('click', closeModal)
           document.getElementById('dashboard-btn')?.addEventListener('click', () => {
             window.open(`${tibokUrl}/dashboard?tab=prescriptions`, '_blank')
             closeModal()
+          })
+
+          // Optional: Allow clicking outside to close
+          modalContainer.addEventListener('click', (e) => {
+            if (e.target === modalContainer) {
+              closeModal()
+            }
           })
         }
 
@@ -894,15 +735,6 @@ export default function ProfessionalReportEditable({
       } else {
         throw new Error(result.error || "Failed to send documents")
       }
-    } catch (error) {
-      console.error("❌ Error sending documents:", error)
-      toast({
-        title: "Error sending documents",
-        description: error instanceof Error ? error.message : "An error occurred while sending documents",
-        variant: "destructive"
-      })
-    }
-  } // Proper closing brace for handleSendDocuments
   
   // Safe getter functions
   const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
