@@ -1,9 +1,6 @@
 // app/api/openai-questions/route.ts - VERSION OPTIMISÉE SANS EDGE
 import { type NextRequest, NextResponse } from "next/server"
 
-// ❌ SUPPRIMÉ: export const runtime = 'edge'
-// ❌ SUPPRIMÉ: export const preferredRegion = 'auto'
-
 // ==================== DATA PROTECTION FUNCTIONS ====================
 function anonymizePatientData(patientData: any): {
   anonymized: any,
