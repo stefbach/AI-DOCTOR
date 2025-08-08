@@ -532,71 +532,24 @@ export default function ProfessionalReportEditable({
         })
       })
 
-      const result = await response.json()
-      
-      if (result.success) {
-        // Update states to reflect validation
-        setValidationStatus('validated')
-        setEditMode(false)
-        setReport(updatedReport)
-        
-        // Optional: Store signature in Supabase doctors table for future use
-        // This allows reusing the same signature for future documents
-        if (doctorId) {
-          try {
-            await fetch('/api/update-doctor-signature', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                doctorId: doctorId,
-                signatureDataUrl: signatureDataUrl,
-                lastSignedAt: new Date().toISOString()
-              })
-            })
-          } catch (err) {
-            console.log('Could not store signature for future use:', err)
-            // Non-critical error, continue
-          }
-        }
-        
-        toast({
-          title: "✅ Validation successful",
-          description: "All documents have been validated and digitally signed. You can now send them to the patient dashboard."
-        })
-        
-      } else {
-        throw new Error(result.error || "Validation failed")
-      }
-    } catch (error) {
-      console.error("Validation error:", error)
-      toast({
-        title: "Validation error",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive"
-      })
-    } finally {
-      setSaving(false)
-    }
-  }  // This closes the handleValidation function
-
-  const handleSendDocuments = async () => {
-    // Check if report is validated
-    if (!report || validationStatus !== 'validated') {
-      toast({
-        title: "Cannot send documents",
-        description: "Please validate the documents first",
-        variant: "destructive"
-      })
-      return
-    }
+const handleSendDocuments = async () => {
+  // Check if report is validated
+  if (!report || validationStatus !== 'validated') {
+    toast({
+      title: "Cannot send documents",
+      description: "Please validate the documents first",
+      variant: "destructive"
+    })
+    return
+  }
+  
+  try {
+    // Show loading state
+    toast({
+      title: "📤 Sending documents...",
+      description: "Preparing documents for patient dashboard"
+    })
     
-    try {
-      // Show loading state
-      toast({
-        title: "📤 Sending documents...",
-        description: "Preparing documents for patient dashboard"
-      })
-      // ... rest of handleSendDocuments function continues ...
     // Get necessary IDs from URL parameters
     const params = new URLSearchParams(window.location.search)
     const consultationId = params.get('consultationId')
@@ -727,33 +680,186 @@ export default function ProfessionalReportEditable({
     console.log('✅ API Response:', result)
 
     if (result.success) {
+      // Show initial success toast
       toast({
-        title: "✅ Documents sent successfully",
-        description: "Documents are now available in the patient's dashboard"
+        title: "✅ Documents envoyés avec succès",
+        description: "Les documents sont maintenant disponibles dans le tableau de bord du patient"
       })
 
-      // Clear any stored report data
-      sessionStorage.removeItem('currentDoctorInfo')
-      
-      // Wait a moment for user to see the success message
-      setTimeout(() => {
-        // Option 1: If onComplete callback exists, call it
-        if (onComplete) {
-          onComplete()
-        } 
-        // Option 2: Redirect to Tibok dashboard
-        else if (consultationId) {
-          window.location.href = `${tibokUrl}/dashboard?tab=prescriptions`
+      // Create and show enhanced success modal
+      const showSuccessModal = () => {
+        // Create modal container
+        const modalContainer = document.createElement('div')
+        modalContainer.id = 'success-modal'
+        modalContainer.style.cssText = `
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+          animation: fadeIn 0.3s ease-out;
+        `
+
+        // Create modal content
+        const modalContent = document.createElement('div')
+        modalContent.style.cssText = `
+          background: white;
+          padding: 2rem;
+          border-radius: 1rem;
+          max-width: 500px;
+          margin: 1rem;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+          animation: slideUp 0.3s ease-out;
+        `
+
+        modalContent.innerHTML = `
+          <div style="text-align: center;">
+            <!-- Success Icon -->
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; animation: scaleIn 0.5s ease-out;">
+              <svg width="40" height="40" fill="white" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            
+            <!-- Title -->
+            <h2 style="font-size: 1.5rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
+              Documents envoyés avec succès!
+            </h2>
+            
+            <!-- Description -->
+            <p style="color: #6b7280; margin-bottom: 1.5rem; line-height: 1.5;">
+              Les documents médicaux ont été transmis au tableau de bord du patient.<br>
+              Le patient recevra une notification pour valider son ordonnance.
+            </p>
+            
+            <!-- Info Box -->
+            <div style="background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e7eb;">
+              <p style="font-size: 0.875rem; color: #4b5563; margin: 0 0 0.5rem 0;">
+                <strong>Prochaines étapes:</strong>
+              </p>
+              <ul style="text-align: left; font-size: 0.875rem; color: #6b7280; margin: 0; padding-left: 1.5rem;">
+                <li>Le patient validera son ordonnance</li>
+                <li>La pharmacie préparera les médicaments</li>
+                <li>Livraison selon l'option choisie par le patient</li>
+              </ul>
+            </div>
+            
+            <!-- Countdown -->
+            <div style="background: #fef3c7; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #fde68a;">
+              <p style="font-size: 0.875rem; color: #92400e; margin: 0;">
+                ⏱️ Cette fenêtre se fermera automatiquement dans <span id="countdown" style="font-weight: bold;">5</span> secondes
+              </p>
+            </div>
+            
+            <!-- Buttons -->
+            <div style="display: flex; gap: 0.75rem; justify-content: center;">
+              <button id="close-now-btn" style="
+                padding: 0.5rem 1.5rem;
+                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                color: white;
+                border: none;
+                border-radius: 0.5rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s;
+              " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                Fermer maintenant
+              </button>
+              
+              <button id="dashboard-btn" style="
+                padding: 0.5rem 1.5rem;
+                background: white;
+                color: #3b82f6;
+                border: 1px solid #3b82f6;
+                border-radius: 0.5rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s;
+              " onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='white'">
+                Voir le tableau de bord
+              </button>
+            </div>
+          </div>
+        `
+
+        modalContainer.appendChild(modalContent)
+        document.body.appendChild(modalContainer)
+
+        // Add CSS animations
+        const style = document.createElement('style')
+        style.textContent = `
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          @keyframes slideUp {
+            from {
+              transform: translateY(20px);
+              opacity: 0;
+            }
+            to {
+              transform: translateY(0);
+              opacity: 1;
+            }
+          }
+          @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+          }
+          @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+          }
+        `
+        document.head.appendChild(style)
+
+        // Countdown timer
+        let countdown = 5
+        const countdownElement = document.getElementById('countdown')
+        const countdownInterval = setInterval(() => {
+          countdown--
+          if (countdownElement) {
+            countdownElement.textContent = countdown.toString()
+          }
+          if (countdown <= 0) {
+            clearInterval(countdownInterval)
+            closeModal()
+          }
+        }, 1000)
+
+        // Close modal function
+        const closeModal = () => {
+          clearInterval(countdownInterval)
+          const modal = document.getElementById('success-modal')
+          if (modal) {
+            modal.style.animation = 'fadeOut 0.3s ease-out'
+            setTimeout(() => {
+              modal.remove()
+              // Clear session storage
+              sessionStorage.removeItem('currentDoctorInfo')
+              
+              // Close window or redirect
+              if (window.opener) {
+                window.close()
+              } else if (consultationId) {
+                window.location.href = `${tibokUrl}/dashboard?tab=prescriptions`
+              }
+            }, 300)
+          }
         }
-        // Option 3: Close the Medical AI window if it was opened as a popup
-        else if (window.opener) {
-          window.close()
-        }
-        // Option 4: Stay on the same page
-        else {
-          console.log('Documents sent, staying on current page')
-        }
-      }, 2000)
+
+        // Button event listeners
+        document.getElementById('close-now-btn')?.addEventListener('click', closeModal)
+        document.getElementById('dashboard-btn')?.addEventListener('click', () => {
+          window.open(`${tibokUrl}/dashboard?tab=prescriptions`, '_blank')
+          closeModal()
+        })
+      }
+
+      // Show the modal after a brief delay to ensure DOM is ready
+      setTimeout(showSuccessModal, 100)
       
     } else {
       throw new Error(result.error || "Failed to send documents")
