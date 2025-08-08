@@ -2,6 +2,16 @@ import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
 
+// ==================== GPT-5 PARAMETERS CONFIGURATION ====================
+const GPT5_CONFIG = {
+  model: 'gpt-5', // ONLY GPT-5, NO TURBO
+  temperature: 0.2,
+  topP: 1.0,
+  presencePenalty: 0.0,
+  frequencyPenalty: 0.1,
+  maxTokens: 1200
+}
+
 // ==================== DATA PROTECTION FUNCTIONS ====================
 function anonymizePatientData(patientData: any): {
   anonymized: any,
@@ -37,40 +47,6 @@ function anonymizePatientData(patientData: any): {
   console.log('🔒 Patient data anonymized for report')
   
   return { anonymized, originalIdentity, anonymousId }
-}
-
-// ==================== GPT-5 MODEL SELECTION ====================
-/**
- * Determine which GPT-5 model to use based on report complexity
- */
-function selectGPT5Model(
-  patientData: any, 
-  diagnosisData: any, 
-  medications: any[], 
-  labTests: any[], 
-  imagingStudies: any[]
-): string {
-  let complexityScore = 0
-  
-  // Factor in patient complexity
-  if (patientData.age >= 65) complexityScore += 1
-  if ((patientData.medicalHistory || []).length > 3) complexityScore += 1
-  
-  // Factor in prescription complexity
-  if (medications.length > 3) complexityScore += 2
-  if (labTests.length > 5) complexityScore += 2
-  if (imagingStudies.length > 2) complexityScore += 1
-  
-  // Factor in diagnosis complexity
-  if (diagnosisData?.diagnosis?.primary?.severity === "severe") complexityScore += 2
-  if (diagnosisData?.diagnosis?.differential?.length > 3) complexityScore += 1
-  
-  // Select model based on complexity
-  const model = complexityScore >= 5 ? 'gpt-5' : 'gpt-5-turbo'
-  
-  console.log(`🤖 GPT-5 Model selection for report: ${model} (complexity score: ${complexityScore})`)
-  
-  return model
 }
 
 // Helper function to handle bilingual objects
@@ -468,7 +444,8 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any) {
 // ==================== MAIN FUNCTION ====================
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
-  console.log("🚀 Starting report generation with GPT-5 (VERSION WITH ENGLISH CONTENT)")
+  console.log("🚀 Starting report generation with GPT-5 (OPTIMIZED PARAMETERS)")
+  console.log("📊 GPT-5 Config:", GPT5_CONFIG)
   
   try {
     const body = await request.json()
@@ -499,9 +476,6 @@ export async function POST(request: NextRequest) {
     
     // PRESCRIPTIONS EXTRACTION WITH IMPROVED FUNCTION
     const { medications, labTests, imagingStudies } = extractPrescriptions(diagnosisData)
-    
-    // Determine which GPT-5 model to use
-    const selectedModel = selectGPT5Model(anonymizedPatientData, diagnosisData, medications, labTests, imagingStudies)
     
     // Extract real data from diagnosis
     const realData = extractRealDataFromDiagnosis(diagnosisData, clinicalData)
@@ -830,20 +804,23 @@ Generate content for these sections IN ENGLISH:
 Return ONLY a JSON object with these 9 keys and their content in ENGLISH.
 Remember to use Celsius for temperature (not Fahrenheit).`
 
-    console.log(`🤖 Calling ${selectedModel} for ENGLISH content generation...`)
+    console.log(`🤖 Calling GPT-5 with optimized parameters...`)
     
     try {
       const result = await generateText({
-        model: openai(selectedModel),
+        model: openai(GPT5_CONFIG.model),
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        maxTokens: 4000,
-        temperature: 0.2,
+        maxTokens: GPT5_CONFIG.maxTokens,
+        temperature: GPT5_CONFIG.temperature,
+        topP: GPT5_CONFIG.topP,
+        presencePenalty: GPT5_CONFIG.presencePenalty,
+        frequencyPenalty: GPT5_CONFIG.frequencyPenalty,
       })
 
-      console.log(`✅ ${selectedModel} response received`)
+      console.log(`✅ GPT-5 response received`)
 
       // Parse and extract narrative content
       const cleanedText = result.text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
@@ -871,7 +848,7 @@ Remember to use Celsius for temperature (not Fahrenheit).`
         useRealDataFallback(reportStructure, gptData)
       }
     } catch (error) {
-      console.error(`❌ ${selectedModel} Error:`, error)
+      console.error(`❌ GPT-5 Error:`, error)
       // Use fallback content with real data
       useRealDataFallback(reportStructure, gptData)
     }
@@ -900,12 +877,14 @@ Remember to use Celsius for temperature (not Fahrenheit).`
 
     console.log("\n✅ REPORT GENERATED SUCCESSFULLY")
     console.log("📊 Final summary:")
-    console.log(`   - Model used: ${selectedModel}`)
+    console.log(`   - Model used: ${GPT5_CONFIG.model}`)
+    console.log(`   - Temperature: ${GPT5_CONFIG.temperature}`)
+    console.log(`   - Max tokens: ${GPT5_CONFIG.maxTokens}`)
     console.log(`   - Medications: ${medications.length}`)
     console.log(`   - Lab tests: ${labTests.length}`)
     console.log(`   - Imaging: ${imagingStudies.length}`)
     console.log(`   - Processing time: ${processingTime}ms`)
-    console.log(`🔒 Data protection: ACTIVE - No personal data sent to ${selectedModel}`)
+    console.log(`🔒 Data protection: ACTIVE - No personal data sent to GPT-5`)
 
     return NextResponse.json({
       success: true,
@@ -923,7 +902,14 @@ Remember to use Celsius for temperature (not Fahrenheit).`
       },
       metadata: {
         type: "professional_narrative_mauritius_compliant",
-        model: selectedModel,
+        model: GPT5_CONFIG.model,
+        modelParameters: {
+          temperature: GPT5_CONFIG.temperature,
+          topP: GPT5_CONFIG.topP,
+          presencePenalty: GPT5_CONFIG.presencePenalty,
+          frequencyPenalty: GPT5_CONFIG.frequencyPenalty,
+          maxTokens: GPT5_CONFIG.maxTokens
+        },
         includesFullPrescriptions: true,
         generatedAt: currentDate.toISOString(),
         processingTimeMs: processingTime,
