@@ -309,271 +309,262 @@ export default function ProfessionalReportEditable({
     invoice?: string
   }>({})
 
-  // UPDATED: Enhanced validation with digital signature integration
+// UPDATED: Enhanced validation with digital signature integration
   const handleValidation = async () => {
-    // Check if doctor info is complete
-    const requiredFieldsMissing = []
-    if (doctorInfo.nom.includes('[')) requiredFieldsMissing.push('Doctor name')
-    if (doctorInfo.numeroEnregistrement.includes('[')) requiredFieldsMissing.push('Registration number')
-    if (doctorInfo.email.includes('[')) requiredFieldsMissing.push('Email')
+  // Check if doctor info is complete
+  const requiredFieldsMissing = []
+  if (doctorInfo.nom.includes('[')) requiredFieldsMissing.push('Doctor name')
+  if (doctorInfo.numeroEnregistrement.includes('[')) requiredFieldsMissing.push('Registration number')
+  if (doctorInfo.email.includes('[')) requiredFieldsMissing.push('Email')
+  
+  if (requiredFieldsMissing.length > 0) {
+    toast({
+      title: "Cannot Validate",
+      description: `Please complete doctor profile. Missing: ${requiredFieldsMissing.join(', ')}`,
+      variant: "destructive"
+    })
+    setEditingDoctor(true)
+    return
+  }
+  
+  if (!report) {
+    toast({
+      title: "Error",
+      description: "No report to validate",
+      variant: "destructive"
+    })
+    return
+  }
+  
+  // Ensure we have a report ID
+  let currentReportId = reportId
+  if (!currentReportId) {
+    currentReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    setReportId(currentReportId)
+  }
+  
+  setSaving(true)
+  try {
+    // Generate a unique signature seed for this doctor
+    const signatureSeed = `${doctorInfo.nom}_${doctorInfo.numeroEnregistrement}_signature`
     
-    if (requiredFieldsMissing.length > 0) {
-      toast({
-        title: "Cannot Validate",
-        description: `Please complete doctor profile. Missing: ${requiredFieldsMissing.join(', ')}`,
-        variant: "destructive"
-      })
-      setEditingDoctor(true)
-      return
-    }
+    // Create signature data URL using the existing component logic
+    const canvas = document.createElement('canvas')
+    canvas.width = 300
+    canvas.height = 80
+    const ctx = canvas.getContext('2d')
     
-    if (!report) {
-      toast({
-        title: "Error",
-        description: "No report to validate",
-        variant: "destructive"
-      })
-      return
-    }
-    
-    // Ensure we have a report ID
-    let currentReportId = reportId
-    if (!currentReportId) {
-      currentReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      setReportId(currentReportId)
-    }
-    
-    setSaving(true)
-    try {
-      // Generate a unique signature seed for this doctor
-      // This ensures consistency across documents but uniqueness per doctor
-      const signatureSeed = `${doctorInfo.nom}_${doctorInfo.numeroEnregistrement}_signature`
+    if (ctx) {
+      // Generate signature using the same logic as DoctorSignature component
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, 300, 80)
       
-      // Create signature data URL using the existing component logic
-      const canvas = document.createElement('canvas')
-      canvas.width = 300
-      canvas.height = 80
-      const ctx = canvas.getContext('2d')
+      const nameParts = doctorInfo.nom.replace('Dr. ', '').split(' ')
+      const fullName = nameParts.join(' ')
       
-      if (ctx) {
-        // Generate signature using the same logic as DoctorSignature component
-        ctx.fillStyle = '#ffffff'
-        ctx.fillRect(0, 0, 300, 80)
-        
-        const nameParts = doctorInfo.nom.replace('Dr. ', '').split(' ')
-        const fullName = nameParts.join(' ')
-        
-        // Create unique but consistent signature based on name
-        const nameHash = doctorInfo.nom.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-        const signatureStyle = nameHash % 3
-        
-        ctx.save()
-        ctx.translate(50, 40)
-        
-        // Dark ink color
-        ctx.strokeStyle = '#1a1a2e'
-        ctx.fillStyle = '#1a1a2e'
-        ctx.lineWidth = 2.2
-        ctx.lineCap = 'round'
-        ctx.lineJoin = 'round'
-        
-        // Apply signature style (same as in DoctorSignature component)
-        if (signatureStyle === 0) {
-          ctx.font = 'italic 28px "Brush Script MT", "Lucida Handwriting", cursive'
-          ctx.fillText(fullName, 0, 0)
-          ctx.beginPath()
-          ctx.moveTo(-5, 12)
-          ctx.quadraticCurveTo(100, 16, 205, 10)
-          ctx.lineWidth = 1.8
-          ctx.stroke()
-        } else if (signatureStyle === 1) {
-          ctx.font = 'italic bold 32px "Brush Script MT", cursive'
-          const firstLetter = nameParts[0]?.[0] || 'D'
-          ctx.fillText(firstLetter, 0, 0)
-          ctx.font = 'italic 26px "Lucida Handwriting", cursive'
-          const restOfName = nameParts[0]?.substring(1) + ' ' + (nameParts[1] || '')
-          ctx.fillText(restOfName, 28, 2)
-          ctx.beginPath()
-          ctx.moveTo(0, 14)
-          ctx.bezierCurveTo(50, 16, 150, 14, 200, 12)
-          ctx.lineWidth = 1.5
-          ctx.stroke()
-        } else {
-          ctx.font = 'italic 30px "Segoe Script", "Brush Script MT", cursive'
-          let xOffset = 0
-          for (let i = 0; i < fullName.length; i++) {
-            const char = fullName[i]
-            const charWidth = ctx.measureText(char).width
-            const yOffset = Math.sin(i * 0.5) * 2
-            ctx.fillText(char, xOffset, yOffset)
-            xOffset += charWidth * 0.85
-          }
-          ctx.beginPath()
-          ctx.moveTo(0, 15)
-          ctx.quadraticCurveTo(xOffset/2, 18, xOffset, 13)
-          ctx.lineWidth = 1.6
-          ctx.stroke()
+      // Create unique but consistent signature based on name
+      const nameHash = doctorInfo.nom.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      const signatureStyle = nameHash % 3
+      
+      ctx.save()
+      ctx.translate(50, 40)
+      
+      // Dark ink color
+      ctx.strokeStyle = '#1a1a2e'
+      ctx.fillStyle = '#1a1a2e'
+      ctx.lineWidth = 2.2
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      
+      // Apply signature style
+      if (signatureStyle === 0) {
+        ctx.font = 'italic 28px "Brush Script MT", "Lucida Handwriting", cursive'
+        ctx.fillText(fullName, 0, 0)
+        ctx.beginPath()
+        ctx.moveTo(-5, 12)
+        ctx.quadraticCurveTo(100, 16, 205, 10)
+        ctx.lineWidth = 1.8
+        ctx.stroke()
+      } else if (signatureStyle === 1) {
+        ctx.font = 'italic bold 32px "Brush Script MT", cursive'
+        const firstLetter = nameParts[0]?.[0] || 'D'
+        ctx.fillText(firstLetter, 0, 0)
+        ctx.font = 'italic 26px "Lucida Handwriting", cursive'
+        const restOfName = nameParts[0]?.substring(1) + ' ' + (nameParts[1] || '')
+        ctx.fillText(restOfName, 28, 2)
+        ctx.beginPath()
+        ctx.moveTo(0, 14)
+        ctx.bezierCurveTo(50, 16, 150, 14, 200, 12)
+        ctx.lineWidth = 1.5
+        ctx.stroke()
+      } else {
+        ctx.font = 'italic 30px "Segoe Script", "Brush Script MT", cursive'
+        let xOffset = 0
+        for (let i = 0; i < fullName.length; i++) {
+          const char = fullName[i]
+          const charWidth = ctx.measureText(char).width
+          const yOffset = Math.sin(i * 0.5) * 2
+          ctx.fillText(char, xOffset, yOffset)
+          xOffset += charWidth * 0.85
         }
-        
-        // Add date
-        ctx.font = '9px Arial'
-        ctx.fillStyle = '#9ca3af'
-        ctx.textAlign = 'left'
-        const date = new Date().toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        })
-        ctx.fillText(`Signed: ${date}`, 0, 35)
-        ctx.restore()
+        ctx.beginPath()
+        ctx.moveTo(0, 15)
+        ctx.quadraticCurveTo(xOffset/2, 18, xOffset, 13)
+        ctx.lineWidth = 1.6
+        ctx.stroke()
       }
       
-      // Convert canvas to data URL
-      const signatureDataUrl = canvas.toDataURL('image/png')
-      
-      // Create signatures object for all document types
-      const signatures = {
-        consultation: signatureDataUrl,
-        prescription: signatureDataUrl,
-        laboratory: signatureDataUrl,
-        imaging: signatureDataUrl,
-        invoice: signatureDataUrl
-      }
-      
-      // Update the document signatures state
-      setDocumentSignatures(signatures)
-      
-      // Create the updated report with signatures embedded
-      const updatedReport = {
-        ...report,
-        compteRendu: {
-          ...report.compteRendu,
-          praticien: doctorInfo,
-          metadata: {
-            ...getReportMetadata(),
-            validatedAt: new Date().toISOString(),
-            validatedBy: doctorInfo.nom,
-            validationStatus: 'validated' as const,
-            signatures: signatures,
-            signatureDataUrl: signatureDataUrl // Store the actual signature image
-          }
-        },
-        // Add signature references to each document section
-        ordonnances: report.ordonnances ? {
-          ...report.ordonnances,
-          medicaments: report.ordonnances.medicaments ? {
-            ...report.ordonnances.medicaments,
-            authentification: {
-              ...report.ordonnances.medicaments.authentification,
-              signatureImage: signatureDataUrl,
-              signedAt: new Date().toISOString()
-            }
-          } : null,
-          biologie: report.ordonnances.biologie ? {
-            ...report.ordonnances.biologie,
-            authentification: {
-              ...report.ordonnances.biologie.authentification,
-              signatureImage: signatureDataUrl,
-              signedAt: new Date().toISOString()
-            }
-          } : null,
-          imagerie: report.ordonnances.imagerie ? {
-            ...report.ordonnances.imagerie,
-            authentification: {
-              ...report.ordonnances.imagerie.authentification,
-              signatureImage: signatureDataUrl,
-              signedAt: new Date().toISOString()
-            }
-          } : null
-        } : report.ordonnances,
-        invoice: report.invoice ? {
-          ...report.invoice,
-          signature: {
-            ...report.invoice.signature,
+      // Add date
+      ctx.font = '9px Arial'
+      ctx.fillStyle = '#9ca3af'
+      ctx.textAlign = 'left'
+      const date = new Date().toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      })
+      ctx.fillText(`Signed: ${date}`, 0, 35)
+      ctx.restore()
+    }
+    
+    // Convert canvas to data URL
+    const signatureDataUrl = canvas.toDataURL('image/png')
+    
+    // Create signatures object for all document types
+    const signatures = {
+      consultation: signatureDataUrl,
+      prescription: signatureDataUrl,
+      laboratory: signatureDataUrl,
+      imaging: signatureDataUrl,
+      invoice: signatureDataUrl
+    }
+    
+    // Update the document signatures state
+    setDocumentSignatures(signatures)
+    
+    // Create the updated report with signatures embedded
+    const updatedReport = {
+      ...report,
+      compteRendu: {
+        ...report.compteRendu,
+        praticien: doctorInfo,
+        metadata: {
+          ...getReportMetadata(),
+          validatedAt: new Date().toISOString(),
+          validatedBy: doctorInfo.nom,
+          validationStatus: 'validated' as const,
+          signatures: signatures,
+          signatureDataUrl: signatureDataUrl
+        }
+      },
+      // Add signature references to each document section
+      ordonnances: report.ordonnances ? {
+        ...report.ordonnances,
+        medicaments: report.ordonnances.medicaments ? {
+          ...report.ordonnances.medicaments,
+          authentification: {
+            ...report.ordonnances.medicaments.authentification,
             signatureImage: signatureDataUrl,
             signedAt: new Date().toISOString()
           }
-        } : report.invoice
-      }
-      
-// Get URL parameters
-      const params = new URLSearchParams(window.location.search)
-      const consultationId = params.get('consultationId')
-      const patientId = params.get('patientId') || patientData?.id
-      const doctorId = params.get('doctorId')
-      
- // REMOVED: API calls to save-medical-report and update-doctor-signature
-// Validation is now handled locally without server persistence
-
-// Get URL parameters for logging
-const params = new URLSearchParams(window.location.search)
-const consultationId = params.get('consultationId')
-const patientId = params.get('patientId') || patientData?.id
-const doctorId = params.get('doctorId')
-
-// Log validation info for debugging
-console.log('✅ Report validated locally (API calls removed):', {
-  reportId: currentReportId,
-  patientId: patientId || 'temp',
-  consultationId,
-  doctorId,
-  doctorName: doctorInfo.nom,
-  patientName: getReportPatient().nomComplet || getReportPatient().nom,
-  validatedAt: new Date().toISOString(),
-  validatedBy: doctorInfo.nom,
-  documentValidations: {
-    consultation: true,
-    prescription: !!report?.ordonnances?.medicaments,
-    laboratory: !!report?.ordonnances?.biologie,
-    imaging: !!report?.ordonnances?.imagerie,
-    invoice: !!report?.invoice
-  }
-})
-
-// Update states to reflect validation (same as before)
-setValidationStatus('validated')
-setEditMode(false)
-setReport(updatedReport)
-
-// Store signature in localStorage for session persistence (optional)
-if (doctorId && signatureDataUrl) {
-  try {
-    const signatureData = {
-      doctorId: doctorId,
-      doctorName: doctorInfo.nom,
-      signatureDataUrl: signatureDataUrl,
-      lastSignedAt: new Date().toISOString()
+        } : null,
+        biologie: report.ordonnances.biologie ? {
+          ...report.ordonnances.biologie,
+          authentification: {
+            ...report.ordonnances.biologie.authentification,
+            signatureImage: signatureDataUrl,
+            signedAt: new Date().toISOString()
+          }
+        } : null,
+        imagerie: report.ordonnances.imagerie ? {
+          ...report.ordonnances.imagerie,
+          authentification: {
+            ...report.ordonnances.imagerie.authentification,
+            signatureImage: signatureDataUrl,
+            signedAt: new Date().toISOString()
+          }
+        } : null
+      } : report.ordonnances,
+      invoice: report.invoice ? {
+        ...report.invoice,
+        signature: {
+          ...report.invoice.signature,
+          signatureImage: signatureDataUrl,
+          signedAt: new Date().toISOString()
+        }
+      } : report.invoice
     }
-    localStorage.setItem(`doctor_signature_${doctorId}`, JSON.stringify(signatureData))
-    console.log('📝 Signature stored locally for session')
-  } catch (err) {
-    console.log('Could not store signature locally:', err)
-    // Non-critical error, continue
+    
+    // Get URL parameters for logging
+    const params = new URLSearchParams(window.location.search)
+    const consultationId = params.get('consultationId')
+    const patientId = params.get('patientId') || patientData?.id
+    const doctorId = params.get('doctorId')
+    
+    // REMOVED: API calls to save-medical-report and update-doctor-signature
+    // Validation is now handled locally without server persistence
+    
+    console.log('✅ Report validated locally (API calls removed):', {
+      reportId: currentReportId,
+      patientId: patientId || 'temp',
+      consultationId,
+      doctorId,
+      doctorName: doctorInfo.nom,
+      patientName: getReportPatient().nomComplet || getReportPatient().nom,
+      validatedAt: new Date().toISOString(),
+      validatedBy: doctorInfo.nom,
+      documentValidations: {
+        consultation: true,
+        prescription: !!report?.ordonnances?.medicaments,
+        laboratory: !!report?.ordonnances?.biologie,
+        imaging: !!report?.ordonnances?.imagerie,
+        invoice: !!report?.invoice
+      }
+    })
+    
+    // Update states to reflect validation
+    setValidationStatus('validated')
+    setEditMode(false)
+    setReport(updatedReport)
+    setModifiedSections(new Set())
+    
+    // Store signature in localStorage for session persistence (optional)
+    if (doctorId && signatureDataUrl) {
+      try {
+        const signatureData = {
+          doctorId: doctorId,
+          doctorName: doctorInfo.nom,
+          signatureDataUrl: signatureDataUrl,
+          lastSignedAt: new Date().toISOString()
+        }
+        localStorage.setItem(`doctor_signature_${doctorId}`, JSON.stringify(signatureData))
+        console.log('📝 Signature stored locally for session')
+      } catch (err) {
+        console.log('Could not store signature locally:', err)
+        // Non-critical error, continue
+      }
+    }
+    
+    // Show success toast
+    toast({
+      title: "✅ Validation successful",
+      description: "All documents have been validated and digitally signed. You can now send them to the patient dashboard."
+    })
+    
+  } catch (error) {
+    console.error('Validation error:', error)
+    toast({
+      title: "Validation Error",
+      description: error instanceof Error ? error.message : "Failed to validate document",
+      variant: "destructive"
+    })
+  } finally {
+    setSaving(false)
   }
 }
+  }  // Closing brace for handleValidation
 
-// Show success toast (same message as before)
-toast({
-  title: "✅ Validation successful",
-  description: "All documents have been validated and digitally signed. You can now send them to the patient dashboard."
-})
-     
-        
-      } else {
-        throw new Error(result.error || "Validation failed")
-      }
-    } catch (error) {
-      console.error("Validation error:", error)
-      toast({
-        title: "Validation error",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive"
-      })
-    } finally {
-      setSaving(false)
-    }
-  }  // This closes the handleValidation function
-
+  // handleSendDocuments should be a SEPARATE function
   const handleSendDocuments = async () => {
     // Check if report is validated
     if (!report || validationStatus !== 'validated') {
@@ -591,178 +582,375 @@ toast({
         title: "📤 Sending documents...",
         description: "Preparing documents for patient dashboard"
       })
-      // ... rest of handleSendDocuments function continues ...
-    // Get necessary IDs from URL parameters
-    const params = new URLSearchParams(window.location.search)
-    const consultationId = params.get('consultationId')
-    const patientId = params.get('patientId') || patientData?.id
-    const doctorId = params.get('doctorId')
+      
+      // Get necessary IDs from URL parameters
+      const params = new URLSearchParams(window.location.search)
+      const consultationId = params.get('consultationId')
+      const patientId = params.get('patientId') || patientData?.id
+      const doctorId = params.get('doctorId')
 
-    if (!consultationId || !patientId) {
+      if (!consultationId || !patientId) {
+        toast({
+          title: "Error",
+          description: "Missing consultation or patient information",
+          variant: "destructive"
+        })
+        return
+      }
+
+      // Smart Tibok URL detection
+      const getTibokUrl = () => {
+        const urlParam = params.get('tibokUrl')
+        if (urlParam) {
+          console.log('📍 Using Tibok URL from parameter:', decodeURIComponent(urlParam))
+          return decodeURIComponent(urlParam)
+        }
+
+        if (document.referrer) {
+          try {
+            const referrerUrl = new URL(document.referrer)
+            const knownTibokDomains = ['tibok.mu', 'v0-tibokmain2.vercel.app', 'localhost']
+            if (knownTibokDomains.some(domain => referrerUrl.hostname.includes(domain))) {
+              console.log('📍 Using Tibok URL from referrer:', referrerUrl.origin)
+              return referrerUrl.origin
+            }
+          } catch (e) {
+            console.log('Could not parse referrer')
+          }
+        }
+
+        if (process.env.NEXT_PUBLIC_TIBOK_URL) {
+          console.log('📍 Using Tibok URL from environment:', process.env.NEXT_PUBLIC_TIBOK_URL)
+          return process.env.NEXT_PUBLIC_TIBOK_URL
+        }
+
+        console.log('📍 Using default Tibok URL: https://tibok.mu')
+        return 'https://tibok.mu'
+      }
+
+      const tibokUrl = getTibokUrl()
+
+      // Prepare documents payload
+      const documentsPayload = {
+        consultationId,
+        patientId,
+        doctorId,
+        doctorName: doctorInfo.nom,
+        patientName: getReportPatient().nomComplet || getReportPatient().nom,
+        generatedAt: new Date().toISOString(),
+        documents: {
+          consultationReport: report.compteRendu ? {
+            type: 'consultation_report',
+            title: 'Medical Consultation Report',
+            content: report.compteRendu,
+            validated: true,
+            validatedAt: report.compteRendu.metadata.validatedAt,
+            signature: documentSignatures.consultation
+          } : null,
+          prescriptions: report.ordonnances?.medicaments ? {
+            type: 'prescription',
+            title: 'Medical Prescription',
+            medications: report.ordonnances.medicaments.prescription.medicaments,
+            validity: report.ordonnances.medicaments.prescription.validite,
+            signature: documentSignatures.prescription,
+            content: report.ordonnances.medicaments
+          } : null,
+          laboratoryRequests: report.ordonnances?.biologie ? {
+            type: 'laboratory_request',
+            title: 'Laboratory Request Form',
+            tests: report.ordonnances.biologie.prescription.analyses,
+            signature: documentSignatures.laboratory,
+            content: report.ordonnances.biologie
+          } : null,
+          imagingRequests: report.ordonnances?.imagerie ? {
+            type: 'imaging_request',
+            title: 'Radiology Request Form',
+            examinations: report.ordonnances.imagerie.prescription.examens,
+            signature: documentSignatures.imaging,
+            content: report.ordonnances.imagerie
+          } : null,
+          invoice: report.invoice ? {
+            type: 'invoice',
+            title: `Invoice ${report.invoice.header.invoiceNumber}`,
+            content: report.invoice,
+            signature: documentSignatures.invoice
+          } : null
+        }
+      }
+
+      console.log('📦 Sending documents payload to:', tibokUrl)
+      console.log('📦 Payload:', documentsPayload)
+
+      // Send to Tibok patient dashboard
+      const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(documentsPayload)
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ Tibok API error:', errorText)
+        throw new Error(`Failed to send documents: ${response.status} - ${errorText}`)
+      }
+
+      const result = await response.json()
+      console.log('✅ API Response:', result)
+
+if (result.success) {
+        // Show initial success toast
+        toast({
+          title: "✅ Documents envoyés avec succès",
+          description: "Les documents sont maintenant disponibles dans le tableau de bord du patient"
+        })
+
+        // Create and show enhanced success modal
+        const showSuccessModal = () => {
+          // Create modal container
+          const modalContainer = document.createElement('div')
+          modalContainer.id = 'success-modal'
+          modalContainer.style.cssText = `
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease-out;
+          `
+
+          // Create modal content
+          const modalContent = document.createElement('div')
+          modalContent.style.cssText = `
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 500px;
+            margin: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: slideUp 0.3s ease-out;
+            position: relative;
+          `
+
+          modalContent.innerHTML = `
+            <!-- Close X button -->
+            <button id="close-x-btn" style="
+              position: absolute;
+              top: 1rem;
+              right: 1rem;
+              width: 32px;
+              height: 32px;
+              border-radius: 50%;
+              border: none;
+              background: #f3f4f6;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition: all 0.2s;
+            " onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+              <svg width="20" height="20" fill="#6b7280" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            
+            <div style="text-align: center;">
+              <!-- Success Icon -->
+              <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; animation: scaleIn 0.5s ease-out;">
+                <svg width="40" height="40" fill="white" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              
+              <!-- Title -->
+              <h2 style="font-size: 1.5rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
+                Documents envoyés avec succès!
+              </h2>
+              
+              <!-- Description -->
+              <p style="color: #6b7280; margin-bottom: 1.5rem; line-height: 1.5;">
+                Les documents médicaux ont été transmis au tableau de bord du patient.<br>
+                Le patient recevra une notification pour valider son ordonnance.
+              </p>
+              
+              <!-- Info Box -->
+              <div style="background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e7eb;">
+                <p style="font-size: 0.875rem; color: #4b5563; margin: 0 0 0.5rem 0;">
+                  <strong>Prochaines étapes:</strong>
+                </p>
+                <ul style="text-align: left; font-size: 0.875rem; color: #6b7280; margin: 0; padding-left: 1.5rem;">
+                  <li>Le patient validera son ordonnance</li>
+                  <li>La pharmacie préparera les médicaments</li>
+                  <li>Livraison selon l'option choisie par le patient</li>
+                </ul>
+              </div>
+              
+              <!-- Success Status -->
+              <div style="background: #d1fae5; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #a7f3d0;">
+                <p style="font-size: 0.875rem; color: #065f46; margin: 0; font-weight: 500;">
+                  ✅ Tous les documents ont été envoyés avec succès
+                </p>
+                <p style="font-size: 0.75rem; color: #047857; margin: 0.25rem 0 0 0;">
+                  Consultation ID: ${consultationId}
+                </p>
+              </div>
+              
+              <!-- Single Button to Close Tab -->
+              <button id="close-tab-btn" style="
+                width: 100%;
+                padding: 0.75rem 1.5rem;
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+                color: white;
+                border: none;
+                border-radius: 0.5rem;
+                font-weight: 600;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+              " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+                Cliquez ici pour fermer cet onglet si vous avez terminé
+              </button>
+              
+              <!-- Optional Note -->
+              <div style="margin-top: 1rem;">
+                <p style="font-size: 0.75rem; color: #9ca3af; margin: 0;">
+                  Vous pouvez également garder cet onglet ouvert pour traiter d'autres consultations
+                </p>
+              </div>
+            </div>
+          `
+
+          modalContainer.appendChild(modalContent)
+          document.body.appendChild(modalContainer)
+
+          // Add CSS animations
+          const style = document.createElement('style')
+          style.textContent = `
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+            @keyframes slideUp {
+              from {
+                transform: translateY(20px);
+                opacity: 0;
+              }
+              to {
+                transform: translateY(0);
+                opacity: 1;
+              }
+            }
+            @keyframes scaleIn {
+              from { transform: scale(0); }
+              to { transform: scale(1); }
+            }
+            @keyframes fadeOut {
+              from { opacity: 1; }
+              to { opacity: 0; }
+            }
+          `
+          document.head.appendChild(style)
+
+          // Function to close the tab
+          const closeTab = () => {
+            // Clear session storage
+            sessionStorage.removeItem('currentDoctorInfo')
+            
+            // Try to close the window/tab
+            if (window.opener) {
+              // If opened as popup
+              window.close()
+            } else {
+              // If regular tab, try to close (may not work in all browsers)
+              window.close()
+              
+              // If window.close() doesn't work, show a message
+              setTimeout(() => {
+                const modal = document.getElementById('success-modal')
+                if (modal) {
+                  modal.innerHTML = `
+                    <div style="background: white; padding: 2rem; border-radius: 1rem; max-width: 400px; margin: auto;">
+                      <div style="text-align: center;">
+                        <div style="width: 60px; height: 60px; background: #fbbf24; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                          <svg width="30" height="30" fill="white" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                          </svg>
+                        </div>
+                        <h3 style="font-size: 1.25rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
+                          Impossible de fermer automatiquement
+                        </h3>
+                        <p style="color: #6b7280; margin-bottom: 1rem;">
+                          Votre navigateur empêche la fermeture automatique des onglets.
+                        </p>
+                        <p style="color: #4b5563; font-weight: 500;">
+                          Veuillez fermer manuellement cet onglet.
+                        </p>
+                        <button onclick="document.getElementById('success-modal').remove()" style="
+                          margin-top: 1rem;
+                          padding: 0.5rem 1rem;
+                          background: #3b82f6;
+                          color: white;
+                          border: none;
+                          border-radius: 0.5rem;
+                          cursor: pointer;
+                        ">
+                          OK, Compris
+                        </button>
+                      </div>
+                    </div>
+                  `
+                }
+              }, 100)
+            }
+          }
+
+          // Close modal function (only closes the modal, not the tab)
+          const closeModal = () => {
+            const modal = document.getElementById('success-modal')
+            if (modal) {
+              modal.style.animation = 'fadeOut 0.3s ease-out'
+              setTimeout(() => {
+                modal.remove()
+              }, 300)
+            }
+          }
+
+          // Button event listeners
+          document.getElementById('close-x-btn')?.addEventListener('click', closeModal)
+          document.getElementById('close-tab-btn')?.addEventListener('click', closeTab)
+
+          // Optional: Allow clicking outside to close modal only (not tab)
+          modalContainer.addEventListener('click', (e) => {
+            if (e.target === modalContainer) {
+              closeModal()
+            }
+          })
+        }
+
+        // Show the modal after a brief delay to ensure DOM is ready
+        setTimeout(showSuccessModal, 100)
+        
+      } else {
+        throw new Error(result.error || "Failed to send documents")
+      }
+    } catch (error) {
+      console.error("❌ Error sending documents:", error)
       toast({
-        title: "Error",
-        description: "Missing consultation or patient information",
+        title: "Error sending documents",
+        description: error instanceof Error ? error.message : "An error occurred while sending documents",
         variant: "destructive"
       })
-      return
     }
-
-    // Smart Tibok URL detection
-    const getTibokUrl = () => {
-      // 1. Check URL parameter
-      const urlParam = params.get('tibokUrl')
-      if (urlParam) {
-        console.log('📍 Using Tibok URL from parameter:', decodeURIComponent(urlParam))
-        return decodeURIComponent(urlParam)
-      }
-
-      // 2. Check referrer
-      if (document.referrer) {
-        try {
-          const referrerUrl = new URL(document.referrer)
-          // Only use referrer if it's a known Tibok domain
-          const knownTibokDomains = ['tibok.mu', 'v0-tibokmain2.vercel.app', 'localhost']
-          if (knownTibokDomains.some(domain => referrerUrl.hostname.includes(domain))) {
-            console.log('📍 Using Tibok URL from referrer:', referrerUrl.origin)
-            return referrerUrl.origin
-          }
-        } catch (e) {
-          console.log('Could not parse referrer')
-        }
-      }
-
-      // 3. Check environment variable
-      if (process.env.NEXT_PUBLIC_TIBOK_URL) {
-        console.log('📍 Using Tibok URL from environment:', process.env.NEXT_PUBLIC_TIBOK_URL)
-        return process.env.NEXT_PUBLIC_TIBOK_URL
-      }
-
-      // 4. Default to production
-      console.log('📍 Using default Tibok URL: https://tibok.mu')
-      return 'https://tibok.mu'
-    }
-
-    const tibokUrl = getTibokUrl()
-
-    // Prepare documents payload with all validated documents
-    const documentsPayload = {
-      consultationId,
-      patientId,
-      doctorId,
-      doctorName: doctorInfo.nom,
-      patientName: getReportPatient().nomComplet || getReportPatient().nom,
-      generatedAt: new Date().toISOString(),
-      documents: {
-        // Main consultation report
-        consultationReport: report.compteRendu ? {
-          type: 'consultation_report',
-          title: 'Medical Consultation Report',
-          content: report.compteRendu,
-          validated: true,
-          validatedAt: report.compteRendu.metadata.validatedAt,
-          signature: documentSignatures.consultation
-        } : null,
-        
-        // Prescriptions (if any)
-        prescriptions: report.ordonnances?.medicaments ? {
-          type: 'prescription',
-          title: 'Medical Prescription',
-          medications: report.ordonnances.medicaments.prescription.medicaments,
-          validity: report.ordonnances.medicaments.prescription.validite,
-          signature: documentSignatures.prescription,
-          content: report.ordonnances.medicaments
-        } : null,
-        
-        // Laboratory requests (if any)
-        laboratoryRequests: report.ordonnances?.biologie ? {
-          type: 'laboratory_request',
-          title: 'Laboratory Request Form',
-          tests: report.ordonnances.biologie.prescription.analyses,
-          signature: documentSignatures.laboratory,
-          content: report.ordonnances.biologie
-        } : null,
-        
-        // Imaging requests (if any)
-        imagingRequests: report.ordonnances?.imagerie ? {
-          type: 'imaging_request',
-          title: 'Radiology Request Form',
-          examinations: report.ordonnances.imagerie.prescription.examens,
-          signature: documentSignatures.imaging,
-          content: report.ordonnances.imagerie
-        } : null,
-        
-        // Invoice
-        invoice: report.invoice ? {
-          type: 'invoice',
-          title: `Invoice ${report.invoice.header.invoiceNumber}`,
-          content: report.invoice,
-          signature: documentSignatures.invoice
-        } : null
-      }
-    }
-
-    console.log('📦 Sending documents payload to:', tibokUrl)
-    console.log('📦 Payload:', documentsPayload)
-
-    // Send to Tibok patient dashboard
-    const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(documentsPayload)
-    })
-
-    // Check if response is ok before parsing JSON
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('❌ Tibok API error:', errorText)
-      throw new Error(`Failed to send documents: ${response.status} - ${errorText}`)
-    }
-
-    const result = await response.json()
-    console.log('✅ API Response:', result)
-
-    if (result.success) {
-      toast({
-        title: "✅ Documents sent successfully",
-        description: "Documents are now available in the patient's dashboard"
-      })
-
-      // Clear any stored report data
-      sessionStorage.removeItem('currentDoctorInfo')
-      
-      // Wait a moment for user to see the success message
-      setTimeout(() => {
-        // Option 1: If onComplete callback exists, call it
-        if (onComplete) {
-          onComplete()
-        } 
-        // Option 2: Redirect to Tibok dashboard
-        else if (consultationId) {
-          window.location.href = `${tibokUrl}/dashboard?tab=prescriptions`
-        }
-        // Option 3: Close the Medical AI window if it was opened as a popup
-        else if (window.opener) {
-          window.close()
-        }
-        // Option 4: Stay on the same page
-        else {
-          console.log('Documents sent, staying on current page')
-        }
-      }, 2000)
-      
-    } else {
-      throw new Error(result.error || "Failed to send documents")
-    }
-  } catch (error) {
-    console.error("❌ Error sending documents:", error)
-    toast({
-      title: "Error sending documents",
-      description: error instanceof Error ? error.message : "An error occurred while sending documents",
-      variant: "destructive"
-    })
-  }
-}
-
+  }  // Closing brace for handleSendDocuments
+  
   // Safe getter functions
   const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
   const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
@@ -959,35 +1147,37 @@ toast({
     }
   }, [patientData, clinicalData, questionsData, diagnosisData])
 
-  // Check for existing report
-  const checkExistingReport = async () => {
-    try {
-      const params = new URLSearchParams(window.location.search)
-      const patientIdFromUrl = params.get('patientId')
-      const actualPatientId = patientData?.id || patientIdFromUrl || (patientData ? 'patient_' + Date.now() : 'temp')
-      
-      if (!patientData || actualPatientId === 'temp') {
-        console.log("No patient data, generating new report")
-        generateProfessionalReport()
-        return
-      }
-      
-      // REMOVED: Check for existing report via save-medical-report API
-// const response = await fetch(`/api/save-medical-report?patientId=${actualPatientId}`)
-// Go directly to generate report since we can't check for existing
-
-console.log("Skipping existing report check (save-medical-report API removed), generating new report")
-generateProfessionalReport()
-    } catch (error) {
-      console.log("No existing report, generating new one")
+// Check for existing report
+ const checkExistingReport = async () => {
+  try {
+    const params = new URLSearchParams(window.location.search)
+    const patientIdFromUrl = params.get('patientId')
+    const actualPatientId = patientData?.id || patientIdFromUrl || (patientData ? 'patient_' + Date.now() : 'temp')
+    
+    if (!patientData || actualPatientId === 'temp') {
+      console.log("No patient data, generating new report")
       generateProfessionalReport()
+      return
     }
+    
+    // REMOVED: Check for existing report via save-medical-report API
+    // Go directly to generate report since we can't check for existing
+    console.log("Skipping existing report check (save-medical-report API removed), generating new report")
+    generateProfessionalReport()
+    
+  } catch (error) {
+    console.log("Error in checkExistingReport, generating new one:", error)
+    generateProfessionalReport()
   }
+}
 
   // UPDATED: Generate report with doctor data and auto-save
   const generateProfessionalReport = async () => {
     setLoading(true)
     setError(null)
+    // CRITICAL: Always reset validation status when generating a new report
+    setValidationStatus('draft')
+    setDocumentSignatures({})
 
     try {
       // Wait for doctor info to be loaded
@@ -1055,41 +1245,63 @@ generateProfessionalReport()
         // Override the praticien data with actual doctor info
         reportData.compteRendu.praticien = currentDoctorInfo
         
-        // Also update all prescription headers
+        // CRITICAL: Ensure the report is set as draft, not validated
+        if (reportData.compteRendu.metadata) {
+          reportData.compteRendu.metadata.validationStatus = 'draft'
+          delete reportData.compteRendu.metadata.signatures
+          delete reportData.compteRendu.metadata.signatureDataUrl
+          delete reportData.compteRendu.metadata.validatedAt
+          delete reportData.compteRendu.metadata.validatedBy
+        }
+        
+        // Also update all prescription headers and remove any signatures
         if (reportData.ordonnances?.medicaments) {
           reportData.ordonnances.medicaments.enTete = currentDoctorInfo
           reportData.ordonnances.medicaments.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
           reportData.ordonnances.medicaments.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
+          // Remove any existing signatures
+          delete reportData.ordonnances.medicaments.authentification.signatureImage
+          delete reportData.ordonnances.medicaments.authentification.signedAt
         }
         
         if (reportData.ordonnances?.biologie) {
           reportData.ordonnances.biologie.enTete = currentDoctorInfo
           reportData.ordonnances.biologie.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
           reportData.ordonnances.biologie.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
+          // Remove any existing signatures
+          delete reportData.ordonnances.biologie.authentification.signatureImage
+          delete reportData.ordonnances.biologie.authentification.signedAt
         }
         
         if (reportData.ordonnances?.imagerie) {
           reportData.ordonnances.imagerie.enTete = currentDoctorInfo
           reportData.ordonnances.imagerie.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
           reportData.ordonnances.imagerie.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
+          // Remove any existing signatures
+          delete reportData.ordonnances.imagerie.authentification.signatureImage
+          delete reportData.ordonnances.imagerie.authentification.signedAt
         }
         
         if (reportData.invoice?.physician) {
           reportData.invoice.physician.name = currentDoctorInfo.nom
           reportData.invoice.physician.registrationNumber = currentDoctorInfo.numeroEnregistrement
+          // Remove any existing signatures
+          if (reportData.invoice.signature) {
+            delete reportData.invoice.signature.signatureImage
+            delete reportData.invoice.signature.signedAt
+          }
         }
         
         setReport(reportData)
-        setValidationStatus('draft')
+        setValidationStatus('draft') // Ensure it's set to draft
+        setDocumentSignatures({}) // Clear any signatures
         
         // Auto-save the report immediately after generation
-        const newReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-        setReportId(newReportId)
-        
-        // REMOVED: Auto-save via save-medical-report API
-// const saveResponse = await fetch('/api/save-medical-report', {...})
-// Report is now only stored in local state
+const newReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+setReportId(newReportId)
 
+// REMOVED: Auto-save via save-medical-report API
+// Report is now only stored in local state
 const params = new URLSearchParams(window.location.search)
 const consultationId = params.get('consultationId')
 const patientId = params.get('patientId') || patientData?.id
@@ -1098,7 +1310,7 @@ console.log('✅ Report generated locally with ID:', newReportId, {
   consultationId,
   patientId
 })
-
+        
         toast({
           title: "Report generated successfully",
           description: "Report is ready for editing and validation"
@@ -1129,6 +1341,8 @@ console.log('✅ Report generated locally with ID:', newReportId, {
         }
       }
       setReport(emptyReport)
+      setValidationStatus('draft') // Ensure it's set to draft even on error
+      setDocumentSignatures({}) // Clear any signatures
       
       toast({
         title: "Note",
@@ -1139,7 +1353,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       setLoading(false)
     }
   }
-
   // Save report (for backward compatibility but redirects to validation)
   const handleSave = async () => {
     // Auto-save is handled by validation now
