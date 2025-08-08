@@ -238,21 +238,20 @@ export async function POST(request: NextRequest) {
   console.log("🚀 Starting POST request /api/openai-questions (GPT-5 VERSION)")
   console.log("📊 GPT-5 Config:", GPT5_CONFIG)
   
+  let body: any = null
+  
   try {
-    // 1. Retrieve and validate API key
-    const apiKey = process.env.OPENAI_API_KEY
-    
-    if (!apiKey) {
-      throw new Error('OPENAI_API_KEY missing in environment variables')
+    // 1. Parse request body
+    try {
+      body = await request.json()
+      console.log("📝 Body received, parsing data...")
+    } catch (parseError) {
+      console.error("❌ Failed to parse request body:", parseError)
+      return NextResponse.json(
+        { error: "Invalid request body", success: false },
+        { status: 400 }
+      )
     }
-    
-    if (!apiKey.startsWith('sk-')) {
-      throw new Error('Invalid API key format (must start with sk-)')
-    }
-    
-    // 2. Parse request
-    const body = await request.json()
-    console.log("📝 Body received, parsing data...")
     
     const { 
       patientData, 
@@ -260,7 +259,22 @@ export async function POST(request: NextRequest) {
       mode = 'balanced'
     } = body
 
-    // 3. Validate data
+    // 2. Retrieve and validate API key
+    const apiKey = process.env.OPENAI_API_KEY
+    
+    if (!apiKey) {
+      console.error('❌ OPENAI_API_KEY missing')
+      throw new Error('OPENAI_API_KEY missing in environment variables')
+    }
+    
+    if (!apiKey.startsWith('sk-')) {
+      console.error('❌ Invalid API key format')
+      throw new Error('Invalid API key format (must start with sk-)')
+    }
+    
+    console.log('✅ API key validated')
+    
+    // 3. Extract data from body
     if (!patientData || !clinicalData) {
       console.error("❌ Missing data in request")
       return NextResponse.json(
@@ -269,10 +283,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // ========== DATA PROTECTION: ANONYMIZATION ==========
+    // 5. Data protection: anonymization
     const { anonymized: anonymizedPatientData, originalIdentity, anonymousId } = anonymizePatientData(patientData)
+    console.log('✅ Patient data anonymized')
 
-    // 4. Data normalization WITH ANONYMIZED DATA
+    // 6. Data normalization WITH ANONYMIZED DATA
     const validatedPatientData = {
       age: anonymizedPatientData.age || 'Not specified',
       gender: anonymizedPatientData.gender || anonymizedPatientData.sex || 'Not specified',
@@ -287,12 +302,13 @@ export async function POST(request: NextRequest) {
       ...clinicalData
     }
 
-    // 5. Determine symptoms string
+    // 7. Determine symptoms string
     const symptomsString = String(validatedClinicalData.symptoms || validatedClinicalData.chiefComplaint || '')
+    console.log(`📋 Symptoms: "${symptomsString.substring(0, 100)}..."`)
     
     console.log(`🤖 Using model: ${GPT5_CONFIG.model}`)
 
-    // 6. Check cache
+    // 8. Check cache
     const cacheKey = `${symptomsString}_${validatedPatientData.age}_${validatedPatientData.gender}_${GPT5_CONFIG.model}`
     const cached = patternCache.get(cacheKey)
     
@@ -315,11 +331,11 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // 7. Detect main pattern
+    // 9. Detect main pattern
     const pattern = detectMainPattern(symptomsString)
     console.log(`🔍 Pattern detected: ${pattern}`)
 
-    // 8. Use predefined questions if available and mode is fast
+    // 10. Use predefined questions if available and mode is fast
     if (mode === 'fast' && pattern !== 'general' && DIAGNOSTIC_PATTERNS[pattern as keyof typeof DIAGNOSTIC_PATTERNS]) {
       console.log(`✅ Using predefined questions for: ${pattern}`)
       const response = {
@@ -346,7 +362,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response)
     }
 
-    // 9. Generate prompt for OpenAI - QUESTIONS ONLY
+    // 11. Generate prompt for OpenAI - QUESTIONS ONLY
     const prompt = `Patient: ${validatedPatientData.age} years old, ${validatedPatientData.gender}. 
 Medical history: ${validatedPatientData.medicalHistory.length > 0 ? validatedPatientData.medicalHistory.join(', ') : 'None specified'}.
 Current medications: ${validatedPatientData.currentMedications.length > 0 ? validatedPatientData.currentMedications.join(', ') : 'None'}.
@@ -355,33 +371,59 @@ Location: Mauritius (use metric system - Celsius for temperature, kg for weight,
 
 Generate exactly 5 highly relevant diagnostic questions to assess this patient's condition.
 
-Required JSON format:
+You MUST respond with ONLY a JSON object in this exact format (no other text):
 {
   "questions": [
     {
       "id": 1,
       "question": "Clear and medically relevant question in English",
       "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
-      "priority": "high/medium/low",
+      "priority": "high",
       "rationale": "Brief medical rationale for this question"
+    },
+    {
+      "id": 2,
+      "question": "Another diagnostic question",
+      "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+      "priority": "high",
+      "rationale": "Medical rationale"
+    },
+    {
+      "id": 3,
+      "question": "Third diagnostic question",
+      "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+      "priority": "medium",
+      "rationale": "Medical rationale"
+    },
+    {
+      "id": 4,
+      "question": "Fourth diagnostic question",
+      "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+      "priority": "medium",
+      "rationale": "Medical rationale"
+    },
+    {
+      "id": 5,
+      "question": "Fifth diagnostic question",
+      "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+      "priority": "low",
+      "rationale": "Medical rationale"
     }
   ]
 }
 
-IMPORTANT: 
-- Respond ONLY with JSON, no additional text
-- Exactly 5 questions, prioritized by clinical importance
+CRITICAL REQUIREMENTS: 
+- Output MUST be valid JSON only, no markdown formatting
+- Exactly 5 questions required
 - Each question must have exactly 4 options
-- Questions must be clinically relevant and help narrow the differential diagnosis
-- Include a brief rationale for each question
-- Use clear medical terminology but ensure patient understanding
-- Consider the patient's age and medical history
-- Use metric system (Celsius for temperature, not Fahrenheit)
-- NEVER mention names or personal information`
+- Priority must be "high", "medium", or "low"
+- Questions must be clinically relevant to narrow differential diagnosis
+- Use metric system (Celsius for temperature)
+- NEVER include patient names or personal information`
 
     console.log(`🔒 Protection enabled: No personal data sent`)
 
-    // 10. OpenAI call with retry
+    // 12. OpenAI call with retry
     console.log(`🤖 Calling OpenAI ${GPT5_CONFIG.model}...`)
     const aiStartTime = Date.now()
     
@@ -402,7 +444,7 @@ IMPORTANT:
             messages: [
               {
                 role: 'system',
-                content: 'You are an expert telemedicine physician with deep clinical knowledge practicing in Mauritius. Generate highly relevant diagnostic questions that will help establish a differential diagnosis. Focus on questions that distinguish between likely conditions based on the presented symptoms. Use the metric system (Celsius for temperature, kg for weight, cm for height) as used in Mauritius. IMPORTANT: Never include or ask for names or personally identifiable information.'
+                content: 'You are an expert telemedicine physician with deep clinical knowledge practicing in Mauritius. Generate highly relevant diagnostic questions that will help establish a differential diagnosis. You must respond with valid JSON only, no additional text or markdown formatting. Focus on questions that distinguish between likely conditions based on the presented symptoms. Use the metric system (Celsius for temperature, kg for weight, cm for height) as used in Mauritius. Never include or ask for names or personally identifiable information.'
               },
               {
                 role: 'user',
@@ -445,32 +487,76 @@ IMPORTANT:
     }
     
     const aiTime = Date.now() - aiStartTime
-    console.log(`✅ OpenAI response in ${aiTime}ms`)
+    console.log(`✅ OpenAI response received in ${aiTime}ms`)
     
-    // 11. Parse response
+    // 13. Parse response with improved error handling
     const openaiData = await openaiResponse.json()
     const content = openaiData.choices[0]?.message?.content || '{}'
     
+    console.log(`📝 Raw OpenAI response (first 500 chars):`, content.substring(0, 500))
+    
     let questions = []
     try {
-      const parsed = JSON.parse(content)
+      // Clean the content in case there are markdown code blocks
+      let cleanedContent = content
+        .replace(/```json\s*/g, '')
+        .replace(/```\s*/g, '')
+        .trim()
+      
+      // If the content starts with text before JSON, find the first {
+      const jsonStart = cleanedContent.indexOf('{')
+      if (jsonStart > 0) {
+        cleanedContent = cleanedContent.substring(jsonStart)
+      }
+      
+      // If the content ends with text after JSON, find the last }
+      const jsonEnd = cleanedContent.lastIndexOf('}')
+      if (jsonEnd > -1 && jsonEnd < cleanedContent.length - 1) {
+        cleanedContent = cleanedContent.substring(0, jsonEnd + 1)
+      }
+      
+      console.log(`🧹 Cleaned content (first 500 chars):`, cleanedContent.substring(0, 500))
+      
+      const parsed = JSON.parse(cleanedContent)
       questions = parsed.questions || []
+      
       console.log(`✅ ${questions.length} questions extracted`)
+      
+      // Log the first question for debugging
+      if (questions.length > 0) {
+        console.log(`📋 First question:`, JSON.stringify(questions[0], null, 2))
+      }
+      
     } catch (parseError) {
       console.error("❌ JSON parsing error:", parseError)
       console.error("Content received:", content)
-      throw new Error('Invalid OpenAI response')
+      
+      // Try to use fallback questions instead of throwing error
+      console.log("⚠️ Using fallback questions due to parsing error")
+      const pattern = detectMainPattern(symptomsString)
+      questions = FALLBACK_QUESTIONS[pattern as keyof typeof FALLBACK_QUESTIONS] || FALLBACK_QUESTIONS.general
     }
 
     // 12. Validate questions
     if (!Array.isArray(questions) || questions.length === 0) {
-      throw new Error("No valid questions generated")
+      console.error("❌ No valid questions generated, using fallback")
+      const pattern = detectMainPattern(symptomsString)
+      questions = FALLBACK_QUESTIONS[pattern as keyof typeof FALLBACK_QUESTIONS] || FALLBACK_QUESTIONS.general
     }
+    
+    // Ensure we have exactly 5 questions with proper structure
+    questions = questions.slice(0, 5).map((q: any, idx: number) => ({
+      id: q.id || idx + 1,
+      question: q.question || `Question ${idx + 1}`,
+      options: Array.isArray(q.options) ? q.options.slice(0, 4) : ["Option 1", "Option 2", "Option 3", "Option 4"],
+      priority: q.priority || "medium",
+      rationale: q.rationale || ""
+    }))
 
-    // 13. Prepare response WITH PROTECTION INDICATOR
+    // 14. Prepare response WITH PROTECTION INDICATOR
     const response = {
       success: true,
-      questions: questions.slice(0, 5), // Maximum 5 questions
+      questions: questions.slice(0, 5), // Ensure maximum 5 questions
       dataProtection: {
         enabled: true,
         anonymousId,
@@ -501,28 +587,37 @@ IMPORTANT:
           medicalHistory: validatedPatientData.medicalHistory.length,
           medications: validatedPatientData.currentMedications.length
         },
-        tokensUsed: openaiData.usage || {}
+        tokensUsed: openaiData.usage || {},
+        questionsGenerated: questions.length
       }
     }
 
-    // 14. Cache response
+    // 15. Cache response
     patternCache.set(cacheKey, response)
 
     console.log(`✅ Total success: ${response.metadata.responseTime}ms`)
+    console.log(`📊 Questions generated: ${questions.length}`)
     console.log(`🔒 Data protection: ACTIVE - No personal data sent to OpenAI`)
     console.log(`🤖 Model used: ${GPT5_CONFIG.model}`)
     
     return NextResponse.json(response)
 
   } catch (error: any) {
-    console.error(`❌ Error:`, error)
+    console.error(`❌ Main Error:`, error)
     console.error("Stack:", error.stack)
     
-    // Return fallback questions WITH PROTECTION
-    const pattern = 'general'
+    // Always return fallback questions to ensure the app continues working
+    const pattern = detectMainPattern(
+      body?.clinicalData?.symptoms || body?.clinicalData?.chiefComplaint || 'general'
+    )
+    
+    console.log(`🔄 Using fallback questions for pattern: ${pattern}`)
+    
+    const fallbackQuestions = FALLBACK_QUESTIONS[pattern as keyof typeof FALLBACK_QUESTIONS] || FALLBACK_QUESTIONS.general
+    
     return NextResponse.json({
       success: true,
-      questions: FALLBACK_QUESTIONS[pattern],
+      questions: fallbackQuestions,
       dataProtection: {
         enabled: true,
         method: 'fallback',
@@ -543,7 +638,8 @@ IMPORTANT:
         dataProtected: true,
         debugInfo: {
           hasApiKey: !!process.env.OPENAI_API_KEY,
-          apiKeyLength: process.env.OPENAI_API_KEY?.length || 0
+          apiKeyLength: process.env.OPENAI_API_KEY?.length || 0,
+          errorDetails: error.message
         }
       }
     })
