@@ -2684,119 +2684,6 @@ export default function ProfessionalReportEditable({
     )
   }
 
-  // ==================== MAIN RENDER ====================
-  return (
-    <div className="space-y-6 print:space-y-4">
-      <ActionsBar />
-      <UnsavedChangesAlert />
-      <DoctorInfoEditor />
-      <PrescriptionStats />
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="consultation">
-            <FileText className="h-4 w-4 mr-2" />
-            Report
-          </TabsTrigger>
-          <TabsTrigger value="medicaments">
-            <Pill className="h-4 w-4 mr-2" />
-            Medications
-            {report?.ordonnances?.medicaments?.prescription?.medicaments?.length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {report.ordonnances.medicaments.prescription.medicaments.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="biologie">
-            <TestTube className="h-4 w-4 mr-2" />
-            Laboratory
-            {report?.ordonnances?.biologie && (
-              <Badge variant="secondary" className="ml-2">
-                {Object.values(report.ordonnances.biologie.prescription.analyses || {})
-                  .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="imagerie">
-            <Scan className="h-4 w-4 mr-2" />
-            Imaging
-            {report?.ordonnances?.imagerie?.prescription?.examens?.length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {report.ordonnances.imagerie.prescription.examens.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="invoice">
-            <Receipt className="h-4 w-4 mr-2" />
-            Invoice
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="consultation">
-          <ConsultationReport />
-        </TabsContent>
-        
-        <TabsContent value="medicaments">
-          <MedicationPrescription />
-        </TabsContent>
-        
-        <TabsContent value="biologie">
-          <BiologyPrescription />
-        </TabsContent>
-        
-        <TabsContent value="imagerie">
-          <ImagingPrescription />
-        </TabsContent>
-
-        <TabsContent value="invoice">
-          <InvoiceComponent />
-        </TabsContent>
-      </Tabs>
-
-      <div className="hidden print:block">
-        <ConsultationReport />
-        {includeFullPrescriptions && report?.ordonnances && (
-          <>
-            {report.ordonnances.medicaments && (
-              <div className="page-break-before mt-8">
-                <MedicationPrescription />
-              </div>
-            )}
-            {report.ordonnances.biologie && (
-              <div className="page-break-before mt-8">
-                <BiologyPrescription />
-              </div>
-            )}
-            {report.ordonnances.imagerie && (
-              <div className="page-break-before mt-8">
-                <ImagingPrescription />
-              </div>
-            )}
-          </>
-        )}
-        {report?.invoice && (
-          <div className="page-break-before mt-8">
-            <InvoiceComponent />
-          </div>
-        )}
-      </div>
-
-      {validationStatus === 'validated' && (
-        <div className="flex justify-center print:hidden mt-8">
-          <Button 
-            size="lg"
-            onClick={handleSendDocuments}
-            className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
-          >
-            <CheckCircle className="h-5 w-5 mr-2" />
-            Finalize and Send documents
-          </Button>
-        </div>
-      )}
-    </div>
-  )
-}
-
   const BiologyPrescription = () => {
     const analyses = report?.ordonnances?.biologie?.prescription?.analyses || {}
     const hasTests = Object.values(analyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
@@ -3268,3 +3155,121 @@ export default function ProfessionalReportEditable({
                 <p className="text-sm">Date: {patient.dateExamen}</p>
               </div>
             )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ==================== MAIN RENDER ====================
+  return (
+    <div className="space-y-6 print:space-y-4">
+      <ActionsBar />
+      <UnsavedChangesAlert />
+      <DoctorInfoEditor />
+      <PrescriptionStats />
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="consultation">
+            <FileText className="h-4 w-4 mr-2" />
+            Report
+          </TabsTrigger>
+          <TabsTrigger value="medicaments">
+            <Pill className="h-4 w-4 mr-2" />
+            Medications
+            {report?.ordonnances?.medicaments?.prescription?.medicaments?.length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {report.ordonnances.medicaments.prescription.medicaments.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="biologie">
+            <TestTube className="h-4 w-4 mr-2" />
+            Laboratory
+            {report?.ordonnances?.biologie && (
+              <Badge variant="secondary" className="ml-2">
+                {Object.values(report.ordonnances.biologie.prescription.analyses || {})
+                  .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="imagerie">
+            <Scan className="h-4 w-4 mr-2" />
+            Imaging
+            {report?.ordonnances?.imagerie?.prescription?.examens?.length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {report.ordonnances.imagerie.prescription.examens.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="invoice">
+            <Receipt className="h-4 w-4 mr-2" />
+            Invoice
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="consultation">
+          <ConsultationReport />
+        </TabsContent>
+        
+        <TabsContent value="medicaments">
+          <MedicationPrescription />
+        </TabsContent>
+        
+        <TabsContent value="biologie">
+          <BiologyPrescription />
+        </TabsContent>
+        
+        <TabsContent value="imagerie">
+          <ImagingPrescription />
+        </TabsContent>
+
+        <TabsContent value="invoice">
+          <InvoiceComponent />
+        </TabsContent>
+      </Tabs>
+
+      <div className="hidden print:block">
+        <ConsultationReport />
+        {includeFullPrescriptions && report?.ordonnances && (
+          <>
+            {report.ordonnances.medicaments && (
+              <div className="page-break-before mt-8">
+                <MedicationPrescription />
+              </div>
+            )}
+            {report.ordonnances.biologie && (
+              <div className="page-break-before mt-8">
+                <BiologyPrescription />
+              </div>
+            )}
+            {report.ordonnances.imagerie && (
+              <div className="page-break-before mt-8">
+                <ImagingPrescription />
+              </div>
+            )}
+          </>
+        )}
+        {report?.invoice && (
+          <div className="page-break-before mt-8">
+            <InvoiceComponent />
+          </div>
+        )}
+      </div>
+
+      {validationStatus === 'validated' && (
+        <div className="flex justify-center print:hidden mt-8">
+          <Button 
+            size="lg"
+            onClick={handleSendDocuments}
+            className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+          >
+            <CheckCircle className="h-5 w-5 mr-2" />
+            Finalize and Send documents
+          </Button>
+        </div>
+      )}
+    </div>
+  )
+}
