@@ -1193,11 +1193,24 @@ export default function ProfessionalReportEditable({
       if (data.success && data.report) {
         const reportData = data.report
         
+// Ensure reportData has the proper structure before modifying
+        if (!reportData.compteRendu) {
+          console.error('Report data missing compteRendu structure')
+          reportData.compteRendu = createEmptyReport().compteRendu
+        }
+        
         // Override the praticien data with actual doctor info
         reportData.compteRendu.praticien = currentDoctorInfo
         
         // CRITICAL: Ensure the report is set as draft, not validated
-        if (reportData.compteRendu.metadata) {
+        if (!reportData.compteRendu.metadata) {
+          reportData.compteRendu.metadata = {
+            dateGeneration: new Date().toISOString(),
+            wordCount: 0,
+            validationStatus: 'draft',
+            complianceNote: "This document complies with Medical Council of Mauritius guidelines"
+          }
+        } else {
           reportData.compteRendu.metadata.validationStatus = 'draft'
           delete reportData.compteRendu.metadata.signatures
           delete reportData.compteRendu.metadata.signatureDataUrl
@@ -1207,30 +1220,76 @@ export default function ProfessionalReportEditable({
         
         // Also update all prescription headers and remove any signatures
         if (reportData.ordonnances?.medicaments) {
+          // Ensure structure exists before modifying
+          if (!reportData.ordonnances.medicaments.enTete) {
+            reportData.ordonnances.medicaments.enTete = {}
+          }
           reportData.ordonnances.medicaments.enTete = currentDoctorInfo
-          reportData.ordonnances.medicaments.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
-          reportData.ordonnances.medicaments.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
-          // Remove any existing signatures
-          delete reportData.ordonnances.medicaments.authentification.signatureImage
-          delete reportData.ordonnances.medicaments.authentification.signedAt
+          
+          // Check if authentification exists before accessing its properties
+          if (!reportData.ordonnances.medicaments.authentification) {
+            reportData.ordonnances.medicaments.authentification = {
+              signature: "Medical Practitioner's Signature",
+              nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
+              numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
+              cachetProfessionnel: "Official Medical Stamp",
+              date: new Date().toISOString().split('T')[0]
+            }
+          } else {
+            reportData.ordonnances.medicaments.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
+            reportData.ordonnances.medicaments.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
+            // Remove any existing signatures
+            delete reportData.ordonnances.medicaments.authentification.signatureImage
+            delete reportData.ordonnances.medicaments.authentification.signedAt
+          }
         }
         
         if (reportData.ordonnances?.biologie) {
+          // Ensure structure exists before modifying
+          if (!reportData.ordonnances.biologie.enTete) {
+            reportData.ordonnances.biologie.enTete = {}
+          }
           reportData.ordonnances.biologie.enTete = currentDoctorInfo
-          reportData.ordonnances.biologie.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
-          reportData.ordonnances.biologie.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
-          // Remove any existing signatures
-          delete reportData.ordonnances.biologie.authentification.signatureImage
-          delete reportData.ordonnances.biologie.authentification.signedAt
+          
+          // Check if authentification exists before accessing its properties
+          if (!reportData.ordonnances.biologie.authentification) {
+            reportData.ordonnances.biologie.authentification = {
+              signature: "Medical Practitioner's Signature",
+              nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
+              numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
+              date: new Date().toISOString().split('T')[0]
+            }
+          } else {
+            reportData.ordonnances.biologie.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
+            reportData.ordonnances.biologie.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
+            // Remove any existing signatures
+            delete reportData.ordonnances.biologie.authentification.signatureImage
+            delete reportData.ordonnances.biologie.authentification.signedAt
+          }
         }
         
         if (reportData.ordonnances?.imagerie) {
+          // Ensure structure exists before modifying
+          if (!reportData.ordonnances.imagerie.enTete) {
+            reportData.ordonnances.imagerie.enTete = {}
+          }
           reportData.ordonnances.imagerie.enTete = currentDoctorInfo
-          reportData.ordonnances.imagerie.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
-          reportData.ordonnances.imagerie.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
-          // Remove any existing signatures
-          delete reportData.ordonnances.imagerie.authentification.signatureImage
-          delete reportData.ordonnances.imagerie.authentification.signedAt
+          
+          // Check if authentification exists before accessing its properties
+          if (!reportData.ordonnances.imagerie.authentification) {
+            reportData.ordonnances.imagerie.authentification = {
+              signature: "Medical Practitioner's Signature",
+              nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
+              numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
+              date: new Date().toISOString().split('T')[0]
+            }
+          } else {
+            reportData.ordonnances.imagerie.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
+            reportData.ordonnances.imagerie.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
+            // Remove any existing signatures
+            delete reportData.ordonnances.imagerie.authentification.signatureImage
+            delete reportData.ordonnances.imagerie.authentification.signedAt
+          }
         }
         
         if (reportData.invoice?.physician) {
@@ -1302,6 +1361,7 @@ export default function ProfessionalReportEditable({
     // Auto-save is handled by validation now
     await handleValidation()
   }
+  
   // Update invoice
   const updateInvoice = (field: string, value: any) => {
     if (validationStatus === 'validated') return
