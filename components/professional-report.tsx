@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
 import { DoctorSignature } from "@/components/doctor-signature"
-import { saveMedicalReport } from "@/helpers/saveMedicalReport"
+// Removed: import { saveMedicalReport } from "@/helpers/saveMedicalReport"
 import { useTibokDoctorData } from "@/hooks/use-tibok-doctor-data"
 import { 
   FileText, 
@@ -262,7 +262,6 @@ const createEmptyReport = (): MauritianReport => ({
     }
   }
 })
-
 export default function ProfessionalReportEditable({
   patientData,
   clinicalData,
@@ -310,7 +309,7 @@ export default function ProfessionalReportEditable({
     invoice?: string
   }>({})
 
-// UPDATED: Enhanced validation with digital signature integration
+  // FIXED: Enhanced validation with digital signature integration
   const handleValidation = async () => {
     // Check if doctor info is complete
     const requiredFieldsMissing = []
@@ -496,55 +495,16 @@ export default function ProfessionalReportEditable({
         } : report.invoice
       }
       
-      // Get URL parameters
-      const params = new URLSearchParams(window.location.search)
-      const consultationId = params.get('consultationId')
-      const patientId = params.get('patientId') || patientData?.id
-      const doctorId = params.get('doctorId')
+      // FIXED: Just update local state - no saving to API
+      setReport(updatedReport)
+      setValidationStatus('validated')
+      setModifiedSections(new Set())
       
-      // Save the validated report with signatures
-     const resp = await saveMedicalReport({
-      reportId: currentReportId,
-      patientId: patientId || 'temp',
-      consultationId,
-      doctorId,
-      doctorName: doctorInfo.nom,
-      patientName: getReportPatient().nomComplet || getReportPatient().nom,
-      report: updatedReport,
-      action: 'validate',
-      metadata: {
-        validatedAt: new Date().toISOString(),
-        validatedBy: doctorInfo.nom,
-        validationStatus: 'validated',
-        signatures: signatures,
-        signatureDataUrl: signatureDataUrl,
-        documentValidations: {
-          consultation: true,
-          prescription: !!report?.ordonnances?.medicaments,
-          laboratory: !!report?.ordonnances?.biologie,
-          imaging: !!report?.ordonnances?.imagerie,
-          invoice: !!report?.invoice
-        }
-      }
-    })
-
-      // Handle the response properly
-      if (resp.ok) {
-        const result = await response.json()
-        console.log('✅ Report validated and saved:', result)
-        
-        // Update the local state
-        setReport(updatedReport)
-        setValidationStatus('validated')
-        setModifiedSections(new Set())
-        
-        toast({
-          title: "✅ Document Validated",
-          description: "All documents have been validated and digitally signed"
-        })
-      } else {
-        throw new Error('Failed to save validated report')
-      }
+      toast({
+        title: "✅ Document Validated",
+        description: "All documents have been validated and digitally signed. Click 'Send documents' to finalize."
+      })
+      
     } catch (error) {
       console.error('Validation error:', error)
       toast({
@@ -556,8 +516,7 @@ export default function ProfessionalReportEditable({
       setSaving(false)
     }
   }  // Closing brace for handleValidation
-
-  // handleSendDocuments should be a SEPARATE function
+// handleSendDocuments function
   const handleSendDocuments = async () => {
     // Check if report is validated
     if (!report || validationStatus !== 'validated') {
@@ -690,7 +649,7 @@ export default function ProfessionalReportEditable({
       const result = await response.json()
       console.log('✅ API Response:', result)
 
-if (result.success) {
+      if (result.success) {
         // Show initial success toast
         toast({
           title: "✅ Documents envoyés avec succès",
@@ -943,8 +902,7 @@ if (result.success) {
       })
     }
   }  // Closing brace for handleSendDocuments
-  
-  // Safe getter functions
+// Safe getter functions
   const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
   const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
   const getReportPatient = () => report?.compteRendu?.patient || createEmptyReport().compteRendu.patient
@@ -988,7 +946,8 @@ if (result.success) {
     const updatedInfo = { ...doctorInfo, [field]: value }
     sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
   }
-  // UPDATED: Load doctor information from Tibok with better field mapping and debugging
+
+  // Load doctor information from Tibok with better field mapping and debugging
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
     const doctorDataParam = urlParams.get('doctorData')
@@ -1140,7 +1099,7 @@ if (result.success) {
     }
   }, [patientData, clinicalData, questionsData, diagnosisData])
 
-// Check for existing report
+  // FIXED: Check for existing report - now just generates fresh report
   const checkExistingReport = async () => {
     try {
       const params = new URLSearchParams(window.location.search)
@@ -1153,71 +1112,17 @@ if (result.success) {
         return
       }
       
-      const response = await fetch(`/api/save-medical-report?patientId=${actualPatientId}`)
-      const result = await response.json()
+      // Since /api/save-medical-report is deleted, just generate a fresh report
+      console.log("Generating fresh report for patient:", actualPatientId)
+      generateProfessionalReport()
       
-      if (result.success && result.data?.content) {
-        const reportContent = result.data.content
-        if (reportContent?.compteRendu) {
-          // CRITICAL FIX: Always reset to draft when loading a report
-          // This ensures the validate button is always available for re-validation
-          setValidationStatus('draft')
-          setDocumentSignatures({}) // Clear any existing signatures
-          
-          // Clean the report content to remove any validation artifacts
-          if (reportContent.compteRendu.metadata) {
-            reportContent.compteRendu.metadata.validationStatus = 'draft'
-            delete reportContent.compteRendu.metadata.signatures
-            delete reportContent.compteRendu.metadata.signatureDataUrl
-            delete reportContent.compteRendu.metadata.validatedAt
-            delete reportContent.compteRendu.metadata.validatedBy
-          }
-          
-          // Remove signatures from prescriptions if they exist
-          if (reportContent.ordonnances?.medicaments?.authentification) {
-            delete reportContent.ordonnances.medicaments.authentification.signatureImage
-            delete reportContent.ordonnances.medicaments.authentification.signedAt
-          }
-          
-          if (reportContent.ordonnances?.biologie?.authentification) {
-            delete reportContent.ordonnances.biologie.authentification.signatureImage
-            delete reportContent.ordonnances.biologie.authentification.signedAt
-          }
-          
-          if (reportContent.ordonnances?.imagerie?.authentification) {
-            delete reportContent.ordonnances.imagerie.authentification.signatureImage
-            delete reportContent.ordonnances.imagerie.authentification.signedAt
-          }
-          
-          if (reportContent.invoice?.signature) {
-            delete reportContent.invoice.signature.signatureImage
-            delete reportContent.invoice.signature.signedAt
-          }
-          
-          setReport(reportContent)
-          setReportId(result.data.id)
-          
-          if (reportContent.compteRendu.praticien) {
-            setDoctorInfo(reportContent.compteRendu.praticien)
-          }
-          
-          toast({
-            title: "Existing report found",
-            description: "Loading previous report - ready for validation"
-          })
-        } else {
-          generateProfessionalReport()
-        }
-      } else {
-        generateProfessionalReport()
-      }
     } catch (error) {
-      console.log("No existing report, generating new one")
+      console.error("Error in checkExistingReport:", error)
       generateProfessionalReport()
     }
   }
 
-  // UPDATED: Generate report with doctor data and auto-save
+  // FIXED: Generate report with doctor data - removed auto-save
   const generateProfessionalReport = async () => {
     setLoading(true)
     setError(null)
@@ -1342,32 +1247,12 @@ if (result.success) {
         setValidationStatus('draft') // Ensure it's set to draft
         setDocumentSignatures({}) // Clear any signatures
         
-        // Auto-save the report immediately after generation
+        // Generate a report ID but don't save
         const newReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
         setReportId(newReportId)
         
-        // Save to storage
-        const params = new URLSearchParams(window.location.search)
-        const consultationId = params.get('consultationId')
-        const patientId = params.get('patientId') || patientData?.id
-        
-        if (consultationId && patientId) {
-         const resp2 = await saveMedicalReport({
-      reportId: newReportId,
-      patientId,
-      report: reportData,
-      action: 'save',
-      consultationId,
-      metadata: {
-        lastModified: new Date().toISOString(),
-        validationStatus: 'draft'
-      }
-    })
-          
-          if (resp2.ok) { 
-            console.log('✅ Report auto-saved with ID:', newReportId)
-          }
-        }
+        // FIXED: Removed auto-save functionality - just keep the report in local state
+        console.log('✅ Report generated with ID:', newReportId)
         
         toast({
           title: "Report generated successfully",
@@ -1411,12 +1296,12 @@ if (result.success) {
       setLoading(false)
     }
   }
+
   // Save report (for backward compatibility but redirects to validation)
   const handleSave = async () => {
     // Auto-save is handled by validation now
     await handleValidation()
   }
-
   // Update invoice
   const updateInvoice = (field: string, value: any) => {
     if (validationStatus === 'validated') return
@@ -1454,6 +1339,7 @@ if (result.success) {
       method: method
     })
   }
+
   // Update medications
   const updateMedicament = (index: number, field: string, value: string) => {
     if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
@@ -2336,7 +2222,7 @@ if (result.success) {
               <p className="text-sm text-gray-600">License: {praticien.licencePratique}</p>
               <p className="text-sm text-gray-600">{praticien.adresseCabinet}</p>
               
-              {/* UPDATED: Enhanced signature display */}
+              {/* Enhanced signature display */}
               {validationStatus === 'validated' && documentSignatures.consultation ? (
                 <div className="mt-4">
                   <img 
@@ -2604,7 +2490,7 @@ if (result.success) {
             <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
             <p className="text-sm text-gray-600">License: {praticien.licencePratique}</p>
             
-            {/* UPDATED: Enhanced signature display for prescriptions */}
+            {/* Enhanced signature display for prescriptions */}
             {validationStatus === 'validated' && documentSignatures.prescription ? (
               <div className="mt-4">
                 <img 
@@ -2878,7 +2764,7 @@ if (result.success) {
             <p className="font-semibold">{praticien.nom}</p>
             <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
             
-            {/* UPDATED: Enhanced signature display for laboratory */}
+            {/* Enhanced signature display for laboratory */}
             {validationStatus === 'validated' && documentSignatures.laboratory ? (
               <div className="mt-4">
                 <img 
@@ -2903,7 +2789,6 @@ if (result.success) {
       </div>
     )
   }
-
   // Imaging prescription editing component
   const ImagingPrescription = () => {
     const examens = report?.ordonnances?.imagerie?.prescription?.examens || []
@@ -3085,7 +2970,7 @@ if (result.success) {
             <p className="font-semibold">{praticien.nom}</p>
             <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
             
-            {/* UPDATED: Enhanced signature display for imaging */}
+            {/* Enhanced signature display for imaging */}
             {validationStatus === 'validated' && documentSignatures.imaging ? (
               <div className="mt-4">
                 <img 
@@ -3274,7 +3159,7 @@ if (result.success) {
         <div className="mt-12 pt-8 border-t border-gray-300 text-center">
           <p className="font-bold">Electronic Signature:</p>
           
-          {/* UPDATED: Enhanced signature display for invoice */}
+          {/* Enhanced signature display for invoice */}
           {validationStatus === 'validated' && documentSignatures.invoice ? (
             <div className="mt-4 flex flex-col items-center">
               <img 
@@ -3423,7 +3308,6 @@ if (result.success) {
       </Card>
     )
   }
-
   // Main render
   return (
     <div className="space-y-6 print:space-y-4">
