@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
 import { DoctorSignature } from "@/components/doctor-signature"
+import { saveMedicalReport } from "@/helpers/saveMedicalReport"
 import { useTibokDoctorData } from "@/hooks/use-tibok-doctor-data"
 import { 
   FileText, 
@@ -502,37 +503,33 @@ export default function ProfessionalReportEditable({
       const doctorId = params.get('doctorId')
       
       // Save the validated report with signatures
-      const response = await fetch('/api/save-medical-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reportId: currentReportId,
-          patientId: patientId || 'temp',
-          consultationId,
-          doctorId,
-          doctorName: doctorInfo.nom,
-          patientName: getReportPatient().nomComplet || getReportPatient().nom,
-          report: updatedReport,
-          action: 'validate',
-          metadata: {
-            validatedAt: new Date().toISOString(),
-            validatedBy: doctorInfo.nom,
-            validationStatus: 'validated',
-            signatures: signatures,
-            signatureDataUrl: signatureDataUrl,
-            documentValidations: {
-              consultation: true,
-              prescription: !!report?.ordonnances?.medicaments,
-              laboratory: !!report?.ordonnances?.biologie,
-              imaging: !!report?.ordonnances?.imagerie,
-              invoice: !!report?.invoice
-            }
-          }
-        })
-      })
+     const resp = await saveMedicalReport({
+      reportId: currentReportId,
+      patientId: patientId || 'temp',
+      consultationId,
+      doctorId,
+      doctorName: doctorInfo.nom,
+      patientName: getReportPatient().nomComplet || getReportPatient().nom,
+      report: updatedReport,
+      action: 'validate',
+      metadata: {
+        validatedAt: new Date().toISOString(),
+        validatedBy: doctorInfo.nom,
+        validationStatus: 'validated',
+        signatures: signatures,
+        signatureDataUrl: signatureDataUrl,
+        documentValidations: {
+          consultation: true,
+          prescription: !!report?.ordonnances?.medicaments,
+          laboratory: !!report?.ordonnances?.biologie,
+          imaging: !!report?.ordonnances?.imagerie,
+          invoice: !!report?.invoice
+        }
+      }
+    })
 
       // Handle the response properly
-      if (response.ok) {
+      if (resp.ok) {
         const result = await response.json()
         console.log('✅ Report validated and saved:', result)
         
@@ -1355,23 +1352,19 @@ if (result.success) {
         const patientId = params.get('patientId') || patientData?.id
         
         if (consultationId && patientId) {
-          const saveResponse = await fetch('/api/save-medical-report', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              reportId: newReportId,
-              patientId,
-              report: reportData,
-              action: 'save',
-              consultationId,
-              metadata: {
-                lastModified: new Date().toISOString(),
-                validationStatus: 'draft' // Explicitly set as draft
-              }
-            })
-          })
+         const resp2 = await saveMedicalReport({
+      reportId: newReportId,
+      patientId,
+      report: reportData,
+      action: 'save',
+      consultationId,
+      metadata: {
+        lastModified: new Date().toISOString(),
+        validationStatus: 'draft'
+      }
+    })
           
-          if (saveResponse.ok) {
+          if (resp2.ok) { 
             console.log('✅ Report auto-saved with ID:', newReportId)
           }
         }
