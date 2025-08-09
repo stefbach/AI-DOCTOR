@@ -12,42 +12,14 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
-import { DoctorSignature } from "@/components/doctor-signature"
-// Removed: import { saveMedicalReport } from "@/helpers/saveMedicalReport"
-import { useTibokDoctorData } from "@/hooks/use-tibok-doctor-data"
 import { 
-  FileText, 
-  Download, 
-  Printer, 
-  CheckCircle,
-  Loader2,
-  Share2,
-  Pill,
-  TestTube,
-  Scan,
-  AlertTriangle,
-  XCircle,
-  Eye,
-  EyeOff,
-  Edit,
-  Save,
-  FileCheck,
-  Plus,
-  Trash2,
-  AlertCircle,
-  Lock,
-  Unlock,
-  Copy,
-  ClipboardCheck,
-  Stethoscope,
-  Calendar,
-  User,
-  Building,
-  CreditCard,
-  Receipt
+  FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube, 
+  Scan, AlertTriangle, XCircle, Eye, EyeOff, Edit, Save, FileCheck, Plus, 
+  Trash2, AlertCircle, Lock, Unlock, Copy, ClipboardCheck, Stethoscope, 
+  Calendar, User, Building, CreditCard, Receipt
 } from "lucide-react"
 
-// Types for Mauritian format
+// ==================== TYPES ====================
 interface MauritianReport {
   compteRendu: {
     header: {
@@ -104,99 +76,11 @@ interface MauritianReport {
     }
   }
   ordonnances?: {
-    medicaments?: {
-      enTete: any
-      patient: any
-      prescription: {
-        datePrescription: string
-        medicaments: any[]
-        validite: string
-        dispensationNote?: string
-      }
-      authentification: any
-    }
-    biologie?: {
-      enTete: any
-      patient: any
-      prescription: {
-        datePrescription: string
-        motifClinique: string
-        analyses: {
-          haematology?: any[]
-          clinicalChemistry?: any[]
-          immunology?: any[]
-          microbiology?: any[]
-          endocrinology?: any[]
-        }
-        instructionsSpeciales: string[]
-        laboratoireRecommande?: string
-      }
-      authentification: any
-    }
-    imagerie?: {
-      enTete: any
-      patient: any
-      prescription: {
-        datePrescription: string
-        examens: any[]
-        renseignementsCliniques: string
-        centreImagerie?: string
-      }
-      authentification: any
-    }
+    medicaments?: any
+    biologie?: any
+    imagerie?: any
   }
-  invoice?: {
-    header: {
-      invoiceNumber: string
-      consultationDate: string
-      invoiceDate: string
-    }
-    provider: {
-      companyName: string
-      tradeName: string
-      registrationNumber: string
-      vatNumber: string
-      registeredOffice: string
-      phone: string
-      email: string
-      website: string
-    }
-    patient: {
-      name: string
-      email: string
-      phone: string
-      patientId: string
-    }
-    services: {
-      items: Array<{
-        description: string
-        quantity: number
-        unitPrice: number
-        total: number
-      }>
-      subtotal: number
-      vatRate: number
-      vatAmount: number
-      totalDue: number
-    }
-    payment: {
-      method: string
-      receivedDate: string
-      status: 'pending' | 'paid' | 'cancelled'
-    }
-    physician: {
-      name: string
-      registrationNumber: string
-    }
-    notes: string[]
-    signature: {
-      entity: string
-      onBehalfOf: string
-      title: string
-      signatureImage?: string
-      signedAt?: string
-    }
-  }
+  invoice?: any
   prescriptionsResume?: {
     medicaments: string
     examens: string
@@ -213,7 +97,7 @@ interface ProfessionalReportProps {
   onComplete?: () => void
 }
 
-// Fonction utilitaire pour créer un rapport vide avec structure complète
+// ==================== HELPER FUNCTIONS ====================
 const createEmptyReport = (): MauritianReport => ({
   compteRendu: {
     header: {
@@ -262,6 +146,8 @@ const createEmptyReport = (): MauritianReport => ({
     }
   }
 })
+
+// ==================== MAIN COMPONENT ====================
 export default function ProfessionalReportEditable({
   patientData,
   clinicalData,
@@ -270,24 +156,20 @@ export default function ProfessionalReportEditable({
   editedDocuments,
   onComplete
 }: ProfessionalReportProps) {
-  // Main states
+  // ==================== STATE MANAGEMENT ====================
   const [report, setReport] = useState<MauritianReport | null>(null)
   const [reportId, setReportId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState("consultation")
   
-  // Edit states
   const [editMode, setEditMode] = useState(false)
   const [validationStatus, setValidationStatus] = useState<'draft' | 'validated'>('draft')
   const [modifiedSections, setModifiedSections] = useState<Set<string>>(new Set())
   const [saving, setSaving] = useState(false)
   const [showFullReport, setShowFullReport] = useState(false)
-  
-  // Display states
   const [includeFullPrescriptions, setIncludeFullPrescriptions] = useState(true)
   
-  // Doctor information states
   const [doctorInfo, setDoctorInfo] = useState({
     nom: "Dr. [Name Required]",
     qualifications: "MBBS",
@@ -299,8 +181,6 @@ export default function ProfessionalReportEditable({
     licencePratique: "[License Required]"
   })
   const [editingDoctor, setEditingDoctor] = useState(false)
-
-  // Add state for signatures
   const [documentSignatures, setDocumentSignatures] = useState<{
     consultation?: string
     prescription?: string
@@ -309,9 +189,461 @@ export default function ProfessionalReportEditable({
     invoice?: string
   }>({})
 
-  // FIXED: Enhanced validation with digital signature integration
+  // ==================== SAFE GETTERS ====================
+  const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
+  const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
+  const getReportPatient = () => report?.compteRendu?.patient || createEmptyReport().compteRendu.patient
+  const getReportRapport = () => report?.compteRendu?.rapport || createEmptyReport().compteRendu.rapport
+  const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
+
+  // ==================== TRACKING & UPDATES ====================
+  const trackModification = (section: string) => {
+    if (validationStatus === 'validated') return
+    setModifiedSections(prev => new Set(prev).add(section))
+  }
+
+  const updateRapportSection = (section: string, value: string) => {
+    if (validationStatus === 'validated') return
+    
+    setReport(prev => {
+      if (!prev) return null
+      
+      return {
+        ...prev,
+        compteRendu: {
+          ...prev.compteRendu,
+          rapport: {
+            ...prev.compteRendu.rapport,
+            [section]: value
+          }
+        }
+      }
+    })
+    trackModification(`rapport.${section}`)
+  }
+
+  const updateDoctorInfo = (field: string, value: string) => {
+    setDoctorInfo(prev => ({
+      ...prev,
+      [field]: value
+    }))
+    trackModification(`praticien.${field}`)
+    const updatedInfo = { ...doctorInfo, [field]: value }
+    sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
+  }
+
+  // ==================== LOAD DOCTOR DATA ====================
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const doctorDataParam = urlParams.get('doctorData')
+    
+    if (doctorDataParam) {
+      try {
+        const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
+        console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
+        
+        const doctorInfoFromTibok = {
+          nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
+            `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
+            'Dr. [Name Required]',
+          qualifications: tibokDoctorData.qualifications || 'MBBS',
+          specialite: tibokDoctorData.specialty || 'General Medicine',
+          adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
+          email: tibokDoctorData.email || '[Email Required]',
+          heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+          numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]'),
+          licencePratique: tibokDoctorData.license_number ? 
+            String(tibokDoctorData.license_number) : 
+            '[License Required]'
+        }
+        
+        console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
+        setDoctorInfo(doctorInfoFromTibok)
+        sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
+        
+      } catch (error) {
+        console.error('Error parsing Tibok doctor data:', error)
+      }
+    }
+    
+    const storedDoctorInfo = sessionStorage.getItem('currentDoctorInfo')
+    if (!doctorDataParam && storedDoctorInfo) {
+      try {
+        const doctorData = JSON.parse(storedDoctorInfo)
+        setDoctorInfo(doctorData)
+        console.log('✅ Doctor information loaded from session')
+      } catch (error) {
+        console.error('Error loading doctor data from storage:', error)
+      }
+    }
+  }, [])
+
+  // ==================== INITIAL DATA LOAD ====================
+  useEffect(() => {
+    console.log("🚀 ProfessionalReportEditable mounted with data:", {
+      hasPatientData: !!patientData,
+      hasClinicalData: !!clinicalData,
+      hasDiagnosisData: !!diagnosisData,
+      hasQuestionsData: !!questionsData
+    })
+    
+    if (patientData && (patientData.name || (patientData.firstName && patientData.lastName))) {
+      generateProfessionalReport()
+    } else {
+      console.warn("Insufficient patient data, creating empty report")
+      const emptyReport = createEmptyReport()
+      if (patientData) {
+        emptyReport.compteRendu.patient = {
+          ...emptyReport.compteRendu.patient,
+          nom: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
+          nomComplet: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
+          age: patientData.age?.toString() || '',
+          dateNaissance: patientData.dateOfBirth || '',
+          sexe: patientData.gender || '',
+          adresse: patientData.address || '',
+          telephone: patientData.phone || '',
+          email: patientData.email || '',
+          poids: patientData.weight?.toString() || ''
+        }
+      }
+      setReport(emptyReport)
+      setLoading(false)
+    }
+  }, [patientData, clinicalData, questionsData, diagnosisData])
+
+  // ==================== GENERATE REPORT ====================
+  const generateProfessionalReport = async () => {
+    setLoading(true)
+    setError(null)
+    setValidationStatus('draft')
+    setDocumentSignatures({})
+
+    try {
+      let currentDoctorInfo = doctorInfo
+      if (currentDoctorInfo.nom === 'Dr. [DOCTOR NAME]' || currentDoctorInfo.nom === 'Dr. [Name Required]') {
+        const storedInfo = sessionStorage.getItem('currentDoctorInfo')
+        if (storedInfo) {
+          currentDoctorInfo = JSON.parse(storedInfo)
+          setDoctorInfo(currentDoctorInfo)
+        }
+      }
+      
+      console.log("📤 Generating report with doctor info:", currentDoctorInfo)
+      
+      const validPatientData = patientData || {
+        name: 'Patient',
+        age: '',
+        gender: '',
+        dateOfBirth: '',
+        address: '',
+        phone: '',
+        email: '',
+        weight: ''
+      }
+      
+      const doctorDataForAPI = {
+        fullName: currentDoctorInfo.nom.replace('Dr. ', ''),
+        qualifications: currentDoctorInfo.qualifications,
+        specialty: currentDoctorInfo.specialite,
+        clinicAddress: currentDoctorInfo.adresseCabinet,
+        email: currentDoctorInfo.email,
+        consultationHours: currentDoctorInfo.heuresConsultation,
+        medicalCouncilNumber: currentDoctorInfo.numeroEnregistrement,
+        licenseNumber: currentDoctorInfo.licencePratique
+      }
+      
+      const response = await fetch("/api/generate-consultation-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patientData: validPatientData,
+          clinicalData: clinicalData || {},
+          questionsData: questionsData || {},
+          diagnosisData: diagnosisData || {},
+          editedDocuments: editedDocuments || {},
+          doctorData: doctorDataForAPI,
+          includeFullPrescriptions
+        })
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("API Error:", errorText)
+        throw new Error(`HTTP Error ${response.status}: ${errorText}`)
+      }
+
+      const data = await response.json()
+      console.log("📥 Report received:", data)
+
+      if (data.success && data.report) {
+        const apiReport = data.report
+        
+        // MAP API STRUCTURE TO COMPONENT STRUCTURE
+        console.log("🔄 Mapping API structure to component structure...")
+        
+        const reportData: MauritianReport = {
+          compteRendu: {
+            header: apiReport.medicalReport?.header || {
+              title: "Medical Consultation Report",
+              subtitle: "Professional Medical Documentation",
+              reference: `REF-${Date.now()}`
+            },
+            praticien: currentDoctorInfo,
+            patient: {
+              nom: apiReport.medicalReport?.patient?.name || validPatientData.name || 'Patient',
+              nomComplet: apiReport.medicalReport?.patient?.fullName || apiReport.medicalReport?.patient?.name || validPatientData.name || 'Patient',
+              age: apiReport.medicalReport?.patient?.age || validPatientData.age || '',
+              dateNaissance: apiReport.medicalReport?.patient?.birthDate || validPatientData.dateOfBirth || '',
+              sexe: apiReport.medicalReport?.patient?.gender || validPatientData.gender || '',
+              adresse: apiReport.medicalReport?.patient?.address || validPatientData.address || '',
+              telephone: apiReport.medicalReport?.patient?.phone || validPatientData.phone || '',
+              email: apiReport.medicalReport?.patient?.email || validPatientData.email || '',
+              poids: apiReport.medicalReport?.patient?.weight || validPatientData.weight || '',
+              taille: apiReport.medicalReport?.patient?.height || '',
+              identifiantNational: apiReport.medicalReport?.patient?.nationalId || '',
+              dateExamen: apiReport.medicalReport?.patient?.examinationDate || new Date().toISOString().split('T')[0]
+            },
+            rapport: {
+              motifConsultation: apiReport.medicalReport?.report?.chiefComplaint || '',
+              anamnese: apiReport.medicalReport?.report?.historyOfPresentIllness || '',
+              antecedents: apiReport.medicalReport?.report?.pastMedicalHistory || '',
+              examenClinique: apiReport.medicalReport?.report?.physicalExamination || '',
+              syntheseDiagnostique: apiReport.medicalReport?.report?.diagnosticSynthesis || '',
+              conclusionDiagnostique: apiReport.medicalReport?.report?.diagnosticConclusion || '',
+              priseEnCharge: apiReport.medicalReport?.report?.managementPlan || '',
+              surveillance: apiReport.medicalReport?.report?.followUpPlan || '',
+              conclusion: apiReport.medicalReport?.report?.conclusion || ''
+            },
+            metadata: {
+              dateGeneration: apiReport.medicalReport?.metadata?.generatedAt || new Date().toISOString(),
+              wordCount: apiReport.medicalReport?.metadata?.wordCount || 0,
+              validationStatus: 'draft' as const,
+              complianceNote: apiReport.medicalReport?.metadata?.complianceNote || "This document complies with Medical Council of Mauritius guidelines"
+            }
+          },
+          ordonnances: {
+            medicaments: null as any,
+            biologie: null as any,
+            imagerie: null as any
+          },
+          invoice: null as any
+        }
+        
+        // Map medications
+        if (apiReport.prescriptions?.medications) {
+          reportData.ordonnances!.medicaments = {
+            enTete: currentDoctorInfo,
+            patient: reportData.compteRendu.patient,
+            prescription: {
+              datePrescription: apiReport.prescriptions.medications.prescription?.prescriptionDate || new Date().toISOString().split('T')[0],
+              medicaments: apiReport.prescriptions.medications.prescription?.medications?.map((med: any) => ({
+                nom: med.name || '',
+                denominationCommune: med.genericName || med.name || '',
+                dosage: med.dosage || '',
+                forme: med.form || 'tablet',
+                posologie: med.frequency || '',
+                modeAdministration: med.route || 'Oral route',
+                dureeTraitement: med.duration || '7 days',
+                quantite: med.quantity || '1 box',
+                instructions: med.instructions || '',
+                justification: med.indication || '',
+                surveillanceParticuliere: med.monitoring || '',
+                nonSubstituable: med.doNotSubstitute || false,
+                ligneComplete: med.fullDescription || ''
+              })) || [],
+              validite: apiReport.prescriptions.medications.prescription?.validity || "3 months unless otherwise specified",
+              dispensationNote: apiReport.prescriptions.medications.prescription?.dispensationNote
+            },
+            authentification: {
+              signature: "Medical Practitioner's Signature",
+              nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
+              numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
+              cachetProfessionnel: "Official Medical Stamp",
+              date: apiReport.prescriptions.medications.prescription?.prescriptionDate || new Date().toISOString().split('T')[0]
+            }
+          }
+        }
+        
+        // Map laboratory tests
+        if (apiReport.prescriptions?.laboratoryTests) {
+          const labData = apiReport.prescriptions.laboratoryTests
+          reportData.ordonnances!.biologie = {
+            enTete: currentDoctorInfo,
+            patient: reportData.compteRendu.patient,
+            prescription: {
+              datePrescription: labData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0],
+              motifClinique: labData.prescription?.clinicalIndication || '',
+              analyses: {
+                haematology: (labData.prescription?.tests?.hematology || []).map((test: any) => ({
+                  nom: test.name || '',
+                  categorie: test.category || 'Haematology',
+                  urgence: test.urgent || false,
+                  aJeun: test.fasting || false,
+                  conditionsPrelevement: test.sampleConditions || '',
+                  motifClinique: test.clinicalIndication || '',
+                  renseignementsCliniques: test.clinicalInformation || '',
+                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
+                  delaiResultat: test.turnaroundTime || 'Standard'
+                })),
+                clinicalChemistry: (labData.prescription?.tests?.clinicalChemistry || []).map((test: any) => ({
+                  nom: test.name || '',
+                  categorie: test.category || 'Clinical Chemistry',
+                  urgence: test.urgent || false,
+                  aJeun: test.fasting || false,
+                  conditionsPrelevement: test.sampleConditions || '',
+                  motifClinique: test.clinicalIndication || '',
+                  renseignementsCliniques: test.clinicalInformation || '',
+                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
+                  delaiResultat: test.turnaroundTime || 'Standard'
+                })),
+                immunology: (labData.prescription?.tests?.immunology || []).map((test: any) => ({
+                  nom: test.name || '',
+                  categorie: test.category || 'Immunology',
+                  urgence: test.urgent || false,
+                  aJeun: test.fasting || false,
+                  conditionsPrelevement: test.sampleConditions || '',
+                  motifClinique: test.clinicalIndication || '',
+                  renseignementsCliniques: test.clinicalInformation || '',
+                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
+                  delaiResultat: test.turnaroundTime || 'Standard'
+                })),
+                microbiology: (labData.prescription?.tests?.microbiology || []).map((test: any) => ({
+                  nom: test.name || '',
+                  categorie: test.category || 'Microbiology',
+                  urgence: test.urgent || false,
+                  aJeun: test.fasting || false,
+                  conditionsPrelevement: test.sampleConditions || '',
+                  motifClinique: test.clinicalIndication || '',
+                  renseignementsCliniques: test.clinicalInformation || '',
+                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
+                  delaiResultat: test.turnaroundTime || 'Standard'
+                })),
+                endocrinology: (labData.prescription?.tests?.endocrinology || []).map((test: any) => ({
+                  nom: test.name || '',
+                  categorie: test.category || 'Endocrinology',
+                  urgence: test.urgent || false,
+                  aJeun: test.fasting || false,
+                  conditionsPrelevement: test.sampleConditions || '',
+                  motifClinique: test.clinicalIndication || '',
+                  renseignementsCliniques: test.clinicalInformation || '',
+                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
+                  delaiResultat: test.turnaroundTime || 'Standard'
+                }))
+              },
+              instructionsSpeciales: labData.prescription?.specialInstructions || [],
+              laboratoireRecommande: labData.prescription?.recommendedLaboratory || ''
+            },
+            authentification: {
+              signature: "Medical Practitioner's Signature",
+              nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
+              numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
+              date: labData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0]
+            }
+          }
+        }
+        
+        // Map imaging studies
+        if (apiReport.prescriptions?.imagingStudies) {
+          const imagingData = apiReport.prescriptions.imagingStudies
+          reportData.ordonnances!.imagerie = {
+            enTete: currentDoctorInfo,
+            patient: reportData.compteRendu.patient,
+            prescription: {
+              datePrescription: imagingData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0],
+              examens: imagingData.prescription?.studies?.map((study: any) => ({
+                type: study.type || study.modality || '',
+                modalite: study.modality || '',
+                region: study.region || '',
+                indicationClinique: study.clinicalIndication || '',
+                urgence: study.urgent || false,
+                contraste: study.contrast || false,
+                protocoleSpecifique: study.specificProtocol || '',
+                questionDiagnostique: study.diagnosticQuestion || ''
+              })) || [],
+              renseignementsCliniques: imagingData.prescription?.clinicalInformation || '',
+              centreImagerie: imagingData.prescription?.imagingCenter || ''
+            },
+            authentification: {
+              signature: "Medical Practitioner's Signature",
+              nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
+              numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
+              date: imagingData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0]
+            }
+          }
+        }
+        
+        // Map invoice
+        if (apiReport.invoice) {
+          reportData.invoice = apiReport.invoice
+          if (reportData.invoice.physician) {
+            reportData.invoice.physician.name = currentDoctorInfo.nom
+            reportData.invoice.physician.registrationNumber = currentDoctorInfo.numeroEnregistrement
+          }
+        }
+        
+        console.log("✅ Structure mapping complete")
+        
+        setReport(reportData)
+        setValidationStatus('draft')
+        setDocumentSignatures({})
+        
+        const newReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        setReportId(newReportId)
+        
+        console.log('✅ Report generated with ID:', newReportId)
+        console.log('📊 Report structure:', {
+          hasCompteRendu: !!reportData.compteRendu,
+          hasOrdonnances: !!reportData.ordonnances,
+          hasMedicaments: !!reportData.ordonnances?.medicaments,
+          hasBiologie: !!reportData.ordonnances?.biologie,
+          hasImagerie: !!reportData.ordonnances?.imagerie,
+          hasInvoice: !!reportData.invoice
+        })
+        
+        toast({
+          title: "Report generated successfully",
+          description: "Report is ready for editing and validation"
+        })
+      } else {
+        throw new Error(data.error || "Generation error")
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+      console.error("Report generation error:", errorMessage)
+      setError(errorMessage)
+      
+      const emptyReport = createEmptyReport()
+      emptyReport.compteRendu.praticien = doctorInfo
+      if (patientData) {
+        emptyReport.compteRendu.patient = {
+          ...emptyReport.compteRendu.patient,
+          nom: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim() || 'Patient',
+          nomComplet: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim() || 'Patient',
+          age: patientData.age?.toString() || '',
+          dateNaissance: patientData.dateOfBirth || '',
+          sexe: patientData.gender || '',
+          adresse: patientData.address || '',
+          telephone: patientData.phone || '',
+          email: patientData.email || '',
+          poids: patientData.weight?.toString() || ''
+        }
+      }
+      setReport(emptyReport)
+      setValidationStatus('draft')
+      setDocumentSignatures({})
+      
+      toast({
+        title: "Note",
+        description: "Using default template. Please fill in the required information.",
+        variant: "default"
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // ==================== VALIDATION & SIGNATURE ====================
   const handleValidation = async () => {
-    // Check if doctor info is complete
     const requiredFieldsMissing = []
     if (doctorInfo.nom.includes('[')) requiredFieldsMissing.push('Doctor name')
     if (doctorInfo.numeroEnregistrement.includes('[')) requiredFieldsMissing.push('Registration number')
@@ -336,7 +668,6 @@ export default function ProfessionalReportEditable({
       return
     }
     
-    // Ensure we have a report ID
     let currentReportId = reportId
     if (!currentReportId) {
       currentReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -345,38 +676,32 @@ export default function ProfessionalReportEditable({
     
     setSaving(true)
     try {
-      // Generate a unique signature seed for this doctor
       const signatureSeed = `${doctorInfo.nom}_${doctorInfo.numeroEnregistrement}_signature`
       
-      // Create signature data URL using the existing component logic
       const canvas = document.createElement('canvas')
       canvas.width = 300
       canvas.height = 80
       const ctx = canvas.getContext('2d')
       
       if (ctx) {
-        // Generate signature using the same logic as DoctorSignature component
         ctx.fillStyle = '#ffffff'
         ctx.fillRect(0, 0, 300, 80)
         
         const nameParts = doctorInfo.nom.replace('Dr. ', '').split(' ')
         const fullName = nameParts.join(' ')
         
-        // Create unique but consistent signature based on name
         const nameHash = doctorInfo.nom.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
         const signatureStyle = nameHash % 3
         
         ctx.save()
         ctx.translate(50, 40)
         
-        // Dark ink color
         ctx.strokeStyle = '#1a1a2e'
         ctx.fillStyle = '#1a1a2e'
         ctx.lineWidth = 2.2
         ctx.lineCap = 'round'
         ctx.lineJoin = 'round'
         
-        // Apply signature style
         if (signatureStyle === 0) {
           ctx.font = 'italic 28px "Brush Script MT", "Lucida Handwriting", cursive'
           ctx.fillText(fullName, 0, 0)
@@ -414,7 +739,6 @@ export default function ProfessionalReportEditable({
           ctx.stroke()
         }
         
-        // Add date
         ctx.font = '9px Arial'
         ctx.fillStyle = '#9ca3af'
         ctx.textAlign = 'left'
@@ -427,10 +751,8 @@ export default function ProfessionalReportEditable({
         ctx.restore()
       }
       
-      // Convert canvas to data URL
       const signatureDataUrl = canvas.toDataURL('image/png')
       
-      // Create signatures object for all document types
       const signatures = {
         consultation: signatureDataUrl,
         prescription: signatureDataUrl,
@@ -439,10 +761,8 @@ export default function ProfessionalReportEditable({
         invoice: signatureDataUrl
       }
       
-      // Update the document signatures state
       setDocumentSignatures(signatures)
       
-      // Create the updated report with signatures embedded
       const updatedReport = {
         ...report,
         compteRendu: {
@@ -457,7 +777,6 @@ export default function ProfessionalReportEditable({
             signatureDataUrl: signatureDataUrl
           }
         },
-        // Add signature references to each document section
         ordonnances: report.ordonnances ? {
           ...report.ordonnances,
           medicaments: report.ordonnances.medicaments ? {
@@ -495,7 +814,6 @@ export default function ProfessionalReportEditable({
         } : report.invoice
       }
       
-      // FIXED: Just update local state - no saving to API
       setReport(updatedReport)
       setValidationStatus('validated')
       setModifiedSections(new Set())
@@ -515,10 +833,10 @@ export default function ProfessionalReportEditable({
     } finally {
       setSaving(false)
     }
-  }  // Closing brace for handleValidation
-// handleSendDocuments function
+  }
+
+  // ==================== SEND DOCUMENTS ====================
   const handleSendDocuments = async () => {
-    // Check if report is validated
     if (!report || validationStatus !== 'validated') {
       toast({
         title: "Cannot send documents",
@@ -529,13 +847,11 @@ export default function ProfessionalReportEditable({
     }
     
     try {
-      // Show loading state
       toast({
         title: "📤 Sending documents...",
         description: "Preparing documents for patient dashboard"
       })
       
-      // Get necessary IDs from URL parameters
       const params = new URLSearchParams(window.location.search)
       const consultationId = params.get('consultationId')
       const patientId = params.get('patientId') || patientData?.id
@@ -550,7 +866,6 @@ export default function ProfessionalReportEditable({
         return
       }
 
-      // Smart Tibok URL detection
       const getTibokUrl = () => {
         const urlParam = params.get('tibokUrl')
         if (urlParam) {
@@ -582,7 +897,6 @@ export default function ProfessionalReportEditable({
 
       const tibokUrl = getTibokUrl()
 
-      // Prepare documents payload
       const documentsPayload = {
         consultationId,
         patientId,
@@ -633,7 +947,6 @@ export default function ProfessionalReportEditable({
       console.log('📦 Sending documents payload to:', tibokUrl)
       console.log('📦 Payload:', documentsPayload)
 
-      // Send to Tibok patient dashboard
       const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -650,245 +963,12 @@ export default function ProfessionalReportEditable({
       console.log('✅ API Response:', result)
 
       if (result.success) {
-        // Show initial success toast
         toast({
           title: "✅ Documents envoyés avec succès",
           description: "Les documents sont maintenant disponibles dans le tableau de bord du patient"
         })
 
-        // Create and show enhanced success modal
-        const showSuccessModal = () => {
-          // Create modal container
-          const modalContainer = document.createElement('div')
-          modalContainer.id = 'success-modal'
-          modalContainer.style.cssText = `
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            animation: fadeIn 0.3s ease-out;
-          `
-
-          // Create modal content
-          const modalContent = document.createElement('div')
-          modalContent.style.cssText = `
-            background: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            max-width: 500px;
-            margin: 1rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            animation: slideUp 0.3s ease-out;
-            position: relative;
-          `
-
-          modalContent.innerHTML = `
-            <!-- Close X button -->
-            <button id="close-x-btn" style="
-              position: absolute;
-              top: 1rem;
-              right: 1rem;
-              width: 32px;
-              height: 32px;
-              border-radius: 50%;
-              border: none;
-              background: #f3f4f6;
-              cursor: pointer;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              transition: all 0.2s;
-            " onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
-              <svg width="20" height="20" fill="#6b7280" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-              </svg>
-            </button>
-            
-            <div style="text-align: center;">
-              <!-- Success Icon -->
-              <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; animation: scaleIn 0.5s ease-out;">
-                <svg width="40" height="40" fill="white" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-              </div>
-              
-              <!-- Title -->
-              <h2 style="font-size: 1.5rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
-                Documents envoyés avec succès!
-              </h2>
-              
-              <!-- Description -->
-              <p style="color: #6b7280; margin-bottom: 1.5rem; line-height: 1.5;">
-                Les documents médicaux ont été transmis au tableau de bord du patient.<br>
-                Le patient recevra une notification pour valider son ordonnance.
-              </p>
-              
-              <!-- Info Box -->
-              <div style="background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e7eb;">
-                <p style="font-size: 0.875rem; color: #4b5563; margin: 0 0 0.5rem 0;">
-                  <strong>Prochaines étapes:</strong>
-                </p>
-                <ul style="text-align: left; font-size: 0.875rem; color: #6b7280; margin: 0; padding-left: 1.5rem;">
-                  <li>Le patient validera son ordonnance</li>
-                  <li>La pharmacie préparera les médicaments</li>
-                  <li>Livraison selon l'option choisie par le patient</li>
-                </ul>
-              </div>
-              
-              <!-- Success Status -->
-              <div style="background: #d1fae5; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #a7f3d0;">
-                <p style="font-size: 0.875rem; color: #065f46; margin: 0; font-weight: 500;">
-                  ✅ Tous les documents ont été envoyés avec succès
-                </p>
-                <p style="font-size: 0.75rem; color: #047857; margin: 0.25rem 0 0 0;">
-                  Consultation ID: ${consultationId}
-                </p>
-              </div>
-              
-              <!-- Single Button to Close Tab -->
-              <button id="close-tab-btn" style="
-                width: 100%;
-                padding: 0.75rem 1.5rem;
-                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-                color: white;
-                border: none;
-                border-radius: 0.5rem;
-                font-weight: 600;
-                font-size: 1rem;
-                cursor: pointer;
-                transition: all 0.2s;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 0.5rem;
-              " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-                Cliquez ici pour fermer cet onglet si vous avez terminé
-              </button>
-              
-              <!-- Optional Note -->
-              <div style="margin-top: 1rem;">
-                <p style="font-size: 0.75rem; color: #9ca3af; margin: 0;">
-                  Vous pouvez également garder cet onglet ouvert pour traiter d'autres consultations
-                </p>
-              </div>
-            </div>
-          `
-
-          modalContainer.appendChild(modalContent)
-          document.body.appendChild(modalContainer)
-
-          // Add CSS animations
-          const style = document.createElement('style')
-          style.textContent = `
-            @keyframes fadeIn {
-              from { opacity: 0; }
-              to { opacity: 1; }
-            }
-            @keyframes slideUp {
-              from {
-                transform: translateY(20px);
-                opacity: 0;
-              }
-              to {
-                transform: translateY(0);
-                opacity: 1;
-              }
-            }
-            @keyframes scaleIn {
-              from { transform: scale(0); }
-              to { transform: scale(1); }
-            }
-            @keyframes fadeOut {
-              from { opacity: 1; }
-              to { opacity: 0; }
-            }
-          `
-          document.head.appendChild(style)
-
-          // Function to close the tab
-          const closeTab = () => {
-            // Clear session storage
-            sessionStorage.removeItem('currentDoctorInfo')
-            
-            // Try to close the window/tab
-            if (window.opener) {
-              // If opened as popup
-              window.close()
-            } else {
-              // If regular tab, try to close (may not work in all browsers)
-              window.close()
-              
-              // If window.close() doesn't work, show a message
-              setTimeout(() => {
-                const modal = document.getElementById('success-modal')
-                if (modal) {
-                  modal.innerHTML = `
-                    <div style="background: white; padding: 2rem; border-radius: 1rem; max-width: 400px; margin: auto;">
-                      <div style="text-align: center;">
-                        <div style="width: 60px; height: 60px; background: #fbbf24; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
-                          <svg width="30" height="30" fill="white" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                          </svg>
-                        </div>
-                        <h3 style="font-size: 1.25rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
-                          Impossible de fermer automatiquement
-                        </h3>
-                        <p style="color: #6b7280; margin-bottom: 1rem;">
-                          Votre navigateur empêche la fermeture automatique des onglets.
-                        </p>
-                        <p style="color: #4b5563; font-weight: 500;">
-                          Veuillez fermer manuellement cet onglet.
-                        </p>
-                        <button onclick="document.getElementById('success-modal').remove()" style="
-                          margin-top: 1rem;
-                          padding: 0.5rem 1rem;
-                          background: #3b82f6;
-                          color: white;
-                          border: none;
-                          border-radius: 0.5rem;
-                          cursor: pointer;
-                        ">
-                          OK, Compris
-                        </button>
-                      </div>
-                    </div>
-                  `
-                }
-              }, 100)
-            }
-          }
-
-          // Close modal function (only closes the modal, not the tab)
-          const closeModal = () => {
-            const modal = document.getElementById('success-modal')
-            if (modal) {
-              modal.style.animation = 'fadeOut 0.3s ease-out'
-              setTimeout(() => {
-                modal.remove()
-              }, 300)
-            }
-          }
-
-          // Button event listeners
-          document.getElementById('close-x-btn')?.addEventListener('click', closeModal)
-          document.getElementById('close-tab-btn')?.addEventListener('click', closeTab)
-
-          // Optional: Allow clicking outside to close modal only (not tab)
-          modalContainer.addEventListener('click', (e) => {
-            if (e.target === modalContainer) {
-              closeModal()
-            }
-          })
-        }
-
-        // Show the modal after a brief delay to ensure DOM is ready
-        setTimeout(showSuccessModal, 100)
+        showSuccessModal()
         
       } else {
         throw new Error(result.error || "Failed to send documents")
@@ -901,506 +981,219 @@ export default function ProfessionalReportEditable({
         variant: "destructive"
       })
     }
-  }  // Closing brace for handleSendDocuments
-// Safe getter functions
-  const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
-  const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
-  const getReportPatient = () => report?.compteRendu?.patient || createEmptyReport().compteRendu.patient
-  const getReportRapport = () => report?.compteRendu?.rapport || createEmptyReport().compteRendu.rapport
-  const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
-
-  // Track modifications
-  const trackModification = (section: string) => {
-    if (validationStatus === 'validated') return
-    setModifiedSections(prev => new Set(prev).add(section))
   }
 
-  // Update narrative report section
-  const updateRapportSection = (section: string, value: string) => {
-    if (validationStatus === 'validated') return
-    
-    setReport(prev => {
-      if (!prev) return null
+  const showSuccessModal = () => {
+    const modalContainer = document.createElement('div')
+    modalContainer.id = 'success-modal'
+    modalContainer.style.cssText = `
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeIn 0.3s ease-out;
+    `
+
+    const modalContent = document.createElement('div')
+    modalContent.style.cssText = `
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      max-width: 500px;
+      margin: 1rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      animation: slideUp 0.3s ease-out;
+      position: relative;
+    `
+
+    modalContent.innerHTML = `
+      <button id="close-x-btn" style="
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: none;
+        background: #f3f4f6;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      " onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+        <svg width="20" height="20" fill="#6b7280" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </button>
       
-      return {
-        ...prev,
-        compteRendu: {
-          ...prev.compteRendu,
-          rapport: {
-            ...prev.compteRendu.rapport,
-            [section]: value
-          }
+      <div style="text-align: center;">
+        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; animation: scaleIn 0.5s ease-out;">
+          <svg width="40" height="40" fill="white" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        
+        <h2 style="font-size: 1.5rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
+          Documents envoyés avec succès!
+        </h2>
+        
+        <p style="color: #6b7280; margin-bottom: 1.5rem; line-height: 1.5;">
+          Les documents médicaux ont été transmis au tableau de bord du patient.<br>
+          Le patient recevra une notification pour valider son ordonnance.
+        </p>
+        
+        <div style="background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e7eb;">
+          <p style="font-size: 0.875rem; color: #4b5563; margin: 0 0 0.5rem 0;">
+            <strong>Prochaines étapes:</strong>
+          </p>
+          <ul style="text-align: left; font-size: 0.875rem; color: #6b7280; margin: 0; padding-left: 1.5rem;">
+            <li>Le patient validera son ordonnance</li>
+            <li>La pharmacie préparera les médicaments</li>
+            <li>Livraison selon l'option choisie par le patient</li>
+          </ul>
+        </div>
+        
+        <div style="background: #d1fae5; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #a7f3d0;">
+          <p style="font-size: 0.875rem; color: #065f46; margin: 0; font-weight: 500;">
+            ✅ Tous les documents ont été envoyés avec succès
+          </p>
+          <p style="font-size: 0.75rem; color: #047857; margin: 0.25rem 0 0 0;">
+            Consultation ID: ${reportId}
+          </p>
+        </div>
+        
+        <button id="close-tab-btn" style="
+          width: 100%;
+          padding: 0.75rem 1.5rem;
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+          color: white;
+          border: none;
+          border-radius: 0.5rem;
+          font-weight: 600;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+        " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+          Cliquez ici pour fermer cet onglet si vous avez terminé
+        </button>
+        
+        <div style="margin-top: 1rem;">
+          <p style="font-size: 0.75rem; color: #9ca3af; margin: 0;">
+            Vous pouvez également garder cet onglet ouvert pour traiter d'autres consultations
+          </p>
+        </div>
+      </div>
+    `
+
+    modalContainer.appendChild(modalContent)
+    document.body.appendChild(modalContainer)
+
+    const style = document.createElement('style')
+    style.textContent = `
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes slideUp {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
         }
       }
-    })
-    trackModification(`rapport.${section}`)
-  }
-
-  // Update doctor information
-  const updateDoctorInfo = (field: string, value: string) => {
-    setDoctorInfo(prev => ({
-      ...prev,
-      [field]: value
-    }))
-    trackModification(`praticien.${field}`)
-    const updatedInfo = { ...doctorInfo, [field]: value }
-    sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
-  }
-
-  // Load doctor information from Tibok with better field mapping and debugging
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const doctorDataParam = urlParams.get('doctorData')
-    
-    if (doctorDataParam) {
-      try {
-        const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
-        console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
-        
-        // Debug: Check what fields are actually present
-        console.log('🔍 Doctor data fields:', {
-          hasLicenseNumber: 'licenseNumber' in tibokDoctorData,
-          hasLicense_number: 'license_number' in tibokDoctorData,
-          licenseNumberValue: tibokDoctorData.licenseNumber,
-          license_numberValue: tibokDoctorData.license_number,
-          typeOfLicenseNumber: typeof tibokDoctorData.licenseNumber,
-          typeOfLicense_number: typeof tibokDoctorData.license_number
-        })
-        
-        // Map all possible field names from database
-        const doctorInfoFromTibok = {
-          nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
-            `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
-            'Dr. [Name Required]',
-          qualifications: tibokDoctorData.qualifications || 'MBBS',
-          specialite: tibokDoctorData.specialty || 'General Medicine',
-          adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
-          telephone: '', // Keep this empty as requested
-          email: tibokDoctorData.email || '[Email Required]',
-          heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
-          numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]'),
-          // FIXED: Directly assign the license_number field
-          licencePratique: tibokDoctorData.license_number ? 
-            String(tibokDoctorData.license_number) : 
-            '[License Required]'
-        }
-        
-        console.log('🔍 License extraction:', {
-          rawValue: tibokDoctorData.license_number,
-          type: typeof tibokDoctorData.license_number,
-          hasLicense: !!tibokDoctorData.license_number
-        });
-        
-        console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
-        
-        setDoctorInfo(doctorInfoFromTibok)
-        sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
-        
-      } catch (error) {
-        console.error('Error parsing Tibok doctor data:', error)
+      @keyframes scaleIn {
+        from { transform: scale(0); }
+        to { transform: scale(1); }
       }
-    }
-    
-    // Also check sessionStorage as fallback
-    const storedDoctorInfo = sessionStorage.getItem('currentDoctorInfo')
-    if (!doctorDataParam && storedDoctorInfo) {
-      try {
-        const doctorData = JSON.parse(storedDoctorInfo)
-        setDoctorInfo(doctorData)
-        console.log('✅ Doctor information loaded from session')
-      } catch (error) {
-        console.error('Error loading doctor data from storage:', error)
+      @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
       }
-    }
-  }, [])
+    `
+    document.head.appendChild(style)
 
-  // Update report when doctor info changes
-  useEffect(() => {
-    if (report && doctorInfo && doctorInfo.nom !== 'Dr. [DOCTOR NAME]') {
-      setReport(prev => ({
-        ...prev!,
-        compteRendu: {
-          ...prev!.compteRendu,
-          praticien: doctorInfo
-        },
-        ordonnances: prev!.ordonnances ? {
-          ...prev!.ordonnances,
-          medicaments: prev!.ordonnances.medicaments ? {
-            ...prev!.ordonnances.medicaments,
-            enTete: doctorInfo,
-            authentification: {
-              ...prev!.ordonnances.medicaments.authentification,
-              nomEnCapitales: doctorInfo.nom.toUpperCase(),
-              numeroEnregistrement: doctorInfo.numeroEnregistrement
-            }
-          } : null,
-          biologie: prev!.ordonnances.biologie ? {
-            ...prev!.ordonnances.biologie,
-            enTete: doctorInfo,
-            authentification: {
-              ...prev!.ordonnances.biologie.authentification,
-              nomEnCapitales: doctorInfo.nom.toUpperCase(),
-              numeroEnregistrement: doctorInfo.numeroEnregistrement
-            }
-          } : null,
-          imagerie: prev!.ordonnances.imagerie ? {
-            ...prev!.ordonnances.imagerie,
-            enTete: doctorInfo,
-            authentification: {
-              ...prev!.ordonnances.imagerie.authentification,
-              nomEnCapitales: doctorInfo.nom.toUpperCase(),
-              numeroEnregistrement: doctorInfo.numeroEnregistrement
-            }
-          } : null
-        } : prev!.ordonnances,
-        invoice: prev!.invoice ? {
-          ...prev!.invoice,
-          physician: {
-            name: doctorInfo.nom,
-            registrationNumber: doctorInfo.numeroEnregistrement
-          }
-        } : prev!.invoice
-      }))
-      console.log('📝 Report updated with doctor information')
-    }
-  }, [doctorInfo, report?.compteRendu?.header])
-
-  useEffect(() => {
-    console.log("🚀 ProfessionalReportEditable mounted with data:", {
-      hasPatientData: !!patientData,
-      patientName: patientData?.name || `${patientData?.firstName} ${patientData?.lastName}`,
-      hasClinicalData: !!clinicalData,
-      hasDiagnosisData: !!diagnosisData,
-      hasQuestionsData: !!questionsData
-    })
-    
-    // Check if we have minimum required data
-    if (patientData && (patientData.name || (patientData.firstName && patientData.lastName))) {
-      checkExistingReport()
-    } else {
-      console.warn("Insufficient patient data, creating empty report")
-      const emptyReport = createEmptyReport()
-      if (patientData) {
-        emptyReport.compteRendu.patient = {
-          ...emptyReport.compteRendu.patient,
-          nom: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
-          nomComplet: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
-          age: patientData.age?.toString() || '',
-          dateNaissance: patientData.dateOfBirth || '',
-          sexe: patientData.gender || '',
-          adresse: patientData.address || '',
-          telephone: patientData.phone || '',
-          email: patientData.email || '',
-          poids: patientData.weight?.toString() || ''
-        }
-      }
-      setReport(emptyReport)
-      setLoading(false)
-    }
-  }, [patientData, clinicalData, questionsData, diagnosisData])
-
-  // FIXED: Check for existing report - now just generates fresh report
-  const checkExistingReport = async () => {
-    try {
-      const params = new URLSearchParams(window.location.search)
-      const patientIdFromUrl = params.get('patientId')
-      const actualPatientId = patientData?.id || patientIdFromUrl || (patientData ? 'patient_' + Date.now() : 'temp')
+    const closeTab = () => {
+      sessionStorage.removeItem('currentDoctorInfo')
       
-      if (!patientData || actualPatientId === 'temp') {
-        console.log("No patient data, generating new report")
-        generateProfessionalReport()
-        return
-      }
-      
-      // Since /api/save-medical-report is deleted, just generate a fresh report
-      console.log("Generating fresh report for patient:", actualPatientId)
-      generateProfessionalReport()
-      
-    } catch (error) {
-      console.error("Error in checkExistingReport:", error)
-      generateProfessionalReport()
-    }
-  }
-
-  // FIXED: Generate report with doctor data - removed auto-save
-  const generateProfessionalReport = async () => {
-    setLoading(true)
-    setError(null)
-    // CRITICAL: Always reset validation status when generating a new report
-    setValidationStatus('draft')
-    setDocumentSignatures({})
-
-    try {
-      // Wait for doctor info to be loaded
-      let currentDoctorInfo = doctorInfo
-      if (currentDoctorInfo.nom === 'Dr. [DOCTOR NAME]' || currentDoctorInfo.nom === 'Dr. [Name Required]') {
-        // Try to get from session if not loaded yet
-        const storedInfo = sessionStorage.getItem('currentDoctorInfo')
-        if (storedInfo) {
-          currentDoctorInfo = JSON.parse(storedInfo)
-          setDoctorInfo(currentDoctorInfo)
-        }
-      }
-      
-      console.log("📤 Generating report with doctor info:", currentDoctorInfo)
-      
-      const validPatientData = patientData || {
-        name: 'Patient',
-        age: '',
-        gender: '',
-        dateOfBirth: '',
-        address: '',
-        phone: '',
-        email: '',
-        weight: ''
-      }
-      
-      // Prepare doctor data for API
-      const doctorDataForAPI = {
-        fullName: currentDoctorInfo.nom.replace('Dr. ', ''),
-        qualifications: currentDoctorInfo.qualifications,
-        specialty: currentDoctorInfo.specialite,
-        clinicAddress: currentDoctorInfo.adresseCabinet,
-        email: currentDoctorInfo.email,
-        consultationHours: currentDoctorInfo.heuresConsultation,
-        medicalCouncilNumber: currentDoctorInfo.numeroEnregistrement,
-        licenseNumber: currentDoctorInfo.licencePratique
-      }
-      
-      const response = await fetch("/api/generate-consultation-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          patientData: validPatientData,
-          clinicalData: clinicalData || {},
-          questionsData: questionsData || {},
-          diagnosisData: diagnosisData || {},
-          editedDocuments: editedDocuments || {},
-          doctorData: doctorDataForAPI,
-          includeFullPrescriptions
-        })
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error("API Error:", errorText)
-        throw new Error(`HTTP Error ${response.status}: ${errorText}`)
-      }
-
-      const data = await response.json()
-      console.log("📥 Report received:", data)
-
-      if (data.success && data.report) {
-        const reportData = data.report
-        
-// Ensure reportData has the proper structure before modifying
-        if (!reportData.compteRendu) {
-          console.error('Report data missing compteRendu structure')
-          reportData.compteRendu = createEmptyReport().compteRendu
-        }
-        
-        // Override the praticien data with actual doctor info
-        reportData.compteRendu.praticien = currentDoctorInfo
-        
-        // CRITICAL: Ensure the report is set as draft, not validated
-        if (!reportData.compteRendu.metadata) {
-          reportData.compteRendu.metadata = {
-            dateGeneration: new Date().toISOString(),
-            wordCount: 0,
-            validationStatus: 'draft',
-            complianceNote: "This document complies with Medical Council of Mauritius guidelines"
-          }
-        } else {
-          reportData.compteRendu.metadata.validationStatus = 'draft'
-          delete reportData.compteRendu.metadata.signatures
-          delete reportData.compteRendu.metadata.signatureDataUrl
-          delete reportData.compteRendu.metadata.validatedAt
-          delete reportData.compteRendu.metadata.validatedBy
-        }
-        
-        // Also update all prescription headers and remove any signatures
-        if (reportData.ordonnances?.medicaments) {
-          // Ensure structure exists before modifying
-          if (!reportData.ordonnances.medicaments.enTete) {
-            reportData.ordonnances.medicaments.enTete = {}
-          }
-          reportData.ordonnances.medicaments.enTete = currentDoctorInfo
-          
-          // Check if authentification exists before accessing its properties
-          if (!reportData.ordonnances.medicaments.authentification) {
-            reportData.ordonnances.medicaments.authentification = {
-              signature: "Medical Practitioner's Signature",
-              nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
-              numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
-              cachetProfessionnel: "Official Medical Stamp",
-              date: new Date().toISOString().split('T')[0]
-            }
-          } else {
-            reportData.ordonnances.medicaments.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
-            reportData.ordonnances.medicaments.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
-            // Remove any existing signatures
-            delete reportData.ordonnances.medicaments.authentification.signatureImage
-            delete reportData.ordonnances.medicaments.authentification.signedAt
-          }
-        }
-        
-        if (reportData.ordonnances?.biologie) {
-          // Ensure structure exists before modifying
-          if (!reportData.ordonnances.biologie.enTete) {
-            reportData.ordonnances.biologie.enTete = {}
-          }
-          reportData.ordonnances.biologie.enTete = currentDoctorInfo
-          
-          // Check if authentification exists before accessing its properties
-          if (!reportData.ordonnances.biologie.authentification) {
-            reportData.ordonnances.biologie.authentification = {
-              signature: "Medical Practitioner's Signature",
-              nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
-              numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
-              date: new Date().toISOString().split('T')[0]
-            }
-          } else {
-            reportData.ordonnances.biologie.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
-            reportData.ordonnances.biologie.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
-            // Remove any existing signatures
-            delete reportData.ordonnances.biologie.authentification.signatureImage
-            delete reportData.ordonnances.biologie.authentification.signedAt
-          }
-        }
-        
-        if (reportData.ordonnances?.imagerie) {
-          // Ensure structure exists before modifying
-          if (!reportData.ordonnances.imagerie.enTete) {
-            reportData.ordonnances.imagerie.enTete = {}
-          }
-          reportData.ordonnances.imagerie.enTete = currentDoctorInfo
-          
-          // Check if authentification exists before accessing its properties
-          if (!reportData.ordonnances.imagerie.authentification) {
-            reportData.ordonnances.imagerie.authentification = {
-              signature: "Medical Practitioner's Signature",
-              nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
-              numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
-              date: new Date().toISOString().split('T')[0]
-            }
-          } else {
-            reportData.ordonnances.imagerie.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
-            reportData.ordonnances.imagerie.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
-            // Remove any existing signatures
-            delete reportData.ordonnances.imagerie.authentification.signatureImage
-            delete reportData.ordonnances.imagerie.authentification.signedAt
-          }
-        }
-        
-        if (reportData.invoice?.physician) {
-          reportData.invoice.physician.name = currentDoctorInfo.nom
-          reportData.invoice.physician.registrationNumber = currentDoctorInfo.numeroEnregistrement
-          // Remove any existing signatures
-          if (reportData.invoice.signature) {
-            delete reportData.invoice.signature.signatureImage
-            delete reportData.invoice.signature.signedAt
-          }
-        }
-        
-        setReport(reportData)
-        setValidationStatus('draft') // Ensure it's set to draft
-        setDocumentSignatures({}) // Clear any signatures
-        
-        // Generate a report ID but don't save
-        const newReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-        setReportId(newReportId)
-        
-        // FIXED: Removed auto-save functionality - just keep the report in local state
-        console.log('✅ Report generated with ID:', newReportId)
-        
-        toast({
-          title: "Report generated successfully",
-          description: "Report is ready for editing and validation"
-        })
+      if (window.opener) {
+        window.close()
       } else {
-        throw new Error(data.error || "Generation error")
+        window.close()
+        
+        setTimeout(() => {
+          const modal = document.getElementById('success-modal')
+          if (modal) {
+            modal.innerHTML = `
+              <div style="background: white; padding: 2rem; border-radius: 1rem; max-width: 400px; margin: auto;">
+                <div style="text-align: center;">
+                  <div style="width: 60px; height: 60px; background: #fbbf24; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                    <svg width="30" height="30" fill="white" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <h3 style="font-size: 1.25rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
+                    Impossible de fermer automatiquement
+                  </h3>
+                  <p style="color: #6b7280; margin-bottom: 1rem;">
+                    Votre navigateur empêche la fermeture automatique des onglets.
+                  </p>
+                  <p style="color: #4b5563; font-weight: 500;">
+                    Veuillez fermer manuellement cet onglet.
+                  </p>
+                  <button onclick="document.getElementById('success-modal').remove()" style="
+                    margin-top: 1rem;
+                    padding: 0.5rem 1rem;
+                    background: #3b82f6;
+                    color: white;
+                    border: none;
+                    border-radius: 0.5rem;
+                    cursor: pointer;
+                  ">
+                    OK, Compris
+                  </button>
+                </div>
+              </div>
+            `
+          }
+        }, 100)
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error"
-      console.error("Report generation error:", errorMessage)
-      setError(errorMessage)
-      
-      // Create fallback report with doctor info
-      const emptyReport = createEmptyReport()
-      emptyReport.compteRendu.praticien = doctorInfo
-      if (patientData) {
-        emptyReport.compteRendu.patient = {
-          ...emptyReport.compteRendu.patient,
-          nom: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim() || 'Patient',
-          nomComplet: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim() || 'Patient',
-          age: patientData.age?.toString() || '',
-          dateNaissance: patientData.dateOfBirth || '',
-          sexe: patientData.gender || '',
-          adresse: patientData.address || '',
-          telephone: patientData.phone || '',
-          email: patientData.email || '',
-          poids: patientData.weight?.toString() || ''
-        }
-      }
-      setReport(emptyReport)
-      setValidationStatus('draft') // Ensure it's set to draft even on error
-      setDocumentSignatures({}) // Clear any signatures
-      
-      toast({
-        title: "Note",
-        description: "Using default template. Please fill in the required information.",
-        variant: "default"
-      })
-    } finally {
-      setLoading(false)
     }
-  }
 
-  // Save report (for backward compatibility but redirects to validation)
-  const handleSave = async () => {
-    // Auto-save is handled by validation now
-    await handleValidation()
-  }
-  
-  // Update invoice
-  const updateInvoice = (field: string, value: any) => {
-    if (validationStatus === 'validated') return
-    
-    setReport(prev => {
-      if (!prev) return null
-      
-      return {
-        ...prev,
-        invoice: {
-          ...prev.invoice!,
-          [field]: value
-        }
+    const closeModal = () => {
+      const modal = document.getElementById('success-modal')
+      if (modal) {
+        modal.style.animation = 'fadeOut 0.3s ease-out'
+        setTimeout(() => {
+          modal.remove()
+        }, 300)
+      }
+    }
+
+    document.getElementById('close-x-btn')?.addEventListener('click', closeModal)
+    document.getElementById('close-tab-btn')?.addEventListener('click', closeTab)
+
+    modalContainer.addEventListener('click', (e) => {
+      if (e.target === modalContainer) {
+        closeModal()
       }
     })
-    trackModification(`invoice.${field}`)
   }
 
-  // Update payment status
-  const updatePaymentStatus = (status: 'pending' | 'paid' | 'cancelled') => {
-    if (!report?.invoice) return
-    
-    updateInvoice('payment', {
-      ...report.invoice.payment,
-      status: status
-    })
-  }
-
-  // Update payment method
-  const updatePaymentMethod = (method: string) => {
-    if (!report?.invoice) return
-    
-    updateInvoice('payment', {
-      ...report.invoice.payment,
-      method: method
-    })
-  }
-
-  // Update medications
+  // ==================== PRESCRIPTIONS MANAGEMENT ====================
   const updateMedicament = (index: number, field: string, value: string) => {
     if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
     
@@ -1424,7 +1217,6 @@ export default function ProfessionalReportEditable({
     trackModification(`medicament.${index}.${field}`)
   }
 
-  // Add medication
   const addMedicament = () => {
     if (validationStatus === 'validated') return
     
@@ -1449,7 +1241,6 @@ export default function ProfessionalReportEditable({
       
       const newReport = { ...prev }
       
-      // Initialize ordonnances if needed
       if (!newReport.ordonnances) {
         newReport.ordonnances = {}
       }
@@ -1486,7 +1277,6 @@ export default function ProfessionalReportEditable({
     trackModification('medicaments.new')
   }
 
-  // Remove medication
   const removeMedicament = (index: number) => {
     if (validationStatus === 'validated') return
     
@@ -1510,7 +1300,6 @@ export default function ProfessionalReportEditable({
     trackModification(`medicament.remove.${index}`)
   }
 
-  // Add biology test
   const addBiologyTest = (category: string = 'clinicalChemistry') => {
     if (validationStatus === 'validated') return
     
@@ -1531,7 +1320,6 @@ export default function ProfessionalReportEditable({
       
       const newReport = { ...prev }
       
-      // Initialize structure if needed
       if (!newReport.ordonnances) newReport.ordonnances = {}
       
       if (!newReport.ordonnances.biologie) {
@@ -1575,7 +1363,6 @@ export default function ProfessionalReportEditable({
     trackModification(`biologie.new.${category}`)
   }
 
-  // Update biology test
   const updateBiologyTest = (category: string, index: number, field: string, value: any) => {
     if (validationStatus === 'validated') return
     
@@ -1594,7 +1381,6 @@ export default function ProfessionalReportEditable({
     trackModification(`biologie.${category}.${index}.${field}`)
   }
 
-  // Remove biology test
   const removeBiologyTest = (category: string, index: number) => {
     if (validationStatus === 'validated') return
     
@@ -1621,7 +1407,6 @@ export default function ProfessionalReportEditable({
     trackModification(`biologie.remove.${category}.${index}`)
   }
 
-  // Add imaging exam
   const addImagingExam = () => {
     if (validationStatus === 'validated') return
     
@@ -1641,7 +1426,6 @@ export default function ProfessionalReportEditable({
       
       const newReport = { ...prev }
       
-      // Initialize structure if needed
       if (!newReport.ordonnances) newReport.ordonnances = {}
       
       if (!newReport.ordonnances.imagerie) {
@@ -1676,7 +1460,6 @@ export default function ProfessionalReportEditable({
     trackModification('imagerie.new')
   }
 
-  // Update imaging exam
   const updateImagingExam = (index: number, field: string, value: any) => {
     if (validationStatus === 'validated') return
     
@@ -1695,7 +1478,6 @@ export default function ProfessionalReportEditable({
     trackModification(`imagerie.${index}.${field}`)
   }
 
-  // Remove imaging exam
   const removeImagingExam = (index: number) => {
     if (validationStatus === 'validated') return
     
@@ -1719,22 +1501,54 @@ export default function ProfessionalReportEditable({
     trackModification(`imagerie.remove.${index}`)
   }
 
-  // Enhanced PDF export - extracts only specific content
+  const updateInvoice = (field: string, value: any) => {
+    if (validationStatus === 'validated') return
+    
+    setReport(prev => {
+      if (!prev) return null
+      
+      return {
+        ...prev,
+        invoice: {
+          ...prev.invoice!,
+          [field]: value
+        }
+      }
+    })
+    trackModification(`invoice.${field}`)
+  }
+
+  const updatePaymentStatus = (status: 'pending' | 'paid' | 'cancelled') => {
+    if (!report?.invoice) return
+    
+    updateInvoice('payment', {
+      ...report.invoice.payment,
+      status: status
+    })
+  }
+
+  const updatePaymentMethod = (method: string) => {
+    if (!report?.invoice) return
+    
+    updateInvoice('payment', {
+      ...report.invoice.payment,
+      method: method
+    })
+  }
+
+  // ==================== PDF EXPORT ====================
   const exportSectionToPDF = (sectionId: string, filename: string) => {
     const element = document.getElementById(sectionId)
     if (!element) return
 
-    // Clone element to avoid modifying the original
     const clonedElement = element.cloneNode(true) as HTMLElement
     
-    // Remove unnecessary elements for printing
     const noExportElements = clonedElement.querySelectorAll('.print\\:hidden, .no-print')
     noExportElements.forEach(el => el.remove())
 
     const printWindow = window.open('', '_blank')
     if (!printWindow) return
 
-    // Specific styles for each document type
     const getDocumentStyles = () => {
       const baseStyles = `
         @page { 
@@ -1853,7 +1667,6 @@ export default function ProfessionalReportEditable({
           background: #f5f5f5;
         }
         
-        /* Hide interface elements */
         button, .button, input, select, textarea { display: none !important; }
         
         @media print {
@@ -1920,18 +1733,16 @@ export default function ProfessionalReportEditable({
       return baseStyles
     }
 
-    // Clean HTML for printing
     const cleanHTML = clonedElement.innerHTML
       .replace(/class="[^"]*"/g, (match) => {
-        // Keep only important classes for styling
         const importantClasses = ['header', 'section', 'prescription-item', 'signature', 'info-box', 'urgent', 'badge', 'badge-red', 'grid', 'grid-row', 'grid-cell', 'category-header', 'invoice-table', 'invoice-total', 'payment-info']
         const classes = match.match(/class="([^"]*)"/)?.[1].split(' ') || []
         const filtered = classes.filter(c => importantClasses.some(ic => c.includes(ic)))
         return filtered.length > 0 ? `class="${filtered.join(' ')}"` : ''
       })
-      .replace(/<button[^>]*>.*?<\/button>/gi, '') // Remove all buttons
-      .replace(/<svg[^>]*>.*?<\/svg>/gi, '') // Remove SVG icons
-      .replace(/<!--.*?-->/gs, '') // Remove comments
+      .replace(/<button[^>]*>.*?<\/button>/gi, '')
+      .replace(/<svg[^>]*>.*?<\/svg>/gi, '')
+      .replace(/<!--.*?-->/gs, '')
 
     const content = `
       <!DOCTYPE html>
@@ -1952,18 +1763,16 @@ export default function ProfessionalReportEditable({
     printWindow.document.write(content)
     printWindow.document.close()
     
-    // Wait for content to load before printing
     printWindow.onload = () => {
       setTimeout(() => {
         printWindow.print()
-        // Optional: close window after printing
-        // printWindow.onafterprint = () => printWindow.close()
       }, 500)
     }
   }
 
   const handlePrint = () => window.print()
-  // Loading and error states
+
+  // ==================== RENDER STATES ====================
   if (loading) {
     return (
       <Card className="w-full">
@@ -1978,7 +1787,6 @@ export default function ProfessionalReportEditable({
     )
   }
 
-  // Add debug information display
   if (!loading && !report && !error && !patientData) {
     return (
       <Card className="w-full">
@@ -1988,13 +1796,6 @@ export default function ProfessionalReportEditable({
           <p className="text-center text-gray-600 mb-4">
             Patient information is required to generate the medical report.
           </p>
-          <div className="text-sm text-gray-500 space-y-1">
-            <p>Debug Info:</p>
-            <p>• Patient Data: {patientData ? 'Present' : 'Missing'}</p>
-            <p>• Clinical Data: {clinicalData ? 'Present' : 'Missing'}</p>
-            <p>• Questions Data: {questionsData ? 'Present' : 'Missing'}</p>
-            <p>• Diagnosis Data: {diagnosisData ? 'Present' : 'Missing'}</p>
-          </div>
           <Button 
             onClick={() => {
               const emptyReport = createEmptyReport()
@@ -2024,7 +1825,6 @@ export default function ProfessionalReportEditable({
     )
   }
 
-  // Always check that report exists
   if (!report) {
     return (
       <Card className="w-full">
@@ -2041,7 +1841,7 @@ export default function ProfessionalReportEditable({
     )
   }
 
-  // Doctor info editor component
+  // ==================== COMPONENTS ====================
   const DoctorInfoEditor = () => {
     const hasRequiredFields = doctorInfo.nom !== 'Dr. [Name Required]' && 
                              !doctorInfo.numeroEnregistrement.includes('[') &&
@@ -2170,7 +1970,7 @@ export default function ProfessionalReportEditable({
       </Card>
     )
   }
-  // Narrative report editing component
+
   const ConsultationReport = () => {
     const sections = [
       { key: 'motifConsultation', title: 'CHIEF COMPLAINT' },
@@ -2282,7 +2082,6 @@ export default function ProfessionalReportEditable({
               <p className="text-sm text-gray-600">License: {praticien.licencePratique}</p>
               <p className="text-sm text-gray-600">{praticien.adresseCabinet}</p>
               
-              {/* Enhanced signature display */}
               {validationStatus === 'validated' && documentSignatures.consultation ? (
                 <div className="mt-4">
                   <img 
@@ -2308,7 +2107,7 @@ export default function ProfessionalReportEditable({
       </Card>
     )
   }
-  // Medication editing component
+
   const MedicationPrescription = () => {
     const medications = report?.ordonnances?.medicaments?.prescription?.medicaments || []
     const patient = getReportPatient()
@@ -2550,7 +2349,6 @@ export default function ProfessionalReportEditable({
             <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
             <p className="text-sm text-gray-600">License: {praticien.licencePratique}</p>
             
-            {/* Enhanced signature display for prescriptions */}
             {validationStatus === 'validated' && documentSignatures.prescription ? (
               <div className="mt-4">
                 <img 
@@ -2576,7 +2374,429 @@ export default function ProfessionalReportEditable({
       </div>
     )
   }
-  // Biology tests editing component
+
+  const InvoiceComponent = () => {
+    const invoice = report?.invoice
+    if (!invoice) return null
+
+    return (
+      <div id="invoice-document" className="bg-white p-8 rounded-lg shadow print:shadow-none">
+        <div className="text-center mb-8 header">
+          <h1 className="text-2xl font-bold mb-2">INVOICE</h1>
+          <p className="text-lg">No.: {invoice.header.invoiceNumber}</p>
+          <p className="text-sm text-gray-600">
+            Consultation Date: {invoice.header.consultationDate} | 
+            Invoice Date: {invoice.header.invoiceDate}
+          </p>
+        </div>
+
+        <div className="mb-6 p-4 bg-blue-50 rounded-lg info-box">
+          <h3 className="font-bold mb-2">Service Provider</h3>
+          <p className="font-bold">{invoice.provider.companyName}</p>
+          <p className="text-sm">Private company incorporated under Mauritian law</p>
+          <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+            <div>Company Reg. No.: {invoice.provider.registrationNumber}</div>
+            <div>VAT No.: {invoice.provider.vatNumber}</div>
+            <div className="col-span-2">Registered Office: {invoice.provider.registeredOffice}</div>
+            <div>Phone: {invoice.provider.phone}</div>
+            <div>Email: {invoice.provider.email}</div>
+            <div>Website: {invoice.provider.website}</div>
+            <div className="col-span-2 font-medium">Trade Name: {invoice.provider.tradeName}</div>
+          </div>
+          <p className="text-sm mt-2 italic">
+            Medical consultations provided by licensed physicians registered with the Medical Council of Mauritius
+          </p>
+        </div>
+
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg info-box">
+          <h3 className="font-bold mb-2">Patient Information</h3>
+          <div className="grid grid-cols-1 gap-1 text-sm">
+            <div><strong>Name:</strong> {invoice.patient.name}</div>
+            <div><strong>Email:</strong> {invoice.patient.email}</div>
+            <div><strong>Phone Number:</strong> {invoice.patient.phone}</div>
+            <div><strong>Tibok Patient ID:</strong> {invoice.patient.patientId}</div>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <h3 className="font-bold mb-4">Service Details</h3>
+          <table className="w-full border-collapse invoice-table">
+            <thead>
+              <tr className="border-b-2 border-gray-300">
+                <th className="text-left py-2">Description</th>
+                <th className="text-center py-2">Quantity</th>
+                <th className="text-right py-2">Unit Price (MUR)</th>
+                <th className="text-right py-2">Total (MUR)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invoice.services.items.map((item: any, idx: number) => (
+                <tr key={idx} className="border-b border-gray-200">
+                  <td className="py-2">{item.description}</td>
+                  <td className="text-center py-2">{item.quantity}</td>
+                  <td className="text-right py-2">{item.unitPrice.toLocaleString()}</td>
+                  <td className="text-right py-2 font-medium">{item.total.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-gray-300">
+                <td colSpan={3} className="text-right py-2">Subtotal (Excl. VAT):</td>
+                <td className="text-right py-2">MUR {invoice.services.subtotal.toLocaleString()}</td>
+              </tr>
+              <tr>
+                <td colSpan={3} className="text-right py-2">
+                  VAT ({(invoice.services.vatRate * 100).toFixed(0)}%):
+                </td>
+                <td className="text-right py-2">
+                  MUR {invoice.services.vatAmount.toLocaleString()}
+                  {invoice.services.vatAmount === 0 && (
+                    <span className="text-xs text-gray-600 block">
+                      (Exempt - medical services)
+                    </span>
+                  )}
+                </td>
+              </tr>
+              <tr className="font-bold text-lg invoice-total">
+                <td colSpan={3} className="text-right py-2">Total Due:</td>
+                <td className="text-right py-2">MUR {invoice.services.totalDue.toLocaleString()}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div className="mb-6 p-4 bg-green-50 rounded-lg payment-info">
+          <h3 className="font-bold mb-2">Payment Information</h3>
+          {editMode && validationStatus !== 'validated' ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Payment Method</Label>
+                  <Select value={invoice.payment.method} onValueChange={updatePaymentMethod}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Credit Card">Credit Card</SelectItem>
+                      <SelectItem value="MCB Juice">MCB Juice</SelectItem>
+                      <SelectItem value="MyT Money">MyT Money</SelectItem>
+                      <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                      <SelectItem value="Cash">Cash</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Payment Status</Label>
+                  <Select value={invoice.payment.status} onValueChange={updatePaymentStatus}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="paid">Paid</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div><strong>Payment Method:</strong> {invoice.payment.method}</div>
+              <div><strong>Payment Received On:</strong> {invoice.payment.receivedDate}</div>
+              <div className="col-span-2">
+                <strong>Status:</strong> 
+                <Badge className={`ml-2 ${
+                  invoice.payment.status === 'paid' ? 'bg-green-100 text-green-800' :
+                  invoice.payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {invoice.payment.status.toUpperCase()}
+                </Badge>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="mb-6 p-4 bg-purple-50 rounded-lg">
+          <h3 className="font-bold mb-2">Consulting Physician</h3>
+          <div className="text-sm">
+            <div><strong>Name:</strong> {invoice.physician.name}</div>
+            <div><strong>Medical Council Registration No.:</strong> {invoice.physician.registrationNumber}</div>
+          </div>
+        </div>
+
+        <div className="mb-8">
+          <h3 className="font-bold mb-2">Notes</h3>
+          <ul className="list-disc list-inside text-sm space-y-1">
+            {invoice.notes.map((note: string, idx: number) => (
+              <li key={idx}>{note}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mt-12 pt-8 border-t border-gray-300 text-center">
+          <p className="font-bold">Electronic Signature:</p>
+          
+          {validationStatus === 'validated' && documentSignatures.invoice ? (
+            <div className="mt-4 flex flex-col items-center">
+              <img 
+                src={documentSignatures.invoice} 
+                alt="Electronic Signature" 
+                className="h-20 w-auto"
+                style={{ maxWidth: '300px' }}
+              />
+              <p className="mt-2">{invoice.signature.entity}</p>
+              <p>on behalf of {invoice.signature.onBehalfOf}</p>
+              <p className="text-sm text-gray-600">{invoice.signature.title}</p>
+              <p className="text-sm text-gray-600 mt-2">
+                Digitally signed on {new Date().toLocaleDateString()}
+              </p>
+            </div>
+          ) : (
+            <>
+              <p className="mt-2">{invoice.signature.entity}</p>
+              <p>on behalf of {invoice.signature.onBehalfOf}</p>
+              <p className="text-sm text-gray-600">{invoice.signature.title}</p>
+            </>
+          )}
+        </div>
+
+        <div className="mt-6 flex justify-center print:hidden">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exportSectionToPDF('invoice-document', `invoice_${invoice.header.invoiceNumber}.pdf`)}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export Invoice
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  const ActionsBar = () => {
+    const metadata = getReportMetadata()
+    
+    return (
+      <Card className="print:hidden">
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <Badge className={validationStatus === 'validated' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                {validationStatus === 'validated' ? (
+                  <>
+                    <Lock className="h-3 w-3 mr-1" />
+                    Document validated & signed
+                  </>
+                ) : (
+                  <>
+                    <Unlock className="h-3 w-3 mr-1" />
+                    Draft - awaiting validation
+                  </>
+                )}
+              </Badge>
+              <span className="text-sm text-gray-600">
+                {metadata.wordCount} words
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant={editMode ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setEditMode(!editMode)}
+                disabled={validationStatus === 'validated'}
+              >
+                {editMode ? <Eye className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
+                {editMode ? 'Preview' : 'Edit'}
+              </Button>
+              
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleValidation}
+                disabled={saving || validationStatus === 'validated'}
+              >
+                {saving ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <FileCheck className="h-4 w-4 mr-2" />
+                )}
+                {validationStatus === 'validated' ? 'Validated' : 'Validate & Sign'}
+              </Button>
+              
+              <Button variant="outline" size="sm" onClick={handlePrint}>
+                <Printer className="h-4 w-4 mr-2" />
+                Print all
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const UnsavedChangesAlert = () => {
+    if (modifiedSections.size === 0 || validationStatus === 'validated') return null
+
+    return (
+      <Alert className="print:hidden">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          Changes will be saved automatically when you validate the document.
+        </AlertDescription>
+      </Alert>
+    )
+  }
+
+  const PrescriptionStats = () => {
+    const medicamentCount = report?.ordonnances?.medicaments?.prescription?.medicaments?.length || 0
+    const bioCount = Object.values(report?.ordonnances?.biologie?.prescription?.analyses || {})
+      .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)
+    const imagingCount = report?.ordonnances?.imagerie?.prescription?.examens?.length || 0
+
+    return (
+      <Card className="print:hidden">
+        <CardHeader>
+          <CardTitle className="text-lg">Prescription Summary</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="p-4 bg-green-50 rounded">
+              <Pill className="h-8 w-8 mx-auto mb-2 text-green-600" />
+              <p className="text-2xl font-bold text-green-600">{medicamentCount}</p>
+              <p className="text-sm text-gray-600">Medications</p>
+            </div>
+            <div className="p-4 bg-purple-50 rounded">
+              <TestTube className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+              <p className="text-2xl font-bold text-purple-600">{bioCount}</p>
+              <p className="text-sm text-gray-600">Lab Tests</p>
+            </div>
+            <div className="p-4 bg-indigo-50 rounded">
+              <Scan className="h-8 w-8 mx-auto mb-2 text-indigo-600" />
+              <p className="text-2xl font-bold text-indigo-600">{imagingCount}</p>
+              <p className="text-sm text-gray-600">Imaging</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // ==================== MAIN RENDER ====================
+  return (
+    <div className="space-y-6 print:space-y-4">
+      <ActionsBar />
+      <UnsavedChangesAlert />
+      <DoctorInfoEditor />
+      <PrescriptionStats />
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="consultation">
+            <FileText className="h-4 w-4 mr-2" />
+            Report
+          </TabsTrigger>
+          <TabsTrigger value="medicaments">
+            <Pill className="h-4 w-4 mr-2" />
+            Medications
+            {report?.ordonnances?.medicaments?.prescription?.medicaments?.length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {report.ordonnances.medicaments.prescription.medicaments.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="biologie">
+            <TestTube className="h-4 w-4 mr-2" />
+            Laboratory
+            {report?.ordonnances?.biologie && (
+              <Badge variant="secondary" className="ml-2">
+                {Object.values(report.ordonnances.biologie.prescription.analyses || {})
+                  .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="imagerie">
+            <Scan className="h-4 w-4 mr-2" />
+            Imaging
+            {report?.ordonnances?.imagerie?.prescription?.examens?.length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {report.ordonnances.imagerie.prescription.examens.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="invoice">
+            <Receipt className="h-4 w-4 mr-2" />
+            Invoice
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="consultation">
+          <ConsultationReport />
+        </TabsContent>
+        
+        <TabsContent value="medicaments">
+          <MedicationPrescription />
+        </TabsContent>
+        
+        <TabsContent value="biologie">
+          <BiologyPrescription />
+        </TabsContent>
+        
+        <TabsContent value="imagerie">
+          <ImagingPrescription />
+        </TabsContent>
+
+        <TabsContent value="invoice">
+          <InvoiceComponent />
+        </TabsContent>
+      </Tabs>
+
+      <div className="hidden print:block">
+        <ConsultationReport />
+        {includeFullPrescriptions && report?.ordonnances && (
+          <>
+            {report.ordonnances.medicaments && (
+              <div className="page-break-before mt-8">
+                <MedicationPrescription />
+              </div>
+            )}
+            {report.ordonnances.biologie && (
+              <div className="page-break-before mt-8">
+                <BiologyPrescription />
+              </div>
+            )}
+            {report.ordonnances.imagerie && (
+              <div className="page-break-before mt-8">
+                <ImagingPrescription />
+              </div>
+            )}
+          </>
+        )}
+        {report?.invoice && (
+          <div className="page-break-before mt-8">
+            <InvoiceComponent />
+          </div>
+        )}
+      </div>
+
+      {validationStatus === 'validated' && (
+        <div className="flex justify-center print:hidden mt-8">
+          <Button 
+            size="lg"
+            onClick={handleSendDocuments}
+            className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+          >
+            <CheckCircle className="h-5 w-5 mr-2" />
+            Finalize and Send documents
+          </Button>
+        </div>
+      )}
+    </div>
+  )
+}
+
   const BiologyPrescription = () => {
     const analyses = report?.ordonnances?.biologie?.prescription?.analyses || {}
     const hasTests = Object.values(analyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
@@ -2824,7 +3044,6 @@ export default function ProfessionalReportEditable({
             <p className="font-semibold">{praticien.nom}</p>
             <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
             
-            {/* Enhanced signature display for laboratory */}
             {validationStatus === 'validated' && documentSignatures.laboratory ? (
               <div className="mt-4">
                 <img 
@@ -2849,7 +3068,7 @@ export default function ProfessionalReportEditable({
       </div>
     )
   }
-  // Imaging prescription editing component
+
   const ImagingPrescription = () => {
     const examens = report?.ordonnances?.imagerie?.prescription?.examens || []
     const patient = getReportPatient()
@@ -3030,7 +3249,6 @@ export default function ProfessionalReportEditable({
             <p className="font-semibold">{praticien.nom}</p>
             <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
             
-            {/* Enhanced signature display for imaging */}
             {validationStatus === 'validated' && documentSignatures.imaging ? (
               <div className="mt-4">
                 <img 
@@ -3050,433 +3268,3 @@ export default function ProfessionalReportEditable({
                 <p className="text-sm">Date: {patient.dateExamen}</p>
               </div>
             )}
-          </div>
-        </div>
-      </div>
-    )
-  }
-  // Invoice Component
-  const InvoiceComponent = () => {
-    const invoice = report?.invoice
-    if (!invoice) return null
-
-    return (
-      <div id="invoice-document" className="bg-white p-8 rounded-lg shadow print:shadow-none">
-        <div className="text-center mb-8 header">
-          <h1 className="text-2xl font-bold mb-2">INVOICE</h1>
-          <p className="text-lg">No.: {invoice.header.invoiceNumber}</p>
-          <p className="text-sm text-gray-600">
-            Consultation Date: {invoice.header.consultationDate} | 
-            Invoice Date: {invoice.header.invoiceDate}
-          </p>
-        </div>
-
-        <div className="mb-6 p-4 bg-blue-50 rounded-lg info-box">
-          <h3 className="font-bold mb-2">Service Provider</h3>
-          <p className="font-bold">{invoice.provider.companyName}</p>
-          <p className="text-sm">Private company incorporated under Mauritian law</p>
-          <div className="grid grid-cols-2 gap-2 text-sm mt-2">
-            <div>Company Reg. No.: {invoice.provider.registrationNumber}</div>
-            <div>VAT No.: {invoice.provider.vatNumber}</div>
-            <div className="col-span-2">Registered Office: {invoice.provider.registeredOffice}</div>
-            <div>Phone: {invoice.provider.phone}</div>
-            <div>Email: {invoice.provider.email}</div>
-            <div>Website: {invoice.provider.website}</div>
-            <div className="col-span-2 font-medium">Trade Name: {invoice.provider.tradeName}</div>
-          </div>
-          <p className="text-sm mt-2 italic">
-            Medical consultations provided by licensed physicians registered with the Medical Council of Mauritius
-          </p>
-        </div>
-
-        <div className="mb-6 p-4 bg-gray-50 rounded-lg info-box">
-          <h3 className="font-bold mb-2">Patient Information</h3>
-          <div className="grid grid-cols-1 gap-1 text-sm">
-            <div><strong>Name:</strong> {invoice.patient.name}</div>
-            <div><strong>Email:</strong> {invoice.patient.email}</div>
-            <div><strong>Phone Number:</strong> {invoice.patient.phone}</div>
-            <div><strong>Tibok Patient ID:</strong> {invoice.patient.patientId}</div>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <h3 className="font-bold mb-4">Service Details</h3>
-          <table className="w-full border-collapse invoice-table">
-            <thead>
-              <tr className="border-b-2 border-gray-300">
-                <th className="text-left py-2">Description</th>
-                <th className="text-center py-2">Quantity</th>
-                <th className="text-right py-2">Unit Price (MUR)</th>
-                <th className="text-right py-2">Total (MUR)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoice.services.items.map((item, idx) => (
-                <tr key={idx} className="border-b border-gray-200">
-                  <td className="py-2">{item.description}</td>
-                  <td className="text-center py-2">{item.quantity}</td>
-                  <td className="text-right py-2">{item.unitPrice.toLocaleString()}</td>
-                  <td className="text-right py-2 font-medium">{item.total.toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-gray-300">
-                <td colSpan={3} className="text-right py-2">Subtotal (Excl. VAT):</td>
-                <td className="text-right py-2">MUR {invoice.services.subtotal.toLocaleString()}</td>
-              </tr>
-              <tr>
-                <td colSpan={3} className="text-right py-2">
-                  VAT ({(invoice.services.vatRate * 100).toFixed(0)}%):
-                </td>
-                <td className="text-right py-2">
-                  MUR {invoice.services.vatAmount.toLocaleString()}
-                  {invoice.services.vatAmount === 0 && (
-                    <span className="text-xs text-gray-600 block">
-                      (Exempt - medical services)
-                    </span>
-                  )}
-                </td>
-              </tr>
-              <tr className="font-bold text-lg invoice-total">
-                <td colSpan={3} className="text-right py-2">Total Due:</td>
-                <td className="text-right py-2">MUR {invoice.services.totalDue.toLocaleString()}</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-
-        <div className="mb-6 p-4 bg-green-50 rounded-lg payment-info">
-          <h3 className="font-bold mb-2">Payment Information</h3>
-          {editMode && validationStatus !== 'validated' ? (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Payment Method</Label>
-                  <Select value={invoice.payment.method} onValueChange={updatePaymentMethod}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Credit Card">Credit Card</SelectItem>
-                      <SelectItem value="MCB Juice">MCB Juice</SelectItem>
-                      <SelectItem value="MyT Money">MyT Money</SelectItem>
-                      <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
-                      <SelectItem value="Cash">Cash</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Payment Status</Label>
-                  <Select value={invoice.payment.status} onValueChange={updatePaymentStatus}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="paid">Paid</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div><strong>Payment Method:</strong> {invoice.payment.method}</div>
-              <div><strong>Payment Received On:</strong> {invoice.payment.receivedDate}</div>
-              <div className="col-span-2">
-                <strong>Status:</strong> 
-                <Badge className={`ml-2 ${
-                  invoice.payment.status === 'paid' ? 'bg-green-100 text-green-800' :
-                  invoice.payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'
-                }`}>
-                  {invoice.payment.status.toUpperCase()}
-                </Badge>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="mb-6 p-4 bg-purple-50 rounded-lg">
-          <h3 className="font-bold mb-2">Consulting Physician</h3>
-          <div className="text-sm">
-            <div><strong>Name:</strong> {invoice.physician.name}</div>
-            <div><strong>Medical Council Registration No.:</strong> {invoice.physician.registrationNumber}</div>
-          </div>
-        </div>
-
-        <div className="mb-8">
-          <h3 className="font-bold mb-2">Notes</h3>
-          <ul className="list-disc list-inside text-sm space-y-1">
-            {invoice.notes.map((note, idx) => (
-              <li key={idx}>{note}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="mt-12 pt-8 border-t border-gray-300 text-center">
-          <p className="font-bold">Electronic Signature:</p>
-          
-          {/* Enhanced signature display for invoice */}
-          {validationStatus === 'validated' && documentSignatures.invoice ? (
-            <div className="mt-4 flex flex-col items-center">
-              <img 
-                src={documentSignatures.invoice} 
-                alt="Electronic Signature" 
-                className="h-20 w-auto"
-                style={{ maxWidth: '300px' }}
-              />
-              <p className="mt-2">{invoice.signature.entity}</p>
-              <p>on behalf of {invoice.signature.onBehalfOf}</p>
-              <p className="text-sm text-gray-600">{invoice.signature.title}</p>
-              <p className="text-sm text-gray-600 mt-2">
-                Digitally signed on {new Date().toLocaleDateString()}
-              </p>
-            </div>
-          ) : (
-            <>
-              <p className="mt-2">{invoice.signature.entity}</p>
-              <p>on behalf of {invoice.signature.onBehalfOf}</p>
-              <p className="text-sm text-gray-600">{invoice.signature.title}</p>
-            </>
-          )}
-        </div>
-
-        <div className="mt-6 flex justify-center print:hidden">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => exportSectionToPDF('invoice-document', `invoice_${invoice.header.invoiceNumber}.pdf`)}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Export Invoice
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
-  // Actions Bar component
-  const ActionsBar = () => {
-    const metadata = getReportMetadata()
-    
-    return (
-      <Card className="print:hidden">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <Badge className={validationStatus === 'validated' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                {validationStatus === 'validated' ? (
-                  <>
-                    <Lock className="h-3 w-3 mr-1" />
-                    Document validated & signed
-                  </>
-                ) : (
-                  <>
-                    <Unlock className="h-3 w-3 mr-1" />
-                    Draft - awaiting validation
-                  </>
-                )}
-              </Badge>
-              <span className="text-sm text-gray-600">
-                {metadata.wordCount} words
-              </span>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant={editMode ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setEditMode(!editMode)}
-                disabled={validationStatus === 'validated'}
-              >
-                {editMode ? <Eye className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
-                {editMode ? 'Preview' : 'Edit'}
-              </Button>
-              
-              <Button
-                variant="default"
-                size="sm"
-                onClick={handleValidation}
-                disabled={saving || validationStatus === 'validated'}
-              >
-                {saving ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <FileCheck className="h-4 w-4 mr-2" />
-                )}
-                {validationStatus === 'validated' ? 'Validated' : 'Validate & Sign'}
-              </Button>
-              
-              <Button variant="outline" size="sm" onClick={handlePrint}>
-                <Printer className="h-4 w-4 mr-2" />
-                Print all
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  // Unsaved changes warning
-  const UnsavedChangesAlert = () => {
-    if (modifiedSections.size === 0 || validationStatus === 'validated') return null
-
-    return (
-      <Alert className="print:hidden">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>
-          Changes will be saved automatically when you validate the document.
-        </AlertDescription>
-      </Alert>
-    )
-  }
-
-  // Prescription stats
-  const PrescriptionStats = () => {
-    const medicamentCount = report?.ordonnances?.medicaments?.prescription?.medicaments?.length || 0
-    const bioCount = Object.values(report?.ordonnances?.biologie?.prescription?.analyses || {})
-      .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)
-    const imagingCount = report?.ordonnances?.imagerie?.prescription?.examens?.length || 0
-
-    return (
-      <Card className="print:hidden">
-        <CardHeader>
-          <CardTitle className="text-lg">Prescription Summary</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="p-4 bg-green-50 rounded">
-              <Pill className="h-8 w-8 mx-auto mb-2 text-green-600" />
-              <p className="text-2xl font-bold text-green-600">{medicamentCount}</p>
-              <p className="text-sm text-gray-600">Medications</p>
-            </div>
-            <div className="p-4 bg-purple-50 rounded">
-              <TestTube className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-              <p className="text-2xl font-bold text-purple-600">{bioCount}</p>
-              <p className="text-sm text-gray-600">Lab Tests</p>
-            </div>
-            <div className="p-4 bg-indigo-50 rounded">
-              <Scan className="h-8 w-8 mx-auto mb-2 text-indigo-600" />
-              <p className="text-2xl font-bold text-indigo-600">{imagingCount}</p>
-              <p className="text-sm text-gray-600">Imaging</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-  // Main render
-  return (
-    <div className="space-y-6 print:space-y-4">
-      <ActionsBar />
-      <UnsavedChangesAlert />
-      <DoctorInfoEditor />
-      <PrescriptionStats />
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="consultation">
-            <FileText className="h-4 w-4 mr-2" />
-            Report
-          </TabsTrigger>
-          <TabsTrigger value="medicaments">
-            <Pill className="h-4 w-4 mr-2" />
-            Medications
-            {report?.ordonnances?.medicaments?.prescription?.medicaments?.length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {report.ordonnances.medicaments.prescription.medicaments.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="biologie">
-            <TestTube className="h-4 w-4 mr-2" />
-            Laboratory
-            {report?.ordonnances?.biologie && (
-              <Badge variant="secondary" className="ml-2">
-                {Object.values(report.ordonnances.biologie.prescription.analyses || {})
-                  .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="imagerie">
-            <Scan className="h-4 w-4 mr-2" />
-            Imaging
-            {report?.ordonnances?.imagerie?.prescription?.examens?.length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {report.ordonnances.imagerie.prescription.examens.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="invoice">
-            <Receipt className="h-4 w-4 mr-2" />
-            Invoice
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="consultation">
-          <ConsultationReport />
-        </TabsContent>
-        
-        <TabsContent value="medicaments">
-          <MedicationPrescription />
-        </TabsContent>
-        
-        <TabsContent value="biologie">
-          <BiologyPrescription />
-        </TabsContent>
-        
-        <TabsContent value="imagerie">
-          <ImagingPrescription />
-        </TabsContent>
-
-        <TabsContent value="invoice">
-          <InvoiceComponent />
-        </TabsContent>
-      </Tabs>
-
-      <div className="hidden print:block">
-        <ConsultationReport />
-        {includeFullPrescriptions && report?.ordonnances && (
-          <>
-            {report.ordonnances.medicaments && (
-              <div className="page-break-before mt-8">
-                <MedicationPrescription />
-              </div>
-            )}
-            {report.ordonnances.biologie && (
-              <div className="page-break-before mt-8">
-                <BiologyPrescription />
-              </div>
-            )}
-            {report.ordonnances.imagerie && (
-              <div className="page-break-before mt-8">
-                <ImagingPrescription />
-              </div>
-            )}
-          </>
-        )}
-        {report?.invoice && (
-          <div className="page-break-before mt-8">
-            <InvoiceComponent />
-          </div>
-        )}
-      </div>
-
-      {validationStatus === 'validated' && (
-        <div className="flex justify-center print:hidden mt-8">
-          <Button 
-            size="lg"
-            onClick={handleSendDocuments}
-            className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
-          >
-            <CheckCircle className="h-5 w-5 mr-2" />
-            Finalize and Send documents
-          </Button>
-        </div>
-      )}
-    </div>
-  )
-}
