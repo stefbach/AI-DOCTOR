@@ -94,7 +94,125 @@ const SECTIONS = [
   { id: "vitals", titleKey: 'clinicalForm.sections.vitals', icon: Stethoscope },
 ]
 
+// ==================== CHIEF COMPLAINT TRANSLATIONS ====================
+// Mapping of French consultation reasons to English
+const CONSULTATION_REASON_TRANSLATIONS: Record<string, string> = {
+  // General consultation
+  "Consultation générale": "General consultation",
+  "Bilan de santé": "Health check-up",
+  
+  // Common symptoms
+  "Fièvre": "Fever",
+  "Grippe": "Flu",
+  "Symptômes grippaux": "Flu-like symptoms",
+  "Douleurs abdominales": "Abdominal pain",
+  "Troubles digestifs": "Digestive problems",
+  "Maux de tête": "Headache",
+  "Migraine": "Migraine",
+  "Toux": "Cough",
+  "Problèmes respiratoires": "Respiratory problems",
+  "Mal de dos": "Back pain",
+  "Douleurs musculaires": "Muscle pain",
+  "Douleur à l'oreille": "Ear pain",
+  "Problèmes auditifs": "Hearing problems",
+  "Problèmes de vue": "Vision problems",
+  "Irritation oculaire": "Eye irritation",
+  
+  // Skin conditions
+  "Problème de peau": "Skin problem",
+  "Éruption cutanée": "Skin rash",
+  
+  // Mental health
+  "Stress": "Stress",
+  "Anxiété": "Anxiety",
+  "Santé mentale": "Mental health",
+  
+  // Prescriptions
+  "Renouvellement d'ordonnance": "Prescription renewal",
+  
+  // Pediatric
+  "Consultation pédiatrique": "Pediatric consultation",
+  
+  // Other
+  "Autre motif (préciser)": "Other reason (specify)",
+  
+  // Combined symptoms (handle combinations)
+  "Fièvre / Grippe / Symptômes grippaux": "Fever / Flu / Flu-like symptoms",
+  "Douleurs abdominales / Troubles digestifs": "Abdominal pain / Digestive problems",
+  "Maux de tête / Migraine": "Headache / Migraine",
+  "Toux / Problèmes respiratoires": "Cough / Respiratory problems",
+  "Mal de dos / Douleurs musculaires": "Back pain / Muscle pain",
+  "Douleur à l'oreille / Problèmes auditifs": "Ear pain / Hearing problems",
+  "Problèmes de vue / Irritation oculaire": "Vision problems / Eye irritation",
+  "Problème de peau / Éruption cutanée": "Skin problem / Skin rash",
+  "Stress / Anxiété / Santé mentale": "Stress / Anxiety / Mental health",
+}
+
 // ==================== HELPER FUNCTIONS ====================
+
+// Helper function to translate consultation reason
+const translateConsultationReason = (reason: string): string => {
+  if (!reason) return ""
+  
+  // First check for exact match
+  const exactMatch = CONSULTATION_REASON_TRANSLATIONS[reason]
+  if (exactMatch) {
+    console.log('✅ Exact translation found:', reason, '→', exactMatch)
+    return exactMatch
+  }
+  
+  // Check for partial matches (in case of variations)
+  const reasonLower = reason.toLowerCase().trim()
+  for (const [french, english] of Object.entries(CONSULTATION_REASON_TRANSLATIONS)) {
+    if (french.toLowerCase() === reasonLower) {
+      console.log('✅ Translation found (case-insensitive):', reason, '→', english)
+      return english
+    }
+  }
+  
+  // Check if the reason contains multiple items separated by "/"
+  if (reason.includes('/')) {
+    const parts = reason.split('/').map(part => part.trim())
+    const translatedParts = parts.map(part => {
+      // Try to find translation for each part
+      for (const [french, english] of Object.entries(CONSULTATION_REASON_TRANSLATIONS)) {
+        if (french.toLowerCase() === part.toLowerCase()) {
+          return english
+        }
+      }
+      // If no translation found for this part, keep original
+      return part
+    })
+    
+    const translatedReason = translatedParts.join(' / ')
+    console.log('✅ Translated multi-part reason:', reason, '→', translatedReason)
+    return translatedReason
+  }
+  
+  // Check if it's already in English (common English terms)
+  const englishTerms = [
+    'fever', 'flu', 'headache', 'migraine', 'cough', 'pain', 
+    'consultation', 'symptoms', 'prescription', 'renewal',
+    'general', 'health', 'check', 'skin', 'rash', 'stress',
+    'anxiety', 'mental', 'pediatric', 'abdominal', 'digestive',
+    'respiratory', 'muscle', 'back', 'ear', 'eye', 'vision'
+  ]
+  
+  const reasonWords = reasonLower.split(/\s+/)
+  const hasEnglishWords = reasonWords.some(word => 
+    englishTerms.some(term => word.includes(term))
+  )
+  
+  if (hasEnglishWords) {
+    console.log('ℹ️ Reason appears to be in English already:', reason)
+    return reason
+  }
+  
+  // If no translation found, log warning and return original
+  console.warn('⚠️ No translation found for consultation reason:', reason)
+  return reason
+}
+
 const mapSymptomToCommonStatic = (symptom: string, commonSymptoms: string[]): string => {
   console.log('🔧 Mapping symptom:', symptom)
   
@@ -163,7 +281,8 @@ export default function ModernClinicalForm({
       hasLoadedTibokData.current = true
       
       return {
-        chiefComplaint: tibokPatient.consultationReason || "",
+        // TRANSLATE the consultation reason here
+        chiefComplaint: translateConsultationReason(tibokPatient.consultationReason) || "",
         diseaseHistory: "",
         symptomDuration: tibokPatient.symptomDuration || "",
         symptoms: mappedSymptoms,
@@ -180,6 +299,8 @@ export default function ModernClinicalForm({
       return {
         ...INITIAL_CLINICAL_DATA,
         ...data,
+        // Also translate if data contains a consultation reason
+        chiefComplaint: data.chiefComplaint ? translateConsultationReason(data.chiefComplaint) : "",
         symptoms: Array.isArray(data.symptoms) ? data.symptoms : [],
         vitalSigns: {
           ...INITIAL_CLINICAL_DATA.vitalSigns,
@@ -421,7 +542,8 @@ export default function ModernClinicalForm({
       const validatedTemperature = validateTemperatureValue(tibokPatient.vitalSigns?.temperature)
 
       const tibokClinicalData: ClinicalData = {
-        chiefComplaint: tibokPatient.consultationReason || "",
+        // TRANSLATE the consultation reason before setting it
+        chiefComplaint: translateConsultationReason(tibokPatient.consultationReason) || "",
         diseaseHistory: "",
         symptomDuration: tibokPatient.symptomDuration || "",
         symptoms: mappedSymptoms,
