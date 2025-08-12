@@ -321,7 +321,9 @@ export default function ModernClinicalForm({
   const [isLoading, setIsLoading] = useState(false)
 
   // ========== Memoization of translated lists ==========
+  // UPDATED: Now contains all 51 symptoms (24 original + 27 new)
   const COMMON_SYMPTOMS = useMemo(() => [
+    // Original 24 symptoms
     "Chest pain",
     "Shortness of breath",
     "Palpitations",
@@ -346,6 +348,34 @@ export default function ModernClinicalForm({
     "Rash",
     "Blurred vision",
     "Hearing problems",
+    // New 27 symptoms to match Tibok
+    "Night sweats",
+    "Wheezing",
+    "Chest tightness",
+    "Sore throat",
+    "Runny nose",
+    "Irregular heartbeat",
+    "Bloating",
+    "Heartburn",
+    "Numbness",
+    "Tingling",
+    "Memory problems",
+    "Confusion",
+    "Muscle pain",
+    "Neck pain",
+    "Joint stiffness",
+    "Muscle weakness",
+    "Itching",
+    "Skin lesions",
+    "Dry skin",
+    "Skin discoloration",
+    "Depression",
+    "Irritability",
+    "Mood swings",
+    "Ear pain",
+    "Tinnitus",
+    "Nasal congestion",
+    "Sinus pain"
   ], [])
 
   const DURATION_OPTIONS = useMemo(() => [
@@ -883,7 +913,7 @@ export default function ModernClinicalForm({
         </CardContent>
       </Card>
 
-      {/* Section 4: Current symptoms */}
+      {/* Section 4: Current symptoms - UPDATED GRID LAYOUT */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
@@ -911,7 +941,8 @@ export default function ModernClinicalForm({
             </div>
           )}
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {/* UPDATED: Changed from grid-cols-3 to grid-cols-4 */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {filteredSymptoms.map((symptom) => {
               const isSelected = localData.symptoms.some(s => 
                 s.toLowerCase() === symptom.toLowerCase()
