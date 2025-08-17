@@ -96,46 +96,36 @@ const MAURITIUS_HEALTHCARE_CONTEXT = {
 // ==================== DATA PROTECTION FUNCTIONS ====================
 function anonymizePatientData(patientData: any): { 
   anonymized: any, 
-  originalIdentity: any,
-  anonymousId: string
+  originalIdentity: any 
 } {
-  // Generate anonymous ID without crypto module (Edge Runtime compatible)
-  const timestamp = Date.now()
-  const random = Math.random().toString(36).substring(2, 9)
-  const anonymousId = `ANON-${timestamp}-${random}`
-  
   // Save original identity
   const originalIdentity = {
     firstName: patientData?.firstName,
     lastName: patientData?.lastName,
-    name: patientData?.name,
-    email: patientData?.email,
-    phone: patientData?.phone
+    name: patientData?.name
   }
   
   // Create a copy without sensitive data
   const anonymized = { ...patientData }
-  const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'idNumber', 'ssn']
-  
-  sensitiveFields.forEach(field => {
-    delete anonymized[field]
-  })
+  delete anonymized.firstName
+  delete anonymized.lastName
+  delete anonymized.name
   
   // Add anonymous ID for tracking
-  anonymized.anonymousId = anonymousId
+  anonymized.anonymousId = `ANON-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
   
   console.log('🔒 Patient data anonymized')
-  console.log(`   - Anonymous ID: ${anonymousId}`)
-  console.log('   - Protected fields:', sensitiveFields.filter(f => originalIdentity[f]).join(', '))
+  console.log(`   - Anonymous ID: ${anonymized.anonymousId}`)
+  console.log('   - Name/Surname: [PROTECTED]')
   
-  return { anonymized, originalIdentity, anonymousId }
+  return { anonymized, originalIdentity }
 }
 
 // Secure logging function
 function secureLog(message: string, data?: any) {
   if (data && typeof data === 'object') {
     const safeData = { ...data }
-    const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'apiKey', 'password']
+    const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address']
     
     sensitiveFields.forEach(field => {
       if (safeData[field]) {
