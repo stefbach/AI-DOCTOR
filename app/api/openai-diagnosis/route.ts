@@ -1,4 +1,4 @@
-// app/api/openai-diagnosis/route.ts - VERSION 6.0 WITH PREGNANCY MANAGEMENT
+// app/api/openai-diagnosis/route.ts - VERSION 6.1 WITH POSOLOGY FIX
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
@@ -26,7 +26,7 @@ interface PatientContext {
     question: string
     answer: string
   }>
-  // PREGNANCY FIELDS - NEW
+  // PREGNANCY FIELDS
   pregnancy_status?: string // pregnant, possibly_pregnant, breastfeeding, not_pregnant
   last_menstrual_period?: string
   gestational_age?: string // in weeks
@@ -46,12 +46,14 @@ interface ValidationResult {
   isValid: boolean
   issues: string[]
   suggestions: string[]
-  pregnancyWarnings: string[] // NEW
+  pregnancyWarnings: string[] 
+  posologyCorrections: string[] // NEW
   metrics: {
     medications: number
     laboratory_tests: number
     imaging_studies: number
-    pregnancySafetyChecked: boolean // NEW
+    pregnancySafetyChecked: boolean
+    posologyIssuesFixed: number // NEW
   }
 }
 
@@ -63,19 +65,19 @@ interface DrugProtocol {
   quantity: string
   pediatricAdjustment?: string
   geriatricAdjustment?: string
-  pregnancyAdjustment?: string // NEW
-  pregnancyCategory?: string // NEW: FDA categories A, B, C, D, X
-  breastfeedingCategory?: string // NEW: L1-L5
+  pregnancyAdjustment?: string 
+  pregnancyCategory?: string 
+  breastfeedingCategory?: string 
   contraindication?: string
 }
 
 // ==================== PREGNANCY SAFETY CATEGORIES ====================
 const PREGNANCY_CATEGORIES = {
-  A: "No risk in controlled studies", // Safe
-  B: "No risk in animal studies", // Probably safe
-  C: "Risk cannot be ruled out", // Use if benefit > risk
-  D: "Positive evidence of risk", // Use only in life-threatening situations
-  X: "Contraindicated in pregnancy" // Never use
+  A: "No risk in controlled studies", 
+  B: "No risk in animal studies", 
+  C: "Risk cannot be ruled out", 
+  D: "Positive evidence of risk", 
+  X: "Contraindicated in pregnancy" 
 }
 
 const BREASTFEEDING_CATEGORIES = {
@@ -85,6 +87,29 @@ const BREASTFEEDING_CATEGORIES = {
   L4: "Possibly hazardous - Evidence of risk",
   L5: "Contraindicated - Significant documented risk"
 }
+
+// ==================== MEDICATIONS THAT ARE ACTUALLY ONCE DAILY ====================
+const ACTUALLY_ONCE_DAILY_MEDICATIONS = [
+  'azithromycin',
+  'amlodipine',
+  'lisinopril',
+  'enalapril',
+  'ramipril',
+  'losartan',
+  'valsartan',
+  'atorvastatin',
+  'simvastatin',
+  'rosuvastatin',
+  'omeprazole',
+  'esomeprazole',
+  'lansoprazole',
+  'loratadine',
+  'cetirizine',
+  'montelukast',
+  'levothyroxine',
+  'fosfomycin', // single dose
+  'fluconazole' // for simple candidiasis
+]
 
 // ==================== UNIVERSAL DRUG CLASSIFICATION ====================
 const DRUG_CLASSIFICATIONS = {
@@ -103,12 +128,12 @@ const DRUG_CLASSIFICATIONS = {
   },
   
   not_antibiotics: [
-    'acetic acid',      // Acidifier, NOT antibiotic
-    'hydrogen peroxide', // Antiseptic, NOT antibiotic
-    'povidone iodine',  // Antiseptic, NOT antibiotic
-    'chlorhexidine',    // Antiseptic, NOT antibiotic
-    'alcohol',          // Antiseptic, NOT antibiotic
-    'saline'            // Irrigant, NOT antibiotic
+    'acetic acid',      
+    'hydrogen peroxide', 
+    'povidone iodine',  
+    'chlorhexidine',    
+    'alcohol',          
+    'saline'            
   ],
   
   corticosteroids: {
@@ -119,7 +144,7 @@ const DRUG_CLASSIFICATIONS = {
   
   nsaids: ['ibuprofen', 'diclofenac', 'naproxen', 'indomethacin', 'ketorolac', 'celecoxib'],
   
-  analgesics_only: ['paracetamol', 'acetaminophen'], // NOT anti-inflammatory!
+  analgesics_only: ['paracetamol', 'acetaminophen'], 
   
   antifungals: ['fluconazole', 'itraconazole', 'ketoconazole', 'clotrimazole', 'miconazole', 'nystatin', 'terbinafine']
 }
@@ -1007,7 +1032,7 @@ const PREGNANCY_SAFE_PROTOCOLS = {
   }
 }
 
-// ==================== ENHANCED MEDICAL PROMPT WITH PREGNANCY ====================
+// ==================== ENHANCED MEDICAL PROMPT WITH POSOLOGY FIX ====================
 const ENHANCED_DIAGNOSTIC_PROMPT_WITH_PREGNANCY = `You are an expert physician practicing telemedicine in Mauritius with comprehensive knowledge of ALL medical specialties, INCLUDING obstetrics and pregnancy care.
 
 🏥 MEDICAL SPECIALTIES COVERED:
@@ -1015,6 +1040,83 @@ const ENHANCED_DIAGNOSTIC_PROMPT_WITH_PREGNANCY = `You are an expert physician p
 - Ophthalmology • Otolaryngology (ENT) • Dermatology • Cardiology
 - Psychiatry • Gastroenterology • Respiratory • Endocrinology
 - Urology • Neurology • Rheumatology • Infectious Diseases
+
+⚠️ CRITICAL POSOLOGY RULES - MANDATORY FOR ALL PATIENTS:
+═══════════════════════════════════════════════════════════
+YOU MUST USE SPECIFIC, ACCURATE POSOLOGIES - NEVER GENERIC "ONCE DAILY"
+
+CORRECT POSOLOGY EXAMPLES BY DRUG CLASS:
+
+ANTIBIOTICS - NEVER "once daily" (except specific ones):
+✅ Amoxicillin 500mg: "1 capsule three times daily"
+✅ Amoxicillin-clavulanate 875mg: "1 tablet twice daily"
+✅ Cephalexin 500mg: "1 capsule four times daily"
+✅ Cefuroxime 500mg: "1 tablet twice daily"
+✅ Ciprofloxacin 500mg: "1 tablet twice daily"
+✅ Azithromycin 500mg: "500mg once daily" (EXCEPTION - this IS once daily)
+✅ Nitrofurantoin 100mg: "1 capsule four times daily with food"
+✅ Metronidazole 500mg: "1 tablet three times daily"
+✅ Flucloxacillin 500mg: "1 capsule four times daily on empty stomach"
+❌ NEVER: Generic "once daily" for beta-lactams or most antibiotics
+
+NSAIDs - MULTIPLE DAILY DOSES WITH FOOD:
+✅ Ibuprofen 400mg: "1 tablet three times daily with food"
+✅ Diclofenac 50mg: "1 tablet three times daily with food"
+✅ Naproxen 500mg: "1 tablet twice daily with food"
+✅ Indomethacin 25mg: "1 capsule three times daily with food"
+❌ NEVER: "once daily" for NSAIDs
+
+TOPICAL MEDICATIONS:
+✅ Ciprofloxacin 0.3% ear drops: "4 drops in affected ear twice daily"
+✅ Ofloxacin ear drops: "10 drops in affected ear twice daily"
+✅ Chloramphenicol eye drops: "1 drop every 2 hours for 2 days, then 4 times daily"
+✅ Tobramycin eye drops: "1-2 drops every 4 hours"
+✅ Hydrocortisone ear drops: "4 drops twice daily"
+✅ Dexamethasone ear drops: "3-4 drops three times daily"
+❌ NEVER: "once daily" for ear/eye drops
+
+ANALGESICS:
+✅ Paracetamol 500mg: "2 tablets every 6 hours as needed"
+✅ Codeine 30mg: "1-2 tablets every 4-6 hours as needed"
+✅ Tramadol 50mg: "1-2 tablets every 4-6 hours as needed"
+❌ NEVER: Vague "as directed"
+
+CORTICOSTEROIDS:
+✅ Prednisolone 20mg: "2 tablets once daily in morning" (specify timing)
+✅ Dexamethasone 4mg: "1 tablet twice daily"
+✅ Methylprednisolone 4mg: "2 tablets twice daily"
+
+ANTIHYPERTENSIVES (some ARE once daily - THIS IS CORRECT):
+✅ Amlodipine 5mg: "1 tablet once daily" (CORRECT - long half-life)
+✅ Lisinopril 10mg: "1 tablet once daily" (CORRECT - 24h duration)
+✅ Atenolol 50mg: "1 tablet once daily"
+✅ Metoprolol 50mg: "1 tablet twice daily" (SHORT-ACTING version)
+✅ Losartan 50mg: "1 tablet once daily"
+
+GASTROINTESTINAL:
+✅ Omeprazole 20mg: "1 capsule once daily before breakfast" (CORRECT - once daily)
+✅ Domperidone 10mg: "1 tablet three times daily before meals"
+✅ Metoclopramide 10mg: "1 tablet three times daily before meals"
+✅ Ondansetron 4mg: "1 tablet twice daily"
+✅ Hyoscine butylbromide 10mg: "1 tablet three times daily"
+
+ANTIHISTAMINES:
+✅ Cetirizine 10mg: "1 tablet once daily" (CORRECT - long-acting)
+✅ Loratadine 10mg: "1 tablet once daily" (CORRECT - long-acting)
+✅ Chlorpheniramine 4mg: "1 tablet three times daily" (SHORT-ACTING)
+
+RESPIRATORY:
+✅ Salbutamol inhaler: "2 puffs every 4-6 hours as needed"
+✅ Budesonide inhaler: "2 puffs twice daily"
+
+MANDATORY POSOLOGY COMPONENTS:
+1. Exact dose amount (1 tablet, 2 tablets, 4 drops, etc.)
+2. Frequency (twice daily, three times daily, every 6 hours, etc.)
+3. Timing when relevant (with food, before meals, in morning, at bedtime)
+4. Duration (7 days, 10 days, 5 days, as needed)
+
+DO NOT USE "ONCE DAILY" UNLESS THE DRUG IS SPECIFICALLY:
+- Azithromycin, Amlodipine, Lisinopril, Losartan, Omeprazole, Cetirizine, Loratadine
 
 🤰 PREGNANCY STATUS ASSESSMENT - CRITICAL:
 {{PREGNANCY_STATUS}}
@@ -1064,7 +1166,7 @@ FOR INFECTIONS IN PREGNANCY:
 📋 PATIENT PRESENTATION:
 {{PATIENT_CONTEXT}}
 
-GENERATE THIS EXACT JSON STRUCTURE WITH PREGNANCY CONSIDERATIONS:
+GENERATE THIS EXACT JSON STRUCTURE WITH ACCURATE POSOLOGIES:
 
 {
   "diagnostic_reasoning": {
@@ -1163,7 +1265,7 @@ GENERATE THIS EXACT JSON STRUCTURE WITH PREGNANCY CONSIDERATIONS:
         "breastfeeding_category": "[L1-L5]",
         "trimester_precautions": "[First/Second/Third trimester specific]",
         "fetal_monitoring": "[Any special monitoring needed]",
-        "posology": "[EXACT dosing adjusted for pregnancy if needed]",
+        "posology": "[EXACT SPECIFIC DOSING - NEVER generic 'once daily' unless appropriate for that specific drug]",
         "duration": "[EXACT duration]",
         "packaging": "[EXACT packaging]",
         "quantity": "[EXACT quantity]",
@@ -1221,6 +1323,319 @@ GENERATE THIS EXACT JSON STRUCTURE WITH PREGNANCY CONSIDERATIONS:
     }
   }
 }`
+
+// ==================== POSOLOGY VALIDATION AND CORRECTION ====================
+function validateAndCorrectPosology(
+  medication: any,
+  diagnosis: string
+): { 
+  isValid: boolean; 
+  correctedPosology?: string; 
+  error?: string 
+} {
+  const drugName = medication.drug?.toLowerCase() || '';
+  const currentPosology = medication.posology?.toLowerCase() || '';
+  
+  // Check if drug is actually a once-daily medication
+  const isActuallyOnceDaily = ACTUALLY_ONCE_DAILY_MEDICATIONS.some(drug => 
+    drugName.includes(drug)
+  );
+  
+  // Detect generic "once daily" problem
+  if ((currentPosology === 'once daily' || 
+       currentPosology === '1 tablet once daily' || 
+       currentPosology === 'take once daily' ||
+       currentPosology === 'one tablet once daily') && 
+      !isActuallyOnceDaily) {
+    
+    // Search in therapeutic protocols first
+    for (const [condition, protocol] of Object.entries(THERAPEUTIC_PROTOCOLS)) {
+      if (diagnosis.toLowerCase().includes(condition.split(' ')[0])) {
+        for (const requirement of protocol.mandatory) {
+          for (const protocolDrug of requirement.drugs as DrugProtocol[]) {
+            if (drugName.includes(protocolDrug.name.toLowerCase().split(' ')[0])) {
+              return {
+                isValid: false,
+                correctedPosology: protocolDrug.posology,
+                error: `Generic "once daily" incorrect for ${medication.drug}`
+              };
+            }
+          }
+        }
+      }
+    }
+    
+    // Default corrections by drug class
+    // ANTIBIOTICS
+    if (drugName.includes('amoxicillin') && !drugName.includes('clavulanate')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 capsule three times daily',
+        error: 'Amoxicillin requires TID dosing'
+      };
+    }
+    if (drugName.includes('amoxicillin-clavulanate') || drugName.includes('augmentin')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 tablet twice daily',
+        error: 'Amoxicillin-clavulanate is BID'
+      };
+    }
+    if (drugName.includes('cephalexin') || drugName.includes('cefalexin')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 capsule four times daily',
+        error: 'Cephalexin requires QID dosing'
+      };
+    }
+    if (drugName.includes('cefuroxime')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 tablet twice daily',
+        error: 'Cefuroxime is BID'
+      };
+    }
+    if (drugName.includes('ciprofloxacin') && !drugName.includes('drop')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 tablet twice daily',
+        error: 'Ciprofloxacin is BID'
+      };
+    }
+    if (drugName.includes('nitrofurantoin')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 capsule four times daily with food',
+        error: 'Nitrofurantoin requires QID dosing with food'
+      };
+    }
+    if (drugName.includes('metronidazole')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 tablet three times daily',
+        error: 'Metronidazole is TID'
+      };
+    }
+    if (drugName.includes('flucloxacillin')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 capsule four times daily on empty stomach',
+        error: 'Flucloxacillin requires QID on empty stomach'
+      };
+    }
+    if (drugName.includes('clindamycin')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 capsule three times daily',
+        error: 'Clindamycin is TID'
+      };
+    }
+    
+    // NSAIDs
+    if (drugName.includes('ibuprofen')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 tablet three times daily with food',
+        error: 'Ibuprofen requires TID dosing with food'
+      };
+    }
+    if (drugName.includes('diclofenac')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 tablet three times daily with food',
+        error: 'Diclofenac requires TID dosing with food'
+      };
+    }
+    if (drugName.includes('naproxen')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 tablet twice daily with food',
+        error: 'Naproxen is BID with food'
+      };
+    }
+    if (drugName.includes('indomethacin')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 capsule three times daily with food',
+        error: 'Indomethacin is TID with food'
+      };
+    }
+    
+    // ANALGESICS
+    if (drugName.includes('paracetamol') || drugName.includes('acetaminophen')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '2 tablets every 6 hours as needed',
+        error: 'Paracetamol requires Q6H dosing'
+      };
+    }
+    if (drugName.includes('codeine')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1-2 tablets every 4-6 hours as needed',
+        error: 'Codeine requires Q4-6H dosing'
+      };
+    }
+    if (drugName.includes('tramadol')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1-2 tablets every 4-6 hours as needed',
+        error: 'Tramadol requires Q4-6H dosing'
+      };
+    }
+    
+    // EAR/EYE DROPS
+    if (drugName.includes('drop')) {
+      if (drugName.includes('ear')) {
+        if (drugName.includes('ciprofloxacin')) {
+          return { 
+            isValid: false, 
+            correctedPosology: '4 drops in affected ear twice daily',
+            error: 'Ciprofloxacin ear drops are BID'
+          };
+        }
+        if (drugName.includes('ofloxacin')) {
+          return { 
+            isValid: false, 
+            correctedPosology: '10 drops in affected ear twice daily',
+            error: 'Ofloxacin ear drops are BID'
+          };
+        }
+        return { 
+          isValid: false, 
+          correctedPosology: '4 drops in affected ear twice daily',
+          error: 'Ear drops require BID application'
+        };
+      }
+      if (drugName.includes('eye') || drugName.includes('ophthalmic')) {
+        if (drugName.includes('chloramphenicol')) {
+          return { 
+            isValid: false, 
+            correctedPosology: '1 drop every 2 hours for 2 days, then 4 times daily',
+            error: 'Chloramphenicol eye drops require frequent initial dosing'
+          };
+        }
+        if (drugName.includes('tobramycin')) {
+          return { 
+            isValid: false, 
+            correctedPosology: '1-2 drops every 4 hours',
+            error: 'Tobramycin eye drops are Q4H'
+          };
+        }
+        return { 
+          isValid: false, 
+          correctedPosology: '1-2 drops four times daily',
+          error: 'Eye drops require QID application'
+        };
+      }
+    }
+    
+    // CORTICOSTEROIDS
+    if (drugName.includes('prednisolone')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '2 tablets once daily in morning',
+        error: 'Prednisolone should specify morning dosing'
+      };
+    }
+    if (drugName.includes('methylprednisolone')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '2 tablets twice daily',
+        error: 'Methylprednisolone is usually BID'
+      };
+    }
+    if (drugName.includes('dexamethasone') && !drugName.includes('drop')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 tablet twice daily',
+        error: 'Dexamethasone is usually BID'
+      };
+    }
+    
+    // GASTROINTESTINAL
+    if (drugName.includes('domperidone')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 tablet three times daily before meals',
+        error: 'Domperidone is TID before meals'
+      };
+    }
+    if (drugName.includes('metoclopramide')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 tablet three times daily before meals',
+        error: 'Metoclopramide is TID before meals'
+      };
+    }
+    if (drugName.includes('ondansetron')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 tablet twice daily',
+        error: 'Ondansetron is BID'
+      };
+    }
+    if (drugName.includes('hyoscine')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 tablet three times daily',
+        error: 'Hyoscine butylbromide is TID'
+      };
+    }
+    
+    // ANTIHISTAMINES (short-acting)
+    if (drugName.includes('chlorpheniramine')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '1 tablet three times daily',
+        error: 'Chlorpheniramine is TID (short-acting)'
+      };
+    }
+    
+    // RESPIRATORY
+    if (drugName.includes('salbutamol')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '2 puffs every 4-6 hours as needed',
+        error: 'Salbutamol requires Q4-6H PRN dosing'
+      };
+    }
+    if (drugName.includes('ipratropium')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '2 puffs four times daily',
+        error: 'Ipratropium is QID'
+      };
+    }
+    if (drugName.includes('budesonide') && drugName.includes('inhaler')) {
+      return { 
+        isValid: false, 
+        correctedPosology: '2 puffs twice daily',
+        error: 'Budesonide inhaler is BID'
+      };
+    }
+    
+    // Generic fallback
+    return {
+      isValid: false,
+      error: `Generic "once daily" detected for ${medication.drug} - needs specific posology`
+    };
+  }
+  
+  // Check for vague posologies
+  if (currentPosology === 'as directed' || 
+      currentPosology === 'take as directed' ||
+      currentPosology === 'use as directed' ||
+      currentPosology === 'as prescribed' ||
+      currentPosology === '') {
+    return {
+      isValid: false,
+      error: `Vague posology for ${medication.drug} - needs specific instructions`
+    };
+  }
+  
+  return { isValid: true };
+}
 
 // ==================== HELPER FUNCTIONS FOR PREGNANCY ====================
 function getPregnancyTrimester(gestationalAge: string): string {
@@ -1437,185 +1852,7 @@ function validatePharmacologyWithPregnancy(
   }
 }
 
-// ==================== HELPER FUNCTIONS FOR PRESCRIPTION ====================
-function generateCompletePrescription(protocolDrug: DrugProtocol, patientAge: number): any {
-  // Ajuster la posologie selon l'âge si nécessaire
-  let adjustedPosology = protocolDrug.posology
-  let adjustedQuantity = protocolDrug.quantity
-  let adjustedPackaging = protocolDrug.packaging
-  
-  // Ajustements pédiatriques
-  if (patientAge < 12) {
-    if (protocolDrug.pediatricAdjustment) {
-      adjustedPosology = protocolDrug.pediatricAdjustment
-    } else if (protocolDrug.name.includes('Paracetamol')) {
-      adjustedPosology = '15mg/kg every 6 hours'
-      adjustedPackaging = 'bottle of syrup 120mg/5ml'
-      adjustedQuantity = '1 bottle'
-    } else if (protocolDrug.name.includes('Ibuprofen')) {
-      adjustedPosology = '10mg/kg every 8 hours'
-      adjustedPackaging = 'bottle of syrup 100mg/5ml'
-      adjustedQuantity = '1 bottle'
-    } else if (protocolDrug.name.includes('Amoxicillin')) {
-      adjustedPosology = '25-45mg/kg/day divided in 3 doses'
-      adjustedPackaging = 'bottle of syrup 250mg/5ml'
-      adjustedQuantity = '1 bottle'
-    }
-  }
-  
-  // Ajustements gériatriques
-  if (patientAge > 65) {
-    if (protocolDrug.geriatricAdjustment) {
-      adjustedPosology = protocolDrug.geriatricAdjustment
-    } else if (protocolDrug.name.includes('NSAID')) {
-      adjustedPosology += ' (use lowest effective dose)'
-    }
-  }
-  
-  return {
-    drug: protocolDrug.name,
-    posology: adjustedPosology,
-    duration: protocolDrug.duration,
-    packaging: adjustedPackaging,
-    quantity: adjustedQuantity,
-    form: extractFormFromPackaging(adjustedPackaging),
-    route: extractRouteFromName(protocolDrug.name),
-    administration_instructions: generateAdministrationInstructions(protocolDrug)
-  }
-}
-
-function extractFormFromPackaging(packaging: string): string {
-  const packagingLower = packaging.toLowerCase()
-  
-  if (packagingLower.includes('tablet')) return 'tablet'
-  if (packagingLower.includes('capsule')) return 'capsule'
-  if (packagingLower.includes('bottle') && packagingLower.includes('ml')) {
-    if (packagingLower.includes('drop')) return 'drops'
-    if (packagingLower.includes('syrup')) return 'syrup'
-    if (packagingLower.includes('suspension')) return 'suspension'
-    if (packagingLower.includes('spray')) return 'spray'
-    if (packagingLower.includes('mouthwash') || packagingLower.includes('gargle')) return 'solution'
-    return 'solution'
-  }
-  if (packagingLower.includes('tube')) return 'cream'
-  if (packagingLower.includes('inhaler')) return 'inhaler'
-  if (packagingLower.includes('pessary')) return 'pessary'
-  if (packagingLower.includes('sachet')) return 'powder'
-  if (packagingLower.includes('lozenge')) return 'lozenge'
-  if (packagingLower.includes('device')) return 'device'
-  
-  return 'unit'
-}
-
-function extractRouteFromName(drugName: string): string {
-  const nameLower = drugName.toLowerCase()
-  
-  if (nameLower.includes('ear drop')) return 'Otic'
-  if (nameLower.includes('eye drop')) return 'Ophthalmic'
-  if (nameLower.includes('nasal')) return 'Nasal'
-  if (nameLower.includes('inhaler')) return 'Inhalation'
-  if (nameLower.includes('cream') || nameLower.includes('gel') || nameLower.includes('ointment')) return 'Topical'
-  if (nameLower.includes('pessary') || nameLower.includes('vaginal')) return 'Vaginal'
-  if (nameLower.includes('mouthwash') || nameLower.includes('gargle')) return 'Oral rinse'
-  if (nameLower.includes('spray') && nameLower.includes('throat')) return 'Oropharyngeal'
-  
-  return 'Oral' // Par défaut
-}
-
-function generateAdministrationInstructions(drug: DrugProtocol): string {
-  const name = drug.name.toLowerCase()
-  
-  // Instructions spécifiques par type
-  if (name.includes('ear drop')) {
-    return 'Warm to body temperature. Lie on side, instill drops, remain in position for 5 minutes'
-  }
-  if (name.includes('eye drop')) {
-    return 'Pull lower eyelid down, instill drops, close eye gently for 1 minute'
-  }
-  if (name.includes('inhaler')) {
-    return 'Shake well, exhale fully, inhale deeply while pressing, hold breath 10 seconds. Use spacer if available'
-  }
-  if (name.includes('pessary')) {
-    return 'Insert deep into vagina at bedtime, remain lying down'
-  }
-  if (name.includes('gargle') || name.includes('mouthwash')) {
-    return 'Do not swallow. Gargle for 30 seconds then spit out'
-  }
-  
-  // Instructions par médicament
-  if (name.includes('ibuprofen') || name.includes('diclofenac')) {
-    return 'Take with food to minimize gastric irritation'
-  }
-  if (name.includes('amoxicillin') && !name.includes('clavulanate')) {
-    return 'Can be taken with or without food. Complete full course even if feeling better'
-  }
-  if (name.includes('flucloxacillin')) {
-    return 'Take on empty stomach, 1 hour before or 2 hours after meals'
-  }
-  if (name.includes('nitrofurantoin')) {
-    return 'Take with food or milk to improve absorption and reduce nausea'
-  }
-  if (name.includes('metronidazole')) {
-    return 'Avoid alcohol during treatment and for 48 hours after'
-  }
-  if (name.includes('ciprofloxacin') && !name.includes('drop')) {
-    return 'Take with full glass of water. Avoid dairy products within 2 hours'
-  }
-  if (name.includes('prednisolone')) {
-    return 'Take in the morning with food to reduce gastric irritation'
-  }
-  if (name.includes('ors') || name.includes('rehydration')) {
-    return 'Dissolve in clean water as directed. Drink slowly throughout the day'
-  }
-  
-  // Par défaut selon la posologie
-  if (drug.posology.includes('with food')) {
-    return 'Take with meals'
-  }
-  if (drug.posology.includes('empty stomach')) {
-    return 'Take 1 hour before or 2 hours after meals'
-  }
-  
-  return 'Take as directed'
-}
-
-function extractTherapeuticClass(medication: any): string {
-  const drugName = (medication.drug || '').toLowerCase()
-  
-  // Antibiotics
-  if (drugName.includes('cillin')) return 'Antibiotic - Beta-lactam'
-  if (drugName.includes('mycin')) return 'Antibiotic - Macrolide'
-  if (drugName.includes('floxacin')) return 'Antibiotic - Fluoroquinolone'
-  if (drugName.includes('cef') || drugName.includes('ceph')) return 'Antibiotic - Cephalosporin'
-  if (drugName.includes('azole') && !drugName.includes('prazole')) return 'Antibiotic/Antifungal - Azole'
-  
-  // Analgesics
-  if (drugName.includes('paracetamol') || drugName.includes('acetaminophen')) return 'Analgesic - Non-opioid'
-  if (drugName.includes('tramadol') || drugName.includes('codeine')) return 'Analgesic - Opioid'
-  
-  // Anti-inflammatories
-  if (drugName.includes('ibuprofen') || drugName.includes('diclofenac') || drugName.includes('naproxen')) return 'NSAID'
-  if (drugName.includes('prednis') || drugName.includes('cortisone')) return 'Corticosteroid'
-  
-  // Cardiovascular
-  if (drugName.includes('pril')) return 'Antihypertensive - ACE inhibitor'
-  if (drugName.includes('sartan')) return 'Antihypertensive - ARB'
-  if (drugName.includes('lol') && !drugName.includes('omeprazole')) return 'Beta-blocker'
-  if (drugName.includes('pine') && !drugName.includes('atropine')) return 'Calcium channel blocker'
-  if (drugName.includes('statin')) return 'Lipid-lowering - Statin'
-  
-  // Gastro
-  if (drugName.includes('prazole')) return 'PPI'
-  if (drugName.includes('tidine')) return 'H2 blocker'
-  
-  // Others
-  if (drugName.includes('salbutamol') || drugName.includes('salmeterol')) return 'Bronchodilator'
-  if (drugName.includes('loratadine') || drugName.includes('cetirizine')) return 'Antihistamine'
-  
-  return 'Therapeutic agent'
-}
-
-// ==================== STANDARD PHARMACOLOGY VALIDATION (kept from original) ====================
+// ==================== STANDARD PHARMACOLOGY VALIDATION ====================
 function validatePharmacology(diagnosis: string, medications: any[], patientAge: number = 30): {
   valid: boolean
   errors: string[]
@@ -1624,6 +1861,28 @@ function validatePharmacology(diagnosis: string, medications: any[], patientAge:
   const errors: string[] = []
   const corrections: any[] = []
   const diagnosisLower = diagnosis.toLowerCase()
+  
+  // CRITICAL: Validate posologies for ALL medications
+  console.log('🔍 Checking posologies for all medications...');
+  medications.forEach((med, index) => {
+    const posologyCheck = validateAndCorrectPosology(med, diagnosis);
+    
+    if (!posologyCheck.isValid) {
+      errors.push(`❌ Posology issue: ${posologyCheck.error}`);
+      
+      if (posologyCheck.correctedPosology) {
+        corrections.push({
+          action: 'update_posology',
+          index: index,
+          originalDrug: med.drug,
+          originalPosology: med.posology,
+          newPosology: posologyCheck.correctedPosology,
+          reason: posologyCheck.error
+        });
+        console.log(`   📝 Will correct ${med.drug}: "${med.posology}" → "${posologyCheck.correctedPosology}"`);
+      }
+    }
+  });
   
   // Check each medication for misclassification
   medications.forEach((med, index) => {
@@ -1741,11 +2000,11 @@ function validatePharmacology(diagnosis: string, medications: any[], patientAge:
   return { valid: errors.length === 0, errors, corrections }
 }
 
-// ==================== APPLY CORRECTIONS WITH PREGNANCY ====================
+// ==================== APPLY CORRECTIONS ====================
 function applyPharmacologicalCorrectionsWithPregnancy(analysis: any, corrections: any[]): any {
   if (!corrections || corrections.length === 0) return analysis
   
-  console.log(`🔧 Applying ${corrections.length} corrections (including pregnancy adjustments)...`)
+  console.log(`🔧 Applying ${corrections.length} corrections (including posology fixes)...`)
   
   let medications = analysis.treatment_plan?.medications || []
   
@@ -1768,6 +2027,18 @@ function applyPharmacologicalCorrectionsWithPregnancy(analysis: any, corrections
       }
     })
   
+  // Process posology updates - CRITICAL FOR ALL CASES
+  corrections
+    .filter(c => c.action === 'update_posology')
+    .forEach(correction => {
+      if (correction.index < medications.length) {
+        console.log(`   📝 Fixing posology for ${correction.originalDrug}:`);
+        console.log(`      From: "${correction.originalPosology}"`);
+        console.log(`      To: "${correction.newPosology}"`);
+        medications[correction.index].posology = correction.newPosology;
+      }
+    });
+  
   // Process additions
   corrections
     .filter(c => c.action === 'add')
@@ -1781,10 +2052,150 @@ function applyPharmacologicalCorrectionsWithPregnancy(analysis: any, corrections
   // Update medication count
   if (analysis.treatment_plan.completeness_check) {
     analysis.treatment_plan.completeness_check.total_medications = medications.length
-    analysis.treatment_plan.completeness_check.pregnancy_safe = true
   }
   
   return analysis
+}
+
+// ==================== HELPER FUNCTIONS FOR PRESCRIPTION ====================
+function generateCompletePrescription(protocolDrug: DrugProtocol, patientAge: number): any {
+  let adjustedPosology = protocolDrug.posology
+  let adjustedQuantity = protocolDrug.quantity
+  let adjustedPackaging = protocolDrug.packaging
+  
+  // Pediatric adjustments
+  if (patientAge < 12) {
+    if (protocolDrug.pediatricAdjustment) {
+      adjustedPosology = protocolDrug.pediatricAdjustment
+    } else if (protocolDrug.name.includes('Paracetamol')) {
+      adjustedPosology = '15mg/kg every 6 hours'
+      adjustedPackaging = 'bottle of syrup 120mg/5ml'
+      adjustedQuantity = '1 bottle'
+    } else if (protocolDrug.name.includes('Ibuprofen')) {
+      adjustedPosology = '10mg/kg every 8 hours'
+      adjustedPackaging = 'bottle of syrup 100mg/5ml'
+      adjustedQuantity = '1 bottle'
+    } else if (protocolDrug.name.includes('Amoxicillin')) {
+      adjustedPosology = '25-45mg/kg/day divided in 3 doses'
+      adjustedPackaging = 'bottle of syrup 250mg/5ml'
+      adjustedQuantity = '1 bottle'
+    }
+  }
+  
+  // Geriatric adjustments
+  if (patientAge > 65) {
+    if (protocolDrug.geriatricAdjustment) {
+      adjustedPosology = protocolDrug.geriatricAdjustment
+    } else if (protocolDrug.name.includes('NSAID')) {
+      adjustedPosology += ' (use lowest effective dose)'
+    }
+  }
+  
+  return {
+    drug: protocolDrug.name,
+    posology: adjustedPosology,
+    duration: protocolDrug.duration,
+    packaging: adjustedPackaging,
+    quantity: adjustedQuantity,
+    form: extractFormFromPackaging(adjustedPackaging),
+    route: extractRouteFromName(protocolDrug.name),
+    administration_instructions: generateAdministrationInstructions(protocolDrug)
+  }
+}
+
+function extractFormFromPackaging(packaging: string): string {
+  const packagingLower = packaging.toLowerCase()
+  
+  if (packagingLower.includes('tablet')) return 'tablet'
+  if (packagingLower.includes('capsule')) return 'capsule'
+  if (packagingLower.includes('bottle') && packagingLower.includes('ml')) {
+    if (packagingLower.includes('drop')) return 'drops'
+    if (packagingLower.includes('syrup')) return 'syrup'
+    if (packagingLower.includes('suspension')) return 'suspension'
+    if (packagingLower.includes('spray')) return 'spray'
+    if (packagingLower.includes('mouthwash') || packagingLower.includes('gargle')) return 'solution'
+    return 'solution'
+  }
+  if (packagingLower.includes('tube')) return 'cream'
+  if (packagingLower.includes('inhaler')) return 'inhaler'
+  if (packagingLower.includes('pessary')) return 'pessary'
+  if (packagingLower.includes('sachet')) return 'powder'
+  if (packagingLower.includes('lozenge')) return 'lozenge'
+  if (packagingLower.includes('device')) return 'device'
+  
+  return 'unit'
+}
+
+function extractRouteFromName(drugName: string): string {
+  const nameLower = drugName.toLowerCase()
+  
+  if (nameLower.includes('ear drop')) return 'Otic'
+  if (nameLower.includes('eye drop')) return 'Ophthalmic'
+  if (nameLower.includes('nasal')) return 'Nasal'
+  if (nameLower.includes('inhaler')) return 'Inhalation'
+  if (nameLower.includes('cream') || nameLower.includes('gel') || nameLower.includes('ointment')) return 'Topical'
+  if (nameLower.includes('pessary') || nameLower.includes('vaginal')) return 'Vaginal'
+  if (nameLower.includes('mouthwash') || nameLower.includes('gargle')) return 'Oral rinse'
+  if (nameLower.includes('spray') && nameLower.includes('throat')) return 'Oropharyngeal'
+  
+  return 'Oral' // Default
+}
+
+function generateAdministrationInstructions(drug: DrugProtocol): string {
+  const name = drug.name.toLowerCase()
+  
+  // Type-specific instructions
+  if (name.includes('ear drop')) {
+    return 'Warm to body temperature. Lie on side, instill drops, remain in position for 5 minutes'
+  }
+  if (name.includes('eye drop')) {
+    return 'Pull lower eyelid down, instill drops, close eye gently for 1 minute'
+  }
+  if (name.includes('inhaler')) {
+    return 'Shake well, exhale fully, inhale deeply while pressing, hold breath 10 seconds. Use spacer if available'
+  }
+  if (name.includes('pessary')) {
+    return 'Insert deep into vagina at bedtime, remain lying down'
+  }
+  if (name.includes('gargle') || name.includes('mouthwash')) {
+    return 'Do not swallow. Gargle for 30 seconds then spit out'
+  }
+  
+  // Drug-specific instructions
+  if (name.includes('ibuprofen') || name.includes('diclofenac')) {
+    return 'Take with food to minimize gastric irritation'
+  }
+  if (name.includes('amoxicillin') && !name.includes('clavulanate')) {
+    return 'Can be taken with or without food. Complete full course even if feeling better'
+  }
+  if (name.includes('flucloxacillin')) {
+    return 'Take on empty stomach, 1 hour before or 2 hours after meals'
+  }
+  if (name.includes('nitrofurantoin')) {
+    return 'Take with food or milk to improve absorption and reduce nausea'
+  }
+  if (name.includes('metronidazole')) {
+    return 'Avoid alcohol during treatment and for 48 hours after'
+  }
+  if (name.includes('ciprofloxacin') && !name.includes('drop')) {
+    return 'Take with full glass of water. Avoid dairy products within 2 hours'
+  }
+  if (name.includes('prednisolone')) {
+    return 'Take in the morning with food to reduce gastric irritation'
+  }
+  if (name.includes('ors') || name.includes('rehydration')) {
+    return 'Dissolve in clean water as directed. Drink slowly throughout the day'
+  }
+  
+  // Default based on posology
+  if (drug.posology.includes('with food')) {
+    return 'Take with meals'
+  }
+  if (drug.posology.includes('empty stomach')) {
+    return 'Take 1 hour before or 2 hours after meals'
+  }
+  
+  return 'Take as directed'
 }
 
 // ==================== PRESCRIPTION MONITORING SYSTEM ====================
@@ -1794,10 +2205,11 @@ const PrescriptionMonitoring = {
     avgTestsPerDiagnosis: new Map<string, number[]>(),
     outliers: [] as any[],
     pharmacologicalErrors: [] as any[],
-    pregnancyAdjustments: [] as any[]
+    pregnancyAdjustments: [] as any[],
+    posologyCorrections: [] as any[] // NEW
   },
   
-  track(diagnosis: string, medications: number, tests: number, errors: string[] = [], pregnancyStatus?: string) {
+  track(diagnosis: string, medications: number, tests: number, errors: string[] = [], pregnancyStatus?: string, posologyFixed?: number) {
     if (!this.metrics.avgMedicationsPerDiagnosis.has(diagnosis)) {
       this.metrics.avgMedicationsPerDiagnosis.set(diagnosis, [])
     }
@@ -1813,6 +2225,15 @@ const PrescriptionMonitoring = {
       this.metrics.pharmacologicalErrors.push({
         diagnosis,
         errors,
+        timestamp: new Date().toISOString()
+      })
+    }
+    
+    // Track posology corrections
+    if (posologyFixed && posologyFixed > 0) {
+      this.metrics.posologyCorrections.push({
+        diagnosis,
+        correctionsCount: posologyFixed,
         timestamp: new Date().toISOString()
       })
     }
@@ -1850,7 +2271,7 @@ const PrescriptionMonitoring = {
   }
 }
 
-// ==================== DATA PROTECTION (kept from original) ====================
+// ==================== DATA PROTECTION ====================
 function anonymizePatientData(patientData: any): { 
   anonymized: any, 
   originalIdentity: any,
@@ -1898,6 +2319,7 @@ function validateMedicalAnalysisWithPregnancy(
   const issues: string[] = []
   const suggestions: string[] = []
   const pregnancyWarnings: string[] = []
+  const posologyCorrections: string[] = [] // NEW
   
   console.log(`📊 Complete analysis with pregnancy considerations:`)
   console.log(`   - ${medications.length} medication(s) prescribed`)
@@ -1947,6 +2369,12 @@ function validateMedicalAnalysisWithPregnancy(
   
   pregnancyWarnings.push(...pharmacoValidation.pregnancyWarnings)
   
+  // Count posology corrections
+  const posologyFixCount = pharmacoValidation.corrections.filter(c => c.action === 'update_posology').length
+  if (posologyFixCount > 0) {
+    posologyCorrections.push(`Fixed ${posologyFixCount} posology issue(s)`)
+  }
+  
   // Standard validations
   if (!analysis.clinical_analysis?.primary_diagnosis?.condition) {
     issues.push('Primary diagnosis missing')
@@ -1960,14 +2388,15 @@ function validateMedicalAnalysisWithPregnancy(
     issues.push('Red flags missing')
   }
   
-  // Track metrics with pregnancy status
+  // Track metrics with pregnancy status and posology corrections
   if (diagnosis) {
     PrescriptionMonitoring.track(
       diagnosis, 
       medications.length, 
       labTests.length + imaging.length,
       pharmacoValidation.errors,
-      patientContext.pregnancy_status
+      patientContext.pregnancy_status,
+      posologyFixCount
     )
   }
   
@@ -1976,11 +2405,13 @@ function validateMedicalAnalysisWithPregnancy(
     issues,
     suggestions,
     pregnancyWarnings,
+    posologyCorrections,
     metrics: {
       medications: medications.length,
       laboratory_tests: labTests.length,
       imaging_studies: imaging.length,
-      pregnancySafetyChecked: isPregnant
+      pregnancySafetyChecked: isPregnant,
+      posologyIssuesFixed: posologyFixCount
     }
   }
 }
@@ -2027,7 +2458,7 @@ function preparePromptWithPregnancy(patientContext: PatientContext): string {
     .replace('{{PATIENT_CONTEXT}}', JSON.stringify(patientContext, null, 2))
 }
 
-// ==================== MAURITIUS HEALTHCARE CONTEXT (kept from original) ====================
+// ==================== MAURITIUS HEALTHCARE CONTEXT ====================
 const MAURITIUS_HEALTHCARE_CONTEXT = {
   laboratories: {
     everywhere: "C-Lab (29 centers), Green Cross (36 centers), Biosanté (48 locations)",
@@ -2066,7 +2497,7 @@ async function callOpenAIWithRetry(
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`📡 OpenAI call (attempt ${attempt + 1}/${maxRetries + 1}) with pregnancy considerations...`)
+      console.log(`📡 OpenAI call (attempt ${attempt + 1}/${maxRetries + 1})...`)
       
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -2079,7 +2510,22 @@ async function callOpenAIWithRetry(
           messages: [
             {
               role: 'system',
-              content: 'You are an expert physician with comprehensive knowledge of ALL medical specialties INCLUDING obstetrics. You MUST consider pregnancy status in ALL recommendations. Always prioritize pregnancy-safe medications and avoid teratogenic drugs.'
+              content: `You are an expert physician. CRITICAL POSOLOGY RULES:
+              
+              NEVER use generic "once daily" unless the drug is SPECIFICALLY once-daily:
+              ✅ ACTUALLY once daily: Azithromycin, Amlodipine, Lisinopril, Losartan, Omeprazole, Cetirizine, Loratadine
+              
+              USE SPECIFIC POSOLOGIES:
+              - Amoxicillin: "1 capsule three times daily" NOT "once daily"
+              - Ibuprofen: "1 tablet three times daily with food" NOT "once daily"
+              - Ciprofloxacin: "1 tablet twice daily" NOT "once daily"
+              - Paracetamol: "2 tablets every 6 hours" NOT "once daily"
+              - Metronidazole: "1 tablet three times daily" NOT "once daily"
+              - Domperidone: "1 tablet three times daily before meals" NOT "once daily"
+              - Ear drops: "4 drops twice daily" NOT "once daily"
+              - Eye drops: "1-2 drops four times daily" NOT "once daily"
+              
+              ALWAYS include: dose amount, frequency, timing, duration.`
             },
             {
               role: 'user',
@@ -2104,34 +2550,68 @@ async function callOpenAIWithRetry(
       const data = await response.json()
       let analysis = JSON.parse(data.choices[0]?.message?.content || '{}')
       
-      // Validation and correction with pregnancy
+      // CRITICAL: Validate and fix posologies immediately
       const diagnosis = analysis.clinical_analysis?.primary_diagnosis?.condition || ''
       const medications = analysis.treatment_plan?.medications || []
       const patientAge = parseInt(patientContext.age as string) || 30
-      const trimester = getPregnancyTrimester(patientContext.gestational_age || '')
       
-      console.log('💊 Validating pharmacology with pregnancy status:', patientContext.pregnancy_status)
-      const pharmacoValidation = validatePharmacologyWithPregnancy(
-        diagnosis, 
-        medications, 
-        patientAge,
-        patientContext.pregnancy_status,
-        trimester
-      )
+      console.log('💊 Validating posologies for ALL medications...');
       
-      if (!pharmacoValidation.valid || pharmacoValidation.pregnancyWarnings.length > 0) {
-        console.warn('⚠️ Pregnancy-related medication issues detected:')
-        pharmacoValidation.errors.forEach(err => console.warn(`   ${err}`))
-        pharmacoValidation.pregnancyWarnings.forEach(warn => console.warn(`   ${warn}`))
-        
-        // Apply corrections
-        analysis = applyPharmacologicalCorrectionsWithPregnancy(analysis, pharmacoValidation.corrections)
-        console.log('✅ Pregnancy-safe corrections applied')
+      // Immediate posology correction
+      let posologyErrors = 0;
+      medications.forEach((med: any, idx: number) => {
+        const check = validateAndCorrectPosology(med, diagnosis);
+        if (!check.isValid) {
+          console.warn(`   ⚠️ Posology issue for ${med.drug}: ${check.error}`);
+          if (check.correctedPosology) {
+            console.log(`   ✅ Auto-correcting to: ${check.correctedPosology}`);
+            med.posology = check.correctedPosology;
+            posologyErrors++;
+          }
+        }
+      });
+      
+      if (posologyErrors > 0) {
+        console.log(`📝 Auto-corrected ${posologyErrors} posology issues`);
       }
       
-      // Add pregnancy warnings to analysis
-      if (pharmacoValidation.pregnancyWarnings.length > 0) {
-        analysis.pregnancy_warnings = pharmacoValidation.pregnancyWarnings
+      // Standard pharmacology validation
+      console.log('💊 Running complete pharmacology validation...');
+      const pharmacoValidation = validatePharmacology(
+        diagnosis, 
+        medications, 
+        patientAge
+      )
+      
+      // Pregnancy validation if applicable
+      const trimester = getPregnancyTrimester(patientContext.gestational_age || '')
+      if (patientContext.pregnancy_status === 'pregnant' || 
+          patientContext.pregnancy_status === 'possibly_pregnant' ||
+          patientContext.pregnancy_status === 'breastfeeding') {
+        
+        console.log('🤰 Additional pregnancy validation...');
+        const pregnancyValidation = validatePharmacologyWithPregnancy(
+          diagnosis, 
+          medications, 
+          patientAge,
+          patientContext.pregnancy_status,
+          trimester
+        )
+        
+        if (!pregnancyValidation.valid || pregnancyValidation.pregnancyWarnings.length > 0) {
+          console.warn('⚠️ Pregnancy-related issues detected');
+          analysis = applyPharmacologicalCorrectionsWithPregnancy(analysis, pregnancyValidation.corrections)
+        }
+        
+        if (pregnancyValidation.pregnancyWarnings.length > 0) {
+          analysis.pregnancy_warnings = pregnancyValidation.pregnancyWarnings
+        }
+      } else {
+        // Apply standard corrections for all cases
+        if (!pharmacoValidation.valid) {
+          console.warn('⚠️ Pharmacological issues detected');
+          analysis = applyPharmacologicalCorrectionsWithPregnancy(analysis, pharmacoValidation.corrections)
+        }
       }
       
       // Basic validation
@@ -2139,7 +2619,7 @@ async function callOpenAIWithRetry(
         throw new Error('Incomplete response - diagnosis missing')
       }
       
-      console.log('✅ OpenAI response received, validated for pregnancy safety')
+      console.log('✅ OpenAI response received, validated, and corrected')
       return { data, analysis }
       
     } catch (error) {
@@ -2151,13 +2631,19 @@ async function callOpenAIWithRetry(
         console.log(`⏳ Retrying in ${waitTime}ms...`)
         await new Promise(resolve => setTimeout(resolve, waitTime))
         
+        // Reinforce posology rules on retry
         if (attempt === 1) {
-          prompt += `\n\nCRITICAL PREGNANCY REMINDER:
-          - Patient pregnancy status: ${patientContext.pregnancy_status}
-          - Use ONLY pregnancy-safe medications
-          - NO NSAIDs in 3rd trimester
-          - NO ACE inhibitors or ARBs
-          - Prefer ultrasound over X-ray/CT`
+          prompt += `\n\nCRITICAL POSOLOGY REMINDER:
+          NEVER use "once daily" for:
+          - Amoxicillin: USE "1 capsule three times daily"
+          - Ibuprofen: USE "1 tablet three times daily with food"
+          - Ciprofloxacin: USE "1 tablet twice daily"
+          - Paracetamol: USE "2 tablets every 6 hours"
+          - Metronidazole: USE "1 tablet three times daily"
+          - Ear drops: USE "4 drops twice daily"
+          - Eye drops: USE "1-2 drops four times daily"
+          
+          ONLY use "once daily" for: Azithromycin, Amlodipine, Lisinopril, Omeprazole, Cetirizine`
         }
       }
     }
@@ -2166,7 +2652,7 @@ async function callOpenAIWithRetry(
   throw lastError || new Error('Failed after multiple attempts')
 }
 
-// ==================== DOCUMENT GENERATION (enhanced for pregnancy) ====================
+// ==================== DOCUMENT GENERATION ====================
 function generateMedicalDocumentsWithPregnancy(
   analysis: any,
   patient: PatientContext,
@@ -2321,7 +2807,7 @@ function generateEmergencyFallbackDiagnosis(patient: any): any {
 
 // ==================== MAIN FUNCTION ====================
 export async function POST(request: NextRequest) {
-  console.log('🚀 MAURITIUS MEDICAL AI - VERSION 6.0 WITH PREGNANCY MANAGEMENT')
+  console.log('🚀 MAURITIUS MEDICAL AI - VERSION 6.1 WITH POSOLOGY FIX')
   const startTime = Date.now()
   
   try {
@@ -2396,7 +2882,43 @@ export async function POST(request: NextRequest) {
       patientContext
     )
     
-    console.log('✅ Medical analysis generated with pregnancy safety verification')
+    console.log('✅ Medical analysis generated with posology validation')
+    
+    // CRITICAL: Final posology verification
+    console.log('🔍 FINAL POSOLOGY VERIFICATION:');
+    console.log('═══════════════════════════════════════');
+    let suspiciousPosologies = 0;
+    medicalAnalysis.treatment_plan?.medications?.forEach((med: any, idx: number) => {
+      const posology = med.posology || 'NO POSOLOGY';
+      console.log(`   ${idx + 1}. ${med.drug}: "${posology}"`);
+      
+      // Detect problems
+      if (posology === 'once daily' || posology === '1 tablet once daily') {
+        const drugName = med.drug.toLowerCase();
+        // List of medications that are actually once daily
+        const validOnceDaily = ACTUALLY_ONCE_DAILY_MEDICATIONS;
+        const isValidOnceDaily = validOnceDaily.some(d => drugName.includes(d));
+        
+        if (!isValidOnceDaily) {
+          console.error(`      ⚠️ SUSPICIOUS: Generic "once daily" for ${med.drug}!`);
+          suspiciousPosologies++;
+          
+          // Final correction attempt
+          const correction = validateAndCorrectPosology(med, medicalAnalysis.clinical_analysis?.primary_diagnosis?.condition || '');
+          if (correction.correctedPosology) {
+            console.log(`      ✅ Final correction applied: ${correction.correctedPosology}`);
+            med.posology = correction.correctedPosology;
+          }
+        } else {
+          console.log(`      ✅ Valid: ${med.drug} is actually once daily`);
+        }
+      }
+    });
+    
+    if (suspiciousPosologies > 0) {
+      console.log(`⚠️ Fixed ${suspiciousPosologies} suspicious posology issue(s)`);
+    }
+    console.log('═══════════════════════════════════════');
     
     const validation = validateMedicalAnalysisWithPregnancy(medicalAnalysis, patientContext)
     
@@ -2410,6 +2932,10 @@ export async function POST(request: NextRequest) {
     
     if (validation.pregnancyWarnings.length > 0) {
       console.log('🤰 Pregnancy warnings:', validation.pregnancyWarnings)
+    }
+    
+    if (validation.posologyCorrections.length > 0) {
+      console.log('📝 Posology corrections:', validation.posologyCorrections)
     }
     
     const patientContextWithIdentity = {
@@ -2428,6 +2954,7 @@ export async function POST(request: NextRequest) {
     console.log(`📊 Summary: ${validation.metrics.medications} medication(s), ${validation.metrics.laboratory_tests} lab test(s), ${validation.metrics.imaging_studies} imaging study/studies`)
     console.log(`🔒 Data protection: ACTIVE`)
     console.log(`🤰 Pregnancy safety: ${validation.metrics.pregnancySafetyChecked ? 'VERIFIED' : 'N/A'}`)
+    console.log(`📝 Posology issues fixed: ${validation.metrics.posologyIssuesFixed}`);
     
     const finalResponse = {
       success: true,
@@ -2459,6 +2986,7 @@ export async function POST(request: NextRequest) {
         issues: validation.issues,
         suggestions: validation.suggestions,
         pregnancyWarnings: validation.pregnancyWarnings,
+        posologyCorrections: validation.posologyCorrections,
         metrics: validation.metrics
       },
       
@@ -2522,7 +3050,7 @@ export async function POST(request: NextRequest) {
             breastfeeding_category: med.breastfeeding_category || '',
             trimester_precautions: med.trimester_precautions || '',
             fetal_monitoring: med.fetal_monitoring || '',
-            posology: med.posology || "Standard dosing",
+            posology: med.posology || "Standard dosing", // Validated posology
             duration: med.duration || "As directed",
             packaging: med.packaging || "To be specified",
             quantity: med.quantity || "As needed",
@@ -2544,20 +3072,22 @@ export async function POST(request: NextRequest) {
       
       metadata: {
         ai_model: 'GPT-4o',
-        system_version: '6.0-Pregnancy-Management',
-        approach: 'Evidence-Based Medicine with Pregnancy Safety',
+        system_version: '6.1-Posology-Fix-Complete',
+        approach: 'Evidence-Based Medicine with Posology Validation',
         medical_guidelines: medicalAnalysis.quality_metrics?.guidelines_followed || ["WHO", "ACOG", "RCOG", "ESC", "NICE"],
         evidence_level: medicalAnalysis.quality_metrics?.evidence_level || "High",
         mauritius_adapted: true,
         data_protection_enabled: true,
         pregnancy_safety_verified: medicalAnalysis.quality_metrics?.pregnancy_safety_verified || false,
+        posology_validation_enabled: true,
         generation_timestamp: new Date().toISOString(),
         quality_metrics: medicalAnalysis.quality_metrics || {},
         validation_passed: validation.isValid,
         completeness_score: medicalAnalysis.quality_metrics?.completeness_score || 0.85,
         total_processing_time_ms: processingTime,
         tokens_used: openaiData.usage || {},
-        retry_count: 0
+        retry_count: 0,
+        posology_corrections_applied: validation.metrics.posologyIssuesFixed || 0
       }
     }
     
@@ -2607,7 +3137,7 @@ export async function POST(request: NextRequest) {
       
       metadata: {
         ai_model: 'GPT-4o',
-        system_version: '6.0-Pregnancy-Management-Complete',
+        system_version: '6.1-Posology-Fix-Complete',
         error_logged: true,
         support_contact: 'support@telemedecine.mu'
       }
@@ -2621,7 +3151,8 @@ export async function GET(request: NextRequest) {
     medications: {} as any,
     tests: {} as any,
     pharmacologicalErrors: PrescriptionMonitoring.metrics.pharmacologicalErrors.slice(-10),
-    pregnancyAdjustments: PrescriptionMonitoring.metrics.pregnancyAdjustments.slice(-10)
+    pregnancyAdjustments: PrescriptionMonitoring.metrics.pregnancyAdjustments.slice(-10),
+    posologyCorrections: PrescriptionMonitoring.metrics.posologyCorrections.slice(-10) // NEW
   }
   
   PrescriptionMonitoring.metrics.avgMedicationsPerDiagnosis.forEach((values, diagnosis) => {
@@ -2639,10 +3170,14 @@ export async function GET(request: NextRequest) {
   })
   
   return NextResponse.json({
-    status: '✅ Mauritius Medical AI - Version 6.0 with Complete Pregnancy Management',
-    version: '6.0-Pregnancy-Management-Complete',
+    status: '✅ Mauritius Medical AI - Version 6.1 with Complete Posology Fix',
+    version: '6.1-Posology-Fix-Complete',
     features: [
       '🔒 Patient data anonymization (RGPD/HIPAA)',
+      '💊 POSOLOGY FIX: Automatic correction of generic "once daily"',
+      '📝 Specific posologies for ALL drug classes',
+      '✅ Validation of correct once-daily medications',
+      '🔧 Real-time posology correction system',
       '🤰 Complete pregnancy safety management',
       '👶 FDA pregnancy categories (A, B, C, D, X)',
       '🤱 Breastfeeding safety (L1-L5 categories)',
@@ -2652,7 +3187,6 @@ export async function GET(request: NextRequest) {
       '💊 Pregnancy-safe therapeutic protocols',
       '🚨 Obstetric emergency recognition',
       '📋 Evidence-based pregnancy protocols',
-      '🔧 Automatic prescription correction for pregnancy',
       '📦 Complete packaging specification',
       '💉 Exact posology for all medications',
       '👶 Pediatric dose adjustments',
@@ -2661,6 +3195,20 @@ export async function GET(request: NextRequest) {
       '✅ Therapeutic coherence verification',
       '📊 Real-time prescription monitoring'
     ],
+    posologyValidation: {
+      enabled: true,
+      actuallyOnceDailyMedications: ACTUALLY_ONCE_DAILY_MEDICATIONS.length + ' medications',
+      correctionRules: {
+        antibiotics: 'TID/QID for most, BID for some',
+        nsaids: 'TID with food',
+        analgesics: 'Q6H for paracetamol',
+        earDrops: 'BID',
+        eyeDrops: 'QID or more frequent',
+        gastrointestinal: 'TID before meals for prokinetics'
+      },
+      autoCorrection: true,
+      realTimeValidation: true
+    },
     pregnancyManagement: {
       enabled: true,
       categories: Object.keys(PREGNANCY_CATEGORIES),
@@ -2683,10 +3231,12 @@ export async function GET(request: NextRequest) {
       drugsClassified: Object.keys(DRUG_CLASSIFICATIONS).length,
       protocolsCovered: Object.keys(THERAPEUTIC_PROTOCOLS).length,
       posologyIncluded: true,
+      posologyValidationActive: true,
       packagingSpecified: true,
       ageAdjustments: ['pediatric', 'geriatric'],
       pregnancyAdjustments: true,
       commonErrors: [
+        'Generic "once daily" auto-corrected',
         'Acetic acid misclassified as antibiotic',
         'Paracetamol misclassified as anti-inflammatory',
         'Generic "1 box" replaced with specific packaging',
@@ -2708,13 +3258,30 @@ export async function GET(request: NextRequest) {
     },
     guidelines: {
       supported: ['WHO', 'ACOG', 'RCOG', 'ESC', 'NICE', 'Mauritius MOH'],
-      approach: 'Evidence-based medicine with pregnancy safety prioritization'
+      approach: 'Evidence-based medicine with posology validation and pregnancy safety'
     },
     performance: {
       averageResponseTime: '20-40 seconds',
       maxTokens: 8000,
       model: 'GPT-4o',
-      timeout: 'NONE - Let OpenAI complete'
+      timeout: 'NONE - Let OpenAI complete',
+      posologyValidationTime: '< 100ms per medication'
+    },
+    posologyExamples: {
+      correct: {
+        'Amoxicillin 500mg': '1 capsule three times daily',
+        'Ibuprofen 400mg': '1 tablet three times daily with food',
+        'Ciprofloxacin 500mg': '1 tablet twice daily',
+        'Paracetamol 500mg': '2 tablets every 6 hours as needed',
+        'Azithromycin 500mg': '500mg once daily (CORRECT once daily)',
+        'Amlodipine 5mg': '1 tablet once daily (CORRECT once daily)'
+      },
+      incorrect: {
+        'Amoxicillin': 'once daily ❌',
+        'Ibuprofen': 'once daily ❌',
+        'Paracetamol': 'once daily ❌',
+        'Ear drops': 'once daily ❌'
+      }
     }
   })
 }
