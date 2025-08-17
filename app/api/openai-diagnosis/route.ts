@@ -1447,7 +1447,6 @@ export async function GET(request: NextRequest) {
       method: 'anonymization',
       compliance: ['RGPD', 'HIPAA', 'Data Minimization'],
       protectedFields: ['firstName', 'lastName', 'name', 'email', 'phone'],
-      runtime: 'Edge Runtime Compatible'
     },
     monitoring: {
       prescriptionPatterns: monitoringData,
@@ -1466,7 +1465,6 @@ export async function GET(request: NextRequest) {
       averageResponseTime: '4-6 seconds',
       maxTokens: 8000,
       model: 'GPT-4o',
-      runtime: 'Edge Runtime'
     },
     temperatureUnit: 'CELSIUS (°C) ONLY'
   })
