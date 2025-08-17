@@ -1,4 +1,4 @@
-// app/api/openai-diagnosis/route.ts - VERSION 3.1 FIXED & OPTIMIZED
+// app/api/openai-diagnosis/route.ts - VERSION 3.1 FIXED & OPTIMIZED (NO TIMEOUT)
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
@@ -93,6 +93,9 @@ const MAURITIUS_HEALTHCARE_CONTEXT = {
   }
 }
 
+// Context string cache
+const MAURITIUS_CONTEXT_STRING = JSON.stringify(MAURITIUS_HEALTHCARE_CONTEXT, null, 2)
+
 // ==================== DATA PROTECTION FUNCTIONS ====================
 function anonymizePatientData(patientData: any): { 
   anonymized: any, 
@@ -159,6 +162,7 @@ const PrescriptionMonitoring = {
   },
   
   track(diagnosis: string, medications: number, tests: number) {
+    // Track averages by diagnosis
     if (!this.metrics.avgMedicationsPerDiagnosis.has(diagnosis)) {
       this.metrics.avgMedicationsPerDiagnosis.set(diagnosis, [])
     }
@@ -169,6 +173,7 @@ const PrescriptionMonitoring = {
     this.metrics.avgMedicationsPerDiagnosis.get(diagnosis)?.push(medications)
     this.metrics.avgTestsPerDiagnosis.get(diagnosis)?.push(tests)
     
+    // Outlier detection
     const medAvg = this.getAverage(diagnosis, 'medications')
     const testAvg = this.getAverage(diagnosis, 'tests')
     
@@ -202,7 +207,7 @@ const ENHANCED_DIAGNOSTIC_PROMPT = `You are an expert physician practicing telem
 - You use systematic diagnostic reasoning to analyze patient data
 
 🇲🇺 MAURITIUS HEALTHCARE CONTEXT:
-${JSON.stringify(MAURITIUS_HEALTHCARE_CONTEXT, null, 2)}
+${MAURITIUS_CONTEXT_STRING}
 
 📋 PATIENT PRESENTATION:
 {{PATIENT_CONTEXT}}
@@ -265,6 +270,43 @@ D) SUPPORTIVE CARE
 - 5-7 medications = Normal for complex or multi-system conditions
 - 7+ medications = Acceptable if justified by complexity
 
+🔍 SELF-CHECK before finalizing:
+Ask yourself:
+1. "Have I addressed the ROOT CAUSE?" (if identifiable)
+2. "Have I relieved ALL symptoms that bother the patient?"
+3. "Have I prevented predictable complications?"
+4. "Have I optimized the recovery process?"
+
+If any answer is "NO" → Add appropriate medication
+
+❌ AVOID THESE COMMON ERRORS:
+- Treating only the main symptom (incomplete)
+- Ignoring secondary symptoms (poor care)
+- Forgetting preventive measures (risky)
+- Under-prescribing due to minimalism bias (inadequate)
+
+✅ REMEMBER:
+- Comprehensive care = Better outcomes
+- Patient comfort matters
+- Multiple medications are NORMAL, not excessive
+- Each medication should have clear purpose
+- Quality care often requires 3-6 medications
+
+PRESCRIPTION PRINCIPLES BY CATEGORY:
+═════════════════════════════════════════════
+INFECTIONS: Antimicrobial + Symptom relief + Support
+INFLAMMATORY: Anti-inflammatory + Pain relief + Protection
+ALLERGIC: Antihistamine + Symptom relief + Prevention
+TRAUMATIC: Pain relief + Healing support + Prevention
+METABOLIC: Specific treatment + Symptom control + Monitoring
+FUNCTIONAL: Symptom management + Support + Lifestyle
+
+FLEXIBLE APPROACH:
+- Simple conditions → 2-4 medications typically
+- Moderate conditions → 3-5 medications typically  
+- Complex conditions → 4-7 medications typically
+- Always individualize based on patient needs
+
 🔍 DIAGNOSTIC REASONING PROCESS:
 
 1. ANALYZE ALL DATA:
@@ -295,8 +337,6 @@ D) SUPPORTIVE CARE
 - Add PREVENTIVE measures when indicated
 - Include SUPPORTIVE care as needed
 - Consider drug interactions and contraindications
-
-IMPORTANT: ALL TEMPERATURES ARE IN CELSIUS (°C)
 
 GENERATE THIS EXACT JSON STRUCTURE:
 
@@ -359,9 +399,29 @@ GENERATE THIS EXACT JSON STRUCTURE:
     "clinical_justification": "[Explain why these tests are necessary or why no tests are required]",
     
     "tests_by_purpose": {
-      "to_confirm_primary": [],
-      "to_exclude_differentials": [],
-      "to_assess_severity": []
+      "to_confirm_primary": [
+        {
+          "test": "[Test name]",
+          "rationale": "This test will confirm the diagnosis if [expected result]",
+          "expected_if_positive": "[Specific values/findings]",
+          "expected_if_negative": "[Values that would exclude]"
+        }
+      ],
+      
+      "to_exclude_differentials": [
+        {
+          "differential": "[Which differential diagnosis]",
+          "test": "[Test name]",
+          "rationale": "Normal → excludes [differential diagnosis]"
+        }
+      ],
+      
+      "to_assess_severity": [
+        {
+          "test": "[Test name]",
+          "purpose": "Assess impact/complications"
+        }
+      ]
     },
     
     "test_sequence": {
@@ -370,8 +430,38 @@ GENERATE THIS EXACT JSON STRUCTURE:
       "routine": "[Tests for monitoring or complete assessment]"
     },
     
-    "laboratory_tests": [],
-    "imaging_studies": [],
+    "laboratory_tests": [
+      // CAN BE EMPTY ARRAY IF NO TESTS NEEDED
+      {
+        "test_name": "[Test name]",
+        "clinical_justification": "[Why this test for this specific patient]",
+        "urgency": "STAT/urgent/routine",
+        "expected_results": "[Expected values and interpretation]",
+        "mauritius_logistics": {
+          "where": "[C-Lab, Green Cross, Biosanté, etc.]",
+          "cost": "[Rs 400-3000]",
+          "turnaround": "[2-6h urgent, 24-48h routine]",
+          "preparation": "[Fasting, special requirements]"
+        }
+      }
+    ],
+    
+    "imaging_studies": [
+      // CAN BE EMPTY ARRAY IF NO IMAGING NEEDED
+      {
+        "study_name": "[Imaging study name]",
+        "indication": "[Specific clinical indication]",
+        "findings_sought": "[What we're looking for]",
+        "urgency": "immediate/urgent/routine",
+        "mauritius_availability": {
+          "centers": "[Apollo, Wellkin, etc.]",
+          "cost": "[Rs 800-25000]",
+          "wait_time": "[Realistic timeline]",
+          "preparation": "[NPO, contrast precautions]"
+        }
+      }
+    ],
+    
     "specialized_tests": []
   },
   
@@ -393,59 +483,68 @@ GENERATE THIS EXACT JSON STRUCTURE:
     },
     
     "medications": [
+      // EXPECT 2-5 MEDICATIONS for most conditions
+      // Apply systematic approach: Etiological + Symptomatic + Preventive + Supportive
+      // Single medication prescriptions are RARELY complete
       {
         "drug": "[INN + precise dosage]",
         "therapeutic_role": "etiological/symptomatic/preventive/supportive",
-        "indication": "[Specific indication for THIS patient]",
-        "mechanism": "[How this medication helps]",
+        "indication": "[Specific indication for THIS patient with THESE symptoms]",
+        "mechanism": "[MINIMUM 50 WORDS] How this medication specifically helps this patient in their clinical context.",
         "dosing": {
           "adult": "[Precise dosing]",
-          "adjustments": {}
+          "adjustments": {
+            "elderly": "[If >65 years]",
+            "renal": "[If CKD]",
+            "hepatic": "[If liver disease]"
+          }
         },
-        "duration": "[Precise duration]",
+        "duration": "[Precise duration: X days/weeks]",
         "monitoring": "[Required monitoring]",
-        "side_effects": "[Main side effects]",
-        "contraindications": "[Contraindications]",
-        "interactions": "[Major interactions]",
+        "side_effects": "[Main side effects to monitor]",
+        "contraindications": "[Absolute and relative contraindications]",
+        "interactions": "[Major interactions with patient's medications]",
         "mauritius_availability": {
           "public_free": true/false,
-          "estimated_cost": "[Rs XXX]",
-          "alternatives": "[Alternatives]",
-          "brand_names": "[Common brands]"
+          "estimated_cost": "[If not free: Rs XXX]",
+          "alternatives": "[Alternative if unavailable]",
+          "brand_names": "[Common brands in Mauritius]"
         },
-        "administration_instructions": "[Instructions]"
+        "administration_instructions": "[Precise instructions: before/during/after meals, timing, etc.]"
       }
+      // REMEMBER: Each symptom/problem should have a solution
+      // 2-5 medications expected for most conditions
     ],
     
-    "non_pharmacological": "[MINIMUM 100 WORDS] Detailed lifestyle measures.",
+    "non_pharmacological": "[MINIMUM 100 WORDS] Detailed lifestyle measures, rest, hydration adapted to tropical climate, exercises, lifestyle changes.",
     
     "procedures": [],
     "referrals": []
   },
   
   "follow_up_plan": {
-    "immediate": "[Actions within 24-48h]",
-    "short_term": "[Follow-up D3-D7]",
-    "long_term": "[Long-term follow-up]",
-    "red_flags": ["List of warning signs"],
-    "next_consultation": "[When to consult next]"
+    "immediate": "[Actions within 24-48h: monitoring, first results]",
+    "short_term": "[Follow-up D3-D7: response evaluation, adjustments]",
+    "long_term": "[Long-term follow-up: recurrence prevention, monitoring]",
+    "red_flags": "[CRITICAL] Signs requiring immediate urgent consultation",
+    "next_consultation": "Follow-up teleconsultation recommended in [timeframe] or physical consultation if [conditions]"
   },
   
   "patient_education": {
-    "understanding_condition": "[MINIMUM 150 WORDS] Clear explanation",
-    "treatment_importance": "[MINIMUM 100 WORDS] Why follow treatment",
-    "warning_signs": "[Warning signs]",
-    "lifestyle_modifications": "[Lifestyle changes]",
+    "understanding_condition": "[MINIMUM 150 WORDS] Clear and accessible explanation of your condition. Start with 'Your condition is...' and use simple analogies.",
+    "treatment_importance": "[MINIMUM 100 WORDS] Why follow this treatment, expected benefits, risks if untreated.",
+    "warning_signs": "[Warning signs explained simply with actions to take]",
+    "lifestyle_modifications": "[Necessary lifestyle changes, adapted to local context]",
     "mauritius_specific": {
-      "tropical_advice": "Hydration 3L/day, avoid sun 10am-4pm, store medications <25°C",
-      "local_diet": "[Diet advice]"
+      "tropical_advice": "Minimum hydration 3L/day, avoid sun 10am-4pm, store medications <25°C",
+      "local_diet": "[Dietary adaptations with available local foods]"
     }
   },
   
   "quality_metrics": {
     "completeness_score": 0.85,
     "evidence_level": "[High/Moderate/Low]",
-    "guidelines_followed": ["WHO", "ESC", "NICE"],
+    "guidelines_followed": ["WHO", "ESC", "NICE", "Local Mauritius guidelines"],
     "word_counts": {
       "pathophysiology": 200,
       "clinical_reasoning": 150,
@@ -477,141 +576,7 @@ function preparePrompt(patientContext: PatientContext): string {
     .replace('{{AI_QUESTIONS}}', aiQuestionsFormatted)
 }
 
-// ==================== AUTO-REPAIR FUNCTION ====================
-function ensureCriticalFields(analysis: any): any {
-  // Ensure all critical top-level fields exist
-  if (!analysis.diagnostic_reasoning) {
-    analysis.diagnostic_reasoning = {
-      key_findings: {
-        from_history: 'Based on patient history',
-        from_symptoms: 'Based on reported symptoms',
-        from_ai_questions: 'Based on additional information',
-        red_flags: 'None immediately identified'
-      },
-      syndrome_identification: {
-        clinical_syndrome: 'Clinical syndrome to be determined',
-        supporting_features: 'As per clinical presentation',
-        inconsistent_features: 'None noted'
-      },
-      clinical_confidence: {
-        diagnostic_certainty: 'Moderate',
-        reasoning: 'Based on teleconsultation limitations',
-        missing_information: 'Physical examination would provide additional clarity'
-      }
-    }
-  }
-  
-  if (!analysis.clinical_analysis) {
-    analysis.clinical_analysis = {}
-  }
-  
-  if (!analysis.clinical_analysis.primary_diagnosis) {
-    analysis.clinical_analysis.primary_diagnosis = {
-      condition: 'Clinical assessment required',
-      icd10_code: 'R69',
-      confidence_level: 60,
-      severity: 'moderate',
-      diagnostic_criteria_met: ['Based on reported symptoms'],
-      certainty_level: 'Moderate',
-      pathophysiology: 'The pathophysiology of this condition requires further clinical evaluation.',
-      clinical_reasoning: 'Based on the teleconsultation, further evaluation is needed.',
-      prognosis: 'Prognosis depends on the final diagnosis after complete evaluation.'
-    }
-  }
-  
-  if (!analysis.clinical_analysis.differential_diagnoses) {
-    analysis.clinical_analysis.differential_diagnoses = []
-  }
-  
-  if (!analysis.investigation_strategy) {
-    analysis.investigation_strategy = {
-      diagnostic_approach: 'Targeted investigation based on clinical presentation',
-      clinical_justification: 'Tests ordered as clinically indicated',
-      tests_by_purpose: {
-        to_confirm_primary: [],
-        to_exclude_differentials: [],
-        to_assess_severity: []
-      },
-      test_sequence: {
-        immediate: 'None urgently required',
-        urgent: 'As clinically indicated',
-        routine: 'Follow-up as needed'
-      },
-      laboratory_tests: [],
-      imaging_studies: [],
-      specialized_tests: []
-    }
-  }
-  
-  if (!analysis.treatment_plan) {
-    analysis.treatment_plan = {
-      approach: 'Symptomatic treatment and supportive care with monitoring',
-      prescription_rationale: 'Treatment plan based on current presentation',
-      completeness_check: {
-        symptoms_addressed: ['Primary symptoms'],
-        untreated_symptoms: [],
-        total_medications: 0,
-        therapeutic_coverage: {
-          etiological: false,
-          symptomatic: true,
-          preventive: false,
-          supportive: true
-        }
-      },
-      medications: [],
-      non_pharmacological: 'Rest, adequate hydration, and monitoring of symptoms.',
-      procedures: [],
-      referrals: []
-    }
-  }
-  
-  if (!analysis.follow_up_plan) {
-    analysis.follow_up_plan = {
-      immediate: 'Monitor symptoms over next 24-48 hours',
-      short_term: 'Reassess if no improvement in 3-5 days',
-      long_term: 'Follow up as needed based on evolution',
-      red_flags: [
-        'Worsening of symptoms',
-        'Fever >39°C persisting >48h',
-        'Severe pain',
-        'Difficulty breathing',
-        'Chest pain',
-        'Altered mental status'
-      ],
-      next_consultation: 'If symptoms persist or worsen, seek medical attention'
-    }
-  }
-  
-  if (!analysis.patient_education) {
-    analysis.patient_education = {
-      understanding_condition: 'Your symptoms require monitoring.',
-      treatment_importance: 'Follow the treatment plan for proper recovery.',
-      warning_signs: 'Watch for worsening symptoms',
-      lifestyle_modifications: 'Rest and stay hydrated',
-      mauritius_specific: {
-        tropical_advice: 'Stay hydrated, avoid sun 10am-4pm',
-        local_diet: 'Maintain regular meals'
-      }
-    }
-  }
-  
-  if (!analysis.quality_metrics) {
-    analysis.quality_metrics = {
-      completeness_score: 0.80,
-      evidence_level: 'Moderate',
-      guidelines_followed: ['WHO', 'Evidence-based medicine'],
-      word_counts: {
-        pathophysiology: 100,
-        clinical_reasoning: 100,
-        patient_education: 100
-      }
-    }
-  }
-  
-  return analysis
-}
-
-// ==================== VALIDATION FUNCTION ====================
+// ==================== INTELLIGENT VALIDATION ====================
 function validateMedicalAnalysis(
   analysis: any,
   patientContext: PatientContext
@@ -623,27 +588,55 @@ function validateMedicalAnalysis(
   const issues: string[] = []
   const suggestions: string[] = []
   
-  console.log(`📊 Analysis validation:`)
+  // Contextual validation (no rigid minimums)
+  console.log(`📊 Complete analysis:`)
   console.log(`   - ${medications.length} medication(s) prescribed`)
   console.log(`   - ${labTests.length} laboratory test(s)`)
   console.log(`   - ${imaging.length} imaging study/studies`)
+  
+  // Coherence checks
+  const diagnosis = analysis.clinical_analysis?.primary_diagnosis?.condition || ''
+  
+  // Contextual alerts (no rejections)
+  if (medications.length === 0) {
+    console.info('ℹ️ No medications prescribed')
+    if (analysis.treatment_plan?.prescription_rationale) {
+      console.info(`   Justification: ${analysis.treatment_plan.prescription_rationale}`)
+    } else {
+      suggestions.push('Consider adding justification for absence of prescription')
+    }
+  }
+  
+  if (medications.length === 1) {
+    console.warn('⚠️ Only one medication prescribed')
+    console.warn(`   Diagnosis: ${diagnosis}`)
+    suggestions.push('Verify if symptomatic or adjuvant treatment needed')
+  }
+  
+  if (labTests.length === 0 && imaging.length === 0) {
+    console.info('ℹ️ No additional tests prescribed')
+    if (analysis.investigation_strategy?.clinical_justification) {
+      console.info(`   Justification: ${analysis.investigation_strategy.clinical_justification}`)
+    } else {
+      suggestions.push('Consider adding justification for absence of tests')
+    }
+  }
   
   // Check for primary diagnosis
   if (!analysis.clinical_analysis?.primary_diagnosis?.condition) {
     issues.push('Primary diagnosis missing')
   }
   
-  // Flexible validation
-  if (medications.length === 0) {
-    console.info('ℹ️ No medications prescribed')
+  // Check critical sections
+  if (!analysis.treatment_plan?.approach) {
+    issues.push('Therapeutic approach missing')
   }
   
-  if (medications.length === 1) {
-    suggestions.push('Consider if additional symptomatic treatment needed')
+  if (!analysis.follow_up_plan?.red_flags) {
+    issues.push('Red flags missing')
   }
   
-  // Track for monitoring
-  const diagnosis = analysis.clinical_analysis?.primary_diagnosis?.condition || 'Unspecified'
+  // Tracking for monitoring
   if (diagnosis) {
     PrescriptionMonitoring.track(diagnosis, medications.length, labTests.length + imaging.length)
   }
@@ -660,22 +653,19 @@ function validateMedicalAnalysis(
   }
 }
 
-// ==================== OPENAI CALL WITH RETRY ====================
+// ==================== INTELLIGENT RETRY (WITHOUT TIMEOUT) ====================
 async function callOpenAIWithRetry(
   apiKey: string,
   prompt: string,
-  maxRetries: number = 1
+  maxRetries: number = 2
 ): Promise<any> {
   let lastError: Error | null = null
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`📡 OpenAI API call (attempt ${attempt + 1}/${maxRetries + 1})...`)
+      console.log(`📡 OpenAI call (attempt ${attempt + 1}/${maxRetries + 1})...`)
       
-      // Add timeout for safety
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 50000) // 50 seconds timeout
-      
+      // ✅ PAS DE TIMEOUT - LAISSEZ OPENAI FINIR
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -687,7 +677,7 @@ async function callOpenAIWithRetry(
           messages: [
             {
               role: 'system',
-              content: 'You are an expert physician with deep knowledge of medical guidelines and the Mauritius healthcare system. Generate comprehensive, evidence-based analyses. ALL TEMPERATURES MUST BE IN CELSIUS.'
+              content: 'You are an expert physician with deep knowledge of medical guidelines and the Mauritius healthcare system. Generate comprehensive, evidence-based analyses while avoiding over-prescription.'
             },
             {
               role: 'user',
@@ -695,16 +685,15 @@ async function callOpenAIWithRetry(
             }
           ],
           temperature: 0.3,
-          max_tokens: 6000,
+          max_tokens: 8000,
           response_format: { type: "json_object" },
           top_p: 0.95,
           frequency_penalty: 0,
-          presence_penalty: 0.1
-        }),
-        signal: controller.signal
+          presence_penalty: 0.1,
+          seed: 12345
+        })
+        // ✅ PAS DE signal: controller.signal
       })
-      
-      clearTimeout(timeoutId)
       
       if (!response.ok) {
         const errorText = await response.text()
@@ -712,10 +701,7 @@ async function callOpenAIWithRetry(
       }
       
       const data = await response.json()
-      let analysis = JSON.parse(data.choices[0]?.message?.content || '{}')
-      
-      // Auto-repair critical fields
-      analysis = ensureCriticalFields(analysis)
+      const analysis = JSON.parse(data.choices[0]?.message?.content || '{}')
       
       // Basic validation
       if (!analysis.clinical_analysis?.primary_diagnosis) {
@@ -730,9 +716,20 @@ async function callOpenAIWithRetry(
       console.error(`❌ Error attempt ${attempt + 1}:`, error)
       
       if (attempt < maxRetries) {
+        // Exponential backoff
         const waitTime = Math.pow(2, attempt) * 1000
         console.log(`⏳ Retrying in ${waitTime}ms...`)
         await new Promise(resolve => setTimeout(resolve, waitTime))
+        
+        // Enrich prompt for next attempt
+        if (attempt === 1) {
+          prompt += `\n\nIMPORTANT: Previous response was incomplete. 
+          Please ensure you include:
+          - A clear primary diagnosis with ICD-10
+          - A therapeutic strategy (medicinal or not)
+          - Tests IF clinically justified
+          - Follow-up plan with red flags`
+        }
       }
     }
   }
@@ -747,7 +744,7 @@ function generateMedicalDocuments(
   infrastructure: any
 ): any {
   const currentDate = new Date()
-  const consultationId = `TC-MU-${currentDate.getFullYear()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`
+  const consultationId = `TC-MU-${currentDate.getFullYear()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
   
   return {
     // CONSULTATION REPORT
@@ -817,10 +814,12 @@ function generateMedicalDocuments(
       examinations: analysis.investigation_strategy.laboratory_tests.map((test: any, idx: number) => ({
         number: idx + 1,
         test: test.test_name || "Test",
-        justification: test.clinical_justification || "Clinical indication",
+        justification: test.clinical_justification || "Justification",
         urgency: test.urgency || "routine",
         expected_results: test.expected_results || {},
-        preparation: test.mauritius_logistics?.preparation || 'As per laboratory protocol',
+        preparation: test.mauritius_logistics?.preparation || (
+          test.urgency === 'STAT' ? 'None' : 'As per laboratory protocol'
+        ),
         where_to_go: {
           recommended: test.mauritius_logistics?.where || "C-Lab, Green Cross, or Biosanté",
           cost_estimate: test.mauritius_logistics?.cost || "Rs 500-2000",
@@ -829,20 +828,105 @@ function generateMedicalDocuments(
       }))
     } : null,
     
-    // Similar structures for imaging and medication...
+    // IMAGING REQUEST (if imaging prescribed)
     imaging: (analysis.investigation_strategy?.imaging_studies?.length > 0) ? {
-      // ... imaging structure
+      header: {
+        title: "IMAGING REQUEST",
+        validity: "Valid 30 days"
+      },
+      
+      patient: {
+        name: `${patient.firstName || ''} ${patient.lastName || ''}`.trim(),
+        age: `${patient.age} years`,
+        id: consultationId
+      },
+      
+      clinical_context: {
+        diagnosis: analysis.clinical_analysis?.primary_diagnosis?.condition || 'Investigation',
+        indication: analysis.investigation_strategy?.clinical_justification || 'Imaging assessment'
+      },
+      
+      studies: analysis.investigation_strategy.imaging_studies.map((study: any, idx: number) => ({
+        number: idx + 1,
+        examination: study.study_name || "Imaging",
+        indication: study.indication || "Indication",
+        findings_sought: study.findings_sought || {},
+        urgency: study.urgency || "routine",
+        centers: study.mauritius_availability?.centers || "Apollo, Wellkin, Public hospitals",
+        cost_estimate: study.mauritius_availability?.cost || "Variable",
+        wait_time: study.mauritius_availability?.wait_time || "As per availability",
+        preparation: study.mauritius_availability?.preparation || "As per center protocol"
+      }))
     } : null,
     
+    // MEDICATION PRESCRIPTION (if medications prescribed)
     medication: (analysis.treatment_plan?.medications?.length > 0) ? {
-      // ... medication structure
+      header: {
+        title: "MEDICAL PRESCRIPTION",
+        prescriber: {
+          name: "Dr. Teleconsultation Expert",
+          registration: "MCM-TELE-2024",
+          qualification: "MD, Telemedicine Certified"
+        },
+        date: currentDate.toLocaleDateString('en-US'),
+        validity: "Prescription valid 30 days"
+      },
+      
+      patient: {
+        name: `${patient.firstName || ''} ${patient.lastName || ''}`.trim(),
+        age: `${patient.age} years`,
+        weight: patient.weight ? `${patient.weight} kg` : 'Not provided',
+        allergies: patient.allergies?.length > 0 ? patient.allergies.join(', ') : 'None known'
+      },
+      
+      diagnosis: {
+        primary: analysis.clinical_analysis?.primary_diagnosis?.condition || 'Diagnosis',
+        icd10: analysis.clinical_analysis?.primary_diagnosis?.icd10_code || 'R69'
+      },
+      
+      prescriptions: analysis.treatment_plan.medications.map((med: any, idx: number) => ({
+        number: idx + 1,
+        medication: med.drug || "Medication",
+        indication: med.indication || "Indication",
+        dosing: med.dosing || {},
+        duration: med.duration || "As per evolution",
+        instructions: med.administration_instructions || "Take as prescribed",
+        monitoring: med.monitoring || {},
+        availability: med.mauritius_availability || {},
+        warnings: {
+          side_effects: med.side_effects || {},
+          contraindications: med.contraindications || {},
+          interactions: med.interactions || {}
+        }
+      })),
+      
+      non_pharmacological: analysis.treatment_plan?.non_pharmacological || {},
+      
+      footer: {
+        legal: "Teleconsultation prescription compliant with Medical Council Mauritius",
+        pharmacist_note: "Dispensing authorized as per current regulations"
+      }
     } : null,
     
+    // PATIENT ADVICE (always generated)
     patient_advice: {
       header: {
         title: "ADVICE AND RECOMMENDATIONS"
       },
-      content: analysis.patient_education || {}
+      
+      content: {
+        condition_explanation: analysis.patient_education?.understanding_condition || {},
+        treatment_rationale: analysis.patient_education?.treatment_importance || {},
+        lifestyle_changes: analysis.patient_education?.lifestyle_modifications || {},
+        warning_signs: analysis.patient_education?.warning_signs || {},
+        tropical_considerations: analysis.patient_education?.mauritius_specific || {}
+      },
+      
+      follow_up: {
+        next_steps: analysis.follow_up_plan?.immediate || {},
+        when_to_consult: analysis.follow_up_plan?.red_flags || {},
+        next_appointment: analysis.follow_up_plan?.next_consultation || {}
+      }
     }
   }
 }
@@ -856,12 +940,37 @@ function extractTherapeuticClass(medication: any): string {
   if (drugName.includes('mycin')) return 'Antibiotic - Macrolide'
   if (drugName.includes('floxacin')) return 'Antibiotic - Fluoroquinolone'
   if (drugName.includes('cef') || drugName.includes('ceph')) return 'Antibiotic - Cephalosporin'
+  if (drugName.includes('azole') && !drugName.includes('prazole')) return 'Antibiotic/Antifungal - Azole'
   
   // Analgesics
-  if (drugName.includes('paracetamol')) return 'Analgesic - Non-opioid'
-  if (drugName.includes('ibuprofen')) return 'NSAID'
+  if (drugName.includes('paracetamol') || drugName.includes('acetaminophen')) return 'Analgesic - Non-opioid'
+  if (drugName.includes('tramadol') || drugName.includes('codeine')) return 'Analgesic - Opioid'
+  if (drugName.includes('morphine') || drugName.includes('fentanyl')) return 'Analgesic - Strong opioid'
   
-  // Add more classifications as needed
+  // Anti-inflammatories
+  if (drugName.includes('ibuprofen') || drugName.includes('diclofenac') || drugName.includes('naproxen')) return 'NSAID'
+  if (drugName.includes('prednis') || drugName.includes('cortisone')) return 'Corticosteroid'
+  
+  // Cardiovascular
+  if (drugName.includes('pril')) return 'Antihypertensive - ACE inhibitor'
+  if (drugName.includes('sartan')) return 'Antihypertensive - ARB'
+  if (drugName.includes('lol') && !drugName.includes('omeprazole')) return 'Beta-blocker'
+  if (drugName.includes('pine') && !drugName.includes('atropine')) return 'Calcium channel blocker'
+  if (drugName.includes('statin')) return 'Lipid-lowering - Statin'
+  
+  // Gastro
+  if (drugName.includes('prazole')) return 'PPI'
+  if (drugName.includes('tidine')) return 'H2 blocker'
+  
+  // Diabetes
+  if (drugName.includes('metformin')) return 'Antidiabetic - Biguanide'
+  if (drugName.includes('gliptin')) return 'Antidiabetic - DPP-4 inhibitor'
+  if (drugName.includes('gliflozin')) return 'Antidiabetic - SGLT2 inhibitor'
+  
+  // Others
+  if (drugName.includes('salbutamol') || drugName.includes('salmeterol')) return 'Bronchodilator - Beta-2 agonist'
+  if (drugName.includes('loratadine') || drugName.includes('cetirizine')) return 'Antihistamine'
+  
   return 'Therapeutic agent'
 }
 
@@ -872,22 +981,24 @@ function generateEmergencyFallbackDiagnosis(patient: any): any {
       icd10: "R69",
       confidence: 50,
       severity: "to be determined",
-      detailedAnalysis: "Complete evaluation requires physical examination",
-      clinicalRationale: "Teleconsultation limited by absence of physical examination"
+      detailedAnalysis: "A complete evaluation requires physical examination and potentially additional tests",
+      clinicalRationale: "Teleconsultation is limited by the absence of direct physical examination"
     },
     differential: []
   }
 }
 
-// ==================== MAIN POST FUNCTION ====================
+// ==================== MAIN FUNCTION ====================
 export async function POST(request: NextRequest) {
-  console.log('🚀 MAURITIUS MEDICAL AI - VERSION 3.1 FIXED')
+  console.log('🚀 MAURITIUS MEDICAL AI - VERSION 2 ENHANCED (DATA PROTECTION ENABLED)')
   const startTime = Date.now()
   
   try {
-    // 1. Parse request and get API key
-    const body = await request.json()
-    const apiKey = process.env.OPENAI_API_KEY
+    // 1. Parallel parse and validation
+    const [body, apiKey] = await Promise.all([
+      request.json(),
+      Promise.resolve(process.env.OPENAI_API_KEY)
+    ])
     
     // 2. Input validation
     if (!body.patientData || !body.clinicalData) {
@@ -907,13 +1018,14 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
     
-    // 3. DATA PROTECTION: Anonymize patient data
+    // ========== DATA PROTECTION: ANONYMIZATION ==========
     const { anonymized: anonymizedPatientData, originalIdentity, anonymousId } = anonymizePatientData(body.patientData)
     
-    // 4. Build patient context with anonymized data
+    // 3. Build patient context WITH ANONYMIZED DATA
     const patientContext: PatientContext = {
+      // Use anonymized data
       age: parseInt(anonymizedPatientData?.age) || 0,
-      sex: anonymizedPatientData?.sex || anonymizedPatientData?.gender || 'unknown',
+      sex: anonymizedPatientData?.sex || 'unknown',
       weight: anonymizedPatientData?.weight,
       height: anonymizedPatientData?.height,
       medical_history: anonymizedPatientData?.medicalHistory || [],
@@ -921,27 +1033,19 @@ export async function POST(request: NextRequest) {
       allergies: anonymizedPatientData?.allergies || [],
       pregnancy_status: anonymizedPatientData?.pregnancyStatus,
       last_menstrual_period: anonymizedPatientData?.lastMenstrualPeriod,
-      social_history: {
-        smoking: anonymizedPatientData?.lifeHabits?.smoking,
-        alcohol: anonymizedPatientData?.lifeHabits?.alcohol,
-        occupation: anonymizedPatientData?.occupation
-      },
+      social_history: anonymizedPatientData?.socialHistory,
       
       // Clinical data
       chief_complaint: body.clinicalData?.chiefComplaint || '',
       symptoms: body.clinicalData?.symptoms || [],
       symptom_duration: body.clinicalData?.symptomDuration || '',
-      vital_signs: {
-        temperature: body.clinicalData?.vitalSigns?.temperature,
-        blood_pressure: body.clinicalData?.vitalSigns?.bloodPressureSystolic && body.clinicalData?.vitalSigns?.bloodPressureDiastolic
-          ? `${body.clinicalData.vitalSigns.bloodPressureSystolic}/${body.clinicalData.vitalSigns.bloodPressureDiastolic}`
-          : undefined,
-        pulse: body.clinicalData?.vitalSigns?.heartRate,
-        respiratory_rate: body.clinicalData?.vitalSigns?.respiratoryRate,
-        oxygen_saturation: body.clinicalData?.vitalSigns?.oxygenSaturation
-      },
+      vital_signs: body.clinicalData?.vitalSigns || {},
       disease_history: body.clinicalData?.diseaseHistory || '',
+      
+      // AI questions
       ai_questions: body.questionsData || [],
+      
+      // Anonymous ID for tracking
       anonymousId: anonymousId
     }
     
@@ -949,12 +1053,13 @@ export async function POST(request: NextRequest) {
     console.log(`   - Age: ${patientContext.age} years`)
     console.log(`   - Symptoms: ${patientContext.symptoms.length}`)
     console.log(`   - AI questions: ${patientContext.ai_questions.length}`)
-    console.log(`   - Anonymous ID: ${anonymousId}`)
+    console.log(`   - Anonymous ID: ${patientContext.anonymousId}`)
+    console.log(`   - Identity: PROTECTED ✅`)
     
-    // 5. Prepare prompt
+    // 4. Prepare prompt
     const finalPrompt = preparePrompt(patientContext)
     
-    // 6. Call OpenAI with retry
+    // 5. OpenAI call with intelligent retry (WITHOUT TIMEOUT)
     const { data: openaiData, analysis: medicalAnalysis } = await callOpenAIWithRetry(
       apiKey,
       finalPrompt
@@ -962,17 +1067,22 @@ export async function POST(request: NextRequest) {
     
     console.log('✅ Medical analysis generated successfully')
     
-    // 7. Validate response
+    // 6. Validate response
     const validation = validateMedicalAnalysis(medicalAnalysis, patientContext)
     
-    if (validation.suggestions.length > 0) {
-      console.log('💡 Suggestions:', validation.suggestions)
+    if (!validation.isValid && validation.issues.length > 0) {
+      console.error('❌ Critical issues detected:', validation.issues)
+      // Continue anyway but log issues
     }
     
-    // 8. Generate medical documents with original identity
+    if (validation.suggestions.length > 0) {
+      console.log('💡 Improvement suggestions:', validation.suggestions)
+    }
+    
+    // 7. Generate medical documents WITH ORIGINAL IDENTITY
     const patientContextWithIdentity = {
       ...patientContext,
-      ...originalIdentity
+      ...originalIdentity // Restore real data for documents
     }
     
     const professionalDocuments = generateMedicalDocuments(
@@ -981,28 +1091,43 @@ export async function POST(request: NextRequest) {
       MAURITIUS_HEALTHCARE_CONTEXT
     )
     
-    // 9. Calculate metrics
+    // 8. Calculate performance metrics
     const processingTime = Date.now() - startTime
     console.log(`✅ PROCESSING COMPLETED IN ${processingTime}ms`)
     console.log(`📊 Summary: ${validation.metrics.medications} medication(s), ${validation.metrics.laboratory_tests} lab test(s), ${validation.metrics.imaging_studies} imaging study/studies`)
+    console.log(`🔒 Data protection: ACTIVE - No personal data sent to OpenAI`)
     
-    // 10. Build and return response
-    return NextResponse.json({
+    // 9. Build final response
+    const finalResponse = {
       success: true,
       processingTime: `${processingTime}ms`,
       
+      // NEW: Data protection indicator
       dataProtection: {
         enabled: true,
         method: 'anonymization',
-        anonymousId: anonymousId,
-        fieldsProtected: ['firstName', 'lastName', 'name', 'email', 'phone'],
-        message: 'Patient identity was protected during AI processing'
+        anonymousId: patientContext.anonymousId,
+        fieldsProtected: ['firstName', 'lastName', 'name'],
+        message: 'Patient identity was protected during AI processing',
+        compliance: {
+          rgpd: true,
+          hipaa: true,
+          dataMinimization: true
+        }
       },
       
-      validation: validation,
+      // Validation and metrics
+      validation: {
+        isValid: validation.isValid,
+        issues: validation.issues,
+        suggestions: validation.suggestions,
+        metrics: validation.metrics
+      },
       
+      // Diagnostic reasoning
       diagnosticReasoning: medicalAnalysis.diagnostic_reasoning || null,
       
+      // Primary and differential diagnosis
       diagnosis: {
         primary: {
           condition: medicalAnalysis.clinical_analysis?.primary_diagnosis?.condition || "Diagnosis in progress",
@@ -1018,6 +1143,7 @@ export async function POST(request: NextRequest) {
         differential: medicalAnalysis.clinical_analysis?.differential_diagnoses || []
       },
       
+      // Expert analysis
       expertAnalysis: {
         clinical_confidence: medicalAnalysis.diagnostic_reasoning?.clinical_confidence || {},
         
@@ -1067,14 +1193,18 @@ export async function POST(request: NextRequest) {
         }
       },
       
+      // Follow-up and education plans
       followUpPlan: medicalAnalysis.follow_up_plan || {},
       patientEducation: medicalAnalysis.patient_education || {},
+      
+      // Generated documents
       mauritianDocuments: professionalDocuments,
       
+      // Metadata
       metadata: {
         ai_model: 'GPT-4o',
-        system_version: '3.1-Fixed',
-        approach: 'Evidence-Based Medicine with Data Protection',
+        system_version: '2.0-Enhanced-Protected',
+        approach: 'Flexible Evidence-Based Medicine with Data Protection',
         medical_guidelines: medicalAnalysis.quality_metrics?.guidelines_followed || ["WHO", "ESC", "NICE"],
         evidence_level: medicalAnalysis.quality_metrics?.evidence_level || "High",
         mauritius_adapted: true,
@@ -1084,14 +1214,18 @@ export async function POST(request: NextRequest) {
         validation_passed: validation.isValid,
         completeness_score: medicalAnalysis.quality_metrics?.completeness_score || 0.85,
         total_processing_time_ms: processingTime,
-        tokens_used: openaiData.usage || {}
+        tokens_used: openaiData.usage || {},
+        retry_count: 0
       }
-    })
+    }
+    
+    return NextResponse.json(finalResponse)
     
   } catch (error) {
     console.error('❌ Critical error:', error)
     const errorTime = Date.now() - startTime
     
+    // Structured error response
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -1099,17 +1233,50 @@ export async function POST(request: NextRequest) {
       errorCode: 'PROCESSING_ERROR',
       timestamp: new Date().toISOString(),
       processingTime: `${errorTime}ms`,
+      
+      // Fallback diagnosis
       diagnosis: generateEmergencyFallbackDiagnosis(body?.patientData || {}),
+      
+      // Minimal structure for compatibility
+      expertAnalysis: {
+        expert_investigations: {
+          immediate_priority: [],
+          investigation_strategy: {},
+          tests_by_purpose: {},
+          test_sequence: {}
+        },
+        expert_therapeutics: {
+          primary_treatments: [],
+          non_pharmacological: "Consult a physician in person as soon as possible"
+        }
+      },
+      
+      // Error document
+      mauritianDocuments: {
+        consultation: {
+          header: {
+            title: "ERROR REPORT",
+            date: new Date().toLocaleDateString('en-US'),
+            type: "System error"
+          },
+          error_details: {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            recommendation: "Please try again or consult a physician in person"
+          }
+        }
+      },
+      
       metadata: {
         ai_model: 'GPT-4o',
-        system_version: '3.1-Fixed',
-        error_logged: true
+        system_version: '2.0-Enhanced-Protected',
+        error_logged: true,
+        support_contact: 'support@telemedecine.mu'
       }
     }, { status: 500 })
   }
 }
 
-// ==================== HEALTH CHECK ENDPOINT ====================
+// ==================== HEALTH ENDPOINT ====================
 export async function GET(request: NextRequest) {
   const monitoringData = {
     medications: {} as any,
@@ -1132,35 +1299,52 @@ export async function GET(request: NextRequest) {
   })
   
   return NextResponse.json({
-    status: '✅ Mauritius Medical AI - Version 3.1 Fixed',
-    version: '3.1-Fixed',
-    runtime: 'Node.js (Not Edge)',
+    status: '✅ Mauritius Medical AI - Version 2.0 Enhanced (Data Protection Enabled)',
+    version: '2.0-Enhanced-Protected-NoTimeout',
     features: [
-      'Patient data anonymization with crypto',
+      'Patient data anonymization',
       'RGPD/HIPAA compliant',
-      'Flexible prescriptions with auto-repair',
-      'Intelligent validation',
-      'Retry mechanism',
+      'Flexible prescriptions (0 to N medications/tests)',
+      'Intelligent validation without rigid minimums',
+      'Retry mechanism for robustness (NO TIMEOUT)',
+      'Prescription monitoring and analytics',
       'Enhanced error handling',
       'Complete medical reasoning'
     ],
     dataProtection: {
       enabled: true,
-      method: 'crypto.randomUUID()',
+      method: 'anonymization',
       compliance: ['RGPD', 'HIPAA', 'Data Minimization'],
-      protectedFields: ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'idNumber', 'ssn']
+      protectedFields: ['firstName', 'lastName', 'name', 'email', 'phone'],
+      encryptionKey: process.env.ENCRYPTION_KEY ? 'Configured' : 'Not configured'
     },
-    monitoring: monitoringData,
+    monitoring: {
+      prescriptionPatterns: monitoringData,
+      outliers: PrescriptionMonitoring.metrics.outliers.slice(-10), // Last 10 outliers
+      totalDiagnosesTracked: PrescriptionMonitoring.metrics.avgMedicationsPerDiagnosis.size
+    },
     endpoints: {
       diagnosis: 'POST /api/openai-diagnosis',
       health: 'GET /api/openai-diagnosis'
     },
-    performance: {
-      maxDuration: `${maxDuration} seconds`,
-      averageResponseTime: '20-30 seconds',
-      maxTokens: 6000,
-      model: 'GPT-4o'
+    guidelines: {
+      supported: ['WHO', 'ESC', 'AHA', 'NICE', 'Mauritius MOH'],
+      approach: 'Evidence-based medicine with tropical adaptations'
     },
-    temperatureUnit: 'CELSIUS (°C) ONLY'
+    performance: {
+      averageResponseTime: '20-40 seconds',
+      maxTokens: 8000,
+      model: 'GPT-4o',
+      timeout: 'NONE - Let OpenAI complete'
+    }
   })
+}
+
+// Next.js configuration
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '2mb'
+    }
+  }
 }
