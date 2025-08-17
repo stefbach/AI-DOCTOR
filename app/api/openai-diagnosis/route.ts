@@ -1,9 +1,7 @@
 // app/api/openai-diagnosis/route.ts - VERSION 3.0 COMPLETE REWRITE
 import { NextRequest, NextResponse } from 'next/server'
+import crypto from 'crypto'
 
-// Configuration for Edge Runtime
-export const runtime = 'edge'
-export const preferredRegion = 'auto'
 
 // ==================== TYPES AND INTERFACES ====================
 interface PatientContext {
