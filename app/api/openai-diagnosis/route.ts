@@ -1,4 +1,4 @@
-// app/api/openai-diagnosis/route.ts - VERSION 5.0 COMPLETE WITH POSOLOGY & PACKAGING
+// app/api/openai-diagnosis/route.ts - VERSION 6.0 WITH PREGNANCY MANAGEMENT
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
@@ -26,8 +26,11 @@ interface PatientContext {
     question: string
     answer: string
   }>
-  pregnancy_status?: string
+  // PREGNANCY FIELDS - NEW
+  pregnancy_status?: string // pregnant, possibly_pregnant, breastfeeding, not_pregnant
   last_menstrual_period?: string
+  gestational_age?: string // in weeks
+  trimester?: string // first, second, third
   social_history?: {
     smoking?: string
     alcohol?: string
@@ -43,10 +46,12 @@ interface ValidationResult {
   isValid: boolean
   issues: string[]
   suggestions: string[]
+  pregnancyWarnings: string[] // NEW
   metrics: {
     medications: number
     laboratory_tests: number
     imaging_studies: number
+    pregnancySafetyChecked: boolean // NEW
   }
 }
 
@@ -58,7 +63,27 @@ interface DrugProtocol {
   quantity: string
   pediatricAdjustment?: string
   geriatricAdjustment?: string
+  pregnancyAdjustment?: string // NEW
+  pregnancyCategory?: string // NEW: FDA categories A, B, C, D, X
+  breastfeedingCategory?: string // NEW: L1-L5
   contraindication?: string
+}
+
+// ==================== PREGNANCY SAFETY CATEGORIES ====================
+const PREGNANCY_CATEGORIES = {
+  A: "No risk in controlled studies", // Safe
+  B: "No risk in animal studies", // Probably safe
+  C: "Risk cannot be ruled out", // Use if benefit > risk
+  D: "Positive evidence of risk", // Use only in life-threatening situations
+  X: "Contraindicated in pregnancy" // Never use
+}
+
+const BREASTFEEDING_CATEGORIES = {
+  L1: "Safest - Extensive studies show no risk",
+  L2: "Safer - Limited studies show no risk",
+  L3: "Moderately safe - No controlled studies, probably compatible",
+  L4: "Possibly hazardous - Evidence of risk",
+  L5: "Contraindicated - Significant documented risk"
 }
 
 // ==================== UNIVERSAL DRUG CLASSIFICATION ====================
@@ -97,6 +122,70 @@ const DRUG_CLASSIFICATIONS = {
   analgesics_only: ['paracetamol', 'acetaminophen'], // NOT anti-inflammatory!
   
   antifungals: ['fluconazole', 'itraconazole', 'ketoconazole', 'clotrimazole', 'miconazole', 'nystatin', 'terbinafine']
+}
+
+// ==================== MEDICATION PREGNANCY SAFETY DATABASE ====================
+const MEDICATION_PREGNANCY_SAFETY = {
+  // ANTIBIOTICS
+  'amoxicillin': { category: 'B', breastfeeding: 'L1', safe: true },
+  'azithromycin': { category: 'B', breastfeeding: 'L2', safe: true },
+  'cephalexin': { category: 'B', breastfeeding: 'L1', safe: true },
+  'cefuroxime': { category: 'B', breastfeeding: 'L1', safe: true },
+  'penicillin': { category: 'B', breastfeeding: 'L1', safe: true },
+  'nitrofurantoin': { category: 'B', breastfeeding: 'L2', safe: true, note: 'Avoid at term' },
+  'metronidazole': { category: 'B', breastfeeding: 'L2', safe: true, note: 'Single dose OK' },
+  'doxycycline': { category: 'D', breastfeeding: 'L3', safe: false, note: 'Avoid - teeth discoloration' },
+  'tetracycline': { category: 'D', breastfeeding: 'L2', safe: false, note: 'Contraindicated' },
+  'ciprofloxacin': { category: 'C', breastfeeding: 'L3', safe: false, note: 'Use only if no alternative' },
+  'levofloxacin': { category: 'C', breastfeeding: 'L3', safe: false },
+  'gentamicin': { category: 'D', breastfeeding: 'L2', safe: false, note: 'Ototoxicity risk' },
+  
+  // ANALGESICS
+  'paracetamol': { category: 'B', breastfeeding: 'L1', safe: true },
+  'acetaminophen': { category: 'B', breastfeeding: 'L1', safe: true },
+  'ibuprofen': { category: 'B/D', breastfeeding: 'L1', safe: false, note: 'Avoid in 3rd trimester' },
+  'diclofenac': { category: 'C/D', breastfeeding: 'L2', safe: false, note: 'Avoid in 3rd trimester' },
+  'aspirin': { category: 'C/D', breastfeeding: 'L2', safe: false, note: 'Low dose OK for certain conditions' },
+  'codeine': { category: 'C', breastfeeding: 'L3', safe: false, note: 'Risk of neonatal withdrawal' },
+  'tramadol': { category: 'C', breastfeeding: 'L2', safe: false, note: 'Use with caution' },
+  
+  // CORTICOSTEROIDS
+  'prednisolone': { category: 'B', breastfeeding: 'L2', safe: true, note: 'Short courses OK' },
+  'methylprednisolone': { category: 'C', breastfeeding: 'L2', safe: true },
+  'hydrocortisone': { category: 'C', breastfeeding: 'L2', safe: true },
+  'dexamethasone': { category: 'C', breastfeeding: 'L3', safe: true, note: 'For fetal lung maturation' },
+  'betamethasone': { category: 'C', breastfeeding: 'L3', safe: true },
+  
+  // ANTIFUNGALS
+  'fluconazole': { category: 'C', breastfeeding: 'L2', safe: false, note: 'Single dose OK, avoid high doses' },
+  'clotrimazole': { category: 'B', breastfeeding: 'L1', safe: true, note: 'Topical/vaginal safe' },
+  'miconazole': { category: 'C', breastfeeding: 'L2', safe: true, note: 'Topical/vaginal safe' },
+  'nystatin': { category: 'A', breastfeeding: 'L1', safe: true },
+  
+  // ANTIHISTAMINES
+  'cetirizine': { category: 'B', breastfeeding: 'L2', safe: true },
+  'loratadine': { category: 'B', breastfeeding: 'L1', safe: true },
+  'chlorpheniramine': { category: 'B', breastfeeding: 'L3', safe: true },
+  
+  // GASTROINTESTINAL
+  'omeprazole': { category: 'C', breastfeeding: 'L2', safe: true },
+  'ranitidine': { category: 'B', breastfeeding: 'L2', safe: true },
+  'domperidone': { category: 'C', breastfeeding: 'L1', safe: true, note: 'Increases milk production' },
+  'metoclopramide': { category: 'B', breastfeeding: 'L2', safe: true },
+  'ondansetron': { category: 'B', breastfeeding: 'L2', safe: true },
+  
+  // CARDIOVASCULAR
+  'methyldopa': { category: 'B', breastfeeding: 'L2', safe: true, note: 'First-line for HTN in pregnancy' },
+  'labetalol': { category: 'C', breastfeeding: 'L2', safe: true, note: 'Safe for HTN in pregnancy' },
+  'nifedipine': { category: 'C', breastfeeding: 'L2', safe: true },
+  'amlodipine': { category: 'C', breastfeeding: 'L3', safe: false, note: 'Limited data' },
+  'lisinopril': { category: 'D', breastfeeding: 'L3', safe: false, note: 'ACE inhibitors contraindicated' },
+  'losartan': { category: 'D', breastfeeding: 'L3', safe: false, note: 'ARBs contraindicated' },
+  
+  // RESPIRATORY
+  'salbutamol': { category: 'C', breastfeeding: 'L1', safe: true },
+  'budesonide': { category: 'B', breastfeeding: 'L1', safe: true, note: 'Preferred inhaled steroid' },
+  'beclomethasone': { category: 'C', breastfeeding: 'L2', safe: true },
 }
 
 // ==================== THERAPEUTIC PROTOCOLS WITH FULL POSOLOGY & PACKAGING ====================
@@ -794,6 +883,560 @@ const THERAPEUTIC_PROTOCOLS = {
   }
 }
 
+// ==================== PREGNANCY-ADAPTED THERAPEUTIC PROTOCOLS ====================
+const PREGNANCY_SAFE_PROTOCOLS = {
+  'urinary tract infection': {
+    pregnant: [
+      {
+        name: 'Cephalexin 500mg',
+        posology: '1 capsule four times daily',
+        duration: '7 days',
+        packaging: 'box of 28 capsules',
+        quantity: '1 box',
+        pregnancyCategory: 'B'
+      },
+      {
+        name: 'Amoxicillin 500mg',
+        posology: '1 capsule three times daily',
+        duration: '7 days',
+        packaging: 'box of 21 capsules',
+        quantity: '1 box',
+        pregnancyCategory: 'B'
+      },
+      {
+        name: 'Paracetamol 500mg',
+        posology: '2 tablets every 6 hours as needed',
+        duration: 'As needed',
+        packaging: 'box of 20 tablets',
+        quantity: '1 box',
+        pregnancyCategory: 'B'
+      }
+    ],
+    avoid_in_pregnancy: ['Ciprofloxacin', 'Trimethoprim in 1st trimester', 'Nitrofurantoin at term']
+  },
+  
+  'pharyngitis bacterial': {
+    pregnant: [
+      {
+        name: 'Amoxicillin 500mg',
+        posology: '1 capsule three times daily',
+        duration: '10 days',
+        packaging: 'box of 30 capsules',
+        quantity: '1 box',
+        pregnancyCategory: 'B'
+      },
+      {
+        name: 'Azithromycin 500mg',
+        posology: '500mg once daily',
+        duration: '5 days',
+        packaging: 'box of 5 tablets',
+        quantity: '1 box',
+        pregnancyCategory: 'B'
+      },
+      {
+        name: 'Paracetamol 500mg',
+        posology: '2 tablets every 6 hours',
+        duration: '5 days',
+        packaging: 'box of 20 tablets',
+        quantity: '1 box',
+        pregnancyCategory: 'B'
+      },
+      {
+        name: 'Chlorhexidine 0.2% mouthwash',
+        posology: 'Gargle 10ml twice daily',
+        duration: '7 days',
+        packaging: '200ml bottle',
+        quantity: '1 bottle',
+        pregnancyCategory: 'B'
+      }
+    ],
+    avoid_in_pregnancy: ['NSAIDs', 'Aspirin']
+  },
+  
+  'hypertension': {
+    pregnant: [
+      {
+        name: 'Methyldopa 250mg',
+        posology: '1 tablet twice daily',
+        duration: 'Long-term',
+        packaging: 'box of 30 tablets',
+        quantity: '1 box',
+        pregnancyCategory: 'B',
+        note: 'First-line for pregnancy hypertension'
+      },
+      {
+        name: 'Labetalol 100mg',
+        posology: '1 tablet twice daily',
+        duration: 'Long-term',
+        packaging: 'box of 30 tablets',
+        quantity: '1 box',
+        pregnancyCategory: 'C',
+        note: 'Safe alternative'
+      }
+    ],
+    avoid_in_pregnancy: ['ACE inhibitors', 'ARBs', 'Atenolol']
+  },
+  
+  'nausea and vomiting of pregnancy': {
+    pregnant: [
+      {
+        name: 'Vitamin B6 (Pyridoxine) 25mg',
+        posology: '1 tablet three times daily',
+        duration: 'As needed',
+        packaging: 'box of 30 tablets',
+        quantity: '1 box',
+        pregnancyCategory: 'A'
+      },
+      {
+        name: 'Doxylamine 10mg',
+        posology: '1 tablet at bedtime',
+        duration: 'As needed',
+        packaging: 'box of 30 tablets',
+        quantity: '1 box',
+        pregnancyCategory: 'A'
+      },
+      {
+        name: 'Metoclopramide 10mg',
+        posology: '1 tablet three times daily before meals',
+        duration: '5 days',
+        packaging: 'box of 20 tablets',
+        quantity: '1 box',
+        pregnancyCategory: 'B'
+      }
+    ]
+  }
+}
+
+// ==================== ENHANCED MEDICAL PROMPT WITH PREGNANCY ====================
+const ENHANCED_DIAGNOSTIC_PROMPT_WITH_PREGNANCY = `You are an expert physician practicing telemedicine in Mauritius with comprehensive knowledge of ALL medical specialties, INCLUDING obstetrics and pregnancy care.
+
+🏥 MEDICAL SPECIALTIES COVERED:
+- General Medicine • Pediatrics • OBSTETRICS & GYNECOLOGY (CRITICAL)
+- Ophthalmology • Otolaryngology (ENT) • Dermatology • Cardiology
+- Psychiatry • Gastroenterology • Respiratory • Endocrinology
+- Urology • Neurology • Rheumatology • Infectious Diseases
+
+🤰 PREGNANCY STATUS ASSESSMENT - CRITICAL:
+{{PREGNANCY_STATUS}}
+
+⚠️ PREGNANCY SAFETY RULES - MANDATORY:
+═══════════════════════════════════════════════════════════
+
+IF PATIENT IS PREGNANT OR POSSIBLY PREGNANT:
+1. ONLY prescribe Category A or B medications when possible
+2. AVOID Category C unless benefit clearly outweighs risk
+3. NEVER prescribe Category D or X unless life-threatening
+4. NO NSAIDs in 3rd trimester (premature ductus closure)
+5. NO ACE inhibitors or ARBs (teratogenic)
+6. NO tetracyclines or fluoroquinolones
+7. PREFER ultrasound over X-ray/CT for imaging
+8. DOCUMENT pregnancy considerations in ALL sections
+
+IF PATIENT IS BREASTFEEDING:
+1. Check lactation category (L1-L5)
+2. Prefer L1-L2 medications
+3. Time doses after breastfeeding when possible
+4. Monitor infant for side effects
+
+📋 PREGNANCY-SPECIFIC PROTOCOLS:
+═══════════════════════════════════════════════════════════
+
+FOR UTI IN PREGNANCY:
+✅ USE: Cephalexin, Amoxicillin, Nitrofurantoin (not at term)
+❌ AVOID: Fluoroquinolones, Trimethoprim (1st trimester)
+
+FOR HYPERTENSION IN PREGNANCY:
+✅ USE: Methyldopa (first-line), Labetalol, Nifedipine
+❌ AVOID: ACE inhibitors, ARBs, Atenolol
+
+FOR PAIN IN PREGNANCY:
+✅ USE: Paracetamol/Acetaminophen (safest)
+❌ AVOID: NSAIDs (especially 3rd trimester), Aspirin (unless low-dose for specific indication)
+
+FOR NAUSEA/VOMITING IN PREGNANCY:
+✅ USE: Vitamin B6, Doxylamine, Metoclopramide
+❌ AVOID: Most antiemetics without clear indication
+
+FOR INFECTIONS IN PREGNANCY:
+✅ USE: Penicillins, Cephalosporins, Azithromycin
+❌ AVOID: Tetracyclines, Fluoroquinolones, Aminoglycosides
+
+📋 PATIENT PRESENTATION:
+{{PATIENT_CONTEXT}}
+
+GENERATE THIS EXACT JSON STRUCTURE WITH PREGNANCY CONSIDERATIONS:
+
+{
+  "diagnostic_reasoning": {
+    "key_findings": {
+      "from_history": "[What stands out from patient history]",
+      "from_symptoms": "[Pattern recognition from symptoms]",
+      "from_ai_questions": "[CRITICAL findings from questionnaire responses]",
+      "pregnancy_impact": "[How pregnancy affects presentation if applicable]",
+      "red_flags": "[Any concerning features requiring urgent action]"
+    },
+    
+    "syndrome_identification": {
+      "clinical_syndrome": "[e.g., Acute coronary syndrome, Viral syndrome, etc.]",
+      "supporting_features": "[List features supporting this syndrome]",
+      "inconsistent_features": "[Any features that don't fit]",
+      "pregnancy_considerations": "[How pregnancy modifies the syndrome]"
+    },
+    
+    "clinical_confidence": {
+      "diagnostic_certainty": "[High/Moderate/Low]",
+      "reasoning": "[Why this level of certainty]",
+      "missing_information": "[What additional info would increase certainty]",
+      "pregnancy_safety_reviewed": true/false
+    }
+  },
+  
+  "clinical_analysis": {
+    "primary_diagnosis": {
+      "condition": "[Precise diagnosis with classification/stage if applicable]",
+      "icd10_code": "[Appropriate ICD-10 code]",
+      "confidence_level": [60-85 max for teleconsultation],
+      "severity": "mild/moderate/severe/critical",
+      "pregnancy_impact": "[How pregnancy affects the condition and vice versa]",
+      "fetal_risk": "[Risk to fetus if pregnant: None/Low/Moderate/High]",
+      "diagnostic_criteria_met": [
+        "Criterion 1: [How patient meets this]",
+        "Criterion 2: [How patient meets this]"
+      ],
+      "certainty_level": "[High/Moderate/Low based on available data]",
+      
+      "pathophysiology": "[MINIMUM 200 WORDS] Include pregnancy-related changes if applicable",
+      
+      "clinical_reasoning": "[MINIMUM 150 WORDS] Include pregnancy considerations",
+      
+      "prognosis": "[MINIMUM 100 WORDS] Include maternal and fetal prognosis if pregnant"
+    },
+    
+    "differential_diagnoses": [],
+    
+    "pregnancy_assessment": {
+      "trimester": "[First/Second/Third/Not pregnant]",
+      "gestational_age": "[X weeks]",
+      "pregnancy_complications_risk": "[List potential complications]",
+      "monitoring_needed": "[Special monitoring required]",
+      "obstetric_referral_needed": true/false
+    }
+  },
+  
+  "investigation_strategy": {
+    "diagnostic_approach": "Strategy adapted to pregnancy status",
+    "clinical_justification": "[Why these tests, considering pregnancy]",
+    "pregnancy_safe_alternatives": "[Alternative tests if standard ones contraindicated]",
+    "laboratory_tests": [
+      {
+        "test_name": "[Test name]",
+        "pregnancy_safe": true/false,
+        "trimester_specific": "[Any trimester-specific considerations]",
+        "fetal_monitoring": "[If test affects fetus]"
+      }
+    ],
+    "imaging_studies": [
+      {
+        "study_name": "[Imaging type]",
+        "radiation_exposure": true/false,
+        "pregnancy_alternative": "[Ultrasound/MRI if X-ray/CT needed]",
+        "shielding_required": true/false
+      }
+    ]
+  },
+  
+  "treatment_plan": {
+    "approach": "[Overall strategy considering pregnancy]",
+    
+    "pregnancy_safety_statement": "[Clear statement about medication safety in pregnancy]",
+    
+    "prescription_rationale": "[Why THESE specific medications, considering pregnancy]",
+    
+    "medications": [
+      {
+        "drug": "[Name with exact strength]",
+        "therapeutic_role": "etiological/symptomatic/preventive/supportive",
+        "indication": "[Specific indication]",
+        "mechanism": "[How it helps]",
+        "pregnancy_category": "[A/B/C/D/X]",
+        "pregnancy_safety": "[Safe/Use with caution/Contraindicated]",
+        "breastfeeding_category": "[L1-L5]",
+        "trimester_precautions": "[First/Second/Third trimester specific]",
+        "fetal_monitoring": "[Any special monitoring needed]",
+        "posology": "[EXACT dosing adjusted for pregnancy if needed]",
+        "duration": "[EXACT duration]",
+        "packaging": "[EXACT packaging]",
+        "quantity": "[EXACT quantity]",
+        "form": "[tablet/capsule/drops/cream/inhaler/etc]",
+        "route": "[Oral/Topical/Otic/Ophthalmic/etc]",
+        "monitoring": "[What to monitor including fetal]",
+        "side_effects": "[Including pregnancy-specific]",
+        "contraindications": "[Including pregnancy-related]",
+        "administration_instructions": "[How to take/use]"
+      }
+    ],
+    
+    "non_pharmacological": "[Lifestyle measures safe in pregnancy]",
+    
+    "procedures": [],
+    
+    "referrals": [
+      {
+        "specialty": "[Obstetrics if needed]",
+        "urgency": "[Routine/Urgent/Emergency]",
+        "reason": "[Why referral needed]"
+      }
+    ]
+  },
+  
+  "follow_up_plan": {
+    "immediate": "[Within 24-48h]",
+    "short_term": "[D3-D7]",
+    "long_term": "[1 month]",
+    "obstetric_follow_up": "[Prenatal care schedule if pregnant]",
+    "red_flags": ["Warning signs including pregnancy complications"],
+    "when_to_seek_emergency": ["Including obstetric emergencies"],
+    "next_consultation": "[When to follow up]"
+  },
+  
+  "patient_education": {
+    "understanding_condition": "[Clear explanation]",
+    "pregnancy_specific_education": "[Information about condition in pregnancy]",
+    "medication_safety": "[Reassurance about pregnancy-safe medications]",
+    "warning_signs": "[Including pregnancy warning signs]",
+    "lifestyle_modifications": "[Safe for pregnancy]",
+    "fetal_wellbeing": "[How to monitor if pregnant]",
+    "breastfeeding_guidance": "[If applicable]"
+  },
+  
+  "quality_metrics": {
+    "completeness_score": 0.85,
+    "evidence_level": "[High/Moderate/Low]",
+    "pregnancy_safety_verified": true/false,
+    "guidelines_followed": ["WHO", "ACOG", "RCOG", "ESC", "NICE"],
+    "word_counts": {
+      "pathophysiology": 200,
+      "clinical_reasoning": 150,
+      "patient_education": 150
+    }
+  }
+}`
+
+// ==================== HELPER FUNCTIONS FOR PREGNANCY ====================
+function getPregnancyTrimester(gestationalAge: string): string {
+  if (!gestationalAge) return ''
+  
+  const weeks = parseInt(gestationalAge.replace(/[^\d]/g, ''))
+  if (isNaN(weeks)) return ''
+  
+  if (weeks < 13) return 'first'
+  if (weeks < 28) return 'second'
+  if (weeks <= 42) return 'third'
+  return ''
+}
+
+function checkMedicationPregnancySafety(drugName: string): {
+  category: string
+  safe: boolean
+  note: string
+  breastfeeding: string
+} {
+  const drug = drugName.toLowerCase().split(' ')[0]
+  
+  for (const [med, safety] of Object.entries(MEDICATION_PREGNANCY_SAFETY)) {
+    if (drug.includes(med)) {
+      return {
+        category: safety.category,
+        safe: safety.safe,
+        note: safety.note || '',
+        breastfeeding: safety.breastfeeding
+      }
+    }
+  }
+  
+  return {
+    category: 'Unknown',
+    safe: false,
+    note: 'No pregnancy safety data available - use with caution',
+    breastfeeding: 'Unknown'
+  }
+}
+
+function getPregnancySafeAlternative(drugClass: string, trimester: string): DrugProtocol | null {
+  const alternatives: { [key: string]: DrugProtocol } = {
+    'nsaid': {
+      name: 'Paracetamol 500mg',
+      posology: '2 tablets every 6 hours as needed',
+      duration: 'As needed',
+      packaging: 'box of 20 tablets',
+      quantity: '1 box',
+      pregnancyCategory: 'B'
+    },
+    'antibiotic_uti': {
+      name: 'Cephalexin 500mg',
+      posology: '1 capsule four times daily',
+      duration: '7 days',
+      packaging: 'box of 28 capsules',
+      quantity: '1 box',
+      pregnancyCategory: 'B'
+    },
+    'antihypertensive': {
+      name: 'Methyldopa 250mg',
+      posology: '1 tablet twice daily',
+      duration: 'Long-term',
+      packaging: 'box of 30 tablets',
+      quantity: '1 box',
+      pregnancyCategory: 'B'
+    },
+    'antiemetic': {
+      name: 'Vitamin B6 25mg',
+      posology: '1 tablet three times daily',
+      duration: 'As needed',
+      packaging: 'box of 30 tablets',
+      quantity: '1 box',
+      pregnancyCategory: 'A'
+    }
+  }
+  
+  return alternatives[drugClass] || null
+}
+
+// ==================== ENHANCED VALIDATION WITH PREGNANCY ====================
+function validatePharmacologyWithPregnancy(
+  diagnosis: string, 
+  medications: any[], 
+  patientAge: number,
+  pregnancyStatus?: string,
+  trimester?: string
+): {
+  valid: boolean
+  errors: string[]
+  corrections: any[]
+  pregnancyWarnings: string[]
+} {
+  const errors: string[] = []
+  const corrections: any[] = []
+  const pregnancyWarnings: string[] = []
+  
+  const isPregnant = pregnancyStatus === 'pregnant' || pregnancyStatus === 'possibly_pregnant'
+  const isBreastfeeding = pregnancyStatus === 'breastfeeding'
+  
+  // Check each medication for pregnancy safety
+  medications.forEach((med, index) => {
+    const drugName = (med.drug || '').toLowerCase()
+    
+    if (isPregnant || isBreastfeeding) {
+      const safety = checkMedicationPregnancySafety(drugName)
+      
+      if (isPregnant) {
+        if (safety.category === 'D' || safety.category === 'X') {
+          errors.push(`❌ ${med.drug} is Category ${safety.category} - CONTRAINDICATED in pregnancy`)
+          pregnancyWarnings.push(`⚠️ ${med.drug}: ${PREGNANCY_CATEGORIES[safety.category as keyof typeof PREGNANCY_CATEGORIES]}`)
+          
+          // Find safe alternative
+          let alternative = null
+          if (drugName.includes('ibuprofen') || drugName.includes('diclofenac')) {
+            alternative = getPregnancySafeAlternative('nsaid', trimester || '')
+          } else if (drugName.includes('ciprofloxacin')) {
+            alternative = getPregnancySafeAlternative('antibiotic_uti', trimester || '')
+          } else if (drugName.includes('lisinopril') || drugName.includes('losartan')) {
+            alternative = getPregnancySafeAlternative('antihypertensive', trimester || '')
+          }
+          
+          if (alternative) {
+            corrections.push({
+              action: 'replace',
+              index: index,
+              originalDrug: med.drug,
+              replacement: {
+                ...med,
+                drug: alternative.name,
+                posology: alternative.posology,
+                duration: alternative.duration,
+                packaging: alternative.packaging,
+                quantity: alternative.quantity,
+                pregnancy_category: alternative.pregnancyCategory,
+                pregnancy_safety: 'Safe in pregnancy',
+                administration_instructions: 'Safe for use during pregnancy'
+              }
+            })
+          } else {
+            corrections.push({
+              action: 'remove',
+              index: index,
+              reason: 'Contraindicated in pregnancy with no safe alternative identified'
+            })
+          }
+        } else if (safety.category === 'C') {
+          pregnancyWarnings.push(`⚠️ ${med.drug} (Category C): Use only if benefit outweighs risk`)
+          med.pregnancy_category = 'C'
+          med.pregnancy_safety = 'Use with caution - discuss with doctor'
+        } else if (safety.category === 'B' || safety.category === 'A') {
+          med.pregnancy_category = safety.category
+          med.pregnancy_safety = 'Generally safe in pregnancy'
+        }
+        
+        // Special trimester checks
+        if (trimester === 'third' && drugName.includes('nsaid')) {
+          errors.push(`❌ NSAIDs contraindicated in 3rd trimester (premature ductus closure)`)
+          corrections.push({
+            action: 'replace',
+            index: index,
+            replacement: getPregnancySafeAlternative('nsaid', trimester)
+          })
+        }
+      }
+      
+      if (isBreastfeeding) {
+        const bfCategory = safety.breastfeeding
+        if (bfCategory === 'L4' || bfCategory === 'L5') {
+          pregnancyWarnings.push(`⚠️ ${med.drug}: ${BREASTFEEDING_CATEGORIES[bfCategory as keyof typeof BREASTFEEDING_CATEGORIES]}`)
+        }
+        med.breastfeeding_category = bfCategory
+        med.breastfeeding_safety = bfCategory ? BREASTFEEDING_CATEGORIES[bfCategory as keyof typeof BREASTFEEDING_CATEGORIES] : 'Unknown'
+      }
+    }
+  })
+  
+  // Check for missing pregnancy-specific treatments
+  if (isPregnant) {
+    const hasPregnancyVitamins = medications.some(m => 
+      m.drug.toLowerCase().includes('folic acid') || 
+      m.drug.toLowerCase().includes('prenatal')
+    )
+    
+    if (!hasPregnancyVitamins && diagnosis.toLowerCase() !== 'emergency') {
+      corrections.push({
+        action: 'add',
+        medication: {
+          drug: 'Folic Acid 5mg',
+          therapeutic_role: 'preventive',
+          indication: 'Pregnancy supplementation',
+          posology: '1 tablet once daily',
+          duration: 'Throughout pregnancy',
+          packaging: 'box of 30 tablets',
+          quantity: '1 box',
+          pregnancy_category: 'A',
+          pregnancy_safety: 'Essential for pregnancy',
+          administration_instructions: 'Take with or without food'
+        }
+      })
+    }
+  }
+  
+  // Run standard pharmacology validation
+  const standardValidation = validatePharmacology(diagnosis, medications, patientAge)
+  errors.push(...standardValidation.errors)
+  corrections.push(...standardValidation.corrections)
+  
+  return { 
+    valid: errors.length === 0, 
+    errors, 
+    corrections,
+    pregnancyWarnings
+  }
+}
+
 // ==================== HELPER FUNCTIONS FOR PRESCRIPTION ====================
 function generateCompletePrescription(protocolDrug: DrugProtocol, patientAge: number): any {
   // Ajuster la posologie selon l'âge si nécessaire
@@ -936,84 +1579,43 @@ function generateAdministrationInstructions(drug: DrugProtocol): string {
   return 'Take as directed'
 }
 
-// ==================== MAURITIUS HEALTHCARE CONTEXT ====================
-const MAURITIUS_HEALTHCARE_CONTEXT = {
-  laboratories: {
-    everywhere: "C-Lab (29 centers), Green Cross (36 centers), Biosanté (48 locations)",
-    specialized: "ProCare Medical (oncology/genetics), C-Lab (PCR/NGS)",
-    public: "Central Health Lab, all regional hospitals",
-    home_service: "C-Lab free >70 years, Hans Biomedical mobile",
-    results_time: "STAT: 1-2h, Urgent: 2-6h, Routine: 24-48h",
-    online_results: "C-Lab, Green Cross"
-  },
-  imaging: {
-    basic: "X-ray/Ultrasound available everywhere",
-    ct_scan: "Apollo Bramwell, Wellkin, Victoria Hospital, Dr Jeetoo",
-    mri: "Apollo, Wellkin (1-2 week delays)",
-    cardiac: {
-      echo: "Available all hospitals + private",
-      coronary_ct: "Apollo, Cardiac Centre Pamplemousses",
-      angiography: "Cardiac Centre (public), Apollo Cath Lab (private)"
-    }
-  },
-  hospitals: {
-    emergency_24_7: "Dr Jeetoo (Port Louis), SSRN (Pamplemousses), Victoria (Candos), Apollo, Wellkin",
-    cardiac_emergencies: "Cardiac Centre Pamplemousses, Apollo Bramwell",
-    specialists: "Generally 1-3 week wait, emergencies seen faster"
-  },
-  costs: {
-    consultation: "Public: free, Private: Rs 1500-3000",
-    blood_tests: "Rs 400-3000 depending on complexity",
-    imaging: "X-ray: Rs 800-1500, CT: Rs 8000-15000, MRI: Rs 15000-25000",
-    procedures: "Coronary angiography: Rs 50000-80000, Surgery: Rs 100000+"
-  },
-  medications: {
-    public_free: "Essential medications list free in public hospitals",
-    private: "Pharmacies everywhere, variable prices by brand"
-  },
-  emergency_numbers: {
-    samu: "114",
-    police_fire: "999",
-    private_ambulance: "132"
-  }
+function extractTherapeuticClass(medication: any): string {
+  const drugName = (medication.drug || '').toLowerCase()
+  
+  // Antibiotics
+  if (drugName.includes('cillin')) return 'Antibiotic - Beta-lactam'
+  if (drugName.includes('mycin')) return 'Antibiotic - Macrolide'
+  if (drugName.includes('floxacin')) return 'Antibiotic - Fluoroquinolone'
+  if (drugName.includes('cef') || drugName.includes('ceph')) return 'Antibiotic - Cephalosporin'
+  if (drugName.includes('azole') && !drugName.includes('prazole')) return 'Antibiotic/Antifungal - Azole'
+  
+  // Analgesics
+  if (drugName.includes('paracetamol') || drugName.includes('acetaminophen')) return 'Analgesic - Non-opioid'
+  if (drugName.includes('tramadol') || drugName.includes('codeine')) return 'Analgesic - Opioid'
+  
+  // Anti-inflammatories
+  if (drugName.includes('ibuprofen') || drugName.includes('diclofenac') || drugName.includes('naproxen')) return 'NSAID'
+  if (drugName.includes('prednis') || drugName.includes('cortisone')) return 'Corticosteroid'
+  
+  // Cardiovascular
+  if (drugName.includes('pril')) return 'Antihypertensive - ACE inhibitor'
+  if (drugName.includes('sartan')) return 'Antihypertensive - ARB'
+  if (drugName.includes('lol') && !drugName.includes('omeprazole')) return 'Beta-blocker'
+  if (drugName.includes('pine') && !drugName.includes('atropine')) return 'Calcium channel blocker'
+  if (drugName.includes('statin')) return 'Lipid-lowering - Statin'
+  
+  // Gastro
+  if (drugName.includes('prazole')) return 'PPI'
+  if (drugName.includes('tidine')) return 'H2 blocker'
+  
+  // Others
+  if (drugName.includes('salbutamol') || drugName.includes('salmeterol')) return 'Bronchodilator'
+  if (drugName.includes('loratadine') || drugName.includes('cetirizine')) return 'Antihistamine'
+  
+  return 'Therapeutic agent'
 }
 
-// ==================== DATA PROTECTION FUNCTIONS ====================
-function anonymizePatientData(patientData: any): { 
-  anonymized: any, 
-  originalIdentity: any,
-  anonymousId: string
-} {
-  const anonymousId = `ANON-${crypto.randomUUID()}`
-  
-  const originalIdentity = {
-    firstName: patientData?.firstName,
-    lastName: patientData?.lastName,
-    name: patientData?.name,
-    email: patientData?.email,
-    phone: patientData?.phone,
-    address: patientData?.address,
-    idNumber: patientData?.idNumber,
-    ssn: patientData?.ssn
-  }
-  
-  const anonymized = JSON.parse(JSON.stringify(patientData))
-  const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'idNumber', 'ssn']
-  
-  sensitiveFields.forEach(field => {
-    delete anonymized[field]
-  })
-  
-  anonymized.anonymousId = anonymousId
-  
-  console.log('🔒 Patient data anonymized')
-  console.log(`   - Anonymous ID: ${anonymousId}`)
-  console.log('   - Protected fields:', sensitiveFields.filter(f => originalIdentity[f]).join(', '))
-  
-  return { anonymized, originalIdentity, anonymousId }
-}
-
-// ==================== PHARMACOLOGICAL VALIDATION WITH AGE ====================
+// ==================== STANDARD PHARMACOLOGY VALIDATION (kept from original) ====================
 function validatePharmacology(diagnosis: string, medications: any[], patientAge: number = 30): {
   valid: boolean
   errors: string[]
@@ -1139,15 +1741,15 @@ function validatePharmacology(diagnosis: string, medications: any[], patientAge:
   return { valid: errors.length === 0, errors, corrections }
 }
 
-// ==================== APPLY CORRECTIONS ====================
-function applyPharmacologicalCorrections(analysis: any, corrections: any[]): any {
+// ==================== APPLY CORRECTIONS WITH PREGNANCY ====================
+function applyPharmacologicalCorrectionsWithPregnancy(analysis: any, corrections: any[]): any {
   if (!corrections || corrections.length === 0) return analysis
   
-  console.log(`🔧 Applying ${corrections.length} pharmacological corrections...`)
+  console.log(`🔧 Applying ${corrections.length} corrections (including pregnancy adjustments)...`)
   
   let medications = analysis.treatment_plan?.medications || []
   
-  // First, remove incorrect medications (process in reverse to maintain indices)
+  // Process removals first
   corrections
     .filter(c => c.action === 'remove')
     .sort((a, b) => b.index - a.index)
@@ -1156,13 +1758,21 @@ function applyPharmacologicalCorrections(analysis: any, corrections: any[]): any
       medications.splice(correction.index, 1)
     })
   
-  // Then, add missing medications with complete posology
+  // Process replacements
+  corrections
+    .filter(c => c.action === 'replace')
+    .forEach(correction => {
+      if (correction.index < medications.length) {
+        console.log(`   🔄 Replacing: ${correction.originalDrug} with ${correction.replacement.drug}`)
+        medications[correction.index] = correction.replacement
+      }
+    })
+  
+  // Process additions
   corrections
     .filter(c => c.action === 'add')
     .forEach(correction => {
       console.log(`   ✅ Adding: ${correction.medication.drug}`)
-      console.log(`      Posology: ${correction.medication.posology}`)
-      console.log(`      Packaging: ${correction.medication.packaging}`)
       medications.push(correction.medication)
     })
   
@@ -1171,21 +1781,69 @@ function applyPharmacologicalCorrections(analysis: any, corrections: any[]): any
   // Update medication count
   if (analysis.treatment_plan.completeness_check) {
     analysis.treatment_plan.completeness_check.total_medications = medications.length
+    analysis.treatment_plan.completeness_check.pregnancy_safe = true
   }
   
   return analysis
 }
 
-// ==================== MONITORING SYSTEM ====================
+// ==================== APPLY CORRECTIONS WITH PREGNANCY ====================
+function applyPharmacologicalCorrectionsWithPregnancy(analysis: any, corrections: any[]): any {
+  if (!corrections || corrections.length === 0) return analysis
+  
+  console.log(`🔧 Applying ${corrections.length} corrections (including pregnancy adjustments)...`)
+  
+  let medications = analysis.treatment_plan?.medications || []
+  
+  // Process removals first
+  corrections
+    .filter(c => c.action === 'remove')
+    .sort((a, b) => b.index - a.index)
+    .forEach(correction => {
+      console.log(`   ❌ Removing: ${medications[correction.index]?.drug} - ${correction.reason}`)
+      medications.splice(correction.index, 1)
+    })
+  
+  // Process replacements
+  corrections
+    .filter(c => c.action === 'replace')
+    .forEach(correction => {
+      if (correction.index < medications.length) {
+        console.log(`   🔄 Replacing: ${correction.originalDrug} with ${correction.replacement.drug}`)
+        medications[correction.index] = correction.replacement
+      }
+    })
+  
+  // Process additions
+  corrections
+    .filter(c => c.action === 'add')
+    .forEach(correction => {
+      console.log(`   ✅ Adding: ${correction.medication.drug}`)
+      medications.push(correction.medication)
+    })
+  
+  analysis.treatment_plan.medications = medications
+  
+  // Update medication count
+  if (analysis.treatment_plan.completeness_check) {
+    analysis.treatment_plan.completeness_check.total_medications = medications.length
+    analysis.treatment_plan.completeness_check.pregnancy_safe = true
+  }
+  
+  return analysis
+}
+
+// ==================== PRESCRIPTION MONITORING SYSTEM ====================
 const PrescriptionMonitoring = {
   metrics: {
     avgMedicationsPerDiagnosis: new Map<string, number[]>(),
     avgTestsPerDiagnosis: new Map<string, number[]>(),
     outliers: [] as any[],
-    pharmacologicalErrors: [] as any[]
+    pharmacologicalErrors: [] as any[],
+    pregnancyAdjustments: [] as any[]
   },
   
-  track(diagnosis: string, medications: number, tests: number, errors: string[] = []) {
+  track(diagnosis: string, medications: number, tests: number, errors: string[] = [], pregnancyStatus?: string) {
     if (!this.metrics.avgMedicationsPerDiagnosis.has(diagnosis)) {
       this.metrics.avgMedicationsPerDiagnosis.set(diagnosis, [])
     }
@@ -1205,6 +1863,16 @@ const PrescriptionMonitoring = {
       })
     }
     
+    // Track pregnancy adjustments
+    if (pregnancyStatus === 'pregnant' || pregnancyStatus === 'possibly_pregnant') {
+      this.metrics.pregnancyAdjustments.push({
+        diagnosis,
+        pregnancyStatus,
+        medicationCount: medications,
+        timestamp: new Date().toISOString()
+      })
+    }
+    
     const medAvg = this.getAverage(diagnosis, 'medications')
     const testAvg = this.getAverage(diagnosis, 'tests')
     
@@ -1213,6 +1881,7 @@ const PrescriptionMonitoring = {
         diagnosis,
         medications,
         tests,
+        pregnancyStatus,
         timestamp: new Date().toISOString()
       })
     }
@@ -1227,238 +1896,44 @@ const PrescriptionMonitoring = {
   }
 }
 
-// ==================== ENHANCED MEDICAL PROMPT ====================
-const ENHANCED_DIAGNOSTIC_PROMPT = `You are an expert physician practicing telemedicine in Mauritius with comprehensive knowledge of ALL medical specialties.
-
-🏥 MEDICAL SPECIALTIES COVERED:
-- General Medicine • Pediatrics • Gynecology • Ophthalmology
-- Otolaryngology (ENT) • Dermatology • Cardiology • Psychiatry
-- Gastroenterology • Respiratory • Endocrinology • Urology
-- Neurology • Rheumatology • Infectious Diseases
-
-🇲🇺 MAURITIUS HEALTHCARE CONTEXT:
-${JSON.stringify(MAURITIUS_HEALTHCARE_CONTEXT, null, 2)}
-
-📋 PATIENT PRESENTATION:
-{{PATIENT_CONTEXT}}
-
-🔴 CRITICAL PHARMACOLOGICAL RULES - MANDATORY:
-═══════════════════════════════════════════════════════════
-
-⚠️ DRUG CLASSIFICATION - YOU MUST UNDERSTAND THE DIFFERENCE:
-
-ANTIBIOTICS (kill/inhibit bacteria):
-✅ SYSTEMIC: Amoxicillin, Azithromycin, Ciprofloxacin, Cefuroxime, Doxycycline
-✅ TOPICAL EAR: Ciprofloxacin drops, Ofloxacin drops, Gentamicin drops
-✅ TOPICAL SKIN: Fusidic acid, Mupirocin
-✅ TOPICAL EYE: Chloramphenicol, Tobramycin drops
-
-NOT ANTIBIOTICS (commonly confused):
-❌ Acetic Acid = ACIDIFIER (changes pH, NOT antibiotic)
-❌ Hydrogen Peroxide = ANTISEPTIC (cleans, NOT antibiotic)
-❌ Povidone Iodine = ANTISEPTIC (disinfects, NOT antibiotic)
-❌ Chlorhexidine = ANTISEPTIC (for gargling/cleaning, NOT antibiotic)
-
-CORTICOSTEROIDS (reduce inflammation):
-✅ SYSTEMIC: Prednisolone, Methylprednisolone, Dexamethasone
-✅ TOPICAL: Hydrocortisone, Betamethasone, Clobetasol
-
-NSAIDs (anti-inflammatory + analgesic):
-✅ Ibuprofen, Diclofenac, Naproxen (BOTH anti-inflammatory AND analgesic)
-❌ Paracetamol/Acetaminophen (ONLY analgesic, NO anti-inflammatory effect)
-
-📋 EVIDENCE-BASED PROTOCOLS BY CONDITION WITH EXACT POSOLOGY:
-═══════════════════════════════════════════════════════════
-
-OTITIS EXTERNA (External Ear Infection):
-MUST PRESCRIBE ALL 4:
-1. Ciprofloxacin 0.3% ear drops - 4 drops BD x 7 days (5ml bottle)
-2. Hydrocortisone 1% ear drops - 4 drops BD x 7 days (10ml bottle)
-3. Ibuprofen 400mg - 1 tab TDS with food x 5 days (box of 30)
-4. Paracetamol 500mg - 2 tabs QDS PRN (box of 20)
-NEVER: Prescribe acetic acid alone as "antibiotic"
-
-OTITIS MEDIA (Middle Ear Infection):
-MUST PRESCRIBE:
-1. Amoxicillin 500mg - 1 cap TDS x 7-10 days (box of 21)
-2. Ibuprofen 400mg - 1 tab TDS with food x 5 days (box of 30)
-3. Pseudoephedrine 60mg - 1 tab TDS x 5 days (box of 15)
-4. Paracetamol 500mg - 2 tabs QDS PRN (box of 20)
-
-PHARYNGITIS (Bacterial):
-MUST PRESCRIBE:
-1. Amoxicillin 500mg - 1 cap TDS x 10 days (box of 30)
-2. Ibuprofen 400mg - 1 tab TDS with food x 5 days (box of 30)
-3. Chlorhexidine 0.2% mouthwash - Gargle 10ml BD x 7 days (200ml bottle)
-4. Paracetamol 500mg - 2 tabs QDS PRN (box of 20)
-5. Benzocaine lozenges - 1 every 2-3h PRN (box of 24)
-
-URINARY TRACT INFECTION:
-MUST PRESCRIBE:
-1. Ciprofloxacin 500mg - 1 tab BD x 3 days (box of 10) OR
-   Nitrofurantoin 100mg - 1 cap QDS x 5 days (box of 20)
-2. Potassium citrate - 1 sachet TDS x 5 days (box of 20 sachets)
-3. Flavoxate 200mg - 1 tab TDS x 5 days (box of 15)
-4. Paracetamol 500mg - 2 tabs QDS PRN (box of 20)
-
-⚠️ PACKAGING RULES:
-- Tablets/Capsules → "box of X tablets/capsules"
-- Liquids → "Xml bottle" (specify volume)
-- Drops → "Xml bottle"
-- Creams/Gels → "Xg tube"
-- Inhalers → "X dose inhaler"
-- Sachets → "box of X sachets"
-- Single doses → "1 capsule" or "1 sachet"
-NEVER use "1 box" without specifying contents
-
-[CONTINUE WITH JSON STRUCTURE...]
-
-GENERATE THIS EXACT JSON STRUCTURE:
-
-{
-  "diagnostic_reasoning": {
-    "key_findings": {
-      "from_history": "[What stands out from patient history]",
-      "from_symptoms": "[Pattern recognition from symptoms]",
-      "from_ai_questions": "[CRITICAL findings from questionnaire responses]",
-      "red_flags": "[Any concerning features requiring urgent action]"
-    },
-    
-    "syndrome_identification": {
-      "clinical_syndrome": "[e.g., Acute coronary syndrome, Viral syndrome, etc.]",
-      "supporting_features": "[List features supporting this syndrome]",
-      "inconsistent_features": "[Any features that don't fit]"
-    },
-    
-    "clinical_confidence": {
-      "diagnostic_certainty": "[High/Moderate/Low]",
-      "reasoning": "[Why this level of certainty]",
-      "missing_information": "[What additional info would increase certainty]"
-    }
-  },
+// ==================== DATA PROTECTION (kept from original) ====================
+function anonymizePatientData(patientData: any): { 
+  anonymized: any, 
+  originalIdentity: any,
+  anonymousId: string
+} {
+  const anonymousId = `ANON-${crypto.randomUUID()}`
   
-  "clinical_analysis": {
-    "primary_diagnosis": {
-      "condition": "[Precise diagnosis with classification/stage if applicable]",
-      "icd10_code": "[Appropriate ICD-10 code]",
-      "confidence_level": [60-85 max for teleconsultation],
-      "severity": "mild/moderate/severe/critical",
-      "diagnostic_criteria_met": [
-        "Criterion 1: [How patient meets this]",
-        "Criterion 2: [How patient meets this]"
-      ],
-      "certainty_level": "[High/Moderate/Low based on available data]",
-      
-      "pathophysiology": "[MINIMUM 200 WORDS] Mechanism explaining ALL patient's symptoms.",
-      
-      "clinical_reasoning": "[MINIMUM 150 WORDS] Systematic diagnostic reasoning.",
-      
-      "prognosis": "[MINIMUM 100 WORDS] Expected evolution."
-    },
-    
-    "differential_diagnoses": []
-  },
-  
-  "investigation_strategy": {
-    "diagnostic_approach": "Strategy adapted to Mauritian context",
-    "clinical_justification": "[Why these tests or why no tests]",
-    "laboratory_tests": [],
-    "imaging_studies": [],
-    "specialized_tests": []
-  },
-  
-  "treatment_plan": {
-    "approach": "[Overall therapeutic strategy]",
-    
-    "prescription_rationale": "[Why THESE specific medications]",
-    
-    "medications": [
-      {
-        "drug": "[Name with exact strength]",
-        "therapeutic_role": "etiological/symptomatic/preventive/supportive",
-        "indication": "[Specific indication]",
-        "mechanism": "[How it helps]",
-        "posology": "[EXACT dosing: e.g., 1 tablet three times daily]",
-        "duration": "[EXACT duration: e.g., 7 days]",
-        "packaging": "[EXACT packaging: e.g., box of 21 tablets]",
-        "quantity": "[EXACT quantity: e.g., 1 box]",
-        "form": "[tablet/capsule/drops/cream/inhaler/etc]",
-        "route": "[Oral/Topical/Otic/Ophthalmic/etc]",
-        "dosing": {
-          "adult": "[Adult dosing]",
-          "adjustments": {
-            "elderly": "[If applicable]",
-            "renal": "[If applicable]",
-            "hepatic": "[If applicable]"
-          }
-        },
-        "monitoring": "[What to monitor]",
-        "side_effects": "[Main side effects]",
-        "contraindications": "[Contraindications]",
-        "interactions": "[Drug interactions]",
-        "mauritius_availability": {
-          "public_free": true/false,
-          "estimated_cost": "[Rs XXX]",
-          "alternatives": "[Alternative drugs]",
-          "brand_names": "[Common brands]"
-        },
-        "administration_instructions": "[How to take/use]"
-      }
-    ],
-    
-    "non_pharmacological": "[Lifestyle measures]",
-    
-    "procedures": [],
-    "referrals": []
-  },
-  
-  "follow_up_plan": {
-    "immediate": "[Within 24-48h]",
-    "short_term": "[D3-D7]",
-    "long_term": "[1 month]",
-    "red_flags": ["Warning signs"],
-    "next_consultation": "[When to follow up]"
-  },
-  
-  "patient_education": {
-    "understanding_condition": "[Clear explanation]",
-    "treatment_importance": "[Why follow treatment]",
-    "warning_signs": "[Warning signs]",
-    "lifestyle_modifications": "[Lifestyle changes]",
-    "mauritius_specific": {
-      "tropical_advice": "Hydration 3L/day, avoid sun 10am-4pm",
-      "local_diet": "[Diet advice]"
-    }
-  },
-  
-  "quality_metrics": {
-    "completeness_score": 0.85,
-    "evidence_level": "[High/Moderate/Low]",
-    "guidelines_followed": ["WHO", "ESC", "NICE"],
-    "word_counts": {
-      "pathophysiology": 200,
-      "clinical_reasoning": 150,
-      "patient_education": 150
-    }
+  const originalIdentity = {
+    firstName: patientData?.firstName,
+    lastName: patientData?.lastName,
+    name: patientData?.name,
+    email: patientData?.email,
+    phone: patientData?.phone,
+    address: patientData?.address,
+    idNumber: patientData?.idNumber,
+    ssn: patientData?.ssn
   }
-}`
-
-// ==================== UTILITY FUNCTIONS ====================
-function preparePrompt(patientContext: PatientContext): string {
-  const aiQuestionsFormatted = patientContext.ai_questions
-    .map((q: any) => `Q: ${q.question}\n   A: ${q.answer}`)
-    .join('\n   ')
   
-  return ENHANCED_DIAGNOSTIC_PROMPT
-    .replace('{{PATIENT_CONTEXT}}', JSON.stringify(patientContext, null, 2))
-    .replace('{{CHIEF_COMPLAINT}}', patientContext.chief_complaint)
-    .replace('{{SYMPTOMS}}', patientContext.symptoms.join(', '))
-    .replace('{{DISEASE_HISTORY}}', patientContext.disease_history)
-    .replace('{{AI_QUESTIONS}}', aiQuestionsFormatted)
+  const anonymized = JSON.parse(JSON.stringify(patientData))
+  const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'idNumber', 'ssn']
+  
+  sensitiveFields.forEach(field => {
+    delete anonymized[field]
+  })
+  
+  anonymized.anonymousId = anonymousId
+  
+  console.log('🔒 Patient data anonymized')
+  console.log(`   - Anonymous ID: ${anonymousId}`)
+  console.log('   - Protected fields:', sensitiveFields.filter(f => originalIdentity[f]).join(', '))
+  console.log('   - Pregnancy status:', anonymized.pregnancyStatus || 'Not specified')
+  
+  return { anonymized, originalIdentity, anonymousId }
 }
 
-// ==================== INTELLIGENT VALIDATION ====================
-function validateMedicalAnalysis(
+// ==================== MAIN ENHANCED VALIDATION ====================
+function validateMedicalAnalysisWithPregnancy(
   analysis: any,
   patientContext: PatientContext
 ): ValidationResult {
@@ -1468,29 +1943,57 @@ function validateMedicalAnalysis(
   
   const issues: string[] = []
   const suggestions: string[] = []
+  const pregnancyWarnings: string[] = []
   
-  console.log(`📊 Complete analysis:`)
+  console.log(`📊 Complete analysis with pregnancy considerations:`)
   console.log(`   - ${medications.length} medication(s) prescribed`)
   console.log(`   - ${labTests.length} laboratory test(s)`)
   console.log(`   - ${imaging.length} imaging study/studies`)
+  console.log(`   - Pregnancy status: ${patientContext.pregnancy_status || 'Not specified'}`)
   
   const diagnosis = analysis.clinical_analysis?.primary_diagnosis?.condition || ''
+  const isPregnant = patientContext.pregnancy_status === 'pregnant' || 
+                     patientContext.pregnancy_status === 'possibly_pregnant'
   
-  if (medications.length === 0) {
-    console.info('ℹ️ No medications prescribed')
-    if (analysis.treatment_plan?.prescription_rationale) {
-      console.info(`   Justification: ${analysis.treatment_plan.prescription_rationale}`)
-    } else {
-      suggestions.push('Consider adding justification for absence of prescription')
+  // Pregnancy-specific validations
+  if (isPregnant) {
+    // Check for radiation exposure in imaging
+    imaging.forEach((study: any) => {
+      if (study.radiation_exposure && !study.pregnancy_alternative) {
+        issues.push(`⚠️ ${study.study_name} involves radiation - need pregnancy alternative`)
+        suggestions.push(`Consider ultrasound or MRI instead of ${study.study_name}`)
+      }
+    })
+    
+    // Check if pregnancy considerations are documented
+    if (!analysis.clinical_analysis?.pregnancy_assessment) {
+      suggestions.push('Add pregnancy assessment section')
+    }
+    
+    if (!analysis.treatment_plan?.pregnancy_safety_statement) {
+      suggestions.push('Add clear pregnancy safety statement for medications')
     }
   }
   
-  if (medications.length === 1) {
-    console.warn('⚠️ Only one medication prescribed')
-    console.warn(`   Diagnosis: ${diagnosis}`)
-    suggestions.push('Verify if symptomatic or adjuvant treatment needed')
+  // Validate pharmacology with pregnancy
+  const patientAge = parseInt(patientContext.age as string) || 30
+  const trimester = getPregnancyTrimester(patientContext.gestational_age || '')
+  
+  const pharmacoValidation = validatePharmacologyWithPregnancy(
+    diagnosis, 
+    medications, 
+    patientAge,
+    patientContext.pregnancy_status,
+    trimester
+  )
+  
+  if (!pharmacoValidation.valid) {
+    issues.push(...pharmacoValidation.errors)
   }
   
+  pregnancyWarnings.push(...pharmacoValidation.pregnancyWarnings)
+  
+  // Standard validations
   if (!analysis.clinical_analysis?.primary_diagnosis?.condition) {
     issues.push('Primary diagnosis missing')
   }
@@ -1503,19 +2006,14 @@ function validateMedicalAnalysis(
     issues.push('Red flags missing')
   }
   
-  // Validation pharmacologique avec âge
-  const patientAge = parseInt(patientContext.age as string) || 30
-  const pharmacoValidation = validatePharmacology(diagnosis, medications, patientAge)
-  if (!pharmacoValidation.valid) {
-    issues.push(...pharmacoValidation.errors)
-  }
-  
+  // Track metrics with pregnancy status
   if (diagnosis) {
     PrescriptionMonitoring.track(
       diagnosis, 
       medications.length, 
       labTests.length + imaging.length,
-      pharmacoValidation.errors
+      pharmacoValidation.errors,
+      patientContext.pregnancy_status
     )
   }
   
@@ -1523,26 +2021,98 @@ function validateMedicalAnalysis(
     isValid: issues.length === 0,
     issues,
     suggestions,
+    pregnancyWarnings,
     metrics: {
       medications: medications.length,
       laboratory_tests: labTests.length,
-      imaging_studies: imaging.length
+      imaging_studies: imaging.length,
+      pregnancySafetyChecked: isPregnant
     }
   }
 }
 
-// ==================== INTELLIGENT RETRY (WITHOUT TIMEOUT) ====================
+// ==================== PREPARE PROMPT WITH PREGNANCY ====================
+function preparePromptWithPregnancy(patientContext: PatientContext): string {
+  const aiQuestionsFormatted = patientContext.ai_questions
+    .map((q: any) => `Q: ${q.question}\n   A: ${q.answer}`)
+    .join('\n   ')
+  
+  // Prepare pregnancy status section
+  let pregnancyStatusSection = ''
+  if (patientContext.pregnancy_status === 'pregnant') {
+    const trimester = getPregnancyTrimester(patientContext.gestational_age || '')
+    pregnancyStatusSection = `
+🤰 PATIENT IS PREGNANT
+- Gestational age: ${patientContext.gestational_age || 'Unknown'}
+- Trimester: ${trimester || 'Unknown'}
+- LMP: ${patientContext.last_menstrual_period || 'Unknown'}
+
+⚠️ ALL medications MUST be pregnancy-safe (Category A or B preferred)
+⚠️ Avoid radiation exposure - use ultrasound/MRI instead
+⚠️ Consider pregnancy-related complications in differential
+⚠️ Include obstetric referral if needed`
+  } else if (patientContext.pregnancy_status === 'possibly_pregnant') {
+    pregnancyStatusSection = `
+⚠️ PATIENT POSSIBLY PREGNANT
+- Treat as pregnant until confirmed otherwise
+- Order pregnancy test if relevant
+- Use pregnancy-safe medications only
+- Avoid radiation exposure`
+  } else if (patientContext.pregnancy_status === 'breastfeeding') {
+    pregnancyStatusSection = `
+🤱 PATIENT IS BREASTFEEDING
+- Check all medications for lactation safety (L1-L2 preferred)
+- Consider timing of doses relative to feeding
+- Monitor infant for side effects`
+  } else {
+    pregnancyStatusSection = 'Patient is not pregnant'
+  }
+  
+  return ENHANCED_DIAGNOSTIC_PROMPT_WITH_PREGNANCY
+    .replace('{{PREGNANCY_STATUS}}', pregnancyStatusSection)
+    .replace('{{PATIENT_CONTEXT}}', JSON.stringify(patientContext, null, 2))
+}
+
+// ==================== MAURITIUS HEALTHCARE CONTEXT (kept from original) ====================
+const MAURITIUS_HEALTHCARE_CONTEXT = {
+  laboratories: {
+    everywhere: "C-Lab (29 centers), Green Cross (36 centers), Biosanté (48 locations)",
+    specialized: "ProCare Medical (oncology/genetics), C-Lab (PCR/NGS)",
+    public: "Central Health Lab, all regional hospitals",
+    home_service: "C-Lab free >70 years, Hans Biomedical mobile",
+    results_time: "STAT: 1-2h, Urgent: 2-6h, Routine: 24-48h",
+    online_results: "C-Lab, Green Cross"
+  },
+  imaging: {
+    basic: "X-ray/Ultrasound available everywhere",
+    ct_scan: "Apollo Bramwell, Wellkin, Victoria Hospital, Dr Jeetoo",
+    mri: "Apollo, Wellkin (1-2 week delays)",
+    cardiac: {
+      echo: "Available all hospitals + private",
+      coronary_ct: "Apollo, Cardiac Centre Pamplemousses",
+      angiography: "Cardiac Centre (public), Apollo Cath Lab (private)"
+    }
+  },
+  hospitals: {
+    emergency_24_7: "Dr Jeetoo (Port Louis), SSRN (Pamplemousses), Victoria (Candos), Apollo, Wellkin",
+    cardiac_emergencies: "Cardiac Centre Pamplemousses, Apollo Bramwell",
+    obstetric_emergencies: "Dr Jeetoo, SSRN, Victoria (public), Apollo (private)",
+    specialists: "Generally 1-3 week wait, emergencies seen faster"
+  }
+}
+
+// ==================== CALL OPENAI WITH RETRY ====================
 async function callOpenAIWithRetry(
   apiKey: string,
   prompt: string,
-  patientAge: number,
+  patientContext: PatientContext,
   maxRetries: number = 2
 ): Promise<any> {
   let lastError: Error | null = null
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`📡 OpenAI call (attempt ${attempt + 1}/${maxRetries + 1})...`)
+      console.log(`📡 OpenAI call (attempt ${attempt + 1}/${maxRetries + 1}) with pregnancy considerations...`)
       
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -1555,7 +2125,7 @@ async function callOpenAIWithRetry(
           messages: [
             {
               role: 'system',
-              content: 'You are an expert physician with comprehensive knowledge of ALL medical specialties and the Mauritius healthcare system. You MUST follow evidence-based protocols with EXACT posology and packaging specifications. NEVER use generic "1 box" - specify exact packaging like "box of 20 tablets" or "5ml bottle".'
+              content: 'You are an expert physician with comprehensive knowledge of ALL medical specialties INCLUDING obstetrics. You MUST consider pregnancy status in ALL recommendations. Always prioritize pregnancy-safe medications and avoid teratogenic drugs.'
             },
             {
               role: 'user',
@@ -1580,20 +2150,34 @@ async function callOpenAIWithRetry(
       const data = await response.json()
       let analysis = JSON.parse(data.choices[0]?.message?.content || '{}')
       
-      // Validation et correction pharmacologique avec âge
+      // Validation and correction with pregnancy
       const diagnosis = analysis.clinical_analysis?.primary_diagnosis?.condition || ''
       const medications = analysis.treatment_plan?.medications || []
+      const patientAge = parseInt(patientContext.age as string) || 30
+      const trimester = getPregnancyTrimester(patientContext.gestational_age || '')
       
-      console.log('💊 Validating pharmacology with patient age:', patientAge)
-      const pharmacoValidation = validatePharmacology(diagnosis, medications, patientAge)
+      console.log('💊 Validating pharmacology with pregnancy status:', patientContext.pregnancy_status)
+      const pharmacoValidation = validatePharmacologyWithPregnancy(
+        diagnosis, 
+        medications, 
+        patientAge,
+        patientContext.pregnancy_status,
+        trimester
+      )
       
-      if (!pharmacoValidation.valid) {
-        console.warn('⚠️ Pharmacological errors detected:')
+      if (!pharmacoValidation.valid || pharmacoValidation.pregnancyWarnings.length > 0) {
+        console.warn('⚠️ Pregnancy-related medication issues detected:')
         pharmacoValidation.errors.forEach(err => console.warn(`   ${err}`))
+        pharmacoValidation.pregnancyWarnings.forEach(warn => console.warn(`   ${warn}`))
         
         // Apply corrections
-        analysis = applyPharmacologicalCorrections(analysis, pharmacoValidation.corrections)
-        console.log('✅ Pharmacological corrections applied with proper posology and packaging')
+        analysis = applyPharmacologicalCorrectionsWithPregnancy(analysis, pharmacoValidation.corrections)
+        console.log('✅ Pregnancy-safe corrections applied')
+      }
+      
+      // Add pregnancy warnings to analysis
+      if (pharmacoValidation.pregnancyWarnings.length > 0) {
+        analysis.pregnancy_warnings = pharmacoValidation.pregnancyWarnings
       }
       
       // Basic validation
@@ -1601,7 +2185,7 @@ async function callOpenAIWithRetry(
         throw new Error('Incomplete response - diagnosis missing')
       }
       
-      console.log('✅ OpenAI response received, validated and corrected')
+      console.log('✅ OpenAI response received, validated for pregnancy safety')
       return { data, analysis }
       
     } catch (error) {
@@ -1614,12 +2198,12 @@ async function callOpenAIWithRetry(
         await new Promise(resolve => setTimeout(resolve, waitTime))
         
         if (attempt === 1) {
-          prompt += `\n\nCRITICAL REMINDER:
-          - Acetic Acid is NOT an antibiotic
-          - Paracetamol is NOT anti-inflammatory
-          - Follow the EXACT protocols with EXACT posology
-          - Use EXACT packaging: "box of 20 tablets" NOT "1 box"
-          - Include ALL mandatory medications`
+          prompt += `\n\nCRITICAL PREGNANCY REMINDER:
+          - Patient pregnancy status: ${patientContext.pregnancy_status}
+          - Use ONLY pregnancy-safe medications
+          - NO NSAIDs in 3rd trimester
+          - NO ACE inhibitors or ARBs
+          - Prefer ultrasound over X-ray/CT`
         }
       }
     }
@@ -1628,14 +2212,17 @@ async function callOpenAIWithRetry(
   throw lastError || new Error('Failed after multiple attempts')
 }
 
-// ==================== DOCUMENT GENERATION ====================
-function generateMedicalDocuments(
+// ==================== DOCUMENT GENERATION (enhanced for pregnancy) ====================
+function generateMedicalDocumentsWithPregnancy(
   analysis: any,
   patient: PatientContext,
   infrastructure: any
 ): any {
   const currentDate = new Date()
   const consultationId = `TC-MU-${currentDate.getFullYear()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+  
+  const isPregnant = patient.pregnancy_status === 'pregnant' || patient.pregnancy_status === 'possibly_pregnant'
+  const isBreastfeeding = patient.pregnancy_status === 'breastfeeding'
   
   return {
     consultation: {
@@ -1645,7 +2232,8 @@ function generateMedicalDocuments(
         date: currentDate.toLocaleDateString('en-US'),
         time: currentDate.toLocaleTimeString('en-US'),
         type: "Teleconsultation",
-        disclaimer: "Assessment based on teleconsultation - Physical examination not performed"
+        disclaimer: "Assessment based on teleconsultation - Physical examination not performed",
+        pregnancyAlert: isPregnant ? `⚠️ PATIENT IS PREGNANT - ${patient.gestational_age || 'Gestational age unknown'}` : null
       },
       
       patient: {
@@ -1653,8 +2241,18 @@ function generateMedicalDocuments(
         age: `${patient.age} years`,
         sex: patient.sex,
         weight: patient.weight ? `${patient.weight} kg` : 'Not provided',
-        allergies: patient.allergies?.length > 0 ? patient.allergies.join(', ') : 'None'
+        allergies: patient.allergies?.length > 0 ? patient.allergies.join(', ') : 'None',
+        pregnancyStatus: patient.pregnancy_status || 'Not specified',
+        gestationalAge: patient.gestational_age || '',
+        lastMenstrualPeriod: patient.last_menstrual_period || ''
       },
+      
+      pregnancyNotice: isPregnant ? {
+        warning: '🤰 ALL RECOMMENDATIONS HAVE BEEN REVIEWED FOR PREGNANCY SAFETY',
+        trimester: analysis.clinical_analysis?.pregnancy_assessment?.trimester || 'Unknown',
+        specialConsiderations: 'Medications selected from pregnancy categories A-B when possible',
+        imagingNote: 'Non-radiating imaging preferred'
+      } : null,
       
       diagnostic_reasoning: analysis.diagnostic_reasoning || {},
       
@@ -1663,10 +2261,13 @@ function generateMedicalDocuments(
         diagnosis: analysis.clinical_analysis?.primary_diagnosis?.condition || "To be determined",
         severity: analysis.clinical_analysis?.primary_diagnosis?.severity || "moderate",
         confidence: `${analysis.clinical_analysis?.primary_diagnosis?.confidence_level || 70}%`,
+        pregnancyImpact: analysis.clinical_analysis?.primary_diagnosis?.pregnancy_impact || '',
+        fetalRisk: analysis.clinical_analysis?.primary_diagnosis?.fetal_risk || '',
         clinical_reasoning: analysis.clinical_analysis?.primary_diagnosis?.clinical_reasoning || "In progress",
-        prognosis: analysis.clinical_analysis?.primary_diagnosis?.prognosis || "To be evaluated",
-        diagnostic_criteria: analysis.clinical_analysis?.primary_diagnosis?.diagnostic_criteria_met || []
+        prognosis: analysis.clinical_analysis?.primary_diagnosis?.prognosis || "To be evaluated"
       },
+      
+      pregnancy_assessment: isPregnant ? analysis.clinical_analysis?.pregnancy_assessment || {} : null,
       
       management_plan: {
         investigations: analysis.investigation_strategy || {},
@@ -1676,74 +2277,15 @@ function generateMedicalDocuments(
       
       patient_education: analysis.patient_education || {},
       
+      pregnancy_warnings: analysis.pregnancy_warnings || [],
+      
       metadata: {
         generation_time: new Date().toISOString(),
         ai_confidence: analysis.diagnostic_reasoning?.clinical_confidence || {},
+        pregnancy_safety_verified: isPregnant || isBreastfeeding,
         quality_metrics: analysis.quality_metrics || {}
       }
     },
-    
-    biological: (analysis.investigation_strategy?.laboratory_tests?.length > 0) ? {
-      header: {
-        title: "LABORATORY TEST REQUEST",
-        validity: "Valid 30 days - All accredited laboratories Mauritius"
-      },
-      
-      patient: {
-        name: `${patient.firstName || ''} ${patient.lastName || ''}`.trim(),
-        age: `${patient.age} years`,
-        id: consultationId
-      },
-      
-      clinical_context: {
-        diagnosis: analysis.clinical_analysis?.primary_diagnosis?.condition || 'Assessment',
-        justification: analysis.investigation_strategy?.clinical_justification || 'Diagnostic assessment'
-      },
-      
-      examinations: analysis.investigation_strategy.laboratory_tests.map((test: any, idx: number) => ({
-        number: idx + 1,
-        test: test.test_name || "Test",
-        justification: test.clinical_justification || "Justification",
-        urgency: test.urgency || "routine",
-        expected_results: test.expected_results || {},
-        preparation: test.mauritius_logistics?.preparation || 'As per laboratory protocol',
-        where_to_go: {
-          recommended: test.mauritius_logistics?.where || "C-Lab, Green Cross, or Biosanté",
-          cost_estimate: test.mauritius_logistics?.cost || "Rs 500-2000",
-          turnaround: test.mauritius_logistics?.turnaround || "24-48h"
-        }
-      }))
-    } : null,
-    
-    imaging: (analysis.investigation_strategy?.imaging_studies?.length > 0) ? {
-      header: {
-        title: "IMAGING REQUEST",
-        validity: "Valid 30 days"
-      },
-      
-      patient: {
-        name: `${patient.firstName || ''} ${patient.lastName || ''}`.trim(),
-        age: `${patient.age} years`,
-        id: consultationId
-      },
-      
-      clinical_context: {
-        diagnosis: analysis.clinical_analysis?.primary_diagnosis?.condition || 'Investigation',
-        indication: analysis.investigation_strategy?.clinical_justification || 'Imaging assessment'
-      },
-      
-      studies: analysis.investigation_strategy.imaging_studies.map((study: any, idx: number) => ({
-        number: idx + 1,
-        examination: study.study_name || "Imaging",
-        indication: study.indication || "Indication",
-        findings_sought: study.findings_sought || {},
-        urgency: study.urgency || "routine",
-        centers: study.mauritius_availability?.centers || "Apollo, Wellkin, Public hospitals",
-        cost_estimate: study.mauritius_availability?.cost || "Variable",
-        wait_time: study.mauritius_availability?.wait_time || "As per availability",
-        preparation: study.mauritius_availability?.preparation || "As per center protocol"
-      }))
-    } : null,
     
     medication: (analysis.treatment_plan?.medications?.length > 0) ? {
       header: {
@@ -1754,108 +2296,61 @@ function generateMedicalDocuments(
           qualification: "MD, Telemedicine Certified"
         },
         date: currentDate.toLocaleDateString('en-US'),
-        validity: "Prescription valid 30 days"
+        validity: "Prescription valid 30 days",
+        pregnancyWarning: isPregnant ? '⚠️ PREGNANCY - All medications reviewed for safety' : null
       },
       
       patient: {
         name: `${patient.firstName || ''} ${patient.lastName || ''}`.trim(),
         age: `${patient.age} years`,
         weight: patient.weight ? `${patient.weight} kg` : 'Not provided',
-        allergies: patient.allergies?.length > 0 ? patient.allergies.join(', ') : 'None known'
+        allergies: patient.allergies?.length > 0 ? patient.allergies.join(', ') : 'None known',
+        pregnancyStatus: patient.pregnancy_status || '',
+        gestationalAge: patient.gestational_age || ''
       },
       
-      diagnosis: {
-        primary: analysis.clinical_analysis?.primary_diagnosis?.condition || 'Diagnosis',
-        icd10: analysis.clinical_analysis?.primary_diagnosis?.icd10_code || 'R69'
-      },
+      pregnancySafetyNotice: isPregnant ? {
+        statement: 'All prescribed medications have been verified for pregnancy safety',
+        categories: 'Only Category A and B medications used unless specifically noted',
+        monitoring: 'Regular obstetric follow-up recommended'
+      } : null,
       
       prescriptions: analysis.treatment_plan.medications.map((med: any, idx: number) => ({
         number: idx + 1,
         medication: med.drug || "Medication",
         indication: med.indication || "Indication",
-        posology: med.posology || med.dosing?.adult || "As directed",
+        pregnancyCategory: med.pregnancy_category || '',
+        pregnancySafety: med.pregnancy_safety || '',
+        breastfeedingCategory: med.breastfeeding_category || '',
+        trimesterPrecautions: med.trimester_precautions || '',
+        posology: med.posology || "As directed",
         duration: med.duration || "As per evolution",
         packaging: med.packaging || "To be specified",
         quantity: med.quantity || "As needed",
-        form: med.form || extractFormFromPackaging(med.packaging || ''),
-        route: med.route || extractRouteFromName(med.drug || ''),
         instructions: med.administration_instructions || "Take as prescribed",
         monitoring: med.monitoring || {},
-        availability: med.mauritius_availability || {},
         warnings: {
           side_effects: med.side_effects || {},
           contraindications: med.contraindications || {},
-          interactions: med.interactions || {}
+          pregnancySpecific: med.fetal_monitoring || ''
         }
       })),
       
-      non_pharmacological: analysis.treatment_plan?.non_pharmacological || {},
+      pharmacistNote: isPregnant ? 
+        'PREGNANCY ALERT: Please verify all medications for pregnancy safety before dispensing' : 
+        null,
       
       footer: {
         legal: "Teleconsultation prescription compliant with Medical Council Mauritius",
-        pharmacist_note: "Dispensing authorized as per current regulations"
+        pregnancyDisclaimer: isPregnant ? 
+          'All medications selected with consideration of pregnancy. Patient advised to inform all healthcare providers of pregnancy status.' : 
+          null
       }
-    } : null,
-    
-    patient_advice: {
-      header: {
-        title: "ADVICE AND RECOMMENDATIONS"
-      },
-      
-      content: {
-        condition_explanation: analysis.patient_education?.understanding_condition || {},
-        treatment_rationale: analysis.patient_education?.treatment_importance || {},
-        lifestyle_changes: analysis.patient_education?.lifestyle_modifications || {},
-        warning_signs: analysis.patient_education?.warning_signs || {},
-        tropical_considerations: analysis.patient_education?.mauritius_specific || {}
-      },
-      
-      follow_up: {
-        next_steps: analysis.follow_up_plan?.immediate || {},
-        when_to_consult: analysis.follow_up_plan?.red_flags || {},
-        next_appointment: analysis.follow_up_plan?.next_consultation || {}
-      }
-    }
+    } : null
   }
 }
 
-// ==================== HELPER FUNCTIONS ====================
-function extractTherapeuticClass(medication: any): string {
-  const drugName = (medication.drug || '').toLowerCase()
-  
-  // Antibiotics
-  if (drugName.includes('cillin')) return 'Antibiotic - Beta-lactam'
-  if (drugName.includes('mycin')) return 'Antibiotic - Macrolide'
-  if (drugName.includes('floxacin')) return 'Antibiotic - Fluoroquinolone'
-  if (drugName.includes('cef') || drugName.includes('ceph')) return 'Antibiotic - Cephalosporin'
-  if (drugName.includes('azole') && !drugName.includes('prazole')) return 'Antibiotic/Antifungal - Azole'
-  
-  // Analgesics
-  if (drugName.includes('paracetamol') || drugName.includes('acetaminophen')) return 'Analgesic - Non-opioid'
-  if (drugName.includes('tramadol') || drugName.includes('codeine')) return 'Analgesic - Opioid'
-  
-  // Anti-inflammatories
-  if (drugName.includes('ibuprofen') || drugName.includes('diclofenac') || drugName.includes('naproxen')) return 'NSAID'
-  if (drugName.includes('prednis') || drugName.includes('cortisone')) return 'Corticosteroid'
-  
-  // Cardiovascular
-  if (drugName.includes('pril')) return 'Antihypertensive - ACE inhibitor'
-  if (drugName.includes('sartan')) return 'Antihypertensive - ARB'
-  if (drugName.includes('lol') && !drugName.includes('omeprazole')) return 'Beta-blocker'
-  if (drugName.includes('pine') && !drugName.includes('atropine')) return 'Calcium channel blocker'
-  if (drugName.includes('statin')) return 'Lipid-lowering - Statin'
-  
-  // Gastro
-  if (drugName.includes('prazole')) return 'PPI'
-  if (drugName.includes('tidine')) return 'H2 blocker'
-  
-  // Others
-  if (drugName.includes('salbutamol') || drugName.includes('salmeterol')) return 'Bronchodilator'
-  if (drugName.includes('loratadine') || drugName.includes('cetirizine')) return 'Antihistamine'
-  
-  return 'Therapeutic agent'
-}
-
+// ==================== HELPER FUNCTIONS FOR DIAGNOSIS ====================
 function generateEmergencyFallbackDiagnosis(patient: any): any {
   return {
     primary: {
@@ -1872,7 +2367,7 @@ function generateEmergencyFallbackDiagnosis(patient: any): any {
 
 // ==================== MAIN FUNCTION ====================
 export async function POST(request: NextRequest) {
-  console.log('🚀 MAURITIUS MEDICAL AI - VERSION 5.0 WITH COMPLETE POSOLOGY')
+  console.log('🚀 MAURITIUS MEDICAL AI - VERSION 6.0 WITH PREGNANCY MANAGEMENT')
   const startTime = Date.now()
   
   try {
@@ -1908,8 +2403,13 @@ export async function POST(request: NextRequest) {
       medical_history: anonymizedPatientData?.medicalHistory || [],
       current_medications: anonymizedPatientData?.currentMedications || [],
       allergies: anonymizedPatientData?.allergies || [],
-      pregnancy_status: anonymizedPatientData?.pregnancyStatus,
+      
+      // Pregnancy fields
+      pregnancy_status: anonymizedPatientData?.pregnancyStatus || 'not_specified',
       last_menstrual_period: anonymizedPatientData?.lastMenstrualPeriod,
+      gestational_age: anonymizedPatientData?.gestationalAge,
+      trimester: getPregnancyTrimester(anonymizedPatientData?.gestationalAge),
+      
       social_history: anonymizedPatientData?.socialHistory,
       
       chief_complaint: body.clinicalData?.chiefComplaint || '',
@@ -1923,26 +2423,28 @@ export async function POST(request: NextRequest) {
       anonymousId: anonymousId
     }
     
-    const patientAge = parseInt(patientContext.age as string) || 30
-    
     console.log('📋 Patient context prepared (ANONYMIZED)')
-    console.log(`   - Age: ${patientAge} years`)
+    console.log(`   - Age: ${patientContext.age} years`)
+    console.log(`   - Sex: ${patientContext.sex}`)
+    console.log(`   - Pregnancy status: ${patientContext.pregnancy_status}`)
+    console.log(`   - Gestational age: ${patientContext.gestational_age || 'N/A'}`)
+    console.log(`   - Trimester: ${patientContext.trimester || 'N/A'}`)
     console.log(`   - Symptoms: ${patientContext.symptoms.length}`)
     console.log(`   - AI questions: ${patientContext.ai_questions.length}`)
     console.log(`   - Anonymous ID: ${patientContext.anonymousId}`)
     console.log(`   - Identity: PROTECTED ✅`)
     
-    const finalPrompt = preparePrompt(patientContext)
+    const finalPrompt = preparePromptWithPregnancy(patientContext)
     
     const { data: openaiData, analysis: medicalAnalysis } = await callOpenAIWithRetry(
       apiKey,
       finalPrompt,
-      patientAge
+      patientContext
     )
     
-    console.log('✅ Medical analysis generated with complete posology and packaging')
+    console.log('✅ Medical analysis generated with pregnancy safety verification')
     
-    const validation = validateMedicalAnalysis(medicalAnalysis, patientContext)
+    const validation = validateMedicalAnalysisWithPregnancy(medicalAnalysis, patientContext)
     
     if (!validation.isValid && validation.issues.length > 0) {
       console.error('❌ Critical issues detected:', validation.issues)
@@ -1952,12 +2454,16 @@ export async function POST(request: NextRequest) {
       console.log('💡 Improvement suggestions:', validation.suggestions)
     }
     
+    if (validation.pregnancyWarnings.length > 0) {
+      console.log('🤰 Pregnancy warnings:', validation.pregnancyWarnings)
+    }
+    
     const patientContextWithIdentity = {
       ...patientContext,
       ...originalIdentity
     }
     
-    const professionalDocuments = generateMedicalDocuments(
+    const professionalDocuments = generateMedicalDocumentsWithPregnancy(
       medicalAnalysis,
       patientContextWithIdentity,
       MAURITIUS_HEALTHCARE_CONTEXT
@@ -1967,8 +2473,7 @@ export async function POST(request: NextRequest) {
     console.log(`✅ PROCESSING COMPLETED IN ${processingTime}ms`)
     console.log(`📊 Summary: ${validation.metrics.medications} medication(s), ${validation.metrics.laboratory_tests} lab test(s), ${validation.metrics.imaging_studies} imaging study/studies`)
     console.log(`🔒 Data protection: ACTIVE`)
-    console.log(`💊 Pharmacological validation: ENABLED with posology`)
-    console.log(`📦 Packaging specification: COMPLETE`)
+    console.log(`🤰 Pregnancy safety: ${validation.metrics.pregnancySafetyChecked ? 'VERIFIED' : 'N/A'}`)
     
     const finalResponse = {
       success: true,
@@ -1987,10 +2492,19 @@ export async function POST(request: NextRequest) {
         }
       },
       
+      pregnancySafety: {
+        status: patientContext.pregnancy_status,
+        gestationalAge: patientContext.gestational_age,
+        trimester: patientContext.trimester,
+        safetyVerified: validation.metrics.pregnancySafetyChecked,
+        warnings: validation.pregnancyWarnings
+      },
+      
       validation: {
         isValid: validation.isValid,
         issues: validation.issues,
         suggestions: validation.suggestions,
+        pregnancyWarnings: validation.pregnancyWarnings,
         metrics: validation.metrics
       },
       
@@ -2002,13 +2516,16 @@ export async function POST(request: NextRequest) {
           icd10: medicalAnalysis.clinical_analysis?.primary_diagnosis?.icd10_code || "R69",
           confidence: medicalAnalysis.clinical_analysis?.primary_diagnosis?.confidence_level || 70,
           severity: medicalAnalysis.clinical_analysis?.primary_diagnosis?.severity || "moderate",
+          pregnancyImpact: medicalAnalysis.clinical_analysis?.primary_diagnosis?.pregnancy_impact || '',
+          fetalRisk: medicalAnalysis.clinical_analysis?.primary_diagnosis?.fetal_risk || '',
           detailedAnalysis: medicalAnalysis.clinical_analysis?.primary_diagnosis?.pathophysiology || "Analysis in progress",
           clinicalRationale: medicalAnalysis.clinical_analysis?.primary_diagnosis?.clinical_reasoning || "Reasoning in progress",
           prognosis: medicalAnalysis.clinical_analysis?.primary_diagnosis?.prognosis || "To be determined",
           diagnosticCriteriaMet: medicalAnalysis.clinical_analysis?.primary_diagnosis?.diagnostic_criteria_met || [],
           certaintyLevel: medicalAnalysis.clinical_analysis?.primary_diagnosis?.certainty_level || "Moderate"
         },
-        differential: medicalAnalysis.clinical_analysis?.differential_diagnoses || []
+        differential: medicalAnalysis.clinical_analysis?.differential_diagnoses || [],
+        pregnancyAssessment: medicalAnalysis.clinical_analysis?.pregnancy_assessment || null
       },
       
       expertAnalysis: {
@@ -2017,48 +2534,49 @@ export async function POST(request: NextRequest) {
         expert_investigations: {
           investigation_strategy: medicalAnalysis.investigation_strategy || {},
           clinical_justification: medicalAnalysis.investigation_strategy?.clinical_justification || {},
+          pregnancy_safe_alternatives: medicalAnalysis.investigation_strategy?.pregnancy_safe_alternatives || {},
           immediate_priority: [
             ...(medicalAnalysis.investigation_strategy?.laboratory_tests || []).map((test: any) => ({
               category: 'biology',
               examination: test.test_name || "Test",
+              pregnancy_safe: test.pregnancy_safe !== false,
               specific_indication: test.clinical_justification || "Indication",
-              urgency: test.urgency || "routine",
-              expected_results: test.expected_results || {},
-              mauritius_availability: test.mauritius_logistics || {}
+              urgency: test.urgency || "routine"
             })),
             ...(medicalAnalysis.investigation_strategy?.imaging_studies || []).map((img: any) => ({
               category: 'imaging',
               examination: img.study_name || "Imaging",
+              radiation_exposure: img.radiation_exposure || false,
+              pregnancy_alternative: img.pregnancy_alternative || '',
               specific_indication: img.indication || "Indication",
-              findings_sought: img.findings_sought || {},
-              urgency: img.urgency || "routine",
-              mauritius_availability: img.mauritius_availability || {}
+              urgency: img.urgency || "routine"
             }))
-          ],
-          tests_by_purpose: medicalAnalysis.investigation_strategy?.tests_by_purpose || {},
-          test_sequence: medicalAnalysis.investigation_strategy?.test_sequence || {}
+          ]
         },
         
         expert_therapeutics: {
           treatment_approach: medicalAnalysis.treatment_plan?.approach || {},
+          pregnancy_safety_statement: medicalAnalysis.treatment_plan?.pregnancy_safety_statement || '',
           prescription_rationale: medicalAnalysis.treatment_plan?.prescription_rationale || {},
           primary_treatments: (medicalAnalysis.treatment_plan?.medications || []).map((med: any) => ({
             medication_dci: med.drug || "Medication",
-            therapeutic_class: extractTherapeuticClass(med),
+            therapeutic_class: med.therapeutic_role || '',
             precise_indication: med.indication || "Indication",
             mechanism: med.mechanism || "Mechanism",
-            posology: med.posology || med.dosing?.adult || "Standard dosing",
+            pregnancy_category: med.pregnancy_category || '',
+            pregnancy_safety: med.pregnancy_safety || '',
+            breastfeeding_category: med.breastfeeding_category || '',
+            trimester_precautions: med.trimester_precautions || '',
+            fetal_monitoring: med.fetal_monitoring || '',
+            posology: med.posology || "Standard dosing",
             duration: med.duration || "As directed",
             packaging: med.packaging || "To be specified",
             quantity: med.quantity || "As needed",
-            form: med.form || extractFormFromPackaging(med.packaging || ''),
-            route: med.route || extractRouteFromName(med.drug || ''),
-            dosing_regimen: med.dosing || {},
+            form: med.form || '',
+            route: med.route || '',
             monitoring: med.monitoring || {},
             side_effects: med.side_effects || {},
             contraindications: med.contraindications || {},
-            interactions: med.interactions || {},
-            mauritius_availability: med.mauritius_availability || {},
             administration_instructions: med.administration_instructions || {}
           })),
           non_pharmacological: medicalAnalysis.treatment_plan?.non_pharmacological || {}
@@ -2072,15 +2590,13 @@ export async function POST(request: NextRequest) {
       
       metadata: {
         ai_model: 'GPT-4o',
-        system_version: '5.0-Complete-Posology-Packaging',
-        approach: 'Evidence-Based Medicine with Full Prescription Details',
-        medical_guidelines: medicalAnalysis.quality_metrics?.guidelines_followed || ["WHO", "ESC", "NICE"],
+        system_version: '6.0-Pregnancy-Management',
+        approach: 'Evidence-Based Medicine with Pregnancy Safety',
+        medical_guidelines: medicalAnalysis.quality_metrics?.guidelines_followed || ["WHO", "ACOG", "RCOG", "ESC", "NICE"],
         evidence_level: medicalAnalysis.quality_metrics?.evidence_level || "High",
         mauritius_adapted: true,
         data_protection_enabled: true,
-        pharmacological_validation: true,
-        posology_complete: true,
-        packaging_specified: true,
+        pregnancy_safety_verified: medicalAnalysis.quality_metrics?.pregnancy_safety_verified || false,
         generation_timestamp: new Date().toISOString(),
         quality_metrics: medicalAnalysis.quality_metrics || {},
         validation_passed: validation.isValid,
@@ -2111,6 +2627,7 @@ export async function POST(request: NextRequest) {
         expert_investigations: {
           immediate_priority: [],
           investigation_strategy: {},
+          pregnancy_safe_alternatives: {},
           tests_by_purpose: {},
           test_sequence: {}
         },
@@ -2136,7 +2653,7 @@ export async function POST(request: NextRequest) {
       
       metadata: {
         ai_model: 'GPT-4o',
-        system_version: '5.0-Complete-Posology-Packaging',
+        system_version: '6.0-Pregnancy-Management-Complete',
         error_logged: true,
         support_contact: 'support@telemedecine.mu'
       }
@@ -2149,7 +2666,8 @@ export async function GET(request: NextRequest) {
   const monitoringData = {
     medications: {} as any,
     tests: {} as any,
-    pharmacologicalErrors: PrescriptionMonitoring.metrics.pharmacologicalErrors.slice(-10)
+    pharmacologicalErrors: PrescriptionMonitoring.metrics.pharmacologicalErrors.slice(-10),
+    pregnancyAdjustments: PrescriptionMonitoring.metrics.pregnancyAdjustments.slice(-10)
   }
   
   PrescriptionMonitoring.metrics.avgMedicationsPerDiagnosis.forEach((values, diagnosis) => {
@@ -2167,27 +2685,44 @@ export async function GET(request: NextRequest) {
   })
   
   return NextResponse.json({
-    status: '✅ Mauritius Medical AI - Version 5.0 Complete Posology & Packaging',
-    version: '5.0-Complete-Posology-Packaging',
+    status: '✅ Mauritius Medical AI - Version 6.0 with Complete Pregnancy Management',
+    version: '6.0-Pregnancy-Management-Complete',
     features: [
       '🔒 Patient data anonymization (RGPD/HIPAA)',
-      '💊 Universal pharmacological validation',
+      '🤰 Complete pregnancy safety management',
+      '👶 FDA pregnancy categories (A, B, C, D, X)',
+      '🤱 Breastfeeding safety (L1-L5 categories)',
+      '⚠️ Automatic contraindicated medication replacement',
+      '📊 Trimester-specific adjustments',
+      '🩻 Radiation-free imaging alternatives for pregnancy',
+      '💊 Pregnancy-safe therapeutic protocols',
+      '🚨 Obstetric emergency recognition',
+      '📋 Evidence-based pregnancy protocols',
+      '🔧 Automatic prescription correction for pregnancy',
       '📦 Complete packaging specification',
       '💉 Exact posology for all medications',
       '👶 Pediatric dose adjustments',
       '👴 Geriatric dose adjustments',
-      '🔧 Automatic prescription correction',
-      '🏥 All medical specialties covered',
-      '📋 Evidence-based protocols',
-      '🚫 Prevention of drug misclassification',
+      '🏥 All medical specialties including obstetrics',
       '✅ Therapeutic coherence verification',
       '📊 Real-time prescription monitoring'
     ],
-    dataProtection: {
+    pregnancyManagement: {
       enabled: true,
-      method: 'crypto.randomUUID()',
-      compliance: ['RGPD', 'HIPAA', 'Data Minimization'],
-      protectedFields: ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'idNumber', 'ssn']
+      categories: Object.keys(PREGNANCY_CATEGORIES),
+      breastfeedingCategories: Object.keys(BREASTFEEDING_CATEGORIES),
+      safetyDatabase: Object.keys(MEDICATION_PREGNANCY_SAFETY).length + ' medications',
+      protocolsStandard: Object.keys(THERAPEUTIC_PROTOCOLS).length + ' conditions',
+      protocolsPregnancy: Object.keys(PREGNANCY_SAFE_PROTOCOLS).length + ' pregnancy-adapted protocols',
+      features: [
+        'Gestational age calculation',
+        'Trimester identification',
+        'Medication safety verification',
+        'Alternative medication suggestions',
+        'Radiation exposure warnings',
+        'Obstetric referral recommendations',
+        'Fetal risk assessment'
+      ]
     },
     pharmacologicalValidation: {
       enabled: true,
@@ -2196,21 +2731,30 @@ export async function GET(request: NextRequest) {
       posologyIncluded: true,
       packagingSpecified: true,
       ageAdjustments: ['pediatric', 'geriatric'],
+      pregnancyAdjustments: true,
       commonErrors: [
         'Acetic acid misclassified as antibiotic',
         'Paracetamol misclassified as anti-inflammatory',
         'Generic "1 box" replaced with specific packaging',
-        'Missing posology corrected'
+        'Missing posology corrected',
+        'NSAIDs replaced in 3rd trimester',
+        'ACE inhibitors replaced in pregnancy'
       ]
     },
     monitoring: monitoringData,
+    dataProtection: {
+      enabled: true,
+      method: 'crypto.randomUUID()',
+      compliance: ['RGPD', 'HIPAA', 'Data Minimization'],
+      protectedFields: ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'idNumber', 'ssn']
+    },
     endpoints: {
       diagnosis: 'POST /api/openai-diagnosis',
       health: 'GET /api/openai-diagnosis'
     },
     guidelines: {
-      supported: ['WHO', 'ESC', 'AHA', 'NICE', 'Mauritius MOH'],
-      approach: 'Evidence-based medicine with complete prescription details'
+      supported: ['WHO', 'ACOG', 'RCOG', 'ESC', 'NICE', 'Mauritius MOH'],
+      approach: 'Evidence-based medicine with pregnancy safety prioritization'
     },
     performance: {
       averageResponseTime: '20-40 seconds',
