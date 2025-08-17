@@ -1,12 +1,12 @@
 // app/api/openai-questions/route.ts - VERSION 2.0 COMPLETE REWRITE
 import { type NextRequest, NextResponse } from "next/server"
-import crypto from 'crypto'
 
 // Configuration
 export const runtime = 'edge'
 export const preferredRegion = 'auto'
 
 // ==================== TYPES & INTERFACES ====================
+// Note: ALL TEMPERATURES ARE IN CELSIUS (°C) THROUGHOUT THE SYSTEM
 interface PatientData {
   // Demographics
   firstName?: string
@@ -201,7 +201,7 @@ const DURATION_URGENCY_MAP: Record<string, 'immediate' | 'urgent' | 'semi-urgent
   'more_6_months': 'routine'
 }
 
-// ==================== CACHE SYSTEM ====================
+// ==================== ENHANCED CACHE SYSTEM ====================
 class EnhancedCache {
   private cache = new Map<string, { data: any, timestamp: number }>()
   private maxSize = 100
@@ -241,7 +241,15 @@ class EnhancedCache {
       mode
     })
     
-    return crypto.createHash('sha256').update(dataStr).digest('hex').substring(0, 16)
+    // Simple hash function for Edge Runtime (no crypto module)
+    let hash = 0
+    for (let i = 0; i < dataStr.length; i++) {
+      const char = dataStr.charCodeAt(i)
+      hash = ((hash << 5) - hash) + char
+      hash = hash & hash // Convert to 32-bit integer
+    }
+    
+    return `cache_${Math.abs(hash)}_${mode}`
   }
 }
 
@@ -345,7 +353,7 @@ function processVitalSigns(vitals?: ClinicalData['vitalSigns']) {
   
   const result: ProcessedClinicalData['vitals'] = {}
   
-  // Temperature
+  // Temperature (ALL VALUES IN CELSIUS)
   if (vitals.temperature) {
     const temp = typeof vitals.temperature === 'string' 
       ? parseFloat(vitals.temperature) 
@@ -354,10 +362,11 @@ function processVitalSigns(vitals?: ClinicalData['vitalSigns']) {
     if (!isNaN(temp) && temp > 30 && temp < 45) {
       result.temperature = temp
       
-      if (temp < 36.1) result.tempStatus = 'hypothermia'
-      else if (temp <= 37.2) result.tempStatus = 'normal'
-      else if (temp <= 38.5) result.tempStatus = 'fever'
-      else result.tempStatus = 'high-fever'
+      // Temperature thresholds in Celsius:
+      if (temp < 36.1) result.tempStatus = 'hypothermia'      // Below 36.1°C
+      else if (temp <= 37.2) result.tempStatus = 'normal'     // 36.1-37.2°C
+      else if (temp <= 38.5) result.tempStatus = 'fever'      // 37.3-38.5°C
+      else result.tempStatus = 'high-fever'                   // Above 38.5°C
     }
   }
   
@@ -986,7 +995,11 @@ function anonymizeData(patient: PatientData): {
   anonymousId: string,
   removedFields: string[]
 } {
-  const anonymousId = `ANON-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  // Generate anonymous ID without crypto module
+  const timestamp = Date.now()
+  const random = Math.random().toString(36).substring(2, 11)
+  const anonymousId = `ANON-${timestamp}-${random}`
+  
   const anonymized = { ...patient }
   const removedFields: string[] = []
   
