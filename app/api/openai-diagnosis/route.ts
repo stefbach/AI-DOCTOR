@@ -1787,52 +1787,6 @@ function applyPharmacologicalCorrectionsWithPregnancy(analysis: any, corrections
   return analysis
 }
 
-// ==================== APPLY CORRECTIONS WITH PREGNANCY ====================
-function applyPharmacologicalCorrectionsWithPregnancy(analysis: any, corrections: any[]): any {
-  if (!corrections || corrections.length === 0) return analysis
-  
-  console.log(`🔧 Applying ${corrections.length} corrections (including pregnancy adjustments)...`)
-  
-  let medications = analysis.treatment_plan?.medications || []
-  
-  // Process removals first
-  corrections
-    .filter(c => c.action === 'remove')
-    .sort((a, b) => b.index - a.index)
-    .forEach(correction => {
-      console.log(`   ❌ Removing: ${medications[correction.index]?.drug} - ${correction.reason}`)
-      medications.splice(correction.index, 1)
-    })
-  
-  // Process replacements
-  corrections
-    .filter(c => c.action === 'replace')
-    .forEach(correction => {
-      if (correction.index < medications.length) {
-        console.log(`   🔄 Replacing: ${correction.originalDrug} with ${correction.replacement.drug}`)
-        medications[correction.index] = correction.replacement
-      }
-    })
-  
-  // Process additions
-  corrections
-    .filter(c => c.action === 'add')
-    .forEach(correction => {
-      console.log(`   ✅ Adding: ${correction.medication.drug}`)
-      medications.push(correction.medication)
-    })
-  
-  analysis.treatment_plan.medications = medications
-  
-  // Update medication count
-  if (analysis.treatment_plan.completeness_check) {
-    analysis.treatment_plan.completeness_check.total_medications = medications.length
-    analysis.treatment_plan.completeness_check.pregnancy_safe = true
-  }
-  
-  return analysis
-}
-
 // ==================== PRESCRIPTION MONITORING SYSTEM ====================
 const PrescriptionMonitoring = {
   metrics: {
