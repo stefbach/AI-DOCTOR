@@ -1484,6 +1484,15 @@ FORBIDDEN PHRASES - NEVER USE:
 ❌ "standard dose"
 ❌ Any vague or generic instructions
 
+📝 MANDATORY FIELD COMPLETION:
+- Always populate `treatment_plan.approach` with a clear overall therapeutic strategy.
+- Provide a concise `treatment_plan.prescription_rationale` explaining why each medication was chosen.
+- Detail `treatment_plan.non_pharmacological` with concrete lifestyle or supportive measures.
+- List any needed `treatment_plan.procedures` (e.g., wound care, splinting, nebulization).
+- Include relevant `treatment_plan.referrals` specifying specialists and the reason for referral.
+- Structure the global `follow_up_plan` with explicit timelines, red flags, emergency criteria and next consultation timing.
+- Fill out `patient_education` with condition explanation, medication safety, warning signs and lifestyle advice.
+
 🤰 PREGNANCY STATUS ASSESSMENT:
 {{PREGNANCY_STATUS}}
 
@@ -1548,10 +1557,10 @@ GENERATE THIS EXACT JSON STRUCTURE WITH ENFORCED POSOLOGIES:
   },
   
   "treatment_plan": {
-    "approach": "[Overall strategy]",
-    
+    "approach": "[Clear overall therapeutic strategy]",
+
     "prescription_rationale": "[Why THESE specific medications]",
-    
+
     "medications": [
       {
         "drug": "[EXACT name with strength, e.g., 'Amoxicillin 500mg']",
@@ -1571,11 +1580,21 @@ GENERATE THIS EXACT JSON STRUCTURE WITH ENFORCED POSOLOGIES:
       }
     ],
     
-    "non_pharmacological": "[Lifestyle measures]",
-    
-    "procedures": [],
-    
-    "referrals": []
+    "non_pharmacological": "[Specific lifestyle/supportive measures]",
+
+    "procedures": [
+      {
+        "name": "[Procedure name]",
+        "purpose": "[Why it's needed]"
+      }
+    ],
+
+    "referrals": [
+      {
+        "specialist": "[Specialist type]",
+        "reason": "[Why referred]"
+      }
+    ]
   },
   
   "follow_up_plan": {
