@@ -1,5 +1,7 @@
 // lib/consultation-data-service.ts
 
+import { generateId } from '@/lib/random'
+
 interface ConsultationData {
   step: number
   data: any
@@ -21,7 +23,7 @@ class ConsultationDataService {
   getCurrentConsultationId(): string | null {
     if (!this.currentConsultationId) {
       // Generate a new ID if necessary
-      this.currentConsultationId = `consultation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      this.currentConsultationId = generateId('consultation')
     }
     return this.currentConsultationId
   }
@@ -250,7 +252,7 @@ class ConsultationDataService {
     }
     
     // Create new ID
-    this.currentConsultationId = `consultation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    this.currentConsultationId = generateId('consultation')
     this.currentConsultation.clear()
     
     console.log(`📋 New consultation created: ${this.currentConsultationId}`)

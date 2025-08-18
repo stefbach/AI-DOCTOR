@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { generateId } from '@/lib/random'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -587,7 +588,7 @@ export default function ProfessionalReportEditable({
         setValidationStatus('draft')
         setDocumentSignatures({})
         
-        const newReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        const newReportId = generateId('report')
         setReportId(newReportId)
         
         console.log('✅ Report generated with ID:', newReportId)
@@ -670,7 +671,7 @@ export default function ProfessionalReportEditable({
     
     let currentReportId = reportId
     if (!currentReportId) {
-      currentReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      currentReportId = generateId('report')
       setReportId(currentReportId)
     }
     

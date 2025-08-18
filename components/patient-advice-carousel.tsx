@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
+import { randomFloat } from '@/lib/random'
 import { 
   Stethoscope,
   Thermometer,
@@ -370,7 +371,7 @@ const generateDoctorActions = (patientData: any, clinicalData: any): DoctorActio
   }
   
   // Mix for variety
-  return actions.sort(() => Math.random() - 0.5)
+  return actions.sort(() => randomFloat() - 0.5)
 }
 
 export default function PatientAdviceCarousel({

@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
+import { randomString } from '@/lib/random'
 
 /**
  * ORCHESTRATEUR MÉDICAL SIMPLIFIÉ TIBOK IA DOCTOR
@@ -989,7 +990,7 @@ function getExamCode(examName: string): string {
   if (exam.includes("ecg")) return "DEQP003"
   if (exam.includes("echo") && exam.includes("cardiaque")) return "DEQP007"
   if (exam.includes("scanner") && exam.includes("thorax")) return "ZBQK400"
-  return `EX${Math.random().toString(36).substr(2, 6).toUpperCase()}`
+  return `EX${randomString(6).toUpperCase()}`
 }
 
 function getExamPreparation(examName: string): string {
