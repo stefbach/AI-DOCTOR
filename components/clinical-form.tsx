@@ -27,6 +27,7 @@ import {
 } from "lucide-react"
 import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
 import { getTranslation, Language } from "@/lib/translations"
+import { debugLog } from '@/lib/logger'
 
 // ==================== INTERFACES & TYPES ====================
 interface VitalSigns {
@@ -157,7 +158,7 @@ const translateConsultationReason = (reason: string): string => {
   // First check for exact match
   const exactMatch = CONSULTATION_REASON_TRANSLATIONS[reason]
   if (exactMatch) {
-    console.log('✅ Exact translation found:', reason, '→', exactMatch)
+    debugLog('✅ Exact translation found for consultation reason')
     return exactMatch
   }
   
@@ -165,7 +166,7 @@ const translateConsultationReason = (reason: string): string => {
   const reasonLower = reason.toLowerCase().trim()
   for (const [french, english] of Object.entries(CONSULTATION_REASON_TRANSLATIONS)) {
     if (french.toLowerCase() === reasonLower) {
-      console.log('✅ Translation found (case-insensitive):', reason, '→', english)
+      debugLog('✅ Translation found (case-insensitive) for consultation reason')
       return english
     }
   }
@@ -185,7 +186,7 @@ const translateConsultationReason = (reason: string): string => {
     })
     
     const translatedReason = translatedParts.join(' / ')
-    console.log('✅ Translated multi-part reason:', reason, '→', translatedReason)
+    debugLog('✅ Translated multi-part consultation reason')
     return translatedReason
   }
   
@@ -204,7 +205,7 @@ const translateConsultationReason = (reason: string): string => {
   )
   
   if (hasEnglishWords) {
-    console.log('ℹ️ Reason appears to be in English already:', reason)
+    debugLog('ℹ️ Reason appears to be in English already')
     return reason
   }
   
@@ -214,14 +215,14 @@ const translateConsultationReason = (reason: string): string => {
 }
 
 const mapSymptomToCommonStatic = (symptom: string, commonSymptoms: string[]): string => {
-  console.log('🔧 Mapping symptom:', symptom)
+  debugLog('🔧 Mapping symptom')
   
   const matchedSymptom = commonSymptoms.find(commonSymptom => 
     commonSymptom.toLowerCase().trim() === symptom.toLowerCase().trim()
   )
   
   if (matchedSymptom) {
-    console.log('✅ Symptom matched:', symptom, '→', matchedSymptom)
+    debugLog('✅ Symptom matched to common list')
     return matchedSymptom
   } else {
     console.warn('⚠️ Symptom not found, keeping original:', symptom)
@@ -267,7 +268,7 @@ export default function ModernClinicalForm({
   // Initialize with TIBOK data if available immediately
   const getInitialData = useCallback((): ClinicalData => {
     if (tibokPatient && isFromTibok && !hasLoadedTibokData.current) {
-      console.log('🚀 Initializing with TIBOK data immediately')
+      debugLog('🚀 Initializing with TIBOK data immediately')
       
       const mappedSymptoms = Array.isArray(tibokPatient.currentSymptoms) 
         ? tibokPatient.currentSymptoms.map(symptom => {
@@ -555,13 +556,11 @@ export default function ModernClinicalForm({
   // Load TIBOK data if it arrives after initial render
   useEffect(() => {
     if (tibokPatient && isFromTibok && !hasLoadedTibokData.current && isMounted.current) {
-      console.log('🔄 Loading TIBOK data after mount:', {
-        patient: tibokPatient.firstName + ' ' + tibokPatient.lastName,
-        hasSymptoms: !!tibokPatient.currentSymptoms,
+      debugLog('🔄 Loading TIBOK data after mount', {
         symptomCount: tibokPatient.currentSymptoms?.length,
         hasDuration: !!tibokPatient.symptomDuration,
         hasTemperature: !!tibokPatient.vitalSigns?.temperature
-      })
+      }, ['symptomCount', 'hasDuration', 'hasTemperature'])
 
       const mappedSymptoms = Array.isArray(tibokPatient.currentSymptoms) 
         ? tibokPatient.currentSymptoms.map(symptom => 
@@ -585,13 +584,12 @@ export default function ModernClinicalForm({
         }
       }
 
-      console.log('✅ Setting TIBOK data to state:', {
-        duration: tibokClinicalData.symptomDuration,
+      debugLog('✅ Setting TIBOK data to state', {
         symptomsCount: tibokClinicalData.symptoms.length,
-        symptoms: tibokClinicalData.symptoms,
-        temperature: tibokClinicalData.vitalSigns.temperature,
+        hasDuration: !!tibokClinicalData.symptomDuration,
+        hasTemperature: !!tibokClinicalData.vitalSigns.temperature,
         painScale: tibokClinicalData.painScale
-      })
+      }, ['symptomsCount', 'hasDuration', 'hasTemperature', 'painScale'])
 
       setLocalData(tibokClinicalData)
       hasLoadedTibokData.current = true
@@ -604,7 +602,7 @@ export default function ModernClinicalForm({
       const loadFromDatabase = async () => {
         try {
           setIsLoading(true)
-          console.log('📂 Loading saved clinical data from database')
+          debugLog('📂 Loading saved clinical data from database')
           
           const savedData = await consultationDataService.getAllData()
           
@@ -644,7 +642,7 @@ export default function ModernClinicalForm({
           await consultationDataService.saveStepData(1, localData)
           setLastSaved(new Date())
           onDataChange(localData)
-          console.log('✅ Data saved for step 1')
+          debugLog('✅ Data saved for step 1')
         } catch (error) {
           console.error('Error saving clinical data:', error)
         }
@@ -657,14 +655,13 @@ export default function ModernClinicalForm({
   // Debug: Log state changes
   useEffect(() => {
     if (isMounted.current) {
-      console.log('📊 Clinical Form State Updated:', {
-        symptomDuration: localData.symptomDuration,
+      debugLog('📊 Clinical Form State Updated:', {
         symptomsCount: localData.symptoms.length,
-        symptoms: localData.symptoms,
-        temperature: localData.vitalSigns.temperature,
+        hasSymptomDuration: !!localData.symptomDuration,
+        hasTemperature: localData.vitalSigns.temperature !== null,
         hasLoadedTibokData: hasLoadedTibokData.current,
         isMounted: isMounted.current
-      })
+      }, ['symptomsCount', 'hasSymptomDuration', 'hasTemperature', 'hasLoadedTibokData', 'isMounted'])
     }
   }, [localData])
 
@@ -827,7 +824,7 @@ export default function ModernClinicalForm({
               onValueChange={(value) => {
                 // CRITICAL: Prevent empty value from clearing TIBOK data
                 if (value || !hasLoadedTibokData.current) {
-                  console.log('Duration select changed to:', value)
+                  debugLog('Duration select changed')
                   updateData({ symptomDuration: value })
                 }
               }}
