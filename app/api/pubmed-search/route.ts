@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
+import { randomInt } from '@/lib/random'
 
 export async function POST(request: NextRequest) {
   try {
@@ -84,7 +85,7 @@ Répondez UNIQUEMENT avec du JSON valide, sans texte supplémentaire.
       articlesData = {
         articles: [
           {
-            pmid: `3${Math.floor(Math.random() * 9999999)}`,
+            pmid: `3${randomInt(9999999)}`,
             title: `Clinical evaluation of ${query}: A systematic review`,
             authors: ["Smith JA", "Johnson MB", "Williams CD"],
             journal: "Journal of Clinical Medicine",
@@ -93,14 +94,14 @@ Répondez UNIQUEMENT avec du JSON valide, sans texte supplémentaire.
             issue: "2",
             pages: "145-158",
             abstract: `Background: This systematic review examines current evidence regarding ${query}. Methods: We conducted a comprehensive literature search and meta-analysis. Results: Significant findings were observed in relation to ${query} with clinical implications. Conclusions: Further research is needed to establish optimal management strategies.`,
-            doi: `10.3390/jcm13020${Math.floor(Math.random() * 999)}`,
+            doi: `10.3390/jcm13020${randomInt(999)}`,
             relevanceScore: 0.85,
-            citationCount: Math.floor(Math.random() * 50) + 10,
+            citationCount: randomInt(50) + 10,
             publicationType: "Review",
-            url: `https://pubmed.ncbi.nlm.nih.gov/3${Math.floor(Math.random() * 9999999)}/`
+            url: `https://pubmed.ncbi.nlm.nih.gov/3${randomInt(9999999)}/`
           },
           {
-            pmid: `3${Math.floor(Math.random() * 9999999)}`,
+            pmid: `3${randomInt(9999999)}`,
             title: `Therapeutic approaches in ${query}: A randomized controlled trial`,
             authors: ["Brown EF", "Davis GH", "Miller IJ"],
             journal: "The Lancet",
@@ -109,11 +110,11 @@ Répondez UNIQUEMENT avec du JSON valide, sans texte supplémentaire.
             issue: "10380",
             pages: "1234-1242",
             abstract: `Introduction: Current treatment options for ${query} remain limited. This RCT evaluates new therapeutic approaches. Methods: 200 patients were randomized to intervention vs control groups. Results: Significant improvement was observed in the intervention group (p<0.001). Conclusion: This study provides evidence for new treatment strategies.`,
-            doi: `10.1016/S0140-6736(23)${Math.floor(Math.random() * 9999)}`,
+            doi: `10.1016/S0140-6736(23)${randomInt(9999)}`,
             relevanceScore: 0.92,
-            citationCount: Math.floor(Math.random() * 30) + 15,
+            citationCount: randomInt(30) + 15,
             publicationType: "Clinical Trial",
-            url: `https://pubmed.ncbi.nlm.nih.gov/3${Math.floor(Math.random() * 9999999)}/`
+            url: `https://pubmed.ncbi.nlm.nih.gov/3${randomInt(9999999)}/`
           }
         ]
       }

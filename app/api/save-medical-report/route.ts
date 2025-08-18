@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { generateId } from '@/lib/random'
 
 // Keep existing interface and add new fields
 interface StoredReport {
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
     
     if (action === 'save') {
       // Keep existing save logic
-      const id = reportId || `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      const id = reportId || generateId('report')
       
       const existingReport = reportId ? memoryStorage.get(reportId) : null
       

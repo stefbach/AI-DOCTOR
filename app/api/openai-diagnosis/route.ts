@@ -1,6 +1,7 @@
 // app/api/openai-diagnosis/route.ts - VERSION 7.0 WITH ENFORCED POSOLOGY SYSTEM
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
+import { randomString } from '@/lib/random'
 
 // ==================== TYPES AND INTERFACES ====================
 interface PatientContext {
@@ -2223,7 +2224,7 @@ function generateMedicalDocumentsWithEnforcedPosology(
   infrastructure: any
 ): any {
   const currentDate = new Date()
-  const consultationId = `TC-MU-${currentDate.getFullYear()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+  const consultationId = `TC-MU-${currentDate.getFullYear()}-${randomString(9).toUpperCase()}`
   
   const isPregnant = patient.pregnancy_status === 'pregnant' || patient.pregnancy_status === 'possibly_pregnant'
   const isBreastfeeding = patient.pregnancy_status === 'breastfeeding'

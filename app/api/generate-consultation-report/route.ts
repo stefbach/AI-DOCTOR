@@ -2,6 +2,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
+import { randomString } from '@/lib/random'
 
 // ==================== DATA PROTECTION FUNCTIONS ====================
 function anonymizePatientData(patientData: any): {
@@ -32,7 +33,7 @@ function anonymizePatientData(patientData: any): {
     delete anonymized[field]
   })
   
-  const anonymousId = `ANON-RPT-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+  const anonymousId = `ANON-RPT-${Date.now()}-${randomString(6)}`
   anonymized.anonymousId = anonymousId
   
   console.log('🔒 Patient data anonymized for report')

@@ -1,5 +1,6 @@
 // app/api/openai-questions/route.ts - VERSION 2.0 COMPLETE REWRITE
 import { type NextRequest, NextResponse } from "next/server"
+import { randomString } from '@/lib/random'
 
 // Configuration
 export const runtime = 'edge'
@@ -995,9 +996,9 @@ function anonymizeData(patient: PatientData): {
   anonymousId: string,
   removedFields: string[]
 } {
-  // Generate anonymous ID without crypto module
+  // Generate anonymous ID
   const timestamp = Date.now()
-  const random = Math.random().toString(36).substring(2, 11)
+  const random = randomString(9)
   const anonymousId = `ANON-${timestamp}-${random}`
   
   const anonymized = { ...patient }
