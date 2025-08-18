@@ -1484,6 +1484,15 @@ FORBIDDEN PHRASES - NEVER USE:
 ❌ "standard dose"
 ❌ Any vague or generic instructions
 
+📝 MANDATORY CARE PLAN DETAILS:
+• Always provide a clear and specific `treatment_plan.approach` outlining the overall management strategy.
+• Always include a `prescription_rationale` explaining why each medication is chosen.
+• Always detail `non_pharmacological` measures with concrete lifestyle and supportive instructions.
+• Always list any `procedures` that should be performed or considered.
+• Always mention necessary `referrals` and why specialist input is required.
+• Always produce a `follow_up_plan` that specifies red_flags, when_to_seek_emergency, and the exact timing of the next_consultation.
+• Always generate comprehensive `patient_education` covering understanding of the condition, medication safety, warning signs, and lifestyle guidance.
+
 🤰 PREGNANCY STATUS ASSESSMENT:
 {{PREGNANCY_STATUS}}
 
@@ -1548,9 +1557,9 @@ GENERATE THIS EXACT JSON STRUCTURE WITH ENFORCED POSOLOGIES:
   },
   
   "treatment_plan": {
-    "approach": "[Overall strategy]",
-    
-    "prescription_rationale": "[Why THESE specific medications]",
+    "approach": "[Clear overall management strategy]",
+
+    "prescription_rationale": "[Specific justification for each medication]",
     
     "medications": [
       {
@@ -1571,27 +1580,35 @@ GENERATE THIS EXACT JSON STRUCTURE WITH ENFORCED POSOLOGIES:
       }
     ],
     
-    "non_pharmacological": "[Lifestyle measures]",
-    
-    "procedures": [],
-    
-    "referrals": []
+    "non_pharmacological": "[Detailed lifestyle and supportive measures]",
+
+    "procedures": [
+      "[Procedure or intervention if required]"
+    ],
+
+    "referrals": [
+      "[Specialist referral and reason]"
+    ]
   },
   
   "follow_up_plan": {
     "immediate": "[Within 24-48h]",
     "short_term": "[D3-D7]",
     "long_term": "[1 month]",
-    "red_flags": [],
-    "when_to_seek_emergency": [],
-    "next_consultation": "[When to follow up]"
+    "red_flags": [
+      "[Specific warning symptoms]"
+    ],
+    "when_to_seek_emergency": [
+      "[Explicit criteria for urgent care]"
+    ],
+    "next_consultation": "[Exact time frame for next consultation]"
   },
-  
+
   "patient_education": {
-    "understanding_condition": "[Clear explanation]",
-    "medication_safety": "[Key points]",
-    "warning_signs": "[What to watch for]",
-    "lifestyle_modifications": "[Recommendations]"
+    "understanding_condition": "[Lay explanation of the diagnosis]",
+    "medication_safety": "[Key safety points for each medication]",
+    "warning_signs": "[Specific symptoms to monitor]",
+    "lifestyle_modifications": "[Actionable recommendations]"
   },
   
   "quality_metrics": {
