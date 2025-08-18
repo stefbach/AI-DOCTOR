@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
+import { validatePatientAndClinical } from "@/lib/validation"
 
 /**
  * ORCHESTRATEUR MÉDICAL SIMPLIFIÉ TIBOK IA DOCTOR
@@ -11,18 +12,21 @@ export async function POST(request: NextRequest) {
   try {
     console.log("🚀 ORCHESTRATEUR MÉDICAL SIMPLIFIÉ - Démarrage")
 
-    const { patientData, clinicalData, questionsData } = await request.json()
+    const body = await request.json()
+    let { patientData, clinicalData, questionsData } = body
 
-    // Validation des données d'entrée
-    if (!patientData || !clinicalData) {
+    const validation = validatePatientAndClinical(patientData, clinicalData)
+    if (!validation.success) {
       return NextResponse.json(
         {
           success: false,
-          error: "Données patient et cliniques requises",
+          error: `Invalid ${validation.source}`,
+          details: validation.errors,
         },
         { status: 400 },
       )
     }
+    ;({ patientData, clinicalData } = validation.data)
 
     const workflow = []
     let currentStep = 1

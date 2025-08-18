@@ -1,17 +1,27 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
+import { validatePatientAndClinical } from "@/lib/validation"
 
 export async function POST(request: NextRequest) {
   try {
     console.log("🩺 Début diagnostic expert")
     
-    const { patientData, clinicalData, questionsData } = await request.json()
+    const body = await request.json()
+    let { patientData, clinicalData, questionsData } = body
 
-    // Validation des données d'entrée
-    if (!patientData || !clinicalData) {
-      return NextResponse.json({ success: false, error: "Données patient ou cliniques manquantes" }, { status: 400 })
+    const validation = validatePatientAndClinical(patientData, clinicalData)
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Invalid ${validation.source}`,
+          details: validation.errors,
+        },
+        { status: 400 },
+      )
     }
+    ;({ patientData, clinicalData } = validation.data)
 
     // Construction du contexte complet
     const fullContext = `
