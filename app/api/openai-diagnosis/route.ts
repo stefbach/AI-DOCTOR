@@ -1605,7 +1605,7 @@ GENERATE THIS EXACT JSON STRUCTURE WITH ENFORCED POSOLOGIES:
       "patient_education": 150
     }
   }
-}`
+}`;
 
 // ==================== HELPER FUNCTIONS FOR PREGNANCY ====================
 function getPregnancyTrimester(gestationalAge: string): string {
