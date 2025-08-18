@@ -1493,6 +1493,9 @@ If patient is pregnant/breastfeeding, check all medications for safety categorie
 📋 PATIENT PRESENTATION:
 {{PATIENT_CONTEXT}}
 
+📝 QUESTIONNAIRE RESPONSES:
+{{AI_QUESTION_RESPONSES}}
+
 GENERATE THIS EXACT JSON STRUCTURE WITH ENFORCED POSOLOGIES:
 
 {
@@ -1797,8 +1800,8 @@ function validatePharmacologyWithPregnancy(
 // ==================== PREPARE PROMPT WITH PREGNANCY ====================
 function preparePromptWithEnforcedPosology(patientContext: PatientContext): string {
   const aiQuestionsFormatted = patientContext.ai_questions
-    .map((q: any) => `Q: ${q.question}\n   A: ${q.answer}`)
-    .join('\n   ')
+    .map((q: any, idx: number) => `${idx + 1}. Q: ${q.question}\n   A: ${q.answer}`)
+    .join('\n')
   
   // Prepare pregnancy status section
   let pregnancyStatusSection = ''
@@ -1834,6 +1837,7 @@ function preparePromptWithEnforcedPosology(patientContext: PatientContext): stri
   return ENHANCED_DIAGNOSTIC_PROMPT_WITH_ENFORCED_POSOLOGY
     .replace('{{PREGNANCY_STATUS}}', pregnancyStatusSection)
     .replace('{{PATIENT_CONTEXT}}', JSON.stringify(patientContext, null, 2))
+    .replace('{{AI_QUESTION_RESPONSES}}', aiQuestionsFormatted)
 }
 
 // ==================== MAURITIUS HEALTHCARE CONTEXT ====================
