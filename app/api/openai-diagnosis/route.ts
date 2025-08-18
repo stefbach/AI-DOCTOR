@@ -1391,6 +1391,7 @@ const ENHANCED_DIAGNOSTIC_PROMPT_WITH_ENFORCED_POSOLOGY = `You are an expert phy
 - Psychiatry • Gastroenterology • Respiratory • Endocrinology
 - Urology • Neurology • Rheumatology • Infectious Diseases
 
+{{VECTOR_BORNE_NOTE}}
 ⚠️ CRITICAL PRESCRIPTION RULES - ABSOLUTELY MANDATORY:
 ═══════════════════════════════════════════════════════════
 
@@ -1834,11 +1835,21 @@ function preparePromptWithEnforcedPosology(patientContext: PatientContext): stri
   } else {
     pregnancyStatusSection = 'Patient is not pregnant'
   }
-  
+
+  const temp = typeof patientContext.vital_signs?.temperature === 'string'
+    ? parseFloat(patientContext.vital_signs.temperature as any)
+    : patientContext.vital_signs?.temperature
+  const hasFever = (temp !== undefined && temp >= 38) ||
+    patientContext.symptoms.some((s: string) => s.toLowerCase().includes('fever'))
+  const vectorNote = hasFever
+    ? 'When fever is present, consider vector-borne diseases prevalent in endemic regions such as dengue and chikungunya.'
+    : ''
+
   return ENHANCED_DIAGNOSTIC_PROMPT_WITH_ENFORCED_POSOLOGY
     .replace('{{PREGNANCY_STATUS}}', pregnancyStatusSection)
     .replace('{{PATIENT_CONTEXT}}', JSON.stringify(patientContext, null, 2))
     .replace('{{AI_QUESTION_RESPONSES}}', aiQuestionsFormatted)
+    .replace('{{VECTOR_BORNE_NOTE}}', vectorNote)
 }
 
 // ==================== MAURITIUS HEALTHCARE CONTEXT ====================
