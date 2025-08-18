@@ -40,6 +40,7 @@ const PRESCRIPTION_TEMPLATES_REFERENCE = {
       route: 'Oral',
       administration_instructions: 'Maximum 8 tablets per day. Can alternate with ibuprofen.'
     }// app/api/openai-diagnosis/route.ts - VERSION 9.0 COMPLETE WITH ULTRA ENFORCED POSOLOGY
+}
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
