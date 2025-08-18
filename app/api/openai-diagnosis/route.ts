@@ -1383,6 +1383,9 @@ const THERAPEUTIC_PROTOCOLS = {
 
 // ==================== ENHANCED MEDICAL PROMPT WITH ENFORCED POSOLOGY ====================
 const ENHANCED_DIAGNOSTIC_PROMPT_WITH_ENFORCED_POSOLOGY = `You are an expert physician practicing telemedicine in Mauritius with comprehensive knowledge of ALL medical specialties, INCLUDING obstetrics and pregnancy care.
+Always factor in Mauritian epidemiology, available healthcare facilities, and local treatment practices using the context below:
+
+{{MAURITIUS_CONTEXT}}
 
 🏥 MEDICAL SPECIALTIES COVERED:
 - General Medicine • Pediatrics • OBSTETRICS & GYNECOLOGY (CRITICAL)
@@ -1493,6 +1496,10 @@ If patient is pregnant/breastfeeding, check all medications for safety categorie
 📋 PATIENT PRESENTATION:
 {{PATIENT_CONTEXT}}
 
+You MUST provide:
+- A differential diagnosis list with probability (%) for each condition.
+- Recommended laboratory and imaging examinations tailored to Mauritian epidemiology and available facilities.
+
 GENERATE THIS EXACT JSON STRUCTURE WITH ENFORCED POSOLOGIES:
 
 {
@@ -1534,17 +1541,36 @@ GENERATE THIS EXACT JSON STRUCTURE WITH ENFORCED POSOLOGIES:
       "clinical_reasoning": "[MINIMUM 150 WORDS]",
       "prognosis": "[MINIMUM 100 WORDS]"
     },
-    
-    "differential_diagnoses": [],
-    
+
+    "differential_diagnoses": [
+      {
+        "condition": "[Differential diagnosis]",
+        "icd10_code": "[ICD-10]",
+        "probability": 0.1,
+        "rationale": "[Why included]"
+      }
+    ],
+
     "pregnancy_assessment": {}
   },
-  
+
   "investigation_strategy": {
     "diagnostic_approach": "[Strategy]",
     "clinical_justification": "[Why these tests]",
-    "laboratory_tests": [],
-    "imaging_studies": []
+    "laboratory_tests": [
+      {
+        "test": "[Laboratory test]",
+        "purpose": "[What it evaluates]",
+        "facility": "[Mauritian facility]"
+      }
+    ],
+    "imaging_studies": [
+      {
+        "study": "[Imaging study]",
+        "purpose": "[What it evaluates]",
+        "facility": "[Mauritian facility]"
+      }
+    ]
   },
   
   "treatment_plan": {
@@ -1834,6 +1860,7 @@ function preparePromptWithEnforcedPosology(patientContext: PatientContext): stri
   return ENHANCED_DIAGNOSTIC_PROMPT_WITH_ENFORCED_POSOLOGY
     .replace('{{PREGNANCY_STATUS}}', pregnancyStatusSection)
     .replace('{{PATIENT_CONTEXT}}', JSON.stringify(patientContext, null, 2))
+    .replace('{{MAURITIUS_CONTEXT}}', JSON.stringify(MAURITIUS_HEALTHCARE_CONTEXT, null, 2))
 }
 
 // ==================== MAURITIUS HEALTHCARE CONTEXT ====================
@@ -2090,6 +2117,7 @@ function validateMedicalAnalysisWithEnforcedPosology(
   const medications = analysis.treatment_plan?.medications || []
   const labTests = analysis.investigation_strategy?.laboratory_tests || []
   const imaging = analysis.investigation_strategy?.imaging_studies || []
+  const differential = analysis.clinical_analysis?.differential_diagnoses || []
   
   const issues: string[] = []
   const suggestions: string[] = []
@@ -2100,6 +2128,7 @@ function validateMedicalAnalysisWithEnforcedPosology(
   console.log(`   - ${medications.length} medication(s) prescribed`)
   console.log(`   - ${labTests.length} laboratory test(s)`)
   console.log(`   - ${imaging.length} imaging study/studies`)
+  console.log(`   - ${differential.length} differential diagnosis(es)`)
   console.log(`   - Pregnancy status: ${patientContext.pregnancy_status || 'Not specified'}`)
   
   const diagnosis = analysis.clinical_analysis?.primary_diagnosis?.condition || ''
@@ -2128,13 +2157,44 @@ function validateMedicalAnalysisWithEnforcedPosology(
   if (posologyIssuesFixed > 0) {
     posologyCorrections.push(`Corrected ${posologyIssuesFixed} posology issue(s)`)
   }
+
+  // Differential diagnoses validation
+  if (differential.length === 0) {
+    issues.push('Differential diagnoses missing')
+  } else {
+    differential.forEach((d: any, idx: number) => {
+      if (d.probability === undefined) {
+        issues.push(`Missing probability for differential diagnosis ${idx + 1}`)
+      }
+    })
+  }
+
+  if (labTests.length === 0) {
+    issues.push('Recommended laboratory examinations missing')
+  } else {
+    labTests.forEach((test: any, idx: number) => {
+      if (!test.test || !test.purpose) {
+        suggestions.push(`Provide name and purpose for laboratory test ${idx + 1}`)
+      }
+    })
+  }
+
+  if (imaging.length === 0) {
+    issues.push('Recommended imaging examinations missing')
+  } else {
+    imaging.forEach((study: any, idx: number) => {
+      if (!study.study || !study.purpose) {
+        suggestions.push(`Provide study and purpose for imaging ${idx + 1}`)
+      }
+    })
+  }
   
   // Pregnancy-specific validations
   if (isPregnant) {
     imaging.forEach((study: any) => {
       if (study.radiation_exposure && !study.pregnancy_alternative) {
-        issues.push(`⚠️ ${study.study_name} involves radiation - need pregnancy alternative`)
-        suggestions.push(`Consider ultrasound or MRI instead of ${study.study_name}`)
+        issues.push(`⚠️ ${study.study} involves radiation - need pregnancy alternative`)
+        suggestions.push(`Consider ultrasound or MRI instead of ${study.study}`)
       }
     })
     
@@ -2170,6 +2230,7 @@ function validateMedicalAnalysisWithEnforcedPosology(
       medications: medications.length,
       laboratory_tests: labTests.length,
       imaging_studies: imaging.length,
+      differential_diagnoses: differential.length,
       pregnancySafetyChecked: isPregnant,
       posologyIssuesFixed
     }
@@ -2569,7 +2630,7 @@ export async function POST(request: NextRequest) {
     
     const processingTime = Date.now() - startTime
     console.log(`✅ PROCESSING COMPLETED IN ${processingTime}ms`)
-    console.log(`📊 Summary: ${validation.metrics.medications} medication(s), ${validation.metrics.laboratory_tests} lab test(s), ${validation.metrics.imaging_studies} imaging study/studies`)
+    console.log(`📊 Summary: ${validation.metrics.medications} medication(s), ${validation.metrics.laboratory_tests} lab test(s), ${validation.metrics.imaging_studies} imaging study/studies, ${validation.metrics.differential_diagnoses} differential diagnosis(es)`)
     console.log(`🔒 Data protection: ACTIVE`)
     console.log(`🤰 Pregnancy safety: ${validation.metrics.pregnancySafetyChecked ? 'VERIFIED' : 'N/A'}`)
     console.log(`📝 Posology enforcement: ACTIVE`)
@@ -2650,17 +2711,17 @@ export async function POST(request: NextRequest) {
           immediate_priority: [
             ...(medicalAnalysis.investigation_strategy?.laboratory_tests || []).map((test: any) => ({
               category: 'biology',
-              examination: test.test_name || "Test",
+              examination: test.test || "Test",
               pregnancy_safe: test.pregnancy_safe !== false,
-              specific_indication: test.clinical_justification || "Indication",
+              specific_indication: test.purpose || "Indication",
               urgency: test.urgency || "routine"
             })),
             ...(medicalAnalysis.investigation_strategy?.imaging_studies || []).map((img: any) => ({
               category: 'imaging',
-              examination: img.study_name || "Imaging",
+              examination: img.study || "Imaging",
               radiation_exposure: img.radiation_exposure || false,
               pregnancy_alternative: img.pregnancy_alternative || '',
-              specific_indication: img.indication || "Indication",
+              specific_indication: img.purpose || "Indication",
               urgency: img.urgency || "routine"
             }))
           ]
