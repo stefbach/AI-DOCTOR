@@ -1347,6 +1347,32 @@ function extractRouteFromName(drugName: string): string {
   return 'Oral' // Default
 }
 
+function generateTreatmentApproach(treatmentPlan: any): string {
+  const medications = treatmentPlan.medications || []
+  const grouped: { [role: string]: string[] } = {}
+
+  medications.forEach((med: any) => {
+    const role = med.therapeutic_role || 'other'
+    const indication = med.indication || ''
+    if (!indication) return
+    if (!grouped[role]) grouped[role] = []
+    grouped[role].push(indication)
+  })
+
+  const parts = Object.entries(grouped).map(([role, indications]) => {
+    const roleLabel = role.charAt(0).toUpperCase() + role.slice(1)
+    return `${roleLabel} treatment for ${indications.join(', ')}`
+  })
+
+  const nonPharm = treatmentPlan.non_pharmacological
+  if (nonPharm) {
+    const advice = Array.isArray(nonPharm) ? nonPharm.join(', ') : nonPharm
+    parts.push(`Non-pharmacological advice includes ${advice}`)
+  }
+
+  return parts.join('. ') + (parts.length ? '.' : '')
+}
+
 // ==================== THERAPEUTIC PROTOCOLS WITH ENFORCED POSOLOGY ====================
 const THERAPEUTIC_PROTOCOLS = {
   // Will use MEDICATION_POSOLOGY_DATABASE for all drugs
@@ -2537,7 +2563,13 @@ export async function POST(request: NextRequest) {
         medicalAnalysis.treatment_plan.medications
       )
     }
-    
+
+    if (medicalAnalysis.treatment_plan) {
+      medicalAnalysis.treatment_plan.approach = generateTreatmentApproach(
+        medicalAnalysis.treatment_plan
+      )
+    }
+
     const validation = validateMedicalAnalysisWithEnforcedPosology(medicalAnalysis, patientContext)
     
     if (!validation.isValid && validation.issues.length > 0) {
