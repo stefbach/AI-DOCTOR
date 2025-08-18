@@ -1864,6 +1864,11 @@ const MAURITIUS_HEALTHCARE_CONTEXT = {
   }
 }
 
+function generateTreatmentApproach(analysis: any): string {
+  const condition = analysis?.clinical_analysis?.primary_diagnosis?.condition || 'the condition'
+  return `Evidence-based management for ${condition} combining medication, supportive care, and lifestyle measures.`
+}
+
 // ==================== CALL OPENAI WITH ENFORCED POSOLOGY ====================
 async function callOpenAIWithRetry(
   apiKey: string,
@@ -2056,9 +2061,73 @@ FORBIDDEN:
           }
         }
       });
-      
+
       console.log('═══════════════════════════════════════');
-      
+
+      // Ensure treatment plan fields are populated
+      const isEmptyOrPlaceholder = (value: any): boolean => {
+        if (value === undefined || value === null) return true
+        if (typeof value === 'string') {
+          const trimmed = value.trim()
+          return trimmed === '' || /^\[.*\]$/.test(trimmed)
+        }
+        return Array.isArray(value) ? value.length === 0 : false
+      }
+
+      analysis.treatment_plan = analysis.treatment_plan || {}
+
+      if (isEmptyOrPlaceholder(analysis.treatment_plan.approach)) {
+        analysis.treatment_plan.approach = generateTreatmentApproach(analysis)
+      }
+      if (isEmptyOrPlaceholder(analysis.treatment_plan.prescription_rationale)) {
+        analysis.treatment_plan.prescription_rationale =
+          'Medications chosen according to clinical guidelines and patient factors.'
+      }
+      if (isEmptyOrPlaceholder(analysis.treatment_plan.non_pharmacological)) {
+        analysis.treatment_plan.non_pharmacological =
+          'Encourage rest, adequate hydration, balanced diet and appropriate lifestyle measures.'
+      }
+
+      analysis.follow_up_plan = analysis.follow_up_plan || {}
+
+      if (isEmptyOrPlaceholder(analysis.follow_up_plan.red_flags)) {
+        analysis.follow_up_plan.red_flags = [
+          'Worsening symptoms',
+          'High fever',
+          'Any new severe symptom'
+        ]
+      }
+      if (isEmptyOrPlaceholder(analysis.follow_up_plan.when_to_seek_emergency)) {
+        analysis.follow_up_plan.when_to_seek_emergency = [
+          'Difficulty breathing',
+          'Chest pain',
+          'Confusion or fainting'
+        ]
+      }
+      if (isEmptyOrPlaceholder(analysis.follow_up_plan.next_consultation)) {
+        analysis.follow_up_plan.next_consultation =
+          'Follow up with a healthcare provider within one week or sooner if symptoms worsen.'
+      }
+
+      analysis.patient_education = analysis.patient_education || {}
+
+      if (isEmptyOrPlaceholder(analysis.patient_education.understanding_condition)) {
+        analysis.patient_education.understanding_condition =
+          'Your condition and its management have been explained.'
+      }
+      if (isEmptyOrPlaceholder(analysis.patient_education.medication_safety)) {
+        analysis.patient_education.medication_safety =
+          'Take medications exactly as prescribed and report any side effects.'
+      }
+      if (isEmptyOrPlaceholder(analysis.patient_education.warning_signs)) {
+        analysis.patient_education.warning_signs =
+          'Seek medical care if symptoms worsen or new concerning signs appear.'
+      }
+      if (isEmptyOrPlaceholder(analysis.patient_education.lifestyle_modifications)) {
+        analysis.patient_education.lifestyle_modifications =
+          'Maintain healthy lifestyle habits including balanced diet and regular activity as tolerated.'
+      }
+
       // Basic validation
       if (!analysis.clinical_analysis?.primary_diagnosis) {
         throw new Error('Incomplete response - diagnosis missing')
