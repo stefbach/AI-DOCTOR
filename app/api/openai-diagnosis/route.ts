@@ -1795,11 +1795,53 @@ function validatePharmacologyWithPregnancy(
 }
 
 // ==================== PREPARE PROMPT WITH PREGNANCY ====================
+function formatPatientContext(patientContext: PatientContext): string {
+  const formatList = (items?: string[]): string =>
+    items && items.length > 0 ? items.map(item => `  - ${item}`).join('\n') : '  - None'
+
+  const vitals = patientContext.vital_signs || {}
+
+  const patientForm = [
+    'PATIENT FORM DATA:',
+    `- Age: ${patientContext.age ?? 'Unknown'}`,
+    `- Sex: ${patientContext.sex ?? 'Unknown'}`,
+    `- Weight: ${patientContext.weight ?? 'Unknown'}`,
+    `- Height: ${patientContext.height ?? 'Unknown'}`,
+    `- Medical History:\n${formatList(patientContext.medical_history)}`,
+    `- Current Medications:\n${formatList(patientContext.current_medications)}`,
+    `- Allergies:\n${formatList(patientContext.allergies)}`
+  ]
+
+  if (patientContext.social_history) {
+    patientForm.push(
+      `- Social History:\n  - Smoking: ${patientContext.social_history.smoking ?? 'Unknown'}\n  - Alcohol: ${patientContext.social_history.alcohol ?? 'Unknown'}\n  - Occupation: ${patientContext.social_history.occupation ?? 'Unknown'}`
+    )
+  }
+
+  const clinicalForm = [
+    'CLINICAL FORM DATA:',
+    `- Chief Complaint: ${patientContext.chief_complaint || 'Unknown'}`,
+    `- Symptom Duration: ${patientContext.symptom_duration || 'Unknown'}`,
+    `- Symptoms:\n${formatList(patientContext.symptoms)}`,
+    `- Disease History: ${patientContext.disease_history || 'None'}`,
+    `- Vital Signs:\n  - Blood Pressure: ${vitals.blood_pressure ?? 'Unknown'}\n  - Pulse: ${vitals.pulse ?? 'Unknown'}\n  - Temperature: ${vitals.temperature ?? 'Unknown'}\n  - Respiratory Rate: ${vitals.respiratory_rate ?? 'Unknown'}\n  - Oxygen Saturation: ${vitals.oxygen_saturation ?? 'Unknown'}`
+  ]
+
+  const aiSection = [
+    'AI QUESTION ANSWERS:',
+    patientContext.ai_questions && patientContext.ai_questions.length > 0
+      ? patientContext.ai_questions
+          .map((q: any) => `Q: ${q.question}\n   A: ${q.answer}`)
+          .join('\n')
+      : 'None'
+  ]
+
+  return `${patientForm.join('\n')}\n\n${clinicalForm.join('\n')}\n\n${aiSection.join('\n')}`
+}
+
 function preparePromptWithEnforcedPosology(patientContext: PatientContext): string {
-  const aiQuestionsFormatted = patientContext.ai_questions
-    .map((q: any) => `Q: ${q.question}\n   A: ${q.answer}`)
-    .join('\n   ')
-  
+  const formattedContext = formatPatientContext(patientContext)
+
   // Prepare pregnancy status section
   let pregnancyStatusSection = ''
   if (patientContext.pregnancy_status === 'pregnant') {
@@ -1830,10 +1872,10 @@ function preparePromptWithEnforcedPosology(patientContext: PatientContext): stri
   } else {
     pregnancyStatusSection = 'Patient is not pregnant'
   }
-  
+
   return ENHANCED_DIAGNOSTIC_PROMPT_WITH_ENFORCED_POSOLOGY
     .replace('{{PREGNANCY_STATUS}}', pregnancyStatusSection)
-    .replace('{{PATIENT_CONTEXT}}', JSON.stringify(patientContext, null, 2))
+    .replace('{{PATIENT_CONTEXT}}', formattedContext)
 }
 
 // ==================== MAURITIUS HEALTHCARE CONTEXT ====================
