@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { MedicalAnalysis, Medication, LaboratoryTest, ImagingStudy } from '@/types/medical'
+import { sanitizeObject } from '@/lib/utils'
 
 // ==================== TYPES AND INTERFACES ====================
 interface PatientContext {
@@ -2506,10 +2507,18 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now()
   
   try {
-    const [body, apiKey] = await Promise.all([
+    const [rawBody, apiKey] = await Promise.all([
       request.json(),
       Promise.resolve(process.env.OPENAI_API_KEY)
     ])
+
+    const body = {
+      ...rawBody,
+      patientData: sanitizeObject(rawBody.patientData),
+      clinicalData: sanitizeObject(rawBody.clinicalData),
+      questionsData: sanitizeObject((rawBody as any).questionsData),
+      questions: sanitizeObject((rawBody as any).questions)
+    }
     
     if (!body.patientData || !body.clinicalData) {
       return NextResponse.json({

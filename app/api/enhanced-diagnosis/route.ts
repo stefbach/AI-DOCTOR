@@ -1,10 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
+import { sanitizeObject } from "@/lib/utils"
 
 export async function POST(request: NextRequest) {
   try {
-    const { patientData, clinicalData, questions } = await request.json()
+    const raw = await request.json()
+    const patientData = sanitizeObject(raw.patientData)
+    const clinicalData = sanitizeObject(raw.clinicalData)
+    const questions = sanitizeObject(raw.questions)
 
     // Étape 1: Diagnostic principal avec IA
     const diagnosticPrompt = `
