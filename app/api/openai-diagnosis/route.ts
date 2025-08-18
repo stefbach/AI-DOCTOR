@@ -1,6 +1,7 @@
 // app/api/openai-diagnosis/route.ts - VERSION 7.0 WITH ENFORCED POSOLOGY SYSTEM
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
+import { MedicalAnalysis, Medication, LaboratoryTest, ImagingStudy } from '@/types/medical'
 
 // ==================== TYPES AND INTERFACES ====================
 interface PatientContext {
@@ -2088,12 +2089,12 @@ FORBIDDEN:
 
 // ==================== VALIDATION FUNCTIONS ====================
 function validateMedicalAnalysisWithEnforcedPosology(
-  analysis: any,
+  analysis: MedicalAnalysis,
   patientContext: PatientContext
 ): ValidationResult {
-  const medications = analysis.treatment_plan?.medications || []
-  const labTests = analysis.investigation_strategy?.laboratory_tests || []
-  const imaging = analysis.investigation_strategy?.imaging_studies || []
+  const medications: Medication[] = analysis.treatment_plan?.medications || []
+  const labTests: LaboratoryTest[] = analysis.investigation_strategy?.laboratory_tests || []
+  const imaging: ImagingStudy[] = analysis.investigation_strategy?.imaging_studies || []
   
   const issues: string[] = []
   const suggestions: string[] = []
@@ -2107,12 +2108,69 @@ function validateMedicalAnalysisWithEnforcedPosology(
   console.log(`   - Pregnancy status: ${patientContext.pregnancy_status || 'Not specified'}`)
   
   const diagnosis = analysis.clinical_analysis?.primary_diagnosis?.condition || ''
-  const isPregnant = patientContext.pregnancy_status === 'pregnant' || 
+  const isPregnant = patientContext.pregnancy_status === 'pregnant' ||
                      patientContext.pregnancy_status === 'possibly_pregnant'
+
+  // Medication duplicate and interaction checks
+  const medNames = new Set<string>()
+  medications.forEach(med => {
+    const name = med.drug.toLowerCase()
+    if (medNames.has(name)) {
+      issues.push(`Duplicate medication: ${med.drug}`)
+    }
+    medNames.add(name)
+    med.interactions?.forEach(inter => {
+      if (medications.some(other => other.drug.toLowerCase() === inter.toLowerCase())) {
+        issues.push(`Interaction between ${med.drug} and ${inter}`)
+      }
+    })
+  })
+
+  // Laboratory test validations
+  const labNames = new Set<string>()
+  labTests.forEach(test => {
+    const name = test.test_name.toLowerCase()
+    if (labNames.has(name)) {
+      issues.push(`Duplicate laboratory test: ${test.test_name}`)
+    }
+    labNames.add(name)
+    if (!test.justification) {
+      suggestions.push(`Add justification for laboratory test ${test.test_name}`)
+    } else if (diagnosis && !test.justification.toLowerCase().includes(diagnosis.toLowerCase())) {
+      suggestions.push(`Review relevance of laboratory test ${test.test_name} for ${diagnosis}`)
+    }
+    if (!test.urgency) {
+      suggestions.push(`Specify urgency for laboratory test ${test.test_name}`)
+    }
+    if (isPregnant && test.contraindications?.some(c => c.toLowerCase().includes('pregnan'))) {
+      issues.push(`Laboratory test ${test.test_name} contraindicated in pregnancy`)
+    }
+  })
+
+  // Imaging study validations
+  const imagingNames = new Set<string>()
+  imaging.forEach(study => {
+    const name = study.study_name.toLowerCase()
+    if (imagingNames.has(name)) {
+      issues.push(`Duplicate imaging study: ${study.study_name}`)
+    }
+    imagingNames.add(name)
+    if (!study.justification) {
+      suggestions.push(`Add justification for imaging study ${study.study_name}`)
+    } else if (diagnosis && !study.justification.toLowerCase().includes(diagnosis.toLowerCase())) {
+      suggestions.push(`Review relevance of imaging study ${study.study_name} for ${diagnosis}`)
+    }
+    if (!study.urgency) {
+      suggestions.push(`Specify urgency for imaging study ${study.study_name}`)
+    }
+    if (isPregnant && study.contraindications?.some(c => c.toLowerCase().includes('pregnan'))) {
+      issues.push(`Imaging study ${study.study_name} contraindicated in pregnancy`)
+    }
+  })
   
   // Check posology completeness
   let posologyIssuesFixed = 0;
-  medications.forEach((med: any) => {
+  medications.forEach((med: Medication) => {
     if (!med.posology || med.posology === 'once daily' && !ACTUALLY_ONCE_DAILY_MEDICATIONS.some(d => 
       med.drug.toLowerCase().includes(d))) {
       issues.push(`Posology issue for ${med.drug}`)
@@ -2135,7 +2193,7 @@ function validateMedicalAnalysisWithEnforcedPosology(
   
   // Pregnancy-specific validations
   if (isPregnant) {
-    imaging.forEach((study: any) => {
+    imaging.forEach((study: ImagingStudy) => {
       if (study.radiation_exposure && !study.pregnancy_alternative) {
         issues.push(`⚠️ ${study.study_name} involves radiation - need pregnancy alternative`)
         suggestions.push(`Consider ultrasound or MRI instead of ${study.study_name}`)
@@ -2542,7 +2600,10 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    const validation = validateMedicalAnalysisWithEnforcedPosology(medicalAnalysis, patientContext)
+    const validation = validateMedicalAnalysisWithEnforcedPosology(
+      medicalAnalysis as MedicalAnalysis,
+      patientContext
+    )
     
     if (!validation.isValid && validation.issues.length > 0) {
       console.error('❌ Critical issues detected:', validation.issues)
