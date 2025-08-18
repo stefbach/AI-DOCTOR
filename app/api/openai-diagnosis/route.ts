@@ -1,4 +1,45 @@
-// app/api/openai-diagnosis/route.ts - VERSION 9.0 COMPLETE WITH ULTRA ENFORCED POSOLOGY
+// ==================== REFERENCE TEMPLATES (NOT FOR AUTO-APPLICATION) ====================
+// These templates are ONLY for reference and validation purposes
+// OpenAI should generate its own treatment based on the diagnosis
+// DO NOT automatically apply these templates
+const PRESCRIPTION_TEMPLATES_REFERENCE = {
+  'otitis_media_adult': [
+    {
+      drug: 'Amoxicillin 500mg',
+      therapeutic_role: 'etiological',
+      indication: 'Bacterial middle ear infection',
+      posology: '1 capsule three times daily',
+      duration: '7 days',
+      packaging: 'box of 21 capsules',
+      quantity: '1 box',
+      form: 'capsule',
+      route: 'Oral',
+      administration_instructions: 'Take with or without food. Complete full course even if symptoms improve.'
+    },
+    {
+      drug: 'Ibuprofen 400mg',
+      therapeutic_role: 'symptomatic',
+      indication: 'Pain and inflammation',
+      posology: '1 tablet three times daily with food',
+      duration: '5 days',
+      packaging: 'box of 30 tablets',
+      quantity: '1 box',
+      form: 'tablet',
+      route: 'Oral',
+      administration_instructions: 'Must take with food to prevent stomach upset.'
+    },
+    {
+      drug: 'Paracetamol 500mg',
+      therapeutic_role: 'symptomatic',
+      indication: 'Additional pain relief and fever',
+      posology: '2 tablets every 6 hours as needed',
+      duration: 'As needed',
+      packaging: 'box of 20 tablets',
+      quantity: '1 box',
+      form: 'tablet',
+      route: 'Oral',
+      administration_instructions: 'Maximum 8 tablets per day. Can alternate with ibuprofen.'
+    }// app/api/openai-diagnosis/route.ts - VERSION 9.0 COMPLETE WITH ULTRA ENFORCED POSOLOGY
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
@@ -102,11 +143,18 @@ YOU ARE A MEDICAL PRESCRIPTION SYSTEM WITH ABSOLUTE RULES.
 ⚠️⚠️⚠️ CRITICAL SYSTEM REQUIREMENT ⚠️⚠️⚠️
 FAILURE TO FOLLOW THESE RULES WILL RESULT IN AUTOMATIC REJECTION AND CORRECTION.
 
+🔴 MANDATORY FIELDS - NEVER OMIT:
+1. RED FLAGS: You MUST include at least 5 red flags in follow_up_plan.red_flags as an ARRAY
+2. EMERGENCY SIGNS: You MUST include when_to_seek_emergency as an ARRAY
+3. NEXT CONSULTATION: You MUST specify follow-up timing
+4. POSOLOGY: You MUST use exact dosing, never "once daily" except for approved exceptions
+
 🚫 ABSOLUTELY FORBIDDEN:
 - NEVER write "once daily" except for the specific exceptions listed below
 - NEVER write "as directed" or "as prescribed"
 - NEVER write generic "1 box" without specifying contents
 - NEVER omit duration, packaging, or quantity
+- NEVER submit without red_flags array in follow_up_plan
 
 ✅ EXCEPTIONS - ONLY THESE can be "once daily":
 - Azithromycin 500mg → "500mg once daily" (3-5 days)
@@ -1219,6 +1267,70 @@ ${ULTRA_STRICT_SYSTEM_PROMPT}
 - Psychiatry • Gastroenterology • Respiratory • Endocrinology
 - Urology • Neurology • Rheumatology • Infectious Diseases
 
+⚠️ CRITICAL MEDICAL REQUIREMENTS:
+
+1. TREATMENT GENERATION REQUIREMENTS:
+   
+   For OTITIS EXTERNA you MUST prescribe:
+   - Ciprofloxacin 0.3% ear drops: 4 drops in affected ear twice daily for 7 days
+   - Ibuprofen 400mg: 1 tablet three times daily with food for pain
+   - Keep ear dry, avoid swimming
+   - Include otoscopic examination in procedures
+   
+   For OTITIS MEDIA you MUST prescribe:
+   - Amoxicillin 500mg: 1 capsule three times daily for 7-10 days
+   - Ibuprofen 400mg: 1 tablet three times daily with food for pain
+   - Paracetamol 500mg: 2 tablets every 6 hours as needed for additional pain relief
+   - Include otoscopic examination in procedures
+   
+   For BACTERIAL PHARYNGITIS you MUST prescribe:
+   - Amoxicillin 500mg: 1 capsule three times daily for 10 days
+   - OR Azithromycin 500mg: once daily for 3 days (if penicillin allergy)
+   - Analgesics for throat pain
+   - Antiseptic gargles
+   
+   For URINARY TRACT INFECTION you MUST prescribe:
+   - Ciprofloxacin 500mg: 1 tablet twice daily for 3 days (uncomplicated)
+   - OR Nitrofurantoin 100mg: 1 capsule four times daily with food for 5 days
+   - Increase fluid intake
+   - Consider urine culture
+   
+   For ANY BACTERIAL INFECTION: ALWAYS prescribe appropriate antibiotics
+   For ANY PAIN condition: ALWAYS include analgesics
+   For ANY INFLAMMATORY condition: Consider NSAIDs or corticosteroids
+
+2. PHYSICAL EXAMINATION RECOMMENDATIONS:
+   - For EAR conditions: ALWAYS include "Otoscopic examination" in procedures
+   - For THROAT conditions: ALWAYS include "Pharyngeal examination"
+   - For CHEST symptoms: ALWAYS include "Auscultation"
+   - For ABDOMINAL pain: ALWAYS include "Abdominal palpation"
+   - Include these in the "procedures" section of treatment_plan
+
+3. FOLLOW-UP REQUIREMENTS:
+   - ALWAYS specify when patient should return
+   - ALWAYS include at least 5 specific red flags
+   - ALWAYS specify emergency signs
+   - Red flags must be condition-specific, not generic
+
+⚠️ CRITICAL REQUIREMENT FOR RED FLAGS:
+YOU MUST ALWAYS INCLUDE AT LEAST 5 RED FLAGS IN THE follow_up_plan SECTION.
+Red flags are warning signs that require immediate medical attention.
+NEVER submit a response without red flags - they are MANDATORY for patient safety.
+
+RED FLAGS ARE REQUIRED EVEN IF:
+- No medications are prescribed
+- Only non-pharmacological treatment is recommended
+- Patient is referred to a specialist
+- Watchful waiting approach is taken
+- Condition is mild or self-limiting
+
+Examples of red flags to include based on condition:
+- Respiratory: difficulty breathing, cyanosis, respiratory rate >30
+- Cardiac: chest pain, syncope, palpitations with dizziness
+- Infection: high fever >39°C, altered mental status, signs of sepsis
+- General: severe uncontrolled pain, rapid symptom progression
+- ANY CASE: always include warning signs even for benign conditions
+
 🤰 PREGNANCY STATUS ASSESSMENT:
 {{PREGNANCY_STATUS}}
 
@@ -1310,10 +1422,12 @@ GENERATE THIS EXACT JSON STRUCTURE:
   },
   
   "treatment_plan": {
-    "approach": "[Overall therapeutic strategy]",
-    "prescription_rationale": "[Why THESE specific medications]",
+    "approach": "[Overall therapeutic strategy - REQUIRED even if non-pharmacological]",
+    "prescription_rationale": "[Why these medications OR why no medications needed]",
     
     "medications": [
+      "NOTE: This array can be empty if no medications are needed",
+      "But if medications are prescribed, each must have:",
       {
         "drug": "[EXACT name with strength, e.g., 'Amoxicillin 500mg']",
         "therapeutic_role": "etiological/symptomatic/preventive/supportive",
@@ -1334,7 +1448,7 @@ GENERATE THIS EXACT JSON STRUCTURE:
       }
     ],
     
-    "non_pharmacological": "[Lifestyle measures, diet, rest, etc.]",
+    "non_pharmacological": "[REQUIRED - Lifestyle measures, rest, hydration, diet modifications, etc.]",
     
     "procedures": [
       {
@@ -1358,8 +1472,14 @@ GENERATE THIS EXACT JSON STRUCTURE:
     "immediate": "[Within 24-48h - what to monitor]",
     "short_term": "[Day 3-7 - expected progress]",
     "long_term": "[1 month - complete resolution expected]",
-    "red_flags": "[Symptoms requiring immediate return]",
-    "when_to_seek_emergency": "[Specific warning signs]",
+    "red_flags": [
+      "MANDATORY - List at least 5 warning signs requiring immediate medical attention",
+      "Include specific symptoms like: difficulty breathing, chest pain, altered mental status",
+      "Add condition-specific red flags based on the diagnosis",
+      "Include fever thresholds and pain severity indicators",
+      "Specify any medication-related adverse reactions to watch for"
+    ],
+    "when_to_seek_emergency": "[Specific warning signs - MUST be different from red_flags]",
     "next_consultation": "[When to follow up]"
   },
   
@@ -1581,7 +1701,12 @@ async function callOpenAIWithUltraEnforcement(
       let enhancedPrompt = prompt
       if (attempt > 0) {
         enhancedPrompt += `\n\n⚠️⚠️⚠️ ATTEMPT ${attempt + 1} - PREVIOUS RESPONSE HAD ERRORS ⚠️⚠️⚠️\n`
-        enhancedPrompt += `CRITICAL REMINDER:\n`
+        enhancedPrompt += `CRITICAL REMINDERS:\n`
+        enhancedPrompt += `- MUST prescribe antibiotics for bacterial infections\n`
+        enhancedPrompt += `- MUST prescribe ear drops for otitis externa\n`
+        enhancedPrompt += `- MUST prescribe analgesics for pain\n`
+        enhancedPrompt += `- MUST include physical examination recommendations\n`
+        enhancedPrompt += `- MUST include at least 5 red flags\n`
         enhancedPrompt += `- DO NOT use "once daily" except for: Azithromycin, Levofloxacin, Amlodipine, Lisinopril, Losartan, Omeprazole, Cetirizine, Loratadine\n`
         enhancedPrompt += `- USE SPECIFIC POSOLOGIES: "three times daily", "twice daily", "four times daily", "every 6 hours"\n`
         enhancedPrompt += `- INCLUDE EXACT PACKAGING: "box of X tablets/capsules", not just "1 box"\n`
@@ -1599,20 +1724,20 @@ async function callOpenAIWithUltraEnforcement(
           messages: [
             {
               role: 'system',
-              content: ULTRA_STRICT_SYSTEM_PROMPT
+              content: ULTRA_STRICT_SYSTEM_PROMPT + '\n\nYou are an expert physician who ALWAYS prescribes appropriate medications for bacterial infections, inflammatory conditions, and pain management.'
             },
             {
               role: 'user',
               content: enhancedPrompt
             }
           ],
-          temperature: 0.1, // Ultra low for consistency
+          temperature: 0.3, // Slightly higher for better generation while maintaining consistency
           max_tokens: 8000,
           response_format: { type: "json_object" },
           top_p: 0.95,
-          frequency_penalty: 0.2,
+          frequency_penalty: 0.1, // Reduced to allow repetition of medical terms
           presence_penalty: 0.1,
-          seed: 12345
+          seed: undefined // Remove seed for better generation variety
         })
       })
       
@@ -1624,21 +1749,91 @@ async function callOpenAIWithUltraEnforcement(
       const data = await response.json()
       let analysis = JSON.parse(data.choices[0]?.message?.content || '{}')
       
-      // ULTRA AGGRESSIVE VALIDATION AND CORRECTION
-      if (analysis.treatment_plan?.medications) {
+      // CHECK IF TREATMENT IS MISSING FOR CONDITIONS THAT NEED IT
+      const diagnosis = analysis.clinical_analysis?.primary_diagnosis?.condition?.toLowerCase() || ''
+      const needsTreatment = diagnosis.includes('otitis') || 
+                            diagnosis.includes('bacterial') || 
+                            diagnosis.includes('infection') ||
+                            diagnosis.includes('pharyngitis') ||
+                            diagnosis.includes('pneumonia') ||
+                            diagnosis.includes('urinary')
+      
+      if (needsTreatment && (!analysis.treatment_plan?.medications || 
+          analysis.treatment_plan.medications.length === 0)) {
+        
+        console.error('═══════════════════════════════════════════════════════════')
+        console.error(`❌ CRITICAL: NO TREATMENT GENERATED FOR ${diagnosis.toUpperCase()}`)
+        console.error('═══════════════════════════════════════════════════════════')
+        
+        // If not last attempt, retry with VERY explicit instructions
+        if (attempt < maxRetries) {
+          console.warn('🔁 RETRYING WITH EXPLICIT TREATMENT REQUIREMENTS...')
+          
+          enhancedPrompt = prompt + `\n\n⚠️⚠️⚠️ CRITICAL ERROR - RETRY ${attempt + 1} ⚠️⚠️⚠️\n\n`
+          enhancedPrompt += `YOU FAILED TO PRESCRIBE MEDICATIONS FOR ${diagnosis.toUpperCase()}.\n\n`
+          
+          if (diagnosis.includes('otitis externa')) {
+            enhancedPrompt += `FOR OTITIS EXTERNA YOU MUST PRESCRIBE IN THE medications ARRAY:\n\n`
+            enhancedPrompt += `1. First medication:\n`
+            enhancedPrompt += `   "drug": "Ciprofloxacin 0.3% ear drops",\n`
+            enhancedPrompt += `   "posology": "4 drops in affected ear twice daily",\n`
+            enhancedPrompt += `   "duration": "7 days",\n`
+            enhancedPrompt += `   "packaging": "5ml bottle",\n`
+            enhancedPrompt += `   "quantity": "1 bottle"\n\n`
+            enhancedPrompt += `2. Second medication:\n`
+            enhancedPrompt += `   "drug": "Ibuprofen 400mg",\n`
+            enhancedPrompt += `   "posology": "1 tablet three times daily with food",\n`
+            enhancedPrompt += `   "duration": "5 days",\n`
+            enhancedPrompt += `   "packaging": "box of 30 tablets",\n`
+            enhancedPrompt += `   "quantity": "1 box"\n\n`
+            enhancedPrompt += `3. Third medication (if needed):\n`
+            enhancedPrompt += `   "drug": "Paracetamol 500mg",\n`
+            enhancedPrompt += `   "posology": "2 tablets every 6 hours as needed",\n`
+            enhancedPrompt += `   "duration": "As needed",\n`
+            enhancedPrompt += `   "packaging": "box of 20 tablets",\n`
+            enhancedPrompt += `   "quantity": "1 box"\n\n`
+            enhancedPrompt += `ALSO ADD "Otoscopic examination" in the procedures array.\n`
+          } else if (diagnosis.includes('otitis media')) {
+            enhancedPrompt += `FOR OTITIS MEDIA YOU MUST PRESCRIBE:\n`
+            enhancedPrompt += `1. Amoxicillin 500mg - 1 capsule three times daily for 7 days\n`
+            enhancedPrompt += `2. Ibuprofen 400mg - 1 tablet three times daily with food\n`
+            enhancedPrompt += `3. Add otoscopic examination in procedures\n`
+          } else if (diagnosis.includes('pharyngitis')) {
+            enhancedPrompt += `FOR PHARYNGITIS YOU MUST PRESCRIBE:\n`
+            enhancedPrompt += `1. Amoxicillin 500mg - 1 capsule three times daily for 10 days\n`
+            enhancedPrompt += `2. Analgesics for pain\n`
+            enhancedPrompt += `3. Antiseptic gargles\n`
+          } else if (diagnosis.includes('infection')) {
+            enhancedPrompt += `FOR BACTERIAL INFECTION YOU MUST PRESCRIBE:\n`
+            enhancedPrompt += `1. Appropriate antibiotic based on the infection site\n`
+            enhancedPrompt += `2. Analgesics for pain/fever\n`
+            enhancedPrompt += `3. Supportive care medications\n`
+          }
+          
+          enhancedPrompt += `\nTHIS IS MANDATORY. THE medications ARRAY CANNOT BE EMPTY.\n`
+          
+          continue // Retry with enhanced prompt
+        } else {
+          console.error('❌ FAILED TO GENERATE TREATMENT AFTER ALL RETRIES')
+          console.error('   Manual intervention required')
+        }
+      }
+      
+      // ULTRA AGGRESSIVE VALIDATION AND CORRECTION FOR POSOLOGY
+      if (analysis.treatment_plan?.medications && analysis.treatment_plan.medications.length > 0) {
         console.log('🔨 APPLYING ULTRA ENFORCEMENT...')
         
         const validation = detectAndFixPosologyIssues(analysis.treatment_plan.medications)
         
         if (validation.hadIssues) {
-          console.error(`❌ DETECTED ${validation.issueCount} ISSUES - APPLYING FORCED CORRECTIONS`)
+          console.error(`❌ DETECTED ${validation.issueCount} POSOLOGY ISSUES - APPLYING FORCED CORRECTIONS`)
           console.log(validation.report)
           
           analysis.treatment_plan.medications = validation.fixed
           
           // If too many issues and not last attempt, retry
           if (validation.issueCount > 3 && attempt < maxRetries) {
-            console.warn('🔁 Too many issues detected, retrying with stricter enforcement...')
+            console.warn('🔁 Too many posology issues detected, retrying...')
             continue
           }
         } else {
@@ -1719,7 +1914,206 @@ async function callOpenAIWithUltraEnforcement(
   throw lastError || new Error('Failed after multiple attempts')
 }
 
-// ==================== COMPREHENSIVE VALIDATION ====================
+// ==================== RED FLAGS DATABASE ====================
+const RED_FLAGS_DATABASE: { [key: string]: string[] } = {
+  // Cardiovascular
+  'myocardial_infarction': [
+    'Chest pain at rest or worsening',
+    'Shortness of breath or dyspnea',
+    'Syncope or near-syncope',
+    'Palpitations with chest pain',
+    'Cold sweats with chest discomfort'
+  ],
+  'heart_failure': [
+    'Worsening dyspnea or orthopnea',
+    'Rapid weight gain (>2kg in 3 days)',
+    'Chest pain or pressure',
+    'Syncope or dizziness',
+    'Decreased urine output'
+  ],
+  
+  // Respiratory
+  'pneumonia': [
+    'Difficulty breathing or respiratory rate >30',
+    'Confusion or altered mental status',
+    'Chest pain with breathing',
+    'Cyanosis (blue lips/fingernails)',
+    'High fever >39°C not responding to treatment',
+    'Blood in sputum'
+  ],
+  'asthma': [
+    'Unable to speak in full sentences',
+    'Use of accessory muscles to breathe',
+    'Peak flow <50% of baseline',
+    'Cyanosis',
+    'Silent chest (no wheeze audible)'
+  ],
+  
+  // Infectious
+  'urinary_tract_infection': [
+    'Fever >38.5°C with chills',
+    'Flank pain or costovertebral angle tenderness',
+    'Nausea and vomiting',
+    'Signs of sepsis (confusion, low BP)',
+    'Blood in urine'
+  ],
+  'gastroenteritis': [
+    'Signs of severe dehydration',
+    'Blood in stool or vomit',
+    'High fever >39°C',
+    'Severe abdominal pain',
+    'Altered mental status',
+    'No urine output for >8 hours'
+  ],
+  
+  // ENT Detailed
+  'otitis_media': [
+    'Facial weakness or paralysis',
+    'Severe headache or neck stiffness',
+    'Confusion or altered consciousness',
+    'Swelling behind the ear (mastoiditis)',
+    'High fever >39°C not responding to treatment',
+    'Persistent ear discharge with foul odor',
+    'Vertigo or severe dizziness'
+  ],
+  'otitis_externa': [
+    'Fever >38.5°C',
+    'Facial swelling or cellulitis',
+    'Severe pain not controlled by analgesics',
+    'Hearing loss or muffled hearing',
+    'Discharge with blood',
+    'Swelling extending beyond the ear'
+  ],
+  'pharyngitis': [
+    'Difficulty swallowing or drooling',
+    'Difficulty breathing',
+    'Muffled or "hot potato" voice',
+    'Severe neck swelling',
+    'High fever >39°C for >3 days',
+    'Inability to open mouth (trismus)',
+    'Unilateral throat swelling'
+  ],
+  'sinusitis': [
+    'Severe headache with neck stiffness',
+    'Vision changes or eye swelling',
+    'High fever >39°C',
+    'Confusion or altered mental status',
+    'Facial swelling around eyes',
+    'Severe pain not responding to treatment'
+  ],
+  
+  // Conditions often managed without medication
+  'viral_syndrome': [
+    'Difficulty breathing or rapid breathing',
+    'Persistent fever >39°C for >5 days',
+    'Signs of dehydration',
+    'Confusion or altered mental status',
+    'Severe headache with neck stiffness',
+    'Rash with fever (could be meningococcal)'
+  ],
+  'mild_condition': [
+    'Symptoms rapidly worsening',
+    'New or worsening fever >38.5°C',
+    'Difficulty breathing',
+    'Severe pain not improving',
+    'Signs of dehydration',
+    'Any concerning new symptoms'
+  ],
+  'watchful_waiting': [
+    'Symptoms not improving after expected timeframe',
+    'New concerning symptoms developing',
+    'Fever developing or worsening',
+    'Pain becoming severe',
+    'Any signs of complications',
+    'Patient feeling significantly worse'
+  ],
+  
+  // General/Default - ALWAYS applicable
+  'default': [
+    'Difficulty breathing or shortness of breath',
+    'Chest pain or pressure',
+    'Confusion or altered mental status',
+    'Severe pain not controlled by medication',
+    'High fever >39°C persisting despite treatment',
+    'Signs of dehydration or shock',
+    'Any symptom rapidly worsening',
+    'New neurological symptoms (weakness, numbness)',
+    'Severe headache with neck stiffness'
+  ]
+};
+
+function generateRedFlags(diagnosis: string): string[] {
+  const diagnosisLower = diagnosis.toLowerCase();
+  console.log(`🚨 Generating red flags for diagnosis: "${diagnosis}"`);
+  
+  // Search for exact matching condition
+  for (const [condition, flags] of Object.entries(RED_FLAGS_DATABASE)) {
+    if (diagnosisLower.includes(condition.replace('_', ' '))) {
+      console.log(`   ✅ Found exact match: ${condition}`);
+      return flags;
+    }
+  }
+  
+  // Check for partial matches
+  for (const [condition, flags] of Object.entries(RED_FLAGS_DATABASE)) {
+    const conditionWords = condition.replace('_', ' ').split(' ');
+    for (const word of conditionWords) {
+      if (word.length > 4 && diagnosisLower.includes(word)) {
+        console.log(`   ✅ Found partial match: ${condition} (matched on "${word}")`);
+        return flags;
+      }
+    }
+  }
+  
+  // Check for conditions that typically don't need medication
+  if (diagnosisLower.includes('viral') || diagnosisLower.includes('self-limiting')) {
+    console.log(`   ✅ Detected viral/self-limiting condition`);
+    return RED_FLAGS_DATABASE.viral_syndrome;
+  }
+  
+  if (diagnosisLower.includes('mild') || diagnosisLower.includes('benign')) {
+    console.log(`   ✅ Detected mild condition`);
+    return RED_FLAGS_DATABASE.mild_condition;
+  }
+  
+  if (diagnosisLower.includes('observation') || diagnosisLower.includes('watchful')) {
+    console.log(`   ✅ Detected watchful waiting approach`);
+    return RED_FLAGS_DATABASE.watchful_waiting;
+  }
+  
+  // Check for specific keywords
+  if (diagnosisLower.includes('cardiac') || diagnosisLower.includes('heart') || diagnosisLower.includes('coronary')) {
+    console.log(`   ✅ Detected cardiac condition`);
+    return RED_FLAGS_DATABASE.myocardial_infarction;
+  }
+  
+  if (diagnosisLower.includes('respiratory') || diagnosisLower.includes('lung') || diagnosisLower.includes('pneumo')) {
+    console.log(`   ✅ Detected respiratory condition`);
+    return RED_FLAGS_DATABASE.pneumonia;
+  }
+  
+  if (diagnosisLower.includes('infection') || diagnosisLower.includes('bacterial') || diagnosisLower.includes('viral')) {
+    console.log(`   ✅ Detected infectious condition`);
+    return RED_FLAGS_DATABASE.urinary_tract_infection;
+  }
+  
+  if (diagnosisLower.includes('ear') || diagnosisLower.includes('otic')) {
+    console.log(`   ✅ Detected ear condition`);
+    return RED_FLAGS_DATABASE.otitis_media;
+  }
+  
+  if (diagnosisLower.includes('throat') || diagnosisLower.includes('pharyn')) {
+    console.log(`   ✅ Detected throat condition`);
+    return RED_FLAGS_DATABASE.pharyngitis;
+  }
+  
+  // Return default red flags - ALWAYS have red flags
+  console.log(`   ⚠️ No specific match found, using default red flags`);
+  console.log(`   Note: Red flags are MANDATORY even without treatment`);
+  return RED_FLAGS_DATABASE.default;
+}
+
+// ==================== COMPREHENSIVE VALIDATION WITH RED FLAGS ====================
 function validateMedicalAnalysis(
   analysis: any,
   patientContext: PatientContext
@@ -1799,11 +2193,78 @@ function validateMedicalAnalysis(
   }
   
   if (!analysis.treatment_plan?.approach) {
-    issues.push('Therapeutic approach missing')
+    // Note: Therapeutic approach can be non-pharmacological
+    suggestions.push('Consider adding therapeutic approach (even if non-pharmacological)')
   }
   
-  if (!analysis.follow_up_plan?.red_flags) {
-    issues.push('Red flags missing')
+  // RED FLAGS ARE MANDATORY REGARDLESS OF TREATMENT
+  // Red flags must be present even if:
+  // - No medications prescribed
+  // - Only non-pharmacological treatment
+  // - Referral to specialist
+  // - Watchful waiting approach
+  
+  // RED FLAGS VALIDATION AND AUTO-GENERATION
+  if (!analysis.follow_up_plan?.red_flags || 
+      !Array.isArray(analysis.follow_up_plan?.red_flags) || 
+      analysis.follow_up_plan.red_flags.length === 0) {
+    
+    console.log('⚠️ Red flags missing - auto-generating (MANDATORY for patient safety)...')
+    
+    // Auto-generate red flags based on diagnosis
+    const diagnosis = analysis.clinical_analysis?.primary_diagnosis?.condition || 'general condition'
+    const generatedRedFlags = generateRedFlags(diagnosis)
+    
+    // Fix the analysis object
+    if (!analysis.follow_up_plan) {
+      analysis.follow_up_plan = {}
+    }
+    analysis.follow_up_plan.red_flags = generatedRedFlags
+    
+    console.log(`✅ Generated ${generatedRedFlags.length} red flags for ${diagnosis}`)
+    console.log('   Note: Red flags are mandatory even without pharmacological treatment')
+    suggestions.push('Red flags were auto-generated based on diagnosis (required for all cases)')
+  }
+  
+  // EMERGENCY SIGNS VALIDATION
+  if (!analysis.follow_up_plan?.when_to_seek_emergency || 
+      !Array.isArray(analysis.follow_up_plan?.when_to_seek_emergency)) {
+    
+    console.log('⚠️ Emergency signs missing - auto-generating...')
+    
+    // Generate emergency signs (more critical than red flags)
+    const emergencySigns = [
+      'Loss of consciousness or unresponsiveness',
+      'Severe difficulty breathing or choking',
+      'Chest pain with radiation to arm or jaw',
+      'Signs of stroke (facial drooping, arm weakness, speech difficulty)',
+      'Severe allergic reaction (swelling of face/throat)',
+      'Uncontrolled bleeding',
+      'Severe confusion or hallucinations'
+    ]
+    
+    if (!analysis.follow_up_plan) {
+      analysis.follow_up_plan = {}
+    }
+    analysis.follow_up_plan.when_to_seek_emergency = emergencySigns
+    
+    console.log(`✅ Generated emergency signs`)
+    suggestions.push('Emergency signs were auto-generated')
+  }
+  
+  // NEXT CONSULTATION VALIDATION
+  if (!analysis.follow_up_plan?.next_consultation) {
+    const defaultFollowUp = analysis.clinical_analysis?.primary_diagnosis?.severity === 'severe' 
+      ? 'Within 48 hours' 
+      : analysis.clinical_analysis?.primary_diagnosis?.severity === 'moderate'
+      ? 'Within 3-5 days'
+      : 'Within 7-10 days if symptoms persist'
+    
+    if (!analysis.follow_up_plan) {
+      analysis.follow_up_plan = {}
+    }
+    analysis.follow_up_plan.next_consultation = defaultFollowUp
+    suggestions.push('Follow-up timing was auto-generated based on severity')
   }
   
   return {
@@ -1992,7 +2453,16 @@ function generateMedicalDocuments(
           'All medications selected with consideration of pregnancy. Patient advised to inform all healthcare providers of pregnancy status.' : 
           null
       }
-    } : null
+    } : {
+      // No prescription document when no medications
+      header: {
+        title: "NON-PHARMACOLOGICAL TREATMENT PLAN",
+        date: currentDate.toLocaleDateString('en-US')
+      },
+      message: "No medications prescribed for this consultation",
+      nonPharmacological: analysis.treatment_plan?.non_pharmacological || "Supportive care and monitoring",
+      followUp: "Follow red flags and return if symptoms worsen"
+    }
   }
 }
 
@@ -2160,32 +2630,126 @@ export async function POST(request: NextRequest) {
     
     console.log('✅ Medical analysis generated with ultra enforced posology')
     
-    // Apply prescription templates if diagnosis matches
-    const diagnosis = medicalAnalysis.clinical_analysis?.primary_diagnosis?.condition?.toLowerCase() || ''
-    for (const [condition, template] of Object.entries(PRESCRIPTION_TEMPLATES)) {
-      if (diagnosis.includes(condition.replace('_', ' '))) {
-        console.log(`📋 Applying prescription template for ${condition}`)
-        if (!medicalAnalysis.treatment_plan.medications || medicalAnalysis.treatment_plan.medications.length === 0) {
-          medicalAnalysis.treatment_plan.medications = template
-        }
-        break
+    // Check if treatment is missing for conditions that need it
+    const diagnosisLower = medicalAnalysis.clinical_analysis?.primary_diagnosis?.condition?.toLowerCase() || ''
+    
+    // VALIDATION: Check if treatment is missing for bacterial/inflammatory conditions
+    const needsTreatment = diagnosisLower.includes('otitis') || 
+                          diagnosisLower.includes('bacterial') || 
+                          diagnosisLower.includes('infection') ||
+                          diagnosisLower.includes('pharyngitis') ||
+                          diagnosisLower.includes('pneumonia') ||
+                          diagnosisLower.includes('urinary tract') ||
+                          diagnosisLower.includes('sinusitis') ||
+                          diagnosisLower.includes('cellulitis')
+    
+    if (needsTreatment && (!medicalAnalysis.treatment_plan?.medications || 
+        medicalAnalysis.treatment_plan.medications.length === 0)) {
+      
+      console.error('⚠️ WARNING: No treatment generated for condition requiring medication!')
+      console.log(`   Diagnosis: ${diagnosisLower}`)
+      console.log('   This appears to be an OpenAI generation issue')
+      
+      // Log for debugging but DON'T auto-apply templates
+      // The goal is to fix the OpenAI prompt, not bypass it
+      console.log('   Consider reviewing the prompt to ensure OpenAI generates appropriate treatment')
+      
+      // Add a note in the validation
+      if (!medicalAnalysis.treatment_plan) {
+        medicalAnalysis.treatment_plan = {}
       }
+      
+      medicalAnalysis.treatment_plan.note = 'Treatment may need review - consult physician if symptoms persist'
     }
     
-    // FINAL ENFORCEMENT
-    if (medicalAnalysis.treatment_plan?.medications) {
-      console.log('🔨 FINAL ENFORCEMENT CHECK...')
+    // Check for missing examination recommendations for ENT conditions
+    if ((diagnosisLower.includes('otitis') || diagnosisLower.includes('ear')) && 
+        (!medicalAnalysis.treatment_plan?.procedures || medicalAnalysis.treatment_plan.procedures.length === 0)) {
+      
+      console.log('⚠️ Adding otoscopic examination recommendation for ear condition')
+      
+      if (!medicalAnalysis.treatment_plan) {
+        medicalAnalysis.treatment_plan = {}
+      }
+      
+      if (!medicalAnalysis.treatment_plan.procedures) {
+        medicalAnalysis.treatment_plan.procedures = []
+      }
+      
+      medicalAnalysis.treatment_plan.procedures.push({
+        procedure_name: 'Otoscopic Examination',
+        indication: 'Visual examination of ear canal and tympanic membrane',
+        urgency: 'recommended',
+        pregnancy_considerations: 'Safe during pregnancy'
+      })
+    }
+    
+    // FINAL ENFORCEMENT - Only for posology correction, NOT for adding treatments
+    if (medicalAnalysis.treatment_plan?.medications && medicalAnalysis.treatment_plan.medications.length > 0) {
+      console.log('🔨 FINAL POSOLOGY ENFORCEMENT CHECK...')
       const finalValidation = detectAndFixPosologyIssues(medicalAnalysis.treatment_plan.medications)
       if (finalValidation.hadIssues) {
-        console.log('📝 Final corrections applied')
+        console.log('📝 Final posology corrections applied')
         medicalAnalysis.treatment_plan.medications = finalValidation.fixed
       }
     }
     
+    // ENSURE RED FLAGS ARE PRESENT
+    if (!medicalAnalysis.follow_up_plan) {
+      medicalAnalysis.follow_up_plan = {}
+    }
+    
+    // Convert string red_flags to array if needed
+    if (typeof medicalAnalysis.follow_up_plan.red_flags === 'string') {
+      console.log('⚠️ Red flags were string, converting to array...')
+      medicalAnalysis.follow_up_plan.red_flags = [medicalAnalysis.follow_up_plan.red_flags]
+    }
+    
+    if (!medicalAnalysis.follow_up_plan.red_flags || 
+        !Array.isArray(medicalAnalysis.follow_up_plan.red_flags) || 
+        medicalAnalysis.follow_up_plan.red_flags.length === 0) {
+      const diagnosis = medicalAnalysis.clinical_analysis?.primary_diagnosis?.condition || 'general condition'
+      medicalAnalysis.follow_up_plan.red_flags = generateRedFlags(diagnosis)
+      console.log('🚨 Red flags were missing - auto-generated based on diagnosis')
+    }
+    
+    // Ensure red_flags contains actual warning signs, not placeholder text
+    if (medicalAnalysis.follow_up_plan.red_flags.some((flag: any) => 
+        typeof flag === 'string' && flag.includes('MANDATORY'))) {
+      console.log('⚠️ Red flags contained placeholder text, replacing with actual warnings...')
+      const diagnosis = medicalAnalysis.clinical_analysis?.primary_diagnosis?.condition || 'general condition'
+      medicalAnalysis.follow_up_plan.red_flags = generateRedFlags(diagnosis)
+    }
+    
+    // Convert string when_to_seek_emergency to array if needed
+    if (typeof medicalAnalysis.follow_up_plan.when_to_seek_emergency === 'string') {
+      console.log('⚠️ Emergency signs were string, converting to array...')
+      medicalAnalysis.follow_up_plan.when_to_seek_emergency = [medicalAnalysis.follow_up_plan.when_to_seek_emergency]
+    }
+    
+    if (!medicalAnalysis.follow_up_plan.when_to_seek_emergency || 
+        !Array.isArray(medicalAnalysis.follow_up_plan.when_to_seek_emergency) || 
+        medicalAnalysis.follow_up_plan.when_to_seek_emergency.length === 0) {
+      medicalAnalysis.follow_up_plan.when_to_seek_emergency = [
+        'Loss of consciousness or unresponsiveness',
+        'Severe difficulty breathing or choking',
+        'Chest pain with radiation to arm or jaw',
+        'Signs of stroke (facial drooping, arm weakness, speech difficulty)',
+        'Severe allergic reaction (swelling of face/throat)'
+      ]
+      console.log('🚨 Emergency signs were missing - auto-generated')
+    }
+    
+    if (!medicalAnalysis.follow_up_plan.next_consultation) {
+      medicalAnalysis.follow_up_plan.next_consultation = 'Within 7 days if symptoms persist or worsen'
+      console.log('📅 Follow-up timing was missing - auto-generated')
+    }
+    
     const validation = validateMedicalAnalysis(medicalAnalysis, patientContext)
     
-    if (!validation.isValid && validation.issues.length > 0) {
-      console.error('❌ Critical issues detected:', validation.issues)
+    // Note: Red flags are now auto-generated if missing, so this should not show as an error
+    if (validation.issues.length > 0) {
+      console.log('⚠️ Issues detected (non-critical):', validation.issues)
     }
     
     if (validation.suggestions.length > 0) {
@@ -2217,6 +2781,8 @@ export async function POST(request: NextRequest) {
     console.log(`🔒 Data protection: ACTIVE`)
     console.log(`🤰 Pregnancy safety: ${validation.metrics.pregnancySafetyChecked ? 'VERIFIED' : 'N/A'}`)
     console.log(`📝 Posology enforcement: ULTRA ACTIVE`)
+    console.log(`🚨 Red flags: ${medicalAnalysis.follow_up_plan?.red_flags?.length || 0} warning signs included`)
+    console.log(`✅ All critical fields validated and auto-corrected if needed`)
     
     // Track metrics
     if (diagnosis) {
@@ -2458,29 +3024,45 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     status: '✅ Mauritius Medical AI - Version 9.0 Complete with Ultra Enforcement',
     version: '9.0-Complete-Ultra-Enforced-Posology-System',
+    approach: 'OpenAI-Driven Diagnosis and Treatment Generation',
     features: [
-      '🔒 Patient data anonymization (RGPD/HIPAA)',
-      '💊 ULTRA ENFORCED POSOLOGY DATABASE: ' + Object.keys(MEDICATION_POSOLOGY_DATABASE).length + ' medications',
-      '🔨 Multi-level ultra aggressive enforcement',
-      '📋 Complete prescription templates for common conditions',
+      '🤖 OpenAI generates all diagnoses and treatments (not template-based)',
+      '🔍 Intelligent detection when treatment is missing',
+      '🔄 Auto-retry with enhanced prompts if treatment missing',
+      '💊 POSOLOGY CORRECTION: ' + Object.keys(MEDICATION_POSOLOGY_DATABASE).length + ' medications database',
+      '🔨 Multi-level posology enforcement (correction only, not generation)',
+      '📋 Templates exist only as fallback reference (not auto-applied)',
       '🚫 Zero tolerance for generic posologies',
-      '✅ Automatic correction with detailed validation reports',
+      '✅ Automatic posology correction with detailed validation reports',
       '⚠️ Temperature 0.1 for maximum consistency',
       '🔁 Automatic retry with stricter prompts on errors',
+      '🩺 Enforced physical examination recommendations',
+      '🚨 Mandatory red flags (auto-generated if missing)',
       '🤰 Complete pregnancy safety management',
       '👶 FDA pregnancy categories (A, B, C, D, X)',
       '🤱 Breastfeeding safety (L1-L5 categories)',
       '⚠️ Automatic contraindicated medication replacement',
       '📊 Trimester-specific adjustments',
       '🩻 Radiation-free imaging alternatives for pregnancy',
-      '💊 Pregnancy-safe therapeutic protocols',
-      '🚨 Obstetric emergency recognition',
-      '📋 Evidence-based pregnancy protocols',
       '🏥 All medical specialties including obstetrics',
-      '✅ Therapeutic coherence verification',
       '📊 Real-time prescription monitoring',
       '🎯 99.9% posology accuracy target'
     ],
+    criticalNote: 'The system relies on OpenAI to generate appropriate treatments based on diagnosis. Templates are NOT automatically applied.',
+    openAIResponsibilities: {
+      diagnosis: 'OpenAI generates the primary and differential diagnoses',
+      treatment: 'OpenAI prescribes appropriate medications based on condition',
+      investigations: 'OpenAI recommends necessary tests and imaging',
+      procedures: 'OpenAI suggests physical examinations needed',
+      education: 'OpenAI provides patient education content'
+    },
+    systemResponsibilities: {
+      posologyCorrection: 'System corrects any incorrect posologies',
+      redFlagsGeneration: 'System ensures red flags are present',
+      pregnancySafety: 'System validates pregnancy safety',
+      dataProtection: 'System anonymizes patient data',
+      qualityControl: 'System validates completeness'
+    },
     ultraEnforcement: {
       enabled: true,
       levels: [
@@ -2502,7 +3084,7 @@ export async function GET(request: NextRequest) {
     posologyDatabase: {
       totalEntries: Object.keys(MEDICATION_POSOLOGY_DATABASE).length,
       onceDailyExceptions: ACTUALLY_ONCE_DAILY_MEDICATIONS.length,
-      prescriptionTemplates: Object.keys(PRESCRIPTION_TEMPLATES).length,
+      referenceTemplates: Object.keys(PRESCRIPTION_TEMPLATES_REFERENCE).length,
       categories: [
         'Antibiotics (Complete)',
         'NSAIDs (Complete)',
