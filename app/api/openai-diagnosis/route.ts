@@ -2582,22 +2582,26 @@ async function callOpenAIWithRetry(
   apiKey: string,
   prompt: string,
   patientContext: PatientContext,
-  maxRetries: number = 2
+  maxRetries: number = 0
 ): Promise<any> {
   let lastError: Error | null = null
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       console.log(`📡 OpenAI call (attempt ${attempt + 1}/${maxRetries + 1})...`)
+
+       const controller = new AbortController();
+       const timeoutId = setTimeout(() => controller.abort(), 90000);
       
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
+        signal: controller.signal, 
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o',
+          model: 'gpt-4-turbo-preview',
           messages: [
             {
               role: 'system',
