@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo, memo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -147,6 +147,450 @@ const createEmptyReport = (): MauritianReport => ({
   }
 })
 
+// ==================== MEMOIZED INPUT COMPONENTS ====================
+// Medication Input Component with local state to prevent focus loss
+const MedicationEditForm = memo(({ 
+  medication, 
+  index, 
+  onUpdate, 
+  onRemove 
+}: {
+  medication: any
+  index: number
+  onUpdate: (index: number, updates: any) => void
+  onRemove: (index: number) => void
+}) => {
+  const [localMed, setLocalMed] = useState({
+    nom: medication.nom || '',
+    denominationCommune: medication.denominationCommune || '',
+    dosage: medication.dosage || '',
+    forme: medication.forme || 'tablet',
+    posologie: medication.posologie || '',
+    modeAdministration: medication.modeAdministration || 'Oral route',
+    dureeTraitement: medication.dureeTraitement || '7 days',
+    quantite: medication.quantite || '1 box',
+    instructions: medication.instructions || '',
+    justification: medication.justification || '',
+    surveillanceParticuliere: medication.surveillanceParticuliere || '',
+    nonSubstituable: medication.nonSubstituable || false
+  })
+
+  // Debounced update to parent
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const hasChanges = Object.keys(localMed).some(
+        key => localMed[key as keyof typeof localMed] !== medication[key]
+      )
+      
+      if (hasChanges) {
+        const updatedMed = {
+          ...localMed,
+          ligneComplete: `${localMed.nom} ${localMed.dosage ? `- ${localMed.dosage}` : ''}\n` +
+                        `${localMed.posologie} - ${localMed.modeAdministration}\n` +
+                        `Duration: ${localMed.dureeTraitement} - Quantity: ${localMed.quantite}`
+        }
+        onUpdate(index, updatedMed)
+      }
+    }, 800)
+
+    return () => clearTimeout(timer)
+  }, [localMed, index, medication, onUpdate])
+
+  const handleChange = (field: string, value: any) => {
+    setLocalMed(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label htmlFor={`med-nom-${index}`}>Medication Name</Label>
+          <Input
+            id={`med-nom-${index}`}
+            value={localMed.nom}
+            onChange={(e) => handleChange('nom', e.target.value)}
+            placeholder="e.g., Paracetamol"
+          />
+        </div>
+        <div>
+          <Label htmlFor={`med-generic-${index}`}>Generic Name (INN)</Label>
+          <Input
+            id={`med-generic-${index}`}
+            value={localMed.denominationCommune}
+            onChange={(e) => handleChange('denominationCommune', e.target.value)}
+            placeholder="e.g., Paracetamol"
+          />
+        </div>
+        <div>
+          <Label htmlFor={`med-dosage-${index}`}>Dosage</Label>
+          <Input
+            id={`med-dosage-${index}`}
+            value={localMed.dosage}
+            onChange={(e) => handleChange('dosage', e.target.value)}
+            placeholder="e.g., 500mg"
+          />
+        </div>
+        <div>
+          <Label htmlFor={`med-form-${index}`}>Form</Label>
+          <Select
+            value={localMed.forme}
+            onValueChange={(value) => handleChange('forme', value)}
+          >
+            <SelectTrigger id={`med-form-${index}`}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="tablet">Tablet</SelectItem>
+              <SelectItem value="capsule">Capsule</SelectItem>
+              <SelectItem value="syrup">Syrup</SelectItem>
+              <SelectItem value="injection">Injection</SelectItem>
+              <SelectItem value="cream">Cream</SelectItem>
+              <SelectItem value="ointment">Ointment</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor={`med-frequency-${index}`}>Frequency</Label>
+          <Input
+            id={`med-frequency-${index}`}
+            value={localMed.posologie}
+            onChange={(e) => handleChange('posologie', e.target.value)}
+            placeholder="e.g., 1 tablet 3 times daily"
+          />
+        </div>
+        <div>
+          <Label htmlFor={`med-duration-${index}`}>Duration</Label>
+          <Input
+            id={`med-duration-${index}`}
+            value={localMed.dureeTraitement}
+            onChange={(e) => handleChange('dureeTraitement', e.target.value)}
+            placeholder="e.g., 7 days"
+          />
+        </div>
+        <div>
+          <Label htmlFor={`med-quantity-${index}`}>Quantity</Label>
+          <Input
+            id={`med-quantity-${index}`}
+            value={localMed.quantite}
+            onChange={(e) => handleChange('quantite', e.target.value)}
+            placeholder="e.g., 1 box"
+          />
+        </div>
+        <div>
+          <Label htmlFor={`med-route-${index}`}>Route of Administration</Label>
+          <Select
+            value={localMed.modeAdministration}
+            onValueChange={(value) => handleChange('modeAdministration', value)}
+          >
+            <SelectTrigger id={`med-route-${index}`}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Oral route">Oral route</SelectItem>
+              <SelectItem value="Sublingual route">Sublingual route</SelectItem>
+              <SelectItem value="Topical route">Topical route</SelectItem>
+              <SelectItem value="Parenteral route">Parenteral route</SelectItem>
+              <SelectItem value="Rectal route">Rectal route</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div>
+        <Label htmlFor={`med-instructions-${index}`}>Special Instructions</Label>
+        <Input
+          id={`med-instructions-${index}`}
+          value={localMed.instructions}
+          onChange={(e) => handleChange('instructions', e.target.value)}
+          placeholder="e.g., Take with food"
+        />
+      </div>
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id={`med-nonsubstitutable-${index}`}
+            checked={localMed.nonSubstituable}
+            onCheckedChange={(checked) => handleChange('nonSubstituable', checked)}
+          />
+          <Label htmlFor={`med-nonsubstitutable-${index}`}>Non-substitutable</Label>
+        </div>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => onRemove(index)}
+          type="button"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  )
+})
+
+MedicationEditForm.displayName = 'MedicationEditForm'
+
+// Biology Test Input Component with local state
+const BiologyTestEditForm = memo(({
+  test,
+  category,
+  index,
+  onUpdate,
+  onRemove
+}: {
+  test: any
+  category: string
+  index: number
+  onUpdate: (category: string, index: number, updates: any) => void
+  onRemove: (category: string, index: number) => void
+}) => {
+  const [localTest, setLocalTest] = useState({
+    nom: test.nom || '',
+    categorie: test.categorie || category,
+    urgence: test.urgence || false,
+    aJeun: test.aJeun || false,
+    conditionsPrelevement: test.conditionsPrelevement || '',
+    motifClinique: test.motifClinique || '',
+    renseignementsCliniques: test.renseignementsCliniques || '',
+    tubePrelevement: test.tubePrelevement || 'As per laboratory protocol',
+    delaiResultat: test.delaiResultat || 'Standard'
+  })
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const hasChanges = Object.keys(localTest).some(
+        key => localTest[key as keyof typeof localTest] !== test[key]
+      )
+      if (hasChanges) {
+        onUpdate(category, index, localTest)
+      }
+    }, 800)
+    
+    return () => clearTimeout(timer)
+  }, [localTest, category, index, test, onUpdate])
+  
+  const handleChange = (field: string, value: any) => {
+    setLocalTest(prev => ({ ...prev, [field]: value }))
+  }
+  
+  return (
+    <div className="space-y-3 p-3">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>Test Name</Label>
+          <Input
+            value={localTest.nom}
+            onChange={(e) => handleChange('nom', e.target.value)}
+            placeholder="e.g., Complete Blood Count"
+          />
+        </div>
+        <div>
+          <Label>Clinical Indication</Label>
+          <Input
+            value={localTest.motifClinique}
+            onChange={(e) => handleChange('motifClinique', e.target.value)}
+            placeholder="e.g., Anemia evaluation"
+          />
+        </div>
+        <div>
+          <Label>Sample Type</Label>
+          <Select
+            value={localTest.tubePrelevement}
+            onValueChange={(value) => handleChange('tubePrelevement', value)}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="As per laboratory protocol">Lab Protocol</SelectItem>
+              <SelectItem value="EDTA (Purple top)">EDTA (Purple)</SelectItem>
+              <SelectItem value="SST (Gold top)">SST (Gold)</SelectItem>
+              <SelectItem value="Sodium Citrate (Blue top)">Citrate (Blue)</SelectItem>
+              <SelectItem value="Heparin (Green top)">Heparin (Green)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Turnaround Time</Label>
+          <Select
+            value={localTest.delaiResultat}
+            onValueChange={(value) => handleChange('delaiResultat', value)}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Standard">Standard (24-48h)</SelectItem>
+              <SelectItem value="Urgent">Urgent (2-4h)</SelectItem>
+              <SelectItem value="STAT">STAT (&lt;1h)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div>
+        <Label>Special Conditions</Label>
+        <Input
+          value={localTest.conditionsPrelevement}
+          onChange={(e) => handleChange('conditionsPrelevement', e.target.value)}
+          placeholder="e.g., Early morning sample required"
+        />
+      </div>
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={localTest.urgence}
+              onCheckedChange={(checked) => handleChange('urgence', checked)}
+            />
+            <Label>Urgent</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={localTest.aJeun}
+              onCheckedChange={(checked) => handleChange('aJeun', checked)}
+            />
+            <Label>Fasting required</Label>
+          </div>
+        </div>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => onRemove(category, index)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  )
+})
+
+BiologyTestEditForm.displayName = 'BiologyTestEditForm'
+
+// Imaging Exam Input Component with local state
+const ImagingExamEditForm = memo(({
+  exam,
+  index,
+  onUpdate,
+  onRemove
+}: {
+  exam: any
+  index: number
+  onUpdate: (index: number, updates: any) => void
+  onRemove: (index: number) => void
+}) => {
+  const [localExam, setLocalExam] = useState({
+    type: exam.type || exam.modalite || '',
+    modalite: exam.modalite || '',
+    region: exam.region || '',
+    indicationClinique: exam.indicationClinique || '',
+    urgence: exam.urgence || false,
+    contraste: exam.contraste || false,
+    protocoleSpecifique: exam.protocoleSpecifique || '',
+    questionDiagnostique: exam.questionDiagnostique || ''
+  })
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const hasChanges = Object.keys(localExam).some(
+        key => localExam[key as keyof typeof localExam] !== exam[key]
+      )
+      if (hasChanges) {
+        onUpdate(index, localExam)
+      }
+    }, 800)
+    
+    return () => clearTimeout(timer)
+  }, [localExam, index, exam, onUpdate])
+  
+  const handleChange = (field: string, value: any) => {
+    setLocalExam(prev => ({ ...prev, [field]: value }))
+  }
+  
+  return (
+    <div className="space-y-3 p-3">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>Imaging Type</Label>
+          <Select
+            value={localExam.type || localExam.modalite}
+            onValueChange={(value) => handleChange('type', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="X-Ray">X-Ray</SelectItem>
+              <SelectItem value="CT Scan">CT Scan</SelectItem>
+              <SelectItem value="MRI">MRI</SelectItem>
+              <SelectItem value="Ultrasound">Ultrasound</SelectItem>
+              <SelectItem value="Mammography">Mammography</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Anatomical Region</Label>
+          <Input
+            value={localExam.region}
+            onChange={(e) => handleChange('region', e.target.value)}
+            placeholder="e.g., Chest PA/Lateral"
+          />
+        </div>
+        <div className="col-span-2">
+          <Label>Clinical Indication</Label>
+          <Input
+            value={localExam.indicationClinique}
+            onChange={(e) => handleChange('indicationClinique', e.target.value)}
+            placeholder="e.g., Rule out pneumonia"
+          />
+        </div>
+        <div className="col-span-2">
+          <Label>Clinical Question</Label>
+          <Input
+            value={localExam.questionDiagnostique}
+            onChange={(e) => handleChange('questionDiagnostique', e.target.value)}
+            placeholder="e.g., Consolidation? Pleural effusion?"
+          />
+        </div>
+        <div>
+          <Label>Specific Protocol</Label>
+          <Input
+            value={localExam.protocoleSpecifique}
+            onChange={(e) => handleChange('protocoleSpecifique', e.target.value)}
+            placeholder="e.g., High resolution CT"
+          />
+        </div>
+      </div>
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={localExam.urgence}
+              onCheckedChange={(checked) => handleChange('urgence', checked)}
+            />
+            <Label>Urgent</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={localExam.contraste}
+              onCheckedChange={(checked) => handleChange('contraste', checked)}
+            />
+            <Label>Contrast required</Label>
+          </div>
+        </div>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => onRemove(index)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  )
+})
+
+ImagingExamEditForm.displayName = 'ImagingExamEditForm'
 // ==================== MAIN COMPONENT ====================
 export default function ProfessionalReportEditable({
   patientData,
@@ -196,13 +640,13 @@ export default function ProfessionalReportEditable({
   const getReportRapport = () => report?.compteRendu?.rapport || createEmptyReport().compteRendu.rapport
   const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
 
-  // ==================== TRACKING & UPDATES ====================
-  const trackModification = (section: string) => {
+  // ==================== TRACKING & UPDATES WITH CALLBACKS ====================
+  const trackModification = useCallback((section: string) => {
     if (validationStatus === 'validated') return
     setModifiedSections(prev => new Set(prev).add(section))
-  }
+  }, [validationStatus])
 
-  const updateRapportSection = (section: string, value: string) => {
+  const updateRapportSection = useCallback((section: string, value: string) => {
     if (validationStatus === 'validated') return
     
     setReport(prev => {
@@ -220,9 +664,9 @@ export default function ProfessionalReportEditable({
       }
     })
     trackModification(`rapport.${section}`)
-  }
+  }, [validationStatus, trackModification])
 
-  const updateDoctorInfo = (field: string, value: string) => {
+  const updateDoctorInfo = useCallback((field: string, value: string) => {
     setDoctorInfo(prev => ({
       ...prev,
       [field]: value
@@ -230,7 +674,7 @@ export default function ProfessionalReportEditable({
     trackModification(`praticien.${field}`)
     const updatedInfo = { ...doctorInfo, [field]: value }
     sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
-  }
+  }, [doctorInfo, trackModification])
 
   // ==================== LOAD DOCTOR DATA ====================
   useEffect(() => {
@@ -310,7 +754,6 @@ export default function ProfessionalReportEditable({
       setLoading(false)
     }
   }, [patientData, clinicalData, questionsData, diagnosisData])
-
   // ==================== GENERATE REPORT ====================
   const generateProfessionalReport = async () => {
     setLoading(true)
@@ -641,7 +1084,6 @@ export default function ProfessionalReportEditable({
       setLoading(false)
     }
   }
-
   // ==================== VALIDATION & SIGNATURE ====================
   const handleValidation = async () => {
     const requiredFieldsMissing = []
@@ -1192,32 +1634,25 @@ export default function ProfessionalReportEditable({
       }
     })
   }
-
-  // ==================== PRESCRIPTIONS MANAGEMENT ====================
-  const updateMedicament = (index: number, field: string, value: string) => {
+  // ==================== PRESCRIPTIONS MANAGEMENT WITH BATCH UPDATES ====================
+  
+  // Batch update for medications to prevent focus loss
+  const updateMedicamentBatch = useCallback((index: number, updatedMedication: any) => {
     if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
     
     setReport(prev => {
       if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
       
-      const newReport = { ...prev }
-      const meds = [...newReport.ordonnances.medicaments.prescription.medicaments]
-      const med = meds[index]
-      if (!med) return prev
+      const newReport = JSON.parse(JSON.stringify(prev)) // Deep clone
+      newReport.ordonnances.medicaments.prescription.medicaments[index] = updatedMedication
       
-      med[field] = value
-      
-      med.ligneComplete = `${med.nom} ${med.dosage ? `- ${med.dosage}` : ''}\n` +
-                         `${med.posologie} - ${med.modeAdministration}\n` +
-                         `Duration: ${med.dureeTraitement} - Quantity: ${med.quantite}`
-      
-      newReport.ordonnances.medicaments.prescription.medicaments = meds
       return newReport
     })
-    trackModification(`medicament.${index}.${field}`)
-  }
+    
+    trackModification(`medicament.${index}`)
+  }, [validationStatus, report?.ordonnances?.medicaments, trackModification])
 
-  const addMedicament = () => {
+  const addMedicament = useCallback(() => {
     if (validationStatus === 'validated') return
     
     const newMed = {
@@ -1275,9 +1710,9 @@ export default function ProfessionalReportEditable({
       return newReport
     })
     trackModification('medicaments.new')
-  }
+  }, [validationStatus, getReportPraticien, getReportPatient, trackModification])
 
-  const removeMedicament = (index: number) => {
+  const removeMedicament = useCallback((index: number) => {
     if (validationStatus === 'validated') return
     
     setReport(prev => {
@@ -1298,9 +1733,24 @@ export default function ProfessionalReportEditable({
       }
     })
     trackModification(`medicament.remove.${index}`)
-  }
+  }, [validationStatus, trackModification])
 
-  const addBiologyTest = (category: string = 'clinicalChemistry') => {
+  // Batch update for biology tests
+  const updateBiologyTestBatch = useCallback((category: string, index: number, updatedTest: any) => {
+    if (validationStatus === 'validated') return
+    
+    setReport(prev => {
+      if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
+      
+      const newReport = JSON.parse(JSON.stringify(prev)) // Deep clone
+      newReport.ordonnances.biologie.prescription.analyses[category][index] = updatedTest
+      
+      return newReport
+    })
+    trackModification(`biologie.${category}.${index}`)
+  }, [validationStatus, trackModification])
+
+  const addBiologyTest = useCallback((category: string = 'clinicalChemistry') => {
     if (validationStatus === 'validated') return
     
     const newTest = {
@@ -1361,27 +1811,9 @@ export default function ProfessionalReportEditable({
       return newReport
     })
     trackModification(`biologie.new.${category}`)
-  }
+  }, [validationStatus, getReportPraticien, getReportPatient, trackModification])
 
-  const updateBiologyTest = (category: string, index: number, field: string, value: any) => {
-    if (validationStatus === 'validated') return
-    
-    setReport(prev => {
-      if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
-      
-      const newReport = { ...prev }
-      const tests = [...newReport.ordonnances.biologie.prescription.analyses[category]]
-      if (tests[index]) {
-        tests[index][field] = value
-      }
-      
-      newReport.ordonnances.biologie.prescription.analyses[category] = tests
-      return newReport
-    })
-    trackModification(`biologie.${category}.${index}.${field}`)
-  }
-
-  const removeBiologyTest = (category: string, index: number) => {
+  const removeBiologyTest = useCallback((category: string, index: number) => {
     if (validationStatus === 'validated') return
     
     setReport(prev => {
@@ -1405,9 +1837,24 @@ export default function ProfessionalReportEditable({
       }
     })
     trackModification(`biologie.remove.${category}.${index}`)
-  }
+  }, [validationStatus, trackModification])
 
-  const addImagingExam = () => {
+  // Batch update for imaging exams
+  const updateImagingExamBatch = useCallback((index: number, updatedExam: any) => {
+    if (validationStatus === 'validated') return
+    
+    setReport(prev => {
+      if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
+      
+      const newReport = JSON.parse(JSON.stringify(prev)) // Deep clone
+      newReport.ordonnances.imagerie.prescription.examens[index] = updatedExam
+      
+      return newReport
+    })
+    trackModification(`imagerie.${index}`)
+  }, [validationStatus, trackModification])
+
+  const addImagingExam = useCallback(() => {
     if (validationStatus === 'validated') return
     
     const newExam = {
@@ -1458,27 +1905,9 @@ export default function ProfessionalReportEditable({
       return newReport
     })
     trackModification('imagerie.new')
-  }
+  }, [validationStatus, getReportPraticien, getReportPatient, trackModification])
 
-  const updateImagingExam = (index: number, field: string, value: any) => {
-    if (validationStatus === 'validated') return
-    
-    setReport(prev => {
-      if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
-      
-      const newReport = { ...prev }
-      const exams = [...newReport.ordonnances.imagerie.prescription.examens]
-      if (exams[index]) {
-        exams[index][field] = value
-      }
-      
-      newReport.ordonnances.imagerie.prescription.examens = exams
-      return newReport
-    })
-    trackModification(`imagerie.${index}.${field}`)
-  }
-
-  const removeImagingExam = (index: number) => {
+  const removeImagingExam = useCallback((index: number) => {
     if (validationStatus === 'validated') return
     
     setReport(prev => {
@@ -1499,9 +1928,9 @@ export default function ProfessionalReportEditable({
       }
     })
     trackModification(`imagerie.remove.${index}`)
-  }
+  }, [validationStatus, trackModification])
 
-  const updateInvoice = (field: string, value: any) => {
+  const updateInvoice = useCallback((field: string, value: any) => {
     if (validationStatus === 'validated') return
     
     setReport(prev => {
@@ -1516,26 +1945,25 @@ export default function ProfessionalReportEditable({
       }
     })
     trackModification(`invoice.${field}`)
-  }
+  }, [validationStatus, trackModification])
 
-  const updatePaymentStatus = (status: 'pending' | 'paid' | 'cancelled') => {
+  const updatePaymentStatus = useCallback((status: 'pending' | 'paid' | 'cancelled') => {
     if (!report?.invoice) return
     
     updateInvoice('payment', {
       ...report.invoice.payment,
       status: status
     })
-  }
+  }, [report?.invoice, updateInvoice])
 
-  const updatePaymentMethod = (method: string) => {
+  const updatePaymentMethod = useCallback((method: string) => {
     if (!report?.invoice) return
     
     updateInvoice('payment', {
       ...report.invoice.payment,
       method: method
     })
-  }
-
+  }, [report?.invoice, updateInvoice])
   // ==================== PDF EXPORT ====================
   const exportSectionToPDF = (sectionId: string, filename: string) => {
     const element = document.getElementById(sectionId)
@@ -1840,12 +2268,33 @@ export default function ProfessionalReportEditable({
       </Card>
     )
   }
-
-  // ==================== COMPONENTS ====================
-  const DoctorInfoEditor = () => {
+  // ==================== DOCTOR INFO EDITOR WITH LOCAL STATE ====================
+  const DoctorInfoEditor = memo(() => {
     const hasRequiredFields = doctorInfo.nom !== 'Dr. [Name Required]' && 
                              !doctorInfo.numeroEnregistrement.includes('[') &&
                              !doctorInfo.email.includes('[')
+    
+    // Local state for editing to prevent focus loss
+    const [localDoctorInfo, setLocalDoctorInfo] = useState(doctorInfo)
+    
+    // Sync local state with parent after delay
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        if (editingDoctor && JSON.stringify(localDoctorInfo) !== JSON.stringify(doctorInfo)) {
+          Object.keys(localDoctorInfo).forEach(key => {
+            if (localDoctorInfo[key as keyof typeof localDoctorInfo] !== doctorInfo[key as keyof typeof doctorInfo]) {
+              updateDoctorInfo(key, localDoctorInfo[key as keyof typeof localDoctorInfo])
+            }
+          })
+        }
+      }, 1000)
+      
+      return () => clearTimeout(timer)
+    }, [localDoctorInfo, editingDoctor])
+    
+    const handleDoctorFieldChange = (field: string, value: string) => {
+      setLocalDoctorInfo(prev => ({ ...prev, [field]: value }))
+    }
     
     return (
       <Card className="mb-6 print:hidden">
@@ -1885,68 +2334,68 @@ export default function ProfessionalReportEditable({
               <div>
                 <Label>Full name *</Label>
                 <Input
-                  value={doctorInfo.nom}
-                  onChange={(e) => updateDoctorInfo('nom', e.target.value)}
+                  value={localDoctorInfo.nom}
+                  onChange={(e) => handleDoctorFieldChange('nom', e.target.value)}
                   placeholder="Dr. Full Name"
-                  className={doctorInfo.nom.includes('[') ? 'border-red-500' : ''}
+                  className={localDoctorInfo.nom.includes('[') ? 'border-red-500' : ''}
                 />
               </div>
               <div>
                 <Label>Qualifications</Label>
                 <Input
-                  value={doctorInfo.qualifications}
-                  onChange={(e) => updateDoctorInfo('qualifications', e.target.value)}
+                  value={localDoctorInfo.qualifications}
+                  onChange={(e) => handleDoctorFieldChange('qualifications', e.target.value)}
                   placeholder="MBBS, MD"
                 />
               </div>
               <div>
                 <Label>Speciality</Label>
                 <Input
-                  value={doctorInfo.specialite}
-                  onChange={(e) => updateDoctorInfo('specialite', e.target.value)}
+                  value={localDoctorInfo.specialite}
+                  onChange={(e) => handleDoctorFieldChange('specialite', e.target.value)}
                   placeholder="General Medicine"
                 />
               </div>
               <div>
                 <Label>Medical Council Registration No. *</Label>
                 <Input
-                  value={doctorInfo.numeroEnregistrement}
-                  onChange={(e) => updateDoctorInfo('numeroEnregistrement', e.target.value)}
+                  value={localDoctorInfo.numeroEnregistrement}
+                  onChange={(e) => handleDoctorFieldChange('numeroEnregistrement', e.target.value)}
                   placeholder="MCM/12345"
-                  className={doctorInfo.numeroEnregistrement.includes('[') ? 'border-red-500' : ''}
+                  className={localDoctorInfo.numeroEnregistrement.includes('[') ? 'border-red-500' : ''}
                 />
               </div>
               <div>
                 <Label>Practice License No.</Label>
                 <Input
-                  value={doctorInfo.licencePratique}
-                  onChange={(e) => updateDoctorInfo('licencePratique', e.target.value)}
+                  value={localDoctorInfo.licencePratique}
+                  onChange={(e) => handleDoctorFieldChange('licencePratique', e.target.value)}
                   placeholder="PL/2024/123"
-                  className={doctorInfo.licencePratique.includes('[') ? 'border-red-500' : ''}
+                  className={localDoctorInfo.licencePratique.includes('[') ? 'border-red-500' : ''}
                 />
               </div>
               <div>
                 <Label>Email *</Label>
                 <Input
-                  value={doctorInfo.email}
-                  onChange={(e) => updateDoctorInfo('email', e.target.value)}
+                  value={localDoctorInfo.email}
+                  onChange={(e) => handleDoctorFieldChange('email', e.target.value)}
                   placeholder="doctor@email.com"
-                  className={doctorInfo.email.includes('[') ? 'border-red-500' : ''}
+                  className={localDoctorInfo.email.includes('[') ? 'border-red-500' : ''}
                 />
               </div>
               <div className="col-span-2">
                 <Label>Clinic Address</Label>
                 <Input
-                  value={doctorInfo.adresseCabinet}
-                  onChange={(e) => updateDoctorInfo('adresseCabinet', e.target.value)}
+                  value={localDoctorInfo.adresseCabinet}
+                  onChange={(e) => handleDoctorFieldChange('adresseCabinet', e.target.value)}
                   placeholder="Clinic address or Teleconsultation"
                 />
               </div>
               <div className="col-span-2">
                 <Label>Consultation Hours</Label>
                 <Input
-                  value={doctorInfo.heuresConsultation}
-                  onChange={(e) => updateDoctorInfo('heuresConsultation', e.target.value)}
+                  value={localDoctorInfo.heuresConsultation}
+                  onChange={(e) => handleDoctorFieldChange('heuresConsultation', e.target.value)}
                   placeholder="Teleconsultation Hours: 8:00 AM - 8:00 PM"
                 />
               </div>
@@ -1969,7 +2418,9 @@ export default function ProfessionalReportEditable({
         </CardContent>
       </Card>
     )
-  }
+  })
+
+  DoctorInfoEditor.displayName = 'DoctorInfoEditor'
 
   const ConsultationReport = () => {
     const sections = [
@@ -2107,7 +2558,6 @@ export default function ProfessionalReportEditable({
       </Card>
     )
   }
-
   const MedicationPrescription = () => {
     const medications = report?.ordonnances?.medicaments?.prescription?.medicaments || []
     const patient = getReportPatient()
@@ -2168,121 +2618,17 @@ export default function ProfessionalReportEditable({
         <div className="space-y-6">
           {medications.length > 0 ? (
             medications.map((med: any, index: number) => (
-              <div key={index} className="border-l-4 border-green-500 pl-4 py-2 prescription-item">
+              <div 
+                key={`medication-${index}-${med.nom?.substring(0, 5) || 'new'}`} 
+                className="border-l-4 border-green-500 pl-4 py-2 prescription-item"
+              >
                 {editMode && validationStatus !== 'validated' ? (
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label>Medication Name</Label>
-                        <Input
-                          value={med.nom}
-                          onChange={(e) => updateMedicament(index, 'nom', e.target.value)}
-                          placeholder="e.g., Paracetamol"
-                        />
-                      </div>
-                      <div>
-                        <Label>Generic Name (INN)</Label>
-                        <Input
-                          value={med.denominationCommune}
-                          onChange={(e) => updateMedicament(index, 'denominationCommune', e.target.value)}
-                          placeholder="e.g., Paracetamol"
-                        />
-                      </div>
-                      <div>
-                        <Label>Dosage</Label>
-                        <Input
-                          value={med.dosage}
-                          onChange={(e) => updateMedicament(index, 'dosage', e.target.value)}
-                          placeholder="e.g., 500mg"
-                        />
-                      </div>
-                      <div>
-                        <Label>Form</Label>
-                        <Select
-                          value={med.forme}
-                          onValueChange={(value) => updateMedicament(index, 'forme', value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="tablet">Tablet</SelectItem>
-                            <SelectItem value="capsule">Capsule</SelectItem>
-                            <SelectItem value="syrup">Syrup</SelectItem>
-                            <SelectItem value="injection">Injection</SelectItem>
-                            <SelectItem value="cream">Cream</SelectItem>
-                            <SelectItem value="ointment">Ointment</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label>Frequency</Label>
-                        <Input
-                          value={med.posologie}
-                          onChange={(e) => updateMedicament(index, 'posologie', e.target.value)}
-                          placeholder="e.g., 1 tablet 3 times daily"
-                        />
-                      </div>
-                      <div>
-                        <Label>Duration</Label>
-                        <Input
-                          value={med.dureeTraitement}
-                          onChange={(e) => updateMedicament(index, 'dureeTraitement', e.target.value)}
-                          placeholder="e.g., 7 days"
-                        />
-                      </div>
-                      <div>
-                        <Label>Quantity</Label>
-                        <Input
-                          value={med.quantite}
-                          onChange={(e) => updateMedicament(index, 'quantite', e.target.value)}
-                          placeholder="e.g., 1 box"
-                        />
-                      </div>
-                      <div>
-                        <Label>Route of Administration</Label>
-                        <Select
-                          value={med.modeAdministration}
-                          onValueChange={(value) => updateMedicament(index, 'modeAdministration', value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Oral route">Oral route</SelectItem>
-                            <SelectItem value="Sublingual route">Sublingual route</SelectItem>
-                            <SelectItem value="Topical route">Topical route</SelectItem>
-                            <SelectItem value="Parenteral route">Parenteral route</SelectItem>
-                            <SelectItem value="Rectal route">Rectal route</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Special Instructions</Label>
-                      <Input
-                        value={med.instructions}
-                        onChange={(e) => updateMedicament(index, 'instructions', e.target.value)}
-                        placeholder="e.g., Take with food"
-                      />
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          checked={med.nonSubstituable}
-                          onCheckedChange={(checked) => updateMedicament(index, 'nonSubstituable', checked.toString())}
-                        />
-                        <Label>Non-substitutable</Label>
-                      </div>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => removeMedicament(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
+                  <MedicationEditForm
+                    medication={med}
+                    index={index}
+                    onUpdate={updateMedicamentBatch}
+                    onRemove={removeMedicament}
+                  />
                 ) : (
                   <div>
                     <div className="font-bold text-lg">
@@ -2374,7 +2720,329 @@ export default function ProfessionalReportEditable({
       </div>
     )
   }
+  const BiologyPrescription = () => {
+    const analyses = report?.ordonnances?.biologie?.prescription?.analyses || {}
+    const hasTests = Object.values(analyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
+    const patient = getReportPatient()
+    const praticien = getReportPraticien()
+    const rapport = getReportRapport()
+    
+    const categories = [
+      { key: 'haematology', label: 'HAEMATOLOGY' },
+      { key: 'clinicalChemistry', label: 'CLINICAL CHEMISTRY' },
+      { key: 'immunology', label: 'IMMUNOLOGY' },
+      { key: 'microbiology', label: 'MICROBIOLOGY' },
+      { key: 'endocrinology', label: 'ENDOCRINOLOGY' }
+    ]
+    
+    if (!includeFullPrescriptions && report?.prescriptionsResume) {
+      return (
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-bold mb-4">Laboratory Tests Summary</h3>
+            <p>{report.prescriptionsResume.examens}</p>
+          </CardContent>
+        </Card>
+      )
+    }
 
+    return (
+      <div id="prescription-biologie" className="bg-white p-8 rounded-lg shadow print:shadow-none">
+        <div className="border-b-2 border-purple-600 pb-4 mb-6 header">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-2xl font-bold">LABORATORY REQUEST FORM</h2>
+              <p className="text-gray-600 mt-1">Compliant with MoH Laboratory Standards</p>
+            </div>
+            <div className="flex gap-2 print:hidden">
+              {editMode && validationStatus !== 'validated' && (
+                <Select onValueChange={(value) => addBiologyTest(value)}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Add Test Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(cat => (
+                      <SelectItem key={cat.key} value={cat.key}>
+                        {cat.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => exportSectionToPDF('prescription-biologie', `lab_request_${patient.nom}_${new Date().toISOString().split('T')[0]}.pdf`)}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export PDF
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-6 p-4 bg-purple-50 rounded info-box">
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div><strong>Patient:</strong> {patient.nomComplet || patient.nom}</div>
+            <div><strong>Date:</strong> {patient.dateExamen}</div>
+            <div><strong>Clinical Information:</strong> {report?.ordonnances?.biologie?.patient?.diagnosticProvisoire || rapport.conclusionDiagnostique?.substring(0, 100) + '...' || 'N/A'}</div>
+          </div>
+        </div>
+
+        {hasTests ? (
+          <div className="space-y-6">
+            {categories.map(({ key, label }) => {
+              const tests = analyses[key]
+              if (!Array.isArray(tests) || tests.length === 0) return null
+              
+              return (
+                <div key={key} className="border-l-4 border-purple-500 pl-4">
+                  <h3 className="font-bold text-lg mb-3 text-purple-800 category-header">
+                    {label}
+                  </h3>
+                  <div className="space-y-2">
+                    {tests.map((test: any, idx: number) => (
+                      <div key={`${key}-test-${idx}`} className="prescription-item">
+                        {editMode && validationStatus !== 'validated' ? (
+                          <BiologyTestEditForm
+                            test={test}
+                            category={key}
+                            index={idx}
+                            onUpdate={updateBiologyTestBatch}
+                            onRemove={removeBiologyTest}
+                          />
+                        ) : (
+                          <div className="flex items-start justify-between p-2 hover:bg-gray-50 rounded">
+                            <div className="flex-1">
+                              <p className="font-medium">
+                                {test.nom}
+                                {test.urgence && <Badge className="ml-2 bg-red-100 text-red-800 urgent badge badge-red">URGENT</Badge>}
+                              </p>
+                              {test.aJeun && (
+                                <p className="text-sm text-orange-600 mt-1">⚠️ Fasting required</p>
+                              )}
+                              {test.conditionsPrelevement && (
+                                <p className="text-sm text-gray-600 mt-1">
+                                  Conditions: {test.conditionsPrelevement}
+                                </p>
+                              )}
+                              {test.motifClinique && (
+                                <p className="text-sm text-gray-600 mt-1">
+                                  Indication: {test.motifClinique}
+                                </p>
+                              )}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              <p>Tube: {test.tubePrelevement}</p>
+                              <p>TAT: {test.delaiResultat}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+            
+            {report?.ordonnances?.biologie?.prescription?.instructionsSpeciales?.length > 0 && (
+              <div className="mt-6 p-4 bg-yellow-50 rounded">
+                <h4 className="font-bold mb-2">Special Instructions</h4>
+                <ul className="list-disc list-inside text-sm">
+                  {report.ordonnances.biologie.prescription.instructionsSpeciales.map((instruction: string, idx: number) => (
+                    <li key={idx}>{instruction}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <TestTube className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <p>No laboratory tests ordered</p>
+            {editMode && (
+              <div className="mt-4">
+                <Select onValueChange={(value) => addBiologyTest(value)}>
+                  <SelectTrigger className="w-[250px] mx-auto">
+                    <SelectValue placeholder="Select test category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(cat => (
+                      <SelectItem key={cat.key} value={cat.key}>
+                        {cat.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="mt-8 pt-6 border-t border-gray-300">
+          <p className="text-sm text-gray-600 mb-4">
+            Laboratory: {report?.ordonnances?.biologie?.prescription?.laboratoireRecommande || "Any MoH approved laboratory"}
+          </p>
+          <div className="text-right signature">
+            <p className="font-semibold">{praticien.nom}</p>
+            <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
+            
+            {validationStatus === 'validated' && documentSignatures.laboratory ? (
+              <div className="mt-4">
+                <img 
+                  src={documentSignatures.laboratory} 
+                  alt="Doctor's Signature" 
+                  className="ml-auto h-20 w-auto"
+                  style={{ maxWidth: '300px' }}
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Digitally signed on {new Date().toLocaleDateString()}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-8">
+                <p className="text-sm">_______________________________</p>
+                <p className="text-sm">Requesting Physician's Signature</p>
+                <p className="text-sm">Date: {patient.dateExamen}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const ImagingPrescription = () => {
+    const examens = report?.ordonnances?.imagerie?.prescription?.examens || []
+    const patient = getReportPatient()
+    const praticien = getReportPraticien()
+    
+    return (
+      <div id="prescription-imagerie" className="bg-white p-8 rounded-lg shadow print:shadow-none">
+        <div className="border-b-2 border-indigo-600 pb-4 mb-6 header">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-2xl font-bold">RADIOLOGY REQUEST FORM</h2>
+              <p className="text-gray-600 mt-1">Compliant with MoH Radiology Standards</p>
+            </div>
+            <div className="flex gap-2 print:hidden">
+              {editMode && validationStatus !== 'validated' && (
+                <Button onClick={addImagingExam} size="sm" variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Imaging
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => exportSectionToPDF('prescription-imagerie', `imaging_request_${patient.nom}_${new Date().toISOString().split('T')[0]}.pdf`)}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export PDF
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-6 p-4 bg-indigo-50 rounded info-box">
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div><strong>Patient:</strong> {patient.nomComplet || patient.nom}</div>
+            <div><strong>Weight:</strong> {patient.poids}</div>
+            <div><strong>Clinical Diagnosis:</strong> {report?.ordonnances?.imagerie?.prescription?.renseignementsCliniques || 'N/A'}</div>
+            {report?.ordonnances?.imagerie?.patient?.allergiesConnues && (
+              <div><strong>Known Allergies:</strong> {report.ordonnances.imagerie.patient.allergiesConnues}</div>
+            )}
+          </div>
+        </div>
+
+        {examens.length > 0 ? (
+          <div className="space-y-6">
+            {examens.map((exam: any, index: number) => (
+              <div key={`imaging-${index}-${exam.type || 'new'}`} className="border-l-4 border-indigo-500 pl-4 py-2 prescription-item">
+                {editMode && validationStatus !== 'validated' ? (
+                  <ImagingExamEditForm
+                    exam={exam}
+                    index={index}
+                    onUpdate={updateImagingExamBatch}
+                    onRemove={removeImagingExam}
+                  />
+                ) : (
+                  <div>
+                    <div className="font-bold text-lg">
+                      {index + 1}. {exam.type || exam.modalite}
+                      {exam.urgence && <Badge className="ml-2 bg-red-100 text-red-800 urgent badge badge-red">URGENT</Badge>}
+                    </div>
+                    <p className="mt-1">
+                      <span className="font-medium">Region:</span> {exam.region}
+                    </p>
+                    <p className="mt-1">
+                      <span className="font-medium">Clinical Indication:</span> {exam.indicationClinique}
+                    </p>
+                    {exam.contraste && (
+                      <p className="mt-1 text-orange-600">
+                        ⚠️ <span className="font-medium">Contrast required</span>
+                      </p>
+                    )}
+                    {exam.protocoleSpecifique && (
+                      <p className="mt-1">
+                        <span className="font-medium">Protocol:</span> {exam.protocoleSpecifique}
+                      </p>
+                    )}
+                    {exam.questionDiagnostique && (
+                      <p className="mt-1 text-sm text-gray-600">
+                        <span className="font-medium">Clinical Question:</span> {exam.questionDiagnostique}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <Scan className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <p>No imaging studies ordered</p>
+            {editMode && (
+              <Button onClick={addImagingExam} className="mt-4" variant="outline">
+                <Plus className="h-4 w-4 mr-2" />
+                Add First Imaging Study
+              </Button>
+            )}
+          </div>
+        )}
+
+        <div className="mt-8 pt-6 border-t border-gray-300">
+          <p className="text-sm text-gray-600 mb-4">
+            Imaging Center: {report?.ordonnances?.imagerie?.prescription?.centreImagerie || "Any MoH approved imaging center"}
+          </p>
+          <div className="text-right signature">
+            <p className="font-semibold">{praticien.nom}</p>
+            <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
+            
+            {validationStatus === 'validated' && documentSignatures.imaging ? (
+              <div className="mt-4">
+                <img 
+                  src={documentSignatures.imaging} 
+                  alt="Doctor's Signature" 
+                  className="ml-auto h-20 w-auto"
+                  style={{ maxWidth: '300px' }}
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Digitally signed on {new Date().toLocaleDateString()}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-8">
+                <p className="text-sm">_______________________________</p>
+                <p className="text-sm">Requesting Physician's Signature</p>
+                <p className="text-sm">Date: {patient.dateExamen}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
   const InvoiceComponent = () => {
     const invoice = report?.invoice
     if (!invoice) return null
@@ -2683,484 +3351,6 @@ export default function ProfessionalReportEditable({
       </Card>
     )
   }
-
-  const BiologyPrescription = () => {
-    const analyses = report?.ordonnances?.biologie?.prescription?.analyses || {}
-    const hasTests = Object.values(analyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
-    const patient = getReportPatient()
-    const praticien = getReportPraticien()
-    const rapport = getReportRapport()
-    
-    const categories = [
-      { key: 'haematology', label: 'HAEMATOLOGY' },
-      { key: 'clinicalChemistry', label: 'CLINICAL CHEMISTRY' },
-      { key: 'immunology', label: 'IMMUNOLOGY' },
-      { key: 'microbiology', label: 'MICROBIOLOGY' },
-      { key: 'endocrinology', label: 'ENDOCRINOLOGY' }
-    ]
-    
-    if (!includeFullPrescriptions && report?.prescriptionsResume) {
-      return (
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="font-bold mb-4">Laboratory Tests Summary</h3>
-            <p>{report.prescriptionsResume.examens}</p>
-          </CardContent>
-        </Card>
-      )
-    }
-
-    return (
-      <div id="prescription-biologie" className="bg-white p-8 rounded-lg shadow print:shadow-none">
-        <div className="border-b-2 border-purple-600 pb-4 mb-6 header">
-          <div className="flex justify-between items-start">
-            <div>
-              <h2 className="text-2xl font-bold">LABORATORY REQUEST FORM</h2>
-              <p className="text-gray-600 mt-1">Compliant with MoH Laboratory Standards</p>
-            </div>
-            <div className="flex gap-2 print:hidden">
-              {editMode && validationStatus !== 'validated' && (
-                <Select onValueChange={(value) => addBiologyTest(value)}>
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Add Test Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map(cat => (
-                      <SelectItem key={cat.key} value={cat.key}>
-                        {cat.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => exportSectionToPDF('prescription-biologie', `lab_request_${patient.nom}_${new Date().toISOString().split('T')[0]}.pdf`)}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Export PDF
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-6 p-4 bg-purple-50 rounded info-box">
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div><strong>Patient:</strong> {patient.nomComplet || patient.nom}</div>
-            <div><strong>Date:</strong> {patient.dateExamen}</div>
-            <div><strong>Clinical Information:</strong> {report?.ordonnances?.biologie?.patient?.diagnosticProvisoire || rapport.conclusionDiagnostique?.substring(0, 100) + '...' || 'N/A'}</div>
-          </div>
-        </div>
-
-        {hasTests ? (
-          <div className="space-y-6">
-            {categories.map(({ key, label }) => {
-              const tests = analyses[key]
-              if (!Array.isArray(tests) || tests.length === 0) return null
-              
-              return (
-                <div key={key} className="border-l-4 border-purple-500 pl-4">
-                  <h3 className="font-bold text-lg mb-3 text-purple-800 category-header">
-                    {label}
-                  </h3>
-                  <div className="space-y-2">
-                    {tests.map((test: any, idx: number) => (
-                      <div key={idx} className="prescription-item">
-                        {editMode && validationStatus !== 'validated' ? (
-                          <div className="space-y-3 p-3">
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <Label>Test Name</Label>
-                                <Input
-                                  value={test.nom}
-                                  onChange={(e) => updateBiologyTest(key, idx, 'nom', e.target.value)}
-                                  placeholder="e.g., Complete Blood Count"
-                                />
-                              </div>
-                              <div>
-                                <Label>Clinical Indication</Label>
-                                <Input
-                                  value={test.motifClinique}
-                                  onChange={(e) => updateBiologyTest(key, idx, 'motifClinique', e.target.value)}
-                                  placeholder="e.g., Anemia evaluation"
-                                />
-                              </div>
-                              <div>
-                                <Label>Sample Type</Label>
-                                <Select
-                                  value={test.tubePrelevement}
-                                  onValueChange={(value) => updateBiologyTest(key, idx, 'tubePrelevement', value)}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="As per laboratory protocol">Lab Protocol</SelectItem>
-                                    <SelectItem value="EDTA (Purple top)">EDTA (Purple)</SelectItem>
-                                    <SelectItem value="SST (Gold top)">SST (Gold)</SelectItem>
-                                    <SelectItem value="Sodium Citrate (Blue top)">Citrate (Blue)</SelectItem>
-                                    <SelectItem value="Heparin (Green top)">Heparin (Green)</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div>
-                                <Label>Turnaround Time</Label>
-                                <Select
-                                  value={test.delaiResultat}
-                                  onValueChange={(value) => updateBiologyTest(key, idx, 'delaiResultat', value)}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="Standard">Standard (24-48h)</SelectItem>
-                                    <SelectItem value="Urgent">Urgent (2-4h)</SelectItem>
-                                    <SelectItem value="STAT">STAT (&lt;1h)</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                            <div>
-                              <Label>Special Conditions</Label>
-                              <Input
-                                value={test.conditionsPrelevement}
-                                onChange={(e) => updateBiologyTest(key, idx, 'conditionsPrelevement', e.target.value)}
-                                placeholder="e.g., Early morning sample required"
-                              />
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <div className="flex items-center gap-4">
-                                <div className="flex items-center space-x-2">
-                                  <Switch
-                                    checked={test.urgence}
-                                    onCheckedChange={(checked) => updateBiologyTest(key, idx, 'urgence', checked)}
-                                  />
-                                  <Label>Urgent</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <Switch
-                                    checked={test.aJeun}
-                                    onCheckedChange={(checked) => updateBiologyTest(key, idx, 'aJeun', checked)}
-                                  />
-                                  <Label>Fasting required</Label>
-                                </div>
-                              </div>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => removeBiologyTest(key, idx)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex items-start justify-between p-2 hover:bg-gray-50 rounded">
-                            <div className="flex-1">
-                              <p className="font-medium">
-                                {test.nom}
-                                {test.urgence && <Badge className="ml-2 bg-red-100 text-red-800 urgent badge badge-red">URGENT</Badge>}
-                              </p>
-                              {test.aJeun && (
-                                <p className="text-sm text-orange-600 mt-1">⚠️ Fasting required</p>
-                              )}
-                              {test.conditionsPrelevement && (
-                                <p className="text-sm text-gray-600 mt-1">
-                                  Conditions: {test.conditionsPrelevement}
-                                </p>
-                              )}
-                              {test.motifClinique && (
-                                <p className="text-sm text-gray-600 mt-1">
-                                  Indication: {test.motifClinique}
-                                </p>
-                              )}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              <p>Tube: {test.tubePrelevement}</p>
-                              <p>TAT: {test.delaiResultat}</p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )
-            })}
-            
-            {report?.ordonnances?.biologie?.prescription?.instructionsSpeciales?.length > 0 && (
-              <div className="mt-6 p-4 bg-yellow-50 rounded">
-                <h4 className="font-bold mb-2">Special Instructions</h4>
-                <ul className="list-disc list-inside text-sm">
-                  {report.ordonnances.biologie.prescription.instructionsSpeciales.map((instruction: string, idx: number) => (
-                    <li key={idx}>{instruction}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            <TestTube className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p>No laboratory tests ordered</p>
-            {editMode && (
-              <div className="mt-4">
-                <Select onValueChange={(value) => addBiologyTest(value)}>
-                  <SelectTrigger className="w-[250px] mx-auto">
-                    <SelectValue placeholder="Select test category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map(cat => (
-                      <SelectItem key={cat.key} value={cat.key}>
-                        {cat.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="mt-8 pt-6 border-t border-gray-300">
-          <p className="text-sm text-gray-600 mb-4">
-            Laboratory: {report?.ordonnances?.biologie?.prescription?.laboratoireRecommande || "Any MoH approved laboratory"}
-          </p>
-          <div className="text-right signature">
-            <p className="font-semibold">{praticien.nom}</p>
-            <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
-            
-            {validationStatus === 'validated' && documentSignatures.laboratory ? (
-              <div className="mt-4">
-                <img 
-                  src={documentSignatures.laboratory} 
-                  alt="Doctor's Signature" 
-                  className="ml-auto h-20 w-auto"
-                  style={{ maxWidth: '300px' }}
-                />
-                <p className="text-sm text-gray-600 mt-2">
-                  Digitally signed on {new Date().toLocaleDateString()}
-                </p>
-              </div>
-            ) : (
-              <div className="mt-8">
-                <p className="text-sm">_______________________________</p>
-                <p className="text-sm">Requesting Physician's Signature</p>
-                <p className="text-sm">Date: {patient.dateExamen}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  const ImagingPrescription = () => {
-    const examens = report?.ordonnances?.imagerie?.prescription?.examens || []
-    const patient = getReportPatient()
-    const praticien = getReportPraticien()
-    
-    return (
-      <div id="prescription-imagerie" className="bg-white p-8 rounded-lg shadow print:shadow-none">
-        <div className="border-b-2 border-indigo-600 pb-4 mb-6 header">
-          <div className="flex justify-between items-start">
-            <div>
-              <h2 className="text-2xl font-bold">RADIOLOGY REQUEST FORM</h2>
-              <p className="text-gray-600 mt-1">Compliant with MoH Radiology Standards</p>
-            </div>
-            <div className="flex gap-2 print:hidden">
-              {editMode && validationStatus !== 'validated' && (
-                <Button onClick={addImagingExam} size="sm" variant="outline">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Imaging
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => exportSectionToPDF('prescription-imagerie', `imaging_request_${patient.nom}_${new Date().toISOString().split('T')[0]}.pdf`)}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Export PDF
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-6 p-4 bg-indigo-50 rounded info-box">
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div><strong>Patient:</strong> {patient.nomComplet || patient.nom}</div>
-            <div><strong>Weight:</strong> {patient.poids}</div>
-            <div><strong>Clinical Diagnosis:</strong> {report?.ordonnances?.imagerie?.prescription?.renseignementsCliniques || 'N/A'}</div>
-            {report?.ordonnances?.imagerie?.patient?.allergiesConnues && (
-              <div><strong>Known Allergies:</strong> {report.ordonnances.imagerie.patient.allergiesConnues}</div>
-            )}
-          </div>
-        </div>
-
-        {examens.length > 0 ? (
-          <div className="space-y-6">
-            {examens.map((exam: any, index: number) => (
-              <div key={index} className="border-l-4 border-indigo-500 pl-4 py-2 prescription-item">
-                {editMode && validationStatus !== 'validated' ? (
-                  <div className="space-y-3 p-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label>Imaging Type</Label>
-                        <Select
-                          value={exam.type || exam.modalite}
-                          onValueChange={(value) => updateImagingExam(index, 'type', value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="X-Ray">X-Ray</SelectItem>
-                            <SelectItem value="CT Scan">CT Scan</SelectItem>
-                            <SelectItem value="MRI">MRI</SelectItem>
-                            <SelectItem value="Ultrasound">Ultrasound</SelectItem>
-                            <SelectItem value="Mammography">Mammography</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label>Anatomical Region</Label>
-                        <Input
-                          value={exam.region}
-                          onChange={(e) => updateImagingExam(index, 'region', e.target.value)}
-                          placeholder="e.g., Chest PA/Lateral"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Label>Clinical Indication</Label>
-                        <Input
-                          value={exam.indicationClinique}
-                          onChange={(e) => updateImagingExam(index, 'indicationClinique', e.target.value)}
-                          placeholder="e.g., Rule out pneumonia"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Label>Clinical Question</Label>
-                        <Input
-                          value={exam.questionDiagnostique}
-                          onChange={(e) => updateImagingExam(index, 'questionDiagnostique', e.target.value)}
-                          placeholder="e.g., Consolidation? Pleural effusion?"
-                        />
-                      </div>
-                      <div>
-                        <Label>Specific Protocol</Label>
-                        <Input
-                          value={exam.protocoleSpecifique}
-                          onChange={(e) => updateImagingExam(index, 'protocoleSpecifique', e.target.value)}
-                          placeholder="e.g., High resolution CT"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={exam.urgence}
-                            onCheckedChange={(checked) => updateImagingExam(index, 'urgence', checked)}
-                          />
-                          <Label>Urgent</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={exam.contraste}
-                            onCheckedChange={(checked) => updateImagingExam(index, 'contraste', checked)}
-                          />
-                          <Label>Contrast required</Label>
-                        </div>
-                      </div>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => removeImagingExam(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="font-bold text-lg">
-                      {index + 1}. {exam.type || exam.modalite}
-                      {exam.urgence && <Badge className="ml-2 bg-red-100 text-red-800 urgent badge badge-red">URGENT</Badge>}
-                    </div>
-                    <p className="mt-1">
-                      <span className="font-medium">Region:</span> {exam.region}
-                    </p>
-                    <p className="mt-1">
-                      <span className="font-medium">Clinical Indication:</span> {exam.indicationClinique}
-                    </p>
-                    {exam.contraste && (
-                      <p className="mt-1 text-orange-600">
-                        ⚠️ <span className="font-medium">Contrast required</span>
-                      </p>
-                    )}
-                    {exam.protocoleSpecifique && (
-                      <p className="mt-1">
-                        <span className="font-medium">Protocol:</span> {exam.protocoleSpecifique}
-                      </p>
-                    )}
-                    {exam.questionDiagnostique && (
-                      <p className="mt-1 text-sm text-gray-600">
-                        <span className="font-medium">Clinical Question:</span> {exam.questionDiagnostique}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            <Scan className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p>No imaging studies ordered</p>
-            {editMode && (
-              <Button onClick={addImagingExam} className="mt-4" variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                Add First Imaging Study
-              </Button>
-            )}
-          </div>
-        )}
-
-        <div className="mt-8 pt-6 border-t border-gray-300">
-          <p className="text-sm text-gray-600 mb-4">
-            Imaging Center: {report?.ordonnances?.imagerie?.prescription?.centreImagerie || "Any MoH approved imaging center"}
-          </p>
-          <div className="text-right signature">
-            <p className="font-semibold">{praticien.nom}</p>
-            <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
-            
-            {validationStatus === 'validated' && documentSignatures.imaging ? (
-              <div className="mt-4">
-                <img 
-                  src={documentSignatures.imaging} 
-                  alt="Doctor's Signature" 
-                  className="ml-auto h-20 w-auto"
-                  style={{ maxWidth: '300px' }}
-                />
-                <p className="text-sm text-gray-600 mt-2">
-                  Digitally signed on {new Date().toLocaleDateString()}
-                </p>
-              </div>
-            ) : (
-              <div className="mt-8">
-                <p className="text-sm">_______________________________</p>
-                <p className="text-sm">Requesting Physician's Signature</p>
-                <p className="text-sm">Date: {patient.dateExamen}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   // ==================== MAIN RENDER ====================
   return (
     <div className="space-y-6 print:space-y-4">
