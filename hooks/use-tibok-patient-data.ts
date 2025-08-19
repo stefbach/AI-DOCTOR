@@ -2,6 +2,7 @@
 // REPLACE the entire file with this updated version:
 
 import { useEffect, useState } from 'react'
+import { debugLog } from '@/lib/logger'
 
 // Complete patient data interface matching what TIBOK sends
 interface PatientData {
@@ -223,22 +224,7 @@ function normalizeLifestyleData(data: any): any {
     normalized.symptomDuration = symptomDurationMap[data.symptomDuration] || data.symptomDuration
   }
 
-  console.log('🔄 Data normalization completed:', {
-    original: {
-      smoking: data.smokingStatus,
-      alcohol: data.alcoholConsumption,
-      activity: data.physicalActivity,
-      symptoms: data.currentSymptoms,
-      duration: data.symptomDuration
-    },
-    normalized: {
-      smoking: normalized.smokingStatus,
-      alcohol: normalized.alcoholConsumption,
-      activity: normalized.physicalActivity,
-      symptoms: normalized.currentSymptoms,
-      duration: normalized.symptomDuration
-    }
-  })
+  debugLog('🔄 Data normalization completed')
 
   return normalized
 }
@@ -260,28 +246,28 @@ export function useTibokPatientData() {
     const patientId = urlParams.get('patientId')
     const doctorId = urlParams.get('doctorId')
 
-    console.log('🔍 TIBOK Data Check:', {
+    debugLog('🔍 TIBOK Data Check:', {
       source,
       hasPatientData: !!patientDataParam,
       hasDoctorData: !!doctorDataParam,
       consultationId,
       patientId,
       doctorId
-    })
+    }, ['source', 'hasPatientData', 'hasDoctorData', 'consultationId', 'patientId', 'doctorId'])
 
     if (source === 'tibok' && patientDataParam && doctorDataParam) {
       try {
         // Parse patient data
         const parsedPatientData = JSON.parse(decodeURIComponent(patientDataParam))
-        console.log('📋 Parsed TIBOK Patient Data (before normalization):', parsedPatientData)
+        debugLog('📋 Parsed TIBOK Patient Data (before normalization):', parsedPatientData, ['id'])
         
         // ✅ APPLY NORMALIZATION: Translate French values to English
         const normalizedPatientData = normalizeLifestyleData(parsedPatientData)
-        console.log('🔄 Normalized Patient Data (after translation):', normalizedPatientData)
+        debugLog('🔄 Normalized Patient Data (after translation):', normalizedPatientData, ['id'])
         
         // Parse doctor data
         const parsedDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
-        console.log('👨‍⚕️ Parsed TIBOK Doctor Data:', parsedDoctorData)
+        debugLog('👨‍⚕️ Parsed TIBOK Doctor Data:', parsedDoctorData, ['id'])
 
         // Set consultation data
         const consultation = {
@@ -299,18 +285,17 @@ export function useTibokPatientData() {
         }
 
         // Log medical data specifically (now in English)
-        console.log('🏥 Medical Data Received (English):', {
-          symptoms: normalizedPatientData.currentSymptoms,
-          medicalHistory: normalizedPatientData.medicalHistory,
-          allergies: normalizedPatientData.allergies,
-          consultationReason: normalizedPatientData.consultationReason,
-          vitalSigns: normalizedPatientData.vitalSigns,
-          currentMedications: normalizedPatientData.currentMedications,
-          lifestyle: {
-            smoking: normalizedPatientData.smokingStatus,
-            alcohol: normalizedPatientData.alcoholConsumption,
-            activity: normalizedPatientData.physicalActivity
-          }
+        debugLog('🏥 Medical Data Received (English)', {
+          symptomsCount: normalizedPatientData.currentSymptoms.length,
+          medicalHistoryCount: normalizedPatientData.medicalHistory.length,
+          allergiesCount: normalizedPatientData.allergies.length,
+          hasConsultationReason: !!normalizedPatientData.consultationReason,
+          hasVitalSigns: !!normalizedPatientData.vitalSigns,
+          hasCurrentMedications: !!normalizedPatientData.currentMedications,
+          hasLifestyleData:
+            !!(normalizedPatientData.smokingStatus ||
+               normalizedPatientData.alcoholConsumption ||
+               normalizedPatientData.physicalActivity)
         })
 
         // Use normalized data
@@ -319,7 +304,7 @@ export function useTibokPatientData() {
         setConsultationData(consultation)
         setIsFromTibok(true)
         
-        console.log('✅ TIBOK data loaded and normalized successfully')
+        debugLog('✅ TIBOK data loaded and normalized successfully')
         
       } catch (error) {
         console.error('❌ Error parsing TIBOK data:', error)
@@ -327,14 +312,14 @@ export function useTibokPatientData() {
         console.error('Raw doctor data:', doctorDataParam?.substring(0, 200) + '...')
       }
     } else {
-      console.log('ℹ️ Not from TIBOK or missing data parameters')
+      debugLog('ℹ️ Not from TIBOK or missing data parameters')
     }
 
     setLoading(false)
 
     // Also listen for custom events (fallback)
     const handlePatientData = (event: CustomEvent) => {
-      console.log('📡 Received patient data via custom event:', event.detail)
+      debugLog('📡 Received patient data via custom event', event.detail)
       
       // Apply normalization to event data as well
       let normalizedEventData = event.detail

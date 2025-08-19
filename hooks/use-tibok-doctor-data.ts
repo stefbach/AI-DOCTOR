@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { debugLog } from '@/lib/logger'
 
 interface DoctorData {
   id: string
@@ -32,7 +33,7 @@ export function useTibokDoctorData() {
     if (doctorDataParam) {
       try {
         const parsedData = JSON.parse(decodeURIComponent(doctorDataParam))
-        console.log('👨‍⚕️ Doctor data from URL:', parsedData)
+        debugLog('👨‍⚕️ Doctor data from URL', parsedData, ['id'])
         
         // Normalize field names from database
         const normalizedData = {
@@ -56,7 +57,7 @@ export function useTibokDoctorData() {
       if (storedDoctorData) {
         try {
           const parsedData = JSON.parse(storedDoctorData)
-          console.log('👨‍⚕️ Doctor data from sessionStorage:', parsedData)
+          debugLog('👨‍⚕️ Doctor data from sessionStorage', parsedData, ['id'])
           setDoctorData(parsedData)
           setIsFromTibok(true)
         } catch (error) {

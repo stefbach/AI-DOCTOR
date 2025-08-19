@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
-import { 
+import {
   BrainCircuit,
   AlertCircle,
   CheckCircle,
@@ -25,6 +25,7 @@ import {
   AlertTriangle,
   RefreshCw
 } from "lucide-react"
+import { debugLog } from '@/lib/logger'
 import aiQuestionsService, { useAIQuestions, type AIMode } from "@/lib/ai-questions-service"
 
 interface AIQuestionsStepProps {
@@ -62,11 +63,11 @@ export default function AIQuestionsStep({
   // Tester la connexion au montage
   useEffect(() => {
     const checkConnection = async () => {
-      console.log('🔌 Test de connexion à l\'API IA...')
+      debugLog('🔌 Test de connexion à l\'API IA...')
       const result = await testConnection()
       
       if (result.connected) {
-        console.log('✅ API IA connectée')
+        debugLog('✅ API IA connectée')
         setConnectionStatus('connected')
       } else {
         console.error('❌ API IA non disponible:', result.error)
@@ -87,13 +88,13 @@ export default function AIQuestionsStep({
 
   // Fonction pour charger les questions
   const loadQuestions = async () => {
-    console.log('🤖 Chargement des questions IA...')
-    console.log('📊 Données patient:', {
+    debugLog('🤖 Chargement des questions IA...')
+    debugLog('📊 Données patient', {
       age: patientData.age,
       gender: patientData.gender,
-      symptoms: clinicalData.symptoms?.length || 0,
-      chiefComplaint: clinicalData.chiefComplaint?.substring(0, 50)
-    })
+      symptomsCount: clinicalData.symptoms?.length || 0,
+      hasChiefComplaint: !!clinicalData.chiefComplaint
+    }, ['age', 'gender', 'symptomsCount', 'hasChiefComplaint'])
     
     await fetchQuestions(patientData, clinicalData, mode)
   }
@@ -104,7 +105,7 @@ export default function AIQuestionsStep({
     setAnswers({})
     setCurrentQuestionIndex(0)
     
-    console.log(`🔄 Rechargement en mode ${newMode}`)
+    debugLog(`🔄 Rechargement en mode ${newMode}`)
     await fetchQuestions(patientData, clinicalData, newMode)
   }
 
@@ -148,7 +149,7 @@ export default function AIQuestionsStep({
       timestamp: new Date().toISOString()
     }
     
-    console.log('✅ Réponses aux questions IA:', questionsData)
+    debugLog('✅ Réponses aux questions IA', questionsData)
     onDataChange(questionsData)
     onNext()
   }

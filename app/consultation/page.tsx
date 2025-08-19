@@ -5,6 +5,7 @@ import PatientForm from "@/components/patient-form"
 import ClinicalForm from "@/components/clinical-form"
 import QuestionsForm from "@/components/questions-form"
 import { consultationDataService } from '@/lib/consultation-data-service'
+import { debugLog } from '@/lib/logger'
 
 export default function ConsultationPage() {
   const [currentStep, setCurrentStep] = useState(0)
@@ -21,12 +22,16 @@ export default function ConsultationPage() {
       try {
         const id = await consultationDataService.initializeConsultation()
         setConsultationId(id)
-        console.log('✅ Consultation initialized:', id)
+        debugLog('✅ Consultation initialized:', { id }, ['id'])
         
         // Load any existing data
         const savedData = await consultationDataService.getAllData()
         if (savedData) {
-          console.log('📂 Loaded saved data:', savedData)
+          debugLog('📂 Loaded saved data', {
+            hasPatientData: !!savedData.patientData,
+            hasClinicalData: !!savedData.clinicalData,
+            hasQuestionsData: !!savedData.questionsData
+          }, ['hasPatientData', 'hasClinicalData', 'hasQuestionsData'])
           if (savedData.patientData) setPatientData(savedData.patientData)
           if (savedData.clinicalData) setClinicalData(savedData.clinicalData)
           if (savedData.questionsData) setQuestionsData(savedData.questionsData)
@@ -50,70 +55,55 @@ export default function ConsultationPage() {
 
   // Handlers for data updates
   const handlePatientDataChange = (data: any) => {
-    console.log('📊 PATIENT DATA UPDATED:', {
-      firstName: data?.firstName,
-      lastName: data?.lastName,
-      age: data?.age,
-      hasAllergies: data?.allergies?.length > 0,
-      hasMedicalHistory: data?.medicalHistory?.length > 0,
+    debugLog('📊 PATIENT DATA UPDATED:', {
+      hasAllergies: (data?.allergies?.length || 0) > 0,
+      hasMedicalHistory: (data?.medicalHistory?.length || 0) > 0,
       dataKeys: Object.keys(data || {})
-    })
+    }, ['hasAllergies', 'hasMedicalHistory', 'dataKeys'])
     setPatientData(data)
   }
 
   const handleClinicalDataChange = (data: any) => {
-    console.log('🏥 CLINICAL DATA UPDATED:', {
-      chiefComplaint: data?.chiefComplaint,
-      symptoms: data?.symptoms,
-      symptomDuration: data?.symptomDuration,
+    debugLog('🏥 CLINICAL DATA UPDATED:', {
+      hasChiefComplaint: !!data?.chiefComplaint,
+      symptomsCount: data?.symptoms?.length,
       painScale: data?.painScale,
+      hasSymptomDuration: !!data?.symptomDuration,
       dataKeys: Object.keys(data || {})
-    })
+    }, ['hasChiefComplaint', 'symptomsCount', 'painScale', 'hasSymptomDuration', 'dataKeys'])
     setClinicalData(data)
   }
 
   const handleQuestionsDataChange = (data: any) => {
-    console.log('❓ QUESTIONS DATA UPDATED:', {
+    debugLog('❓ QUESTIONS DATA UPDATED:', {
       responsesCount: data?.responses?.length,
-      responses: data?.responses,
       dataKeys: Object.keys(data || {})
-    })
+    }, ['responsesCount', 'dataKeys'])
     setQuestionsData(data)
   }
 
   // Navigation handlers
   const goToNext = () => {
-    console.log(`➡️ NAVIGATING FROM STEP ${currentStep} TO STEP ${currentStep + 1}`)
-    console.log('Current data state:', {
+    debugLog(`➡️ NAVIGATING FROM STEP ${currentStep} TO STEP ${currentStep + 1}`)
+    debugLog('Current data state:', {
       hasPatientData: !!patientData,
       hasClinicalData: !!clinicalData,
       hasQuestionsData: !!questionsData
-    })
+    }, ['hasPatientData', 'hasClinicalData', 'hasQuestionsData'])
     
     if (currentStep === 1) {
       // Moving from Clinical to Questions
-      console.log('🚀 MOVING TO QUESTIONS WITH DATA:', {
-        patientData: {
-          firstName: patientData?.firstName,
-          lastName: patientData?.lastName,
-          age: patientData?.age,
-          gender: patientData?.gender,
-          exists: !!patientData
-        },
-        clinicalData: {
-          chiefComplaint: clinicalData?.chiefComplaint,
-          symptoms: clinicalData?.symptoms,
-          symptomDuration: clinicalData?.symptomDuration,
-          exists: !!clinicalData
-        }
-      })
+      debugLog('🚀 MOVING TO QUESTIONS WITH DATA:', {
+        patientExists: !!patientData,
+        clinicalExists: !!clinicalData
+      }, ['patientExists', 'clinicalExists'])
     }
     
     setCurrentStep(prev => prev + 1)
   }
 
   const goToPrevious = () => {
-    console.log(`⬅️ NAVIGATING FROM STEP ${currentStep} TO STEP ${currentStep - 1}`)
+    debugLog(`⬅️ NAVIGATING FROM STEP ${currentStep} TO STEP ${currentStep - 1}`)
     setCurrentStep(prev => Math.max(0, prev - 1))
   }
 
@@ -236,7 +226,7 @@ export default function ConsultationPage() {
                   patientData={patientData}
                   clinicalData={clinicalData}
                   onDataChange={handleQuestionsDataChange}
-                  onNext={() => console.log('Next from Questions')}
+                  onNext={() => debugLog('Next from Questions')}
                   onPrevious={goToPrevious}
                   consultationId={consultationId}
                 />

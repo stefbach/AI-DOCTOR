@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { debugLog } from '@/lib/logger'
 
 interface PatientData {
   id?: string
@@ -38,7 +39,7 @@ export function PatientDataLoader() {
       }
 
       try {
-        console.log('Processing TIBOK data...')
+        debugLog('Processing TIBOK data...')
         
         let patientData: PatientData = { id: patientId }
         
@@ -47,9 +48,9 @@ export function PatientDataLoader() {
           try {
             const decodedData = JSON.parse(decodeURIComponent(patientDataParam))
             patientData = { ...patientData, ...decodedData }
-            console.log('Patient data from URL:', patientData)
+            debugLog('Patient data from URL', patientData, ['id'])
           } catch (e) {
-            console.log('Could not parse patient data from URL')
+            debugLog('Could not parse patient data from URL')
           }
         }
 
