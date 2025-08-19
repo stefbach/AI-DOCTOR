@@ -35,6 +35,7 @@ interface ClinicalData {
   diseaseHistory?: string
   symptomDuration?: string
   symptoms?: string[]
+  exposures?: string[]
   painScale?: string | number
   
   // Vital Signs
@@ -86,6 +87,7 @@ interface ProcessedClinicalData {
   mainComplaint: string
   complaintCategory: string
   symptomsList: string[]
+  exposures?: string[]
   duration: {
     value: string
     urgency: 'immediate' | 'urgent' | 'semi-urgent' | 'routine'
@@ -314,6 +316,7 @@ function processClinicalData(clinical: ClinicalData): ProcessedClinicalData {
   const mainComplaint = clinical.chiefComplaint || ''
   const complaintCategory = categorizeComplaint(mainComplaint, clinical.symptoms || [])
   const symptomsList = clinical.symptoms || []
+  const exposures = clinical.exposures || []
   
   // Process duration
   const duration = {
@@ -335,11 +338,12 @@ function processClinicalData(clinical: ClinicalData): ProcessedClinicalData {
   
   // Process vitals
   const vitals = processVitalSigns(clinical.vitalSigns)
-  
+
   return {
     mainComplaint,
     complaintCategory,
     symptomsList,
+    exposures,
     duration,
     painLevel,
     painCategory,
@@ -616,6 +620,10 @@ function generateBalancedModePrompt(
   const vitalsStr = clinical.vitals.temperature || clinical.vitals.bloodPressure
     ? `\nVITALS: Temp: ${clinical.vitals.temperature}°C (${clinical.vitals.tempStatus}), BP: ${clinical.vitals.bloodPressure} (${clinical.vitals.bpStatus})`
     : ''
+
+  const vectorNote = context.riskFactors.some(r => r.factor === 'Vector-borne disease risk')
+    ? '\nNOTE: Fever with mosquito exposure in endemic area - include questions to assess for dengue and chikungunya.'
+    : ''
     
   return `CLINICAL DIAGNOSTIC ASSESSMENT - STANDARD MODE
 
@@ -635,7 +643,7 @@ CLINICAL PRESENTATION:
 ASSESSMENT:
 - Criticality Score: ${context.criticalityScore}/10
 - Red Flags: ${context.redFlags.join(', ') || 'None'}
-- Risk Factors: ${context.riskFactors.map(r => `${r.factor}(${r.severity})`).join(', ')}
+ - Risk Factors: ${context.riskFactors.map(r => `${r.factor}(${r.severity})`).join(', ')}${vectorNote}
 
 Generate 5 diagnostic questions following standard clinical protocol:
 
@@ -683,6 +691,10 @@ function generateIntelligentModePrompt(
   const fullMedications = patient.medicationsList.length > 0
     ? patient.medicationsList.map(m => `• ${m}`).join('\n')
     : 'No current medications'
+
+  const vectorNote = context.riskFactors.some(r => r.factor === 'Vector-borne disease risk')
+    ? '\nEPIDEMIOLOGY: Fever with mosquito exposure in endemic area - evaluate for dengue and chikungunya.'
+    : ''
   
   return `COMPREHENSIVE SPECIALIST CONSULTATION - EXPERT MODE
 
@@ -735,12 +747,14 @@ Cardiovascular Risk: ${patient.riskProfile.cardiovascular.toUpperCase()}
 Diabetes Risk: ${patient.riskProfile.diabetes.toUpperCase()}
 Respiratory Risk: ${patient.riskProfile.respiratory.toUpperCase()}
 
+${vectorNote}
+
 IDENTIFIED RED FLAGS:
 ${context.redFlags.length > 0 ? context.redFlags.map(f => `⚠️ ${f}`).join('\n') : '✓ No immediate red flags identified'}
 
 DIFFERENTIAL DIAGNOSIS CONSIDERATIONS:
 Based on presentation, consider:
-${generateDifferentialDiagnosis(clinical.complaintCategory, clinical.symptomsList)}
+${generateDifferentialDiagnosis(clinical.complaintCategory, clinical.symptomsList, clinical.exposures)}
 
 ═══════════════════════════════════════════════════════════
 EXPERT DIAGNOSTIC QUESTIONING REQUIRED
@@ -788,44 +802,55 @@ Format:
 Generate exactly 8 expert-level questions. Response must be valid JSON only.`
 }
 
-function generateDifferentialDiagnosis(category: string, symptoms: string[]): string {
+function generateDifferentialDiagnosis(category: string, symptoms: string[], exposures: string[] = []): string {
   const differentials: string[] = []
-  
+  const lowerSymptoms = symptoms.map(s => s.toLowerCase())
+  const lowerExposures = exposures.map(e => e.toLowerCase())
+
+  const hasFever = lowerSymptoms.includes('fever')
+  const mosquitoExposure = lowerExposures.some(e => e.includes('mosquito') || e.includes('moustique'))
+  const endemicExposure = lowerExposures.some(e => e.includes('endemic') || e.includes('tropical'))
+
+  let index = 1
+  if (hasFever && (mosquitoExposure || endemicExposure)) {
+    differentials.push(`${index++}. Dengue fever`, `${index++}. Chikungunya virus infection`)
+  }
+
   // Add category-specific differentials
   switch (category) {
     case 'cardiovascular':
       differentials.push(
-        '1. Acute Coronary Syndrome (STEMI/NSTEMI/UA)',
-        '2. Pulmonary Embolism',
-        '3. Aortic Dissection',
-        '4. Pericarditis/Myocarditis',
-        '5. Congestive Heart Failure exacerbation'
+        `${index++}. Acute Coronary Syndrome (STEMI/NSTEMI/UA)`,
+        `${index++}. Pulmonary Embolism`,
+        `${index++}. Aortic Dissection`,
+        `${index++}. Pericarditis/Myocarditis`,
+        `${index++}. Congestive Heart Failure exacerbation`
       )
       break
     case 'respiratory':
       differentials.push(
-        '1. Community-Acquired Pneumonia',
-        '2. Acute Bronchitis',
-        '3. COPD/Asthma Exacerbation',
-        '4. Pulmonary Embolism',
-        '5. Pneumothorax'
+        `${index++}. Community-Acquired Pneumonia`,
+        `${index++}. Acute Bronchitis`,
+        `${index++}. COPD/Asthma Exacerbation`,
+        `${index++}. Pulmonary Embolism`,
+        `${index++}. Pneumothorax`
       )
       break
     case 'neurological':
       differentials.push(
-        '1. Migraine vs Tension Headache',
-        '2. Subarachnoid Hemorrhage',
-        '3. Meningitis/Encephalitis',
-        '4. Temporal Arteritis',
-        '5. Space-Occupying Lesion'
+        `${index++}. Migraine vs Tension Headache`,
+        `${index++}. Subarachnoid Hemorrhage`,
+        `${index++}. Meningitis/Encephalitis`,
+        `${index++}. Temporal Arteritis`,
+        `${index++}. Space-Occupying Lesion`
       )
       break
     default:
       differentials.push(
-        '1. Most likely diagnosis based on symptoms',
-        '2. Common alternative diagnosis',
-        '3. Serious condition to rule out',
-        '4. Rare but possible diagnosis'
+        `${index++}. Most likely diagnosis based on symptoms`,
+        `${index++}. Common alternative diagnosis`,
+        `${index++}. Serious condition to rule out`,
+        `${index++}. Rare but possible diagnosis`
       )
   }
   
@@ -935,6 +960,10 @@ function generateRecommendations(
     tests.push('Chest X-ray', 'Pulse oximetry', 'Peak flow if asthma')
   } else if (context.clinical.complaintCategory === 'neurological') {
     tests.push('CT head if trauma', 'MRI if persistent symptoms')
+  }
+
+  if (context.riskFactors.some(r => r.factor === 'Vector-borne disease risk')) {
+    tests.push('Dengue NS1/serology', 'Chikungunya serology')
   }
   
   if (tests.length > 0) {
@@ -1083,6 +1112,19 @@ export async function POST(request: NextRequest) {
         factor: 'Obesity',
         severity: 'medium',
         relatedTo: 'Physical health'
+      })
+    }
+
+    // Vector-borne disease risk
+    const hasFever = ['fever', 'high-fever'].includes(processedClinical.vitals.tempStatus || '')
+    const exposureList = (processedClinical.exposures || []).map(e => e.toLowerCase())
+    const mosquitoExposure = exposureList.some(e => e.includes('mosquito') || e.includes('moustique'))
+    const endemicExposure = exposureList.some(e => e.includes('endemic') || e.includes('tropical'))
+    if (hasFever && (mosquitoExposure || endemicExposure)) {
+      riskFactors.push({
+        factor: 'Vector-borne disease risk',
+        severity: 'medium',
+        relatedTo: 'Epidemiological exposure'
       })
     }
     

@@ -89,7 +89,8 @@ const generateDoctorActions = (patientData: any, clinicalData: any): DoctorActio
       "Precise timeline of symptoms",
       "Triggering/relieving factors",
       "Similar family history",
-      "Recent travel or sick contacts"
+      "Recent travel or sick contacts",
+      "Mosquito bites or stay in endemic area"
     ],
     color: "green"
   })
@@ -117,7 +118,8 @@ const generateDoctorActions = (patientData: any, clinicalData: any): DoctorActio
       "Living conditions (dampness, mold)",
       "Pets in the home",
       "Occupational exposures",
-      "Sleep quality and bedding"
+      "Sleep quality and bedding",
+      "Standing water or mosquito breeding nearby"
     ],
     color: "yellow"
   })
@@ -159,7 +161,8 @@ const generateDoctorActions = (patientData: any, clinicalData: any): DoctorActio
       "Explain teleconsultation process",
       "Importance of medical follow-up",
       "Warning signs to monitor",
-      "Preventive hygiene measures"
+      "Preventive hygiene measures",
+      "Inform about dengue/chikungunya signs and mosquito protection"
     ],
     color: "blue"
   })
