@@ -1,18 +1,7 @@
 // app/api/openai-diagnosis/route.ts - VERSION 7.0 WITH ENFORCED POSOLOGY SYSTEM
 import { NextRequest, NextResponse } from 'next/server'
+import crypto from 'crypto'
 import { MedicalAnalysis, Medication, LaboratoryTest, ImagingStudy } from '@/types/medical'
-
-export const runtime = 'edge'
-export const maxDuration = 300
-
-
-function generateUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0
-    const v = c === 'x' ? r : (r & 0x3 | 0x8)
-    return v.toString(16)
-  })
-}
 
 
 // ==================== TYPES AND INTERFACES ====================
@@ -2997,7 +2986,7 @@ function anonymizePatientData(patientData: any): {
   originalIdentity: any,
   anonymousId: string
 } {
- const anonymousId = `ANON-${generateUUID()}`
+ const anonymousId = `ANON-${crypto.randomUUID()}`
   
   const originalIdentity = {
     firstName: patientData?.firstName,
