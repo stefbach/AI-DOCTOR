@@ -1,7 +1,10 @@
 // app/api/openai-diagnosis/route.ts - VERSION 7.0 WITH ENFORCED POSOLOGY SYSTEM
 import { NextRequest, NextResponse } from 'next/server'
 import { MedicalAnalysis, Medication, LaboratoryTest, ImagingStudy } from '@/types/medical'
+
 export const runtime = 'edge'
+export const maxDuration = 300
+
 
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
