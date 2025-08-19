@@ -1,5 +1,6 @@
 {
   "name": "my-v0-project",
+  "main": "app.js",
   "version": "0.1.0",
   "private": true,
   "scripts": {
