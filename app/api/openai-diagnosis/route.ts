@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { MedicalAnalysis, Medication, LaboratoryTest, ImagingStudy } from '@/types/medical'
+import { selectDiagnosticQuestionResponses } from '@/lib/diagnostic-questions'
 
 // ==================== TYPES AND INTERFACES ====================
 interface PatientContext {
@@ -2563,7 +2564,12 @@ export async function POST(request: NextRequest) {
     }
     
     const { anonymized: anonymizedPatientData, originalIdentity, anonymousId } = anonymizePatientData(body.patientData)
-    
+
+    const relevantAIQuestions = selectDiagnosticQuestionResponses(
+      body.clinicalData?.symptoms || [],
+      body.questionsData || []
+    )
+
     const patientContext: PatientContext = {
       age: parseInt(anonymizedPatientData?.age) || 0,
       sex: anonymizedPatientData?.sex || 'unknown',
@@ -2586,9 +2592,9 @@ export async function POST(request: NextRequest) {
       symptom_duration: body.clinicalData?.symptomDuration || '',
       vital_signs: body.clinicalData?.vitalSigns || {},
       disease_history: body.clinicalData?.diseaseHistory || '',
-      
-      ai_questions: body.questionsData || [],
-      
+
+      ai_questions: relevantAIQuestions,
+
       anonymousId: anonymousId
     }
     
