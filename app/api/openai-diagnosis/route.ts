@@ -2114,13 +2114,22 @@ function validateMedicalAnalysisWithEnforcedPosology(
   // Medication duplicate and interaction checks
   const medNames = new Set<string>()
   medications.forEach(med => {
-    const name = med.drug.toLowerCase()
+    const name = (med.drug || '').toLowerCase()
+    if (!name) {
+      issues.push('Medication missing name')
+      return
+    }
     if (medNames.has(name)) {
       issues.push(`Duplicate medication: ${med.drug}`)
     }
     medNames.add(name)
     med.interactions?.forEach(inter => {
-      if (medications.some(other => other.drug.toLowerCase() === inter.toLowerCase())) {
+      if (
+        inter &&
+        medications.some(
+          other => (other.drug || '').toLowerCase() === inter.toLowerCase()
+        )
+      ) {
         issues.push(`Interaction between ${med.drug} and ${inter}`)
       }
     })
@@ -2129,20 +2138,30 @@ function validateMedicalAnalysisWithEnforcedPosology(
   // Laboratory test validations
   const labNames = new Set<string>()
   labTests.forEach(test => {
-    const name = test.test_name.toLowerCase()
+    const name = (test.test_name || '').toLowerCase()
+    if (!name) {
+      issues.push('Laboratory test missing name')
+      return
+    }
     if (labNames.has(name)) {
       issues.push(`Duplicate laboratory test: ${test.test_name}`)
     }
     labNames.add(name)
     if (!test.justification) {
       suggestions.push(`Add justification for laboratory test ${test.test_name}`)
-    } else if (diagnosis && !test.justification.toLowerCase().includes(diagnosis.toLowerCase())) {
+    } else if (
+      diagnosis &&
+      !(test.justification || '').toLowerCase().includes(diagnosis.toLowerCase())
+    ) {
       suggestions.push(`Review relevance of laboratory test ${test.test_name} for ${diagnosis}`)
     }
     if (!test.urgency) {
       suggestions.push(`Specify urgency for laboratory test ${test.test_name}`)
     }
-    if (isPregnant && test.contraindications?.some(c => c.toLowerCase().includes('pregnan'))) {
+    if (
+      isPregnant &&
+      test.contraindications?.some(c => (c || '').toLowerCase().includes('pregnan'))
+    ) {
       issues.push(`Laboratory test ${test.test_name} contraindicated in pregnancy`)
     }
   })
@@ -2150,20 +2169,30 @@ function validateMedicalAnalysisWithEnforcedPosology(
   // Imaging study validations
   const imagingNames = new Set<string>()
   imaging.forEach(study => {
-    const name = study.study_name.toLowerCase()
+    const name = (study.study_name || '').toLowerCase()
+    if (!name) {
+      issues.push('Imaging study missing name')
+      return
+    }
     if (imagingNames.has(name)) {
       issues.push(`Duplicate imaging study: ${study.study_name}`)
     }
     imagingNames.add(name)
     if (!study.justification) {
       suggestions.push(`Add justification for imaging study ${study.study_name}`)
-    } else if (diagnosis && !study.justification.toLowerCase().includes(diagnosis.toLowerCase())) {
+    } else if (
+      diagnosis &&
+      !(study.justification || '').toLowerCase().includes(diagnosis.toLowerCase())
+    ) {
       suggestions.push(`Review relevance of imaging study ${study.study_name} for ${diagnosis}`)
     }
     if (!study.urgency) {
       suggestions.push(`Specify urgency for imaging study ${study.study_name}`)
     }
-    if (isPregnant && study.contraindications?.some(c => c.toLowerCase().includes('pregnan'))) {
+    if (
+      isPregnant &&
+      study.contraindications?.some(c => (c || '').toLowerCase().includes('pregnan'))
+    ) {
       issues.push(`Imaging study ${study.study_name} contraindicated in pregnancy`)
     }
   })
@@ -2171,8 +2200,13 @@ function validateMedicalAnalysisWithEnforcedPosology(
   // Check posology completeness
   let posologyIssuesFixed = 0;
   medications.forEach((med: Medication) => {
-    if (!med.posology || med.posology === 'once daily' && !ACTUALLY_ONCE_DAILY_MEDICATIONS.some(d => 
-      med.drug.toLowerCase().includes(d))) {
+    if (
+      !med.posology ||
+      (med.posology === 'once daily' &&
+        !ACTUALLY_ONCE_DAILY_MEDICATIONS.some(d =>
+          (med.drug || '').toLowerCase().includes(d)
+        ))
+    ) {
       issues.push(`Posology issue for ${med.drug}`)
       posologyIssuesFixed++
     }
