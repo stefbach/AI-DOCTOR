@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
+import { validateDiagnosisAgainstSymptoms } from "../../../lib/diagnostic-validation"
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,12 +43,40 @@ export async function POST(request: NextRequest) {
     Répondez de manière structurée, précise et basée sur l'evidence-based medicine.
     `
 
-    const diagnosticResult = await generateText({
+    let diagnosticResult = await generateText({
       model: openai("gpt-4o"),
       prompt: diagnosticPrompt,
       temperature: 0.2,
       maxTokens: 2000,
     })
+
+    const symptomsArray = Array.isArray(clinicalData.symptoms)
+      ? clinicalData.symptoms
+      : String(clinicalData.symptoms || '')
+          .split(',')
+          .map((s: string) => s.trim())
+
+    let diagnosis = diagnosticResult.text.split("\n")[0].trim()
+    let validation = validateDiagnosisAgainstSymptoms(diagnosis, symptomsArray)
+    console.log('🔎 Concordance score:', validation.score.toFixed(2))
+    if (!validation.isValid) {
+      console.warn('⚠️ Missing symptoms:', validation.missingSymptoms.join(', '))
+      const retryPrompt = diagnosticPrompt +
+        `\n\nPrevious diagnosis was incorrect. Missing symptoms: ${validation.missingSymptoms.join(', ')}. Please reassess.`
+      const retryResult = await generateText({
+        model: openai("gpt-4o"),
+        prompt: retryPrompt,
+        temperature: 0.2,
+        maxTokens: 2000,
+      })
+      diagnosticResult = retryResult
+      diagnosis = diagnosticResult.text.split("\n")[0].trim()
+      validation = validateDiagnosisAgainstSymptoms(diagnosis, symptomsArray)
+      console.log('🔎 Concordance score (retry):', validation.score.toFixed(2))
+      if (!validation.isValid) {
+        console.warn('⚠️ Missing symptoms after retry:', validation.missingSymptoms.join(', '))
+      }
+    }
 
     // Étape 2: Recherche automatique PubMed
     let pubmedEvidence = null
