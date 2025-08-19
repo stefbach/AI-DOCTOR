@@ -107,6 +107,36 @@ const MODE_CONFIGS = {
   }
 }
 
+// Automatic urgency mode detection
+export function detectUrgencyMode(clinicalData: any): GenerationMode {
+  const symptoms = String(clinicalData?.symptoms || '').toLowerCase()
+  const chiefComplaint = String(clinicalData?.chiefComplaint || '').toLowerCase()
+  const combined = `${symptoms} ${chiefComplaint}`
+
+  const urgentKeywords = [
+    'chest pain',
+    'dyspnea',
+    'syncope',
+    'confusion',
+    'distress',
+    'severe chest pain',
+    'palpitations',
+    'sudden weakness',
+    'speech difficulty',
+    'severe bleeding'
+  ]
+  if (urgentKeywords.some(keyword => combined.includes(keyword))) {
+    return 'fast'
+  }
+
+  const complexKeywords = ['multiple', 'chronic', 'recurrent', 'several']
+  if (complexKeywords.some(keyword => combined.includes(keyword))) {
+    return 'intelligent'
+  }
+
+  return 'balanced'
+}
+
 // Helper component for dynamic icons
 function DynamicIcon({ icon: Icon, className }: { icon: any, className?: string }) {
   return <Icon className={className} />
@@ -223,26 +253,6 @@ export default function QuestionsForm({
   // Helper for translations
   const t = (key: string) => getTranslation(key, language)
 
-  // Automatic urgency mode detection
-  const detectUrgencyMode = (): GenerationMode => {
-    // Ensure values are strings before calling toLowerCase
-    const symptoms = String(clinicalData?.symptoms || '').toLowerCase()
-    const chiefComplaint = String(clinicalData?.chiefComplaint || '').toLowerCase()
-    const combined = `${symptoms} ${chiefComplaint}`
-    
-    const urgentKeywords = ['chest pain', 'dyspnea', 'syncope', 'confusion', 'distress']
-    if (urgentKeywords.some(keyword => combined.includes(keyword))) {
-      return 'fast'
-    }
-    
-    const complexKeywords = ['multiple', 'chronic', 'recurrent', 'several']
-    if (complexKeywords.some(keyword => combined.includes(keyword))) {
-      return 'intelligent'
-    }
-    
-    return 'balanced'
-  }
-
   // Load saved data
   useEffect(() => {
     const loadSavedData = async () => {
@@ -299,7 +309,7 @@ export default function QuestionsForm({
   // Systematic automatic generation
   useEffect(() => {
     if (patientData && clinicalData && !hasGenerated) {
-      const detectedMode = detectUrgencyMode()
+      const detectedMode = detectUrgencyMode(clinicalData)
       setGenerationMode(detectedMode)
       
       console.log('🎯 SYSTEMATIC GENERATION TRIGGERED')
