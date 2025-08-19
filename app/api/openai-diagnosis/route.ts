@@ -2475,22 +2475,7 @@ CONSIDER:
 }
 
 // ==================== HELPER FUNCTIONS ====================
-
-/**
- * Calcule le trimestre de grossesse basé sur l'âge gestationnel
- */
-  
-  // Extract weeks from various formats: "12 weeks", "12w", "12"
-  const weekMatch = gestationalAge.match(/(\d+)/);
-  if (!weekMatch) return '';
-  
-  const weeks = parseInt(weekMatch[1]);
-  
-  if (weeks < 1) return 'Very early pregnancy';
-  if (weeks <= 12) return 'First trimester';
-  if (weeks <= 27) return 'Second trimester';
-  if (weeks <= 42) return 'Third trimester';
-  return 'Post-term';
+// Note: getPregnancyTrimester est déjà définie plus haut dans le fichier
 
 /**
  * Calcule la date prévue d'accouchement (EDD) basée sur la LMP
@@ -2563,7 +2548,6 @@ function getAgeSpecificRecommendations(age: number): string[] {
   
   return recommendations;
 }
-
 // ==================== MAURITIUS HEALTHCARE CONTEXT ====================
 const MAURITIUS_HEALTHCARE_CONTEXT = {
   laboratories: {
