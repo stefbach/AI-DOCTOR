@@ -2479,8 +2479,6 @@ CONSIDER:
 /**
  * Calcule le trimestre de grossesse basé sur l'âge gestationnel
  */
-function getPregnancyTrimester(gestationalAge: string | undefined): string {
-  if (!gestationalAge) return '';
   
   // Extract weeks from various formats: "12 weeks", "12w", "12"
   const weekMatch = gestationalAge.match(/(\d+)/);
