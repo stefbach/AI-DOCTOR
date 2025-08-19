@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
+import { selectDiagnosticQuestionResponses } from "@/lib/diagnostic-questions"
 
 /**
  * ORCHESTRATEUR MÉDICAL SIMPLIFIÉ TIBOK IA DOCTOR
@@ -224,6 +225,11 @@ export async function POST(request: NextRequest) {
  * DIAGNOSTIC IA COMPLET - SOURCE UNIQUE DE VÉRITÉ
  */
 async function generateCompleteDiagnosis(patientData: any, clinicalData: any, questionsData: any) {
+  const relevantQuestions = selectDiagnosticQuestionResponses(
+    clinicalData.symptoms || [],
+    questionsData?.responses || questionsData || []
+  )
+
   const patientContext = `
 PATIENT: ${patientData.firstName} ${patientData.lastName}, ${patientData.age} ans, ${patientData.gender}
 ANTHROPOMÉTRIE: ${patientData.weight}kg, ${patientData.height}cm (IMC: ${calculateBMI(patientData)})
@@ -234,7 +240,7 @@ CONSTANTES: T°${clinicalData.vitalSigns?.temperature}°C, FC ${clinicalData.vit
 ANTÉCÉDENTS: ${(patientData.medicalHistory || []).join(", ") || "Aucun"}
 ALLERGIES: ${(patientData.allergies || []).join(", ") || "Aucune"}
 TRAITEMENTS: ${patientData.currentMedicationsText || "Aucun"}
-ANAMNÈSE COMPLÉMENTAIRE: ${questionsData?.responses?.map((r: any) => `${r.question}: ${r.answer}`).join(", ") || "Non réalisée"}
+ANAMNÈSE COMPLÉMENTAIRE: ${relevantQuestions.map((r: any) => `${r.question}: ${r.answer}`).join(", ") || "Non réalisée"}
   `.trim()
 
   const diagnosticPrompt = `
