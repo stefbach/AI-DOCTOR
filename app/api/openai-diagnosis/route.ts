@@ -2491,7 +2491,6 @@ CONSIDER:
   if (weeks <= 27) return 'Second trimester';
   if (weeks <= 42) return 'Third trimester';
   return 'Post-term';
-}
 
 /**
  * Calcule la date prévue d'accouchement (EDD) basée sur la LMP
