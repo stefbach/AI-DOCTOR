@@ -177,25 +177,25 @@ const MedicationEditForm = memo(({
   })
 
   // Delayed sync with parent - 5 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const hasChanges = Object.keys(localMed).some(
-        key => localMed[key as keyof typeof localMed] !== medication[key]
-      )
-      
-      if (hasChanges) {
-        const updatedMed = {
-          ...localMed,
-          ligneComplete: `${localMed.nom} ${localMed.dosage ? `- ${localMed.dosage}` : ''}\n` +
-                        `${localMed.posologie} - ${localMed.modeAdministration}\n` +
-                        `Duration: ${localMed.dureeTraitement} - Quantity: ${localMed.quantite}`
-        }
-        onUpdate(index, updatedMed)
+useEffect(() => {
+  const timer = setTimeout(() => {
+    const hasChanges = Object.keys(localMed).some(
+      key => localMed[key as keyof typeof localMed] !== medication[key]
+    )
+    
+    if (hasChanges) {
+      const updatedMed = {
+        ...localMed,
+        ligneComplete: `${localMed.nom} ${localMed.dosage ? `- ${localMed.dosage}` : ''}\n` +
+                      `${localMed.posologie} - ${localMed.modeAdministration}\n` +
+                      `Duration: ${localMed.dureeTraitement} - Quantity: ${localMed.quantite}`
       }
-    }, 5000)
+      onUpdate(index, updatedMed)
+    }
+  }, 5000)
 
-    return () => clearTimeout(timer)
-  }, [localMed, index, medication, onUpdate])
+  return () => clearTimeout(timer)
+}, [localMed, index, onUpdate])  // REMOVED 'medication' from dependencies
 
   // Local change handler
   const handleFieldChange = useCallback((field: string, value: any) => {
@@ -361,19 +361,19 @@ const BiologyTestEditForm = memo(({
   })
   
   // Delayed sync with parent - 5 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const hasChanges = Object.keys(localTest).some(
-        key => localTest[key as keyof typeof localTest] !== test[key]
-      )
-      
-      if (hasChanges) {
-        onUpdate(category, index, localTest)
-      }
-    }, 5000)
+useEffect(() => {
+  const timer = setTimeout(() => {
+    const hasChanges = Object.keys(localTest).some(
+      key => localTest[key as keyof typeof localTest] !== test[key]
+    )
     
-    return () => clearTimeout(timer)
-  }, [localTest, category, index, test, onUpdate])
+    if (hasChanges) {
+      onUpdate(category, index, localTest)
+    }
+  }, 5000)
+  
+  return () => clearTimeout(timer)
+}, [localTest, category, index, onUpdate])  // REMOVED 'test' from dependencies
   
   // Local change handler
   const handleFieldChange = useCallback((field: string, value: any) => {
@@ -498,19 +498,19 @@ const ImagingExamEditForm = memo(({
   })
   
   // Delayed sync with parent - 5 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const hasChanges = Object.keys(localExam).some(
-        key => localExam[key as keyof typeof localExam] !== exam[key]
-      )
-      
-      if (hasChanges) {
-        onUpdate(index, localExam)
-      }
-    }, 5000)
+useEffect(() => {
+  const timer = setTimeout(() => {
+    const hasChanges = Object.keys(localExam).some(
+      key => localExam[key as keyof typeof localExam] !== exam[key]
+    )
     
-    return () => clearTimeout(timer)
-  }, [localExam, index, exam, onUpdate])
+    if (hasChanges) {
+      onUpdate(index, localExam)
+    }
+  }, 5000)
+  
+  return () => clearTimeout(timer)
+}, [localExam, index, onUpdate])  // REMOVED 'exam' from dependencies
   
   // Local change handler
   const handleFieldChange = useCallback((field: string, value: any) => {
@@ -2671,11 +2671,11 @@ export default function ProfessionalReportEditable({
 
         <div className="space-y-6">
           {medications.length > 0 ? (
-            medications.map((med: any, index: number) => (
-<div 
-  key={`medication-${index}`}  // Using stable index-based key
-  className="border-l-4 border-green-500 pl-4 py-2 prescription-item"
->
+medications.map((med: any, index: number) => (
+  <div 
+    key={`medication-${index}`}
+    className="border-l-4 border-green-500 pl-4 py-2 prescription-item"
+  >
                 {editMode && validationStatus !== 'validated' ? (
                   <MedicationEditForm
                     medication={med}
