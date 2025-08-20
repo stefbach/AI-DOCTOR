@@ -176,27 +176,9 @@ const MedicationEditForm = memo(({
     nonSubstituable: medication.nonSubstituable || false
   })
 
-// Update parent immediately when local state changes
-const handleFieldChange = useCallback((field: string, value: any) => {
-  const newMed = {
-    ...localMed,
-    [field]: value
-  }
-  setLocalMed(newMed)
-  
-  // Update parent immediately
-  const updatedMed = {
-    ...newMed,
-    ligneComplete: `${newMed.nom} ${newMed.dosage ? `- ${newMed.dosage}` : ''}\n` +
-                  `${newMed.posologie} - ${newMed.modeAdministration}\n` +
-                  `Duration: ${newMed.dureeTraitement} - Quantity: ${newMed.quantite}`
-  }
-  onUpdate(index, updatedMed)
-}, [localMed, index, onUpdate])
-
   // Single handleFieldChange that updates parent immediately
   const handleFieldChange = useCallback((field: string, value: any) => {
- const newMed = {
+    const newMed = {
       ...localMed,
       [field]: value
     }
@@ -592,6 +574,7 @@ const ImagingExamEditForm = memo(({
 })
 
 ImagingExamEditForm.displayName = 'ImagingExamEditForm'
+
 // ==================== MAIN COMPONENT ====================
 export default function ProfessionalReportEditable({
   patientData,
