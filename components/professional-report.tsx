@@ -194,13 +194,23 @@ const handleFieldChange = useCallback((field: string, value: any) => {
   onUpdate(index, updatedMed)
 }, [localMed, index, onUpdate])
 
-  // Local change handler
+  // Single handleFieldChange that updates parent immediately
   const handleFieldChange = useCallback((field: string, value: any) => {
-    setLocalMed(prev => ({
-      ...prev,
+ const newMed = {
+      ...localMed,
       [field]: value
-    }))
-  }, [])
+    }
+    setLocalMed(newMed)
+    
+    // Update parent immediately
+    const updatedMed = {
+      ...newMed,
+      ligneComplete: `${newMed.nom} ${newMed.dosage ? `- ${newMed.dosage}` : ''}\n` +
+                    `${newMed.posologie} - ${newMed.modeAdministration}\n` +
+                    `Duration: ${newMed.dureeTraitement} - Quantity: ${newMed.quantite}`
+    }
+    onUpdate(index, updatedMed)
+  }, [localMed, index, onUpdate])
 
   return (
     <div className="space-y-3">
@@ -357,21 +367,17 @@ const BiologyTestEditForm = memo(({
     delaiResultat: test.delaiResultat || 'Standard'
   })
   
-const handleFieldChange = useCallback((field: string, value: any) => {
-  const newTest = {
-    ...localTest,
-    [field]: value
-  }
-  setLocalTest(newTest)
-  
-  // Update parent immediately
-  onUpdate(category, index, newTest)
-}, [category, index, onUpdate, localTest])
-  
-  // Local change handler
+  // Single handleFieldChange that updates parent immediately
   const handleFieldChange = useCallback((field: string, value: any) => {
-    setLocalTest(prev => ({ ...prev, [field]: value }))
-  }, [])
+    const newTest = {
+      ...localTest,
+      [field]: value
+    }
+    setLocalTest(newTest)
+    
+    // Update parent immediately
+    onUpdate(category, index, newTest)
+  }, [category, index, onUpdate, localTest])
   
   return (
     <div className="space-y-3 p-3">
@@ -490,21 +496,17 @@ const ImagingExamEditForm = memo(({
     questionDiagnostique: exam.questionDiagnostique || ''
   })
   
-const handleFieldChange = useCallback((field: string, value: any) => {
-  const newExam = {
-    ...localExam,
-    [field]: value
-  }
-  setLocalExam(newExam)
-  
-  // Update parent immediately
-  onUpdate(index, newExam)
-}, [index, onUpdate, localExam])
-  
-  // Local change handler
+  // Single handleFieldChange that updates parent immediately
   const handleFieldChange = useCallback((field: string, value: any) => {
-    setLocalExam(prev => ({ ...prev, [field]: value }))
-  }, [])
+    const newExam = {
+      ...localExam,
+      [field]: value
+    }
+    setLocalExam(newExam)
+    
+    // Update parent immediately
+    onUpdate(index, newExam)
+  }, [index, onUpdate, localExam])
   
   return (
     <div className="space-y-3 p-3">
