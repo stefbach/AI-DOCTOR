@@ -147,7 +147,7 @@ const createEmptyReport = (): MauritianReport => ({
   }
 })
 
-// ==================== OPTIMIZED INPUT COMPONENTS ====================
+// ==================== OPTIMIZED INPUT COMPONENTS (MOVED OUTSIDE MAIN COMPONENT) ====================
 // Medication Input Component - Updated with local state and delayed sync
 const MedicationEditForm = memo(({ 
   medication, 
@@ -2474,6 +2474,7 @@ export default function ProfessionalReportEditable({
   })
 
   DoctorInfoEditor.displayName = 'DoctorInfoEditor'
+
   const ConsultationReport = () => {
     const sections = [
       { key: 'motifConsultation', title: 'CHIEF COMPLAINT' },
@@ -2672,14 +2673,14 @@ export default function ProfessionalReportEditable({
           {medications.length > 0 ? (
             medications.map((med: any, index: number) => (
               <div 
-                key={`medication-${index}-${med.nom?.substring(0, 5) || 'new'}`} 
+                key={`medication-${index}`}  {/* FIXED: Using stable index-based key */}
                 className="border-l-4 border-green-500 pl-4 py-2 prescription-item"
               >
                 {editMode && validationStatus !== 'validated' ? (
                   <MedicationEditForm
                     medication={med}
                     index={index}
-                    onUpdate={updateMedicamentBatch}  // CHANGED from updateMedicationField
+                    onUpdate={updateMedicamentBatch}
                     onRemove={removeMedicament}
                   />
                 ) : (
@@ -2855,13 +2856,13 @@ export default function ProfessionalReportEditable({
                   </h3>
                   <div className="space-y-2">
                     {tests.map((test: any, idx: number) => (
-                      <div key={`${key}-test-${idx}`} className="prescription-item">
+                      <div key={`${key}-test-${idx}`} className="prescription-item">  {/* This key is already stable - good! */}
                         {editMode && validationStatus !== 'validated' ? (
                           <BiologyTestEditForm
                             test={test}
                             category={key}
                             index={idx}
-                            onUpdate={updateBiologyTestBatch}  // CHANGED from updateBiologyTestField
+                            onUpdate={updateBiologyTestBatch}
                             onRemove={removeBiologyTest}
                           />
                         ) : (
@@ -3011,12 +3012,12 @@ export default function ProfessionalReportEditable({
         {examens.length > 0 ? (
           <div className="space-y-6">
             {examens.map((exam: any, index: number) => (
-              <div key={`imaging-${index}-${exam.type || 'new'}`} className="border-l-4 border-indigo-500 pl-4 py-2 prescription-item">
+              <div key={`imaging-${index}`} className="border-l-4 border-indigo-500 pl-4 py-2 prescription-item">  {/* FIXED: Using stable index-based key */}
                 {editMode && validationStatus !== 'validated' ? (
                   <ImagingExamEditForm
                     exam={exam}
                     index={index}
-                    onUpdate={updateImagingExamBatch}  // CHANGED from updateImagingExamField
+                    onUpdate={updateImagingExamBatch}
                     onRemove={removeImagingExam}
                   />
                 ) : (
@@ -3096,6 +3097,7 @@ export default function ProfessionalReportEditable({
       </div>
     )
   }
+
   const InvoiceComponent = () => {
     const invoice = report?.invoice
     if (!invoice) return null
@@ -3404,6 +3406,7 @@ export default function ProfessionalReportEditable({
       </Card>
     )
   }
+
   // ==================== MAIN RENDER ====================
   return (
     <div className="space-y-6 print:space-y-4">
