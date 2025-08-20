@@ -2745,68 +2745,7 @@ async function callOpenAIWithRetry(
 }
 
 
-ANTIBIOTICS (NEVER "once daily" except azithromycin/levofloxacin):
-• Amoxicillin 500mg → "1 capsule three times daily"
-• Amoxicillin-clavulanate → "1 tablet twice daily"
-• Cephalexin → "1 capsule four times daily"
-• Cefuroxime → "1 tablet twice daily"
-• Ciprofloxacin → "1 tablet twice daily"
-• Metronidazole → "1 tablet three times daily"
-• Nitrofurantoin → "1 capsule four times daily with food"
-• Flucloxacillin → "1 capsule four times daily on empty stomach"
-• Azithromycin → "500mg once daily" (EXCEPTION - actually once daily)
-• Levofloxacin → "1 tablet once daily" (EXCEPTION - actually once daily)
 
-NSAIDs (NEVER "once daily", ALWAYS with food):
-• Ibuprofen 400mg → "1 tablet three times daily with food"
-• Diclofenac 50mg → "1 tablet three times daily with food"
-• Naproxen 500mg → "1 tablet twice daily with food"
-
-ANALGESICS:
-• Paracetamol 500mg → "2 tablets every 6 hours as needed"
-• Codeine 30mg → "1-2 tablets every 4-6 hours as needed"
-
-GASTROINTESTINAL:
-• Omeprazole → "1 capsule once daily before breakfast" (OK - actually once daily)
-• Domperidone → "1 tablet three times daily before meals"
-• Metoclopramide → "1 tablet three times daily before meals"
-• Ondansetron → "1 tablet twice daily"
-• Hyoscine → "1 tablet three times daily"
-
-EAR DROPS (NEVER "once daily"):
-• Ciprofloxacin ear drops → "4 drops in affected ear twice daily"
-• Ofloxacin ear drops → "10 drops in affected ear twice daily"
-
-EYE DROPS (NEVER "once daily"):
-• Chloramphenicol → "1 drop every 2 hours for 2 days, then 4 times daily"
-• Tobramycin → "1-2 drops every 4 hours"
-
-CORTICOSTEROIDS:
-• Prednisolone → "2 tablets once daily in morning"
-• Methylprednisolone → "2 tablets twice daily"
-
-RESPIRATORY:
-• Salbutamol inhaler → "2 puffs every 4-6 hours as needed"
-• Budesonide inhaler → "2 puffs twice daily"
-
-ANTIHISTAMINES:
-• Cetirizine → "1 tablet once daily" (OK - long-acting)
-• Loratadine → "1 tablet once daily" (OK - long-acting)
-• Chlorpheniramine → "1 tablet three times daily" (short-acting)
-
-ALWAYS INCLUDE:
-- Exact duration: "7 days", "10 days", NOT "as directed"
-- Exact packaging: "box of 21 capsules", NOT just "1 box"
-- Exact quantity: "1 box", "2 bottles"
-- Clear instructions: specific, not "as directed"
-
-FORBIDDEN:
-❌ Generic "once daily" (except for the specific drugs listed above)
-❌ "As directed"
-❌ "Take as prescribed"
-❌ Vague packaging like "1 box" without details
-❌ Missing duration or quantity`
-            },
             {
               role: 'user',
               content: prompt
