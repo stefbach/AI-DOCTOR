@@ -148,7 +148,7 @@ const createEmptyReport = (): MauritianReport => ({
 })
 
 // ==================== OPTIMIZED INPUT COMPONENTS ====================
-// Medication Input Component - Optimized to prevent focus loss
+// Medication Input Component - Updated with local state and delayed sync
 const MedicationEditForm = memo(({ 
   medication, 
   index, 
@@ -157,15 +157,53 @@ const MedicationEditForm = memo(({
 }: {
   medication: any
   index: number
-  onUpdate: (index: number, field: string, value: any) => void
+  onUpdate: (index: number, updatedMedication: any) => void
   onRemove: (index: number) => void
 }) => {
-  // Use refs to prevent focus loss
-  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
-  
+  // Local state
+  const [localMed, setLocalMed] = useState({
+    nom: medication.nom || '',
+    denominationCommune: medication.denominationCommune || '',
+    dosage: medication.dosage || '',
+    forme: medication.forme || 'tablet',
+    posologie: medication.posologie || '',
+    modeAdministration: medication.modeAdministration || 'Oral route',
+    dureeTraitement: medication.dureeTraitement || '7 days',
+    quantite: medication.quantite || '1 box',
+    instructions: medication.instructions || '',
+    justification: medication.justification || '',
+    surveillanceParticuliere: medication.surveillanceParticuliere || '',
+    nonSubstituable: medication.nonSubstituable || false
+  })
+
+  // Delayed sync with parent - 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const hasChanges = Object.keys(localMed).some(
+        key => localMed[key as keyof typeof localMed] !== medication[key]
+      )
+      
+      if (hasChanges) {
+        const updatedMed = {
+          ...localMed,
+          ligneComplete: `${localMed.nom} ${localMed.dosage ? `- ${localMed.dosage}` : ''}\n` +
+                        `${localMed.posologie} - ${localMed.modeAdministration}\n` +
+                        `Duration: ${localMed.dureeTraitement} - Quantity: ${localMed.quantite}`
+        }
+        onUpdate(index, updatedMed)
+      }
+    }, 5000)
+
+    return () => clearTimeout(timer)
+  }, [localMed, index, medication, onUpdate])
+
+  // Local change handler
   const handleFieldChange = useCallback((field: string, value: any) => {
-    onUpdate(index, field, value)
-  }, [index, onUpdate])
+    setLocalMed(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }, [])
 
   return (
     <div className="space-y-3">
@@ -173,9 +211,8 @@ const MedicationEditForm = memo(({
         <div>
           <Label htmlFor={`med-nom-${index}`}>Medication Name</Label>
           <Input
-            ref={(el) => { inputRefs.current[`nom-${index}`] = el }}
             id={`med-nom-${index}`}
-            value={medication.nom || ''}
+            value={localMed.nom}
             onChange={(e) => handleFieldChange('nom', e.target.value)}
             placeholder="e.g., Paracetamol"
           />
@@ -183,9 +220,8 @@ const MedicationEditForm = memo(({
         <div>
           <Label htmlFor={`med-generic-${index}`}>Generic Name (INN)</Label>
           <Input
-            ref={(el) => { inputRefs.current[`generic-${index}`] = el }}
             id={`med-generic-${index}`}
-            value={medication.denominationCommune || ''}
+            value={localMed.denominationCommune}
             onChange={(e) => handleFieldChange('denominationCommune', e.target.value)}
             placeholder="e.g., Paracetamol"
           />
@@ -193,9 +229,8 @@ const MedicationEditForm = memo(({
         <div>
           <Label htmlFor={`med-dosage-${index}`}>Dosage</Label>
           <Input
-            ref={(el) => { inputRefs.current[`dosage-${index}`] = el }}
             id={`med-dosage-${index}`}
-            value={medication.dosage || ''}
+            value={localMed.dosage}
             onChange={(e) => handleFieldChange('dosage', e.target.value)}
             placeholder="e.g., 500mg"
           />
@@ -203,7 +238,7 @@ const MedicationEditForm = memo(({
         <div>
           <Label htmlFor={`med-form-${index}`}>Form</Label>
           <Select
-            value={medication.forme || 'tablet'}
+            value={localMed.forme}
             onValueChange={(value) => handleFieldChange('forme', value)}
           >
             <SelectTrigger id={`med-form-${index}`}>
@@ -222,9 +257,8 @@ const MedicationEditForm = memo(({
         <div>
           <Label htmlFor={`med-frequency-${index}`}>Frequency</Label>
           <Input
-            ref={(el) => { inputRefs.current[`frequency-${index}`] = el }}
             id={`med-frequency-${index}`}
-            value={medication.posologie || ''}
+            value={localMed.posologie}
             onChange={(e) => handleFieldChange('posologie', e.target.value)}
             placeholder="e.g., 1 tablet 3 times daily"
           />
@@ -232,9 +266,8 @@ const MedicationEditForm = memo(({
         <div>
           <Label htmlFor={`med-duration-${index}`}>Duration</Label>
           <Input
-            ref={(el) => { inputRefs.current[`duration-${index}`] = el }}
             id={`med-duration-${index}`}
-            value={medication.dureeTraitement || ''}
+            value={localMed.dureeTraitement}
             onChange={(e) => handleFieldChange('dureeTraitement', e.target.value)}
             placeholder="e.g., 7 days"
           />
@@ -242,9 +275,8 @@ const MedicationEditForm = memo(({
         <div>
           <Label htmlFor={`med-quantity-${index}`}>Quantity</Label>
           <Input
-            ref={(el) => { inputRefs.current[`quantity-${index}`] = el }}
             id={`med-quantity-${index}`}
-            value={medication.quantite || ''}
+            value={localMed.quantite}
             onChange={(e) => handleFieldChange('quantite', e.target.value)}
             placeholder="e.g., 1 box"
           />
@@ -252,7 +284,7 @@ const MedicationEditForm = memo(({
         <div>
           <Label htmlFor={`med-route-${index}`}>Route of Administration</Label>
           <Select
-            value={medication.modeAdministration || 'Oral route'}
+            value={localMed.modeAdministration}
             onValueChange={(value) => handleFieldChange('modeAdministration', value)}
           >
             <SelectTrigger id={`med-route-${index}`}>
@@ -271,9 +303,8 @@ const MedicationEditForm = memo(({
       <div>
         <Label htmlFor={`med-instructions-${index}`}>Special Instructions</Label>
         <Input
-          ref={(el) => { inputRefs.current[`instructions-${index}`] = el }}
           id={`med-instructions-${index}`}
-          value={medication.instructions || ''}
+          value={localMed.instructions}
           onChange={(e) => handleFieldChange('instructions', e.target.value)}
           placeholder="e.g., Take with food"
         />
@@ -282,7 +313,7 @@ const MedicationEditForm = memo(({
         <div className="flex items-center space-x-2">
           <Switch
             id={`med-nonsubstitutable-${index}`}
-            checked={medication.nonSubstituable || false}
+            checked={localMed.nonSubstituable}
             onCheckedChange={(checked) => handleFieldChange('nonSubstituable', checked)}
           />
           <Label htmlFor={`med-nonsubstitutable-${index}`}>Non-substitutable</Label>
@@ -302,7 +333,7 @@ const MedicationEditForm = memo(({
 
 MedicationEditForm.displayName = 'MedicationEditForm'
 
-// Biology Test Input Component - Optimized
+// Biology Test Input Component - Updated with local state and delayed sync
 const BiologyTestEditForm = memo(({
   test,
   category,
@@ -313,14 +344,41 @@ const BiologyTestEditForm = memo(({
   test: any
   category: string
   index: number
-  onUpdate: (category: string, index: number, field: string, value: any) => void
+  onUpdate: (category: string, index: number, updatedTest: any) => void
   onRemove: (category: string, index: number) => void
 }) => {
-  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
+  // Local state
+  const [localTest, setLocalTest] = useState({
+    nom: test.nom || '',
+    categorie: test.categorie || category,
+    urgence: test.urgence || false,
+    aJeun: test.aJeun || false,
+    conditionsPrelevement: test.conditionsPrelevement || '',
+    motifClinique: test.motifClinique || '',
+    renseignementsCliniques: test.renseignementsCliniques || '',
+    tubePrelevement: test.tubePrelevement || 'As per laboratory protocol',
+    delaiResultat: test.delaiResultat || 'Standard'
+  })
   
+  // Delayed sync with parent - 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const hasChanges = Object.keys(localTest).some(
+        key => localTest[key as keyof typeof localTest] !== test[key]
+      )
+      
+      if (hasChanges) {
+        onUpdate(category, index, localTest)
+      }
+    }, 5000)
+    
+    return () => clearTimeout(timer)
+  }, [localTest, category, index, test, onUpdate])
+  
+  // Local change handler
   const handleFieldChange = useCallback((field: string, value: any) => {
-    onUpdate(category, index, field, value)
-  }, [category, index, onUpdate])
+    setLocalTest(prev => ({ ...prev, [field]: value }))
+  }, [])
   
   return (
     <div className="space-y-3 p-3">
@@ -328,8 +386,7 @@ const BiologyTestEditForm = memo(({
         <div>
           <Label>Test Name</Label>
           <Input
-            ref={(el) => { inputRefs.current[`name-${index}`] = el }}
-            value={test.nom || ''}
+            value={localTest.nom}
             onChange={(e) => handleFieldChange('nom', e.target.value)}
             placeholder="e.g., Complete Blood Count"
           />
@@ -337,8 +394,7 @@ const BiologyTestEditForm = memo(({
         <div>
           <Label>Clinical Indication</Label>
           <Input
-            ref={(el) => { inputRefs.current[`indication-${index}`] = el }}
-            value={test.motifClinique || ''}
+            value={localTest.motifClinique}
             onChange={(e) => handleFieldChange('motifClinique', e.target.value)}
             placeholder="e.g., Anemia evaluation"
           />
@@ -346,7 +402,7 @@ const BiologyTestEditForm = memo(({
         <div>
           <Label>Sample Type</Label>
           <Select
-            value={test.tubePrelevement || 'As per laboratory protocol'}
+            value={localTest.tubePrelevement}
             onValueChange={(value) => handleFieldChange('tubePrelevement', value)}
           >
             <SelectTrigger>
@@ -364,7 +420,7 @@ const BiologyTestEditForm = memo(({
         <div>
           <Label>Turnaround Time</Label>
           <Select
-            value={test.delaiResultat || 'Standard'}
+            value={localTest.delaiResultat}
             onValueChange={(value) => handleFieldChange('delaiResultat', value)}
           >
             <SelectTrigger>
@@ -381,8 +437,7 @@ const BiologyTestEditForm = memo(({
       <div>
         <Label>Special Conditions</Label>
         <Input
-          ref={(el) => { inputRefs.current[`conditions-${index}`] = el }}
-          value={test.conditionsPrelevement || ''}
+          value={localTest.conditionsPrelevement}
           onChange={(e) => handleFieldChange('conditionsPrelevement', e.target.value)}
           placeholder="e.g., Early morning sample required"
         />
@@ -391,14 +446,14 @@ const BiologyTestEditForm = memo(({
         <div className="flex items-center gap-4">
           <div className="flex items-center space-x-2">
             <Switch
-              checked={test.urgence || false}
+              checked={localTest.urgence}
               onCheckedChange={(checked) => handleFieldChange('urgence', checked)}
             />
             <Label>Urgent</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Switch
-              checked={test.aJeun || false}
+              checked={localTest.aJeun}
               onCheckedChange={(checked) => handleFieldChange('aJeun', checked)}
             />
             <Label>Fasting required</Label>
@@ -418,7 +473,7 @@ const BiologyTestEditForm = memo(({
 
 BiologyTestEditForm.displayName = 'BiologyTestEditForm'
 
-// Imaging Exam Input Component - Optimized
+// Imaging Exam Input Component - Updated with local state and delayed sync
 const ImagingExamEditForm = memo(({
   exam,
   index,
@@ -427,14 +482,40 @@ const ImagingExamEditForm = memo(({
 }: {
   exam: any
   index: number
-  onUpdate: (index: number, field: string, value: any) => void
+  onUpdate: (index: number, updatedExam: any) => void
   onRemove: (index: number) => void
 }) => {
-  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
+  // Local state
+  const [localExam, setLocalExam] = useState({
+    type: exam.type || exam.modalite || '',
+    modalite: exam.modalite || '',
+    region: exam.region || '',
+    indicationClinique: exam.indicationClinique || '',
+    urgence: exam.urgence || false,
+    contraste: exam.contraste || false,
+    protocoleSpecifique: exam.protocoleSpecifique || '',
+    questionDiagnostique: exam.questionDiagnostique || ''
+  })
   
+  // Delayed sync with parent - 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const hasChanges = Object.keys(localExam).some(
+        key => localExam[key as keyof typeof localExam] !== exam[key]
+      )
+      
+      if (hasChanges) {
+        onUpdate(index, localExam)
+      }
+    }, 5000)
+    
+    return () => clearTimeout(timer)
+  }, [localExam, index, exam, onUpdate])
+  
+  // Local change handler
   const handleFieldChange = useCallback((field: string, value: any) => {
-    onUpdate(index, field, value)
-  }, [index, onUpdate])
+    setLocalExam(prev => ({ ...prev, [field]: value }))
+  }, [])
   
   return (
     <div className="space-y-3 p-3">
@@ -442,7 +523,7 @@ const ImagingExamEditForm = memo(({
         <div>
           <Label>Imaging Type</Label>
           <Select
-            value={exam.type || exam.modalite || ''}
+            value={localExam.type || localExam.modalite}
             onValueChange={(value) => handleFieldChange('type', value)}
           >
             <SelectTrigger>
@@ -460,8 +541,7 @@ const ImagingExamEditForm = memo(({
         <div>
           <Label>Anatomical Region</Label>
           <Input
-            ref={(el) => { inputRefs.current[`region-${index}`] = el }}
-            value={exam.region || ''}
+            value={localExam.region}
             onChange={(e) => handleFieldChange('region', e.target.value)}
             placeholder="e.g., Chest PA/Lateral"
           />
@@ -469,8 +549,7 @@ const ImagingExamEditForm = memo(({
         <div className="col-span-2">
           <Label>Clinical Indication</Label>
           <Input
-            ref={(el) => { inputRefs.current[`indication-${index}`] = el }}
-            value={exam.indicationClinique || ''}
+            value={localExam.indicationClinique}
             onChange={(e) => handleFieldChange('indicationClinique', e.target.value)}
             placeholder="e.g., Rule out pneumonia"
           />
@@ -478,8 +557,7 @@ const ImagingExamEditForm = memo(({
         <div className="col-span-2">
           <Label>Clinical Question</Label>
           <Input
-            ref={(el) => { inputRefs.current[`question-${index}`] = el }}
-            value={exam.questionDiagnostique || ''}
+            value={localExam.questionDiagnostique}
             onChange={(e) => handleFieldChange('questionDiagnostique', e.target.value)}
             placeholder="e.g., Consolidation? Pleural effusion?"
           />
@@ -487,8 +565,7 @@ const ImagingExamEditForm = memo(({
         <div>
           <Label>Specific Protocol</Label>
           <Input
-            ref={(el) => { inputRefs.current[`protocol-${index}`] = el }}
-            value={exam.protocoleSpecifique || ''}
+            value={localExam.protocoleSpecifique}
             onChange={(e) => handleFieldChange('protocoleSpecifique', e.target.value)}
             placeholder="e.g., High resolution CT"
           />
@@ -498,14 +575,14 @@ const ImagingExamEditForm = memo(({
         <div className="flex items-center gap-4">
           <div className="flex items-center space-x-2">
             <Switch
-              checked={exam.urgence || false}
+              checked={localExam.urgence}
               onCheckedChange={(checked) => handleFieldChange('urgence', checked)}
             />
             <Label>Urgent</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Switch
-              checked={exam.contraste || false}
+              checked={localExam.contraste}
               onCheckedChange={(checked) => handleFieldChange('contraste', checked)}
             />
             <Label>Contrast required</Label>
@@ -524,7 +601,6 @@ const ImagingExamEditForm = memo(({
 })
 
 ImagingExamEditForm.displayName = 'ImagingExamEditForm'
-
 // ==================== MAIN COMPONENT ====================
 export default function ProfessionalReportEditable({
   patientData,
@@ -609,74 +685,16 @@ export default function ProfessionalReportEditable({
     const updatedInfo = { ...doctorInfo, [field]: value }
     sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
   }, [doctorInfo, trackModification])
-  // ==================== LOAD DOCTOR DATA ====================
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const doctorDataParam = urlParams.get('doctorData')
-    
-    if (doctorDataParam) {
-      try {
-        const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
-        console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
-        
-        const doctorInfoFromTibok = {
-          nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
-            `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
-            'Dr. [Name Required]',
-          qualifications: tibokDoctorData.qualifications || 'MBBS',
-          specialite: tibokDoctorData.specialty || 'General Medicine',
-          adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
-          email: tibokDoctorData.email || '[Email Required]',
-          heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
-          numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]'),
-          licencePratique: tibokDoctorData.license_number ? 
-            String(tibokDoctorData.license_number) : 
-            '[License Required]'
-        }
-        
-        console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
-        setDoctorInfo(doctorInfoFromTibok)
-        sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
-        
-      } catch (error) {
-        console.error('Error parsing Tibok doctor data:', error)
-      }
-    }
-    
-    const storedDoctorInfo = sessionStorage.getItem('currentDoctorInfo')
-    if (!doctorDataParam && storedDoctorInfo) {
-      try {
-        const doctorData = JSON.parse(storedDoctorInfo)
-        setDoctorInfo(doctorData)
-        console.log('✅ Doctor information loaded from session')
-      } catch (error) {
-        console.error('Error loading doctor data from storage:', error)
-      }
-    }
-  }, [])
 
-  // ==================== OPTIMIZED PRESCRIPTION UPDATES ====================
-  
-  // Update single medication field without recreating entire array
-  const updateMedicationField = useCallback((index: number, field: string, value: any) => {
+  // ==================== NEW BATCH UPDATE FUNCTIONS ====================
+  const updateMedicamentBatch = useCallback((index: number, updatedMedication: any) => {
     if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
     
     setReport(prev => {
       if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
       
       const newMedicaments = [...prev.ordonnances.medicaments.prescription.medicaments]
-      newMedicaments[index] = {
-        ...newMedicaments[index],
-        [field]: value
-      }
-      
-      // Update ligneComplete if needed
-      if (field === 'nom' || field === 'dosage' || field === 'posologie' || field === 'modeAdministration' || field === 'dureeTraitement' || field === 'quantite') {
-        const med = newMedicaments[index]
-        newMedicaments[index].ligneComplete = `${med.nom} ${med.dosage ? `- ${med.dosage}` : ''}\n` +
-                                              `${med.posologie} - ${med.modeAdministration}\n` +
-                                              `Duration: ${med.dureeTraitement} - Quantity: ${med.quantite}`
-      }
+      newMedicaments[index] = updatedMedication
       
       return {
         ...prev,
@@ -692,17 +710,10 @@ export default function ProfessionalReportEditable({
         }
       }
     })
-    
-    // Debounce tracking to avoid too many updates
-    const timeoutId = setTimeout(() => {
-      trackModification(`medicament.${index}.${field}`)
-    }, 500)
-    
-    return () => clearTimeout(timeoutId)
+    trackModification(`medicament.${index}`)
   }, [validationStatus, report?.ordonnances?.medicaments, trackModification])
 
-  // Update single biology test field
-  const updateBiologyTestField = useCallback((category: string, index: number, field: string, value: any) => {
+  const updateBiologyTestBatch = useCallback((category: string, index: number, updatedTest: any) => {
     if (validationStatus === 'validated') return
     
     setReport(prev => {
@@ -710,10 +721,7 @@ export default function ProfessionalReportEditable({
       
       const newAnalyses = { ...prev.ordonnances.biologie.prescription.analyses }
       newAnalyses[category] = [...newAnalyses[category]]
-      newAnalyses[category][index] = {
-        ...newAnalyses[category][index],
-        [field]: value
-      }
+      newAnalyses[category][index] = updatedTest
       
       return {
         ...prev,
@@ -729,27 +737,17 @@ export default function ProfessionalReportEditable({
         }
       }
     })
-    
-    // Debounce tracking
-    const timeoutId = setTimeout(() => {
-      trackModification(`biologie.${category}.${index}.${field}`)
-    }, 500)
-    
-    return () => clearTimeout(timeoutId)
+    trackModification(`biologie.${category}.${index}`)
   }, [validationStatus, trackModification])
 
-  // Update single imaging exam field
-  const updateImagingExamField = useCallback((index: number, field: string, value: any) => {
+  const updateImagingExamBatch = useCallback((index: number, updatedExam: any) => {
     if (validationStatus === 'validated') return
     
     setReport(prev => {
       if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
       
       const newExamens = [...prev.ordonnances.imagerie.prescription.examens]
-      newExamens[index] = {
-        ...newExamens[index],
-        [field]: value
-      }
+      newExamens[index] = updatedExam
       
       return {
         ...prev,
@@ -765,13 +763,7 @@ export default function ProfessionalReportEditable({
         }
       }
     })
-    
-    // Debounce tracking
-    const timeoutId = setTimeout(() => {
-      trackModification(`imagerie.${index}.${field}`)
-    }, 500)
-    
-    return () => clearTimeout(timeoutId)
+    trackModification(`imagerie.${index}`)
   }, [validationStatus, trackModification])
 
   const addMedicament = useCallback(() => {
@@ -1056,6 +1048,52 @@ export default function ProfessionalReportEditable({
       method: method
     })
   }, [report?.invoice, updateInvoice])
+  // ==================== LOAD DOCTOR DATA ====================
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const doctorDataParam = urlParams.get('doctorData')
+    
+    if (doctorDataParam) {
+      try {
+        const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
+        console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
+        
+        const doctorInfoFromTibok = {
+          nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
+            `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
+            'Dr. [Name Required]',
+          qualifications: tibokDoctorData.qualifications || 'MBBS',
+          specialite: tibokDoctorData.specialty || 'General Medicine',
+          adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
+          email: tibokDoctorData.email || '[Email Required]',
+          heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+          numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]'),
+          licencePratique: tibokDoctorData.license_number ? 
+            String(tibokDoctorData.license_number) : 
+            '[License Required]'
+        }
+        
+        console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
+        setDoctorInfo(doctorInfoFromTibok)
+        sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
+        
+      } catch (error) {
+        console.error('Error parsing Tibok doctor data:', error)
+      }
+    }
+    
+    const storedDoctorInfo = sessionStorage.getItem('currentDoctorInfo')
+    if (!doctorDataParam && storedDoctorInfo) {
+      try {
+        const doctorData = JSON.parse(storedDoctorInfo)
+        setDoctorInfo(doctorData)
+        console.log('✅ Doctor information loaded from session')
+      } catch (error) {
+        console.error('Error loading doctor data from storage:', error)
+      }
+    }
+  }, [])
+
   // ==================== INITIAL DATA LOAD ====================
   useEffect(() => {
     console.log("🚀 ProfessionalReportEditable mounted with data:", {
@@ -1759,6 +1797,7 @@ export default function ProfessionalReportEditable({
       })
     }
   }
+
   const showSuccessModal = () => {
     const modalContainer = document.createElement('div')
     modalContainer.id = 'success-modal'
@@ -2283,7 +2322,7 @@ export default function ProfessionalReportEditable({
     const [localDoctorInfo, setLocalDoctorInfo] = useState(doctorInfo)
     const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
     
-    // Sync local state with parent after delay
+    // Sync local state with parent after delay - Updated to 5 seconds
     useEffect(() => {
       const timer = setTimeout(() => {
         if (editingDoctor && JSON.stringify(localDoctorInfo) !== JSON.stringify(doctorInfo)) {
@@ -2293,7 +2332,7 @@ export default function ProfessionalReportEditable({
             }
           })
         }
-      }, 1000)
+      }, 5000) // Updated from 1000 to 5000
       
       return () => clearTimeout(timer)
     }, [localDoctorInfo, editingDoctor])
@@ -2435,7 +2474,6 @@ export default function ProfessionalReportEditable({
   })
 
   DoctorInfoEditor.displayName = 'DoctorInfoEditor'
-
   const ConsultationReport = () => {
     const sections = [
       { key: 'motifConsultation', title: 'CHIEF COMPLAINT' },
@@ -2572,6 +2610,7 @@ export default function ProfessionalReportEditable({
       </Card>
     )
   }
+
   const MedicationPrescription = () => {
     const medications = report?.ordonnances?.medicaments?.prescription?.medicaments || []
     const patient = getReportPatient()
@@ -2640,7 +2679,7 @@ export default function ProfessionalReportEditable({
                   <MedicationEditForm
                     medication={med}
                     index={index}
-                    onUpdate={updateMedicationField}
+                    onUpdate={updateMedicamentBatch}  // CHANGED from updateMedicationField
                     onRemove={removeMedicament}
                   />
                 ) : (
@@ -2822,7 +2861,7 @@ export default function ProfessionalReportEditable({
                             test={test}
                             category={key}
                             index={idx}
-                            onUpdate={updateBiologyTestField}
+                            onUpdate={updateBiologyTestBatch}  // CHANGED from updateBiologyTestField
                             onRemove={removeBiologyTest}
                           />
                         ) : (
@@ -2977,7 +3016,7 @@ export default function ProfessionalReportEditable({
                   <ImagingExamEditForm
                     exam={exam}
                     index={index}
-                    onUpdate={updateImagingExamField}
+                    onUpdate={updateImagingExamBatch}  // CHANGED from updateImagingExamField
                     onRemove={removeImagingExam}
                   />
                 ) : (
