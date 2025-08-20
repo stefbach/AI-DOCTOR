@@ -92,47 +92,7 @@ const CONFIG = {
   seed: 12345
 }
 
-// ==================== MAURITIUS HEALTHCARE CONTEXT ====================
-const MAURITIUS_HEALTHCARE_CONTEXT = {
-  laboratories: {
-    everywhere: "C-Lab (29 centers), Green Cross (36 centers), Biosanté (48 locations)",
-    specialized: "ProCare Medical (oncology/genetics), C-Lab (PCR/NGS)",
-    public: "Central Health Lab, all regional hospitals",
-    home_service: "C-Lab free >70 years, Hans Biomedical mobile",
-    results_time: "STAT: 1-2h, Urgent: 2-6h, Routine: 24-48h",
-    online_results: "C-Lab, Green Cross"
-  },
-  imaging: {
-    basic: "X-ray/Ultrasound available everywhere",
-    ct_scan: "Apollo Bramwell, Wellkin, Victoria Hospital, Dr Jeetoo",
-    mri: "Apollo, Wellkin (1-2 week delays)",
-    cardiac: {
-      echo: "Available all hospitals + private",
-      coronary_ct: "Apollo, Cardiac Centre Pamplemousses",
-      angiography: "Cardiac Centre (public), Apollo Cath Lab (private)"
-    }
-  },
-  hospitals: {
-    emergency_24_7: "Dr Jeetoo (Port Louis), SSRN (Pamplemousses), Victoria (Candos), Apollo, Wellkin",
-    cardiac_emergencies: "Cardiac Centre Pamplemousses, Apollo Bramwell",
-    specialists: "Generally 1-3 week wait, emergencies seen faster"
-  },
-  costs: {
-    consultation: "Public: free, Private: Rs 1500-3000",
-    blood_tests: "Rs 400-3000 depending on complexity",
-    imaging: "X-ray: Rs 800-1500, CT: Rs 8000-15000, MRI: Rs 15000-25000",
-    procedures: "Coronary angiography: Rs 50000-80000, Surgery: Rs 100000+"
-  },
-  medications: {
-    public_free: "Essential medications list free in public hospitals",
-    private: "Pharmacies everywhere, variable prices by brand"
-  },
-  emergency_numbers: {
-    samu: "114",
-    police_fire: "999",
-    private_ambulance: "132"
-  }
-}
+
 
 // ==================== COMPREHENSIVE CLINICAL PATTERNS ====================
 const COMPREHENSIVE_CLINICAL_PATTERNS: { [key: string]: any } = {
@@ -228,98 +188,70 @@ const COMPREHENSIVE_CLINICAL_PATTERNS: { [key: string]: any } = {
 }
 
 // ==================== COMPLETE MEDICAL PROMPT V3 ====================
-const COMPLETE_MEDICAL_PROMPT_V3 = `You are an expert physician practicing evidence-based medicine in Mauritius.
-You MUST provide COMPLETE diagnostic workup and COMPREHENSIVE treatment for EVERY condition.
+const COMPLETE_MEDICAL_PROMPT_V3 = `
+You are an expert physician practicing evidence-based medicine.
 
-🔴 CRITICAL MANDATORY RULES:
-═══════════════════════════════════════════════════════════════
-1. NEVER prescribe less than 4 medications for any acute condition
-2. ALWAYS order appropriate investigations (minimum 3-5 tests)
-3. ALWAYS include symptomatic + etiological + supportive treatment
-4. NEVER use once-daily dosing for acute symptomatic medications
-5. ALWAYS specify exact dose, frequency, duration, and quantity
-6. ALWAYS consider complications and comorbidities
-7. NEVER leave any symptom untreated
-8. For antiemetics like Ondansetron: ALWAYS prescribe TID (three times daily), NEVER once daily
+Your task: generate a COMPLETE and SAFE medical evaluation in strict JSON format.
 
-⚠️ DIAGNOSTIC APPROACH - MANDATORY FOR ALL CONDITIONS:
-═══════════════════════════════════════════════════════════════
-For EVERY patient, you MUST:
-1. Order baseline investigations (CBC, CRP, basic metabolic panel)
-2. Order specific tests for the suspected condition
-3. Consider differential diagnoses requiring different tests
-4. Include imaging if clinically indicated
-5. Never say "no tests needed" unless explicitly normal vital signs and mild symptoms
+⚠️ CRITICAL RULES:
+- Always provide a full reasoning chain (why this diagnosis, why these tests, why these treatments).
+- Always include a minimum of 4 medications for acute conditions.
+- Always include at least 3 laboratory tests (and add imaging if relevant).
+- Always specify dose + frequency + duration + total quantity for each medication.
+- Never leave any symptom untreated.
+- Always include red flags and follow-up instructions.
+- Ondansetron or other antiemetics: never once daily, always TID or QID.
 
-💊 TREATMENT PRINCIPLES - NON-NEGOTIABLE:
-═══════════════════════════════════════════════════════════════
-For EVERY condition, prescribe:
-1. PRIMARY TREATMENT: Address the underlying cause
-2. SYMPTOMATIC RELIEF: Treat EACH symptom mentioned
-3. SUPPORTIVE CARE: Vitamins, probiotics, hydration as needed
-4. PREVENTIVE: Gastroprotection if NSAIDs, probiotics if antibiotics
-5. ADJUVANT: Comfort measures, dietary supplements
+📋 DIAGNOSTIC STRATEGY:
+- Start with baseline labs: CBC, CRP, electrolytes.
+- Add condition-specific labs or imaging as justified.
+- Provide differential diagnoses with reasoning.
+- Highlight acute vs chronic conditions.
 
-📋 SPECIFIC PROTOCOLS:
-═══════════════════════════════════════════════════════════════
+💊 TREATMENT PRINCIPLES:
+- Etiological: treat the underlying cause.
+- Symptomatic: cover each major symptom.
+- Supportive: hydration, vitamins, probiotics, protective measures.
+- Preventive: add gastroprotection if NSAIDs, probiotics if antibiotics.
+- Lifestyle: basic recommendations included in every case.
 
-🔸 GASTROINTESTINAL CONDITIONS:
-For Diarrhea/Vomiting/Gastroenteritis:
-MANDATORY TESTS:
-• Complete Blood Count with differential
-• C-Reactive Protein
-• Serum Electrolytes (Na, K, Cl)
-• Renal Function (Urea, Creatinine)
-• Stool for Routine & Microscopy
-• Stool Culture if fever >38.5°C
+📊 OUTPUT FORMAT (JSON):
+{
+  "diagnostic_reasoning": "...",
+  "clinical_analysis": {
+    "primary_diagnosis": "...",
+    "differential_diagnoses": ["...", "..."]
+  },
+  "investigation_strategy": {
+    "labs": [
+      {"test": "...", "justification": "..."}
+    ],
+    "imaging": [
+      {"study": "...", "justification": "..."}
+    ]
+  },
+  "treatment_plan": [
+    {
+      "medication": "...",
+      "dosage": "...",
+      "frequency": "...",
+      "duration": "...",
+      "quantity": "..."
+    }
+  ],
+  "follow_up_plan": {
+    "red_flags": ["...", "..."],
+    "next_steps": ["...", "..."]
+  },
+  "patient_education": "...",
+  "quality_metrics": {
+    "completeness_score": 0.0
+  }
+}
 
-MANDATORY TREATMENT (all required):
-• ORS: 200-400ml after each loose stool + 2-3L daily (20 sachets for 5 days)
-• Paracetamol: 500-1000mg QID for fever/pain (20 tablets)
-• Ondansetron: 4-8mg TID (THREE times daily, NOT once!) (12 tablets for 3 days)
-• Hyoscine Butylbromide: 10-20mg TID for cramps (12 tablets)
-• Saccharomyces boulardii: 250mg BD (14 capsules for 7 days)
-• Zinc: 20mg OD for 14 days (14 tablets)
-• Ciprofloxacin 500mg BD if bacterial suspected (10 tablets for 5 days)
-
-🔸 RESPIRATORY CONDITIONS:
-Upper Respiratory:
-MANDATORY TESTS:
-• CBC if fever >3 days
-• Throat swab if exudative
-• Chest X-ray if lower respiratory symptoms
-
-MANDATORY TREATMENT (minimum 5-6 medications):
-• Paracetamol 500mg QID (20 tablets)
-• Antihistamine: Loratadine 10mg OD (7 tablets)
-• Decongestant: Pseudoephedrine 60mg QID (12 tablets)
-• Throat antiseptic: Benzydamine spray TID (1 bottle)
-• Cough syrup based on type
-• Vitamin C 1000mg OD (10 tablets)
-• Antibiotic if bacterial signs
-
-🔸 URINARY TRACT INFECTIONS:
-MANDATORY TESTS:
-• Urinalysis
-• Urine Culture & Sensitivity
-• CBC
-• Renal Function
-• Ultrasound if recurrent
-
-MANDATORY TREATMENT:
-• Antibiotic: Nitrofurantoin 100mg BD x 5-7 days (14 tablets) for females
-           Ciprofloxacin 500mg BD x 7-14 days (28 tablets) for males
-• Paracetamol 500mg QID PRN (12 tablets)
-• Potassium Citrate sachets TID (15 sachets)
-• Cranberry Extract 500mg BD (60 capsules)
-• Probiotics OD (14 capsules)
-
-🇲🇺 MAURITIUS-SPECIFIC CONSIDERATIONS:
-═══════════════════════════════════════════════════════════════
-• TROPICAL DISEASES: Always consider Dengue, Chikungunya, Leptospirosis
-• LABORATORIES: C-Lab, Green Cross, Biosanté widely available
-• EMERGENCY: SAMU 114
-• Include local availability and costs in recommendations
+⚠️ PATIENT CONTEXT:
+{{PATIENT_CONTEXT}}
+`
 
 📊 OUTPUT REQUIREMENTS:
 ═══════════════════════════════════════════════════════════════
@@ -333,8 +265,6 @@ Your response MUST include:
 
 CRITICAL REMINDER: Ondansetron and other antiemetics must ALWAYS be prescribed TID (three times daily) or QID, NEVER once daily for acute conditions.
 
-🇲🇺 MAURITIUS HEALTHCARE CONTEXT:
-{{MAURITIUS_CONTEXT}}
 
 📋 PATIENT PRESENTATION:
 {{PATIENT_CONTEXT}}
@@ -1383,88 +1313,106 @@ async function callOpenAIWithRetry(
   apiKey: string,
   prompt: string,
   maxRetries: number = CONFIG.maxRetries
-): Promise<{ data: any, analysis: MedicalAnalysis }> {
-  let lastError: Error | null = null
-  let enrichedPrompt = prompt
-  
+): Promise<{ data: any; analysis: MedicalAnalysis }> {
+  let lastError: Error | null = null;
+  let enrichedPrompt = prompt;
+
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`📡 OpenAI API call (attempt ${attempt + 1}/${maxRetries + 1})...`)
-      
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
+      console.log(`📡 OpenAI API call (attempt ${attempt + 1}/${maxRetries + 1})...`);
+
+      // Timeout 120s
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 120000);
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           model: CONFIG.model,
           messages: [
             {
-              role: 'system',
+              role: "system",
               content: `You are an expert physician providing comprehensive medical analysis. 
-                       CRITICAL: Always include complete treatment with minimum 4-6 medications for acute conditions.
-                       NEVER prescribe antiemetics once daily - always TID or QID.`
+                        CRITICAL: Always include minimum 4–6 medications for acute conditions.
+                        NEVER prescribe antiemetics once daily — always TID or QID.
+                        Always include labs, imaging if relevant, red flags, follow-up.`,
             },
             {
-              role: 'user',
-              content: enrichedPrompt
-            }
+              role: "user",
+              content: enrichedPrompt,
+            },
           ],
-          temperature: CONFIG.temperature,
-          max_tokens: CONFIG.maxTokens,
+          temperature: CONFIG.temperature ?? 0.2,
+          max_tokens: Math.min(CONFIG.maxTokens || 4000, 4000),
           response_format: { type: "json_object" },
           top_p: 0.95,
           frequency_penalty: 0,
           presence_penalty: 0.1,
-          seed: CONFIG.seed
+          seed: CONFIG.seed,
         }),
-      })
-      
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+
       if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`OpenAI API error (${response.status}): ${errorText.substring(0, 200)}`)
+        const errorText = await response.text();
+        throw new Error(
+          `OpenAI API error (${response.status}): ${errorText.substring(0, 200)}`
+        );
       }
-      
-      const data = await response.json()
-      const analysis = JSON.parse(data.choices[0]?.message?.content || '{}')
-      
-      const hasRequiredFields = 
-        analysis.clinical_analysis?.primary_diagnosis &&
-        analysis.treatment_plan?.approach &&
-        analysis.follow_up_plan?.red_flags
-      
-      if (!hasRequiredFields && attempt < maxRetries) {
-        console.warn('⚠️ Missing required fields, enriching prompt for retry...')
-        
-        enrichedPrompt = `${prompt}
-        
-        CRITICAL - PREVIOUS ATTEMPT MISSING REQUIRED FIELDS:
-        ${!analysis.clinical_analysis?.primary_diagnosis ? '- Primary diagnosis is MANDATORY\n' : ''}
-        ${!analysis.treatment_plan?.approach ? '- treatment_plan.approach is MANDATORY (min 100 words)\n' : ''}
-        ${!analysis.follow_up_plan?.red_flags ? '- follow_up_plan.red_flags is MANDATORY for patient safety\n' : ''}
-        
-        YOU MUST INCLUDE ALL THESE FIELDS IN YOUR RESPONSE.`
-        
-        throw new Error('Required fields missing, retrying...')
+
+      const data = await response.json();
+      let analysis: MedicalAnalysis;
+
+      try {
+        analysis = JSON.parse(data.choices[0]?.message?.content || "{}");
+      } catch (e) {
+        console.warn("⚠️ JSON parsing failed, returning empty object");
+        analysis = {} as MedicalAnalysis;
       }
-      
-      console.log('✅ OpenAI response received and validated')
-      return { data, analysis }
-      
+
+      // ✅ Validation assouplie → on complète les champs manquants
+      const safeAnalysis: MedicalAnalysis = {
+        diagnostic_reasoning: analysis.diagnostic_reasoning || "Not specified",
+        clinical_analysis: analysis.clinical_analysis || {
+          primary_diagnosis: "Unclear",
+          differential_diagnoses: [],
+        },
+        investigation_strategy: analysis.investigation_strategy || {
+          labs: [],
+          imaging: [],
+        },
+        treatment_plan: analysis.treatment_plan || [],
+        follow_up_plan: analysis.follow_up_plan || {
+          red_flags: ["Worsening symptoms", "Persistent fever", "Severe pain"],
+          next_steps: ["Urgent consultation if red flags", "Re-evaluation in 48h"],
+        },
+        patient_education:
+          analysis.patient_education ||
+          "Hydration, hygiene, and urgent consultation if symptoms worsen.",
+        quality_metrics: analysis.quality_metrics || { completeness_score: 0.6 },
+      };
+
+      console.log("✅ OpenAI response received and validated");
+      return { data, analysis: safeAnalysis };
     } catch (error) {
-      lastError = error as Error
-      console.error(`❌ Attempt ${attempt + 1} failed:`, error)
-      
+      lastError = error as Error;
+      console.error(`❌ Attempt ${attempt + 1} failed:`, error);
+
       if (attempt < maxRetries) {
-        const waitTime = CONFIG.retryDelay * Math.pow(2, attempt)
-        console.log(`⏳ Retrying in ${waitTime}ms...`)
-        await new Promise(resolve => setTimeout(resolve, waitTime))
+        const waitTime = CONFIG.retryDelay * Math.pow(2, attempt);
+        console.log(`⏳ Retrying in ${waitTime}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, waitTime));
       }
     }
   }
-  
-  throw lastError || new Error('Failed to generate medical analysis after all retries')
+
+  throw lastError || new Error("Failed to generate medical analysis after all retries");
 }
 
 // ==================== DOCUMENT GENERATION ====================
