@@ -253,8 +253,8 @@ Your task: generate a COMPLETE and SAFE medical evaluation in strict JSON format
 {{PATIENT_CONTEXT}}
 `
 
-📊 OUTPUT REQUIREMENTS:
-═══════════════════════════════════════════════════════════════
+const OUTPUT_REQUIREMENTS_PROMPT = `
+OUTPUT REQUIREMENTS:
 Your response MUST include:
 1. At least 3-5 laboratory tests with justification
 2. At least 1-2 imaging studies if indicated
@@ -263,13 +263,15 @@ Your response MUST include:
 5. Complete coverage of ALL symptoms mentioned
 6. Clear red flags and follow-up instructions
 
-CRITICAL REMINDER: Ondansetron and other antiemetics must ALWAYS be prescribed TID (three times daily) or QID, NEVER once daily for acute conditions.
+CRITICAL REMINDER:
+Ondansetron and other antiemetics must ALWAYS be prescribed TID (three times daily) or QID,
+NEVER once daily for acute conditions.
 
-
-📋 PATIENT PRESENTATION:
+PATIENT PRESENTATION:
 {{PATIENT_CONTEXT}}
 
-Generate comprehensive JSON response with COMPLETE treatment...`
+Generate comprehensive JSON response with COMPLETE treatment... 
+`;
 
 // ==================== MEDICAL VALIDATION SYSTEM ====================
 class MedicalValidationSystem {
