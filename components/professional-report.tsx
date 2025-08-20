@@ -176,26 +176,23 @@ const MedicationEditForm = memo(({
     nonSubstituable: medication.nonSubstituable || false
   })
 
-  // Delayed sync with parent - 5 seconds
-useEffect(() => {
-  const timer = setTimeout(() => {
-    const hasChanges = Object.keys(localMed).some(
-      key => localMed[key as keyof typeof localMed] !== medication[key]
-    )
-    
-    if (hasChanges) {
-      const updatedMed = {
-        ...localMed,
-        ligneComplete: `${localMed.nom} ${localMed.dosage ? `- ${localMed.dosage}` : ''}\n` +
-                      `${localMed.posologie} - ${localMed.modeAdministration}\n` +
-                      `Duration: ${localMed.dureeTraitement} - Quantity: ${localMed.quantite}`
-      }
-      onUpdate(index, updatedMed)
-    }
-  }, 5000)
-
-  return () => clearTimeout(timer)
-}, [localMed, index, onUpdate])  // REMOVED 'medication' from dependencies
+// Update parent immediately when local state changes
+const handleFieldChange = useCallback((field: string, value: any) => {
+  const newMed = {
+    ...localMed,
+    [field]: value
+  }
+  setLocalMed(newMed)
+  
+  // Update parent immediately
+  const updatedMed = {
+    ...newMed,
+    ligneComplete: `${newMed.nom} ${newMed.dosage ? `- ${newMed.dosage}` : ''}\n` +
+                  `${newMed.posologie} - ${newMed.modeAdministration}\n` +
+                  `Duration: ${newMed.dureeTraitement} - Quantity: ${newMed.quantite}`
+  }
+  onUpdate(index, updatedMed)
+}, [localMed, index, onUpdate])
 
   // Local change handler
   const handleFieldChange = useCallback((field: string, value: any) => {
@@ -360,20 +357,16 @@ const BiologyTestEditForm = memo(({
     delaiResultat: test.delaiResultat || 'Standard'
   })
   
-  // Delayed sync with parent - 5 seconds
-useEffect(() => {
-  const timer = setTimeout(() => {
-    const hasChanges = Object.keys(localTest).some(
-      key => localTest[key as keyof typeof localTest] !== test[key]
-    )
-    
-    if (hasChanges) {
-      onUpdate(category, index, localTest)
-    }
-  }, 5000)
+const handleFieldChange = useCallback((field: string, value: any) => {
+  const newTest = {
+    ...localTest,
+    [field]: value
+  }
+  setLocalTest(newTest)
   
-  return () => clearTimeout(timer)
-}, [localTest, category, index, onUpdate])  // REMOVED 'test' from dependencies
+  // Update parent immediately
+  onUpdate(category, index, newTest)
+}, [category, index, onUpdate, localTest])
   
   // Local change handler
   const handleFieldChange = useCallback((field: string, value: any) => {
@@ -497,20 +490,16 @@ const ImagingExamEditForm = memo(({
     questionDiagnostique: exam.questionDiagnostique || ''
   })
   
-  // Delayed sync with parent - 5 seconds
-useEffect(() => {
-  const timer = setTimeout(() => {
-    const hasChanges = Object.keys(localExam).some(
-      key => localExam[key as keyof typeof localExam] !== exam[key]
-    )
-    
-    if (hasChanges) {
-      onUpdate(index, localExam)
-    }
-  }, 5000)
+const handleFieldChange = useCallback((field: string, value: any) => {
+  const newExam = {
+    ...localExam,
+    [field]: value
+  }
+  setLocalExam(newExam)
   
-  return () => clearTimeout(timer)
-}, [localExam, index, onUpdate])  // REMOVED 'exam' from dependencies
+  // Update parent immediately
+  onUpdate(index, newExam)
+}, [index, onUpdate, localExam])
   
   // Local change handler
   const handleFieldChange = useCallback((field: string, value: any) => {
