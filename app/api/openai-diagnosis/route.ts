@@ -2743,10 +2743,7 @@ async function callOpenAIWithRetry(
     }
   }
 }
-⚠️ CRITICAL MEDICATION PRESCRIPTION RULES - ABSOLUTELY MANDATORY:
-═══════════════════════════════════════════════════════════
 
-FOR EVERY MEDICATION YOU MUST SPECIFY EXACT POSOLOGY:
 
 ANTIBIOTICS (NEVER "once daily" except azithromycin/levofloxacin):
 • Amoxicillin 500mg → "1 capsule three times daily"
