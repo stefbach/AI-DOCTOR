@@ -2672,10 +2672,10 @@ export default function ProfessionalReportEditable({
         <div className="space-y-6">
           {medications.length > 0 ? (
             medications.map((med: any, index: number) => (
-              <div 
-                key={`medication-${index}`}  {/* FIXED: Using stable index-based key */}
-                className="border-l-4 border-green-500 pl-4 py-2 prescription-item"
-              >
+<div 
+  key={`medication-${index}`}  // Using stable index-based key
+  className="border-l-4 border-green-500 pl-4 py-2 prescription-item"
+>
                 {editMode && validationStatus !== 'validated' ? (
                   <MedicationEditForm
                     medication={med}
