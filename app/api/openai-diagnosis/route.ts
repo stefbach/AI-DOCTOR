@@ -1,4 +1,4 @@
-// /app/api/openai-diagnosis/route.ts - VERSION 4.0 COMPLETE WITH INTELLIGENT VALIDATION
+// /app/api/openai-diagnosis/route.ts - VERSION 4.0 SIMPLIFIED (WITHOUT MAURITIUS CONTEXT)
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
@@ -32,7 +32,7 @@ interface PatientContext {
   
   // Vital signs
   vital_signs: {
-    blood_pressure?: string  // Format: "120/80"
+    blood_pressure?: string
     pulse?: number
     temperature?: number
     respiratory_rate?: number
@@ -91,8 +91,6 @@ const CONFIG = {
   retryDelay: 1000,
   seed: 12345
 }
-
-
 
 // ==================== COMPREHENSIVE CLINICAL PATTERNS ====================
 const COMPREHENSIVE_CLINICAL_PATTERNS: { [key: string]: any } = {
@@ -253,26 +251,6 @@ Your task: generate a COMPLETE and SAFE medical evaluation in strict JSON format
 {{PATIENT_CONTEXT}}
 `
 
-const OUTPUT_REQUIREMENTS_PROMPT = `
-OUTPUT REQUIREMENTS:
-Your response MUST include:
-1. At least 3-5 laboratory tests with justification
-2. At least 1-2 imaging studies if indicated
-3. Minimum 4-6 medications for acute conditions
-4. Exact dosing: dose, frequency (NEVER once daily for symptomatics), duration, quantity
-5. Complete coverage of ALL symptoms mentioned
-6. Clear red flags and follow-up instructions
-
-CRITICAL REMINDER:
-Ondansetron and other antiemetics must ALWAYS be prescribed TID (three times daily) or QID,
-NEVER once daily for acute conditions.
-
-PATIENT PRESENTATION:
-{{PATIENT_CONTEXT}}
-
-Generate comprehensive JSON response with COMPLETE treatment... 
-`;
-
 // ==================== MEDICAL VALIDATION SYSTEM ====================
 class MedicalValidationSystem {
   
@@ -424,13 +402,7 @@ class MedicalValidationSystem {
           study_name: test,
           indication: `Standard imaging for diagnosis`,
           urgency: 'routine',
-          findings_sought: { primary: 'Diagnostic findings' },
-          mauritius_availability: {
-            centers: 'Apollo, Wellkin, Public hospitals',
-            cost: 'Rs 1000-15000',
-            wait_time: '1-3 days',
-            preparation: 'As per protocol'
-          }
+          findings_sought: { primary: 'Diagnostic findings' }
         } : {
           test_name: test,
           clinical_justification: `Standard test for diagnosis and monitoring`,
@@ -438,12 +410,6 @@ class MedicalValidationSystem {
           expected_results: {
             normal_range: 'As per laboratory reference',
             clinical_significance: 'Will guide treatment decisions'
-          },
-          mauritius_logistics: {
-            where: 'C-Lab, Green Cross, Biosanté',
-            cost: 'Rs 500-2000',
-            turnaround: '24-48 hours',
-            preparation: 'No special preparation required'
           }
         }
         
@@ -487,12 +453,7 @@ class MedicalValidationSystem {
           },
           duration: med.duration,
           total_quantity: med.quantity,
-          administration_instructions: this.generateInstructions(med.drug),
-          mauritius_availability: {
-            brand_names: 'Multiple brands available',
-            cost_range: 'Variable',
-            availability: 'Both public and private'
-          }
+          administration_instructions: this.generateInstructions(med.drug)
         })
         modifications.push(`Added mandatory medication: ${med.drug}`)
       }
@@ -556,12 +517,7 @@ class MedicalValidationSystem {
         {
           test_name: 'Complete Blood Count',
           clinical_justification: 'Baseline assessment',
-          urgency: 'routine',
-          mauritius_logistics: {
-            where: 'C-Lab, Green Cross',
-            cost: 'Rs 800',
-            turnaround: '24 hours'
-          }
+          urgency: 'routine'
         }
       ]
       modifications.push('Added baseline CBC')
@@ -1195,7 +1151,6 @@ function preparePrompt(patientContext: PatientContext): string {
   const isChild = parseInt(String(patientContext.age)) < 12
   
   let enhancedPrompt = COMPLETE_MEDICAL_PROMPT_V3
-    .replace('{{MAURITIUS_CONTEXT}}', JSON.stringify(MAURITIUS_HEALTHCARE_CONTEXT, null, 2))
     .replace('{{PATIENT_CONTEXT}}', JSON.stringify(patientContext, null, 2))
   
   if (hasFebrile) {
@@ -1256,7 +1211,7 @@ function ensureCriticalFields(analysis: any, patientContext: PatientContext): Me
       The therapeutic approach addresses the patient's presenting symptoms of ${symptoms} through
       a combination of pharmacological and non-pharmacological measures. Primary goals include
       rapid symptom relief, prevention of complications, and restoration of normal function.
-      Treatment selection is based on current medical guidelines and local availability in Mauritius.
+      Treatment selection is based on current medical guidelines and local availability.
     `.trim().replace(/\s+/g, ' ')
     
     wasModified = true
@@ -1275,7 +1230,7 @@ function ensureCriticalFields(analysis: any, patientContext: PatientContext): Me
     safeAnalysis.follow_up_plan.red_flags = `
       🚨 SEEK IMMEDIATE MEDICAL ATTENTION IF YOU EXPERIENCE:
       
-      EMERGENCY SIGNS (Call 114 immediately):
+      EMERGENCY SIGNS (Call emergency immediately):
       • Difficulty breathing or severe shortness of breath
       • Chest pain, pressure, or tightness
       • Sudden confusion or difficulty speaking
@@ -1293,11 +1248,6 @@ function ensureCriticalFields(analysis: any, patientContext: PatientContext): Me
       • Severe or increasing pain
       • Signs of dehydration
       • Fever >38.5°C for more than 48 hours
-      
-      MAURITIUS EMERGENCY CONTACTS:
-      • SAMU: 114
-      • Police/Fire: 999
-      • Private Ambulance: 132
     `.trim()
     
     wasModified = true
@@ -1420,11 +1370,10 @@ async function callOpenAIWithRetry(
 // ==================== DOCUMENT GENERATION ====================
 function generateMedicalDocuments(
   analysis: MedicalAnalysis,
-  patient: PatientContext,
-  infrastructure: any
+  patient: PatientContext
 ): any {
   const currentDate = new Date()
-  const consultationId = `TC-MU-${currentDate.getFullYear()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+  const consultationId = `TC-${currentDate.getFullYear()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
   
   return {
     consultation: {
@@ -1469,7 +1418,7 @@ function generateMedicalDocuments(
     biological: (analysis.investigation_strategy?.laboratory_tests?.length > 0) ? {
       header: {
         title: "LABORATORY TEST REQUEST",
-        validity: "Valid 30 days - All accredited laboratories Mauritius"
+        validity: "Valid 30 days - All accredited laboratories"
       },
       patient: {
         name: `${patient.firstName || ''} ${patient.lastName || ''}`.trim(),
@@ -1486,12 +1435,7 @@ function generateMedicalDocuments(
         justification: test.clinical_justification || "",
         urgency: test.urgency || "routine",
         expected_results: test.expected_results || {},
-        preparation: test.mauritius_logistics?.preparation || "As per laboratory protocol",
-        where_to_go: {
-          recommended: test.mauritius_logistics?.where || "C-Lab, Green Cross, or Biosanté",
-          cost_estimate: test.mauritius_logistics?.cost || "Rs 500-2000",
-          turnaround: test.mauritius_logistics?.turnaround || "24-48h"
-        }
+        preparation: "As per laboratory protocol"
       }))
     } : null,
     
@@ -1516,11 +1460,7 @@ function generateMedicalDocuments(
         examination: study.study_name || "Imaging",
         indication: study.indication || "",
         findings_sought: study.findings_sought || {},
-        urgency: study.urgency || "routine",
-        centers: study.mauritius_availability?.centers || "Apollo, Wellkin, Public hospitals",
-        cost_estimate: study.mauritius_availability?.cost || "Variable",
-        wait_time: study.mauritius_availability?.wait_time || "As per availability",
-        preparation: study.mauritius_availability?.preparation || "As per center protocol"
+        urgency: study.urgency || "routine"
       }))
     } : null,
     
@@ -1558,7 +1498,6 @@ function generateMedicalDocuments(
         total_quantity: med.total_quantity || med.quantity || "To be determined",
         instructions: med.administration_instructions || "Take as prescribed",
         monitoring: med.monitoring || {},
-        availability: med.mauritius_availability || {},
         warnings: {
           side_effects: med.side_effects || {},
           contraindications: med.contraindications || {},
@@ -1567,7 +1506,7 @@ function generateMedicalDocuments(
       })),
       non_pharmacological: analysis.treatment_plan?.non_pharmacological || {},
       footer: {
-        legal: "Teleconsultation prescription compliant with Medical Council Mauritius",
+        legal: "Teleconsultation prescription compliant with medical regulations",
         pharmacist_note: "Dispensing authorized as per current regulations"
       }
     } : null,
@@ -1580,8 +1519,7 @@ function generateMedicalDocuments(
         condition_explanation: analysis.patient_education?.understanding_condition || {},
         treatment_rationale: analysis.patient_education?.treatment_importance || {},
         lifestyle_changes: analysis.patient_education?.lifestyle_modifications || {},
-        warning_signs: analysis.patient_education?.warning_signs || {},
-        tropical_considerations: analysis.patient_education?.mauritius_specific || {}
+        warning_signs: analysis.patient_education?.warning_signs || {}
       },
       follow_up: {
         next_steps: analysis.follow_up_plan?.immediate || {},
@@ -1618,7 +1556,7 @@ function generateEmergencyFallbackDiagnosis(patient: any): any {
 
 // ==================== MAIN POST HANDLER ====================
 export async function POST(request: NextRequest) {
-  console.log('🚀 MAURITIUS MEDICAL AI - VERSION 4.0 WITH INTELLIGENT VALIDATION')
+  console.log('🚀 MEDICAL AI - VERSION 4.0 SIMPLIFIED')
   const startTime = Date.now()
   
   try {
@@ -1653,7 +1591,6 @@ export async function POST(request: NextRequest) {
     console.log(`   - Sex: ${patientContext.sex}`)
     console.log(`   - Chief complaint: ${patientContext.chief_complaint}`)
     console.log(`   - Symptoms: ${patientContext.symptoms.length}`)
-    console.log(`   - Vital signs: BP ${patientContext.vital_signs.blood_pressure}, Temp ${patientContext.vital_signs.temperature}°C`)
     
     // 4. Anonymize patient data for AI processing
     const { anonymized: anonymizedData, originalIdentity } = anonymizePatientData(patientContext)
@@ -1748,8 +1685,7 @@ export async function POST(request: NextRequest) {
     const patientWithIdentity = { ...anonymizedContext, ...originalIdentity }
     const professionalDocuments = generateMedicalDocuments(
       medicalAnalysis,
-      patientWithIdentity,
-      MAURITIUS_HEALTHCARE_CONTEXT
+      patientWithIdentity
     )
     
     // 12. Calculate metrics
@@ -1824,11 +1760,7 @@ export async function POST(request: NextRequest) {
             name: test.test_name,
             justification: test.clinical_justification,
             urgency: test.urgency,
-            expected_results: test.expected_results,
-            where_to_go: test.mauritius_logistics?.where || "Any accredited laboratory",
-            cost_estimate: test.mauritius_logistics?.cost || "Variable",
-            turnaround_time: test.mauritius_logistics?.turnaround || "24-48h",
-            preparation: test.mauritius_logistics?.preparation || "No special preparation"
+            expected_results: test.expected_results
           })),
           
           // Exposer clairement les examens d'imagerie
@@ -1836,11 +1768,7 @@ export async function POST(request: NextRequest) {
             name: img.study_name,
             indication: img.indication,
             urgency: img.urgency,
-            findings_sought: img.findings_sought,
-            available_centers: img.mauritius_availability?.centers || "Major hospitals",
-            cost_estimate: img.mauritius_availability?.cost || "Variable",
-            wait_time: img.mauritius_availability?.wait_time || "As per availability",
-            preparation: img.mauritius_availability?.preparation || "As per protocol"
+            findings_sought: img.findings_sought
           })),
           
           immediate_priority: [
@@ -1849,16 +1777,14 @@ export async function POST(request: NextRequest) {
               examination: test.test_name || "Test",
               specific_indication: test.clinical_justification || "",
               urgency: test.urgency || "routine",
-              expected_results: test.expected_results || {},
-              mauritius_availability: test.mauritius_logistics || {}
+              expected_results: test.expected_results || {}
             })),
             ...(medicalAnalysis.investigation_strategy?.imaging_studies || []).map((img: any) => ({
               category: 'imaging',
               examination: img.study_name || "Imaging",
               specific_indication: img.indication || "",
               findings_sought: img.findings_sought || {},
-              urgency: img.urgency || "routine",
-              mauritius_availability: img.mauritius_availability || {}
+              urgency: img.urgency || "routine"
             }))
           ],
           
@@ -1895,7 +1821,6 @@ export async function POST(request: NextRequest) {
             side_effects: med.side_effects || {},
             contraindications: med.contraindications || {},
             interactions: med.interactions || {},
-            mauritius_availability: med.mauritius_availability || {},
             administration_instructions: med.administration_instructions || "Take as directed"
           })),
           
@@ -1905,15 +1830,14 @@ export async function POST(request: NextRequest) {
       
       followUpPlan: medicalAnalysis.follow_up_plan || {},
       patientEducation: medicalAnalysis.patient_education || {},
-      mauritianDocuments: professionalDocuments,
+      documents: professionalDocuments,
       
       metadata: {
         ai_model: CONFIG.model,
-        system_version: '4.0-Complete',
+        system_version: '4.0-Simplified',
         approach: 'Evidence-Based Medicine with Intelligent Validation',
         medical_guidelines: medicalAnalysis.quality_metrics?.guidelines_followed || ["WHO", "ESC", "NICE"],
         evidence_level: medicalAnalysis.quality_metrics?.evidence_level || "High",
-        mauritius_adapted: true,
         data_protection_enabled: true,
         intelligent_validation_enabled: true,
         generation_timestamp: new Date().toISOString(),
@@ -1958,7 +1882,7 @@ export async function POST(request: NextRequest) {
         }
       },
       
-      mauritianDocuments: {
+      documents: {
         consultation: {
           header: {
             title: "ERROR REPORT",
@@ -1974,9 +1898,9 @@ export async function POST(request: NextRequest) {
       
       metadata: {
         ai_model: CONFIG.model,
-        system_version: '4.0-Complete',
+        system_version: '4.0-Simplified',
         error_logged: true,
-        support_contact: 'support@telemedecine.mu'
+        support_contact: 'support@telemedecine.com'
       }
     }, { status: 500 })
   }
@@ -2012,17 +1936,16 @@ export async function GET(request: NextRequest) {
   })
   
   return NextResponse.json({
-    status: '✅ Mauritius Medical AI - Version 4.0 Complete with Intelligent Validation',
-    version: '4.0-Complete',
+    status: '✅ Medical AI - Version 4.0 Simplified (Without Mauritius Context)',
+    version: '4.0-Simplified',
     features: [
-      'Comprehensive clinical patterns for 30+ conditions',
+      'Comprehensive clinical patterns for common conditions',
       'Intelligent validation and auto-correction',
       'Mandatory minimum treatment standards (4-6 medications for acute)',
       'Complete symptom coverage validation',
       'Automatic supportive care addition',
       'Dosing completeness validation with Ondansetron fix',
       'Pattern-based treatment protocols',
-      'Tropical disease recognition (Dengue, Chikungunya)',
       'Age-specific adjustments',
       'Drug interaction checking',
       'Patient data anonymization (RGPD/HIPAA compliant)',
@@ -2088,8 +2011,8 @@ export async function GET(request: NextRequest) {
     },
     
     guidelines: {
-      supported: ['WHO', 'ESC', 'AHA', 'NICE', 'IDSA', 'Mauritius MOH'],
-      approach: 'Evidence-based medicine with tropical adaptations'
+      supported: ['WHO', 'ESC', 'AHA', 'NICE', 'IDSA'],
+      approach: 'Evidence-based medicine'
     },
     
     performance: {
