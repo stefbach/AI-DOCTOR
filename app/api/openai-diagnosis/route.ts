@@ -1,4 +1,4 @@
-// /app/api/openai-diagnosis/route.ts - VERSION 3.1 WITH RENEWAL & COMPLETE FIELDS
+// /app/api/openai-diagnosis/route.ts - VERSION 3.2 WITH FREE TEXT MEDICATIONS
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
@@ -10,6 +10,7 @@ interface PatientContext {
   height?: number | string
   medical_history: string[]
   current_medications: string[]
+  current_medications_text?: string // Ajout pour garder le texte original
   allergies: string[]
   chief_complaint: string
   symptoms: string[]
@@ -32,7 +33,7 @@ interface PatientContext {
     smoking?: string
     alcohol?: string
     occupation?: string
-    physical_activity?: string  // 🆕 AJOUT pour activité physique
+    physical_activity?: string
   }
   name?: string
   firstName?: string
@@ -42,11 +43,11 @@ interface PatientContext {
   last_prescription_date?: string
   medication_adherence?: string
   
-  // 🆕 NOUVEAUX CHAMPS AJOUTÉS
-  other_allergies?: string        // Allergies en texte libre du Patient Form
-  other_medical_history?: string  // Historique médical en texte libre du Patient Form
-  gestational_age?: string        // Âge gestationnel calculé du Patient Form
-  pain_scale?: string             // Échelle de douleur 0-10 du Clinical Form
+  // Nouveaux champs
+  other_allergies?: string
+  other_medical_history?: string
+  gestational_age?: string
+  pain_scale?: string
 }
 
 interface ValidationResult {
@@ -60,20 +61,155 @@ interface ValidationResult {
   }
 }
 
+// ==================== MEDICATION PARSING FUNCTIONS ====================
+/**
+ * Parse medications from various text formats
+ * Handles: text with newlines, comma-separated, semicolon-separated, or mixed formats
+ */
+function parseMedicationsFromText(medicationsData: any): string[] {
+  console.log('💊 Parsing medications from:', medicationsData);
+  
+  // Handle null/undefined
+  if (!medicationsData) {
+    console.log('   No medication data provided');
+    return [];
+  }
+  
+  // If already an array, clean and return
+  if (Array.isArray(medicationsData)) {
+    console.log('   Data is array with', medicationsData.length, 'items');
+    return medicationsData
+      .filter(med => med && med !== 'None' && med !== 'Aucun')
+      .map(med => med.trim());
+  }
+  
+  // If it's a string, parse it
+  if (typeof medicationsData === 'string') {
+    // Check for empty/none values
+    const emptyValues = ['', 'none', 'aucun', 'néant', 'rien', 'n/a', 'nil'];
+    if (emptyValues.includes(medicationsData.toLowerCase().trim())) {
+      console.log('   Empty/None value detected');
+      return [];
+    }
+    
+    // Split by multiple possible delimiters
+    const medications = medicationsData
+      .split(/[\n\r]+|[;,](?![0-9])/) // Split by newlines or semicolons/commas (not followed by numbers)
+      .map(line => line.trim())
+      .filter(line => {
+        // Filter out empty lines and common non-medication text
+        if (!line) return false;
+        
+        const excludePatterns = [
+          /^none$/i,
+          /^aucun$/i,
+          /^example:/i,
+          /^exemple:/i,
+          /^e\.g\./i,
+          /^ex:/i,
+          /^note:/i,
+          /^remarque:/i
+        ];
+        
+        return !excludePatterns.some(pattern => pattern.test(line));
+      })
+      .map(line => {
+        // Clean up common formatting
+        return line
+          .replace(/^[-•*·→]\s*/, '') // Remove bullets
+          .replace(/^\d+\.\s*/, '') // Remove numbered lists
+          .replace(/^\d+\)\s*/, '') // Remove numbered lists with parentheses
+          .trim();
+      })
+      .filter(med => med.length > 0); // Final filter for non-empty
+    
+    console.log('   Parsed', medications.length, 'medications:', medications);
+    return medications;
+  }
+  
+  // If it's an object, try to extract medication fields
+  if (typeof medicationsData === 'object' && medicationsData !== null) {
+    const possibleFields = [
+      'medications', 'meds', 'drugs', 'treatments',
+      'currentMedications', 'current_medications',
+      'medicamentsActuels', 'traitements'
+    ];
+    
+    for (const field of possibleFields) {
+      if (medicationsData[field]) {
+        console.log('   Found medications in field:', field);
+        return parseMedicationsFromText(medicationsData[field]);
+      }
+    }
+  }
+  
+  console.log('   Unable to parse medication data');
+  return [];
+}
+
+/**
+ * Detect if text contains medication references
+ */
+function detectMedicationsInText(text: string): boolean {
+  if (!text) return false;
+  
+  const lowerText = text.toLowerCase();
+  
+  // Common medication indicators
+  const medicationIndicators = [
+    // Dosage units
+    'mg', 'mcg', 'ml', 'ui', 'iu', 'gouttes', 'drops',
+    // Frequency terms
+    'fois', 'jour', 'daily', 'matin', 'soir', 'midi',
+    'bid', 'tid', 'qd', 'prn', 'sos',
+    // Forms
+    'comprimé', 'gélule', 'capsule', 'sachet', 'sirop',
+    'injection', 'patch', 'crème', 'pommade',
+    // Common medication names (partial list)
+    'paracetamol', 'acetaminophen', 'ibuprofen', 'aspirin',
+    'metformin', 'amlodipine', 'atorvastatin', 'omeprazole',
+    'amoxicillin', 'azithromycin', 'prednisolone'
+  ];
+  
+  return medicationIndicators.some(indicator => lowerText.includes(indicator));
+}
+
+/**
+ * Extract medications mentioned in chief complaint
+ */
+function extractMedicationsFromComplaint(complaint: string): string[] {
+  if (!complaint) return [];
+  
+  const medications = [];
+  
+  // Look for patterns like "Metformin 500mg"
+  const medicationPattern = /\b([A-Za-z]+(?:\s+[A-Za-z]+)*)\s+(\d+(?:\.\d+)?)\s*(mg|mcg|ml|g|ui|iu)\b/gi;
+  const matches = complaint.matchAll(medicationPattern);
+  
+  for (const match of matches) {
+    medications.push(`${match[1]} ${match[2]}${match[3]}`);
+  }
+  
+  return medications;
+}
+
 // ==================== RENEWAL DETECTION AND HANDLING ====================
 interface RenewalContext {
   isRenewal: boolean
-  renewalType?: 'standard' | 'partial' | 'with_adjustment'
+  renewalType?: 'standard' | 'partial' | 'with_adjustment' | 'needs_medications'
   medicationsToRenew: string[]
-  renewalDuration?: number // in days
+  medicationsFromComplaint: string[]
+  renewalDuration?: number
   requiresReview: boolean
 }
 
 function detectRenewalRequest(
   chiefComplaint: string,
   symptoms: string[],
-  currentMedications: string[]
+  currentMedicationsRaw: any
 ): RenewalContext {
+  console.log('🔄 === RENEWAL DETECTION ===');
+  
   const renewalKeywords = [
     'renouvellement',
     'renewal',
@@ -88,28 +224,71 @@ function detectRenewalRequest(
     'continuation',
     'refill',
     'chronic medication',
-    'regular medication'
+    'regular medication',
+    'besoin de mes médicaments',
+    'need my medications'
   ];
   
   const complaintLower = chiefComplaint.toLowerCase();
-  const isRenewal = renewalKeywords.some(keyword => complaintLower.includes(keyword));
+  const hasRenewalKeyword = renewalKeywords.some(keyword => complaintLower.includes(keyword));
   
-  // Check if there are concerning symptoms that require full evaluation
-  const concerningSymptoms = symptoms.filter(s => 
-    s.toLowerCase().includes('douleur') ||
-    s.toLowerCase().includes('pain') ||
-    s.toLowerCase().includes('nouveau') ||
-    s.toLowerCase().includes('new') ||
-    s.toLowerCase().includes('aggravation') ||
-    s.toLowerCase().includes('worse')
-  );
+  // Parse medications from the provided data
+  const medicationsList = parseMedicationsFromText(currentMedicationsRaw);
+  
+  // Try to extract medications from the complaint itself
+  const medicationsFromComplaint = extractMedicationsFromComplaint(chiefComplaint);
+  
+  // Check if complaint mentions medications even without specific names
+  const mentionsMedications = detectMedicationsInText(chiefComplaint);
+  
+  console.log('   Renewal keyword found:', hasRenewalKeyword);
+  console.log('   Medications in data:', medicationsList.length);
+  console.log('   Medications in complaint:', medicationsFromComplaint.length);
+  console.log('   Mentions medications:', mentionsMedications);
+  
+  // Check for concerning symptoms
+  const concerningSymptoms = symptoms.filter(s => {
+    const lower = s.toLowerCase();
+    return lower.includes('douleur') ||
+           lower.includes('pain') ||
+           lower.includes('nouveau') ||
+           lower.includes('new') ||
+           lower.includes('aggravation') ||
+           lower.includes('worse') ||
+           lower.includes('effet secondaire') ||
+           lower.includes('side effect');
+  });
+  
+  // Combine all found medications
+  const allMedications = [...new Set([...medicationsList, ...medicationsFromComplaint])];
+  
+  // Determine renewal status
+  let renewalType: RenewalContext['renewalType'] = 'standard';
+  let isRenewal = false;
+  
+  if (hasRenewalKeyword) {
+    if (allMedications.length > 0) {
+      isRenewal = true;
+      renewalType = concerningSymptoms.length > 0 ? 'with_adjustment' : 'standard';
+    } else if (mentionsMedications) {
+      // User wants renewal but we don't have the medication list
+      isRenewal = true;
+      renewalType = 'needs_medications';
+      console.warn('⚠️ Renewal requested but no specific medications found - will need to ask patient');
+    }
+  }
+  
+  console.log('   Final decision - Is renewal:', isRenewal);
+  console.log('   Renewal type:', renewalType);
+  console.log('   Total medications found:', allMedications.length);
   
   return {
-    isRenewal: isRenewal && currentMedications.length > 0,
-    renewalType: concerningSymptoms.length > 0 ? 'with_adjustment' : 'standard',
-    medicationsToRenew: currentMedications,
-    renewalDuration: 90, // Default 3 months
-    requiresReview: concerningSymptoms.length > 0 || currentMedications.length > 5
+    isRenewal,
+    renewalType,
+    medicationsToRenew: medicationsList,
+    medicationsFromComplaint,
+    renewalDuration: 90,
+    requiresReview: concerningSymptoms.length > 0 || allMedications.length > 5
   };
 }
 
@@ -159,7 +338,146 @@ function validateMedicationForRenewal(medication: string): {
   };
 }
 
-// ==================== RENEWAL PROMPT ====================
+// ==================== DATA PROTECTION FUNCTIONS ====================
+function anonymizePatientData(patientData: any): { 
+  anonymized: any, 
+  originalIdentity: any 
+} {
+  const originalIdentity = {
+    firstName: patientData?.firstName || patientData?.prenom,
+    lastName: patientData?.lastName || patientData?.nom,
+    name: patientData?.name
+  }
+  
+  const anonymized = { ...patientData }
+  delete anonymized.firstName
+  delete anonymized.lastName
+  delete anonymized.name
+  delete anonymized.prenom
+  delete anonymized.nom
+  
+  anonymized.anonymousId = `ANON-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+  
+  console.log('🔒 Patient data anonymized');
+  console.log(`   - Anonymous ID: ${anonymized.anonymousId}`);
+  console.log('   - Name/Surname: [PROTECTED]');
+  
+  return { anonymized, originalIdentity }
+}
+
+// Secure logging function
+function secureLog(message: string, data?: any) {
+  if (data && typeof data === 'object') {
+    const safeData = { ...data }
+    const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address']
+    
+    sensitiveFields.forEach(field => {
+      if (safeData[field]) {
+        safeData[field] = '[PROTECTED]'
+      }
+    })
+    
+    console.log(message, safeData)
+  } else {
+    console.log(message, data)
+  }
+}
+
+// ==================== MAURITIUS HEALTHCARE CONTEXT ====================
+const MAURITIUS_HEALTHCARE_CONTEXT = {
+  laboratories: {
+    everywhere: "C-Lab (29 centers), Green Cross (36 centers), Biosanté (48 locations)",
+    specialized: "ProCare Medical (oncology/genetics), C-Lab (PCR/NGS)",
+    public: "Central Health Lab, all regional hospitals",
+    home_service: "C-Lab free >70 years, Hans Biomedical mobile",
+    results_time: "STAT: 1-2h, Urgent: 2-6h, Routine: 24-48h",
+    online_results: "C-Lab, Green Cross"
+  },
+  imaging: {
+    basic: "X-ray/Ultrasound available everywhere",
+    ct_scan: "Apollo Bramwell, Wellkin, Victoria Hospital, Dr Jeetoo",
+    mri: "Apollo, Wellkin (1-2 week delays)",
+    cardiac: {
+      echo: "Available all hospitals + private",
+      coronary_ct: "Apollo, Cardiac Centre Pamplemousses",
+      angiography: "Cardiac Centre (public), Apollo Cath Lab (private)"
+    }
+  },
+  hospitals: {
+    emergency_24_7: "Dr Jeetoo (Port Louis), SSRN (Pamplemousses), Victoria (Candos), Apollo, Wellkin",
+    cardiac_emergencies: "Cardiac Centre Pamplemousses, Apollo Bramwell",
+    specialists: "Generally 1-3 week wait, emergencies seen faster"
+  },
+  costs: {
+    consultation: "Public: free, Private: Rs 1500-3000",
+    blood_tests: "Rs 400-3000 depending on complexity",
+    imaging: "X-ray: Rs 800-1500, CT: Rs 8000-15000, MRI: Rs 15000-25000",
+    procedures: "Coronary angiography: Rs 50000-80000, Surgery: Rs 100000+"
+  },
+  medications: {
+    public_free: "Essential medications list free in public hospitals",
+    private: "Pharmacies everywhere, variable prices by brand"
+  },
+  emergency_numbers: {
+    samu: "114",
+    police_fire: "999",
+    private_ambulance: "132"
+  }
+}
+
+const MAURITIUS_CONTEXT_STRING = JSON.stringify(MAURITIUS_HEALTHCARE_CONTEXT, null, 2)
+
+// ==================== MONITORING SYSTEM ====================
+const PrescriptionMonitoring = {
+  metrics: {
+    avgMedicationsPerDiagnosis: new Map<string, number[]>(),
+    avgTestsPerDiagnosis: new Map<string, number[]>(),
+    renewalRequests: 0,
+    renewalApprovals: 0,
+    outliers: [] as any[]
+  },
+  
+  track(diagnosis: string, medications: number, tests: number) {
+    if (!this.metrics.avgMedicationsPerDiagnosis.has(diagnosis)) {
+      this.metrics.avgMedicationsPerDiagnosis.set(diagnosis, [])
+    }
+    if (!this.metrics.avgTestsPerDiagnosis.has(diagnosis)) {
+      this.metrics.avgTestsPerDiagnosis.set(diagnosis, [])
+    }
+    
+    this.metrics.avgMedicationsPerDiagnosis.get(diagnosis)?.push(medications)
+    this.metrics.avgTestsPerDiagnosis.get(diagnosis)?.push(tests)
+    
+    const medAvg = this.getAverage(diagnosis, 'medications')
+    const testAvg = this.getAverage(diagnosis, 'tests')
+    
+    if (medications > medAvg * 2 || tests > testAvg * 2) {
+      this.metrics.outliers.push({
+        diagnosis,
+        medications,
+        tests,
+        timestamp: new Date().toISOString()
+      })
+    }
+  },
+  
+  trackRenewal(approved: boolean) {
+    this.metrics.renewalRequests++
+    if (approved) {
+      this.metrics.renewalApprovals++
+    }
+  },
+  
+  getAverage(diagnosis: string, type: 'medications' | 'tests'): number {
+    const map = type === 'medications' 
+      ? this.metrics.avgMedicationsPerDiagnosis 
+      : this.metrics.avgTestsPerDiagnosis
+    const values = map.get(diagnosis) || []
+    return values.length ? values.reduce((a, b) => a + b, 0) / values.length : 3
+  }
+}
+
+// ==================== PROMPTS (keeping existing prompts) ====================
 const PRESCRIPTION_RENEWAL_PROMPT = `You are an expert physician handling a PRESCRIPTION RENEWAL request in Mauritius.
 
 🔄 RENEWAL REQUEST CONTEXT:
@@ -366,144 +684,6 @@ CRITICAL REMINDERS FOR RENEWAL:
 - FLAG any controlled substances for special handling
 - ENSURE all dosing information is explicit (X × Y/jour format)`;
 
-// ==================== DATA PROTECTION FUNCTIONS ====================
-function anonymizePatientData(patientData: any): { 
-  anonymized: any, 
-  originalIdentity: any 
-} {
-  const originalIdentity = {
-    firstName: patientData?.firstName,
-    lastName: patientData?.lastName,
-    name: patientData?.name
-  }
-  
-  const anonymized = { ...patientData }
-  delete anonymized.firstName
-  delete anonymized.lastName
-  delete anonymized.name
-  
-  anonymized.anonymousId = `ANON-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
-  
-  console.log('🔒 Patient data anonymized')
-  console.log(`   - Anonymous ID: ${anonymized.anonymousId}`)
-  console.log('   - Name/Surname: [PROTECTED]')
-  
-  return { anonymized, originalIdentity }
-}
-
-// Secure logging function
-function secureLog(message: string, data?: any) {
-  if (data && typeof data === 'object') {
-    const safeData = { ...data }
-    const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address']
-    
-    sensitiveFields.forEach(field => {
-      if (safeData[field]) {
-        safeData[field] = '[PROTECTED]'
-      }
-    })
-    
-    console.log(message, safeData)
-  } else {
-    console.log(message, data)
-  }
-}
-
-// ==================== MAURITIUS HEALTHCARE CONTEXT ====================
-const MAURITIUS_HEALTHCARE_CONTEXT = {
-  laboratories: {
-    everywhere: "C-Lab (29 centers), Green Cross (36 centers), Biosanté (48 locations)",
-    specialized: "ProCare Medical (oncology/genetics), C-Lab (PCR/NGS)",
-    public: "Central Health Lab, all regional hospitals",
-    home_service: "C-Lab free >70 years, Hans Biomedical mobile",
-    results_time: "STAT: 1-2h, Urgent: 2-6h, Routine: 24-48h",
-    online_results: "C-Lab, Green Cross"
-  },
-  imaging: {
-    basic: "X-ray/Ultrasound available everywhere",
-    ct_scan: "Apollo Bramwell, Wellkin, Victoria Hospital, Dr Jeetoo",
-    mri: "Apollo, Wellkin (1-2 week delays)",
-    cardiac: {
-      echo: "Available all hospitals + private",
-      coronary_ct: "Apollo, Cardiac Centre Pamplemousses",
-      angiography: "Cardiac Centre (public), Apollo Cath Lab (private)"
-    }
-  },
-  hospitals: {
-    emergency_24_7: "Dr Jeetoo (Port Louis), SSRN (Pamplemousses), Victoria (Candos), Apollo, Wellkin",
-    cardiac_emergencies: "Cardiac Centre Pamplemousses, Apollo Bramwell",
-    specialists: "Generally 1-3 week wait, emergencies seen faster"
-  },
-  costs: {
-    consultation: "Public: free, Private: Rs 1500-3000",
-    blood_tests: "Rs 400-3000 depending on complexity",
-    imaging: "X-ray: Rs 800-1500, CT: Rs 8000-15000, MRI: Rs 15000-25000",
-    procedures: "Coronary angiography: Rs 50000-80000, Surgery: Rs 100000+"
-  },
-  medications: {
-    public_free: "Essential medications list free in public hospitals",
-    private: "Pharmacies everywhere, variable prices by brand"
-  },
-  emergency_numbers: {
-    samu: "114",
-    police_fire: "999",
-    private_ambulance: "132"
-  }
-}
-
-const MAURITIUS_CONTEXT_STRING = JSON.stringify(MAURITIUS_HEALTHCARE_CONTEXT, null, 2)
-
-// ==================== MONITORING SYSTEM ====================
-const PrescriptionMonitoring = {
-  metrics: {
-    avgMedicationsPerDiagnosis: new Map<string, number[]>(),
-    avgTestsPerDiagnosis: new Map<string, number[]>(),
-    renewalRequests: 0,
-    renewalApprovals: 0,
-    outliers: [] as any[]
-  },
-  
-  track(diagnosis: string, medications: number, tests: number) {
-    if (!this.metrics.avgMedicationsPerDiagnosis.has(diagnosis)) {
-      this.metrics.avgMedicationsPerDiagnosis.set(diagnosis, [])
-    }
-    if (!this.metrics.avgTestsPerDiagnosis.has(diagnosis)) {
-      this.metrics.avgTestsPerDiagnosis.set(diagnosis, [])
-    }
-    
-    this.metrics.avgMedicationsPerDiagnosis.get(diagnosis)?.push(medications)
-    this.metrics.avgTestsPerDiagnosis.get(diagnosis)?.push(tests)
-    
-    const medAvg = this.getAverage(diagnosis, 'medications')
-    const testAvg = this.getAverage(diagnosis, 'tests')
-    
-    if (medications > medAvg * 2 || tests > testAvg * 2) {
-      this.metrics.outliers.push({
-        diagnosis,
-        medications,
-        tests,
-        timestamp: new Date().toISOString()
-      })
-    }
-  },
-  
-  trackRenewal(approved: boolean) {
-    this.metrics.renewalRequests++
-    if (approved) {
-      this.metrics.renewalApprovals++
-    }
-  },
-  
-  getAverage(diagnosis: string, type: 'medications' | 'tests'): number {
-    const map = type === 'medications' 
-      ? this.metrics.avgMedicationsPerDiagnosis 
-      : this.metrics.avgTestsPerDiagnosis
-    const values = map.get(diagnosis) || []
-    return values.length ? values.reduce((a, b) => a + b, 0) / values.length : 3
-  }
-}
-
-// ==================== ENHANCED MEDICAL PROMPT (Original) ====================
 const ENHANCED_DIAGNOSTIC_PROMPT = `You are an expert physician practicing telemedicine in Mauritius using systematic diagnostic reasoning.
 
 🏥 YOUR MEDICAL EXPERTISE:
@@ -638,26 +818,32 @@ function preparePrompt(patientContext: PatientContext, isRenewal: boolean = fals
     .map((q: any) => `Q: ${q.question}\n   A: ${q.answer}`)
     .join('\n   ')
   
-  // 🆕 Combiner allergies et other_allergies
+  // Combiner allergies et other_allergies
   const allAllergies = [
     ...patientContext.allergies,
     ...(patientContext.other_allergies ? [patientContext.other_allergies] : [])
   ].filter(Boolean).join(', ')
   
-  // 🆕 Combiner medical_history et other_medical_history
+  // Combiner medical_history et other_medical_history
   const allMedicalHistory = [
     ...patientContext.medical_history,
     ...(patientContext.other_medical_history ? [patientContext.other_medical_history] : [])
   ].filter(Boolean).join(', ')
   
-  // 🆕 Créer un contexte enrichi avec tous les nouveaux champs
+  // Format medications for display
+  const medicationsDisplay = patientContext.current_medications.length > 0
+    ? patientContext.current_medications.join('\n')
+    : patientContext.current_medications_text || 'None';
+  
+  // Créer un contexte enrichi avec tous les nouveaux champs
   const enrichedContext = {
     ...patientContext,
     all_allergies: allAllergies || "None",
     all_medical_history: allMedicalHistory || "None",
     pain_assessment: patientContext.pain_scale ? `Pain level: ${patientContext.pain_scale}/10` : "No pain reported",
     physical_activity_level: patientContext.social_history?.physical_activity || "Not specified",
-    gestational_age_info: patientContext.gestational_age || "Not applicable"
+    gestational_age_info: patientContext.gestational_age || "Not applicable",
+    medications_display: medicationsDisplay
   }
   
   const basePrompt = isRenewal ? PRESCRIPTION_RENEWAL_PROMPT : ENHANCED_DIAGNOSTIC_PROMPT
@@ -668,8 +854,10 @@ function preparePrompt(patientContext: PatientContext, isRenewal: boolean = fals
     .replace('{{SYMPTOMS}}', patientContext.symptoms.join(', '))
     .replace('{{DISEASE_HISTORY}}', patientContext.disease_history)
     .replace('{{AI_QUESTIONS}}', aiQuestionsFormatted)
-    .replace('{{CURRENT_MEDICATIONS}}', JSON.stringify(patientContext.current_medications))
-    .replace('{{RENEWAL_TYPE}}', patientContext.renewal_request ? 'Standard Renewal' : 'New Consultation')
+    .replace('{{CURRENT_MEDICATIONS}}', medicationsDisplay)
+    .replace('{{RENEWAL_TYPE}}', patientContext.renewal_request ? 
+      (patientContext.current_medications.length > 0 ? 'Standard Renewal' : 'Renewal - Medications to be confirmed') 
+      : 'New Consultation')
     .replace('{{PAIN_SCALE}}', patientContext.pain_scale || '0')
     .replace('{{GESTATIONAL_AGE}}', patientContext.gestational_age || 'Not applicable')
     .replace('{{PHYSICAL_ACTIVITY}}', patientContext.social_history?.physical_activity || 'Not specified')
@@ -700,8 +888,8 @@ function validateMedicalAnalysis(
   
   if (isRenewal) {
     // Renewal-specific validation
-    if (medications.length === 0) {
-      issues.push('No medications renewed - requires justification')
+    if (medications.length === 0 && patientContext.current_medications.length > 0) {
+      issues.push('No medications renewed despite having current medications')
     }
     
     // Check if controlled substances are being renewed appropriately
@@ -784,7 +972,7 @@ async function callOpenAIWithRetry(
           messages: [
             {
               role: 'system',
-              content: 'You are an expert physician with deep knowledge of medical guidelines and the Mauritius healthcare system. Generate comprehensive, evidence-based analyses while avoiding over-prescription. Handle prescription renewals appropriately.'
+              content: 'You are an expert physician with deep knowledge of medical guidelines and the Mauritius healthcare system. Generate comprehensive, evidence-based analyses while avoiding over-prescription. Handle prescription renewals appropriately. Accept medications in text format.'
             },
             {
               role: 'user',
@@ -840,7 +1028,7 @@ async function callOpenAIWithRetry(
   throw lastError || new Error('Failed after multiple attempts')
 }
 
-// ==================== DOCUMENT GENERATION ====================
+// ==================== DOCUMENT GENERATION (keeping existing) ====================
 function generateMedicalDocuments(
   analysis: any,
   patient: PatientContext,
@@ -869,15 +1057,11 @@ function generateMedicalDocuments(
         sex: patient.sex,
         weight: patient.weight ? `${patient.weight} kg` : 'Not provided',
         allergies: patient.allergies?.length > 0 ? patient.allergies.join(', ') : 'None',
-        // 🆕 Ajout des autres allergies
         other_allergies: patient.other_allergies || 'None specified',
-        // 🆕 Ajout de l'activité physique
         physical_activity: patient.social_history?.physical_activity || 'Not specified',
-        // 🆕 Ajout de l'échelle de douleur
         pain_level: patient.pain_scale ? `${patient.pain_scale}/10` : 'Not assessed'
       },
       
-      // 🆕 Section grossesse si applicable
       pregnancy_information: patient.pregnancy_status === 'pregnant' ? {
         status: 'Currently pregnant',
         gestational_age: patient.gestational_age || 'Not specified',
@@ -919,7 +1103,6 @@ function generateMedicalDocuments(
       }
     },
     
-    // Only generate lab/imaging requests if they exist and it's not a simple renewal
     biological: (!isRenewal && analysis.investigation_strategy?.laboratory_tests?.length > 0) ? {
       header: {
         title: "LABORATORY TEST REQUEST",
@@ -996,7 +1179,6 @@ function generateMedicalDocuments(
         age: `${patient.age} years`,
         weight: patient.weight ? `${patient.weight} kg` : 'Not provided',
         allergies: patient.allergies?.length > 0 ? patient.allergies.join(', ') : 'None known',
-        // 🆕 Ajout des autres allergies dans la prescription
         other_allergies: patient.other_allergies || 'None specified'
       },
       
@@ -1065,7 +1247,7 @@ function generateMedicalDocuments(
 
 // ==================== MAIN FUNCTION ====================
 export async function POST(request: NextRequest) {
-  console.log('🚀 MAURITIUS MEDICAL AI - VERSION 3.1 WITH RENEWAL & COMPLETE FIELDS')
+  console.log('🚀 MAURITIUS MEDICAL AI - VERSION 3.2 WITH FREE TEXT MEDICATIONS')
   const startTime = Date.now()
   
   try {
@@ -1074,6 +1256,38 @@ export async function POST(request: NextRequest) {
       Promise.resolve(process.env.OPENAI_API_KEY)
     ])
     
+    // ========== DEBUG LOGGING ==========
+    console.log('📦 === REQUEST DATA ANALYSIS ===')
+    console.log('   Has patient data:', !!body.patientData)
+    console.log('   Has clinical data:', !!body.clinicalData)
+    
+    if (body.patientData) {
+      console.log('   Patient data fields:', Object.keys(body.patientData))
+      
+      // Log all medication-related fields
+      const medicationFields = [
+        'currentMedications',
+        'current_medications',
+        'currentMedicationsText',
+        'currentMedicationsArray',
+        'medicamentsActuels',
+        'medications'
+      ]
+      
+      console.log('   Medication fields present:')
+      medicationFields.forEach(field => {
+        if (body.patientData[field] !== undefined) {
+          const value = body.patientData[field]
+          const type = Array.isArray(value) ? 'array' : typeof value
+          console.log(`     - ${field}: ${type}`, 
+            type === 'string' ? `(${value.substring(0, 50)}...)` : `(${value?.length || 0} items)`)
+        }
+      })
+    }
+    
+    console.log('   Chief complaint:', body.clinicalData?.chiefComplaint?.substring(0, 100))
+    
+    // ========== VALIDATION ==========
     if (!body.patientData || !body.clinicalData) {
       return NextResponse.json({
         success: false,
@@ -1091,20 +1305,40 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
     
+    // ========== MEDICATIONS EXTRACTION ==========
+    // Try to get medications from any available field
+    const currentMedicationsRaw = 
+      body.patientData?.currentMedications ||
+      body.patientData?.current_medications ||
+      body.patientData?.currentMedicationsText ||
+      body.patientData?.currentMedicationsArray ||
+      body.patientData?.medicamentsActuels ||
+      body.patientData?.medications ||
+      ''
+    
+    console.log('💊 === MEDICATIONS EXTRACTION ===')
+    console.log('   Raw medications:', currentMedicationsRaw)
+    console.log('   Type:', Array.isArray(currentMedicationsRaw) ? 'array' : typeof currentMedicationsRaw)
+    
     // ========== RENEWAL DETECTION ==========
     const renewalContext = detectRenewalRequest(
       body.clinicalData?.chiefComplaint || '',
       body.clinicalData?.symptoms || [],
-      body.patientData?.currentMedications || []
+      currentMedicationsRaw
     )
     
     const isRenewal = renewalContext.isRenewal
     
     if (isRenewal) {
-      console.log('🔄 PRESCRIPTION RENEWAL REQUEST DETECTED')
-      console.log(`   - Type: ${renewalContext.renewalType}`)
-      console.log(`   - Medications to review: ${renewalContext.medicationsToRenew.length}`)
-      console.log(`   - Proposed duration: ${renewalContext.renewalDuration} days`)
+      console.log('🔄 === PRESCRIPTION RENEWAL REQUEST ===')
+      console.log(`   Type: ${renewalContext.renewalType}`)
+      console.log(`   Medications in data: ${renewalContext.medicationsToRenew.length}`)
+      console.log(`   Medications from complaint: ${renewalContext.medicationsFromComplaint.length}`)
+      console.log(`   Proposed duration: ${renewalContext.renewalDuration} days`)
+      
+      if (renewalContext.renewalType === 'needs_medications') {
+        console.warn('⚠️ Renewal requested but medications need to be specified')
+      }
       
       // Validate each medication for renewal
       const validationResults = renewalContext.medicationsToRenew.map(med => ({
@@ -1121,29 +1355,46 @@ export async function POST(request: NextRequest) {
     // ========== DATA PROTECTION ==========
     const { anonymized: anonymizedPatientData, originalIdentity } = anonymizePatientData(body.patientData)
     
+    // ========== PATIENT CONTEXT CREATION ==========
+    const parsedMedications = parseMedicationsFromText(currentMedicationsRaw)
+    
     const patientContext: PatientContext = {
       // Use anonymized data
       age: parseInt(anonymizedPatientData?.age) || 0,
-      sex: anonymizedPatientData?.sex || 'unknown',
-      weight: anonymizedPatientData?.weight,
-      height: anonymizedPatientData?.height,
-      medical_history: anonymizedPatientData?.medicalHistory || [],
-      current_medications: anonymizedPatientData?.currentMedications || [],
-      allergies: anonymizedPatientData?.allergies || [],
-      pregnancy_status: anonymizedPatientData?.pregnancyStatus,
-      last_menstrual_period: anonymizedPatientData?.lastMenstrualPeriod,
+      sex: anonymizedPatientData?.sex || anonymizedPatientData?.sexe || anonymizedPatientData?.gender || 'unknown',
+      weight: anonymizedPatientData?.weight || anonymizedPatientData?.poids,
+      height: anonymizedPatientData?.height || anonymizedPatientData?.taille,
+      medical_history: Array.isArray(anonymizedPatientData?.medicalHistory) 
+        ? anonymizedPatientData.medicalHistory 
+        : (anonymizedPatientData?.medical_history || []),
+      current_medications: parsedMedications,
+      current_medications_text: typeof currentMedicationsRaw === 'string' ? currentMedicationsRaw : '',
+      allergies: Array.isArray(anonymizedPatientData?.allergies)
+        ? anonymizedPatientData.allergies
+        : (anonymizedPatientData?.allergies ? [anonymizedPatientData.allergies] : []),
+      pregnancy_status: anonymizedPatientData?.pregnancyStatus || anonymizedPatientData?.pregnancy_status,
+      last_menstrual_period: anonymizedPatientData?.lastMenstrualPeriod || anonymizedPatientData?.last_menstrual_period,
       
-      // 🆕 AJOUT - Champs Patient Form supplémentaires
-      other_allergies: anonymizedPatientData?.otherAllergies || "",
-      other_medical_history: anonymizedPatientData?.otherMedicalHistory || "",
-      gestational_age: anonymizedPatientData?.gestationalAge || "",
+      // Additional fields
+      other_allergies: anonymizedPatientData?.otherAllergies || anonymizedPatientData?.other_allergies || "",
+      other_medical_history: anonymizedPatientData?.otherMedicalHistory || anonymizedPatientData?.other_medical_history || "",
+      gestational_age: anonymizedPatientData?.gestationalAge || anonymizedPatientData?.gestational_age || "",
       
-      // Mise à jour social_history avec physical_activity
+      // Social history
       social_history: {
-        smoking: anonymizedPatientData?.lifeHabits?.smoking || anonymizedPatientData?.socialHistory?.smoking,
-        alcohol: anonymizedPatientData?.lifeHabits?.alcohol || anonymizedPatientData?.socialHistory?.alcohol,
+        smoking: anonymizedPatientData?.lifeHabits?.smoking || 
+                anonymizedPatientData?.life_habits?.smoking ||
+                anonymizedPatientData?.smokingStatus ||
+                anonymizedPatientData?.smoking_status,
+        alcohol: anonymizedPatientData?.lifeHabits?.alcohol || 
+                anonymizedPatientData?.life_habits?.alcohol ||
+                anonymizedPatientData?.alcoholConsumption ||
+                anonymizedPatientData?.alcohol_consumption,
         occupation: anonymizedPatientData?.socialHistory?.occupation,
-        physical_activity: anonymizedPatientData?.lifeHabits?.physicalActivity || ""  // 🆕 AJOUT
+        physical_activity: anonymizedPatientData?.lifeHabits?.physicalActivity || 
+                          anonymizedPatientData?.life_habits?.physical_activity ||
+                          anonymizedPatientData?.physicalActivity ||
+                          anonymizedPatientData?.physical_activity || ""
       },
       
       // Clinical data
@@ -1153,7 +1404,7 @@ export async function POST(request: NextRequest) {
       vital_signs: body.clinicalData?.vitalSigns || {},
       disease_history: body.clinicalData?.diseaseHistory || '',
       
-      // 🆕 AJOUT - Pain scale du Clinical Form
+      // Pain scale
       pain_scale: body.clinicalData?.painScale || "0",
       
       // AI questions
@@ -1166,21 +1417,23 @@ export async function POST(request: NextRequest) {
       medication_adherence: body.patientData?.medicationAdherence
     }
     
-    console.log('📋 Patient context prepared (ANONYMIZED)')
-    console.log(`   - Age: ${patientContext.age} years`)
-    console.log(`   - Current medications: ${patientContext.current_medications.length}`)
-    console.log(`   - Request type: ${isRenewal ? 'RENEWAL' : 'NEW DIAGNOSIS'}`)
-    console.log(`   - Pain level: ${patientContext.pain_scale}/10`)
-    console.log(`   - Physical activity: ${patientContext.social_history?.physical_activity || 'Not specified'}`)
-    console.log(`   - Other allergies: ${patientContext.other_allergies || 'None'}`)
-    console.log(`   - Gestational age: ${patientContext.gestational_age || 'N/A'}`)
-    console.log(`   - Anonymous ID: ${patientContext.anonymousId}`)
-    console.log(`   - Identity: PROTECTED ✅`)
+    console.log('📋 === PATIENT CONTEXT PREPARED ===')
+    console.log(`   Age: ${patientContext.age} years`)
+    console.log(`   Sex: ${patientContext.sex}`)
+    console.log(`   Current medications (parsed): ${patientContext.current_medications.length} items`)
+    if (patientContext.current_medications.length > 0) {
+      console.log('   Medications list:', patientContext.current_medications)
+    }
+    console.log(`   Request type: ${isRenewal ? 'RENEWAL' : 'NEW DIAGNOSIS'}`)
+    console.log(`   Pain level: ${patientContext.pain_scale}/10`)
+    console.log(`   Physical activity: ${patientContext.social_history?.physical_activity || 'Not specified'}`)
+    console.log(`   Anonymous ID: ${patientContext.anonymousId}`)
+    console.log(`   Identity: PROTECTED ✅`)
     
-    // Prepare appropriate prompt
+    // ========== PREPARE PROMPT ==========
     const finalPrompt = preparePrompt(patientContext, isRenewal)
     
-    // OpenAI call
+    // ========== OPENAI CALL ==========
     const { data: openaiData, analysis: medicalAnalysis } = await callOpenAIWithRetry(
       apiKey,
       finalPrompt
@@ -1193,9 +1446,9 @@ export async function POST(request: NextRequest) {
     }
     
     console.log('✅ Medical analysis generated successfully')
-    console.log(`   - Type: ${isRenewal ? 'Renewal' : 'New Diagnosis'}`)
+    console.log(`   Type: ${isRenewal ? 'Renewal' : 'New Diagnosis'}`)
     
-    // Validate response
+    // ========== VALIDATION ==========
     const validation = validateMedicalAnalysis(medicalAnalysis, patientContext, isRenewal)
     
     if (!validation.isValid && validation.issues.length > 0) {
@@ -1206,7 +1459,7 @@ export async function POST(request: NextRequest) {
       console.log('💡 Improvement suggestions:', validation.suggestions)
     }
     
-    // Generate medical documents
+    // ========== GENERATE DOCUMENTS ==========
     const patientContextWithIdentity = {
       ...patientContext,
       ...originalIdentity
@@ -1224,15 +1477,18 @@ export async function POST(request: NextRequest) {
     console.log(`📊 Summary: ${validation.metrics.medications} medication(s), ${validation.metrics.laboratory_tests} lab test(s), ${validation.metrics.imaging_studies} imaging study/studies`)
     console.log(`🔒 Data protection: ACTIVE - No personal data sent to OpenAI`)
     
+    // ========== FINAL RESPONSE ==========
     const finalResponse = {
       success: true,
       processingTime: `${processingTime}ms`,
       
-      // NEW: Renewal indicator
+      // Renewal information
       consultationType: isRenewal ? 'renewal' : 'new_diagnosis',
       renewalDetails: isRenewal ? {
         type: renewalContext.renewalType,
         medicationsRenewed: validation.metrics.medications,
+        medicationsFound: renewalContext.medicationsToRenew.length,
+        medicationsFromComplaint: renewalContext.medicationsFromComplaint.length,
         renewalPeriod: medicalAnalysis.renewal_evaluation?.renewal_period || '90 days',
         stability: medicalAnalysis.renewal_evaluation?.patient_stability || 'Stable'
       } : null,
@@ -1330,9 +1586,9 @@ export async function POST(request: NextRequest) {
       
       metadata: {
         ai_model: 'GPT-4o',
-        system_version: '3.1-Complete-Fields',
+        system_version: '3.2-Free-Text-Medications',
         consultation_type: isRenewal ? 'renewal' : 'new_diagnosis',
-        approach: 'Flexible Evidence-Based Medicine with Complete Field Support',
+        approach: 'Flexible Evidence-Based Medicine with Free Text Support',
         medical_guidelines: medicalAnalysis.quality_metrics?.guidelines_followed || ["WHO", "ESC", "NICE"],
         evidence_level: medicalAnalysis.quality_metrics?.evidence_level || "High",
         mauritius_adapted: true,
@@ -1342,7 +1598,13 @@ export async function POST(request: NextRequest) {
           other_medical_history: true,
           gestational_age: true,
           physical_activity: true,
-          pain_scale: true
+          pain_scale: true,
+          free_text_medications: true
+        },
+        medications_parsing: {
+          raw_format: Array.isArray(currentMedicationsRaw) ? 'array' : 'text',
+          parsed_count: patientContext.current_medications.length,
+          from_complaint: renewalContext.medicationsFromComplaint.length
         },
         generation_timestamp: new Date().toISOString(),
         quality_metrics: medicalAnalysis.quality_metrics || {},
@@ -1395,7 +1657,7 @@ export async function POST(request: NextRequest) {
       },
       metadata: {
         ai_model: 'GPT-4o',
-        system_version: '3.1-Complete-Fields',
+        system_version: '3.2-Free-Text-Medications',
         error_logged: true,
         support_contact: 'support@telemedecine.mu'
       }
@@ -1476,10 +1738,13 @@ export async function GET(request: NextRequest) {
   })
   
   return NextResponse.json({
-    status: '✅ Mauritius Medical AI - Version 3.1 with Complete Fields',
-    version: '3.1-Complete-Fields',
+    status: '✅ Mauritius Medical AI - Version 3.2 with Free Text Medications',
+    version: '3.2-Free-Text-Medications',
     features: [
       '🔄 Prescription renewal support',
+      '📝 Free text medication parsing',
+      '💊 Multiple medication format support (text/array)',
+      '🔍 Medication extraction from chief complaint',
       '💊 Controlled medication validation',
       '🔒 Patient data anonymization',
       '📋 Renewal vs New diagnosis detection',
@@ -1488,18 +1753,34 @@ export async function GET(request: NextRequest) {
       '📊 Prescription monitoring and analytics',
       '🔁 Retry mechanism for robustness',
       '📝 Complete medical reasoning',
-      '🆕 Support for all form fields',
       '😣 Pain scale integration',
       '🏃 Physical activity tracking',
       '🤰 Complete pregnancy information',
       '⚠️ Extended allergy and medical history'
     ],
+    medicationParsing: {
+      supportedFormats: [
+        'Plain text with line breaks',
+        'Comma-separated list',
+        'Semicolon-separated list',
+        'Array of strings',
+        'Bulleted lists',
+        'Numbered lists'
+      ],
+      extractionSources: [
+        'currentMedications field',
+        'currentMedicationsText field',
+        'Chief complaint text',
+        'Multiple field fallbacks'
+      ]
+    },
     fieldsSupported: {
       patientForm: {
         other_allergies: '✅ Supported',
         other_medical_history: '✅ Supported',
         gestational_age: '✅ Supported',
-        physical_activity: '✅ Supported'
+        physical_activity: '✅ Supported',
+        free_text_medications: '✅ Supported'
       },
       clinicalForm: {
         pain_scale: '✅ Supported (0-10 scale)'
@@ -1508,13 +1789,15 @@ export async function GET(request: NextRequest) {
     renewalCapabilities: {
       supported: true,
       autoDetection: true,
+      freeTextMedications: true,
+      extractFromComplaint: true,
       controlledSubstances: {
         psychotropes: '30 days max',
         opioids: '7 days max (requires justification)',
         antibiotics: 'Not renewable without evaluation'
       },
       standardRenewalPeriod: '90 days',
-      requiresCurrentMedications: true
+      requiresCurrentMedications: false // Now can extract from complaint
     },
     dataProtection: {
       enabled: true,
