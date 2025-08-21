@@ -318,64 +318,112 @@ export default function ModernPatientForm({
     return gender
   }, [])
 
-  const transformDataForAPI = useCallback((data: PatientFormData) => {
-    const sexe = data.gender === 'Male' ? 'Male' : 
-                 data.gender === 'Female' ? 'Female' : 
-                 data.gender || 'Not specified'
-
-    const allergiesArray = [...data.allergies]
-    if (data.otherAllergies?.trim()) {
-      allergiesArray.push(data.otherAllergies.trim())
+const transformDataForAPI = useCallback((data: PatientFormData) => {
+  const sexe = data.gender === 'Male' ? 'Male' : 
+               data.gender === 'Female' ? 'Female' : 
+               data.gender || 'Not specified'
+  
+  const allergiesArray = [...data.allergies]
+  if (data.otherAllergies?.trim()) {
+    allergiesArray.push(data.otherAllergies.trim())
+  }
+  
+  const historyArray = [...data.medicalHistory]
+  if (data.otherMedicalHistory?.trim()) {
+    historyArray.push(data.otherMedicalHistory.trim())
+  }
+  
+  // Calculate gestational age if pregnant
+  let gestationalAge = ''
+  if (data.pregnancyStatus === 'pregnant' && data.lastMenstrualPeriod) {
+    gestationalAge = calculateGestationalAge(data.lastMenstrualPeriod)
+  }
+  
+  return {
+    // Personal information - Include all field name variations
+    nom: data.lastName || '',
+    prenom: data.firstName || '',
+    firstName: data.firstName || '',
+    lastName: data.lastName || '',
+    first_name: data.firstName || '',
+    last_name: data.lastName || '',
+    dateNaissance: data.birthDate || '',
+    dateOfBirth: data.birthDate || '',
+    date_of_birth: data.birthDate || '',
+    age: data.age || '',
+    sexe: sexe,
+    sex: sexe,
+    gender: sexe,
+    
+    // Pregnancy information - Include all field name variations
+    pregnancyStatus: data.pregnancyStatus || 'not_specified',
+    pregnancy_status: data.pregnancyStatus || 'not_specified',
+    lastMenstrualPeriod: data.lastMenstrualPeriod || '',
+    last_menstrual_period: data.lastMenstrualPeriod || '',
+    gestationalAge: gestationalAge,
+    gestational_age: gestationalAge,
+    
+    // Contact - Include all field name variations
+    telephone: data.phone || '',
+    phone: data.phone || '',
+    phone_number: data.phone || '',
+    phoneNumber: data.phone || '',
+    email: data.email || '',
+    adresse: data.address || '',
+    address: data.address || '',
+    ville: data.city || '',
+    city: data.city || '',
+    pays: data.country || 'Mauritius',
+    country: data.country || 'Mauritius',
+    
+    // Medical data - Include all field name variations
+    poids: data.weight || '',
+    weight: data.weight || '',
+    taille: data.height || '',
+    height: data.height || '',
+    allergies: allergiesArray.join(', ') || 'No known allergies',
+    otherAllergies: data.otherAllergies || '',
+    other_allergies: data.otherAllergies || '',
+    antecedents: historyArray.join(', ') || 'No significant history',
+    medicalHistory: historyArray,
+    medical_history: historyArray,
+    otherMedicalHistory: data.otherMedicalHistory || '',
+    other_medical_history: data.otherMedicalHistory || '',
+    medicamentsActuels: data.currentMedicationsText || 'None',
+    currentMedications: data.currentMedicationsText || 'None',
+    current_medications: data.currentMedicationsText || 'None',
+    
+    // LIFESTYLE HABITS - Include all possible field names and structures
+    // Flat structure (for direct field access)
+    smokingStatus: data.lifeHabits.smoking || 'Not specified',
+    smoking_status: data.lifeHabits.smoking || 'Not specified',
+    alcoholConsumption: data.lifeHabits.alcohol || 'Not specified',
+    alcohol_consumption: data.lifeHabits.alcohol || 'Not specified',
+    physicalActivity: data.lifeHabits.physicalActivity || 'Not specified',
+    physical_activity: data.lifeHabits.physicalActivity || 'Not specified',
+    
+    // Nested structure in French (for compatibility)
+    habitudes: {
+      tabac: data.lifeHabits.smoking || 'Not specified',
+      alcool: data.lifeHabits.alcohol || 'Not specified',
+      activitePhysique: data.lifeHabits.physicalActivity || 'Not specified'
+    },
+    
+    // Nested structure in English (for compatibility)
+    lifeHabits: {
+      smoking: data.lifeHabits.smoking || 'Not specified',
+      alcohol: data.lifeHabits.alcohol || 'Not specified',
+      physicalActivity: data.lifeHabits.physicalActivity || 'Not specified'
+    },
+    
+    // Also include snake_case nested structure
+    life_habits: {
+      smoking: data.lifeHabits.smoking || 'Not specified',
+      alcohol: data.lifeHabits.alcohol || 'Not specified',
+      physical_activity: data.lifeHabits.physicalActivity || 'Not specified'
     }
-
-    const historyArray = [...data.medicalHistory]
-    if (data.otherMedicalHistory?.trim()) {
-      historyArray.push(data.otherMedicalHistory.trim())
-    }
-
-    // Calculate gestational age if pregnant
-    let gestationalAge = ''
-    if (data.pregnancyStatus === 'pregnant' && data.lastMenstrualPeriod) {
-      gestationalAge = calculateGestationalAge(data.lastMenstrualPeriod)
-    }
-
-    return {
-      // Personal information
-      nom: data.lastName || '',
-      prenom: data.firstName || '',
-      dateNaissance: data.birthDate || '',
-      age: data.age || '',
-      sexe: sexe,
-      sex: sexe,
-      gender: sexe,
-      
-      // Pregnancy information
-      pregnancyStatus: data.pregnancyStatus || 'not_specified',
-      lastMenstrualPeriod: data.lastMenstrualPeriod || '',
-      gestationalAge: gestationalAge,
-      
-      // Contact
-      telephone: data.phone || '',
-      email: data.email || '',
-      adresse: data.address || '',
-      ville: data.city || '',
-      pays: data.country || 'Mauritius',
-      
-      // Medical data
-      poids: data.weight || '',
-      taille: data.height || '',
-      allergies: allergiesArray.join(', ') || 'No known allergies',
-      antecedents: historyArray.join(', ') || 'No significant history',
-      medicamentsActuels: data.currentMedicationsText || 'None',
-      
-      // Life habits
-      habitudes: {
-        tabac: data.lifeHabits.smoking || 'Not specified',
-        alcool: data.lifeHabits.alcohol || 'Not specified',
-        activitePhysique: data.lifeHabits.physicalActivity || 'Not specified'
-      }
-    }
-  }, [calculateGestationalAge])
+  }
+}, [calculateGestationalAge])
 
   // ========== Event handlers ==========
   const handleInputChange = useCallback((field: keyof PatientFormData, value: any) => {
@@ -517,86 +565,189 @@ export default function ModernPatientForm({
     }
   }, [formData.lastMenstrualPeriod, formData.pregnancyStatus, formData.gestationalAge, calculateGestationalAge])
 
-  // Initialize data
-  useEffect(() => {
-    const initializeData = async () => {
-      if (dataInitialized) return
-      
-      try {
-        setIsLoading(true)
-        
-        const urlParams = new URLSearchParams(window.location.search)
-        const source = urlParams.get('source')
-        const patientDataParam = urlParams.get('patientData')
-        
-        let patientInfo = null
-        
-        if (source === 'tibok' && patientDataParam) {
-          try {
-            patientInfo = JSON.parse(decodeURIComponent(patientDataParam))
-          } catch (e) {
-            console.error('Error parsing URL data:', e)
-          }
-        } else if (tibokPatient) {
-          patientInfo = tibokPatient
-        }
-        
-        if (patientInfo) {
-          const normalizedAllergies = Array.isArray(patientInfo.allergies) 
-            ? patientInfo.allergies : []
-          const normalizedMedicalHistory = Array.isArray(patientInfo.medicalHistory)
-            ? patientInfo.medicalHistory : []
-
-          const newFormData: PatientFormData = {
-            firstName: patientInfo.firstName || patientInfo.first_name || "",
-            lastName: patientInfo.lastName || patientInfo.last_name || "",
-            birthDate: (patientInfo.dateOfBirth || patientInfo.date_of_birth || "").split('T')[0],
-            age: patientInfo.age?.toString() || "",
-            gender: normalizeGender(patientInfo.gender),
-            pregnancyStatus: patientInfo.pregnancyStatus || "",
-            lastMenstrualPeriod: patientInfo.lastMenstrualPeriod || "",
-            gestationalAge: "",
-            weight: patientInfo.weight?.toString() || "",
-            height: patientInfo.height?.toString() || "",
-            phone: patientInfo.phone || patientInfo.phone_number || patientInfo.phoneNumber || "",
-            email: patientInfo.email || "",
-            address: patientInfo.address || "",
-            city: patientInfo.city || "",
-            country: patientInfo.country || "Mauritius",
-            allergies: normalizedAllergies,
-            otherAllergies: patientInfo.otherAllergies || "",
-            medicalHistory: normalizedMedicalHistory,
-            otherMedicalHistory: patientInfo.otherMedicalHistory || "",
-            currentMedicationsText: patientInfo.currentMedications || "",
-            lifeHabits: {
-              smoking: patientInfo.smokingStatus || "",
-              alcohol: patientInfo.alcoholConsumption || "",
-              physicalActivity: patientInfo.physicalActivity || ""
-            }
-          }
-          
-          setFormData(newFormData)
-          setDataInitialized(true)
-        } else if (consultationId) {
-          const savedData = await consultationDataService.getAllData()
-          if (savedData?.patientData) {
-            setFormData(prev => ({
-              ...prev,
-              ...savedData.patientData
-            }))
-            setDataInitialized(true)
-          }
-        }
-        
-      } catch (error) {
-        console.error('Error initializing data:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+// Initialize data
+useEffect(() => {
+  const initializeData = async () => {
+    if (dataInitialized) return
     
-    initializeData()
-  }, [consultationId, tibokPatient, dataInitialized, normalizeGender])
+    try {
+      setIsLoading(true)
+      
+      const urlParams = new URLSearchParams(window.location.search)
+      const source = urlParams.get('source')
+      const patientDataParam = urlParams.get('patientData')
+      
+      let patientInfo = null
+      
+      if (source === 'tibok' && patientDataParam) {
+        try {
+          patientInfo = JSON.parse(decodeURIComponent(patientDataParam))
+          console.log('📋 Received patient data from Tibok:', patientInfo)
+          
+          // Debug log to see what fields are actually present
+          console.log('🔍 DEBUG - Available fields:', {
+            lifestyle: {
+              smokingStatus: patientInfo.smokingStatus,
+              smoking_status: patientInfo.smoking_status,
+              alcoholConsumption: patientInfo.alcoholConsumption,
+              alcohol_consumption: patientInfo.alcohol_consumption,
+              physicalActivity: patientInfo.physicalActivity,
+              physical_activity: patientInfo.physical_activity,
+              lifeHabits: patientInfo.lifeHabits,
+              habitudes: patientInfo.habitudes
+            },
+            pregnancy: {
+              pregnancyStatus: patientInfo.pregnancyStatus,
+              pregnancy_status: patientInfo.pregnancy_status,
+              lastMenstrualPeriod: patientInfo.lastMenstrualPeriod,
+              last_menstrual_period: patientInfo.last_menstrual_period
+            }
+          })
+        } catch (e) {
+          console.error('Error parsing URL data:', e)
+        }
+      } else if (tibokPatient) {
+        patientInfo = tibokPatient
+      }
+      
+      if (patientInfo) {
+        // Handle allergies - check if it's an array or comma-separated string
+        const normalizedAllergies = Array.isArray(patientInfo.allergies) 
+          ? patientInfo.allergies 
+          : (patientInfo.allergies && typeof patientInfo.allergies === 'string' 
+              ? patientInfo.allergies.split(',').map((a: string) => a.trim()).filter((a: string) => a)
+              : [])
+        
+        // Handle medical history - check if it's an array or comma-separated string
+        const normalizedMedicalHistory = Array.isArray(patientInfo.medicalHistory)
+          ? patientInfo.medicalHistory 
+          : Array.isArray(patientInfo.medical_history)
+            ? patientInfo.medical_history
+            : (patientInfo.antecedents && typeof patientInfo.antecedents === 'string'
+                ? patientInfo.antecedents.split(',').map((h: string) => h.trim()).filter((h: string) => h)
+                : [])
+        
+        const newFormData: PatientFormData = {
+          // Personal information - check multiple field name variations
+          firstName: patientInfo.firstName || 
+                    patientInfo.first_name || 
+                    patientInfo.prenom || 
+                    "",
+          lastName: patientInfo.lastName || 
+                   patientInfo.last_name || 
+                   patientInfo.nom || 
+                   "",
+          birthDate: (patientInfo.dateOfBirth || 
+                     patientInfo.date_of_birth || 
+                     patientInfo.dateNaissance || 
+                     "").split('T')[0],
+          age: (patientInfo.age?.toString ? patientInfo.age.toString() : patientInfo.age) || "",
+          gender: normalizeGender(patientInfo.gender || patientInfo.sexe || patientInfo.sex),
+          
+          // PREGNANCY INFORMATION - Check all possible field names
+          pregnancyStatus: patientInfo.pregnancyStatus || 
+                          patientInfo.pregnancy_status || 
+                          "",
+          lastMenstrualPeriod: (patientInfo.lastMenstrualPeriod || 
+                               patientInfo.last_menstrual_period || 
+                               "").split('T')[0], // Remove time component if present
+          gestationalAge: patientInfo.gestationalAge || 
+                         patientInfo.gestational_age || 
+                         "",
+          
+          // Physical data
+          weight: (patientInfo.weight?.toString ? patientInfo.weight.toString() : patientInfo.weight) || 
+                  (patientInfo.poids?.toString ? patientInfo.poids.toString() : patientInfo.poids) || 
+                  "",
+          height: (patientInfo.height?.toString ? patientInfo.height.toString() : patientInfo.height) || 
+                  (patientInfo.taille?.toString ? patientInfo.taille.toString() : patientInfo.taille) || 
+                  "",
+          
+          // Contact information
+          phone: patientInfo.phone || 
+                patientInfo.phone_number || 
+                patientInfo.phoneNumber || 
+                patientInfo.telephone || 
+                "",
+          email: patientInfo.email || "",
+          address: patientInfo.address || 
+                  patientInfo.adresse || 
+                  "",
+          city: patientInfo.city || 
+               patientInfo.ville || 
+               "",
+          country: patientInfo.country || 
+                  patientInfo.pays || 
+                  "Mauritius",
+          
+          // Medical information
+          allergies: normalizedAllergies,
+          otherAllergies: patientInfo.otherAllergies || 
+                         patientInfo.other_allergies || 
+                         "",
+          medicalHistory: normalizedMedicalHistory,
+          otherMedicalHistory: patientInfo.otherMedicalHistory || 
+                              patientInfo.other_medical_history || 
+                              "",
+          currentMedicationsText: patientInfo.currentMedications || 
+                                 patientInfo.current_medications || 
+                                 patientInfo.medicamentsActuels || 
+                                 "",
+          
+          // LIFESTYLE HABITS - Check all possible field locations and names
+          lifeHabits: {
+            smoking: patientInfo.smokingStatus || 
+                    patientInfo.smoking_status || 
+                    patientInfo.lifeHabits?.smoking || 
+                    patientInfo.life_habits?.smoking || 
+                    patientInfo.habitudes?.tabac || 
+                    "",
+            alcohol: patientInfo.alcoholConsumption || 
+                    patientInfo.alcohol_consumption || 
+                    patientInfo.lifeHabits?.alcohol || 
+                    patientInfo.life_habits?.alcohol || 
+                    patientInfo.habitudes?.alcool || 
+                    "",
+            physicalActivity: patientInfo.physicalActivity || 
+                            patientInfo.physical_activity || 
+                            patientInfo.lifeHabits?.physicalActivity || 
+                            patientInfo.life_habits?.physical_activity || 
+                            patientInfo.habitudes?.activitePhysique || 
+                            ""
+          }
+        }
+        
+        console.log('✅ Initialized form data with:', newFormData)
+        console.log('📊 Lifestyle data populated:', newFormData.lifeHabits)
+        console.log('👶 Pregnancy data populated:', {
+          status: newFormData.pregnancyStatus,
+          lmp: newFormData.lastMenstrualPeriod,
+          gestAge: newFormData.gestationalAge
+        })
+        
+        setFormData(newFormData)
+        setDataInitialized(true)
+      } else if (consultationId) {
+        const savedData = await consultationDataService.getAllData()
+        if (savedData?.patientData) {
+          setFormData(prev => ({
+            ...prev,
+            ...savedData.patientData
+          }))
+          setDataInitialized(true)
+        }
+      }
+      
+    } catch (error) {
+      console.error('❌ Error initializing data:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+  
+  initializeData()
+}, [consultationId, tibokPatient, dataInitialized, normalizeGender])
+
 
   // Auto-save
   useEffect(() => {
