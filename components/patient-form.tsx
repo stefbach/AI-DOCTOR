@@ -627,6 +627,73 @@ useEffect(() => {
                 ? patientInfo.antecedents.split(',').map((h: string) => h.trim()).filter((h: string) => h)
                 : [])
         
+        // VALUE MAPPING FUNCTIONS - Map English/Tibok values to form's expected French values
+        const mapSmokingStatus = (value: string): string => {
+          if (!value) return ""
+          const lowerValue = value.toLowerCase().trim()
+          // Map from English/Tibok to form's expected values
+          const mappings: Record<string, string> = {
+            'current-smoker': 'actuel',
+            'current smoker': 'actuel',
+            'smoker': 'actuel',
+            'non-smoker': 'non',
+            'non smoker': 'non',
+            'never': 'non',
+            'ex-smoker': 'ancien',
+            'ex smoker': 'ancien',
+            'former smoker': 'ancien',
+            'former': 'ancien',
+            // French values pass through
+            'actuel': 'actuel',
+            'non': 'non',
+            'ancien': 'ancien'
+          }
+          return mappings[lowerValue] || value
+        }
+        
+        const mapAlcoholStatus = (value: string): string => {
+          if (!value) return ""
+          const lowerValue = value.toLowerCase().trim()
+          // Map from English/Tibok to form's expected values
+          const mappings: Record<string, string> = {
+            'never': 'jamais',
+            'none': 'jamais',
+            'occasional': 'occasionnel',
+            'occasionally': 'occasionnel',
+            'sometimes': 'occasionnel',
+            'regular': 'regulier',
+            'regularly': 'regulier',
+            'daily': 'regulier',
+            // French values pass through
+            'jamais': 'jamais',
+            'occasionnel': 'occasionnel',
+            'regulier': 'regulier'
+          }
+          return mappings[lowerValue] || value
+        }
+        
+        const mapPhysicalActivity = (value: string): string => {
+          if (!value) return ""
+          const lowerValue = value.toLowerCase().trim()
+          // Map from English/Tibok to form's expected values
+          const mappings: Record<string, string> = {
+            'sedentary': 'sedentaire',
+            'none': 'sedentaire',
+            'minimal': 'sedentaire',
+            'moderate': 'moderee',
+            'moderate activity': 'moderee',
+            'regular': 'moderee',
+            'intense': 'intense',
+            'high': 'intense',
+            'very active': 'intense',
+            // French values pass through
+            'sedentaire': 'sedentaire',
+            'moderee': 'moderee',
+            'intense': 'intense'
+          }
+          return mappings[lowerValue] || value
+        }
+        
         const newFormData: PatientFormData = {
           // Personal information - check multiple field name variations
           firstName: patientInfo.firstName || 
@@ -694,26 +761,32 @@ useEffect(() => {
                                  patientInfo.medicamentsActuels || 
                                  "",
           
-          // LIFESTYLE HABITS - Check all possible field locations and names
+          // LIFESTYLE HABITS - Map values to match form's expected French values
           lifeHabits: {
-            smoking: patientInfo.smokingStatus || 
-                    patientInfo.smoking_status || 
-                    patientInfo.lifeHabits?.smoking || 
-                    patientInfo.life_habits?.smoking || 
-                    patientInfo.habitudes?.tabac || 
-                    "",
-            alcohol: patientInfo.alcoholConsumption || 
-                    patientInfo.alcohol_consumption || 
-                    patientInfo.lifeHabits?.alcohol || 
-                    patientInfo.life_habits?.alcohol || 
-                    patientInfo.habitudes?.alcool || 
-                    "",
-            physicalActivity: patientInfo.physicalActivity || 
-                            patientInfo.physical_activity || 
-                            patientInfo.lifeHabits?.physicalActivity || 
-                            patientInfo.life_habits?.physical_activity || 
-                            patientInfo.habitudes?.activitePhysique || 
-                            ""
+            smoking: mapSmokingStatus(
+              patientInfo.smokingStatus || 
+              patientInfo.smoking_status || 
+              patientInfo.lifeHabits?.smoking || 
+              patientInfo.life_habits?.smoking || 
+              patientInfo.habitudes?.tabac || 
+              ""
+            ),
+            alcohol: mapAlcoholStatus(
+              patientInfo.alcoholConsumption || 
+              patientInfo.alcohol_consumption || 
+              patientInfo.lifeHabits?.alcohol || 
+              patientInfo.life_habits?.alcohol || 
+              patientInfo.habitudes?.alcool || 
+              ""
+            ),
+            physicalActivity: mapPhysicalActivity(
+              patientInfo.physicalActivity || 
+              patientInfo.physical_activity || 
+              patientInfo.lifeHabits?.physicalActivity || 
+              patientInfo.life_habits?.physical_activity || 
+              patientInfo.habitudes?.activitePhysique || 
+              ""
+            )
           }
         }
         
