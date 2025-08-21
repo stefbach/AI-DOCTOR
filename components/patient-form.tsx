@@ -800,7 +800,14 @@ useEffect(() => {
         
         setFormData(newFormData)
         setDataInitialized(true)
+        
+        // IMPORTANT: Save the properly mapped data immediately to prevent old data from loading
+        if (source === 'tibok') {
+          await consultationDataService.saveStepData(0, newFormData)
+        }
+        
       } else if (consultationId) {
+        // Only load saved data if NOT coming from Tibok
         const savedData = await consultationDataService.getAllData()
         if (savedData?.patientData) {
           setFormData(prev => ({
