@@ -146,21 +146,70 @@ const createEmptyReport = (): MauritianReport => ({
     }
   }
 })
+// ==================== DEBOUNCED COMPONENTS (MOVED OUTSIDE MAIN COMPONENT) ====================
 
-// ==================== OPTIMIZED INPUT COMPONENTS (MOVED OUTSIDE MAIN COMPONENT) ====================
-// Medication Input Component - Updated with local state and delayed sync
-const MedicationEditForm = memo(({ 
-  medication, 
-  index, 
-  onUpdate, 
-  onRemove 
+// 1. Debounced Textarea for Report Sections
+const DebouncedTextarea = memo(({
+  value,
+  onUpdate,
+  className,
+  placeholder
+}: {
+  value: string
+  onUpdate: (value: string) => void
+  className?: string
+  placeholder?: string
+}) => {
+  const [localValue, setLocalValue] = useState(value)
+  const updateTimeoutRef = useRef<NodeJS.Timeout>()
+
+  useEffect(() => {
+    setLocalValue(value)
+  }, [value])
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value
+    setLocalValue(newValue)
+
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current)
+    }
+
+    updateTimeoutRef.current = setTimeout(() => {
+      onUpdate(newValue)
+    }, 500)
+  }, [onUpdate])
+
+  useEffect(() => {
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  return (
+    <Textarea
+      value={localValue}
+      onChange={handleChange}
+      className={className}
+      placeholder={placeholder}
+    />
+  )
+})
+
+// 2. Fixed Medication Input Component
+const MedicationEditForm = memo(({
+  medication,
+  index,
+  onUpdate,
+  onRemove
 }: {
   medication: any
   index: number
   onUpdate: (index: number, updatedMedication: any) => void
   onRemove: (index: number) => void
 }) => {
-  // Local state
   const [localMed, setLocalMed] = useState({
     nom: medication.nom || '',
     denominationCommune: medication.denominationCommune || '',
@@ -175,23 +224,34 @@ const MedicationEditForm = memo(({
     surveillanceParticuliere: medication.surveillanceParticuliere || '',
     nonSubstituable: medication.nonSubstituable || false
   })
+  const updateTimeoutRef = useRef<NodeJS.Timeout>()
 
-  // Single handleFieldChange that updates parent immediately
+  // Update local state immediately - NO parent update here
   const handleFieldChange = useCallback((field: string, value: any) => {
-    const newMed = {
-      ...localMed,
-      [field]: value
+    setLocalMed(prev => ({ ...prev, [field]: value }))
+  }, [])
+
+  // Debounced update to parent
+  useEffect(() => {
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current)
     }
-    setLocalMed(newMed)
     
-    // Update parent immediately
-    const updatedMed = {
-      ...newMed,
-      ligneComplete: `${newMed.nom} ${newMed.dosage ? `- ${newMed.dosage}` : ''}\n` +
-                    `${newMed.posologie} - ${newMed.modeAdministration}\n` +
-                    `Duration: ${newMed.dureeTraitement} - Quantity: ${newMed.quantite}`
+    updateTimeoutRef.current = setTimeout(() => {
+      const updatedMed = {
+        ...localMed,
+        ligneComplete: `${localMed.nom} ${localMed.dosage ? `- ${localMed.dosage}` : ''}\n` +
+                      `${localMed.posologie} - ${localMed.modeAdministration}\n` +
+                      `Duration: ${localMed.dureeTraitement} - Quantity: ${localMed.quantite}`
+      }
+      onUpdate(index, updatedMed)
+    }, 500)
+
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current)
+      }
     }
-    onUpdate(index, updatedMed)
   }, [localMed, index, onUpdate])
 
   return (
@@ -320,9 +380,7 @@ const MedicationEditForm = memo(({
   )
 })
 
-MedicationEditForm.displayName = 'MedicationEditForm'
-
-// Biology Test Input Component - Updated with local state and delayed sync
+// 3. Fixed Biology Test Input Component
 const BiologyTestEditForm = memo(({
   test,
   category,
@@ -336,7 +394,6 @@ const BiologyTestEditForm = memo(({
   onUpdate: (category: string, index: number, updatedTest: any) => void
   onRemove: (category: string, index: number) => void
 }) => {
-  // Local state
   const [localTest, setLocalTest] = useState({
     nom: test.nom || '',
     categorie: test.categorie || category,
@@ -348,19 +405,30 @@ const BiologyTestEditForm = memo(({
     tubePrelevement: test.tubePrelevement || 'As per laboratory protocol',
     delaiResultat: test.delaiResultat || 'Standard'
   })
-  
-  // Single handleFieldChange that updates parent immediately
+  const updateTimeoutRef = useRef<NodeJS.Timeout>()
+
+  // Update local state immediately - NO parent update here
   const handleFieldChange = useCallback((field: string, value: any) => {
-    const newTest = {
-      ...localTest,
-      [field]: value
+    setLocalTest(prev => ({ ...prev, [field]: value }))
+  }, [])
+
+  // Debounced update to parent
+  useEffect(() => {
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current)
     }
-    setLocalTest(newTest)
     
-    // Update parent immediately
-    onUpdate(category, index, newTest)
-  }, [category, index, onUpdate, localTest])
-  
+    updateTimeoutRef.current = setTimeout(() => {
+      onUpdate(category, index, localTest)
+    }, 500)
+
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current)
+      }
+    }
+  }, [localTest, category, index, onUpdate])
+
   return (
     <div className="space-y-3 p-3">
       <div className="grid grid-cols-2 gap-3">
@@ -452,9 +520,7 @@ const BiologyTestEditForm = memo(({
   )
 })
 
-BiologyTestEditForm.displayName = 'BiologyTestEditForm'
-
-// Imaging Exam Input Component - Updated with local state and delayed sync
+// 4. Fixed Imaging Exam Input Component
 const ImagingExamEditForm = memo(({
   exam,
   index,
@@ -466,7 +532,6 @@ const ImagingExamEditForm = memo(({
   onUpdate: (index: number, updatedExam: any) => void
   onRemove: (index: number) => void
 }) => {
-  // Local state
   const [localExam, setLocalExam] = useState({
     type: exam.type || exam.modalite || '',
     modalite: exam.modalite || '',
@@ -477,19 +542,30 @@ const ImagingExamEditForm = memo(({
     protocoleSpecifique: exam.protocoleSpecifique || '',
     questionDiagnostique: exam.questionDiagnostique || ''
   })
-  
-  // Single handleFieldChange that updates parent immediately
+  const updateTimeoutRef = useRef<NodeJS.Timeout>()
+
+  // Update local state immediately - NO parent update here
   const handleFieldChange = useCallback((field: string, value: any) => {
-    const newExam = {
-      ...localExam,
-      [field]: value
+    setLocalExam(prev => ({ ...prev, [field]: value }))
+  }, [])
+
+  // Debounced update to parent
+  useEffect(() => {
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current)
     }
-    setLocalExam(newExam)
     
-    // Update parent immediately
-    onUpdate(index, newExam)
-  }, [index, onUpdate, localExam])
-  
+    updateTimeoutRef.current = setTimeout(() => {
+      onUpdate(index, localExam)
+    }, 500)
+
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current)
+      }
+    }
+  }, [localExam, index, onUpdate])
+
   return (
     <div className="space-y-3 p-3">
       <div className="grid grid-cols-2 gap-3">
@@ -573,8 +649,11 @@ const ImagingExamEditForm = memo(({
   )
 })
 
+// Set display names for debugging
+MedicationEditForm.displayName = 'MedicationEditForm'
+BiologyTestEditForm.displayName = 'BiologyTestEditForm'
 ImagingExamEditForm.displayName = 'ImagingExamEditForm'
-
+DebouncedTextarea.displayName = 'DebouncedTextarea'
 // ==================== MAIN COMPONENT ====================
 export default function ProfessionalReportEditable({
   patientData,
@@ -2296,7 +2375,7 @@ export default function ProfessionalReportEditable({
     const [localDoctorInfo, setLocalDoctorInfo] = useState(doctorInfo)
     const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
     
-    // Sync local state with parent after delay - Updated to 5 seconds
+    // Sync local state with parent after delay
     useEffect(() => {
       const timer = setTimeout(() => {
         if (editingDoctor && JSON.stringify(localDoctorInfo) !== JSON.stringify(doctorInfo)) {
@@ -2306,7 +2385,7 @@ export default function ProfessionalReportEditable({
             }
           })
         }
-      }, 5000) // Updated from 1000 to 5000
+      }, 5000)
       
       return () => clearTimeout(timer)
     }, [localDoctorInfo, editingDoctor])
@@ -2525,9 +2604,9 @@ export default function ProfessionalReportEditable({
                 <section key={section.key} className="space-y-2 section">
                   <h2 className="text-xl font-bold text-gray-900">{section.title}</h2>
                   {editMode && validationStatus !== 'validated' ? (
-                    <Textarea
+                    <DebouncedTextarea
                       value={content}
-                      onChange={(e) => updateRapportSection(section.key, e.target.value)}
+                      onUpdate={(value) => updateRapportSection(section.key, value)}
                       className="min-h-[200px] font-sans text-gray-700"
                       placeholder="Enter text..."
                     />
@@ -2585,7 +2664,6 @@ export default function ProfessionalReportEditable({
       </Card>
     )
   }
-
   const MedicationPrescription = () => {
     const medications = report?.ordonnances?.medicaments?.prescription?.medicaments || []
     const patient = getReportPatient()
@@ -2645,11 +2723,11 @@ export default function ProfessionalReportEditable({
 
         <div className="space-y-6">
           {medications.length > 0 ? (
-medications.map((med: any, index: number) => (
-  <div 
-    key={`medication-${index}`}
-    className="border-l-4 border-green-500 pl-4 py-2 prescription-item"
-  >
+            medications.map((med: any, index: number) => (
+              <div 
+                key={index}
+                className="border-l-4 border-green-500 pl-4 py-2 prescription-item"
+              >
                 {editMode && validationStatus !== 'validated' ? (
                   <MedicationEditForm
                     medication={med}
@@ -2830,7 +2908,7 @@ medications.map((med: any, index: number) => (
                   </h3>
                   <div className="space-y-2">
                     {tests.map((test: any, idx: number) => (
-                      <div key={`${key}-test-${idx}`} className="prescription-item">  {/* This key is already stable - good! */}
+                      <div key={idx} className="prescription-item">
                         {editMode && validationStatus !== 'validated' ? (
                           <BiologyTestEditForm
                             test={test}
@@ -2986,7 +3064,7 @@ medications.map((med: any, index: number) => (
         {examens.length > 0 ? (
           <div className="space-y-6">
             {examens.map((exam: any, index: number) => (
-              <div key={`imaging-${index}`} className="border-l-4 border-indigo-500 pl-4 py-2 prescription-item">  {/* FIXED: Using stable index-based key */}
+              <div key={index} className="border-l-4 border-indigo-500 pl-4 py-2 prescription-item">
                 {editMode && validationStatus !== 'validated' ? (
                   <ImagingExamEditForm
                     exam={exam}
@@ -3071,7 +3149,6 @@ medications.map((med: any, index: number) => (
       </div>
     )
   }
-
   const InvoiceComponent = () => {
     const invoice = report?.invoice
     if (!invoice) return null
@@ -3380,7 +3457,6 @@ medications.map((med: any, index: number) => (
       </Card>
     )
   }
-
   // ==================== MAIN RENDER ====================
   return (
     <div className="space-y-6 print:space-y-4">
