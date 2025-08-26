@@ -1629,7 +1629,6 @@ export async function POST(request: NextRequest) {
       errorCode: 'PROCESSING_ERROR',
       timestamp: new Date().toISOString(),
       processingTime: `${errorTime}ms`,
-    return NextResponse.json({
       diagnosis: generateEmergencyFallbackDiagnosis ({}),
       expertAnalysis: {
         expert_investigations: {
