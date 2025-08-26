@@ -150,11 +150,240 @@ const CONSULTATION_REASON_TRANSLATIONS: Record<string, string> = {
 
 // ==================== HELPER FUNCTIONS ====================
 
-// Helper function to translate consultation reason
+// Add this helper function for translating custom medical text
+const translateCustomMedicalText = (text: string): string => {
+  // Common French medical terms and phrases dictionary
+  const medicalDictionary: Record<string, string> = {
+    // Body parts
+    'tête': 'head',
+    'gorge': 'throat',
+    'ventre': 'stomach/abdomen',
+    'dos': 'back',
+    'jambe': 'leg',
+    'jambes': 'legs',
+    'bras': 'arm',
+    'pied': 'foot',
+    'pieds': 'feet',
+    'main': 'hand',
+    'mains': 'hands',
+    'poitrine': 'chest',
+    'cou': 'neck',
+    'épaule': 'shoulder',
+    'genou': 'knee',
+    'cheville': 'ankle',
+    'oreille': 'ear',
+    'œil': 'eye',
+    'yeux': 'eyes',
+    'nez': 'nose',
+    'bouche': 'mouth',
+    'dent': 'tooth',
+    'dents': 'teeth',
+    
+    // Symptoms
+    'douleur': 'pain',
+    'douleurs': 'pains',
+    'mal': 'pain/ache',
+    'maux': 'aches',
+    'fièvre': 'fever',
+    'toux': 'cough',
+    'fatigue': 'fatigue',
+    'fatigué': 'tired',
+    'nausée': 'nausea',
+    'nausées': 'nausea',
+    'vomissement': 'vomiting',
+    'vomissements': 'vomiting',
+    'vertige': 'dizziness',
+    'vertiges': 'dizziness',
+    'brûlure': 'burning',
+    'démangeaison': 'itching',
+    'gonflement': 'swelling',
+    'enflure': 'swelling',
+    'rougeur': 'redness',
+    'éruption': 'rash',
+    'boutons': 'pimples/bumps',
+    'saignement': 'bleeding',
+    'écoulement': 'discharge',
+    'difficulté': 'difficulty',
+    'problème': 'problem',
+    'problèmes': 'problems',
+    'trouble': 'disorder',
+    'troubles': 'disorders',
+    
+    // Common phrases
+    "j'ai": "I have",
+    "je suis": "I am",
+    "je me sens": "I feel",
+    "je ressens": "I feel",
+    "depuis": "for/since",
+    "hier": "yesterday",
+    "aujourd'hui": "today",
+    "jours": "days",
+    "jour": "day",
+    "semaine": "week",
+    "semaines": "weeks",
+    "mois": "month",
+    "très": "very",
+    "beaucoup": "a lot",
+    "peu": "little",
+    "fort": "strong",
+    "forte": "strong",
+    "léger": "mild",
+    "légère": "mild",
+    "aigu": "acute",
+    "aiguë": "acute",
+    "chronique": "chronic",
+    
+    // Actions/Verbs
+    'respirer': 'breathe',
+    'avaler': 'swallow',
+    'dormir': 'sleep',
+    'manger': 'eat',
+    'boire': 'drink',
+    'marcher': 'walk',
+    'bouger': 'move',
+    
+    // Medical conditions
+    'grippe': 'flu',
+    'rhume': 'cold',
+    'allergie': 'allergy',
+    'infection': 'infection',
+    'inflammation': 'inflammation',
+    'blessure': 'injury',
+    'coupure': 'cut',
+    'brûlure': 'burn',
+    'fracture': 'fracture',
+    'entorse': 'sprain',
+    'migraine': 'migraine',
+    'sinusite': 'sinusitis',
+    'gastro': 'gastroenteritis',
+    'angine': 'sore throat/tonsillitis',
+    'otite': 'ear infection',
+    'bronchite': 'bronchitis',
+    'asthme': 'asthma',
+    'diabète': 'diabetes',
+    'hypertension': 'hypertension',
+    'tension': 'blood pressure',
+    
+    // Time expressions
+    'matin': 'morning',
+    'soir': 'evening',
+    'nuit': 'night',
+    'après-midi': 'afternoon',
+    'maintenant': 'now',
+    'récemment': 'recently',
+    'souvent': 'often',
+    'parfois': 'sometimes',
+    'toujours': 'always',
+    'jamais': 'never'
+  }
+  
+  // Start with the original text
+  let translated = text
+  
+  // First, try to do phrase-level translations
+  const phraseReplacements = [
+    { fr: /j'ai mal au/gi, en: 'I have pain in the' },
+    { fr: /j'ai mal à la/gi, en: 'I have pain in the' },
+    { fr: /j'ai mal aux/gi, en: 'I have pain in the' },
+    { fr: /j'ai des/gi, en: 'I have' },
+    { fr: /je n'arrive pas à/gi, en: "I can't" },
+    { fr: /depuis (\d+) jours?/gi, en: 'for $1 days' },
+    { fr: /depuis (\d+) semaines?/gi, en: 'for $1 weeks' },
+    { fr: /depuis (\d+) mois/gi, en: 'for $1 months' },
+    { fr: /depuis hier/gi, en: 'since yesterday' },
+    { fr: /ce matin/gi, en: 'this morning' },
+    { fr: /cette nuit/gi, en: 'tonight/last night' },
+    { fr: /tout le temps/gi, en: 'all the time' },
+    { fr: /de temps en temps/gi, en: 'from time to time' },
+    { fr: /quand je/gi, en: 'when I' },
+    { fr: /après avoir/gi, en: 'after having' }
+  ]
+  
+  // Apply phrase replacements
+  phraseReplacements.forEach(({ fr, en }) => {
+    translated = translated.replace(fr, en)
+  })
+  
+  // Then do word-by-word translation for remaining French words
+  const words = translated.split(/\s+/)
+  const translatedWords = words.map(word => {
+    // Preserve punctuation
+    const punctuation = word.match(/[.,!?;:]+$/)?.[0] || ''
+    const cleanWord = word.replace(/[.,!?;:]+$/, '')
+    
+    // Check dictionary for the word (case-insensitive)
+    const lowerWord = cleanWord.toLowerCase()
+    if (medicalDictionary[lowerWord]) {
+      return medicalDictionary[lowerWord] + punctuation
+    }
+    
+    // Check for words with articles (le, la, les, un, une, des)
+    const articles = ['le', 'la', 'les', 'un', 'une', 'des', 'du', 'de', 'au', 'aux']
+    if (articles.includes(lowerWord)) {
+      // Common article translations
+      const articleMap: Record<string, string> = {
+        'le': 'the',
+        'la': 'the',
+        'les': 'the',
+        'un': 'a',
+        'une': 'a',
+        'des': 'some',
+        'du': 'of the',
+        'de': 'of',
+        'au': 'in the',
+        'aux': 'in the'
+      }
+      return (articleMap[lowerWord] || lowerWord) + punctuation
+    }
+    
+    return word
+  })
+  
+  translated = translatedWords.join(' ')
+  
+  // Clean up the translation
+  translated = translated
+    .replace(/\s+/g, ' ')
+    .replace(/the the/gi, 'the')
+    .replace(/a a/gi, 'a')
+    .trim()
+  
+  // Capitalize first letter
+  if (translated.length > 0) {
+    translated = translated.charAt(0).toUpperCase() + translated.slice(1)
+  }
+  
+  return translated
+}
+
+// Replace the translateConsultationReason function with this updated version:
 const translateConsultationReason = (reason: string): string => {
   if (!reason) return ""
   
-  // First check for exact match
+  // First check if it starts with "Autre motif" or contains custom text pattern
+  // Pattern 1: "Autre motif (préciser): [custom text]"
+  // Pattern 2: "Autre motif (préciser) - [custom text]"
+  // Pattern 3: Just the custom text if "Autre motif" was selected
+  
+  const autreMotifPatterns = [
+    /^Autre motif \(préciser\)\s*:\s*(.+)$/i,
+    /^Autre motif \(préciser\)\s*-\s*(.+)$/i,
+    /^Autre motif \(préciser\)\s*(.+)$/i,
+  ]
+  
+  for (const pattern of autreMotifPatterns) {
+    const match = reason.match(pattern)
+    if (match && match[1]) {
+      const customText = match[1].trim()
+      console.log('🔄 Found custom "Autre motif" text:', customText)
+      
+      // Try to translate the custom text using a basic French-English medical dictionary
+      const translatedCustom = translateCustomMedicalText(customText)
+      return `Other reason (specify): ${translatedCustom}`
+    }
+  }
+  
+  // Check for exact match in the existing translations
   const exactMatch = CONSULTATION_REASON_TRANSLATIONS[reason]
   if (exactMatch) {
     console.log('✅ Exact translation found:', reason, '→', exactMatch)
@@ -174,13 +403,11 @@ const translateConsultationReason = (reason: string): string => {
   if (reason.includes('/')) {
     const parts = reason.split('/').map(part => part.trim())
     const translatedParts = parts.map(part => {
-      // Try to find translation for each part
       for (const [french, english] of Object.entries(CONSULTATION_REASON_TRANSLATIONS)) {
         if (french.toLowerCase() === part.toLowerCase()) {
           return english
         }
       }
-      // If no translation found for this part, keep original
       return part
     })
     
@@ -189,7 +416,7 @@ const translateConsultationReason = (reason: string): string => {
     return translatedReason
   }
   
-  // Check if it's already in English (common English terms)
+  // Check if it's already in English
   const englishTerms = [
     'fever', 'flu', 'headache', 'migraine', 'cough', 'pain', 
     'consultation', 'symptoms', 'prescription', 'renewal',
@@ -208,7 +435,14 @@ const translateConsultationReason = (reason: string): string => {
     return reason
   }
   
-  // If no translation found, log warning and return original
+  // If no translation found, try to translate as custom text
+  // This handles cases where the patient entered custom text directly
+  const translatedCustom = translateCustomMedicalText(reason)
+  if (translatedCustom !== reason) {
+    console.log('✅ Translated custom text:', reason, '→', translatedCustom)
+    return translatedCustom
+  }
+  
   console.warn('⚠️ No translation found for consultation reason:', reason)
   return reason
 }
