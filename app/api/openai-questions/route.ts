@@ -1,4 +1,4 @@
-// app/api/openai-questions/route.ts - VERSION 2.0 COMPLETE REWRITE
+// app/api/openai-questions/route.ts - VERSION 2.1 ADAPTÉE POUR START-CONSULTATION
 import { type NextRequest, NextResponse } from "next/server"
 
 // Configuration
@@ -6,7 +6,7 @@ export const runtime = 'edge'
 export const preferredRegion = 'auto'
 
 // ==================== TYPES & INTERFACES ====================
-// Note: ALL TEMPERATURES ARE IN CELSIUS (°C) THROUGHOUT THE SYSTEM
+// ADAPTÉES AUX DONNÉES DE START-CONSULTATION
 interface PatientData {
   // Demographics
   firstName?: string
@@ -16,17 +16,34 @@ interface PatientData {
   weight?: string | number
   height?: string | number
   
+  // NEW: Pregnancy information
+  pregnancyStatus?: string
+  lastMenstrualPeriod?: string
+  gestationalAge?: string
+  
   // Medical History
   allergies?: string[]
   medicalHistory?: string[]
   currentMedications?: string
+  currentMedicationsText?: string // Alternative field name
   
-  // Lifestyle
+  // Lifestyle - STRUCTURE DE START-CONSULTATION
   lifeHabits?: {
     smoking?: string
     alcohol?: string
     physicalActivity?: string
   }
+  // Alternative naming for compatibility
+  smokingStatus?: string
+  alcoholConsumption?: string
+  physicalActivity?: string
+  
+  // Contact info (optional)
+  phone?: string
+  email?: string
+  address?: string
+  city?: string
+  country?: string
 }
 
 interface ClinicalData {
@@ -76,10 +93,17 @@ interface ProcessedPatientData {
   }
   
   lifestyle: {
-    smoking: 'non' | 'current' | 'former'
-    alcohol: 'none' | 'occasional' | 'regular' | 'heavy'
-    exercise: 'sedentary' | 'moderate' | 'active'
+    smoking: 'non' | 'current' | 'former' | 'unknown'
+    alcohol: 'none' | 'occasional' | 'regular' | 'heavy' | 'unknown'
+    exercise: 'sedentary' | 'moderate' | 'active' | 'unknown'
   }
+  
+  // NEW: Pregnancy data
+  pregnancyStatus?: string
+  lastMenstrualPeriod?: string
+  gestationalAge?: string
+  isPregnant?: boolean
+  isChildbearingAge?: boolean
 }
 
 interface ProcessedClinicalData {
@@ -187,6 +211,13 @@ const RED_FLAGS = {
     { symptom: 'blood in stool', severity: 'high' },
     { symptom: 'persistent vomiting', severity: 'high' },
     { symptom: 'severe dehydration', severity: 'high' }
+  ],
+  // NEW: Pregnancy-specific red flags
+  obstetric: [
+    { symptom: 'severe abdominal pain in pregnancy', severity: 'critical' },
+    { symptom: 'vaginal bleeding in pregnancy', severity: 'critical' },
+    { symptom: 'severe headache with visual changes in pregnancy', severity: 'critical' },
+    { symptom: 'persistent vomiting in pregnancy', severity: 'high' }
   ]
 }
 
@@ -257,9 +288,10 @@ const cache = new EnhancedCache()
 
 // ==================== DATA PROCESSING FUNCTIONS ====================
 function processPatientData(patient: PatientData): ProcessedPatientData {
-  const age = typeof patient.age === 'string' ? parseInt(patient.age) : patient.age || 0
-  const weight = typeof patient.weight === 'string' ? parseFloat(patient.weight) : patient.weight || 0
-  const height = typeof patient.height === 'string' ? parseFloat(patient.height) : patient.height || 0
+  // SAFE TYPE CONVERSION
+  const age = typeof patient.age === 'string' ? parseInt(patient.age) || 0 : patient.age || 0
+  const weight = typeof patient.weight === 'string' ? parseFloat(patient.weight) || 0 : patient.weight || 0
+  const height = typeof patient.height === 'string' ? parseFloat(patient.height) || 0 : patient.height || 0
   
   // Calculate BMI
   let bmi: number | undefined
@@ -274,25 +306,44 @@ function processPatientData(patient: PatientData): ProcessedPatientData {
     else bmiCategory = 'obese'
   }
   
-  // Process chronic conditions
-  const chronicConditions = patient.medicalHistory || []
+  // Process chronic conditions - SÉCURISÉ
+  const chronicConditions = Array.isArray(patient.medicalHistory) 
+    ? patient.medicalHistory.filter(h => typeof h === 'string' && h.trim() !== '')
+    : []
   const hasChronicConditions = chronicConditions.length > 0
   
-  // Process allergies
-  const allergiesList = patient.allergies || []
+  // Process allergies - SÉCURISÉ
+  const allergiesList = Array.isArray(patient.allergies)
+    ? patient.allergies.filter(a => typeof a === 'string' && a.trim() !== '')
+    : []
   const hasAllergies = allergiesList.length > 0
   
-  // Process medications
-  const medicationsList = patient.currentMedications 
-    ? patient.currentMedications.split(/[,\n]/).map(m => m.trim()).filter(Boolean)
+  // Process medications - GESTION DES DEUX FORMATS
+  let medicationsText = patient.currentMedications || patient.currentMedicationsText || ''
+  if (typeof medicationsText !== 'string') {
+    medicationsText = ''
+  }
+  
+  const medicationsList = medicationsText 
+    ? medicationsText.split(/[,\n]/).map(m => m.trim()).filter(Boolean)
     : []
   const onMedications = medicationsList.length > 0
   
   // Calculate risk profiles
   const riskProfile = calculateRiskProfile(age, chronicConditions, patient.lifeHabits, bmi)
   
-  // Process lifestyle
-  const lifestyle = processLifestyle(patient.lifeHabits)
+  // Process lifestyle - ADAPTÉ À START-CONSULTATION
+  const lifestyle = processLifestyle(patient.lifeHabits || {
+    smoking: patient.smokingStatus,
+    alcohol: patient.alcoholConsumption,
+    physicalActivity: patient.physicalActivity
+  })
+  
+  // PREGNANCY PROCESSING
+  const isChildbearingAge = age >= 15 && age <= 50
+  const isPregnant = patient.pregnancyStatus === 'pregnant' || 
+                    patient.pregnancyStatus === 'currently_pregnant' ||
+                    patient.pregnancyStatus === 'possibly_pregnant'
   
   return {
     age,
@@ -306,25 +357,46 @@ function processPatientData(patient: PatientData): ProcessedPatientData {
     onMedications,
     medicationsList,
     riskProfile,
-    lifestyle
+    lifestyle,
+    // NEW: Pregnancy fields
+    pregnancyStatus: patient.pregnancyStatus,
+    lastMenstrualPeriod: patient.lastMenstrualPeriod,
+    gestationalAge: patient.gestationalAge,
+    isPregnant,
+    isChildbearingAge
   }
 }
 
 function processClinicalData(clinical: ClinicalData): ProcessedClinicalData {
-  const mainComplaint = clinical.chiefComplaint || ''
-  const complaintCategory = categorizeComplaint(mainComplaint, clinical.symptoms || [])
-  const symptomsList = clinical.symptoms || []
+  // SAFE STRING PROCESSING
+  const mainComplaint = typeof clinical.chiefComplaint === 'string' 
+    ? clinical.chiefComplaint.trim() 
+    : ''
+    
+  const symptomsList = Array.isArray(clinical.symptoms) 
+    ? clinical.symptoms.filter(s => typeof s === 'string' && s.trim() !== '')
+    : []
+    
+  const complaintCategory = categorizeComplaint(mainComplaint, symptomsList)
   
-  // Process duration
+  // Process duration - SAFE
+  const durationValue = typeof clinical.symptomDuration === 'string' 
+    ? clinical.symptomDuration 
+    : 'unknown'
+    
   const duration = {
-    value: clinical.symptomDuration || 'unknown',
-    urgency: DURATION_URGENCY_MAP[clinical.symptomDuration || ''] || 'semi-urgent' as const
+    value: durationValue,
+    urgency: DURATION_URGENCY_MAP[durationValue] || 'semi-urgent' as const
   }
   
-  // Process pain
-  const painLevel = typeof clinical.painScale === 'string' 
-    ? parseInt(clinical.painScale) 
-    : clinical.painScale || 0
+  // Process pain - SAFE CONVERSION
+  let painLevel = 0
+  if (typeof clinical.painScale === 'string') {
+    const parsed = parseInt(clinical.painScale)
+    painLevel = isNaN(parsed) ? 0 : Math.max(0, Math.min(10, parsed))
+  } else if (typeof clinical.painScale === 'number') {
+    painLevel = Math.max(0, Math.min(10, clinical.painScale))
+  }
   
   let painCategory: 'none' | 'mild' | 'moderate' | 'severe' | 'extreme'
   if (painLevel === 0) painCategory = 'none'
@@ -344,7 +416,9 @@ function processClinicalData(clinical: ClinicalData): ProcessedClinicalData {
     painLevel,
     painCategory,
     vitals,
-    evolution: clinical.diseaseHistory
+    evolution: typeof clinical.diseaseHistory === 'string' 
+      ? clinical.diseaseHistory 
+      : undefined
   }
 }
 
@@ -354,7 +428,7 @@ function processVitalSigns(vitals?: ClinicalData['vitalSigns']) {
   const result: ProcessedClinicalData['vitals'] = {}
   
   // Temperature (ALL VALUES IN CELSIUS)
-  if (vitals.temperature) {
+  if (vitals.temperature !== null && vitals.temperature !== undefined) {
     const temp = typeof vitals.temperature === 'string' 
       ? parseFloat(vitals.temperature) 
       : vitals.temperature
@@ -363,10 +437,10 @@ function processVitalSigns(vitals?: ClinicalData['vitalSigns']) {
       result.temperature = temp
       
       // Temperature thresholds in Celsius:
-      if (temp < 36.1) result.tempStatus = 'hypothermia'      // Below 36.1°C
-      else if (temp <= 37.2) result.tempStatus = 'normal'     // 36.1-37.2°C
-      else if (temp <= 38.5) result.tempStatus = 'fever'      // 37.3-38.5°C
-      else result.tempStatus = 'high-fever'                   // Above 38.5°C
+      if (temp < 36.1) result.tempStatus = 'hypothermia'      
+      else if (temp <= 37.2) result.tempStatus = 'normal'     
+      else if (temp <= 38.5) result.tempStatus = 'fever'      
+      else result.tempStatus = 'high-fever'                   
     }
   }
   
@@ -414,6 +488,8 @@ function calculateRiskProfile(
   if (conditions.some(c => c.toLowerCase().includes('hypertension'))) cvRisk += 2
   if (conditions.some(c => c.toLowerCase().includes('heart'))) cvRisk += 3
   if (conditions.some(c => c.toLowerCase().includes('diabetes'))) cvRisk++
+  
+  // LIFESTYLE RISK - SAFE ACCESS
   if (lifestyle?.smoking === 'actuel' || lifestyle?.smoking === 'current') cvRisk += 2
   if (bmi && bmi > 30) cvRisk++
   
@@ -455,6 +531,9 @@ function calculateCriticalityScore(
   else if (patient.age > 65) score += 1
   else if (patient.age < 2) score += 2
   
+  // Pregnancy factor
+  if (patient.isPregnant) score += 1
+  
   // Vital signs
   if (clinical.vitals.tempStatus === 'high-fever') score += 2
   else if (clinical.vitals.tempStatus === 'fever') score += 1
@@ -481,8 +560,10 @@ function calculateCriticalityScore(
   ]
   
   clinical.symptomsList.forEach(symptom => {
-    if (criticalSymptoms.some(cs => symptom.toLowerCase().includes(cs))) {
-      score += 2
+    if (typeof symptom === 'string') {
+      if (criticalSymptoms.some(cs => symptom.toLowerCase().includes(cs))) {
+        score += 2
+      }
     }
   })
   
@@ -506,14 +587,31 @@ function detectRedFlags(
   Object.entries(RED_FLAGS).forEach(([category, categoryFlags]) => {
     categoryFlags.forEach(flag => {
       const hasSymptom = clinical.symptomsList.some(s => 
-        s.toLowerCase().includes(flag.symptom.toLowerCase())
-      ) || clinical.mainComplaint.toLowerCase().includes(flag.symptom.toLowerCase())
+        typeof s === 'string' && s.toLowerCase().includes(flag.symptom.toLowerCase())
+      ) || (typeof clinical.mainComplaint === 'string' && 
+           clinical.mainComplaint.toLowerCase().includes(flag.symptom.toLowerCase()))
       
       if (hasSymptom) {
         flags.push(`${flag.severity.toUpperCase()}: ${flag.symptom}`)
       }
     })
   })
+  
+  // PREGNANCY-SPECIFIC RED FLAGS
+  if (patient.isPregnant) {
+    if (clinical.symptomsList.some(s => 
+      typeof s === 'string' && s.toLowerCase().includes('bleeding'))) {
+      flags.push('CRITICAL: Bleeding in pregnancy')
+    }
+    
+    if (clinical.painLevel >= 7 && clinical.complaintCategory === 'gastrointestinal') {
+      flags.push('HIGH: Severe abdominal pain in pregnancy')
+    }
+    
+    if (clinical.vitals.bpStatus === 'hypertension' || clinical.vitals.bpStatus === 'crisis') {
+      flags.push('HIGH: Hypertension in pregnancy (preeclampsia risk)')
+    }
+  }
   
   // Check vital signs red flags
   if (clinical.vitals.tempStatus === 'high-fever') {
@@ -537,6 +635,124 @@ function detectRedFlags(
   }
   
   return flags
+}
+
+// ==================== HELPER FUNCTIONS ====================
+function normalizeGender(gender: string): 'Male' | 'Female' | 'Other' {
+  if (!gender || typeof gender !== 'string') return 'Other'
+  
+  const g = gender.toLowerCase().trim()
+  if (['m', 'male', 'homme', 'man'].includes(g)) return 'Male'
+  if (['f', 'female', 'femme', 'woman'].includes(g)) return 'Female'
+  
+  return 'Other'
+}
+
+function processLifestyle(habits?: PatientData['lifeHabits']): ProcessedPatientData['lifestyle'] {
+  const mapSmoking = (value?: string): 'non' | 'current' | 'former' | 'unknown' => {
+    if (!value || typeof value !== 'string') return 'unknown'
+    const v = value.toLowerCase().trim()
+    
+    if (['non', 'non-smoker', 'never'].includes(v)) return 'non'
+    if (['actuel', 'current', 'current-smoker', 'smoker'].includes(v)) return 'current'
+    if (['ancien', 'ex-smoker', 'former', 'former-smoker'].includes(v)) return 'former'
+    
+    return 'unknown'
+  }
+  
+  const mapAlcohol = (value?: string): 'none' | 'occasional' | 'regular' | 'heavy' | 'unknown' => {
+    if (!value || typeof value !== 'string') return 'unknown'
+    const v = value.toLowerCase().trim()
+    
+    if (['jamais', 'never', 'none'].includes(v)) return 'none'
+    if (['occasionnel', 'occasional', 'sometimes'].includes(v)) return 'occasional'
+    if (['regulier', 'regular', 'daily'].includes(v)) return 'regular'
+    if (['heavy', 'excessive'].includes(v)) return 'heavy'
+    
+    return 'unknown'
+  }
+  
+  const mapExercise = (value?: string): 'sedentary' | 'moderate' | 'active' | 'unknown' => {
+    if (!value || typeof value !== 'string') return 'unknown'
+    const v = value.toLowerCase().trim()
+    
+    if (['sedentaire', 'sedentary', 'none'].includes(v)) return 'sedentary'
+    if (['moderee', 'moderate', 'regular'].includes(v)) return 'moderate'
+    if (['intense', 'active', 'high'].includes(v)) return 'active'
+    
+    return 'unknown'
+  }
+  
+  return {
+    smoking: mapSmoking(habits?.smoking),
+    alcohol: mapAlcohol(habits?.alcohol),
+    exercise: mapExercise(habits?.physicalActivity)
+  }
+}
+
+function categorizeComplaint(complaint: string, symptoms: string[]): string {
+  // SAFE STRING PROCESSING
+  const cleanComplaint = typeof complaint === 'string' ? complaint : ''
+  const cleanSymptoms = Array.isArray(symptoms) 
+    ? symptoms.filter(s => typeof s === 'string' && s.trim() !== '')
+    : []
+  
+  const allText = `${cleanComplaint} ${cleanSymptoms.join(' ')}`.toLowerCase()
+  
+  for (const [category, keywords] of Object.entries(SYMPTOM_CATEGORIES)) {
+    if (keywords.some(keyword => allText.includes(keyword))) {
+      return category
+    }
+  }
+  
+  return 'general'
+}
+
+function suggestSpecialty(category: string, redFlags: string[], isPregnant: boolean = false): string | undefined {
+  if (redFlags.some(f => f.includes('CRITICAL'))) {
+    return 'Emergency Medicine'
+  }
+  
+  // Pregnancy takes priority
+  if (isPregnant) {
+    return 'Obstetrics/Gynecology'
+  }
+  
+  const specialtyMap: Record<string, string> = {
+    cardiovascular: 'Cardiology',
+    respiratory: 'Pulmonology',
+    neurological: 'Neurology',
+    gastrointestinal: 'Gastroenterology',
+    musculoskeletal: 'Orthopedics/Rheumatology',
+    dermatological: 'Dermatology',
+    psychiatric: 'Psychiatry',
+    constitutional: 'Internal Medicine'
+  }
+  
+  return specialtyMap[category] || 'Internal Medicine'
+}
+
+function calculateUrgencyLevel(criticalityScore: number, isPregnant: boolean = false): string {
+  // Pregnancy adjustment
+  let adjustedScore = criticalityScore
+  if (isPregnant) adjustedScore += 1
+  
+  if (adjustedScore >= 8) return 'IMMEDIATE - Emergency care required'
+  if (adjustedScore >= 6) return 'URGENT - See provider within 24 hours'
+  if (adjustedScore >= 4) return 'SEMI-URGENT - See provider within 48-72 hours'
+  if (adjustedScore >= 2) return 'ROUTINE - Schedule appointment'
+  return 'ROUTINE - Telehealth appropriate'
+}
+
+function getTriageCategory(criticalityScore: number, isPregnant: boolean = false): string {
+  let adjustedScore = criticalityScore
+  if (isPregnant) adjustedScore += 1
+  
+  if (adjustedScore >= 8) return 'ESI-1: Resuscitation'
+  if (adjustedScore >= 6) return 'ESI-2: Emergent'
+  if (adjustedScore >= 4) return 'ESI-3: Urgent'
+  if (adjustedScore >= 2) return 'ESI-4: Semi-urgent'
+  return 'ESI-5: Non-urgent'
 }
 
 // ==================== PROMPT GENERATION ====================
@@ -563,13 +779,15 @@ function generateFastModePrompt(
   clinical: ProcessedClinicalData,
   context: MedicalContext
 ): string {
+  const pregnancyAlert = patient.isPregnant ? '\n⚠️ PATIENT IS PREGNANT - Consider obstetric emergencies' : ''
+  
   return `EMERGENCY TRIAGE ASSESSMENT - RAPID MODE
 
-PATIENT: ${patient.age}y ${patient.gender}
+PATIENT: ${patient.age}y ${patient.gender}${patient.isPregnant ? ' (PREGNANT)' : ''}
 CHIEF COMPLAINT: ${clinical.mainComplaint}
 DURATION: ${clinical.duration.value}
 PAIN: ${clinical.painLevel}/10
-RED FLAGS: ${context.redFlags.length > 0 ? context.redFlags.join(', ') : 'None identified'}
+RED FLAGS: ${context.redFlags.length > 0 ? context.redFlags.join(', ') : 'None identified'}${pregnancyAlert}
 
 Generate 3 CRITICAL triage questions to rapidly identify life-threatening conditions.
 
@@ -577,11 +795,13 @@ Focus ONLY on:
 1. Ruling out immediate life threats
 2. Identifying need for emergency intervention
 3. Detecting critical red flags
+${patient.isPregnant ? '4. Pregnancy-specific emergencies (preeclampsia, placental abruption, ectopic pregnancy)' : ''}
 
 Each question must:
 - Be answerable with simple yes/no or quick selection
 - Target specific emergency conditions
 - Help determine if immediate medical attention needed
+${patient.isPregnant ? '- Consider pregnancy safety' : ''}
 
 Format:
 {
@@ -613,6 +833,15 @@ function generateBalancedModePrompt(
     ? `\nCURRENT MEDICATIONS: ${patient.medicationsList.join(', ')}`
     : ''
   
+  // PREGNANCY INFORMATION
+  const pregnancyStr = patient.isPregnant && patient.gender === 'Female'
+    ? `\n⚠️ PREGNANCY STATUS: ${patient.pregnancyStatus}${
+        patient.lastMenstrualPeriod ? `, LMP: ${patient.lastMenstrualPeriod}` : ''
+      }${
+        patient.gestationalAge ? `, Gestational age: ${patient.gestationalAge}` : ''
+      }`
+    : ''
+  
   const vitalsStr = clinical.vitals.temperature || clinical.vitals.bloodPressure
     ? `\nVITALS: Temp: ${clinical.vitals.temperature}°C (${clinical.vitals.tempStatus}), BP: ${clinical.vitals.bloodPressure} (${clinical.vitals.bpStatus})`
     : ''
@@ -621,7 +850,7 @@ function generateBalancedModePrompt(
 
 PATIENT PROFILE:
 - Demographics: ${patient.age}y ${patient.gender}, BMI: ${patient.bmi?.toFixed(1)} (${patient.bmiCategory})
-- Risk Profile: CV-${patient.riskProfile.cardiovascular}, DM-${patient.riskProfile.diabetes}, Resp-${patient.riskProfile.respiratory}${medicalHistoryStr}${medicationsStr}
+- Risk Profile: CV-${patient.riskProfile.cardiovascular}, DM-${patient.riskProfile.diabetes}, Resp-${patient.riskProfile.respiratory}${medicalHistoryStr}${medicationsStr}${pregnancyStr}
 - Lifestyle: Smoking-${patient.lifestyle.smoking}, Alcohol-${patient.lifestyle.alcohol}, Exercise-${patient.lifestyle.exercise}
 
 CLINICAL PRESENTATION:
@@ -637,6 +866,15 @@ ASSESSMENT:
 - Red Flags: ${context.redFlags.join(', ') || 'None'}
 - Risk Factors: ${context.riskFactors.map(r => `${r.factor}(${r.severity})`).join(', ')}
 
+${patient.isPregnant ? `
+⚠️ PREGNANCY CONSIDERATIONS:
+- All medications must be pregnancy-safe (Category A/B preferred)
+- Avoid teratogenic drugs and procedures
+- Consider physiological changes of pregnancy
+- Assess for pregnancy-specific conditions (preeclampsia, gestational diabetes, etc.)
+- Normal pregnancy symptoms vs pathological conditions
+` : ''}
+
 Generate 5 diagnostic questions following standard clinical protocol:
 
 1. ONE question to characterize the primary symptom (OPQRST method)
@@ -644,11 +882,14 @@ Generate 5 diagnostic questions following standard clinical protocol:
 3. TWO questions to differentiate between likely diagnoses
 4. ONE question about functional impact or associated symptoms
 
+${patient.isPregnant ? 'IMPORTANT: Include pregnancy-specific considerations in your questions.' : ''}
+
 Each question must:
 - Be clinically relevant to the presentation
 - Help narrow the differential diagnosis
 - Use appropriate medical terminology with lay explanations
 - Include 4 specific answer options
+${patient.isPregnant ? '- Consider pregnancy safety when relevant' : ''}
 
 Format:
 {
@@ -683,6 +924,29 @@ function generateIntelligentModePrompt(
   const fullMedications = patient.medicationsList.length > 0
     ? patient.medicationsList.map(m => `• ${m}`).join('\n')
     : 'No current medications'
+  
+  // DETAILED PREGNANCY SECTION
+  const pregnancySection = patient.isPregnant ? `
+
+⚠️ ═══════════════════════════════════════════════════════════
+PREGNANCY STATUS - CRITICAL MEDICAL CONSIDERATIONS
+═══════════════════════════════════════════════════════════
+- Status: ${patient.pregnancyStatus}
+- Last Menstrual Period: ${patient.lastMenstrualPeriod || 'Not provided'}
+- Gestational Age: ${patient.gestationalAge || 'To be calculated'}
+- Pregnancy Category for Medications: MUST be considered for ALL drugs
+- Teratogenic Risk Assessment: Required for any diagnostic procedures
+- Physiological Changes: Cardiovascular, respiratory, renal adaptations
+- Pregnancy-Specific Conditions to Rule Out:
+  • Preeclampsia/HELLP syndrome
+  • Gestational diabetes
+  • Placental abruption
+  • Ectopic pregnancy (if early)
+  • Hyperemesis gravidarum
+  • Deep vein thrombosis (increased risk)
+  • Pulmonary embolism (increased risk)
+═══════════════════════════════════════════════════════════
+` : ''
   
   return `COMPREHENSIVE SPECIALIST CONSULTATION - EXPERT MODE
 
@@ -740,7 +1004,7 @@ ${context.redFlags.length > 0 ? context.redFlags.map(f => `⚠️ ${f}`).join('\
 
 DIFFERENTIAL DIAGNOSIS CONSIDERATIONS:
 Based on presentation, consider:
-${generateDifferentialDiagnosis(clinical.complaintCategory, clinical.symptomsList)}
+${generateDifferentialDiagnosis(clinical.complaintCategory, clinical.symptomsList, patient.isPregnant)}${pregnancySection}
 
 ═══════════════════════════════════════════════════════════
 EXPERT DIAGNOSTIC QUESTIONING REQUIRED
@@ -756,6 +1020,7 @@ Generate 8 sophisticated diagnostic questions that:
 6. MUST assess functional status and quality of life
 7. MUST identify reversible causes
 8. MUST determine need for urgent vs routine evaluation
+${patient.isPregnant ? '9. MUST consider pregnancy-specific conditions and safety' : ''}
 
 Requirements for each question:
 - Use precise medical terminology WITH patient-friendly explanations
@@ -764,6 +1029,7 @@ Requirements for each question:
 - Indicate if positive response requires urgent action
 - Consider age and gender-specific conditions
 - Account for existing comorbidities
+${patient.isPregnant ? '- ALWAYS consider pregnancy safety and specific conditions' : ''}
 
 Format:
 {
@@ -788,8 +1054,13 @@ Format:
 Generate exactly 8 expert-level questions. Response must be valid JSON only.`
 }
 
-function generateDifferentialDiagnosis(category: string, symptoms: string[]): string {
+function generateDifferentialDiagnosis(category: string, symptoms: string[], isPregnant: boolean = false): string {
   const differentials: string[] = []
+  
+  // Add pregnancy-specific differentials first if applicable
+  if (isPregnant) {
+    differentials.push('0. Pregnancy-related conditions (preeclampsia, gestational diabetes, etc.)')
+  }
   
   // Add category-specific differentials
   switch (category) {
@@ -820,6 +1091,18 @@ function generateDifferentialDiagnosis(category: string, symptoms: string[]): st
         '5. Space-Occupying Lesion'
       )
       break
+    case 'gastrointestinal':
+      differentials.push(
+        '1. Acute Gastroenteritis',
+        '2. Inflammatory Bowel Disease',
+        '3. Peptic Ulcer Disease',
+        '4. Gallbladder Disease',
+        '5. Appendicitis'
+      )
+      if (isPregnant) {
+        differentials.push('6. Hyperemesis Gravidarum')
+      }
+      break
     default:
       differentials.push(
         '1. Most likely diagnosis based on symptoms',
@@ -832,77 +1115,13 @@ function generateDifferentialDiagnosis(category: string, symptoms: string[]): st
   return differentials.join('\n')
 }
 
-// ==================== HELPER FUNCTIONS ====================
-function normalizeGender(gender: string): 'Male' | 'Female' | 'Other' {
-  if (!gender) return 'Other'
-  
-  const g = gender.toLowerCase().trim()
-  if (['m', 'male', 'homme', 'man'].includes(g)) return 'Male'
-  if (['f', 'female', 'femme', 'woman'].includes(g)) return 'Female'
-  
-  return 'Other'
-}
-
-function processLifestyle(habits?: PatientData['lifeHabits']) {
-  return {
-    smoking: (habits?.smoking || 'unknown') as 'non' | 'current' | 'former',
-    alcohol: (habits?.alcohol || 'unknown') as 'none' | 'occasional' | 'regular' | 'heavy',
-    exercise: (habits?.physicalActivity || 'unknown') as 'sedentary' | 'moderate' | 'active'
-  }
-}
-
-function categorizeComplaint(complaint: string, symptoms: string[]): string {
-  const allText = `${complaint} ${symptoms.join(' ')}`.toLowerCase()
-  
-  for (const [category, keywords] of Object.entries(SYMPTOM_CATEGORIES)) {
-    if (keywords.some(keyword => allText.includes(keyword))) {
-      return category
-    }
-  }
-  
-  return 'general'
-}
-
-function suggestSpecialty(category: string, redFlags: string[]): string | undefined {
-  if (redFlags.some(f => f.includes('CRITICAL'))) {
-    return 'Emergency Medicine'
-  }
-  
-  const specialtyMap: Record<string, string> = {
-    cardiovascular: 'Cardiology',
-    respiratory: 'Pulmonology',
-    neurological: 'Neurology',
-    gastrointestinal: 'Gastroenterology',
-    musculoskeletal: 'Orthopedics/Rheumatology',
-    dermatological: 'Dermatology',
-    psychiatric: 'Psychiatry',
-    constitutional: 'Internal Medicine'
-  }
-  
-  return specialtyMap[category] || 'Internal Medicine'
-}
-
-function calculateUrgencyLevel(criticalityScore: number): string {
-  if (criticalityScore >= 8) return 'IMMEDIATE - Emergency care required'
-  if (criticalityScore >= 6) return 'URGENT - See provider within 24 hours'
-  if (criticalityScore >= 4) return 'SEMI-URGENT - See provider within 48-72 hours'
-  if (criticalityScore >= 2) return 'ROUTINE - Schedule appointment'
-  return 'ROUTINE - Telehealth appropriate'
-}
-
-function getTriageCategory(criticalityScore: number): string {
-  if (criticalityScore >= 8) return 'ESI-1: Resuscitation'
-  if (criticalityScore >= 6) return 'ESI-2: Emergent'
-  if (criticalityScore >= 4) return 'ESI-3: Urgent'
-  if (criticalityScore >= 2) return 'ESI-4: Semi-urgent'
-  return 'ESI-5: Non-urgent'
-}
-
+// ==================== RECOMMENDATION FUNCTIONS ====================
 function generateRecommendations(
   context: MedicalContext,
   mode: string
 ): APIResponse['recommendations'] {
   const recommendations: APIResponse['recommendations'] = {}
+  const { patient, clinical } = context
   
   // Immediate actions for high criticality
   if (context.criticalityScore >= 7) {
@@ -912,29 +1131,55 @@ function generateRecommendations(
       'Have someone stay with you',
       'Prepare list of current medications'
     ]
+    
+    if (patient.isPregnant) {
+      recommendations.immediateAction.push('Inform emergency services that you are pregnant')
+    }
   } else if (context.criticalityScore >= 5) {
     recommendations.immediateAction = [
       'Seek medical attention within 24 hours',
       'Monitor symptoms closely',
       'Rest and avoid strenuous activity'
     ]
+    
+    if (patient.isPregnant) {
+      recommendations.immediateAction.push('Contact your obstetrician or midwife')
+    }
   }
   
   // Follow-up recommendations
   if (context.criticalityScore >= 4) {
-    recommendations.followUp = 'Schedule urgent appointment with primary care or specialist'
+    recommendations.followUp = patient.isPregnant 
+      ? 'Schedule urgent appointment with obstetrician and primary care'
+      : 'Schedule urgent appointment with primary care or specialist'
   } else {
-    recommendations.followUp = 'Schedule routine follow-up if symptoms persist or worsen'
+    recommendations.followUp = patient.isPregnant
+      ? 'Schedule routine follow-up with obstetrician if symptoms persist'
+      : 'Schedule routine follow-up if symptoms persist or worsen'
   }
   
   // Additional tests based on presentation
   const tests: string[] = []
-  if (context.clinical.complaintCategory === 'cardiovascular') {
-    tests.push('ECG', 'Troponin', 'Chest X-ray', 'D-dimer if PE suspected')
-  } else if (context.clinical.complaintCategory === 'respiratory') {
-    tests.push('Chest X-ray', 'Pulse oximetry', 'Peak flow if asthma')
-  } else if (context.clinical.complaintCategory === 'neurological') {
+  if (clinical.complaintCategory === 'cardiovascular') {
+    tests.push('ECG', 'Troponin', 'Chest X-ray')
+    if (!patient.isPregnant) {
+      tests.push('D-dimer if PE suspected')
+    } else {
+      tests.push('Consider ultrasound instead of X-ray if possible')
+    }
+  } else if (clinical.complaintCategory === 'respiratory') {
+    tests.push('Pulse oximetry', 'Peak flow if asthma')
+    if (!patient.isPregnant) {
+      tests.push('Chest X-ray')
+    } else {
+      tests.push('Chest X-ray only if essential (with abdominal shielding)')
+    }
+  } else if (clinical.complaintCategory === 'neurological' && !patient.isPregnant) {
     tests.push('CT head if trauma', 'MRI if persistent symptoms')
+  }
+  
+  if (patient.isPregnant) {
+    tests.push('Urine dipstick for protein/glucose', 'Blood pressure monitoring')
   }
   
   if (tests.length > 0) {
@@ -943,7 +1188,9 @@ function generateRecommendations(
   
   // Specialist referral
   if (context.suggestedSpecialty && context.criticalityScore >= 3) {
-    recommendations.specialistReferral = context.suggestedSpecialty
+    recommendations.specialistReferral = patient.isPregnant && context.suggestedSpecialty !== 'Emergency Medicine'
+      ? 'Obstetrics/Gynecology + ' + context.suggestedSpecialty
+      : context.suggestedSpecialty
   }
   
   return recommendations
@@ -967,13 +1214,20 @@ function calculateDataCompleteness(patient: ProcessedPatientData, clinical: Proc
     if ((clinical as any)[field]) fieldsProvided++
   })
   
+  // Pregnancy fields if applicable
+  if (patient.isChildbearingAge && patient.gender === 'Female') {
+    totalFields++
+    if (patient.pregnancyStatus) fieldsProvided++
+  }
+  
   return Math.round((fieldsProvided / totalFields) * 100)
 }
 
 function calculateConfidenceLevel(
   dataCompleteness: number,
   mode: string,
-  criticalityScore: number
+  criticalityScore: number,
+  isPregnant: boolean = false
 ): number {
   let confidence = dataCompleteness
   
@@ -984,6 +1238,11 @@ function calculateConfidenceLevel(
   // Adjust based on criticality (lower confidence for critical cases without full data)
   if (criticalityScore >= 7 && dataCompleteness < 80) {
     confidence -= 20
+  }
+  
+  // Pregnancy considerations
+  if (isPregnant && dataCompleteness < 90) {
+    confidence -= 10 // Higher data requirements for pregnant patients
   }
   
   return Math.max(20, Math.min(95, confidence))
@@ -1030,9 +1289,36 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { patientData, clinicalData, mode = 'balanced' } = body
     
+    // ENHANCED DEBUG LOGGING
+    console.log('🔍 COMPREHENSIVE DEBUG - API Input:', {
+      patientData: {
+        type: typeof patientData,
+        keys: patientData ? Object.keys(patientData) : null,
+        firstName: patientData?.firstName,
+        gender: patientData?.gender,
+        pregnancyStatus: patientData?.pregnancyStatus,
+        lifeHabits: patientData?.lifeHabits,
+        smokingStatus: patientData?.smokingStatus
+      },
+      clinicalData: {
+        type: typeof clinicalData,
+        keys: clinicalData ? Object.keys(clinicalData) : null,
+        chiefComplaint: {
+          type: typeof clinicalData?.chiefComplaint,
+          value: clinicalData?.chiefComplaint
+        },
+        symptoms: {
+          isArray: Array.isArray(clinicalData?.symptoms),
+          type: typeof clinicalData?.symptoms,
+          length: clinicalData?.symptoms?.length,
+          sample: clinicalData?.symptoms?.slice(0, 2)
+        }
+      }
+    })
+    
     if (!patientData || !clinicalData) {
       return NextResponse.json(
-        { error: 'Missing required data', success: false },
+        { error: 'Missing required data: patientData and clinicalData are required', success: false },
         { status: 400 }
       )
     }
@@ -1058,6 +1344,20 @@ export async function POST(request: NextRequest) {
     const processedPatient = processPatientData(anonymized)
     const processedClinical = processClinicalData(clinicalData)
     
+    console.log('✅ Processed data:', {
+      patient: {
+        age: processedPatient.age,
+        gender: processedPatient.gender,
+        isPregnant: processedPatient.isPregnant,
+        pregnancyStatus: processedPatient.pregnancyStatus
+      },
+      clinical: {
+        complaint: processedClinical.mainComplaint,
+        symptoms: processedClinical.symptomsList.length,
+        category: processedClinical.complaintCategory
+      }
+    })
+    
     // 6. Risk assessment
     const riskFactors: RiskFactor[] = []
     
@@ -1073,7 +1373,7 @@ export async function POST(request: NextRequest) {
     if (processedPatient.lifestyle.smoking === 'current') {
       riskFactors.push({
         factor: 'Active smoking',
-        severity: 'high',
+        severity: processedPatient.isPregnant ? 'critical' : 'high',
         relatedTo: 'Lifestyle'
       })
     }
@@ -1086,19 +1386,46 @@ export async function POST(request: NextRequest) {
       })
     }
     
+    // Pregnancy-specific risk factors
+    if (processedPatient.isPregnant) {
+      riskFactors.push({
+        factor: 'Pregnancy status',
+        severity: 'medium',
+        relatedTo: 'Physiological state'
+      })
+      
+      if (processedPatient.lifestyle.alcohol !== 'none') {
+        riskFactors.push({
+          factor: 'Alcohol use in pregnancy',
+          severity: 'critical',
+          relatedTo: 'Lifestyle'
+        })
+      }
+    }
+    
     // 7. Calculate scores
     const criticalityScore = calculateCriticalityScore(processedPatient, processedClinical)
     const redFlags = detectRedFlags(processedPatient, processedClinical)
-    const suggestedSpecialty = suggestSpecialty(processedClinical.complaintCategory, redFlags)
+    const suggestedSpecialty = suggestSpecialty(
+      processedClinical.complaintCategory, 
+      redFlags, 
+      processedPatient.isPregnant
+    )
     
     // 8. Auto-adjust mode if critical
     let adjustedMode = mode
     if (criticalityScore >= 8 && mode !== 'intelligent') {
       adjustedMode = 'intelligent'
       console.log(`⚠️ Auto-escalated to intelligent mode due to criticality: ${criticalityScore}`)
-    } else if (criticalityScore <= 2 && mode === 'intelligent') {
+    } else if (criticalityScore <= 2 && mode === 'intelligent' && !processedPatient.isPregnant) {
       adjustedMode = 'balanced'
       console.log(`📉 Optimized to balanced mode for routine case`)
+    }
+    
+    // Pregnancy always gets at least balanced mode
+    if (processedPatient.isPregnant && adjustedMode === 'fast') {
+      adjustedMode = 'balanced'
+      console.log(`👶 Upgraded to balanced mode due to pregnancy`)
     }
     
     // 9. Create context
@@ -1121,6 +1448,8 @@ export async function POST(request: NextRequest) {
       intelligent: { model: 'gpt-4o', temperature: 0.3, maxTokens: 1500 }
     }[adjustedMode] || { model: 'gpt-4o-mini', temperature: 0.2, maxTokens: 1000 }
     
+    console.log(`🤖 Calling ${aiConfig.model} with ${adjustedMode} mode`)
+    
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -1132,7 +1461,7 @@ export async function POST(request: NextRequest) {
         messages: [
           {
             role: 'system',
-            content: 'You are an expert physician conducting a thorough clinical assessment. Generate diagnostic questions based on evidence-based medicine. Always respond with valid JSON only.'
+            content: `You are an expert physician conducting a thorough clinical assessment. Generate diagnostic questions based on evidence-based medicine. Always respond with valid JSON only. ${processedPatient.isPregnant ? 'IMPORTANT: This patient is pregnant - consider pregnancy-specific conditions and medication safety.' : ''}`
           },
           {
             role: 'user',
@@ -1151,12 +1480,25 @@ export async function POST(request: NextRequest) {
     
     const aiData = await openaiResponse.json()
     const content = aiData.choices[0]?.message?.content || '{}'
-    const parsed = JSON.parse(content)
+    
+    let parsed
+    try {
+      parsed = JSON.parse(content)
+    } catch (parseError) {
+      console.error('Failed to parse OpenAI response:', content)
+      throw new Error('Invalid response format from AI')
+    }
+    
     const questions = parsed.questions || []
     
     // 12. Calculate metadata
     const dataCompleteness = calculateDataCompleteness(processedPatient, processedClinical)
-    const confidenceLevel = calculateConfidenceLevel(dataCompleteness, adjustedMode, criticalityScore)
+    const confidenceLevel = calculateConfidenceLevel(
+      dataCompleteness, 
+      adjustedMode, 
+      criticalityScore,
+      processedPatient.isPregnant
+    )
     
     // 13. Generate recommendations
     const recommendations = generateRecommendations(context, adjustedMode)
@@ -1172,8 +1514,8 @@ export async function POST(request: NextRequest) {
         redFlags,
         riskFactors,
         suggestedSpecialty,
-        urgencyLevel: calculateUrgencyLevel(criticalityScore),
-        triageCategory: getTriageCategory(criticalityScore)
+        urgencyLevel: calculateUrgencyLevel(criticalityScore, processedPatient.isPregnant),
+        triageCategory: getTriageCategory(criticalityScore, processedPatient.isPregnant)
       },
       recommendations,
       dataProtection: {
@@ -1193,10 +1535,18 @@ export async function POST(request: NextRequest) {
     // 15. Cache response
     cache.set(cacheKey, response)
     
+    console.log('✅ API Response generated successfully:', {
+      questionsCount: questions.length,
+      criticalityScore,
+      redFlagsCount: redFlags.length,
+      mode: adjustedMode,
+      isPregnant: processedPatient.isPregnant
+    })
+    
     return NextResponse.json(response)
     
   } catch (error: any) {
-    console.error('API Error:', error)
+    console.error('❌ API Error:', error)
     
     // Return fallback for errors
     return NextResponse.json({
@@ -1233,37 +1583,51 @@ export async function POST(request: NextRequest) {
 // ==================== TEST ENDPOINT ====================
 export async function GET() {
   return NextResponse.json({
-    status: '✅ API v2.0 Operational',
-    version: '2.0.0',
+    status: '✅ API v2.1 Operational - Adapted for Start-Consultation',
+    version: '2.1.0',
     features: [
       'Three differentiated AI modes (fast/balanced/intelligent)',
-      'Complete medical data utilization',
+      'Complete medical data utilization from start-consultation',
+      'Pregnancy-specific assessments and safety considerations',
       'Advanced risk assessment and triage',
-      'Red flag detection system',
-      'Automatic mode escalation for critical cases',
+      'Red flag detection system with pregnancy alerts',
+      'Automatic mode escalation for critical cases and pregnancy',
       'GDPR/HIPAA compliant data protection',
       'Comprehensive clinical recommendations',
-      'Evidence-based diagnostic questioning'
+      'Evidence-based diagnostic questioning',
+      'Enhanced type safety and error handling',
+      'Full compatibility with start-consultation data structure'
     ],
     modes: {
       fast: {
         description: 'Rapid triage for emergency assessment',
         questions: 3,
-        focusOn: 'Life-threatening conditions',
+        focusOn: 'Life-threatening conditions + pregnancy emergencies',
         model: 'gpt-3.5-turbo'
       },
       balanced: {
-        description: 'Standard clinical assessment',
+        description: 'Standard clinical assessment with pregnancy considerations',
         questions: 5,
-        focusOn: 'Differential diagnosis',
+        focusOn: 'Differential diagnosis + pregnancy safety',
         model: 'gpt-4o-mini'
       },
       intelligent: {
         description: 'Comprehensive specialist consultation',
         questions: 8,
-        focusOn: 'Complex cases with rare conditions',
+        focusOn: 'Complex cases + pregnancy management + rare conditions',
         model: 'gpt-4o'
       }
+    },
+    pregnancySupport: {
+      enabled: true,
+      features: [
+        'Automatic pregnancy detection and mode adjustment',
+        'Pregnancy-specific red flags and risk assessment',
+        'Medication safety considerations',
+        'Obstetric emergency screening',
+        'Gestational age calculation',
+        'Specialized recommendations for pregnant patients'
+      ]
     },
     compliance: {
       dataProtection: 'Full PII anonymization',
