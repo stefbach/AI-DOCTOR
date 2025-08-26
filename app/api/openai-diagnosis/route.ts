@@ -972,7 +972,7 @@ async function callOpenAIWithRetry(
           messages: [
             {
               role: 'system',
-              content: 'You are an expert physician with deep knowledge of medical guidelines and the Mauritius healthcare system. Generate comprehensive, evidence-based analyses while avoiding over-prescription. Handle prescription renewals appropriately. Accept medications in text format.'
+              content: 'You are an expert physician with deep knowledge of medical guidelines and the Mauritius healthcare system. Generate comprehensive, evidence-based analyses while avoiding over-prescription. Handle prescription renewals appropriately. Accept medications in text format.Respond with valid JSON format.'
             },
             {
               role: 'user',
@@ -1629,7 +1629,8 @@ export async function POST(request: NextRequest) {
       errorCode: 'PROCESSING_ERROR',
       timestamp: new Date().toISOString(),
       processingTime: `${errorTime}ms`,
-      diagnosis: generateEmergencyFallbackDiagnosis(body?.patientData || {}),
+    return NextResponse.json({
+      diagnosis: generateEmergencyFallbackDiagnosis ({}),
       expertAnalysis: {
         expert_investigations: {
           immediate_priority: [],
