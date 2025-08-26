@@ -177,7 +177,7 @@ const DebouncedTextarea = memo(({
 
     updateTimeoutRef.current = setTimeout(() => {
       onUpdate(newValue)
-    }, 500)
+    }, 60000)
   }, [onUpdate])
 
   useEffect(() => {
@@ -245,7 +245,7 @@ const MedicationEditForm = memo(({
                       `Duration: ${localMed.dureeTraitement} - Quantity: ${localMed.quantite}`
       }
       onUpdate(index, updatedMed)
-    }, 500)
+    }, 60000)
 
     return () => {
       if (updateTimeoutRef.current) {
@@ -420,7 +420,7 @@ const BiologyTestEditForm = memo(({
     
     updateTimeoutRef.current = setTimeout(() => {
       onUpdate(category, index, localTest)
-    }, 500)
+    }, 60000)
 
     return () => {
       if (updateTimeoutRef.current) {
@@ -557,7 +557,7 @@ const ImagingExamEditForm = memo(({
     
     updateTimeoutRef.current = setTimeout(() => {
       onUpdate(index, localExam)
-    }, 500)
+    }, 60000)
 
     return () => {
       if (updateTimeoutRef.current) {
