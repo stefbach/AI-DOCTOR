@@ -152,12 +152,13 @@ const CONSULTATION_REASON_TRANSLATIONS: Record<string, string> = {
 
 // Add this helper function for translating custom medical text
 const translateCustomMedicalText = (text: string): string => {
-  // Common French medical terms and phrases dictionary
+  // Common French medical terms and phrases dictionary (includes variations without accents)
   const medicalDictionary: Record<string, string> = {
     // Body parts
     'tête': 'head',
+    'tete': 'head',
     'gorge': 'throat',
-    'ventre': 'stomach/abdomen',
+    'ventre': 'stomach',
     'dos': 'back',
     'jambe': 'leg',
     'jambes': 'legs',
@@ -169,69 +170,93 @@ const translateCustomMedicalText = (text: string): string => {
     'poitrine': 'chest',
     'cou': 'neck',
     'épaule': 'shoulder',
+    'epaule': 'shoulder',
     'genou': 'knee',
     'cheville': 'ankle',
     'oreille': 'ear',
     'œil': 'eye',
+    'oeil': 'eye',
     'yeux': 'eyes',
     'nez': 'nose',
     'bouche': 'mouth',
     'dent': 'tooth',
     'dents': 'teeth',
     
-    // Symptoms
+    // Symptoms (with and without accents for real-world usage)
     'douleur': 'pain',
     'douleurs': 'pains',
-    'mal': 'pain/ache',
+    'mal': 'pain',
     'maux': 'aches',
     'fièvre': 'fever',
+    'fievre': 'fever',
     'toux': 'cough',
     'fatigue': 'fatigue',
     'fatigué': 'tired',
+    'fatigue': 'tired',
     'nausée': 'nausea',
+    'nausee': 'nausea',
     'nausées': 'nausea',
+    'nausees': 'nausea',
     'vomissement': 'vomiting',
     'vomissements': 'vomiting',
     'vertige': 'dizziness',
     'vertiges': 'dizziness',
     'brûlure': 'burning',
+    'brulure': 'burning',
     'démangeaison': 'itching',
+    'demangeaison': 'itching',
     'gonflement': 'swelling',
     'enflure': 'swelling',
     'rougeur': 'redness',
     'éruption': 'rash',
-    'boutons': 'pimples/bumps',
+    'eruption': 'rash',
+    'boutons': 'pimples',
     'saignement': 'bleeding',
     'écoulement': 'discharge',
+    'ecoulement': 'discharge',
     'difficulté': 'difficulty',
+    'difficulte': 'difficulty',
     'problème': 'problem',
+    'probleme': 'problem',
     'problèmes': 'problems',
+    'problemes': 'problems',
     'trouble': 'disorder',
     'troubles': 'disorders',
     
-    // Common phrases
+    // Common phrases and connectors
     "j'ai": "I have",
+    "j ai": "I have",
+    "jai": "I have",
     "je suis": "I am",
     "je me sens": "I feel",
     "je ressens": "I feel",
-    "depuis": "for/since",
+    "et": "and",
+    "ou": "or",
+    "avec": "with",
+    "sans": "without",
+    "depuis": "for",
     "hier": "yesterday",
     "aujourd'hui": "today",
+    "aujourd hui": "today",
     "jours": "days",
     "jour": "day",
     "semaine": "week",
     "semaines": "weeks",
     "mois": "month",
     "très": "very",
+    "tres": "very",
     "beaucoup": "a lot",
     "peu": "little",
     "fort": "strong",
     "forte": "strong",
-    "léger": "mild",
-    "légère": "mild",
-    "aigu": "acute",
-    "aiguë": "acute",
-    "chronique": "chronic",
+    'léger': 'mild',
+    'leger': 'mild',
+    'légère': 'mild',
+    'legere': 'mild',
+    'aigu': 'acute',
+    'aiguë': 'acute',
+    'aigue': 'acute',
+    'chronique': 'chronic',
     
     // Actions/Verbs
     'respirer': 'breathe',
@@ -242,7 +267,7 @@ const translateCustomMedicalText = (text: string): string => {
     'marcher': 'walk',
     'bouger': 'move',
     
-    // Medical conditions
+    // Medical conditions (with variations)
     'grippe': 'flu',
     'rhume': 'cold',
     'allergie': 'allergy',
@@ -251,16 +276,19 @@ const translateCustomMedicalText = (text: string): string => {
     'blessure': 'injury',
     'coupure': 'cut',
     'brûlure': 'burn',
+    'brulure': 'burn',
     'fracture': 'fracture',
     'entorse': 'sprain',
     'migraine': 'migraine',
     'sinusite': 'sinusitis',
     'gastro': 'gastroenteritis',
-    'angine': 'sore throat/tonsillitis',
+    'angine': 'sore throat',
     'otite': 'ear infection',
     'bronchite': 'bronchitis',
     'asthme': 'asthma',
+    'asthma': 'asthma',
     'diabète': 'diabetes',
+    'diabete': 'diabetes',
     'hypertension': 'hypertension',
     'tension': 'blood pressure',
     
@@ -269,24 +297,37 @@ const translateCustomMedicalText = (text: string): string => {
     'soir': 'evening',
     'nuit': 'night',
     'après-midi': 'afternoon',
+    'apres-midi': 'afternoon',
+    'apres midi': 'afternoon',
     'maintenant': 'now',
     'récemment': 'recently',
+    'recemment': 'recently',
     'souvent': 'often',
     'parfois': 'sometimes',
     'toujours': 'always',
     'jamais': 'never'
   }
   
-  // Start with the original text
-  let translated = text
+  // Pre-process text to handle common patterns
+  let preprocessed = text.toLowerCase().trim()
   
+  // Handle common connectors that might not have spaces
+  preprocessed = preprocessed
+    .replace(/\bet\b/g, ' and ')
+    .replace(/\bou\b/g, ' or ')
+    .replace(/\bavec\b/g, ' with ')
+    
   // First, try to do phrase-level translations
   const phraseReplacements = [
-    { fr: /j'ai mal au/gi, en: 'I have pain in the' },
-    { fr: /j'ai mal à la/gi, en: 'I have pain in the' },
-    { fr: /j'ai mal aux/gi, en: 'I have pain in the' },
-    { fr: /j'ai des/gi, en: 'I have' },
-    { fr: /je n'arrive pas à/gi, en: "I can't" },
+    { fr: /j'?ai mal au/gi, en: 'I have pain in the' },
+    { fr: /j'?ai mal a la/gi, en: 'I have pain in the' },
+    { fr: /j'?ai mal aux/gi, en: 'I have pain in the' },
+    { fr: /mal au/gi, en: 'pain in the' },
+    { fr: /mal a la/gi, en: 'pain in the' },
+    { fr: /j'?ai des/gi, en: 'I have' },
+    { fr: /j'?ai un/gi, en: 'I have a' },
+    { fr: /j'?ai une/gi, en: 'I have a' },
+    { fr: /je n'?arrive pas a/gi, en: "I can't" },
     { fr: /depuis (\d+) jours?/gi, en: 'for $1 days' },
     { fr: /depuis (\d+) semaines?/gi, en: 'for $1 weeks' },
     { fr: /depuis (\d+) mois/gi, en: 'for $1 months' },
@@ -296,8 +337,12 @@ const translateCustomMedicalText = (text: string): string => {
     { fr: /tout le temps/gi, en: 'all the time' },
     { fr: /de temps en temps/gi, en: 'from time to time' },
     { fr: /quand je/gi, en: 'when I' },
-    { fr: /après avoir/gi, en: 'after having' }
+    { fr: /après avoir/gi, en: 'after having' },
+    { fr: /apres avoir/gi, en: 'after having' }
   ]
+  
+  // Start with preprocessed text
+  let translated = preprocessed
   
   // Apply phrase replacements
   phraseReplacements.forEach(({ fr, en }) => {
@@ -309,43 +354,52 @@ const translateCustomMedicalText = (text: string): string => {
   const translatedWords = words.map(word => {
     // Preserve punctuation
     const punctuation = word.match(/[.,!?;:]+$/)?.[0] || ''
-    const cleanWord = word.replace(/[.,!?;:]+$/, '')
+    const cleanWord = word.replace(/[.,!?;:]+$/, '').toLowerCase()
     
-    // Check dictionary for the word (case-insensitive)
-    const lowerWord = cleanWord.toLowerCase()
-    if (medicalDictionary[lowerWord]) {
-      return medicalDictionary[lowerWord] + punctuation
+    // Check dictionary for the word (always lowercase)
+    if (medicalDictionary[cleanWord]) {
+      return medicalDictionary[cleanWord] + punctuation
     }
     
     // Check for words with articles (le, la, les, un, une, des)
     const articles = ['le', 'la', 'les', 'un', 'une', 'des', 'du', 'de', 'au', 'aux']
-    if (articles.includes(lowerWord)) {
+    if (articles.includes(cleanWord)) {
       // Common article translations
       const articleMap: Record<string, string> = {
         'le': 'the',
-        'la': 'the',
+        'la': 'the', 
         'les': 'the',
         'un': 'a',
         'une': 'a',
         'des': 'some',
         'du': 'of the',
         'de': 'of',
-        'au': 'in the',
-        'aux': 'in the'
+        'au': 'to the',
+        'aux': 'to the'
       }
-      return (articleMap[lowerWord] || lowerWord) + punctuation
+      return (articleMap[cleanWord] || '') + punctuation
+    }
+    
+    // If no translation found and it's a very short word, skip it
+    if (cleanWord.length <= 2 && !['et', 'ou', 'au', 'de', 'le', 'la'].includes(cleanWord)) {
+      return ''
     }
     
     return word
   })
   
-  translated = translatedWords.join(' ')
+  // Filter out empty strings and join
+  translated = translatedWords
+    .filter(word => word.trim() !== '')
+    .join(' ')
   
   // Clean up the translation
   translated = translated
     .replace(/\s+/g, ' ')
-    .replace(/the the/gi, 'the')
-    .replace(/a a/gi, 'a')
+    .replace(/\bthe the\b/gi, 'the')
+    .replace(/\ba a\b/gi, 'a')
+    .replace(/\bto the the\b/gi, 'to the')
+    .replace(/\bin the the\b/gi, 'in the')
     .trim()
   
   // Capitalize first letter
@@ -1383,7 +1437,7 @@ export default function ModernClinicalForm({
           <ArrowLeft className="h-4 w-4 mr-2" />
           Previous
         </Button>
-        <Button 
+<Button 
           type="submit"
           className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
         >
