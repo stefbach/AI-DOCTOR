@@ -184,6 +184,35 @@ function normalizeLifestyleData(data: any): any {
     'plus-6-mois': 'more than 6 months'
   }
 
+  // ADD THIS NEW MAPPING for consultation reasons
+  const consultationReasonMap: Record<string, string> = {
+    'Consultation générale': 'General consultation',
+    'Bilan de santé': 'Health check-up',
+    'Fièvre': 'Fever',
+    'Grippe': 'Flu',
+    'Symptômes grippaux': 'Flu-like symptoms',
+    'Douleurs abdominales': 'Abdominal pain',
+    'Troubles digestifs': 'Digestive problems',
+    'Maux de tête': 'Headache',
+    'Migraine': 'Migraine',
+    'Toux': 'Cough',
+    'Problèmes respiratoires': 'Respiratory problems',
+    'Mal de dos': 'Back pain',
+    'Douleurs musculaires': 'Muscle pain',
+    'Douleur à l\'oreille': 'Ear pain',
+    'Problèmes auditifs': 'Hearing problems',
+    'Problèmes de vue': 'Vision problems',
+    'Irritation oculaire': 'Eye irritation',
+    'Problème de peau': 'Skin problem',
+    'Éruption cutanée': 'Skin rash',
+    'Stress': 'Stress',
+    'Anxiété': 'Anxiety',
+    'Santé mentale': 'Mental health',
+    'Renouvellement d\'ordonnance': 'Prescription renewal',
+    'Consultation pédiatrique': 'Pediatric consultation',
+    'Autre motif (préciser)': 'Other reason (specify)'
+  }
+
   // Helper function to translate array values
   const translateArray = (arr: string[], map: Record<string, string>): string[] => {
     return arr.map(item => map[item] || item).filter(item => item.trim() !== '')
@@ -223,20 +252,42 @@ function normalizeLifestyleData(data: any): any {
     normalized.symptomDuration = symptomDurationMap[data.symptomDuration] || data.symptomDuration
   }
 
+  // ADD THIS: Translate consultation reason
+  if (data.consultationReason) {
+    // Check if it starts with "Autre motif" and contains custom text
+    const autreMotifPattern = /^Autre motif \(préciser\)[\s::\-]*(.+)$/i
+    const match = data.consultationReason.match(autreMotifPattern)
+    
+    if (match && match[1]) {
+      // It's a custom reason - keep the pattern but note it needs further translation
+      normalized.consultationReason = `Other reason (specify): ${match[1].trim()}`
+      console.log('🔄 Found custom consultation reason:', data.consultationReason, '→', normalized.consultationReason)
+    } else if (consultationReasonMap[data.consultationReason]) {
+      // Standard reason - translate directly
+      normalized.consultationReason = consultationReasonMap[data.consultationReason]
+    } else {
+      // Unknown format - keep as is but log for debugging
+      normalized.consultationReason = data.consultationReason
+      console.warn('⚠️ Unknown consultation reason format:', data.consultationReason)
+    }
+  }
+
   console.log('🔄 Data normalization completed:', {
     original: {
       smoking: data.smokingStatus,
       alcohol: data.alcoholConsumption,
       activity: data.physicalActivity,
       symptoms: data.currentSymptoms,
-      duration: data.symptomDuration
+      duration: data.symptomDuration,
+      consultationReason: data.consultationReason
     },
     normalized: {
       smoking: normalized.smokingStatus,
       alcohol: normalized.alcoholConsumption,
       activity: normalized.physicalActivity,
       symptoms: normalized.currentSymptoms,
-      duration: normalized.symptomDuration
+      duration: normalized.symptomDuration,
+      consultationReason: normalized.consultationReason
     }
   })
 
