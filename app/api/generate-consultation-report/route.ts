@@ -341,11 +341,45 @@ function extractPrescriptions(diagnosisData: any, pregnancyStatus?: string) {
     }
   }
   
-  // Execute extraction phases
-  console.log("\n🔍 PHASE 1: Complete recursive extraction")
-  extractMedications(diagnosisData)
-  extractBiologyTests(diagnosisData)
-  extractImagingStudies(diagnosisData)
+ // Execute extraction phases - DIRECT ACCESS
+console.log("\n🔍 PHASE 1: Direct access to structured data")
+
+// Direct medication access
+const directMeds = diagnosisData?.treatment_plan?.medications || []
+directMeds.forEach((med: any) => {
+  medications.push({
+    name: med.drug || '',
+    genericName: med.drug || '',
+    dosage: med.dosage || '',
+    form: med.form || 'tablet',
+    frequency: med.dosing?.adult || '',
+    route: med.route || 'Oral',
+    duration: med.duration || '7 days',
+    quantity: med.quantity || '1 box',
+    instructions: med.instructions || '',
+    indication: med.indication || '',
+    monitoring: med.monitoring || '',
+    doNotSubstitute: false,
+    completeLine: `${med.drug} ${med.dosage || ''}\n${med.dosing?.adult || ''}`
+  })
+})
+
+// Direct lab tests access  
+const directTests = diagnosisData?.investigation_strategy?.laboratory_tests || []
+labTests.push(...directTests.map((test: any) => ({
+  name: test.test_name || '',
+  category: test.category || 'Clinical Chemistry',
+  urgent: test.urgency === 'STAT',
+  fasting: test.fasting || false
+})))
+
+// Direct imaging access
+const directImaging = diagnosisData?.investigation_strategy?.imaging_studies || []  
+imagingStudies.push(...directImaging.map((study: any) => ({
+  type: study.study_type || '',
+  region: study.region || '',
+  clinicalIndication: study.indication || ''
+})))
   
   // Specific extraction from mauritianDocuments
   if (diagnosisData?.mauritianDocuments) {
