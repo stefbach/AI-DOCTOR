@@ -1247,6 +1247,35 @@ export default function ProfessionalReportEditable({
       if (data.success && data.report) {
         const apiReport = data.report
         
+        // ===== DEBUG POUR IDENTIFIER LE PROBLÈME =====
+console.log("📥 API Response Debug COMPLET:")
+console.log("- Response success:", data.success)
+console.log("- Response keys:", Object.keys(data))
+console.log("- Has report:", !!data.report)
+console.log("- Report keys:", data.report ? Object.keys(data.report) : "No report")
+console.log("- Metadata type:", data.metadata?.type)
+console.log("- Metadata:", data.metadata)
+
+if (data.report?.medicalReport) {
+  console.log("- Medical report keys:", Object.keys(data.report.medicalReport))
+  
+  if (data.report.medicalReport.report) {
+    console.log("- Report sections keys:", Object.keys(data.report.medicalReport.report))
+    
+    // Vérifier le contenu de chaque section
+    const sections = data.report.medicalReport.report
+    Object.keys(sections).forEach(key => {
+      const content = sections[key]
+      console.log(`- ${key}:`, {
+        type: typeof content,
+        length: typeof content === 'string' ? content.length : 0,
+        preview: typeof content === 'string' ? content.substring(0, 50) + "..." : content
+      })
+    })
+  }
+}
+
+console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 2).substring(0, 1000))
         // MAP API STRUCTURE TO COMPONENT STRUCTURE
         console.log("🔄 Mapping API structure to component structure...")
         
@@ -1451,6 +1480,24 @@ export default function ProfessionalReportEditable({
         }
         
         console.log("✅ Structure mapping complete")
+
+        // VÉRIFICATION DU RÉSULTAT FINAL
+console.log("📋 Final report verification:")
+console.log("- Patient name:", reportData.compteRendu.patient.nom)
+console.log("- Report sections status:")
+
+Object.keys(reportData.compteRendu.rapport).forEach(key => {
+  const content = reportData.compteRendu.rapport[key as keyof typeof reportData.compteRendu.rapport]
+  const status = content && typeof content === 'string' && content.length > 0 ? "✅ FILLED" : "❌ EMPTY"
+  console.log(`  - ${key}: ${status} (${typeof content === 'string' ? content.length : 0} chars)`)
+})
+
+console.log("- Prescriptions:", {
+  medications: !!reportData.ordonnances?.medicaments,
+  labTests: !!reportData.ordonnances?.biologie,
+  imaging: !!reportData.ordonnances?.imagerie
+})
+console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
         
         setReport(reportData)
         setValidationStatus('draft')
