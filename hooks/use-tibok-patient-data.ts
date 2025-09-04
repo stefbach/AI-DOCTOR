@@ -1,5 +1,5 @@
 // FILE: hooks/use-tibok-patient-data.ts (Medical Platform)
-// REPLACE the entire file with this updated version:
+// Updated version with Google Translate integration
 
 import { useEffect, useState } from 'react'
 
@@ -92,9 +92,31 @@ interface ConsultationData {
   status: string
 }
 
-// ✅ ADD: Data normalization function to translate French to English
-function normalizeLifestyleData(data: any): any {
-  // Translation mappings
+// Helper function to translate text using Google Translate API
+async function translateText(text: string): Promise<string> {
+  if (!text) return text
+  
+  try {
+    const response = await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    })
+    
+    if (response.ok) {
+      const result = await response.json()
+      return result.translatedText || text
+    }
+  } catch (error) {
+    console.error('Translation failed for:', text, error)
+  }
+  
+  return text
+}
+
+// Data normalization function to translate French to English
+async function normalizeLifestyleData(data: any): Promise<any> {
+  // Translation mappings for known values
   const smokingMap: Record<string, string> = {
     'non-smoker': 'non-smoker',
     'current-smoker': 'current smoker',
@@ -119,74 +141,69 @@ function normalizeLifestyleData(data: any): any {
     'intense': 'intense',
     'Sédentaire': 'sedentary',
     'Modéré': 'moderate',
+    'Modérée': 'moderate',
     'Intense': 'intense'
   }
 
   const medicalConditionsMap: Record<string, string> = {
     'Hypertension': 'Hypertension',
+    'hypertension': 'Hypertension',
+    'Type 2 Diabetes': 'Type 2 Diabetes',
+    'Type 1 Diabetes': 'Type 1 Diabetes',
+    'Asthma': 'Asthma',
+    'asthma': 'Asthma',
+    'Heart disease': 'Heart disease',
+    'heart disease': 'Heart disease',
+    'Depression/Anxiety': 'Depression/Anxiety',
+    'depression/anxiety': 'Depression/Anxiety',
+    'Arthritis': 'Arthritis',
+    'arthritis': 'Arthritis',
+    'Migraine': 'Migraine',
+    'migraine': 'Migraine',
+    'GERD (Gastroesophageal reflux)': 'GERD (Gastroesophageal reflux)',
+    'gerd (gastroesophageal reflux)': 'GERD (Gastroesophageal reflux)',
+    'High cholesterol': 'High cholesterol',
+    'high cholesterol': 'High cholesterol',
     'Diabète de type 2': 'Type 2 Diabetes',
     'Diabète de type 1': 'Type 1 Diabetes',
     'Asthme': 'Asthma',
     'Maladie cardiaque': 'Heart disease',
     'Dépression/Anxiété': 'Depression/Anxiety',
     'Arthrite': 'Arthritis',
-    'Migraine': 'Migraine',
     'Reflux gastro-œsophagien': 'GERD (Gastroesophageal reflux)',
     'Cholestérol élevé': 'High cholesterol'
   }
 
   const allergiesMap: Record<string, string> = {
+    'Penicillin': 'Penicillin',
+    'Aspirin': 'Aspirin',
+    'NSAIDs (Ibuprofen, Diclofenac)': 'NSAIDs (Ibuprofen, Diclofenac)',
+    'Codeine': 'Codeine',
+    'Latex': 'Latex',
+    'Iodine': 'Iodine',
+    'Local anesthetics': 'Local anesthetics',
+    'Sulfonamides': 'Sulfonamides',
     'Pénicilline': 'Penicillin',
     'Aspirine': 'Aspirin',
     'Anti-inflammatoires (Ibuprofène, Diclofénac)': 'NSAIDs (Ibuprofen, Diclofenac)',
     'Codéine': 'Codeine',
-    'Latex': 'Latex',
     'Iode': 'Iodine',
     'Anesthésiques locaux': 'Local anesthetics',
     'Sulfamides': 'Sulfonamides'
   }
 
-  const symptomsMap: Record<string, string> = {
-    'Douleur thoracique': 'Chest pain',
-    'Essoufflement': 'Shortness of breath',
-    'Palpitations': 'Palpitations',
-    'Fatigue': 'Fatigue',
-    'Nausées': 'Nausea',
-    'Vomissements': 'Vomiting',
-    'Diarrhée': 'Diarrhea',
-    'Constipation': 'Constipation',
-    'Maux de tête': 'Headache',
-    'Vertiges': 'Dizziness',
-    'Fièvre': 'Fever',
-    'Frissons': 'Chills',
-    'Toux': 'Cough',
-    'Douleur abdominale': 'Abdominal pain',
-    'Mal de dos': 'Back pain',
-    'Insomnie': 'Insomnia',
-    'Anxiété': 'Anxiety',
-    'Perte d\'appétit': 'Loss of appetite',
-    'Perte de poids': 'Weight loss',
-    'Gonflement des jambes': 'Leg swelling',
-    'Douleur articulaire': 'Joint pain',
-    'Éruption cutanée': 'Rash',
-    'Vision floue': 'Blurred vision',
-    'Problèmes d\'audition': 'Hearing problems'
-  }
-
-  const symptomDurationMap: Record<string, string> = {
-    'quelques-heures': 'a few hours',
-    '1-jour': '1 day',
-    '2-3-jours': '2-3 days',
-    '1-semaine': '1 week',
-    '2-semaines': '2 weeks',
-    '1-mois': '1 month',
-    'plusieurs-mois': 'several months',
-    'plus-6-mois': 'more than 6 months'
-  }
-
   // Helper function to translate array values
   const translateArray = (arr: string[], map: Record<string, string>): string[] => {
-    return arr.map(item => map[item] || item).filter(item => item.trim() !== '')
+    return arr.map(item => {
+      const trimmedItem = item.trim()
+      // Check for exact match (case-insensitive)
+      for (const [key, value] of Object.entries(map)) {
+        if (key.toLowerCase() === trimmedItem.toLowerCase()) {
+          return value
+        }
+      }
+      return map[trimmedItem] || trimmedItem
+    }).filter(item => item.trim() !== '')
   }
 
   // Normalize the data
@@ -203,7 +220,7 @@ function normalizeLifestyleData(data: any): any {
     normalized.physicalActivity = activityMap[data.physicalActivity] || data.physicalActivity
   }
 
-  // Medical history
+  // Medical history with proper capitalization
   if (Array.isArray(data.medicalHistory)) {
     normalized.medicalHistory = translateArray(data.medicalHistory, medicalConditionsMap)
   }
@@ -213,30 +230,35 @@ function normalizeLifestyleData(data: any): any {
     normalized.allergies = translateArray(data.allergies, allergiesMap)
   }
 
+  // Translate "other" fields using Google Translate API
+  if (data.otherAllergies) {
+    normalized.otherAllergies = await translateText(data.otherAllergies)
+  }
+  
+  if (data.otherMedicalHistory) {
+    normalized.otherMedicalHistory = await translateText(data.otherMedicalHistory)
+  }
+
   // Current symptoms
   if (Array.isArray(data.currentSymptoms)) {
-    normalized.currentSymptoms = translateArray(data.currentSymptoms, symptomsMap)
+    normalized.currentSymptoms = data.currentSymptoms
   }
 
   // Symptom duration
   if (data.symptomDuration) {
-    normalized.symptomDuration = symptomDurationMap[data.symptomDuration] || data.symptomDuration
+    normalized.symptomDuration = data.symptomDuration
   }
 
   console.log('🔄 Data normalization completed:', {
     original: {
-      smoking: data.smokingStatus,
-      alcohol: data.alcoholConsumption,
-      activity: data.physicalActivity,
-      symptoms: data.currentSymptoms,
-      duration: data.symptomDuration
+      otherAllergies: data.otherAllergies,
+      otherMedicalHistory: data.otherMedicalHistory,
+      medicalHistory: data.medicalHistory
     },
     normalized: {
-      smoking: normalized.smokingStatus,
-      alcohol: normalized.alcoholConsumption,
-      activity: normalized.physicalActivity,
-      symptoms: normalized.currentSymptoms,
-      duration: normalized.symptomDuration
+      otherAllergies: normalized.otherAllergies,
+      otherMedicalHistory: normalized.otherMedicalHistory,
+      medicalHistory: normalized.medicalHistory
     }
   })
 
@@ -251,95 +273,101 @@ export function useTibokPatientData() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check URL parameters for TIBOK data
-    const urlParams = new URLSearchParams(window.location.search)
-    const source = urlParams.get('source')
-    const patientDataParam = urlParams.get('patientData')
-    const doctorDataParam = urlParams.get('doctorData')
-    const consultationId = urlParams.get('consultationId')
-    const patientId = urlParams.get('patientId')
-    const doctorId = urlParams.get('doctorId')
+    const loadData = async () => {
+      // Check URL parameters for TIBOK data
+      const urlParams = new URLSearchParams(window.location.search)
+      const source = urlParams.get('source')
+      const patientDataParam = urlParams.get('patientData')
+      const doctorDataParam = urlParams.get('doctorData')
+      const consultationId = urlParams.get('consultationId')
+      const patientId = urlParams.get('patientId')
+      const doctorId = urlParams.get('doctorId')
 
-    console.log('🔍 TIBOK Data Check:', {
-      source,
-      hasPatientData: !!patientDataParam,
-      hasDoctorData: !!doctorDataParam,
-      consultationId,
-      patientId,
-      doctorId
-    })
+      console.log('🔍 TIBOK Data Check:', {
+        source,
+        hasPatientData: !!patientDataParam,
+        hasDoctorData: !!doctorDataParam,
+        consultationId,
+        patientId,
+        doctorId
+      })
 
-    if (source === 'tibok' && patientDataParam && doctorDataParam) {
-      try {
-        // Parse patient data
-        const parsedPatientData = JSON.parse(decodeURIComponent(patientDataParam))
-        console.log('📋 Parsed TIBOK Patient Data (before normalization):', parsedPatientData)
-        
-        // ✅ APPLY NORMALIZATION: Translate French values to English
-        const normalizedPatientData = normalizeLifestyleData(parsedPatientData)
-        console.log('🔄 Normalized Patient Data (after translation):', normalizedPatientData)
-        
-        // Parse doctor data
-        const parsedDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
-        console.log('👨‍⚕️ Parsed TIBOK Doctor Data:', parsedDoctorData)
+      if (source === 'tibok' && patientDataParam && doctorDataParam) {
+        try {
+          // Parse patient data
+          const parsedPatientData = JSON.parse(decodeURIComponent(patientDataParam))
+          console.log('📋 Parsed TIBOK Patient Data (before normalization):', parsedPatientData)
+          
+          // Apply normalization with translation
+          const normalizedPatientData = await normalizeLifestyleData(parsedPatientData)
+          console.log('🔄 Normalized Patient Data (after translation):', normalizedPatientData)
+          
+          // Parse doctor data
+          const parsedDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
+          console.log('👨‍⚕️ Parsed TIBOK Doctor Data:', parsedDoctorData)
 
-        // Set consultation data
-        const consultation = {
-          id: consultationId || '',
-          patient_id: patientId || '',
-          doctor_id: doctorId || '',
-          status: 'in_progress'
-        }
-
-        // Validate critical patient data
-        if (!normalizedPatientData.firstName || !normalizedPatientData.lastName) {
-          console.error('❌ Missing critical patient data (name)')
-          setLoading(false)
-          return
-        }
-
-        // Log medical data specifically (now in English)
-        console.log('🏥 Medical Data Received (English):', {
-          symptoms: normalizedPatientData.currentSymptoms,
-          medicalHistory: normalizedPatientData.medicalHistory,
-          allergies: normalizedPatientData.allergies,
-          consultationReason: normalizedPatientData.consultationReason,
-          vitalSigns: normalizedPatientData.vitalSigns,
-          currentMedications: normalizedPatientData.currentMedications,
-          lifestyle: {
-            smoking: normalizedPatientData.smokingStatus,
-            alcohol: normalizedPatientData.alcoholConsumption,
-            activity: normalizedPatientData.physicalActivity
+          // Set consultation data
+          const consultation = {
+            id: consultationId || '',
+            patient_id: patientId || '',
+            doctor_id: doctorId || '',
+            status: 'in_progress'
           }
-        })
 
-        // Use normalized data
-        setPatientData(normalizedPatientData)
-        setDoctorData(parsedDoctorData)
-        setConsultationData(consultation)
-        setIsFromTibok(true)
-        
-        console.log('✅ TIBOK data loaded and normalized successfully')
-        
-      } catch (error) {
-        console.error('❌ Error parsing TIBOK data:', error)
-        console.error('Raw patient data:', patientDataParam?.substring(0, 200) + '...')
-        console.error('Raw doctor data:', doctorDataParam?.substring(0, 200) + '...')
+          // Validate critical patient data
+          if (!normalizedPatientData.firstName || !normalizedPatientData.lastName) {
+            console.error('❌ Missing critical patient data (name)')
+            setLoading(false)
+            return
+          }
+
+          // Log medical data specifically (now in English)
+          console.log('🏥 Medical Data Received (English):', {
+            symptoms: normalizedPatientData.currentSymptoms,
+            medicalHistory: normalizedPatientData.medicalHistory,
+            allergies: normalizedPatientData.allergies,
+            otherAllergies: normalizedPatientData.otherAllergies,
+            otherMedicalHistory: normalizedPatientData.otherMedicalHistory,
+            consultationReason: normalizedPatientData.consultationReason,
+            vitalSigns: normalizedPatientData.vitalSigns,
+            currentMedications: normalizedPatientData.currentMedications,
+            lifestyle: {
+              smoking: normalizedPatientData.smokingStatus,
+              alcohol: normalizedPatientData.alcoholConsumption,
+              activity: normalizedPatientData.physicalActivity
+            }
+          })
+
+          // Use normalized data
+          setPatientData(normalizedPatientData)
+          setDoctorData(parsedDoctorData)
+          setConsultationData(consultation)
+          setIsFromTibok(true)
+          
+          console.log('✅ TIBOK data loaded and normalized successfully')
+          
+        } catch (error) {
+          console.error('❌ Error parsing TIBOK data:', error)
+          console.error('Raw patient data:', patientDataParam?.substring(0, 200) + '...')
+          console.error('Raw doctor data:', doctorDataParam?.substring(0, 200) + '...')
+        }
+      } else {
+        console.log('ℹ️ Not from TIBOK or missing data parameters')
       }
-    } else {
-      console.log('ℹ️ Not from TIBOK or missing data parameters')
+
+      setLoading(false)
     }
 
-    setLoading(false)
+    loadData()
 
     // Also listen for custom events (fallback)
-    const handlePatientData = (event: CustomEvent) => {
+    const handlePatientData = async (event: CustomEvent) => {
       console.log('📡 Received patient data via custom event:', event.detail)
       
       // Apply normalization to event data as well
       let normalizedEventData = event.detail
       if (event.detail.patient) {
-        normalizedEventData.patient = normalizeLifestyleData(event.detail.patient)
+        normalizedEventData.patient = await normalizeLifestyleData(event.detail.patient)
       }
       
       if (normalizedEventData.patient) setPatientData(normalizedEventData.patient)
