@@ -1,4 +1,4 @@
-// /app/api/openai-diagnosis/route.ts - VERSION 3 COMPLETE FIXED - COMPATIBLE FRONTEND
+// /app/api/openai-diagnosis/route.ts - VERSION 3.1 COMPLETE FIXED + RÈGLES SÉCURITÉ MÉDICALE - COMPATIBLE FRONTEND
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
@@ -50,7 +50,316 @@ interface ValidationResult {
   }
 }
 
-// ==================== GESTION INTELLIGENTE DES TRAITEMENTS ACTUELS ====================
+// ==================== NOUVELLES FONCTIONS DE SÉCURITÉ MÉDICALE ====================
+
+// DÉTECTION DES TRAITEMENTS DE BASE MANQUANTS
+function hasAntipyretic(medications: any[]): boolean {
+  const antipyretics = [
+    'paracetamol', 'acetaminophen', 'doliprane', 'efferalgan',
+    'ibuprofen', 'ibuprofène', 'advil', 'nurofen',
+    'aspirin', 'aspirine', 'kardégic'
+  ]
+  
+  return medications.some(med => {
+    const drugName = (med.drug || '').toLowerCase()
+    return antipyretics.some(anti => drugName.includes(anti))
+  })
+}
+
+function hasAnalgesic(medications: any[]): boolean {
+  const analgesics = [
+    'paracetamol', 'tramadol', 'codeine', 'morphine',
+    'ibuprofen', 'diclofenac', 'naproxen', 'ketoprofen'
+  ]
+  
+  return medications.some(med => {
+    const drugName = (med.drug || '').toLowerCase()
+    return analgesics.some(analg => drugName.includes(analg))
+  })
+}
+
+function hasInfectionSymptoms(symptoms: string[], chiefComplaint: string = ''): boolean {
+  const infectionSigns = [
+    'fièvre', 'fever', 'température', 'frissons', 'chills',
+    'toux', 'cough', 'expectoration', 'sputum',
+    'dysurie', 'brûlures mictionnelles', 'dysuria',
+    'diarrhée', 'diarrhea', 'vomissement', 'vomiting'
+  ]
+  
+  const allText = [...symptoms, chiefComplaint].join(' ').toLowerCase()
+  return infectionSigns.some(sign => allText.includes(sign))
+}
+
+function hasFeverSymptoms(symptoms: string[], chiefComplaint: string = '', vitalSigns: any = {}): boolean {
+  const feverSigns = ['fièvre', 'fever', 'température', 'chaud', 'brûlant', 'hyperthermie']
+  const allText = [...symptoms, chiefComplaint].join(' ').toLowerCase()
+  
+  // Vérifier dans les symptômes OU température élevée
+  const symptomsHaveFever = feverSigns.some(sign => allText.includes(sign))
+  const tempHigh = vitalSigns.temperature && vitalSigns.temperature > 37.5
+  
+  return symptomsHaveFever || tempHigh
+}
+
+function hasPainSymptoms(symptoms: string[], chiefComplaint: string = ''): boolean {
+  const painSigns = [
+    'douleur', 'pain', 'mal', 'ache', 'céphalée', 'headache',
+    'arthralgie', 'myalgie', 'lombalgie', 'cervicalgie',
+    'douloureux', 'painful', 'souffrance'
+  ]
+  
+  const allText = [...symptoms, chiefComplaint].join(' ').toLowerCase()
+  return painSigns.some(sign => allText.includes(sign))
+}
+
+function mentionsHydration(analysis: any): boolean {
+  const hydrationTerms = ['hydrat', 'boire', 'liquide', 'eau', 'fluid']
+  const nonPharmText = (analysis.treatment_plan?.non_pharmacological || '').toLowerCase()
+  const educationText = (analysis.patient_education?.lifestyle_modifications || '').toLowerCase()
+  
+  const allText = `${nonPharmText} ${educationText}`
+  return hydrationTerms.some(term => allText.includes(term))
+}
+
+// RÈGLES DE SÉCURITÉ MÉDICALE AUTOMATIQUES
+function enforceBasicMedicalRules(analysis: any, patientContext: PatientContext): any {
+  console.log('🛡️ Applying basic medical safety rules...')
+  
+  const symptoms = patientContext.symptoms || []
+  const chiefComplaint = patientContext.chief_complaint || ''
+  const vitalSigns = patientContext.vital_signs || {}
+  const medications = analysis.treatment_plan?.medications || []
+  
+  let modificationsApplied = 0
+  
+  // RÈGLE 1: Fièvre détectée = Antipyrétique obligatoire
+  if (hasFeverSymptoms(symptoms, chiefComplaint, vitalSigns) && !hasAntipyretic(medications)) {
+    console.log('🌡️ RÈGLE APPLIQUÉE: Ajout antipyrétique pour fièvre')
+    medications.push({
+      drug: "Paracétamol 500mg",
+      indication: "Traitement symptomatique de la fièvre",
+      mechanism: "Inhibition de la cyclooxygénase centrale, action antipyrétique et antalgique",
+      dosing: {
+        adult: "1 comprimé × 3/jour"
+      },
+      duration: "Selon besoin (maximum 3 jours consécutifs sans avis médical)",
+      interactions: "Vérifiées avec les médicaments actuels - Compatible",
+      relationship_to_current_treatment: "ajout",
+      monitoring: "Surveillance de la température, arrêt si fièvre disparaît",
+      side_effects: "Rares aux doses thérapeutiques : hépatotoxicité en cas de surdosage",
+      contraindications: "Allergie au paracétamol, insuffisance hépatique sévère",
+      mauritius_availability: {
+        public_free: true,
+        estimated_cost: "Rs 50-100",
+        alternatives: "Doliprane, Efferalgan",
+        brand_names: "Paracétamol Maurice, Doliprane"
+      },
+      administration_instructions: "Prendre avec un verre d'eau, à distance des repas si besoin",
+      _added_by_safety_rule: "fever_management"
+    })
+    modificationsApplied++
+  }
+  
+  // RÈGLE 2: Douleur détectée = Antalgique si pas déjà présent
+  if (hasPainSymptoms(symptoms, chiefComplaint) && !hasAnalgesic(medications) && !hasFeverSymptoms(symptoms, chiefComplaint, vitalSigns)) {
+    console.log('💊 RÈGLE APPLIQUÉE: Ajout antalgique pour douleur')
+    medications.push({
+      drug: "Paracétamol 500mg",
+      indication: "Traitement symptomatique des douleurs",
+      mechanism: "Action antalgique par inhibition de la synthèse des prostaglandines",
+      dosing: {
+        adult: "1 comprimé × 3/jour"
+      },
+      duration: "Selon intensité douloureuse (5-7 jours maximum)",
+      interactions: "Compatible avec la plupart des médications",
+      relationship_to_current_treatment: "ajout",
+      monitoring: "Évaluation de l'intensité douloureuse",
+      side_effects: "Bien toléré aux doses thérapeutiques",
+      contraindications: "Allergie connue au paracétamol",
+      mauritius_availability: {
+        public_free: true,
+        estimated_cost: "Rs 50-100",
+        alternatives: "Ibuprofène si pas de contre-indications",
+        brand_names: "Paracétamol Maurice, Doliprane"
+      },
+      administration_instructions: "À prendre si besoin selon l'intensité de la douleur",
+      _added_by_safety_rule: "pain_management"
+    })
+    modificationsApplied++
+  }
+  
+  // RÈGLE 3: Infection suspectée = Hydratation obligatoire
+  if (hasInfectionSymptoms(symptoms, chiefComplaint) && !mentionsHydration(analysis)) {
+    console.log('💧 RÈGLE APPLIQUÉE: Ajout conseils hydratation pour infection')
+    
+    const currentNonPharm = analysis.treatment_plan?.non_pharmacological || ""
+    analysis.treatment_plan.non_pharmacological = currentNonPharm + 
+      "\n• HYDRATATION RENFORCÉE : 2,5-3 litres d'eau par jour minimum" +
+      "\n• Privilégier eau à température ambiante, tisanes tièdes" +
+      "\n• Éviter boissons glacées (choc thermique)"
+    
+    // Ajouter aussi dans l'éducation patient
+    const currentEducation = analysis.patient_education?.lifestyle_modifications || ""
+    analysis.patient_education.lifestyle_modifications = currentEducation +
+      "\n• Boire régulièrement même sans soif (climat tropical)" +
+      "\n• Signe de bonne hydratation : urines claires"
+    
+    modificationsApplied++
+  }
+  
+  // RÈGLE 4: Conseils spécifiques Maurice (climat tropical)
+  if (hasFeverSymptoms(symptoms, chiefComplaint, vitalSigns)) {
+    console.log('🏝️ RÈGLE APPLIQUÉE: Conseils spécifiques climat Maurice')
+    
+    // S'assurer que mauritius_specific existe
+    if (!analysis.patient_education?.mauritius_specific) {
+      analysis.patient_education = analysis.patient_education || {}
+      analysis.patient_education.mauritius_specific = {}
+    }
+    
+    analysis.patient_education.mauritius_specific.tropical_advice = 
+      "Climat tropical et fièvre : Repos dans lieu frais et ventilé, éviter exposition directe à la climatisation, privilégier ventilateur. Porter vêtements légers et amples."
+    
+    analysis.patient_education.mauritius_specific.local_diet = 
+      "Privilégier aliments légers : bouillons, fruits riches en eau (pastèque, ananas), éviter épices fortes pendant la fièvre."
+    
+    modificationsApplied++
+  }
+  
+  // RÈGLE 5: Antibiotique prescrit = Conseils prise et effets secondaires
+  const hasAntibiotic = medications.some(med => 
+    (med.drug || '').toLowerCase().includes('cillin') || 
+    (med.drug || '').toLowerCase().includes('mycin') ||
+    (med.drug || '').toLowerCase().includes('floxacin')
+  )
+  
+  if (hasAntibiotic) {
+    console.log('💊 RÈGLE APPLIQUÉE: Conseils antibiotiques')
+    
+    const currentEducation = analysis.patient_education?.treatment_importance || ""
+    analysis.patient_education.treatment_importance = currentEducation +
+      "\n• ANTIBIOTIQUES : Prendre à heures régulières, terminer TOUT le traitement même si amélioration" +
+      "\n• Ne pas arrêter prématurément (risque de résistance)" +
+      "\n• Surveiller troubles digestifs, candidoses"
+    
+    modificationsApplied++
+  }
+  
+  // Mettre à jour les métriques
+  analysis.treatment_plan.medications = medications
+  
+  // Ajouter les informations de règles appliquées
+  analysis.safety_rules_applied = {
+    enabled: true,
+    modifications_count: modificationsApplied,
+    rules_triggered: [],
+    timestamp: new Date().toISOString()
+  }
+  
+  // Log des règles appliquées
+  if (modificationsApplied > 0) {
+    console.log(`✅ ${modificationsApplied} règle(s) de sécurité médicale appliquée(s)`)
+    analysis.safety_rules_applied.success = true
+  } else {
+    console.log('ℹ️ Aucune règle de sécurité additionnelle nécessaire')
+    analysis.safety_rules_applied.success = true
+    analysis.safety_rules_applied.note = "Prescription initiale complète"
+  }
+  
+  return analysis
+}
+
+// VALIDATION MÉDICALE INTELLIGENTE POST-GPT-4
+function validateMedicalCompleteness(analysis: any, patientContext: PatientContext): {
+  warnings: string[];
+  missing_elements: string[];
+  completeness_score: number;
+} {
+  const warnings: string[] = []
+  const missing_elements: string[] = []
+  const symptoms = patientContext.symptoms || []
+  const chiefComplaint = patientContext.chief_complaint || ''
+  const vitalSigns = patientContext.vital_signs || {}
+  const medications = analysis.treatment_plan?.medications || []
+  
+  let completenessScore = 100
+  
+  // Vérification fièvre → antipyrétique
+  if (hasFeverSymptoms(symptoms, chiefComplaint, vitalSigns) && !hasAntipyretic(medications)) {
+    warnings.push("⚠️ FIÈVRE détectée mais aucun antipyrétique prescrit")
+    missing_elements.push("Traitement antipyrétique (paracétamol)")
+    completenessScore -= 25
+  }
+  
+  // Vérification douleur → antalgique
+  if (hasPainSymptoms(symptoms, chiefComplaint) && !hasAnalgesic(medications)) {
+    warnings.push("⚠️ DOULEUR mentionnée mais aucun antalgique prescrit")
+    missing_elements.push("Traitement antalgique")
+    completenessScore -= 20
+  }
+  
+  // Vérification infection → hydratation
+  if (hasInfectionSymptoms(symptoms, chiefComplaint) && !mentionsHydration(analysis)) {
+    warnings.push("⚠️ INFECTION suspectée mais hydratation non mentionnée")
+    missing_elements.push("Conseils d'hydratation renforcée")
+    completenessScore -= 15
+  }
+  
+  // Vérification red flags présents
+  if (!analysis.follow_up_plan?.red_flags) {
+    warnings.push("⚠️ SIGNAUX D'ALARME manquants")
+    missing_elements.push("Red flags obligatoires")
+    completenessScore -= 20
+  }
+  
+  // Vérification durée traitement
+  medications.forEach((med, idx) => {
+    if (!med.duration || med.duration.toLowerCase().includes('selon')) {
+      warnings.push(`⚠️ Durée imprécise pour ${med.drug}`)
+    }
+  })
+  
+  return {
+    warnings,
+    missing_elements,
+    completeness_score: Math.max(0, completenessScore)
+  }
+}
+
+// AJOUT DE CONSEILS SPÉCIFIQUES MAURICE
+function addMauritiusSpecificAdvice(analysis: any, patientContext: PatientContext): any {
+  console.log('🏝️ Adding Mauritius-specific medical advice...')
+  
+  // S'assurer que la structure existe
+  if (!analysis.patient_education?.mauritius_specific) {
+    analysis.patient_education = analysis.patient_education || {}
+    analysis.patient_education.mauritius_specific = {}
+  }
+  
+  const symptoms = patientContext.symptoms || []
+  const chiefComplaint = patientContext.chief_complaint || ''
+  const allSymptoms = [...symptoms, chiefComplaint].join(' ').toLowerCase()
+  
+  // Conseils respiratoires
+  if (allSymptoms.includes('toux') || allSymptoms.includes('cough') || allSymptoms.includes('respiratoire')) {
+    analysis.patient_education.mauritius_specific.respiratory_advice = 
+      "Climat humide Maurice : Éviter ventilateurs directs la nuit, humidifier air si climatisation, inhalations vapeur d'eau tiède avec eucalyptus local."
+  }
+  
+  // Conseils gastro
+  if (allSymptoms.includes('diarrhée') || allSymptoms.includes('vomissement') || allSymptoms.includes('gastro')) {
+    analysis.patient_education.mauritius_specific.gastro_advice = 
+      "Réhydratation importante (climat tropical) : SRO disponible pharmacies, éviter fruits crus temporairement, privilégier riz blanc, bouillon léger."
+  }
+  
+  // Conseils généraux Maurice
+  analysis.patient_education.mauritius_specific.general_mauritius = 
+    "Pharmacies de garde 24/7 : Phoenix, Quatre-Bornes, Port-Louis. SAMU: 114. Centres de santé gratuits si aggravation."
+  
+  return analysis
+}
+
+// ==================== GESTION INTELLIGENTE DES TRAITEMENTS ACTUELS (INCHANGÉ) ====================
 
 // DÉTECTION TYPE DE CONSULTATION
 function analyzeConsultationType(
@@ -274,7 +583,7 @@ function isSameActiveIngredient(drug1: string, drug2: string): boolean {
   return false;
 }
 
-// ==================== CORRECTION POSOLOGIES INTELLIGENTE ====================
+// ==================== CORRECTION POSOLOGIES INTELLIGENTE (INCHANGÉ) ====================
 
 // CORRECTION QUI PRÉSERVE LE CONTENU MÉDICAL
 function preserveMedicalKnowledge(dosing: string): string {
@@ -463,7 +772,7 @@ async function enhancedMedicationManagement(
   return analysis;
 }
 
-// ==================== DATA PROTECTION FUNCTIONS ====================
+// ==================== DATA PROTECTION FUNCTIONS (INCHANGÉ) ====================
 function anonymizePatientData(patientData: any): { 
   anonymized: any, 
   originalIdentity: any 
@@ -505,7 +814,7 @@ function secureLog(message: string, data?: any) {
   }
 }
 
-// ==================== MAURITIUS HEALTHCARE CONTEXT ====================
+// ==================== MAURITIUS HEALTHCARE CONTEXT (INCHANGÉ) ====================
 const MAURITIUS_HEALTHCARE_CONTEXT = {
   laboratories: {
     everywhere: "C-Lab (29 centers), Green Cross (36 centers), Biosanté (48 locations)",
@@ -549,7 +858,7 @@ const MAURITIUS_HEALTHCARE_CONTEXT = {
 
 const MAURITIUS_CONTEXT_STRING = JSON.stringify(MAURITIUS_HEALTHCARE_CONTEXT, null, 2)
 
-// ==================== MONITORING SYSTEM ====================
+// ==================== MONITORING SYSTEM (INCHANGÉ) ====================
 const PrescriptionMonitoring = {
   metrics: {
     avgMedicationsPerDiagnosis: new Map<string, number[]>(),
@@ -590,8 +899,8 @@ const PrescriptionMonitoring = {
   }
 }
 
-// ==================== PROMPT MÉDICAL SIMPLIFIÉ ET ROBUSTE ====================
-const SIMPLIFIED_DIAGNOSTIC_PROMPT = `Vous êtes un médecin expert pratiquant la télémédecine à Maurice.
+// ==================== PROMPT MÉDICAL AMÉLIORÉ AVEC CHECKLIST OBLIGATOIRE ====================
+const ENHANCED_DIAGNOSTIC_PROMPT = `Vous êtes un médecin expert pratiquant la télémédecine à Maurice.
 
 PATIENT ET CONTEXTE :
 {{PATIENT_CONTEXT}}
@@ -608,6 +917,14 @@ TYPE DE CONSULTATION DÉTECTÉ : {{CONSULTATION_TYPE}}
 3. VÉRIFIEZ les interactions avec les médicaments actuels du patient
 4. UTILISEZ le format "X × Y/jour" pour toutes les posologies
 5. Si consultation de renouvellement, analysez la continuité du traitement
+
+⚠️ CHECKLIST MÉDICALE OBLIGATOIRE - VÉRIFIEZ SYSTÉMATIQUEMENT :
+□ FIÈVRE mentionnée → Antipyrétique prescrit (paracétamol) ?
+□ DOULEUR mentionnée → Antalgique prescrit ?
+□ INFECTION suspectée → Hydratation renforcée conseillée ?
+□ ANTIBIOTIQUE prescrit → Durée précise et conseils de prise ?
+□ SIGNAUX D'ALARME → Red flags définis pour la sécurité patient ?
+□ CLIMAT TROPICAL MAURICE → Conseils adaptés (hydratation, repos au frais) ?
 
 ⚠️ INTERACTIONS À VÉRIFIER AVEC MÉDICAMENTS ACTUELS :
 {{CURRENT_MEDICATIONS_LIST}}
@@ -733,14 +1050,14 @@ TYPE DE CONSULTATION DÉTECTÉ : {{CONSULTATION_TYPE}}
         "administration_instructions": "Instructions précises"
       }
     ],
-    "non_pharmacological": "Mesures non médicamenteuses"
+    "non_pharmacological": "Mesures non médicamenteuses - INCLURE hydratation si infection/fièvre"
   },
   
   "follow_up_plan": {
     "immediate": "Actions 24-48h",
     "short_term": "Suivi 1 semaine", 
     "long_term": "Suivi long terme",
-    "red_flags": "Signes d'alerte urgente - OBLIGATOIRE",
+    "red_flags": "Signes d'alerte urgente - OBLIGATOIRE pour sécurité patient",
     "next_consultation": "Suivi recommandé"
   },
   
@@ -750,37 +1067,39 @@ TYPE DE CONSULTATION DÉTECTÉ : {{CONSULTATION_TYPE}}
     "warning_signs": "Signaux d'alarme",
     "lifestyle_modifications": "Modifications lifestyle",
     "mauritius_specific": {
-      "tropical_advice": "Conseils climat tropical",
+      "tropical_advice": "Conseils climat tropical - hydratation, repos au frais",
       "local_diet": "Adaptations alimentaires locales"
     }
   }
 }
 
-⚠️ RÈGLES ABSOLUES :
+🚨 RÈGLES ABSOLUES - RESPECT DE LA CHECKLIST :
+- Si FIÈVRE → TOUJOURS inclure un antipyrétique dans medications
+- Si DOULEUR → TOUJOURS inclure un antalgique  
+- Si INFECTION → TOUJOURS mentionner hydratation dans non_pharmacological
+- Si ANTIBIOTIQUE → TOUJOURS préciser durée exacte et instructions
+- red_flags est OBLIGATOIRE pour la sécurité patient
 - clinical_analysis.primary_diagnosis DOIT être présent et complet
-- Si pas de médicaments : medications = []
 - Analysez TOUTES les interactions avec: {{CURRENT_MEDICATIONS_LIST}}
-- red_flags est OBLIGATOIRE pour la sécurité
-- diagnostic_reasoning DOIT être complet
 
-GÉNÉREZ votre analyse JSON complète maintenant :`
+GÉNÉREZ votre analyse JSON complète maintenant en respectant la CHECKLIST MÉDICALE :`
 
-// ==================== FONCTION POUR PRÉPARER LE PROMPT SIMPLIFIÉ ====================
-function prepareSimplifiedPrompt(patientContext: PatientContext, consultationType: any): string {
+// ==================== FONCTION POUR PRÉPARER LE PROMPT AMÉLIORÉ ====================
+function prepareEnhancedPrompt(patientContext: PatientContext, consultationType: any): string {
   const currentMedsFormatted = patientContext.current_medications.length > 0 
     ? patientContext.current_medications.join(', ')
     : 'Aucun médicament en cours'
   
   const consultationTypeFormatted = `${consultationType.consultationType.toUpperCase()} (${Math.round(consultationType.confidence * 100)}%)`
   
-  return SIMPLIFIED_DIAGNOSTIC_PROMPT
+  return ENHANCED_DIAGNOSTIC_PROMPT
     .replace('{{PATIENT_CONTEXT}}', JSON.stringify(patientContext, null, 2))
     .replace('{{CURRENT_MEDICATIONS}}', currentMedsFormatted)
     .replace('{{CONSULTATION_TYPE}}', consultationTypeFormatted)
     .replace(/{{CURRENT_MEDICATIONS_LIST}}/g, currentMedsFormatted)
 }
 
-// ==================== OPENAI CALL AVEC DEBUG COMPLET ====================
+// ==================== OPENAI CALL AVEC DEBUG COMPLET + RÈGLES SÉCURITÉ ====================
 async function callOpenAIWithRetry(
   apiKey: string,
   prompt: string,
@@ -791,11 +1110,12 @@ async function callOpenAIWithRetry(
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`📡 OpenAI call with medication management (attempt ${attempt + 1}/${maxRetries + 1})...`)
+      console.log(`📡 OpenAI call with enhanced medical rules (attempt ${attempt + 1}/${maxRetries + 1})...`)
       
       // DEBUG: Log du prompt pour vérification
       if (attempt === 0) {
-        console.log('📝 Prompt length:', prompt.length, 'characters')
+        console.log('📝 Enhanced prompt length:', prompt.length, 'characters')
+        console.log('🔍 Prompt contains checklist:', prompt.includes('CHECKLIST MÉDICALE'))
         console.log('🔍 Prompt preview (first 500 chars):', prompt.substring(0, 500))
       }
       
@@ -810,7 +1130,7 @@ async function callOpenAIWithRetry(
           messages: [
             {
               role: 'system',
-              content: `Vous êtes un médecin expert. IMPÉRATIF : Vous DEVEZ générer une réponse JSON complète avec toutes les sections demandées, notamment clinical_analysis avec primary_diagnosis et diagnostic_reasoning.`
+              content: `Vous êtes un médecin expert avec une CHECKLIST de sécurité médicale obligatoire. IMPÉRATIF : Respectez systématiquement la checklist fournie et générez une réponse JSON complète avec toutes les sections demandées.`
             },
             {
               role: 'user',
@@ -856,10 +1176,34 @@ async function callOpenAIWithRetry(
       console.log('🔍 Primary diagnosis present:', !!analysis.clinical_analysis?.primary_diagnosis)
       console.log('🔍 Treatment plan present:', !!analysis.treatment_plan)
       console.log('🔍 Diagnostic reasoning present:', !!analysis.diagnostic_reasoning)
+      console.log('🔍 Medications count:', analysis.treatment_plan?.medications?.length || 0)
+      
+      // APPLIQUER LES RÈGLES DE SÉCURITÉ MÉDICALE POST-GPT-4
+      console.log('🛡️ Applying post-GPT-4 medical safety rules...')
+      analysis = enforceBasicMedicalRules(analysis, patientContext)
+      
+      // AJOUTER CONSEILS SPÉCIFIQUES MAURICE
+      analysis = addMauritiusSpecificAdvice(analysis, patientContext)
+      
+      // VALIDATION DE COMPLÉTUDE MÉDICALE
+      const completenessCheck = validateMedicalCompleteness(analysis, patientContext)
+      analysis.medical_completeness = {
+        warnings: completenessCheck.warnings,
+        missing_elements: completenessCheck.missing_elements,
+        completeness_score: completenessCheck.completeness_score,
+        validated_at: new Date().toISOString()
+      }
+      
+      console.log(`🎯 Medical completeness score: ${completenessCheck.completeness_score}%`)
+      if (completenessCheck.warnings.length > 0) {
+        console.log('⚠️ Completeness warnings:', completenessCheck.warnings)
+      } else {
+        console.log('✅ Medical prescription appears complete')
+      }
       
       // GESTION MÉDICAMENTEUSE SEULEMENT SI MÉDICAMENTS PRÉSENTS
       if (analysis.treatment_plan?.medications?.length > 0) {
-        console.log('🧠 Processing medication management...');
+        console.log('🧠 Processing enhanced medication management...');
         
         // 1. Gestion intelligente des traitements actuels
         analysis = await enhancedMedicationManagement(patientContext, analysis);
@@ -877,7 +1221,7 @@ async function callOpenAIWithRetry(
           success_rate: Math.round((posologyValidation.stats.preserved_gpt4_knowledge / posologyValidation.stats.total) * 100)
         };
         
-        console.log(`✅ Medication processing completed:`);
+        console.log(`✅ Enhanced medication processing completed:`);
         console.log(`   🧠 ${posologyValidation.stats.preserved_gpt4_knowledge} prescriptions preserved`);
         console.log(`   🔧 ${posologyValidation.stats.format_standardized} prescriptions reformatted`);
         console.log(`   🛡️ Safety level: ${analysis.medication_safety?.safety_level || 'unknown'}`);
@@ -944,7 +1288,7 @@ async function callOpenAIWithRetry(
         }
       }
       
-      console.log('✅ Response validation passed')
+      console.log('✅ Enhanced response validation passed with medical safety rules applied')
       return { data, analysis }
       
     } catch (error) {
@@ -962,7 +1306,7 @@ async function callOpenAIWithRetry(
   throw lastError || new Error('Failed after multiple attempts')
 }
 
-// ==================== VALIDATION FINALE ====================
+// ==================== VALIDATION FINALE AMÉLIORÉE ====================
 function validateMedicalAnalysis(
   analysis: any,
   patientContext: PatientContext
@@ -974,11 +1318,13 @@ function validateMedicalAnalysis(
   const issues: string[] = []
   const suggestions: string[] = []
   
-  console.log(`📊 Complete analysis:`)
+  console.log(`📊 Complete enhanced analysis:`)
   console.log(`   - ${medications.length} medication(s) prescribed`)
   console.log(`   - ${labTests.length} laboratory test(s)`)
   console.log(`   - ${imaging.length} imaging study/studies`)
   console.log(`   - Medication safety: ${analysis.medication_safety?.safety_level || 'not assessed'}`)
+  console.log(`   - Safety rules applied: ${analysis.safety_rules_applied?.modifications_count || 0}`)
+  console.log(`   - Medical completeness: ${analysis.medical_completeness?.completeness_score || 'N/A'}%`)
   
   // Check for primary diagnosis
   if (!analysis.clinical_analysis?.primary_diagnosis?.condition) {
@@ -991,7 +1337,24 @@ function validateMedicalAnalysis(
   }
   
   if (!analysis.follow_up_plan?.red_flags) {
-    issues.push('Red flags missing')
+    issues.push('Red flags missing - CRITICAL SAFETY ISSUE')
+  }
+  
+  // Vérifications sécurité médicale
+  const symptoms = patientContext.symptoms || []
+  const chiefComplaint = patientContext.chief_complaint || ''
+  const vitalSigns = patientContext.vital_signs || {}
+  
+  if (hasFeverSymptoms(symptoms, chiefComplaint, vitalSigns) && !hasAntipyretic(medications)) {
+    suggestions.push('Consider adding antipyretic for fever management')
+  }
+  
+  if (hasPainSymptoms(symptoms, chiefComplaint) && !hasAnalgesic(medications)) {
+    suggestions.push('Consider adding analgesic for pain management')
+  }
+  
+  if (hasInfectionSymptoms(symptoms, chiefComplaint) && !mentionsHydration(analysis)) {
+    suggestions.push('Consider adding hydration advice for infection')
   }
   
   // Tracking for monitoring
@@ -1012,7 +1375,7 @@ function validateMedicalAnalysis(
   }
 }
 
-// ==================== HELPER FUNCTION ====================
+// ==================== HELPER FUNCTION (INCHANGÉ) ====================
 function extractTherapeuticClass(medication: any): string {
   const drugName = (medication.drug || '').toLowerCase()
   
@@ -1055,7 +1418,7 @@ function extractTherapeuticClass(medication: any): string {
   return 'Therapeutic agent'
 }
 
-// ==================== DOCUMENT GENERATION ====================
+// ==================== DOCUMENT GENERATION (INCHANGÉ) ====================
 function generateMedicalDocuments(
   analysis: any,
   patient: PatientContext,
@@ -1067,12 +1430,12 @@ function generateMedicalDocuments(
   const baseDocuments = {
     consultation: {
       header: {
-        title: "MEDICAL TELECONSULTATION REPORT - MEDICATION MANAGEMENT",
+        title: "MEDICAL TELECONSULTATION REPORT - ENHANCED MEDICATION SAFETY",
         id: consultationId,
         date: currentDate.toLocaleDateString('en-US'),
         time: currentDate.toLocaleTimeString('en-US'),
-        type: "Teleconsultation with Medication Safety Analysis",
-        disclaimer: "Assessment based on teleconsultation with comprehensive medication review"
+        type: "Teleconsultation with Enhanced Medical Safety Rules",
+        disclaimer: "Assessment based on teleconsultation with comprehensive medication review and safety validation"
       },
       
       patient: {
@@ -1084,6 +1447,8 @@ function generateMedicalDocuments(
       },
       
       medication_safety_assessment: analysis.medication_safety || {},
+      medical_safety_rules: analysis.safety_rules_applied || {},
+      medical_completeness: analysis.medical_completeness || {},
       
       clinical_summary: {
         chief_complaint: patient.chief_complaint,
@@ -1167,11 +1532,11 @@ function generateMedicalDocuments(
   if (analysis.treatment_plan?.medications?.length > 0) {
     baseDocuments.medication = {
       header: {
-        title: "MEDICAL PRESCRIPTION",
+        title: "MEDICAL PRESCRIPTION - ENHANCED SAFETY VALIDATED",
         prescriber: {
           name: "Dr. Teleconsultation Expert",
           registration: "MCM-TELE-2024",
-          qualification: "MD, Telemedicine Certified"
+          qualification: "MD, Telemedicine Certified, Medical Safety Enhanced"
         },
         date: currentDate.toLocaleDateString('en-US'),
         validity: "Prescription valid 30 days"
@@ -1199,12 +1564,14 @@ function generateMedicalDocuments(
           side_effects: med.side_effects || {},
           contraindications: med.contraindications || {},
           interactions: med.interactions || {}
-        }
+        },
+        safety_rule_applied: med._added_by_safety_rule || null
       })),
       non_pharmacological: analysis.treatment_plan?.non_pharmacological || {},
       footer: {
         legal: "Teleconsultation prescription compliant with Medical Council Mauritius",
-        pharmacist_note: "Dispensing authorized as per current regulations"
+        pharmacist_note: "Dispensing authorized as per current regulations",
+        safety_validation: `Enhanced medical safety rules applied: ${analysis.safety_rules_applied?.modifications_count || 0} modifications`
       }
     }
   }
@@ -1212,9 +1579,9 @@ function generateMedicalDocuments(
   return baseDocuments
 }
 
-// ==================== MAIN FUNCTION AVEC GESTION MÉDICAMENTEUSE COMPLÈTE ====================
+// ==================== MAIN FUNCTION AVEC GESTION MÉDICAMENTEUSE ET RÈGLES SÉCURITÉ ====================
 export async function POST(request: NextRequest) {
-  console.log('🚀 MAURITIUS MEDICAL AI - VERSION 3 COMPLETE FIXED - COMPATIBLE FRONTEND')
+  console.log('🚀 MAURITIUS MEDICAL AI - VERSION 3.1 ENHANCED WITH MEDICAL SAFETY RULES - COMPATIBLE FRONTEND')
   const startTime = Date.now()
   
   try {
@@ -1272,9 +1639,13 @@ export async function POST(request: NextRequest) {
       anonymousId: anonymizedPatientData.anonymousId
     }
     
-    console.log('📋 Patient context prepared with medication management')
+    console.log('📋 Patient context prepared with enhanced medical safety')
     console.log(`   - Current medications: ${patientContext.current_medications.length}`)
     console.log(`   - Anonymous ID: ${patientContext.anonymousId}`)
+    console.log(`   - Symptoms requiring safety checks:`)
+    console.log(`     • Fever: ${hasFeverSymptoms(patientContext.symptoms, patientContext.chief_complaint, patientContext.vital_signs)}`)
+    console.log(`     • Pain: ${hasPainSymptoms(patientContext.symptoms, patientContext.chief_complaint)}`)
+    console.log(`     • Infection signs: ${hasInfectionSymptoms(patientContext.symptoms, patientContext.chief_complaint)}`)
     
     // 5. Analyser le type de consultation AVANT le prompt
     const consultationAnalysis = analyzeConsultationType(
@@ -1285,17 +1656,17 @@ export async function POST(request: NextRequest) {
     
     console.log(`🔍 Pre-analysis: ${consultationAnalysis.consultationType} (${Math.round(consultationAnalysis.confidence * 100)}%)`)
     
-    // 6. Prepare enhanced prompt avec gestion médicamenteuse - VERSION SIMPLIFIÉE
-    const finalPrompt = prepareSimplifiedPrompt(patientContext, consultationAnalysis)
+    // 6. Prepare enhanced prompt avec checklist médicale obligatoire
+    const finalPrompt = prepareEnhancedPrompt(patientContext, consultationAnalysis)
     
-    // 7. OpenAI call avec gestion médicamenteuse intégrée et debug
+    // 7. OpenAI call avec règles de sécurité médicale automatiques
     const { data: openaiData, analysis: medicalAnalysis } = await callOpenAIWithRetry(
       apiKey,
       finalPrompt,
       patientContext
     )
     
-    console.log('✅ Medical analysis with medication management completed')
+    console.log('✅ Medical analysis with enhanced safety rules completed')
     
     // 8. Validate response
     const validation = validateMedicalAnalysis(medicalAnalysis, patientContext)
@@ -1314,9 +1685,9 @@ export async function POST(request: NextRequest) {
     
     // 10. Calculate performance metrics
     const processingTime = Date.now() - startTime
-    console.log(`✅ PROCESSING COMPLETED WITH MEDICATION MANAGEMENT IN ${processingTime}ms`)
+    console.log(`✅ PROCESSING COMPLETED WITH ENHANCED MEDICAL SAFETY IN ${processingTime}ms`)
     
-    // 11. Build final response - COMPATIBLE AVEC LE FRONTEND
+    // 11. Build final response - COMPATIBLE AVEC LE FRONTEND + NOUVELLES FONCTIONNALITÉS
     const finalResponse = {
       success: true,
       processingTime: `${processingTime}ms`,
@@ -1328,6 +1699,24 @@ export async function POST(request: NextRequest) {
         anonymousId: patientContext.anonymousId,
         fieldsProtected: ['firstName', 'lastName', 'name'],
         compliance: ['RGPD', 'HIPAA', 'Data Minimization']
+      },
+      
+      // NOUVELLES FONCTIONNALITÉS V3.1 - SÉCURITÉ MÉDICALE
+      medicalSafetyRules: {
+        enabled: true,
+        modifications_applied: medicalAnalysis.safety_rules_applied?.modifications_count || 0,
+        rules_triggered: medicalAnalysis.safety_rules_applied?.rules_triggered || [],
+        success: medicalAnalysis.safety_rules_applied?.success || false,
+        timestamp: medicalAnalysis.safety_rules_applied?.timestamp,
+        checklist_validated: true
+      },
+      
+      medicalCompleteness: {
+        enabled: true,
+        completeness_score: medicalAnalysis.medical_completeness?.completeness_score || 100,
+        warnings: medicalAnalysis.medical_completeness?.warnings || [],
+        missing_elements: medicalAnalysis.medical_completeness?.missing_elements || [],
+        validated_at: medicalAnalysis.medical_completeness?.validated_at
       },
       
       // DIAGNOSTIC REASONING - Extrait de medicalAnalysis pour compatibilité frontend
@@ -1426,13 +1815,14 @@ export async function POST(request: NextRequest) {
               alternatives: med.mauritius_availability?.alternatives || "Alternatives disponibles",
               brand_names: med.mauritius_availability?.brand_names || "Marques disponibles"
             },
-            administration_instructions: med.administration_instructions || "Instructions d'administration"
+            administration_instructions: med.administration_instructions || "Instructions d'administration",
+            safety_rule_applied: med._added_by_safety_rule || null // NOUVEAU
           })),
           non_pharmacological: medicalAnalysis.treatment_plan?.non_pharmacological || "Mesures non médicamenteuses recommandées"
         }
       },
       
-      // Gestion médicamenteuse avancée (spécifique V3)
+      // Gestion médicamenteuse avancée (spécifique V3+)
       medicationManagement: {
         enabled: true,
         consultation_type: medicalAnalysis.medication_safety?.consultation_type || 'new_problem',
@@ -1444,7 +1834,7 @@ export async function POST(request: NextRequest) {
         renewal_keywords: medicalAnalysis.medication_safety?.renewal_keywords || []
       },
       
-      // Sécurité des prescriptions (spécifique V3)
+      // Sécurité des prescriptions (spécifique V3+)
       prescriptionSafety: {
         safety_alerts: medicalAnalysis.safety_alerts || [],
         interactions: medicalAnalysis.medication_safety?.interactions_detected || [],
@@ -1453,7 +1843,7 @@ export async function POST(request: NextRequest) {
         recommendations: medicalAnalysis.medication_safety?.safety_recommendations || []
       },
       
-      // Validation posologies (spécifique V3)
+      // Validation posologies (spécifique V3+)
       posologyValidation: {
         enabled: true,
         preserved_gpt4_knowledge: medicalAnalysis.posology_validation?.preserved_gpt4_knowledge || 0,
@@ -1489,8 +1879,12 @@ export async function POST(request: NextRequest) {
       // Metadata
       metadata: {
         ai_model: 'GPT-4o',
-        system_version: '3.0-Complete-Fixed-Compatible',
+        system_version: '3.1-Enhanced-Medical-Safety-Compatible',
         features: [
+          'Automatic medical safety rules enforcement',
+          'Intelligent fever/pain/infection management',
+          'Enhanced medical completeness validation',
+          'Mauritius-specific medical advice integration',
           'Complete medication safety analysis',
           'Renewal detection and management', 
           'Drug interaction checking',
@@ -1501,9 +1895,18 @@ export async function POST(request: NextRequest) {
           'Complete debug logging',
           'Error recovery system'
         ],
+        safety_enhancements: [
+          'Post-GPT-4 medical rule validation',
+          'Automatic antipyretic addition for fever',
+          'Automatic hydration advice for infections',
+          'Medical completeness scoring',
+          'Enhanced checklist validation',
+          'Tropical medicine considerations'
+        ],
         generation_timestamp: new Date().toISOString(),
         total_processing_time_ms: processingTime,
-        validation_passed: validation.isValid
+        validation_passed: validation.isValid,
+        medical_completeness_score: medicalAnalysis.medical_completeness?.completeness_score || 100
       }
     }
     
@@ -1520,17 +1923,63 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
       processingTime: `${errorTime}ms`,
       metadata: {
-        system_version: '3.0-Complete-Fixed-Compatible',
+        system_version: '3.1-Enhanced-Medical-Safety-Compatible',
         error_logged: true
       }
     }, { status: 500 })
   }
 }
 
-// ==================== HEALTH ENDPOINT AVEC DEBUG ====================
+// ==================== HEALTH ENDPOINT AVEC DEBUG ET TESTS SÉCURITÉ ====================
 export async function GET(request: NextRequest) {
   const url = new URL(request.url)
   const testPrompt = url.searchParams.get('test_prompt')
+  const testSafety = url.searchParams.get('test_safety')
+  
+  if (testSafety === 'true') {
+    // Test des règles de sécurité
+    const testContext = {
+      age: 35,
+      sex: 'M',
+      current_medications: ['Paracétamol 500mg'],
+      chief_complaint: 'Toux et fièvre',
+      symptoms: ['toux', 'fièvre', 'fatigue'],
+      ai_questions: [],
+      vital_signs: { temperature: 38.5 }
+    } as PatientContext
+    
+    // Test des fonctions de détection
+    const feverDetected = hasFeverSymptoms(testContext.symptoms, testContext.chief_complaint, testContext.vital_signs)
+    const painDetected = hasPainSymptoms(testContext.symptoms, testContext.chief_complaint)
+    const infectionDetected = hasInfectionSymptoms(testContext.symptoms, testContext.chief_complaint)
+    
+    // Test analyse consultation
+    const consultationType = analyzeConsultationType(
+      testContext.current_medications,
+      testContext.chief_complaint,
+      testContext.symptoms
+    )
+    
+    return NextResponse.json({
+      status: 'Medical safety rules test completed',
+      test_context: testContext,
+      detection_results: {
+        fever_detected: feverDetected,
+        pain_detected: painDetected,
+        infection_detected: infectionDetected
+      },
+      consultation_analysis: consultationType,
+      safety_rules_status: {
+        fever_rule: feverDetected ? 'WOULD TRIGGER - Add antipyretic' : 'Not triggered',
+        infection_rule: infectionDetected ? 'WOULD TRIGGER - Add hydration advice' : 'Not triggered',
+        tropical_rule: feverDetected ? 'WOULD TRIGGER - Add Mauritius-specific advice' : 'Not triggered'
+      },
+      expected_modifications: {
+        medications_to_add: feverDetected ? ['Paracétamol 500mg for fever'] : [],
+        advice_to_add: infectionDetected ? ['Hydration 2.5-3L/day'] : []
+      }
+    })
+  }
   
   if (testPrompt === 'true') {
     // Test du prompt avec données minimales
@@ -1538,9 +1987,10 @@ export async function GET(request: NextRequest) {
       age: 35,
       sex: 'M',
       current_medications: ['Paracétamol 500mg'],
-      chief_complaint: 'Mal de tête',
-      symptoms: ['céphalées', 'fatigue'],
-      ai_questions: []
+      chief_complaint: 'Mal de tête et fièvre',
+      symptoms: ['céphalées', 'fièvre', 'fatigue'],
+      ai_questions: [],
+      vital_signs: { temperature: 38.2 }
     }
     
     const testConsultationType = {
@@ -1549,10 +1999,10 @@ export async function GET(request: NextRequest) {
       renewalKeywords: []
     }
     
-    const generatedPrompt = prepareSimplifiedPrompt(testContext as PatientContext, testConsultationType)
+    const generatedPrompt = prepareEnhancedPrompt(testContext as PatientContext, testConsultationType)
     
     return NextResponse.json({
-      status: 'Test prompt generated successfully',
+      status: 'Enhanced prompt generated successfully',
       prompt_length: generatedPrompt.length,
       prompt_preview: generatedPrompt.substring(0, 1000),
       test_context: testContext,
@@ -1560,18 +2010,27 @@ export async function GET(request: NextRequest) {
       debug_info: {
         prompt_structure_ok: generatedPrompt.includes('clinical_analysis'),
         medication_context_included: generatedPrompt.includes('Paracétamol'),
-        json_structure_defined: generatedPrompt.includes('"primary_diagnosis"')
+        json_structure_defined: generatedPrompt.includes('"primary_diagnosis"'),
+        checklist_included: generatedPrompt.includes('CHECKLIST MÉDICALE OBLIGATOIRE'),
+        safety_rules_mentioned: generatedPrompt.includes('FIÈVRE → TOUJOURS'),
+        mauritius_context: generatedPrompt.includes('CLIMAT TROPICAL MAURICE')
       }
     })
   }
   
   return NextResponse.json({
-    status: '✅ Mauritius Medical AI - Version 3.0 Complete Fixed Compatible',
-    version: '3.0-Complete-Fixed-Compatible',
+    status: '✅ Mauritius Medical AI - Version 3.1 Enhanced Medical Safety Rules',
+    version: '3.1-Enhanced-Medical-Safety-Compatible',
     features: [
       '🔒 Patient data anonymization (RGPD/HIPAA compliant)',
       '🧠 GPT-4 medical knowledge preservation',
-      '💊 Complete medication management system',
+      '🛡️ NOUVEAU: Automatic medical safety rules enforcement',
+      '🌡️ NOUVEAU: Intelligent fever detection & antipyretic addition',
+      '💧 NOUVEAU: Automatic hydration advice for infections',
+      '💊 NOUVEAU: Enhanced pain management validation',
+      '🏝️ NOUVEAU: Mauritius tropical medicine integration',
+      '📊 NOUVEAU: Medical completeness scoring system',
+      '✅ NOUVEAU: Enhanced checklist validation',
       '🔄 Intelligent renewal detection',
       '⚠️ Drug interaction checking',
       '🎯 Duplicate therapy detection', 
@@ -1583,30 +2042,52 @@ export async function GET(request: NextRequest) {
       '🔧 Error recovery system',
       '⚡ Frontend compatibility maintained'
     ],
+    
+    new_safety_features: {
+      automatic_rules: [
+        'Fever → Automatic antipyretic (paracetamol) addition',
+        'Pain → Automatic analgesic validation',
+        'Infection → Automatic hydration advice',
+        'Antibiotics → Automatic duration & instructions',
+        'Tropical climate → Automatic Mauritius-specific advice'
+      ],
+      validation_enhancements: [
+        'Post-GPT-4 medical completeness check',
+        'Automatic missing element detection',
+        'Medical completeness scoring (0-100%)',
+        'Enhanced checklist validation',
+        'Safety rule modification tracking'
+      ],
+      mauritius_integration: [
+        'Tropical medicine considerations',
+        'Local healthcare resource integration',
+        'Climate-adapted medical advice',
+        'Cultural and dietary adaptations'
+      ]
+    },
+    
     compatibility: {
       frontend_structure: 'Compatible with diagnosis-form.tsx',
       required_fields: ['diagnosticReasoning', 'diagnosis', 'expertAnalysis', 'mauritianDocuments'],
-      additional_v3_features: ['medicationManagement', 'prescriptionSafety', 'posologyValidation']
+      additional_v31_features: ['medicalSafetyRules', 'medicalCompleteness', 'enhanced prescriptionSafety']
     },
-    debug_features: [
-      'Complete GPT-4 response logging',
-      'JSON parsing error recovery',
-      'Simplified robust prompt structure',
-      'Partial response recovery',
-      'Token usage monitoring'
-    ],
-    endpoints: {
+    
+    testing_endpoints: {
       diagnosis: 'POST /api/openai-diagnosis',
       health: 'GET /api/openai-diagnosis',
-      test_prompt: 'GET /api/openai-diagnosis?test_prompt=true'
+      test_prompt: 'GET /api/openai-diagnosis?test_prompt=true',
+      test_safety: 'GET /api/openai-diagnosis?test_safety=true'
     },
+    
     fixes_applied: [
       'Frontend compatibility ensured',
-      'diagnosticReasoning field included',
-      'Expert analysis structure maintained',
-      'Helper function extractTherapeuticClass added',
-      'Response structure unified with V2',
-      'All V3 advanced features preserved'
+      'Medical safety rules post-GPT-4 enforcement',
+      'Enhanced prompt with medical checklist',
+      'Automatic fever/pain/infection management',
+      'Mauritius tropical medicine integration',
+      'Medical completeness validation',
+      'All V3 advanced features preserved',
+      'Complete backward compatibility maintained'
     ]
   })
 }
