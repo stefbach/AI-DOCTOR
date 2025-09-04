@@ -1,4 +1,4 @@
-/ app/api/generate-consultation-report/route.ts - VERSION 2.1 CORRECTED DATA RECOVERY
+// app/api/generate-consultation-report/route.ts - VERSION 2.1 CORRECTED DATA RECOVERY
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
