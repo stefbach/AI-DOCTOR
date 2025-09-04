@@ -239,6 +239,11 @@ async function normalizeLifestyleData(data: any): Promise<any> {
     normalized.otherMedicalHistory = await translateText(data.otherMedicalHistory)
   }
 
+  // Translate consultation reason (chief complaint)
+    if (data.consultationReason) {
+    normalized.consultationReason = await translateText(data.consultationReason)
+  }
+  
   // Current symptoms
   if (Array.isArray(data.currentSymptoms)) {
     normalized.currentSymptoms = data.currentSymptoms
