@@ -562,82 +562,53 @@ export default function ModernPatientForm({
     }
   }, [formData.lastMenstrualPeriod, formData.pregnancyStatus, formData.gestationalAge, calculateGestationalAge])
 
-  // Initialize data - CORRECTED VERSION
-  useEffect(() => {
-    const initializeData = async () => {
-      if (dataInitialized) return
+// Initialize data - FIXED VERSION
+useEffect(() => {
+  const initializeData = async () => {
+    if (dataInitialized) return
+    
+    try {
+      setIsLoading(true)
       
-      try {
-        setIsLoading(true)
-        
-        const urlParams = new URLSearchParams(window.location.search)
-        const source = urlParams.get('source')
-        const patientDataParam = urlParams.get('patientData')
-        
-        // Check if this is from TIBOK with tibokPatient data already processed
-        if (source === 'tibok' && tibokPatient) {
-          // Helper functions for mapping lifestyle values
+      const urlParams = new URLSearchParams(window.location.search)
+      const source = urlParams.get('source')
+      
+      // CRITICAL FIX: Check if we're from TIBOK and WAIT for tibokPatient data
+      if (source === 'tibok') {
+        // If tibokPatient is available, use it (it's already normalized/translated)
+        if (tibokPatient && tibokPatient.firstName) {
+          console.log('✅ Using NORMALIZED data from tibokPatient hook')
+          
+          // Simple mapping functions for lifestyle values
           const mapSmokingStatus = (value: string): string => {
             if (!value) return ""
             const lowerValue = value.toLowerCase().trim()
-            const mappings: Record<string, string> = {
-              'current-smoker': 'actuel',
-              'current smoker': 'actuel',
-              'smoker': 'actuel',
-              'non-smoker': 'non',
-              'non smoker': 'non',
-              'never': 'non',
-              'ex-smoker': 'ancien',
-              'ex smoker': 'ancien',
-              'former smoker': 'ancien',
-              'former': 'ancien',
-              'actuel': 'actuel',
-              'non': 'non',
-              'ancien': 'ancien'
-            }
-            return mappings[lowerValue] || value
+            if (lowerValue.includes('current') || lowerValue.includes('smoker')) return 'actuel'
+            if (lowerValue.includes('non') || lowerValue === 'never') return 'non'
+            if (lowerValue.includes('ex') || lowerValue.includes('former')) return 'ancien'
+            return value === 'actuel' || value === 'non' || value === 'ancien' ? value : ""
           }
           
           const mapAlcoholStatus = (value: string): string => {
             if (!value) return ""
             const lowerValue = value.toLowerCase().trim()
-            const mappings: Record<string, string> = {
-              'never': 'jamais',
-              'none': 'jamais',
-              'occasional': 'occasionnel',
-              'occasionally': 'occasionnel',
-              'sometimes': 'occasionnel',
-              'regular': 'regulier',
-              'regularly': 'regulier',
-              'daily': 'regulier',
-              'jamais': 'jamais',
-              'occasionnel': 'occasionnel',
-              'regulier': 'regulier'
-            }
-            return mappings[lowerValue] || value
+            if (lowerValue === 'never' || lowerValue === 'none') return 'jamais'
+            if (lowerValue === 'occasional') return 'occasionnel'
+            if (lowerValue === 'regular' || lowerValue === 'daily') return 'regulier'
+            return value === 'jamais' || value === 'occasionnel' || value === 'regulier' ? value : ""
           }
           
           const mapPhysicalActivity = (value: string): string => {
             if (!value) return ""
             const lowerValue = value.toLowerCase().trim()
-            const mappings: Record<string, string> = {
-              'sedentary': 'sedentaire',
-              'none': 'sedentaire',
-              'minimal': 'sedentaire',
-              'moderate': 'moderee',
-              'moderate activity': 'moderee',
-              'regular': 'moderee',
-              'intense': 'intense',
-              'high': 'intense',
-              'very active': 'intense',
-              'sedentaire': 'sedentaire',
-              'moderee': 'moderee',
-              'intense': 'intense'
-            }
-            return mappings[lowerValue] || value
+            if (lowerValue === 'sedentary' || lowerValue === 'none') return 'sedentaire'
+            if (lowerValue === 'moderate') return 'moderee'
+            if (lowerValue === 'intense' || lowerValue === 'high') return 'intense'
+            return value === 'sedentaire' || value === 'moderee' || value === 'intense' ? value : ""
           }
           
-          // Use the ALREADY NORMALIZED data from tibokPatient hook
+          // IMPORTANT: tibokPatient data is ALREADY TRANSLATED by the hook!
+          // We just need to use it directly
           const newFormData: PatientFormData = {
             firstName: tibokPatient.firstName || "",
             lastName: tibokPatient.lastName || "",
@@ -655,13 +626,18 @@ export default function ModernPatientForm({
             city: tibokPatient.city || "",
             country: tibokPatient.country || "Mauritius",
             
-            // THESE ARE ALREADY TRANSLATED IN THE HOOK!
+            // THESE ARE ALREADY IN ENGLISH FROM THE HOOK!
+            // The hook has already translated:
+            // - "Autre allergies test" → "Other allergies test"
+            // - "hypertension" → "Hypertension"
+            // - "migraine" → "Migraine"
             allergies: tibokPatient.allergies || [],
             otherAllergies: tibokPatient.otherAllergies || "",
             medicalHistory: tibokPatient.medicalHistory || [],
             otherMedicalHistory: tibokPatient.otherMedicalHistory || "",
             currentMedicationsText: tibokPatient.currentMedications || "",
             
+            // Map lifestyle values to form's expected format
             lifeHabits: {
               smoking: mapSmokingStatus(tibokPatient.smokingStatus || ""),
               alcohol: mapAlcoholStatus(tibokPatient.alcoholConsumption || ""),
@@ -669,94 +645,48 @@ export default function ModernPatientForm({
             }
           }
           
-          console.log('✅ Using NORMALIZED data from tibokPatient hook:', newFormData)
+          console.log('📊 Setting form with TRANSLATED data:', {
+            allergies: newFormData.allergies,
+            otherAllergies: newFormData.otherAllergies,
+            medicalHistory: newFormData.medicalHistory,
+            otherMedicalHistory: newFormData.otherMedicalHistory
+          })
+          
           setFormData(newFormData)
           setDataInitialized(true)
           
-          // Save the properly mapped data immediately to prevent old data from loading
+          // Save the properly formatted data
           await consultationDataService.saveStepData(0, newFormData)
           
-        } else if (source === 'tibok' && patientDataParam) {
-          // Parse raw URL data if tibokPatient is not available yet
-          try {
-            const patientInfo = JSON.parse(decodeURIComponent(patientDataParam))
-            console.log('📋 Parsing raw patient data from URL:', patientInfo)
-            
-            // Process raw data (fallback case)
-            const normalizedAllergies = Array.isArray(patientInfo.allergies) 
-              ? patientInfo.allergies 
-              : (patientInfo.allergies && typeof patientInfo.allergies === 'string' 
-                  ? patientInfo.allergies.split(',').map((a: string) => a.trim()).filter((a: string) => a)
-                  : [])
-            
-            const normalizedMedicalHistory = Array.isArray(patientInfo.medicalHistory)
-              ? patientInfo.medicalHistory 
-              : Array.isArray(patientInfo.medical_history)
-                ? patientInfo.medical_history
-                : (patientInfo.antecedents && typeof patientInfo.antecedents === 'string'
-                    ? patientInfo.antecedents.split(',').map((h: string) => h.trim()).filter((h: string) => h)
-                    : [])
-            
-            const newFormData: PatientFormData = {
-              firstName: patientInfo.firstName || patientInfo.first_name || patientInfo.prenom || "",
-              lastName: patientInfo.lastName || patientInfo.last_name || patientInfo.nom || "",
-              birthDate: (patientInfo.dateOfBirth || patientInfo.date_of_birth || patientInfo.dateNaissance || "").split('T')[0],
-              age: (patientInfo.age?.toString ? patientInfo.age.toString() : patientInfo.age) || "",
-              gender: normalizeGender(patientInfo.gender || patientInfo.sexe || patientInfo.sex),
-              pregnancyStatus: patientInfo.pregnancyStatus || patientInfo.pregnancy_status || "",
-              lastMenstrualPeriod: (patientInfo.lastMenstrualPeriod || patientInfo.last_menstrual_period || "").split('T')[0],
-              gestationalAge: patientInfo.gestationalAge || patientInfo.gestational_age || "",
-              weight: (patientInfo.weight?.toString ? patientInfo.weight.toString() : patientInfo.weight) || (patientInfo.poids?.toString ? patientInfo.poids.toString() : patientInfo.poids) || "",
-              height: (patientInfo.height?.toString ? patientInfo.height.toString() : patientInfo.height) || (patientInfo.taille?.toString ? patientInfo.taille.toString() : patientInfo.taille) || "",
-              phone: patientInfo.phone || patientInfo.phone_number || patientInfo.phoneNumber || patientInfo.telephone || "",
-              email: patientInfo.email || "",
-              address: patientInfo.address || patientInfo.adresse || "",
-              city: patientInfo.city || patientInfo.ville || "",
-              country: patientInfo.country || patientInfo.pays || "Mauritius",
-              allergies: normalizedAllergies,
-              otherAllergies: patientInfo.otherAllergies || patientInfo.other_allergies || "",
-              medicalHistory: normalizedMedicalHistory,
-              otherMedicalHistory: patientInfo.otherMedicalHistory || patientInfo.other_medical_history || "",
-              currentMedicationsText: patientInfo.currentMedications || patientInfo.current_medications || patientInfo.medicamentsActuels || "",
-              lifeHabits: {
-                smoking: patientInfo.smokingStatus || patientInfo.smoking_status || "",
-                alcohol: patientInfo.alcoholConsumption || patientInfo.alcohol_consumption || "",
-                physicalActivity: patientInfo.physicalActivity || patientInfo.physical_activity || ""
-              }
-            }
-            
-            console.log('✅ Initialized form data from URL params:', newFormData)
-            setFormData(newFormData)
-            setDataInitialized(true)
-            
-            // Save immediately for TIBOK source
-            await consultationDataService.saveStepData(0, newFormData)
-            
-          } catch (e) {
-            console.error('Error parsing URL data:', e)
-          }
-          
-        } else if (consultationId) {
-          // Load saved data if NOT coming from Tibok
-          const savedData = await consultationDataService.getAllData()
-          if (savedData?.patientData) {
-            setFormData(prev => ({
-              ...prev,
-              ...savedData.patientData
-            }))
-            setDataInitialized(true)
-          }
+        } else if (!tibokPatient) {
+          // If tibokPatient is not ready yet, DON'T process raw data
+          // Just wait for the next render when tibokPatient will be available
+          console.log('⏳ Waiting for tibokPatient data from hook...')
+          setIsLoading(false)
+          return // Exit early and wait
         }
         
-      } catch (error) {
-        console.error('❌ Error initializing data:', error)
-      } finally {
-        setIsLoading(false)
+      } else if (consultationId) {
+        // For NON-TIBOK sources, load saved data normally
+        const savedData = await consultationDataService.getAllData()
+        if (savedData?.patientData) {
+          setFormData(prev => ({
+            ...prev,
+            ...savedData.patientData
+          }))
+          setDataInitialized(true)
+        }
       }
+      
+    } catch (error) {
+      console.error('❌ Error initializing data:', error)
+    } finally {
+      setIsLoading(false)
     }
-    
-    initializeData()
-  }, [consultationId, tibokPatient, dataInitialized, normalizeGender])
+  }
+  
+  initializeData()
+}, [consultationId, tibokPatient, dataInitialized, normalizeGender])
 
   // Auto-save
   useEffect(() => {
