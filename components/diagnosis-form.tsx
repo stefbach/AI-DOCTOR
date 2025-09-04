@@ -286,7 +286,7 @@ export default function DiagnosisForm({
       let progress = 0
       
       const messages = [
-        { time: 0, msg: "Connecting to GPT-4o Medical AI...", progress: 5 },
+        { time: 0, msg: "Connecting to GPT-5 Medical AI...", progress: 5 },
         { time: 2000, msg: "Analyzing symptoms and medical history...", progress: 15 },
         { time: 5000, msg: "Identifying clinical syndrome...", progress: 25 },
         { time: 10000, msg: "Formulating diagnostic hypotheses...", progress: 40 },
@@ -711,7 +711,7 @@ export default function DiagnosisForm({
           <CardHeader className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white">
             <CardTitle className="flex items-center justify-center gap-3 text-xl font-bold">
               <Brain className="h-6 w-6 animate-pulse" />
-              GPT-4o Artificial Intelligence in Action
+              GPT-5 Artificial Intelligence in Action
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -727,7 +727,7 @@ export default function DiagnosisForm({
               </div>
               <div className="text-center p-3 bg-white rounded-lg shadow-sm">
                 <Brain className="h-6 w-6 text-purple-600 mx-auto mb-1" />
-                <p className="text-xs font-medium text-gray-700">GPT-4o</p>
+                <p className="text-xs font-medium text-gray-700">GPT-5</p>
               </div>
               <div className="text-center p-3 bg-white rounded-lg shadow-sm">
                 <Sparkles className="h-6 w-6 text-yellow-600 mx-auto mb-1" />
@@ -930,7 +930,7 @@ export default function DiagnosisForm({
               Certainty: {diagnosis?.primary?.certaintyLevel || "Moderate"}
             </Badge>
             <Badge className="bg-blue-500 text-white">
-              GPT-4o Enhanced
+              GPT-5 Enhanced
             </Badge>
             {documentsGenerated && (
               <Badge className="bg-green-500 text-white">

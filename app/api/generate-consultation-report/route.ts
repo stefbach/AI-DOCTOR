@@ -794,7 +794,7 @@ Return ONLY a JSON object with these 9 keys and their content in ENGLISH.`
     
     try {
       const result = await generateText({
-        model: openai("gpt-4o"),
+        model: openai("gpt-5),
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }

@@ -502,67 +502,62 @@ export default function ProfessionalReportEditable({
       const patientId = params.get('patientId') || patientData?.id
       const doctorId = params.get('doctorId')
       
-      // Save the validated report with signatures
-      const response = await fetch('/api/save-medical-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reportId: currentReportId,
-          patientId: patientId || 'temp',
-          consultationId,
-          doctorId,
-          doctorName: doctorInfo.nom,
-          patientName: getReportPatient().nomComplet || getReportPatient().nom,
-          report: updatedReport,
-          action: 'validate',
-          metadata: {
-            validatedAt: new Date().toISOString(),
-            validatedBy: doctorInfo.nom,
-            validationStatus: 'validated',
-            signatures: signatures,
-            signatureDataUrl: signatureDataUrl,
-            documentValidations: {
-              consultation: true,
-              prescription: !!report?.ordonnances?.medicaments,
-              laboratory: !!report?.ordonnances?.biologie,
-              imaging: !!report?.ordonnances?.imagerie,
-              invoice: !!report?.invoice
-            }
-          }
-        })
-      })
+ // REMOVED: API calls to save-medical-report and update-doctor-signature
+// Validation is now handled locally without server persistence
 
-      const result = await response.json()
-      
-      if (result.success) {
-        // Update states to reflect validation
-        setValidationStatus('validated')
-        setEditMode(false)
-        setReport(updatedReport)
-        
-        // Optional: Store signature in Supabase doctors table for future use
-        // This allows reusing the same signature for future documents
-        if (doctorId) {
-          try {
-            await fetch('/api/update-doctor-signature', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                doctorId: doctorId,
-                signatureDataUrl: signatureDataUrl,
-                lastSignedAt: new Date().toISOString()
-              })
-            })
-          } catch (err) {
-            console.log('Could not store signature for future use:', err)
-            // Non-critical error, continue
-          }
-        }
-        
-        toast({
-          title: "✅ Validation successful",
-          description: "All documents have been validated and digitally signed. You can now send them to the patient dashboard."
-        })
+// Get URL parameters for logging
+const params = new URLSearchParams(window.location.search)
+const consultationId = params.get('consultationId')
+const patientId = params.get('patientId') || patientData?.id
+const doctorId = params.get('doctorId')
+
+// Log validation info for debugging
+console.log('✅ Report validated locally (API calls removed):', {
+  reportId: currentReportId,
+  patientId: patientId || 'temp',
+  consultationId,
+  doctorId,
+  doctorName: doctorInfo.nom,
+  patientName: getReportPatient().nomComplet || getReportPatient().nom,
+  validatedAt: new Date().toISOString(),
+  validatedBy: doctorInfo.nom,
+  documentValidations: {
+    consultation: true,
+    prescription: !!report?.ordonnances?.medicaments,
+    laboratory: !!report?.ordonnances?.biologie,
+    imaging: !!report?.ordonnances?.imagerie,
+    invoice: !!report?.invoice
+  }
+})
+
+// Update states to reflect validation (same as before)
+setValidationStatus('validated')
+setEditMode(false)
+setReport(updatedReport)
+
+// Store signature in localStorage for session persistence (optional)
+if (doctorId && signatureDataUrl) {
+  try {
+    const signatureData = {
+      doctorId: doctorId,
+      doctorName: doctorInfo.nom,
+      signatureDataUrl: signatureDataUrl,
+      lastSignedAt: new Date().toISOString()
+    }
+    localStorage.setItem(`doctor_signature_${doctorId}`, JSON.stringify(signatureData))
+    console.log('📝 Signature stored locally for session')
+  } catch (err) {
+    console.log('Could not store signature locally:', err)
+    // Non-critical error, continue
+  }
+}
+
+// Show success toast (same message as before)
+toast({
+  title: "✅ Validation successful",
+  description: "All documents have been validated and digitally signed. You can now send them to the patient dashboard."
+})
+     
         
       } else {
         throw new Error(result.error || "Validation failed")
@@ -977,30 +972,12 @@ export default function ProfessionalReportEditable({
         return
       }
       
-      const response = await fetch(`/api/save-medical-report?patientId=${actualPatientId}`)
-      const result = await response.json()
-      
-      if (result.success && result.data?.content) {
-        const reportContent = result.data.content
-        if (reportContent?.compteRendu) {
-          setReport(reportContent)
-          setReportId(result.data.id)
-          setValidationStatus(result.data.status || 'draft')
-          
-          if (reportContent.compteRendu.praticien) {
-            setDoctorInfo(reportContent.compteRendu.praticien)
-          }
-          
-          toast({
-            title: "Existing report found",
-            description: "Loading previous report"
-          })
-        } else {
-          generateProfessionalReport()
-        }
-      } else {
-        generateProfessionalReport()
-      }
+      // REMOVED: Check for existing report via save-medical-report API
+// const response = await fetch(`/api/save-medical-report?patientId=${actualPatientId}`)
+// Go directly to generate report since we can't check for existing
+
+console.log("Skipping existing report check (save-medical-report API removed), generating new report")
+generateProfessionalReport()
     } catch (error) {
       console.log("No existing report, generating new one")
       generateProfessionalReport()
@@ -1109,33 +1086,19 @@ export default function ProfessionalReportEditable({
         const newReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
         setReportId(newReportId)
         
-        // Save to storage
-        const params = new URLSearchParams(window.location.search)
-        const consultationId = params.get('consultationId')
-        const patientId = params.get('patientId') || patientData?.id
-        
-        if (consultationId && patientId) {
-          const saveResponse = await fetch('/api/save-medical-report', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              reportId: newReportId,
-              patientId,
-              report: reportData,
-              action: 'save',
-              consultationId,
-              metadata: {
-                lastModified: new Date().toISOString(),
-                validationStatus: 'draft'
-              }
-            })
-          })
-          
-          if (saveResponse.ok) {
-            console.log('✅ Report auto-saved with ID:', newReportId)
-          }
-        }
-        
+        // REMOVED: Auto-save via save-medical-report API
+// const saveResponse = await fetch('/api/save-medical-report', {...})
+// Report is now only stored in local state
+
+const params = new URLSearchParams(window.location.search)
+const consultationId = params.get('consultationId')
+const patientId = params.get('patientId') || patientData?.id
+
+console.log('✅ Report generated locally with ID:', newReportId, {
+  consultationId,
+  patientId
+})
+
         toast({
           title: "Report generated successfully",
           description: "Report is ready for editing and validation"

@@ -253,17 +253,17 @@ function detectMainPattern(symptoms: string | undefined | null): string {
 // ==================== MODEL CONFIGURATION ====================
 const AI_CONFIGS = {
   fast: {
-    model: "gpt-3.5-turbo",
+    model: "gpt-5 nano",
     temperature: 0.1,
     maxTokens: 500
   },
   balanced: {
-    model: "gpt-4o-mini", 
+    model: "gpt-5-mini", 
     temperature: 0.2,
     maxTokens: 800
   },
   intelligent: {
-    model: "gpt-4o",
+    model: "gpt-5",
     temperature: 0.3,
     maxTokens: 1200
   }
@@ -595,7 +595,7 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-5 nano',
         messages: [
           {
             role: 'user',
@@ -641,19 +641,19 @@ export async function GET(request: NextRequest) {
       modes: {
         fast: {
           description: "Ultra-fast",
-          model: "gpt-3.5-turbo",
+          model: "gpt-5 nano",
           useCase: "Initial triage",
           dataProtected: true
         },
         balanced: {
           description: "Balanced",
-          model: "gpt-4o-mini",
+          model: "gpt-5-mini",
           useCase: "Standard usage",
           dataProtected: true
         },
         intelligent: {
           description: "Maximum intelligence",
-          model: "gpt-4o",
+          model: "gpt-5",
           useCase: "Complex cases",
           dataProtected: true
         }

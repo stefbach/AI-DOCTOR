@@ -1,0 +1,169 @@
+--- a/app/api/openai-diagnosis/route.ts
++++ b/app/api/openai-diagnosis/route.ts
+@@
+-// ==================== STRICT MED VALIDATION (AJOUT) ====================
++// ==================== STRICT MED VALIDATION (AJOUT) ====================
+ type Medication = {
+   drug: string
+   dosing?: { adult?: string; adjustments?: any }
+   duration?: string
+   indication?: string
+   administration_instructions?: string
+ }
+@@
+   return { issues, normalized }
+ }
+ 
++// ==================== EMERGENCY DETECTION (ADD) ====================
++function isHospitalEmergency(analysis: any): { emergency: boolean; reason: string } {
++  const dx = (analysis?.clinical_analysis?.primary_diagnosis?.condition || '').toLowerCase()
++  const severity = (analysis?.clinical_analysis?.primary_diagnosis?.severity || '').toLowerCase()
++  const redFlags = String(analysis?.diagnostic_reasoning?.key_findings?.red_flags || '').toLowerCase()
++
++  const emergencyKeywords = [
++    'aortic dissection', 'dissection aortique',
++    'stemi', 'infarctus', 'acute coronary', 'syndrome coronarien',
++    'stroke', 'avc',
++    'sepsis', 'septic',
++    'ectopic pregnancy', 'grossesse extra',
++    'massive hemorrhage', 'hémorragie', 'bleeding',
++    'shock', 'choc'
++  ]
++
++  const hit = emergencyKeywords.some(k => dx.includes(k)) || severity === 'critical' || redFlags.includes('urgence')
++  return { emergency: hit, reason: hit ? `Emergency pattern found (dx: ${dx} | severity: ${severity})` : '' }
++}
++
+ // ==================== INTELLIGENT VALIDATION ====================
+ function validateMedicalAnalysis(
+   analysis: any,
+@@
+   if (!analysis.follow_up_plan?.red_flags) {
+     issues.push('Red flags missing')
+   }
+ 
++  // URGENCY CLINICAL RULE (ADD)
++  const emergency = isHospitalEmergency(analysis)
++  if (emergency.emergency) {
++    if ((analysis.treatment_plan?.medications || []).length > 0) {
++      issues.push('Urgence vitale détectée: ordonnance ambulatoire interdite. Médicaments à 0 et transfert SAMU 114 requis.')
++    }
++  }
++
+   // ===== Validation stricte des médicaments (AJOUT) =====
+   const medStrict = strictValidateMedications(analysis, patientContext)
+   if (medStrict.issues.length) {
+@@
+-const ENHANCED_DIAGNOSTIC_PROMPT = `You are an expert physician practicing telemedicine in Mauritius using systematic diagnostic reasoning.
++// ==================== EMERGENCY EXCEPTION (Prompt Header) (ADD) ====================
++const EMERGENCY_EXCEPTION = `
++⚠️ EMERGENCY EXCEPTION — OVERRIDES ALL RULES
++If the presentation suggests a condition that requires immediate hospital management
++(e.g., suspected aortic dissection, acute coronary syndrome/STEMI, stroke, sepsis, ectopic pregnancy,
++major hemorrhage, shock):
++- DO NOT prescribe any outpatient medication.
++- Set "treatment_plan.medications" to [] (empty).
++- Add "referrals" = "Immediate transfer via SAMU 114 to appropriate center".
++- Restrict IV/ICU treatments as hospital-only notes (do not convert them into outpatient Rx).
++- Generate an Emergency Transfer Note instead of a prescription.
++`
++
++const ENHANCED_DIAGNOSTIC_PROMPT = `You are an expert physician practicing telemedicine in Mauritius using systematic diagnostic reasoning.
++
++${EMERGENCY_EXCEPTION}
+ 
+ 🏥 YOUR MEDICAL EXPERTISE:
+ - You know international medical guidelines (ESC, AHA, WHO, NICE)
+@@
+ export async function callOpenAIWithRetry(
+   apiKey: string,
+   prompt: string,
+   maxRetries: number = 2
+ ): Promise<any> {
+@@
+-            {
+-              role: "system",
+-              content: "You are an expert physician with deep knowledge of medical guidelines and the Mauritius healthcare system. Generate comprehensive, evidence-based analyses while avoiding over-prescription."
+-            },
++            {
++              role: "system",
++              content: "You are an expert physician with deep knowledge of medical guidelines and the Mauritius healthcare system. Apply the EMERGENCY EXCEPTION strictly: if a hospital-level emergency is suspected, do NOT prescribe any outpatient medication and mandate SAMU 114 transfer. Generate comprehensive, evidence-based analyses while avoiding over-prescription."
++            },
+             {
+               role: "user",
+               content: prompt
+@@
+   const { data: openaiData, analysis: medicalAnalysis } = await callOpenAIWithRetry(
+       apiKey,
+       finalPrompt
+     )
+ 
+   console.log('✅ Medical analysis generated successfully')
++
++  // ENFORCE EMERGENCY RULE BEFORE VALIDATION (ADD)
++  const emergencyGate = isHospitalEmergency(medicalAnalysis)
++  if (emergencyGate.emergency) {
++    console.warn(`🚨 Emergency detected: ${emergencyGate.reason}`)
++    medicalAnalysis.treatment_plan = medicalAnalysis.treatment_plan || {}
++    medicalAnalysis.treatment_plan.prescription_rationale =
++      "Aucune prescription ambulatoire: transfert hospitalier immédiat (SAMU 114) requis."
++    medicalAnalysis.treatment_plan.medications = [] // zéro Rx en ville
++    medicalAnalysis.treatment_plan.referrals = [
++      { type: 'Emergency', action: 'SAMU 114 – transfert immédiat vers centre adapté (cardiothoracique / stroke / ICU)' }
++    ]
++    medicalAnalysis.investigation_strategy = medicalAnalysis.investigation_strategy || {}
++    medicalAnalysis.investigation_strategy.test_sequence = {
++      immediate: "Examens urgents en milieu hospitalier (ex: CT-angio aortique si dissection suspectée)",
++      urgent: "", routine: ""
++    }
++  }
+@@
+ function generateMedicalDocuments(
+   analysis: any,
+   patient: PatientContext,
+   infrastructure: any
+ ): any {
+   const currentDate = new Date()
+   const consultationId = `TC-MU-${currentDate.getFullYear()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
++  const emergency = isHospitalEmergency(analysis) // (ADD)
++
++  // Emergency Transfer Note (ADD)
++  const emergencyTransferDoc = emergency.emergency ? {
++    header: {
++      title: "EMERGENCY TRANSFER ORDER",
++      date: currentDate.toLocaleDateString('en-US'),
++      time: currentDate.toLocaleTimeString('en-US'),
++      id: consultationId
++    },
++    instructions: [
++      "Appeler SAMU 114 immédiatement",
++      "Décubitus dorsal, NPO (à jeun)",
++      "Surveillance et contrôle FC/PA en milieu hospitalier uniquement",
++      "CT-angio aortique prioritaire si suspicion de dissection"
++    ],
++    recommended_centers: "Cardiac Centre Pamplemousses / Apollo / Wellkin / Dr Jeetoo / SSRN / Victoria",
++    emergency_numbers: infrastructure?.emergency_numbers || { samu: "114" }
++  } : null
+@@
+-    // MEDICATION PRESCRIPTION (if medications prescribed)
+-    medication: (analysis.treatment_plan?.medications?.length > 0) ? {
++    // MEDICATION PRESCRIPTION (if medications prescribed) — disabled on emergency (ADD)
++    medication: (!emergency.emergency && (analysis.treatment_plan?.medications?.length > 0)) ? {
+       header: {
+         title: "MEDICAL PRESCRIPTION",
+         prescriber: {
+@@
+       footer: {
+         legal: "Teleconsultation prescription compliant with Medical Council Mauritius",
+         pharmacist_note: "Dispensing authorized as per current regulations"
+       }
+-    } : null,
++    } : null,
++
++    // EMERGENCY TRANSFER NOTE (ADD)
++    emergency_transfer: emergencyTransferDoc,
+ 
+     // PATIENT ADVICE (always generated)
+     patient_advice: {
+       header: {
+         title: "ADVICE AND RECOMMENDATIONS"
