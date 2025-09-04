@@ -505,12 +505,6 @@ export default function ProfessionalReportEditable({
  // REMOVED: API calls to save-medical-report and update-doctor-signature
 // Validation is now handled locally without server persistence
 
-// Get URL parameters for logging
-const params = new URLSearchParams(window.location.search)
-const consultationId = params.get('consultationId')
-const patientId = params.get('patientId') || patientData?.id
-const doctorId = params.get('doctorId')
-
 // Log validation info for debugging
 console.log('✅ Report validated locally (API calls removed):', {
   reportId: currentReportId,
