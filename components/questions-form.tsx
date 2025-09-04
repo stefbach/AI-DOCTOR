@@ -608,10 +608,10 @@ export default function QuestionsForm({
                 Pattern: {metadata.pattern || 'general'}
               </Badge>
               <Badge 
-                className={`${MODE_CONFIGS[metadata.mode || 'balanced'].bgColor} ${MODE_CONFIGS[metadata.mode || 'balanced'].color}`}
+                className={`${MODE_CONFIGS[metadata.mode || 'balanced']?.bgColor || 'bg-blue-50'} ${MODE_CONFIGS[metadata.mode || 'balanced']?.color || 'text-blue-600'}`}
               >
-                <DynamicIcon icon={MODE_CONFIGS[metadata.mode || 'balanced'].icon} className="h-3 w-3 mr-1" />
-                {MODE_CONFIGS[metadata.mode || 'balanced'].label} Mode
+                <DynamicIcon icon={MODE_CONFIGS[metadata.mode || 'balanced']?.icon || Activity} className="h-3 w-3 mr-1" />
+                {MODE_CONFIGS[metadata.mode || 'balanced']?.label || 'Balanced'} Mode
               </Badge>
               {metadata.responseTime && (
                 <Badge variant="outline">
@@ -658,7 +658,7 @@ export default function QuestionsForm({
                   variant={generationMode === mode ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setGenerationMode(mode as GenerationMode)}
-                  className={generationMode === mode ? config.bgColor : ''}
+                  className={generationMode === mode ? (config?.bgColor || 'bg-blue-50') : ''}
                 >
                   <DynamicIcon icon={config.icon} className="h-3 w-3 mr-1" />
                   <span className="font-medium">{config.label}</span>
@@ -669,7 +669,7 @@ export default function QuestionsForm({
 
             {/* Selected mode description */}
             <p className="text-sm text-gray-600">
-              {MODE_CONFIGS[generationMode].description}
+              {MODE_CONFIGS[generationMode]?.description || 'Standard usage'}
             </p>
 
             {/* Regenerate button */}
@@ -681,7 +681,7 @@ export default function QuestionsForm({
               className="mx-auto"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              {loading ? 'Generating...' : `Regenerate (${MODE_CONFIGS[generationMode].label} mode)`}
+              {loading ? 'Generating...' : `Regenerate (${MODE_CONFIGS[generationMode]?.label || 'Balanced'} mode)`}
             </Button>
 
             {/* Generation time */}
