@@ -548,14 +548,23 @@ function ensureCompleteStructure(analysis: any): any {
     
     console.log('🚨 Emergency diagnosis assignment needed')
     
-    const symptoms = analysis?.symptoms_analyzed || []
-    const chiefComplaint = analysis?.chief_complaint_analyzed || ''
+    // Safely handle symptoms analysis
+    const symptoms = (analysis?.symptoms_analyzed && Array.isArray(analysis.symptoms_analyzed)) ? 
+                     analysis.symptoms_analyzed.filter(s => typeof s === 'string') : [];
+    const chiefComplaint = (typeof analysis?.chief_complaint_analyzed === 'string') ? 
+                          analysis.chief_complaint_analyzed : '';
     
-    if (symptoms.includes('fever') || chiefComplaint.toLowerCase().includes('fever') || chiefComplaint.toLowerCase().includes('fièvre')) {
+    const symptomsText = symptoms.join(' ').toLowerCase();
+    const complaintText = chiefComplaint.toLowerCase();
+    
+    if (symptomsText.includes('fever') || complaintText.includes('fever') || 
+        symptomsText.includes('fièvre') || complaintText.includes('fièvre')) {
       ensuredStructure.clinical_analysis.primary_diagnosis.condition = "Pyrexia of unknown origin - Investigation required"
-    } else if (symptoms.includes('pain') || chiefComplaint.toLowerCase().includes('pain') || chiefComplaint.toLowerCase().includes('douleur')) {
+    } else if (symptomsText.includes('pain') || complaintText.includes('pain') || 
+               symptomsText.includes('douleur') || complaintText.includes('douleur')) {
       ensuredStructure.clinical_analysis.primary_diagnosis.condition = "Pain syndrome - Assessment required"
-    } else if (symptoms.includes('respiratory') || chiefComplaint.toLowerCase().includes('cough') || chiefComplaint.toLowerCase().includes('toux')) {
+    } else if (symptomsText.includes('respiratory') || complaintText.includes('cough') || 
+               symptomsText.includes('toux') || complaintText.includes('toux')) {
       ensuredStructure.clinical_analysis.primary_diagnosis.condition = "Respiratory symptoms - Analysis required"
     } else {
       ensuredStructure.clinical_analysis.primary_diagnosis.condition = "Medical consultation - Symptomatic assessment required"
