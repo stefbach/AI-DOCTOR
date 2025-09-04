@@ -557,11 +557,7 @@ toast({
   title: "✅ Validation successful",
   description: "All documents have been validated and digitally signed. You can now send them to the patient dashboard."
 })
-     
-        
-      } else {
-        throw new Error(result.error || "Validation failed")
-      }
+
     } catch (error) {
       console.error("Validation error:", error)
       toast({
@@ -591,22 +587,21 @@ toast({
         title: "📤 Sending documents...",
         description: "Preparing documents for patient dashboard"
       })
-      // ... rest of handleSendDocuments function continues ...
-    // Get necessary IDs from URL parameters
-    const params = new URLSearchParams(window.location.search)
-    const consultationId = params.get('consultationId')
-    const patientId = params.get('patientId') || patientData?.id
-    const doctorId = params.get('doctorId')
-
-    if (!consultationId || !patientId) {
-      toast({
-        title: "Error",
-        description: "Missing consultation or patient information",
-        variant: "destructive"
-      })
-      return
-    }
-
+      
+      // Get necessary IDs from URL parameters
+      const params = new URLSearchParams(window.location.search)
+      const consultationId = params.get('consultationId')
+      const patientId = params.get('patientId') || patientData?.id
+      const doctorId = params.get('doctorId')
+      
+      if (!consultationId || !patientId) {
+        toast({
+          title: "Error",
+          description: "Missing consultation or patient information",
+          variant: "destructive"
+        })
+        return
+      }
     // Smart Tibok URL detection
     const getTibokUrl = () => {
       // 1. Check URL parameter
