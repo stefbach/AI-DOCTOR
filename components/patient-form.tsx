@@ -27,7 +27,8 @@ import {
   Mail,
   Phone,
   MapPin,
-  Home
+  Home,
+  Baby
 } from "lucide-react"
 import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
 import { getTranslation, Language } from "@/lib/translations"
@@ -46,6 +47,11 @@ interface PatientFormData {
   birthDate: string
   age: string
   gender: string
+  
+  // Pregnancy information (NEW)
+  pregnancyStatus?: string
+  lastMenstrualPeriod?: string
+  gestationalAge?: string
   
   // Physical data
   weight: string
@@ -69,13 +75,12 @@ interface PatientFormData {
   lifeHabits: LifeHabits
 }
 
-// ✅ FIXED: Changed prop from 'initialData' to 'data' for consistency
 interface PatientFormProps {
   onDataChange: (data: PatientFormData) => void
   onNext: () => void
   language?: Language
   consultationId?: string | null
-  data?: Partial<PatientFormData>  // ← Changed from 'initialData' to 'data'
+  data?: Partial<PatientFormData>
 }
 
 interface ValidationErrors {
@@ -89,6 +94,9 @@ const INITIAL_FORM_DATA: PatientFormData = {
   birthDate: "",
   age: "",
   gender: "",
+  pregnancyStatus: "",
+  lastMenstrualPeriod: "",
+  gestationalAge: "",
   weight: "",
   height: "",
   phone: "",
@@ -100,7 +108,7 @@ const INITIAL_FORM_DATA: PatientFormData = {
   otherAllergies: "",
   medicalHistory: [],
   otherMedicalHistory: "",
-  currentMedicationsText: "", // ✅ FIXED: Ensure this is a STRING, not array
+  currentMedicationsText: "",
   lifeHabits: {
     smoking: "",
     alcohol: "",
@@ -117,33 +125,38 @@ const SECTIONS = [
   { id: "habits", titleKey: 'patientForm.lifestyle', icon: Activity },
 ]
 
-// ✅ FIXED: Exact option values to match the mapping
 const SMOKING_OPTIONS = [
   { value: "non", label: "Non-smoker" },
-  { value: "actuel", label: "Current smoker" }, // Must match "actuel" from mapping
+  { value: "actuel", label: "Current smoker" },
   { value: "ancien", label: "Ex-smoker" }
 ]
 
 const ALCOHOL_OPTIONS = [
   { value: "jamais", label: "Never" },
-  { value: "occasionnel", label: "Occasional" }, // Must match "occasionnel" from mapping
+  { value: "occasionnel", label: "Occasional" },
   { value: "regulier", label: "Regular" }
 ]
 
 const ACTIVITY_OPTIONS = [
-  { value: "sedentaire", label: "Sedentary" }, // Must match "sedentaire" from mapping
+  { value: "sedentaire", label: "Sedentary" },
   { value: "moderee", label: "Moderate" },
   { value: "intense", label: "Intense" }
 ]
 
+const PREGNANCY_STATUS_OPTIONS = [
+  { value: "not_pregnant", label: "Not pregnant", color: "green" },
+  { value: "pregnant", label: "Currently pregnant", color: "pink" },
+  { value: "possibly_pregnant", label: "Possibly pregnant", color: "yellow" },
+  { value: "breastfeeding", label: "Breastfeeding", color: "blue" },
+  { value: "not_applicable", label: "Not applicable", color: "gray" }
+]
 // ==================== MAIN COMPONENT ====================
-// ✅ FIXED: Changed parameter from 'initialData' to 'data'
 export default function ModernPatientForm({ 
   onDataChange, 
   onNext, 
   language = 'en',
   consultationId,
-  data  // ← Changed from 'initialData' to 'data'
+  data
 }: PatientFormProps) {
   // ========== Hooks ==========
   const { patientData: tibokPatient, isFromTibok } = useTibokPatientData()
@@ -152,10 +165,9 @@ export default function ModernPatientForm({
   // ========== States ==========
   const [isLoading, setIsLoading] = useState(true)
   const [dataInitialized, setDataInitialized] = useState(false)
-  // ✅ FIXED: Changed from 'initialData' to 'data' in useState initialization
   const [formData, setFormData] = useState<PatientFormData>(() => ({
     ...INITIAL_FORM_DATA,
-    ...data  // ← Changed from 'initialData' to 'data'
+    ...data
   }))
   const [errors, setErrors] = useState<ValidationErrors>({})
   const [allergySearch, setAllergySearch] = useState("")
@@ -163,7 +175,7 @@ export default function ModernPatientForm({
   const [currentSection, setCurrentSection] = useState(0)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
 
-  // ========== Memoization of translated lists ==========
+  // ========== Memoization ==========
   const COMMON_ALLERGIES = useMemo(() => [
     "Penicillin",
     "Aspirin",
@@ -188,6 +200,12 @@ export default function ModernPatientForm({
     "High cholesterol",
   ], [])
 
+  // Check if patient is female of childbearing age
+  const isChildbearingAge = useMemo(() => {
+    const age = parseInt(formData.age)
+    return formData.gender === 'Female' && age >= 15 && age <= 50
+  }, [formData.age, formData.gender])
+
   // ========== Utility functions ==========
   const calculateAge = useCallback((birthDate: string): string => {
     if (!birthDate) return ""
@@ -202,6 +220,20 @@ export default function ModernPatientForm({
     }
     
     return age >= 0 ? age.toString() : ""
+  }, [])
+
+  const calculateGestationalAge = useCallback((lmp: string): string => {
+    if (!lmp) return ""
+    
+    const today = new Date()
+    const lastPeriod = new Date(lmp)
+    const diffTime = Math.abs(today.getTime() - lastPeriod.getTime())
+    const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7))
+    
+    if (diffWeeks > 0 && diffWeeks <= 42) {
+      return `${diffWeeks} weeks`
+    }
+    return ""
   }, [])
 
   const calculateBMI = useCallback((): string | null => {
@@ -250,6 +282,11 @@ export default function ModernPatientForm({
       formData.height
     ]
     
+    // Add pregnancy status if applicable
+    if (isChildbearingAge) {
+      requiredFields.push(formData.pregnancyStatus || '')
+    }
+    
     const optionalFields = [
       formData.phone,
       formData.email,
@@ -265,7 +302,7 @@ export default function ModernPatientForm({
     const totalCompleted = requiredCompleted + optionalCompleted
     
     return Math.round((totalCompleted / totalFields) * 100)
-  }, [formData])
+  }, [formData, isChildbearingAge])
 
   const normalizeGender = useCallback((gender: any): string => {
     if (!gender) return ""
@@ -279,54 +316,112 @@ export default function ModernPatientForm({
     
     return gender
   }, [])
-
   const transformDataForAPI = useCallback((data: PatientFormData) => {
     const sexe = data.gender === 'Male' ? 'Male' : 
                  data.gender === 'Female' ? 'Female' : 
                  data.gender || 'Not specified'
-
+    
     const allergiesArray = [...data.allergies]
     if (data.otherAllergies?.trim()) {
       allergiesArray.push(data.otherAllergies.trim())
     }
-
+    
     const historyArray = [...data.medicalHistory]
     if (data.otherMedicalHistory?.trim()) {
       historyArray.push(data.otherMedicalHistory.trim())
     }
-
+    
+    // Calculate gestational age if pregnant
+    let gestationalAge = ''
+    if (data.pregnancyStatus === 'pregnant' && data.lastMenstrualPeriod) {
+      gestationalAge = calculateGestationalAge(data.lastMenstrualPeriod)
+    }
+    
     return {
-      // Personal information
+      // Personal information - Include all field name variations
       nom: data.lastName || '',
       prenom: data.firstName || '',
+      firstName: data.firstName || '',
+      lastName: data.lastName || '',
+      first_name: data.firstName || '',
+      last_name: data.lastName || '',
       dateNaissance: data.birthDate || '',
+      dateOfBirth: data.birthDate || '',
+      date_of_birth: data.birthDate || '',
       age: data.age || '',
       sexe: sexe,
       sex: sexe,
       gender: sexe,
       
-      // Contact
+      // Pregnancy information - Include all field name variations
+      pregnancyStatus: data.pregnancyStatus || 'not_specified',
+      pregnancy_status: data.pregnancyStatus || 'not_specified',
+      lastMenstrualPeriod: data.lastMenstrualPeriod || '',
+      last_menstrual_period: data.lastMenstrualPeriod || '',
+      gestationalAge: gestationalAge,
+      gestational_age: gestationalAge,
+      
+      // Contact - Include all field name variations
       telephone: data.phone || '',
+      phone: data.phone || '',
+      phone_number: data.phone || '',
+      phoneNumber: data.phone || '',
       email: data.email || '',
       adresse: data.address || '',
+      address: data.address || '',
       ville: data.city || '',
+      city: data.city || '',
       pays: data.country || 'Mauritius',
+      country: data.country || 'Mauritius',
       
-      // Medical data
+      // Medical data - Include all field name variations
       poids: data.weight || '',
+      weight: data.weight || '',
       taille: data.height || '',
+      height: data.height || '',
       allergies: allergiesArray.join(', ') || 'No known allergies',
+      otherAllergies: data.otherAllergies || '',
+      other_allergies: data.otherAllergies || '',
       antecedents: historyArray.join(', ') || 'No significant history',
+      medicalHistory: historyArray,
+      medical_history: historyArray,
+      otherMedicalHistory: data.otherMedicalHistory || '',
+      other_medical_history: data.otherMedicalHistory || '',
       medicamentsActuels: data.currentMedicationsText || 'None',
+      currentMedications: data.currentMedicationsText || 'None',
+      current_medications: data.currentMedicationsText || 'None',
       
-      // Life habits
+      // LIFESTYLE HABITS - Include all possible field names and structures
+      // Flat structure (for direct field access)
+      smokingStatus: data.lifeHabits.smoking || 'Not specified',
+      smoking_status: data.lifeHabits.smoking || 'Not specified',
+      alcoholConsumption: data.lifeHabits.alcohol || 'Not specified',
+      alcohol_consumption: data.lifeHabits.alcohol || 'Not specified',
+      physicalActivity: data.lifeHabits.physicalActivity || 'Not specified',
+      physical_activity: data.lifeHabits.physicalActivity || 'Not specified',
+      
+      // Nested structure in French (for compatibility)
       habitudes: {
         tabac: data.lifeHabits.smoking || 'Not specified',
         alcool: data.lifeHabits.alcohol || 'Not specified',
         activitePhysique: data.lifeHabits.physicalActivity || 'Not specified'
+      },
+      
+      // Nested structure in English (for compatibility)
+      lifeHabits: {
+        smoking: data.lifeHabits.smoking || 'Not specified',
+        alcohol: data.lifeHabits.alcohol || 'Not specified',
+        physicalActivity: data.lifeHabits.physicalActivity || 'Not specified'
+      },
+      
+      // Also include snake_case nested structure
+      life_habits: {
+        smoking: data.lifeHabits.smoking || 'Not specified',
+        alcohol: data.lifeHabits.alcohol || 'Not specified',
+        physical_activity: data.lifeHabits.physicalActivity || 'Not specified'
       }
     }
-  }, [])
+  }, [calculateGestationalAge])
 
   // ========== Event handlers ==========
   const handleInputChange = useCallback((field: keyof PatientFormData, value: any) => {
@@ -380,7 +475,6 @@ export default function ModernPatientForm({
       }
     }
   }, [])
-
   // ========== Validation ==========
   const validateForm = useCallback((): boolean => {
     const newErrors: ValidationErrors = {}
@@ -408,6 +502,11 @@ export default function ModernPatientForm({
       newErrors.gender = "Gender is required"
     }
     
+    // Pregnancy status validation for females of childbearing age
+    if (isChildbearingAge && !formData.pregnancyStatus) {
+      newErrors.pregnancyStatus = "Pregnancy status is required for females aged 15-50"
+    }
+    
     const weight = parseFloat(formData.weight)
     if (!formData.weight || isNaN(weight) || weight < 1 || weight > 500) {
       newErrors.weight = "Valid weight is required (1-500 kg)"
@@ -425,7 +524,7 @@ export default function ModernPatientForm({
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
-  }, [formData])
+  }, [formData, isChildbearingAge])
 
   const handleSubmit = useCallback(() => {
     if (validateForm()) {
@@ -453,7 +552,17 @@ export default function ModernPatientForm({
     }
   }, [formData.birthDate, formData.age, calculateAge])
 
-  // ✅ FIXED: Initialize data with improved TIBOK mapping
+  // Update gestational age when LMP changes
+  useEffect(() => {
+    if (formData.lastMenstrualPeriod && formData.pregnancyStatus === 'pregnant') {
+      const gestAge = calculateGestationalAge(formData.lastMenstrualPeriod)
+      if (gestAge !== formData.gestationalAge) {
+        setFormData(prev => ({ ...prev, gestationalAge: gestAge }))
+      }
+    }
+  }, [formData.lastMenstrualPeriod, formData.pregnancyStatus, formData.gestationalAge, calculateGestationalAge])
+
+  // Initialize data - CORRECTED VERSION
   useEffect(() => {
     const initializeData = async () => {
       if (dataInitialized) return
@@ -461,204 +570,174 @@ export default function ModernPatientForm({
       try {
         setIsLoading(true)
         
-        // 1. Check URL data
         const urlParams = new URLSearchParams(window.location.search)
         const source = urlParams.get('source')
         const patientDataParam = urlParams.get('patientData')
         
-        let patientInfo = null
-        
-        // 2. Retrieve patient data (URL or TIBOK)
-        if (source === 'tibok' && patientDataParam) {
+        // Check if this is from TIBOK with tibokPatient data already processed
+        if (source === 'tibok' && tibokPatient) {
+          // Helper functions for mapping lifestyle values
+          const mapSmokingStatus = (value: string): string => {
+            if (!value) return ""
+            const lowerValue = value.toLowerCase().trim()
+            const mappings: Record<string, string> = {
+              'current-smoker': 'actuel',
+              'current smoker': 'actuel',
+              'smoker': 'actuel',
+              'non-smoker': 'non',
+              'non smoker': 'non',
+              'never': 'non',
+              'ex-smoker': 'ancien',
+              'ex smoker': 'ancien',
+              'former smoker': 'ancien',
+              'former': 'ancien',
+              'actuel': 'actuel',
+              'non': 'non',
+              'ancien': 'ancien'
+            }
+            return mappings[lowerValue] || value
+          }
+          
+          const mapAlcoholStatus = (value: string): string => {
+            if (!value) return ""
+            const lowerValue = value.toLowerCase().trim()
+            const mappings: Record<string, string> = {
+              'never': 'jamais',
+              'none': 'jamais',
+              'occasional': 'occasionnel',
+              'occasionally': 'occasionnel',
+              'sometimes': 'occasionnel',
+              'regular': 'regulier',
+              'regularly': 'regulier',
+              'daily': 'regulier',
+              'jamais': 'jamais',
+              'occasionnel': 'occasionnel',
+              'regulier': 'regulier'
+            }
+            return mappings[lowerValue] || value
+          }
+          
+          const mapPhysicalActivity = (value: string): string => {
+            if (!value) return ""
+            const lowerValue = value.toLowerCase().trim()
+            const mappings: Record<string, string> = {
+              'sedentary': 'sedentaire',
+              'none': 'sedentaire',
+              'minimal': 'sedentaire',
+              'moderate': 'moderee',
+              'moderate activity': 'moderee',
+              'regular': 'moderee',
+              'intense': 'intense',
+              'high': 'intense',
+              'very active': 'intense',
+              'sedentaire': 'sedentaire',
+              'moderee': 'moderee',
+              'intense': 'intense'
+            }
+            return mappings[lowerValue] || value
+          }
+          
+          // Use the ALREADY NORMALIZED data from tibokPatient hook
+          const newFormData: PatientFormData = {
+            firstName: tibokPatient.firstName || "",
+            lastName: tibokPatient.lastName || "",
+            birthDate: (tibokPatient.dateOfBirth || "").split('T')[0],
+            age: tibokPatient.age?.toString() || "",
+            gender: normalizeGender(tibokPatient.gender),
+            pregnancyStatus: tibokPatient.pregnancyStatus || "",
+            lastMenstrualPeriod: (tibokPatient.lastMenstrualPeriod || "").split('T')[0],
+            gestationalAge: tibokPatient.gestationalAge || "",
+            weight: tibokPatient.weight?.toString() || "",
+            height: tibokPatient.height?.toString() || "",
+            phone: tibokPatient.phone || "",
+            email: tibokPatient.email || "",
+            address: tibokPatient.address || "",
+            city: tibokPatient.city || "",
+            country: tibokPatient.country || "Mauritius",
+            
+            // THESE ARE ALREADY TRANSLATED IN THE HOOK!
+            allergies: tibokPatient.allergies || [],
+            otherAllergies: tibokPatient.otherAllergies || "",
+            medicalHistory: tibokPatient.medicalHistory || [],
+            otherMedicalHistory: tibokPatient.otherMedicalHistory || "",
+            currentMedicationsText: tibokPatient.currentMedications || "",
+            
+            lifeHabits: {
+              smoking: mapSmokingStatus(tibokPatient.smokingStatus || ""),
+              alcohol: mapAlcoholStatus(tibokPatient.alcoholConsumption || ""),
+              physicalActivity: mapPhysicalActivity(tibokPatient.physicalActivity || "")
+            }
+          }
+          
+          console.log('✅ Using NORMALIZED data from tibokPatient hook:', newFormData)
+          setFormData(newFormData)
+          setDataInitialized(true)
+          
+          // Save the properly mapped data immediately to prevent old data from loading
+          await consultationDataService.saveStepData(0, newFormData)
+          
+        } else if (source === 'tibok' && patientDataParam) {
+          // Parse raw URL data if tibokPatient is not available yet
           try {
-            patientInfo = JSON.parse(decodeURIComponent(patientDataParam))
+            const patientInfo = JSON.parse(decodeURIComponent(patientDataParam))
+            console.log('📋 Parsing raw patient data from URL:', patientInfo)
+            
+            // Process raw data (fallback case)
+            const normalizedAllergies = Array.isArray(patientInfo.allergies) 
+              ? patientInfo.allergies 
+              : (patientInfo.allergies && typeof patientInfo.allergies === 'string' 
+                  ? patientInfo.allergies.split(',').map((a: string) => a.trim()).filter((a: string) => a)
+                  : [])
+            
+            const normalizedMedicalHistory = Array.isArray(patientInfo.medicalHistory)
+              ? patientInfo.medicalHistory 
+              : Array.isArray(patientInfo.medical_history)
+                ? patientInfo.medical_history
+                : (patientInfo.antecedents && typeof patientInfo.antecedents === 'string'
+                    ? patientInfo.antecedents.split(',').map((h: string) => h.trim()).filter((h: string) => h)
+                    : [])
+            
+            const newFormData: PatientFormData = {
+              firstName: patientInfo.firstName || patientInfo.first_name || patientInfo.prenom || "",
+              lastName: patientInfo.lastName || patientInfo.last_name || patientInfo.nom || "",
+              birthDate: (patientInfo.dateOfBirth || patientInfo.date_of_birth || patientInfo.dateNaissance || "").split('T')[0],
+              age: (patientInfo.age?.toString ? patientInfo.age.toString() : patientInfo.age) || "",
+              gender: normalizeGender(patientInfo.gender || patientInfo.sexe || patientInfo.sex),
+              pregnancyStatus: patientInfo.pregnancyStatus || patientInfo.pregnancy_status || "",
+              lastMenstrualPeriod: (patientInfo.lastMenstrualPeriod || patientInfo.last_menstrual_period || "").split('T')[0],
+              gestationalAge: patientInfo.gestationalAge || patientInfo.gestational_age || "",
+              weight: (patientInfo.weight?.toString ? patientInfo.weight.toString() : patientInfo.weight) || (patientInfo.poids?.toString ? patientInfo.poids.toString() : patientInfo.poids) || "",
+              height: (patientInfo.height?.toString ? patientInfo.height.toString() : patientInfo.height) || (patientInfo.taille?.toString ? patientInfo.taille.toString() : patientInfo.taille) || "",
+              phone: patientInfo.phone || patientInfo.phone_number || patientInfo.phoneNumber || patientInfo.telephone || "",
+              email: patientInfo.email || "",
+              address: patientInfo.address || patientInfo.adresse || "",
+              city: patientInfo.city || patientInfo.ville || "",
+              country: patientInfo.country || patientInfo.pays || "Mauritius",
+              allergies: normalizedAllergies,
+              otherAllergies: patientInfo.otherAllergies || patientInfo.other_allergies || "",
+              medicalHistory: normalizedMedicalHistory,
+              otherMedicalHistory: patientInfo.otherMedicalHistory || patientInfo.other_medical_history || "",
+              currentMedicationsText: patientInfo.currentMedications || patientInfo.current_medications || patientInfo.medicamentsActuels || "",
+              lifeHabits: {
+                smoking: patientInfo.smokingStatus || patientInfo.smoking_status || "",
+                alcohol: patientInfo.alcoholConsumption || patientInfo.alcohol_consumption || "",
+                physicalActivity: patientInfo.physicalActivity || patientInfo.physical_activity || ""
+              }
+            }
+            
+            console.log('✅ Initialized form data from URL params:', newFormData)
+            setFormData(newFormData)
+            setDataInitialized(true)
+            
+            // Save immediately for TIBOK source
+            await consultationDataService.saveStepData(0, newFormData)
+            
           } catch (e) {
             console.error('Error parsing URL data:', e)
           }
-        } else if (tibokPatient) {
-          patientInfo = tibokPatient
-        }
-        
-        // 3. If we have patient data, use it
-        if (patientInfo) {
-          console.log('🔄 Auto-filling patient form with TIBOK data:', {
-            allergies: patientInfo.allergies,
-            medicalHistory: patientInfo.medicalHistory, 
-            currentMedications: patientInfo.currentMedications,
-            smokingStatus: patientInfo.smokingStatus,
-            alcoholConsumption: patientInfo.alcoholConsumption,
-            physicalActivity: patientInfo.physicalActivity
-          })
-
-          // ✅ FIXED ALLERGIES MAPPING with debugging
-          const normalizedAllergies = Array.isArray(patientInfo.allergies) 
-            ? patientInfo.allergies.map(allergy => {
-                console.log('🔧 Mapping allergy:', allergy)
-                
-                switch(allergy.toLowerCase().trim()) {
-                  case 'aspirin': return 'Aspirin'
-                  case 'aspirine': return 'Aspirin'
-                  case 'penicillin': return 'Penicillin'
-                  case 'pénicilline': return 'Penicillin'
-                  case 'ibuprofen': return 'NSAIDs (Ibuprofen, Diclofenac)'
-                  case 'ibuprofène': return 'NSAIDs (Ibuprofen, Diclofenac)'
-                  case 'nsaids (ibuprofen, diclofenac)': return 'NSAIDs (Ibuprofen, Diclofenac)'
-                  case 'anti-inflammatoires (ibuprofène, diclofénac)': return 'NSAIDs (Ibuprofen, Diclofenac)'
-                  case 'codeine': return 'Codeine'
-                  case 'codéine': return 'Codeine'
-                  case 'latex': return 'Latex'
-                  case 'iodine': return 'Iodine'
-                  case 'iode': return 'Iodine'
-                  case 'local anesthetics': return 'Local anesthetics'
-                  case 'anesthésiques locaux': return 'Local anesthetics'
-                  case 'sulfonamides': return 'Sulfonamides'
-                  case 'sulfamides': return 'Sulfonamides'
-                  default: 
-                    console.warn('⚠️ Unknown allergy:', allergy)
-                    return allergy
-                }
-              })
-            : []
-
-          // ✅ FIXED MEDICAL HISTORY MAPPING with exact matching
-          const normalizedMedicalHistory = Array.isArray(patientInfo.medicalHistory)
-            ? patientInfo.medicalHistory.map(condition => {
-                console.log('🔧 Mapping medical condition:', condition)
-                
-                switch(condition.toLowerCase().trim()) {
-                  case 'diabete-t1': return 'Type 1 Diabetes'
-                  case 'diabete-t2': return 'Type 2 Diabetes'  
-                  case 'type 1 diabetes': return 'Type 1 Diabetes'
-                  case 'diabète de type 1': return 'Type 1 Diabetes'
-                  case 'type 2 diabetes': return 'Type 2 Diabetes'
-                  case 'diabète de type 2': return 'Type 2 Diabetes'
-                  case 'hypertension': return 'Hypertension'
-                  case 'asthma': return 'Asthma'
-                  case 'asthme': return 'Asthma'
-                  case 'heart disease': return 'Heart disease'
-                  case 'maladie cardiaque': return 'Heart disease'
-                  case 'depression': return 'Depression/Anxiety'
-                  case 'dépression': return 'Depression/Anxiety'
-                  case 'anxiety': return 'Depression/Anxiety'
-                  case 'anxiété': return 'Depression/Anxiety'
-                  case 'depression/anxiety': return 'Depression/Anxiety'
-                  case 'dépression/anxiété': return 'Depression/Anxiety'
-                  case 'arthritis': return 'Arthritis'
-                  case 'arthrite': return 'Arthritis'
-                  case 'migraine': return 'Migraine'
-                  case 'gerd': return 'GERD (Gastroesophageal reflux)'
-                  case 'reflux': return 'GERD (Gastroesophageal reflux)'
-                  case 'gerd (gastroesophageal reflux)': return 'GERD (Gastroesophageal reflux)'
-                  case 'reflux gastro-œsophagien': return 'GERD (Gastroesophageal reflux)'
-                  case 'high cholesterol': return 'High cholesterol'
-                  case 'cholestérol élevé': return 'High cholesterol'
-                  default: 
-                    console.warn('⚠️ Unknown medical condition:', condition)
-                    return condition
-                }
-              })
-            : []
-
-          // ✅ FIXED LIFESTYLE MAPPING with proper debugging
-          const mappedLifestyle = {
-            smoking: (() => {
-              console.log('🔧 Mapping smoking status:', patientInfo.smokingStatus)
-              switch(patientInfo.smokingStatus?.toLowerCase().trim()) {
-                case 'fumeur-actuel': return 'actuel'
-                case 'current-smoker': return 'actuel'
-                case 'non-smoker': return 'non'
-                case 'non': return 'non'
-                case 'ex-smoker': return 'ancien'
-                case 'ancien': return 'ancien'
-                default: 
-                  console.warn('⚠️ Unknown smoking status:', patientInfo.smokingStatus)
-                  return patientInfo.smokingStatus || ""
-              }
-            })(),
-            
-            alcohol: (() => {
-              console.log('🔧 Mapping alcohol consumption:', patientInfo.alcoholConsumption)
-              switch(patientInfo.alcoholConsumption?.toLowerCase().trim()) {
-                case 'occasional': return 'occasionnel'
-                case 'occasionnel': return 'occasionnel'
-                case 'never': return 'jamais'
-                case 'jamais': return 'jamais'
-                case 'regular': return 'regulier'
-                case 'regulier': return 'regulier'
-                default:
-                  console.warn('⚠️ Unknown alcohol consumption:', patientInfo.alcoholConsumption)
-                  return patientInfo.alcoholConsumption || ""
-              }
-            })(),
-            
-            physicalActivity: (() => {
-              console.log('🔧 Mapping physical activity:', patientInfo.physicalActivity)
-              switch(patientInfo.physicalActivity?.toLowerCase().trim()) {
-                case 'sedentaire': return 'sedentaire'
-                case 'sedentary': return 'sedentaire'
-                case 'moderate': return 'moderee'
-                case 'moderee': return 'moderee'
-                case 'intense': return 'intense'
-                default:
-                  console.warn('⚠️ Unknown physical activity:', patientInfo.physicalActivity)
-                  return patientInfo.physicalActivity || ""
-              }
-            })()
-          }
-
-          console.log('🔧 NORMALIZED DATA DEBUG:', {
-            originalAllergies: patientInfo.allergies,
-            normalizedAllergies: normalizedAllergies,
-            allergiesMatched: normalizedAllergies.length,
-            originalMedicalHistory: patientInfo.medicalHistory,
-            normalizedMedicalHistory: normalizedMedicalHistory,
-            medicalHistoryMatched: normalizedMedicalHistory.length,
-            originalLifestyle: {
-              smoking: patientInfo.smokingStatus,
-              alcohol: patientInfo.alcoholConsumption,
-              activity: patientInfo.physicalActivity
-            },
-            mappedLifestyle: mappedLifestyle
-          })
-
-          const newFormData: PatientFormData = {
-            firstName: patientInfo.firstName || patientInfo.first_name || "",
-            lastName: patientInfo.lastName || patientInfo.last_name || "",
-            birthDate: (patientInfo.dateOfBirth || patientInfo.date_of_birth || "").split('T')[0],
-            age: patientInfo.age?.toString() || "",
-            gender: normalizeGender(patientInfo.gender),
-            weight: patientInfo.weight?.toString() || "",
-            height: patientInfo.height?.toString() || "",
-            phone: patientInfo.phone || patientInfo.phone_number || patientInfo.phoneNumber || "",
-            email: patientInfo.email || "",
-            address: patientInfo.address || "",
-            city: patientInfo.city || "",
-            country: patientInfo.country || "Mauritius",
-            
-            // ✅ FIXED: Use normalized data for medical information
-            allergies: normalizedAllergies,
-            otherAllergies: patientInfo.otherAllergies || "",
-            medicalHistory: normalizedMedicalHistory,
-            otherMedicalHistory: patientInfo.otherMedicalHistory || "",
-            currentMedicationsText: patientInfo.currentMedications || "", // ✅ Ensure string
-            
-            // ✅ FIXED: Use mapped lifestyle data
-            lifeHabits: mappedLifestyle
-          }
           
-          console.log('✅ Patient form auto-filled with FINAL DATA:', {
-            allergiesCount: newFormData.allergies.length,
-            medicalHistoryCount: newFormData.medicalHistory.length,
-            hasMedications: !!newFormData.currentMedicationsText,
-            lifestyle: newFormData.lifeHabits,
-            medicationsType: typeof newFormData.currentMedicationsText
-          })
-          
-          setFormData(newFormData)
-          setDataInitialized(true)
-        }
-        // 4. Otherwise load from database
-        else if (consultationId) {
+        } else if (consultationId) {
+          // Load saved data if NOT coming from Tibok
           const savedData = await consultationDataService.getAllData()
           if (savedData?.patientData) {
             setFormData(prev => ({
@@ -670,7 +749,7 @@ export default function ModernPatientForm({
         }
         
       } catch (error) {
-        console.error('Error initializing data:', error)
+        console.error('❌ Error initializing data:', error)
       } finally {
         setIsLoading(false)
       }
@@ -684,11 +763,8 @@ export default function ModernPatientForm({
     const timer = setTimeout(async () => {
       if (formData.firstName || formData.lastName) {
         try {
-          // Save data
           await consultationDataService.saveStepData(0, formData)
           setLastSaved(new Date())
-          
-          // Notify parent
           onDataChange(formData)
         } catch (error) {
           console.error('Error saving:', error)
@@ -698,7 +774,6 @@ export default function ModernPatientForm({
     
     return () => clearTimeout(timer)
   }, [formData, onDataChange])
-
   // ========== Conditional rendering ==========
   if (isLoading) {
     return (
@@ -775,7 +850,6 @@ export default function ModernPatientForm({
           </button>
         ))}
       </div>
-
       {/* Section 1: Identity */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
@@ -903,6 +977,128 @@ export default function ModernPatientForm({
             )}
           </div>
 
+          {/* PREGNANCY STATUS SECTION - NEW */}
+          {isChildbearingAge && (
+            <div className="space-y-4 p-4 bg-pink-50 rounded-lg border border-pink-200">
+              <Label className="flex items-center gap-2 font-medium text-pink-800">
+                <Baby className="h-4 w-4" />
+                Pregnancy Information <span className="text-red-500">*</span>
+              </Label>
+              
+              <RadioGroup
+                id="pregnancyStatus"
+                value={formData.pregnancyStatus}
+                onValueChange={(value) => handleInputChange("pregnancyStatus", value)}
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <label 
+                    htmlFor="pregnancy-not"
+                    className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                      formData.pregnancyStatus === 'not_pregnant' 
+                        ? "border-green-500 bg-green-50" 
+                        : "border-gray-200 hover:border-green-300"
+                    }`}
+                  >
+                    <RadioGroupItem value="not_pregnant" id="pregnancy-not" />
+                    <span className="text-sm font-medium">Not pregnant</span>
+                  </label>
+
+                  <label 
+                    htmlFor="pregnancy-yes"
+                    className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                      formData.pregnancyStatus === 'pregnant' 
+                        ? "border-pink-500 bg-pink-100" 
+                        : "border-gray-200 hover:border-pink-300"
+                    }`}
+                  >
+                    <RadioGroupItem value="pregnant" id="pregnancy-yes" />
+                    <span className="text-sm font-medium">Currently pregnant</span>
+                  </label>
+
+                  <label 
+                    htmlFor="pregnancy-maybe"
+                    className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                      formData.pregnancyStatus === 'possibly_pregnant' 
+                        ? "border-yellow-500 bg-yellow-50" 
+                        : "border-gray-200 hover:border-yellow-300"
+                    }`}
+                  >
+                    <RadioGroupItem value="possibly_pregnant" id="pregnancy-maybe" />
+                    <span className="text-sm font-medium">Possibly pregnant</span>
+                  </label>
+
+                  <label 
+                    htmlFor="pregnancy-breastfeeding"
+                    className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                      formData.pregnancyStatus === 'breastfeeding' 
+                        ? "border-blue-500 bg-blue-50" 
+                        : "border-gray-200 hover:border-blue-300"
+                    }`}
+                  >
+                    <RadioGroupItem value="breastfeeding" id="pregnancy-breastfeeding" />
+                    <span className="text-sm font-medium">Breastfeeding</span>
+                  </label>
+                </div>
+              </RadioGroup>
+
+              {errors.pregnancyStatus && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <X className="h-3 w-3" />
+                  {errors.pregnancyStatus}
+                </p>
+              )}
+
+              {/* Last Menstrual Period */}
+              {(formData.pregnancyStatus === 'not_pregnant' || 
+                formData.pregnancyStatus === 'possibly_pregnant' ||
+                formData.pregnancyStatus === 'pregnant') && (
+                <div className="space-y-2 mt-4">
+                  <Label htmlFor="lastMenstrualPeriod" className="flex items-center gap-2 font-medium">
+                    Last Menstrual Period (LMP)
+                  </Label>
+                  <Input
+                    id="lastMenstrualPeriod"
+                    type="date"
+                    value={formData.lastMenstrualPeriod}
+                    onChange={(e) => handleInputChange("lastMenstrualPeriod", e.target.value)}
+                    max={new Date().toISOString().split('T')[0]}
+                    className="border-pink-200"
+                  />
+                  {formData.pregnancyStatus === 'pregnant' && formData.gestationalAge && (
+                    <p className="text-sm text-pink-700 font-medium">
+                      Gestational age: {formData.gestationalAge}
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-600">
+                    Important for medication safety and diagnostic considerations
+                  </p>
+                </div>
+              )}
+
+              {/* Pregnancy warning */}
+              {(formData.pregnancyStatus === 'pregnant' || 
+                formData.pregnancyStatus === 'possibly_pregnant') && (
+                <div className="mt-4 p-3 bg-yellow-100 border border-yellow-400 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-semibold text-yellow-800">Important Medical Notice</p>
+                      <p className="text-yellow-700 mt-1">
+                        Your pregnancy status will be taken into account for all medical recommendations. 
+                        Some medications and examinations may be contraindicated or require special precautions.
+                      </p>
+                      <ul className="mt-2 text-yellow-700 list-disc list-inside">
+                        <li>Medications will be reviewed for pregnancy safety</li>
+                        <li>X-rays and CT scans will be avoided unless absolutely necessary</li>
+                        <li>Safe alternatives will be prioritized</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="weight" className="flex items-center gap-2 font-medium">
@@ -959,13 +1155,17 @@ export default function ModernPatientForm({
                 <div>
                   <p className="font-semibold">BMI: {bmi} kg/m²</p>
                   <p className="text-sm">{bmiCategory.text}</p>
+                  {formData.pregnancyStatus === 'pregnant' && (
+                    <p className="text-xs text-gray-600 mt-1">
+                      Note: BMI interpretation may vary during pregnancy
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
           )}
         </CardContent>
       </Card>
-
       {/* Section 2: Contact */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-t-lg">
@@ -1167,47 +1367,8 @@ export default function ModernPatientForm({
                   checked={formData.medicalHistory.includes(condition)}
                   onCheckedChange={() => handleMedicalHistoryToggle(condition)}
                 />
-                <span className="text-sm font-medium">{condition}</span>
-              </label>
-            ))}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="otherMedicalHistory">Other Medical History</Label>
-            <Textarea
-              id="otherMedicalHistory"
-              value={formData.otherMedicalHistory}
-              onChange={(e) => handleInputChange("otherMedicalHistory", e.target.value)}
-              placeholder="List any other medical conditions, surgeries, or hospitalizations..."
-              rows={3}
-              className="resize-none"
-            />
-          </div>
-
-          {(formData.medicalHistory.length > 0 || formData.otherMedicalHistory) && (
-            <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-              <div className="flex items-center gap-2 mb-3">
-                <Heart className="h-5 w-5 text-purple-600" />
-                <p className="font-semibold text-purple-800">Declared Medical History</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {formData.medicalHistory.map((condition) => (
-                  <Badge key={condition} className="bg-purple-100 text-purple-800 text-xs">
-                    {condition}
-                  </Badge>
-                ))}
-                {formData.otherMedicalHistory && (
-                  <Badge className="bg-purple-100 text-purple-800 text-xs">
-                    Other
-                  </Badge>
-                )}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Section 5: Current Medications */}
+                <span
+                  {/* Section 5: Current Medications */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
@@ -1230,6 +1391,11 @@ Example:
               className="font-mono text-sm"
             />
             <p className="text-xs text-gray-500">Please include medication name, dosage, and frequency</p>
+            {formData.pregnancyStatus === 'pregnant' && (
+              <p className="text-xs text-pink-600 font-medium">
+                ⚠️ Current medications will be reviewed for pregnancy safety
+              </p>
+            )}
           </div>
 
           {formData.currentMedicationsText && (
@@ -1247,7 +1413,7 @@ Example:
         </CardContent>
       </Card>
 
-      {/* Section 6: Lifestyle - ✅ FIXED: Use exact option values */}
+      {/* Section 6: Lifestyle */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
@@ -1280,6 +1446,11 @@ Example:
                   </label>
                 ))}
               </RadioGroup>
+              {formData.pregnancyStatus === 'pregnant' && formData.lifeHabits.smoking === 'actuel' && (
+                <p className="text-xs text-red-600 font-medium">
+                  ⚠️ Smoking during pregnancy increases health risks
+                </p>
+              )}
             </div>
 
             {/* Alcohol */}
@@ -1305,6 +1476,12 @@ Example:
                   </label>
                 ))}
               </RadioGroup>
+              {formData.pregnancyStatus === 'pregnant' && 
+               (formData.lifeHabits.alcohol === 'occasionnel' || formData.lifeHabits.alcohol === 'regulier') && (
+                <p className="text-xs text-red-600 font-medium">
+                  ⚠️ No safe level of alcohol during pregnancy
+                </p>
+              )}
             </div>
 
             {/* Physical Activity */}
@@ -1330,6 +1507,11 @@ Example:
                   </label>
                 ))}
               </RadioGroup>
+              {formData.pregnancyStatus === 'pregnant' && (
+                <p className="text-xs text-blue-600 font-medium">
+                  💡 Moderate exercise is generally safe during pregnancy
+                </p>
+              )}
             </div>
           </div>
         </CardContent>
