@@ -1367,7 +1367,45 @@ export default function ModernPatientForm({
                   checked={formData.medicalHistory.includes(condition)}
                   onCheckedChange={() => handleMedicalHistoryToggle(condition)}
                 />
-                <span
+                <span className="text-sm font-medium">{condition}</span>
+              </label>
+            ))}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="otherMedicalHistory">Other Medical History</Label>
+            <Textarea
+              id="otherMedicalHistory"
+              value={formData.otherMedicalHistory}
+              onChange={(e) => handleInputChange("otherMedicalHistory", e.target.value)}
+              placeholder="List any other medical conditions, surgeries, or hospitalizations..."
+              rows={3}
+              className="resize-none"
+            />
+          </div>
+
+          {(formData.medicalHistory.length > 0 || formData.otherMedicalHistory) && (
+            <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+              <div className="flex items-center gap-2 mb-3">
+                <Heart className="h-5 w-5 text-purple-600" />
+                <p className="font-semibold text-purple-800">Declared Medical History</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {formData.medicalHistory.map((condition) => (
+                  <Badge key={condition} className="bg-purple-100 text-purple-800 text-xs">
+                    {condition}
+                  </Badge>
+                ))}
+                {formData.otherMedicalHistory && (
+                  <Badge className="bg-purple-100 text-purple-800 text-xs">
+                    Other
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
                   {/* Section 5: Current Medications */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
