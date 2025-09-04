@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo, memo, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -12,41 +12,14 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
-import { DoctorSignature } from "@/components/doctor-signature"
-import { useTibokDoctorData } from "@/hooks/use-tibok-doctor-data"
 import { 
-  FileText, 
-  Download, 
-  Printer, 
-  CheckCircle,
-  Loader2,
-  Share2,
-  Pill,
-  TestTube,
-  Scan,
-  AlertTriangle,
-  XCircle,
-  Eye,
-  EyeOff,
-  Edit,
-  Save,
-  FileCheck,
-  Plus,
-  Trash2,
-  AlertCircle,
-  Lock,
-  Unlock,
-  Copy,
-  ClipboardCheck,
-  Stethoscope,
-  Calendar,
-  User,
-  Building,
-  CreditCard,
-  Receipt
+  FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube, 
+  Scan, AlertTriangle, XCircle, Eye, EyeOff, Edit, Save, FileCheck, Plus, 
+  Trash2, AlertCircle, Lock, Unlock, Copy, ClipboardCheck, Stethoscope, 
+  Calendar, User, Building, CreditCard, Receipt
 } from "lucide-react"
 
-// Types for Mauritian format
+// ==================== TYPES ====================
 interface MauritianReport {
   compteRendu: {
     header: {
@@ -103,99 +76,11 @@ interface MauritianReport {
     }
   }
   ordonnances?: {
-    medicaments?: {
-      enTete: any
-      patient: any
-      prescription: {
-        datePrescription: string
-        medicaments: any[]
-        validite: string
-        dispensationNote?: string
-      }
-      authentification: any
-    }
-    biologie?: {
-      enTete: any
-      patient: any
-      prescription: {
-        datePrescription: string
-        motifClinique: string
-        analyses: {
-          haematology?: any[]
-          clinicalChemistry?: any[]
-          immunology?: any[]
-          microbiology?: any[]
-          endocrinology?: any[]
-        }
-        instructionsSpeciales: string[]
-        laboratoireRecommande?: string
-      }
-      authentification: any
-    }
-    imagerie?: {
-      enTete: any
-      patient: any
-      prescription: {
-        datePrescription: string
-        examens: any[]
-        renseignementsCliniques: string
-        centreImagerie?: string
-      }
-      authentification: any
-    }
+    medicaments?: any
+    biologie?: any
+    imagerie?: any
   }
-  invoice?: {
-    header: {
-      invoiceNumber: string
-      consultationDate: string
-      invoiceDate: string
-    }
-    provider: {
-      companyName: string
-      tradeName: string
-      registrationNumber: string
-      vatNumber: string
-      registeredOffice: string
-      phone: string
-      email: string
-      website: string
-    }
-    patient: {
-      name: string
-      email: string
-      phone: string
-      patientId: string
-    }
-    services: {
-      items: Array<{
-        description: string
-        quantity: number
-        unitPrice: number
-        total: number
-      }>
-      subtotal: number
-      vatRate: number
-      vatAmount: number
-      totalDue: number
-    }
-    payment: {
-      method: string
-      receivedDate: string
-      status: 'pending' | 'paid' | 'cancelled'
-    }
-    physician: {
-      name: string
-      registrationNumber: string
-    }
-    notes: string[]
-    signature: {
-      entity: string
-      onBehalfOf: string
-      title: string
-      signatureImage?: string
-      signedAt?: string
-    }
-  }
+  invoice?: any
   prescriptionsResume?: {
     medicaments: string
     examens: string
@@ -212,7 +97,7 @@ interface ProfessionalReportProps {
   onComplete?: () => void
 }
 
-// Fonction utilitaire pour créer un rapport vide avec structure complète
+// ==================== HELPER FUNCTIONS ====================
 const createEmptyReport = (): MauritianReport => ({
   compteRendu: {
     header: {
@@ -261,7 +146,515 @@ const createEmptyReport = (): MauritianReport => ({
     }
   }
 })
+// ==================== DEBOUNCED COMPONENTS (MOVED OUTSIDE MAIN COMPONENT) ====================
 
+// 1. Debounced Textarea for Report Sections
+const DebouncedTextarea = memo(({
+  value,
+  onUpdate,
+  className,
+  placeholder
+}: {
+  value: string
+  onUpdate: (value: string) => void
+  className?: string
+  placeholder?: string
+}) => {
+  const [localValue, setLocalValue] = useState(value)
+  const updateTimeoutRef = useRef<NodeJS.Timeout>()
+
+  useEffect(() => {
+    setLocalValue(value)
+  }, [value])
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value
+    setLocalValue(newValue)
+
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current)
+    }
+
+    updateTimeoutRef.current = setTimeout(() => {
+      onUpdate(newValue)
+    }, 60000)
+  }, [onUpdate])
+
+  useEffect(() => {
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  return (
+    <Textarea
+      value={localValue}
+      onChange={handleChange}
+      className={className}
+      placeholder={placeholder}
+    />
+  )
+})
+
+// 2. Fixed Medication Input Component
+const MedicationEditForm = memo(({
+  medication,
+  index,
+  onUpdate,
+  onRemove
+}: {
+  medication: any
+  index: number
+  onUpdate: (index: number, updatedMedication: any) => void
+  onRemove: (index: number) => void
+}) => {
+  const [localMed, setLocalMed] = useState({
+    nom: medication.nom || '',
+    denominationCommune: medication.denominationCommune || '',
+    dosage: medication.dosage || '',
+    forme: medication.forme || 'tablet',
+    posologie: medication.posologie || '',
+    modeAdministration: medication.modeAdministration || 'Oral route',
+    dureeTraitement: medication.dureeTraitement || '7 days',
+    quantite: medication.quantite || '1 box',
+    instructions: medication.instructions || '',
+    justification: medication.justification || '',
+    surveillanceParticuliere: medication.surveillanceParticuliere || '',
+    nonSubstituable: medication.nonSubstituable || false
+  })
+  const updateTimeoutRef = useRef<NodeJS.Timeout>()
+
+  // Update local state immediately - NO parent update here
+  const handleFieldChange = useCallback((field: string, value: any) => {
+    setLocalMed(prev => ({ ...prev, [field]: value }))
+  }, [])
+
+  // Debounced update to parent
+  useEffect(() => {
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current)
+    }
+    
+    updateTimeoutRef.current = setTimeout(() => {
+      const updatedMed = {
+        ...localMed,
+        ligneComplete: `${localMed.nom} ${localMed.dosage ? `- ${localMed.dosage}` : ''}\n` +
+                      `${localMed.posologie} - ${localMed.modeAdministration}\n` +
+                      `Duration: ${localMed.dureeTraitement} - Quantity: ${localMed.quantite}`
+      }
+      onUpdate(index, updatedMed)
+    }, 60000)
+
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current)
+      }
+    }
+  }, [localMed, index, onUpdate])
+
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label htmlFor={`med-nom-${index}`}>Medication Name</Label>
+          <Input
+            id={`med-nom-${index}`}
+            value={localMed.nom}
+            onChange={(e) => handleFieldChange('nom', e.target.value)}
+            placeholder="e.g., Paracetamol"
+          />
+        </div>
+        <div>
+          <Label htmlFor={`med-generic-${index}`}>Generic Name (INN)</Label>
+          <Input
+            id={`med-generic-${index}`}
+            value={localMed.denominationCommune}
+            onChange={(e) => handleFieldChange('denominationCommune', e.target.value)}
+            placeholder="e.g., Paracetamol"
+          />
+        </div>
+        <div>
+          <Label htmlFor={`med-dosage-${index}`}>Dosage</Label>
+          <Input
+            id={`med-dosage-${index}`}
+            value={localMed.dosage}
+            onChange={(e) => handleFieldChange('dosage', e.target.value)}
+            placeholder="e.g., 500mg"
+          />
+        </div>
+        <div>
+          <Label htmlFor={`med-form-${index}`}>Form</Label>
+          <Select
+            value={localMed.forme}
+            onValueChange={(value) => handleFieldChange('forme', value)}
+          >
+            <SelectTrigger id={`med-form-${index}`}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="tablet">Tablet</SelectItem>
+              <SelectItem value="capsule">Capsule</SelectItem>
+              <SelectItem value="syrup">Syrup</SelectItem>
+              <SelectItem value="injection">Injection</SelectItem>
+              <SelectItem value="cream">Cream</SelectItem>
+              <SelectItem value="ointment">Ointment</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor={`med-frequency-${index}`}>Frequency</Label>
+          <Input
+            id={`med-frequency-${index}`}
+            value={localMed.posologie}
+            onChange={(e) => handleFieldChange('posologie', e.target.value)}
+            placeholder="e.g., 1 tablet 3 times daily"
+          />
+        </div>
+        <div>
+          <Label htmlFor={`med-duration-${index}`}>Duration</Label>
+          <Input
+            id={`med-duration-${index}`}
+            value={localMed.dureeTraitement}
+            onChange={(e) => handleFieldChange('dureeTraitement', e.target.value)}
+            placeholder="e.g., 7 days"
+          />
+        </div>
+        <div>
+          <Label htmlFor={`med-quantity-${index}`}>Quantity</Label>
+          <Input
+            id={`med-quantity-${index}`}
+            value={localMed.quantite}
+            onChange={(e) => handleFieldChange('quantite', e.target.value)}
+            placeholder="e.g., 1 box"
+          />
+        </div>
+        <div>
+          <Label htmlFor={`med-route-${index}`}>Route of Administration</Label>
+          <Select
+            value={localMed.modeAdministration}
+            onValueChange={(value) => handleFieldChange('modeAdministration', value)}
+          >
+            <SelectTrigger id={`med-route-${index}`}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Oral route">Oral route</SelectItem>
+              <SelectItem value="Sublingual route">Sublingual route</SelectItem>
+              <SelectItem value="Topical route">Topical route</SelectItem>
+              <SelectItem value="Parenteral route">Parenteral route</SelectItem>
+              <SelectItem value="Rectal route">Rectal route</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div>
+        <Label htmlFor={`med-instructions-${index}`}>Special Instructions</Label>
+        <Input
+          id={`med-instructions-${index}`}
+          value={localMed.instructions}
+          onChange={(e) => handleFieldChange('instructions', e.target.value)}
+          placeholder="e.g., Take with food"
+        />
+      </div>
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id={`med-nonsubstitutable-${index}`}
+            checked={localMed.nonSubstituable}
+            onCheckedChange={(checked) => handleFieldChange('nonSubstituable', checked)}
+          />
+          <Label htmlFor={`med-nonsubstitutable-${index}`}>Non-substitutable</Label>
+        </div>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => onRemove(index)}
+          type="button"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  )
+})
+
+// 3. Fixed Biology Test Input Component
+const BiologyTestEditForm = memo(({
+  test,
+  category,
+  index,
+  onUpdate,
+  onRemove
+}: {
+  test: any
+  category: string
+  index: number
+  onUpdate: (category: string, index: number, updatedTest: any) => void
+  onRemove: (category: string, index: number) => void
+}) => {
+  const [localTest, setLocalTest] = useState({
+    nom: test.nom || '',
+    categorie: test.categorie || category,
+    urgence: test.urgence || false,
+    aJeun: test.aJeun || false,
+    conditionsPrelevement: test.conditionsPrelevement || '',
+    motifClinique: test.motifClinique || '',
+    renseignementsCliniques: test.renseignementsCliniques || '',
+    tubePrelevement: test.tubePrelevement || 'As per laboratory protocol',
+    delaiResultat: test.delaiResultat || 'Standard'
+  })
+  const updateTimeoutRef = useRef<NodeJS.Timeout>()
+
+  // Update local state immediately - NO parent update here
+  const handleFieldChange = useCallback((field: string, value: any) => {
+    setLocalTest(prev => ({ ...prev, [field]: value }))
+  }, [])
+
+  // Debounced update to parent
+  useEffect(() => {
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current)
+    }
+    
+    updateTimeoutRef.current = setTimeout(() => {
+      onUpdate(category, index, localTest)
+    }, 60000)
+
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current)
+      }
+    }
+  }, [localTest, category, index, onUpdate])
+
+  return (
+    <div className="space-y-3 p-3">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>Test Name</Label>
+          <Input
+            value={localTest.nom}
+            onChange={(e) => handleFieldChange('nom', e.target.value)}
+            placeholder="e.g., Complete Blood Count"
+          />
+        </div>
+        <div>
+          <Label>Clinical Indication</Label>
+          <Input
+            value={localTest.motifClinique}
+            onChange={(e) => handleFieldChange('motifClinique', e.target.value)}
+            placeholder="e.g., Anemia evaluation"
+          />
+        </div>
+        <div>
+          <Label>Sample Type</Label>
+          <Select
+            value={localTest.tubePrelevement}
+            onValueChange={(value) => handleFieldChange('tubePrelevement', value)}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="As per laboratory protocol">Lab Protocol</SelectItem>
+              <SelectItem value="EDTA (Purple top)">EDTA (Purple)</SelectItem>
+              <SelectItem value="SST (Gold top)">SST (Gold)</SelectItem>
+              <SelectItem value="Sodium Citrate (Blue top)">Citrate (Blue)</SelectItem>
+              <SelectItem value="Heparin (Green top)">Heparin (Green)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Turnaround Time</Label>
+          <Select
+            value={localTest.delaiResultat}
+            onValueChange={(value) => handleFieldChange('delaiResultat', value)}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Standard">Standard (24-48h)</SelectItem>
+              <SelectItem value="Urgent">Urgent (2-4h)</SelectItem>
+              <SelectItem value="STAT">STAT (&lt;1h)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div>
+        <Label>Special Conditions</Label>
+        <Input
+          value={localTest.conditionsPrelevement}
+          onChange={(e) => handleFieldChange('conditionsPrelevement', e.target.value)}
+          placeholder="e.g., Early morning sample required"
+        />
+      </div>
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={localTest.urgence}
+              onCheckedChange={(checked) => handleFieldChange('urgence', checked)}
+            />
+            <Label>Urgent</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={localTest.aJeun}
+              onCheckedChange={(checked) => handleFieldChange('aJeun', checked)}
+            />
+            <Label>Fasting required</Label>
+          </div>
+        </div>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => onRemove(category, index)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  )
+})
+
+// 4. Fixed Imaging Exam Input Component
+const ImagingExamEditForm = memo(({
+  exam,
+  index,
+  onUpdate,
+  onRemove
+}: {
+  exam: any
+  index: number
+  onUpdate: (index: number, updatedExam: any) => void
+  onRemove: (index: number) => void
+}) => {
+  const [localExam, setLocalExam] = useState({
+    type: exam.type || exam.modalite || '',
+    modalite: exam.modalite || '',
+    region: exam.region || '',
+    indicationClinique: exam.indicationClinique || '',
+    urgence: exam.urgence || false,
+    contraste: exam.contraste || false,
+    protocoleSpecifique: exam.protocoleSpecifique || '',
+    questionDiagnostique: exam.questionDiagnostique || ''
+  })
+  const updateTimeoutRef = useRef<NodeJS.Timeout>()
+
+  // Update local state immediately - NO parent update here
+  const handleFieldChange = useCallback((field: string, value: any) => {
+    setLocalExam(prev => ({ ...prev, [field]: value }))
+  }, [])
+
+  // Debounced update to parent
+  useEffect(() => {
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current)
+    }
+    
+    updateTimeoutRef.current = setTimeout(() => {
+      onUpdate(index, localExam)
+    }, 60000)
+
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current)
+      }
+    }
+  }, [localExam, index, onUpdate])
+
+  return (
+    <div className="space-y-3 p-3">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>Imaging Type</Label>
+          <Select
+            value={localExam.type || localExam.modalite}
+            onValueChange={(value) => handleFieldChange('type', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="X-Ray">X-Ray</SelectItem>
+              <SelectItem value="CT Scan">CT Scan</SelectItem>
+              <SelectItem value="MRI">MRI</SelectItem>
+              <SelectItem value="Ultrasound">Ultrasound</SelectItem>
+              <SelectItem value="Mammography">Mammography</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Anatomical Region</Label>
+          <Input
+            value={localExam.region}
+            onChange={(e) => handleFieldChange('region', e.target.value)}
+            placeholder="e.g., Chest PA/Lateral"
+          />
+        </div>
+        <div className="col-span-2">
+          <Label>Clinical Indication</Label>
+          <Input
+            value={localExam.indicationClinique}
+            onChange={(e) => handleFieldChange('indicationClinique', e.target.value)}
+            placeholder="e.g., Rule out pneumonia"
+          />
+        </div>
+        <div className="col-span-2">
+          <Label>Clinical Question</Label>
+          <Input
+            value={localExam.questionDiagnostique}
+            onChange={(e) => handleFieldChange('questionDiagnostique', e.target.value)}
+            placeholder="e.g., Consolidation? Pleural effusion?"
+          />
+        </div>
+        <div>
+          <Label>Specific Protocol</Label>
+          <Input
+            value={localExam.protocoleSpecifique}
+            onChange={(e) => handleFieldChange('protocoleSpecifique', e.target.value)}
+            placeholder="e.g., High resolution CT"
+          />
+        </div>
+      </div>
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={localExam.urgence}
+              onCheckedChange={(checked) => handleFieldChange('urgence', checked)}
+            />
+            <Label>Urgent</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={localExam.contraste}
+              onCheckedChange={(checked) => handleFieldChange('contraste', checked)}
+            />
+            <Label>Contrast required</Label>
+          </div>
+        </div>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => onRemove(index)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  )
+})
+
+// Set display names for debugging
+MedicationEditForm.displayName = 'MedicationEditForm'
+BiologyTestEditForm.displayName = 'BiologyTestEditForm'
+ImagingExamEditForm.displayName = 'ImagingExamEditForm'
+DebouncedTextarea.displayName = 'DebouncedTextarea'
+// ==================== MAIN COMPONENT ====================
 export default function ProfessionalReportEditable({
   patientData,
   clinicalData,
@@ -270,24 +663,20 @@ export default function ProfessionalReportEditable({
   editedDocuments,
   onComplete
 }: ProfessionalReportProps) {
-  // Main states
+  // ==================== STATE MANAGEMENT ====================
   const [report, setReport] = useState<MauritianReport | null>(null)
   const [reportId, setReportId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState("consultation")
   
-  // Edit states
   const [editMode, setEditMode] = useState(false)
   const [validationStatus, setValidationStatus] = useState<'draft' | 'validated'>('draft')
   const [modifiedSections, setModifiedSections] = useState<Set<string>>(new Set())
   const [saving, setSaving] = useState(false)
   const [showFullReport, setShowFullReport] = useState(false)
-  
-  // Display states
   const [includeFullPrescriptions, setIncludeFullPrescriptions] = useState(true)
   
-  // Doctor information states
   const [doctorInfo, setDoctorInfo] = useState({
     nom: "Dr. [Name Required]",
     qualifications: "MBBS",
@@ -299,8 +688,6 @@ export default function ProfessionalReportEditable({
     licencePratique: "[License Required]"
   })
   const [editingDoctor, setEditingDoctor] = useState(false)
-
-  // Add state for signatures
   const [documentSignatures, setDocumentSignatures] = useState<{
     consultation?: string
     prescription?: string
@@ -309,464 +696,20 @@ export default function ProfessionalReportEditable({
     invoice?: string
   }>({})
 
-  // UPDATED: Enhanced validation with digital signature integration
-  const handleValidation = async () => {
-    // Check if doctor info is complete
-    const requiredFieldsMissing = []
-    if (doctorInfo.nom.includes('[')) requiredFieldsMissing.push('Doctor name')
-    if (doctorInfo.numeroEnregistrement.includes('[')) requiredFieldsMissing.push('Registration number')
-    if (doctorInfo.email.includes('[')) requiredFieldsMissing.push('Email')
-    
-    if (requiredFieldsMissing.length > 0) {
-      toast({
-        title: "Cannot Validate",
-        description: `Please complete doctor profile. Missing: ${requiredFieldsMissing.join(', ')}`,
-        variant: "destructive"
-      })
-      setEditingDoctor(true)
-      return
-    }
-    
-    if (!report) {
-      toast({
-        title: "Error",
-        description: "No report to validate",
-        variant: "destructive"
-      })
-      return
-    }
-    
-    // Ensure we have a report ID
-    let currentReportId = reportId
-    if (!currentReportId) {
-      currentReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      setReportId(currentReportId)
-    }
-    
-    setSaving(true)
-    try {
-      // Generate a unique signature seed for this doctor
-      // This ensures consistency across documents but uniqueness per doctor
-      const signatureSeed = `${doctorInfo.nom}_${doctorInfo.numeroEnregistrement}_signature`
-      
-      // Create signature data URL using the existing component logic
-      const canvas = document.createElement('canvas')
-      canvas.width = 300
-      canvas.height = 80
-      const ctx = canvas.getContext('2d')
-      
-      if (ctx) {
-        // Generate signature using the same logic as DoctorSignature component
-        ctx.fillStyle = '#ffffff'
-        ctx.fillRect(0, 0, 300, 80)
-        
-        const nameParts = doctorInfo.nom.replace('Dr. ', '').split(' ')
-        const fullName = nameParts.join(' ')
-        
-        // Create unique but consistent signature based on name
-        const nameHash = doctorInfo.nom.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-        const signatureStyle = nameHash % 3
-        
-        ctx.save()
-        ctx.translate(50, 40)
-        
-        // Dark ink color
-        ctx.strokeStyle = '#1a1a2e'
-        ctx.fillStyle = '#1a1a2e'
-        ctx.lineWidth = 2.2
-        ctx.lineCap = 'round'
-        ctx.lineJoin = 'round'
-        
-        // Apply signature style (same as in DoctorSignature component)
-        if (signatureStyle === 0) {
-          ctx.font = 'italic 28px "Brush Script MT", "Lucida Handwriting", cursive'
-          ctx.fillText(fullName, 0, 0)
-          ctx.beginPath()
-          ctx.moveTo(-5, 12)
-          ctx.quadraticCurveTo(100, 16, 205, 10)
-          ctx.lineWidth = 1.8
-          ctx.stroke()
-        } else if (signatureStyle === 1) {
-          ctx.font = 'italic bold 32px "Brush Script MT", cursive'
-          const firstLetter = nameParts[0]?.[0] || 'D'
-          ctx.fillText(firstLetter, 0, 0)
-          ctx.font = 'italic 26px "Lucida Handwriting", cursive'
-          const restOfName = nameParts[0]?.substring(1) + ' ' + (nameParts[1] || '')
-          ctx.fillText(restOfName, 28, 2)
-          ctx.beginPath()
-          ctx.moveTo(0, 14)
-          ctx.bezierCurveTo(50, 16, 150, 14, 200, 12)
-          ctx.lineWidth = 1.5
-          ctx.stroke()
-        } else {
-          ctx.font = 'italic 30px "Segoe Script", "Brush Script MT", cursive'
-          let xOffset = 0
-          for (let i = 0; i < fullName.length; i++) {
-            const char = fullName[i]
-            const charWidth = ctx.measureText(char).width
-            const yOffset = Math.sin(i * 0.5) * 2
-            ctx.fillText(char, xOffset, yOffset)
-            xOffset += charWidth * 0.85
-          }
-          ctx.beginPath()
-          ctx.moveTo(0, 15)
-          ctx.quadraticCurveTo(xOffset/2, 18, xOffset, 13)
-          ctx.lineWidth = 1.6
-          ctx.stroke()
-        }
-        
-        // Add date
-        ctx.font = '9px Arial'
-        ctx.fillStyle = '#9ca3af'
-        ctx.textAlign = 'left'
-        const date = new Date().toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        })
-        ctx.fillText(`Signed: ${date}`, 0, 35)
-        ctx.restore()
-      }
-      
-      // Convert canvas to data URL
-      const signatureDataUrl = canvas.toDataURL('image/png')
-      
-      // Create signatures object for all document types
-      const signatures = {
-        consultation: signatureDataUrl,
-        prescription: signatureDataUrl,
-        laboratory: signatureDataUrl,
-        imaging: signatureDataUrl,
-        invoice: signatureDataUrl
-      }
-      
-      // Update the document signatures state
-      setDocumentSignatures(signatures)
-      
-      // Create the updated report with signatures embedded
-      const updatedReport = {
-        ...report,
-        compteRendu: {
-          ...report.compteRendu,
-          praticien: doctorInfo,
-          metadata: {
-            ...getReportMetadata(),
-            validatedAt: new Date().toISOString(),
-            validatedBy: doctorInfo.nom,
-            validationStatus: 'validated' as const,
-            signatures: signatures,
-            signatureDataUrl: signatureDataUrl // Store the actual signature image
-          }
-        },
-        // Add signature references to each document section
-        ordonnances: report.ordonnances ? {
-          ...report.ordonnances,
-          medicaments: report.ordonnances.medicaments ? {
-            ...report.ordonnances.medicaments,
-            authentification: {
-              ...report.ordonnances.medicaments.authentification,
-              signatureImage: signatureDataUrl,
-              signedAt: new Date().toISOString()
-            }
-          } : null,
-          biologie: report.ordonnances.biologie ? {
-            ...report.ordonnances.biologie,
-            authentification: {
-              ...report.ordonnances.biologie.authentification,
-              signatureImage: signatureDataUrl,
-              signedAt: new Date().toISOString()
-            }
-          } : null,
-          imagerie: report.ordonnances.imagerie ? {
-            ...report.ordonnances.imagerie,
-            authentification: {
-              ...report.ordonnances.imagerie.authentification,
-              signatureImage: signatureDataUrl,
-              signedAt: new Date().toISOString()
-            }
-          } : null
-        } : report.ordonnances,
-        invoice: report.invoice ? {
-          ...report.invoice,
-          signature: {
-            ...report.invoice.signature,
-            signatureImage: signatureDataUrl,
-            signedAt: new Date().toISOString()
-          }
-        } : report.invoice
-      }
-      
-// Get URL parameters
-      const params = new URLSearchParams(window.location.search)
-      const consultationId = params.get('consultationId')
-      const patientId = params.get('patientId') || patientData?.id
-      const doctorId = params.get('doctorId')
-      
- // REMOVED: API calls to save-medical-report and update-doctor-signature
-// Validation is now handled locally without server persistence
-
-// Log validation info for debugging
-console.log('✅ Report validated locally (API calls removed):', {
-  reportId: currentReportId,
-  patientId: patientId || 'temp',
-  consultationId,
-  doctorId,
-  doctorName: doctorInfo.nom,
-  patientName: getReportPatient().nomComplet || getReportPatient().nom,
-  validatedAt: new Date().toISOString(),
-  validatedBy: doctorInfo.nom,
-  documentValidations: {
-    consultation: true,
-    prescription: !!report?.ordonnances?.medicaments,
-    laboratory: !!report?.ordonnances?.biologie,
-    imaging: !!report?.ordonnances?.imagerie,
-    invoice: !!report?.invoice
-  }
-})
-
-// Update states to reflect validation (same as before)
-setValidationStatus('validated')
-setEditMode(false)
-setReport(updatedReport)
-
-// Store signature in localStorage for session persistence (optional)
-if (doctorId && signatureDataUrl) {
-  try {
-    const signatureData = {
-      doctorId: doctorId,
-      doctorName: doctorInfo.nom,
-      signatureDataUrl: signatureDataUrl,
-      lastSignedAt: new Date().toISOString()
-    }
-    localStorage.setItem(`doctor_signature_${doctorId}`, JSON.stringify(signatureData))
-    console.log('📝 Signature stored locally for session')
-  } catch (err) {
-    console.log('Could not store signature locally:', err)
-    // Non-critical error, continue
-  }
-}
-
-// Show success toast (same message as before)
-toast({
-  title: "✅ Validation successful",
-  description: "All documents have been validated and digitally signed. You can now send them to the patient dashboard."
-})
-
-    } catch (error) {
-      console.error("Validation error:", error)
-      toast({
-        title: "Validation error",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive"
-      })
-    } finally {
-      setSaving(false)
-    }
-  }  // This closes the handleValidation function
-
-  const handleSendDocuments = async () => {
-    // Check if report is validated
-    if (!report || validationStatus !== 'validated') {
-      toast({
-        title: "Cannot send documents",
-        description: "Please validate the documents first",
-        variant: "destructive"
-      })
-      return
-    }
-    
-    try {
-      // Show loading state
-      toast({
-        title: "📤 Sending documents...",
-        description: "Preparing documents for patient dashboard"
-      })
-      
-      // Get necessary IDs from URL parameters
-      const params = new URLSearchParams(window.location.search)
-      const consultationId = params.get('consultationId')
-      const patientId = params.get('patientId') || patientData?.id
-      const doctorId = params.get('doctorId')
-      
-      if (!consultationId || !patientId) {
-        toast({
-          title: "Error",
-          description: "Missing consultation or patient information",
-          variant: "destructive"
-        })
-        return
-      }
-    // Smart Tibok URL detection
-    const getTibokUrl = () => {
-      // 1. Check URL parameter
-      const urlParam = params.get('tibokUrl')
-      if (urlParam) {
-        console.log('📍 Using Tibok URL from parameter:', decodeURIComponent(urlParam))
-        return decodeURIComponent(urlParam)
-      }
-
-      // 2. Check referrer
-      if (document.referrer) {
-        try {
-          const referrerUrl = new URL(document.referrer)
-          // Only use referrer if it's a known Tibok domain
-          const knownTibokDomains = ['tibok.mu', 'v0-tibokmain2.vercel.app', 'localhost']
-          if (knownTibokDomains.some(domain => referrerUrl.hostname.includes(domain))) {
-            console.log('📍 Using Tibok URL from referrer:', referrerUrl.origin)
-            return referrerUrl.origin
-          }
-        } catch (e) {
-          console.log('Could not parse referrer')
-        }
-      }
-
-      // 3. Check environment variable
-      if (process.env.NEXT_PUBLIC_TIBOK_URL) {
-        console.log('📍 Using Tibok URL from environment:', process.env.NEXT_PUBLIC_TIBOK_URL)
-        return process.env.NEXT_PUBLIC_TIBOK_URL
-      }
-
-      // 4. Default to production
-      console.log('📍 Using default Tibok URL: https://tibok.mu')
-      return 'https://tibok.mu'
-    }
-
-    const tibokUrl = getTibokUrl()
-
-    // Prepare documents payload with all validated documents
-    const documentsPayload = {
-      consultationId,
-      patientId,
-      doctorId,
-      doctorName: doctorInfo.nom,
-      patientName: getReportPatient().nomComplet || getReportPatient().nom,
-      generatedAt: new Date().toISOString(),
-      documents: {
-        // Main consultation report
-        consultationReport: report.compteRendu ? {
-          type: 'consultation_report',
-          title: 'Medical Consultation Report',
-          content: report.compteRendu,
-          validated: true,
-          validatedAt: report.compteRendu.metadata.validatedAt,
-          signature: documentSignatures.consultation
-        } : null,
-        
-        // Prescriptions (if any)
-        prescriptions: report.ordonnances?.medicaments ? {
-          type: 'prescription',
-          title: 'Medical Prescription',
-          medications: report.ordonnances.medicaments.prescription.medicaments,
-          validity: report.ordonnances.medicaments.prescription.validite,
-          signature: documentSignatures.prescription,
-          content: report.ordonnances.medicaments
-        } : null,
-        
-        // Laboratory requests (if any)
-        laboratoryRequests: report.ordonnances?.biologie ? {
-          type: 'laboratory_request',
-          title: 'Laboratory Request Form',
-          tests: report.ordonnances.biologie.prescription.analyses,
-          signature: documentSignatures.laboratory,
-          content: report.ordonnances.biologie
-        } : null,
-        
-        // Imaging requests (if any)
-        imagingRequests: report.ordonnances?.imagerie ? {
-          type: 'imaging_request',
-          title: 'Radiology Request Form',
-          examinations: report.ordonnances.imagerie.prescription.examens,
-          signature: documentSignatures.imaging,
-          content: report.ordonnances.imagerie
-        } : null,
-        
-        // Invoice
-        invoice: report.invoice ? {
-          type: 'invoice',
-          title: `Invoice ${report.invoice.header.invoiceNumber}`,
-          content: report.invoice,
-          signature: documentSignatures.invoice
-        } : null
-      }
-    }
-
-    console.log('📦 Sending documents payload to:', tibokUrl)
-    console.log('📦 Payload:', documentsPayload)
-
-    // Send to Tibok patient dashboard
-    const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(documentsPayload)
-    })
-
-    // Check if response is ok before parsing JSON
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('❌ Tibok API error:', errorText)
-      throw new Error(`Failed to send documents: ${response.status} - ${errorText}`)
-    }
-
-    const result = await response.json()
-    console.log('✅ API Response:', result)
-
-    if (result.success) {
-      toast({
-        title: "✅ Documents sent successfully",
-        description: "Documents are now available in the patient's dashboard"
-      })
-
-      // Clear any stored report data
-      sessionStorage.removeItem('currentDoctorInfo')
-      
-      // Wait a moment for user to see the success message
-      setTimeout(() => {
-        // Option 1: If onComplete callback exists, call it
-        if (onComplete) {
-          onComplete()
-        } 
-        // Option 2: Redirect to Tibok dashboard
-        else if (consultationId) {
-          window.location.href = `${tibokUrl}/dashboard?tab=prescriptions`
-        }
-        // Option 3: Close the Medical AI window if it was opened as a popup
-        else if (window.opener) {
-          window.close()
-        }
-        // Option 4: Stay on the same page
-        else {
-          console.log('Documents sent, staying on current page')
-        }
-      }, 2000)
-      
-    } else {
-      throw new Error(result.error || "Failed to send documents")
-    }
-  } catch (error) {
-    console.error("❌ Error sending documents:", error)
-    toast({
-      title: "Error sending documents",
-      description: error instanceof Error ? error.message : "An error occurred while sending documents",
-      variant: "destructive"
-    })
-  }
-}
-
-  // Safe getter functions
+  // ==================== SAFE GETTERS ====================
   const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
   const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
   const getReportPatient = () => report?.compteRendu?.patient || createEmptyReport().compteRendu.patient
   const getReportRapport = () => report?.compteRendu?.rapport || createEmptyReport().compteRendu.rapport
   const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
 
-  // Track modifications
-  const trackModification = (section: string) => {
+  // ==================== TRACKING & UPDATES WITH CALLBACKS ====================
+  const trackModification = useCallback((section: string) => {
     if (validationStatus === 'validated') return
     setModifiedSections(prev => new Set(prev).add(section))
-  }
+  }, [validationStatus])
 
-  // Update narrative report section
-  const updateRapportSection = (section: string, value: string) => {
+  const updateRapportSection = useCallback((section: string, value: string) => {
     if (validationStatus === 'validated') return
     
     setReport(prev => {
@@ -784,10 +727,9 @@ toast({
       }
     })
     trackModification(`rapport.${section}`)
-  }
+  }, [validationStatus, trackModification])
 
-  // Update doctor information
-  const updateDoctorInfo = (field: string, value: string) => {
+  const updateDoctorInfo = useCallback((field: string, value: string) => {
     setDoctorInfo(prev => ({
       ...prev,
       [field]: value
@@ -795,409 +737,89 @@ toast({
     trackModification(`praticien.${field}`)
     const updatedInfo = { ...doctorInfo, [field]: value }
     sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
-  }
-  // UPDATED: Load doctor information from Tibok with better field mapping and debugging
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const doctorDataParam = urlParams.get('doctorData')
-    
-    if (doctorDataParam) {
-      try {
-        const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
-        console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
-        
-        // Debug: Check what fields are actually present
-        console.log('🔍 Doctor data fields:', {
-          hasLicenseNumber: 'licenseNumber' in tibokDoctorData,
-          hasLicense_number: 'license_number' in tibokDoctorData,
-          licenseNumberValue: tibokDoctorData.licenseNumber,
-          license_numberValue: tibokDoctorData.license_number,
-          typeOfLicenseNumber: typeof tibokDoctorData.licenseNumber,
-          typeOfLicense_number: typeof tibokDoctorData.license_number
-        })
-        
-        // Map all possible field names from database
-        const doctorInfoFromTibok = {
-          nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
-            `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
-            'Dr. [Name Required]',
-          qualifications: tibokDoctorData.qualifications || 'MBBS',
-          specialite: tibokDoctorData.specialty || 'General Medicine',
-          adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
-          telephone: '', // Keep this empty as requested
-          email: tibokDoctorData.email || '[Email Required]',
-          heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
-          numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]'),
-          // FIXED: Directly assign the license_number field
-          licencePratique: tibokDoctorData.license_number ? 
-            String(tibokDoctorData.license_number) : 
-            '[License Required]'
-        }
-        
-        console.log('🔍 License extraction:', {
-          rawValue: tibokDoctorData.license_number,
-          type: typeof tibokDoctorData.license_number,
-          hasLicense: !!tibokDoctorData.license_number
-        });
-        
-        console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
-        
-        setDoctorInfo(doctorInfoFromTibok)
-        sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
-        
-      } catch (error) {
-        console.error('Error parsing Tibok doctor data:', error)
-      }
-    }
-    
-    // Also check sessionStorage as fallback
-    const storedDoctorInfo = sessionStorage.getItem('currentDoctorInfo')
-    if (!doctorDataParam && storedDoctorInfo) {
-      try {
-        const doctorData = JSON.parse(storedDoctorInfo)
-        setDoctorInfo(doctorData)
-        console.log('✅ Doctor information loaded from session')
-      } catch (error) {
-        console.error('Error loading doctor data from storage:', error)
-      }
-    }
-  }, [])
+  }, [doctorInfo, trackModification])
 
-  // Update report when doctor info changes
-  useEffect(() => {
-    if (report && doctorInfo && doctorInfo.nom !== 'Dr. [DOCTOR NAME]') {
-      setReport(prev => ({
-        ...prev!,
-        compteRendu: {
-          ...prev!.compteRendu,
-          praticien: doctorInfo
-        },
-        ordonnances: prev!.ordonnances ? {
-          ...prev!.ordonnances,
-          medicaments: prev!.ordonnances.medicaments ? {
-            ...prev!.ordonnances.medicaments,
-            enTete: doctorInfo,
-            authentification: {
-              ...prev!.ordonnances.medicaments.authentification,
-              nomEnCapitales: doctorInfo.nom.toUpperCase(),
-              numeroEnregistrement: doctorInfo.numeroEnregistrement
-            }
-          } : null,
-          biologie: prev!.ordonnances.biologie ? {
-            ...prev!.ordonnances.biologie,
-            enTete: doctorInfo,
-            authentification: {
-              ...prev!.ordonnances.biologie.authentification,
-              nomEnCapitales: doctorInfo.nom.toUpperCase(),
-              numeroEnregistrement: doctorInfo.numeroEnregistrement
-            }
-          } : null,
-          imagerie: prev!.ordonnances.imagerie ? {
-            ...prev!.ordonnances.imagerie,
-            enTete: doctorInfo,
-            authentification: {
-              ...prev!.ordonnances.imagerie.authentification,
-              nomEnCapitales: doctorInfo.nom.toUpperCase(),
-              numeroEnregistrement: doctorInfo.numeroEnregistrement
-            }
-          } : null
-        } : prev!.ordonnances,
-        invoice: prev!.invoice ? {
-          ...prev!.invoice,
-          physician: {
-            name: doctorInfo.nom,
-            registrationNumber: doctorInfo.numeroEnregistrement
-          }
-        } : prev!.invoice
-      }))
-      console.log('📝 Report updated with doctor information')
-    }
-  }, [doctorInfo, report?.compteRendu?.header])
-
-  useEffect(() => {
-    console.log("🚀 ProfessionalReportEditable mounted with data:", {
-      hasPatientData: !!patientData,
-      patientName: patientData?.name || `${patientData?.firstName} ${patientData?.lastName}`,
-      hasClinicalData: !!clinicalData,
-      hasDiagnosisData: !!diagnosisData,
-      hasQuestionsData: !!questionsData
-    })
-    
-    // Check if we have minimum required data
-    if (patientData && (patientData.name || (patientData.firstName && patientData.lastName))) {
-      checkExistingReport()
-    } else {
-      console.warn("Insufficient patient data, creating empty report")
-      const emptyReport = createEmptyReport()
-      if (patientData) {
-        emptyReport.compteRendu.patient = {
-          ...emptyReport.compteRendu.patient,
-          nom: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
-          nomComplet: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
-          age: patientData.age?.toString() || '',
-          dateNaissance: patientData.dateOfBirth || '',
-          sexe: patientData.gender || '',
-          adresse: patientData.address || '',
-          telephone: patientData.phone || '',
-          email: patientData.email || '',
-          poids: patientData.weight?.toString() || ''
-        }
-      }
-      setReport(emptyReport)
-      setLoading(false)
-    }
-  }, [patientData, clinicalData, questionsData, diagnosisData])
-
-  // Check for existing report
-  const checkExistingReport = async () => {
-    try {
-      const params = new URLSearchParams(window.location.search)
-      const patientIdFromUrl = params.get('patientId')
-      const actualPatientId = patientData?.id || patientIdFromUrl || (patientData ? 'patient_' + Date.now() : 'temp')
-      
-      if (!patientData || actualPatientId === 'temp') {
-        console.log("No patient data, generating new report")
-        generateProfessionalReport()
-        return
-      }
-      
-      // REMOVED: Check for existing report via save-medical-report API
-// const response = await fetch(`/api/save-medical-report?patientId=${actualPatientId}`)
-// Go directly to generate report since we can't check for existing
-
-console.log("Skipping existing report check (save-medical-report API removed), generating new report")
-generateProfessionalReport()
-    } catch (error) {
-      console.log("No existing report, generating new one")
-      generateProfessionalReport()
-    }
-  }
-
-  // UPDATED: Generate report with doctor data and auto-save
-  const generateProfessionalReport = async () => {
-    setLoading(true)
-    setError(null)
-
-    try {
-      // Wait for doctor info to be loaded
-      let currentDoctorInfo = doctorInfo
-      if (currentDoctorInfo.nom === 'Dr. [DOCTOR NAME]' || currentDoctorInfo.nom === 'Dr. [Name Required]') {
-        // Try to get from session if not loaded yet
-        const storedInfo = sessionStorage.getItem('currentDoctorInfo')
-        if (storedInfo) {
-          currentDoctorInfo = JSON.parse(storedInfo)
-          setDoctorInfo(currentDoctorInfo)
-        }
-      }
-      
-      console.log("📤 Generating report with doctor info:", currentDoctorInfo)
-      
-      const validPatientData = patientData || {
-        name: 'Patient',
-        age: '',
-        gender: '',
-        dateOfBirth: '',
-        address: '',
-        phone: '',
-        email: '',
-        weight: ''
-      }
-      
-      // Prepare doctor data for API
-      const doctorDataForAPI = {
-        fullName: currentDoctorInfo.nom.replace('Dr. ', ''),
-        qualifications: currentDoctorInfo.qualifications,
-        specialty: currentDoctorInfo.specialite,
-        clinicAddress: currentDoctorInfo.adresseCabinet,
-        email: currentDoctorInfo.email,
-        consultationHours: currentDoctorInfo.heuresConsultation,
-        medicalCouncilNumber: currentDoctorInfo.numeroEnregistrement,
-        licenseNumber: currentDoctorInfo.licencePratique
-      }
-      
-      const response = await fetch("/api/generate-consultation-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          patientData: validPatientData,
-          clinicalData: clinicalData || {},
-          questionsData: questionsData || {},
-          diagnosisData: diagnosisData || {},
-          editedDocuments: editedDocuments || {},
-          doctorData: doctorDataForAPI,
-          includeFullPrescriptions
-        })
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error("API Error:", errorText)
-        throw new Error(`HTTP Error ${response.status}: ${errorText}`)
-      }
-
-      const data = await response.json()
-      console.log("📥 Report received:", data)
-
-      if (data.success && data.report) {
-        const reportData = data.report
-        
-        // Override the praticien data with actual doctor info
-        reportData.compteRendu.praticien = currentDoctorInfo
-        
-        // Also update all prescription headers
-        if (reportData.ordonnances?.medicaments) {
-          reportData.ordonnances.medicaments.enTete = currentDoctorInfo
-          reportData.ordonnances.medicaments.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
-          reportData.ordonnances.medicaments.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
-        }
-        
-        if (reportData.ordonnances?.biologie) {
-          reportData.ordonnances.biologie.enTete = currentDoctorInfo
-          reportData.ordonnances.biologie.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
-          reportData.ordonnances.biologie.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
-        }
-        
-        if (reportData.ordonnances?.imagerie) {
-          reportData.ordonnances.imagerie.enTete = currentDoctorInfo
-          reportData.ordonnances.imagerie.authentification.nomEnCapitales = currentDoctorInfo.nom.toUpperCase()
-          reportData.ordonnances.imagerie.authentification.numeroEnregistrement = currentDoctorInfo.numeroEnregistrement
-        }
-        
-        if (reportData.invoice?.physician) {
-          reportData.invoice.physician.name = currentDoctorInfo.nom
-          reportData.invoice.physician.registrationNumber = currentDoctorInfo.numeroEnregistrement
-        }
-        
-        setReport(reportData)
-        setValidationStatus('draft')
-        
-        // Auto-save the report immediately after generation
-        const newReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-        setReportId(newReportId)
-        
-        // REMOVED: Auto-save via save-medical-report API
-// const saveResponse = await fetch('/api/save-medical-report', {...})
-// Report is now only stored in local state
-
-const params = new URLSearchParams(window.location.search)
-const consultationId = params.get('consultationId')
-const patientId = params.get('patientId') || patientData?.id
-
-console.log('✅ Report generated locally with ID:', newReportId, {
-  consultationId,
-  patientId
-})
-
-        toast({
-          title: "Report generated successfully",
-          description: "Report is ready for editing and validation"
-        })
-      } else {
-        throw new Error(data.error || "Generation error")
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error"
-      console.error("Report generation error:", errorMessage)
-      setError(errorMessage)
-      
-      // Create fallback report with doctor info
-      const emptyReport = createEmptyReport()
-      emptyReport.compteRendu.praticien = doctorInfo
-      if (patientData) {
-        emptyReport.compteRendu.patient = {
-          ...emptyReport.compteRendu.patient,
-          nom: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim() || 'Patient',
-          nomComplet: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim() || 'Patient',
-          age: patientData.age?.toString() || '',
-          dateNaissance: patientData.dateOfBirth || '',
-          sexe: patientData.gender || '',
-          adresse: patientData.address || '',
-          telephone: patientData.phone || '',
-          email: patientData.email || '',
-          poids: patientData.weight?.toString() || ''
-        }
-      }
-      setReport(emptyReport)
-      
-      toast({
-        title: "Note",
-        description: "Using default template. Please fill in the required information.",
-        variant: "default"
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Save report (for backward compatibility but redirects to validation)
-  const handleSave = async () => {
-    // Auto-save is handled by validation now
-    await handleValidation()
-  }
-
-  // Update invoice
-  const updateInvoice = (field: string, value: any) => {
-    if (validationStatus === 'validated') return
-    
-    setReport(prev => {
-      if (!prev) return null
-      
-      return {
-        ...prev,
-        invoice: {
-          ...prev.invoice!,
-          [field]: value
-        }
-      }
-    })
-    trackModification(`invoice.${field}`)
-  }
-
-  // Update payment status
-  const updatePaymentStatus = (status: 'pending' | 'paid' | 'cancelled') => {
-    if (!report?.invoice) return
-    
-    updateInvoice('payment', {
-      ...report.invoice.payment,
-      status: status
-    })
-  }
-
-  // Update payment method
-  const updatePaymentMethod = (method: string) => {
-    if (!report?.invoice) return
-    
-    updateInvoice('payment', {
-      ...report.invoice.payment,
-      method: method
-    })
-  }
-  // Update medications
-  const updateMedicament = (index: number, field: string, value: string) => {
+  // ==================== NEW BATCH UPDATE FUNCTIONS ====================
+  const updateMedicamentBatch = useCallback((index: number, updatedMedication: any) => {
     if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
     
     setReport(prev => {
       if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
       
-      const newReport = { ...prev }
-      const meds = [...newReport.ordonnances.medicaments.prescription.medicaments]
-      const med = meds[index]
-      if (!med) return prev
+      const newMedicaments = [...prev.ordonnances.medicaments.prescription.medicaments]
+      newMedicaments[index] = updatedMedication
       
-      med[field] = value
-      
-      med.ligneComplete = `${med.nom} ${med.dosage ? `- ${med.dosage}` : ''}\n` +
-                         `${med.posologie} - ${med.modeAdministration}\n` +
-                         `Duration: ${med.dureeTraitement} - Quantity: ${med.quantite}`
-      
-      newReport.ordonnances.medicaments.prescription.medicaments = meds
-      return newReport
+      return {
+        ...prev,
+        ordonnances: {
+          ...prev.ordonnances,
+          medicaments: {
+            ...prev.ordonnances.medicaments,
+            prescription: {
+              ...prev.ordonnances.medicaments.prescription,
+              medicaments: newMedicaments
+            }
+          }
+        }
+      }
     })
-    trackModification(`medicament.${index}.${field}`)
-  }
+    trackModification(`medicament.${index}`)
+  }, [validationStatus, report?.ordonnances?.medicaments, trackModification])
 
-  // Add medication
-  const addMedicament = () => {
+  const updateBiologyTestBatch = useCallback((category: string, index: number, updatedTest: any) => {
+    if (validationStatus === 'validated') return
+    
+    setReport(prev => {
+      if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
+      
+      const newAnalyses = { ...prev.ordonnances.biologie.prescription.analyses }
+      newAnalyses[category] = [...newAnalyses[category]]
+      newAnalyses[category][index] = updatedTest
+      
+      return {
+        ...prev,
+        ordonnances: {
+          ...prev.ordonnances,
+          biologie: {
+            ...prev.ordonnances.biologie,
+            prescription: {
+              ...prev.ordonnances.biologie.prescription,
+              analyses: newAnalyses
+            }
+          }
+        }
+      }
+    })
+    trackModification(`biologie.${category}.${index}`)
+  }, [validationStatus, trackModification])
+
+  const updateImagingExamBatch = useCallback((index: number, updatedExam: any) => {
+    if (validationStatus === 'validated') return
+    
+    setReport(prev => {
+      if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
+      
+      const newExamens = [...prev.ordonnances.imagerie.prescription.examens]
+      newExamens[index] = updatedExam
+      
+      return {
+        ...prev,
+        ordonnances: {
+          ...prev.ordonnances,
+          imagerie: {
+            ...prev.ordonnances.imagerie,
+            prescription: {
+              ...prev.ordonnances.imagerie.prescription,
+              examens: newExamens
+            }
+          }
+        }
+      }
+    })
+    trackModification(`imagerie.${index}`)
+  }, [validationStatus, trackModification])
+
+  const addMedicament = useCallback(() => {
     if (validationStatus === 'validated') return
     
     const newMed = {
@@ -1221,7 +843,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       
       const newReport = { ...prev }
       
-      // Initialize ordonnances if needed
       if (!newReport.ordonnances) {
         newReport.ordonnances = {}
       }
@@ -1256,10 +877,9 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       return newReport
     })
     trackModification('medicaments.new')
-  }
+  }, [validationStatus, getReportPraticien, getReportPatient, trackModification])
 
-  // Remove medication
-  const removeMedicament = (index: number) => {
+  const removeMedicament = useCallback((index: number) => {
     if (validationStatus === 'validated') return
     
     setReport(prev => {
@@ -1280,10 +900,9 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       }
     })
     trackModification(`medicament.remove.${index}`)
-  }
+  }, [validationStatus, trackModification])
 
-  // Add biology test
-  const addBiologyTest = (category: string = 'clinicalChemistry') => {
+  const addBiologyTest = useCallback((category: string = 'clinicalChemistry') => {
     if (validationStatus === 'validated') return
     
     const newTest = {
@@ -1303,7 +922,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       
       const newReport = { ...prev }
       
-      // Initialize structure if needed
       if (!newReport.ordonnances) newReport.ordonnances = {}
       
       if (!newReport.ordonnances.biologie) {
@@ -1345,29 +963,9 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       return newReport
     })
     trackModification(`biologie.new.${category}`)
-  }
+  }, [validationStatus, getReportPraticien, getReportPatient, trackModification])
 
-  // Update biology test
-  const updateBiologyTest = (category: string, index: number, field: string, value: any) => {
-    if (validationStatus === 'validated') return
-    
-    setReport(prev => {
-      if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
-      
-      const newReport = { ...prev }
-      const tests = [...newReport.ordonnances.biologie.prescription.analyses[category]]
-      if (tests[index]) {
-        tests[index][field] = value
-      }
-      
-      newReport.ordonnances.biologie.prescription.analyses[category] = tests
-      return newReport
-    })
-    trackModification(`biologie.${category}.${index}.${field}`)
-  }
-
-  // Remove biology test
-  const removeBiologyTest = (category: string, index: number) => {
+  const removeBiologyTest = useCallback((category: string, index: number) => {
     if (validationStatus === 'validated') return
     
     setReport(prev => {
@@ -1391,10 +989,9 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       }
     })
     trackModification(`biologie.remove.${category}.${index}`)
-  }
+  }, [validationStatus, trackModification])
 
-  // Add imaging exam
-  const addImagingExam = () => {
+  const addImagingExam = useCallback(() => {
     if (validationStatus === 'validated') return
     
     const newExam = {
@@ -1413,7 +1010,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       
       const newReport = { ...prev }
       
-      // Initialize structure if needed
       if (!newReport.ordonnances) newReport.ordonnances = {}
       
       if (!newReport.ordonnances.imagerie) {
@@ -1446,29 +1042,9 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       return newReport
     })
     trackModification('imagerie.new')
-  }
+  }, [validationStatus, getReportPraticien, getReportPatient, trackModification])
 
-  // Update imaging exam
-  const updateImagingExam = (index: number, field: string, value: any) => {
-    if (validationStatus === 'validated') return
-    
-    setReport(prev => {
-      if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
-      
-      const newReport = { ...prev }
-      const exams = [...newReport.ordonnances.imagerie.prescription.examens]
-      if (exams[index]) {
-        exams[index][field] = value
-      }
-      
-      newReport.ordonnances.imagerie.prescription.examens = exams
-      return newReport
-    })
-    trackModification(`imagerie.${index}.${field}`)
-  }
-
-  // Remove imaging exam
-  const removeImagingExam = (index: number) => {
+  const removeImagingExam = useCallback((index: number) => {
     if (validationStatus === 'validated') return
     
     setReport(prev => {
@@ -1489,24 +1065,1015 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       }
     })
     trackModification(`imagerie.remove.${index}`)
+  }, [validationStatus, trackModification])
+
+  const updateInvoice = useCallback((field: string, value: any) => {
+    if (validationStatus === 'validated') return
+    
+    setReport(prev => {
+      if (!prev) return null
+      
+      return {
+        ...prev,
+        invoice: {
+          ...prev.invoice!,
+          [field]: value
+        }
+      }
+    })
+    trackModification(`invoice.${field}`)
+  }, [validationStatus, trackModification])
+
+  const updatePaymentStatus = useCallback((status: 'pending' | 'paid' | 'cancelled') => {
+    if (!report?.invoice) return
+    
+    updateInvoice('payment', {
+      ...report.invoice.payment,
+      status: status
+    })
+  }, [report?.invoice, updateInvoice])
+
+  const updatePaymentMethod = useCallback((method: string) => {
+    if (!report?.invoice) return
+    
+    updateInvoice('payment', {
+      ...report.invoice.payment,
+      method: method
+    })
+  }, [report?.invoice, updateInvoice])
+  // ==================== LOAD DOCTOR DATA ====================
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const doctorDataParam = urlParams.get('doctorData')
+    
+    if (doctorDataParam) {
+      try {
+        const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
+        console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
+        
+        const doctorInfoFromTibok = {
+          nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
+            `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
+            'Dr. [Name Required]',
+          qualifications: tibokDoctorData.qualifications || 'MBBS',
+          specialite: tibokDoctorData.specialty || 'General Medicine',
+          adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
+          email: tibokDoctorData.email || '[Email Required]',
+          heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+          numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]'),
+          licencePratique: tibokDoctorData.license_number ? 
+            String(tibokDoctorData.license_number) : 
+            '[License Required]'
+        }
+        
+        console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
+        setDoctorInfo(doctorInfoFromTibok)
+        sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
+        
+      } catch (error) {
+        console.error('Error parsing Tibok doctor data:', error)
+      }
+    }
+    
+    const storedDoctorInfo = sessionStorage.getItem('currentDoctorInfo')
+    if (!doctorDataParam && storedDoctorInfo) {
+      try {
+        const doctorData = JSON.parse(storedDoctorInfo)
+        setDoctorInfo(doctorData)
+        console.log('✅ Doctor information loaded from session')
+      } catch (error) {
+        console.error('Error loading doctor data from storage:', error)
+      }
+    }
+  }, [])
+
+  // ==================== INITIAL DATA LOAD ====================
+  useEffect(() => {
+    console.log("🚀 ProfessionalReportEditable mounted with data:", {
+      hasPatientData: !!patientData,
+      hasClinicalData: !!clinicalData,
+      hasDiagnosisData: !!diagnosisData,
+      hasQuestionsData: !!questionsData
+    })
+    
+    if (patientData && (patientData.name || (patientData.firstName && patientData.lastName))) {
+      generateProfessionalReport()
+    } else {
+      console.warn("Insufficient patient data, creating empty report")
+      const emptyReport = createEmptyReport()
+      if (patientData) {
+        emptyReport.compteRendu.patient = {
+          ...emptyReport.compteRendu.patient,
+          nom: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
+          nomComplet: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
+          age: patientData.age?.toString() || '',
+          dateNaissance: patientData.dateOfBirth || '',
+          sexe: patientData.gender || '',
+          adresse: patientData.address || '',
+          telephone: patientData.phone || '',
+          email: patientData.email || '',
+          poids: patientData.weight?.toString() || ''
+        }
+      }
+      setReport(emptyReport)
+      setLoading(false)
+    }
+  }, [patientData, clinicalData, questionsData, diagnosisData])
+
+  // ==================== GENERATE REPORT ====================
+  const generateProfessionalReport = async () => {
+    setLoading(true)
+    setError(null)
+    setValidationStatus('draft')
+    setDocumentSignatures({})
+
+    try {
+      let currentDoctorInfo = doctorInfo
+      if (currentDoctorInfo.nom === 'Dr. [DOCTOR NAME]' || currentDoctorInfo.nom === 'Dr. [Name Required]') {
+        const storedInfo = sessionStorage.getItem('currentDoctorInfo')
+        if (storedInfo) {
+          currentDoctorInfo = JSON.parse(storedInfo)
+          setDoctorInfo(currentDoctorInfo)
+        }
+      }
+      
+      console.log("📤 Generating report with doctor info:", currentDoctorInfo)
+      
+      const validPatientData = patientData || {
+        name: 'Patient',
+        age: '',
+        gender: '',
+        dateOfBirth: '',
+        address: '',
+        phone: '',
+        email: '',
+        weight: ''
+      }
+      
+      const doctorDataForAPI = {
+        fullName: currentDoctorInfo.nom.replace('Dr. ', ''),
+        qualifications: currentDoctorInfo.qualifications,
+        specialty: currentDoctorInfo.specialite,
+        clinicAddress: currentDoctorInfo.adresseCabinet,
+        email: currentDoctorInfo.email,
+        consultationHours: currentDoctorInfo.heuresConsultation,
+        medicalCouncilNumber: currentDoctorInfo.numeroEnregistrement,
+        licenseNumber: currentDoctorInfo.licencePratique
+      }
+      
+      const response = await fetch("/api/generate-consultation-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patientData: validPatientData,
+          clinicalData: clinicalData || {},
+          questionsData: questionsData || {},
+          diagnosisData: diagnosisData || {},
+          editedDocuments: editedDocuments || {},
+          doctorData: doctorDataForAPI,
+          includeFullPrescriptions
+        })
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("API Error:", errorText)
+        throw new Error(`HTTP Error ${response.status}: ${errorText}`)
+      }
+
+      const data = await response.json()
+      console.log("📥 Report received:", data)
+
+      if (data.success && data.report) {
+        const apiReport = data.report
+        
+        // MAP API STRUCTURE TO COMPONENT STRUCTURE
+        console.log("🔄 Mapping API structure to component structure...")
+        
+        const reportData: MauritianReport = {
+          compteRendu: {
+            header: apiReport.medicalReport?.header || {
+              title: "Medical Consultation Report",
+              subtitle: "Professional Medical Documentation",
+              reference: `REF-${Date.now()}`
+            },
+            praticien: currentDoctorInfo,
+            patient: {
+              nom: apiReport.medicalReport?.patient?.name || validPatientData.name || 'Patient',
+              nomComplet: apiReport.medicalReport?.patient?.fullName || apiReport.medicalReport?.patient?.name || validPatientData.name || 'Patient',
+              age: apiReport.medicalReport?.patient?.age || validPatientData.age || '',
+              dateNaissance: apiReport.medicalReport?.patient?.birthDate || validPatientData.dateOfBirth || '',
+              sexe: apiReport.medicalReport?.patient?.gender || validPatientData.gender || '',
+              adresse: apiReport.medicalReport?.patient?.address || validPatientData.address || '',
+              telephone: apiReport.medicalReport?.patient?.phone || validPatientData.phone || '',
+              email: apiReport.medicalReport?.patient?.email || validPatientData.email || '',
+              poids: apiReport.medicalReport?.patient?.weight || validPatientData.weight || '',
+              taille: apiReport.medicalReport?.patient?.height || '',
+              identifiantNational: apiReport.medicalReport?.patient?.nationalId || '',
+              dateExamen: apiReport.medicalReport?.patient?.examinationDate || new Date().toISOString().split('T')[0]
+            },
+            rapport: {
+              motifConsultation: apiReport.medicalReport?.report?.chiefComplaint || '',
+              anamnese: apiReport.medicalReport?.report?.historyOfPresentIllness || '',
+              antecedents: apiReport.medicalReport?.report?.pastMedicalHistory || '',
+              examenClinique: apiReport.medicalReport?.report?.physicalExamination || '',
+              syntheseDiagnostique: apiReport.medicalReport?.report?.diagnosticSynthesis || '',
+              conclusionDiagnostique: apiReport.medicalReport?.report?.diagnosticConclusion || '',
+              priseEnCharge: apiReport.medicalReport?.report?.managementPlan || '',
+              surveillance: apiReport.medicalReport?.report?.followUpPlan || '',
+              conclusion: apiReport.medicalReport?.report?.conclusion || ''
+            },
+            metadata: {
+              dateGeneration: apiReport.medicalReport?.metadata?.generatedAt || new Date().toISOString(),
+              wordCount: apiReport.medicalReport?.metadata?.wordCount || 0,
+              validationStatus: 'draft' as const,
+              complianceNote: apiReport.medicalReport?.metadata?.complianceNote || "This document complies with Medical Council of Mauritius guidelines"
+            }
+          },
+          ordonnances: {
+            medicaments: null as any,
+            biologie: null as any,
+            imagerie: null as any
+          },
+          invoice: null as any
+        }
+        
+        // Map medications
+        if (apiReport.prescriptions?.medications) {
+          reportData.ordonnances!.medicaments = {
+            enTete: currentDoctorInfo,
+            patient: reportData.compteRendu.patient,
+            prescription: {
+              datePrescription: apiReport.prescriptions.medications.prescription?.prescriptionDate || new Date().toISOString().split('T')[0],
+              medicaments: apiReport.prescriptions.medications.prescription?.medications?.map((med: any) => ({
+                nom: med.name || '',
+                denominationCommune: med.genericName || med.name || '',
+                dosage: med.dosage || '',
+                forme: med.form || 'tablet',
+                posologie: med.frequency || '',
+                modeAdministration: med.route || 'Oral route',
+                dureeTraitement: med.duration || '7 days',
+                quantite: med.quantity || '1 box',
+                instructions: med.instructions || '',
+                justification: med.indication || '',
+                surveillanceParticuliere: med.monitoring || '',
+                nonSubstituable: med.doNotSubstitute || false,
+                ligneComplete: med.fullDescription || ''
+              })) || [],
+              validite: apiReport.prescriptions.medications.prescription?.validity || "3 months unless otherwise specified",
+              dispensationNote: apiReport.prescriptions.medications.prescription?.dispensationNote
+            },
+            authentification: {
+              signature: "Medical Practitioner's Signature",
+              nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
+              numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
+              cachetProfessionnel: "Official Medical Stamp",
+              date: apiReport.prescriptions.medications.prescription?.prescriptionDate || new Date().toISOString().split('T')[0]
+            }
+          }
+        }
+        
+        // Map laboratory tests
+        if (apiReport.prescriptions?.laboratoryTests) {
+          const labData = apiReport.prescriptions.laboratoryTests
+          reportData.ordonnances!.biologie = {
+            enTete: currentDoctorInfo,
+            patient: reportData.compteRendu.patient,
+            prescription: {
+              datePrescription: labData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0],
+              motifClinique: labData.prescription?.clinicalIndication || '',
+              analyses: {
+                haematology: (labData.prescription?.tests?.hematology || []).map((test: any) => ({
+                  nom: test.name || '',
+                  categorie: test.category || 'Haematology',
+                  urgence: test.urgent || false,
+                  aJeun: test.fasting || false,
+                  conditionsPrelevement: test.sampleConditions || '',
+                  motifClinique: test.clinicalIndication || '',
+                  renseignementsCliniques: test.clinicalInformation || '',
+                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
+                  delaiResultat: test.turnaroundTime || 'Standard'
+                })),
+                clinicalChemistry: (labData.prescription?.tests?.clinicalChemistry || []).map((test: any) => ({
+                  nom: test.name || '',
+                  categorie: test.category || 'Clinical Chemistry',
+                  urgence: test.urgent || false,
+                  aJeun: test.fasting || false,
+                  conditionsPrelevement: test.sampleConditions || '',
+                  motifClinique: test.clinicalIndication || '',
+                  renseignementsCliniques: test.clinicalInformation || '',
+                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
+                  delaiResultat: test.turnaroundTime || 'Standard'
+                })),
+                immunology: (labData.prescription?.tests?.immunology || []).map((test: any) => ({
+                  nom: test.name || '',
+                  categorie: test.category || 'Immunology',
+                  urgence: test.urgent || false,
+                  aJeun: test.fasting || false,
+                  conditionsPrelevement: test.sampleConditions || '',
+                  motifClinique: test.clinicalIndication || '',
+                  renseignementsCliniques: test.clinicalInformation || '',
+                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
+                  delaiResultat: test.turnaroundTime || 'Standard'
+                })),
+                microbiology: (labData.prescription?.tests?.microbiology || []).map((test: any) => ({
+                  nom: test.name || '',
+                  categorie: test.category || 'Microbiology',
+                  urgence: test.urgent || false,
+                  aJeun: test.fasting || false,
+                  conditionsPrelevement: test.sampleConditions || '',
+                  motifClinique: test.clinicalIndication || '',
+                  renseignementsCliniques: test.clinicalInformation || '',
+                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
+                  delaiResultat: test.turnaroundTime || 'Standard'
+                })),
+                endocrinology: (labData.prescription?.tests?.endocrinology || []).map((test: any) => ({
+                  nom: test.name || '',
+                  categorie: test.category || 'Endocrinology',
+                  urgence: test.urgent || false,
+                  aJeun: test.fasting || false,
+                  conditionsPrelevement: test.sampleConditions || '',
+                  motifClinique: test.clinicalIndication || '',
+                  renseignementsCliniques: test.clinicalInformation || '',
+                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
+                  delaiResultat: test.turnaroundTime || 'Standard'
+                }))
+              },
+              instructionsSpeciales: labData.prescription?.specialInstructions || [],
+              laboratoireRecommande: labData.prescription?.recommendedLaboratory || ''
+            },
+            authentification: {
+              signature: "Medical Practitioner's Signature",
+              nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
+              numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
+              date: labData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0]
+            }
+          }
+        }
+        
+        // Map imaging studies
+        if (apiReport.prescriptions?.imagingStudies) {
+          const imagingData = apiReport.prescriptions.imagingStudies
+          reportData.ordonnances!.imagerie = {
+            enTete: currentDoctorInfo,
+            patient: reportData.compteRendu.patient,
+            prescription: {
+              datePrescription: imagingData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0],
+              examens: imagingData.prescription?.studies?.map((study: any) => ({
+                type: study.type || study.modality || '',
+                modalite: study.modality || '',
+                region: study.region || '',
+                indicationClinique: study.clinicalIndication || '',
+                urgence: study.urgent || false,
+                contraste: study.contrast || false,
+                protocoleSpecifique: study.specificProtocol || '',
+                questionDiagnostique: study.diagnosticQuestion || ''
+              })) || [],
+              renseignementsCliniques: imagingData.prescription?.clinicalInformation || '',
+              centreImagerie: imagingData.prescription?.imagingCenter || ''
+            },
+            authentification: {
+              signature: "Medical Practitioner's Signature",
+              nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
+              numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
+              date: imagingData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0]
+            }
+          }
+        }
+        
+        // Map invoice
+        if (apiReport.invoice) {
+          reportData.invoice = apiReport.invoice
+          if (reportData.invoice.physician) {
+            reportData.invoice.physician.name = currentDoctorInfo.nom
+            reportData.invoice.physician.registrationNumber = currentDoctorInfo.numeroEnregistrement
+          }
+        }
+        
+        console.log("✅ Structure mapping complete")
+        
+        setReport(reportData)
+        setValidationStatus('draft')
+        setDocumentSignatures({})
+        
+        const newReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        setReportId(newReportId)
+        
+        console.log('✅ Report generated with ID:', newReportId)
+        console.log('📊 Report structure:', {
+          hasCompteRendu: !!reportData.compteRendu,
+          hasOrdonnances: !!reportData.ordonnances,
+          hasMedicaments: !!reportData.ordonnances?.medicaments,
+          hasBiologie: !!reportData.ordonnances?.biologie,
+          hasImagerie: !!reportData.ordonnances?.imagerie,
+          hasInvoice: !!reportData.invoice
+        })
+        
+        toast({
+          title: "Report generated successfully",
+          description: "Report is ready for editing and validation"
+        })
+      } else {
+        throw new Error(data.error || "Generation error")
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+      console.error("Report generation error:", errorMessage)
+      setError(errorMessage)
+      
+      const emptyReport = createEmptyReport()
+      emptyReport.compteRendu.praticien = doctorInfo
+      if (patientData) {
+        emptyReport.compteRendu.patient = {
+          ...emptyReport.compteRendu.patient,
+          nom: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim() || 'Patient',
+          nomComplet: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim() || 'Patient',
+          age: patientData.age?.toString() || '',
+          dateNaissance: patientData.dateOfBirth || '',
+          sexe: patientData.gender || '',
+          adresse: patientData.address || '',
+          telephone: patientData.phone || '',
+          email: patientData.email || '',
+          poids: patientData.weight?.toString() || ''
+        }
+      }
+      setReport(emptyReport)
+      setValidationStatus('draft')
+      setDocumentSignatures({})
+      
+      toast({
+        title: "Note",
+        description: "Using default template. Please fill in the required information.",
+        variant: "default"
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+  // ==================== VALIDATION & SIGNATURE ====================
+  const handleValidation = async () => {
+    const requiredFieldsMissing = []
+    if (doctorInfo.nom.includes('[')) requiredFieldsMissing.push('Doctor name')
+    if (doctorInfo.numeroEnregistrement.includes('[')) requiredFieldsMissing.push('Registration number')
+    if (doctorInfo.email.includes('[')) requiredFieldsMissing.push('Email')
+    
+    if (requiredFieldsMissing.length > 0) {
+      toast({
+        title: "Cannot Validate",
+        description: `Please complete doctor profile. Missing: ${requiredFieldsMissing.join(', ')}`,
+        variant: "destructive"
+      })
+      setEditingDoctor(true)
+      return
+    }
+    
+    if (!report) {
+      toast({
+        title: "Error",
+        description: "No report to validate",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    let currentReportId = reportId
+    if (!currentReportId) {
+      currentReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      setReportId(currentReportId)
+    }
+    
+    setSaving(true)
+    try {
+      const signatureSeed = `${doctorInfo.nom}_${doctorInfo.numeroEnregistrement}_signature`
+      
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 80
+      const ctx = canvas.getContext('2d')
+      
+      if (ctx) {
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(0, 0, 300, 80)
+        
+        const nameParts = doctorInfo.nom.replace('Dr. ', '').split(' ')
+        const fullName = nameParts.join(' ')
+        
+        const nameHash = doctorInfo.nom.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+        const signatureStyle = nameHash % 3
+        
+        ctx.save()
+        ctx.translate(50, 40)
+        
+        ctx.strokeStyle = '#1a1a2e'
+        ctx.fillStyle = '#1a1a2e'
+        ctx.lineWidth = 2.2
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        
+        if (signatureStyle === 0) {
+          ctx.font = 'italic 28px "Brush Script MT", "Lucida Handwriting", cursive'
+          ctx.fillText(fullName, 0, 0)
+          ctx.beginPath()
+          ctx.moveTo(-5, 12)
+          ctx.quadraticCurveTo(100, 16, 205, 10)
+          ctx.lineWidth = 1.8
+          ctx.stroke()
+        } else if (signatureStyle === 1) {
+          ctx.font = 'italic bold 32px "Brush Script MT", cursive'
+          const firstLetter = nameParts[0]?.[0] || 'D'
+          ctx.fillText(firstLetter, 0, 0)
+          ctx.font = 'italic 26px "Lucida Handwriting", cursive'
+          const restOfName = nameParts[0]?.substring(1) + ' ' + (nameParts[1] || '')
+          ctx.fillText(restOfName, 28, 2)
+          ctx.beginPath()
+          ctx.moveTo(0, 14)
+          ctx.bezierCurveTo(50, 16, 150, 14, 200, 12)
+          ctx.lineWidth = 1.5
+          ctx.stroke()
+        } else {
+          ctx.font = 'italic 30px "Segoe Script", "Brush Script MT", cursive'
+          let xOffset = 0
+          for (let i = 0; i < fullName.length; i++) {
+            const char = fullName[i]
+            const charWidth = ctx.measureText(char).width
+            const yOffset = Math.sin(i * 0.5) * 2
+            ctx.fillText(char, xOffset, yOffset)
+            xOffset += charWidth * 0.85
+          }
+          ctx.beginPath()
+          ctx.moveTo(0, 15)
+          ctx.quadraticCurveTo(xOffset/2, 18, xOffset, 13)
+          ctx.lineWidth = 1.6
+          ctx.stroke()
+        }
+        
+        ctx.font = '9px Arial'
+        ctx.fillStyle = '#9ca3af'
+        ctx.textAlign = 'left'
+        const date = new Date().toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        })
+        ctx.fillText(`Signed: ${date}`, 0, 35)
+        ctx.restore()
+      }
+      
+      const signatureDataUrl = canvas.toDataURL('image/png')
+      
+      const signatures = {
+        consultation: signatureDataUrl,
+        prescription: signatureDataUrl,
+        laboratory: signatureDataUrl,
+        imaging: signatureDataUrl,
+        invoice: signatureDataUrl
+      }
+      
+      setDocumentSignatures(signatures)
+      
+      const updatedReport = {
+        ...report,
+        compteRendu: {
+          ...report.compteRendu,
+          praticien: doctorInfo,
+          metadata: {
+            ...getReportMetadata(),
+            validatedAt: new Date().toISOString(),
+            validatedBy: doctorInfo.nom,
+            validationStatus: 'validated' as const,
+            signatures: signatures,
+            signatureDataUrl: signatureDataUrl
+          }
+        },
+        ordonnances: report.ordonnances ? {
+          ...report.ordonnances,
+          medicaments: report.ordonnances.medicaments ? {
+            ...report.ordonnances.medicaments,
+            authentification: {
+              ...report.ordonnances.medicaments.authentification,
+              signatureImage: signatureDataUrl,
+              signedAt: new Date().toISOString()
+            }
+          } : null,
+          biologie: report.ordonnances.biologie ? {
+            ...report.ordonnances.biologie,
+            authentification: {
+              ...report.ordonnances.biologie.authentification,
+              signatureImage: signatureDataUrl,
+              signedAt: new Date().toISOString()
+            }
+          } : null,
+          imagerie: report.ordonnances.imagerie ? {
+            ...report.ordonnances.imagerie,
+            authentification: {
+              ...report.ordonnances.imagerie.authentification,
+              signatureImage: signatureDataUrl,
+              signedAt: new Date().toISOString()
+            }
+          } : null
+        } : report.ordonnances,
+        invoice: report.invoice ? {
+          ...report.invoice,
+          signature: {
+            ...report.invoice.signature,
+            signatureImage: signatureDataUrl,
+            signedAt: new Date().toISOString()
+          }
+        } : report.invoice
+      }
+      
+      setReport(updatedReport)
+      setValidationStatus('validated')
+      setModifiedSections(new Set())
+      
+      toast({
+        title: "✅ Document Validated",
+        description: "All documents have been validated and digitally signed. Click 'Send documents' to finalize."
+      })
+      
+    } catch (error) {
+      console.error('Validation error:', error)
+      toast({
+        title: "Validation Error",
+        description: error instanceof Error ? error.message : "Failed to validate document",
+        variant: "destructive"
+      })
+    } finally {
+      setSaving(false)
+    }
   }
 
-  // Enhanced PDF export - extracts only specific content
+  // ==================== SEND DOCUMENTS ====================
+  const handleSendDocuments = async () => {
+    if (!report || validationStatus !== 'validated') {
+      toast({
+        title: "Cannot send documents",
+        description: "Please validate the documents first",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    try {
+      toast({
+        title: "📤 Sending documents...",
+        description: "Preparing documents for patient dashboard"
+      })
+      
+      const params = new URLSearchParams(window.location.search)
+      const consultationId = params.get('consultationId')
+      const patientId = params.get('patientId') || patientData?.id
+      const doctorId = params.get('doctorId')
+
+      if (!consultationId || !patientId) {
+        toast({
+          title: "Error",
+          description: "Missing consultation or patient information",
+          variant: "destructive"
+        })
+        return
+      }
+
+      const getTibokUrl = () => {
+        const urlParam = params.get('tibokUrl')
+        if (urlParam) {
+          console.log('📍 Using Tibok URL from parameter:', decodeURIComponent(urlParam))
+          return decodeURIComponent(urlParam)
+        }
+
+        if (document.referrer) {
+          try {
+            const referrerUrl = new URL(document.referrer)
+            const knownTibokDomains = ['tibok.mu', 'v0-tibokmain2.vercel.app', 'localhost']
+            if (knownTibokDomains.some(domain => referrerUrl.hostname.includes(domain))) {
+              console.log('📍 Using Tibok URL from referrer:', referrerUrl.origin)
+              return referrerUrl.origin
+            }
+          } catch (e) {
+            console.log('Could not parse referrer')
+          }
+        }
+
+        if (process.env.NEXT_PUBLIC_TIBOK_URL) {
+          console.log('📍 Using Tibok URL from environment:', process.env.NEXT_PUBLIC_TIBOK_URL)
+          return process.env.NEXT_PUBLIC_TIBOK_URL
+        }
+
+        console.log('📍 Using default Tibok URL: https://tibok.mu')
+        return 'https://tibok.mu'
+      }
+
+      const tibokUrl = getTibokUrl()
+
+      const documentsPayload = {
+        consultationId,
+        patientId,
+        doctorId,
+        doctorName: doctorInfo.nom,
+        patientName: getReportPatient().nomComplet || getReportPatient().nom,
+        generatedAt: new Date().toISOString(),
+        documents: {
+          consultationReport: report.compteRendu ? {
+            type: 'consultation_report',
+            title: 'Medical Consultation Report',
+            content: report.compteRendu,
+            validated: true,
+            validatedAt: report.compteRendu.metadata.validatedAt,
+            signature: documentSignatures.consultation
+          } : null,
+          prescriptions: report.ordonnances?.medicaments ? {
+            type: 'prescription',
+            title: 'Medical Prescription',
+            medications: report.ordonnances.medicaments.prescription.medicaments,
+            validity: report.ordonnances.medicaments.prescription.validite,
+            signature: documentSignatures.prescription,
+            content: report.ordonnances.medicaments
+          } : null,
+          laboratoryRequests: report.ordonnances?.biologie ? {
+            type: 'laboratory_request',
+            title: 'Laboratory Request Form',
+            tests: report.ordonnances.biologie.prescription.analyses,
+            signature: documentSignatures.laboratory,
+            content: report.ordonnances.biologie
+          } : null,
+          imagingRequests: report.ordonnances?.imagerie ? {
+            type: 'imaging_request',
+            title: 'Radiology Request Form',
+            examinations: report.ordonnances.imagerie.prescription.examens,
+            signature: documentSignatures.imaging,
+            content: report.ordonnances.imagerie
+          } : null,
+          invoice: report.invoice ? {
+            type: 'invoice',
+            title: `Invoice ${report.invoice.header.invoiceNumber}`,
+            content: report.invoice,
+            signature: documentSignatures.invoice
+          } : null
+        }
+      }
+
+      console.log('📦 Sending documents payload to:', tibokUrl)
+      console.log('📦 Payload:', documentsPayload)
+
+      const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(documentsPayload)
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ Tibok API error:', errorText)
+        throw new Error(`Failed to send documents: ${response.status} - ${errorText}`)
+      }
+
+      const result = await response.json()
+      console.log('✅ API Response:', result)
+
+      if (result.success) {
+        toast({
+          title: "✅ Documents envoyés avec succès",
+          description: "Les documents sont maintenant disponibles dans le tableau de bord du patient"
+        })
+
+        showSuccessModal()
+        
+      } else {
+        throw new Error(result.error || "Failed to send documents")
+      }
+    } catch (error) {
+      console.error("❌ Error sending documents:", error)
+      toast({
+        title: "Error sending documents",
+        description: error instanceof Error ? error.message : "An error occurred while sending documents",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const showSuccessModal = () => {
+    const modalContainer = document.createElement('div')
+    modalContainer.id = 'success-modal'
+    modalContainer.style.cssText = `
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeIn 0.3s ease-out;
+    `
+
+    const modalContent = document.createElement('div')
+    modalContent.style.cssText = `
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      max-width: 500px;
+      margin: 1rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      animation: slideUp 0.3s ease-out;
+      position: relative;
+    `
+
+    modalContent.innerHTML = `
+      <button id="close-x-btn" style="
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: none;
+        background: #f3f4f6;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      " onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+        <svg width="20" height="20" fill="#6b7280" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </button>
+      
+      <div style="text-align: center;">
+        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; animation: scaleIn 0.5s ease-out;">
+          <svg width="40" height="40" fill="white" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        
+        <h2 style="font-size: 1.5rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
+          Documents envoyés avec succès!
+        </h2>
+        
+        <p style="color: #6b7280; margin-bottom: 1.5rem; line-height: 1.5;">
+          Les documents médicaux ont été transmis au tableau de bord du patient.<br>
+          Le patient recevra une notification pour valider son ordonnance.
+        </p>
+        
+        <div style="background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e7eb;">
+          <p style="font-size: 0.875rem; color: #4b5563; margin: 0 0 0.5rem 0;">
+            <strong>Prochaines étapes:</strong>
+          </p>
+          <ul style="text-align: left; font-size: 0.875rem; color: #6b7280; margin: 0; padding-left: 1.5rem;">
+            <li>Le patient validera son ordonnance</li>
+            <li>La pharmacie préparera les médicaments</li>
+            <li>Livraison selon l'option choisie par le patient</li>
+          </ul>
+        </div>
+        
+        <div style="background: #d1fae5; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #a7f3d0;">
+          <p style="font-size: 0.875rem; color: #065f46; margin: 0; font-weight: 500;">
+            ✅ Tous les documents ont été envoyés avec succès
+          </p>
+          <p style="font-size: 0.75rem; color: #047857; margin: 0.25rem 0 0 0;">
+            Consultation ID: ${reportId}
+          </p>
+        </div>
+        
+        <button id="close-tab-btn" style="
+          width: 100%;
+          padding: 0.75rem 1.5rem;
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+          color: white;
+          border: none;
+          border-radius: 0.5rem;
+          font-weight: 600;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+        " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+          Cliquez ici pour fermer cet onglet si vous avez terminé
+        </button>
+        
+        <div style="margin-top: 1rem;">
+          <p style="font-size: 0.75rem; color: #9ca3af; margin: 0;">
+            Vous pouvez également garder cet onglet ouvert pour traiter d'autres consultations
+          </p>
+        </div>
+      </div>
+    `
+
+    modalContainer.appendChild(modalContent)
+    document.body.appendChild(modalContainer)
+
+    const style = document.createElement('style')
+    style.textContent = `
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes slideUp {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      @keyframes scaleIn {
+        from { transform: scale(0); }
+        to { transform: scale(1); }
+      }
+      @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+      }
+    `
+    document.head.appendChild(style)
+
+    const closeTab = () => {
+      sessionStorage.removeItem('currentDoctorInfo')
+      
+      if (window.opener) {
+        window.close()
+      } else {
+        window.close()
+        
+        setTimeout(() => {
+          const modal = document.getElementById('success-modal')
+          if (modal) {
+            modal.innerHTML = `
+              <div style="background: white; padding: 2rem; border-radius: 1rem; max-width: 400px; margin: auto;">
+                <div style="text-align: center;">
+                  <div style="width: 60px; height: 60px; background: #fbbf24; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                    <svg width="30" height="30" fill="white" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <h3 style="font-size: 1.25rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
+                    Impossible de fermer automatiquement
+                  </h3>
+                  <p style="color: #6b7280; margin-bottom: 1rem;">
+                    Votre navigateur empêche la fermeture automatique des onglets.
+                  </p>
+                  <p style="color: #4b5563; font-weight: 500;">
+                    Veuillez fermer manuellement cet onglet.
+                  </p>
+                  <button onclick="document.getElementById('success-modal').remove()" style="
+                    margin-top: 1rem;
+                    padding: 0.5rem 1rem;
+                    background: #3b82f6;
+                    color: white;
+                    border: none;
+                    border-radius: 0.5rem;
+                    cursor: pointer;
+                  ">
+                    OK, Compris
+                  </button>
+                </div>
+              </div>
+            `
+          }
+        }, 100)
+      }
+    }
+
+    const closeModal = () => {
+      const modal = document.getElementById('success-modal')
+      if (modal) {
+        modal.style.animation = 'fadeOut 0.3s ease-out'
+        setTimeout(() => {
+          modal.remove()
+        }, 300)
+      }
+    }
+
+    document.getElementById('close-x-btn')?.addEventListener('click', closeModal)
+    document.getElementById('close-tab-btn')?.addEventListener('click', closeTab)
+
+    modalContainer.addEventListener('click', (e) => {
+      if (e.target === modalContainer) {
+        closeModal()
+      }
+    })
+  }
+
+  // ==================== PDF EXPORT ====================
   const exportSectionToPDF = (sectionId: string, filename: string) => {
     const element = document.getElementById(sectionId)
     if (!element) return
 
-    // Clone element to avoid modifying the original
     const clonedElement = element.cloneNode(true) as HTMLElement
     
-    // Remove unnecessary elements for printing
     const noExportElements = clonedElement.querySelectorAll('.print\\:hidden, .no-print')
     noExportElements.forEach(el => el.remove())
 
     const printWindow = window.open('', '_blank')
     if (!printWindow) return
 
-    // Specific styles for each document type
     const getDocumentStyles = () => {
       const baseStyles = `
         @page { 
@@ -1625,7 +2192,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
           background: #f5f5f5;
         }
         
-        /* Hide interface elements */
         button, .button, input, select, textarea { display: none !important; }
         
         @media print {
@@ -1692,18 +2258,16 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       return baseStyles
     }
 
-    // Clean HTML for printing
     const cleanHTML = clonedElement.innerHTML
       .replace(/class="[^"]*"/g, (match) => {
-        // Keep only important classes for styling
         const importantClasses = ['header', 'section', 'prescription-item', 'signature', 'info-box', 'urgent', 'badge', 'badge-red', 'grid', 'grid-row', 'grid-cell', 'category-header', 'invoice-table', 'invoice-total', 'payment-info']
         const classes = match.match(/class="([^"]*)"/)?.[1].split(' ') || []
         const filtered = classes.filter(c => importantClasses.some(ic => c.includes(ic)))
         return filtered.length > 0 ? `class="${filtered.join(' ')}"` : ''
       })
-      .replace(/<button[^>]*>.*?<\/button>/gi, '') // Remove all buttons
-      .replace(/<svg[^>]*>.*?<\/svg>/gi, '') // Remove SVG icons
-      .replace(/<!--.*?-->/gs, '') // Remove comments
+      .replace(/<button[^>]*>.*?<\/button>/gi, '')
+      .replace(/<svg[^>]*>.*?<\/svg>/gi, '')
+      .replace(/<!--.*?-->/gs, '')
 
     const content = `
       <!DOCTYPE html>
@@ -1724,18 +2288,15 @@ console.log('✅ Report generated locally with ID:', newReportId, {
     printWindow.document.write(content)
     printWindow.document.close()
     
-    // Wait for content to load before printing
     printWindow.onload = () => {
       setTimeout(() => {
         printWindow.print()
-        // Optional: close window after printing
-        // printWindow.onafterprint = () => printWindow.close()
       }, 500)
     }
   }
 
   const handlePrint = () => window.print()
-  // Loading and error states
+  // ==================== RENDER STATES ====================
   if (loading) {
     return (
       <Card className="w-full">
@@ -1750,7 +2311,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
     )
   }
 
-  // Add debug information display
   if (!loading && !report && !error && !patientData) {
     return (
       <Card className="w-full">
@@ -1760,13 +2320,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
           <p className="text-center text-gray-600 mb-4">
             Patient information is required to generate the medical report.
           </p>
-          <div className="text-sm text-gray-500 space-y-1">
-            <p>Debug Info:</p>
-            <p>• Patient Data: {patientData ? 'Present' : 'Missing'}</p>
-            <p>• Clinical Data: {clinicalData ? 'Present' : 'Missing'}</p>
-            <p>• Questions Data: {questionsData ? 'Present' : 'Missing'}</p>
-            <p>• Diagnosis Data: {diagnosisData ? 'Present' : 'Missing'}</p>
-          </div>
           <Button 
             onClick={() => {
               const emptyReport = createEmptyReport()
@@ -1796,7 +2349,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
     )
   }
 
-  // Always check that report exists
   if (!report) {
     return (
       <Card className="w-full">
@@ -1813,11 +2365,34 @@ console.log('✅ Report generated locally with ID:', newReportId, {
     )
   }
 
-  // Doctor info editor component
-  const DoctorInfoEditor = () => {
+  // ==================== DOCTOR INFO EDITOR ====================
+  const DoctorInfoEditor = memo(() => {
     const hasRequiredFields = doctorInfo.nom !== 'Dr. [Name Required]' && 
                              !doctorInfo.numeroEnregistrement.includes('[') &&
                              !doctorInfo.email.includes('[')
+    
+    // Local state for editing to prevent focus loss
+    const [localDoctorInfo, setLocalDoctorInfo] = useState(doctorInfo)
+    const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
+    
+    // Sync local state with parent after delay
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        if (editingDoctor && JSON.stringify(localDoctorInfo) !== JSON.stringify(doctorInfo)) {
+          Object.keys(localDoctorInfo).forEach(key => {
+            if (localDoctorInfo[key as keyof typeof localDoctorInfo] !== doctorInfo[key as keyof typeof doctorInfo]) {
+              updateDoctorInfo(key, localDoctorInfo[key as keyof typeof localDoctorInfo])
+            }
+          })
+        }
+      }, 5000)
+      
+      return () => clearTimeout(timer)
+    }, [localDoctorInfo, editingDoctor])
+    
+    const handleDoctorFieldChange = useCallback((field: string, value: string) => {
+      setLocalDoctorInfo(prev => ({ ...prev, [field]: value }))
+    }, [])
     
     return (
       <Card className="mb-6 print:hidden">
@@ -1857,68 +2432,76 @@ console.log('✅ Report generated locally with ID:', newReportId, {
               <div>
                 <Label>Full name *</Label>
                 <Input
-                  value={doctorInfo.nom}
-                  onChange={(e) => updateDoctorInfo('nom', e.target.value)}
+                  ref={(el) => { inputRefs.current['nom'] = el }}
+                  value={localDoctorInfo.nom}
+                  onChange={(e) => handleDoctorFieldChange('nom', e.target.value)}
                   placeholder="Dr. Full Name"
-                  className={doctorInfo.nom.includes('[') ? 'border-red-500' : ''}
+                  className={localDoctorInfo.nom.includes('[') ? 'border-red-500' : ''}
                 />
               </div>
               <div>
                 <Label>Qualifications</Label>
                 <Input
-                  value={doctorInfo.qualifications}
-                  onChange={(e) => updateDoctorInfo('qualifications', e.target.value)}
+                  ref={(el) => { inputRefs.current['qualifications'] = el }}
+                  value={localDoctorInfo.qualifications}
+                  onChange={(e) => handleDoctorFieldChange('qualifications', e.target.value)}
                   placeholder="MBBS, MD"
                 />
               </div>
               <div>
                 <Label>Speciality</Label>
                 <Input
-                  value={doctorInfo.specialite}
-                  onChange={(e) => updateDoctorInfo('specialite', e.target.value)}
+                  ref={(el) => { inputRefs.current['specialite'] = el }}
+                  value={localDoctorInfo.specialite}
+                  onChange={(e) => handleDoctorFieldChange('specialite', e.target.value)}
                   placeholder="General Medicine"
                 />
               </div>
               <div>
                 <Label>Medical Council Registration No. *</Label>
                 <Input
-                  value={doctorInfo.numeroEnregistrement}
-                  onChange={(e) => updateDoctorInfo('numeroEnregistrement', e.target.value)}
+                  ref={(el) => { inputRefs.current['numeroEnregistrement'] = el }}
+                  value={localDoctorInfo.numeroEnregistrement}
+                  onChange={(e) => handleDoctorFieldChange('numeroEnregistrement', e.target.value)}
                   placeholder="MCM/12345"
-                  className={doctorInfo.numeroEnregistrement.includes('[') ? 'border-red-500' : ''}
+                  className={localDoctorInfo.numeroEnregistrement.includes('[') ? 'border-red-500' : ''}
                 />
               </div>
               <div>
                 <Label>Practice License No.</Label>
                 <Input
-                  value={doctorInfo.licencePratique}
-                  onChange={(e) => updateDoctorInfo('licencePratique', e.target.value)}
+                  ref={(el) => { inputRefs.current['licencePratique'] = el }}
+                  value={localDoctorInfo.licencePratique}
+                  onChange={(e) => handleDoctorFieldChange('licencePratique', e.target.value)}
                   placeholder="PL/2024/123"
-                  className={doctorInfo.licencePratique.includes('[') ? 'border-red-500' : ''}
+                  className={localDoctorInfo.licencePratique.includes('[') ? 'border-red-500' : ''}
                 />
               </div>
               <div>
                 <Label>Email *</Label>
                 <Input
-                  value={doctorInfo.email}
-                  onChange={(e) => updateDoctorInfo('email', e.target.value)}
+                  ref={(el) => { inputRefs.current['email'] = el }}
+                  value={localDoctorInfo.email}
+                  onChange={(e) => handleDoctorFieldChange('email', e.target.value)}
                   placeholder="doctor@email.com"
-                  className={doctorInfo.email.includes('[') ? 'border-red-500' : ''}
+                  className={localDoctorInfo.email.includes('[') ? 'border-red-500' : ''}
                 />
               </div>
               <div className="col-span-2">
                 <Label>Clinic Address</Label>
                 <Input
-                  value={doctorInfo.adresseCabinet}
-                  onChange={(e) => updateDoctorInfo('adresseCabinet', e.target.value)}
+                  ref={(el) => { inputRefs.current['adresseCabinet'] = el }}
+                  value={localDoctorInfo.adresseCabinet}
+                  onChange={(e) => handleDoctorFieldChange('adresseCabinet', e.target.value)}
                   placeholder="Clinic address or Teleconsultation"
                 />
               </div>
               <div className="col-span-2">
                 <Label>Consultation Hours</Label>
                 <Input
-                  value={doctorInfo.heuresConsultation}
-                  onChange={(e) => updateDoctorInfo('heuresConsultation', e.target.value)}
+                  ref={(el) => { inputRefs.current['heuresConsultation'] = el }}
+                  value={localDoctorInfo.heuresConsultation}
+                  onChange={(e) => handleDoctorFieldChange('heuresConsultation', e.target.value)}
                   placeholder="Teleconsultation Hours: 8:00 AM - 8:00 PM"
                 />
               </div>
@@ -1941,8 +2524,10 @@ console.log('✅ Report generated locally with ID:', newReportId, {
         </CardContent>
       </Card>
     )
-  }
-  // Narrative report editing component
+  })
+
+  DoctorInfoEditor.displayName = 'DoctorInfoEditor'
+
   const ConsultationReport = () => {
     const sections = [
       { key: 'motifConsultation', title: 'CHIEF COMPLAINT' },
@@ -2019,9 +2604,9 @@ console.log('✅ Report generated locally with ID:', newReportId, {
                 <section key={section.key} className="space-y-2 section">
                   <h2 className="text-xl font-bold text-gray-900">{section.title}</h2>
                   {editMode && validationStatus !== 'validated' ? (
-                    <Textarea
+                    <DebouncedTextarea
                       value={content}
-                      onChange={(e) => updateRapportSection(section.key, e.target.value)}
+                      onUpdate={(value) => updateRapportSection(section.key, value)}
                       className="min-h-[200px] font-sans text-gray-700"
                       placeholder="Enter text..."
                     />
@@ -2054,7 +2639,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
               <p className="text-sm text-gray-600">License: {praticien.licencePratique}</p>
               <p className="text-sm text-gray-600">{praticien.adresseCabinet}</p>
               
-              {/* UPDATED: Enhanced signature display */}
               {validationStatus === 'validated' && documentSignatures.consultation ? (
                 <div className="mt-4">
                   <img 
@@ -2080,7 +2664,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       </Card>
     )
   }
-  // Medication editing component
   const MedicationPrescription = () => {
     const medications = report?.ordonnances?.medicaments?.prescription?.medicaments || []
     const patient = getReportPatient()
@@ -2141,121 +2724,17 @@ console.log('✅ Report generated locally with ID:', newReportId, {
         <div className="space-y-6">
           {medications.length > 0 ? (
             medications.map((med: any, index: number) => (
-              <div key={index} className="border-l-4 border-green-500 pl-4 py-2 prescription-item">
+              <div 
+                key={index}
+                className="border-l-4 border-green-500 pl-4 py-2 prescription-item"
+              >
                 {editMode && validationStatus !== 'validated' ? (
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label>Medication Name</Label>
-                        <Input
-                          value={med.nom}
-                          onChange={(e) => updateMedicament(index, 'nom', e.target.value)}
-                          placeholder="e.g., Paracetamol"
-                        />
-                      </div>
-                      <div>
-                        <Label>Generic Name (INN)</Label>
-                        <Input
-                          value={med.denominationCommune}
-                          onChange={(e) => updateMedicament(index, 'denominationCommune', e.target.value)}
-                          placeholder="e.g., Paracetamol"
-                        />
-                      </div>
-                      <div>
-                        <Label>Dosage</Label>
-                        <Input
-                          value={med.dosage}
-                          onChange={(e) => updateMedicament(index, 'dosage', e.target.value)}
-                          placeholder="e.g., 500mg"
-                        />
-                      </div>
-                      <div>
-                        <Label>Form</Label>
-                        <Select
-                          value={med.forme}
-                          onValueChange={(value) => updateMedicament(index, 'forme', value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="tablet">Tablet</SelectItem>
-                            <SelectItem value="capsule">Capsule</SelectItem>
-                            <SelectItem value="syrup">Syrup</SelectItem>
-                            <SelectItem value="injection">Injection</SelectItem>
-                            <SelectItem value="cream">Cream</SelectItem>
-                            <SelectItem value="ointment">Ointment</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label>Frequency</Label>
-                        <Input
-                          value={med.posologie}
-                          onChange={(e) => updateMedicament(index, 'posologie', e.target.value)}
-                          placeholder="e.g., 1 tablet 3 times daily"
-                        />
-                      </div>
-                      <div>
-                        <Label>Duration</Label>
-                        <Input
-                          value={med.dureeTraitement}
-                          onChange={(e) => updateMedicament(index, 'dureeTraitement', e.target.value)}
-                          placeholder="e.g., 7 days"
-                        />
-                      </div>
-                      <div>
-                        <Label>Quantity</Label>
-                        <Input
-                          value={med.quantite}
-                          onChange={(e) => updateMedicament(index, 'quantite', e.target.value)}
-                          placeholder="e.g., 1 box"
-                        />
-                      </div>
-                      <div>
-                        <Label>Route of Administration</Label>
-                        <Select
-                          value={med.modeAdministration}
-                          onValueChange={(value) => updateMedicament(index, 'modeAdministration', value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Oral route">Oral route</SelectItem>
-                            <SelectItem value="Sublingual route">Sublingual route</SelectItem>
-                            <SelectItem value="Topical route">Topical route</SelectItem>
-                            <SelectItem value="Parenteral route">Parenteral route</SelectItem>
-                            <SelectItem value="Rectal route">Rectal route</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Special Instructions</Label>
-                      <Input
-                        value={med.instructions}
-                        onChange={(e) => updateMedicament(index, 'instructions', e.target.value)}
-                        placeholder="e.g., Take with food"
-                      />
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          checked={med.nonSubstituable}
-                          onCheckedChange={(checked) => updateMedicament(index, 'nonSubstituable', checked.toString())}
-                        />
-                        <Label>Non-substitutable</Label>
-                      </div>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => removeMedicament(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
+                  <MedicationEditForm
+                    medication={med}
+                    index={index}
+                    onUpdate={updateMedicamentBatch}
+                    onRemove={removeMedicament}
+                  />
                 ) : (
                   <div>
                     <div className="font-bold text-lg">
@@ -2322,7 +2801,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
             <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
             <p className="text-sm text-gray-600">License: {praticien.licencePratique}</p>
             
-            {/* UPDATED: Enhanced signature display for prescriptions */}
             {validationStatus === 'validated' && documentSignatures.prescription ? (
               <div className="mt-4">
                 <img 
@@ -2348,7 +2826,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       </div>
     )
   }
-  // Biology tests editing component
   const BiologyPrescription = () => {
     const analyses = report?.ordonnances?.biologie?.prescription?.analyses || {}
     const hasTests = Object.values(analyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
@@ -2433,93 +2910,13 @@ console.log('✅ Report generated locally with ID:', newReportId, {
                     {tests.map((test: any, idx: number) => (
                       <div key={idx} className="prescription-item">
                         {editMode && validationStatus !== 'validated' ? (
-                          <div className="space-y-3 p-3">
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <Label>Test Name</Label>
-                                <Input
-                                  value={test.nom}
-                                  onChange={(e) => updateBiologyTest(key, idx, 'nom', e.target.value)}
-                                  placeholder="e.g., Complete Blood Count"
-                                />
-                              </div>
-                              <div>
-                                <Label>Clinical Indication</Label>
-                                <Input
-                                  value={test.motifClinique}
-                                  onChange={(e) => updateBiologyTest(key, idx, 'motifClinique', e.target.value)}
-                                  placeholder="e.g., Anemia evaluation"
-                                />
-                              </div>
-                              <div>
-                                <Label>Sample Type</Label>
-                                <Select
-                                  value={test.tubePrelevement}
-                                  onValueChange={(value) => updateBiologyTest(key, idx, 'tubePrelevement', value)}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="As per laboratory protocol">Lab Protocol</SelectItem>
-                                    <SelectItem value="EDTA (Purple top)">EDTA (Purple)</SelectItem>
-                                    <SelectItem value="SST (Gold top)">SST (Gold)</SelectItem>
-                                    <SelectItem value="Sodium Citrate (Blue top)">Citrate (Blue)</SelectItem>
-                                    <SelectItem value="Heparin (Green top)">Heparin (Green)</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div>
-                                <Label>Turnaround Time</Label>
-                                <Select
-                                  value={test.delaiResultat}
-                                  onValueChange={(value) => updateBiologyTest(key, idx, 'delaiResultat', value)}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="Standard">Standard (24-48h)</SelectItem>
-                                    <SelectItem value="Urgent">Urgent (2-4h)</SelectItem>
-                                    <SelectItem value="STAT">STAT (&lt;1h)</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                            <div>
-                              <Label>Special Conditions</Label>
-                              <Input
-                                value={test.conditionsPrelevement}
-                                onChange={(e) => updateBiologyTest(key, idx, 'conditionsPrelevement', e.target.value)}
-                                placeholder="e.g., Early morning sample required"
-                              />
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <div className="flex items-center gap-4">
-                                <div className="flex items-center space-x-2">
-                                  <Switch
-                                    checked={test.urgence}
-                                    onCheckedChange={(checked) => updateBiologyTest(key, idx, 'urgence', checked)}
-                                  />
-                                  <Label>Urgent</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <Switch
-                                    checked={test.aJeun}
-                                    onCheckedChange={(checked) => updateBiologyTest(key, idx, 'aJeun', checked)}
-                                  />
-                                  <Label>Fasting required</Label>
-                                </div>
-                              </div>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => removeBiologyTest(key, idx)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
+                          <BiologyTestEditForm
+                            test={test}
+                            category={key}
+                            index={idx}
+                            onUpdate={updateBiologyTestBatch}
+                            onRemove={removeBiologyTest}
+                          />
                         ) : (
                           <div className="flex items-start justify-between p-2 hover:bg-gray-50 rounded">
                             <div className="flex-1">
@@ -2596,7 +2993,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
             <p className="font-semibold">{praticien.nom}</p>
             <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
             
-            {/* UPDATED: Enhanced signature display for laboratory */}
             {validationStatus === 'validated' && documentSignatures.laboratory ? (
               <div className="mt-4">
                 <img 
@@ -2622,7 +3018,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
     )
   }
 
-  // Imaging prescription editing component
   const ImagingPrescription = () => {
     const examens = report?.ordonnances?.imagerie?.prescription?.examens || []
     const patient = getReportPatient()
@@ -2671,85 +3066,12 @@ console.log('✅ Report generated locally with ID:', newReportId, {
             {examens.map((exam: any, index: number) => (
               <div key={index} className="border-l-4 border-indigo-500 pl-4 py-2 prescription-item">
                 {editMode && validationStatus !== 'validated' ? (
-                  <div className="space-y-3 p-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label>Imaging Type</Label>
-                        <Select
-                          value={exam.type || exam.modalite}
-                          onValueChange={(value) => updateImagingExam(index, 'type', value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="X-Ray">X-Ray</SelectItem>
-                            <SelectItem value="CT Scan">CT Scan</SelectItem>
-                            <SelectItem value="MRI">MRI</SelectItem>
-                            <SelectItem value="Ultrasound">Ultrasound</SelectItem>
-                            <SelectItem value="Mammography">Mammography</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label>Anatomical Region</Label>
-                        <Input
-                          value={exam.region}
-                          onChange={(e) => updateImagingExam(index, 'region', e.target.value)}
-                          placeholder="e.g., Chest PA/Lateral"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Label>Clinical Indication</Label>
-                        <Input
-                          value={exam.indicationClinique}
-                          onChange={(e) => updateImagingExam(index, 'indicationClinique', e.target.value)}
-                          placeholder="e.g., Rule out pneumonia"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Label>Clinical Question</Label>
-                        <Input
-                          value={exam.questionDiagnostique}
-                          onChange={(e) => updateImagingExam(index, 'questionDiagnostique', e.target.value)}
-                          placeholder="e.g., Consolidation? Pleural effusion?"
-                        />
-                      </div>
-                      <div>
-                        <Label>Specific Protocol</Label>
-                        <Input
-                          value={exam.protocoleSpecifique}
-                          onChange={(e) => updateImagingExam(index, 'protocoleSpecifique', e.target.value)}
-                          placeholder="e.g., High resolution CT"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={exam.urgence}
-                            onCheckedChange={(checked) => updateImagingExam(index, 'urgence', checked)}
-                          />
-                          <Label>Urgent</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={exam.contraste}
-                            onCheckedChange={(checked) => updateImagingExam(index, 'contraste', checked)}
-                          />
-                          <Label>Contrast required</Label>
-                        </div>
-                      </div>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => removeImagingExam(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
+                  <ImagingExamEditForm
+                    exam={exam}
+                    index={index}
+                    onUpdate={updateImagingExamBatch}
+                    onRemove={removeImagingExam}
+                  />
                 ) : (
                   <div>
                     <div className="font-bold text-lg">
@@ -2803,7 +3125,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
             <p className="font-semibold">{praticien.nom}</p>
             <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
             
-            {/* UPDATED: Enhanced signature display for imaging */}
             {validationStatus === 'validated' && documentSignatures.imaging ? (
               <div className="mt-4">
                 <img 
@@ -2828,7 +3149,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       </div>
     )
   }
-  // Invoice Component
   const InvoiceComponent = () => {
     const invoice = report?.invoice
     if (!invoice) return null
@@ -2884,7 +3204,7 @@ console.log('✅ Report generated locally with ID:', newReportId, {
               </tr>
             </thead>
             <tbody>
-              {invoice.services.items.map((item, idx) => (
+              {invoice.services.items.map((item: any, idx: number) => (
                 <tr key={idx} className="border-b border-gray-200">
                   <td className="py-2">{item.description}</td>
                   <td className="text-center py-2">{item.quantity}</td>
@@ -2983,7 +3303,7 @@ console.log('✅ Report generated locally with ID:', newReportId, {
         <div className="mb-8">
           <h3 className="font-bold mb-2">Notes</h3>
           <ul className="list-disc list-inside text-sm space-y-1">
-            {invoice.notes.map((note, idx) => (
+            {invoice.notes.map((note: string, idx: number) => (
               <li key={idx}>{note}</li>
             ))}
           </ul>
@@ -2992,7 +3312,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
         <div className="mt-12 pt-8 border-t border-gray-300 text-center">
           <p className="font-bold">Electronic Signature:</p>
           
-          {/* UPDATED: Enhanced signature display for invoice */}
           {validationStatus === 'validated' && documentSignatures.invoice ? (
             <div className="mt-4 flex flex-col items-center">
               <img 
@@ -3031,7 +3350,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
     )
   }
 
-  // Actions Bar component
   const ActionsBar = () => {
     const metadata = getReportMetadata()
     
@@ -3093,7 +3411,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
     )
   }
 
-  // Unsaved changes warning
   const UnsavedChangesAlert = () => {
     if (modifiedSections.size === 0 || validationStatus === 'validated') return null
 
@@ -3107,7 +3424,6 @@ console.log('✅ Report generated locally with ID:', newReportId, {
     )
   }
 
-  // Prescription stats
   const PrescriptionStats = () => {
     const medicamentCount = report?.ordonnances?.medicaments?.prescription?.medicaments?.length || 0
     const bioCount = Object.values(report?.ordonnances?.biologie?.prescription?.analyses || {})
@@ -3141,8 +3457,7 @@ console.log('✅ Report generated locally with ID:', newReportId, {
       </Card>
     )
   }
-
-  // Main render
+  // ==================== MAIN RENDER ====================
   return (
     <div className="space-y-6 print:space-y-4">
       <ActionsBar />
