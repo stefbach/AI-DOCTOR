@@ -2496,21 +2496,22 @@ if (medicalAnalysis?.treatment_plan?.medications) {
     medicalAnalysis.treatment_plan.medications
   )
   console.log(`✅ ${medicalAnalysis.treatment_plan.medications.length} medications normalized`)
-}
-    // DEBUG - Afficher les médicaments après normalisation
-  medicalAnalysis.treatment_plan.medications.forEach((med: any, idx: number) => {
-    console.log(`🔍 Medication ${idx + 1} after normalization:`, {
-      drug: med.drug,
-      medication_name: med.medication_name,
-      indication: med.indication,
-      why_prescribed: med.why_prescribed,
-      dosing_adult: med.dosing?.adult,
-      how_to_take: med.how_to_take,
-      dci: med.dci
-    })
+
+// DEBUG - Afficher les médicaments après normalisation
+medicalAnalysis.treatment_plan.medications.forEach((med: any, idx: number) => {
+  console.log(`🔍 Medication ${idx + 1} after normalization:`, {
+    drug: med.drug,
+    medication_name: med.medication_name,
+    indication: med.indication,
+    why_prescribed: med.why_prescribed,
+    dosing_adult: med.dosing?.adult,
+    how_to_take: med.how_to_take,
+    dci: med.dci
   })
+})
 }
-    console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
+
+console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     console.log(`🎯 Diagnostic primaire garanti : ${medicalAnalysis.clinical_analysis.primary_diagnosis.condition}`)
     
     // Validation universelle et améliorations
