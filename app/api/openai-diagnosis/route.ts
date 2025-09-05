@@ -2609,9 +2609,13 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       },
 
       // ========== MEDICATIONS ULTRA PRÉCISES - DCI + POSOLOGIE ==========
-      medicationsSimple: generateEnhancedMedicationsResponse(
-        finalAnalysis.treatment_plan?.medications || []
-      ),
+    medicationsSimple: (finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
+  id: idx + 1,
+  nom: med.drug,  // Direct
+  posologie_complete: med.dosing?.adult || med.how_to_take,  // Direct
+  indication: med.indication || med.why_prescribed,  // Direct
+  dci: med.dci
+})),
       
       // Protection des données
       dataProtection: {
@@ -2723,6 +2727,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
           treatment_approach: finalAnalysis.treatment_plan?.approach || "Approche thérapeutique personnalisée avec standards UK/Maurice",
           prescription_rationale: finalAnalysis.treatment_plan?.prescription_rationale || "Justification de prescription selon standards internationaux",
           primary_treatments: (finalAnalysis.treatment_plan?.medications || []).map((med: any) => ({
+  medication_name: med.drug,  // Direct
          medication_name: med?.drug || med?.medication_name || "Médicament",
         dci: med?.dci || "DCI", 
         therapeutic_class: extractTherapeuticClass(med) || "Agent thérapeutique",
