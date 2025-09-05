@@ -258,8 +258,8 @@ export function validateMauritiusMedicalSpecificity(analysis: any): {
   
   medications.forEach((med: any, idx: number) => {
     // Accepter TOUS les formats de médicament qui contiennent l'info essentielle
-    const hasMedicationInfo = med?.drug || med?.medication || med?.nom
-    const hasIndication = med?.indication || med?.purpose || med?.pour
+    const hasMedicationInfo = med?.drug || med?.medication || med?.nom || med?.medication_name
+    const hasIndication = med?.indication || med?.purpose || med?.pour || med?.why_prescribed
     const hasDCI = med?.dci
     
     console.log(`Medication ${idx + 1}:`, {
