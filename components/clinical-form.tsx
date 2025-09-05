@@ -200,7 +200,10 @@ export default function ModernClinicalForm({
   const [isLoading, setIsLoading] = useState(false)
 
   // ========== Memoization of translated lists ==========
-  const COMMON_SYMPTOMS = useMemo(() => [
+// Replace the COMMON_SYMPTOMS useMemo in your clinical-form.tsx (around line 139-163)
+// with this complete list of 51 symptoms:
+
+const COMMON_SYMPTOMS = useMemo(() => [
     "Chest pain",
     "Shortness of breath",
     "Palpitations",
@@ -225,6 +228,33 @@ export default function ModernClinicalForm({
     "Rash",
     "Blurred vision",
     "Hearing problems",
+    "Night sweats",
+    "Wheezing",
+    "Chest tightness",
+    "Sore throat",
+    "Runny nose",
+    "Irregular heartbeat",
+    "Bloating",
+    "Heartburn",
+    "Numbness",
+    "Tingling",
+    "Memory problems",
+    "Confusion",
+    "Muscle pain",
+    "Neck pain",
+    "Joint stiffness",
+    "Muscle weakness",
+    "Itching",
+    "Skin lesions",
+    "Dry skin",
+    "Skin discoloration",
+    "Depression",
+    "Irritability",
+    "Mood swings",
+    "Ear pain",
+    "Tinnitus",
+    "Nasal congestion",
+    "Sinus pain"
   ], [])
 
   const DURATION_OPTIONS = useMemo(() => [
