@@ -1063,6 +1063,43 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
   throw lastError || new Error('Failed after multiple attempts with Mauritius quality enhancement')
 }
 
+async function callOpenAIWithMauritiusQualityTropical(
+  apiKey: string,
+  basePrompt: string,
+  enhancedPrompt: string,
+  patientContext: PatientContext,
+  maxRetries: number = 3
+): Promise<any> {
+  const combinedPrompt = `${basePrompt}\n\n${enhancedPrompt}`
+  const result = await callOpenAIWithMauritiusQuality(
+    apiKey,
+    combinedPrompt,
+    patientContext,
+    maxRetries
+  )
+  const tropical_context = getMauritiusTropicalContext()
+  return { ...result, tropical_context }
+}
+
+function getMauritiusTropicalContext() {
+  const month = new Date().getMonth() + 1
+  let season: 'dry' | 'transition' | 'rainy' | 'cyclone'
+  let riskLevel: 'low' | 'medium' | 'high' | 'very_high'
+
+  if ([11, 12, 1, 2, 3, 4].includes(month)) {
+    season = [12, 1, 2, 3].includes(month) ? 'cyclone' : 'rainy'
+    riskLevel = [12, 1, 2, 3].includes(month) ? 'very_high' : 'high'
+  } else if ([5, 6, 7, 8, 9, 10].includes(month)) {
+    season = 'dry'
+    riskLevel = 'medium'
+  } else {
+    season = 'transition'
+    riskLevel = 'medium'
+  }
+
+  return { season, riskLevel }
+}
+
 function prepareMauritiusQualityPrompt(patientContext: PatientContext, consultationType: any): string {
   const currentMedsFormatted = patientContext.current_medications.length > 0 
     ? patientContext.current_medications.join(', ')
@@ -2401,6 +2438,14 @@ function convertToSimpleFormat(dosing: string): string {
   return dosing
 }
 
+const MAURITIUS_ENHANCED_MEDICAL_PROMPT = `
+PATIENT CONTEXT:
+{{PATIENT_CONTEXT}}
+
+CURRENT MEDICATIONS:
+{{CURRENT_MEDICATIONS}}
+`
+
 // ==================== MAIN POST FUNCTION ====================
 export async function POST(request: NextRequest) {
   console.log('🚀 MAURITIUS MEDICAL AI - VERSION 4.3 LOGIQUE COMPLÈTE + DCI PRÉCIS')
@@ -2469,12 +2514,29 @@ export async function POST(request: NextRequest) {
     
     // ============ APPEL OPENAI AVEC QUALITÉ MAURITIUS + DCI ============
     const mauritiusPrompt = prepareMauritiusQualityPrompt(patientContext, consultationAnalysis)
-    
-    const { data: openaiData, analysis: medicalAnalysis, mauritius_quality_level } = await callOpenAIWithMauritiusQuality(
+    const medsList = patientContext.current_medications.length > 0
+      ? patientContext.current_medications.join(', ')
+      : 'Aucun médicament actuel'
+    const enhancedPrompt = MAURITIUS_ENHANCED_MEDICAL_PROMPT
+      .replace('{{PATIENT_CONTEXT}}', JSON.stringify(patientContext, null, 2))
+      .replace('{{CURRENT_MEDICATIONS}}', medsList)
+
+    const {
+      data: openaiData,
+      analysis: medicalAnalysis,
+      mauritius_quality_level,
+      tropical_context
+    } = await callOpenAIWithMauritiusQualityTropical(
       apiKey,
       mauritiusPrompt,
+      enhancedPrompt,
       patientContext
     )
+
+    console.log('🏝️ Tropical context:', {
+      season: tropical_context.season,
+      riskLevel: tropical_context.riskLevel
+    })
     
     console.log('✅ Analyse médicale avec qualité anglo-saxonne + DCI précis terminée')
     // ========== DÉDUPLICATION DES MÉDICAMENTS ==========
