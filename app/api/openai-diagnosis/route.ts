@@ -2477,6 +2477,19 @@ export async function POST(request: NextRequest) {
     )
     
     console.log('✅ Analyse médicale avec qualité anglo-saxonne + DCI précis terminée')
+    // ========== DÉDUPLICATION DES MÉDICAMENTS ==========
+function deduplicateMedications(medications: any[]): any[] {
+  const seen = new Set()
+  return medications.filter(med => {
+    const dci = (med.dci || '').toLowerCase().trim()
+    if (seen.has(dci)) {
+      console.log(`🔄 Removing duplicate medication: ${dci}`)
+      return false
+    }
+    seen.add(dci)
+    return true
+  })
+}
     // ========== NORMALISATION DES CHAMPS MÉDICAMENTS ==========
 function normalizeMedicationFields(medications: any[]): any[] {
   return medications.map(med => ({
@@ -2784,19 +2797,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         renewal_issues: finalAnalysis.medication_safety?.renewal_issues || [],
         recommendations: finalAnalysis.medication_safety?.safety_recommendations || []
       },
-// ========== DÉDUPLICATION DES MÉDICAMENTS ==========
-function deduplicateMedications(medications: any[]): any[] {
-  const seen = new Set()
-  return medications.filter(med => {
-    const dci = (med.dci || '').toLowerCase().trim()
-    if (seen.has(dci)) {
-      console.log(`🔄 Removing duplicate medication: ${dci}`)
-      return false
-    }
-    seen.add(dci)
-    return true
-  })
-}
+
       // ========== MEDICATIONS - FRONTEND ACCESSIBLE ==========
      medications: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
   id: idx + 1,
