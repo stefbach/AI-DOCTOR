@@ -215,6 +215,8 @@ For PAIN/FEVER:
 
 GENERATE your EXPERT medical analysis with MAXIMUM MAURITIUS MEDICAL SPECIFICITY + PRECISE DCI:`
 
+export { MAURITIUS_MEDICAL_PROMPT as MAURITIUS_ENHANCED_MEDICAL_PROMPT }
+
 // ==================== MAURITIUS MEDICAL SPECIFICITY VALIDATION + DCI PRÉCIS ====================
 export function validateMauritiusMedicalSpecificity(analysis: any): {
   hasGenericContent: boolean,
@@ -1063,6 +1065,8 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
   throw lastError || new Error('Failed after multiple attempts with Mauritius quality enhancement')
 }
 
+export { callOpenAIWithMauritiusQuality as callOpenAIWithMauritiusQualityTropical }
+
 function prepareMauritiusQualityPrompt(patientContext: PatientContext, consultationType: any): string {
   const currentMedsFormatted = patientContext.current_medications.length > 0 
     ? patientContext.current_medications.join(', ')
@@ -1422,6 +1426,27 @@ function validateUniversalSafety(analysis: any, patientContext: PatientContext) 
   }
   
   return { issues }
+}
+
+export function validateTropicalMedicalSafety(analysis: any, patientContext: PatientContext) {
+  const meds = analysis?.treatment_plan?.medications || []
+  const fever = (patientContext?.symptoms || []).some((s: string) =>
+    s.toLowerCase().includes('fever') || s.toLowerCase().includes('pyrex')
+  ) || (patientContext?.vital_signs?.temperature || 0) >= 38
+
+  const issues: string[] = []
+
+  if (fever) {
+    const banned = meds.filter((m: any) => {
+      const name = (m?.drug || m?.medication_name || '').toLowerCase()
+      return /aspirin|acetylsalicylic|ibuprofen|diclofenac|naproxen/.test(name)
+    })
+    if (banned.length > 0) {
+      issues.push('Avoid aspirin/NSAIDs in febrile patients in tropical regions')
+    }
+  }
+
+  return { isValid: issues.length === 0, issues }
 }
 
 function validateEvidenceBasedApproach(analysis: any) {
@@ -1999,6 +2024,26 @@ function validateAndFixPosology(medications: any[]) {
       format_standardized: formatImproved
     }
   };
+}
+
+// ==================== TROPICAL INVESTIGATIONS (NEW) ====================
+export function addMauritiusTropicalInvestigations(analysis: any): any {
+  analysis.investigation_strategy = analysis.investigation_strategy || {}
+  analysis.investigation_strategy.laboratory_tests = analysis.investigation_strategy.laboratory_tests || []
+
+  const required = [
+    { test_name: 'Dengue NS1 antigen', clinical_justification: 'Rule out dengue fever' },
+    { test_name: 'Chikungunya IgM/IgG', clinical_justification: 'Detect chikungunya infection' },
+    { test_name: 'Malaria rapid diagnostic test', clinical_justification: 'Screen for malaria' }
+  ]
+
+  required.forEach((t) => {
+    if (!analysis.investigation_strategy.laboratory_tests.some((e: any) => e?.test_name === t.test_name)) {
+      analysis.investigation_strategy.laboratory_tests.push(t)
+    }
+  })
+
+  return analysis
 }
 
 // ==================== MAURITIUS ADVICE (CONSERVÉ) ====================
@@ -2988,7 +3033,32 @@ export async function GET(request: NextRequest) {
   const testQuality = url.searchParams.get('test_quality')
   const testDCI = url.searchParams.get('test_dci')
   const testLogic = url.searchParams.get('test_logic')
-  
+  const testTropical = url.searchParams.get('test_tropical')
+
+  if (testTropical === 'true') {
+    const analysis = {
+      treatment_plan: {
+        medications: [
+          { drug: 'Ibuprofen 400mg', dci: 'Ibuprofen', dosing: { adult: '400mg TDS' } }
+        ]
+      },
+      investigation_strategy: { laboratory_tests: [] }
+    }
+    const context = {
+      symptoms: ['fever'],
+      vital_signs: { temperature: 38.5 }
+    } as PatientContext
+
+    const safety = validateTropicalMedicalSafety(analysis, context)
+    const withTests = addMauritiusTropicalInvestigations({ investigation_strategy: { laboratory_tests: [] } })
+
+    return NextResponse.json({
+      test_type: 'Test Tropical Medicine',
+      safety,
+      investigations: withTests.investigation_strategy.laboratory_tests.map((t: any) => t.test_name)
+    })
+  }
+
   if (testMauritius === 'true') {
     console.log('🧪 Test du système médical mauritien complet + DCI précis...')
     
