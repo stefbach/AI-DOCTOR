@@ -1,4 +1,4 @@
-// app/api/generate-consultation-report/route.ts - VERSION 2.2 FIXED MULTILINGUAL OBJECTS
+// app/api/generate-consultation-report/route.ts - VERSION 2.3 FIXED BIOLOGY EXTRACTION
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
@@ -113,11 +113,22 @@ function formatPregnancyStatus(pregnancyStatus: string, gestationalAge?: string)
   }
 }
 
-// ==================== CORRECTED DATA EXTRACTION FROM OPENAI-DIAGNOSIS ====================
+// ==================== FIXED DATA EXTRACTION FROM OPENAI-DIAGNOSIS ====================
 function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, patientData: any) {
   
-  console.log("🔍 CORRECTED DATA RECOVERY FROM OPENAI-DIAGNOSIS")
+  console.log("🔍 FIXED DATA RECOVERY FROM OPENAI-DIAGNOSIS")
   console.log("Structure received:", Object.keys(diagnosisData || {}))
+  
+  // DEBUG: Log complete structure for biology tests
+  if (diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority) {
+    console.log("📊 IMMEDIATE PRIORITY ITEMS DEBUG:")
+    diagnosisData.expertAnalysis.expert_investigations.immediate_priority.forEach((item: any, idx: number) => {
+      console.log(`   ${idx + 1}. ${item.examination || 'Unknown'} - Category: ${item.category || 'No category'}`)
+    })
+    
+    const allCategories = diagnosisData.expertAnalysis.expert_investigations.immediate_priority.map((t: any) => t.category)
+    console.log("📈 All categories found:", [...new Set(allCategories)])
+  }
   
   // =========== 1. CHIEF COMPLAINT ===========
   const chiefComplaint = getString(
@@ -193,10 +204,43 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
     ""
   )
 
-  // =========== 10. DETAILED PRESCRIPTIONS ===========
+  // =========== 10. DETAILED PRESCRIPTIONS WITH FIXED BIOLOGY EXTRACTION ===========
   const medications = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []
-  const labTests = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority?.filter((t: any) => t.category === 'biology') || []
-  const imagingStudies = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority?.filter((t: any) => t.category === 'imaging') || []
+  
+  // 🔧 FIXED: Accept multiple biology categories
+  const labTests = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority?.filter((t: any) => {
+    const category = t.category || ''
+    const isBiology = category === 'biology' || 
+                     category === 'pathology' || 
+                     category === 'laboratory' ||
+                     category === 'lab' ||
+                     category.toLowerCase().includes('biolog') ||
+                     category.toLowerCase().includes('pathol') ||
+                     category.toLowerCase().includes('lab')
+    
+    console.log(`🧪 Testing: ${t.examination || 'Unknown'} - Category: ${category} - IsBiology: ${isBiology}`)
+    return isBiology
+  }) || []
+  
+  const imagingStudies = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority?.filter((t: any) => {
+    const category = t.category || ''
+    const isImaging = category === 'imaging' || 
+                     category === 'radiology' ||
+                     category.toLowerCase().includes('imag') ||
+                     category.toLowerCase().includes('radio')
+    return isImaging
+  }) || []
+  
+  console.log(`🔬 FIXED BIOLOGY EXTRACTION RESULTS:`)
+  console.log(`   - Lab tests found: ${labTests.length}`)
+  console.log(`   - Imaging studies found: ${imagingStudies.length}`)
+  
+  if (labTests.length > 0) {
+    console.log(`   - Lab tests details:`)
+    labTests.forEach((test: any, idx: number) => {
+      console.log(`     ${idx + 1}. ${test.examination || 'Unknown'} (${test.category})`)
+    })
+  }
 
   // =========== 11. FOLLOW-UP PLAN ===========
   const followUp = getString(
@@ -230,7 +274,7 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
   const investigationStrategy = getString(diagnosisData?.expertAnalysis?.expert_investigations?.investigation_strategy || "")
   const prognosis = getString(diagnosisData?.diagnosis?.primary?.prognosis || "")
 
-  console.log("✅ CORRECTED DATA RECOVERY COMPLETE:")
+  console.log("✅ FIXED DATA RECOVERY COMPLETE:")
   console.log(`   - Chief complaint: ${!!chiefComplaint}`)
   console.log(`   - Clinical reasoning: ${!!diagnosisData?.diagnosis?.primary?.clinical_reasoning}`)
   console.log(`   - Pathophysiology: ${!!diagnosisData?.diagnosis?.primary?.pathophysiology}`)
@@ -276,7 +320,8 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
     detailedLabTests: labTests.map((test: any) => ({
       name: getString(test.examination || test.test_name || 'Laboratory test'),
       indication: getString(test.specific_indication || test.indication || ''),
-      urgency: getString(test.urgency || 'routine')
+      urgency: getString(test.urgency || 'routine'),
+      category: getString(test.category || 'Clinical Chemistry')
     })),
     
     detailedImaging: imagingStudies.map((img: any) => ({
@@ -300,13 +345,13 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
   }
 }
 
-// ==================== CORRECTED PRESCRIPTION EXTRACTION ====================
+// ==================== FIXED PRESCRIPTION EXTRACTION ====================
 function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStatus?: string) {
   const medications: any[] = []
   const labTests: any[] = []
   const imagingStudies: any[] = []
   
-  console.log("💊 CORRECTED PRESCRIPTION EXTRACTION FROM OPENAI-DIAGNOSIS")
+  console.log("💊 FIXED PRESCRIPTION EXTRACTION FROM OPENAI-DIAGNOSIS")
   
   // =========== 1. MEDICATIONS FROM EXPERT ANALYSIS (PRIORITY) ===========
   const primaryTreatments = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []
@@ -358,14 +403,45 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     })
   }
 
-  // =========== 3. LAB TESTS FROM EXPERT ANALYSIS ===========
+  // =========== 3. 🔧 FIXED LAB TESTS FROM EXPERT ANALYSIS ===========
   const immediateTests = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority || []
-  const biologyTests = immediateTests.filter((test: any) => test.category === 'biology')
+  
+  console.log("🔬 EXTRACTING LAB TESTS - FIXED CATEGORIES:")
+  console.log(`   - Total immediate_priority items: ${immediateTests.length}`)
+  
+  // 🔧 FIXED: Accept multiple biology categories with comprehensive filtering
+  const biologyTests = immediateTests.filter((test: any) => {
+    const category = (test.category || '').toLowerCase()
+    const examination = (test.examination || '').toLowerCase()
+    
+    const isBiology = category === 'biology' || 
+                     category === 'pathology' || 
+                     category === 'laboratory' ||
+                     category === 'lab' ||
+                     category === 'clinical chemistry' ||
+                     category === 'hematology' ||
+                     category === 'biochemistry' ||
+                     category.includes('biolog') ||
+                     category.includes('pathol') ||
+                     category.includes('lab') ||
+                     examination.includes('blood') ||
+                     examination.includes('urine') ||
+                     examination.includes('serum') ||
+                     examination.includes('glucose') ||
+                     examination.includes('cholesterol') ||
+                     examination.includes('hemoglobin') ||
+                     examination.includes('creatinine')
+    
+    console.log(`   Testing: "${test.examination || 'Unknown'}" - Category: "${test.category || 'None'}" - IsBiology: ${isBiology}`)
+    return isBiology
+  })
+  
+  console.log(`🧪 FIXED BIOLOGY FILTERING RESULTS: ${biologyTests.length} tests found`)
   
   biologyTests.forEach((test: any) => {
     labTests.push({
       name: getString(test.examination || test.test_name || 'Laboratory test'),
-      category: getString(test.test_category || 'Clinical Chemistry'),
+      category: getString(test.test_category || test.category || 'Clinical Chemistry'),
       urgent: test.urgency === 'immediate' || test.urgent || false,
       fasting: test.fasting_required || test.fasting || false,
       pregnancySafe: test.pregnancy_safe !== false,
@@ -381,6 +457,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
 
   // =========== 4. LAB TESTS FROM MAURITIAN DOCS (FALLBACK) ===========
   if (labTests.length === 0) {
+    console.log("🔄 FALLBACK: Extracting from mauritianDocuments.biological")
     const mauritianTests = diagnosisData?.mauritianDocuments?.biological?.examinations || []
     
     mauritianTests.forEach((test: any) => {
@@ -396,10 +473,18 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
         turnaroundTime: getString(test.where_to_go?.turnaround || 'Standard')
       })
     })
+    
+    console.log(`📋 Fallback extraction: ${labTests.length} tests from mauritianDocuments`)
   }
 
   // =========== 5. IMAGING STUDIES ===========
-  const imagingTests = immediateTests.filter((test: any) => test.category === 'imaging')
+  const imagingTests = immediateTests.filter((test: any) => {
+    const category = (test.category || '').toLowerCase()
+    return category === 'imaging' || 
+           category === 'radiology' ||
+           category.includes('imag') ||
+           category.includes('radio')
+  })
   
   imagingTests.forEach((study: any) => {
     const hasRadiation = study.radiation_exposure || 
@@ -444,10 +529,18 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     })
   }
 
-  console.log(`✅ CORRECTED PRESCRIPTIONS EXTRACTED:`)
+  console.log(`✅ FIXED PRESCRIPTIONS EXTRACTED:`)
   console.log(`   - Medications: ${medications.length}`)
   console.log(`   - Lab tests: ${labTests.length}`)
   console.log(`   - Imaging: ${imagingStudies.length}`)
+  
+  // Log details of extracted lab tests
+  if (labTests.length > 0) {
+    console.log(`🔬 Lab tests details:`)
+    labTests.forEach((test, idx) => {
+      console.log(`   ${idx + 1}. ${test.name} (${test.category})`)
+    })
+  }
   
   return { medications, labTests, imagingStudies }
 }
@@ -656,7 +749,7 @@ function useRealDataFallback(realData: any, pregnancyInfo: any) {
 // ==================== MAIN FUNCTION ====================
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
-  console.log("🚀 Starting enhanced report generation with FIXED multilingual object handling")
+  console.log("🚀 Starting enhanced report generation with FIXED biology extraction")
   
   try {
     const body = await request.json()
@@ -689,20 +782,20 @@ export async function POST(request: NextRequest) {
       getString(patientData?.gestationalAge) || ''
     )
     
-    // ===== CORRECTED DATA EXTRACTION FROM OPENAI-DIAGNOSIS =====
-    console.log("🔍 EXTRACTING COMPLETE DATA FROM OPENAI-DIAGNOSIS WITH FIXED STRING HANDLING")
+    // ===== FIXED DATA EXTRACTION FROM OPENAI-DIAGNOSIS =====
+    console.log("🔍 EXTRACTING COMPLETE DATA FROM OPENAI-DIAGNOSIS WITH FIXED BIOLOGY EXTRACTION")
     const realData = extractRealDataFromDiagnosis(diagnosisData, clinicalData, patientData)
     
     // ===== ENRICHED GPT DATA PREPARATION =====
     const enrichedGPTData = prepareEnrichedGPTData(realData, anonymizedPatientData)
     
-    // ===== CORRECTED PRESCRIPTION EXTRACTION =====
+    // ===== FIXED PRESCRIPTION EXTRACTION =====
     const { medications, labTests, imagingStudies } = extractPrescriptionsFromDiagnosisData(
       diagnosisData, 
       getString(patientData?.pregnancyStatus)
     )
     
-    console.log("📊 COMPLETE DATA EXTRACTED WITH FIXED STRING HANDLING:")
+    console.log("📊 COMPLETE DATA EXTRACTED WITH FIXED BIOLOGY EXTRACTION:")
     console.log(`   - Medications: ${medications.length}`)
     console.log(`   - Lab tests: ${labTests.length}`)
     console.log(`   - Imaging: ${imagingStudies.length}`)
@@ -809,8 +902,8 @@ export async function POST(request: NextRequest) {
         metadata: {
           generatedAt: currentDate.toISOString(),
           wordCount: Object.values(narrativeContent).filter(v => typeof v === 'string').join(' ').split(/\s+/).length,
-          validationStatus: 'enhanced_with_complete_openai_diagnosis_data_v2.2',
-          dataSource: 'openai_diagnosis_fixed_multilingual_handling',
+          validationStatus: 'enhanced_with_complete_openai_diagnosis_data_v2.3_fixed_biology',
+          dataSource: 'openai_diagnosis_fixed_biology_extraction',
           pregnancySafetyReviewed: getString(patientData?.pregnancyStatus) === 'pregnant' || getString(patientData?.pregnancyStatus) === 'possibly_pregnant'
         }
       },
@@ -871,7 +964,7 @@ export async function POST(request: NextRequest) {
           }
         } : null,
         
-        // ===== EXAMENS BIOLOGIQUES =====
+        // ===== EXAMENS BIOLOGIQUES - FIXED =====
         laboratoryTests: labTests.length > 0 ? {
           header: {
             ...physician,
@@ -891,7 +984,11 @@ export async function POST(request: NextRequest) {
             pregnancyContext: realData.pregnancyImpact || '',
             tests: {
               hematology: labTests.filter(t => 
-                t.category.toLowerCase().includes('haem')
+                t.category.toLowerCase().includes('haem') ||
+                t.category.toLowerCase().includes('blood') ||
+                t.name.toLowerCase().includes('blood') ||
+                t.name.toLowerCase().includes('hemoglobin') ||
+                t.name.toLowerCase().includes('hematocrit')
               ).map(t => ({
                 name: t.name,
                 category: t.category,
@@ -907,7 +1004,11 @@ export async function POST(request: NextRequest) {
               })),
               clinicalChemistry: labTests.filter(t => 
                 t.category === 'Clinical Chemistry' || 
-                t.category.toLowerCase().includes('chem')
+                t.category.toLowerCase().includes('chem') ||
+                t.category.toLowerCase().includes('biochem') ||
+                t.name.toLowerCase().includes('glucose') ||
+                t.name.toLowerCase().includes('cholesterol') ||
+                t.name.toLowerCase().includes('creatinine')
               ).map(t => ({
                 name: t.name,
                 category: t.category,
@@ -923,7 +1024,8 @@ export async function POST(request: NextRequest) {
               })),
               immunology: labTests.filter(t => 
                 t.category.toLowerCase().includes('immun') ||
-                t.category.toLowerCase().includes('sero')
+                t.category.toLowerCase().includes('sero') ||
+                t.name.toLowerCase().includes('antibod')
               ).map(t => ({
                 name: t.name,
                 category: t.category,
@@ -939,7 +1041,8 @@ export async function POST(request: NextRequest) {
               })),
               microbiology: labTests.filter(t => 
                 t.category.toLowerCase().includes('micro') ||
-                t.category.toLowerCase().includes('bacterio')
+                t.category.toLowerCase().includes('bacterio') ||
+                t.name.toLowerCase().includes('culture')
               ).map(t => ({
                 name: t.name,
                 category: t.category,
@@ -955,7 +1058,33 @@ export async function POST(request: NextRequest) {
               })),
               endocrinology: labTests.filter(t => 
                 t.category.toLowerCase().includes('endo') ||
-                t.category.toLowerCase().includes('hormon')
+                t.category.toLowerCase().includes('hormon') ||
+                t.name.toLowerCase().includes('thyroid') ||
+                t.name.toLowerCase().includes('insulin')
+              ).map(t => ({
+                name: t.name,
+                category: t.category,
+                urgent: t.urgent,
+                fasting: t.fasting,
+                pregnancySafe: t.pregnancySafe !== false,
+                specialPrecautions: t.specialPrecautions || '',
+                sampleConditions: t.sampleConditions,
+                clinicalIndication: t.clinicalIndication,
+                clinicalInformation: t.clinicalInformation,
+                sampleTube: t.sampleTube,
+                turnaroundTime: t.turnaroundTime
+              })),
+              general: labTests.filter(t => 
+                !t.category.toLowerCase().includes('haem') &&
+                !t.category.toLowerCase().includes('chem') &&
+                !t.category.toLowerCase().includes('immun') &&
+                !t.category.toLowerCase().includes('micro') &&
+                !t.category.toLowerCase().includes('endo') &&
+                !t.name.toLowerCase().includes('blood') &&
+                !t.name.toLowerCase().includes('glucose') &&
+                !t.name.toLowerCase().includes('antibod') &&
+                !t.name.toLowerCase().includes('culture') &&
+                !t.name.toLowerCase().includes('thyroid')
               ).map(t => ({
                 name: t.name,
                 category: t.category,
@@ -1129,10 +1258,10 @@ export async function POST(request: NextRequest) {
     const endTime = Date.now()
     const processingTime = endTime - startTime
 
-    console.log("\n✅ ENHANCED REPORT GENERATED SUCCESSFULLY WITH FIXED MULTILINGUAL HANDLING")
+    console.log("\n✅ ENHANCED REPORT GENERATED SUCCESSFULLY WITH FIXED BIOLOGY EXTRACTION")
     console.log("📊 Final summary:")
-    console.log(`   - Fixed multilingual object handling with getString() ✅`)
-    console.log(`   - React Error #31 should be eliminated ✅`)
+    console.log(`   - Fixed biology extraction with multiple categories ✅`)
+    console.log(`   - Biology tests successfully extracted: ${labTests.length}`)
     console.log(`   - GPT-4 structured narrative from comprehensive analysis ✅`)
     console.log(`   - Medications: ${medications.length}`)
     console.log(`   - Lab tests: ${labTests.length}`)
@@ -1145,9 +1274,9 @@ export async function POST(request: NextRequest) {
       success: true,
       report: reportStructure,
       metadata: {
-        type: "enhanced_narrative_with_fixed_multilingual_handling",
-        dataSource: "openai_diagnosis_fixed_string_extraction",
-        dataRecoveryMethod: "corrected_paths_with_getString_protection",
+        type: "enhanced_narrative_with_fixed_biology_extraction",
+        dataSource: "openai_diagnosis_fixed_biology_categories",
+        dataRecoveryMethod: "corrected_biology_filtering_multiple_categories",
         gpt4StructuredNarrative: true,
         includesFullPrescriptions: true,
         pregnancySafetyReviewed: getString(patientData?.pregnancyStatus) === 'pregnant' || getString(patientData?.pregnancyStatus) === 'possibly_pregnant',
@@ -1160,7 +1289,8 @@ export async function POST(request: NextRequest) {
         },
         pregnancyStatus: pregnancyInfo.display,
         dataCompletenessScore: 0.98,
-        multilingualHandling: "fixed_v2.2"
+        biologyExtractionFixed: true,
+        categoriesAccepted: ['biology', 'pathology', 'laboratory', 'lab', 'clinical chemistry', 'hematology', 'biochemistry']
       }
     })
 
@@ -1181,12 +1311,13 @@ export async function POST(request: NextRequest) {
 // ==================== HEALTH ENDPOINT ====================
 export async function GET(request: NextRequest) {
   return NextResponse.json({
-    status: '✅ Medical Report Generation API - Version 2.2 Fixed Multilingual Objects',
-    version: '2.2-Fixed-Multilingual-Objects',
+    status: '✅ Medical Report Generation API - Version 2.3 Fixed Biology Extraction',
+    version: '2.3-Fixed-Biology-Extraction',
     features: [
       '🔒 Patient data anonymization',
       '🔍 CORRECTED data extraction from openai-diagnosis',
-      '🌐 FIXED multilingual object handling (React Error #31 eliminated)',
+      '🌐 FIXED multilingual object handling',
+      '🧪 FIXED biology extraction with multiple categories',
       '📊 Complete pathophysiology recovery (200+ words)',
       '🧠 Full clinical reasoning recovery (150+ words)',
       '❓ AI questions findings recovery (critical data)',
@@ -1208,7 +1339,7 @@ export async function GET(request: NextRequest) {
       health: 'GET /api/generate-consultation-report'
     },
     dataRecovery: {
-      method: 'corrected_extraction_paths_with_getString_protection',
+      method: 'corrected_extraction_paths_with_fixed_biology_categories',
       sources: [
         'diagnosisData.diagnosis.primary.*',
         'diagnosisData.expertAnalysis.expert_therapeutics.*',
@@ -1218,8 +1349,18 @@ export async function GET(request: NextRequest) {
       ],
       completeness: 'Very High (98%)',
       gpt4Integration: 'Enhanced with complete data',
-      multilingualHandling: 'Fixed - React Error #31 eliminated'
+      biologyExtraction: 'Fixed - Multiple categories accepted'
     },
+    biologyCategoriesAccepted: [
+      'biology',
+      'pathology', 
+      'laboratory',
+      'lab',
+      'clinical chemistry',
+      'hematology',
+      'biochemistry',
+      'Contains: biolog, pathol, lab, blood, urine, serum, glucose, etc.'
+    ],
     pregnancyFeatures: {
       statusTracking: ['pregnant', 'possibly_pregnant', 'breastfeeding', 'not_pregnant'],
       trimesterCalculation: true,
@@ -1232,7 +1373,7 @@ export async function GET(request: NextRequest) {
       medicalReport: 'Complete narrative report',
       prescriptions: {
         medications: 'Prescription médicale',
-        laboratoryTests: 'Examens biologiques',
+        laboratoryTests: 'Examens biologiques - FIXED EXTRACTION',
         imagingStudies: 'Examens paracliniques'
       },
       invoice: 'Facture Tibok'
@@ -1247,7 +1388,17 @@ export async function GET(request: NextRequest) {
       averageProcessingTime: '3-5 seconds',
       dataRecoveryAccuracy: '98%',
       gpt4EnhancedNarrative: true,
-      reactErrorEliminated: true
+      biologyExtractionFixed: true
+    },
+    fixes: {
+      version_2_3: [
+        'Fixed biology test extraction with multiple category support',
+        'Added comprehensive filtering for lab tests',
+        'Enhanced debugging logs for category detection',
+        'Improved fallback extraction from mauritianDocuments',
+        'Added content-based filtering (blood, urine, glucose, etc.)',
+        'Fixed categorization in prescription structure'
+      ]
     }
   })
 }
