@@ -307,7 +307,7 @@ function validateMauritiusMedicalSpecificity(analysis: any): {
         drugName.includes('medication') ||
         drugName.includes('médicament') ||
         drugName.length < 5 ||
-        !drugName.match(/\d+\s*m[cg]/)) {  // Must contain UK dosage (mg/mcg)
+        !drugName.match(/\d+\s*(mg|mcg|g)/i)) {  // Must contain UK dosage (mg/mcg/g)
       issues.push(`Medication ${idx + 1}: Generic/missing name "${med?.drug || 'undefined'}"`)
       suggestions.push(`Use UK nomenclature with dose (e.g., "Amoxicilline 500mg", "Ibuprofène 400mg")`)
     }
