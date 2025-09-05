@@ -2739,15 +2739,29 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         expert_therapeutics: {
           treatment_approach: finalAnalysis.treatment_plan?.approach || "Approche thérapeutique personnalisée avec standards UK/Maurice",
           prescription_rationale: finalAnalysis.treatment_plan?.prescription_rationale || "Justification de prescription selon standards internationaux",
-          primary_treatments: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any) => ({
-  medication_name: med.drug,  // Direct
-        medication_dci: med.drug || med.medication_name, 
-        precise_indication: med.indication || med.why_prescribed,
-        dosing_regimen: { 
-          adult: {
-      en: med.dosing?.adult || med.how_to_take || "Selon prescription"
-    }
-  },
+          primary_treatments: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any) => {
+  // DEBUG POSOLOGIE
+  console.log('🔍 POSOLOGY MAPPING:', {
+    drug: med.drug,
+    dosing_adult: med.dosing?.adult,
+    how_to_take: med.how_to_take,
+    final_dosing: med.dosing?.adult || med.how_to_take || "DÉFAUT"
+  })
+  
+  return {
+    medication_dci: med.drug || med.medication_name,
+    precise_indication: med.indication || med.why_prescribed,
+    dosing_regimen: {
+      adult: {
+        en: med.dosing?.adult || med.how_to_take || "Selon prescription médicale"
+      }
+    },
+    therapeutic_class: extractTherapeuticClass(med),
+    mechanism: med.mechanism || "Mécanisme d'action",
+    duration: { en: med.duration || "Selon évolution" },
+    mauritius_availability: med.mauritius_availability || {}
+  }
+}),
         therapeutic_class: extractTherapeuticClass(med) || "Agent thérapeutique",
             precise_indication: med?.indication || "Indication thérapeutique",
             mechanism: med?.mechanism || "Mécanisme d'action spécifique pour le patient",
