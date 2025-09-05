@@ -2292,6 +2292,36 @@ export async function POST(request: NextRequest) {
           detailed_indications_enforced: true
         }
       },
+
+      // ========== MEDICATIONS SIMPLE FORMAT - ULTRA ACCESSIBLE ==========
+      medicationsSimple: (finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => {
+        const drugName = med?.drug || "Médicament";
+        const dosing = med?.dosing?.adult || "";
+        
+        return {
+          id: idx + 1,
+          nom: drugName,
+          principe_actif: (() => {
+            if (drugName.toLowerCase().includes('paracetamol')) return 'Paracétamol';
+            if (drugName.toLowerCase().includes('ibuprofen')) return 'Ibuprofène';
+            if (drugName.toLowerCase().includes('amoxicillin')) return 'Amoxicilline';
+            if (drugName.toLowerCase().includes('metoclopramide')) return 'Métoclopramide';
+            return drugName.split(' ')[0];
+          })(),
+          dosage: drugName.match(/\d+\s*mg/)?.[0] || "500mg",
+          posologie_complete: dosing,
+          posologie_simple: (() => {
+            if (dosing.includes('OD')) return '1 fois/jour';
+            if (dosing.includes('BD')) return '2 fois/jour'; 
+            if (dosing.includes('TDS')) return '3 fois/jour';
+            if (dosing.includes('QDS')) return '4 fois/jour';
+            return 'Selon prescription';
+          })(),
+          indication: med?.indication || "Traitement médical",
+          duree: med?.duration || "Selon évolution",
+          instructions: med?.administration_instructions || "Prendre selon prescription"
+        };
+      }),
       
       // Data protection
       dataProtection: {
@@ -2448,6 +2478,42 @@ export async function POST(request: NextRequest) {
         renewal_issues: finalAnalysis.medication_safety?.renewal_issues || [],
         recommendations: finalAnalysis.medication_safety?.safety_recommendations || []
       },
+
+      // ========== MEDICATIONS - FRONTEND ACCESSIBLE ==========
+      medications: (finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
+        id: idx + 1,
+        name: med?.drug || "Medication",
+        dci: med?.drug?.split(' ')[0] || "DCI",
+        dosage: med?.drug?.match(/\d+\s*m[cg]/)?.[0] || "Dosage",
+        posology: med?.dosing?.adult || "As directed",
+        indication: med?.indication || "Therapeutic indication",
+        duration: med?.duration || "As needed",
+        route: "Oral",
+        frequency: (() => {
+          const dosing = med?.dosing?.adult || '';
+          if (dosing.includes('OD')) return 'Once daily';
+          if (dosing.includes('BD')) return 'Twice daily';
+          if (dosing.includes('TDS')) return 'Three times daily';
+          if (dosing.includes('QDS')) return 'Four times daily';
+          if (dosing.includes('times daily')) {
+            const match = dosing.match(/(\d+)\s*times daily/);
+            return match ? `${match[1]} times daily` : 'As directed';
+          }
+          return 'As directed';
+        })(),
+        instructions: med?.administration_instructions || "Take as directed",
+        contraindications: med?.contraindications || "None specified",
+        side_effects: med?.side_effects || "None specified",
+        interactions: med?.interactions || "None specified",
+        monitoring: med?.monitoring || "Standard monitoring",
+        mauritius_availability: {
+          public_free: med?.mauritius_availability?.public_free || false,
+          estimated_cost: med?.mauritius_availability?.estimated_cost || "Cost to be determined",
+          brand_names: med?.mauritius_availability?.brand_names || "Available brands",
+          availability: "Available at pharmacies"
+        },
+        prescription_details: {
+          prescriber: "Dr. Teleconsultation Expert
       
       // Posology validation
       posologyValidation: {
