@@ -2609,7 +2609,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       },
 
       // ========== MEDICATIONS ULTRA PRÉCISES - DCI + POSOLOGIE ==========
-    medicationsSimple: (finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
+    medicationsSimple: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
   id: idx + 1,
   nom: med.drug,  // Direct
   posologie_complete: med.dosing?.adult || med.how_to_take,  // Direct
@@ -2726,13 +2726,13 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         expert_therapeutics: {
           treatment_approach: finalAnalysis.treatment_plan?.approach || "Approche thérapeutique personnalisée avec standards UK/Maurice",
           prescription_rationale: finalAnalysis.treatment_plan?.prescription_rationale || "Justification de prescription selon standards internationaux",
-          primary_treatments: (finalAnalysis.treatment_plan?.medications || []).map((med: any) => ({
+          primary_treatments: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any) => ({
   medication_name: med.drug,  // Direct
         medication_dci: med.drug || med.medication_name, 
         precise_indication: med.indication || med.why_prescribed,
         dosing_regimen: { 
           adult: {
-      en: med.dosing?.adult || med.how_to_take
+      en: med.dosing?.adult || med.how_to_take || "Selon prescription"
     }
   },
         therapeutic_class: extractTherapeuticClass(med) || "Agent thérapeutique",
@@ -2784,9 +2784,21 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         renewal_issues: finalAnalysis.medication_safety?.renewal_issues || [],
         recommendations: finalAnalysis.medication_safety?.safety_recommendations || []
       },
-
+// ========== DÉDUPLICATION DES MÉDICAMENTS ==========
+function deduplicateMedications(medications: any[]): any[] {
+  const seen = new Set()
+  return medications.filter(med => {
+    const dci = (med.dci || '').toLowerCase().trim()
+    if (seen.has(dci)) {
+      console.log(`🔄 Removing duplicate medication: ${dci}`)
+      return false
+    }
+    seen.add(dci)
+    return true
+  })
+}
       // ========== MEDICATIONS - FRONTEND ACCESSIBLE ==========
-     medications: (finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
+     medications: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
   id: idx + 1,
   name: med?.drug || med?.medication_name || "Médicament", 
         dci: med?.dci || "DCI",
