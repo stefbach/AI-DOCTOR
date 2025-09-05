@@ -244,18 +244,18 @@ function validateMauritiusMedicalSpecificity(analysis: any): {
   // UK/Mauritius laboratory nomenclature check
   const labTests = analysis?.investigation_strategy?.laboratory_tests || []
   labTests.forEach((test: any, idx: number) => {
-    const testName = test?.test_name || ''
-    if (!testName || 
-        testName.toLowerCase().includes('laboratory test') ||
-        testName.toLowerCase().includes('test de laboratoire') ||
+    const testName = String(test?.test_name ?? '')
+    if (!testName ||
+        (typeof testName === 'string' && testName.toLowerCase().includes('laboratory test')) ||
+        (typeof testName === 'string' && testName.toLowerCase().includes('test de laboratoire')) ||
         testName.length < 10) {
       issues.push(`Test ${idx + 1}: Generic name "${testName || 'undefined'}"`)
       suggestions.push(`Use UK/Mauritius nomenclature (e.g., "Full Blood Count", "U&E", "LFTs")`)
     }
-    
-    const justification = test?.clinical_justification || ''
-    if (!justification || 
-        justification.toLowerCase().includes('investigation') ||
+
+    const justification = String(test?.clinical_justification ?? '')
+    if (!justification ||
+        (typeof justification === 'string' && justification.toLowerCase().includes('investigation')) ||
         justification.length < 20) {
       issues.push(`Test ${idx + 1}: Vague justification`)
       suggestions.push(`Specify medical reason (e.g., "Rule out iron deficiency anaemia")`)
@@ -278,10 +278,10 @@ function validateMauritiusMedicalSpecificity(analysis: any): {
       indication: med?.indication,
       dosing_adult: med?.dosing?.adult
     })
-    
+
     // Extraction intelligente si GPT-4 a mélangé drug + dosing
-    let cleanDrugName = med?.drug || ''
-    let extractedDosing = med?.dosing?.adult || ''
+    let cleanDrugName = String(med?.drug ?? '')
+    let extractedDosing = String(med?.dosing?.adult ?? '')
     
     // Si le dosing est dans le nom du médicament, l'extraire
     const dosingInDrugMatch = cleanDrugName.match(/^(.+?)\s+(OD|BD|TDS|QDS|once\s+daily|twice\s+daily|three\s+times\s+daily|four\s+times\s+daily)$/i)
@@ -292,14 +292,14 @@ function validateMauritiusMedicalSpecificity(analysis: any): {
     }
     
     // Vérification DCI
-    const dci = med?.dci || ''
+    const dci = String(med?.dci ?? '')
     if (!dci || dci.length < 3) {
       issues.push(`Medication ${idx + 1}: Missing or invalid DCI "${dci}"`)
       suggestions.push(`Add exact DCI (e.g., "Amoxicilline", "Paracétamol", "Ibuprofène")`)
     }
-    
+
     // Vérification sécurisée des propriétés avec nom nettoyé
-    const drugName = cleanDrugName.toLowerCase() || ''
+    const drugName = String(cleanDrugName).toLowerCase() || ''
     
     if (!med?.drug || 
         med.drug === 'undefined' ||
@@ -313,18 +313,22 @@ function validateMauritiusMedicalSpecificity(analysis: any): {
     }
     
     // Validation d'indication intelligente
-    const indication = med?.indication || ''
+    const indication = String(med?.indication ?? '')
     const isVagueIndication = (
-      !indication || 
+      !indication ||
       indication === 'Therapeutic indication' ||
       indication === 'Indication thérapeutique' ||
       indication === 'Treatment' ||
       indication === 'Therapeutic use' ||
       indication === 'Medical treatment' ||
       indication.length < 12 ||
-      (indication.toLowerCase() === 'treatment' || 
-       indication.toLowerCase() === 'therapeutic indication' ||
-       (indication.toLowerCase().includes('treatment') && indication.length < 20 && !indication.includes('bacterial') && !indication.includes('pain') && !indication.includes('fever') && !indication.includes('infection')))
+      (typeof indication === 'string' && (
+        indication.toLowerCase() === 'treatment' ||
+        indication.toLowerCase() === 'therapeutic indication' ||
+        (indication.toLowerCase().includes('treatment') && indication.length < 20 &&
+         !indication.includes('bacterial') && !indication.includes('pain') &&
+         !indication.includes('fever') && !indication.includes('infection'))
+      ))
     )
     
     if (isVagueIndication) {
@@ -365,8 +369,8 @@ function validateMauritiusMedicalSpecificity(analysis: any): {
 // ==================== NOUVELLES FONCTIONS DCI + POSOLOGIE PRÉCISE ====================
 function extractDCIFromDrugName(drugName: string): string {
   if (!drugName) return 'Principe actif'
-  
-  const name = drugName.toLowerCase()
+
+  const name = String(drugName).toLowerCase()
   
   // Correspondances DCI spécifiques
   const dciMap: { [key: string]: string } = {
@@ -490,11 +494,11 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
     
     // Corrections pour les laboratoires (inchangé)
     analysis.investigation_strategy.laboratory_tests = analysis.investigation_strategy.laboratory_tests.map((test: any) => {
-      const testName = test?.test_name || ''
+      const testName = String(test?.test_name ?? '')
       if (!testName || testName.includes('Laboratory test') || testName.includes('Test de laboratoire') || testName.length < 10) {
-        
-        const symptoms = (patientContext.symptoms || []).join(' ').toLowerCase()
-        const chiefComplaint = (patientContext.chief_complaint || '').toLowerCase()
+
+        const symptoms = String((patientContext.symptoms || []).join(' ')).toLowerCase()
+        const chiefComplaint = String(patientContext.chief_complaint ?? '').toLowerCase()
         const allSymptoms = `${symptoms} ${chiefComplaint}`
         
         if (allSymptoms.includes('fever') || allSymptoms.includes('fièvre') || allSymptoms.includes('infection')) {
@@ -565,8 +569,8 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
           fixedMed.drug === null ||
           fixedMed.drug.length < 5) {
         
-        const symptoms = (patientContext.symptoms || []).join(' ').toLowerCase()
-        const chiefComplaint = (patientContext.chief_complaint || '').toLowerCase()
+        const symptoms = String((patientContext.symptoms || []).join(' ')).toLowerCase()
+        const chiefComplaint = String(patientContext.chief_complaint ?? '').toLowerCase()
         const allSymptoms = `${symptoms} ${chiefComplaint}`
         
         // Assignation intelligente basée sur les symptômes avec DCI précis
@@ -697,20 +701,22 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
       }
       
       // Corriger les indications vagues avec DCI précis
-      const currentIndication = fixedMed.indication || ''
+      const currentIndication = String(fixedMed.indication ?? '')
       const isVagueIndication = (
-        !currentIndication || 
+        !currentIndication ||
         currentIndication === 'Therapeutic indication' ||
         currentIndication === 'Indication thérapeutique' ||
         currentIndication === 'Treatment' ||
         currentIndication === 'Therapeutic use' ||
         currentIndication === 'Medical treatment' ||
         currentIndication.length < 12 ||
-        (currentIndication.toLowerCase() === 'treatment' || 
-         currentIndication.toLowerCase() === 'therapeutic indication' ||
-         (currentIndication.toLowerCase().includes('treatment') && currentIndication.length < 20 && 
-          !currentIndication.includes('bacterial') && !currentIndication.includes('pain') && 
-          !currentIndication.includes('fever') && !currentIndication.includes('infection')))
+        (typeof currentIndication === 'string' && (
+          currentIndication.toLowerCase() === 'treatment' ||
+          currentIndication.toLowerCase() === 'therapeutic indication' ||
+          (currentIndication.toLowerCase().includes('treatment') && currentIndication.length < 20 &&
+           !currentIndication.includes('bacterial') && !currentIndication.includes('pain') &&
+           !currentIndication.includes('fever') && !currentIndication.includes('infection'))
+        ))
       )
       
       if (isVagueIndication) {
@@ -1168,7 +1174,7 @@ function hasAntipyretic(medications: any[]): boolean {
   ]
   
   return medications.some(med => {
-    const drugName = (med?.drug || '').toLowerCase()
+    const drugName = String(med?.drug ?? '').toLowerCase()
     return antipyretics.some(anti => drugName.includes(anti))
   })
 }
@@ -1180,14 +1186,14 @@ function hasAnalgesic(medications: any[]): boolean {
   ]
   
   return medications.some(med => {
-    const drugName = (med?.drug || '').toLowerCase()
+    const drugName = String(med?.drug ?? '').toLowerCase()
     return analgesics.some(analg => drugName.includes(analg))
   })
 }
 
 function hasFeverSymptoms(symptoms: string[], chiefComplaint: string = '', vitalSigns: any = {}): boolean {
   const feverSigns = ['fièvre', 'fever', 'température', 'chaud', 'brûlant', 'hyperthermie', 'pyrexia', 'febrile']
-  const allText = [...symptoms, chiefComplaint].join(' ').toLowerCase()
+  const allText = String([...symptoms, chiefComplaint].join(' ')).toLowerCase()
   
   const symptomsHaveFever = feverSigns.some(sign => allText.includes(sign))
   const tempHigh = vitalSigns?.temperature && vitalSigns.temperature > 37.5
@@ -1202,7 +1208,7 @@ function hasPainSymptoms(symptoms: string[], chiefComplaint: string = ''): boole
     'douloureux', 'painful', 'souffrance', 'sore', 'tender'
   ]
   
-  const allText = [...symptoms, chiefComplaint].join(' ').toLowerCase()
+  const allText = String([...symptoms, chiefComplaint].join(' ')).toLowerCase()
   return painSigns.some(sign => allText.includes(sign))
 }
 
@@ -1215,7 +1221,7 @@ function hasInfectionSymptoms(symptoms: string[], chiefComplaint: string = ''): 
     'purulent', 'discharge', 'sepsis'
   ]
   
-  const allText = [...symptoms, chiefComplaint].join(' ').toLowerCase()
+  const allText = String([...symptoms, chiefComplaint].join(' ')).toLowerCase()
   return infectionSigns.some(sign => allText.includes(sign))
 }
 
@@ -1325,8 +1331,8 @@ function validateTherapeuticCompleteness(analysis: any, patientContext: PatientC
   let completenessScore = 100
   
   if (medications.length === 0) {
-    const diagnosis = analysis?.clinical_analysis?.primary_diagnosis?.condition || ''
-    const needsTreatment = !['observation', 'surveillance', 'monitoring'].some(word => 
+    const diagnosis = String(analysis?.clinical_analysis?.primary_diagnosis?.condition ?? '')
+    const needsTreatment = !['observation', 'surveillance', 'monitoring'].some(word =>
       diagnosis.toLowerCase().includes(word)
     )
     
@@ -1363,7 +1369,7 @@ function validateTherapeuticCompleteness(analysis: any, patientContext: PatientC
       completenessScore -= 15
     }
     
-    const duration = med?.duration || ''
+    const duration = String(med?.duration ?? '')
     if (!duration || duration.toLowerCase().includes('as needed') || duration.toLowerCase().includes('selon')) {
       issues.push({
         type: 'important',
@@ -1405,10 +1411,10 @@ function analyzeUnaddressedSymptoms(patientContext: PatientContext, medications:
   const issues: Array<{type: 'critical'|'important'|'minor', category: string, description: string, suggestion: string}> = []
   let scoreDeduction = 0
   
-  const symptoms = [...(patientContext.symptoms || []), patientContext.chief_complaint || '']
-    .join(' ').toLowerCase()
-  
-  const drugList = medications.map(med => (med?.drug || '').toLowerCase()).join(' ')
+  const symptoms = String([...(patientContext.symptoms || []), patientContext.chief_complaint || '']
+    .join(' ')).toLowerCase()
+
+  const drugList = medications.map(med => String(med?.drug ?? '').toLowerCase()).join(' ')
   
   if ((symptoms.includes('fever') || symptoms.includes('fièvre') || 
        (patientContext.vital_signs?.temperature && patientContext.vital_signs.temperature > 38.5)) &&
@@ -1719,8 +1725,8 @@ function analyzeConsultationType(
     'prescription', 'continue', 'poursuivre', 'maintenir', 'repeat'
   ];
   
-  const chiefComplaintLower = chiefComplaint.toLowerCase();
-  const symptomsLower = symptoms.join(' ').toLowerCase();
+  const chiefComplaintLower = String(chiefComplaint ?? '').toLowerCase();
+  const symptomsLower = String(symptoms.join(' ')).toLowerCase();
   const allText = `${chiefComplaintLower} ${symptomsLower}`;
   
   const foundKeywords = renewalKeywords.filter(keyword => 
@@ -1768,10 +1774,10 @@ function validateMedicationSafety(
   let safetyLevel: 'safe' | 'caution' | 'unsafe' = 'safe';
   
   newMedications.forEach(newMed => {
-    const newDrug = (newMed?.drug || '').toLowerCase();
-    
+    const newDrug = String(newMed?.drug ?? '').toLowerCase();
+
     currentMedications.forEach(currentMed => {
-      const interaction = checkBasicInteraction(newDrug, currentMed.toLowerCase());
+      const interaction = checkBasicInteraction(newDrug, String(currentMed).toLowerCase());
       if (interaction.level !== 'none') {
         interactions.push({
           drug1: newMed?.drug || 'Unknown',
@@ -1789,7 +1795,7 @@ function validateMedicationSafety(
     });
     
     currentMedications.forEach(currentMed => {
-      if (isSameActiveIngredient(newDrug, currentMed.toLowerCase())) {
+      if (isSameActiveIngredient(newDrug, String(currentMed).toLowerCase())) {
         duplicates.push(`${newMed?.drug || 'Unknown'} déjà présent dans : ${currentMed}`);
         if (safetyLevel === 'safe') safetyLevel = 'caution';
       }
@@ -2071,7 +2077,7 @@ function addMauritiusSpecificAdvice(analysis: any, patientContext: PatientContex
   
   const symptoms = patientContext.symptoms || []
   const chiefComplaint = patientContext.chief_complaint || ''
-  const allSymptoms = [...symptoms, chiefComplaint].join(' ').toLowerCase()
+  const allSymptoms = String([...symptoms, chiefComplaint].join(' ')).toLowerCase()
   
   if (allSymptoms.includes('cough') || allSymptoms.includes('toux') || allSymptoms.includes('respiratory')) {
     analysis.patient_education.mauritius_specific.respiratory_advice = 
@@ -2208,8 +2214,8 @@ function validateUniversalMedicalAnalysis(
 }
 
 function extractTherapeuticClass(medication: any): string {
-  const drugName = (medication?.drug || '').toLowerCase()
-  const dci = (medication?.dci || '').toLowerCase()
+  const drugName = String(medication?.drug ?? '').toLowerCase()
+  const dci = String(medication?.dci ?? '').toLowerCase()
   
   // Utiliser le DCI d'abord, puis le nom du médicament
   const searchTerm = dci || drugName
