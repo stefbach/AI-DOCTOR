@@ -263,7 +263,12 @@ function validateMauritiusMedicalSpecificity(analysis: any): {
   })
   
   // UK/Mauritius medication nomenclature check + DCI validation
-  const medications = analysis?.treatment_plan?.medications || []
+  const medications = (analysis?.treatment_plan?.medications || []).filter(
+    (med: any) => med && (med.drug || med.dci || med.indication || med.dosing)
+  )
+  if (analysis?.treatment_plan) {
+    analysis.treatment_plan.medications = medications
+  }
   console.log(`🧪 Validating ${medications.length} medications...`)
   
   medications.forEach((med: any, idx: number) => {
