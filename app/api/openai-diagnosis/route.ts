@@ -1704,9 +1704,9 @@ function applySafetyCorrections(analysis: any, issue: any): number {
 }
 
 // ==================== MEDICATION MANAGEMENT (CONSERVÉ) ====================
-function analyzeConsultationType(
+export function analyzeConsultationType(
   currentMedications: string[],
-  chiefComplaint: string,
+  chiefComplaint: unknown,
   symptoms: string[]
 ): {
   consultationType: 'renewal' | 'new_problem' | 'mixed';
@@ -1718,8 +1718,13 @@ function analyzeConsultationType(
     'renewal', 'refill', 'same medication', 'usual', 'chronic', 'chronique',
     'prescription', 'continue', 'poursuivre', 'maintenir', 'repeat'
   ];
-  
-  const chiefComplaintLower = chiefComplaint.toLowerCase();
+
+  if (typeof chiefComplaint !== 'string') {
+    console.warn('analyzeConsultationType expected chiefComplaint to be a string');
+  }
+  const chiefComplaintStr =
+    typeof chiefComplaint === 'string' ? chiefComplaint : '';
+  const chiefComplaintLower = chiefComplaintStr.toLowerCase();
   const symptomsLower = symptoms.join(' ').toLowerCase();
   const allText = `${chiefComplaintLower} ${symptomsLower}`;
   
