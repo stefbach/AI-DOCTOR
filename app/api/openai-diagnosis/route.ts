@@ -136,24 +136,14 @@ const MAURITIUS_MEDICAL_PROMPT = `YOU ARE AN EXPERT PHYSICIAN - MANDATORY JSON R
     "approach": "MANDATORY - Specific therapeutic approach",
     "prescription_rationale": "MANDATORY - Precise medical justification", 
     "medications": [
-      {
-        "drug": "EXACT DCI + DOSE - UK/MAURITIUS NOMENCLATURE - NEVER undefined (e.g., Amoxicilline 500mg)",
-        "dci": "EXACT DCI NAME ONLY (e.g., Amoxicilline)",
-        "indication": "DETAILED SPECIFIC MEDICAL INDICATION - MINIMUM 30 CHARACTERS - e.g. 'Empirical antibiotic therapy for suspected bacterial otitis media with systemic symptoms'",
-        "mechanism": "SPECIFIC MECHANISM OF ACTION",
-       "posologie": "MEDICATION NAME + DOSE + FREQUENCY (e.g., 'Amoxicilline 500mg TDS' or 'Paracétamol 1g quatre fois par jour')",
-        "duration": "PRECISE DURATION X days/weeks",
-        "contraindications": "SPECIFIC CONTRAINDICATIONS",
-        "interactions": "PRECISE INTERACTIONS",
-        "monitoring": "SPECIFIC MONITORING",
-        "side_effects": "PRECISE SIDE EFFECTS",
-        "mauritius_availability": {
-          "public_free": true/false,
-          "estimated_cost": "PRECISE COST Rs X-Y",
-          "brand_names": "SPECIFIC MAURITIUS BRANDS"
-        },
-        "administration_instructions": "PRECISE INSTRUCTIONS"
-      }
+  {
+    "medication_name": "Drug name + dose (e.g., Amoxicillin 500mg)",
+    "why_prescribed": "MANDATORY - Why you are prescribing this medication to this patient",
+    "how_to_take": "Clear dosing instructions (e.g., three times daily)",
+    "duration": "Treatment duration (e.g., 7 days)",
+    "dci": "Active ingredient name (e.g., Amoxicillin)"
+  }
+]
     ],
     "non_pharmacological": "SPECIFIC NON-DRUG MEASURES"
   },
@@ -174,7 +164,7 @@ const MAURITIUS_MEDICAL_PROMPT = `YOU ARE AN EXPERT PHYSICIAN - MANDATORY JSON R
 - NEVER generic names: "Laboratory test", "Medication", "Investigation"
 - ALWAYS exact UK/Mauritius names: "Full Blood Count", "Amoxicilline 500mg", "Community-acquired pneumonia"
 - EVERY medication MUST have exact DCI (e.g., "Amoxicilline", "Paracétamol")
-- INDICATION MUST BE DETAILED: MINIMUM 30 CHARACTERS with specific medical context
+- WHY_PRESCRIBED is MANDATORY: Always explain why you prescribe each medication
 - DOSING MUST BE PRECISE: exact mg + UK frequency (OD/BD/TDS/QDS) + daily total
 - SPECIFIC MEDICAL TERMINOLOGY mandatory in every field
 - AVOID vague terms like "appropriate", "as needed", "investigation"
