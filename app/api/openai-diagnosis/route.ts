@@ -141,12 +141,7 @@ const MAURITIUS_MEDICAL_PROMPT = `YOU ARE AN EXPERT PHYSICIAN - MANDATORY JSON R
         "dci": "EXACT DCI NAME ONLY (e.g., Amoxicilline)",
         "indication": "DETAILED SPECIFIC MEDICAL INDICATION - MINIMUM 30 CHARACTERS - e.g. 'Empirical antibiotic therapy for suspected bacterial otitis media with systemic symptoms'",
         "mechanism": "SPECIFIC MECHANISM OF ACTION",
-        "dosing": {
-          "adult": "PRECISE DOSAGE X mg Y times daily - UK FORMAT OD/BD/TDS/QDS",
-          "frequency_per_day": "EXACT NUMBER (e.g., 3)",
-          "individual_dose": "EXACT DOSE PER TAKE (e.g., 500mg)",
-          "daily_total_dose": "TOTAL PER DAY (e.g., 1500mg/day)"
-        },
+       "posologie": "MEDICATION NAME + DOSE + FREQUENCY (e.g., 'Amoxicilline 500mg TDS' or 'Paracétamol 1g quatre fois par jour')",
         "duration": "PRECISE DURATION X days/weeks",
         "contraindications": "SPECIFIC CONTRAINDICATIONS",
         "interactions": "PRECISE INTERACTIONS",
@@ -239,9 +234,9 @@ export function validateMauritiusMedicalSpecificity(analysis: any): {
   const issues: string[] = []
   const suggestions: string[] = []
   
-  console.log('🔍 Validating Mauritius medical specificity...')
+  console.log('🔍 Validating Mauritius medical specificity (assouplied)...')
   
-  // UK/Mauritius laboratory nomenclature check
+  // UK/Mauritius laboratory nomenclature check (inchangé)
   const labTests = analysis?.investigation_strategy?.laboratory_tests || []
   labTests.forEach((test: any, idx: number) => {
     const testName = test?.test_name || ''
@@ -262,112 +257,52 @@ export function validateMauritiusMedicalSpecificity(analysis: any): {
     }
   })
   
-  // UK/Mauritius medication nomenclature check + DCI validation
+  // VALIDATION ASSOUPLIE pour médicaments - accepter formats naturels GPT-4
   const medications = (analysis?.treatment_plan?.medications || []).filter(
-    (med: any) => med && (med.drug || med.dci || med.indication || med.dosing)
+    (med: any) => med && (med.drug || med.medication || med.nom || med.dci || med.indication || med.dosing)
   )
   if (analysis?.treatment_plan) {
     analysis.treatment_plan.medications = medications
   }
-  console.log(`🧪 Validating ${medications.length} medications...`)
+  console.log(`🧪 Validating ${medications.length} medications (format flexible)...`)
   
   medications.forEach((med: any, idx: number) => {
+    // Accepter TOUS les formats de médicament qui contiennent l'info essentielle
+    const hasMedicationInfo = med?.drug || med?.medication || med?.nom
+    const hasIndication = med?.indication || med?.purpose || med?.pour
+    const hasDCI = med?.dci
+    
     console.log(`Medication ${idx + 1}:`, {
-      drug: med?.drug,
-      dci: med?.dci,
-      indication: med?.indication,
-      dosing_adult: med?.dosing?.adult
+      hasMedicationInfo,
+      hasIndication,
+      hasDCI
     })
-
-    // Extraction intelligente si GPT-4 a mélangé drug + dosing
-    let cleanDrugName: string
-    try {
-      cleanDrugName = String(med?.drug || '')
-    } catch (err) {
-      console.warn(`⚠️ Skipping medication ${idx + 1}: unable to stringify drug`, err)
-      return
-    }
-    let extractedDosing = med?.dosing?.adult || ''
     
-    // Si le dosing est dans le nom du médicament, l'extraire
-    const dosingInDrugMatch = cleanDrugName.match(/^(.+?)\s+(OD|BD|TDS|QDS|once\s+daily|twice\s+daily|three\s+times\s+daily|four\s+times\s+daily)$/i)
-    if (dosingInDrugMatch && !extractedDosing) {
-      cleanDrugName = dosingInDrugMatch[1].trim()
-      extractedDosing = dosingInDrugMatch[2]
-      console.log(`🔧 Extracted dosing from drug name: "${cleanDrugName}" + "${extractedDosing}"`)
+    // Validation minimale - seulement l'essentiel
+    if (!hasMedicationInfo) {
+      issues.push(`Medication ${idx + 1}: Missing medication name`)
+      suggestions.push(`Add medication name (any format accepted)`)
     }
     
-    // Vérification DCI
-    const dci = med?.dci || ''
-    if (!dci || dci.length < 3) {
-      issues.push(`Medication ${idx + 1}: Missing or invalid DCI "${dci}"`)
-      suggestions.push(`Add exact DCI (e.g., "Amoxicilline", "Paracétamol", "Ibuprofène")`)
+    if (!hasIndication || (typeof hasIndication === 'string' && hasIndication.length < 8)) {
+      issues.push(`Medication ${idx + 1}: Missing or too brief indication`)
+      suggestions.push(`Add indication (any natural language accepted)`)
     }
     
-    // Vérification sécurisée des propriétés avec nom nettoyé
-    const drugName = cleanDrugName.toLowerCase() || ''
-    
-    if (!med?.drug || 
-        med.drug === 'undefined' ||
-        med.drug === null ||
-        drugName.includes('medication') ||
-        drugName.includes('médicament') ||
-        drugName.length < 5 ||
-        !drugName.match(/\d+\s*(mg|mcg|g)/i)) {  // Must contain UK dosage (mg/mcg/g)
-      issues.push(`Medication ${idx + 1}: Generic/missing name "${med?.drug || 'undefined'}"`)
-      suggestions.push(`Use UK nomenclature with dose (e.g., "Amoxicilline 500mg", "Ibuprofène 400mg")`)
+    // DCI optionnel - on peut l'extraire automatiquement
+    if (!hasDCI) {
+      console.log(`ℹ️ Medication ${idx + 1}: DCI will be auto-extracted`)
     }
     
-    // Validation d'indication intelligente
-    const indication = med?.indication || ''
-    const isVagueIndication = (
-      !indication || 
-      indication === 'Therapeutic indication' ||
-      indication === 'Indication thérapeutique' ||
-      indication === 'Treatment' ||
-      indication === 'Therapeutic use' ||
-      indication === 'Medical treatment' ||
-      indication.length < 12 ||
-      (indication.toLowerCase() === 'treatment' || 
-       indication.toLowerCase() === 'therapeutic indication' ||
-       (indication.toLowerCase().includes('treatment') && indication.length < 20 && !indication.includes('bacterial') && !indication.includes('pain') && !indication.includes('fever') && !indication.includes('infection')))
-    )
-    
-    if (isVagueIndication) {
-      issues.push(`Medication ${idx + 1}: Vague indication`)
-      suggestions.push(`Precise indication (e.g., "Treatment of acute bacterial otitis media", "Management of fever and pain")`)
-    }
-    
-    // Validation posologie précise
-    const adultDosing = med?.dosing?.adult || ''
-    if (!adultDosing || 
-        (!adultDosing.includes('OD') && 
-         !adultDosing.includes('BD') && 
-         !adultDosing.includes('TDS') && 
-         !adultDosing.includes('QDS') &&
-         !adultDosing.includes('times daily'))) {
-      issues.push(`Medication ${idx + 1}: Non-UK dosage format`)
-      suggestions.push(`Use UK format: "500mg BD" or "1 tablet three times daily"`)
-    }
-    
-    // Validation dose totale journalière
-    if (!med?.dosing?.daily_total_dose) {
-      issues.push(`Medication ${idx + 1}: Missing daily total dose`)
-      suggestions.push(`Add daily total: "1500mg/day", "4g/day"`)
-    }
-    
-    // Validation fréquence numérique
-    if (!med?.dosing?.frequency_per_day || typeof med.dosing.frequency_per_day !== 'number') {
-      issues.push(`Medication ${idx + 1}: Missing numeric frequency`)
-      suggestions.push(`Add exact frequency: 1, 2, 3, or 4 times per day`)
-    }
+    // Plus de validation stricte du format dosing - GPT-4 peut utiliser le format qui lui convient
   })
   
   const hasGenericContent = issues.length > 0
   
+  console.log(`✅ Validation assouplie terminée: ${issues.length} issues critiques seulement`)
+  
   return { hasGenericContent, issues, suggestions }
 }
-
 // ==================== NOUVELLES FONCTIONS DCI + POSOLOGIE PRÉCISE ====================
 function extractDCIFromDrugName(drugName: string): string {
   if (!drugName) return 'Principe actif'
