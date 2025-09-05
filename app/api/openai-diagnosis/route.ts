@@ -2622,170 +2622,170 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       },
 
       // ========== MEDICATIONS ULTRA PRÉCISES - DCI + POSOLOGIE ==========
-    medicationsSimple: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
+medicationsSimple: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
   id: idx + 1,
-  nom: med.drug,  // Direct
-  posologie_complete: med.dosing?.adult || med.how_to_take,  // Direct
-  indication: med.indication || med.why_prescribed,  // Direct
-  dci: med.dci
+  nom: med.drug || med.medication_name || "Médicament",
+  posologie_complete: med.dosing?.adult || med.how_to_take || "Selon prescription",
+  indication: med.indication || med.why_prescribed || "Indication thérapeutique",
+  dci: med.dci || "DCI"
 })),
-      
-      // Protection des données
-      dataProtection: {
-        enabled: true,
-        method: 'anonymization',
-        anonymousId: patientContext.anonymousId,
-        fieldsProtected: ['firstName', 'lastName', 'name'],
-        compliance: ['GDPR', 'HIPAA', 'Minimisation des données']
-      },
-      
-      // Validation universelle
-      universalValidation: {
-        enabled: true,
-        system_version: '4.3-Complete-Logic-DCI-Precise',
-        overall_quality: finalAnalysis.universal_validation?.overall_quality || 'good',
-        gpt4_trusted: finalAnalysis.universal_validation?.gpt4_trusted || true,
-        pathology_coverage: 'all_medical_conditions',
-        validation_approach: 'evidence_based_principles',
-        metrics: finalAnalysis.universal_validation?.metrics || {},
-        critical_issues: finalAnalysis.universal_validation?.critical_issues || 0,
-        important_issues: finalAnalysis.universal_validation?.important_issues || 0,
-        minor_issues: finalAnalysis.universal_validation?.minor_issues || 0,
-        corrections_applied: {
-          minimal: finalAnalysis.minimal_corrections_applied || 0,
-          targeted: finalAnalysis.targeted_corrections_applied || 0
-        },
-        specialties_supported: [
-          'Cardiologie', 'Pneumologie', 'Endocrinologie', 'Neurologie',
-          'Gastroentérologie', 'Psychiatrie', 'Dermatologie', 'Urologie',
-          'Gynécologie', 'Pédiatrie', 'Gériatrie', 'Médecine générale'
-        ],
-        timestamp: finalAnalysis.universal_validation?.timestamp
-      },
-      
-      // Raisonnement diagnostique
-      diagnosticReasoning: finalAnalysis.diagnostic_reasoning || {
-        key_findings: {
-          from_history: "Analyse de l'historique médical disponible",
-          from_symptoms: "Analyse des symptômes présentés",
-          from_ai_questions: "Analyse des réponses au questionnaire IA",
-          red_flags: "Aucun signe d'alarme identifié"
-        },
-        syndrome_identification: {
-          clinical_syndrome: "Syndrome clinique identifié",
-          supporting_features: ["Symptômes compatibles"],
-          inconsistent_features: []
-        },
-        clinical_confidence: {
-          diagnostic_certainty: "Modérée",
-          reasoning: "Basé sur données téléconsultation avec standards UK/Maurice",
-          missing_information: "Examen physique complet recommandé"
+
+// Protection des données
+dataProtection: {
+  enabled: true,
+  method: 'anonymization',
+  anonymousId: patientContext.anonymousId,
+  fieldsProtected: ['firstName', 'lastName', 'name'],
+  compliance: ['GDPR', 'HIPAA', 'Minimisation des données']
+},
+
+// Validation universelle
+universalValidation: {
+  enabled: true,
+  system_version: '4.3-Complete-Logic-DCI-Precise',
+  overall_quality: finalAnalysis.universal_validation?.overall_quality || 'good',
+  gpt4_trusted: finalAnalysis.universal_validation?.gpt4_trusted || true,
+  pathology_coverage: 'all_medical_conditions',
+  validation_approach: 'evidence_based_principles',
+  metrics: finalAnalysis.universal_validation?.metrics || {},
+  critical_issues: finalAnalysis.universal_validation?.critical_issues || 0,
+  important_issues: finalAnalysis.universal_validation?.important_issues || 0,
+  minor_issues: finalAnalysis.universal_validation?.minor_issues || 0,
+  corrections_applied: {
+    minimal: finalAnalysis.minimal_corrections_applied || 0,
+    targeted: finalAnalysis.targeted_corrections_applied || 0
+  },
+  specialties_supported: [
+    'Cardiologie', 'Pneumologie', 'Endocrinologie', 'Neurologie',
+    'Gastroentérologie', 'Psychiatrie', 'Dermatologie', 'Urologie',
+    'Gynécologie', 'Pédiatrie', 'Gériatrie', 'Médecine générale'
+  ],
+  timestamp: finalAnalysis.universal_validation?.timestamp || new Date().toISOString()
+},
+
+// Raisonnement diagnostique
+diagnosticReasoning: finalAnalysis.diagnostic_reasoning || {
+  key_findings: {
+    from_history: "Analyse de l'historique médical disponible",
+    from_symptoms: "Analyse des symptômes présentés",
+    from_ai_questions: "Analyse des réponses au questionnaire IA",
+    red_flags: "Aucun signe d'alarme identifié"
+  },
+  syndrome_identification: {
+    clinical_syndrome: "Syndrome clinique identifié",
+    supporting_features: ["Symptômes compatibles"],
+    inconsistent_features: []
+  },
+  clinical_confidence: {
+    diagnostic_certainty: "Modérée",
+    reasoning: "Basé sur données téléconsultation avec standards UK/Maurice",
+    missing_information: "Examen physique complet recommandé"
+  }
+},
+
+// Diagnostic
+diagnosis: {
+  primary: {
+    condition: finalAnalysis.clinical_analysis?.primary_diagnosis?.condition || "Condition médicale",
+    icd10: finalAnalysis.clinical_analysis?.primary_diagnosis?.icd10_code || "R69",
+    confidence: finalAnalysis.clinical_analysis?.primary_diagnosis?.confidence_level || 70,
+    severity: finalAnalysis.clinical_analysis?.primary_diagnosis?.severity || "modérée",
+    detailedAnalysis: finalAnalysis.clinical_analysis?.primary_diagnosis?.pathophysiology || "Analyse physiopathologique en cours",
+    clinicalRationale: finalAnalysis.clinical_analysis?.primary_diagnosis?.clinical_reasoning || "Raisonnement clinique en développement",
+    prognosis: finalAnalysis.clinical_analysis?.primary_diagnosis?.prognosis || "Pronostic à évaluer selon évolution",
+    diagnosticCriteriaMet: finalAnalysis.clinical_analysis?.primary_diagnosis?.diagnostic_criteria_met || [],
+    certaintyLevel: finalAnalysis.clinical_analysis?.primary_diagnosis?.certainty_level || "Modérée"
+  },
+  differential: finalAnalysis.clinical_analysis?.differential_diagnoses || []
+},
+
+// Analyse experte
+expertAnalysis: {
+  clinical_confidence: finalAnalysis.diagnostic_reasoning?.clinical_confidence || {},
+  
+  expert_investigations: {
+    investigation_strategy: finalAnalysis.investigation_strategy || {},
+    clinical_justification: finalAnalysis.investigation_strategy?.clinical_justification || "Stratégie d'investigation personnalisée avec standards UK/Maurice",
+    immediate_priority: [
+      ...(finalAnalysis.investigation_strategy?.laboratory_tests || []).map((test: any) => ({
+        category: 'pathology',
+        examination: test?.test_name || "Investigation de laboratoire",
+        specific_indication: test?.clinical_justification || "Investigation diagnostique",
+        urgency: test?.urgency || "routine",
+        expected_results: test?.expected_results || {},
+        mauritius_availability: test?.mauritius_logistics || {
+          where: "C-Lab, Green Cross, Biosanté",
+          cost: "Rs 500-2000",
+          turnaround: "24-48h"
+        }
+      })),
+      ...(finalAnalysis.investigation_strategy?.imaging_studies || []).map((img: any) => ({
+        category: 'radiology',
+        examination: img?.study_name || "Imagerie médicale",
+        specific_indication: img?.indication || "Investigation d'imagerie",
+        findings_sought: img?.findings_sought || "Recherche de signes spécifiques",
+        urgency: img?.urgency || "routine",
+        mauritius_availability: img?.mauritius_availability || {
+          centers: "Apollo, Wellkin, Victoria Hospital",
+          cost: "Rs 8000-15000",
+          wait_time: "1-2 semaines"
+        }
+      }))
+    ],
+    tests_by_purpose: finalAnalysis.investigation_strategy?.tests_by_purpose || {},
+    test_sequence: finalAnalysis.investigation_strategy?.test_sequence || {}
+  },
+  
+  expert_therapeutics: {
+    treatment_approach: finalAnalysis.treatment_plan?.approach || "Approche thérapeutique personnalisée avec standards UK/Maurice",
+    prescription_rationale: finalAnalysis.treatment_plan?.prescription_rationale || "Justification de prescription selon standards internationaux",
+    primary_treatments: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any) => ({
+      medication_dci: med.drug || med.medication_name || "Médicament",
+      precise_indication: med.indication || med.why_prescribed || "Indication thérapeutique",
+      dosing_regimen: {
+        adult: {
+          en: med.dosing?.adult || med.how_to_take || "Selon prescription"
         }
       },
-
-      // Diagnostic
-      diagnosis: {
-        primary: {
-          condition: finalAnalysis.clinical_analysis.primary_diagnosis.condition,
-          icd10: finalAnalysis.clinical_analysis?.primary_diagnosis?.icd10_code || "R69",
-          confidence: finalAnalysis.clinical_analysis?.primary_diagnosis?.confidence_level || 70,
-          severity: finalAnalysis.clinical_analysis?.primary_diagnosis?.severity || "modérée",
-          detailedAnalysis: finalAnalysis.clinical_analysis?.primary_diagnosis?.pathophysiology || "Analyse physiopathologique en cours",
-          clinicalRationale: finalAnalysis.clinical_analysis?.primary_diagnosis?.clinical_reasoning || "Raisonnement clinique en développement",
-          prognosis: finalAnalysis.clinical_analysis?.primary_diagnosis?.prognosis || "Pronostic à évaluer selon évolution",
-          diagnosticCriteriaMet: finalAnalysis.clinical_analysis?.primary_diagnosis?.diagnostic_criteria_met || [],
-          certaintyLevel: finalAnalysis.clinical_analysis?.primary_diagnosis?.certainty_level || "Modérée"
-        },
-        differential: finalAnalysis.clinical_analysis?.differential_diagnoses || []
+      therapeutic_class: extractTherapeuticClass(med) || "Agent thérapeutique",
+      mechanism: med.mechanism || "Mécanisme d'action spécifique",
+      duration: { en: med.duration || "Selon évolution" },
+      mauritius_availability: {
+        public_free: med.mauritius_availability?.public_free || false,
+        estimated_cost: med.mauritius_availability?.estimated_cost || "À vérifier",
+        alternatives: med.mauritius_availability?.alternatives || "Alternatives disponibles",
+        brand_names: med.mauritius_availability?.brand_names || "Marques disponibles"
       },
-      
-      // Analyse experte
-      expertAnalysis: {
-        clinical_confidence: finalAnalysis.diagnostic_reasoning?.clinical_confidence || {},
-        
-        expert_investigations: {
-          investigation_strategy: finalAnalysis.investigation_strategy || {},
-          clinical_justification: finalAnalysis.investigation_strategy?.clinical_justification || "Stratégie d'investigation personnalisée avec standards UK/Maurice",
-          immediate_priority: [
-            ...(finalAnalysis.investigation_strategy?.laboratory_tests || []).map((test: any) => ({
-              category: 'pathology',
-              examination: test?.test_name || "Investigation de laboratoire",
-              specific_indication: test?.clinical_justification || "Investigation diagnostique",
-              urgency: test?.urgency || "routine",
-              expected_results: test?.expected_results || {},
-              mauritius_availability: test?.mauritius_logistics || {
-                where: "C-Lab, Green Cross, Biosanté",
-                cost: "Rs 500-2000",
-                turnaround: "24-48h"
-              }
-            })),
-            ...(finalAnalysis.investigation_strategy?.imaging_studies || []).map((img: any) => ({
-              category: 'radiology',
-              examination: img?.study_name || "Imagerie médicale",
-              specific_indication: img?.indication || "Investigation d'imagerie",
-              findings_sought: img?.findings_sought || "Recherche de signes spécifiques",
-              urgency: img?.urgency || "routine",
-              mauritius_availability: img?.mauritius_availability || {
-                centers: "Apollo, Wellkin, Victoria Hospital",
-                cost: "Rs 8000-15000",
-                wait_time: "1-2 semaines"
-              }
-            }))
-          ],
-          tests_by_purpose: finalAnalysis.investigation_strategy?.tests_by_purpose || {},
-          test_sequence: finalAnalysis.investigation_strategy?.test_sequence || {}
-        },
-      expert_therapeutics: {
-  treatment_approach: finalAnalysis.treatment_plan?.approach || "Approche thérapeutique personnalisée avec standards UK/Maurice",
-  prescription_rationale: finalAnalysis.treatment_plan?.prescription_rationale || "Justification de prescription selon standards internationaux",
-  primary_treatments: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any) => ({
-    medication_dci: med.drug || med.medication_name || "Médicament",
-    precise_indication: med.indication || med.why_prescribed || "Indication thérapeutique",
-    dosing_regimen: {
-      adult: {
-        en: med.dosing?.adult || med.how_to_take || "Selon prescription"
-      }
-    },
-    therapeutic_class: extractTherapeuticClass(med) || "Agent thérapeutique",
-    mechanism: med.mechanism || "Mécanisme d'action spécifique",
-    duration: { en: med.duration || "Selon évolution" },
-    mauritius_availability: {
-      public_free: med.mauritius_availability?.public_free || false,
-      estimated_cost: med.mauritius_availability?.estimated_cost || "À vérifier",
-      alternatives: med.mauritius_availability?.alternatives || "Alternatives disponibles",
-      brand_names: med.mauritius_availability?.brand_names || "Marques disponibles"
-    },
-    monitoring: med.monitoring || "Surveillance standard",
-    side_effects: med.side_effects || "Effets secondaires à surveiller",
-    contraindications: med.contraindications || "Aucune contre-indication identifiée",
-    interactions: med.interactions || "Interactions vérifiées",
-    administration_instructions: med.administration_instructions || "Instructions d'administration"
-  })),
-  non_pharmacological: finalAnalysis.treatment_plan?.non_pharmacological || "Mesures non pharmacologiques recommandées"
-},
+      monitoring: med.monitoring || "Surveillance standard",
+      side_effects: med.side_effects || "Effets secondaires à surveiller",
+      contraindications: med.contraindications || "Aucune contre-indication identifiée",
+      interactions: med.interactions || "Interactions vérifiées",
+      administration_instructions: med.administration_instructions || "Instructions d'administration"
+    })),
+    non_pharmacological: finalAnalysis.treatment_plan?.non_pharmacological || "Mesures non pharmacologiques recommandées"
+  },
 
-// Gestion des médicaments
-medicationManagement: {
-  enabled: true,
-  consultation_type: finalAnalysis.medication_safety?.consultation_type || 'new_problem',
-  confidence: finalAnalysis.medication_safety?.confidence || 0,
-  current_medications_analyzed: patientContext.current_medications.length,
-  safety_level: finalAnalysis.medication_safety?.safety_level || 'safe',
-  interactions_detected: finalAnalysis.medication_safety?.interactions_detected?.length || 0,
-  duplicates_detected: finalAnalysis.medication_safety?.duplicate_therapies?.length || 0,
-  renewal_keywords: finalAnalysis.medication_safety?.renewal_keywords || []
-},
+  // Gestion des médicaments
+  medicationManagement: {
+    enabled: true,
+    consultation_type: finalAnalysis.medication_safety?.consultation_type || 'new_problem',
+    confidence: finalAnalysis.medication_safety?.confidence || 0,
+    current_medications_analyzed: patientContext.current_medications.length,
+    safety_level: finalAnalysis.medication_safety?.safety_level || 'safe',
+    interactions_detected: finalAnalysis.medication_safety?.interactions_detected?.length || 0,
+    duplicates_detected: finalAnalysis.medication_safety?.duplicate_therapies?.length || 0,
+    renewal_keywords: finalAnalysis.medication_safety?.renewal_keywords || []
+  },
 
-// Sécurité des prescriptions
-prescriptionSafety: {
-  safety_alerts: finalAnalysis.safety_alerts || [],
-  interactions: finalAnalysis.medication_safety?.interactions_detected || [],
-  duplicate_therapies: finalAnalysis.medication_safety?.duplicate_therapies || [],
-  renewal_issues: finalAnalysis.medication_safety?.renewal_issues || [],
-  recommendations: finalAnalysis.medication_safety?.safety_recommendations || []
+  // Sécurité des prescriptions
+  prescriptionSafety: {
+    safety_alerts: finalAnalysis.safety_alerts || [],
+    interactions: finalAnalysis.medication_safety?.interactions_detected || [],
+    duplicate_therapies: finalAnalysis.medication_safety?.duplicate_therapies || [],
+    renewal_issues: finalAnalysis.medication_safety?.renewal_issues || [],
+    recommendations: finalAnalysis.medication_safety?.safety_recommendations || []
+  }
 },
-  }
-  }
       // ========== MEDICATIONS - FRONTEND ACCESSIBLE ==========
      medications: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
   id: idx + 1,
