@@ -239,6 +239,8 @@ function validateMauritiusMedicalSpecificity(analysis: any): {
   const issues: string[] = []
   const suggestions: string[] = []
   
+  console.log('🔍 Validating Mauritius medical specificity...')
+  
   // UK/Mauritius laboratory nomenclature check
   const labTests = analysis?.investigation_strategy?.laboratory_tests || []
   labTests.forEach((test: any, idx: number) => {
@@ -262,7 +264,16 @@ function validateMauritiusMedicalSpecificity(analysis: any): {
   
   // UK/Mauritius medication nomenclature check + DCI validation
   const medications = analysis?.treatment_plan?.medications || []
+  console.log(`🧪 Validating ${medications.length} medications...`)
+  
   medications.forEach((med: any, idx: number) => {
+    console.log(`Medication ${idx + 1}:`, {
+      drug: med?.drug,
+      dci: med?.dci,
+      indication: med?.indication,
+      dosing_adult: med?.dosing?.adult
+    })
+    
     // Vérification DCI
     const dci = med?.dci || ''
     if (!dci || dci.length < 3) {
