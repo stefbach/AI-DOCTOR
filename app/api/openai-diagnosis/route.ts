@@ -2821,7 +2821,7 @@ prescriptionSafety: {
           posology_precise: !!(med?.dosing?.frequency_per_day && med?.dosing?.individual_dose),
           daily_total_calculated: !!(med?.dosing?.daily_total_dose)
         }
-      })),
+     })),
       
       // Validation de la posologie
       posologyValidation: {
