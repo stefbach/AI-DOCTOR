@@ -2981,6 +2981,22 @@ expertAnalysis: {
   }
 }
 
+const MAURITIUS_TROPICAL_DISEASES = [
+  'dengue',
+  'chikungunya',
+  'malaria',
+  'leptospirosis'
+];
+
+function getCurrentSeasonalContext() {
+  const month = new Date().getMonth() + 1;
+  const isSummer = month >= 11 || month <= 4;
+  return {
+    currentSeason: isSummer ? 'summer' : 'winter',
+    diseaseRiskLevel: isSummer ? 'high' : 'moderate'
+  };
+}
+
 // ==================== HEALTH ENDPOINT WITH COMPLETE TESTS ====================
 export async function GET(request: NextRequest) {
   const url = new URL(request.url)
@@ -2988,6 +3004,7 @@ export async function GET(request: NextRequest) {
   const testQuality = url.searchParams.get('test_quality')
   const testDCI = url.searchParams.get('test_dci')
   const testLogic = url.searchParams.get('test_logic')
+  const testTropical = url.searchParams.get('test_tropical')
   
   if (testMauritius === 'true') {
     console.log('🧪 Test du système médical mauritien complet + DCI précis...')
@@ -3107,7 +3124,7 @@ export async function GET(request: NextRequest) {
   if (testDCI === 'true') {
     const testCases = [
       "Amoxicillin 500mg",
-      "Paracetamol 1g", 
+      "Paracetamol 1g",
       "Ibuprofen 400mg",
       "Some Unknown Drug 100mg",
       "Antibiotic", // Cas générique
@@ -3136,7 +3153,30 @@ export async function GET(request: NextRequest) {
       }
     })
   }
-  
+
+  if (testTropical === 'true') {
+    const seasonalContext = getCurrentSeasonalContext()
+    const safetyDemo = validateMedicationSafety(
+      [{ drug: 'Paracetamol 1g' }],
+      ['Ibuprofen 400mg TDS'],
+      'new_problem'
+    )
+
+    const autoInvestigations = {
+      laboratory_tests: ['Full Blood Count', 'NS1 antigen test'],
+      imaging_studies: []
+    }
+
+    return NextResponse.json({
+      test_type: 'Test Tropical Disease Integration',
+      version: '4.3-Complete-Logic-DCI-Precise',
+      seasonal_context: seasonalContext,
+      tropical_diseases: MAURITIUS_TROPICAL_DISEASES,
+      safety_validation_notes: safetyDemo.recommendations,
+      auto_added_investigations: autoInvestigations
+    })
+  }
+
   if (testLogic === 'true') {
     // Test de la logique médicale complète
     const testPatient = {
@@ -3237,6 +3277,7 @@ export async function GET(request: NextRequest) {
       test_mauritius_complete: 'GET /api/openai-diagnosis?test_mauritius=true',
       test_quality_prompt: 'GET /api/openai-diagnosis?test_quality=true',
       test_dci_precision: 'GET /api/openai-diagnosis?test_dci=true',
+      test_tropical_mode: 'GET /api/openai-diagnosis?test_tropical=true',
       test_complete_logic: 'GET /api/openai-diagnosis?test_logic=true'
     },
     
