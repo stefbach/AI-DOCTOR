@@ -2728,8 +2728,13 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
           prescription_rationale: finalAnalysis.treatment_plan?.prescription_rationale || "Justification de prescription selon standards internationaux",
           primary_treatments: (finalAnalysis.treatment_plan?.medications || []).map((med: any) => ({
   medication_name: med.drug,  // Direct
-         medication_name: med?.drug || med?.medication_name || "Médicament",
-        dci: med?.dci || "DCI", 
+        medication_dci: med.drug || med.medication_name, 
+        precise_indication: med.indication || med.why_prescribed,
+        dosing_regimen: { 
+          adult: {
+      en: med.dosing?.adult || med.how_to_take
+    }
+  },
         therapeutic_class: extractTherapeuticClass(med) || "Agent thérapeutique",
             precise_indication: med?.indication || "Indication thérapeutique",
             mechanism: med?.mechanism || "Mécanisme d'action spécifique pour le patient",
