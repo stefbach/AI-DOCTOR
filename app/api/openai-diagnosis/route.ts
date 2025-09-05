@@ -274,6 +274,18 @@ function validateMauritiusMedicalSpecificity(analysis: any): {
       dosing_adult: med?.dosing?.adult
     })
     
+    // Extraction intelligente si GPT-4 a mélangé drug + dosing
+    let cleanDrugName = med?.drug || ''
+    let extractedDosing = med?.dosing?.adult || ''
+    
+    // Si le dosing est dans le nom du médicament, l'extraire
+    const dosingInDrugMatch = cleanDrugName.match(/^(.+?)\s+(OD|BD|TDS|QDS|once\s+daily|twice\s+daily|three\s+times\s+daily|four\s+times\s+daily)$/i)
+    if (dosingInDrugMatch && !extractedDosing) {
+      cleanDrugName = dosingInDrugMatch[1].trim()
+      extractedDosing = dosingInDrugMatch[2]
+      console.log(`🔧 Extracted dosing from drug name: "${cleanDrugName}" + "${extractedDosing}"`)
+    }
+    
     // Vérification DCI
     const dci = med?.dci || ''
     if (!dci || dci.length < 3) {
@@ -281,8 +293,8 @@ function validateMauritiusMedicalSpecificity(analysis: any): {
       suggestions.push(`Add exact DCI (e.g., "Amoxicilline", "Paracétamol", "Ibuprofène")`)
     }
     
-    // Vérification sécurisée des propriétés
-    const drugName = med?.drug?.toLowerCase() || ''
+    // Vérification sécurisée des propriétés avec nom nettoyé
+    const drugName = cleanDrugName.toLowerCase() || ''
     
     if (!med?.drug || 
         med.drug === 'undefined' ||
