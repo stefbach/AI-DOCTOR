@@ -231,7 +231,7 @@ For PAIN/FEVER:
 GENERATE your EXPERT medical analysis with MAXIMUM MAURITIUS MEDICAL SPECIFICITY + PRECISE DCI:`
 
 // ==================== MAURITIUS MEDICAL SPECIFICITY VALIDATION + DCI PRÉCIS ====================
-function validateMauritiusMedicalSpecificity(analysis: any): {
+export function validateMauritiusMedicalSpecificity(analysis: any): {
   hasGenericContent: boolean,
   issues: string[],
   suggestions: string[]
@@ -278,9 +278,15 @@ function validateMauritiusMedicalSpecificity(analysis: any): {
       indication: med?.indication,
       dosing_adult: med?.dosing?.adult
     })
-    
+
     // Extraction intelligente si GPT-4 a mélangé drug + dosing
-    let cleanDrugName = med?.drug || ''
+    let cleanDrugName: string
+    try {
+      cleanDrugName = String(med?.drug || '')
+    } catch (err) {
+      console.warn(`⚠️ Skipping medication ${idx + 1}: unable to stringify drug`, err)
+      return
+    }
     let extractedDosing = med?.dosing?.adult || ''
     
     // Si le dosing est dans le nom du médicament, l'extraire
