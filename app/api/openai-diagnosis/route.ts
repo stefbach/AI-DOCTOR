@@ -2497,6 +2497,19 @@ if (medicalAnalysis?.treatment_plan?.medications) {
   )
   console.log(`✅ ${medicalAnalysis.treatment_plan.medications.length} medications normalized`)
 }
+    // DEBUG - Afficher les médicaments après normalisation
+  medicalAnalysis.treatment_plan.medications.forEach((med: any, idx: number) => {
+    console.log(`🔍 Medication ${idx + 1} after normalization:`, {
+      drug: med.drug,
+      medication_name: med.medication_name,
+      indication: med.indication,
+      why_prescribed: med.why_prescribed,
+      dosing_adult: med.dosing?.adult,
+      how_to_take: med.how_to_take,
+      dci: med.dci
+    })
+  })
+}
     console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     console.log(`🎯 Diagnostic primaire garanti : ${medicalAnalysis.clinical_analysis.primary_diagnosis.condition}`)
     
@@ -2709,9 +2722,9 @@ if (medicalAnalysis?.treatment_plan?.medications) {
           treatment_approach: finalAnalysis.treatment_plan?.approach || "Approche thérapeutique personnalisée avec standards UK/Maurice",
           prescription_rationale: finalAnalysis.treatment_plan?.prescription_rationale || "Justification de prescription selon standards internationaux",
           primary_treatments: (finalAnalysis.treatment_plan?.medications || []).map((med: any) => ({
-            medication_name: med?.drug || "Médicament",
-            dci: med?.dci || "DCI",
-            therapeutic_class: extractTherapeuticClass(med) || "Agent thérapeutique",
+         medication_name: med?.drug || med?.medication_name || "Médicament",
+        dci: med?.dci || "DCI", 
+        therapeutic_class: extractTherapeuticClass(med) || "Agent thérapeutique",
             precise_indication: med?.indication || "Indication thérapeutique",
             mechanism: med?.mechanism || "Mécanisme d'action spécifique pour le patient",
             dosing_regimen: {
@@ -2762,9 +2775,9 @@ if (medicalAnalysis?.treatment_plan?.medications) {
       },
 
       // ========== MEDICATIONS - FRONTEND ACCESSIBLE ==========
-      medications: (finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
-        id: idx + 1,
-         name: med?.drug || med?.medication_name || "Médicament",
+     medications: (finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
+  id: idx + 1,
+  name: med?.drug || med?.medication_name || "Médicament", 
         dci: med?.dci || "DCI",
         dosage: med?.dosing?.individual_dose || "Dosage",
        posology: med?.dosing?.adult || med?.how_to_take || "Selon prescription",
