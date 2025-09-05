@@ -2513,7 +2513,7 @@ export async function POST(request: NextRequest) {
           availability: "Available at pharmacies"
         },
         prescription_details: {
-          prescriber: "Dr. Teleconsultation Expert,
+          prescriber: "Dr. Teleconsultation Expert",
       
       // Posology validation
       posologyValidation: {
