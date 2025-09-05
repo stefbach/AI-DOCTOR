@@ -2735,7 +2735,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
           tests_by_purpose: finalAnalysis.investigation_strategy?.tests_by_purpose || {},
           test_sequence: finalAnalysis.investigation_strategy?.test_sequence || {}
         },
-       expert_therapeutics: {
+      expert_therapeutics: {
   treatment_approach: finalAnalysis.treatment_plan?.approach || "Approche thérapeutique personnalisée avec standards UK/Maurice",
   prescription_rationale: finalAnalysis.treatment_plan?.prescription_rationale || "Justification de prescription selon standards internationaux",
   primary_treatments: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any) => ({
@@ -2746,65 +2746,44 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         en: med.dosing?.adult || med.how_to_take || "Selon prescription"
       }
     },
-    therapeutic_class: extractTherapeuticClass(med),
+    therapeutic_class: extractTherapeuticClass(med) || "Agent thérapeutique",
     mechanism: med.mechanism || "Mécanisme d'action spécifique",
     duration: { en: med.duration || "Selon évolution" },
-    mauritius_availability: med.mauritius_availability || {
-      public_free: false,
-      estimated_cost: "À vérifier"
-    }
+    mauritius_availability: {
+      public_free: med.mauritius_availability?.public_free || false,
+      estimated_cost: med.mauritius_availability?.estimated_cost || "À vérifier",
+      alternatives: med.mauritius_availability?.alternatives || "Alternatives disponibles",
+      brand_names: med.mauritius_availability?.brand_names || "Marques disponibles"
+    },
+    monitoring: med.monitoring || "Surveillance standard",
+    side_effects: med.side_effects || "Effets secondaires à surveiller",
+    contraindications: med.contraindications || "Aucune contre-indication identifiée",
+    interactions: med.interactions || "Interactions vérifiées",
+    administration_instructions: med.administration_instructions || "Instructions d'administration"
   })),
   non_pharmacological: finalAnalysis.treatment_plan?.non_pharmacological || "Mesures non pharmacologiques recommandées"
-}
-        therapeutic_class: extractTherapeuticClass(med) || "Agent thérapeutique",
-            precise_indication: med?.indication || "Indication thérapeutique",
-            mechanism: med?.mechanism || "Mécanisme d'action spécifique pour le patient",
-            dosing_regimen: {
-              adult: { 
-                fr: med?.dosing?.adult || "Posologie à déterminer",
-                individual_dose: med?.dosing?.individual_dose || "Dose individuelle",
-                frequency_per_day: med?.dosing?.frequency_per_day || 0,
-                daily_total_dose: med?.dosing?.daily_total_dose || "Dose totale/jour"
-              }
-            },
-            duration: { fr: med?.duration || "Selon évolution" },
-            monitoring: med?.monitoring || "Surveillance standard",
-            side_effects: med?.side_effects || "Effets secondaires à surveiller",
-            contraindications: med?.contraindications || "Aucune contre-indication identifiée",
-            interactions: med?.interactions || "Interactions vérifiées",
-            mauritius_availability: {
-              public_free: med?.mauritius_availability?.public_free || false,
-              estimated_cost: med?.mauritius_availability?.estimated_cost || "À vérifier",
-              alternatives: med?.mauritius_availability?.alternatives || "Alternatives disponibles",
-              brand_names: med?.mauritius_availability?.brand_names || "Marques disponibles"
-            },
-            administration_instructions: med?.administration_instructions || "Instructions d'administration",
-            validation_applied: med?._mauritius_specificity_applied || med?._added_by_universal_safety || null
-          })),
-          non_pharmacological: finalAnalysis.treatment_plan?.non_pharmacological || "Mesures non pharmacologiques recommandées"
-        }
-      },
-      
-      // Gestion des médicaments
-      medicationManagement: {
-        enabled: true,
-        consultation_type: finalAnalysis.medication_safety?.consultation_type || 'new_problem',
-        confidence: finalAnalysis.medication_safety?.confidence || 0,
-        current_medications_analyzed: patientContext.current_medications.length,
-        safety_level: finalAnalysis.medication_safety?.safety_level || 'safe',
-        interactions_detected: finalAnalysis.medication_safety?.interactions_detected?.length || 0,
-        duplicates_detected: finalAnalysis.medication_safety?.duplicate_therapies?.length || 0,
-        renewal_keywords: finalAnalysis.medication_safety?.renewal_keywords || []
-      },
-      
-      // Sécurité des prescriptions
-      prescriptionSafety: {
-        safety_alerts: finalAnalysis.safety_alerts || [],
-        interactions: finalAnalysis.medication_safety?.interactions_detected || [],
-        duplicate_therapies: finalAnalysis.medication_safety?.duplicate_therapies || [],
-        renewal_issues: finalAnalysis.medication_safety?.renewal_issues || [],
-        recommendations: finalAnalysis.medication_safety?.safety_recommendations || []
-      },
+},
+
+// Gestion des médicaments
+medicationManagement: {
+  enabled: true,
+  consultation_type: finalAnalysis.medication_safety?.consultation_type || 'new_problem',
+  confidence: finalAnalysis.medication_safety?.confidence || 0,
+  current_medications_analyzed: patientContext.current_medications.length,
+  safety_level: finalAnalysis.medication_safety?.safety_level || 'safe',
+  interactions_detected: finalAnalysis.medication_safety?.interactions_detected?.length || 0,
+  duplicates_detected: finalAnalysis.medication_safety?.duplicate_therapies?.length || 0,
+  renewal_keywords: finalAnalysis.medication_safety?.renewal_keywords || []
+},
+
+// Sécurité des prescriptions
+prescriptionSafety: {
+  safety_alerts: finalAnalysis.safety_alerts || [],
+  interactions: finalAnalysis.medication_safety?.interactions_detected || [],
+  duplicate_therapies: finalAnalysis.medication_safety?.duplicate_therapies || [],
+  renewal_issues: finalAnalysis.medication_safety?.renewal_issues || [],
+  recommendations: finalAnalysis.medication_safety?.safety_recommendations || []
+},
 
       // ========== MEDICATIONS - FRONTEND ACCESSIBLE ==========
      medications: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
