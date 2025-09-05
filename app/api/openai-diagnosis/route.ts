@@ -1746,7 +1746,7 @@ function analyzeConsultationType(
 
 function validateMedicationSafety(
   newMedications: any[],
-  currentMedications: string[],
+  currentMedications: any[],
   consultationType: string
 ): {
   safetyLevel: 'safe' | 'caution' | 'unsafe';
@@ -1761,6 +1761,11 @@ function validateMedicationSafety(
   recommendations: string[];
 } {
   
+  // Normalize current medications to include only strings
+  const normalizedCurrentMedications = currentMedications.filter(
+    (m): m is string => typeof m === 'string'
+  );
+
   const interactions: any[] = [];
   const duplicates: string[] = [];
   const renewalIssues: string[] = [];
@@ -1770,7 +1775,8 @@ function validateMedicationSafety(
   newMedications.forEach(newMed => {
     const newDrug = (newMed?.drug || '').toLowerCase();
     
-    currentMedications.forEach(currentMed => {
+    normalizedCurrentMedications.forEach(currentMedRaw => {
+      const currentMed = String(currentMedRaw);
       const interaction = checkBasicInteraction(newDrug, currentMed.toLowerCase());
       if (interaction.level !== 'none') {
         interactions.push({
@@ -1788,24 +1794,25 @@ function validateMedicationSafety(
       }
     });
     
-    currentMedications.forEach(currentMed => {
+    normalizedCurrentMedications.forEach(currentMedRaw => {
+      const currentMed = String(currentMedRaw);
       if (isSameActiveIngredient(newDrug, currentMed.toLowerCase())) {
         duplicates.push(`${newMed?.drug || 'Unknown'} déjà présent dans : ${currentMed}`);
         if (safetyLevel === 'safe') safetyLevel = 'caution';
       }
     });
   });
-  
+
   if (consultationType === 'renewal') {
-    if (newMedications.length > currentMedications.length + 2) {
+    if (newMedications.length > normalizedCurrentMedications.length + 2) {
       renewalIssues.push('Nombreux nouveaux médicaments pour un renouvellement');
     }
-    
-    const renewedCount = newMedications.filter(med => 
+
+    const renewedCount = newMedications.filter(med =>
       med?.relationship_to_current_treatment === 'renewal'
     ).length;
-    
-    if (renewedCount < currentMedications.length * 0.5) {
+
+    if (renewedCount < normalizedCurrentMedications.length * 0.5) {
       renewalIssues.push('Peu de médicaments actuels poursuivis');
     }
   }
@@ -1825,6 +1832,8 @@ function validateMedicationSafety(
     recommendations
   };
 }
+
+export { validateMedicationSafety };
 
 function checkBasicInteraction(drug1: string, drug2: string): {
   level: 'none' | 'minor' | 'moderate' | 'major' | 'contraindicated';
