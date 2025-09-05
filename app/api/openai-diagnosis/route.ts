@@ -1324,7 +1324,7 @@ function validateDiagnosticProcess(analysis: any) {
   return { issues }
 }
 
-function validateTherapeuticCompleteness(analysis: any, patientContext: PatientContext) {
+export function validateTherapeuticCompleteness(analysis: any, patientContext: PatientContext) {
   const issues: Array<{type: 'critical'|'important'|'minor', category: string, description: string, suggestion: string}> = []
   const medications = analysis?.treatment_plan?.medications || []
   
@@ -1369,11 +1369,16 @@ function validateTherapeuticCompleteness(analysis: any, patientContext: PatientC
       completenessScore -= 15
     }
     
-    const duration = med?.duration || ''
+    const rawDuration = med?.duration
+    const duration = String(rawDuration || '')
+    if (rawDuration != null && typeof rawDuration !== 'string') {
+      console.warn(`Non-string duration for ${med?.drug || `medication ${idx+1}`}:`, rawDuration)
+      return
+    }
     if (!duration || duration.toLowerCase().includes('as needed') || duration.toLowerCase().includes('selon')) {
       issues.push({
         type: 'important',
-        category: 'therapeutic', 
+        category: 'therapeutic',
         description: `Imprecise duration for ${med?.drug || `medication ${idx+1}`}`,
         suggestion: 'Specify treatment duration (days/weeks/months)'
       })
