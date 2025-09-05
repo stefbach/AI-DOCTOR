@@ -230,6 +230,14 @@ For PAIN/FEVER:
 
 GENERATE your EXPERT medical analysis with MAXIMUM MAURITIUS MEDICAL SPECIFICITY + PRECISE DCI:`
 
+function normalizeTextField(raw: unknown): string {
+  return Array.isArray(raw)
+    ? raw.join(' ')
+    : typeof raw === 'string'
+      ? raw
+      : ''
+}
+
 // ==================== MAURITIUS MEDICAL SPECIFICITY VALIDATION + DCI PRÉCIS ====================
 function validateMauritiusMedicalSpecificity(analysis: any): {
   hasGenericContent: boolean,
@@ -308,9 +316,9 @@ function validateMauritiusMedicalSpecificity(analysis: any): {
     }
     
     // Validation d'indication intelligente
-    const indication = med?.indication || ''
+    const indication = normalizeTextField(med?.indication)
     const isVagueIndication = (
-      !indication || 
+      !indication ||
       indication === 'Therapeutic indication' ||
       indication === 'Indication thérapeutique' ||
       indication === 'Treatment' ||
@@ -692,9 +700,9 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
       }
       
       // Corriger les indications vagues avec DCI précis
-      const currentIndication = fixedMed.indication || ''
+      const currentIndication = normalizeTextField(fixedMed.indication)
       const isVagueIndication = (
-        !currentIndication || 
+        !currentIndication ||
         currentIndication === 'Therapeutic indication' ||
         currentIndication === 'Indication thérapeutique' ||
         currentIndication === 'Treatment' ||
