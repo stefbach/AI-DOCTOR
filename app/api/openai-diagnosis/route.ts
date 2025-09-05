@@ -2326,9 +2326,10 @@ function generateMedicalDocuments(
 // ==================== RESPONSE GENERATION FUNCTIONS ====================
 function generateEnhancedMedicationsResponse(medications: any[]): any[] {
   return medications.map((med: any, idx: number) => {
-    const drugName = med?.drug || "Médicament"
-    const dci = med?.dci || extractDCIFromDrugName(drugName)
-    const dosing = med?.dosing || {}
+   const drugName = med?.drug || med?.medication_name || "Médicament"
+const dci = med?.dci || extractDCIFromDrugName(drugName)
+const dosing = med?.dosing || { adult: med?.how_to_take }
+const indication = med?.indication || med?.why_prescribed || "Indication"
     
     return {
       id: idx + 1,
@@ -2476,6 +2477,26 @@ export async function POST(request: NextRequest) {
     )
     
     console.log('✅ Analyse médicale avec qualité anglo-saxonne + DCI précis terminée')
+    // ========== NORMALISATION DES CHAMPS MÉDICAMENTS ==========
+function normalizeMedicationFields(medications: any[]): any[] {
+  return medications.map(med => ({
+    ...med,
+    // Mapper nouveaux champs vers anciens pour compatibilité
+    drug: med.drug || med.medication_name,
+    indication: med.indication || med.why_prescribed,
+    dosing: med.dosing || { adult: med.how_to_take },
+    dci: med.dci
+  }))
+}
+
+// Appliquer la normalisation
+if (medicalAnalysis?.treatment_plan?.medications) {
+  console.log('🔄 Normalizing medication fields for compatibility...')
+  medicalAnalysis.treatment_plan.medications = normalizeMedicationFields(
+    medicalAnalysis.treatment_plan.medications
+  )
+  console.log(`✅ ${medicalAnalysis.treatment_plan.medications.length} medications normalized`)
+}
     console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     console.log(`🎯 Diagnostic primaire garanti : ${medicalAnalysis.clinical_analysis.primary_diagnosis.condition}`)
     
@@ -2743,10 +2764,10 @@ export async function POST(request: NextRequest) {
       // ========== MEDICATIONS - FRONTEND ACCESSIBLE ==========
       medications: (finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
         id: idx + 1,
-        name: med?.drug || "Médicament",
+         name: med?.drug || med?.medication_name || "Médicament",
         dci: med?.dci || "DCI",
         dosage: med?.dosing?.individual_dose || "Dosage",
-        posology: med?.dosing?.adult || "Selon prescription",
+       posology: med?.dosing?.adult || med?.how_to_take || "Selon prescription",
         precise_posology: {
           individual_dose: med?.dosing?.individual_dose || "Dose individuelle",
           frequency_per_day: med?.dosing?.frequency_per_day || 0,
@@ -2754,8 +2775,8 @@ export async function POST(request: NextRequest) {
           uk_format: med?.dosing?.adult || "Format UK",
           administration_time: med?.administration_time || "Selon prescription"
         },
-        indication: med?.indication || "Indication thérapeutique",
-        duration: med?.duration || "Selon évolution",
+       indication: med?.indication || med?.why_prescribed || "Indication thérapeutique",
+       duration: med?.duration || "Selon évolution",
         route: "Oral",
         frequency: convertToSimpleFormat(med?.dosing?.adult || ''),
         instructions: med?.administration_instructions || "Prendre selon prescription",
