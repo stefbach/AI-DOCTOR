@@ -2784,7 +2784,8 @@ prescriptionSafety: {
   renewal_issues: finalAnalysis.medication_safety?.renewal_issues || [],
   recommendations: finalAnalysis.medication_safety?.safety_recommendations || []
 },
-
+  }
+  }
       // ========== MEDICATIONS - FRONTEND ACCESSIBLE ==========
      medications: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
   id: idx + 1,
