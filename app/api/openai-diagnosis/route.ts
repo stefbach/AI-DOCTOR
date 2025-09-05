@@ -296,13 +296,13 @@ function validateMauritiusMedicalSpecificity(analysis: any): {
     // Vérification sécurisée des propriétés avec nom nettoyé
     const drugName = cleanDrugName.toLowerCase() || ''
     
-    if (!med?.drug || 
+    if (!med?.drug ||
         med.drug === 'undefined' ||
         med.drug === null ||
         drugName.includes('medication') ||
         drugName.includes('médicament') ||
         drugName.length < 5 ||
-        !drugName.match(/\d+\s*m[cg]/)) {  // Must contain UK dosage (mg/mcg)
+        !drugName.match(/\d+(\.\d+)?\s*(mg|mcg|g)/i)) {  // Must contain UK dosage unit
       issues.push(`Medication ${idx + 1}: Generic/missing name "${med?.drug || 'undefined'}"`)
       suggestions.push(`Use UK nomenclature with dose (e.g., "Amoxicilline 500mg", "Ibuprofène 400mg")`)
     }
@@ -327,12 +327,12 @@ function validateMauritiusMedicalSpecificity(analysis: any): {
       suggestions.push(`Precise indication (e.g., "Treatment of acute bacterial otitis media", "Management of fever and pain")`)
     }
     
-    // Validation posologie précise
-    const adultDosing = med?.dosing?.adult || ''
-    if (!adultDosing || 
-        (!adultDosing.includes('OD') && 
-         !adultDosing.includes('BD') && 
-         !adultDosing.includes('TDS') && 
+    // Validation posologie précise (vérifie aussi la posologie dans le nom du médicament)
+    const adultDosing = med?.dosing?.adult || extractedDosing || med?.drug || ''
+    if (!adultDosing ||
+        (!adultDosing.includes('OD') &&
+         !adultDosing.includes('BD') &&
+         !adultDosing.includes('TDS') &&
          !adultDosing.includes('QDS') &&
          !adultDosing.includes('times daily'))) {
       issues.push(`Medication ${idx + 1}: Non-UK dosage format`)
