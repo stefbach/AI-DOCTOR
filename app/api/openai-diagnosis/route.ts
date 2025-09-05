@@ -2514,7 +2514,8 @@ export async function POST(request: NextRequest) {
         },
         prescription_details: {
           prescriber: "Dr. Teleconsultation Expert",
-      
+       }
+       })),   
       // Posology validation
       posologyValidation: {
         enabled: true,
