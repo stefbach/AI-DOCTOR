@@ -2341,7 +2341,7 @@ const indication = med?.indication || med?.why_prescribed || "Indication"
       
       // POSOLOGIE PRÉCISE
       dosage_unitaire: dosing.individual_dose || extractDoseFromDrugName(drugName),
-      posologie_complete: dosing.adult || "À déterminer",
+     posologie_complete: dosing.adult || med?.how_to_take || "À déterminer",
       frequence_par_jour: dosing.frequency_per_day || extractFrequencyFromDosing(dosing.adult),
       dose_totale_jour: dosing.daily_total_dose || calculateDailyTotal(dosing.individual_dose, dosing.frequency_per_day),
       
