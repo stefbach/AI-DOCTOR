@@ -2739,7 +2739,22 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         expert_therapeutics: {
           treatment_approach: finalAnalysis.treatment_plan?.approach || "Approche thérapeutique personnalisée avec standards UK/Maurice",
           prescription_rationale: finalAnalysis.treatment_plan?.prescription_rationale || "Justification de prescription selon standards internationaux",
-          primary_treatments: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any) => {
+         primary_treatments: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any) => ({
+  medication_dci: med.drug || med.medication_name || "Médicament",
+  precise_indication: med.indication || med.why_prescribed || "Indication thérapeutique",
+  dosing_regimen: {
+    adult: {
+      en: med.dosing?.adult || med.how_to_take || "Selon prescription"
+    }
+  },
+  therapeutic_class: extractTherapeuticClass(med),
+  mechanism: med.mechanism || "Mécanisme d'action spécifique",
+  duration: { en: med.duration || "Selon évolution" },
+  mauritius_availability: med.mauritius_availability || {
+    public_free: false,
+    estimated_cost: "À vérifier"
+  }
+})),
   // DEBUG POSOLOGIE
   console.log('🔍 POSOLOGY MAPPING:', {
     drug: med.drug,
