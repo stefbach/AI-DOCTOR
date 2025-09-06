@@ -3585,6 +3585,7 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
     )
   }
   // ==================== MAIN RENDER ====================
+  export default function ProfessionalReport() { 
   return (
     <div className="space-y-6 print:space-y-4">
       <ActionsBar />
