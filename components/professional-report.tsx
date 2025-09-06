@@ -1362,17 +1362,9 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
           }
         }
         
-        // Map laboratory tests
+       // Map laboratory tests
         if (apiReport.prescriptions?.laboratoryTests) {
           const labData = apiReport.prescriptions.laboratoryTests
-          console.log("🔬 DEBUG: Mapping laboratory tests from API")
-          console.log("🔬 API structure:", {
-            hasLabData: !!labData,
-            hasPrescription: !!labData.prescription,
-            hasTests: !!labData.prescription?.tests,
-            testsKeys: labData.prescription?.tests ? Object.keys(labData.prescription.tests) : [],
-          })
-          
           reportData.ordonnances!.biologie = {
             enTete: currentDoctorInfo,
             patient: reportData.compteRendu.patient,
@@ -1457,6 +1449,7 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
               date: labData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0]
             }
           }
+        }
           
           // DEBUG: Vérification du mapping final
           const totalTests = Object.values(reportData.ordonnances.biologie.prescription.analyses)
