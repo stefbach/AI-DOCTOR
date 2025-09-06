@@ -1,4 +1,4 @@
-// app/api/openai-questions/route.ts - VERSION 3.0 MAURICE ADAPTED
+// app/api/openai-questions/route.ts - VERSION 3.0 MAURICE ADAPTED - BUG FIX
 import { type NextRequest, NextResponse } from "next/server"
 
 // Configuration
@@ -1791,25 +1791,25 @@ function generateMauritiusRecommendations(
   const tests: string[] = []
   
   // Tropical disease-specific tests
-  if (tropicalRisk.dengue === 'high' || tropicalRisk.dengue === 'very_high') {
+  if (tropicalDiseaseRisk.dengue === 'high' || tropicalDiseaseRisk.dengue === 'very_high') {
     tests.push('NS1 antigen test (if <7 days of fever)')
     tests.push('Dengue IgM/IgG serology (if >5 days of fever)')
     tests.push('Full blood count with platelet count')
     tests.push('Hematocrit monitoring')
   }
   
-  if (tropicalRisk.chikungunya === 'high' || tropicalRisk.chikungunya === 'very_high') {
+  if (tropicalDiseaseRisk.chikungunya === 'high' || tropicalDiseaseRisk.chikungunya === 'very_high') {
     tests.push('Chikungunya RT-PCR (acute phase)')
     tests.push('Chikungunya IgM serology')
   }
   
-  if (tropicalRisk.malaria === 'high') {
+  if (tropicalDiseaseRisk.malaria === 'high') {
     tests.push('Malaria rapid diagnostic test (RDT)')
     tests.push('Blood smear for malaria parasites')
     tests.push('If positive: Species identification and parasitemia count')
   }
   
-  if (tropicalRisk.leptospirosis === 'high') {
+  if (tropicalDiseaseRisk.leptospirosis === 'high') {
     tests.push('Leptospirosis serology (acute and convalescent)')
     tests.push('Liver function tests')
     tests.push('Renal function tests')
@@ -1838,7 +1838,7 @@ function generateMauritiusRecommendations(
     tests.push('Urine protein dipstick')
     tests.push('Blood pressure monitoring')
     tests.push('Fetal heart rate monitoring if indicated')
-    if (tropicalRisk.dengue === 'high' || tropicalRisk.dengue === 'very_high') {
+    if (tropicalDiseaseRisk.dengue === 'high' || tropicalDiseaseRisk.dengue === 'very_high') {
       tests.push('Enhanced maternal monitoring for bleeding')
       tests.push('Fetal monitoring for distress signs')
     }
@@ -1857,7 +1857,7 @@ function generateMauritiusRecommendations(
     }
     
     // Add infectious disease if high tropical risk
-    if ((tropicalRisk.dengue === 'very_high' || tropicalRisk.chikungunya === 'very_high' || tropicalRisk.malaria === 'high') 
+    if ((tropicalDiseaseRisk.dengue === 'very_high' || tropicalDiseaseRisk.chikungunya === 'very_high' || tropicalDiseaseRisk.malaria === 'high') 
         && !specialty.includes('Infectious Disease')) {
       specialty = specialty + ' + Infectious Disease'
     }
@@ -1874,13 +1874,13 @@ function generateMauritiusRecommendations(
     tropicalConsiderations.push('Monitor for dengue warning signs: bleeding, severe abdominal pain, persistent vomiting')
   }
   
-  if (tropicalRisk.dengue === 'high' || tropicalRisk.dengue === 'very_high') {
+  if (tropicalDiseaseRisk.dengue === 'high' || tropicalDiseaseRisk.dengue === 'very_high') {
     tropicalConsiderations.push('Dengue warning signs to watch: severe abdominal pain, persistent vomiting, bleeding, restlessness')
     tropicalConsiderations.push('Seek immediate care if blood pressure drops or breathing difficulties')
     tropicalConsiderations.push('Maintain adequate fluid intake but avoid overhydration')
   }
   
-  if (tropicalRisk.chikungunya === 'high' || tropicalRisk.chikungunya === 'very_high') {
+  if (tropicalDiseaseRisk.chikungunya === 'high' || tropicalDiseaseRisk.chikungunya === 'very_high') {
     tropicalConsiderations.push('Chikungunya joint pain may persist for months - early physiotherapy helps')
     tropicalConsiderations.push('Use paracetamol for pain relief, avoid aspirin/NSAIDs in acute phase')
   }
@@ -2359,7 +2359,7 @@ export async function GET() {
   
   return NextResponse.json({
     status: '✅ Mauritius Tropical Medicine API v3.0 Operational',
-    version: '3.0.0 - MAURITIUS ADAPTED',
+    version: '3.0.0 - MAURITIUS ADAPTED - BUG FIXED',
     
     mauritiusContext: {
       location: 'Republic of Mauritius (20.2°S, 57.5°E)',
@@ -2406,8 +2406,18 @@ export async function GET() {
       '🔬 Local diagnostic test recommendations',
       '🏥 Mauritius specialist referral pathways',
       '🚫 Elimination of inappropriate travel-related questions',
-      '🇲🇺 Compliance with Mauritius medical standards'
+      '🇲🇺 Compliance with Mauritius medical standards',
+      '🐛 BUG FIX: Fixed tropicalRisk variable name error'
     ],
+    
+    bugFixes: {
+      v3_0_1: {
+        issue: 'ReferenceError: tropicalRisk is not defined',
+        fix: 'Corrected variable name from tropicalRisk to tropicalDiseaseRisk in generateMauritiusRecommendations function',
+        affectedFunction: 'generateMauritiusRecommendations',
+        status: 'RESOLVED'
+      }
+    },
     
     modes: {
       fast: {
@@ -2428,28 +2438,6 @@ export async function GET() {
         focusOn: 'Complex tropical cases + rare complications + chronic management',
         model: 'gpt-4o'
       }
-    },
-    
-    adaptations: {
-      eliminatedInappropriateQuestions: [
-        '❌ "Have you traveled to tropical countries?"',
-        '❌ "Malaria exposure during travel?"',
-        '❌ "Risk of dengue from trips?"'
-      ],
-      addedMauritiusSpecificQuestions: [
-        '✅ Mosquito exposure and breeding site assessment',
-        '✅ Community outbreak pattern evaluation',
-        '✅ Seasonal timing correlation',
-        '✅ Water contact exposure (leptospirosis)',
-        '✅ Dengue vs chikungunya differentiation',
-        '✅ Pregnancy + tropical disease interactions'
-      ]
-    },
-    
-    compliance: {
-      dataProtection: 'GDPR + HIPAA + Mauritius Data Protection Act',
-      medicalStandards: 'UK-influenced protocols adapted for tropical context',
-      epidemiology: 'WHO + Mauritius Ministry of Health guidelines'
     },
     
     testEndpoints: {
