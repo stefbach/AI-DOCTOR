@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
+import { BiologyResultsManager } from "./biology-results-manager"
 import { 
   FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube, 
   Scan, AlertTriangle, XCircle, Eye, EyeOff, Edit, Save, FileCheck, Plus, 
@@ -674,6 +675,7 @@ export default function ProfessionalReportEditable({
   const [validationStatus, setValidationStatus] = useState<'draft' | 'validated'>('draft')
   const [modifiedSections, setModifiedSections] = useState<Set<string>>(new Set())
   const [saving, setSaving] = useState(false)
+  const [results, setResults] = useState<BiologyResult[]>([])
   const [showFullReport, setShowFullReport] = useState(false)
   const [includeFullPrescriptions, setIncludeFullPrescriptions] = useState(true)
   
@@ -3078,7 +3080,38 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
             )}
           </div>
         )}
-
+{results.length > 0 && (
+  <div className="mt-8 border-t pt-6">
+    <h3 className="font-bold text-lg mb-4 text-purple-800">RÉSULTATS REÇUS</h3>
+    <div className="space-y-4">
+      {results.map(result => (
+        <div key={result.id} className="p-4 border rounded-lg bg-gray-50">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="font-medium">{result.testName}</p>
+              <p className="text-lg font-bold">
+                {result.value} {result.unit}
+                <Badge className={`ml-2 ${
+                  result.isCritical ? 'bg-red-100 text-red-800' :
+                  result.isAbnormal ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-green-100 text-green-800'
+                }`}>
+                  {result.isCritical ? 'CRITIQUE' : result.isAbnormal ? 'ANORMAL' : 'NORMAL'}
+                </Badge>
+              </p>
+              <p className="text-sm text-gray-600">
+                Référence: {result.referenceRange.normalRange}
+              </p>
+            </div>
+            <div className="text-sm text-gray-500">
+              {new Date(result.receivedAt).toLocaleDateString()}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
         <div className="mt-8 pt-6 border-t border-gray-300">
           <p className="text-sm text-gray-600 mb-4">
             Laboratory: {report?.ordonnances?.biologie?.prescription?.laboratoireRecommande || "Any MoH approved laboratory"}
@@ -3560,7 +3593,7 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
       <PrescriptionStats />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="consultation">
             <FileText className="h-4 w-4 mr-2" />
             Report
@@ -3592,6 +3625,15 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
                 {report.ordonnances.imagerie.prescription.examens.length}
               </Badge>
             )}
+            <TabsTrigger value="resultats">
+  <TestTube className="h-4 w-4 mr-2" />
+  Résultats
+  {results.length > 0 && (
+    <Badge variant="secondary" className="ml-2">
+      {results.length}
+    </Badge>
+  )}
+
           </TabsTrigger>
           <TabsTrigger value="invoice">
             <Receipt className="h-4 w-4 mr-2" />
@@ -3614,7 +3656,16 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
         <TabsContent value="imagerie">
           <ImagingPrescription />
         </TabsContent>
-
+<TabsContent value="resultats">
+  <BiologyResultsManager
+    consultationId={reportId || ""}
+    patientId={getReportPatient().nom || ""}
+    prescribedTests={report?.ordonnances?.biologie?.prescription?.analyses ? 
+      Object.values(report.ordonnances.biologie.prescription.analyses).flat() : []}
+    onResultsUpdated={(results) => {
+      setResults(results)
+    }}
+  
         <TabsContent value="invoice">
           <InvoiceComponent />
         </TabsContent>
