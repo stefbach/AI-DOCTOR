@@ -3289,15 +3289,6 @@ const MAURITIUS_TROPICAL_DISEASES = [
   'leptospirosis'
 ];
 
-function getCurrentSeasonalContext() {
-  const month = new Date().getMonth() + 1;
-  const isSummer = month >= 11 || month <= 4;
-  return {
-    currentSeason: isSummer ? 'summer' : 'winter',
-    diseaseRiskLevel: isSummer ? 'high' : 'moderate'
-  };
-}
-
 // ==================== HEALTH ENDPOINT WITH COMPLETE TESTS ====================
 export async function GET(request: NextRequest) {
   const url = new URL(request.url)
