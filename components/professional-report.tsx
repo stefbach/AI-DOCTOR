@@ -2863,13 +2863,61 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
       </div>
     )
   }
-  const BiologyPrescription = () => {
+ const BiologyPrescription = () => {
     const analyses = report?.ordonnances?.biologie?.prescription?.analyses || {}
-    const hasTests = Object.values(analyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
+    
+    // 🔍 DEBUG - Ajout temporaire pour identifier le problème
+    console.log("🔬 BIOLOGY PRESCRIPTION DEBUG:", {
+      hasOrdonnances: !!report?.ordonnances,
+      hasBiologie: !!report?.ordonnances?.biologie,
+      hasPrescription: !!report?.ordonnances?.biologie?.prescription,
+      hasAnalyses: !!report?.ordonnances?.biologie?.prescription?.analyses,
+      analysesKeys: Object.keys(analyses),
+      analysesStructure: Object.entries(analyses).map(([key, tests]) => ({ 
+        [key]: Array.isArray(tests) ? tests.length : 'not array' 
+      }))
+    })
+    
+    // 🆕 FALLBACK - Si pas d'analyses dans la structure principale
+    let finalAnalyses = analyses
+    if (Object.keys(analyses).length === 0 && diagnosisData) {
+      console.log("🔄 Trying fallback extraction from diagnosisData...")
+      
+      const immediateTests = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority || []
+      const biologicTests = immediateTests.filter((test: any) => {
+        const category = (test.category || '').toLowerCase()
+        const examination = (test.examination || '').toLowerCase()
+        
+        return category.includes('biolog') || category.includes('pathol') || 
+               category.includes('lab') || category.includes('haem') || 
+               category.includes('chem') || category.includes('immun') || 
+               category.includes('micro') || category.includes('endo') ||
+               examination.includes('blood') || examination.includes('test') ||
+               examination.includes('analysis')
+      })
+      
+      console.log(`🧪 Fallback found ${biologicTests.length} biology tests`)
+      
+      if (biologicTests.length > 0) {
+        finalAnalyses = {
+          general: biologicTests.map((test: any) => ({
+            nom: test.examination || test.test_name || 'Laboratory test',
+            categorie: 'general',
+            urgence: test.urgency === 'urgent',
+            aJeun: test.fasting_required || false,
+            conditionsPrelevement: test.sample_conditions || '',
+            motifClinique: test.specific_indication || test.indication || '',
+            renseignementsCliniques: test.clinical_information || '',
+            tubePrelevement: test.sample_tube || 'As per laboratory protocol',
+            delaiResultat: test.turnaround_time || 'Standard'
+          }))
+        }
+      }
+    }
+    
+    const hasTests = Object.values(finalAnalyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
     const patient = getReportPatient()
     const praticien = getReportPraticien()
-    const rapport = getReportRapport()
-    
    const categories = [
   { key: 'general', label: 'GENERAL BIOLOGY' },  
   { key: 'hematology', label: 'HAEMATOLOGY' },
@@ -2937,7 +2985,7 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
         {hasTests ? (
           <div className="space-y-6">
             {categories.map(({ key, label }) => {
-              const tests = analyses[key]
+              const tests = finalAnalyses[key]
               if (!Array.isArray(tests) || tests.length === 0) return null
               
               return (
