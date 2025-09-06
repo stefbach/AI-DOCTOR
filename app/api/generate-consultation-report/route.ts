@@ -479,22 +479,22 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   
   console.log(`🔬 USING EXTRACTED LAB TESTS: ${extractedLabTests.length} tests`)
   
-  extractedLabTests.forEach((test: any) => {
-    labTests.push({
-      name: test.name,
-      category: test.originalCategory || test.category || 'Clinical Chemistry',
-      urgent: test.urgency === 'urgent' || test.urgent || false,
-      fasting: test.fasting_required || test.fasting || false,
-      pregnancySafe: test.pregnancy_safe !== false,
-      specialPrecautions: (pregnancyStatus === 'pregnant' || pregnancyStatus === 'possibly_pregnant') ?
-        'Inform laboratory of pregnancy status' : '',
-      sampleConditions: test.conditions || '',
-      clinicalIndication: test.indication || '',
-      clinicalInformation: test.clinical_information || '',
-      sampleTube: test.tube_type || 'As per laboratory protocol',
-      turnaroundTime: test.turnaround_time || 'Standard'
-    })
+ extractedLabTests.forEach((test: any) => {
+  labTests.push({
+    name: test.name,
+    category: test.category,  // ← FIX: Utilise la smart category, pas originalCategory
+    urgent: test.urgency === 'urgent' || test.urgent || false,
+    fasting: test.fasting_required || test.fasting || false,
+    pregnancySafe: test.pregnancy_safe !== false,
+    specialPrecautions: (pregnancyStatus === 'pregnant' || pregnancyStatus === 'possibly_pregnant') ?
+      'Inform laboratory of pregnancy status' : '',
+    sampleConditions: test.conditions || '',
+    clinicalIndication: test.indication || '',
+    clinicalInformation: test.clinical_information || '',
+    sampleTube: test.tube_type || 'As per laboratory protocol',
+    turnaroundTime: test.turnaround_time || 'Standard'
   })
+})
 
   // =========== 4. LAB TESTS FROM MAURITIAN DOCS (FALLBACK) ===========
   if (labTests.length === 0) {
