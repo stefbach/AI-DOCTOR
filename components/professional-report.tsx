@@ -1330,6 +1330,18 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
         // Map medications
         if (apiReport.prescriptions?.medications) {
           reportData.ordonnances!.medicaments = {
+            // 🔍 DEBUG COMPLET
+  console.log("🔬 MAPPING DEBUG:")
+  console.log("- labData existe:", !!labData)
+  console.log("- labData.prescription existe:", !!labData.prescription)
+  console.log("- labData.prescription.analyses existe:", !!labData.prescription?.analyses)
+  console.log("- Contenu de analyses:", JSON.stringify(labData.prescription?.analyses, null, 2))
+  
+  // Compter les tests dans chaque catégorie
+  const analyses = labData.prescription?.analyses || {}
+  Object.keys(analyses).forEach(category => {
+    console.log(`- ${category}: ${analyses[category]?.length || 0} tests`)
+  })
             enTete: currentDoctorInfo,
             patient: reportData.compteRendu.patient,
             prescription: {
@@ -1450,7 +1462,8 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
             }
           }
         }
-                
+          console.log("✅ STRUCTURE FINALE reportData.ordonnances.biologie:")
+          console.log(JSON.stringify(reportData.ordonnances?.biologie, null, 2))      
         // Map imaging studies
         if (apiReport.prescriptions?.imagingStudies) {
           const imagingData = apiReport.prescriptions.imagingStudies
