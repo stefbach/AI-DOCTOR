@@ -1,4 +1,4 @@
-// /app/api/openai-diagnosis/route.ts - VERSION 4.3 MAURITIUS + SYSTÈME D'URGENCES VITALES
+// /app/api/openai-diagnosis/route.ts - VERSION 4.3 MAURITIUS + SYSTÈME D'URGENCES VITALES CORRIGÉ
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
@@ -811,50 +811,52 @@ function getEmergencyICD10(emergencyCategory: string): string {
   return icd10Map[emergencyCategory] || 'R68.8'
 }
 
-// ==================== GÉNÉRATION RÉPONSE D'URGENCE NORMALISÉE ====================
-function buildNormalizedEmergencyResponse(
+// ==================== FONCTION BUILDCOMPLETEEMERGENCYRESPONSE CORRIGÉE ====================
+function buildCompleteEmergencyResponse(
   patientContext: PatientContext,
   emergencyTriage: EmergencyTriage,
-  emergencyAnalysis: any,
-  processingTime: number
+  emergencyAnalysis: any
 ): any {
-  
-  const telemedicineAlert = getTelemedicineAlert(emergencyTriage.emergencyCategory);
   const protocol = getEmergencyProtocol(emergencyTriage.emergencyCategory);
+  const telemedicineAlert = getTelemedicineAlert(emergencyTriage.emergencyCategory);
+  const processingTime = Date.now();
   
   return {
     success: true,
     processingTime: `${processingTime}ms`,
     
-    // ========== DIAGNOSTIC (FORMAT ATTENDU PARTOUT) ==========
+    // ========== FORMAT FRONTEND ATTENDU ==========
+    // Diagnostic principal
     diagnosis: {
       primary: {
-        condition: `URGENCE VITALE: ${emergencyTriage.emergencyCategory}`,
-        icd10_code: getEmergencyICD10(emergencyTriage.emergencyCategory),
-        confidence_level: 95,
+        condition: `🚨 URGENCE VITALE: ${emergencyTriage.emergencyCategory}`,
+        icd10: getEmergencyICD10(emergencyTriage.emergencyCategory),
+        confidence: 95,
         severity: "critique",
-        pathophysiology: `Urgence vitale nécessitant intervention immédiate. ${emergencyTriage.emergencyCategory} détecté selon les critères cliniques internationaux. Protocole d'urgence activé pour assurer la sécurité du patient.`,
-        clinical_reasoning: `Présentation clinique évocatrice d'urgence vitale: ${emergencyTriage.redFlags.join(', ')}. Action immédiate requise selon protocoles d'urgence Maurice et standards internationaux.`
+        pathophysiology: `Urgence vitale nécessitant intervention immédiate. ${emergencyTriage.emergencyCategory} détecté selon les critères cliniques internationaux.`,
+        clinical_reasoning: `Présentation clinique évocatrice d'urgence vitale: ${emergencyTriage.redFlags.join(', ')}. Action immédiate requise.`
       }
     },
     
-    // ========== MEDICATIONS (FORMAT ATTENDU PARTOUT) ==========
+    // Médications d'urgence (format frontend)
     medications: protocol.medications.emergency.map((med: any, idx: number) => ({
       id: idx + 1,
-      name: med?.drug || "Médicament d'urgence",
-      dci: med?.dci || "DCI urgence",
-      posology: med?.dosing?.adult || "Selon protocole urgence",
-      indication: med?.indication || "Traitement d'urgence vitale",
-      duration: med?.duration || "Urgence - selon évolution",
-      contraindications: emergencyTriage.contraindications.join(', ') || "Voir protocole urgence",
+      name: med?.drug || "Aspirine 300mg",
+      dci: med?.dci || "Acide acétylsalicylique",
+      posology: med?.dosing?.adult || "300mg stat puis 75mg OD",
+      indication: med?.indication || "Antiagrégant plaquettaire en urgence coronarienne",
+      duration: med?.duration || "Urgence - selon protocole",
+      contraindications: "Allergie aspirine, hémorragie active",
       side_effects: "Surveillance continue requise en milieu hospitalier"
     })),
     
-    // ========== FOLLOW UP PLAN (FORMAT ATTENDU PARTOUT) ==========
+    // Plan de suivi d'urgence (format frontend)
     followUpPlan: {
-      red_flags: emergencyTriage.redFlags.join(' | '),
-      immediate: emergencyTriage.immediateActions.join(' | '),
-      next_consultation: "HOSPITALISATION IMMÉDIATE REQUISE",
+      red_flags: `🚨 URGENCE VITALE EN COURS: ${emergencyTriage.redFlags.join(' | ')}`,
+      immediate: `⚡ ACTIONS IMMÉDIATES: ${emergencyTriage.immediateActions.join(' | ')}`,
+      next_consultation: "🏥 HOSPITALISATION IMMÉDIATE REQUISE - SAMU 114",
+      
+      // Infos spécifiques urgence
       emergency_specific: {
         urgency_level: emergencyTriage.urgencyLevel,
         time_to_treatment: emergencyTriage.timeToTreatment,
@@ -867,7 +869,62 @@ function buildNormalizedEmergencyResponse(
       }
     },
     
-    // ========== MAURITIUS DOCUMENTS (FORMAT ATTENDU PARTOUT) ==========
+    // ========== INDICATEURS CLÉS POUR LE FRONTEND ==========
+    // Indicateur principal d'urgence
+    is_emergency: true,
+    emergency_detected: true,
+    vital_emergency: true,
+    
+    // Données d'urgence structurées
+    emergency_info: {
+      alert_level: "CRITIQUE",
+      emergency_category: emergencyTriage.emergencyCategory,
+      urgency_display: `🚨 ${emergencyTriage.emergencyCategory.replace('_', ' ')}`,
+      time_critical: emergencyTriage.timeToTreatment === 'IMMEDIAT',
+      
+      // Instructions patient visibles
+      patient_alert: {
+        title: `🚨 URGENCE VITALE DÉTECTÉE`,
+        subtitle: `${emergencyTriage.emergencyCategory.replace('_', ' ')}`,
+        priority: "CRITIQUE - ACTION IMMÉDIATE REQUISE",
+        main_action: "APPELER SAMU 114 IMMÉDIATEMENT",
+        secondary_actions: emergencyTriage.immediateActions
+      },
+      
+      // Limitations télémédecine
+      telemedicine_alert: {
+        risk_level: emergencyTriage.telemedicineRisk,
+        limitation: telemedicineAlert.limitation,
+        reason: telemedicineAlert.reason,
+        required_action: telemedicineAlert.immediateAction,
+        physical_exam_required: true
+      }
+    },
+    
+    // ========== TRIAGE D'URGENCE VISIBLE ==========
+    emergency_triage: {
+      performed: true,
+      result: "URGENCE_VITALE_DETECTEE",
+      urgency_level: emergencyTriage.urgencyLevel,
+      emergency_category: emergencyTriage.emergencyCategory,
+      vitale: emergencyTriage.vitale,
+      time_to_treatment: emergencyTriage.timeToTreatment,
+      telemedicine_risk: emergencyTriage.telemedicineRisk,
+      hospitalization_required: emergencyTriage.hospitalization,
+      
+      // Surveillance et escalade
+      monitoring: {
+        red_flags: emergencyTriage.redFlags,
+        immediate_actions: emergencyTriage.immediateActions,
+        contraindications: emergencyTriage.contraindications,
+        when_to_call_samu: [
+          "IMMÉDIATEMENT - Urgence vitale en cours",
+          "Ne pas attendre - Transport médicalisé requis"
+        ]
+      }
+    },
+    
+    // ========== DOCUMENTS MAURITIUS ==========
     mauritianDocuments: {
       consultation: {
         header: {
@@ -876,7 +933,7 @@ function buildNormalizedEmergencyResponse(
           date: new Date().toLocaleDateString('fr-FR'),
           time: new Date().toLocaleTimeString('fr-FR'),
           type: `URGENCE VITALE: ${emergencyTriage.emergencyCategory}`,
-          priority: "CRITIQUE - ACTION IMMÉDIATE REQUISE"
+          priority: "🚨 CRITIQUE - ACTION IMMÉDIATE REQUISE"
         },
         clinical_summary: {
           chief_complaint: patientContext.chief_complaint,
@@ -889,7 +946,7 @@ function buildNormalizedEmergencyResponse(
       }
     },
     
-    // ========== VALIDATION (FORMAT ATTENDU PARTOUT) ==========
+    // ========== VALIDATION ==========
     universalValidation: {
       enabled: true,
       overall_quality: 'emergency',
@@ -900,182 +957,43 @@ function buildNormalizedEmergencyResponse(
     
     mauritiusQualityValidation: {
       enabled: true,
-      system_version: '4.3-Emergency-Response-Normalized',
+      system_version: '4.3-Emergency-Response-Frontend-Compatible',
       medical_nomenclature: 'Emergency UK/Mauritius Standards',
       emergency_protocol_compliance: true,
-      anglo_saxon_compliance: true,
-      emergency_system_integrated: true
+      frontend_compatibility: true
     },
     
-    // ========== INFORMATIONS D'URGENCE SUPPLÉMENTAIRES ==========
-    emergency_info: {
-      is_emergency: true,
-      urgency_level: emergencyTriage.urgencyLevel,
-      emergency_category: emergencyTriage.emergencyCategory,
-      vitale: emergencyTriage.vitale,
-      time_to_treatment: emergencyTriage.timeToTreatment,
-      hospitalization_required: emergencyTriage.hospitalization,
-      telemedicine_risk: emergencyTriage.telemedicineRisk,
-      
-      // Alertes télémédecine
-      telemedicine_alerts: {
-        limitation_level: telemedicineAlert.limitation,
-        risk_assessment: telemedicineAlert.riskLevel,
-        reason: telemedicineAlert.reason,
-        required_physical_exam: telemedicineAlert.requiredExamination,
-        immediate_action: telemedicineAlert.immediateAction,
-        fallback_instructions: telemedicineAlert.fallbackInstructions
-      },
-      
-      // Instructions patient
-      patient_instructions: {
-        immediate_actions: emergencyTriage.immediateActions,
-        contraindications: emergencyTriage.contraindications,
-        emergency_contacts: {
-          samu: "114",
-          primary_hospital: protocol.referral.destination,
-          hospitals: [
-            "Dr Jeetoo Hospital - Port Louis - 24h/24",
-            "Apollo Bramwell - Moka - 24h/24", 
-            "Victoria Hospital - Candos - 24h/24",
-            "SSRN Hospital - Pamplemousses - 24h/24"
-          ]
-        },
-        transport_guidance: {
-          recommended_mode: protocol.referral.transportMode,
-          urgency: protocol.referral.urgency,
-          what_to_bring: [
-            "Carte d'identité",
-            "Liste médicaments actuels",
-            "Résultats récents si disponibles",
-            "Personne de confiance"
-          ]
-        }
-      },
-      
-      // Protocole médical
-      medical_protocol: {
-        protocol_name: protocol.protocolName,
-        recognition_criteria: protocol.recognitionCriteria,
-        immediate_instructions: protocol.immediateInstructions,
-        investigations: protocol.investigations,
-        referral: protocol.referral
-      }
-    },
-    
-    // ========== TRIAGE D'URGENCE POUR COMPATIBILITÉ ==========
-    emergency_triage: {
-      performed: true,
-      urgency_level: emergencyTriage.urgencyLevel,
-      emergency_category: emergencyTriage.emergencyCategory,
-      vitale: emergencyTriage.vitale,
-      time_to_treatment: emergencyTriage.timeToTreatment,
-      telemedicine_risk: emergencyTriage.telemedicineRisk,
-      hospitalization_required: emergencyTriage.hospitalization,
-      
-      red_flags_monitoring: emergencyTriage.redFlags,
-      immediate_actions_if_worsening: emergencyTriage.immediateActions,
-      contraindications_noted: emergencyTriage.contraindications,
-      
-      escalation_criteria: {
-        when_to_call_emergency: [
-          "Situation d'urgence vitale en cours",
-          "Appeler SAMU 114 immédiatement",
-          "Transport médicalisé obligatoire"
-        ],
-        emergency_contacts: {
-          samu: "114",
-          emergency_centers: protocol.referral.destination
-        }
-      }
-    },
-    
-    // ========== MÉTADONNÉES ==========
+    // ========== MÉTADONNÉES EMERGENCY ==========
     metadata: {
-      system_version: '4.3-Normalized-Emergency-Response',
-      generation_timestamp: new Date().toISOString(),
+      response_type: 'EMERGENCY_RESPONSE',
+      system_version: '4.3-Emergency-Frontend-Compatible',
       emergency_detected: true,
-      response_type: 'emergency_normalized',
-      total_processing_time_ms: processingTime,
-      emergency_processing_bypassed_openai: true,
+      vital_emergency: true,
+      frontend_alert_required: true,
       
-      emergency_metrics: {
-        detection_accuracy: 98,
-        triage_classification_precision: 95,
-        telemedicine_safety_assessment: 99,
-        protocol_compliance_rate: 100,
-        response_time_ms: processingTime
+      emergency_classification: {
+        level: emergencyTriage.urgencyLevel,
+        category: emergencyTriage.emergencyCategory,
+        vitale: emergencyTriage.vitale,
+        time_critical: emergencyTriage.timeToTreatment === 'IMMEDIAT',
+        transport_required: emergencyTriage.hospitalization === 'IMMEDIATE'
+      },
+      
+      display_instructions: {
+        show_emergency_banner: true,
+        highlight_color: "red",
+        priority_display: "CRITIQUE",
+        auto_scroll_to_emergency: true,
+        disable_telemedicine_options: true
       },
       
       features: [
-        '🚨 URGENCE VITALE DÉTECTÉE - Réponse immédiate',
+        '🚨 URGENCE VITALE DÉTECTÉE - Alerte immédiate',
         '⚠️ TÉLÉMÉDECINE INSUFFISANTE - Examen physique requis',
-        '🏥 HOSPITALISATION IMMÉDIATE - Transport arrangé',
-        '🎯 PROTOCOLE MAURICE - Standards internationaux',
-        '📱 SAMU 114 - Contact d\'urgence activé',
-        '🔄 FORMAT NORMALISÉ - Compatible avec toute la chaîne'
+        '🏥 HOSPITALISATION IMMÉDIATE - Transport organisé',
+        '📱 SAMU 114 - Contact d\'urgence prioritaire',
+        '🎯 PROTOCOLE MAURICE - Standards d\'urgence'
       ]
-    }
-  };
-}
-
-// ==================== FONCTION MANQUANTE AJOUTÉE ====================
-function buildCompleteEmergencyResponse(
-  patientContext: PatientContext,
-  emergencyTriage: EmergencyTriage,
-  emergencyAnalysis: any
-): any {
-  const protocol = getEmergencyProtocol(emergencyTriage.emergencyCategory);
-  const telemedicineAlert = getTelemedicineAlert(emergencyTriage.emergencyCategory);
-  
-  return {
-    success: true,
-    
-    // Diagnostic d'urgence
-    diagnosis: {
-      primary: {
-        condition: `URGENCE VITALE: ${emergencyTriage.emergencyCategory}`,
-        icd10_code: getEmergencyICD10(emergencyTriage.emergencyCategory),
-        confidence_level: 95,
-        severity: "critique"
-      }
-    },
-    
-    // Médications d'urgence
-    medications: protocol.medications.emergency.map((med: any, idx: number) => ({
-      id: idx + 1,
-      name: med?.drug || "Médicament d'urgence",
-      dci: med?.dci || "DCI urgence",
-      posology: med?.dosing?.adult || "Selon protocole urgence",
-      indication: med?.indication || "Traitement d'urgence vitale",
-      duration: med?.duration || "Urgence - selon évolution"
-    })),
-    
-    // Plan de suivi d'urgence
-    followUpPlan: {
-      red_flags: emergencyTriage.redFlags.join(' | '),
-      immediate: emergencyTriage.immediateActions.join(' | '),
-      next_consultation: "HOSPITALISATION IMMÉDIATE REQUISE"
-    },
-    
-    // Info d'urgence
-    emergency_info: {
-      is_emergency: true,
-      urgency_level: emergencyTriage.urgencyLevel,
-      emergency_category: emergencyTriage.emergencyCategory,
-      vitale: emergencyTriage.vitale,
-      time_to_treatment: emergencyTriage.timeToTreatment,
-      hospitalization_required: emergencyTriage.hospitalization,
-      telemedicine_risk: emergencyTriage.telemedicineRisk,
-      
-      patient_instructions: {
-        immediate_actions: emergencyTriage.immediateActions,
-        contraindications: emergencyTriage.contraindications,
-        emergency_contacts: {
-          samu: "114",
-          primary_hospital: protocol.referral.destination
-        }
-      }
     }
   };
 }
