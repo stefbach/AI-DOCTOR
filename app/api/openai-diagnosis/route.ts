@@ -2,6 +2,168 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
+// ==================== MAURITIUS TROPICAL DISEASES CONTEXT ====================
+interface MauritiusSeasonalContext {
+  currentSeason: 'dry' | 'transition' | 'rainy'
+  diseaseRisk: {
+    dengue: 'low' | 'medium' | 'high'
+    chikungunya: 'low' | 'medium' | 'high'
+    malaria: 'low' | 'medium' | 'high'
+    leptospirosis: 'low' | 'medium' | 'high'
+  }
+}
+
+const MAURITIUS_TROPICAL_DISEASES: Record<
+  keyof MauritiusSeasonalContext['diseaseRisk'],
+  { symptoms: string[]; investigations: string[] }
+> = {
+  dengue: {
+    symptoms: ['fever', 'headache', 'retro-orbital pain', 'joint pain'],
+    investigations: ['Dengue NS1 antigen', 'Full Blood Count'],
+  },
+  chikungunya: {
+    symptoms: ['fever', 'severe joint pain', 'rash'],
+    investigations: ['Chikungunya IgM serology'],
+  },
+  malaria: {
+    symptoms: ['fever', 'chills', 'sweats'],
+    investigations: ['Thick and thin blood film', 'Rapid diagnostic test'],
+  },
+  leptospirosis: {
+    symptoms: ['fever', 'jaundice', 'muscle pain'],
+    investigations: ['Leptospira IgM serology', 'Renal function tests'],
+  },
+}
+
+function getCurrentMauritiusSeasonalContext(): MauritiusSeasonalContext {
+  const month = new Date().getMonth() + 1
+  if ([11, 12, 1, 2, 3, 4].includes(month)) {
+    return {
+      currentSeason: 'rainy',
+      diseaseRisk: {
+        dengue: 'high',
+        chikungunya: 'high',
+        malaria: 'medium',
+        leptospirosis: 'medium',
+      },
+    }
+  }
+  return {
+    currentSeason: 'dry',
+    diseaseRisk: {
+      dengue: 'medium',
+      chikungunya: 'medium',
+      malaria: 'low',
+      leptospirosis: 'low',
+    },
+  }
+}
+
+function validateTropicalMedicalSafety(
+  analysis: any,
+  patientContext: PatientContext,
+  seasonalContext: MauritiusSeasonalContext,
+) {
+  const issues: Array<{
+    type: 'critical' | 'important' | 'minor'
+    category: string
+    description: string
+    suggestion: string
+  }> = []
+
+  const symptoms = (patientContext.symptoms || [])
+    .join(' ')
+    .toLowerCase()
+
+  if (seasonalContext.diseaseRisk.dengue !== 'low' && symptoms.includes('fever')) {
+    const hasTest = (analysis?.investigation_strategy?.laboratory_tests || []).some((t: any) =>
+      (t.test_name || '').toLowerCase().includes('dengue'),
+    )
+    if (!hasTest) {
+      issues.push({
+        type: 'important',
+        category: 'tropical_safety',
+        description: 'Possible dengue infection not investigated',
+        suggestion: 'Add Dengue NS1 antigen test',
+      })
+    }
+  }
+
+  if (seasonalContext.diseaseRisk.malaria !== 'low' && symptoms.includes('fever')) {
+    const hasTest = (analysis?.investigation_strategy?.laboratory_tests || []).some((t: any) =>
+      (t.test_name || '').toLowerCase().includes('malaria'),
+    )
+    if (!hasTest) {
+      issues.push({
+        type: 'important',
+        category: 'tropical_safety',
+        description: 'Fever in malaria season without malaria test',
+        suggestion: 'Request thick and thin blood film for malaria',
+      })
+    }
+  }
+
+  return issues
+}
+
+function addMauritiusTropicalInvestigations(
+  analysis: any,
+  patientContext: PatientContext,
+  seasonalContext: MauritiusSeasonalContext,
+) {
+  analysis = analysis || {}
+  analysis.investigation_strategy = analysis.investigation_strategy || {}
+  analysis.investigation_strategy.laboratory_tests =
+    analysis.investigation_strategy.laboratory_tests || []
+
+  const tests = analysis.investigation_strategy.laboratory_tests
+  const symptoms = (patientContext.symptoms || [])
+    .join(' ')
+    .toLowerCase()
+
+  if (seasonalContext.diseaseRisk.dengue !== 'low' && symptoms.includes('fever')) {
+    const exists = tests.some((t: any) =>
+      (t.test_name || '').toLowerCase().includes('dengue ns1'),
+    )
+    if (!exists) {
+      tests.push({
+        test_name: 'Dengue NS1 antigen',
+        clinical_justification: 'Early detection of dengue infection',
+        expected_results: 'Positive indicates acute dengue',
+        urgency: 'urgent',
+        tube_type: 'Serum (yellow top)',
+        mauritius_logistics: {
+          where: 'Central Health Laboratory',
+          cost: 'Rs 1500-2500',
+          turnaround: '24h',
+        },
+      })
+    }
+  }
+
+  if (seasonalContext.diseaseRisk.malaria !== 'low' && symptoms.includes('fever')) {
+    const exists = tests.some((t: any) =>
+      (t.test_name || '').toLowerCase().includes('thick and thin blood film'),
+    )
+    if (!exists) {
+      tests.push({
+        test_name: 'Thick and thin blood film for malaria',
+        clinical_justification: 'Detect malaria parasites',
+        expected_results: 'Parasite species identified',
+        urgency: 'urgent',
+        tube_type: 'EDTA (purple top)',
+        mauritius_logistics: {
+          where: 'Central Health Laboratory',
+          cost: 'Rs 500-800',
+          turnaround: '24h',
+        },
+      })
+    }
+  }
+
+  return analysis
+}
+
 // ==================== TYPES AND INTERFACES ====================
 interface PatientContext {
   age: number | string
@@ -37,6 +199,7 @@ interface PatientContext {
   firstName?: string
   lastName?: string
   anonymousId?: string
+  mauritiusSeasonalContext?: MauritiusSeasonalContext
 }
 
 interface ValidationResult {
@@ -337,7 +500,7 @@ function extractDCIFromDrugName(drugName: string): string {
   }
   
   // Extraction générique
-  const match = drugName.match(/^([a-zA-ZÀ-ÿ]+)/)
+  const match = name.match(/^([a-zA-ZÀ-ÿ]+)/)
   return match ? match[1].charAt(0).toUpperCase() + match[1].slice(1) : 'Principe actif'
 }
 
@@ -406,7 +569,14 @@ function calculateDailyTotal(individualDose: string, frequency: number): string 
 // ==================== MAURITIUS MEDICAL ENHANCEMENT COMPLET + DCI ====================
 function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: PatientContext): any {
   console.log('🏝️ Enhancing Mauritius medical specificity + DCI...')
-  
+  const seasonalContext =
+    patientContext.mauritiusSeasonalContext || getCurrentMauritiusSeasonalContext()
+  analysis = addMauritiusTropicalInvestigations(
+    analysis,
+    patientContext,
+    seasonalContext,
+  )
+
   const qualityCheck = validateMauritiusMedicalSpecificity(analysis)
   
   if (qualityCheck.hasGenericContent) {
@@ -1464,7 +1634,10 @@ function validateUniversalSafety(analysis: any, patientContext: PatientContext) 
       suggestion: 'Define parameters to monitor'
     })
   }
-  
+
+  const seasonalContext = patientContext.mauritiusSeasonalContext || getCurrentMauritiusSeasonalContext()
+  issues.push(...validateTropicalMedicalSafety(analysis, patientContext, seasonalContext))
+
   return { issues }
 }
 
