@@ -1450,63 +1450,7 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
             }
           }
         }
-                clinicalChemistry: (labData.prescription?.tests?.clinicalChemistry || []).map((test: any) => ({
-                  nom: test.name || '',
-                  categorie: test.category || 'Clinical Chemistry',
-                  urgence: test.urgent || false,
-                  aJeun: test.fasting || false,
-                  conditionsPrelevement: test.sampleConditions || '',
-                  motifClinique: test.clinicalIndication || '',
-                  renseignementsCliniques: test.clinicalInformation || '',
-                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
-                  delaiResultat: test.turnaroundTime || 'Standard'
-                })),
-                immunology: (labData.prescription?.tests?.immunology || []).map((test: any) => ({
-                  nom: test.name || '',
-                  categorie: test.category || 'Immunology',
-                  urgence: test.urgent || false,
-                  aJeun: test.fasting || false,
-                  conditionsPrelevement: test.sampleConditions || '',
-                  motifClinique: test.clinicalIndication || '',
-                  renseignementsCliniques: test.clinicalInformation || '',
-                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
-                  delaiResultat: test.turnaroundTime || 'Standard'
-                })),
-                microbiology: (labData.prescription?.tests?.microbiology || []).map((test: any) => ({
-                  nom: test.name || '',
-                  categorie: test.category || 'Microbiology',
-                  urgence: test.urgent || false,
-                  aJeun: test.fasting || false,
-                  conditionsPrelevement: test.sampleConditions || '',
-                  motifClinique: test.clinicalIndication || '',
-                  renseignementsCliniques: test.clinicalInformation || '',
-                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
-                  delaiResultat: test.turnaroundTime || 'Standard'
-                })),
-                endocrinology: (labData.prescription?.tests?.endocrinology || []).map((test: any) => ({
-                  nom: test.name || '',
-                  categorie: test.category || 'Endocrinology',
-                  urgence: test.urgent || false,
-                  aJeun: test.fasting || false,
-                  conditionsPrelevement: test.sampleConditions || '',
-                  motifClinique: test.clinicalIndication || '',
-                  renseignementsCliniques: test.clinicalInformation || '',
-                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
-                  delaiResultat: test.turnaroundTime || 'Standard'
-                }))
-              },
-              instructionsSpeciales: labData.prescription?.specialInstructions || [],
-              laboratoireRecommande: labData.prescription?.recommendedLaboratory || ''
-            },
-            authentification: {
-              signature: "Medical Practitioner's Signature",
-              nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
-              numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
-              date: labData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0]
-            }
-          }
-        }
-        
+                
         // Map imaging studies
         if (apiReport.prescriptions?.imagingStudies) {
           const imagingData = apiReport.prescriptions.imagingStudies
