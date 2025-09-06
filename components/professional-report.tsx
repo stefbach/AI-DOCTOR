@@ -2872,7 +2872,7 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
     )
   }
  const BiologyPrescription = () => {
-    const analyses = report?.ordonnances?.biologie?.prescription?.analyses || {}
+   const analyses = report?.prescriptions?.laboratoryTests?.prescription?.tests || {}
     
     // 🔍 DEBUG - Ajout temporaire pour identifier le problème
     console.log("🔬 BIOLOGY PRESCRIPTION DEBUG:", {
