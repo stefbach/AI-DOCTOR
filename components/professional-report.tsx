@@ -1362,7 +1362,7 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
           }
         }
         
-       // Map laboratory tests
+      // Map laboratory tests
         if (apiReport.prescriptions?.laboratoryTests) {
           const labData = apiReport.prescriptions.laboratoryTests
           reportData.ordonnances!.biologie = {
@@ -1373,6 +1373,7 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
               motifClinique: labData.prescription?.clinicalIndication || '',
               analyses: {
                 hematology: (labData.prescription?.tests?.hematology || []).map((test: any) => ({
+                  nom: test.name || '',  // ← AJOUTÉ
                   categorie: test.category || 'hematology',
                   urgence: test.urgent || false,
                   aJeun: test.fasting || false,
@@ -1383,6 +1384,7 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
                   delaiResultat: test.turnaroundTime || 'Standard'
                 })),
                 clinicalChemistry: (labData.prescription?.tests?.clinicalChemistry || []).map((test: any) => ({
+                  nom: test.name || '',  // ← AJOUTÉ
                   categorie: test.category || 'Clinical Chemistry',
                   urgence: test.urgent || false,
                   aJeun: test.fasting || false,
@@ -1393,6 +1395,7 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
                   delaiResultat: test.turnaroundTime || 'Standard'
                 })),
                 immunology: (labData.prescription?.tests?.immunology || []).map((test: any) => ({
+                  nom: test.name || '',  // ← AJOUTÉ
                   categorie: test.category || 'Immunology',
                   urgence: test.urgent || false,
                   aJeun: test.fasting || false,
@@ -1403,6 +1406,7 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
                   delaiResultat: test.turnaroundTime || 'Standard'
                 })),
                 microbiology: (labData.prescription?.tests?.microbiology || []).map((test: any) => ({
+                  nom: test.name || '',  // ← AJOUTÉ
                   categorie: test.category || 'Microbiology',
                   urgence: test.urgent || false,
                   aJeun: test.fasting || false,
@@ -1413,6 +1417,7 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
                   delaiResultat: test.turnaroundTime || 'Standard'
                 })),
                 endocrinology: (labData.prescription?.tests?.endocrinology || []).map((test: any) => ({
+                  nom: test.name || '',  // ← AJOUTÉ
                   categorie: test.category || 'Endocrinology',
                   urgence: test.urgent || false,
                   aJeun: test.fasting || false,
@@ -1423,6 +1428,7 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
                   delaiResultat: test.turnaroundTime || 'Standard'
                 })),
                 general: (labData.prescription?.tests?.general || []).map((test: any) => ({
+                  nom: test.name || '',  // ← AJOUTÉ
                   categorie: test.category || 'General Laboratory',
                   urgence: test.urgent || false,
                   aJeun: test.fasting || false,
@@ -1444,7 +1450,6 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
             }
           }
         }
-          
           // DEBUG: Vérification du mapping final
           const totalTests = Object.values(reportData.ordonnances.biologie.prescription.analyses)
             .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)
