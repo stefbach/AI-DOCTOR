@@ -1,5 +1,6 @@
 // app/api/openai-questions/route.ts - VERSION 3.0 MAURICE ADAPTED - BUG FIX
 import { type NextRequest, NextResponse } from "next/server"
+import { analyzeConsultationType, type ConsultationAnalysis } from '@/lib/consultation-utils'
 
 // Configuration
 export const runtime = 'edge'
@@ -77,6 +78,7 @@ interface MedicalContext {
   suggestedSpecialty?: string
   tropicalDiseaseRisk: TropicalDiseaseRisk // NEW
   mauritiusSeasonalContext: SeasonalContext // NEW
+  consultationAnalysis: ConsultationAnalysis
 }
 
 interface ProcessedPatientData {
@@ -197,6 +199,8 @@ interface APIResponse {
     triageCategory: string
     tropicalDiseaseRisk: TropicalDiseaseRisk // NEW
     mauritiusContext: SeasonalContext // NEW
+    consultationType: ConsultationAnalysis['consultationType']
+    consultationKeywords: string[]
   }
   recommendations: {
     immediateAction?: string[]
@@ -1200,18 +1204,30 @@ function generateMauritiusModeSpecificPrompt(
   mode: string,
   context: MedicalContext
 ): string {
-  const { patient, clinical } = context
-  
+  const { patient, clinical, consultationAnalysis } = context
+  let prompt: string
+
   switch (mode) {
     case 'fast':
-      return generateMauritiusFastModePrompt(patient, clinical, context)
+      prompt = generateMauritiusFastModePrompt(patient, clinical, context)
+      break
     case 'balanced':
-      return generateMauritiusBalancedModePrompt(patient, clinical, context)
+      prompt = generateMauritiusBalancedModePrompt(patient, clinical, context)
+      break
     case 'intelligent':
-      return generateMauritiusIntelligentModePrompt(patient, clinical, context)
+      prompt = generateMauritiusIntelligentModePrompt(patient, clinical, context)
+      break
     default:
-      return generateMauritiusBalancedModePrompt(patient, clinical, context)
+      prompt = generateMauritiusBalancedModePrompt(patient, clinical, context)
   }
+
+  if (consultationAnalysis.consultationType === 'renewal') {
+    prompt += '\nFocus questions on treatment tolerance, adherence, and need for renewal.'
+  } else if (consultationAnalysis.consultationType === 'mixed') {
+    prompt += '\nInclude questions about current treatment tolerance and new symptoms.'
+  }
+
+  return prompt
 }
 
 function generateMauritiusFastModePrompt(
@@ -2059,7 +2075,12 @@ export async function POST(request: NextRequest) {
     // 5. Process data with Mauritius adaptations
     const processedPatient = processPatientData(anonymized)
     const processedClinical = processClinicalData(clinicalData)
-    
+    const consultationAnalysis = analyzeConsultationType(
+      processedPatient.medicationsList,
+      processedClinical.mainComplaint,
+      processedClinical.symptomsList
+    )
+
     console.log('✅ Mauritius data processed:', {
       patient: {
         age: processedPatient.age,
@@ -2073,7 +2094,8 @@ export async function POST(request: NextRequest) {
         category: processedClinical.complaintCategory,
         fever: processedClinical.vitals.tempStatus,
         communityPattern: processedClinical.communityPattern
-      }
+      },
+      consultationType: consultationAnalysis.consultationType
     })
     
     // 6. Mauritius-specific risk assessment
@@ -2189,7 +2211,8 @@ export async function POST(request: NextRequest) {
       redFlags,
       suggestedSpecialty,
       tropicalDiseaseRisk,
-      mauritiusSeasonalContext
+      mauritiusSeasonalContext,
+      consultationAnalysis
     }
     
     // 10. Generate Mauritius-adapted prompt
@@ -2272,7 +2295,9 @@ export async function POST(request: NextRequest) {
         urgencyLevel: calculateUrgencyLevel(criticalityScore, processedPatient.isPregnant, tropicalDiseaseRisk),
         triageCategory: getTriageCategory(criticalityScore, processedPatient.isPregnant, tropicalDiseaseRisk),
         tropicalDiseaseRisk,
-        mauritiusContext: mauritiusSeasonalContext
+        mauritiusContext: mauritiusSeasonalContext,
+        consultationType: consultationAnalysis.consultationType,
+        consultationKeywords: consultationAnalysis.renewalKeywords
       },
       recommendations,
       dataProtection: {
@@ -2331,7 +2356,9 @@ export async function POST(request: NextRequest) {
           diseaseRiskLevel: 'medium',
           predominantDiseases: [],
           environmentalFactors: []
-        }
+        },
+        consultationType: 'new_problem',
+        consultationKeywords: []
       },
       recommendations: {
         followUp: 'Please consult with a healthcare provider familiar with tropical diseases for proper assessment'

@@ -1,4 +1,4 @@
-import { analyzeConsultationType } from '../app/api/openai-diagnosis/route'
+import { analyzeConsultationType } from '../lib/consultation-utils'
 import { describe, it } from 'node:test'
 import assert from 'node:assert'
 
