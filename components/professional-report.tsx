@@ -1330,12 +1330,6 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
         // Map medications
         if (apiReport.prescriptions?.medications) {
           reportData.ordonnances!.medicaments = {
-            
-  // Compter les tests dans chaque catégorie
-  const analyses = labData.prescription?.analyses || {}
-  Object.keys(analyses).forEach(category => {
-    console.log(`- ${category}: ${analyses[category]?.length || 0} tests`)
-  })
             enTete: currentDoctorInfo,
             patient: reportData.compteRendu.patient,
             prescription: {
@@ -1377,6 +1371,12 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
   console.log("- labData.prescription existe:", !!labData.prescription)
   console.log("- labData.prescription.analyses existe:", !!labData.prescription?.analyses)
   console.log("- Contenu de analyses:", JSON.stringify(labData.prescription?.analyses, null, 2))
+          
+  // Compter les tests dans chaque catégorie
+  const analyses = labData.prescription?.analyses || {}
+  Object.keys(analyses).forEach(category => {
+    console.log(`- ${category}: ${analyses[category]?.length || 0} tests`)
+  })
   
           reportData.ordonnances!.biologie = {
             enTete: currentDoctorInfo,
