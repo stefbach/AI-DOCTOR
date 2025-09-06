@@ -1372,7 +1372,13 @@ if (apiReport.prescriptions?.laboratoryTests || apiReport.prescriptions?.laborat
     hasPrescription: !!labData.prescription,
     hasTests: !!labData.prescription?.tests,
     testsStructure: labData.prescription?.tests ? Object.keys(labData.prescription.tests) : [],
-    labTestCount: apiReport.metadata?.prescriptionsSummary?.laboratoryTests || apiReport.metadata?.prescriptionsSummary?.laboratoryRequests || 0
+
+    labTestCount:
+      apiReport.metadata?.prescriptionsSummary?.laboratoryTests ||
+      apiReport.metadata?.prescriptionsSummary?.laboratoryRequests ||
+      0
+
+ 
   })
   
   // 🎯 FONCTION HELPER pour mapper les tests
