@@ -67,6 +67,13 @@ interface UniversalValidationResult {
   }
 }
 
+interface SeasonalContext {
+  currentSeason: 'dry' | 'transition' | 'rainy' | 'cyclone'
+  diseaseRiskLevel: 'low' | 'medium' | 'high' | 'very_high'
+  predominantDiseases: string[]
+  environmentalFactors: string[]
+}
+
 // ==================== MAURITIUS MEDICAL PROMPT COMPLET + DCI PRÉCIS ====================
 const MAURITIUS_MEDICAL_PROMPT = `YOU ARE AN EXPERT PHYSICIAN - MANDATORY JSON RESPONSE WITH MAURITIUS MEDICAL STANDARDS
 
@@ -2090,9 +2097,42 @@ const MAURITIUS_HEALTHCARE_CONTEXT = {
   },
   emergency_numbers: {
     samu: "114",
-    police_fire: "999", 
+    police_fire: "999",
     private_ambulance: "132"
   }
+}
+
+function getCurrentSeasonalContext(): SeasonalContext {
+  const currentMonth = new Date().getMonth() + 1
+
+  let currentSeason: 'dry' | 'transition' | 'rainy' | 'cyclone'
+  let diseaseRiskLevel: 'low' | 'medium' | 'high' | 'very_high'
+  let predominantDiseases: string[]
+  let environmentalFactors: string[]
+
+  if ([11, 12, 1, 2, 3, 4].includes(currentMonth)) {
+    currentSeason = 'rainy'
+    if ([12, 1, 2, 3].includes(currentMonth)) {
+      currentSeason = 'cyclone'
+      diseaseRiskLevel = 'very_high'
+    } else {
+      diseaseRiskLevel = 'high'
+    }
+    predominantDiseases = ['dengue', 'chikungunya', 'leptospirosis']
+    environmentalFactors = ['increased mosquito breeding', 'stagnant water', 'flooding risk']
+  } else if ([5, 6, 7, 8, 9, 10].includes(currentMonth)) {
+    currentSeason = 'dry'
+    diseaseRiskLevel = 'medium'
+    predominantDiseases = ['respiratory infections', 'sugar cane burning effects']
+    environmentalFactors = ['dry air', 'dust', 'air pollution from burning']
+  } else {
+    currentSeason = 'transition'
+    diseaseRiskLevel = 'medium'
+    predominantDiseases = ['viral respiratory infections', 'gastroenteritis']
+    environmentalFactors = ['variable weather', 'changing humidity']
+  }
+
+  return { currentSeason, diseaseRiskLevel, predominantDiseases, environmentalFactors }
 }
 
 // ==================== VALIDATION AND DOCUMENTS (CONSERVÉ) ====================
@@ -2405,7 +2445,9 @@ function convertToSimpleFormat(dosing: string): string {
 export async function POST(request: NextRequest) {
   console.log('🚀 MAURITIUS MEDICAL AI - VERSION 4.3 LOGIQUE COMPLÈTE + DCI PRÉCIS')
   const startTime = Date.now()
-  
+
+  const mauritiusSeasonalContext = getCurrentSeasonalContext()
+
   try {
     const [body, apiKey] = await Promise.all([
       request.json(),
@@ -2428,7 +2470,7 @@ export async function POST(request: NextRequest) {
         errorCode: 'API_CONFIG_ERROR'
       }, { status: 500 })
     }
-    
+
     const { anonymized: anonymizedPatientData, originalIdentity } = anonymizePatientData(body.patientData)
     
     const patientContext: PatientContext = {
@@ -2661,6 +2703,16 @@ universalValidation: {
     'Gynécologie', 'Pédiatrie', 'Gériatrie', 'Médecine générale'
   ],
   timestamp: finalAnalysis.universal_validation?.timestamp || new Date().toISOString()
+},
+
+// Validation maladies tropicales
+tropicalDiseaseValidation: {
+  seasonal_context: mauritiusSeasonalContext,
+  safety_validation_status: finalAnalysis.medication_safety?.safety_level || 'unknown',
+  medication_safety_flags: finalAnalysis.safety_alerts || [],
+  investigation_enhancements: finalAnalysis.investigation_strategy?.tropical_enhancements || [],
+  endemic_diseases: mauritiusSeasonalContext.predominantDiseases,
+  safety_corrections_applied: finalAnalysis.medication_safety?.safety_recommendations || []
 },
 
 // Raisonnement diagnostique
@@ -2907,6 +2959,13 @@ expertAnalysis: {
           'Gestion avancée interactions médicamenteuses',
           'Corrections symptomatiques intelligentes'
         ],
+        tropical_medicine_adaptation: {
+          seasonal_risk: mauritiusSeasonalContext.diseaseRiskLevel,
+          endemic_coverage: mauritiusSeasonalContext.predominantDiseases,
+          medication_safety_validation: finalAnalysis.medication_safety?.safety_level || 'unknown',
+          investigation_enhancement: finalAnalysis.investigation_strategy?.tropical_enhancements || [],
+          community_outbreak_awareness: mauritiusSeasonalContext.environmentalFactors
+        },
         quality_metrics: {
           diagnostic_confidence: finalAnalysis.universal_validation?.metrics?.diagnostic_confidence || 85,
           treatment_completeness: finalAnalysis.universal_validation?.metrics?.treatment_completeness || 90,
@@ -2975,7 +3034,14 @@ expertAnalysis: {
         undefined_protection: true,
         detailed_indications: true,
         dci_enforcement: true,
-        complete_logic_preserved: true
+        complete_logic_preserved: true,
+        tropical_medicine_adaptation: {
+          seasonal_risk: mauritiusSeasonalContext.diseaseRiskLevel,
+          endemic_coverage: mauritiusSeasonalContext.predominantDiseases,
+          medication_safety_validation: 'unknown',
+          investigation_enhancement: [],
+          community_outbreak_awareness: mauritiusSeasonalContext.environmentalFactors
+        }
       }
     }, { status: 500 })
   }
