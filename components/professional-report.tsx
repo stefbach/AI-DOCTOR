@@ -2871,7 +2871,7 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
     const rapport = getReportRapport()
     
    const categories = [
-  { key: 'general', label: 'GENERAL BIOLOGY' }   
+  { key: 'general', label: 'GENERAL BIOLOGY' },  
   { key: 'hematology', label: 'HAEMATOLOGY' },
   { key: 'clinicalChemistry', label: 'CLINICAL CHEMISTRY' },
   { key: 'immunology', label: 'IMMUNOLOGY' },
