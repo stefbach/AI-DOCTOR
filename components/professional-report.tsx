@@ -1372,9 +1372,9 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
               datePrescription: labData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0],
               motifClinique: labData.prescription?.clinicalIndication || '',
               analyses: {
-                haematology: (labData.prescription?.tests?.hematology || []).map((test: any) => ({
+                hematology: (labData.prescription?.tests?.hematology || []).map((test: any) => ({
                   nom: test.name || '',
-                  categorie: test.category || 'Haematology',
+                  categorie: test.category || 'hematology',
                   urgence: test.urgent || false,
                   aJeun: test.fasting || false,
                   conditionsPrelevement: test.sampleConditions || '',
@@ -2881,11 +2881,12 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
     const rapport = getReportRapport()
     
     const categories = [
-      { key: 'haematology', label: 'HAEMATOLOGY' },
+      { key: 'hematology', label: 'hematology' },
       { key: 'clinicalChemistry', label: 'CLINICAL CHEMISTRY' },
       { key: 'immunology', label: 'IMMUNOLOGY' },
       { key: 'microbiology', label: 'MICROBIOLOGY' },
-      { key: 'endocrinology', label: 'ENDOCRINOLOGY' }
+      { key: 'endocrinology', label: 'ENDOCRINOLOGY' },
+      { key: 'general', label: 'GENERAL LABORATORY' }
     ]
     
     if (!includeFullPrescriptions && report?.prescriptionsResume) {
