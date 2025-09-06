@@ -3656,15 +3656,17 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
           <ImagingPrescription />
         </TabsContent>
 <TabsContent value="resultats">
-  <BiologyResultsManager
-    consultationId={reportId || ""}
-    patientId={getReportPatient().nom || ""}
-    prescribedTests={report?.ordonnances?.biologie?.prescription?.analyses ? 
-      Object.values(report.ordonnances.biologie.prescription.analyses).flat() : []}
-    onResultsUpdated={(results) => {
-      setResults(results)
-    }}
-  
+          <BiologyResultsManager
+            consultationId={reportId || ""}
+            patientId={getReportPatient().nom || ""}
+            prescribedTests={report?.ordonnances?.biologie?.prescription?.analyses ? 
+              Object.values(report.ordonnances.biologie.prescription.analyses).flat() : []}
+            onResultsUpdated={(results) => {
+              setResults(results)
+            }}
+          />
+        </TabsContent>
+        
         <TabsContent value="invoice">
           <InvoiceComponent />
         </TabsContent>
