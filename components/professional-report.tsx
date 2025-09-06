@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
-import { BiologyResultsManager } from "./biology-results-manager"
 import { 
   FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube, 
   Scan, AlertTriangle, XCircle, Eye, EyeOff, Edit, Save, FileCheck, Plus, 
@@ -675,7 +674,6 @@ export default function ProfessionalReportEditable({
   const [validationStatus, setValidationStatus] = useState<'draft' | 'validated'>('draft')
   const [modifiedSections, setModifiedSections] = useState<Set<string>>(new Set())
   const [saving, setSaving] = useState(false)
-  const [results, setResults] = useState<BiologyResult[]>([])
   const [showFullReport, setShowFullReport] = useState(false)
   const [includeFullPrescriptions, setIncludeFullPrescriptions] = useState(true)
   
@@ -1364,79 +1362,83 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
           }
         }
         
-      // Map laboratory tests - VERSION PROPRE ET EFFICACE
-if (apiReport.prescriptions?.laboratoryTests || apiReport.prescriptions?.laboratoryRequests) {
-  const labData = apiReport.prescriptions.laboratoryTests || apiReport.prescriptions.laboratoryRequests
-  
-  // 🔍 Debug pour voir la structure exacte
-  console.log("🔬 LAB DATA DEBUG:", {
-    hasLabData: !!labData,
-    hasPrescription: !!labData.prescription,
-    hasTests: !!labData.prescription?.tests,
-    testsStructure: labData.prescription?.tests ? Object.keys(labData.prescription.tests) : [],
-
-    labTestCount:
-      apiReport.metadata?.prescriptionsSummary?.laboratoryTests ||
-      apiReport.metadata?.prescriptionsSummary?.laboratoryRequests ||
-      0
-
- 
-  })
-  
-  // 🎯 FONCTION HELPER pour mapper les tests
-  const mapTestsForCategory = (categoryTests: any[]) => {
-    return (categoryTests || []).map((test: any) => ({
-      nom: test.name || '',
-      categorie: test.category || 'Laboratory Test',
-      urgence: test.urgent || false,
-      aJeun: test.fasting || false,
-      conditionsPrelevement: test.sampleConditions || '',
-      motifClinique: test.clinicalIndication || '',
-      renseignementsCliniques: test.clinicalInformation || '',
-      tubePrelevement: test.sampleTube || 'As per laboratory protocol',
-      delaiResultat: test.turnaroundTime || 'Standard'
-    }))
-  }
-  
-  // 🔧 EXTRACTION PROPRE des tests par catégorie
-  const tests = labData.prescription?.tests || {}
-  const analyses = {
-    hematology: mapTestsForCategory(tests.hematology),
-    immunology: mapTestsForCategory(tests.immunology),
-    clinicalChemistry: mapTestsForCategory(tests.clinicalChemistry),
-    microbiology: mapTestsForCategory(tests.microbiology),
-    endocrinology: mapTestsForCategory(tests.endocrinology),
-    general: mapTestsForCategory(tests.general)
-  }
-  
-  // 🔍 Debug des résultats
-  const totalTests = Object.values(analyses).reduce((acc, arr) => acc + arr.length, 0)
-  console.log("🧪 ANALYSES MAPPED:", {
-    totalTests,
-    byCategory: Object.entries(analyses).map(([key, arr]) => ({ [key]: arr.length }))
-  })
-  
-  // ✅ CRÉATION de la structure biologie
-  reportData.ordonnances!.biologie = {
-    enTete: currentDoctorInfo,
-    patient: reportData.compteRendu.patient,
-    prescription: {
-      datePrescription: labData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0],
-      motifClinique: labData.prescription?.clinicalIndication || '',
-      analyses: analyses,
-      instructionsSpeciales: labData.prescription?.specialInstructions || [],
-      laboratoireRecommande: labData.prescription?.recommendedLaboratory || ''
-    },
-    authentification: {
-      signature: "Medical Practitioner's Signature",
-      nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
-      numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
-      date: labData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0]
-    }
-  }
-  
-  console.log("✅ BIOLOGIE STRUCTURE CREATED with", totalTests, "tests")
-}
+        // Map laboratory tests
+        if (apiReport.prescriptions?.laboratoryTests) {
+          const labData = apiReport.prescriptions.laboratoryTests
+          reportData.ordonnances!.biologie = {
+            enTete: currentDoctorInfo,
+            patient: reportData.compteRendu.patient,
+            prescription: {
+              datePrescription: labData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0],
+              motifClinique: labData.prescription?.clinicalIndication || '',
+              analyses: {
+                haematology: (labData.prescription?.tests?.hematology || []).map((test: any) => ({
+                  nom: test.name || '',
+                  categorie: test.category || 'Haematology',
+                  urgence: test.urgent || false,
+                  aJeun: test.fasting || false,
+                  conditionsPrelevement: test.sampleConditions || '',
+                  motifClinique: test.clinicalIndication || '',
+                  renseignementsCliniques: test.clinicalInformation || '',
+                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
+                  delaiResultat: test.turnaroundTime || 'Standard'
+                })),
+                clinicalChemistry: (labData.prescription?.tests?.clinicalChemistry || []).map((test: any) => ({
+                  nom: test.name || '',
+                  categorie: test.category || 'Clinical Chemistry',
+                  urgence: test.urgent || false,
+                  aJeun: test.fasting || false,
+                  conditionsPrelevement: test.sampleConditions || '',
+                  motifClinique: test.clinicalIndication || '',
+                  renseignementsCliniques: test.clinicalInformation || '',
+                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
+                  delaiResultat: test.turnaroundTime || 'Standard'
+                })),
+                immunology: (labData.prescription?.tests?.immunology || []).map((test: any) => ({
+                  nom: test.name || '',
+                  categorie: test.category || 'Immunology',
+                  urgence: test.urgent || false,
+                  aJeun: test.fasting || false,
+                  conditionsPrelevement: test.sampleConditions || '',
+                  motifClinique: test.clinicalIndication || '',
+                  renseignementsCliniques: test.clinicalInformation || '',
+                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
+                  delaiResultat: test.turnaroundTime || 'Standard'
+                })),
+                microbiology: (labData.prescription?.tests?.microbiology || []).map((test: any) => ({
+                  nom: test.name || '',
+                  categorie: test.category || 'Microbiology',
+                  urgence: test.urgent || false,
+                  aJeun: test.fasting || false,
+                  conditionsPrelevement: test.sampleConditions || '',
+                  motifClinique: test.clinicalIndication || '',
+                  renseignementsCliniques: test.clinicalInformation || '',
+                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
+                  delaiResultat: test.turnaroundTime || 'Standard'
+                })),
+                endocrinology: (labData.prescription?.tests?.endocrinology || []).map((test: any) => ({
+                  nom: test.name || '',
+                  categorie: test.category || 'Endocrinology',
+                  urgence: test.urgent || false,
+                  aJeun: test.fasting || false,
+                  conditionsPrelevement: test.sampleConditions || '',
+                  motifClinique: test.clinicalIndication || '',
+                  renseignementsCliniques: test.clinicalInformation || '',
+                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
+                  delaiResultat: test.turnaroundTime || 'Standard'
+                }))
+              },
+              instructionsSpeciales: labData.prescription?.specialInstructions || [],
+              laboratoireRecommande: labData.prescription?.recommendedLaboratory || ''
+            },
+            authentification: {
+              signature: "Medical Practitioner's Signature",
+              nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
+              numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
+              date: labData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0]
+            }
+          }
+        }
         
         // Map imaging studies
         if (apiReport.prescriptions?.imagingStudies) {
@@ -2871,72 +2873,21 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
       </div>
     )
   }
- const BiologyPrescription = () => {
-   const analyses = report?.prescriptions?.laboratoryTests?.prescription?.tests || {}
-    
-    // 🔍 DEBUG - Ajout temporaire pour identifier le problème
-    console.log("🔬 BIOLOGY PRESCRIPTION DEBUG:", {
-      hasOrdonnances: !!report?.ordonnances,
-      hasBiologie: !!report?.ordonnances?.biologie,
-      hasPrescription: !!report?.ordonnances?.biologie?.prescription,
-      hasAnalyses: !!report?.ordonnances?.biologie?.prescription?.analyses,
-      analysesKeys: Object.keys(analyses),
-      analysesStructure: Object.entries(analyses).map(([key, tests]) => ({ 
-        [key]: Array.isArray(tests) ? tests.length : 'not array' 
-      }))
-    })
-    
-    // 🆕 FALLBACK - Si pas d'analyses dans la structure principale
-    let finalAnalyses = analyses
-    if (Object.keys(analyses).length === 0 && diagnosisData) {
-      console.log("🔄 Trying fallback extraction from diagnosisData...")
-      
-      const immediateTests = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority || []
-      const biologicTests = immediateTests.filter((test: any) => {
-        const category = (test.category || '').toLowerCase()
-        const examination = (test.examination || '').toLowerCase()
-        
-        return category.includes('biolog') || category.includes('pathol') || 
-               category.includes('lab') || category.includes('haem') || 
-               category.includes('chem') || category.includes('immun') || 
-               category.includes('micro') || category.includes('endo') ||
-               examination.includes('blood') || examination.includes('test') ||
-               examination.includes('analysis')
-      })
-      
-      console.log(`🧪 Fallback found ${biologicTests.length} biology tests`)
-      
-      if (biologicTests.length > 0) {
-        finalAnalyses = {
-          general: biologicTests.map((test: any) => ({
-            nom: test.examination || test.test_name || 'Laboratory test',
-            categorie: 'general',
-            urgence: test.urgency === 'urgent',
-            aJeun: test.fasting_required || false,
-            conditionsPrelevement: test.sample_conditions || '',
-            motifClinique: test.specific_indication || test.indication || '',
-            renseignementsCliniques: test.clinical_information || '',
-            tubePrelevement: test.sample_tube || 'As per laboratory protocol',
-            delaiResultat: test.turnaround_time || 'Standard'
-          }))
-        }
-      }
-    }
-    
-    const hasTests = Object.values(finalAnalyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
+  const BiologyPrescription = () => {
+    const analyses = report?.ordonnances?.biologie?.prescription?.analyses || {}
+    const hasTests = Object.values(analyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
     const patient = getReportPatient()
     const praticien = getReportPraticien()
-   const rapport = getReportRapport()  
-   const categories = [
-  { key: 'general', label: 'GENERAL BIOLOGY' },  
-  { key: 'hematology', label: 'HAEMATOLOGY' },
-  { key: 'clinicalChemistry', label: 'CLINICAL CHEMISTRY' },
-  { key: 'immunology', label: 'IMMUNOLOGY' },
-  { key: 'microbiology', label: 'MICROBIOLOGY' },
-  { key: 'endocrinology', label: 'ENDOCRINOLOGY' },
-  
-]
-
+    const rapport = getReportRapport()
+    
+    const categories = [
+      { key: 'haematology', label: 'HAEMATOLOGY' },
+      { key: 'clinicalChemistry', label: 'CLINICAL CHEMISTRY' },
+      { key: 'immunology', label: 'IMMUNOLOGY' },
+      { key: 'microbiology', label: 'MICROBIOLOGY' },
+      { key: 'endocrinology', label: 'ENDOCRINOLOGY' }
+    ]
+    
     if (!includeFullPrescriptions && report?.prescriptionsResume) {
       return (
         <Card>
@@ -2994,7 +2945,7 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
         {hasTests ? (
           <div className="space-y-6">
             {categories.map(({ key, label }) => {
-              const tests = finalAnalyses[key]
+              const tests = analyses[key]
               if (!Array.isArray(tests) || tests.length === 0) return null
               
               return (
@@ -3080,38 +3031,7 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
             )}
           </div>
         )}
-{results.length > 0 && (
-  <div className="mt-8 border-t pt-6">
-    <h3 className="font-bold text-lg mb-4 text-purple-800">RÉSULTATS REÇUS</h3>
-    <div className="space-y-4">
-      {results.map(result => (
-        <div key={result.id} className="p-4 border rounded-lg bg-gray-50">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="font-medium">{result.testName}</p>
-              <p className="text-lg font-bold">
-                {result.value} {result.unit}
-                <Badge className={`ml-2 ${
-                  result.isCritical ? 'bg-red-100 text-red-800' :
-                  result.isAbnormal ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-green-100 text-green-800'
-                }`}>
-                  {result.isCritical ? 'CRITIQUE' : result.isAbnormal ? 'ANORMAL' : 'NORMAL'}
-                </Badge>
-              </p>
-              <p className="text-sm text-gray-600">
-                Référence: {result.referenceRange.normalRange}
-              </p>
-            </div>
-            <div className="text-sm text-gray-500">
-              {new Date(result.receivedAt).toLocaleDateString()}
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
+
         <div className="mt-8 pt-6 border-t border-gray-300">
           <p className="text-sm text-gray-600 mb-4">
             Laboratory: {report?.ordonnances?.biologie?.prescription?.laboratoireRecommande || "Any MoH approved laboratory"}
@@ -3593,7 +3513,7 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
       <PrescriptionStats />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="consultation">
             <FileText className="h-4 w-4 mr-2" />
             Report
@@ -3616,21 +3536,13 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
                   .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)}
               </Badge>
             )}
-        <TabsTrigger value="imagerie">
+          </TabsTrigger>
+          <TabsTrigger value="imagerie">
             <Scan className="h-4 w-4 mr-2" />
             Imaging
             {report?.ordonnances?.imagerie?.prescription?.examens?.length > 0 && (
               <Badge variant="secondary" className="ml-2">
                 {report.ordonnances.imagerie.prescription.examens.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="resultats">
-            <TestTube className="h-4 w-4 mr-2" />
-            Résultats
-            {results.length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {results.length}
               </Badge>
             )}
           </TabsTrigger>
@@ -3655,18 +3567,7 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
         <TabsContent value="imagerie">
           <ImagingPrescription />
         </TabsContent>
-<TabsContent value="resultats">
-          <BiologyResultsManager
-            consultationId={reportId || ""}
-            patientId={getReportPatient().nom || ""}
-            prescribedTests={report?.ordonnances?.biologie?.prescription?.analyses ? 
-              Object.values(report.ordonnances.biologie.prescription.analyses).flat() : []}
-            onResultsUpdated={(results) => {
-              setResults(results)
-            }}
-          />
-        </TabsContent>
-        
+
         <TabsContent value="invoice">
           <InvoiceComponent />
         </TabsContent>
