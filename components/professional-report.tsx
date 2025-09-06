@@ -1450,29 +1450,7 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
             }
           }
         }
-          // DEBUG: Vérification du mapping final
-          const totalTests = Object.values(reportData.ordonnances.biologie.prescription.analyses)
-            .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)
-          
-          console.log("✅ Biology mapping completed:")
-          console.log(`   - Total tests mapped: ${totalTests}`)
-          Object.keys(reportData.ordonnances.biologie.prescription.analyses).forEach(category => {
-            const tests = reportData.ordonnances.biologie.prescription.analyses[category as keyof typeof reportData.ordonnances.biologie.prescription.analyses]
-            if (Array.isArray(tests) && tests.length > 0) {
-              console.log(`   - ${category}: ${tests.length} tests`)
-            }
-          })
-        }
-                  nom: test.name || '',
-                  categorie: test.category || 'hematology',
-                  urgence: test.urgent || false,
-                  aJeun: test.fasting || false,
-                  conditionsPrelevement: test.sampleConditions || '',
-                  motifClinique: test.clinicalIndication || '',
-                  renseignementsCliniques: test.clinicalInformation || '',
-                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
-                  delaiResultat: test.turnaroundTime || 'Standard'
-                })),
+         
                 clinicalChemistry: (labData.prescription?.tests?.clinicalChemistry || []).map((test: any) => ({
                   nom: test.name || '',
                   categorie: test.category || 'Clinical Chemistry',
