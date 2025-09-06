@@ -202,6 +202,13 @@ interface PatientContext {
   mauritiusSeasonalContext?: MauritiusSeasonalContext
 }
 
+interface SeasonalContext {
+  currentSeason: 'dry' | 'transition' | 'rainy' | 'cyclone'
+  diseaseRiskLevel: 'low' | 'medium' | 'high' | 'very_high'
+  predominantDiseases: string[]
+  environmentalFactors: string[]
+}
+
 interface ValidationResult {
   isValid: boolean
   issues: string[]
@@ -230,11 +237,45 @@ interface UniversalValidationResult {
   }
 }
 
+
+function getCurrentSeasonalContext(): SeasonalContext {
+  const currentMonth = new Date().getMonth() + 1
+
+  let currentSeason: 'dry' | 'transition' | 'rainy' | 'cyclone'
+  let diseaseRiskLevel: 'low' | 'medium' | 'high' | 'very_high'
+  let predominantDiseases: string[]
+  let environmentalFactors: string[]
+
+  if ([11, 12, 1, 2, 3, 4].includes(currentMonth)) {
+    currentSeason = 'rainy'
+    if ([12, 1, 2, 3].includes(currentMonth)) {
+      currentSeason = 'cyclone'
+      diseaseRiskLevel = 'very_high'
+    } else {
+      diseaseRiskLevel = 'high'
+    }
+    predominantDiseases = ['dengue', 'chikungunya', 'leptospirosis']
+    environmentalFactors = ['increased mosquito breeding', 'stagnant water', 'flooding risk']
+  } else if ([5, 6, 7, 8, 9, 10].includes(currentMonth)) {
+    currentSeason = 'dry'
+    diseaseRiskLevel = 'medium'
+    predominantDiseases = ['respiratory infections', 'sugar cane burning effects']
+    environmentalFactors = ['dry air', 'dust', 'air pollution from burning']
+  } else {
+    currentSeason = 'transition'
+    diseaseRiskLevel = 'medium'
+    predominantDiseases = ['viral respiratory infections', 'gastroenteritis']
+    environmentalFactors = ['variable weather', 'changing humidity']
+  }
+
+  return { currentSeason, diseaseRiskLevel, predominantDiseases, environmentalFactors }
+
 interface SeasonalContext {
   currentSeason: 'dry' | 'transition' | 'rainy' | 'cyclone'
   diseaseRiskLevel: 'low' | 'medium' | 'high' | 'very_high'
   predominantDiseases: string[]
   environmentalFactors: string[]
+
 }
 
 // ==================== MAURITIUS MEDICAL PROMPT COMPLET + DCI PRÉCIS ====================
@@ -1039,120 +1080,35 @@ function validateAndParseJSON(rawContent: string): { success: boolean, data?: an
   }
 }
 
-// ==================== MAURITIUS OPENAI CALL WITH QUALITY RETRY + DCI ====================
-async function callOpenAIWithMauritiusQuality(
+// ==================== MAURITIUS OPENAI CALL WITH TROPICAL QUALITY RETRY + DCI ====================
+async function callOpenAIWithMauritiusQualityTropical(
   apiKey: string,
   basePrompt: string,
   patientContext: PatientContext,
+  seasonalContext: SeasonalContext,
   maxRetries: number = 3
 ): Promise<any> {
-  
   let lastError: Error | null = null
   let qualityLevel = 0
-  
+
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`📡 OpenAI call attempt ${attempt + 1}/${maxRetries + 1} (Mauritius quality level: ${qualityLevel})`)
-      
-      let finalPrompt = basePrompt
-      
+      console.log(`📡 OpenAI tropical call attempt ${attempt + 1}/${maxRetries + 1} (Mauritius quality level: ${qualityLevel})`)
+
+      const seasonInfo = `🌴 CURRENT MAURITIUS SEASON: ${seasonalContext.currentSeason.toUpperCase()} - Disease risk: ${seasonalContext.diseaseRiskLevel}. Predominant diseases: ${seasonalContext.predominantDiseases.join(', ')}. Environmental factors: ${seasonalContext.environmentalFactors.join(', ')}`
+      let finalPrompt = `${seasonInfo}\n\n${basePrompt}`
+
       if (attempt === 1) {
-        finalPrompt = `🚨 PREVIOUS RESPONSE HAD GENERIC CONTENT - MAURITIUS MEDICAL SPECIFICITY + DCI REQUIRED
-
-${basePrompt}
-
-⚠️ CRITICAL REQUIREMENTS:
-- EVERY medication must have EXACT UK name + dose + DCI (e.g., "Amoxicilline 500mg", DCI: "Amoxicilline")
-- EVERY indication must be DETAILED and SPECIFIC (minimum 30 characters with medical context)
-- EVERY dosing must use UK format with precise daily totals (e.g., "500mg TDS", daily: "1500mg/day")
-- NO undefined, null, or empty values allowed
-- EVERY medication must have frequency_per_day as number
-
-EXAMPLES OF DETAILED MEDICATIONS WITH DCI:
-✅ "drug": "Amoxicilline 500mg", "dci": "Amoxicilline", "indication": "Antibiothérapie empirique pour infection bactérienne suspectée des voies respiratoires"
-✅ "drug": "Ibuprofène 400mg", "dci": "Ibuprofène", "indication": "Traitement anti-inflammatoire pour soulagement de la douleur musculo-squelettique"
-
-❌ FORBIDDEN:
-❌ "drug": "Medication" or "Antibiotic" (too generic)
-❌ "dci": missing or undefined
-❌ "indication": "Treatment" (too vague)`
+        finalPrompt = `⚠️ PREVIOUS RESPONSE TOO GENERIC - PROVIDE TROPICAL-SPECIFIC MEDICAL CONTENT FOR MAURITIUS\n\n${finalPrompt}\n\n- Highlight tropical differential diagnoses\n- Include Mauritius-available investigations\n- Use precise UK medication names with DCI`
         qualityLevel = 1
       } else if (attempt === 2) {
-        finalPrompt = `🚨🚨 MAURITIUS MEDICAL SPECIFICITY + PRECISE DCI MANDATORY
-
-${basePrompt}
-
-🆘 ABSOLUTE REQUIREMENTS:
-1. NEVER use "Medication", "undefined", null, or generic names
-2. ALWAYS use UK pharmaceutical names with exact doses + DCI
-3. ALWAYS use UK dosing format (OD/BD/TDS/QDS) with daily totals
-4. DCI MUST BE EXACT: Amoxicilline, Paracétamol, Ibuprofène, etc.
-5. INDICATIONS MUST BE DETAILED: Minimum 30 characters with specific medical context
-6. DOSING MUST INCLUDE: adult, frequency_per_day, individual_dose, daily_total_dose
-7. ALL fields must be completed with specific medical content
-
-MANDATORY DCI + MEDICATION FORMAT:
-{
-  "drug": "Amoxicilline 500mg",
-  "dci": "Amoxicilline",
-  "indication": "Antibiothérapie empirique à large spectre pour infection bactérienne suspectée des voies respiratoires incluant otite moyenne aiguë",
-  "dosing": {
-    "adult": "500mg TDS",
-    "frequency_per_day": 3,
-    "individual_dose": "500mg", 
-    "daily_total_dose": "1500mg/day"
-  }
-}
-
-❌ ABSOLUTELY FORBIDDEN:
-❌ Any medication without DCI
-❌ Any indication shorter than 25 characters
-❌ Generic terms like "medication", "antibiotic"
-❌ Vague descriptions without medical context`
+        finalPrompt = `🚨 TROPICAL MEDICINE FOCUS REQUIRED\n\n${finalPrompt}\n\n🆘 REQUIREMENTS:\n1. Integrate tropical diseases prevalent during ${seasonalContext.currentSeason} season.\n2. Investigations must specify Mauritius laboratories and logistics.\n3. Medications must include DCI and dosing in UK format.\n4. Eliminate all generic terms.`
         qualityLevel = 2
       } else if (attempt >= 3) {
-        finalPrompt = `🆘 MAXIMUM MAURITIUS MEDICAL SPECIFICITY + DCI MODE
-
-${basePrompt}
-
-🎯 EMERGENCY REQUIREMENTS FOR MAURITIUS SYSTEM:
-Every medication MUST have ALL these fields completed with DETAILED content:
-
-1. "drug": "SPECIFIC UK NAME + DOSE" (e.g., "Amoxicilline 500mg")
-2. "dci": "EXACT DCI NAME" (e.g., "Amoxicilline") 
-3. "indication": "DETAILED MEDICAL INDICATION" (minimum 40 characters with full medical context)
-4. "dosing": {
-     "adult": "UK FORMAT" (using OD/BD/TDS/QDS),
-     "frequency_per_day": NUMBER (e.g., 3),
-     "individual_dose": "EXACT DOSE" (e.g., "500mg"),
-     "daily_total_dose": "TOTAL/DAY" (e.g., "1500mg/day")
-   }
-5. ALL other fields must be completed with medical content
-
-EXAMPLE COMPLETE MEDICATION WITH DCI + DETAILED INDICATION:
-{
-  "drug": "Amoxicilline 500mg",
-  "dci": "Amoxicilline",
-  "indication": "Antibiothérapie empirique à large spectre pour infection bactérienne suspectée des voies respiratoires incluant otite moyenne aiguë et infections des voies respiratoires basses",
-  "mechanism": "Antibiotique bêta-lactamine, inhibition de la synthèse de la paroi cellulaire bactérienne",
-  "dosing": {
-    "adult": "500mg TDS",
-    "frequency_per_day": 3,
-    "individual_dose": "500mg",
-    "daily_total_dose": "1500mg/day"
-  },
-  "duration": "7 jours de traitement complet",
-  "contraindications": "Allergie aux pénicillines, mononucléose infectieuse sévère",
-  "interactions": "Efficacité réduite des contraceptifs oraux",
-  "monitoring": "Réponse clinique et réactions allergiques",
-  "side_effects": "Diarrhée, nausées, éruption cutanée",
-  "administration_instructions": "Prendre avec la nourriture, terminer le traitement complet"
-}
-
-GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters each)`
+        finalPrompt = `🆘 MAXIMUM TROPICAL SPECIFICITY MODE - MAURITIUS\n\n${finalPrompt}\n\n🎯 FINAL REQUIREMENTS:\n- Exhaustive tropical differential diagnoses.\n- Tropical investigations with Mauritian availability and cost.\n- All medications Mauritius-available with exact DCI and dosing.\n- Indications linked to tropical epidemiology.`
         qualityLevel = 3
       }
-      
+
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -1164,7 +1120,7 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
           messages: [
             {
               role: 'system',
-              content: `You are an expert physician practicing in Mauritius. CRITICAL: Generate COMPLETE medical responses with exact UK/Mauritius names and precise DCI. Never use "Medication", "undefined", null, or generic terms. Every medication must have exact DCI (Amoxicilline, Paracétamol, etc.), detailed indication (minimum 30 characters), and precise UK dosing with daily totals. Use UK dosing conventions (OD/BD/TDS/QDS). All medication objects must have ALL required fields completed with detailed medical information.`
+              content: `You are an expert physician practicing in Mauritius. CRITICAL: Generate COMPLETE medical responses with exact UK/Mauritius names and precise DCI. Emphasize tropical diseases and seasonal epidemiology for Mauritius. Never use "Medication", "undefined", null, or generic terms. Every medication must have exact DCI (Amoxicilline, Paracétamol, etc.), detailed indication (minimum 30 characters), and precise UK dosing with daily totals. Use UK dosing conventions (OD/BD/TDS/QDS). All medication objects must have ALL required fields completed with detailed medical information.`
             },
             {
               role: 'user',
@@ -1179,65 +1135,67 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
           presence_penalty: 0.2
         }),
       })
-      
+
       if (!response.ok) {
         const errorText = await response.text()
         throw new Error(`OpenAI API error (${response.status}): ${errorText.substring(0, 200)}`)
       }
-      
+
       const data = await response.json()
       const rawContent = data.choices[0]?.message?.content || ''
-      
-      console.log('🤖 GPT-4 response received, length:', rawContent.length)
-      
+
+      console.log('🤖 GPT-4 tropical response received, length:', rawContent.length)
+
       const jsonValidation = validateAndParseJSON(rawContent)
-      
+
       if (!jsonValidation.success) {
         console.error(`❌ JSON validation failed: ${jsonValidation.error}`)
         throw new Error(`Invalid JSON structure: ${jsonValidation.error}`)
       }
-      
+
       let analysis = jsonValidation.data!
-      
+
       analysis = ensureCompleteStructure(analysis)
-      
+
       const qualityCheck = validateMauritiusMedicalSpecificity(analysis)
-      
+
       if (qualityCheck.hasGenericContent && attempt < maxRetries) {
-        console.log(`⚠️ Generic content detected (${qualityCheck.issues.length} issues), retrying...`)
+        console.log(`⚠️ Generic content detected (${qualityCheck.issues.length} issues), retrying with stronger tropical focus...`)
         console.log('Issues:', qualityCheck.issues.slice(0, 3))
         throw new Error(`Generic medical content detected: ${qualityCheck.issues.slice(0, 2).join(', ')}`)
       } else if (qualityCheck.hasGenericContent && attempt === maxRetries) {
-        console.log(`⚠️ Final attempt - forcing corrections for ${qualityCheck.issues.length} issues`)
+        console.log(`⚠️ Final attempt - forcing tropical corrections for ${qualityCheck.issues.length} issues`)
         analysis = enhanceMauritiusMedicalSpecificity(analysis, patientContext)
-        
         const finalQualityCheck = validateMauritiusMedicalSpecificity(analysis)
         console.log(`✅ After enhancement: ${finalQualityCheck.issues.length} remaining issues`)
       }
-      
+
       if (qualityCheck.hasGenericContent) {
         analysis = enhanceMauritiusMedicalSpecificity(analysis, patientContext)
       }
-      
-      console.log('✅ Mauritius quality validation successful')
+
+      const tropicalSafety = validateTropicalMedicalSafety(analysis, patientContext)
+      analysis = addMauritiusTropicalInvestigations(analysis, seasonalContext)
+
+      console.log('✅ Mauritius tropical quality validation successful')
       console.log(`🏝️ Quality level used: ${qualityLevel}`)
       console.log(`📊 Medical specificity issues corrected: ${qualityCheck.issues.length}`)
-      
-      return { data, analysis, mauritius_quality_level: qualityLevel }
-      
+
+      return { data, analysis, mauritius_quality_level: qualityLevel, tropical_safety: tropicalSafety }
+
     } catch (error) {
       lastError = error as Error
       console.error(`❌ Error attempt ${attempt + 1}:`, error)
-      
+
       if (attempt < maxRetries) {
         const waitTime = Math.pow(2, attempt) * 1000
-        console.log(`⏳ Retrying in ${waitTime}ms with enhanced Mauritius medical specificity prompt...`)
+        console.log(`⏳ Retrying in ${waitTime}ms with enhanced Mauritius tropical prompt...`)
         await new Promise(resolve => setTimeout(resolve, waitTime))
       }
     }
   }
-  
-  throw lastError || new Error('Failed after multiple attempts with Mauritius quality enhancement')
+
+  throw lastError || new Error('Failed after multiple attempts with Mauritius tropical quality enhancement')
 }
 
 async function callOpenAIWithMauritiusQualityTropical(
@@ -2241,14 +2199,35 @@ function addMauritiusSpecificAdvice(analysis: any, patientContext: PatientContex
       "Réhydratation importante (climat tropical) : SRO disponibles en pharmacie, éviter fruits crus temporairement, privilégier riz blanc, bouillon léger."
   }
   
-  analysis.patient_education.mauritius_specific.general_mauritius = 
+  analysis.patient_education.mauritius_specific.general_mauritius =
     "Pharmacies 24h/24 : Phoenix, Quatre-Bornes, Port-Louis. SAMU : 114. Centres de santé gratuits si aggravation."
-  
+
+  return analysis
+}
+
+function validateTropicalMedicalSafety(analysis: any, patientContext: PatientContext) {
+  console.log('🦠 Validating tropical medical safety...')
+  const issues: string[] = []
+  const content = JSON.stringify(analysis).toLowerCase()
+  const tropicalKeywords = ['dengue', 'chikungunya', 'leptospirosis', 'malaria', 'typhoid', 'zika']
+  if (!tropicalKeywords.some(k => content.includes(k))) {
+    issues.push('No tropical disease considerations detected')
+  }
+  return { isSafe: issues.length === 0, issues }
+}
+
+function addMauritiusTropicalInvestigations(analysis: any, seasonalContext: SeasonalContext) {
+  console.log('🔍 Adding Mauritius tropical investigations...')
+  analysis.investigation_strategy = analysis.investigation_strategy || {}
+  analysis.investigation_strategy.tropical_considerations = {
+    current_season: seasonalContext.currentSeason,
+    recommended_tests: seasonalContext.predominantDiseases.map(d => `${d} serology`)
+  }
   return analysis
 }
 
 // ==================== DATA PROTECTION (CONSERVÉ) ====================
-function anonymizePatientData(patientData: any): { 
+function anonymizePatientData(patientData: any): {
   anonymized: any, 
   originalIdentity: any 
 } {
@@ -2729,6 +2708,17 @@ export async function POST(request: NextRequest) {
     
     // ============ APPEL OPENAI AVEC QUALITÉ MAURITIUS + DCI ============
     const mauritiusPrompt = prepareMauritiusQualityPrompt(patientContext, consultationAnalysis)
+
+    const seasonalContext = getCurrentSeasonalContext()
+
+    const { data: openaiData, analysis: medicalAnalysis, mauritius_quality_level, tropical_safety } = await callOpenAIWithMauritiusQualityTropical(
+      apiKey,
+      mauritiusPrompt,
+      patientContext,
+      seasonalContext
+    )
+
+
     const medsList = patientContext.current_medications.length > 0
       ? patientContext.current_medications.join(', ')
       : 'Aucun médicament actuel'
@@ -2753,7 +2743,9 @@ export async function POST(request: NextRequest) {
       riskLevel: tropical_context.riskLevel
     })
     
+
     console.log('✅ Analyse médicale avec qualité anglo-saxonne + DCI précis terminée')
+    console.log(`🌡️ Tropical safety issues: ${tropical_safety.issues.length}`)
     // ========== DÉDUPLICATION DES MÉDICAMENTS ==========
 function deduplicateMedications(medications: any[]): any[] {
   const seen = new Set()
