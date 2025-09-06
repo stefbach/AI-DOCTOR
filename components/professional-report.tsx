@@ -3616,8 +3616,7 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
                   .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)}
               </Badge>
             )}
-          </TabsTrigger>
-          <TabsTrigger value="imagerie">
+         <TabsTrigger value="imagerie">
             <Scan className="h-4 w-4 mr-2" />
             Imaging
             {report?.ordonnances?.imagerie?.prescription?.examens?.length > 0 && (
@@ -3625,15 +3624,15 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
                 {report.ordonnances.imagerie.prescription.examens.length}
               </Badge>
             )}
-            <TabsTrigger value="resultats">
-  <TestTube className="h-4 w-4 mr-2" />
-  Résultats
-  {results.length > 0 && (
-    <Badge variant="secondary" className="ml-2">
-      {results.length}
-    </Badge>
-  )}
-
+          </TabsTrigger>
+          <TabsTrigger value="resultats">
+            <TestTube className="h-4 w-4 mr-2" />
+            Résultats
+            {results.length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {results.length}
+              </Badge>
+            )}
           </TabsTrigger>
           <TabsTrigger value="invoice">
             <Receipt className="h-4 w-4 mr-2" />
