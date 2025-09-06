@@ -3624,7 +3624,6 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
                 {report.ordonnances.imagerie.prescription.examens.length}
               </Badge>
             )}
-          </TabsTrigger>
           <TabsTrigger value="resultats">
             <TestTube className="h-4 w-4 mr-2" />
             Résultats
