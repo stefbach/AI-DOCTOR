@@ -67,6 +67,13 @@ interface UniversalValidationResult {
   }
 }
 
+interface SeasonalContext {
+  currentSeason: 'dry' | 'transition' | 'rainy' | 'cyclone'
+  diseaseRiskLevel: 'low' | 'medium' | 'high' | 'very_high'
+  predominantDiseases: string[]
+  environmentalFactors: string[]
+}
+
 // ==================== MAURITIUS MEDICAL PROMPT COMPLET + DCI PRÉCIS ====================
 const MAURITIUS_MEDICAL_PROMPT = `YOU ARE AN EXPERT PHYSICIAN - MANDATORY JSON RESPONSE WITH MAURITIUS MEDICAL STANDARDS
 
@@ -2135,9 +2142,42 @@ const MAURITIUS_HEALTHCARE_CONTEXT = {
   },
   emergency_numbers: {
     samu: "114",
-    police_fire: "999", 
+    police_fire: "999",
     private_ambulance: "132"
   }
+}
+
+function getCurrentSeasonalContext(): SeasonalContext {
+  const currentMonth = new Date().getMonth() + 1
+
+  let currentSeason: 'dry' | 'transition' | 'rainy' | 'cyclone'
+  let diseaseRiskLevel: 'low' | 'medium' | 'high' | 'very_high'
+  let predominantDiseases: string[]
+  let environmentalFactors: string[]
+
+  if ([11, 12, 1, 2, 3, 4].includes(currentMonth)) {
+    currentSeason = 'rainy'
+    if ([12, 1, 2, 3].includes(currentMonth)) {
+      currentSeason = 'cyclone'
+      diseaseRiskLevel = 'very_high'
+    } else {
+      diseaseRiskLevel = 'high'
+    }
+    predominantDiseases = ['dengue', 'chikungunya', 'leptospirosis']
+    environmentalFactors = ['increased mosquito breeding', 'stagnant water', 'flooding risk']
+  } else if ([5, 6, 7, 8, 9, 10].includes(currentMonth)) {
+    currentSeason = 'dry'
+    diseaseRiskLevel = 'medium'
+    predominantDiseases = ['respiratory infections', 'sugar cane burning effects']
+    environmentalFactors = ['dry air', 'dust', 'air pollution from burning']
+  } else {
+    currentSeason = 'transition'
+    diseaseRiskLevel = 'medium'
+    predominantDiseases = ['viral respiratory infections', 'gastroenteritis']
+    environmentalFactors = ['variable weather', 'changing humidity']
+  }
+
+  return { currentSeason, diseaseRiskLevel, predominantDiseases, environmentalFactors }
 }
 
 // ==================== VALIDATION AND DOCUMENTS (CONSERVÉ) ====================
@@ -2450,7 +2490,9 @@ function convertToSimpleFormat(dosing: string): string {
 export async function POST(request: NextRequest) {
   console.log('🚀 MAURITIUS MEDICAL AI - VERSION 4.3 LOGIQUE COMPLÈTE + DCI PRÉCIS')
   const startTime = Date.now()
-  
+
+  const mauritiusSeasonalContext = getCurrentSeasonalContext()
+
   try {
     const [body, apiKey] = await Promise.all([
       request.json(),
@@ -2473,7 +2515,7 @@ export async function POST(request: NextRequest) {
         errorCode: 'API_CONFIG_ERROR'
       }, { status: 500 })
     }
-    
+
     const { anonymized: anonymizedPatientData, originalIdentity } = anonymizePatientData(body.patientData)
     
     const patientContext: PatientContext = {
@@ -2706,6 +2748,16 @@ universalValidation: {
     'Gynécologie', 'Pédiatrie', 'Gériatrie', 'Médecine générale'
   ],
   timestamp: finalAnalysis.universal_validation?.timestamp || new Date().toISOString()
+},
+
+// Validation maladies tropicales
+tropicalDiseaseValidation: {
+  seasonal_context: mauritiusSeasonalContext,
+  safety_validation_status: finalAnalysis.medication_safety?.safety_level || 'unknown',
+  medication_safety_flags: finalAnalysis.safety_alerts || [],
+  investigation_enhancements: finalAnalysis.investigation_strategy?.tropical_enhancements || [],
+  endemic_diseases: mauritiusSeasonalContext.predominantDiseases,
+  safety_corrections_applied: finalAnalysis.medication_safety?.safety_recommendations || []
 },
 
 // Raisonnement diagnostique
@@ -2952,6 +3004,13 @@ expertAnalysis: {
           'Gestion avancée interactions médicamenteuses',
           'Corrections symptomatiques intelligentes'
         ],
+        tropical_medicine_adaptation: {
+          seasonal_risk: mauritiusSeasonalContext.diseaseRiskLevel,
+          endemic_coverage: mauritiusSeasonalContext.predominantDiseases,
+          medication_safety_validation: finalAnalysis.medication_safety?.safety_level || 'unknown',
+          investigation_enhancement: finalAnalysis.investigation_strategy?.tropical_enhancements || [],
+          community_outbreak_awareness: mauritiusSeasonalContext.environmentalFactors
+        },
         quality_metrics: {
           diagnostic_confidence: finalAnalysis.universal_validation?.metrics?.diagnostic_confidence || 85,
           treatment_completeness: finalAnalysis.universal_validation?.metrics?.treatment_completeness || 90,
@@ -3020,10 +3079,33 @@ expertAnalysis: {
         undefined_protection: true,
         detailed_indications: true,
         dci_enforcement: true,
-        complete_logic_preserved: true
+        complete_logic_preserved: true,
+        tropical_medicine_adaptation: {
+          seasonal_risk: mauritiusSeasonalContext.diseaseRiskLevel,
+          endemic_coverage: mauritiusSeasonalContext.predominantDiseases,
+          medication_safety_validation: 'unknown',
+          investigation_enhancement: [],
+          community_outbreak_awareness: mauritiusSeasonalContext.environmentalFactors
+        }
       }
     }, { status: 500 })
   }
+}
+
+const MAURITIUS_TROPICAL_DISEASES = [
+  'dengue',
+  'chikungunya',
+  'malaria',
+  'leptospirosis'
+];
+
+function getCurrentSeasonalContext() {
+  const month = new Date().getMonth() + 1;
+  const isSummer = month >= 11 || month <= 4;
+  return {
+    currentSeason: isSummer ? 'summer' : 'winter',
+    diseaseRiskLevel: isSummer ? 'high' : 'moderate'
+  };
 }
 
 // ==================== HEALTH ENDPOINT WITH COMPLETE TESTS ====================
@@ -3034,6 +3116,7 @@ export async function GET(request: NextRequest) {
   const testDCI = url.searchParams.get('test_dci')
   const testLogic = url.searchParams.get('test_logic')
   const testTropical = url.searchParams.get('test_tropical')
+
 
   if (testTropical === 'true') {
     const analysis = {
@@ -3058,6 +3141,7 @@ export async function GET(request: NextRequest) {
       investigations: withTests.investigation_strategy.laboratory_tests.map((t: any) => t.test_name)
     })
   }
+
 
   if (testMauritius === 'true') {
     console.log('🧪 Test du système médical mauritien complet + DCI précis...')
@@ -3177,7 +3261,7 @@ export async function GET(request: NextRequest) {
   if (testDCI === 'true') {
     const testCases = [
       "Amoxicillin 500mg",
-      "Paracetamol 1g", 
+      "Paracetamol 1g",
       "Ibuprofen 400mg",
       "Some Unknown Drug 100mg",
       "Antibiotic", // Cas générique
@@ -3206,7 +3290,30 @@ export async function GET(request: NextRequest) {
       }
     })
   }
-  
+
+  if (testTropical === 'true') {
+    const seasonalContext = getCurrentSeasonalContext()
+    const safetyDemo = validateMedicationSafety(
+      [{ drug: 'Paracetamol 1g' }],
+      ['Ibuprofen 400mg TDS'],
+      'new_problem'
+    )
+
+    const autoInvestigations = {
+      laboratory_tests: ['Full Blood Count', 'NS1 antigen test'],
+      imaging_studies: []
+    }
+
+    return NextResponse.json({
+      test_type: 'Test Tropical Disease Integration',
+      version: '4.3-Complete-Logic-DCI-Precise',
+      seasonal_context: seasonalContext,
+      tropical_diseases: MAURITIUS_TROPICAL_DISEASES,
+      safety_validation_notes: safetyDemo.recommendations,
+      auto_added_investigations: autoInvestigations
+    })
+  }
+
   if (testLogic === 'true') {
     // Test de la logique médicale complète
     const testPatient = {
@@ -3307,6 +3414,7 @@ export async function GET(request: NextRequest) {
       test_mauritius_complete: 'GET /api/openai-diagnosis?test_mauritius=true',
       test_quality_prompt: 'GET /api/openai-diagnosis?test_quality=true',
       test_dci_precision: 'GET /api/openai-diagnosis?test_dci=true',
+      test_tropical_mode: 'GET /api/openai-diagnosis?test_tropical=true',
       test_complete_logic: 'GET /api/openai-diagnosis?test_logic=true'
     },
     
