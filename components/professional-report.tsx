@@ -2918,6 +2918,7 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
     const hasTests = Object.values(finalAnalyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
     const patient = getReportPatient()
     const praticien = getReportPraticien()
+   const rapport = getReportRapport()  
    const categories = [
   { key: 'general', label: 'GENERAL BIOLOGY' },  
   { key: 'hematology', label: 'HAEMATOLOGY' },
