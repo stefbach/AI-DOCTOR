@@ -797,65 +797,7 @@ function generateEmergencyAnalysis(
     }
   }
 }
-function buildCompleteEmergencyResponse(
-  patientContext: PatientContext,
-  emergencyTriage: EmergencyTriage,
-  emergencyAnalysis: any
-): any {
-  const protocol = getEmergencyProtocol(emergencyTriage.emergencyCategory);
-  const telemedicineAlert = getTelemedicineAlert(emergencyTriage.emergencyCategory);
-  
-  return {
-    success: true,
-    
-    // Diagnostic d'urgence
-    diagnosis: {
-      primary: {
-        condition: `URGENCE VITALE: ${emergencyTriage.emergencyCategory}`,
-        icd10_code: getEmergencyICD10(emergencyTriage.emergencyCategory),
-        confidence_level: 95,
-        severity: "critique"
-      }
-    },
-    
-    // Médications d'urgence
-    medications: protocol.medications.emergency.map((med: any, idx: number) => ({
-      id: idx + 1,
-      name: med?.drug || "Médicament d'urgence",
-      dci: med?.dci || "DCI urgence",
-      posology: med?.dosing?.adult || "Selon protocole urgence",
-      indication: med?.indication || "Traitement d'urgence vitale",
-      duration: med?.duration || "Urgence - selon évolution"
-    })),
-    
-    // Plan de suivi d'urgence
-    followUpPlan: {
-      red_flags: emergencyTriage.redFlags.join(' | '),
-      immediate: emergencyTriage.immediateActions.join(' | '),
-      next_consultation: "HOSPITALISATION IMMÉDIATE REQUISE"
-    },
-    
-    // Info d'urgence
-    emergency_info: {
-      is_emergency: true,
-      urgency_level: emergencyTriage.urgencyLevel,
-      emergency_category: emergencyTriage.emergencyCategory,
-      vitale: emergencyTriage.vitale,
-      time_to_treatment: emergencyTriage.timeToTreatment,
-      hospitalization_required: emergencyTriage.hospitalization,
-      telemedicine_risk: emergencyTriage.telemedicineRisk,
-      
-      patient_instructions: {
-        immediate_actions: emergencyTriage.immediateActions,
-        contraindications: emergencyTriage.contraindications,
-        emergency_contacts: {
-          samu: "114",
-          primary_hospital: protocol.referral.destination
-        }
-      }
-    }
-  };
-}
+
 function getEmergencyICD10(emergencyCategory: string): string {
   const icd10Map: { [key: string]: string } = {
     'SYNDROME_CORONARIEN_AIGU': 'I21.9',
@@ -1076,6 +1018,68 @@ function buildNormalizedEmergencyResponse(
     }
   };
 }
+
+// ==================== FONCTION MANQUANTE AJOUTÉE ====================
+function buildCompleteEmergencyResponse(
+  patientContext: PatientContext,
+  emergencyTriage: EmergencyTriage,
+  emergencyAnalysis: any
+): any {
+  const protocol = getEmergencyProtocol(emergencyTriage.emergencyCategory);
+  const telemedicineAlert = getTelemedicineAlert(emergencyTriage.emergencyCategory);
+  
+  return {
+    success: true,
+    
+    // Diagnostic d'urgence
+    diagnosis: {
+      primary: {
+        condition: `URGENCE VITALE: ${emergencyTriage.emergencyCategory}`,
+        icd10_code: getEmergencyICD10(emergencyTriage.emergencyCategory),
+        confidence_level: 95,
+        severity: "critique"
+      }
+    },
+    
+    // Médications d'urgence
+    medications: protocol.medications.emergency.map((med: any, idx: number) => ({
+      id: idx + 1,
+      name: med?.drug || "Médicament d'urgence",
+      dci: med?.dci || "DCI urgence",
+      posology: med?.dosing?.adult || "Selon protocole urgence",
+      indication: med?.indication || "Traitement d'urgence vitale",
+      duration: med?.duration || "Urgence - selon évolution"
+    })),
+    
+    // Plan de suivi d'urgence
+    followUpPlan: {
+      red_flags: emergencyTriage.redFlags.join(' | '),
+      immediate: emergencyTriage.immediateActions.join(' | '),
+      next_consultation: "HOSPITALISATION IMMÉDIATE REQUISE"
+    },
+    
+    // Info d'urgence
+    emergency_info: {
+      is_emergency: true,
+      urgency_level: emergencyTriage.urgencyLevel,
+      emergency_category: emergencyTriage.emergencyCategory,
+      vitale: emergencyTriage.vitale,
+      time_to_treatment: emergencyTriage.timeToTreatment,
+      hospitalization_required: emergencyTriage.hospitalization,
+      telemedicine_risk: emergencyTriage.telemedicineRisk,
+      
+      patient_instructions: {
+        immediate_actions: emergencyTriage.immediateActions,
+        contraindications: emergencyTriage.contraindications,
+        emergency_contacts: {
+          samu: "114",
+          primary_hospital: protocol.referral.destination
+        }
+      }
+    }
+  };
+}
+
 // ==================== MAURITIUS TROPICAL DISEASES CONTEXT ====================
 interface MauritiusSeasonalContext {
   currentSeason: 'dry' | 'transition' | 'rainy'
@@ -2067,13 +2071,13 @@ export async function POST(request: NextRequest) {
     
     // ============ SI URGENCE VITALE DÉTECTÉE - RÉPONSE IMMÉDIATE ============
     if (emergencyTriage.vitale) {
-      console.log(`🚨 URGENCE VITALE DÉTECTÉE: ${emergencyTriage.emergencyCategory}`)
-      console.log(`⏰ Action requise: ${emergencyTriage.timeToTreatment}`)
-      console.log(`🏥 Hospitalisation: ${emergencyTriage.hospitalization}`)
-      console.log(`⚠️ Risque télémédecine: ${emergencyTriage.telemedicineRisk}`)
+      console.log(`🚨 URGENCE VITALE DÉTECTÉE: ${emergencyTriage.emergencyCategory}`);
+      console.log(`⏰ Action requise: ${emergencyTriage.timeToTreatment}`);
+      console.log(`🏥 Hospitalisation: ${emergencyTriage.hospitalization}`);
+      console.log(`⚠️ Risque télémédecine: ${emergencyTriage.telemedicineRisk}`);
       
       // Génération d'analyse d'urgence accélérée (sans appel OpenAI)
-    const emergencyAnalysis = generateEmergencyAnalysis(patientContext, emergencyTriage);
+      const emergencyAnalysis = generateEmergencyAnalysis(patientContext, emergencyTriage);
       
       // Construction de la réponse d'urgence complète
       const emergencyResponse = buildCompleteEmergencyResponse(
@@ -2116,50 +2120,9 @@ export async function POST(request: NextRequest) {
         }
       });
     }
-      // Construction de la réponse d'urgence complète
-      const emergencyResponse = buildCompleteEmergencyResponse(
-        patientContext,
-        emergencyTriage,
-        emergencyAnalysis
-      )
-      
-      const emergencyProcessingTime = Date.now() - startTime
-      
-      // RÉPONSE D'URGENCE IMMÉDIATE
-      return NextResponse.json({
-        ...emergencyResponse,
-        
-        emergency_metadata: {
-          system_version: '4.3-Emergency-Priority-System',
-          emergency_processing_time_ms: emergencyProcessingTime,
-          normal_flow_bypassed: true,
-          openai_call_skipped: true,
-          emergency_protocol_applied: true,
-          immediate_response_generated: true,
-          requires_urgent_medical_attention: true,
-          telemedicine_insufficient: emergencyTriage.telemedicineRisk === 'HIGH',
-          
-          emergency_classification: {
-            urgency_level: emergencyTriage.urgencyLevel,
-            emergency_category: emergencyTriage.emergencyCategory,
-            vitale: emergencyTriage.vitale,
-            time_to_treatment: emergencyTriage.timeToTreatment,
-            hospitalization: emergencyTriage.hospitalization,
-            telemedicine_risk: emergencyTriage.telemedicineRisk
-          },
-          
-          mauritius_emergency_context: {
-            seasonal_risk: mauritiusSeasonalContext.diseaseRisk,
-            emergency_centers_alerted: true,
-            samu_114_notification: true,
-            transport_arranged: emergencyTriage.hospitalization === 'IMMEDIATE'
-          }
-        }
-      })
-    }
     
     // ============ FLUX NORMAL POUR CAS NON URGENTS ============
-   console.log('✅ Aucune urgence vitale détectée - Procédure normale');
+    console.log('✅ Aucune urgence vitale détectée - Procédure normale');
     console.log(`📊 Classification: ${emergencyTriage.urgencyLevel} (${emergencyTriage.emergencyCategory})`);
     
     const consultationAnalysis = analyzeConsultationType(
@@ -2358,62 +2321,10 @@ export async function POST(request: NextRequest) {
       }
     };
     
-    return NextResponse.json(finalResponse); // ✅ POINT-VIRGULE AJOUTÉ
-   let emergencyFallback = null;
-    try {
-      if (body?.clinicalData) {
-        const quickContext = {
-          symptoms: body.clinicalData?.symptoms || [],
-          chief_complaint: body.clinicalData?.chiefComplaint || '',
-          vital_signs: body.clinicalData?.vitalSigns || {},
-          current_medications: body.patientData?.currentMedications || [],
-          age: body.patientData?.age || 0,
-          sex: body.patientData?.sex || 'unknown'
-        } as PatientContext;
-        
-        const emergencyCheck = detectVitalEmergency(quickContext, quickContext.vital_signs);
-        
-        if (emergencyCheck.vitale) {
-          emergencyFallback = {
-            URGENCE_VITALE_DETECTED: true,
-            emergency_category: emergencyCheck.emergencyCategory,
-            immediate_action: 'APPELER SAMU 114 IMMÉDIATEMENT',
-            telemedicine_insufficient: true,
-            error_but_emergency_detected: true
-          };
-        }
-      }
-    } catch (emergencyError) {
-      console.error('Erreur dans le triage d\'urgence de fallback:', emergencyError);
-    }
+    return NextResponse.json(finalResponse);
     
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Erreur inconnue',
-      errorCode: 'PROCESSING_ERROR',
-      timestamp: new Date().toISOString(),
-      processingTime: `${errorTime}ms`,
-      
-      // Include emergency fallback if detected
-      ...(emergencyFallback || {}),
-      
-      emergencyFallback: {
-        enabled: true,
-        emergency_check_performed: !!emergencyFallback,
-        vital_emergency_detected: !!emergencyFallback?.URGENCE_VITALE_DETECTED,
-        safety_net_active: true,
-        reason: 'Système de sécurité d\'urgence activé malgré erreur technique'
-      },
-      
-      metadata: {
-        system_version: '4.3-Mauritius-Complete-Logic-DCI-Precise-Emergency',
-        error_logged: true,
-        emergency_fallback_active: true,
-        emergency_system_version: '4.3-Complete-Emergency-Integration'
-      }
-    }, { status: 500 });
-  }
-}
+  } catch (error) {
+    console.error('❌ Erreur critique :', error);
     const errorTime = Date.now() - startTime;
     
     // ========== GESTION D'ERREUR AVEC SÉCURITÉ URGENCE ==========
@@ -2470,8 +2381,8 @@ export async function POST(request: NextRequest) {
         emergency_system_version: '4.3-Complete-Emergency-Integration'
       }
     }, { status: 500 });
-  } // ✅ CORRECTION: Fermeture correcte du catch
-} // ✅ CORRECTION: Fermeture correcte de la fonction POST
+  }
+}
 
 // ==================== ENDPOINT GET AVEC TESTS D'URGENCE ====================
 export async function GET(request: NextRequest) {
