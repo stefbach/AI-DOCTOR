@@ -1372,7 +1372,7 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
               datePrescription: labData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0],
               motifClinique: labData.prescription?.clinicalIndication || '',
               analyses: {
-                hematology: (labData.prescription?.tests?.hematology || []).map((test: any) => ({
+                hematology: (labData.prescription?.analyses?.hematology || []).map((test: any) => ({
                   nom: test.name || '',
                   categorie: test.category || 'hematology',
                   urgence: test.urgent || false,
@@ -1383,7 +1383,7 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
                   tubePrelevement: test.sampleTube || 'As per laboratory protocol',
                   delaiResultat: test.turnaroundTime || 'Standard'
                 })),
-                clinicalChemistry: (labData.prescription?.tests?.clinicalChemistry || []).map((test: any) => ({
+                clinicalChemistry: (labData.prescription?.analyses?.clinicalChemistry || []).map((test: any) => ({
                   nom: test.name || '',
                   categorie: test.category || 'Clinical Chemistry',
                   urgence: test.urgent || false,
@@ -1394,7 +1394,7 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
                   tubePrelevement: test.sampleTube || 'As per laboratory protocol',
                   delaiResultat: test.turnaroundTime || 'Standard'
                 })),
-                immunology: (labData.prescription?.tests?.immunology || []).map((test: any) => ({
+                immunology: (labData.prescription?.analyses?.immunology || []).map((test: any) => ({
                   nom: test.name || '',
                   categorie: test.category || 'Immunology',
                   urgence: test.urgent || false,
@@ -1405,7 +1405,7 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
                   tubePrelevement: test.sampleTube || 'As per laboratory protocol',
                   delaiResultat: test.turnaroundTime || 'Standard'
                 })),
-                microbiology: (labData.prescription?.tests?.microbiology || []).map((test: any) => ({
+                microbiology: (labData.prescription?.analyses?.microbiology || []).map((test: any) => ({
                   nom: test.name || '',
                   categorie: test.category || 'Microbiology',
                   urgence: test.urgent || false,
@@ -1416,7 +1416,7 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
                   tubePrelevement: test.sampleTube || 'As per laboratory protocol',
                   delaiResultat: test.turnaroundTime || 'Standard'
                 })),
-                endocrinology: (labData.prescription?.tests?.endocrinology || []).map((test: any) => ({
+                endocrinology: (labData.prescription?.analyses?.endocrinology || []).map((test: any) => ({
                   nom: test.name || '',
                   categorie: test.category || 'Endocrinology',
                   urgence: test.urgent || false,
@@ -1427,7 +1427,7 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
                   tubePrelevement: test.sampleTube || 'As per laboratory protocol',
                   delaiResultat: test.turnaroundTime || 'Standard'
                 })),
-                general: (labData.prescription?.tests?.general || []).map((test: any) => ({
+                general: (labData.prescription?.analyses?.general || []).map((test: any) => ({
                   nom: test.name || '',
                   categorie: test.category || 'General Laboratory',
                   urgence: test.urgent || false,
