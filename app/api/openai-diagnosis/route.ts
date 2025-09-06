@@ -3282,12 +3282,7 @@ expertAnalysis: {
   }
 }
 
-const MAURITIUS_TROPICAL_DISEASES = [
-  'dengue',
-  'chikungunya',
-  'malaria',
-  'leptospirosis'
-];
+
 
 // ==================== HEALTH ENDPOINT WITH COMPLETE TESTS ====================
 export async function GET(request: NextRequest) {
@@ -3463,7 +3458,6 @@ export async function GET(request: NextRequest) {
       test_type: 'Test Tropical Disease Integration',
       version: '4.3-Complete-Logic-DCI-Precise',
       seasonal_context: seasonalContext,
-      tropical_diseases: MAURITIUS_TROPICAL_DISEASES,
       safety_validation_notes: safetyDemo.recommendations,
       auto_added_investigations: autoInvestigations
     })
