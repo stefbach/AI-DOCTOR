@@ -1372,17 +1372,23 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
               datePrescription: labData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0],
               motifClinique: labData.prescription?.clinicalIndication || '',
               analyses: {
-                haematology: (labData.prescription?.tests?.hematology || []).map((test: any) => ({
-                  nom: test.name || '',
-                  categorie: test.category || 'Haematology',
-                  urgence: test.urgent || false,
-                  aJeun: test.fasting || false,
-                  conditionsPrelevement: test.sampleConditions || '',
-                  motifClinique: test.clinicalIndication || '',
-                  renseignementsCliniques: test.clinicalInformation || '',
-                  tubePrelevement: test.sampleTube || 'As per laboratory protocol',
-                  delaiResultat: test.turnaroundTime || 'Standard'
-                })),
+                analyses: {
+  hematology: (labData.prescription?.tests?.hematology || []).map((test: any) => ({  // ← corrigé
+  clinicalChemistry: (labData.prescription?.tests?.clinicalChemistry || []).map((test: any) => ({
+  immunology: (labData.prescription?.tests?.immunology || []).map((test: any) => ({
+  microbiology: (labData.prescription?.tests?.microbiology || []).map((test: any) => ({
+  endocrinology: (labData.prescription?.tests?.endocrinology || []).map((test: any) => ({
+  general: (labData.prescription?.tests?.general || []).map((test: any) => ({  // ← AJOUTÉ !
+    nom: test.name || '',
+    categorie: test.category || 'General Biology',
+    urgence: test.urgent || false,
+    aJeun: test.fasting || false,
+    conditionsPrelevement: test.sampleConditions || '',
+    motifClinique: test.clinicalIndication || '',
+    renseignementsCliniques: test.clinicalInformation || '',
+    tubePrelevement: test.sampleTube || 'As per laboratory protocol',
+    delaiResultat: test.turnaroundTime || 'Standard'
+  })),
                 clinicalChemistry: (labData.prescription?.tests?.clinicalChemistry || []).map((test: any) => ({
                   nom: test.name || '',
                   categorie: test.category || 'Clinical Chemistry',
@@ -2880,14 +2886,14 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
     const praticien = getReportPraticien()
     const rapport = getReportRapport()
     
-    const categories = [
-      { key: 'haematology', label: 'HAEMATOLOGY' },
-      { key: 'clinicalChemistry', label: 'CLINICAL CHEMISTRY' },
-      { key: 'immunology', label: 'IMMUNOLOGY' },
-      { key: 'microbiology', label: 'MICROBIOLOGY' },
-      { key: 'endocrinology', label: 'ENDOCRINOLOGY' }
-    ]
-    
+   const categories = [
+  { key: 'hematology', label: 'HAEMATOLOGY' },      // ← corrigé 'haematology' → 'hematology'
+  { key: 'clinicalChemistry', label: 'CLINICAL CHEMISTRY' },
+  { key: 'immunology', label: 'IMMUNOLOGY' },
+  { key: 'microbiology', label: 'MICROBIOLOGY' },
+  { key: 'endocrinology', label: 'ENDOCRINOLOGY' },
+  { key: 'general', label: 'GENERAL BIOLOGY' }      // ← AJOUTÉ !
+]
     if (!includeFullPrescriptions && report?.prescriptionsResume) {
       return (
         <Card>
