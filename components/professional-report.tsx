@@ -1363,8 +1363,8 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
         }
         
       // Map laboratory tests - VERSION PROPRE ET EFFICACE
-if (apiReport.prescriptions?.laboratoryTests) {
-  const labData = apiReport.prescriptions.laboratoryTests
+if (apiReport.prescriptions?.laboratoryTests || apiReport.prescriptions?.laboratoryRequests) {
+  const labData = apiReport.prescriptions.laboratoryTests || apiReport.prescriptions.laboratoryRequests
   
   // 🔍 Debug pour voir la structure exacte
   console.log("🔬 LAB DATA DEBUG:", {
@@ -1372,7 +1372,10 @@ if (apiReport.prescriptions?.laboratoryTests) {
     hasPrescription: !!labData.prescription,
     hasTests: !!labData.prescription?.tests,
     testsStructure: labData.prescription?.tests ? Object.keys(labData.prescription.tests) : [],
-    labTestCount: apiReport.metadata?.prescriptionsSummary?.laboratoryTests || 0
+    labTestCount:
+      apiReport.metadata?.prescriptionsSummary?.laboratoryTests ||
+      apiReport.metadata?.prescriptionsSummary?.laboratoryRequests ||
+      0
   })
   
   // 🎯 FONCTION HELPER pour mapper les tests
