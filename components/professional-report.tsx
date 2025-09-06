@@ -1362,95 +1362,60 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
           }
         }
         
-       // Map laboratory tests
+      // Map laboratory tests - VERSION PROPRE ET EFFICACE
 if (apiReport.prescriptions?.laboratoryTests) {
   const labData = apiReport.prescriptions.laboratoryTests
+  
+  // 🔍 Debug pour voir la structure exacte
+  console.log("🔬 LAB DATA DEBUG:", {
+    hasLabData: !!labData,
+    hasPrescription: !!labData.prescription,
+    hasTests: !!labData.prescription?.tests,
+    testsStructure: labData.prescription?.tests ? Object.keys(labData.prescription.tests) : [],
+    labTestCount: apiReport.metadata?.prescriptionsSummary?.laboratoryTests || 0
+  })
+  
+  // 🎯 FONCTION HELPER pour mapper les tests
+  const mapTestsForCategory = (categoryTests: any[]) => {
+    return (categoryTests || []).map((test: any) => ({
+      nom: test.name || '',
+      categorie: test.category || 'Laboratory Test',
+      urgence: test.urgent || false,
+      aJeun: test.fasting || false,
+      conditionsPrelevement: test.sampleConditions || '',
+      motifClinique: test.clinicalIndication || '',
+      renseignementsCliniques: test.clinicalInformation || '',
+      tubePrelevement: test.sampleTube || 'As per laboratory protocol',
+      delaiResultat: test.turnaroundTime || 'Standard'
+    }))
+  }
+  
+  // 🔧 EXTRACTION PROPRE des tests par catégorie
+  const tests = labData.prescription?.tests || {}
+  const analyses = {
+    hematology: mapTestsForCategory(tests.hematology),
+    immunology: mapTestsForCategory(tests.immunology),
+    clinicalChemistry: mapTestsForCategory(tests.clinicalChemistry),
+    microbiology: mapTestsForCategory(tests.microbiology),
+    endocrinology: mapTestsForCategory(tests.endocrinology),
+    general: mapTestsForCategory(tests.general)
+  }
+  
+  // 🔍 Debug des résultats
+  const totalTests = Object.values(analyses).reduce((acc, arr) => acc + arr.length, 0)
+  console.log("🧪 ANALYSES MAPPED:", {
+    totalTests,
+    byCategory: Object.entries(analyses).map(([key, arr]) => ({ [key]: arr.length }))
+  })
+  
+  // ✅ CRÉATION de la structure biologie
   reportData.ordonnances!.biologie = {
     enTete: currentDoctorInfo,
     patient: reportData.compteRendu.patient,
     prescription: {
       datePrescription: labData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0],
       motifClinique: labData.prescription?.clinicalIndication || '',
-      analyses: {
-        // 🔧 FIX: Utiliser la structure correcte depuis l'API
-        hematology: (apiReport.metadata?.prescriptionsSummary?.laboratoryTests > 0 && labData.prescription?.tests?.hematology) ? 
-          labData.prescription.tests.hematology.map((test: any) => ({
-            nom: test.name || '',
-            categorie: 'Hematology',
-            urgence: test.urgent || false,
-            aJeun: test.fasting || false,
-            conditionsPrelevement: test.sampleConditions || '',
-            motifClinique: test.clinicalIndication || '',
-            renseignementsCliniques: test.clinicalInformation || '',
-            tubePrelevement: test.sampleTube || 'As per laboratory protocol',
-            delaiResultat: test.turnaroundTime || 'Standard'
-          })) : [],
-          
-        immunology: (apiReport.metadata?.prescriptionsSummary?.laboratoryTests > 0 && labData.prescription?.tests?.immunology) ? 
-          labData.prescription.tests.immunology.map((test: any) => ({
-            nom: test.name || '',
-            categorie: 'Immunology',
-            urgence: test.urgent || false,
-            aJeun: test.fasting || false,
-            conditionsPrelevement: test.sampleConditions || '',
-            motifClinique: test.clinicalIndication || '',
-            renseignementsCliniques: test.clinicalInformation || '',
-            tubePrelevement: test.sampleTube || 'As per laboratory protocol',
-            delaiResultat: test.turnaroundTime || 'Standard'
-          })) : [],
-          
-        clinicalChemistry: (apiReport.metadata?.prescriptionsSummary?.laboratoryTests > 0 && labData.prescription?.tests?.clinicalChemistry) ? 
-          labData.prescription.tests.clinicalChemistry.map((test: any) => ({
-            nom: test.name || '',
-            categorie: 'Clinical Chemistry',
-            urgence: test.urgent || false,
-            aJeun: test.fasting || false,
-            conditionsPrelevement: test.sampleConditions || '',
-            motifClinique: test.clinicalIndication || '',
-            renseignementsCliniques: test.clinicalInformation || '',
-            tubePrelevement: test.sampleTube || 'As per laboratory protocol',
-            delaiResultat: test.turnaroundTime || 'Standard'
-          })) : [],
-          
-        microbiology: (apiReport.metadata?.prescriptionsSummary?.laboratoryTests > 0 && labData.prescription?.tests?.microbiology) ? 
-          labData.prescription.tests.microbiology.map((test: any) => ({
-            nom: test.name || '',
-            categorie: 'Microbiology',
-            urgence: test.urgent || false,
-            aJeun: test.fasting || false,
-            conditionsPrelevement: test.sampleConditions || '',
-            motifClinique: test.clinicalIndication || '',
-            renseignementsCliniques: test.clinicalInformation || '',
-            tubePrelevement: test.sampleTube || 'As per laboratory protocol',
-            delaiResultat: test.turnaroundTime || 'Standard'
-          })) : [],
-          
-        endocrinology: (apiReport.metadata?.prescriptionsSummary?.laboratoryTests > 0 && labData.prescription?.tests?.endocrinology) ? 
-          labData.prescription.tests.endocrinology.map((test: any) => ({
-            nom: test.name || '',
-            categorie: 'Endocrinology',
-            urgence: test.urgent || false,
-            aJeun: test.fasting || false,
-            conditionsPrelevement: test.sampleConditions || '',
-            motifClinique: test.clinicalIndication || '',
-            renseignementsCliniques: test.clinicalInformation || '',
-            tubePrelevement: test.sampleTube || 'As per laboratory protocol',
-            delaiResultat: test.turnaroundTime || 'Standard'
-          })) : [],
-          
-        general: (apiReport.metadata?.prescriptionsSummary?.laboratoryTests > 0 && labData.prescription?.tests?.general) ? 
-          labData.prescription.tests.general.map((test: any) => ({
-            nom: test.name || '',
-            categorie: 'General Biology',
-            urgence: test.urgent || false,
-            aJeun: test.fasting || false,
-            conditionsPrelevement: test.sampleConditions || '',
-            motifClinique: test.clinicalIndication || '',
-            renseignementsCliniques: test.clinicalInformation || '',
-            tubePrelevement: test.sampleTube || 'As per laboratory protocol',
-            delaiResultat: test.turnaroundTime || 'Standard'
-          })) : []
-      },
+      analyses: analyses,
       instructionsSpeciales: labData.prescription?.specialInstructions || [],
       laboratoireRecommande: labData.prescription?.recommendedLaboratory || ''
     },
@@ -1461,6 +1426,8 @@ if (apiReport.prescriptions?.laboratoryTests) {
       date: labData.prescription?.prescriptionDate || new Date().toISOString().split('T')[0]
     }
   }
+  
+  console.log("✅ BIOLOGIE STRUCTURE CREATED with", totalTests, "tests")
 }
         
         // Map imaging studies
@@ -2904,12 +2871,13 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
     const rapport = getReportRapport()
     
    const categories = [
+  { key: 'general', label: 'GENERAL BIOLOGY' }   
   { key: 'hematology', label: 'HAEMATOLOGY' },
   { key: 'clinicalChemistry', label: 'CLINICAL CHEMISTRY' },
   { key: 'immunology', label: 'IMMUNOLOGY' },
   { key: 'microbiology', label: 'MICROBIOLOGY' },
   { key: 'endocrinology', label: 'ENDOCRINOLOGY' },
-  { key: 'general', label: 'GENERAL BIOLOGY' }
+  
 ]
 
     if (!includeFullPrescriptions && report?.prescriptionsResume) {
