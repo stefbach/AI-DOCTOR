@@ -2065,19 +2065,19 @@ export async function POST(request: NextRequest) {
     }
     
     // ============ FLUX NORMAL POUR CAS NON URGENTS ============
-    console.log('✅ Aucune urgence vitale détectée - Procédure normale')
-    console.log(`📊 Classification: ${emergencyTriage.urgencyLevel} (${emergencyTriage.emergencyCategory})`)
+    console.log('✅ Aucune urgence vitale détectée - Procédure normale'); // ✅ POINT-VIRGULE AJOUTÉ
+    console.log(`📊 Classification: ${emergencyTriage.urgencyLevel} (${emergencyTriage.emergencyCategory})`);
     
     const consultationAnalysis = analyzeConsultationType(
       patientContext.current_medications,
       patientContext.chief_complaint,
       patientContext.symptoms
-    )
+    );
     
-    console.log(`🔍 Pré-analyse : ${consultationAnalysis.consultationType} (${Math.round(consultationAnalysis.confidence * 100)}%)`)
+    console.log(`🔍 Pré-analyse : ${consultationAnalysis.consultationType} (${Math.round(consultationAnalysis.confidence * 100)}%)`);
     
     // Appel OpenAI avec qualité Mauritius + DCI
-    const mauritiusPrompt = prepareMauritiusQualityPrompt(patientContext, consultationAnalysis)
+    const mauritiusPrompt = prepareMauritiusQualityPrompt(patientContext, consultationAnalysis);
 
     const {
       data: openaiData,
@@ -2087,13 +2087,13 @@ export async function POST(request: NextRequest) {
       apiKey,
       mauritiusPrompt,
       patientContext
-    )
+    );
 
-    console.log('✅ Analyse médicale avec qualité anglo-saxonne + DCI précis terminée')
-    console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
+    console.log('✅ Analyse médicale avec qualité anglo-saxonne + DCI précis terminée');
+    console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`);
     
     // Validation universelle et améliorations
-    let validatedAnalysis = universalIntelligentValidation(medicalAnalysis, patientContext)
+    let validatedAnalysis = universalIntelligentValidation(medicalAnalysis, patientContext);
     
     // ============ INTÉGRATION INFO URGENCE DANS RÉPONSE NORMALE ============
     validatedAnalysis.emergency_assessment = {
@@ -2105,7 +2105,7 @@ export async function POST(request: NextRequest) {
       red_flags_detected: emergencyTriage.redFlags,
       monitoring_required: emergencyTriage.urgencyLevel !== 'NON_URGENT',
       follow_up_timeframe: emergencyTriage.timeToTreatment
-    }
+    };
     
     // Si semi-urgent, ajouter des instructions spéciales
     if (emergencyTriage.urgencyLevel === 'SEMI_URGENT') {
@@ -2118,24 +2118,24 @@ export async function POST(request: NextRequest) {
           'Absence d\'amélioration en 24h'
         ],
         when_to_seek_immediate_care: emergencyTriage.immediateActions
-      }
+      };
     }
     
-    const finalAnalysis = validatedAnalysis
+    const finalAnalysis = validatedAnalysis;
     
     // Validation finale et documents
     const patientContextWithIdentity = {
       ...patientContext,
       ...originalIdentity
-    }
+    };
     
     const professionalDocuments = generateMedicalDocuments(
       finalAnalysis,
       patientContextWithIdentity,
       MAURITIUS_HEALTHCARE_CONTEXT
-    )
+    );
     
-    const processingTime = Date.now() - startTime
+    const processingTime = Date.now() - startTime;
     
     // ============ RÉPONSE NORMALE ENRICHIE AVEC INFO URGENCE ============
     const finalResponse = {
@@ -2262,16 +2262,16 @@ export async function POST(request: NextRequest) {
         validation_passed: true,
         emergency_system_version: '4.3-Complete-Emergency-Integration'
       }
-    }
+    };
     
-    return NextResponse.json(finalResponse)
+    return NextResponse.json(finalResponse); // ✅ POINT-VIRGULE AJOUTÉ
     
-  } catch (error) {
-    console.error('❌ Erreur critique :', error)
-    const errorTime = Date.now() - startTime
+  } catch (error) { // ✅ CORRECTION: Structure try/catch correcte
+    console.error('❌ Erreur critique :', error);
+    const errorTime = Date.now() - startTime;
     
     // ========== GESTION D'ERREUR AVEC SÉCURITÉ URGENCE ==========
-    let emergencyFallback = null
+    let emergencyFallback = null;
     try {
       if (body?.clinicalData) {
         const quickContext = {
@@ -2281,9 +2281,9 @@ export async function POST(request: NextRequest) {
           current_medications: body.patientData?.currentMedications || [],
           age: body.patientData?.age || 0,
           sex: body.patientData?.sex || 'unknown'
-        } as PatientContext
+        } as PatientContext;
         
-        const emergencyCheck = detectVitalEmergency(quickContext, quickContext.vital_signs)
+        const emergencyCheck = detectVitalEmergency(quickContext, quickContext.vital_signs);
         
         if (emergencyCheck.vitale) {
           emergencyFallback = {
@@ -2292,11 +2292,11 @@ export async function POST(request: NextRequest) {
             immediate_action: 'APPELER SAMU 114 IMMÉDIATEMENT',
             telemedicine_insufficient: true,
             error_but_emergency_detected: true
-          }
+          };
         }
       }
     } catch (emergencyError) {
-      console.error('Erreur dans le triage d\'urgence de fallback:', emergencyError)
+      console.error('Erreur dans le triage d\'urgence de fallback:', emergencyError);
     }
     
     return NextResponse.json({
@@ -2323,9 +2323,9 @@ export async function POST(request: NextRequest) {
         emergency_fallback_active: true,
         emergency_system_version: '4.3-Complete-Emergency-Integration'
       }
-    }, { status: 500 })
-  }
-}
+    }, { status: 500 });
+  } // ✅ CORRECTION: Fermeture correcte du catch
+} // ✅ CORRECTION: Fermeture correcte de la fonction POST
 
 // ==================== ENDPOINT GET AVEC TESTS D'URGENCE ====================
 export async function GET(request: NextRequest) {
