@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea';
 import { 
   MessageCircle, 
@@ -286,7 +285,7 @@ Je suis votre assistant IA spécialisé dans l'amélioration des rapports médic
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4">
+      <div className="flex-1 p-4 overflow-y-auto max-h-96">
         <div className="space-y-4">
           {messages.map((message) => (
             <div
