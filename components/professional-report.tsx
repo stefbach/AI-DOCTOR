@@ -662,7 +662,41 @@ export default function ProfessionalReportEditable({
   diagnosisData,
   editedDocuments,
   onComplete
-  const handleUpdateSection = useCallback((section: string, content: string) => {
+ 
+}: ProfessionalReportProps) {
+  // ==================== STATE MANAGEMENT ====================
+  const [report, setReport] = useState<MauritianReport | null>(null)
+  const [reportId, setReportId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState("consultation")
+  
+  const [editMode, setEditMode] = useState(false)
+  const [validationStatus, setValidationStatus] = useState<'draft' | 'validated'>('draft')
+  const [modifiedSections, setModifiedSections] = useState<Set<string>>(new Set())
+  const [saving, setSaving] = useState(false)
+  const [showFullReport, setShowFullReport] = useState(false)
+  const [includeFullPrescriptions, setIncludeFullPrescriptions] = useState(true)
+  
+  const [doctorInfo, setDoctorInfo] = useState({
+    nom: "Dr. [Name Required]",
+    qualifications: "MBBS",
+    specialite: "General Medicine",
+    adresseCabinet: "Tibok Teleconsultation Platform",
+    email: "[Email Required]",
+    heuresConsultation: "Teleconsultation Hours: 8:00 AM - 8:00 PM",
+    numeroEnregistrement: "[MCM Registration Required]",
+    licencePratique: "[License Required]"
+  })
+  const [editingDoctor, setEditingDoctor] = useState(false)
+  const [documentSignatures, setDocumentSignatures] = useState<{
+    consultation?: string
+    prescription?: string
+    laboratory?: string
+    imaging?: string
+    invoice?: string
+  }>({})
+ const handleUpdateSection = useCallback((section: string, content: string) => {
   console.log('🤖 AI Assistant updating section:', section, 'with content length:', content.length)
   
   // Sections du rapport médical principal
@@ -701,40 +735,6 @@ export default function ProfessionalReportEditable({
       })
   }
 }, [updateRapportSection])
-}: ProfessionalReportProps) {
-  // ==================== STATE MANAGEMENT ====================
-  const [report, setReport] = useState<MauritianReport | null>(null)
-  const [reportId, setReportId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState("consultation")
-  
-  const [editMode, setEditMode] = useState(false)
-  const [validationStatus, setValidationStatus] = useState<'draft' | 'validated'>('draft')
-  const [modifiedSections, setModifiedSections] = useState<Set<string>>(new Set())
-  const [saving, setSaving] = useState(false)
-  const [showFullReport, setShowFullReport] = useState(false)
-  const [includeFullPrescriptions, setIncludeFullPrescriptions] = useState(true)
-  
-  const [doctorInfo, setDoctorInfo] = useState({
-    nom: "Dr. [Name Required]",
-    qualifications: "MBBS",
-    specialite: "General Medicine",
-    adresseCabinet: "Tibok Teleconsultation Platform",
-    email: "[Email Required]",
-    heuresConsultation: "Teleconsultation Hours: 8:00 AM - 8:00 PM",
-    numeroEnregistrement: "[MCM Registration Required]",
-    licencePratique: "[License Required]"
-  })
-  const [editingDoctor, setEditingDoctor] = useState(false)
-  const [documentSignatures, setDocumentSignatures] = useState<{
-    consultation?: string
-    prescription?: string
-    laboratory?: string
-    imaging?: string
-    invoice?: string
-  }>({})
-
   // ==================== SAFE GETTERS ====================
   const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
   const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
