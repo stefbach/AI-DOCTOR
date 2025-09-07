@@ -2,168 +2,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
-// ==================== MAURITIUS TROPICAL DISEASES CONTEXT ====================
-interface MauritiusSeasonalContext {
-  currentSeason: 'dry' | 'transition' | 'rainy'
-  diseaseRisk: {
-    dengue: 'low' | 'medium' | 'high'
-    chikungunya: 'low' | 'medium' | 'high'
-    malaria: 'low' | 'medium' | 'high'
-    leptospirosis: 'low' | 'medium' | 'high'
-  }
-}
-
-const MAURITIUS_TROPICAL_DISEASES: Record<
-  keyof MauritiusSeasonalContext['diseaseRisk'],
-  { symptoms: string[]; investigations: string[] }
-> = {
-  dengue: {
-    symptoms: ['fever', 'headache', 'retro-orbital pain', 'joint pain'],
-    investigations: ['Dengue NS1 antigen', 'Full Blood Count'],
-  },
-  chikungunya: {
-    symptoms: ['fever', 'severe joint pain', 'rash'],
-    investigations: ['Chikungunya IgM serology'],
-  },
-  malaria: {
-    symptoms: ['fever', 'chills', 'sweats'],
-    investigations: ['Thick and thin blood film', 'Rapid diagnostic test'],
-  },
-  leptospirosis: {
-    symptoms: ['fever', 'jaundice', 'muscle pain'],
-    investigations: ['Leptospira IgM serology', 'Renal function tests'],
-  },
-}
-
-function getCurrentMauritiusSeasonalContext(): MauritiusSeasonalContext {
-  const month = new Date().getMonth() + 1
-  if ([11, 12, 1, 2, 3, 4].includes(month)) {
-    return {
-      currentSeason: 'rainy',
-      diseaseRisk: {
-        dengue: 'high',
-        chikungunya: 'high',
-        malaria: 'medium',
-        leptospirosis: 'medium',
-      },
-    }
-  }
-  return {
-    currentSeason: 'dry',
-    diseaseRisk: {
-      dengue: 'medium',
-      chikungunya: 'medium',
-      malaria: 'low',
-      leptospirosis: 'low',
-    },
-  }
-}
-
-function validateTropicalMedicalSafety(
-  analysis: any,
-  patientContext: PatientContext,
-  seasonalContext: MauritiusSeasonalContext,
-) {
-  const issues: Array<{
-    type: 'critical' | 'important' | 'minor'
-    category: string
-    description: string
-    suggestion: string
-  }> = []
-
-  const symptoms = (patientContext.symptoms || [])
-    .join(' ')
-    .toLowerCase()
-
-  if (seasonalContext.diseaseRisk.dengue !== 'low' && symptoms.includes('fever')) {
-    const hasTest = (analysis?.investigation_strategy?.laboratory_tests || []).some((t: any) =>
-      (t.test_name || '').toLowerCase().includes('dengue'),
-    )
-    if (!hasTest) {
-      issues.push({
-        type: 'important',
-        category: 'tropical_safety',
-        description: 'Possible dengue infection not investigated',
-        suggestion: 'Add Dengue NS1 antigen test',
-      })
-    }
-  }
-
-  if (seasonalContext.diseaseRisk.malaria !== 'low' && symptoms.includes('fever')) {
-    const hasTest = (analysis?.investigation_strategy?.laboratory_tests || []).some((t: any) =>
-      (t.test_name || '').toLowerCase().includes('malaria'),
-    )
-    if (!hasTest) {
-      issues.push({
-        type: 'important',
-        category: 'tropical_safety',
-        description: 'Fever in malaria season without malaria test',
-        suggestion: 'Request thick and thin blood film for malaria',
-      })
-    }
-  }
-
-  return issues
-}
-
-function addMauritiusTropicalInvestigations(
-  analysis: any,
-  patientContext: PatientContext,
-  seasonalContext: MauritiusSeasonalContext,
-) {
-  analysis = analysis || {}
-  analysis.investigation_strategy = analysis.investigation_strategy || {}
-  analysis.investigation_strategy.laboratory_tests =
-    analysis.investigation_strategy.laboratory_tests || []
-
-  const tests = analysis.investigation_strategy.laboratory_tests
-  const symptoms = (patientContext.symptoms || [])
-    .join(' ')
-    .toLowerCase()
-
-  if (seasonalContext.diseaseRisk.dengue !== 'low' && symptoms.includes('fever')) {
-    const exists = tests.some((t: any) =>
-      (t.test_name || '').toLowerCase().includes('dengue ns1'),
-    )
-    if (!exists) {
-      tests.push({
-        test_name: 'Dengue NS1 antigen',
-        clinical_justification: 'Early detection of dengue infection',
-        expected_results: 'Positive indicates acute dengue',
-        urgency: 'urgent',
-        tube_type: 'Serum (yellow top)',
-        mauritius_logistics: {
-          where: 'Central Health Laboratory',
-          cost: 'Rs 1500-2500',
-          turnaround: '24h',
-        },
-      })
-    }
-  }
-
-  if (seasonalContext.diseaseRisk.malaria !== 'low' && symptoms.includes('fever')) {
-    const exists = tests.some((t: any) =>
-      (t.test_name || '').toLowerCase().includes('thick and thin blood film'),
-    )
-    if (!exists) {
-      tests.push({
-        test_name: 'Thick and thin blood film for malaria',
-        clinical_justification: 'Detect malaria parasites',
-        expected_results: 'Parasite species identified',
-        urgency: 'urgent',
-        tube_type: 'EDTA (purple top)',
-        mauritius_logistics: {
-          where: 'Central Health Laboratory',
-          cost: 'Rs 500-800',
-          turnaround: '24h',
-        },
-      })
-    }
-  }
-
-  return analysis
-}
-
 // ==================== TYPES AND INTERFACES ====================
 interface PatientContext {
   age: number | string
@@ -199,7 +37,6 @@ interface PatientContext {
   firstName?: string
   lastName?: string
   anonymousId?: string
-  mauritiusSeasonalContext?: MauritiusSeasonalContext
 }
 
 interface ValidationResult {
@@ -228,13 +65,6 @@ interface UniversalValidationResult {
     safety_score: number
     evidence_base_score: number
   }
-}
-
-interface SeasonalContext {
-  currentSeason: 'dry' | 'transition' | 'rainy' | 'cyclone'
-  diseaseRiskLevel: 'low' | 'medium' | 'high' | 'very_high'
-  predominantDiseases: string[]
-  environmentalFactors: string[]
 }
 
 // ==================== MAURITIUS MEDICAL PROMPT COMPLET + DCI PRÉCIS ====================
@@ -500,7 +330,7 @@ function extractDCIFromDrugName(drugName: string): string {
   }
   
   // Extraction générique
-  const match = name.match(/^([a-zA-ZÀ-ÿ]+)/)
+  const match = drugName.match(/^([a-zA-ZÀ-ÿ]+)/)
   return match ? match[1].charAt(0).toUpperCase() + match[1].slice(1) : 'Principe actif'
 }
 
@@ -569,14 +399,7 @@ function calculateDailyTotal(individualDose: string, frequency: number): string 
 // ==================== MAURITIUS MEDICAL ENHANCEMENT COMPLET + DCI ====================
 function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: PatientContext): any {
   console.log('🏝️ Enhancing Mauritius medical specificity + DCI...')
-  const seasonalContext =
-    patientContext.mauritiusSeasonalContext || getCurrentMauritiusSeasonalContext()
-  analysis = addMauritiusTropicalInvestigations(
-    analysis,
-    patientContext,
-    seasonalContext,
-  )
-
+  
   const qualityCheck = validateMauritiusMedicalSpecificity(analysis)
   
   if (qualityCheck.hasGenericContent) {
@@ -1240,43 +1063,6 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
   throw lastError || new Error('Failed after multiple attempts with Mauritius quality enhancement')
 }
 
-async function callOpenAIWithMauritiusQualityTropical(
-  apiKey: string,
-  basePrompt: string,
-  enhancedPrompt: string,
-  patientContext: PatientContext,
-  maxRetries: number = 3
-): Promise<any> {
-  const combinedPrompt = `${basePrompt}\n\n${enhancedPrompt}`
-  const result = await callOpenAIWithMauritiusQuality(
-    apiKey,
-    combinedPrompt,
-    patientContext,
-    maxRetries
-  )
-  const tropical_context = getMauritiusTropicalContext()
-  return { ...result, tropical_context }
-}
-
-function getMauritiusTropicalContext() {
-  const month = new Date().getMonth() + 1
-  let season: 'dry' | 'transition' | 'rainy' | 'cyclone'
-  let riskLevel: 'low' | 'medium' | 'high' | 'very_high'
-
-  if ([11, 12, 1, 2, 3, 4].includes(month)) {
-    season = [12, 1, 2, 3].includes(month) ? 'cyclone' : 'rainy'
-    riskLevel = [12, 1, 2, 3].includes(month) ? 'very_high' : 'high'
-  } else if ([5, 6, 7, 8, 9, 10].includes(month)) {
-    season = 'dry'
-    riskLevel = 'medium'
-  } else {
-    season = 'transition'
-    riskLevel = 'medium'
-  }
-
-  return { season, riskLevel }
-}
-
 function prepareMauritiusQualityPrompt(patientContext: PatientContext, consultationType: any): string {
   const currentMedsFormatted = patientContext.current_medications.length > 0 
     ? patientContext.current_medications.join(', ')
@@ -1634,10 +1420,7 @@ function validateUniversalSafety(analysis: any, patientContext: PatientContext) 
       suggestion: 'Define parameters to monitor'
     })
   }
-
-  const seasonalContext = patientContext.mauritiusSeasonalContext || getCurrentMauritiusSeasonalContext()
-  issues.push(...validateTropicalMedicalSafety(analysis, patientContext, seasonalContext))
-
+  
   return { issues }
 }
 
@@ -2307,42 +2090,9 @@ const MAURITIUS_HEALTHCARE_CONTEXT = {
   },
   emergency_numbers: {
     samu: "114",
-    police_fire: "999",
+    police_fire: "999", 
     private_ambulance: "132"
   }
-}
-
-function getCurrentSeasonalContext(): SeasonalContext {
-  const currentMonth = new Date().getMonth() + 1
-
-  let currentSeason: 'dry' | 'transition' | 'rainy' | 'cyclone'
-  let diseaseRiskLevel: 'low' | 'medium' | 'high' | 'very_high'
-  let predominantDiseases: string[]
-  let environmentalFactors: string[]
-
-  if ([11, 12, 1, 2, 3, 4].includes(currentMonth)) {
-    currentSeason = 'rainy'
-    if ([12, 1, 2, 3].includes(currentMonth)) {
-      currentSeason = 'cyclone'
-      diseaseRiskLevel = 'very_high'
-    } else {
-      diseaseRiskLevel = 'high'
-    }
-    predominantDiseases = ['dengue', 'chikungunya', 'leptospirosis']
-    environmentalFactors = ['increased mosquito breeding', 'stagnant water', 'flooding risk']
-  } else if ([5, 6, 7, 8, 9, 10].includes(currentMonth)) {
-    currentSeason = 'dry'
-    diseaseRiskLevel = 'medium'
-    predominantDiseases = ['respiratory infections', 'sugar cane burning effects']
-    environmentalFactors = ['dry air', 'dust', 'air pollution from burning']
-  } else {
-    currentSeason = 'transition'
-    diseaseRiskLevel = 'medium'
-    predominantDiseases = ['viral respiratory infections', 'gastroenteritis']
-    environmentalFactors = ['variable weather', 'changing humidity']
-  }
-
-  return { currentSeason, diseaseRiskLevel, predominantDiseases, environmentalFactors }
 }
 
 // ==================== VALIDATION AND DOCUMENTS (CONSERVÉ) ====================
@@ -2651,21 +2401,11 @@ function convertToSimpleFormat(dosing: string): string {
   return dosing
 }
 
-const MAURITIUS_ENHANCED_MEDICAL_PROMPT = `
-PATIENT CONTEXT:
-{{PATIENT_CONTEXT}}
-
-CURRENT MEDICATIONS:
-{{CURRENT_MEDICATIONS}}
-`
-
 // ==================== MAIN POST FUNCTION ====================
 export async function POST(request: NextRequest) {
   console.log('🚀 MAURITIUS MEDICAL AI - VERSION 4.3 LOGIQUE COMPLÈTE + DCI PRÉCIS')
   const startTime = Date.now()
-
-  const mauritiusSeasonalContext = getCurrentSeasonalContext()
-
+  
   try {
     const [body, apiKey] = await Promise.all([
       request.json(),
@@ -2688,7 +2428,7 @@ export async function POST(request: NextRequest) {
         errorCode: 'API_CONFIG_ERROR'
       }, { status: 500 })
     }
-
+    
     const { anonymized: anonymizedPatientData, originalIdentity } = anonymizePatientData(body.patientData)
     
     const patientContext: PatientContext = {
@@ -2729,29 +2469,12 @@ export async function POST(request: NextRequest) {
     
     // ============ APPEL OPENAI AVEC QUALITÉ MAURITIUS + DCI ============
     const mauritiusPrompt = prepareMauritiusQualityPrompt(patientContext, consultationAnalysis)
-    const medsList = patientContext.current_medications.length > 0
-      ? patientContext.current_medications.join(', ')
-      : 'Aucun médicament actuel'
-    const enhancedPrompt = MAURITIUS_ENHANCED_MEDICAL_PROMPT
-      .replace('{{PATIENT_CONTEXT}}', JSON.stringify(patientContext, null, 2))
-      .replace('{{CURRENT_MEDICATIONS}}', medsList)
-
-    const {
-      data: openaiData,
-      analysis: medicalAnalysis,
-      mauritius_quality_level,
-      tropical_context
-    } = await callOpenAIWithMauritiusQualityTropical(
+    
+    const { data: openaiData, analysis: medicalAnalysis, mauritius_quality_level } = await callOpenAIWithMauritiusQuality(
       apiKey,
       mauritiusPrompt,
-      enhancedPrompt,
       patientContext
     )
-
-    console.log('🏝️ Tropical context:', {
-      season: tropical_context.season,
-      riskLevel: tropical_context.riskLevel
-    })
     
     console.log('✅ Analyse médicale avec qualité anglo-saxonne + DCI précis terminée')
     // ========== DÉDUPLICATION DES MÉDICAMENTS ==========
@@ -2899,180 +2622,182 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       },
 
       // ========== MEDICATIONS ULTRA PRÉCISES - DCI + POSOLOGIE ==========
-medicationsSimple: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
+    medicationsSimple: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
   id: idx + 1,
-  nom: med.drug || med.medication_name || "Médicament",
-  posologie_complete: med.dosing?.adult || med.how_to_take || "Selon prescription",
-  indication: med.indication || med.why_prescribed || "Indication thérapeutique",
-  dci: med.dci || "DCI"
+  nom: med.drug,  // Direct
+  posologie_complete: med.dosing?.adult || med.how_to_take,  // Direct
+  indication: med.indication || med.why_prescribed,  // Direct
+  dci: med.dci
 })),
-
-// Protection des données
-dataProtection: {
-  enabled: true,
-  method: 'anonymization',
-  anonymousId: patientContext.anonymousId,
-  fieldsProtected: ['firstName', 'lastName', 'name'],
-  compliance: ['GDPR', 'HIPAA', 'Minimisation des données']
-},
-
-// Validation universelle
-universalValidation: {
-  enabled: true,
-  system_version: '4.3-Complete-Logic-DCI-Precise',
-  overall_quality: finalAnalysis.universal_validation?.overall_quality || 'good',
-  gpt4_trusted: finalAnalysis.universal_validation?.gpt4_trusted || true,
-  pathology_coverage: 'all_medical_conditions',
-  validation_approach: 'evidence_based_principles',
-  metrics: finalAnalysis.universal_validation?.metrics || {},
-  critical_issues: finalAnalysis.universal_validation?.critical_issues || 0,
-  important_issues: finalAnalysis.universal_validation?.important_issues || 0,
-  minor_issues: finalAnalysis.universal_validation?.minor_issues || 0,
-  corrections_applied: {
-    minimal: finalAnalysis.minimal_corrections_applied || 0,
-    targeted: finalAnalysis.targeted_corrections_applied || 0
-  },
-  specialties_supported: [
-    'Cardiologie', 'Pneumologie', 'Endocrinologie', 'Neurologie',
-    'Gastroentérologie', 'Psychiatrie', 'Dermatologie', 'Urologie',
-    'Gynécologie', 'Pédiatrie', 'Gériatrie', 'Médecine générale'
-  ],
-  timestamp: finalAnalysis.universal_validation?.timestamp || new Date().toISOString()
-},
-
-// Validation maladies tropicales
-tropicalDiseaseValidation: {
-  seasonal_context: mauritiusSeasonalContext,
-  safety_validation_status: finalAnalysis.medication_safety?.safety_level || 'unknown',
-  medication_safety_flags: finalAnalysis.safety_alerts || [],
-  investigation_enhancements: finalAnalysis.investigation_strategy?.tropical_enhancements || [],
-  endemic_diseases: mauritiusSeasonalContext.predominantDiseases,
-  safety_corrections_applied: finalAnalysis.medication_safety?.safety_recommendations || []
-},
-
-// Raisonnement diagnostique
-diagnosticReasoning: finalAnalysis.diagnostic_reasoning || {
-  key_findings: {
-    from_history: "Analyse de l'historique médical disponible",
-    from_symptoms: "Analyse des symptômes présentés",
-    from_ai_questions: "Analyse des réponses au questionnaire IA",
-    red_flags: "Aucun signe d'alarme identifié"
-  },
-  syndrome_identification: {
-    clinical_syndrome: "Syndrome clinique identifié",
-    supporting_features: ["Symptômes compatibles"],
-    inconsistent_features: []
-  },
-  clinical_confidence: {
-    diagnostic_certainty: "Modérée",
-    reasoning: "Basé sur données téléconsultation avec standards UK/Maurice",
-    missing_information: "Examen physique complet recommandé"
-  }
-},
-
-// Diagnostic
-diagnosis: {
-  primary: {
-    condition: finalAnalysis.clinical_analysis?.primary_diagnosis?.condition || "Condition médicale",
-    icd10: finalAnalysis.clinical_analysis?.primary_diagnosis?.icd10_code || "R69",
-    confidence: finalAnalysis.clinical_analysis?.primary_diagnosis?.confidence_level || 70,
-    severity: finalAnalysis.clinical_analysis?.primary_diagnosis?.severity || "modérée",
-    detailedAnalysis: finalAnalysis.clinical_analysis?.primary_diagnosis?.pathophysiology || "Analyse physiopathologique en cours",
-    clinicalRationale: finalAnalysis.clinical_analysis?.primary_diagnosis?.clinical_reasoning || "Raisonnement clinique en développement",
-    prognosis: finalAnalysis.clinical_analysis?.primary_diagnosis?.prognosis || "Pronostic à évaluer selon évolution",
-    diagnosticCriteriaMet: finalAnalysis.clinical_analysis?.primary_diagnosis?.diagnostic_criteria_met || [],
-    certaintyLevel: finalAnalysis.clinical_analysis?.primary_diagnosis?.certainty_level || "Modérée"
-  },
-  differential: finalAnalysis.clinical_analysis?.differential_diagnoses || []
-},
-
-// Analyse experte
-expertAnalysis: {
-  clinical_confidence: finalAnalysis.diagnostic_reasoning?.clinical_confidence || {},
-  
-  expert_investigations: {
-    investigation_strategy: finalAnalysis.investigation_strategy || {},
-    clinical_justification: finalAnalysis.investigation_strategy?.clinical_justification || "Stratégie d'investigation personnalisée avec standards UK/Maurice",
-    immediate_priority: [
-      ...(finalAnalysis.investigation_strategy?.laboratory_tests || []).map((test: any) => ({
-        category: 'pathology',
-        examination: test?.test_name || "Investigation de laboratoire",
-        specific_indication: test?.clinical_justification || "Investigation diagnostique",
-        urgency: test?.urgency || "routine",
-        expected_results: test?.expected_results || {},
-        mauritius_availability: test?.mauritius_logistics || {
-          where: "C-Lab, Green Cross, Biosanté",
-          cost: "Rs 500-2000",
-          turnaround: "24-48h"
-        }
-      })),
-      ...(finalAnalysis.investigation_strategy?.imaging_studies || []).map((img: any) => ({
-        category: 'radiology',
-        examination: img?.study_name || "Imagerie médicale",
-        specific_indication: img?.indication || "Investigation d'imagerie",
-        findings_sought: img?.findings_sought || "Recherche de signes spécifiques",
-        urgency: img?.urgency || "routine",
-        mauritius_availability: img?.mauritius_availability || {
-          centers: "Apollo, Wellkin, Victoria Hospital",
-          cost: "Rs 8000-15000",
-          wait_time: "1-2 semaines"
-        }
-      }))
-    ],
-    tests_by_purpose: finalAnalysis.investigation_strategy?.tests_by_purpose || {},
-    test_sequence: finalAnalysis.investigation_strategy?.test_sequence || {}
-  },
-  
-  expert_therapeutics: {
-    treatment_approach: finalAnalysis.treatment_plan?.approach || "Approche thérapeutique personnalisée avec standards UK/Maurice",
-    prescription_rationale: finalAnalysis.treatment_plan?.prescription_rationale || "Justification de prescription selon standards internationaux",
-    primary_treatments: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any) => ({
-      medication_dci: med.drug || med.medication_name || "Médicament",
-      precise_indication: med.indication || med.why_prescribed || "Indication thérapeutique",
-      dosing_regimen: {
-        adult: {
-          en: med.dosing?.adult || med.how_to_take || "Selon prescription"
+      
+      // Protection des données
+      dataProtection: {
+        enabled: true,
+        method: 'anonymization',
+        anonymousId: patientContext.anonymousId,
+        fieldsProtected: ['firstName', 'lastName', 'name'],
+        compliance: ['GDPR', 'HIPAA', 'Minimisation des données']
+      },
+      
+      // Validation universelle
+      universalValidation: {
+        enabled: true,
+        system_version: '4.3-Complete-Logic-DCI-Precise',
+        overall_quality: finalAnalysis.universal_validation?.overall_quality || 'good',
+        gpt4_trusted: finalAnalysis.universal_validation?.gpt4_trusted || true,
+        pathology_coverage: 'all_medical_conditions',
+        validation_approach: 'evidence_based_principles',
+        metrics: finalAnalysis.universal_validation?.metrics || {},
+        critical_issues: finalAnalysis.universal_validation?.critical_issues || 0,
+        important_issues: finalAnalysis.universal_validation?.important_issues || 0,
+        minor_issues: finalAnalysis.universal_validation?.minor_issues || 0,
+        corrections_applied: {
+          minimal: finalAnalysis.minimal_corrections_applied || 0,
+          targeted: finalAnalysis.targeted_corrections_applied || 0
+        },
+        specialties_supported: [
+          'Cardiologie', 'Pneumologie', 'Endocrinologie', 'Neurologie',
+          'Gastroentérologie', 'Psychiatrie', 'Dermatologie', 'Urologie',
+          'Gynécologie', 'Pédiatrie', 'Gériatrie', 'Médecine générale'
+        ],
+        timestamp: finalAnalysis.universal_validation?.timestamp
+      },
+      
+      // Raisonnement diagnostique
+      diagnosticReasoning: finalAnalysis.diagnostic_reasoning || {
+        key_findings: {
+          from_history: "Analyse de l'historique médical disponible",
+          from_symptoms: "Analyse des symptômes présentés",
+          from_ai_questions: "Analyse des réponses au questionnaire IA",
+          red_flags: "Aucun signe d'alarme identifié"
+        },
+        syndrome_identification: {
+          clinical_syndrome: "Syndrome clinique identifié",
+          supporting_features: ["Symptômes compatibles"],
+          inconsistent_features: []
+        },
+        clinical_confidence: {
+          diagnostic_certainty: "Modérée",
+          reasoning: "Basé sur données téléconsultation avec standards UK/Maurice",
+          missing_information: "Examen physique complet recommandé"
         }
       },
-      therapeutic_class: extractTherapeuticClass(med) || "Agent thérapeutique",
-      mechanism: med.mechanism || "Mécanisme d'action spécifique",
-      duration: { en: med.duration || "Selon évolution" },
-      mauritius_availability: {
-        public_free: med.mauritius_availability?.public_free || false,
-        estimated_cost: med.mauritius_availability?.estimated_cost || "À vérifier",
-        alternatives: med.mauritius_availability?.alternatives || "Alternatives disponibles",
-        brand_names: med.mauritius_availability?.brand_names || "Marques disponibles"
+
+      // Diagnostic
+      diagnosis: {
+        primary: {
+          condition: finalAnalysis.clinical_analysis.primary_diagnosis.condition,
+          icd10: finalAnalysis.clinical_analysis?.primary_diagnosis?.icd10_code || "R69",
+          confidence: finalAnalysis.clinical_analysis?.primary_diagnosis?.confidence_level || 70,
+          severity: finalAnalysis.clinical_analysis?.primary_diagnosis?.severity || "modérée",
+          detailedAnalysis: finalAnalysis.clinical_analysis?.primary_diagnosis?.pathophysiology || "Analyse physiopathologique en cours",
+          clinicalRationale: finalAnalysis.clinical_analysis?.primary_diagnosis?.clinical_reasoning || "Raisonnement clinique en développement",
+          prognosis: finalAnalysis.clinical_analysis?.primary_diagnosis?.prognosis || "Pronostic à évaluer selon évolution",
+          diagnosticCriteriaMet: finalAnalysis.clinical_analysis?.primary_diagnosis?.diagnostic_criteria_met || [],
+          certaintyLevel: finalAnalysis.clinical_analysis?.primary_diagnosis?.certainty_level || "Modérée"
+        },
+        differential: finalAnalysis.clinical_analysis?.differential_diagnoses || []
       },
-      monitoring: med.monitoring || "Surveillance standard",
-      side_effects: med.side_effects || "Effets secondaires à surveiller",
-      contraindications: med.contraindications || "Aucune contre-indication identifiée",
-      interactions: med.interactions || "Interactions vérifiées",
-      administration_instructions: med.administration_instructions || "Instructions d'administration"
-    })),
-    non_pharmacological: finalAnalysis.treatment_plan?.non_pharmacological || "Mesures non pharmacologiques recommandées"
+      
+      // Analyse experte
+      expertAnalysis: {
+        clinical_confidence: finalAnalysis.diagnostic_reasoning?.clinical_confidence || {},
+        
+        expert_investigations: {
+          investigation_strategy: finalAnalysis.investigation_strategy || {},
+          clinical_justification: finalAnalysis.investigation_strategy?.clinical_justification || "Stratégie d'investigation personnalisée avec standards UK/Maurice",
+          immediate_priority: [
+            ...(finalAnalysis.investigation_strategy?.laboratory_tests || []).map((test: any) => ({
+              category: 'pathology',
+              examination: test?.test_name || "Investigation de laboratoire",
+              specific_indication: test?.clinical_justification || "Investigation diagnostique",
+              urgency: test?.urgency || "routine",
+              expected_results: test?.expected_results || {},
+              mauritius_availability: test?.mauritius_logistics || {
+                where: "C-Lab, Green Cross, Biosanté",
+                cost: "Rs 500-2000",
+                turnaround: "24-48h"
+              }
+            })),
+            ...(finalAnalysis.investigation_strategy?.imaging_studies || []).map((img: any) => ({
+              category: 'radiology',
+              examination: img?.study_name || "Imagerie médicale",
+              specific_indication: img?.indication || "Investigation d'imagerie",
+              findings_sought: img?.findings_sought || "Recherche de signes spécifiques",
+              urgency: img?.urgency || "routine",
+              mauritius_availability: img?.mauritius_availability || {
+                centers: "Apollo, Wellkin, Victoria Hospital",
+                cost: "Rs 8000-15000",
+                wait_time: "1-2 semaines"
+              }
+            }))
+          ],
+          tests_by_purpose: finalAnalysis.investigation_strategy?.tests_by_purpose || {},
+          test_sequence: finalAnalysis.investigation_strategy?.test_sequence || {}
+        },
+        
+        expert_therapeutics: {
+          treatment_approach: finalAnalysis.treatment_plan?.approach || "Approche thérapeutique personnalisée avec standards UK/Maurice",
+          prescription_rationale: finalAnalysis.treatment_plan?.prescription_rationale || "Justification de prescription selon standards internationaux",
+          primary_treatments: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any) => ({
+  medication_name: med.drug,  // Direct
+        medication_dci: med.drug || med.medication_name, 
+        precise_indication: med.indication || med.why_prescribed,
+        dosing_regimen: { 
+          adult: {
+      en: med.dosing?.adult || med.how_to_take || "Selon prescription"
+    }
   },
+        therapeutic_class: extractTherapeuticClass(med) || "Agent thérapeutique",
+            precise_indication: med?.indication || "Indication thérapeutique",
+            mechanism: med?.mechanism || "Mécanisme d'action spécifique pour le patient",
+            dosing_regimen: {
+              adult: { 
+                fr: med?.dosing?.adult || "Posologie à déterminer",
+                individual_dose: med?.dosing?.individual_dose || "Dose individuelle",
+                frequency_per_day: med?.dosing?.frequency_per_day || 0,
+                daily_total_dose: med?.dosing?.daily_total_dose || "Dose totale/jour"
+              }
+            },
+            duration: { fr: med?.duration || "Selon évolution" },
+            monitoring: med?.monitoring || "Surveillance standard",
+            side_effects: med?.side_effects || "Effets secondaires à surveiller",
+            contraindications: med?.contraindications || "Aucune contre-indication identifiée",
+            interactions: med?.interactions || "Interactions vérifiées",
+            mauritius_availability: {
+              public_free: med?.mauritius_availability?.public_free || false,
+              estimated_cost: med?.mauritius_availability?.estimated_cost || "À vérifier",
+              alternatives: med?.mauritius_availability?.alternatives || "Alternatives disponibles",
+              brand_names: med?.mauritius_availability?.brand_names || "Marques disponibles"
+            },
+            administration_instructions: med?.administration_instructions || "Instructions d'administration",
+            validation_applied: med?._mauritius_specificity_applied || med?._added_by_universal_safety || null
+          })),
+          non_pharmacological: finalAnalysis.treatment_plan?.non_pharmacological || "Mesures non pharmacologiques recommandées"
+        }
+      },
+      
+      // Gestion des médicaments
+      medicationManagement: {
+        enabled: true,
+        consultation_type: finalAnalysis.medication_safety?.consultation_type || 'new_problem',
+        confidence: finalAnalysis.medication_safety?.confidence || 0,
+        current_medications_analyzed: patientContext.current_medications.length,
+        safety_level: finalAnalysis.medication_safety?.safety_level || 'safe',
+        interactions_detected: finalAnalysis.medication_safety?.interactions_detected?.length || 0,
+        duplicates_detected: finalAnalysis.medication_safety?.duplicate_therapies?.length || 0,
+        renewal_keywords: finalAnalysis.medication_safety?.renewal_keywords || []
+      },
+      
+      // Sécurité des prescriptions
+      prescriptionSafety: {
+        safety_alerts: finalAnalysis.safety_alerts || [],
+        interactions: finalAnalysis.medication_safety?.interactions_detected || [],
+        duplicate_therapies: finalAnalysis.medication_safety?.duplicate_therapies || [],
+        renewal_issues: finalAnalysis.medication_safety?.renewal_issues || [],
+        recommendations: finalAnalysis.medication_safety?.safety_recommendations || []
+      },
 
-  // Gestion des médicaments
-  medicationManagement: {
-    enabled: true,
-    consultation_type: finalAnalysis.medication_safety?.consultation_type || 'new_problem',
-    confidence: finalAnalysis.medication_safety?.confidence || 0,
-    current_medications_analyzed: patientContext.current_medications.length,
-    safety_level: finalAnalysis.medication_safety?.safety_level || 'safe',
-    interactions_detected: finalAnalysis.medication_safety?.interactions_detected?.length || 0,
-    duplicates_detected: finalAnalysis.medication_safety?.duplicate_therapies?.length || 0,
-    renewal_keywords: finalAnalysis.medication_safety?.renewal_keywords || []
-  },
-
-  // Sécurité des prescriptions
-  prescriptionSafety: {
-    safety_alerts: finalAnalysis.safety_alerts || [],
-    interactions: finalAnalysis.medication_safety?.interactions_detected || [],
-    duplicate_therapies: finalAnalysis.medication_safety?.duplicate_therapies || [],
-    renewal_issues: finalAnalysis.medication_safety?.renewal_issues || [],
-    recommendations: finalAnalysis.medication_safety?.safety_recommendations || []
-  }
-},
       // ========== MEDICATIONS - FRONTEND ACCESSIBLE ==========
      medications: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
   id: idx + 1,
@@ -3108,7 +2833,7 @@ expertAnalysis: {
           posology_precise: !!(med?.dosing?.frequency_per_day && med?.dosing?.individual_dose),
           daily_total_calculated: !!(med?.dosing?.daily_total_dose)
         }
-     })),
+      })),
       
       // Validation de la posologie
       posologyValidation: {
@@ -3194,13 +2919,6 @@ expertAnalysis: {
           'Gestion avancée interactions médicamenteuses',
           'Corrections symptomatiques intelligentes'
         ],
-        tropical_medicine_adaptation: {
-          seasonal_risk: mauritiusSeasonalContext.diseaseRiskLevel,
-          endemic_coverage: mauritiusSeasonalContext.predominantDiseases,
-          medication_safety_validation: finalAnalysis.medication_safety?.safety_level || 'unknown',
-          investigation_enhancement: finalAnalysis.investigation_strategy?.tropical_enhancements || [],
-          community_outbreak_awareness: mauritiusSeasonalContext.environmentalFactors
-        },
         quality_metrics: {
           diagnostic_confidence: finalAnalysis.universal_validation?.metrics?.diagnostic_confidence || 85,
           treatment_completeness: finalAnalysis.universal_validation?.metrics?.treatment_completeness || 90,
@@ -3269,20 +2987,11 @@ expertAnalysis: {
         undefined_protection: true,
         detailed_indications: true,
         dci_enforcement: true,
-        complete_logic_preserved: true,
-        tropical_medicine_adaptation: {
-          seasonal_risk: mauritiusSeasonalContext.diseaseRiskLevel,
-          endemic_coverage: mauritiusSeasonalContext.predominantDiseases,
-          medication_safety_validation: 'unknown',
-          investigation_enhancement: [],
-          community_outbreak_awareness: mauritiusSeasonalContext.environmentalFactors
-        }
+        complete_logic_preserved: true
       }
     }, { status: 500 })
   }
 }
-
-
 
 // ==================== HEALTH ENDPOINT WITH COMPLETE TESTS ====================
 export async function GET(request: NextRequest) {
@@ -3291,7 +3000,6 @@ export async function GET(request: NextRequest) {
   const testQuality = url.searchParams.get('test_quality')
   const testDCI = url.searchParams.get('test_dci')
   const testLogic = url.searchParams.get('test_logic')
-  const testTropical = url.searchParams.get('test_tropical')
   
   if (testMauritius === 'true') {
     console.log('🧪 Test du système médical mauritien complet + DCI précis...')
@@ -3411,7 +3119,7 @@ export async function GET(request: NextRequest) {
   if (testDCI === 'true') {
     const testCases = [
       "Amoxicillin 500mg",
-      "Paracetamol 1g",
+      "Paracetamol 1g", 
       "Ibuprofen 400mg",
       "Some Unknown Drug 100mg",
       "Antibiotic", // Cas générique
@@ -3440,29 +3148,7 @@ export async function GET(request: NextRequest) {
       }
     })
   }
-
-  if (testTropical === 'true') {
-    const seasonalContext = getCurrentSeasonalContext()
-    const safetyDemo = validateMedicationSafety(
-      [{ drug: 'Paracetamol 1g' }],
-      ['Ibuprofen 400mg TDS'],
-      'new_problem'
-    )
-
-    const autoInvestigations = {
-      laboratory_tests: ['Full Blood Count', 'NS1 antigen test'],
-      imaging_studies: []
-    }
-
-    return NextResponse.json({
-      test_type: 'Test Tropical Disease Integration',
-      version: '4.3-Complete-Logic-DCI-Precise',
-      seasonal_context: seasonalContext,
-      safety_validation_notes: safetyDemo.recommendations,
-      auto_added_investigations: autoInvestigations
-    })
-  }
-
+  
   if (testLogic === 'true') {
     // Test de la logique médicale complète
     const testPatient = {
@@ -3563,7 +3249,6 @@ export async function GET(request: NextRequest) {
       test_mauritius_complete: 'GET /api/openai-diagnosis?test_mauritius=true',
       test_quality_prompt: 'GET /api/openai-diagnosis?test_quality=true',
       test_dci_precision: 'GET /api/openai-diagnosis?test_dci=true',
-      test_tropical_mode: 'GET /api/openai-diagnosis?test_tropical=true',
       test_complete_logic: 'GET /api/openai-diagnosis?test_logic=true'
     },
     
