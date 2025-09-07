@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { 
   MessageCircle, 
@@ -67,18 +67,18 @@ export default function MedicalAIAssistant({ reportData, onUpdateSection, curren
 Je suis votre assistant IA spécialisé dans l'amélioration des rapports médicaux selon les standards du **Medical Council of Mauritius** et la nomenclature **UK/Anglo-Saxonne**.
 
 **🎯 Je peux vous aider à :**
-• **Corriger et améliorer** les sections du rapport médical
-• **Standardiser** la terminologie médicale UK/Maurice
-• **Optimiser** les prescriptions avec DCI précis
-• **Enrichir** le contenu clinique
-• **Vérifier** la conformité aux standards MCM
+- **Corriger et améliorer** les sections du rapport médical
+- **Standardiser** la terminologie médicale UK/Maurice
+- **Optimiser** les prescriptions avec DCI précis
+- **Enrichir** le contenu clinique
+- **Vérifier** la conformité aux standards MCM
 
 **📋 Exemples de commandes :**
-• *"Améliore la section motif de consultation avec terminologie UK"*
-• *"Corrige l'examen clinique selon standards MCM"*
-• *"Ajoute une prescription d'Amoxicilline 500mg avec DCI"*
-• *"Révise le diagnostic pour plus de précision clinique"*
-• *"Optimise toutes les prescriptions selon nomenclature britannique"*
+- *"Améliore la section motif de consultation avec terminologie UK"*
+- *"Corrige l'examen clinique selon standards MCM"*
+- *"Ajoute une prescription d'Amoxicilline 500mg avec DCI"*
+- *"Révise le diagnostic pour plus de précision clinique"*
+- *"Optimise toutes les prescriptions selon nomenclature britannique"*
 
 **Quelle section souhaitez-vous améliorer ?** 🩺`,
         timestamp: new Date()
@@ -285,7 +285,7 @@ Je suis votre assistant IA spécialisé dans l'amélioration des rapports médic
       </div>
 
       {/* Messages */}
-      <div className="flex-1 p-4 overflow-y-auto max-h-96">
+      <div className="flex-1 p-4 overflow-y-auto">
         <div className="space-y-4">
           {messages.map((message) => (
             <div
@@ -372,7 +372,7 @@ Je suis votre assistant IA spécialisé dans l'amélioration des rapports médic
           
           <div ref={messagesEndRef} />
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Input */}
       <div className="p-4 border-t border-gray-200">
