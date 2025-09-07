@@ -51,6 +51,17 @@ export default function MedicalAIAssistant({ reportData, onUpdateSection, curren
   const [selectedSection, setSelectedSection] = useState(currentSection || 'motifConsultation');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // 🛡️ Fonction helper pour afficher le texte en toute sécurité
+  const getSafeText = (text: any, maxLength: number = 100): string => {
+    if (typeof text !== 'string' || !text) {
+      return 'Texte non disponible';
+    }
+    if (text.length <= maxLength) {
+      return text;
+    }
+    return text.substring(0, maxLength) + '...';
+  };
+
   // Auto-scroll vers le bas lors de nouveaux messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -152,7 +163,7 @@ Je suis votre assistant IA spécialisé dans l'amélioration des rapports médic
         assistantMessage.suggestion = {
           section: data.suggestion.section,
           originalText: getOriginalText(data.suggestion.section),
-          suggestedText: data.suggestion.text,
+          suggestedText: data.suggestion.text || '', // 🛡️ Valeur par défaut
           applied: false
         };
       }
@@ -173,17 +184,18 @@ Je suis votre assistant IA spécialisé dans l'amélioration des rapports médic
     }
   };
 
-  const getOriginalText = (section: string) => {
+  const getOriginalText = (section: string): string => {
     // Récupère le texte original d'une section
     if (reportData?.compteRendu?.rapport?.[section]) {
-      return reportData.compteRendu.rapport[section];
+      const text = reportData.compteRendu.rapport[section];
+      return typeof text === 'string' ? text : '';
     }
     return '';
   };
 
   const applySuggestion = (messageId: string) => {
     const message = messages.find(m => m.id === messageId);
-    if (message?.suggestion) {
+    if (message?.suggestion && typeof message.suggestion.suggestedText === 'string') {
       onUpdateSection(message.suggestion.section, message.suggestion.suggestedText);
       
       // Marquer la suggestion comme appliquée
@@ -305,7 +317,7 @@ Je suis votre assistant IA spécialisé dans l'amélioration des rapports médic
                   <div className="flex-1">
                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     
-                    {/* Suggestion Card */}
+                    {/* 🛡️ Suggestion Card avec protection contre les erreurs */}
                     {message.suggestion && (
                       <div className="mt-3 p-3 bg-white rounded border border-gray-200">
                         <div className="flex items-center justify-between mb-2">
@@ -324,14 +336,14 @@ Je suis votre assistant IA spécialisé dans l'amélioration des rapports médic
                           <div>
                             <p className="text-xs font-medium text-gray-600">Texte original :</p>
                             <p className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-                              {message.suggestion.originalText.substring(0, 100)}...
+                              {getSafeText(message.suggestion.originalText)}
                             </p>
                           </div>
                           
                           <div>
                             <p className="text-xs font-medium text-gray-600">Amélioration suggérée :</p>
                             <p className="text-xs text-gray-800 bg-blue-50 p-2 rounded">
-                              {message.suggestion.suggestedText.substring(0, 100)}...
+                              {getSafeText(message.suggestion.suggestedText)}
                             </p>
                           </div>
                         </div>
@@ -341,6 +353,7 @@ Je suis votre assistant IA spécialisé dans l'amélioration des rapports médic
                             size="sm"
                             onClick={() => applySuggestion(message.id)}
                             className="w-full mt-2 bg-green-600 hover:bg-green-700"
+                            disabled={!message.suggestion.suggestedText || typeof message.suggestion.suggestedText !== 'string'}
                           >
                             <CheckCircle className="h-4 w-4 mr-2" />
                             Appliquer l'amélioration
