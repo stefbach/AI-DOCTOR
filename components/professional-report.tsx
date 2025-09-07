@@ -662,6 +662,45 @@ export default function ProfessionalReportEditable({
   diagnosisData,
   editedDocuments,
   onComplete
+  const handleUpdateSection = useCallback((section: string, content: string) => {
+  console.log('🤖 AI Assistant updating section:', section, 'with content length:', content.length)
+  
+  // Sections du rapport médical principal
+  const reportSections = [
+    'motifConsultation', 'anamnese', 'antecedents', 'examenClinique',
+    'syntheseDiagnostique', 'conclusionDiagnostique', 'priseEnCharge',
+    'surveillance', 'conclusion'
+  ]
+  
+  if (reportSections.includes(section)) {
+    updateRapportSection(section, content)
+    toast({
+      title: "✅ Section mise à jour",
+      description: `${section} a été améliorée par l'IA médicale`
+    })
+    return
+  }
+  
+  // Gestion des autres sections si nécessaire
+  switch (section) {
+    case 'diagnosticConclusion':
+      updateRapportSection('conclusionDiagnostique', content)
+      break
+    case 'managementPlan':
+      updateRapportSection('priseEnCharge', content)
+      break
+    case 'followUpPlan':
+      updateRapportSection('surveillance', content)
+      break
+    default:
+      console.warn('Section non reconnue:', section)
+      toast({
+        title: "⚠️ Section non reconnue",
+        description: `La section "${section}" n'a pas pu être mise à jour automatiquement`,
+        variant: "destructive"
+      })
+  }
+}, [updateRapportSection])
 }: ProfessionalReportProps) {
   // ==================== STATE MANAGEMENT ====================
   const [report, setReport] = useState<MauritianReport | null>(null)
