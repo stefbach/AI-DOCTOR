@@ -1402,6 +1402,7 @@ function prepareMauritiusQualityPrompt(patientContext: PatientContext, consultat
     sex: patientContext.sex,
     chief_complaint: patientContext.chief_complaint,
     symptoms: patientContext.symptoms,
+    disease_history: patientContext.disease_history,
     current_medications: patientContext.current_medications,
     vital_signs: patientContext.vital_signs,
     medical_history: patientContext.medical_history,
