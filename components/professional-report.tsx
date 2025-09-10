@@ -146,9 +146,10 @@ const createEmptyReport = (): MauritianReport => ({
     }
   }
 })
-// ==================== DEBOUNCED COMPONENTS (MOVED OUTSIDE MAIN COMPONENT) ====================
 
-// 1. Debounced Textarea for Report Sections
+// ==================== DEBOUNCED COMPONENTS (OPTIMISÉS) ====================
+
+// 1. Debounced Textarea avec délai réduit à 3 secondes
 const DebouncedTextarea = memo(({
   value,
   onUpdate,
@@ -175,9 +176,10 @@ const DebouncedTextarea = memo(({
       clearTimeout(updateTimeoutRef.current)
     }
 
+    // 🔧 AMÉLIORÉ: Délai réduit à 3 secondes au lieu de 60 secondes
     updateTimeoutRef.current = setTimeout(() => {
       onUpdate(newValue)
-    }, 60000)
+    }, 3000)
   }, [onUpdate])
 
   useEffect(() => {
@@ -198,7 +200,7 @@ const DebouncedTextarea = memo(({
   )
 })
 
-// 2. Fixed Medication Input Component
+// 2. Medication Input Component avec délai optimisé
 const MedicationEditForm = memo(({
   medication,
   index,
@@ -226,12 +228,11 @@ const MedicationEditForm = memo(({
   })
   const updateTimeoutRef = useRef<NodeJS.Timeout>()
 
-  // Update local state immediately - NO parent update here
   const handleFieldChange = useCallback((field: string, value: any) => {
     setLocalMed(prev => ({ ...prev, [field]: value }))
   }, [])
 
-  // Debounced update to parent
+  // 🔧 AMÉLIORÉ: Délai réduit à 3 secondes
   useEffect(() => {
     if (updateTimeoutRef.current) {
       clearTimeout(updateTimeoutRef.current)
@@ -245,7 +246,7 @@ const MedicationEditForm = memo(({
                       `Duration: ${localMed.dureeTraitement} - Quantity: ${localMed.quantite}`
       }
       onUpdate(index, updatedMed)
-    }, 60000)
+    }, 3000)
 
     return () => {
       if (updateTimeoutRef.current) {
@@ -380,7 +381,7 @@ const MedicationEditForm = memo(({
   )
 })
 
-// 3. Fixed Biology Test Input Component
+// 3. Biology Test Input Component avec délai optimisé
 const BiologyTestEditForm = memo(({
   test,
   category,
@@ -407,12 +408,11 @@ const BiologyTestEditForm = memo(({
   })
   const updateTimeoutRef = useRef<NodeJS.Timeout>()
 
-  // Update local state immediately - NO parent update here
   const handleFieldChange = useCallback((field: string, value: any) => {
     setLocalTest(prev => ({ ...prev, [field]: value }))
   }, [])
 
-  // Debounced update to parent
+  // 🔧 AMÉLIORÉ: Délai réduit à 3 secondes
   useEffect(() => {
     if (updateTimeoutRef.current) {
       clearTimeout(updateTimeoutRef.current)
@@ -420,7 +420,7 @@ const BiologyTestEditForm = memo(({
     
     updateTimeoutRef.current = setTimeout(() => {
       onUpdate(category, index, localTest)
-    }, 60000)
+    }, 3000)
 
     return () => {
       if (updateTimeoutRef.current) {
@@ -520,7 +520,7 @@ const BiologyTestEditForm = memo(({
   )
 })
 
-// 4. Fixed Imaging Exam Input Component
+// 4. Imaging Exam Input Component avec délai optimisé
 const ImagingExamEditForm = memo(({
   exam,
   index,
@@ -544,12 +544,11 @@ const ImagingExamEditForm = memo(({
   })
   const updateTimeoutRef = useRef<NodeJS.Timeout>()
 
-  // Update local state immediately - NO parent update here
   const handleFieldChange = useCallback((field: string, value: any) => {
     setLocalExam(prev => ({ ...prev, [field]: value }))
   }, [])
 
-  // Debounced update to parent
+  // 🔧 AMÉLIORÉ: Délai réduit à 3 secondes
   useEffect(() => {
     if (updateTimeoutRef.current) {
       clearTimeout(updateTimeoutRef.current)
@@ -557,7 +556,7 @@ const ImagingExamEditForm = memo(({
     
     updateTimeoutRef.current = setTimeout(() => {
       onUpdate(index, localExam)
-    }, 60000)
+    }, 3000)
 
     return () => {
       if (updateTimeoutRef.current) {
@@ -654,6 +653,7 @@ MedicationEditForm.displayName = 'MedicationEditForm'
 BiologyTestEditForm.displayName = 'BiologyTestEditForm'
 ImagingExamEditForm.displayName = 'ImagingExamEditForm'
 DebouncedTextarea.displayName = 'DebouncedTextarea'
+
 // ==================== MAIN COMPONENT ====================
 export default function ProfessionalReportEditable({
   patientData,
@@ -662,575 +662,786 @@ export default function ProfessionalReportEditable({
   diagnosisData,
   editedDocuments,
   onComplete
- 
 }: ProfessionalReportProps) {
- // ==================== STATE MANAGEMENT ====================
-const [report, setReport] = useState<MauritianReport | null>(null)
-const [reportId, setReportId] = useState<string | null>(null)
-const [loading, setLoading] = useState(false)
-const [error, setError] = useState<string | null>(null)
-const [activeTab, setActiveTab] = useState("consultation")
+  // ==================== STATE MANAGEMENT ====================
+  const [report, setReport] = useState<MauritianReport | null>(null)
+  const [reportId, setReportId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState("consultation")
 
-const [editMode, setEditMode] = useState(false)
-const [validationStatus, setValidationStatus] = useState<'draft' | 'validated'>('draft')
-const [modifiedSections, setModifiedSections] = useState<Set<string>>(new Set())
-const [saving, setSaving] = useState(false)
-const [showFullReport, setShowFullReport] = useState(false)
-const [includeFullPrescriptions, setIncludeFullPrescriptions] = useState(true)
+  const [editMode, setEditMode] = useState(false)
+  const [validationStatus, setValidationStatus] = useState<'draft' | 'validated'>('draft')
+  const [modifiedSections, setModifiedSections] = useState<Set<string>>(new Set())
+  const [saving, setSaving] = useState(false)
+  const [showFullReport, setShowFullReport] = useState(false)
+  const [includeFullPrescriptions, setIncludeFullPrescriptions] = useState(true)
 
-// 🤖 États pour l'Assistant IA Médical Maurice
-const [showAIAssistant, setShowAIAssistant] = useState(false)
-const [aiAssistantCurrentSection, setAiAssistantCurrentSection] = useState<string>()
+  const [doctorInfo, setDoctorInfo] = useState({
+    nom: "Dr. [Name Required]",
+    qualifications: "MBBS",
+    specialite: "General Medicine",
+    adresseCabinet: "Tibok Teleconsultation Platform",
+    email: "[Email Required]",
+    heuresConsultation: "Teleconsultation Hours: 8:00 AM - 8:00 PM",
+    numeroEnregistrement: "[MCM Registration Required]",
+    licencePratique: "[License Required]"
+  })
+  const [editingDoctor, setEditingDoctor] = useState(false)
+  const [documentSignatures, setDocumentSignatures] = useState<{
+    consultation?: string
+    prescription?: string
+    laboratory?: string
+    imaging?: string
+    invoice?: string
+  }>({})
 
-const [doctorInfo, setDoctorInfo] = useState({
-  nom: "Dr. [Name Required]",
-  qualifications: "MBBS",
-  specialite: "General Medicine",
-  adresseCabinet: "Tibok Teleconsultation Platform",
-  email: "[Email Required]",
-  heuresConsultation: "Teleconsultation Hours: 8:00 AM - 8:00 PM",
-  numeroEnregistrement: "[MCM Registration Required]",
-  licencePratique: "[License Required]"
-})
-const [editingDoctor, setEditingDoctor] = useState(false)
-const [documentSignatures, setDocumentSignatures] = useState<{
-  consultation?: string
-  prescription?: string
-  laboratory?: string
-  imaging?: string
-  invoice?: string
-}>({})
+  // ==================== SAFE GETTERS ====================
+  const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
+  const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
+  const getReportPatient = () => report?.compteRendu?.patient || createEmptyReport().compteRendu.patient
+  const getReportRapport = () => report?.compteRendu?.rapport || createEmptyReport().compteRendu.rapport
+  const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
 
-// ==================== SAFE GETTERS ====================
-const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
-const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
-const getReportPatient = () => report?.compteRendu?.patient || createEmptyReport().compteRendu.patient
-const getReportRapport = () => report?.compteRendu?.rapport || createEmptyReport().compteRendu.rapport
-const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
+  // ==================== TRACKING & UPDATES WITH CALLBACKS ====================
+  const trackModification = useCallback((section: string) => {
+    if (validationStatus === 'validated') return
+    setModifiedSections(prev => new Set(prev).add(section))
+  }, [validationStatus])
 
-// ==================== TRACKING & UPDATES WITH CALLBACKS ====================
-const trackModification = useCallback((section: string) => {
-  if (validationStatus === 'validated') return
-  setModifiedSections(prev => new Set(prev).add(section))
-}, [validationStatus])
-
-const updateRapportSection = useCallback((section: string, value: string) => {
-  if (validationStatus === 'validated') return
-  
-  setReport(prev => {
-    if (!prev) return null
+  const updateRapportSection = useCallback((section: string, value: string) => {
+    if (validationStatus === 'validated') return
     
-    return {
-      ...prev,
-      compteRendu: {
-        ...prev.compteRendu,
-        rapport: {
-          ...prev.compteRendu.rapport,
-          [section]: value
+    setReport(prev => {
+      if (!prev) return null
+      
+      return {
+        ...prev,
+        compteRendu: {
+          ...prev.compteRendu,
+          rapport: {
+            ...prev.compteRendu.rapport,
+            [section]: value
+          }
         }
       }
-    }
-  })
-  trackModification(`rapport.${section}`)
-}, [validationStatus, trackModification])
-
-// 🤖 Fonction de mise à jour pour l'Assistant IA
-const handleUpdateSection = useCallback((section: string, content: string) => {
-  console.log('🤖 AI Assistant updating section:', section, 'with content length:', content.length)
-  
-  // Sections du rapport médical principal
-  const reportSections = [
-    'motifConsultation', 'anamnese', 'antecedents', 'examenClinique',
-    'syntheseDiagnostique', 'conclusionDiagnostique', 'priseEnCharge',
-    'surveillance', 'conclusion'
-  ]
-  
-  if (reportSections.includes(section)) {
-    updateRapportSection(section, content)
-    toast({
-      title: "✅ Section mise à jour",
-      description: `${section} a été améliorée par l'IA médicale`
     })
-    return
-  }
-  
-  // Gestion des autres sections si nécessaire
-  switch (section) {
-    case 'diagnosticConclusion':
-      updateRapportSection('conclusionDiagnostique', content)
-      break
-    case 'managementPlan':
-      updateRapportSection('priseEnCharge', content)
-      break
-    case 'followUpPlan':
-      updateRapportSection('surveillance', content)
-      break
-    default:
-      console.warn('Section non reconnue:', section)
+    trackModification(`rapport.${section}`)
+  }, [validationStatus, trackModification])
+
+  // 🆕 NOUVELLES FONCTIONS CALLBACK POUR L'ASSISTANT IA ====================
+
+  // Fonction de mise à jour immédiate pour l'IA (sans debounce)
+  const handleUpdateSectionImmediate = useCallback((section: string, content: string) => {
+    console.log('🚀 AI Assistant updating section immediately:', section, 'with content length:', content.length)
+    
+    if (validationStatus === 'validated') {
       toast({
-        title: "⚠️ Section non reconnue",
-        description: `La section "${section}" n'a pas pu être mise à jour automatiquement`,
+        title: "❌ Document validé",
+        description: "Impossible de modifier un document validé",
         variant: "destructive"
       })
-  }
-}, [updateRapportSection])
-
-const updateDoctorInfo = useCallback((field: string, value: string) => {
-  setDoctorInfo(prev => ({
-    ...prev,
-    [field]: value
-  }))
-  trackModification(`praticien.${field}`)
-  const updatedInfo = { ...doctorInfo, [field]: value }
-  sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
-}, [doctorInfo, trackModification])
-
-// ==================== NEW BATCH UPDATE FUNCTIONS ====================
-const updateMedicamentBatch = useCallback((index: number, updatedMedication: any) => {
-  if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
-  
-  setReport(prev => {
-    if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
-    
-    const newMedicaments = [...prev.ordonnances.medicaments.prescription.medicaments]
-    newMedicaments[index] = updatedMedication
-    
-    return {
-      ...prev,
-      ordonnances: {
-        ...prev.ordonnances,
-        medicaments: {
-          ...prev.ordonnances.medicaments,
-          prescription: {
-            ...prev.ordonnances.medicaments.prescription,
-            medicaments: newMedicaments
-          }
-        }
-      }
-    }
-  })
-  trackModification(`medicament.${index}`)
-}, [validationStatus, report?.ordonnances?.medicaments, trackModification])
-
-const updateBiologyTestBatch = useCallback((category: string, index: number, updatedTest: any) => {
-  if (validationStatus === 'validated') return
-  
-  setReport(prev => {
-    if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
-    
-    const newAnalyses = { ...prev.ordonnances.biologie.prescription.analyses }
-    newAnalyses[category] = [...newAnalyses[category]]
-    newAnalyses[category][index] = updatedTest
-    
-    return {
-      ...prev,
-      ordonnances: {
-        ...prev.ordonnances,
-        biologie: {
-          ...prev.ordonnances.biologie,
-          prescription: {
-            ...prev.ordonnances.biologie.prescription,
-            analyses: newAnalyses
-          }
-        }
-      }
-    }
-  })
-  trackModification(`biologie.${category}.${index}`)
-}, [validationStatus, trackModification])
-
-const updateImagingExamBatch = useCallback((index: number, updatedExam: any) => {
-  if (validationStatus === 'validated') return
-  
-  setReport(prev => {
-    if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
-    
-    const newExamens = [...prev.ordonnances.imagerie.prescription.examens]
-    newExamens[index] = updatedExam
-    
-    return {
-      ...prev,
-      ordonnances: {
-        ...prev.ordonnances,
-        imagerie: {
-          ...prev.ordonnances.imagerie,
-          prescription: {
-            ...prev.ordonnances.imagerie.prescription,
-            examens: newExamens
-          }
-        }
-      }
-    }
-  })
-  trackModification(`imagerie.${index}`)
-}, [validationStatus, trackModification])
-
-const addMedicament = useCallback(() => {
-  if (validationStatus === 'validated') return
-  
-  const newMed = {
-    nom: '',
-    denominationCommune: '',
-    dosage: '',
-    forme: 'tablet',
-    posologie: '',
-    modeAdministration: 'Oral route',
-    dureeTraitement: '7 days',
-    quantite: '1 box',
-    instructions: '',
-    justification: '',
-    surveillanceParticuliere: '',
-    nonSubstituable: false,
-    ligneComplete: ''
-  }
-  
-  setReport(prev => {
-    if (!prev) return null
-    
-    const newReport = { ...prev }
-    
-    if (!newReport.ordonnances) {
-      newReport.ordonnances = {}
+      return
     }
     
-    if (!newReport.ordonnances.medicaments) {
-      const praticien = getReportPraticien()
-      const patient = getReportPatient()
-      
-      newReport.ordonnances.medicaments = {
-        enTete: praticien,
-        patient: patient,
-        prescription: { 
-          datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
-          medicaments: [],
-          validite: "3 months unless otherwise specified"
-        },
-        authentification: {
-          signature: "Medical Practitioner's Signature",
-          nomEnCapitales: praticien.nom.toUpperCase(),
-          numeroEnregistrement: praticien.numeroEnregistrement,
-          cachetProfessionnel: "Official Medical Stamp",
-          date: patient.dateExamen || new Date().toISOString().split('T')[0]
-        }
-      }
-    }
-    
-    newReport.ordonnances.medicaments.prescription.medicaments = [
-      ...(newReport.ordonnances.medicaments.prescription.medicaments || []), 
-      newMed
+    // Sections du rapport médical principal
+    const reportSections = [
+      'motifConsultation', 'anamnese', 'antecedents', 'examenClinique',
+      'syntheseDiagnostique', 'conclusionDiagnostique', 'priseEnCharge',
+      'surveillance', 'conclusion'
     ]
     
-    return newReport
-  })
-  trackModification('medicaments.new')
-}, [validationStatus, getReportPraticien, getReportPatient, trackModification])
-
-const removeMedicament = useCallback((index: number) => {
-  if (validationStatus === 'validated') return
-  
-  setReport(prev => {
-    if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
+    if (reportSections.includes(section)) {
+      updateRapportSection(section, content)
+      toast({
+        title: "✅ Section mise à jour",
+        description: `${section} a été améliorée par l'IA médicale`,
+        duration: 3000
+      })
+      return
+    }
     
-    return {
-      ...prev,
-      ordonnances: {
-        ...prev.ordonnances,
-        medicaments: {
-          ...prev.ordonnances.medicaments,
-          prescription: {
-            ...prev.ordonnances.medicaments.prescription,
-            medicaments: prev.ordonnances.medicaments.prescription.medicaments.filter((_, i) => i !== index)
+    // Gestion des autres sections si nécessaire
+    switch (section) {
+      case 'diagnosticConclusion':
+        updateRapportSection('conclusionDiagnostique', content)
+        break
+      case 'managementPlan':
+        updateRapportSection('priseEnCharge', content)
+        break
+      case 'followUpPlan':
+        updateRapportSection('surveillance', content)
+        break
+      default:
+        console.warn('Section non reconnue:', section)
+        toast({
+          title: "⚠️ Section non reconnue",
+          description: `La section "${section}" n'a pas pu être mise à jour automatiquement`,
+          variant: "destructive"
+        })
+    }
+  }, [validationStatus, updateRapportSection])
+
+  // Fonction pour ajouter un médicament via l'IA
+  const handleAIAddMedication = useCallback((medicationData: any) => {
+    console.log('🤖 AI Assistant adding medication:', medicationData)
+    
+    if (validationStatus === 'validated') {
+      toast({
+        title: "❌ Document validé",
+        description: "Impossible de modifier un document validé",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      setReport(prev => {
+        if (!prev) return null
+        
+        const newReport = { ...prev }
+        
+        if (!newReport.ordonnances) {
+          newReport.ordonnances = {}
+        }
+        
+        if (!newReport.ordonnances.medicaments) {
+          const praticien = getReportPraticien()
+          const patient = getReportPatient()
+          
+          newReport.ordonnances.medicaments = {
+            enTete: praticien,
+            patient: patient,
+            prescription: { 
+              datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
+              medicaments: [],
+              validite: "3 months unless otherwise specified"
+            },
+            authentification: {
+              signature: "Medical Practitioner's Signature",
+              nomEnCapitales: praticien.nom.toUpperCase(),
+              numeroEnregistrement: praticien.numeroEnregistrement,
+              cachetProfessionnel: "Official Medical Stamp",
+              date: patient.dateExamen || new Date().toISOString().split('T')[0]
+            }
           }
         }
-      }
-    }
-  })
-  trackModification(`medicament.remove.${index}`)
-}, [validationStatus, trackModification])
-
-const addBiologyTest = useCallback((category: string = 'clinicalChemistry') => {
-  if (validationStatus === 'validated') return
-  
-  const newTest = {
-    nom: '',
-    categorie: category,
-    urgence: false,
-    aJeun: false,
-    conditionsPrelevement: '',
-    motifClinique: '',
-    renseignementsCliniques: '',
-    tubePrelevement: 'As per laboratory protocol',
-    delaiResultat: 'Standard'
-  }
-  
-  setReport(prev => {
-    if (!prev) return null
-    
-    const newReport = { ...prev }
-    
-    if (!newReport.ordonnances) newReport.ordonnances = {}
-    
-    if (!newReport.ordonnances.biologie) {
-      const praticien = getReportPraticien()
-      const patient = getReportPatient()
+        
+        newReport.ordonnances.medicaments.prescription.medicaments = [
+          ...(newReport.ordonnances.medicaments.prescription.medicaments || []), 
+          medicationData
+        ]
+        
+        return newReport
+      })
       
-      newReport.ordonnances.biologie = {
-        enTete: praticien,
-        patient: patient,
-        prescription: {
-          datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
-          motifClinique: '',
-          analyses: {},
-          instructionsSpeciales: [],
-          laboratoireRecommande: ''
-        },
-        authentification: {
-          signature: "Medical Practitioner's Signature",
-          nomEnCapitales: praticien.nom.toUpperCase(),
-          numeroEnregistrement: praticien.numeroEnregistrement,
-          date: patient.dateExamen || new Date().toISOString().split('T')[0]
-        }
-      }
+      trackModification('medicaments.ai_add')
+      
+      toast({
+        title: "✅ Médicament ajouté",
+        description: `${medicationData.nom} ajouté à la prescription par l'IA`,
+        duration: 4000
+      })
+      
+      console.log('✅ Medication added successfully via AI')
+    } catch (error) {
+      console.error('❌ Error adding medication via AI:', error)
+      throw error
     }
-    
-    if (!newReport.ordonnances.biologie.prescription.analyses) {
-      newReport.ordonnances.biologie.prescription.analyses = {}
-    }
-    
-    if (!newReport.ordonnances.biologie.prescription.analyses[category]) {
-      newReport.ordonnances.biologie.prescription.analyses[category] = []
-    }
-    
-    newReport.ordonnances.biologie.prescription.analyses[category] = [
-      ...newReport.ordonnances.biologie.prescription.analyses[category], 
-      newTest
-    ]
-    
-    return newReport
-  })
-  trackModification(`biologie.new.${category}`)
-}, [validationStatus, getReportPraticien, getReportPatient, trackModification])
+  }, [validationStatus, getReportPraticien, getReportPatient, trackModification])
 
-const removeBiologyTest = useCallback((category: string, index: number) => {
-  if (validationStatus === 'validated') return
-  
-  setReport(prev => {
-    if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
+  // Fonction pour ajouter un test de laboratoire via l'IA
+  const handleAIAddLabTest = useCallback((category: string, testData: any) => {
+    console.log('🤖 AI Assistant adding lab test:', { category, testData })
     
-    return {
+    if (validationStatus === 'validated') {
+      toast({
+        title: "❌ Document validé",
+        description: "Impossible de modifier un document validé",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      setReport(prev => {
+        if (!prev) return null
+        
+        const newReport = { ...prev }
+        
+        if (!newReport.ordonnances) newReport.ordonnances = {}
+        
+        if (!newReport.ordonnances.biologie) {
+          const praticien = getReportPraticien()
+          const patient = getReportPatient()
+          
+          newReport.ordonnances.biologie = {
+            enTete: praticien,
+            patient: patient,
+            prescription: {
+              datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
+              motifClinique: '',
+              analyses: {},
+              instructionsSpeciales: [],
+              laboratoireRecommande: ''
+            },
+            authentification: {
+              signature: "Medical Practitioner's Signature",
+              nomEnCapitales: praticien.nom.toUpperCase(),
+              numeroEnregistrement: praticien.numeroEnregistrement,
+              date: patient.dateExamen || new Date().toISOString().split('T')[0]
+            }
+          }
+        }
+        
+        if (!newReport.ordonnances.biologie.prescription.analyses) {
+          newReport.ordonnances.biologie.prescription.analyses = {}
+        }
+        
+        if (!newReport.ordonnances.biologie.prescription.analyses[category]) {
+          newReport.ordonnances.biologie.prescription.analyses[category] = []
+        }
+        
+        newReport.ordonnances.biologie.prescription.analyses[category] = [
+          ...newReport.ordonnances.biologie.prescription.analyses[category], 
+          testData
+        ]
+        
+        return newReport
+      })
+      
+      trackModification(`biologie.ai_add.${category}`)
+      
+      toast({
+        title: "✅ Analyse ajoutée",
+        description: `${testData.nom} ajouté aux analyses biologiques par l'IA`,
+        duration: 4000
+      })
+      
+      console.log('✅ Lab test added successfully via AI')
+    } catch (error) {
+      console.error('❌ Error adding lab test via AI:', error)
+      throw error
+    }
+  }, [validationStatus, getReportPraticien, getReportPatient, trackModification])
+
+  // Fonction pour ajouter un examen d'imagerie via l'IA
+  const handleAIAddImaging = useCallback((examData: any) => {
+    console.log('🤖 AI Assistant adding imaging exam:', examData)
+    
+    if (validationStatus === 'validated') {
+      toast({
+        title: "❌ Document validé",
+        description: "Impossible de modifier un document validé",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      setReport(prev => {
+        if (!prev) return null
+        
+        const newReport = { ...prev }
+        
+        if (!newReport.ordonnances) newReport.ordonnances = {}
+        
+        if (!newReport.ordonnances.imagerie) {
+          const praticien = getReportPraticien()
+          const patient = getReportPatient()
+          
+          newReport.ordonnances.imagerie = {
+            enTete: praticien,
+            patient: patient,
+            prescription: {
+              datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
+              examens: [],
+              renseignementsCliniques: '',
+              centreImagerie: ''
+            },
+            authentification: {
+              signature: "Medical Practitioner's Signature",
+              nomEnCapitales: praticien.nom.toUpperCase(),
+              numeroEnregistrement: praticien.numeroEnregistrement,
+              date: patient.dateExamen || new Date().toISOString().split('T')[0]
+            }
+          }
+        }
+        
+        newReport.ordonnances.imagerie.prescription.examens = [
+          ...(newReport.ordonnances.imagerie.prescription.examens || []), 
+          examData
+        ]
+        
+        return newReport
+      })
+      
+      trackModification('imagerie.ai_add')
+      
+      toast({
+        title: "✅ Imagerie ajoutée",
+        description: `${examData.type} ajouté aux examens d'imagerie par l'IA`,
+        duration: 4000
+      })
+      
+      console.log('✅ Imaging exam added successfully via AI')
+    } catch (error) {
+      console.error('❌ Error adding imaging exam via AI:', error)
+      throw error
+    }
+  }, [validationStatus, getReportPraticien, getReportPatient, trackModification])
+
+  const updateDoctorInfo = useCallback((field: string, value: string) => {
+    setDoctorInfo(prev => ({
       ...prev,
-      ordonnances: {
-        ...prev.ordonnances,
-        biologie: {
-          ...prev.ordonnances.biologie,
-          prescription: {
-            ...prev.ordonnances.biologie.prescription,
-            analyses: {
-              ...prev.ordonnances.biologie.prescription.analyses,
-              [category]: prev.ordonnances.biologie.prescription.analyses[category].filter((_, i) => i !== index)
+      [field]: value
+    }))
+    trackModification(`praticien.${field}`)
+    const updatedInfo = { ...doctorInfo, [field]: value }
+    sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
+  }, [doctorInfo, trackModification])
+
+  // ==================== BATCH UPDATE FUNCTIONS ====================
+  const updateMedicamentBatch = useCallback((index: number, updatedMedication: any) => {
+    if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
+    
+    setReport(prev => {
+      if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
+      
+      const newMedicaments = [...prev.ordonnances.medicaments.prescription.medicaments]
+      newMedicaments[index] = updatedMedication
+      
+      return {
+        ...prev,
+        ordonnances: {
+          ...prev.ordonnances,
+          medicaments: {
+            ...prev.ordonnances.medicaments,
+            prescription: {
+              ...prev.ordonnances.medicaments.prescription,
+              medicaments: newMedicaments
             }
           }
         }
       }
-    }
-  })
-  trackModification(`biologie.remove.${category}.${index}`)
-}, [validationStatus, trackModification])
+    })
+    trackModification(`medicament.${index}`)
+  }, [validationStatus, report?.ordonnances?.medicaments, trackModification])
 
-const addImagingExam = useCallback(() => {
-  if (validationStatus === 'validated') return
-  
-  const newExam = {
-    type: '',
-    modalite: '',
-    region: '',
-    indicationClinique: '',
-    urgence: false,
-    contraste: false,
-    protocoleSpecifique: '',
-    questionDiagnostique: ''
-  }
-  
-  setReport(prev => {
-    if (!prev) return null
+  const updateBiologyTestBatch = useCallback((category: string, index: number, updatedTest: any) => {
+    if (validationStatus === 'validated') return
     
-    const newReport = { ...prev }
-    
-    if (!newReport.ordonnances) newReport.ordonnances = {}
-    
-    if (!newReport.ordonnances.imagerie) {
-      const praticien = getReportPraticien()
-      const patient = getReportPatient()
+    setReport(prev => {
+      if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
       
-      newReport.ordonnances.imagerie = {
-        enTete: praticien,
-        patient: patient,
-        prescription: {
-          datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
-          examens: [],
-          renseignementsCliniques: '',
-          centreImagerie: ''
-        },
-        authentification: {
-          signature: "Medical Practitioner's Signature",
-          nomEnCapitales: praticien.nom.toUpperCase(),
-          numeroEnregistrement: praticien.numeroEnregistrement,
-          date: patient.dateExamen || new Date().toISOString().split('T')[0]
-        }
-      }
-    }
-    
-    newReport.ordonnances.imagerie.prescription.examens = [
-      ...(newReport.ordonnances.imagerie.prescription.examens || []), 
-      newExam
-    ]
-    
-    return newReport
-  })
-  trackModification('imagerie.new')
-}, [validationStatus, getReportPraticien, getReportPatient, trackModification])
-
-const removeImagingExam = useCallback((index: number) => {
-  if (validationStatus === 'validated') return
-  
-  setReport(prev => {
-    if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
-    
-    return {
-      ...prev,
-      ordonnances: {
-        ...prev.ordonnances,
-        imagerie: {
-          ...prev.ordonnances.imagerie,
-          prescription: {
-            ...prev.ordonnances.imagerie.prescription,
-            examens: prev.ordonnances.imagerie.prescription.examens.filter((_, i) => i !== index)
+      const newAnalyses = { ...prev.ordonnances.biologie.prescription.analyses }
+      newAnalyses[category] = [...newAnalyses[category]]
+      newAnalyses[category][index] = updatedTest
+      
+      return {
+        ...prev,
+        ordonnances: {
+          ...prev.ordonnances,
+          biologie: {
+            ...prev.ordonnances.biologie,
+            prescription: {
+              ...prev.ordonnances.biologie.prescription,
+              analyses: newAnalyses
+            }
           }
         }
       }
-    }
-  })
-  trackModification(`imagerie.remove.${index}`)
-}, [validationStatus, trackModification])
+    })
+    trackModification(`biologie.${category}.${index}`)
+  }, [validationStatus, trackModification])
 
-const updateInvoice = useCallback((field: string, value: any) => {
-  if (validationStatus === 'validated') return
-  
-  setReport(prev => {
-    if (!prev) return null
+  const updateImagingExamBatch = useCallback((index: number, updatedExam: any) => {
+    if (validationStatus === 'validated') return
     
-    return {
-      ...prev,
-      invoice: {
-        ...prev.invoice!,
-        [field]: value
-      }
-    }
-  })
-  trackModification(`invoice.${field}`)
-}, [validationStatus, trackModification])
-
-const updatePaymentStatus = useCallback((status: 'pending' | 'paid' | 'cancelled') => {
-  if (!report?.invoice) return
-  
-  updateInvoice('payment', {
-    ...report.invoice.payment,
-    status: status
-  })
-}, [report?.invoice, updateInvoice])
-
-const updatePaymentMethod = useCallback((method: string) => {
-  if (!report?.invoice) return
-  
-  updateInvoice('payment', {
-    ...report.invoice.payment,
-    method: method
-  })
-}, [report?.invoice, updateInvoice])
-
-// ==================== LOAD DOCTOR DATA ====================
-useEffect(() => {
-  const urlParams = new URLSearchParams(window.location.search)
-  const doctorDataParam = urlParams.get('doctorData')
-  
-  if (doctorDataParam) {
-    try {
-      const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
-      console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
+    setReport(prev => {
+      if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
       
-      const doctorInfoFromTibok = {
-        nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
-          `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
-          'Dr. [Name Required]',
-        qualifications: tibokDoctorData.qualifications || 'MBBS',
-        specialite: tibokDoctorData.specialty || 'General Medicine',
-        adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
-        email: tibokDoctorData.email || '[Email Required]',
-        heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
-        numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]'),
-        licencePratique: tibokDoctorData.license_number ? 
-          String(tibokDoctorData.license_number) : 
-          '[License Required]'
+      const newExamens = [...prev.ordonnances.imagerie.prescription.examens]
+      newExamens[index] = updatedExam
+      
+      return {
+        ...prev,
+        ordonnances: {
+          ...prev.ordonnances,
+          imagerie: {
+            ...prev.ordonnances.imagerie,
+            prescription: {
+              ...prev.ordonnances.imagerie.prescription,
+              examens: newExamens
+            }
+          }
+        }
+      }
+    })
+    trackModification(`imagerie.${index}`)
+  }, [validationStatus, trackModification])
+
+  const addMedicament = useCallback(() => {
+    if (validationStatus === 'validated') return
+    
+    const newMed = {
+      nom: '',
+      denominationCommune: '',
+      dosage: '',
+      forme: 'tablet',
+      posologie: '',
+      modeAdministration: 'Oral route',
+      dureeTraitement: '7 days',
+      quantite: '1 box',
+      instructions: '',
+      justification: '',
+      surveillanceParticuliere: '',
+      nonSubstituable: false,
+      ligneComplete: ''
+    }
+    
+    setReport(prev => {
+      if (!prev) return null
+      
+      const newReport = { ...prev }
+      
+      if (!newReport.ordonnances) {
+        newReport.ordonnances = {}
       }
       
-      console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
-      setDoctorInfo(doctorInfoFromTibok)
-      sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
+      if (!newReport.ordonnances.medicaments) {
+        const praticien = getReportPraticien()
+        const patient = getReportPatient()
+        
+        newReport.ordonnances.medicaments = {
+          enTete: praticien,
+          patient: patient,
+          prescription: { 
+            datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
+            medicaments: [],
+            validite: "3 months unless otherwise specified"
+          },
+          authentification: {
+            signature: "Medical Practitioner's Signature",
+            nomEnCapitales: praticien.nom.toUpperCase(),
+            numeroEnregistrement: praticien.numeroEnregistrement,
+            cachetProfessionnel: "Official Medical Stamp",
+            date: patient.dateExamen || new Date().toISOString().split('T')[0]
+          }
+        }
+      }
       
-    } catch (error) {
-      console.error('Error parsing Tibok doctor data:', error)
-    }
-  }
-  
-  const storedDoctorInfo = sessionStorage.getItem('currentDoctorInfo')
-  if (!doctorDataParam && storedDoctorInfo) {
-    try {
-      const doctorData = JSON.parse(storedDoctorInfo)
-      setDoctorInfo(doctorData)
-      console.log('✅ Doctor information loaded from session')
-    } catch (error) {
-      console.error('Error loading doctor data from storage:', error)
-    }
-  }
-}, [])
+      newReport.ordonnances.medicaments.prescription.medicaments = [
+        ...(newReport.ordonnances.medicaments.prescription.medicaments || []), 
+        newMed
+      ]
+      
+      return newReport
+    })
+    trackModification('medicaments.new')
+  }, [validationStatus, getReportPraticien, getReportPatient, trackModification])
 
-// ==================== INITIAL DATA LOAD ====================
-useEffect(() => {
-  console.log("🚀 ProfessionalReportEditable mounted with data:", {
-    hasPatientData: !!patientData,
-    hasClinicalData: !!clinicalData,
-    hasDiagnosisData: !!diagnosisData,
-    hasQuestionsData: !!questionsData
-  })
-  
-  if (patientData && (patientData.name || (patientData.firstName && patientData.lastName))) {
-    generateProfessionalReport()
-  } else {
-    console.warn("Insufficient patient data, creating empty report")
-    const emptyReport = createEmptyReport()
-    if (patientData) {
-      emptyReport.compteRendu.patient = {
-        ...emptyReport.compteRendu.patient,
-        nom: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
-        nomComplet: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
-        age: patientData.age?.toString() || '',
-        dateNaissance: patientData.dateOfBirth || '',
-        sexe: patientData.gender || '',
-        adresse: patientData.address || '',
-        telephone: patientData.phone || '',
-        email: patientData.email || '',
-        poids: patientData.weight?.toString() || ''
+  const removeMedicament = useCallback((index: number) => {
+    if (validationStatus === 'validated') return
+    
+    setReport(prev => {
+      if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
+      
+      return {
+        ...prev,
+        ordonnances: {
+          ...prev.ordonnances,
+          medicaments: {
+            ...prev.ordonnances.medicaments,
+            prescription: {
+              ...prev.ordonnances.medicaments.prescription,
+              medicaments: prev.ordonnances.medicaments.prescription.medicaments.filter((_, i) => i !== index)
+            }
+          }
+        }
+      }
+    })
+    trackModification(`medicament.remove.${index}`)
+  }, [validationStatus, trackModification])
+
+  const addBiologyTest = useCallback((category: string = 'clinicalChemistry') => {
+    if (validationStatus === 'validated') return
+    
+    const newTest = {
+      nom: '',
+      categorie: category,
+      urgence: false,
+      aJeun: false,
+      conditionsPrelevement: '',
+      motifClinique: '',
+      renseignementsCliniques: '',
+      tubePrelevement: 'As per laboratory protocol',
+      delaiResultat: 'Standard'
+    }
+    
+    setReport(prev => {
+      if (!prev) return null
+      
+      const newReport = { ...prev }
+      
+      if (!newReport.ordonnances) newReport.ordonnances = {}
+      
+      if (!newReport.ordonnances.biologie) {
+        const praticien = getReportPraticien()
+        const patient = getReportPatient()
+        
+        newReport.ordonnances.biologie = {
+          enTete: praticien,
+          patient: patient,
+          prescription: {
+            datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
+            motifClinique: '',
+            analyses: {},
+            instructionsSpeciales: [],
+            laboratoireRecommande: ''
+          },
+          authentification: {
+            signature: "Medical Practitioner's Signature",
+            nomEnCapitales: praticien.nom.toUpperCase(),
+            numeroEnregistrement: praticien.numeroEnregistrement,
+            date: patient.dateExamen || new Date().toISOString().split('T')[0]
+          }
+        }
+      }
+      
+      if (!newReport.ordonnances.biologie.prescription.analyses) {
+        newReport.ordonnances.biologie.prescription.analyses = {}
+      }
+      
+      if (!newReport.ordonnances.biologie.prescription.analyses[category]) {
+        newReport.ordonnances.biologie.prescription.analyses[category] = []
+      }
+      
+      newReport.ordonnances.biologie.prescription.analyses[category] = [
+        ...newReport.ordonnances.biologie.prescription.analyses[category], 
+        newTest
+      ]
+      
+      return newReport
+    })
+    trackModification(`biologie.new.${category}`)
+  }, [validationStatus, getReportPraticien, getReportPatient, trackModification])
+
+  const removeBiologyTest = useCallback((category: string, index: number) => {
+    if (validationStatus === 'validated') return
+    
+    setReport(prev => {
+      if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
+      
+      return {
+        ...prev,
+        ordonnances: {
+          ...prev.ordonnances,
+          biologie: {
+            ...prev.ordonnances.biologie,
+            prescription: {
+              ...prev.ordonnances.biologie.prescription,
+              analyses: {
+                ...prev.ordonnances.biologie.prescription.analyses,
+                [category]: prev.ordonnances.biologie.prescription.analyses[category].filter((_, i) => i !== index)
+              }
+            }
+          }
+        }
+      }
+    })
+    trackModification(`biologie.remove.${category}.${index}`)
+  }, [validationStatus, trackModification])
+
+  const addImagingExam = useCallback(() => {
+    if (validationStatus === 'validated') return
+    
+    const newExam = {
+      type: '',
+      modalite: '',
+      region: '',
+      indicationClinique: '',
+      urgence: false,
+      contraste: false,
+      protocoleSpecifique: '',
+      questionDiagnostique: ''
+    }
+    
+    setReport(prev => {
+      if (!prev) return null
+      
+      const newReport = { ...prev }
+      
+      if (!newReport.ordonnances) newReport.ordonnances = {}
+      
+      if (!newReport.ordonnances.imagerie) {
+        const praticien = getReportPraticien()
+        const patient = getReportPatient()
+        
+        newReport.ordonnances.imagerie = {
+          enTete: praticien,
+          patient: patient,
+          prescription: {
+            datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
+            examens: [],
+            renseignementsCliniques: '',
+            centreImagerie: ''
+          },
+          authentification: {
+            signature: "Medical Practitioner's Signature",
+            nomEnCapitales: praticien.nom.toUpperCase(),
+            numeroEnregistrement: praticien.numeroEnregistrement,
+            date: patient.dateExamen || new Date().toISOString().split('T')[0]
+          }
+        }
+      }
+      
+      newReport.ordonnances.imagerie.prescription.examens = [
+        ...(newReport.ordonnances.imagerie.prescription.examens || []), 
+        newExam
+      ]
+      
+      return newReport
+    })
+    trackModification('imagerie.new')
+  }, [validationStatus, getReportPraticien, getReportPatient, trackModification])
+
+  const removeImagingExam = useCallback((index: number) => {
+    if (validationStatus === 'validated') return
+    
+    setReport(prev => {
+      if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
+      
+      return {
+        ...prev,
+        ordonnances: {
+          ...prev.ordonnances,
+          imagerie: {
+            ...prev.ordonnances.imagerie,
+            prescription: {
+              ...prev.ordonnances.imagerie.prescription,
+              examens: prev.ordonnances.imagerie.prescription.examens.filter((_, i) => i !== index)
+            }
+          }
+        }
+      }
+    })
+    trackModification(`imagerie.remove.${index}`)
+  }, [validationStatus, trackModification])
+
+  const updateInvoice = useCallback((field: string, value: any) => {
+    if (validationStatus === 'validated') return
+    
+    setReport(prev => {
+      if (!prev) return null
+      
+      return {
+        ...prev,
+        invoice: {
+          ...prev.invoice!,
+          [field]: value
+        }
+      }
+    })
+    trackModification(`invoice.${field}`)
+  }, [validationStatus, trackModification])
+
+  const updatePaymentStatus = useCallback((status: 'pending' | 'paid' | 'cancelled') => {
+    if (!report?.invoice) return
+    
+    updateInvoice('payment', {
+      ...report.invoice.payment,
+      status: status
+    })
+  }, [report?.invoice, updateInvoice])
+
+  const updatePaymentMethod = useCallback((method: string) => {
+    if (!report?.invoice) return
+    
+    updateInvoice('payment', {
+      ...report.invoice.payment,
+      method: method
+    })
+  }, [report?.invoice, updateInvoice])
+
+  // ==================== LOAD DOCTOR DATA ====================
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const doctorDataParam = urlParams.get('doctorData')
+    
+    if (doctorDataParam) {
+      try {
+        const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
+        console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
+        
+        const doctorInfoFromTibok = {
+          nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
+            `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
+            'Dr. [Name Required]',
+          qualifications: tibokDoctorData.qualifications || 'MBBS',
+          specialite: tibokDoctorData.specialty || 'General Medicine',
+          adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
+          email: tibokDoctorData.email || '[Email Required]',
+          heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+          numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]'),
+          licencePratique: tibokDoctorData.license_number ? 
+            String(tibokDoctorData.license_number) : 
+            '[License Required]'
+        }
+        
+        console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
+        setDoctorInfo(doctorInfoFromTibok)
+        sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
+        
+      } catch (error) {
+        console.error('Error parsing Tibok doctor data:', error)
       }
     }
-    setReport(emptyReport)
-    setLoading(false)
-  }
-}, [patientData, clinicalData, questionsData, diagnosisData])
+    
+    const storedDoctorInfo = sessionStorage.getItem('currentDoctorInfo')
+    if (!doctorDataParam && storedDoctorInfo) {
+      try {
+        const doctorData = JSON.parse(storedDoctorInfo)
+        setDoctorInfo(doctorData)
+        console.log('✅ Doctor information loaded from session')
+      } catch (error) {
+        console.error('Error loading doctor data from storage:', error)
+      }
+    }
+  }, [])
 
-// 🤖 Mettre à jour la section courante de l'Assistant IA quand l'onglet change
-useEffect(() => {
-  setAiAssistantCurrentSection(activeTab === 'consultation' ? 'motifConsultation' : activeTab)
-}, [activeTab])
+  // ==================== INITIAL DATA LOAD ====================
+  useEffect(() => {
+    console.log("🚀 ProfessionalReportEditable mounted with data:", {
+      hasPatientData: !!patientData,
+      hasClinicalData: !!clinicalData,
+      hasDiagnosisData: !!diagnosisData,
+      hasQuestionsData: !!questionsData
+    })
+    
+    if (patientData && (patientData.name || (patientData.firstName && patientData.lastName))) {
+      generateProfessionalReport()
+    } else {
+      console.warn("Insufficient patient data, creating empty report")
+      const emptyReport = createEmptyReport()
+      if (patientData) {
+        emptyReport.compteRendu.patient = {
+          ...emptyReport.compteRendu.patient,
+          nom: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
+          nomComplet: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
+          age: patientData.age?.toString() || '',
+          dateNaissance: patientData.dateOfBirth || '',
+          sexe: patientData.gender || '',
+          adresse: patientData.address || '',
+          telephone: patientData.phone || '',
+          email: patientData.email || '',
+          poids: patientData.weight?.toString() || ''
+        }
+      }
+      setReport(emptyReport)
+      setLoading(false)
+    }
+  }, [patientData, clinicalData, questionsData, diagnosisData])
 
   // ==================== GENERATE REPORT ====================
   const generateProfessionalReport = async () => {
@@ -1299,36 +1510,6 @@ useEffect(() => {
       if (data.success && data.report) {
         const apiReport = data.report
         
-        // ===== DEBUG POUR IDENTIFIER LE PROBLÈME =====
-console.log("📥 API Response Debug COMPLET:")
-console.log("- Response success:", data.success)
-console.log("- Response keys:", Object.keys(data))
-console.log("- Has report:", !!data.report)
-console.log("- Report keys:", data.report ? Object.keys(data.report) : "No report")
-console.log("- Metadata type:", data.metadata?.type)
-console.log("- Metadata:", data.metadata)
-
-if (data.report?.medicalReport) {
-  console.log("- Medical report keys:", Object.keys(data.report.medicalReport))
-  
-  if (data.report.medicalReport.report) {
-    console.log("- Report sections keys:", Object.keys(data.report.medicalReport.report))
-    
-    // Vérifier le contenu de chaque section
-    const sections = data.report.medicalReport.report
-    Object.keys(sections).forEach(key => {
-      const content = sections[key]
-      console.log(`- ${key}:`, {
-        type: typeof content,
-        length: typeof content === 'string' ? content.length : 0,
-        preview: typeof content === 'string' ? content.substring(0, 50) + "..." : content
-      })
-    })
-  }
-}
-
-console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 2).substring(0, 1000))
-        // MAP API STRUCTURE TO COMPONENT STRUCTURE
         console.log("🔄 Mapping API structure to component structure...")
         
         const reportData: MauritianReport = {
@@ -1414,22 +1595,10 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
           }
         }
         
-     // Map laboratory tests
+        // Map laboratory tests
         if (apiReport.prescriptions?.laboratoryTests) {
           const labData = apiReport.prescriptions.laboratoryTests
-          // 🔍 DEBUG COMPLET
-  console.log("🔬 MAPPING DEBUG:")
-  console.log("- labData existe:", !!labData)
-  console.log("- labData.prescription existe:", !!labData.prescription)
-  console.log("- labData.prescription.analyses existe:", !!labData.prescription?.analyses)
-  console.log("- Contenu de analyses:", JSON.stringify(labData.prescription?.analyses, null, 2))
           
-  // Compter les tests dans chaque catégorie
-  const analyses = labData.prescription?.analyses || {}
-  Object.keys(analyses).forEach(category => {
-    console.log(`- ${category}: ${analyses[category]?.length || 0} tests`)
-  })
-  
           reportData.ordonnances!.biologie = {
             enTete: currentDoctorInfo,
             patient: reportData.compteRendu.patient,
@@ -1515,8 +1684,7 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
             }
           }
         }
-      console.log("✅ STRUCTURE FINALE reportData.ordonnances.biologie:")
-      console.log(JSON.stringify(reportData.ordonnances?.biologie, null, 2))
+        
         // Map imaging studies
         if (apiReport.prescriptions?.imagingStudies) {
           const imagingData = apiReport.prescriptions.imagingStudies
@@ -1557,24 +1725,6 @@ console.log("🔍 Raw response (first 1000 chars):", JSON.stringify(data, null, 
         }
         
         console.log("✅ Structure mapping complete")
-
-        // VÉRIFICATION DU RÉSULTAT FINAL
-console.log("📋 Final report verification:")
-console.log("- Patient name:", reportData.compteRendu.patient.nom)
-console.log("- Report sections status:")
-
-Object.keys(reportData.compteRendu.rapport).forEach(key => {
-  const content = reportData.compteRendu.rapport[key as keyof typeof reportData.compteRendu.rapport]
-  const status = content && typeof content === 'string' && content.length > 0 ? "✅ FILLED" : "❌ EMPTY"
-  console.log(`  - ${key}: ${status} (${typeof content === 'string' ? content.length : 0} chars)`)
-})
-
-console.log("- Prescriptions:", {
-  medications: !!reportData.ordonnances?.medicaments,
-  labTests: !!reportData.ordonnances?.biologie,
-  imaging: !!reportData.ordonnances?.imagerie
-})
-console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
         
         setReport(reportData)
         setValidationStatus('draft')
@@ -1584,14 +1734,6 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
         setReportId(newReportId)
         
         console.log('✅ Report generated with ID:', newReportId)
-        console.log('📊 Report structure:', {
-          hasCompteRendu: !!reportData.compteRendu,
-          hasOrdonnances: !!reportData.ordonnances,
-          hasMedicaments: !!reportData.ordonnances?.medicaments,
-          hasBiologie: !!reportData.ordonnances?.biologie,
-          hasImagerie: !!reportData.ordonnances?.imagerie,
-          hasInvoice: !!reportData.invoice
-        })
         
         toast({
           title: "Report generated successfully",
@@ -1634,6 +1776,7 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
       setLoading(false)
     }
   }
+
   // ==================== VALIDATION & SIGNATURE ====================
   const handleValidation = async () => {
     const requiredFieldsMissing = []
@@ -1937,7 +2080,6 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
       }
 
       console.log('📦 Sending documents payload to:', tibokUrl)
-      console.log('📦 Payload:', documentsPayload)
 
       const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
         method: 'POST',
@@ -2420,6 +2562,7 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
   }
 
   const handlePrint = () => window.print()
+
   // ==================== RENDER STATES ====================
   if (loading) {
     return (
@@ -2495,11 +2638,9 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
                              !doctorInfo.numeroEnregistrement.includes('[') &&
                              !doctorInfo.email.includes('[')
     
-    // Local state for editing to prevent focus loss
     const [localDoctorInfo, setLocalDoctorInfo] = useState(doctorInfo)
     const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
     
-    // Sync local state with parent after delay
     useEffect(() => {
       const timer = setTimeout(() => {
         if (editingDoctor && JSON.stringify(localDoctorInfo) !== JSON.stringify(doctorInfo)) {
@@ -2788,6 +2929,7 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
       </Card>
     )
   }
+
   const MedicationPrescription = () => {
     const medications = report?.ordonnances?.medicaments?.prescription?.medicaments || []
     const patient = getReportPatient()
@@ -2950,6 +3092,7 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
       </div>
     )
   }
+
   const BiologyPrescription = () => {
     const analyses = report?.ordonnances?.biologie?.prescription?.analyses || {}
     const hasTests = Object.values(analyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
@@ -2957,14 +3100,14 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
     const praticien = getReportPraticien()
     const rapport = getReportRapport()
     
-   const categories = [
-  { key: 'hematology', label: 'HEMATOLOGY' },
-  { key: 'clinicalChemistry', label: 'CLINICAL CHEMISTRY' },
-  { key: 'immunology', label: 'IMMUNOLOGY' },
-  { key: 'microbiology', label: 'MICROBIOLOGY' },
-  { key: 'endocrinology', label: 'ENDOCRINOLOGY' },
-  { key: 'general', label: 'GENERAL LABORATORY' }
-]
+    const categories = [
+      { key: 'hematology', label: 'HEMATOLOGY' },
+      { key: 'clinicalChemistry', label: 'CLINICAL CHEMISTRY' },
+      { key: 'immunology', label: 'IMMUNOLOGY' },
+      { key: 'microbiology', label: 'MICROBIOLOGY' },
+      { key: 'endocrinology', label: 'ENDOCRINOLOGY' },
+      { key: 'general', label: 'GENERAL LABORATORY' }
+    ]
     
     if (!includeFullPrescriptions && report?.prescriptionsResume) {
       return (
@@ -3274,6 +3417,7 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
       </div>
     )
   }
+
   const InvoiceComponent = () => {
     const invoice = report?.invoice
     if (!invoice) return null
@@ -3582,123 +3726,129 @@ console.log("- Total word count:", reportData.compteRendu.metadata.wordCount)
       </Card>
     )
   }
- // ==================== MAIN RENDER ====================
-return (
-  <div className="space-y-6 print:space-y-4">
-    <ActionsBar />
-    <UnsavedChangesAlert />
-    <DoctorInfoEditor />
-    <PrescriptionStats />
 
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
-      <TabsList className="grid w-full grid-cols-5">
-        <TabsTrigger value="consultation">
-          <FileText className="h-4 w-4 mr-2" />
-          Report
-        </TabsTrigger>
-        <TabsTrigger value="medicaments">
-          <Pill className="h-4 w-4 mr-2" />
-          Medications
-          {report?.ordonnances?.medicaments?.prescription?.medicaments?.length > 0 && (
-            <Badge variant="secondary" className="ml-2">
-              {report.ordonnances.medicaments.prescription.medicaments.length}
-            </Badge>
-          )}
-        </TabsTrigger>
-        <TabsTrigger value="biologie">
-          <TestTube className="h-4 w-4 mr-2" />
-          Laboratory
-          {report?.ordonnances?.biologie && (
-            <Badge variant="secondary" className="ml-2">
-              {Object.values(report.ordonnances.biologie.prescription.analyses || {})
-                .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)}
-            </Badge>
-          )}
-        </TabsTrigger>
-        <TabsTrigger value="imagerie">
-          <Scan className="h-4 w-4 mr-2" />
-          Imaging
-          {report?.ordonnances?.imagerie?.prescription?.examens?.length > 0 && (
-            <Badge variant="secondary" className="ml-2">
-              {report.ordonnances.imagerie.prescription.examens.length}
-            </Badge>
-          )}
-        </TabsTrigger>
-        <TabsTrigger value="invoice">
-          <Receipt className="h-4 w-4 mr-2" />
-          Invoice
-        </TabsTrigger>
-      </TabsList>
+  // ==================== MAIN RENDER ====================
+  return (
+    <div className="space-y-6 print:space-y-4">
+      <ActionsBar />
+      <UnsavedChangesAlert />
+      <DoctorInfoEditor />
+      <PrescriptionStats />
 
-      <TabsContent value="consultation">
-        <ConsultationReport />
-      </TabsContent>
-      
-      <TabsContent value="medicaments">
-        <MedicationPrescription />
-      </TabsContent>
-      
-      <TabsContent value="biologie">
-        <BiologyPrescription />
-      </TabsContent>
-      
-      <TabsContent value="imagerie">
-        <ImagingPrescription />
-      </TabsContent>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="consultation">
+            <FileText className="h-4 w-4 mr-2" />
+            Report
+          </TabsTrigger>
+          <TabsTrigger value="medicaments">
+            <Pill className="h-4 w-4 mr-2" />
+            Medications
+            {report?.ordonnances?.medicaments?.prescription?.medicaments?.length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {report.ordonnances.medicaments.prescription.medicaments.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="biologie">
+            <TestTube className="h-4 w-4 mr-2" />
+            Laboratory
+            {report?.ordonnances?.biologie && (
+              <Badge variant="secondary" className="ml-2">
+                {Object.values(report.ordonnances.biologie.prescription.analyses || {})
+                  .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="imagerie">
+            <Scan className="h-4 w-4 mr-2" />
+            Imaging
+            {report?.ordonnances?.imagerie?.prescription?.examens?.length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {report.ordonnances.imagerie.prescription.examens.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="invoice">
+            <Receipt className="h-4 w-4 mr-2" />
+            Invoice
+          </TabsTrigger>
+        </TabsList>
 
-      <TabsContent value="invoice">
-        <InvoiceComponent />
-      </TabsContent>
-    </Tabs>
+        <TabsContent value="consultation">
+          <ConsultationReport />
+        </TabsContent>
+        
+        <TabsContent value="medicaments">
+          <MedicationPrescription />
+        </TabsContent>
+        
+        <TabsContent value="biologie">
+          <BiologyPrescription />
+        </TabsContent>
+        
+        <TabsContent value="imagerie">
+          <ImagingPrescription />
+        </TabsContent>
 
-    <div className="hidden print:block">
-      <ConsultationReport />
-      {includeFullPrescriptions && report?.ordonnances && (
-        <>
-          {report.ordonnances.medicaments && (
-            <div className="page-break-before mt-8">
-              <MedicationPrescription />
-            </div>
-          )}
-          {report.ordonnances.biologie && (
-            <div className="page-break-before mt-8">
-              <BiologyPrescription />
-            </div>
-          )}
-          {report.ordonnances.imagerie && (
-            <div className="page-break-before mt-8">
-              <ImagingPrescription />
-            </div>
-          )}
-        </>
-      )}
-      {report?.invoice && (
-        <div className="page-break-before mt-8">
+        <TabsContent value="invoice">
           <InvoiceComponent />
+        </TabsContent>
+      </Tabs>
+
+      <div className="hidden print:block">
+        <ConsultationReport />
+        {includeFullPrescriptions && report?.ordonnances && (
+          <>
+            {report.ordonnances.medicaments && (
+              <div className="page-break-before mt-8">
+                <MedicationPrescription />
+              </div>
+            )}
+            {report.ordonnances.biologie && (
+              <div className="page-break-before mt-8">
+                <BiologyPrescription />
+              </div>
+            )}
+            {report.ordonnances.imagerie && (
+              <div className="page-break-before mt-8">
+                <ImagingPrescription />
+              </div>
+            )}
+          </>
+        )}
+        {report?.invoice && (
+          <div className="page-break-before mt-8">
+            <InvoiceComponent />
+          </div>
+        )}
+      </div>
+
+      {validationStatus === 'validated' && (
+        <div className="flex justify-center print:hidden mt-8">
+          <Button 
+            size="lg"
+            onClick={handleSendDocuments}
+            className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+          >
+            <CheckCircle className="h-5 w-5 mr-2" />
+            Finalize and Send documents
+          </Button>
         </div>
       )}
+
+      {/* 🤖 Assistant IA Médical Maurice avec toutes les nouvelles capacités */}
+      <MedicalAIAssistant
+        reportData={report}
+        onUpdateSection={handleUpdateSectionImmediate} // 🔧 Utilise la version immédiate
+        onUpdateMedication={updateMedicamentBatch} // 🆕 Fonction pour mettre à jour médicaments
+        onAddMedication={handleAIAddMedication} // 🆕 Fonction pour ajouter médicaments
+        onUpdateLabTest={updateBiologyTestBatch} // 🆕 Fonction pour mettre à jour tests bio
+        onAddLabTest={handleAIAddLabTest} // 🆕 Fonction pour ajouter tests bio
+        onUpdateImaging={updateImagingExamBatch} // 🆕 Fonction pour mettre à jour imagerie
+        onAddImaging={handleAIAddImaging} // 🆕 Fonction pour ajouter imagerie
+        currentSection={activeTab === 'consultation' ? 'motifConsultation' : activeTab}
+      />
     </div>
-
-    {validationStatus === 'validated' && (
-      <div className="flex justify-center print:hidden mt-8">
-        <Button 
-          size="lg"
-          onClick={handleSendDocuments}
-          className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
-        >
-          <CheckCircle className="h-5 w-5 mr-2" />
-          Finalize and Send documents
-        </Button>
-      </div>
-    )}
-
-    {/* 🤖 Assistant IA Médical Maurice */}
-    <MedicalAIAssistant
-      reportData={report}
-      onUpdateSection={handleUpdateSection}
-      currentSection={activeTab === 'consultation' ? 'motifConsultation' : activeTab}
-    />
-  </div>
-)
-  
+  )
 }
