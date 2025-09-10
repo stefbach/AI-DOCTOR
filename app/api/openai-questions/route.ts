@@ -310,7 +310,7 @@ const TRIGGER_PATTERNS = {
 const RED_FLAG_PATTERNS = {
   cardiac: [
     {
-      pattern: /douleur.*(irradiant?|irradie).*(bras|mâchoire|dos|jaw|arm|back)/i,
+      pattern: /douleur.*(irradiant?|irradie).*(bras|machoire|dos|jaw|arm|back)/i,
       flag: 'RADIATION_PATTERN',
       severity: 'critical' as const,
       description: 'Chest pain with radiation - suggests ACS'
@@ -410,7 +410,7 @@ const CLINICAL_PATTERNS = {
   
   acute_coronary: {
     pattern: /(douleur.*thoracique|poitrine|chest pain).*(brutal|soudain|intense|sudden|severe).*(?!effort)/i,
-    confidence_keywords: ['irradiation', 'bras', 'mâchoire', 'sueur', 'nausée', 'radiation', 'arm', 'jaw', 'sweat', 'nausea'],
+    confidence_keywords: ['irradiation', 'bras', 'machoire', 'sueur', 'nausée', 'radiation', 'arm', 'jaw', 'sweat', 'nausea'],
     specialty: 'Emergency Cardiology',
     urgency: 'immediate' as const,
     description: 'Acute coronary syndrome pattern'
@@ -641,7 +641,7 @@ function analyzeCharacteristics(text: string) {
   // Irradiation
   if (/bras|membre supérieur|arm/i.test(text)) radiation.push('arm')
   if (/dos|dorsale|back/i.test(text)) radiation.push('back')
-  if /(mâchoire|jaw)/i.test(text)) radiation.push('jaw')
+  if /(machoire|jaw)/i.test(text)) radiation.push('jaw')
   if /(abdomen|ventre|stomach)/i.test(text)) radiation.push('abdomen')
   if /(cou|cervical|neck)/i.test(text)) radiation.push('neck')
   
