@@ -66,7 +66,41 @@ interface UniversalValidationResult {
     evidence_base_score: number
   }
 }
-
+// ==================== PATHOLOGIES TROPICALES MAURICIENNES (V4.5) ====================
+const MAURITIUS_SPECIFIC_CONDITIONS = {
+  tropical_diseases: {
+    dengue: {
+      prevalence: "Endemic - particularly Nov-May (cyclone season)",
+      symptoms: ["fever", "headache", "muscle pain", "rash"],
+      first_line_tests: ["FBC with platelet count", "NS1 antigen", "IgM/IgG dengue"],
+      local_guidance: "Notify Ministry of Health if suspected"
+    },
+    chikungunya: {
+      prevalence: "Sporadic outbreaks",
+      symptoms: ["joint pain", "fever", "rash"],
+      first_line_tests: ["IgM chikungunya", "FBC"],
+      local_guidance: "Joint pain can persist for months"
+    },
+    leptospirosis: {
+      prevalence: "Rainy season risk (Dec-May)",
+      risk_factors: ["flood exposure", "agricultural work"],
+      first_line_tests: ["FBC", "liver function", "leptospira serology"]
+    }
+  },
+  
+  climate_related: {
+    heat_exhaustion: {
+      risk_period: "Oct-April (hot season)",
+      local_advice: "Avoid midday sun, increase fluid intake",
+      cultural_considerations: "Ramadan fasting periods require special attention"
+    },
+    cyclone_related: {
+      injuries: "Cuts, falls, flying debris during cyclone season",
+      infections: "Post-cyclone water contamination risks",
+      mental_health: "Post-cyclone stress and anxiety"
+    }
+  }
+}
 // ==================== MAURITIUS MEDICAL PROMPT COMPLET + DCI PRÉCIS ====================
 const MAURITIUS_MEDICAL_PROMPT = `YOU ARE AN EXPERT PHYSICIAN - MANDATORY JSON RESPONSE WITH MAURITIUS MEDICAL STANDARDS
 
