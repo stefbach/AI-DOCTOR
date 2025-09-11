@@ -399,10 +399,10 @@ const COMMON_SYMPTOMS = useMemo(() => [
       newErrors.symptomDuration = "Symptom duration is required"
     }
     
-    const symptoms = Array.isArray(localData.symptoms) ? localData.symptoms : []
-    if (symptoms.length === 0) {
-      newErrors.symptoms = "At least one symptom must be selected"
-    }
+// const symptoms = Array.isArray(localData.symptoms) ? localData.symptoms : []
+// if (symptoms.length === 0) {
+//   newErrors.symptoms = "At least one symptom must be selected"
+// }
     
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
