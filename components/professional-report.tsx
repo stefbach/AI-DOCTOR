@@ -35,7 +35,6 @@ interface MauritianReport {
       email: string
       heuresConsultation: string
       numeroEnregistrement: string
-      licencePratique: string
     }
     patient: {
       nom: string
@@ -112,8 +111,7 @@ const createEmptyReport = (): MauritianReport => ({
       adresseCabinet: "Tibok Teleconsultation Platform",
       email: "[Email Required]",
       heuresConsultation: "Teleconsultation Hours: 8:00 AM - 8:00 PM",
-      numeroEnregistrement: "[MCM Registration Required]",
-      licencePratique: "[License Required]"
+      numeroEnregistrement: "[MCM Registration Required]"
     },
     patient: {
       nom: "",
@@ -684,8 +682,7 @@ export default function ProfessionalReportEditable({
     adresseCabinet: "Tibok Teleconsultation Platform",
     email: "[Email Required]",
     heuresConsultation: "Teleconsultation Hours: 8:00 AM - 8:00 PM",
-    numeroEnregistrement: "[MCM Registration Required]",
-    licencePratique: "[License Required]"
+    numeroEnregistrement: "[MCM Registration Required]"
   })
   const [editingDoctor, setEditingDoctor] = useState(false)
   const [documentSignatures, setDocumentSignatures] = useState<{
@@ -1374,20 +1371,17 @@ export default function ProfessionalReportEditable({
         const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
         console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
         
-        const doctorInfoFromTibok = {
-          nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
-            `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
-            'Dr. [Name Required]',
-          qualifications: tibokDoctorData.qualifications || 'MBBS',
-          specialite: tibokDoctorData.specialty || 'General Medicine',
-          adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
-          email: tibokDoctorData.email || '[Email Required]',
-          heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
-          numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]'),
-          licencePratique: tibokDoctorData.license_number ? 
-            String(tibokDoctorData.license_number) : 
-            '[License Required]'
-        }
+const doctorInfoFromTibok = {
+  nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
+    `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
+    'Dr. [Name Required]',
+  qualifications: tibokDoctorData.qualifications || 'MBBS',
+  specialite: tibokDoctorData.specialty || 'General Medicine',
+  adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
+  email: tibokDoctorData.email || '[Email Required]',
+  heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+  numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]')
+}
         
         console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
         setDoctorInfo(doctorInfoFromTibok)
@@ -1480,8 +1474,7 @@ export default function ProfessionalReportEditable({
         clinicAddress: currentDoctorInfo.adresseCabinet,
         email: currentDoctorInfo.email,
         consultationHours: currentDoctorInfo.heuresConsultation,
-        medicalCouncilNumber: currentDoctorInfo.numeroEnregistrement,
-        licenseNumber: currentDoctorInfo.licencePratique
+        medicalCouncilNumber: currentDoctorInfo.numeroEnregistrement
       }
       
       const response = await fetch("/api/generate-consultation-report", {
@@ -2733,16 +2726,6 @@ export default function ProfessionalReportEditable({
                 />
               </div>
               <div>
-                <Label>Practice License No.</Label>
-                <Input
-                  ref={(el) => { inputRefs.current['licencePratique'] = el }}
-                  value={localDoctorInfo.licencePratique}
-                  onChange={(e) => handleDoctorFieldChange('licencePratique', e.target.value)}
-                  placeholder="PL/2024/123"
-                  className={localDoctorInfo.licencePratique.includes('[') ? 'border-red-500' : ''}
-                />
-              </div>
-              <div>
                 <Label>Email *</Label>
                 <Input
                   ref={(el) => { inputRefs.current['email'] = el }}
@@ -2780,7 +2763,6 @@ export default function ProfessionalReportEditable({
               <div><strong>Qualifications:</strong> {doctorInfo.qualifications}</div>
               <div><strong>Speciality:</strong> {doctorInfo.specialite}</div>
               <div><strong>Medical Council No.:</strong> {doctorInfo.numeroEnregistrement}</div>
-              <div><strong>License No.:</strong> {doctorInfo.licencePratique}</div>
               <div><strong>Email:</strong> {doctorInfo.email}</div>
               <div className="col-span-2"><strong>Clinic Address:</strong> {doctorInfo.adresseCabinet}</div>
               <div className="col-span-2"><strong>Consultation Hours:</strong> {doctorInfo.heuresConsultation}</div>
@@ -2828,7 +2810,6 @@ export default function ProfessionalReportEditable({
               <div>{praticien.qualifications}</div>
               <div>{praticien.specialite}</div>
               <div>Medical Council Reg: {praticien.numeroEnregistrement}</div>
-              <div>Practice License: {praticien.licencePratique}</div>
               <div>{praticien.email}</div>
               <div className="col-span-2">{praticien.adresseCabinet}</div>
               <div className="col-span-2">{praticien.heuresConsultation}</div>
@@ -2901,7 +2882,6 @@ export default function ProfessionalReportEditable({
               <p className="font-semibold">{praticien.nom}</p>
               <p className="text-sm text-gray-600">{praticien.qualifications}</p>
               <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
-              <p className="text-sm text-gray-600">License: {praticien.licencePratique}</p>
               <p className="text-sm text-gray-600">{praticien.adresseCabinet}</p>
               
               {validationStatus === 'validated' && documentSignatures.consultation ? (
@@ -3065,7 +3045,6 @@ export default function ProfessionalReportEditable({
             <p className="font-semibold">{praticien.nom}</p>
             <p className="text-sm text-gray-600">{praticien.qualifications}</p>
             <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
-            <p className="text-sm text-gray-600">License: {praticien.licencePratique}</p>
             
             {validationStatus === 'validated' && documentSignatures.prescription ? (
               <div className="mt-4">
