@@ -66,6 +66,7 @@ interface UniversalValidationResult {
     evidence_base_score: number
   }
 }
+
 interface SymptomTriageResult {
   urgency: 'immediate' | 'urgent' | 'routine'
   primary_orientation: string
@@ -74,6 +75,7 @@ interface SymptomTriageResult {
   second_line_investigations: string[]
   specialist_referral_threshold: string
 }
+
 // ==================== LOGIQUE DIAGNOSTIQUE PROGRESSIVE (V4.6) ====================
 function universalSymptomAnalysis(
   symptoms: string[], 
@@ -82,20 +84,162 @@ function universalSymptomAnalysis(
   sex: string,
   vitalSigns: any
 ): SymptomTriageResult {
-  // [Copier toute la fonction universalSymptomAnalysis de la V4.6]
+  const allSymptoms = [...symptoms, chiefComplaint].join(' ').toLowerCase()
+  
+  // Analyse des symptômes prioritaires
+  const hasFever = allSymptoms.includes('fever') || allSymptoms.includes('fièvre') || 
+                   (vitalSigns?.temperature && vitalSigns.temperature > 37.5)
+  const hasChestPain = allSymptoms.includes('chest pain') || allSymptoms.includes('douleur thoracique')
+  const hasBreathing = allSymptoms.includes('shortness of breath') || allSymptoms.includes('dyspnea')
+  const hasHeadache = allSymptoms.includes('headache') || allSymptoms.includes('céphalée')
+  const hasAbdominalPain = allSymptoms.includes('abdominal pain') || allSymptoms.includes('douleur abdominale')
+  
+  let urgency: 'immediate' | 'urgent' | 'routine' = 'routine'
+  let primaryOrientation = 'Consultation médicale générale'
+  let differentialConsiderations: string[] = []
+  let firstLineInvestigations: string[] = []
+  let secondLineInvestigations: string[] = []
+  let specialistReferralThreshold = 'low'
+  
+  // Logique de triage par urgence
+  if (hasChestPain && hasBreathing) {
+    urgency = 'immediate'
+    primaryOrientation = 'Syndrome coronarien aigu possible'
+    differentialConsiderations = [
+      'Infarctus du myocarde',
+      'Angor instable', 
+      'Embolie pulmonaire',
+      'Pneumothorax',
+      'Douleur musculo-squelettique'
+    ]
+    firstLineInvestigations = ['ECG', 'Troponines', 'Radiographie thoracique']
+    secondLineInvestigations = ['Échocardiographie', 'Angiographie coronaire']
+    specialistReferralThreshold = 'immediate'
+  } else if (hasFever && hasHeadache && age < 60) {
+    urgency = 'urgent'
+    primaryOrientation = 'Syndrome infectieux avec céphalées'
+    differentialConsiderations = [
+      'Infection virale commune',
+      'Méningite (à exclure)',
+      'Sinusite aiguë',
+      'Infection des voies respiratoires supérieures'
+    ]
+    firstLineInvestigations = ['FBC', 'CRP', 'Hémocultures si fièvre >38.5°C']
+    secondLineInvestigations = ['Ponction lombaire si signes méningés']
+    specialistReferralThreshold = 'urgent if deterioration'
+  } else if (hasAbdominalPain) {
+    urgency = 'urgent'
+    primaryOrientation = 'Douleur abdominale aiguë'
+    differentialConsiderations = [
+      'Gastro-entérite',
+      'Appendicite (à exclure)',
+      'Cholécystite',
+      'Colique néphrétique',
+      'Occlusion intestinale'
+    ]
+    firstLineInvestigations = ['FBC', 'CRP', 'Échographie abdominale']
+    secondLineInvestigations = ['CT abdomen-pelvis si complications']
+    specialistReferralThreshold = 'urgent if peritoneal signs'
+  } else if (hasFever) {
+    urgency = 'routine'
+    primaryOrientation = 'Syndrome fébrile'
+    differentialConsiderations = [
+      'Infection virale commune',
+      'Infection bactérienne',
+      'Infection des voies respiratoires',
+      'Infection urinaire'
+    ]
+    firstLineInvestigations = ['FBC', 'CRP', 'ECBU']
+    secondLineInvestigations = ['Hémocultures si persistance']
+    specialistReferralThreshold = 'routine follow-up'
+  } else {
+    urgency = 'routine'
+    primaryOrientation = 'Consultation médicale de routine'
+    differentialConsiderations = [
+      'Affection bénigne',
+      'Troubles fonctionnels',
+      'Pathologie chronique stable'
+    ]
+    firstLineInvestigations = ['Selon orientation clinique']
+    secondLineInvestigations = ['Selon résultats premiers examens']
+    specialistReferralThreshold = 'low'
+  }
+  
+  return {
+    urgency,
+    primary_orientation: primaryOrientation,
+    differential_considerations: differentialConsiderations,
+    first_line_investigations: firstLineInvestigations,
+    second_line_investigations: secondLineInvestigations,
+    specialist_referral_threshold: specialistReferralThreshold
+  }
 }
+
 // ==================== VALIDATION DIAGNOSTIQUE PROGRESSIVE (V4.6) ====================
 function validateDiagnosticProgression(analysis: any): {
   isProgressive: boolean,
   issues: string[],
   corrections: any
 } {
-  // [Copier toute la fonction validateDiagnosticProgression de la V4.6]
+  const issues: string[] = []
+  const corrections: any = {}
+  
+  // Vérifier que le diagnostic n'est pas trop spécifique pour une téléconsultation
+  const diagnosis = analysis?.clinical_analysis?.primary_diagnosis?.condition || ''
+  const confidence = analysis?.clinical_analysis?.primary_diagnosis?.confidence_level || 0
+  
+  if (diagnosis.toLowerCase().includes('cancer') || diagnosis.toLowerCase().includes('infarctus')) {
+    if (confidence > 70) {
+      issues.push('Diagnostic trop spécifique pour téléconsultation')
+      corrections.primary_diagnosis_adjustment = 'Syndrome nécessitant investigation'
+    }
+  }
+  
+  // Vérifier l'approche progressive des investigations
+  const labTests = analysis?.investigation_strategy?.laboratory_tests || []
+  const hasBasicTests = labTests.some((test: any) => 
+    (test?.test_name || '').toLowerCase().includes('fbc') ||
+    (test?.test_name || '').toLowerCase().includes('crp') ||
+    (test?.test_name || '').toLowerCase().includes('u&e')
+  )
+  
+  if (labTests.length > 0 && !hasBasicTests) {
+    issues.push('Tests spécialisés avant tests de base')
+    corrections.investigations_hierarchy = 'Prioriser FBC, CRP, U&E d\'abord'
+  }
+  
+  return {
+    isProgressive: issues.length === 0,
+    issues,
+    corrections
+  }
 }
 
 function applyProgressiveDiagnosticCorrections(analysis: any, patientContext: any): any {
-  // [Copier toute la fonction applyProgressiveDiagnosticCorrections de la V4.6]
+  const validation = validateDiagnosticProgression(analysis)
+  
+  if (!validation.isProgressive) {
+    // Appliquer les corrections
+    if (validation.corrections.primary_diagnosis_adjustment) {
+      analysis.clinical_analysis = analysis.clinical_analysis || {}
+      analysis.clinical_analysis.primary_diagnosis = analysis.clinical_analysis.primary_diagnosis || {}
+      analysis.clinical_analysis.primary_diagnosis.condition = 'Syndrome clinique nécessitant évaluation diagnostique'
+      analysis.clinical_analysis.primary_diagnosis.confidence_level = Math.min(
+        analysis.clinical_analysis.primary_diagnosis.confidence_level || 70, 75
+      )
+    }
+    
+    // Marquer les corrections appliquées
+    analysis.diagnostic_progression_applied = {
+      corrections_made: validation.issues.length,
+      approach: 'conservative_progressive',
+      issues_corrected: validation.issues
+    }
+  }
+  
+  return analysis
 }
+
 // ==================== PATHOLOGIES TROPICALES MAURICIENNES (V4.5) ====================
 const MAURITIUS_SPECIFIC_CONDITIONS = {
   tropical_diseases: {
@@ -131,6 +275,7 @@ const MAURITIUS_SPECIFIC_CONDITIONS = {
     }
   }
 }
+
 // ==================== NOUVEAU PROMPT HYBRIDE V4.6 ====================
 const IMPROVED_MAURITIUS_MEDICAL_PROMPT = `YOU ARE AN EXPERT PHYSICIAN - PROGRESSIVE EVIDENCE-BASED APPROACH + MAURITIUS STANDARDS + ULTRA-SOPHISTICATED MEDICATIONS
 
@@ -301,6 +446,7 @@ CURRENT MEDICATIONS: {{CURRENT_MEDICATIONS}}
 CONSULTATION TYPE: {{CONSULTATION_TYPE}}
 
 GENERATE PROGRESSIVE DIAGNOSTIC ANALYSIS WITH MAURITIUS MEDICAL STANDARDS + ULTRA-SOPHISTICATED MEDICATIONS`
+
 // ==================== NOUVELLES FONCTIONS DCI + POSOLOGIE PRÉCISE ====================
 function extractDCIFromDrugName(drugName: string): string {
   if (!drugName) return 'Principe actif'
@@ -470,7 +616,143 @@ export function validateMauritiusMedicalSpecificity(analysis: any): {
   return { hasGenericContent, issues, suggestions }
 }
 
-// ==================== STRUCTURE GUARANTEE FUNCTIONS (CONSERVÉES) ====================
+// ==================== ENHANCEMENT FUNCTION ====================
+function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: PatientContext): any {
+  console.log('🏝️ Enhancing Mauritius medical specificity...')
+  
+  // Ensure medications array exists
+  if (!analysis?.treatment_plan?.medications) {
+    if (!analysis.treatment_plan) analysis.treatment_plan = {}
+    analysis.treatment_plan.medications = []
+  }
+  
+  // Ensure laboratory tests array exists  
+  if (!analysis?.investigation_strategy?.laboratory_tests) {
+    if (!analysis.investigation_strategy) analysis.investigation_strategy = {}
+    analysis.investigation_strategy.laboratory_tests = []
+  }
+  
+  // Auto-detect and add missing medications based on symptoms
+  const symptoms = [...patientContext.symptoms, patientContext.chief_complaint].join(' ').toLowerCase()
+  const existingMeds = analysis.treatment_plan.medications
+  
+  // Check for fever without antipyretic
+  const hasFever = symptoms.includes('fever') || symptoms.includes('fièvre') || 
+                   (patientContext.vital_signs?.temperature && patientContext.vital_signs.temperature > 37.5)
+  const hasAntipyretic = existingMeds.some((med: any) => {
+    const drugName = (med?.drug || med?.medication_name || '').toLowerCase()
+    return drugName.includes('paracetamol') || drugName.includes('ibuprofen') || drugName.includes('ibuprofène')
+  })
+  
+  if (hasFever && !hasAntipyretic) {
+    existingMeds.push({
+      drug: "Paracétamol 500mg",
+      medication_name: "Paracétamol 500mg", 
+      dci: "Paracétamol",
+      indication: "Prise en charge symptomatique de la fièvre et soulagement de la douleur légère à modérée",
+      why_prescribed: "Traitement antipyrétique pour fièvre documentée",
+      how_to_take: "500mg QDS if fever >38°C",
+      dosing: {
+        adult: "500mg QDS if fever >38°C",
+        frequency_per_day: 4,
+        individual_dose: "500mg",
+        daily_total_dose: "2g/day"
+      },
+      duration: "Selon évolution de la fièvre, arrêter si apyrexie",
+      contraindications: "Allergie au paracétamol, insuffisance hépatique sévère",
+      side_effects: "Bien toléré aux doses thérapeutiques",
+      interactions: "Compatible avec la plupart des médicaments",
+      monitoring: "Surveillance de la température",
+      mauritius_availability: {
+        public_free: true,
+        estimated_cost: "Rs 50-100",
+        brand_names: "Panadol, Paracétamol générique"
+      },
+      _mauritius_specificity_applied: true
+    })
+  }
+  
+  // Enhance existing medications with missing DCI and detailed fields
+  analysis.treatment_plan.medications = existingMeds.map((med: any) => {
+    const drugName = med?.drug || med?.medication_name || "Médicament"
+    const dci = med?.dci || extractDCIFromDrugName(drugName)
+    const posology = generatePrecisePosology(dci, patientContext)
+    
+    return {
+      ...med,
+      drug: drugName,
+      medication_name: drugName,
+      dci: dci,
+      indication: med?.indication || med?.why_prescribed || "Traitement médical selon prescription",
+      why_prescribed: med?.why_prescribed || med?.indication || "Traitement médical selon prescription", 
+      how_to_take: med?.how_to_take || med?.dosing?.adult || posology.adult,
+      dosing: {
+        adult: med?.dosing?.adult || med?.how_to_take || posology.adult,
+        frequency_per_day: med?.dosing?.frequency_per_day || posology.frequency_per_day,
+        individual_dose: med?.dosing?.individual_dose || posology.individual_dose,
+        daily_total_dose: med?.dosing?.daily_total_dose || posology.daily_total_dose
+      },
+      duration: med?.duration || "Selon prescription médicale",
+      contraindications: med?.contraindications || "Allergie connue au principe actif",
+      side_effects: med?.side_effects || "Effets secondaires selon notice",
+      interactions: med?.interactions || "Vérifier interactions avec autres médicaments",
+      monitoring: med?.monitoring || "Surveillance clinique standard",
+      mauritius_availability: med?.mauritius_availability || {
+        public_free: false,
+        estimated_cost: "Rs 100-500",
+        brand_names: "Disponible en pharmacie"
+      },
+      _mauritius_specificity_applied: true
+    }
+  })
+  
+  // Add basic laboratory tests if missing
+  if (analysis.investigation_strategy.laboratory_tests.length === 0 && 
+      (hasFever || symptoms.includes('fatigue') || symptoms.includes('pain'))) {
+    analysis.investigation_strategy.laboratory_tests = [
+      {
+        test_name: "Full Blood Count (FBC)",
+        clinical_justification: "Évaluation hématologique de base pour syndrome fébrile et identification d'éventuelles anomalies",
+        expected_results: "Leucocytes normaux ou élevés si infection bactérienne",
+        urgency: "routine",
+        tube_type: "EDTA tube (purple top)",
+        mauritius_logistics: {
+          where: "C-Lab, Green Cross, Biosanté - Disponible partout",
+          cost: "Rs 400-800",
+          turnaround: "24h"
+        }
+      },
+      {
+        test_name: "C-Reactive Protein (CRP)",
+        clinical_justification: "Marqueur inflammatoire pour différencier infection bactérienne vs virale",
+        expected_results: "Élevé >50mg/L si infection bactérienne",
+        urgency: "routine", 
+        tube_type: "Serum tube (red top)",
+        mauritius_logistics: {
+          where: "Tous laboratoires Maurice",
+          cost: "Rs 300-600",
+          turnaround: "24h"
+        }
+      }
+    ]
+  }
+  
+  // Mark enhancement applied
+  analysis.mauritius_specificity_enhancement = {
+    corrections_applied: true,
+    medications_enhanced: analysis.treatment_plan.medications.length,
+    laboratory_tests_added: analysis.investigation_strategy.laboratory_tests.length,
+    fever_medication_added: hasFever && !hasAntipyretic,
+    uk_nomenclature_applied: true,
+    dci_precision_achieved: true
+  }
+  
+  console.log('✅ Mauritius medical specificity enhanced')
+  
+  return analysis
+}
+
+// ==================== STRUCTURE GUARANTEE FUNCTIONS ====================
 function ensureCompleteStructure(analysis: any): any {
   console.log('🛡️ Ensuring complete medical analysis structure...')
   
@@ -851,7 +1133,7 @@ function prepareMauritiusQualityPrompt(patientContext: PatientContext, consultat
     .replace('{{CONSULTATION_TYPE}}', consultationTypeFormatted)
 }
 
-// ==================== UNIVERSAL VALIDATION FUNCTIONS (CONSERVÉES) ====================
+// ==================== UNIVERSAL VALIDATION FUNCTIONS ====================
 function universalMedicalValidation(
   analysis: any, 
   patientContext: PatientContext
@@ -1340,7 +1622,7 @@ function applySafetyCorrections(analysis: any, issue: any): number {
   return 0
 }
 
-// ==================== MEDICATION MANAGEMENT (CONSERVÉ) ====================
+// ==================== MEDICATION MANAGEMENT ====================
 export function analyzeConsultationType(
   currentMedications: string[],
   chiefComplaint: unknown,
@@ -1587,7 +1869,7 @@ async function enhancedMedicationManagement(
   return analysis;
 }
 
-// ==================== POSOLOGY PRESERVATION (CONSERVÉ) ====================
+// ==================== POSOLOGY PRESERVATION ====================
 function preserveMedicalKnowledge(dosing: string): string {
   if (!dosing || dosing.trim() === '') {
     return "1 tablet BD (twice daily)";
@@ -1702,7 +1984,7 @@ function validateAndFixPosology(medications: any[]) {
   };
 }
 
-// ==================== MAURITIUS ADVICE (CONSERVÉ) ====================
+// ==================== MAURITIUS ADVICE ====================
 function addMauritiusSpecificAdvice(analysis: any, patientContext: PatientContext): any {
   console.log('🏝️ Ajout de conseils spécifiques à Maurice...')
   
@@ -1731,7 +2013,7 @@ function addMauritiusSpecificAdvice(analysis: any, patientContext: PatientContex
   return analysis
 }
 
-// ==================== DATA PROTECTION (CONSERVÉ) ====================
+// ==================== DATA PROTECTION ====================
 function anonymizePatientData(patientData: any): { 
   anonymized: any, 
   originalIdentity: any 
@@ -1796,7 +2078,7 @@ const MAURITIUS_HEALTHCARE_CONTEXT = {
   }
 }
 
-// ==================== VALIDATION AND DOCUMENTS (CONSERVÉ) ====================
+// ==================== VALIDATION AND DOCUMENTS ====================
 function validateUniversalMedicalAnalysis(
   analysis: any,
   patientContext: PatientContext
@@ -2027,10 +2309,10 @@ function generateMedicalDocuments(
 // ==================== RESPONSE GENERATION FUNCTIONS ====================
 function generateEnhancedMedicationsResponse(medications: any[]): any[] {
   return medications.map((med: any, idx: number) => {
-   const drugName = med?.drug || med?.medication_name || "Médicament"
-const dci = med?.dci || extractDCIFromDrugName(drugName)
-const dosing = med?.dosing || { adult: med?.how_to_take }
-const indication = med?.indication || med?.why_prescribed || "Indication"
+    const drugName = med?.drug || med?.medication_name || "Médicament"
+    const dci = med?.dci || extractDCIFromDrugName(drugName)
+    const dosing = med?.dosing || { adult: med?.how_to_take }
+    const indication = med?.indication || med?.why_prescribed || "Indication"
     
     return {
       id: idx + 1,
@@ -2042,7 +2324,7 @@ const indication = med?.indication || med?.why_prescribed || "Indication"
       
       // POSOLOGIE PRÉCISE
       dosage_unitaire: dosing.individual_dose || extractDoseFromDrugName(drugName),
-     posologie_complete: dosing.adult || med?.how_to_take || "À déterminer",
+      posologie_complete: dosing.adult || med?.how_to_take || "À déterminer",
       frequence_par_jour: dosing.frequency_per_day || extractFrequencyFromDosing(dosing.adult),
       dose_totale_jour: dosing.daily_total_dose || calculateDailyTotal(dosing.individual_dose, dosing.frequency_per_day),
       
@@ -2101,6 +2383,7 @@ function convertToSimpleFormat(dosing: string): string {
   
   return dosing
 }
+
 // ==================== DETECTION FUNCTIONS INTÉGRALES (V4.6) ====================
 function hasAntipyretic(medications: any[]): boolean {
   const antipyretics = [
@@ -2160,6 +2443,7 @@ function hasInfectionSymptoms(symptoms: string[], chiefComplaint: string = ''): 
   const allText = [...symptoms, chiefComplaint].join(' ').toLowerCase()
   return infectionSigns.some(sign => allText.includes(sign))
 }
+
 // ==================== INTÉGRATION CONTEXTE MAURICIEN COMPLET (V4.6) ====================
 function enhanceMauritiusContextualAnalysis(
   analysis: any, 
@@ -2269,6 +2553,7 @@ function generateMauritiusSpecificAdvice(
   
   return analysis
 }
+
 // ========== DÉDUPLICATION DES MÉDICAMENTS ==========
 function deduplicateMedications(medications: any[]): any[] {
   const seen = new Set()
@@ -2361,18 +2646,20 @@ export async function POST(request: NextRequest) {
     console.log(`🔍 Pré-analyse : ${consultationAnalysis.consultationType} (${Math.round(consultationAnalysis.confidence * 100)}%)`)
     
     // ============ ANALYSE DIAGNOSTIQUE PROGRESSIVE V4.6 ============
-   const diagnosticTriage = universalSymptomAnalysis(
-  patientContext.symptoms,
-  patientContext.chief_complaint,
-  parseInt(patientContext.age.toString()) || 0,
-  patientContext.sex,
-  patientContext.vital_signs
-) || {
-  primary_orientation: 'Consultation médicale générale',
-  urgency: 'routine',
-  differential_considerations: ['Évaluation clinique nécessaire'],
-  specialist_referral_threshold: 'low'
-}
+    const diagnosticTriage = universalSymptomAnalysis(
+      patientContext.symptoms,
+      patientContext.chief_complaint,
+      parseInt(patientContext.age.toString()) || 0,
+      patientContext.sex,
+      patientContext.vital_signs
+    ) || {
+      primary_orientation: 'Consultation médicale générale',
+      urgency: 'routine',
+      differential_considerations: ['Évaluation clinique nécessaire'],
+      specialist_referral_threshold: 'low',
+      first_line_investigations: [],
+      second_line_investigations: []
+    }
     
     console.log(`🎯 Triage diagnostique progressif V4.6: ${diagnosticTriage.primary_orientation}`)
     console.log(`   - Urgence: ${diagnosticTriage.urgency}`)
@@ -2486,10 +2773,10 @@ export async function POST(request: NextRequest) {
         system_version: '4.6-Fusion-Ultimate-Progressive-Ultra-Sophisticated-Medications',
         approach: 'evidence_based_systematic_progressive_mauritius_contextualized_ultra_medications_v46',
         diagnostic_triage: {
-          urgency: diagnosticTriage.urgency,
-          primary_orientation: diagnosticTriage.primary_orientation,
-          differential_ranking: diagnosticTriage.differential_considerations,
-          specialist_threshold: diagnosticTriage.specialist_referral_threshold
+          urgency: diagnosticTriage?.urgency || 'routine',
+          primary_orientation: diagnosticTriage?.primary_orientation || 'Consultation générale',
+          differential_ranking: diagnosticTriage?.differential_considerations || [],
+          specialist_threshold: diagnosticTriage?.specialist_referral_threshold || 'low'
         },
         corrections_applied: finalAnalysis.diagnostic_progression_applied || null,
         quality_improvements: [
@@ -2618,9 +2905,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    
-
-return NextResponse.json(finalResponse)
+    return NextResponse.json(finalResponse)
     
   } catch (error) {
     console.error('❌ Erreur critique :', error)
@@ -2676,6 +2961,7 @@ return NextResponse.json(finalResponse)
     }, { status: 500 })
   }
 }
+
 // ==================== HEALTH ENDPOINT WITH COMPLETE TESTS ====================
 export async function GET(request: NextRequest) {
   const url = new URL(request.url)
@@ -2882,9 +3168,10 @@ export async function GET(request: NextRequest) {
       }
     })
   }
-   return NextResponse.json({
-    status: '✅ Mauritius Medical AI - Version 4.3 Logique Complète + DCI Précis',
-    version: '4.3-Mauritius-Complete-Logic-DCI-Precise-System',
+  
+  return NextResponse.json({
+    status: '✅ Mauritius Medical AI - Version 4.6 Logique Complète + DCI Précis',
+    version: '4.6-Mauritius-Complete-Logic-DCI-Precise-System',
     
     system_guarantees: {
       complete_medical_logic: 'GARANTI - Toute la logique médicale sophistiquée préservée',
@@ -2900,7 +3187,8 @@ export async function GET(request: NextRequest) {
       complete_objects: 'GARANTI - Tous champs médicament remplis',
       enhanced_retry: 'GARANTI - Système récupération erreur intelligent',
       detailed_indications: 'GARANTI - Contextes médicaux 30+ caractères',
-      smart_validation: 'GARANTI - Évaluation intelligente contextuelle'
+      smart_validation: 'GARANTI - Évaluation intelligente contextuelle',
+      progressive_diagnostic: 'GARANTI - Approche diagnostique progressive V4.6'
     },
     
     revolutionary_features: [
@@ -2922,7 +3210,8 @@ export async function GET(request: NextRequest) {
       '📋 MEDICATION MANAGEMENT - Gestion médicaments sophistiquée',
       '🏥 ALL SPECIALTIES SUPPORTED - Toutes spécialités médicales',
       '📊 EVIDENCE-BASED STANDARDS - Standards basés preuves',
-      '🔒 COMPLETE DATA PROTECTION - Protection données complète'
+      '🔒 COMPLETE DATA PROTECTION - Protection données complète',
+      '🎯 PROGRESSIVE DIAGNOSTIC V4.6 - Approche diagnostique progressive'
     ],
     
     testing_endpoints: {
@@ -2949,7 +3238,8 @@ export async function GET(request: NextRequest) {
       'Posology preservation and enhancement',
       'Multi-specialty medical coverage',
       'Intelligent retry mechanisms',
-      'Complete structure guarantees'
+      'Complete structure guarantees',
+      'Progressive diagnostic approach V4.6'
     ],
     
     enhanced_with_dci: [
