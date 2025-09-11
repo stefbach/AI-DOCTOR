@@ -66,6 +66,36 @@ interface UniversalValidationResult {
     evidence_base_score: number
   }
 }
+interface SymptomTriageResult {
+  urgency: 'immediate' | 'urgent' | 'routine'
+  primary_orientation: string
+  differential_considerations: string[]
+  first_line_investigations: string[]
+  second_line_investigations: string[]
+  specialist_referral_threshold: string
+}
+// ==================== LOGIQUE DIAGNOSTIQUE PROGRESSIVE (V4.6) ====================
+function universalSymptomAnalysis(
+  symptoms: string[], 
+  chiefComplaint: string, 
+  age: number, 
+  sex: string,
+  vitalSigns: any
+): SymptomTriageResult {
+  // [Copier toute la fonction universalSymptomAnalysis de la V4.6]
+}
+// ==================== VALIDATION DIAGNOSTIQUE PROGRESSIVE (V4.6) ====================
+function validateDiagnosticProgression(analysis: any): {
+  isProgressive: boolean,
+  issues: string[],
+  corrections: any
+} {
+  // [Copier toute la fonction validateDiagnosticProgression de la V4.6]
+}
+
+function applyProgressiveDiagnosticCorrections(analysis: any, patientContext: any): any {
+  // [Copier toute la fonction applyProgressiveDiagnosticCorrections de la V4.6]
+}
 // ==================== PATHOLOGIES TROPICALES MAURICIENNES (V4.5) ====================
 const MAURITIUS_SPECIFIC_CONDITIONS = {
   tropical_diseases: {
