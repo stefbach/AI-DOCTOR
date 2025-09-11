@@ -144,25 +144,26 @@ const createEmptyReport = (): MauritianReport => ({
     }
   }
 })
+// ==================== FIXED DEBOUNCED COMPONENTS WITH MANUAL SAVE ====================
 
-// ==================== FIXED DEBOUNCED COMPONENTS ====================
-
-// 1. Fixed DebouncedTextarea with proper state management
+// 1. Updated DebouncedTextarea without auto-save
 const DebouncedTextarea = memo(({
   value,
   onUpdate,
   className,
-  placeholder
+  placeholder,
+  sectionKey,
+  onLocalChange
 }: {
   value: string
   onUpdate: (value: string) => void
   className?: string
   placeholder?: string
+  sectionKey?: string
+  onLocalChange?: () => void
 }) => {
   const [localValue, setLocalValue] = useState(value)
-  const updateTimeoutRef = useRef<NodeJS.Timeout>()
   const isFirstRender = useRef(true)
-  const lastSavedValue = useRef(value)
 
   // Only update local value if parent value changed externally
   useEffect(() => {
@@ -170,68 +171,42 @@ const DebouncedTextarea = memo(({
       isFirstRender.current = false
       return
     }
-    // Only update if the value is different from both local and last saved
-    if (value !== lastSavedValue.current && value !== localValue) {
-      setLocalValue(value)
-      lastSavedValue.current = value
-    }
+    setLocalValue(value)
   }, [value])
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value
     setLocalValue(newValue)
-
-    if (updateTimeoutRef.current) {
-      clearTimeout(updateTimeoutRef.current)
+    if (onLocalChange) {
+      onLocalChange() // Notify parent of unsaved changes
     }
-
-    // Reduced delay to 2 seconds for better UX
-    updateTimeoutRef.current = setTimeout(() => {
-      onUpdate(newValue)
-      lastSavedValue.current = newValue
-    }, 2000)
-  }, [onUpdate])
-
-  // Save immediately on blur
-  const handleBlur = useCallback(() => {
-    if (updateTimeoutRef.current) {
-      clearTimeout(updateTimeoutRef.current)
-    }
-    if (localValue !== lastSavedValue.current) {
-      onUpdate(localValue)
-      lastSavedValue.current = localValue
-    }
-  }, [localValue, onUpdate])
-
-  useEffect(() => {
-    return () => {
-      if (updateTimeoutRef.current) {
-        clearTimeout(updateTimeoutRef.current)
-      }
-    }
-  }, [])
+  }, [onLocalChange])
 
   return (
     <Textarea
       value={localValue}
       onChange={handleChange}
-      onBlur={handleBlur}
       className={className}
       placeholder={placeholder}
+      data-section={sectionKey}
+      data-pending-value={localValue}
     />
   )
 })
-// 2. Fixed Medication Input Component with proper state management
+
+// 2. Updated Medication Input Component with manual save
 const MedicationEditForm = memo(({
   medication,
   index,
   onUpdate,
-  onRemove
+  onRemove,
+  onLocalChange
 }: {
   medication: any
   index: number
   onUpdate: (index: number, updatedMedication: any) => void
   onRemove: (index: number) => void
+  onLocalChange?: () => void
 }) => {
   const [localMed, setLocalMed] = useState({
     nom: medication.nom || '',
@@ -247,59 +222,22 @@ const MedicationEditForm = memo(({
     surveillanceParticuliere: medication.surveillanceParticuliere || '',
     nonSubstituable: medication.nonSubstituable || false
   })
-  const updateTimeoutRef = useRef<NodeJS.Timeout>()
-  const lastSavedData = useRef(localMed)
 
   const handleFieldChange = useCallback((field: string, value: any) => {
     setLocalMed(prev => ({ ...prev, [field]: value }))
-  }, [])
+    if (onLocalChange) onLocalChange()
+  }, [onLocalChange])
 
-  // Immediate save on blur
-  const handleBlur = useCallback(() => {
-    if (updateTimeoutRef.current) {
-      clearTimeout(updateTimeoutRef.current)
-    }
-    
-    const updatedMed = {
-      ...localMed,
-      ligneComplete: `${localMed.nom} ${localMed.dosage ? `- ${localMed.dosage}` : ''}\n` +
-                    `${localMed.posologie} - ${localMed.modeAdministration}\n` +
-                    `Duration: ${localMed.dureeTraitement} - Quantity: ${localMed.quantite}`
-    }
-    onUpdate(index, updatedMed)
-    lastSavedData.current = localMed
-  }, [localMed, index, onUpdate])
-
-  // Auto-save with reduced delay
+  // Store the pending data for manual save
   useEffect(() => {
-    if (JSON.stringify(localMed) === JSON.stringify(lastSavedData.current)) {
-      return
+    const element = document.querySelector(`[data-medication-index="${index}"]`)
+    if (element) {
+      element.setAttribute('data-pending-medication', JSON.stringify(localMed))
     }
-
-    if (updateTimeoutRef.current) {
-      clearTimeout(updateTimeoutRef.current)
-    }
-    
-    updateTimeoutRef.current = setTimeout(() => {
-      const updatedMed = {
-        ...localMed,
-        ligneComplete: `${localMed.nom} ${localMed.dosage ? `- ${localMed.dosage}` : ''}\n` +
-                      `${localMed.posologie} - ${localMed.modeAdministration}\n` +
-                      `Duration: ${localMed.dureeTraitement} - Quantity: ${localMed.quantite}`
-      }
-      onUpdate(index, updatedMed)
-      lastSavedData.current = localMed
-    }, 2000)
-
-    return () => {
-      if (updateTimeoutRef.current) {
-        clearTimeout(updateTimeoutRef.current)
-      }
-    }
-  }, [localMed, index, onUpdate])
+  }, [localMed, index])
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-medication-index={index}>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label htmlFor={`med-nom-${index}`}>Medication Name</Label>
@@ -307,7 +245,6 @@ const MedicationEditForm = memo(({
             id={`med-nom-${index}`}
             value={localMed.nom}
             onChange={(e) => handleFieldChange('nom', e.target.value)}
-            onBlur={handleBlur}
             placeholder="e.g., Paracetamol"
           />
         </div>
@@ -317,7 +254,6 @@ const MedicationEditForm = memo(({
             id={`med-generic-${index}`}
             value={localMed.denominationCommune}
             onChange={(e) => handleFieldChange('denominationCommune', e.target.value)}
-            onBlur={handleBlur}
             placeholder="e.g., Paracetamol"
           />
         </div>
@@ -327,7 +263,6 @@ const MedicationEditForm = memo(({
             id={`med-dosage-${index}`}
             value={localMed.dosage}
             onChange={(e) => handleFieldChange('dosage', e.target.value)}
-            onBlur={handleBlur}
             placeholder="e.g., 500mg"
           />
         </div>
@@ -335,10 +270,7 @@ const MedicationEditForm = memo(({
           <Label htmlFor={`med-form-${index}`}>Form</Label>
           <Select
             value={localMed.forme}
-            onValueChange={(value) => {
-              handleFieldChange('forme', value)
-              handleBlur()
-            }}
+            onValueChange={(value) => handleFieldChange('forme', value)}
           >
             <SelectTrigger id={`med-form-${index}`}>
               <SelectValue />
@@ -359,7 +291,6 @@ const MedicationEditForm = memo(({
             id={`med-frequency-${index}`}
             value={localMed.posologie}
             onChange={(e) => handleFieldChange('posologie', e.target.value)}
-            onBlur={handleBlur}
             placeholder="e.g., 1 tablet 3 times daily"
           />
         </div>
@@ -369,7 +300,6 @@ const MedicationEditForm = memo(({
             id={`med-duration-${index}`}
             value={localMed.dureeTraitement}
             onChange={(e) => handleFieldChange('dureeTraitement', e.target.value)}
-            onBlur={handleBlur}
             placeholder="e.g., 7 days"
           />
         </div>
@@ -379,7 +309,6 @@ const MedicationEditForm = memo(({
             id={`med-quantity-${index}`}
             value={localMed.quantite}
             onChange={(e) => handleFieldChange('quantite', e.target.value)}
-            onBlur={handleBlur}
             placeholder="e.g., 1 box"
           />
         </div>
@@ -387,10 +316,7 @@ const MedicationEditForm = memo(({
           <Label htmlFor={`med-route-${index}`}>Route of Administration</Label>
           <Select
             value={localMed.modeAdministration}
-            onValueChange={(value) => {
-              handleFieldChange('modeAdministration', value)
-              handleBlur()
-            }}
+            onValueChange={(value) => handleFieldChange('modeAdministration', value)}
           >
             <SelectTrigger id={`med-route-${index}`}>
               <SelectValue />
@@ -411,7 +337,6 @@ const MedicationEditForm = memo(({
           id={`med-instructions-${index}`}
           value={localMed.instructions}
           onChange={(e) => handleFieldChange('instructions', e.target.value)}
-          onBlur={handleBlur}
           placeholder="e.g., Take with food"
         />
       </div>
@@ -420,10 +345,7 @@ const MedicationEditForm = memo(({
           <Switch
             id={`med-nonsubstitutable-${index}`}
             checked={localMed.nonSubstituable}
-            onCheckedChange={(checked) => {
-              handleFieldChange('nonSubstituable', checked)
-              handleBlur()
-            }}
+            onCheckedChange={(checked) => handleFieldChange('nonSubstituable', checked)}
           />
           <Label htmlFor={`med-nonsubstitutable-${index}`}>Non-substitutable</Label>
         </div>
@@ -439,19 +361,21 @@ const MedicationEditForm = memo(({
     </div>
   )
 })
-// 3. Fixed Biology Test Input Component with proper state management
+// 3. Updated Biology Test Input Component with manual save
 const BiologyTestEditForm = memo(({
   test,
   category,
   index,
   onUpdate,
-  onRemove
+  onRemove,
+  onLocalChange
 }: {
   test: any
   category: string
   index: number
   onUpdate: (category: string, index: number, updatedTest: any) => void
   onRemove: (category: string, index: number) => void
+  onLocalChange?: () => void
 }) => {
   const [localTest, setLocalTest] = useState({
     nom: test.nom || '',
@@ -464,53 +388,28 @@ const BiologyTestEditForm = memo(({
     tubePrelevement: test.tubePrelevement || 'As per laboratory protocol',
     delaiResultat: test.delaiResultat || 'Standard'
   })
-  const updateTimeoutRef = useRef<NodeJS.Timeout>()
-  const lastSavedData = useRef(localTest)
 
   const handleFieldChange = useCallback((field: string, value: any) => {
     setLocalTest(prev => ({ ...prev, [field]: value }))
-  }, [])
+    if (onLocalChange) onLocalChange()
+  }, [onLocalChange])
 
-  // Immediate save on blur
-  const handleBlur = useCallback(() => {
-    if (updateTimeoutRef.current) {
-      clearTimeout(updateTimeoutRef.current)
-    }
-    onUpdate(category, index, localTest)
-    lastSavedData.current = localTest
-  }, [localTest, category, index, onUpdate])
-
-  // Auto-save with reduced delay
+  // Store the pending data for manual save
   useEffect(() => {
-    if (JSON.stringify(localTest) === JSON.stringify(lastSavedData.current)) {
-      return
+    const element = document.querySelector(`[data-biology-test="${category}-${index}"]`)
+    if (element) {
+      element.setAttribute('data-pending-test', JSON.stringify(localTest))
     }
-
-    if (updateTimeoutRef.current) {
-      clearTimeout(updateTimeoutRef.current)
-    }
-    
-    updateTimeoutRef.current = setTimeout(() => {
-      onUpdate(category, index, localTest)
-      lastSavedData.current = localTest
-    }, 2000)
-
-    return () => {
-      if (updateTimeoutRef.current) {
-        clearTimeout(updateTimeoutRef.current)
-      }
-    }
-  }, [localTest, category, index, onUpdate])
+  }, [localTest, category, index])
 
   return (
-    <div className="space-y-3 p-3">
+    <div className="space-y-3 p-3" data-biology-test={`${category}-${index}`}>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label>Test Name</Label>
           <Input
             value={localTest.nom}
             onChange={(e) => handleFieldChange('nom', e.target.value)}
-            onBlur={handleBlur}
             placeholder="e.g., Complete Blood Count"
           />
         </div>
@@ -519,7 +418,6 @@ const BiologyTestEditForm = memo(({
           <Input
             value={localTest.motifClinique}
             onChange={(e) => handleFieldChange('motifClinique', e.target.value)}
-            onBlur={handleBlur}
             placeholder="e.g., Anemia evaluation"
           />
         </div>
@@ -527,10 +425,7 @@ const BiologyTestEditForm = memo(({
           <Label>Sample Type</Label>
           <Select
             value={localTest.tubePrelevement}
-            onValueChange={(value) => {
-              handleFieldChange('tubePrelevement', value)
-              handleBlur()
-            }}
+            onValueChange={(value) => handleFieldChange('tubePrelevement', value)}
           >
             <SelectTrigger>
               <SelectValue />
@@ -548,10 +443,7 @@ const BiologyTestEditForm = memo(({
           <Label>Turnaround Time</Label>
           <Select
             value={localTest.delaiResultat}
-            onValueChange={(value) => {
-              handleFieldChange('delaiResultat', value)
-              handleBlur()
-            }}
+            onValueChange={(value) => handleFieldChange('delaiResultat', value)}
           >
             <SelectTrigger>
               <SelectValue />
@@ -569,7 +461,6 @@ const BiologyTestEditForm = memo(({
         <Input
           value={localTest.conditionsPrelevement}
           onChange={(e) => handleFieldChange('conditionsPrelevement', e.target.value)}
-          onBlur={handleBlur}
           placeholder="e.g., Early morning sample required"
         />
       </div>
@@ -578,20 +469,14 @@ const BiologyTestEditForm = memo(({
           <div className="flex items-center space-x-2">
             <Switch
               checked={localTest.urgence}
-              onCheckedChange={(checked) => {
-                handleFieldChange('urgence', checked)
-                handleBlur()
-              }}
+              onCheckedChange={(checked) => handleFieldChange('urgence', checked)}
             />
             <Label>Urgent</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Switch
               checked={localTest.aJeun}
-              onCheckedChange={(checked) => {
-                handleFieldChange('aJeun', checked)
-                handleBlur()
-              }}
+              onCheckedChange={(checked) => handleFieldChange('aJeun', checked)}
             />
             <Label>Fasting required</Label>
           </div>
@@ -608,17 +493,19 @@ const BiologyTestEditForm = memo(({
   )
 })
 
-// 4. Fixed Imaging Exam Input Component with proper state management
+// 4. Updated Imaging Exam Input Component with manual save
 const ImagingExamEditForm = memo(({
   exam,
   index,
   onUpdate,
-  onRemove
+  onRemove,
+  onLocalChange
 }: {
   exam: any
   index: number
   onUpdate: (index: number, updatedExam: any) => void
   onRemove: (index: number) => void
+  onLocalChange?: () => void
 }) => {
   const [localExam, setLocalExam] = useState({
     type: exam.type || exam.modalite || '',
@@ -630,55 +517,28 @@ const ImagingExamEditForm = memo(({
     protocoleSpecifique: exam.protocoleSpecifique || '',
     questionDiagnostique: exam.questionDiagnostique || ''
   })
-  const updateTimeoutRef = useRef<NodeJS.Timeout>()
-  const lastSavedData = useRef(localExam)
 
   const handleFieldChange = useCallback((field: string, value: any) => {
     setLocalExam(prev => ({ ...prev, [field]: value }))
-  }, [])
+    if (onLocalChange) onLocalChange()
+  }, [onLocalChange])
 
-  // Immediate save on blur
-  const handleBlur = useCallback(() => {
-    if (updateTimeoutRef.current) {
-      clearTimeout(updateTimeoutRef.current)
-    }
-    onUpdate(index, localExam)
-    lastSavedData.current = localExam
-  }, [localExam, index, onUpdate])
-
-  // Auto-save with reduced delay
+  // Store the pending data for manual save
   useEffect(() => {
-    if (JSON.stringify(localExam) === JSON.stringify(lastSavedData.current)) {
-      return
+    const element = document.querySelector(`[data-imaging-exam="${index}"]`)
+    if (element) {
+      element.setAttribute('data-pending-exam', JSON.stringify(localExam))
     }
-
-    if (updateTimeoutRef.current) {
-      clearTimeout(updateTimeoutRef.current)
-    }
-    
-    updateTimeoutRef.current = setTimeout(() => {
-      onUpdate(index, localExam)
-      lastSavedData.current = localExam
-    }, 2000)
-
-    return () => {
-      if (updateTimeoutRef.current) {
-        clearTimeout(updateTimeoutRef.current)
-      }
-    }
-  }, [localExam, index, onUpdate])
+  }, [localExam, index])
 
   return (
-    <div className="space-y-3 p-3">
+    <div className="space-y-3 p-3" data-imaging-exam={index}>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label>Imaging Type</Label>
           <Select
             value={localExam.type || localExam.modalite}
-            onValueChange={(value) => {
-              handleFieldChange('type', value)
-              handleBlur()
-            }}
+            onValueChange={(value) => handleFieldChange('type', value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select type" />
@@ -697,7 +557,6 @@ const ImagingExamEditForm = memo(({
           <Input
             value={localExam.region}
             onChange={(e) => handleFieldChange('region', e.target.value)}
-            onBlur={handleBlur}
             placeholder="e.g., Chest PA/Lateral"
           />
         </div>
@@ -706,7 +565,6 @@ const ImagingExamEditForm = memo(({
           <Input
             value={localExam.indicationClinique}
             onChange={(e) => handleFieldChange('indicationClinique', e.target.value)}
-            onBlur={handleBlur}
             placeholder="e.g., Rule out pneumonia"
           />
         </div>
@@ -715,7 +573,6 @@ const ImagingExamEditForm = memo(({
           <Input
             value={localExam.questionDiagnostique}
             onChange={(e) => handleFieldChange('questionDiagnostique', e.target.value)}
-            onBlur={handleBlur}
             placeholder="e.g., Consolidation? Pleural effusion?"
           />
         </div>
@@ -724,7 +581,6 @@ const ImagingExamEditForm = memo(({
           <Input
             value={localExam.protocoleSpecifique}
             onChange={(e) => handleFieldChange('protocoleSpecifique', e.target.value)}
-            onBlur={handleBlur}
             placeholder="e.g., High resolution CT"
           />
         </div>
@@ -734,20 +590,14 @@ const ImagingExamEditForm = memo(({
           <div className="flex items-center space-x-2">
             <Switch
               checked={localExam.urgence}
-              onCheckedChange={(checked) => {
-                handleFieldChange('urgence', checked)
-                handleBlur()
-              }}
+              onCheckedChange={(checked) => handleFieldChange('urgence', checked)}
             />
             <Label>Urgent</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Switch
               checked={localExam.contraste}
-              onCheckedChange={(checked) => {
-                handleFieldChange('contraste', checked)
-                handleBlur()
-              }}
+              onCheckedChange={(checked) => handleFieldChange('contraste', checked)}
             />
             <Label>Contrast required</Label>
           </div>
@@ -792,8 +642,9 @@ export default function ProfessionalReportEditable({
   const [showFullReport, setShowFullReport] = useState(false)
   const [includeFullPrescriptions, setIncludeFullPrescriptions] = useState(true)
   
-  // 🔧 NEW: Save status indicator
+  // 🔧 NEW: Manual save states
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
   const [doctorInfo, setDoctorInfo] = useState({
     nom: "Dr. [Name Required]",
@@ -820,17 +671,112 @@ export default function ProfessionalReportEditable({
   const getReportRapport = () => report?.compteRendu?.rapport || createEmptyReport().compteRendu.rapport
   const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
 
-  // ==================== TRACKING & UPDATES WITH CALLBACKS ====================
+  // ==================== MANUAL SAVE FUNCTION ====================
+  const handleManualSave = useCallback(() => {
+    if (!hasUnsavedChanges) return
+    
+    setSaveStatus('saving')
+    
+    // Save all textarea sections
+    const textareas = document.querySelectorAll('textarea[data-section][data-pending-value]')
+    textareas.forEach((textarea: any) => {
+      const section = textarea.getAttribute('data-section')
+      const value = textarea.getAttribute('data-pending-value')
+      if (section && value) {
+        updateRapportSection(section, value)
+      }
+    })
+    
+    // Save all medications
+    const medicationElements = document.querySelectorAll('[data-medication-index][data-pending-medication]')
+    medicationElements.forEach((element: any) => {
+      const index = parseInt(element.getAttribute('data-medication-index'))
+      const pendingData = element.getAttribute('data-pending-medication')
+      if (pendingData) {
+        try {
+          const medicationData = JSON.parse(pendingData)
+          const updatedMed = {
+            ...medicationData,
+            ligneComplete: `${medicationData.nom} ${medicationData.dosage ? `- ${medicationData.dosage}` : ''}\n` +
+                          `${medicationData.posologie} - ${medicationData.modeAdministration}\n` +
+                          `Duration: ${medicationData.dureeTraitement} - Quantity: ${medicationData.quantite}`
+          }
+          updateMedicamentBatch(index, updatedMed)
+        } catch (e) {
+          console.error('Error parsing medication data:', e)
+        }
+      }
+    })
+    
+    // Save all biology tests
+    const biologyElements = document.querySelectorAll('[data-biology-test][data-pending-test]')
+    biologyElements.forEach((element: any) => {
+      const testId = element.getAttribute('data-biology-test')
+      const [category, index] = testId.split('-')
+      const pendingData = element.getAttribute('data-pending-test')
+      if (pendingData) {
+        try {
+          const testData = JSON.parse(pendingData)
+          updateBiologyTestBatch(category, parseInt(index), testData)
+        } catch (e) {
+          console.error('Error parsing biology test data:', e)
+        }
+      }
+    })
+    
+    // Save all imaging exams
+    const imagingElements = document.querySelectorAll('[data-imaging-exam][data-pending-exam]')
+    imagingElements.forEach((element: any) => {
+      const index = parseInt(element.getAttribute('data-imaging-exam'))
+      const pendingData = element.getAttribute('data-pending-exam')
+      if (pendingData) {
+        try {
+          const examData = JSON.parse(pendingData)
+          updateImagingExamBatch(index, examData)
+        } catch (e) {
+          console.error('Error parsing imaging exam data:', e)
+        }
+      }
+    })
+    
+    setHasUnsavedChanges(false)
+    setSaveStatus('saved')
+    
+    setTimeout(() => {
+      setSaveStatus('idle')
+    }, 3000)
+    
+    toast({
+      title: "✅ Changes Saved",
+      description: "All your changes have been saved successfully",
+      duration: 3000
+    })
+  }, [hasUnsavedChanges])
+
+  // ==================== KEYBOARD SHORTCUT FOR SAVE ====================
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault()
+        if (hasUnsavedChanges) {
+          handleManualSave()
+        }
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [hasUnsavedChanges, handleManualSave])
+
+  // ==================== TRACKING & UPDATES ====================
   const trackModification = useCallback((section: string) => {
     if (validationStatus === 'validated') return
     setModifiedSections(prev => new Set(prev).add(section))
+    setHasUnsavedChanges(true)
   }, [validationStatus])
 
-  // 🔧 FIXED: Updated updateRapportSection with save status
   const updateRapportSection = useCallback((section: string, value: string) => {
     if (validationStatus === 'validated') return
-    
-    setSaveStatus('saving')
     
     setReport(prev => {
       if (!prev) return null
@@ -846,17 +792,11 @@ export default function ProfessionalReportEditable({
         }
       }
       
-      // Update save status after a short delay
-      setTimeout(() => {
-        setSaveStatus('saved')
-        setTimeout(() => setSaveStatus('idle'), 2000)
-      }, 500)
-      
       return newReport
     })
     trackModification(`rapport.${section}`)
   }, [validationStatus, trackModification])
-  // 🆕 AI ASSISTANT CALLBACK FUNCTIONS ====================
+  // ==================== AI ASSISTANT CALLBACK FUNCTIONS ====================
 
   // Immediate update function for AI (no debounce)
   const handleUpdateSectionImmediate = useCallback((section: string, content: string) => {
@@ -887,6 +827,12 @@ export default function ProfessionalReportEditable({
         description: `${section} a été améliorée par l'IA médicale`,
         duration: 3000
       })
+      
+      // Auto-save after AI update
+      setTimeout(() => {
+        setSaveStatus('saved')
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      }, 500)
       return
     }
     
@@ -909,6 +855,11 @@ export default function ProfessionalReportEditable({
           variant: "destructive"
         })
     }
+    
+    setTimeout(() => {
+      setSaveStatus('saved')
+      setTimeout(() => setSaveStatus('idle'), 2000)
+    }, 500)
   }, [validationStatus, updateRapportSection])
 
   // Add medication via AI
@@ -1153,11 +1104,10 @@ export default function ProfessionalReportEditable({
     const updatedInfo = { ...doctorInfo, [field]: value }
     sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
   }, [doctorInfo, trackModification])
+
   // ==================== BATCH UPDATE FUNCTIONS ====================
   const updateMedicamentBatch = useCallback((index: number, updatedMedication: any) => {
     if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
-    
-    setSaveStatus('saving')
     
     setReport(prev => {
       if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
@@ -1181,17 +1131,10 @@ export default function ProfessionalReportEditable({
     })
     
     trackModification(`medicament.${index}`)
-    
-    setTimeout(() => {
-      setSaveStatus('saved')
-      setTimeout(() => setSaveStatus('idle'), 2000)
-    }, 500)
   }, [validationStatus, report?.ordonnances?.medicaments, trackModification])
 
   const updateBiologyTestBatch = useCallback((category: string, index: number, updatedTest: any) => {
     if (validationStatus === 'validated') return
-    
-    setSaveStatus('saving')
     
     setReport(prev => {
       if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
@@ -1216,17 +1159,10 @@ export default function ProfessionalReportEditable({
     })
     
     trackModification(`biologie.${category}.${index}`)
-    
-    setTimeout(() => {
-      setSaveStatus('saved')
-      setTimeout(() => setSaveStatus('idle'), 2000)
-    }, 500)
   }, [validationStatus, trackModification])
 
   const updateImagingExamBatch = useCallback((index: number, updatedExam: any) => {
     if (validationStatus === 'validated') return
-    
-    setSaveStatus('saving')
     
     setReport(prev => {
       if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
@@ -1250,13 +1186,7 @@ export default function ProfessionalReportEditable({
     })
     
     trackModification(`imagerie.${index}`)
-    
-    setTimeout(() => {
-      setSaveStatus('saved')
-      setTimeout(() => setSaveStatus('idle'), 2000)
-    }, 500)
   }, [validationStatus, trackModification])
-
   const addMedicament = useCallback(() => {
     if (validationStatus === 'validated') return
     
@@ -1539,6 +1469,7 @@ export default function ProfessionalReportEditable({
       method: method
     })
   }, [report?.invoice, updateInvoice])
+
   // ==================== LOAD DOCTOR DATA ====================
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
@@ -1614,13 +1545,13 @@ export default function ProfessionalReportEditable({
       setLoading(false)
     }
   }, [patientData, clinicalData, questionsData, diagnosisData])
-
   // ==================== GENERATE REPORT ====================
   const generateProfessionalReport = async () => {
     setLoading(true)
     setError(null)
     setValidationStatus('draft')
     setDocumentSignatures({})
+    setHasUnsavedChanges(false)
 
     try {
       let currentDoctorInfo = doctorInfo
@@ -1973,6 +1904,11 @@ export default function ProfessionalReportEditable({
       return
     }
     
+    // Save any unsaved changes before validation
+    if (hasUnsavedChanges) {
+      handleManualSave()
+    }
+    
     let currentReportId = reportId
     if (!currentReportId) {
       currentReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -2122,6 +2058,7 @@ export default function ProfessionalReportEditable({
       setReport(updatedReport)
       setValidationStatus('validated')
       setModifiedSections(new Set())
+      setHasUnsavedChanges(false)
       
       toast({
         title: "✅ Document Validated",
@@ -2572,61 +2509,6 @@ export default function ProfessionalReportEditable({
           margin-top: 10pt;
         }
         
-        .grid {
-          display: table;
-          width: 100%;
-          margin-bottom: 10pt;
-        }
-        .grid-row {
-          display: table-row;
-        }
-        .grid-cell {
-          display: table-cell;
-          padding: 3pt 5pt;
-          vertical-align: top;
-        }
-        
-        .urgent { 
-          color: #e74c3c; 
-          font-weight: bold; 
-          text-transform: uppercase;
-        }
-        
-        strong { 
-          font-weight: 600; 
-        }
-        
-        .badge {
-          display: inline-block;
-          padding: 2pt 6pt;
-          font-size: 10pt;
-          font-weight: bold;
-          border-radius: 3pt;
-          margin-left: 5pt;
-        }
-        .badge-red {
-          background: #fee;
-          color: #c00;
-          border: 1pt solid #fcc;
-        }
-        
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin: 10pt 0;
-        }
-        
-        th, td {
-          padding: 8pt;
-          text-align: left;
-          border-bottom: 1pt solid #ddd;
-        }
-        
-        th {
-          font-weight: bold;
-          background: #f5f5f5;
-        }
-        
         button, .button, input, select, textarea { display: none !important; }
         
         @media print {
@@ -2634,68 +2516,12 @@ export default function ProfessionalReportEditable({
         }
       `
       
-      if (sectionId === 'prescription-medicaments') {
-        return baseStyles + `
-          .prescription-item {
-            border-left-color: #27ae60;
-            background: #f8fdf9;
-            padding: 8pt;
-            margin: 12pt 0;
-          }
-          .header { border-bottom-color: #27ae60; }
-        `
-      } else if (sectionId === 'prescription-biologie') {
-        return baseStyles + `
-          .prescription-item {
-            border-left-color: #8e44ad;
-            background: #faf8fc;
-            padding: 8pt;
-            margin: 12pt 0;
-          }
-          .header { border-bottom-color: #8e44ad; }
-          .category-header {
-            color: #8e44ad;
-            font-weight: bold;
-            margin-top: 15pt;
-            margin-bottom: 8pt;
-          }
-        `
-      } else if (sectionId === 'prescription-imagerie') {
-        return baseStyles + `
-          .prescription-item {
-            border-left-color: #3498db;
-            background: #f7fafc;
-            padding: 8pt;
-            margin: 12pt 0;
-          }
-          .header { border-bottom-color: #3498db; }
-        `
-      } else if (sectionId === 'invoice-document') {
-        return baseStyles + `
-          .header { border-bottom-color: #e67e22; }
-          .invoice-table {
-            margin: 20pt 0;
-          }
-          .invoice-total {
-            text-align: right;
-            font-weight: bold;
-            font-size: 14pt;
-          }
-          .payment-info {
-            background: #e8f5e9;
-            padding: 10pt;
-            border-radius: 4pt;
-            margin: 15pt 0;
-          }
-        `
-      }
-      
       return baseStyles
     }
 
     const cleanHTML = clonedElement.innerHTML
       .replace(/class="[^"]*"/g, (match) => {
-        const importantClasses = ['header', 'section', 'prescription-item', 'signature', 'info-box', 'urgent', 'badge', 'badge-red', 'grid', 'grid-row', 'grid-cell', 'category-header', 'invoice-table', 'invoice-total', 'payment-info']
+        const importantClasses = ['header', 'section', 'prescription-item', 'signature', 'info-box', 'urgent', 'badge', 'badge-red']
         const classes = match.match(/class="([^"]*)"/)?.[1].split(' ') || []
         const filtered = classes.filter(c => importantClasses.some(ic => c.includes(ic)))
         return filtered.length > 0 ? `class="${filtered.join(' ')}"` : ''
@@ -2825,6 +2651,7 @@ export default function ProfessionalReportEditable({
     
     const handleDoctorFieldChange = useCallback((field: string, value: string) => {
       setLocalDoctorInfo(prev => ({ ...prev, [field]: value }))
+      setHasUnsavedChanges(true)
     }, [])
     
     return (
@@ -3027,8 +2854,10 @@ export default function ProfessionalReportEditable({
                     <DebouncedTextarea
                       value={content}
                       onUpdate={(value) => updateRapportSection(section.key, value)}
+                      onLocalChange={() => setHasUnsavedChanges(true)}
                       className="min-h-[200px] font-sans text-gray-700"
                       placeholder="Enter text..."
+                      sectionKey={section.key}
                     />
                   ) : (
                     <div className="prose prose-lg max-w-none">
@@ -3153,6 +2982,7 @@ export default function ProfessionalReportEditable({
                     index={index}
                     onUpdate={updateMedicamentBatch}
                     onRemove={removeMedicament}
+                    onLocalChange={() => setHasUnsavedChanges(true)}
                   />
                 ) : (
                   <div>
@@ -3335,6 +3165,7 @@ export default function ProfessionalReportEditable({
                             index={idx}
                             onUpdate={updateBiologyTestBatch}
                             onRemove={removeBiologyTest}
+                            onLocalChange={() => setHasUnsavedChanges(true)}
                           />
                         ) : (
                           <div className="flex items-start justify-between p-2 hover:bg-gray-50 rounded">
@@ -3436,7 +3267,6 @@ export default function ProfessionalReportEditable({
       </div>
     )
   }
-
   const ImagingPrescription = () => {
     const examens = report?.ordonnances?.imagerie?.prescription?.examens || []
     const patient = getReportPatient()
@@ -3490,6 +3320,7 @@ export default function ProfessionalReportEditable({
                     index={index}
                     onUpdate={updateImagingExamBatch}
                     onRemove={removeImagingExam}
+                    onLocalChange={() => setHasUnsavedChanges(true)}
                   />
                 ) : (
                   <div>
@@ -3568,6 +3399,7 @@ export default function ProfessionalReportEditable({
       </div>
     )
   }
+
   const InvoiceComponent = () => {
     const invoice = report?.invoice
     if (!invoice) return null
@@ -3711,50 +3543,6 @@ export default function ProfessionalReportEditable({
           )}
         </div>
 
-        <div className="mb-6 p-4 bg-purple-50 rounded-lg">
-          <h3 className="font-bold mb-2">Consulting Physician</h3>
-          <div className="text-sm">
-            <div><strong>Name:</strong> {invoice.physician.name}</div>
-            <div><strong>Medical Council Registration No.:</strong> {invoice.physician.registrationNumber}</div>
-          </div>
-        </div>
-
-        <div className="mb-8">
-          <h3 className="font-bold mb-2">Notes</h3>
-          <ul className="list-disc list-inside text-sm space-y-1">
-            {invoice.notes.map((note: string, idx: number) => (
-              <li key={idx}>{note}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="mt-12 pt-8 border-t border-gray-300 text-center">
-          <p className="font-bold">Electronic Signature:</p>
-          
-          {validationStatus === 'validated' && documentSignatures.invoice ? (
-            <div className="mt-4 flex flex-col items-center">
-              <img 
-                src={documentSignatures.invoice} 
-                alt="Electronic Signature" 
-                className="h-20 w-auto"
-                style={{ maxWidth: '300px' }}
-              />
-              <p className="mt-2">{invoice.signature.entity}</p>
-              <p>on behalf of {invoice.signature.onBehalfOf}</p>
-              <p className="text-sm text-gray-600">{invoice.signature.title}</p>
-              <p className="text-sm text-gray-600 mt-2">
-                Digitally signed on {new Date().toLocaleDateString()}
-              </p>
-            </div>
-          ) : (
-            <>
-              <p className="mt-2">{invoice.signature.entity}</p>
-              <p>on behalf of {invoice.signature.onBehalfOf}</p>
-              <p className="text-sm text-gray-600">{invoice.signature.title}</p>
-            </>
-          )}
-        </div>
-
         <div className="mt-6 flex justify-center print:hidden">
           <Button
             variant="outline"
@@ -3768,7 +3556,6 @@ export default function ProfessionalReportEditable({
       </div>
     )
   }
-
   const ActionsBar = () => {
     const metadata = getReportMetadata()
     
@@ -3831,13 +3618,13 @@ export default function ProfessionalReportEditable({
   }
 
   const UnsavedChangesAlert = () => {
-    if (modifiedSections.size === 0 || validationStatus === 'validated') return null
+    if (!hasUnsavedChanges || validationStatus === 'validated') return null
 
     return (
       <Alert className="print:hidden">
         <AlertTriangle className="h-4 w-4" />
         <AlertDescription>
-          Changes will be saved automatically when you validate the document.
+          You have unsaved changes. Click the Save button or press Ctrl+S to save.
         </AlertDescription>
       </Alert>
     )
@@ -3876,6 +3663,7 @@ export default function ProfessionalReportEditable({
       </Card>
     )
   }
+
   // ==================== MAIN RENDER ====================
   return (
     <div className="space-y-6 print:space-y-4">
@@ -3986,17 +3774,38 @@ export default function ProfessionalReportEditable({
         </div>
       )}
 
-      {/* 🔧 NEW: Save Status Indicators */}
+      {/* 🔧 UPDATED: Manual Save Button (positioned left) */}
+      {hasUnsavedChanges && (
+        <div className="fixed bottom-4 left-4 z-50">
+          <Button
+            onClick={handleManualSave}
+            className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+            size="lg"
+          >
+            <Save className="h-5 w-5 mr-2" />
+            Save Changes
+          </Button>
+        </div>
+      )}
+
+      {/* 🔧 UPDATED: Save Status Indicators (positioned left) */}
       {saveStatus === 'saving' && (
-        <div className="fixed bottom-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
+        <div className="fixed bottom-4 left-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2">
           <Loader2 className="h-4 w-4 animate-spin" />
           Saving...
         </div>
       )}
       {saveStatus === 'saved' && (
-        <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
+        <div className="fixed bottom-4 left-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2">
           <CheckCircle className="h-4 w-4" />
           Saved!
+        </div>
+      )}
+
+      {/* 🔧 Unsaved Changes Indicator (positioned top-left) */}
+      {hasUnsavedChanges && (
+        <div className="fixed top-4 left-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-sm z-50">
+          Unsaved changes
         </div>
       )}
 
