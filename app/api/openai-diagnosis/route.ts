@@ -779,6 +779,15 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
 }
 
 function prepareMauritiusQualityPrompt(patientContext: PatientContext, consultationType: any): string {
+  // Analyse diagnostique progressive basée sur symptômes
+  const triageResult = universalSymptomAnalysis(
+    patientContext.symptoms,
+    patientContext.chief_complaint,
+    parseInt(patientContext.age.toString()) || 0,
+    patientContext.sex,
+    patientContext.vital_signs
+  )
+  
   const currentMedsFormatted = patientContext.current_medications.length > 0 
     ? patientContext.current_medications.join(', ')
     : 'Aucun médicament actuel'
@@ -795,74 +804,21 @@ function prepareMauritiusQualityPrompt(patientContext: PatientContext, consultat
     medical_history: patientContext.medical_history,
     allergies: patientContext.allergies,
     consultation_type: consultationType.consultationType,
-    ai_questions: patientContext.ai_questions
+    ai_questions: patientContext.ai_questions,
+    // Intégration du triage diagnostique progressif
+    diagnostic_triage: {
+      urgency: triageResult.urgency,
+      primary_orientation: triageResult.primary_orientation,
+      differential_considerations: triageResult.differential_considerations,
+      specialist_referral_threshold: triageResult.specialist_referral_threshold,
+      progressive_approach: "Common causes first, systematic exclusion"
+    }
   }, null, 2)
   
-  return MAURITIUS_MEDICAL_PROMPT
+  return IMPROVED_MAURITIUS_MEDICAL_PROMPT
     .replace('{{PATIENT_CONTEXT}}', contextString)
     .replace('{{CURRENT_MEDICATIONS}}', currentMedsFormatted)
     .replace('{{CONSULTATION_TYPE}}', consultationTypeFormatted)
-    .replace(/{{CURRENT_MEDICATIONS_LIST}}/g, currentMedsFormatted)
-}
-
-// ==================== DETECTION FUNCTIONS (CONSERVÉES) ====================
-function hasAntipyretic(medications: any[]): boolean {
-  const antipyretics = [
-    'paracetamol', 'acetaminophen', 'doliprane', 'efferalgan',
-    'ibuprofen', 'ibuprofène', 'advil', 'nurofen',
-    'aspirin', 'aspirine', 'kardégic'
-  ]
-  
-  return medications.some(med => {
-    const drugName = (med?.drug || '').toLowerCase()
-    return antipyretics.some(anti => drugName.includes(anti))
-  })
-}
-
-function hasAnalgesic(medications: any[]): boolean {
-  const analgesics = [
-    'paracetamol', 'tramadol', 'codeine', 'morphine',
-    'ibuprofen', 'diclofenac', 'naproxen', 'ketoprofen'
-  ]
-  
-  return medications.some(med => {
-    const drugName = (med?.drug || '').toLowerCase()
-    return analgesics.some(analg => drugName.includes(analg))
-  })
-}
-
-function hasFeverSymptoms(symptoms: string[], chiefComplaint: string = '', vitalSigns: any = {}): boolean {
-  const feverSigns = ['fièvre', 'fever', 'température', 'chaud', 'brûlant', 'hyperthermie', 'pyrexia', 'febrile']
-  const allText = [...symptoms, chiefComplaint].join(' ').toLowerCase()
-  
-  const symptomsHaveFever = feverSigns.some(sign => allText.includes(sign))
-  const tempHigh = vitalSigns?.temperature && vitalSigns.temperature > 37.5
-  
-  return symptomsHaveFever || tempHigh
-}
-
-function hasPainSymptoms(symptoms: string[], chiefComplaint: string = ''): boolean {
-  const painSigns = [
-    'douleur', 'pain', 'mal', 'ache', 'céphalée', 'headache',
-    'arthralgie', 'myalgie', 'lombalgie', 'cervicalgie',
-    'douloureux', 'painful', 'souffrance', 'sore', 'tender'
-  ]
-  
-  const allText = [...symptoms, chiefComplaint].join(' ').toLowerCase()
-  return painSigns.some(sign => allText.includes(sign))
-}
-
-function hasInfectionSymptoms(symptoms: string[], chiefComplaint: string = ''): boolean {
-  const infectionSigns = [
-    'fièvre', 'fever', 'température', 'frissons', 'chills',
-    'toux', 'cough', 'expectoration', 'sputum',
-    'dysurie', 'brûlures mictionnelles', 'dysuria',
-    'diarrhée', 'diarrhea', 'vomissement', 'vomiting',
-    'purulent', 'discharge', 'sepsis'
-  ]
-  
-  const allText = [...symptoms, chiefComplaint].join(' ').toLowerCase()
-  return infectionSigns.some(sign => allText.includes(sign))
 }
 
 // ==================== UNIVERSAL VALIDATION FUNCTIONS (CONSERVÉES) ====================
