@@ -10,9 +10,6 @@ interface DoctorData {
   experience: string
   languages: string[]
   description: string
-  // Add optional fields that might come from database
-  licenseNumber?: string
-  license_number?: string  // Database field name
   qualifications?: string
   clinicAddress?: string
   clinic_address?: string  // Database field name
@@ -37,7 +34,6 @@ export function useTibokDoctorData() {
         // Normalize field names from database
         const normalizedData = {
           ...parsedData,
-          licenseNumber: parsedData.licenseNumber || parsedData.license_number,
           clinicAddress: parsedData.clinicAddress || parsedData.clinic_address,
           consultationHours: parsedData.consultationHours || parsedData.consultation_hours
         }
