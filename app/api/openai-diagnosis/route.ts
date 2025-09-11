@@ -2161,7 +2161,6 @@ console.log(`   - Urgence: ${diagnosticTriage.urgency}`)
 console.log(`   - Différentiels classés par fréquence: ${diagnosticTriage.differential_considerations.slice(0, 2).join(', ')}...`)
 
 // ============ VALIDATION ET CORRECTIONS PROGRESSIVES + MÉDICAMENTS V4.6 ============
-let finalAnalysis = universalIntelligentValidation(medicalAnalysis, patientContext)
 
 // Application des corrections diagnostiques progressives
 finalAnalysis = applyProgressiveDiagnosticCorrections(finalAnalysis, patientContext)
