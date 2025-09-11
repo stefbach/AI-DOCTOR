@@ -374,333 +374,70 @@ function calculateDailyTotal(individualDose: string, frequency: number): string 
   return `${total}${unit}/jour`
 }
 
-// ==================== MAURITIUS MEDICAL ENHANCEMENT COMPLET + DCI ====================
-function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: PatientContext): any {
-  console.log('🏝️ Enhancing Mauritius medical specificity + DCI...')
+// ==================== VALIDATION MÉDICAMENTS ULTRA-SOPHISTIQUÉE (V4.6 INTÉGRALE) ====================
+export function validateMauritiusMedicalSpecificity(analysis: any): {
+  hasGenericContent: boolean,
+  issues: string[],
+  suggestions: string[]
+} {
+  const issues: string[] = []
+  const suggestions: string[] = []
   
-  const qualityCheck = validateMauritiusMedicalSpecificity(analysis)
+  console.log('🔍 Validating Mauritius medical specificity (ultra-sophistiquée V4.6)...')
   
-  if (qualityCheck.hasGenericContent) {
-    console.log('⚠️ Generic content detected, applying Mauritius medical corrections...')
-    
-    // S'assurer que la structure existe
-    if (!analysis.treatment_plan) {
-      analysis.treatment_plan = {}
-    }
-    if (!analysis.treatment_plan.medications) {
-      analysis.treatment_plan.medications = []
-    }
-    if (!analysis.investigation_strategy) {
-      analysis.investigation_strategy = {}
-    }
-    if (!analysis.investigation_strategy.laboratory_tests) {
-      analysis.investigation_strategy.laboratory_tests = []
+  // UK/Mauritius laboratory nomenclature check
+  const labTests = analysis?.investigation_strategy?.laboratory_tests || []
+  labTests.forEach((test: any, idx: number) => {
+    const testName = test?.test_name || ''
+    if (!testName || 
+        testName.toLowerCase().includes('laboratory test') ||
+        testName.toLowerCase().includes('test de laboratoire') ||
+        testName.length < 10) {
+      issues.push(`Test ${idx + 1}: Generic name "${testName || 'undefined'}"`)
+      suggestions.push(`Use UK/Mauritius nomenclature (e.g., "Full Blood Count", "U&E", "LFTs")`)
     }
     
-    // Corrections pour les laboratoires (inchangé)
-    analysis.investigation_strategy.laboratory_tests = analysis.investigation_strategy.laboratory_tests.map((test: any) => {
-      const testName = test?.test_name || ''
-      if (!testName || testName.includes('Laboratory test') || testName.includes('Test de laboratoire') || testName.length < 10) {
-        
-        const symptoms = (patientContext.symptoms || []).join(' ').toLowerCase()
-        const chiefComplaint = (patientContext.chief_complaint || '').toLowerCase()
-        const allSymptoms = `${symptoms} ${chiefComplaint}`
-        
-        if (allSymptoms.includes('fever') || allSymptoms.includes('fièvre') || allSymptoms.includes('infection')) {
-          test.test_name = "Full Blood Count (FBC) with differential"
-          test.clinical_justification = "Rule out bacterial infection (raised white cell count)"
-          test.expected_results = { wbc: "Normal: 4.0-11.0 × 10⁹/L", crp: "Normal: <5 mg/L" }
-          test.tube_type = "EDTA (purple top)"
-        } else if (allSymptoms.includes('abdominal pain') || allSymptoms.includes('stomach') || allSymptoms.includes('gastro')) {
-          test.test_name = "Serum Amylase"
-          test.clinical_justification = "Rule out acute pancreatitis"
-          test.expected_results = { amylase: "Normal: 30-110 U/L" }
-          test.tube_type = "Serum (yellow top)"
-        } else if (allSymptoms.includes('fatigue') || allSymptoms.includes('tired') || allSymptoms.includes('weakness')) {
-          test.test_name = "Thyroid Function Tests (TFTs)"
-          test.clinical_justification = "Rule out thyroid dysfunction causing fatigue"
-          test.expected_results = { tsh: "Normal: 0.4-4.0 mU/L", free_t4: "Normal: 10-25 pmol/L" }
-          test.tube_type = "Serum (yellow top)"
-        } else if (allSymptoms.includes('chest pain') || allSymptoms.includes('cardiac') || allSymptoms.includes('heart')) {
-          test.test_name = "Cardiac Enzymes (Troponin I)"
-          test.clinical_justification = "Rule out myocardial infarction"
-          test.expected_results = { troponin_i: "Normal: <0.04 ng/mL" }
-          test.tube_type = "Serum (yellow top)"
-        } else {
-          test.test_name = "Full Blood Count (FBC)"
-          test.clinical_justification = "General screening in symptomatic patient"
-          test.expected_results = { haemoglobin: "Normal: M 130-175 g/L, F 115-155 g/L" }
-          test.tube_type = "EDTA (purple top)"
-        }
-        
-        test.mauritius_logistics = {
-          where: "C-Lab, Green Cross, or Biosanté laboratories",
-          cost: "Rs 500-1200 depending on test",
-          turnaround: "24-48 hours (routine), 2-4 hours (urgent)"
-        }
-      }
-      return test
-    })
-    
-    // Corrections pour les medications avec DCI + posologie précise
-    analysis.treatment_plan.medications = analysis.treatment_plan.medications.map((med: any, idx: number) => {
-      // Créer un objet medication complet avec tous les champs requis
-      const fixedMed = {
-        drug: med?.drug || '',
-        dci: med?.dci || '',
-        indication: med?.indication || '',
-        mechanism: med?.mechanism || '',
-        dosing: med?.dosing || { adult: '' },
-        duration: med?.duration || '',
-        contraindications: med?.contraindications || '',
-        interactions: med?.interactions || '',
-        side_effects: med?.side_effects || '',
-        monitoring: med?.monitoring || '',
-        administration_instructions: med?.administration_instructions || '',
-        mauritius_availability: med?.mauritius_availability || {},
-        ...med // Préserver les autres propriétés existantes
-      }
-      
-      // Correction DCI si manquant
-      if (!fixedMed.dci || fixedMed.dci.length < 3) {
-        fixedMed.dci = extractDCIFromDrugName(fixedMed.drug)
-      }
-      
-      // Si le médicament n'a pas de nom valide ou est générique
-      if (!fixedMed.drug || 
-          fixedMed.drug === 'Medication' || 
-          fixedMed.drug === 'Médicament' || 
-          fixedMed.drug === 'undefined' ||
-          fixedMed.drug === null ||
-          fixedMed.drug.length < 5) {
-        
-        const symptoms = (patientContext.symptoms || []).join(' ').toLowerCase()
-        const chiefComplaint = (patientContext.chief_complaint || '').toLowerCase()
-        const allSymptoms = `${symptoms} ${chiefComplaint}`
-        
-        // Assignation intelligente basée sur les symptômes avec DCI précis
-        if (allSymptoms.includes('pain') || allSymptoms.includes('douleur') || allSymptoms.includes('ache')) {
-          Object.assign(fixedMed, {
-            drug: "Ibuprofène 400mg",
-            dci: "Ibuprofène",
-            indication: "Traitement anti-inflammatoire pour soulagement de la douleur musculo-squelettique avec réduction de l'inflammation associée",
-            mechanism: "Anti-inflammatoire non stéroïdien (AINS), inhibition de la cyclooxygénase",
-            dosing: { 
-              adult: "400mg TDS", 
-              frequency_per_day: 3,
-              individual_dose: "400mg",
-              daily_total_dose: "1200mg/day"
-            },
-            duration: "5-7 jours maximum",
-            contraindications: "Ulcère gastroduodénal, insuffisance rénale sévère, grossesse (3e trimestre)",
-            side_effects: "Irritation gastrique, vertiges, céphalées, insuffisance rénale",
-            interactions: "Éviter avec anticoagulants, IEC, diurétiques",
-            monitoring: "Fonction rénale si utilisation prolongée, symptômes gastriques",
-            mauritius_availability: {
-              public_free: true,
-              estimated_cost: "Rs 50-200",
-              brand_names: "Brufen, Nurofen disponibles"
-            },
-            administration_instructions: "Prendre avec la nourriture pour réduire l'irritation gastrique"
-          })
-        } else if (allSymptoms.includes('fever') || allSymptoms.includes('fièvre') || allSymptoms.includes('temperature')) {
-          Object.assign(fixedMed, {
-            drug: "Paracétamol 1g",
-            dci: "Paracétamol",
-            indication: "Prise en charge symptomatique de la pyrexie et soulagement de la douleur légère à modérée dans une affection fébrile aiguë",
-            mechanism: "Analgésique et antipyrétique, inhibition centrale de la cyclooxygénase",
-            dosing: { 
-              adult: "1g QDS",
-              frequency_per_day: 4,
-              individual_dose: "1g",
-              daily_total_dose: "4g/day"
-            },
-            duration: "3-5 jours selon nécessité",
-            contraindications: "Insuffisance hépatique sévère, allergie au paracétamol",
-            side_effects: "Rares aux doses thérapeutiques, hépatotoxicité en cas de surdosage",
-            interactions: "Compatible avec la plupart des médicaments, prudence avec warfarine",
-            monitoring: "Surveillance de la température, fonction hépatique si utilisation prolongée",
-            mauritius_availability: {
-              public_free: true,
-              estimated_cost: "Rs 50-150",
-              brand_names: "Panadol, Doliprane disponibles partout"
-            },
-            administration_instructions: "Prendre avec de l'eau, peut être pris avec ou sans nourriture"
-          })
-        } else if (allSymptoms.includes('nausea') || allSymptoms.includes('vomit') || allSymptoms.includes('gastro') || allSymptoms.includes('stomach')) {
-          Object.assign(fixedMed, {
-            drug: "Métoclopramide 10mg",
-            dci: "Métoclopramide",
-            indication: "Thérapie antiémétique pour prise en charge des nausées et vomissements associés aux troubles gastro-intestinaux",
-            mechanism: "Antagoniste dopaminergique avec activité prokinétique",
-            dosing: { 
-              adult: "10mg TDS",
-              frequency_per_day: 3,
-              individual_dose: "10mg",
-              daily_total_dose: "30mg/day"
-            },
-            duration: "48-72 heures maximum",
-            contraindications: "Phéochromocytome, obstruction gastro-intestinale, maladie de Parkinson",
-            side_effects: "Somnolence, effets extrapyramidaux (rares), agitation",
-            interactions: "Éviter avec neuroleptiques, sédation accrue avec dépresseurs SNC",
-            monitoring: "Symptômes neurologiques, efficacité sur nausées/vomissements",
-            mauritius_availability: {
-              public_free: true,
-              estimated_cost: "Rs 60-180",
-              brand_names: "Maxolon, Primperan disponibles"
-            },
-            administration_instructions: "Prendre 30 minutes avant les repas si nauséeux"
-          })
-        } else if (allSymptoms.includes('cough') || allSymptoms.includes('toux') || allSymptoms.includes('respiratory') || allSymptoms.includes('ear') || allSymptoms.includes('oreille')) {
-          Object.assign(fixedMed, {
-            drug: "Amoxicilline 500mg",
-            dci: "Amoxicilline",
-            indication: "Antibiothérapie empirique à large spectre pour infection bactérienne suspectée des voies respiratoires incluant otite moyenne aiguë",
-            mechanism: "Antibiotique bêta-lactamine, inhibition de la synthèse de la paroi cellulaire bactérienne",
-            dosing: { 
-              adult: "500mg TDS",
-              frequency_per_day: 3,
-              individual_dose: "500mg",
-              daily_total_dose: "1500mg/day"
-            },
-            duration: "7 jours",
-            contraindications: "Allergie aux pénicillines, mononucléose infectieuse sévère",
-            side_effects: "Diarrhée, nausées, éruption cutanée, surinfection à Candida",
-            interactions: "Efficacité réduite des contraceptifs oraux, augmentation effet warfarine",
-            monitoring: "Réponse clinique, réactions allergiques, symptômes gastro-intestinaux",
-            mauritius_availability: {
-              public_free: true,
-              estimated_cost: "Rs 100-250",
-              brand_names: "Amoxil, Flemoxin disponibles"
-            },
-            administration_instructions: "Prendre avec la nourriture pour réduire les troubles gastriques, terminer le traitement complet"
-          })
-        } else {
-          // Médicament par défaut pour les cas non spécifiques
-          Object.assign(fixedMed, {
-            drug: "Paracétamol 500mg",
-            dci: "Paracétamol",
-            indication: "Soulagement symptomatique de la douleur et de la fièvre dans les conditions médicales aiguës",
-            mechanism: "Analgésique et antipyrétique, inhibition centrale de la cyclooxygénase",
-            dosing: { 
-              adult: "500mg QDS",
-              frequency_per_day: 4,
-              individual_dose: "500mg",
-              daily_total_dose: "2g/day"
-            },
-            duration: "3-5 jours selon nécessité",
-            contraindications: "Insuffisance hépatique sévère, allergie au paracétamol",
-            side_effects: "Rares aux doses thérapeutiques, hépatotoxicité en cas de surdosage",
-            interactions: "Compatible avec la plupart des traitements, prudence avec warfarine",
-            monitoring: "Température si pour fièvre, fonction hépatique si utilisation prolongée",
-            mauritius_availability: {
-              public_free: true,
-              estimated_cost: "Rs 50-150",
-              brand_names: "Panadol disponible partout"
-            },
-            administration_instructions: "Prendre avec de l'eau, respecter les intervalles de dosage"
-          })
-        }
-        
-        fixedMed._mauritius_specificity_applied = true
-      }
-      
-      // Corriger les indications vagues avec DCI précis
-      const currentIndication = fixedMed.indication || ''
-      const isVagueIndication = (
-        !currentIndication || 
-        currentIndication === 'Therapeutic indication' ||
-        currentIndication === 'Indication thérapeutique' ||
-        currentIndication === 'Treatment' ||
-        currentIndication === 'Therapeutic use' ||
-        currentIndication === 'Medical treatment' ||
-        currentIndication.length < 12 ||
-        (currentIndication.toLowerCase() === 'treatment' || 
-         currentIndication.toLowerCase() === 'therapeutic indication' ||
-         (currentIndication.toLowerCase().includes('treatment') && currentIndication.length < 20 && 
-          !currentIndication.includes('bacterial') && !currentIndication.includes('pain') && 
-          !currentIndication.includes('fever') && !currentIndication.includes('infection')))
-      )
-      
-      if (isVagueIndication) {
-        const diagnosis = analysis?.clinical_analysis?.primary_diagnosis?.condition || 'condition médicale'
-        const dci = fixedMed.dci || ''
-        
-        // Créer des indications très spécifiques selon le DCI
-        if (dci === 'Paracétamol') {
-          fixedMed.indication = `Prise en charge symptomatique de la fièvre et soulagement de la douleur légère à modérée associées à ${diagnosis}`
-        } else if (dci === 'Ibuprofène') {
-          fixedMed.indication = `Traitement anti-inflammatoire non stéroïdien pour soulagement de la douleur et réduction de l'inflammation dans le contexte de ${diagnosis}`
-        } else if (dci === 'Amoxicilline') {
-          fixedMed.indication = `Antibiothérapie empirique à large spectre pour infection bactérienne suspectée contribuant à ${diagnosis}`
-        } else if (dci === 'Métoclopramide') {
-          fixedMed.indication = `Thérapie antiémétique et prokinétique pour prise en charge des symptômes de nausées et vomissements associés à ${diagnosis}`
-        } else {
-          fixedMed.indication = `Intervention thérapeutique ciblée pour prise en charge complète et soulagement symptomatique de ${diagnosis} selon les recommandations cliniques`
-        }
-      }
-      
-      // Améliorer la posologie si imprécise
-      if (!fixedMed.dosing?.adult || 
-          (!fixedMed.dosing.adult.includes('OD') && 
-           !fixedMed.dosing.adult.includes('BD') && 
-           !fixedMed.dosing.adult.includes('TDS') && 
-           !fixedMed.dosing.adult.includes('QDS') &&
-           !fixedMed.dosing.adult.includes('times daily'))) {
-        const dci = fixedMed.dci || ''
-        const precisePosology = generatePrecisePosology(dci, patientContext)
-        fixedMed.dosing = { ...fixedMed.dosing, ...precisePosology }
-      }
-      
-      // S'assurer que tous les champs obligatoires sont remplis
-      if (!fixedMed.mechanism || fixedMed.mechanism.length < 10) {
-        fixedMed.mechanism = "Mécanisme pharmacologique spécifique pour cette indication"
-      }
-      if (!fixedMed.contraindications || fixedMed.contraindications.length < 10) {
-        fixedMed.contraindications = "Hypersensibilité connue au principe actif"
-      }
-      if (!fixedMed.side_effects || fixedMed.side_effects.length < 10) {
-        fixedMed.side_effects = "Généralement bien toléré aux doses thérapeutiques"
-      }
-      if (!fixedMed.interactions || fixedMed.interactions.length < 10) {
-        fixedMed.interactions = "Aucune interaction majeure connue aux doses thérapeutiques"
-      }
-      if (!fixedMed.monitoring || fixedMed.monitoring.length < 10) {
-        fixedMed.monitoring = "Réponse clinique et tolérance"
-      }
-      if (!fixedMed.administration_instructions || fixedMed.administration_instructions.length < 10) {
-        fixedMed.administration_instructions = "Prendre selon prescription avec de l'eau"
-      }
-      
-      return fixedMed
-    })
-    
-    // Nettoyer les medications undefined ou invalides
-    analysis.treatment_plan.medications = analysis.treatment_plan.medications.filter((med: any) => 
-      med && 
-      med.drug && 
-      med.drug !== 'undefined' && 
-      med.drug !== null &&
-      med.drug.length > 0 &&
-      med.dci &&
-      med.dci !== 'undefined' &&
-      med.dci !== null
-    )
-    
-    analysis.mauritius_specificity_enhancement = {
-      issues_detected: qualityCheck.issues.length,
-      corrections_applied: true,
-      enhanced_laboratories: analysis.investigation_strategy?.laboratory_tests?.length || 0,
-      enhanced_medications: analysis.treatment_plan?.medications?.length || 0,
-      dci_corrections_applied: analysis.treatment_plan?.medications?.filter((m: any) => m.dci)?.length || 0,
-      nomenclature: 'UK/Mauritius Anglo-Saxon + DCI précis',
-      timestamp: new Date().toISOString()
+    const justification = test?.clinical_justification || ''
+    if (!justification || 
+        justification.toLowerCase().includes('investigation') ||
+        justification.length < 20) {
+      issues.push(`Test ${idx + 1}: Vague justification`)
+      suggestions.push(`Specify medical reason (e.g., "Rule out iron deficiency anaemia")`)
     }
-    
-    console.log(`✅ Mauritius medical specificity + DCI enhanced: ${qualityCheck.issues.length} generic items corrected`)
+  })
+  
+  // Medication validation - flexible format acceptance (V4.3)
+  const medications = (analysis?.treatment_plan?.medications || []).filter(
+    (med: any) => med && (med.drug || med.medication || med.nom || med.dci || med.indication || med.dosing)
+  )
+  if (analysis?.treatment_plan) {
+    analysis.treatment_plan.medications = medications
   }
   
-  return analysis
+  medications.forEach((med: any, idx: number) => {
+    const hasMedicationInfo = med?.drug || med?.medication || med?.nom || med?.medication_name
+    const hasIndication = med?.indication || med?.purpose || med?.pour || med?.why_prescribed
+    const hasDCI = med?.dci
+    
+    if (!hasMedicationInfo) {
+      issues.push(`Medication ${idx + 1}: Missing medication name`)
+      suggestions.push(`Add medication name (any format accepted)`)
+    }
+    
+    if (!hasIndication || (typeof hasIndication === 'string' && hasIndication.length < 8)) {
+      issues.push(`Medication ${idx + 1}: Missing or too brief indication`)
+      suggestions.push(`Add indication (any natural language accepted)`)
+    }
+    
+    if (!hasDCI) {
+      console.log(`ℹ️ Medication ${idx + 1}: DCI will be auto-extracted`)
+    }
+  })
+  
+  const hasGenericContent = issues.length > 0
+  console.log(`✅ Validation completed: ${issues.length} critical issues only`)
+  
+  return { hasGenericContent, issues, suggestions }
 }
 
 // ==================== STRUCTURE GUARANTEE FUNCTIONS (CONSERVÉES) ====================
