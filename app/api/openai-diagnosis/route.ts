@@ -2146,6 +2146,7 @@ export async function POST(request: NextRequest) {
       mauritiusPrompt,
       patientContext
     )
+    console.log('✅ Analyse médicale avec qualité anglo-saxonne + DCI précis terminée')
     // ============ ANALYSE DIAGNOSTIQUE PROGRESSIVE V4.6 ============
 const diagnosticTriage = universalSymptomAnalysis(
   patientContext.symptoms,
@@ -2170,7 +2171,6 @@ if (finalAnalysis.diagnostic_progression_applied) {
   console.log(`   - ${finalAnalysis.diagnostic_progression_applied.corrections_made} corrections appliquées`)
   console.log(`   - Approche: ${finalAnalysis.diagnostic_progression_applied.approach}`)
 }
-    console.log('✅ Analyse médicale avec qualité anglo-saxonne + DCI précis terminée')
     // ========== DÉDUPLICATION DES MÉDICAMENTS ==========
 function deduplicateMedications(medications: any[]): any[] {
   const seen = new Set()
