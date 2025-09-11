@@ -2361,13 +2361,18 @@ export async function POST(request: NextRequest) {
     console.log(`🔍 Pré-analyse : ${consultationAnalysis.consultationType} (${Math.round(consultationAnalysis.confidence * 100)}%)`)
     
     // ============ ANALYSE DIAGNOSTIQUE PROGRESSIVE V4.6 ============
-    const diagnosticTriage = universalSymptomAnalysis(
-      patientContext.symptoms,
-      patientContext.chief_complaint,
-      parseInt(patientContext.age.toString()) || 0,
-      patientContext.sex,
-      patientContext.vital_signs
-    )
+   const diagnosticTriage = universalSymptomAnalysis(
+  patientContext.symptoms,
+  patientContext.chief_complaint,
+  parseInt(patientContext.age.toString()) || 0,
+  patientContext.sex,
+  patientContext.vital_signs
+) || {
+  primary_orientation: 'Consultation médicale générale',
+  urgency: 'routine',
+  differential_considerations: ['Évaluation clinique nécessaire'],
+  specialist_referral_threshold: 'low'
+}
     
     console.log(`🎯 Triage diagnostique progressif V4.6: ${diagnosticTriage.primary_orientation}`)
     console.log(`   - Urgence: ${diagnosticTriage.urgency}`)
