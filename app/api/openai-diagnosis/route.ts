@@ -2876,7 +2876,6 @@ export async function GET(request: NextRequest) {
     })
   }
   
-  return NextResponse.json({
     status: '✅ Mauritius Medical AI - Version 4.3 Logique Complète + DCI Précis',
     version: '4.3-Mauritius-Complete-Logic-DCI-Precise-System',
     
