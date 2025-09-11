@@ -2101,7 +2101,65 @@ function convertToSimpleFormat(dosing: string): string {
   
   return dosing
 }
+// ==================== DETECTION FUNCTIONS INTÉGRALES (V4.6) ====================
+function hasAntipyretic(medications: any[]): boolean {
+  const antipyretics = [
+    'paracetamol', 'acetaminophen', 'doliprane', 'efferalgan',
+    'ibuprofen', 'ibuprofène', 'advil', 'nurofen',
+    'aspirin', 'aspirine', 'kardégic'
+  ]
+  
+  return medications.some(med => {
+    const drugName = (med?.drug || '').toLowerCase()
+    return antipyretics.some(anti => drugName.includes(anti))
+  })
+}
 
+function hasAnalgesic(medications: any[]): boolean {
+  const analgesics = [
+    'paracetamol', 'tramadol', 'codeine', 'morphine',
+    'ibuprofen', 'diclofenac', 'naproxen', 'ketoprofen'
+  ]
+  
+  return medications.some(med => {
+    const drugName = (med?.drug || '').toLowerCase()
+    return analgesics.some(analg => drugName.includes(analg))
+  })
+}
+
+function hasFeverSymptoms(symptoms: string[], chiefComplaint: string = '', vitalSigns: any = {}): boolean {
+  const feverSigns = ['fièvre', 'fever', 'température', 'chaud', 'brûlant', 'hyperthermie', 'pyrexia', 'febrile']
+  const allText = [...symptoms, chiefComplaint].join(' ').toLowerCase()
+  
+  const symptomsHaveFever = feverSigns.some(sign => allText.includes(sign))
+  const tempHigh = vitalSigns?.temperature && vitalSigns.temperature > 37.5
+  
+  return symptomsHaveFever || tempHigh
+}
+
+function hasPainSymptoms(symptoms: string[], chiefComplaint: string = ''): boolean {
+  const painSigns = [
+    'douleur', 'pain', 'mal', 'ache', 'céphalée', 'headache',
+    'arthralgie', 'myalgie', 'lombalgie', 'cervicalgie',
+    'douloureux', 'painful', 'souffrance', 'sore', 'tender'
+  ]
+  
+  const allText = [...symptoms, chiefComplaint].join(' ').toLowerCase()
+  return painSigns.some(sign => allText.includes(sign))
+}
+
+function hasInfectionSymptoms(symptoms: string[], chiefComplaint: string = ''): boolean {
+  const infectionSigns = [
+    'fièvre', 'fever', 'température', 'frissons', 'chills',
+    'toux', 'cough', 'expectoration', 'sputum',
+    'dysurie', 'brûlures mictionnelles', 'dysuria',
+    'diarrhée', 'diarrhea', 'vomissement', 'vomiting',
+    'purulent', 'discharge', 'sepsis'
+  ]
+  
+  const allText = [...symptoms, chiefComplaint].join(' ').toLowerCase()
+  return infectionSigns.some(sign => allText.includes(sign))
+}
 // ==================== MAIN POST FUNCTION ====================
 export async function POST(request: NextRequest) {
   console.log('🚀 MAURITIUS MEDICAL AI - VERSION 4.3 LOGIQUE COMPLÈTE + DCI PRÉCIS')
