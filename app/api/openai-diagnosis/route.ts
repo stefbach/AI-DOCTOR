@@ -2146,7 +2146,30 @@ export async function POST(request: NextRequest) {
       mauritiusPrompt,
       patientContext
     )
-    
+    // ============ ANALYSE DIAGNOSTIQUE PROGRESSIVE V4.6 ============
+const diagnosticTriage = universalSymptomAnalysis(
+  patientContext.symptoms,
+  patientContext.chief_complaint,
+  parseInt(patientContext.age.toString()) || 0,
+  patientContext.sex,
+  patientContext.vital_signs
+)
+
+console.log(`🎯 Triage diagnostique progressif V4.6: ${diagnosticTriage.primary_orientation}`)
+console.log(`   - Urgence: ${diagnosticTriage.urgency}`)
+console.log(`   - Différentiels classés par fréquence: ${diagnosticTriage.differential_considerations.slice(0, 2).join(', ')}...`)
+
+// ============ VALIDATION ET CORRECTIONS PROGRESSIVES + MÉDICAMENTS V4.6 ============
+let finalAnalysis = universalIntelligentValidation(medicalAnalysis, patientContext)
+
+// Application des corrections diagnostiques progressives
+finalAnalysis = applyProgressiveDiagnosticCorrections(finalAnalysis, patientContext)
+
+console.log('🔧 Corrections diagnostiques progressives V4.6 appliquées')
+if (finalAnalysis.diagnostic_progression_applied) {
+  console.log(`   - ${finalAnalysis.diagnostic_progression_applied.corrections_made} corrections appliquées`)
+  console.log(`   - Approche: ${finalAnalysis.diagnostic_progression_applied.approach}`)
+}
     console.log('✅ Analyse médicale avec qualité anglo-saxonne + DCI précis terminée')
     // ========== DÉDUPLICATION DES MÉDICAMENTS ==========
 function deduplicateMedications(medications: any[]): any[] {
