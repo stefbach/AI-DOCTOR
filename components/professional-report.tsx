@@ -668,6 +668,63 @@ export default function ProfessionalReportEditable({
   const getReportRapport = () => report?.compteRendu?.rapport || createEmptyReport().compteRendu.rapport
   const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
 
+  // ==================== BATCH UPDATE FUNCTIONS ====================
+  const updateMedicamentBatch = useCallback((index: number, updatedMedication: any) => {
+    if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
+    
+    setReport(prev => {
+      if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
+      
+      const newMedicaments = [...prev.ordonnances.medicaments.prescription.medicaments]
+      newMedicaments[index] = updatedMedication
+      
+      return {
+        ...prev,
+        ordonnances: {
+          ...prev.ordonnances,
+          medicaments: {
+            ...prev.ordonnances.medicaments,
+            prescription: {
+              ...prev.ordonnances.medicaments.prescription,
+              medicaments: newMedicaments
+            }
+          }
+        }
+      }
+    })
+    
+    trackModification(`medicament.${index}`)
+  }, [validationStatus, report?.ordonnances?.medicaments, trackModification])
+
+  const updateBiologyTestBatch = useCallback((category: string, index: number, updatedTest: any) => {
+    if (validationStatus === 'validated') return
+    
+    setReport(prev => {
+      if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
+      
+      const newAnalyses = { ...prev.ordonnances.biologie.prescription.analyses }
+      newAnalyses[category] = [...newAnalyses[category]]
+      newAnalyses[category][index] = updatedTest
+      
+      return {
+        ...prev,
+        ordonnances: {
+          ...prev.ordonnances,
+          biologie: {
+            ...prev.ordonnances.biologie,
+            prescription: {
+              ...prev.ordonnances.biologie.prescription,
+              analyses: newAnalyses
+            }
+          }
+        }
+      }
+    })
+    
+    trackModification(`biologie.${category}.${index}`)
+  }, [validationStatus, trackModification])
+
+  
 // ==================== MANUAL SAVE FUNCTION ====================
 const handleManualSave = useCallback(() => {
   if (!hasUnsavedChanges) return
@@ -1101,62 +1158,6 @@ const handleManualSave = useCallback(() => {
     const updatedInfo = { ...doctorInfo, [field]: value }
     sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
   }, [doctorInfo, trackModification])
-
-  // ==================== BATCH UPDATE FUNCTIONS ====================
-  const updateMedicamentBatch = useCallback((index: number, updatedMedication: any) => {
-    if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
-    
-    setReport(prev => {
-      if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
-      
-      const newMedicaments = [...prev.ordonnances.medicaments.prescription.medicaments]
-      newMedicaments[index] = updatedMedication
-      
-      return {
-        ...prev,
-        ordonnances: {
-          ...prev.ordonnances,
-          medicaments: {
-            ...prev.ordonnances.medicaments,
-            prescription: {
-              ...prev.ordonnances.medicaments.prescription,
-              medicaments: newMedicaments
-            }
-          }
-        }
-      }
-    })
-    
-    trackModification(`medicament.${index}`)
-  }, [validationStatus, report?.ordonnances?.medicaments, trackModification])
-
-  const updateBiologyTestBatch = useCallback((category: string, index: number, updatedTest: any) => {
-    if (validationStatus === 'validated') return
-    
-    setReport(prev => {
-      if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
-      
-      const newAnalyses = { ...prev.ordonnances.biologie.prescription.analyses }
-      newAnalyses[category] = [...newAnalyses[category]]
-      newAnalyses[category][index] = updatedTest
-      
-      return {
-        ...prev,
-        ordonnances: {
-          ...prev.ordonnances,
-          biologie: {
-            ...prev.ordonnances.biologie,
-            prescription: {
-              ...prev.ordonnances.biologie.prescription,
-              analyses: newAnalyses
-            }
-          }
-        }
-      }
-    })
-    
-    trackModification(`biologie.${category}.${index}`)
-  }, [validationStatus, trackModification])
 
   const updateImagingExamBatch = useCallback((index: number, updatedExam: any) => {
     if (validationStatus === 'validated') return
