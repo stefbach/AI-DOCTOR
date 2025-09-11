@@ -2612,12 +2612,30 @@ export async function POST(request: NextRequest) {
         medication_sophistication: 'ultra_advanced_v43_enhanced_v46_progressive'
       }
     }
+
     
-    return NextResponse.json(finalResponse)
+
+return NextResponse.json(finalResponse)
     
   } catch (error) {
     console.error('❌ Erreur critique :', error)
     const errorTime = Date.now() - startTime
+    
+    // Emergency fallback analysis pour assurer une réponse même en cas d'erreur
+    const emergencyAnalysis = {
+      primary_diagnosis: {
+        condition: "Consultation médicale requise",
+        confidence_level: 60,
+        severity: "À évaluer",
+        icd10_code: "R69"
+      },
+      clinical_reasoning: "Analyse d'urgence - Consultation médicale recommandée pour évaluation complète",
+      recommendations: [
+        "Consulter un médecin pour évaluation détaillée",
+        "Surveiller les symptômes",
+        "Revenir si aggravation"
+      ]
+    }
     
     return NextResponse.json({
       success: false,
@@ -2625,12 +2643,8 @@ export async function POST(request: NextRequest) {
       errorCode: 'PROCESSING_ERROR',
       timestamp: new Date().toISOString(),
       processingTime: `${errorTime}ms`,
-      system_version: '4.6-Fusion-Ultimate-Progressive-Ultra-Sophisticated-Medications'
-    }, { status: 500 })
-  }
-}
-    
-
+      system_version: '4.6-Fusion-Ultimate-Progressive-Ultra-Sophisticated-Medications',
+      
       emergencyFallback: {
         enabled: true,
         analysis: emergencyAnalysis,
@@ -2643,19 +2657,20 @@ export async function POST(request: NextRequest) {
       },
       
       metadata: {
-        system_version: '4.3-Mauritius-Complete-Logic-DCI-Precise',
+        system_version: '4.6-Fusion-Ultimate-Progressive-Ultra-Sophisticated-Medications',
         error_logged: true,
         emergency_fallback_active: true,
         uk_standards_maintained: true,
         undefined_protection: true,
         detailed_indications: true,
         dci_enforcement: true,
-        complete_logic_preserved: true
+        complete_logic_preserved: true,
+        processing_time_ms: errorTime,
+        fallback_triggered_at: new Date().toISOString()
       }
     }, { status: 500 })
   }
 }
-
 // ==================== HEALTH ENDPOINT WITH COMPLETE TESTS ====================
 export async function GET(request: NextRequest) {
   const url = new URL(request.url)
