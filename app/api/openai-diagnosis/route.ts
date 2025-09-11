@@ -2630,20 +2630,7 @@ export async function POST(request: NextRequest) {
   }
 }
     
-  } catch (error) {
-    console.error('❌ Erreur critique :', error)
-    const errorTime = Date.now() - startTime
-    
-    // Fallback d'urgence avec nomenclature UK + logique complète
-    const emergencyAnalysis = ensureCompleteStructure({})
-    
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Erreur inconnue',
-      errorCode: 'PROCESSING_ERROR',
-      timestamp: new Date().toISOString(),
-      processingTime: `${errorTime}ms`,
-      
+
       emergencyFallback: {
         enabled: true,
         analysis: emergencyAnalysis,
