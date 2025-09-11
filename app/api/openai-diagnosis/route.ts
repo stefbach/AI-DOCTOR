@@ -2313,7 +2313,33 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
           complete_logic_preserved: true
         }
       },
-
+// Validation diagnostique progressive V4.6
+progressiveDiagnosticValidation: {
+  enabled: true,
+  system_version: '4.6-Fusion-Ultimate-Progressive-Ultra-Sophisticated-Medications',
+  approach: 'evidence_based_systematic_progressive_mauritius_contextualized_ultra_medications_v46',
+  diagnostic_triage: {
+    urgency: diagnosticTriage.urgency,
+    primary_orientation: diagnosticTriage.primary_orientation,
+    differential_ranking: diagnosticTriage.differential_considerations,
+    specialist_threshold: diagnosticTriage.specialist_referral_threshold
+  },
+  corrections_applied: finalAnalysis.diagnostic_progression_applied || null,
+  quality_improvements: [
+    'Common causes prioritized over rare diseases (frequency-based)',
+    'Basic investigations before specialized tests (evidence hierarchy)',
+    'Conservative diagnostic confidence levels (60-80%)',
+    'Systematic elimination of frequent causes',
+    'Age-appropriate differential diagnosis',
+    'Progressive investigation hierarchy enforced',
+    'Mauritius-specific pathology considerations integrated',
+    'Tropical/seasonal disease factors with progressive approach',
+    'Local healthcare system integration',
+    'Ultra-sophisticated medication logic V4.3 enhanced',
+    'Conservative therapeutic approach while investigating',
+    'Symptomatic relief prioritized pending diagnosis'
+  ]
+},
       // ========== MEDICATIONS ULTRA PRÉCISES - DCI + POSOLOGIE ==========
     medicationsSimple: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
   id: idx + 1,
