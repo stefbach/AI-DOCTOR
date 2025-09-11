@@ -2660,7 +2660,7 @@ export async function POST(request: NextRequest) {
       const safeSymptoms = Array.isArray(patientContext.symptoms) ? patientContext.symptoms : []
       const safeChiefComplaint = typeof patientContext.chief_complaint === 'string' ? patientContext.chief_complaint : ''
       const allText = [...safeSymptoms, safeChiefComplaint].join(' ').toLowerCase()
-      painResult = painSigns.some(sign => allText.includes(sign))
+      painResult = Boolean(painSigns.some(sign => allText.includes(sign)))
       console.log(`🩹 Pain analysis: symptoms="${allText}", result=${painResult}`)
     } catch (error) {
       console.error('❌ Error in pain test:', error)
@@ -2673,7 +2673,7 @@ export async function POST(request: NextRequest) {
       const safeSymptoms = Array.isArray(patientContext.symptoms) ? patientContext.symptoms : []
       const safeChiefComplaint = typeof patientContext.chief_complaint === 'string' ? patientContext.chief_complaint : ''
       const allText = [...safeSymptoms, safeChiefComplaint].join(' ').toLowerCase()
-      infectionResult = infectionSigns.some(sign => allText.includes(sign))
+      infectionResult = Boolean(infectionSigns.some(sign => allText.includes(sign)))
       console.log(`🦠 Infection analysis: symptoms="${allText}", result=${infectionResult}`)
     } catch (error) {
       console.error('❌ Error in infection test:', error)
