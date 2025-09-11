@@ -2633,9 +2633,9 @@ export async function POST(request: NextRequest) {
     console.log(`   - Médicaments actuels : ${patientContext.current_medications.length}`)
     console.log(`   - ID anonyme : ${patientContext.anonymousId}`)
     console.log(`   - Symptômes nécessitant validation :`)
-    console.log(`     • Fièvre : ${hasFeverSymptoms(patientContext.symptoms, patientContext.chief_complaint, patientContext.vital_signs)}`)
-    console.log(`     • Douleur : ${hasPainSymptoms(patientContext.symptoms, patientContext.chief_complaint)}`)
-    console.log(`     • Signes d'infection : ${hasInfectionSymptoms(patientContext.symptoms, patientContext.chief_complaint)}`)
+    console.log(`     • Fièvre : ${hasFeverSymptoms(patientContext.symptoms || [], patientContext.chief_complaint || '', patientContext.vital_signs || {})}`)
+    console.log(`     • Douleur : ${hasPainSymptoms(patientContext.symptoms || [], patientContext.chief_complaint || '')}`)
+    console.log(`     • Signes d'infection : ${hasInfectionSymptoms(patientContext.symptoms || [], patientContext.chief_complaint || '')}`)
     
     const consultationAnalysis = analyzeConsultationType(
       patientContext.current_medications,
