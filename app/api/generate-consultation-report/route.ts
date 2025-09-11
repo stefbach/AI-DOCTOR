@@ -861,8 +861,7 @@ export async function POST(request: NextRequest) {
       practiceAddress: getString(body.doctorData?.clinicAddress || "[Complete practice address]"),
       email: getString(body.doctorData?.email || "[Professional email]"),
       consultationHours: getString(body.doctorData?.consultationHours || "Mon-Fri: 8:30 AM-5:30 PM, Sat: 8:30 AM-12:30 PM"),
-      medicalCouncilNumber: getString(body.doctorData?.medicalCouncilNumber || "[Medical Council Registration No.]"),
-      licenseNumber: getString(body.doctorData?.licenseNumber || "[Practice License No.]")
+      medicalCouncilNumber: getString(body.doctorData?.medicalCouncilNumber || "[Medical Council Registration No.]")
     }
 
     const patient = {
