@@ -661,71 +661,126 @@ export default function ProfessionalReportEditable({
     invoice?: string
   }>({})
 
-  // ==================== SAFE GETTERS ====================
-  const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
-  const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
-  const getReportPatient = () => report?.compteRendu?.patient || createEmptyReport().compteRendu.patient
-  const getReportRapport = () => report?.compteRendu?.rapport || createEmptyReport().compteRendu.rapport
-  const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
+// ==================== SAFE GETTERS ====================
+const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
+const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
+const getReportPatient = () => report?.compteRendu?.patient || createEmptyReport().compteRendu.patient
+const getReportRapport = () => report?.compteRendu?.rapport || createEmptyReport().compteRendu.rapport
+const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
 
-  // ==================== BATCH UPDATE FUNCTIONS ====================
-  const updateMedicamentBatch = useCallback((index: number, updatedMedication: any) => {
-    if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
-    
-    setReport(prev => {
-      if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
-      
-      const newMedicaments = [...prev.ordonnances.medicaments.prescription.medicaments]
-      newMedicaments[index] = updatedMedication
-      
-      return {
-        ...prev,
-        ordonnances: {
-          ...prev.ordonnances,
-          medicaments: {
-            ...prev.ordonnances.medicaments,
-            prescription: {
-              ...prev.ordonnances.medicaments.prescription,
-              medicaments: newMedicaments
-            }
-          }
-        }
-      }
-    })
-    
-    trackModification(`medicament.${index}`)
-  }, [validationStatus, report?.ordonnances?.medicaments, trackModification])
+// ==================== TRACKING & UPDATES (MUST BE FIRST) ====================
+const trackModification = useCallback((section: string) => {
+  if (validationStatus === 'validated') return
+  setModifiedSections(prev => new Set(prev).add(section))
+  setHasUnsavedChanges(true)
+}, [validationStatus])
 
-  const updateBiologyTestBatch = useCallback((category: string, index: number, updatedTest: any) => {
-    if (validationStatus === 'validated') return
-    
-    setReport(prev => {
-      if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
-      
-      const newAnalyses = { ...prev.ordonnances.biologie.prescription.analyses }
-      newAnalyses[category] = [...newAnalyses[category]]
-      newAnalyses[category][index] = updatedTest
-      
-      return {
-        ...prev,
-        ordonnances: {
-          ...prev.ordonnances,
-          biologie: {
-            ...prev.ordonnances.biologie,
-            prescription: {
-              ...prev.ordonnances.biologie.prescription,
-              analyses: newAnalyses
-            }
-          }
-        }
-      }
-    })
-    
-    trackModification(`biologie.${category}.${index}`)
-  }, [validationStatus, trackModification])
-
+const updateRapportSection = useCallback((section: string, value: string) => {
+  if (validationStatus === 'validated') return
   
-// ==================== MANUAL SAVE FUNCTION ====================
+  setReport(prev => {
+    if (!prev) return null
+    
+    const newReport = {
+      ...prev,
+      compteRendu: {
+        ...prev.compteRendu,
+        rapport: {
+          ...prev.compteRendu.rapport,
+          [section]: value
+        }
+      }
+    }
+    
+    return newReport
+  })
+  trackModification(`rapport.${section}`)
+}, [validationStatus, trackModification])
+
+// ==================== BATCH UPDATE FUNCTIONS (AFTER trackModification) ====================
+const updateMedicamentBatch = useCallback((index: number, updatedMedication: any) => {
+  if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
+  
+  setReport(prev => {
+    if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
+    
+    const newMedicaments = [...prev.ordonnances.medicaments.prescription.medicaments]
+    newMedicaments[index] = updatedMedication
+    
+    return {
+      ...prev,
+      ordonnances: {
+        ...prev.ordonnances,
+        medicaments: {
+          ...prev.ordonnances.medicaments,
+          prescription: {
+            ...prev.ordonnances.medicaments.prescription,
+            medicaments: newMedicaments
+          }
+        }
+      }
+    }
+  })
+  
+  trackModification(`medicament.${index}`)
+}, [validationStatus, report?.ordonnances?.medicaments, trackModification])
+
+const updateBiologyTestBatch = useCallback((category: string, index: number, updatedTest: any) => {
+  if (validationStatus === 'validated') return
+  
+  setReport(prev => {
+    if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
+    
+    const newAnalyses = { ...prev.ordonnances.biologie.prescription.analyses }
+    newAnalyses[category] = [...newAnalyses[category]]
+    newAnalyses[category][index] = updatedTest
+    
+    return {
+      ...prev,
+      ordonnances: {
+        ...prev.ordonnances,
+        biologie: {
+          ...prev.ordonnances.biologie,
+          prescription: {
+            ...prev.ordonnances.biologie.prescription,
+            analyses: newAnalyses
+          }
+        }
+      }
+    }
+  })
+  
+  trackModification(`biologie.${category}.${index}`)
+}, [validationStatus, trackModification])
+
+const updateImagingExamBatch = useCallback((index: number, updatedExam: any) => {
+  if (validationStatus === 'validated') return
+  
+  setReport(prev => {
+    if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
+    
+    const newExamens = [...prev.ordonnances.imagerie.prescription.examens]
+    newExamens[index] = updatedExam
+    
+    return {
+      ...prev,
+      ordonnances: {
+        ...prev.ordonnances,
+        imagerie: {
+          ...prev.ordonnances.imagerie,
+          prescription: {
+            ...prev.ordonnances.imagerie.prescription,
+            examens: newExamens
+          }
+        }
+      }
+    }
+  })
+  
+  trackModification(`imagerie.${index}`)
+}, [validationStatus, trackModification])
+
+// ==================== MANUAL SAVE FUNCTION (AFTER ALL DEPENDENCIES) ====================
 const handleManualSave = useCallback(() => {
   if (!hasUnsavedChanges) return
   
@@ -807,80 +862,51 @@ const handleManualSave = useCallback(() => {
   })
 }, [hasUnsavedChanges, updateRapportSection, updateMedicamentBatch, updateBiologyTestBatch, updateImagingExamBatch])
 
-  // ==================== KEYBOARD SHORTCUT FOR SAVE ====================
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault()
-        if (hasUnsavedChanges) {
-          handleManualSave()
-        }
+// ==================== KEYBOARD SHORTCUT FOR SAVE ====================
+useEffect(() => {
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault()
+      if (hasUnsavedChanges) {
+        handleManualSave()
       }
     }
-    
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [hasUnsavedChanges, handleManualSave])
+  }
+  
+  window.addEventListener('keydown', handleKeyDown)
+  return () => window.removeEventListener('keydown', handleKeyDown)
+}, [hasUnsavedChanges, handleManualSave])
 
-  // ==================== TRACKING & UPDATES ====================
-  const trackModification = useCallback((section: string) => {
-    if (validationStatus === 'validated') return
-    setModifiedSections(prev => new Set(prev).add(section))
-    setHasUnsavedChanges(true)
-  }, [validationStatus])
-
-  const updateRapportSection = useCallback((section: string, value: string) => {
-    if (validationStatus === 'validated') return
-    
-    setReport(prev => {
-      if (!prev) return null
-      
-      const newReport = {
-        ...prev,
-        compteRendu: {
-          ...prev.compteRendu,
-          rapport: {
-            ...prev.compteRendu.rapport,
-            [section]: value
-          }
-        }
-      }
-      
-      return newReport
+// ==================== AI ASSISTANT CALLBACK FUNCTIONS ====================
+// Immediate update function for AI (no debounce)
+const handleUpdateSectionImmediate = useCallback((section: string, content: string) => {
+  console.log('🚀 AI Assistant updating section immediately:', section, 'with content length:', content.length)
+  
+  if (validationStatus === 'validated') {
+    toast({
+      title: "❌ Document validé",
+      description: "Impossible de modifier un document validé",
+      variant: "destructive"
     })
-    trackModification(`rapport.${section}`)
-  }, [validationStatus, trackModification])
-  // ==================== AI ASSISTANT CALLBACK FUNCTIONS ====================
-
-  // Immediate update function for AI (no debounce)
-  const handleUpdateSectionImmediate = useCallback((section: string, content: string) => {
-    console.log('🚀 AI Assistant updating section immediately:', section, 'with content length:', content.length)
-    
-    if (validationStatus === 'validated') {
-      toast({
-        title: "❌ Document validé",
-        description: "Impossible de modifier un document validé",
-        variant: "destructive"
-      })
-      return
-    }
-    
-    setSaveStatus('saving')
-    
-    // Main report sections
-    const reportSections = [
-      'motifConsultation', 'anamnese', 'antecedents', 'examenClinique',
-      'syntheseDiagnostique', 'conclusionDiagnostique', 'priseEnCharge',
-      'surveillance', 'conclusion'
-    ]
-    
-    if (reportSections.includes(section)) {
-      updateRapportSection(section, content)
-      toast({
-        title: "✅ Section mise à jour",
-        description: `${section} a été améliorée par l'IA médicale`,
-        duration: 3000
-      })
+    return
+  }
+  
+  setSaveStatus('saving')
+  
+  // Main report sections
+  const reportSections = [
+    'motifConsultation', 'anamnese', 'antecedents', 'examenClinique',
+    'syntheseDiagnostique', 'conclusionDiagnostique', 'priseEnCharge',
+    'surveillance', 'conclusion'
+  ]
+  
+  if (reportSections.includes(section)) {
+    updateRapportSection(section, content)
+    toast({
+      title: "✅ Section mise à jour",
+      description: `${section} a été améliorée par l'IA médicale`,
+      duration: 3000
+    })
       
       // Auto-save after AI update
       setTimeout(() => {
