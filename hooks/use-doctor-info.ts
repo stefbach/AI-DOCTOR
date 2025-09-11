@@ -16,7 +16,6 @@ export interface DoctorInfo {
   qualifications?: string
   clinicAddress?: string
   consultationHours?: string
-  licenseNumber?: string
 }
 
 export function useDoctorInfo() {
@@ -38,8 +37,7 @@ export function useDoctorInfo() {
         description: tibokDoctorData.description,
         qualifications: tibokDoctorData.qualifications || 'MBBS, MD (Medicine)',
         clinicAddress: tibokDoctorData.clinicAddress || 'Medical Center, Port Louis',
-        consultationHours: tibokDoctorData.consultationHours || 'Mon-Fri: 8:30am-5:30pm',
-        licenseNumber: tibokDoctorData.licenseNumber || tibokDoctorData.license_number || 'PL/2024/123' // FIX: Check for license_number field
+        consultationHours: tibokDoctorData.consultationHours || 'Mon-Fri: 8:30am-5:30pm'
       }
       setDoctorInfo(doctorData)
     } else {
@@ -56,8 +54,7 @@ export function useDoctorInfo() {
         description: 'Experienced general practitioner',
         qualifications: 'MBBS, MD (Medicine)',
         clinicAddress: 'Medical Center, Port Louis',
-        consultationHours: 'Mon-Fri: 8:30am-5:30pm',
-        licenseNumber: 'PL/2024/123'
+        consultationHours: 'Mon-Fri: 8:30am-5:30pm'
       }
       setDoctorInfo(defaultDoctor)
     }
