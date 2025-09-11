@@ -2160,6 +2160,115 @@ function hasInfectionSymptoms(symptoms: string[], chiefComplaint: string = ''): 
   const allText = [...symptoms, chiefComplaint].join(' ').toLowerCase()
   return infectionSigns.some(sign => allText.includes(sign))
 }
+// ==================== INTÉGRATION CONTEXTE MAURICIEN COMPLET (V4.6) ====================
+function enhanceMauritiusContextualAnalysis(
+  analysis: any, 
+  patientContext: PatientContext
+): any {
+  
+  const age = parseInt(patientContext.age.toString())
+  const symptoms = [...patientContext.symptoms, patientContext.chief_complaint].join(' ').toLowerCase()
+  
+  // Considérations tropical/climat avec approche progressive
+  if (symptoms.includes('fever') && symptoms.includes('headache')) {
+    const currentMonth = new Date().getMonth() + 1
+    const isDengueSeasonMauritius = currentMonth >= 11 || currentMonth <= 5
+    
+    analysis.mauritius_specific_considerations = {
+      tropical_disease_risk: isDengueSeasonMauritius ? 
+        "HIGH PRIORITY: Consider dengue/chikungunya (endemic in Mauritius during cyclone season)" :
+        "Consider tropical diseases (lower priority outside peak season)",
+      seasonal_factors: isDengueSeasonMauritius ? 
+        "CYCLONE SEASON (Nov-May): Higher dengue/chikungunya risk - platelet monitoring essential" :
+        "Dry season: Lower vector-borne disease risk",
+      progressive_approach: "Start with basic FBC + platelet count before specialized tropical disease panels",
+      additional_tests: isDengueSeasonMauritius ? 
+        ["FBC with platelet count (PRIORITY)", "Dengue NS1 antigen", "CRP"] :
+        ["FBC with platelet count", "CRP", "Dengue serology if fever >3 days"],
+      notification_requirements: "Notifiable disease if dengue/chikungunya confirmed"
+    }
+  }
+  
+  // Considérations diabète (très prévalent) avec approche progressive
+  if (age > 30) {
+    analysis.mauritius_screening_recommendations = {
+      diabetes_screening: "Mauritius has highest diabetes prevalence globally (23%) - Progressive screening approach",
+      progressive_approach: "Basic glucose first, then HbA1c if abnormal",
+      recommended_tests: ["Random glucose (if symptomatic)", "Fasting glucose", "HbA1c (if glucose abnormal)"],
+      frequency: "Annual screening recommended for all adults >30 in Mauritius"
+    }
+  }
+  
+  // Considérations cardiovasculaires avec approche progressive
+  if (symptoms.includes('chest') || symptoms.includes('hypertension')) {
+    analysis.mauritius_cardiovascular_context = {
+      local_prevalence: "CVD leading cause of death in Mauritius - Progressive cardiac assessment",
+      progressive_approach: "ECG + basic tests first, echo/stress test if abnormal",
+      risk_factors: "High diabetes (23%) and hypertension (30%) prevalence in Mauritius",
+      specialized_care: "Cardiac Centre Pamplemousses for complex cases",
+      first_line_assessment: ["ECG", "Blood pressure", "Random glucose"]
+    }
+  }
+  
+  // Ajustements culturels/religieux
+  analysis.cultural_considerations = {
+    language_preference: "Consider explanation in Creole/French for better understanding",
+    family_involvement: "Family often involved in medical decisions in Mauritian culture",
+    traditional_medicine: "Check for concurrent use of herbal/ayurvedic remedies - drug interactions",
+    progressive_communication: "Explain step-by-step approach to build trust"
+  }
+  
+  return analysis
+}
+
+function generateMauritiusSpecificAdvice(
+  analysis: any,
+  patientContext: PatientContext
+): any {
+  
+  const symptoms = patientContext.symptoms.join(' ').toLowerCase()
+  
+  analysis.mauritius_patient_advice = {
+    general: {
+      emergency_numbers: "SAMU: 114, Police/Fire: 999, Private ambulance: 132",
+      pharmacy_24h: "Phoenix (Quatre Bornes), Pharmacy Curé (Port Louis)",
+      public_healthcare: "Free treatment at government hospitals/health centres"
+    },
+    
+    progressive_follow_up: {
+      when_to_return: "Return if symptoms worsen or no improvement in 48-72h",
+      what_to_monitor: "Temperature, pain level, appetite, general wellbeing",
+      red_flags_mauritius: "High fever >39°C, difficulty breathing, severe pain, confusion"
+    },
+    
+    climate_specific: {},
+    seasonal_advice: {},
+    cultural_guidance: {}
+  }
+  
+  // Conseils climatiques avec approche progressive
+  if (symptoms.includes('respiratory') || symptoms.includes('cough')) {
+    analysis.mauritius_patient_advice.climate_specific = {
+      humidity: "High humidity can worsen respiratory symptoms - use dehumidifier mode on AC",
+      air_conditioning: "Avoid direct cold air, set to 24-26°C for comfort",
+      seasonal: "Symptoms may be worse during rainy season (Dec-May)",
+      progressive_management: "Start with simple measures - humidity control, then medication if needed"
+    }
+  }
+  
+  // Conseils saisonniers avec approche progressive
+  const currentMonth = new Date().getMonth() + 1
+  if (currentMonth >= 11 || currentMonth <= 5) { // Cyclone season
+    analysis.mauritius_patient_advice.seasonal_advice = {
+      cyclone_season: "Currently cyclone season - stock medications for 7 days",
+      dengue_risk: "Increased dengue/chikungunya risk - eliminate standing water, use repellent",
+      heat_precautions: "Avoid midday sun (11am-3pm), increase fluid intake",
+      progressive_precautions: "Monitor temperature daily during fever season"
+    }
+  }
+  
+  return analysis
+}
 // ==================== MAIN POST FUNCTION ====================
 export async function POST(request: NextRequest) {
   console.log('🚀 MAURITIUS MEDICAL AI - VERSION 4.3 LOGIQUE COMPLÈTE + DCI PRÉCIS')
