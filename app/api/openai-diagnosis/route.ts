@@ -2633,9 +2633,56 @@ export async function POST(request: NextRequest) {
     console.log(`   - Médicaments actuels : ${patientContext.current_medications.length}`)
     console.log(`   - ID anonyme : ${patientContext.anonymousId}`)
     console.log(`   - Symptômes nécessitant validation :`)
-    console.log(`     • Fièvre : ${hasFeverSymptoms(patientContext.symptoms || [], patientContext.chief_complaint || '', patientContext.vital_signs || {})}`)
-    console.log(`     • Douleur : ${hasPainSymptoms(patientContext.symptoms || [], patientContext.chief_complaint || '')}`)
-    console.log(`     • Signes d'infection : ${hasInfectionSymptoms(patientContext.symptoms || [], patientContext.chief_complaint || '')}`)
+    
+    // TEST DIRECT des fonctions avec debug intégré
+    let feverResult
+    let painResult  
+    let infectionResult
+    
+    try {
+      console.log('🧪 TESTING hasFeverSymptoms function...')
+      const feverSigns = ['fièvre', 'fever', 'température', 'chaud', 'brûlant', 'hyperthermie', 'pyrexia', 'febrile']
+      const safeSymptoms = Array.isArray(patientContext.symptoms) ? patientContext.symptoms : []
+      const safeChiefComplaint = typeof patientContext.chief_complaint === 'string' ? patientContext.chief_complaint : ''
+      const allText = [...safeSymptoms, safeChiefComplaint].join(' ').toLowerCase()
+      const symptomsHaveFever = feverSigns.some(sign => allText.includes(sign))
+      const tempHigh = patientContext.vital_signs?.temperature && patientContext.vital_signs.temperature > 37.5
+      feverResult = symptomsHaveFever || tempHigh
+      console.log(`🌡️ Fever analysis: symptoms="${allText}", hasKeywords=${symptomsHaveFever}, tempHigh=${tempHigh}, result=${feverResult}`)
+    } catch (error) {
+      console.error('❌ Error in fever test:', error)
+      feverResult = false
+    }
+    
+    try {
+      console.log('🧪 TESTING hasPainSymptoms function...')
+      const painSigns = ['douleur', 'pain', 'mal', 'ache', 'céphalée', 'headache', 'douloureux', 'painful']
+      const safeSymptoms = Array.isArray(patientContext.symptoms) ? patientContext.symptoms : []
+      const safeChiefComplaint = typeof patientContext.chief_complaint === 'string' ? patientContext.chief_complaint : ''
+      const allText = [...safeSymptoms, safeChiefComplaint].join(' ').toLowerCase()
+      painResult = painSigns.some(sign => allText.includes(sign))
+      console.log(`🩹 Pain analysis: symptoms="${allText}", result=${painResult}`)
+    } catch (error) {
+      console.error('❌ Error in pain test:', error)
+      painResult = false
+    }
+    
+    try {
+      console.log('🧪 TESTING hasInfectionSymptoms function...')
+      const infectionSigns = ['fièvre', 'fever', 'température', 'frissons', 'toux', 'cough']
+      const safeSymptoms = Array.isArray(patientContext.symptoms) ? patientContext.symptoms : []
+      const safeChiefComplaint = typeof patientContext.chief_complaint === 'string' ? patientContext.chief_complaint : ''
+      const allText = [...safeSymptoms, safeChiefComplaint].join(' ').toLowerCase()
+      infectionResult = infectionSigns.some(sign => allText.includes(sign))
+      console.log(`🦠 Infection analysis: symptoms="${allText}", result=${infectionResult}`)
+    } catch (error) {
+      console.error('❌ Error in infection test:', error)
+      infectionResult = false
+    }
+    
+    console.log(`     • Fièvre : ${feverResult}`)
+    console.log(`     • Douleur : ${painResult}`)
+    console.log(`     • Signes d'infection : ${infectionResult}`)
     
     const consultationAnalysis = analyzeConsultationType(
       patientContext.current_medications,
