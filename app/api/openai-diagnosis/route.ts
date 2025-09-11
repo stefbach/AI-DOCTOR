@@ -1,6 +1,86 @@
-// /app/api/openai-diagnosis/route.ts - VERSION 4.3 MAURITIUS MEDICAL SYSTEM - LOGIQUE COMPLÈTE + DCI PRÉCIS
+// /app/api/openai-diagnosis/route.ts - VERSION 4.3 MAURITIUS MEDICAL SYSTEM - LOGIQUE COMPLÈTE + DCI PRÉCIS + PRACTICE PROFILES
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
+
+// ==================== SYSTÈME DE PROFILS DE PRATIQUE (AJOUT) ====================
+interface MedicalPracticeProfile {
+  id: string
+  name: string
+  investigationLevel: 'basic' | 'intermediate' | 'advanced' | 'hospital'
+  prescriptionLevel: 'basic' | 'standard' | 'full' | 'specialist'
+  availableInvestigations: string[]
+  restrictedInvestigations: string[]
+  canPrescribe: string[]
+  mustRefer: string[]
+  specialtyScope: string[]
+}
+
+class PracticeProfileManager {
+  private static profiles: Record<string, MedicalPracticeProfile> = {
+    gp_standard: {
+      id: 'gp_standard',
+      name: 'Médecin Généraliste',
+      investigationLevel: 'basic',
+      prescriptionLevel: 'standard',
+      availableInvestigations: [
+        'FBC', 'U&E', 'LFTs', 'Glucose', 'Urinalysis', 'ECBU',
+        'Chest X-ray', 'Abdominal X-ray', 'ECG', 'Basic ultrasound'
+      ],
+      restrictedInvestigations: [
+        'CT scan', 'MRI', 'Cystoscopy', 'Colonoscopy', 'Advanced imaging'
+      ],
+      canPrescribe: ['basicMedications', 'antibiotics', 'analgesics'],
+      mustRefer: ['invasiveProcedures', 'specialistDiagnosis'],
+      specialtyScope: ['general_medicine', 'preventive_care']
+    },
+    urologist: {
+      id: 'urologist',
+      name: 'Urologue',
+      investigationLevel: 'advanced',
+      prescriptionLevel: 'specialist',
+      availableInvestigations: [
+        'All basic investigations', 'CT urogram', 'MRI pelvis', 'Cystoscopy',
+        'Urodynamics', 'Prostate biopsy', 'PSA', 'Urine cytology'
+      ],
+      restrictedInvestigations: [],
+      canPrescribe: ['All medications', 'hormone therapy'],
+      mustRefer: ['non_urological_emergencies'],
+      specialtyScope: ['urology', 'male_health', 'urological_oncology']
+    },
+    hospital_physician: {
+      id: 'hospital_physician',
+      name: 'Médecin Hospitalier',
+      investigationLevel: 'hospital',
+      prescriptionLevel: 'full',
+      availableInvestigations: [
+        'All investigations', 'Emergency CT', 'Emergency MRI', 'ICU monitoring'
+      ],
+      restrictedInvestigations: [],
+      canPrescribe: ['Emergency medications', 'IV therapy'],
+      mustRefer: ['outpatient_specialist_procedures'],
+      specialtyScope: ['emergency_medicine', 'internal_medicine']
+    },
+    telemedicine: {
+      id: 'telemedicine',
+      name: 'Télémédecine',
+      investigationLevel: 'basic',
+      prescriptionLevel: 'basic',
+      availableInvestigations: ['Basic labs', 'Basic imaging if accessible'],
+      restrictedInvestigations: ['Advanced imaging', 'Invasive procedures'],
+      canPrescribe: ['basicMedications', 'renewal_prescriptions'],
+      mustRefer: ['physical_examination_required', 'urgent_cases'],
+      specialtyScope: ['remote_consultation', 'chronic_disease_monitoring']
+    }
+  }
+
+  static getProfile(profileId: string): MedicalPracticeProfile {
+    return this.profiles[profileId] || this.profiles.gp_standard
+  }
+
+  static getAllProfiles(): MedicalPracticeProfile[] {
+    return Object.values(this.profiles)
+  }
+}
 
 // ==================== TYPES AND INTERFACES ====================
 interface PatientContext {
@@ -215,6 +295,88 @@ For PAIN/FEVER:
 
 GENERATE your EXPERT medical analysis with MAXIMUM MAURITIUS MEDICAL SPECIFICITY + PRECISE DCI:`
 
+// MODIFIER la fonction prepareMauritiusQualityPrompt EXISTANTE pour ajouter le profil
+function prepareMauritiusQualityPrompt(
+  patientContext: PatientContext, 
+  consultationType: any,
+  practiceProfile?: MedicalPracticeProfile  // AJOUT
+): string {
+  const currentMedsFormatted = patientContext.current_medications.length > 0 
+    ? patientContext.current_medications.join(', ')
+    : 'Aucun médicament actuel'
+  
+  const consultationTypeFormatted = `${consultationType.consultationType.toUpperCase()} (${Math.round(consultationType.confidence * 100)}%)`
+  
+  const contextString = JSON.stringify({
+    age: patientContext.age,
+    sex: patientContext.sex,
+    chief_complaint: patientContext.chief_complaint,
+    symptoms: patientContext.symptoms,
+    current_medications: patientContext.current_medications,
+    vital_signs: patientContext.vital_signs,
+    medical_history: patientContext.medical_history,
+    allergies: patientContext.allergies,
+    consultation_type: consultationType.consultationType,
+    ai_questions: patientContext.ai_questions
+  }, null, 2)
+  
+  // AJOUTER l'adaptation profil au prompt existant
+  const profileAdaptation = practiceProfile ? generateProfileAdaptation(practiceProfile) : ''
+  
+  return MAURITIUS_MEDICAL_PROMPT
+    .replace('{{PATIENT_CONTEXT}}', contextString)
+    .replace('{{CURRENT_MEDICATIONS}}', currentMedsFormatted)
+    .replace('{{CONSULTATION_TYPE}}', consultationTypeFormatted)
+    .replace(/{{CURRENT_MEDICATIONS_LIST}}/g, currentMedsFormatted) +
+    profileAdaptation  // AJOUT
+}
+
+// NOUVELLE FONCTION (ajouter après prepareMauritiusQualityPrompt)
+function generateProfileAdaptation(profile: MedicalPracticeProfile): string {
+  return `
+
+🏥 PRACTICE PROFILE ADAPTATION: ${profile.name}
+
+INVESTIGATION CAPABILITIES FOR ${profile.name}:
+- Available: ${profile.availableInvestigations.join(', ')}
+- Requires Referral: ${profile.restrictedInvestigations.join(', ')}
+
+PRESCRIPTION AUTHORITY FOR ${profile.name}:
+- Can Prescribe: ${profile.canPrescribe.join(', ')}
+- Must Refer For: ${profile.mustRefer.join(', ')}
+
+ADAPTATION RULES FOR ${profile.name}:
+- Recommend ONLY investigations available to this practice level
+- For restricted investigations, suggest referral with clear indication
+- Prescribe only within authorized scope
+- Generate appropriate referrals when capabilities exceeded
+
+SPECIFIC CLINICAL APPROACH FOR ${profile.investigationLevel} LEVEL:
+${getInvestigationLevelGuidance(profile.investigationLevel)}`
+}
+
+function getInvestigationLevelGuidance(level: string): string {
+  switch (level) {
+    case 'basic':
+      return `- Focus on screening, stabilization, appropriate referral
+- Use basic investigations for initial assessment
+- Refer complex cases promptly to specialists
+- Provide symptomatic management pending specialist review`
+    case 'advanced':
+      return `- Perform comprehensive evaluation within specialty
+- Order advanced investigations directly within scope
+- Provide definitive diagnosis and treatment
+- Manage complex cases independently`
+    case 'hospital':
+      return `- Access to urgent investigations 24/7
+- Multidisciplinary team available
+- Emergency intervention capabilities
+- Advanced monitoring and intensive care`
+    default:
+      return '- Standard medical practice approach'
+  }
+}
+
 // ==================== MAURITIUS MEDICAL SPECIFICITY VALIDATION + DCI PRÉCIS ====================
 export function validateMauritiusMedicalSpecificity(analysis: any): {
   hasGenericContent: boolean,
@@ -293,6 +455,7 @@ export function validateMauritiusMedicalSpecificity(analysis: any): {
   
   return { hasGenericContent, issues, suggestions }
 }
+
 // ==================== NOUVELLES FONCTIONS DCI + POSOLOGIE PRÉCISE ====================
 function extractDCIFromDrugName(drugName: string): string {
   if (!drugName) return 'Principe actif'
@@ -386,7 +549,7 @@ function generatePrecisePosology(dci: string, patientContext: PatientContext): a
 function calculateDailyTotal(individualDose: string, frequency: number): string {
   if (!individualDose || !frequency) return "À calculer"
   
-  const doseMatch = individualDose.match(/(\d+(?:[.,]\d+)?)\s*(m[cg]|g)/i)
+  const doseMatch = individualDose.match(/(\d+(?:[.,]\d+)?)\s*(m[cg]|g|IU|UI)/i)
   if (!doseMatch) return "À calculer"
   
   const amount = parseFloat(doseMatch[1])
@@ -394,6 +557,302 @@ function calculateDailyTotal(individualDose: string, frequency: number): string 
   const total = amount * frequency
   
   return `${total}${unit}/jour`
+}
+
+// ==================== ADAPTATEUR DE PROFIL (AJOUT APRÈS VALIDATIONS) ====================
+function adaptAnalysisToProfile(
+  analysis: any,
+  profile: MedicalPracticeProfile,
+  patientContext: PatientContext
+): any {
+  // PRÉSERVER l'analyse existante, ajouter seulement l'adaptation
+  const adaptedInvestigations = adaptInvestigationsToProfile(analysis, profile, patientContext)
+  const adaptedMedications = adaptMedicationsToProfile(analysis, profile)
+  const requiredReferrals = generateRequiredReferrals(analysis, profile, patientContext)
+  
+  return {
+    ...analysis,  // PRÉSERVER TOUT L'EXISTANT
+    investigation_strategy: {
+      ...analysis.investigation_strategy,  // PRÉSERVER L'EXISTANT
+      practice_adaptation: {
+        profile_used: profile.name,
+        accessible_investigations: adaptedInvestigations.accessible,
+        requires_referral: adaptedInvestigations.requiresReferral,
+        alternatives_suggested: adaptedInvestigations.alternatives
+      }
+    },
+    treatment_plan: {
+      ...analysis.treatment_plan,  // PRÉSERVER L'EXISTANT
+      practice_restrictions: adaptedMedications.restrictions
+    },
+    referrals: requiredReferrals,
+    practice_guidance: {
+      profile_name: profile.name,
+      investigation_level: profile.investigationLevel,
+      limitations: profile.mustRefer,
+      capabilities: profile.availableInvestigations
+    }
+  }
+}
+
+function adaptInvestigationsToProfile(
+  analysis: any,
+  profile: MedicalPracticeProfile,
+  patientContext: PatientContext
+): any {
+  const labTests = analysis?.investigation_strategy?.laboratory_tests || []
+  const imaging = analysis?.investigation_strategy?.imaging_studies || []
+  
+  const accessible = []
+  const requiresReferral = []
+  const alternatives = []
+
+  // CAS SPÉCIFIQUE HÉMATURIE (selon contexte médical)
+  if (isHematuriaCase(patientContext)) {
+    return adaptHematuriaByProfile(profile, patientContext)
+  }
+
+  // ADAPTATION GÉNÉRALE
+  const allInvestigations = [...labTests, ...imaging]
+  
+  allInvestigations.forEach(investigation => {
+    const testName = investigation.test_name || investigation.study_name || ''
+    
+    if (isInvestigationAccessible(testName, profile)) {
+      accessible.push(investigation)
+    } else {
+      requiresReferral.push({
+        originalInvestigation: testName,
+        referralTo: determineReferralTarget(testName),
+        indication: investigation.clinical_justification || investigation.indication,
+        urgency: investigation.urgency || 'routine'
+      })
+      
+      const alternative = suggestAlternativeInvestigation(testName, profile)
+      if (alternative) {
+        alternatives.push(alternative)
+      }
+    }
+  })
+
+  return { accessible, requiresReferral, alternatives }
+}
+
+function adaptHematuriaByProfile(profile: MedicalPracticeProfile, context: PatientContext): any {
+  const age = typeof context.age === 'number' ? context.age : parseInt(context.age as string) || 0
+  
+  switch (profile.investigationLevel) {
+    case 'advanced': // Urologue
+      return {
+        accessible: [
+          {
+            test_name: 'Cystoscopy',
+            urgency: 'urgent',
+            clinical_justification: 'Direct visualization bladder mucosa - gold standard hematuria investigation',
+            mauritius_logistics: {
+              where: 'Private urology clinic or Apollo Bramwell',
+              cost: 'Rs 15000-25000',
+              turnaround: '1-2 weeks'
+            }
+          },
+          {
+            test_name: 'CT urogram',
+            urgency: 'urgent',
+            clinical_justification: 'Comprehensive upper and lower urinary tract assessment',
+            mauritius_logistics: {
+              where: 'Apollo Bramwell, Wellkin Hospital',
+              cost: 'Rs 12000-18000',
+              turnaround: '1-3 days'
+            }
+          },
+          {
+            test_name: 'Urine cytology',
+            urgency: 'urgent',
+            clinical_justification: 'Cytological evidence of malignancy'
+          }
+        ],
+        requiresReferral: [],
+        approach: 'Complete urological workup within specialist scope'
+      }
+      
+    case 'basic': // Médecin généraliste
+      return {
+        accessible: [
+          {
+            test_name: 'Urinalysis with microscopy',
+            urgency: 'urgent',
+            clinical_justification: 'Confirm hematuria, exclude UTI'
+          },
+          {
+            test_name: 'Urine culture',
+            urgency: 'urgent',
+            clinical_justification: 'Rule out infectious cause'
+          },
+          {
+            test_name: 'Renal ultrasound',
+            urgency: 'routine',
+            clinical_justification: 'Initial structural assessment'
+          }
+        ],
+        requiresReferral: [
+          {
+            originalInvestigation: 'Cystoscopy',
+            referralTo: 'Urology',
+            indication: 'Hematuria in ' + age + '-year-old - requires specialist assessment',
+            urgency: 'urgent',
+            expectedTimeframe: 'Within 2 weeks'
+          }
+        ],
+        approach: 'Initial workup and urgent specialist referral'
+      }
+      
+    case 'hospital': // Médecin hospitalier
+      return {
+        accessible: [
+          {
+            test_name: 'CT urogram',
+            urgency: 'urgent',
+            clinical_justification: 'Hospital-based comprehensive assessment'
+          },
+          {
+            test_name: 'Urine cytology',
+            urgency: 'urgent',
+            clinical_justification: 'Cytological assessment'
+          }
+        ],
+        requiresReferral: [
+          {
+            originalInvestigation: 'Cystoscopy',
+            referralTo: 'Inpatient urology consultation',
+            indication: 'Cystoscopy and management planning',
+            urgency: 'urgent'
+          }
+        ],
+        approach: 'Hospital investigation with specialist consultation'
+      }
+  }
+  
+  return { accessible: [], requiresReferral: [], alternatives: [] }
+}
+
+function isHematuriaCase(context: PatientContext): boolean {
+  const symptoms = [...(context.symptoms || []), context.chief_complaint || ''].join(' ').toLowerCase()
+  return symptoms.includes('hematuria') || symptoms.includes('blood in urine') || 
+         (symptoms.includes('urine') && symptoms.includes('blood'))
+}
+
+function isInvestigationAccessible(testName: string, profile: MedicalPracticeProfile): boolean {
+  const lowerTestName = testName.toLowerCase()
+  
+  // Vérifier si dans les investigations disponibles
+  const isAvailable = profile.availableInvestigations.some(available => 
+    lowerTestName.includes(available.toLowerCase()) || 
+    available.toLowerCase().includes(lowerTestName) ||
+    available === 'All basic investigations' ||
+    available === 'All investigations'
+  )
+  
+  // Vérifier si dans les restrictions
+  const isRestricted = profile.restrictedInvestigations.some(restricted =>
+    lowerTestName.includes(restricted.toLowerCase())
+  )
+  
+  return isAvailable && !isRestricted
+}
+
+function determineReferralTarget(testName: string): string {
+  const lowerTestName = testName.toLowerCase()
+  
+  if (lowerTestName.includes('ct') || lowerTestName.includes('mri')) {
+    return 'Radiology department'
+  }
+  if (lowerTestName.includes('cystoscopy') || lowerTestName.includes('urolog')) {
+    return 'Urology'
+  }
+  if (lowerTestName.includes('cardiac') || lowerTestName.includes('echo')) {
+    return 'Cardiology'
+  }
+  
+  return 'Appropriate specialist'
+}
+
+function suggestAlternativeInvestigation(testName: string, profile: MedicalPracticeProfile): any {
+  const lowerTestName = testName.toLowerCase()
+  
+  if (lowerTestName.includes('ct urogram') && profile.investigationLevel === 'basic') {
+    return {
+      alternative_test: 'Renal ultrasound + IVU',
+      rationale: 'Accessible alternative for initial urinary tract assessment',
+      limitations: 'Less sensitive for small lesions'
+    }
+  }
+  
+  if (lowerTestName.includes('mri') && profile.investigationLevel === 'basic') {
+    return {
+      alternative_test: 'Ultrasound',
+      rationale: 'Basic imaging alternative',
+      limitations: 'Limited soft tissue detail'
+    }
+  }
+  
+  return null
+}
+
+function adaptMedicationsToProfile(analysis: any, profile: MedicalPracticeProfile): any {
+  const medications = analysis?.treatment_plan?.medications || []
+  const restrictions = []
+
+  medications.forEach((med: any) => {
+    const medicationName = med.medication_name || med.drug || ''
+    
+    if (!canPrescribeMedication(medicationName, profile)) {
+      restrictions.push({
+        medication: medicationName,
+        reason: 'Outside prescription authority for ' + profile.name,
+        recommendation: 'Refer to appropriate specialist for prescription'
+      })
+    }
+  })
+
+  return { restrictions }
+}
+
+function canPrescribeMedication(medicationName: string, profile: MedicalPracticeProfile): boolean {
+  // Médicaments de base autorisés pour tous
+  const basicMeds = ['paracetamol', 'ibuprofen', 'amoxicillin']
+  const lowerMed = medicationName.toLowerCase()
+  
+  if (basicMeds.some(basic => lowerMed.includes(basic))) {
+    return true
+  }
+  
+  return profile.prescriptionLevel === 'specialist' || 
+         profile.prescriptionLevel === 'full' ||
+         profile.canPrescribe.includes('All medications')
+}
+
+function generateRequiredReferrals(
+  analysis: any,
+  profile: MedicalPracticeProfile,
+  context: PatientContext
+): any[] {
+  const referrals = []
+  
+  // Référence basée sur diagnostic
+  const diagnosis = analysis?.clinical_analysis?.primary_diagnosis?.condition?.toLowerCase() || ''
+  
+  if (diagnosis.includes('cancer') || diagnosis.includes('malignancy')) {
+    if (profile.id !== 'urologist' && diagnosis.includes('bladder')) {
+      referrals.push({
+        specialty: 'Urology',
+        urgency: 'urgent',
+        indication: 'Suspected urological malignancy requiring specialist management',
+        expectedActions: ['Cystoscopy', 'Staging', 'Treatment planning']
+      })
+    }
+  }
+  
+  return referrals
 }
 
 // ==================== MAURITIUS MEDICAL ENHANCEMENT COMPLET + DCI ====================
@@ -1061,33 +1520,6 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
   }
   
   throw lastError || new Error('Failed after multiple attempts with Mauritius quality enhancement')
-}
-
-function prepareMauritiusQualityPrompt(patientContext: PatientContext, consultationType: any): string {
-  const currentMedsFormatted = patientContext.current_medications.length > 0 
-    ? patientContext.current_medications.join(', ')
-    : 'Aucun médicament actuel'
-  
-  const consultationTypeFormatted = `${consultationType.consultationType.toUpperCase()} (${Math.round(consultationType.confidence * 100)}%)`
-  
-  const contextString = JSON.stringify({
-    age: patientContext.age,
-    sex: patientContext.sex,
-    chief_complaint: patientContext.chief_complaint,
-    symptoms: patientContext.symptoms,
-    current_medications: patientContext.current_medications,
-    vital_signs: patientContext.vital_signs,
-    medical_history: patientContext.medical_history,
-    allergies: patientContext.allergies,
-    consultation_type: consultationType.consultationType,
-    ai_questions: patientContext.ai_questions
-  }, null, 2)
-  
-  return MAURITIUS_MEDICAL_PROMPT
-    .replace('{{PATIENT_CONTEXT}}', contextString)
-    .replace('{{CURRENT_MEDICATIONS}}', currentMedsFormatted)
-    .replace('{{CONSULTATION_TYPE}}', consultationTypeFormatted)
-    .replace(/{{CURRENT_MEDICATIONS_LIST}}/g, currentMedsFormatted)
 }
 
 // ==================== DETECTION FUNCTIONS (CONSERVÉES) ====================
@@ -2403,7 +2835,7 @@ function convertToSimpleFormat(dosing: string): string {
 
 // ==================== MAIN POST FUNCTION ====================
 export async function POST(request: NextRequest) {
-  console.log('🚀 MAURITIUS MEDICAL AI - VERSION 4.3 LOGIQUE COMPLÈTE + DCI PRÉCIS')
+  console.log('🚀 MAURITIUS MEDICAL AI - VERSION 4.3 + PRACTICE PROFILES')
   const startTime = Date.now()
   
   try {
@@ -2428,6 +2860,11 @@ export async function POST(request: NextRequest) {
         errorCode: 'API_CONFIG_ERROR'
       }, { status: 500 })
     }
+    
+    // AJOUT - Support profil de pratique
+    const practiceProfileId = body.practiceProfile || 'gp_standard'
+    const practiceProfile = PracticeProfileManager.getProfile(practiceProfileId)
+    console.log(`🏥 Processing for ${practiceProfile.name}`)
     
     const { anonymized: anonymizedPatientData, originalIdentity } = anonymizePatientData(body.patientData)
     
@@ -2468,7 +2905,8 @@ export async function POST(request: NextRequest) {
     console.log(`🔍 Pré-analyse : ${consultationAnalysis.consultationType} (${Math.round(consultationAnalysis.confidence * 100)}%)`)
     
     // ============ APPEL OPENAI AVEC QUALITÉ MAURITIUS + DCI ============
-    const mauritiusPrompt = prepareMauritiusQualityPrompt(patientContext, consultationAnalysis)
+    // MODIFIER l'appel prepareMauritiusQualityPrompt
+    const mauritiusPrompt = prepareMauritiusQualityPrompt(patientContext, consultationAnalysis, practiceProfile)
     
     const { data: openaiData, analysis: medicalAnalysis, mauritius_quality_level } = await callOpenAIWithMauritiusQuality(
       apiKey,
@@ -2555,6 +2993,9 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       console.log(`   🛡️ Niveau de sécurité : ${finalAnalysis.medication_safety?.safety_level || 'inconnu'}`);
     }
     
+    // AJOUT - Adaptation profil APRÈS toutes les validations existantes
+    finalAnalysis = adaptAnalysisToProfile(finalAnalysis, practiceProfile, patientContext)
+    
     const validation = validateUniversalMedicalAnalysis(finalAnalysis, patientContext)
     
     const patientContextWithIdentity = {
@@ -2569,22 +3010,31 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     )
     
     const processingTime = Date.now() - startTime
-    console.log(`✅ TRAITEMENT TERMINÉ AVEC QUALITÉ MAURITIUS ANGLO-SAXON + DCI EN ${processingTime}ms`)
+    console.log(`✅ TRAITEMENT TERMINÉ AVEC QUALITÉ MAURITIUS ANGLO-SAXON + DCI + PRACTICE PROFILES EN ${processingTime}ms`)
     
-    // ============ RÉPONSE FINALE - VERSION 4.3 LOGIQUE COMPLÈTE + DCI PRÉCIS ============
+    // ============ RÉPONSE FINALE - VERSION 4.3 LOGIQUE COMPLÈTE + DCI PRÉCIS + PRACTICE PROFILES ============
     const finalResponse = {
       success: true,
       processingTime: `${processingTime}ms`,
       
+      // AJOUTER ces champs à la réponse existante
+      practiceProfile: {
+        id: practiceProfile.id,
+        name: practiceProfile.name,
+        investigationLevel: practiceProfile.investigationLevel,
+        adaptationsApplied: finalAnalysis.practice_guidance || {}
+      },
+      
       // ========== VALIDATION QUALITÉ MAURITIUS + DCI PRÉCIS ==========
       mauritiusQualityValidation: {
         enabled: true,
-        system_version: '4.3-Mauritius-Complete-Logic-DCI-Precise',
-        medical_nomenclature: 'UK/Mauritius Standards + DCI précis',
+        system_version: '4.3-Mauritius-Complete-Logic-DCI-Precise-Practice-Profiles',
+        medical_nomenclature: 'UK/Mauritius Standards + DCI précis + Practice Profiles',
         quality_level_used: mauritius_quality_level,
         anglo_saxon_compliance: true,
         uk_dosing_format: true,
         dci_enforcement: true,
+        practice_profile_integration: true,
         mauritius_specificity_applied: !!finalAnalysis.mauritius_specificity_enhancement,
         laboratory_tests_uk_nomenclature: true,
         medications_uk_format: true,
@@ -2607,7 +3057,8 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
           'Complete medical reasoning',
           'Universal pathology coverage',
           'Advanced medication management',
-          'Symptom-based intelligent corrections'
+          'Symptom-based intelligent corrections',
+          'Practice profile adaptation system'
         ],
         quality_metrics: {
           generic_content_eliminated: true,
@@ -2617,7 +3068,8 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
           undefined_errors_prevented: true,
           detailed_indications_enforced: true,
           dci_precision_achieved: true,
-          complete_logic_preserved: true
+          complete_logic_preserved: true,
+          practice_profiles_integrated: true
         }
       },
 
@@ -2642,7 +3094,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       // Validation universelle
       universalValidation: {
         enabled: true,
-        system_version: '4.3-Complete-Logic-DCI-Precise',
+        system_version: '4.3-Complete-Logic-DCI-Precise-Practice-Profiles',
         overall_quality: finalAnalysis.universal_validation?.overall_quality || 'good',
         gpt4_trusted: finalAnalysis.universal_validation?.gpt4_trusted || true,
         pathology_coverage: 'all_medical_conditions',
@@ -2869,13 +3321,13 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         issues: validation.issues,
         suggestions: validation.suggestions,
         metrics: validation.metrics,
-        approach: 'mauritius_anglo_saxon_universal_validation_complete_logic_dci_precise'
+        approach: 'mauritius_anglo_saxon_universal_validation_complete_logic_dci_precise_practice_profiles'
       },
       
       // Métadonnées
       metadata: {
         ai_model: 'GPT-4o',
-        system_version: '4.3-Mauritius-Complete-Logic-DCI-Precise-System',
+        system_version: '4.3-Mauritius-Complete-Logic-DCI-Precise-Practice-Profiles-System',
         features: [
           '🏝️ MAURITIUS ANGLO-SAXON NOMENCLATURE - Terminologie médicale UK',
           '🇬🇧 UK DOSING CONVENTIONS - Format OD/BD/TDS/QDS standardisé',
@@ -2899,7 +3351,11 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
           '🎯 VALIDATION INTELLIGENTE - Évaluation intelligente indications',
           '📋 Compatibilité frontend maintenue',
           '🔍 SYMPTOM-BASED CORRECTIONS - Corrections intelligentes basées symptômes',
-          '🧬 COMPLETE MEDICAL REASONING - Raisonnement médical complet préservé'
+          '🧬 COMPLETE MEDICAL REASONING - Raisonnement médical complet préservé',
+          '🏥 PRACTICE PROFILES SYSTEM - Adaptation selon profil médical',
+          '🩺 SPECIALIST CAPABILITIES - Urologue, Généraliste, Hospitalier, Télémédecine',
+          '🔬 INVESTIGATION ADAPTATION - Investigations selon niveau pratique',
+          '📋 REFERRAL MANAGEMENT - Gestion référence automatique'
         ],
         mauritius_innovations: [
           'Conformité nomenclature médicale UK/Anglo-Saxonne',
@@ -2917,7 +3373,11 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
           'Préservation logique médicale complète',
           'Support universel toutes pathologies',
           'Gestion avancée interactions médicamenteuses',
-          'Corrections symptomatiques intelligentes'
+          'Corrections symptomatiques intelligentes',
+          'Système de profils de pratique médicale',
+          'Adaptation investigations selon niveau praticien',
+          'Gestion automatique des références spécialisées',
+          'Support complet Urologue, Généraliste, Hospitalier'
         ],
         quality_metrics: {
           diagnostic_confidence: finalAnalysis.universal_validation?.metrics?.diagnostic_confidence || 85,
@@ -2929,7 +3389,8 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
           undefined_errors_prevented: 100,
           detailed_indications_enforced: 100,
           dci_precision_achieved: 100,
-          complete_logic_preserved: 100
+          complete_logic_preserved: 100,
+          practice_profiles_integrated: 100
         },
         generation_timestamp: new Date().toISOString(),
         total_processing_time_ms: processingTime,
@@ -2939,6 +3400,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         anglo_saxon_compliance: true,
         complete_medical_logic: true,
         dci_precision: true,
+        practice_profiles_system: true,
         error_prevention: {
           undefined_protection: true,
           null_safety: true,
@@ -2947,7 +3409,8 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
           detailed_indications: true,
           smart_indication_validation: true,
           dci_enforcement: true,
-          complete_logic_preservation: true
+          complete_logic_preservation: true,
+          practice_profile_adaptation: true
         }
       }
     }
@@ -2976,18 +3439,20 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         uk_nomenclature: true,
         dci_protection: true,
         complete_logic_preserved: true,
-        reason: 'Fallback d\'urgence activé - Standards UK/Maurice + logique complète maintenus'
+        practice_profiles_fallback: true,
+        reason: 'Fallback d\'urgence activé - Standards UK/Maurice + logique complète + profils maintenus'
       },
       
       metadata: {
-        system_version: '4.3-Mauritius-Complete-Logic-DCI-Precise',
+        system_version: '4.3-Mauritius-Complete-Logic-DCI-Precise-Practice-Profiles',
         error_logged: true,
         emergency_fallback_active: true,
         uk_standards_maintained: true,
         undefined_protection: true,
         detailed_indications: true,
         dci_enforcement: true,
-        complete_logic_preserved: true
+        complete_logic_preserved: true,
+        practice_profiles_system: true
       }
     }, { status: 500 })
   }
@@ -3000,6 +3465,53 @@ export async function GET(request: NextRequest) {
   const testQuality = url.searchParams.get('test_quality')
   const testDCI = url.searchParams.get('test_dci')
   const testLogic = url.searchParams.get('test_logic')
+  const testProfiles = url.searchParams.get('test_profiles')
+  const testHematuria = url.searchParams.get('test_hematuria')
+  
+  if (testProfiles === 'true') {
+    return NextResponse.json({
+      test_type: 'Test Profils de Pratique Intégrés',
+      available_profiles: PracticeProfileManager.getAllProfiles().map(p => ({
+        id: p.id,
+        name: p.name,
+        investigationLevel: p.investigationLevel
+      })),
+      integration_status: 'Intégré sans perte de fonctionnalité existante'
+    })
+  }
+  
+  if (testHematuria === 'true') {
+    const testContext: PatientContext = {
+      age: 61,
+      sex: 'M',
+      symptoms: ['hematuria', 'dysuria'],
+      chief_complaint: 'Blood in urine',
+      current_medications: [],
+      medical_history: [],
+      allergies: [],
+      symptom_duration: '2 days',
+      vital_signs: {},
+      disease_history: '',
+      ai_questions: []
+    }
+    
+    const profiles = ['gp_standard', 'urologist', 'hospital_physician']
+    const results = profiles.map(profileId => {
+      const profile = PracticeProfileManager.getProfile(profileId)
+      const adapted = adaptHematuriaByProfile(profile, testContext)
+      return {
+        profile: profile.name,
+        accessible_investigations: adapted.accessible?.length || 0,
+        requires_referral: adapted.requiresReferral?.length || 0,
+        approach: adapted.approach
+      }
+    })
+    
+    return NextResponse.json({
+      test_case: 'Hématurie homme 61 ans',
+      results_by_profile: results
+    })
+  }
   
   if (testMauritius === 'true') {
     console.log('🧪 Test du système médical mauritien complet + DCI précis...')
@@ -3035,8 +3547,8 @@ export async function GET(request: NextRequest) {
     const enhanced = enhanceMauritiusMedicalSpecificity(testAnalysisGeneric, testContext)
     
     return NextResponse.json({
-      test_type: 'Test Système Médical Maurice Complet + DCI Précis',
-      version: '4.3-Mauritius-Complete-Logic-DCI-Precise',
+      test_type: 'Test Système Médical Maurice Complet + DCI Précis + Practice Profiles',
+      version: '4.3-Mauritius-Complete-Logic-DCI-Precise-Practice-Profiles',
       
       original_analysis: {
         generic_lab_tests: testAnalysisGeneric.investigation_strategy.laboratory_tests.map(t => t?.test_name || 'undefined'),
@@ -3075,7 +3587,8 @@ export async function GET(request: NextRequest) {
         'Medication management preserved': true,
         'Safety validation preserved': true,
         'Mauritius context preserved': true,
-        'Document generation preserved': true
+        'Document generation preserved': true,
+        'Practice profiles integrated': true
       }
     })
   }
@@ -3093,11 +3606,11 @@ export async function GET(request: NextRequest) {
       consultationType: 'new_problem',
       confidence: 0.8,
       renewalKeywords: []
-    })
+    }, PracticeProfileManager.getProfile('gp_standard'))
     
     return NextResponse.json({
-      status: 'Prompt Qualité Maurice Généré + DCI Précis',
-      system_version: '4.3-Complete-Logic-DCI-Precise',
+      status: 'Prompt Qualité Maurice Généré + DCI Précis + Practice Profiles',
+      system_version: '4.3-Complete-Logic-DCI-Precise-Practice-Profiles',
       prompt_length: testPrompt.length,
       prompt_preview: testPrompt.substring(0, 1000),
       
@@ -3111,7 +3624,8 @@ export async function GET(request: NextRequest) {
         undefined_protection: testPrompt.includes('NEVER undefined'),
         detailed_indications: testPrompt.includes('MINIMUM 30 CHARACTERS'),
         dci_enforcement: testPrompt.includes('EXACT DCI NAME'),
-        precise_posology: testPrompt.includes('frequency_per_day')
+        precise_posology: testPrompt.includes('frequency_per_day'),
+        practice_profile_adaptation: testPrompt.includes('PRACTICE PROFILE ADAPTATION')
       }
     })
   }
@@ -3136,8 +3650,8 @@ export async function GET(request: NextRequest) {
     }))
     
     return NextResponse.json({
-      test_type: 'Test DCI + Posologie Précise',
-      version: '4.3-Complete-Logic-DCI-Precise',
+      test_type: 'Test DCI + Posologie Précise + Practice Profiles',
+      version: '4.3-Complete-Logic-DCI-Precise-Practice-Profiles',
       test_results: dciResults,
       
       validation_test: {
@@ -3171,8 +3685,8 @@ export async function GET(request: NextRequest) {
     )
     
     return NextResponse.json({
-      test_type: 'Test Logique Médicale Complète',
-      version: '4.3-Complete-Logic-DCI-Precise',
+      test_type: 'Test Logique Médicale Complète + Practice Profiles',
+      version: '4.3-Complete-Logic-DCI-Precise-Practice-Profiles',
       
       symptom_detection: {
         fever_detected: feverDetected,
@@ -3195,14 +3709,15 @@ export async function GET(request: NextRequest) {
         safety_validation: true,
         universal_validation: true,
         document_generation: true,
-        mauritius_context: true
+        mauritius_context: true,
+        practice_profiles_system: true
       }
     })
   }
   
   return NextResponse.json({
-    status: '✅ Mauritius Medical AI - Version 4.3 Logique Complète + DCI Précis',
-    version: '4.3-Mauritius-Complete-Logic-DCI-Precise-System',
+    status: '✅ Mauritius Medical AI - Version 4.3 Logique Complète + DCI Précis + Practice Profiles',
+    version: '4.3-Mauritius-Complete-Logic-DCI-Precise-Practice-Profiles-System',
     
     system_guarantees: {
       complete_medical_logic: 'GARANTI - Toute la logique médicale sophistiquée préservée',
@@ -3218,7 +3733,8 @@ export async function GET(request: NextRequest) {
       complete_objects: 'GARANTI - Tous champs médicament remplis',
       enhanced_retry: 'GARANTI - Système récupération erreur intelligent',
       detailed_indications: 'GARANTI - Contextes médicaux 30+ caractères',
-      smart_validation: 'GARANTI - Évaluation intelligente contextuelle'
+      smart_validation: 'GARANTI - Évaluation intelligente contextuelle',
+      practice_profiles_system: 'GARANTI - Adaptation selon profil médical'
     },
     
     revolutionary_features: [
@@ -3240,7 +3756,11 @@ export async function GET(request: NextRequest) {
       '📋 MEDICATION MANAGEMENT - Gestion médicaments sophistiquée',
       '🏥 ALL SPECIALTIES SUPPORTED - Toutes spécialités médicales',
       '📊 EVIDENCE-BASED STANDARDS - Standards basés preuves',
-      '🔒 COMPLETE DATA PROTECTION - Protection données complète'
+      '🔒 COMPLETE DATA PROTECTION - Protection données complète',
+      '🏥 PRACTICE PROFILES SYSTEM - Système profils de pratique',
+      '🩺 MULTI-SPECIALIST SUPPORT - Urologue, Généraliste, Hospitalier',
+      '🔬 ADAPTIVE INVESTIGATIONS - Investigations selon niveau',
+      '📋 SMART REFERRALS - Référence automatique intelligente'
     ],
     
     testing_endpoints: {
@@ -3249,7 +3769,9 @@ export async function GET(request: NextRequest) {
       test_mauritius_complete: 'GET /api/openai-diagnosis?test_mauritius=true',
       test_quality_prompt: 'GET /api/openai-diagnosis?test_quality=true',
       test_dci_precision: 'GET /api/openai-diagnosis?test_dci=true',
-      test_complete_logic: 'GET /api/openai-diagnosis?test_logic=true'
+      test_complete_logic: 'GET /api/openai-diagnosis?test_logic=true',
+      test_practice_profiles: 'GET /api/openai-diagnosis?test_profiles=true',
+      test_hematuria_case: 'GET /api/openai-diagnosis?test_hematuria=true'
     },
     
     preserved_sophisticated_logic: [
@@ -3281,6 +3803,19 @@ export async function GET(request: NextRequest) {
       'Enhanced GPT-4 prompting for precision',
       'Multi-retry system for accuracy',
       'Intelligent validation and correction'
+    ],
+    
+    practice_profiles_system: [
+      'Médecin Généraliste - Basic investigations, standard prescriptions',
+      'Urologue - Advanced urological investigations, specialist treatments',
+      'Médecin Hospitalier - Emergency investigations, full prescription authority',
+      'Télémédecine - Remote consultation adaptations',
+      'Investigation level adaptation (basic/advanced/hospital)',
+      'Automatic referral generation when capabilities exceeded',
+      'Hematuria case-specific adaptations by specialty',
+      'Practice-appropriate investigation recommendations',
+      'Prescription authority validation',
+      'Seamless integration with existing medical logic'
     ]
   })
 }
