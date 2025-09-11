@@ -163,14 +163,10 @@ const DebouncedTextarea = memo(({
   onLocalChange?: () => void
 }) => {
   const [localValue, setLocalValue] = useState(value)
-  const isFirstRender = useRef(true)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // Only update local value if parent value changed externally
+  // Update local value when parent value changes
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false
-      return
-    }
     setLocalValue(value)
   }, [value])
 
@@ -184,12 +180,13 @@ const DebouncedTextarea = memo(({
 
   return (
     <Textarea
+      ref={textareaRef}
       value={localValue}
       onChange={handleChange}
       className={className}
       placeholder={placeholder}
       data-section={sectionKey}
-      data-pending-value={localValue}
+      autoFocus={false}
     />
   )
 })
@@ -671,87 +668,87 @@ export default function ProfessionalReportEditable({
   const getReportRapport = () => report?.compteRendu?.rapport || createEmptyReport().compteRendu.rapport
   const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
 
-  // ==================== MANUAL SAVE FUNCTION ====================
-  const handleManualSave = useCallback(() => {
-    if (!hasUnsavedChanges) return
-    
-    setSaveStatus('saving')
-    
-    // Save all textarea sections
-    const textareas = document.querySelectorAll('textarea[data-section][data-pending-value]')
-    textareas.forEach((textarea: any) => {
-      const section = textarea.getAttribute('data-section')
-      const value = textarea.getAttribute('data-pending-value')
-      if (section && value) {
-        updateRapportSection(section, value)
-      }
-    })
-    
-    // Save all medications
-    const medicationElements = document.querySelectorAll('[data-medication-index][data-pending-medication]')
-    medicationElements.forEach((element: any) => {
-      const index = parseInt(element.getAttribute('data-medication-index'))
-      const pendingData = element.getAttribute('data-pending-medication')
-      if (pendingData) {
-        try {
-          const medicationData = JSON.parse(pendingData)
-          const updatedMed = {
-            ...medicationData,
-            ligneComplete: `${medicationData.nom} ${medicationData.dosage ? `- ${medicationData.dosage}` : ''}\n` +
-                          `${medicationData.posologie} - ${medicationData.modeAdministration}\n` +
-                          `Duration: ${medicationData.dureeTraitement} - Quantity: ${medicationData.quantite}`
-          }
-          updateMedicamentBatch(index, updatedMed)
-        } catch (e) {
-          console.error('Error parsing medication data:', e)
+// ==================== MANUAL SAVE FUNCTION ====================
+const handleManualSave = useCallback(() => {
+  if (!hasUnsavedChanges) return
+  
+  setSaveStatus('saving')
+  
+  // Save all textarea sections by getting their current values directly
+  const textareas = document.querySelectorAll('textarea[data-section]')
+  textareas.forEach((textarea: HTMLTextAreaElement) => {
+    const section = textarea.getAttribute('data-section')
+    const value = textarea.value // Get the actual current value from the textarea
+    if (section && value !== undefined) {
+      updateRapportSection(section, value)
+    }
+  })
+  
+  // Save all medications
+  const medicationElements = document.querySelectorAll('[data-medication-index][data-pending-medication]')
+  medicationElements.forEach((element: any) => {
+    const index = parseInt(element.getAttribute('data-medication-index'))
+    const pendingData = element.getAttribute('data-pending-medication')
+    if (pendingData) {
+      try {
+        const medicationData = JSON.parse(pendingData)
+        const updatedMed = {
+          ...medicationData,
+          ligneComplete: `${medicationData.nom} ${medicationData.dosage ? `- ${medicationData.dosage}` : ''}\n` +
+                        `${medicationData.posologie} - ${medicationData.modeAdministration}\n` +
+                        `Duration: ${medicationData.dureeTraitement} - Quantity: ${medicationData.quantite}`
         }
+        updateMedicamentBatch(index, updatedMed)
+      } catch (e) {
+        console.error('Error parsing medication data:', e)
       }
-    })
-    
-    // Save all biology tests
-    const biologyElements = document.querySelectorAll('[data-biology-test][data-pending-test]')
-    biologyElements.forEach((element: any) => {
-      const testId = element.getAttribute('data-biology-test')
-      const [category, index] = testId.split('-')
-      const pendingData = element.getAttribute('data-pending-test')
-      if (pendingData) {
-        try {
-          const testData = JSON.parse(pendingData)
-          updateBiologyTestBatch(category, parseInt(index), testData)
-        } catch (e) {
-          console.error('Error parsing biology test data:', e)
-        }
+    }
+  })
+  
+  // Save all biology tests
+  const biologyElements = document.querySelectorAll('[data-biology-test][data-pending-test]')
+  biologyElements.forEach((element: any) => {
+    const testId = element.getAttribute('data-biology-test')
+    const [category, index] = testId.split('-')
+    const pendingData = element.getAttribute('data-pending-test')
+    if (pendingData) {
+      try {
+        const testData = JSON.parse(pendingData)
+        updateBiologyTestBatch(category, parseInt(index), testData)
+      } catch (e) {
+        console.error('Error parsing biology test data:', e)
       }
-    })
-    
-    // Save all imaging exams
-    const imagingElements = document.querySelectorAll('[data-imaging-exam][data-pending-exam]')
-    imagingElements.forEach((element: any) => {
-      const index = parseInt(element.getAttribute('data-imaging-exam'))
-      const pendingData = element.getAttribute('data-pending-exam')
-      if (pendingData) {
-        try {
-          const examData = JSON.parse(pendingData)
-          updateImagingExamBatch(index, examData)
-        } catch (e) {
-          console.error('Error parsing imaging exam data:', e)
-        }
+    }
+  })
+  
+  // Save all imaging exams
+  const imagingElements = document.querySelectorAll('[data-imaging-exam][data-pending-exam]')
+  imagingElements.forEach((element: any) => {
+    const index = parseInt(element.getAttribute('data-imaging-exam'))
+    const pendingData = element.getAttribute('data-pending-exam')
+    if (pendingData) {
+      try {
+        const examData = JSON.parse(pendingData)
+        updateImagingExamBatch(index, examData)
+      } catch (e) {
+        console.error('Error parsing imaging exam data:', e)
       }
-    })
-    
-    setHasUnsavedChanges(false)
-    setSaveStatus('saved')
-    
-    setTimeout(() => {
-      setSaveStatus('idle')
-    }, 3000)
-    
-    toast({
-      title: "✅ Changes Saved",
-      description: "All your changes have been saved successfully",
-      duration: 3000
-    })
-  }, [hasUnsavedChanges])
+    }
+  })
+  
+  setHasUnsavedChanges(false)
+  setSaveStatus('saved')
+  
+  setTimeout(() => {
+    setSaveStatus('idle')
+  }, 3000)
+  
+  toast({
+    title: "✅ Changes Saved",
+    description: "All your changes have been saved successfully",
+    duration: 3000
+  })
+}, [hasUnsavedChanges, updateRapportSection, updateMedicamentBatch, updateBiologyTestBatch, updateImagingExamBatch])
 
   // ==================== KEYBOARD SHORTCUT FOR SAVE ====================
   useEffect(() => {
