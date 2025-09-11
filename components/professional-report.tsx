@@ -145,9 +145,9 @@ const createEmptyReport = (): MauritianReport => ({
   }
 })
 
-// ==================== DEBOUNCED COMPONENTS (OPTIMISÉS) ====================
+// ==================== FIXED DEBOUNCED COMPONENTS ====================
 
-// 1. Debounced Textarea avec délai réduit à 3 secondes
+// 1. Fixed DebouncedTextarea with proper state management
 const DebouncedTextarea = memo(({
   value,
   onUpdate,
@@ -161,9 +161,20 @@ const DebouncedTextarea = memo(({
 }) => {
   const [localValue, setLocalValue] = useState(value)
   const updateTimeoutRef = useRef<NodeJS.Timeout>()
+  const isFirstRender = useRef(true)
+  const lastSavedValue = useRef(value)
 
+  // Only update local value if parent value changed externally
   useEffect(() => {
-    setLocalValue(value)
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    // Only update if the value is different from both local and last saved
+    if (value !== lastSavedValue.current && value !== localValue) {
+      setLocalValue(value)
+      lastSavedValue.current = value
+    }
   }, [value])
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -174,11 +185,23 @@ const DebouncedTextarea = memo(({
       clearTimeout(updateTimeoutRef.current)
     }
 
-    // 🔧 AMÉLIORÉ: Délai réduit à 3 secondes au lieu de 60 secondes
+    // Reduced delay to 2 seconds for better UX
     updateTimeoutRef.current = setTimeout(() => {
       onUpdate(newValue)
-    }, 3000)
+      lastSavedValue.current = newValue
+    }, 2000)
   }, [onUpdate])
+
+  // Save immediately on blur
+  const handleBlur = useCallback(() => {
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current)
+    }
+    if (localValue !== lastSavedValue.current) {
+      onUpdate(localValue)
+      lastSavedValue.current = localValue
+    }
+  }, [localValue, onUpdate])
 
   useEffect(() => {
     return () => {
@@ -192,13 +215,13 @@ const DebouncedTextarea = memo(({
     <Textarea
       value={localValue}
       onChange={handleChange}
+      onBlur={handleBlur}
       className={className}
       placeholder={placeholder}
     />
   )
 })
-
-// 2. Medication Input Component avec délai optimisé
+// 2. Fixed Medication Input Component with proper state management
 const MedicationEditForm = memo(({
   medication,
   index,
@@ -225,13 +248,34 @@ const MedicationEditForm = memo(({
     nonSubstituable: medication.nonSubstituable || false
   })
   const updateTimeoutRef = useRef<NodeJS.Timeout>()
+  const lastSavedData = useRef(localMed)
 
   const handleFieldChange = useCallback((field: string, value: any) => {
     setLocalMed(prev => ({ ...prev, [field]: value }))
   }, [])
 
-  // 🔧 AMÉLIORÉ: Délai réduit à 3 secondes
+  // Immediate save on blur
+  const handleBlur = useCallback(() => {
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current)
+    }
+    
+    const updatedMed = {
+      ...localMed,
+      ligneComplete: `${localMed.nom} ${localMed.dosage ? `- ${localMed.dosage}` : ''}\n` +
+                    `${localMed.posologie} - ${localMed.modeAdministration}\n` +
+                    `Duration: ${localMed.dureeTraitement} - Quantity: ${localMed.quantite}`
+    }
+    onUpdate(index, updatedMed)
+    lastSavedData.current = localMed
+  }, [localMed, index, onUpdate])
+
+  // Auto-save with reduced delay
   useEffect(() => {
+    if (JSON.stringify(localMed) === JSON.stringify(lastSavedData.current)) {
+      return
+    }
+
     if (updateTimeoutRef.current) {
       clearTimeout(updateTimeoutRef.current)
     }
@@ -244,7 +288,8 @@ const MedicationEditForm = memo(({
                       `Duration: ${localMed.dureeTraitement} - Quantity: ${localMed.quantite}`
       }
       onUpdate(index, updatedMed)
-    }, 3000)
+      lastSavedData.current = localMed
+    }, 2000)
 
     return () => {
       if (updateTimeoutRef.current) {
@@ -262,6 +307,7 @@ const MedicationEditForm = memo(({
             id={`med-nom-${index}`}
             value={localMed.nom}
             onChange={(e) => handleFieldChange('nom', e.target.value)}
+            onBlur={handleBlur}
             placeholder="e.g., Paracetamol"
           />
         </div>
@@ -271,6 +317,7 @@ const MedicationEditForm = memo(({
             id={`med-generic-${index}`}
             value={localMed.denominationCommune}
             onChange={(e) => handleFieldChange('denominationCommune', e.target.value)}
+            onBlur={handleBlur}
             placeholder="e.g., Paracetamol"
           />
         </div>
@@ -280,6 +327,7 @@ const MedicationEditForm = memo(({
             id={`med-dosage-${index}`}
             value={localMed.dosage}
             onChange={(e) => handleFieldChange('dosage', e.target.value)}
+            onBlur={handleBlur}
             placeholder="e.g., 500mg"
           />
         </div>
@@ -287,7 +335,10 @@ const MedicationEditForm = memo(({
           <Label htmlFor={`med-form-${index}`}>Form</Label>
           <Select
             value={localMed.forme}
-            onValueChange={(value) => handleFieldChange('forme', value)}
+            onValueChange={(value) => {
+              handleFieldChange('forme', value)
+              handleBlur()
+            }}
           >
             <SelectTrigger id={`med-form-${index}`}>
               <SelectValue />
@@ -308,6 +359,7 @@ const MedicationEditForm = memo(({
             id={`med-frequency-${index}`}
             value={localMed.posologie}
             onChange={(e) => handleFieldChange('posologie', e.target.value)}
+            onBlur={handleBlur}
             placeholder="e.g., 1 tablet 3 times daily"
           />
         </div>
@@ -317,6 +369,7 @@ const MedicationEditForm = memo(({
             id={`med-duration-${index}`}
             value={localMed.dureeTraitement}
             onChange={(e) => handleFieldChange('dureeTraitement', e.target.value)}
+            onBlur={handleBlur}
             placeholder="e.g., 7 days"
           />
         </div>
@@ -326,6 +379,7 @@ const MedicationEditForm = memo(({
             id={`med-quantity-${index}`}
             value={localMed.quantite}
             onChange={(e) => handleFieldChange('quantite', e.target.value)}
+            onBlur={handleBlur}
             placeholder="e.g., 1 box"
           />
         </div>
@@ -333,7 +387,10 @@ const MedicationEditForm = memo(({
           <Label htmlFor={`med-route-${index}`}>Route of Administration</Label>
           <Select
             value={localMed.modeAdministration}
-            onValueChange={(value) => handleFieldChange('modeAdministration', value)}
+            onValueChange={(value) => {
+              handleFieldChange('modeAdministration', value)
+              handleBlur()
+            }}
           >
             <SelectTrigger id={`med-route-${index}`}>
               <SelectValue />
@@ -354,6 +411,7 @@ const MedicationEditForm = memo(({
           id={`med-instructions-${index}`}
           value={localMed.instructions}
           onChange={(e) => handleFieldChange('instructions', e.target.value)}
+          onBlur={handleBlur}
           placeholder="e.g., Take with food"
         />
       </div>
@@ -362,7 +420,10 @@ const MedicationEditForm = memo(({
           <Switch
             id={`med-nonsubstitutable-${index}`}
             checked={localMed.nonSubstituable}
-            onCheckedChange={(checked) => handleFieldChange('nonSubstituable', checked)}
+            onCheckedChange={(checked) => {
+              handleFieldChange('nonSubstituable', checked)
+              handleBlur()
+            }}
           />
           <Label htmlFor={`med-nonsubstitutable-${index}`}>Non-substitutable</Label>
         </div>
@@ -378,8 +439,7 @@ const MedicationEditForm = memo(({
     </div>
   )
 })
-
-// 3. Biology Test Input Component avec délai optimisé
+// 3. Fixed Biology Test Input Component with proper state management
 const BiologyTestEditForm = memo(({
   test,
   category,
@@ -405,20 +465,35 @@ const BiologyTestEditForm = memo(({
     delaiResultat: test.delaiResultat || 'Standard'
   })
   const updateTimeoutRef = useRef<NodeJS.Timeout>()
+  const lastSavedData = useRef(localTest)
 
   const handleFieldChange = useCallback((field: string, value: any) => {
     setLocalTest(prev => ({ ...prev, [field]: value }))
   }, [])
 
-  // 🔧 AMÉLIORÉ: Délai réduit à 3 secondes
+  // Immediate save on blur
+  const handleBlur = useCallback(() => {
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current)
+    }
+    onUpdate(category, index, localTest)
+    lastSavedData.current = localTest
+  }, [localTest, category, index, onUpdate])
+
+  // Auto-save with reduced delay
   useEffect(() => {
+    if (JSON.stringify(localTest) === JSON.stringify(lastSavedData.current)) {
+      return
+    }
+
     if (updateTimeoutRef.current) {
       clearTimeout(updateTimeoutRef.current)
     }
     
     updateTimeoutRef.current = setTimeout(() => {
       onUpdate(category, index, localTest)
-    }, 3000)
+      lastSavedData.current = localTest
+    }, 2000)
 
     return () => {
       if (updateTimeoutRef.current) {
@@ -435,6 +510,7 @@ const BiologyTestEditForm = memo(({
           <Input
             value={localTest.nom}
             onChange={(e) => handleFieldChange('nom', e.target.value)}
+            onBlur={handleBlur}
             placeholder="e.g., Complete Blood Count"
           />
         </div>
@@ -443,6 +519,7 @@ const BiologyTestEditForm = memo(({
           <Input
             value={localTest.motifClinique}
             onChange={(e) => handleFieldChange('motifClinique', e.target.value)}
+            onBlur={handleBlur}
             placeholder="e.g., Anemia evaluation"
           />
         </div>
@@ -450,7 +527,10 @@ const BiologyTestEditForm = memo(({
           <Label>Sample Type</Label>
           <Select
             value={localTest.tubePrelevement}
-            onValueChange={(value) => handleFieldChange('tubePrelevement', value)}
+            onValueChange={(value) => {
+              handleFieldChange('tubePrelevement', value)
+              handleBlur()
+            }}
           >
             <SelectTrigger>
               <SelectValue />
@@ -468,7 +548,10 @@ const BiologyTestEditForm = memo(({
           <Label>Turnaround Time</Label>
           <Select
             value={localTest.delaiResultat}
-            onValueChange={(value) => handleFieldChange('delaiResultat', value)}
+            onValueChange={(value) => {
+              handleFieldChange('delaiResultat', value)
+              handleBlur()
+            }}
           >
             <SelectTrigger>
               <SelectValue />
@@ -486,6 +569,7 @@ const BiologyTestEditForm = memo(({
         <Input
           value={localTest.conditionsPrelevement}
           onChange={(e) => handleFieldChange('conditionsPrelevement', e.target.value)}
+          onBlur={handleBlur}
           placeholder="e.g., Early morning sample required"
         />
       </div>
@@ -494,14 +578,20 @@ const BiologyTestEditForm = memo(({
           <div className="flex items-center space-x-2">
             <Switch
               checked={localTest.urgence}
-              onCheckedChange={(checked) => handleFieldChange('urgence', checked)}
+              onCheckedChange={(checked) => {
+                handleFieldChange('urgence', checked)
+                handleBlur()
+              }}
             />
             <Label>Urgent</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Switch
               checked={localTest.aJeun}
-              onCheckedChange={(checked) => handleFieldChange('aJeun', checked)}
+              onCheckedChange={(checked) => {
+                handleFieldChange('aJeun', checked)
+                handleBlur()
+              }}
             />
             <Label>Fasting required</Label>
           </div>
@@ -518,7 +608,7 @@ const BiologyTestEditForm = memo(({
   )
 })
 
-// 4. Imaging Exam Input Component avec délai optimisé
+// 4. Fixed Imaging Exam Input Component with proper state management
 const ImagingExamEditForm = memo(({
   exam,
   index,
@@ -541,20 +631,35 @@ const ImagingExamEditForm = memo(({
     questionDiagnostique: exam.questionDiagnostique || ''
   })
   const updateTimeoutRef = useRef<NodeJS.Timeout>()
+  const lastSavedData = useRef(localExam)
 
   const handleFieldChange = useCallback((field: string, value: any) => {
     setLocalExam(prev => ({ ...prev, [field]: value }))
   }, [])
 
-  // 🔧 AMÉLIORÉ: Délai réduit à 3 secondes
+  // Immediate save on blur
+  const handleBlur = useCallback(() => {
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current)
+    }
+    onUpdate(index, localExam)
+    lastSavedData.current = localExam
+  }, [localExam, index, onUpdate])
+
+  // Auto-save with reduced delay
   useEffect(() => {
+    if (JSON.stringify(localExam) === JSON.stringify(lastSavedData.current)) {
+      return
+    }
+
     if (updateTimeoutRef.current) {
       clearTimeout(updateTimeoutRef.current)
     }
     
     updateTimeoutRef.current = setTimeout(() => {
       onUpdate(index, localExam)
-    }, 3000)
+      lastSavedData.current = localExam
+    }, 2000)
 
     return () => {
       if (updateTimeoutRef.current) {
@@ -570,7 +675,10 @@ const ImagingExamEditForm = memo(({
           <Label>Imaging Type</Label>
           <Select
             value={localExam.type || localExam.modalite}
-            onValueChange={(value) => handleFieldChange('type', value)}
+            onValueChange={(value) => {
+              handleFieldChange('type', value)
+              handleBlur()
+            }}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select type" />
@@ -589,6 +697,7 @@ const ImagingExamEditForm = memo(({
           <Input
             value={localExam.region}
             onChange={(e) => handleFieldChange('region', e.target.value)}
+            onBlur={handleBlur}
             placeholder="e.g., Chest PA/Lateral"
           />
         </div>
@@ -597,6 +706,7 @@ const ImagingExamEditForm = memo(({
           <Input
             value={localExam.indicationClinique}
             onChange={(e) => handleFieldChange('indicationClinique', e.target.value)}
+            onBlur={handleBlur}
             placeholder="e.g., Rule out pneumonia"
           />
         </div>
@@ -605,6 +715,7 @@ const ImagingExamEditForm = memo(({
           <Input
             value={localExam.questionDiagnostique}
             onChange={(e) => handleFieldChange('questionDiagnostique', e.target.value)}
+            onBlur={handleBlur}
             placeholder="e.g., Consolidation? Pleural effusion?"
           />
         </div>
@@ -613,6 +724,7 @@ const ImagingExamEditForm = memo(({
           <Input
             value={localExam.protocoleSpecifique}
             onChange={(e) => handleFieldChange('protocoleSpecifique', e.target.value)}
+            onBlur={handleBlur}
             placeholder="e.g., High resolution CT"
           />
         </div>
@@ -622,14 +734,20 @@ const ImagingExamEditForm = memo(({
           <div className="flex items-center space-x-2">
             <Switch
               checked={localExam.urgence}
-              onCheckedChange={(checked) => handleFieldChange('urgence', checked)}
+              onCheckedChange={(checked) => {
+                handleFieldChange('urgence', checked)
+                handleBlur()
+              }}
             />
             <Label>Urgent</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Switch
               checked={localExam.contraste}
-              onCheckedChange={(checked) => handleFieldChange('contraste', checked)}
+              onCheckedChange={(checked) => {
+                handleFieldChange('contraste', checked)
+                handleBlur()
+              }}
             />
             <Label>Contrast required</Label>
           </div>
@@ -651,7 +769,6 @@ MedicationEditForm.displayName = 'MedicationEditForm'
 BiologyTestEditForm.displayName = 'BiologyTestEditForm'
 ImagingExamEditForm.displayName = 'ImagingExamEditForm'
 DebouncedTextarea.displayName = 'DebouncedTextarea'
-
 // ==================== MAIN COMPONENT ====================
 export default function ProfessionalReportEditable({
   patientData,
@@ -674,6 +791,9 @@ export default function ProfessionalReportEditable({
   const [saving, setSaving] = useState(false)
   const [showFullReport, setShowFullReport] = useState(false)
   const [includeFullPrescriptions, setIncludeFullPrescriptions] = useState(true)
+  
+  // 🔧 NEW: Save status indicator
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
 
   const [doctorInfo, setDoctorInfo] = useState({
     nom: "Dr. [Name Required]",
@@ -706,13 +826,16 @@ export default function ProfessionalReportEditable({
     setModifiedSections(prev => new Set(prev).add(section))
   }, [validationStatus])
 
+  // 🔧 FIXED: Updated updateRapportSection with save status
   const updateRapportSection = useCallback((section: string, value: string) => {
     if (validationStatus === 'validated') return
+    
+    setSaveStatus('saving')
     
     setReport(prev => {
       if (!prev) return null
       
-      return {
+      const newReport = {
         ...prev,
         compteRendu: {
           ...prev.compteRendu,
@@ -722,13 +845,20 @@ export default function ProfessionalReportEditable({
           }
         }
       }
+      
+      // Update save status after a short delay
+      setTimeout(() => {
+        setSaveStatus('saved')
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      }, 500)
+      
+      return newReport
     })
     trackModification(`rapport.${section}`)
   }, [validationStatus, trackModification])
+  // 🆕 AI ASSISTANT CALLBACK FUNCTIONS ====================
 
-  // 🆕 NOUVELLES FONCTIONS CALLBACK POUR L'ASSISTANT IA ====================
-
-  // Fonction de mise à jour immédiate pour l'IA (sans debounce)
+  // Immediate update function for AI (no debounce)
   const handleUpdateSectionImmediate = useCallback((section: string, content: string) => {
     console.log('🚀 AI Assistant updating section immediately:', section, 'with content length:', content.length)
     
@@ -741,7 +871,9 @@ export default function ProfessionalReportEditable({
       return
     }
     
-    // Sections du rapport médical principal
+    setSaveStatus('saving')
+    
+    // Main report sections
     const reportSections = [
       'motifConsultation', 'anamnese', 'antecedents', 'examenClinique',
       'syntheseDiagnostique', 'conclusionDiagnostique', 'priseEnCharge',
@@ -758,7 +890,7 @@ export default function ProfessionalReportEditable({
       return
     }
     
-    // Gestion des autres sections si nécessaire
+    // Handle other sections
     switch (section) {
       case 'diagnosticConclusion':
         updateRapportSection('conclusionDiagnostique', content)
@@ -779,7 +911,7 @@ export default function ProfessionalReportEditable({
     }
   }, [validationStatus, updateRapportSection])
 
-  // Fonction pour ajouter un médicament via l'IA
+  // Add medication via AI
   const handleAIAddMedication = useCallback((medicationData: any) => {
     console.log('🤖 AI Assistant adding medication:', medicationData)
     
@@ -791,6 +923,8 @@ export default function ProfessionalReportEditable({
       })
       return
     }
+
+    setSaveStatus('saving')
 
     try {
       setReport(prev => {
@@ -834,6 +968,11 @@ export default function ProfessionalReportEditable({
       
       trackModification('medicaments.ai_add')
       
+      setTimeout(() => {
+        setSaveStatus('saved')
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      }, 500)
+      
       toast({
         title: "✅ Médicament ajouté",
         description: `${medicationData.nom} ajouté à la prescription par l'IA`,
@@ -843,11 +982,12 @@ export default function ProfessionalReportEditable({
       console.log('✅ Medication added successfully via AI')
     } catch (error) {
       console.error('❌ Error adding medication via AI:', error)
+      setSaveStatus('idle')
       throw error
     }
   }, [validationStatus, getReportPraticien, getReportPatient, trackModification])
 
-  // Fonction pour ajouter un test de laboratoire via l'IA
+  // Add lab test via AI
   const handleAIAddLabTest = useCallback((category: string, testData: any) => {
     console.log('🤖 AI Assistant adding lab test:', { category, testData })
     
@@ -859,6 +999,8 @@ export default function ProfessionalReportEditable({
       })
       return
     }
+
+    setSaveStatus('saving')
 
     try {
       setReport(prev => {
@@ -909,6 +1051,11 @@ export default function ProfessionalReportEditable({
       
       trackModification(`biologie.ai_add.${category}`)
       
+      setTimeout(() => {
+        setSaveStatus('saved')
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      }, 500)
+      
       toast({
         title: "✅ Analyse ajoutée",
         description: `${testData.nom} ajouté aux analyses biologiques par l'IA`,
@@ -918,11 +1065,12 @@ export default function ProfessionalReportEditable({
       console.log('✅ Lab test added successfully via AI')
     } catch (error) {
       console.error('❌ Error adding lab test via AI:', error)
+      setSaveStatus('idle')
       throw error
     }
   }, [validationStatus, getReportPraticien, getReportPatient, trackModification])
 
-  // Fonction pour ajouter un examen d'imagerie via l'IA
+  // Add imaging exam via AI
   const handleAIAddImaging = useCallback((examData: any) => {
     console.log('🤖 AI Assistant adding imaging exam:', examData)
     
@@ -934,6 +1082,8 @@ export default function ProfessionalReportEditable({
       })
       return
     }
+
+    setSaveStatus('saving')
 
     try {
       setReport(prev => {
@@ -975,6 +1125,11 @@ export default function ProfessionalReportEditable({
       
       trackModification('imagerie.ai_add')
       
+      setTimeout(() => {
+        setSaveStatus('saved')
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      }, 500)
+      
       toast({
         title: "✅ Imagerie ajoutée",
         description: `${examData.type} ajouté aux examens d'imagerie par l'IA`,
@@ -984,6 +1139,7 @@ export default function ProfessionalReportEditable({
       console.log('✅ Imaging exam added successfully via AI')
     } catch (error) {
       console.error('❌ Error adding imaging exam via AI:', error)
+      setSaveStatus('idle')
       throw error
     }
   }, [validationStatus, getReportPraticien, getReportPatient, trackModification])
@@ -997,10 +1153,11 @@ export default function ProfessionalReportEditable({
     const updatedInfo = { ...doctorInfo, [field]: value }
     sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
   }, [doctorInfo, trackModification])
-
   // ==================== BATCH UPDATE FUNCTIONS ====================
   const updateMedicamentBatch = useCallback((index: number, updatedMedication: any) => {
     if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
+    
+    setSaveStatus('saving')
     
     setReport(prev => {
       if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
@@ -1022,11 +1179,19 @@ export default function ProfessionalReportEditable({
         }
       }
     })
+    
     trackModification(`medicament.${index}`)
+    
+    setTimeout(() => {
+      setSaveStatus('saved')
+      setTimeout(() => setSaveStatus('idle'), 2000)
+    }, 500)
   }, [validationStatus, report?.ordonnances?.medicaments, trackModification])
 
   const updateBiologyTestBatch = useCallback((category: string, index: number, updatedTest: any) => {
     if (validationStatus === 'validated') return
+    
+    setSaveStatus('saving')
     
     setReport(prev => {
       if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
@@ -1049,11 +1214,19 @@ export default function ProfessionalReportEditable({
         }
       }
     })
+    
     trackModification(`biologie.${category}.${index}`)
+    
+    setTimeout(() => {
+      setSaveStatus('saved')
+      setTimeout(() => setSaveStatus('idle'), 2000)
+    }, 500)
   }, [validationStatus, trackModification])
 
   const updateImagingExamBatch = useCallback((index: number, updatedExam: any) => {
     if (validationStatus === 'validated') return
+    
+    setSaveStatus('saving')
     
     setReport(prev => {
       if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
@@ -1075,7 +1248,13 @@ export default function ProfessionalReportEditable({
         }
       }
     })
+    
     trackModification(`imagerie.${index}`)
+    
+    setTimeout(() => {
+      setSaveStatus('saved')
+      setTimeout(() => setSaveStatus('idle'), 2000)
+    }, 500)
   }, [validationStatus, trackModification])
 
   const addMedicament = useCallback(() => {
@@ -1360,7 +1539,6 @@ export default function ProfessionalReportEditable({
       method: method
     })
   }, [report?.invoice, updateInvoice])
-
   // ==================== LOAD DOCTOR DATA ====================
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
@@ -1371,17 +1549,17 @@ export default function ProfessionalReportEditable({
         const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
         console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
         
-const doctorInfoFromTibok = {
-  nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
-    `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
-    'Dr. [Name Required]',
-  qualifications: tibokDoctorData.qualifications || 'MBBS',
-  specialite: tibokDoctorData.specialty || 'General Medicine',
-  adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
-  email: tibokDoctorData.email || '[Email Required]',
-  heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
-  numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]')
-}
+        const doctorInfoFromTibok = {
+          nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
+            `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
+            'Dr. [Name Required]',
+          qualifications: tibokDoctorData.qualifications || 'MBBS',
+          specialite: tibokDoctorData.specialty || 'General Medicine',
+          adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
+          email: tibokDoctorData.email || '[Email Required]',
+          heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+          numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]')
+        }
         
         console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
         setDoctorInfo(doctorInfoFromTibok)
@@ -1769,7 +1947,6 @@ const doctorInfoFromTibok = {
       setLoading(false)
     }
   }
-
   // ==================== VALIDATION & SIGNATURE ====================
   const handleValidation = async () => {
     const requiredFieldsMissing = []
@@ -2109,7 +2286,6 @@ const doctorInfoFromTibok = {
       })
     }
   }
-
   const showSuccessModal = () => {
     const modalContainer = document.createElement('div')
     modalContainer.id = 'success-modal'
@@ -2555,7 +2731,6 @@ const doctorInfoFromTibok = {
   }
 
   const handlePrint = () => window.print()
-
   // ==================== RENDER STATES ====================
   if (loading) {
     return (
@@ -2774,7 +2949,6 @@ const doctorInfoFromTibok = {
   })
 
   DoctorInfoEditor.displayName = 'DoctorInfoEditor'
-
   const ConsultationReport = () => {
     const sections = [
       { key: 'motifConsultation', title: 'CHIEF COMPLAINT' },
@@ -2909,7 +3083,6 @@ const doctorInfoFromTibok = {
       </Card>
     )
   }
-
   const MedicationPrescription = () => {
     const medications = report?.ordonnances?.medicaments?.prescription?.medicaments || []
     const patient = getReportPatient()
@@ -3071,7 +3244,6 @@ const doctorInfoFromTibok = {
       </div>
     )
   }
-
   const BiologyPrescription = () => {
     const analyses = report?.ordonnances?.biologie?.prescription?.analyses || {}
     const hasTests = Object.values(analyses).some((tests: any) => Array.isArray(tests) && tests.length > 0)
@@ -3396,7 +3568,6 @@ const doctorInfoFromTibok = {
       </div>
     )
   }
-
   const InvoiceComponent = () => {
     const invoice = report?.invoice
     if (!invoice) return null
@@ -3705,7 +3876,6 @@ const doctorInfoFromTibok = {
       </Card>
     )
   }
-
   // ==================== MAIN RENDER ====================
   return (
     <div className="space-y-6 print:space-y-4">
@@ -3816,16 +3986,30 @@ const doctorInfoFromTibok = {
         </div>
       )}
 
-      {/* 🤖 Assistant IA Médical Maurice avec toutes les nouvelles capacités */}
+      {/* 🔧 NEW: Save Status Indicators */}
+      {saveStatus === 'saving' && (
+        <div className="fixed bottom-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Saving...
+        </div>
+      )}
+      {saveStatus === 'saved' && (
+        <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
+          <CheckCircle className="h-4 w-4" />
+          Saved!
+        </div>
+      )}
+
+      {/* 🤖 AI Medical Assistant with all capabilities */}
       <MedicalAIAssistant
         reportData={report}
-        onUpdateSection={handleUpdateSectionImmediate} // 🔧 Utilise la version immédiate
-        onUpdateMedication={updateMedicamentBatch} // 🆕 Fonction pour mettre à jour médicaments
-        onAddMedication={handleAIAddMedication} // 🆕 Fonction pour ajouter médicaments
-        onUpdateLabTest={updateBiologyTestBatch} // 🆕 Fonction pour mettre à jour tests bio
-        onAddLabTest={handleAIAddLabTest} // 🆕 Fonction pour ajouter tests bio
-        onUpdateImaging={updateImagingExamBatch} // 🆕 Fonction pour mettre à jour imagerie
-        onAddImaging={handleAIAddImaging} // 🆕 Fonction pour ajouter imagerie
+        onUpdateSection={handleUpdateSectionImmediate}
+        onUpdateMedication={updateMedicamentBatch}
+        onAddMedication={handleAIAddMedication}
+        onUpdateLabTest={updateBiologyTestBatch}
+        onAddLabTest={handleAIAddLabTest}
+        onUpdateImaging={updateImagingExamBatch}
+        onAddImaging={handleAIAddImaging}
         currentSection={activeTab === 'consultation' ? 'motifConsultation' : activeTab}
       />
     </div>
