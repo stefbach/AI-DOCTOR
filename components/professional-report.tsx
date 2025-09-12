@@ -4268,18 +4268,24 @@ const handleSendDocuments = async () => {
         )}
       </div>
 
-      {validationStatus === 'validated' && (
-        <div className="flex justify-center print:hidden mt-8">
-          <Button 
-            size="lg"
-            onClick={handleSendDocuments}
-            className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
-          >
-            <CheckCircle className="h-5 w-5 mr-2" />
-            Finalize and Send documents
-          </Button>
-        </div>
-      )}
+// Update the button rendering (around line 2700 in your code)
+{validationStatus === 'validated' && (
+  <div className="flex justify-center print:hidden mt-8">
+    <Button 
+      size="lg"
+      onClick={() => {
+        console.log('🔍 Send button clicked')
+        console.log('Report exists:', !!report)
+        console.log('Validation status:', validationStatus)
+        handleSendDocuments()
+      }}
+      className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+    >
+      <CheckCircle className="h-5 w-5 mr-2" />
+      Finalize and Send documents
+    </Button>
+  </div>
+)}
 
       {/* Manual Save Button (positioned left) */}
       {hasUnsavedChanges && (
