@@ -1579,7 +1579,7 @@ const removeImagingExam = useCallback((index: number) => {
     }
   }, [])
 
-  // Load existing report from database
+// Load existing report from database
 useEffect(() => {
   const loadExistingReport = async () => {
     const params = new URLSearchParams(window.location.search)
@@ -1594,33 +1594,51 @@ useEffect(() => {
         const result = await response.json()
         if (result.success && result.data?.content) {
           console.log('📄 Loading existing report from database')
+          console.log('📊 Loaded content structure:', Object.keys(result.data.content))
           
-          // Check if content has the expected structure
           const loadedContent = result.data.content
           
-          // If we have a complete report structure, use it
-          if (loadedContent.consultationReport || loadedContent.prescriptions) {
-            setReport({
-              compteRendu: loadedContent.consultationReport || createEmptyReport().compteRendu,
+          // The data structure from Supabase has consultationReport, prescriptions, etc.
+          if (loadedContent.consultationReport) {
+            const loadedReport = {
+              compteRendu: loadedContent.consultationReport,
               ordonnances: loadedContent.prescriptions || {},
               invoice: loadedContent.invoice || null
+            }
+            
+            // Apply the loaded report
+            setReport(loadedReport)
+            
+            // If there's doctor info in the loaded data, use it
+            if (loadedContent.consultationReport?.praticien) {
+              setDoctorInfo(loadedContent.consultationReport.praticien)
+              sessionStorage.setItem('currentDoctorInfo', JSON.stringify(loadedContent.consultationReport.praticien))
+            }
+            
+            // Load other data if available
+            if (loadedContent.editedSections) {
+              setModifiedSections(new Set(loadedContent.editedSections))
+            }
+            
+            setValidationStatus(result.data.status === 'validated' ? 'validated' : 'draft')
+            setDocumentSignatures(result.data.signatures || {})
+            
+            toast({
+              title: "Report loaded",
+              description: "Previous report data has been restored from database",
+              duration: 3000
             })
+            
+            console.log('✅ Report successfully loaded from database')
+          } else {
+            console.log('ℹ️ No consultation report in loaded content, generating new one')
           }
-          
-          setValidationStatus(result.data.status === 'validated' ? 'validated' : 'draft')
-          setDocumentSignatures(result.data.signatures || {})
-          
-          toast({
-            title: "Report loaded",
-            description: "Previous report data has been restored",
-            duration: 3000
-          })
         }
       } else {
         console.log('No existing report found, will generate new one')
       }
     } catch (error) {
-      console.log('No existing report found or error loading:', error)
+      console.log('Error loading report:', error)
     }
   }
   
