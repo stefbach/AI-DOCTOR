@@ -503,92 +503,94 @@ const BiologyTestEditForm = memo(({
     delaiResultat: test.delaiResultat || 'Standard'
   })
 
-  // ADD THIS: Track if there are changes
   const [hasLocalChanges, setHasLocalChanges] = useState(false)
   const saveTimeoutRef = useRef<NodeJS.Timeout>()
+  const updateCallbackRef = useRef(onUpdate) // Store callback in ref
+
+  // Update the ref when callback changes
+  useEffect(() => {
+    updateCallbackRef.current = onUpdate
+  }, [onUpdate])
 
   const handleFieldChange = useCallback((field: string, value: any) => {
     setLocalTest(prev => ({ ...prev, [field]: value }))
-    setHasLocalChanges(true) // ADD THIS
+    setHasLocalChanges(true)
     if (onLocalChange) onLocalChange()
   }, [onLocalChange])
 
-  // ADD THIS: Auto-save effect with debouncing
+  // Auto-save effect with longer debounce
   useEffect(() => {
     if (!hasLocalChanges) return
 
-    // Clear existing timeout
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current)
     }
 
-    // Set new timeout for auto-save
+    // INCREASED TIMEOUT to 5 seconds to avoid interrupting typing
     saveTimeoutRef.current = setTimeout(() => {
       console.log(`Auto-saving lab test ${category}-${index}...`)
-      onUpdate(category, index, localTest)
+      // Use the ref to avoid re-render issues
+      updateCallbackRef.current(category, index, localTest)
       setHasLocalChanges(false)
-    }, 2000) // Save after 2 seconds of inactivity
+    }, 5000) // Increased from 2000ms to 5000ms
 
-    // Cleanup
     return () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
       }
     }
-  }, [localTest, category, index, onUpdate, hasLocalChanges])
+  }, [localTest, category, index, hasLocalChanges])
 
-  // ADD THIS: Save on unmount if there are pending changes
+  // Save on unmount
   useEffect(() => {
     return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
       if (hasLocalChanges) {
         console.log(`Saving lab test ${category}-${index} on unmount...`)
-        onUpdate(category, index, localTest)
+        updateCallbackRef.current(category, index, localTest)
       }
     }
-  }, [hasLocalChanges, category, index, localTest, onUpdate])
-
-  // Store the pending data for manual save (keep as backup)
-  useEffect(() => {
-    const element = document.querySelector(`[data-biology-test="${category}-${index}"]`)
-    if (element) {
-      element.setAttribute('data-pending-test', JSON.stringify(localTest))
-    }
-  }, [localTest, category, index])
+  }, [hasLocalChanges, category, index, localTest])
 
   return (
     <div className="space-y-3 p-3" data-biology-test={`${category}-${index}`}>
-      {/* ADD THIS: Visual indicator of unsaved changes */}
       {hasLocalChanges && (
         <div className="text-xs text-yellow-600 flex items-center gap-1">
           <Loader2 className="h-3 w-3 animate-spin" />
-          Auto-saving...
+          Changes will auto-save in a few seconds...
         </div>
       )}
       
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label>Test Name</Label>
+          <Label htmlFor={`test-nom-${category}-${index}`}>Test Name</Label>
           <Input
+            id={`test-nom-${category}-${index}`}
             value={localTest.nom}
             onChange={(e) => handleFieldChange('nom', e.target.value)}
             placeholder="e.g., Complete Blood Count"
+            autoComplete="off"
           />
         </div>
         <div>
-          <Label>Clinical Indication</Label>
+          <Label htmlFor={`test-motif-${category}-${index}`}>Clinical Indication</Label>
           <Input
+            id={`test-motif-${category}-${index}`}
             value={localTest.motifClinique}
             onChange={(e) => handleFieldChange('motifClinique', e.target.value)}
             placeholder="e.g., Anemia evaluation"
+            autoComplete="off"
           />
         </div>
         <div>
-          <Label>Sample Type</Label>
+          <Label htmlFor={`test-tube-${category}-${index}`}>Sample Type</Label>
           <Select
             value={localTest.tubePrelevement}
             onValueChange={(value) => handleFieldChange('tubePrelevement', value)}
           >
-            <SelectTrigger>
+            <SelectTrigger id={`test-tube-${category}-${index}`}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -601,12 +603,12 @@ const BiologyTestEditForm = memo(({
           </Select>
         </div>
         <div>
-          <Label>Turnaround Time</Label>
+          <Label htmlFor={`test-delai-${category}-${index}`}>Turnaround Time</Label>
           <Select
             value={localTest.delaiResultat}
             onValueChange={(value) => handleFieldChange('delaiResultat', value)}
           >
-            <SelectTrigger>
+            <SelectTrigger id={`test-delai-${category}-${index}`}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -618,38 +620,41 @@ const BiologyTestEditForm = memo(({
         </div>
       </div>
       <div>
-        <Label>Special Conditions</Label>
+        <Label htmlFor={`test-conditions-${category}-${index}`}>Special Conditions</Label>
         <Input
+          id={`test-conditions-${category}-${index}`}
           value={localTest.conditionsPrelevement}
           onChange={(e) => handleFieldChange('conditionsPrelevement', e.target.value)}
           placeholder="e.g., Early morning sample required"
+          autoComplete="off"
         />
       </div>
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
           <div className="flex items-center space-x-2">
             <Switch
+              id={`test-urgence-${category}-${index}`}
               checked={localTest.urgence}
               onCheckedChange={(checked) => handleFieldChange('urgence', checked)}
             />
-            <Label>Urgent</Label>
+            <Label htmlFor={`test-urgence-${category}-${index}`}>Urgent</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Switch
+              id={`test-ajeun-${category}-${index}`}
               checked={localTest.aJeun}
               onCheckedChange={(checked) => handleFieldChange('aJeun', checked)}
             />
-            <Label>Fasting required</Label>
+            <Label htmlFor={`test-ajeun-${category}-${index}`}>Fasting required</Label>
           </div>
         </div>
         <div className="flex gap-2">
-          {/* ADD THIS: Manual save button as backup */}
           {hasLocalChanges && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => {
-                onUpdate(category, index, localTest)
+                updateCallbackRef.current(category, index, localTest)
                 setHasLocalChanges(false)
                 toast({
                   title: "Lab test saved",
@@ -659,7 +664,8 @@ const BiologyTestEditForm = memo(({
               }}
               type="button"
             >
-              <Save className="h-4 w-4" />
+              <Save className="h-4 w-4 mr-1" />
+              Save Now
             </Button>
           )}
           <Button
