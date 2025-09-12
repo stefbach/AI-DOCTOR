@@ -186,7 +186,7 @@ const DebouncedTextarea = memo(({
       if (onLocalChange) {
         onLocalChange()
       }
-    }, 500)
+    }, 3000)
   }, [onUpdate, onLocalChange])
 
   // Cleanup on unmount
