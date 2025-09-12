@@ -6,9 +6,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { consultationId, reportContent, doctorInfo, modifiedSections, patientId, doctorId } = body
     
+    // Fix: Use correct environment variable name
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY! // Changed from SUPABASE_SERVICE_KEY
     )
     
     const { data, error } = await supabase
@@ -39,27 +40,41 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  const url = new URL(request.url)
-  const consultationId = url.searchParams.get('consultationId')
-  
-  if (!consultationId) {
-    return NextResponse.json({ error: 'Missing consultationId' }, { status: 400 })
+  try {
+    const url = new URL(request.url)
+    const consultationId = url.searchParams.get('consultationId')
+    
+    if (!consultationId) {
+      return NextResponse.json({ success: false, error: 'Missing consultationId' }, { status: 400 })
+    }
+    
+    // Fix: Use correct environment variable name
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY! // Changed from SUPABASE_SERVICE_KEY
+    )
+    
+    const { data, error } = await supabase
+      .from('consultation_drafts')
+      .select('*')
+      .eq('consultation_id', consultationId)
+      .single()
+    
+    if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found
+      console.error('Error fetching draft:', error)
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    }
+    
+    // Return consistent response structure
+    return NextResponse.json({ 
+      success: true, 
+      data: data || null 
+    })
+  } catch (error) {
+    console.error('Draft fetch error:', error)
+    return NextResponse.json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to fetch draft' 
+    }, { status: 500 })
   }
-  
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_KEY!
-  )
-  
-  const { data, error } = await supabase
-    .from('consultation_drafts')
-    .select('*')
-    .eq('consultation_id', consultationId)
-    .single()
-  
-  if (error && error.code !== 'PGRST116') {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-  
-  return NextResponse.json({ success: true, data })
 }
