@@ -163,7 +163,6 @@ const DebouncedTextarea = memo(({
   onLocalChange?: () => void
 }) => {
   const [localValue, setLocalValue] = useState(value)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Update local value when parent value changes (e.g., from database load)
   useEffect(() => {
@@ -174,27 +173,17 @@ const DebouncedTextarea = memo(({
     const newValue = e.target.value
     setLocalValue(newValue)
     
-    // Just notify that there are unsaved changes
+    // Update parent immediately - this ensures the value is always saved
+    onUpdate(newValue)
+    
+    // Notify that there are unsaved changes
     if (onLocalChange) {
       onLocalChange()
     }
-    
-    // Don't call onUpdate here at all - let the save button handle it
-  }, [onLocalChange])
-
-  // When component unmounts or when user navigates away, update the parent
-  useEffect(() => {
-    return () => {
-      // On unmount, ensure the parent has the latest value
-      if (textareaRef.current) {
-        onUpdate(textareaRef.current.value)
-      }
-    }
-  }, [onUpdate])
+  }, [onUpdate, onLocalChange])
 
   return (
     <Textarea
-      ref={textareaRef}
       value={localValue}
       onChange={handleChange}
       className={className}
@@ -821,31 +810,8 @@ const handleManualSave = useCallback(async () => {
     return
   }
   
-  // Wait a tick to ensure all state updates are flushed
-  await new Promise(resolve => setTimeout(resolve, 0))
-  
-  // Create a new report object with current values
+  // Just use the current report state - it already has all the updated text!
   let currentReport = report
-  
-  // Save all textarea sections by getting their current values
-  const textareas = document.querySelectorAll('textarea[data-section]')
-  textareas.forEach((textarea: HTMLTextAreaElement) => {
-    const section = textarea.getAttribute('data-section')
-    const value = textarea.value
-    if (section && value !== undefined && currentReport) {
-      // Update the report object directly
-      currentReport = {
-        ...currentReport,
-        compteRendu: {
-          ...currentReport.compteRendu,
-          rapport: {
-            ...currentReport.compteRendu.rapport,
-            [section]: value
-          }
-        }
-      }
-    }
-  })
   
   // Save all medications with updated report
   const medicationElements = document.querySelectorAll('[data-medication-index][data-pending-medication]')
@@ -950,9 +916,6 @@ const handleManualSave = useCallback(async () => {
     }
   }
   
-  // Update the state with the new report
-  setReport(currentReport)
-  
   // Save to Supabase with the updated report
   try {
     const response = await fetch('/api/save-medical-report', {
@@ -964,7 +927,7 @@ const handleManualSave = useCallback(async () => {
         doctorId,
         doctorName: doctorInfo.nom,
         patientName: getReportPatient().nomComplet || getReportPatient().nom,
-        report: currentReport, // Use currentReport instead of report
+        report: currentReport,
         action: 'save',
         metadata: {
           wordCount: getReportMetadata().wordCount,
@@ -1010,6 +973,7 @@ const handleManualSave = useCallback(async () => {
     })
   }
 }, [hasUnsavedChanges, report, doctorInfo, patientData, clinicalData, diagnosisData, documentSignatures, modifiedSections, getReportPatient, getReportMetadata])
+  
 // ==================== KEYBOARD SHORTCUT FOR SAVE ====================
 useEffect(() => {
   const handleKeyDown = (e: KeyboardEvent) => {
