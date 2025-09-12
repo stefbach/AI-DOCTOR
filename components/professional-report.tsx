@@ -208,7 +208,7 @@ const DebouncedTextarea = memo(({
   )
 })
 
-// 2. MedicationEditForm Component
+// 2. MedicationEditForm Component - CORRECTED VERSION
 const MedicationEditForm = memo(({
   medication,
   index,
@@ -237,12 +237,51 @@ const MedicationEditForm = memo(({
     nonSubstituable: medication.nonSubstituable || false
   })
 
+  // 🔧 ADD THIS: Track if there are changes
+  const [hasLocalChanges, setHasLocalChanges] = useState(false)
+  const saveTimeoutRef = useRef<NodeJS.Timeout>()
+
   const handleFieldChange = useCallback((field: string, value: any) => {
     setLocalMed(prev => ({ ...prev, [field]: value }))
+    setHasLocalChanges(true)
     if (onLocalChange) onLocalChange()
   }, [onLocalChange])
 
-  // Store the pending data for manual save
+  // 🔧 ADD THIS: Auto-save effect with debouncing
+  useEffect(() => {
+    if (!hasLocalChanges) return
+
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
+    // Set new timeout for auto-save
+    saveTimeoutRef.current = setTimeout(() => {
+      console.log(`Auto-saving medication ${index}...`)
+      onUpdate(index, localMed)
+      setHasLocalChanges(false)
+    }, 2000) // Save after 2 seconds of inactivity
+
+    // Cleanup
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [localMed, index, onUpdate, hasLocalChanges])
+
+  // 🔧 ADD THIS: Save on unmount if there are pending changes
+  useEffect(() => {
+    return () => {
+      if (hasLocalChanges) {
+        console.log(`Saving medication ${index} on unmount...`)
+        onUpdate(index, localMed)
+      }
+    }
+  }, [])
+
+  // Store the pending data for manual save (keep this as backup)
   useEffect(() => {
     const element = document.querySelector(`[data-medication-index="${index}"]`)
     if (element) {
@@ -252,6 +291,14 @@ const MedicationEditForm = memo(({
 
   return (
     <div className="space-y-3" data-medication-index={index}>
+      {/* 🔧 ADD THIS: Visual indicator of unsaved changes */}
+      {hasLocalChanges && (
+        <div className="text-xs text-yellow-600 flex items-center gap-1">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          Auto-saving...
+        </div>
+      )}
+      
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label htmlFor={`med-nom-${index}`}>Medication Name</Label>
@@ -363,18 +410,40 @@ const MedicationEditForm = memo(({
           />
           <Label htmlFor={`med-nonsubstitutable-${index}`}>Non-substitutable</Label>
         </div>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => onRemove(index)}
-          type="button"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        <div className="flex gap-2">
+          {/* 🔧 ADD THIS: Manual save button as backup */}
+          {hasLocalChanges && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                onUpdate(index, localMed)
+                setHasLocalChanges(false)
+                toast({
+                  title: "Medication saved",
+                  description: "Changes have been saved",
+                  duration: 2000
+                })
+              }}
+              type="button"
+            >
+              <Save className="h-4 w-4" />
+            </Button>
+          )}
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => onRemove(index)}
+            type="button"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   )
 })
+
 // 3. BiologyTestEditForm Component
 const BiologyTestEditForm = memo(({
   test,
@@ -507,7 +576,7 @@ const BiologyTestEditForm = memo(({
   )
 })
 
-// 4. ImagingExamEditForm Component
+// 4. ImagingExamEditForm Component - CORRECTED VERSION
 const ImagingExamEditForm = memo(({
   exam,
   index,
@@ -532,12 +601,51 @@ const ImagingExamEditForm = memo(({
     questionDiagnostique: exam.questionDiagnostique || ''
   })
 
+  // 🔧 ADD THIS: Track if there are changes
+  const [hasLocalChanges, setHasLocalChanges] = useState(false)
+  const saveTimeoutRef = useRef<NodeJS.Timeout>()
+
   const handleFieldChange = useCallback((field: string, value: any) => {
     setLocalExam(prev => ({ ...prev, [field]: value }))
+    setHasLocalChanges(true)
     if (onLocalChange) onLocalChange()
   }, [onLocalChange])
 
-  // Store the pending data for manual save
+  // 🔧 ADD THIS: Auto-save effect with debouncing
+  useEffect(() => {
+    if (!hasLocalChanges) return
+
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
+    // Set new timeout for auto-save
+    saveTimeoutRef.current = setTimeout(() => {
+      console.log(`Auto-saving imaging exam ${index}...`)
+      onUpdate(index, localExam)
+      setHasLocalChanges(false)
+    }, 2000) // Save after 2 seconds of inactivity
+
+    // Cleanup
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [localExam, index, onUpdate, hasLocalChanges])
+
+  // 🔧 ADD THIS: Save on unmount if there are pending changes
+  useEffect(() => {
+    return () => {
+      if (hasLocalChanges) {
+        console.log(`Saving imaging exam ${index} on unmount...`)
+        onUpdate(index, localExam)
+      }
+    }
+  }, [])
+
+  // Store the pending data for manual save (keep this as backup)
   useEffect(() => {
     const element = document.querySelector(`[data-imaging-exam="${index}"]`)
     if (element) {
@@ -547,6 +655,14 @@ const ImagingExamEditForm = memo(({
 
   return (
     <div className="space-y-3 p-3" data-imaging-exam={index}>
+      {/* 🔧 ADD THIS: Visual indicator of unsaved changes */}
+      {hasLocalChanges && (
+        <div className="text-xs text-yellow-600 flex items-center gap-1">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          Auto-saving...
+        </div>
+      )}
+      
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label>Imaging Type</Label>
@@ -616,13 +732,33 @@ const ImagingExamEditForm = memo(({
             <Label>Contrast required</Label>
           </div>
         </div>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => onRemove(index)}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        <div className="flex gap-2">
+          {/* 🔧 ADD THIS: Manual save button as backup */}
+          {hasLocalChanges && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                onUpdate(index, localExam)
+                setHasLocalChanges(false)
+                toast({
+                  title: "Imaging exam saved",
+                  description: "Changes have been saved",
+                  duration: 2000
+                })
+              }}
+            >
+              <Save className="h-4 w-4" />
+            </Button>
+          )}
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => onRemove(index)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   )
