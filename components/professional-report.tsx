@@ -1374,19 +1374,15 @@ const handleAIAddImaging = useCallback((examData: any) => {
   }
 }, [validationStatus, getReportPraticien, getReportPatient, trackModification])
 
-// UPDATED updateDoctorInfo with auto-save and report update
 const updateDoctorInfo = useCallback((field: string, value: string) => {
+  // Create updated info object first
+  const updatedInfo = { ...doctorInfo, [field]: value }
+  
   // Update local doctor info state
-  setDoctorInfo(prev => ({
-    ...prev,
-    [field]: value
-  }))
+  setDoctorInfo(updatedInfo)
   
   // Track modification
   trackModification(`praticien.${field}`)
-  
-  // Create updated info object
-  const updatedInfo = { ...doctorInfo, [field]: value }
   
   // Save to session storage
   sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
@@ -1395,16 +1391,18 @@ const updateDoctorInfo = useCallback((field: string, value: string) => {
   setHasUnsavedChanges(true)
   
   // If report exists, update it with new doctor info
-  if (report) {
-    setReport(prev => prev ? {
+  // Using functional update to avoid dependency on report
+  setReport(prev => {
+    if (!prev) return prev
+    return {
       ...prev,
       compteRendu: {
         ...prev.compteRendu,
         praticien: updatedInfo
       }
-    } : null)
-  }
-}, [doctorInfo, trackModification, report])  // Added report to dependencies
+    }
+  })
+}, [doctorInfo, trackModification]) // Remove 'report' from dependencies
 
 const addMedicament = useCallback(() => {
   if (validationStatus === 'validated') return
@@ -1744,68 +1742,74 @@ const updatePaymentMethod = useCallback((method: string) => {
     }
   }, [])
 
-  // ==================== LOAD DRAFT FROM DATABASE ====================
-  useEffect(() => {
-    const loadDraft = async () => {
-      const params = new URLSearchParams(window.location.search)
-      const consultationId = params.get('consultationId')
+// ==================== LOAD DRAFT FROM DATABASE ====================
+useEffect(() => {
+  // Prevent multiple loads
+  const params = new URLSearchParams(window.location.search)
+  const consultationId = params.get('consultationId')
+  
+  if (!consultationId) {
+    setIsLoadingFromDb(false)
+    setDbCheckComplete(true)
+    setShouldGenerateReport(false)
+    return
+  }
+  
+  const loadDraft = async () => {
+    setIsLoadingFromDb(true)
+    
+    try {
+      const response = await fetch(`/api/save-draft?consultationId=${consultationId}`)
+      const result = await response.json()
       
-      if (!consultationId) {
-        setIsLoadingFromDb(false)
-        setDbCheckComplete(true)
-        setShouldGenerateReport(false)
-        return
-      }
-      
-      setIsLoadingFromDb(true)
-      
-      try {
-        const response = await fetch(`/api/save-draft?consultationId=${consultationId}`)
-        const result = await response.json()
+      if (result.success && result.data) {
+        console.log('📂 Loading draft from database')
         
-        if (result.success && result.data) {
-          console.log('📂 Loading draft from database')
-          
-          setReport(result.data.report_content)
-          setDoctorInfo(result.data.doctor_info || doctorInfo)
-          setModifiedSections(new Set(result.data.modified_sections || []))
-          setValidationStatus(result.data.validation_status || 'draft')
-          
-          toast({
-            title: "Draft loaded",
-            description: "Your previous edits have been restored",
-            duration: 3000
-          })
-          
-          setShouldGenerateReport(false)
-        } else {
-          console.log('No draft found, will generate new report if patient data is valid')
-          
-          const hasValidPatientData = patientData && 
-            patientData.name !== 'Patient' &&
-            patientData.name !== 'Non spécifié' &&
-            patientData.name !== '1 janvier 1970' &&
-            !patientData.name?.includes('1970')
-          
-          setShouldGenerateReport(hasValidPatientData)
+        setReport(result.data.report_content)
+        
+        // Only update doctor info if it exists in the draft
+        if (result.data.doctor_info) {
+          setDoctorInfo(result.data.doctor_info)
         }
-      } catch (error) {
-        console.error('Error loading draft:', error)
+        
+        setModifiedSections(new Set(result.data.modified_sections || []))
+        setValidationStatus(result.data.validation_status || 'draft')
+        
+        toast({
+          title: "Draft loaded",
+          description: "Your previous edits have been restored",
+          duration: 3000
+        })
+        
+        setShouldGenerateReport(false)
+      } else {
+        console.log('No draft found, will generate new report if patient data is valid')
         
         const hasValidPatientData = patientData && 
           patientData.name !== 'Patient' &&
           patientData.name !== 'Non spécifié' &&
+          patientData.name !== '1 janvier 1970' &&
           !patientData.name?.includes('1970')
         
         setShouldGenerateReport(hasValidPatientData)
-      } finally {
-        setIsLoadingFromDb(false)
-        setDbCheckComplete(true)
       }
+    } catch (error) {
+      console.error('Error loading draft:', error)
+      
+      const hasValidPatientData = patientData && 
+        patientData.name !== 'Patient' &&
+        patientData.name !== 'Non spécifié' &&
+        !patientData.name?.includes('1970')
+      
+      setShouldGenerateReport(hasValidPatientData)
+    } finally {
+      setIsLoadingFromDb(false)
+      setDbCheckComplete(true)
     }
-    
-    loadDraft()
-  }, [patientData, doctorInfo])
+  }
+  
+  loadDraft()
+}, [patientData]) // Remove doctorInfo from dependencies
 
   // ==================== INITIAL DATA LOAD ====================
   useEffect(() => {
