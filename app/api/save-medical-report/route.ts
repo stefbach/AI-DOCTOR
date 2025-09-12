@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
 // Keep existing interface and add new fields
 interface StoredReport {
@@ -20,48 +21,137 @@ interface StoredReport {
 // Keep existing memory storage (your current implementation)
 const memoryStorage = new Map<string, StoredReport>()
 
-// Supabase configuration for future use (optional)
-const supabaseUrl = 'https://ehlqjfuutyhpbrqcvdut.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVobHFqZnV1dHlocGJycWN2ZHV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczODkxMzQsImV4cCI6MjA2Mjk2NTEzNH0.-pujAg_Fn9zONxS61HCNJ_8zsnaX00N5raoUae2olAs'
+// Supabase configuration
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ehlqjfuutyhpbrqcvdut.supabase.co'
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVobHFqZnV1dHlocGJycWN2ZHV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczODkxMzQsImV4cCI6MjA2Mjk2NTEzNH0.-pujAg_Fn9zONxS61HCNJ_8zsnaX00N5raoUae2olAs'
 
-// Function to sync with Supabase (optional - only if you want to use it)
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// Function to sync with Supabase (enhanced version)
 async function syncWithSupabase(reportData: any, action: string) {
   try {
-    // Only sync if environment variable is set
-    if (process.env.ENABLE_SUPABASE_SYNC === 'true') {
-      const supabaseData = {
-        consultation_id: reportData.consultationId || `consultation_${Date.now()}`,
-        patient_id: reportData.patientId,
-        doctor_id: reportData.doctorId || 'default-doctor',
-        doctor_name: reportData.doctorName || 'Dr. Default',
-        patient_name: reportData.patientName || 'Patient',
-        report_content: reportData.content,
-        signatures: reportData.signatures || {},
-        document_validations: reportData.documentValidations || {},
-        validation_status: reportData.status || 'draft',
-        validated_at: action === 'validate' ? new Date().toISOString() : null,
-        validated_by: action === 'validate' ? reportData.doctorName : null,
-        updated_at: new Date().toISOString()
-      }
-
-      const response = await fetch(`${supabaseUrl}/rest/v1/medical_reports`, {
-        method: 'POST',
-        headers: {
-          'apikey': supabaseAnonKey,
-          'Authorization': `Bearer ${supabaseAnonKey}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation'
-        },
-        body: JSON.stringify(supabaseData)
-      })
-
-      if (response.ok) {
-        console.log('✅ Synced with Supabase')
-      }
+    // Check if Supabase sync is enabled
+    const enableSync = process.env.ENABLE_SUPABASE_SYNC !== 'false' // Default to true
+    
+    if (!enableSync) {
+      console.log('Supabase sync disabled, using memory storage only')
+      return { success: false, reason: 'disabled' }
     }
+
+    const { 
+      consultationId,
+      patientId,
+      doctorId,
+      doctorName,
+      patientName,
+      report,
+      metadata,
+      patientData,
+      clinicalData,
+      diagnosisData
+    } = reportData
+
+    // Extract report sections and prescriptions
+    const reportSections = report?.compteRendu?.rapport || {}
+    const prescriptions = report?.ordonnances || {}
+    
+    // Build the documents_data JSON object
+    const documentsData = {
+      consultationReport: report?.compteRendu || {},
+      prescriptions: prescriptions,
+      invoice: report?.invoice || {},
+      lastModified: new Date().toISOString(),
+      editedSections: metadata?.modifiedSections || []
+    }
+
+    // Build prescription_data JSON object
+    const prescriptionData = {
+      medications: prescriptions?.medicaments?.prescription?.medicaments || [],
+      laboratoryTests: prescriptions?.biologie?.prescription?.analyses || {},
+      imagingStudies: prescriptions?.imagerie?.prescription?.examens || [],
+      generatedAt: new Date().toISOString()
+    }
+
+    // Prepare data for Supabase
+    const supabaseData = {
+      consultation_id: consultationId || `consultation_${Date.now()}`,
+      patient_id: patientId,
+      doctor_id: doctorId,
+      doctor_name: doctorName,
+      patient_name: patientName,
+      
+      // Store complete data in JSONB fields
+      documents_data: documentsData,
+      prescription_data: prescriptionData,
+      patient_data: patientData || {},
+      clinical_data: clinicalData || {},
+      diagnosis_data: diagnosisData || {},
+      
+      // Extract key fields for querying
+      chief_complaint: reportSections.motifConsultation || '',
+      diagnosis: reportSections.conclusionDiagnostique || '',
+      
+      // Status fields
+      documents_status: action === 'validate' ? 'validated' : 'draft',
+      prescription_status: action === 'validate' ? 'validated' : 'pending_validation',
+      
+      // Prescription flags
+      has_prescriptions: (prescriptions?.medicaments?.prescription?.medicaments?.length || 0) > 0,
+      has_lab_requests: Object.keys(prescriptions?.biologie?.prescription?.analyses || {}).length > 0,
+      has_imaging_requests: (prescriptions?.imagerie?.prescription?.examens?.length || 0) > 0,
+      has_invoice: !!report?.invoice,
+      
+      // Metadata
+      signatures: metadata?.signatures || {},
+      document_validations: metadata?.documentValidations || {},
+      updated_at: new Date().toISOString()
+    }
+
+    if (action === 'validate') {
+      supabaseData.prescription_validated_at = new Date().toISOString()
+    }
+
+    // Check if record exists
+    const { data: existingRecord } = await supabase
+      .from('consultation_records')
+      .select('id')
+      .eq('consultation_id', consultationId)
+      .single()
+
+    let result
+    
+    if (existingRecord) {
+      // Update existing record
+      result = await supabase
+        .from('consultation_records')
+        .update(supabaseData)
+        .eq('consultation_id', consultationId)
+        .select()
+        .single()
+    } else {
+      // Insert new record
+      result = await supabase
+        .from('consultation_records')
+        .insert({
+          ...supabaseData,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+    }
+
+    if (result.error) {
+      console.error('Supabase sync error:', result.error)
+      return { success: false, error: result.error }
+    }
+
+    console.log('✅ Synced with Supabase successfully')
+    return { success: true, data: result.data }
+    
   } catch (error) {
     console.error('Supabase sync error (non-blocking):', error)
     // Don't fail the main operation if sync fails
+    return { success: false, error }
   }
 }
 
@@ -74,11 +164,14 @@ export async function POST(request: NextRequest) {
       report, 
       action, 
       metadata,
-      // New fields for signatures
+      // New fields for signatures and Supabase
       consultationId,
       doctorId,
       doctorName,
-      patientName
+      patientName,
+      patientData,
+      clinicalData,
+      diagnosisData
     } = body
 
     console.log(`📝 Action de sauvegarde: ${action} pour patient: ${patientId}`)
@@ -92,8 +185,39 @@ export async function POST(request: NextRequest) {
 
     const now = new Date()
     
+    // Try to sync with Supabase first
+    const supabaseSync = await syncWithSupabase({
+      consultationId: consultationId || reportId,
+      patientId,
+      doctorId,
+      doctorName,
+      patientName,
+      report,
+      metadata,
+      patientData,
+      clinicalData,
+      diagnosisData
+    }, action)
+
+    // If Supabase sync succeeded, return that result
+    if (supabaseSync.success) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          reportId: consultationId || reportId,
+          status: action === 'validate' ? 'validated' : 'draft',
+          savedAt: now.toISOString(),
+          storage: 'supabase',
+          report: report // Return full report for compatibility
+        }
+      })
+    }
+
+    // Fallback to memory storage if Supabase fails
+    console.log('Using memory storage fallback')
+    
     if (action === 'save') {
-      // Keep existing save logic
+      // Keep existing save logic for memory storage
       const id = reportId || `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       
       const existingReport = reportId ? memoryStorage.get(reportId) : null
@@ -122,13 +246,7 @@ export async function POST(request: NextRequest) {
       
       memoryStorage.set(id, reportToSave)
       
-      // Optional: Sync with Supabase
-      await syncWithSupabase({
-        ...reportToSave,
-        consultationId
-      }, 'save')
-      
-      console.log(`✅ Rapport sauvegardé avec ID: ${id}`)
+      console.log(`✅ Rapport sauvegardé avec ID: ${id} (memory storage)`)
       
       return NextResponse.json({
         success: true,
@@ -136,6 +254,7 @@ export async function POST(request: NextRequest) {
           reportId: id,
           status: reportToSave.status,
           savedAt: now.toISOString(),
+          storage: 'memory',
           report: reportToSave // Return full report for compatibility
         }
       })
@@ -181,13 +300,7 @@ export async function POST(request: NextRequest) {
       
       memoryStorage.set(reportId, validatedReport)
       
-      // Optional: Sync with Supabase
-      await syncWithSupabase({
-        ...validatedReport,
-        consultationId
-      }, 'validate')
-      
-      console.log(`✅ Rapport validé: ${reportId}`)
+      console.log(`✅ Rapport validé: ${reportId} (memory storage)`)
       
       return NextResponse.json({
         success: true,
@@ -195,6 +308,7 @@ export async function POST(request: NextRequest) {
           reportId,
           status: 'validated',
           validatedAt: now.toISOString(),
+          storage: 'memory',
           report: validatedReport // Return full report for compatibility
         }
       })
@@ -214,7 +328,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Keep your existing GET function unchanged
+// Keep your existing GET function with Supabase integration
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -224,6 +338,37 @@ export async function GET(request: NextRequest) {
     
     console.log(`🔍 Recherche rapport - patientId: ${patientId}, reportId: ${reportId}, consultationId: ${consultationId}`)
     
+    // Try Supabase first
+    if (consultationId) {
+      const { data, error } = await supabase
+        .from('consultation_records')
+        .select('*')
+        .eq('consultation_id', consultationId)
+        .single()
+      
+      if (data && !error) {
+        return NextResponse.json({
+          success: true,
+          data: {
+            id: data.id,
+            consultationId: data.consultation_id,
+            content: data.documents_data || {},
+            status: data.documents_status,
+            metadata: {
+              wordCount: data.documents_data?.wordCount,
+              validationStatus: data.documents_status
+            },
+            signatures: data.signatures,
+            documentValidations: data.document_validations,
+            createdAt: data.created_at,
+            updatedAt: data.updated_at,
+            storage: 'supabase'
+          }
+        })
+      }
+    }
+    
+    // Fallback to memory storage
     if (reportId) {
       // Keep existing search by ID logic
       const report = memoryStorage.get(reportId)
@@ -239,30 +384,10 @@ export async function GET(request: NextRequest) {
             updatedAt: report.updatedAt,
             // Add signature data to response
             signatures: report.signatures,
-            documentValidations: report.documentValidations
+            documentValidations: report.documentValidations,
+            storage: 'memory'
           }
         })
-      }
-    }
-    
-    if (consultationId) {
-      // Search by consultation ID (new feature)
-      for (const [_, report] of memoryStorage) {
-        if (report.metadata?.consultationId === consultationId) {
-          return NextResponse.json({
-            success: true,
-            data: {
-              id: report.id,
-              content: report.content,
-              status: report.status,
-              metadata: report.metadata,
-              createdAt: report.createdAt,
-              updatedAt: report.updatedAt,
-              signatures: report.signatures,
-              documentValidations: report.documentValidations
-            }
-          })
-        }
       }
     }
     
@@ -291,7 +416,8 @@ export async function GET(request: NextRequest) {
             updatedAt: latestReport.updatedAt,
             // Add signature data
             signatures: latestReport.signatures,
-            documentValidations: latestReport.documentValidations
+            documentValidations: latestReport.documentValidations,
+            storage: 'memory'
           }
         })
       }
