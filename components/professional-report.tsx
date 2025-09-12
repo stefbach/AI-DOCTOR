@@ -173,10 +173,11 @@ const DebouncedTextarea = memo(({
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value
     setLocalValue(newValue)
+    onUpdate(newValue) // Add this line to immediately update parent
     if (onLocalChange) {
-      onLocalChange() // Notify parent of unsaved changes
+      onLocalChange()
     }
-  }, [onLocalChange])
+  }, [onUpdate, onLocalChange])
 
   return (
     <Textarea
@@ -802,63 +803,139 @@ const handleManualSave = useCallback(async () => {
     return
   }
   
+  // Wait a tick to ensure all state updates are flushed
+  await new Promise(resolve => setTimeout(resolve, 0))
+  
+  // Create a new report object with current values
+  let currentReport = report
+  
   // Save all textarea sections by getting their current values
   const textareas = document.querySelectorAll('textarea[data-section]')
   textareas.forEach((textarea: HTMLTextAreaElement) => {
     const section = textarea.getAttribute('data-section')
     const value = textarea.value
-    if (section && value !== undefined) {
-      updateRapportSection(section, value)
+    if (section && value !== undefined && currentReport) {
+      // Update the report object directly
+      currentReport = {
+        ...currentReport,
+        compteRendu: {
+          ...currentReport.compteRendu,
+          rapport: {
+            ...currentReport.compteRendu.rapport,
+            [section]: value
+          }
+        }
+      }
     }
   })
   
-  // Save all medications
+  // Save all medications with updated report
   const medicationElements = document.querySelectorAll('[data-medication-index][data-pending-medication]')
-  medicationElements.forEach((element: any) => {
-    const index = parseInt(element.getAttribute('data-medication-index'))
-    const pendingData = element.getAttribute('data-pending-medication')
-    if (pendingData) {
-      try {
-        const medicationData = JSON.parse(pendingData)
-        updateMedicamentBatch(index, medicationData)
-      } catch (e) {
-        console.error('Error parsing medication data:', e)
+  if (medicationElements.length > 0 && currentReport?.ordonnances?.medicaments) {
+    const updatedMedications = [...(currentReport.ordonnances.medicaments.prescription.medicaments || [])]
+    
+    medicationElements.forEach((element: any) => {
+      const index = parseInt(element.getAttribute('data-medication-index'))
+      const pendingData = element.getAttribute('data-pending-medication')
+      if (pendingData) {
+        try {
+          const medicationData = JSON.parse(pendingData)
+          updatedMedications[index] = medicationData
+        } catch (e) {
+          console.error('Error parsing medication data:', e)
+        }
+      }
+    })
+    
+    currentReport = {
+      ...currentReport,
+      ordonnances: {
+        ...currentReport.ordonnances,
+        medicaments: {
+          ...currentReport.ordonnances.medicaments,
+          prescription: {
+            ...currentReport.ordonnances.medicaments.prescription,
+            medicaments: updatedMedications
+          }
+        }
       }
     }
-  })
+  }
   
-  // Save all biology tests
+  // Save all biology tests with updated report
   const biologyElements = document.querySelectorAll('[data-biology-test][data-pending-test]')
-  biologyElements.forEach((element: any) => {
-    const testId = element.getAttribute('data-biology-test')
-    const [category, index] = testId.split('-')
-    const pendingData = element.getAttribute('data-pending-test')
-    if (pendingData) {
-      try {
-        const testData = JSON.parse(pendingData)
-        updateBiologyTestBatch(category, parseInt(index), testData)
-      } catch (e) {
-        console.error('Error parsing biology test data:', e)
+  if (biologyElements.length > 0 && currentReport?.ordonnances?.biologie) {
+    const updatedAnalyses = { ...(currentReport.ordonnances.biologie.prescription.analyses || {}) }
+    
+    biologyElements.forEach((element: any) => {
+      const testId = element.getAttribute('data-biology-test')
+      const [category, index] = testId.split('-')
+      const pendingData = element.getAttribute('data-pending-test')
+      if (pendingData) {
+        try {
+          const testData = JSON.parse(pendingData)
+          if (!updatedAnalyses[category]) {
+            updatedAnalyses[category] = []
+          }
+          updatedAnalyses[category][parseInt(index)] = testData
+        } catch (e) {
+          console.error('Error parsing biology test data:', e)
+        }
+      }
+    })
+    
+    currentReport = {
+      ...currentReport,
+      ordonnances: {
+        ...currentReport.ordonnances,
+        biologie: {
+          ...currentReport.ordonnances.biologie,
+          prescription: {
+            ...currentReport.ordonnances.biologie.prescription,
+            analyses: updatedAnalyses
+          }
+        }
       }
     }
-  })
+  }
   
-  // Save all imaging exams
+  // Save all imaging exams with updated report
   const imagingElements = document.querySelectorAll('[data-imaging-exam][data-pending-exam]')
-  imagingElements.forEach((element: any) => {
-    const index = parseInt(element.getAttribute('data-imaging-exam'))
-    const pendingData = element.getAttribute('data-pending-exam')
-    if (pendingData) {
-      try {
-        const examData = JSON.parse(pendingData)
-        updateImagingExamBatch(index, examData)
-      } catch (e) {
-        console.error('Error parsing imaging exam data:', e)
+  if (imagingElements.length > 0 && currentReport?.ordonnances?.imagerie) {
+    const updatedExamens = [...(currentReport.ordonnances.imagerie.prescription.examens || [])]
+    
+    imagingElements.forEach((element: any) => {
+      const index = parseInt(element.getAttribute('data-imaging-exam'))
+      const pendingData = element.getAttribute('data-pending-exam')
+      if (pendingData) {
+        try {
+          const examData = JSON.parse(pendingData)
+          updatedExamens[index] = examData
+        } catch (e) {
+          console.error('Error parsing imaging exam data:', e)
+        }
+      }
+    })
+    
+    currentReport = {
+      ...currentReport,
+      ordonnances: {
+        ...currentReport.ordonnances,
+        imagerie: {
+          ...currentReport.ordonnances.imagerie,
+          prescription: {
+            ...currentReport.ordonnances.imagerie.prescription,
+            examens: updatedExamens
+          }
+        }
       }
     }
-  })
+  }
   
-  // Save to Supabase
+  // Update the state with the new report
+  setReport(currentReport)
+  
+  // Save to Supabase with the updated report
   try {
     const response = await fetch('/api/save-medical-report', {
       method: 'POST',
@@ -869,7 +946,7 @@ const handleManualSave = useCallback(async () => {
         doctorId,
         doctorName: doctorInfo.nom,
         patientName: getReportPatient().nomComplet || getReportPatient().nom,
-        report,
+        report: currentReport, // Use currentReport instead of report
         action: 'save',
         metadata: {
           wordCount: getReportMetadata().wordCount,
@@ -914,8 +991,7 @@ const handleManualSave = useCallback(async () => {
       variant: "destructive"
     })
   }
-}, [hasUnsavedChanges, report, doctorInfo, patientData, clinicalData, diagnosisData, documentSignatures, modifiedSections, updateRapportSection, updateMedicamentBatch, updateBiologyTestBatch, updateImagingExamBatch, getReportPatient, getReportMetadata])
-
+}, [hasUnsavedChanges, report, doctorInfo, patientData, clinicalData, diagnosisData, documentSignatures, modifiedSections, getReportPatient, getReportMetadata])
 // ==================== KEYBOARD SHORTCUT FOR SAVE ====================
 useEffect(() => {
   const handleKeyDown = (e: KeyboardEvent) => {
