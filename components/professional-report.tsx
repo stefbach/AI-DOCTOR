@@ -970,6 +970,32 @@ const updateImagingExamBatch = useCallback((index: number, updatedExam: any) => 
 
 // ==================== MANUAL SAVE FUNCTION (AFTER ALL DEPENDENCIES) ====================
 const handleManualSave = useCallback(async () => {
+  // ADD VALIDATION AT THE VERY START
+  const patientName = getReportPatient().nomComplet || getReportPatient().nom || ''
+  
+  // Check if we have valid patient data BEFORE attempting to save
+  const invalidNames = [
+    'Patient', 
+    'Non spécifié', 
+    '1 janvier 1970', 
+    '01/01/1970',
+    '1 January 1970',
+    ''
+  ]
+  
+  // Check if the name looks like a date
+  const looksLikeDate = /^\d{1,2}[\s\/\-]\w+[\s\/\-]\d{4}$/.test(patientName) || 
+                        /^\d{4}[\-\/]\d{2}[\-\/]\d{2}$/.test(patientName) ||
+                        /^\d{1,2}[\s\/\-]\d{1,2}[\s\/\-]\d{4}$/.test(patientName)
+  
+  if (!patientName || invalidNames.includes(patientName) || looksLikeDate || !report) {
+    console.log('❌ Skipping save - invalid patient data:', patientName)
+    setHasUnsavedChanges(false) // Reset flag to stop auto-save loop
+    setSaveStatus('idle')
+    return // Exit early - don't save
+  }
+  
+  // Also check if we have unsaved changes
   if (!hasUnsavedChanges) return
   
   setSaveStatus('saving')
@@ -1817,24 +1843,26 @@ useEffect(() => {
       const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
       console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
       
-      const doctorInfoFromTibok = {
-        nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
-          `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
-          'Dr. [Name Required]',
-        qualifications: tibokDoctorData.qualifications || 'MBBS',
-        specialite: tibokDoctorData.specialty || 'General Medicine',
-        adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
-        email: tibokDoctorData.email || '[Email Required]',
-        heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
-        numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || 
-                            tibokDoctorData.medical_council_number || 
-                            tibokDoctorData.mcm_reg_no ||  // Add this line
-                            '[MCM Registration Required]')
-      }
-      
-      console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
-      setDoctorInfo(doctorInfoFromTibok)
-      sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
+const doctorInfoFromTibok = {
+  nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
+    `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
+    'Dr. [Name Required]',
+  qualifications: tibokDoctorData.qualifications || 'MBBS',
+  specialite: tibokDoctorData.specialty || 'General Medicine',
+  adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
+  email: tibokDoctorData.email || '[Email Required]',
+  heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+  numeroEnregistrement: String(
+    tibokDoctorData.mcm_reg_no ||  // CHECK YOUR DB COLUMN FIRST
+    tibokDoctorData.medicalCouncilNumber || 
+    tibokDoctorData.medical_council_number || 
+    '[MCM Registration Required]'
+  )
+}
+
+console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
+setDoctorInfo(doctorInfoFromTibok)
+sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
       
     } catch (error) {
       console.error('Error parsing Tibok doctor data:', error)
