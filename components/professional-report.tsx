@@ -1798,7 +1798,10 @@ useEffect(() => {
         adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
         email: tibokDoctorData.email || '[Email Required]',
         heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
-        numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || tibokDoctorData.medical_council_number || '[MCM Registration Required]')
+        numeroEnregistrement: String(tibokDoctorData.medicalCouncilNumber || 
+                            tibokDoctorData.medical_council_number || 
+                            tibokDoctorData.mcm_reg_no ||  // Add this line
+                            '[MCM Registration Required]')
       }
       
       console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
