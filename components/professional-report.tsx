@@ -2384,203 +2384,331 @@ useEffect(() => {
     }
   }
 
-  // ==================== SEND DOCUMENTS ====================
-  const handleSendDocuments = async () => {
-    if (!report || validationStatus !== 'validated') {
+// ==================== SEND DOCUMENTS ====================
+const handleSendDocuments = async () => {
+  if (!report || validationStatus !== 'validated') {
+    toast({
+      title: "Cannot send documents",
+      description: "Please validate the documents first",
+      variant: "destructive"
+    })
+    return
+  }
+  
+  // ADD COMPREHENSIVE VALIDATION HERE
+  const patient = getReportPatient()
+  const patientName = patient.nomComplet || patient.nom
+  
+  // Check for fake/test patient data
+  const invalidNames = ['Patient', 'Non spécifié', 'Test', 'test', 'Demo', 'demo', '[Name Required]', 'undefined', 'null']
+  if (!patientName || 
+      patientName.trim() === '' ||
+      invalidNames.some(invalid => patientName.includes(invalid)) ||
+      patientName.includes('[') ||
+      patientName.includes('1970') ||
+      patientName.trim().length < 3) {
+    toast({
+      title: "❌ Invalid Patient Data",
+      description: "Cannot send documents with incomplete or test patient information. Please ensure all patient details are correctly filled.",
+      variant: "destructive"
+    })
+    return
+  }
+  
+  // Check patient contact info
+  if (!patient.email || patient.email === '' || patient.email.includes('[') || !patient.email.includes('@')) {
+    toast({
+      title: "❌ Missing Patient Email",
+      description: "A valid patient email address is required to send documents",
+      variant: "destructive"
+    })
+    return
+  }
+  
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(patient.email) || patient.email.includes('test') || patient.email.includes('example')) {
+    toast({
+      title: "❌ Invalid Email Address",
+      description: "Please provide a valid patient email address (not a test email)",
+      variant: "destructive"
+    })
+    return
+  }
+  
+  // Check phone number
+  if (!patient.telephone || patient.telephone === '') {
+    toast({
+      title: "❌ Missing Patient Phone",
+      description: "Patient phone number is required to send documents",
+      variant: "destructive"
+    })
+    return
+  }
+  
+  // Clean and validate phone
+  const cleanPhone = patient.telephone.replace(/[\s\-\(\)]/g, '')
+  if (cleanPhone.length < 7 || cleanPhone === '00000000') {
+    toast({
+      title: "❌ Invalid Phone Number",
+      description: "Please provide a valid patient phone number",
+      variant: "destructive"
+    })
+    return
+  }
+  
+  // Check doctor info completeness
+  if (doctorInfo.nom.includes('[') || 
+      doctorInfo.nom === 'Dr. [Name Required]' ||
+      doctorInfo.numeroEnregistrement.includes('[') ||
+      doctorInfo.numeroEnregistrement === '[MCM Registration Required]' ||
+      doctorInfo.email.includes('[') ||
+      !doctorInfo.email.includes('@')) {
+    toast({
+      title: "❌ Incomplete Doctor Information",
+      description: "Please complete all doctor information (name, MCM registration, email) before sending documents",
+      variant: "destructive"
+    })
+    setEditingDoctor(true) // Open doctor editor
+    return
+  }
+  
+  // Check if report has actual medical content
+  const rapport = getReportRapport()
+  if (!rapport.motifConsultation || rapport.motifConsultation.trim() === '' ||
+      rapport.motifConsultation.length < 10) {
+    toast({
+      title: "❌ Incomplete Medical Report",
+      description: "The medical report must contain a detailed chief complaint",
+      variant: "destructive"
+    })
+    setActiveTab('consultation') // Switch to consultation tab
+    return
+  }
+  
+  if (!rapport.conclusionDiagnostique || rapport.conclusionDiagnostique.trim() === '' ||
+      rapport.conclusionDiagnostique.length < 10) {
+    toast({
+      title: "❌ Missing Diagnosis",
+      description: "The medical report must contain a diagnostic conclusion",
+      variant: "destructive"
+    })
+    setActiveTab('consultation') // Switch to consultation tab
+    return
+  }
+  
+  // Additional check for patient address
+  if (!patient.adresse || patient.adresse === '' || patient.adresse.includes('[')) {
+    toast({
+      title: "❌ Missing Patient Address",
+      description: "Patient address is required for document delivery",
+      variant: "destructive"
+    })
+    return
+  }
+  
+  try {
+    toast({
+      title: "📤 Sending documents...",
+      description: "Preparing documents for patient dashboard"
+    })
+    
+    const params = new URLSearchParams(window.location.search)
+    const consultationId = params.get('consultationId')
+    const patientId = params.get('patientId') || patientData?.id
+    const doctorId = params.get('doctorId')
+
+    if (!consultationId || !patientId || !doctorId) {
       toast({
-        title: "Cannot send documents",
-        description: "Please validate the documents first",
+        title: "Error",
+        description: "Missing consultation, patient, or doctor information",
         variant: "destructive"
       })
       return
     }
-    
-    try {
-      toast({
-        title: "📤 Sending documents...",
-        description: "Preparing documents for patient dashboard"
-      })
-      
-      const params = new URLSearchParams(window.location.search)
-      const consultationId = params.get('consultationId')
-      const patientId = params.get('patientId') || patientData?.id
-      const doctorId = params.get('doctorId')
-      const patientName = getReportPatient().nomComplet || getReportPatient().nom
 
-      if (!consultationId || !patientId) {
-        toast({
-          title: "Error",
-          description: "Missing consultation or patient information",
-          variant: "destructive"
-        })
-        return
-      }
-
-      // Save final version to consultation_reports table
-      const saveResponse = await fetch('/api/save-medical-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          consultationId,
-          patientId,
-          doctorId,
-          doctorName: doctorInfo.nom,
-          patientName: patientName,
-          report: report,
-          action: 'finalize',
-          metadata: {
-            wordCount: getReportMetadata().wordCount,
-            signatures: documentSignatures,
-            validationStatus: 'validated',
-            finalizedAt: new Date().toISOString()
-          },
-          patientData: patientData,
-          clinicalData: clinicalData,
-          diagnosisData: diagnosisData
-        })
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to save final report')
-      }
-
-      // Mark draft as finalized
-      await fetch('/api/save-draft', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          consultationId,
-          reportContent: {
-            ...report,
-            compteRendu: {
-              ...report.compteRendu,
-              metadata: {
-                ...report.compteRendu.metadata,
-                finalized: true,
-                finalizedAt: new Date().toISOString()
-              }
-            }
-          },
-          doctorInfo,
-          modifiedSections: []
-        })
-      })
-
-      const getTibokUrl = () => {
-        const urlParam = params.get('tibokUrl')
-        if (urlParam) {
-          console.log('📍 Using Tibok URL from parameter:', decodeURIComponent(urlParam))
-          return decodeURIComponent(urlParam)
-        }
-
-        if (document.referrer) {
-          try {
-            const referrerUrl = new URL(document.referrer)
-            const knownTibokDomains = ['tibok.mu', 'v0-tibokmain2.vercel.app', 'localhost']
-            if (knownTibokDomains.some(domain => referrerUrl.hostname.includes(domain))) {
-              console.log('📍 Using Tibok URL from referrer:', referrerUrl.origin)
-              return referrerUrl.origin
-            }
-          } catch (e) {
-            console.log('Could not parse referrer')
-          }
-        }
-
-        if (process.env.NEXT_PUBLIC_TIBOK_URL) {
-          console.log('📍 Using Tibok URL from environment:', process.env.NEXT_PUBLIC_TIBOK_URL)
-          return process.env.NEXT_PUBLIC_TIBOK_URL
-        }
-
-        console.log('📍 Using default Tibok URL: https://tibok.mu')
-        return 'https://tibok.mu'
-      }
-
-      const tibokUrl = getTibokUrl()
-
-      const documentsPayload = {
+    // Save final version to consultation_reports table
+    const saveResponse = await fetch('/api/save-medical-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         consultationId,
         patientId,
         doctorId,
         doctorName: doctorInfo.nom,
         patientName: patientName,
-        generatedAt: new Date().toISOString(),
-        documents: {
-          consultationReport: report.compteRendu ? {
-            type: 'consultation_report',
-            title: 'Medical Consultation Report',
-            content: report.compteRendu,
-            validated: true,
-            validatedAt: report.compteRendu.metadata.validatedAt,
-            signature: documentSignatures.consultation
-          } : null,
-          prescriptions: report.ordonnances?.medicaments ? {
-            type: 'prescription',
-            title: 'Medical Prescription',
-            medications: report.ordonnances.medicaments.prescription.medicaments,
-            validity: report.ordonnances.medicaments.prescription.validite,
-            signature: documentSignatures.prescription,
-            content: report.ordonnances.medicaments
-          } : null,
-          laboratoryRequests: report.ordonnances?.biologie ? {
-            type: 'laboratory_request',
-            title: 'Laboratory Request Form',
-            tests: report.ordonnances.biologie.prescription.analyses,
-            signature: documentSignatures.laboratory,
-            content: report.ordonnances.biologie
-          } : null,
-          imagingRequests: report.ordonnances?.imagerie ? {
-            type: 'imaging_request',
-            title: 'Radiology Request Form',
-            examinations: report.ordonnances.imagerie.prescription.examens,
-            signature: documentSignatures.imaging,
-            content: report.ordonnances.imagerie
-          } : null,
-          invoice: report.invoice ? {
-            type: 'invoice',
-            title: `Invoice ${report.invoice.header.invoiceNumber}`,
-            content: report.invoice,
-            signature: documentSignatures.invoice
-          } : null
+        report: report,
+        action: 'finalize',
+        metadata: {
+          wordCount: getReportMetadata().wordCount,
+          signatures: documentSignatures,
+          validationStatus: 'validated',
+          finalizedAt: new Date().toISOString()
+        },
+        patientData: {
+          ...patientData,
+          email: patient.email,
+          phone: patient.telephone,
+          address: patient.adresse
+        },
+        clinicalData: clinicalData,
+        diagnosisData: diagnosisData
+      })
+    })
+
+    if (!saveResponse.ok) {
+      const errorData = await saveResponse.json()
+      // Check if it's a validation error
+      if (errorData.validationError) {
+        toast({
+          title: "❌ Validation Failed",
+          description: errorData.error || "Document validation failed",
+          variant: "destructive"
+        })
+        return
+      }
+      throw new Error(errorData.error || 'Failed to save final report')
+    }
+
+    // Mark draft as finalized
+    await fetch('/api/save-draft', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        consultationId,
+        reportContent: {
+          ...report,
+          compteRendu: {
+            ...report.compteRendu,
+            metadata: {
+              ...report.compteRendu.metadata,
+              finalized: true,
+              finalizedAt: new Date().toISOString()
+            }
+          }
+        },
+        doctorInfo,
+        modifiedSections: []
+      })
+    })
+
+    const getTibokUrl = () => {
+      const urlParam = params.get('tibokUrl')
+      if (urlParam) {
+        console.log('📍 Using Tibok URL from parameter:', decodeURIComponent(urlParam))
+        return decodeURIComponent(urlParam)
+      }
+
+      if (document.referrer) {
+        try {
+          const referrerUrl = new URL(document.referrer)
+          const knownTibokDomains = ['tibok.mu', 'v0-tibokmain2.vercel.app', 'localhost']
+          if (knownTibokDomains.some(domain => referrerUrl.hostname.includes(domain))) {
+            console.log('📍 Using Tibok URL from referrer:', referrerUrl.origin)
+            return referrerUrl.origin
+          }
+        } catch (e) {
+          console.log('Could not parse referrer')
         }
       }
 
-      console.log('📦 Sending documents payload to:', tibokUrl)
-
-      const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(documentsPayload)
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('❌ Tibok API error:', errorText)
-        throw new Error(`Failed to send documents: ${response.status} - ${errorText}`)
+      if (process.env.NEXT_PUBLIC_TIBOK_URL) {
+        console.log('📍 Using Tibok URL from environment:', process.env.NEXT_PUBLIC_TIBOK_URL)
+        return process.env.NEXT_PUBLIC_TIBOK_URL
       }
 
-      const result = await response.json()
-      console.log('✅ API Response:', result)
-
-      if (result.success) {
-        toast({
-          title: "✅ Documents envoyés avec succès",
-          description: "Les documents sont maintenant disponibles dans le tableau de bord du patient"
-        })
-
-        showSuccessModal()
-        
-      } else {
-        throw new Error(result.error || "Failed to send documents")
-      }
-    } catch (error) {
-      console.error("❌ Error sending documents:", error)
-      toast({
-        title: "Error sending documents",
-        description: error instanceof Error ? error.message : "An error occurred while sending documents",
-        variant: "destructive"
-      })
+      console.log('📍 Using default Tibok URL: https://tibok.mu')
+      return 'https://tibok.mu'
     }
+
+    const tibokUrl = getTibokUrl()
+
+    const documentsPayload = {
+      consultationId,
+      patientId,
+      doctorId,
+      doctorName: doctorInfo.nom,
+      patientName: patientName,
+      patientEmail: patient.email, // Add patient email
+      patientPhone: patient.telephone, // Add patient phone
+      generatedAt: new Date().toISOString(),
+      documents: {
+        consultationReport: report.compteRendu ? {
+          type: 'consultation_report',
+          title: 'Medical Consultation Report',
+          content: report.compteRendu,
+          validated: true,
+          validatedAt: report.compteRendu.metadata.validatedAt,
+          signature: documentSignatures.consultation
+        } : null,
+        prescriptions: report.ordonnances?.medicaments ? {
+          type: 'prescription',
+          title: 'Medical Prescription',
+          medications: report.ordonnances.medicaments.prescription.medicaments,
+          validity: report.ordonnances.medicaments.prescription.validite,
+          signature: documentSignatures.prescription,
+          content: report.ordonnances.medicaments
+        } : null,
+        laboratoryRequests: report.ordonnances?.biologie ? {
+          type: 'laboratory_request',
+          title: 'Laboratory Request Form',
+          tests: report.ordonnances.biologie.prescription.analyses,
+          signature: documentSignatures.laboratory,
+          content: report.ordonnances.biologie
+        } : null,
+        imagingRequests: report.ordonnances?.imagerie ? {
+          type: 'imaging_request',
+          title: 'Radiology Request Form',
+          examinations: report.ordonnances.imagerie.prescription.examens,
+          signature: documentSignatures.imaging,
+          content: report.ordonnances.imagerie
+        } : null,
+        invoice: report.invoice ? {
+          type: 'invoice',
+          title: `Invoice ${report.invoice.header.invoiceNumber}`,
+          content: report.invoice,
+          signature: documentSignatures.invoice
+        } : null
+      }
+    }
+
+    console.log('📦 Sending documents payload to:', tibokUrl)
+
+    const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(documentsPayload)
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('❌ Tibok API error:', errorText)
+      throw new Error(`Failed to send documents: ${response.status} - ${errorText}`)
+    }
+
+    const result = await response.json()
+    console.log('✅ API Response:', result)
+
+    if (result.success) {
+      toast({
+        title: "✅ Documents envoyés avec succès",
+        description: "Les documents sont maintenant disponibles dans le tableau de bord du patient"
+      })
+
+      showSuccessModal()
+      
+    } else {
+      throw new Error(result.error || "Failed to send documents")
+    }
+  } catch (error) {
+    console.error("❌ Error sending documents:", error)
+    toast({
+      title: "Error sending documents",
+      description: error instanceof Error ? error.message : "An error occurred while sending documents",
+      variant: "destructive"
+    })
   }
+}
   const showSuccessModal = () => {
     const modalContainer = document.createElement('div')
     modalContainer.id = 'success-modal'
