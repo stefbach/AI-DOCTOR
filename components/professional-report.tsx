@@ -675,6 +675,11 @@ export default function ProfessionalReportEditable({
     invoice?: string
   }>({})
 
+    // Clear the report loaded flag on mount
+  useEffect(() => {
+    sessionStorage.removeItem('reportLoaded')
+  }, [])
+
 // ==================== SAFE GETTERS ====================
 const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
 const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
@@ -1674,65 +1679,77 @@ useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const consultationId = params.get('consultationId')
     
-    if (!consultationId) return
+    if (!consultationId) {
+      console.log('No consultationId, will generate new report')
+      return false // Return false to indicate no report loaded
+    }
     
     try {
       const response = await fetch(`/api/save-medical-report?consultationId=${consultationId}`)
       
-      if (response.ok) {
-        const result = await response.json()
-        if (result.success && result.data?.content) {
-          console.log('📄 Loading existing report from database')
-          console.log('📊 Loaded content structure:', Object.keys(result.data.content))
-          
-          const loadedContent = result.data.content
-          
-          // The data structure from Supabase has consultationReport, prescriptions, etc.
-          if (loadedContent.consultationReport) {
-            const loadedReport = {
-              compteRendu: loadedContent.consultationReport,
-              ordonnances: loadedContent.prescriptions || {},
-              invoice: loadedContent.invoice || null
-            }
-            
-            // Apply the loaded report
-            setReport(loadedReport)
-            
-            // If there's doctor info in the loaded data, use it
-            if (loadedContent.consultationReport?.praticien) {
-              setDoctorInfo(loadedContent.consultationReport.praticien)
-              sessionStorage.setItem('currentDoctorInfo', JSON.stringify(loadedContent.consultationReport.praticien))
-            }
-            
-            // Load other data if available
-            if (loadedContent.editedSections) {
-              setModifiedSections(new Set(loadedContent.editedSections))
-            }
-            
-            setValidationStatus(result.data.status === 'validated' ? 'validated' : 'draft')
-            setDocumentSignatures(result.data.signatures || {})
-            
-            toast({
-              title: "Report loaded",
-              description: "Previous report data has been restored from database",
-              duration: 3000
-            })
-            
-            console.log('✅ Report successfully loaded from database')
-          } else {
-            console.log('ℹ️ No consultation report in loaded content, generating new one')
-          }
-        }
-      } else {
-        console.log('No existing report found, will generate new one')
+      if (!response.ok) {
+        console.log('Failed to fetch report, will generate new one')
+        return false
       }
+      
+      const result = await response.json()
+      
+      // Check if we have actual data
+      if (result.success && result.data && result.data.content && Object.keys(result.data.content).length > 0) {
+        console.log('📄 Loading existing report from database')
+        
+        const loadedContent = result.data.content
+        
+        // Check if there's actual report content
+        if (loadedContent.consultationReport && loadedContent.consultationReport.rapport) {
+          const loadedReport = {
+            compteRendu: loadedContent.consultationReport,
+            ordonnances: loadedContent.prescriptions || {},
+            invoice: loadedContent.invoice || null
+          }
+          
+          // Apply the loaded report
+          setReport(loadedReport)
+          
+          // Load doctor info if available
+          if (loadedContent.consultationReport?.praticien) {
+            setDoctorInfo(loadedContent.consultationReport.praticien)
+            sessionStorage.setItem('currentDoctorInfo', JSON.stringify(loadedContent.consultationReport.praticien))
+          }
+          
+          // Load other metadata
+          if (loadedContent.editedSections) {
+            setModifiedSections(new Set(loadedContent.editedSections))
+          }
+          
+          setValidationStatus(result.data.status === 'validated' ? 'validated' : 'draft')
+          setDocumentSignatures(result.data.signatures || {})
+          
+          toast({
+            title: "Report loaded",
+            description: "Previous report data has been restored",
+            duration: 3000
+          })
+          
+          console.log('✅ Report successfully loaded from database')
+          return true // Report was loaded
+        }
+      }
+      
+      console.log('No valid report content found, will generate new one')
+      return false
+      
     } catch (error) {
-      console.log('Error loading report:', error)
+      console.error('Error loading report:', error)
+      return false
     }
   }
   
-  // Load existing report before generating new one
-  loadExistingReport()
+  // Load and set a flag
+  loadExistingReport().then(reportLoaded => {
+    // Store whether a report was loaded
+    sessionStorage.setItem('reportLoaded', reportLoaded ? 'true' : 'false')
+  })
 }, [])
 
 // ==================== INITIAL DATA LOAD ====================
@@ -1744,32 +1761,29 @@ useEffect(() => {
     hasQuestionsData: !!questionsData
   })
   
-  // Add a flag to prevent double generation
+// Generate report only if needed
+useEffect(() => {
   const checkAndGenerate = async () => {
     const params = new URLSearchParams(window.location.search)
     const consultationId = params.get('consultationId')
     
-    // First, try to load existing report
-    if (consultationId) {
-      try {
-        const response = await fetch(`/api/save-medical-report?consultationId=${consultationId}`)
-        if (response.ok) {
-          const result = await response.json()
-          if (result.success && result.data?.content?.consultationReport) {
-            console.log('📄 Existing report found, skipping generation')
-            return // Don't generate new report if we have one
-          }
-        }
-      } catch (error) {
-        console.log('No existing report, will generate new one')
-      }
+    // Wait a bit to see if a report loads
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    // Check if a report was already loaded
+    const reportLoaded = sessionStorage.getItem('reportLoaded') === 'true'
+    
+    if (reportLoaded) {
+      console.log('📄 Report already loaded, skipping generation')
+      return
     }
     
-    // Only generate if no existing report was found
+    // Only generate if we have patient data
     if (patientData && (patientData.name || (patientData.firstName && patientData.lastName))) {
+      console.log('🚀 Generating new report')
       generateProfessionalReport()
-    } else {
-      console.warn("Insufficient patient data, creating empty report")
+    } else if (!report) {
+      console.warn("No patient data and no existing report, creating empty template")
       const emptyReport = createEmptyReport()
       if (patientData) {
         emptyReport.compteRendu.patient = {
@@ -1790,8 +1804,11 @@ useEffect(() => {
     }
   }
   
-  checkAndGenerate()
-}, [patientData, clinicalData, questionsData, diagnosisData])
+  // Only run if no report exists yet
+  if (!report) {
+    checkAndGenerate()
+  }
+}, [patientData, clinicalData, questionsData, diagnosisData, report])
   
   // ==================== GENERATE REPORT ====================
   const generateProfessionalReport = async () => {
