@@ -1068,63 +1068,100 @@ const handleManualSave = useCallback(async () => {
     }
   }
   
-  // Save to Supabase with the updated report
-  try {
-    const response = await fetch('/api/save-medical-report', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        consultationId,
-        patientId,
-        doctorId,
-        doctorName: doctorInfo.nom,
-        patientName: getReportPatient().nomComplet || getReportPatient().nom,
-        report: currentReport,
-        action: 'save',
-        metadata: {
-          wordCount: getReportMetadata().wordCount,
-          signatures: documentSignatures,
-          documentValidations: {},
-          modifiedSections: Array.from(modifiedSections)
-        },
-        // Include the original data for complete storage
-        patientData: patientData,
-        clinicalData: clinicalData,
-        diagnosisData: diagnosisData
-      })
-    })
-    
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.error || 'Failed to save report')
-    }
-    
-    const result = await response.json()
-    console.log('✅ Save successful:', result)
-    
-    setHasUnsavedChanges(false)
-    setSaveStatus('saved')
-    
-    setTimeout(() => {
-      setSaveStatus('idle')
-    }, 3000)
-    
+// Save to Supabase with the updated report
+try {
+  // Validate patient name before saving
+  const patientName = getReportPatient().nomComplet || getReportPatient().nom || ''
+  
+  // List of invalid patient names to reject
+  const invalidNames = [
+    'Patient', 
+    'Non spécifié', 
+    '1 janvier 1970', 
+    '01/01/1970',
+    '1 January 1970',
+    ''
+  ]
+  
+  // Check if the name looks like a date (e.g., "1 janvier 1970" or "01/01/1970")
+  const looksLikeDate = /^\d{1,2}[\s\/\-]\w+[\s\/\-]\d{4}$/.test(patientName) || 
+                        /^\d{4}[\-\/]\d{2}[\-\/]\d{2}$/.test(patientName) ||
+                        /^\d{1,2}[\s\/\-]\d{1,2}[\s\/\-]\d{4}$/.test(patientName)
+  
+  if (!patientName || invalidNames.includes(patientName) || looksLikeDate) {
+    console.error('❌ Invalid patient name detected:', patientName)
     toast({
-      title: "✅ Changes Saved",
-      description: "Your changes have been saved to the database",
-      duration: 3000
-    })
-    
-  } catch (error) {
-    console.error('Save error:', error)
-    setSaveStatus('idle')
-    toast({
-      title: "Error",
-      description: error instanceof Error ? error.message : "Failed to save changes",
+      title: "Cannot save report",
+      description: "Valid patient information is required. Please update patient details.",
       variant: "destructive"
     })
+    setSaveStatus('idle')
+    setHasUnsavedChanges(false) // Reset to prevent auto-save loop
+    return // Stop execution here
   }
+
+  // Also validate doctor name doesn't have duplicate "Dr."
+  let validatedDoctorName = doctorInfo.nom
+  if (validatedDoctorName.startsWith('Dr. Dr.')) {
+    validatedDoctorName = validatedDoctorName.replace('Dr. Dr.', 'Dr.')
+  }
+
+  const response = await fetch('/api/save-medical-report', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      consultationId,
+      patientId,
+      doctorId,
+      doctorName: validatedDoctorName, // Use cleaned doctor name
+      patientName: patientName, // Now validated
+      report: currentReport,
+      action: 'save',
+      metadata: {
+        wordCount: getReportMetadata().wordCount,
+        signatures: documentSignatures,
+        documentValidations: {},
+        modifiedSections: Array.from(modifiedSections)
+      },
+      // Include the original data for complete storage
+      patientData: patientData,
+      clinicalData: clinicalData,
+      diagnosisData: diagnosisData
+    })
+  })
+  
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error || 'Failed to save report')
+  }
+  
+  const result = await response.json()
+  console.log('✅ Save successful:', result)
+  
+  setHasUnsavedChanges(false)
+  setSaveStatus('saved')
+  
+  setTimeout(() => {
+    setSaveStatus('idle')
+  }, 3000)
+  
+  toast({
+    title: "✅ Changes Saved",
+    description: "Your changes have been saved to the database",
+    duration: 3000
+  })
+  
+} catch (error) {
+  console.error('Save error:', error)
+  setSaveStatus('idle')
+  toast({
+    title: "Error",
+    description: error instanceof Error ? error.message : "Failed to save changes",
+    variant: "destructive"
+  })
+}
 }, [hasUnsavedChanges, report, doctorInfo, patientData, clinicalData, diagnosisData, documentSignatures, modifiedSections, getReportPatient, getReportMetadata])
+  
   // ==================== KEYBOARD SHORTCUT FOR SAVE ====================
 useEffect(() => {
   const handleKeyDown = (e: KeyboardEvent) => {
