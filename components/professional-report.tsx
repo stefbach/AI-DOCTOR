@@ -1765,26 +1765,11 @@ useEffect(() => {
     if (patientData && (patientData.name || (patientData.firstName && patientData.lastName))) {
       console.log('🚀 Generating new report')
       generateProfessionalReport()
-    } else if (!report) {
-      console.warn("No patient data and no existing report, creating empty template")
-      const emptyReport = createEmptyReport()
-      if (patientData) {
-        emptyReport.compteRendu.patient = {
-          ...emptyReport.compteRendu.patient,
-          nom: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
-          nomComplet: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
-          age: patientData.age?.toString() || '',
-          dateNaissance: patientData.dateOfBirth || '',
-          sexe: patientData.gender || '',
-          adresse: patientData.address || '',
-          telephone: patientData.phone || '',
-          email: patientData.email || '',
-          poids: patientData.weight?.toString() || ''
-        }
-      }
-      setReport(emptyReport)
-      setLoading(false)
     }
+    // DELETE EVERYTHING FROM "else if (!report)" to the closing bracket
+    // No more creating empty reports!
+    
+    setLoading(false)
   }
   
   // Only run if no report exists yet
