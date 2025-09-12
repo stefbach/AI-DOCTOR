@@ -475,7 +475,7 @@ const MedicationEditForm = memo(({
   )
 })
 
-// 3. BiologyTestEditForm Component - WITH AUTO-SAVE
+// 3. BiologyTestEditForm Component - SAVE ON BLUR
 const BiologyTestEditForm = memo(({
   test,
   category,
@@ -503,94 +503,56 @@ const BiologyTestEditForm = memo(({
     delaiResultat: test.delaiResultat || 'Standard'
   })
 
-  const [hasLocalChanges, setHasLocalChanges] = useState(false)
-  const saveTimeoutRef = useRef<NodeJS.Timeout>()
-  const updateCallbackRef = useRef(onUpdate) // Store callback in ref
-
-  // Update the ref when callback changes
-  useEffect(() => {
-    updateCallbackRef.current = onUpdate
-  }, [onUpdate])
-
   const handleFieldChange = useCallback((field: string, value: any) => {
     setLocalTest(prev => ({ ...prev, [field]: value }))
-    setHasLocalChanges(true)
     if (onLocalChange) onLocalChange()
   }, [onLocalChange])
 
-  // Auto-save effect with longer debounce
+  // Save on blur (when clicking outside the input)
+  const handleBlur = useCallback(() => {
+    onUpdate(category, index, localTest)
+  }, [category, index, localTest, onUpdate])
+
+  // Store the pending data for manual save
   useEffect(() => {
-    if (!hasLocalChanges) return
-
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current)
+    const element = document.querySelector(`[data-biology-test="${category}-${index}"]`)
+    if (element) {
+      element.setAttribute('data-pending-test', JSON.stringify(localTest))
     }
-
-    // INCREASED TIMEOUT to 5 seconds to avoid interrupting typing
-    saveTimeoutRef.current = setTimeout(() => {
-      console.log(`Auto-saving lab test ${category}-${index}...`)
-      // Use the ref to avoid re-render issues
-      updateCallbackRef.current(category, index, localTest)
-      setHasLocalChanges(false)
-    }, 5000) // Increased from 2000ms to 5000ms
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current)
-      }
-    }
-  }, [localTest, category, index, hasLocalChanges])
-
-  // Save on unmount
-  useEffect(() => {
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current)
-      }
-      if (hasLocalChanges) {
-        console.log(`Saving lab test ${category}-${index} on unmount...`)
-        updateCallbackRef.current(category, index, localTest)
-      }
-    }
-  }, [hasLocalChanges, category, index, localTest])
+  }, [localTest, category, index])
 
   return (
     <div className="space-y-3 p-3" data-biology-test={`${category}-${index}`}>
-      {hasLocalChanges && (
-        <div className="text-xs text-yellow-600 flex items-center gap-1">
-          <Loader2 className="h-3 w-3 animate-spin" />
-          Changes will auto-save in a few seconds...
-        </div>
-      )}
-      
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label htmlFor={`test-nom-${category}-${index}`}>Test Name</Label>
+          <Label>Test Name</Label>
           <Input
-            id={`test-nom-${category}-${index}`}
             value={localTest.nom}
             onChange={(e) => handleFieldChange('nom', e.target.value)}
+            onBlur={handleBlur} // Save when clicking outside
             placeholder="e.g., Complete Blood Count"
-            autoComplete="off"
           />
         </div>
         <div>
-          <Label htmlFor={`test-motif-${category}-${index}`}>Clinical Indication</Label>
+          <Label>Clinical Indication</Label>
           <Input
-            id={`test-motif-${category}-${index}`}
             value={localTest.motifClinique}
             onChange={(e) => handleFieldChange('motifClinique', e.target.value)}
+            onBlur={handleBlur} // Save when clicking outside
             placeholder="e.g., Anemia evaluation"
-            autoComplete="off"
           />
         </div>
         <div>
-          <Label htmlFor={`test-tube-${category}-${index}`}>Sample Type</Label>
+          <Label>Sample Type</Label>
           <Select
             value={localTest.tubePrelevement}
-            onValueChange={(value) => handleFieldChange('tubePrelevement', value)}
+            onValueChange={(value) => {
+              handleFieldChange('tubePrelevement', value)
+              // Save immediately for selects
+              onUpdate(category, index, { ...localTest, tubePrelevement: value })
+            }}
           >
-            <SelectTrigger id={`test-tube-${category}-${index}`}>
+            <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -603,12 +565,16 @@ const BiologyTestEditForm = memo(({
           </Select>
         </div>
         <div>
-          <Label htmlFor={`test-delai-${category}-${index}`}>Turnaround Time</Label>
+          <Label>Turnaround Time</Label>
           <Select
             value={localTest.delaiResultat}
-            onValueChange={(value) => handleFieldChange('delaiResultat', value)}
+            onValueChange={(value) => {
+              handleFieldChange('delaiResultat', value)
+              // Save immediately for selects
+              onUpdate(category, index, { ...localTest, delaiResultat: value })
+            }}
           >
-            <SelectTrigger id={`test-delai-${category}-${index}`}>
+            <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -620,63 +586,46 @@ const BiologyTestEditForm = memo(({
         </div>
       </div>
       <div>
-        <Label htmlFor={`test-conditions-${category}-${index}`}>Special Conditions</Label>
+        <Label>Special Conditions</Label>
         <Input
-          id={`test-conditions-${category}-${index}`}
           value={localTest.conditionsPrelevement}
           onChange={(e) => handleFieldChange('conditionsPrelevement', e.target.value)}
+          onBlur={handleBlur} // Save when clicking outside
           placeholder="e.g., Early morning sample required"
-          autoComplete="off"
         />
       </div>
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
           <div className="flex items-center space-x-2">
             <Switch
-              id={`test-urgence-${category}-${index}`}
               checked={localTest.urgence}
-              onCheckedChange={(checked) => handleFieldChange('urgence', checked)}
+              onCheckedChange={(checked) => {
+                handleFieldChange('urgence', checked)
+                // Save immediately for switches
+                onUpdate(category, index, { ...localTest, urgence: checked })
+              }}
             />
-            <Label htmlFor={`test-urgence-${category}-${index}`}>Urgent</Label>
+            <Label>Urgent</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Switch
-              id={`test-ajeun-${category}-${index}`}
               checked={localTest.aJeun}
-              onCheckedChange={(checked) => handleFieldChange('aJeun', checked)}
+              onCheckedChange={(checked) => {
+                handleFieldChange('aJeun', checked)
+                // Save immediately for switches
+                onUpdate(category, index, { ...localTest, aJeun: checked })
+              }}
             />
-            <Label htmlFor={`test-ajeun-${category}-${index}`}>Fasting required</Label>
+            <Label>Fasting required</Label>
           </div>
         </div>
-        <div className="flex gap-2">
-          {hasLocalChanges && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                updateCallbackRef.current(category, index, localTest)
-                setHasLocalChanges(false)
-                toast({
-                  title: "Lab test saved",
-                  description: "Changes have been saved",
-                  duration: 2000
-                })
-              }}
-              type="button"
-            >
-              <Save className="h-4 w-4 mr-1" />
-              Save Now
-            </Button>
-          )}
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => onRemove(category, index)}
-            type="button"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => onRemove(category, index)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   )
@@ -961,88 +910,36 @@ export default function ProfessionalReportEditable({
     trackModification(`rapport.${section}`)
   }, [validationStatus, trackModification])
 
-  // ==================== BATCH UPDATE FUNCTIONS (AFTER trackModification) ====================
-  const updateMedicamentBatch = useCallback((index: number, updatedMedication: any) => {
-    if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
+const updateBiologyTestBatch = useCallback((category: string, index: number, updatedTest: any) => {
+  if (validationStatus === 'validated') return
+  
+  setReport(prev => {
+    if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
     
-    setReport(prev => {
-      if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
-      
-      const newMedicaments = [...prev.ordonnances.medicaments.prescription.medicaments]
-      newMedicaments[index] = updatedMedication
-      
-      return {
-        ...prev,
-        ordonnances: {
-          ...prev.ordonnances,
-          medicaments: {
-            ...prev.ordonnances.medicaments,
-            prescription: {
-              ...prev.ordonnances.medicaments.prescription,
-              medicaments: newMedicaments
-            }
+    // Create new references only for what's being updated
+    const newAnalyses = { ...prev.ordonnances.biologie.prescription.analyses }
+    const categoryTests = [...newAnalyses[category]]
+    categoryTests[index] = updatedTest
+    newAnalyses[category] = categoryTests
+    
+    return {
+      ...prev,
+      ordonnances: {
+        ...prev.ordonnances,
+        biologie: {
+          ...prev.ordonnances.biologie,
+          prescription: {
+            ...prev.ordonnances.biologie.prescription,
+            analyses: newAnalyses
           }
         }
       }
-    })
-    
-    trackModification(`medicament.${index}`)
-  }, [validationStatus, report?.ordonnances?.medicaments, trackModification])
-
-  const updateBiologyTestBatch = useCallback((category: string, index: number, updatedTest: any) => {
-    if (validationStatus === 'validated') return
-    
-    setReport(prev => {
-      if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
-      
-      const newAnalyses = { ...prev.ordonnances.biologie.prescription.analyses }
-      newAnalyses[category] = [...newAnalyses[category]]
-      newAnalyses[category][index] = updatedTest
-      
-      return {
-        ...prev,
-        ordonnances: {
-          ...prev.ordonnances,
-          biologie: {
-            ...prev.ordonnances.biologie,
-            prescription: {
-              ...prev.ordonnances.biologie.prescription,
-              analyses: newAnalyses
-            }
-          }
-        }
-      }
-    })
-    
-    trackModification(`biologie.${category}.${index}`)
-  }, [validationStatus, trackModification])
-
-  const updateImagingExamBatch = useCallback((index: number, updatedExam: any) => {
-    if (validationStatus === 'validated') return
-    
-    setReport(prev => {
-      if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
-      
-      const newExamens = [...prev.ordonnances.imagerie.prescription.examens]
-      newExamens[index] = updatedExam
-      
-      return {
-        ...prev,
-        ordonnances: {
-          ...prev.ordonnances,
-          imagerie: {
-            ...prev.ordonnances.imagerie,
-            prescription: {
-              ...prev.ordonnances.imagerie.prescription,
-              examens: newExamens
-            }
-          }
-        }
-      }
-    })
-    
-    trackModification(`imagerie.${index}`)
-  }, [validationStatus, trackModification])
+    }
+  })
+  
+  // Remove trackModification from here - only track on blur/save
+  // trackModification(`biologie.${category}.${index}`)
+}, [validationStatus]) // Remove trackModification from dependencies
 
   // ==================== DRAFT SAVE FUNCTIONS ====================
   const saveDraft = useCallback(async () => {
