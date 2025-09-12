@@ -6,10 +6,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { consultationId, reportContent, doctorInfo, modifiedSections, patientId, doctorId } = body
     
-    // Fix: Use correct environment variable name
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY! // Changed from SUPABASE_SERVICE_KEY
+      process.env.SUPABASE_SERVICE_ROLE_KEY! // ← FIXED: Changed from SUPABASE_SERVICE_KEY
     )
     
     const { data, error } = await supabase
@@ -48,10 +47,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Missing consultationId' }, { status: 400 })
     }
     
-    // Fix: Use correct environment variable name
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY! // Changed from SUPABASE_SERVICE_KEY
+      process.env.SUPABASE_SERVICE_ROLE_KEY! // ← FIXED: Changed from SUPABASE_SERVICE_KEY
     )
     
     const { data, error } = await supabase
@@ -60,12 +58,11 @@ export async function GET(request: NextRequest) {
       .eq('consultation_id', consultationId)
       .single()
     
-    if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found
-      console.error('Error fetching draft:', error)
+    if (error && error.code !== 'PGRST116') {
+      console.error('Supabase error:', error)
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
     
-    // Return consistent response structure
     return NextResponse.json({ 
       success: true, 
       data: data || null 
