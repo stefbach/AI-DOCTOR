@@ -1760,6 +1760,7 @@ useEffect(() => {
     hasDiagnosisData: !!diagnosisData,
     hasQuestionsData: !!questionsData
   })
+}, []) 
   
 // Generate report only if needed
 useEffect(() => {
