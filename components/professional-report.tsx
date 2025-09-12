@@ -1233,15 +1233,26 @@ useEffect(() => {
 
 // Auto-save every 30 seconds if there are unsaved changes
 useEffect(() => {
+  if (validationStatus === 'validated') return
+  
   const autoSaveInterval = setInterval(() => {
-    if (hasUnsavedChanges && !saving && validationStatus !== 'validated') {
-      console.log('⏰ Auto-saving changes...')
+    // CRITICAL: Check patient data validity FIRST
+    if (!report?.compteRendu?.patient?.nom || 
+        report.compteRendu.patient.nom === '' ||
+        report.compteRendu.patient.nom === 'Patient' ||
+        report.compteRendu.patient.nom.includes('1970')) {
+      console.log('⏭️ Skipping auto-save - invalid patient in report:', report?.compteRendu?.patient?.nom)
+      return
+    }
+    
+    if (hasUnsavedChanges && report) {
+      console.log('💾 Auto-saving...')
       handleManualSave()
     }
-  }, 30000) // 30 seconds
-  
+  }, 30000)
+
   return () => clearInterval(autoSaveInterval)
-}, [hasUnsavedChanges, saving, validationStatus, handleManualSave])
+}, [hasUnsavedChanges, handleManualSave, validationStatus, report])
 
 // ==================== AI ASSISTANT CALLBACK FUNCTIONS ====================
 // Immediate update function for AI (no debounce)
@@ -1852,12 +1863,19 @@ const doctorInfoFromTibok = {
   adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
   email: tibokDoctorData.email || '[Email Required]',
   heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
-  numeroEnregistrement: String(
-    tibokDoctorData.mcm_reg_no ||  // CHECK YOUR DB COLUMN FIRST
-    tibokDoctorData.medicalCouncilNumber || 
-    tibokDoctorData.medical_council_number || 
-    '[MCM Registration Required]'
-  )
+  numeroEnregistrement: (() => {
+    // Check each field and ensure it's not empty
+    const mcmNumber = tibokDoctorData.mcm_reg_no || 
+                      tibokDoctorData.medicalCouncilNumber || 
+                      tibokDoctorData.medical_council_number ||
+                      tibokDoctorData.license_number || 
+                      ''
+    
+    // Only use the value if it's not empty
+    return mcmNumber && mcmNumber.trim() !== '' 
+      ? String(mcmNumber) 
+      : '[MCM Registration Required]'
+  })()
 }
 
 console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
