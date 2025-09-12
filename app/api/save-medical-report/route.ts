@@ -39,13 +39,17 @@ function validatePatientData(patientName: string, patientData: any): { isValid: 
   }
   
   // Check for valid phone if provided
-  if (patientData?.phone) {
-    // Remove spaces and special characters for validation
-    const cleanPhone = patientData.phone.replace(/[\s\-\(\)]/g, '')
-    if (cleanPhone.length < 7 || cleanPhone === '00000000') {
-      return { isValid: false, error: "Invalid patient phone number" }
-    }
+if (patientData?.phone) {
+  const digitsOnly = (patientData.phone || '').replace(/\D/g, '')
+  // Only fail if there are NO digits at all
+  if (digitsOnly.length === 0) {
+    return { isValid: false, error: "Phone number required" }
   }
+  // Accept partial numbers but log them
+  if (digitsOnly.length < 7) {
+    console.log('⚠️ Partial phone number accepted:', patientData.phone, `(${digitsOnly.length} digits)`)
+  }
+}
   
   return { isValid: true }
 }
