@@ -781,16 +781,32 @@ const updateImagingExamBatch = useCallback((index: number, updatedExam: any) => 
 }, [validationStatus, trackModification])
 
 // ==================== MANUAL SAVE FUNCTION (AFTER ALL DEPENDENCIES) ====================
-const handleManualSave = useCallback(() => {
+const handleManualSave = useCallback(async () => {
   if (!hasUnsavedChanges) return
   
   setSaveStatus('saving')
   
-  // Save all textarea sections by getting their current values directly
+  // Get consultation ID from URL params
+  const params = new URLSearchParams(window.location.search)
+  const consultationId = params.get('consultationId')
+  const patientId = params.get('patientId') || patientData?.id
+  const doctorId = params.get('doctorId')
+  
+  if (!consultationId || !patientId) {
+    toast({
+      title: "Error",
+      description: "Missing consultation or patient information",
+      variant: "destructive"
+    })
+    setSaveStatus('idle')
+    return
+  }
+  
+  // Save all textarea sections by getting their current values
   const textareas = document.querySelectorAll('textarea[data-section]')
   textareas.forEach((textarea: HTMLTextAreaElement) => {
     const section = textarea.getAttribute('data-section')
-    const value = textarea.value // Get the actual current value from the textarea
+    const value = textarea.value
     if (section && value !== undefined) {
       updateRapportSection(section, value)
     }
@@ -804,13 +820,7 @@ const handleManualSave = useCallback(() => {
     if (pendingData) {
       try {
         const medicationData = JSON.parse(pendingData)
-        const updatedMed = {
-          ...medicationData,
-          ligneComplete: `${medicationData.nom} ${medicationData.dosage ? `- ${medicationData.dosage}` : ''}\n` +
-                        `${medicationData.posologie} - ${medicationData.modeAdministration}\n` +
-                        `Duration: ${medicationData.dureeTraitement} - Quantity: ${medicationData.quantite}`
-        }
-        updateMedicamentBatch(index, updatedMed)
+        updateMedicamentBatch(index, medicationData)
       } catch (e) {
         console.error('Error parsing medication data:', e)
       }
@@ -848,19 +858,63 @@ const handleManualSave = useCallback(() => {
     }
   })
   
-  setHasUnsavedChanges(false)
-  setSaveStatus('saved')
-  
-  setTimeout(() => {
+  // Save to Supabase
+  try {
+    const response = await fetch('/api/save-medical-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        consultationId,
+        patientId,
+        doctorId,
+        doctorName: doctorInfo.nom,
+        patientName: getReportPatient().nomComplet || getReportPatient().nom,
+        report,
+        action: 'save',
+        metadata: {
+          wordCount: getReportMetadata().wordCount,
+          signatures: documentSignatures,
+          documentValidations: {},
+          modifiedSections: Array.from(modifiedSections)
+        },
+        // Include the original data for complete storage
+        patientData: patientData,
+        clinicalData: clinicalData,
+        diagnosisData: diagnosisData
+      })
+    })
+    
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.error || 'Failed to save report')
+    }
+    
+    const result = await response.json()
+    console.log('✅ Save successful:', result)
+    
+    setHasUnsavedChanges(false)
+    setSaveStatus('saved')
+    
+    setTimeout(() => {
+      setSaveStatus('idle')
+    }, 3000)
+    
+    toast({
+      title: "✅ Changes Saved",
+      description: "Your changes have been saved to the database",
+      duration: 3000
+    })
+    
+  } catch (error) {
+    console.error('Save error:', error)
     setSaveStatus('idle')
-  }, 3000)
-  
-  toast({
-    title: "✅ Changes Saved",
-    description: "All your changes have been saved successfully",
-    duration: 3000
-  })
-}, [hasUnsavedChanges, updateRapportSection, updateMedicamentBatch, updateBiologyTestBatch, updateImagingExamBatch])
+    toast({
+      title: "Error",
+      description: error instanceof Error ? error.message : "Failed to save changes",
+      variant: "destructive"
+    })
+  }
+}, [hasUnsavedChanges, report, doctorInfo, patientData, clinicalData, diagnosisData, documentSignatures, modifiedSections, updateRapportSection, updateMedicamentBatch, updateBiologyTestBatch, updateImagingExamBatch, getReportPatient, getReportMetadata])
 
 // ==================== KEYBOARD SHORTCUT FOR SAVE ====================
 useEffect(() => {
@@ -876,6 +930,18 @@ useEffect(() => {
   window.addEventListener('keydown', handleKeyDown)
   return () => window.removeEventListener('keydown', handleKeyDown)
 }, [hasUnsavedChanges, handleManualSave])
+
+  // Auto-save every 30 seconds if there are unsaved changes
+useEffect(() => {
+  const autoSaveInterval = setInterval(() => {
+    if (hasUnsavedChanges && !saving && validationStatus !== 'validated') {
+      console.log('⏰ Auto-saving changes...')
+      handleManualSave()
+    }
+  }, 30000) // 30 seconds
+  
+  return () => clearInterval(autoSaveInterval)
+}, [hasUnsavedChanges, saving, validationStatus, handleManualSave])
 
 // ==================== AI ASSISTANT CALLBACK FUNCTIONS ====================
 // Immediate update function for AI (no debounce)
@@ -1512,6 +1578,55 @@ const removeImagingExam = useCallback((index: number) => {
       }
     }
   }, [])
+
+  // Load existing report from database
+useEffect(() => {
+  const loadExistingReport = async () => {
+    const params = new URLSearchParams(window.location.search)
+    const consultationId = params.get('consultationId')
+    
+    if (!consultationId) return
+    
+    try {
+      const response = await fetch(`/api/save-medical-report?consultationId=${consultationId}`)
+      
+      if (response.ok) {
+        const result = await response.json()
+        if (result.success && result.data?.content) {
+          console.log('📄 Loading existing report from database')
+          
+          // Check if content has the expected structure
+          const loadedContent = result.data.content
+          
+          // If we have a complete report structure, use it
+          if (loadedContent.consultationReport || loadedContent.prescriptions) {
+            setReport({
+              compteRendu: loadedContent.consultationReport || createEmptyReport().compteRendu,
+              ordonnances: loadedContent.prescriptions || {},
+              invoice: loadedContent.invoice || null
+            })
+          }
+          
+          setValidationStatus(result.data.status === 'validated' ? 'validated' : 'draft')
+          setDocumentSignatures(result.data.signatures || {})
+          
+          toast({
+            title: "Report loaded",
+            description: "Previous report data has been restored",
+            duration: 3000
+          })
+        }
+      } else {
+        console.log('No existing report found, will generate new one')
+      }
+    } catch (error) {
+      console.log('No existing report found or error loading:', error)
+    }
+  }
+  
+  // Load existing report before generating new one
+  loadExistingReport()
+}, [])
 
   // ==================== INITIAL DATA LOAD ====================
   useEffect(() => {
