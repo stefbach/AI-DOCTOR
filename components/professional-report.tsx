@@ -144,9 +144,10 @@ const createEmptyReport = (): MauritianReport => ({
     }
   }
 })
-// ==================== FIXED DEBOUNCED COMPONENTS WITH MANUAL SAVE ====================
 
-// 1. Updated DebouncedTextarea without auto-save
+// ==================== MEMOIZED COMPONENTS (OUTSIDE MAIN COMPONENT) ====================
+
+// 1. DebouncedTextarea Component
 const DebouncedTextarea = memo(({
   value,
   onUpdate,
@@ -163,8 +164,9 @@ const DebouncedTextarea = memo(({
   onLocalChange?: () => void
 }) => {
   const [localValue, setLocalValue] = useState(value)
+  const timeoutRef = useRef<NodeJS.Timeout>()
 
-  // Update local value when parent value changes (e.g., from database load)
+  // Update local value when parent value changes
   useEffect(() => {
     setLocalValue(value)
   }, [value])
@@ -173,14 +175,28 @@ const DebouncedTextarea = memo(({
     const newValue = e.target.value
     setLocalValue(newValue)
     
-    // Update parent immediately - this ensures the value is always saved
-    onUpdate(newValue)
-    
-    // Notify that there are unsaved changes
-    if (onLocalChange) {
-      onLocalChange()
+    // Clear existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
     }
+    
+    // Debounce the parent update
+    timeoutRef.current = setTimeout(() => {
+      onUpdate(newValue)
+      if (onLocalChange) {
+        onLocalChange()
+      }
+    }, 500)
   }, [onUpdate, onLocalChange])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
 
   return (
     <Textarea
@@ -189,12 +205,11 @@ const DebouncedTextarea = memo(({
       className={className}
       placeholder={placeholder}
       data-section={sectionKey}
-      autoFocus={false}
     />
   )
 })
 
-// 2. Updated Medication Input Component with manual save
+// 2. MedicationEditForm Component
 const MedicationEditForm = memo(({
   medication,
   index,
@@ -361,7 +376,8 @@ const MedicationEditForm = memo(({
     </div>
   )
 })
-// 3. Updated Biology Test Input Component with manual save
+
+// 3. BiologyTestEditForm Component
 const BiologyTestEditForm = memo(({
   test,
   category,
@@ -493,7 +509,7 @@ const BiologyTestEditForm = memo(({
   )
 })
 
-// 4. Updated Imaging Exam Input Component with manual save
+// 4. ImagingExamEditForm Component
 const ImagingExamEditForm = memo(({
   exam,
   index,
@@ -615,10 +631,11 @@ const ImagingExamEditForm = memo(({
 })
 
 // Set display names for debugging
+DebouncedTextarea.displayName = 'DebouncedTextarea'
 MedicationEditForm.displayName = 'MedicationEditForm'
 BiologyTestEditForm.displayName = 'BiologyTestEditForm'
 ImagingExamEditForm.displayName = 'ImagingExamEditForm'
-DebouncedTextarea.displayName = 'DebouncedTextarea'
+
 // ==================== MAIN COMPONENT ====================
 export default function ProfessionalReportEditable({
   patientData,
@@ -628,6 +645,7 @@ export default function ProfessionalReportEditable({
   editedDocuments,
   onComplete
 }: ProfessionalReportProps) {
+
   // ==================== STATE MANAGEMENT ====================
   const [report, setReport] = useState<MauritianReport | null>(null)
   const [reportId, setReportId] = useState<string | null>(null)
