@@ -164,6 +164,7 @@ const DebouncedTextarea = memo(({
 }) => {
   const [localValue, setLocalValue] = useState(value)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Update local value when parent value changes
   useEffect(() => {
@@ -173,11 +174,30 @@ const DebouncedTextarea = memo(({
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value
     setLocalValue(newValue)
-    onUpdate(newValue) // Add this line to immediately update parent
+    
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+    
+    // Set a new timeout to update parent after user stops typing
+    timeoutRef.current = setTimeout(() => {
+      onUpdate(newValue)
+    }, 500) // Wait 500ms after user stops typing
+    
     if (onLocalChange) {
-      onLocalChange()
+      onLocalChange() // Notify parent of unsaved changes
     }
   }, [onUpdate, onLocalChange])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
 
   return (
     <Textarea
