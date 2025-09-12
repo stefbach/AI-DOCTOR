@@ -24,34 +24,32 @@ export async function GET(request: NextRequest) {
       .from('consultation_records')
       .select('*')
       .eq('consultation_id', consultationId)
-      .single()
+      .maybeSingle() // Changed from .single() to .maybeSingle()
 
-    if (error) {
+    if (error && error.code !== 'PGRST116') {
       console.error('Supabase GET error:', error)
-      if (error.code === 'PGRST116') {
-        // No record found
-        return NextResponse.json({
-          success: false,
-          error: "No report found"
-        }, { status: 404 })
-      }
-      throw error
-    }
-
-    if (!data) {
       return NextResponse.json({
         success: false,
-        error: "No report found"
-      }, { status: 404 })
+        error: error.message
+      }, { status: 500 })
     }
 
-    // Return the data in the expected format
+    // If no data found, return empty success (not 404)
+    if (!data) {
+      console.log('No existing report found for consultation:', consultationId)
+      return NextResponse.json({
+        success: true,
+        data: null // Return null data instead of 404
+      })
+    }
+
+    // Return the data with proper structure
     return NextResponse.json({
       success: true,
       data: {
         id: data.id,
         consultationId: data.consultation_id,
-        content: data.documents_data || {},
+        content: data.documents_data || {}, // This contains the actual report
         prescriptionData: data.prescription_data || {},
         status: data.documents_status || 'draft',
         signatures: data.signatures || {},
@@ -69,7 +67,6 @@ export async function GET(request: NextRequest) {
     }, { status: 500 })
   }
 }
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
