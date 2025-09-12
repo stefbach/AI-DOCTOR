@@ -1,15 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
+// Use the same approach as save-medical-report - anon key!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { consultationId, reportContent, doctorInfo, modifiedSections, patientId, doctorId } = body
-    
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY! // ← FIXED: Changed from SUPABASE_SERVICE_KEY
-    )
     
     const { data, error } = await supabase
       .from('consultation_drafts')
@@ -47,16 +48,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Missing consultationId' }, { status: 400 })
     }
     
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY! // ← FIXED: Changed from SUPABASE_SERVICE_KEY
-    )
-    
     const { data, error } = await supabase
       .from('consultation_drafts')
       .select('*')
       .eq('consultation_id', consultationId)
-      .single()
+      .maybeSingle() // Changed to maybeSingle like save-medical-report
     
     if (error && error.code !== 'PGRST116') {
       console.error('Supabase error:', error)
