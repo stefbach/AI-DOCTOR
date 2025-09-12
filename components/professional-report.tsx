@@ -164,9 +164,8 @@ const DebouncedTextarea = memo(({
 }) => {
   const [localValue, setLocalValue] = useState(value)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Update local value when parent value changes
+  // Update local value when parent value changes (e.g., from database load)
   useEffect(() => {
     setLocalValue(value)
   }, [value])
@@ -175,29 +174,23 @@ const DebouncedTextarea = memo(({
     const newValue = e.target.value
     setLocalValue(newValue)
     
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
-    
-    // Set a new timeout to update parent after user stops typing
-    timeoutRef.current = setTimeout(() => {
-      onUpdate(newValue)
-    }, 500) // Wait 500ms after user stops typing
-    
+    // Just notify that there are unsaved changes
     if (onLocalChange) {
-      onLocalChange() // Notify parent of unsaved changes
+      onLocalChange()
     }
-  }, [onUpdate, onLocalChange])
+    
+    // Don't call onUpdate here at all - let the save button handle it
+  }, [onLocalChange])
 
-  // Cleanup timeout on unmount
+  // When component unmounts or when user navigates away, update the parent
   useEffect(() => {
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
+      // On unmount, ensure the parent has the latest value
+      if (textareaRef.current) {
+        onUpdate(textareaRef.current.value)
       }
     }
-  }, [])
+  }, [onUpdate])
 
   return (
     <Textarea
