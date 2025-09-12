@@ -474,7 +474,8 @@ const MedicationEditForm = memo(({
     </div>
   )
 })
-// 3. BiologyTestEditForm Component
+
+// 3. BiologyTestEditForm Component - WITH AUTO-SAVE
 const BiologyTestEditForm = memo(({
   test,
   category,
@@ -502,12 +503,51 @@ const BiologyTestEditForm = memo(({
     delaiResultat: test.delaiResultat || 'Standard'
   })
 
+  // ADD THIS: Track if there are changes
+  const [hasLocalChanges, setHasLocalChanges] = useState(false)
+  const saveTimeoutRef = useRef<NodeJS.Timeout>()
+
   const handleFieldChange = useCallback((field: string, value: any) => {
     setLocalTest(prev => ({ ...prev, [field]: value }))
+    setHasLocalChanges(true) // ADD THIS
     if (onLocalChange) onLocalChange()
   }, [onLocalChange])
 
-  // Store the pending data for manual save
+  // ADD THIS: Auto-save effect with debouncing
+  useEffect(() => {
+    if (!hasLocalChanges) return
+
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
+    // Set new timeout for auto-save
+    saveTimeoutRef.current = setTimeout(() => {
+      console.log(`Auto-saving lab test ${category}-${index}...`)
+      onUpdate(category, index, localTest)
+      setHasLocalChanges(false)
+    }, 2000) // Save after 2 seconds of inactivity
+
+    // Cleanup
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [localTest, category, index, onUpdate, hasLocalChanges])
+
+  // ADD THIS: Save on unmount if there are pending changes
+  useEffect(() => {
+    return () => {
+      if (hasLocalChanges) {
+        console.log(`Saving lab test ${category}-${index} on unmount...`)
+        onUpdate(category, index, localTest)
+      }
+    }
+  }, [hasLocalChanges, category, index, localTest, onUpdate])
+
+  // Store the pending data for manual save (keep as backup)
   useEffect(() => {
     const element = document.querySelector(`[data-biology-test="${category}-${index}"]`)
     if (element) {
@@ -517,6 +557,14 @@ const BiologyTestEditForm = memo(({
 
   return (
     <div className="space-y-3 p-3" data-biology-test={`${category}-${index}`}>
+      {/* ADD THIS: Visual indicator of unsaved changes */}
+      {hasLocalChanges && (
+        <div className="text-xs text-yellow-600 flex items-center gap-1">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          Auto-saving...
+        </div>
+      )}
+      
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label>Test Name</Label>
@@ -594,13 +642,35 @@ const BiologyTestEditForm = memo(({
             <Label>Fasting required</Label>
           </div>
         </div>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => onRemove(category, index)}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        <div className="flex gap-2">
+          {/* ADD THIS: Manual save button as backup */}
+          {hasLocalChanges && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                onUpdate(category, index, localTest)
+                setHasLocalChanges(false)
+                toast({
+                  title: "Lab test saved",
+                  description: "Changes have been saved",
+                  duration: 2000
+                })
+              }}
+              type="button"
+            >
+              <Save className="h-4 w-4" />
+            </Button>
+          )}
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => onRemove(category, index)}
+            type="button"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   )
