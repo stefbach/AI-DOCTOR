@@ -1646,15 +1646,37 @@ useEffect(() => {
   loadExistingReport()
 }, [])
 
-  // ==================== INITIAL DATA LOAD ====================
-  useEffect(() => {
-    console.log("🚀 ProfessionalReportEditable mounted with data:", {
-      hasPatientData: !!patientData,
-      hasClinicalData: !!clinicalData,
-      hasDiagnosisData: !!diagnosisData,
-      hasQuestionsData: !!questionsData
-    })
+// ==================== INITIAL DATA LOAD ====================
+useEffect(() => {
+  console.log("🚀 ProfessionalReportEditable mounted with data:", {
+    hasPatientData: !!patientData,
+    hasClinicalData: !!clinicalData,
+    hasDiagnosisData: !!diagnosisData,
+    hasQuestionsData: !!questionsData
+  })
+  
+  // Add a flag to prevent double generation
+  const checkAndGenerate = async () => {
+    const params = new URLSearchParams(window.location.search)
+    const consultationId = params.get('consultationId')
     
+    // First, try to load existing report
+    if (consultationId) {
+      try {
+        const response = await fetch(`/api/save-medical-report?consultationId=${consultationId}`)
+        if (response.ok) {
+          const result = await response.json()
+          if (result.success && result.data?.content?.consultationReport) {
+            console.log('📄 Existing report found, skipping generation')
+            return // Don't generate new report if we have one
+          }
+        }
+      } catch (error) {
+        console.log('No existing report, will generate new one')
+      }
+    }
+    
+    // Only generate if no existing report was found
     if (patientData && (patientData.name || (patientData.firstName && patientData.lastName))) {
       generateProfessionalReport()
     } else {
@@ -1677,7 +1699,11 @@ useEffect(() => {
       setReport(emptyReport)
       setLoading(false)
     }
-  }, [patientData, clinicalData, questionsData, diagnosisData])
+  }
+  
+  checkAndGenerate()
+}, [patientData, clinicalData, questionsData, diagnosisData])
+  
   // ==================== GENERATE REPORT ====================
   const generateProfessionalReport = async () => {
     setLoading(true)
