@@ -19,6 +19,34 @@ import {
   Calendar, User, Building, CreditCard, Receipt
 } from "lucide-react"
 
+// Helper function to safely handle DCI fields
+function sanitizeMedications(medications: any[]): any[] {
+  if (!medications || !Array.isArray(medications)) return []
+  
+  return medications.map(med => {
+    // Ensure dci is always a string
+    if (med && typeof med === 'object') {
+      return {
+        ...med,
+        dci: String(med.dci || med.denominationCommune || med.nom || ''),
+        // Also ensure other fields that might cause issues
+        nom: String(med.nom || med.drug || med.medication_name || ''),
+        dosage: String(med.dosage || ''),
+        forme: String(med.forme || 'tablet'),
+        posologie: String(med.posologie || ''),
+        modeAdministration: String(med.modeAdministration || 'Oral route'),
+        dureeTraitement: String(med.dureeTraitement || '7 days'),
+        quantite: String(med.quantite || '1 box'),
+        instructions: String(med.instructions || ''),
+        justification: String(med.justification || ''),
+        surveillanceParticuliere: String(med.surveillanceParticuliere || ''),
+        ligneComplete: String(med.ligneComplete || '')
+      }
+    }
+    return med
+  })
+}
+
 // ==================== TYPES ====================
 interface MauritianReport {
   compteRendu: {
@@ -2103,40 +2131,43 @@ const generateProfessionalReport = async () => {
         invoice: null as any
       }
       
-      // Map medications
-      if (apiReport.prescriptions?.medications) {
-        reportData.ordonnances!.medicaments = {
-          enTete: currentDoctorInfo,
-          patient: reportData.compteRendu.patient,
-          prescription: {
-            datePrescription: apiReport.prescriptions.medications.prescription?.prescriptionDate || new Date().toISOString().split('T')[0],
-            medicaments: apiReport.prescriptions.medications.prescription?.medications?.map((med: any) => ({
-              nom: med.name || '',
-              denominationCommune: med.genericName || med.name || '',
-              dosage: med.dosage || '',
-              forme: med.form || 'tablet',
-              posologie: med.frequency || '',
-              modeAdministration: med.route || 'Oral route',
-              dureeTraitement: med.duration || '7 days',
-              quantite: med.quantity || '1 box',
-              instructions: med.instructions || '',
-              justification: med.indication || '',
-              surveillanceParticuliere: med.monitoring || '',
-              nonSubstituable: med.doNotSubstitute || false,
-              ligneComplete: med.fullDescription || ''
-            })) || [],
-            validite: apiReport.prescriptions.medications.prescription?.validity || "3 months unless otherwise specified",
-            dispensationNote: apiReport.prescriptions.medications.prescription?.dispensationNote
-          },
-          authentification: {
-            signature: "Medical Practitioner's Signature",
-            nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
-            numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
-            cachetProfessionnel: "Official Medical Stamp",
-            date: apiReport.prescriptions.medications.prescription?.prescriptionDate || new Date().toISOString().split('T')[0]
-          }
-        }
-      }
+// Map medications
+if (apiReport.prescriptions?.medications) {
+  reportData.ordonnances!.medicaments = {
+    enTete: currentDoctorInfo,
+    patient: reportData.compteRendu.patient,
+    prescription: {
+      datePrescription: apiReport.prescriptions.medications.prescription?.prescriptionDate || new Date().toISOString().split('T')[0],
+      // APPLY SANITIZATION HERE
+      medicaments: sanitizeMedications(
+        apiReport.prescriptions.medications.prescription?.medications?.map((med: any) => ({
+          nom: med.name || '',
+          denominationCommune: med.genericName || med.name || '',
+          dosage: med.dosage || '',
+          forme: med.form || 'tablet',
+          posologie: med.frequency || '',
+          modeAdministration: med.route || 'Oral route',
+          dureeTraitement: med.duration || '7 days',
+          quantite: med.quantity || '1 box',
+          instructions: med.instructions || '',
+          justification: med.indication || '',
+          surveillanceParticuliere: med.monitoring || '',
+          nonSubstituable: med.doNotSubstitute || false,
+          ligneComplete: med.fullDescription || ''
+        })) || []
+      ),
+      validite: apiReport.prescriptions.medications.prescription?.validity || "3 months unless otherwise specified",
+      dispensationNote: apiReport.prescriptions.medications.prescription?.dispensationNote
+    },
+    authentification: {
+      signature: "Medical Practitioner's Signature",
+      nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
+      numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
+      cachetProfessionnel: "Official Medical Stamp",
+      date: apiReport.prescriptions.medications.prescription?.prescriptionDate || new Date().toISOString().split('T')[0]
+    }
+  }
+}
       
       // Map laboratory tests
       if (apiReport.prescriptions?.laboratoryTests) {
