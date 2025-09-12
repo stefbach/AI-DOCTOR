@@ -4268,7 +4268,6 @@ const handleSendDocuments = async () => {
         )}
       </div>
 
-// Update the button rendering (around line 2700 in your code)
 {validationStatus === 'validated' && (
   <div className="flex justify-center print:hidden mt-8">
     <Button 
