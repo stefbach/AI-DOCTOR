@@ -881,35 +881,65 @@ export default function ProfessionalReportEditable({
   const getReportPatient = () => report?.compteRendu?.patient || createEmptyReport().compteRendu.patient
   const getReportRapport = () => report?.compteRendu?.rapport || createEmptyReport().compteRendu.rapport
   const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
-  // ==================== TRACKING & UPDATES (MUST BE FIRST) ====================
-  const trackModification = useCallback((section: string) => {
-    if (validationStatus === 'validated') return
-    setModifiedSections(prev => new Set(prev).add(section))
-    setHasUnsavedChanges(true)
-  }, [validationStatus])
 
-  const updateRapportSection = useCallback((section: string, value: string) => {
-    if (validationStatus === 'validated') return
+  // ==================== TRACKING & UPDATES (MUST BE FIRST) ====================
+const trackModification = useCallback((section: string) => {
+  if (validationStatus === 'validated') return
+  setModifiedSections(prev => new Set(prev).add(section))
+  setHasUnsavedChanges(true)
+}, [validationStatus])
+
+const updateRapportSection = useCallback((section: string, value: string) => {
+  if (validationStatus === 'validated') return
+  
+  setReport(prev => {
+    if (!prev) return null
     
-    setReport(prev => {
-      if (!prev) return null
-      
-      const newReport = {
-        ...prev,
-        compteRendu: {
-          ...prev.compteRendu,
-          rapport: {
-            ...prev.compteRendu.rapport,
-            [section]: value
+    const newReport = {
+      ...prev,
+      compteRendu: {
+        ...prev.compteRendu,
+        rapport: {
+          ...prev.compteRendu.rapport,
+          [section]: value
+        }
+      }
+    }
+    
+    return newReport
+  })
+  trackModification(`rapport.${section}`)
+}, [validationStatus, trackModification])
+
+// ADD THIS - Medication batch update function
+const updateMedicamentBatch = useCallback((index: number, updatedMedication: any) => {
+  if (validationStatus === 'validated' || !report?.ordonnances?.medicaments) return
+  
+  setReport(prev => {
+    if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
+    
+    const newMedicaments = [...prev.ordonnances.medicaments.prescription.medicaments]
+    newMedicaments[index] = updatedMedication
+    
+    return {
+      ...prev,
+      ordonnances: {
+        ...prev.ordonnances,
+        medicaments: {
+          ...prev.ordonnances.medicaments,
+          prescription: {
+            ...prev.ordonnances.medicaments.prescription,
+            medicaments: newMedicaments
           }
         }
       }
-      
-      return newReport
-    })
-    trackModification(`rapport.${section}`)
-  }, [validationStatus, trackModification])
+    }
+  })
+  
+  trackModification(`medicament.${index}`)
+}, [validationStatus, report?.ordonnances?.medicaments, trackModification])
 
+// ADD THIS - Biology test batch update function
 const updateBiologyTestBatch = useCallback((category: string, index: number, updatedTest: any) => {
   if (validationStatus === 'validated') return
   
@@ -937,9 +967,36 @@ const updateBiologyTestBatch = useCallback((category: string, index: number, upd
     }
   })
   
-  // Remove trackModification from here - only track on blur/save
-  // trackModification(`biologie.${category}.${index}`)
-}, [validationStatus]) // Remove trackModification from dependencies
+  trackModification(`biologie.${category}.${index}`)
+}, [validationStatus, trackModification])
+
+// ADD THIS - Imaging exam batch update function
+const updateImagingExamBatch = useCallback((index: number, updatedExam: any) => {
+  if (validationStatus === 'validated') return
+  
+  setReport(prev => {
+    if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
+    
+    const newExamens = [...prev.ordonnances.imagerie.prescription.examens]
+    newExamens[index] = updatedExam
+    
+    return {
+      ...prev,
+      ordonnances: {
+        ...prev.ordonnances,
+        imagerie: {
+          ...prev.ordonnances.imagerie,
+          prescription: {
+            ...prev.ordonnances.imagerie.prescription,
+            examens: newExamens
+          }
+        }
+      }
+    }
+  })
+  
+  trackModification(`imagerie.${index}`)
+}, [validationStatus, trackModification])
 
   // ==================== DRAFT SAVE FUNCTIONS ====================
   const saveDraft = useCallback(async () => {
