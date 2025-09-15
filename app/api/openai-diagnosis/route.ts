@@ -964,51 +964,43 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
         qualityLevel = 3
       }
       
-      const response = await fetch('https://api.openai.com/v1/responses', {
+     // === Appel OpenAI /v1/responses (version propre et cohérente) ===
+const openaiResp = await fetch('https://api.openai.com/v1/responses', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${process.env.OPENAI_API_KEY!}`,
+  },
+  body: JSON.stringify({
+    model: 'gpt-5',
+    input: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user',   content: finalPrompt }
+    ],
+    max_output_tokens: 8000,
+    text: { format: { type: 'json_object' } } // NE RIEN AJOUTER D’AUTRE ICI
+  }),
+});
 
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-5',
-          input: [
-            {
-              role: 'system',
-              content: `You are an expert physician practicing in Mauritius. CRITICAL: Generate COMPLETE medical responses with exact UK/Mauritius names and precise DCI. Never use "Medication", "undefined", null, or generic terms. Every medication must have exact DCI (Amoxicilline, Paracétamol, etc.), detailed indication (minimum 30 characters), and precise UK dosing with daily totals. Use UK dosing conventions (OD/BD/TDS/QDS). All medication objects must have ALL required fields completed with detailed medical information.`
-            },
-            {
-              role: 'user',
-              content: finalPrompt
-            }
-          ],
-         
-          max_output_tokens: 8000,
-text: { format: { type: "json_object" } },
+// Vérif HTTP
+if (!openaiResp.ok) {
+  const errText = await openaiResp.text();
+  throw new Error(`OpenAI API error (${openaiResp.status}): ${errText.slice(0, 500)}`);
+}
 
- 
-        }),
-      })
-      
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`OpenAI API error (${response.status}): ${errorText.substring(0, 200)}`)
-      }
-      
-   const data = await resp.json();
+// Lecture JSON
+const data = await openaiResp.json();
 
-// Récupération robuste du texte (compat toutes variantes du Responses API)
+// Extraction robuste du texte (Responses API)
 let rawContent = getOutputTextFromResponses(data);
 console.log('🤖 GPT-5 response received, length:', rawContent.length);
 
-// Tolérance: isole le bloc JSON même si le modèle parle autour
+// Tolérance au "bruit" autour du JSON
 const jsonStr = safeExtractJSONObjectString(rawContent);
 
-// Parse du JSON
-let analysis: any;
-try {
-  analysis = JSON.parse(jsonStr);
+// Parse final
+const analysis = JSON.parse(jsonStr);
+
 } catch (e) {
   throw new Error(`Invalid JSON parse: ${(e as Error).message}`);
 }
