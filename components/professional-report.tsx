@@ -2486,6 +2486,7 @@ try {
 } finally {
   setSaving(false)
 }
+  }
 
 // ==================== SEND DOCUMENTS ====================
 const handleSendDocuments = async () => {
