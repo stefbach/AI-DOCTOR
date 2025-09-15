@@ -965,44 +965,69 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
       }
       
      // === Appel OpenAI /v1/responses (version propre et cohérente) ===
-const openaiResp = await fetch('https://api.openai.com/v1/responses', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${process.env.OPENAI_API_KEY!}`,
-  },
-  body: JSON.stringify({
-    model: 'gpt-5',
-    input: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user',   content: finalPrompt }
-    ],
-    max_output_tokens: 8000,
-    text: { format: { type: 'json_object' } } // NE RIEN AJOUTER D’AUTRE ICI
-  }),
-});
+async function callOpenAIWithMauritiusQuality(
+  finalPrompt: string,
+  qualityLevel: number,
+  systemPrompt: string
+) {
+  const MAX_ATTEMPTS = 4;
+  let lastError: Error | null = null;
 
-// Vérif HTTP
-if (!openaiResp.ok) {
-  const errText = await openaiResp.text();
-  throw new Error(`OpenAI API error (${openaiResp.status}): ${errText.slice(0, 500)}`);
-}
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    console.info(`📡 OpenAI call attempt ${attempt + 1}/${MAX_ATTEMPTS} (Mauritius quality level: ${qualityLevel})`);
 
-// Lecture JSON
-const data = await openaiResp.json();
+    try {
+      const openaiResp = await fetch('https://api.openai.com/v1/responses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY!}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-5',
+          input: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user',   content: finalPrompt }
+          ],
+          // IMPORTANT: pas de temperature / top_p / presence_penalty / frequency_penalty
+          max_output_tokens: 8000,
+          text: { format: { type: 'json_object' } }
+        }),
+      });
 
-// Extraction robuste du texte (Responses API)
-let rawContent = getOutputTextFromResponses(data);
-console.log('🤖 GPT-5 response received, length:', rawContent.length);
+      if (!openaiResp.ok) {
+        const errText = await openaiResp.text();
+        throw new Error(`OpenAI API error (${openaiResp.status}): ${errText.slice(0, 500)}`);
+      }
 
-// Tolérance au "bruit" autour du JSON
-const jsonStr = safeExtractJSONObjectString(rawContent);
+      const data = await openaiResp.json();
 
-// Parse final
-const analysis = JSON.parse(jsonStr);
+      // Récupération robuste du texte (toutes variantes du Responses API)
+      const rawContent = getOutputTextFromResponses(data);
+      console.log('🤖 GPT-5 response received, length:', rawContent.length);
 
-} catch (e) {
-  throw new Error(`Invalid JSON parse: ${(e as Error).message}`);
+      // Tolérance: extraire le JSON même si du texte entoure
+      const jsonStr = safeExtractJSONObjectString(rawContent);
+
+      // Parse final
+      const analysis = JSON.parse(jsonStr);
+      return analysis; // ✅ succès, on sort de la fonction
+
+    } catch (error) {
+      lastError = error as Error;
+      console.error(`❌ Error attempt ${attempt + 1}:`, error);
+
+      // backoff simple
+      if (attempt < MAX_ATTEMPTS - 1) {
+        const waitMs = attempt === 0 ? 1000 : attempt === 1 ? 2000 : 4000;
+        console.info(`⏳ Retrying in ${waitMs}ms with enhanced Mauritius medical specificity prompt...`);
+        await new Promise(res => setTimeout(res, waitMs));
+      }
+    }
+  }
+
+  // Si on arrive ici, toutes les tentatives ont échoué
+  throw lastError || new Error('Failed after multiple attempts with Mauritius quality enhancement');
 }
 
       
