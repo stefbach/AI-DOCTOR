@@ -216,7 +216,7 @@ For PAIN/FEVER:
 GENERATE your EXPERT medical analysis with MAXIMUM MAURITIUS MEDICAL SPECIFICITY + PRECISE DCI:`
 
 // ==================== MAURITIUS MEDICAL SPECIFICITY VALIDATION + DCI PRÉCIS ====================
-export function validateMauritiusMedicalSpecificity(analysis: any): {
+ function validateMauritiusMedicalSpecificity(analysis: any): {
   hasGenericContent: boolean,
   issues: string[],
   suggestions: string[]
@@ -3131,7 +3131,7 @@ return NextResponse.json(payloadEN);
 }
 
 // ==================== HEALTH /v1/responses WITH COMPLETE TESTS ====================
-export async function GET(request: NextRequest) {
+ async function GET(request: NextRequest) {
   const url = new URL(request.url)
   const testMauritius = url.searchParams.get('test_mauritius')
   const testQuality = url.searchParams.get('test_quality')
