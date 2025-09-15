@@ -985,7 +985,7 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
           ],
           temperature: qualityLevel === 0 ? 0.3 : 0.05,
           max_output_tokens: 8000,
-response_format: { type: "json_object" },
+text: { format: { type: "json_object" } },
 top_p: 0.9,
 
           frequency_penalty: 0.1,
