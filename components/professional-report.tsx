@@ -881,13 +881,15 @@ export default function ProfessionalReportEditable({
 const getFullSignatureUrl = (signatureUrl: string | null): string | null => {
   if (!signatureUrl) return null;
   
-  // If it's already a full URL
+  // If it's already a full URL, return it as is
   if (signatureUrl.startsWith('http://') || signatureUrl.startsWith('https://')) {
+    console.log('✅ Signature URL is already complete:', signatureUrl);
     return signatureUrl;
   }
   
-  // If it's a data URL (base64)
+  // If it's a data URL (base64), return as is
   if (signatureUrl.startsWith('data:')) {
+    console.log('✅ Using base64 signature');
     return signatureUrl;
   }
   
@@ -895,21 +897,45 @@ const getFullSignatureUrl = (signatureUrl: string | null): string | null => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   
   if (!supabaseUrl) {
-    console.error('NEXT_PUBLIC_SUPABASE_URL is not defined in environment variables');
+    console.error('❌ NEXT_PUBLIC_SUPABASE_URL is not defined');
     return null;
   }
   
-  // Handle different path formats
-  if (signatureUrl.startsWith('storage/')) {
-    return `${supabaseUrl}/${signatureUrl}`;
+  // Build the correct path for documents/doctor-signatures bucket
+  // Handle different possible formats the signatureUrl might be stored as
+  
+  // If it's just the filename (e.g., "1344d47c-91c2-4466-ab89-d635d5d8c62b-1757419582535.png")
+  if (!signatureUrl.includes('/')) {
+    const fullUrl = `${supabaseUrl}/storage/v1/object/public/documents/doctor-signatures/${signatureUrl}`;
+    console.log('📎 Built signature URL from filename:', fullUrl);
+    return fullUrl;
   }
   
+  // If it includes the bucket path (e.g., "documents/doctor-signatures/filename.png")
+  if (signatureUrl.startsWith('documents/doctor-signatures/')) {
+    const fullUrl = `${supabaseUrl}/storage/v1/object/public/${signatureUrl}`;
+    console.log('📎 Built signature URL from bucket path:', fullUrl);
+    return fullUrl;
+  }
+  
+  // If it includes partial path (e.g., "doctor-signatures/filename.png")
+  if (signatureUrl.startsWith('doctor-signatures/')) {
+    const fullUrl = `${supabaseUrl}/storage/v1/object/public/documents/${signatureUrl}`;
+    console.log('📎 Built signature URL from partial path:', fullUrl);
+    return fullUrl;
+  }
+  
+  // If it starts with /storage/ (relative path)
   if (signatureUrl.startsWith('/storage/')) {
-    return `${supabaseUrl}${signatureUrl}`;
+    const fullUrl = `${supabaseUrl}${signatureUrl}`;
+    console.log('📎 Built signature URL from relative path:', fullUrl);
+    return fullUrl;
   }
   
-  // Assume it's a storage bucket path
-  return `${supabaseUrl}/storage/v1/object/public/signatures/${signatureUrl}`;
+  // Default case - assume it needs the full path
+  const fullUrl = `${supabaseUrl}/storage/v1/object/public/documents/doctor-signatures/${signatureUrl}`;
+  console.log('📎 Built signature URL (default):', fullUrl);
+  return fullUrl;
 }
 
   // ==================== SAFE GETTERS ====================
@@ -2263,7 +2289,7 @@ useEffect(() => {
       setReportId(currentReportId)
     }
     
-    setSaving(true)
+setSaving(true)
 try {
   let signatureDataUrl = null;
   
@@ -2277,75 +2303,27 @@ try {
     const fullSignatureUrl = getFullSignatureUrl(realSignatureUrl);
     
     if (fullSignatureUrl) {
-      // If it's already a data URL, use it directly
+      // If it's a data URL (base64), use it directly
       if (fullSignatureUrl.startsWith('data:')) {
         signatureDataUrl = fullSignatureUrl;
         console.log('✅ Using stored digital signature (base64)');
-      } else {
-        // Try to load the image from URL
-        try {
-          const img = new Image();
-          img.crossOrigin = "anonymous";
-          
-          signatureDataUrl = await new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => {
-              reject(new Error('Signature loading timeout'));
-            }, 5000); // 5 second timeout
-            
-            img.onload = () => {
-              clearTimeout(timeout);
-              
-              // Convert to data URL for consistency
-              const canvas = document.createElement('canvas');
-              const maxWidth = 300;
-              const maxHeight = 100;
-              
-              let width = img.width;
-              let height = img.height;
-              
-              // Scale down if needed
-              if (width > maxWidth || height > maxHeight) {
-                const ratio = Math.min(maxWidth / width, maxHeight / height);
-                width *= ratio;
-                height *= ratio;
-              }
-              
-              canvas.width = width;
-              canvas.height = height;
-              
-              const ctx = canvas.getContext('2d');
-              if (ctx) {
-                // Clear canvas with transparent background
-                ctx.clearRect(0, 0, width, height);
-                
-                // Draw the signature
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                const dataUrl = canvas.toDataURL('image/png');
-                console.log('✅ Real signature loaded and processed');
-                resolve(dataUrl);
-              } else {
-                reject(new Error('Canvas context failed'));
-              }
-            };
-            
-            img.onerror = () => {
-              clearTimeout(timeout);
-              console.warn('❌ Failed to load signature image from:', fullSignatureUrl);
-              reject(new Error('Failed to load signature'));
-            };
-            
-            img.src = fullSignatureUrl;
-          });
-        } catch (error) {
-          console.error('Error processing real signature:', error);
-          signatureDataUrl = null;
-        }
+      } 
+      // If it's an HTTP URL, use it directly without trying to convert
+      else if (fullSignatureUrl.startsWith('http')) {
+        // Simply use the URL directly - no canvas conversion needed
+        signatureDataUrl = fullSignatureUrl;
+        console.log('✅ Using signature URL directly (no conversion):', signatureDataUrl);
+        
+        // Optional: Test if the image is accessible (without blocking)
+        const img = new Image();
+        img.onload = () => console.log('✅ Signature image verified as accessible');
+        img.onerror = () => console.warn('⚠️ Signature image may not be accessible, but will try to use it anyway');
+        img.src = fullSignatureUrl;
       }
     }
   }
   
-  // If no real signature or loading failed, generate one
+  // If no real signature or it wasn't usable, generate one
   if (!signatureDataUrl) {
     console.log('📝 Generating fallback signature...');
     
@@ -2426,89 +2404,88 @@ try {
       signatureDataUrl = canvas.toDataURL('image/png');
     }
   }
-      
-      const signatures = {
-        consultation: signatureDataUrl,
-        prescription: signatureDataUrl,
-        laboratory: signatureDataUrl,
-        imaging: signatureDataUrl,
-        invoice: signatureDataUrl
-      }
-      
-      setDocumentSignatures(signatures)
-      
-      const updatedReport = {
-        ...report,
-        compteRendu: {
-          ...report.compteRendu,
-          praticien: doctorInfo,
-          metadata: {
-            ...getReportMetadata(),
-            validatedAt: new Date().toISOString(),
-            validatedBy: doctorInfo.nom,
-            validationStatus: 'validated' as const,
-            signatures: signatures,
-            signatureDataUrl: signatureDataUrl
-          }
-        },
-        ordonnances: report.ordonnances ? {
-          ...report.ordonnances,
-          medicaments: report.ordonnances.medicaments ? {
-            ...report.ordonnances.medicaments,
-            authentification: {
-              ...report.ordonnances.medicaments.authentification,
-              signatureImage: signatureDataUrl,
-              signedAt: new Date().toISOString()
-            }
-          } : null,
-          biologie: report.ordonnances.biologie ? {
-            ...report.ordonnances.biologie,
-            authentification: {
-              ...report.ordonnances.biologie.authentification,
-              signatureImage: signatureDataUrl,
-              signedAt: new Date().toISOString()
-            }
-          } : null,
-          imagerie: report.ordonnances.imagerie ? {
-            ...report.ordonnances.imagerie,
-            authentification: {
-              ...report.ordonnances.imagerie.authentification,
-              signatureImage: signatureDataUrl,
-              signedAt: new Date().toISOString()
-            }
-          } : null
-        } : report.ordonnances,
-        invoice: report.invoice ? {
-          ...report.invoice,
-          signature: {
-            ...report.invoice.signature,
-            signatureImage: signatureDataUrl,
-            signedAt: new Date().toISOString()
-          }
-        } : report.invoice
-      }
-      
-      setReport(updatedReport)
-      setValidationStatus('validated')
-      setModifiedSections(new Set())
-      setHasUnsavedChanges(false)
-      
-      toast({
-        title: "✅ Document Validated",
-        description: "All documents have been validated and digitally signed. Click 'Send documents' to finalize."
-      })
-      
-    } catch (error) {
-      console.error('Validation error:', error)
-      toast({
-        title: "Validation Error",
-        description: error instanceof Error ? error.message : "Failed to validate document",
-        variant: "destructive"
-      })
-    } finally {
-      setSaving(false)
-    }
+  
+  const signatures = {
+    consultation: signatureDataUrl,
+    prescription: signatureDataUrl,
+    laboratory: signatureDataUrl,
+    imaging: signatureDataUrl,
+    invoice: signatureDataUrl
   }
+  
+  setDocumentSignatures(signatures)
+  
+  const updatedReport = {
+    ...report,
+    compteRendu: {
+      ...report.compteRendu,
+      praticien: doctorInfo,
+      metadata: {
+        ...getReportMetadata(),
+        validatedAt: new Date().toISOString(),
+        validatedBy: doctorInfo.nom,
+        validationStatus: 'validated' as const,
+        signatures: signatures,
+        signatureDataUrl: signatureDataUrl
+      }
+    },
+    ordonnances: report.ordonnances ? {
+      ...report.ordonnances,
+      medicaments: report.ordonnances.medicaments ? {
+        ...report.ordonnances.medicaments,
+        authentification: {
+          ...report.ordonnances.medicaments.authentification,
+          signatureImage: signatureDataUrl,
+          signedAt: new Date().toISOString()
+        }
+      } : null,
+      biologie: report.ordonnances.biologie ? {
+        ...report.ordonnances.biologie,
+        authentification: {
+          ...report.ordonnances.biologie.authentification,
+          signatureImage: signatureDataUrl,
+          signedAt: new Date().toISOString()
+        }
+      } : null,
+      imagerie: report.ordonnances.imagerie ? {
+        ...report.ordonnances.imagerie,
+        authentification: {
+          ...report.ordonnances.imagerie.authentification,
+          signatureImage: signatureDataUrl,
+          signedAt: new Date().toISOString()
+        }
+      } : null
+    } : report.ordonnances,
+    invoice: report.invoice ? {
+      ...report.invoice,
+      signature: {
+        ...report.invoice.signature,
+        signatureImage: signatureDataUrl,
+        signedAt: new Date().toISOString()
+      }
+    } : report.invoice
+  }
+  
+  setReport(updatedReport)
+  setValidationStatus('validated')
+  setModifiedSections(new Set())
+  setHasUnsavedChanges(false)
+  
+  toast({
+    title: "✅ Document Validated",
+    description: "All documents have been validated and digitally signed. Click 'Send documents' to finalize."
+  })
+  
+} catch (error) {
+  console.error('Validation error:', error)
+  toast({
+    title: "Validation Error",
+    description: error instanceof Error ? error.message : "Failed to validate document",
+    variant: "destructive"
+  })
+} finally {
+  setSaving(false)
+}
 
 // ==================== SEND DOCUMENTS ====================
 const handleSendDocuments = async () => {
