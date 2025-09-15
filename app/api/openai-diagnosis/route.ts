@@ -1031,29 +1031,7 @@ async function callOpenAIWithMauritiusQuality(
 }
 
       
-      const qualityCheck = validateMauritiusMedicalSpecificity(analysis)
-      
-      if (qualityCheck.hasGenericContent && attempt < maxRetries) {
-        console.log(`⚠️ Generic content detected (${qualityCheck.issues.length} issues), retrying...`)
-        console.log('Issues:', qualityCheck.issues.slice(0, 3))
-        throw new Error(`Generic medical content detected: ${qualityCheck.issues.slice(0, 2).join(', ')}`)
-      } else if (qualityCheck.hasGenericContent && attempt === maxRetries) {
-        console.log(`⚠️ Final attempt - forcing corrections for ${qualityCheck.issues.length} issues`)
-        analysis = enhanceMauritiusMedicalSpecificity(analysis, patientContext)
-        
-        const finalQualityCheck = validateMauritiusMedicalSpecificity(analysis)
-        console.log(`✅ After enhancement: ${finalQualityCheck.issues.length} remaining issues`)
-      }
-      
-      if (qualityCheck.hasGenericContent) {
-        analysis = enhanceMauritiusMedicalSpecificity(analysis, patientContext)
-      }
-      
-      console.log('✅ Mauritius quality validation successful')
-      console.log(`🏝️ Quality level used: ${qualityLevel}`)
-      console.log(`📊 Medical specificity issues corrected: ${qualityCheck.issues.length}`)
-      
-      return { data, analysis, mauritius_quality_level: qualityLevel }
+     
       
     } catch (error) {
       lastError = error as Error
