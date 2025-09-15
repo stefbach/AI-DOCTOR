@@ -52,7 +52,7 @@ interface ValidationResult {
 
 interface UniversalValidationResult {
   overallQuality: 'excellent' | 'good' | 'concerning' | 'poor'
-  trustGPT4: boolean
+  trustGPT5: boolean
   issues: Array<{
     type: 'critical' | 'important' | 'minor'
     category: string
@@ -143,7 +143,7 @@ const MAURITIUS_MEDICAL_PROMPT = `YOU ARE AN EXPERT PHYSICIAN - MANDATORY JSON R
     "duration": "Treatment duration (e.g., 7 days)",
     "dci": "Active ingredient name (e.g., Amoxicillin)"
   }
-]
+
     ],
     "non_pharmacological": "SPECIFIC NON-DRUG MEASURES"
   },
@@ -247,7 +247,7 @@ export function validateMauritiusMedicalSpecificity(analysis: any): {
     }
   })
   
-  // VALIDATION ASSOUPLIE pour médicaments - accepter formats naturels GPT-4
+  // VALIDATION ASSOUPLIE pour médicaments - accepter formats naturels GPT-5
   const medications = (analysis?.treatment_plan?.medications || []).filter(
     (med: any) => med && (med.drug || med.medication || med.nom || med.dci || med.indication || med.dosing)
   )
@@ -284,7 +284,7 @@ export function validateMauritiusMedicalSpecificity(analysis: any): {
       console.log(`ℹ️ Medication ${idx + 1}: DCI will be auto-extracted`)
     }
     
-    // Plus de validation stricte du format dosing - GPT-4 peut utiliser le format qui lui convient
+    // Plus de validation stricte du format dosing - GPT-5 peut utiliser le format qui lui convient
   })
   
   const hasGenericContent = issues.length > 0
@@ -383,18 +383,6 @@ function generatePrecisePosology(dci: string, patientContext: PatientContext): a
   }
 }
 
-function calculateDailyTotal(individualDose: string, frequency: number): string {
-  if (!individualDose || !frequency) return "À calculer"
-  
-  const doseMatch = individualDose.match(/(\d+(?:[.,]\d+)?)\s*(m[cg]|g)/i)
-  if (!doseMatch) return "À calculer"
-  
-  const amount = parseFloat(doseMatch[1])
-  const unit = doseMatch[2]
-  const total = amount * frequency
-  
-  return `${total}${unit}/jour`
-}
 
 // ==================== MAURITIUS MEDICAL ENHANCEMENT COMPLET + DCI ====================
 function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: PatientContext): any {
@@ -513,7 +501,7 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
               individual_dose: "400mg",
               daily_total_dose: "1200mg/day"
             },
-            duration: "5-7 jours maximum",
+            duration: "5-7 days maximum",
             contraindications: "Ulcère gastroduodénal, insuffisance rénale sévère, grossesse (3e trimestre)",
             side_effects: "Irritation gastrique, vertiges, céphalées, insuffisance rénale",
             interactions: "Éviter avec anticoagulants, IEC, diurétiques",
@@ -537,7 +525,7 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
               individual_dose: "1g",
               daily_total_dose: "4g/day"
             },
-            duration: "3-5 jours selon nécessité",
+            duration: "3-5 days maximum",
             contraindications: "Insuffisance hépatique sévère, allergie au paracétamol",
             side_effects: "Rares aux doses thérapeutiques, hépatotoxicité en cas de surdosage",
             interactions: "Compatible avec la plupart des médicaments, prudence avec warfarine",
@@ -561,7 +549,7 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
               individual_dose: "10mg",
               daily_total_dose: "30mg/day"
             },
-            duration: "48-72 heures maximum",
+            duration: "48-72 hours maximum",
             contraindications: "Phéochromocytome, obstruction gastro-intestinale, maladie de Parkinson",
             side_effects: "Somnolence, effets extrapyramidaux (rares), agitation",
             interactions: "Éviter avec neuroleptiques, sédation accrue avec dépresseurs SNC",
@@ -585,7 +573,7 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
               individual_dose: "500mg",
               daily_total_dose: "1500mg/day"
             },
-            duration: "7 jours",
+            duration: "7 days",
             contraindications: "Allergie aux pénicillines, mononucléose infectieuse sévère",
             side_effects: "Diarrhée, nausées, éruption cutanée, surinfection à Candida",
             interactions: "Efficacité réduite des contraceptifs oraux, augmentation effet warfarine",
@@ -610,7 +598,7 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
               individual_dose: "500mg",
               daily_total_dose: "2g/day"
             },
-            duration: "3-5 jours selon nécessité",
+            duration: "3-5 days maximum",
             contraindications: "Insuffisance hépatique sévère, allergie au paracétamol",
             side_effects: "Rares aux doses thérapeutiques, hépatotoxicité en cas de surdosage",
             interactions: "Compatible avec la plupart des traitements, prudence avec warfarine",
@@ -964,7 +952,7 @@ EXAMPLE COMPLETE MEDICATION WITH DCI + DETAILED INDICATION:
     "individual_dose": "500mg",
     "daily_total_dose": "1500mg/day"
   },
-  "duration": "7 jours de traitement complet",
+  "duration": "7 days (complete course ),
   "contraindications": "Allergie aux pénicillines, mononucléose infectieuse sévère",
   "interactions": "Efficacité réduite des contraceptifs oraux",
   "monitoring": "Réponse clinique et réactions allergiques",
@@ -976,15 +964,16 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
         qualityLevel = 3
       }
       
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch('https://api.openai.com/v1/responses', {
+
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o',
-          messages: [
+          model: 'gpt-5',
+          input: [
             {
               role: 'system',
               content: `You are an expert physician practicing in Mauritius. CRITICAL: Generate COMPLETE medical responses with exact UK/Mauritius names and precise DCI. Never use "Medication", "undefined", null, or generic terms. Every medication must have exact DCI (Amoxicilline, Paracétamol, etc.), detailed indication (minimum 30 characters), and precise UK dosing with daily totals. Use UK dosing conventions (OD/BD/TDS/QDS). All medication objects must have ALL required fields completed with detailed medical information.`
@@ -995,9 +984,10 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
             }
           ],
           temperature: qualityLevel === 0 ? 0.3 : 0.05,
-          max_tokens: 8000,
-          response_format: { type: "json_object" },
-          top_p: 0.9,
+          max_output_tokens: 8000,
+response_format: { type: "json_object" },
+top_p: 0.9,
+
           frequency_penalty: 0.1,
           presence_penalty: 0.2
         }),
@@ -1009,9 +999,9 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
       }
       
       const data = await response.json()
-      const rawContent = data.choices[0]?.message?.content || ''
+     const rawContent = data.output_text || ''
       
-      console.log('🤖 GPT-4 response received, length:', rawContent.length)
+      console.log('🤖 GPT-5 response received, length:', rawContent.length)
       
       const jsonValidation = validateAndParseJSON(rawContent)
       
@@ -1176,20 +1166,20 @@ function universalMedicalValidation(
   const importantIssues = issues.filter(i => i.type === 'important').length
   
   let overallQuality: 'excellent' | 'good' | 'concerning' | 'poor'
-  let trustGPT4: boolean
+  let trustGPT5: boolean
   
   if (criticalIssues === 0 && importantIssues === 0) {
     overallQuality = 'excellent'
-    trustGPT4 = true
+    trustGPT5 = true
   } else if (criticalIssues === 0 && importantIssues <= 2) {
     overallQuality = 'good' 
-    trustGPT4 = true
+    trustGPT5 = true
   } else if (criticalIssues <= 1) {
     overallQuality = 'concerning'
-    trustGPT4 = false
+    trustGPT5 = false
   } else {
     overallQuality = 'poor'
-    trustGPT4 = false
+    trustGPT5 = false
   }
   
   const metrics = {
@@ -1201,14 +1191,14 @@ function universalMedicalValidation(
   
   console.log(`📊 Universal Validation Results:`)
   console.log(`   - Overall Quality: ${overallQuality}`)
-  console.log(`   - Trust GPT-4: ${trustGPT4}`)
+  console.log(`   - Trust GPT-5: ${trustGPT5}`)
   console.log(`   - Critical Issues: ${criticalIssues}`)
   console.log(`   - Important Issues: ${importantIssues}`)
   console.log(`   - Treatment Completeness: ${metrics.treatment_completeness}%`)
   
   return {
     overallQuality,
-    trustGPT4,
+    trustGPT5,
     issues,
     metrics
   }
@@ -1465,17 +1455,17 @@ function universalIntelligentValidation(analysis: any, patientContext: PatientCo
   
   const validation = universalMedicalValidation(analysis, patientContext)
   
-  if (validation.trustGPT4) {
-    console.log('✅ GPT-4 prescription quality is sufficient - Minimal corrections')
+  if (validation.trustGPT5) {
+    console.log('✅ GPT-5 prescription quality is sufficient - Minimal corrections')
     analysis = applyMinimalCorrections(analysis, validation.issues, patientContext)
   } else {
-    console.log('⚠️ GPT-4 prescription needs improvement - Targeted corrections') 
+    console.log('⚠️ GPT-5 prescription needs improvement - Targeted corrections') 
     analysis = applyTargetedUniversalCorrections(analysis, validation.issues, patientContext)
   }
   
   analysis.universal_validation = {
     overall_quality: validation.overallQuality,
-    gpt4_trusted: validation.trustGPT4,
+    gpt5_trusted: validation.trustGPT5,
     metrics: validation.metrics,
     critical_issues: validation.issues.filter(i => i.type === 'critical').length,
     important_issues: validation.issues.filter(i => i.type === 'important').length,
@@ -1514,7 +1504,7 @@ function applyMinimalCorrections(analysis: any, issues: any[], patientContext: P
           individual_dose: "500mg",
           daily_total_dose: "2g/day"
         },
-        duration: "Selon nécessité, arrêter si fièvre résorbée",
+        duration: "maximum, arrêter si fièvre résorbée",
         interactions: "Compatible avec la plupart des médicaments",
         relationship_to_current_treatment: "ajout_symptomatique",
         monitoring: "Surveillance de la température",
@@ -1607,7 +1597,7 @@ function applySymptomaticCorrections(analysis: any, issue: any, patientContext: 
         individual_dose: "10mg",
         daily_total_dose: "30mg/day"
       },
-      duration: "2-3 jours maximum",
+      duration: "2-3 days maximum",
       interactions: "Éviter avec neuroleptiques",
       relationship_to_current_treatment: "ajout_symptomatique",
       monitoring: "Efficacité sur nausées",
@@ -1901,7 +1891,7 @@ function preserveMedicalKnowledge(dosing: string): string {
   }
   
   const corrections = [
-    { from: /\s*[x×*]\s*(\d+)\/jour/gi, to: (match: any, p1: string) => {
+    { from: /\s*[x×*]\s*(\d+)\/day/gi, to: (match: any, p1: string) => {
       const freq = parseInt(p1);
       if (freq === 1) return ' OD';
       if (freq === 2) return ' BD'; 
@@ -1909,8 +1899,8 @@ function preserveMedicalKnowledge(dosing: string): string {
       if (freq === 4) return ' QDS';
       return ` ${freq} times daily`;
     }},
-    { from: /\s*fois\s*par\s*jour/gi, to: ' times daily' },
-    { from: /\s*par\s*jour/gi, to: ' daily' },
+    { from: /\s*fois\s*par\s*day/gi, to: ' times daily' },
+    { from: /\s*par\s*day/gi, to: ' daily' },
     { from: /\bcp\b/gi, to: 'tablet' },
     { from: /\bcps\b/gi, to: 'tablets' },  
     { from: /\bgel\b/gi, to: 'capsule' },
@@ -2112,7 +2102,7 @@ function validateUniversalMedicalAnalysis(
   console.log(`   - ${labTests.length} test(s) de laboratoire`)
   console.log(`   - ${imaging.length} étude(s) d'imagerie`)
   console.log(`   - Validation universelle : ${analysis.universal_validation?.overall_quality || 'non évaluée'}`)
-  console.log(`   - GPT-4 fiable : ${analysis.universal_validation?.gpt4_trusted || false}`)
+  console.log(`   - GPT-5 fiable : ${analysis.universal_validation?.gpt5_trusted || false}`)
   console.log(`   - Problèmes critiques : ${analysis.universal_validation?.critical_issues || 0}`)
   
   if (!analysis?.clinical_analysis?.primary_diagnosis?.condition) {
@@ -2185,15 +2175,15 @@ function generateMedicalDocuments(
       header: {
         title: "RAPPORT DE TÉLÉCONSULTATION MÉDICALE - SYSTÈME MAURICE ANGLO-SAXON",
         id: consultationId,
-        date: currentDate.toLocaleDateString('fr-FR'),
-        time: currentDate.toLocaleTimeString('fr-FR'),
+        date: currentDate.toLocaleDateString('en-GB'),
+        time: currentDate.toLocaleTimeString('en-GB'),
         type: "Téléconsultation avec standards médicaux Maurice",
         disclaimer: "Évaluation basée sur téléconsultation avec nomenclature UK/Maurice"
       },
       
       patient: {
         name: `${patient.firstName || patient.name || 'Patient'} ${patient.lastName || ''}`.trim(),
-        age: `${patient.age} ans`,
+       age: `${patient.age} years`,
         sex: patient.sex,
         current_medications: patient.current_medications || [],
         allergies: patient.allergies?.length > 0 ? patient.allergies.join(', ') : 'NKDA (Aucune allergie médicamenteuse connue)'
@@ -2216,11 +2206,11 @@ function generateMedicalDocuments(
     baseDocuments.biological = {
       header: {
         title: "DEMANDE D'INVESTIGATIONS DE LABORATOIRE",
-        validity: "Valide 30 jours - Tous laboratoires accrédités Maurice"
+        validity: "Valide 30 days - Tous laboratoires accrédités Maurice"
       },
       patient: {
         name: `${patient.firstName || ''} ${patient.lastName || ''}`.trim(),
-        age: `${patient.age} ans`,
+       age: `${patient.age} years`,
         id: consultationId
       },
       clinical_context: {
@@ -2247,11 +2237,11 @@ function generateMedicalDocuments(
     baseDocuments.imaging = {
       header: {
         title: "DEMANDE D'IMAGERIE",
-        validity: "Valide 30 jours"
+        validity: "Valid 30 days"
       },
       patient: {
         name: `${patient.firstName || ''} ${patient.lastName || ''}`.trim(),
-        age: `${patient.age} ans`,
+       age: `${patient.age} years`,
         id: consultationId
       },
       clinical_context: {
@@ -2281,12 +2271,12 @@ function generateMedicalDocuments(
           registration: "MCM-TELE-2024",
           qualification: "MB ChB, Standards Médicaux Maurice"
         },
-        date: currentDate.toLocaleDateString('fr-FR'),
-        validity: "Ordonnance valide 30 jours"
+        date: currentDate.toLocaleDateString('en-GB'),
+        validity: "Ordonnance valide 30 days"
       },
       patient: {
         name: `${patient.firstName || ''} ${patient.lastName || ''}`.trim(),
-        age: `${patient.age} ans`,
+       age: `${patient.age} years`,
         weight: patient.weight ? `${patient.weight} kg` : 'Non spécifié',
         allergies: patient.allergies?.length > 0 ? patient.allergies.join(', ') : 'NKDA'
       },
@@ -2324,6 +2314,19 @@ function generateMedicalDocuments(
 }
 
 // ==================== RESPONSE GENERATION FUNCTIONS ====================
+function extractFrequencyFromDosing(dosingAdult: string): number {
+  if (!dosingAdult) return 0;
+  const u = dosingAdult.toUpperCase();
+
+  if (u.includes('QDS') || u.includes('FOUR TIMES DAILY')) return 4;
+  if (u.includes('TDS') || u.includes('THREE TIMES DAILY')) return 3;
+  if (u.includes('BD')  || u.includes('TWICE DAILY')) return 2;
+  if (u.includes('OD')  || u.includes('ONCE DAILY')) return 1;
+
+  const m = dosingAdult.match(/(\d+)\s*(?:times|\u00D7|x)?\s*(?:daily|\/day)/i);
+  return m ? parseInt(m[1], 10) : 0;
+}
+
 function generateEnhancedMedicationsResponse(medications: any[]): any[] {
   return medications.map((med: any, idx: number) => {
    const drugName = med?.drug || med?.medication_name || "Médicament"
@@ -2342,8 +2345,8 @@ const indication = med?.indication || med?.why_prescribed || "Indication"
       // POSOLOGIE PRÉCISE
       dosage_unitaire: dosing.individual_dose || extractDoseFromDrugName(drugName),
      posologie_complete: dosing.adult || med?.how_to_take || "À déterminer",
-      frequence_par_jour: dosing.frequency_per_day || extractFrequencyFromDosing(dosing.adult),
-      dose_totale_jour: dosing.daily_total_dose || calculateDailyTotal(dosing.individual_dose, dosing.frequency_per_day),
+      frequence_par_day: dosing.frequency_per_day || extractFrequencyFromDosing(dosing.adult),
+      dose_totale_day: dosing.daily_total_dose || calculateDailyTotal(dosing.individual_dose, dosing.frequency_per_day),
       
       // FORMAT SIMPLIFIÉ
       posologie_simple: convertToSimpleFormat(dosing.adult),
@@ -2372,33 +2375,56 @@ const indication = med?.indication || med?.why_prescribed || "Indication"
     }
   })
 }
+function convertToSimpleFormat(dosing: string): string {
+  if (!dosing) return "As prescribed";
+  if (dosing.includes('QDS')) return '4 times/day';
+  if (dosing.includes('TDS')) return '3 times/day';
+  if (dosing.includes('BD'))  return '2 times/day';
+  if (dosing.includes('OD'))  return '1 time/day'; // singular
+  return dosing;
+}
 
 function extractDoseFromDrugName(drugName: string): string {
-  const doseMatch = drugName.match(/(\d+(?:[.,]\d+)?)\s*(m[cg]|g|IU|UI)/i)
-  return doseMatch ? `${doseMatch[1]}${doseMatch[2]}` : "Dose à déterminer"
+  const m = drugName.match(/(\d+(?:[.,]\d+)?)\s*(mcg|mg|g|iu|ui)/i);
+  if (!m) return "Dose to be determined";
+  const unit = m[2].toLowerCase() === 'ui' ? 'IU' : m[2];
+  return `${m[1]}${unit}`;
 }
 
-function extractFrequencyFromDosing(dosing: string): number {
-  if (!dosing) return 0
-  
-  if (dosing.includes('QDS')) return 4
-  if (dosing.includes('TDS')) return 3
-  if (dosing.includes('BD')) return 2
-  if (dosing.includes('OD')) return 1
-  
-  const match = dosing.match(/(\d+)\s*times?\s*daily/i)
-  return match ? parseInt(match[1]) : 0
+function calculateDailyTotal(individualDose: string, frequency: number): string {
+  if (!individualDose || !frequency) return "To calculate";
+  const m = individualDose.match(/(\d+(?:[.,]\d+)?)\s*(mcg|mg|g|iu|ui)/i);
+  if (!m) return "To calculate";
+  const amount = parseFloat(m[1].replace(',', '.'));
+  const unit = m[2].toLowerCase() === 'ui' ? 'IU' : m[2].toUpperCase();
+  const total = amount * frequency;
+  return `${total}${unit}/day`;
 }
 
-function convertToSimpleFormat(dosing: string): string {
-  if (!dosing) return "Selon prescription"
-  
-  if (dosing.includes('QDS')) return '4 fois/jour'
-  if (dosing.includes('TDS')) return '3 fois/jour'
-  if (dosing.includes('BD')) return '2 fois/jour'
-  if (dosing.includes('OD')) return '1 fois/jour'
-  
-  return dosing
+// --- Helper FR -> EN (unique) ---
+function normalizeFRtoEN<T>(obj: T): T {
+  const s = JSON.stringify(obj);
+  const t = s
+    .replaceAll('/jour', '/day')
+    .replaceAll(' fois/day', ' times/day')
+    .replaceAll(' heures', ' hours')
+    .replaceAll(' heure', ' hour')
+    .replaceAll(' jours', ' days')
+    .replaceAll(' jour', ' day')
+    .replaceAll('Valide 30 days', 'Valid 30 days')
+    .replaceAll('Ordonnance valide 30 days', 'Prescription valid 30 days')
+    .replaceAll('Selon prescription', 'As prescribed')
+    .replaceAll('Dose totale/jour', 'Daily total dose')
+    .replaceAll('Selon évolution', 'As clinically indicated')
+    .replaceAll('Aucune spécifiée', 'None specified')
+    .replaceAll('Aucun spécifié', 'None specified')
+    .replaceAll("Instructions d'administration", 'Administration instructions')
+    .replaceAll('Investigation de laboratoire', 'Laboratory investigation')
+    .replaceAll("DEMANDE D'IMAGERIE", 'IMAGING REQUEST')
+    .replaceAll("DEMANDE D'INVESTIGATIONS DE LABORATOIRE", 'LAB INVESTIGATION REQUEST')
+    .replaceAll('NKDA (Aucune allergie médicamenteuse connue)', 'NKDA')
+    .replaceAll('Valide 30 jours', 'Valid 30 days');
+  return JSON.parse(t);
 }
 
 // ==================== MAIN POST FUNCTION ====================
@@ -2479,17 +2505,20 @@ export async function POST(request: NextRequest) {
     console.log('✅ Analyse médicale avec qualité anglo-saxonne + DCI précis terminée')
     // ========== DÉDUPLICATION DES MÉDICAMENTS ==========
 function deduplicateMedications(medications: any[]): any[] {
-  const seen = new Set()
-  return medications.filter(med => {
-    const dci = (med.dci || '').toLowerCase().trim()
-    if (seen.has(dci)) {
-      console.log(`🔄 Removing duplicate medication: ${dci}`)
-      return false
-    }
-    seen.add(dci)
-    return true
-  })
+  const seen = new Set<string>();
+  return (medications || []).filter((med: any) => {
+    const nameRaw = (med?.drug ?? med?.medication_name ?? '').toString().trim();
+    const dciRaw = (med?.dci ?? extractDCIFromDrugName(nameRaw) ?? '').toString().trim();
+    const dciKey  = dciRaw.toLowerCase();
+    const nameKey = nameRaw.toLowerCase();
+    if (!dciKey && !nameKey) return false; // ignore fiches vides
+    const key = `${dciKey}|${nameKey}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
+
     // ========== NORMALISATION DES CHAMPS MÉDICAMENTS ==========
 function normalizeMedicationFields(medications: any[]): any[] {
   return medications.map(med => ({
@@ -2644,7 +2673,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         enabled: true,
         system_version: '4.3-Complete-Logic-DCI-Precise',
         overall_quality: finalAnalysis.universal_validation?.overall_quality || 'good',
-        gpt4_trusted: finalAnalysis.universal_validation?.gpt4_trusted || true,
+        gpt5_trusted: finalAnalysis.universal_validation?.gpt5_trusted || true,
         pathology_coverage: 'all_medical_conditions',
         validation_approach: 'evidence_based_principles',
         metrics: finalAnalysis.universal_validation?.metrics || {},
@@ -2699,83 +2728,171 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         differential: finalAnalysis.clinical_analysis?.differential_diagnoses || []
       },
       
-      // Analyse experte
-      expertAnalysis: {
-        clinical_confidence: finalAnalysis.diagnostic_reasoning?.clinical_confidence || {},
-        
-        expert_investigations: {
-          investigation_strategy: finalAnalysis.investigation_strategy || {},
-          clinical_justification: finalAnalysis.investigation_strategy?.clinical_justification || "Stratégie d'investigation personnalisée avec standards UK/Maurice",
-          immediate_priority: [
-            ...(finalAnalysis.investigation_strategy?.laboratory_tests || []).map((test: any) => ({
-              category: 'pathology',
-              examination: test?.test_name || "Investigation de laboratoire",
-              specific_indication: test?.clinical_justification || "Investigation diagnostique",
-              urgency: test?.urgency || "routine",
-              expected_results: test?.expected_results || {},
-              mauritius_availability: test?.mauritius_logistics || {
-                where: "C-Lab, Green Cross, Biosanté",
-                cost: "Rs 500-2000",
-                turnaround: "24-48h"
-              }
-            })),
-            ...(finalAnalysis.investigation_strategy?.imaging_studies || []).map((img: any) => ({
-              category: 'radiology',
-              examination: img?.study_name || "Imagerie médicale",
-              specific_indication: img?.indication || "Investigation d'imagerie",
-              findings_sought: img?.findings_sought || "Recherche de signes spécifiques",
-              urgency: img?.urgency || "routine",
-              mauritius_availability: img?.mauritius_availability || {
-                centers: "Apollo, Wellkin, Victoria Hospital",
-                cost: "Rs 8000-15000",
-                wait_time: "1-2 semaines"
-              }
-            }))
-          ],
-          tests_by_purpose: finalAnalysis.investigation_strategy?.tests_by_purpose || {},
-          test_sequence: finalAnalysis.investigation_strategy?.test_sequence || {}
+      // ======== Analyse experte (remplacer tout le bloc) ========
+expertAnalysis: {
+  clinical_confidence:
+    finalAnalysis.diagnostic_reasoning?.clinical_confidence || {},
+
+  expert_investigations: {
+    investigation_strategy: finalAnalysis.investigation_strategy || {},
+    clinical_justification:
+      finalAnalysis.investigation_strategy?.clinical_justification ||
+      "Personalized investigation strategy aligned with UK/Mauritius standards",
+
+    // --- REPLACEMENT: immediate_priority normalisée EN + spreads corrects ---
+    immediate_priority: (() => {
+      // Normalise l'urgence: stat | urgent | routine
+      const normUrgency = (u?: string) => {
+        const v = (u || '').toLowerCase().trim();
+        if (v === 'stat' || v === 'immediate') return 'stat';
+        if (v === 'urgent' || v === 'emergent') return 'urgent';
+        return 'routine';
+      };
+
+      const labs = Array.isArray(finalAnalysis?.investigation_strategy?.laboratory_tests)
+        ? finalAnalysis.investigation_strategy.laboratory_tests
+        : [];
+
+      const imgs = Array.isArray(finalAnalysis?.investigation_strategy?.imaging_studies)
+        ? finalAnalysis.investigation_strategy.imaging_studies
+        : [];
+
+      const labItems = labs.map((test: any) => ({
+        category: 'pathology',
+        examination: test?.test_name || 'Laboratory investigation',
+        specific_indication: test?.clinical_justification || 'Diagnostic investigation',
+        urgency: normUrgency(test?.urgency || 'routine'),
+        expected_results: test?.expected_results || {},
+        mauritius_availability: test?.mauritius_logistics || {
+          where: 'C-Lab, Green Cross, Biosanté',
+          cost: 'Rs 500–2,000',
+          turnaround: '24–48 h',
         },
-        
-        expert_therapeutics: {
-          treatment_approach: finalAnalysis.treatment_plan?.approach || "Approche thérapeutique personnalisée avec standards UK/Maurice",
-          prescription_rationale: finalAnalysis.treatment_plan?.prescription_rationale || "Justification de prescription selon standards internationaux",
-          primary_treatments: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any) => ({
-  medication_name: med.drug,  // Direct
-        medication_dci: med.drug || med.medication_name, 
-        precise_indication: med.indication || med.why_prescribed,
-        dosing_regimen: { 
-          adult: {
-      en: med.dosing?.adult || med.how_to_take || "Selon prescription"
-    }
+      }));
+
+      const imagingItems = imgs.map((img: any) => ({
+        category: 'radiology',
+        examination: img?.study_name || 'Medical imaging',
+        specific_indication: img?.indication || 'Imaging investigation',
+        findings_sought: img?.findings_sought || 'Search for specific signs',
+        urgency: normUrgency(img?.urgency || 'routine'),
+        mauritius_availability: img?.mauritius_availability || {
+          centers: 'Apollo, Wellkin, Victoria Hospital',
+          cost: 'Rs 8,000–15,000',
+          wait_time: '1–2 weeks',
+        },
+      }));
+
+      return [...labItems, ...imagingItems];
+    })(),
+
+    tests_by_purpose: finalAnalysis.investigation_strategy?.tests_by_purpose || {},
+    test_sequence: finalAnalysis.investigation_strategy?.test_sequence || {},
   },
-        therapeutic_class: extractTherapeuticClass(med) || "Agent thérapeutique",
-            precise_indication: med?.indication || "Indication thérapeutique",
-            mechanism: med?.mechanism || "Mécanisme d'action spécifique pour le patient",
-            dosing_regimen: {
-              adult: { 
-                fr: med?.dosing?.adult || "Posologie à déterminer",
-                individual_dose: med?.dosing?.individual_dose || "Dose individuelle",
-                frequency_per_day: med?.dosing?.frequency_per_day || 0,
-                daily_total_dose: med?.dosing?.daily_total_dose || "Dose totale/jour"
-              }
+
+  // --- Thérapeutique experte ---
+  expert_therapeutics: {
+    treatment_approach:
+      finalAnalysis.treatment_plan?.approach ||
+      "Personalized therapeutic approach aligned with UK/Mauritius standards",
+
+    prescription_rationale:
+      finalAnalysis.treatment_plan?.prescription_rationale ||
+      "Prescription rationale according to international standards",
+
+    // --- REPLACEMENT: primary_treatments dédoublonné + mapping complet ---
+    primary_treatments: (() => {
+      const meds = Array.isArray(finalAnalysis?.treatment_plan?.medications)
+        ? finalAnalysis.treatment_plan.medications
+        : [];
+
+      const seen = new Set<string>();
+      const out: any[] = [];
+
+      for (const m of meds) {
+        const dciRaw  = (m?.dci ?? '').toString().trim();
+        const nameRaw = (m?.drug ?? m?.medication_name ?? '').toString().trim();
+
+        // DCI inférée depuis le nom (avant parenthèse)
+        const inferredDCIFromName = nameRaw ? nameRaw.split('(')[0].trim() : '';
+
+        // Clé de dédoublonnage robuste
+        const dciKey  = (dciRaw || inferredDCIFromName).toLowerCase();
+        const nameKey = (nameRaw || '').toLowerCase();
+        if (!dciKey && !nameKey) continue;
+
+        const key = `${dciKey}|${nameKey}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+
+        // Posologies bilingues
+        const adultEN =
+          m?.dosing?.adult ??
+          m?.how_to_take ??
+          "According to medical prescription";
+        const adultFR =
+          m?.dosing?.adult ??
+          "Posologie à déterminer";
+
+        out.push({
+          medication_name: nameRaw || 'Medication',
+          medication_dci: dciRaw || inferredDCIFromName || 'DCI à confirmer',
+          therapeutic_class: m?.therapeutic_class || "Agent thérapeutique",
+          precise_indication:
+            m?.indication || m?.why_prescribed || "Indication thérapeutique",
+          mechanism:
+            m?.mechanism || "Mécanisme d'action spécifique au cas clinique",
+
+          // <<< aucune duplication de clé >>>
+          dosing_regimen: {
+            adult: {
+              en: adultEN,
+              fr: adultFR,
+              individual_dose:
+                m?.dosing?.individual_dose || "Dose individuelle à préciser",
+              frequency_per_day:
+                m?.dosing?.frequency_per_day ?? 0,
+              daily_total_dose:
+                m?.dosing?.daily_total_dose || "Total per day to be confirmed",
             },
-            duration: { fr: med?.duration || "Selon évolution" },
-            monitoring: med?.monitoring || "Surveillance standard",
-            side_effects: med?.side_effects || "Effets secondaires à surveiller",
-            contraindications: med?.contraindications || "Aucune contre-indication identifiée",
-            interactions: med?.interactions || "Interactions vérifiées",
-            mauritius_availability: {
-              public_free: med?.mauritius_availability?.public_free || false,
-              estimated_cost: med?.mauritius_availability?.estimated_cost || "À vérifier",
-              alternatives: med?.mauritius_availability?.alternatives || "Alternatives disponibles",
-              brand_names: med?.mauritius_availability?.brand_names || "Marques disponibles"
-            },
-            administration_instructions: med?.administration_instructions || "Instructions d'administration",
-            validation_applied: med?._mauritius_specificity_applied || med?._added_by_universal_safety || null
-          })),
-          non_pharmacological: finalAnalysis.treatment_plan?.non_pharmacological || "Mesures non pharmacologiques recommandées"
-        }
-      },
+          },
+
+          duration: { fr: m?.duration || "Selon évolution / protocole" },
+
+          monitoring:
+            m?.monitoring || "Surveillance clinique standard (PA, FC, symptômes) ; avis spécialisé si anomalie.",
+          side_effects:
+            m?.side_effects || "Effets secondaires potentiels à surveiller (cf. RCP).",
+          contraindications:
+            m?.contraindications || "Contre-indications à vérifier selon terrain/comorbidités.",
+          interactions:
+            m?.interactions || "Interactions médicamenteuses vérifiées ; recontrôle pharmaceutique.",
+
+          mauritius_availability: {
+            public_free: m?.mauritius_availability?.public_free ?? false,
+            estimated_cost: m?.mauritius_availability?.estimated_cost || "To be confirmed",
+            alternatives: m?.mauritius_availability?.alternatives || "Possible local alternatives",
+            brand_names: m?.mauritius_availability?.brand_names || "Brands available in Mauritius",
+          },
+
+          administration_instructions:
+            m?.administration_instructions ||
+            "Follow the prescription; adjust in renal/hepatic impairment.",
+          validation_applied:
+            m?._mauritius_specificity_applied || m?._added_by_universal_safety || null,
+        });
+      }
+
+      return out;
+    })(),
+
+    non_pharmacological:
+      finalAnalysis.treatment_plan?.non_pharmacological ||
+      "Recommended non-pharmacological measures",
+  },
+}
+
+
       
       // Gestion des médicaments
       medicationManagement: {
@@ -2808,7 +2925,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         precise_posology: {
           individual_dose: med?.dosing?.individual_dose || "Dose individuelle",
           frequency_per_day: med?.dosing?.frequency_per_day || 0,
-          daily_total_dose: med?.dosing?.daily_total_dose || "Dose totale/jour",
+          daily_total_dose: med?.dosing?.daily_total_dose || "Total per day",
           uk_format: med?.dosing?.adult || "Format UK",
           administration_time: med?.administration_time || "Selon prescription"
         },
@@ -2874,7 +2991,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       
       // Métadonnées
       metadata: {
-        ai_model: 'GPT-4o',
+        ai_model: 'gpt-5',
         system_version: '4.3-Mauritius-Complete-Logic-DCI-Precise-System',
         features: [
           '🏝️ MAURITIUS ANGLO-SAXON NOMENCLATURE - Terminologie médicale UK',
@@ -2887,7 +3004,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
           '🔄 INTELLIGENT QUALITY RETRY - Application progressive spécificité UK',
           '🌍 Validation médicale universelle (TOUTES pathologies)',
           '🧠 Standards basés sur preuves internationales',
-          '🎯 Évaluation intelligente confiance GPT-4', 
+          '🎯 Évaluation intelligente confiance GPT-5', 
           '🏥 Toutes spécialités médicales supportées automatiquement',
           '📊 Métriques de qualité et scoring en temps réel',
           '🔒 Protection complète des données (GDPR/HIPAA)',
@@ -2952,7 +3069,8 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       }
     }
     
-    return NextResponse.json(finalResponse)
+  const payloadEN = normalizeFRtoEN(finalResponse);
+return NextResponse.json(payloadEN);
     
   } catch (error) {
     console.error('❌ Erreur critique :', error)
@@ -2993,7 +3111,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
   }
 }
 
-// ==================== HEALTH ENDPOINT WITH COMPLETE TESTS ====================
+// ==================== HEALTH /v1/responses WITH COMPLETE TESTS ====================
 export async function GET(request: NextRequest) {
   const url = new URL(request.url)
   const testMauritius = url.searchParams.get('test_mauritius')
@@ -3208,7 +3326,7 @@ export async function GET(request: NextRequest) {
       complete_medical_logic: 'GARANTI - Toute la logique médicale sophistiquée préservée',
       uk_nomenclature: 'GARANTI - Terminologie médicale britannique appliquée',
       dci_enforcement: 'GARANTI - Jamais de DCI manquant',
-      precise_posology: 'GARANTI - Posologie toujours précise avec mg exacts',
+      precise_posology: 'GARANTI - Posologie toudays précise avec mg exacts',
       anglo_saxon_compliance: 'GARANTI - Conventions posologie UK OD/BD/TDS/QDS', 
       primary_diagnosis: 'GARANTI - Jamais manquant, système bulletproof',
       quality_specificity: 'GARANTI - Aucun terme médical générique autorisé',
@@ -3224,9 +3342,9 @@ export async function GET(request: NextRequest) {
     revolutionary_features: [
       '🏝️ MAURITIUS ANGLO-SAXON NOMENCLATURE - Terminologie médicale UK complète',
       '🎯 EXACT DCI ENFORCEMENT - Jamais de principe actif manquant',
-      '💊 PRECISE POSOLOGY - Toujours mg exacts + fréquence UK',
+      '💊 PRECISE POSOLOGY - Toudays mg exacts + fréquence UK',
       '📊 AUTOMATIC DAILY CALCULATION - Mathématiques intelligentes',
-      '🔢 NUMERIC FREQUENCY - 1,2,3,4 fois par jour exactes',
+      '🔢 NUMERIC FREQUENCY - 1,2,3,4 fois par day exactes',
       '⏰ ADMINISTRATION TIMING - Avec repas, à jeun, etc.',
       '🇬🇧 UK FORMAT COMPLIANCE - OD/BD/TDS/QDS standardisé',
       '🧮 INTELLIGENT EXTRACTION - DCI depuis nom médicament',
@@ -3278,7 +3396,7 @@ export async function GET(request: NextRequest) {
       'Individual dose specification',
       'Administration timing precision',
       'Complete medication object generation',
-      'Enhanced GPT-4 prompting for precision',
+      'Enhanced GPT-5 prompting for precision',
       'Multi-retry system for accuracy',
       'Intelligent validation and correction'
     ]
