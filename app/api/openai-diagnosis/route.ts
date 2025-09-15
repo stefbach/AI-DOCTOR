@@ -1620,7 +1620,7 @@ function applySafetyCorrections(analysis: any, issue: any): number {
 }
 
 // ==================== MEDICATION MANAGEMENT (CONSERVÉ) ====================
-export function analyzeConsultationType(
+ function analyzeConsultationType(
   currentMedications: string[],
   chiefComplaint: unknown,
   symptoms: string[]
