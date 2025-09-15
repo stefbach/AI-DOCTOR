@@ -988,8 +988,7 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
 text: { format: { type: "json_object" } },
 top_p: 0.9,
 
-          frequency_penalty: 0.1,
-          presence_penalty: 0.2
+ 
         }),
       })
       
