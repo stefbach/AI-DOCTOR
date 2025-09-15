@@ -864,7 +864,9 @@ export default function ProfessionalReportEditable({
     adresseCabinet: "Tibok Teleconsultation Platform",
     email: "[Email Required]",
     heuresConsultation: "Teleconsultation Hours: 8:00 AM - 8:00 PM",
-    numeroEnregistrement: "[MCM Registration Required]"
+    numeroEnregistrement: "[MCM Registration Required]",
+    signatureUrl: null,
+    digitalSignature: null
   })
   const [editingDoctor, setEditingDoctor] = useState(false)
   const [documentSignatures, setDocumentSignatures] = useState<{
@@ -874,6 +876,41 @@ export default function ProfessionalReportEditable({
     imaging?: string
     invoice?: string
   }>({})
+
+// Helper function to get full Supabase storage URL
+const getFullSignatureUrl = (signatureUrl: string | null): string | null => {
+  if (!signatureUrl) return null;
+  
+  // If it's already a full URL
+  if (signatureUrl.startsWith('http://') || signatureUrl.startsWith('https://')) {
+    return signatureUrl;
+  }
+  
+  // If it's a data URL (base64)
+  if (signatureUrl.startsWith('data:')) {
+    return signatureUrl;
+  }
+  
+  // Get Supabase URL from environment variable
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  
+  if (!supabaseUrl) {
+    console.error('NEXT_PUBLIC_SUPABASE_URL is not defined in environment variables');
+    return null;
+  }
+  
+  // Handle different path formats
+  if (signatureUrl.startsWith('storage/')) {
+    return `${supabaseUrl}/${signatureUrl}`;
+  }
+  
+  if (signatureUrl.startsWith('/storage/')) {
+    return `${supabaseUrl}${signatureUrl}`;
+  }
+  
+  // Assume it's a storage bucket path
+  return `${supabaseUrl}/storage/v1/object/public/signatures/${signatureUrl}`;
+}
 
   // ==================== SAFE GETTERS ====================
   const getReportHeader = () => report?.compteRendu?.header || createEmptyReport().compteRendu.header
@@ -1697,29 +1734,29 @@ const updatePaymentMethod = useCallback((method: string) => {
         const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
         console.log('👨‍⚕️ Loading Tibok Doctor Data:', tibokDoctorData)
         
-        const doctorInfoFromTibok = {
-          nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
-            `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
-            'Dr. [Name Required]',
-          qualifications: tibokDoctorData.qualifications || 'MBBS',
-          specialite: tibokDoctorData.specialty || 'General Medicine',
-          adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
-          email: tibokDoctorData.email || '[Email Required]',
-          heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
-          numeroEnregistrement: (() => {
-            // Check each field and ensure it's not empty
-            const mcmNumber = tibokDoctorData.mcm_reg_no || 
-                              tibokDoctorData.medicalCouncilNumber || 
-                              tibokDoctorData.medical_council_number ||
-                              tibokDoctorData.license_number || 
-                              ''
-            
-            // Only use the value if it's not empty
-            return mcmNumber && mcmNumber.trim() !== '' 
-              ? String(mcmNumber) 
-              : '[MCM Registration Required]'
-          })()
-        }
+// In the useEffect that processes doctorDataParam
+const doctorInfoFromTibok = {
+  nom: tibokDoctorData.fullName || tibokDoctorData.full_name ? 
+    `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` : 
+    'Dr. [Name Required]',
+  qualifications: tibokDoctorData.qualifications || 'MBBS',
+  specialite: tibokDoctorData.specialty || 'General Medicine',
+  adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
+  email: tibokDoctorData.email || '[Email Required]',
+  heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+  numeroEnregistrement: (() => {
+    const mcmNumber = tibokDoctorData.mcm_reg_no || 
+                      tibokDoctorData.medicalCouncilNumber || 
+                      tibokDoctorData.medical_council_number ||
+                      tibokDoctorData.license_number || 
+                      ''
+    return mcmNumber && mcmNumber.trim() !== '' 
+      ? String(mcmNumber) 
+      : '[MCM Registration Required]'
+  })(),
+  signatureUrl: tibokDoctorData.signature_url || null, // ADD THIS
+  digitalSignature: tibokDoctorData.digital_signature || null // ADD THIS
+}
 
         console.log('✅ Doctor info prepared:', doctorInfoFromTibok)
         setDoctorInfo(doctorInfoFromTibok)
@@ -2227,83 +2264,168 @@ useEffect(() => {
     }
     
     setSaving(true)
-    try {
-      const signatureSeed = `${doctorInfo.nom}_${doctorInfo.numeroEnregistrement}_signature`
-      
-      const canvas = document.createElement('canvas')
-      canvas.width = 300
-      canvas.height = 80
-      const ctx = canvas.getContext('2d')
-      
-      if (ctx) {
-        ctx.fillStyle = '#ffffff'
-        ctx.fillRect(0, 0, 300, 80)
-        
-        const nameParts = doctorInfo.nom.replace('Dr. ', '').split(' ')
-        const fullName = nameParts.join(' ')
-        
-        const nameHash = doctorInfo.nom.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-        const signatureStyle = nameHash % 3
-        
-        ctx.save()
-        ctx.translate(50, 40)
-        
-        ctx.strokeStyle = '#1a1a2e'
-        ctx.fillStyle = '#1a1a2e'
-        ctx.lineWidth = 2.2
-        ctx.lineCap = 'round'
-        ctx.lineJoin = 'round'
-        
-        if (signatureStyle === 0) {
-          ctx.font = 'italic 28px "Brush Script MT", "Lucida Handwriting", cursive'
-          ctx.fillText(fullName, 0, 0)
-          ctx.beginPath()
-          ctx.moveTo(-5, 12)
-          ctx.quadraticCurveTo(100, 16, 205, 10)
-          ctx.lineWidth = 1.8
-          ctx.stroke()
-        } else if (signatureStyle === 1) {
-          ctx.font = 'italic bold 32px "Brush Script MT", cursive'
-          const firstLetter = nameParts[0]?.[0] || 'D'
-          ctx.fillText(firstLetter, 0, 0)
-          ctx.font = 'italic 26px "Lucida Handwriting", cursive'
-          const restOfName = nameParts[0]?.substring(1) + ' ' + (nameParts[1] || '')
-          ctx.fillText(restOfName, 28, 2)
-          ctx.beginPath()
-          ctx.moveTo(0, 14)
-          ctx.bezierCurveTo(50, 16, 150, 14, 200, 12)
-          ctx.lineWidth = 1.5
-          ctx.stroke()
-        } else {
-          ctx.font = 'italic 30px "Segoe Script", "Brush Script MT", cursive'
-          let xOffset = 0
-          for (let i = 0; i < fullName.length; i++) {
-            const char = fullName[i]
-            const charWidth = ctx.measureText(char).width
-            const yOffset = Math.sin(i * 0.5) * 2
-            ctx.fillText(char, xOffset, yOffset)
-            xOffset += charWidth * 0.85
-          }
-          ctx.beginPath()
-          ctx.moveTo(0, 15)
-          ctx.quadraticCurveTo(xOffset/2, 18, xOffset, 13)
-          ctx.lineWidth = 1.6
-          ctx.stroke()
+try {
+  let signatureDataUrl = null;
+  
+  // Try to use real signature first
+  const realSignatureUrl = doctorInfo.signatureUrl || doctorInfo.digitalSignature;
+  
+  if (realSignatureUrl) {
+    console.log('🖊️ Attempting to use real doctor signature...');
+    
+    // Process the URL to ensure it's complete
+    const fullSignatureUrl = getFullSignatureUrl(realSignatureUrl);
+    
+    if (fullSignatureUrl) {
+      // If it's already a data URL, use it directly
+      if (fullSignatureUrl.startsWith('data:')) {
+        signatureDataUrl = fullSignatureUrl;
+        console.log('✅ Using stored digital signature (base64)');
+      } else {
+        // Try to load the image from URL
+        try {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          
+          signatureDataUrl = await new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+              reject(new Error('Signature loading timeout'));
+            }, 5000); // 5 second timeout
+            
+            img.onload = () => {
+              clearTimeout(timeout);
+              
+              // Convert to data URL for consistency
+              const canvas = document.createElement('canvas');
+              const maxWidth = 300;
+              const maxHeight = 100;
+              
+              let width = img.width;
+              let height = img.height;
+              
+              // Scale down if needed
+              if (width > maxWidth || height > maxHeight) {
+                const ratio = Math.min(maxWidth / width, maxHeight / height);
+                width *= ratio;
+                height *= ratio;
+              }
+              
+              canvas.width = width;
+              canvas.height = height;
+              
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                // Clear canvas with transparent background
+                ctx.clearRect(0, 0, width, height);
+                
+                // Draw the signature
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                const dataUrl = canvas.toDataURL('image/png');
+                console.log('✅ Real signature loaded and processed');
+                resolve(dataUrl);
+              } else {
+                reject(new Error('Canvas context failed'));
+              }
+            };
+            
+            img.onerror = () => {
+              clearTimeout(timeout);
+              console.warn('❌ Failed to load signature image from:', fullSignatureUrl);
+              reject(new Error('Failed to load signature'));
+            };
+            
+            img.src = fullSignatureUrl;
+          });
+        } catch (error) {
+          console.error('Error processing real signature:', error);
+          signatureDataUrl = null;
         }
-        
-        ctx.font = '9px Arial'
-        ctx.fillStyle = '#9ca3af'
-        ctx.textAlign = 'left'
-        const date = new Date().toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        })
-        ctx.fillText(`Signed: ${date}`, 0, 35)
-        ctx.restore()
+      }
+    }
+  }
+  
+  // If no real signature or loading failed, generate one
+  if (!signatureDataUrl) {
+    console.log('📝 Generating fallback signature...');
+    
+    const signatureSeed = `${doctorInfo.nom}_${doctorInfo.numeroEnregistrement}_signature`;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = 300;
+    canvas.height = 80;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, 300, 80)
+      
+      const nameParts = doctorInfo.nom.replace('Dr. ', '').split(' ')
+      const fullName = nameParts.join(' ')
+      
+      const nameHash = doctorInfo.nom.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      const signatureStyle = nameHash % 3
+      
+      ctx.save()
+      ctx.translate(50, 40)
+      
+      ctx.strokeStyle = '#1a1a2e'
+      ctx.fillStyle = '#1a1a2e'
+      ctx.lineWidth = 2.2
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      
+      if (signatureStyle === 0) {
+        ctx.font = 'italic 28px "Brush Script MT", "Lucida Handwriting", cursive'
+        ctx.fillText(fullName, 0, 0)
+        ctx.beginPath()
+        ctx.moveTo(-5, 12)
+        ctx.quadraticCurveTo(100, 16, 205, 10)
+        ctx.lineWidth = 1.8
+        ctx.stroke()
+      } else if (signatureStyle === 1) {
+        ctx.font = 'italic bold 32px "Brush Script MT", cursive'
+        const firstLetter = nameParts[0]?.[0] || 'D'
+        ctx.fillText(firstLetter, 0, 0)
+        ctx.font = 'italic 26px "Lucida Handwriting", cursive'
+        const restOfName = nameParts[0]?.substring(1) + ' ' + (nameParts[1] || '')
+        ctx.fillText(restOfName, 28, 2)
+        ctx.beginPath()
+        ctx.moveTo(0, 14)
+        ctx.bezierCurveTo(50, 16, 150, 14, 200, 12)
+        ctx.lineWidth = 1.5
+        ctx.stroke()
+      } else {
+        ctx.font = 'italic 30px "Segoe Script", "Brush Script MT", cursive'
+        let xOffset = 0
+        for (let i = 0; i < fullName.length; i++) {
+          const char = fullName[i]
+          const charWidth = ctx.measureText(char).width
+          const yOffset = Math.sin(i * 0.5) * 2
+          ctx.fillText(char, xOffset, yOffset)
+          xOffset += charWidth * 0.85
+        }
+        ctx.beginPath()
+        ctx.moveTo(0, 15)
+        ctx.quadraticCurveTo(xOffset/2, 18, xOffset, 13)
+        ctx.lineWidth = 1.6
+        ctx.stroke()
       }
       
-      const signatureDataUrl = canvas.toDataURL('image/png')
+      ctx.font = '9px Arial'
+      ctx.fillStyle = '#9ca3af'
+      ctx.textAlign = 'left'
+      const date = new Date().toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      })
+      ctx.fillText(`Signed: ${date}`, 0, 35)
+      ctx.restore()
+      
+      signatureDataUrl = canvas.toDataURL('image/png');
+    }
+  }
       
       const signatures = {
         consultation: signatureDataUrl,
