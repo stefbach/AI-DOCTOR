@@ -996,21 +996,23 @@ text: { format: { type: "json_object" } },
         throw new Error(`OpenAI API error (${response.status}): ${errorText.substring(0, 200)}`)
       }
       
-      const data = await response.json()
-     const rawContent = data.output_text || ''
-      
-      console.log('🤖 GPT-5 response received, length:', rawContent.length)
-      
-      const jsonValidation = validateAndParseJSON(rawContent)
-      
-      if (!jsonValidation.success) {
-        console.error(`❌ JSON validation failed: ${jsonValidation.error}`)
-        throw new Error(`Invalid JSON structure: ${jsonValidation.error}`)
-      }
-      
-      let analysis = jsonValidation.data!
-      
-      analysis = ensureCompleteStructure(analysis)
+   const data = await resp.json();
+
+// Récupération robuste du texte (compat toutes variantes du Responses API)
+let rawContent = getOutputTextFromResponses(data);
+console.log('🤖 GPT-5 response received, length:', rawContent.length);
+
+// Tolérance: isole le bloc JSON même si le modèle parle autour
+const jsonStr = safeExtractJSONObjectString(rawContent);
+
+// Parse du JSON
+let analysis: any;
+try {
+  analysis = JSON.parse(jsonStr);
+} catch (e) {
+  throw new Error(`Invalid JSON parse: ${(e as Error).message}`);
+}
+
       
       const qualityCheck = validateMauritiusMedicalSpecificity(analysis)
       
@@ -2423,6 +2425,39 @@ function normalizeFRtoEN<T>(obj: T): T {
     .replaceAll('NKDA (Aucune allergie médicamenteuse connue)', 'NKDA')
     .replaceAll('Valide 30 jours', 'Valid 30 days');
   return JSON.parse(t);
+}
+// === Helpers Responses API ===
+function getOutputTextFromResponses(data: any): string {
+  // 1) Chemin direct (certaines versions du Responses API)
+  if (typeof data?.output_text === 'string' && data.output_text.trim()) {
+    return data.output_text.trim();
+  }
+
+  // 2) Nouveau format: data.output[].content[].text
+  const blocks =
+    Array.isArray(data?.output)
+      ? data.output
+      : (Array.isArray(data?.response?.output) ? data.response.output : []);
+
+  const parts: string[] = [];
+  for (const b of blocks) {
+    const content = Array.isArray(b?.content) ? b.content : [];
+    for (const c of content) {
+      if (typeof c?.text === 'string' && c.text.trim()) parts.push(c.text);
+      else if (typeof c?.content === 'string' && c.content.trim()) parts.push(c.content);
+    }
+  }
+  return parts.join('\n').trim();
+}
+
+function safeExtractJSONObjectString(s: string): string {
+  if (!s) throw new Error('Empty model output');
+  const start = s.indexOf('{');
+  const end = s.lastIndexOf('}');
+  if (start === -1 || end === -1 || end <= start) {
+    throw new Error("Invalid JSON structure - doesn't start with { or end with }");
+  }
+  return s.slice(start, end + 1);
 }
 
 // ==================== MAIN POST FUNCTION ====================
