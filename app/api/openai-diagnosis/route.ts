@@ -2454,7 +2454,7 @@ function safeExtractJSONObjectString(s: string): string {
 export async function POST(request: NextRequest) {
   console.log('🚀 MAURITIUS MEDICAL AI - VERSION 4.3 LOGIQUE COMPLÈTE + DCI PRÉCIS')
   const startTime = Date.now()
-  
+
   try {
     const [body, apiKey] = await Promise.all([
       request.json(),
