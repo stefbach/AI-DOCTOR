@@ -1229,7 +1229,7 @@ function validateDiagnosticProcess(analysis: any) {
   return { issues }
 }
 
-export function validateTherapeuticCompleteness(analysis: any, patientContext: PatientContext) {
+ function validateTherapeuticCompleteness(analysis: any, patientContext: PatientContext) {
   const issues: Array<{type: 'critical'|'important'|'minor', category: string, description: string, suggestion: string}> = []
   const medications = analysis?.treatment_plan?.medications || []
   
