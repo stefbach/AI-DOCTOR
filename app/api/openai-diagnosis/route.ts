@@ -2728,10 +2728,9 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         differential: finalAnalysis.clinical_analysis?.differential_diagnoses || []
       },
       
-      // ======== Analyse experte (remplacer tout le bloc) ========
+// ======== Analyse experte (REMPLACER TOUT LE BLOC) ========
 expertAnalysis: {
-  clinical_confidence:
-    finalAnalysis.diagnostic_reasoning?.clinical_confidence || {},
+  clinical_confidence: finalAnalysis.diagnostic_reasoning?.clinical_confidence || {},
 
   expert_investigations: {
     investigation_strategy: finalAnalysis.investigation_strategy || {},
@@ -2739,9 +2738,8 @@ expertAnalysis: {
       finalAnalysis.investigation_strategy?.clinical_justification ||
       "Personalized investigation strategy aligned with UK/Mauritius standards",
 
-    // --- REPLACEMENT: immediate_priority normalisée EN + spreads corrects ---
+    // Liste des examens prioritaires (laboratoire + imagerie), spreads corrects
     immediate_priority: (() => {
-      // Normalise l'urgence: stat | urgent | routine
       const normUrgency = (u?: string) => {
         const v = (u || '').toLowerCase().trim();
         if (v === 'stat' || v === 'immediate') return 'stat';
@@ -2752,7 +2750,6 @@ expertAnalysis: {
       const labs = Array.isArray(finalAnalysis?.investigation_strategy?.laboratory_tests)
         ? finalAnalysis.investigation_strategy.laboratory_tests
         : [];
-
       const imgs = Array.isArray(finalAnalysis?.investigation_strategy?.imaging_studies)
         ? finalAnalysis.investigation_strategy.imaging_studies
         : [];
@@ -2790,7 +2787,7 @@ expertAnalysis: {
     test_sequence: finalAnalysis.investigation_strategy?.test_sequence || {},
   },
 
-  // --- Thérapeutique experte ---
+  // Traitements
   expert_therapeutics: {
     treatment_approach:
       finalAnalysis.treatment_plan?.approach ||
@@ -2800,7 +2797,6 @@ expertAnalysis: {
       finalAnalysis.treatment_plan?.prescription_rationale ||
       "Prescription rationale according to international standards",
 
-    // --- REPLACEMENT: primary_treatments dédoublonné + mapping complet ---
     primary_treatments: (() => {
       const meds = Array.isArray(finalAnalysis?.treatment_plan?.medications)
         ? finalAnalysis.treatment_plan.medications
@@ -2813,7 +2809,7 @@ expertAnalysis: {
         const dciRaw  = (m?.dci ?? '').toString().trim();
         const nameRaw = (m?.drug ?? m?.medication_name ?? '').toString().trim();
 
-        // DCI inférée depuis le nom (avant parenthèse)
+        // DCI inférée à partir du nom (avant parenthèses)
         const inferredDCIFromName = nameRaw ? nameRaw.split('(')[0].trim() : '';
 
         // Clé de dédoublonnage robuste
@@ -2843,7 +2839,6 @@ expertAnalysis: {
           mechanism:
             m?.mechanism || "Mécanisme d'action spécifique au cas clinique",
 
-          // <<< aucune duplication de clé >>>
           dosing_regimen: {
             adult: {
               en: adultEN,
@@ -2870,14 +2865,14 @@ expertAnalysis: {
 
           mauritius_availability: {
             public_free: m?.mauritius_availability?.public_free ?? false,
-            estimated_cost: m?.mauritius_availability?.estimated_cost || "To be confirmed",
-            alternatives: m?.mauritius_availability?.alternatives || "Possible local alternatives",
-            brand_names: m?.mauritius_availability?.brand_names || "Brands available in Mauritius",
+            estimated_cost: m?.mauritius_availability?.estimated_cost || "À vérifier",
+            alternatives: m?.mauritius_availability?.alternatives || "Alternatives disponibles",
+            brand_names: m?.mauritius_availability?.brand_names || "Marques disponibles",
           },
 
           administration_instructions:
             m?.administration_instructions ||
-            "Follow the prescription; adjust in renal/hepatic impairment.",
+            "Respecter l'ordonnance ; adapter si insuffisance rénale/hépatique.",
           validation_applied:
             m?._mauritius_specificity_applied || m?._added_by_universal_safety || null,
         });
@@ -2888,9 +2883,10 @@ expertAnalysis: {
 
     non_pharmacological:
       finalAnalysis.treatment_plan?.non_pharmacological ||
-      "Recommended non-pharmacological measures",
+      "Mesures non pharmacologiques recommandées",
   },
-}
+}, // <— VIRGULE ICI pour enchaîner avec medicationManagement
+
 
 
       
