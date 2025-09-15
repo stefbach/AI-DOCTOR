@@ -255,93 +255,186 @@ export async function POST(request: NextRequest) {
       generatedAt: new Date().toISOString()
     }
 
-    // Check if record exists
-    const { data: existingRecord } = await supabase
-      .from('consultation_records')
-      .select('id')
-      .eq('consultation_id', consultationId)
-      .maybeSingle()
+   // Validate content completeness before determining status
+let finalStatus = 'draft';
+const hasValidContent = documentsData.consultationReport?.rapport?.motifConsultation &&
+                       documentsData.consultationReport?.rapport?.conclusionDiagnostique;
 
-    let result
+const hasMedications = prescriptionData.medications && prescriptionData.medications.length > 0;
+const hasLabTests = Object.values(prescriptionData.laboratoryTests || {}).some((tests: any) => tests.length > 0);
+const hasImaging = prescriptionData.imagingStudies && prescriptionData.imagingStudies.length > 0;
+
+// Determine appropriate status based on action and content
+if (action === 'finalize') {
+  if (!hasValidContent) {
+    console.warn('⚠️ Cannot finalize without consultation content - downgrading to draft');
+    finalStatus = 'draft';
+  } else {
+    finalStatus = 'finalized';
+  }
+} else if (action === 'validate') {
+  finalStatus = 'validated';
+} else {
+  finalStatus = 'draft';
+}
+
+// Check if record exists
+const { data: existingRecord, error: checkError } = await supabase
+  .from('consultation_records')
+  .select('id, documents_status, documents_data')
+  .eq('consultation_id', consultationId)
+  .maybeSingle()
+
+// Only throw if there's an actual database error
+if (checkError && checkError.code !== 'PGRST116') {
+  console.error('❌ Error checking for existing record:', checkError)
+  throw checkError
+}
+
+let result
+
+if (existingRecord) {
+  // Update existing record
+  console.log('📝 Updating existing record for consultation:', consultationId)
+  console.log('Current status:', existingRecord.documents_status, '→ New status:', finalStatus)
+  
+  // Prevent downgrading from finalized to draft
+  if (existingRecord.documents_status === 'finalized' && finalStatus === 'draft') {
+    console.warn('⚠️ Cannot downgrade finalized record to draft')
+    finalStatus = existingRecord.documents_status; // Keep finalized status
+  }
+  
+  // Prevent overwriting completed records with empty data
+  if (existingRecord.documents_status === 'completed' && !hasValidContent && action === 'finalize') {
+    console.error('❌ Cannot finalize completed record without content')
+    return NextResponse.json({
+      success: false,
+      error: 'Cannot finalize consultation without medical content',
+      validationError: true
+    }, { status: 400 })
+  }
+  
+  const updateData = {
+    documents_data: documentsData,
+    prescription_data: prescriptionData,
+    documents_status: finalStatus, // Use validated status
+    signatures: metadata?.signatures || {},
+    document_validations: metadata?.documentValidations || {},
+    doctor_name: doctorName,
+    patient_name: patientName,
+    patient_data: patientData || existingRecord.patient_data || {},
+    clinical_data: clinicalData || existingRecord.clinical_data || {},
+    diagnosis_data: diagnosisData || existingRecord.diagnosis_data || {},
+    has_prescriptions: hasMedications,
+    has_lab_requests: hasLabTests,
+    has_imaging_requests: hasImaging,
+    has_invoice: !!(report?.invoice),
+    updated_at: new Date().toISOString()
+  }
+  
+  const { data, error } = await supabase
+    .from('consultation_records')
+    .update(updateData)
+    .eq('consultation_id', consultationId)
+    .select()
+    .single()
     
-    if (existingRecord) {
-      // Update existing record
-      console.log('📝 Updating existing record for consultation:', consultationId)
-      
-      const updateData = {
-        documents_data: documentsData,
-        prescription_data: prescriptionData,
-        documents_status: action === 'finalize' ? 'finalized' : (action === 'validate' ? 'validated' : 'draft'),
-        signatures: metadata?.signatures || {},
-        document_validations: metadata?.documentValidations || {},
-        doctor_name: doctorName,
-        patient_name: patientName,
-        updated_at: new Date().toISOString()
-      }
-      
-      const { data, error } = await supabase
+  if (error) {
+    console.error('❌ Supabase update error:', error)
+    throw error
+  }
+  result = data
+  
+} else {
+  // Create new record
+  console.log('📝 Creating new record for consultation:', consultationId)
+  
+  // Validate consultation date
+  let consultationDate = new Date().toISOString();
+  if (clinicalData?.consultationDate) {
+    const parsedDate = new Date(clinicalData.consultationDate);
+    if (parsedDate.getFullYear() >= 2000 && parsedDate.getFullYear() <= new Date().getFullYear() + 1) {
+      consultationDate = parsedDate.toISOString();
+    } else {
+      console.warn('⚠️ Invalid consultation date detected, using current date');
+    }
+  }
+  
+  const insertData = {
+    consultation_id: consultationId,
+    patient_id: patientId,
+    doctor_id: doctorId,
+    patient_data: patientData || {},
+    clinical_data: clinicalData || {},
+    diagnosis_data: diagnosisData || {},
+    documents_data: documentsData,
+    prescription_data: prescriptionData,
+    documents_status: finalStatus, // Use validated status
+    prescription_status: hasMedications ? 'pending_validation' : null,
+    signatures: metadata?.signatures || {},
+    document_validations: metadata?.documentValidations || {},
+    doctor_name: doctorName,
+    patient_name: patientName,
+    consultation_date: consultationDate,
+    has_prescriptions: hasMedications,
+    has_lab_requests: hasLabTests,
+    has_imaging_requests: hasImaging,
+    has_invoice: !!(report?.invoice),
+    chief_complaint: documentsData.consultationReport?.rapport?.motifConsultation || null,
+    diagnosis: documentsData.consultationReport?.rapport?.conclusionDiagnostique || null,
+    doctor_specialty: documentsData.consultationReport?.praticien?.specialite || null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  }
+  
+  const { data, error } = await supabase
+    .from('consultation_records')
+    .insert(insertData)
+    .select()
+    .single()
+    
+  if (error) {
+    console.error('❌ Supabase insert error:', error)
+    
+    // Check if it's a unique constraint violation
+    if (error.code === '23505') {
+      // Try to update instead if insert fails due to duplicate
+      console.log('Record already exists, attempting update instead...')
+      const { data: updateData, error: updateError } = await supabase
         .from('consultation_records')
-        .update(updateData)
+        .update({
+          ...insertData,
+          created_at: undefined // Don't update created_at
+        })
         .eq('consultation_id', consultationId)
         .select()
         .single()
-
-      if (error) {
-        console.error('❌ Supabase update error:', error)
-        throw error
+        
+      if (updateError) {
+        throw updateError
       }
-      result = data
+      result = updateData
     } else {
-      // Create new record
-      console.log('📝 Creating new record for consultation:', consultationId)
-      
-      const insertData = {
-        consultation_id: consultationId,
-        patient_id: patientId,
-        doctor_id: doctorId,
-        patient_data: patientData || {},
-        clinical_data: clinicalData || {},
-        diagnosis_data: diagnosisData || {},
-        documents_data: documentsData,
-        prescription_data: prescriptionData,
-        documents_status: action === 'finalize' ? 'finalized' : 'draft',
-        prescription_status: 'pending_validation',
-        signatures: metadata?.signatures || {},
-        document_validations: metadata?.documentValidations || {},
-        doctor_name: doctorName,
-        patient_name: patientName,
-        has_prescriptions: !!(report?.ordonnances?.medicaments?.prescription?.medicaments?.length > 0),
-        has_lab_requests: !!(report?.ordonnances?.biologie),
-        has_imaging_requests: !!(report?.ordonnances?.imagerie),
-        has_invoice: !!(report?.invoice),
-        created_at: new Date().toISOString()
-      }
-      
-      const { data, error } = await supabase
-        .from('consultation_records')
-        .insert(insertData)
-        .select()
-        .single()
-
-      if (error) {
-        console.error('❌ Supabase insert error:', error)
-        throw error
-      }
-      result = data
+      throw error
     }
+  } else {
+    result = data
+  }
+}
 
-    console.log('✅ Supabase save successful')
-    
-    return NextResponse.json({
-      success: true,
-      data: {
-        reportId: consultationId,
-        status: result.documents_status,
-        savedAt: result.updated_at || result.created_at,
-        storage: 'supabase',
-        report: documentsData
-      }
-    })
+console.log('✅ Supabase save successful')
+
+return NextResponse.json({
+  success: true,
+  data: {
+    reportId: consultationId,
+    status: result.documents_status,
+    savedAt: result.updated_at || result.created_at,
+    storage: 'supabase',
+    report: documentsData,
+    action: existingRecord ? 'updated' : 'created'
+  }
+})
 
   } catch (error) {
     console.error("❌ POST Error:", error)
