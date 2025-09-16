@@ -11,6 +11,7 @@ class ConsultationDataService {
   private storageKey = 'mauritius_medical_consultation'
   private currentConsultation: Map<number, ConsultationData> = new Map()
   private currentConsultationId: string | null = null
+  private prescriptionRenewalFlag: boolean = false // ADD THIS LINE
   
   constructor() {
     // Load existing data on startup
@@ -31,6 +32,33 @@ class ConsultationDataService {
     this.currentConsultationId = id
     console.log(`📋 Consultation ID set: ${id}`)
   }
+
+  // ADD THESE NEW METHODS AFTER setCurrentConsultationId
+  // Set prescription renewal flag
+  setPrescriptionRenewalFlag(isRenewal: boolean): void {
+    this.prescriptionRenewalFlag = isRenewal
+    console.log(`💊 Prescription renewal flag set to: ${isRenewal}`)
+    
+    // Store in sessionStorage as well for persistence
+    if (isRenewal) {
+      sessionStorage.setItem('prescriptionRenewal', 'true')
+    } else {
+      sessionStorage.removeItem('prescriptionRenewal')
+    }
+  }
+
+  // Check if current consultation is prescription renewal
+  isPrescriptionRenewal(): boolean {
+    // Check both flag and session storage
+    return this.prescriptionRenewalFlag || sessionStorage.getItem('prescriptionRenewal') === 'true'
+  }
+
+  // Clear renewal flag
+  clearRenewalFlag(): void {
+    this.prescriptionRenewalFlag = false
+    sessionStorage.removeItem('prescriptionRenewal')
+  }
+  // END OF NEW METHODS
 
   // Save step data
   async saveStepData(step: number, data: any): Promise<void> {
@@ -123,6 +151,7 @@ class ConsultationDataService {
   async clearCurrentConsultation(): Promise<void> {
     this.currentConsultation.clear()
     this.currentConsultationId = null
+    this.clearRenewalFlag() // ADD THIS LINE - Reset renewal flag when clearing
     localStorage.removeItem(this.storageKey)
     console.log('🧹 Current consultation cleared')
   }
@@ -255,6 +284,21 @@ class ConsultationDataService {
     
     console.log(`📋 New consultation created: ${this.currentConsultationId}`)
     return this.currentConsultationId
+  }
+
+  // ADD THIS METHOD - it's missing in the original
+  private getConsultationFromHistory(consultationId: string): any {
+    const historyKey = 'mauritius_medical_consultation_history'
+    try {
+      const existingHistory = localStorage.getItem(historyKey)
+      if (existingHistory) {
+        const history = JSON.parse(existingHistory)
+        return history.find((consultation: any) => consultation.id === consultationId) || null
+      }
+    } catch (error) {
+      console.error('Error retrieving consultation from history:', error)
+    }
+    return null
   }
 
   // Load consultation from history
