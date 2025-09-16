@@ -252,7 +252,10 @@ GENERATE your EXPERT medical analysis with MAXIMUM MAURITIUS MEDICAL SPECIFICITY
     (med: any) => med && (med.drug || med.medication || med.nom || med.dci || med.indication || med.dosing)
   )
   if (analysis?.treatment_plan) {
-    analysis.treatment_plan.medications = medications
+    if (!analysis.treatment_plan) {
+  analysis.treatment_plan = {};
+}
+analysis.treatment_plan.medications = medications;
   }
   console.log(`🧪 Validating ${medications.length} medications (format flexible)...`)
   
@@ -1558,7 +1561,10 @@ function applyMinimalCorrections(analysis: any, issues: any[], patientContext: P
         administration_instructions: "Prendre avec de l'eau si température >38°C",
         _added_by_universal_safety: "critical_fever_management"
       })
-      analysis.treatment_plan.medications = medications
+      if (!analysis.treatment_plan) {
+  analysis.treatment_plan = {};
+}
+analysis.treatment_plan.medications = medications;
       correctionsApplied++
     }
   })
@@ -1620,7 +1626,10 @@ function applySymptomaticCorrections(analysis: any, issue: any, patientContext: 
       administration_instructions: "Avec de l'eau si fièvre",
       _added_by_universal_correction: "fever_symptomatic"
     })
-    analysis.treatment_plan.medications = medications
+    if (!analysis.treatment_plan) {
+  analysis.treatment_plan = {};
+}
+analysis.treatment_plan.medications = medications;
     return 1
   }
   
@@ -1651,7 +1660,10 @@ function applySymptomaticCorrections(analysis: any, issue: any, patientContext: 
       administration_instructions: "30 min avant repas si nauséeux",
       _added_by_universal_correction: "nausea_symptomatic"
     })
-    analysis.treatment_plan.medications = medications
+    if (!analysis.treatment_plan) {
+  analysis.treatment_plan = {};
+}
+analysis.treatment_plan.medications = medications;
     return 1
   }
   
