@@ -297,7 +297,7 @@ export async function POST(request: NextRequest) {
         general: report?.ordonnances?.biologie?.prescription?.analyses?.general || []
       },
       imagingStudies: report?.ordonnances?.imagerie?.prescription?.examens || [],
-      sickLeave: report?.ordonnances?.sickLeave?.certificate || null,
+      sickLeave: report?.ordonnances?.arretMaladie?.certificat || null,
       generatedAt: new Date().toISOString()
     }
 
@@ -377,7 +377,7 @@ const updateData = {
         has_prescriptions: hasMedications,
         has_lab_requests: hasLabTests,
         has_imaging_requests: hasImaging,
-        has_sick_leave: !!(prescriptionData.sickLeave && prescriptionData.sickLeave.numberOfDays > 0),
+       has_sick_leave: !!(prescriptionData.sickLeave && (prescriptionData.sickLeave.nombreJours > 0 || prescriptionData.sickLeave.numberOfDays > 0)),
         has_invoice: !!(report?.invoice),
         chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation || 
                          clinicalData?.chiefComplaint || 
@@ -440,7 +440,7 @@ const insertData = {
         has_prescriptions: hasMedications,
         has_lab_requests: hasLabTests,
         has_imaging_requests: hasImaging,
-        has_sick_leave: !!(prescriptionData.sickLeave && prescriptionData.sickLeave.numberOfDays > 0),
+        has_sick_leave: !!(prescriptionData.sickLeave && (prescriptionData.sickLeave.nombreJours > 0 || prescriptionData.sickLeave.numberOfDays > 0)),
         has_invoice: !!(report?.invoice),
         chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation || 
                          clinicalData?.chiefComplaint || 
