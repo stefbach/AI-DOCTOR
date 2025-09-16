@@ -39,17 +39,17 @@ function validatePatientData(patientName: string, patientData: any): { isValid: 
   }
   
   // Check for valid phone if provided
-if (patientData?.phone) {
-  const digitsOnly = (patientData.phone || '').replace(/\D/g, '')
-  // Only fail if there are NO digits at all
-  if (digitsOnly.length === 0) {
-    return { isValid: false, error: "Phone number required" }
+  if (patientData?.phone) {
+    const digitsOnly = (patientData.phone || '').replace(/\D/g, '')
+    // Only fail if there are NO digits at all
+    if (digitsOnly.length === 0) {
+      return { isValid: false, error: "Phone number required" }
+    }
+    // Accept partial numbers but log them
+    if (digitsOnly.length < 7) {
+      console.log('⚠️ Partial phone number accepted:', patientData.phone, `(${digitsOnly.length} digits)`)
+    }
   }
-  // Accept partial numbers but log them
-  if (digitsOnly.length < 7) {
-    console.log('⚠️ Partial phone number accepted:', patientData.phone, `(${digitsOnly.length} digits)`)
-  }
-}
   
   return { isValid: true }
 }
@@ -77,6 +77,30 @@ function validateDoctorData(doctorName: string, doctorId: string, report: any): 
   }
   
   return { isValid: true }
+}
+
+// Helper function to detect prescription renewal
+function isPrescriptionRenewal(clinicalData: any, documentsData: any, report: any): boolean {
+  const chiefComplaint = clinicalData?.chiefComplaint?.toLowerCase() || ''
+  const motifConsultation = documentsData?.consultationReport?.rapport?.motifConsultation?.toLowerCase() || ''
+  const reportMotif = report?.compteRendu?.rapport?.motifConsultation?.toLowerCase() || ''
+  
+  const renewalKeywords = [
+    'renewal', 
+    'renouvellement', 
+    'ordonnance', 
+    'prescription',
+    'refill',
+    'order renewal',
+    'repeat prescription',
+    'médicaments à renouveler'
+  ]
+  
+  return renewalKeywords.some(keyword => 
+    chiefComplaint.includes(keyword) || 
+    motifConsultation.includes(keyword) ||
+    reportMotif.includes(keyword)
+  )
 }
 
 export async function GET(request: NextRequest) {
@@ -190,31 +214,33 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-// Additional strict validation for finalization
+    // Structure the documents data
+    const documentsData = {
+      consultationReport: report?.compteRendu || {},
+      prescriptions: report?.ordonnances || {},
+      invoice: report?.invoice || null,
+      lastModified: new Date().toISOString(),
+      editedSections: metadata?.modifiedSections || []
+    }
+
+    // Check if this is a prescription renewal
+    const isRenewal = isPrescriptionRenewal(clinicalData, documentsData, report)
+    
+    if (isRenewal) {
+      console.log('💊 Prescription renewal detected - applying relaxed validation')
+    }
+
+    // Additional strict validation for finalization
     if (action === 'finalize') {
-      // Check if this is a prescription renewal
-      const isPrescriptionRenewal = 
-        clinicalData?.chiefComplaint?.toLowerCase().includes('renewal') ||
-        clinicalData?.chiefComplaint?.toLowerCase().includes('renouvellement') ||
-        clinicalData?.chiefComplaint?.toLowerCase().includes('ordonnance') ||
-        clinicalData?.chiefComplaint?.toLowerCase().includes('prescription') ||
-        clinicalData?.chiefComplaint?.toLowerCase().includes('refill');
-      
-      // For prescription renewals, apply relaxed validation
-      if (isPrescriptionRenewal) {
-        // Only check for medications in prescription renewals
-        const hasMedications = report?.ordonnances?.medicaments?.prescription?.medicaments?.length > 0;
+      if (isRenewal) {
+        // For prescription renewals, apply very relaxed validation
+        console.log('📋 Prescription renewal mode - relaxed validation applied')
         
-        if (!hasMedications) {
-          return NextResponse.json({
-            success: false,
-            error: "Prescription renewal requires at least one medication",
-            validationError: true
-          }, { status: 400 })
-        }
+        // Don't require medications immediately for renewals
+        // Doctor will add them in the UI
         
-        // Skip strict email/phone validation for renewals if they have basic contact
-        console.log('📋 Prescription renewal mode - relaxed validation applied');
+        // Don't require signatures for renewals if not yet validated
+        // They will be added during validation
         
       } else {
         // Normal strict validation for regular consultations
@@ -247,25 +273,16 @@ export async function POST(request: NextRequest) {
             validationError: true
           }, { status: 400 })
         }
+        
+        // Verify signatures exist for finalized documents (not for renewals)
+        if (!metadata?.signatures || Object.keys(metadata.signatures).length === 0) {
+          return NextResponse.json({
+            success: false,
+            error: "Document signatures are required for finalization",
+            validationError: true
+          }, { status: 400 })
+        }
       }
-      
-      // Verify signatures exist for finalized documents
-      if (!metadata?.signatures || Object.keys(metadata.signatures).length === 0) {
-        return NextResponse.json({
-          success: false,
-          error: "Document signatures are required for finalization",
-          validationError: true
-        }, { status: 400 })
-      }
-    }
-
-    // Structure the documents data
-    const documentsData = {
-      consultationReport: report?.compteRendu || {},
-      prescriptions: report?.ordonnances || {},
-      invoice: report?.invoice || null,
-      lastModified: new Date().toISOString(),
-      editedSections: metadata?.modifiedSections || []
     }
 
     // Structure prescription data separately for pharmacy workflow
@@ -283,220 +300,205 @@ export async function POST(request: NextRequest) {
       generatedAt: new Date().toISOString()
     }
 
-   // Validate content completeness before determining status
-let finalStatus = 'draft';
-const hasValidContent = documentsData.consultationReport?.rapport?.motifConsultation &&
-                       documentsData.consultationReport?.rapport?.conclusionDiagnostique;
+    // Validate content completeness before determining status
+    let finalStatus = 'draft';
+    const hasValidContent = documentsData.consultationReport?.rapport?.motifConsultation &&
+                           documentsData.consultationReport?.rapport?.conclusionDiagnostique;
 
-const hasMedications = prescriptionData.medications && prescriptionData.medications.length > 0;
-const hasLabTests = Object.values(prescriptionData.laboratoryTests || {}).some((tests: any) => tests.length > 0);
-const hasImaging = prescriptionData.imagingStudies && prescriptionData.imagingStudies.length > 0;
+    const hasMedications = prescriptionData.medications && prescriptionData.medications.length > 0;
+    const hasLabTests = Object.values(prescriptionData.laboratoryTests || {}).some((tests: any) => tests.length > 0);
+    const hasImaging = prescriptionData.imagingStudies && prescriptionData.imagingStudies.length > 0;
 
-// Determine appropriate status based on action and content
-if (action === 'finalize') {
-  if (!hasValidContent) {
-    console.warn('⚠️ Cannot finalize without consultation content - downgrading to draft');
-    finalStatus = 'draft';
-  } else {
-    finalStatus = 'finalized';
-  }
-} else if (action === 'validate') {
-  finalStatus = 'validated';
-} else {
-  finalStatus = 'draft';
-}
-
-// Check if record exists
-const { data: existingRecord, error: checkError } = await supabase
-  .from('consultation_records')
-  .select('id, documents_status, documents_data')
-  .eq('consultation_id', consultationId)
-  .maybeSingle()
-
-// Only throw if there's an actual database error
-if (checkError && checkError.code !== 'PGRST116') {
-  console.error('❌ Error checking for existing record:', checkError)
-  throw checkError
-}
-
-let result
-
-if (existingRecord) {
-  // Update existing record
-  console.log('📝 Updating existing record for consultation:', consultationId)
-  console.log('Current status:', existingRecord.documents_status, '→ New status:', finalStatus)
-  
-  // Prevent downgrading from finalized to draft
-  if (existingRecord.documents_status === 'finalized' && finalStatus === 'draft') {
-    console.warn('⚠️ Cannot downgrade finalized record to draft')
-    finalStatus = existingRecord.documents_status; // Keep finalized status
-  }
-  
-  // Prevent overwriting completed records with empty data
-  if (existingRecord.documents_status === 'completed' && !hasValidContent && action === 'finalize') {
-    console.error('❌ Cannot finalize completed record without content')
-    return NextResponse.json({
-      success: false,
-      error: 'Cannot finalize consultation without medical content',
-      validationError: true
-    }, { status: 400 })
-  }
-  
-// Detect prescription renewal
-const isPrescriptionRenewal = 
-  clinicalData?.chiefComplaint?.toLowerCase().includes('renewal') ||
-  clinicalData?.chiefComplaint?.toLowerCase().includes('renouvellement') ||
-  clinicalData?.chiefComplaint?.toLowerCase().includes('ordonnance') ||
-  documentsData?.consultationReport?.rapport?.motifConsultation?.toLowerCase().includes('renewal') ||
-  documentsData?.consultationReport?.rapport?.motifConsultation?.toLowerCase().includes('renouvellement') ||
-  documentsData?.consultationReport?.rapport?.motifConsultation?.toLowerCase().includes('ordonnance');
-
-const updateData = {
-  documents_data: documentsData,
-  prescription_data: prescriptionData,
-  documents_status: finalStatus,
-  signatures: metadata?.signatures || {},
-  document_validations: metadata?.documentValidations || {},
-  doctor_name: doctorName,
-  patient_name: patientName,
-  patient_data: patientData || existingRecord.patient_data || {},
-  clinical_data: clinicalData || existingRecord.clinical_data || {},
-  diagnosis_data: isPrescriptionRenewal ? {} : (diagnosisData || existingRecord.diagnosis_data || {}),
-  has_prescriptions: hasMedications,
-  has_lab_requests: hasLabTests,
-  has_imaging_requests: hasImaging,
-  has_invoice: !!(report?.invoice),
-  chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation || 
-                   clinicalData?.chiefComplaint || 
-                   existingRecord.chief_complaint ||
-                   (isPrescriptionRenewal ? 'Prescription Renewal / Renouvellement d\'ordonnance' : null),
-  diagnosis: documentsData?.consultationReport?.rapport?.conclusionDiagnostique || 
-             existingRecord.diagnosis ||
-             (isPrescriptionRenewal ? 'Prescription renewal - stable condition' : null),
-  doctor_specialty: documentsData?.consultationReport?.praticien?.specialite || 
-                    report?.compteRendu?.praticien?.specialite || 
-                    existingRecord.doctor_specialty || 
-                    null,
-  updated_at: new Date().toISOString()
-}
-  
-  const { data, error } = await supabase
-    .from('consultation_records')
-    .update(updateData)
-    .eq('consultation_id', consultationId)
-    .select()
-    .single()
-    
-  if (error) {
-    console.error('❌ Supabase update error:', error)
-    throw error
-  }
-  result = data
-  
-} else {
-  // Create new record
-  console.log('📝 Creating new record for consultation:', consultationId)
-  
-  // Validate consultation date
-  let consultationDate = new Date().toISOString();
-  if (clinicalData?.consultationDate) {
-    const parsedDate = new Date(clinicalData.consultationDate);
-    if (parsedDate.getFullYear() >= 2000 && parsedDate.getFullYear() <= new Date().getFullYear() + 1) {
-      consultationDate = parsedDate.toISOString();
+    // Determine appropriate status based on action and content
+    if (action === 'finalize') {
+      // For renewals, we can finalize even without all content
+      if (isRenewal) {
+        finalStatus = 'finalized';
+      } else if (!hasValidContent) {
+        console.warn('⚠️ Cannot finalize without consultation content - downgrading to draft');
+        finalStatus = 'draft';
+      } else {
+        finalStatus = 'finalized';
+      }
+    } else if (action === 'validate') {
+      finalStatus = 'validated';
     } else {
-      console.warn('⚠️ Invalid consultation date detected, using current date');
+      finalStatus = 'draft';
     }
-  }
 
-// Detect prescription renewal (same logic)
-const isPrescriptionRenewal = 
-  clinicalData?.chiefComplaint?.toLowerCase().includes('renewal') ||
-  clinicalData?.chiefComplaint?.toLowerCase().includes('renouvellement') ||
-  clinicalData?.chiefComplaint?.toLowerCase().includes('ordonnance') ||
-  documentsData?.consultationReport?.rapport?.motifConsultation?.toLowerCase().includes('renewal') ||
-  documentsData?.consultationReport?.rapport?.motifConsultation?.toLowerCase().includes('renouvellement') ||
-  documentsData?.consultationReport?.rapport?.motifConsultation?.toLowerCase().includes('ordonnance');
+    // Check if record exists
+    const { data: existingRecord, error: checkError } = await supabase
+      .from('consultation_records')
+      .select('*')
+      .eq('consultation_id', consultationId)
+      .maybeSingle()
 
-const insertData = {
-  consultation_id: consultationId,
-  patient_id: patientId,
-  doctor_id: doctorId,
-  patient_data: patientData || {},
-  clinical_data: clinicalData || {},
-  diagnosis_data: isPrescriptionRenewal ? {} : (diagnosisData || {}),
-  documents_data: documentsData,
-  prescription_data: prescriptionData,
-  documents_status: finalStatus,
-  prescription_status: hasMedications ? 'pending_validation' : null,
-  signatures: metadata?.signatures || {},
-  document_validations: metadata?.documentValidations || {},
-  doctor_name: doctorName,
-  patient_name: patientName,
-  consultation_date: consultationDate,
-  has_prescriptions: hasMedications,
-  has_lab_requests: hasLabTests,
-  has_imaging_requests: hasImaging,
-  has_invoice: !!(report?.invoice),
-  chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation || 
-                   clinicalData?.chiefComplaint || 
-                   (isPrescriptionRenewal ? 'Prescription Renewal / Renouvellement d\'ordonnance' : null),
-  diagnosis: documentsData?.consultationReport?.rapport?.conclusionDiagnostique || 
-             (isPrescriptionRenewal ? 'Prescription renewal - stable condition' : null),
-  doctor_specialty: documentsData?.consultationReport?.praticien?.specialite || 
-                    report?.compteRendu?.praticien?.specialite || 
-                    null,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString()
-}
-  
-  const { data, error } = await supabase
-    .from('consultation_records')
-    .insert(insertData)
-    .select()
-    .single()
-    
-  if (error) {
-    console.error('❌ Supabase insert error:', error)
-    
-    // Check if it's a unique constraint violation
-    if (error.code === '23505') {
-      // Try to update instead if insert fails due to duplicate
-      console.log('Record already exists, attempting update instead...')
-      const { data: updateData, error: updateError } = await supabase
+    // Only throw if there's an actual database error
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error('❌ Error checking for existing record:', checkError)
+      throw checkError
+    }
+
+    let result
+
+    if (existingRecord) {
+      // Update existing record
+      console.log('📝 Updating existing record for consultation:', consultationId)
+      console.log('Current status:', existingRecord.documents_status, '→ New status:', finalStatus)
+      
+      // Prevent downgrading from finalized to draft (unless it's a renewal)
+      if (!isRenewal && existingRecord.documents_status === 'finalized' && finalStatus === 'draft') {
+        console.warn('⚠️ Cannot downgrade finalized record to draft')
+        finalStatus = existingRecord.documents_status; // Keep finalized status
+      }
+      
+      // Prevent overwriting completed records with empty data (unless renewal)
+      if (!isRenewal && existingRecord.documents_status === 'completed' && !hasValidContent && action === 'finalize') {
+        console.error('❌ Cannot finalize completed record without content')
+        return NextResponse.json({
+          success: false,
+          error: 'Cannot finalize consultation without medical content',
+          validationError: true
+        }, { status: 400 })
+      }
+      
+      const updateData = {
+        documents_data: documentsData,
+        prescription_data: prescriptionData,
+        documents_status: finalStatus,
+        signatures: metadata?.signatures || {},
+        document_validations: metadata?.documentValidations || {},
+        doctor_name: doctorName,
+        patient_name: patientName,
+        patient_data: patientData || existingRecord.patient_data || {},
+        clinical_data: clinicalData || existingRecord.clinical_data || {},
+        diagnosis_data: isRenewal ? {} : (diagnosisData || existingRecord.diagnosis_data || {}),
+        has_prescriptions: hasMedications,
+        has_lab_requests: hasLabTests,
+        has_imaging_requests: hasImaging,
+        has_invoice: !!(report?.invoice),
+        chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation || 
+                         clinicalData?.chiefComplaint || 
+                         existingRecord.chief_complaint ||
+                         (isRenewal ? 'Prescription Renewal / Renouvellement d\'ordonnance' : null),
+        diagnosis: documentsData?.consultationReport?.rapport?.conclusionDiagnostique || 
+                   existingRecord.diagnosis ||
+                   (isRenewal ? 'Prescription renewal - stable condition' : null),
+        doctor_specialty: documentsData?.consultationReport?.praticien?.specialite || 
+                          report?.compteRendu?.praticien?.specialite || 
+                          existingRecord.doctor_specialty || 
+                          null,
+        updated_at: new Date().toISOString()
+      }
+      
+      const { data, error } = await supabase
         .from('consultation_records')
-        .update({
-          ...insertData,
-          created_at: undefined // Don't update created_at
-        })
+        .update(updateData)
         .eq('consultation_id', consultationId)
         .select()
         .single()
         
-      if (updateError) {
-        throw updateError
+      if (error) {
+        console.error('❌ Supabase update error:', error)
+        throw error
       }
-      result = updateData
+      result = data
+      
     } else {
-      throw error
+      // Create new record
+      console.log('📝 Creating new record for consultation:', consultationId)
+      
+      // Validate consultation date
+      let consultationDate = new Date().toISOString();
+      if (clinicalData?.consultationDate) {
+        const parsedDate = new Date(clinicalData.consultationDate);
+        if (parsedDate.getFullYear() >= 2000 && parsedDate.getFullYear() <= new Date().getFullYear() + 1) {
+          consultationDate = parsedDate.toISOString();
+        } else {
+          console.warn('⚠️ Invalid consultation date detected, using current date');
+        }
+      }
+
+      const insertData = {
+        consultation_id: consultationId,
+        patient_id: patientId,
+        doctor_id: doctorId,
+        patient_data: patientData || {},
+        clinical_data: clinicalData || {},
+        diagnosis_data: isRenewal ? {} : (diagnosisData || {}),
+        documents_data: documentsData,
+        prescription_data: prescriptionData,
+        documents_status: finalStatus,
+        prescription_status: hasMedications ? 'pending_validation' : null,
+        signatures: metadata?.signatures || {},
+        document_validations: metadata?.documentValidations || {},
+        doctor_name: doctorName,
+        patient_name: patientName,
+        consultation_date: consultationDate,
+        has_prescriptions: hasMedications,
+        has_lab_requests: hasLabTests,
+        has_imaging_requests: hasImaging,
+        has_invoice: !!(report?.invoice),
+        chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation || 
+                         clinicalData?.chiefComplaint || 
+                         (isRenewal ? 'Prescription Renewal / Renouvellement d\'ordonnance' : null),
+        diagnosis: documentsData?.consultationReport?.rapport?.conclusionDiagnostique || 
+                   (isRenewal ? 'Prescription renewal - stable condition' : null),
+        doctor_specialty: documentsData?.consultationReport?.praticien?.specialite || 
+                          report?.compteRendu?.praticien?.specialite || 
+                          null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+      
+      const { data, error } = await supabase
+        .from('consultation_records')
+        .insert(insertData)
+        .select()
+        .single()
+        
+      if (error) {
+        console.error('❌ Supabase insert error:', error)
+        
+        // Check if it's a unique constraint violation
+        if (error.code === '23505') {
+          // Try to update instead if insert fails due to duplicate
+          console.log('Record already exists, attempting update instead...')
+          const { data: updateData, error: updateError } = await supabase
+            .from('consultation_records')
+            .update({
+              ...insertData,
+              created_at: undefined // Don't update created_at
+            })
+            .eq('consultation_id', consultationId)
+            .select()
+            .single()
+            
+          if (updateError) {
+            throw updateError
+          }
+          result = updateData
+        } else {
+          throw error
+        }
+      } else {
+        result = data
+      }
     }
-  } else {
-    result = data
-  }
-}
 
-console.log('✅ Supabase save successful')
+    console.log('✅ Supabase save successful')
 
-return NextResponse.json({
-  success: true,
-  data: {
-    reportId: consultationId,
-    status: result.documents_status,
-    savedAt: result.updated_at || result.created_at,
-    storage: 'supabase',
-    report: documentsData,
-    action: existingRecord ? 'updated' : 'created'
-  }
-})
+    return NextResponse.json({
+      success: true,
+      data: {
+        reportId: consultationId,
+        status: result.documents_status,
+        savedAt: result.updated_at || result.created_at,
+        storage: 'supabase',
+        report: documentsData,
+        action: existingRecord ? 'updated' : 'created'
+      }
+    })
 
   } catch (error) {
     console.error("❌ POST Error:", error)
