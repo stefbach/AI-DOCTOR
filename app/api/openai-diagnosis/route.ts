@@ -855,7 +855,7 @@ async function callOpenAIWithMauritiusQuality(
   apiKey: string,
   basePrompt: string,
   patientContext: PatientContext,
-  maxRetries: number = 3
+  maxRetries: number = 2
 ): Promise<{ data: any; analysis: any; mauritius_quality_level: number }> {
   const backoffMs = [1000, 2000, 4000];
   let lastError: Error | null = null;
@@ -981,7 +981,8 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
 
     try {
       const systemPrompt = MAURITIUS_MEDICAL_PROMPT;
-
+     const controller = new AbortController(); 
+     const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minutes
       const openaiResp = await fetch('https://api.openai.com/v1/responses', {
         method: 'POST',
         headers: {
@@ -994,11 +995,12 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
             { role: 'system', content: systemPrompt },
             { role: 'user', content: finalPrompt }
           ],
-          max_output_tokens: 8000,
+          max_output_tokens: 5000,
           text: { format: { type: 'json_object' } }
         }),
+      signal: controller.signal // ← Ajouter cette ligne
       });
-
+     clearTimeout(timeoutId); // ← Ajouter après le fetch
       if (!openaiResp.ok) {
         const errText = await openaiResp.text().catch(() => '');
         throw new Error(`HTTP ${openaiResp.status} ${openaiResp.statusText} – ${errText.slice(0, 400)}`);
