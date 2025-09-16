@@ -190,35 +190,63 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Additional strict validation for finalization
+// Additional strict validation for finalization
     if (action === 'finalize') {
-      // Ensure all required patient fields are present
-      if (!patientData?.email || patientData.email === '') {
-        return NextResponse.json({
-          success: false,
-          error: "Patient email is required for document finalization",
-          validationError: true
-        }, { status: 400 })
-      }
+      // Check if this is a prescription renewal
+      const isPrescriptionRenewal = 
+        clinicalData?.chiefComplaint?.toLowerCase().includes('renewal') ||
+        clinicalData?.chiefComplaint?.toLowerCase().includes('renouvellement') ||
+        clinicalData?.chiefComplaint?.toLowerCase().includes('ordonnance') ||
+        clinicalData?.chiefComplaint?.toLowerCase().includes('prescription') ||
+        clinicalData?.chiefComplaint?.toLowerCase().includes('refill');
       
-      if (!patientData?.phone || patientData.phone === '') {
-        return NextResponse.json({
-          success: false,
-          error: "Patient phone number is required for document finalization",
-          validationError: true
-        }, { status: 400 })
-      }
-      
-      // Check if report has actual medical content
-      const hasContent = report?.compteRendu?.rapport?.motifConsultation && 
-                        report?.compteRendu?.rapport?.conclusionDiagnostique
-      
-      if (!hasContent) {
-        return NextResponse.json({
-          success: false,
-          error: "Medical report must contain consultation details and diagnosis",
-          validationError: true
-        }, { status: 400 })
+      // For prescription renewals, apply relaxed validation
+      if (isPrescriptionRenewal) {
+        // Only check for medications in prescription renewals
+        const hasMedications = report?.ordonnances?.medicaments?.prescription?.medicaments?.length > 0;
+        
+        if (!hasMedications) {
+          return NextResponse.json({
+            success: false,
+            error: "Prescription renewal requires at least one medication",
+            validationError: true
+          }, { status: 400 })
+        }
+        
+        // Skip strict email/phone validation for renewals if they have basic contact
+        console.log('📋 Prescription renewal mode - relaxed validation applied');
+        
+      } else {
+        // Normal strict validation for regular consultations
+        
+        // Ensure all required patient fields are present
+        if (!patientData?.email || patientData.email === '') {
+          return NextResponse.json({
+            success: false,
+            error: "Patient email is required for document finalization",
+            validationError: true
+          }, { status: 400 })
+        }
+        
+        if (!patientData?.phone || patientData.phone === '') {
+          return NextResponse.json({
+            success: false,
+            error: "Patient phone number is required for document finalization",
+            validationError: true
+          }, { status: 400 })
+        }
+        
+        // Check if report has actual medical content
+        const hasContent = report?.compteRendu?.rapport?.motifConsultation && 
+                          report?.compteRendu?.rapport?.conclusionDiagnostique
+        
+        if (!hasContent) {
+          return NextResponse.json({
+            success: false,
+            error: "Medical report must contain consultation details and diagnosis",
+            validationError: true
+          }, { status: 400 })
+        }
       }
       
       // Verify signatures exist for finalized documents
