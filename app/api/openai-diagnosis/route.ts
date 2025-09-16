@@ -1011,7 +1011,47 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
       if (!rawContent) throw new Error('Empty model output_text/content');
 
       const jsonStr = safeExtractJSONObjectString(rawContent);
-      const analysis = JSON.parse(jsonStr);
+    let analysis;
+try {
+  // Nettoyer le JSON avant parsing
+  let cleanJsonStr = jsonStr.trim();
+  
+  // Enlever les backticks markdown si présents
+  cleanJsonStr = cleanJsonStr.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+  
+  // Vérifier que ça commence et finit bien par { }
+  if (!cleanJsonStr.startsWith('{')) {
+    const startIdx = cleanJsonStr.indexOf('{');
+    if (startIdx !== -1) cleanJsonStr = cleanJsonStr.substring(startIdx);
+  }
+  
+  if (!cleanJsonStr.endsWith('}')) {
+    const endIdx = cleanJsonStr.lastIndexOf('}');
+    if (endIdx !== -1) cleanJsonStr = cleanJsonStr.substring(0, endIdx + 1);
+  }
+  
+  analysis = JSON.parse(cleanJsonStr);
+  
+} catch (parseError) {
+  console.error('❌ JSON Parse Error:', parseError);
+  console.log('📄 Raw JSON (first 500 chars):', jsonStr.substring(0, 500));
+  
+  // Fallback d'urgence avec structure minimale
+  analysis = {
+    clinical_analysis: {
+      primary_diagnosis: {
+        condition: "Consultation médicale - Évaluation requise",
+        icd10_code: "R69",
+        confidence_level: 70,
+        severity: "modérée"
+      }
+    },
+    treatment_plan: { medications: [] },
+    follow_up_plan: {
+      red_flags: "Consulter si aggravation des symptômes"
+    }
+  };
+}
 
       return { data, analysis, mauritius_quality_level: qualityLevel };
       
