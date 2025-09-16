@@ -856,19 +856,20 @@ async function callOpenAIWithMauritiusQuality(
   basePrompt: string,
   patientContext: PatientContext,
   maxRetries: number = 3
-): Promise<any> {
-  
-  let lastError: Error | null = null
-  let qualityLevel = 0
-  
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      console.log(`📡 OpenAI call attempt ${attempt + 1}/${maxRetries + 1} (Mauritius quality level: ${qualityLevel})`)
-      
-      let finalPrompt = basePrompt
-      
-      if (attempt === 1) {
-        finalPrompt = `🚨 PREVIOUS RESPONSE HAD GENERIC CONTENT - MAURITIUS MEDICAL SPECIFICITY + DCI REQUIRED
+): Promise<{ data: any; analysis: any; mauritius_quality_level: number }> {
+  const backoffMs = [1000, 2000, 4000];
+  let lastError: Error | null = null;
+  let qualityLevel = 0;
+  let finalPrompt = basePrompt;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    // Renforcement progressif du prompt
+    if (attempt === 0) {
+      // First attempt - use base prompt
+      finalPrompt = basePrompt;
+      qualityLevel = 0;
+    } else if (attempt === 1) {
+      finalPrompt = `🚨 PREVIOUS RESPONSE HAD GENERIC CONTENT - MAURITIUS MEDICAL SPECIFICITY + DCI REQUIRED
 
 ${basePrompt}
 
@@ -886,10 +887,10 @@ EXAMPLES OF DETAILED MEDICATIONS WITH DCI:
 ❌ FORBIDDEN:
 ❌ "drug": "Medication" or "Antibiotic" (too generic)
 ❌ "dci": missing or undefined
-❌ "indication": "Treatment" (too vague)`
-        qualityLevel = 1
-      } else if (attempt === 2) {
-        finalPrompt = `🚨🚨 MAURITIUS MEDICAL SPECIFICITY + PRECISE DCI MANDATORY
+❌ "indication": "Treatment" (too vague)`;
+      qualityLevel = 1;
+    } else if (attempt === 2) {
+      finalPrompt = `🚨🚨 MAURITIUS MEDICAL SPECIFICITY + PRECISE DCI MANDATORY
 
 ${basePrompt}
 
@@ -919,10 +920,10 @@ MANDATORY DCI + MEDICATION FORMAT:
 ❌ Any medication without DCI
 ❌ Any indication shorter than 25 characters
 ❌ Generic terms like "medication", "antibiotic"
-❌ Vague descriptions without medical context`
-        qualityLevel = 2
-      } else if (attempt >= 3) {
-        finalPrompt = `🆘 MAXIMUM MAURITIUS MEDICAL SPECIFICITY + DCI MODE
+❌ Vague descriptions without medical context`;
+      qualityLevel = 2;
+    } else if (attempt >= 3) {
+      finalPrompt = `🆘 MAXIMUM MAURITIUS MEDICAL SPECIFICITY + DCI MODE
 
 ${basePrompt}
 
@@ -952,7 +953,7 @@ EXAMPLE COMPLETE MEDICATION WITH DCI + DETAILED INDICATION:
     "individual_dose": "500mg",
     "daily_total_dose": "1500mg/day"
   },
- "duration": "7 days (complete course)",
+  "duration": "7 days (complete course)",
   "contraindications": "Allergie aux pénicillines, mononucléose infectieuse sévère",
   "interactions": "Efficacité réduite des contraceptifs oraux",
   "monitoring": "Réponse clinique et réactions allergiques",
@@ -960,43 +961,26 @@ EXAMPLE COMPLETE MEDICATION WITH DCI + DETAILED INDICATION:
   "administration_instructions": "Prendre avec la nourriture, terminer le traitement complet"
 }
 
-GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters each)`
-        qualityLevel = 3
-      }
-      
-   // Appel OpenAI /v1/responses — version unique et propre
-async function callOpenAIWithMauritiusQuality(
-  apiKey: string,
-  basePrompt: string,
-  patientContext: PatientContext,
-  maxRetries: number = 3
-): Promise<{ data: any; analysis: any; mauritius_quality_level: number }> {
-  const backoffMs = [1000, 2000, 4000];
-  let lastError: Error | null = null;
-  let qualityLevel = 0;
-  let finalPrompt = basePrompt;
+GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters each)`;
+      qualityLevel = 3;
+    }
 
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    // Renforcement progressif du prompt
-    if (attempt === 1) {
-      qualityLevel = 1;
-      finalPrompt = basePrompt + "\n\n" + prepareMauritiusQualityPrompt(patientContext, analyzeConsultationType(
+    // Additional prompt enhancement
+    if (attempt >= 1) {
+      const consultationType = analyzeConsultationType(
         patientContext.current_medications,
         patientContext.chief_complaint,
         patientContext.symptoms
-      ));
-    } else if (attempt >= 2) {
-      qualityLevel = 2;
-      finalPrompt = basePrompt + "\n\n" + prepareMauritiusQualityPrompt(patientContext, analyzeConsultationType(
-        patientContext.current_medications,
-        patientContext.chief_complaint,
-        patientContext.symptoms
-      )) + `
-IMPORTANT: OUTPUT MUST BE STRICT, SINGLE JSON OBJECT. NO MARKDOWN, NO EXTRA TEXT.`;
+      );
+      finalPrompt = finalPrompt + "\n\n" + prepareMauritiusQualityPrompt(patientContext, consultationType);
+      
+      if (attempt >= 2) {
+        finalPrompt = finalPrompt + `\nIMPORTANT: OUTPUT MUST BE STRICT, SINGLE JSON OBJECT. NO MARKDOWN, NO EXTRA TEXT.`;
+      }
     }
 
     try {
-      const systemPrompt = MAURITIUS_MEDICAL_PROMPT; // ta constante système déjà définie
+      const systemPrompt = MAURITIUS_MEDICAL_PROMPT;
 
       const openaiResp = await fetch('https://api.openai.com/v1/responses', {
         method: 'POST',
@@ -1008,9 +992,8 @@ IMPORTANT: OUTPUT MUST BE STRICT, SINGLE JSON OBJECT. NO MARKDOWN, NO EXTRA TEXT
           model: 'gpt-5',
           input: [
             { role: 'system', content: systemPrompt },
-            { role: 'user',   content: finalPrompt }
+            { role: 'user', content: finalPrompt }
           ],
-          // IMPORTANT: ne PAS envoyer temperature/top_p/presence_penalty/frequency_penalty avec GPT-5
           max_output_tokens: 8000,
           text: { format: { type: 'json_object' } }
         }),
@@ -1029,6 +1012,7 @@ IMPORTANT: OUTPUT MUST BE STRICT, SINGLE JSON OBJECT. NO MARKDOWN, NO EXTRA TEXT
       const analysis = JSON.parse(jsonStr);
 
       return { data, analysis, mauritius_quality_level: qualityLevel };
+      
     } catch (e: any) {
       lastError = e instanceof Error ? e : new Error(String(e));
       const wait = backoffMs[Math.min(attempt, backoffMs.length - 1)];
@@ -1038,7 +1022,6 @@ IMPORTANT: OUTPUT MUST BE STRICT, SINGLE JSON OBJECT. NO MARKDOWN, NO EXTRA TEXT
 
   throw lastError ?? new Error('Failed after multiple attempts with Mauritius quality enhancement');
 }
-
 
 function prepareMauritiusQualityPrompt(patientContext: PatientContext, consultationType: any): string {
   const currentMedsFormatted = patientContext.current_medications.length > 0 
