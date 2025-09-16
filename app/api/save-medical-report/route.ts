@@ -342,23 +342,43 @@ if (existingRecord) {
     }, { status: 400 })
   }
   
-  const updateData = {
-    documents_data: documentsData,
-    prescription_data: prescriptionData,
-    documents_status: finalStatus, // Use validated status
-    signatures: metadata?.signatures || {},
-    document_validations: metadata?.documentValidations || {},
-    doctor_name: doctorName,
-    patient_name: patientName,
-    patient_data: patientData || existingRecord.patient_data || {},
-    clinical_data: clinicalData || existingRecord.clinical_data || {},
-    diagnosis_data: diagnosisData || existingRecord.diagnosis_data || {},
-    has_prescriptions: hasMedications,
-    has_lab_requests: hasLabTests,
-    has_imaging_requests: hasImaging,
-    has_invoice: !!(report?.invoice),
-    updated_at: new Date().toISOString()
-  }
+// Detect prescription renewal
+const isPrescriptionRenewal = 
+  clinicalData?.chiefComplaint?.toLowerCase().includes('renewal') ||
+  clinicalData?.chiefComplaint?.toLowerCase().includes('renouvellement') ||
+  clinicalData?.chiefComplaint?.toLowerCase().includes('ordonnance') ||
+  documentsData?.consultationReport?.rapport?.motifConsultation?.toLowerCase().includes('renewal') ||
+  documentsData?.consultationReport?.rapport?.motifConsultation?.toLowerCase().includes('renouvellement') ||
+  documentsData?.consultationReport?.rapport?.motifConsultation?.toLowerCase().includes('ordonnance');
+
+const updateData = {
+  documents_data: documentsData,
+  prescription_data: prescriptionData,
+  documents_status: finalStatus,
+  signatures: metadata?.signatures || {},
+  document_validations: metadata?.documentValidations || {},
+  doctor_name: doctorName,
+  patient_name: patientName,
+  patient_data: patientData || existingRecord.patient_data || {},
+  clinical_data: clinicalData || existingRecord.clinical_data || {},
+  diagnosis_data: isPrescriptionRenewal ? {} : (diagnosisData || existingRecord.diagnosis_data || {}),
+  has_prescriptions: hasMedications,
+  has_lab_requests: hasLabTests,
+  has_imaging_requests: hasImaging,
+  has_invoice: !!(report?.invoice),
+  chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation || 
+                   clinicalData?.chiefComplaint || 
+                   existingRecord.chief_complaint ||
+                   (isPrescriptionRenewal ? 'Prescription Renewal / Renouvellement d\'ordonnance' : null),
+  diagnosis: documentsData?.consultationReport?.rapport?.conclusionDiagnostique || 
+             existingRecord.diagnosis ||
+             (isPrescriptionRenewal ? 'Prescription renewal - stable condition' : null),
+  doctor_specialty: documentsData?.consultationReport?.praticien?.specialite || 
+                    report?.compteRendu?.praticien?.specialite || 
+                    existingRecord.doctor_specialty || 
+                    null,
+  updated_at: new Date().toISOString()
+}
   
   const { data, error } = await supabase
     .from('consultation_records')
@@ -387,33 +407,47 @@ if (existingRecord) {
       console.warn('⚠️ Invalid consultation date detected, using current date');
     }
   }
-  
-  const insertData = {
-    consultation_id: consultationId,
-    patient_id: patientId,
-    doctor_id: doctorId,
-    patient_data: patientData || {},
-    clinical_data: clinicalData || {},
-    diagnosis_data: diagnosisData || {},
-    documents_data: documentsData,
-    prescription_data: prescriptionData,
-    documents_status: finalStatus, // Use validated status
-    prescription_status: hasMedications ? 'pending_validation' : null,
-    signatures: metadata?.signatures || {},
-    document_validations: metadata?.documentValidations || {},
-    doctor_name: doctorName,
-    patient_name: patientName,
-    consultation_date: consultationDate,
-    has_prescriptions: hasMedications,
-    has_lab_requests: hasLabTests,
-    has_imaging_requests: hasImaging,
-    has_invoice: !!(report?.invoice),
-    chief_complaint: documentsData.consultationReport?.rapport?.motifConsultation || null,
-    diagnosis: documentsData.consultationReport?.rapport?.conclusionDiagnostique || null,
-    doctor_specialty: documentsData.consultationReport?.praticien?.specialite || null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  }
+
+// Detect prescription renewal (same logic)
+const isPrescriptionRenewal = 
+  clinicalData?.chiefComplaint?.toLowerCase().includes('renewal') ||
+  clinicalData?.chiefComplaint?.toLowerCase().includes('renouvellement') ||
+  clinicalData?.chiefComplaint?.toLowerCase().includes('ordonnance') ||
+  documentsData?.consultationReport?.rapport?.motifConsultation?.toLowerCase().includes('renewal') ||
+  documentsData?.consultationReport?.rapport?.motifConsultation?.toLowerCase().includes('renouvellement') ||
+  documentsData?.consultationReport?.rapport?.motifConsultation?.toLowerCase().includes('ordonnance');
+
+const insertData = {
+  consultation_id: consultationId,
+  patient_id: patientId,
+  doctor_id: doctorId,
+  patient_data: patientData || {},
+  clinical_data: clinicalData || {},
+  diagnosis_data: isPrescriptionRenewal ? {} : (diagnosisData || {}),
+  documents_data: documentsData,
+  prescription_data: prescriptionData,
+  documents_status: finalStatus,
+  prescription_status: hasMedications ? 'pending_validation' : null,
+  signatures: metadata?.signatures || {},
+  document_validations: metadata?.documentValidations || {},
+  doctor_name: doctorName,
+  patient_name: patientName,
+  consultation_date: consultationDate,
+  has_prescriptions: hasMedications,
+  has_lab_requests: hasLabTests,
+  has_imaging_requests: hasImaging,
+  has_invoice: !!(report?.invoice),
+  chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation || 
+                   clinicalData?.chiefComplaint || 
+                   (isPrescriptionRenewal ? 'Prescription Renewal / Renouvellement d\'ordonnance' : null),
+  diagnosis: documentsData?.consultationReport?.rapport?.conclusionDiagnostique || 
+             (isPrescriptionRenewal ? 'Prescription renewal - stable condition' : null),
+  doctor_specialty: documentsData?.consultationReport?.praticien?.specialite || 
+                    report?.compteRendu?.praticien?.specialite || 
+                    null,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString()
+}
   
   const { data, error } = await supabase
     .from('consultation_records')
