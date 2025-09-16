@@ -97,6 +97,34 @@ async function translateText(text: string): Promise<string> {
   if (!text) return text
   
   try {
+    // Handle multi-line text by splitting and translating each line
+    if (text.includes('\n')) {
+      console.log('📝 Translating multi-line text with', text.split('\n').filter(line => line.trim()).length, 'lines')
+      
+      const lines = text.split('\n').filter(line => line.trim() !== '')
+      const translatedLines = await Promise.all(
+        lines.map(async (line) => {
+          const response = await fetch('/api/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: line.trim() })
+          })
+          
+          if (response.ok) {
+            const result = await response.json()
+            console.log('  Line translated:', line.trim(), '→', result.translatedText)
+            return result.translatedText || line
+          }
+          return line
+        })
+      )
+      
+      const result = translatedLines.join('\n')
+      console.log('✅ Multi-line translation complete:', result)
+      return result
+    }
+    
+    // Single line translation
     const response = await fetch('/api/translate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -192,7 +220,7 @@ async function normalizeLifestyleData(data: any): Promise<any> {
     'Sulfamides': 'Sulfonamides'
   }
 
-  // Helper function to translate array values
+// Helper function to translate array values
   const translateArray = (arr: string[], map: Record<string, string>): string[] => {
     return arr.map(item => {
       const trimmedItem = item.trim()
@@ -240,7 +268,7 @@ async function normalizeLifestyleData(data: any): Promise<any> {
   }
 
   // Translate consultation reason (chief complaint)
-    if (data.consultationReason) {
+  if (data.consultationReason) {
     normalized.consultationReason = await translateText(data.consultationReason)
   }
   
@@ -249,10 +277,22 @@ async function normalizeLifestyleData(data: any): Promise<any> {
     normalized.currentSymptoms = data.currentSymptoms
   }
 
-  // Translate current medications
-if (data.currentMedications) {
-  normalized.currentMedications = await translateText(data.currentMedications)
-}
+  // Translate current medications with improved logging
+  if (data.currentMedications) {
+    console.log('💊 BEFORE translation - Current medications:', {
+      original: data.currentMedications,
+      lineCount: data.currentMedications.split('\n').filter(line => line.trim()).length,
+      length: data.currentMedications.length
+    })
+    
+    normalized.currentMedications = await translateText(data.currentMedications)
+    
+    console.log('💊 AFTER translation - Current medications:', {
+      translated: normalized.currentMedications,
+      lineCount: normalized.currentMedications.split('\n').filter(line => line.trim()).length,
+      length: normalized.currentMedications.length
+    })
+  }
 
   // Symptom duration
   if (data.symptomDuration) {
@@ -263,12 +303,14 @@ if (data.currentMedications) {
     original: {
       otherAllergies: data.otherAllergies,
       otherMedicalHistory: data.otherMedicalHistory,
-      medicalHistory: data.medicalHistory
+      medicalHistory: data.medicalHistory,
+      currentMedications: data.currentMedications
     },
     normalized: {
       otherAllergies: normalized.otherAllergies,
       otherMedicalHistory: normalized.otherMedicalHistory,
-      medicalHistory: normalized.medicalHistory
+      medicalHistory: normalized.medicalHistory,
+      currentMedications: normalized.currentMedications
     }
   })
 
