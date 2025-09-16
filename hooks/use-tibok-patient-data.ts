@@ -343,13 +343,37 @@ export function useTibokPatientData() {
             }
           })
 
-          // Use normalized data
+// Use normalized data
           setPatientData(normalizedPatientData)
           setDoctorData(parsedDoctorData)
           setConsultationData(consultation)
           setIsFromTibok(true)
           
           console.log('✅ TIBOK data loaded and normalized successfully')
+          
+          // ADD THIS NEW CODE BLOCK - Check for prescription renewal
+          if (normalizedPatientData.consultationReason) {
+            const lowerReason = normalizedPatientData.consultationReason.toLowerCase()
+            const isRenewal = lowerReason.includes('renewal') || 
+                              lowerReason.includes('renouvellement') ||
+                              lowerReason.includes('ordonnance') ||
+                              lowerReason.includes('prescription') ||
+                              lowerReason.includes('refill') ||
+                              lowerReason.includes('order renewal')
+            
+            if (isRenewal) {
+              console.log('💊 Prescription renewal detected from Tibok:', normalizedPatientData.consultationReason)
+              
+              // Dispatch event to notify the main component
+              window.dispatchEvent(new CustomEvent('prescription-renewal-detected', {
+                detail: { 
+                  consultationReason: normalizedPatientData.consultationReason,
+                  isRenewal: true 
+                }
+              }))
+            }
+          }
+          // END OF NEW CODE BLOCK
           
         } catch (error) {
           console.error('❌ Error parsing TIBOK data:', error)
