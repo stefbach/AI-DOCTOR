@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
+import { toast } from "@/components/ui/use-toast"
 import { supabase } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -85,6 +86,32 @@ interface PatientFormProps {
 
 interface ValidationErrors {
   [key: string]: string
+}
+
+// Helper function to translate medications
+async function translateMedications(medications: string): Promise<string> {
+  if (!medications || medications.trim() === '') return medications
+  
+  try {
+    const response = await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: medications })
+    })
+    
+    if (response.ok) {
+      const result = await response.json()
+      console.log('💊 Medications translated:', {
+        original: medications,
+        translated: result.translatedText
+      })
+      return result.translatedText || medications
+    }
+  } catch (error) {
+    console.error('Failed to translate medications:', error)
+  }
+  
+  return medications
 }
 
 // ==================== CONSTANTS ====================
@@ -1336,7 +1363,7 @@ useEffect(() => {
           )}
         </CardContent>
       </Card>
-                  {/* Section 5: Current Medications */}
+{/* Section 5: Current Medications */}
       <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3">
@@ -1351,6 +1378,28 @@ useEffect(() => {
               id="currentMedicationsText"
               value={formData.currentMedicationsText}
               onChange={(e) => handleInputChange("currentMedicationsText", e.target.value)}
+              onBlur={async () => {
+                // Auto-translate on blur if text contains French patterns
+                const text = formData.currentMedicationsText
+                const frenchPatterns = [
+                  /\bfois\b/i, /\bpar jour\b/i, /\bcomprimé/i, 
+                  /\bmatin\b/i, /\bsoir\b/i, /\bmidi\b/i,
+                  /\bavant\b/i, /\baprès\b/i, /\brepas\b/i
+                ]
+                
+                if (text && frenchPatterns.some(pattern => pattern.test(text))) {
+                  console.log('🔍 French medication detected, translating...')
+                  const translated = await translateMedications(text)
+                  if (translated !== text) {
+                    handleInputChange("currentMedicationsText", translated)
+                    toast({
+                      title: "✅ Medications Translated",
+                      description: "French medications have been translated to English",
+                      duration: 3000
+                    })
+                  }
+                }
+              }}
               placeholder="List all medications you are currently taking...
 Example:
 - Aspirin 100mg - once daily
@@ -1358,7 +1407,14 @@ Example:
               rows={6}
               className="font-mono text-sm"
             />
-            <p className="text-xs text-gray-500">Please include medication name, dosage, and frequency</p>
+            <p className="text-xs text-gray-500">
+              Please include medication name, dosage, and frequency
+              {isFromTibok && (
+                <span className="block text-blue-600 mt-1">
+                  ℹ️ Medications will be auto-translated from French if needed
+                </span>
+              )}
+            </p>
             {formData.pregnancyStatus === 'pregnant' && (
               <p className="text-xs text-pink-600 font-medium">
                 ⚠️ Current medications will be reviewed for pregnancy safety
