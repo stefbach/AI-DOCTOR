@@ -998,7 +998,7 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
             { role: 'system', content: systemPrompt },
             { role: 'user', content: finalPrompt }
           ],
-          max_output_tokens: 5000,
+          max_output_tokens: 8000,
           text: { format: { type: 'json_object' } }
         }),
       signal: controller.signal // ← Ajouter cette ligne
