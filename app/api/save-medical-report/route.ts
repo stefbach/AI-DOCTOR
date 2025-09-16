@@ -285,7 +285,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Structure prescription data separately for pharmacy workflow
+// Structure prescription data separately for pharmacy workflow
     const prescriptionData = {
       medications: report?.ordonnances?.medicaments?.prescription?.medicaments || [],
       laboratoryTests: {
@@ -297,6 +297,7 @@ export async function POST(request: NextRequest) {
         general: report?.ordonnances?.biologie?.prescription?.analyses?.general || []
       },
       imagingStudies: report?.ordonnances?.imagerie?.prescription?.examens || [],
+      sickLeave: report?.ordonnances?.sickLeave?.certificate || null,
       generatedAt: new Date().toISOString()
     }
 
@@ -362,7 +363,7 @@ export async function POST(request: NextRequest) {
         }, { status: 400 })
       }
       
-      const updateData = {
+const updateData = {
         documents_data: documentsData,
         prescription_data: prescriptionData,
         documents_status: finalStatus,
@@ -376,6 +377,7 @@ export async function POST(request: NextRequest) {
         has_prescriptions: hasMedications,
         has_lab_requests: hasLabTests,
         has_imaging_requests: hasImaging,
+        has_sick_leave: !!(prescriptionData.sickLeave && prescriptionData.sickLeave.numberOfDays > 0),
         has_invoice: !!(report?.invoice),
         chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation || 
                          clinicalData?.chiefComplaint || 
@@ -419,7 +421,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      const insertData = {
+const insertData = {
         consultation_id: consultationId,
         patient_id: patientId,
         doctor_id: doctorId,
@@ -438,6 +440,7 @@ export async function POST(request: NextRequest) {
         has_prescriptions: hasMedications,
         has_lab_requests: hasLabTests,
         has_imaging_requests: hasImaging,
+        has_sick_leave: !!(prescriptionData.sickLeave && prescriptionData.sickLeave.numberOfDays > 0),
         has_invoice: !!(report?.invoice),
         chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation || 
                          clinicalData?.chiefComplaint || 
