@@ -801,9 +801,10 @@ export async function POST(request: NextRequest) {
       questionsData, 
       diagnosisData,
       editedDocuments, 
+      sickLeaveData,
       includeFullPrescriptions = true,
-      isPrescriptionRenewal = false,  // ADD THIS
-      skipDetailedSections = false    // ADD THIS
+      isPrescriptionRenewal = false,
+      skipDetailedSections = false  
     } = body
 
     // ADD THIS BLOCK - Handle prescription renewal mode
@@ -1294,7 +1295,7 @@ export async function POST(request: NextRequest) {
           }
         } : null,
         
-        // ===== EXAMENS PARACLINIQUES =====
+// ===== EXAMENS PARACLINIQUES =====
         imagingStudies: imagingStudies.length > 0 ? {
           header: {
             ...physician,
@@ -1346,6 +1347,32 @@ export async function POST(request: NextRequest) {
             signature: "Requesting Physician's Signature",
             physicianName: physician.name.toUpperCase(),
             registrationNumber: physician.medicalCouncilNumber,
+            date: examDate
+          }
+        } : null,
+        
+        // ===== CERTIFICAT D'ARRET DE TRAVAIL (SICK LEAVE) =====
+        sickLeave: (body.sickLeaveData && body.sickLeaveData.numberOfDays > 0) ? {
+          header: {
+            ...physician,
+            title: "CERTIFICAT D'ARRÊT DE TRAVAIL / SICK LEAVE CERTIFICATE"
+          },
+          patient: patient,
+          certificate: {
+            startDate: body.sickLeaveData?.startDate || new Date().toISOString().split('T')[0],
+            endDate: body.sickLeaveData?.endDate || '',
+            numberOfDays: body.sickLeaveData?.numberOfDays || 0,
+            medicalReason: body.sickLeaveData?.medicalReason || realData.diagnosticConclusion || '',
+            remarks: body.sickLeaveData?.remarks || '',
+            workRestrictions: body.sickLeaveData?.workRestrictions || '',
+            returnToWork: body.sickLeaveData?.returnToWork || '',
+            issueDate: examDate
+          },
+          authentication: {
+            signature: "Medical Practitioner's Signature",
+            physicianName: physician.name.toUpperCase(),
+            registrationNumber: physician.medicalCouncilNumber,
+            officialStamp: "Official Medical Stamp",
             date: examDate
           }
         } : null
@@ -1409,7 +1436,6 @@ export async function POST(request: NextRequest) {
         }
       }
     }
-
     // Calculate word count
     const wordCount = Object.values(narrativeContent)
       .filter(v => typeof v === 'string')
