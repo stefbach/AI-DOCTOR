@@ -1920,6 +1920,70 @@ useEffect(() => {
   setShouldGenerateReport(false) // Reset flag after generation
   
 }, [dbCheckComplete, shouldGenerateReport, report, patientData, editingDoctor])  // ADD editingDoctor to dependencies
+
+// Helper function to parse medication text into structured format
+const parseMedicationText = (medicationText: string): any[] => {
+  if (!medicationText) return []
+  
+  const lines = medicationText.split('\n').filter(line => line.trim())
+  const medications = []
+  
+  for (const line of lines) {
+    // Remove leading dashes, numbers, or bullet points
+    const cleanLine = line.replace(/^[-•\d.)\s]+/, '').trim()
+    if (!cleanLine) continue
+    
+    // Parse medication name and dosage
+    const match = cleanLine.match(/^(.+?)\s+(\d+\s*mg|\d+mg)\s+(.+)$/)
+    
+    if (match) {
+      const [_, name, dosage, frequency] = match
+      
+      // Convert frequency patterns to standard format
+      let standardFrequency = frequency
+        .replace(/1\/day|1 time per day/gi, '1 tablet OD')
+        .replace(/2\/day|2 times per day/gi, '1 tablet BD')
+        .replace(/3\/day|3 times per day/gi, '1 tablet TDS')
+        .replace(/4\/day|4 times per day/gi, '1 tablet QDS')
+        .replace(/7\/day/gi, '1 tablet OD') // Daily medication
+      
+      medications.push({
+        nom: `${name} ${dosage}`,
+        denominationCommune: name,
+        dosage: dosage,
+        forme: 'tablet',
+        posologie: standardFrequency,
+        modeAdministration: 'Oral route',
+        dureeTraitement: '30 days', // Default for renewal
+        quantite: '1 month supply',
+        instructions: '',
+        justification: 'Prescription renewal - Continuation of chronic treatment',
+        surveillanceParticuliere: '',
+        nonSubstituable: false,
+        ligneComplete: cleanLine
+      })
+    } else {
+      // Fallback for medications that don't match the pattern
+      medications.push({
+        nom: cleanLine,
+        denominationCommune: cleanLine.split(' ')[0],
+        dosage: '',
+        forme: 'tablet',
+        posologie: 'As prescribed',
+        modeAdministration: 'Oral route',
+        dureeTraitement: '30 days',
+        quantite: '1 month supply',
+        instructions: '',
+        justification: 'Prescription renewal',
+        surveillanceParticuliere: '',
+        nonSubstituable: false,
+        ligneComplete: cleanLine
+      })
+    }
+  }
+  
+  return medications
+}
   
 // ==================== GENERATE REPORT ====================
   const generateProfessionalReport = async () => {
@@ -1931,20 +1995,41 @@ useEffect(() => {
                       clinicalData?.chiefComplaint?.toLowerCase().includes('prescription') ||
                       clinicalData?.chiefComplaint?.toLowerCase().includes('renouvellement')
     
-    if (isRenewal) {
-      console.log('💊 Prescription renewal mode - generating simplified report')
+if (isRenewal) {
+  console.log('💊 Prescription renewal mode - generating simplified report')
+  
+  // Set medications tab as active
+  setActiveTab("medicaments")
+  
+  // Auto-parse current medications if available
+  const currentMeds = patientData?.currentMedicationsText || 
+                      patientData?.currentMedications || 
+                      clinicalData?.currentMedications || ''
+  
+  if (currentMeds) {
+    console.log('📋 Auto-parsing current medications for renewal:', currentMeds)
+    
+    // Parse medications from text
+    const parsedMedications = parseMedicationText(currentMeds)
+    
+    if (parsedMedications.length > 0) {
+      // Store parsed medications to be added to report
+      sessionStorage.setItem('renewalMedications', JSON.stringify(parsedMedications))
       
-      // Set medications tab as active
-      setActiveTab("medicaments")
-      
-      // Show notification
       toast({
-        title: "Mode Renouvellement d'Ordonnance",
-        description: "Rapport simplifié généré. Veuillez ajouter les médicaments.",
+        title: "💊 Prescription Renewal Mode",
+        description: `${parsedMedications.length} medication(s) detected and will be auto-filled`,
         duration: 5000
       })
     }
-    // END OF NEW BLOCK
+  } else {
+    toast({
+      title: "Mode Renouvellement d'Ordonnance",
+      description: "Rapport simplifié généré. Veuillez ajouter les médicaments.",
+      duration: 5000
+    })
+  }
+}
 
     // VALIDATE PATIENT DATA AT THE START
     const hasValidPatientData = patientData && 
@@ -2240,7 +2325,7 @@ useEffect(() => {
           }
         }
         
-        // Map invoice
+// Map invoice
         if (apiReport.invoice) {
           reportData.invoice = apiReport.invoice
           if (reportData.invoice.physician) {
@@ -2254,6 +2339,59 @@ useEffect(() => {
         setReport(reportData)
         setValidationStatus('draft')
         setDocumentSignatures({})
+        
+        // Check for renewal medications to auto-fill
+        const renewalMedications = sessionStorage.getItem('renewalMedications')
+        if (isRenewal && renewalMedications) {
+          const medsToAdd = JSON.parse(renewalMedications)
+          console.log('💊 Auto-filling renewal medications:', medsToAdd)
+          
+          // Apply sanitization to the medications
+          const sanitizedMeds = sanitizeMedications(medsToAdd)
+          
+          // Update the report with auto-filled medications
+          setReport(prev => {
+            if (!prev) return prev
+            
+            const updatedReport = { ...prev }
+            
+            if (!updatedReport.ordonnances) {
+              updatedReport.ordonnances = {}
+            }
+            
+            if (!updatedReport.ordonnances.medicaments) {
+              updatedReport.ordonnances.medicaments = {
+                enTete: currentDoctorInfo,
+                patient: updatedReport.compteRendu.patient,
+                prescription: {
+                  datePrescription: new Date().toISOString().split('T')[0],
+                  medicaments: sanitizedMeds,
+                  validite: "3 months unless otherwise specified"
+                },
+                authentification: {
+                  signature: "Medical Practitioner's Signature",
+                  nomEnCapitales: currentDoctorInfo.nom.toUpperCase(),
+                  numeroEnregistrement: currentDoctorInfo.numeroEnregistrement,
+                  cachetProfessionnel: "Official Medical Stamp",
+                  date: new Date().toISOString().split('T')[0]
+                }
+              }
+            } else {
+              // Merge with existing medications
+              updatedReport.ordonnances.medicaments.prescription.medicaments = [
+                ...sanitizedMeds,
+                ...(updatedReport.ordonnances.medicaments.prescription.medicaments || [])
+              ]
+            }
+            
+            return updatedReport
+          })
+          
+          // Clear session storage
+          sessionStorage.removeItem('renewalMedications')
+          
+          console.log('✅ Medications auto-filled for renewal')
+        }
         
         const newReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
         setReportId(newReportId)
@@ -2281,6 +2419,7 @@ useEffect(() => {
       setLoading(false)
     }
   }
+  
   // ==================== VALIDATION & SIGNATURE ====================
   const handleValidation = async () => {
     const requiredFieldsMissing = []
