@@ -834,13 +834,16 @@ export default function ProfessionalReportEditable({
   onComplete
 }: ProfessionalReportProps) {
 
-  // ==================== STATE MANAGEMENT ====================
+// ==================== STATE MANAGEMENT ====================
   const [report, setReport] = useState<MauritianReport | null>(null)
   const [reportId, setReportId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState("consultation")
-
+  const [activeTab, setActiveTab] = useState(() => {
+    // Check if this is a prescription renewal
+    const isRenewal = sessionStorage.getItem('prescriptionRenewal') === 'true'
+    return isRenewal ? "medicaments" : "consultation"
+  })
   const [editMode, setEditMode] = useState(false)
   const [validationStatus, setValidationStatus] = useState<'draft' | 'validated'>('draft')
   const [modifiedSections, setModifiedSections] = useState<Set<string>>(new Set())
@@ -1917,8 +1920,31 @@ useEffect(() => {
   
 }, [dbCheckComplete, shouldGenerateReport, report, patientData, editingDoctor])  // ADD editingDoctor to dependencies
   
-  // ==================== GENERATE REPORT ====================
+// ==================== GENERATE REPORT ====================
   const generateProfessionalReport = async () => {
+    // CHECK IF THIS IS A PRESCRIPTION RENEWAL - ADD THIS BLOCK
+    const isRenewal = consultationDataService?.isPrescriptionRenewal?.() || 
+                      sessionStorage.getItem('prescriptionRenewal') === 'true' ||
+                      clinicalData?.chiefComplaint?.toLowerCase().includes('renewal') ||
+                      clinicalData?.chiefComplaint?.toLowerCase().includes('ordonnance') ||
+                      clinicalData?.chiefComplaint?.toLowerCase().includes('prescription') ||
+                      clinicalData?.chiefComplaint?.toLowerCase().includes('renouvellement')
+    
+    if (isRenewal) {
+      console.log('💊 Prescription renewal mode - generating simplified report')
+      
+      // Set medications tab as active
+      setActiveTab("medicaments")
+      
+      // Show notification
+      toast({
+        title: "Mode Renouvellement d'Ordonnance",
+        description: "Rapport simplifié généré. Veuillez ajouter les médicaments.",
+        duration: 5000
+      })
+    }
+    // END OF NEW BLOCK
+
     // VALIDATE PATIENT DATA AT THE START
     const hasValidPatientData = patientData && 
       (patientData.name || (patientData.firstName && patientData.lastName)) &&
@@ -1987,7 +2013,9 @@ useEffect(() => {
           diagnosisData: diagnosisData || {},
           editedDocuments: editedDocuments || {},
           doctorData: doctorDataForAPI,
-          includeFullPrescriptions
+          includeFullPrescriptions,
+          isPrescriptionRenewal: isRenewal,
+          skipDetailedSections: isRenewal
         })
       })
 
@@ -3311,7 +3339,7 @@ const handleSendDocuments = async () => {
       return () => clearTimeout(timer)
     }, [localDoctorInfo, editingDoctor])
     
-    const handleDoctorFieldChange = useCallback((field: string, value: string) => {
+const handleDoctorFieldChange = useCallback((field: string, value: string) => {
       setLocalDoctorInfo(prev => ({ ...prev, [field]: value }))
       setHasUnsavedChanges(true)
     }, [])
@@ -3326,6 +3354,15 @@ const handleSendDocuments = async () => {
               {!hasRequiredFields && (
                 <Badge variant="destructive" className="ml-2">
                   Incomplete Profile
+                </Badge>
+              )}
+              {/* ADD THIS BADGE FOR PRESCRIPTION RENEWAL */}
+              {(sessionStorage.getItem('prescriptionRenewal') === 'true' || 
+                clinicalData?.chiefComplaint?.toLowerCase().includes('renewal') ||
+                clinicalData?.chiefComplaint?.toLowerCase().includes('renouvellement') ||
+                clinicalData?.chiefComplaint?.toLowerCase().includes('ordonnance')) && (
+                <Badge className="ml-2 bg-blue-100 text-blue-800">
+                  Prescription Renewal
                 </Badge>
               )}
             </span>
