@@ -112,8 +112,20 @@ async function translateText(text: string): Promise<string> {
           
           if (response.ok) {
             const result = await response.json()
-            console.log('  Line translated:', line.trim(), '→', result.translatedText)
-            return result.translatedText || line
+            let translatedText = result.translatedText || line
+            
+            // Fix common medical abbreviation translations
+            translatedText = translatedText
+              .replace(/(\d+)\s*\/\s*J\b/gi, '$1/day')  // Fix "7/J" -> "7/day"
+              .replace(/(\d+)\s*\/\s*j\b/gi, '$1/day')  // Fix "7/j" -> "7/day"
+              .replace(/(\d+)\s*\/\s*d\b/gi, '$1/day')  // Fix "1/d" -> "1/day"
+              .replace(/\bfois par jour\b/gi, 'times per day')
+              .replace(/\bpar jour\b/gi, 'per day')
+              .replace(/\b1 time a day\b/gi, '1 time per day')
+              .replace(/\b(\d+) time a day\b/gi, '$1 times per day')
+            
+            console.log('  Line translated:', line.trim(), '→', translatedText)
+            return translatedText
           }
           return line
         })
@@ -133,7 +145,19 @@ async function translateText(text: string): Promise<string> {
     
     if (response.ok) {
       const result = await response.json()
-      return result.translatedText || text
+      let translatedText = result.translatedText || text
+      
+      // Apply the same fixes for single line
+      translatedText = translatedText
+        .replace(/(\d+)\s*\/\s*J\b/gi, '$1/day')
+        .replace(/(\d+)\s*\/\s*j\b/gi, '$1/day')
+        .replace(/(\d+)\s*\/\s*d\b/gi, '$1/day')
+        .replace(/\bfois par jour\b/gi, 'times per day')
+        .replace(/\bpar jour\b/gi, 'per day')
+        .replace(/\b1 time a day\b/gi, '1 time per day')
+        .replace(/\b(\d+) time a day\b/gi, '$1 times per day')
+      
+      return translatedText
     }
   } catch (error) {
     console.error('Translation failed for:', text, error)
