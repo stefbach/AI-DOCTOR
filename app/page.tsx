@@ -37,6 +37,25 @@ export default function MedicalAIExpert() {
   
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
+  // Listen for prescription renewal detection from Tibok data
+useEffect(() => {
+  const handleRenewalDetected = (event: CustomEvent) => {
+    console.log('💊 Prescription renewal event received:', event.detail)
+    
+    // Update clinical data with the consultation reason
+    setClinicalData(prev => ({
+      ...prev,
+      chiefComplaint: event.detail.consultationReason
+    }))
+  }
+  
+  window.addEventListener('prescription-renewal-detected', handleRenewalDetected as EventListener)
+  
+  return () => {
+    window.removeEventListener('prescription-renewal-detected', handleRenewalDetected as EventListener)
+  }
+}, [])
+
   const currentConsultationId: string | null = null
   const currentPatientId: string | null = null
   const currentDoctorId: string | null = null
@@ -132,56 +151,103 @@ export default function MedicalAIExpert() {
 
   const progress = ((currentStep + 1) / steps.length) * 100
 
-  const handleNext = async () => {
-    const consultationId = consultationDataService.getCurrentConsultationId()
-    if (consultationId) {
-      try {
-        console.log(`Saving data for step ${currentStep}`)
-        switch (currentStep) {
-          case 0:
-            if (patientData) {
-              await consultationDataService.saveStepData(0, patientData)
+const handleNext = async () => {
+  const consultationId = consultationDataService.getCurrentConsultationId()
+  
+  if (consultationId) {
+    try {
+      console.log(`Saving data for step ${currentStep}`)
+      
+      // Special handling for step 0 (Patient Form)
+      if (currentStep === 0) {
+        if (patientData) {
+          await consultationDataService.saveStepData(0, patientData)
+          
+          // Check if chief complaint indicates prescription renewal
+          const chiefComplaint = clinicalData?.chiefComplaint || ''
+          const lowerComplaint = chiefComplaint.toLowerCase()
+          
+          // Check for ALL possible variations
+          const renewalKeywords = [
+            'order renewal',
+            'prescription renewal',
+            'renouvellement',
+            'ordonnance',
+            'renewal',
+            'refill',
+            'medication renewal',
+            'repeat prescription',
+            'médicament',
+            'renouveler'
+          ]
+          
+          const isRenewal = renewalKeywords.some(keyword => 
+            lowerComplaint.includes(keyword)
+          )
+          
+          if (isRenewal) {
+            console.log('💊 Prescription renewal detected:', chiefComplaint)
+            console.log('💊 Jumping directly to Professional Report (step 4)')
+            
+            // Set a flag for renewal mode
+            consultationDataService.setPrescriptionRenewalFlag(true)
+            
+            // Save minimal clinical data for prescription renewal
+            const renewalClinicalData = {
+              chiefComplaint: chiefComplaint,
+              diseaseHistory: "Patient requesting prescription renewal",
+              symptomDuration: "ongoing",
+              symptoms: [],
+              painScale: "0",
+              vitalSigns: {
+                temperature: "",
+                bloodPressureSystolic: "",
+                bloodPressureDiastolic: ""
+              }
             }
-            break
-          case 1:
-            if (clinicalData) {
-              await consultationDataService.saveStepData(1, clinicalData)
-            }
-            break
-          case 2:
-            if (questionsData) {
-              await consultationDataService.saveStepData(2, questionsData)
-            }
-            break
-          case 3:
-            if (diagnosisData) {
-              await consultationDataService.saveStepData(3, diagnosisData)
-            }
-            break
-          case 4:
-            if (finalReport) {
-              await consultationDataService.saveStepData(4, finalReport)
-              // Mark consultation as complete
-              await consultationDataService.markConsultationComplete()
-            }
-            break
+            await consultationDataService.saveStepData(1, renewalClinicalData)
+            
+            // Jump directly to step 4 (Professional Report)
+            setCurrentStep(4)
+            return
+          }
         }
-        console.log(`Data saved for step ${currentStep}`)
-      } catch (error) {
-        console.error('Error saving step data:', error)
       }
-    }
-    
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
+      
+      // Normal flow for other steps
+      switch (currentStep) {
+        case 1:
+          if (clinicalData) {
+            await consultationDataService.saveStepData(1, clinicalData)
+          }
+          break
+        case 2:
+          if (questionsData) {
+            await consultationDataService.saveStepData(2, questionsData)
+          }
+          break
+        case 3:
+          if (diagnosisData) {
+            await consultationDataService.saveStepData(3, diagnosisData)
+          }
+          break
+        case 4:
+          if (finalReport) {
+            await consultationDataService.saveStepData(4, finalReport)
+            await consultationDataService.markConsultationComplete()
+          }
+          break
+      }
+      console.log(`Data saved for step ${currentStep}`)
+    } catch (error) {
+      console.error('Error saving step data:', error)
     }
   }
-
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
-    }
+  
+  if (currentStep < steps.length - 1) {
+    setCurrentStep(currentStep + 1)
   }
+}
 
   const handleFinalReportComplete = async (data: any) => {
     console.log('Final report and documents completed:', data)
