@@ -964,25 +964,44 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
         qualityLevel = 3
       }
       
-     // === Appel OpenAI /v1/responses (version propre et cohérente) ===
+   // Appel OpenAI /v1/responses — version unique et propre
 async function callOpenAIWithMauritiusQuality(
-  finalPrompt: string,
-  qualityLevel: number,
-  systemPrompt: string
-) {
-  const MAX_ATTEMPTS = 4;
-  const backoffMs = [1000, 2000, 4000]; // pour tentatives 1→3
+  apiKey: string,
+  basePrompt: string,
+  patientContext: PatientContext,
+  maxRetries: number = 3
+): Promise<{ data: any; analysis: any; mauritius_quality_level: number }> {
+  const backoffMs = [1000, 2000, 4000];
   let lastError: Error | null = null;
+  let qualityLevel = 0;
+  let finalPrompt = basePrompt;
 
-  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-    console.info(`📡 OpenAI call attempt ${attempt + 1}/${MAX_ATTEMPTS} (Mauritius quality level: ${qualityLevel})`);
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    // Renforcement progressif du prompt
+    if (attempt === 1) {
+      qualityLevel = 1;
+      finalPrompt = basePrompt + "\n\n" + prepareMauritiusQualityPrompt(patientContext, analyzeConsultationType(
+        patientContext.current_medications,
+        patientContext.chief_complaint,
+        patientContext.symptoms
+      ));
+    } else if (attempt >= 2) {
+      qualityLevel = 2;
+      finalPrompt = basePrompt + "\n\n" + prepareMauritiusQualityPrompt(patientContext, analyzeConsultationType(
+        patientContext.current_medications,
+        patientContext.chief_complaint,
+        patientContext.symptoms
+      )) + `
+IMPORTANT: OUTPUT MUST BE STRICT, SINGLE JSON OBJECT. NO MARKDOWN, NO EXTRA TEXT.`;
+    }
 
     try {
-      // 1) Appel OpenAI (avec await !)
+      const systemPrompt = MAURITIUS_MEDICAL_PROMPT; // ta constante système déjà définie
+
       const openaiResp = await fetch('https://api.openai.com/v1/responses', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY!}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -991,57 +1010,35 @@ async function callOpenAIWithMauritiusQuality(
             { role: 'system', content: systemPrompt },
             { role: 'user',   content: finalPrompt }
           ],
-          // IMPORTANT: ne pas inclure temperature / top_p / presence_penalty / frequency_penalty
+          // IMPORTANT: ne PAS envoyer temperature/top_p/presence_penalty/frequency_penalty avec GPT-5
           max_output_tokens: 8000,
           text: { format: { type: 'json_object' } }
         }),
       });
 
-      // 2) Statut HTTP
       if (!openaiResp.ok) {
         const errText = await openaiResp.text().catch(() => '');
-        const err = new Error(`HTTP ${openaiResp.status} ${openaiResp.statusText} – ${errText.slice(0, 400)}`);
-        lastError = err;
-        throw err;
+        throw new Error(`HTTP ${openaiResp.status} ${openaiResp.statusText} – ${errText.slice(0, 400)}`);
       }
 
-      // 3) Parse JSON réponse
       const data = await openaiResp.json();
-
-      // 4) Extraction robuste du texte (compat différentes formes de payload)
       const rawContent = getOutputTextFromResponses(data);
-      console.log('🤖 GPT-5 response received, length:', rawContent?.length ?? 0);
+      if (!rawContent) throw new Error('Empty model output_text/content');
 
-      if (!rawContent) {
-        const err = new Error('Empty model output_text/content');
-        lastError = err;
-        throw err;
-      }
-
-      // 5) Isolation du bloc JSON + parse
       const jsonStr = safeExtractJSONObjectString(rawContent);
       const analysis = JSON.parse(jsonStr);
 
-      // ✅ Succès
-      return analysis;
-
+      return { data, analysis, mauritius_quality_level: qualityLevel };
     } catch (e: any) {
-      // 6) Journalise et mémorise l’erreur
       lastError = e instanceof Error ? e : new Error(String(e));
-      console.error(`❌ Error attempt ${attempt + 1}:`, lastError.message);
-
-      // 7) Backoff si il reste des tentatives
-      if (attempt < MAX_ATTEMPTS - 1) {
-        const wait = backoffMs[Math.min(attempt, backoffMs.length - 1)];
-        console.info(`⏳ Retrying in ${wait}ms with enhanced Mauritius medical specificity prompt...`);
-        await new Promise(res => setTimeout(res, wait));
-      }
+      const wait = backoffMs[Math.min(attempt, backoffMs.length - 1)];
+      if (attempt < maxRetries - 1) await new Promise(r => setTimeout(r, wait));
     }
   }
 
-  // 8) Toutes tentatives échouées → renvoyer la dernière cause (pas un générique)
-  throw lastError ?? new Error('Failed after multiple attempts (no additional error details)');
+  throw lastError ?? new Error('Failed after multiple attempts with Mauritius quality enhancement');
 }
+
 
 function prepareMauritiusQualityPrompt(patientContext: PatientContext, consultationType: any): string {
   const currentMedsFormatted = patientContext.current_medications.length > 0 
