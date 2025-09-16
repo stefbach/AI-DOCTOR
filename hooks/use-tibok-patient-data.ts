@@ -249,6 +249,11 @@ async function normalizeLifestyleData(data: any): Promise<any> {
     normalized.currentSymptoms = data.currentSymptoms
   }
 
+  // Translate current medications
+if (data.currentMedications) {
+  normalized.currentMedications = await translateText(data.currentMedications)
+}
+
   // Symptom duration
   if (data.symptomDuration) {
     normalized.symptomDuration = data.symptomDuration
