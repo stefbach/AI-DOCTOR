@@ -249,6 +249,12 @@ const handleNext = async () => {
   }
 }
 
+const handlePrevious = () => {
+  if (currentStep > 0) {
+    setCurrentStep(currentStep - 1)
+  }
+}
+  
   const handleFinalReportComplete = async (data: any) => {
     console.log('Final report and documents completed:', data)
     setFinalReport(data)
