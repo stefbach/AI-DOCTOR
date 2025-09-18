@@ -1,11 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-// Use the same approach as save-medical-report - anon key!
+// Use SERVICE_ROLE_KEY for draft operations to bypass RLS
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 export async function POST(request: NextRequest) {
   try {
@@ -52,7 +51,7 @@ export async function GET(request: NextRequest) {
       .from('consultation_drafts')
       .select('*')
       .eq('consultation_id', consultationId)
-      .maybeSingle() // Changed to maybeSingle like save-medical-report
+      .maybeSingle()
     
     if (error && error.code !== 'PGRST116') {
       console.error('Supabase error:', error)
