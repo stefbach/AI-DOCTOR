@@ -640,7 +640,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     imagingStudies.push({
       type: getString(study.examination || study.study_type || 'Imaging study'),
       modality: getString(study.modality || study.examination || 'Imaging'),
-      region: getString(study.region || study.body_region || 'To be specified'),
+      region: getString(study.region || study.body_region || ''),
       pregnancySafe: !hasRadiation || study.pregnancy_safe === true,
       radiationExposure: hasRadiation,
       alternativesIfPregnant: hasRadiation && (pregnancyStatus === 'pregnant' || pregnancyStatus === 'possibly_pregnant') ?
@@ -1521,7 +1521,7 @@ export async function POST(request: NextRequest) {
             studies: cleanImagingStudies.map(exam => ({
               type: exam.type,
               modality: exam.modality,
-              region: exam.region || 'To be specified',
+              region: exam.region || '',
               pregnancySafe: exam.pregnancySafe !== false,
               radiationExposure: exam.radiationExposure ? 'YES - Use shielding' : 'No',
               alternativesIfPregnant: exam.alternativesIfPregnant || '',
