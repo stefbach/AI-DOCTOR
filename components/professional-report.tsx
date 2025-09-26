@@ -3384,28 +3384,38 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
     )
   })
 
-  DoctorInfoEditor.displayName = 'DoctorInfoEditor'
-  const ConsultationReport = () => {
-    const sections = [
-      { key: 'motifConsultation', title: 'CHIEF COMPLAINT' },
-      { key: 'anamnese', title: 'HISTORY OF PRESENT ILLNESS' },
-      { key: 'antecedents', title: 'PAST MEDICAL HISTORY' },
-      { key: 'examenClinique', title: 'PHYSICAL EXAMINATION' },
-      { key: 'syntheseDiagnostique', title: 'DIAGNOSTIC SYNTHESIS' },
-      { key: 'conclusionDiagnostique', title: 'DIAGNOSTIC CONCLUSION' },
-      { key: 'priseEnCharge', title: 'MANAGEMENT PLAN' },
-      { key: 'surveillance', title: 'FOLLOW-UP PLAN' },
-      { key: 'conclusion', title: 'FINAL REMARKS' }
-    ]
+DoctorInfoEditor.displayName = 'DoctorInfoEditor'
 
-    const header = getReportHeader()
-    const praticien = getReportPraticien()
-    const patient = getReportPatient()
-    const rapport = getReportRapport()
-    const metadata = getReportMetadata()
+const ConsultationReport = () => {
+  const sections = [
+    { key: 'motifConsultation', title: 'CHIEF COMPLAINT' },
+    { key: 'anamnese', title: 'HISTORY OF PRESENT ILLNESS' },
+    { key: 'antecedents', title: 'PAST MEDICAL HISTORY' },
+    { key: 'examenClinique', title: 'PHYSICAL EXAMINATION' },
+    { key: 'syntheseDiagnostique', title: 'DIAGNOSTIC SYNTHESIS' },
+    { key: 'conclusionDiagnostique', title: 'DIAGNOSTIC CONCLUSION' },
+    { key: 'priseEnCharge', title: 'MANAGEMENT PLAN' },
+    { key: 'surveillance', title: 'FOLLOW-UP PLAN' },
+    { key: 'conclusion', title: 'FINAL REMARKS' }
+  ]
+  
+  const header = getReportHeader()
+  const praticien = getReportPraticien()
+  const patient = getReportPatient()
+  const rapport = getReportRapport()
+  const metadata = getReportMetadata()
 
-    return (
-      <Card className="shadow-xl print:shadow-none">
+  // Create stable handlers for each section - MUST BE INSIDE THE COMPONENT
+  const stableUpdateHandlers = useMemo(() => {
+    const handlers: { [key: string]: (value: string) => void } = {}
+    sections.forEach(section => {
+      handlers[section.key] = (value: string) => updateRapportSection(section.key, value)
+    })
+    return handlers
+  }, [updateRapportSection])
+
+  return (
+    <Card className="shadow-xl print:shadow-none">
         <CardContent className="p-8 print:p-12" id="consultation-report">
           <div className="text-center mb-8 print:mb-12 header">
             <h1 className="text-2xl font-bold mb-2">{header.title}</h1>
@@ -3460,14 +3470,14 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
                 <section key={section.key} className="space-y-2 section">
                   <h2 className="text-xl font-bold text-gray-900">{section.title}</h2>
                   {editMode && validationStatus !== 'validated' ? (
-                    <DebouncedTextarea
-                      value={content}
-                      onUpdate={(value) => updateRapportSection(section.key, value)}
-                      onLocalChange={() => setHasUnsavedChanges(true)}
-                      className="min-h-[200px] font-sans text-gray-700"
-                      placeholder="Enter text..."
-                      sectionKey={section.key}
-                    />
+<DebouncedTextarea
+  value={content}
+  onUpdate={stableUpdateHandlers[section.key]}
+  onLocalChange={stableTrackModification}
+  className="min-h-[200px] font-sans text-gray-700"
+  placeholder="Enter text..."
+  sectionKey={section.key}
+/>
                   ) : (
                     <div className="prose prose-lg max-w-none">
                       <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
