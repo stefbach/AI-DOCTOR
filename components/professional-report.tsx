@@ -196,6 +196,7 @@ const DebouncedTextarea = memo(({
 }) => {
   const [localValue, setLocalValue] = useState(value)
   const timeoutRef = useRef<NodeJS.Timeout>()
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   
   // IMPORTANT FIX: Store callbacks in refs
   const onUpdateRef = useRef(onUpdate)
@@ -215,7 +216,16 @@ const DebouncedTextarea = memo(({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value
+    const cursorPosition = e.target.selectionStart
+    
     setLocalValue(newValue)
+    
+    // Restore cursor position after React re-render
+    requestAnimationFrame(() => {
+      if (textareaRef.current) {
+        textareaRef.current.setSelectionRange(cursorPosition, cursorPosition)
+      }
+    })
     
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
@@ -242,6 +252,7 @@ const DebouncedTextarea = memo(({
 
   return (
     <Textarea
+      ref={textareaRef}  // IMPORTANT: Add ref here
       value={localValue}
       onChange={handleChange}
       className={className}
@@ -299,11 +310,22 @@ const MedicationEditForm = memo(({
     onLocalChangeRef.current = onLocalChange
   }, [onUpdate, onLocalChange])
 
-  const handleFieldChange = useCallback((field: string, value: any) => {
-    setLocalMed(prev => ({ ...prev, [field]: value }))
+const handleFieldChange = useCallback((field: string, value: any) => {
+  setLocalMed(prev => ({ ...prev, [field]: value }))
+  
+  // Only set hasLocalChanges if it's not already true
+  if (!hasLocalChanges) {
     setHasLocalChanges(true)
-    if (onLocalChangeRef.current) onLocalChangeRef.current()
-  }, [])
+  }
+  
+  // Notify parent without causing re-render
+  if (onLocalChangeRef.current) {
+    // Use setTimeout to avoid immediate re-render
+    setTimeout(() => {
+      if (onLocalChangeRef.current) onLocalChangeRef.current()
+    }, 0)
+  }
+}, [hasLocalChanges])
 
   // Fixed auto-save with refs
   useEffect(() => {
@@ -337,14 +359,16 @@ const MedicationEditForm = memo(({
     }
   }, [hasLocalChanges, index, localMed])
 
-  return (
-    <div className="space-y-3" data-medication-index={index}>
+return (
+  <div className="space-y-3" data-medication-index={index}>
+    <div className="h-4">
       {hasLocalChanges && (
         <div className="text-xs text-yellow-600 flex items-center gap-1">
           <Loader2 className="h-3 w-3 animate-spin" />
           Auto-saving...
         </div>
       )}
+    </div>
       
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -4114,7 +4138,7 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
                   </h3>
                   <div className="space-y-2">
                     {tests.map((test: any, idx: number) => (
-                      <div key={idx} className="prescription-item">
+  <div key={`${category}-test-${idx}`} className="prescription-item">
                         {editMode && validationStatus !== 'validated' ? (
 <BiologyTestEditForm
   key={`bio-edit-${key}-${idx}`}  // ADDED: Stable key
@@ -4272,7 +4296,7 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
         {examens.length > 0 ? (
           <div className="space-y-6">
            {examens.map((exam: any, index: number) => (
-  <div key={index} className="border-l-4 border-indigo-500 pl-4 py-2 prescription-item">
+  <div key={`imaging-exam-${index}`} className="border-l-4 border-indigo-500 pl-4 py-2 prescription-item">
     {editMode && validationStatus !== 'validated' ? (
 <ImagingExamEditForm
   key={`imaging-edit-${index}`}  // ADDED: Stable key
