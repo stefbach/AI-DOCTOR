@@ -908,41 +908,6 @@ export default function ProfessionalReportEditable({
     invoice?: string
   }>({})
 
-  // FIX STEP 1: Add refs to store callbacks and prevent stale closures
-  const callbackRefs = useRef({
-    updateMedicamentBatch,
-    updateBiologyTestBatch,
-    updateImagingExamBatch,
-    trackModification
-  })
-
-  // Update refs when callbacks change
-  useEffect(() => {
-    callbackRefs.current = {
-      updateMedicamentBatch,
-      updateBiologyTestBatch,
-      updateImagingExamBatch,
-      trackModification
-    }
-  }, [updateMedicamentBatch, updateBiologyTestBatch, updateImagingExamBatch, trackModification])
-
-  // Create stable callbacks that won't cause re-renders
-  const stableUpdateMedication = useCallback((index: number, updatedMedication: any) => {
-    callbackRefs.current.updateMedicamentBatch(index, updatedMedication)
-  }, [])
-
-  const stableUpdateBiologyTest = useCallback((category: string, index: number, updatedTest: any) => {
-    callbackRefs.current.updateBiologyTestBatch(category, index, updatedTest)
-  }, [])
-
-  const stableUpdateImagingExam = useCallback((index: number, updatedExam: any) => {
-    callbackRefs.current.updateImagingExamBatch(index, updatedExam)
-  }, [])
-
-  const stableTrackModification = useCallback(() => {
-    setHasUnsavedChanges(true)
-  }, [])
-
   const [sickLeaveData, setSickLeaveData] = useState({
   startDate: '',
   endDate: '',
@@ -1137,6 +1102,34 @@ const updateImagingExamBatch = useCallback((index: number, updatedExam: any) => 
   trackModification(`imagerie.${index}`)
 }, [validationStatus, trackModification])
 
+  // Store callbacks in refs to prevent stale closures
+const updateMedicamentBatchRef = useRef(updateMedicamentBatch)
+const updateBiologyTestBatchRef = useRef(updateBiologyTestBatch)
+const updateImagingExamBatchRef = useRef(updateImagingExamBatch)
+
+useEffect(() => {
+  updateMedicamentBatchRef.current = updateMedicamentBatch
+  updateBiologyTestBatchRef.current = updateBiologyTestBatch
+  updateImagingExamBatchRef.current = updateImagingExamBatch
+}, [updateMedicamentBatch, updateBiologyTestBatch, updateImagingExamBatch])
+
+// Create stable wrapper callbacks
+const stableUpdateMedication = useCallback((index: number, updatedMedication: any) => {
+  updateMedicamentBatchRef.current(index, updatedMedication)
+}, [])
+
+const stableUpdateBiologyTest = useCallback((category: string, index: number, updatedTest: any) => {
+  updateBiologyTestBatchRef.current(category, index, updatedTest)
+}, [])
+
+const stableUpdateImagingExam = useCallback((index: number, updatedExam: any) => {
+  updateImagingExamBatchRef.current(index, updatedExam)
+}, [])
+
+const stableTrackModification = useCallback(() => {
+  setHasUnsavedChanges(true)
+}, [])
+
   // ==================== DRAFT SAVE FUNCTIONS ====================
   const saveDraft = useCallback(async () => {
     const params = new URLSearchParams(window.location.search)
@@ -1183,7 +1176,7 @@ const handleManualSave = useCallback(async () => {
     if (index && data) {
       try {
         const medData = JSON.parse(data)
-        callbackRefs.current.updateMedicamentBatch(parseInt(index), medData)
+        updateMedicamentBatchRef.current(parseInt(index), medData)  // CHANGED: using Ref
       } catch (e) {
         console.error('Failed to parse pending medication data', e)
       }
@@ -1198,7 +1191,7 @@ const handleManualSave = useCallback(async () => {
       try {
         const [category, index] = testId.split('-')
         const testData = JSON.parse(data)
-        callbackRefs.current.updateBiologyTestBatch(category, parseInt(index), testData)
+        updateBiologyTestBatchRef.current(category, parseInt(index), testData)  // CHANGED: using Ref
       } catch (e) {
         console.error('Failed to parse pending test data', e)
       }
@@ -1212,7 +1205,7 @@ const handleManualSave = useCallback(async () => {
     if (index && data) {
       try {
         const examData = JSON.parse(data)
-        callbackRefs.current.updateImagingExamBatch(parseInt(index), examData)
+        updateImagingExamBatchRef.current(parseInt(index), examData)  // CHANGED: using Ref
       } catch (e) {
         console.error('Failed to parse pending exam data', e)
       }
