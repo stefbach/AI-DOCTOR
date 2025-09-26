@@ -196,38 +196,49 @@ const DebouncedTextarea = memo(({
 }) => {
   const [localValue, setLocalValue] = useState(value)
   const timeoutRef = useRef<NodeJS.Timeout>()
-
-  // Update local value when parent value changes
+  
+  // IMPORTANT FIX: Store callbacks in refs
+  const onUpdateRef = useRef(onUpdate)
+  const onLocalChangeRef = useRef(onLocalChange)
+  
   useEffect(() => {
-    setLocalValue(value)
-  }, [value])
+    onUpdateRef.current = onUpdate
+    onLocalChangeRef.current = onLocalChange
+  }, [onUpdate, onLocalChange])
+
+  // Only update if parent value changed
+  useEffect(() => {
+    if (value !== localValue && !timeoutRef.current) {
+      setLocalValue(value)
+    }
+  }, [value])  // Removed localValue from deps
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value
     setLocalValue(newValue)
     
-    // Clear existing timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
     }
     
-    // Debounce the parent update
     timeoutRef.current = setTimeout(() => {
-      onUpdate(newValue)
-      if (onLocalChange) {
-        onLocalChange()
+      onUpdateRef.current(newValue)  // Uses ref
+      if (onLocalChangeRef.current) {
+        onLocalChangeRef.current()
       }
+      timeoutRef.current = undefined
     }, 3000)
-  }, [onUpdate, onLocalChange])
+  }, [])
 
-  // Cleanup on unmount
+  // Cleanup and force save on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
+        onUpdateRef.current(localValue)
       }
     }
-  }, [])
+  }, [localValue])
 
   return (
     <Textarea
@@ -236,11 +247,18 @@ const DebouncedTextarea = memo(({
       className={className}
       placeholder={placeholder}
       data-section={sectionKey}
+      autoComplete="off"      // ADDED to prevent focus issues
+      spellCheck="false"      // ADDED to prevent spell-check focus stealing
     />
+  )
+}, (prevProps, nextProps) => {
+  // Only re-render if value or key changes
+  return (
+    prevProps.value === nextProps.value &&
+    prevProps.sectionKey === nextProps.sectionKey
   )
 })
 
-// 2. MedicationEditForm Component - CORRECTED VERSION
 const MedicationEditForm = memo(({
   medication,
   index,
@@ -269,61 +287,58 @@ const MedicationEditForm = memo(({
     nonSubstituable: medication.nonSubstituable || false
   })
 
-  // Track if there are changes
   const [hasLocalChanges, setHasLocalChanges] = useState(false)
   const saveTimeoutRef = useRef<NodeJS.Timeout>()
+  
+  // IMPORTANT FIX: Store callbacks in refs to avoid stale closures
+  const onUpdateRef = useRef(onUpdate)
+  const onLocalChangeRef = useRef(onLocalChange)
+  
+  useEffect(() => {
+    onUpdateRef.current = onUpdate
+    onLocalChangeRef.current = onLocalChange
+  }, [onUpdate, onLocalChange])
 
   const handleFieldChange = useCallback((field: string, value: any) => {
     setLocalMed(prev => ({ ...prev, [field]: value }))
     setHasLocalChanges(true)
-    if (onLocalChange) onLocalChange()
-  }, [onLocalChange])
+    if (onLocalChangeRef.current) onLocalChangeRef.current()
+  }, [])
 
-  // Auto-save effect with debouncing
+  // Fixed auto-save with refs
   useEffect(() => {
     if (!hasLocalChanges) return
 
-    // Clear existing timeout
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current)
     }
 
-    // Set new timeout for auto-save
     saveTimeoutRef.current = setTimeout(() => {
       console.log(`Auto-saving medication ${index}...`)
-      onUpdate(index, localMed)
+      onUpdateRef.current(index, localMed)  // Uses ref instead of prop
       setHasLocalChanges(false)
-    }, 2000) // Save after 2 seconds of inactivity
+    }, 2000)
 
-    // Cleanup
     return () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
       }
     }
-  }, [localMed, index, onUpdate, hasLocalChanges])
+  }, [localMed, index, hasLocalChanges])  // Removed onUpdate from deps
 
-  // Save on unmount if there are pending changes
+  // Force save on unmount
   useEffect(() => {
     return () => {
-      if (hasLocalChanges) {
-        console.log(`Saving medication ${index} on unmount...`)
-        onUpdate(index, localMed)
+      if (hasLocalChanges && saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+        console.log(`Force saving medication ${index} on unmount...`)
+        onUpdateRef.current(index, localMed)
       }
     }
-  }, [])
-
-  // Store the pending data for manual save (keep this as backup)
-  useEffect(() => {
-    const element = document.querySelector(`[data-medication-index="${index}"]`)
-    if (element) {
-      element.setAttribute('data-pending-medication', JSON.stringify(localMed))
-    }
-  }, [localMed, index])
+  }, [hasLocalChanges, index, localMed])
 
   return (
     <div className="space-y-3" data-medication-index={index}>
-      {/* Visual indicator of unsaved changes */}
       {hasLocalChanges && (
         <div className="text-xs text-yellow-600 flex items-center gap-1">
           <Loader2 className="h-3 w-3 animate-spin" />
@@ -339,6 +354,7 @@ const MedicationEditForm = memo(({
             value={localMed.nom}
             onChange={(e) => handleFieldChange('nom', e.target.value)}
             placeholder="e.g., Paracetamol"
+            autoComplete="off"  // ADDED to prevent focus issues
           />
         </div>
         <div>
@@ -348,6 +364,7 @@ const MedicationEditForm = memo(({
             value={localMed.denominationCommune}
             onChange={(e) => handleFieldChange('denominationCommune', e.target.value)}
             placeholder="e.g., Paracetamol"
+            autoComplete="off"  // ADDED
           />
         </div>
         <div>
@@ -357,6 +374,7 @@ const MedicationEditForm = memo(({
             value={localMed.dosage}
             onChange={(e) => handleFieldChange('dosage', e.target.value)}
             placeholder="e.g., 500mg"
+            autoComplete="off"  // ADDED
           />
         </div>
         <div>
@@ -385,6 +403,7 @@ const MedicationEditForm = memo(({
             value={localMed.posologie}
             onChange={(e) => handleFieldChange('posologie', e.target.value)}
             placeholder="e.g., 1 tablet 3 times daily"
+            autoComplete="off"  // ADDED
           />
         </div>
         <div>
@@ -394,6 +413,7 @@ const MedicationEditForm = memo(({
             value={localMed.dureeTraitement}
             onChange={(e) => handleFieldChange('dureeTraitement', e.target.value)}
             placeholder="e.g., 7 days"
+            autoComplete="off"  // ADDED
           />
         </div>
         <div>
@@ -403,6 +423,7 @@ const MedicationEditForm = memo(({
             value={localMed.quantite}
             onChange={(e) => handleFieldChange('quantite', e.target.value)}
             placeholder="e.g., 1 box"
+            autoComplete="off"  // ADDED
           />
         </div>
         <div>
@@ -431,6 +452,7 @@ const MedicationEditForm = memo(({
           value={localMed.instructions}
           onChange={(e) => handleFieldChange('instructions', e.target.value)}
           placeholder="e.g., Take with food"
+          autoComplete="off"  // ADDED
         />
       </div>
       <div className="flex justify-between items-center">
@@ -443,13 +465,12 @@ const MedicationEditForm = memo(({
           <Label htmlFor={`med-nonsubstitutable-${index}`}>Non-substitutable</Label>
         </div>
         <div className="flex gap-2">
-          {/* Manual save button as backup */}
           {hasLocalChanges && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => {
-                onUpdate(index, localMed)
+                onUpdateRef.current(index, localMed)  // Uses ref
                 setHasLocalChanges(false)
                 toast({
                   title: "Medication saved",
@@ -473,6 +494,12 @@ const MedicationEditForm = memo(({
         </div>
       </div>
     </div>
+  )
+}, (prevProps, nextProps) => {
+  // Custom comparison - only re-render if data changes
+  return (
+    prevProps.index === nextProps.index &&
+    JSON.stringify(prevProps.medication) === JSON.stringify(nextProps.medication)
   )
 })
 
@@ -881,6 +908,41 @@ export default function ProfessionalReportEditable({
     invoice?: string
   }>({})
 
+  // FIX STEP 1: Add refs to store callbacks and prevent stale closures
+  const callbackRefs = useRef({
+    updateMedicamentBatch,
+    updateBiologyTestBatch,
+    updateImagingExamBatch,
+    trackModification
+  })
+
+  // Update refs when callbacks change
+  useEffect(() => {
+    callbackRefs.current = {
+      updateMedicamentBatch,
+      updateBiologyTestBatch,
+      updateImagingExamBatch,
+      trackModification
+    }
+  }, [updateMedicamentBatch, updateBiologyTestBatch, updateImagingExamBatch, trackModification])
+
+  // Create stable callbacks that won't cause re-renders
+  const stableUpdateMedication = useCallback((index: number, updatedMedication: any) => {
+    callbackRefs.current.updateMedicamentBatch(index, updatedMedication)
+  }, [])
+
+  const stableUpdateBiologyTest = useCallback((category: string, index: number, updatedTest: any) => {
+    callbackRefs.current.updateBiologyTestBatch(category, index, updatedTest)
+  }, [])
+
+  const stableUpdateImagingExam = useCallback((index: number, updatedExam: any) => {
+    callbackRefs.current.updateImagingExamBatch(index, updatedExam)
+  }, [])
+
+  const stableTrackModification = useCallback(() => {
+    setHasUnsavedChanges(true)
+  }, [])
+
   const [sickLeaveData, setSickLeaveData] = useState({
   startDate: '',
   endDate: '',
@@ -1110,18 +1172,62 @@ const updateImagingExamBatch = useCallback((index: number, updatedExam: any) => 
   }, [report, doctorInfo, modifiedSections])
 
   // ==================== MANUAL SAVE FUNCTION (SIMPLIFIED) ====================
-  const handleManualSave = useCallback(async () => {
-    if (!hasUnsavedChanges) return
-    
-    setSaveStatus('saving')
-    await saveDraft()
-    
-    toast({
-      title: "✅ Draft Saved",
-      description: "Your changes have been saved",
-      duration: 2000
-    })
-  }, [hasUnsavedChanges, saveDraft])
+const handleManualSave = useCallback(async () => {
+  if (!hasUnsavedChanges) return
+  
+  // Force flush any pending changes from child components
+  const pendingMedications = document.querySelectorAll('[data-pending-medication]')
+  pendingMedications.forEach((el) => {
+    const index = el.getAttribute('data-medication-index')
+    const data = el.getAttribute('data-pending-medication')
+    if (index && data) {
+      try {
+        const medData = JSON.parse(data)
+        callbackRefs.current.updateMedicamentBatch(parseInt(index), medData)
+      } catch (e) {
+        console.error('Failed to parse pending medication data', e)
+      }
+    }
+  })
+  
+  const pendingTests = document.querySelectorAll('[data-pending-test]')
+  pendingTests.forEach((el) => {
+    const testId = el.getAttribute('data-biology-test')
+    const data = el.getAttribute('data-pending-test')
+    if (testId && data) {
+      try {
+        const [category, index] = testId.split('-')
+        const testData = JSON.parse(data)
+        callbackRefs.current.updateBiologyTestBatch(category, parseInt(index), testData)
+      } catch (e) {
+        console.error('Failed to parse pending test data', e)
+      }
+    }
+  })
+  
+  const pendingExams = document.querySelectorAll('[data-pending-exam]')
+  pendingExams.forEach((el) => {
+    const index = el.getAttribute('data-imaging-exam')
+    const data = el.getAttribute('data-pending-exam')
+    if (index && data) {
+      try {
+        const examData = JSON.parse(data)
+        callbackRefs.current.updateImagingExamBatch(parseInt(index), examData)
+      } catch (e) {
+        console.error('Failed to parse pending exam data', e)
+      }
+    }
+  })
+  
+  setSaveStatus('saving')
+  await saveDraft()
+  
+  toast({
+    title: "✅ Draft Saved",
+    description: "Your changes have been saved",
+    duration: 2000
+  })
+}, [hasUnsavedChanges, saveDraft])
 
   // ==================== KEYBOARD SHORTCUT FOR SAVE ====================
   useEffect(() => {
@@ -3827,20 +3933,21 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
         </div>
 
         <div className="space-y-6">
-          {medications.length > 0 ? (
-            medications.map((med: any, index: number) => (
-              <div 
-                key={index}
-                className="border-l-4 border-green-500 pl-4 py-2 prescription-item"
-              >
-                {editMode && validationStatus !== 'validated' ? (
-                  <MedicationEditForm
-                    medication={med}
-                    index={index}
-                    onUpdate={updateMedicamentBatch}
-                    onRemove={removeMedicament}
-                    onLocalChange={() => setHasUnsavedChanges(true)}
-                  />
+{medications.length > 0 ? (
+  medications.map((med: any, index: number) => (
+    <div 
+      key={`medication-${index}`}  // CHANGED: Better key
+      className="border-l-4 border-green-500 pl-4 py-2 prescription-item"
+    >
+      {editMode && validationStatus !== 'validated' ? (
+        <MedicationEditForm
+          key={`med-edit-${index}`}  // ADDED: Stable key
+          medication={med}
+          index={index}
+          onUpdate={stableUpdateMedication}  // CHANGED: Use stable callback
+          onRemove={removeMedicament}
+          onLocalChange={stableTrackModification}  // CHANGED: Use stable callback
+        />
                 ) : (
                   <div>
                     <div className="font-bold text-lg">
@@ -4016,14 +4123,15 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
                     {tests.map((test: any, idx: number) => (
                       <div key={idx} className="prescription-item">
                         {editMode && validationStatus !== 'validated' ? (
-                          <BiologyTestEditForm
-                            test={test}
-                            category={key}
-                            index={idx}
-                            onUpdate={updateBiologyTestBatch}
-                            onRemove={removeBiologyTest}
-                            onLocalChange={() => setHasUnsavedChanges(true)}
-                          />
+<BiologyTestEditForm
+  key={`bio-edit-${key}-${idx}`}  // ADDED: Stable key
+  test={test}
+  category={key}
+  index={idx}
+  onUpdate={stableUpdateBiologyTest}  // CHANGED: Use stable callback
+  onRemove={removeBiologyTest}
+  onLocalChange={stableTrackModification}  // CHANGED: Use stable callback
+/>
                         ) : (
                           <div className="flex items-start justify-between p-2 hover:bg-gray-50 rounded">
                             <div className="flex-1">
@@ -4173,13 +4281,14 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
            {examens.map((exam: any, index: number) => (
   <div key={index} className="border-l-4 border-indigo-500 pl-4 py-2 prescription-item">
     {editMode && validationStatus !== 'validated' ? (
-      <ImagingExamEditForm
-        exam={exam}
-        index={index}
-        onUpdate={updateImagingExamBatch}
-        onRemove={removeImagingExam}
-        onLocalChange={() => setHasUnsavedChanges(true)}
-      />
+<ImagingExamEditForm
+  key={`imaging-edit-${index}`}  // ADDED: Stable key
+  exam={exam}
+  index={index}
+  onUpdate={stableUpdateImagingExam}  // CHANGED: Use stable callback
+  onRemove={removeImagingExam}
+  onLocalChange={stableTrackModification}  // CHANGED: Use stable callback
+/>
     ) : (
       <div>
         <div className="font-bold text-lg">
