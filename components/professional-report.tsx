@@ -197,8 +197,9 @@ const DebouncedTextarea = memo(({
   const [localValue, setLocalValue] = useState(value)
   const timeoutRef = useRef<NodeJS.Timeout>()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const lastCursorPosition = useRef<number>(0)
   
-  // IMPORTANT FIX: Store callbacks in refs
+  // Store callbacks in refs
   const onUpdateRef = useRef(onUpdate)
   const onLocalChangeRef = useRef(onLocalChange)
   
@@ -207,32 +208,31 @@ const DebouncedTextarea = memo(({
     onLocalChangeRef.current = onLocalChange
   }, [onUpdate, onLocalChange])
 
-  // Only update if parent value changed
+  // Only update if parent value changed and we're not typing
   useEffect(() => {
     if (value !== localValue && !timeoutRef.current) {
       setLocalValue(value)
     }
-  }, [value])  // Removed localValue from deps
+  }, [value])
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value
-    const cursorPosition = e.target.selectionStart
+    const cursorPos = e.target.selectionStart
     
+    // Store cursor position
+    lastCursorPosition.current = cursorPos
+    
+    // Update local value immediately
     setLocalValue(newValue)
     
-    // Restore cursor position after React re-render
-    requestAnimationFrame(() => {
-      if (textareaRef.current) {
-        textareaRef.current.setSelectionRange(cursorPosition, cursorPosition)
-      }
-    })
-    
+    // Clear existing timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
     }
     
+    // Schedule parent update
     timeoutRef.current = setTimeout(() => {
-      onUpdateRef.current(newValue)  // Uses ref
+      onUpdateRef.current(newValue)
       if (onLocalChangeRef.current) {
         onLocalChangeRef.current()
       }
@@ -240,7 +240,14 @@ const DebouncedTextarea = memo(({
     }, 3000)
   }, [])
 
-  // Cleanup and force save on unmount
+  // Restore cursor position after every render
+  useEffect(() => {
+    if (textareaRef.current && document.activeElement === textareaRef.current) {
+      textareaRef.current.setSelectionRange(lastCursorPosition.current, lastCursorPosition.current)
+    }
+  })
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -252,24 +259,24 @@ const DebouncedTextarea = memo(({
 
   return (
     <Textarea
-      ref={textareaRef}  // IMPORTANT: Add ref here
+      ref={textareaRef}
       value={localValue}
       onChange={handleChange}
       className={className}
       placeholder={placeholder}
       data-section={sectionKey}
-      autoComplete="off"      // ADDED to prevent focus issues
-      spellCheck="false"      // ADDED to prevent spell-check focus stealing
+      autoComplete="off"
+      spellCheck="false"
     />
   )
 }, (prevProps, nextProps) => {
-  // Only re-render if value or key changes
   return (
     prevProps.value === nextProps.value &&
-    prevProps.sectionKey === nextProps.sectionKey
+    prevProps.sectionKey === nextProps.sectionKey &&
+    prevProps.className === nextProps.className &&
+    prevProps.placeholder === nextProps.placeholder
   )
 })
-
 const MedicationEditForm = memo(({
   medication,
   index,
@@ -3405,7 +3412,7 @@ const ConsultationReport = () => {
   const rapport = getReportRapport()
   const metadata = getReportMetadata()
 
-  // Create stable handlers for each section - MUST BE INSIDE THE COMPONENT
+  // Create stable handlers for each section
   const stableUpdateHandlers = useMemo(() => {
     const handlers: { [key: string]: (value: string) => void } = {}
     sections.forEach(section => {
@@ -3413,6 +3420,11 @@ const ConsultationReport = () => {
     })
     return handlers
   }, [updateRapportSection])
+
+  // ADD THIS: Create stable local change handler
+  const stableLocalChangeHandler = useCallback(() => {
+    setHasUnsavedChanges(true)
+  }, [])
 
   return (
     <Card className="shadow-xl print:shadow-none">
@@ -3469,16 +3481,16 @@ const ConsultationReport = () => {
               return (
                 <section key={section.key} className="space-y-2 section">
                   <h2 className="text-xl font-bold text-gray-900">{section.title}</h2>
-                  {editMode && validationStatus !== 'validated' ? (
-<DebouncedTextarea
-  value={content}
-  onUpdate={stableUpdateHandlers[section.key]}
-  onLocalChange={stableTrackModification}
-  className="min-h-[200px] font-sans text-gray-700"
-  placeholder="Enter text..."
-  sectionKey={section.key}
-/>
-                  ) : (
+      {editMode && validationStatus !== 'validated' ? (
+        <DebouncedTextarea
+          value={content}
+          onUpdate={stableUpdateHandlers[section.key]}
+          onLocalChange={stableLocalChangeHandler}  // Use the local stable handler
+          className="min-h-[200px] font-sans text-gray-700"
+          placeholder="Enter text..."
+          sectionKey={section.key}
+        />
+      ) : (
                     <div className="prose prose-lg max-w-none">
                       <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                         {content}
