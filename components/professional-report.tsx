@@ -301,56 +301,46 @@ const MedicationEditForm = memo(({
   
   const [hasLocalChanges, setHasLocalChanges] = useState(false)
   const saveTimeoutRef = useRef<NodeJS.Timeout>()
-  
-  // Store callbacks in refs
-  const onUpdateRef = useRef(onUpdate)
-  const onLocalChangeRef = useRef(onLocalChange)
-  const onRemoveRef = useRef(onRemove)
-  
-  useEffect(() => {
-    onUpdateRef.current = onUpdate
-    onLocalChangeRef.current = onLocalChange
-    onRemoveRef.current = onRemove
-  }, [onUpdate, onLocalChange, onRemove])
 
-  // Handle field changes without causing parent re-renders
+  // Handle field changes - DON'T call onUpdate immediately
   const handleFieldChange = useCallback((field: string, value: any) => {
-    setLocalMed(prev => {
-      const updated = { ...prev, [field]: value }
-      
-      // Clear existing timeout
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current)
-      }
-      
-      // Set up new save timeout
-      saveTimeoutRef.current = setTimeout(() => {
-        onUpdateRef.current(index, updated)
-        setHasLocalChanges(false)
-      }, 2000)
-      
-      return updated
-    })
-    
+    setLocalMed(prev => ({ ...prev, [field]: value }))
     setHasLocalChanges(true)
-  }, [index])
+    if (onLocalChange) onLocalChange()
+  }, [onLocalChange])
 
-  // Cleanup on unmount
+  // Auto-save with debouncing - THIS is where we update the parent
   useEffect(() => {
+    if (!hasLocalChanges) return
+
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
+    // Set new timeout for auto-save
+    saveTimeoutRef.current = setTimeout(() => {
+      onUpdate(index, localMed)  // Update parent after delay
+      setHasLocalChanges(false)
+    }, 2000) // Save after 2 seconds of no typing
+
+    // Cleanup
     return () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
-        if (hasLocalChanges) {
-          onUpdateRef.current(index, localMed)
-        }
       }
     }
-  }, [index, hasLocalChanges, localMed])
+  }, [localMed, index, onUpdate, hasLocalChanges])
 
-  // Handle remove with ref
-  const handleRemove = useCallback(() => {
-    onRemoveRef.current(index)
-  }, [index])
+  // Save on unmount if there are pending changes
+  useEffect(() => {
+    return () => {
+      if (hasLocalChanges && saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+        onUpdate(index, localMed)
+      }
+    }
+  }, [])
 
   return (
     <div className="space-y-3" data-medication-index={index}>
@@ -502,11 +492,9 @@ const MedicationEditForm = memo(({
     </div>
   )
 }, (prevProps, nextProps) => {
-  // Only re-render if medication data or index changes
-  if (prevProps.index !== nextProps.index) return false
-  if (JSON.stringify(prevProps.medication) !== JSON.stringify(nextProps.medication)) return false
-  // Don't re-render for callback changes
-  return true
+  // IMPORTANT: Prevent re-renders when callbacks change
+  return prevProps.index === nextProps.index && 
+         JSON.stringify(prevProps.medication) === JSON.stringify(nextProps.medication)
 })
 
 // 3. BiologyTestEditForm Component - SAVE ON BLUR
@@ -537,33 +525,61 @@ const BiologyTestEditForm = memo(({
     delaiResultat: test.delaiResultat || 'Standard'
   })
 
+  const [hasLocalChanges, setHasLocalChanges] = useState(false)
+  const saveTimeoutRef = useRef<NodeJS.Timeout>()
+
+  // Handle field changes locally only
   const handleFieldChange = useCallback((field: string, value: any) => {
     setLocalTest(prev => ({ ...prev, [field]: value }))
+    setHasLocalChanges(true)
     if (onLocalChange) onLocalChange()
   }, [onLocalChange])
 
-  // Save on blur (when clicking outside the input)
-  const handleBlur = useCallback(() => {
-    onUpdate(category, index, localTest)
-  }, [category, index, localTest, onUpdate])
-
-  // Store the pending data for manual save
+  // Auto-save with debouncing
   useEffect(() => {
-    const element = document.querySelector(`[data-biology-test="${category}-${index}"]`)
-    if (element) {
-      element.setAttribute('data-pending-test', JSON.stringify(localTest))
+    if (!hasLocalChanges) return
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
     }
-  }, [localTest, category, index])
+
+    saveTimeoutRef.current = setTimeout(() => {
+      onUpdate(category, index, localTest)
+      setHasLocalChanges(false)
+    }, 2000)
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [localTest, category, index, onUpdate, hasLocalChanges])
+
+  // Save on unmount
+  useEffect(() => {
+    return () => {
+      if (hasLocalChanges && saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+        onUpdate(category, index, localTest)
+      }
+    }
+  }, [])
 
   return (
     <div className="space-y-3 p-3" data-biology-test={`${category}-${index}`}>
+      {hasLocalChanges && (
+        <div className="text-xs text-yellow-600 flex items-center gap-1">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          Auto-saving...
+        </div>
+      )}
+      
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label>Test Name</Label>
           <Input
             value={localTest.nom}
             onChange={(e) => handleFieldChange('nom', e.target.value)}
-            onBlur={handleBlur} // Save when clicking outside
             placeholder="e.g., Complete Blood Count"
           />
         </div>
@@ -572,7 +588,6 @@ const BiologyTestEditForm = memo(({
           <Input
             value={localTest.motifClinique}
             onChange={(e) => handleFieldChange('motifClinique', e.target.value)}
-            onBlur={handleBlur} // Save when clicking outside
             placeholder="e.g., Anemia evaluation"
           />
         </div>
@@ -580,11 +595,7 @@ const BiologyTestEditForm = memo(({
           <Label>Sample Type</Label>
           <Select
             value={localTest.tubePrelevement}
-            onValueChange={(value) => {
-              handleFieldChange('tubePrelevement', value)
-              // Save immediately for selects
-              onUpdate(category, index, { ...localTest, tubePrelevement: value })
-            }}
+            onValueChange={(value) => handleFieldChange('tubePrelevement', value)}
           >
             <SelectTrigger>
               <SelectValue />
@@ -602,11 +613,7 @@ const BiologyTestEditForm = memo(({
           <Label>Turnaround Time</Label>
           <Select
             value={localTest.delaiResultat}
-            onValueChange={(value) => {
-              handleFieldChange('delaiResultat', value)
-              // Save immediately for selects
-              onUpdate(category, index, { ...localTest, delaiResultat: value })
-            }}
+            onValueChange={(value) => handleFieldChange('delaiResultat', value)}
           >
             <SelectTrigger>
               <SelectValue />
@@ -624,7 +631,6 @@ const BiologyTestEditForm = memo(({
         <Input
           value={localTest.conditionsPrelevement}
           onChange={(e) => handleFieldChange('conditionsPrelevement', e.target.value)}
-          onBlur={handleBlur} // Save when clicking outside
           placeholder="e.g., Early morning sample required"
         />
       </div>
@@ -633,22 +639,14 @@ const BiologyTestEditForm = memo(({
           <div className="flex items-center space-x-2">
             <Switch
               checked={localTest.urgence}
-              onCheckedChange={(checked) => {
-                handleFieldChange('urgence', checked)
-                // Save immediately for switches
-                onUpdate(category, index, { ...localTest, urgence: checked })
-              }}
+              onCheckedChange={(checked) => handleFieldChange('urgence', checked)}
             />
             <Label>Urgent</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Switch
               checked={localTest.aJeun}
-              onCheckedChange={(checked) => {
-                handleFieldChange('aJeun', checked)
-                // Save immediately for switches
-                onUpdate(category, index, { ...localTest, aJeun: checked })
-              }}
+              onCheckedChange={(checked) => handleFieldChange('aJeun', checked)}
             />
             <Label>Fasting required</Label>
           </div>
@@ -663,6 +661,10 @@ const BiologyTestEditForm = memo(({
       </div>
     </div>
   )
+}, (prevProps, nextProps) => {
+  return prevProps.index === nextProps.index && 
+         prevProps.category === nextProps.category &&
+         JSON.stringify(prevProps.test) === JSON.stringify(nextProps.test)
 })
 
 // 4. ImagingExamEditForm Component - CORRECTED VERSION
@@ -690,33 +692,29 @@ const ImagingExamEditForm = memo(({
     questionDiagnostique: exam.questionDiagnostique || ''
   })
 
-  // Track if there are changes
   const [hasLocalChanges, setHasLocalChanges] = useState(false)
   const saveTimeoutRef = useRef<NodeJS.Timeout>()
 
+  // Handle field changes locally only
   const handleFieldChange = useCallback((field: string, value: any) => {
     setLocalExam(prev => ({ ...prev, [field]: value }))
     setHasLocalChanges(true)
     if (onLocalChange) onLocalChange()
   }, [onLocalChange])
 
-  // Auto-save effect with debouncing
+  // Auto-save with debouncing
   useEffect(() => {
     if (!hasLocalChanges) return
 
-    // Clear existing timeout
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current)
     }
 
-    // Set new timeout for auto-save
     saveTimeoutRef.current = setTimeout(() => {
-      console.log(`Auto-saving imaging exam ${index}...`)
       onUpdate(index, localExam)
       setHasLocalChanges(false)
-    }, 2000) // Save after 2 seconds of inactivity
+    }, 2000)
 
-    // Cleanup
     return () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
@@ -724,27 +722,18 @@ const ImagingExamEditForm = memo(({
     }
   }, [localExam, index, onUpdate, hasLocalChanges])
 
-  // Save on unmount if there are pending changes
+  // Save on unmount
   useEffect(() => {
     return () => {
-      if (hasLocalChanges) {
-        console.log(`Saving imaging exam ${index} on unmount...`)
+      if (hasLocalChanges && saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
         onUpdate(index, localExam)
       }
     }
   }, [])
 
-  // Store the pending data for manual save (keep this as backup)
-  useEffect(() => {
-    const element = document.querySelector(`[data-imaging-exam="${index}"]`)
-    if (element) {
-      element.setAttribute('data-pending-exam', JSON.stringify(localExam))
-    }
-  }, [localExam, index])
-
   return (
     <div className="space-y-3 p-3" data-imaging-exam={index}>
-      {/* Visual indicator of unsaved changes */}
       {hasLocalChanges && (
         <div className="text-xs text-yellow-600 flex items-center gap-1">
           <Loader2 className="h-3 w-3 animate-spin" />
@@ -821,36 +810,19 @@ const ImagingExamEditForm = memo(({
             <Label>Contrast required</Label>
           </div>
         </div>
-        <div className="flex gap-2">
-          {/* Manual save button as backup */}
-          {hasLocalChanges && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                onUpdate(index, localExam)
-                setHasLocalChanges(false)
-                toast({
-                  title: "Imaging exam saved",
-                  description: "Changes have been saved",
-                  duration: 2000
-                })
-              }}
-            >
-              <Save className="h-4 w-4" />
-            </Button>
-          )}
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => onRemove(index)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => onRemove(index)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   )
+}, (prevProps, nextProps) => {
+  return prevProps.index === nextProps.index && 
+         JSON.stringify(prevProps.exam) === JSON.stringify(nextProps.exam)
 })
 
 // Set display names for debugging
@@ -3614,14 +3586,14 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
       className="border-l-4 border-green-500 pl-4 py-2 prescription-item"
     >
 {editMode && validationStatus !== 'validated' ? (
-  <MedicationEditForm
-    key={`med-edit-${index}`}
-    medication={med}
-    index={index}
-    onUpdate={stableUpdateMedication}
-    onRemove={stableRemoveMedication}  // Just use it, don't define it here
-    onLocalChange={stableTrackModification}
-  />
+<MedicationEditForm
+  key={`med-edit-${index}`}
+  medication={med}
+  index={index}
+  onUpdate={stableUpdateMedication}
+  onRemove={stableRemoveMedication}
+  onLocalChange={stableTrackModification}
+/>
 ) : (
   <div>
     <div className="font-bold text-lg">
@@ -3798,13 +3770,13 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
   <div key={`${key}-test-${idx}`} className="prescription-item">
                         {editMode && validationStatus !== 'validated' ? (
 <BiologyTestEditForm
-  key={`bio-edit-${key}-${idx}`}  // ADDED: Stable key
+  key={`bio-edit-${key}-${idx}`}
   test={test}
   category={key}
   index={idx}
-  onUpdate={stableUpdateBiologyTest}  // CHANGED: Use stable callback
-  onRemove={stableRemoveBiologyTest}
-  onLocalChange={stableTrackModification}  // CHANGED: Use stable callback
+  onUpdate={stableUpdateBiologyTest}
+  onRemove={stableRemoveBiologyTest}  // <- Use the stable version
+  onLocalChange={stableTrackModification}
 />
                         ) : (
                           <div className="flex items-start justify-between p-2 hover:bg-gray-50 rounded">
@@ -3956,12 +3928,12 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
   <div key={`imaging-exam-${index}`} className="border-l-4 border-indigo-500 pl-4 py-2 prescription-item">
     {editMode && validationStatus !== 'validated' ? (
 <ImagingExamEditForm
-  key={`imaging-edit-${index}`}  // ADDED: Stable key
+  key={`imaging-edit-${index}`}
   exam={exam}
   index={index}
-  onUpdate={stableUpdateImagingExam}  // CHANGED: Use stable callback
-  onRemove={stableRemoveImagingExam}
-  onLocalChange={stableTrackModification}  // CHANGED: Use stable callback
+  onUpdate={stableUpdateImagingExam}
+  onRemove={stableRemoveImagingExam}  // <- Use the stable version
+  onLocalChange={stableTrackModification}
 />
     ) : (
       <div>
