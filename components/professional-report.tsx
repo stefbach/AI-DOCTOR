@@ -283,7 +283,8 @@ const MedicationEditForm = memo(({
   onRemove: (index: number) => void
   onLocalChange?: () => void
 }) => {
-  const [localMed, setLocalMed] = useState({
+  // Initialize state from props only once
+  const [localMed, setLocalMed] = useState(() => ({
     nom: medication.nom || '',
     denominationCommune: medication.denominationCommune || '',
     dosage: medication.dosage || '',
@@ -296,109 +297,104 @@ const MedicationEditForm = memo(({
     justification: medication.justification || '',
     surveillanceParticuliere: medication.surveillanceParticuliere || '',
     nonSubstituable: medication.nonSubstituable || false
-  })
-
+  }))
+  
   const [hasLocalChanges, setHasLocalChanges] = useState(false)
   const saveTimeoutRef = useRef<NodeJS.Timeout>()
   
-  // IMPORTANT FIX: Store callbacks in refs to avoid stale closures
+  // Store callbacks in refs
   const onUpdateRef = useRef(onUpdate)
   const onLocalChangeRef = useRef(onLocalChange)
+  const onRemoveRef = useRef(onRemove)
   
   useEffect(() => {
     onUpdateRef.current = onUpdate
     onLocalChangeRef.current = onLocalChange
-  }, [onUpdate, onLocalChange])
+    onRemoveRef.current = onRemove
+  }, [onUpdate, onLocalChange, onRemove])
 
-const handleFieldChange = useCallback((field: string, value: any) => {
-  setLocalMed(prev => ({ ...prev, [field]: value }))
-  
-  // Only set hasLocalChanges if it's not already true
-  if (!hasLocalChanges) {
-    setHasLocalChanges(true)
-  }
-  
-  // Notify parent without causing re-render
-  if (onLocalChangeRef.current) {
-    // Use setTimeout to avoid immediate re-render
-    setTimeout(() => {
-      if (onLocalChangeRef.current) onLocalChangeRef.current()
-    }, 0)
-  }
-}, [hasLocalChanges])
-
-  // Fixed auto-save with refs
-  useEffect(() => {
-    if (!hasLocalChanges) return
-
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current)
-    }
-
-    saveTimeoutRef.current = setTimeout(() => {
-      console.log(`Auto-saving medication ${index}...`)
-      onUpdateRef.current(index, localMed)  // Uses ref instead of prop
-      setHasLocalChanges(false)
-    }, 2000)
-
-    return () => {
+  // Handle field changes without causing parent re-renders
+  const handleFieldChange = useCallback((field: string, value: any) => {
+    setLocalMed(prev => {
+      const updated = { ...prev, [field]: value }
+      
+      // Clear existing timeout
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
       }
-    }
-  }, [localMed, index, hasLocalChanges])  // Removed onUpdate from deps
+      
+      // Set up new save timeout
+      saveTimeoutRef.current = setTimeout(() => {
+        onUpdateRef.current(index, updated)
+        setHasLocalChanges(false)
+      }, 2000)
+      
+      return updated
+    })
+    
+    setHasLocalChanges(true)
+  }, [index])
 
-  // Force save on unmount
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (hasLocalChanges && saveTimeoutRef.current) {
+      if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
-        console.log(`Force saving medication ${index} on unmount...`)
-        onUpdateRef.current(index, localMed)
+        if (hasLocalChanges) {
+          onUpdateRef.current(index, localMed)
+        }
       }
     }
-  }, [hasLocalChanges, index, localMed])
+  }, [index, hasLocalChanges, localMed])
 
-return (
-  <div className="space-y-3" data-medication-index={index}>
-    <div className="h-4">
-      {hasLocalChanges && (
-        <div className="text-xs text-yellow-600 flex items-center gap-1">
-          <Loader2 className="h-3 w-3 animate-spin" />
-          Auto-saving...
-        </div>
-      )}
-    </div>
+  // Handle remove with ref
+  const handleRemove = useCallback(() => {
+    onRemoveRef.current(index)
+  }, [index])
+
+  return (
+    <div className="space-y-3" data-medication-index={index}>
+      <div style={{ height: '20px', minHeight: '20px' }}>
+        {hasLocalChanges && (
+          <div className="text-xs text-yellow-600 flex items-center gap-1">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            Auto-saving...
+          </div>
+        )}
+      </div>
       
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label htmlFor={`med-nom-${index}`}>Medication Name</Label>
           <Input
             id={`med-nom-${index}`}
+            name={`med-nom-${index}`}
             value={localMed.nom}
             onChange={(e) => handleFieldChange('nom', e.target.value)}
             placeholder="e.g., Paracetamol"
-            autoComplete="off"  // ADDED to prevent focus issues
+            autoComplete="off"
           />
         </div>
         <div>
           <Label htmlFor={`med-generic-${index}`}>Generic Name (INN)</Label>
           <Input
             id={`med-generic-${index}`}
+            name={`med-generic-${index}`}
             value={localMed.denominationCommune}
             onChange={(e) => handleFieldChange('denominationCommune', e.target.value)}
             placeholder="e.g., Paracetamol"
-            autoComplete="off"  // ADDED
+            autoComplete="off"
           />
         </div>
         <div>
           <Label htmlFor={`med-dosage-${index}`}>Dosage</Label>
           <Input
             id={`med-dosage-${index}`}
+            name={`med-dosage-${index}`}
             value={localMed.dosage}
             onChange={(e) => handleFieldChange('dosage', e.target.value)}
             placeholder="e.g., 500mg"
-            autoComplete="off"  // ADDED
+            autoComplete="off"
           />
         </div>
         <div>
@@ -424,30 +420,33 @@ return (
           <Label htmlFor={`med-frequency-${index}`}>Frequency</Label>
           <Input
             id={`med-frequency-${index}`}
+            name={`med-frequency-${index}`}
             value={localMed.posologie}
             onChange={(e) => handleFieldChange('posologie', e.target.value)}
             placeholder="e.g., 1 tablet 3 times daily"
-            autoComplete="off"  // ADDED
+            autoComplete="off"
           />
         </div>
         <div>
           <Label htmlFor={`med-duration-${index}`}>Duration</Label>
           <Input
             id={`med-duration-${index}`}
+            name={`med-duration-${index}`}
             value={localMed.dureeTraitement}
             onChange={(e) => handleFieldChange('dureeTraitement', e.target.value)}
             placeholder="e.g., 7 days"
-            autoComplete="off"  // ADDED
+            autoComplete="off"
           />
         </div>
         <div>
           <Label htmlFor={`med-quantity-${index}`}>Quantity</Label>
           <Input
             id={`med-quantity-${index}`}
+            name={`med-quantity-${index}`}
             value={localMed.quantite}
             onChange={(e) => handleFieldChange('quantite', e.target.value)}
             placeholder="e.g., 1 box"
-            autoComplete="off"  // ADDED
+            autoComplete="off"
           />
         </div>
         <div>
@@ -473,10 +472,11 @@ return (
         <Label htmlFor={`med-instructions-${index}`}>Special Instructions</Label>
         <Input
           id={`med-instructions-${index}`}
+          name={`med-instructions-${index}`}
           value={localMed.instructions}
           onChange={(e) => handleFieldChange('instructions', e.target.value)}
           placeholder="e.g., Take with food"
-          autoComplete="off"  // ADDED
+          autoComplete="off"
         />
       </div>
       <div className="flex justify-between items-center">
@@ -489,28 +489,10 @@ return (
           <Label htmlFor={`med-nonsubstitutable-${index}`}>Non-substitutable</Label>
         </div>
         <div className="flex gap-2">
-          {hasLocalChanges && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                onUpdateRef.current(index, localMed)  // Uses ref
-                setHasLocalChanges(false)
-                toast({
-                  title: "Medication saved",
-                  description: "Changes have been saved",
-                  duration: 2000
-                })
-              }}
-              type="button"
-            >
-              <Save className="h-4 w-4" />
-            </Button>
-          )}
           <Button
             variant="destructive"
             size="sm"
-            onClick={() => onRemove(index)}
+            onClick={handleRemove}
             type="button"
           >
             <Trash2 className="h-4 w-4" />
@@ -520,11 +502,11 @@ return (
     </div>
   )
 }, (prevProps, nextProps) => {
-  // Custom comparison - only re-render if data changes
-  return (
-    prevProps.index === nextProps.index &&
-    JSON.stringify(prevProps.medication) === JSON.stringify(nextProps.medication)
-  )
+  // Only re-render if medication data or index changes
+  if (prevProps.index !== nextProps.index) return false
+  if (JSON.stringify(prevProps.medication) !== JSON.stringify(nextProps.medication)) return false
+  // Don't re-render for callback changes
+  return true
 })
 
 // 3. BiologyTestEditForm Component - SAVE ON BLUR
@@ -1153,6 +1135,18 @@ const stableUpdateImagingExam = useCallback((index: number, updatedExam: any) =>
 const stableTrackModification = useCallback(() => {
   setHasUnsavedChanges(true)
 }, [])
+
+  const stableRemoveMedication = useCallback((index: number) => {
+  removeMedicament(index)
+}, [removeMedicament])
+
+const stableRemoveBiologyTest = useCallback((category: string, index: number) => {
+  removeBiologyTest(category, index)
+}, [removeBiologyTest])
+
+const stableRemoveImagingExam = useCallback((index: number) => {
+  removeImagingExam(index)
+}, [removeImagingExam])
 
   // ==================== DRAFT SAVE FUNCTIONS ====================
   const saveDraft = useCallback(async () => {
@@ -3962,9 +3956,13 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
           medication={med}
           index={index}
           onUpdate={stableUpdateMedication}  // CHANGED: Use stable callback
-          onRemove={removeMedicament}
+          onRemove={stableRemoveMedication}
           onLocalChange={stableTrackModification}  // CHANGED: Use stable callback
         />
+const stableRemoveMedication = useCallback((index: number) => {
+  removeMedicament(index)
+}, [removeMedicament])
+      
                 ) : (
                   <div>
                     <div className="font-bold text-lg">
@@ -4146,7 +4144,7 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
   category={key}
   index={idx}
   onUpdate={stableUpdateBiologyTest}  // CHANGED: Use stable callback
-  onRemove={removeBiologyTest}
+  onRemove={stableRemoveBiologyTest}
   onLocalChange={stableTrackModification}  // CHANGED: Use stable callback
 />
                         ) : (
@@ -4303,7 +4301,7 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
   exam={exam}
   index={index}
   onUpdate={stableUpdateImagingExam}  // CHANGED: Use stable callback
-  onRemove={removeImagingExam}
+  onRemove={stableRemoveImagingExam}
   onLocalChange={stableTrackModification}  // CHANGED: Use stable callback
 />
     ) : (
