@@ -479,14 +479,14 @@ const MedicationEditForm = memo(({
           <Label htmlFor={`med-nonsubstitutable-${index}`}>Non-substitutable</Label>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={handleRemove}
-            type="button"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+<Button
+  variant="destructive"
+  size="sm"
+  onClick={() => onRemove(index)}  // ✅ Correct
+  type="button"
+>
+  <Trash2 className="h-4 w-4" />
+</Button>
         </div>
       </div>
     </div>
