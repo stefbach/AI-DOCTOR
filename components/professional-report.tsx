@@ -3950,23 +3950,19 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
       key={`medication-${index}`}  // CHANGED: Better key
       className="border-l-4 border-green-500 pl-4 py-2 prescription-item"
     >
-      {editMode && validationStatus !== 'validated' ? (
-        <MedicationEditForm
-          key={`med-edit-${index}`}  // ADDED: Stable key
-          medication={med}
-          index={index}
-          onUpdate={stableUpdateMedication}  // CHANGED: Use stable callback
-          onRemove={stableRemoveMedication}
-          onLocalChange={stableTrackModification}  // CHANGED: Use stable callback
-        />
-const stableRemoveMedication = useCallback((index: number) => {
-  removeMedicament(index)
-}, [removeMedicament])
-      
-                ) : (
-                  <div>
-                    <div className="font-bold text-lg">
-                      {index + 1}. {med.nom}
+{editMode && validationStatus !== 'validated' ? (
+  <MedicationEditForm
+    key={`med-edit-${index}`}
+    medication={med}
+    index={index}
+    onUpdate={stableUpdateMedication}
+    onRemove={stableRemoveMedication}  // Just use it, don't define it here
+    onLocalChange={stableTrackModification}
+  />
+) : (
+  <div>
+    <div className="font-bold text-lg">
+      {index + 1}. {med.nom}
                       {med.nonSubstituable && (
                         <Badge className="ml-2 bg-red-100 text-red-800 badge badge-red">Non-substitutable</Badge>
                       )}
