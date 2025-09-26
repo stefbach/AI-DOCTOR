@@ -4138,7 +4138,7 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
                   </h3>
                   <div className="space-y-2">
                     {tests.map((test: any, idx: number) => (
-  <div key={`${category}-test-${idx}`} className="prescription-item">
+  <div key={`${key}-test-${idx}`} className="prescription-item">
                         {editMode && validationStatus !== 'validated' ? (
 <BiologyTestEditForm
   key={`bio-edit-${key}-${idx}`}  // ADDED: Stable key
