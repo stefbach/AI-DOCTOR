@@ -4170,47 +4170,50 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
 
         {examens.length > 0 ? (
           <div className="space-y-6">
-            {examens.map((exam: any, index: number) => (
-              <div key={index} className="border-l-4 border-indigo-500 pl-4 py-2 prescription-item">
-                {editMode && validationStatus !== 'validated' ? (
-                  <ImagingExamEditForm
-                    exam={exam}
-                    index={index}
-                    onUpdate={updateImagingExamBatch}
-                    onRemove={removeImagingExam}
-                    onLocalChange={() => setHasUnsavedChanges(true)}
-                  />
-                ) : (
-                  <div>
-                    <div className="font-bold text-lg">
-                      {index + 1}. {exam.type || exam.modalite}
-                      {exam.urgence && <Badge className="ml-2 bg-red-100 text-red-800 urgent badge badge-red">URGENT</Badge>}
-                    </div>
-                    <p className="mt-1">
-                      <span className="font-medium">Region:</span> {exam.region}
-                    </p>
-                    <p className="mt-1">
-                      <span className="font-medium">Clinical Indication:</span> {exam.indicationClinique}
-                    </p>
-                    {exam.contraste && (
-                      <p className="mt-1 text-orange-600">
-                        ⚠️ <span className="font-medium">Contrast required</span>
-                      </p>
-                    )}
-                    {exam.protocoleSpecifique && (
-                      <p className="mt-1">
-                        <span className="font-medium">Protocol:</span> {exam.protocoleSpecifique}
-                      </p>
-                    )}
-                    {exam.questionDiagnostique && (
-                      <p className="mt-1 text-sm text-gray-600">
-                        <span className="font-medium">Clinical Question:</span> {exam.questionDiagnostique}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
+           {examens.map((exam: any, index: number) => (
+  <div key={index} className="border-l-4 border-indigo-500 pl-4 py-2 prescription-item">
+    {editMode && validationStatus !== 'validated' ? (
+      <ImagingExamEditForm
+        exam={exam}
+        index={index}
+        onUpdate={updateImagingExamBatch}
+        onRemove={removeImagingExam}
+        onLocalChange={() => setHasUnsavedChanges(true)}
+      />
+    ) : (
+      <div>
+        <div className="font-bold text-lg">
+          {index + 1}. {exam.type || exam.modalite}
+          {exam.urgence && <Badge className="ml-2 bg-red-100 text-red-800 urgent badge badge-red">URGENT</Badge>}
+        </div>
+        {/* Only show Region if it exists and is not "To be specified" */}
+        {exam.region && exam.region !== 'To be specified' && exam.region !== '' && (
+          <p className="mt-1">
+            <span className="font-medium">Region:</span> {exam.region}
+          </p>
+        )}
+        <p className="mt-1">
+          <span className="font-medium">Clinical Indication:</span> {exam.indicationClinique}
+        </p>
+        {exam.contraste && (
+          <p className="mt-1 text-orange-600">
+            ⚠️ <span className="font-medium">Contrast required</span>
+          </p>
+        )}
+        {exam.protocoleSpecifique && (
+          <p className="mt-1">
+            <span className="font-medium">Protocol:</span> {exam.protocoleSpecifique}
+          </p>
+        )}
+        {exam.questionDiagnostique && (
+          <p className="mt-1 text-sm text-gray-600">
+            <span className="font-medium">Clinical Question:</span> {exam.questionDiagnostique}
+          </p>
+        )}
+      </div>
+    )}
+  </div>
+))}
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500">
