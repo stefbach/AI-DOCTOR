@@ -218,7 +218,7 @@ const DebouncedTextarea = memo(({
     saveTimeoutRef.current = setTimeout(() => {
       onUpdate(localValue)  // Update parent after delay
       setHasLocalChanges(false)
-    }, 5000) // 5 seconds
+    }, 3000) // 3 seconds
     
     // Cleanup
     return () => {
@@ -324,7 +324,7 @@ const MedicationEditForm = memo(({
     saveTimeoutRef.current = setTimeout(() => {
       onUpdate(index, localMed)  // Update parent after delay
       setHasLocalChanges(false)
-    }, 5000) // 5 seconds
+    }, 3000) // 3 seconds
 
     // Cleanup
     return () => {
@@ -548,7 +548,7 @@ const BiologyTestEditForm = memo(({
     saveTimeoutRef.current = setTimeout(() => {
       onUpdate(category, index, localTest)
       setHasLocalChanges(false)
-    }, 5000) // 5 seconds
+    }, 3000) // 3 seconds
 
     return () => {
       if (saveTimeoutRef.current) {
@@ -715,7 +715,7 @@ const ImagingExamEditForm = memo(({
     saveTimeoutRef.current = setTimeout(() => {
       onUpdate(index, localExam)
       setHasLocalChanges(false)
-    }, 5000) // 5 seconds
+    }, 3000) // 3 seconds
 
     return () => {
       if (saveTimeoutRef.current) {
@@ -3246,7 +3246,7 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
             }
           })
         }
-      }, 5000)
+      }, 3000) // 3 seconds
       
       return () => clearTimeout(timer)
     }, [localDoctorInfo, editingDoctor])
@@ -4117,7 +4117,7 @@ const SickLeaveCertificate = () => {
         trackModification('arretMaladie')
         setHasUnsavedChanges(true)
         setHasLocalChanges(false)
-      }, 5000) // 5 seconds
+      }, 3000) // 3 seconds
       
       return () => {
         if (saveTimeoutRef.current) {
