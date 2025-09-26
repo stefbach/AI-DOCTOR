@@ -177,7 +177,6 @@ const createEmptyReport = (): MauritianReport => ({
   }
 })
 // ==================== MEMOIZED COMPONENTS (OUTSIDE MAIN COMPONENT) ====================
-
 // 1. DebouncedTextarea Component
 const DebouncedTextarea = memo(({
   value,
@@ -194,89 +193,85 @@ const DebouncedTextarea = memo(({
   sectionKey?: string
   onLocalChange?: () => void
 }) => {
+  // Initialize local state from props
   const [localValue, setLocalValue] = useState(value)
-  const timeoutRef = useRef<NodeJS.Timeout>()
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const lastCursorPosition = useRef<number>(0)
+  const [hasLocalChanges, setHasLocalChanges] = useState(false)
+  const saveTimeoutRef = useRef<NodeJS.Timeout>()
   
-  // Store callbacks in refs
-  const onUpdateRef = useRef(onUpdate)
-  const onLocalChangeRef = useRef(onLocalChange)
-  
-  useEffect(() => {
-    onUpdateRef.current = onUpdate
-    onLocalChangeRef.current = onLocalChange
-  }, [onUpdate, onLocalChange])
-
-  // Only update if parent value changed and we're not typing
-  useEffect(() => {
-    if (value !== localValue && !timeoutRef.current) {
-      setLocalValue(value)
-    }
-  }, [value])
-
+  // Handle text changes - update locally immediately
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newValue = e.target.value
-    const cursorPos = e.target.selectionStart
-    
-    // Store cursor position
-    lastCursorPosition.current = cursorPos
-    
-    // Update local value immediately
-    setLocalValue(newValue)
+    setLocalValue(e.target.value)
+    setHasLocalChanges(true)
+    if (onLocalChange) onLocalChange()
+  }, [onLocalChange])
+  
+  // Auto-save with debouncing - exactly like MedicationEditForm
+  useEffect(() => {
+    if (!hasLocalChanges) return
     
     // Clear existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
     }
     
-    // Schedule parent update
-    timeoutRef.current = setTimeout(() => {
-      onUpdateRef.current(newValue)
-      if (onLocalChangeRef.current) {
-        onLocalChangeRef.current()
+    // Set new timeout for auto-save
+    saveTimeoutRef.current = setTimeout(() => {
+      onUpdate(localValue)  // Update parent after delay
+      setHasLocalChanges(false)
+    }, 2000) // Save after 2 seconds of no typing (same as medication form)
+    
+    // Cleanup
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
       }
-      timeoutRef.current = undefined
-    }, 3000)
-  }, [])
-
-  // Restore cursor position after every render
-  useEffect(() => {
-    if (textareaRef.current && document.activeElement === textareaRef.current) {
-      textareaRef.current.setSelectionRange(lastCursorPosition.current, lastCursorPosition.current)
     }
-  })
-
-  // Cleanup on unmount
+  }, [localValue, onUpdate, hasLocalChanges])
+  
+  // Save on unmount if there are pending changes
   useEffect(() => {
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-        onUpdateRef.current(localValue)
+      if (hasLocalChanges && saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+        onUpdate(localValue)
       }
     }
-  }, [localValue])
-
+  }, []) // FIXED: Empty dependency array for unmount effect
+  
+  // Update local value if parent value changes (but only if we're not editing)
+  useEffect(() => {
+    if (value !== localValue && !hasLocalChanges) {
+      setLocalValue(value)
+    }
+  }, [value, hasLocalChanges]) // FIXED: Removed localValue to prevent loops
+  
   return (
-    <Textarea
-      ref={textareaRef}
-      value={localValue}
-      onChange={handleChange}
-      className={className}
-      placeholder={placeholder}
-      data-section={sectionKey}
-      autoComplete="off"
-      spellCheck="false"
-    />
+    <div className="space-y-2">
+      {hasLocalChanges && (
+        <div className="text-xs text-yellow-600 flex items-center gap-1">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          Auto-saving...
+        </div>
+      )}
+      <Textarea
+        value={localValue}
+        onChange={handleChange}
+        className={className}
+        placeholder={placeholder}
+        data-section={sectionKey}
+        autoComplete="off"
+      />
+    </div>
   )
 }, (prevProps, nextProps) => {
   return (
     prevProps.value === nextProps.value &&
-    prevProps.sectionKey === nextProps.sectionKey &&
-    prevProps.className === nextProps.className &&
-    prevProps.placeholder === nextProps.placeholder
+    prevProps.sectionKey === nextProps.sectionKey
   )
 })
+
+DebouncedTextarea.displayName = 'DebouncedTextarea'
+
 const MedicationEditForm = memo(({
   medication,
   index,
