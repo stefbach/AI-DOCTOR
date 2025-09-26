@@ -992,7 +992,7 @@ const getFullSignatureUrl = (signatureUrl: string | null): string | null => {
   const getReportRapport = () => report?.compteRendu?.rapport || createEmptyReport().compteRendu.rapport
   const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
 
-// ==================== TRACKING & UPDATES (MUST BE FIRST) ====================
+// ==================== TRACKING & UPDATES ====================
 const trackModification = useCallback((section: string) => {
   if (validationStatus === 'validated') return
   setModifiedSections(prev => new Set(prev).add(section))
@@ -1019,79 +1019,6 @@ const updateRapportSection = useCallback((section: string, value: string) => {
     return newReport
   })
   trackModification(`rapport.${section}`)
-}, [validationStatus, trackModification])
-
-// ==================== REMOVE FUNCTIONS ====================
-const removeMedicament = useCallback((index: number) => {
-  if (validationStatus === 'validated') return
-  
-  setReport(prev => {
-    if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
-    
-    return {
-      ...prev,
-      ordonnances: {
-        ...prev.ordonnances,
-        medicaments: {
-          ...prev.ordonnances.medicaments,
-          prescription: {
-            ...prev.ordonnances.medicaments.prescription,
-            medicaments: prev.ordonnances.medicaments.prescription.medicaments.filter((_, i) => i !== index)
-          }
-        }
-      }
-    }
-  })
-  trackModification(`medicament.remove.${index}`)
-}, [validationStatus, trackModification])
-
-const removeBiologyTest = useCallback((category: string, index: number) => {
-  if (validationStatus === 'validated') return
-  
-  setReport(prev => {
-    if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
-    
-    return {
-      ...prev,
-      ordonnances: {
-        ...prev.ordonnances,
-        biologie: {
-          ...prev.ordonnances.biologie,
-          prescription: {
-            ...prev.ordonnances.biologie.prescription,
-            analyses: {
-              ...prev.ordonnances.biologie.prescription.analyses,
-              [category]: prev.ordonnances.biologie.prescription.analyses[category].filter((_, i) => i !== index)
-            }
-          }
-        }
-      }
-    }
-  })
-  trackModification(`biologie.remove.${category}.${index}`)
-}, [validationStatus, trackModification])
-
-const removeImagingExam = useCallback((index: number) => {
-  if (validationStatus === 'validated') return
-  
-  setReport(prev => {
-    if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
-    
-    return {
-      ...prev,
-      ordonnances: {
-        ...prev.ordonnances,
-        imagerie: {
-          ...prev.ordonnances.imagerie,
-          prescription: {
-            ...prev.ordonnances.imagerie.prescription,
-            examens: prev.ordonnances.imagerie.prescription.examens.filter((_, i) => i !== index)
-          }
-        }
-      }
-    }
-  })
-  trackModification(`imagerie.remove.${index}`)
 }, [validationStatus, trackModification])
 
 // ==================== ADD FUNCTIONS ====================
@@ -1270,6 +1197,79 @@ const addImagingExam = useCallback(() => {
   })
   trackModification('imagerie.new')
 }, [validationStatus, getReportPraticien, getReportPatient, trackModification])
+
+// ==================== REMOVE FUNCTIONS ====================
+const removeMedicament = useCallback((index: number) => {
+  if (validationStatus === 'validated') return
+  
+  setReport(prev => {
+    if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
+    
+    return {
+      ...prev,
+      ordonnances: {
+        ...prev.ordonnances,
+        medicaments: {
+          ...prev.ordonnances.medicaments,
+          prescription: {
+            ...prev.ordonnances.medicaments.prescription,
+            medicaments: prev.ordonnances.medicaments.prescription.medicaments.filter((_, i) => i !== index)
+          }
+        }
+      }
+    }
+  })
+  trackModification(`medicament.remove.${index}`)
+}, [validationStatus, trackModification])
+
+const removeBiologyTest = useCallback((category: string, index: number) => {
+  if (validationStatus === 'validated') return
+  
+  setReport(prev => {
+    if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
+    
+    return {
+      ...prev,
+      ordonnances: {
+        ...prev.ordonnances,
+        biologie: {
+          ...prev.ordonnances.biologie,
+          prescription: {
+            ...prev.ordonnances.biologie.prescription,
+            analyses: {
+              ...prev.ordonnances.biologie.prescription.analyses,
+              [category]: prev.ordonnances.biologie.prescription.analyses[category].filter((_, i) => i !== index)
+            }
+          }
+        }
+      }
+    }
+  })
+  trackModification(`biologie.remove.${category}.${index}`)
+}, [validationStatus, trackModification])
+
+const removeImagingExam = useCallback((index: number) => {
+  if (validationStatus === 'validated') return
+  
+  setReport(prev => {
+    if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
+    
+    return {
+      ...prev,
+      ordonnances: {
+        ...prev.ordonnances,
+        imagerie: {
+          ...prev.ordonnances.imagerie,
+          prescription: {
+            ...prev.ordonnances.imagerie.prescription,
+            examens: prev.ordonnances.imagerie.prescription.examens.filter((_, i) => i !== index)
+          }
+        }
+      }
+    }
+  })
+  trackModification(`imagerie.remove.${index}`)
+}, [validationStatus, trackModification])
 
 // ==================== BATCH UPDATE FUNCTIONS ====================
 const updateMedicamentBatch = useCallback((index: number, updatedMedication: any) => {
@@ -1458,467 +1458,91 @@ const updateDoctorInfo = useCallback((field: string, value: string) => {
   })
 }, [doctorInfo, trackModification])
 
-const addMedicament = useCallback(() => {
-  if (validationStatus === 'validated') return
+// ==================== AI ASSISTANT HANDLERS ====================
+const handleUpdateSectionImmediate = useCallback((section: string, value: string) => {
+  updateRapportSection(section, value)
+}, [updateRapportSection])
+
+const handleAIAddMedication = useCallback((medication: any) => {
+  addMedicament()
+  const lastIndex = report?.ordonnances?.medicaments?.prescription?.medicaments?.length || 0
+  setTimeout(() => {
+    updateMedicamentBatch(lastIndex, medication)
+  }, 100)
+}, [addMedicament, updateMedicamentBatch, report])
+
+const handleAIAddLabTest = useCallback((category: string, test: any) => {
+  addBiologyTest(category)
+  const lastIndex = report?.ordonnances?.biologie?.prescription?.analyses?.[category]?.length || 0
+  setTimeout(() => {
+    updateBiologyTestBatch(category, lastIndex, test)
+  }, 100)
+}, [addBiologyTest, updateBiologyTestBatch, report])
+
+const handleAIAddImaging = useCallback((exam: any) => {
+  addImagingExam()
+  const lastIndex = report?.ordonnances?.imagerie?.prescription?.examens?.length || 0
+  setTimeout(() => {
+    updateImagingExamBatch(lastIndex, exam)
+  }, 100)
+}, [addImagingExam, updateImagingExamBatch, report])
+
+// ==================== MANUAL SAVE FUNCTION ====================
+const handleManualSave = useCallback(async () => {
+  const params = new URLSearchParams(window.location.search)
+  const consultationId = params.get('consultationId')
   
-  const newMed = {
-    nom: '',
-    denominationCommune: '',
-    dosage: '',
-    forme: 'tablet',
-    posologie: '',
-    modeAdministration: 'Oral route',
-    dureeTraitement: '7 days',
-    quantite: '1 box',
-    instructions: '',
-    justification: '',
-    surveillanceParticuliere: '',
-    nonSubstituable: false,
-    ligneComplete: ''
+  if (!consultationId || !report) {
+    toast({
+      title: "Cannot save",
+      description: "Missing consultation ID or report data",
+      variant: "destructive"
+    })
+    return
   }
   
-  setReport(prev => {
-    if (!prev) return null
+  setSaveStatus('saving')
+  
+  try {
+    const response = await fetch('/api/save-draft', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        consultationId,
+        reportContent: report,
+        doctorInfo,
+        modifiedSections: Array.from(modifiedSections),
+        validationStatus
+      })
+    })
     
-    const newReport = { ...prev }
+    const result = await response.json()
     
-    if (!newReport.ordonnances) {
-      newReport.ordonnances = {}
-    }
-    
-    if (!newReport.ordonnances.medicaments) {
-      const praticien = getReportPraticien()
-      const patient = getReportPatient()
+    if (result.success) {
+      setSaveStatus('saved')
+      setHasUnsavedChanges(false)
+      setModifiedSections(new Set())
       
-      newReport.ordonnances.medicaments = {
-        enTete: praticien,
-        patient: patient,
-        prescription: { 
-          datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
-          medicaments: [],
-          validite: "3 months unless otherwise specified"
-        },
-        authentification: {
-          signature: "Medical Practitioner's Signature",
-          nomEnCapitales: praticien.nom.toUpperCase(),
-          numeroEnregistrement: praticien.numeroEnregistrement,
-          cachetProfessionnel: "Official Medical Stamp",
-          date: patient.dateExamen || new Date().toISOString().split('T')[0]
-        }
-      }
+      toast({
+        title: "✅ Saved successfully",
+        description: "Your changes have been saved",
+        duration: 2000
+      })
+      
+      setTimeout(() => setSaveStatus('idle'), 3000)
+    } else {
+      throw new Error(result.error || 'Failed to save')
     }
-    
-    newReport.ordonnances.medicaments.prescription.medicaments = [
-      ...(newReport.ordonnances.medicaments.prescription.medicaments || []), 
-      newMed
-    ]
-    
-    return newReport
-  })
-  trackModification('medicaments.new')
-}, [validationStatus, getReportPraticien, getReportPatient, trackModification])
-
-const removeMedicament = useCallback((index: number) => {
-  if (validationStatus === 'validated') return
-  
-  setReport(prev => {
-    if (!prev?.ordonnances?.medicaments?.prescription?.medicaments) return prev
-    
-    return {
-      ...prev,
-      ordonnances: {
-        ...prev.ordonnances,
-        medicaments: {
-          ...prev.ordonnances.medicaments,
-          prescription: {
-            ...prev.ordonnances.medicaments.prescription,
-            medicaments: prev.ordonnances.medicaments.prescription.medicaments.filter((_, i) => i !== index)
-          }
-        }
-      }
-    }
-  })
-  trackModification(`medicament.remove.${index}`)
-}, [validationStatus, trackModification])
-
-const removeBiologyTest = useCallback((category: string, index: number) => {
-  if (validationStatus === 'validated') return
-  
-  setReport(prev => {
-    if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]) return prev
-    
-    return {
-      ...prev,
-      ordonnances: {
-        ...prev.ordonnances,
-        biologie: {
-          ...prev.ordonnances.biologie,
-          prescription: {
-            ...prev.ordonnances.biologie.prescription,
-            analyses: {
-              ...prev.ordonnances.biologie.prescription.analyses,
-              [category]: prev.ordonnances.biologie.prescription.analyses[category].filter((_, i) => i !== index)
-            }
-          }
-        }
-      }
-    }
-  })
-  trackModification(`biologie.remove.${category}.${index}`)
-}, [validationStatus, trackModification])
-
-const removeImagingExam = useCallback((index: number) => {
-  if (validationStatus === 'validated') return
-  
-  setReport(prev => {
-    if (!prev?.ordonnances?.imagerie?.prescription?.examens) return prev
-    
-    return {
-      ...prev,
-      ordonnances: {
-        ...prev.ordonnances,
-        imagerie: {
-          ...prev.ordonnances.imagerie,
-          prescription: {
-            ...prev.ordonnances.imagerie.prescription,
-            examens: prev.ordonnances.imagerie.prescription.examens.filter((_, i) => i !== index)
-          }
-        }
-      }
-    }
-  })
-  trackModification(`imagerie.remove.${index}`)
-}, [validationStatus, trackModification])
-
-// ============================================
-// ADD FUNCTIONS - These come next
-// ============================================
-
-const addMedicament = useCallback(() => {
-  if (validationStatus === 'validated') return
-  
-  const newMed = {
-    nom: '',
-    denominationCommune: '',
-    dosage: '',
-    forme: 'tablet',
-    posologie: '',
-    modeAdministration: 'Oral route',
-    dureeTraitement: '7 days',
-    quantite: '1 box',
-    instructions: '',
-    justification: '',
-    surveillanceParticuliere: '',
-    nonSubstituable: false,
-    ligneComplete: ''
+  } catch (error) {
+    console.error('Save error:', error)
+    setSaveStatus('idle')
+    toast({
+      title: "Save failed",
+      description: error instanceof Error ? error.message : "Failed to save changes",
+      variant: "destructive"
+    })
   }
-  
-  setReport(prev => {
-    if (!prev) return null
-    
-    const newReport = { ...prev }
-    
-    if (!newReport.ordonnances) {
-      newReport.ordonnances = {}
-    }
-    
-    if (!newReport.ordonnances.medicaments) {
-      const praticien = getReportPraticien()
-      const patient = getReportPatient()
-      
-      newReport.ordonnances.medicaments = {
-        enTete: praticien,
-        patient: patient,
-        prescription: { 
-          datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
-          medicaments: [],
-          validite: "3 months unless otherwise specified"
-        },
-        authentification: {
-          signature: "Medical Practitioner's Signature",
-          nomEnCapitales: praticien.nom.toUpperCase(),
-          numeroEnregistrement: praticien.numeroEnregistrement,
-          cachetProfessionnel: "Official Medical Stamp",
-          date: patient.dateExamen || new Date().toISOString().split('T')[0]
-        }
-      }
-    }
-    
-    newReport.ordonnances.medicaments.prescription.medicaments = [
-      ...(newReport.ordonnances.medicaments.prescription.medicaments || []), 
-      newMed
-    ]
-    
-    return newReport
-  })
-  trackModification('medicaments.new')
-}, [validationStatus, getReportPraticien, getReportPatient, trackModification])
-
-const addBiologyTest = useCallback((category: string = 'clinicalChemistry') => {
-  if (validationStatus === 'validated') return
-  
-  const newTest = {
-    nom: '',
-    categorie: category,
-    urgence: false,
-    aJeun: false,
-    conditionsPrelevement: '',
-    motifClinique: '',
-    renseignementsCliniques: '',
-    tubePrelevement: 'As per laboratory protocol',
-    delaiResultat: 'Standard'
-  }
-  
-  setReport(prev => {
-    if (!prev) return null
-    
-    const newReport = { ...prev }
-    
-    if (!newReport.ordonnances) newReport.ordonnances = {}
-    
-    if (!newReport.ordonnances.biologie) {
-      const praticien = getReportPraticien()
-      const patient = getReportPatient()
-      
-      newReport.ordonnances.biologie = {
-        enTete: praticien,
-        patient: patient,
-        prescription: {
-          datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
-          motifClinique: '',
-          analyses: {},
-          instructionsSpeciales: [],
-          laboratoireRecommande: ''
-        },
-        authentification: {
-          signature: "Medical Practitioner's Signature",
-          nomEnCapitales: praticien.nom.toUpperCase(),
-          numeroEnregistrement: praticien.numeroEnregistrement,
-          date: patient.dateExamen || new Date().toISOString().split('T')[0]
-        }
-      }
-    }
-    
-    if (!newReport.ordonnances.biologie.prescription.analyses) {
-      newReport.ordonnances.biologie.prescription.analyses = {}
-    }
-    
-    if (!newReport.ordonnances.biologie.prescription.analyses[category]) {
-      newReport.ordonnances.biologie.prescription.analyses[category] = []
-    }
-    
-    newReport.ordonnances.biologie.prescription.analyses[category] = [
-      ...newReport.ordonnances.biologie.prescription.analyses[category], 
-      newTest
-    ]
-    
-    return newReport
-  })
-  trackModification(`biologie.new.${category}`)
-}, [validationStatus, getReportPraticien, getReportPatient, trackModification])
-
-const addImagingExam = useCallback(() => {
-  if (validationStatus === 'validated') return
-  
-  const newExam = {
-    type: '',
-    modalite: '',
-    region: '',
-    indicationClinique: '',
-    urgence: false,
-    contraste: false,
-    protocoleSpecifique: '',
-    questionDiagnostique: ''
-  }
-  
-  setReport(prev => {
-    if (!prev) return null
-    
-    const newReport = { ...prev }
-    
-    if (!newReport.ordonnances) newReport.ordonnances = {}
-    
-    if (!newReport.ordonnances.imagerie) {
-      const praticien = getReportPraticien()
-      const patient = getReportPatient()
-      
-      newReport.ordonnances.imagerie = {
-        enTete: praticien,
-        patient: patient,
-        prescription: {
-          datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
-          examens: [],
-          renseignementsCliniques: '',
-          centreImagerie: ''
-        },
-        authentification: {
-          signature: "Medical Practitioner's Signature",
-          nomEnCapitales: praticien.nom.toUpperCase(),
-          numeroEnregistrement: praticien.numeroEnregistrement,
-          date: patient.dateExamen || new Date().toISOString().split('T')[0]
-        }
-      }
-    }
-    
-    newReport.ordonnances.imagerie.prescription.examens = [
-      ...(newReport.ordonnances.imagerie.prescription.examens || []), 
-      newExam
-    ]
-    
-    return newReport
-  })
-  trackModification('imagerie.new')
-}, [validationStatus, getReportPraticien, getReportPatient, trackModification])
-
-// ============================================
-// BATCH UPDATE FUNCTIONS
-// ============================================
-
-const updateMedicamentBatch = useCallback((index: number, updates: Partial<Medicament>) => {
-  if (validationStatus === 'validated') return
-  
-  setReport(prev => {
-    if (!prev?.ordonnances?.medicaments?.prescription?.medicaments?.[index]) return prev
-    
-    const newReport = { ...prev }
-    const meds = [...newReport.ordonnances.medicaments.prescription.medicaments]
-    meds[index] = { ...meds[index], ...updates }
-    
-    newReport.ordonnances.medicaments.prescription.medicaments = meds
-    return newReport
-  })
-  
-  Object.keys(updates).forEach(field => {
-    trackModification(`medicament.${index}.${field}`)
-  })
-}, [validationStatus, trackModification])
-
-const updateBiologyTestBatch = useCallback((category: string, index: number, updates: Record<string, any>) => {
-  if (validationStatus === 'validated') return
-  
-  setReport(prev => {
-    if (!prev?.ordonnances?.biologie?.prescription?.analyses?.[category]?.[index]) return prev
-    
-    const newReport = { ...prev }
-    const tests = [...newReport.ordonnances.biologie.prescription.analyses[category]]
-    tests[index] = { ...tests[index], ...updates }
-    
-    newReport.ordonnances.biologie.prescription.analyses[category] = tests
-    return newReport
-  })
-  
-  Object.keys(updates).forEach(field => {
-    trackModification(`biologie.${category}.${index}.${field}`)
-  })
-}, [validationStatus, trackModification])
-
-const updateImagingExamBatch = useCallback((index: number, updates: Record<string, any>) => {
-  if (validationStatus === 'validated') return
-  
-  setReport(prev => {
-    if (!prev?.ordonnances?.imagerie?.prescription?.examens?.[index]) return prev
-    
-    const newReport = { ...prev }
-    const exams = [...newReport.ordonnances.imagerie.prescription.examens]
-    exams[index] = { ...exams[index], ...updates }
-    
-    newReport.ordonnances.imagerie.prescription.examens = exams
-    return newReport
-  })
-  
-  Object.keys(updates).forEach(field => {
-    trackModification(`imagerie.${index}.${field}`)
-  })
-}, [validationStatus, trackModification])
-
-// ============================================
-// UPDATE REFS - Create refs for batch functions
-// ============================================
-
-const updateMedicamentBatchRef = useRef(updateMedicamentBatch)
-const updateBiologyTestBatchRef = useRef(updateBiologyTestBatch)
-const updateImagingExamBatchRef = useRef(updateImagingExamBatch)
-
-// Keep refs updated
-useEffect(() => {
-  updateMedicamentBatchRef.current = updateMedicamentBatch
-}, [updateMedicamentBatch])
-
-useEffect(() => {
-  updateBiologyTestBatchRef.current = updateBiologyTestBatch
-}, [updateBiologyTestBatch])
-
-useEffect(() => {
-  updateImagingExamBatchRef.current = updateImagingExamBatch
-}, [updateImagingExamBatch])
-
-// ============================================
-// STABLE CALLBACKS - These can now use the functions defined above
-// ============================================
-
-const stableUpdateMedication = useCallback((index: number, field: string, value: any) => {
-  updateMedicamentBatchRef.current(index, { [field]: value })
-}, [])
-
-const stableUpdateBiologyTest = useCallback((category: string, index: number, field: string, value: any) => {
-  updateBiologyTestBatchRef.current(category, index, { [field]: value })
-}, [])
-
-const stableUpdateImagingExam = useCallback((index: number, field: string, value: any) => {
-  updateImagingExamBatchRef.current(index, { [field]: value })
-}, [])
-
-// Now these can safely use the remove functions that were defined above
-const stableRemoveMedication = useCallback((index: number) => {
-  removeMedicament(index)
-}, [removeMedicament])
-
-const stableRemoveBiologyTest = useCallback((category: string, index: number) => {
-  removeBiologyTest(category, index)
-}, [removeBiologyTest])
-
-const stableRemoveImagingExam = useCallback((index: number) => {
-  removeImagingExam(index)
-}, [removeImagingExam])
-
-// ============================================
-// OTHER UPDATE FUNCTIONS (these come after)
-// ============================================
-
-const updateInvoice = useCallback((field: string, value: any) => {
-  if (validationStatus === 'validated') return
-  
-  setReport(prev => {
-    if (!prev) return null
-    
-    return {
-      ...prev,
-      invoice: {
-        ...prev.invoice!,
-        [field]: value
-      }
-    }
-  })
-  trackModification(`invoice.${field}`)
-}, [validationStatus, trackModification])
-
-const updatePaymentStatus = useCallback((status: 'pending' | 'paid' | 'cancelled') => {
-  if (!report?.invoice) return
-  
-  updateInvoice('payment', {
-    ...report.invoice.payment,
-    status: status
-  })
-}, [report?.invoice, updateInvoice])
-
-const updatePaymentMethod = useCallback((method: string) => {
-  if (!report?.invoice) return
-  
-  updateInvoice('payment', {
-    ...report.invoice.payment,
-    method: method
-  })
-}, [report?.invoice, updateInvoice])
+}, [report, doctorInfo, modifiedSections, validationStatus])
   
   // ==================== LOAD DOCTOR DATA ====================
   useEffect(() => {
@@ -5129,17 +4753,17 @@ const SickLeaveCertificate = () => {
       )}
 
       {/* AI Medical Assistant with all capabilities */}
-      <MedicalAIAssistant
-        reportData={report}
-        onUpdateSection={handleUpdateSectionImmediate}
-        onUpdateMedication={updateMedicamentBatch}
-        onAddMedication={handleAIAddMedication}
-        onUpdateLabTest={updateBiologyTestBatch}
-        onAddLabTest={handleAIAddLabTest}
-        onUpdateImaging={updateImagingExamBatch}
-        onAddImaging={handleAIAddImaging}
-        currentSection={activeTab === 'consultation' ? 'motifConsultation' : activeTab}
-      />
+<MedicalAIAssistant
+  reportData={report}
+  onUpdateSection={handleUpdateSectionImmediate}
+  onUpdateMedication={stableUpdateMedication}  // <-- Changed
+  onAddMedication={handleAIAddMedication}
+  onUpdateLabTest={stableUpdateBiologyTest}     // <-- Changed
+  onAddLabTest={handleAIAddLabTest}
+  onUpdateImaging={stableUpdateImagingExam}     // <-- Changed
+  onAddImaging={handleAIAddImaging}
+  currentSection={activeTab === 'consultation' ? 'motifConsultation' : activeTab}
+/>
     </div>
   )
 }
