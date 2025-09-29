@@ -296,9 +296,19 @@ export async function POST(request: NextRequest) {
         endocrinology: report?.ordonnances?.biologie?.prescription?.analyses?.endocrinology || [],
         general: report?.ordonnances?.biologie?.prescription?.analyses?.general || []
       },
-      imagingStudies: report?.ordonnances?.imagerie?.prescription?.examens || [],
-      sickLeave: report?.ordonnances?.arretMaladie?.certificat || null,
-      generatedAt: new Date().toISOString()
+imagingStudies: report?.ordonnances?.imagerie?.prescription?.examens || [],
+sickLeave: report?.ordonnances?.arretMaladie?.certificat ? {
+  dateDebut: report.ordonnances.arretMaladie.certificat.dateDebut,
+  dateFin: report.ordonnances.arretMaladie.certificat.dateFin,
+  nombreJours: report.ordonnances.arretMaladie.certificat.nombreJours,
+  motifMedical: report.ordonnances.arretMaladie.certificat.motifMedical || 
+                report?.compteRendu?.rapport?.conclusionDiagnostique || 
+                'État de santé nécessitant un arrêt de travail',
+  remarques: report.ordonnances.arretMaladie.certificat.remarques || '',
+  restrictionsTravail: report.ordonnances.arretMaladie.certificat.restrictionsTravail || '',
+  repriseAutorisee: report.ordonnances.arretMaladie.certificat.repriseAutorisee
+} : null,
+generatedAt: new Date().toISOString()
     }
 
     // Validate content completeness before determining status
@@ -378,7 +388,8 @@ const updateData = {
         has_lab_requests: hasLabTests,
         has_imaging_requests: hasImaging,
        has_sick_leave: !!(prescriptionData.sickLeave && (prescriptionData.sickLeave.nombreJours > 0 || prescriptionData.sickLeave.numberOfDays > 0)),
-        has_invoice: !!(report?.invoice),
+  sick_leave_data: prescriptionData.sickLeave || null,      
+  has_invoice: !!(report?.invoice),
         chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation || 
                          clinicalData?.chiefComplaint || 
                          existingRecord.chief_complaint ||
@@ -441,7 +452,8 @@ const insertData = {
         has_lab_requests: hasLabTests,
         has_imaging_requests: hasImaging,
         has_sick_leave: !!(prescriptionData.sickLeave && (prescriptionData.sickLeave.nombreJours > 0 || prescriptionData.sickLeave.numberOfDays > 0)),
-        has_invoice: !!(report?.invoice),
+  sick_leave_data: prescriptionData.sickLeave || null,      
+  has_invoice: !!(report?.invoice),
         chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation || 
                          clinicalData?.chiefComplaint || 
                          (isRenewal ? 'Prescription Renewal / Renouvellement d\'ordonnance' : null),
