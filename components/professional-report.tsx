@@ -2730,8 +2730,18 @@ imagingRequests: report?.ordonnances?.imagerie ? {
         } : null,
 sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
   type: 'sick_leave',
-  title: 'Sick Leave Certificate',  // <- Changed to English
-  certificate: report.ordonnances.arretMaladie.certificat,
+  title: 'Sick Leave Certificate',
+  certificate: {
+    dateDebut: report.ordonnances.arretMaladie.certificat?.dateDebut || '',
+    dateFin: report.ordonnances.arretMaladie.certificat?.dateFin || '',
+    nombreJours: report.ordonnances.arretMaladie.certificat?.nombreJours || 0,
+    motifMedical: report.ordonnances.arretMaladie.certificat?.motifMedical || 
+                  report?.compteRendu?.rapport?.conclusionDiagnostique || 
+                  'Medical condition requiring rest',
+    remarques: report.ordonnances.arretMaladie.certificat?.remarques || '',
+    restrictionsTravail: report.ordonnances.arretMaladie.certificat?.restrictionsTravail || '',
+    repriseAutorisee: report.ordonnances.arretMaladie.certificat?.repriseAutorisee || ''
+  },
   signature: documentSignatures?.sickLeave || null,
   content: report.ordonnances.arretMaladie
 } : null,
