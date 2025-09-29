@@ -1,5 +1,5 @@
 "use client"
-import MedicalAIAssistant from './MedicalAIAssistant'
+// import MedicalAIAssistant from './MedicalAIAssistant'
 import { useState, useEffect, useCallback, useMemo, memo, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -4039,15 +4039,16 @@ const SickLeaveCertificate = () => {
     const certificat = report?.ordonnances?.arretMaladie?.certificat
     
     // Use local state for form fields
-    const [localSickLeave, setLocalSickLeave] = useState({
-      dateDebut: certificat?.dateDebut || '',
-      dateFin: certificat?.dateFin || '',
-      nombreJours: certificat?.nombreJours || 0,
-      motifMedical: certificat?.motifMedical || '',
-      remarques: certificat?.remarques || '',
-      restrictionsTravail: certificat?.restrictionsTravail || '',
-      repriseAutorisee: certificat?.repriseAutorisee || ''
-    })
+const rapport = getReportRapport()
+const [localSickLeave, setLocalSickLeave] = useState({
+  dateDebut: certificat?.dateDebut || '',
+  dateFin: certificat?.dateFin || '',
+  nombreJours: certificat?.nombreJours || 0,
+  motifMedical: certificat?.motifMedical || rapport?.conclusionDiagnostique || '',
+  remarques: certificat?.remarques || '',
+  restrictionsTravail: certificat?.restrictionsTravail || '',
+  repriseAutorisee: certificat?.repriseAutorisee || ''
+})
     
     // Track if there are unsaved changes
     const [hasLocalChanges, setHasLocalChanges] = useState(false)
@@ -4741,18 +4742,18 @@ const SickLeaveCertificate = () => {
         </div>
       )}
 
-      {/* AI Medical Assistant with all capabilities */}
-<MedicalAIAssistant
+{/* AI Medical Assistant - Disabled for now */}
+{/* <MedicalAIAssistant
   reportData={report}
   onUpdateSection={handleUpdateSectionImmediate}
-  onUpdateMedication={stableUpdateMedication}  // <-- Changed
+  onUpdateMedication={stableUpdateMedication}
   onAddMedication={handleAIAddMedication}
-  onUpdateLabTest={stableUpdateBiologyTest}     // <-- Changed
+  onUpdateLabTest={stableUpdateBiologyTest}
   onAddLabTest={handleAIAddLabTest}
-  onUpdateImaging={stableUpdateImagingExam}     // <-- Changed
+  onUpdateImaging={stableUpdateImagingExam}
   onAddImaging={handleAIAddImaging}
   currentSection={activeTab === 'consultation' ? 'motifConsultation' : activeTab}
-/>
+/> */}
     </div>
   )
 }
