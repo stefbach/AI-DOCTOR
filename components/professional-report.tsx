@@ -4203,14 +4203,6 @@ const [localSickLeave, setLocalSickLeave] = useState({
                   className="bg-gray-50"
                 />
               </div>
-              <div>
-                <Label>Return to Work Date</Label>
-                <Input
-                  type="date"
-                  value={localSickLeave.repriseAutorisee}
-                  onChange={(e) => handleFieldChange('repriseAutorisee', e.target.value)}
-                />
-              </div>
             </div>
             
             <div>
@@ -4222,25 +4214,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
                 className="min-h-[80px]"
               />
             </div>
-            
-            <div>
-              <Label>Work Restrictions (optional)</Label>
-              <Input
-                value={localSickLeave.restrictionsTravail}
-                onChange={(e) => handleFieldChange('restrictionsTravail', e.target.value)}
-                placeholder="E.g., No heavy lifting"
-              />
-            </div>
-            
-            <div>
-              <Label>Additional Remarks (optional)</Label>
-              <Textarea
-                value={localSickLeave.remarques}
-                onChange={(e) => handleFieldChange('remarques', e.target.value)}
-                placeholder="Additional information"
-                className="min-h-[60px]"
-              />
-            </div>
+                
           </div>
         ) : certificat ? (
           <div className="space-y-4">
@@ -4256,18 +4230,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
             
             <div className="space-y-2">
               <p><strong>Medical reason:</strong> {certificat.motifMedical}</p>
-              
-              {certificat.repriseAutorisee && (
-                <p><strong>Return to work authorized on:</strong> {new Date(certificat.repriseAutorisee).toLocaleDateString('en-GB')}</p>
-              )}
-              
-              {certificat.restrictionsTravail && (
-                <p><strong>Restrictions:</strong> {certificat.restrictionsTravail}</p>
-              )}
-              
-              {certificat.remarques && (
-                <p><strong>Remarks:</strong> {certificat.remarques}</p>
-              )}
+                            
             </div>
             
             <div className="mt-4 p-3 bg-gray-50 rounded text-sm">
