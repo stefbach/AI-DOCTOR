@@ -1,0 +1,69 @@
+name: Deploy AI-DOCTOR Main
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy to VPS
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.SSH_PORT || 22 }}
+        script: |
+          echo "=== AI-DOCTOR Deployment ==="
+          source /home/tibok/nodevenv/medical-ai-expert/22/bin/activate && cd /home/tibok/medical-ai-expert
+
+          echo "Node version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+          
+          # Use SSH remote
+          git remote set-url origin git@github-tibok:stefbach/AI-DOCTOR.git
+          
+          # Pull changes
+          git pull origin main
+
+          # Clean up corrupted dependencies and cache
+          echo "Cleaning up old dependencies and cache..."
+          rm -rf node_modules
+          rm -rf .next
+          rm -f package-lock.json
+          npm cache clean --force
+
+          # Install dependencies
+          npm install --omit=dev
+
+          # Build if needed
+          npm run build
+
+          if [ $? -eq 0 ]; then
+            echo "Build successful"
+          else
+            echo "Build failed, trying alternative approach..."
+            
+            # Try with different Node.js options
+            export NODE_OPTIONS="--max-old-space-size=4096"
+            npm run build
+            
+            if [ $? -ne 0 ]; then
+              echo "Build still failing, checking for specific issues..."
+              
+              # Check if specific packages are causing issues
+              npm list --depth=0
+              
+              # Try installing with legacy peer deps
+              npm install --legacy-peer-deps
+              npm run build
+            fi
+          fi
+          
+          # Restart app
+          echo "Restarting application..."
+          cloudlinux-selector restart --json --interpreter nodejs --app-root /home/tibok/medical-ai-expert/
+          
+          echo "Deployment complete!"
