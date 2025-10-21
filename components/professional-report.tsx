@@ -856,6 +856,7 @@ export default function ProfessionalReportEditable({
   const [validationStatus, setValidationStatus] = useState<'draft' | 'validated'>('draft')
   const [modifiedSections, setModifiedSections] = useState<Set<string>>(new Set())
   const [saving, setSaving] = useState(false)
+  const [isSendingDocuments, setIsSendingDocuments] = useState(false)
   const [showFullReport, setShowFullReport] = useState(false)
   const [includeFullPrescriptions, setIncludeFullPrescriptions] = useState(true)
   
@@ -2424,6 +2425,7 @@ const signatures = {
 // ==================== SEND DOCUMENTS ====================
 const handleSendDocuments = async () => {
   console.log('📤 Starting handleSendDocuments...')
+  setIsSendingDocuments(true)
   
   // Check if report is validated
   if (!report || validationStatus !== 'validated') {
@@ -2797,6 +2799,7 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
 
     if (result?.success) {
       console.log('🎉 Documents sent successfully!')
+      setIsSendingDocuments(false)
       
       toast({
         title: "✅ Documents envoyés avec succès",
@@ -2812,6 +2815,7 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
     
   } catch (error) {
     console.error("❌ Error in handleSendDocuments:", error)
+    setIsSendingDocuments(false)
     toast({
       title: "Error sending documents",
       description: error instanceof Error ? error.message : "An error occurred while sending documents",
@@ -4666,16 +4670,21 @@ const [localSickLeave, setLocalSickLeave] = useState({
   <div className="flex justify-center print:hidden mt-8">
     <Button 
       size="lg"
-      onClick={() => {
-        console.log('🔍 Send button clicked')
-        console.log('Report exists:', !!report)
-        console.log('Validation status:', validationStatus)
-        handleSendDocuments()
-      }}
-      className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+      onClick={handleSendDocuments}
+      disabled={isSendingDocuments}
+      className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
     >
-      <CheckCircle className="h-5 w-5 mr-2" />
-      Finalize and Send documents
+      {isSendingDocuments ? (
+        <>
+          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+          Sending documents...
+        </>
+      ) : (
+        <>
+          <CheckCircle className="h-5 w-5 mr-2" />
+          Finalize and Send documents
+        </>
+      )}
     </Button>
   </div>
 )}
