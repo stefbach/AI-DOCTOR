@@ -301,6 +301,51 @@ const createEmptyReport = (): ChronicProfessionalReportData => ({
   }
 })
 
+// Helper to normalize patient data from form to API format
+function normalizePatientData(patientData: any): any {
+  if (!patientData) return null
+  
+  return {
+    // Normalize name fields
+    firstName: patientData.firstName || '',
+    lastName: patientData.lastName || '',
+    fullName: patientData.fullName || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
+    name: patientData.name || `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim(),
+    
+    // Other fields
+    age: patientData.age || '',
+    dateOfBirth: patientData.birthDate || patientData.dateOfBirth || '',
+    gender: patientData.gender || '',
+    weight: patientData.weight || '',
+    height: patientData.height || '',
+    phone: patientData.phone || '',
+    email: patientData.email || '',
+    address: patientData.address || '',
+    nationalId: patientData.nationalId || '',
+    
+    // Normalize allergies (form has array + otherAllergies)
+    allergies: Array.isArray(patientData.allergies) 
+      ? patientData.allergies.join(', ') + (patientData.otherAllergies ? `, ${patientData.otherAllergies}` : '')
+      : (patientData.allergies || ''),
+    
+    // Normalize medical history (form has array + otherMedicalHistory)
+    medicalHistory: Array.isArray(patientData.medicalHistory)
+      ? patientData.medicalHistory
+      : (patientData.medicalHistory || []),
+    
+    // Normalize current medications
+    currentMedications: patientData.currentMedications || patientData.currentMedicationsText || '',
+    
+    // Pregnancy info
+    pregnancyStatus: patientData.pregnancyStatus || '',
+    gestationalAge: patientData.gestationalAge || '',
+    lastMenstrualPeriod: patientData.lastMenstrualPeriod || '',
+    
+    // Pass through any other fields
+    ...patientData
+  }
+}
+
 // Helper to sanitize medications
 function sanitizeMedications(medications: any[]): any[] {
   if (!medications || !Array.isArray(medications)) return []
@@ -478,22 +523,37 @@ export default function ChronicProfessionalReport({
         
         setReport(initialReport)
         
+        // Normalize patient data BEFORE sending to APIs
+        const normalizedPatientData = normalizePatientData(patientData)
+        console.log('✅ Normalized patient data:', normalizedPatientData)
+        
         // Now fetch the three API responses in parallel
         const [reportResponse, prescriptionResponse, examensResponse] = await Promise.all([
           fetch("/api/chronic-report", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ patientData, clinicalData, questionsData, diagnosisData })
+            body: JSON.stringify({ 
+              patientData: normalizedPatientData, 
+              clinicalData, 
+              questionsData, 
+              diagnosisData 
+            })
           }),
           fetch("/api/chronic-prescription", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ patientData, diagnosisData })
+            body: JSON.stringify({ 
+              patientData: normalizedPatientData, 
+              diagnosisData 
+            })
           }),
           fetch("/api/chronic-examens", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ patientData, diagnosisData })
+            body: JSON.stringify({ 
+              patientData: normalizedPatientData, 
+              diagnosisData 
+            })
           })
         ])
         
