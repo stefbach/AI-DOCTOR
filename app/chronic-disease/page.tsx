@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation"
 import ChronicClinicalForm from "@/components/chronic-disease/chronic-clinical-form"
 import ChronicQuestionsForm from "@/components/chronic-disease/chronic-questions-form"
 import ChronicDiagnosisForm from "@/components/chronic-disease/chronic-diagnosis-form"
-import ChronicReport from "@/components/chronic-disease/chronic-report"
+import ChronicProfessionalReport from "@/components/chronic-disease/chronic-professional-report"
 
 export default function ChronicDiseaseWorkflow() {
   const router = useRouter()
@@ -282,18 +282,24 @@ export default function ChronicDiseaseWorkflow() {
               <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
                 <CardTitle className="flex items-center gap-2">
                   <FileSignature className="h-6 w-6" />
-                  Chronic Disease Follow-Up Report
+                  Professional Chronic Disease Report
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <ChronicReport
+                <ChronicProfessionalReport
                   patientData={patientData}
-                  clinicalData={clinicalData}
                   questionsData={questionsData}
                   diagnosisData={diagnosisData}
                   onComplete={handleBackToHome}
-                  onBack={() => setCurrentStep(2)}
                 />
+                <div className="mt-4 flex justify-start">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setCurrentStep(2)}
+                  >
+                    Back to Diagnosis
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}
