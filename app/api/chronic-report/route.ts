@@ -17,14 +17,6 @@ export async function POST(req: NextRequest) {
       doctorData 
     } = await req.json()
 
-    const apiKey = process.env.OPENAI_API_KEY
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: "OpenAI API key not configured" },
-        { status: 500 }
-      )
-    }
-
     // Calculate BMI
     const weight = parseFloat(patientData.weight)
     const heightInMeters = parseFloat(patientData.height) / 100

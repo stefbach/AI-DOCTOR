@@ -11,14 +11,6 @@ export async function POST(req: NextRequest) {
   try {
     const { patientData, diagnosisData, reportData } = await req.json()
 
-    const apiKey = process.env.OPENAI_API_KEY
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: "OpenAI API key not configured" },
-        { status: 500 }
-      )
-    }
-
     // Get current date for exam orders
     const orderDate = new Date()
     const orderId = `EXM-CHR-${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}-${String(orderDate.getDate()).padStart(2, '0')}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`
