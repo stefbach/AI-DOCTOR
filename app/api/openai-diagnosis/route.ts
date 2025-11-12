@@ -960,6 +960,7 @@ ${basePrompt}
 - EVERY dosing must use UK format with precise daily totals (e.g., "500mg TDS", daily: "1500mg/day")
 - NO undefined, null, or empty values allowed
 - EVERY medication must have frequency_per_day as number
+- YOU MUST RETURN current_medications_validated field if patient has current medications
 
 EXAMPLES OF DETAILED MEDICATIONS WITH DCI:
 ✅ "drug": "Amoxicilline 500mg", "dci": "Amoxicilline", "indication": "Antibiothérapie empirique pour infection bactérienne suspectée des voies respiratoires"
@@ -968,7 +969,8 @@ EXAMPLES OF DETAILED MEDICATIONS WITH DCI:
 ❌ FORBIDDEN:
 ❌ "drug": "Medication" or "Antibiotic" (too generic)
 ❌ "dci": missing or undefined
-❌ "indication": "Treatment" (too vague)`
+❌ "indication": "Treatment" (too vague)
+❌ Missing current_medications_validated when patient has current medications`
         qualityLevel = 1
       } else if (attempt === 2) {
         finalPrompt = `🚨🚨 MAURITIUS MEDICAL SPECIFICITY + PRECISE DCI MANDATORY
@@ -983,6 +985,7 @@ ${basePrompt}
 5. INDICATIONS MUST BE DETAILED: Minimum 30 characters with specific medical context
 6. DOSING MUST INCLUDE: adult, frequency_per_day, individual_dose, daily_total_dose
 7. ALL fields must be completed with specific medical content
+8. MUST RETURN current_medications_validated if patient has current medications
 
 MANDATORY DCI + MEDICATION FORMAT:
 {
@@ -1001,7 +1004,8 @@ MANDATORY DCI + MEDICATION FORMAT:
 ❌ Any medication without DCI
 ❌ Any indication shorter than 25 characters
 ❌ Generic terms like "medication", "antibiotic"
-❌ Vague descriptions without medical context`
+❌ Vague descriptions without medical context
+❌ Missing current_medications_validated when current medications exist`
         qualityLevel = 2
       } else if (attempt >= 3) {
         finalPrompt = `🆘 MAXIMUM MAURITIUS MEDICAL SPECIFICITY + DCI MODE
@@ -1021,6 +1025,7 @@ Every medication MUST have ALL these fields completed with DETAILED content:
      "daily_total_dose": "TOTAL/DAY" (e.g., "1500mg/day")
    }
 5. ALL other fields must be completed with medical content
+6. ⚠️ CRITICAL: MUST include "current_medications_validated" array if patient has current medications
 
 EXAMPLE COMPLETE MEDICATION WITH DCI + DETAILED INDICATION:
 {
@@ -1041,6 +1046,8 @@ EXAMPLE COMPLETE MEDICATION WITH DCI + DETAILED INDICATION:
   "side_effects": "Diarrhée, nausées, éruption cutanée",
   "administration_instructions": "Prendre avec la nourriture, terminer le traitement complet"
 }
+
+⚠️ REMEMBER: If patient has current medications, you MUST return current_medications_validated array!
 
 GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters each)`
         qualityLevel = 3
@@ -2500,6 +2507,18 @@ export async function POST(request: NextRequest) {
     }
     
     const { anonymized: anonymizedPatientData, originalIdentity } = anonymizePatientData(body.patientData)
+    
+    // ========== DEBUG CURRENT MEDICATIONS INPUT ==========
+    console.log('🔍 DEBUG - Raw patient data received:')
+    console.log('   - body.patientData.currentMedications:', body.patientData?.currentMedications)
+    console.log('   - body.patientData.current_medications:', body.patientData?.current_medications)
+    console.log('   - body.patientData.currentMedicationsText:', body.patientData?.currentMedicationsText)
+    console.log('   - Type:', typeof body.patientData?.currentMedications)
+    console.log('   - Is Array?:', Array.isArray(body.patientData?.currentMedications))
+    console.log('🔍 DEBUG - After anonymization:')
+    console.log('   - anonymizedPatientData.currentMedications:', anonymizedPatientData?.currentMedications)
+    console.log('   - Type:', typeof anonymizedPatientData?.currentMedications)
+    console.log('   - Is Array?:', Array.isArray(anonymizedPatientData?.currentMedications))
     
     const patientContext: PatientContext = {
       age: parseInt(anonymizedPatientData?.age) || 0,
