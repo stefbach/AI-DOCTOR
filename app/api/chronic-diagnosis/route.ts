@@ -388,13 +388,14 @@ CRITICAL: Return ONLY the JSON object, no markdown formatting, no explanations o
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: patientContext }
         ],
-        temperature: 0.4, // Slightly higher for more natural meal plan variety
-        max_tokens: 4000, // Increased for detailed meal plans
+        temperature: 0.3,
+        max_tokens: 3000,
+        response_format: { type: "json_object" }
       }),
     })
 

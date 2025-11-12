@@ -358,13 +358,14 @@ Generate the comprehensive chronic disease exam orders now.`
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: patientContext }
         ],
-        temperature: 0.3, // Lower temperature for medical accuracy
-        max_tokens: 5000, // Sufficient for comprehensive exam orders
+        temperature: 0.2,
+        max_tokens: 2500,
+        response_format: { type: "json_object" }
       }),
     })
 

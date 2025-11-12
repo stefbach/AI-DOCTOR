@@ -420,7 +420,7 @@ INSTRUCTIONS FOR REPORT GENERATION:
 
 Generate the complete narrative report now.`
 
-    // Call OpenAI API
+    // Call OpenAI API - Using gpt-4o-mini for faster response (matching working APIs)
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -428,13 +428,14 @@ Generate the complete narrative report now.`
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: patientContext }
         ],
-        temperature: 0.4, // Slightly higher for natural narrative writing
-        max_tokens: 6000, // Increased for comprehensive narrative report
+        temperature: 0.3,
+        max_tokens: 4000,
+        response_format: { type: "json_object" }
       }),
     })
 
