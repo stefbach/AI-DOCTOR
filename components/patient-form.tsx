@@ -578,6 +578,27 @@ export default function ModernPatientForm({
 
   const handleSubmit = useCallback(() => {
     if (validateForm()) {
+      // ========== CHRONIC DISEASE DETECTION ==========
+      // Detect if patient has chronic diseases that require specialized workflow
+      const chronicDiseases = ['diabetes', 'hypertension', 'obesity']
+      const hasChronicDisease = formData.medicalHistory.some(condition => 
+        chronicDiseases.some(chronic => condition.toLowerCase().includes(chronic))
+      )
+      
+      if (hasChronicDisease) {
+        console.log('🏥 Chronic disease detected, redirecting to specialized workflow...')
+        console.log('📋 Medical History:', formData.medicalHistory)
+        
+        // Store patient data for chronic disease workflow
+        sessionStorage.setItem('chronicDiseasePatientData', JSON.stringify(formData))
+        sessionStorage.setItem('isChronicDiseaseWorkflow', 'true')
+        
+        // Redirect to chronic disease workflow
+        window.location.href = '/chronic-disease'
+        return
+      }
+      
+      // Normal workflow for non-chronic patients
       onNext()
     } else {
       // Scroll to first error
@@ -588,7 +609,7 @@ export default function ModernPatientForm({
         element.focus()
       }
     }
-  }, [validateForm, onNext, errors])
+  }, [validateForm, onNext, errors, formData])
 
   // ========== Effects ==========
   
