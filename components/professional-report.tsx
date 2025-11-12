@@ -3569,132 +3569,214 @@ const ConsultationReport = () => {
             {/* Section 2: Vital Signs & Measurements - EDITABLE */}
             <div className="mb-4 pb-3 border-b border-gray-200">
               <h4 className="font-semibold text-sm text-gray-700 mb-2">Vital Signs & Measurements</h4>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                {/* Poids */}
-                <div>
-                  <span className="font-medium">Weight:</span> {patientData?.weight ? `${patientData.weight} kg` : 'Not recorded'}
-                </div>
-                
-                {/* Taille */}
-                <div>
-                  <span className="font-medium">Height:</span> {patientData?.height ? `${patientData.height} cm` : 'Not recorded'}
-                </div>
-                
-                {/* IMC calculé si poids et taille disponibles */}
-                {patientData?.weight && patientData?.height && (
+              {editMode && validationStatus !== 'validated' ? (
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Poids - Editable */}
                   <div>
-                    <span className="font-medium">BMI:</span> {(parseFloat(patientData.weight) / Math.pow(parseFloat(patientData.height) / 100, 2)).toFixed(1)} kg/m²
+                    <Label htmlFor="patient-weight" className="text-xs">Weight (kg)</Label>
+                    <Input
+                      id="patient-weight"
+                      type="number"
+                      step="0.1"
+                      value={patient.poids || ''}
+                      onChange={(e) => updatePatientField('poids', e.target.value)}
+                      placeholder="75"
+                      className="h-8 text-sm"
+                    />
                   </div>
-                )}
-                
-                {/* Température */}
-                {clinicalData?.vitalSigns?.temperature && (
+                  
+                  {/* Taille - Editable */}
                   <div>
-                    <span className="font-medium">Temperature:</span> {clinicalData.vitalSigns.temperature}°C
-                    {parseFloat(clinicalData.vitalSigns.temperature) > 37.2 && ' ⚠️'}
+                    <Label htmlFor="patient-height" className="text-xs">Height (cm)</Label>
+                    <Input
+                      id="patient-height"
+                      type="number"
+                      step="0.1"
+                      value={patient.taille || ''}
+                      onChange={(e) => updatePatientField('taille', e.target.value)}
+                      placeholder="175"
+                      className="h-8 text-sm"
+                    />
                   </div>
-                )}
-                
-                {/* Tension artérielle */}
-                {clinicalData?.vitalSigns?.bloodPressureSystolic && clinicalData?.vitalSigns?.bloodPressureDiastolic && (
-                  <div className="col-span-2">
-                    <span className="font-medium">Blood Pressure:</span> {clinicalData.vitalSigns.bloodPressureSystolic}/{clinicalData.vitalSigns.bloodPressureDiastolic} mmHg
-                    {(parseInt(clinicalData.vitalSigns.bloodPressureSystolic) >= 140 || parseInt(clinicalData.vitalSigns.bloodPressureDiastolic) >= 90) && ' ⚠️'}
+                  
+                  {/* Température - Editable */}
+                  <div>
+                    <Label htmlFor="patient-temperature" className="text-xs">Temperature (°C)</Label>
+                    <Input
+                      id="patient-temperature"
+                      type="number"
+                      step="0.1"
+                      value={patient.temperature || ''}
+                      onChange={(e) => updatePatientField('temperature', e.target.value)}
+                      placeholder="37.0"
+                      className="h-8 text-sm"
+                    />
                   </div>
-                )}
-                
-                {/* Glycémie */}
-                {clinicalData?.vitalSigns?.bloodGlucose && (
-                  <div className="col-span-2">
-                    <span className="font-medium">Blood Glucose:</span> {clinicalData.vitalSigns.bloodGlucose} g/L
-                    {(parseFloat(clinicalData.vitalSigns.bloodGlucose) < 0.7 || parseFloat(clinicalData.vitalSigns.bloodGlucose) > 1.26) && ' ⚠️'}
-                    {parseFloat(clinicalData.vitalSigns.bloodGlucose) < 0.7 && ' (Hypoglycemia)'}
-                    {parseFloat(clinicalData.vitalSigns.bloodGlucose) > 1.26 && parseFloat(clinicalData.vitalSigns.bloodGlucose) < 2.0 && ' (Moderate hyperglycemia)'}
-                    {parseFloat(clinicalData.vitalSigns.bloodGlucose) >= 2.0 && ' (Severe hyperglycemia)'}
+                  
+                  {/* Tension Systolique - Editable */}
+                  <div>
+                    <Label htmlFor="patient-bp-systolic" className="text-xs">BP Systolic (mmHg)</Label>
+                    <Input
+                      id="patient-bp-systolic"
+                      type="number"
+                      value={patient.bloodPressureSystolic || ''}
+                      onChange={(e) => updatePatientField('bloodPressureSystolic', e.target.value)}
+                      placeholder="120"
+                      className="h-8 text-sm"
+                    />
                   </div>
-                )}
-              </div>
+                  
+                  {/* Tension Diastolique - Editable */}
+                  <div>
+                    <Label htmlFor="patient-bp-diastolic" className="text-xs">BP Diastolic (mmHg)</Label>
+                    <Input
+                      id="patient-bp-diastolic"
+                      type="number"
+                      value={patient.bloodPressureDiastolic || ''}
+                      onChange={(e) => updatePatientField('bloodPressureDiastolic', e.target.value)}
+                      placeholder="80"
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                  
+                  {/* Glycémie - Editable */}
+                  <div>
+                    <Label htmlFor="patient-glucose" className="text-xs">Blood Glucose (g/L)</Label>
+                    <Input
+                      id="patient-glucose"
+                      type="number"
+                      step="0.01"
+                      value={patient.bloodGlucose || ''}
+                      onChange={(e) => updatePatientField('bloodGlucose', e.target.value)}
+                      placeholder="1.0"
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  {/* Display mode */}
+                  {patient.poids && (
+                    <div><span className="font-medium">Weight:</span> {patient.poids} kg</div>
+                  )}
+                  {patient.taille && (
+                    <div><span className="font-medium">Height:</span> {patient.taille} cm</div>
+                  )}
+                  {patient.poids && patient.taille && (
+                    <div><span className="font-medium">BMI:</span> {(parseFloat(patient.poids) / Math.pow(parseFloat(patient.taille) / 100, 2)).toFixed(1)} kg/m²</div>
+                  )}
+                  {patient.temperature && (
+                    <div>
+                      <span className="font-medium">Temperature:</span> {patient.temperature}°C
+                      {parseFloat(patient.temperature) > 37.2 && ' ⚠️'}
+                    </div>
+                  )}
+                  {patient.bloodPressureSystolic && patient.bloodPressureDiastolic && (
+                    <div className="col-span-2">
+                      <span className="font-medium">Blood Pressure:</span> {patient.bloodPressureSystolic}/{patient.bloodPressureDiastolic} mmHg
+                      {(parseInt(patient.bloodPressureSystolic) >= 140 || parseInt(patient.bloodPressureDiastolic) >= 90) && ' ⚠️'}
+                    </div>
+                  )}
+                  {patient.bloodGlucose && (
+                    <div className="col-span-2">
+                      <span className="font-medium">Blood Glucose:</span> {patient.bloodGlucose} g/L
+                      {(parseFloat(patient.bloodGlucose) < 0.7 || parseFloat(patient.bloodGlucose) > 1.26) && ' ⚠️'}
+                      {parseFloat(patient.bloodGlucose) < 0.7 && ' (Hypoglycemia)'}
+                      {parseFloat(patient.bloodGlucose) > 1.26 && parseFloat(patient.bloodGlucose) < 2.0 && ' (Moderate hyperglycemia)'}
+                      {parseFloat(patient.bloodGlucose) >= 2.0 && ' (Severe hyperglycemia)'}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Section 3: Allergies */}
+            {/* Section 3: Allergies - EDITABLE */}
             <div className="mb-4 pb-3 border-b border-gray-200">
               <h4 className="font-semibold text-sm text-gray-700 mb-2">Allergies</h4>
-              <div className="text-sm">
-                {patientData?.allergies && Array.isArray(patientData.allergies) && patientData.allergies.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {patientData.allergies.map((allergy: string, idx: number) => (
-                      <span key={idx} className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded">
-                        ⚠️ {allergy}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <span className="text-green-700">✅ NKDA (No Known Drug Allergies)</span>
-                )}
-                {patientData?.otherAllergies && (
-                  <div className="mt-2 text-gray-600">
-                    <span className="font-medium">Other:</span> {patientData.otherAllergies}
-                  </div>
-                )}
-              </div>
+              {editMode && validationStatus !== 'validated' ? (
+                <div>
+                  <Label htmlFor="patient-allergies" className="text-xs">Allergies (comma separated or "NKDA")</Label>
+                  <Textarea
+                    id="patient-allergies"
+                    value={patient.allergies || ''}
+                    onChange={(e) => updatePatientField('allergies', e.target.value)}
+                    placeholder="Penicillin, Sulfa, Aspirin or NKDA"
+                    className="min-h-[60px] text-sm"
+                  />
+                </div>
+              ) : (
+                <div className="text-sm">
+                  {patient.allergies && patient.allergies !== 'NKDA (No Known Drug Allergies)' && patient.allergies !== 'NKDA' ? (
+                    <div className="flex flex-wrap gap-2">
+                      {patient.allergies.split(',').map((allergy: string, idx: number) => (
+                        <span key={idx} className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded">
+                          ⚠️ {allergy.trim()}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-green-700">✅ {patient.allergies || 'NKDA (No Known Drug Allergies)'}</span>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Section 4: Medical History / Antécédents */}
+            {/* Section 4: Medical History / Antécédents - EDITABLE */}
             <div className="mb-4 pb-3 border-b border-gray-200">
               <h4 className="font-semibold text-sm text-gray-700 mb-2">Medical History (Antécédents)</h4>
-              <div className="text-sm">
-                {patientData?.medicalHistory && Array.isArray(patientData.medicalHistory) && patientData.medicalHistory.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {patientData.medicalHistory.map((condition: string, idx: number) => (
-                      <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded">
-                        {condition}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <span className="text-gray-600">No significant medical history recorded</span>
-                )}
-                {patientData?.otherMedicalHistory && (
-                  <div className="mt-2 text-gray-600">
-                    <span className="font-medium">Additional:</span> {patientData.otherMedicalHistory}
-                  </div>
-                )}
-              </div>
+              {editMode && validationStatus !== 'validated' ? (
+                <div>
+                  <Label htmlFor="patient-history" className="text-xs">Medical History (comma separated)</Label>
+                  <Textarea
+                    id="patient-history"
+                    value={patient.medicalHistory || ''}
+                    onChange={(e) => updatePatientField('medicalHistory', e.target.value)}
+                    placeholder="Hypertension, Diabetes Type 2, Asthma"
+                    className="min-h-[60px] text-sm"
+                  />
+                </div>
+              ) : (
+                <div className="text-sm">
+                  {patient.medicalHistory && patient.medicalHistory !== 'No significant medical history' ? (
+                    <div className="flex flex-wrap gap-2">
+                      {patient.medicalHistory.split(',').map((condition: string, idx: number) => (
+                        <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded">
+                          {condition.trim()}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-gray-600">{patient.medicalHistory || 'No significant medical history recorded'}</span>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Section 5: Current Medications / Traitement Actuel */}
+            {/* Section 5: Current Medications / Traitement Actuel - EDITABLE */}
             <div>
               <h4 className="font-semibold text-sm text-gray-700 mb-2">Current Medications (Traitement Actuel)</h4>
-              <div className="text-sm">
-                {diagnosisData?.currentMedicationsValidated && Array.isArray(diagnosisData.currentMedicationsValidated) && diagnosisData.currentMedicationsValidated.length > 0 ? (
-                  <div className="space-y-2">
-                    {diagnosisData.currentMedicationsValidated.map((med: any, idx: number) => (
-                      <div key={idx} className="p-2 bg-green-50 border border-green-200 rounded">
-                        <div className="font-medium text-green-900">
-                          {idx + 1}. {med.name || med.medication_name}
-                          {med.validated_by_ai && <span className="ml-2 text-xs text-green-600">✓ AI Validated</span>}
-                        </div>
-                        {med.dosage && (
-                          <div className="text-gray-600 text-xs mt-1">
-                            Dosage: {med.dosage}
-                          </div>
-                        )}
-                        {med.frequency && (
-                          <div className="text-gray-600 text-xs">
-                            Frequency: {med.frequency}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : patientData?.currentMedicationsText ? (
-                  <div className="whitespace-pre-wrap text-gray-700 p-2 bg-gray-50 border border-gray-200 rounded">
-                    {patientData.currentMedicationsText}
-                  </div>
-                ) : (
-                  <span className="text-gray-600">No current medications</span>
-                )}
-              </div>
+              {editMode && validationStatus !== 'validated' ? (
+                <div>
+                  <Label htmlFor="patient-medications" className="text-xs">Current Medications (one per line)</Label>
+                  <Textarea
+                    id="patient-medications"
+                    value={patient.currentMedications || ''}
+                    onChange={(e) => updatePatientField('currentMedications', e.target.value)}
+                    placeholder="1. Metformin 500mg - BD&#10;2. Aspirin 100mg - OD"
+                    className="min-h-[100px] text-sm font-mono"
+                  />
+                </div>
+              ) : (
+                <div className="text-sm">
+                  {patient.currentMedications && patient.currentMedications !== 'No current medications' ? (
+                    <div className="whitespace-pre-wrap text-gray-700 p-3 bg-green-50 border border-green-200 rounded">
+                      {patient.currentMedications}
+                    </div>
+                  ) : (
+                    <span className="text-gray-600">{patient.currentMedications || 'No current medications'}</span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
