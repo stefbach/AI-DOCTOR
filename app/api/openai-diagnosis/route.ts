@@ -132,6 +132,17 @@ const MAURITIUS_MEDICAL_PROMPT = `YOU ARE AN EXPERT PHYSICIAN - MANDATORY JSON R
       }
     ]
   },
+  "current_medications_validated": [
+    {
+      "medication_name": "MANDATORY - Validated drug name + corrected dose",
+      "why_prescribed": "MANDATORY - Original indication or chronic condition",
+      "how_to_take": "MANDATORY - UK format dosing (OD/BD/TDS/QDS)",
+      "duration": "MANDATORY - Ongoing or specific duration",
+      "dci": "MANDATORY - Validated DCI name",
+      "validated_corrections": "List corrections made (spelling/dosology)",
+      "original_input": "Original patient input for reference"
+    }
+  ],
   "treatment_plan": {
     "approach": "MANDATORY - Specific therapeutic approach",
     "prescription_rationale": "MANDATORY - Precise medical justification", 
@@ -177,6 +188,39 @@ CURRENT PATIENT MEDICATIONS:
 {{CURRENT_MEDICATIONS}}
 
 CONSULTATION TYPE DETECTED: {{CONSULTATION_TYPE}}
+
+🚨 MANDATORY CURRENT MEDICATIONS HANDLING:
+
+IF PATIENT HAS CURRENT MEDICATIONS, YOU MUST:
+1. VALIDATE and CORRECT spelling errors (e.g., "metfromin" → "Metformin")
+2. STANDARDIZE dosology to UK format (e.g., "2 fois par jour" → "BD", "once daily" → "OD")
+3. ADD PRECISE DCI for each current medication if not provided
+4. INCLUDE in "current_medications_validated" field with complete medical details
+5. FORMAT exactly like new prescriptions with all required fields
+
+FOR CONSULTATION TYPE "renewal":
+- Focus on validating current medications
+- Add new medications ONLY if medically necessary for current complaint
+- MUST return all validated current medications in "current_medications_validated"
+
+FOR CONSULTATION TYPE "new_problem":
+- Validate and keep current medications safe
+- Check for interactions with new medications
+- MUST return validated current medications + new medications separately
+- System will merge them in final prescription
+
+REQUIRED OUTPUT STRUCTURE FOR CURRENT MEDICATIONS:
+"current_medications_validated": [
+  {
+    "medication_name": "Validated Drug name + corrected dose (e.g., Metformin 500mg)",
+    "why_prescribed": "Original indication from patient history OR chronic condition management",
+    "how_to_take": "CORRECTED UK dosing format (e.g., BD, TDS, QDS)",
+    "duration": "Ongoing treatment or specific duration",
+    "dci": "Validated DCI (e.g., Metformin)",
+    "validated_corrections": "List any corrections made (spelling, dosology, etc.)",
+    "original_input": "Original text from patient form for reference"
+  }
+]
 
 🎯 MAURITIUS-SPECIFIC CLINICAL GUIDELINES + PRECISE DCI:
 
@@ -2783,10 +2827,14 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         consultation_type: finalAnalysis.medication_safety?.consultation_type || 'new_problem',
         confidence: finalAnalysis.medication_safety?.confidence || 0,
         current_medications_analyzed: patientContext.current_medications.length,
+        current_medications_validated_count: (finalAnalysis.current_medications_validated || []).length,
+        newly_prescribed_count: (finalAnalysis.treatment_plan?.medications || []).length,
+        combined_prescription_count: (finalAnalysis.current_medications_validated || []).length + (finalAnalysis.treatment_plan?.medications || []).length,
         safety_level: finalAnalysis.medication_safety?.safety_level || 'safe',
         interactions_detected: finalAnalysis.medication_safety?.interactions_detected?.length || 0,
         duplicates_detected: finalAnalysis.medication_safety?.duplicate_therapies?.length || 0,
-        renewal_keywords: finalAnalysis.medication_safety?.renewal_keywords || []
+        renewal_keywords: finalAnalysis.medication_safety?.renewal_keywords || [],
+        ai_validation_applied: (finalAnalysis.current_medications_validated || []).length > 0
       },
       
       // Sécurité des prescriptions
@@ -2798,7 +2846,29 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         recommendations: finalAnalysis.medication_safety?.safety_recommendations || []
       },
 
-      // ========== MEDICATIONS - FRONTEND ACCESSIBLE ==========
+      // ========== VALIDATED CURRENT MEDICATIONS - AI CORRECTED ==========
+      currentMedicationsValidated: deduplicateMedications(finalAnalysis.current_medications_validated || []).map((med: any, idx: number) => ({
+        id: idx + 1,
+        name: med?.medication_name || "Médicament actuel",
+        dci: med?.dci || "DCI",
+        dosage: med?.medication_name?.match(/\d+\s*mg/)?.[0] || "Dosage non spécifié",
+        posology: med?.how_to_take || "Selon prescription",
+        indication: med?.why_prescribed || "Traitement chronique en cours",
+        duration: med?.duration || "Traitement continu",
+        route: "Oral",
+        frequency: med?.how_to_take || "",
+        instructions: `Traitement actuel du patient - ${med?.validated_corrections || 'Validé par IA'}`,
+        original_input: med?.original_input || "",
+        validated_corrections: med?.validated_corrections || "Aucune correction nécessaire",
+        medication_type: "current",
+        prescription_details: {
+          prescriber: "Traitement existant (validé IA)",
+          dci_verified: !!(med?.dci && med.dci.length > 2),
+          validated_by_ai: true
+        }
+      })),
+
+      // ========== NEW MEDICATIONS - NEWLY PRESCRIBED ==========
      medications: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => ({
   id: idx + 1,
   name: med?.drug || med?.medication_name || "Médicament", 
@@ -2821,6 +2891,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         side_effects: med?.side_effects || "Aucun spécifié",
         interactions: med?.interactions || "Aucune spécifiée",
         monitoring: med?.monitoring || "Surveillance standard",
+        medication_type: "newly_prescribed",
         mauritius_availability: {
           public_free: med?.mauritius_availability?.public_free || false,
           estimated_cost: med?.mauritius_availability?.estimated_cost || "Coût à déterminer",
@@ -2834,6 +2905,49 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
           daily_total_calculated: !!(med?.dosing?.daily_total_dose)
         }
       })),
+      
+      // ========== COMBINED PRESCRIPTION - ALL MEDICATIONS TO PRESCRIBE ==========
+      combinedPrescription: [
+        ...deduplicateMedications(finalAnalysis.current_medications_validated || []).map((med: any, idx: number) => ({
+          id: idx + 1,
+          name: med?.medication_name || "Médicament actuel",
+          dci: med?.dci || "DCI",
+          dosage: med?.medication_name?.match(/\d+\s*mg/)?.[0] || "Dosage non spécifié",
+          posology: med?.how_to_take || "Selon prescription",
+          indication: med?.why_prescribed || "Traitement chronique en cours",
+          duration: med?.duration || "Traitement continu",
+          route: "Oral",
+          frequency: med?.how_to_take || "",
+          instructions: `Traitement actuel - ${med?.validated_corrections || 'Validé par IA'}`,
+          medication_type: "current_continued",
+          prescription_details: {
+            prescriber: "Traitement existant (validé IA)",
+            dci_verified: true,
+            validated_by_ai: true
+          }
+        })),
+        ...deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => {
+          const baseIndex = (finalAnalysis.current_medications_validated || []).length
+          return {
+            id: baseIndex + idx + 1,
+            name: med?.drug || med?.medication_name || "Médicament",
+            dci: med?.dci || "DCI",
+            dosage: med?.dosing?.individual_dose || "Dosage",
+            posology: med?.dosing?.adult || med?.how_to_take || "Selon prescription",
+            indication: med?.indication || med?.why_prescribed || "Indication thérapeutique",
+            duration: med?.duration || "Selon évolution",
+            route: "Oral",
+            frequency: convertToSimpleFormat(med?.dosing?.adult || ''),
+            instructions: med?.administration_instructions || "Prendre selon prescription",
+            medication_type: "newly_prescribed",
+            prescription_details: {
+              prescriber: "Dr. Expert Téléconsultation",
+              dci_verified: !!(med?.dci && med.dci.length > 2),
+              posology_precise: true
+            }
+          }
+        })
+      ],
       
       // Validation de la posologie
       posologyValidation: {

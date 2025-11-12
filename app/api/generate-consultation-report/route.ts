@@ -574,8 +574,40 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   
   console.log("💊 PRESCRIPTION EXTRACTION FROM OPENAI-DIAGNOSIS")
   
-  // =========== 1. MEDICATIONS ===========
+  // =========== 1. MEDICATIONS - COMBINED PRESCRIPTION (CURRENT + NEW) ===========
+  
+  // First, add VALIDATED CURRENT MEDICATIONS (if any)
+  const validatedCurrentMeds = diagnosisData?.currentMedicationsValidated || []
+  console.log(`📋 Current medications validated by AI: ${validatedCurrentMeds.length}`)
+  
+  validatedCurrentMeds.forEach((med: any, idx: number) => {
+    medications.push({
+      name: getString(med.name || med.medication_name || `Current medication ${idx + 1}`),
+      genericName: getString(med.dci || med.name || `Current medication ${idx + 1}`),
+      dosage: getString(med.dosage || ''),
+      form: getString(med.form || 'tablet'),
+      frequency: getString(med.posology || med.frequency || med.how_to_take || 'As prescribed'),
+      route: getString(med.route || 'Oral'),
+      duration: getString(med.duration || 'Ongoing treatment'),
+      quantity: getString(med.quantity || '1 box'),
+      instructions: getString(med.instructions || med.validated_corrections || 'Continue current treatment - Validated by AI'),
+      indication: getString(med.indication || med.why_prescribed || 'Chronic treatment'),
+      monitoring: getString(med.monitoring || 'Standard monitoring'),
+      doNotSubstitute: false,
+      medication_type: 'current_continued',
+      validated_by_ai: true,
+      original_input: getString(med.original_input || ''),
+      validated_corrections: getString(med.validated_corrections || 'None'),
+      pregnancyCategory: '',
+      pregnancySafety: '',
+      breastfeedingSafety: '',
+      completeLine: `${getString(med.name || med.medication_name)} ${getString(med.dosage || '')}\n${getString(med.posology || med.frequency || 'As prescribed')}\n[Current treatment - AI validated]`
+    })
+  })
+  
+  // Then, add NEWLY PRESCRIBED MEDICATIONS (if any)
   const primaryTreatments = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []
+  console.log(`💊 Newly prescribed medications: ${primaryTreatments.length}`)
   
   primaryTreatments.forEach((med: any, idx: number) => {
     medications.push({
@@ -591,12 +623,16 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
       indication: getString(med.precise_indication || med.indication || ''),
       monitoring: getString(med.monitoring || ''),
       doNotSubstitute: false,
+      medication_type: 'newly_prescribed',
+      validated_by_ai: false,
       pregnancyCategory: getString(med.pregnancy_category || ''),
       pregnancySafety: getString(med.pregnancy_safety || ''),
       breastfeedingSafety: getString(med.breastfeeding_safety || ''),
       completeLine: `${getString(med.medication_dci || med.drug)} ${getString(med.dosage_strength || med.dosage || '')}\n${getString(med.dosing_regimen?.adult || med.dosing?.adult || 'As prescribed')}`
     })
   })
+  
+  console.log(`✅ COMBINED PRESCRIPTION: ${validatedCurrentMeds.length} current + ${primaryTreatments.length} new = ${medications.length} total medications`)
 
   // =========== 2. LAB TESTS ===========
   const extractedData = extractRealDataFromDiagnosis(diagnosisData, {}, {})
