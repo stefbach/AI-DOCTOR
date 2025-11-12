@@ -237,6 +237,7 @@ interface ChronicProfessionalReportData {
 
 interface ChronicProfessionalReportProps {
   patientData: any
+  clinicalData: any
   questionsData: any
   diagnosisData: any
   onComplete?: () => void
@@ -330,6 +331,7 @@ function sanitizeMedications(medications: any[]): any[] {
 
 export default function ChronicProfessionalReport({
   patientData,
+  clinicalData,
   questionsData,
   diagnosisData,
   onComplete
@@ -481,7 +483,7 @@ export default function ChronicProfessionalReport({
           fetch("/api/chronic-report", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ patientData, questionsData, diagnosisData })
+            body: JSON.stringify({ patientData, clinicalData, questionsData, diagnosisData })
           }),
           fetch("/api/chronic-prescription", {
             method: "POST",
@@ -613,7 +615,7 @@ export default function ChronicProfessionalReport({
     if (patientData && diagnosisData) {
       generateReport()
     }
-  }, [patientData, questionsData, diagnosisData])
+  }, [patientData, clinicalData, questionsData, diagnosisData])
   
   // ==================== EVENT HANDLERS ====================
   

@@ -288,6 +288,7 @@ export default function ChronicDiseaseWorkflow() {
               <CardContent className="p-6">
                 <ChronicProfessionalReport
                   patientData={patientData}
+                  clinicalData={clinicalData}
                   questionsData={questionsData}
                   diagnosisData={diagnosisData}
                   onComplete={handleBackToHome}
