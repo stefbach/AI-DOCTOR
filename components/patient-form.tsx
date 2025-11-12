@@ -678,7 +678,13 @@ useEffect(() => {
             otherAllergies: tibokPatient.otherAllergies || "",
             medicalHistory: tibokPatient.medicalHistory || [],
             otherMedicalHistory: tibokPatient.otherMedicalHistory || "",
-            currentMedicationsText: tibokPatient.currentMedications || "",
+            currentMedicationsText: (() => {
+              console.log('🔍 CLIENT DEBUG - LOADING TIBOK CURRENT MEDICATIONS:')
+              console.log('   📦 tibokPatient.currentMedications:', tibokPatient.currentMedications)
+              console.log('   📋 Type:', typeof tibokPatient.currentMedications)
+              console.log('   ✅ Has value?:', !!tibokPatient.currentMedications)
+              return tibokPatient.currentMedications || ""
+            })(),
             
             // Map lifestyle values to form's expected format
             lifeHabits: {
