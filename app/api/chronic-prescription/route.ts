@@ -2,7 +2,7 @@
 // Generates prescriptions for chronic disease medications (antidiabetics, antihypertensives, statins, etc.)
 import { type NextRequest, NextResponse } from "next/server"
 
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
 
 export async function POST(req: NextRequest) {

@@ -2,7 +2,7 @@
 // Generates TRUE endocrinology consultation report with narrative text + structured data
 import { type NextRequest, NextResponse } from "next/server"
 
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
 
 export async function POST(req: NextRequest) {
