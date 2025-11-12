@@ -579,8 +579,15 @@ export default function ChronicProfessionalReport({
           
           // Update narrative from chronic-report API
           if (reportData.report) {
-            updatedReport.medicalReport.narrative = reportData.report
-            updatedReport.medicalReport.metadata.wordCount = reportData.report.split(/\s+/).length
+            // Extract the narrative text from the report structure
+            const narrativeText = reportData.report.narrativeReport?.fullText || 
+                                 reportData.report.narrativeReport || 
+                                 (typeof reportData.report === 'string' ? reportData.report : JSON.stringify(reportData.report, null, 2))
+            
+            updatedReport.medicalReport.narrative = narrativeText
+            updatedReport.medicalReport.metadata.wordCount = typeof narrativeText === 'string' 
+              ? narrativeText.split(/\s+/).length 
+              : 0
           }
           
           // Update medication prescription from chronic-prescription API
