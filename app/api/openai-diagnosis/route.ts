@@ -2501,6 +2501,18 @@ export async function POST(request: NextRequest) {
     
     const { anonymized: anonymizedPatientData, originalIdentity } = anonymizePatientData(body.patientData)
     
+    // ========== DEBUG CURRENT MEDICATIONS INPUT ==========
+    console.log('🔍 DEBUG - Raw patient data received:')
+    console.log('   - body.patientData.currentMedications:', body.patientData?.currentMedications)
+    console.log('   - body.patientData.current_medications:', body.patientData?.current_medications)
+    console.log('   - body.patientData.currentMedicationsText:', body.patientData?.currentMedicationsText)
+    console.log('   - Type:', typeof body.patientData?.currentMedications)
+    console.log('   - Is Array?:', Array.isArray(body.patientData?.currentMedications))
+    console.log('🔍 DEBUG - After anonymization:')
+    console.log('   - anonymizedPatientData.currentMedications:', anonymizedPatientData?.currentMedications)
+    console.log('   - Type:', typeof anonymizedPatientData?.currentMedications)
+    console.log('   - Is Array?:', Array.isArray(anonymizedPatientData?.currentMedications))
+    
     const patientContext: PatientContext = {
       age: parseInt(anonymizedPatientData?.age) || 0,
       sex: anonymizedPatientData?.sex || 'inconnu',
