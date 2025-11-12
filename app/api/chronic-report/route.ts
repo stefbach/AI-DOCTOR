@@ -1,9 +1,8 @@
 // app/api/chronic-report/route.ts - Comprehensive Narrative Medical Report for Chronic Disease Follow-Up
 // Generates TRUE endocrinology consultation report with narrative text + structured data
 import { type NextRequest, NextResponse } from "next/server"
-
-export const runtime = 'nodejs'
-export const preferredRegion = 'auto'
+import { generateText } from "ai"
+import { openai } from "@ai-sdk/openai"
 
 export async function POST(req: NextRequest) {
   try {
@@ -421,42 +420,29 @@ INSTRUCTIONS FOR REPORT GENERATION:
 Generate the complete narrative report now.`
 
     // Call OpenAI API - Using gpt-4o-mini for faster response (matching working APIs)
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: patientContext }
-        ],
-        temperature: 0.3,
-        max_tokens: 4000,
-        response_format: { type: "json_object" }
-      }),
+    console.log('🤖 Calling OpenAI API using Vercel AI SDK (like generate-consultation-report)...')
+    
+    const result = await generateText({
+      model: openai("gpt-4o-mini"),
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: patientContext }
+      ],
+      maxTokens: 3500,
+      temperature: 0.3,
     })
 
-    if (!response.ok) {
-      const error = await response.text()
-      console.error("OpenAI API Error:", error)
-      return NextResponse.json(
-        { error: "Failed to generate chronic disease report" },
-        { status: response.status }
-      )
-    }
-
-    const data = await response.json()
-    const content = data.choices[0]?.message?.content
-
+    const content = result.text
+    
     if (!content) {
+      console.error("❌ No content in AI response")
       return NextResponse.json(
         { error: "No content received from AI" },
         { status: 500 }
       )
     }
+    
+    console.log('✅ AI response received, length:', content.length)
 
     // Parse JSON response
     let reportData
