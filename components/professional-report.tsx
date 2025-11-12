@@ -79,6 +79,15 @@ interface MauritianReport {
       taille?: string
       identifiantNational?: string
       dateExamen: string
+      // Vital Signs
+      temperature?: string
+      bloodPressureSystolic?: string
+      bloodPressureDiastolic?: string
+      bloodGlucose?: string
+      // Medical Profile
+      allergies?: string
+      medicalHistory?: string
+      currentMedications?: string
     }
     rapport: {
       motifConsultation: string
@@ -155,7 +164,16 @@ const createEmptyReport = (): MauritianReport => ({
       telephone: "",
       email: "",
       poids: "",
-      dateExamen: new Date().toISOString().split('T')[0]
+      dateExamen: new Date().toISOString().split('T')[0],
+      // Vital Signs
+      temperature: "",
+      bloodPressureSystolic: "",
+      bloodPressureDiastolic: "",
+      bloodGlucose: "",
+      // Medical Profile
+      allergies: "",
+      medicalHistory: "",
+      currentMedications: ""
     },
     rapport: {
       motifConsultation: "",
@@ -994,6 +1012,30 @@ const updateRapportSection = useCallback((section: string, value: string) => {
     return newReport
   })
   trackModification(`rapport.${section}`)
+}, [validationStatus, trackModification])
+
+// ==================== UPDATE PATIENT FIELDS ====================
+const updatePatientField = useCallback((field: string, value: string) => {
+  if (validationStatus === 'validated') return
+  
+  setReport(prev => {
+    if (!prev) return null
+    
+    const newReport = {
+      ...prev,
+      compteRendu: {
+        ...prev.compteRendu,
+        patient: {
+          ...prev.compteRendu.patient,
+          [field]: value
+        }
+      }
+    }
+    
+    return newReport
+  })
+  trackModification(`patient.${field}`)
+  setHasUnsavedChanges(true)
 }, [validationStatus, trackModification])
 
 // ==================== ADD FUNCTIONS ====================
@@ -1917,9 +1959,38 @@ if (isRenewal) {
               telephone: apiReport.medicalReport?.patient?.phone || validPatientData.phone || '',
               email: apiReport.medicalReport?.patient?.email || validPatientData.email || '',
               poids: apiReport.medicalReport?.patient?.weight || validPatientData.weight || '',
-              taille: apiReport.medicalReport?.patient?.height || '',
+              taille: apiReport.medicalReport?.patient?.height || validPatientData.height || '',
               identifiantNational: apiReport.medicalReport?.patient?.nationalId || '',
-              dateExamen: apiReport.medicalReport?.patient?.examinationDate || new Date().toISOString().split('T')[0]
+              dateExamen: apiReport.medicalReport?.patient?.examinationDate || new Date().toISOString().split('T')[0],
+              // Vital Signs from clinical data
+              temperature: clinicalData?.vitalSigns?.temperature || '',
+              bloodPressureSystolic: clinicalData?.vitalSigns?.bloodPressureSystolic || '',
+              bloodPressureDiastolic: clinicalData?.vitalSigns?.bloodPressureDiastolic || '',
+              bloodGlucose: clinicalData?.vitalSigns?.bloodGlucose || '',
+              // Medical Profile
+              allergies: (() => {
+                const allergies = validPatientData?.allergies || []
+                if (Array.isArray(allergies) && allergies.length > 0) {
+                  return allergies.join(', ')
+                }
+                return 'NKDA (No Known Drug Allergies)'
+              })(),
+              medicalHistory: (() => {
+                const history = validPatientData?.medicalHistory || []
+                if (Array.isArray(history) && history.length > 0) {
+                  return history.join(', ')
+                }
+                return 'No significant medical history'
+              })(),
+              currentMedications: (() => {
+                const meds = diagnosisData?.currentMedicationsValidated || []
+                if (Array.isArray(meds) && meds.length > 0) {
+                  return meds.map((med: any, idx: number) => 
+                    `${idx + 1}. ${med.name || med.medication_name}${med.dosage ? ` - ${med.dosage}` : ''}${med.frequency ? ` - ${med.frequency}` : ''}`
+                  ).join('\n')
+                }
+                return validPatientData?.currentMedicationsText || 'No current medications'
+              })()
             },
             rapport: {
               motifConsultation: apiReport.medicalReport?.report?.chiefComplaint || '',
@@ -3472,28 +3543,33 @@ const ConsultationReport = () => {
             </div>
           </div>
 
-          <div className="mb-8 p-4 bg-gray-50 rounded-lg info-box">
-            <h3 className="font-bold mb-3">Patient Identification & Medical Profile</h3>
+          <div className="mb-8 p-4 bg-gray-50 rounded-lg info-box print:bg-transparent print:border print:border-gray-300">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-bold">Patient Identification & Medical Profile</h3>
+              {editMode && validationStatus !== 'validated' && (
+                <span className="text-xs text-blue-600">✏️ Editable</span>
+              )}
+            </div>
             
             {/* Section 1: Identification */}
             <div className="mb-4 pb-3 border-b border-gray-200">
               <h4 className="font-semibold text-sm text-gray-700 mb-2">Personal Information</h4>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div><span className="font-medium">Patient:</span> {patient.nomComplet || patient.nom || patientData?.name || 'N/A'}</div>
-                <div><span className="font-medium">Age:</span> {patient.age || patientData?.age || 'N/A'} years</div>
-                <div><span className="font-medium">Gender:</span> {patient.sexe || patientData?.gender || 'N/A'}</div>
-                <div><span className="font-medium">DOB:</span> {patient.dateNaissance || patientData?.dateOfBirth || 'N/A'}</div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div><span className="font-medium">Patient:</span> {patient.nomComplet || patient.nom}</div>
+                <div><span className="font-medium">Age:</span> {patient.age} years</div>
+                <div><span className="font-medium">Gender:</span> {patient.sexe}</div>
+                <div><span className="font-medium">DOB:</span> {patient.dateNaissance}</div>
                 {patient.identifiantNational && (
                   <div><span className="font-medium">NID:</span> {patient.identifiantNational}</div>
                 )}
-                <div><span className="font-medium">Examination Date:</span> {patient.dateExamen || new Date().toLocaleDateString()}</div>
+                <div><span className="font-medium">Examination Date:</span> {patient.dateExamen}</div>
               </div>
             </div>
 
-            {/* Section 2: Vital Signs & Clinical Measurements */}
+            {/* Section 2: Vital Signs & Measurements - EDITABLE */}
             <div className="mb-4 pb-3 border-b border-gray-200">
               <h4 className="font-semibold text-sm text-gray-700 mb-2">Vital Signs & Measurements</h4>
-              <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="grid grid-cols-2 gap-3 text-sm">
                 {/* Poids */}
                 <div>
                   <span className="font-medium">Weight:</span> {patientData?.weight ? `${patientData.weight} kg` : 'Not recorded'}
