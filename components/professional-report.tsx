@@ -3473,16 +3473,152 @@ const ConsultationReport = () => {
           </div>
 
           <div className="mb-8 p-4 bg-gray-50 rounded-lg info-box">
-            <h3 className="font-bold mb-2">Patient Identification</h3>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div><span className="font-medium">Patient:</span> {patient.nomComplet || patient.nom || patientData?.name || 'N/A'}</div>
-              <div><span className="font-medium">Age:</span> {patient.age || patientData?.age || 'N/A'}</div>
-              <div><span className="font-medium">Gender:</span> {patient.sexe || patientData?.gender || 'N/A'}</div>
-              <div><span className="font-medium">DOB:</span> {patient.dateNaissance || patientData?.dateOfBirth || 'N/A'}</div>
-              {patient.identifiantNational && (
-                <div><span className="font-medium">NID:</span> {patient.identifiantNational}</div>
-              )}
-              <div><span className="font-medium">Examination Date:</span> {patient.dateExamen || new Date().toLocaleDateString()}</div>
+            <h3 className="font-bold mb-3">Patient Identification & Medical Profile</h3>
+            
+            {/* Section 1: Identification */}
+            <div className="mb-4 pb-3 border-b border-gray-200">
+              <h4 className="font-semibold text-sm text-gray-700 mb-2">Personal Information</h4>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div><span className="font-medium">Patient:</span> {patient.nomComplet || patient.nom || patientData?.name || 'N/A'}</div>
+                <div><span className="font-medium">Age:</span> {patient.age || patientData?.age || 'N/A'} years</div>
+                <div><span className="font-medium">Gender:</span> {patient.sexe || patientData?.gender || 'N/A'}</div>
+                <div><span className="font-medium">DOB:</span> {patient.dateNaissance || patientData?.dateOfBirth || 'N/A'}</div>
+                {patient.identifiantNational && (
+                  <div><span className="font-medium">NID:</span> {patient.identifiantNational}</div>
+                )}
+                <div><span className="font-medium">Examination Date:</span> {patient.dateExamen || new Date().toLocaleDateString()}</div>
+              </div>
+            </div>
+
+            {/* Section 2: Vital Signs & Clinical Measurements */}
+            <div className="mb-4 pb-3 border-b border-gray-200">
+              <h4 className="font-semibold text-sm text-gray-700 mb-2">Vital Signs & Measurements</h4>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                {/* Poids */}
+                <div>
+                  <span className="font-medium">Weight:</span> {patientData?.weight ? `${patientData.weight} kg` : 'Not recorded'}
+                </div>
+                
+                {/* Taille */}
+                <div>
+                  <span className="font-medium">Height:</span> {patientData?.height ? `${patientData.height} cm` : 'Not recorded'}
+                </div>
+                
+                {/* IMC calculé si poids et taille disponibles */}
+                {patientData?.weight && patientData?.height && (
+                  <div>
+                    <span className="font-medium">BMI:</span> {(parseFloat(patientData.weight) / Math.pow(parseFloat(patientData.height) / 100, 2)).toFixed(1)} kg/m²
+                  </div>
+                )}
+                
+                {/* Température */}
+                {clinicalData?.vitalSigns?.temperature && (
+                  <div>
+                    <span className="font-medium">Temperature:</span> {clinicalData.vitalSigns.temperature}°C
+                    {parseFloat(clinicalData.vitalSigns.temperature) > 37.2 && ' ⚠️'}
+                  </div>
+                )}
+                
+                {/* Tension artérielle */}
+                {clinicalData?.vitalSigns?.bloodPressureSystolic && clinicalData?.vitalSigns?.bloodPressureDiastolic && (
+                  <div className="col-span-2">
+                    <span className="font-medium">Blood Pressure:</span> {clinicalData.vitalSigns.bloodPressureSystolic}/{clinicalData.vitalSigns.bloodPressureDiastolic} mmHg
+                    {(parseInt(clinicalData.vitalSigns.bloodPressureSystolic) >= 140 || parseInt(clinicalData.vitalSigns.bloodPressureDiastolic) >= 90) && ' ⚠️'}
+                  </div>
+                )}
+                
+                {/* Glycémie */}
+                {clinicalData?.vitalSigns?.bloodGlucose && (
+                  <div className="col-span-2">
+                    <span className="font-medium">Blood Glucose:</span> {clinicalData.vitalSigns.bloodGlucose} g/L
+                    {(parseFloat(clinicalData.vitalSigns.bloodGlucose) < 0.7 || parseFloat(clinicalData.vitalSigns.bloodGlucose) > 1.26) && ' ⚠️'}
+                    {parseFloat(clinicalData.vitalSigns.bloodGlucose) < 0.7 && ' (Hypoglycemia)'}
+                    {parseFloat(clinicalData.vitalSigns.bloodGlucose) > 1.26 && parseFloat(clinicalData.vitalSigns.bloodGlucose) < 2.0 && ' (Moderate hyperglycemia)'}
+                    {parseFloat(clinicalData.vitalSigns.bloodGlucose) >= 2.0 && ' (Severe hyperglycemia)'}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Section 3: Allergies */}
+            <div className="mb-4 pb-3 border-b border-gray-200">
+              <h4 className="font-semibold text-sm text-gray-700 mb-2">Allergies</h4>
+              <div className="text-sm">
+                {patientData?.allergies && Array.isArray(patientData.allergies) && patientData.allergies.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {patientData.allergies.map((allergy: string, idx: number) => (
+                      <span key={idx} className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded">
+                        ⚠️ {allergy}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-green-700">✅ NKDA (No Known Drug Allergies)</span>
+                )}
+                {patientData?.otherAllergies && (
+                  <div className="mt-2 text-gray-600">
+                    <span className="font-medium">Other:</span> {patientData.otherAllergies}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Section 4: Medical History / Antécédents */}
+            <div className="mb-4 pb-3 border-b border-gray-200">
+              <h4 className="font-semibold text-sm text-gray-700 mb-2">Medical History (Antécédents)</h4>
+              <div className="text-sm">
+                {patientData?.medicalHistory && Array.isArray(patientData.medicalHistory) && patientData.medicalHistory.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {patientData.medicalHistory.map((condition: string, idx: number) => (
+                      <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded">
+                        {condition}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-gray-600">No significant medical history recorded</span>
+                )}
+                {patientData?.otherMedicalHistory && (
+                  <div className="mt-2 text-gray-600">
+                    <span className="font-medium">Additional:</span> {patientData.otherMedicalHistory}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Section 5: Current Medications / Traitement Actuel */}
+            <div>
+              <h4 className="font-semibold text-sm text-gray-700 mb-2">Current Medications (Traitement Actuel)</h4>
+              <div className="text-sm">
+                {diagnosisData?.currentMedicationsValidated && Array.isArray(diagnosisData.currentMedicationsValidated) && diagnosisData.currentMedicationsValidated.length > 0 ? (
+                  <div className="space-y-2">
+                    {diagnosisData.currentMedicationsValidated.map((med: any, idx: number) => (
+                      <div key={idx} className="p-2 bg-green-50 border border-green-200 rounded">
+                        <div className="font-medium text-green-900">
+                          {idx + 1}. {med.name || med.medication_name}
+                          {med.validated_by_ai && <span className="ml-2 text-xs text-green-600">✓ AI Validated</span>}
+                        </div>
+                        {med.dosage && (
+                          <div className="text-gray-600 text-xs mt-1">
+                            Dosage: {med.dosage}
+                          </div>
+                        )}
+                        {med.frequency && (
+                          <div className="text-gray-600 text-xs">
+                            Frequency: {med.frequency}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : patientData?.currentMedicationsText ? (
+                  <div className="whitespace-pre-wrap text-gray-700 p-2 bg-gray-50 border border-gray-200 rounded">
+                    {patientData.currentMedicationsText}
+                  </div>
+                ) : (
+                  <span className="text-gray-600">No current medications</span>
+                )}
+              </div>
             </div>
           </div>
 
