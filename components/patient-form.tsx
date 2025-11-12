@@ -197,6 +197,7 @@ export default function ModernPatientForm({
     ...data
   }))
   const [errors, setErrors] = useState<ValidationErrors>({})
+  const [consultationType, setConsultationType] = useState<'normal' | 'chronic' | ''>('')
   const [allergySearch, setAllergySearch] = useState("")
   const [historySearch, setHistorySearch] = useState("")
   const [currentSection, setCurrentSection] = useState(0)
@@ -578,15 +579,24 @@ export default function ModernPatientForm({
 
   const handleSubmit = useCallback(() => {
     if (validateForm()) {
-      // ========== CHRONIC DISEASE DETECTION ==========
-      // Detect if patient has chronic diseases that require specialized workflow
-      const chronicDiseases = ['diabetes', 'hypertension', 'obesity']
-      const hasChronicDisease = formData.medicalHistory.some(condition => 
-        chronicDiseases.some(chronic => condition.toLowerCase().includes(chronic))
-      )
+      // Validate consultation type selection
+      if (!consultationType) {
+        toast({
+          title: "⚠️ Selection Required",
+          description: "Please select the type of consultation (Normal or Chronic Disease Follow-up)",
+          variant: "destructive"
+        })
+        // Scroll to consultation type selection
+        const element = document.getElementById('consultation-type-section')
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+        return
+      }
       
-      if (hasChronicDisease) {
-        console.log('🏥 Chronic disease detected, redirecting to specialized workflow...')
+      // ========== USER CHOICE: CHRONIC DISEASE WORKFLOW ==========
+      if (consultationType === 'chronic') {
+        console.log('🏥 User selected Chronic Disease Follow-up, redirecting to specialized workflow...')
         console.log('📋 Medical History:', formData.medicalHistory)
         
         // Store patient data for chronic disease workflow
@@ -598,7 +608,8 @@ export default function ModernPatientForm({
         return
       }
       
-      // Normal workflow for non-chronic patients
+      // ========== NORMAL WORKFLOW ==========
+      console.log('👨‍⚕️ User selected Normal Consultation, continuing standard workflow...')
       onNext()
     } else {
       // Scroll to first error
@@ -609,7 +620,7 @@ export default function ModernPatientForm({
         element.focus()
       }
     }
-  }, [validateForm, onNext, errors, formData])
+  }, [validateForm, onNext, errors, formData, consultationType, toast])
 
   // ========== Effects ==========
   
@@ -1608,14 +1619,122 @@ Example:
         </div>
       </div>
 
+      {/* CONSULTATION TYPE SELECTION */}
+      <Card id="consultation-type-section" className="shadow-xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-purple-50">
+        <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <Activity className="h-7 w-7" />
+            Type of Consultation
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-8">
+          <p className="text-gray-700 mb-6 text-lg font-medium">
+            Please select the type of consultation you wish to perform:
+          </p>
+          
+          <RadioGroup 
+            value={consultationType} 
+            onValueChange={(value) => setConsultationType(value as 'normal' | 'chronic')}
+            className="space-y-4"
+          >
+            {/* Normal Consultation Option */}
+            <label 
+              className={`flex items-start gap-4 p-6 rounded-xl border-3 transition-all cursor-pointer ${
+                consultationType === 'normal'
+                  ? "border-blue-500 bg-blue-50 shadow-lg scale-[1.02]"
+                  : "border-gray-300 hover:border-blue-400 hover:bg-blue-50/50"
+              }`}
+            >
+              <RadioGroupItem value="normal" id="consultation-normal" className="mt-1" />
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">👨‍⚕️</span>
+                  <span className="font-bold text-xl text-blue-900">Normal Consultation</span>
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Standard medical consultation for acute symptoms, infections, injuries, or general health concerns.
+                  Suitable for new complaints, check-ups, and non-chronic conditions.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                    Acute symptoms
+                  </Badge>
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                    Infections
+                  </Badge>
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                    General check-up
+                  </Badge>
+                </div>
+              </div>
+            </label>
+
+            {/* Chronic Disease Follow-up Option */}
+            <label 
+              className={`flex items-start gap-4 p-6 rounded-xl border-3 transition-all cursor-pointer ${
+                consultationType === 'chronic'
+                  ? "border-purple-500 bg-purple-50 shadow-lg scale-[1.02]"
+                  : "border-gray-300 hover:border-purple-400 hover:bg-purple-50/50"
+              }`}
+            >
+              <RadioGroupItem value="chronic" id="consultation-chronic" className="mt-1" />
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">🏥</span>
+                  <span className="font-bold text-xl text-purple-900">Chronic Disease Follow-up</span>
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Specialized consultation for chronic disease management. Includes detailed assessment, 
+                  treatment plan optimization, lifestyle counseling, and long-term follow-up scheduling.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                    Diabetes
+                  </Badge>
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                    Hypertension
+                  </Badge>
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                    Obesity
+                  </Badge>
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                    Dyslipidemia
+                  </Badge>
+                </div>
+              </div>
+            </label>
+          </RadioGroup>
+
+          {consultationType && (
+            <div className="mt-6 p-4 bg-white rounded-lg border-l-4 border-green-500">
+              <div className="flex items-center gap-2 text-green-700">
+                <Check className="h-5 w-5" />
+                <span className="font-medium">
+                  {consultationType === 'normal' 
+                    ? '✅ Normal Consultation selected - Standard medical workflow'
+                    : '✅ Chronic Disease Follow-up selected - Specialized management workflow'}
+                </span>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Submit button */}
-      <div className="flex justify-center pt-4">
+      <div className="flex justify-center pt-6">
         <Button 
           type="submit"
           size="lg"
-          className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+          disabled={!consultationType}
+          className={`px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 ${
+            consultationType === 'chronic'
+              ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
+              : 'bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700'
+          } ${!consultationType ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          Continue to Clinical Information
+          {consultationType === 'chronic' 
+            ? 'Continue to Chronic Disease Management'
+            : 'Continue to Clinical Information'}
           <ArrowRight className="h-5 w-5 ml-2" />
         </Button>
       </div>

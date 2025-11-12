@@ -3,12 +3,40 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Badge } from "@/components/ui/badge"
-import { ClipboardList, Loader2, CheckCircle } from "lucide-react"
+import { Progress } from "@/components/ui/progress"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { 
+  ClipboardList, 
+  Loader2, 
+  CheckCircle,
+  AlertCircle,
+  Brain,
+  Activity,
+  Heart
+} from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
+
+// ==================== INTERFACES ====================
+interface Question {
+  id: number
+  question: string
+  options: string[]
+  priority: 'critical' | 'high' | 'medium' | 'low'
+  category: 'diabetes_control' | 'hypertension_control' | 'obesity_management' | 'complications' | 'medications' | 'lifestyle'
+  rationale?: string
+  clinicalRelevance?: string
+}
+
+interface QuestionResponse {
+  questionId: number
+  question: string
+  answer: string
+  category: string
+  priority: string
+}
 
 interface ChronicQuestionsFormProps {
   patientData: any
@@ -17,17 +45,46 @@ interface ChronicQuestionsFormProps {
   onBack: () => void
 }
 
+// ==================== HELPER FUNCTIONS ====================
+const getCategoryColor = (category: string) => {
+  const colors: Record<string, string> = {
+    diabetes_control: 'bg-blue-100 text-blue-800',
+    hypertension_control: 'bg-red-100 text-red-800',
+    obesity_management: 'bg-orange-100 text-orange-800',
+    complications: 'bg-purple-100 text-purple-800',
+    medications: 'bg-green-100 text-green-800',
+    lifestyle: 'bg-yellow-100 text-yellow-800'
+  }
+  return colors[category] || 'bg-gray-100 text-gray-800'
+}
+
+const getCategoryIcon = (category: string) => {
+  const icons: Record<string, any> = {
+    diabetes_control: Activity,
+    hypertension_control: Heart,
+    obesity_management: Activity,
+    complications: AlertCircle,
+    medications: Brain,
+    lifestyle: Activity
+  }
+  return icons[category] || Activity
+}
+
+// ==================== MAIN COMPONENT ====================
 export default function ChronicQuestionsForm({ 
   patientData, 
   clinicalData, 
   onNext, 
   onBack 
 }: ChronicQuestionsFormProps) {
-  const [questions, setQuestions] = useState<any[]>([])
-  const [answers, setAnswers] = useState<Record<string, string>>({})
+  // ========== States ==========
+  const [questions, setQuestions] = useState<Question[]>([])
+  const [responses, setResponses] = useState<QuestionResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [metadata, setMetadata] = useState<any>(null)
 
+  // ========== Generate Questions on Mount ==========
   useEffect(() => {
     generateQuestions()
   }, [])
@@ -37,6 +94,8 @@ export default function ChronicQuestionsForm({
     setError("")
     
     try {
+      console.log('🏥 Generating chronic disease questions...')
+      
       const response = await fetch("/api/chronic-questions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -50,16 +109,29 @@ export default function ChronicQuestionsForm({
       const data = await response.json()
       
       if (data.success && data.questions) {
+        console.log(`✅ Generated ${data.questions.length} questions`)
         setQuestions(data.questions)
+        setMetadata(data.metadata)
+        
+        // Initialize empty responses
+        const initialResponses: QuestionResponse[] = data.questions.map((q: Question) => ({
+          questionId: q.id,
+          question: q.question,
+          answer: '',
+          category: q.category,
+          priority: q.priority
+        }))
+        setResponses(initialResponses)
+        
         toast({
-          title: "✅ AI Questions Generated",
+          title: "✅ Questions Generated",
           description: `${data.questions.length} specialized chronic disease questions ready`
         })
       } else {
         throw new Error(data.error || "Failed to generate questions")
       }
     } catch (err: any) {
-      console.error("Error generating chronic questions:", err)
+      console.error("❌ Error generating chronic questions:", err)
       setError(err.message)
       toast({
         title: "Error",
@@ -71,120 +143,202 @@ export default function ChronicQuestionsForm({
     }
   }
 
-  const handleAnswerChange = (questionId: string, value: string) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }))
+  // ========== Handle Answer Selection ==========
+  const handleAnswerChange = (questionId: number, selectedOption: string) => {
+    setResponses(prev => 
+      prev.map(r => 
+        r.questionId === questionId 
+          ? { ...r, answer: selectedOption }
+          : r
+      )
+    )
   }
 
+  // ========== Handle Submit ==========
   const handleSubmit = () => {
-    const questionsData = questions.map(q => ({
-      question: q.question_en,
-      answer: answers[q.id] || "",
-      category: q.category,
-      clinicalSignificance: q.clinicalSignificance
-    }))
-
-    onNext({ questions: questionsData, rawAnswers: answers })
+    const answeredQuestions = responses.filter(r => r.answer !== '')
+    
+    if (answeredQuestions.length === 0) {
+      toast({
+        title: "⚠️ No Answers",
+        description: "Please answer at least some questions before continuing.",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    console.log(`✅ Submitting ${answeredQuestions.length} answered questions`)
+    
+    onNext({ 
+      responses: answeredQuestions,
+      allResponses: responses,
+      metadata
+    })
   }
 
+  // ========== Calculate Progress ==========
+  const answeredCount = responses.filter(r => r.answer !== '').length
+  const totalQuestions = questions.length
+  const progressPercentage = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0
+
+  // ========== Render: Loading State ==========
   if (loading) {
     return (
       <Card className="border-purple-200">
         <CardContent className="p-12 text-center">
           <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-purple-600" />
-          <p className="text-lg text-gray-600">Generating specialized chronic disease questions...</p>
+          <p className="text-lg font-medium text-gray-700 mb-2">Generating Specialized Questions...</p>
+          <p className="text-sm text-gray-500">AI is analyzing chronic disease data</p>
         </CardContent>
       </Card>
     )
   }
 
+  // ========== Render: Error State ==========
   if (error) {
     return (
       <Card className="border-red-200">
         <CardContent className="p-6">
-          <p className="text-red-600 mb-4">Error: {error}</p>
-          <div className="flex gap-4">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Error:</strong> {error}
+            </AlertDescription>
+          </Alert>
+          <div className="flex gap-4 mt-6">
             <Button onClick={onBack} variant="outline">Back</Button>
-            <Button onClick={generateQuestions}>Retry</Button>
+            <Button onClick={generateQuestions}>Retry Generation</Button>
           </div>
         </CardContent>
       </Card>
     )
   }
 
-  const answeredCount = Object.keys(answers).length
-  const totalQuestions = questions.length
-
+  // ========== Render: Questions Form ==========
   return (
     <div className="space-y-6">
-      <Card className="border-purple-200">
-        <CardHeader className="bg-gradient-to-r from-purple-100 to-pink-100">
-          <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center gap-2">
+      {/* Progress Card */}
+      <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
+        <CardContent className="p-6">
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center gap-2">
               <ClipboardList className="h-5 w-5 text-purple-600" />
-              AI Specialized Questions
-            </CardTitle>
-            <Badge variant="secondary">
+              <span className="font-medium text-gray-700">Progress</span>
+            </div>
+            <Badge variant="secondary" className="bg-purple-600 text-white">
               {answeredCount} / {totalQuestions} answered
             </Badge>
           </div>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          {questions.map((q, index) => (
-            <div key={q.id} className="space-y-2 pb-4 border-b last:border-b-0">
-              <div className="flex items-start gap-3">
-                <Badge variant="outline" className="mt-1">{index + 1}</Badge>
-                <div className="flex-1 space-y-2">
-                  <Label htmlFor={q.id} className="text-base font-medium">
-                    {q.question_en}
-                  </Label>
-                  {q.category && (
-                    <Badge variant="secondary" className="text-xs">
-                      {q.category.replace(/_/g, ' ')}
-                    </Badge>
-                  )}
-                  {q.type === "text" || q.type === "textarea" ? (
-                    <Textarea
-                      id={q.id}
-                      value={answers[q.id] || ""}
-                      onChange={(e) => handleAnswerChange(q.id, e.target.value)}
-                      placeholder="Your answer..."
-                      rows={3}
-                      className="mt-2"
-                    />
-                  ) : q.type === "number" ? (
-                    <Input
-                      id={q.id}
-                      type="number"
-                      value={answers[q.id] || ""}
-                      onChange={(e) => handleAnswerChange(q.id, e.target.value)}
-                      placeholder="Enter number..."
-                      className="mt-2"
-                    />
-                  ) : (
-                    <Input
-                      id={q.id}
-                      value={answers[q.id] || ""}
-                      onChange={(e) => handleAnswerChange(q.id, e.target.value)}
-                      placeholder="Your answer..."
-                      className="mt-2"
-                    />
-                  )}
-                  {answers[q.id] && (
-                    <div className="flex items-center gap-1 text-green-600 text-sm">
-                      <CheckCircle className="h-4 w-4" />
-                      Answered
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
+          <Progress value={progressPercentage} className="h-2" />
         </CardContent>
       </Card>
 
+      {/* Questions List */}
+      <div className="space-y-4">
+        {questions.map((question, index) => {
+          const response = responses.find(r => r.questionId === question.id)
+          const isAnswered = response?.answer !== ''
+          const CategoryIcon = getCategoryIcon(question.category)
+          
+          return (
+            <Card 
+              key={question.id} 
+              className={`border-2 transition-all ${
+                isAnswered 
+                  ? 'border-green-300 bg-green-50/30' 
+                  : 'border-purple-200 hover:border-purple-300'
+              }`}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="outline" className="text-sm">
+                        Q{index + 1}
+                      </Badge>
+                      <Badge className={getCategoryColor(question.category)}>
+                        <CategoryIcon className="h-3 w-3 mr-1" />
+                        {question.category.replace(/_/g, ' ')}
+                      </Badge>
+                      {question.priority === 'critical' || question.priority === 'high' ? (
+                        <Badge variant="destructive" className="text-xs">
+                          {question.priority}
+                        </Badge>
+                      ) : null}
+                    </div>
+                    <Label className="text-base font-medium text-gray-800 leading-relaxed">
+                      {question.question}
+                    </Label>
+                  </div>
+                  {isAnswered && (
+                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-1" />
+                  )}
+                </div>
+              </CardHeader>
+              
+              <CardContent>
+                <RadioGroup
+                  value={response?.answer || ''}
+                  onValueChange={(value) => handleAnswerChange(question.id, value)}
+                  className="space-y-3"
+                >
+                  {question.options.map((option, optionIndex) => (
+                    <label
+                      key={optionIndex}
+                      className={`flex items-center space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                        response?.answer === option
+                          ? 'border-purple-500 bg-purple-50 shadow-md'
+                          : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50/30'
+                      }`}
+                    >
+                      <RadioGroupItem 
+                        value={option} 
+                        id={`q${question.id}-opt${optionIndex}`}
+                        className="flex-shrink-0"
+                      />
+                      <span className="text-sm text-gray-700 leading-relaxed flex-1">
+                        {option}
+                      </span>
+                    </label>
+                  ))}
+                </RadioGroup>
+                
+                {/* Clinical Relevance (optional display) */}
+                {question.clinicalRelevance && isAnswered && (
+                  <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-start gap-2">
+                      <Brain className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <p className="text-xs text-blue-800">
+                        <strong>Clinical relevance:</strong> {question.clinicalRelevance}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
+
+      {/* Summary Card */}
+      {answeredCount > 0 && (
+        <Card className="border-green-200 bg-green-50/30">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-green-700">
+              <CheckCircle className="h-5 w-5" />
+              <p className="font-medium">
+                Great! You've answered {answeredCount} out of {totalQuestions} questions
+                {answeredCount < totalQuestions && ' (you can continue with partial answers)'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Action Buttons */}
       <div className="flex justify-between pt-4">
         <Button onClick={onBack} variant="outline" size="lg">
-          Back
+          Back to Clinical Data
         </Button>
         <Button 
           onClick={handleSubmit} 
@@ -192,7 +346,10 @@ export default function ChronicQuestionsForm({
           className="bg-purple-600 hover:bg-purple-700"
           disabled={answeredCount === 0}
         >
-          Continue to Analysis ({answeredCount} answers)
+          Continue to Analysis
+          <span className="ml-2 px-2 py-0.5 bg-white/20 rounded text-sm">
+            {answeredCount} answers
+          </span>
         </Button>
       </div>
     </div>
