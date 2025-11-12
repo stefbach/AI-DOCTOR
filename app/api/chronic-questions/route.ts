@@ -197,36 +197,64 @@ function generateChronicDiseasePrompt(
   if (patient.chronicDiseases.hypertension) diseasesPresent.push('Hypertension')
   if (patient.chronicDiseases.obesity) diseasesPresent.push('Obesity')
   
-  return `Generate 8-10 chronic disease follow-up questions in JSON format.
+  const medsList = patient.currentMedications.slice(0, 3).join(', ') || 'None'
+  
+  return `CHRONIC DISEASE FOLLOW-UP ASSESSMENT
 
-PATIENT: ${patient.age}yo ${patient.gender}, BMI ${patient.bmi?.toFixed(1)}, Diseases: ${diseasesPresent.join(', ')}
-CLINICAL: BP ${clinical.bloodPressure || 'N/A'}, BG ${clinical.bloodGlucose || 'N/A'} g/L, HbA1c ${clinical.lastHbA1c || 'N/A'}%
-MEDICATIONS: ${patient.currentMedications.slice(0, 3).join(', ') || 'None'}, Adherence: ${clinical.medicationAdherence}
+PATIENT PROFILE:
+- Demographics: ${patient.age}y ${patient.gender}, BMI: ${patient.bmi?.toFixed(1) || 'N/A'}
+- Chronic Diseases: ${diseasesPresent.join(', ')}
+- Current Medications: ${medsList}
 
-REQUIRED QUESTIONS:
-${patient.chronicDiseases.diabetes ? '- Diabetes: 3-4 questions (glucose control, hypo symptoms, SMBG, complications)\n' : ''}${patient.chronicDiseases.hypertension ? '- Hypertension: 2-3 questions (BP patterns, medication, symptoms)\n' : ''}${patient.chronicDiseases.obesity ? '- Obesity: 2 questions (weight trends, diet/exercise)\n' : ''}- Medications: 1-2 questions (adherence barriers, side effects)
-- Lifestyle: 1-2 questions (diet, physical activity)
+CLINICAL STATUS:
+- Chief Complaint: ${clinical.chiefComplaint}
+${clinical.bloodPressure ? `- Blood Pressure: ${clinical.bloodPressure} (${clinical.bpStatus})` : ''}
+${clinical.bloodGlucose ? `- Blood Glucose: ${clinical.bloodGlucose} g/L (${clinical.bgStatus})` : ''}
+${clinical.lastHbA1c ? `- Last HbA1c: ${clinical.lastHbA1c}%` : ''}
+- Medication Adherence: ${clinical.medicationAdherence}
 
-FORMAT (STRICT JSON):
+Generate 8 diagnostic questions following this protocol:
+
+${patient.chronicDiseases.diabetes ? `DIABETES MONITORING (3 questions):
+- Glycemic control patterns (fasting/post-prandial glucose)
+- Hypoglycemia frequency and symptoms
+- Complications screening (neuropathy, retinopathy)
+` : ''}
+${patient.chronicDiseases.hypertension ? `HYPERTENSION MONITORING (2 questions):
+- Blood pressure control and patterns
+- Medication compliance
+` : ''}
+${patient.chronicDiseases.obesity ? `OBESITY MANAGEMENT (1 question):
+- Weight trends and dietary patterns
+` : ''}
+MEDICATION ASSESSMENT (1 question):
+- Adherence barriers and side effects
+
+LIFESTYLE ASSESSMENT (1 question):
+- Diet quality and physical activity
+
+Each question must:
+- Include EXACTLY 4 specific answer options
+- Options should represent different severity/frequency levels
+- Use clear, patient-friendly language
+- Be clinically actionable
+
+Format:
 {
   "questions": [
     {
       "id": 1,
-      "question": "Specific question text?",
-      "options": ["Option A (specific)", "Option B (specific)", "Option C (specific)", "Option D (specific)"],
+      "question": "Clear clinical question text",
+      "options": ["Specific option 1", "Specific option 2", "Specific option 3", "Specific option 4"],
       "priority": "high",
       "category": "diabetes_control",
-      "rationale": "Brief clinical reasoning",
-      "clinicalRelevance": "Brief impact on care"
+      "rationale": "Clinical reasoning for this question",
+      "clinicalRelevance": "How this helps management"
     }
   ]
 }
 
-RULES:
-- Each question needs EXACTLY 4 specific options (no yes/no)
-- Options should show different severity/frequency levels
-- Use simple language
-- Valid JSON only`
+Generate exactly 8 questions. Response must be valid JSON only.`
 }
 
 // ==================== MAIN API HANDLER ====================
@@ -269,75 +297,61 @@ export async function POST(request: NextRequest) {
     
     const prompt = generateChronicDiseasePrompt(processedPatient, processedClinical)
     
-    console.log('🤖 Calling GPT-4o for chronic disease questions...')
+    console.log('🤖 Calling GPT-4o-mini for chronic disease questions (matching openai-questions config)...')
     
-    // Add timeout to prevent 504 errors
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 25000) // 25 second timeout
+    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert endocrinologist and diabetologist conducting a chronic disease follow-up assessment. Generate diagnostic questions based on evidence-based medicine. Always respond with valid JSON only.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.2,
+        max_tokens: 1200,
+        response_format: { type: 'json_object' }
+      }),
+    })
     
-    try {
-      const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o',
-          messages: [
-            {
-              role: 'system',
-              content: 'Expert endocrinologist generating chronic disease follow-up questions. Respond with valid JSON only.'
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          temperature: 0.2,
-          max_tokens: 2500,
-          response_format: { type: 'json_object' }
-        }),
-        signal: controller.signal
-      })
-      
-      clearTimeout(timeoutId)
-      
-      if (!openaiResponse.ok) {
-        throw new Error(`OpenAI API error: ${openaiResponse.status}`)
-      }
-      
-      const aiData = await openaiResponse.json()
-      const content = aiData.choices[0]?.message?.content || '{}'
-      
-      let parsed
-      try {
-        parsed = JSON.parse(content)
-      } catch (parseError) {
-        console.error('Failed to parse OpenAI response:', content)
-        throw new Error('Invalid response format from AI')
-      }
-      
-      const questions: DiagnosticQuestion[] = parsed.questions || []
-      
-      console.log(`✅ Generated ${questions.length} chronic disease questions`)
-      
-      return NextResponse.json({
-        success: true,
-        questions,
-        metadata: {
-          model: 'gpt-4o',
-          processingTime: Date.now() - startTime,
-          chronicDiseases: processedPatient.chronicDiseases,
-          questionsGenerated: questions.length
-        }
-      })
-    } catch (fetchError: any) {
-      if (fetchError.name === 'AbortError') {
-        throw new Error('Request timeout - AI took too long to respond')
-      }
-      throw fetchError
+    if (!openaiResponse.ok) {
+      throw new Error(`OpenAI API error: ${openaiResponse.status}`)
     }
+    
+    const aiData = await openaiResponse.json()
+    const content = aiData.choices[0]?.message?.content || '{}'
+    
+    let parsed
+    try {
+      parsed = JSON.parse(content)
+    } catch (parseError) {
+      console.error('Failed to parse OpenAI response:', content)
+      throw new Error('Invalid response format from AI')
+    }
+    
+    const questions: DiagnosticQuestion[] = parsed.questions || []
+    
+    console.log(`✅ Generated ${questions.length} chronic disease questions`)
+    
+    return NextResponse.json({
+      success: true,
+      questions,
+      metadata: {
+        model: 'gpt-4o-mini',
+        processingTime: Date.now() - startTime,
+        chronicDiseases: processedPatient.chronicDiseases,
+        questionsGenerated: questions.length
+      }
+    })
     
   } catch (error: any) {
     console.error('❌ Chronic Questions API Error:', error)
