@@ -209,18 +209,44 @@ FOR CONSULTATION TYPE "new_problem":
 - MUST return validated current medications + new medications separately
 - System will merge them in final prescription
 
+PARSING EXAMPLES FOR CURRENT MEDICATIONS:
+
+Input: "metfromin 500mg 2 fois par jour"
+→ Output: {
+  "medication_name": "Metformin 500mg",
+  "dci": "Metformin",
+  "how_to_take": "BD (twice daily)",
+  "why_prescribed": "Type 2 diabetes management",
+  "duration": "Ongoing treatment",
+  "validated_corrections": "Spelling: metfromin→Metformin, Dosology: 2 fois par jour→BD",
+  "original_input": "metfromin 500mg 2 fois par jour"
+}
+
+Input: "asprin 100mg once daily"
+→ Output: {
+  "medication_name": "Aspirin 100mg",
+  "dci": "Aspirin",
+  "how_to_take": "OD (once daily)",
+  "why_prescribed": "Cardiovascular prophylaxis",
+  "duration": "Ongoing treatment",
+  "validated_corrections": "Spelling: asprin→Aspirin, Dosology standardized to OD",
+  "original_input": "asprin 100mg once daily"
+}
+
 REQUIRED OUTPUT STRUCTURE FOR CURRENT MEDICATIONS:
 "current_medications_validated": [
   {
     "medication_name": "Validated Drug name + corrected dose (e.g., Metformin 500mg)",
-    "why_prescribed": "Original indication from patient history OR chronic condition management",
-    "how_to_take": "CORRECTED UK dosing format (e.g., BD, TDS, QDS)",
+    "why_prescribed": "Original indication from patient history OR chronic condition management (infer from drug class if needed)",
+    "how_to_take": "CORRECTED UK dosing format (e.g., BD, TDS, QDS, OD)",
     "duration": "Ongoing treatment or specific duration",
     "dci": "Validated DCI (e.g., Metformin)",
-    "validated_corrections": "List any corrections made (spelling, dosology, etc.)",
-    "original_input": "Original text from patient form for reference"
+    "validated_corrections": "Explicit list of corrections made (spelling, dosology format, etc.)",
+    "original_input": "EXACT original text from patient form"
   }
 ]
+
+⚠️ CRITICAL: You MUST process ALL current medications provided. Do NOT skip any!
 
 🎯 MAURITIUS-SPECIFIC CLINICAL GUIDELINES + PRECISE DCI:
 
@@ -2497,6 +2523,7 @@ export async function POST(request: NextRequest) {
     
     console.log('📋 Contexte patient préparé avec validation Maurice anglo-saxonne + DCI')
     console.log(`   - Médicaments actuels : ${patientContext.current_medications.length}`)
+    console.log(`   - Détail médicaments actuels:`, patientContext.current_medications)
     console.log(`   - ID anonyme : ${patientContext.anonymousId}`)
     console.log(`   - Symptômes nécessitant validation :`)
     console.log(`     • Fièvre : ${hasFeverSymptoms(patientContext.symptoms, patientContext.chief_complaint, patientContext.vital_signs)}`)
@@ -2521,6 +2548,19 @@ export async function POST(request: NextRequest) {
     )
     
     console.log('✅ Analyse médicale avec qualité anglo-saxonne + DCI précis terminée')
+    
+    // ========== DEBUG CURRENT MEDICATIONS VALIDATED ==========
+    if (medicalAnalysis.current_medications_validated) {
+      console.log('💊 CURRENT MEDICATIONS VALIDATED BY AI:', medicalAnalysis.current_medications_validated.length)
+      medicalAnalysis.current_medications_validated.forEach((med: any, idx: number) => {
+        console.log(`   ${idx + 1}. ${med.medication_name} - ${med.how_to_take}`)
+        console.log(`      Original: "${med.original_input}"`)
+        console.log(`      Corrections: ${med.validated_corrections}`)
+      })
+    } else {
+      console.log('⚠️ NO CURRENT MEDICATIONS VALIDATED - AI did not return current_medications_validated field!')
+    }
+    
     // ========== DÉDUPLICATION DES MÉDICAMENTS ==========
 function deduplicateMedications(medications: any[]): any[] {
   const seen = new Set()
