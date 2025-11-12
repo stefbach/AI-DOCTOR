@@ -1816,33 +1816,66 @@ if (isRenewal) {
   // Set medications tab as active
   setActiveTab("medicaments")
   
-  // Auto-parse current medications if available
-  const currentMeds = patientData?.currentMedicationsText || 
-                      patientData?.currentMedications || 
-                      clinicalData?.currentMedications || ''
+  // PRIORITY 1: Use validated medications from diagnosisData (already structured by AI)
+  const validatedMeds = diagnosisData?.currentMedicationsValidated || []
   
-  if (currentMeds) {
-    console.log('📋 Auto-parsing current medications for renewal:', currentMeds)
+  if (validatedMeds && validatedMeds.length > 0) {
+    console.log('✅ Using AI-validated current medications for renewal:', validatedMeds)
     
-    // Parse medications from text
-    const parsedMedications = parseMedicationText(currentMeds)
+    // Convert AI-validated medications to prescription format
+    const structuredMedications = validatedMeds.map((med: any) => ({
+      nom: med.name || med.medication_name || '',
+      denominationCommune: med.generic_name || med.name || med.medication_name || '',
+      dci: med.generic_name || med.name || med.medication_name || '',
+      dosage: med.dosage || '',
+      forme: med.form || 'tablet',
+      posologie: med.frequency || med.posology || '',
+      modeAdministration: med.route || 'Oral route',
+      dureeTraitement: '30 days', // Default renewal duration
+      quantite: '1 month supply',
+      instructions: med.instructions || '',
+      justification: 'Prescription renewal - Continuation of chronic treatment',
+      surveillanceParticuliere: '',
+      nonSubstituable: false,
+      ligneComplete: `${med.name || med.medication_name} ${med.dosage || ''} ${med.frequency || ''}`
+    }))
     
-    if (parsedMedications.length > 0) {
-      // Store parsed medications to be added to report
-      sessionStorage.setItem('renewalMedications', JSON.stringify(parsedMedications))
+    sessionStorage.setItem('renewalMedications', JSON.stringify(structuredMedications))
+    
+    toast({
+      title: "💊 Mode Renouvellement d'Ordonnance",
+      description: `${structuredMedications.length} médicament(s) validé(s) par IA seront automatiquement ajoutés`,
+      duration: 5000
+    })
+  } else {
+    // FALLBACK: Parse from text if validated medications not available
+    const currentMeds = patientData?.currentMedicationsText || 
+                        patientData?.currentMedications || 
+                        clinicalData?.currentMedications || ''
+    
+    if (currentMeds) {
+      console.log('📋 Auto-parsing current medications text for renewal:', currentMeds)
       
+      // Parse medications from text
+      const parsedMedications = parseMedicationText(currentMeds)
+      
+      if (parsedMedications.length > 0) {
+        // Store parsed medications to be added to report
+        sessionStorage.setItem('renewalMedications', JSON.stringify(parsedMedications))
+        
+        toast({
+          title: "💊 Prescription Renewal Mode",
+          description: `${parsedMedications.length} medication(s) detected and will be auto-filled`,
+          duration: 5000
+        })
+      }
+    } else {
       toast({
-        title: "💊 Prescription Renewal Mode",
-        description: `${parsedMedications.length} medication(s) detected and will be auto-filled`,
+        title: "Mode Renouvellement d'Ordonnance",
+        description: "Rapport simplifié généré. Veuillez ajouter les médicaments manuellement.",
         duration: 5000
       })
     }
-  } else {
-    toast({
-      title: "Mode Renouvellement d'Ordonnance",
-      description: "Rapport simplifié généré. Veuillez ajouter les médicaments.",
-      duration: 5000
-    })
   }
 }
 
