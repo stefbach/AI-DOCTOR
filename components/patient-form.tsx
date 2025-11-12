@@ -348,7 +348,10 @@ export default function ModernPatientForm({
                  data.gender === 'Female' ? 'Female' : 
                  data.gender || 'Not specified'
     
-    const allergiesArray = [...data.allergies]
+    // Ensure allergies is always an array (handle edge cases where it might be string or undefined)
+    const allergiesArray = Array.isArray(data.allergies) ? [...data.allergies] : 
+                           typeof data.allergies === 'string' ? [data.allergies] :
+                           []
     if (data.otherAllergies?.trim()) {
       allergiesArray.push(data.otherAllergies.trim())
     }
@@ -406,7 +409,8 @@ export default function ModernPatientForm({
       weight: data.weight || '',
       taille: data.height || '',
       height: data.height || '',
-      allergies: allergiesArray.join(', ') || 'No known allergies',
+      allergies: allergiesArray.length > 0 ? allergiesArray : [],  // ✅ Keep as ARRAY for API
+      allergiesText: allergiesArray.join(', ') || 'No known allergies',  // Add text version for display
       otherAllergies: data.otherAllergies || '',
       other_allergies: data.otherAllergies || '',
       antecedents: historyArray.join(', ') || 'No significant history',
@@ -424,10 +428,13 @@ export default function ModernPatientForm({
           ? data.currentMedicationsText.split('\n').map(line => line.trim()).filter(line => line.length > 0)
           : []
         console.log('🔍 CLIENT DEBUG - PATIENT FORM:')
-        console.log('   📝 Raw text:', data.currentMedicationsText)
-        console.log('   📋 Parsed array:', parsed)
-        console.log('   ✅ Is Array?:', Array.isArray(parsed))
-        console.log('   📊 Length:', parsed.length)
+        console.log('   📝 Raw medications text:', data.currentMedicationsText)
+        console.log('   📋 Parsed medications array:', parsed)
+        console.log('   ✅ Medications is Array?:', Array.isArray(parsed))
+        console.log('   📊 Medications length:', parsed.length)
+        console.log('   🩹 Allergies array:', allergiesArray)
+        console.log('   ✅ Allergies is Array?:', Array.isArray(allergiesArray))
+        console.log('   📊 Allergies length:', allergiesArray.length)
         return parsed
       })(),
       current_medications: data.currentMedicationsText 
