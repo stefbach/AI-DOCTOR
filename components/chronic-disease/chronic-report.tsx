@@ -47,8 +47,14 @@ export default function ChronicReport({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [loadingStage, setLoadingStage] = useState("report")
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [consultationId, setConsultationId] = useState("")
 
   useEffect(() => {
+    // Generate unique consultation ID
+    const newConsultationId = `CHR-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`
+    setConsultationId(newConsultationId)
     generateAllDocuments()
   }, [])
 
@@ -155,6 +161,126 @@ export default function ChronicReport({
     })
   }
 
+  const handleSaveToDatabase = async () => {
+    if (!report || !prescription || !examOrders) {
+      toast({
+        title: "❌ Error",
+        description: "Please ensure all documents are generated before saving",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setSaving(true)
+    try {
+      // Save to database using existing API
+      const saveResponse = await fetch("/api/save-medical-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          consultationId,
+          patientId: patientData.id || `PATIENT-${Date.now()}`,
+          doctorId: "DOCTOR-CHRONIC-001",
+          doctorName: "Dr. TIBOKai DOCTOR",
+          patientName: `${patientData.firstName || ""} ${patientData.lastName || ""}`.trim(),
+          patientData: {
+            ...patientData,
+            chronicDiseases: patientData.chronicDiseases || []
+          },
+          clinicalData: {
+            ...clinicalData,
+            consultationType: "chronic_disease_followup"
+          },
+          diagnosisData,
+          report: {
+            compteRendu: {
+              rapport: {
+                motifConsultation: "Suivi Maladie Chronique",
+                conclusionDiagnostique: report.narrativeReport?.fullText?.substring(0, 500) || "Suivi spécialisé maladies chroniques",
+                ...report.narrativeReport
+              },
+              patient: {
+                nom: patientData.lastName || "",
+                prenom: patientData.firstName || "",
+                dateNaissance: patientData.dateOfBirth || "",
+                sexe: patientData.gender || "",
+                ...patientData
+              },
+              praticien: {
+                nom: "Dr. TIBOKai DOCTOR",
+                specialite: "Endocrinologie / Médecine Interne",
+                numeroEnregistrement: "MCM-XXXXXXXXX",
+                email: "doctor@tibokaidoctor.com"
+              }
+            },
+            ordonnances: {
+              medicaments: {
+                prescription: {
+                  medicaments: prescription.chronicMedications || []
+                }
+              }
+            }
+          },
+          action: "finalize",
+          metadata: {
+            documentType: "chronic_disease_followup",
+            chronicDiseases: patientData.chronicDiseases || [],
+            generatedAt: new Date().toISOString()
+          }
+        })
+      })
+
+      if (!saveResponse.ok) {
+        throw new Error("Failed to save to database")
+      }
+
+      const saveData = await saveResponse.json()
+      
+      if (saveData.success) {
+        setSaved(true)
+        toast({
+          title: "✅ Saved Successfully",
+          description: "Medical documentation saved to database",
+          duration: 5000
+        })
+      } else {
+        throw new Error(saveData.error || "Failed to save")
+      }
+
+    } catch (err: any) {
+      console.error("Error saving to database:", err)
+      toast({
+        title: "❌ Error",
+        description: "Failed to save to database. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleCompleteConsultation = async () => {
+    if (!saved) {
+      toast({
+        title: "⚠️ Warning",
+        description: "Please save the consultation first",
+        variant: "destructive"
+      })
+      return
+    }
+
+    // Complete consultation and redirect
+    toast({
+      title: "✅ Consultation Complete",
+      description: "Thank you! Redirecting...",
+      duration: 3000
+    })
+    
+    setTimeout(() => {
+      onComplete()
+    }, 2000)
+  }
+
   if (loading) {
     return (
       <Card className="border-purple-200">
@@ -220,13 +346,31 @@ export default function ChronicReport({
                 <Download className="h-4 w-4 mr-2" />
                 Download PDF
               </Button>
+              <Button 
+                onClick={handleSaveToDatabase} 
+                variant="outline" 
+                size="sm"
+                disabled={saving || saved}
+                className={saved ? "bg-green-50 border-green-500 text-green-700" : ""}
+              >
+                {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                {saved && <CheckCircle className="h-4 w-4 mr-2" />}
+                {saving ? "Saving..." : saved ? "Saved ✓" : "Save to Database"}
+              </Button>
             </div>
             <div className="flex gap-2">
-              <Badge className="bg-green-600 text-white">
-                <CheckCircle className="h-4 w-4 mr-1" />
-                Complete Documentation
-              </Badge>
-              <Badge variant="outline">{report.documentMetadata?.documentId || "CHR-XXXX"}</Badge>
+              {saved ? (
+                <Badge className="bg-green-600 text-white">
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                  Saved to Database
+                </Badge>
+              ) : (
+                <Badge className="bg-purple-600 text-white">
+                  <FileText className="h-4 w-4 mr-1" />
+                  Complete Documentation
+                </Badge>
+              )}
+              <Badge variant="outline">{report.documentMetadata?.documentId || consultationId}</Badge>
             </div>
           </div>
         </CardContent>
@@ -690,15 +834,54 @@ export default function ChronicReport({
         <Button onClick={onBack} variant="outline" size="lg">
           ← Retour au Diagnostic
         </Button>
-        <Button 
-          onClick={onComplete} 
-          size="lg"
-          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
-        >
-          <CheckCircle className="h-5 w-5 mr-2" />
-          Terminer & Retour Accueil
-        </Button>
+        <div className="flex gap-3">
+          {!saved && (
+            <Button 
+              onClick={handleSaveToDatabase} 
+              variant="outline"
+              size="lg"
+              disabled={saving}
+              className="border-blue-500 text-blue-700 hover:bg-blue-50"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                  Enregistrement...
+                </>
+              ) : (
+                <>
+                  <FileSignature className="h-5 w-5 mr-2" />
+                  Enregistrer en Base
+                </>
+              )}
+            </Button>
+          )}
+          <Button 
+            onClick={handleCompleteConsultation} 
+            size="lg"
+            disabled={!saved}
+            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <CheckCircle className="h-5 w-5 mr-2" />
+            Terminer & Retour Accueil
+          </Button>
+        </div>
       </div>
+
+      {/* Save Status Alert */}
+      {!saved && (
+        <Card className="border-yellow-300 bg-yellow-50 print:hidden">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
+              <div>
+                <p className="font-semibold text-yellow-900">Documentation prête</p>
+                <p className="text-sm text-yellow-800">N'oubliez pas d'enregistrer la consultation en base de données avant de terminer.</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Print Styles */}
       <style jsx global>{`
