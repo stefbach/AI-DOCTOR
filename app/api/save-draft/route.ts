@@ -2,12 +2,17 @@ import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Use ANON_KEY since we have open RLS policy for drafts
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+const supabase = (supabaseUrl && supabaseAnonKey) 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null
 
 export async function POST(request: NextRequest) {
   try {
+    if (!supabase) {
+      return NextResponse.json({ success: false, error: 'Draft saving not configured' }, { status: 503 })
+    }
     const body = await request.json()
     const { consultationId, reportContent, doctorInfo, modifiedSections, patientId, doctorId } = body
     
@@ -40,6 +45,9 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    if (!supabase) {
+      return NextResponse.json({ success: false, error: 'Draft loading not configured' }, { status: 503 })
+    }
     const url = new URL(request.url)
     const consultationId = url.searchParams.get('consultationId')
     
