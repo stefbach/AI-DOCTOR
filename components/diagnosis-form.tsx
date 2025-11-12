@@ -745,8 +745,20 @@ export default function DiagnosisForm({
         mauritianDocuments: data.mauritianDocuments,
         expertAnalysis: data.expertAnalysis || data.expert_analysis || {},
         completeData: data,
-        documentsGenerated: true
+        documentsGenerated: true,
+        // 🔍 CRITICAL - Pass through current medications validated
+        currentMedicationsValidated: data.currentMedicationsValidated,
+        medications: data.medications,
+        combinedPrescription: data.combinedPrescription
       }
+      
+      // 🔍 CLIENT DEBUG - Check what we're saving
+      console.log('🔍 CLIENT DEBUG - DIAGNOSIS FORM SAVING:')
+      console.log('   💊 currentMedicationsValidated:', completeData.currentMedicationsValidated)
+      console.log('   💊 Length:', completeData.currentMedicationsValidated?.length || 0)
+      console.log('   📋 medications:', completeData.medications)
+      console.log('   📋 combinedPrescription:', completeData.combinedPrescription)
+      
       onDataChange(completeData)
     }, 13000)
   }

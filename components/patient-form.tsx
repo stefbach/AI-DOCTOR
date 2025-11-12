@@ -419,9 +419,17 @@ export default function ModernPatientForm({
       currentMedicationsText: data.currentMedicationsText || 'None',
       current_medications_text: data.currentMedicationsText || 'None',
       // Parse medications text into array (split by line breaks, filter empty)
-      currentMedications: data.currentMedicationsText 
-        ? data.currentMedicationsText.split('\n').map(line => line.trim()).filter(line => line.length > 0)
-        : [],
+      currentMedications: (() => {
+        const parsed = data.currentMedicationsText 
+          ? data.currentMedicationsText.split('\n').map(line => line.trim()).filter(line => line.length > 0)
+          : []
+        console.log('🔍 CLIENT DEBUG - PATIENT FORM:')
+        console.log('   📝 Raw text:', data.currentMedicationsText)
+        console.log('   📋 Parsed array:', parsed)
+        console.log('   ✅ Is Array?:', Array.isArray(parsed))
+        console.log('   📊 Length:', parsed.length)
+        return parsed
+      })(),
       current_medications: data.currentMedicationsText 
         ? data.currentMedicationsText.split('\n').map(line => line.trim()).filter(line => line.length > 0)
         : [],

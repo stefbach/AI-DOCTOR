@@ -1854,6 +1854,14 @@ if (isRenewal) {
         medicalCouncilNumber: currentDoctorInfo.numeroEnregistrement
       }
       
+      // 🔍 CLIENT DEBUG - Check diagnosisData before API call
+      console.log('🔍 CLIENT DEBUG - PROFESSIONAL REPORT:')
+      console.log('   📦 diagnosisData:', diagnosisData)
+      console.log('   💊 currentMedicationsValidated:', diagnosisData?.currentMedicationsValidated)
+      console.log('   💊 Length:', diagnosisData?.currentMedicationsValidated?.length || 0)
+      console.log('   📋 medications:', diagnosisData?.medications)
+      console.log('   📋 combinedPrescription:', diagnosisData?.combinedPrescription)
+      
       const response = await fetch("/api/generate-consultation-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1878,6 +1886,13 @@ if (isRenewal) {
 
       const data = await response.json()
       console.log("📥 Report received:", data)
+      
+      // 🔍 CLIENT DEBUG - Check API response
+      console.log('🔍 CLIENT DEBUG - API RESPONSE:')
+      console.log('   ✅ Success:', data.success)
+      console.log('   💊 Prescriptions medications:', data.report?.prescriptions?.medications)
+      console.log('   📋 Medications array:', data.report?.prescriptions?.medications?.prescription?.medications)
+      console.log('   📊 Medications count:', data.report?.prescriptions?.medications?.prescription?.medications?.length || 0)
 
       if (data.success && data.report) {
         const apiReport = data.report
