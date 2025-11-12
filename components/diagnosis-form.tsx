@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { 
   ArrowLeft, 
   Brain, 
@@ -169,6 +171,297 @@ function ProgressStep({
       }`}>
         {children}
       </span>
+    </div>
+  )
+}
+
+// ==================== TREATMENT EDITOR COMPONENT ====================
+function TreatmentEditorSection({ 
+  treatments, 
+  onTreatmentsUpdate 
+}: { 
+  treatments: any[]
+  onTreatmentsUpdate: (treatments: any[]) => void
+}) {
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [editedTreatment, setEditedTreatment] = useState<any>(null)
+  const [validationResult, setValidationResult] = useState<{ valid: boolean, message: string } | null>(null)
+  const [isValidating, setIsValidating] = useState(false)
+
+  const handleStartEdit = (index: number) => {
+    setEditingIndex(index)
+    setEditedTreatment({ ...treatments[index] })
+    setValidationResult(null)
+  }
+
+  const handleCancelEdit = () => {
+    setEditingIndex(null)
+    setEditedTreatment(null)
+    setValidationResult(null)
+  }
+
+  const validateTreatment = async (treatment: any) => {
+    setIsValidating(true)
+    try {
+      // Validation basique
+      const errors = []
+      
+      // Vérifier le nom du médicament
+      if (!treatment.medication_dci || treatment.medication_dci.trim().length < 3) {
+        errors.push('Nom du médicament trop court')
+      }
+      
+      // Vérifier l'indication
+      if (!treatment.precise_indication || treatment.precise_indication.trim().length < 20) {
+        errors.push('Indication doit contenir au moins 20 caractères')
+      }
+      
+      // Vérifier la posologie
+      const dosing = treatment.dosing_regimen?.adult?.en || treatment.dosing_regimen?.adult?.fr
+      if (!dosing || dosing.trim().length < 5) {
+        errors.push('Posologie manquante ou incomplète')
+      }
+      
+      // Vérifier le format UK de la posologie (OD/BD/TDS/QDS)
+      if (dosing && !dosing.match(/\b(OD|BD|TDS|QDS|once|twice|three times|four times)\b/i)) {
+        errors.push('Format posologie UK requis (OD/BD/TDS/QDS)')
+      }
+      
+      // Vérifier la durée
+      if (!treatment.duration?.en && !treatment.duration?.fr) {
+        errors.push('Durée de traitement manquante')
+      }
+
+      if (errors.length > 0) {
+        setValidationResult({
+          valid: false,
+          message: `❌ Erreurs: ${errors.join(', ')}`
+        })
+        return false
+      }
+
+      setValidationResult({
+        valid: true,
+        message: '✅ Traitement valide - Orthographe et posologie correctes'
+      })
+      return true
+    } catch (error) {
+      setValidationResult({
+        valid: false,
+        message: '❌ Erreur lors de la validation'
+      })
+      return false
+    } finally {
+      setIsValidating(false)
+    }
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editedTreatment) return
+
+    const isValid = await validateTreatment(editedTreatment)
+    
+    if (isValid && editingIndex !== null) {
+      const updatedTreatments = [...treatments]
+      updatedTreatments[editingIndex] = editedTreatment
+      onTreatmentsUpdate(updatedTreatments)
+      setEditingIndex(null)
+      setEditedTreatment(null)
+    }
+  }
+
+  return (
+    <div className="grid gap-6">
+      {treatments.map((treatment: any, index: number) => {
+        const isEditing = editingIndex === index
+        const currentTreatment = isEditing ? editedTreatment : treatment
+
+        return (
+          <div key={index} className="border rounded-lg p-6 hover:shadow-md transition-shadow bg-gradient-to-r from-gray-50 to-purple-50">
+            {/* Header with Edit Button */}
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3 flex-1">
+                <Pill className="h-6 w-6 text-purple-600 flex-shrink-0" />
+                <div className="flex-1">
+                  {isEditing ? (
+                    <Input
+                      value={editedTreatment.medication_dci || ''}
+                      onChange={(e) => setEditedTreatment({
+                        ...editedTreatment,
+                        medication_dci: e.target.value
+                      })}
+                      className="font-bold text-lg mb-2"
+                      placeholder="Nom du médicament"
+                    />
+                  ) : (
+                    <h3 className="font-bold text-lg text-gray-800">
+                      {treatment.medication_dci}
+                    </h3>
+                  )}
+                  <Badge variant="outline" className="mt-1 border-purple-300 text-purple-700">
+                    {treatment.therapeutic_class}
+                  </Badge>
+                </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                {!isEditing ? (
+                  <Button
+                    onClick={() => handleStartEdit(index)}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                    Modifier
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      onClick={handleSaveEdit}
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+                      disabled={isValidating}
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                      {isValidating ? 'Validation...' : 'Valider'}
+                    </Button>
+                    <Button
+                      onClick={handleCancelEdit}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <X className="h-4 w-4" />
+                      Annuler
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Validation Result */}
+            {isEditing && validationResult && (
+              <Alert className={`mb-4 ${validationResult.valid ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                <AlertCircle className={`h-4 w-4 ${validationResult.valid ? 'text-green-600' : 'text-red-600'}`} />
+                <AlertTitle className={validationResult.valid ? 'text-green-800' : 'text-red-800'}>
+                  {validationResult.valid ? 'Validation réussie' : 'Erreurs détectées'}
+                </AlertTitle>
+                <AlertDescription className={validationResult.valid ? 'text-green-700' : 'text-red-700'}>
+                  {validationResult.message}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Treatment Details */}
+            <div className="space-y-4">
+              {/* INDICATION */}
+              <div>
+                <h4 className="font-semibold text-sm text-gray-700 mb-1">INDICATION:</h4>
+                {isEditing ? (
+                  <Textarea
+                    value={editedTreatment.precise_indication || ''}
+                    onChange={(e) => setEditedTreatment({
+                      ...editedTreatment,
+                      precise_indication: e.target.value
+                    })}
+                    rows={3}
+                    className="text-sm"
+                    placeholder="Indication thérapeutique détaillée (min. 20 caractères)"
+                  />
+                ) : (
+                  <p className="text-sm text-gray-600">
+                    {currentTreatment.precise_indication}
+                  </p>
+                )}
+              </div>
+
+              {/* MECHANISM */}
+              {currentTreatment.mechanism && (
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-1">MECHANISM OF ACTION:</h4>
+                  {isEditing ? (
+                    <Textarea
+                      value={editedTreatment.mechanism || ''}
+                      onChange={(e) => setEditedTreatment({
+                        ...editedTreatment,
+                        mechanism: e.target.value
+                      })}
+                      rows={2}
+                      className="text-sm"
+                      placeholder="Mécanisme d'action"
+                    />
+                  ) : (
+                    <p className="text-sm text-gray-600">
+                      {currentTreatment.mechanism}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* DOSING & DURATION */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-2">DOSING:</h4>
+                  {isEditing ? (
+                    <div className="space-y-2">
+                      <Input
+                        value={editedTreatment.dosing_regimen?.adult?.en || editedTreatment.dosing_regimen?.adult?.fr || ''}
+                        onChange={(e) => setEditedTreatment({
+                          ...editedTreatment,
+                          dosing_regimen: {
+                            ...editedTreatment.dosing_regimen,
+                            adult: {
+                              ...(editedTreatment.dosing_regimen?.adult || {}),
+                              en: e.target.value
+                            }
+                          }
+                        })}
+                        className="text-sm"
+                        placeholder="Ex: 500mg TDS (3 fois/jour)"
+                      />
+                      <p className="text-xs text-gray-500">Format UK requis: OD/BD/TDS/QDS</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1 text-sm">
+                      <p><strong>Adult:</strong> {currentTreatment.dosing_regimen?.adult?.en || currentTreatment.dosing_regimen?.adult?.fr || 'To be specified'}</p>
+                      {currentTreatment.dosing_regimen?.adjustments?.elderly && (
+                        <p><strong>Elderly:</strong> {currentTreatment.dosing_regimen.adjustments.elderly.en}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-2">DURATION & COST:</h4>
+                  {isEditing ? (
+                    <Input
+                      value={editedTreatment.duration?.en || editedTreatment.duration?.fr || ''}
+                      onChange={(e) => setEditedTreatment({
+                        ...editedTreatment,
+                        duration: {
+                          ...(editedTreatment.duration || {}),
+                          en: e.target.value
+                        }
+                      })}
+                      className="text-sm mb-2"
+                      placeholder="Ex: 7 days"
+                    />
+                  ) : (
+                    <div className="space-y-1 text-sm">
+                      <p><strong>Duration:</strong> {currentTreatment.duration?.en || currentTreatment.duration?.fr || 'As per evolution'}</p>
+                      <p><strong>Available:</strong> {currentTreatment.mauritius_availability?.public_free ? 'Free (public)' : 'Paid'}</p>
+                      {currentTreatment.mauritius_availability?.estimated_cost && (
+                        <p><strong>Estimated cost:</strong> {currentTreatment.mauritius_availability.estimated_cost}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -1338,7 +1631,7 @@ export default function DiagnosisForm({
         )}
       </AnimatedSection>
 
-      {/* TREATMENTS - With animation */}
+      {/* TREATMENTS - With animation AND EDITOR */}
       <AnimatedSection show={showTreatments} delay={400}>
         {currentSection === 3 && expertAnalysis?.expert_therapeutics?.primary_treatments && expertAnalysis.expert_therapeutics.primary_treatments.length > 0 && (
           <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
@@ -1349,68 +1642,20 @@ export default function DiagnosisForm({
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8">
-              <div className="grid gap-6">
-                {expertAnalysis.expert_therapeutics.primary_treatments.map((treatment: any, index: number) => (
-                  <div key={index} className="border rounded-lg p-6 hover:shadow-md transition-shadow bg-gradient-to-r from-gray-50 to-purple-50">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <Pill className="h-6 w-6 text-purple-600" />
-                        <div>
-                          <h3 className="font-bold text-lg text-gray-800">
-                            {treatment.medication_dci}
-                          </h3>
-                          <Badge variant="outline" className="mt-1 border-purple-300 text-purple-700">
-                            {treatment.therapeutic_class}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-semibold text-sm text-gray-700 mb-1">INDICATION:</h4>
-                        <p className="text-sm text-gray-600">
-                          {treatment.precise_indication}
-                        </p>
-                      </div>
-
-                      {treatment.mechanism && (
-                        <div>
-                          <h4 className="font-semibold text-sm text-gray-700 mb-1">MECHANISM OF ACTION:</h4>
-                          <p className="text-sm text-gray-600">
-                            {treatment.mechanism}
-                          </p>
-                        </div>
-                      )}
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <h4 className="font-semibold text-sm text-gray-700 mb-2">DOSING:</h4>
-                          <div className="space-y-1 text-sm">
-                            <p><strong>Adult:</strong> {treatment.dosing_regimen?.adult?.en || 'To be specified'}</p>
-                            {treatment.dosing_regimen?.adjustments?.elderly && (
-                              <p><strong>Elderly:</strong> {treatment.dosing_regimen.adjustments.elderly.en}</p>
-                            )}
-                            {treatment.dosing_regimen?.adjustments?.renal && (
-                              <p><strong>Renal impairment:</strong> {treatment.dosing_regimen.adjustments.renal.en}</p>
-                            )}
-                          </div>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-sm text-gray-700 mb-2">DURATION & COST:</h4>
-                          <div className="space-y-1 text-sm">
-                            <p><strong>Duration:</strong> {treatment.duration?.en || 'As per evolution'}</p>
-                            <p><strong>Available:</strong> {treatment.mauritius_availability?.public_free ? 'Free (public)' : 'Paid'}</p>
-                            {treatment.mauritius_availability?.estimated_cost && (
-                              <p><strong>Estimated cost:</strong> {treatment.mauritius_availability.estimated_cost}</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {/* Treatment Editor Component */}
+              <TreatmentEditorSection 
+                treatments={expertAnalysis.expert_therapeutics.primary_treatments}
+                onTreatmentsUpdate={(updatedTreatments) => {
+                  // Update the expertAnalysis with modified treatments
+                  setExpertAnalysis({
+                    ...expertAnalysis,
+                    expert_therapeutics: {
+                      ...expertAnalysis.expert_therapeutics,
+                      primary_treatments: updatedTreatments
+                    }
+                  })
+                }}
+              />
             </CardContent>
           </Card>
         )}
@@ -1538,8 +1783,8 @@ export default function DiagnosisForm({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <ul className="text-sm text-yellow-700 space-y-1">
                     <li>• Worsening general condition</li>
-                    <li>• Persistent fever >39°C</li>
-                    <li>• Uncontrolled pain >8/10</li>
+                    <li>• Persistent fever &gt;39°C</li>
+                    <li>• Uncontrolled pain &gt;8/10</li>
                   </ul>
                   <ul className="text-sm text-yellow-700 space-y-1">
                     <li>• Severe adverse effects</li>
