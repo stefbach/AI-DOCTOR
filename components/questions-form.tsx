@@ -350,7 +350,19 @@ export default function QuestionsForm({
       })
 
       console.log('📨 Response status:', response.status)
-      const data = await response.json()
+      
+      // Better error handling for non-JSON responses
+      const responseText = await response.text()
+      console.log('📄 Raw response (first 200 chars):', responseText.substring(0, 200))
+      
+      let data
+      try {
+        data = JSON.parse(responseText)
+      } catch (parseError) {
+        console.error('❌ Failed to parse JSON response:', parseError)
+        console.error('Full raw response:', responseText)
+        throw new Error(`API returned invalid JSON. Status: ${response.status}. Response starts with: "${responseText.substring(0, 100)}"`)
+      }
 
       if (!response.ok || !data.success) {
         throw new Error(data.error || `Error ${response.status}`)
