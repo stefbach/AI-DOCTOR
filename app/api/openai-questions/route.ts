@@ -45,6 +45,7 @@ interface ClinicalData {
     temperature?: string | number
     bloodPressureSystolic?: string | number
     bloodPressureDiastolic?: string | number
+    bloodGlucose?: string | number  // Test de glycémie en g/L (optionnel)
   }
 }
 
@@ -146,6 +147,8 @@ interface ProcessedClinicalData {
     tempStatus?: 'hypothermia' | 'normal' | 'fever' | 'high-fever'
     bloodPressure?: string
     bpStatus?: 'hypotension' | 'normal' | 'pre-hypertension' | 'hypertension' | 'crisis'
+    bloodGlucose?: number  // Glycémie en g/L
+    bgStatus?: 'severe-hypo' | 'hypo' | 'normal' | 'moderate-hyper' | 'severe-hyper'
   }
   evolution?: string
   historyAnalysis: DiseaseHistoryAnalysis
@@ -960,6 +963,24 @@ function processVitalSigns(vitals?: ClinicalData['vitalSigns']) {
       else if (sys < 140 && dia < 90) result.bpStatus = 'pre-hypertension'
       else if (sys < 180 && dia < 120) result.bpStatus = 'hypertension'
       else result.bpStatus = 'crisis'
+    }
+  }
+  
+  // Process blood glucose if provided (optional)
+  if (vitals.bloodGlucose !== null && vitals.bloodGlucose !== undefined && vitals.bloodGlucose !== '') {
+    const bg = typeof vitals.bloodGlucose === 'string' 
+      ? parseFloat(vitals.bloodGlucose) 
+      : vitals.bloodGlucose
+    
+    if (!isNaN(bg) && bg > 0 && bg < 10) {  // Realistic range in g/L
+      result.bloodGlucose = bg
+      
+      // Glycémie à jeun (normes en g/L)
+      if (bg < 0.7) result.bgStatus = 'severe-hypo'           // < 0.7 g/L
+      else if (bg < 1.0) result.bgStatus = 'hypo'             // 0.7-0.99 g/L
+      else if (bg <= 1.26) result.bgStatus = 'normal'         // 1.0-1.26 g/L (à jeun)
+      else if (bg < 2.0) result.bgStatus = 'moderate-hyper'   // 1.27-1.99 g/L
+      else result.bgStatus = 'severe-hyper'                   // >= 2.0 g/L
     }
   }
   

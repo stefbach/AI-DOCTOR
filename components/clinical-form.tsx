@@ -33,6 +33,7 @@ interface VitalSigns {
   temperature: string
   bloodPressureSystolic: string
   bloodPressureDiastolic: string
+  bloodGlucose: string  // Test de glycémie en g/L (optionnel)
 }
 
 interface ClinicalData {
@@ -68,7 +69,8 @@ const INITIAL_CLINICAL_DATA: ClinicalData = {
   vitalSigns: {
     temperature: "",
     bloodPressureSystolic: "",
-    bloodPressureDiastolic: ""
+    bloodPressureDiastolic: "",
+    bloodGlucose: ""  // Test de glycémie optionnel
   }
 }
 
@@ -309,6 +311,20 @@ const COMMON_SYMPTOMS = useMemo(() => [
     if (sys < 120 && dia < 80) return "Normal"
     if (sys >= 120 && sys < 140 && dia < 90) return "Pre-hypertension"
     if (sys >= 140 || dia >= 90) return "Hypertension"
+    
+    return ""
+  }, [])
+
+  const validateBloodGlucose = useCallback((glucose: string): string => {
+    const bg = parseFloat(glucose)
+    if (isNaN(bg)) return ""
+    
+    // Normes de glycémie en g/L
+    if (bg < 0.7) return "Hypoglycémie sévère"
+    if (bg >= 0.7 && bg < 1.0) return "Hypoglycémie"
+    if (bg >= 1.0 && bg <= 1.26) return "Normal (à jeun)"
+    if (bg > 1.26 && bg < 2.0) return "Hyperglycémie modérée"
+    if (bg >= 2.0) return "Hyperglycémie sévère"
     
     return ""
   }, [])
@@ -560,6 +576,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
     localData.vitalSigns.bloodPressureSystolic,
     localData.vitalSigns.bloodPressureDiastolic
   )
+  const bgStatus = validateBloodGlucose(localData.vitalSigns.bloodGlucose)
 
   const showTibokNotification = hasLoadedTibokData.current && isFromTibok && tibokPatient
 
@@ -956,6 +973,43 @@ const COMMON_SYMPTOMS = useMemo(() => [
               <XCircle className="h-4 w-4 mr-2" />
               Blood pressure not available
             </Button>
+          </div>
+
+          {/* Blood Glucose (optional) */}
+          <div className="col-span-3 space-y-2 pt-4 border-t">
+            <div className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-purple-500" />
+              <Label htmlFor="bloodGlucose" className="font-medium">
+                Glycémie (g/L) - Test Glucomètre
+                <span className="ml-2 text-xs text-gray-500 font-normal">(Optionnel)</span>
+              </Label>
+            </div>
+            <Input
+              id="bloodGlucose"
+              type="number"
+              step="0.01"
+              min="0.3"
+              max="6.0"
+              value={localData.vitalSigns.bloodGlucose}
+              onChange={(e) => updateVitalSigns("bloodGlucose", e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="1.0"
+            />
+            {bgStatus && (
+              <div className={`p-2 rounded-lg border text-sm font-medium ${
+                bgStatus.includes('Normal') ? 'bg-green-50 border-green-200 text-green-800' :
+                bgStatus.includes('Hypoglycémie sévère') ? 'bg-red-50 border-red-200 text-red-800' :
+                bgStatus.includes('Hypoglycémie') ? 'bg-orange-50 border-orange-200 text-orange-800' :
+                bgStatus.includes('Hyperglycémie sévère') ? 'bg-red-50 border-red-200 text-red-800' :
+                'bg-yellow-50 border-yellow-200 text-yellow-800'
+              }`}>
+                {bgStatus.includes('Normal') ? '✅' :
+                 bgStatus.includes('sévère') ? '🔴' : '⚠️'} {bgStatus}
+              </div>
+            )}
+            <p className="text-xs text-gray-500">
+              Valeurs normales à jeun : 0.7 - 1.26 g/L
+            </p>
           </div>
 
           {/* Blood pressure display */}
