@@ -1,6 +1,8 @@
 // app/api/chronic-examens/route.ts - Chronic Disease Laboratory and Paraclinical Exam Orders API
 // Generates exam orders for chronic disease monitoring (HbA1c, lipids, ECG, fundus exam, etc.)
 import { type NextRequest, NextResponse } from "next/server"
+import { generateText } from "ai"
+import { openai } from "@ai-sdk/openai"
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
@@ -350,43 +352,30 @@ EXAM ORDER INSTRUCTIONS:
 
 Generate the comprehensive chronic disease exam orders now.`
 
-    // Call OpenAI API
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: patientContext }
-        ],
-        temperature: 0.2,
-        max_tokens: 2500,
-        response_format: { type: "json_object" }
-      }),
+    // Call OpenAI API using Vercel AI SDK (like generate-consultation-report)
+    console.log('🤖 Calling OpenAI API using Vercel AI SDK...')
+    
+    const result = await generateText({
+      model: openai("gpt-4o-mini"),
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: patientContext }
+      ],
+      maxTokens: 2500,
+      temperature: 0.2,
     })
 
-    if (!response.ok) {
-      const error = await response.text()
-      console.error("OpenAI API Error:", error)
-      return NextResponse.json(
-        { error: "Failed to generate chronic disease exam orders" },
-        { status: response.status }
-      )
-    }
-
-    const data = await response.json()
-    const content = data.choices[0]?.message?.content
-
+    const content = result.text
+    
     if (!content) {
+      console.error("❌ No content in AI response")
       return NextResponse.json(
         { error: "No content received from AI" },
         { status: 500 }
       )
     }
+    
+    console.log('✅ AI response received, length:', content.length)
 
     // Parse JSON response
     let examOrdersData
