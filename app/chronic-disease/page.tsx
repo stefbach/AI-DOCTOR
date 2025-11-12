@@ -15,11 +15,11 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
-// Import chronic disease specific components (to be created)
-// import ChronicClinicalForm from "@/components/chronic-disease/chronic-clinical-form"
-// import ChronicQuestionsForm from "@/components/chronic-disease/chronic-questions-form"
-// import ChronicDiagnosisForm from "@/components/chronic-disease/chronic-diagnosis-form"
-// import ChronicReport from "@/components/chronic-disease/chronic-report"
+// Import chronic disease specific components
+import ChronicClinicalForm from "@/components/chronic-disease/chronic-clinical-form"
+import ChronicQuestionsForm from "@/components/chronic-disease/chronic-questions-form"
+import ChronicDiagnosisForm from "@/components/chronic-disease/chronic-diagnosis-form"
+import ChronicReport from "@/components/chronic-disease/chronic-report"
 
 export default function ChronicDiseaseWorkflow() {
   const router = useRouter()
@@ -217,20 +217,15 @@ export default function ChronicDiseaseWorkflow() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <p className="text-center text-gray-600 py-12">
-                  Chronic Clinical Form Component (To be implemented)
-                </p>
-                <div className="flex justify-end gap-4 mt-6">
-                  <Button onClick={handleBackToHome} variant="outline">
-                    Cancel
-                  </Button>
-                  <Button 
-                    onClick={() => setCurrentStep(1)}
-                    className="bg-purple-600 hover:bg-purple-700"
-                  >
-                    Continue to AI Questions
-                  </Button>
-                </div>
+                <ChronicClinicalForm
+                  patientData={patientData}
+                  onNext={(data) => {
+                    console.log('✅ Clinical data captured:', data)
+                    setClinicalData(data)
+                    setCurrentStep(1)
+                  }}
+                  onBack={handleBackToHome}
+                />
               </CardContent>
             </Card>
           )}
@@ -244,20 +239,16 @@ export default function ChronicDiseaseWorkflow() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <p className="text-center text-gray-600 py-12">
-                  Chronic Questions Form Component (To be implemented)
-                </p>
-                <div className="flex justify-between mt-6">
-                  <Button onClick={() => setCurrentStep(0)} variant="outline">
-                    Back
-                  </Button>
-                  <Button 
-                    onClick={() => setCurrentStep(2)}
-                    className="bg-purple-600 hover:bg-purple-700"
-                  >
-                    Continue to Analysis
-                  </Button>
-                </div>
+                <ChronicQuestionsForm
+                  patientData={patientData}
+                  clinicalData={clinicalData}
+                  onNext={(data) => {
+                    console.log('✅ Questions answered:', data)
+                    setQuestionsData(data)
+                    setCurrentStep(2)
+                  }}
+                  onBack={() => setCurrentStep(0)}
+                />
               </CardContent>
             </Card>
           )}
@@ -271,20 +262,17 @@ export default function ChronicDiseaseWorkflow() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <p className="text-center text-gray-600 py-12">
-                  Chronic Diagnosis Form Component (To be implemented)
-                </p>
-                <div className="flex justify-between mt-6">
-                  <Button onClick={() => setCurrentStep(1)} variant="outline">
-                    Back
-                  </Button>
-                  <Button 
-                    onClick={() => setCurrentStep(3)}
-                    className="bg-purple-600 hover:bg-purple-700"
-                  >
-                    Generate Report
-                  </Button>
-                </div>
+                <ChronicDiagnosisForm
+                  patientData={patientData}
+                  clinicalData={clinicalData}
+                  questionsData={questionsData}
+                  onNext={(data) => {
+                    console.log('✅ Diagnosis generated:', data)
+                    setDiagnosisData(data)
+                    setCurrentStep(3)
+                  }}
+                  onBack={() => setCurrentStep(1)}
+                />
               </CardContent>
             </Card>
           )}
@@ -298,20 +286,14 @@ export default function ChronicDiseaseWorkflow() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <p className="text-center text-gray-600 py-12">
-                  Chronic Report Component (To be implemented)
-                </p>
-                <div className="flex justify-between mt-6">
-                  <Button onClick={() => setCurrentStep(2)} variant="outline">
-                    Back
-                  </Button>
-                  <Button 
-                    onClick={handleBackToHome}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    Complete & Return to Home
-                  </Button>
-                </div>
+                <ChronicReport
+                  patientData={patientData}
+                  clinicalData={clinicalData}
+                  questionsData={questionsData}
+                  diagnosisData={diagnosisData}
+                  onComplete={handleBackToHome}
+                  onBack={() => setCurrentStep(2)}
+                />
               </CardContent>
             </Card>
           )}
