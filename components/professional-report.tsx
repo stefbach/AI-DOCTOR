@@ -88,6 +88,10 @@ interface MauritianReport {
       allergies?: string
       medicalHistory?: string
       currentMedications?: string
+      // Gynecological Status
+      pregnancyStatus?: string
+      gestationalAge?: string
+      lastMenstrualPeriod?: string
     }
     rapport: {
       motifConsultation: string
@@ -173,7 +177,11 @@ const createEmptyReport = (): MauritianReport => ({
       // Medical Profile
       allergies: "",
       medicalHistory: "",
-      currentMedications: ""
+      currentMedications: "",
+      // Gynecological Status
+      pregnancyStatus: "",
+      gestationalAge: "",
+      lastMenstrualPeriod: ""
     },
     rapport: {
       motifConsultation: "",
@@ -1990,7 +1998,11 @@ if (isRenewal) {
                   ).join('\n')
                 }
                 return validPatientData?.currentMedicationsText || 'No current medications'
-              })()
+              })(),
+              // Gynecological Status
+              pregnancyStatus: validPatientData?.pregnancyStatus || '',
+              gestationalAge: validPatientData?.gestationalAge || '',
+              lastMenstrualPeriod: validPatientData?.lastMenstrualPeriod || ''
             },
             rapport: {
               motifConsultation: apiReport.medicalReport?.report?.chiefComplaint || '',
@@ -3565,6 +3577,94 @@ const ConsultationReport = () => {
                 <div><span className="font-medium">Examination Date:</span> {patient.dateExamen}</div>
               </div>
             </div>
+
+            {/* Section 1b: Gynecological Status - EDITABLE (for females only) */}
+            {patient.sexe && (patient.sexe.toLowerCase() === 'female' || patient.sexe.toLowerCase() === 'f' || patient.sexe.toLowerCase() === 'femme') && (
+              <div className="mb-4 pb-3 border-b border-gray-200">
+                <h4 className="font-semibold text-sm text-gray-700 mb-2">🤰 Gynecological Status</h4>
+                {editMode && validationStatus !== 'validated' ? (
+                  <div className="space-y-3">
+                    {/* Pregnancy Status - Editable */}
+                    <div>
+                      <Label htmlFor="patient-pregnancy-status" className="text-xs">Pregnancy Status</Label>
+                      <select
+                        id="patient-pregnancy-status"
+                        value={patient.pregnancyStatus || ''}
+                        onChange={(e) => updatePatientField('pregnancyStatus', e.target.value)}
+                        className="w-full h-8 text-sm border border-gray-300 rounded px-2"
+                      >
+                        <option value="">Not specified</option>
+                        <option value="not_pregnant">Not Pregnant</option>
+                        <option value="pregnant">Pregnant</option>
+                        <option value="possibly_pregnant">Possibly Pregnant</option>
+                        <option value="postpartum">Postpartum</option>
+                        <option value="breastfeeding">Breastfeeding</option>
+                      </select>
+                    </div>
+                    
+                    {/* Gestational Age - Editable (if pregnant) */}
+                    {patient.pregnancyStatus === 'pregnant' && (
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label htmlFor="patient-gestational-age" className="text-xs">Gestational Age</Label>
+                          <Input
+                            id="patient-gestational-age"
+                            type="text"
+                            value={patient.gestationalAge || ''}
+                            onChange={(e) => updatePatientField('gestationalAge', e.target.value)}
+                            placeholder="12 weeks"
+                            className="h-8 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="patient-lmp" className="text-xs">Last Menstrual Period</Label>
+                          <Input
+                            id="patient-lmp"
+                            type="date"
+                            value={patient.lastMenstrualPeriod || ''}
+                            onChange={(e) => updatePatientField('lastMenstrualPeriod', e.target.value)}
+                            className="h-8 text-sm"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-sm space-y-1">
+                    {patient.pregnancyStatus ? (
+                      <>
+                        <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                          patient.pregnancyStatus === 'pregnant' ? 'bg-pink-100 text-pink-800' :
+                          patient.pregnancyStatus === 'possibly_pregnant' ? 'bg-yellow-100 text-yellow-800' :
+                          patient.pregnancyStatus === 'postpartum' ? 'bg-purple-100 text-purple-800' :
+                          patient.pregnancyStatus === 'breastfeeding' ? 'bg-blue-100 text-blue-800' :
+                          'bg-green-100 text-green-800'
+                        }`}>
+                          {patient.pregnancyStatus === 'not_pregnant' && '✓ Not Pregnant'}
+                          {patient.pregnancyStatus === 'pregnant' && '🤰 Pregnant'}
+                          {patient.pregnancyStatus === 'possibly_pregnant' && '⚠️ Possibly Pregnant'}
+                          {patient.pregnancyStatus === 'postpartum' && '👶 Postpartum'}
+                          {patient.pregnancyStatus === 'breastfeeding' && '🤱 Breastfeeding'}
+                        </div>
+                        
+                        {patient.pregnancyStatus === 'pregnant' && patient.gestationalAge && (
+                          <div className="mt-2">
+                            <span className="font-medium">Gestational Age:</span> {patient.gestationalAge}
+                          </div>
+                        )}
+                        {patient.pregnancyStatus === 'pregnant' && patient.lastMenstrualPeriod && (
+                          <div>
+                            <span className="font-medium">Last Menstrual Period:</span> {new Date(patient.lastMenstrualPeriod).toLocaleDateString()}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-gray-500">Not specified</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Section 2: Vital Signs & Measurements - EDITABLE */}
             <div className="mb-4 pb-3 border-b border-gray-200">
