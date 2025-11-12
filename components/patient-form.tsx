@@ -742,9 +742,11 @@ useEffect(() => {
     const timer = setTimeout(async () => {
       if (formData.firstName || formData.lastName) {
         try {
-          await consultationDataService.saveStepData(0, formData)
+          // 🔴 CRITICAL FIX: Transform data before saving
+          const transformedData = transformDataForAPI(formData)
+          await consultationDataService.saveStepData(0, transformedData)
           setLastSaved(new Date())
-          onDataChange(formData)
+          onDataChange(transformedData)
         } catch (error) {
           console.error('Error saving:', error)
         }
@@ -752,7 +754,7 @@ useEffect(() => {
     }, 1000)
     
     return () => clearTimeout(timer)
-  }, [formData, onDataChange])
+  }, [formData, onDataChange, transformDataForAPI])
   // ========== Conditional rendering ==========
   if (isLoading) {
     return (
