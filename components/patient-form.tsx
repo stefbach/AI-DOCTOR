@@ -414,9 +414,17 @@ export default function ModernPatientForm({
       medical_history: historyArray,
       otherMedicalHistory: data.otherMedicalHistory || '',
       other_medical_history: data.otherMedicalHistory || '',
+      // Current medications - parse text into array for API
       medicamentsActuels: data.currentMedicationsText || 'None',
-      currentMedications: data.currentMedicationsText || 'None',
-      current_medications: data.currentMedicationsText || 'None',
+      currentMedicationsText: data.currentMedicationsText || 'None',
+      current_medications_text: data.currentMedicationsText || 'None',
+      // Parse medications text into array (split by line breaks, filter empty)
+      currentMedications: data.currentMedicationsText 
+        ? data.currentMedicationsText.split('\n').map(line => line.trim()).filter(line => line.length > 0)
+        : [],
+      current_medications: data.currentMedicationsText 
+        ? data.currentMedicationsText.split('\n').map(line => line.trim()).filter(line => line.length > 0)
+        : [],
       
       // LIFESTYLE HABITS - Include all possible field names and structures
       // Flat structure (for direct field access)
