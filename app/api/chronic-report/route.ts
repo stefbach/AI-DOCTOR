@@ -83,11 +83,11 @@ Return ONLY valid JSON with this EXACT structure:
       "documentType": "CHRONIC DISEASE FOLLOW-UP CONSULTATION",
       "generatedAt": "ISO timestamp",
       "consultationDate": "date of consultation",
-      "language": "French (Mauritius)",
+      "language": "English (Anglo-Saxon medical standards)",
       "version": "1.0"
     },
     "narrativeReport": {
-      "fullText": "COMPLETE NARRATIVE REPORT AS ONE LONG TEXT STRING WITH \\n\\n FOR PARAGRAPHS - This is the actual medical letter a doctor would write, in French, professional medical language, covering ALL sections mentioned above. Minimum 1500 words. Include all assessment details, meal plans summary, therapeutic objectives, follow-up schedule, etc.",
+      "fullText": "COMPLETE NARRATIVE REPORT AS ONE LONG TEXT STRING WITH \\n\\n FOR PARAGRAPHS - This is the actual medical letter a doctor would write, in ENGLISH with Anglo-Saxon medical standards, professional medical language, covering ALL sections mentioned above. Minimum 1500 words. Include all assessment details, meal plans summary, therapeutic objectives, follow-up schedule, etc.",
       "sections": {
         "header": "Report header text",
         "patientIdentification": "Patient ID paragraph",
@@ -331,7 +331,7 @@ Return ONLY valid JSON with this EXACT structure:
 }
 
 IMPORTANT INSTRUCTIONS:
-1. Write the narrative report in FRENCH (medical French as used in Mauritius)
+1. Write the narrative report in ENGLISH (Anglo-Saxon medical standards)
 2. Use professional medical terminology but keep it understandable
 3. The narrative should be DETAILED and COMPLETE (minimum 1500 words)
 4. Include ALL assessment data from the diagnosis
@@ -342,8 +342,8 @@ IMPORTANT INSTRUCTIONS:
 9. The fullText field should contain the ENTIRE narrative report as one continuous text
 10. Use \\n\\n to separate paragraphs in the fullText
 11. Be specific with medication names, dosages, frequencies (based on diagnosis data)
-12. Include precise follow-up timing (e.g., "consultation dans 3 mois")
-13. Reference lab test frequencies (e.g., "HbA1c tous les 3 mois")
+12. Include precise follow-up timing (e.g., "follow-up consultation in 3 months")
+13. Reference lab test frequencies (e.g., "HbA1c every 3 months")
 
 CRITICAL: The narrative report must be comprehensive enough to serve as the OFFICIAL medical consultation report that could be printed, signed, and given to the patient or sent to referring physicians.`
 
@@ -401,7 +401,7 @@ DOCTOR INFORMATION:
 - Practice: ${doctorData?.practice || 'Mauritius'}
 
 INSTRUCTIONS FOR REPORT GENERATION:
-1. Generate a COMPLETE narrative medical report in French
+1. Generate a COMPLETE narrative medical report in ENGLISH (Anglo-Saxon standards)
 2. The report should be suitable for printing and filing in medical records
 3. Include ALL assessment data from the specialist diagnosis
 4. Summarize the detailed meal plans (don't list every meal individually, but describe the dietary approach)
@@ -410,7 +410,7 @@ INSTRUCTIONS FOR REPORT GENERATION:
 7. List medications with precise dosages and frequencies
 8. Explain clinical reasoning for therapeutic decisions
 9. Make it professional but understandable for both medical professionals and educated patients
-10. Use proper medical French terminology as used in Mauritius healthcare system
+10. Use proper English medical terminology with Anglo-Saxon medical standards
 
 Generate the complete narrative report now.`
 

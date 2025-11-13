@@ -73,7 +73,7 @@ CRITICAL REQUIREMENTS:
 
 3. EXAM ORDER FORMAT:
    Each exam must include:
-   - Test/exam name (French medical terminology)
+   - Test/exam name (English medical terminology - Anglo-Saxon standards)
    - Category (BIOLOGIE, IMAGERIE, EXPLORATION FONCTIONNELLE, CONSULTATION SPÉCIALISÉE)
    - Clinical indication (why ordered)
    - Urgency (URGENT, SEMI-URGENT, ROUTINE)
@@ -93,7 +93,7 @@ CRITICAL REQUIREMENTS:
    - Consider patient's last exam dates if available
 
 5. MAURITIUS HEALTHCARE CONTEXT:
-   - Use French medical terminology
+   - Use English medical terminology (Anglo-Saxon standards)
    - Follow Mauritius lab standards
    - Include local lab reference values
    - Consider local availability of exams
@@ -124,7 +124,7 @@ Return ONLY valid JSON with this EXACT structure:
       {
         "lineNumber": 1,
         "category": "BIOCHIMIE|HÉMATOLOGIE|IMMUNOLOGIE|MICROBIOLOGIE",
-        "testName": "test name in French",
+        "testName": "test name in English",
         "testCode": "lab code if applicable",
         "clinicalIndication": "why this test is ordered",
         "urgency": "URGENT|SEMI-URGENT|ROUTINE",
@@ -160,7 +160,7 @@ Return ONLY valid JSON with this EXACT structure:
       {
         "lineNumber": 1,
         "category": "IMAGERIE|EXPLORATION FONCTIONNELLE|CONSULTATION SPÉCIALISÉE",
-        "examName": "exam name in French",
+        "examName": "exam name in English",
         "examType": "specific type",
         "clinicalIndication": "why this exam is ordered",
         "urgency": "URGENT|SEMI-URGENT|ROUTINE",
@@ -256,7 +256,7 @@ IMPORTANT:
 7. Include preparation instructions (fasting, medication adjustments)
 8. Specify what to look for in results
 9. Define follow-up actions based on results
-10. Use French medical terminology for Mauritius healthcare`
+10. Use English medical terminology with Anglo-Saxon standards`
 
     const patientContext = `
 EXAM ORDER DATE: ${orderDate.toLocaleDateString('fr-MU', { day: '2-digit', month: '2-digit', year: 'numeric' })}
@@ -339,7 +339,7 @@ EXAM ORDER INSTRUCTIONS:
    - Néphrologue (if renal impairment)
    - Podologue (foot exam)
    
-10. Write in French for Mauritius healthcare system
+10. Write in ENGLISH with Anglo-Saxon medical standards
 11. Generate COMPLETE JSON with ALL required fields
 
 Generate the comprehensive chronic disease exam orders now.`

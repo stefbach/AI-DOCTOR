@@ -65,7 +65,7 @@ CRITICAL REQUIREMENTS:
    - Monitor for side effects
 
 5. MAURITIUS HEALTHCARE CONTEXT:
-   - Use French medication names
+   - Use International Nonproprietary Names (INN) - English medication names
    - Follow Mauritius formulary when possible
    - Include local availability considerations
 
@@ -198,7 +198,7 @@ IMPORTANT:
 6. Ensure all chronic diseases are covered with appropriate medications
 7. Include cardiovascular protection (Aspirine) if diabetes + CV risk
 8. Consider supplements (Vitamin D) if indicated
-9. Use French medication names and terminology
+9. Use International Nonproprietary Names (INN) - English terminology with Anglo-Saxon standards
 10. Make prescription COMPREHENSIVE and SAFE`
 
     const patientContext = `
@@ -260,7 +260,7 @@ PRESCRIPTION INSTRUCTIONS:
    - Amlodipine: 5-10mg 1x/jour
 7. All chronic medications should be "Traitement au long cours - Renouvelable"
 8. Include complete safety information and monitoring requirements
-9. Write in French for Mauritius healthcare system
+9. Write in ENGLISH with Anglo-Saxon medical standards (UK/US medical terminology)
 10. Generate COMPLETE JSON with ALL required fields
 
 Generate the comprehensive chronic disease prescription now.`
