@@ -1896,6 +1896,22 @@ export default function ChronicProfessionalReport({
       { key: 'endocrinology', label: 'ENDOCRINOLOGY' },
       { key: 'general', label: 'GENERAL LABORATORY' }
     ]
+
+    const handleLabTestEdit = (categoryKey: string, testIdx: number, field: string, value: any) => {
+      const updatedReport = { ...report }
+      updatedReport.laboratoryTests.prescription.tests[categoryKey][testIdx][field] = value
+      setReport(updatedReport)
+      setHasUnsavedChanges(true)
+    }
+
+    const handleDeleteLabTest = (categoryKey: string, testIdx: number) => {
+      if (confirm('Delete this laboratory test?')) {
+        const updatedReport = { ...report }
+        updatedReport.laboratoryTests.prescription.tests[categoryKey].splice(testIdx, 1)
+        setReport(updatedReport)
+        setHasUnsavedChanges(true)
+      }
+    }
     
     return (
       <div id="laboratory-tests-section" className="bg-white p-8 rounded-lg shadow print:shadow-none">
@@ -1929,12 +1945,24 @@ export default function ChronicProfessionalReport({
         </div>
         
         {/* Clinical Indication */}
-        {laboratoryTests.prescription.clinicalIndication && (
-          <div className="mb-6 p-4 bg-blue-50 rounded">
-            <h3 className="font-bold mb-2">Clinical Indication:</h3>
+        <div className="mb-6 p-4 bg-blue-50 rounded">
+          <h3 className="font-bold mb-2">Clinical Indication:</h3>
+          {editMode ? (
+            <Textarea
+              value={laboratoryTests.prescription.clinicalIndication || ''}
+              onChange={(e) => {
+                const updatedReport = { ...report }
+                updatedReport.laboratoryTests.prescription.clinicalIndication = e.target.value
+                setReport(updatedReport)
+                setHasUnsavedChanges(true)
+              }}
+              className="text-sm"
+              rows={3}
+            />
+          ) : (
             <p className="text-sm">{laboratoryTests.prescription.clinicalIndication}</p>
-          </div>
-        )}
+          )}
+        </div>
         
         {/* Tests by Category */}
         {hasTests ? (
@@ -1950,30 +1978,103 @@ export default function ChronicProfessionalReport({
                     {categoryTests.map((test: any, idx: number) => (
                       <div key={idx} className="border-l-4 border-blue-400 pl-4 py-2">
                         <div className="flex items-start justify-between">
-                          <div>
-                            <p className="font-semibold">{test.nom || test.name}</p>
-                            {test.motifClinique && (
-                              <p className="text-sm text-gray-600 mt-1">
-                                <span className="font-medium">Indication:</span> {test.motifClinique}
-                              </p>
-                            )}
-                            {test.conditionsPrelevement && (
-                              <p className="text-sm text-gray-600 mt-1">
-                                <span className="font-medium">Conditions:</span> {test.conditionsPrelevement}
-                              </p>
-                            )}
-                            {test.tubePrelevement && (
-                              <p className="text-sm text-gray-600 mt-1">
-                                <span className="font-medium">Sample Type:</span> {test.tubePrelevement}
-                              </p>
+                          <div className="flex-1">
+                            {editMode ? (
+                              <div className="space-y-2">
+                                <div>
+                                  <Label>Test Name</Label>
+                                  <Input
+                                    value={test.nom || test.name || ''}
+                                    onChange={(e) => handleLabTestEdit(category.key, idx, 'nom', e.target.value)}
+                                    className="font-semibold"
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Clinical Indication</Label>
+                                  <Input
+                                    value={test.motifClinique || ''}
+                                    onChange={(e) => handleLabTestEdit(category.key, idx, 'motifClinique', e.target.value)}
+                                    className="text-sm"
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Sample Conditions</Label>
+                                  <Input
+                                    value={test.conditionsPrelevement || ''}
+                                    onChange={(e) => handleLabTestEdit(category.key, idx, 'conditionsPrelevement', e.target.value)}
+                                    className="text-sm"
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Sample Type</Label>
+                                  <Input
+                                    value={test.tubePrelevement || ''}
+                                    onChange={(e) => handleLabTestEdit(category.key, idx, 'tubePrelevement', e.target.value)}
+                                    className="text-sm"
+                                  />
+                                </div>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2">
+                                    <input
+                                      type="checkbox"
+                                      checked={test.urgence || false}
+                                      onChange={(e) => handleLabTestEdit(category.key, idx, 'urgence', e.target.checked)}
+                                      className="rounded"
+                                    />
+                                    <span className="text-sm">Urgent</span>
+                                  </label>
+                                  <label className="flex items-center gap-2">
+                                    <input
+                                      type="checkbox"
+                                      checked={test.aJeun || false}
+                                      onChange={(e) => handleLabTestEdit(category.key, idx, 'aJeun', e.target.checked)}
+                                      className="rounded"
+                                    />
+                                    <span className="text-sm">Fasting Required</span>
+                                  </label>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <p className="font-semibold">{test.nom || test.name}</p>
+                                {test.motifClinique && (
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    <span className="font-medium">Indication:</span> {test.motifClinique}
+                                  </p>
+                                )}
+                                {test.conditionsPrelevement && (
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    <span className="font-medium">Conditions:</span> {test.conditionsPrelevement}
+                                  </p>
+                                )}
+                                {test.tubePrelevement && (
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    <span className="font-medium">Sample Type:</span> {test.tubePrelevement}
+                                  </p>
+                                )}
+                              </>
                             )}
                           </div>
-                          <div className="flex gap-2">
-                            {test.urgence && (
-                              <Badge className="bg-blue-100 text-blue-800">URGENT</Badge>
+                          <div className="flex gap-2 ml-4">
+                            {editMode && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteLabTest(category.key, idx)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             )}
-                            {test.aJeun && (
-                              <Badge className="bg-cyan-100 text-cyan-800">FASTING</Badge>
+                            {!editMode && (
+                              <>
+                                {test.urgence && (
+                                  <Badge className="bg-blue-100 text-blue-800">URGENT</Badge>
+                                )}
+                                {test.aJeun && (
+                                  <Badge className="bg-cyan-100 text-cyan-800">FASTING</Badge>
+                                )}
+                              </>
                             )}
                           </div>
                         </div>
@@ -2042,6 +2143,22 @@ export default function ChronicProfessionalReport({
     
     const { paraclinicalExams } = report
     const exams = paraclinicalExams.prescription.exams || []
+
+    const handleParaclinicalEdit = (examIdx: number, field: string, value: any) => {
+      const updatedReport = { ...report }
+      updatedReport.paraclinicalExams.prescription.exams[examIdx][field] = value
+      setReport(updatedReport)
+      setHasUnsavedChanges(true)
+    }
+
+    const handleDeleteParaclinicalExam = (examIdx: number) => {
+      if (confirm('Delete this paraclinical examination?')) {
+        const updatedReport = { ...report }
+        updatedReport.paraclinicalExams.prescription.exams.splice(examIdx, 1)
+        setReport(updatedReport)
+        setHasUnsavedChanges(true)
+      }
+    }
     
     return (
       <div id="paraclinical-exams-section" className="bg-white p-8 rounded-lg shadow print:shadow-none">
@@ -2083,42 +2200,129 @@ export default function ChronicProfessionalReport({
             exams.map((exam: any, index: number) => (
               <div key={index} className="border-l-4 border-indigo-500 pl-4 py-2">
                 <div className="flex items-start justify-between">
-                  <div>
-                    <div className="font-bold text-lg">
-                      {index + 1}. {exam.type}
-                      {exam.urgency && (
-                        <Badge className="ml-2 bg-blue-100 text-blue-800">URGENT</Badge>
-                      )}
-                      {exam.contrast && (
-                        <Badge className="ml-2 bg-cyan-100 text-cyan-800">WITH CONTRAST</Badge>
-                      )}
-                    </div>
-                    {exam.modality && (
-                      <p className="mt-1 text-sm">
-                        <span className="font-medium">Modality:</span> {exam.modality}
-                      </p>
-                    )}
-                    {exam.region && (
-                      <p className="mt-1 text-sm">
-                        <span className="font-medium">Region:</span> {exam.region}
-                      </p>
-                    )}
-                    {exam.clinicalIndication && (
-                      <p className="mt-2 text-sm text-gray-600">
-                        <span className="font-medium">Clinical Indication:</span> {exam.clinicalIndication}
-                      </p>
-                    )}
-                    {exam.diagnosticQuestion && (
-                      <p className="mt-1 text-sm text-gray-600">
-                        <span className="font-medium">Diagnostic Question:</span> {exam.diagnosticQuestion}
-                      </p>
-                    )}
-                    {exam.specificProtocol && (
-                      <p className="mt-1 text-sm text-blue-600">
-                        <span className="font-medium">Protocol:</span> {exam.specificProtocol}
-                      </p>
+                  <div className="flex-1">
+                    {editMode ? (
+                      <div className="space-y-3">
+                        <div>
+                          <Label>Examination Type</Label>
+                          <Input
+                            value={exam.type || ''}
+                            onChange={(e) => handleParaclinicalEdit(index, 'type', e.target.value)}
+                            className="font-bold"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label>Modality</Label>
+                            <Input
+                              value={exam.modality || ''}
+                              onChange={(e) => handleParaclinicalEdit(index, 'modality', e.target.value)}
+                              placeholder="e.g., X-Ray, CT, MRI, Ultrasound"
+                            />
+                          </div>
+                          <div>
+                            <Label>Region/Body Part</Label>
+                            <Input
+                              value={exam.region || ''}
+                              onChange={(e) => handleParaclinicalEdit(index, 'region', e.target.value)}
+                              placeholder="e.g., Chest, Abdomen, Brain"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Clinical Indication</Label>
+                          <Textarea
+                            value={exam.clinicalIndication || ''}
+                            onChange={(e) => handleParaclinicalEdit(index, 'clinicalIndication', e.target.value)}
+                            rows={2}
+                          />
+                        </div>
+                        <div>
+                          <Label>Diagnostic Question</Label>
+                          <Textarea
+                            value={exam.diagnosticQuestion || ''}
+                            onChange={(e) => handleParaclinicalEdit(index, 'diagnosticQuestion', e.target.value)}
+                            rows={2}
+                          />
+                        </div>
+                        <div>
+                          <Label>Specific Protocol</Label>
+                          <Input
+                            value={exam.specificProtocol || ''}
+                            onChange={(e) => handleParaclinicalEdit(index, 'specificProtocol', e.target.value)}
+                            placeholder="Special imaging protocol if needed"
+                          />
+                        </div>
+                        <div className="flex gap-4">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={exam.urgency || false}
+                              onChange={(e) => handleParaclinicalEdit(index, 'urgency', e.target.checked)}
+                              className="rounded"
+                            />
+                            <span className="text-sm">Urgent</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={exam.contrast || false}
+                              onChange={(e) => handleParaclinicalEdit(index, 'contrast', e.target.checked)}
+                              className="rounded"
+                            />
+                            <span className="text-sm">With Contrast</span>
+                          </label>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="font-bold text-lg">
+                          {index + 1}. {exam.type}
+                          {exam.urgency && (
+                            <Badge className="ml-2 bg-blue-100 text-blue-800">URGENT</Badge>
+                          )}
+                          {exam.contrast && (
+                            <Badge className="ml-2 bg-cyan-100 text-cyan-800">WITH CONTRAST</Badge>
+                          )}
+                        </div>
+                        {exam.modality && (
+                          <p className="mt-1 text-sm">
+                            <span className="font-medium">Modality:</span> {exam.modality}
+                          </p>
+                        )}
+                        {exam.region && (
+                          <p className="mt-1 text-sm">
+                            <span className="font-medium">Region:</span> {exam.region}
+                          </p>
+                        )}
+                        {exam.clinicalIndication && (
+                          <p className="mt-2 text-sm text-gray-600">
+                            <span className="font-medium">Clinical Indication:</span> {exam.clinicalIndication}
+                          </p>
+                        )}
+                        {exam.diagnosticQuestion && (
+                          <p className="mt-1 text-sm text-gray-600">
+                            <span className="font-medium">Diagnostic Question:</span> {exam.diagnosticQuestion}
+                          </p>
+                        )}
+                        {exam.specificProtocol && (
+                          <p className="mt-1 text-sm text-blue-600">
+                            <span className="font-medium">Protocol:</span> {exam.specificProtocol}
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
+                  {editMode && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteParaclinicalExam(index)}
+                      className="text-red-600 hover:text-red-700 ml-4"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </div>
             ))
