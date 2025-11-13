@@ -1342,7 +1342,7 @@ export default function ChronicProfessionalReport({
         
         {/* Vital Signs */}
         {(medicalReport.patient.bloodPressureSystolic || medicalReport.patient.temperature || medicalReport.patient.bloodGlucose) && (
-          <div className="mb-6 p-4 bg-green-50 rounded">
+          <div className="mb-6 p-4 bg-teal-50 rounded">
             <h3 className="font-bold mb-2 flex items-center gap-2">
               <Activity className="h-5 w-5" />
               Vital Signs
@@ -1604,7 +1604,7 @@ export default function ChronicProfessionalReport({
     
     return (
       <div id="medication-prescription-section" className="bg-white p-8 rounded-lg shadow print:shadow-none">
-        <div className="border-b-2 border-green-600 pb-4 mb-6">
+        <div className="border-b-2 border-teal-600 pb-4 mb-6">
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-2xl font-bold flex items-center gap-2">
@@ -1655,7 +1655,7 @@ export default function ChronicProfessionalReport({
         <div className="space-y-6">
           {medications.length > 0 ? (
             medications.map((med: any, index: number) => (
-              <div key={index} className="border-l-4 border-green-500 pl-4 py-2 relative">
+              <div key={index} className="border-l-4 border-teal-500 pl-4 py-2 relative">
                 {editMode ? (
                   // EDIT MODE - Editable fields
                   <div className="space-y-3 bg-gray-50 p-4 rounded">
@@ -1776,7 +1776,7 @@ export default function ChronicProfessionalReport({
                     <div className="font-bold text-lg">
                       {index + 1}. {med.nom}
                       {med.nonSubstituable && (
-                        <Badge className="ml-2 bg-red-100 text-red-800">Non-substitutable</Badge>
+                        <Badge className="ml-2 bg-blue-100 text-blue-800">Non-substitutable</Badge>
                       )}
                     </div>
                     {med.denominationCommune && med.denominationCommune !== med.nom && (
@@ -1810,7 +1810,7 @@ export default function ChronicProfessionalReport({
                       </p>
                     )}
                     {med.surveillanceParticuliere && (
-                      <p className="mt-1 text-sm text-orange-600">
+                      <p className="mt-1 text-sm text-cyan-600">
                         <span className="font-medium">⚠️ Monitoring:</span> {med.surveillanceParticuliere}
                       </p>
                     )}
@@ -1834,7 +1834,7 @@ export default function ChronicProfessionalReport({
         
         {/* Special Instructions */}
         {medicationPrescription.prescription.specialInstructions && medicationPrescription.prescription.specialInstructions.length > 0 && (
-          <div className="mt-6 p-4 bg-yellow-50 rounded">
+          <div className="mt-6 p-4 bg-cyan-50 rounded">
             <h3 className="font-bold mb-2">Special Instructions:</h3>
             <ul className="list-disc list-inside text-sm space-y-1">
               {medicationPrescription.prescription.specialInstructions.map((instruction, idx) => (
@@ -1892,7 +1892,7 @@ export default function ChronicProfessionalReport({
     
     return (
       <div id="laboratory-tests-section" className="bg-white p-8 rounded-lg shadow print:shadow-none">
-        <div className="border-b-2 border-purple-600 pb-4 mb-6">
+        <div className="border-b-2 border-blue-600 pb-4 mb-6">
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-2xl font-bold">LABORATORY REQUEST FORM</h2>
@@ -1923,7 +1923,7 @@ export default function ChronicProfessionalReport({
         
         {/* Clinical Indication */}
         {laboratoryTests.prescription.clinicalIndication && (
-          <div className="mb-6 p-4 bg-purple-50 rounded">
+          <div className="mb-6 p-4 bg-blue-50 rounded">
             <h3 className="font-bold mb-2">Clinical Indication:</h3>
             <p className="text-sm">{laboratoryTests.prescription.clinicalIndication}</p>
           </div>
@@ -1938,10 +1938,10 @@ export default function ChronicProfessionalReport({
               
               return (
                 <div key={category.key} className="border rounded-lg p-4">
-                  <h3 className="font-bold text-lg mb-3 text-purple-700">{category.label}</h3>
+                  <h3 className="font-bold text-lg mb-3 text-blue-700">{category.label}</h3>
                   <div className="space-y-3">
                     {categoryTests.map((test: any, idx: number) => (
-                      <div key={idx} className="border-l-4 border-purple-400 pl-4 py-2">
+                      <div key={idx} className="border-l-4 border-blue-400 pl-4 py-2">
                         <div className="flex items-start justify-between">
                           <div>
                             <p className="font-semibold">{test.nom || test.name}</p>
@@ -1963,10 +1963,10 @@ export default function ChronicProfessionalReport({
                           </div>
                           <div className="flex gap-2">
                             {test.urgence && (
-                              <Badge className="bg-red-100 text-red-800">URGENT</Badge>
+                              <Badge className="bg-blue-100 text-blue-800">URGENT</Badge>
                             )}
                             {test.aJeun && (
-                              <Badge className="bg-orange-100 text-orange-800">FASTING</Badge>
+                              <Badge className="bg-cyan-100 text-cyan-800">FASTING</Badge>
                             )}
                           </div>
                         </div>
@@ -1986,7 +1986,7 @@ export default function ChronicProfessionalReport({
         
         {/* Special Instructions */}
         {laboratoryTests.prescription.specialInstructions && laboratoryTests.prescription.specialInstructions.length > 0 && (
-          <div className="mt-6 p-4 bg-yellow-50 rounded">
+          <div className="mt-6 p-4 bg-cyan-50 rounded">
             <h3 className="font-bold mb-2">Special Instructions:</h3>
             <ul className="list-disc list-inside text-sm space-y-1">
               {laboratoryTests.prescription.specialInstructions.map((instruction, idx) => (
@@ -2080,10 +2080,10 @@ export default function ChronicProfessionalReport({
                     <div className="font-bold text-lg">
                       {index + 1}. {exam.type}
                       {exam.urgency && (
-                        <Badge className="ml-2 bg-red-100 text-red-800">URGENT</Badge>
+                        <Badge className="ml-2 bg-blue-100 text-blue-800">URGENT</Badge>
                       )}
                       {exam.contrast && (
-                        <Badge className="ml-2 bg-orange-100 text-orange-800">WITH CONTRAST</Badge>
+                        <Badge className="ml-2 bg-cyan-100 text-cyan-800">WITH CONTRAST</Badge>
                       )}
                     </div>
                     {exam.modality && (
@@ -2125,7 +2125,7 @@ export default function ChronicProfessionalReport({
         
         {/* Special Instructions */}
         {paraclinicalExams.prescription.specialInstructions && paraclinicalExams.prescription.specialInstructions.length > 0 && (
-          <div className="mt-6 p-4 bg-yellow-50 rounded">
+          <div className="mt-6 p-4 bg-cyan-50 rounded">
             <h3 className="font-bold mb-2">Special Instructions:</h3>
             <ul className="list-disc list-inside text-sm space-y-1">
               {paraclinicalExams.prescription.specialInstructions.map((instruction, idx) => (
@@ -2163,7 +2163,7 @@ export default function ChronicProfessionalReport({
               onClick={handleGenerateDietaryPlan}
               disabled={dietaryLoading}
               size="lg"
-              className="bg-orange-600 hover:bg-orange-700"
+              className="bg-cyan-600 hover:bg-cyan-700"
             >
               {dietaryLoading ? (
                 <>
@@ -2192,7 +2192,7 @@ export default function ChronicProfessionalReport({
     
     return (
       <div id="dietary-protocol-section" className="bg-white p-8 rounded-lg shadow print:shadow-none">
-        <div className="border-b-2 border-orange-600 pb-4 mb-6">
+        <div className="border-b-2 border-cyan-600 pb-4 mb-6">
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-2xl font-bold flex items-center gap-2">
@@ -2201,12 +2201,12 @@ export default function ChronicProfessionalReport({
               </h2>
               <p className="text-gray-600 mt-1">Personalized Nutrition Plan</p>
               {!detailedDietaryGenerated && (
-                <p className="text-sm text-orange-600 mt-1 font-medium">
+                <p className="text-sm text-cyan-600 mt-1 font-medium">
                   📋 Basic meal plan from diagnosis. Click button to generate detailed 7-day plan.
                 </p>
               )}
               {detailedDietaryGenerated && (
-                <p className="text-sm text-green-600 mt-1 font-medium">
+                <p className="text-sm text-teal-600 mt-1 font-medium">
                   ✓ Detailed 7-day meal plan generated with exact portions and nutrition
                 </p>
               )}
@@ -2217,7 +2217,7 @@ export default function ChronicProfessionalReport({
                   onClick={handleGenerateDietaryPlan}
                   variant="default"
                   size="sm"
-                  className="bg-orange-600 hover:bg-orange-700"
+                  className="bg-cyan-600 hover:bg-cyan-700"
                 >
                   <Utensils className="h-4 w-4 mr-2" />
                   Generate Detailed 7-Day Plan
@@ -2310,7 +2310,7 @@ export default function ChronicProfessionalReport({
         
         {/* Nutritional Guidelines */}
         {dietaryProtocol.nutritionalGuidelines && (
-          <div className="mb-6 p-4 bg-orange-50 rounded">
+          <div className="mb-6 p-4 bg-cyan-50 rounded">
             <h3 className="font-bold mb-3">Nutritional Guidelines</h3>
             <div className="grid grid-cols-2 gap-3 text-sm">
               {dietaryProtocol.nutritionalGuidelines.caloriesTarget && (
@@ -2346,7 +2346,7 @@ export default function ChronicProfessionalReport({
         {/* 7-Day Weekly Meal Plan */}
         {dietaryProtocol.weeklyMealPlan && (
           <div className="mb-6">
-            <h3 className="font-bold text-xl mb-4 text-center border-b-2 border-orange-600 pb-2">
+            <h3 className="font-bold text-xl mb-4 text-center border-b-2 border-cyan-600 pb-2">
               7-DAY MEAL PLAN
             </h3>
             
@@ -2359,22 +2359,22 @@ export default function ChronicProfessionalReport({
               const dayName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][dayIndex]
               
               return (
-                <div key={dayKey} className="mb-6 border-2 border-orange-200 rounded-lg p-6 bg-gradient-to-br from-orange-50 to-white print:page-break-inside-avoid">
+                <div key={dayKey} className="mb-6 border-2 border-cyan-200 rounded-lg p-6 bg-gradient-to-br from-orange-50 to-white print:page-break-inside-avoid">
                   {/* Day Header */}
-                  <div className="mb-4 pb-3 border-b-2 border-orange-300">
-                    <h4 className="text-xl font-bold text-orange-800">
+                  <div className="mb-4 pb-3 border-b-2 border-cyan-300">
+                    <h4 className="text-xl font-bold text-cyan-800">
                       DAY {dayNumber} - {dayName}
                     </h4>
                   </div>
                   
                   {/* Breakfast */}
                   {dayData.breakfast && (
-                    <div className="mb-4 bg-white rounded p-3 border-l-4 border-yellow-500">
-                      <h5 className="font-bold text-yellow-700 mb-2">🌅 BREAKFAST ({dayData.breakfast.totalCalories} kcal)</h5>
+                    <div className="mb-4 bg-white rounded p-3 border-l-4 border-cyan-500">
+                      <h5 className="font-bold text-cyan-700 mb-2">🌅 BREAKFAST ({dayData.breakfast.totalCalories} kcal)</h5>
                       <ul className="space-y-1 text-sm">
                         {dayData.breakfast.foods && dayData.breakfast.foods.map((food: any, idx: number) => (
                           <li key={idx} className="ml-4">
-                            • <strong>{food.item}</strong> - {food.quantity} - <span className="text-orange-600">{food.calories} kcal</span>
+                            • <strong>{food.item}</strong> - {food.quantity} - <span className="text-cyan-600">{food.calories} kcal</span>
                           </li>
                         ))}
                       </ul>
@@ -2383,12 +2383,12 @@ export default function ChronicProfessionalReport({
                   
                   {/* Mid-Morning Snack */}
                   {dayData.midMorningSnack && (
-                    <div className="mb-4 bg-white rounded p-3 border-l-4 border-green-500">
-                      <h5 className="font-bold text-green-700 mb-2">☕ MID-MORNING SNACK ({dayData.midMorningSnack.totalCalories} kcal)</h5>
+                    <div className="mb-4 bg-white rounded p-3 border-l-4 border-teal-500">
+                      <h5 className="font-bold text-teal-700 mb-2">☕ MID-MORNING SNACK ({dayData.midMorningSnack.totalCalories} kcal)</h5>
                       <ul className="space-y-1 text-sm">
                         {dayData.midMorningSnack.foods && dayData.midMorningSnack.foods.map((food: any, idx: number) => (
                           <li key={idx} className="ml-4">
-                            • <strong>{food.item}</strong> - {food.quantity} - <span className="text-orange-600">{food.calories} kcal</span>
+                            • <strong>{food.item}</strong> - {food.quantity} - <span className="text-cyan-600">{food.calories} kcal</span>
                           </li>
                         ))}
                       </ul>
@@ -2402,7 +2402,7 @@ export default function ChronicProfessionalReport({
                       <ul className="space-y-1 text-sm">
                         {dayData.lunch.foods && dayData.lunch.foods.map((food: any, idx: number) => (
                           <li key={idx} className="ml-4">
-                            • <strong>{food.item}</strong> - {food.quantity} - <span className="text-orange-600">{food.calories} kcal</span>
+                            • <strong>{food.item}</strong> - {food.quantity} - <span className="text-cyan-600">{food.calories} kcal</span>
                           </li>
                         ))}
                       </ul>
@@ -2411,12 +2411,12 @@ export default function ChronicProfessionalReport({
                   
                   {/* Afternoon Snack */}
                   {dayData.afternoonSnack && (
-                    <div className="mb-4 bg-white rounded p-3 border-l-4 border-purple-500">
-                      <h5 className="font-bold text-purple-700 mb-2">🍎 AFTERNOON SNACK ({dayData.afternoonSnack.totalCalories} kcal)</h5>
+                    <div className="mb-4 bg-white rounded p-3 border-l-4 border-blue-500">
+                      <h5 className="font-bold text-blue-700 mb-2">🍎 AFTERNOON SNACK ({dayData.afternoonSnack.totalCalories} kcal)</h5>
                       <ul className="space-y-1 text-sm">
                         {dayData.afternoonSnack.foods && dayData.afternoonSnack.foods.map((food: any, idx: number) => (
                           <li key={idx} className="ml-4">
-                            • <strong>{food.item}</strong> - {food.quantity} - <span className="text-orange-600">{food.calories} kcal</span>
+                            • <strong>{food.item}</strong> - {food.quantity} - <span className="text-cyan-600">{food.calories} kcal</span>
                           </li>
                         ))}
                       </ul>
@@ -2430,7 +2430,7 @@ export default function ChronicProfessionalReport({
                       <ul className="space-y-1 text-sm">
                         {dayData.dinner.foods && dayData.dinner.foods.map((food: any, idx: number) => (
                           <li key={idx} className="ml-4">
-                            • <strong>{food.item}</strong> - {food.quantity} - <span className="text-orange-600">{food.calories} kcal</span>
+                            • <strong>{food.item}</strong> - {food.quantity} - <span className="text-cyan-600">{food.calories} kcal</span>
                           </li>
                         ))}
                       </ul>
@@ -2438,8 +2438,8 @@ export default function ChronicProfessionalReport({
                   )}
                   
                   {/* Daily Total */}
-                  <div className="mt-3 pt-3 border-t border-orange-300">
-                    <p className="text-right font-bold text-lg text-orange-800">
+                  <div className="mt-3 pt-3 border-t border-cyan-300">
+                    <p className="text-right font-bold text-lg text-cyan-800">
                       📊 DAILY TOTAL: {
                         (dayData.breakfast?.totalCalories || 0) +
                         (dayData.midMorningSnack?.totalCalories || 0) +
@@ -2467,7 +2467,7 @@ export default function ChronicProfessionalReport({
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   {dietaryProtocol.practicalGuidance.groceryList.proteins && (
                     <div>
-                      <p className="font-semibold text-red-700">Proteins:</p>
+                      <p className="font-semibold text-blue-700">Proteins:</p>
                       <ul className="list-disc list-inside ml-2">
                         {dietaryProtocol.practicalGuidance.groceryList.proteins.map((item: string, idx: number) => (
                           <li key={idx}>{item}</li>
@@ -2477,7 +2477,7 @@ export default function ChronicProfessionalReport({
                   )}
                   {dietaryProtocol.practicalGuidance.groceryList.vegetables && (
                     <div>
-                      <p className="font-semibold text-green-700">Vegetables:</p>
+                      <p className="font-semibold text-teal-700">Vegetables:</p>
                       <ul className="list-disc list-inside ml-2">
                         {dietaryProtocol.practicalGuidance.groceryList.vegetables.map((item: string, idx: number) => (
                           <li key={idx}>{item}</li>
@@ -2487,7 +2487,7 @@ export default function ChronicProfessionalReport({
                   )}
                   {dietaryProtocol.practicalGuidance.groceryList.grains && (
                     <div>
-                      <p className="font-semibold text-yellow-700">Grains:</p>
+                      <p className="font-semibold text-cyan-700">Grains:</p>
                       <ul className="list-disc list-inside ml-2">
                         {dietaryProtocol.practicalGuidance.groceryList.grains.map((item: string, idx: number) => (
                           <li key={idx}>{item}</li>
@@ -2517,8 +2517,8 @@ export default function ChronicProfessionalReport({
                 <h4 className="font-semibold mb-2 text-blue-700">👨‍🍳 Cooking Methods:</h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   {dietaryProtocol.practicalGuidance.cookingMethods.recommended && (
-                    <div className="bg-green-50 p-3 rounded">
-                      <p className="font-semibold text-green-700 mb-1">✅ Recommended:</p>
+                    <div className="bg-teal-50 p-3 rounded">
+                      <p className="font-semibold text-teal-700 mb-1">✅ Recommended:</p>
                       <ul className="list-disc list-inside ml-2">
                         {dietaryProtocol.practicalGuidance.cookingMethods.recommended.map((method: string, idx: number) => (
                           <li key={idx}>{method}</li>
@@ -2527,8 +2527,8 @@ export default function ChronicProfessionalReport({
                     </div>
                   )}
                   {dietaryProtocol.practicalGuidance.cookingMethods.avoid && (
-                    <div className="bg-red-50 p-3 rounded">
-                      <p className="font-semibold text-red-700 mb-1">❌ Avoid:</p>
+                    <div className="bg-blue-50 p-3 rounded">
+                      <p className="font-semibold text-blue-700 mb-1">❌ Avoid:</p>
                       <ul className="list-disc list-inside ml-2">
                         {dietaryProtocol.practicalGuidance.cookingMethods.avoid.map((method: string, idx: number) => (
                           <li key={idx}>{method}</li>
@@ -2545,8 +2545,8 @@ export default function ChronicProfessionalReport({
         {/* Foods to Avoid & Recommended */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           {dietaryProtocol.forbiddenFoods && dietaryProtocol.forbiddenFoods.length > 0 && (
-            <div className="p-4 bg-red-50 rounded">
-              <h4 className="font-semibold mb-2 text-red-700">Foods to Avoid:</h4>
+            <div className="p-4 bg-blue-50 rounded">
+              <h4 className="font-semibold mb-2 text-blue-700">Foods to Avoid:</h4>
               <ul className="list-disc list-inside text-sm space-y-1">
                 {dietaryProtocol.forbiddenFoods.map((food, idx) => (
                   <li key={idx}>{food}</li>
@@ -2555,8 +2555,8 @@ export default function ChronicProfessionalReport({
             </div>
           )}
           {dietaryProtocol.recommendedFoods && dietaryProtocol.recommendedFoods.length > 0 && (
-            <div className="p-4 bg-green-50 rounded">
-              <h4 className="font-semibold mb-2 text-green-700">Recommended Foods:</h4>
+            <div className="p-4 bg-teal-50 rounded">
+              <h4 className="font-semibold mb-2 text-teal-700">Recommended Foods:</h4>
               <ul className="list-disc list-inside text-sm space-y-1">
                 {dietaryProtocol.recommendedFoods.map((food, idx) => (
                   <li key={idx}>{food}</li>
@@ -2568,7 +2568,7 @@ export default function ChronicProfessionalReport({
         
         {/* Special Instructions */}
         {dietaryProtocol.specialInstructions && dietaryProtocol.specialInstructions.length > 0 && (
-          <div className="p-4 bg-yellow-50 rounded mb-6">
+          <div className="p-4 bg-cyan-50 rounded mb-6">
             <h4 className="font-semibold mb-2">Special Instructions:</h4>
             <ul className="list-disc list-inside text-sm space-y-1">
               {dietaryProtocol.specialInstructions.map((instruction, idx) => (
@@ -2645,14 +2645,14 @@ export default function ChronicProfessionalReport({
         {/* Treatment Goals */}
         <div className="grid grid-cols-2 gap-6 mb-6">
           {followUpPlan.shortTermGoals && followUpPlan.shortTermGoals.length > 0 && (
-            <div className="border rounded-lg p-4 bg-green-50">
+            <div className="border rounded-lg p-4 bg-teal-50">
               <h3 className="font-bold mb-3 flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
                 Short-Term Goals (0-3 months)
               </h3>
               <div className="space-y-3">
                 {followUpPlan.shortTermGoals.map((goal, idx) => (
-                  <div key={idx} className="border-l-4 border-green-500 pl-3">
+                  <div key={idx} className="border-l-4 border-teal-500 pl-3">
                     <p className="font-semibold text-sm">{goal.goal}</p>
                     <p className="text-xs text-gray-600">Timeline: {goal.timeline}</p>
                     {goal.metrics && goal.metrics.length > 0 && (
@@ -2695,7 +2695,7 @@ export default function ChronicProfessionalReport({
         
         {/* Monitoring Schedule */}
         {followUpPlan.monitoringSchedule && (
-          <div className="mb-6 p-4 bg-purple-50 rounded-lg">
+          <div className="mb-6 p-4 bg-blue-50 rounded-lg">
             <h3 className="font-bold mb-3">Monitoring Schedule</h3>
             <div className="grid grid-cols-2 gap-3 text-sm">
               {followUpPlan.monitoringSchedule.nextAppointment && (
@@ -2773,8 +2773,8 @@ export default function ChronicProfessionalReport({
         
         {/* Emergency Protocol */}
         {followUpPlan.emergencyProtocol && (
-          <div className="mb-6 p-4 bg-red-50 rounded-lg border-2 border-red-200">
-            <h3 className="font-bold mb-3 text-red-700 flex items-center gap-2">
+          <div className="mb-6 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+            <h3 className="font-bold mb-3 text-blue-700 flex items-center gap-2">
               <AlertTriangle className="h-5 w-5" />
               Emergency Protocol
             </h3>
@@ -2813,7 +2813,7 @@ export default function ChronicProfessionalReport({
         
         {/* Educational Resources */}
         {followUpPlan.educationalResources && followUpPlan.educationalResources.length > 0 && (
-          <div className="p-4 bg-yellow-50 rounded mb-6">
+          <div className="p-4 bg-cyan-50 rounded mb-6">
             <h4 className="font-semibold mb-2">Educational Resources:</h4>
             <ul className="list-disc list-inside text-sm space-y-1">
               {followUpPlan.educationalResources.map((resource, idx) => (
@@ -2860,7 +2860,7 @@ export default function ChronicProfessionalReport({
         <CardContent className="p-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <Badge className={validationStatus === 'validated' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+              <Badge className={validationStatus === 'validated' ? 'bg-teal-100 text-teal-800' : 'bg-cyan-100 text-cyan-800'}>
                 {validationStatus === 'validated' ? (
                   <>
                     <Lock className="h-3 w-3 mr-1" />
@@ -2945,14 +2945,14 @@ export default function ChronicProfessionalReport({
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="p-4 bg-green-50 rounded">
-              <Pill className="h-8 w-8 mx-auto mb-2 text-green-600" />
-              <p className="text-2xl font-bold text-green-600">{medicationCount}</p>
+            <div className="p-4 bg-teal-50 rounded">
+              <Pill className="h-8 w-8 mx-auto mb-2 text-teal-600" />
+              <p className="text-2xl font-bold text-teal-600">{medicationCount}</p>
               <p className="text-sm text-gray-600">Medications</p>
             </div>
-            <div className="p-4 bg-purple-50 rounded">
-              <TestTube className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-              <p className="text-2xl font-bold text-purple-600">{labTestsCount}</p>
+            <div className="p-4 bg-blue-50 rounded">
+              <TestTube className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+              <p className="text-2xl font-bold text-blue-600">{labTestsCount}</p>
               <p className="text-sm text-gray-600">Lab Tests</p>
             </div>
             <div className="p-4 bg-indigo-50 rounded">

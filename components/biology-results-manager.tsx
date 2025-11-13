@@ -349,7 +349,7 @@ export const BiologyResultsManager = ({
 
   // ========== Rendu des composants ==========
   const ResultCard = ({ result }: { result: BiologyResult }) => (
-    <Card className={`mb-4 ${result.isCritical ? 'border-red-500' : result.isAbnormal ? 'border-yellow-500' : 'border-green-500'}`}>
+    <Card className={`mb-4 ${result.isCritical ? 'border-blue-500' : result.isAbnormal ? 'border-cyan-500' : 'border-teal-500'}`}>
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">
           <div>
@@ -358,9 +358,9 @@ export const BiologyResultsManager = ({
           </div>
           <div className="flex gap-2">
             <Badge className={
-              result.isCritical ? 'bg-red-100 text-red-800' :
-              result.isAbnormal ? 'bg-yellow-100 text-yellow-800' :
-              'bg-green-100 text-green-800'
+              result.isCritical ? 'bg-blue-100 text-blue-800' :
+              result.isAbnormal ? 'bg-cyan-100 text-cyan-800' :
+              'bg-teal-100 text-teal-800'
             }>
               {result.isCritical ? 'CRITIQUE' : result.isAbnormal ? 'ANORMAL' : 'NORMAL'}
             </Badge>
@@ -425,7 +425,7 @@ export const BiologyResultsManager = ({
             <p className="text-sm text-gray-600">Prescrit le: {new Date(test.prescribedAt).toLocaleDateString()}</p>
           </div>
           <div className="flex gap-2">
-            <Badge className={test.urgency === 'urgent' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}>
+            <Badge className={test.urgency === 'urgent' ? 'bg-blue-100 text-blue-800' : 'bg-blue-100 text-blue-800'}>
               {test.urgency === 'urgent' ? 'URGENT' : 'ROUTINE'}
             </Badge>
             <Badge variant="outline">EN ATTENTE</Badge>
@@ -459,21 +459,21 @@ export const BiologyResultsManager = ({
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <Clock className="h-8 w-8 mx-auto mb-2 text-orange-600" />
+            <Clock className="h-8 w-8 mx-auto mb-2 text-cyan-600" />
             <p className="text-2xl font-bold">{stats.pending}</p>
             <p className="text-sm text-gray-600">En attente</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-yellow-600" />
+            <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-cyan-600" />
             <p className="text-2xl font-bold">{stats.abnormal}</p>
             <p className="text-sm text-gray-600">Anormaux</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <AlertCircle className="h-8 w-8 mx-auto mb-2 text-red-600" />
+            <AlertCircle className="h-8 w-8 mx-auto mb-2 text-blue-600" />
             <p className="text-2xl font-bold">{stats.critical}</p>
             <p className="text-sm text-gray-600">Critiques</p>
           </CardContent>
@@ -742,7 +742,7 @@ Dans BiologyPrescription, AJOUTER après le rendu des tests prescrits:
 
 {results.length > 0 && (
   <div className="mt-8 border-t pt-6">
-    <h3 className="font-bold text-lg mb-4 text-purple-800">RÉSULTATS REÇUS</h3>
+    <h3 className="font-bold text-lg mb-4 text-blue-800">RÉSULTATS REÇUS</h3>
     <div className="space-y-4">
       {results.map(result => (
         <div key={result.id} className="p-4 border rounded-lg bg-gray-50">
@@ -752,9 +752,9 @@ Dans BiologyPrescription, AJOUTER après le rendu des tests prescrits:
               <p className="text-lg font-bold">
                 {result.value} {result.unit}
                 <Badge className={`ml-2 ${
-                  result.isCritical ? 'bg-red-100 text-red-800' :
-                  result.isAbnormal ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-green-100 text-green-800'
+                  result.isCritical ? 'bg-blue-100 text-blue-800' :
+                  result.isAbnormal ? 'bg-cyan-100 text-cyan-800' :
+                  'bg-teal-100 text-teal-800'
                 }`}>
                   {result.isCritical ? 'CRITIQUE' : result.isAbnormal ? 'ANORMAL' : 'NORMAL'}
                 </Badge>

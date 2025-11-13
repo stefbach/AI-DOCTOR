@@ -208,7 +208,7 @@ export function DoctorSignature({
                 </Button>
               </>
             ) : (
-              <div className="flex items-center text-green-600 text-sm">
+              <div className="flex items-center text-teal-600 text-sm">
                 <Check className="h-4 w-4 mr-1" />
                 Signature confirmed
               </div>

@@ -285,17 +285,17 @@ export default function ModernPatientForm({
     }
     if (bmi < 25) return { 
       text: "Normal weight", 
-      color: "bg-green-100 text-green-800 border-green-200", 
+      color: "bg-teal-100 text-teal-800 border-teal-200", 
       icon: "✅" 
     }
     if (bmi < 30) return { 
       text: "Overweight", 
-      color: "bg-yellow-100 text-yellow-800 border-yellow-200", 
+      color: "bg-cyan-100 text-cyan-800 border-cyan-200", 
       icon: "⚠️" 
     }
     return { 
       text: "Obesity", 
-      color: "bg-red-100 text-red-800 border-red-200", 
+      color: "bg-blue-100 text-blue-800 border-blue-200", 
       icon: "🔴" 
     }
   }, [])
@@ -882,18 +882,18 @@ useEffect(() => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="firstName" className="flex items-center gap-2 font-medium">
-                First Name <span className="text-red-500">*</span>
+                First Name <span className="text-blue-500">*</span>
               </Label>
               <Input
                 id="firstName"
                 value={formData.firstName}
                 onChange={(e) => handleInputChange("firstName", e.target.value)}
                 onKeyDown={handleKeyDown}
-                className={errors.firstName ? "border-red-500" : ""}
+                className={errors.firstName ? "border-blue-500" : ""}
                 placeholder="John"
               />
               {errors.firstName && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
+                <p className="text-sm text-blue-500 flex items-center gap-1">
                   <X className="h-3 w-3" />
                   {errors.firstName}
                 </p>
@@ -902,18 +902,18 @@ useEffect(() => {
 
             <div className="space-y-2">
               <Label htmlFor="lastName" className="flex items-center gap-2 font-medium">
-                Last Name <span className="text-red-500">*</span>
+                Last Name <span className="text-blue-500">*</span>
               </Label>
               <Input
                 id="lastName"
                 value={formData.lastName}
                 onChange={(e) => handleInputChange("lastName", e.target.value)}
                 onKeyDown={handleKeyDown}
-                className={errors.lastName ? "border-red-500" : ""}
+                className={errors.lastName ? "border-blue-500" : ""}
                 placeholder="Doe"
               />
               {errors.lastName && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
+                <p className="text-sm text-blue-500 flex items-center gap-1">
                   <X className="h-3 w-3" />
                   {errors.lastName}
                 </p>
@@ -924,7 +924,7 @@ useEffect(() => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="birthDate" className="flex items-center gap-2 font-medium">
-                Birth Date <span className="text-red-500">*</span>
+                Birth Date <span className="text-blue-500">*</span>
               </Label>
               <Input
                 id="birthDate"
@@ -932,11 +932,11 @@ useEffect(() => {
                 value={formData.birthDate}
                 onChange={(e) => handleInputChange("birthDate", e.target.value)}
                 onKeyDown={handleKeyDown}
-                className={errors.birthDate ? "border-red-500" : ""}
+                className={errors.birthDate ? "border-blue-500" : ""}
                 max={new Date().toISOString().split('T')[0]}
               />
               {errors.birthDate && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
+                <p className="text-sm text-blue-500 flex items-center gap-1">
                   <X className="h-3 w-3" />
                   {errors.birthDate}
                 </p>
@@ -955,7 +955,7 @@ useEffect(() => {
 
           <div className="space-y-4">
             <Label className="flex items-center gap-2 font-medium">
-              Gender <span className="text-red-500">*</span>
+              Gender <span className="text-blue-500">*</span>
             </Label>
             
             <RadioGroup
@@ -979,7 +979,7 @@ useEffect(() => {
                   htmlFor="gender-female"
                   className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
                     formData.gender === 'Female' 
-                      ? "border-pink-500 bg-pink-50" 
+                      ? "border-pink-500 bg-cyan-50" 
                       : "border-gray-200 hover:border-pink-300"
                   }`}
                 >
@@ -990,7 +990,7 @@ useEffect(() => {
             </RadioGroup>
 
             {errors.gender && (
-              <p className="text-sm text-red-500 flex items-center gap-1">
+              <p className="text-sm text-blue-500 flex items-center gap-1">
                 <X className="h-3 w-3" />
                 {errors.gender}
               </p>
@@ -999,10 +999,10 @@ useEffect(() => {
 
           {/* PREGNANCY STATUS SECTION - NEW */}
           {isChildbearingAge && (
-            <div className="space-y-4 p-4 bg-pink-50 rounded-lg border border-pink-200">
-              <Label className="flex items-center gap-2 font-medium text-pink-800">
+            <div className="space-y-4 p-4 bg-cyan-50 rounded-lg border border-pink-200">
+              <Label className="flex items-center gap-2 font-medium text-cyan-800">
                 <Baby className="h-4 w-4" />
-                Pregnancy Information <span className="text-red-500">*</span>
+                Pregnancy Information <span className="text-blue-500">*</span>
               </Label>
               
               <RadioGroup
@@ -1015,8 +1015,8 @@ useEffect(() => {
                     htmlFor="pregnancy-not"
                     className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
                       formData.pregnancyStatus === 'not_pregnant' 
-                        ? "border-green-500 bg-green-50" 
-                        : "border-gray-200 hover:border-green-300"
+                        ? "border-teal-500 bg-teal-50" 
+                        : "border-gray-200 hover:border-teal-300"
                     }`}
                   >
                     <RadioGroupItem value="not_pregnant" id="pregnancy-not" />
@@ -1027,7 +1027,7 @@ useEffect(() => {
                     htmlFor="pregnancy-yes"
                     className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
                       formData.pregnancyStatus === 'pregnant' 
-                        ? "border-pink-500 bg-pink-100" 
+                        ? "border-pink-500 bg-cyan-100" 
                         : "border-gray-200 hover:border-pink-300"
                     }`}
                   >
@@ -1039,8 +1039,8 @@ useEffect(() => {
                     htmlFor="pregnancy-maybe"
                     className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
                       formData.pregnancyStatus === 'possibly_pregnant' 
-                        ? "border-yellow-500 bg-yellow-50" 
-                        : "border-gray-200 hover:border-yellow-300"
+                        ? "border-cyan-500 bg-cyan-50" 
+                        : "border-gray-200 hover:border-cyan-300"
                     }`}
                   >
                     <RadioGroupItem value="possibly_pregnant" id="pregnancy-maybe" />
@@ -1062,7 +1062,7 @@ useEffect(() => {
               </RadioGroup>
 
               {errors.pregnancyStatus && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
+                <p className="text-sm text-blue-500 flex items-center gap-1">
                   <X className="h-3 w-3" />
                   {errors.pregnancyStatus}
                 </p>
@@ -1085,7 +1085,7 @@ useEffect(() => {
                     className="border-pink-200"
                   />
                   {formData.pregnancyStatus === 'pregnant' && formData.gestationalAge && (
-                    <p className="text-sm text-pink-700 font-medium">
+                    <p className="text-sm text-cyan-700 font-medium">
                       Gestational age: {formData.gestationalAge}
                     </p>
                   )}
@@ -1098,16 +1098,16 @@ useEffect(() => {
               {/* Pregnancy warning */}
               {(formData.pregnancyStatus === 'pregnant' || 
                 formData.pregnancyStatus === 'possibly_pregnant') && (
-                <div className="mt-4 p-3 bg-yellow-100 border border-yellow-400 rounded-lg">
+                <div className="mt-4 p-3 bg-cyan-100 border border-cyan-400 rounded-lg">
                   <div className="flex items-start gap-2">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                    <AlertTriangle className="h-5 w-5 text-cyan-600 mt-0.5" />
                     <div className="text-sm">
-                      <p className="font-semibold text-yellow-800">Important Medical Notice</p>
-                      <p className="text-yellow-700 mt-1">
+                      <p className="font-semibold text-cyan-800">Important Medical Notice</p>
+                      <p className="text-cyan-700 mt-1">
                         Your pregnancy status will be taken into account for all medical recommendations. 
                         Some medications and examinations may be contraindicated or require special precautions.
                       </p>
-                      <ul className="mt-2 text-yellow-700 list-disc list-inside">
+                      <ul className="mt-2 text-cyan-700 list-disc list-inside">
                         <li>Medications will be reviewed for pregnancy safety</li>
                         <li>X-rays and CT scans will be avoided unless absolutely necessary</li>
                         <li>Safe alternatives will be prioritized</li>
@@ -1122,7 +1122,7 @@ useEffect(() => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="weight" className="flex items-center gap-2 font-medium">
-                Weight (kg) <span className="text-red-500">*</span>
+                Weight (kg) <span className="text-blue-500">*</span>
               </Label>
               <Input
                 id="weight"
@@ -1133,11 +1133,11 @@ useEffect(() => {
                 min="1"
                 max="500"
                 step="0.1"
-                className={errors.weight ? "border-red-500" : ""}
+                className={errors.weight ? "border-blue-500" : ""}
                 placeholder="70.5"
               />
               {errors.weight && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
+                <p className="text-sm text-blue-500 flex items-center gap-1">
                   <X className="h-3 w-3" />
                   {errors.weight}
                 </p>
@@ -1146,7 +1146,7 @@ useEffect(() => {
 
             <div className="space-y-2">
               <Label htmlFor="height" className="flex items-center gap-2 font-medium">
-                Height (cm) <span className="text-red-500">*</span>
+                Height (cm) <span className="text-blue-500">*</span>
               </Label>
               <Input
                 id="height"
@@ -1156,11 +1156,11 @@ useEffect(() => {
                 onKeyDown={handleKeyDown}
                 min="50"
                 max="250"
-                className={errors.height ? "border-red-500" : ""}
+                className={errors.height ? "border-blue-500" : ""}
                 placeholder="175"
               />
               {errors.height && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
+                <p className="text-sm text-blue-500 flex items-center gap-1">
                   <X className="h-3 w-3" />
                   {errors.height}
                 </p>
@@ -1223,10 +1223,10 @@ useEffect(() => {
                 onChange={(e) => handleInputChange("email", e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="patient@example.com"
-                className={errors.email ? "border-red-500" : ""}
+                className={errors.email ? "border-blue-500" : ""}
               />
               {errors.email && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
+                <p className="text-sm text-blue-500 flex items-center gap-1">
                   <X className="h-3 w-3" />
                   {errors.email}
                 </p>
@@ -1306,8 +1306,8 @@ useEffect(() => {
                 key={allergy}
                 className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
                   formData.allergies.includes(allergy)
-                    ? "border-red-400 bg-red-50"
-                    : "border-gray-200 hover:border-red-300 hover:bg-red-50/50"
+                    ? "border-blue-400 bg-blue-50"
+                    : "border-gray-200 hover:border-blue-300 hover:bg-blue-50/50"
                 }`}
               >
                 <Checkbox
@@ -1332,10 +1332,10 @@ useEffect(() => {
           </div>
 
           {(formData.allergies.length > 0 || formData.otherAllergies) && (
-            <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
-                <p className="font-semibold text-red-800">Declared Allergies</p>
+                <AlertTriangle className="h-5 w-5 text-blue-600" />
+                <p className="font-semibold text-blue-800">Declared Allergies</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {formData.allergies.map((allergy) => (
@@ -1379,8 +1379,8 @@ useEffect(() => {
                 key={condition}
                 className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
                   formData.medicalHistory.includes(condition)
-                    ? "border-purple-400 bg-purple-50"
-                    : "border-gray-200 hover:border-purple-300 hover:bg-purple-50/50"
+                    ? "border-blue-400 bg-blue-50"
+                    : "border-gray-200 hover:border-blue-300 hover:bg-blue-50/50"
                 }`}
               >
                 <Checkbox
@@ -1405,19 +1405,19 @@ useEffect(() => {
           </div>
 
           {(formData.medicalHistory.length > 0 || formData.otherMedicalHistory) && (
-            <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-center gap-2 mb-3">
-                <Heart className="h-5 w-5 text-purple-600" />
-                <p className="font-semibold text-purple-800">Declared Medical History</p>
+                <Heart className="h-5 w-5 text-blue-600" />
+                <p className="font-semibold text-blue-800">Declared Medical History</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {formData.medicalHistory.map((condition) => (
-                  <Badge key={condition} className="bg-purple-100 text-purple-800 text-xs">
+                  <Badge key={condition} className="bg-blue-100 text-blue-800 text-xs">
                     {condition}
                   </Badge>
                 ))}
                 {formData.otherMedicalHistory && (
-                  <Badge className="bg-purple-100 text-purple-800 text-xs">
+                  <Badge className="bg-blue-100 text-blue-800 text-xs">
                     Other
                   </Badge>
                 )}
@@ -1479,17 +1479,17 @@ Example:
               )}
             </p>
             {formData.pregnancyStatus === 'pregnant' && (
-              <p className="text-xs text-pink-600 font-medium">
+              <p className="text-xs text-cyan-600 font-medium">
                 ⚠️ Current medications will be reviewed for pregnancy safety
               </p>
             )}
           </div>
 
           {formData.currentMedicationsText && (
-            <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+            <div className="p-4 bg-teal-50 rounded-lg border border-teal-200">
               <div className="flex items-center gap-2">
-                <Check className="h-5 w-5 text-green-600" />
-                <p className="font-semibold text-green-800">
+                <Check className="h-5 w-5 text-teal-600" />
+                <p className="font-semibold text-teal-800">
                   Treatments entered (
                   {formData.currentMedicationsText.split('\n').filter(line => line.trim()).length} 
                   {' '}lines)
@@ -1524,7 +1524,7 @@ Example:
                     key={option.value}
                     className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
                       formData.lifeHabits.smoking === option.value
-                        ? "border-orange-400 bg-orange-50"
+                        ? "border-orange-400 bg-blue-50"
                         : "border-gray-200 hover:border-orange-300"
                     }`}
                   >
@@ -1534,7 +1534,7 @@ Example:
                 ))}
               </RadioGroup>
               {formData.pregnancyStatus === 'pregnant' && formData.lifeHabits.smoking === 'actuel' && (
-                <p className="text-xs text-red-600 font-medium">
+                <p className="text-xs text-blue-600 font-medium">
                   ⚠️ Smoking during pregnancy increases health risks
                 </p>
               )}
@@ -1554,7 +1554,7 @@ Example:
                     key={option.value}
                     className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
                       formData.lifeHabits.alcohol === option.value
-                        ? "border-orange-400 bg-orange-50"
+                        ? "border-orange-400 bg-blue-50"
                         : "border-gray-200 hover:border-orange-300"
                     }`}
                   >
@@ -1565,7 +1565,7 @@ Example:
               </RadioGroup>
               {formData.pregnancyStatus === 'pregnant' && 
                (formData.lifeHabits.alcohol === 'occasionnel' || formData.lifeHabits.alcohol === 'regulier') && (
-                <p className="text-xs text-red-600 font-medium">
+                <p className="text-xs text-blue-600 font-medium">
                   ⚠️ No safe level of alcohol during pregnancy
                 </p>
               )}
@@ -1585,7 +1585,7 @@ Example:
                     key={option.value}
                     className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
                       formData.lifeHabits.physicalActivity === option.value
-                        ? "border-orange-400 bg-orange-50"
+                        ? "border-orange-400 bg-blue-50"
                         : "border-gray-200 hover:border-orange-300"
                     }`}
                   >
@@ -1607,7 +1607,7 @@ Example:
       {/* Auto-save indicator */}
       <div className="flex justify-center">
         <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse"></div>
           <span className="text-sm text-gray-600">
             Auto-saving
             {lastSaved && (
@@ -1673,31 +1673,31 @@ Example:
             <label 
               className={`flex items-start gap-4 p-6 rounded-xl border-3 transition-all cursor-pointer ${
                 consultationType === 'chronic'
-                  ? "border-purple-500 bg-purple-50 shadow-lg scale-[1.02]"
-                  : "border-gray-300 hover:border-purple-400 hover:bg-purple-50/50"
+                  ? "border-blue-500 bg-blue-50 shadow-lg scale-[1.02]"
+                  : "border-gray-300 hover:border-blue-400 hover:bg-blue-50/50"
               }`}
             >
               <RadioGroupItem value="chronic" id="consultation-chronic" className="mt-1" />
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-2xl">🏥</span>
-                  <span className="font-bold text-xl text-purple-900">Chronic Disease Follow-up</span>
+                  <span className="font-bold text-xl text-blue-900">Chronic Disease Follow-up</span>
                 </div>
                 <p className="text-gray-600 text-sm leading-relaxed">
                   Specialized consultation for chronic disease management. Includes detailed assessment, 
                   treatment plan optimization, lifestyle counseling, and long-term follow-up scheduling.
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
                     Diabetes
                   </Badge>
-                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
                     Hypertension
                   </Badge>
-                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
                     Obesity
                   </Badge>
-                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
                     Dyslipidemia
                   </Badge>
                 </div>
@@ -1706,8 +1706,8 @@ Example:
           </RadioGroup>
 
           {consultationType && (
-            <div className="mt-6 p-4 bg-white rounded-lg border-l-4 border-green-500">
-              <div className="flex items-center gap-2 text-green-700">
+            <div className="mt-6 p-4 bg-white rounded-lg border-l-4 border-teal-500">
+              <div className="flex items-center gap-2 text-teal-700">
                 <Check className="h-5 w-5" />
                 <span className="font-medium">
                   {consultationType === 'normal' 
