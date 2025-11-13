@@ -9,7 +9,7 @@ export const preferredRegion = 'auto'
 
 export async function POST(req: NextRequest) {
   try {
-    const { patientData, diagnosisData, reportData } = await req.json()
+    const { patientData, clinicalData, diagnosisData, reportData } = await req.json()
 
     // Get current date for exam orders
     const orderDate = new Date()
@@ -301,6 +301,22 @@ LIFESTYLE HABITS (context for exam interpretation):
 - Smoking: ${patientData.lifeHabits?.smoking || 'Not specified'}
 - Alcohol Consumption: ${patientData.lifeHabits?.alcohol || 'Not specified'}
 - Physical Activity: ${patientData.lifeHabits?.physicalActivity || 'Not specified'}
+
+CURRENT CLINICAL EXAMINATION DATA:
+${clinicalData ? `
+- Chief Complaint: ${clinicalData.chiefComplaint || 'Not specified'}
+- Current Blood Pressure: ${clinicalData.vitalSigns?.bloodPressureSystolic || 'Not measured'}/${clinicalData.vitalSigns?.bloodPressureDiastolic || 'Not measured'} mmHg
+- Current Blood Glucose: ${clinicalData.vitalSigns?.bloodGlucose || 'Not measured'} g/L
+- Heart Rate: ${clinicalData.vitalSigns?.heartRate || 'Not measured'} bpm
+- Last HbA1c: ${clinicalData.chronicDiseaseSpecific?.lastHbA1c || 'Not available'} (Date: ${clinicalData.chronicDiseaseSpecific?.lastHbA1cDate || 'N/A'})
+- Last Lipid Panel: ${clinicalData.chronicDiseaseSpecific?.lastLipidPanel || 'Not available'} (Date: ${clinicalData.chronicDiseaseSpecific?.lastLipidPanelDate || 'N/A'})
+- Last Follow-up: ${clinicalData.chronicDiseaseSpecific?.lastFollowUp || 'Not available'}
+- Complications Present:
+  * Vision Changes: ${clinicalData.chronicDiseaseSpecific?.complications?.visionChanges || 'None'}
+  * Foot Problems: ${clinicalData.chronicDiseaseSpecific?.complications?.footProblems || 'None'}
+  * Chest Pain: ${clinicalData.chronicDiseaseSpecific?.complications?.chestPain || 'None'}
+  * Shortness of Breath: ${clinicalData.chronicDiseaseSpecific?.complications?.shortnessOfBreath || 'None'}
+` : 'Clinical data not available'}
 
 DIAGNOSIS DATA (BASIS FOR EXAM ORDERS):
 ${JSON.stringify(diagnosisData, null, 2)}

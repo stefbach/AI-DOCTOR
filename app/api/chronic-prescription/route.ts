@@ -9,7 +9,7 @@ export const preferredRegion = 'auto'
 
 export async function POST(req: NextRequest) {
   try {
-    const { patientData, diagnosisData, reportData } = await req.json()
+    const { patientData, clinicalData, diagnosisData, reportData } = await req.json()
 
     // Calculate BMI for medication dosing considerations
     const weight = parseFloat(patientData.weight)
@@ -239,6 +239,24 @@ LIFESTYLE HABITS (may affect medication choice):
 - Smoking: ${patientData.lifeHabits?.smoking || 'Not specified'}
 - Alcohol Consumption: ${patientData.lifeHabits?.alcohol || 'Not specified'}
 - Physical Activity: ${patientData.lifeHabits?.physicalActivity || 'Not specified'}
+
+CURRENT CLINICAL EXAMINATION DATA:
+${clinicalData ? `
+- Chief Complaint: ${clinicalData.chiefComplaint || 'Not specified'}
+- Symptom Duration: ${clinicalData.symptomDuration || 'Not specified'}
+- Blood Pressure: ${clinicalData.vitalSigns?.bloodPressureSystolic || 'Not measured'}/${clinicalData.vitalSigns?.bloodPressureDiastolic || 'Not measured'} mmHg
+- Blood Glucose: ${clinicalData.vitalSigns?.bloodGlucose || 'Not measured'} g/L
+- Heart Rate: ${clinicalData.vitalSigns?.heartRate || 'Not measured'} bpm
+- Last HbA1c: ${clinicalData.chronicDiseaseSpecific?.lastHbA1c || 'Not available'} (Date: ${clinicalData.chronicDiseaseSpecific?.lastHbA1cDate || 'N/A'})
+- Last Lipid Panel: ${clinicalData.chronicDiseaseSpecific?.lastLipidPanel || 'Not available'}
+- Medication Adherence: ${clinicalData.chronicDiseaseSpecific?.medicationAdherence || 'Not reported'}
+- Side Effects: ${clinicalData.chronicDiseaseSpecific?.sideEffects || 'None reported'}
+- Complications Screening:
+  * Vision Changes: ${clinicalData.chronicDiseaseSpecific?.complications?.visionChanges || 'None'}
+  * Foot Problems: ${clinicalData.chronicDiseaseSpecific?.complications?.footProblems || 'None'}
+  * Chest Pain: ${clinicalData.chronicDiseaseSpecific?.complications?.chestPain || 'None'}
+  * Shortness of Breath: ${clinicalData.chronicDiseaseSpecific?.complications?.shortnessOfBreath || 'None'}
+` : 'Clinical data not available'}
 
 DIAGNOSIS DATA (BASIS FOR PRESCRIPTION):
 ${JSON.stringify(diagnosisData, null, 2)}

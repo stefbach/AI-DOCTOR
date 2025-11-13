@@ -567,6 +567,7 @@ export default function ChronicProfessionalReport({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
               patientData: normalizedPatientData, 
+              clinicalData,
               diagnosisData 
             })
           }),
@@ -575,6 +576,7 @@ export default function ChronicProfessionalReport({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
               patientData: normalizedPatientData, 
+              clinicalData,
               diagnosisData 
             })
           }),
