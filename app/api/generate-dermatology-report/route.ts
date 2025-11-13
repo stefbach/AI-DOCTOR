@@ -118,16 +118,51 @@ export async function POST(request: NextRequest) {
 
     // ==================== BUILD COMPLETE MAURITIAN REPORT STRUCTURE ====================
     const reportStructure = {
-      medicalReport: {
+      compteRendu: {
         header: {
-          title: "DERMATOLOGY CONSULTATION REPORT",
-          subtitle: "Professional Dermatological Documentation",
+          title: "COMPTE RENDU DE CONSULTATION DERMATOLOGIQUE",
+          subtitle: "Documentation Médicale Professionnelle - Dermatologie",
           reference: `DERM-${Date.now()}`,
           consultationType: "Dermatology - Teleconsultation with Image Analysis"
         },
-        physician: physician,
-        patient: patient,
-        report: narrativeReport,
+        praticien: {
+          nom: physician.name,
+          qualifications: physician.qualifications,
+          specialite: physician.specialty,
+          adresseCabinet: physician.clinicAddress,
+          email: physician.email,
+          heuresConsultation: physician.consultationHours,
+          numeroEnregistrement: physician.medicalCouncilNumber
+        },
+        patient: {
+          nom: patient.name,
+          nomComplet: patient.fullName,
+          age: patient.age,
+          dateNaissance: patient.birthDate,
+          sexe: patient.gender,
+          adresse: patient.address,
+          telephone: patient.phone,
+          email: patient.email,
+          poids: patient.weight,
+          taille: patient.height,
+          dateExamen: patient.examDate,
+          allergies: patient.allergies,
+          antecedentsMedicaux: patient.medicalHistory,
+          medicamentsActuels: patient.currentMedications
+        },
+        rapport: {
+          motifConsultation: narrativeReport.chiefComplaint || 'Consultation dermatologique avec analyse d\'images',
+          anamnese: narrativeReport.historyPresentIllness || '',
+          antecedents: narrativeReport.pastMedicalHistory || patient.medicalHistory,
+          examenClinique: narrativeReport.examinationFindings || ocrAnalysis,
+          syntheseDiagnostique: narrativeReport.diagnosis || '',
+          conclusionDiagnostique: narrativeReport.diagnosis || '',
+          diagnosticsDifferentiels: narrativeReport.differentialDiagnosis || '',
+          priseEnCharge: narrativeReport.treatmentPlan || '',
+          educationPatient: narrativeReport.patientEducation || '',
+          surveillance: narrativeReport.followUp || '',
+          conclusion: narrativeReport.conclusion || 'Consultation dermatologique complète avec analyse d\'images et recommandations thérapeutiques.'
+        },
         imageAnalysis: {
           summary: ocrAnalysisData?.summary || '',
           fullAnalysis: ocrAnalysis,
@@ -135,17 +170,17 @@ export async function POST(request: NextRequest) {
           imagesCount: imageData?.images?.length || 0
         },
         metadata: {
-          generatedAt: currentDate.toISOString(),
+          dateGeneration: currentDate.toISOString(),
           wordCount: JSON.stringify(narrativeReport).split(/\s+/).length,
-          validationStatus: 'dermatology_professional_v1.0',
+          validationStatus: 'dermatology_professional_mauritian_v1.0',
           dataSource: 'ai_dermatology_specialist_gpt4o',
           imagesAnalyzed: imageData?.images?.length || 0
         }
       },
 
       // ===== PRESCRIPTIONS - MEDICATIONS =====
-      prescriptions: {
-        medications: medications.length > 0 ? {
+      ordonnances: {
+        medicaments: medications.length > 0 ? {
           header: physician,
           patient: patient,
           prescription: {
@@ -178,7 +213,7 @@ export async function POST(request: NextRequest) {
         } : null,
 
         // ===== LABORATORY TESTS =====
-        laboratoryTests: labTests.length > 0 ? {
+        biologie: labTests.length > 0 ? {
           header: physician,
           patient: patient,
           prescription: {
@@ -248,7 +283,7 @@ export async function POST(request: NextRequest) {
         } : null,
 
         // ===== IMAGING STUDIES =====
-        imagingStudies: imagingStudies.length > 0 ? {
+        imagerie: imagingStudies.length > 0 ? {
           header: physician,
           patient: patient,
           prescription: {
@@ -354,9 +389,9 @@ export async function POST(request: NextRequest) {
         generatedAt: currentDate.toISOString(),
         processingTimeMs: processingTime,
         prescriptionsSummary: {
-          medications: medications.length,
-          laboratoryTests: labTests.length,
-          imagingStudies: imagingStudies.length
+          medicaments: medications.length,
+          biologie: labTests.length,
+          imagerie: imagingStudies.length
         },
         imagesAnalyzed: imageData?.images?.length || 0,
         version: "1.0"

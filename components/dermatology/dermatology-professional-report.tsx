@@ -126,9 +126,9 @@ export default function DermatologyProfessionalReport(props: Props) {
           const reportText = generateConsultationReportFromStructure(data.report)
           setConsultationReport(reportText)
           
-          // Extract medications from prescriptions.medications.prescription.medications
-          if (data.report.prescriptions?.medications?.prescription?.medications) {
-            const meds = data.report.prescriptions.medications.prescription.medications
+          // Extract medications from ordonnances.medicaments.prescription.medications
+          if (data.report.ordonnances?.medicaments?.prescription?.medications) {
+            const meds = data.report.ordonnances.medicaments.prescription.medications
             setMedications(meds.map((m: any) => ({
               nom: m.name || m.nom,
               denominationCommune: m.genericName || m.denominationCommune,
@@ -147,9 +147,9 @@ export default function DermatologyProfessionalReport(props: Props) {
             })
           }
           
-          // Extract lab tests from prescriptions.laboratoryTests.prescription.analyses
-          if (data.report.prescriptions?.laboratoryTests?.prescription?.analyses) {
-            const analyses = data.report.prescriptions.laboratoryTests.prescription.analyses
+          // Extract lab tests from ordonnances.biologie.prescription.analyses
+          if (data.report.ordonnances?.biologie?.prescription?.analyses) {
+            const analyses = data.report.ordonnances.biologie.prescription.analyses
             const allTests: BiologyTest[] = []
             
             // Combine all categories
@@ -175,9 +175,9 @@ export default function DermatologyProfessionalReport(props: Props) {
             })
           }
 
-          // Extract imaging studies from prescriptions.imagingStudies.prescription.examinations
-          if (data.report.prescriptions?.imagingStudies?.prescription?.examinations) {
-            const exams = data.report.prescriptions.imagingStudies.prescription.examinations
+          // Extract imaging studies from ordonnances.imagerie.prescription.examinations
+          if (data.report.ordonnances?.imagerie?.prescription?.examinations) {
+            const exams = data.report.ordonnances.imagerie.prescription.examinations
             setImagingExams(exams.map((e: any) => ({
               type: e.type,
               region: e.region,
@@ -221,12 +221,12 @@ export default function DermatologyProfessionalReport(props: Props) {
   }
 
   function generateConsultationReportFromStructure(reportData: any) {
-    if (!reportData?.medicalReport) {
+    if (!reportData?.compteRendu) {
       return generateConsultationReport(props)
     }
 
-    const { medicalReport } = reportData
-    const { header, physician, patient, report, imageAnalysis } = medicalReport
+    const { compteRendu } = reportData
+    const { header, praticien, patient, rapport, imageAnalysis } = compteRendu
 
     const sections = [
       `╔═══════════════════════════════════════════════════════════════╗`,
@@ -237,20 +237,20 @@ export default function DermatologyProfessionalReport(props: Props) {
       `📋 INFORMATIONS PATIENT`,
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       ``,
-      `**Nom:** ${patient.fullName || patient.name}`,
-      `**Âge:** ${patient.age} | **Sexe:** ${patient.gender}`,
-      `**Date de consultation:** ${patient.examDate}`,
-      `**Poids:** ${patient.weight} | **Taille:** ${patient.height || 'N/A'}`,
+      `**Nom:** ${patient.nomComplet || patient.nom}`,
+      `**Âge:** ${patient.age} | **Sexe:** ${patient.sexe}`,
+      `**Date de consultation:** ${patient.dateExamen}`,
+      `**Poids:** ${patient.poids} | **Taille:** ${patient.taille || 'N/A'}`,
       ``,
-      `**Antécédents médicaux:** ${patient.medicalHistory}`,
+      `**Antécédents médicaux:** ${patient.antecedentsMedicaux}`,
       `**Allergies connues:** ${patient.allergies}`,
-      `**Traitement actuel:** ${patient.currentMedications}`,
+      `**Traitement actuel:** ${patient.medicamentsActuels}`,
       ``,
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       `🔍 MOTIF DE CONSULTATION`,
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       ``,
-      report.chiefComplaint || 'Consultation dermatologique avec analyse d\'images',
+      rapport.motifConsultation || 'Consultation dermatologique avec analyse d\'images',
       ``,
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       `📸 ANALYSE D'IMAGES (${imageAnalysis.imagesCount} photo(s))`,
@@ -263,45 +263,45 @@ export default function DermatologyProfessionalReport(props: Props) {
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       ``,
       `**Histoire de la maladie:**`,
-      report.historyPresentIllness || 'En attente',
+      rapport.anamnese || 'En attente',
       ``,
       `**Examen clinique:**`,
-      report.examinationFindings || 'Voir analyse d\'images ci-dessus',
+      rapport.examenClinique || 'Voir analyse d\'images ci-dessus',
       ``,
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       `🎯 DIAGNOSTIC DERMATOLOGIQUE`,
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       ``,
       `**DIAGNOSTIC PRINCIPAL:**`,
-      report.diagnosis || 'En attente',
+      rapport.syntheseDiagnostique || rapport.conclusionDiagnostique || 'En attente',
       ``,
-      report.differentialDiagnosis ? `**DIAGNOSTICS DIFFÉRENTIELS:**\n${report.differentialDiagnosis}\n` : '',
+      rapport.diagnosticsDifferentiels ? `**DIAGNOSTICS DIFFÉRENTIELS:**\n${rapport.diagnosticsDifferentiels}\n` : '',
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       `💊 PLAN THÉRAPEUTIQUE`,
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       ``,
-      report.treatmentPlan || 'Voir section "Ordonnance" pour les prescriptions détaillées.',
+      rapport.priseEnCharge || 'Voir section "Ordonnance" pour les prescriptions détaillées.',
       ``,
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       `📚 ÉDUCATION PATIENT`,
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       ``,
-      report.patientEducation || 'Information et éducation thérapeutique dispensées au patient.',
+      rapport.educationPatient || 'Information et éducation thérapeutique dispensées au patient.',
       ``,
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       `🔄 SUIVI & SURVEILLANCE`,
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       ``,
-      report.followUp || 'Suivi clinique recommandé dans 2 à 4 semaines.',
+      rapport.surveillance || 'Suivi clinique recommandé dans 2 à 4 semaines.',
       ``,
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       ``,
       `**Date du rapport:** ${new Date().toLocaleString('fr-FR')}`,
       `**Mode de consultation:** Téléconsultation avec analyse d'images assistée par IA`,
       ``,
-      `**Médecin:** ${physician.name}`,
-      `**Qualifications:** ${physician.qualifications}`,
-      `**Numéro d'enregistrement:** ${physician.medicalCouncilNumber}`,
+      `**Médecin:** ${praticien.nom}`,
+      `**Qualifications:** ${praticien.qualifications}`,
+      `**Numéro d'enregistrement:** ${praticien.numeroEnregistrement}`,
       ``,
       `Signature et cachet du médecin: _______________________`
     ]
@@ -713,8 +713,8 @@ Signature et cachet du médecin: _______________________
 
   function generatePrescriptionText() {
     // If we have Mauritian structure, use it
-    if (mauritianReport?.prescriptions?.medications) {
-      const { header, patient, prescription, authentication } = mauritianReport.prescriptions.medications
+    if (mauritianReport?.ordonnances?.medicaments) {
+      const { header, patient, prescription, authentication } = mauritianReport.ordonnances.medicaments
       
       return `╔═══════════════════════════════════════════════════════════════╗
 ║                    ORDONNANCE MÉDICALE                         ║
@@ -810,8 +810,8 @@ Date: ${new Date().toLocaleDateString('fr-FR')}
 
   function generateLabOrderText() {
     // If we have Mauritian structure, use it
-    if (mauritianReport?.prescriptions?.laboratoryTests) {
-      const { header, patient, prescription, authentication } = mauritianReport.prescriptions.laboratoryTests
+    if (mauritianReport?.ordonnances?.biologie) {
+      const { header, patient, prescription, authentication } = mauritianReport.ordonnances.biologie
       const { analyses } = prescription
       
       let testsText = ''
@@ -921,8 +921,8 @@ Date: ${new Date().toLocaleDateString('fr-FR')}
 
   function generateImagingOrderText() {
     // If we have Mauritian structure, use it
-    if (mauritianReport?.prescriptions?.imagingStudies) {
-      const { header, patient, prescription, authentication } = mauritianReport.prescriptions.imagingStudies
+    if (mauritianReport?.ordonnances?.imagerie) {
+      const { header, patient, prescription, authentication } = mauritianReport.ordonnances.imagerie
       
       return `╔═══════════════════════════════════════════════════════════════╗
 ║                  DEMANDE D'EXAMENS D'IMAGERIE                  ║
