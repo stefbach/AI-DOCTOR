@@ -550,8 +550,8 @@ export default function ChronicProfessionalReport({
         const normalizedPatientData = normalizePatientData(patientData)
         console.log('✅ Normalized patient data:', normalizedPatientData)
         
-        // Now fetch the three API responses in parallel
-        const [reportResponse, prescriptionResponse, examensResponse] = await Promise.all([
+        // Now fetch the FOUR API responses in parallel (report, prescription, examens, dietary)
+        const [reportResponse, prescriptionResponse, examensResponse, dietaryResponse] = await Promise.all([
           fetch("/api/chronic-report", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -577,6 +577,15 @@ export default function ChronicProfessionalReport({
               patientData: normalizedPatientData, 
               diagnosisData 
             })
+          }),
+          fetch("/api/chronic-dietary", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              patientData: normalizedPatientData, 
+              diagnosisData,
+              clinicalData 
+            })
           })
         ])
         
@@ -589,14 +598,19 @@ export default function ChronicProfessionalReport({
         if (!examensResponse.ok) {
           throw new Error(`Examens API failed: ${examensResponse.statusText}`)
         }
+        if (!dietaryResponse.ok) {
+          console.warn('⚠️ Dietary API failed (non-critical):', dietaryResponse.statusText)
+        }
         
         const reportData = await reportResponse.json()
         const prescriptionData = await prescriptionResponse.json()
         const examensData = await examensResponse.json()
+        const dietaryData = dietaryResponse.ok ? await dietaryResponse.json() : null
         
         console.log('📊 API Response - Report:', reportData)
         console.log('💊 API Response - Prescription:', prescriptionData)
         console.log('🧪 API Response - Examens:', examensData)
+        console.log('🍽️ API Response - Dietary:', dietaryData)
         
         // Update report with API responses
         setReport(prev => {
@@ -756,6 +770,54 @@ export default function ChronicProfessionalReport({
             }
           }
           
+          // Update dietary protocol from chronic-dietary API
+          if (dietaryData && dietaryData.success && dietaryData.dietaryProtocol) {
+            const dietary = dietaryData.dietaryProtocol
+            console.log('🍽️ Dietary Protocol Data:', dietary)
+            
+            updatedReport.dietaryProtocol = {
+              header: {
+                title: dietary.protocolHeader?.protocolType || "Dietary Protocol for Chronic Disease Management",
+                patientName: prev.medicalReport.patient.fullName,
+                date: new Date().toISOString().split('T')[0]
+              },
+              nutritionalAssessment: {
+                currentDiet: dietary.nutritionalAssessment?.currentWeight ? 
+                  `Current weight: ${dietary.nutritionalAssessment.currentWeight}, Target: ${dietary.nutritionalAssessment.targetWeight}` : "",
+                nutritionalDeficiencies: dietary.nutritionalAssessment?.micronutrientFocus || [],
+                dietaryRestrictions: dietary.foodLists?.foodsToAvoid || [],
+                culturalConsiderations: dietary.culturalAdaptations ? "Mauritius cultural adaptations included" : ""
+              },
+              mealPlans: dietary.weeklyMealPlan ? {
+                breakfast: Object.values(dietary.weeklyMealPlan).map((day: any) => day.breakfast).filter(Boolean),
+                lunch: Object.values(dietary.weeklyMealPlan).map((day: any) => day.lunch).filter(Boolean),
+                dinner: Object.values(dietary.weeklyMealPlan).map((day: any) => day.dinner).filter(Boolean),
+                snacks: Object.values(dietary.weeklyMealPlan).flatMap((day: any) => 
+                  [day.midMorningSnack, day.afternoonSnack, day.eveningSnack].filter(Boolean)
+                )
+              } : {
+                breakfast: [],
+                lunch: [],
+                dinner: [],
+                snacks: []
+              },
+              nutritionalGuidelines: {
+                caloriesTarget: dietary.nutritionalAssessment?.recommendedCaloricIntake || "Calculated based on TDEE",
+                macronutrients: dietary.nutritionalAssessment?.macronutrientTargets || {},
+                micronutrients: dietary.nutritionalAssessment?.micronutrientFocus || [],
+                hydration: dietary.nutritionalAssessment?.hydrationTarget || "8-10 glasses daily"
+              },
+              forbiddenFoods: dietary.foodLists?.foodsToAvoid || [],
+              recommendedFoods: dietary.foodLists?.emphasizedFoods ? 
+                Object.values(dietary.foodLists.emphasizedFoods).flat() : [],
+              specialInstructions: dietary.practicalGuidance?.mealPrepTips || [],
+              followUpSchedule: dietary.monitoringAndFollowUp?.followUpSchedule?.initialPhase || "Monthly nutritional assessment"
+            }
+            console.log('🍽️ Dietary Protocol Updated Successfully')
+          } else {
+            console.log('⚠️ No dietary data from API, keeping existing data')
+          }
+          
           console.log('✅ Updated Report Structure:', {
             hasMedicationPrescription: !!updatedReport.medicationPrescription,
             hasLaboratoryTests: !!updatedReport.laboratoryTests,
@@ -763,7 +825,11 @@ export default function ChronicProfessionalReport({
             hasDietaryProtocol: !!updatedReport.dietaryProtocol,
             medicationCount: updatedReport.medicationPrescription?.prescription?.medications?.length || 0,
             labTestCategories: Object.keys(updatedReport.laboratoryTests?.prescription?.tests || {}),
-            paraclinicalExamCount: updatedReport.paraclinicalExams?.prescription?.exams?.length || 0
+            paraclinicalExamCount: updatedReport.paraclinicalExams?.prescription?.exams?.length || 0,
+            dietaryMealsCount: updatedReport.dietaryProtocol ? 
+              (updatedReport.dietaryProtocol.mealPlans?.breakfast?.length || 0) + 
+              (updatedReport.dietaryProtocol.mealPlans?.lunch?.length || 0) + 
+              (updatedReport.dietaryProtocol.mealPlans?.dinner?.length || 0) : 0
           })
           
           return updatedReport
