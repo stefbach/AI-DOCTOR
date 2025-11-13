@@ -551,7 +551,8 @@ export default function ChronicProfessionalReport({
         console.log('✅ Normalized patient data:', normalizedPatientData)
         
         // Now fetch the FOUR API responses in parallel (report, prescription, examens, dietary)
-        const [reportResponse, prescriptionResponse, examensResponse, dietaryResponse] = await Promise.all([
+        // Using Promise.allSettled to allow dietary API to fail without breaking workflow
+        const results = await Promise.allSettled([
           fetch("/api/chronic-report", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -591,23 +592,35 @@ export default function ChronicProfessionalReport({
           })
         ])
         
-        if (!reportResponse.ok) {
-          throw new Error(`Report API failed: ${reportResponse.statusText}`)
+        // Extract responses (first 3 are critical, 4th is optional)
+        const reportResponse = results[0].status === 'fulfilled' ? results[0].value : null
+        const prescriptionResponse = results[1].status === 'fulfilled' ? results[1].value : null
+        const examensResponse = results[2].status === 'fulfilled' ? results[2].value : null
+        const dietaryResponse = results[3].status === 'fulfilled' ? results[3].value : null
+        
+        // Check critical APIs (first 3)
+        if (!reportResponse || !reportResponse.ok) {
+          throw new Error(`Report API failed: ${reportResponse?.statusText || 'Network error'}`)
         }
-        if (!prescriptionResponse.ok) {
-          throw new Error(`Prescription API failed: ${prescriptionResponse.statusText}`)
+        if (!prescriptionResponse || !prescriptionResponse.ok) {
+          throw new Error(`Prescription API failed: ${prescriptionResponse?.statusText || 'Network error'}`)
         }
-        if (!examensResponse.ok) {
-          throw new Error(`Examens API failed: ${examensResponse.statusText}`)
+        if (!examensResponse || !examensResponse.ok) {
+          throw new Error(`Examens API failed: ${examensResponse?.statusText || 'Network error'}`)
         }
-        if (!dietaryResponse.ok) {
-          console.warn('⚠️ Dietary API failed (non-critical):', dietaryResponse.statusText)
+        
+        // Dietary API is optional - just warn if it fails
+        if (!dietaryResponse || !dietaryResponse.ok) {
+          console.warn('⚠️ Dietary API failed (non-critical) - continuing without detailed meal plan')
+          if (results[3].status === 'rejected') {
+            console.warn('Dietary API error:', results[3].reason)
+          }
         }
         
         const reportData = await reportResponse.json()
         const prescriptionData = await prescriptionResponse.json()
         const examensData = await examensResponse.json()
-        const dietaryData = dietaryResponse.ok ? await dietaryResponse.json() : null
+        const dietaryData = (dietaryResponse && dietaryResponse.ok) ? await dietaryResponse.json().catch(() => null) : null
         
         console.log('📊 API Response - Report:', reportData)
         console.log('💊 API Response - Prescription:', prescriptionData)
