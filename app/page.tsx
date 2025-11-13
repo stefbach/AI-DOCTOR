@@ -366,9 +366,11 @@ const handlePrevious = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-md">
-                <Stethoscope className="h-7 w-7 text-blue-600" />
-              </div>
+              <img 
+                src="/tibok-logo.svg" 
+                alt="TIBOK Logo" 
+                className="h-12 w-auto object-contain"
+              />
               <div>
                 <h1 className="text-2xl font-bold tracking-tight">TIBOK IA DOCTOR</h1>
                 <p className="text-blue-100 text-sm">Assistant Médical Intelligent</p>

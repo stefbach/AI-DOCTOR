@@ -1,0 +1,22 @@
+<svg width="200" height="50" viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg">
+  <!-- T -->
+  <rect x="5" y="5" width="30" height="8" rx="4" fill="#0B5FD1"/>
+  <rect x="17" y="13" width="6" height="32" rx="3" fill="#0B5FD1"/>
+  
+  <!-- I -->
+  <rect x="45" y="5" width="8" height="40" rx="4" fill="#1890D1"/>
+  
+  <!-- B -->
+  <path d="M 63 5 L 75 5 Q 83 5 83 13 Q 83 20 75 20 L 75 20 Q 83 20 83 30 Q 83 40 75 40 L 63 40 L 63 5 Z M 69 11 L 69 18 L 74 18 Q 77 18 77 14.5 Q 77 11 74 11 Z M 69 24 L 69 34 L 74 34 Q 77 34 77 29 Q 77 24 74 24 Z" fill="#16A8CC"/>
+  
+  <!-- O (Phone/Card icon) -->
+  <rect x="95" y="5" width="25" height="40" rx="5" fill="#21B6CC" stroke="#0B5FD1" stroke-width="2"/>
+  <circle cx="107.5" cy="18" r="6" fill="#0B5FD1"/>
+  <path d="M 100 28 Q 107.5 32 115 28" fill="none" stroke="#0B5FD1" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="107.5" cy="38" r="1.5" fill="#0B5FD1"/>
+  
+  <!-- K -->
+  <rect x="130" y="5" width="7" height="40" rx="3.5" fill="#3DBDAF"/>
+  <path d="M 137 22 L 155 5" stroke="#3DBDAF" stroke-width="7" stroke-linecap="round"/>
+  <path d="M 137 22 L 155 40" stroke="#3DBDAF" stroke-width="7" stroke-linecap="round"/>
+</svg>
