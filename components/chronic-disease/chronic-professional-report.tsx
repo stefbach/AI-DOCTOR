@@ -2626,48 +2626,103 @@ export default function ChronicProfessionalReport({
     
     return (
       <div id="followup-plan-section" className="bg-white p-8 rounded-lg shadow print:shadow-none">
-        <div className="border-b-2 border-blue-600 pb-4 mb-6">
-          <div className="flex justify-between items-start">
-            <div>
-              <h2 className="text-2xl font-bold flex items-center gap-2">
-                <ClipboardList className="h-6 w-6" />
-                {followUpPlan.header.title}
-              </h2>
-              <p className="text-gray-600 mt-1">Comprehensive Care & Monitoring Strategy</p>
-              <p className="text-sm text-gray-500 mt-1">Patient: {followUpPlan.header.patientName}</p>
+        {/* Professional Header */}
+        <div className="text-center mb-8 pb-6 border-b-2 border-gray-800">
+          <h1 className="text-2xl font-bold mb-4">CHRONIC DISEASE MANAGEMENT</h1>
+          <h2 className="text-xl font-semibold mb-6">FOLLOW-UP CARE PLAN</h2>
+          
+          {/* Medical Practitioner Info */}
+          <div className="bg-gray-100 p-4 rounded mb-4">
+            <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm max-w-3xl mx-auto">
+              <div className="text-left">
+                <strong>Medical Practitioner:</strong> {report.medicalReport.practitioner.name}
+              </div>
+              <div className="text-left">
+                <strong>Qualifications:</strong> {report.medicalReport.practitioner.qualifications}
+              </div>
+              <div className="text-left">
+                <strong>Registration Number:</strong> {report.medicalReport.practitioner.registrationNumber}
+              </div>
+              <div className="text-left">
+                <strong>Facility:</strong> {report.medicalReport.practitioner.facility}
+              </div>
+              <div className="text-left">
+                <strong>Contact:</strong> {report.medicalReport.practitioner.contact}
+              </div>
+              <div className="text-left">
+                <strong>Date:</strong> {followUpPlan.header.date}
+              </div>
             </div>
-            <div className="flex gap-2 print:hidden">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => exportToPDF('followup-plan-section', `followup_${report.medicalReport.patient.fullName}.pdf`)}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Export PDF
-              </Button>
+          </div>
+          
+          {/* Export Button */}
+          <div className="flex justify-center print:hidden mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => exportToPDF('followup-plan-section', `followup_${report.medicalReport.patient.fullName}.pdf`)}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export PDF
+            </Button>
+          </div>
+        </div>
+        
+        {/* Patient Identification Section */}
+        <div className="mb-8">
+          <h3 className="text-lg font-bold mb-3 pb-2 border-b border-gray-400">PATIENT IDENTIFICATION & MEDICAL PROFILE</h3>
+          <div className="bg-gray-50 p-4 rounded">
+            <div className="grid grid-cols-3 gap-x-6 gap-y-3 text-sm">
+              <div>
+                <span className="font-semibold">Full Name:</span> {report.medicalReport.patient.fullName}
+              </div>
+              <div>
+                <span className="font-semibold">Age:</span> {report.medicalReport.patient.age} years
+              </div>
+              <div>
+                <span className="font-semibold">Gender:</span> {report.medicalReport.patient.gender}
+              </div>
+              {report.medicalReport.patient.nationalId && (
+                <div>
+                  <span className="font-semibold">National ID:</span> {report.medicalReport.patient.nationalId}
+                </div>
+              )}
+              <div>
+                <span className="font-semibold">Contact:</span> {report.medicalReport.patient.contact}
+              </div>
+              <div>
+                <span className="font-semibold">Address:</span> {report.medicalReport.patient.address}
+              </div>
             </div>
           </div>
         </div>
         
-        {/* Treatment Goals */}
-        <div className="grid grid-cols-2 gap-6 mb-6">
+        {/* Treatment Goals Section */}
+        <div className="mb-8">
+          <h3 className="text-lg font-bold mb-3 pb-2 border-b border-gray-400">TREATMENT GOALS & OBJECTIVES</h3>
+          
+          {/* Short-Term Goals */}
           {followUpPlan.shortTermGoals && followUpPlan.shortTermGoals.length > 0 && (
-            <div className="border rounded-lg p-4 bg-teal-50">
-              <h3 className="font-bold mb-3 flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Short-Term Goals (0-3 months)
-              </h3>
-              <div className="space-y-3">
+            <div className="mb-6">
+              <h4 className="font-semibold text-base mb-3 text-teal-700">
+                SHORT-TERM GOALS (0-3 months)
+              </h4>
+              <div className="space-y-4">
                 {followUpPlan.shortTermGoals.map((goal, idx) => (
-                  <div key={idx} className="border-l-4 border-teal-500 pl-3">
-                    <p className="font-semibold text-sm">{goal.goal}</p>
-                    <p className="text-xs text-gray-600">Timeline: {goal.timeline}</p>
+                  <div key={idx} className="bg-teal-50 border-l-4 border-teal-600 p-4">
+                    <p className="font-semibold mb-1">{idx + 1}. {goal.goal}</p>
+                    <p className="text-sm text-gray-600 mb-2">
+                      <span className="font-medium">Timeline:</span> {goal.timeline}
+                    </p>
                     {goal.metrics && goal.metrics.length > 0 && (
-                      <ul className="text-xs text-gray-600 mt-1 list-disc list-inside">
-                        {goal.metrics.map((metric, midx) => (
-                          <li key={midx}>{metric}</li>
-                        ))}
-                      </ul>
+                      <div className="text-sm">
+                        <span className="font-medium">Success Metrics:</span>
+                        <ul className="list-disc list-inside ml-4 mt-1 space-y-0.5">
+                          {goal.metrics.map((metric, midx) => (
+                            <li key={midx}>{metric}</li>
+                          ))}
+                        </ul>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -2675,23 +2730,28 @@ export default function ChronicProfessionalReport({
             </div>
           )}
           
+          {/* Long-Term Goals */}
           {followUpPlan.longTermGoals && followUpPlan.longTermGoals.length > 0 && (
-            <div className="border rounded-lg p-4 bg-blue-50">
-              <h3 className="font-bold mb-3 flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Long-Term Goals (3-12 months)
-              </h3>
-              <div className="space-y-3">
+            <div>
+              <h4 className="font-semibold text-base mb-3 text-blue-700">
+                LONG-TERM GOALS (3-12 months)
+              </h4>
+              <div className="space-y-4">
                 {followUpPlan.longTermGoals.map((goal, idx) => (
-                  <div key={idx} className="border-l-4 border-blue-500 pl-3">
-                    <p className="font-semibold text-sm">{goal.goal}</p>
-                    <p className="text-xs text-gray-600">Timeline: {goal.timeline}</p>
+                  <div key={idx} className="bg-blue-50 border-l-4 border-blue-600 p-4">
+                    <p className="font-semibold mb-1">{idx + 1}. {goal.goal}</p>
+                    <p className="text-sm text-gray-600 mb-2">
+                      <span className="font-medium">Timeline:</span> {goal.timeline}
+                    </p>
                     {goal.metrics && goal.metrics.length > 0 && (
-                      <ul className="text-xs text-gray-600 mt-1 list-disc list-inside">
-                        {goal.metrics.map((metric, midx) => (
-                          <li key={midx}>{metric}</li>
-                        ))}
-                      </ul>
+                      <div className="text-sm">
+                        <span className="font-medium">Success Metrics:</span>
+                        <ul className="list-disc list-inside ml-4 mt-1 space-y-0.5">
+                          {goal.metrics.map((metric, midx) => (
+                            <li key={midx}>{metric}</li>
+                          ))}
+                        </ul>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -2700,76 +2760,136 @@ export default function ChronicProfessionalReport({
           )}
         </div>
         
-        {/* Monitoring Schedule */}
+        {/* Monitoring Schedule Section */}
         {followUpPlan.monitoringSchedule && (
-          <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-bold mb-3">Monitoring Schedule</h3>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              {followUpPlan.monitoringSchedule.nextAppointment && (
-                <div>
-                  <strong>Next Appointment:</strong> {followUpPlan.monitoringSchedule.nextAppointment}
-                </div>
-              )}
-              {followUpPlan.monitoringSchedule.followUpFrequency && (
-                <div>
-                  <strong>Follow-up Frequency:</strong> {followUpPlan.monitoringSchedule.followUpFrequency}
+          <div className="mb-8">
+            <h3 className="text-lg font-bold mb-3 pb-2 border-b border-gray-400">MONITORING & FOLLOW-UP SCHEDULE</h3>
+            <div className="bg-blue-50 p-4 rounded border border-blue-200">
+              <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                {followUpPlan.monitoringSchedule.nextAppointment && (
+                  <div>
+                    <span className="font-semibold">Next Appointment:</span>
+                    <p className="ml-4">{followUpPlan.monitoringSchedule.nextAppointment}</p>
+                  </div>
+                )}
+                {followUpPlan.monitoringSchedule.followUpFrequency && (
+                  <div>
+                    <span className="font-semibold">Follow-up Frequency:</span>
+                    <p className="ml-4">{followUpPlan.monitoringSchedule.followUpFrequency}</p>
+                  </div>
+                )}
+              </div>
+              {followUpPlan.monitoringSchedule.monitoringParameters && followUpPlan.monitoringSchedule.monitoringParameters.length > 0 && (
+                <div className="text-sm">
+                  <span className="font-semibold">Parameters to Monitor:</span>
+                  <ul className="list-disc list-inside ml-4 mt-2 space-y-1">
+                    {followUpPlan.monitoringSchedule.monitoringParameters.map((param, idx) => (
+                      <li key={idx}>{param}</li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>
-            {followUpPlan.monitoringSchedule.monitoringParameters && followUpPlan.monitoringSchedule.monitoringParameters.length > 0 && (
-              <div className="mt-3">
-                <strong className="text-sm">Parameters to Monitor:</strong>
-                <ul className="list-disc list-inside text-sm mt-1 space-y-1">
-                  {followUpPlan.monitoringSchedule.monitoringParameters.map((param, idx) => (
-                    <li key={idx}>{param}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
         )}
         
-        {/* Lifestyle Modifications */}
+        {/* Lifestyle Modifications Section */}
         {followUpPlan.lifestyleModifications && (
-          <div className="mb-6">
-            <h3 className="font-bold text-lg mb-3">Lifestyle Modifications</h3>
-            <div className="grid grid-cols-2 gap-4">
-              {followUpPlan.lifestyleModifications.physicalActivity && followUpPlan.lifestyleModifications.physicalActivity.length > 0 && (
-                <div className="border rounded-lg p-3">
-                  <h4 className="font-semibold mb-2 text-sm">Physical Activity:</h4>
-                  <ul className="list-disc list-inside text-sm space-y-1">
+          <div className="mb-8">
+            <h3 className="text-lg font-bold mb-3 pb-2 border-b border-gray-400">LIFESTYLE MODIFICATIONS & RECOMMENDATIONS</h3>
+            
+            {/* Physical Activity */}
+            {followUpPlan.lifestyleModifications.physicalActivity && followUpPlan.lifestyleModifications.physicalActivity.length > 0 && (
+              <div className="mb-4">
+                <h4 className="font-semibold mb-2">Physical Activity Recommendations:</h4>
+                <div className="bg-gray-50 p-3 rounded text-sm">
+                  <ul className="list-disc list-inside space-y-1">
                     {followUpPlan.lifestyleModifications.physicalActivity.map((item, idx) => (
                       <li key={idx}>{item}</li>
                     ))}
                   </ul>
                 </div>
-              )}
-              {followUpPlan.lifestyleModifications.dietaryChanges && followUpPlan.lifestyleModifications.dietaryChanges.length > 0 && (
-                <div className="border rounded-lg p-3">
-                  <h4 className="font-semibold mb-2 text-sm">Dietary Changes:</h4>
-                  <ul className="list-disc list-inside text-sm space-y-1">
+              </div>
+            )}
+            
+            {/* Dietary Changes */}
+            {followUpPlan.lifestyleModifications.dietaryChanges && followUpPlan.lifestyleModifications.dietaryChanges.length > 0 && (
+              <div className="mb-4">
+                <h4 className="font-semibold mb-2">Dietary Modifications:</h4>
+                <div className="bg-gray-50 p-3 rounded text-sm">
+                  <ul className="list-disc list-inside space-y-1">
                     {followUpPlan.lifestyleModifications.dietaryChanges.map((item, idx) => (
                       <li key={idx}>{item}</li>
                     ))}
                   </ul>
                 </div>
-              )}
-              {followUpPlan.lifestyleModifications.stressManagement && followUpPlan.lifestyleModifications.stressManagement.length > 0 && (
-                <div className="border rounded-lg p-3">
-                  <h4 className="font-semibold mb-2 text-sm">Stress Management:</h4>
-                  <ul className="list-disc list-inside text-sm space-y-1">
+              </div>
+            )}
+            
+            {/* Stress Management */}
+            {followUpPlan.lifestyleModifications.stressManagement && followUpPlan.lifestyleModifications.stressManagement.length > 0 && (
+              <div className="mb-4">
+                <h4 className="font-semibold mb-2">Stress Management:</h4>
+                <div className="bg-gray-50 p-3 rounded text-sm">
+                  <ul className="list-disc list-inside space-y-1">
                     {followUpPlan.lifestyleModifications.stressManagement.map((item, idx) => (
                       <li key={idx}>{item}</li>
                     ))}
                   </ul>
                 </div>
-              )}
-              {followUpPlan.lifestyleModifications.sleepHygiene && followUpPlan.lifestyleModifications.sleepHygiene.length > 0 && (
-                <div className="border rounded-lg p-3">
-                  <h4 className="font-semibold mb-2 text-sm">Sleep Hygiene:</h4>
-                  <ul className="list-disc list-inside text-sm space-y-1">
+              </div>
+            )}
+            
+            {/* Sleep Hygiene */}
+            {followUpPlan.lifestyleModifications.sleepHygiene && followUpPlan.lifestyleModifications.sleepHygiene.length > 0 && (
+              <div>
+                <h4 className="font-semibold mb-2">Sleep Hygiene:</h4>
+                <div className="bg-gray-50 p-3 rounded text-sm">
+                  <ul className="list-disc list-inside space-y-1">
                     {followUpPlan.lifestyleModifications.sleepHygiene.map((item, idx) => (
                       <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* Emergency Protocol Section */}
+        {followUpPlan.emergencyProtocol && (
+          <div className="mb-8">
+            <h3 className="text-lg font-bold mb-3 pb-2 border-b border-gray-400 text-blue-700">EMERGENCY PROTOCOL</h3>
+            <div className="bg-blue-50 border-2 border-blue-300 p-4 rounded">
+              {followUpPlan.emergencyProtocol.warningSigns && followUpPlan.emergencyProtocol.warningSigns.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    Warning Signs - Seek Immediate Medical Attention:
+                  </h4>
+                  <ul className="list-disc list-inside text-sm space-y-1 ml-4">
+                    {followUpPlan.emergencyProtocol.warningSigns.map((sign, idx) => (
+                      <li key={idx}>{sign}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {followUpPlan.emergencyProtocol.actionSteps && followUpPlan.emergencyProtocol.actionSteps.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="font-semibold text-blue-800 mb-2">Immediate Action Steps:</h4>
+                  <ol className="list-decimal list-inside text-sm space-y-1 ml-4">
+                    {followUpPlan.emergencyProtocol.actionSteps.map((step, idx) => (
+                      <li key={idx}>{step}</li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+              {followUpPlan.emergencyProtocol.emergencyContacts && followUpPlan.emergencyProtocol.emergencyContacts.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-blue-800 mb-2">Emergency Contact Numbers:</h4>
+                  <ul className="list-disc list-inside text-sm space-y-1 ml-4">
+                    {followUpPlan.emergencyProtocol.emergencyContacts.map((contact, idx) => (
+                      <li key={idx} className="font-medium">{contact}</li>
                     ))}
                   </ul>
                 </div>
@@ -2778,81 +2898,58 @@ export default function ChronicProfessionalReport({
           </div>
         )}
         
-        {/* Emergency Protocol */}
-        {followUpPlan.emergencyProtocol && (
-          <div className="mb-6 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-            <h3 className="font-bold mb-3 text-blue-700 flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5" />
-              Emergency Protocol
-            </h3>
-            {followUpPlan.emergencyProtocol.warningSigns && followUpPlan.emergencyProtocol.warningSigns.length > 0 && (
-              <div className="mb-3">
-                <h4 className="font-semibold text-sm">Warning Signs:</h4>
-                <ul className="list-disc list-inside text-sm space-y-1">
-                  {followUpPlan.emergencyProtocol.warningSigns.map((sign, idx) => (
-                    <li key={idx}>{sign}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {followUpPlan.emergencyProtocol.actionSteps && followUpPlan.emergencyProtocol.actionSteps.length > 0 && (
-              <div className="mb-3">
-                <h4 className="font-semibold text-sm">Action Steps:</h4>
-                <ol className="list-decimal list-inside text-sm space-y-1">
-                  {followUpPlan.emergencyProtocol.actionSteps.map((step, idx) => (
-                    <li key={idx}>{step}</li>
-                  ))}
-                </ol>
-              </div>
-            )}
-            {followUpPlan.emergencyProtocol.emergencyContacts && followUpPlan.emergencyProtocol.emergencyContacts.length > 0 && (
-              <div>
-                <h4 className="font-semibold text-sm">Emergency Contacts:</h4>
-                <ul className="list-disc list-inside text-sm space-y-1">
-                  {followUpPlan.emergencyProtocol.emergencyContacts.map((contact, idx) => (
-                    <li key={idx}>{contact}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        )}
-        
-        {/* Educational Resources */}
+        {/* Educational Resources Section */}
         {followUpPlan.educationalResources && followUpPlan.educationalResources.length > 0 && (
-          <div className="p-4 bg-cyan-50 rounded mb-6">
-            <h4 className="font-semibold mb-2">Educational Resources:</h4>
-            <ul className="list-disc list-inside text-sm space-y-1">
-              {followUpPlan.educationalResources.map((resource, idx) => (
-                <li key={idx}>{resource}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-        
-        {/* Special Instructions */}
-        {followUpPlan.specialInstructions && followUpPlan.specialInstructions.length > 0 && (
-          <div className="p-4 bg-blue-50 rounded">
-            <h4 className="font-semibold mb-2">Special Instructions:</h4>
-            <ul className="list-disc list-inside text-sm space-y-1">
-              {followUpPlan.specialInstructions.map((instruction, idx) => (
-                <li key={idx}>{instruction}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-        
-        {/* Signature */}
-        <div className="mt-8 pt-6 border-t border-gray-300">
-          <div className="text-right">
-            <p className="font-semibold">{report.medicalReport.practitioner.name}</p>
-            <p className="text-sm text-gray-600">{report.medicalReport.practitioner.qualifications}</p>
-            <p className="text-sm text-gray-600">Medical Council Reg: {report.medicalReport.practitioner.registrationNumber}</p>
-            <div className="mt-6">
-              <p className="text-sm">_______________________________</p>
-              <p className="text-sm">Medical Practitioner's Signature</p>
-              <p className="text-sm">Date: {followUpPlan.header.date}</p>
+          <div className="mb-8">
+            <h3 className="text-lg font-bold mb-3 pb-2 border-b border-gray-400">PATIENT EDUCATION & RESOURCES</h3>
+            <div className="bg-cyan-50 p-4 rounded border border-cyan-200">
+              <ul className="list-disc list-inside text-sm space-y-2">
+                {followUpPlan.educationalResources.map((resource, idx) => (
+                  <li key={idx}>{resource}</li>
+                ))}
+              </ul>
             </div>
+          </div>
+        )}
+        
+        {/* Special Instructions Section */}
+        {followUpPlan.specialInstructions && followUpPlan.specialInstructions.length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-lg font-bold mb-3 pb-2 border-b border-gray-400">SPECIAL INSTRUCTIONS & PRECAUTIONS</h3>
+            <div className="bg-blue-50 p-4 rounded border border-blue-200">
+              <ul className="list-disc list-inside text-sm space-y-2">
+                {followUpPlan.specialInstructions.map((instruction, idx) => (
+                  <li key={idx}>{instruction}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+        
+        {/* Professional Footer with Signature */}
+        <div className="mt-12 pt-6 border-t-2 border-gray-800">
+          <div className="flex justify-between items-start">
+            <div className="text-left">
+              <p className="text-sm text-gray-600 mb-2">This follow-up care plan has been prepared for:</p>
+              <p className="font-semibold">{report.medicalReport.patient.fullName}</p>
+              <p className="text-sm text-gray-600">Date: {followUpPlan.header.date}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-600 mb-4">Medical Practitioner's Signature:</p>
+              <div className="mb-2">
+                <p className="border-b-2 border-gray-400 w-64 mb-1"></p>
+              </div>
+              <p className="font-semibold">{report.medicalReport.practitioner.name}</p>
+              <p className="text-sm text-gray-600">{report.medicalReport.practitioner.qualifications}</p>
+              <p className="text-sm text-gray-600">Registration: {report.medicalReport.practitioner.registrationNumber}</p>
+              <p className="text-sm text-gray-600 mt-2">Date: {followUpPlan.header.date}</p>
+            </div>
+          </div>
+          
+          {/* Document Footer */}
+          <div className="mt-8 pt-4 border-t border-gray-300 text-center text-xs text-gray-500">
+            <p>This document is confidential and intended solely for the use of the patient and authorized healthcare providers.</p>
+            <p className="mt-1">© {new Date().getFullYear()} {report.medicalReport.practitioner.facility} - All Rights Reserved</p>
           </div>
         </div>
       </div>
