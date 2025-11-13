@@ -1,3 +1,4 @@
+// app/api/generate-dermatology-report/route.ts - COMPLETE MAURITIAN STRUCTURE
 import { type NextRequest, NextResponse } from "next/server"
 import OpenAI from 'openai'
 
@@ -8,6 +9,14 @@ const openai = new OpenAI({
 // ==================== HELPER FUNCTIONS ====================
 function getString(value: any): string {
   if (value === null || value === undefined) return ''
+  if (typeof value === 'string') return value
+  if (typeof value === 'number') return value.toString()
+  if (typeof value === 'object' && !Array.isArray(value)) {
+    if (value.en && typeof value.en === 'string') return value.en
+    if (value.fr && typeof value.fr === 'string') return value.fr
+    const firstValue = Object.values(value).find(v => typeof v === 'string')
+    return firstValue ? String(firstValue) : ''
+  }
   return String(value)
 }
 
@@ -20,6 +29,7 @@ function getArray(value: any): any[] {
 // ==================== MAIN HANDLER ====================
 export async function POST(request: NextRequest) {
   try {
+    const startTime = Date.now()
     const body = await request.json()
     const {
       patientData,
@@ -30,14 +40,29 @@ export async function POST(request: NextRequest) {
       doctorData
     } = body
 
-    console.log('🔬 Generating comprehensive dermatology report')
+    console.log('🔬 ===============================================')
+    console.log('🔬 DERMATOLOGY REPORT GENERATION - MAURITIAN STANDARD')
+    console.log('🔬 ===============================================')
     console.log(`👤 Patient: ${patientData.firstName} ${patientData.lastName}`)
+
+    const currentDate = new Date()
+    const examDate = currentDate.toISOString().split('T')[0]
+
+    // ==================== PREPARE PHYSICIAN INFO ====================
+    const physician = {
+      name: `Dr. ${getString(doctorData?.fullName) || '[Name Required]'}`,
+      qualifications: getString(doctorData?.qualifications) || 'MBBS, MD (Dermatology)',
+      specialty: getString(doctorData?.specialty) || 'Dermatology',
+      clinicAddress: getString(doctorData?.clinicAddress) || 'Tibok Teleconsultation Platform',
+      email: getString(doctorData?.email) || '[Email Required]',
+      consultationHours: getString(doctorData?.consultationHours) || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+      medicalCouncilNumber: getString(doctorData?.medicalCouncilNumber) || '[MCM Registration Required]'
+    }
 
     // ==================== PREPARE PATIENT INFO ====================
     const patient = {
-      firstName: getString(patientData?.firstName),
-      lastName: getString(patientData?.lastName),
-      fullName: `${getString(patientData?.firstName)} ${getString(patientData?.lastName)}`.trim(),
+      name: `${getString(patientData?.firstName)} ${getString(patientData?.lastName)}`.trim(),
+      fullName: `${getString(patientData?.lastName).toUpperCase()} ${getString(patientData?.firstName)}`.trim(),
       age: getString(patientData?.age),
       birthDate: getString(patientData?.birthDate),
       gender: getString(patientData?.gender),
@@ -48,356 +73,517 @@ export async function POST(request: NextRequest) {
       address: getString(patientData?.address),
       city: getString(patientData?.city),
       country: getString(patientData?.country) || 'Mauritius',
-      allergies: getArray(patientData?.allergies),
-      otherAllergies: getString(patientData?.otherAllergies),
-      medicalHistory: getArray(patientData?.medicalHistory),
-      otherMedicalHistory: getString(patientData?.otherMedicalHistory),
+      allergies: formatAllergies(patientData),
+      medicalHistory: formatMedicalHistory(patientData),
       currentMedications: getString(patientData?.currentMedicationsText) || getString(patientData?.currentMedications),
-      lifeHabits: patientData?.lifeHabits || {}
+      lifeHabits: patientData?.lifeHabits || {},
+      examDate: examDate
     }
 
-    // ==================== PREPARE DOCTOR INFO ====================
-    const doctor = {
-      fullName: getString(doctorData?.fullName) || 'Dr. [Name Required]',
-      qualifications: getString(doctorData?.qualifications) || 'MBBS',
-      specialty: getString(doctorData?.specialty) || 'Dermatology',
-      clinicAddress: getString(doctorData?.clinicAddress) || 'Tibok Teleconsultation Platform',
-      email: getString(doctorData?.email) || '[Email Required]',
-      consultationHours: getString(doctorData?.consultationHours) || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
-      medicalCouncilNumber: getString(doctorData?.medicalCouncilNumber) || '[MCM Registration Required]'
-    }
+    console.log('✅ Patient and physician data prepared')
 
-    // ==================== EXTRACT DATA ====================
-    const ocrAnalysis = ocrAnalysisData?.analysis?.fullText || 'No image analysis available'
-    const diagnosis = diagnosisData?.diagnosis?.fullText || 'Pending diagnosis'
+    // ==================== EXTRACT DIAGNOSTIC DATA ====================
+    const ocrAnalysis = ocrAnalysisData?.analysis?.fullText || ''
+    const diagnosisFullText = diagnosisData?.diagnosis?.fullText || ''
     
-    // Format questions and answers
-    const questionsFormatted = formatQuestionsData(questionsData)
+    console.log('📊 Diagnostic data extracted:')
+    console.log(`   - OCR Analysis: ${ocrAnalysis.length} chars`)
+    console.log(`   - Diagnosis: ${diagnosisFullText.length} chars`)
 
-    // ==================== GENERATE COMPREHENSIVE REPORT WITH AI ====================
-    const reportPrompt = `You are a medical documentation specialist creating a comprehensive dermatology consultation report.
+    // ==================== GENERATE MEDICATIONS WITH AI ====================
+    console.log('💊 Extracting medications from diagnosis...')
+    const medications = await extractMedicationsAI(diagnosisFullText, patient)
+    console.log(`   ✅ ${medications.length} medications extracted`)
 
-PATIENT INFORMATION:
-- Name: ${patient.fullName}
-- Age: ${patient.age} years | Gender: ${patient.gender}
-- Weight: ${patient.weight} | Height: ${patient.height}
-- Medical History: ${formatMedicalHistory(patient)}
-- Known Allergies: ${formatAllergies(patient)}
-- Current Medications: ${patient.currentMedications || 'None'}
+    // ==================== GENERATE LAB TESTS WITH AI ====================
+    console.log('🧪 Extracting laboratory tests from diagnosis...')
+    const labTests = await extractLabTestsAI(diagnosisFullText, patient)
+    console.log(`   ✅ ${labTests.length} lab tests extracted`)
 
-IMAGE ANALYSIS (OCR):
-${ocrAnalysis}
+    // ==================== GENERATE IMAGING STUDIES WITH AI ====================
+    console.log('🔬 Extracting imaging studies from diagnosis...')
+    const imagingStudies = await extractImagingStudiesAI(diagnosisFullText, patient)
+    console.log(`   ✅ ${imagingStudies.length} imaging studies extracted`)
 
-CLINICAL HISTORY (Questions & Answers):
-${questionsFormatted}
+    // ==================== GENERATE NARRATIVE REPORT ====================
+    console.log('📝 Generating narrative consultation report...')
+    const narrativeReport = await generateNarrativeReportAI(
+      patient,
+      ocrAnalysis,
+      questionsData,
+      diagnosisFullText,
+      imageData
+    )
+    console.log('   ✅ Narrative report generated')
 
-AI DERMATOLOGY DIAGNOSIS:
-${diagnosis}
-
-TASK: Generate a COMPLETE, PROFESSIONAL dermatology consultation report in FRENCH with the following structure:
-
-1. COMPTE RENDU DE CONSULTATION (Narrative Format)
-   - Write in professional medical narrative style
-   - Include all patient information
-   - Describe chief complaint and reason for dermatology consultation
-   - Summarize visual examination findings from images
-   - Present clinical history in narrative form
-   - State the primary diagnosis with ICD-10 code if available
-   - List differential diagnoses
-   - Describe the treatment plan in narrative format
-   - Include patient education points
-   - State follow-up recommendations
-
-2. ORDONNANCE MÉDICAMENTS (Structured Prescription)
-   - Extract ALL medications from the treatment plan
-   - For EACH medication provide:
-     * Nom commercial (commercial name)
-     * DCI (Dénomination Commune Internationale / Generic name)
-     * Dosage (e.g., "1%", "500mg")
-     * Forme (cream, ointment, lotion, gel, tablet, capsule)
-     * Posologie (frequency: "Apply twice daily", "1 tablet 3 times daily")
-     * Voie d'administration (Topical route, Oral route, Parenteral route)
-     * Durée du traitement (duration: "14 days", "4 weeks")
-     * Quantité (quantity: "1 tube", "1 box")
-     * Instructions spéciales (special instructions)
-
-3. EXAMENS DE LABORATOIRE (Laboratory Tests)
-   - Extract ALL laboratory tests mentioned in RECOMMENDED INVESTIGATIONS
-   - For EACH test provide:
-     * Nom de l'examen (test name)
-     * Catégorie (clinicalChemistry, hematology, immunology, microbiology, other)
-     * Urgence (true/false - urgent or routine)
-     * À jeun (true/false - fasting required)
-     * Indication clinique (clinical indication)
-
-4. EXAMENS D'IMAGERIE (Imaging Studies)
-   - Extract any imaging studies recommended
-   - For EACH exam provide:
-     * Type (X-Ray, CT Scan, MRI, Ultrasound)
-     * Région (anatomical region)
-     * Indication clinique (clinical indication)
-     * Urgence (true/false)
-
-IMPORTANT FORMATTING REQUIREMENTS:
-- Use professional French medical terminology
-- Be concise but comprehensive
-- Use clear section headings with "**SECTION:**" format
-- For lists, use numbered format
-- Include ICD-10 codes where applicable
-- Ensure all medication details are complete
-- Prioritize dermatology-specific medications (topical > oral when appropriate)
-
-Return the response in JSON format with these exact keys:
-{
-  "compteRendu": "Full narrative consultation report in French",
-  "medications": [array of medication objects],
-  "laboratoryTests": [array of test objects],
-  "imagingStudies": [array of imaging objects],
-  "metadata": {
-    "generatedAt": "ISO date",
-    "patientAge": "age",
-    "consultationType": "Dermatology",
-    "imagesAnalyzed": number
-  }
-}`
-
-    console.log('🤖 Sending request to OpenAI...')
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: "You are a medical documentation specialist with expertise in dermatology. You create comprehensive, professionally structured medical reports in French that comply with medical documentation standards. You extract structured data from diagnoses and format them appropriately for prescriptions and lab orders."
-        },
-        {
-          role: "user",
-          content: reportPrompt
-        }
-      ],
-      temperature: 0.4,
-      max_tokens: 4000,
-      response_format: { type: "json_object" }
-    })
-
-    const responseText = completion.choices[0].message.content || '{}'
-    console.log('✅ AI Response received')
-
-    let reportData
-    try {
-      reportData = JSON.parse(responseText)
-    } catch (parseError) {
-      console.error('❌ Error parsing AI response:', parseError)
-      throw new Error('Failed to parse AI response')
-    }
-
-    // ==================== STRUCTURE THE COMPLETE REPORT ====================
-    const structuredReport = {
-      success: true,
-      report: {
-        // Header Information
+    // ==================== BUILD COMPLETE MAURITIAN REPORT STRUCTURE ====================
+    const reportStructure = {
+      medicalReport: {
         header: {
-          title: "COMPTE RENDU DE CONSULTATION DERMATOLOGIQUE",
-          subtitle: "Documentation Médicale Professionnelle",
+          title: "DERMATOLOGY CONSULTATION REPORT",
+          subtitle: "Professional Dermatological Documentation",
           reference: `DERM-${Date.now()}`,
-          date: new Date().toISOString()
+          consultationType: "Dermatology - Teleconsultation with Image Analysis"
         },
-
-        // Patient Information
-        patient: {
-          fullName: patient.fullName,
-          firstName: patient.firstName,
-          lastName: patient.lastName,
-          age: patient.age,
-          birthDate: patient.birthDate,
-          gender: patient.gender,
-          weight: patient.weight,
-          height: patient.height,
-          phone: patient.phone,
-          email: patient.email,
-          address: `${patient.address}, ${patient.city}, ${patient.country}`,
-          allergies: formatAllergies(patient),
-          medicalHistory: formatMedicalHistory(patient),
-          currentMedications: patient.currentMedications,
-          dateExamen: new Date().toISOString().split('T')[0]
-        },
-
-        // Doctor Information
-        doctor: {
-          name: `Dr. ${doctor.fullName}`,
-          qualifications: doctor.qualifications,
-          specialty: doctor.specialty,
-          clinicAddress: doctor.clinicAddress,
-          email: doctor.email,
-          consultationHours: doctor.consultationHours,
-          medicalCouncilNumber: doctor.medicalCouncilNumber
-        },
-
-        // Consultation Report (Narrative)
-        consultationReport: {
-          fullText: reportData.compteRendu || generateFallbackReport(patient, ocrAnalysis, diagnosis),
-          sections: extractReportSections(reportData.compteRendu || '')
-        },
-
-        // Image Analysis
+        physician: physician,
+        patient: patient,
+        report: narrativeReport,
         imageAnalysis: {
           summary: ocrAnalysisData?.summary || '',
-          fullText: ocrAnalysis,
+          fullAnalysis: ocrAnalysis,
           observations: ocrAnalysisData?.observations || [],
           imagesCount: imageData?.images?.length || 0
         },
-
-        // Clinical History
-        clinicalHistory: {
-          questions: questionsData?.questions || [],
-          answers: questionsData?.answers || {},
-          formatted: questionsFormatted
-        },
-
-        // Diagnosis
-        diagnosis: {
-          fullText: diagnosis,
-          primary: extractPrimaryDiagnosis(diagnosis),
-          differential: extractDifferentialDiagnoses(diagnosis),
-          icd10: extractICD10Codes(diagnosis)
-        },
-
-        // Prescriptions - Medications
-        prescriptions: {
-          medications: reportData.medications || [],
-          laboratoryTests: reportData.laboratoryTests || [],
-          imagingStudies: reportData.imagingStudies || []
-        },
-
-        // Metadata
         metadata: {
-          generatedAt: new Date().toISOString(),
-          consultationType: 'Dermatology',
-          imagesAnalyzed: imageData?.images?.length || 0,
-          questionsAnswered: Object.keys(questionsData?.answers || {}).length,
-          aiModel: 'gpt-4o',
-          reportVersion: '1.0'
+          generatedAt: currentDate.toISOString(),
+          wordCount: JSON.stringify(narrativeReport).split(/\s+/).length,
+          validationStatus: 'dermatology_professional_v1.0',
+          dataSource: 'ai_dermatology_specialist_gpt4o',
+          imagesAnalyzed: imageData?.images?.length || 0
+        }
+      },
+
+      // ===== PRESCRIPTIONS - MEDICATIONS =====
+      prescriptions: {
+        medications: medications.length > 0 ? {
+          header: physician,
+          patient: patient,
+          prescription: {
+            prescriptionDate: examDate,
+            medications: medications.map((med, idx) => ({
+              number: idx + 1,
+              name: med.nom || med.name,
+              genericName: med.denominationCommune || med.genericName || med.name,
+              dosage: med.dosage,
+              form: med.forme || med.form || 'cream',
+              frequency: med.posologie || med.frequency,
+              route: med.modeAdministration || med.route || 'Topical route',
+              duration: med.dureeTraitement || med.duration,
+              quantity: med.quantite || med.quantity,
+              instructions: med.instructions,
+              indication: med.indication || 'As per dermatological diagnosis',
+              doNotSubstitute: med.nonSubstituable || false,
+              fullDescription: `${med.nom} ${med.dosage} - ${med.posologie}`
+            })),
+            validity: "3 months unless otherwise specified",
+            dispensationNote: "For pharmaceutical use only - Dermatological prescription"
+          },
+          authentication: {
+            signature: "Medical Practitioner's Signature",
+            physicianName: physician.name.toUpperCase(),
+            registrationNumber: physician.medicalCouncilNumber,
+            officialStamp: "Official Medical Stamp",
+            date: examDate
+          }
+        } : null,
+
+        // ===== LABORATORY TESTS =====
+        laboratoryTests: labTests.length > 0 ? {
+          header: physician,
+          patient: patient,
+          prescription: {
+            prescriptionDate: examDate,
+            clinicalIndication: "Dermatological investigation as per consultation findings",
+            analyses: {
+              hematology: labTests.filter(t => t.categorie === 'hematology' || t.category === 'hematology').map(t => ({
+                name: t.nom || t.name,
+                category: 'hematology',
+                urgent: t.urgence || t.urgent || false,
+                fasting: t.aJeun || t.fasting || false,
+                sampleConditions: t.conditionsPrelevement || t.sampleConditions || '',
+                clinicalIndication: t.motifClinique || t.clinicalIndication || '',
+                sampleTube: t.tubePrelevement || t.sampleTube || 'As per laboratory protocol',
+                turnaroundTime: t.delaiResultat || t.turnaroundTime || 'Standard (24-48h)'
+              })),
+              clinicalChemistry: labTests.filter(t => t.categorie === 'clinicalChemistry' || t.category === 'clinicalChemistry').map(t => ({
+                name: t.nom || t.name,
+                category: 'clinicalChemistry',
+                urgent: t.urgence || t.urgent || false,
+                fasting: t.aJeun || t.fasting || false,
+                sampleConditions: t.conditionsPrelevement || t.sampleConditions || '',
+                clinicalIndication: t.motifClinique || t.clinicalIndication || '',
+                sampleTube: t.tubePrelevement || t.sampleTube || 'As per laboratory protocol',
+                turnaroundTime: t.delaiResultat || t.turnaroundTime || 'Standard (24-48h)'
+              })),
+              immunology: labTests.filter(t => t.categorie === 'immunology' || t.category === 'immunology').map(t => ({
+                name: t.nom || t.name,
+                category: 'immunology',
+                urgent: t.urgence || t.urgent || false,
+                fasting: t.aJeun || t.fasting || false,
+                sampleConditions: t.conditionsPrelevement || t.sampleConditions || '',
+                clinicalIndication: t.motifClinique || t.clinicalIndication || '',
+                sampleTube: t.tubePrelevement || t.sampleTube || 'As per laboratory protocol',
+                turnaroundTime: t.delaiResultat || t.turnaroundTime || 'Standard (24-48h)'
+              })),
+              microbiology: labTests.filter(t => t.categorie === 'microbiology' || t.category === 'microbiology').map(t => ({
+                name: t.nom || t.name,
+                category: 'microbiology',
+                urgent: t.urgence || t.urgent || false,
+                fasting: t.aJeun || t.fasting || false,
+                sampleConditions: t.conditionsPrelevement || t.sampleConditions || '',
+                clinicalIndication: t.motifClinique || t.clinicalIndication || '',
+                sampleTube: t.tubePrelevement || t.sampleTube || 'As per laboratory protocol',
+                turnaroundTime: t.delaiResultat || t.turnaroundTime || 'Standard (24-48h)'
+              })),
+              other: labTests.filter(t => !['hematology', 'clinicalChemistry', 'immunology', 'microbiology'].includes(t.categorie || t.category)).map(t => ({
+                name: t.nom || t.name,
+                category: t.categorie || t.category || 'other',
+                urgent: t.urgence || t.urgent || false,
+                fasting: t.aJeun || t.fasting || false,
+                sampleConditions: t.conditionsPrelevement || t.sampleConditions || '',
+                clinicalIndication: t.motifClinique || t.clinicalIndication || '',
+                sampleTube: t.tubePrelevement || t.sampleTube || 'As per laboratory protocol',
+                turnaroundTime: t.delaiResultat || t.turnaroundTime || 'Standard (24-48h)'
+              }))
+            },
+            specialInstructions: ["Inform laboratory staff about dermatological context", "Handle samples according to standard protocols"],
+            recommendedLaboratory: ""
+          },
+          authentication: {
+            signature: "Medical Practitioner's Signature",
+            physicianName: physician.name.toUpperCase(),
+            registrationNumber: physician.medicalCouncilNumber,
+            date: examDate
+          }
+        } : null,
+
+        // ===== IMAGING STUDIES =====
+        imagingStudies: imagingStudies.length > 0 ? {
+          header: physician,
+          patient: patient,
+          prescription: {
+            prescriptionDate: examDate,
+            examinations: imagingStudies.map((exam, idx) => ({
+              number: idx + 1,
+              type: exam.type,
+              modalite: exam.modalite || exam.type,
+              region: exam.region,
+              clinicalIndication: exam.indicationClinique || exam.clinicalIndication,
+              urgence: exam.urgence || exam.urgent || false,
+              contrast: exam.contraste || exam.contrast || false,
+              specificProtocol: exam.protocoleSpecifique || exam.specificProtocol || '',
+              diagnosticQuestion: exam.questionDiagnostique || exam.diagnosticQuestion || ''
+            })),
+            clinicalInformation: "Dermatological evaluation - detailed findings in consultation report",
+            imagingCenter: ""
+          },
+          authentication: {
+            signature: "Medical Practitioner's Signature",
+            physicianName: physician.name.toUpperCase(),
+            registrationNumber: physician.medicalCouncilNumber,
+            date: examDate
+          }
+        } : null
+      },
+
+      // ===== INVOICE =====
+      invoice: {
+        header: {
+          invoiceNumber: `TIBOK-DERM-${currentDate.getFullYear()}-${String(Date.now()).slice(-6)}`,
+          consultationDate: examDate,
+          invoiceDate: examDate
+        },
+        provider: {
+          companyName: "Digital Data Solutions Ltd",
+          tradeName: "Tibok",
+          registrationNumber: "C20173522",
+          address: "Cybercity, Ebene, Mauritius",
+          phone: "+230 5xxx xxxx",
+          email: "contact@tibok.mu",
+          website: "www.tibok.mu"
+        },
+        billTo: {
+          name: patient.fullName,
+          address: `${patient.address}, ${patient.city}, ${patient.country}`,
+          phone: patient.phone,
+          email: patient.email
+        },
+        services: {
+          items: [{
+            description: "Online dermatology consultation with image analysis via Tibok",
+            quantity: 1,
+            unitPrice: 1500,
+            total: 1500
+          }],
+          subtotal: 1500,
+          vatRate: 0.15,
+          vatAmount: 0,
+          totalDue: 1500
+        },
+        payment: {
+          method: "[Credit Card / MCB Juice / MyT Money / Other]",
+          receivedDate: examDate,
+          status: "pending" as const
+        },
+        physician: {
+          name: physician.name,
+          registrationNumber: physician.medicalCouncilNumber
+        },
+        notes: [
+          "This invoice corresponds to a remote dermatology consultation with image analysis performed via the Tibok platform.",
+          "The service was delivered by a registered medical professional specialized in dermatology.",
+          "All images and data are securely hosted on a health data certified server (OVH – HDS compliant).",
+          "Service available from 08:00 to 00:00 (Mauritius time), 7 days a week.",
+          "Medication delivery included during daytime, with possible extra charges after 17:00."
+        ],
+        signature: {
+          entity: "Digital Data Solutions Ltd",
+          onBehalfOf: physician.name,
+          title: "Registered Medical Practitioner - Dermatology Specialist (Mauritius)"
         }
       }
     }
 
-    console.log('✅ Structured dermatology report generated successfully')
-    console.log(`📊 Medications: ${structuredReport.report.prescriptions.medications.length}`)
-    console.log(`📊 Lab Tests: ${structuredReport.report.prescriptions.laboratoryTests.length}`)
-    console.log(`📊 Imaging: ${structuredReport.report.prescriptions.imagingStudies.length}`)
+    const endTime = Date.now()
+    const processingTime = endTime - startTime
 
-    return NextResponse.json(structuredReport)
+    console.log("\n✅ COMPLETE DERMATOLOGY REPORT GENERATED")
+    console.log("📊 Final summary:")
+    console.log(`   - Medications: ${medications.length}`)
+    console.log(`   - Lab tests: ${labTests.length}`)
+    console.log(`   - Imaging: ${imagingStudies.length}`)
+    console.log(`   - Images analyzed: ${imageData?.images?.length || 0}`)
+    console.log(`   - Processing time: ${processingTime}ms`)
 
-  } catch (error: any) {
-    console.error('❌ Error generating dermatology report:', error)
+    return NextResponse.json({
+      success: true,
+      report: reportStructure,
+      metadata: {
+        type: "complete_dermatology_report_mauritian_v1.0",
+        dataSource: "ai_dermatology_specialist_gpt4o",
+        generatedAt: currentDate.toISOString(),
+        processingTimeMs: processingTime,
+        prescriptionsSummary: {
+          medications: medications.length,
+          laboratoryTests: labTests.length,
+          imagingStudies: imagingStudies.length
+        },
+        imagesAnalyzed: imageData?.images?.length || 0,
+        version: "1.0"
+      }
+    })
+
+  } catch (error) {
+    console.error("❌ API Error:", error)
+    
     return NextResponse.json(
-      {
-        success: false,
-        error: error.message || 'Failed to generate dermatology report',
-        details: error.stack
+      { 
+        success: false, 
+        error: error instanceof Error ? error.message : "Unknown error",
+        stack: process.env.NODE_ENV === 'development' ? (error as Error).stack : undefined
       },
       { status: 500 }
     )
   }
 }
 
-// ==================== HELPER FORMATTING FUNCTIONS ====================
+// ==================== AI EXTRACTION FUNCTIONS ====================
 
+async function extractMedicationsAI(diagnosisText: string, patient: any): Promise<any[]> {
+  try {
+    const prompt = `Extract ALL medications from this dermatology diagnosis. Return ONLY a JSON array.
+
+DIAGNOSIS:
+${diagnosisText}
+
+Return format:
+[
+  {
+    "nom": "Hydrocortisone Cream",
+    "denominationCommune": "Hydrocortisone",
+    "dosage": "1%",
+    "forme": "cream",
+    "posologie": "Apply twice daily",
+    "modeAdministration": "Topical route",
+    "dureeTraitement": "14 days",
+    "quantite": "1 tube (30g)",
+    "instructions": "Apply to affected areas only"
+  }
+]
+
+If no medications: return []`
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "Extract medications as JSON array only. No explanations." },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.3,
+      max_tokens: 2000
+    })
+
+    const text = (completion.choices[0].message.content || '[]').trim()
+    const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '')
+    const match = cleaned.match(/\[[\s\S]*\]/)
+    return match ? JSON.parse(match[0]) : []
+  } catch (error) {
+    console.error('Error extracting medications:', error)
+    return []
+  }
+}
+
+async function extractLabTestsAI(diagnosisText: string, patient: any): Promise<any[]> {
+  try {
+    const prompt = `Extract ALL laboratory tests from RECOMMENDED INVESTIGATIONS. Return ONLY a JSON array.
+
+DIAGNOSIS:
+${diagnosisText}
+
+Return format:
+[
+  {
+    "nom": "Complete Blood Count",
+    "categorie": "hematology",
+    "urgence": false,
+    "aJeun": false,
+    "motifClinique": "Rule out infection"
+  }
+]
+
+Categories: hematology, clinicalChemistry, immunology, microbiology, other
+If no tests: return []`
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "Extract lab tests as JSON array only. No explanations." },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.3,
+      max_tokens: 1500
+    })
+
+    const text = (completion.choices[0].message.content || '[]').trim()
+    const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '')
+    const match = cleaned.match(/\[[\s\S]*\]/)
+    return match ? JSON.parse(match[0]) : []
+  } catch (error) {
+    console.error('Error extracting lab tests:', error)
+    return []
+  }
+}
+
+async function extractImagingStudiesAI(diagnosisText: string, patient: any): Promise<any[]> {
+  try {
+    const prompt = `Extract ALL imaging studies from RECOMMENDED INVESTIGATIONS. Return ONLY a JSON array.
+
+DIAGNOSIS:
+${diagnosisText}
+
+Return format:
+[
+  {
+    "type": "Ultrasound",
+    "region": "Soft tissue",
+    "indicationClinique": "Assess lesion depth",
+    "urgence": false
+  }
+]
+
+Types: X-Ray, CT Scan, MRI, Ultrasound
+If no imaging: return []`
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "Extract imaging as JSON array only. No explanations." },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.3,
+      max_tokens: 1000
+    })
+
+    const text = (completion.choices[0].message.content || '[]').trim()
+    const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '')
+    const match = cleaned.match(/\[[\s\S]*\]/)
+    return match ? JSON.parse(match[0]) : []
+  } catch (error) {
+    console.error('Error extracting imaging:', error)
+    return []
+  }
+}
+
+async function generateNarrativeReportAI(
+  patient: any,
+  ocrAnalysis: string,
+  questionsData: any,
+  diagnosis: string,
+  imageData: any
+): Promise<any> {
+  try {
+    const prompt = `Generate a professional dermatology consultation report in FRENCH with these sections as separate fields:
+
+PATIENT: ${patient.name}, ${patient.age} years, ${patient.gender}
+ALLERGIES: ${patient.allergies}
+MEDICAL HISTORY: ${patient.medicalHistory}
+CURRENT MEDICATIONS: ${patient.currentMedications}
+
+IMAGE ANALYSIS:
+${ocrAnalysis}
+
+DIAGNOSIS:
+${diagnosis}
+
+Return JSON with these EXACT keys:
+{
+  "chiefComplaint": "Motif de consultation",
+  "historyPresentIllness": "Histoire de la maladie",
+  "pastMedicalHistory": "Antécédents médicaux",
+  "examinationFindings": "Résultats de l'examen avec analyse d'images",
+  "diagnosis": "Diagnostic principal",
+  "differentialDiagnosis": "Diagnostics différentiels",
+  "treatmentPlan": "Plan de traitement",
+  "patientEducation": "Éducation du patient",
+  "followUp": "Plan de suivi",
+  "conclusion": "Conclusion"
+}
+
+Write in professional French medical style.`
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: "Generate professional French medical report as JSON only." },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.4,
+      max_tokens: 3000,
+      response_format: { type: "json_object" }
+    })
+
+    const text = completion.choices[0].message.content || '{}'
+    return JSON.parse(text)
+  } catch (error) {
+    console.error('Error generating narrative:', error)
+    return {
+      chiefComplaint: "Consultation dermatologique avec analyse d'images",
+      historyPresentIllness: "En attente",
+      pastMedicalHistory: patient.medicalHistory,
+      examinationFindings: ocrAnalysis,
+      diagnosis: diagnosis.substring(0, 500),
+      differentialDiagnosis: "",
+      treatmentPlan: "Voir ordonnance",
+      patientEducation: "",
+      followUp: "Suivi dans 2-4 semaines",
+      conclusion: "Consultation complète"
+    }
+  }
+}
+
+// ==================== HELPER FORMATTING FUNCTIONS ====================
 function formatMedicalHistory(patient: any): string {
-  const history = [...(patient.medicalHistory || [])]
+  const history = [...getArray(patient.medicalHistory)]
   if (patient.otherMedicalHistory) {
     history.push(patient.otherMedicalHistory)
   }
-  return history.length > 0 ? history.join(', ') : 'Aucun antécédent notable signalé'
+  return history.length > 0 ? history.join(', ') : 'No significant medical history'
 }
 
 function formatAllergies(patient: any): string {
-  const allergies = [...(patient.allergies || [])]
+  const allergies = [...getArray(patient.allergies)]
   if (patient.otherAllergies) {
     allergies.push(patient.otherAllergies)
   }
-  return allergies.length > 0 ? allergies.join(', ') : 'Aucune allergie connue'
-}
-
-function formatQuestionsData(questionsData: any): string {
-  if (!questionsData?.answers || !questionsData?.questions) {
-    return 'Interrogatoire complémentaire non disponible.'
-  }
-  
-  const questions = questionsData.questions || []
-  const answers = questionsData.answers || {}
-  
-  let formatted = ''
-  questions.forEach((q: any, index: number) => {
-    const answer = answers[q.id]
-    if (answer) {
-      const answerText = typeof answer === 'object' ? JSON.stringify(answer) : answer
-      formatted += `${index + 1}. ${q.question}\n   Réponse: ${answerText}\n\n`
-    }
-  })
-  
-  return formatted || 'Interrogatoire complémentaire non disponible.'
-}
-
-function extractReportSections(reportText: string): any {
-  return {
-    motifConsultation: extractSection(reportText, /MOTIF DE CONSULTATION[:\s]+(.*?)(?=\n\n[A-Z]|\Z)/is),
-    examenClinique: extractSection(reportText, /EXAMEN (?:VISUEL|CLINIQUE)[:\s]+(.*?)(?=\n\n[A-Z]|\Z)/is),
-    diagnostic: extractSection(reportText, /DIAGNOSTIC[:\s]+(.*?)(?=\n\n[A-Z]|\Z)/is),
-    planTherapeutique: extractSection(reportText, /PLAN THÉRAPEUTIQUE[:\s]+(.*?)(?=\n\n[A-Z]|\Z)/is),
-    surveillance: extractSection(reportText, /SUIVI[:\s]+(.*?)(?=\n\n[A-Z]|\Z)/is)
-  }
-}
-
-function extractSection(text: string, regex: RegExp): string {
-  const match = text.match(regex)
-  return match ? match[1].trim() : ''
-}
-
-function extractPrimaryDiagnosis(diagnosis: string): string {
-  const match = diagnosis.match(/PRIMARY DIAGNOSIS[:\s]+(.*?)(?=\n\n|DIFFERENTIAL|\Z)/is)
-  return match ? match[1].trim() : ''
-}
-
-function extractDifferentialDiagnoses(diagnosis: string): string[] {
-  const match = diagnosis.match(/DIFFERENTIAL DIAGNOS[EI]S[:\s]+(.*?)(?=\n\n[A-Z]|\Z)/is)
-  if (!match) return []
-  
-  const text = match[1]
-  return text.split(/\n/).filter(line => line.trim().match(/^[\d\-•]/)).map(line => line.trim())
-}
-
-function extractICD10Codes(diagnosis: string): string[] {
-  const codes: string[] = []
-  const regex = /\b[A-Z]\d{2}(?:\.\d{1,2})?\b/g
-  const matches = diagnosis.match(regex)
-  if (matches) {
-    codes.push(...matches)
-  }
-  return [...new Set(codes)] // Remove duplicates
-}
-
-function generateFallbackReport(patient: any, ocrAnalysis: string, diagnosis: string): string {
-  return `COMPTE RENDU DE CONSULTATION DERMATOLOGIQUE
-
-**INFORMATIONS PATIENT:**
-Nom: ${patient.fullName}
-Âge: ${patient.age} ans | Sexe: ${patient.gender}
-Date: ${new Date().toLocaleDateString('fr-FR')}
-
-**MOTIF DE CONSULTATION:**
-Consultation dermatologique avec analyse d'images pour évaluation de lésions cutanées.
-
-**EXAMEN VISUEL:**
-${ocrAnalysis}
-
-**DIAGNOSTIC:**
-${diagnosis}
-
-**PLAN DE SUIVI:**
-Suivi recommandé dans 2-4 semaines. Consultation plus tôt si aggravation des symptômes.
-
-Rapport généré le: ${new Date().toLocaleString('fr-FR')}
-Mode: Téléconsultation avec analyse d'images assistée par IA
-`
+  return allergies.length > 0 ? allergies.join(', ') : 'No known allergies'
 }
