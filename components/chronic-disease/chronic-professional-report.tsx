@@ -515,36 +515,209 @@ export default function ChronicProfessionalReport({
             }
           }
           
-          // Extract follow-up plan
-          if (diagnosisData.followUpPlan || diagnosisData.managementPlan) {
-            const followUpData = diagnosisData.followUpPlan || diagnosisData.managementPlan
+          // Extract and build follow-up plan from diagnosis data
+          if (diagnosisData.followUpPlan || diagnosisData.diseaseAssessment) {
+            const followUpData = diagnosisData.followUpPlan || {}
+            const assessment = diagnosisData.diseaseAssessment || {}
+            
+            // Build short-term goals from diagnosis
+            const shortTermGoals = []
+            if (assessment.diabetesControl?.currentHbA1c) {
+              shortTermGoals.push({
+                goal: `Improve glycemic control - Target HbA1c <7%`,
+                timeline: "0-3 months",
+                metrics: [
+                  `Current: ${assessment.diabetesControl.currentHbA1c}`,
+                  `Target: <7% (good control)`,
+                  `Monitor: Fasting glucose, post-prandial glucose`
+                ]
+              })
+            }
+            if (assessment.hypertensionAssessment?.currentBP) {
+              shortTermGoals.push({
+                goal: `Control blood pressure - Target <130/80 mmHg`,
+                timeline: "0-3 months",
+                metrics: [
+                  `Current: ${assessment.hypertensionAssessment.currentBP}`,
+                  `Target: <130/80 mmHg`,
+                  `Monitor: Daily BP readings`
+                ]
+              })
+            }
+            if (patientData.weight && bmi > 25) {
+              const targetWeight = Math.round(patientData.weight * 0.95) // 5% reduction
+              shortTermGoals.push({
+                goal: `Weight reduction - Lose 5% of body weight`,
+                timeline: "0-3 months",
+                metrics: [
+                  `Current: ${patientData.weight} kg (BMI: ${bmi.toFixed(1)})`,
+                  `Target: ${targetWeight} kg`,
+                  `Monitor: Weekly weigh-ins`
+                ]
+              })
+            }
+            
+            // Build long-term goals
+            const longTermGoals = []
+            if (assessment.diabetesControl) {
+              longTermGoals.push({
+                goal: `Prevent diabetes complications`,
+                timeline: "6-12 months",
+                metrics: [
+                  `HbA1c maintained <7%`,
+                  `No retinopathy progression`,
+                  `No nephropathy (microalbuminuria screening)`,
+                  `No neuropathy symptoms`
+                ]
+              })
+            }
+            if (assessment.hypertensionAssessment) {
+              longTermGoals.push({
+                goal: `Reduce cardiovascular risk`,
+                timeline: "6-12 months",
+                metrics: [
+                  `BP controlled <130/80 mmHg`,
+                  `LDL cholesterol <1.0 g/L`,
+                  `No cardiac events`
+                ]
+              })
+            }
+            if (bmi > 25) {
+              longTermGoals.push({
+                goal: `Achieve healthy weight`,
+                timeline: "6-12 months",
+                metrics: [
+                  `Target BMI: 22-25`,
+                  `Sustained weight loss`,
+                  `Improved metabolic parameters`
+                ]
+              })
+            }
+            
+            // Build monitoring parameters
+            const monitoringParameters = []
+            if (assessment.diabetesControl) {
+              monitoringParameters.push(
+                "HbA1c every 3 months",
+                "Fasting glucose weekly",
+                "Post-prandial glucose as needed",
+                "Annual eye exam (retinopathy screening)",
+                "Annual foot exam",
+                "Annual kidney function (creatinine, microalbuminuria)"
+              )
+            }
+            if (assessment.hypertensionAssessment) {
+              monitoringParameters.push(
+                "Blood pressure daily at home",
+                "Lipid panel every 6 months",
+                "ECG annually",
+                "Cardiovascular risk assessment"
+              )
+            }
+            monitoringParameters.push(
+              "Weight weekly",
+              "Medication adherence check",
+              "Side effects monitoring"
+            )
+            
+            // Build lifestyle modifications
+            const lifestyleModifications = {
+              physicalActivity: [
+                "30 minutes of moderate exercise 5 days per week",
+                "Walking, swimming, or cycling recommended",
+                "Gradually increase intensity",
+                "Avoid sedentary lifestyle - move every hour"
+              ],
+              dietaryChanges: [
+                "Follow prescribed 7-day meal plan",
+                "Reduce sodium intake (<2300mg/day)",
+                "Increase fiber intake (25-35g/day)",
+                "Limit simple sugars and refined carbohydrates",
+                "Portion control - use smaller plates"
+              ],
+              stressManagement: [
+                "Practice relaxation techniques daily",
+                "Yoga or meditation 15 minutes/day",
+                "Adequate sleep (7-8 hours/night)",
+                "Seek support from family/friends",
+                "Consider counseling if needed"
+              ],
+              sleepHygiene: [
+                "Consistent sleep schedule (same bedtime/wake time)",
+                "Avoid screens 1 hour before bed",
+                "Keep bedroom cool and dark",
+                "Limit caffeine after 2 PM",
+                "Avoid heavy meals before bedtime"
+              ]
+            }
+            
+            // Build emergency protocol
+            const emergencyProtocol = {
+              warningSigns: [],
+              emergencyContacts: [
+                "Emergency Services: 114 or 999",
+                "Your Doctor: [Phone number from medical record]",
+                "Nearest Hospital: [Location based hospital]"
+              ],
+              actionSteps: []
+            }
+            
+            if (assessment.diabetesControl) {
+              emergencyProtocol.warningSigns.push(
+                "Severe hypoglycemia: Confusion, sweating, tremors, loss of consciousness",
+                "Severe hyperglycemia: Blood glucose >3.0 g/L with nausea, vomiting",
+                "Diabetic ketoacidosis: Fruity breath, rapid breathing, confusion"
+              )
+              emergencyProtocol.actionSteps.push(
+                "If hypoglycemia: Take 15g fast-acting sugar, recheck in 15 min",
+                "If severe hyperglycemia: Drink water, take prescribed medication, call doctor",
+                "If unconscious or severe symptoms: Call 114 immediately"
+              )
+            }
+            
+            if (assessment.hypertensionAssessment) {
+              emergencyProtocol.warningSigns.push(
+                "Hypertensive crisis: BP >180/120 mmHg",
+                "Chest pain or pressure",
+                "Severe headache",
+                "Shortness of breath",
+                "Vision changes"
+              )
+              emergencyProtocol.actionSteps.push(
+                "If BP >180/120: Rest, recheck in 5 minutes",
+                "If chest pain: Call 114 immediately - possible heart attack",
+                "If stroke symptoms (FAST): Call 114 immediately"
+              )
+            }
+            
             initialReport.followUpPlan = {
               header: {
                 title: "Chronic Disease Management & Follow-Up Plan",
                 patientName: initialReport.medicalReport.patient.fullName,
                 date: new Date().toISOString().split('T')[0]
               },
-              shortTermGoals: followUpData.shortTermGoals || [],
-              longTermGoals: followUpData.longTermGoals || [],
+              shortTermGoals: shortTermGoals.length > 0 ? shortTermGoals : followUpData.shortTermGoals || [],
+              longTermGoals: longTermGoals.length > 0 ? longTermGoals : followUpData.longTermGoals || [],
               monitoringSchedule: {
-                nextAppointment: followUpData.nextAppointment || "",
-                followUpFrequency: followUpData.followUpFrequency || "Monthly",
-                monitoringParameters: followUpData.monitoringParameters || []
+                nextAppointment: followUpData.nextAppointment || "To be scheduled within 4 weeks",
+                followUpFrequency: "Monthly for first 3 months, then quarterly",
+                monitoringParameters: monitoringParameters
               },
-              lifestyleModifications: {
-                physicalActivity: followUpData.physicalActivity || followUpData.exercise || [],
-                dietaryChanges: followUpData.dietaryChanges || [],
-                stressManagement: followUpData.stressManagement || [],
-                sleepHygiene: followUpData.sleepHygiene || [],
-                substanceUse: followUpData.substanceUse || []
-              },
-              educationalResources: followUpData.educationalResources || [],
-              emergencyProtocol: followUpData.emergencyProtocol || {
-                warningSigns: [],
-                emergencyContacts: [],
-                actionSteps: []
-              },
-              specialInstructions: followUpData.specialInstructions || []
+              lifestyleModifications: lifestyleModifications,
+              educationalResources: followUpData.educationalResources || [
+                "Diabetes education program enrollment recommended",
+                "Nutritional counseling sessions",
+                "Patient support groups",
+                "Online resources: mauritiusdiabetes.org"
+              ],
+              emergencyProtocol: emergencyProtocol,
+              specialInstructions: followUpData.specialInstructions || [
+                "Keep a health diary: track glucose, BP, weight, medications",
+                "Bring all medications to each appointment",
+                "Report any new symptoms immediately",
+                "Maintain regular meal times",
+                "Stay hydrated (8-10 glasses water daily)"
+              ]
             }
           }
         }
