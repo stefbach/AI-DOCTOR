@@ -520,6 +520,13 @@ export default function ChronicProfessionalReport({
             const followUpData = diagnosisData.followUpPlan || {}
             const assessment = diagnosisData.diseaseAssessment || {}
             
+            // Calculate BMI for follow-up goals
+            const weight = parseFloat(patientData.weight) || 0
+            const heightInMeters = (parseFloat(patientData.height) || 0) / 100
+            const bmi = (weight > 0 && heightInMeters > 0) 
+              ? weight / (heightInMeters * heightInMeters) 
+              : 0
+            
             // Build short-term goals from diagnosis
             const shortTermGoals = []
             if (assessment.diabetesControl?.currentHbA1c) {
