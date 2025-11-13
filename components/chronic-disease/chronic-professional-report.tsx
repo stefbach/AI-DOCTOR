@@ -608,7 +608,7 @@ export default function ChronicProfessionalReport({
         console.log('📊 API Response - Report:', reportData)
         console.log('💊 API Response - Prescription:', prescriptionData)
         console.log('🧪 API Response - Examens:', examensData)
-        console.log('🍽️ API Response - Dietary:', dietaryData)
+        console.log('ℹ️ Dietary will be generated on-demand via button')
         
         // Update report with API responses
         setReport(prev => {
