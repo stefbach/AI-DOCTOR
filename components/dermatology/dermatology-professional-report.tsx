@@ -78,6 +78,9 @@ export default function DermatologyProfessionalReport(props: Props) {
 
   // Loading state for initial report generation
   const [isGeneratingReport, setIsGeneratingReport] = useState(false)
+  
+  // Store full Mauritian report structure
+  const [mauritianReport, setMauritianReport] = useState<any>(null)
 
   // Generate consultation report on mount using comprehensive API
   useEffect(() => {
@@ -116,32 +119,71 @@ export default function DermatologyProfessionalReport(props: Props) {
         const data = await response.json()
         
         if (data.success && data.report) {
-          // Set consultation report
-          setConsultationReport(data.report.consultationReport?.fullText || generateConsultationReport(props))
+          // Store the complete Mauritian report structure
+          setMauritianReport(data.report)
           
-          // Set medications from API
-          if (data.report.prescriptions?.medications?.length > 0) {
-            setMedications(data.report.prescriptions.medications)
+          // Generate consultation report text from structured data
+          const reportText = generateConsultationReportFromStructure(data.report)
+          setConsultationReport(reportText)
+          
+          // Extract medications from prescriptions.medications.prescription.medications
+          if (data.report.prescriptions?.medications?.prescription?.medications) {
+            const meds = data.report.prescriptions.medications.prescription.medications
+            setMedications(meds.map((m: any) => ({
+              nom: m.name || m.nom,
+              denominationCommune: m.genericName || m.denominationCommune,
+              dosage: m.dosage,
+              forme: m.form || m.forme,
+              posologie: m.frequency || m.posologie,
+              modeAdministration: m.route || m.modeAdministration,
+              dureeTraitement: m.duration || m.dureeTraitement,
+              quantite: m.quantity || m.quantite,
+              instructions: m.instructions
+            })))
             toast({
               title: "Médicaments extraits",
-              description: `${data.report.prescriptions.medications.length} médicament(s) ajouté(s) automatiquement`,
+              description: `${meds.length} médicament(s) ajouté(s) automatiquement`,
               duration: 3000
             })
           }
           
-          // Set lab tests from API
-          if (data.report.prescriptions?.laboratoryTests?.length > 0) {
-            setBiologyTests(data.report.prescriptions.laboratoryTests)
+          // Extract lab tests from prescriptions.laboratoryTests.prescription.analyses
+          if (data.report.prescriptions?.laboratoryTests?.prescription?.analyses) {
+            const analyses = data.report.prescriptions.laboratoryTests.prescription.analyses
+            const allTests: BiologyTest[] = []
+            
+            // Combine all categories
+            Object.entries(analyses).forEach(([category, tests]: [string, any]) => {
+              if (Array.isArray(tests)) {
+                tests.forEach((test: any) => {
+                  allTests.push({
+                    nom: test.name || test.nom,
+                    categorie: test.category || category,
+                    urgence: test.urgent || test.urgence || false,
+                    aJeun: test.fasting || test.aJeun || false,
+                    motifClinique: test.clinicalIndication || test.motifClinique || ''
+                  })
+                })
+              }
+            })
+            
+            setBiologyTests(allTests)
             toast({
               title: "Examens extraits",
-              description: `${data.report.prescriptions.laboratoryTests.length} examen(s) ajouté(s) automatiquement`,
+              description: `${allTests.length} examen(s) ajouté(s) automatiquement`,
               duration: 3000
             })
           }
 
-          // Set imaging studies from API
-          if (data.report.prescriptions?.imagingStudies?.length > 0) {
-            setImagingExams(data.report.prescriptions.imagingStudies)
+          // Extract imaging studies from prescriptions.imagingStudies.prescription.examinations
+          if (data.report.prescriptions?.imagingStudies?.prescription?.examinations) {
+            const exams = data.report.prescriptions.imagingStudies.prescription.examinations
+            setImagingExams(exams.map((e: any) => ({
+              type: e.type,
+              region: e.region,
+              indicationClinique: e.clinicalIndication || e.indicationClinique,
+              urgence: e.urgence || e.urgent || false
+            })))
           }
 
           toast({
@@ -176,6 +218,95 @@ export default function DermatologyProfessionalReport(props: Props) {
       setIsExtractingMedications(false)
       setIsExtractingTests(false)
     }
+  }
+
+  function generateConsultationReportFromStructure(reportData: any) {
+    if (!reportData?.medicalReport) {
+      return generateConsultationReport(props)
+    }
+
+    const { medicalReport } = reportData
+    const { header, physician, patient, report, imageAnalysis } = medicalReport
+
+    const sections = [
+      `╔═══════════════════════════════════════════════════════════════╗`,
+      `║           ${header.title.padEnd(60)}║`,
+      `╚═══════════════════════════════════════════════════════════════╝`,
+      ``,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      `📋 INFORMATIONS PATIENT`,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      ``,
+      `**Nom:** ${patient.fullName || patient.name}`,
+      `**Âge:** ${patient.age} | **Sexe:** ${patient.gender}`,
+      `**Date de consultation:** ${patient.examDate}`,
+      `**Poids:** ${patient.weight} | **Taille:** ${patient.height || 'N/A'}`,
+      ``,
+      `**Antécédents médicaux:** ${patient.medicalHistory}`,
+      `**Allergies connues:** ${patient.allergies}`,
+      `**Traitement actuel:** ${patient.currentMedications}`,
+      ``,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      `🔍 MOTIF DE CONSULTATION`,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      ``,
+      report.chiefComplaint || 'Consultation dermatologique avec analyse d\'images',
+      ``,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      `📸 ANALYSE D'IMAGES (${imageAnalysis.imagesCount} photo(s))`,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      ``,
+      imageAnalysis.summary || imageAnalysis.fullAnalysis?.substring(0, 500) || 'Analyse en attente',
+      ``,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      `🩺 ANAMNÈSE & EXAMEN CLINIQUE`,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      ``,
+      `**Histoire de la maladie:**`,
+      report.historyPresentIllness || 'En attente',
+      ``,
+      `**Examen clinique:**`,
+      report.examinationFindings || 'Voir analyse d\'images ci-dessus',
+      ``,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      `🎯 DIAGNOSTIC DERMATOLOGIQUE`,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      ``,
+      `**DIAGNOSTIC PRINCIPAL:**`,
+      report.diagnosis || 'En attente',
+      ``,
+      report.differentialDiagnosis ? `**DIAGNOSTICS DIFFÉRENTIELS:**\n${report.differentialDiagnosis}\n` : '',
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      `💊 PLAN THÉRAPEUTIQUE`,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      ``,
+      report.treatmentPlan || 'Voir section "Ordonnance" pour les prescriptions détaillées.',
+      ``,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      `📚 ÉDUCATION PATIENT`,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      ``,
+      report.patientEducation || 'Information et éducation thérapeutique dispensées au patient.',
+      ``,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      `🔄 SUIVI & SURVEILLANCE`,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      ``,
+      report.followUp || 'Suivi clinique recommandé dans 2 à 4 semaines.',
+      ``,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      ``,
+      `**Date du rapport:** ${new Date().toLocaleString('fr-FR')}`,
+      `**Mode de consultation:** Téléconsultation avec analyse d'images assistée par IA`,
+      ``,
+      `**Médecin:** ${physician.name}`,
+      `**Qualifications:** ${physician.qualifications}`,
+      `**Numéro d'enregistrement:** ${physician.medicalCouncilNumber}`,
+      ``,
+      `Signature et cachet du médecin: _______________________`
+    ]
+
+    return sections.filter(s => s !== '').join('\n')
   }
 
   function generateConsultationReport(data: any) {
@@ -581,6 +712,72 @@ Signature et cachet du médecin: _______________________
   }
 
   function generatePrescriptionText() {
+    // If we have Mauritian structure, use it
+    if (mauritianReport?.prescriptions?.medications) {
+      const { header, patient, prescription, authentication } = mauritianReport.prescriptions.medications
+      
+      return `╔═══════════════════════════════════════════════════════════════╗
+║                    ORDONNANCE MÉDICALE                         ║
+║                      DERMATOLOGIE                              ║
+╚═══════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EN-TÊTE MÉDECIN PRESCRIPTEUR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Médecin: ${header.name}
+Qualifications: ${header.qualifications}
+Spécialité: ${header.specialty}
+Adresse: ${header.clinicAddress}
+Email: ${header.email}
+Enregistrement MCM: ${header.medicalCouncilNumber}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INFORMATIONS PATIENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Nom complet: ${patient.fullName}
+Âge: ${patient.age} | Sexe: ${patient.gender}
+Date de consultation: ${prescription.prescriptionDate}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRESCRIPTION MÉDICAMENTEUSE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${prescription.medications.map((med: any) => `
+${med.number}. ${med.name} ${med.dosage}
+   DCI (Dénomination Commune Internationale): ${med.genericName}
+   Forme: ${med.form}
+   Posologie: ${med.frequency}
+   Voie d'administration: ${med.route}
+   Durée du traitement: ${med.duration}
+   Quantité: ${med.quantity}
+   ${med.instructions ? `Instructions spéciales: ${med.instructions}` : ''}
+   Indication: ${med.indication}
+   ${med.doNotSubstitute ? '   ⚠️ NON SUBSTITUABLE' : ''}
+`).join('\n')}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Validité de l'ordonnance: ${prescription.validity}
+Note: ${prescription.dispensationNote}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+AUTHENTICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${authentication.signature}
+
+Médecin: ${authentication.physicianName}
+Numéro d'enregistrement: ${authentication.registrationNumber}
+
+${authentication.officialStamp}
+
+Date: ${authentication.date}
+`
+    }
+
+    // Fallback to simple format
     return `╔═══════════════════════════════════════════════════════════════╗
 ║                    ORDONNANCE MÉDICALE                         ║
 ║                      DERMATOLOGIE                              ║
@@ -612,6 +809,89 @@ Date: ${new Date().toLocaleDateString('fr-FR')}
   }
 
   function generateLabOrderText() {
+    // If we have Mauritian structure, use it
+    if (mauritianReport?.prescriptions?.laboratoryTests) {
+      const { header, patient, prescription, authentication } = mauritianReport.prescriptions.laboratoryTests
+      const { analyses } = prescription
+      
+      let testsText = ''
+      const categories = [
+        { key: 'hematology', label: 'HÉMATOLOGIE' },
+        { key: 'clinicalChemistry', label: 'CHIMIE CLINIQUE' },
+        { key: 'immunology', label: 'IMMUNOLOGIE' },
+        { key: 'microbiology', label: 'MICROBIOLOGIE' },
+        { key: 'other', label: 'AUTRES EXAMENS' }
+      ]
+      
+      categories.forEach(({ key, label }) => {
+        const tests = analyses[key]
+        if (tests && tests.length > 0) {
+          testsText += `\n━━━ ${label} ━━━\n\n`
+          tests.forEach((test: any, idx: number) => {
+            testsText += `${idx + 1}. ${test.name}\n`
+            testsText += `   ${test.urgent ? '⚠️ URGENT' : '⏱️ Standard'}\n`
+            testsText += `   ${test.fasting ? '🍽️ À jeun requis' : '✓ Pas de jeûne nécessaire'}\n`
+            if (test.clinicalIndication) {
+              testsText += `   Indication: ${test.clinicalIndication}\n`
+            }
+            testsText += `\n`
+          })
+        }
+      })
+      
+      return `╔═══════════════════════════════════════════════════════════════╗
+║              DEMANDE D'EXAMENS DE LABORATOIRE                  ║
+║                      DERMATOLOGIE                              ║
+╚═══════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EN-TÊTE MÉDECIN PRESCRIPTEUR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Médecin: ${header.name}
+Qualifications: ${header.qualifications}
+Spécialité: ${header.specialty}
+Enregistrement MCM: ${header.medicalCouncilNumber}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INFORMATIONS PATIENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Nom complet: ${patient.fullName}
+Âge: ${patient.age} | Sexe: ${patient.gender}
+Date de prescription: ${prescription.prescriptionDate}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INDICATION CLINIQUE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${prescription.clinicalIndication}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXAMENS DEMANDÉS PAR CATÉGORIE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${testsText}
+${prescription.specialInstructions && prescription.specialInstructions.length > 0 ? `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INSTRUCTIONS SPÉCIALES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${prescription.specialInstructions.map((inst: string) => `• ${inst}`).join('\n')}
+` : ''}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+AUTHENTICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${authentication.signature}
+
+Médecin: ${authentication.physicianName}
+Numéro d'enregistrement: ${authentication.registrationNumber}
+
+Date: ${authentication.date}
+`
+    }
+    
+    // Fallback to simple format
     return `╔═══════════════════════════════════════════════════════════════╗
 ║              DEMANDE D'EXAMENS DE LABORATOIRE                  ║
 ║                      DERMATOLOGIE                              ║
@@ -640,6 +920,66 @@ Date: ${new Date().toLocaleDateString('fr-FR')}
   }
 
   function generateImagingOrderText() {
+    // If we have Mauritian structure, use it
+    if (mauritianReport?.prescriptions?.imagingStudies) {
+      const { header, patient, prescription, authentication } = mauritianReport.prescriptions.imagingStudies
+      
+      return `╔═══════════════════════════════════════════════════════════════╗
+║                  DEMANDE D'EXAMENS D'IMAGERIE                  ║
+║                      DERMATOLOGIE                              ║
+╚═══════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EN-TÊTE MÉDECIN PRESCRIPTEUR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Médecin: ${header.name}
+Qualifications: ${header.qualifications}
+Spécialité: ${header.specialty}
+Enregistrement MCM: ${header.medicalCouncilNumber}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INFORMATIONS PATIENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Nom complet: ${patient.fullName}
+Âge: ${patient.age} | Sexe: ${patient.gender}
+Date de prescription: ${prescription.prescriptionDate}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CONTEXTE CLINIQUE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${prescription.clinicalInformation}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXAMENS D'IMAGERIE DEMANDÉS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${prescription.examinations.map((exam: any) => `
+${exam.number}. ${exam.type} - ${exam.region}
+   Modalité: ${exam.modalite}
+   Indication clinique: ${exam.clinicalIndication}
+   ${exam.urgence ? '⚠️ URGENT' : '⏱️ Standard'}
+   ${exam.contrast ? '💉 Avec produit de contraste' : ''}
+   ${exam.specificProtocol ? `Protocole spécifique: ${exam.specificProtocol}` : ''}
+   ${exam.diagnosticQuestion ? `Question diagnostique: ${exam.diagnosticQuestion}` : ''}
+`).join('\n')}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+AUTHENTICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${authentication.signature}
+
+Médecin: ${authentication.physicianName}
+Numéro d'enregistrement: ${authentication.registrationNumber}
+
+Date: ${authentication.date}
+`
+    }
+    
+    // Fallback to simple format
     return `╔═══════════════════════════════════════════════════════════════╗
 ║                  DEMANDE D'EXAMENS D'IMAGERIE                  ║
 ║                      DERMATOLOGIE                              ║
