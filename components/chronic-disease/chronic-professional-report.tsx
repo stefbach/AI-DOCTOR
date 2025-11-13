@@ -1328,53 +1328,155 @@ export default function ChronicProfessionalReport({
           </div>
         </div>
         
-        {/* Patient Information */}
-        <div className="mb-6 p-4 bg-gray-50 rounded">
-          <h3 className="font-bold mb-2 flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Patient Information
+        {/* Comprehensive Patient Information */}
+        <div className="mb-6 p-5 bg-gradient-to-r from-blue-50 to-teal-50 rounded-lg border-2 border-blue-200">
+          <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-blue-800">
+            <User className="h-6 w-6" />
+            COMPREHENSIVE PATIENT INFORMATION
           </h3>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div><strong>Name:</strong> {medicalReport.patient.fullName}</div>
-            <div><strong>Age:</strong> {medicalReport.patient.age}</div>
-            <div><strong>Gender:</strong> {medicalReport.patient.gender}</div>
-            <div><strong>Date of Birth:</strong> {medicalReport.patient.dateOfBirth}</div>
-            {medicalReport.patient.nationalId && (
-              <div><strong>NID:</strong> {medicalReport.patient.nationalId}</div>
-            )}
-            <div><strong>Phone:</strong> {medicalReport.patient.phone}</div>
-            <div className="col-span-2"><strong>Address:</strong> {medicalReport.patient.address}</div>
+          
+          {/* Demographics Section */}
+          <div className="mb-4 pb-4 border-b border-blue-200">
+            <h4 className="font-semibold text-sm text-blue-700 mb-2">👤 Patient Demographics</h4>
+            <div className="grid grid-cols-3 gap-x-6 gap-y-2 text-sm">
+              <div><strong>Nom complet / Full Name:</strong> {medicalReport.patient.fullName}</div>
+              <div><strong>Date de naissance / Date of Birth:</strong> {medicalReport.patient.dateOfBirth}</div>
+              <div><strong>Âge / Age:</strong> {medicalReport.patient.age} years</div>
+              <div><strong>Genre / Gender:</strong> {medicalReport.patient.gender}</div>
+              <div><strong>Téléphone / Phone:</strong> {medicalReport.patient.phone}</div>
+              {medicalReport.patient.nationalId && (
+                <div><strong>NID:</strong> {medicalReport.patient.nationalId}</div>
+              )}
+              <div className="col-span-3"><strong>Adresse / Address:</strong> {medicalReport.patient.address}</div>
+            </div>
           </div>
-        </div>
-        
-        {/* Vital Signs */}
-        {(medicalReport.patient.bloodPressureSystolic || medicalReport.patient.temperature || medicalReport.patient.bloodGlucose) && (
-          <div className="mb-6 p-4 bg-teal-50 rounded">
-            <h3 className="font-bold mb-2 flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              Vital Signs
-            </h3>
-            <div className="grid grid-cols-3 gap-2 text-sm">
-              {medicalReport.patient.bloodPressureSystolic && (
-                <div>
-                  <strong>Blood Pressure:</strong> {medicalReport.patient.bloodPressureSystolic}/{medicalReport.patient.bloodPressureDiastolic} mmHg
-                </div>
-              )}
-              {medicalReport.patient.temperature && (
-                <div><strong>Temperature:</strong> {medicalReport.patient.temperature}°C</div>
-              )}
-              {medicalReport.patient.bloodGlucose && (
-                <div><strong>Blood Glucose:</strong> {medicalReport.patient.bloodGlucose} mmol/L</div>
-              )}
+          
+          {/* Anthropometric Measurements */}
+          <div className="mb-4 pb-4 border-b border-blue-200">
+            <h4 className="font-semibold text-sm text-blue-700 mb-2">📏 Anthropometric Measurements</h4>
+            <div className="grid grid-cols-4 gap-x-6 gap-y-2 text-sm">
               {medicalReport.patient.weight && (
-                <div><strong>Weight:</strong> {medicalReport.patient.weight} kg</div>
+                <div><strong>Poids / Weight:</strong> {medicalReport.patient.weight} kg</div>
               )}
               {medicalReport.patient.height && (
-                <div><strong>Height:</strong> {medicalReport.patient.height} cm</div>
+                <div><strong>Taille / Height:</strong> {medicalReport.patient.height} cm</div>
+              )}
+              {medicalReport.patient.weight && medicalReport.patient.height && (() => {
+                const weight = parseFloat(medicalReport.patient.weight)
+                const heightInMeters = parseFloat(medicalReport.patient.height) / 100
+                const bmi = weight / (heightInMeters * heightInMeters)
+                let bmiCategory = ''
+                if (bmi < 18.5) bmiCategory = 'Underweight'
+                else if (bmi < 25) bmiCategory = 'Normal'
+                else if (bmi < 30) bmiCategory = 'Overweight'
+                else if (bmi < 35) bmiCategory = 'Obese I'
+                else bmiCategory = 'Obese II+'
+                return (
+                  <>
+                    <div><strong>BMI / IMC:</strong> {bmi.toFixed(1)} kg/m²</div>
+                    <div><strong>Category:</strong> <span className={bmi >= 25 ? 'text-orange-600 font-semibold' : 'text-green-600'}>{bmiCategory}</span></div>
+                  </>
+                )
+              })()}
+            </div>
+          </div>
+          
+          {/* Vital Signs */}
+          {(medicalReport.patient.bloodPressureSystolic || medicalReport.patient.temperature || medicalReport.patient.bloodGlucose) && (
+            <div className="mb-4 pb-4 border-b border-blue-200">
+              <h4 className="font-semibold text-sm text-blue-700 mb-2">💓 Vital Signs & Clinical Parameters</h4>
+              <div className="grid grid-cols-4 gap-x-6 gap-y-2 text-sm">
+                {medicalReport.patient.bloodPressureSystolic && medicalReport.patient.bloodPressureDiastolic && (
+                  <div>
+                    <strong>Tension artérielle / Blood Pressure:</strong>{' '}
+                    <span className={
+                      parseInt(medicalReport.patient.bloodPressureSystolic) >= 140 || 
+                      parseInt(medicalReport.patient.bloodPressureDiastolic) >= 90
+                        ? 'text-red-600 font-semibold'
+                        : 'text-green-600'
+                    }>
+                      {medicalReport.patient.bloodPressureSystolic}/{medicalReport.patient.bloodPressureDiastolic} mmHg
+                    </span>
+                  </div>
+                )}
+                {medicalReport.patient.bloodGlucose && (
+                  <div>
+                    <strong>Glycémie / Blood Glucose:</strong>{' '}
+                    <span className={
+                      parseFloat(medicalReport.patient.bloodGlucose) > 7.0
+                        ? 'text-red-600 font-semibold'
+                        : 'text-green-600'
+                    }>
+                      {medicalReport.patient.bloodGlucose} mmol/L
+                    </span>
+                  </div>
+                )}
+                {medicalReport.patient.temperature && (
+                  <div><strong>Temperature:</strong> {medicalReport.patient.temperature}°C</div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Medical History & Allergies */}
+          <div className="mb-4 pb-4 border-b border-blue-200">
+            <h4 className="font-semibold text-sm text-blue-700 mb-2">🏥 Medical Profile</h4>
+            <div className="space-y-2 text-sm">
+              {medicalReport.patient.medicalHistory && (
+                <div>
+                  <strong>ATCD médicaux / Medical History:</strong>{' '}
+                  <span className="text-gray-800">
+                    {Array.isArray(medicalReport.patient.medicalHistory)
+                      ? medicalReport.patient.medicalHistory.join(', ')
+                      : medicalReport.patient.medicalHistory}
+                  </span>
+                </div>
+              )}
+              {medicalReport.patient.allergies && (
+                <div>
+                  <strong className="text-red-700">⚠️ Allergies:</strong>{' '}
+                  <span className="text-red-600 font-medium">
+                    {medicalReport.patient.allergies}
+                  </span>
+                </div>
+              )}
+              {medicalReport.patient.currentMedications && (
+                <div>
+                  <strong>Current Medications:</strong>{' '}
+                  <span className="text-gray-800">{medicalReport.patient.currentMedications}</span>
+                </div>
               )}
             </div>
           </div>
-        )}
+          
+          {/* Lifestyle Habits */}
+          {(patientData?.smokingStatus || patientData?.tabac || patientData?.alcoholConsumption || 
+            patientData?.alcool || patientData?.physicalActivity || patientData?.activitePhysique) && (
+            <div>
+              <h4 className="font-semibold text-sm text-blue-700 mb-2">🚶 Habitudes de vie / Lifestyle Habits</h4>
+              <div className="grid grid-cols-3 gap-x-6 gap-y-2 text-sm">
+                {(patientData?.smokingStatus || patientData?.tabac) && (
+                  <div>
+                    <strong>Tabac / Smoking:</strong>{' '}
+                    {patientData?.smokingStatus || patientData?.tabac}
+                  </div>
+                )}
+                {(patientData?.alcoholConsumption || patientData?.alcool) && (
+                  <div>
+                    <strong>Alcool / Alcohol:</strong>{' '}
+                    {patientData?.alcoholConsumption || patientData?.alcool}
+                  </div>
+                )}
+                {(patientData?.physicalActivity || patientData?.activitePhysique) && (
+                  <div>
+                    <strong>Activité physique / Physical Activity:</strong>{' '}
+                    {patientData?.physicalActivity || patientData?.activitePhysique}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
         
         {/* Chronic Disease Assessment */}
         <div className="mb-6">
@@ -2553,17 +2655,160 @@ export default function ChronicProfessionalReport({
           </div>
         </div>
         
-        {/* Patient Info */}
-        <div className="mb-6 p-4 bg-gray-50 rounded">
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div><strong>Patient:</strong> {report.medicalReport.patient.fullName}</div>
-            <div><strong>Date:</strong> {dietaryProtocol.header.date}</div>
-            <div><strong>Age:</strong> {report.medicalReport.patient.age}</div>
-            <div><strong>Gender:</strong> {report.medicalReport.patient.gender}</div>
-            {report.medicalReport.patient.nationalId && (
-              <div><strong>National ID:</strong> {report.medicalReport.patient.nationalId}</div>
-            )}
-            <div><strong>Address:</strong> {report.medicalReport.patient.address}</div>
+        {/* Comprehensive Patient Information */}
+        <div className="mb-6 p-5 bg-gradient-to-r from-cyan-50 to-teal-50 rounded-lg border-2 border-cyan-200">
+          <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-cyan-800">
+            <User className="h-6 w-6" />
+            COMPREHENSIVE PATIENT INFORMATION
+          </h3>
+          
+          {/* Demographics Section */}
+          <div className="mb-4 pb-4 border-b border-cyan-200">
+            <h4 className="font-semibold text-sm text-cyan-700 mb-2">👤 Patient Demographics</h4>
+            <div className="grid grid-cols-3 gap-x-6 gap-y-2 text-sm">
+              <div><strong>Nom complet / Full Name:</strong> {report.medicalReport.patient.fullName}</div>
+              <div><strong>Date de naissance / Date of Birth:</strong> {report.medicalReport.patient.dateOfBirth}</div>
+              <div><strong>Âge / Age:</strong> {report.medicalReport.patient.age} years</div>
+              <div><strong>Genre / Gender:</strong> {report.medicalReport.patient.gender}</div>
+              <div><strong>Téléphone / Phone:</strong> {report.medicalReport.patient.phone}</div>
+              {report.medicalReport.patient.nationalId && (
+                <div><strong>NID:</strong> {report.medicalReport.patient.nationalId}</div>
+              )}
+              <div className="col-span-3"><strong>Adresse / Address:</strong> {report.medicalReport.patient.address}</div>
+            </div>
+          </div>
+          
+          {/* Anthropometric Measurements */}
+          <div className="mb-4 pb-4 border-b border-cyan-200">
+            <h4 className="font-semibold text-sm text-cyan-700 mb-2">📏 Anthropometric Measurements</h4>
+            <div className="grid grid-cols-4 gap-x-6 gap-y-2 text-sm">
+              {report.medicalReport.patient.weight && (
+                <div><strong>Poids / Weight:</strong> {report.medicalReport.patient.weight} kg</div>
+              )}
+              {report.medicalReport.patient.height && (
+                <div><strong>Taille / Height:</strong> {report.medicalReport.patient.height} cm</div>
+              )}
+              {report.medicalReport.patient.weight && report.medicalReport.patient.height && (() => {
+                const weight = parseFloat(report.medicalReport.patient.weight)
+                const heightInMeters = parseFloat(report.medicalReport.patient.height) / 100
+                const bmi = weight / (heightInMeters * heightInMeters)
+                let bmiCategory = ''
+                if (bmi < 18.5) bmiCategory = 'Underweight'
+                else if (bmi < 25) bmiCategory = 'Normal'
+                else if (bmi < 30) bmiCategory = 'Overweight'
+                else if (bmi < 35) bmiCategory = 'Obese I'
+                else bmiCategory = 'Obese II+'
+                return (
+                  <>
+                    <div><strong>BMI / IMC:</strong> {bmi.toFixed(1)} kg/m²</div>
+                    <div><strong>Category:</strong> <span className={bmi >= 25 ? 'text-orange-600 font-semibold' : 'text-green-600'}>{bmiCategory}</span></div>
+                  </>
+                )
+              })()}
+            </div>
+          </div>
+          
+          {/* Vital Signs */}
+          {(report.medicalReport.patient.bloodPressureSystolic || report.medicalReport.patient.temperature || report.medicalReport.patient.bloodGlucose) && (
+            <div className="mb-4 pb-4 border-b border-cyan-200">
+              <h4 className="font-semibold text-sm text-cyan-700 mb-2">💓 Vital Signs & Clinical Parameters</h4>
+              <div className="grid grid-cols-4 gap-x-6 gap-y-2 text-sm">
+                {report.medicalReport.patient.bloodPressureSystolic && report.medicalReport.patient.bloodPressureDiastolic && (
+                  <div>
+                    <strong>Tension artérielle / Blood Pressure:</strong>{' '}
+                    <span className={
+                      parseInt(report.medicalReport.patient.bloodPressureSystolic) >= 140 || 
+                      parseInt(report.medicalReport.patient.bloodPressureDiastolic) >= 90
+                        ? 'text-red-600 font-semibold'
+                        : 'text-green-600'
+                    }>
+                      {report.medicalReport.patient.bloodPressureSystolic}/{report.medicalReport.patient.bloodPressureDiastolic} mmHg
+                    </span>
+                  </div>
+                )}
+                {report.medicalReport.patient.bloodGlucose && (
+                  <div>
+                    <strong>Glycémie / Blood Glucose:</strong>{' '}
+                    <span className={
+                      parseFloat(report.medicalReport.patient.bloodGlucose) > 7.0
+                        ? 'text-red-600 font-semibold'
+                        : 'text-green-600'
+                    }>
+                      {report.medicalReport.patient.bloodGlucose} mmol/L
+                    </span>
+                  </div>
+                )}
+                {report.medicalReport.patient.temperature && (
+                  <div><strong>Temperature:</strong> {report.medicalReport.patient.temperature}°C</div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Medical History & Allergies */}
+          <div className="mb-4 pb-4 border-b border-cyan-200">
+            <h4 className="font-semibold text-sm text-cyan-700 mb-2">🏥 Medical Profile</h4>
+            <div className="space-y-2 text-sm">
+              {report.medicalReport.patient.medicalHistory && (
+                <div>
+                  <strong>ATCD médicaux / Medical History:</strong>{' '}
+                  <span className="text-gray-800">
+                    {Array.isArray(report.medicalReport.patient.medicalHistory)
+                      ? report.medicalReport.patient.medicalHistory.join(', ')
+                      : report.medicalReport.patient.medicalHistory}
+                  </span>
+                </div>
+              )}
+              {report.medicalReport.patient.allergies && (
+                <div>
+                  <strong className="text-red-700">⚠️ Allergies:</strong>{' '}
+                  <span className="text-red-600 font-medium">
+                    {report.medicalReport.patient.allergies}
+                  </span>
+                </div>
+              )}
+              {report.medicalReport.patient.currentMedications && (
+                <div>
+                  <strong>Current Medications:</strong>{' '}
+                  <span className="text-gray-800">{report.medicalReport.patient.currentMedications}</span>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {/* Lifestyle Habits */}
+          {(patientData?.smokingStatus || patientData?.tabac || patientData?.alcoholConsumption || 
+            patientData?.alcool || patientData?.physicalActivity || patientData?.activitePhysique) && (
+            <div>
+              <h4 className="font-semibold text-sm text-cyan-700 mb-2">🚶 Habitudes de vie / Lifestyle Habits</h4>
+              <div className="grid grid-cols-3 gap-x-6 gap-y-2 text-sm">
+                {(patientData?.smokingStatus || patientData?.tabac) && (
+                  <div>
+                    <strong>Tabac / Smoking:</strong>{' '}
+                    {patientData?.smokingStatus || patientData?.tabac}
+                  </div>
+                )}
+                {(patientData?.alcoholConsumption || patientData?.alcool) && (
+                  <div>
+                    <strong>Alcool / Alcohol:</strong>{' '}
+                    {patientData?.alcoholConsumption || patientData?.alcool}
+                  </div>
+                )}
+                {(patientData?.physicalActivity || patientData?.activitePhysique) && (
+                  <div>
+                    <strong>Activité physique / Physical Activity:</strong>{' '}
+                    {patientData?.physicalActivity || patientData?.activitePhysique}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Report Date */}
+          <div className="mt-4 pt-4 border-t border-cyan-200">
+            <div className="text-sm">
+              <strong>📅 Report Date / Date du rapport:</strong> {dietaryProtocol.header.date}
+            </div>
           </div>
         </div>
         
