@@ -1037,10 +1037,34 @@ export default function ChronicProfessionalReport({
         {/* Narrative Report from API */}
         {medicalReport.narrative && (
           <div className="mb-6 p-6 bg-gray-50 rounded-lg">
-            <h3 className="font-bold text-lg mb-3">Comprehensive Medical Report</h3>
-            <div className="text-base whitespace-pre-wrap leading-relaxed">
-              {medicalReport.narrative}
-            </div>
+            <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
+              Comprehensive Medical Report
+              {editMode && <Badge variant="outline">Editable</Badge>}
+            </h3>
+            {editMode ? (
+              <Textarea
+                value={medicalReport.narrative}
+                onChange={(e) => {
+                  setReport(prev => {
+                    if (!prev) return null
+                    return {
+                      ...prev,
+                      medicalReport: {
+                        ...prev.medicalReport,
+                        narrative: e.target.value
+                      }
+                    }
+                  })
+                  setHasUnsavedChanges(true)
+                }}
+                className="min-h-[400px] text-base font-mono"
+                placeholder="Enter comprehensive medical report..."
+              />
+            ) : (
+              <div className="text-base whitespace-pre-wrap leading-relaxed">
+                {medicalReport.narrative}
+              </div>
+            )}
           </div>
         )}
         
