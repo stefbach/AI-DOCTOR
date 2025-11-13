@@ -435,12 +435,12 @@ Generate the comprehensive dietary protocol now with ALL required details.`
     console.log('🥗 Calling OpenAI API for comprehensive dietary protocol...')
     
     const result = await generateText({
-      model: openai("gpt-4o-mini"),
+      model: openai("gpt-4o"),  // Use GPT-4o - faster for long responses than gpt-4o-mini
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: patientContext }
       ],
-      maxTokens: 3500,
+      maxTokens: 3500,  // Sufficient for 7-day meal plan
       temperature: 0.3,
     })
 
