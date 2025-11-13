@@ -955,6 +955,10 @@ export default function ChronicProfessionalReport({
       // Normalize patient data before sending
       const normalizedPatientData = normalizePatientData(patientData)
       
+      // Create abort controller with 60 second timeout
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 60000)
+      
       const response = await fetch("/api/chronic-dietary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -962,11 +966,16 @@ export default function ChronicProfessionalReport({
           patientData: normalizedPatientData,
           clinicalData,
           diagnosisData
-        })
+        }),
+        signal: abortController.signal
       })
       
+      clearTimeout(timeoutId)
+      
       if (!response.ok) {
-        throw new Error(`Dietary API failed: ${response.statusText}`)
+        const errorText = await response.text()
+        console.error('❌ API Error Response:', errorText)
+        throw new Error(`Dietary API failed (${response.status}): ${response.statusText}. ${errorText.substring(0, 200)}`)
       }
       
       const dietaryData = await response.json()
@@ -1041,10 +1050,21 @@ export default function ChronicProfessionalReport({
       
     } catch (err: any) {
       console.error('❌ Dietary generation error:', err)
-      setDietaryError(err.message || "Failed to generate dietary plan")
+      
+      // Provide specific error messages based on error type
+      let errorMessage = "Failed to generate dietary plan"
+      if (err.name === 'AbortError') {
+        errorMessage = "Request timed out after 60 seconds. Please try again."
+      } else if (err.message.includes('Failed to fetch')) {
+        errorMessage = "Network error: Could not reach the server. Please check your connection and try again."
+      } else {
+        errorMessage = err.message || errorMessage
+      }
+      
+      setDietaryError(errorMessage)
       toast({
         title: "Generation Failed",
-        description: `Could not generate detailed dietary plan: ${err.message}`,
+        description: errorMessage,
         variant: "destructive",
       })
     } finally {
