@@ -19,17 +19,18 @@ export async function POST(req: NextRequest) {
 
     const systemPrompt = `You are a SPECIALIZED CLINICAL DIETITIAN expert in chronic disease nutrition management.
 
-Your task is to generate a CONCISE DIETARY PROTOCOL for chronic disease management.
+Your task is to generate a PRACTICAL DIETARY PROTOCOL for chronic disease management.
 
-IMPORTANT: Keep responses brief and focused. Generate 3 sample days (not 7) with essential meal info.
+IMPORTANT: Generate a complete 7-DAY meal plan but keep each day's description CONCISE and PRACTICAL.
 
 CRITICAL REQUIREMENTS:
 
 1. PERSONALIZED MEAL PLANNING:
-   - Create meal plans for 3 SAMPLE DAYS (breakfast, lunch, dinner, 2 snacks per day)
-   - Each meal must include:
-     * Key foods with portion sizes
-     * Calorie content per meal
+   - Create meal plans for 7 DAYS (breakfast, lunch, dinner, 1-2 snacks per day)
+   - For EACH MEAL, provide ONLY:
+     * Main foods (2-3 items max per meal)
+     * Total calories per meal
+     * Brief preparation note (1 sentence)
      * Macronutrient breakdown (proteins, carbs, fats)
      * Preparation methods (grilled, steamed, baked, raw)
      * Timing recommendations
@@ -67,16 +68,18 @@ CRITICAL REQUIREMENTS:
    - Micronutrient recommendations (vitamins, minerals)
    - Hydration targets (30-35ml per kg body weight)
 
-4. MEAL PLAN STRUCTURE (3-day sample plan - keep it concise):
-   Provide 3 representative days with key meals only:
+4. MEAL PLAN STRUCTURE (7-day plan - CONCISE format):
+   For EACH of 7 days, provide:
    
-   DAY 1 (Example):
-   BREAKFAST: Oatmeal (60g) with milk (200ml) and apple - 390 kcal
-   LUNCH: Grilled chicken (120g), brown rice (150g), vegetables - 520 kcal
-   DINNER: Fish (150g), quinoa (100g), salad - 480 kcal
-   SNACKS: Greek yogurt, nuts (30g) - 250 kcal
+   DAY 1:
+   Breakfast (390 kcal): Oatmeal with milk and apple | Cook oatmeal with water, add cinnamon
+   Mid-Morning Snack (150 kcal): Greek yogurt | Plain, no sugar
+   Lunch (520 kcal): Grilled chicken, brown rice, vegetables | Grill chicken, steam vegetables
+   Afternoon Snack (100 kcal): Apple with almonds | 1 medium apple, 10 almonds
+   Dinner (480 kcal): Baked fish, quinoa, salad | Bake fish with herbs, serve with quinoa
+   Daily Total: 1640 kcal
    
-   DAY 2 & 3: Provide similar brief meal outlines with calorie totals
+   DAY 2-7: Follow same BRIEF format (main foods, calories, one-line prep)
 
 5. FOODS TO EMPHASIZE vs AVOID:
    List specific foods in each category:
@@ -120,6 +123,13 @@ CRITICAL REQUIREMENTS:
    - Adapt traditional recipes with healthier modifications
    - Respect religious dietary restrictions if any
    - Family meal integration
+
+IMPORTANT OPTIMIZATION RULES:
+- Keep food lists to 2-4 items per meal (not extensive lists)
+- Use brief preparation notes (1 sentence max)
+- Focus on practical, easy-to-follow guidance
+- Omit excessive nutritional micro-details
+- Prioritize clarity and usability over exhaustive detail
 
 Return ONLY valid JSON with this EXACT structure:
 {
@@ -194,42 +204,24 @@ Return ONLY valid JSON with this EXACT structure:
     "weeklyMealPlan": {
       "day1": {
         "breakfast": {
-          "time": "7:00-8:00 AM",
           "foods": [
-            {
-              "item": "food name",
-              "quantity": "amount with unit",
-              "calories": number,
-              "carbs": "g",
-              "protein": "g",
-              "fat": "g",
-              "fiber": "g"
-            }
+            { "item": "food name", "quantity": "amount", "calories": number }
           ],
-          "totalNutrition": {
-            "calories": number,
-            "carbs": "g",
-            "protein": "g",
-            "fat": "g"
-          },
-          "preparationNotes": "how to prepare",
-          "tips": "timing, portion control advice"
+          "totalCalories": number,
+          "preparationNotes": "brief prep instructions"
         },
-        "midMorningSnack": { /* same structure */ },
-        "lunch": { /* same structure */ },
-        "afternoonSnack": { /* same structure */ },
-        "dinner": { /* same structure */ },
-        "eveningSnack": { /* same structure (optional) */ },
-        "dailyTotal": {
-          "calories": number,
-          "carbs": "g",
-          "protein": "g",
-          "fat": "g",
-          "fiber": "g"
-        }
+        "midMorningSnack": { "foods": [...], "totalCalories": number },
+        "lunch": { "foods": [...], "totalCalories": number, "preparationNotes": "..." },
+        "afternoonSnack": { "foods": [...], "totalCalories": number },
+        "dinner": { "foods": [...], "totalCalories": number, "preparationNotes": "..." },
+        "dailyTotal": { "calories": number }
       },
-      "day2": { /* same structure - simplified */ },
-      "day3": { /* same structure - simplified */ }
+      "day2": { /* same brief structure */ },
+      "day3": { /* same brief structure */ },
+      "day4": { /* same brief structure */ },
+      "day5": { /* same brief structure */ },
+      "day6": { /* same brief structure */ },
+      "day7": { /* same brief structure */ }
     },
     "foodLists": {
       "emphasizedFoods": {
@@ -448,7 +440,7 @@ Generate the comprehensive dietary protocol now with ALL required details.`
         { role: "system", content: systemPrompt },
         { role: "user", content: patientContext }
       ],
-      maxTokens: 2500,
+      maxTokens: 3500,
       temperature: 0.3,
     })
 
