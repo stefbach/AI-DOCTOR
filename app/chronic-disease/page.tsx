@@ -139,12 +139,12 @@ export default function ChronicDiseaseWorkflow() {
 
         {/* Patient Info Banner - Modern Design */}
         <Card className="glass-card mb-6 shadow-xl border-0 overflow-hidden">
-          <div className="bg-gradient-to-r from-teal-500 to-emerald-500 h-2"></div>
+          <div className="bg-gradient-to-r from-teal-500 to-teal-500 h-2"></div>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground font-medium mb-1">Patient</p>
-                <p className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
+                <p className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-teal-600 bg-clip-text text-transparent">
                   {patientData.firstName} {patientData.lastName}
                 </p>
               </div>
@@ -154,7 +154,7 @@ export default function ChronicDiseaseWorkflow() {
                   {patientData.medicalHistory.map((condition: string, idx: number) => (
                     <Badge 
                       key={idx} 
-                      className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white border-0 shadow-md"
+                      className="bg-gradient-to-r from-teal-500 to-teal-500 text-white border-0 shadow-md"
                     >
                       {condition}
                     </Badge>
@@ -191,7 +191,7 @@ export default function ChronicDiseaseWorkflow() {
                     onClick={() => handleStepClick(index)}
                     className={`p-5 rounded-xl smooth-transition cursor-pointer transform
                       ${step.status === "current" 
-                        ? "bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-xl scale-105 step-active" 
+                        ? "bg-gradient-to-br from-teal-500 to-teal-500 text-white shadow-xl scale-105 step-active" 
                         : step.status === "complete" 
                         ? "bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg hover:scale-105 hover:shadow-xl" 
                         : "bg-white/50 backdrop-blur-sm border-2 border-gray-200 opacity-70 cursor-not-allowed"}`}
@@ -217,8 +217,8 @@ export default function ChronicDiseaseWorkflow() {
         {/* Main Content Area */}
         <div className="space-y-6">
           {currentStep === 0 && (
-            <Card className="shadow-xl border-purple-200">
-              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+            <Card className="shadow-xl border-blue-200">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white">
                 <CardTitle className="flex items-center gap-2">
                   <Stethoscope className="h-6 w-6" />
                   Chronic Disease Clinical Examination
@@ -239,8 +239,8 @@ export default function ChronicDiseaseWorkflow() {
           )}
 
           {currentStep === 1 && (
-            <Card className="shadow-xl border-purple-200">
-              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+            <Card className="shadow-xl border-blue-200">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white">
                 <CardTitle className="flex items-center gap-2">
                   <ClipboardList className="h-6 w-6" />
                   AI Specialized Questions
@@ -262,8 +262,8 @@ export default function ChronicDiseaseWorkflow() {
           )}
 
           {currentStep === 2 && (
-            <Card className="shadow-xl border-purple-200">
-              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+            <Card className="shadow-xl border-blue-200">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white">
                 <CardTitle className="flex items-center gap-2">
                   <Brain className="h-6 w-6" />
                   Chronic Disease Analysis
@@ -286,8 +286,8 @@ export default function ChronicDiseaseWorkflow() {
           )}
 
           {currentStep === 3 && (
-            <Card className="shadow-xl border-purple-200">
-              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+            <Card className="shadow-xl border-blue-200">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white">
                 <CardTitle className="flex items-center gap-2">
                   <FileSignature className="h-6 w-6" />
                   Professional Chronic Disease Report
