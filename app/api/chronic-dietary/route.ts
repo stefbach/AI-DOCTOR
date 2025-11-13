@@ -19,14 +19,16 @@ export async function POST(req: NextRequest) {
 
     const systemPrompt = `You are a SPECIALIZED CLINICAL DIETITIAN expert in chronic disease nutrition management.
 
-Your task is to generate a COMPREHENSIVE, DETAILED DIETARY PROTOCOL for chronic disease management.
+Your task is to generate a CONCISE DIETARY PROTOCOL for chronic disease management.
+
+IMPORTANT: Keep responses brief and focused. Generate 3 sample days (not 7) with essential meal info.
 
 CRITICAL REQUIREMENTS:
 
 1. PERSONALIZED MEAL PLANNING:
-   - Create SPECIFIC meal plans for 7 days (breakfast, lunch, dinner, 2-3 snacks per day)
+   - Create meal plans for 3 SAMPLE DAYS (breakfast, lunch, dinner, 2 snacks per day)
    - Each meal must include:
-     * Exact foods with portion sizes (in grams, cups, tablespoons)
+     * Key foods with portion sizes
      * Calorie content per meal
      * Macronutrient breakdown (proteins, carbs, fats)
      * Preparation methods (grilled, steamed, baked, raw)
@@ -65,24 +67,16 @@ CRITICAL REQUIREMENTS:
    - Micronutrient recommendations (vitamins, minerals)
    - Hydration targets (30-35ml per kg body weight)
 
-4. MEAL PLAN STRUCTURE (7-day detailed plan):
-   Example format for EACH DAY:
+4. MEAL PLAN STRUCTURE (3-day sample plan - keep it concise):
+   Provide 3 representative days with key meals only:
    
-   DAY 1:
-   BREAKFAST (7:00-8:00 AM):
-   - Food 1: Oatmeal (60g uncooked) - 220 kcal, 40g carbs, 8g protein, 4g fat
-   - Food 2: Milk (200ml low-fat) - 90 kcal, 12g carbs, 8g protein, 2g fat
-   - Food 3: Apple (1 medium, 150g) - 80 kcal, 21g carbs, 0g protein, 0g fat
-   - Total: 390 kcal, 73g carbs, 16g protein, 6g fat
-   - Preparation: Cook oatmeal with water, add cinnamon, serve with milk and sliced apple
+   DAY 1 (Example):
+   BREAKFAST: Oatmeal (60g) with milk (200ml) and apple - 390 kcal
+   LUNCH: Grilled chicken (120g), brown rice (150g), vegetables - 520 kcal
+   DINNER: Fish (150g), quinoa (100g), salad - 480 kcal
+   SNACKS: Greek yogurt, nuts (30g) - 250 kcal
    
-   MID-MORNING SNACK (10:00-10:30 AM):
-   - [Similar detailed breakdown]
-   
-   LUNCH (12:30-1:30 PM):
-   - [Similar detailed breakdown]
-   
-   ... continue for all meals and all 7 days
+   DAY 2 & 3: Provide similar brief meal outlines with calorie totals
 
 5. FOODS TO EMPHASIZE vs AVOID:
    List specific foods in each category:
@@ -234,12 +228,8 @@ Return ONLY valid JSON with this EXACT structure:
           "fiber": "g"
         }
       },
-      "day2": { /* same structure */ },
-      "day3": { /* same structure */ },
-      "day4": { /* same structure */ },
-      "day5": { /* same structure */ },
-      "day6": { /* same structure */ },
-      "day7": { /* same structure */ }
+      "day2": { /* same structure - simplified */ },
+      "day3": { /* same structure - simplified */ }
     },
     "foodLists": {
       "emphasizedFoods": {
@@ -458,7 +448,7 @@ Generate the comprehensive dietary protocol now with ALL required details.`
         { role: "system", content: systemPrompt },
         { role: "user", content: patientContext }
       ],
-      maxTokens: 4000,
+      maxTokens: 2500,
       temperature: 0.3,
     })
 
