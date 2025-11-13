@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { CheckCircle, Download, FileText, Pill, TestTube, Scan, Calendar, Plus, Trash2 } from "lucide-react"
+import { CheckCircle, Download, FileText, Pill, TestTube, Scan, Calendar, Plus, Trash2, Loader2 } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 
 interface Props {
@@ -53,13 +53,15 @@ export default function DermatologyProfessionalReport(props: Props) {
   const [activeTab, setActiveTab] = useState("consultation")
   
   // Consultation Report State
-  const [consultationReport, setConsultationReport] = useState(generateConsultationReport(props))
+  const [consultationReport, setConsultationReport] = useState("")
   
-  // Medications State
+  // Medications State - Initialize with extracted medications
   const [medications, setMedications] = useState<Medication[]>([])
+  const [isExtractingMedications, setIsExtractingMedications] = useState(false)
   
-  // Biology Tests State
+  // Biology Tests State - Initialize with extracted tests
   const [biologyTests, setBiologyTests] = useState<BiologyTest[]>([])
+  const [isExtractingTests, setIsExtractingTests] = useState(false)
   
   // Imaging Exams State
   const [imagingExams, setImagingExams] = useState<ImagingExam[]>([])
@@ -74,81 +76,284 @@ export default function DermatologyProfessionalReport(props: Props) {
     workRestrictions: ''
   })
 
+  // Generate consultation report on mount with proper formatting
+  useEffect(() => {
+    const report = generateConsultationReport(props)
+    setConsultationReport(report)
+    
+    // Extract medications and tests from diagnosis
+    extractMedicationsFromDiagnosis()
+    extractTestsFromDiagnosis()
+  }, [])
+
   function generateConsultationReport(data: any) {
     const patient = data.patientData
-    const diagnosis = data.diagnosisData?.diagnosis?.fullText || 'Pending diagnosis'
-    const ocrSummary = data.ocrAnalysisData?.summary || 'No imaging analysis available'
+    const diagnosis = data.diagnosisData?.diagnosis?.fullText || 'Diagnostic en attente'
+    const ocrAnalysis = data.ocrAnalysisData?.analysis?.fullText || 'Aucune analyse d\'image disponible'
     
-    return `DERMATOLOGY CONSULTATION REPORT
+    // Extract sections from diagnosis
+    const sections = parseDiagnosisSections(diagnosis)
+    
+    const report = `╔═══════════════════════════════════════════════════════════════╗
+║           COMPTE RENDU DE CONSULTATION DERMATOLOGIQUE          ║
+╚═══════════════════════════════════════════════════════════════╝
 
-PATIENT INFORMATION:
-Name: ${patient.firstName} ${patient.lastName}
-Age: ${patient.age} years | Gender: ${patient.gender}
-Date of Consultation: ${new Date().toLocaleDateString()}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 INFORMATIONS PATIENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-CHIEF COMPLAINT:
-Dermatological consultation with image analysis for skin condition assessment.
+**Nom:** ${patient.firstName} ${patient.lastName}
+**Âge:** ${patient.age} ans | **Sexe:** ${patient.gender}
+**Date de consultation:** ${new Date().toLocaleDateString('fr-FR')}
+**Poids:** ${patient.weight || 'Non renseigné'} | **Taille:** ${patient.height || 'Non renseignée'}
 
-VISUAL EXAMINATION & IMAGING ANALYSIS:
-${ocrSummary}
+**Antécédents médicaux:** ${formatMedicalHistory(patient)}
+**Allergies connues:** ${formatAllergies(patient)}
+**Traitement actuel:** ${patient.currentMedicationsText || 'Aucun traitement en cours'}
 
-CLINICAL HISTORY:
-${formatQuestionsData(data.questionsData)}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 MOTIF DE CONSULTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-DERMATOLOGICAL ASSESSMENT:
-${diagnosis}
+Le patient consulte pour une évaluation dermatologique avec analyse d'images de lésions cutanées. Une consultation spécialisée a été demandée pour établir un diagnostic précis et proposer une prise en charge thérapeutique adaptée.
 
-CLINICAL FINDINGS:
-- Visual observations from uploaded images analyzed using AI-powered dermatology specialist
-- Detailed assessment of skin condition morphology, distribution, and characteristics
-- Correlation with patient's clinical history and symptoms
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 EXAMEN VISUEL & ANALYSE D'IMAGES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-DIFFERENTIAL DIAGNOSIS:
-${extractDifferentialDiagnosis(diagnosis)}
+L'analyse des images soumises révèle les observations suivantes:
 
-MANAGEMENT PLAN:
-Treatment recommendations and follow-up care as detailed in the prescription sections below.
+${formatOCRAnalysis(ocrAnalysis)}
 
-PATIENT EDUCATION:
-- Skin care recommendations specific to the diagnosed condition
-- Warning signs that require immediate medical attention
-- Lifestyle modifications if applicable
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🩺 ANAMNÈSE & HISTOIRE CLINIQUE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-FOLLOW-UP:
-Recommended follow-up in 2-4 weeks or sooner if symptoms worsen.
+${formatClinicalHistory(data.questionsData)}
 
-PHYSICIAN NOTES:
-This is a comprehensive dermatological assessment combining AI-powered image analysis 
-with clinical history and patient-reported symptoms.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 DIAGNOSTIC DERMATOLOGIQUE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Report Generated: ${new Date().toLocaleString()}
+${sections.clinicalSummary ? `**RÉSUMÉ CLINIQUE:**\n${sections.clinicalSummary}\n\n` : ''}${sections.primaryDiagnosis ? `**DIAGNOSTIC PRINCIPAL:**\n${sections.primaryDiagnosis}\n\n` : ''}${sections.differentialDiagnosis ? `**DIAGNOSTICS DIFFÉRENTIELS:**\n${sections.differentialDiagnosis}\n\n` : ''}${sections.pathophysiology ? `**PHYSIOPATHOLOGIE:**\n${sections.pathophysiology}\n\n` : ''}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💊 PLAN THÉRAPEUTIQUE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${sections.treatmentPlan || 'Voir section "Ordonnance" pour les prescriptions détaillées.'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔬 EXAMENS COMPLÉMENTAIRES RECOMMANDÉS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${sections.investigations || 'Aucun examen complémentaire immédiat nécessaire. Réévaluation clinique en fonction de l\'évolution.'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📚 ÉDUCATION PATIENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${sections.patientEducation || 'Information et éducation thérapeutique dispensées au patient concernant sa condition, l\'importance de l\'observance thérapeutique et les mesures de prévention.'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔄 SUIVI & SURVEILLANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${sections.followUp || 'Un suivi clinique est recommandé dans 2 à 4 semaines pour évaluer la réponse au traitement. Le patient est invité à consulter plus tôt en cas d\'aggravation des symptômes ou d\'apparition de nouveaux signes cliniques préoccupants.'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ SIGNES D'ALERTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${sections.redFlags || 'Le patient a été informé des signes devant motiver une consultation en urgence.'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Date du rapport:** ${new Date().toLocaleString('fr-FR')}
+**Mode de consultation:** Téléconsultation avec analyse d'images assistée par IA
+
+Le médecin certifie avoir effectué cet examen en conformité avec les bonnes pratiques médicales et avoir fourni au patient toutes les informations nécessaires concernant son état de santé et sa prise en charge.
+
+Signature et cachet du médecin: _______________________
 `
+    return report
   }
 
-  function formatQuestionsData(questionsData: any) {
-    if (!questionsData?.answers) return 'No additional clinical history recorded.'
+  function parseDiagnosisSections(diagnosis: string) {
+    const sections: any = {}
+    
+    // Extract Clinical Summary
+    const summaryMatch = diagnosis.match(/(?:1\.|##)?\s*CLINICAL SUMMARY[:\s]+(.*?)(?=(?:\n\n(?:\d+\.|##)|$))/is)
+    if (summaryMatch) sections.clinicalSummary = summaryMatch[1].trim()
+    
+    // Extract Primary Diagnosis
+    const primaryMatch = diagnosis.match(/(?:2\.|##)?\s*PRIMARY DIAGNOSIS[:\s]+(.*?)(?=(?:\n\n(?:\d+\.|##)|$))/is)
+    if (primaryMatch) sections.primaryDiagnosis = primaryMatch[1].trim()
+    
+    // Extract Differential Diagnoses
+    const differentialMatch = diagnosis.match(/(?:3\.|##)?\s*DIFFERENTIAL DIAGNOS[EI]S[:\s]+(.*?)(?=(?:\n\n(?:\d+\.|##)|$))/is)
+    if (differentialMatch) sections.differentialDiagnosis = differentialMatch[1].trim()
+    
+    // Extract Pathophysiology
+    const pathophysiologyMatch = diagnosis.match(/(?:4\.|##)?\s*PATHOPHYSIOLOGY[:\s]+(.*?)(?=(?:\n\n(?:\d+\.|##)|$))/is)
+    if (pathophysiologyMatch) sections.pathophysiology = pathophysiologyMatch[1].trim()
+    
+    // Extract Recommended Investigations
+    const investigationsMatch = diagnosis.match(/(?:5\.|##)?\s*RECOMMENDED INVESTIGATIONS[:\s]+(.*?)(?=(?:\n\n(?:\d+\.|##)|$))/is)
+    if (investigationsMatch) sections.investigations = investigationsMatch[1].trim()
+    
+    // Extract Treatment Plan
+    const treatmentMatch = diagnosis.match(/(?:6\.|##)?\s*TREATMENT PLAN[:\s]+(.*?)(?=(?:\n\n(?:\d+\.|##)|$))/is)
+    if (treatmentMatch) sections.treatmentPlan = treatmentMatch[1].trim()
+    
+    // Extract Patient Education
+    const educationMatch = diagnosis.match(/(?:7\.|##)?\s*PATIENT EDUCATION[:\s]+(.*?)(?=(?:\n\n(?:\d+\.|##)|$))/is)
+    if (educationMatch) sections.patientEducation = educationMatch[1].trim()
+    
+    // Extract Follow-up Plan
+    const followUpMatch = diagnosis.match(/(?:8\.|##)?\s*FOLLOW-UP PLAN[:\s]+(.*?)(?=(?:\n\n(?:\d+\.|##)|$))/is)
+    if (followUpMatch) sections.followUp = followUpMatch[1].trim()
+    
+    // Extract Red Flags
+    const redFlagsMatch = diagnosis.match(/(?:9\.|##)?\s*RED FLAGS[:\s]+(.*?)(?=(?:\n\n(?:\d+\.|##)|$))/is)
+    if (redFlagsMatch) sections.redFlags = redFlagsMatch[1].trim()
+    
+    return sections
+  }
+
+  function formatMedicalHistory(patient: any) {
+    const history = patient.medicalHistory || []
+    const otherHistory = patient.otherMedicalHistory || ''
+    
+    if (history.length === 0 && !otherHistory) {
+      return 'Aucun antécédent notable signalé'
+    }
+    
+    const formatted = [...history]
+    if (otherHistory) formatted.push(otherHistory)
+    
+    return formatted.join(', ')
+  }
+
+  function formatAllergies(patient: any) {
+    const allergies = patient.allergies || []
+    const otherAllergies = patient.otherAllergies || ''
+    
+    if (allergies.length === 0 && !otherAllergies) {
+      return 'Aucune allergie connue'
+    }
+    
+    const formatted = [...allergies]
+    if (otherAllergies) formatted.push(otherAllergies)
+    
+    return formatted.join(', ')
+  }
+
+  function formatOCRAnalysis(analysis: string) {
+    // Add formatting to OCR analysis for better readability
+    return analysis
+      .split('\n')
+      .filter(line => line.trim())
+      .map(line => {
+        // Make section headers bold
+        if (line.match(/^[A-Z\s]{3,}:/)) {
+          return `**${line}**`
+        }
+        return line
+      })
+      .join('\n')
+  }
+
+  function formatClinicalHistory(questionsData: any) {
+    if (!questionsData?.answers || !questionsData?.questions) {
+      return 'Interrogatoire complémentaire non disponible.'
+    }
     
     const questions = questionsData.questions || []
     const answers = questionsData.answers || {}
     
-    let formatted = ''
-    questions.forEach((q: any) => {
+    let formatted = 'L\'interrogatoire du patient révèle les éléments suivants:\n\n'
+    
+    questions.forEach((q: any, index: number) => {
       const answer = answers[q.id]
       if (answer) {
-        formatted += `- ${q.question}: ${typeof answer === 'object' ? JSON.stringify(answer) : answer}\n`
+        const answerText = typeof answer === 'object' ? JSON.stringify(answer) : answer
+        formatted += `**${index + 1}. ${q.question}**\n${answerText}\n\n`
       }
     })
     
-    return formatted || 'No additional clinical history recorded.'
+    return formatted || 'Interrogatoire complémentaire non disponible.'
   }
 
-  function extractDifferentialDiagnosis(diagnosisText: string) {
-    // Try to extract differential diagnosis section from AI diagnosis
-    const ddMatch = diagnosisText.match(/DIFFERENTIAL DIAGNOS[IE]S:(.*?)(?=\n\n[A-Z]|\n\d+\.|\Z)/is)
-    if (ddMatch) {
-      return ddMatch[1].trim()
+  // Extract medications from AI diagnosis
+  async function extractMedicationsFromDiagnosis() {
+    const diagnosisText = props.diagnosisData?.diagnosis?.fullText || ''
+    
+    if (!diagnosisText) return
+    
+    setIsExtractingMedications(true)
+    
+    try {
+      const response = await fetch('/api/extract-medications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          diagnosisText,
+          patientData: props.patientData
+        })
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.medications?.length > 0) {
+          setMedications(data.medications)
+          toast({
+            title: "Médicaments extraits",
+            description: `${data.medications.length} médicament(s) ajouté(s) automatiquement`,
+            duration: 3000
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Error extracting medications:', error)
+    } finally {
+      setIsExtractingMedications(false)
     }
-    return 'See detailed assessment above.'
+  }
+
+  // Extract lab tests from AI diagnosis
+  async function extractTestsFromDiagnosis() {
+    const diagnosisText = props.diagnosisData?.diagnosis?.fullText || ''
+    
+    if (!diagnosisText) return
+    
+    setIsExtractingTests(true)
+    
+    try {
+      const response = await fetch('/api/extract-lab-tests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          diagnosisText,
+          patientData: props.patientData
+        })
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.tests?.length > 0) {
+          setBiologyTests(data.tests)
+          toast({
+            title: "Examens extraits",
+            description: `${data.tests.length} examen(s) ajouté(s) automatiquement`,
+            duration: 3000
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Error extracting tests:', error)
+    } finally {
+      setIsExtractingTests(false)
+    }
   }
 
   // Medication Management
@@ -225,139 +430,176 @@ Report Generated: ${new Date().toLocaleString()}
 
   // Download Handlers
   const downloadConsultationReport = () => {
-    const blob = new Blob([consultationReport], { type: 'text/plain' })
+    const blob = new Blob([consultationReport], { type: 'text/plain; charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `dermatology-consultation-${props.patientData.lastName}-${Date.now()}.txt`
+    a.download = `compte-rendu-dermatologie-${props.patientData.lastName}-${Date.now()}.txt`
     a.click()
-    toast({ title: "Downloaded", description: "Consultation report downloaded" })
+    URL.revokeObjectURL(url)
+    toast({ title: "Téléchargé", description: "Compte rendu téléchargé" })
   }
 
   const downloadPrescription = () => {
     const prescriptionText = generatePrescriptionText()
-    const blob = new Blob([prescriptionText], { type: 'text/plain' })
+    const blob = new Blob([prescriptionText], { type: 'text/plain; charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `dermatology-prescription-${props.patientData.lastName}-${Date.now()}.txt`
+    a.download = `ordonnance-dermatologie-${props.patientData.lastName}-${Date.now()}.txt`
     a.click()
-    toast({ title: "Downloaded", description: "Prescription downloaded" })
+    URL.revokeObjectURL(url)
+    toast({ title: "Téléchargé", description: "Ordonnance téléchargée" })
   }
 
   const downloadLabOrder = () => {
     const labText = generateLabOrderText()
-    const blob = new Blob([labText], { type: 'text/plain' })
+    const blob = new Blob([labText], { type: 'text/plain; charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `dermatology-lab-order-${props.patientData.lastName}-${Date.now()}.txt`
+    a.download = `demande-labo-dermatologie-${props.patientData.lastName}-${Date.now()}.txt`
     a.click()
-    toast({ title: "Downloaded", description: "Lab order downloaded" })
+    URL.revokeObjectURL(url)
+    toast({ title: "Téléchargé", description: "Demande d'examens téléchargée" })
   }
 
   const downloadImagingOrder = () => {
     const imagingText = generateImagingOrderText()
-    const blob = new Blob([imagingText], { type: 'text/plain' })
+    const blob = new Blob([imagingText], { type: 'text/plain; charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `dermatology-imaging-order-${props.patientData.lastName}-${Date.now()}.txt`
+    a.download = `demande-imagerie-dermatologie-${props.patientData.lastName}-${Date.now()}.txt`
     a.click()
-    toast({ title: "Downloaded", description: "Imaging order downloaded" })
+    URL.revokeObjectURL(url)
+    toast({ title: "Téléchargé", description: "Demande d'imagerie téléchargée" })
   }
 
   const downloadSickLeave = () => {
     const sickLeaveText = generateSickLeaveText()
-    const blob = new Blob([sickLeaveText], { type: 'text/plain' })
+    const blob = new Blob([sickLeaveText], { type: 'text/plain; charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `dermatology-sick-leave-${props.patientData.lastName}-${Date.now()}.txt`
+    a.download = `arret-travail-dermatologie-${props.patientData.lastName}-${Date.now()}.txt`
     a.click()
-    toast({ title: "Downloaded", description: "Sick leave certificate downloaded" })
+    URL.revokeObjectURL(url)
+    toast({ title: "Téléchargé", description: "Arrêt de travail téléchargé" })
   }
 
   function generatePrescriptionText() {
-    return `DERMATOLOGY PRESCRIPTION
+    return `╔═══════════════════════════════════════════════════════════════╗
+║                    ORDONNANCE MÉDICALE                         ║
+║                      DERMATOLOGIE                              ║
+╚═══════════════════════════════════════════════════════════════╝
 
 Patient: ${props.patientData.firstName} ${props.patientData.lastName}
-Date: ${new Date().toLocaleDateString()}
+Date: ${new Date().toLocaleDateString('fr-FR')}
 
-MEDICATIONS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MÉDICAMENTS PRESCRITS:
+
 ${medications.map((med, i) => `
 ${i + 1}. ${med.nom} ${med.dosage}
-   Generic: ${med.denominationCommune}
-   Form: ${med.forme}
-   Dosage: ${med.posologie}
-   Route: ${med.modeAdministration}
-   Duration: ${med.dureeTraitement}
-   Quantity: ${med.quantite}
-   Instructions: ${med.instructions}
+   DCI: ${med.denominationCommune}
+   Forme: ${med.forme}
+   Posologie: ${med.posologie}
+   Voie d'administration: ${med.modeAdministration}
+   Durée: ${med.dureeTraitement}
+   Quantité: ${med.quantite}
+   ${med.instructions ? `Instructions: ${med.instructions}` : ''}
 `).join('\n')}
 
-Physician Signature: ________________
-Date: ${new Date().toLocaleDateString()}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Signature et cachet du médecin: _______________________
+Date: ${new Date().toLocaleDateString('fr-FR')}
 `
   }
 
   function generateLabOrderText() {
-    return `LABORATORY TEST REQUEST - DERMATOLOGY
+    return `╔═══════════════════════════════════════════════════════════════╗
+║              DEMANDE D'EXAMENS DE LABORATOIRE                  ║
+║                      DERMATOLOGIE                              ║
+╚═══════════════════════════════════════════════════════════════╝
 
 Patient: ${props.patientData.firstName} ${props.patientData.lastName}
-Date: ${new Date().toLocaleDateString()}
+Date: ${new Date().toLocaleDateString('fr-FR')}
 
-TESTS REQUESTED:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EXAMENS DEMANDÉS:
+
 ${biologyTests.map((test, i) => `
 ${i + 1}. ${test.nom}
-   Category: ${test.categorie}
-   Urgent: ${test.urgence ? 'Yes' : 'No'}
-   Fasting: ${test.aJeun ? 'Yes' : 'No'}
-   Clinical Indication: ${test.motifClinique}
+   Catégorie: ${test.categorie}
+   ${test.urgence ? '⚠️ URGENT' : ''}
+   ${test.aJeun ? '🍽️ À jeun requis' : ''}
+   Indication clinique: ${test.motifClinique}
 `).join('\n')}
 
-Physician Signature: ________________
-Date: ${new Date().toLocaleDateString()}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Signature et cachet du médecin: _______________________
+Date: ${new Date().toLocaleDateString('fr-FR')}
 `
   }
 
   function generateImagingOrderText() {
-    return `IMAGING REQUEST - DERMATOLOGY
+    return `╔═══════════════════════════════════════════════════════════════╗
+║                  DEMANDE D'EXAMENS D'IMAGERIE                  ║
+║                      DERMATOLOGIE                              ║
+╚═══════════════════════════════════════════════════════════════╝
 
 Patient: ${props.patientData.firstName} ${props.patientData.lastName}
-Date: ${new Date().toLocaleDateString()}
+Date: ${new Date().toLocaleDateString('fr-FR')}
 
-IMAGING STUDIES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EXAMENS DEMANDÉS:
+
 ${imagingExams.map((exam, i) => `
 ${i + 1}. ${exam.type} - ${exam.region}
-   Clinical Indication: ${exam.indicationClinique}
-   Urgent: ${exam.urgence ? 'Yes' : 'No'}
+   Indication clinique: ${exam.indicationClinique}
+   ${exam.urgence ? '⚠️ URGENT' : ''}
 `).join('\n')}
 
-Physician Signature: ________________
-Date: ${new Date().toLocaleDateString()}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Signature et cachet du médecin: _______________________
+Date: ${new Date().toLocaleDateString('fr-FR')}
 `
   }
 
   function generateSickLeaveText() {
-    return `SICK LEAVE CERTIFICATE - DERMATOLOGY
+    return `╔═══════════════════════════════════════════════════════════════╗
+║                   CERTIFICAT D'ARRÊT DE TRAVAIL                ║
+║                      DERMATOLOGIE                              ║
+╚═══════════════════════════════════════════════════════════════╝
 
 Patient: ${props.patientData.firstName} ${props.patientData.lastName}
-Date: ${new Date().toLocaleDateString()}
+Date: ${new Date().toLocaleDateString('fr-FR')}
 
-SICK LEAVE DETAILS:
-Start Date: ${sickLeaveData.startDate}
-End Date: ${sickLeaveData.endDate}
-Number of Days: ${sickLeaveData.numberOfDays}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Medical Reason: ${sickLeaveData.medicalReason}
+DÉTAILS DE L'ARRÊT:
 
-Work Restrictions: ${sickLeaveData.workRestrictions}
+Date de début: ${sickLeaveData.startDate}
+Date de fin: ${sickLeaveData.endDate}
+Nombre de jours: ${sickLeaveData.numberOfDays}
 
-Remarks: ${sickLeaveData.remarks}
+Motif médical: ${sickLeaveData.medicalReason}
 
-Physician Signature: ________________
-Date: ${new Date().toLocaleDateString()}
+Restrictions de travail: ${sickLeaveData.workRestrictions}
+
+Remarques: ${sickLeaveData.remarks}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Signature et cachet du médecin: _______________________
+Date: ${new Date().toLocaleDateString('fr-FR')}
 `
   }
 
@@ -367,7 +609,7 @@ Date: ${new Date().toLocaleDateString()}
         <CardHeader className="bg-gradient-to-r from-teal-50 to-cyan-50">
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-6 w-6" />
-            Professional Dermatology Report
+            Rapport Professionnel Dermatologique
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
@@ -380,14 +622,23 @@ Date: ${new Date().toLocaleDateString()}
               <TabsTrigger value="medicaments">
                 <Pill className="h-4 w-4 mr-2" />
                 Ordonnance
+                {medications.length > 0 && (
+                  <Badge variant="secondary" className="ml-2">{medications.length}</Badge>
+                )}
               </TabsTrigger>
               <TabsTrigger value="biologie">
                 <TestTube className="h-4 w-4 mr-2" />
                 Examens Labo
+                {biologyTests.length > 0 && (
+                  <Badge variant="secondary" className="ml-2">{biologyTests.length}</Badge>
+                )}
               </TabsTrigger>
               <TabsTrigger value="imagerie">
                 <Scan className="h-4 w-4 mr-2" />
                 Paraclinique
+                {imagingExams.length > 0 && (
+                  <Badge variant="secondary" className="ml-2">{imagingExams.length}</Badge>
+                )}
               </TabsTrigger>
               <TabsTrigger value="sickleave">
                 <Calendar className="h-4 w-4 mr-2" />
@@ -398,15 +649,20 @@ Date: ${new Date().toLocaleDateString()}
             {/* Consultation Report Tab */}
             <TabsContent value="consultation" className="space-y-4 mt-6">
               <div className="space-y-4">
+                <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
+                  <p className="text-sm text-teal-800">
+                    <strong>✨ Rapport structuré et formaté automatiquement</strong> - Ce compte rendu suit les standards professionnels de documentation médicale dermatologique.
+                  </p>
+                </div>
                 <Textarea 
                   value={consultationReport} 
                   onChange={(e) => setConsultationReport(e.target.value)} 
-                  className="min-h-[600px] font-mono text-sm"
-                  placeholder="Consultation report will be generated here..."
+                  className="min-h-[700px] font-mono text-sm"
+                  placeholder="Génération du rapport en cours..."
                 />
                 <Button onClick={downloadConsultationReport} className="bg-gradient-to-r from-teal-600 to-cyan-600">
                   <Download className="h-4 w-4 mr-2" />
-                  Download Consultation Report
+                  Télécharger le Compte Rendu
                 </Button>
               </div>
             </TabsContent>
@@ -414,17 +670,27 @@ Date: ${new Date().toLocaleDateString()}
             {/* Medications Tab */}
             <TabsContent value="medicaments" className="space-y-4 mt-6">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Dermatology Medications</h3>
+                <div>
+                  <h3 className="text-lg font-semibold">Médicaments Dermatologiques</h3>
+                  {isExtractingMedications && (
+                    <p className="text-sm text-gray-500 flex items-center gap-2 mt-1">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Extraction automatique des médicaments...
+                    </p>
+                  )}
+                </div>
                 <Button onClick={addMedication} variant="outline" size="sm">
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Medication
+                  Ajouter Médicament
                 </Button>
               </div>
 
               {medications.length === 0 ? (
                 <Card className="border-dashed">
                   <CardContent className="p-8 text-center text-gray-500">
-                    No medications added yet. Click "Add Medication" to start.
+                    <Pill className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                    <p>Aucun médicament ajouté.</p>
+                    <p className="text-sm mt-2">Les médicaments du diagnostic AI seront extraits automatiquement.</p>
                   </CardContent>
                 </Card>
               ) : (
@@ -433,7 +699,7 @@ Date: ${new Date().toLocaleDateString()}
                     <Card key={index} className="border-teal-200">
                       <CardContent className="p-4 space-y-3">
                         <div className="flex justify-between items-start">
-                          <Badge variant="outline">Medication {index + 1}</Badge>
+                          <Badge variant="outline" className="bg-teal-50">Médicament {index + 1}</Badge>
                           <Button 
                             variant="destructive" 
                             size="sm" 
@@ -445,19 +711,19 @@ Date: ${new Date().toLocaleDateString()}
 
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <Label>Medication Name</Label>
+                            <Label>Nom Commercial</Label>
                             <Input 
                               value={med.nom} 
                               onChange={(e) => updateMedication(index, 'nom', e.target.value)}
-                              placeholder="e.g., Hydrocortisone Cream"
+                              placeholder="ex: Hydrocortisone Cream"
                             />
                           </div>
                           <div>
-                            <Label>Generic Name</Label>
+                            <Label>DCI (Dénomination Commune)</Label>
                             <Input 
                               value={med.denominationCommune} 
                               onChange={(e) => updateMedication(index, 'denominationCommune', e.target.value)}
-                              placeholder="e.g., Hydrocortisone"
+                              placeholder="ex: Hydrocortisone"
                             />
                           </div>
                           <div>
@@ -465,68 +731,68 @@ Date: ${new Date().toLocaleDateString()}
                             <Input 
                               value={med.dosage} 
                               onChange={(e) => updateMedication(index, 'dosage', e.target.value)}
-                              placeholder="e.g., 1%"
+                              placeholder="ex: 1%"
                             />
                           </div>
                           <div>
-                            <Label>Form</Label>
+                            <Label>Forme</Label>
                             <Select value={med.forme} onValueChange={(value) => updateMedication(index, 'forme', value)}>
                               <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="cream">Cream</SelectItem>
-                                <SelectItem value="ointment">Ointment</SelectItem>
+                                <SelectItem value="cream">Crème</SelectItem>
+                                <SelectItem value="ointment">Pommade</SelectItem>
                                 <SelectItem value="lotion">Lotion</SelectItem>
                                 <SelectItem value="gel">Gel</SelectItem>
-                                <SelectItem value="tablet">Tablet</SelectItem>
-                                <SelectItem value="capsule">Capsule</SelectItem>
+                                <SelectItem value="tablet">Comprimé</SelectItem>
+                                <SelectItem value="capsule">Gélule</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
                           <div>
-                            <Label>Frequency</Label>
+                            <Label>Posologie</Label>
                             <Input 
                               value={med.posologie} 
                               onChange={(e) => updateMedication(index, 'posologie', e.target.value)}
-                              placeholder="e.g., Apply twice daily"
+                              placeholder="ex: Appliquer 2 fois par jour"
                             />
                           </div>
                           <div>
-                            <Label>Route</Label>
+                            <Label>Voie d'Administration</Label>
                             <Select value={med.modeAdministration} onValueChange={(value) => updateMedication(index, 'modeAdministration', value)}>
                               <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="Topical route">Topical</SelectItem>
-                                <SelectItem value="Oral route">Oral</SelectItem>
-                                <SelectItem value="Parenteral route">Parenteral</SelectItem>
+                                <SelectItem value="Topical route">Topique</SelectItem>
+                                <SelectItem value="Oral route">Orale</SelectItem>
+                                <SelectItem value="Parenteral route">Parentérale</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
                           <div>
-                            <Label>Duration</Label>
+                            <Label>Durée du Traitement</Label>
                             <Input 
                               value={med.dureeTraitement} 
                               onChange={(e) => updateMedication(index, 'dureeTraitement', e.target.value)}
-                              placeholder="e.g., 14 days"
+                              placeholder="ex: 14 jours"
                             />
                           </div>
                           <div>
-                            <Label>Quantity</Label>
+                            <Label>Quantité</Label>
                             <Input 
                               value={med.quantite} 
                               onChange={(e) => updateMedication(index, 'quantite', e.target.value)}
-                              placeholder="e.g., 1 tube"
+                              placeholder="ex: 1 tube"
                             />
                           </div>
                           <div className="col-span-2">
-                            <Label>Special Instructions</Label>
+                            <Label>Instructions Spéciales</Label>
                             <Input 
                               value={med.instructions} 
                               onChange={(e) => updateMedication(index, 'instructions', e.target.value)}
-                              placeholder="e.g., Apply to affected areas only, avoid sun exposure"
+                              placeholder="ex: Appliquer uniquement sur les zones affectées, éviter l'exposition au soleil"
                             />
                           </div>
                         </div>
@@ -539,7 +805,7 @@ Date: ${new Date().toLocaleDateString()}
               {medications.length > 0 && (
                 <Button onClick={downloadPrescription} className="bg-gradient-to-r from-teal-600 to-cyan-600">
                   <Download className="h-4 w-4 mr-2" />
-                  Download Prescription
+                  Télécharger l'Ordonnance
                 </Button>
               )}
             </TabsContent>
@@ -547,17 +813,27 @@ Date: ${new Date().toLocaleDateString()}
             {/* Biology Tests Tab */}
             <TabsContent value="biologie" className="space-y-4 mt-6">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Laboratory Tests</h3>
+                <div>
+                  <h3 className="text-lg font-semibold">Examens de Laboratoire</h3>
+                  {isExtractingTests && (
+                    <p className="text-sm text-gray-500 flex items-center gap-2 mt-1">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Extraction automatique des examens...
+                    </p>
+                  )}
+                </div>
                 <Button onClick={addBiologyTest} variant="outline" size="sm">
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Test
+                  Ajouter Examen
                 </Button>
               </div>
 
               {biologyTests.length === 0 ? (
                 <Card className="border-dashed">
                   <CardContent className="p-8 text-center text-gray-500">
-                    No laboratory tests ordered yet. Click "Add Test" to start.
+                    <TestTube className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                    <p>Aucun examen de laboratoire ajouté.</p>
+                    <p className="text-sm mt-2">Les examens recommandés seront extraits du diagnostic AI.</p>
                   </CardContent>
                 </Card>
               ) : (
@@ -566,7 +842,7 @@ Date: ${new Date().toLocaleDateString()}
                     <Card key={index} className="border-teal-200">
                       <CardContent className="p-4 space-y-3">
                         <div className="flex justify-between items-start">
-                          <Badge variant="outline">Test {index + 1}</Badge>
+                          <Badge variant="outline" className="bg-teal-50">Examen {index + 1}</Badge>
                           <Button 
                             variant="destructive" 
                             size="sm" 
@@ -578,19 +854,19 @@ Date: ${new Date().toLocaleDateString()}
 
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <Label>Test Name</Label>
+                            <Label>Nom de l'Examen</Label>
                             <Input 
                               value={test.nom} 
                               onChange={(e) => updateBiologyTest(index, 'nom', e.target.value)}
-                              placeholder="e.g., Complete Blood Count"
+                              placeholder="ex: NFS (Numération Formule Sanguine)"
                             />
                           </div>
                           <div>
-                            <Label>Clinical Indication</Label>
+                            <Label>Indication Clinique</Label>
                             <Input 
                               value={test.motifClinique} 
                               onChange={(e) => updateBiologyTest(index, 'motifClinique', e.target.value)}
-                              placeholder="e.g., Rule out infection"
+                              placeholder="ex: Exclure une infection"
                             />
                           </div>
                           <div className="flex items-center space-x-2">
@@ -605,7 +881,7 @@ Date: ${new Date().toLocaleDateString()}
                               checked={test.aJeun} 
                               onCheckedChange={(checked) => updateBiologyTest(index, 'aJeun', checked)}
                             />
-                            <Label>Fasting Required</Label>
+                            <Label>À jeun requis</Label>
                           </div>
                         </div>
                       </CardContent>
@@ -617,7 +893,7 @@ Date: ${new Date().toLocaleDateString()}
               {biologyTests.length > 0 && (
                 <Button onClick={downloadLabOrder} className="bg-gradient-to-r from-teal-600 to-cyan-600">
                   <Download className="h-4 w-4 mr-2" />
-                  Download Lab Order
+                  Télécharger la Demande d'Examens
                 </Button>
               )}
             </TabsContent>
@@ -625,17 +901,19 @@ Date: ${new Date().toLocaleDateString()}
             {/* Imaging Exams Tab */}
             <TabsContent value="imagerie" className="space-y-4 mt-6">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Imaging Studies</h3>
+                <h3 className="text-lg font-semibold">Examens d'Imagerie</h3>
                 <Button onClick={addImagingExam} variant="outline" size="sm">
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Imaging
+                  Ajouter Imagerie
                 </Button>
               </div>
 
               {imagingExams.length === 0 ? (
                 <Card className="border-dashed">
                   <CardContent className="p-8 text-center text-gray-500">
-                    No imaging studies ordered yet. Click "Add Imaging" to start.
+                    <Scan className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                    <p>Aucun examen d'imagerie ajouté.</p>
+                    <p className="text-sm mt-2">Cliquez sur "Ajouter Imagerie" pour commencer.</p>
                   </CardContent>
                 </Card>
               ) : (
@@ -644,7 +922,7 @@ Date: ${new Date().toLocaleDateString()}
                     <Card key={index} className="border-teal-200">
                       <CardContent className="p-4 space-y-3">
                         <div className="flex justify-between items-start">
-                          <Badge variant="outline">Imaging {index + 1}</Badge>
+                          <Badge variant="outline" className="bg-teal-50">Imagerie {index + 1}</Badge>
                           <Button 
                             variant="destructive" 
                             size="sm" 
@@ -656,33 +934,33 @@ Date: ${new Date().toLocaleDateString()}
 
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <Label>Imaging Type</Label>
+                            <Label>Type d'Imagerie</Label>
                             <Select value={exam.type} onValueChange={(value) => updateImagingExam(index, 'type', value)}>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select type" />
+                                <SelectValue placeholder="Sélectionner" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="X-Ray">X-Ray</SelectItem>
-                                <SelectItem value="CT Scan">CT Scan</SelectItem>
-                                <SelectItem value="MRI">MRI</SelectItem>
-                                <SelectItem value="Ultrasound">Ultrasound</SelectItem>
+                                <SelectItem value="X-Ray">Radiographie</SelectItem>
+                                <SelectItem value="CT Scan">Scanner (CT)</SelectItem>
+                                <SelectItem value="MRI">IRM</SelectItem>
+                                <SelectItem value="Ultrasound">Échographie</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
                           <div>
-                            <Label>Region</Label>
+                            <Label>Région</Label>
                             <Input 
                               value={exam.region} 
                               onChange={(e) => updateImagingExam(index, 'region', e.target.value)}
-                              placeholder="e.g., Chest, Abdomen"
+                              placeholder="ex: Thorax, Abdomen"
                             />
                           </div>
                           <div className="col-span-2">
-                            <Label>Clinical Indication</Label>
+                            <Label>Indication Clinique</Label>
                             <Input 
                               value={exam.indicationClinique} 
                               onChange={(e) => updateImagingExam(index, 'indicationClinique', e.target.value)}
-                              placeholder="e.g., Rule out deep tissue involvement"
+                              placeholder="ex: Exclure atteinte tissulaire profonde"
                             />
                           </div>
                           <div className="flex items-center space-x-2">
@@ -702,20 +980,20 @@ Date: ${new Date().toLocaleDateString()}
               {imagingExams.length > 0 && (
                 <Button onClick={downloadImagingOrder} className="bg-gradient-to-r from-teal-600 to-cyan-600">
                   <Download className="h-4 w-4 mr-2" />
-                  Download Imaging Order
+                  Télécharger la Demande d'Imagerie
                 </Button>
               )}
             </TabsContent>
 
             {/* Sick Leave Tab */}
             <TabsContent value="sickleave" className="space-y-4 mt-6">
-              <h3 className="text-lg font-semibold">Sick Leave Certificate</h3>
+              <h3 className="text-lg font-semibold">Certificat d'Arrêt de Travail</h3>
               
               <Card className="border-teal-200">
                 <CardContent className="p-4 space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label>Start Date</Label>
+                      <Label>Date de Début</Label>
                       <Input 
                         type="date"
                         value={sickLeaveData.startDate}
@@ -723,7 +1001,7 @@ Date: ${new Date().toLocaleDateString()}
                       />
                     </div>
                     <div>
-                      <Label>End Date</Label>
+                      <Label>Date de Fin</Label>
                       <Input 
                         type="date"
                         value={sickLeaveData.endDate}
@@ -739,36 +1017,38 @@ Date: ${new Date().toLocaleDateString()}
                       />
                     </div>
                     <div>
-                      <Label>Number of Days</Label>
+                      <Label>Nombre de Jours</Label>
                       <Input 
                         type="number"
                         value={sickLeaveData.numberOfDays}
                         onChange={(e) => setSickLeaveData(prev => ({ ...prev, numberOfDays: parseInt(e.target.value) || 0 }))}
+                        readOnly
+                        className="bg-gray-50"
                       />
                     </div>
                     <div>
-                      <Label>Medical Reason</Label>
+                      <Label>Motif Médical</Label>
                       <Input 
                         value={sickLeaveData.medicalReason}
                         onChange={(e) => setSickLeaveData(prev => ({ ...prev, medicalReason: e.target.value }))}
-                        placeholder="e.g., Severe dermatological condition requiring rest"
+                        placeholder="ex: Pathologie dermatologique nécessitant repos"
                       />
                     </div>
                     <div className="col-span-2">
-                      <Label>Work Restrictions</Label>
+                      <Label>Restrictions de Travail</Label>
                       <Textarea 
                         value={sickLeaveData.workRestrictions}
                         onChange={(e) => setSickLeaveData(prev => ({ ...prev, workRestrictions: e.target.value }))}
-                        placeholder="e.g., Avoid sun exposure, avoid physical strain"
+                        placeholder="ex: Éviter l'exposition au soleil, éviter les efforts physiques intenses"
                         rows={2}
                       />
                     </div>
                     <div className="col-span-2">
-                      <Label>Additional Remarks</Label>
+                      <Label>Remarques Additionnelles</Label>
                       <Textarea 
                         value={sickLeaveData.remarks}
                         onChange={(e) => setSickLeaveData(prev => ({ ...prev, remarks: e.target.value }))}
-                        placeholder="Any additional notes"
+                        placeholder="Remarques complémentaires"
                         rows={3}
                       />
                     </div>
@@ -782,7 +1062,7 @@ Date: ${new Date().toLocaleDateString()}
                 disabled={!sickLeaveData.startDate || !sickLeaveData.endDate}
               >
                 <Download className="h-4 w-4 mr-2" />
-                Download Sick Leave Certificate
+                Télécharger le Certificat d'Arrêt de Travail
               </Button>
             </TabsContent>
           </Tabs>
@@ -796,8 +1076,8 @@ Date: ${new Date().toLocaleDateString()}
             <div className="flex items-center gap-3">
               <CheckCircle className="h-6 w-6 text-teal-600" />
               <div>
-                <p className="font-semibold text-teal-900">Ready to Complete Consultation</p>
-                <p className="text-sm text-teal-700">Review all sections before completing.</p>
+                <p className="font-semibold text-teal-900">Prêt à Finaliser la Consultation</p>
+                <p className="text-sm text-teal-700">Vérifiez toutes les sections avant de terminer.</p>
               </div>
             </div>
             <Button 
@@ -805,7 +1085,7 @@ Date: ${new Date().toLocaleDateString()}
               className="bg-gradient-to-r from-teal-600 to-cyan-600"
             >
               <CheckCircle className="h-4 w-4 mr-2" />
-              Complete Consultation
+              Terminer la Consultation
             </Button>
           </div>
         </CardContent>
