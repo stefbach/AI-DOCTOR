@@ -16,7 +16,8 @@ import {
   Loader2,
   CheckCircle,
   AlertCircle,
-  ImageIcon
+  ImageIcon,
+  Brain
 } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 
