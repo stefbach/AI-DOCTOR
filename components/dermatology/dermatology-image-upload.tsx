@@ -11,6 +11,7 @@ import {
   Upload, 
   X, 
   Camera, 
+  ArrowLeft,
   ArrowRight, 
   Loader2,
   CheckCircle,
