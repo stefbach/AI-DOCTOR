@@ -1912,6 +1912,28 @@ export default function ChronicProfessionalReport({
         setHasUnsavedChanges(true)
       }
     }
+
+    const handleAddLabTest = (categoryKey: string) => {
+      const updatedReport = { ...report }
+      if (!updatedReport.laboratoryTests.prescription.tests[categoryKey]) {
+        updatedReport.laboratoryTests.prescription.tests[categoryKey] = []
+      }
+      const newTest = {
+        nom: 'New Laboratory Test',
+        motifClinique: '',
+        conditionsPrelevement: '',
+        tubePrelevement: '',
+        urgence: false,
+        aJeun: false
+      }
+      updatedReport.laboratoryTests.prescription.tests[categoryKey].push(newTest)
+      setReport(updatedReport)
+      setHasUnsavedChanges(true)
+      toast({
+        title: "Test Added",
+        description: "New laboratory test added. Please edit the details.",
+      })
+    }
     
     return (
       <div id="laboratory-tests-section" className="bg-white p-8 rounded-lg shadow print:shadow-none">
@@ -2081,6 +2103,19 @@ export default function ChronicProfessionalReport({
                       </div>
                     ))}
                   </div>
+                  {editMode && (
+                    <div className="mt-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAddLabTest(category.key)}
+                        className="w-full"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Test to {category.label}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )
             })}
@@ -2089,6 +2124,26 @@ export default function ChronicProfessionalReport({
           <div className="text-center py-8 text-gray-500">
             <TestTube className="h-12 w-12 mx-auto mb-4 text-gray-300" />
             <p>No laboratory tests ordered</p>
+          </div>
+        )}
+        
+        {/* Add New Category Tests */}
+        {editMode && hasTests && (
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h3 className="font-semibold mb-3">Add Test to Category:</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {categories.map(category => (
+                <Button
+                  key={category.key}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleAddLabTest(category.key)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  {category.label}
+                </Button>
+              ))}
+            </div>
           </div>
         )}
         
@@ -2158,6 +2213,27 @@ export default function ChronicProfessionalReport({
         setReport(updatedReport)
         setHasUnsavedChanges(true)
       }
+    }
+
+    const handleAddParaclinicalExam = () => {
+      const updatedReport = { ...report }
+      const newExam = {
+        type: 'New Examination',
+        modality: '',
+        region: '',
+        clinicalIndication: '',
+        diagnosticQuestion: '',
+        specificProtocol: '',
+        urgency: false,
+        contrast: false
+      }
+      updatedReport.paraclinicalExams.prescription.exams.push(newExam)
+      setReport(updatedReport)
+      setHasUnsavedChanges(true)
+      toast({
+        title: "Exam Added",
+        description: "New paraclinical examination added. Please edit the details.",
+      })
     }
     
     return (
@@ -2330,6 +2406,21 @@ export default function ChronicProfessionalReport({
             <div className="text-center py-8 text-gray-500">
               <Scan className="h-12 w-12 mx-auto mb-4 text-gray-300" />
               <p>No paraclinical examinations ordered</p>
+            </div>
+          )}
+          
+          {/* Add New Examination Button */}
+          {editMode && (
+            <div className="mt-6">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAddParaclinicalExam}
+                className="w-full"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add New Paraclinical Examination
+              </Button>
             </div>
           )}
         </div>
