@@ -125,9 +125,9 @@ const SectionStatus = ({ status }: { status: 'pending' | 'loading' | 'complete' 
       className: "bg-blue-100 text-blue-600"
     },
     complete: {
-      icon: <CheckCircle className="h-3 w-3 text-green-600" />,
+      icon: <CheckCircle className="h-3 w-3 text-teal-600" />,
       text: "Complete",
-      className: "bg-green-100 text-green-600"
+      className: "bg-teal-100 text-teal-600"
     }
   }
   
@@ -156,7 +156,7 @@ function ProgressStep({
       completed ? 'opacity-100' : 'opacity-60'
     }`}>
       {completed ? (
-        <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+        <CheckCircle className="h-5 w-5 text-teal-600 flex-shrink-0" />
       ) : active ? (
         <div className="h-5 w-5 flex-shrink-0">
           <div className="h-5 w-5 border-2 border-blue-600 rounded-full border-t-transparent animate-spin" />
@@ -165,7 +165,7 @@ function ProgressStep({
         <Circle className="h-5 w-5 text-gray-400 flex-shrink-0" />
       )}
       <span className={`text-sm ${
-        completed ? 'text-green-700 font-medium' : 
+        completed ? 'text-teal-700 font-medium' : 
         active ? 'text-blue-700 font-medium' : 
         'text-gray-500'
       }`}>
@@ -281,7 +281,7 @@ function TreatmentEditorSection({
             {/* Header with Edit Button */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3 flex-1">
-                <Pill className="h-6 w-6 text-purple-600 flex-shrink-0" />
+                <Pill className="h-6 w-6 text-blue-600 flex-shrink-0" />
                 <div className="flex-1">
                   {isEditing ? (
                     <Input
@@ -298,7 +298,7 @@ function TreatmentEditorSection({
                       {treatment.medication_dci}
                     </h3>
                   )}
-                  <Badge variant="outline" className="mt-1 border-purple-300 text-purple-700">
+                  <Badge variant="outline" className="mt-1 border-blue-300 text-blue-700">
                     {treatment.therapeutic_class}
                   </Badge>
                 </div>
@@ -321,7 +321,7 @@ function TreatmentEditorSection({
                     <Button
                       onClick={handleSaveEdit}
                       size="sm"
-                      className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+                      className="bg-teal-600 hover:bg-teal-700 text-white flex items-center gap-2"
                       disabled={isValidating}
                     >
                       <CheckCircle className="h-4 w-4" />
@@ -343,12 +343,12 @@ function TreatmentEditorSection({
 
             {/* Validation Result */}
             {isEditing && validationResult && (
-              <Alert className={`mb-4 ${validationResult.valid ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                <AlertCircle className={`h-4 w-4 ${validationResult.valid ? 'text-green-600' : 'text-red-600'}`} />
-                <AlertTitle className={validationResult.valid ? 'text-green-800' : 'text-red-800'}>
+              <Alert className={`mb-4 ${validationResult.valid ? 'bg-teal-50 border-teal-200' : 'bg-blue-50 border-blue-200'}`}>
+                <AlertCircle className={`h-4 w-4 ${validationResult.valid ? 'text-teal-600' : 'text-blue-600'}`} />
+                <AlertTitle className={validationResult.valid ? 'text-teal-800' : 'text-blue-800'}>
                   {validationResult.valid ? 'Validation réussie' : 'Erreurs détectées'}
                 </AlertTitle>
-                <AlertDescription className={validationResult.valid ? 'text-green-700' : 'text-red-700'}>
+                <AlertDescription className={validationResult.valid ? 'text-teal-700' : 'text-blue-700'}>
                   {validationResult.message}
                 </AlertDescription>
               </Alert>
@@ -1031,11 +1031,11 @@ export default function DiagnosisForm({
                 <p className="text-xs font-medium text-gray-700">Mauritius</p>
               </div>
               <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                <Brain className="h-6 w-6 text-purple-600 mx-auto mb-1" />
+                <Brain className="h-6 w-6 text-blue-600 mx-auto mb-1" />
                 <p className="text-xs font-medium text-gray-700">GPT-5</p>
               </div>
               <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                <Sparkles className="h-6 w-6 text-yellow-600 mx-auto mb-1" />
+                <Sparkles className="h-6 w-6 text-cyan-600 mx-auto mb-1" />
                 <p className="text-xs font-medium text-gray-700">Expert</p>
               </div>
             </div>
@@ -1092,10 +1092,10 @@ export default function DiagnosisForm({
           </CardHeader>
           <CardContent className="p-8 text-center">
             <div className="space-y-4">
-              <AlertTriangle className="h-16 w-16 text-yellow-500 mx-auto" />
+              <AlertTriangle className="h-16 w-16 text-cyan-500 mx-auto" />
               <p className="text-lg text-gray-700">Unable to generate medical analysis</p>
-              <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                <p className="text-sm text-red-700 font-mono">{error}</p>
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <p className="text-sm text-blue-700 font-mono">{error}</p>
               </div>
               <div className="space-y-2 text-sm text-gray-600">
                 <p>Please check that:</p>
@@ -1170,15 +1170,15 @@ export default function DiagnosisForm({
                 <p className="text-sm font-semibold text-gray-700 mb-2">Current status:</p>
                 <ul className="text-xs text-gray-600 space-y-1">
                   <li className="flex items-center gap-2">
-                    {patientData ? <CheckCircle className="h-3 w-3 text-green-600" /> : <AlertCircle className="h-3 w-3 text-red-600" />}
+                    {patientData ? <CheckCircle className="h-3 w-3 text-teal-600" /> : <AlertCircle className="h-3 w-3 text-blue-600" />}
                     Patient: {patientData?.firstName} {patientData?.lastName}
                   </li>
                   <li className="flex items-center gap-2">
-                    {clinicalData ? <CheckCircle className="h-3 w-3 text-green-600" /> : <AlertCircle className="h-3 w-3 text-red-600" />}
+                    {clinicalData ? <CheckCircle className="h-3 w-3 text-teal-600" /> : <AlertCircle className="h-3 w-3 text-blue-600" />}
                     Chief complaint: {clinicalData?.chiefComplaint || 'Not provided'}
                   </li>
                   <li className="flex items-center gap-2">
-                    {questionsData?.responses?.length > 0 ? <CheckCircle className="h-3 w-3 text-green-600" /> : <AlertCircle className="h-3 w-3 text-yellow-600" />}
+                    {questionsData?.responses?.length > 0 ? <CheckCircle className="h-3 w-3 text-teal-600" /> : <AlertCircle className="h-3 w-3 text-cyan-600" />}
                     AI questions: {questionsData?.responses?.length || 0} responses
                   </li>
                 </ul>
@@ -1238,7 +1238,7 @@ export default function DiagnosisForm({
               GPT-5 Enhanced
             </Badge>
             {documentsGenerated && (
-              <Badge className="bg-green-500 text-white">
+              <Badge className="bg-teal-500 text-white">
                 Documents Ready
               </Badge>
             )}
@@ -1289,26 +1289,26 @@ export default function DiagnosisForm({
             <CardContent className="p-8 space-y-6">
               {/* Key Findings */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                  <h4 className="font-semibold text-purple-800 mb-3 flex items-center gap-2">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
                     <Lightbulb className="h-5 w-5" />
                     Key Elements Identified
                   </h4>
                   <div className="space-y-2 text-sm">
                     <div>
-                      <span className="font-medium text-purple-700">Clinical history:</span>
+                      <span className="font-medium text-blue-700">Clinical history:</span>
                       <p className="text-gray-700">
                         <StreamingText text={diagnosticReasoning.key_findings?.from_history || ""} speed={5} />
                       </p>
                     </div>
                     <div>
-                      <span className="font-medium text-purple-700">Symptom pattern:</span>
+                      <span className="font-medium text-blue-700">Symptom pattern:</span>
                       <p className="text-gray-700">
                         <StreamingText text={diagnosticReasoning.key_findings?.from_symptoms || ""} speed={5} />
                       </p>
                     </div>
                     <div>
-                      <span className="font-medium text-purple-700">AI questionnaire:</span>
+                      <span className="font-medium text-blue-700">AI questionnaire:</span>
                       <p className="text-gray-700">
                         <StreamingText text={diagnosticReasoning.key_findings?.from_ai_questions || ""} speed={5} />
                       </p>
@@ -1316,8 +1316,8 @@ export default function DiagnosisForm({
                   </div>
                 </div>
 
-                <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                  <h4 className="font-semibold text-red-800 mb-3 flex items-center gap-2">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5" />
                     Warning Signs
                   </h4>
@@ -1342,13 +1342,13 @@ export default function DiagnosisForm({
                       </p>
                     </div>
                     <div>
-                      <span className="font-medium text-green-700">Supporting features:</span>
+                      <span className="font-medium text-teal-700">Supporting features:</span>
                       <p className="text-sm text-gray-700">
                         {diagnosticReasoning.syndrome_identification.supporting_features}
                       </p>
                     </div>
                     <div>
-                      <span className="font-medium text-orange-700">Inconsistent features:</span>
+                      <span className="font-medium text-blue-700">Inconsistent features:</span>
                       <p className="text-sm text-gray-700">
                         {diagnosticReasoning.syndrome_identification.inconsistent_features || "None"}
                       </p>
@@ -1396,15 +1396,15 @@ export default function DiagnosisForm({
 
               {/* Diagnostic Criteria Met */}
               {diagnosis?.primary?.diagnosticCriteriaMet && diagnosis.primary.diagnosticCriteriaMet.length > 0 && (
-                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                  <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                <div className="bg-teal-50 p-4 rounded-lg border border-teal-200">
+                  <h4 className="font-semibold text-teal-800 mb-3 flex items-center gap-2">
                     <ClipboardCheck className="h-5 w-5" />
                     Validated Diagnostic Criteria
                   </h4>
                   <ul className="space-y-2">
                     {diagnosis.primary.diagnosticCriteriaMet.map((criterion: string, index: number) => (
                       <li key={index} className="flex items-start gap-2 text-sm text-gray-700">
-                        <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
+                        <CheckCircle className="h-4 w-4 text-teal-600 mt-0.5" />
                         <span>{criterion}</span>
                       </li>
                     ))}
@@ -1452,7 +1452,7 @@ export default function DiagnosisForm({
                     <Activity className="h-5 w-5 text-emerald-600" />
                     Prognosis
                   </h4>
-                  <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                  <div className="bg-cyan-50 p-4 rounded-lg border border-cyan-200">
                     <p className="text-sm text-gray-700 leading-relaxed">
                       <StreamingText 
                         text={diagnosis.primary.prognosis}
@@ -1480,8 +1480,8 @@ export default function DiagnosisForm({
             <CardContent className="p-8 space-y-6">
               {/* Diagnostic Approach */}
               {expertAnalysis.expert_investigations.investigation_strategy?.diagnostic_approach && (
-                <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-6">
-                  <p className="text-center font-medium text-red-800">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6">
+                  <p className="text-center font-medium text-blue-800">
                     {expertAnalysis.expert_investigations.investigation_strategy.diagnostic_approach}
                   </p>
                 </div>
@@ -1491,15 +1491,15 @@ export default function DiagnosisForm({
               {expertAnalysis.expert_investigations.tests_by_purpose && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                   {/* To Confirm Primary */}
-                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                    <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                  <div className="bg-teal-50 p-4 rounded-lg border border-teal-200">
+                    <h4 className="font-semibold text-teal-800 mb-3 flex items-center gap-2">
                       <Target className="h-5 w-5" />
                       Confirm Diagnosis
                     </h4>
                     <div className="space-y-3">
                       {expertAnalysis.expert_investigations.tests_by_purpose.to_confirm_primary?.map((test: any, idx: number) => (
                         <div key={idx} className="text-sm">
-                          <p className="font-medium text-green-700">
+                          <p className="font-medium text-teal-700">
                             {test.test}
                           </p>
                           <p className="text-gray-600 text-xs mt-1">
@@ -1511,15 +1511,15 @@ export default function DiagnosisForm({
                   </div>
 
                   {/* To Exclude Differentials */}
-                  <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
-                    <h4 className="font-semibold text-orange-800 mb-3 flex items-center gap-2">
+                  <div className="bg-blue-50 p-4 rounded-lg border border-orange-200">
+                    <h4 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
                       <Search className="h-5 w-5" />
                       Exclude Differentials
                     </h4>
                     <div className="space-y-3">
                       {expertAnalysis.expert_investigations.tests_by_purpose.to_exclude_differentials?.map((test: any, idx: number) => (
                         <div key={idx} className="text-sm">
-                          <p className="font-medium text-orange-700">
+                          <p className="font-medium text-blue-700">
                             {test.test}
                           </p>
                           <p className="text-gray-600 text-xs mt-1">
@@ -1561,15 +1561,15 @@ export default function DiagnosisForm({
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="flex items-center gap-3">
-                      <Badge className="bg-red-100 text-red-800">IMMEDIATE</Badge>
+                      <Badge className="bg-blue-100 text-blue-800">IMMEDIATE</Badge>
                       <p className="text-sm">{expertAnalysis.expert_investigations.test_sequence.immediate}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Badge className="bg-orange-100 text-orange-800">24-48H</Badge>
+                      <Badge className="bg-blue-100 text-blue-800">24-48H</Badge>
                       <p className="text-sm">{expertAnalysis.expert_investigations.test_sequence.urgent}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Badge className="bg-yellow-100 text-yellow-800">ROUTINE</Badge>
+                      <Badge className="bg-cyan-100 text-cyan-800">ROUTINE</Badge>
                       <p className="text-sm">{expertAnalysis.expert_investigations.test_sequence.routine}</p>
                     </div>
                   </div>
@@ -1582,17 +1582,17 @@ export default function DiagnosisForm({
                   <div key={index} className="border rounded-lg p-6 hover:shadow-md transition-shadow bg-gradient-to-r from-gray-50 to-red-50">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        {exam.category === 'biology' && <FlaskConical className="h-6 w-6 text-red-600" />}
+                        {exam.category === 'biology' && <FlaskConical className="h-6 w-6 text-blue-600" />}
                         {exam.category === 'imaging' && <Activity className="h-6 w-6 text-blue-600" />}
-                        {exam.category === 'functional' && <Stethoscope className="h-6 w-6 text-green-600" />}
+                        {exam.category === 'functional' && <Stethoscope className="h-6 w-6 text-teal-600" />}
                         <div>
                           <h3 className="font-bold text-lg text-gray-800">
                             {exam.examination}
                           </h3>
                           <Badge className={`mt-1 ${
-                            exam.urgency === 'immediate' ? 'bg-red-100 text-red-800' :
-                            exam.urgency === 'urgent' ? 'bg-orange-100 text-orange-800' :
-                            'bg-yellow-100 text-yellow-800'
+                            exam.urgency === 'immediate' ? 'bg-blue-100 text-blue-800' :
+                            exam.urgency === 'urgent' ? 'bg-blue-100 text-blue-800' :
+                            'bg-cyan-100 text-cyan-800'
                           }`}>
                             {exam.urgency === 'immediate' ? 'IMMEDIATE' :
                              exam.urgency === 'urgent' ? 'URGENT' : 'SEMI-URGENT'}
@@ -1625,10 +1625,10 @@ export default function DiagnosisForm({
                             COST & TURNAROUND:
                           </h4>
                           <div className="space-y-1">
-                            <p className="text-xs text-green-600">
+                            <p className="text-xs text-teal-600">
                               <strong>Cost:</strong> {exam.mauritius_availability?.cost || 'To be verified'}
                             </p>
-                            <p className="text-xs text-orange-600">
+                            <p className="text-xs text-blue-600">
                               <strong>Turnaround:</strong> {exam.mauritius_availability?.turnaround || 'To be verified'}
                             </p>
                           </div>
@@ -1704,14 +1704,14 @@ export default function DiagnosisForm({
                     
                     {diff.supporting_features && (
                       <div className="mb-2">
-                        <span className="font-medium text-green-700 text-sm">Supporting: </span>
+                        <span className="font-medium text-teal-700 text-sm">Supporting: </span>
                         <span className="text-sm text-gray-600">{diff.supporting_features}</span>
                       </div>
                     )}
                     
                     {diff.against_features && (
                       <div className="mb-2">
-                        <span className="font-medium text-red-700 text-sm">Against: </span>
+                        <span className="font-medium text-blue-700 text-sm">Against: </span>
                         <span className="text-sm text-gray-600">{diff.against_features}</span>
                       </div>
                     )}
@@ -1747,12 +1747,12 @@ export default function DiagnosisForm({
             </CardHeader>
             <CardContent className="p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                   <div className="flex items-center gap-2 mb-3">
-                    <Clock className="h-5 w-5 text-red-600" />
-                    <h3 className="font-semibold text-red-800">Immediate Monitoring (24h)</h3>
+                    <Clock className="h-5 w-5 text-blue-600" />
+                    <h3 className="font-semibold text-blue-800">Immediate Monitoring (24h)</h3>
                   </div>
-                  <ul className="text-sm text-red-700 space-y-1">
+                  <ul className="text-sm text-blue-700 space-y-1">
                     <li>• Symptomatic treatment efficacy</li>
                     <li>• Drug tolerance</li>
                     <li>• Symptom evolution</li>
@@ -1760,12 +1760,12 @@ export default function DiagnosisForm({
                   </ul>
                 </div>
 
-                <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                <div className="bg-blue-50 p-4 rounded-lg border border-orange-200">
                   <div className="flex items-center gap-2 mb-3">
-                    <Calendar className="h-5 w-5 text-orange-600" />
-                    <h3 className="font-semibold text-orange-800">Short Term Follow-up (1 week)</h3>
+                    <Calendar className="h-5 w-5 text-blue-600" />
+                    <h3 className="font-semibold text-blue-800">Short Term Follow-up (1 week)</h3>
                   </div>
-                  <ul className="text-sm text-orange-700 space-y-1">
+                  <ul className="text-sm text-blue-700 space-y-1">
                     <li>• Clinical reassessment</li>
                     <li>• Lab test results</li>
                     <li>• Treatment adjustment if needed</li>
@@ -1773,12 +1773,12 @@ export default function DiagnosisForm({
                   </ul>
                 </div>
 
-                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <div className="bg-teal-50 p-4 rounded-lg border border-teal-200">
                   <div className="flex items-center gap-2 mb-3">
-                    <Activity className="h-5 w-5 text-green-600" />
-                    <h3 className="font-semibold text-green-800">Long Term Follow-up</h3>
+                    <Activity className="h-5 w-5 text-teal-600" />
+                    <h3 className="font-semibold text-teal-800">Long Term Follow-up</h3>
                   </div>
-                  <ul className="text-sm text-green-700 space-y-1">
+                  <ul className="text-sm text-teal-700 space-y-1">
                     <li>• Recurrence prevention</li>
                     <li>• Organ function monitoring</li>
                     <li>• Therapeutic education</li>
@@ -1787,18 +1787,18 @@ export default function DiagnosisForm({
                 </div>
               </div>
 
-              <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <h3 className="font-bold text-yellow-800 mb-2 flex items-center gap-2">
+              <div className="mt-6 p-4 bg-cyan-50 border border-cyan-200 rounded-lg">
+                <h3 className="font-bold text-cyan-800 mb-2 flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5" />
                   Warning Signs - Urgent Consultation
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <ul className="text-sm text-yellow-700 space-y-1">
+                  <ul className="text-sm text-cyan-700 space-y-1">
                     <li>• Worsening general condition</li>
                     <li>• Persistent fever &gt;39°C</li>
                     <li>• Uncontrolled pain &gt;8/10</li>
                   </ul>
-                  <ul className="text-sm text-yellow-700 space-y-1">
+                  <ul className="text-sm text-cyan-700 space-y-1">
                     <li>• Severe adverse effects</li>
                     <li>• New neurological symptoms</li>
                     <li>• Emergency Mauritius: 114 (SAMU)</li>
@@ -1836,40 +1836,40 @@ export default function DiagnosisForm({
                     <p><strong>Patient:</strong> {mauritianDocuments.consultation?.patient?.firstName} {mauritianDocuments.consultation?.patient?.lastName}</p>
                     <p><strong>Date:</strong> {mauritianDocuments.consultation?.header?.date}</p>
                     <p><strong>Diagnosis:</strong> {diagnosis?.primary?.condition}</p>
-                    <p className="text-green-600"><strong>✅</strong> Diagnostic reasoning included</p>
+                    <p className="text-teal-600"><strong>✅</strong> Diagnostic reasoning included</p>
                   </div>
                 </div>
 
                 {/* Lab Tests */}
-                <div className="bg-red-50 p-6 rounded-lg border border-red-200 hover:shadow-md transition-shadow">
+                <div className="bg-blue-50 p-6 rounded-lg border border-blue-200 hover:shadow-md transition-shadow">
                   <div className="flex items-center gap-3 mb-4">
-                    <TestTube className="h-8 w-8 text-red-600" />
+                    <TestTube className="h-8 w-8 text-blue-600" />
                     <div>
-                      <h3 className="font-semibold text-red-800">Laboratory Tests</h3>
-                      <p className="text-sm text-red-600">Structured by objective</p>
+                      <h3 className="font-semibold text-blue-800">Laboratory Tests</h3>
+                      <p className="text-sm text-blue-600">Structured by objective</p>
                     </div>
                   </div>
-                  <div className="text-xs text-red-700">
+                  <div className="text-xs text-blue-700">
                     <p><strong>Tests:</strong> {mauritianDocuments.biological?.examinations?.length || 0} tests</p>
-                    <p className="text-green-600"><strong>✅</strong> Tests organized by diagnostic objective</p>
-                    <p className="text-green-600"><strong>✅</strong> Mauritius availability included</p>
+                    <p className="text-teal-600"><strong>✅</strong> Tests organized by diagnostic objective</p>
+                    <p className="text-teal-600"><strong>✅</strong> Mauritius availability included</p>
                   </div>
                 </div>
 
                 {/* Imaging */}
-                <div className="bg-green-50 p-6 rounded-lg border border-green-200 hover:shadow-md transition-shadow">
+                <div className="bg-teal-50 p-6 rounded-lg border border-teal-200 hover:shadow-md transition-shadow">
                   <div className="flex items-center gap-3 mb-4">
-                    <Stethoscope className="h-8 w-8 text-green-600" />
+                    <Stethoscope className="h-8 w-8 text-teal-600" />
                     <div>
-                      <h3 className="font-semibold text-green-800">Medical Imaging</h3>
-                      <p className="text-sm text-green-600">Temporal sequence</p>
+                      <h3 className="font-semibold text-teal-800">Medical Imaging</h3>
+                      <p className="text-sm text-teal-600">Temporal sequence</p>
                     </div>
                   </div>
-                  <div className="text-xs text-green-700">
+                  <div className="text-xs text-teal-700">
                     {mauritianDocuments.imaging ? (
                       <>
                         <p><strong>Studies:</strong> {mauritianDocuments.imaging.studies?.length || 0}</p>
-                        <p className="text-green-600"><strong>✅</strong> Temporal prioritization</p>
+                        <p className="text-teal-600"><strong>✅</strong> Temporal prioritization</p>
                       </>
                     ) : (
                       <p className="text-gray-600">No imaging required</p>
@@ -1878,34 +1878,34 @@ export default function DiagnosisForm({
                 </div>
 
                 {/* Prescription */}
-                <div className="bg-purple-50 p-6 rounded-lg border border-purple-200 hover:shadow-md transition-shadow">
+                <div className="bg-blue-50 p-6 rounded-lg border border-blue-200 hover:shadow-md transition-shadow">
                   <div className="flex items-center gap-3 mb-4">
-                    <Pill className="h-8 w-8 text-purple-600" />
+                    <Pill className="h-8 w-8 text-blue-600" />
                     <div>
-                      <h3 className="font-semibold text-purple-800">Prescription</h3>
-                      <p className="text-sm text-purple-600">Mechanisms of action</p>
+                      <h3 className="font-semibold text-blue-800">Prescription</h3>
+                      <p className="text-sm text-blue-600">Mechanisms of action</p>
                     </div>
                   </div>
-                  <div className="text-xs text-purple-700">
+                  <div className="text-xs text-blue-700">
                     <p><strong>Medications:</strong> {mauritianDocuments.medication?.prescriptions?.length || 0}</p>
-                    <p className="text-green-600"><strong>✅</strong> Detailed mechanisms of action</p>
-                    <p className="text-green-600"><strong>✅</strong> Mauritius availability and costs</p>
+                    <p className="text-teal-600"><strong>✅</strong> Detailed mechanisms of action</p>
+                    <p className="text-teal-600"><strong>✅</strong> Mauritius availability and costs</p>
                   </div>
                 </div>
               </div>
 
               <div className="bg-gradient-to-r from-blue-100 to-purple-100 p-4 rounded-lg border border-blue-300">
                 <div className="flex items-center gap-2 mb-2">
-                  <Brain className="h-5 w-5 text-purple-600" />
-                  <span className="font-semibold text-purple-800">Complete Documents with Diagnostic Logic</span>
+                  <Brain className="h-5 w-5 text-blue-600" />
+                  <span className="font-semibold text-blue-800">Complete Documents with Diagnostic Logic</span>
                 </div>
-                <p className="text-sm text-purple-700">
+                <p className="text-sm text-blue-700">
                   All documents include systematic diagnostic reasoning 
                   and structured investigation strategy for better medical traceability.
                 </p>
                 <div className="mt-3 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span className="text-sm text-green-700">Ready for printing and archiving</span>
+                  <CheckCircle className="h-4 w-4 text-teal-600" />
+                  <span className="text-sm text-teal-700">Ready for printing and archiving</span>
                 </div>
               </div>
             </CardContent>
@@ -1947,7 +1947,7 @@ export default function DiagnosisForm({
       {/* Auto-generation indicator */}
       <div className="flex justify-center">
         <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse"></div>
           <span className="text-sm text-gray-600">Automatic generation with progressive appearance</span>
         </div>
       </div>

@@ -82,9 +82,9 @@ const MODE_CONFIGS = {
     label: 'Fast',
     duration: '1-2s',
     icon: Zap,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-200',
+    color: 'text-teal-600',
+    bgColor: 'bg-teal-50',
+    borderColor: 'border-teal-200',
     description: 'Initial triage, emergencies'
   },
   balanced: {
@@ -100,9 +100,9 @@ const MODE_CONFIGS = {
     label: 'Intelligent',
     duration: '3-5s',
     icon: Brain,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    borderColor: 'border-purple-200',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-200',
     description: 'Complex cases'
   }
 }
@@ -507,8 +507,8 @@ export default function QuestionsForm({
               key={option}
               className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
                 currentAnswer === option
-                  ? "border-purple-300 bg-purple-50 shadow-md"
-                  : "border-gray-200 hover:border-purple-200 hover:bg-purple-25"
+                  ? "border-blue-300 bg-blue-50 shadow-md"
+                  : "border-gray-200 hover:border-blue-200 hover:bg-blue-25"
               }`}
               onClick={() => updateResponse(question.id, option)}
             >
@@ -632,7 +632,7 @@ export default function QuestionsForm({
                 </Badge>
               )}
               {metadata.fromCache && (
-                <Badge className="bg-green-100 text-green-800">
+                <Badge className="bg-teal-100 text-teal-800">
                   <Gauge className="h-3 w-3 mr-1" />
                   Cache
                 </Badge>
@@ -734,7 +734,7 @@ export default function QuestionsForm({
                   currentQuestionIndex === index
                     ? "bg-blue-600 text-white shadow-lg scale-110"
                     : isAnswered
-                    ? "bg-green-100 text-green-800 border-2 border-green-300"
+                    ? "bg-teal-100 text-teal-800 border-2 border-teal-300"
                     : "bg-white/70 text-gray-600 border-2 border-gray-200 hover:bg-white hover:shadow-md"
                 }`}
               >
@@ -790,12 +790,12 @@ export default function QuestionsForm({
 
               {/* Clinical reasoning (intelligent mode) */}
               {question.clinical_reasoning && (
-                <div className="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="flex items-start gap-2">
-                    <Brain className="h-4 w-4 text-purple-600 mt-0.5" />
+                    <Brain className="h-4 w-4 text-blue-600 mt-0.5" />
                     <div>
-                      <p className="text-sm font-semibold text-purple-800 mb-1">Clinical reasoning:</p>
-                      <p className="text-sm text-purple-700">{question.clinical_reasoning}</p>
+                      <p className="text-sm font-semibold text-blue-800 mb-1">Clinical reasoning:</p>
+                      <p className="text-sm text-blue-700">{question.clinical_reasoning}</p>
                     </div>
                   </div>
                 </div>
@@ -803,18 +803,18 @@ export default function QuestionsForm({
 
               {/* Diagnostic impact (intelligent mode) */}
               {question.diagnostic_impact && (
-                <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                <div className="mt-3 p-3 bg-teal-50 rounded-lg border border-teal-200">
                   <div className="flex items-start gap-2">
-                    <Activity className="h-4 w-4 text-green-600 mt-0.5" />
+                    <Activity className="h-4 w-4 text-teal-600 mt-0.5" />
                     <div className="text-sm">
-                      <p className="font-semibold text-green-800 mb-1">Diagnostic impact:</p>
+                      <p className="font-semibold text-teal-800 mb-1">Diagnostic impact:</p>
                       {question.diagnostic_impact.if_positive && (
-                        <p className="text-green-700">
+                        <p className="text-teal-700">
                           <span className="font-medium">If positive:</span> {question.diagnostic_impact.if_positive}
                         </p>
                       )}
                       {question.diagnostic_impact.if_negative && (
-                        <p className="text-green-700">
+                        <p className="text-teal-700">
                           <span className="font-medium">If negative:</span> {question.diagnostic_impact.if_negative}
                         </p>
                       )}
@@ -836,12 +836,12 @@ export default function QuestionsForm({
               const isAnswered = currentAnswer !== ""
 
               return isAnswered && (
-                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                <div className="p-4 bg-teal-50 rounded-lg border border-teal-200">
                   <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <p className="font-semibold text-green-800">Answer recorded</p>
+                    <CheckCircle className="h-5 w-5 text-teal-600" />
+                    <p className="font-semibold text-teal-800">Answer recorded</p>
                   </div>
-                  <p className="text-sm text-green-700">
+                  <p className="text-sm text-teal-700">
                     <span className="font-medium">Your answer:</span> {currentAnswer}
                   </p>
                 </div>
@@ -903,7 +903,7 @@ export default function QuestionsForm({
       {/* Auto-save indicator */}
       <div className="flex justify-center">
         <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse"></div>
           <span className="text-sm text-gray-600">Auto-save enabled</span>
         </div>
       </div>

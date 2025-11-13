@@ -49,11 +49,11 @@ interface ChronicQuestionsFormProps {
 const getCategoryColor = (category: string) => {
   const colors: Record<string, string> = {
     diabetes_control: 'bg-blue-100 text-blue-800',
-    hypertension_control: 'bg-red-100 text-red-800',
-    obesity_management: 'bg-orange-100 text-orange-800',
-    complications: 'bg-purple-100 text-purple-800',
-    medications: 'bg-green-100 text-green-800',
-    lifestyle: 'bg-yellow-100 text-yellow-800'
+    hypertension_control: 'bg-blue-100 text-blue-800',
+    obesity_management: 'bg-cyan-100 text-cyan-800',
+    complications: 'bg-blue-100 text-blue-800',
+    medications: 'bg-teal-100 text-teal-800',
+    lifestyle: 'bg-cyan-100 text-cyan-800'
   }
   return colors[category] || 'bg-gray-100 text-gray-800'
 }
@@ -184,9 +184,9 @@ export default function ChronicQuestionsForm({
   // ========== Render: Loading State ==========
   if (loading) {
     return (
-      <Card className="border-purple-200">
+      <Card className="border-blue-200">
         <CardContent className="p-12 text-center">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-purple-600" />
+          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
           <p className="text-lg font-medium text-gray-700 mb-2">Generating Specialized Questions...</p>
           <p className="text-sm text-gray-500">AI is analyzing chronic disease data</p>
         </CardContent>
@@ -197,7 +197,7 @@ export default function ChronicQuestionsForm({
   // ========== Render: Error State ==========
   if (error) {
     return (
-      <Card className="border-red-200">
+      <Card className="border-blue-200">
         <CardContent className="p-6">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -218,14 +218,14 @@ export default function ChronicQuestionsForm({
   return (
     <div className="space-y-6">
       {/* Progress Card */}
-      <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
+      <Card className="border-blue-200 bg-gradient-to-r from-purple-50 to-pink-50">
         <CardContent className="p-6">
           <div className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-2">
-              <ClipboardList className="h-5 w-5 text-purple-600" />
+              <ClipboardList className="h-5 w-5 text-blue-600" />
               <span className="font-medium text-gray-700">Progress</span>
             </div>
-            <Badge variant="secondary" className="bg-purple-600 text-white">
+            <Badge variant="secondary" className="bg-blue-600 text-white">
               {answeredCount} / {totalQuestions} answered
             </Badge>
           </div>
@@ -245,8 +245,8 @@ export default function ChronicQuestionsForm({
               key={question.id} 
               className={`border-2 transition-all ${
                 isAnswered 
-                  ? 'border-green-300 bg-green-50/30' 
-                  : 'border-purple-200 hover:border-purple-300'
+                  ? 'border-teal-300 bg-teal-50/30' 
+                  : 'border-blue-200 hover:border-blue-300'
               }`}
             >
               <CardHeader className="pb-3">
@@ -271,7 +271,7 @@ export default function ChronicQuestionsForm({
                     </Label>
                   </div>
                   {isAnswered && (
-                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-1" />
+                    <CheckCircle className="h-5 w-5 text-teal-600 flex-shrink-0 mt-1" />
                   )}
                 </div>
               </CardHeader>
@@ -287,8 +287,8 @@ export default function ChronicQuestionsForm({
                       key={optionIndex}
                       className={`flex items-center space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
                         response?.answer === option
-                          ? 'border-purple-500 bg-purple-50 shadow-md'
-                          : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50/30'
+                          ? 'border-blue-500 bg-blue-50 shadow-md'
+                          : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/30'
                       }`}
                     >
                       <RadioGroupItem 
@@ -322,9 +322,9 @@ export default function ChronicQuestionsForm({
 
       {/* Summary Card */}
       {answeredCount > 0 && (
-        <Card className="border-green-200 bg-green-50/30">
+        <Card className="border-teal-200 bg-teal-50/30">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-green-700">
+            <div className="flex items-center gap-2 text-teal-700">
               <CheckCircle className="h-5 w-5" />
               <p className="font-medium">
                 Great! You've answered {answeredCount} out of {totalQuestions} questions
@@ -343,7 +343,7 @@ export default function ChronicQuestionsForm({
         <Button 
           onClick={handleSubmit} 
           size="lg"
-          className="bg-purple-600 hover:bg-purple-700"
+          className="bg-blue-600 hover:bg-blue-700"
           disabled={answeredCount === 0}
         >
           Continue to Analysis

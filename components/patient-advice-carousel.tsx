@@ -419,11 +419,11 @@ export default function PatientAdviceCarousel({
   
   const bgColorClasses = {
     blue: "bg-blue-50",
-    green: "bg-green-50",
-    red: "bg-red-50",
-    orange: "bg-orange-50",
-    purple: "bg-purple-50",
-    yellow: "bg-yellow-50",
+    green: "bg-teal-50",
+    red: "bg-blue-50",
+    orange: "bg-blue-50",
+    purple: "bg-blue-50",
+    yellow: "bg-cyan-50",
     indigo: "bg-indigo-50"
   }
   

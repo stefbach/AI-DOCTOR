@@ -211,10 +211,10 @@ export default function ChronicClinicalForm({
   return (
     <div className="space-y-6">
       {/* 1. REASON FOR VISIT */}
-      <Card className="border-purple-200">
+      <Card className="border-blue-200">
         <CardHeader className="bg-gradient-to-r from-purple-100 to-pink-100">
           <CardTitle className="flex items-center gap-2">
-            <ClipboardList className="h-5 w-5 text-purple-600" />
+            <ClipboardList className="h-5 w-5 text-blue-600" />
             1. Reason for Visit
           </CardTitle>
         </CardHeader>
@@ -259,7 +259,7 @@ export default function ChronicClinicalForm({
             </div>
           </div>
           {errors.visitReasons && (
-            <p className="text-red-500 text-sm flex items-center gap-1">
+            <p className="text-blue-500 text-sm flex items-center gap-1">
               <AlertCircle className="h-4 w-4" />
               {errors.visitReasons}
             </p>
@@ -286,10 +286,10 @@ export default function ChronicClinicalForm({
                 value={formData.bloodPressureSystolic}
                 onChange={(e) => handleChange("bloodPressureSystolic", e.target.value)}
                 placeholder="120"
-                className={errors.bloodPressureSystolic ? "border-red-500" : ""}
+                className={errors.bloodPressureSystolic ? "border-blue-500" : ""}
               />
               {errors.bloodPressureSystolic && (
-                <p className="text-red-500 text-xs mt-1">{errors.bloodPressureSystolic}</p>
+                <p className="text-blue-500 text-xs mt-1">{errors.bloodPressureSystolic}</p>
               )}
             </div>
             
@@ -301,7 +301,7 @@ export default function ChronicClinicalForm({
                 value={formData.bloodPressureDiastolic}
                 onChange={(e) => handleChange("bloodPressureDiastolic", e.target.value)}
                 placeholder="80"
-                className={errors.bloodPressureDiastolic ? "border-red-500" : ""}
+                className={errors.bloodPressureDiastolic ? "border-blue-500" : ""}
               />
             </div>
             
@@ -313,7 +313,7 @@ export default function ChronicClinicalForm({
                 value={formData.heartRate}
                 onChange={(e) => handleChange("heartRate", e.target.value)}
                 placeholder="72"
-                className={errors.heartRate ? "border-red-500" : ""}
+                className={errors.heartRate ? "border-blue-500" : ""}
               />
             </div>
           </div>
@@ -328,7 +328,7 @@ export default function ChronicClinicalForm({
                 value={formData.bloodGlucose}
                 onChange={(e) => handleChange("bloodGlucose", e.target.value)}
                 placeholder="1.0"
-                className={errors.bloodGlucose ? "border-red-500" : ""}
+                className={errors.bloodGlucose ? "border-blue-500" : ""}
               />
             </div>
             
@@ -341,7 +341,7 @@ export default function ChronicClinicalForm({
                 value={formData.weight}
                 onChange={(e) => handleChange("weight", e.target.value)}
                 placeholder="85"
-                className={errors.weight ? "border-red-500" : ""}
+                className={errors.weight ? "border-blue-500" : ""}
               />
             </div>
             
@@ -353,7 +353,7 @@ export default function ChronicClinicalForm({
                 value={formData.height}
                 onChange={(e) => handleChange("height", e.target.value)}
                 placeholder="170"
-                className={errors.height ? "border-red-500" : ""}
+                className={errors.height ? "border-blue-500" : ""}
               />
             </div>
           </div>
@@ -381,9 +381,9 @@ export default function ChronicClinicalForm({
                     </Badge>
                     <span className={`text-sm font-medium ${
                       parseFloat(bmi) < 18.5 ? "text-blue-600" :
-                      parseFloat(bmi) < 25 ? "text-green-600" :
-                      parseFloat(bmi) < 30 ? "text-orange-600" :
-                      "text-red-600"
+                      parseFloat(bmi) < 25 ? "text-teal-600" :
+                      parseFloat(bmi) < 30 ? "text-cyan-600" :
+                      "text-blue-600"
                     }`}>
                       {parseFloat(bmi) < 18.5 ? "Underweight" :
                        parseFloat(bmi) < 25 ? "Normal" :
@@ -400,10 +400,10 @@ export default function ChronicClinicalForm({
       </Card>
 
       {/* 3. CHRONIC DISEASES MONITORED */}
-      <Card className="border-green-200">
+      <Card className="border-teal-200">
         <CardHeader className="bg-gradient-to-r from-green-100 to-emerald-100">
           <CardTitle className="flex items-center gap-2">
-            <Heart className="h-5 w-5 text-green-600" />
+            <Heart className="h-5 w-5 text-teal-600" />
             3. Chronic Diseases Monitored
           </CardTitle>
         </CardHeader>
@@ -450,7 +450,7 @@ export default function ChronicClinicalForm({
             </div>
           </div>
           {errors.chronicDiseases && (
-            <p className="text-red-500 text-sm flex items-center gap-1">
+            <p className="text-blue-500 text-sm flex items-center gap-1">
               <AlertCircle className="h-4 w-4" />
               {errors.chronicDiseases}
             </p>
@@ -553,10 +553,10 @@ export default function ChronicClinicalForm({
 
       {/* 5. HYPERTENSION CONTROL (if hypertensive) */}
       {formData.chronicDiseases.includes("Arterial Hypertension") && (
-        <Card className="border-orange-200">
+        <Card className="border-cyan-200">
           <CardHeader className="bg-gradient-to-r from-orange-100 to-amber-100">
             <CardTitle className="flex items-center gap-2">
-              <Heart className="h-5 w-5 text-orange-600" />
+              <Heart className="h-5 w-5 text-cyan-600" />
               5. Hypertension Control
             </CardTitle>
           </CardHeader>
@@ -617,10 +617,10 @@ export default function ChronicClinicalForm({
       )}
 
       {/* 6. TREATMENT ADHERENCE */}
-      <Card className="border-red-200">
+      <Card className="border-blue-200">
         <CardHeader className="bg-gradient-to-r from-red-100 to-pink-100">
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-red-600" />
+            <FileText className="h-5 w-5 text-blue-600" />
             6. Treatment Adherence
           </CardTitle>
         </CardHeader>
@@ -700,10 +700,10 @@ export default function ChronicClinicalForm({
       </Card>
 
       {/* 7. CURRENT SYMPTOMS */}
-      <Card className="border-purple-200">
+      <Card className="border-blue-200">
         <CardHeader className="bg-gradient-to-r from-purple-100 to-violet-100">
           <CardTitle className="flex items-center gap-2">
-            <Stethoscope className="h-5 w-5 text-purple-600" />
+            <Stethoscope className="h-5 w-5 text-blue-600" />
             7. Current Symptoms
           </CardTitle>
         </CardHeader>
@@ -754,10 +754,10 @@ export default function ChronicClinicalForm({
       </Card>
 
       {/* 8. RECENT TESTS */}
-      <Card className="border-yellow-200">
+      <Card className="border-cyan-200">
         <CardHeader className="bg-gradient-to-r from-yellow-100 to-amber-100">
           <CardTitle className="flex items-center gap-2">
-            <ClipboardList className="h-5 w-5 text-yellow-600" />
+            <ClipboardList className="h-5 w-5 text-cyan-600" />
             8. Recent Tests (last 6 months)
           </CardTitle>
         </CardHeader>
@@ -805,10 +805,10 @@ export default function ChronicClinicalForm({
       </Card>
 
       {/* 9. MEDICAL PLAN */}
-      <Card className="border-green-200">
+      <Card className="border-teal-200">
         <CardHeader className="bg-gradient-to-r from-green-100 to-teal-100">
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-green-600" />
+            <FileText className="h-5 w-5 text-teal-600" />
             9. Medical Plan / Course of Action
           </CardTitle>
         </CardHeader>
@@ -858,7 +858,7 @@ export default function ChronicClinicalForm({
         <Button 
           onClick={handleSubmit} 
           size="lg"
-          className="bg-purple-600 hover:bg-purple-700"
+          className="bg-blue-600 hover:bg-blue-700"
         >
           Continue to AI Questions
         </Button>

@@ -119,7 +119,7 @@ const SuggestionCard = ({
           <span className="ml-1">🏥 {getSuggestionTitle()}: {suggestion.section}</span>
         </Badge>
         {suggestion.applied && (
-          <Badge className="bg-green-100 text-green-800 text-xs border-green-300">
+          <Badge className="bg-teal-100 text-teal-800 text-xs border-teal-300">
             <CheckCircle className="h-3 w-3 mr-1" />
             Appliquée {suggestion.appliedAt ? `à ${new Date(suggestion.appliedAt).toLocaleTimeString()}` : ''}
           </Badge>
@@ -157,7 +157,7 @@ const SuggestionCard = ({
         {suggestion.reasoning && (
           <div>
             <p className="text-xs font-medium text-gray-600 mb-1">💡 Justification médicale :</p>
-            <div className="text-xs text-gray-600 bg-yellow-50 p-2 rounded border border-yellow-200">
+            <div className="text-xs text-gray-600 bg-cyan-50 p-2 rounded border border-cyan-200">
               {suggestion.reasoning}
             </div>
           </div>
@@ -169,7 +169,7 @@ const SuggestionCard = ({
           size="sm"
           onClick={handleApply}
           disabled={isApplying}
-          className="w-full mt-3 bg-green-600 hover:bg-green-700 text-white"
+          className="w-full mt-3 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white"
         >
           {isApplying ? (
             <>
@@ -184,12 +184,14 @@ const SuggestionCard = ({
           )}
         </Button>
       ) : suggestion.applied ? (
-        <div className="w-full mt-3 p-2 bg-green-50 text-green-700 text-center text-sm rounded border border-green-200">
-          ✅ Suggestion déjà appliquée
+        <div className="w-full mt-3 p-2 bg-teal-50 text-teal-700 text-center text-sm rounded border border-teal-200 flex items-center justify-center gap-2">
+          <CheckCircle className="h-4 w-4" />
+          Suggestion déjà appliquée
         </div>
       ) : (
-        <div className="w-full mt-3 p-2 bg-red-50 text-red-700 text-center text-sm rounded border border-red-200">
-          ❌ Suggestion invalide (données manquantes)
+        <div className="w-full mt-3 p-2 bg-blue-50 text-blue-700 text-center text-sm rounded border border-blue-200 flex items-center justify-center gap-2">
+          <AlertCircle className="h-4 w-4" />
+          Suggestion invalide (données manquantes)
         </div>
       )}
     </div>
@@ -238,10 +240,10 @@ Test réussi : ${new Date().toISOString()}`;
   };
   
   return (
-    <div className="p-3 bg-yellow-50 border-2 border-yellow-300 rounded-lg mb-3">
+    <div className="p-3 bg-cyan-50 border-2 border-cyan-300 rounded-lg mb-3">
       <div className="flex items-center gap-2 mb-2">
-        <Bug className="h-4 w-4 text-yellow-600" />
-        <h4 className="font-bold text-yellow-800">🔧 Debug Assistant IA</h4>
+        <Bug className="h-4 w-4 text-cyan-600" />
+        <h4 className="font-bold text-cyan-800">Debug Assistant IA</h4>
       </div>
       
       <div className="grid grid-cols-3 gap-2 mb-3">

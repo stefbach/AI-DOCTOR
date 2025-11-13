@@ -283,9 +283,9 @@ export default function ChronicReport({
 
   if (loading) {
     return (
-      <Card className="border-purple-200">
+      <Card className="border-blue-200">
         <CardContent className="p-12 text-center">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-purple-600" />
+          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
           <p className="text-lg font-semibold text-gray-700">
             {loadingStage === "report" && "📄 Generating comprehensive medical report..."}
             {loadingStage === "prescription" && "💊 Generating medication prescription..."}
@@ -306,18 +306,18 @@ export default function ChronicReport({
 
   if (error) {
     return (
-      <Card className="border-red-200">
+      <Card className="border-blue-200">
         <CardContent className="p-6">
           <div className="flex items-start gap-3 mb-4">
-            <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
+            <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5" />
             <div>
-              <p className="font-semibold text-red-600">Error generating documentation</p>
+              <p className="font-semibold text-blue-600">Error generating documentation</p>
               <p className="text-sm text-gray-600 mt-1">{error}</p>
             </div>
           </div>
           <div className="flex gap-4">
             <Button onClick={onBack} variant="outline">Back</Button>
-            <Button onClick={generateAllDocuments} className="bg-purple-600 hover:bg-purple-700">
+            <Button onClick={generateAllDocuments} className="bg-blue-600 hover:bg-blue-700">
               Retry Generation
             </Button>
           </div>
@@ -334,7 +334,7 @@ export default function ChronicReport({
   return (
     <div className="space-y-6">
       {/* Action Buttons - Always at top */}
-      <Card className="border-purple-200 print:hidden sticky top-0 z-10 bg-white shadow-lg">
+      <Card className="border-blue-200 print:hidden sticky top-0 z-10 bg-white shadow-lg">
         <CardContent className="p-4">
           <div className="flex justify-between items-center">
             <div className="flex gap-2">
@@ -351,7 +351,7 @@ export default function ChronicReport({
                 variant="outline" 
                 size="sm"
                 disabled={saving || saved}
-                className={saved ? "bg-green-50 border-green-500 text-green-700" : ""}
+                className={saved ? "bg-teal-50 border-teal-500 text-teal-700" : ""}
               >
                 {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 {saved && <CheckCircle className="h-4 w-4 mr-2" />}
@@ -360,12 +360,12 @@ export default function ChronicReport({
             </div>
             <div className="flex gap-2">
               {saved ? (
-                <Badge className="bg-green-600 text-white">
+                <Badge className="bg-teal-600 text-white">
                   <CheckCircle className="h-4 w-4 mr-1" />
                   Saved to Database
                 </Badge>
               ) : (
-                <Badge className="bg-purple-600 text-white">
+                <Badge className="bg-blue-600 text-white">
                   <FileText className="h-4 w-4 mr-1" />
                   Complete Documentation
                 </Badge>
@@ -377,7 +377,7 @@ export default function ChronicReport({
       </Card>
 
       {/* Document Header */}
-      <Card className="border-2 border-purple-300 shadow-xl">
+      <Card className="border-2 border-blue-300 shadow-xl">
         <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
           <CardTitle className="flex items-center gap-2 text-2xl">
             <FileText className="h-7 w-7" />
@@ -392,7 +392,7 @@ export default function ChronicReport({
         <CardContent className="p-6">
           <div className="grid md:grid-cols-3 gap-4 mb-4">
             <div className="flex items-start gap-2">
-              <User className="h-5 w-5 text-purple-600 mt-0.5" />
+              <User className="h-5 w-5 text-blue-600 mt-0.5" />
               <div>
                 <Label>Patient:</Label>
                 <p className="font-semibold text-lg">{structuredData?.patient?.fullName || `${patientData.firstName} ${patientData.lastName}`}</p>
@@ -439,9 +439,9 @@ export default function ChronicReport({
 
       {/* Vital Signs Summary */}
       {structuredData?.vitalSigns && (
-        <Card className="border-green-200">
-          <CardHeader className="bg-green-50">
-            <CardTitle className="flex items-center gap-2 text-green-900">
+        <Card className="border-teal-200">
+          <CardHeader className="bg-teal-50">
+            <CardTitle className="flex items-center gap-2 text-teal-900">
               <Heart className="h-5 w-5" />
               Signes Vitaux & Paramètres Cliniques
             </CardTitle>
@@ -486,18 +486,18 @@ export default function ChronicReport({
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Contrôle:</span>
                   <Badge className={
-                    structuredData.diseaseAssessments.diabetes.controlStatus === "Excellent" ? "bg-green-600" :
+                    structuredData.diseaseAssessments.diabetes.controlStatus === "Excellent" ? "bg-teal-600" :
                     structuredData.diseaseAssessments.diabetes.controlStatus === "Good" ? "bg-blue-600" :
-                    structuredData.diseaseAssessments.diabetes.controlStatus === "Fair" ? "bg-yellow-600" : "bg-red-600"
+                    structuredData.diseaseAssessments.diabetes.controlStatus === "Fair" ? "bg-cyan-600" : "bg-blue-600"
                   }>{structuredData.diseaseAssessments.diabetes.controlStatus}</Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">HbA1c actuelle:</span>
-                  <span className="font-bold text-red-600">{structuredData.diseaseAssessments.diabetes.currentHbA1c}</span>
+                  <span className="font-bold text-blue-600">{structuredData.diseaseAssessments.diabetes.currentHbA1c}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">HbA1c cible:</span>
-                  <span className="font-bold text-green-600">{structuredData.diseaseAssessments.diabetes.targetHbA1c}</span>
+                  <span className="font-bold text-teal-600">{structuredData.diseaseAssessments.diabetes.targetHbA1c}</span>
                 </div>
                 {structuredData.diseaseAssessments.diabetes.summary && (
                   <p className="text-xs text-gray-600 mt-2 pt-2 border-t italic">{structuredData.diseaseAssessments.diabetes.summary}</p>
@@ -508,9 +508,9 @@ export default function ChronicReport({
 
           {/* Hypertension */}
           {structuredData.diseaseAssessments.hypertension?.present && (
-            <Card className="border-red-300">
-              <CardHeader className="bg-red-50">
-                <CardTitle className="text-red-900 text-lg">❤️ Évaluation Hypertension</CardTitle>
+            <Card className="border-blue-300">
+              <CardHeader className="bg-blue-50">
+                <CardTitle className="text-blue-900 text-lg">❤️ Évaluation Hypertension</CardTitle>
               </CardHeader>
               <CardContent className="p-4 space-y-2">
                 <div className="flex justify-between items-center">
@@ -520,18 +520,18 @@ export default function ChronicReport({
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Contrôle:</span>
                   <Badge className={
-                    structuredData.diseaseAssessments.hypertension.controlStatus === "Excellent" ? "bg-green-600" :
+                    structuredData.diseaseAssessments.hypertension.controlStatus === "Excellent" ? "bg-teal-600" :
                     structuredData.diseaseAssessments.hypertension.controlStatus === "Good" ? "bg-blue-600" :
-                    structuredData.diseaseAssessments.hypertension.controlStatus === "Fair" ? "bg-yellow-600" : "bg-red-600"
+                    structuredData.diseaseAssessments.hypertension.controlStatus === "Fair" ? "bg-cyan-600" : "bg-blue-600"
                   }>{structuredData.diseaseAssessments.hypertension.controlStatus}</Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">PA actuelle:</span>
-                  <span className="font-bold text-red-600">{structuredData.diseaseAssessments.hypertension.currentBP}</span>
+                  <span className="font-bold text-blue-600">{structuredData.diseaseAssessments.hypertension.currentBP}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">PA cible:</span>
-                  <span className="font-bold text-green-600">{structuredData.diseaseAssessments.hypertension.targetBP}</span>
+                  <span className="font-bold text-teal-600">{structuredData.diseaseAssessments.hypertension.targetBP}</span>
                 </div>
                 {structuredData.diseaseAssessments.hypertension.summary && (
                   <p className="text-xs text-gray-600 mt-2 pt-2 border-t italic">{structuredData.diseaseAssessments.hypertension.summary}</p>
@@ -562,9 +562,9 @@ export default function ChronicReport({
                   {prescription.medicationSummary && (
                     <div className="flex flex-wrap gap-2 mt-2">
                       <Badge className="bg-blue-600">Antidiabétiques: {prescription.medicationSummary.byCategory?.antidiabetics || 0}</Badge>
-                      <Badge className="bg-red-600">Antihypertenseurs: {prescription.medicationSummary.byCategory?.antihypertensives || 0}</Badge>
-                      <Badge className="bg-yellow-600">Statines: {prescription.medicationSummary.byCategory?.statins || 0}</Badge>
-                      <Badge className="bg-green-600">Antiagrégants: {prescription.medicationSummary.byCategory?.antiplatelets || 0}</Badge>
+                      <Badge className="bg-blue-600">Antihypertenseurs: {prescription.medicationSummary.byCategory?.antihypertensives || 0}</Badge>
+                      <Badge className="bg-cyan-600">Statines: {prescription.medicationSummary.byCategory?.statins || 0}</Badge>
+                      <Badge className="bg-teal-600">Antiagrégants: {prescription.medicationSummary.byCategory?.antiplatelets || 0}</Badge>
                     </div>
                   )}
                 </div>
@@ -588,8 +588,8 @@ export default function ChronicReport({
                             <p className="text-sm font-semibold">{med.posology?.dosage}</p>
                             <p className="text-xs text-gray-600 mt-1">{med.posology?.frequency} - {med.posology?.timing}</p>
                           </div>
-                          <div className="bg-green-50 p-3 rounded">
-                            <Label className="text-xs text-green-900">Traitement:</Label>
+                          <div className="bg-teal-50 p-3 rounded">
+                            <Label className="text-xs text-teal-900">Traitement:</Label>
                             <p className="text-sm font-semibold">{med.treatment?.duration}</p>
                             <p className="text-xs text-gray-600 mt-1">{med.treatment?.renewals}</p>
                           </div>
@@ -604,8 +604,8 @@ export default function ChronicReport({
                         )}
 
                         {med.patientInstructions && (
-                          <div className="mt-2 p-2 bg-yellow-50 rounded border border-yellow-200">
-                            <Label className="text-xs text-yellow-900">Instructions:</Label>
+                          <div className="mt-2 p-2 bg-cyan-50 rounded border border-cyan-200">
+                            <Label className="text-xs text-cyan-900">Instructions:</Label>
                             <p className="text-xs">{med.patientInstructions.administrationInstructions}</p>
                           </div>
                         )}
@@ -615,8 +615,8 @@ export default function ChronicReport({
                 </div>
 
                 {prescription.pharmacologicalPlan && (
-                  <div className="mt-4 p-4 bg-purple-50 rounded border border-purple-200">
-                    <Label className="font-semibold text-purple-900">Plan Pharmacologique:</Label>
+                  <div className="mt-4 p-4 bg-blue-50 rounded border border-blue-200">
+                    <Label className="font-semibold text-blue-900">Plan Pharmacologique:</Label>
                     <p className="text-sm mt-2">{prescription.pharmacologicalPlan.therapeuticStrategy}</p>
                     <div className="grid md:grid-cols-2 gap-3 mt-3">
                       <div>
@@ -733,7 +733,7 @@ export default function ChronicReport({
             {/* Specialist Referrals */}
             {examOrders.specialistReferrals && examOrders.specialistReferrals.length > 0 && (
               <div>
-                <h3 className="font-bold text-lg text-purple-900 mb-3 flex items-center gap-2">
+                <h3 className="font-bold text-lg text-blue-900 mb-3 flex items-center gap-2">
                   <Stethoscope className="h-5 w-5" />
                   Consultations Spécialisées ({examOrders.specialistReferrals.length})
                 </h3>
@@ -743,7 +743,7 @@ export default function ChronicReport({
                       <CardContent className="p-3">
                         <div className="flex justify-between items-start mb-1">
                           <h4 className="font-bold">{referral.specialty}</h4>
-                          <Badge className="bg-purple-600">{referral.urgency}</Badge>
+                          <Badge className="bg-blue-600">{referral.urgency}</Badge>
                         </div>
                         <p className="text-xs text-gray-600 mb-2">{referral.indication}</p>
                         <div className="flex justify-between text-xs">
@@ -771,7 +771,7 @@ export default function ChronicReport({
                 <div className="grid md:grid-cols-3 gap-3">
                   {examOrders.monitoringPlan.immediate?.length > 0 && (
                     <div className="bg-white p-3 rounded">
-                      <Label className="text-xs text-red-600 font-semibold">IMMÉDIAT:</Label>
+                      <Label className="text-xs text-blue-600 font-semibold">IMMÉDIAT:</Label>
                       <ul className="text-xs mt-1 space-y-1">
                         {examOrders.monitoringPlan.immediate.map((exam: string, i: number) => (
                           <li key={i}>• {exam}</li>
@@ -791,7 +791,7 @@ export default function ChronicReport({
                   )}
                   {examOrders.monitoringPlan.annual?.length > 0 && (
                     <div className="bg-white p-3 rounded">
-                      <Label className="text-xs text-green-600 font-semibold">ANNUEL:</Label>
+                      <Label className="text-xs text-teal-600 font-semibold">ANNUEL:</Label>
                       <ul className="text-xs mt-1 space-y-1">
                         {examOrders.monitoringPlan.annual.map((exam: string, i: number) => (
                           <li key={i}>• {exam}</li>
@@ -870,13 +870,13 @@ export default function ChronicReport({
 
       {/* Save Status Alert */}
       {!saved && (
-        <Card className="border-yellow-300 bg-yellow-50 print:hidden">
+        <Card className="border-cyan-300 bg-cyan-50 print:hidden">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
+              <AlertCircle className="h-5 w-5 text-cyan-600 mt-0.5" />
               <div>
-                <p className="font-semibold text-yellow-900">Documentation prête</p>
-                <p className="text-sm text-yellow-800">N'oubliez pas d'enregistrer la consultation en base de données avant de terminer.</p>
+                <p className="font-semibold text-cyan-900">Documentation prête</p>
+                <p className="text-sm text-cyan-800">N'oubliez pas d'enregistrer la consultation en base de données avant de terminer.</p>
               </div>
             </div>
           </CardContent>

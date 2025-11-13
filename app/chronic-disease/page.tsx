@@ -96,8 +96,8 @@ export default function ChronicDiseaseWorkflow() {
 
   if (!patientData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 flex items-center justify-center">
+        <Card className="glass-card w-full max-w-md shadow-2xl border-0">
           <CardContent className="p-6">
             <p className="text-center">Loading chronic disease workflow...</p>
           </CardContent>
@@ -107,49 +107,54 @@ export default function ChronicDiseaseWorkflow() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <Activity className="h-8 w-8 text-purple-600" />
-              <h1 className="text-3xl font-bold text-gray-800">
-                Chronic Disease Management
-              </h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50">
+      {/* Modern Header with Gradient */}
+      <div className="gradient-secondary text-white shadow-xl">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-lg">
+                <Activity className="h-8 w-8 text-teal-600" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight">
+                  Gestion des Maladies Chroniques
+                </h1>
+                <p className="text-teal-100 text-sm">Suivi spécialisé et plan de traitement</p>
+              </div>
             </div>
-            <p className="text-gray-600">
-              Specialized workflow for chronic disease follow-up
-            </p>
+            <Button 
+              variant="outline" 
+              onClick={handleBackToHome}
+              className="flex items-center gap-2 bg-white/20 text-white border-white/30 backdrop-blur-sm hover:bg-white/30"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Retour
+            </Button>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={handleBackToHome}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Normal Workflow
-          </Button>
         </div>
+      </div>
 
-        {/* Patient Info Banner */}
-        <Card className="mb-6 bg-gradient-to-r from-purple-100 to-pink-100 border-purple-200">
-          <CardContent className="p-4">
+      <div className="container mx-auto px-4 py-8">
+
+        {/* Patient Info Banner - Modern Design */}
+        <Card className="glass-card mb-6 shadow-xl border-0 overflow-hidden">
+          <div className="bg-gradient-to-r from-teal-500 to-emerald-500 h-2"></div>
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-purple-800 font-medium">Patient</p>
-                <p className="text-lg font-bold text-purple-900">
+                <p className="text-sm text-muted-foreground font-medium mb-1">Patient</p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
                   {patientData.firstName} {patientData.lastName}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-purple-800 font-medium">Chronic Diseases Detected</p>
-                <div className="flex gap-2 mt-1">
+                <p className="text-sm text-muted-foreground font-medium mb-2">Maladies Chroniques</p>
+                <div className="flex gap-2 flex-wrap justify-end">
                   {patientData.medicalHistory.map((condition: string, idx: number) => (
                     <Badge 
                       key={idx} 
-                      variant="secondary" 
-                      className="bg-purple-200 text-purple-900"
+                      className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white border-0 shadow-md"
                     >
                       {condition}
                     </Badge>
@@ -160,18 +165,23 @@ export default function ChronicDiseaseWorkflow() {
           </CardContent>
         </Card>
 
-        {/* Progress */}
-        <Card className="mb-6 shadow-lg border-purple-200">
-          <CardHeader className="pb-3">
+        {/* Progress - Modern Design */}
+        <Card className="glass-card mb-6 shadow-2xl border-0">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-100 pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl">Progress</CardTitle>
-              <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-                Step {currentStep + 1} of {steps.length}
+              <div>
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                  Progression
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">Suivi de votre consultation</p>
+              </div>
+              <Badge className="gradient-secondary text-white border-0 px-4 py-2 shadow-md">
+                Étape {currentStep + 1}/{steps.length}
               </Badge>
             </div>
           </CardHeader>
-          <CardContent>
-            <Progress value={progress} className="mb-4" />
+          <CardContent className="pt-6">
+            <Progress value={progress} className="mb-6" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {steps.map((step, index) => {
                 const Icon = step.icon
@@ -179,24 +189,22 @@ export default function ChronicDiseaseWorkflow() {
                   <div
                     key={index}
                     onClick={() => handleStepClick(index)}
-                    className={`p-4 rounded-lg border-2 transition-all cursor-pointer
+                    className={`p-5 rounded-xl smooth-transition cursor-pointer transform
                       ${step.status === "current" 
-                        ? "border-purple-500 bg-purple-50 shadow-md" 
+                        ? "bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-xl scale-105 step-active" 
                         : step.status === "complete" 
-                        ? "border-green-300 bg-green-50 cursor-pointer hover:shadow-md" 
-                        : "border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed"}`}
+                        ? "bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg hover:scale-105 hover:shadow-xl" 
+                        : "bg-white/50 backdrop-blur-sm border-2 border-gray-200 opacity-70 cursor-not-allowed"}`}
                   >
-                    <div className="flex items-center gap-2 mb-2">
-                      <Icon
-                        className={`h-5 w-5 ${
-                          step.status === "current"
-                            ? "text-purple-600"
-                            : step.status === "complete"
-                            ? "text-green-600"
-                            : "text-gray-400"
-                        }`}
-                      />
-                      <h3 className="font-semibold text-sm">{step.title}</h3>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center
+                        ${step.status === "current" || step.status === "complete"
+                          ? "bg-white/20 backdrop-blur-sm"
+                          : "bg-gray-200"
+                        }`}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <h3 className="font-bold text-sm flex-1">{step.title}</h3>
                     </div>
                     <p className="text-xs text-gray-600">{step.description}</p>
                   </div>

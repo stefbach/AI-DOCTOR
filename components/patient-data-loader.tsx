@@ -119,14 +119,14 @@ export function PatientDataLoader() {
   if (notification.type === 'success') {
     return (
       <div className="fixed top-4 right-4 z-50 animate-in fade-in slide-in-from-top-2">
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg max-w-md">
+        <div className="bg-teal-50 border border-teal-200 rounded-lg p-4 shadow-lg max-w-md">
           <div className="flex items-start gap-3">
-            <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+            <CheckCircle className="h-5 w-5 text-teal-600 mt-0.5 flex-shrink-0" />
             <div className="flex-1">
-              <h4 className="font-semibold text-green-900">
+              <h4 className="font-semibold text-teal-900">
                 Connexion TIBOK établie
               </h4>
-              <p className="text-sm text-green-700 mt-1">
+              <p className="text-sm text-teal-700 mt-1">
                 {notification.message}
               </p>
             </div>
@@ -146,14 +146,14 @@ export function PatientDataLoader() {
   if (notification.type === 'error') {
     return (
       <div className="fixed top-4 right-4 z-50 animate-in fade-in slide-in-from-top-2">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg max-w-md">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-lg max-w-md">
           <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
             <div className="flex-1">
-              <h4 className="font-semibold text-red-900">
+              <h4 className="font-semibold text-blue-900">
                 Erreur
               </h4>
-              <p className="text-sm text-red-700 mt-1">
+              <p className="text-sm text-blue-700 mt-1">
                 {notification.message}
               </p>
             </div>

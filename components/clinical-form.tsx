@@ -75,17 +75,17 @@ const INITIAL_CLINICAL_DATA: ClinicalData = {
 }
 
 const PAIN_SCALE_LABELS = {
-  0: { label: "No pain", color: "bg-green-50 border-green-200 text-green-800" },
-  1: { label: "Mild pain", color: "bg-green-50 border-green-200 text-green-800" },
-  2: { label: "Mild pain", color: "bg-green-50 border-green-200 text-green-800" },
-  3: { label: "Mild pain", color: "bg-green-50 border-green-200 text-green-800" },
-  4: { label: "Moderate pain", color: "bg-yellow-50 border-yellow-200 text-yellow-800" },
-  5: { label: "Moderate pain", color: "bg-yellow-50 border-yellow-200 text-yellow-800" },
-  6: { label: "Moderate pain", color: "bg-yellow-50 border-yellow-200 text-yellow-800" },
-  7: { label: "Severe pain", color: "bg-orange-50 border-orange-200 text-orange-800" },
-  8: { label: "Severe pain", color: "bg-orange-50 border-orange-200 text-orange-800" },
-  9: { label: "Very severe pain", color: "bg-red-50 border-red-200 text-red-800" },
-  10: { label: "Unbearable pain", color: "bg-red-50 border-red-200 text-red-800" }
+  0: { label: "No pain", color: "bg-teal-50 border-teal-200 text-teal-800" },
+  1: { label: "Mild pain", color: "bg-teal-50 border-teal-200 text-teal-800" },
+  2: { label: "Mild pain", color: "bg-teal-50 border-teal-200 text-teal-800" },
+  3: { label: "Mild pain", color: "bg-teal-50 border-teal-200 text-teal-800" },
+  4: { label: "Moderate pain", color: "bg-cyan-50 border-cyan-200 text-cyan-800" },
+  5: { label: "Moderate pain", color: "bg-cyan-50 border-cyan-200 text-cyan-800" },
+  6: { label: "Moderate pain", color: "bg-cyan-50 border-cyan-200 text-cyan-800" },
+  7: { label: "Severe pain", color: "bg-blue-50 border-blue-200 text-blue-800" },
+  8: { label: "Severe pain", color: "bg-blue-50 border-blue-200 text-blue-800" },
+  9: { label: "Very severe pain", color: "bg-blue-100 border-blue-300 text-blue-900" },
+  10: { label: "Unbearable pain", color: "bg-blue-100 border-blue-300 text-blue-900" }
 }
 
 const SECTIONS = [
@@ -592,7 +592,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
       <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            <Stethoscope className="h-8 w-8 text-purple-600" />
+            <Stethoscope className="h-8 w-8 text-blue-600" />
             Clinical Information
           </CardTitle>
           <div className="mt-4 space-y-2">
@@ -614,7 +614,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
             onClick={() => setCurrentSection(index)}
             className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
               currentSection === index
-                ? "bg-purple-600 text-white shadow-lg"
+                ? "bg-blue-600 text-white shadow-lg"
                 : "bg-white/70 text-gray-600 hover:bg-white hover:shadow-md"
             }`}
           >
@@ -644,10 +644,10 @@ const COMMON_SYMPTOMS = useMemo(() => [
               onKeyDown={handleKeyDown}
               placeholder="Describe your main concern or symptom..."
               rows={3}
-              className={`resize-none ${errors.chiefComplaint ? 'border-red-500' : ''}`}
+              className={`resize-none ${errors.chiefComplaint ? 'border-blue-500' : ''}`}
             />
             {errors.chiefComplaint && (
-              <p className="text-sm text-red-500 flex items-center gap-1">
+              <p className="text-sm text-blue-500 flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
                 {errors.chiefComplaint}
               </p>
@@ -678,10 +678,10 @@ const COMMON_SYMPTOMS = useMemo(() => [
               onChange={(e) => updateData({ diseaseHistory: e.target.value })}
               placeholder="Describe how your symptoms started and how they have progressed over time..."
               rows={5}
-              className={`resize-none ${errors.diseaseHistory ? 'border-red-500' : ''}`}
+              className={`resize-none ${errors.diseaseHistory ? 'border-blue-500' : ''}`}
             />
             {errors.diseaseHistory && (
-              <p className="text-sm text-red-500 flex items-center gap-1">
+              <p className="text-sm text-blue-500 flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
                 {errors.diseaseHistory}
               </p>
@@ -727,7 +727,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
                 }
               }}
             >
-              <SelectTrigger className={errors.symptomDuration ? 'border-red-500' : ''}>
+              <SelectTrigger className={errors.symptomDuration ? 'border-blue-500' : ''}>
                 <SelectValue placeholder="Select duration">
                   {localData.symptomDuration ? getDurationLabel(localData.symptomDuration) : "Select duration"}
                 </SelectValue>
@@ -741,17 +741,17 @@ const COMMON_SYMPTOMS = useMemo(() => [
               </SelectContent>
             </Select>
             {errors.symptomDuration && (
-              <p className="text-sm text-red-500 flex items-center gap-1">
+              <p className="text-sm text-blue-500 flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
                 {errors.symptomDuration}
               </p>
             )}
             
             {localData.symptomDuration && (
-              <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+              <div className="mt-3 p-3 bg-teal-50 rounded-lg border border-teal-200">
                 <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-green-600" />
-                  <p className="font-semibold text-green-800">
+                  <Clock className="h-4 w-4 text-teal-600" />
+                  <p className="font-semibold text-teal-800">
                     Symptoms present for {getDurationLabel(localData.symptomDuration).toLowerCase()}
                   </p>
                 </div>
@@ -828,8 +828,8 @@ const COMMON_SYMPTOMS = useMemo(() => [
           </div>
 
           {errors.symptoms && (
-            <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-              <p className="text-sm text-red-600 flex items-center gap-1">
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-sm text-blue-600 flex items-center gap-1">
                 <AlertCircle className="h-4 w-4" />
                 {errors.symptoms}
               </p>
@@ -847,8 +847,8 @@ const COMMON_SYMPTOMS = useMemo(() => [
                   key={symptom}
                   className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
                     isSelected
-                      ? "border-orange-400 bg-orange-50"
-                      : "border-gray-200 hover:border-orange-300 hover:bg-orange-50/50"
+                      ? "border-cyan-400 bg-cyan-50"
+                      : "border-gray-200 hover:border-cyan-300 hover:bg-cyan-50/50"
                   }`}
                 >
                   <Checkbox
@@ -862,16 +862,16 @@ const COMMON_SYMPTOMS = useMemo(() => [
           </div>
 
           {localData.symptoms.length > 0 && (
-            <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+            <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
               <div className="flex items-center gap-2 mb-3">
-                <Activity className="h-5 w-5 text-orange-600" />
-                <p className="font-semibold text-orange-800">
+                <Activity className="h-5 w-5 text-cyan-600" />
+                <p className="font-semibold text-cyan-800">
                   Selected symptoms ({localData.symptoms.length})
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {localData.symptoms.map((symptom) => (
-                  <Badge key={symptom} className="bg-orange-100 text-orange-800 text-xs">
+                  <Badge key={symptom} className="bg-cyan-100 text-cyan-800 text-xs">
                     {symptom}
                   </Badge>
                 ))}
@@ -894,7 +894,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
             {/* Temperature */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Thermometer className="h-5 w-5 text-red-500" />
+                <Thermometer className="h-5 w-5 text-blue-500" />
                 <Label htmlFor="temperature" className="font-medium">
                   Temperature (°C)
                 </Label>
@@ -912,9 +912,9 @@ const COMMON_SYMPTOMS = useMemo(() => [
               />
               {temperatureStatus && (
                 <p className={`text-xs font-medium ${
-                  temperatureStatus === 'Normal' ? 'text-green-600' :
+                  temperatureStatus === 'Normal' ? 'text-teal-600' :
                   temperatureStatus === 'Hypothermia' ? 'text-blue-600' :
-                  'text-red-600'
+                  'text-blue-600'
                 }`}>
                   {temperatureStatus === 'Normal' ? '✅' : 
                    temperatureStatus === 'Hypothermia' ? '🟦' : '🔴'} {temperatureStatus}
@@ -978,7 +978,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
           {/* Blood Glucose (optional) */}
           <div className="col-span-3 space-y-2 pt-4 border-t">
             <div className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-purple-500" />
+              <Activity className="h-5 w-5 text-blue-500" />
               <Label htmlFor="bloodGlucose" className="font-medium">
                 Glycémie (g/L) - Test Glucomètre
                 <span className="ml-2 text-xs text-gray-500 font-normal">(Optionnel)</span>
@@ -997,11 +997,11 @@ const COMMON_SYMPTOMS = useMemo(() => [
             />
             {bgStatus && (
               <div className={`p-2 rounded-lg border text-sm font-medium ${
-                bgStatus.includes('Normal') ? 'bg-green-50 border-green-200 text-green-800' :
-                bgStatus.includes('Hypoglycémie sévère') ? 'bg-red-50 border-red-200 text-red-800' :
-                bgStatus.includes('Hypoglycémie') ? 'bg-orange-50 border-orange-200 text-orange-800' :
-                bgStatus.includes('Hyperglycémie sévère') ? 'bg-red-50 border-red-200 text-red-800' :
-                'bg-yellow-50 border-yellow-200 text-yellow-800'
+                bgStatus.includes('Normal') ? 'bg-teal-50 border-teal-200 text-teal-800' :
+                bgStatus.includes('Hypoglycémie sévère') ? 'bg-blue-50 border-blue-200 text-blue-800' :
+                bgStatus.includes('Hypoglycémie') ? 'bg-cyan-50 border-cyan-200 text-cyan-800' :
+                bgStatus.includes('Hyperglycémie sévère') ? 'bg-blue-50 border-blue-200 text-blue-800' :
+                'bg-cyan-50 border-cyan-200 text-cyan-800'
               }`}>
                 {bgStatus.includes('Normal') ? '✅' :
                  bgStatus.includes('sévère') ? '🔴' : '⚠️'} {bgStatus}
@@ -1015,17 +1015,17 @@ const COMMON_SYMPTOMS = useMemo(() => [
           {/* Blood pressure display */}
           {(localData.vitalSigns.bloodPressureSystolic && localData.vitalSigns.bloodPressureDiastolic && !bpNotApplicable) && (
             <div className={`mt-4 p-3 rounded-lg border ${
-              bpStatus === 'Normal' ? 'bg-green-50 border-green-200' :
+              bpStatus === 'Normal' ? 'bg-teal-50 border-teal-200' :
               bpStatus === 'Hypotension' ? 'bg-blue-50 border-blue-200' :
-              bpStatus === 'Pre-hypertension' ? 'bg-yellow-50 border-yellow-200' :
-              'bg-red-50 border-red-200'
+              bpStatus === 'Pre-hypertension' ? 'bg-cyan-50 border-cyan-200' :
+              'bg-blue-50 border-blue-200'
             }`}>
               <div className="flex items-center gap-2">
                 <Activity className={`h-4 w-4 ${
-                  bpStatus === 'Normal' ? 'text-green-600' :
+                  bpStatus === 'Normal' ? 'text-teal-600' :
                   bpStatus === 'Hypotension' ? 'text-blue-600' :
-                  bpStatus === 'Pre-hypertension' ? 'text-yellow-600' :
-                  'text-red-600'
+                  bpStatus === 'Pre-hypertension' ? 'text-cyan-600' :
+                  'text-blue-600'
                 }`} />
                 <p className="font-semibold">
                   Blood pressure: {localData.vitalSigns.bloodPressureSystolic}/{localData.vitalSigns.bloodPressureDiastolic} mmHg
@@ -1057,7 +1057,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
       {/* Auto-save indicator */}
       <div className="flex justify-center">
         <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-full shadow-md">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse"></div>
           <span className="text-sm text-gray-600">
             Auto-saving
             {lastSaved && (

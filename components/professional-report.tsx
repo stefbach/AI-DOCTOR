@@ -274,7 +274,7 @@ const DebouncedTextarea = memo(({
   return (
     <div className="space-y-2">
       {hasLocalChanges && (
-        <div className="text-xs text-yellow-600 flex items-center gap-1">
+        <div className="text-xs text-cyan-600 flex items-center gap-1">
           <Loader2 className="h-3 w-3 animate-spin" />
           Auto-saving...
         </div>
@@ -374,7 +374,7 @@ const MedicationEditForm = memo(({
     <div className="space-y-3" data-medication-index={index}>
       <div style={{ height: '20px', minHeight: '20px' }}>
         {hasLocalChanges && (
-          <div className="text-xs text-yellow-600 flex items-center gap-1">
+          <div className="text-xs text-cyan-600 flex items-center gap-1">
             <Loader2 className="h-3 w-3 animate-spin" />
             Auto-saving...
           </div>
@@ -596,7 +596,7 @@ const BiologyTestEditForm = memo(({
   return (
     <div className="space-y-3 p-3" data-biology-test={`${category}-${index}`}>
       {hasLocalChanges && (
-        <div className="text-xs text-yellow-600 flex items-center gap-1">
+        <div className="text-xs text-cyan-600 flex items-center gap-1">
           <Loader2 className="h-3 w-3 animate-spin" />
           Auto-saving...
         </div>
@@ -763,7 +763,7 @@ const ImagingExamEditForm = memo(({
   return (
     <div className="space-y-3 p-3" data-imaging-exam={index}>
       {hasLocalChanges && (
-        <div className="text-xs text-yellow-600 flex items-center gap-1">
+        <div className="text-xs text-cyan-600 flex items-center gap-1">
           <Loader2 className="h-3 w-3 animate-spin" />
           Auto-saving...
         </div>
@@ -3331,7 +3331,7 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
       return (
         <Card className="w-full">
           <CardContent className="p-6">
-            <AlertCircle className="h-12 w-12 text-orange-500 mx-auto mb-4" />
+            <AlertCircle className="h-12 w-12 text-blue-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-center mb-4">No Patient Data Available</h3>
             <p className="text-center text-gray-600 mb-4">
               Valid patient information is required to generate the medical report.
@@ -3347,10 +3347,10 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
 
   if (error && !report) {
     return (
-      <Card className="border-red-200 w-full">
+      <Card className="border-blue-200 w-full">
         <CardContent className="text-center py-10">
-          <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <p className="text-red-600 font-semibold mb-2">Error during generation</p>
+          <XCircle className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+          <p className="text-blue-600 font-semibold mb-2">Error during generation</p>
           <p className="text-gray-600 text-sm mb-4">{error}</p>
           <Button onClick={generateProfessionalReport} variant="outline">
             Try again
@@ -3365,7 +3365,7 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
       <Card className="w-full">
         <CardContent className="flex items-center justify-center py-20">
           <div className="text-center space-y-4">
-            <AlertCircle className="h-12 w-12 text-orange-500 mx-auto" />
+            <AlertCircle className="h-12 w-12 text-blue-500 mx-auto" />
             <p className="text-lg font-semibold">No report data available</p>
             <p className="text-sm text-gray-500">Waiting for valid data...</p>
           </div>
@@ -3452,7 +3452,7 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
                   value={localDoctorInfo.nom}
                   onChange={(e) => handleDoctorFieldChange('nom', e.target.value)}
                   placeholder="Dr. Full Name"
-                  className={localDoctorInfo.nom.includes('[') ? 'border-red-500' : ''}
+                  className={localDoctorInfo.nom.includes('[') ? 'border-blue-500' : ''}
                 />
               </div>
               <div>
@@ -3480,7 +3480,7 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
                   value={localDoctorInfo.numeroEnregistrement}
                   onChange={(e) => handleDoctorFieldChange('numeroEnregistrement', e.target.value)}
                   placeholder="MCM/12345"
-                  className={localDoctorInfo.numeroEnregistrement.includes('[') ? 'border-red-500' : ''}
+                  className={localDoctorInfo.numeroEnregistrement.includes('[') ? 'border-blue-500' : ''}
                 />
               </div>
               <div>
@@ -3490,7 +3490,7 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
                   value={localDoctorInfo.email}
                   onChange={(e) => handleDoctorFieldChange('email', e.target.value)}
                   placeholder="doctor@email.com"
-                  className={localDoctorInfo.email.includes('[') ? 'border-red-500' : ''}
+                  className={localDoctorInfo.email.includes('[') ? 'border-blue-500' : ''}
                 />
               </div>
               <div className="col-span-2">
@@ -3512,7 +3512,7 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
                 />
               </div>
               <div className="col-span-2">
-                <p className="text-sm text-red-600">* Required fields must be completed before validation</p>
+                <p className="text-sm text-blue-600">* Required fields must be completed before validation</p>
               </div>
             </div>
           ) : (
@@ -3667,11 +3667,11 @@ const ConsultationReport = () => {
                     {patient.pregnancyStatus ? (
                       <>
                         <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                          patient.pregnancyStatus === 'pregnant' ? 'bg-pink-100 text-pink-800' :
-                          patient.pregnancyStatus === 'possibly_pregnant' ? 'bg-yellow-100 text-yellow-800' :
-                          patient.pregnancyStatus === 'postpartum' ? 'bg-purple-100 text-purple-800' :
+                          patient.pregnancyStatus === 'pregnant' ? 'bg-cyan-100 text-cyan-800' :
+                          patient.pregnancyStatus === 'possibly_pregnant' ? 'bg-cyan-100 text-cyan-800' :
+                          patient.pregnancyStatus === 'postpartum' ? 'bg-blue-100 text-blue-800' :
                           patient.pregnancyStatus === 'breastfeeding' ? 'bg-blue-100 text-blue-800' :
-                          'bg-green-100 text-green-800'
+                          'bg-teal-100 text-teal-800'
                         }`}>
                           {patient.pregnancyStatus === 'not_pregnant' && '✓ Not Pregnant'}
                           {patient.pregnancyStatus === 'pregnant' && '🤰 Pregnant'}
@@ -3842,13 +3842,13 @@ const ConsultationReport = () => {
                   {patient.allergies && patient.allergies !== 'NKDA (No Known Drug Allergies)' && patient.allergies !== 'NKDA' ? (
                     <div className="flex flex-wrap gap-2">
                       {patient.allergies.split(',').map((allergy: string, idx: number) => (
-                        <span key={idx} className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded">
+                        <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded">
                           ⚠️ {allergy.trim()}
                         </span>
                       ))}
                     </div>
                   ) : (
-                    <span className="text-green-700">✅ {patient.allergies || 'NKDA (No Known Drug Allergies)'}</span>
+                    <span className="text-teal-700">✅ {patient.allergies || 'NKDA (No Known Drug Allergies)'}</span>
                   )}
                 </div>
               )}
@@ -3902,7 +3902,7 @@ const ConsultationReport = () => {
               ) : (
                 <div className="text-sm">
                   {patient.currentMedications && patient.currentMedications !== 'No current medications' ? (
-                    <div className="whitespace-pre-wrap text-gray-700 p-3 bg-green-50 border border-green-200 rounded">
+                    <div className="whitespace-pre-wrap text-gray-700 p-3 bg-teal-50 border border-teal-200 rounded">
                       {patient.currentMedications}
                     </div>
                   ) : (
@@ -4012,7 +4012,7 @@ const ConsultationReport = () => {
 
     return (
       <div id="prescription-medicaments" className="bg-white p-8 rounded-lg shadow print:shadow-none">
-        <div className="border-b-2 border-green-600 pb-4 mb-6 header">
+        <div className="border-b-2 border-teal-600 pb-4 mb-6 header">
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-2xl font-bold">MEDICAL PRESCRIPTION</h2>
@@ -4056,7 +4056,7 @@ const ConsultationReport = () => {
   medications.map((med: any, index: number) => (
     <div 
       key={`medication-${index}`}  // CHANGED: Better key
-      className="border-l-4 border-green-500 pl-4 py-2 prescription-item"
+      className="border-l-4 border-teal-500 pl-4 py-2 prescription-item"
     >
 {editMode && validationStatus !== 'validated' ? (
 <MedicationEditForm
@@ -4072,7 +4072,7 @@ const ConsultationReport = () => {
     <div className="font-bold text-lg">
       {index + 1}. {med.nom}
                       {med.nonSubstituable && (
-                        <Badge className="ml-2 bg-red-100 text-red-800 badge badge-red">Non-substitutable</Badge>
+                        <Badge className="ml-2 bg-blue-100 text-blue-800 badge badge-red">Non-substitutable</Badge>
                       )}
                     </div>
                     {med.denominationCommune && med.denominationCommune !== med.nom && (
@@ -4186,7 +4186,7 @@ const ConsultationReport = () => {
 
     return (
       <div id="prescription-biologie" className="bg-white p-8 rounded-lg shadow print:shadow-none">
-        <div className="border-b-2 border-purple-600 pb-4 mb-6 header">
+        <div className="border-b-2 border-blue-600 pb-4 mb-6 header">
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-2xl font-bold">LABORATORY REQUEST FORM</h2>
@@ -4219,7 +4219,7 @@ const ConsultationReport = () => {
           </div>
         </div>
 
-        <div className="mb-6 p-4 bg-purple-50 rounded info-box">
+        <div className="mb-6 p-4 bg-blue-50 rounded info-box">
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div><strong>Patient:</strong> {patient.nomComplet || patient.nom}</div>
             <div><strong>Date:</strong> {patient.dateExamen}</div>
@@ -4234,8 +4234,8 @@ const ConsultationReport = () => {
               if (!Array.isArray(tests) || tests.length === 0) return null
               
               return (
-                <div key={key} className="border-l-4 border-purple-500 pl-4">
-                  <h3 className="font-bold text-lg mb-3 text-purple-800 category-header">
+                <div key={key} className="border-l-4 border-blue-500 pl-4">
+                  <h3 className="font-bold text-lg mb-3 text-blue-800 category-header">
                     {label}
                   </h3>
                   <div className="space-y-2">
@@ -4256,10 +4256,10 @@ const ConsultationReport = () => {
                             <div className="flex-1">
                               <p className="font-medium">
                                 {test.nom}
-                                {test.urgence && <Badge className="ml-2 bg-red-100 text-red-800 urgent badge badge-red">URGENT</Badge>}
+                                {test.urgence && <Badge className="ml-2 bg-blue-100 text-blue-800 urgent badge badge-red">URGENT</Badge>}
                               </p>
                               {test.aJeun && (
-                                <p className="text-sm text-orange-600 mt-1">⚠️ Fasting required</p>
+                                <p className="text-sm text-blue-600 mt-1">⚠️ Fasting required</p>
                               )}
                               {test.conditionsPrelevement && (
                                 <p className="text-sm text-gray-600 mt-1">
@@ -4286,7 +4286,7 @@ const ConsultationReport = () => {
             })}
             
             {report?.ordonnances?.biologie?.prescription?.instructionsSpeciales?.length > 0 && (
-              <div className="mt-6 p-4 bg-yellow-50 rounded">
+              <div className="mt-6 p-4 bg-cyan-50 rounded">
                 <h4 className="font-bold mb-2">Special Instructions</h4>
                 <ul className="list-disc list-inside text-sm">
                   {report.ordonnances.biologie.prescription.instructionsSpeciales.map((instruction: string, idx: number) => (
@@ -4412,7 +4412,7 @@ const ConsultationReport = () => {
       <div>
         <div className="font-bold text-lg">
           {index + 1}. {exam.type || exam.modalite}
-          {exam.urgence && <Badge className="ml-2 bg-red-100 text-red-800 urgent badge badge-red">URGENT</Badge>}
+          {exam.urgence && <Badge className="ml-2 bg-blue-100 text-blue-800 urgent badge badge-red">URGENT</Badge>}
         </div>
         {/* Only show Region if it exists and is not "To be specified" */}
         {exam.region && exam.region !== 'To be specified' && exam.region !== '' && (
@@ -4424,7 +4424,7 @@ const ConsultationReport = () => {
           <span className="font-medium">Clinical Indication:</span> {exam.indicationClinique}
         </p>
         {exam.contraste && (
-          <p className="mt-1 text-orange-600">
+          <p className="mt-1 text-blue-600">
             ⚠️ <span className="font-medium">Contrast required</span>
           </p>
         )}
@@ -4585,7 +4585,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
     
     return (
       <div id="sick-leave-certificate" className="bg-white p-8 rounded-lg shadow print:shadow-none">
-        <div className="border-b-2 border-yellow-600 pb-4 mb-6 header">
+        <div className="border-b-2 border-cyan-600 pb-4 mb-6 header">
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-2xl font-bold">SICK LEAVE CERTIFICATE</h2>
@@ -4604,7 +4604,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
           </div>
         </div>
 
-        <div className="mb-6 p-4 bg-yellow-50 rounded info-box">
+        <div className="mb-6 p-4 bg-cyan-50 rounded info-box">
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div><strong>Patient:</strong> {patient.nomComplet || patient.nom}</div>
             <div><strong>Date of Birth:</strong> {patient.dateNaissance}</div>
@@ -4616,7 +4616,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
         {editMode && validationStatus !== 'validated' ? (
           <div className="space-y-4">
             {hasLocalChanges && (
-              <div className="text-xs text-yellow-600 flex items-center gap-1">
+              <div className="text-xs text-cyan-600 flex items-center gap-1">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 Auto-saving...
               </div>
@@ -4664,7 +4664,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
           </div>
         ) : certificat ? (
           <div className="space-y-4">
-            <div className="p-4 bg-yellow-100 rounded-lg border-2 border-yellow-400">
+            <div className="p-4 bg-cyan-100 rounded-lg border-2 border-cyan-400">
               <p className="text-lg font-bold mb-2">
                 SICK LEAVE FOR {certificat.nombreJours} DAY{certificat.nombreJours > 1 ? 'S' : ''}
               </p>
@@ -4820,7 +4820,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
           </table>
         </div>
 
-        <div className="mb-6 p-4 bg-green-50 rounded-lg payment-info">
+        <div className="mb-6 p-4 bg-teal-50 rounded-lg payment-info">
           <h3 className="font-bold mb-2">Payment Information</h3>
           {editMode && validationStatus !== 'validated' ? (
             <div className="space-y-3">
@@ -4862,9 +4862,9 @@ const [localSickLeave, setLocalSickLeave] = useState({
               <div className="col-span-2">
                 <strong>Status:</strong> 
                 <Badge className={`ml-2 ${
-                  invoice.payment.status === 'paid' ? 'bg-green-100 text-green-800' :
-                  invoice.payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'
+                  invoice.payment.status === 'paid' ? 'bg-teal-100 text-teal-800' :
+                  invoice.payment.status === 'pending' ? 'bg-cyan-100 text-cyan-800' :
+                  'bg-blue-100 text-blue-800'
                 }`}>
                   {invoice.payment.status.toUpperCase()}
                 </Badge>
@@ -4895,7 +4895,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
         <CardContent className="p-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <Badge className={validationStatus === 'validated' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+              <Badge className={validationStatus === 'validated' ? 'bg-teal-100 text-teal-800' : 'bg-cyan-100 text-cyan-800'}>
                 {validationStatus === 'validated' ? (
                   <>
                     <Lock className="h-3 w-3 mr-1" />
@@ -4974,14 +4974,14 @@ const [localSickLeave, setLocalSickLeave] = useState({
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="p-4 bg-green-50 rounded">
-              <Pill className="h-8 w-8 mx-auto mb-2 text-green-600" />
-              <p className="text-2xl font-bold text-green-600">{medicamentCount}</p>
+            <div className="p-4 bg-teal-50 rounded">
+              <Pill className="h-8 w-8 mx-auto mb-2 text-teal-600" />
+              <p className="text-2xl font-bold text-teal-600">{medicamentCount}</p>
               <p className="text-sm text-gray-600">Medications</p>
             </div>
-            <div className="p-4 bg-purple-50 rounded">
-              <TestTube className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-              <p className="text-2xl font-bold text-purple-600">{bioCount}</p>
+            <div className="p-4 bg-blue-50 rounded">
+              <TestTube className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+              <p className="text-2xl font-bold text-blue-600">{bioCount}</p>
               <p className="text-sm text-gray-600">Lab Tests</p>
             </div>
             <div className="p-4 bg-indigo-50 rounded">
@@ -5153,7 +5153,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
         </div>
       )}
       {saveStatus === 'saved' && (
-        <div className="fixed bottom-4 left-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2">
+        <div className="fixed bottom-4 left-4 bg-teal-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2">
           <CheckCircle className="h-4 w-4" />
           Saved!
         </div>
@@ -5161,7 +5161,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
 
       {/* Unsaved Changes Indicator (positioned top-left) */}
       {hasUnsavedChanges && (
-        <div className="fixed top-4 left-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-sm z-50">
+        <div className="fixed top-4 left-4 bg-cyan-500 text-white px-3 py-1 rounded-full text-sm z-50">
           Unsaved changes
         </div>
       )}

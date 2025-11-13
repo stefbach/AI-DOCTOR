@@ -92,9 +92,9 @@ export default function ChronicDiagnosisForm({
 
   if (loading) {
     return (
-      <Card className="border-purple-200">
+      <Card className="border-blue-200">
         <CardContent className="p-12 text-center">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-purple-600" />
+          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
           <p className="text-lg font-semibold text-gray-700">🏥 Generating Specialist-Level Assessment...</p>
           <p className="text-sm text-gray-500 mt-2">Analyzing chronic disease status with endocrinologist precision</p>
           <p className="text-xs text-gray-400 mt-1">This may take 30-60 seconds</p>
@@ -105,18 +105,18 @@ export default function ChronicDiagnosisForm({
 
   if (error) {
     return (
-      <Card className="border-red-200">
+      <Card className="border-blue-200">
         <CardContent className="p-6">
           <div className="flex items-start gap-3 mb-4">
-            <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
+            <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5" />
             <div>
-              <p className="font-semibold text-red-600">Error generating assessment</p>
+              <p className="font-semibold text-blue-600">Error generating assessment</p>
               <p className="text-sm text-gray-600 mt-1">{error}</p>
             </div>
           </div>
           <div className="flex gap-4">
             <Button onClick={onBack} variant="outline">Back</Button>
-            <Button onClick={generateAssessment} className="bg-purple-600 hover:bg-purple-700">
+            <Button onClick={generateAssessment} className="bg-blue-600 hover:bg-blue-700">
               Retry Assessment
             </Button>
           </div>
@@ -132,7 +132,7 @@ export default function ChronicDiagnosisForm({
   return (
     <div className="space-y-6">
       {/* Overall Assessment Card */}
-      <Card className="border-2 border-purple-300 shadow-lg">
+      <Card className="border-2 border-blue-300 shadow-lg">
         <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
           <CardTitle className="flex items-center gap-2 text-xl">
             <Brain className="h-6 w-6" />
@@ -144,24 +144,24 @@ export default function ChronicDiagnosisForm({
             <div className="flex items-center gap-3">
               <Label className="text-gray-600">Global Control Status:</Label>
               <Badge className={
-                overallAssessment?.globalControl === "Excellent" ? "bg-green-600" :
+                overallAssessment?.globalControl === "Excellent" ? "bg-teal-600" :
                 overallAssessment?.globalControl === "Good" ? "bg-blue-600" :
-                overallAssessment?.globalControl === "Fair" ? "bg-yellow-600" : "bg-red-600"
+                overallAssessment?.globalControl === "Fair" ? "bg-cyan-600" : "bg-blue-600"
               }>
                 {overallAssessment?.globalControl || "Under Review"}
               </Badge>
             </div>
 
             {overallAssessment?.mainConcerns?.length > 0 && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <Label className="font-semibold text-yellow-900 flex items-center gap-2 mb-2">
+              <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
+                <Label className="font-semibold text-cyan-900 flex items-center gap-2 mb-2">
                   <AlertCircle className="h-4 w-4" />
                   Priority Concerns:
                 </Label>
                 <ul className="space-y-1">
                   {overallAssessment.mainConcerns.map((concern: string, idx: number) => (
                     <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
-                      <ArrowRight className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                      <ArrowRight className="h-4 w-4 text-cyan-600 mt-0.5 flex-shrink-0" />
                       <span>{concern}</span>
                     </li>
                   ))}
@@ -170,15 +170,15 @@ export default function ChronicDiagnosisForm({
             )}
 
             {overallAssessment?.strengths?.length > 0 && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <Label className="font-semibold text-green-900 flex items-center gap-2 mb-2">
+              <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
+                <Label className="font-semibold text-teal-900 flex items-center gap-2 mb-2">
                   <CheckCircle2 className="h-4 w-4" />
                   Positive Aspects:
                 </Label>
                 <ul className="space-y-1">
                   {overallAssessment.strengths.map((strength: string, idx: number) => (
                     <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <CheckCircle2 className="h-4 w-4 text-teal-600 mt-0.5 flex-shrink-0" />
                       <span>{strength}</span>
                     </li>
                   ))}
@@ -235,11 +235,11 @@ export default function ChronicDiagnosisForm({
                 </div>
                 <div>
                   <Label className="text-xs text-gray-500">Current HbA1c:</Label>
-                  <p className="text-sm font-semibold text-red-600">{diseaseAssessment.diabetes.currentHbA1c}</p>
+                  <p className="text-sm font-semibold text-blue-600">{diseaseAssessment.diabetes.currentHbA1c}</p>
                 </div>
                 <div>
                   <Label className="text-xs text-gray-500">Target HbA1c:</Label>
-                  <p className="text-sm font-semibold text-green-600">{diseaseAssessment.diabetes.targetHbA1c}</p>
+                  <p className="text-sm font-semibold text-teal-600">{diseaseAssessment.diabetes.targetHbA1c}</p>
                 </div>
                 {diseaseAssessment.diabetes.currentFastingGlucose && (
                   <>
@@ -249,7 +249,7 @@ export default function ChronicDiagnosisForm({
                     </div>
                     <div>
                       <Label className="text-xs text-gray-500">Target Fasting Glucose:</Label>
-                      <p className="text-sm font-semibold text-green-600">{diseaseAssessment.diabetes.targetFastingGlucose}</p>
+                      <p className="text-sm font-semibold text-teal-600">{diseaseAssessment.diabetes.targetFastingGlucose}</p>
                     </div>
                   </>
                 )}
@@ -285,7 +285,7 @@ export default function ChronicDiagnosisForm({
 
         {/* Hypertension Assessment */}
         {diseaseAssessment?.hypertension?.present && (
-          <Card className="border-2 border-red-300">
+          <Card className="border-2 border-blue-300">
             <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white">
               <CardTitle className="flex items-center gap-2">
                 <Heart className="h-5 w-5" />
@@ -304,11 +304,11 @@ export default function ChronicDiagnosisForm({
                 </div>
                 <div>
                   <Label className="text-xs text-gray-500">Current BP:</Label>
-                  <p className="text-sm font-semibold text-red-600">{diseaseAssessment.hypertension.currentBP}</p>
+                  <p className="text-sm font-semibold text-blue-600">{diseaseAssessment.hypertension.currentBP}</p>
                 </div>
                 <div>
                   <Label className="text-xs text-gray-500">Target BP:</Label>
-                  <p className="text-sm font-semibold text-green-600">{diseaseAssessment.hypertension.targetBP}</p>
+                  <p className="text-sm font-semibold text-teal-600">{diseaseAssessment.hypertension.targetBP}</p>
                 </div>
               </div>
 
@@ -342,7 +342,7 @@ export default function ChronicDiagnosisForm({
 
         {/* Obesity Assessment */}
         {diseaseAssessment?.obesity?.present && (
-          <Card className="border-2 border-orange-300 md:col-span-2">
+          <Card className="border-2 border-cyan-300 md:col-span-2">
             <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
               <CardTitle className="flex items-center gap-2">
                 <Scale className="h-5 w-5" />
@@ -357,7 +357,7 @@ export default function ChronicDiagnosisForm({
                 </div>
                 <div>
                   <Label className="text-xs text-gray-500">Current BMI:</Label>
-                  <p className="text-sm font-semibold text-red-600">{diseaseAssessment.obesity.currentBMI}</p>
+                  <p className="text-sm font-semibold text-blue-600">{diseaseAssessment.obesity.currentBMI}</p>
                 </div>
                 <div>
                   <Label className="text-xs text-gray-500">Current Weight:</Label>
@@ -365,13 +365,13 @@ export default function ChronicDiagnosisForm({
                 </div>
                 <div>
                   <Label className="text-xs text-gray-500">Target Weight:</Label>
-                  <p className="text-sm font-semibold text-green-600">{diseaseAssessment.obesity.targetWeight} kg</p>
+                  <p className="text-sm font-semibold text-teal-600">{diseaseAssessment.obesity.targetWeight} kg</p>
                 </div>
               </div>
 
               {diseaseAssessment.obesity.weightLossGoal && (
-                <div className="mt-3 bg-green-50 border border-green-200 rounded p-3">
-                  <Label className="text-sm font-semibold text-green-900">Weight Loss Goal:</Label>
+                <div className="mt-3 bg-teal-50 border border-teal-200 rounded p-3">
+                  <Label className="text-sm font-semibold text-teal-900">Weight Loss Goal:</Label>
                   <p className="text-sm text-gray-700 mt-1">{diseaseAssessment.obesity.weightLossGoal}</p>
                 </div>
               )}
@@ -393,7 +393,7 @@ export default function ChronicDiagnosisForm({
 
       {/* Detailed Meal Plan Section */}
       {detailedMealPlan && (
-        <Card className="border-2 border-green-300 shadow-lg">
+        <Card className="border-2 border-teal-300 shadow-lg">
           <CardHeader className="bg-gradient-to-r from-green-600 to-teal-600 text-white">
             <CardTitle className="flex items-center gap-2 text-xl">
               <Utensils className="h-6 w-6" />
@@ -403,9 +403,9 @@ export default function ChronicDiagnosisForm({
           <CardContent className="p-6 space-y-6">
             {/* Breakfast */}
             {detailedMealPlan.breakfast && (
-              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                <h3 className="font-bold text-lg text-orange-900 mb-3 flex items-center gap-2">
-                  🌅 Breakfast <span className="text-sm font-normal text-orange-700">({detailedMealPlan.breakfast.timing})</span>
+              <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
+                <h3 className="font-bold text-lg text-cyan-900 mb-3 flex items-center gap-2">
+                  🌅 Breakfast <span className="text-sm font-normal text-cyan-700">({detailedMealPlan.breakfast.timing})</span>
                 </h3>
                 <div className="space-y-2">
                   <div>
@@ -422,7 +422,7 @@ export default function ChronicDiagnosisForm({
                       <ul className="text-sm text-gray-700 space-y-1 mt-1">
                         {detailedMealPlan.breakfast.examples.map((example: string, idx: number) => (
                           <li key={idx} className="flex items-start gap-2">
-                            <span className="text-green-600 font-bold">•</span>
+                            <span className="text-teal-600 font-bold">•</span>
                             <span>{example}</span>
                           </li>
                         ))}
@@ -441,9 +441,9 @@ export default function ChronicDiagnosisForm({
 
             {/* Lunch */}
             {detailedMealPlan.lunch && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h3 className="font-bold text-lg text-green-900 mb-3 flex items-center gap-2">
-                  🌞 Lunch <span className="text-sm font-normal text-green-700">({detailedMealPlan.lunch.timing})</span>
+              <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
+                <h3 className="font-bold text-lg text-teal-900 mb-3 flex items-center gap-2">
+                  🌞 Lunch <span className="text-sm font-normal text-teal-700">({detailedMealPlan.lunch.timing})</span>
                 </h3>
                 <div className="space-y-2">
                   <div>
@@ -460,7 +460,7 @@ export default function ChronicDiagnosisForm({
                       <ul className="text-sm text-gray-700 space-y-1 mt-1">
                         {detailedMealPlan.lunch.examples.map((example: string, idx: number) => (
                           <li key={idx} className="flex items-start gap-2">
-                            <span className="text-green-600 font-bold">•</span>
+                            <span className="text-teal-600 font-bold">•</span>
                             <span>{example}</span>
                           </li>
                         ))}
@@ -479,9 +479,9 @@ export default function ChronicDiagnosisForm({
 
             {/* Dinner */}
             {detailedMealPlan.dinner && (
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                <h3 className="font-bold text-lg text-purple-900 mb-3 flex items-center gap-2">
-                  🌙 Dinner <span className="text-sm font-normal text-purple-700">({detailedMealPlan.dinner.timing})</span>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="font-bold text-lg text-blue-900 mb-3 flex items-center gap-2">
+                  🌙 Dinner <span className="text-sm font-normal text-blue-700">({detailedMealPlan.dinner.timing})</span>
                 </h3>
                 <div className="space-y-2">
                   <div>
@@ -498,7 +498,7 @@ export default function ChronicDiagnosisForm({
                       <ul className="text-sm text-gray-700 space-y-1 mt-1">
                         {detailedMealPlan.dinner.examples.map((example: string, idx: number) => (
                           <li key={idx} className="flex items-start gap-2">
-                            <span className="text-green-600 font-bold">•</span>
+                            <span className="text-teal-600 font-bold">•</span>
                             <span>{example}</span>
                           </li>
                         ))}
@@ -517,14 +517,14 @@ export default function ChronicDiagnosisForm({
 
             {/* Snacks */}
             {detailedMealPlan.snacks && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <h3 className="font-bold text-lg text-yellow-900 mb-3 flex items-center gap-2">
+              <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
+                <h3 className="font-bold text-lg text-cyan-900 mb-3 flex items-center gap-2">
                   🍎 Snacks
                 </h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   {detailedMealPlan.snacks.midMorning && (
                     <div>
-                      <Label className="text-sm font-semibold text-yellow-800">
+                      <Label className="text-sm font-semibold text-cyan-800">
                         Mid-Morning ({detailedMealPlan.snacks.midMorning.timing}):
                       </Label>
                       <ul className="text-sm text-gray-700 mt-1 space-y-1">
@@ -536,7 +536,7 @@ export default function ChronicDiagnosisForm({
                   )}
                   {detailedMealPlan.snacks.afternoon && (
                     <div>
-                      <Label className="text-sm font-semibold text-yellow-800">
+                      <Label className="text-sm font-semibold text-cyan-800">
                         Afternoon ({detailedMealPlan.snacks.afternoon.timing}):
                       </Label>
                       <ul className="text-sm text-gray-700 mt-1 space-y-1">
@@ -565,8 +565,8 @@ export default function ChronicDiagnosisForm({
 
               {/* Supplements */}
               {detailedMealPlan.supplements?.length > 0 && (
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-                  <Label className="text-sm font-semibold text-purple-900 flex items-center gap-2 mb-2">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <Label className="text-sm font-semibold text-blue-900 flex items-center gap-2 mb-2">
                     <Pill className="h-4 w-4" />
                     Supplements:
                   </Label>
@@ -582,8 +582,8 @@ export default function ChronicDiagnosisForm({
             {/* Foods to Favor/Avoid */}
             <div className="grid md:grid-cols-2 gap-4">
               {detailedMealPlan.foodsToFavor?.length > 0 && (
-                <div className="bg-green-50 border border-green-300 rounded-lg p-3">
-                  <Label className="text-sm font-semibold text-green-900 mb-2 flex items-center gap-2">
+                <div className="bg-teal-50 border border-teal-300 rounded-lg p-3">
+                  <Label className="text-sm font-semibold text-teal-900 mb-2 flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4" />
                     Foods to FAVOR:
                   </Label>
@@ -596,8 +596,8 @@ export default function ChronicDiagnosisForm({
               )}
 
               {detailedMealPlan.foodsToAvoid?.length > 0 && (
-                <div className="bg-red-50 border border-red-300 rounded-lg p-3">
-                  <Label className="text-sm font-semibold text-red-900 mb-2 flex items-center gap-2">
+                <div className="bg-blue-50 border border-blue-300 rounded-lg p-3">
+                  <Label className="text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
                     <AlertCircle className="h-4 w-4" />
                     Foods to AVOID:
                   </Label>
@@ -613,8 +613,8 @@ export default function ChronicDiagnosisForm({
             {/* Cooking Methods & Portion Control */}
             <div className="grid md:grid-cols-2 gap-4">
               {detailedMealPlan.cookingMethods?.length > 0 && (
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-                  <Label className="text-sm font-semibold text-orange-900 mb-2">Preferred Cooking Methods:</Label>
+                <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-3">
+                  <Label className="text-sm font-semibold text-cyan-900 mb-2">Preferred Cooking Methods:</Label>
                   <div className="flex flex-wrap gap-2">
                     {detailedMealPlan.cookingMethods.map((method: string, idx: number) => (
                       <Badge key={idx} variant="outline" className="text-xs">{method}</Badge>
@@ -669,15 +669,15 @@ export default function ChronicDiagnosisForm({
 
               {/* Medium-term */}
               {therapeuticObjectives.mediumTerm && (
-                <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
-                  <h3 className="font-bold text-purple-900 mb-2 flex items-center gap-2">
-                    <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded">3-6 months</span>
+                <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                  <h3 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
+                    <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded">3-6 months</span>
                     Medium-Term
                   </h3>
                   <ul className="space-y-2">
                     {therapeuticObjectives.mediumTerm.targets?.map((target: string, idx: number) => (
                       <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
-                        <ArrowRight className="h-4 w-4 text-purple-600 mt-0.5 flex-shrink-0" />
+                        <ArrowRight className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                         <span>{target}</span>
                       </li>
                     ))}
@@ -687,15 +687,15 @@ export default function ChronicDiagnosisForm({
 
               {/* Long-term */}
               {therapeuticObjectives.longTerm && (
-                <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
-                  <h3 className="font-bold text-green-900 mb-2 flex items-center gap-2">
-                    <span className="bg-green-600 text-white text-xs px-2 py-1 rounded">6-12 months</span>
+                <div className="bg-teal-50 border-2 border-teal-300 rounded-lg p-4">
+                  <h3 className="font-bold text-teal-900 mb-2 flex items-center gap-2">
+                    <span className="bg-teal-600 text-white text-xs px-2 py-1 rounded">6-12 months</span>
                     Long-Term
                   </h3>
                   <ul className="space-y-2">
                     {therapeuticObjectives.longTerm.targets?.map((target: string, idx: number) => (
                       <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
-                        <ArrowRight className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                        <ArrowRight className="h-4 w-4 text-teal-600 mt-0.5 flex-shrink-0" />
                         <span>{target}</span>
                       </li>
                     ))}
@@ -742,15 +742,15 @@ export default function ChronicDiagnosisForm({
             {followUpPlan.laboratoryTests?.length > 0 && (
               <div>
                 <h3 className="font-bold text-lg text-gray-800 mb-3 flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-red-600" />
+                  <Activity className="h-5 w-5 text-blue-600" />
                   Laboratory Tests Schedule
                 </h3>
                 <div className="grid md:grid-cols-2 gap-3">
                   {followUpPlan.laboratoryTests.map((test: any, idx: number) => (
-                    <div key={idx} className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <div key={idx} className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                       <div className="flex justify-between items-start mb-1">
-                        <Label className="font-semibold text-red-900">{test.test}</Label>
-                        <Badge className="bg-red-600 text-white text-xs">{test.frequency}</Badge>
+                        <Label className="font-semibold text-blue-900">{test.test}</Label>
+                        <Badge className="bg-blue-600 text-white text-xs">{test.frequency}</Badge>
                       </div>
                       {test.target && (
                         <p className="text-xs text-gray-600 mt-1">
@@ -768,7 +768,7 @@ export default function ChronicDiagnosisForm({
             {followUpPlan.selfMonitoring && (
               <div>
                 <h3 className="font-bold text-lg text-gray-800 mb-3 flex items-center gap-2">
-                  <Eye className="h-5 w-5 text-green-600" />
+                  <Eye className="h-5 w-5 text-teal-600" />
                   Self-Monitoring Instructions
                 </h3>
                 <div className="grid md:grid-cols-2 gap-3">
@@ -788,8 +788,8 @@ export default function ChronicDiagnosisForm({
                   )}
 
                   {followUpPlan.selfMonitoring.bloodPressure && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                      <Label className="font-semibold text-red-900 flex items-center gap-2 mb-2">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <Label className="font-semibold text-blue-900 flex items-center gap-2 mb-2">
                         <Heart className="h-4 w-4" />
                         Blood Pressure Monitoring
                       </Label>
@@ -803,8 +803,8 @@ export default function ChronicDiagnosisForm({
                   )}
 
                   {followUpPlan.selfMonitoring.weight && (
-                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-                      <Label className="font-semibold text-orange-900 flex items-center gap-2 mb-2">
+                    <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-3">
+                      <Label className="font-semibold text-cyan-900 flex items-center gap-2 mb-2">
                         <Scale className="h-4 w-4" />
                         Weight Monitoring
                       </Label>
@@ -818,8 +818,8 @@ export default function ChronicDiagnosisForm({
                   )}
 
                   {followUpPlan.selfMonitoring.other && (
-                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-                      <Label className="font-semibold text-purple-900 mb-2">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <Label className="font-semibold text-blue-900 mb-2">
                         {followUpPlan.selfMonitoring.other.task}
                       </Label>
                       <div className="text-xs text-gray-700 space-y-1">
@@ -847,10 +847,10 @@ export default function ChronicDiagnosisForm({
           <CardContent className="p-5 space-y-4">
             {medicationManagement.continue?.length > 0 && (
               <div>
-                <Label className="font-semibold text-green-700 mb-2 block">✓ Continue (No changes):</Label>
+                <Label className="font-semibold text-teal-700 mb-2 block">✓ Continue (No changes):</Label>
                 <div className="space-y-2">
                   {medicationManagement.continue.map((med: any, idx: number) => (
-                    <div key={idx} className="bg-green-50 border border-green-200 rounded p-2 text-sm">
+                    <div key={idx} className="bg-teal-50 border border-teal-200 rounded p-2 text-sm">
                       <span className="font-semibold">{med.medication}</span> - {med.dosage} ({med.frequency})
                       <p className="text-xs text-gray-600 mt-1">{med.rationale}</p>
                     </div>
@@ -861,10 +861,10 @@ export default function ChronicDiagnosisForm({
 
             {medicationManagement.adjust?.length > 0 && (
               <div>
-                <Label className="font-semibold text-orange-700 mb-2 block">⚠ Adjust Dosage:</Label>
+                <Label className="font-semibold text-cyan-700 mb-2 block">⚠ Adjust Dosage:</Label>
                 <div className="space-y-2">
                   {medicationManagement.adjust.map((med: any, idx: number) => (
-                    <div key={idx} className="bg-orange-50 border border-orange-200 rounded p-2 text-sm">
+                    <div key={idx} className="bg-cyan-50 border border-cyan-200 rounded p-2 text-sm">
                       <span className="font-semibold">{med.medication}</span>: {med.currentDosage} → {med.newDosage}
                       <p className="text-xs text-gray-600 mt-1">{med.rationale}</p>
                     </div>
@@ -890,10 +890,10 @@ export default function ChronicDiagnosisForm({
 
             {medicationManagement.stop?.length > 0 && (
               <div>
-                <Label className="font-semibold text-red-700 mb-2 block">✗ Discontinue:</Label>
+                <Label className="font-semibold text-blue-700 mb-2 block">✗ Discontinue:</Label>
                 <div className="space-y-2">
                   {medicationManagement.stop.map((med: any, idx: number) => (
-                    <div key={idx} className="bg-red-50 border border-red-200 rounded p-2 text-sm">
+                    <div key={idx} className="bg-blue-50 border border-blue-200 rounded p-2 text-sm">
                       <span className="font-semibold">{med.medication}</span>
                       <p className="text-xs text-gray-600 mt-1">{med.rationale}</p>
                     </div>
