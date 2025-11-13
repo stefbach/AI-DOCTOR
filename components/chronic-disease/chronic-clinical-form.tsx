@@ -212,7 +212,7 @@ export default function ChronicClinicalForm({
  <div className="space-y-6">
  {/* 1. REASON FOR VISIT */}
  <Card className="border-blue-200">
- <CardHeader className="bg-gradient-to-r from-purple-100 to-cyan-100">
+ <CardHeader className="bg-gradient-to-r from-blue-100 to-cyan-100">
  <CardTitle className="flex items-center gap-2">
  <ClipboardList className="h-5 w-5 text-blue-600" />
  1. Reason for Visit
@@ -554,7 +554,7 @@ export default function ChronicClinicalForm({
  {/* 5. HYPERTENSION CONTROL (if hypertensive) */}
  {formData.chronicDiseases.includes("Arterial Hypertension") && (
  <Card className="border-cyan-200">
- <CardHeader className="bg-gradient-to-r from-orange-100 to-cyan-100">
+ <CardHeader className="bg-gradient-to-r from-cyan-100 to-cyan-100">
  <CardTitle className="flex items-center gap-2">
  <Heart className="h-5 w-5 text-cyan-600" />
  5. Hypertension Control
@@ -618,7 +618,7 @@ export default function ChronicClinicalForm({
 
  {/* 6. TREATMENT ADHERENCE */}
  <Card className="border-blue-200">
- <CardHeader className="bg-gradient-to-r from-red-100 to-cyan-100">
+ <CardHeader className="bg-gradient-to-r from-blue-100 to-cyan-100">
  <CardTitle className="flex items-center gap-2">
  <FileText className="h-5 w-5 text-blue-600" />
  6. Treatment Adherence
@@ -701,7 +701,7 @@ export default function ChronicClinicalForm({
 
  {/* 7. CURRENT SYMPTOMS */}
  <Card className="border-blue-200">
- <CardHeader className="bg-gradient-to-r from-purple-100 to-blue-100">
+ <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-100">
  <CardTitle className="flex items-center gap-2">
  <Stethoscope className="h-5 w-5 text-blue-600" />
  7. Current Symptoms
@@ -755,7 +755,7 @@ export default function ChronicClinicalForm({
 
  {/* 8. RECENT TESTS */}
  <Card className="border-cyan-200">
- <CardHeader className="bg-gradient-to-r from-yellow-100 to-cyan-100">
+ <CardHeader className="bg-gradient-to-r from-cyan-100 to-cyan-100">
  <CardTitle className="flex items-center gap-2">
  <ClipboardList className="h-5 w-5 text-cyan-600" />
  8. Recent Tests (last 6 months)

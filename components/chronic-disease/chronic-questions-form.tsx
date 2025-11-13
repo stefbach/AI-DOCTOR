@@ -218,7 +218,7 @@ export default function ChronicQuestionsForm({
  return (
  <div className="space-y-6">
  {/* Progress Card */}
- <Card className="border-blue-200 bg-gradient-to-r from-purple-50 to-cyan-50">
+ <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50">
  <CardContent className="p-6">
  <div className="flex justify-between items-center mb-3">
  <div className="flex items-center gap-2">

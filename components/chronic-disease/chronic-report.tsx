@@ -378,7 +378,7 @@ export default function ChronicReport({
 
  {/* Document Header */}
  <Card className="border-2 border-blue-300 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-purple-600 to-cyan-600 text-white">
+ <CardHeader className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
  <CardTitle className="flex items-center gap-2 text-2xl">
  <FileText className="h-7 w-7" />
  COMPTE RENDU DE CONSULTATION - SUIVI MALADIE CHRONIQUE
@@ -544,7 +544,7 @@ export default function ChronicReport({
 
  {/* PRESCRIPTION SECTION */}
  {prescription && (
- <Card className="border-2 border-pink-300 shadow-xl">
+ <Card className="border-2 border-blue-300 shadow-xl">
  <CardHeader className="bg-gradient-to-r from-cyan-600 to-cyan-600 text-white">
  <CardTitle className="flex items-center gap-2 text-xl">
  <Pill className="h-6 w-6" />
@@ -571,7 +571,7 @@ export default function ChronicReport({
 
  <div className="space-y-3">
  {prescription.chronicMedications.map((med: any, idx: number) => (
- <Card key={idx} className="border-l-4 border-l-pink-500">
+ <Card key={idx} className="border-l-4 border-l-blue-500">
  <CardContent className="p-4">
  <div className="flex justify-between items-start mb-2">
  <div>
@@ -739,7 +739,7 @@ export default function ChronicReport({
  </h3>
  <div className="grid md:grid-cols-2 gap-3">
  {examOrders.specialistReferrals.map((referral: any, idx: number) => (
- <Card key={idx} className="border-l-4 border-l-purple-500">
+ <Card key={idx} className="border-l-4 border-l-blue-500">
  <CardContent className="p-3">
  <div className="flex justify-between items-start mb-1">
  <h4 className="font-bold">{referral.specialty}</h4>

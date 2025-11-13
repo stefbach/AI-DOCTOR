@@ -2359,7 +2359,7 @@ export default function ChronicProfessionalReport({
  const dayName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][dayIndex]
  
  return (
- <div key={dayKey} className="mb-6 border-2 border-cyan-200 rounded-lg p-6 bg-gradient-to-br from-orange-50 to-white print:page-break-inside-avoid">
+ <div key={dayKey} className="mb-6 border-2 border-cyan-200 rounded-lg p-6 bg-gradient-to-br from-cyan-50 to-white print:page-break-inside-avoid">
  {/* Day Header */}
  <div className="mb-4 pb-3 border-b-2 border-cyan-300">
  <h4 className="text-xl font-bold text-cyan-800">

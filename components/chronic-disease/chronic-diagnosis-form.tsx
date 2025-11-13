@@ -133,7 +133,7 @@ export default function ChronicDiagnosisForm({
  <div className="space-y-6">
  {/* Overall Assessment Card */}
  <Card className="border-2 border-blue-300 shadow-lg">
- <CardHeader className="bg-gradient-to-r from-purple-600 to-cyan-600 text-white">
+ <CardHeader className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
  <CardTitle className="flex items-center gap-2 text-xl">
  <Brain className="h-6 w-6" />
  Overall Chronic Disease Assessment
@@ -286,7 +286,7 @@ export default function ChronicDiagnosisForm({
  {/* Hypertension Assessment */}
  {diseaseAssessment?.hypertension?.present && (
  <Card className="border-2 border-blue-300">
- <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white">
+ <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
  <CardTitle className="flex items-center gap-2">
  <Heart className="h-5 w-5" />
  Hypertension Assessment
@@ -343,7 +343,7 @@ export default function ChronicDiagnosisForm({
  {/* Obesity Assessment */}
  {diseaseAssessment?.obesity?.present && (
  <Card className="border-2 border-cyan-300 md:col-span-2">
- <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+ <CardHeader className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white">
  <CardTitle className="flex items-center gap-2">
  <Scale className="h-5 w-5" />
  Weight Management Assessment
@@ -641,7 +641,7 @@ export default function ChronicDiagnosisForm({
  {/* Therapeutic Objectives Section */}
  {therapeuticObjectives && (
  <Card className="border-2 border-cyan-300 shadow-lg">
- <CardHeader className="bg-gradient-to-r from-cyan-600 to-orange-600 text-white">
+ <CardHeader className="bg-gradient-to-r from-cyan-600 to-cyan-600 text-white">
  <CardTitle className="flex items-center gap-2 text-xl">
  <Target className="h-6 w-6" />
  Therapeutic Objectives & Targets
@@ -710,7 +710,7 @@ export default function ChronicDiagnosisForm({
  {/* Follow-Up Plan Section */}
  {followUpPlan && (
  <Card className="border-2 border-blue-300 shadow-lg">
- <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+ <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-600 text-white">
  <CardTitle className="flex items-center gap-2 text-xl">
  <Calendar className="h-6 w-6" />
  Complete Follow-Up Plan
@@ -837,7 +837,7 @@ export default function ChronicDiagnosisForm({
 
  {/* Medication Management (if present) */}
  {medicationManagement && (
- <Card className="border-2 border-pink-300">
+ <Card className="border-2 border-blue-300">
  <CardHeader className="bg-gradient-to-r from-cyan-600 to-cyan-600 text-white">
  <CardTitle className="flex items-center gap-2">
  <Pill className="h-5 w-5" />
@@ -913,7 +913,7 @@ export default function ChronicDiagnosisForm({
  <Button 
  onClick={handleContinue} 
  size="lg"
- className="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white text-base px-8"
+ className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white text-base px-8"
  >
  Generate Complete Medical Report →
  </Button>

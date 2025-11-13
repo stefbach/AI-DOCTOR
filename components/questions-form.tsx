@@ -567,7 +567,7 @@ export default function QuestionsForm({
  <div className="space-y-6">
  <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
  <CardHeader className="text-center">
- <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+ <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent">
  <Brain className="h-8 w-8 text-blue-600" />
  Clinical Questions
  </CardTitle>
@@ -608,7 +608,7 @@ export default function QuestionsForm({
  {/* Header with Progress and Mode Selector */}
  <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
  <CardHeader className="text-center">
- <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+ <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent">
  <Brain className="h-8 w-8 text-blue-600" />
  Clinical Questions
  </CardTitle>
@@ -753,7 +753,7 @@ export default function QuestionsForm({
  index !== currentQuestionIndex ? 'hidden' : ''
  }`}
  >
- <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
+ <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
  <div className="flex items-center justify-between">
  <CardTitle className="flex items-center gap-3">
  <MessageSquare className="h-6 w-6" />
@@ -921,7 +921,7 @@ export default function QuestionsForm({
  <Button 
  onClick={onNext} 
  disabled={!isFormValid()}
- className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
+ className="bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
  >
  Continue to Diagnosis
  <ArrowRight className="h-4 w-4 ml-2" />

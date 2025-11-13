@@ -979,8 +979,8 @@ useEffect(() => {
  htmlFor="gender-female"
  className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
  formData.gender === 'Female' 
- ? "border-pink-500 bg-cyan-50" 
- : "border-gray-200 hover:border-pink-300"
+ ? "border-blue-500 bg-cyan-50" 
+ : "border-gray-200 hover:border-blue-300"
  }`}
  >
  <RadioGroupItem value="Female" id="gender-female" />
@@ -999,7 +999,7 @@ useEffect(() => {
 
  {/* PREGNANCY STATUS SECTION - NEW */}
  {isChildbearingAge && (
- <div className="space-y-4 p-4 bg-cyan-50 rounded-lg border border-pink-200">
+ <div className="space-y-4 p-4 bg-cyan-50 rounded-lg border border-blue-200">
  <Label className="flex items-center gap-2 font-medium text-cyan-800">
  <Baby className="h-4 w-4" />
  Pregnancy Information <span className="text-blue-500">*</span>
@@ -1027,8 +1027,8 @@ useEffect(() => {
  htmlFor="pregnancy-yes"
  className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
  formData.pregnancyStatus === 'pregnant' 
- ? "border-pink-500 bg-cyan-100" 
- : "border-gray-200 hover:border-pink-300"
+ ? "border-blue-500 bg-cyan-100" 
+ : "border-gray-200 hover:border-blue-300"
  }`}
  >
  <RadioGroupItem value="pregnant" id="pregnancy-yes" />
@@ -1082,7 +1082,7 @@ useEffect(() => {
  value={formData.lastMenstrualPeriod}
  onChange={(e) => handleInputChange("lastMenstrualPeriod", e.target.value)}
  max={new Date().toISOString().split('T')[0]}
- className="border-pink-200"
+ className="border-blue-200"
  />
  {formData.pregnancyStatus === 'pregnant' && formData.gestationalAge && (
  <p className="text-sm text-cyan-700 font-medium">
@@ -1283,7 +1283,7 @@ useEffect(() => {
 
  {/* Section 3: Allergies */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
+ <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
  <CardTitle className="flex items-center gap-3">
  <AlertTriangle className="h-6 w-6" />
  Known Allergies
@@ -1356,7 +1356,7 @@ useEffect(() => {
 
  {/* Section 4: Medical History */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-t-lg">
+ <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
  <CardTitle className="flex items-center gap-3">
  <Heart className="h-6 w-6" />
  Medical History
@@ -1502,7 +1502,7 @@ Example:
 
  {/* Section 6: Lifestyle */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg">
+ <CardHeader className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-t-lg">
  <CardTitle className="flex items-center gap-3">
  <Activity className="h-6 w-6" />
  Lifestyle
@@ -1524,8 +1524,8 @@ Example:
  key={option.value}
  className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
  formData.lifeHabits.smoking === option.value
- ? "border-orange-400 bg-blue-50"
- : "border-gray-200 hover:border-orange-300"
+ ? "border-cyan-400 bg-blue-50"
+ : "border-gray-200 hover:border-cyan-300"
  }`}
  >
  <RadioGroupItem value={option.value} id={`smoking-${option.value}`} />
@@ -1554,8 +1554,8 @@ Example:
  key={option.value}
  className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
  formData.lifeHabits.alcohol === option.value
- ? "border-orange-400 bg-blue-50"
- : "border-gray-200 hover:border-orange-300"
+ ? "border-cyan-400 bg-blue-50"
+ : "border-gray-200 hover:border-cyan-300"
  }`}
  >
  <RadioGroupItem value={option.value} id={`alcohol-${option.value}`} />
@@ -1585,8 +1585,8 @@ Example:
  key={option.value}
  className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
  formData.lifeHabits.physicalActivity === option.value
- ? "border-orange-400 bg-blue-50"
- : "border-gray-200 hover:border-orange-300"
+ ? "border-cyan-400 bg-blue-50"
+ : "border-gray-200 hover:border-cyan-300"
  }`}
  >
  <RadioGroupItem value={option.value} id={`activity-${option.value}`} />
@@ -1620,8 +1620,8 @@ Example:
  </div>
 
  {/* CONSULTATION TYPE SELECTION */}
- <Card id="consultation-type-section" className="shadow-xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-purple-50">
- <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+ <Card id="consultation-type-section" className="shadow-xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-50">
+ <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-600 text-white">
  <CardTitle className="flex items-center gap-3 text-2xl">
  <Activity className="h-7 w-7" />
  Type of Consultation
@@ -1728,7 +1728,7 @@ Example:
  disabled={!consultationType}
  className={`px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 ${
  consultationType === 'chronic'
- ? 'bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700'
+ ? 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700'
  : 'bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700'
  } ${!consultationType ? 'opacity-50 cursor-not-allowed' : ''}`}
  >

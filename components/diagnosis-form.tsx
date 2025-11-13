@@ -277,7 +277,7 @@ function TreatmentEditorSection({
  const currentTreatment = isEditing ? editedTreatment : treatment
 
  return (
- <div key={index} className="border rounded-lg p-6 hover:shadow-md transition-shadow bg-gradient-to-r from-gray-50 to-purple-50">
+ <div key={index} className="border rounded-lg p-6 hover:shadow-md transition-shadow bg-gradient-to-r from-gray-50 to-blue-50">
  {/* Header with Edit Button */}
  <div className="flex items-start justify-between mb-4">
  <div className="flex items-center gap-3 flex-1">
@@ -1084,7 +1084,7 @@ export default function DiagnosisForm({
  return (
  <div className="space-y-6">
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-600 text-white rounded-t-lg">
+ <CardHeader className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-t-lg">
  <CardTitle className="flex items-center gap-3">
  <AlertTriangle className="h-6 w-6" />
  Generation Error
@@ -1280,7 +1280,7 @@ export default function DiagnosisForm({
  <AnimatedSection show={showReasoning} delay={0}>
  {currentSection === 0 && diagnosticReasoning && (
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
- <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-t-lg">
+ <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
  <CardTitle className="flex items-center gap-3">
  <Brain className="h-6 w-6" />
  Systematic Diagnostic Reasoning
@@ -1329,7 +1329,7 @@ export default function DiagnosisForm({
 
  {/* Syndrome Identification */}
  {diagnosticReasoning.syndrome_identification && (
- <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border border-blue-200">
+ <div className="bg-gradient-to-r from-blue-50 to-blue-50 p-6 rounded-lg border border-blue-200">
  <h4 className="font-semibold text-blue-800 mb-4 flex items-center gap-2">
  <Zap className="h-5 w-5" />
  Identified Clinical Syndrome
@@ -1471,7 +1471,7 @@ export default function DiagnosisForm({
  <AnimatedSection show={showInvestigations} delay={300}>
  {currentSection === 2 && expertAnalysis?.expert_investigations && (
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
+ <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
  <CardTitle className="flex items-center gap-3">
  <TestTube className="h-6 w-6" />
  Complete Investigation Strategy
@@ -1511,7 +1511,7 @@ export default function DiagnosisForm({
  </div>
 
  {/* To Exclude Differentials */}
- <div className="bg-blue-50 p-4 rounded-lg border border-orange-200">
+ <div className="bg-blue-50 p-4 rounded-lg border border-cyan-200">
  <h4 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
  <Search className="h-5 w-5" />
  Exclude Differentials
@@ -1579,7 +1579,7 @@ export default function DiagnosisForm({
  {/* Detailed Test List */}
  <div className="grid gap-6">
  {expertAnalysis.expert_investigations.immediate_priority?.map((exam: any, index: number) => (
- <div key={index} className="border rounded-lg p-6 hover:shadow-md transition-shadow bg-gradient-to-r from-gray-50 to-red-50">
+ <div key={index} className="border rounded-lg p-6 hover:shadow-md transition-shadow bg-gradient-to-r from-gray-50 to-blue-50">
  <div className="flex items-start justify-between mb-4">
  <div className="flex items-center gap-3">
  {exam.category === 'biology' && <FlaskConical className="h-6 w-6 text-blue-600" />}
@@ -1647,7 +1647,7 @@ export default function DiagnosisForm({
  <AnimatedSection show={showTreatments} delay={400}>
  {currentSection === 3 && expertAnalysis?.expert_therapeutics?.primary_treatments && expertAnalysis.expert_therapeutics.primary_treatments.length > 0 && (
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
- <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-t-lg">
+ <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
  <CardTitle className="flex items-center gap-3">
  <Pill className="h-6 w-6" />
  Prescribed Treatments ({expertAnalysis.expert_therapeutics.primary_treatments.length})
@@ -1760,7 +1760,7 @@ export default function DiagnosisForm({
  </ul>
  </div>
 
- <div className="bg-blue-50 p-4 rounded-lg border border-orange-200">
+ <div className="bg-blue-50 p-4 rounded-lg border border-cyan-200">
  <div className="flex items-center gap-2 mb-3">
  <Calendar className="h-5 w-5 text-blue-600" />
  <h3 className="font-semibold text-blue-800">Short Term Follow-up (1 week)</h3>
@@ -1894,7 +1894,7 @@ export default function DiagnosisForm({
  </div>
  </div>
 
- <div className="bg-gradient-to-r from-blue-100 to-purple-100 p-4 rounded-lg border border-blue-300">
+ <div className="bg-gradient-to-r from-blue-100 to-blue-100 p-4 rounded-lg border border-blue-300">
  <div className="flex items-center gap-2 mb-2">
  <Brain className="h-5 w-5 text-blue-600" />
  <span className="font-semibold text-blue-800">Complete Documents with Diagnostic Logic</span>

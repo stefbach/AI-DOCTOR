@@ -412,7 +412,7 @@ const handlePrevious = () => {
                   ${index === currentStep 
                     ? 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-xl scale-105 step-active' 
                     : index < currentStep 
-                    ? 'bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-lg hover:scale-105 hover:shadow-xl' 
+                    ? 'bg-gradient-to-br from-teal-500 to-teal-500 text-white shadow-lg hover:scale-105 hover:shadow-xl' 
                     : 'bg-white/50 backdrop-blur-sm border-2 border-gray-200 opacity-70 cursor-not-allowed'
                   }`}
               >

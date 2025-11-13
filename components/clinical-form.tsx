@@ -591,7 +591,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
  {/* Header with progress */}
  <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
  <CardHeader className="text-center">
- <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+ <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent">
  <Stethoscope className="h-8 w-8 text-blue-600" />
  Clinical Information
  </CardTitle>
@@ -626,7 +626,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
 
  {/* Section 1: Chief complaint */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-t-lg">
+ <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
  <CardTitle className="flex items-center gap-3">
  <FileText className="h-6 w-6" />
  Chief Complaint
@@ -763,7 +763,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
 
  {/* Section 3.5: Pain intensity */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-t-lg">
+ <CardHeader className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-t-lg">
  <CardTitle className="flex items-center gap-3">
  <Activity className="h-6 w-6" />
  Pain Intensity
@@ -810,7 +810,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
 
  {/* Section 4: Current symptoms */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg">
+ <CardHeader className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-t-lg">
  <CardTitle className="flex items-center gap-3">
  <Activity className="h-6 w-6" />
  Current Symptoms
@@ -883,7 +883,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
 
  {/* Section 5: Vital signs */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
+ <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
  <CardTitle className="flex items-center gap-3">
  <Stethoscope className="h-6 w-6" />
  Vital Signs
@@ -1082,7 +1082,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
  </Button>
  <Button 
  type="submit"
- className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+ className="bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
  >
  Continue to AI Analysis
  <ArrowRight className="h-4 w-4 ml-2" />
