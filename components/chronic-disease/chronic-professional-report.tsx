@@ -2170,52 +2170,202 @@ export default function ChronicProfessionalReport({
           </div>
         )}
         
-        {/* Meal Plans */}
-        {dietaryProtocol.mealPlans && (
+        {/* 7-Day Weekly Meal Plan */}
+        {dietaryProtocol.weeklyMealPlan && (
           <div className="mb-6">
-            <h3 className="font-bold text-lg mb-3">Meal Plans</h3>
-            <div className="space-y-4">
-              {dietaryProtocol.mealPlans.breakfast && dietaryProtocol.mealPlans.breakfast.length > 0 && (
-                <div className="border rounded-lg p-4">
-                  <h4 className="font-semibold mb-2">Breakfast Options:</h4>
-                  <ul className="list-disc list-inside space-y-1">
-                    {dietaryProtocol.mealPlans.breakfast.map((item, idx) => (
-                      <li key={idx}>{typeof item === 'string' ? item : item.description || item.name}</li>
-                    ))}
-                  </ul>
+            <h3 className="font-bold text-xl mb-4 text-center border-b-2 border-orange-600 pb-2">
+              7-DAY MEAL PLAN
+            </h3>
+            
+            {/* Iterate through each day */}
+            {['day1', 'day2', 'day3', 'day4', 'day5', 'day6', 'day7'].map((dayKey, dayIndex) => {
+              const dayData = dietaryProtocol.weeklyMealPlan[dayKey]
+              if (!dayData) return null
+              
+              const dayNumber = dayIndex + 1
+              const dayName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][dayIndex]
+              
+              return (
+                <div key={dayKey} className="mb-6 border-2 border-orange-200 rounded-lg p-6 bg-gradient-to-br from-orange-50 to-white print:page-break-inside-avoid">
+                  {/* Day Header */}
+                  <div className="mb-4 pb-3 border-b-2 border-orange-300">
+                    <h4 className="text-xl font-bold text-orange-800">
+                      DAY {dayNumber} - {dayName}
+                    </h4>
+                  </div>
+                  
+                  {/* Breakfast */}
+                  {dayData.breakfast && (
+                    <div className="mb-4 bg-white rounded p-3 border-l-4 border-yellow-500">
+                      <h5 className="font-bold text-yellow-700 mb-2">🌅 BREAKFAST ({dayData.breakfast.totalCalories} kcal)</h5>
+                      <ul className="space-y-1 text-sm">
+                        {dayData.breakfast.foods && dayData.breakfast.foods.map((food: any, idx: number) => (
+                          <li key={idx} className="ml-4">
+                            • <strong>{food.item}</strong> - {food.quantity} - <span className="text-orange-600">{food.calories} kcal</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {/* Mid-Morning Snack */}
+                  {dayData.midMorningSnack && (
+                    <div className="mb-4 bg-white rounded p-3 border-l-4 border-green-500">
+                      <h5 className="font-bold text-green-700 mb-2">☕ MID-MORNING SNACK ({dayData.midMorningSnack.totalCalories} kcal)</h5>
+                      <ul className="space-y-1 text-sm">
+                        {dayData.midMorningSnack.foods && dayData.midMorningSnack.foods.map((food: any, idx: number) => (
+                          <li key={idx} className="ml-4">
+                            • <strong>{food.item}</strong> - {food.quantity} - <span className="text-orange-600">{food.calories} kcal</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {/* Lunch */}
+                  {dayData.lunch && (
+                    <div className="mb-4 bg-white rounded p-3 border-l-4 border-blue-500">
+                      <h5 className="font-bold text-blue-700 mb-2">🍽️ LUNCH ({dayData.lunch.totalCalories} kcal)</h5>
+                      <ul className="space-y-1 text-sm">
+                        {dayData.lunch.foods && dayData.lunch.foods.map((food: any, idx: number) => (
+                          <li key={idx} className="ml-4">
+                            • <strong>{food.item}</strong> - {food.quantity} - <span className="text-orange-600">{food.calories} kcal</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {/* Afternoon Snack */}
+                  {dayData.afternoonSnack && (
+                    <div className="mb-4 bg-white rounded p-3 border-l-4 border-purple-500">
+                      <h5 className="font-bold text-purple-700 mb-2">🍎 AFTERNOON SNACK ({dayData.afternoonSnack.totalCalories} kcal)</h5>
+                      <ul className="space-y-1 text-sm">
+                        {dayData.afternoonSnack.foods && dayData.afternoonSnack.foods.map((food: any, idx: number) => (
+                          <li key={idx} className="ml-4">
+                            • <strong>{food.item}</strong> - {food.quantity} - <span className="text-orange-600">{food.calories} kcal</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {/* Dinner */}
+                  {dayData.dinner && (
+                    <div className="mb-4 bg-white rounded p-3 border-l-4 border-indigo-500">
+                      <h5 className="font-bold text-indigo-700 mb-2">🌙 DINNER ({dayData.dinner.totalCalories} kcal)</h5>
+                      <ul className="space-y-1 text-sm">
+                        {dayData.dinner.foods && dayData.dinner.foods.map((food: any, idx: number) => (
+                          <li key={idx} className="ml-4">
+                            • <strong>{food.item}</strong> - {food.quantity} - <span className="text-orange-600">{food.calories} kcal</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {/* Daily Total */}
+                  <div className="mt-3 pt-3 border-t border-orange-300">
+                    <p className="text-right font-bold text-lg text-orange-800">
+                      📊 DAILY TOTAL: {
+                        (dayData.breakfast?.totalCalories || 0) +
+                        (dayData.midMorningSnack?.totalCalories || 0) +
+                        (dayData.lunch?.totalCalories || 0) +
+                        (dayData.afternoonSnack?.totalCalories || 0) +
+                        (dayData.dinner?.totalCalories || 0)
+                      } kcal
+                    </p>
+                  </div>
                 </div>
-              )}
-              {dietaryProtocol.mealPlans.lunch && dietaryProtocol.mealPlans.lunch.length > 0 && (
-                <div className="border rounded-lg p-4">
-                  <h4 className="font-semibold mb-2">Lunch Options:</h4>
-                  <ul className="list-disc list-inside space-y-1">
-                    {dietaryProtocol.mealPlans.lunch.map((item, idx) => (
-                      <li key={idx}>{typeof item === 'string' ? item : item.description || item.name}</li>
-                    ))}
-                  </ul>
+              )
+            })}
+          </div>
+        )}
+        
+        {/* Practical Guidance */}
+        {dietaryProtocol.practicalGuidance && (
+          <div className="mb-6 p-6 bg-blue-50 rounded-lg border border-blue-200">
+            <h3 className="font-bold text-lg mb-4 text-blue-800">📋 PRACTICAL GUIDANCE</h3>
+            
+            {/* Grocery List */}
+            {dietaryProtocol.practicalGuidance.groceryList && (
+              <div className="mb-4">
+                <h4 className="font-semibold mb-2 text-blue-700">🛒 Grocery Shopping List:</h4>
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  {dietaryProtocol.practicalGuidance.groceryList.proteins && (
+                    <div>
+                      <p className="font-semibold text-red-700">Proteins:</p>
+                      <ul className="list-disc list-inside ml-2">
+                        {dietaryProtocol.practicalGuidance.groceryList.proteins.map((item: string, idx: number) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {dietaryProtocol.practicalGuidance.groceryList.vegetables && (
+                    <div>
+                      <p className="font-semibold text-green-700">Vegetables:</p>
+                      <ul className="list-disc list-inside ml-2">
+                        {dietaryProtocol.practicalGuidance.groceryList.vegetables.map((item: string, idx: number) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {dietaryProtocol.practicalGuidance.groceryList.grains && (
+                    <div>
+                      <p className="font-semibold text-yellow-700">Grains:</p>
+                      <ul className="list-disc list-inside ml-2">
+                        {dietaryProtocol.practicalGuidance.groceryList.grains.map((item: string, idx: number) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
-              )}
-              {dietaryProtocol.mealPlans.dinner && dietaryProtocol.mealPlans.dinner.length > 0 && (
-                <div className="border rounded-lg p-4">
-                  <h4 className="font-semibold mb-2">Dinner Options:</h4>
-                  <ul className="list-disc list-inside space-y-1">
-                    {dietaryProtocol.mealPlans.dinner.map((item, idx) => (
-                      <li key={idx}>{typeof item === 'string' ? item : item.description || item.name}</li>
-                    ))}
-                  </ul>
+              </div>
+            )}
+            
+            {/* Meal Prep Tips */}
+            {dietaryProtocol.practicalGuidance.mealPrepTips && dietaryProtocol.practicalGuidance.mealPrepTips.length > 0 && (
+              <div className="mb-4">
+                <h4 className="font-semibold mb-2 text-blue-700">💡 Meal Preparation Tips:</h4>
+                <ul className="list-disc list-inside text-sm space-y-1 ml-2">
+                  {dietaryProtocol.practicalGuidance.mealPrepTips.map((tip: string, idx: number) => (
+                    <li key={idx}>{tip}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {/* Cooking Methods */}
+            {dietaryProtocol.practicalGuidance.cookingMethods && (
+              <div>
+                <h4 className="font-semibold mb-2 text-blue-700">👨‍🍳 Cooking Methods:</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  {dietaryProtocol.practicalGuidance.cookingMethods.recommended && (
+                    <div className="bg-green-50 p-3 rounded">
+                      <p className="font-semibold text-green-700 mb-1">✅ Recommended:</p>
+                      <ul className="list-disc list-inside ml-2">
+                        {dietaryProtocol.practicalGuidance.cookingMethods.recommended.map((method: string, idx: number) => (
+                          <li key={idx}>{method}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {dietaryProtocol.practicalGuidance.cookingMethods.avoid && (
+                    <div className="bg-red-50 p-3 rounded">
+                      <p className="font-semibold text-red-700 mb-1">❌ Avoid:</p>
+                      <ul className="list-disc list-inside ml-2">
+                        {dietaryProtocol.practicalGuidance.cookingMethods.avoid.map((method: string, idx: number) => (
+                          <li key={idx}>{method}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
-              )}
-              {dietaryProtocol.mealPlans.snacks && dietaryProtocol.mealPlans.snacks.length > 0 && (
-                <div className="border rounded-lg p-4">
-                  <h4 className="font-semibold mb-2">Snack Options:</h4>
-                  <ul className="list-disc list-inside space-y-1">
-                    {dietaryProtocol.mealPlans.snacks.map((item, idx) => (
-                      <li key={idx}>{typeof item === 'string' ? item : item.description || item.name}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         )}
         
