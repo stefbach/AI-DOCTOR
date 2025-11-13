@@ -394,6 +394,19 @@ export default function ChronicProfessionalReport({
   
   // ==================== DATA GENERATION ====================
   
+  // Warn before leaving with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+    
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [hasUnsavedChanges])
+  
   useEffect(() => {
     const generateReport = async () => {
       setLoading(true)
@@ -833,6 +846,75 @@ export default function ChronicProfessionalReport({
     window.print()
   }, [])
   
+  const handleSave = useCallback(async () => {
+    if (!hasUnsavedChanges) {
+      toast({
+        title: "No Changes",
+        description: "There are no unsaved changes to save.",
+      })
+      return
+    }
+    
+    setSaving(true)
+    try {
+      // Validate report data before saving
+      const validationErrors: string[] = []
+      
+      // Validate medical report
+      if (!report.medicalReport.narrative || report.medicalReport.narrative.trim() === '') {
+        validationErrors.push("Medical report narrative cannot be empty")
+      }
+      
+      // Validate medications
+      if (report.medicationPrescription) {
+        report.medicationPrescription.prescription.medications.forEach((med, index) => {
+          if (!med.nom || med.nom.trim() === '') {
+            validationErrors.push(`Medication ${index + 1}: Brand name is required`)
+          }
+          if (!med.posologie || med.posologie.trim() === '') {
+            validationErrors.push(`Medication ${index + 1}: Frequency is required`)
+          }
+          if (!med.dureeTraitement || med.dureeTraitement.trim() === '') {
+            validationErrors.push(`Medication ${index + 1}: Duration is required`)
+          }
+        })
+      }
+      
+      if (validationErrors.length > 0) {
+        toast({
+          title: "Validation Errors",
+          description: validationErrors.join(". "),
+          variant: "destructive",
+        })
+        setSaving(false)
+        return
+      }
+      
+      // Here you would typically save to database/backend
+      // For now, we'll simulate a save operation
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // Save to sessionStorage for persistence
+      sessionStorage.setItem('chronicDiseaseReport', JSON.stringify(report))
+      
+      setHasUnsavedChanges(false)
+      toast({
+        title: "Changes Saved",
+        description: "All modifications have been saved successfully.",
+      })
+      
+    } catch (err: any) {
+      console.error("Save error:", err)
+      toast({
+        title: "Save Error",
+        description: err.message || "Failed to save changes",
+        variant: "destructive",
+      })
+    } finally {
+      setSaving(false)
+    }
+  }, [hasUnsavedChanges, report])
+  
   // ==================== RENDER HELPERS ====================
   
   if (loading) {
@@ -1129,18 +1211,100 @@ export default function ChronicProfessionalReport({
     const { medicationPrescription } = report
     const medications = medicationPrescription.prescription.medications || []
     
+    const handleAddMedication = () => {
+      setReport(prev => {
+        if (!prev || !prev.medicationPrescription) return prev
+        return {
+          ...prev,
+          medicationPrescription: {
+            ...prev.medicationPrescription,
+            prescription: {
+              ...prev.medicationPrescription.prescription,
+              medications: [
+                ...prev.medicationPrescription.prescription.medications,
+                {
+                  nom: '',
+                  denominationCommune: '',
+                  dosage: '',
+                  forme: 'tablet',
+                  posologie: '',
+                  modeAdministration: 'Oral route',
+                  dureeTraitement: '',
+                  quantite: '',
+                  instructions: '',
+                  justification: '',
+                  surveillanceParticuliere: '',
+                  nonSubstituable: false
+                }
+              ]
+            }
+          }
+        }
+      })
+      setHasUnsavedChanges(true)
+    }
+    
+    const handleRemoveMedication = (index: number) => {
+      setReport(prev => {
+        if (!prev || !prev.medicationPrescription) return prev
+        return {
+          ...prev,
+          medicationPrescription: {
+            ...prev.medicationPrescription,
+            prescription: {
+              ...prev.medicationPrescription.prescription,
+              medications: prev.medicationPrescription.prescription.medications.filter((_, i) => i !== index)
+            }
+          }
+        }
+      })
+      setHasUnsavedChanges(true)
+    }
+    
+    const handleUpdateMedication = (index: number, field: string, value: any) => {
+      setReport(prev => {
+        if (!prev || !prev.medicationPrescription) return prev
+        const updatedMeds = [...prev.medicationPrescription.prescription.medications]
+        updatedMeds[index] = { ...updatedMeds[index], [field]: value }
+        return {
+          ...prev,
+          medicationPrescription: {
+            ...prev.medicationPrescription,
+            prescription: {
+              ...prev.medicationPrescription.prescription,
+              medications: updatedMeds
+            }
+          }
+        }
+      })
+      setHasUnsavedChanges(true)
+    }
+    
     return (
       <div id="medication-prescription-section" className="bg-white p-8 rounded-lg shadow print:shadow-none">
         <div className="border-b-2 border-green-600 pb-4 mb-6">
           <div className="flex justify-between items-start">
             <div>
-              <h2 className="text-2xl font-bold">MEDICATION PRESCRIPTION</h2>
+              <h2 className="text-2xl font-bold flex items-center gap-2">
+                MEDICATION PRESCRIPTION
+                {editMode && <Badge variant="outline">Editable</Badge>}
+              </h2>
               <p className="text-gray-600 mt-1">Compliant with Medical Council & Pharmacy Act of Mauritius</p>
               <p className="text-sm text-gray-500 mt-1">
                 {medications.length} medication{medications.length !== 1 ? 's' : ''} prescribed
               </p>
             </div>
             <div className="flex gap-2 print:hidden">
+              {editMode && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={handleAddMedication}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Medication
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -1169,47 +1333,166 @@ export default function ChronicProfessionalReport({
         <div className="space-y-6">
           {medications.length > 0 ? (
             medications.map((med: any, index: number) => (
-              <div key={index} className="border-l-4 border-green-500 pl-4 py-2">
-                <div className="font-bold text-lg">
-                  {index + 1}. {med.nom}
-                  {med.nonSubstituable && (
-                    <Badge className="ml-2 bg-red-100 text-red-800">Non-substitutable</Badge>
-                  )}
-                </div>
-                {med.denominationCommune && med.denominationCommune !== med.nom && (
-                  <p className="text-sm text-gray-600">Generic (INN): {med.denominationCommune}</p>
-                )}
-                <p className="mt-1">
-                  <span className="font-medium">Form:</span> {med.forme} - {med.dosage}
-                </p>
-                <p className="mt-1">
-                  <span className="font-medium">Frequency:</span> {med.posologie}
-                </p>
-                <p className="mt-1">
-                  <span className="font-medium">Route:</span> {med.modeAdministration}
-                </p>
-                <p className="mt-1">
-                  <span className="font-medium">Duration:</span> {med.dureeTraitement}
-                </p>
-                {med.quantite && (
-                  <p className="mt-1">
-                    <span className="font-medium">Quantity:</span> {med.quantite}
-                  </p>
-                )}
-                {med.instructions && (
-                  <p className="mt-2 text-sm text-gray-600 italic">
-                    ℹ️ {med.instructions}
-                  </p>
-                )}
-                {med.justification && (
-                  <p className="mt-1 text-sm text-gray-600">
-                    <span className="font-medium">Indication:</span> {med.justification}
-                  </p>
-                )}
-                {med.surveillanceParticuliere && (
-                  <p className="mt-1 text-sm text-orange-600">
-                    <span className="font-medium">⚠️ Monitoring:</span> {med.surveillanceParticuliere}
-                  </p>
+              <div key={index} className="border-l-4 border-green-500 pl-4 py-2 relative">
+                {editMode ? (
+                  // EDIT MODE - Editable fields
+                  <div className="space-y-3 bg-gray-50 p-4 rounded">
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-bold">Medication {index + 1}</h4>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleRemoveMedication(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Brand Name *</Label>
+                        <Input
+                          value={med.nom}
+                          onChange={(e) => handleUpdateMedication(index, 'nom', e.target.value)}
+                          placeholder="e.g., Metformin"
+                        />
+                      </div>
+                      <div>
+                        <Label>Generic Name (INN)</Label>
+                        <Input
+                          value={med.denominationCommune}
+                          onChange={(e) => handleUpdateMedication(index, 'denominationCommune', e.target.value)}
+                          placeholder="e.g., Metformin hydrochloride"
+                        />
+                      </div>
+                      <div>
+                        <Label>Form</Label>
+                        <Input
+                          value={med.forme}
+                          onChange={(e) => handleUpdateMedication(index, 'forme', e.target.value)}
+                          placeholder="e.g., Tablet"
+                        />
+                      </div>
+                      <div>
+                        <Label>Strength/Dosage</Label>
+                        <Input
+                          value={med.dosage}
+                          onChange={(e) => handleUpdateMedication(index, 'dosage', e.target.value)}
+                          placeholder="e.g., 500mg"
+                        />
+                      </div>
+                      <div>
+                        <Label>Frequency *</Label>
+                        <Input
+                          value={med.posologie}
+                          onChange={(e) => handleUpdateMedication(index, 'posologie', e.target.value)}
+                          placeholder="e.g., 1 tablet twice daily"
+                        />
+                      </div>
+                      <div>
+                        <Label>Route</Label>
+                        <Input
+                          value={med.modeAdministration}
+                          onChange={(e) => handleUpdateMedication(index, 'modeAdministration', e.target.value)}
+                          placeholder="e.g., Oral route"
+                        />
+                      </div>
+                      <div>
+                        <Label>Duration *</Label>
+                        <Input
+                          value={med.dureeTraitement}
+                          onChange={(e) => handleUpdateMedication(index, 'dureeTraitement', e.target.value)}
+                          placeholder="e.g., 3 months"
+                        />
+                      </div>
+                      <div>
+                        <Label>Quantity to Dispense</Label>
+                        <Input
+                          value={med.quantite}
+                          onChange={(e) => handleUpdateMedication(index, 'quantite', e.target.value)}
+                          placeholder="e.g., 180 tablets"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Label>Indication</Label>
+                        <Input
+                          value={med.justification}
+                          onChange={(e) => handleUpdateMedication(index, 'justification', e.target.value)}
+                          placeholder="e.g., Type 2 Diabetes management"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Label>Instructions for Patient</Label>
+                        <Textarea
+                          value={med.instructions}
+                          onChange={(e) => handleUpdateMedication(index, 'instructions', e.target.value)}
+                          placeholder="Special instructions..."
+                          rows={2}
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Label>Monitoring Requirements</Label>
+                        <Textarea
+                          value={med.surveillanceParticuliere}
+                          onChange={(e) => handleUpdateMedication(index, 'surveillanceParticuliere', e.target.value)}
+                          placeholder="e.g., Monitor blood glucose, check HbA1c every 3 months"
+                          rows={2}
+                        />
+                      </div>
+                      <div className="col-span-2 flex items-center gap-2">
+                        <Switch
+                          checked={med.nonSubstituable}
+                          onCheckedChange={(checked) => handleUpdateMedication(index, 'nonSubstituable', checked)}
+                        />
+                        <Label>Non-substitutable (brand-specific required)</Label>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  // VIEW MODE - Display only
+                  <>
+                    <div className="font-bold text-lg">
+                      {index + 1}. {med.nom}
+                      {med.nonSubstituable && (
+                        <Badge className="ml-2 bg-red-100 text-red-800">Non-substitutable</Badge>
+                      )}
+                    </div>
+                    {med.denominationCommune && med.denominationCommune !== med.nom && (
+                      <p className="text-sm text-gray-600">Generic (INN): {med.denominationCommune}</p>
+                    )}
+                    <p className="mt-1">
+                      <span className="font-medium">Form:</span> {med.forme} - {med.dosage}
+                    </p>
+                    <p className="mt-1">
+                      <span className="font-medium">Frequency:</span> {med.posologie}
+                    </p>
+                    <p className="mt-1">
+                      <span className="font-medium">Route:</span> {med.modeAdministration}
+                    </p>
+                    <p className="mt-1">
+                      <span className="font-medium">Duration:</span> {med.dureeTraitement}
+                    </p>
+                    {med.quantite && (
+                      <p className="mt-1">
+                        <span className="font-medium">Quantity:</span> {med.quantite}
+                      </p>
+                    )}
+                    {med.instructions && (
+                      <p className="mt-2 text-sm text-gray-600 italic">
+                        ℹ️ {med.instructions}
+                      </p>
+                    )}
+                    {med.justification && (
+                      <p className="mt-1 text-sm text-gray-600">
+                        <span className="font-medium">Indication:</span> {med.justification}
+                      </p>
+                    )}
+                    {med.surveillanceParticuliere && (
+                      <p className="mt-1 text-sm text-orange-600">
+                        <span className="font-medium">⚠️ Monitoring:</span> {med.surveillanceParticuliere}
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             ))
@@ -1217,6 +1500,12 @@ export default function ChronicProfessionalReport({
             <div className="text-center py-8 text-gray-500">
               <Pill className="h-12 w-12 mx-auto mb-4 text-gray-300" />
               <p>No medications prescribed</p>
+              {editMode && (
+                <Button onClick={handleAddMedication} className="mt-4">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add First Medication
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -2045,11 +2334,27 @@ export default function ChronicProfessionalReport({
                 {editMode ? 'Preview' : 'Edit'}
               </Button>
               
+              {hasUnsavedChanges && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleSave}
+                  disabled={saving || validationStatus === 'validated'}
+                >
+                  {saving ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4 mr-2" />
+                  )}
+                  Save Changes
+                </Button>
+              )}
+              
               <Button
                 variant="default"
                 size="sm"
                 onClick={handleValidation}
-                disabled={saving || validationStatus === 'validated'}
+                disabled={saving || validationStatus === 'validated' || hasUnsavedChanges}
               >
                 {saving ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
