@@ -768,53 +768,9 @@ export default function ChronicProfessionalReport({
             }
           }
           
-          // Update dietary protocol from chronic-dietary API
-          if (dietaryData && dietaryData.success && dietaryData.dietaryProtocol) {
-            const dietary = dietaryData.dietaryProtocol
-            console.log('🍽️ Dietary Protocol Data:', dietary)
-            
-            updatedReport.dietaryProtocol = {
-              header: {
-                title: dietary.protocolHeader?.protocolType || "Dietary Protocol for Chronic Disease Management",
-                patientName: prev.medicalReport.patient.fullName,
-                date: new Date().toISOString().split('T')[0]
-              },
-              nutritionalAssessment: {
-                currentDiet: dietary.nutritionalAssessment?.currentWeight ? 
-                  `Current weight: ${dietary.nutritionalAssessment.currentWeight}, Target: ${dietary.nutritionalAssessment.targetWeight}` : "",
-                nutritionalDeficiencies: dietary.nutritionalAssessment?.micronutrientFocus || [],
-                dietaryRestrictions: dietary.foodLists?.foodsToAvoid || [],
-                culturalConsiderations: dietary.culturalAdaptations ? "Mauritius cultural adaptations included" : ""
-              },
-              mealPlans: dietary.weeklyMealPlan ? {
-                breakfast: Object.values(dietary.weeklyMealPlan).map((day: any) => day.breakfast).filter(Boolean),
-                lunch: Object.values(dietary.weeklyMealPlan).map((day: any) => day.lunch).filter(Boolean),
-                dinner: Object.values(dietary.weeklyMealPlan).map((day: any) => day.dinner).filter(Boolean),
-                snacks: Object.values(dietary.weeklyMealPlan).flatMap((day: any) => 
-                  [day.midMorningSnack, day.afternoonSnack, day.eveningSnack].filter(Boolean)
-                )
-              } : {
-                breakfast: [],
-                lunch: [],
-                dinner: [],
-                snacks: []
-              },
-              nutritionalGuidelines: {
-                caloriesTarget: dietary.nutritionalAssessment?.recommendedCaloricIntake || "Calculated based on TDEE",
-                macronutrients: dietary.nutritionalAssessment?.macronutrientTargets || {},
-                micronutrients: dietary.nutritionalAssessment?.micronutrientFocus || [],
-                hydration: dietary.nutritionalAssessment?.hydrationTarget || "8-10 glasses daily"
-              },
-              forbiddenFoods: dietary.foodLists?.foodsToAvoid || [],
-              recommendedFoods: dietary.foodLists?.emphasizedFoods ? 
-                Object.values(dietary.foodLists.emphasizedFoods).flat() : [],
-              specialInstructions: dietary.practicalGuidance?.mealPrepTips || [],
-              followUpSchedule: dietary.monitoringAndFollowUp?.followUpSchedule?.initialPhase || "Monthly nutritional assessment"
-            }
-            console.log('🍽️ Dietary Protocol Updated Successfully')
-          } else {
-            console.log('⚠️ No dietary data from API, keeping existing data')
-          }
+          // Dietary protocol will be generated on-demand via button
+          // No dietary data from initial load - user will click button to generate
+          console.log('ℹ️ Dietary protocol will be generated on-demand via button click')
           
           console.log('✅ Updated Report Structure:', {
             hasMedicationPrescription: !!updatedReport.medicationPrescription,
