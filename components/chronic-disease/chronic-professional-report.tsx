@@ -392,6 +392,11 @@ export default function ChronicProfessionalReport({
   const [validationStatus, setValidationStatus] = useState<'draft' | 'validated'>('draft')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   
+  // Dietary on-demand generation state
+  const [dietaryLoading, setDietaryLoading] = useState(false)
+  const [dietaryError, setDietaryError] = useState<string | null>(null)
+  const [detailedDietaryGenerated, setDetailedDietaryGenerated] = useState(false)
+  
   // ==================== DATA GENERATION ====================
   
   // Warn before leaving with unsaved changes
@@ -550,9 +555,9 @@ export default function ChronicProfessionalReport({
         const normalizedPatientData = normalizePatientData(patientData)
         console.log('✅ Normalized patient data:', normalizedPatientData)
         
-        // Now fetch the FOUR API responses in parallel (report, prescription, examens, dietary)
-        // Using Promise.allSettled to allow dietary API to fail without breaking workflow
-        const results = await Promise.allSettled([
+        // Now fetch only the THREE critical API responses in parallel (report, prescription, examens)
+        // Dietary plan will be generated ON-DEMAND when user clicks button
+        const [reportResponse, prescriptionResponse, examensResponse] = await Promise.all([
           fetch("/api/chronic-report", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -580,47 +585,25 @@ export default function ChronicProfessionalReport({
               clinicalData,
               diagnosisData 
             })
-          }),
-          fetch("/api/chronic-dietary", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-              patientData: normalizedPatientData, 
-              diagnosisData,
-              clinicalData 
-            })
           })
         ])
         
-        // Extract responses (first 3 are critical, 4th is optional)
-        const reportResponse = results[0].status === 'fulfilled' ? results[0].value : null
-        const prescriptionResponse = results[1].status === 'fulfilled' ? results[1].value : null
-        const examensResponse = results[2].status === 'fulfilled' ? results[2].value : null
-        const dietaryResponse = results[3].status === 'fulfilled' ? results[3].value : null
-        
-        // Check critical APIs (first 3)
-        if (!reportResponse || !reportResponse.ok) {
-          throw new Error(`Report API failed: ${reportResponse?.statusText || 'Network error'}`)
+        // Check all critical APIs
+        if (!reportResponse.ok) {
+          throw new Error(`Report API failed: ${reportResponse.statusText}`)
         }
-        if (!prescriptionResponse || !prescriptionResponse.ok) {
-          throw new Error(`Prescription API failed: ${prescriptionResponse?.statusText || 'Network error'}`)
+        if (!prescriptionResponse.ok) {
+          throw new Error(`Prescription API failed: ${prescriptionResponse.statusText}`)
         }
-        if (!examensResponse || !examensResponse.ok) {
-          throw new Error(`Examens API failed: ${examensResponse?.statusText || 'Network error'}`)
-        }
-        
-        // Dietary API is optional - just warn if it fails
-        if (!dietaryResponse || !dietaryResponse.ok) {
-          console.warn('⚠️ Dietary API failed (non-critical) - continuing without detailed meal plan')
-          if (results[3].status === 'rejected') {
-            console.warn('Dietary API error:', results[3].reason)
-          }
+        if (!examensResponse.ok) {
+          throw new Error(`Examens API failed: ${examensResponse.statusText}`)
         }
         
         const reportData = await reportResponse.json()
         const prescriptionData = await prescriptionResponse.json()
         const examensData = await examensResponse.json()
-        const dietaryData = (dietaryResponse && dietaryResponse.ok) ? await dietaryResponse.json().catch(() => null) : null
+        
+        // NO dietary API call here - will be called on-demand via button
         
         console.log('📊 API Response - Report:', reportData)
         console.log('💊 API Response - Prescription:', prescriptionData)
@@ -995,6 +978,114 @@ export default function ChronicProfessionalReport({
       setSaving(false)
     }
   }, [hasUnsavedChanges, report])
+  
+  // Handle on-demand dietary plan generation
+  const handleGenerateDietaryPlan = useCallback(async () => {
+    setDietaryLoading(true)
+    setDietaryError(null)
+    
+    try {
+      console.log('🍽️ Starting on-demand dietary plan generation...')
+      
+      // Normalize patient data before sending
+      const normalizedPatientData = normalizePatientData(patientData)
+      
+      const response = await fetch("/api/chronic-dietary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patientData: normalizedPatientData,
+          clinicalData,
+          diagnosisData
+        })
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Dietary API failed: ${response.statusText}`)
+      }
+      
+      const dietaryData = await response.json()
+      console.log('✅ Dietary data received:', dietaryData)
+      
+      if (dietaryData.success && dietaryData.dietaryProtocol) {
+        const dietary = dietaryData.dietaryProtocol
+        
+        // Update report with detailed dietary protocol
+        setReport(prev => {
+          if (!prev) return null
+          
+          return {
+            ...prev,
+            dietaryProtocol: {
+              header: {
+                title: dietary.protocolHeader?.protocolType || "Detailed Dietary Protocol for Chronic Disease Management",
+                patientName: prev.medicalReport.patient.fullName,
+                date: dietary.protocolHeader?.issueDate || new Date().toISOString().split('T')[0]
+              },
+              nutritionalAssessment: {
+                currentDiet: dietary.nutritionalAssessment?.currentWeight 
+                  ? `Weight: ${dietary.nutritionalAssessment.currentWeight} kg, BMI: ${dietary.nutritionalAssessment.bmi}, Target: ${dietary.nutritionalAssessment.targetWeight} kg`
+                  : dietary.nutritionalAssessment?.currentDiet || "",
+                nutritionalDeficiencies: dietary.nutritionalAssessment?.diseaseSpecificGoals || [],
+                dietaryRestrictions: [],
+                culturalConsiderations: "Mauritius cultural adaptations included"
+              },
+              // Store the full weekly meal plan
+              weeklyMealPlan: dietary.weeklyMealPlan || {},
+              practicalGuidance: dietary.practicalGuidance || {},
+              mealPlans: {
+                breakfast: dietary.weeklyMealPlan?.day1?.breakfast?.foods?.map((f: any) => 
+                  `${f.item} (${f.quantity}) - ${f.calories} kcal`
+                ) || [],
+                lunch: dietary.weeklyMealPlan?.day1?.lunch?.foods?.map((f: any) => 
+                  `${f.item} (${f.quantity}) - ${f.calories} kcal`
+                ) || [],
+                dinner: dietary.weeklyMealPlan?.day1?.dinner?.foods?.map((f: any) => 
+                  `${f.item} (${f.quantity}) - ${f.calories} kcal`
+                ) || [],
+                snacks: dietary.weeklyMealPlan?.day1?.midMorningSnack?.foods?.map((f: any) => 
+                  `${f.item} (${f.quantity}) - ${f.calories} kcal`
+                ) || []
+              },
+              nutritionalGuidelines: {
+                caloriesTarget: dietary.nutritionalAssessment?.dailyCaloricNeeds?.targetCalories || "1600 kcal",
+                macronutrients: dietary.nutritionalAssessment?.dailyCaloricNeeds?.macroDistribution || {},
+                micronutrients: [],
+                hydration: "8-10 glasses of water daily"
+              },
+              forbiddenFoods: dietary.practicalGuidance?.cookingMethods?.avoid || [],
+              recommendedFoods: dietary.practicalGuidance?.groceryList?.proteins || [],
+              specialInstructions: dietary.practicalGuidance?.mealPrepTips || [],
+              followUpSchedule: dietary.monitoringAndAdjustments?.progressMilestones?.week4 || "Monthly nutritional assessment"
+            }
+          }
+        })
+        
+        setDetailedDietaryGenerated(true)
+        setHasUnsavedChanges(true)
+        
+        toast({
+          title: "Success",
+          description: "Detailed 7-day dietary plan generated successfully!",
+        })
+        
+        console.log('✅ Detailed dietary plan generated and integrated')
+      } else {
+        throw new Error("Invalid dietary data received from API")
+      }
+      
+    } catch (err: any) {
+      console.error('❌ Dietary generation error:', err)
+      setDietaryError(err.message || "Failed to generate dietary plan")
+      toast({
+        title: "Generation Failed",
+        description: `Could not generate detailed dietary plan: ${err.message}`,
+        variant: "destructive",
+      })
+    } finally {
+      setDietaryLoading(false)
+    }
+  }, [patientData, clinicalData, diagnosisData])
   
   // ==================== RENDER HELPERS ====================
   
@@ -1917,7 +2008,31 @@ export default function ChronicProfessionalReport({
         <Card>
           <CardContent className="p-8 text-center">
             <Utensils className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p className="text-gray-600">No dietary protocol available</p>
+            <p className="text-gray-600 mb-4">No dietary protocol available</p>
+            <Button
+              onClick={handleGenerateDietaryPlan}
+              disabled={dietaryLoading}
+              size="lg"
+              className="bg-orange-600 hover:bg-orange-700"
+            >
+              {dietaryLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating Detailed Plan...
+                </>
+              ) : (
+                <>
+                  <Utensils className="h-4 w-4 mr-2" />
+                  Generate Detailed 7-Day Meal Plan
+                </>
+              )}
+            </Button>
+            {dietaryError && (
+              <Alert variant="destructive" className="mt-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{dietaryError}</AlertDescription>
+              </Alert>
+            )}
           </CardContent>
         </Card>
       )
@@ -1935,9 +2050,46 @@ export default function ChronicProfessionalReport({
                 {dietaryProtocol.header.title}
               </h2>
               <p className="text-gray-600 mt-1">Personalized Nutrition Plan</p>
+              {!detailedDietaryGenerated && (
+                <p className="text-sm text-orange-600 mt-1 font-medium">
+                  📋 Basic meal plan from diagnosis. Click button to generate detailed 7-day plan.
+                </p>
+              )}
+              {detailedDietaryGenerated && (
+                <p className="text-sm text-green-600 mt-1 font-medium">
+                  ✓ Detailed 7-day meal plan generated with exact portions and nutrition
+                </p>
+              )}
               <p className="text-sm text-gray-500 mt-1">Patient: {dietaryProtocol.header.patientName}</p>
             </div>
             <div className="flex gap-2 print:hidden">
+              {!detailedDietaryGenerated && !dietaryLoading && (
+                <Button
+                  onClick={handleGenerateDietaryPlan}
+                  variant="default"
+                  size="sm"
+                  className="bg-orange-600 hover:bg-orange-700"
+                >
+                  <Utensils className="h-4 w-4 mr-2" />
+                  Generate Detailed 7-Day Plan
+                </Button>
+              )}
+              {dietaryLoading && (
+                <Button disabled size="sm">
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating...
+                </Button>
+              )}
+              {detailedDietaryGenerated && (
+                <Button
+                  onClick={handleGenerateDietaryPlan}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Utensils className="h-4 w-4 mr-2" />
+                  Regenerate Plan
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -1949,6 +2101,14 @@ export default function ChronicProfessionalReport({
             </div>
           </div>
         </div>
+        
+        {/* Show error if dietary generation failed */}
+        {dietaryError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{dietaryError}</AlertDescription>
+          </Alert>
+        )}
         
         {/* Nutritional Assessment */}
         {dietaryProtocol.nutritionalAssessment && (
