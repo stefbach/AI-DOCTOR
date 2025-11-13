@@ -652,13 +652,22 @@ export default function ChronicProfessionalReport({
               nonSubstituable: false
             }))
             
+            // Ensure specialInstructions is always an array
+            const counselingPoints = presData.pharmacistNotes?.counselingPoints
+            let specialInstructions: string[] = []
+            if (Array.isArray(counselingPoints)) {
+              specialInstructions = counselingPoints
+            } else if (typeof counselingPoints === 'string' && counselingPoints.trim()) {
+              specialInstructions = [counselingPoints]
+            }
+            
             updatedReport.medicationPrescription = {
               header: prev.medicalReport.practitioner,
               patient: prev.medicalReport.patient,
               prescription: {
                 datePrescription: new Date().toISOString().split('T')[0],
                 medications: transformedMeds,
-                specialInstructions: presData.pharmacistNotes?.counselingPoints || [],
+                specialInstructions: specialInstructions,
                 validity: presData.prescriptionHeader?.validityPeriod || "3 months unless otherwise specified"
               },
               authentication: {
