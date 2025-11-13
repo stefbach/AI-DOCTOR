@@ -197,7 +197,7 @@ export default function ModernPatientForm({
  ...data
  }))
  const [errors, setErrors] = useState<ValidationErrors>({})
- const [consultationType, setConsultationType] = useState<'normal' | 'chronic' | ''>('')
+ const [consultationType, setConsultationType] = useState<'normal' | 'chronic' | 'dermatology' | ''>('')
  const [allergySearch, setAllergySearch] = useState("")
  const [historySearch, setHistorySearch] = useState("")
  const [currentSection, setCurrentSection] = useState(0)
@@ -605,6 +605,19 @@ export default function ModernPatientForm({
  
  // Redirect to chronic disease workflow
  window.location.href = '/chronic-disease'
+ return
+ }
+ 
+ // ========== USER CHOICE: DERMATOLOGY WORKFLOW ==========
+ if (consultationType === 'dermatology') {
+ console.log('🔬 User selected Dermatology Consultation, redirecting to dermatology workflow...')
+ 
+ // Store patient data for dermatology workflow
+ sessionStorage.setItem('dermatologyPatientData', JSON.stringify(formData))
+ sessionStorage.setItem('isDermatologyWorkflow', 'true')
+ 
+ // Redirect to dermatology workflow
+ window.location.href = '/dermatology'
  return
  }
  
@@ -1634,7 +1647,7 @@ Example:
  
  <RadioGroup 
  value={consultationType} 
- onValueChange={(value) => setConsultationType(value as 'normal' | 'chronic')}
+ onValueChange={(value) => setConsultationType(value as 'normal' | 'chronic' | 'dermatology')}
  className="space-y-4"
  >
  {/* Normal Consultation Option */}
@@ -1703,6 +1716,41 @@ Example:
  </div>
  </div>
  </label>
+
+ {/* Dermatology Consultation Option */}
+ <label 
+ className={`flex items-start gap-4 p-6 rounded-xl border-3 transition-all cursor-pointer ${
+ consultationType === 'dermatology'
+ ? "border-teal-500 bg-teal-50 shadow-lg scale-[1.02]"
+ : "border-gray-300 hover:border-teal-400 hover:bg-teal-50/50"
+ }`}
+ >
+ <RadioGroupItem value="dermatology" id="consultation-dermatology" className="mt-1" />
+ <div className="flex-1">
+ <div className="flex items-center gap-2 mb-2">
+ <span className="text-2xl">🔬</span>
+ <span className="font-bold text-xl text-teal-900">Dermatology Consultation</span>
+ </div>
+ <p className="text-gray-600 text-sm leading-relaxed">
+ Specialized dermatological consultation with image analysis. Upload photos of skin conditions 
+ for AI-powered analysis by a dermatology specialist, followed by comprehensive diagnosis and treatment plan.
+ </p>
+ <div className="mt-3 flex flex-wrap gap-2">
+ <Badge variant="secondary" className="bg-teal-100 text-teal-800">
+ Skin lesions
+ </Badge>
+ <Badge variant="secondary" className="bg-teal-100 text-teal-800">
+ Rashes
+ </Badge>
+ <Badge variant="secondary" className="bg-teal-100 text-teal-800">
+ Image analysis
+ </Badge>
+ <Badge variant="secondary" className="bg-teal-100 text-teal-800">
+ AI-powered OCR
+ </Badge>
+ </div>
+ </div>
+ </label>
  </RadioGroup>
 
  {consultationType && (
@@ -1712,7 +1760,9 @@ Example:
  <span className="font-medium">
  {consultationType === 'normal' 
  ? '✅ Normal Consultation selected - Standard medical workflow'
- : '✅ Chronic Disease Follow-up selected - Specialized management workflow'}
+ : consultationType === 'chronic'
+ ? '✅ Chronic Disease Follow-up selected - Specialized management workflow'
+ : '✅ Dermatology Consultation selected - Image analysis and specialized diagnosis'}
  </span>
  </div>
  </div>
@@ -1734,6 +1784,8 @@ Example:
  >
  {consultationType === 'chronic' 
  ? 'Continue to Chronic Disease Management'
+ : consultationType === 'dermatology'
+ ? 'Continue to Dermatology Analysis'
  : 'Continue to Clinical Information'}
  <ArrowRight className="h-5 w-5 ml-2" />
  </Button>
