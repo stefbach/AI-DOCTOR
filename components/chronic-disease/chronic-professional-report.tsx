@@ -605,16 +605,36 @@ export default function ChronicProfessionalReport({
           }
           
           // Update medication prescription from chronic-prescription API
-          if (prescriptionData.ordonnance || prescriptionData.prescription) {
-            const presData = prescriptionData.ordonnance || prescriptionData.prescription
+          // API returns: { success: true, prescription: { chronicMedications: [...], ... } }
+          if (prescriptionData.success && prescriptionData.prescription) {
+            const presData = prescriptionData.prescription
+            console.log('💊 Prescription Data Structure:', presData)
+            
+            // Transform chronicMedications to match expected structure
+            const medications = presData.chronicMedications || []
+            const transformedMeds = medications.map((med: any) => ({
+              nom: med.brandName || med.dci || '',
+              denominationCommune: med.dci || med.genericName || '',
+              dosage: med.strength || '',
+              forme: med.dosageForm || 'tablet',
+              posologie: med.posology?.frequency || med.posology?.dosage || '',
+              modeAdministration: med.posology?.route || 'Oral route',
+              dureeTraitement: med.treatment?.duration || 'Long-term chronic treatment',
+              quantite: med.treatment?.totalQuantity || '1 box',
+              instructions: med.posology?.specificInstructions || '',
+              justification: med.indication?.chronicDisease || '',
+              surveillanceParticuliere: med.monitoring?.clinicalMonitoring || '',
+              nonSubstituable: false
+            }))
+            
             updatedReport.medicationPrescription = {
               header: prev.medicalReport.practitioner,
               patient: prev.medicalReport.patient,
               prescription: {
                 datePrescription: new Date().toISOString().split('T')[0],
-                medications: sanitizeMedications(presData.medicaments || presData.medications || []),
-                specialInstructions: presData.instructionsSpeciales || presData.specialInstructions || [],
-                validity: "3 months unless otherwise specified"
+                medications: transformedMeds,
+                specialInstructions: presData.pharmacistNotes?.counselingPoints || [],
+                validity: presData.prescriptionHeader?.validityPeriod || "3 months unless otherwise specified"
               },
               authentication: {
                 signature: "Medical Practitioner's Signature",
@@ -623,24 +643,63 @@ export default function ChronicProfessionalReport({
                 date: new Date().toISOString().split('T')[0]
               }
             }
+            console.log('💊 Transformed Medications:', transformedMeds.length, 'medications')
           }
           
           // Update laboratory tests and paraclinical exams from chronic-examens API
-          if (examensData.examens || examensData.exams) {
-            const examData = examensData.examens || examensData.exams
+          // API returns: { success: true, examOrders: { laboratoryTests: [...], paraclinicalExams: [...] } }
+          if (examensData.success && examensData.examOrders) {
+            const examOrders = examensData.examOrders
+            console.log('🧪 Exam Orders Structure:', examOrders)
             
             // Laboratory tests
-            if (examData.biologie || examData.laboratoryTests) {
-              const bioData = examData.biologie || examData.laboratoryTests
+            if (examOrders.laboratoryTests && examOrders.laboratoryTests.length > 0) {
+              const labTests = examOrders.laboratoryTests
+              
+              // Group tests by category
+              const groupedTests: any = {
+                hematology: [],
+                clinicalChemistry: [],
+                immunology: [],
+                microbiology: [],
+                endocrinology: [],
+                general: []
+              }
+              
+              labTests.forEach((test: any) => {
+                const testObj = {
+                  nom: test.testName || '',
+                  indication: test.clinicalIndication || '',
+                  urgence: test.urgency === 'URGENT',
+                  aJeun: test.preparation?.fasting || false,
+                  instructions: test.preparation?.otherInstructions || ''
+                }
+                
+                const category = test.category?.toLowerCase() || ''
+                if (category.includes('hémat') || category.includes('hemat')) {
+                  groupedTests.hematology.push(testObj)
+                } else if (category.includes('biochi') || category.includes('chemistry')) {
+                  groupedTests.clinicalChemistry.push(testObj)
+                } else if (category.includes('immun')) {
+                  groupedTests.immunology.push(testObj)
+                } else if (category.includes('micro')) {
+                  groupedTests.microbiology.push(testObj)
+                } else if (category.includes('endocrin')) {
+                  groupedTests.endocrinology.push(testObj)
+                } else {
+                  groupedTests.general.push(testObj)
+                }
+              })
+              
               updatedReport.laboratoryTests = {
                 header: prev.medicalReport.practitioner,
                 patient: prev.medicalReport.patient,
                 prescription: {
                   datePrescription: new Date().toISOString().split('T')[0],
-                  clinicalIndication: bioData.indicationClinique || bioData.clinicalIndication || "",
-                  tests: bioData.analyses || bioData.tests || {},
-                  specialInstructions: bioData.instructionsSpeciales || [],
-                  recommendedLaboratory: bioData.laboratoireRecommande || ""
+                  clinicalIndication: examOrders.orderHeader?.clinicalContext || "Chronic disease monitoring",
+                  tests: groupedTests,
+                  specialInstructions: [],
+                  recommendedLaboratory: ""
                 },
                 authentication: {
                   signature: "Medical Practitioner's Signature",
@@ -649,18 +708,29 @@ export default function ChronicProfessionalReport({
                   date: new Date().toISOString().split('T')[0]
                 }
               }
+              console.log('🧪 Laboratory Tests Grouped:', Object.keys(groupedTests).map(k => `${k}: ${groupedTests[k].length}`).join(', '))
             }
             
             // Paraclinical exams (imaging, etc.)
-            if (examData.imagerie || examData.paraclinicalExams || examData.imaging) {
-              const imagData = examData.imagerie || examData.paraclinicalExams || examData.imaging
+            if (examOrders.paraclinicalExams && examOrders.paraclinicalExams.length > 0) {
+              const paraclinicalExams = examOrders.paraclinicalExams.map((exam: any) => ({
+                type: exam.examName || exam.examType || '',
+                modality: exam.category || 'IMAGING',
+                region: exam.technicalSpecifications?.views || '',
+                clinicalIndication: exam.clinicalIndication || '',
+                urgency: exam.urgency === 'URGENT',
+                contrast: exam.preparation?.contrastAllergy !== undefined,
+                specificProtocol: exam.technicalSpecifications?.specificProtocol || '',
+                diagnosticQuestion: exam.expectedFindings?.concerningFindings || ''
+              }))
+              
               updatedReport.paraclinicalExams = {
                 header: prev.medicalReport.practitioner,
                 patient: prev.medicalReport.patient,
                 prescription: {
                   datePrescription: new Date().toISOString().split('T')[0],
-                  exams: imagData.examens || imagData.exams || [],
-                  specialInstructions: imagData.instructionsSpeciales || []
+                  exams: paraclinicalExams,
+                  specialInstructions: []
                 },
                 authentication: {
                   signature: "Medical Practitioner's Signature",
@@ -669,6 +739,7 @@ export default function ChronicProfessionalReport({
                   date: new Date().toISOString().split('T')[0]
                 }
               }
+              console.log('🏥 Paraclinical Exams:', paraclinicalExams.length, 'exams')
             }
           }
           
