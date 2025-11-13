@@ -2037,7 +2037,6 @@ export default function ChronicProfessionalReport({
                   ✓ Detailed 7-day meal plan generated with exact portions and nutrition
                 </p>
               )}
-              <p className="text-sm text-gray-500 mt-1">Patient: {dietaryProtocol.header.patientName}</p>
             </div>
             <div className="flex gap-2 print:hidden">
               {!detailedDietaryGenerated && !dietaryLoading && (
@@ -2076,6 +2075,20 @@ export default function ChronicProfessionalReport({
                 Export PDF
               </Button>
             </div>
+          </div>
+        </div>
+        
+        {/* Patient Info */}
+        <div className="mb-6 p-4 bg-gray-50 rounded">
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div><strong>Patient:</strong> {report.medicalReport.patient.fullName}</div>
+            <div><strong>Date:</strong> {dietaryProtocol.header.date}</div>
+            <div><strong>Age:</strong> {report.medicalReport.patient.age}</div>
+            <div><strong>Gender:</strong> {report.medicalReport.patient.gender}</div>
+            {report.medicalReport.patient.nationalId && (
+              <div><strong>National ID:</strong> {report.medicalReport.patient.nationalId}</div>
+            )}
+            <div><strong>Address:</strong> {report.medicalReport.patient.address}</div>
           </div>
         </div>
         
