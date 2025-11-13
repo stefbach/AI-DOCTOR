@@ -955,10 +955,7 @@ export default function ChronicProfessionalReport({
       // Normalize patient data before sending
       const normalizedPatientData = normalizePatientData(patientData)
       
-      // Create abort controller with 60 second timeout
-      const abortController = new AbortController()
-      const timeoutId = setTimeout(() => abortController.abort(), 60000)
-      
+      // Call dietary API without AbortController (like other working APIs)
       const response = await fetch("/api/chronic-dietary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -966,11 +963,8 @@ export default function ChronicProfessionalReport({
           patientData: normalizedPatientData,
           clinicalData,
           diagnosisData
-        }),
-        signal: abortController.signal
+        })
       })
-      
-      clearTimeout(timeoutId)
       
       if (!response.ok) {
         const errorText = await response.text()
@@ -1053,9 +1047,7 @@ export default function ChronicProfessionalReport({
       
       // Provide specific error messages based on error type
       let errorMessage = "Failed to generate dietary plan"
-      if (err.name === 'AbortError') {
-        errorMessage = "Request timed out after 60 seconds. Please try again."
-      } else if (err.message.includes('Failed to fetch')) {
+      if (err.message.includes('Failed to fetch')) {
         errorMessage = "Network error: Could not reach the server. Please check your connection and try again."
       } else {
         errorMessage = err.message || errorMessage

@@ -6,7 +6,7 @@ import { openai } from "@ai-sdk/openai"
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
-export const maxDuration = 60 // Allow up to 60 seconds for this API route
+// Note: maxDuration removed - using default Vercel timeout like other working APIs
 
 export async function POST(req: NextRequest) {
   try {
