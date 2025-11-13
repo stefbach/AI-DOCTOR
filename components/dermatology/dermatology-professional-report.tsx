@@ -76,15 +76,107 @@ export default function DermatologyProfessionalReport(props: Props) {
     workRestrictions: ''
   })
 
-  // Generate consultation report on mount with proper formatting
+  // Loading state for initial report generation
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false)
+
+  // Generate consultation report on mount using comprehensive API
   useEffect(() => {
-    const report = generateConsultationReport(props)
-    setConsultationReport(report)
-    
-    // Extract medications and tests from diagnosis
-    extractMedicationsFromDiagnosis()
-    extractTestsFromDiagnosis()
+    generateComprehensiveReport()
   }, [])
+
+  async function generateComprehensiveReport() {
+    setIsGeneratingReport(true)
+    setIsExtractingMedications(true)
+    setIsExtractingTests(true)
+
+    try {
+      // Call the comprehensive dermatology report API
+      const response = await fetch('/api/generate-dermatology-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientData: props.patientData,
+          imageData: props.imageData,
+          ocrAnalysisData: props.ocrAnalysisData,
+          questionsData: props.questionsData,
+          diagnosisData: props.diagnosisData,
+          doctorData: {
+            fullName: 'Médecin Dermatologue',
+            qualifications: 'MBBS, MD (Dermatology)',
+            specialty: 'Dermatology',
+            clinicAddress: 'Tibok Teleconsultation Platform',
+            email: 'contact@tibok.mu',
+            consultationHours: 'Téléconsultation: 8h - 20h',
+            medicalCouncilNumber: '[MCM Registration Required]'
+          }
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        
+        if (data.success && data.report) {
+          // Set consultation report
+          setConsultationReport(data.report.consultationReport?.fullText || generateConsultationReport(props))
+          
+          // Set medications from API
+          if (data.report.prescriptions?.medications?.length > 0) {
+            setMedications(data.report.prescriptions.medications)
+            toast({
+              title: "Médicaments extraits",
+              description: `${data.report.prescriptions.medications.length} médicament(s) ajouté(s) automatiquement`,
+              duration: 3000
+            })
+          }
+          
+          // Set lab tests from API
+          if (data.report.prescriptions?.laboratoryTests?.length > 0) {
+            setBiologyTests(data.report.prescriptions.laboratoryTests)
+            toast({
+              title: "Examens extraits",
+              description: `${data.report.prescriptions.laboratoryTests.length} examen(s) ajouté(s) automatiquement`,
+              duration: 3000
+            })
+          }
+
+          // Set imaging studies from API
+          if (data.report.prescriptions?.imagingStudies?.length > 0) {
+            setImagingExams(data.report.prescriptions.imagingStudies)
+          }
+
+          toast({
+            title: "✅ Rapport généré",
+            description: "Rapport professionnel complet généré avec succès",
+            duration: 4000
+          })
+        } else {
+          throw new Error('Invalid API response')
+        }
+      } else {
+        throw new Error('API request failed')
+      }
+    } catch (error) {
+      console.error('Error generating comprehensive report:', error)
+      // Fallback to local generation
+      const report = generateConsultationReport(props)
+      setConsultationReport(report)
+      
+      // Try individual extraction as fallback
+      extractMedicationsFromDiagnosis()
+      extractTestsFromDiagnosis()
+      
+      toast({
+        title: "⚠️ Génération simplifiée",
+        description: "Rapport généré localement. Extraction intelligente non disponible.",
+        variant: "destructive",
+        duration: 4000
+      })
+    } finally {
+      setIsGeneratingReport(false)
+      setIsExtractingMedications(false)
+      setIsExtractingTests(false)
+    }
+  }
 
   function generateConsultationReport(data: any) {
     const patient = data.patientData
@@ -650,20 +742,38 @@ Date: ${new Date().toLocaleDateString('fr-FR')}
             <TabsContent value="consultation" className="space-y-4 mt-6">
               <div className="space-y-4">
                 <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
-                  <p className="text-sm text-teal-800">
-                    <strong>✨ Rapport structuré et formaté automatiquement</strong> - Ce compte rendu suit les standards professionnels de documentation médicale dermatologique.
+                  <p className="text-sm text-teal-800 flex items-center gap-2">
+                    {isGeneratingReport && <Loader2 className="h-4 w-4 animate-spin" />}
+                    <strong>✨ Rapport structuré et formaté automatiquement</strong> - Ce compte rendu suit les standards professionnels de documentation médicale dermatologique avec extraction intelligente via IA.
                   </p>
                 </div>
-                <Textarea 
-                  value={consultationReport} 
-                  onChange={(e) => setConsultationReport(e.target.value)} 
-                  className="min-h-[700px] font-mono text-sm"
-                  placeholder="Génération du rapport en cours..."
-                />
-                <Button onClick={downloadConsultationReport} className="bg-gradient-to-r from-teal-600 to-cyan-600">
-                  <Download className="h-4 w-4 mr-2" />
-                  Télécharger le Compte Rendu
-                </Button>
+                
+                {isGeneratingReport ? (
+                  <Card className="border-teal-200">
+                    <CardContent className="p-12 text-center">
+                      <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-teal-600" />
+                      <h3 className="text-lg font-semibold text-teal-900 mb-2">
+                        Génération du rapport professionnel en cours...
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        L'IA analyse toutes les données et génère un compte rendu structuré complet avec extraction automatique des médicaments et examens.
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <>
+                    <Textarea 
+                      value={consultationReport} 
+                      onChange={(e) => setConsultationReport(e.target.value)} 
+                      className="min-h-[700px] font-mono text-sm"
+                      placeholder="Génération du rapport en cours..."
+                    />
+                    <Button onClick={downloadConsultationReport} className="bg-gradient-to-r from-teal-600 to-cyan-600">
+                      <Download className="h-4 w-4 mr-2" />
+                      Télécharger le Compte Rendu
+                    </Button>
+                  </>
+                )}
               </div>
             </TabsContent>
 
