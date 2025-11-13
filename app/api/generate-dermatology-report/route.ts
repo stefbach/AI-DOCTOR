@@ -120,8 +120,8 @@ export async function POST(request: NextRequest) {
     const reportStructure = {
       compteRendu: {
         header: {
-          title: "COMPTE RENDU DE CONSULTATION DERMATOLOGIQUE",
-          subtitle: "Documentation Médicale Professionnelle - Dermatologie",
+          title: "DERMATOLOGY CONSULTATION REPORT",
+          subtitle: "Professional Medical Documentation - Dermatology",
           reference: `DERM-${Date.now()}`,
           consultationType: "Dermatology - Teleconsultation with Image Analysis"
         },
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
           medicamentsActuels: patient.currentMedications
         },
         rapport: {
-          motifConsultation: narrativeReport.chiefComplaint || 'Consultation dermatologique avec analyse d\'images',
+          motifConsultation: narrativeReport.chiefComplaint || 'Dermatological consultation with image analysis',
           anamnese: narrativeReport.historyPresentIllness || '',
           antecedents: narrativeReport.pastMedicalHistory || patient.medicalHistory,
           examenClinique: narrativeReport.examinationFindings || ocrAnalysis,
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
           priseEnCharge: narrativeReport.treatmentPlan || '',
           educationPatient: narrativeReport.patientEducation || '',
           surveillance: narrativeReport.followUp || '',
-          conclusion: narrativeReport.conclusion || 'Consultation dermatologique complète avec analyse d\'images et recommandations thérapeutiques.'
+          conclusion: narrativeReport.conclusion || 'Complete dermatological consultation with image analysis and therapeutic recommendations.'
         },
         imageAnalysis: {
           summary: ocrAnalysisData?.summary || '',
@@ -547,7 +547,7 @@ async function generateNarrativeReportAI(
   imageData: any
 ): Promise<any> {
   try {
-    const prompt = `Generate a professional dermatology consultation report in FRENCH with these sections as separate fields:
+    const prompt = `Generate a professional dermatology consultation report in ENGLISH with these sections as separate fields:
 
 PATIENT: ${patient.name}, ${patient.age} years, ${patient.gender}
 ALLERGIES: ${patient.allergies}
@@ -560,26 +560,26 @@ ${ocrAnalysis}
 DIAGNOSIS:
 ${diagnosis}
 
-Return JSON with these EXACT keys:
+Return JSON with these EXACT keys (ALL CONTENT IN ENGLISH):
 {
-  "chiefComplaint": "Motif de consultation",
-  "historyPresentIllness": "Histoire de la maladie",
-  "pastMedicalHistory": "Antécédents médicaux",
-  "examinationFindings": "Résultats de l'examen avec analyse d'images",
-  "diagnosis": "Diagnostic principal",
-  "differentialDiagnosis": "Diagnostics différentiels",
-  "treatmentPlan": "Plan de traitement",
-  "patientEducation": "Éducation du patient",
-  "followUp": "Plan de suivi",
+  "chiefComplaint": "Chief complaint / reason for consultation",
+  "historyPresentIllness": "History of present illness",
+  "pastMedicalHistory": "Past medical history",
+  "examinationFindings": "Examination findings with image analysis",
+  "diagnosis": "Primary diagnosis",
+  "differentialDiagnosis": "Differential diagnoses",
+  "treatmentPlan": "Treatment plan",
+  "patientEducation": "Patient education",
+  "followUp": "Follow-up plan",
   "conclusion": "Conclusion"
 }
 
-Write in professional French medical style.`
+IMPORTANT: Write ALL content in professional ENGLISH medical style. Do NOT use French.`
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
-        { role: "system", content: "Generate professional French medical report as JSON only." },
+        { role: "system", content: "You are a dermatology specialist. Generate professional ENGLISH medical report as JSON only. ALL content must be in ENGLISH." },
         { role: "user", content: prompt }
       ],
       temperature: 0.4,
@@ -592,16 +592,16 @@ Write in professional French medical style.`
   } catch (error) {
     console.error('Error generating narrative:', error)
     return {
-      chiefComplaint: "Consultation dermatologique avec analyse d'images",
-      historyPresentIllness: "En attente",
+      chiefComplaint: "Dermatological consultation with image analysis",
+      historyPresentIllness: "Pending",
       pastMedicalHistory: patient.medicalHistory,
       examinationFindings: ocrAnalysis,
       diagnosis: diagnosis.substring(0, 500),
       differentialDiagnosis: "",
-      treatmentPlan: "Voir ordonnance",
+      treatmentPlan: "See prescription",
       patientEducation: "",
-      followUp: "Suivi dans 2-4 semaines",
-      conclusion: "Consultation complète"
+      followUp: "Follow-up in 2-4 weeks",
+      conclusion: "Complete consultation"
     }
   }
 }
