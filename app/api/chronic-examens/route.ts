@@ -258,6 +258,11 @@ IMPORTANT:
 9. Define follow-up actions based on results
 10. Use English medical terminology with Anglo-Saxon standards`
 
+    // Calculate BMI for clinical context
+    const weight = parseFloat(patientData.weight)
+    const heightInMeters = parseFloat(patientData.height) / 100
+    const bmi = weight / (heightInMeters * heightInMeters)
+
     const patientContext = `
 EXAM ORDER DATE: ${orderDate.toLocaleDateString('fr-MU', { day: '2-digit', month: '2-digit', year: 'numeric' })}
 TIME: ${orderDate.toLocaleTimeString('fr-MU', { hour: '2-digit', minute: '2-digit' })}
@@ -267,9 +272,35 @@ PATIENT INFORMATION:
 - Full Name: ${patientData.firstName} ${patientData.lastName}
 - Age: ${patientData.age} years
 - Gender: ${patientData.gender}
+- Date of Birth: ${patientData.birthDate || patientData.dateOfBirth || 'Not provided'}
+- Weight: ${weight} kg
+- Height: ${patientData.height} cm
+- BMI: ${bmi.toFixed(1)} kg/m² (${bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal weight' : bmi < 30 ? 'Overweight' : 'Obese'})
+- Address: ${patientData.address || 'Not provided'}, ${patientData.city || ''} ${patientData.country || ''}
+- Phone: ${patientData.phone || 'Not provided'}
 
-CHRONIC DISEASES (REQUIRE MONITORING):
+GYNECOLOGICAL STATUS (if female):
+${patientData.gender?.toLowerCase() === 'female' || patientData.gender?.toLowerCase() === 'femme' ? `
+- Pregnancy Status: ${patientData.pregnancyStatus || 'Not specified'}
+- Last Menstrual Period: ${patientData.lastMenstrualPeriod || 'Not specified'}
+- Gestational Age: ${patientData.gestationalAge || 'Not applicable'}
+` : '- Not applicable (male patient)'}
+
+CHRONIC DISEASES & MEDICAL HISTORY (REQUIRE MONITORING):
 ${(patientData.medicalHistory || []).map((d: string, i: number) => `${i + 1}. ${d}`).join('\n') || '- None declared'}
+${patientData.otherMedicalHistory ? `\nAdditional Medical History: ${patientData.otherMedicalHistory}` : ''}
+
+CURRENT MEDICATIONS (may require monitoring):
+${patientData.currentMedicationsText || patientData.currentMedications || 'None reported'}
+
+ALLERGIES (important for contrast agents, etc.):
+${Array.isArray(patientData.allergies) ? patientData.allergies.join(', ') : (patientData.allergies || 'No known allergies')}
+${patientData.otherAllergies ? `\nOther Allergies: ${patientData.otherAllergies}` : ''}
+
+LIFESTYLE HABITS (context for exam interpretation):
+- Smoking: ${patientData.lifeHabits?.smoking || 'Not specified'}
+- Alcohol Consumption: ${patientData.lifeHabits?.alcohol || 'Not specified'}
+- Physical Activity: ${patientData.lifeHabits?.physicalActivity || 'Not specified'}
 
 DIAGNOSIS DATA (BASIS FOR EXAM ORDERS):
 ${JSON.stringify(diagnosisData, null, 2)}

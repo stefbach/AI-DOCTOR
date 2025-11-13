@@ -355,24 +355,38 @@ PATIENT IDENTIFICATION:
 - Full Name: ${patientData.firstName} ${patientData.lastName}
 - Age: ${patientData.age} years
 - Gender: ${patientData.gender}
-- Date of Birth: ${patientData.dateOfBirth || 'Not provided'}
-- Address: ${patientData.address || 'Not provided'}
+- Date of Birth: ${patientData.birthDate || patientData.dateOfBirth || 'Not provided'}
+- Address: ${patientData.address || 'Not provided'}, ${patientData.city || ''} ${patientData.country || ''}
 - Phone: ${patientData.phone || 'Not provided'}
 - Email: ${patientData.email || 'Not provided'}
 
 ANTHROPOMETRIC DATA:
 - Weight: ${weight} kg
 - Height: ${patientData.height} cm
-- BMI: ${bmi.toFixed(1)} kg/m²
+- BMI: ${bmi.toFixed(1)} kg/m² (${bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal weight' : bmi < 30 ? 'Overweight' : 'Obese'})
 
-CHRONIC DISEASES HISTORY:
+GYNECOLOGICAL STATUS (if female):
+${patientData.gender?.toLowerCase() === 'female' || patientData.gender?.toLowerCase() === 'femme' ? `
+- Pregnancy Status: ${patientData.pregnancyStatus || 'Not specified'}
+- Last Menstrual Period: ${patientData.lastMenstrualPeriod || 'Not specified'}
+- Gestational Age: ${patientData.gestationalAge || 'Not applicable'}
+` : '- Not applicable (male patient)'}
+
+CHRONIC DISEASES HISTORY & MEDICAL BACKGROUND:
 ${(patientData.medicalHistory || []).map((d: string, i: number) => `${i + 1}. ${d}`).join('\n') || '- No chronic diseases declared'}
+${patientData.otherMedicalHistory ? `\nAdditional Medical History: ${patientData.otherMedicalHistory}` : ''}
 
 CURRENT MEDICATIONS:
-${patientData.currentMedications || 'None reported'}
+${patientData.currentMedicationsText || patientData.currentMedications || 'None reported'}
 
 ALLERGIES:
-${patientData.allergies || 'No known allergies'}
+${Array.isArray(patientData.allergies) ? patientData.allergies.join(', ') : (patientData.allergies || 'No known allergies')}
+${patientData.otherAllergies ? `\nOther Allergies: ${patientData.otherAllergies}` : ''}
+
+LIFESTYLE HABITS:
+- Smoking: ${patientData.lifeHabits?.smoking || 'Not specified'}
+- Alcohol Consumption: ${patientData.lifeHabits?.alcohol || 'Not specified'}
+- Physical Activity: ${patientData.lifeHabits?.physicalActivity || 'Not specified'}
 
 CURRENT CONSULTATION DATA:
 
