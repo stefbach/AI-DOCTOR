@@ -454,8 +454,10 @@ export default function ChronicProfessionalReport({
           }
           
           // Extract dietary protocol from meal plans
-          if (diagnosisData.mealPlan || diagnosisData.nutritionPlan) {
-            const mealPlanData = diagnosisData.mealPlan || diagnosisData.nutritionPlan
+          console.log('🍽️ Diagnosis Data for Dietary Protocol:', diagnosisData)
+          if (diagnosisData.detailedMealPlan || diagnosisData.mealPlan || diagnosisData.nutritionPlan) {
+            const mealPlanData = diagnosisData.detailedMealPlan || diagnosisData.mealPlan || diagnosisData.nutritionPlan
+            console.log('✅ Meal Plan Data Found:', mealPlanData)
             initialReport.dietaryProtocol = {
               header: {
                 title: "Dietary Protocol for Chronic Disease Management",
@@ -469,10 +471,18 @@ export default function ChronicProfessionalReport({
                 culturalConsiderations: mealPlanData.culturalConsiderations || ""
               },
               mealPlans: {
-                breakfast: mealPlanData.breakfast || [],
-                lunch: mealPlanData.lunch || [],
-                dinner: mealPlanData.dinner || [],
-                snacks: mealPlanData.snacks || []
+                breakfast: Array.isArray(mealPlanData.breakfast) 
+                  ? mealPlanData.breakfast 
+                  : (mealPlanData.breakfast ? [mealPlanData.breakfast] : []),
+                lunch: Array.isArray(mealPlanData.lunch)
+                  ? mealPlanData.lunch
+                  : (mealPlanData.lunch ? [mealPlanData.lunch] : []),
+                dinner: Array.isArray(mealPlanData.dinner)
+                  ? mealPlanData.dinner
+                  : (mealPlanData.dinner ? [mealPlanData.dinner] : []),
+                snacks: Array.isArray(mealPlanData.snacks)
+                  ? mealPlanData.snacks
+                  : (mealPlanData.snacks ? [mealPlanData.snacks] : [])
               },
               nutritionalGuidelines: {
                 caloriesTarget: mealPlanData.caloriesTarget || mealPlanData.dailyCalories,
@@ -481,8 +491,8 @@ export default function ChronicProfessionalReport({
                 hydration: mealPlanData.hydration || "8-10 glasses of water daily"
               },
               forbiddenFoods: mealPlanData.forbiddenFoods || mealPlanData.foodsToAvoid || [],
-              recommendedFoods: mealPlanData.recommendedFoods || [],
-              specialInstructions: mealPlanData.specialInstructions || [],
+              recommendedFoods: mealPlanData.recommendedFoods || mealPlanData.foodsToFavor || [],
+              specialInstructions: mealPlanData.specialInstructions || mealPlanData.portionControlTips || [],
               followUpSchedule: mealPlanData.followUpSchedule || "Monthly nutritional assessment"
             }
           }
@@ -571,6 +581,10 @@ export default function ChronicProfessionalReport({
         const prescriptionData = await prescriptionResponse.json()
         const examensData = await examensResponse.json()
         
+        console.log('📊 API Response - Report:', reportData)
+        console.log('💊 API Response - Prescription:', prescriptionData)
+        console.log('🧪 API Response - Examens:', examensData)
+        
         // Update report with API responses
         setReport(prev => {
           if (!prev) return null
@@ -657,6 +671,16 @@ export default function ChronicProfessionalReport({
               }
             }
           }
+          
+          console.log('✅ Updated Report Structure:', {
+            hasMedicationPrescription: !!updatedReport.medicationPrescription,
+            hasLaboratoryTests: !!updatedReport.laboratoryTests,
+            hasParaclinicalExams: !!updatedReport.paraclinicalExams,
+            hasDietaryProtocol: !!updatedReport.dietaryProtocol,
+            medicationCount: updatedReport.medicationPrescription?.prescription?.medications?.length || 0,
+            labTestCategories: Object.keys(updatedReport.laboratoryTests?.prescription?.tests || {}),
+            paraclinicalExamCount: updatedReport.paraclinicalExams?.prescription?.exams?.length || 0
+          })
           
           return updatedReport
         })
