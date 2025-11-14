@@ -1093,26 +1093,204 @@ Date: ${new Date().toLocaleDateString('fr-FR')}
                     <CardContent className="p-12 text-center">
                       <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-teal-600" />
                       <h3 className="text-lg font-semibold text-teal-900 mb-2">
-                        Génération du rapport professionnel en cours...
+                        Generating professional report...
                       </h3>
                       <p className="text-sm text-gray-600">
-                        L'IA analyse toutes les données et génère un compte rendu structuré complet avec extraction automatique des médicaments et examens.
+                        AI is analyzing all data and generating a structured comprehensive report with automatic extraction of medications and tests.
                       </p>
                     </CardContent>
                   </Card>
+                ) : mauritianReport?.compteRendu ? (
+                  <Card className="shadow-xl print:shadow-none border-teal-200">
+                    <CardContent className="p-8 print:p-12" id="dermatology-consultation-report">
+                      {/* Header */}
+                      <div className="text-center mb-8 print:mb-12 border-b-2 border-teal-600 pb-4">
+                        <h1 className="text-2xl font-bold mb-2 text-teal-900">{mauritianReport.compteRendu.header.title}</h1>
+                        <p className="text-gray-600">{mauritianReport.compteRendu.header.subtitle}</p>
+                        <p className="text-sm text-gray-500 mt-2">Reference: {mauritianReport.compteRendu.header.reference}</p>
+                        {mauritianReport.compteRendu.header.consultationType && (
+                          <p className="text-xs text-teal-600 mt-1">{mauritianReport.compteRendu.header.consultationType}</p>
+                        )}
+                      </div>
+
+                      {/* Medical Practitioner */}
+                      <div className="mb-6 p-4 bg-teal-50 rounded-lg print:bg-transparent print:border print:border-gray-300">
+                        <h3 className="font-bold mb-2 text-teal-900">Medical Practitioner - Dermatology Specialist</h3>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div><strong>Name:</strong> {mauritianReport.compteRendu.praticien.nom}</div>
+                          <div><strong>Qualifications:</strong> {mauritianReport.compteRendu.praticien.qualifications}</div>
+                          <div><strong>Specialty:</strong> {mauritianReport.compteRendu.praticien.specialite}</div>
+                          <div><strong>Medical Council Reg:</strong> {mauritianReport.compteRendu.praticien.numeroEnregistrement}</div>
+                          <div><strong>Email:</strong> {mauritianReport.compteRendu.praticien.email}</div>
+                          <div className="col-span-2"><strong>Address:</strong> {mauritianReport.compteRendu.praticien.adresseCabinet}</div>
+                          <div className="col-span-2"><strong>Consultation Hours:</strong> {mauritianReport.compteRendu.praticien.heuresConsultation}</div>
+                        </div>
+                      </div>
+
+                      {/* Patient Information */}
+                      <div className="mb-8 p-4 bg-gray-50 rounded-lg print:bg-transparent print:border print:border-gray-300">
+                        <h3 className="font-bold mb-3 text-gray-900">Patient Identification & Medical Profile</h3>
+                        
+                        <div className="mb-4 pb-3 border-b border-gray-200">
+                          <h4 className="font-semibold text-sm text-gray-700 mb-2">Personal Information</h4>
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div><span className="font-medium">Patient:</span> {mauritianReport.compteRendu.patient.nomComplet || mauritianReport.compteRendu.patient.nom}</div>
+                            <div><span className="font-medium">Age:</span> {mauritianReport.compteRendu.patient.age} years</div>
+                            <div><span className="font-medium">Gender:</span> {mauritianReport.compteRendu.patient.sexe}</div>
+                            <div><span className="font-medium">DOB:</span> {mauritianReport.compteRendu.patient.dateNaissance}</div>
+                            <div><span className="font-medium">Examination Date:</span> {mauritianReport.compteRendu.patient.dateExamen}</div>
+                            <div><span className="font-medium">Weight:</span> {mauritianReport.compteRendu.patient.poids}</div>
+                            {mauritianReport.compteRendu.patient.taille && (
+                              <div><span className="font-medium">Height:</span> {mauritianReport.compteRendu.patient.taille}</div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="mb-4 pb-3 border-b border-gray-200">
+                          <h4 className="font-semibold text-sm text-gray-700 mb-2">Medical History</h4>
+                          <div className="text-sm space-y-2">
+                            <div><span className="font-medium">Allergies:</span> {mauritianReport.compteRendu.patient.allergies}</div>
+                            <div><span className="font-medium">Medical History:</span> {mauritianReport.compteRendu.patient.antecedentsMedicaux}</div>
+                            <div><span className="font-medium">Current Medications:</span> {mauritianReport.compteRendu.patient.medicamentsActuels}</div>
+                          </div>
+                        </div>
+
+                        {/* Image Analysis Summary */}
+                        {mauritianReport.compteRendu.imageAnalysis && mauritianReport.compteRendu.imageAnalysis.imagesCount > 0 && (
+                          <div className="mb-4 pb-3 border-b border-gray-200 bg-cyan-50 p-3 rounded">
+                            <h4 className="font-semibold text-sm text-cyan-900 mb-2">📸 Image Analysis ({mauritianReport.compteRendu.imageAnalysis.imagesCount} photo(s))</h4>
+                            <p className="text-sm text-gray-700">{mauritianReport.compteRendu.imageAnalysis.summary || 'Images analyzed with AI-assisted dermatological assessment'}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Report Sections */}
+                      <div className="space-y-6">
+                        {/* Chief Complaint */}
+                        <div className="border-l-4 border-teal-500 pl-4 py-2">
+                          <h3 className="font-bold text-lg mb-2 text-teal-900">🔍 CHIEF COMPLAINT</h3>
+                          <p className="text-gray-700 whitespace-pre-wrap">{mauritianReport.compteRendu.rapport.motifConsultation}</p>
+                        </div>
+
+                        {/* History of Present Illness */}
+                        {mauritianReport.compteRendu.rapport.anamnese && (
+                          <div className="border-l-4 border-blue-500 pl-4 py-2">
+                            <h3 className="font-bold text-lg mb-2 text-blue-900">🩺 HISTORY OF PRESENT ILLNESS</h3>
+                            <p className="text-gray-700 whitespace-pre-wrap">{mauritianReport.compteRendu.rapport.anamnese}</p>
+                          </div>
+                        )}
+
+                        {/* Past Medical History */}
+                        {mauritianReport.compteRendu.rapport.antecedents && (
+                          <div className="border-l-4 border-gray-500 pl-4 py-2">
+                            <h3 className="font-bold text-lg mb-2 text-gray-900">📋 PAST MEDICAL HISTORY</h3>
+                            <p className="text-gray-700 whitespace-pre-wrap">{mauritianReport.compteRendu.rapport.antecedents}</p>
+                          </div>
+                        )}
+
+                        {/* Clinical Examination */}
+                        {mauritianReport.compteRendu.rapport.examenClinique && (
+                          <div className="border-l-4 border-purple-500 pl-4 py-2">
+                            <h3 className="font-bold text-lg mb-2 text-purple-900">🔬 CLINICAL EXAMINATION</h3>
+                            <p className="text-gray-700 whitespace-pre-wrap">{mauritianReport.compteRendu.rapport.examenClinique}</p>
+                          </div>
+                        )}
+
+                        {/* Diagnostic Synthesis */}
+                        {mauritianReport.compteRendu.rapport.syntheseDiagnostique && (
+                          <div className="border-l-4 border-red-500 pl-4 py-2 bg-red-50">
+                            <h3 className="font-bold text-lg mb-2 text-red-900">🎯 DIAGNOSTIC SYNTHESIS</h3>
+                            <p className="text-gray-700 whitespace-pre-wrap">{mauritianReport.compteRendu.rapport.syntheseDiagnostique}</p>
+                          </div>
+                        )}
+
+                        {/* Diagnostic Conclusion */}
+                        {mauritianReport.compteRendu.rapport.conclusionDiagnostique && (
+                          <div className="border-l-4 border-orange-500 pl-4 py-2">
+                            <h3 className="font-bold text-lg mb-2 text-orange-900">📊 DIAGNOSTIC CONCLUSION</h3>
+                            <p className="text-gray-700 whitespace-pre-wrap">{mauritianReport.compteRendu.rapport.conclusionDiagnostique}</p>
+                          </div>
+                        )}
+
+                        {/* Differential Diagnoses */}
+                        {mauritianReport.compteRendu.rapport.diagnosticsDifferentiels && (
+                          <div className="border-l-4 border-yellow-500 pl-4 py-2 bg-yellow-50">
+                            <h3 className="font-bold text-lg mb-2 text-yellow-900">🔀 DIFFERENTIAL DIAGNOSES</h3>
+                            <p className="text-gray-700 whitespace-pre-wrap">{mauritianReport.compteRendu.rapport.diagnosticsDifferentiels}</p>
+                          </div>
+                        )}
+
+                        {/* Management Plan */}
+                        {mauritianReport.compteRendu.rapport.priseEnCharge && (
+                          <div className="border-l-4 border-green-500 pl-4 py-2">
+                            <h3 className="font-bold text-lg mb-2 text-green-900">💊 MANAGEMENT PLAN</h3>
+                            <p className="text-gray-700 whitespace-pre-wrap">{mauritianReport.compteRendu.rapport.priseEnCharge}</p>
+                          </div>
+                        )}
+
+                        {/* Patient Education */}
+                        {mauritianReport.compteRendu.rapport.educationPatient && (
+                          <div className="border-l-4 border-indigo-500 pl-4 py-2">
+                            <h3 className="font-bold text-lg mb-2 text-indigo-900">📚 PATIENT EDUCATION</h3>
+                            <p className="text-gray-700 whitespace-pre-wrap">{mauritianReport.compteRendu.rapport.educationPatient}</p>
+                          </div>
+                        )}
+
+                        {/* Follow-up Plan */}
+                        {mauritianReport.compteRendu.rapport.surveillance && (
+                          <div className="border-l-4 border-pink-500 pl-4 py-2">
+                            <h3 className="font-bold text-lg mb-2 text-pink-900">🔄 FOLLOW-UP PLAN</h3>
+                            <p className="text-gray-700 whitespace-pre-wrap">{mauritianReport.compteRendu.rapport.surveillance}</p>
+                          </div>
+                        )}
+
+                        {/* Conclusion */}
+                        {mauritianReport.compteRendu.rapport.conclusion && (
+                          <div className="border-l-4 border-gray-500 pl-4 py-2 bg-gray-50">
+                            <h3 className="font-bold text-lg mb-2 text-gray-900">✅ FINAL REMARKS</h3>
+                            <p className="text-gray-700 whitespace-pre-wrap">{mauritianReport.compteRendu.rapport.conclusion}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Footer / Signature */}
+                      <div className="mt-12 pt-6 border-t-2 border-gray-300">
+                        <div className="flex justify-between items-start">
+                          <div className="text-sm text-gray-600">
+                            <p><strong>Report Generated:</strong> {new Date(mauritianReport.compteRendu.metadata.dateGeneration).toLocaleString('en-US')}</p>
+                            <p><strong>Consultation Mode:</strong> Teleconsultation with AI-assisted image analysis</p>
+                            {mauritianReport.compteRendu.metadata.imagesAnalyzed > 0 && (
+                              <p><strong>Images Analyzed:</strong> {mauritianReport.compteRendu.metadata.imagesAnalyzed}</p>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm">_______________________________</p>
+                            <p className="text-sm font-semibold">{mauritianReport.compteRendu.praticien.nom}</p>
+                            <p className="text-xs text-gray-600">{mauritianReport.compteRendu.praticien.qualifications}</p>
+                            <p className="text-xs text-gray-600">Medical Council Reg: {mauritianReport.compteRendu.praticien.numeroEnregistrement}</p>
+                            <p className="text-xs text-gray-500 mt-2">Medical Practitioner's Signature</p>
+                            <p className="text-xs text-gray-500">Official Medical Stamp</p>
+                            <p className="text-xs text-gray-500">Date: {mauritianReport.compteRendu.patient.dateExamen}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Download Button */}
+                      <div className="mt-6 flex justify-center print:hidden">
+                        <Button onClick={downloadConsultationReport} className="bg-gradient-to-r from-teal-600 to-cyan-600">
+                          <Download className="h-4 w-4 mr-2" />
+                          Download Consultation Report
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ) : (
-                  <>
-                    <Textarea 
-                      value={consultationReport} 
-                      onChange={(e) => setConsultationReport(e.target.value)} 
-                      className="min-h-[700px] font-mono text-sm"
-                      placeholder="Génération du rapport en cours..."
-                    />
-                    <Button onClick={downloadConsultationReport} className="bg-gradient-to-r from-teal-600 to-cyan-600">
-                      <Download className="h-4 w-4 mr-2" />
-                      Télécharger le Compte Rendu
-                    </Button>
-                  </>
+                  <Card className="border-teal-200">
+                    <CardContent className="p-8 text-center text-gray-500">
+                      <FileText className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                      <p>No report data available. Please generate the report first.</p>
+                    </CardContent>
+                  </Card>
                 )}
               </div>
             </TabsContent>
