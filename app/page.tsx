@@ -376,14 +376,80 @@ const handlePrevious = () => {
                 <p className="text-blue-100 text-sm">Assistant Médical Intelligent</p>
               </div>
             </div>
-            <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-4 py-2">
-              Version 2.0
-            </Badge>
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                className="bg-white/10 text-white border-white/30 hover:bg-white/20 backdrop-blur-sm"
+                onClick={() => window.location.href = '/consultation-hub'}
+              >
+                <Stethoscope className="h-4 w-4 mr-2" />
+                Consultation Hub
+              </Button>
+              <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-4 py-2">
+                Version 2.0
+              </Badge>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Quick Navigation Card */}
+        <Card className="glass-card shadow-xl border-0 p-6 mb-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Stethoscope className="h-5 w-5 text-blue-600" />
+            Accès Rapide aux Consultations
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button 
+              variant="outline" 
+              className="h-auto py-4 px-6 flex flex-col items-start gap-2 hover:bg-blue-50 hover:border-blue-300"
+              onClick={() => window.location.href = '/consultation-hub'}
+            >
+              <div className="flex items-center gap-2 w-full">
+                <Stethoscope className="h-5 w-5 text-blue-600" />
+                <span className="font-semibold">Consultation Hub</span>
+              </div>
+              <span className="text-xs text-gray-600 text-left">
+                Routage intelligent • Historique patient • Suivi automatique
+              </span>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="h-auto py-4 px-6 flex flex-col items-start gap-2 hover:bg-indigo-50 hover:border-indigo-300"
+              onClick={() => window.location.href = '/dermatology'}
+            >
+              <div className="flex items-center gap-2 w-full">
+                <svg className="h-5 w-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <span className="font-semibold">Dermatologie</span>
+              </div>
+              <span className="text-xs text-gray-600 text-left">
+                Analyse d'images • OCR • Diagnostic dermatologique
+              </span>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="h-auto py-4 px-6 flex flex-col items-start gap-2 hover:bg-red-50 hover:border-red-300"
+              onClick={() => window.location.href = '/chronic-disease'}
+            >
+              <div className="flex items-center gap-2 w-full">
+                <svg className="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                <span className="font-semibold">Maladies Chroniques</span>
+              </div>
+              <span className="text-xs text-gray-600 text-left">
+                Diabète • Hypertension • Suivi long terme
+              </span>
+            </Button>
+          </div>
+        </Card>
+
         {/* Progress Section - Modern Design */}
         <Card className="glass-card shadow-2xl border-0 p-6 mb-8 smooth-transition hover-lift">
           <div className="flex items-center justify-between mb-6">
