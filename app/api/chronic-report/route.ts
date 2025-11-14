@@ -428,16 +428,17 @@ INSTRUCTIONS FOR REPORT GENERATION:
 
 Generate the complete narrative report now.`
 
-    // Call OpenAI API - Using gpt-4o-mini for faster response (matching working APIs)
-    console.log('🤖 Calling OpenAI API using Vercel AI SDK (like generate-consultation-report)...')
+    // Call OpenAI API - Using gpt-4o for PROFESSIONAL-QUALITY narrative reports
+    // gpt-4o is required for complex, detailed medical narratives (1500+ words)
+    console.log('🤖 Calling OpenAI API using Vercel AI SDK with gpt-4o for professional quality...')
     
     const result = await generateText({
-      model: openai("gpt-4o-mini"),
+      model: openai("gpt-4o"),  // ✅ UPGRADED to gpt-4o for superior narrative quality
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: patientContext }
       ],
-      maxTokens: 3500,
+      maxTokens: 4000,  // ✅ INCREASED token limit for longer, more detailed reports
       temperature: 0.3,
     })
 
