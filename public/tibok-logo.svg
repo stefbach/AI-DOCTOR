@@ -1,22 +1,28 @@
-<svg width="200" height="50" viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg">
+<svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0080C8;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#0096D6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00BFAE;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
   <!-- T -->
-  <rect x="5" y="5" width="30" height="8" rx="4" fill="#0B5FD1"/>
-  <rect x="17" y="13" width="6" height="32" rx="3" fill="#0B5FD1"/>
+  <path d="M 5 10 L 35 10 L 35 18 L 24 18 L 24 50 L 16 50 L 16 18 L 5 18 Z" fill="url(#gradient1)"/>
   
   <!-- I -->
-  <rect x="45" y="5" width="8" height="40" rx="4" fill="#1890D1"/>
+  <rect x="40" y="10" width="8" height="40" fill="url(#gradient1)"/>
   
   <!-- B -->
-  <path d="M 63 5 L 75 5 Q 83 5 83 13 Q 83 20 75 20 L 75 20 Q 83 20 83 30 Q 83 40 75 40 L 63 40 L 63 5 Z M 69 11 L 69 18 L 74 18 Q 77 18 77 14.5 Q 77 11 74 11 Z M 69 24 L 69 34 L 74 34 Q 77 34 77 29 Q 77 24 74 24 Z" fill="#16A8CC"/>
+  <path d="M 52 10 L 70 10 Q 80 10 80 20 Q 80 25 75 27.5 Q 82 30 82 37.5 Q 82 50 70 50 L 52 50 Z M 60 18 L 60 25 L 68 25 Q 72 25 72 21.5 Q 72 18 68 18 Z M 60 33 L 60 42 L 68 42 Q 72 42 72 37.5 Q 72 33 68 33 Z" fill="url(#gradient1)"/>
   
-  <!-- O (Phone/Card icon) -->
-  <rect x="95" y="5" width="25" height="40" rx="5" fill="#21B6CC" stroke="#0B5FD1" stroke-width="2"/>
-  <circle cx="107.5" cy="18" r="6" fill="#0B5FD1"/>
-  <path d="M 100 28 Q 107.5 32 115 28" fill="none" stroke="#0B5FD1" stroke-width="2" stroke-linecap="round"/>
-  <circle cx="107.5" cy="38" r="1.5" fill="#0B5FD1"/>
+  <!-- Phone Icon -->
+  <rect x="90" y="8" width="28" height="44" rx="4" ry="4" fill="#0096D6" stroke="#ffffff" stroke-width="2"/>
+  <circle cx="104" cy="28" r="8" fill="#ffffff"/>
+  <path d="M 104 23 Q 107 23 107 26 L 107 30 Q 107 33 104 33 Q 101 33 101 30 L 101 26 Q 101 23 104 23 Z" fill="#0096D6"/>
+  <path d="M 98 30 L 102 34 L 106 30 L 110 34" stroke="#0096D6" stroke-width="1.5" fill="none"/>
+  <circle cx="104" cy="47" r="2" fill="#ffffff"/>
   
   <!-- K -->
-  <rect x="130" y="5" width="7" height="40" rx="3.5" fill="#3DBDAF"/>
-  <path d="M 137 22 L 155 5" stroke="#3DBDAF" stroke-width="7" stroke-linecap="round"/>
-  <path d="M 137 22 L 155 40" stroke="#3DBDAF" stroke-width="7" stroke-linecap="round"/>
+  <path d="M 125 10 L 133 10 L 133 26 L 145 10 L 155 10 L 141 28 L 156 50 L 146 50 L 133 33 L 133 50 L 125 50 Z" fill="url(#gradient1)"/>
 </svg>

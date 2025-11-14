@@ -97,6 +97,7 @@ export default function DermatologyFollowUpPage() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
+          <img src="/tibok-logo.svg" alt="TIBOK Logo" className="h-12 w-auto object-contain" />
           <div className="p-3 bg-indigo-100 rounded-lg">
             <Eye className="h-8 w-8 text-indigo-600" />
           </div>

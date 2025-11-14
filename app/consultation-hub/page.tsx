@@ -72,17 +72,27 @@ export default function ConsultationHubPage() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-3 bg-blue-100 rounded-lg">
-            <Building2 className="h-8 w-8 text-blue-600" />
-          </div>
-          <div>
+          <img 
+            src="/tibok-logo.svg" 
+            alt="TIBOK Logo" 
+            className="h-12 w-auto object-contain"
+          />
+          <div className="flex-1">
             <h1 className="text-3xl font-bold text-gray-900">
-              🏥 Hub de Consultation
+              Hub de Consultation
             </h1>
             <p className="text-gray-600 mt-1">
               Centre intelligent de gestion des consultations médicales
             </p>
           </div>
+          <Button
+            variant="outline"
+            onClick={() => window.location.href = '/'}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Retour Accueil
+          </Button>
         </div>
 
         {/* Info Banner */}
