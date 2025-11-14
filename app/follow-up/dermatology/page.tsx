@@ -11,10 +11,11 @@ import {
   usePatientHistory,
   type ConsultationHistoryItem
 } from '@/lib/follow-up/shared'
-import { Eye, Image as ImageIcon, FileText, UserCheck, ClipboardList } from 'lucide-react'
+import { Eye, Image as ImageIcon, FileText, UserCheck, ClipboardList, FileSignature } from 'lucide-react'
 import { DermatologyImageComparison } from '@/lib/follow-up/dermatology/components/dermatology-image-comparison'
 import { DermatologyClinicalForm } from '@/lib/follow-up/dermatology/components/dermatology-clinical-form'
 import { DermatologyReportDisplay } from '@/lib/follow-up/dermatology/components/dermatology-report-display'
+import { FollowUpDocuments } from '@/lib/follow-up/shared/components/follow-up-documents'
 
 /**
  * Dermatology Consultation Follow-Up Page
@@ -38,7 +39,7 @@ export default function DermatologyFollowUpPage() {
     searchPatient
   } = usePatientHistory()
 
-  const [activeTab, setActiveTab] = useState<'search' | 'images' | 'clinical' | 'report'>('search')
+  const [activeTab, setActiveTab] = useState<'search' | 'images' | 'clinical' | 'report' | 'documents'>('search')
   const [selectedConsultation, setSelectedConsultation] = useState<ConsultationHistoryItem | null>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [imageComparisonData, setImageComparisonData] = useState<any>(null)
@@ -71,12 +72,20 @@ export default function DermatologyFollowUpPage() {
 
   const handleReportGenerated = (report: any) => {
     setGeneratedReport(report)
+    // Auto-advance to documents tab
+    setActiveTab('documents')
+  }
+
+  const handleDocumentsComplete = () => {
+    // Could add save to database or redirect logic here
+    alert('Consultation de suivi dermatologique terminée avec succès!')
   }
 
   // Determine if we can proceed to each tab
   const canAccessImages = history.length > 0
   const canAccessClinical = imageComparisonData !== null
   const canAccessReport = clinicalData !== null
+  const canAccessDocuments = generatedReport !== null
 
   // Filter history to only dermatology consultations
   const dermatologyHistory = history.filter(
@@ -137,7 +146,7 @@ export default function DermatologyFollowUpPage() {
 
       {/* Main Workflow Tabs */}
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
-        <TabsList className="grid w-full grid-cols-4 mb-6">
+        <TabsList className="grid w-full grid-cols-5 mb-6">
           <TabsTrigger value="search" className="flex items-center gap-2">
             <ClipboardList className="h-4 w-4" />
             1. Search
@@ -165,6 +174,14 @@ export default function DermatologyFollowUpPage() {
           >
             <FileText className="h-4 w-4" />
             4. Report
+          </TabsTrigger>
+          <TabsTrigger 
+            value="documents" 
+            disabled={!canAccessDocuments}
+            className="flex items-center gap-2"
+          >
+            <FileSignature className="h-4 w-4" />
+            5. Documents
           </TabsTrigger>
         </TabsList>
 
@@ -228,6 +245,18 @@ export default function DermatologyFollowUpPage() {
             previousConsultation={mostRecent}
             consultationHistory={dermatologyHistory}
             onReportGenerated={handleReportGenerated}
+          />
+        </TabsContent>
+
+        {/* Tab 5: Documents (Prescriptions, Lab Tests, Sick Leave) */}
+        <TabsContent value="documents" className="space-y-6">
+          <FollowUpDocuments
+            patientDemographics={patientDemographics}
+            generatedReport={generatedReport}
+            previousConsultation={mostRecent}
+            consultationHistory={dermatologyHistory}
+            consultationType="dermatology"
+            onComplete={handleDocumentsComplete}
           />
         </TabsContent>
       </Tabs>

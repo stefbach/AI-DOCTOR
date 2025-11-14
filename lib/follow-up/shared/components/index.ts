@@ -22,3 +22,6 @@ export type { ComparisonCardProps } from './comparison-card'
 
 export { ConsultationDetailModal } from './consultation-detail-modal'
 export type { ConsultationDetailModalProps } from './consultation-detail-modal'
+
+export { FollowUpDocuments } from './follow-up-documents'
+export type { FollowUpDocumentsProps } from './follow-up-documents'

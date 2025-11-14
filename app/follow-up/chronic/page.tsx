@@ -11,10 +11,11 @@ import {
   usePatientHistory,
   type ConsultationHistoryItem
 } from '@/lib/follow-up/shared'
-import { Heart, TrendingUp, FileText, UserCheck, ClipboardList, Activity } from 'lucide-react'
+import { Heart, TrendingUp, FileText, UserCheck, ClipboardList, Activity, FileSignature } from 'lucide-react'
 import { ChronicVitalsTrends } from '@/lib/follow-up/chronic/components/chronic-vitals-trends'
 import { ChronicClinicalForm } from '@/lib/follow-up/chronic/components/chronic-clinical-form'
 import { ChronicReportDisplay } from '@/lib/follow-up/chronic/components/chronic-report-display'
+import { FollowUpDocuments } from '@/lib/follow-up/shared/components/follow-up-documents'
 
 /**
  * Chronic Disease Follow-Up Page
@@ -38,7 +39,7 @@ export default function ChronicFollowUpPage() {
     searchPatient
   } = usePatientHistory()
 
-  const [activeTab, setActiveTab] = useState<'search' | 'trends' | 'clinical' | 'report'>('search')
+  const [activeTab, setActiveTab] = useState<'search' | 'trends' | 'clinical' | 'report' | 'documents'>('search')
   const [selectedConsultation, setSelectedConsultation] = useState<ConsultationHistoryItem | null>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [trendsData, setTrendsData] = useState<any>(null)
@@ -71,12 +72,20 @@ export default function ChronicFollowUpPage() {
 
   const handleReportGenerated = (report: any) => {
     setGeneratedReport(report)
+    // Auto-advance to documents tab
+    setActiveTab('documents')
+  }
+
+  const handleDocumentsComplete = () => {
+    // Could add save to database or redirect logic here
+    alert('Consultation de suivi de maladie chronique terminée avec succès!')
   }
 
   // Determine if we can proceed to each tab
   const canAccessTrends = history.length > 0
   const canAccessClinical = trendsData !== null
   const canAccessReport = clinicalData !== null
+  const canAccessDocuments = generatedReport !== null
 
   // Filter history to chronic disease consultations
   const chronicHistory = history.filter(
@@ -142,7 +151,7 @@ export default function ChronicFollowUpPage() {
 
       {/* Main Workflow Tabs */}
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
-        <TabsList className="grid w-full grid-cols-4 mb-6">
+        <TabsList className="grid w-full grid-cols-5 mb-6">
           <TabsTrigger value="search" className="flex items-center gap-2">
             <ClipboardList className="h-4 w-4" />
             1. Search
@@ -170,6 +179,14 @@ export default function ChronicFollowUpPage() {
           >
             <FileText className="h-4 w-4" />
             4. Report
+          </TabsTrigger>
+          <TabsTrigger 
+            value="documents" 
+            disabled={!canAccessDocuments}
+            className="flex items-center gap-2"
+          >
+            <FileSignature className="h-4 w-4" />
+            5. Documents
           </TabsTrigger>
         </TabsList>
 
@@ -233,6 +250,18 @@ export default function ChronicFollowUpPage() {
             previousConsultation={mostRecent}
             consultationHistory={history}
             onReportGenerated={handleReportGenerated}
+          />
+        </TabsContent>
+
+        {/* Tab 5: Documents (Prescriptions, Lab Tests, Sick Leave) */}
+        <TabsContent value="documents" className="space-y-6">
+          <FollowUpDocuments
+            patientDemographics={patientDemographics}
+            generatedReport={generatedReport}
+            previousConsultation={mostRecent}
+            consultationHistory={history}
+            consultationType="chronic"
+            onComplete={handleDocumentsComplete}
           />
         </TabsContent>
       </Tabs>

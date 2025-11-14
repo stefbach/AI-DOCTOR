@@ -12,9 +12,10 @@ import {
   usePatientHistory,
   type ConsultationHistoryItem
 } from '@/lib/follow-up/shared'
-import { Stethoscope, ClipboardList, FileText, UserCheck } from 'lucide-react'
+import { Stethoscope, ClipboardList, FileText, UserCheck, FileSignature } from 'lucide-react'
 import { NormalClinicalForm } from '@/lib/follow-up/normal/components/normal-clinical-form'
 import { NormalReportDisplay } from '@/lib/follow-up/normal/components/normal-report-display'
+import { FollowUpDocuments } from '@/lib/follow-up/shared/components/follow-up-documents'
 
 /**
  * Normal Consultation Follow-Up Page
@@ -37,7 +38,7 @@ export default function NormalFollowUpPage() {
     searchPatient
   } = usePatientHistory()
 
-  const [activeTab, setActiveTab] = useState<'search' | 'clinical' | 'report'>('search')
+  const [activeTab, setActiveTab] = useState<'search' | 'clinical' | 'report' | 'documents'>('search')
   const [selectedConsultation, setSelectedConsultation] = useState<ConsultationHistoryItem | null>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [clinicalData, setClinicalData] = useState<any>(null)
@@ -64,11 +65,19 @@ export default function NormalFollowUpPage() {
 
   const handleReportGenerated = (report: any) => {
     setGeneratedReport(report)
+    // Auto-advance to documents tab
+    setActiveTab('documents')
+  }
+
+  const handleDocumentsComplete = () => {
+    // Could add save to database or redirect logic here
+    alert('Consultation de suivi terminée avec succès!')
   }
 
   // Determine if we can proceed to each tab
   const canAccessClinical = history.length > 0
   const canAccessReport = clinicalData !== null
+  const canAccessDocuments = generatedReport !== null
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-7xl">
@@ -116,7 +125,7 @@ export default function NormalFollowUpPage() {
 
       {/* Main Workflow Tabs */}
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
-        <TabsList className="grid w-full grid-cols-3 mb-6">
+        <TabsList className="grid w-full grid-cols-4 mb-6">
           <TabsTrigger value="search" className="flex items-center gap-2">
             <ClipboardList className="h-4 w-4" />
             1. Search Patient
@@ -136,6 +145,14 @@ export default function NormalFollowUpPage() {
           >
             <FileText className="h-4 w-4" />
             3. Generate Report
+          </TabsTrigger>
+          <TabsTrigger 
+            value="documents" 
+            disabled={!canAccessDocuments}
+            className="flex items-center gap-2"
+          >
+            <FileSignature className="h-4 w-4" />
+            4. Documents
           </TabsTrigger>
         </TabsList>
 
@@ -194,6 +211,18 @@ export default function NormalFollowUpPage() {
             previousConsultation={mostRecent}
             consultationHistory={history}
             onReportGenerated={handleReportGenerated}
+          />
+        </TabsContent>
+
+        {/* Tab 4: Documents (Prescriptions, Lab Tests, Sick Leave) */}
+        <TabsContent value="documents" className="space-y-6">
+          <FollowUpDocuments
+            patientDemographics={patientDemographics}
+            generatedReport={generatedReport}
+            previousConsultation={mostRecent}
+            consultationHistory={history}
+            consultationType="normal"
+            onComplete={handleDocumentsComplete}
           />
         </TabsContent>
       </Tabs>
