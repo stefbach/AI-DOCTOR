@@ -2,9 +2,11 @@
 import { type NextRequest, NextResponse } from "next/server"
 import OpenAI from 'openai'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-})
+// OpenAI client will be initialized inside the function to avoid build-time errors
+
+// Moved inside function - const openai = new OpenAI({
+// Moved inside function -   apiKey: process.env.OPENAI_API_KEY
+// Moved inside function - })
 
 // ==================== HELPER FUNCTIONS ====================
 function getString(value: any): string {
@@ -29,6 +31,11 @@ function getArray(value: any): any[] {
 // ==================== MAIN HANDLER ====================
 export async function POST(request: NextRequest) {
   try {
+    // Initialize OpenAI client inside the function to avoid build-time errors
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    })
+
     const startTime = Date.now()
     const body = await request.json()
     const {
