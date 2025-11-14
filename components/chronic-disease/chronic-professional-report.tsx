@@ -1478,31 +1478,31 @@ export default function ChronicProfessionalReport({
           )}
         </div>
         
-        {/* Chronic Disease Assessment */}
+        {/* Chronic Disease Assessment - PROFESSIONAL STRUCTURED LAYOUT */}
         <div className="mb-6">
-          <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
-            <HeartPulse className="h-5 w-5" />
-            Chronic Disease Assessment
+          <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-pink-900">
+            <HeartPulse className="h-6 w-6" />
+            💊 Chronic Disease Assessment
           </h3>
-          <div className="space-y-3">
-            <div>
-              <h4 className="font-semibold text-sm text-gray-700">Primary Diagnosis:</h4>
-              <p className="text-base">{medicalReport.chronicDiseaseAssessment.primaryDiagnosis}</p>
+          <div className="space-y-6">
+            <div className="border-l-4 border-pink-500 pl-4 py-2 bg-pink-50">
+              <h4 className="font-bold text-base mb-1 text-pink-900">PRIMARY DIAGNOSIS</h4>
+              <p className="text-gray-700">{medicalReport.chronicDiseaseAssessment.primaryDiagnosis}</p>
             </div>
-            <div>
-              <h4 className="font-semibold text-sm text-gray-700">Disease Category:</h4>
-              <p className="text-base">{medicalReport.chronicDiseaseAssessment.diseaseCategory}</p>
+            <div className="border-l-4 border-purple-500 pl-4 py-2">
+              <h4 className="font-bold text-base mb-1 text-purple-900">DISEASE CATEGORY</h4>
+              <p className="text-gray-700">{medicalReport.chronicDiseaseAssessment.diseaseCategory}</p>
             </div>
             {medicalReport.chronicDiseaseAssessment.diseaseStage && (
-              <div>
-                <h4 className="font-semibold text-sm text-gray-700">Disease Stage:</h4>
-                <p className="text-base">{medicalReport.chronicDiseaseAssessment.diseaseStage}</p>
+              <div className="border-l-4 border-blue-500 pl-4 py-2">
+                <h4 className="font-bold text-base mb-1 text-blue-900">DISEASE STAGE</h4>
+                <p className="text-gray-700">{medicalReport.chronicDiseaseAssessment.diseaseStage}</p>
               </div>
             )}
             {medicalReport.chronicDiseaseAssessment.comorbidities && medicalReport.chronicDiseaseAssessment.comorbidities.length > 0 && (
-              <div>
-                <h4 className="font-semibold text-sm text-gray-700">Comorbidities:</h4>
-                <ul className="list-disc list-inside text-base">
+              <div className="border-l-4 border-orange-500 pl-4 py-2">
+                <h4 className="font-bold text-base mb-2 text-orange-900">⚠️ COMORBIDITIES</h4>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
                   {medicalReport.chronicDiseaseAssessment.comorbidities.map((item, idx) => (
                     <li key={idx}>{item}</li>
                   ))}
@@ -1510,10 +1510,20 @@ export default function ChronicProfessionalReport({
               </div>
             )}
             {medicalReport.chronicDiseaseAssessment.riskFactors && medicalReport.chronicDiseaseAssessment.riskFactors.length > 0 && (
-              <div>
-                <h4 className="font-semibold text-sm text-gray-700">Risk Factors:</h4>
-                <ul className="list-disc list-inside text-base">
+              <div className="border-l-4 border-red-500 pl-4 py-2">
+                <h4 className="font-bold text-base mb-2 text-red-900">🚨 RISK FACTORS</h4>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
                   {medicalReport.chronicDiseaseAssessment.riskFactors.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {medicalReport.chronicDiseaseAssessment.complications && medicalReport.chronicDiseaseAssessment.complications.length > 0 && (
+              <div className="border-l-4 border-red-600 pl-4 py-2 bg-red-50">
+                <h4 className="font-bold text-base mb-2 text-red-900">⛔ COMPLICATIONS</h4>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  {medicalReport.chronicDiseaseAssessment.complications.map((item, idx) => (
                     <li key={idx}>{item}</li>
                   ))}
                 </ul>
@@ -1522,26 +1532,38 @@ export default function ChronicProfessionalReport({
           </div>
         </div>
         
-        {/* Clinical Evaluation */}
+        {/* Clinical Evaluation - PROFESSIONAL STRUCTURED LAYOUT */}
         <div className="mb-6">
-          <h3 className="font-bold text-lg mb-3">Clinical Evaluation</h3>
-          <div className="space-y-4">
+          <h3 className="font-bold text-lg mb-4 text-blue-900">📋 Clinical Evaluation</h3>
+          <div className="space-y-6">
             {medicalReport.clinicalEvaluation.chiefComplaint && (
-              <div>
-                <h4 className="font-semibold text-sm text-gray-700">Chief Complaint:</h4>
-                <p className="text-base whitespace-pre-wrap">{medicalReport.clinicalEvaluation.chiefComplaint}</p>
+              <div className="border-l-4 border-teal-500 pl-4 py-2">
+                <h4 className="font-bold text-lg mb-2 text-teal-900">🔍 CHIEF COMPLAINT</h4>
+                <p className="text-gray-700 whitespace-pre-wrap">{medicalReport.clinicalEvaluation.chiefComplaint}</p>
               </div>
             )}
             {medicalReport.clinicalEvaluation.historyOfPresentIllness && (
-              <div>
-                <h4 className="font-semibold text-sm text-gray-700">History of Present Illness:</h4>
-                <p className="text-base whitespace-pre-wrap">{medicalReport.clinicalEvaluation.historyOfPresentIllness}</p>
+              <div className="border-l-4 border-blue-500 pl-4 py-2">
+                <h4 className="font-bold text-lg mb-2 text-blue-900">🩺 HISTORY OF PRESENT ILLNESS</h4>
+                <p className="text-gray-700 whitespace-pre-wrap">{medicalReport.clinicalEvaluation.historyOfPresentIllness}</p>
+              </div>
+            )}
+            {medicalReport.clinicalEvaluation.reviewOfSystems && (
+              <div className="border-l-4 border-purple-500 pl-4 py-2">
+                <h4 className="font-bold text-lg mb-2 text-purple-900">📋 REVIEW OF SYSTEMS</h4>
+                <p className="text-gray-700 whitespace-pre-wrap">{medicalReport.clinicalEvaluation.reviewOfSystems}</p>
               </div>
             )}
             {medicalReport.clinicalEvaluation.physicalExamination && (
-              <div>
-                <h4 className="font-semibold text-sm text-gray-700">Physical Examination:</h4>
-                <p className="text-base whitespace-pre-wrap">{medicalReport.clinicalEvaluation.physicalExamination}</p>
+              <div className="border-l-4 border-green-500 pl-4 py-2">
+                <h4 className="font-bold text-lg mb-2 text-green-900">👁️ PHYSICAL EXAMINATION</h4>
+                <p className="text-gray-700 whitespace-pre-wrap">{medicalReport.clinicalEvaluation.physicalExamination}</p>
+              </div>
+            )}
+            {medicalReport.clinicalEvaluation.vitalSignsAnalysis && (
+              <div className="border-l-4 border-cyan-500 pl-4 py-2">
+                <h4 className="font-bold text-lg mb-2 text-cyan-900">💓 VITAL SIGNS ANALYSIS</h4>
+                <p className="text-gray-700 whitespace-pre-wrap">{medicalReport.clinicalEvaluation.vitalSignsAnalysis}</p>
               </div>
             )}
           </div>
@@ -1581,26 +1603,26 @@ export default function ChronicProfessionalReport({
           </div>
         )}
         
-        {/* Diagnostic Summary */}
+        {/* Diagnostic Summary - PROFESSIONAL STRUCTURED LAYOUT */}
         <div className="mb-6">
-          <h3 className="font-bold text-lg mb-3">Diagnostic Summary & Management Goals</h3>
-          <div className="space-y-3">
+          <h3 className="font-bold text-lg mb-4 text-red-900">🎯 Diagnostic Summary & Management Goals</h3>
+          <div className="space-y-6">
             {medicalReport.diagnosticSummary.diagnosticConclusion && (
-              <div>
-                <h4 className="font-semibold text-sm text-gray-700">Diagnostic Conclusion:</h4>
-                <p className="text-base whitespace-pre-wrap">{medicalReport.diagnosticSummary.diagnosticConclusion}</p>
+              <div className="border-l-4 border-red-500 pl-4 py-2 bg-red-50">
+                <h4 className="font-bold text-lg mb-2 text-red-900">🎯 DIAGNOSTIC CONCLUSION</h4>
+                <p className="text-gray-700 whitespace-pre-wrap">{medicalReport.diagnosticSummary.diagnosticConclusion}</p>
               </div>
             )}
             {medicalReport.diagnosticSummary.prognosticAssessment && (
-              <div>
-                <h4 className="font-semibold text-sm text-gray-700">Prognostic Assessment:</h4>
-                <p className="text-base whitespace-pre-wrap">{medicalReport.diagnosticSummary.prognosticAssessment}</p>
+              <div className="border-l-4 border-orange-500 pl-4 py-2">
+                <h4 className="font-bold text-lg mb-2 text-orange-900">📊 PROGNOSTIC ASSESSMENT</h4>
+                <p className="text-gray-700 whitespace-pre-wrap">{medicalReport.diagnosticSummary.prognosticAssessment}</p>
               </div>
             )}
             {medicalReport.diagnosticSummary.diseaseManagementGoals && medicalReport.diagnosticSummary.diseaseManagementGoals.length > 0 && (
-              <div>
-                <h4 className="font-semibold text-sm text-gray-700">Disease Management Goals:</h4>
-                <ul className="list-disc list-inside text-base">
+              <div className="border-l-4 border-indigo-500 pl-4 py-2">
+                <h4 className="font-bold text-lg mb-2 text-indigo-900">🎯 DISEASE MANAGEMENT GOALS</h4>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
                   {medicalReport.diagnosticSummary.diseaseManagementGoals.map((goal, idx) => (
                     <li key={idx}>{goal}</li>
                   ))}
