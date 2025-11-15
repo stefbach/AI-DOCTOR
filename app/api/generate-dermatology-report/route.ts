@@ -277,7 +277,7 @@ function formatPregnancyStatus(pregnancyStatus: string, gestationalAge?: string)
 }
 
 // ==================== DATA EXTRACTION FROM OPENAI-DIAGNOSIS ====================
-function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, patientData: any) {
+function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any = {}, patientData: any) {
   
   console.log(" DATA RECOVERY FROM OPENAI-DIAGNOSIS")
   console.log("Structure received:", Object.keys(diagnosisData || {}))
@@ -965,13 +965,13 @@ export async function POST(request: NextRequest) {
     if (!hasValidDiagnosisData) {
       console.warn(" diagnosisData appears to be empty or invalid - using enhanced fallbacks")
       
-      // Create minimal diagnosis data from available clinical data
+      // Create minimal diagnosis data from available dermatology data
       const enhancedDiagnosisData = {
         diagnosis: {
           primary: {
-            condition: clinicalData?.chiefComplaint || "Medical consultation - symptomatic evaluation",
-            clinical_reasoning: "Diagnosis established based on clinical presentation and teleconsultation assessment",
-            pathophysiology: "Clinical evaluation based on presented symptoms and patient history"
+            condition: questionsData?.skinConcern || "Dermatological consultation - skin condition evaluation",
+            clinical_reasoning: "Diagnosis established based on clinical presentation, image analysis, and teleconsultation assessment",
+            pathophysiology: "Dermatological evaluation based on presented skin condition, images, and patient history"
           }
         },
         expertAnalysis: {
@@ -1043,8 +1043,8 @@ export async function POST(request: NextRequest) {
           physician: physician,
           patient: patient,
           report: {
-            chiefComplaint: clinicalData?.chiefComplaint || "Prescription renewal request",
-            historyOfPresentIllness: "Patient requests renewal of existing prescription for ongoing treatment. Patient reports stable condition with good medication compliance.",
+            chiefComplaint: questionsData?.skinConcern || "Dermatology prescription renewal request",
+            historyOfPresentIllness: "Patient requests renewal of existing dermatology prescription for ongoing skin condition treatment. Patient reports stable condition with good medication compliance.",
             pastMedicalHistory: "As per previous consultation records. Ongoing medical management as established.",
             physicalExamination: "Teleconsultation - patient appears stable, no acute distress reported. Vital signs within normal limits per patient report.",
             diagnosticSynthesis: "Continuation of established treatment plan for chronic condition management.",
@@ -1164,6 +1164,8 @@ export async function POST(request: NextRequest) {
     
     // ===== EXTRACT DATA FROM OPENAI-DIAGNOSIS =====
     console.log(" EXTRACTING COMPLETE DATA FROM OPENAI-DIAGNOSIS WITH PRAGMATIC TRANSLATION v2.6")
+    // For dermatology, clinicalData is not used - we rely on diagnosisData, questionsData, and imageData
+    const clinicalData = {}
     let realData = extractRealDataFromDiagnosis(diagnosisData, clinicalData, patientData)
     
     // ===== APPLY PRAGMATIC TRANSLATION =====
