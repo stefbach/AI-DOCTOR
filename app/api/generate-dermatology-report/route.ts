@@ -99,22 +99,23 @@ export async function POST(request: NextRequest) {
 
     // ==================== GENERATE MEDICATIONS WITH AI ====================
     console.log('💊 Extracting medications from diagnosis...')
-    const medications = await extractMedicationsAI(diagnosisFullText, patient)
+    const medications = await extractMedicationsAI(openai, diagnosisFullText, patient)
     console.log(`   ✅ ${medications.length} medications extracted`)
 
     // ==================== GENERATE LAB TESTS WITH AI ====================
     console.log('🧪 Extracting laboratory tests from diagnosis...')
-    const labTests = await extractLabTestsAI(diagnosisFullText, patient)
+    const labTests = await extractLabTestsAI(openai, diagnosisFullText, patient)
     console.log(`   ✅ ${labTests.length} lab tests extracted`)
 
     // ==================== GENERATE IMAGING STUDIES WITH AI ====================
     console.log('🔬 Extracting imaging studies from diagnosis...')
-    const imagingStudies = await extractImagingStudiesAI(diagnosisFullText, patient)
+    const imagingStudies = await extractImagingStudiesAI(openai, diagnosisFullText, patient)
     console.log(`   ✅ ${imagingStudies.length} imaging studies extracted`)
 
     // ==================== GENERATE NARRATIVE REPORT ====================
     console.log('📝 Generating narrative consultation report...')
     const narrativeReport = await generateNarrativeReportAI(
+      openai,
       patient,
       ocrAnalysis,
       questionsData,
@@ -421,7 +422,7 @@ export async function POST(request: NextRequest) {
 
 // ==================== AI EXTRACTION FUNCTIONS ====================
 
-async function extractMedicationsAI(diagnosisText: string, patient: any): Promise<any[]> {
+async function extractMedicationsAI(openai: OpenAI, diagnosisText: string, patient: any): Promise<any[]> {
   try {
     const prompt = `Extract ALL medications from this dermatology diagnosis. Return ONLY a JSON array.
 
@@ -465,7 +466,7 @@ If no medications: return []`
   }
 }
 
-async function extractLabTestsAI(diagnosisText: string, patient: any): Promise<any[]> {
+async function extractLabTestsAI(openai: OpenAI, diagnosisText: string, patient: any): Promise<any[]> {
   try {
     const prompt = `Extract ALL laboratory tests from RECOMMENDED INVESTIGATIONS. Return ONLY a JSON array.
 
@@ -506,7 +507,7 @@ If no tests: return []`
   }
 }
 
-async function extractImagingStudiesAI(diagnosisText: string, patient: any): Promise<any[]> {
+async function extractImagingStudiesAI(openai: OpenAI, diagnosisText: string, patient: any): Promise<any[]> {
   try {
     const prompt = `Extract ALL imaging studies from RECOMMENDED INVESTIGATIONS. Return ONLY a JSON array.
 
@@ -547,6 +548,7 @@ If no imaging: return []`
 }
 
 async function generateNarrativeReportAI(
+  openai: OpenAI,
   patient: any,
   ocrAnalysis: string,
   questionsData: any,
