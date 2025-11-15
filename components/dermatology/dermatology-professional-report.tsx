@@ -1699,7 +1699,8 @@ useEffect(() => {
  useEffect(() => {
  console.log(" ProfessionalReportEditable mounted with data:", {
  hasPatientData: !!patientData,
- hasClinicalData: !!clinicalData,
+ hasImageData: !!imageData,
+ hasOcrAnalysisData: !!ocrAnalysisData,
  hasDiagnosisData: !!diagnosisData,
  hasQuestionsData: !!questionsData
  })
@@ -1805,12 +1806,9 @@ const parseMedicationText = (medicationText: string): any[] => {
 // ==================== GENERATE REPORT ====================
  const generateProfessionalReport = async () => {
  // CHECK IF THIS IS A PRESCRIPTION RENEWAL - ADD THIS BLOCK
+ // For dermatology, renewal is not typical, but keep the check
  const isRenewal = consultationDataService?.isPrescriptionRenewal?.() || 
- sessionStorage.getItem('prescriptionRenewal') === 'true' ||
- clinicalData?.chiefComplaint?.toLowerCase().includes('renewal') ||
- clinicalData?.chiefComplaint?.toLowerCase().includes('ordonnance') ||
- clinicalData?.chiefComplaint?.toLowerCase().includes('prescription') ||
- clinicalData?.chiefComplaint?.toLowerCase().includes('renouvellement')
+ sessionStorage.getItem('prescriptionRenewal') === 'true'
  
 if (isRenewal) {
  console.log(' Prescription renewal mode - generating simplified report')
@@ -1852,8 +1850,7 @@ if (isRenewal) {
  } else {
  // FALLBACK: Parse from text if validated medications not available
  const currentMeds = patientData?.currentMedicationsText || 
- patientData?.currentMedications || 
- clinicalData?.currentMedications || ''
+ patientData?.currentMedications || ''
  
  if (currentMeds) {
  console.log(' Auto-parsing current medications text for renewal:', currentMeds)
@@ -2006,11 +2003,11 @@ if (isRenewal) {
  taille: apiReport.medicalReport?.patient?.height || validPatientData.height || '',
  identifiantNational: apiReport.medicalReport?.patient?.nationalId || '',
  dateExamen: apiReport.medicalReport?.patient?.examinationDate || new Date().toISOString().split('T')[0],
- // Vital Signs from clinical data
- temperature: clinicalData?.vitalSigns?.temperature || '',
- bloodPressureSystolic: clinicalData?.vitalSigns?.bloodPressureSystolic || '',
- bloodPressureDiastolic: clinicalData?.vitalSigns?.bloodPressureDiastolic || '',
- bloodGlucose: clinicalData?.vitalSigns?.bloodGlucose || '',
+ // Vital Signs from patient data or API report
+ temperature: validPatientData?.temperature || '',
+ bloodPressureSystolic: validPatientData?.bloodPressureSystolic || '',
+ bloodPressureDiastolic: validPatientData?.bloodPressureDiastolic || '',
+ bloodGlucose: validPatientData?.bloodGlucose || '',
  // Medical Profile
  allergies: (() => {
  const allergies = validPatientData?.allergies || []
@@ -2741,7 +2738,8 @@ const handleSendDocuments = async () => {
  phone: patientPhone,
  address: patientAddress
  },
- clinicalData: clinicalData || {},
+ imageData: imageData || {},
+ ocrAnalysisData: ocrAnalysisData || {},
  diagnosisData: diagnosisData || {}
  })
  })
@@ -3416,11 +3414,8 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
  Incomplete Profile
  </Badge>
  )}
- {/* ADD THIS BADGE FOR PRESCRIPTION RENEWAL */}
- {(sessionStorage.getItem('prescriptionRenewal') === 'true' || 
- clinicalData?.chiefComplaint?.toLowerCase().includes('renewal') ||
- clinicalData?.chiefComplaint?.toLowerCase().includes('renouvellement') ||
- clinicalData?.chiefComplaint?.toLowerCase().includes('ordonnance')) && (
+ {/* ADD THIS BADGE FOR PRESCRIPTION RENEWAL (Rare in dermatology) */}
+ {sessionStorage.getItem('prescriptionRenewal') === 'true' && (
  <Badge className="ml-2 bg-blue-100 text-blue-800">
  Prescription Renewal
  </Badge>
