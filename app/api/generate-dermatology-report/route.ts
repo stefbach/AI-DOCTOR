@@ -319,60 +319,295 @@ export async function POST(request: NextRequest) {
         } : null
       },
 
-      // ===== INVOICE =====
+      // ===== SICK LEAVE CERTIFICATE =====
+      sickLeave: {
+        header: {
+          title: "MEDICAL CERTIFICATE - SICK LEAVE",
+          subtitle: "Certificat Médical d'Arrêt de Travail",
+          certificateNumber: `SL-DERM-${currentDate.getFullYear()}-${String(Date.now()).slice(-6)}`,
+          issueDate: examDate,
+          documentType: "Medical Sick Leave Certificate"
+        },
+        physician: {
+          name: physician.name,
+          qualifications: physician.qualifications,
+          specialty: physician.specialty,
+          registrationNumber: physician.medicalCouncilNumber,
+          address: physician.clinicAddress,
+          email: physician.email,
+          consultationMode: "Teleconsultation - Dermatology"
+        },
+        patient: {
+          fullName: patient.fullName,
+          age: patient.age,
+          gender: patient.gender,
+          address: `${patient.address}, ${patient.city}, ${patient.country}`,
+          phone: patient.phone,
+          employerName: "[To be completed by patient]",
+          occupation: "[To be completed by patient]",
+          employerAddress: "[To be completed by patient]"
+        },
+        medicalCertification: {
+          consultationDate: examDate,
+          consultationType: "Dermatological consultation with clinical image analysis",
+          diagnosis: "Dermatological condition requiring medical treatment and temporary work absence",
+          diagnosticCode: "[ICD-10 code - confidential]",
+          clinicalSummary: "Patient examined via teleconsultation with professional dermatological assessment. Clinical condition identified requiring therapeutic intervention and temporary cessation of work activities to allow treatment efficacy and prevent condition aggravation.",
+          
+          sickLeaveDetails: {
+            startDate: examDate,
+            endDate: calculateFutureDate(examDate, 7),
+            totalDays: 7,
+            daysInWords: "Seven (7) days",
+            isExtension: false,
+            isPartialLeave: false,
+            previousLeaveReference: null,
+            cumulativeDays: 7
+          },
+          
+          workCapacity: {
+            currentStatus: "Temporarily unfit for work",
+            fitnessLevel: "0% - Complete rest required",
+            expectedReturnDate: calculateFutureDate(examDate, 7),
+            anticipatedRecovery: "Expected full recovery with treatment compliance",
+            modifiedDutiesPossible: false
+          },
+          
+          workRestrictions: [
+            "Complete cessation of work duties during treatment period",
+            "Avoid exposure to workplace irritants, chemicals, or allergens",
+            "Avoid prolonged sun exposure if applicable to condition",
+            "Follow prescribed dermatological treatment regimen strictly",
+            "Maintain adequate rest and stress reduction",
+            "Avoid activities that may aggravate dermatological condition"
+          ],
+          
+          treatmentRequirements: [
+            "Application of prescribed topical/systemic medications",
+            "Compliance with skincare regimen",
+            "Avoidance of triggering factors",
+            "Possible follow-up consultation",
+            "Rest period essential for treatment efficacy"
+          ],
+          
+          followUpPlan: {
+            requiresFollowUp: true,
+            followUpDate: calculateFutureDate(examDate, 7),
+            followUpPurpose: "Reassessment of dermatological condition, evaluation of treatment response, and determination of fitness to return to work",
+            certificationRenewal: "May be extended upon medical reassessment if condition persists or complications arise",
+            earlyReturnCriteria: "Complete resolution of symptoms and dermatological clearance"
+          },
+          
+          specialConsiderations: [
+            "Patient should avoid workplace exposures that may worsen dermatological condition",
+            "Gradual return to work may be recommended depending on nature of employment and skin condition location",
+            "Employer should be aware that visible skin conditions do not necessarily indicate contagion",
+            "Reasonable workplace accommodations may facilitate earlier safe return to work"
+          ]
+        },
+        
+        legalCompliance: {
+          legislativeFramework: "Workers' Rights Act 2019 (Mauritius)",
+          medicalPracticeAct: "Medical Council of Mauritius Regulations",
+          dataProtection: "Data Protection Act 2017 (Mauritius) - Patient confidentiality maintained",
+          telemedicineCompliance: "Issued in accordance with telemedicine best practices and Mauritian medical regulations"
+        },
+        
+        declaration: {
+          statement: "I, the undersigned medical practitioner, certify that I have conducted a professional dermatological consultation with the above-named patient on the date stated, utilizing teleconsultation with clinical image analysis. In my professional medical opinion, based on the clinical assessment, the patient is temporarily unfit to perform their occupational duties for the period specified above due to a dermatological medical condition requiring treatment and rest.",
+          
+          confidentialityNotice: "CONFIDENTIALITY NOTICE: This medical certificate is provided solely for sick leave verification purposes. Detailed diagnostic information and clinical findings are confidential and maintained in the patient's protected medical record. Only information necessary for sick leave validation is disclosed herein.",
+          
+          validityStatement: "This certificate is valid for the specific dates indicated above. Any extension of sick leave beyond this period requires medical re-evaluation and issuance of a new certificate. Return to work clearance may be provided earlier if clinical improvement permits.",
+          
+          fraudWarning: "This is an official medical document. Falsification, alteration, or misuse of this certificate constitutes a criminal offense under Mauritian law and medical ethics violations."
+        },
+        
+        authentication: {
+          issuingAuthority: "Tibok Telemedicine Platform - Licensed Medical Services",
+          certificationDate: examDate,
+          signature: "Medical Practitioner's Professional Signature",
+          physicianName: physician.name.toUpperCase(),
+          registrationNumber: physician.medicalCouncilNumber,
+          officialStamp: "Official Medical Stamp / Electronic Seal",
+          digitalVerification: `Certificate verification code: DERM-SL-${Date.now().toString(36).toUpperCase()}`,
+          validationUrl: "Verify authenticity at www.tibok.mu/verify-certificate"
+        },
+        
+        employerGuidance: {
+          title: "GUIDANCE FOR EMPLOYERS",
+          instructions: [
+            "This certificate serves as official medical documentation for employee sick leave entitlement",
+            "Employee should not be required to perform work duties during certified period",
+            "Respect employee medical confidentiality - do not request detailed diagnosis",
+            "Contact physician only through proper channels if verification required",
+            "Plan for employee absence and arrange coverage as necessary",
+            "Prepare for employee return on specified date or upon medical clearance",
+            "Consider workplace accommodations if recommended upon return"
+          ],
+          legalObligations: "Employers must comply with Workers' Rights Act 2019 regarding sick leave entitlements and employee medical privacy rights.",
+          disputeResolution: "Any disputes regarding this medical certificate should be addressed through proper medical and legal channels, not through patient coercion."
+        },
+        
+        patientInstructions: {
+          title: "PATIENT INSTRUCTIONS",
+          guidance: [
+            "Present this certificate to your employer as soon as practically possible",
+            "Keep a copy for your personal records",
+            "Follow all prescribed treatments strictly for optimal recovery",
+            "Attend follow-up consultation on the specified date",
+            "Contact physician if condition worsens or unexpected symptoms develop",
+            "Do not return to work before the end date unless medically cleared",
+            "If extending sick leave, schedule reassessment before current certificate expires",
+            "Maintain all receipts and medical documentation for insurance/employer purposes"
+          ]
+        }
+      },
+
+      // ===== INVOICE (ENHANCED) =====
       invoice: {
         header: {
+          title: "PROFESSIONAL SERVICE INVOICE",
           invoiceNumber: `TIBOK-DERM-${currentDate.getFullYear()}-${String(Date.now()).slice(-6)}`,
           consultationDate: examDate,
-          invoiceDate: examDate
+          invoiceDate: examDate,
+          dueDate: examDate,
+          currency: "MUR",
+          documentType: "Tax Invoice"
         },
         provider: {
           companyName: "Digital Data Solutions Ltd",
-          tradeName: "Tibok",
+          tradeName: "Tibok Telemedicine Platform",
           registrationNumber: "C20173522",
-          address: "Cybercity, Ebene, Mauritius",
+          vatNumber: "VAT Registration: [To be provided]",
+          businessCategory: "Healthcare Technology Services",
+          address: "Cybercity, Ebene, Republic of Mauritius",
           phone: "+230 5xxx xxxx",
-          email: "contact@tibok.mu",
-          website: "www.tibok.mu"
+          email: "billing@tibok.mu",
+          website: "www.tibok.mu",
+          supportEmail: "support@tibok.mu"
         },
         billTo: {
+          type: "Individual Patient",
           name: patient.fullName,
+          patientId: `PAT-${Date.now().toString(36).toUpperCase()}`,
           address: `${patient.address}, ${patient.city}, ${patient.country}`,
           phone: patient.phone,
           email: patient.email
         },
         services: {
-          items: [{
-            description: "Online dermatology consultation with image analysis via Tibok",
-            quantity: 1,
-            unitPrice: 1500,
-            total: 1500
-          }],
+          items: [
+            {
+              itemNumber: 1,
+              description: "Online Dermatology Consultation - Professional",
+              details: "Comprehensive dermatological assessment via secure telemedicine platform, including AI-powered clinical image analysis, diagnostic evaluation, differential diagnosis, and personalized treatment planning",
+              category: "Medical Consultation",
+              quantity: 1,
+              unitPrice: 1500,
+              total: 1500,
+              taxable: false
+            },
+            {
+              itemNumber: 2,
+              description: "Medical Documentation Package",
+              details: "Includes: Professional consultation report, medical prescription(s), laboratory test requests (if applicable), imaging study requests (if applicable), sick leave certificate (if applicable)",
+              category: "Medical Documentation",
+              quantity: 1,
+              unitPrice: 0,
+              total: 0,
+              taxable: false,
+              note: "Included in consultation fee"
+            },
+            {
+              itemNumber: 3,
+              description: "Secure Medical Data Storage (HDS Certified)",
+              details: "GDPR-compliant medical record storage on OVH Health Data hosting certified servers",
+              category: "Data Services",
+              quantity: 1,
+              unitPrice: 0,
+              total: 0,
+              taxable: false,
+              note: "Included in consultation fee"
+            }
+          ],
           subtotal: 1500,
-          vatRate: 0.15,
+          vatRate: 0.00,
           vatAmount: 0,
-          totalDue: 1500
+          vatExemptionReason: "Medical services exempt from VAT under Mauritius VAT Act",
+          discounts: [],
+          totalBeforeVat: 1500,
+          totalDue: 1500,
+          amountInWords: "One Thousand Five Hundred Mauritian Rupees Only"
         },
         payment: {
-          method: "[Credit Card / MCB Juice / MyT Money / Other]",
-          receivedDate: examDate,
-          status: "pending" as const
+          status: "Pending",
+          method: "To be selected by patient",
+          acceptedMethods: [
+            "MCB Juice Mobile Payment",
+            "MyT Money Mobile Wallet",
+            "Credit Card (Visa, Mastercard)",
+            "Debit Card (Mauritius banks)",
+            "Bank Transfer (MCB, SBM, ABC Banking)",
+            "Online Banking Payment"
+          ],
+          bankDetails: {
+            accountName: "Digital Data Solutions Ltd",
+            bank: "[Bank Name]",
+            accountNumber: "[Account Number]",
+            swiftCode: "[SWIFT Code]",
+            iban: "[IBAN if applicable]",
+            reference: `TIBOK-DERM-${String(Date.now()).slice(-6)}`
+          },
+          paymentTerms: "Payment due upon receipt. Service rendered prior to payment.",
+          latePaymentPolicy: "N/A - Prepaid consultation service"
         },
         physician: {
-          name: physician.name,
-          registrationNumber: physician.medicalCouncilNumber
+          consultingPhysician: physician.name,
+          specialty: physician.specialty,
+          qualifications: physician.qualifications,
+          registrationNumber: physician.medicalCouncilNumber,
+          consultationMode: "Secure Video Teleconsultation with Image Analysis"
+        },
+        terms: {
+          refundPolicy: "Refunds subject to Terms & Conditions. Request within 24 hours if service not rendered or technical issues prevented consultation.",
+          cancellationPolicy: "Cancellation allowed up to 2 hours before scheduled consultation. Full refund if cancelled within policy window.",
+          serviceGuarantee: "Professional medical service delivered by licensed, registered medical practitioners. Quality assurance maintained.",
+          disputeResolution: "Any billing disputes should be directed to billing@tibok.mu within 30 days of invoice date.",
+          jurisdiction: "This invoice is governed by the laws of the Republic of Mauritius."
         },
         notes: [
-          "This invoice corresponds to a remote dermatology consultation with image analysis performed via the Tibok platform.",
-          "The service was delivered by a registered medical professional specialized in dermatology.",
-          "All images and data are securely hosted on a health data certified server (OVH – HDS compliant).",
-          "Service available from 08:00 to 00:00 (Mauritius time), 7 days a week.",
-          "Medication delivery included during daytime, with possible extra charges after 17:00."
+          "✓ This invoice corresponds to a professional dermatology teleconsultation performed via the Tibok telemedicine platform.",
+          "✓ Service delivered by a licensed medical practitioner registered with the Medical Council of Mauritius, specialized in dermatology.",
+          "✓ All patient data and medical images are securely stored on OVH Health Data certified servers (HDS compliant).",
+          "✓ Platform adheres to international medical data protection standards including GDPR and Mauritius Data Protection Act 2017.",
+          "✓ Telemedicine services available 08:00-00:00 (Mauritius time), 7 days per week including public holidays.",
+          "✓ Prescription medications can be delivered during daytime hours; additional delivery charges may apply for after-hours delivery.",
+          "✓ Medical certificates, prescriptions, and reports are digitally signed and verifiable.",
+          "✓ Insurance reimbursement: This invoice can be submitted to your health insurance provider if telemedicine coverage is included in your policy.",
+          "✓ Receipt will be emailed to the provided email address upon payment confirmation.",
+          "✓ For technical support or medical follow-up questions, contact support@tibok.mu"
+        ],
+        legalNotice: [
+          "TAX COMPLIANCE: This invoice complies with the Mauritius Value Added Tax (VAT) Act. Medical consultation services are VAT-exempt under current legislation.",
+          "COMPANY REGISTRATION: Digital Data Solutions Ltd is registered under the Mauritius Companies Act 2001, Registration Number C20173522.",
+          "MEDICAL LICENSING: All medical practitioners are duly licensed and registered with the Medical Council of Mauritius.",
+          "DATA PROTECTION: Services comply with the Data Protection Act 2017 (Mauritius) and international healthcare data standards.",
+          "PROFESSIONAL INDEMNITY: Medical practitioners are covered by professional indemnity insurance as required by Mauritius medical regulations."
         ],
         signature: {
           entity: "Digital Data Solutions Ltd",
+          tradeName: "Tibok Telemedicine Platform",
           onBehalfOf: physician.name,
-          title: "Registered Medical Practitioner - Dermatology Specialist (Mauritius)"
+          title: "Consultant Dermatologist - Licensed Medical Practitioner (Mauritius)",
+          date: examDate,
+          authorizedSignatory: "Billing Department - Tibok",
+          officialStamp: "Company Seal / Electronic Stamp"
+        },
+        footer: {
+          thankYouMessage: "Thank you for choosing Tibok for your healthcare needs. Your health is our priority.",
+          contactInfo: "Questions? Contact us at support@tibok.mu or call +230 5xxx xxxx",
+          websiteUrl: "www.tibok.mu",
+          followUs: "Follow us on social media for health tips and updates"
         }
       }
     }
@@ -424,36 +659,60 @@ export async function POST(request: NextRequest) {
 
 async function extractMedicationsAI(openai: OpenAI, diagnosisText: string, patient: any): Promise<any[]> {
   try {
-    const prompt = `Extract ALL medications from this dermatology diagnosis. Return ONLY a JSON array.
+    const prompt = `Extract ALL medications from this dermatology diagnosis with COMPLETE details. Return ONLY a JSON array.
 
 DIAGNOSIS:
 ${diagnosisText}
 
-Return format:
+PATIENT CONTEXT:
+- Allergies: ${patient.allergies}
+- Age: ${patient.age}
+- Current Medications: ${patient.currentMedications}
+
+Return format (include ALL fields for professional prescription):
 [
   {
-    "nom": "Hydrocortisone Cream",
+    "nom": "Hydrocortisone Cream 1%",
     "denominationCommune": "Hydrocortisone",
     "dosage": "1%",
-    "forme": "cream",
-    "posologie": "Apply twice daily",
-    "modeAdministration": "Topical route",
-    "dureeTraitement": "14 days",
+    "forme": "Topical Cream",
+    "posologie": "Apply thin layer twice daily (morning and evening)",
+    "modeAdministration": "Topical - For external use only",
+    "dureeTraitement": "14 days initially, may extend based on response",
     "quantite": "1 tube (30g)",
-    "instructions": "Apply to affected areas only"
+    "instructions": "Clean and dry affected area before application. Apply sparingly. Wash hands after use.",
+    "indication": "Eczematous dermatitis / Inflammatory skin condition",
+    "contraindications": "Hypersensitivity to corticosteroids, viral skin infections, rosacea",
+    "sideEffects": "Possible: skin thinning, burning sensation, hypopigmentation with prolonged use",
+    "precautions": "Avoid face, groin, and underarms unless directed. Do not use occlusive dressings. Not for ophthalmic use.",
+    "pharmacologicalClass": "Topical corticosteroid - Class III (Moderate potency)",
+    "storageConditions": "Store at room temperature (15-25°C), away from direct sunlight and moisture",
+    "interactions": "None significant for topical use",
+    "pregnancyCategory": "Category C - Use only if benefits outweigh risks"
   }
 ]
 
-If no medications: return []`
+CRITICAL REQUIREMENTS:
+- Include ALL fields for each medication
+- Be specific and medically accurate
+- Consider patient's allergies and current medications
+- Use proper dermatological terminology
+- Include realistic timeframes and quantities
+- Provide practical patient instructions
+
+If no medications needed: return []`
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       messages: [
-        { role: "system", content: "Extract medications as JSON array only. No explanations." },
+        { 
+          role: "system", 
+          content: "You are a consultant dermatologist prescribing medications. Extract complete medication details as JSON array. Include all safety information, contraindications, and practical instructions. Be thorough and professional." 
+        },
         { role: "user", content: prompt }
       ],
       temperature: 0.3,
-      max_tokens: 2000
+      max_tokens: 3000
     })
 
     const text = (completion.choices[0].message.content || '[]').trim()
@@ -468,33 +727,58 @@ If no medications: return []`
 
 async function extractLabTestsAI(openai: OpenAI, diagnosisText: string, patient: any): Promise<any[]> {
   try {
-    const prompt = `Extract ALL laboratory tests from RECOMMENDED INVESTIGATIONS. Return ONLY a JSON array.
+    const prompt = `Extract ALL laboratory tests from RECOMMENDED INVESTIGATIONS with COMPLETE clinical details. Return ONLY a JSON array.
 
 DIAGNOSIS:
 ${diagnosisText}
 
-Return format:
+PATIENT INFO:
+- Age: ${patient.age}
+- Medical History: ${patient.medicalHistory}
+
+Return format (include ALL fields for professional lab request):
 [
   {
-    "nom": "Complete Blood Count",
+    "nom": "Complete Blood Count (CBC) with Differential",
     "categorie": "hematology",
     "urgence": false,
     "aJeun": false,
-    "motifClinique": "Rule out infection"
+    "motifClinique": "Rule out systemic infection, assess for drug-induced blood dyscrasias, evaluate inflammatory markers",
+    "expectedValues": "WBC: 4.0-11.0 x10^9/L, Hb: 12-16 g/dL (F), 13-17 g/dL (M), Platelets: 150-400 x10^9/L",
+    "clinicalSignificance": "Elevated WBC suggests infection/inflammation. Low counts may indicate drug toxicity. Eosinophilia suggests allergic component.",
+    "sampleType": "Venous blood in EDTA tube (purple/lavender cap)",
+    "sampleVolume": "3-5 mL",
+    "sampleConditions": "No special preparation required. Sample stable for 24h at room temperature.",
+    "patientPreparation": "No fasting required. Adequate hydration recommended.",
+    "tubePrelevement": "EDTA (Ethylenediaminetetraacetic acid) anticoagulant tube",
+    "turnaroundTime": "Same day if urgent (2-4 hours), 24 hours standard",
+    "costEstimate": "MUR 500-800 (may vary by laboratory)",
+    "laboratoryInstructions": "Handle sample gently to avoid hemolysis. Process within 4 hours for accurate differential count."
   }
 ]
 
-Categories: hematology, clinicalChemistry, immunology, microbiology, other
-If no tests: return []`
+Categories: hematology, clinicalChemistry, immunology, microbiology, dermatopathology, other
+
+REQUIREMENTS:
+- Be comprehensive and clinically relevant
+- Include realistic reference ranges for Mauritius
+- Provide practical sample handling instructions
+- Consider dermatological diagnostic context
+- Include cost estimates in MUR (Mauritian Rupees)
+
+If no tests needed: return []`
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       messages: [
-        { role: "system", content: "Extract lab tests as JSON array only. No explanations." },
+        { 
+          role: "system", 
+          content: "You are a consultant dermatologist ordering laboratory investigations. Extract complete test details as JSON array. Include clinical rationale, expected values, sample requirements, and practical logistics. Be thorough and evidence-based." 
+        },
         { role: "user", content: prompt }
       ],
       temperature: 0.3,
-      max_tokens: 1500
+      max_tokens: 3000
     })
 
     const text = (completion.choices[0].message.content || '[]').trim()
@@ -509,32 +793,58 @@ If no tests: return []`
 
 async function extractImagingStudiesAI(openai: OpenAI, diagnosisText: string, patient: any): Promise<any[]> {
   try {
-    const prompt = `Extract ALL imaging studies from RECOMMENDED INVESTIGATIONS. Return ONLY a JSON array.
+    const prompt = `Extract ALL imaging studies from RECOMMENDED INVESTIGATIONS with COMPLETE protocol details. Return ONLY a JSON array.
 
 DIAGNOSIS:
 ${diagnosisText}
 
-Return format:
+PATIENT INFO:
+- Age: ${patient.age}
+- Clinical Context: Dermatology consultation with image analysis
+
+Return format (include ALL fields for professional imaging request):
 [
   {
-    "type": "Ultrasound",
-    "region": "Soft tissue",
-    "indicationClinique": "Assess lesion depth",
-    "urgence": false
+    "type": "High-Frequency Ultrasound",
+    "modalite": "Ultrasound - Dermatological",
+    "region": "Soft tissue - left anterior thigh, subcutaneous layer",
+    "indicationClinique": "Assess depth, margins, and vascularity of subcutaneous lesion. Rule out deeper involvement. Guide potential biopsy or excision.",
+    "urgence": false,
+    "contraste": false,
+    "specificProtocol": "High-frequency linear probe (7-15 MHz preferred, up to 18 MHz for superficial lesions). Include B-mode and color Doppler. Document size in 3 dimensions, depth from skin surface, relation to fascia.",
+    "diagnosticQuestion": "Is this lesion confined to dermis/subcutis? Any deep extension? Vascular flow pattern? Suspicious features for malignancy?",
+    "technicalRequirements": "Linear array transducer, high resolution, doppler capability",
+    "patientPosition": "Supine or as required for optimal access",
+    "expectedDuration": "15-20 minutes including doppler assessment",
+    "reportingSpecialist": "Radiologist with dermatological imaging experience preferred",
+    "costEstimate": "MUR 2000-3500 (varies by facility and doppler requirement)",
+    "preparationInstructions": "No special preparation. Area should be clean, avoid recent application of topical medications.",
+    "clinicalCorrelation": "Correlate with clinical examination and dermoscopy findings. Provide images to radiologist if possible."
   }
 ]
 
-Types: X-Ray, CT Scan, MRI, Ultrasound
-If no imaging: return []`
+Types: High-Frequency Ultrasound, Dermoscopy, MRI (for deep lesions), CT (rarely), X-Ray (for calcifications)
+
+REQUIREMENTS:
+- Be specific about imaging protocols
+- Include technical specifications (probe frequency, etc.)
+- Provide diagnostic questions to answer
+- Consider dermatological imaging best practices
+- Include realistic costs in MUR
+
+If no imaging needed: return []`
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       messages: [
-        { role: "system", content: "Extract imaging as JSON array only. No explanations." },
+        { 
+          role: "system", 
+          content: "You are a consultant dermatologist requesting imaging studies. Extract complete imaging protocols as JSON array. Include technical specifications, diagnostic questions, and practical details. Focus on dermatological imaging modalities. Be specific and evidence-based." 
+        },
         { role: "user", content: prompt }
       ],
       temperature: 0.3,
-      max_tokens: 1000
+      max_tokens: 2500
     })
 
     const text = (completion.choices[0].message.content || '[]').trim()
@@ -924,4 +1234,10 @@ function formatAllergies(patient: any): string {
     allergies.push(patient.otherAllergies)
   }
   return allergies.length > 0 ? allergies.join(', ') : 'No known allergies'
+}
+
+function calculateFutureDate(startDate: string, daysToAdd: number): string {
+  const date = new Date(startDate)
+  date.setDate(date.getDate() + daysToAdd)
+  return date.toISOString().split('T')[0]
 }
