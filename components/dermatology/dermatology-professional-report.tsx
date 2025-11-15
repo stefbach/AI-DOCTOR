@@ -1697,25 +1697,42 @@ useEffect(() => {
 
  // ==================== INITIAL DATA LOAD ====================
  useEffect(() => {
- console.log(" ProfessionalReportEditable mounted with data:", {
- hasPatientData: !!patientData,
- hasImageData: !!imageData,
- hasOcrAnalysisData: !!ocrAnalysisData,
- hasDiagnosisData: !!diagnosisData,
- hasQuestionsData: !!questionsData
- })
+ console.log("===============================================")
+ console.log("PROFESSIONAL REPORT - COMPONENT MOUNTED")
+ console.log("===============================================")
+ console.log("Data availability:")
+ console.log("  - Patient Data:", !!patientData, patientData?.firstName, patientData?.lastName)
+ console.log("  - Image Data:", !!imageData)
+ console.log("  - OCR Analysis:", !!ocrAnalysisData)
+ console.log("  - Questions Data:", !!questionsData)
+ console.log("  - Diagnosis Data:", !!diagnosisData)
+ console.log("")
+ console.log("Initial State:")
+ console.log("  - isLoadingFromDb:", isLoadingFromDb)
+ console.log("  - dbCheckComplete:", dbCheckComplete)
+ console.log("  - shouldGenerateReport:", shouldGenerateReport)
+ console.log("  - report exists:", !!report)
+ console.log("===============================================")
  }, [])
 
 // ==================== GENERATE REPORT WHEN NEEDED ====================
 useEffect(() => {
+ console.log("REPORT GENERATION TRIGGER - Checking conditions:")
+ console.log("  - dbCheckComplete:", dbCheckComplete)
+ console.log("  - shouldGenerateReport:", shouldGenerateReport)
+ console.log("  - report exists:", !!report)
+ console.log("  - editingDoctor:", editingDoctor)
+ console.log("  - diagnosisData:", !!diagnosisData)
+ 
  // Only proceed if DB check is complete and we should generate
  if (!dbCheckComplete || !shouldGenerateReport) {
+ console.log("SKIP: DB check not complete or should not generate")
  return
  }
  
  // Don't generate if we already have a report OR if editing doctor info
- if (report || editingDoctor) { // ADD editingDoctor check here
- console.log(' Report already exists or editing doctor, skipping generation')
+ if (report || editingDoctor) {
+ console.log('SKIP: Report already exists or editing doctor')
  return
  }
  
@@ -1728,16 +1745,19 @@ useEffect(() => {
  !patientData.name?.includes('1970')
  
  if (!hasValidPatientData) {
- console.log(' No valid patient data, not generating report')
+ console.log('SKIP: No valid patient data')
+ console.log('  Patient data:', patientData)
  setLoading(false)
  return
  }
  
- console.log(' Valid patient data found, generating report...')
+ console.log('===============================================')
+ console.log('TRIGGERING REPORT GENERATION')
+ console.log('===============================================')
  generateProfessionalReport()
  setShouldGenerateReport(false) // Reset flag after generation
  
-}, [dbCheckComplete, shouldGenerateReport, report, patientData, editingDoctor]) // ADD editingDoctor to dependencies
+}, [dbCheckComplete, shouldGenerateReport, report, patientData, editingDoctor, diagnosisData])
 
 // Helper function to parse medication text into structured format
 const parseMedicationText = (medicationText: string): any[] => {
@@ -3368,7 +3388,20 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  <div className="text-center space-y-4">
  <AlertCircle className="h-12 w-12 text-blue-500 mx-auto" />
  <p className="text-lg font-semibold">No report data available</p>
- <p className="text-sm text-gray-500">Waiting for valid data...</p>
+ <p className="text-sm text-gray-500">
+ {loading ? 'Generating report...' : 
+  !dbCheckComplete ? 'Checking for existing drafts...' :
+  !diagnosisData ? 'Please complete the diagnosis step first' :
+  'Waiting for valid data...'}
+ </p>
+ {!loading && dbCheckComplete && diagnosisData && (
+ <Button 
+ onClick={generateProfessionalReport}
+ className="mt-4"
+ >
+ Generate Report
+ </Button>
+ )}
  </div>
  </CardContent>
  </Card>
