@@ -134,7 +134,8 @@ interface MauritianReport {
 
 interface ProfessionalReportProps {
  patientData: any
- clinicalData: any
+ imageData?: any
+ ocrAnalysisData?: any
  questionsData: any
  diagnosisData: any
  editedDocuments?: any
@@ -861,7 +862,8 @@ ImagingExamEditForm.displayName = 'ImagingExamEditForm'
 // ==================== MAIN COMPONENT ====================
 export default function ProfessionalReportEditable({
  patientData,
- clinicalData,
+ imageData,
+ ocrAnalysisData,
  questionsData,
  diagnosisData,
  editedDocuments,
@@ -1945,12 +1947,13 @@ if (isRenewal) {
  console.log('  medications:', diagnosisData?.medications)
  console.log('  combinedPrescription:', diagnosisData?.combinedPrescription)
  
- const response = await fetch("/api/generate-consultation-report", {
+ const response = await fetch("/api/generate-dermatology-report", {
  method: "POST",
  headers: { "Content-Type": "application/json" },
  body: JSON.stringify({
  patientData: validPatientData,
- clinicalData: clinicalData || {},
+ imageData: imageData || {},
+ ocrAnalysisData: ocrAnalysisData || {},
  questionsData: questionsData || {},
  diagnosisData: diagnosisData || {},
  editedDocuments: editedDocuments || {},
