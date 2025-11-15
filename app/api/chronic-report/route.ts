@@ -1,11 +1,197 @@
-// app/api/chronic-report/route.ts - Comprehensive Narrative Medical Report for Chronic Disease Follow-Up
-// Generates TRUE endocrinology consultation report with narrative text + structured data
+// app/api/chronic-report/route.ts - PROFESSIONAL Chronic Disease Report with Structured Prescriptions
+// Generates narrative report + PROFESSIONAL ordonnances/biologie/paraclinique (NO EMOJIS, NO COLORS)
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
+import OpenAI from "openai"
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
+
+// ==================== PROFESSIONAL PRESCRIPTION EXTRACTION ====================
+// Extract medications in PROFESSIONAL format (like generate-consultation-report)
+
+async function extractMedicationsProfessional(diagnosisData: any, patientData: any): Promise<any[]> {
+  const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  
+  try {
+    const prompt = `Extract ALL medications from chronic disease management data with COMPLETE professional details.
+
+DIAGNOSIS DATA:
+${JSON.stringify(diagnosisData, null, 2)}
+
+PATIENT INFO:
+- Chronic diseases: ${(patientData.medicalHistory || []).join(', ')}
+- Current medications: ${patientData.currentMedicationsText || patientData.currentMedications || 'None'}
+- Allergies: ${patientData.allergies || 'None'}
+
+Return format (professional prescription - NO EMOJIS):
+[
+  {
+    "name": "Metformin Hydrochloride",
+    "genericName": "Metformin",
+    "dosage": "850mg",
+    "form": "Tablet",
+    "frequency": "1 tablet twice daily with meals",
+    "route": "Oral route",
+    "duration": "3 months (renewable)",
+    "quantity": "180 tablets",
+    "instructions": "Take with food to reduce gastrointestinal side effects. Swallow whole, do not crush.",
+    "indication": "Type 2 Diabetes Mellitus - glycemic control",
+    "monitoring": "Monitor kidney function (eGFR) every 6 months. Discontinue if eGFR <30 ml/min.",
+    "doNotSubstitute": false,
+    "pharmacologicalClass": "Biguanide antidiabetic",
+    "contraindications": "Severe renal impairment, acute metabolic acidosis",
+    "sideEffects": "Gastrointestinal upset, lactic acidosis (rare), vitamin B12 deficiency with long-term use",
+    "precautions": "Hold before contrast procedures. Monitor for lactic acidosis signs.",
+    "interactions": "Caution with alcohol, iodinated contrast agents",
+    "pregnancyCategory": "Category B",
+    "storageConditions": "Store at room temperature, protect from moisture"
+  }
+]
+
+CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON medical nomenclature in ENGLISH. NO EMOJIS.`
+
+    const completion = await openaiClient.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { 
+          role: "system", 
+          content: "You are a clinical pharmacist extracting medication prescriptions. Use professional medical terminology in ENGLISH. NO EMOJIS. Include all safety information." 
+        },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.3,
+      max_tokens: 3000
+    })
+
+    const text = (completion.choices[0].message.content || '[]').trim()
+    const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '')
+    const match = cleaned.match(/\[[\s\S]*\]/)
+    return match ? JSON.parse(match[0]) : []
+  } catch (error) {
+    console.error('Error extracting medications:', error)
+    return []
+  }
+}
+
+async function extractLabTestsProfessional(diagnosisData: any, patientData: any): Promise<any[]> {
+  const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  
+  try {
+    const prompt = `Extract ALL laboratory tests for chronic disease monitoring with COMPLETE details.
+
+DIAGNOSIS DATA:
+${JSON.stringify(diagnosisData, null, 2)}
+
+PATIENT INFO:
+- Chronic diseases: ${(patientData.medicalHistory || []).join(', ')}
+- Age: ${patientData.age}
+
+Return format (professional lab request - NO EMOJIS):
+[
+  {
+    "name": "Glycated Hemoglobin (HbA1c)",
+    "category": "clinicalChemistry",
+    "urgency": false,
+    "fasting": false,
+    "clinicalIndication": "Diabetes monitoring - assessment of 3-month average glycemic control",
+    "expectedValues": "Target <7% for most adults with diabetes, <6.5% if achievable without hypoglycemia",
+    "clinicalSignificance": "HbA1c reflects average plasma glucose over previous 8-12 weeks. Elevated values indicate suboptimal glycemic control.",
+    "sampleType": "Venous blood - EDTA tube (purple top)",
+    "sampleVolume": "2-3 mL whole blood",
+    "handlingInstructions": "No special handling required. Stable at room temperature for 24 hours.",
+    "laboratoryInstructions": "HPLC or immunoassay method. Report with reference range.",
+    "timing": "Every 3 months for uncontrolled diabetes, every 6 months when at target",
+    "costEstimate": "MUR 800-1200"
+  }
+]
+
+Categories: hematology, clinicalChemistry, immunology, microbiology, endocrinology
+
+CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON nomenclature. NO EMOJIS.`
+
+    const completion = await openaiClient.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { 
+          role: "system", 
+          content: "You are a clinical pathologist ordering laboratory investigations. Professional medical terminology in ENGLISH. NO EMOJIS." 
+        },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.3,
+      max_tokens: 3000
+    })
+
+    const text = (completion.choices[0].message.content || '[]').trim()
+    const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '')
+    const match = cleaned.match(/\[[\s\S]*\]/)
+    return match ? JSON.parse(match[0]) : []
+  } catch (error) {
+    console.error('Error extracting lab tests:', error)
+    return []
+  }
+}
+
+async function extractImagingStudiesProfessional(diagnosisData: any, patientData: any): Promise<any[]> {
+  const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  
+  try {
+    const prompt = `Extract ALL imaging studies for chronic disease complications screening with COMPLETE details.
+
+DIAGNOSIS DATA:
+${JSON.stringify(diagnosisData, null, 2)}
+
+PATIENT INFO:
+- Chronic diseases: ${(patientData.medicalHistory || []).join(', ')}
+- Age: ${patientData.age}
+
+Return format (professional imaging request - NO EMOJIS):
+[
+  {
+    "type": "Doppler Ultrasound - Lower Limb Arteries",
+    "modality": "Ultrasound Doppler",
+    "region": "Bilateral lower extremities - femoral to tibial arteries",
+    "clinicalIndication": "Diabetes with peripheral neuropathy - screening for peripheral arterial disease",
+    "urgency": false,
+    "contrast": false,
+    "specificProtocol": "Color Doppler and spectral waveform analysis. Include ankle-brachial index (ABI) calculation.",
+    "diagnosticQuestion": "Evidence of arterial stenosis or occlusion? Assess perfusion adequacy.",
+    "technicalRequirements": "High-resolution linear transducer with Doppler capability",
+    "patientPosition": "Supine with leg slightly externally rotated",
+    "expectedDuration": "30-45 minutes for bilateral examination",
+    "reportingSpecialist": "Radiologist or vascular sonographer",
+    "costEstimate": "MUR 2500-4000",
+    "preparationInstructions": "No special preparation required",
+    "clinicalCorrelation": "Correlate with pedal pulses, capillary refill, and diabetic foot examination"
+  }
+]
+
+CRITICAL: Return ONLY the JSON array. Professional terminology. NO EMOJIS.`
+
+    const completion = await openaiClient.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { 
+          role: "system", 
+          content: "You are a radiologist ordering imaging studies. Professional medical terminology in ENGLISH. NO EMOJIS." 
+        },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.3,
+      max_tokens: 2500
+    })
+
+    const text = (completion.choices[0].message.content || '[]').trim()
+    const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '')
+    const match = cleaned.match(/\[[\s\S]*\]/)
+    return match ? JSON.parse(match[0]) : []
+  } catch (error) {
+    console.error('Error extracting imaging studies:', error)
+    return []
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -487,9 +673,248 @@ Generate the complete narrative report now.`
       )
     }
     
+    console.log('Extracting PROFESSIONAL prescriptions (medications, lab tests, imaging)...')
+    
+    // ===== EXTRACT PROFESSIONAL PRESCRIPTIONS =====
+    const [medications, labTests, imagingStudies] = await Promise.all([
+      extractMedicationsProfessional(diagnosisData, patientData),
+      extractLabTestsProfessional(diagnosisData, patientData),
+      extractImagingStudiesProfessional(diagnosisData, patientData)
+    ])
+    
+    console.log(`Extracted: ${medications.length} medications, ${labTests.length} lab tests, ${imagingStudies.length} imaging studies`)
+    
+    // ===== BUILD PROFESSIONAL PRESCRIPTIONS (NO EMOJIS) =====
+    const examDate = reportDate.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric'
+    })
+    
+    const physician = {
+      name: doctorData?.fullName ? `Dr. ${doctorData.fullName}` : "Dr. [PHYSICIAN NAME]",
+      qualifications: doctorData?.qualifications || "MBBS",
+      specialty: "Endocrinology / Internal Medicine",
+      practiceAddress: doctorData?.practiceAddress || doctorData?.clinicAddress || "Tibok Teleconsultation Platform",
+      email: doctorData?.email || "[Professional email]",
+      consultationHours: doctorData?.consultationHours || "Consultation Hours: 8:00 AM - 8:00 PM",
+      medicalCouncilNumber: doctorData?.medicalCouncilNumber || "[MCM Registration Required]"
+    }
+    
+    const patient = {
+      fullName: `${patientData.firstName} ${patientData.lastName}`,
+      age: `${patientData.age} years`,
+      gender: patientData.gender,
+      address: `${patientData.address || ''}, ${patientData.city || ''}, ${patientData.country || ''}`,
+      phone: patientData.phone || '',
+      email: patientData.email || ''
+    }
+    
+    // Build professional prescriptions structure
+    const professionalPrescriptions: any = {}
+    
+    // MEDICATIONS PRESCRIPTION (if any)
+    if (medications.length > 0) {
+      professionalPrescriptions.medications = {
+        header: physician,
+        patient: patient,
+        prescription: {
+          prescriptionDate: examDate,
+          medications: medications.map((med, idx) => ({
+            number: idx + 1,
+            name: med.name,
+            genericName: med.genericName || med.name,
+            dosage: med.dosage,
+            form: med.form || 'Tablet',
+            frequency: med.frequency,
+            route: med.route,
+            duration: med.duration,
+            quantity: med.quantity,
+            instructions: med.instructions,
+            indication: med.indication,
+            monitoring: med.monitoring,
+            doNotSubstitute: med.doNotSubstitute || false,
+            pharmacologicalClass: med.pharmacologicalClass,
+            contraindications: med.contraindications,
+            sideEffects: med.sideEffects,
+            precautions: med.precautions,
+            storageConditions: med.storageConditions
+          })),
+          validity: "3 months unless otherwise specified",
+          dispensationNote: "For pharmaceutical use only - Chronic disease management"
+        },
+        authentication: {
+          signature: "Medical Practitioner's Signature",
+          physicianName: physician.name.toUpperCase(),
+          registrationNumber: physician.medicalCouncilNumber,
+          officialStamp: "Official Medical Stamp",
+          date: examDate
+        }
+      }
+    }
+    
+    // LABORATORY TESTS (if any)
+    if (labTests.length > 0) {
+      // Categorize tests
+      const categorizedTests: any = {
+        hematology: labTests.filter(t => t.category === 'hematology'),
+        clinicalChemistry: labTests.filter(t => t.category === 'clinicalChemistry'),
+        endocrinology: labTests.filter(t => t.category === 'endocrinology'),
+        immunology: labTests.filter(t => t.category === 'immunology'),
+        microbiology: labTests.filter(t => t.category === 'microbiology')
+      }
+      
+      const analyses: any = {}
+      Object.keys(categorizedTests).forEach(category => {
+        if (categorizedTests[category].length > 0) {
+          analyses[category] = categorizedTests[category].map((test: any) => ({
+            name: test.name,
+            urgency: test.urgency,
+            fasting: test.fasting,
+            clinicalIndication: test.clinicalIndication,
+            expectedValues: test.expectedValues,
+            sampleType: test.sampleType,
+            timing: test.timing
+          }))
+        }
+      })
+      
+      professionalPrescriptions.laboratoryTests = {
+        header: physician,
+        patient: patient,
+        prescription: {
+          prescriptionDate: examDate,
+          clinicalIndication: "Chronic disease monitoring and complications screening",
+          analyses: analyses,
+          specialInstructions: labTests.some(t => t.fasting) ? ["Some tests require fasting - please verify individual requirements"] : [],
+          recommendedLaboratory: "Accredited medical laboratory"
+        },
+        authentication: {
+          signature: "Medical Practitioner's Signature",
+          physicianName: physician.name.toUpperCase(),
+          registrationNumber: physician.medicalCouncilNumber,
+          date: examDate
+        }
+      }
+    }
+    
+    // IMAGING STUDIES (if any)
+    if (imagingStudies.length > 0) {
+      professionalPrescriptions.imagingStudies = {
+        header: physician,
+        patient: patient,
+        prescription: {
+          prescriptionDate: examDate,
+          examinations: imagingStudies.map((study: any) => ({
+            type: study.type,
+            modality: study.modality,
+            region: study.region,
+            clinicalIndication: study.clinicalIndication,
+            urgency: study.urgency,
+            contrast: study.contrast,
+            specificProtocol: study.specificProtocol,
+            diagnosticQuestion: study.diagnosticQuestion
+          })),
+          clinicalContext: "Chronic disease complications screening and management",
+          recommendedCenter: "Accredited imaging center with experienced radiologists"
+        },
+        authentication: {
+          signature: "Medical Practitioner's Signature",
+          physicianName: physician.name.toUpperCase(),
+          registrationNumber: physician.medicalCouncilNumber,
+          date: examDate
+        }
+      }
+    }
+    
+    // ===== INVOICE (Professional format) =====
+    const invoice = {
+      header: {
+        invoiceNumber: `CHR-INV-${reportDate.getFullYear()}-${String(Date.now()).slice(-6)}`,
+        consultationDate: examDate,
+        invoiceDate: examDate
+      },
+      provider: {
+        companyName: "Digital Data Solutions Ltd",
+        tradeName: "Tibok",
+        registrationNumber: "C20173522",
+        vatNumber: "27816949",
+        registeredOffice: "Bourdet Road, Grand Baie, Mauritius",
+        phone: "+230 4687377/78",
+        email: "contact@tibok.mu",
+        website: "www.tibok.mu"
+      },
+      patient: {
+        name: patient.fullName,
+        email: patient.email,
+        phone: patient.phone,
+        patientId: documentId
+      },
+      services: {
+        items: [{
+          description: "Online chronic disease follow-up consultation with comprehensive report generation via Tibok",
+          quantity: 1,
+          unitPrice: 1500,
+          total: 1500
+        }],
+        subtotal: 1500,
+        vatRate: 0.15,
+        vatAmount: 0,
+        totalDue: 1500
+      },
+      payment: {
+        method: "[Credit Card / MCB Juice / MyT Money / Other]",
+        receivedDate: examDate,
+        status: "pending" as const
+      },
+      physician: {
+        name: physician.name,
+        registrationNumber: physician.medicalCouncilNumber
+      },
+      notes: [
+        "This invoice corresponds to a remote chronic disease follow-up consultation performed via the Tibok platform.",
+        "The service was delivered by a registered medical professional specialized in endocrinology/internal medicine.",
+        "No audio or video recording was made. All data securely hosted on health data certified server (OVH - HDS compliant).",
+        "Service available from 08:00 to 00:00 (Mauritius time), 7 days a week.",
+        "Medication delivery included during daytime, with possible extra charges after 17:00 depending on pharmacy availability."
+      ],
+      signature: {
+        entity: "Digital Data Solutions Ltd",
+        onBehalfOf: physician.name,
+        title: "Registered Medical Practitioner - Endocrinology/Internal Medicine (Mauritius)"
+      }
+    }
+    
+    // ===== COMBINE EVERYTHING =====
+    const completeReport = {
+      ...reportData.report,
+      prescriptions: professionalPrescriptions,
+      invoice: invoice,
+      metadata: {
+        documentId: documentId,
+        generatedAt: reportDate.toISOString(),
+        type: "comprehensive_chronic_disease_report",
+        version: "2.0_professional",
+        includedSections: {
+          narrativeReport: true,
+          structuredData: true,
+          medications: medications.length > 0,
+          laboratoryTests: labTests.length > 0,
+          imagingStudies: imagingStudies.length > 0,
+          invoice: true
+        }
+      }
+    }
+    
+    console.log('Professional chronic disease report generated successfully')
+    console.log(`- Narrative report: ${reportData.report.narrativeReport.fullText.length} characters`)
+    console.log(`- Medications: ${medications.length}`)
+    console.log(`- Lab tests: ${labTests.length}`)
+    console.log(`- Imaging studies: ${imagingStudies.length}`)
+    
     return NextResponse.json({
       success: true,
-      report: reportData.report,
+      report: completeReport,
       documentId: documentId,
       generatedAt: reportDate.toISOString()
     })
