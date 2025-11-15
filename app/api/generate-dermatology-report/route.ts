@@ -47,10 +47,10 @@ export async function POST(request: NextRequest) {
       doctorData
     } = body
 
-    console.log('🔬 ===============================================')
-    console.log('🔬 DERMATOLOGY REPORT GENERATION - MAURITIAN STANDARD')
-    console.log('🔬 ===============================================')
-    console.log(`👤 Patient: ${patientData.firstName} ${patientData.lastName}`)
+    console.log('===============================================')
+    console.log('DERMATOLOGY REPORT GENERATION - MAURITIAN STANDARD')
+    console.log('===============================================')
+    console.log(`Patient: ${patientData.firstName} ${patientData.lastName}`)
 
     const currentDate = new Date()
     const examDate = currentDate.toISOString().split('T')[0]
@@ -87,33 +87,33 @@ export async function POST(request: NextRequest) {
       examDate: examDate
     }
 
-    console.log('✅ Patient and physician data prepared')
+    console.log('Patient and physician data prepared')
 
     // ==================== EXTRACT DIAGNOSTIC DATA ====================
     const ocrAnalysis = ocrAnalysisData?.analysis?.fullText || ''
     const diagnosisFullText = diagnosisData?.diagnosis?.fullText || ''
     
-    console.log('📊 Diagnostic data extracted:')
+    console.log('Diagnostic data extracted:')
     console.log(`   - OCR Analysis: ${ocrAnalysis.length} chars`)
     console.log(`   - Diagnosis: ${diagnosisFullText.length} chars`)
 
     // ==================== GENERATE MEDICATIONS WITH AI ====================
-    console.log('💊 Extracting medications from diagnosis...')
+    console.log('Extracting medications from diagnosis...')
     const medications = await extractMedicationsAI(openai, diagnosisFullText, patient)
-    console.log(`   ✅ ${medications.length} medications extracted`)
+    console.log(`   ${medications.length} medications extracted`)
 
     // ==================== GENERATE LAB TESTS WITH AI ====================
-    console.log('🧪 Extracting laboratory tests from diagnosis...')
+    console.log('Extracting laboratory tests from diagnosis...')
     const labTests = await extractLabTestsAI(openai, diagnosisFullText, patient)
-    console.log(`   ✅ ${labTests.length} lab tests extracted`)
+    console.log(`   ${labTests.length} lab tests extracted`)
 
     // ==================== GENERATE IMAGING STUDIES WITH AI ====================
-    console.log('🔬 Extracting imaging studies from diagnosis...')
+    console.log('Extracting imaging studies from diagnosis...')
     const imagingStudies = await extractImagingStudiesAI(openai, diagnosisFullText, patient)
-    console.log(`   ✅ ${imagingStudies.length} imaging studies extracted`)
+    console.log(`   ${imagingStudies.length} imaging studies extracted`)
 
     // ==================== GENERATE NARRATIVE REPORT ====================
-    console.log('📝 Generating narrative consultation report...')
+    console.log('Generating narrative consultation report...')
     const narrativeReport = await generateNarrativeReportAI(
       openai,
       patient,
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
       diagnosisFullText,
       imageData
     )
-    console.log('   ✅ Narrative report generated')
+    console.log('   Narrative report generated')
 
     // ==================== BUILD COMPLETE MAURITIAN REPORT STRUCTURE ====================
     const reportStructure = {
@@ -323,7 +323,7 @@ export async function POST(request: NextRequest) {
       sickLeave: {
         header: {
           title: "MEDICAL CERTIFICATE - SICK LEAVE",
-          subtitle: "Certificat Médical d'Arrêt de Travail",
+          subtitle: "Official Medical Documentation for Work Absence",
           certificateNumber: `SL-DERM-${currentDate.getFullYear()}-${String(Date.now()).slice(-6)}`,
           issueDate: examDate,
           documentType: "Medical Sick Leave Certificate"
@@ -464,150 +464,61 @@ export async function POST(request: NextRequest) {
         }
       },
 
-      // ===== INVOICE (ENHANCED) =====
+      // ===== INVOICE =====
       invoice: {
         header: {
-          title: "PROFESSIONAL SERVICE INVOICE",
           invoiceNumber: `TIBOK-DERM-${currentDate.getFullYear()}-${String(Date.now()).slice(-6)}`,
           consultationDate: examDate,
-          invoiceDate: examDate,
-          dueDate: examDate,
-          currency: "MUR",
-          documentType: "Tax Invoice"
+          invoiceDate: examDate
         },
         provider: {
           companyName: "Digital Data Solutions Ltd",
-          tradeName: "Tibok Telemedicine Platform",
+          tradeName: "Tibok",
           registrationNumber: "C20173522",
-          vatNumber: "VAT Registration: [To be provided]",
-          businessCategory: "Healthcare Technology Services",
-          address: "Cybercity, Ebene, Republic of Mauritius",
-          phone: "+230 5xxx xxxx",
-          email: "billing@tibok.mu",
-          website: "www.tibok.mu",
-          supportEmail: "support@tibok.mu"
+          vatNumber: "27816949",
+          registeredOffice: "Bourdet Road, Grand Baie, Mauritius",
+          phone: "+230 4687377/78",
+          email: "contact@tibok.mu",
+          website: "www.tibok.mu"
         },
-        billTo: {
-          type: "Individual Patient",
+        patient: {
           name: patient.fullName,
-          patientId: `PAT-${Date.now().toString(36).toUpperCase()}`,
-          address: `${patient.address}, ${patient.city}, ${patient.country}`,
+          email: patient.email,
           phone: patient.phone,
-          email: patient.email
+          patientId: patientData?.id || `DERM-${Date.now()}`
         },
         services: {
-          items: [
-            {
-              itemNumber: 1,
-              description: "Online Dermatology Consultation - Professional",
-              details: "Comprehensive dermatological assessment via secure telemedicine platform, including AI-powered clinical image analysis, diagnostic evaluation, differential diagnosis, and personalized treatment planning",
-              category: "Medical Consultation",
-              quantity: 1,
-              unitPrice: 1500,
-              total: 1500,
-              taxable: false
-            },
-            {
-              itemNumber: 2,
-              description: "Medical Documentation Package",
-              details: "Includes: Professional consultation report, medical prescription(s), laboratory test requests (if applicable), imaging study requests (if applicable), sick leave certificate (if applicable)",
-              category: "Medical Documentation",
-              quantity: 1,
-              unitPrice: 0,
-              total: 0,
-              taxable: false,
-              note: "Included in consultation fee"
-            },
-            {
-              itemNumber: 3,
-              description: "Secure Medical Data Storage (HDS Certified)",
-              details: "GDPR-compliant medical record storage on OVH Health Data hosting certified servers",
-              category: "Data Services",
-              quantity: 1,
-              unitPrice: 0,
-              total: 0,
-              taxable: false,
-              note: "Included in consultation fee"
-            }
-          ],
+          items: [{
+            description: "Online dermatology consultation with image analysis via Tibok",
+            quantity: 1,
+            unitPrice: 1500,
+            total: 1500
+          }],
           subtotal: 1500,
-          vatRate: 0.00,
+          vatRate: 0.15,
           vatAmount: 0,
-          vatExemptionReason: "Medical services exempt from VAT under Mauritius VAT Act",
-          discounts: [],
-          totalBeforeVat: 1500,
-          totalDue: 1500,
-          amountInWords: "One Thousand Five Hundred Mauritian Rupees Only"
+          totalDue: 1500
         },
         payment: {
-          status: "Pending",
-          method: "To be selected by patient",
-          acceptedMethods: [
-            "MCB Juice Mobile Payment",
-            "MyT Money Mobile Wallet",
-            "Credit Card (Visa, Mastercard)",
-            "Debit Card (Mauritius banks)",
-            "Bank Transfer (MCB, SBM, ABC Banking)",
-            "Online Banking Payment"
-          ],
-          bankDetails: {
-            accountName: "Digital Data Solutions Ltd",
-            bank: "[Bank Name]",
-            accountNumber: "[Account Number]",
-            swiftCode: "[SWIFT Code]",
-            iban: "[IBAN if applicable]",
-            reference: `TIBOK-DERM-${String(Date.now()).slice(-6)}`
-          },
-          paymentTerms: "Payment due upon receipt. Service rendered prior to payment.",
-          latePaymentPolicy: "N/A - Prepaid consultation service"
+          method: "[Credit Card / MCB Juice / MyT Money / Other]",
+          receivedDate: examDate,
+          status: "pending" as const
         },
         physician: {
-          consultingPhysician: physician.name,
-          specialty: physician.specialty,
-          qualifications: physician.qualifications,
-          registrationNumber: physician.medicalCouncilNumber,
-          consultationMode: "Secure Video Teleconsultation with Image Analysis"
-        },
-        terms: {
-          refundPolicy: "Refunds subject to Terms & Conditions. Request within 24 hours if service not rendered or technical issues prevented consultation.",
-          cancellationPolicy: "Cancellation allowed up to 2 hours before scheduled consultation. Full refund if cancelled within policy window.",
-          serviceGuarantee: "Professional medical service delivered by licensed, registered medical practitioners. Quality assurance maintained.",
-          disputeResolution: "Any billing disputes should be directed to billing@tibok.mu within 30 days of invoice date.",
-          jurisdiction: "This invoice is governed by the laws of the Republic of Mauritius."
+          name: physician.name,
+          registrationNumber: physician.medicalCouncilNumber
         },
         notes: [
-          "✓ This invoice corresponds to a professional dermatology teleconsultation performed via the Tibok telemedicine platform.",
-          "✓ Service delivered by a licensed medical practitioner registered with the Medical Council of Mauritius, specialized in dermatology.",
-          "✓ All patient data and medical images are securely stored on OVH Health Data certified servers (HDS compliant).",
-          "✓ Platform adheres to international medical data protection standards including GDPR and Mauritius Data Protection Act 2017.",
-          "✓ Telemedicine services available 08:00-00:00 (Mauritius time), 7 days per week including public holidays.",
-          "✓ Prescription medications can be delivered during daytime hours; additional delivery charges may apply for after-hours delivery.",
-          "✓ Medical certificates, prescriptions, and reports are digitally signed and verifiable.",
-          "✓ Insurance reimbursement: This invoice can be submitted to your health insurance provider if telemedicine coverage is included in your policy.",
-          "✓ Receipt will be emailed to the provided email address upon payment confirmation.",
-          "✓ For technical support or medical follow-up questions, contact support@tibok.mu"
-        ],
-        legalNotice: [
-          "TAX COMPLIANCE: This invoice complies with the Mauritius Value Added Tax (VAT) Act. Medical consultation services are VAT-exempt under current legislation.",
-          "COMPANY REGISTRATION: Digital Data Solutions Ltd is registered under the Mauritius Companies Act 2001, Registration Number C20173522.",
-          "MEDICAL LICENSING: All medical practitioners are duly licensed and registered with the Medical Council of Mauritius.",
-          "DATA PROTECTION: Services comply with the Data Protection Act 2017 (Mauritius) and international healthcare data standards.",
-          "PROFESSIONAL INDEMNITY: Medical practitioners are covered by professional indemnity insurance as required by Mauritius medical regulations."
+          "This invoice corresponds to a remote dermatology consultation with image analysis performed via the Tibok platform.",
+          "The service was delivered by a registered medical professional specialized in dermatology.",
+          "No audio or video recording was made. All data and images are securely hosted on a health data certified server (OVH - HDS compliant).",
+          "Service available from 08:00 to 00:00 (Mauritius time), 7 days a week.",
+          "Medication delivery included during daytime, with possible extra charges after 17:00 depending on on-call pharmacy availability."
         ],
         signature: {
           entity: "Digital Data Solutions Ltd",
-          tradeName: "Tibok Telemedicine Platform",
           onBehalfOf: physician.name,
-          title: "Consultant Dermatologist - Licensed Medical Practitioner (Mauritius)",
-          date: examDate,
-          authorizedSignatory: "Billing Department - Tibok",
-          officialStamp: "Company Seal / Electronic Stamp"
-        },
-        footer: {
-          thankYouMessage: "Thank you for choosing Tibok for your healthcare needs. Your health is our priority.",
-          contactInfo: "Questions? Contact us at support@tibok.mu or call +230 5xxx xxxx",
-          websiteUrl: "www.tibok.mu",
-          followUs: "Follow us on social media for health tips and updates"
+          title: "Registered Medical Practitioner - Dermatology Specialist (Mauritius)"
         }
       }
     }
@@ -615,8 +526,8 @@ export async function POST(request: NextRequest) {
     const endTime = Date.now()
     const processingTime = endTime - startTime
 
-    console.log("\n✅ COMPLETE DERMATOLOGY REPORT GENERATED")
-    console.log("📊 Final summary:")
+    console.log("\nCOMPLETE DERMATOLOGY REPORT GENERATED")
+    console.log("Final summary:")
     console.log(`   - Medications: ${medications.length}`)
     console.log(`   - Lab tests: ${labTests.length}`)
     console.log(`   - Imaging: ${imagingStudies.length}`)
@@ -642,7 +553,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error("❌ API Error:", error)
+    console.error("API Error:", error)
     
     return NextResponse.json(
       { 
@@ -693,12 +604,13 @@ Return format (include ALL fields for professional prescription):
 ]
 
 CRITICAL REQUIREMENTS:
+- Use ANGLO-SAXON MEDICAL NOMENCLATURE in ENGLISH
 - Include ALL fields for each medication
 - Be specific and medically accurate
 - Consider patient's allergies and current medications
-- Use proper dermatological terminology
+- Use proper dermatological terminology in ENGLISH
 - Include realistic timeframes and quantities
-- Provide practical patient instructions
+- Provide practical patient instructions in ENGLISH
 
 If no medications needed: return []`
 
@@ -707,7 +619,7 @@ If no medications needed: return []`
       messages: [
         { 
           role: "system", 
-          content: "You are a consultant dermatologist prescribing medications. Extract complete medication details as JSON array. Include all safety information, contraindications, and practical instructions. Be thorough and professional." 
+          content: "You are a consultant dermatologist prescribing medications using ANGLO-SAXON MEDICAL NOMENCLATURE in ENGLISH. Extract complete medication details as JSON array. All medical terms, drug names, and instructions must be in ENGLISH. Include all safety information, contraindications, and practical instructions. Be thorough and professional." 
         },
         { role: "user", content: prompt }
       ],
@@ -760,9 +672,10 @@ Return format (include ALL fields for professional lab request):
 Categories: hematology, clinicalChemistry, immunology, microbiology, dermatopathology, other
 
 REQUIREMENTS:
+- Use ANGLO-SAXON MEDICAL NOMENCLATURE in ENGLISH
 - Be comprehensive and clinically relevant
 - Include realistic reference ranges for Mauritius
-- Provide practical sample handling instructions
+- Provide practical sample handling instructions in ENGLISH
 - Consider dermatological diagnostic context
 - Include cost estimates in MUR (Mauritian Rupees)
 
@@ -773,7 +686,7 @@ If no tests needed: return []`
       messages: [
         { 
           role: "system", 
-          content: "You are a consultant dermatologist ordering laboratory investigations. Extract complete test details as JSON array. Include clinical rationale, expected values, sample requirements, and practical logistics. Be thorough and evidence-based." 
+          content: "You are a consultant dermatologist ordering laboratory investigations using ANGLO-SAXON MEDICAL NOMENCLATURE in ENGLISH. Extract complete test details as JSON array. All medical terms, test names, and instructions must be in ENGLISH. Include clinical rationale, expected values, sample requirements, and practical logistics. Be thorough and evidence-based." 
         },
         { role: "user", content: prompt }
       ],
@@ -826,7 +739,8 @@ Return format (include ALL fields for professional imaging request):
 Types: High-Frequency Ultrasound, Dermoscopy, MRI (for deep lesions), CT (rarely), X-Ray (for calcifications)
 
 REQUIREMENTS:
-- Be specific about imaging protocols
+- Use ANGLO-SAXON MEDICAL NOMENCLATURE in ENGLISH
+- Be specific about imaging protocols in ENGLISH
 - Include technical specifications (probe frequency, etc.)
 - Provide diagnostic questions to answer
 - Consider dermatological imaging best practices
@@ -839,7 +753,7 @@ If no imaging needed: return []`
       messages: [
         { 
           role: "system", 
-          content: "You are a consultant dermatologist requesting imaging studies. Extract complete imaging protocols as JSON array. Include technical specifications, diagnostic questions, and practical details. Focus on dermatological imaging modalities. Be specific and evidence-based." 
+          content: "You are a consultant dermatologist requesting imaging studies using ANGLO-SAXON MEDICAL NOMENCLATURE in ENGLISH. Extract complete imaging protocols as JSON array. All medical terms, imaging modalities, and protocols must be in ENGLISH. Include technical specifications, diagnostic questions, and practical details. Focus on dermatological imaging modalities. Be specific and evidence-based." 
         },
         { role: "user", content: prompt }
       ],
