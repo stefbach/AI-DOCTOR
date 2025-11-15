@@ -1694,48 +1694,6 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    // ===== ADD DIETARY PROTOCOL FOR CHRONIC DISEASE MANAGEMENT =====
-    if (narrativeContent.dietPlan) {
-      reportStructure.dietaryProtocol = {
-        header: {
-          title: "DIETARY PROTOCOL FOR CHRONIC DISEASE MANAGEMENT",
-          subtitle: "Personalized Nutrition Plan",
-          date: examDate
-        },
-        physician: physician,
-        patient: patient,
-        dietaryRecommendations: {
-          fullText: narrativeContent.dietPlan,
-          summary: narrativeContent.dietPlan.substring(0, 200) + "..."
-        },
-        metadata: {
-          generatedAt: currentDate.toISOString(),
-          type: "chronic_disease_dietary_protocol"
-        }
-      }
-    }
-    
-    // ===== ADD FOLLOW-UP PLAN FOR CHRONIC DISEASE MANAGEMENT =====
-    if (narrativeContent.followUpPlan) {
-      reportStructure.followUpSchedule = {
-        header: {
-          title: "FOLLOW-UP PLAN - CHRONIC DISEASE MONITORING",
-          subtitle: "Long-term Management Schedule",
-          date: examDate
-        },
-        physician: physician,
-        patient: patient,
-        followUpDetails: {
-          fullText: narrativeContent.followUpPlan,
-          summary: narrativeContent.followUpPlan.substring(0, 200) + "..."
-        },
-        metadata: {
-          generatedAt: currentDate.toISOString(),
-          type: "chronic_disease_followup_schedule"
-        }
-      }
-    }
-    
     // Calculate word count
     const wordCount = Object.values(narrativeContent)
       .filter(v => typeof v === 'string')
