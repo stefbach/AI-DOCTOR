@@ -301,6 +301,66 @@ const createEmptyReport = (): ChronicProfessionalReportData => ({
   }
 })
 
+// Helper to format narrative text with bold section headers
+function formatNarrativeWithBoldHeaders(narrative: string): string {
+  if (!narrative) return ''
+  
+  // Define section headers that should be bold (from the API format)
+  const sectionHeaders = [
+    'CHRONIC DISEASE FOLLOW-UP CONSULTATION REPORT',
+    'DOCUMENT INFORMATION',
+    'PATIENT IDENTIFICATION',
+    'CHIEF COMPLAINT',
+    'HISTORY OF PRESENT ILLNESS',
+    'PAST MEDICAL HISTORY',
+    'PHYSICAL EXAMINATION',
+    'REVIEW OF SYSTEMS',
+    'CLINICAL ASSESSMENT',
+    'CHRONIC DISEASE MANAGEMENT',
+    'DIAGNOSTIC SUMMARY',
+    'TREATMENT PLAN',
+    'PRESCRIPTIONS',
+    'ORDONNANCE',
+    'LABORATORY INVESTIGATIONS',
+    'BIOLOGIE',
+    'PARACLINICAL EXAMINATIONS',
+    'PARACLINIQUE',
+    'DIETARY RECOMMENDATIONS',
+    'PATIENT EDUCATION',
+    'FOLLOW-UP PLAN',
+    'PROGNOSIS',
+    'SIGNATURE',
+    'MEDICAL CERTIFICATION'
+  ]
+  
+  // Split into lines
+  const lines = narrative.split('\n')
+  
+  // Process each line
+  const formattedLines = lines.map(line => {
+    const trimmedLine = line.trim()
+    
+    // Skip separator lines (preserve them as-is)
+    if (trimmedLine.match(/^═+$/)) {
+      return line
+    }
+    
+    // Check if this line is a section header
+    if (sectionHeaders.includes(trimmedLine)) {
+      // Make it bold using HTML
+      return `<strong>${line}</strong>`
+    }
+    
+    // Regular line - escape HTML special chars to prevent XSS
+    return line
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+  })
+  
+  return formattedLines.join('\n')
+}
+
 // Helper to normalize patient data from form to API format
 function normalizePatientData(patientData: any): any {
   if (!patientData) return null
@@ -1341,17 +1401,29 @@ export default function ChronicProfessionalReport({
         {/* NARRATIVE REPORT - PROFESSIONAL FORMAT FROM API */}
         {medicalReport.narrative && (
           <div className="mb-6">
+            <style jsx>{`
+              .professional-narrative {
+                font-family: system-ui, -apple-system, sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+                white-space: pre-wrap;
+              }
+              /* Make section headers bold - targets ALL CAPS lines after separator */
+              .professional-narrative::before {
+                content: '';
+                display: block;
+              }
+              /* Target lines that are section headers (ALL CAPS, no colon at start) */
+              .professional-narrative {
+                /* This will be handled by processing the text */
+              }
+            `}</style>
             <div 
-              className="prose prose-sm max-w-none bg-white p-8 rounded border border-gray-200"
-              style={{
-                fontFamily: 'system-ui, -apple-system, sans-serif',
-                fontSize: '14px',
-                lineHeight: '1.6',
-                whiteSpace: 'pre-wrap'
+              className="prose prose-sm max-w-none bg-white p-8 rounded border border-gray-200 professional-narrative"
+              dangerouslySetInnerHTML={{
+                __html: formatNarrativeWithBoldHeaders(medicalReport.narrative)
               }}
-            >
-              {medicalReport.narrative}
-            </div>
+            />
           </div>
         )}
         
