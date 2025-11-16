@@ -798,18 +798,43 @@ export default function ChronicProfessionalReport({
           
           // Update narrative from chronic-report API
           if (reportData.report) {
-            // Extract the narrative text from the report structure
-            const narrativeText = reportData.report.narrativeReport?.fullText || 
-                                 reportData.report.narrativeReport || 
-                                 (typeof reportData.report === 'string' ? reportData.report : JSON.stringify(reportData.report, null, 2))
-            
-            updatedReport.medicalReport.narrative = narrativeText
-            updatedReport.medicalReport.metadata.wordCount = typeof narrativeText === 'string' 
-              ? narrativeText.split(/\s+/).length 
-              : 0
+            // NEW STRUCTURE: API now returns medicalReport directly
+            if (reportData.report.medicalReport) {
+              // Update entire medicalReport structure from API
+              updatedReport.medicalReport = {
+                ...updatedReport.medicalReport,
+                ...reportData.report.medicalReport
+              }
+              console.log('✅ Medical report updated from API structure')
+            } else {
+              // FALLBACK: Old structure or string
+              const narrativeText = reportData.report.narrativeReport?.fullText || 
+                                   reportData.report.narrativeReport || 
+                                   (typeof reportData.report === 'string' ? reportData.report : JSON.stringify(reportData.report, null, 2))
+              
+              updatedReport.medicalReport.narrative = narrativeText
+              updatedReport.medicalReport.metadata.wordCount = typeof narrativeText === 'string' 
+                ? narrativeText.split(/\s+/).length 
+                : 0
+              console.log('⚠️ Using fallback narrative extraction')
+            }
           }
           
-          // Update medication prescription from chronic-prescription API
+          // Update prescriptions from chronic-report API if available
+          if (reportData.report && reportData.report.medicationPrescription) {
+            updatedReport.medicationPrescription = reportData.report.medicationPrescription
+            console.log('💊 Medication prescription from chronic-report API')
+          }
+          if (reportData.report && reportData.report.laboratoryTests) {
+            updatedReport.laboratoryTests = reportData.report.laboratoryTests
+            console.log('🧪 Laboratory tests from chronic-report API')
+          }
+          if (reportData.report && reportData.report.paraclinicalExams) {
+            updatedReport.paraclinicalExams = reportData.report.paraclinicalExams
+            console.log('📷 Paraclinical exams from chronic-report API')
+          }
+          
+          // Update medication prescription from chronic-prescription API (fallback or additional)
           // API returns: { success: true, prescription: { chronicMedications: [...], ... } }
           if (prescriptionData.success && prescriptionData.prescription) {
             const presData = prescriptionData.prescription
