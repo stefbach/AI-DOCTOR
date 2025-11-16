@@ -200,21 +200,35 @@ Generate complete 7-day meal plan with EXACTLY ${Math.round(targetCalories)} kca
       )
     }
     
-    console.log('✅ Dietary protocol response received')
+    console.log('✅ Dietary protocol response received, length:', content.length)
 
     let dietaryData
     try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/)
+      // Clean response - remove markdown code blocks if present
+      let cleanedContent = content.trim()
+      cleanedContent = cleanedContent.replace(/```json\n?/g, '').replace(/```\n?/g, '')
+      
+      const jsonMatch = cleanedContent.match(/\{[\s\S]*\}/)
       if (!jsonMatch) {
+        console.error("❌ No JSON found in response:", content.substring(0, 500))
         return NextResponse.json(
-          { error: "Invalid response format" },
+          { error: "Invalid response format - no JSON found" },
           { status: 500 }
         )
       }
+      
+      console.log('🔍 Attempting to parse JSON...')
       dietaryData = JSON.parse(jsonMatch[0])
+      console.log('✅ JSON parsed successfully')
     } catch (parseError: any) {
+      console.error("❌ JSON parse error:", parseError.message)
+      console.error("Content sample:", content.substring(0, 1000))
       return NextResponse.json(
-        { error: "Failed to parse dietary protocol" },
+        { 
+          error: "Failed to parse dietary protocol",
+          details: parseError.message,
+          contentSample: content.substring(0, 200)
+        },
         { status: 500 }
       )
     }

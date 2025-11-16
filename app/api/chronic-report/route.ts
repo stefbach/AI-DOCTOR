@@ -301,14 +301,22 @@ IMPORTANT: You are receiving PRE-ANALYZED medical data including:
 
 Your task is to STRUCTURE this existing analysis into narrative form, NOT to re-analyze.
 
-FORMATTING REQUIREMENTS:
+CRITICAL FORMATTING REQUIREMENTS:
 - Each section must contain minimum 150-200 words
 - Use the provided detailed analysis - do not invent new information
 - Expand professionally on available information when sections need more content
 - Maintain medical accuracy and professional tone
 - Structure existing data into coherent narrative sections
 - Use Anglo-Saxon medical terminology in ENGLISH
-- NO EMOJIS, NO COLOR INDICATORS`
+
+ABSOLUTELY FORBIDDEN:
+- NO EMOJIS of any kind (😊, 🏥, 💊, 📊, etc.)
+- NO emoticons or symbols (☺, ♥, ★, etc.)
+- NO color indicators in text
+- NO icons or pictograms
+- ONLY professional medical text
+
+CRITICAL: Any response containing emojis or icons will be rejected. Use ONLY words and standard punctuation.`
 }
 
 function createChronicDiseaseUserPrompt(enrichedData: any, patientData: any, doctorData: any): string {
@@ -693,13 +701,18 @@ export async function POST(req: NextRequest) {
     
     const fullText = `CHRONIC DISEASE FOLLOW-UP CONSULTATION REPORT
 
+═══════════════════════════════════════════════════════════════
+
+DOCUMENT INFORMATION
 DOCUMENT ID: ${documentId}
 DATE: ${reportDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
 PHYSICIAN: ${doctorData?.fullName ? `Dr. ${doctorData.fullName}` : 'Dr. [Physician Name]'}
 SPECIALTY: Endocrinology / Internal Medicine
 MCM REGISTRATION: ${doctorData?.medicalCouncilNumber || '[Registration Number]'}
 
-PATIENT IDENTIFICATION:
+═══════════════════════════════════════════════════════════════
+
+PATIENT IDENTIFICATION
 Name: ${patientData.firstName} ${patientData.lastName}
 Age: ${patientData.age} years
 Gender: ${patientData.gender}
@@ -707,45 +720,73 @@ Weight: ${patientData.weight} kg
 Height: ${patientData.height} cm
 BMI: ${patientData.bmi} kg/m²
 
-CHIEF COMPLAINT:
+═══════════════════════════════════════════════════════════════
+
+CHIEF COMPLAINT
 ${narrativeSections.chiefComplaint}
 
-HISTORY OF PRESENT ILLNESS:
+═══════════════════════════════════════════════════════════════
+
+HISTORY OF PRESENT ILLNESS
 ${narrativeSections.historyOfPresentIllness}
 
-PAST MEDICAL HISTORY:
+═══════════════════════════════════════════════════════════════
+
+PAST MEDICAL HISTORY
 ${narrativeSections.pastMedicalHistory}
 
-PHYSICAL EXAMINATION:
+═══════════════════════════════════════════════════════════════
+
+PHYSICAL EXAMINATION
 ${narrativeSections.physicalExamination}
 
-DIAGNOSTIC SYNTHESIS:
+═══════════════════════════════════════════════════════════════
+
+DIAGNOSTIC SYNTHESIS
 ${narrativeSections.diagnosticSynthesis}
 
-DIAGNOSTIC CONCLUSION:
+═══════════════════════════════════════════════════════════════
+
+DIAGNOSTIC CONCLUSION
 ${narrativeSections.diagnosticConclusion}
 
-MANAGEMENT PLAN:
+═══════════════════════════════════════════════════════════════
+
+MANAGEMENT PLAN
 ${narrativeSections.managementPlan}
 
-DIETARY PLAN:
+═══════════════════════════════════════════════════════════════
+
+DIETARY PLAN
 ${narrativeSections.dietaryPlan}
 
-SELF-MONITORING INSTRUCTIONS:
+═══════════════════════════════════════════════════════════════
+
+SELF-MONITORING INSTRUCTIONS
 ${narrativeSections.selfMonitoring}
 
-FOLLOW-UP PLAN:
+═══════════════════════════════════════════════════════════════
+
+FOLLOW-UP PLAN
 ${narrativeSections.followUpPlan}
 
-CONCLUSION:
+═══════════════════════════════════════════════════════════════
+
+CONCLUSION
 ${narrativeSections.conclusion}
 
-___________________________
+═══════════════════════════════════════════════════════════════
+
+PHYSICIAN AUTHENTICATION
+
 ${doctorData?.fullName ? `Dr. ${doctorData.fullName}` : 'Dr. [Physician Name]'}
 ${doctorData?.qualifications || 'MBBS'}
 Endocrinology / Internal Medicine
 MCM Registration: ${doctorData?.medicalCouncilNumber || '[Registration Number]'}
-Date: ${reportDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`
+
+Date: ${reportDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+
+═══════════════════════════════════════════════════════════════`
 
     // ===== STEP 5: EXTRACT PROFESSIONAL PRESCRIPTIONS =====
     console.log("STEP 5: Extracting PROFESSIONAL prescriptions...")
