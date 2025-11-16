@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation'
 import type { ConsultationType } from '@/lib/consultation-hub/route-decision'
 import { determineOptimalRoute } from '@/lib/consultation-hub/route-decision'
 import type { ConsultationHistoryItem } from '@/lib/follow-up/shared'
+import { extractPatientDemographicsFromHistory } from '@/lib/follow-up/shared/utils/history-fetcher'
 
 export interface HubWorkflowSelectorProps {
   patientData: {
@@ -37,6 +38,55 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
 
   const handleProceed = () => {
     const selectedPath = selectedWorkflow || routeDecision.recommendedPath
+    
+    // If going to a FULL consultation (not follow-up) AND we have patient history
+    // Store demographics in sessionStorage for pre-filling
+    if (!selectedPath.includes('/follow-up') && consultationHistory.length > 0) {
+      console.log('📋 Preparing patient data for prefill...')
+      
+      // Extract demographics from consultation history
+      const demographics = extractPatientDemographicsFromHistory(consultationHistory)
+      
+      if (demographics) {
+        console.log('✅ Demographics extracted:', demographics)
+        
+        // Prepare data in PatientForm format
+        const prefillData = {
+          firstName: demographics.firstName || '',
+          lastName: demographics.lastName || '',
+          birthDate: demographics.dateOfBirth || '',
+          age: demographics.age || '',
+          gender: demographics.gender || '',
+          phone: demographics.phone || '',
+          email: demographics.email || '',
+          address: demographics.address || '',
+          weight: demographics.weight || '',
+          height: demographics.height || '',
+          // Handle allergies - can be array or string
+          allergies: Array.isArray(demographics.allergies) 
+            ? demographics.allergies 
+            : (demographics.allergies ? [demographics.allergies] : []),
+          otherAllergies: '',
+          // Handle medical history - can be array or string
+          medicalHistory: Array.isArray(demographics.medicalHistory)
+            ? demographics.medicalHistory
+            : (demographics.medicalHistory ? [demographics.medicalHistory] : []),
+          otherMedicalHistory: '',
+          currentMedicationsText: Array.isArray(demographics.currentMedications)
+            ? demographics.currentMedications.join(', ')
+            : (demographics.currentMedications || '')
+        }
+        
+        // Store in sessionStorage
+        sessionStorage.setItem('consultationPatientData', JSON.stringify(prefillData))
+        sessionStorage.setItem('isExistingPatientConsultation', 'true')
+        
+        console.log('💾 Prefill data stored in sessionStorage')
+      } else {
+        console.warn('⚠️ Could not extract demographics from consultation history')
+      }
+    }
+    
     onProceed(selectedPath)
     router.push(selectedPath)
   }
