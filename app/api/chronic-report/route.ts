@@ -999,8 +999,82 @@ Date: ${reportDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long',
       }
     }
     
-    // ===== STEP 8: BUILD COMPLETE REPORT =====
+    // ===== STEP 8: BUILD COMPLETE REPORT (MATCHING COMPONENT STRUCTURE) =====
     const completeReport = {
+      medicalReport: {
+        header: {
+          title: "CHRONIC DISEASE FOLLOW-UP CONSULTATION REPORT",
+          subtitle: "Professional Medical Document - Endocrinology / Internal Medicine",
+          reference: documentId,
+          reportDate: reportDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+        },
+        practitioner: {
+          name: physician.name,
+          qualifications: physician.qualifications,
+          specialty: physician.specialty,
+          registrationNumber: physician.medicalCouncilNumber,
+          email: physician.email,
+          consultationPlatform: "Tibok Teleconsultation Platform"
+        },
+        patient: {
+          fullName: patient.fullName,
+          age: patient.age,
+          dateOfBirth: patient.dateOfBirth,
+          gender: patient.sex,
+          address: patient.address,
+          phone: patient.phone,
+          email: patient.email,
+          weight: `${patientData.weight} kg`,
+          height: `${patientData.height} cm`,
+          nationalId: patientData.nationalId || '',
+          bloodPressureSystolic: clinicalData?.vitalSigns?.bloodPressureSystolic || '',
+          bloodPressureDiastolic: clinicalData?.vitalSigns?.bloodPressureDiastolic || '',
+          bloodGlucose: clinicalData?.vitalSigns?.bloodGlucose || '',
+          temperature: clinicalData?.vitalSigns?.temperature || '',
+          allergies: Array.isArray(patientData.allergies) ? patientData.allergies.join(', ') : (patientData.allergies || ''),
+          medicalHistory: Array.isArray(patientData.medicalHistory) ? patientData.medicalHistory.join(', ') : (patientData.medicalHistory || ''),
+          currentMedications: extractedData.currentMedications
+        },
+        chronicDiseaseAssessment: {
+          primaryDiagnosis: extractedData.chiefComplaint || 'Chronic disease management',
+          diseaseCategory: "Chronic Disease Management - Endocrinology",
+          diseaseStage: "Follow-up consultation",
+          comorbidities: Array.isArray(patientData.medicalHistory) ? patientData.medicalHistory : [],
+          riskFactors: [],
+          complications: []
+        },
+        clinicalEvaluation: {
+          chiefComplaint: narrativeSections.chiefComplaint || '',
+          historyOfPresentIllness: narrativeSections.historyOfPresentIllness || '',
+          reviewOfSystems: '',
+          physicalExamination: narrativeSections.physicalExamination || '',
+          vitalSignsAnalysis: extractedData.clinicalExamination || ''
+        },
+        diagnosticSummary: {
+          diagnosticConclusion: narrativeSections.diagnosticConclusion || '',
+          prognosticAssessment: '',
+          diseaseManagementGoals: [
+            "Optimal chronic disease control",
+            "Prevention of complications",
+            "Lifestyle modification support",
+            "Regular monitoring and follow-up"
+          ]
+        },
+        narrative: fullText, // THIS IS THE MAIN REPORT TEXT
+        metadata: {
+          generatedDate: reportDate.toISOString(),
+          wordCount: fullText.split(/\s+/).length,
+          validationStatus: 'draft' as const,
+          validatedAt: undefined,
+          validatedBy: undefined
+        }
+      },
+      // Keep prescriptions in new format (component handles them separately)
+      medicationPrescription: professionalPrescriptions.medications,
+      laboratoryTests: professionalPrescriptions.laboratoryTests,
+      paraclinicalExams: professionalPrescriptions.imagingStudies,
+      // Additional data
+      invoice: invoice,
       documentMetadata: {
         documentId: documentId,
         documentType: "CHRONIC_DISEASE_FOLLOWUP_CONSULTATION",
@@ -1009,13 +1083,6 @@ Date: ${reportDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long',
         language: "English (Anglo-Saxon medical standards)",
         version: "3.0_professional_consultation_structure"
       },
-      narrativeReport: {
-        fullText: fullText,
-        sections: narrativeSections
-      },
-      structuredData: extractedData,
-      prescriptions: professionalPrescriptions,
-      invoice: invoice,
       metadata: {
         documentId: documentId,
         generatedAt: reportDate.toISOString(),
