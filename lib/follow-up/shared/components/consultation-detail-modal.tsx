@@ -170,17 +170,32 @@ export function ConsultationDetailModal({
             {consultation.fullReport && (
               <Section
                 icon={<FileText className="h-5 w-5 text-gray-500" />}
-                title="Full Report"
+                title="Rapport Médical Complet"
               >
-                <Card className="bg-gray-50">
-                  <CardContent className="p-4">
-                    <pre className="text-xs text-gray-700 whitespace-pre-wrap font-mono max-h-96 overflow-y-auto">
-                      {typeof consultation.fullReport === 'string' 
-                        ? consultation.fullReport 
-                        : JSON.stringify(consultation.fullReport, null, 2)}
-                    </pre>
-                  </CardContent>
-                </Card>
+                <div className="space-y-3">
+                  {/* Professional Report Display */}
+                  {renderProfessionalReport(consultation.fullReport)}
+                  
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 pt-4">
+                    <button
+                      onClick={() => window.open(`/view-report/${consultation.consultationId}`, '_blank')}
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      <FileText className="h-4 w-4" />
+                      Voir le Rapport Complet
+                    </button>
+                    <button
+                      onClick={() => handleDownloadReport(consultation)}
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Télécharger PDF
+                    </button>
+                  </div>
+                </div>
               </Section>
             )}
           </div>
@@ -335,4 +350,82 @@ function formatLabel(key: string): string {
     .replace(/([A-Z])/g, ' $1')
     .replace(/^./, str => str.toUpperCase())
     .trim()
+}
+
+/**
+ * Render professional report preview
+ */
+function renderProfessionalReport(fullReport: any) {
+  // Extract narrative or summary from different report structures
+  let reportText = ''
+  
+  if (typeof fullReport === 'string') {
+    reportText = fullReport
+  } else if (fullReport?.medicalReport?.narrative) {
+    // English format with narrative
+    reportText = fullReport.medicalReport.narrative
+  } else if (fullReport?.compteRendu?.synthese) {
+    // Mauritian format with synthesis
+    reportText = fullReport.compteRendu.synthese
+  } else if (fullReport?.medicalReport) {
+    // Try to extract a summary
+    const mr = fullReport.medicalReport
+    reportText = `Patient: ${mr.patient?.fullName || 'N/A'}
+Date: ${mr.header?.reportDate || 'N/A'}
+
+Chief Complaint: ${mr.clinicalEvaluation?.chiefComplaint || 'N/A'}
+
+Diagnosis: ${mr.diagnosticSummary?.diagnosticConclusion || 'N/A'}
+
+Treatment Plan: See full report for details.`
+  } else {
+    reportText = 'Rapport disponible - Cliquez sur "Voir le Rapport Complet" pour afficher'
+  }
+  
+  return (
+    <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+      <CardContent className="p-4">
+        <div className="prose prose-sm max-w-none">
+          <p className="text-xs text-gray-500 uppercase font-semibold mb-2">Aperçu du Rapport</p>
+          <div 
+            className="text-sm text-gray-700 whitespace-pre-wrap max-h-64 overflow-y-auto bg-white p-4 rounded border border-blue-100"
+            style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
+          >
+            {reportText.substring(0, 800)}
+            {reportText.length > 800 && '...'}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+/**
+ * Handle report download
+ */
+function handleDownloadReport(consultation: ConsultationHistoryItem) {
+  // Create a formatted report text
+  let reportContent = ''
+  
+  if (typeof consultation.fullReport === 'string') {
+    reportContent = consultation.fullReport
+  } else if (consultation.fullReport?.medicalReport?.narrative) {
+    reportContent = consultation.fullReport.medicalReport.narrative
+  } else {
+    reportContent = JSON.stringify(consultation.fullReport, null, 2)
+  }
+  
+  // Create blob and download
+  const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `Medical_Report_${consultation.consultationId}_${format(new Date(consultation.date), 'yyyy-MM-dd')}.txt`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+  
+  // TODO: In future, implement PDF generation via API
+  console.log('📄 Report downloaded. Future enhancement: PDF generation via API')
 }
