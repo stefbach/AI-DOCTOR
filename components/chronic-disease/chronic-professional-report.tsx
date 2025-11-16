@@ -1338,8 +1338,28 @@ export default function ChronicProfessionalReport({
           </div>
         </div>
         
-        {/* Practitioner Information */}
-        <div className="mb-6 p-4 bg-blue-50 rounded">
+        {/* NARRATIVE REPORT - PROFESSIONAL FORMAT FROM API */}
+        {medicalReport.narrative && (
+          <div className="mb-6">
+            <div 
+              className="prose prose-sm max-w-none bg-white p-8 rounded border border-gray-200"
+              style={{
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+                fontSize: '14px',
+                lineHeight: '1.6',
+                whiteSpace: 'pre-wrap'
+              }}
+            >
+              {medicalReport.narrative}
+            </div>
+          </div>
+        )}
+        
+        {/* HIDE ALL REDUNDANT SECTIONS - They are already in narrative */}
+        {false && (
+        <>
+        {/* Practitioner Information - REMOVED (in narrative) */}
+        <div className="mb-6 p-4 bg-blue-50 rounded" style={{display: 'none'}}>
           <h3 className="font-bold mb-2 flex items-center gap-2">
             <Stethoscope className="h-5 w-5" />
             Practitioner Information
@@ -1353,8 +1373,8 @@ export default function ChronicProfessionalReport({
           </div>
         </div>
         
-        {/* Comprehensive Patient Information */}
-        <div className="mb-6 p-5 bg-gradient-to-r from-blue-50 to-teal-50 rounded-lg border-2 border-blue-200">
+        {/* Comprehensive Patient Information - REMOVED (in narrative) */}
+        <div className="mb-6 p-5 bg-gradient-to-r from-blue-50 to-teal-50 rounded-lg border-2 border-blue-200" style={{display: 'none'}}>
           <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-blue-800">
             <User className="h-6 w-6" />
             COMPREHENSIVE PATIENT INFORMATION
@@ -1362,7 +1382,7 @@ export default function ChronicProfessionalReport({
           
           {/* Demographics Section */}
           <div className="mb-4 pb-4 border-b border-blue-200">
-            <h4 className="font-semibold text-sm text-blue-700 mb-2">👤 Patient Demographics</h4>
+            <h4 className="font-semibold text-sm text-blue-700 mb-2">Patient Demographics</h4>
             <div className="grid grid-cols-3 gap-x-6 gap-y-2 text-sm">
               <div><strong>Nom complet / Full Name:</strong> {medicalReport.patient.fullName}</div>
               <div><strong>Date de naissance / Date of Birth:</strong> {medicalReport.patient.dateOfBirth}</div>
@@ -1503,11 +1523,11 @@ export default function ChronicProfessionalReport({
           )}
         </div>
         
-        {/* Chronic Disease Assessment - PROFESSIONAL STRUCTURED LAYOUT */}
-        <div className="mb-6">
+        {/* Chronic Disease Assessment - HIDDEN (in narrative) */}
+        <div className="mb-6" style={{display: 'none'}}>
           <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-pink-900">
             <HeartPulse className="h-6 w-6" />
-            💊 Chronic Disease Assessment
+            Chronic Disease Assessment
           </h3>
           <div className="space-y-6">
             <div className="border-l-4 border-pink-500 pl-4 py-2 bg-pink-50">
@@ -1557,9 +1577,9 @@ export default function ChronicProfessionalReport({
           </div>
         </div>
         
-        {/* Clinical Evaluation - PROFESSIONAL STRUCTURED LAYOUT */}
-        <div className="mb-6">
-          <h3 className="font-bold text-lg mb-4 text-blue-900">📋 Clinical Evaluation</h3>
+        {/* Clinical Evaluation - HIDDEN (in narrative) */}
+        <div className="mb-6" style={{display: 'none'}}>
+          <h3 className="font-bold text-lg mb-4 text-blue-900">Clinical Evaluation</h3>
           <div className="space-y-6">
             {medicalReport.clinicalEvaluation.chiefComplaint && (
               <div className="border-l-4 border-teal-500 pl-4 py-2">
@@ -1594,43 +1614,11 @@ export default function ChronicProfessionalReport({
           </div>
         </div>
         
-        {/* Narrative Report from API */}
-        {medicalReport.narrative && (
-          <div className="mb-6 p-6 bg-gray-50 rounded-lg">
-            <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
-              Comprehensive Medical Report
-              {editMode && <Badge variant="outline">Editable</Badge>}
-            </h3>
-            {editMode ? (
-              <Textarea
-                value={medicalReport.narrative}
-                onChange={(e) => {
-                  setReport(prev => {
-                    if (!prev) return null
-                    return {
-                      ...prev,
-                      medicalReport: {
-                        ...prev.medicalReport,
-                        narrative: e.target.value
-                      }
-                    }
-                  })
-                  setHasUnsavedChanges(true)
-                }}
-                className="min-h-[400px] text-base font-mono"
-                placeholder="Enter comprehensive medical report..."
-              />
-            ) : (
-              <div className="text-base whitespace-pre-wrap leading-relaxed">
-                {medicalReport.narrative}
-              </div>
-            )}
-          </div>
-        )}
+        {/* OLD Narrative Display - HIDDEN (replaced by new one above) */}
         
-        {/* Diagnostic Summary - PROFESSIONAL STRUCTURED LAYOUT */}
-        <div className="mb-6">
-          <h3 className="font-bold text-lg mb-4 text-red-900">🎯 Diagnostic Summary & Management Goals</h3>
+        {/* Diagnostic Summary - HIDDEN (in narrative) */}
+        <div className="mb-6" style={{display: 'none'}}>
+          <h3 className="font-bold text-lg mb-4 text-red-900">Diagnostic Summary & Management Goals</h3>
           <div className="space-y-6">
             {medicalReport.diagnosticSummary.diagnosticConclusion && (
               <div className="border-l-4 border-red-500 pl-4 py-2 bg-red-50">
@@ -1657,19 +1645,11 @@ export default function ChronicProfessionalReport({
           </div>
         </div>
         
-        {/* Signature */}
-        <div className="mt-8 pt-6 border-t border-gray-300">
-          <div className="text-right">
-            <p className="font-semibold">{medicalReport.practitioner.name}</p>
-            <p className="text-sm text-gray-600">{medicalReport.practitioner.qualifications}</p>
-            <p className="text-sm text-gray-600">Medical Council Reg: {medicalReport.practitioner.registrationNumber}</p>
-            <div className="mt-6">
-              <p className="text-sm">_______________________________</p>
-              <p className="text-sm">Medical Practitioner's Signature</p>
-              <p className="text-sm">Date: {medicalReport.header.reportDate}</p>
-            </div>
-          </div>
-        </div>
+        {/* End of hidden redundant sections */}
+        </>
+        )}
+        
+        {/* Signature - REMOVED because already in narrative text */}
       </div>
     )
   }
