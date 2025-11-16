@@ -36,6 +36,28 @@ export default function MedicalAIExpert() {
   const [language, setLanguage] = useState<Language>('en')
   
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [prefillData, setPrefillData] = useState<any>({})
+
+  // Load prefill data from sessionStorage for existing patient consultation
+  useEffect(() => {
+    const savedPatientData = sessionStorage.getItem('consultationPatientData')
+    const isExistingPatient = sessionStorage.getItem('isExistingPatientConsultation')
+    
+    if (savedPatientData && isExistingPatient === 'true') {
+      try {
+        console.log('📋 Loading prefill data from sessionStorage...')
+        const patientData = JSON.parse(savedPatientData)
+        setPrefillData(patientData)
+        console.log('✅ Prefill data loaded:', patientData)
+        
+        // Clean up sessionStorage after reading
+        sessionStorage.removeItem('consultationPatientData')
+        sessionStorage.removeItem('isExistingPatientConsultation')
+      } catch (error) {
+        console.error('❌ Error loading prefill data:', error)
+      }
+    }
+  }, [])
 
   // Listen for prescription renewal detection from Tibok data
 useEffect(() => {
@@ -290,7 +312,8 @@ const handlePrevious = () => {
       case 0:
         return {
           ...commonProps,
-          data: patientData,  // ✅ FIXED: Changed from initialData to data
+          // Merge prefillData with patientData - prefillData takes priority if exists
+          data: Object.keys(prefillData).length > 0 ? { ...patientData, ...prefillData } : patientData,
           onDataChange: setPatientData,
           onNext: handleNext,
         }

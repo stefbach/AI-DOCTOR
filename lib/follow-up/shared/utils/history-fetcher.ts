@@ -157,3 +157,84 @@ export async function extractPatientDemographics(
   
   return null
 }
+
+/**
+ * Extract patient demographics from consultation history array
+ * @param consultations - Array of consultation history items
+ * @returns Patient demographic data extracted from most recent consultation
+ */
+export function extractPatientDemographicsFromHistory(
+  consultations: ConsultationHistoryItem[]
+): any {
+  if (!consultations || consultations.length === 0) {
+    return null
+  }
+  
+  // Get most recent consultation
+  const mostRecent = consultations[0]
+  const report = mostRecent.fullReport
+  
+  // Try to extract from Mauritian structure (compteRendu)
+  if (report?.compteRendu?.patient) {
+    const patient = report.compteRendu.patient
+    return {
+      fullName: patient.nomComplet || patient.nom || '',
+      firstName: patient.prenom || '',
+      lastName: patient.nom || '',
+      age: patient.age || '',
+      dateOfBirth: patient.dateNaissance || patient.dateOfBirth || '',
+      gender: patient.sexe || patient.gender || '',
+      address: patient.adresse || patient.address || '',
+      phone: patient.telephone || patient.phone || '',
+      email: patient.email || '',
+      weight: patient.poids || patient.weight || '',
+      height: patient.taille || patient.height || '',
+      allergies: patient.allergies || [],
+      medicalHistory: patient.antecedentsMedicaux || patient.medicalHistory || [],
+      currentMedications: patient.medicamentsActuels || patient.currentMedications || ''
+    }
+  }
+  
+  // Try to extract from medicalReport structure
+  if (report?.medicalReport?.patient) {
+    const patient = report.medicalReport.patient
+    return {
+      fullName: patient.fullName || '',
+      firstName: patient.firstName || '',
+      lastName: patient.lastName || '',
+      age: patient.age || '',
+      dateOfBirth: patient.dateOfBirth || '',
+      gender: patient.gender || '',
+      address: patient.address || '',
+      phone: patient.phone || '',
+      email: patient.email || '',
+      weight: patient.weight || '',
+      height: patient.height || '',
+      allergies: patient.allergies || [],
+      medicalHistory: patient.medicalHistory || [],
+      currentMedications: patient.currentMedications || ''
+    }
+  }
+  
+  // Fallback: Try to extract from vital signs if no patient object
+  if (mostRecent.vitalSigns) {
+    return {
+      fullName: '',
+      firstName: '',
+      lastName: '',
+      age: '',
+      dateOfBirth: '',
+      gender: '',
+      address: '',
+      phone: '',
+      email: '',
+      weight: mostRecent.vitalSigns.weight?.toString() || '',
+      height: mostRecent.vitalSigns.height?.toString() || '',
+      allergies: [],
+      medicalHistory: [],
+      currentMedications: ''
+    }
+  }
+  
+  return null
+}
