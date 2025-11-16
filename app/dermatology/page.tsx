@@ -29,11 +29,13 @@ export default function DermatologyWorkflow() {
   const [ocrAnalysisData, setOcrAnalysisData] = useState<any>(null)
   const [questionsData, setQuestionsData] = useState<any>(null)
   const [diagnosisData, setDiagnosisData] = useState<any>(null)
+  const [isExistingPatient, setIsExistingPatient] = useState(false)
 
   // Load patient data from sessionStorage
   useEffect(() => {
     const savedPatientData = sessionStorage.getItem('dermatologyPatientData')
     const isDermatologyWorkflow = sessionStorage.getItem('isDermatologyWorkflow')
+    const existingPatient = sessionStorage.getItem('isExistingPatientDermatology')
     
     if (!savedPatientData || isDermatologyWorkflow !== 'true') {
       // Redirect back to home if no dermatology data
@@ -45,7 +47,12 @@ export default function DermatologyWorkflow() {
     try {
       const data = JSON.parse(savedPatientData)
       setPatientData(data)
+      setIsExistingPatient(existingPatient === 'true')
       console.log('✅ Dermatology patient data loaded:', data)
+      console.log('👤 Existing patient:', existingPatient === 'true')
+      
+      // Clean up the flag after reading
+      sessionStorage.removeItem('isExistingPatientDermatology')
     } catch (error) {
       console.error('Error parsing patient data:', error)
       router.push('/')
@@ -156,6 +163,31 @@ export default function DermatologyWorkflow() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Existing Patient Banner */}
+        {isExistingPatient && (
+          <Card className="mb-6 bg-blue-50 border-blue-200">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <ClipboardList className="h-5 w-5 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-blue-900 mb-1">
+                    👤 Patient Existant - Nouvelle Consultation Complète
+                  </h4>
+                  <p className="text-sm text-blue-800">
+                    <strong>{patientData.firstName} {patientData.lastName}</strong> a déjà des consultations dans notre système.
+                  </p>
+                  <p className="text-xs text-blue-700 mt-1">
+                    Cette consultation est pour un <strong>nouveau problème cutané</strong> avec analyse complète : 
+                    Upload d'images → OCR Analysis → Questions IA → Diagnostic approfondi
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Progress */}
         <Card className="glass-card mb-6 shadow-2xl border-0">

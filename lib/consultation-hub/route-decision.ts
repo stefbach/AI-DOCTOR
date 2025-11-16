@@ -73,22 +73,11 @@ export function determineOptimalRoute(
     recommendedWorkflow: 'follow-up',
     recommendedPath: getFollowUpPath(selectedType),
     consultationType: selectedType,
-    availablePaths: [
-      {
-        label: `🔄 Suivi ${getTypeLabel(selectedType)}`,
-        path: getFollowUpPath(selectedType),
-        description: hasMatchingHistory
-          ? `Consultation de suivi avec analyse d'évolution (${consultationHistory.length} consultations précédentes)`
-          : `Consultation de suivi (nouveau type de consultation)`,
-        isRecommended: true
-      },
-      {
-        label: `📋 Nouvelle Consultation ${getTypeLabel(selectedType)}`,
-        path: getInitialConsultationPath(selectedType),
-        description: 'Consultation initiale (si nouveau problème distinct)',
-        isRecommended: false
-      }
-    ],
+    availablePaths: buildAvailablePathsForExistingPatient(
+      selectedType,
+      consultationHistory,
+      hasMatchingHistory
+    ),
     patientSummary: {
       totalConsultations: consultationHistory.length,
       lastConsultationDate: lastConsultation.date,
@@ -142,6 +131,73 @@ function getTypeLabel(type: ConsultationType): string {
     default:
       return 'Normale'
   }
+}
+
+/**
+ * Build available paths for existing patient with detailed descriptions
+ */
+function buildAvailablePathsForExistingPatient(
+  selectedType: ConsultationType,
+  consultationHistory: ConsultationHistoryItem[],
+  hasMatchingHistory: boolean
+) {
+  const paths = []
+  
+  // Follow-up option (always recommended for existing patients)
+  if (selectedType === 'normal') {
+    paths.push({
+      label: '🔄 Suivi Consultation Normale',
+      path: '/follow-up/normal',
+      description: hasMatchingHistory
+        ? `Suivi médical avec analyse d'évolution (${consultationHistory.length} consultations précédentes)`
+        : 'Suivi médical simplifié (nouveau type de consultation)',
+      isRecommended: true
+    })
+  } else if (selectedType === 'dermatology') {
+    paths.push({
+      label: '🔄 Suivi Dermatologique',
+      path: '/follow-up/dermatology',
+      description: hasMatchingHistory
+        ? `Comparaison d'images avant/après et analyse d'évolution (${consultationHistory.length} consultations précédentes)`
+        : 'Comparaison d\'images et suivi dermatologique',
+      isRecommended: true
+    })
+  } else if (selectedType === 'chronic') {
+    paths.push({
+      label: '🔄 Suivi Maladie Chronique',
+      path: '/follow-up/chronic',
+      description: hasMatchingHistory
+        ? `Tendances des constantes vitales et compliance médicamenteuse (${consultationHistory.length} consultations précédentes)`
+        : 'Suivi des paramètres chroniques',
+      isRecommended: true
+    })
+  }
+  
+  // Full consultation option (for new problems)
+  if (selectedType === 'normal') {
+    paths.push({
+      label: '📋 Nouvelle Consultation Complète',
+      path: '/consultation',
+      description: 'Consultation complète avec questions IA et diagnostic approfondi (nouveau problème médical)',
+      isRecommended: false
+    })
+  } else if (selectedType === 'dermatology') {
+    paths.push({
+      label: '🔬 Nouvelle Consultation Dermatologique Complète',
+      path: '/dermatology',
+      description: 'Consultation complète avec upload d\'images, OCR, questions IA et diagnostic (nouveau problème cutané)',
+      isRecommended: false
+    })
+  } else if (selectedType === 'chronic') {
+    paths.push({
+      label: '🏥 Nouvelle Consultation Maladie Chronique Complète',
+      path: '/chronic-disease',
+      description: 'Évaluation complète pour nouvelle pathologie chronique ou réévaluation approfondie avec plan diététique',
+      isRecommended: false
+    })
+  }
+  
+  return paths
 }
 
 /**

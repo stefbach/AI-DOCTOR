@@ -50,8 +50,8 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
       if (demographics) {
         console.log('✅ Demographics extracted:', demographics)
         
-        // Prepare data in PatientForm format
-        const prefillData = {
+        // Prepare base data in PatientForm format
+        const basePrefillData = {
           firstName: demographics.firstName || '',
           lastName: demographics.lastName || '',
           birthDate: demographics.dateOfBirth || '',
@@ -77,11 +77,50 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
             : (demographics.currentMedications || '')
         }
         
-        // Store in sessionStorage
-        sessionStorage.setItem('consultationPatientData', JSON.stringify(prefillData))
-        sessionStorage.setItem('isExistingPatientConsultation', 'true')
-        
-        console.log('💾 Prefill data stored in sessionStorage')
+        // DERMATOLOGY WORKFLOW
+        if (selectedPath === '/dermatology') {
+          console.log('🔬 Setting up dermatology workflow with patient prefill')
+          
+          sessionStorage.setItem('dermatologyPatientData', JSON.stringify(basePrefillData))
+          sessionStorage.setItem('isDermatologyWorkflow', 'true')
+          sessionStorage.setItem('isExistingPatientDermatology', 'true')
+          
+          console.log('💾 Dermatology prefill data stored')
+        }
+        // CHRONIC DISEASE WORKFLOW
+        else if (selectedPath === '/chronic-disease') {
+          console.log('🏥 Setting up chronic disease workflow with patient prefill')
+          
+          // Extract chronic disease history
+          const chronicHistory = consultationHistory
+            .filter((c: any) => c.consultationType === 'chronic' || c.consultationType === 'chronic_disease')
+            .map((c: any) => ({
+              date: c.date,
+              diagnosis: c.diagnosis || 'N/A',
+              medications: c.medications || []
+            }))
+          
+          // Add chronic-specific data
+          const chronicPrefillData = {
+            ...basePrefillData,
+            knownChronicDiseases: chronicHistory,
+            previousChronicDiagnoses: chronicHistory.map((c: any) => c.diagnosis).filter(d => d !== 'N/A').join(', ')
+          }
+          
+          sessionStorage.setItem('chronicDiseasePatientData', JSON.stringify(chronicPrefillData))
+          sessionStorage.setItem('isChronicDiseaseWorkflow', 'true')
+          sessionStorage.setItem('isExistingPatientChronic', 'true')
+          sessionStorage.setItem('chronicDiseaseHistory', JSON.stringify(chronicHistory))
+          
+          console.log('💾 Chronic disease prefill data stored with history:', chronicHistory.length, 'entries')
+        }
+        // NORMAL CONSULTATION WORKFLOW
+        else if (selectedPath === '/consultation') {
+          sessionStorage.setItem('consultationPatientData', JSON.stringify(basePrefillData))
+          sessionStorage.setItem('isExistingPatientConsultation', 'true')
+          
+          console.log('💾 Normal consultation prefill data stored')
+        }
       } else {
         console.warn('⚠️ Could not extract demographics from consultation history')
       }

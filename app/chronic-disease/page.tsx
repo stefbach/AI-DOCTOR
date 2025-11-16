@@ -29,11 +29,15 @@ export default function ChronicDiseaseWorkflow() {
   const [questionsData, setQuestionsData] = useState<any>(null)
   const [diagnosisData, setDiagnosisData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isExistingPatient, setIsExistingPatient] = useState(false)
+  const [chronicHistory, setChronicHistory] = useState<any[]>([])
 
   // Load patient data from sessionStorage
   useEffect(() => {
     const savedPatientData = sessionStorage.getItem('chronicDiseasePatientData')
     const isChronicWorkflow = sessionStorage.getItem('isChronicDiseaseWorkflow')
+    const existingPatient = sessionStorage.getItem('isExistingPatientChronic')
+    const history = sessionStorage.getItem('chronicDiseaseHistory')
     
     if (!savedPatientData || isChronicWorkflow !== 'true') {
       // Redirect back to home if no chronic disease data
@@ -45,7 +49,19 @@ export default function ChronicDiseaseWorkflow() {
     try {
       const data = JSON.parse(savedPatientData)
       setPatientData(data)
+      setIsExistingPatient(existingPatient === 'true')
       console.log('✅ Chronic disease patient data loaded:', data)
+      console.log('👤 Existing patient:', existingPatient === 'true')
+      
+      if (history) {
+        const parsedHistory = JSON.parse(history)
+        setChronicHistory(parsedHistory)
+        console.log('📋 Chronic history loaded:', parsedHistory.length, 'entries')
+      }
+      
+      // Clean up flags after reading
+      sessionStorage.removeItem('isExistingPatientChronic')
+      sessionStorage.removeItem('chronicDiseaseHistory')
     } catch (error) {
       console.error('Error parsing patient data:', error)
       router.push('/')
@@ -166,6 +182,45 @@ export default function ChronicDiseaseWorkflow() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Existing Patient with Chronic History Banner */}
+        {isExistingPatient && chronicHistory.length > 0 && (
+          <Card className="mb-6 bg-amber-50 border-amber-200">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-amber-100 rounded-lg">
+                  <Activity className="h-5 w-5 text-amber-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-amber-900 mb-2">
+                    🏥 Patient avec Historique de Maladies Chroniques
+                  </h4>
+                  <p className="text-sm text-amber-800 mb-2">
+                    <strong>{patientData.firstName} {patientData.lastName}</strong> a les pathologies chroniques suivantes :
+                  </p>
+                  <ul className="space-y-1 mb-2">
+                    {chronicHistory.map((c, i) => (
+                      <li key={i} className="text-sm text-amber-800 flex items-start gap-2">
+                        <span className="text-amber-600">•</span>
+                        <span>
+                          <strong>{c.diagnosis}</strong> 
+                          {c.date && (
+                            <span className="text-xs text-amber-600 ml-1">
+                              (diagnostiqué le {new Date(c.date).toLocaleDateString()})
+                            </span>
+                          )}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-xs text-amber-700 bg-amber-100 p-2 rounded">
+                    💡 <strong>Cette consultation est pour :</strong> Évaluer une nouvelle pathologie chronique ou réévaluation complète avec plan diététique personnalisé
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Progress - Modern Design */}
         <Card className="glass-card mb-6 shadow-2xl border-0">
