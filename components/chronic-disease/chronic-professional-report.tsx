@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo, memo, useRef } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -1698,8 +1698,8 @@ export default function ChronicProfessionalReport({
   
   // ==================== SECTION COMPONENTS ====================
   
-  // Memoize medical report section to prevent recreation when typing
-  const MedicalReportSection = memo(() => {
+  // Medical report section component
+  const MedicalReportSection = () => {
     const { medicalReport } = report
 
     return (
@@ -2070,10 +2070,10 @@ export default function ChronicProfessionalReport({
         {/* Signature - REMOVED because already in narrative text */}
       </div>
     )
-  })
+  }
 
-  // Memoized sections to prevent recreation on every render
-  const MedicationPrescriptionSection = memo(() => {
+  // Medication prescription section component
+  const MedicationPrescriptionSection = () => {
     if (!report.medicationPrescription) {
       return (
         <Card>
@@ -2413,9 +2413,9 @@ export default function ChronicProfessionalReport({
         </div>
       </div>
     )
-  })
+  }
 
-  const LaboratoryTestsSection = memo(() => {
+  const LaboratoryTestsSection = () => {
     if (!report.laboratoryTests) {
       return (
         <Card>
@@ -2746,9 +2746,9 @@ export default function ChronicProfessionalReport({
         </div>
       </div>
     )
-  })
+  }
 
-  const ParaclinicalExamsSection = memo(() => {
+  const ParaclinicalExamsSection = () => {
     if (!report.paraclinicalExams) {
       return (
         <Card>
@@ -3029,7 +3029,7 @@ export default function ChronicProfessionalReport({
         </div>
       </div>
     )
-  })
+  }
 
   const DietaryProtocolSection = () => {
     if (!report.dietaryProtocol) {
