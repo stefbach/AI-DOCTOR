@@ -38,18 +38,67 @@ export default function MedicalAIExpert() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [prefillData, setPrefillData] = useState<any>({})
 
+  // Load doctor data from URL params (from Tibok) and save to sessionStorage
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const doctorDataParam = urlParams.get('doctorData')
+
+    if (doctorDataParam) {
+      try {
+        const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
+        console.log('👨‍⚕️ Loading doctor data from Tibok:', tibokDoctorData)
+
+        const doctorInfoFromTibok = {
+          nom: tibokDoctorData.fullName || tibokDoctorData.full_name ?
+            `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` :
+            'Dr. [Name Required]',
+          qualifications: tibokDoctorData.qualifications || 'MBBS',
+          specialite: tibokDoctorData.specialty || 'General Medicine',
+          adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
+          email: tibokDoctorData.email || '[Email Required]',
+          heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+          numeroEnregistrement: (() => {
+            const mcmNumber = tibokDoctorData.mcm_reg_no ||
+              tibokDoctorData.medicalCouncilNumber ||
+              tibokDoctorData.medical_council_number ||
+              tibokDoctorData.license_number ||
+              ''
+            return mcmNumber && mcmNumber.trim() !== ''
+              ? String(mcmNumber)
+              : '[MCM Registration Required]'
+          })(),
+          signatureUrl: tibokDoctorData.signature_url || null,
+          digitalSignature: tibokDoctorData.digital_signature || null
+        }
+
+        console.log('✅ Doctor info prepared and saving to sessionStorage:', doctorInfoFromTibok)
+        sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
+      } catch (error) {
+        console.error('❌ Error parsing doctor data:', error)
+      }
+    } else {
+      console.log('ℹ️ No doctor data in URL params, checking sessionStorage...')
+      const storedDoctorInfo = sessionStorage.getItem('currentDoctorInfo')
+      if (storedDoctorInfo) {
+        console.log('✅ Doctor info already in sessionStorage')
+      } else {
+        console.warn('⚠️ No doctor info available')
+      }
+    }
+  }, [])
+
   // Load prefill data from sessionStorage for existing patient consultation
   useEffect(() => {
     const savedPatientData = sessionStorage.getItem('consultationPatientData')
     const isExistingPatient = sessionStorage.getItem('isExistingPatientConsultation')
-    
+
     if (savedPatientData && isExistingPatient === 'true') {
       try {
         console.log('📋 Loading prefill data from sessionStorage...')
         const patientData = JSON.parse(savedPatientData)
         setPrefillData(patientData)
         console.log('✅ Prefill data loaded:', patientData)
-        
+
         // Clean up sessionStorage after reading
         sessionStorage.removeItem('consultationPatientData')
         sessionStorage.removeItem('isExistingPatientConsultation')
