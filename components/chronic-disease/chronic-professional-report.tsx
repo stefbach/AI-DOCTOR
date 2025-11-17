@@ -517,25 +517,6 @@ export default function ChronicProfessionalReport({
     }
   }, [report?.medicalReport?.narrative])
 
-  // Sync narrative back to report when saving
-  useEffect(() => {
-    if (editableNarrative && report) {
-      const timeoutId = setTimeout(() => {
-        setReport(prev => {
-          if (!prev) return null
-          return {
-            ...prev,
-            medicalReport: {
-              ...prev.medicalReport,
-              narrative: editableNarrative
-            }
-          }
-        })
-      }, 500)
-      return () => clearTimeout(timeoutId)
-    }
-  }, [editableNarrative])
-
   // Generate consultation ID on mount
   useEffect(() => {
     const id = `chronic_disease_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -1245,34 +1226,43 @@ export default function ChronicProfessionalReport({
 
     setSaving(true)
     try {
+      // Sync narrative from editableNarrative to report (same pattern as sickLeaveData)
+      const updatedReport = {
+        ...report,
+        medicalReport: {
+          ...report.medicalReport,
+          narrative: editableNarrative
+        }
+      }
+
       // Format report for save-medical-report API
       const formattedReport = {
         compteRendu: {
           praticien: {
-            nom: report.medicalReport.practitioner.name,
-            qualifications: report.medicalReport.practitioner.qualifications,
-            specialite: report.medicalReport.practitioner.specialty,
-            numeroEnregistrement: report.medicalReport.practitioner.registrationNumber,
-            email: report.medicalReport.practitioner.email,
+            nom: updatedReport.medicalReport.practitioner.name,
+            qualifications: updatedReport.medicalReport.practitioner.qualifications,
+            specialite: updatedReport.medicalReport.practitioner.specialty,
+            numeroEnregistrement: updatedReport.medicalReport.practitioner.registrationNumber,
+            email: updatedReport.medicalReport.practitioner.email,
             adresseCabinet: "Medical Clinic",
             telephone: "+230 XXX XXXX",
             heuresConsultation: "Mon-Fri: 9:00-17:00"
           },
           patient: {
-            nom: report.medicalReport.patient.fullName,
-            age: report.medicalReport.patient.age,
-            dateNaissance: report.medicalReport.patient.dateOfBirth,
-            sexe: report.medicalReport.patient.gender,
-            adresse: report.medicalReport.patient.address || '',
-            telephone: report.medicalReport.patient.phone || '',
-            email: report.medicalReport.patient.email || ''
+            nom: updatedReport.medicalReport.patient.fullName,
+            age: updatedReport.medicalReport.patient.age,
+            dateNaissance: updatedReport.medicalReport.patient.dateOfBirth,
+            sexe: updatedReport.medicalReport.patient.gender,
+            adresse: updatedReport.medicalReport.patient.address || '',
+            telephone: updatedReport.medicalReport.patient.phone || '',
+            email: updatedReport.medicalReport.patient.email || ''
           },
           rapport: {
-            motifConsultation: report.medicalReport.chronicDiseaseAssessment.primaryDiagnosis,
-            antecedentsMedicaux: report.medicalReport.patient.medicalHistory || '',
-            examenClinique: report.medicalReport.clinicalEvaluation.physicalExamination,
-            conclusionDiagnostique: report.medicalReport.diagnosticSummary.diagnosticConclusion,
-            planTraitement: report.medicalReport.narrative,
+            motifConsultation: updatedReport.medicalReport.chronicDiseaseAssessment.primaryDiagnosis,
+            antecedentsMedicaux: updatedReport.medicalReport.patient.medicalHistory || '',
+            examenClinique: updatedReport.medicalReport.clinicalEvaluation.physicalExamination,
+            conclusionDiagnostique: updatedReport.medicalReport.diagnosticSummary.diagnosticConclusion,
+            planTraitement: updatedReport.medicalReport.narrative,
             recommandations: '',
             planSuivi: ''
           },
@@ -1283,26 +1273,26 @@ export default function ChronicProfessionalReport({
           }
         },
         ordonnances: {
-          ...(report.medicationPrescription && {
-            medicaments: report.medicationPrescription
+          ...(updatedReport.medicationPrescription && {
+            medicaments: updatedReport.medicationPrescription
           }),
-          ...(report.laboratoryTests && {
-            biologie: report.laboratoryTests
+          ...(updatedReport.laboratoryTests && {
+            biologie: updatedReport.laboratoryTests
           }),
-          ...(report.paraclinicalExams && {
-            imagerie: report.paraclinicalExams
+          ...(updatedReport.paraclinicalExams && {
+            imagerie: updatedReport.paraclinicalExams
           }),
           ...(sickLeaveData.numberOfDays > 0 && {
             arretMaladie: {
               enTete: {
-                nom: report.medicalReport.practitioner.name,
-                numeroEnregistrement: report.medicalReport.practitioner.registrationNumber
+                nom: updatedReport.medicalReport.practitioner.name,
+                numeroEnregistrement: updatedReport.medicalReport.practitioner.registrationNumber
               },
               patient: {
-                nom: report.medicalReport.patient.fullName,
-                age: report.medicalReport.patient.age,
-                dateNaissance: report.medicalReport.patient.dateOfBirth || '',
-                adresse: report.medicalReport.patient.address || ''
+                nom: updatedReport.medicalReport.patient.fullName,
+                age: updatedReport.medicalReport.patient.age,
+                dateNaissance: updatedReport.medicalReport.patient.dateOfBirth || '',
+                adresse: updatedReport.medicalReport.patient.address || ''
               },
               certificat: {
                 dateDebut: sickLeaveData.startDate,
@@ -1313,8 +1303,8 @@ export default function ChronicProfessionalReport({
               },
               authentification: {
                 signature: "Medical Practitioner's Signature",
-                nomEnCapitales: report.medicalReport.practitioner.name.toUpperCase(),
-                numeroEnregistrement: report.medicalReport.practitioner.registrationNumber,
+                nomEnCapitales: updatedReport.medicalReport.practitioner.name.toUpperCase(),
+                numeroEnregistrement: updatedReport.medicalReport.practitioner.registrationNumber,
                 date: new Date().toISOString().split('T')[0]
               }
             }
@@ -1338,9 +1328,9 @@ export default function ChronicProfessionalReport({
         body: JSON.stringify({
           consultationId,
           patientId: patientData?.patientId || 'unknown',
-          doctorId: report.medicalReport.practitioner.registrationNumber,
-          doctorName: report.medicalReport.practitioner.name,
-          patientName: report.medicalReport.patient.fullName,
+          doctorId: updatedReport.medicalReport.practitioner.registrationNumber,
+          doctorName: updatedReport.medicalReport.practitioner.name,
+          patientName: updatedReport.medicalReport.patient.fullName,
           report: formattedReport,
           action: 'finalize',
           metadata: {
@@ -1348,12 +1338,12 @@ export default function ChronicProfessionalReport({
             documentValidations: {}
           },
           patientData: {
-            name: report.medicalReport.patient.fullName,
-            age: report.medicalReport.patient.age,
-            gender: report.medicalReport.patient.gender,
-            email: report.medicalReport.patient.email,
-            phone: report.medicalReport.patient.phone,
-            birthDate: report.medicalReport.patient.dateOfBirth
+            name: updatedReport.medicalReport.patient.fullName,
+            age: updatedReport.medicalReport.patient.age,
+            gender: updatedReport.medicalReport.patient.gender,
+            email: updatedReport.medicalReport.patient.email,
+            phone: updatedReport.medicalReport.patient.phone,
+            birthDate: updatedReport.medicalReport.patient.dateOfBirth
           },
           clinicalData: clinicalData || {},
           diagnosisData: diagnosisData || {}
@@ -1430,11 +1420,20 @@ export default function ChronicProfessionalReport({
 
     setSaving(true)
     try {
+      // Sync narrative from editableNarrative to report (same pattern as sickLeaveData)
+      const updatedReport = {
+        ...report,
+        medicalReport: {
+          ...report.medicalReport,
+          narrative: editableNarrative
+        }
+      }
+
       // Validate report data before saving
       const validationErrors: string[] = []
 
       // Validate medical report
-      if (!report.medicalReport.narrative || report.medicalReport.narrative.trim() === '') {
+      if (!editableNarrative || editableNarrative.trim() === '') {
         validationErrors.push("Medical report narrative cannot be empty")
       }
 
@@ -1455,15 +1454,15 @@ export default function ChronicProfessionalReport({
         body: JSON.stringify({
           consultationId,
           reportContent: {
-            ...report,
+            ...updatedReport,
             sickLeave: sickLeaveData,
             invoice: invoiceData
           },
           doctorInfo: {
-            nom: report.medicalReport.practitioner.name,
-            specialite: report.medicalReport.practitioner.specialty,
-            numeroEnregistrement: report.medicalReport.practitioner.registrationNumber,
-            email: report.medicalReport.practitioner.email
+            nom: updatedReport.medicalReport.practitioner.name,
+            specialite: updatedReport.medicalReport.practitioner.specialty,
+            numeroEnregistrement: updatedReport.medicalReport.practitioner.registrationNumber,
+            email: updatedReport.medicalReport.practitioner.email
           },
           modifiedSections: [],
           validationStatus
@@ -1476,7 +1475,7 @@ export default function ChronicProfessionalReport({
 
       // Also save to sessionStorage for local persistence
       sessionStorage.setItem('chronicDiseaseReport', JSON.stringify({
-        ...report,
+        ...updatedReport,
         sickLeave: sickLeaveData,
         invoice: invoiceData
       }))
