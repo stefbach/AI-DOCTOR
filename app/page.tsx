@@ -59,12 +59,12 @@ export default function MedicalAIExpert() {
     }
   }, [])
 
-  // Load saved consultation data into parent state
+  // Load saved consultation data into parent state whenever step changes
   useEffect(() => {
     const loadSavedData = async () => {
       try {
         const savedData = await consultationDataService.getAllData()
-        console.log('📦 Loading saved consultation data into parent state:', savedData)
+        console.log('📦 Loading saved consultation data into parent state (step', currentStep, '):', savedData)
 
         // Only load patientData if we don't have prefillData (to avoid overriding consultation hub data)
         if (savedData?.patientData && Object.keys(prefillData).length === 0) {
@@ -93,7 +93,7 @@ export default function MedicalAIExpert() {
     }
 
     loadSavedData()
-  }, [prefillData])
+  }, [currentStep, prefillData])
 
   // Listen for prescription renewal detection from Tibok data
 useEffect(() => {
