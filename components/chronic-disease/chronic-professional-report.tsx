@@ -451,11 +451,37 @@ export default function ChronicProfessionalReport({
   const [saving, setSaving] = useState(false)
   const [validationStatus, setValidationStatus] = useState<'draft' | 'validated'>('draft')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+
+  // Sick leave state
+  const [sickLeaveData, setSickLeaveData] = useState({
+    startDate: '',
+    endDate: '',
+    numberOfDays: 0,
+    medicalReason: '',
+    remarks: ''
+  })
+
+  // Invoice state
+  const [invoiceData, setInvoiceData] = useState({
+    consultationFee: 0,
+    additionalCharges: [] as any[],
+    total: 0
+  })
   
+  // Consultation ID state
+  const [consultationId, setConsultationId] = useState<string>('')
+
   // Dietary on-demand generation state
   const [dietaryLoading, setDietaryLoading] = useState(false)
   const [dietaryError, setDietaryError] = useState<string | null>(null)
   const [detailedDietaryGenerated, setDetailedDietaryGenerated] = useState(false)
+
+  // Generate consultation ID on mount
+  useEffect(() => {
+    const id = `chronic_disease_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    setConsultationId(id)
+    console.log('🔑 Generated consultation ID:', id)
+  }, [])
   
   // ==================== DATA GENERATION ====================
   
@@ -1094,10 +1120,153 @@ export default function ChronicProfessionalReport({
   
   const handleValidation = useCallback(async () => {
     if (validationStatus === 'validated') return
-    
+
+    if (!consultationId) {
+      toast({
+        title: "Validation Error",
+        description: "No consultation ID available",
+        variant: "destructive"
+      })
+      return
+    }
+
     setSaving(true)
     try {
-      // Here you would typically save to database
+      // Format report for save-medical-report API
+      const formattedReport = {
+        compteRendu: {
+          praticien: {
+            nom: report.medicalReport.practitioner.name,
+            qualifications: report.medicalReport.practitioner.qualifications,
+            specialite: report.medicalReport.practitioner.specialty,
+            numeroEnregistrement: report.medicalReport.practitioner.registrationNumber,
+            email: report.medicalReport.practitioner.email,
+            adresseCabinet: "Medical Clinic",
+            telephone: "+230 XXX XXXX",
+            heuresConsultation: "Mon-Fri: 9:00-17:00"
+          },
+          patient: {
+            nom: report.medicalReport.patient.fullName,
+            age: report.medicalReport.patient.age,
+            dateNaissance: report.medicalReport.patient.dateOfBirth,
+            sexe: report.medicalReport.patient.gender,
+            adresse: report.medicalReport.patient.address || '',
+            telephone: report.medicalReport.patient.phone || '',
+            email: report.medicalReport.patient.email || ''
+          },
+          rapport: {
+            motifConsultation: report.medicalReport.chronicDiseaseAssessment.primaryDiagnosis,
+            antecedentsMedicaux: report.medicalReport.patient.medicalHistory || '',
+            examenClinique: report.medicalReport.clinicalEvaluation.physicalExamination,
+            conclusionDiagnostique: report.medicalReport.diagnosticSummary.diagnosticConclusion,
+            planTraitement: report.medicalReport.narrative,
+            recommandations: '',
+            planSuivi: ''
+          },
+          metadata: {
+            dateGeneration: new Date().toISOString(),
+            typeConsultation: 'chronic_disease',
+            validationStatus: 'validated'
+          }
+        },
+        ordonnances: {
+          ...(report.medicationPrescription && {
+            medicaments: report.medicationPrescription
+          }),
+          ...(report.laboratoryTests && {
+            biologie: report.laboratoryTests
+          }),
+          ...(report.paraclinicalExams && {
+            imagerie: report.paraclinicalExams
+          }),
+          ...(sickLeaveData.numberOfDays > 0 && {
+            arretMaladie: {
+              enTete: {
+                nom: report.medicalReport.practitioner.name,
+                numeroEnregistrement: report.medicalReport.practitioner.registrationNumber
+              },
+              patient: {
+                nom: report.medicalReport.patient.fullName,
+                age: report.medicalReport.patient.age,
+                dateNaissance: report.medicalReport.patient.dateOfBirth || '',
+                adresse: report.medicalReport.patient.address || ''
+              },
+              certificat: {
+                dateDebut: sickLeaveData.startDate,
+                dateFin: sickLeaveData.endDate,
+                nombreJours: sickLeaveData.numberOfDays,
+                motifMedical: sickLeaveData.medicalReason,
+                remarques: sickLeaveData.remarks
+              },
+              authentification: {
+                signature: "Medical Practitioner's Signature",
+                nomEnCapitales: report.medicalReport.practitioner.name.toUpperCase(),
+                numeroEnregistrement: report.medicalReport.practitioner.registrationNumber,
+                date: new Date().toISOString().split('T')[0]
+              }
+            }
+          })
+        },
+        ...(invoiceData.total > 0 && {
+          invoice: {
+            physician: {
+              name: report.medicalReport.practitioner.name,
+              registrationNumber: report.medicalReport.practitioner.registrationNumber,
+              address: "Medical Clinic",
+              phone: "+230 XXX XXXX",
+              email: report.medicalReport.practitioner.email
+            },
+            patient: {
+              name: report.medicalReport.patient.fullName,
+              age: parseInt(report.medicalReport.patient.age) || 0,
+              address: report.medicalReport.patient.address || ''
+            },
+            items: [
+              {
+                description: 'Chronic Disease Consultation',
+                amount: invoiceData.consultationFee
+              }
+            ],
+            totalAmount: invoiceData.total,
+            dateIssued: new Date().toISOString().split('T')[0]
+          }
+        })
+      }
+
+      // Save to consultation_records table
+      const response = await fetch('/api/save-medical-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          consultationId,
+          patientId: patientData?.patientId || 'unknown',
+          doctorId: report.medicalReport.practitioner.registrationNumber,
+          doctorName: report.medicalReport.practitioner.name,
+          patientName: report.medicalReport.patient.fullName,
+          report: formattedReport,
+          action: 'finalize',
+          metadata: {
+            signatures: {},
+            documentValidations: {}
+          },
+          patientData: {
+            name: report.medicalReport.patient.fullName,
+            age: report.medicalReport.patient.age,
+            gender: report.medicalReport.patient.gender,
+            email: report.medicalReport.patient.email,
+            phone: report.medicalReport.patient.phone,
+            birthDate: report.medicalReport.patient.dateOfBirth
+          },
+          clinicalData: clinicalData || {},
+          diagnosisData: diagnosisData || {}
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to validate report')
+      }
+
       setValidationStatus('validated')
       setReport(prev => {
         if (!prev) return null
@@ -1114,12 +1283,15 @@ export default function ChronicProfessionalReport({
           }
         }
       })
-      
+
+      setHasUnsavedChanges(false)
+
       toast({
         title: "Document Validated",
-        description: "The chronic disease report has been validated and signed.",
+        description: "Report saved to database. Documents sent to patient dashboard.",
+        duration: 5000
       })
-      
+
       if (onComplete) {
         onComplete()
       }
@@ -1133,7 +1305,7 @@ export default function ChronicProfessionalReport({
     } finally {
       setSaving(false)
     }
-  }, [validationStatus, onComplete])
+  }, [validationStatus, consultationId, report, sickLeaveData, invoiceData, patientData, clinicalData, diagnosisData, onComplete])
   
   const exportToPDF = useCallback((elementId: string, filename: string) => {
     // Simple print-based PDF export
@@ -1148,32 +1320,26 @@ export default function ChronicProfessionalReport({
       })
       return
     }
-    
+
+    if (!consultationId) {
+      toast({
+        title: "Save Error",
+        description: "No consultation ID available",
+        variant: "destructive"
+      })
+      return
+    }
+
     setSaving(true)
     try {
       // Validate report data before saving
       const validationErrors: string[] = []
-      
+
       // Validate medical report
       if (!report.medicalReport.narrative || report.medicalReport.narrative.trim() === '') {
         validationErrors.push("Medical report narrative cannot be empty")
       }
-      
-      // Validate medications
-      if (report.medicationPrescription) {
-        report.medicationPrescription.prescription.medications.forEach((med, index) => {
-          if (!med.nom || med.nom.trim() === '') {
-            validationErrors.push(`Medication ${index + 1}: Brand name is required`)
-          }
-          if (!med.posologie || med.posologie.trim() === '') {
-            validationErrors.push(`Medication ${index + 1}: Frequency is required`)
-          }
-          if (!med.dureeTraitement || med.dureeTraitement.trim() === '') {
-            validationErrors.push(`Medication ${index + 1}: Duration is required`)
-          }
-        })
-      }
-      
+
       if (validationErrors.length > 0) {
         toast({
           title: "Validation Errors",
@@ -1183,20 +1349,46 @@ export default function ChronicProfessionalReport({
         setSaving(false)
         return
       }
-      
-      // Here you would typically save to database/backend
-      // For now, we'll simulate a save operation
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Save to sessionStorage for persistence
-      sessionStorage.setItem('chronicDiseaseReport', JSON.stringify(report))
-      
+
+      // Save to consultation_drafts table via API
+      const response = await fetch('/api/save-draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          consultationId,
+          reportContent: {
+            ...report,
+            sickLeave: sickLeaveData,
+            invoice: invoiceData
+          },
+          doctorInfo: {
+            nom: report.medicalReport.practitioner.name,
+            specialite: report.medicalReport.practitioner.specialty,
+            numeroEnregistrement: report.medicalReport.practitioner.registrationNumber,
+            email: report.medicalReport.practitioner.email
+          },
+          modifiedSections: [],
+          validationStatus
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save draft')
+      }
+
+      // Also save to sessionStorage for local persistence
+      sessionStorage.setItem('chronicDiseaseReport', JSON.stringify({
+        ...report,
+        sickLeave: sickLeaveData,
+        invoice: invoiceData
+      }))
+
       setHasUnsavedChanges(false)
       toast({
         title: "Changes Saved",
-        description: "All modifications have been saved successfully.",
+        description: "Draft saved to database successfully.",
       })
-      
+
     } catch (err: any) {
       console.error("Save error:", err)
       toast({
@@ -1207,7 +1399,7 @@ export default function ChronicProfessionalReport({
     } finally {
       setSaving(false)
     }
-  }, [hasUnsavedChanges, report])
+  }, [hasUnsavedChanges, report, consultationId, sickLeaveData, invoiceData, validationStatus])
   
   // Handle on-demand dietary plan generation
   const handleGenerateDietaryPlan = useCallback(async () => {
@@ -1401,29 +1593,59 @@ export default function ChronicProfessionalReport({
         {/* NARRATIVE REPORT - PROFESSIONAL FORMAT FROM API */}
         {medicalReport.narrative && (
           <div className="mb-6">
-            <style jsx>{`
-              .professional-narrative {
-                font-family: system-ui, -apple-system, sans-serif;
-                font-size: 14px;
-                line-height: 1.6;
-                white-space: pre-wrap;
-              }
-              /* Make section headers bold - targets ALL CAPS lines after separator */
-              .professional-narrative::before {
-                content: '';
-                display: block;
-              }
-              /* Target lines that are section headers (ALL CAPS, no colon at start) */
-              .professional-narrative {
-                /* This will be handled by processing the text */
-              }
-            `}</style>
-            <div 
-              className="prose prose-sm max-w-none bg-white p-8 rounded border border-gray-200 professional-narrative"
-              dangerouslySetInnerHTML={{
-                __html: formatNarrativeWithBoldHeaders(medicalReport.narrative)
-              }}
-            />
+            {editMode ? (
+              // EDIT MODE - Editable Textarea
+              <div className="space-y-2">
+                <Label htmlFor="narrative-edit" className="text-sm font-medium">Medical Report Narrative</Label>
+                <Textarea
+                  id="narrative-edit"
+                  value={report.medicalReport.narrative}
+                  onChange={(e) => {
+                    const newValue = e.target.value
+                    setReport(prev => {
+                      if (!prev) return null
+                      return {
+                        ...prev,
+                        medicalReport: {
+                          ...prev.medicalReport,
+                          narrative: newValue
+                        }
+                      }
+                    })
+                    setHasUnsavedChanges(true)
+                  }}
+                  className="min-h-[600px] font-mono text-sm bg-white"
+                  disabled={validationStatus === 'validated'}
+                />
+              </div>
+            ) : (
+              // VIEW MODE - Formatted display
+              <>
+                <style jsx>{`
+                  .professional-narrative {
+                    font-family: system-ui, -apple-system, sans-serif;
+                    font-size: 14px;
+                    line-height: 1.6;
+                    white-space: pre-wrap;
+                  }
+                  /* Make section headers bold - targets ALL CAPS lines after separator */
+                  .professional-narrative::before {
+                    content: '';
+                    display: block;
+                  }
+                  /* Target lines that are section headers (ALL CAPS, no colon at start) */
+                  .professional-narrative {
+                    /* This will be handled by processing the text */
+                  }
+                `}</style>
+                <div
+                  className="prose prose-sm max-w-none bg-white p-8 rounded border border-gray-200 professional-narrative"
+                  dangerouslySetInnerHTML={{
+                    __html: formatNarrativeWithBoldHeaders(medicalReport.narrative)
+                  }}
+                />
+              </>
+            )}
           </div>
         )}
         
@@ -3717,7 +3939,7 @@ export default function ChronicProfessionalReport({
       <PrescriptionStats />
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="medical-report">
             <FileText className="h-4 w-4 mr-2" />
             Report
@@ -3754,6 +3976,24 @@ export default function ChronicProfessionalReport({
             <Utensils className="h-4 w-4 mr-2" />
             Diet Plan
           </TabsTrigger>
+          <TabsTrigger value="sick-leave">
+            <Calendar className="h-4 w-4 mr-2" />
+            Sick Leave
+            {sickLeaveData.numberOfDays > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {sickLeaveData.numberOfDays}d
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="invoice">
+            <Activity className="h-4 w-4 mr-2" />
+            Invoice
+            {invoiceData.total > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                Rs {invoiceData.total}
+              </Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="followup">
             <ClipboardList className="h-4 w-4 mr-2" />
             Follow-Up
@@ -3779,7 +4019,158 @@ export default function ChronicProfessionalReport({
         <TabsContent value="dietary">
           <DietaryProtocolSection />
         </TabsContent>
-        
+
+        <TabsContent value="sick-leave">
+          <Card>
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b">
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-blue-600" />
+                Medical Certificate / Sick Leave (Arrêt Maladie)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="startDate">Start Date (Date Début)</Label>
+                  <Input
+                    id="startDate"
+                    type="date"
+                    value={sickLeaveData.startDate}
+                    onChange={(e) => {
+                      setSickLeaveData(prev => ({ ...prev, startDate: e.target.value }))
+                      setHasUnsavedChanges(true)
+                      // Auto-calculate days
+                      if (sickLeaveData.endDate && e.target.value) {
+                        const start = new Date(e.target.value)
+                        const end = new Date(sickLeaveData.endDate)
+                        const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)) + 1
+                        setSickLeaveData(prev => ({ ...prev, numberOfDays: days > 0 ? days : 0 }))
+                      }
+                    }}
+                    disabled={validationStatus === 'validated'}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="endDate">End Date (Date Fin)</Label>
+                  <Input
+                    id="endDate"
+                    type="date"
+                    value={sickLeaveData.endDate}
+                    onChange={(e) => {
+                      setSickLeaveData(prev => ({ ...prev, endDate: e.target.value }))
+                      setHasUnsavedChanges(true)
+                      // Auto-calculate days
+                      if (sickLeaveData.startDate && e.target.value) {
+                        const start = new Date(sickLeaveData.startDate)
+                        const end = new Date(e.target.value)
+                        const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)) + 1
+                        setSickLeaveData(prev => ({ ...prev, numberOfDays: days > 0 ? days : 0 }))
+                      }
+                    }}
+                    disabled={validationStatus === 'validated'}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="numberOfDays">Number of Days (Nombre de Jours)</Label>
+                <Input
+                  id="numberOfDays"
+                  type="number"
+                  value={sickLeaveData.numberOfDays}
+                  onChange={(e) => {
+                    setSickLeaveData(prev => ({ ...prev, numberOfDays: parseInt(e.target.value) || 0 }))
+                    setHasUnsavedChanges(true)
+                  }}
+                  disabled={validationStatus === 'validated'}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="medicalReason">Medical Reason (Motif Médical)</Label>
+                <Textarea
+                  id="medicalReason"
+                  value={sickLeaveData.medicalReason}
+                  onChange={(e) => {
+                    setSickLeaveData(prev => ({ ...prev, medicalReason: e.target.value }))
+                    setHasUnsavedChanges(true)
+                  }}
+                  placeholder="Medical reason for sick leave..."
+                  className="min-h-[100px]"
+                  disabled={validationStatus === 'validated'}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="remarks">Additional Remarks (Remarques)</Label>
+                <Textarea
+                  id="remarks"
+                  value={sickLeaveData.remarks}
+                  onChange={(e) => {
+                    setSickLeaveData(prev => ({ ...prev, remarks: e.target.value }))
+                    setHasUnsavedChanges(true)
+                  }}
+                  placeholder="Any additional remarks..."
+                  disabled={validationStatus === 'validated'}
+                />
+              </div>
+
+              {sickLeaveData.numberOfDays > 0 && (
+                <Alert className="bg-blue-50 border-blue-200">
+                  <AlertCircle className="h-4 w-4 text-blue-600" />
+                  <AlertDescription className="text-blue-800">
+                    Sick leave certificate for <strong>{sickLeaveData.numberOfDays} days</strong> will be included in the final report.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="invoice">
+          <Card>
+            <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b">
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-purple-600" />
+                Consultation Invoice (Facture)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-4">
+              <div>
+                <Label htmlFor="consultationFee">Consultation Fee (Honoraires) - MUR</Label>
+                <Input
+                  id="consultationFee"
+                  type="number"
+                  value={invoiceData.consultationFee}
+                  onChange={(e) => {
+                    const fee = parseFloat(e.target.value) || 0
+                    setInvoiceData(prev => ({ ...prev, consultationFee: fee, total: fee }))
+                    setHasUnsavedChanges(true)
+                  }}
+                  disabled={validationStatus === 'validated'}
+                  placeholder="0.00"
+                />
+              </div>
+
+              <div className="pt-4 border-t">
+                <div className="flex justify-between items-center text-lg font-bold">
+                  <span>Total Amount (Montant Total):</span>
+                  <span>MUR {invoiceData.total.toFixed(2)}</span>
+                </div>
+              </div>
+
+              {invoiceData.total > 0 && (
+                <Alert className="bg-purple-50 border-purple-200">
+                  <CheckCircle className="h-4 w-4 text-purple-600" />
+                  <AlertDescription className="text-purple-800">
+                    Invoice for <strong>MUR {invoiceData.total.toFixed(2)}</strong> will be included in the final report.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="followup">
           <FollowUpPlanSection />
         </TabsContent>
