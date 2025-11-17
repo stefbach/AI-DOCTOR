@@ -59,20 +59,56 @@ export default function MedicalAIExpert() {
     }
   }, [])
 
+  // Load saved consultation data into parent state
+  useEffect(() => {
+    const loadSavedData = async () => {
+      try {
+        const savedData = await consultationDataService.getAllData()
+        console.log('📦 Loading saved consultation data into parent state:', savedData)
+
+        // Only load patientData if we don't have prefillData (to avoid overriding consultation hub data)
+        if (savedData?.patientData && Object.keys(prefillData).length === 0) {
+          console.log('✅ Loading saved patient data into parent state')
+          setPatientData(savedData.patientData)
+        }
+
+        // Always load clinical, questions, and diagnosis data
+        if (savedData?.clinicalData) {
+          console.log('✅ Loading saved clinical data into parent state')
+          setClinicalData(savedData.clinicalData)
+        }
+
+        if (savedData?.questionsData) {
+          console.log('✅ Loading saved questions data into parent state')
+          setQuestionsData(savedData.questionsData)
+        }
+
+        if (savedData?.diagnosisData) {
+          console.log('✅ Loading saved diagnosis data into parent state')
+          setDiagnosisData(savedData.diagnosisData)
+        }
+      } catch (error) {
+        console.error('❌ Error loading saved consultation data:', error)
+      }
+    }
+
+    loadSavedData()
+  }, [prefillData])
+
   // Listen for prescription renewal detection from Tibok data
 useEffect(() => {
   const handleRenewalDetected = (event: CustomEvent) => {
     console.log('💊 Prescription renewal event received:', event.detail)
-    
+
     // Update clinical data with the consultation reason
     setClinicalData(prev => ({
       ...prev,
       chiefComplaint: event.detail.consultationReason
     }))
   }
-  
+
   window.addEventListener('prescription-renewal-detected', handleRenewalDetected as EventListener)
-  
+
   return () => {
     window.removeEventListener('prescription-renewal-detected', handleRenewalDetected as EventListener)
   }
