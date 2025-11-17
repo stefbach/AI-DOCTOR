@@ -502,6 +502,15 @@ export default function ChronicProfessionalReport({
   // Local state for narrative text (completely independent like sick leave)
   const [editableNarrative, setEditableNarrative] = useState('')
 
+  // Local state for editable medications (independent, no auto-sync)
+  const [localMedications, setLocalMedications] = useState<any>(null)
+
+  // Local state for editable laboratory tests (independent, no auto-sync)
+  const [localLabTests, setLocalLabTests] = useState<any>(null)
+
+  // Local state for editable paraclinical exams (independent, no auto-sync)
+  const [localParaclinicalExams, setLocalParaclinicalExams] = useState<any>(null)
+
   // Consultation ID state
   const [consultationId, setConsultationId] = useState<string>('')
 
@@ -516,6 +525,27 @@ export default function ChronicProfessionalReport({
       setEditableNarrative(report.medicalReport.narrative)
     }
   }, [report?.medicalReport?.narrative])
+
+  // Initialize local medications from report (one-time sync)
+  useEffect(() => {
+    if (report?.medicationPrescription && !localMedications) {
+      setLocalMedications(JSON.parse(JSON.stringify(report.medicationPrescription)))
+    }
+  }, [report?.medicationPrescription])
+
+  // Initialize local lab tests from report (one-time sync)
+  useEffect(() => {
+    if (report?.laboratoryTests && !localLabTests) {
+      setLocalLabTests(JSON.parse(JSON.stringify(report.laboratoryTests)))
+    }
+  }, [report?.laboratoryTests])
+
+  // Initialize local paraclinical exams from report (one-time sync)
+  useEffect(() => {
+    if (report?.paraclinicalExams && !localParaclinicalExams) {
+      setLocalParaclinicalExams(JSON.parse(JSON.stringify(report.paraclinicalExams)))
+    }
+  }, [report?.paraclinicalExams])
 
   // Generate consultation ID on mount
   useEffect(() => {
@@ -1226,13 +1256,16 @@ export default function ChronicProfessionalReport({
 
     setSaving(true)
     try {
-      // Sync narrative from editableNarrative to report (same pattern as sickLeaveData)
+      // Sync all local state back to report (same pattern as sickLeaveData)
       const updatedReport = {
         ...report,
         medicalReport: {
           ...report.medicalReport,
           narrative: editableNarrative
-        }
+        },
+        ...(localMedications && { medicationPrescription: localMedications }),
+        ...(localLabTests && { laboratoryTests: localLabTests }),
+        ...(localParaclinicalExams && { paraclinicalExams: localParaclinicalExams })
       }
 
       // Format report for save-medical-report API
@@ -1393,7 +1426,7 @@ export default function ChronicProfessionalReport({
     } finally {
       setSaving(false)
     }
-  }, [validationStatus, consultationId, report, sickLeaveData, invoiceData, patientData, clinicalData, diagnosisData, onComplete])
+  }, [validationStatus, consultationId, report, sickLeaveData, invoiceData, patientData, clinicalData, diagnosisData, onComplete, editableNarrative, localMedications, localLabTests, localParaclinicalExams])
   
   const exportToPDF = useCallback((elementId: string, filename: string) => {
     // Simple print-based PDF export
@@ -1420,13 +1453,16 @@ export default function ChronicProfessionalReport({
 
     setSaving(true)
     try {
-      // Sync narrative from editableNarrative to report (same pattern as sickLeaveData)
+      // Sync all local state back to report (same pattern as sickLeaveData)
       const updatedReport = {
         ...report,
         medicalReport: {
           ...report.medicalReport,
           narrative: editableNarrative
-        }
+        },
+        ...(localMedications && { medicationPrescription: localMedications }),
+        ...(localLabTests && { laboratoryTests: localLabTests }),
+        ...(localParaclinicalExams && { paraclinicalExams: localParaclinicalExams })
       }
 
       // Validate report data before saving
@@ -1496,7 +1532,7 @@ export default function ChronicProfessionalReport({
     } finally {
       setSaving(false)
     }
-  }, [hasUnsavedChanges, report, consultationId, sickLeaveData, invoiceData, validationStatus])
+  }, [hasUnsavedChanges, report, consultationId, sickLeaveData, invoiceData, validationStatus, editableNarrative, localMedications, localLabTests, localParaclinicalExams])
   
   // Handle on-demand dietary plan generation
   const handleGenerateDietaryPlan = useCallback(async () => {
@@ -2047,53 +2083,50 @@ export default function ChronicProfessionalReport({
       )
     }
     
-    const { medicationPrescription } = report
+    // Use local state if available, otherwise use report (for display before editing)
+    const medicationPrescription = localMedications || report.medicationPrescription
     const medications = medicationPrescription.prescription.medications || []
     
     const handleAddMedication = () => {
-      setReport(prev => {
-        if (!prev || !prev.medicationPrescription) return prev
+      // Update local state only - no setReport call
+      setLocalMedications(prev => {
+        if (!prev) return prev
         return {
           ...prev,
-          medicationPrescription: {
-            ...prev.medicationPrescription,
-            prescription: {
-              ...prev.medicationPrescription.prescription,
-              medications: [
-                ...prev.medicationPrescription.prescription.medications,
-                {
-                  nom: '',
-                  denominationCommune: '',
-                  dosage: '',
-                  forme: 'tablet',
-                  posologie: '',
-                  modeAdministration: 'Oral route',
-                  dureeTraitement: '',
-                  quantite: '',
-                  instructions: '',
-                  justification: '',
-                  surveillanceParticuliere: '',
-                  nonSubstituable: false
-                }
-              ]
-            }
+          prescription: {
+            ...prev.prescription,
+            medications: [
+              ...prev.prescription.medications,
+              {
+                nom: '',
+                denominationCommune: '',
+                dosage: '',
+                forme: 'tablet',
+                posologie: '',
+                modeAdministration: 'Oral route',
+                dureeTraitement: '',
+                quantite: '',
+                instructions: '',
+                justification: '',
+                surveillanceParticuliere: '',
+                nonSubstituable: false
+              }
+            ]
           }
         }
       })
       setHasUnsavedChanges(true)
     }
-    
+
     const handleRemoveMedication = (index: number) => {
-      setReport(prev => {
-        if (!prev || !prev.medicationPrescription) return prev
+      // Update local state only - no setReport call
+      setLocalMedications(prev => {
+        if (!prev) return prev
         return {
           ...prev,
-          medicationPrescription: {
-            ...prev.medicationPrescription,
-            prescription: {
-              ...prev.medicationPrescription.prescription,
-              medications: prev.medicationPrescription.prescription.medications.filter((_, i) => i !== index)
-            }
+          prescription: {
+            ...prev.prescription,
+            medications: prev.prescription.medications.filter((_, i) => i !== index)
           }
         }
       })
@@ -2101,18 +2134,16 @@ export default function ChronicProfessionalReport({
     }
     
     const handleUpdateMedication = (index: number, field: string, value: any) => {
-      setReport(prev => {
-        if (!prev || !prev.medicationPrescription) return prev
-        const updatedMeds = [...prev.medicationPrescription.prescription.medications]
+      // Update local state only - no setReport call
+      setLocalMedications(prev => {
+        if (!prev) return prev
+        const updatedMeds = [...prev.prescription.medications]
         updatedMeds[index] = { ...updatedMeds[index], [field]: value }
         return {
           ...prev,
-          medicationPrescription: {
-            ...prev.medicationPrescription,
-            prescription: {
-              ...prev.medicationPrescription.prescription,
-              medications: updatedMeds
-            }
+          prescription: {
+            ...prev.prescription,
+            medications: updatedMeds
           }
         }
       })
@@ -2394,7 +2425,8 @@ export default function ChronicProfessionalReport({
       )
     }
     
-    const { laboratoryTests } = report
+    // Use local state if available, otherwise use report (for display before editing)
+    const laboratoryTests = localLabTests || report.laboratoryTests
     const tests = laboratoryTests.prescription.tests || {}
     const hasTests = Object.values(tests).some((testArray: any) => Array.isArray(testArray) && testArray.length > 0)
     
@@ -2408,36 +2440,48 @@ export default function ChronicProfessionalReport({
     ]
 
     const handleLabTestEdit = (categoryKey: string, testIdx: number, field: string, value: any) => {
-      const updatedReport = { ...report }
-      updatedReport.laboratoryTests.prescription.tests[categoryKey][testIdx][field] = value
-      setReport(updatedReport)
+      // Update local state only - no setReport call
+      setLocalLabTests(prev => {
+        if (!prev) return prev
+        const updated = JSON.parse(JSON.stringify(prev))
+        updated.prescription.tests[categoryKey][testIdx][field] = value
+        return updated
+      })
       setHasUnsavedChanges(true)
     }
 
     const handleDeleteLabTest = (categoryKey: string, testIdx: number) => {
       if (confirm('Delete this laboratory test?')) {
-        const updatedReport = { ...report }
-        updatedReport.laboratoryTests.prescription.tests[categoryKey].splice(testIdx, 1)
-        setReport(updatedReport)
+        // Update local state only - no setReport call
+        setLocalLabTests(prev => {
+          if (!prev) return prev
+          const updated = JSON.parse(JSON.stringify(prev))
+          updated.prescription.tests[categoryKey].splice(testIdx, 1)
+          return updated
+        })
         setHasUnsavedChanges(true)
       }
     }
 
     const handleAddLabTest = (categoryKey: string) => {
-      const updatedReport = { ...report }
-      if (!updatedReport.laboratoryTests.prescription.tests[categoryKey]) {
-        updatedReport.laboratoryTests.prescription.tests[categoryKey] = []
-      }
-      const newTest = {
-        nom: 'New Laboratory Test',
-        motifClinique: '',
-        conditionsPrelevement: '',
-        tubePrelevement: '',
-        urgence: false,
-        aJeun: false
-      }
-      updatedReport.laboratoryTests.prescription.tests[categoryKey].push(newTest)
-      setReport(updatedReport)
+      // Update local state only - no setReport call
+      setLocalLabTests(prev => {
+        if (!prev) return prev
+        const updated = JSON.parse(JSON.stringify(prev))
+        if (!updated.prescription.tests[categoryKey]) {
+          updated.prescription.tests[categoryKey] = []
+        }
+        const newTest = {
+          nom: 'New Laboratory Test',
+          motifClinique: '',
+          conditionsPrelevement: '',
+          tubePrelevement: '',
+          urgence: false,
+          aJeun: false
+        }
+        updated.prescription.tests[categoryKey].push(newTest)
+        return updated
+      })
       setHasUnsavedChanges(true)
       toast({
         title: "Test Added",
@@ -2481,18 +2525,26 @@ export default function ChronicProfessionalReport({
           <h3 className="font-bold mb-2">Clinical Indication:</h3>
           {editMode ? (
             <Textarea
-              value={laboratoryTests.prescription.clinicalIndication || ''}
+              value={localLabTests?.prescription.clinicalIndication || ''}
               onChange={(e) => {
-                const updatedReport = { ...report }
-                updatedReport.laboratoryTests.prescription.clinicalIndication = e.target.value
-                setReport(updatedReport)
+                // Update local state only - no setReport call
+                setLocalLabTests(prev => {
+                  if (!prev) return prev
+                  return {
+                    ...prev,
+                    prescription: {
+                      ...prev.prescription,
+                      clinicalIndication: e.target.value
+                    }
+                  }
+                })
                 setHasUnsavedChanges(true)
               }}
               className="text-sm"
               rows={3}
             />
           ) : (
-            <p className="text-sm">{laboratoryTests.prescription.clinicalIndication}</p>
+            <p className="text-sm">{localLabTests?.prescription.clinicalIndication}</p>
           )}
         </div>
         
@@ -2706,39 +2758,52 @@ export default function ChronicProfessionalReport({
       )
     }
     
-    const { paraclinicalExams } = report
+    // Use local state if available, otherwise use report (for display before editing)
+    const paraclinicalExams = localParaclinicalExams || report.paraclinicalExams
     const exams = paraclinicalExams.prescription.exams || []
 
     const handleParaclinicalEdit = (examIdx: number, field: string, value: any) => {
-      const updatedReport = { ...report }
-      updatedReport.paraclinicalExams.prescription.exams[examIdx][field] = value
-      setReport(updatedReport)
+      // Update local state only - no setReport call
+      setLocalParaclinicalExams(prev => {
+        if (!prev) return prev
+        const updated = JSON.parse(JSON.stringify(prev))
+        updated.prescription.exams[examIdx][field] = value
+        return updated
+      })
       setHasUnsavedChanges(true)
     }
 
     const handleDeleteParaclinicalExam = (examIdx: number) => {
       if (confirm('Delete this paraclinical examination?')) {
-        const updatedReport = { ...report }
-        updatedReport.paraclinicalExams.prescription.exams.splice(examIdx, 1)
-        setReport(updatedReport)
+        // Update local state only - no setReport call
+        setLocalParaclinicalExams(prev => {
+          if (!prev) return prev
+          const updated = JSON.parse(JSON.stringify(prev))
+          updated.prescription.exams.splice(examIdx, 1)
+          return updated
+        })
         setHasUnsavedChanges(true)
       }
     }
 
     const handleAddParaclinicalExam = () => {
-      const updatedReport = { ...report }
-      const newExam = {
-        type: 'New Examination',
-        modality: '',
-        region: '',
-        clinicalIndication: '',
-        diagnosticQuestion: '',
-        specificProtocol: '',
-        urgency: false,
-        contrast: false
-      }
-      updatedReport.paraclinicalExams.prescription.exams.push(newExam)
-      setReport(updatedReport)
+      // Update local state only - no setReport call
+      setLocalParaclinicalExams(prev => {
+        if (!prev) return prev
+        const updated = JSON.parse(JSON.stringify(prev))
+        const newExam = {
+          type: 'New Examination',
+          modality: '',
+          region: '',
+          clinicalIndication: '',
+          diagnosticQuestion: '',
+          specificProtocol: '',
+          urgency: false,
+          contrast: false
+        }
+        updated.prescription.exams.push(newExam)
+        return updated
+      })
       setHasUnsavedChanges(true)
       toast({
         title: "Exam Added",
