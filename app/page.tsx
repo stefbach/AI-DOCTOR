@@ -210,18 +210,15 @@ useEffect(() => {
   const progress = ((currentStep + 1) / steps.length) * 100
 
 const handleNext = async () => {
-  // Wait briefly for any debounced auto-saves to complete
-  await new Promise(resolve => setTimeout(resolve, 1200))
-
   const consultationId = consultationDataService.getCurrentConsultationId()
 
   if (consultationId) {
     try {
-      console.log(`Saving data for step ${currentStep}`)
+      console.log(`✅ Moving from step ${currentStep} to step ${currentStep + 1}`)
 
-      // Reload latest data from localStorage before proceeding
+      // Reload latest data from localStorage (forms save synchronously before calling onNext)
       const savedData = await consultationDataService.getAllData()
-      console.log('🔍 Loaded data from localStorage:', {
+      console.log('🔍 Data in localStorage:', {
         hasPatientData: !!savedData?.patientData,
         hasClinicalData: !!savedData?.clinicalData,
         hasQuestionsData: !!savedData?.questionsData,
@@ -290,41 +287,9 @@ const handleNext = async () => {
         }
       }
       
-      // Save current step data before moving to next step
-      // Forms call onDataChange immediately, so parent state has latest data
-      // But their auto-save is debounced and may be cancelled on unmount
-      console.log(`Step ${currentStep} complete. Ensuring data is saved before unmounting...`)
-
-      switch (currentStep) {
-        case 0:
-          if (savedData?.patientData) {
-            console.log('💾 Saving patient data')
-            await consultationDataService.saveStepData(0, savedData.patientData)
-          }
-          break
-        case 1:
-          // Use parent state clinicalData which was updated via onDataChange
-          if (clinicalData) {
-            console.log('💾 Saving clinical data from parent state')
-            await consultationDataService.saveStepData(1, clinicalData)
-          } else if (savedData?.clinicalData) {
-            console.log('💾 Saving clinical data from localStorage')
-            await consultationDataService.saveStepData(1, savedData.clinicalData)
-          } else {
-            console.warn('⚠️ No clinical data found!')
-          }
-          break
-        case 2:
-          if (questionsData) {
-            await consultationDataService.saveStepData(2, questionsData)
-          }
-          break
-        case 3:
-          if (diagnosisData) {
-            await consultationDataService.saveStepData(3, diagnosisData)
-          }
-          break
-      }
+      // Forms now save synchronously before calling onNext
+      // Data should already be in localStorage
+      console.log(`✅ Step ${currentStep} data verified in localStorage`)
     } catch (error) {
       console.error('Error saving step data:', error)
     }

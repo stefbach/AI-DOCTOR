@@ -424,8 +424,17 @@ const COMMON_SYMPTOMS = useMemo(() => [
  return Object.keys(newErrors).length === 0
  }, [localData])
 
- const handleSubmit = useCallback(() => {
+ const handleSubmit = useCallback(async () => {
  if (validateForm()) {
+ // Save data immediately before calling onNext to prevent data loss
+ console.log('💾 Clinical form: Saving data before unmounting')
+ try {
+ await consultationDataService.saveStepData(1, localData)
+ onDataChange(localData)
+ console.log('✅ Clinical data saved successfully before unmounting')
+ } catch (error) {
+ console.error('❌ Error saving clinical data:', error)
+ }
  onNext()
  } else {
  const firstErrorField = Object.keys(errors)[0]
@@ -435,7 +444,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
  element.focus()
  }
  }
- }, [validateForm, onNext, errors])
+ }, [validateForm, onNext, errors, localData, onDataChange])
 
  // ========== Effects ==========
  
