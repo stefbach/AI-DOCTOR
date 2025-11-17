@@ -1698,9 +1698,10 @@ export default function ChronicProfessionalReport({
   
   // ==================== SECTION COMPONENTS ====================
   
-  const MedicalReportSection = () => {
+  // Memoize medical report section to prevent recreation when typing
+  const medicalReportSection = useMemo(() => {
     const { medicalReport } = report
-    
+
     return (
       <div id="medical-report-section" className="bg-white p-8 rounded-lg shadow print:shadow-none">
         <div className="border-b-2 border-blue-600 pb-4 mb-6">
@@ -2069,9 +2070,12 @@ export default function ChronicProfessionalReport({
         {/* Signature - REMOVED because already in narrative text */}
       </div>
     )
-  }
-  
-  const MedicationPrescriptionSection = () => {
+  }, [editableNarrative, editMode, report.medicalReport])
+
+  const MedicalReportSection = () => medicalReportSection
+
+  // Memoized sections to prevent recreation on every render
+  const medicationSection = useMemo(() => {
     if (!report.medicationPrescription) {
       return (
         <Card>
@@ -2082,11 +2086,11 @@ export default function ChronicProfessionalReport({
         </Card>
       )
     }
-    
+
     // Use local state if available, otherwise use report (for display before editing)
     const medicationPrescription = localMedications || report.medicationPrescription
     const medications = medicationPrescription.prescription.medications || []
-    
+
     const handleAddMedication = () => {
       // Update local state only - no setReport call
       setLocalMedications(prev => {
@@ -2132,7 +2136,7 @@ export default function ChronicProfessionalReport({
       })
       setHasUnsavedChanges(true)
     }
-    
+
     const handleUpdateMedication = (index: number, field: string, value: any) => {
       // Update local state only - no setReport call
       setLocalMedications(prev => {
@@ -2411,9 +2415,9 @@ export default function ChronicProfessionalReport({
         </div>
       </div>
     )
-  }
-  
-  const LaboratoryTestsSection = () => {
+  }, [localMedications, editMode, validationStatus, report.medicationPrescription])
+
+  const laboratorySection = useMemo(() => {
     if (!report.laboratoryTests) {
       return (
         <Card>
@@ -2744,9 +2748,9 @@ export default function ChronicProfessionalReport({
         </div>
       </div>
     )
-  }
-  
-  const ParaclinicalExamsSection = () => {
+  }, [localLabTests, editMode, validationStatus, report.laboratoryTests])
+
+  const paraclinicalSection = useMemo(() => {
     if (!report.paraclinicalExams) {
       return (
         <Card>
@@ -2757,7 +2761,7 @@ export default function ChronicProfessionalReport({
         </Card>
       )
     }
-    
+
     // Use local state if available, otherwise use report (for display before editing)
     const paraclinicalExams = localParaclinicalExams || report.paraclinicalExams
     const exams = paraclinicalExams.prescription.exams || []
@@ -3027,8 +3031,8 @@ export default function ChronicProfessionalReport({
         </div>
       </div>
     )
-  }
-  
+  }, [localParaclinicalExams, editMode, validationStatus, report.paraclinicalExams])
+
   const DietaryProtocolSection = () => {
     if (!report.dietaryProtocol) {
       return (
@@ -4157,15 +4161,15 @@ export default function ChronicProfessionalReport({
         </TabsContent>
         
         <TabsContent value="medications">
-          <MedicationPrescriptionSection />
+          {medicationSection}
         </TabsContent>
-        
+
         <TabsContent value="laboratory">
-          <LaboratoryTestsSection />
+          {laboratorySection}
         </TabsContent>
-        
+
         <TabsContent value="paraclinical">
-          <ParaclinicalExamsSection />
+          {paraclinicalSection}
         </TabsContent>
         
         <TabsContent value="dietary">
@@ -4476,17 +4480,17 @@ export default function ChronicProfessionalReport({
         <MedicalReportSection />
         {report.medicationPrescription && (
           <div className="page-break-before mt-8">
-            <MedicationPrescriptionSection />
+            {medicationSection}
           </div>
         )}
         {report.laboratoryTests && (
           <div className="page-break-before mt-8">
-            <LaboratoryTestsSection />
+            {laboratorySection}
           </div>
         )}
         {report.paraclinicalExams && (
           <div className="page-break-before mt-8">
-            <ParaclinicalExamsSection />
+            {paraclinicalSection}
           </div>
         )}
         {report.dietaryProtocol && (
