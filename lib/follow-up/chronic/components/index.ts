@@ -13,3 +13,6 @@ export type { ChronicClinicalFormProps } from './chronic-clinical-form'
 
 export { ChronicReportDisplay } from './chronic-report-display'
 export type { ChronicReportDisplayProps } from './chronic-report-display'
+
+export { ChronicFollowUpProfessionalReport } from './chronic-follow-up-professional-report'
+export type { ChronicFollowUpProfessionalReportProps } from './chronic-follow-up-professional-report'
