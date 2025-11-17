@@ -476,12 +476,39 @@ export default function ChronicProfessionalReport({
   const [dietaryError, setDietaryError] = useState<string | null>(null)
   const [detailedDietaryGenerated, setDetailedDietaryGenerated] = useState(false)
 
+  // Handle narrative text changes with useCallback to prevent focus loss
+  const handleNarrativeChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value
+    setReport(prev => {
+      if (!prev) return null
+      return {
+        ...prev,
+        medicalReport: {
+          ...prev.medicalReport,
+          narrative: newValue
+        }
+      }
+    })
+    setHasUnsavedChanges(true)
+  }, [])
+
   // Generate consultation ID on mount
   useEffect(() => {
     const id = `chronic_disease_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     setConsultationId(id)
     console.log('🔑 Generated consultation ID:', id)
   }, [])
+
+  // Auto-fill sick leave medical reason from diagnosis when report is generated
+  useEffect(() => {
+    if (report && !sickLeaveData.medicalReason) {
+      const diagnosis = report.medicalReport.chronicDiseaseAssessment.primaryDiagnosis ||
+                       report.medicalReport.diagnosticSummary.diagnosticConclusion || ''
+      if (diagnosis) {
+        setSickLeaveData(prev => ({ ...prev, medicalReason: diagnosis }))
+      }
+    }
+  }, [report, sickLeaveData.medicalReason])
   
   // ==================== DATA GENERATION ====================
   
@@ -1223,7 +1250,7 @@ export default function ChronicProfessionalReport({
             },
             items: [
               {
-                description: 'Chronic Disease Consultation',
+                description: 'Online Chronic Disease consultation via Tibok',
                 amount: invoiceData.consultationFee
               }
             ],
@@ -1600,20 +1627,7 @@ export default function ChronicProfessionalReport({
                 <Textarea
                   id="narrative-edit"
                   value={report.medicalReport.narrative}
-                  onChange={(e) => {
-                    const newValue = e.target.value
-                    setReport(prev => {
-                      if (!prev) return null
-                      return {
-                        ...prev,
-                        medicalReport: {
-                          ...prev.medicalReport,
-                          narrative: newValue
-                        }
-                      }
-                    })
-                    setHasUnsavedChanges(true)
-                  }}
+                  onChange={handleNarrativeChange}
                   className="min-h-[600px] font-mono text-sm bg-white"
                   disabled={validationStatus === 'validated'}
                 />
