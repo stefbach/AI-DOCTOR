@@ -511,6 +511,17 @@ export default function ChronicProfessionalReport({
   // Local state for editable paraclinical exams (independent, no auto-sync)
   const [localParaclinicalExams, setLocalParaclinicalExams] = useState<any>(null)
 
+  // Doctor info state - loaded from sessionStorage (shared with normal consultation)
+  const [doctorInfo, setDoctorInfo] = useState({
+    nom: "Dr. [Name Required]",
+    qualifications: "MBBS",
+    specialite: "Internal Medicine / Chronic Disease Management",
+    numeroEnregistrement: "[MCM Registration Required]",
+    email: "[Email Required]",
+    signatureUrl: null as string | null,
+    digitalSignature: null as string | null
+  })
+
   // Consultation ID state
   const [consultationId, setConsultationId] = useState<string>('')
 
@@ -546,6 +557,22 @@ export default function ChronicProfessionalReport({
       setLocalParaclinicalExams(JSON.parse(JSON.stringify(report.paraclinicalExams)))
     }
   }, [report?.paraclinicalExams])
+
+  // Load doctor info from sessionStorage (shared with normal consultation)
+  useEffect(() => {
+    const storedDoctorInfo = sessionStorage.getItem('currentDoctorInfo')
+    if (storedDoctorInfo) {
+      try {
+        const doctorData = JSON.parse(storedDoctorInfo)
+        console.log('✅ Loaded doctor info from sessionStorage:', doctorData)
+        setDoctorInfo(doctorData)
+      } catch (error) {
+        console.error('❌ Error parsing stored doctor info:', error)
+      }
+    } else {
+      console.warn('⚠️ No doctor info found in sessionStorage - using placeholders')
+    }
+  }, [])
 
   // Generate consultation ID on mount
   useEffect(() => {
@@ -653,7 +680,18 @@ export default function ChronicProfessionalReport({
             currentMedications: patientData.currentMedications || ""
           }
         }
-        
+
+        // Populate doctor/practitioner data from sessionStorage
+        initialReport.medicalReport.practitioner = {
+          name: doctorInfo.nom,
+          qualifications: doctorInfo.qualifications,
+          specialty: doctorInfo.specialite,
+          registrationNumber: doctorInfo.numeroEnregistrement,
+          email: doctorInfo.email,
+          consultationPlatform: "Tibok Teleconsultation Platform"
+        }
+        console.log('👨‍⚕️ Doctor info populated:', initialReport.medicalReport.practitioner)
+
         // Populate disease assessment from diagnosisData
         if (diagnosisData) {
           initialReport.medicalReport.chronicDiseaseAssessment = {
@@ -1231,10 +1269,10 @@ export default function ChronicProfessionalReport({
       }
     }
     
-    if (patientData && diagnosisData) {
+    if (patientData && diagnosisData && doctorInfo.nom !== "Dr. [Name Required]") {
       generateReport()
     }
-  }, [patientData, clinicalData, questionsData, diagnosisData])
+  }, [patientData, clinicalData, questionsData, diagnosisData, doctorInfo])
   
   // ==================== EVENT HANDLERS ====================
   
