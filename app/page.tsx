@@ -210,12 +210,22 @@ useEffect(() => {
   const progress = ((currentStep + 1) / steps.length) * 100
 
 const handleNext = async () => {
+  // Wait briefly for any debounced auto-saves to complete
+  await new Promise(resolve => setTimeout(resolve, 1200))
+
   const consultationId = consultationDataService.getCurrentConsultationId()
-  
+
   if (consultationId) {
     try {
       console.log(`Saving data for step ${currentStep}`)
-      
+
+      // Reload latest data from localStorage before proceeding
+      const savedData = await consultationDataService.getAllData()
+      if (savedData?.patientData) setPatientData(savedData.patientData)
+      if (savedData?.clinicalData) setClinicalData(savedData.clinicalData)
+      if (savedData?.questionsData) setQuestionsData(savedData.questionsData)
+      if (savedData?.diagnosisData) setDiagnosisData(savedData.diagnosisData)
+
       // Special handling for step 0 (Patient Form)
       if (currentStep === 0) {
         if (patientData) {
