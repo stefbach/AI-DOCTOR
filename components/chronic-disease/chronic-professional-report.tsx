@@ -499,10 +499,9 @@ export default function ChronicProfessionalReport({
     consultationFee: 0
   })
 
-  // Local state for narrative text to prevent typing issues
-  const [localNarrative, setLocalNarrative] = useState('')
-  const narrativeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  
+  // Local state for narrative text (completely independent like sick leave)
+  const [editableNarrative, setEditableNarrative] = useState('')
+
   // Consultation ID state
   const [consultationId, setConsultationId] = useState<string>('')
 
@@ -511,39 +510,31 @@ export default function ChronicProfessionalReport({
   const [dietaryError, setDietaryError] = useState<string | null>(null)
   const [detailedDietaryGenerated, setDetailedDietaryGenerated] = useState(false)
 
-  // Handle narrative text changes with local state and debouncing
-  const handleNarrativeChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newValue = e.target.value
-    // Update local state immediately (no lag for user)
-    setLocalNarrative(newValue)
-
-    // Clear existing timeout
-    if (narrativeTimeoutRef.current) {
-      clearTimeout(narrativeTimeoutRef.current)
-    }
-
-    // Debounce the actual state update (prevents re-renders during typing)
-    narrativeTimeoutRef.current = setTimeout(() => {
-      setReport(prev => {
-        if (!prev) return null
-        return {
-          ...prev,
-          medicalReport: {
-            ...prev.medicalReport,
-            narrative: newValue
-          }
-        }
-      })
-      setHasUnsavedChanges(true)
-    }, 300) // 300ms debounce
-  }, [])
-
-  // Initialize local narrative when report loads
+  // Initialize editable narrative once when report loads
   useEffect(() => {
-    if (report?.medicalReport?.narrative && localNarrative === '') {
-      setLocalNarrative(report.medicalReport.narrative)
+    if (report?.medicalReport?.narrative && editableNarrative === '') {
+      setEditableNarrative(report.medicalReport.narrative)
     }
-  }, [report, localNarrative])
+  }, [report?.medicalReport?.narrative])
+
+  // Sync narrative back to report when saving
+  useEffect(() => {
+    if (editableNarrative && report) {
+      const timeoutId = setTimeout(() => {
+        setReport(prev => {
+          if (!prev) return null
+          return {
+            ...prev,
+            medicalReport: {
+              ...prev.medicalReport,
+              narrative: editableNarrative
+            }
+          }
+        })
+      }, 500)
+      return () => clearTimeout(timeoutId)
+    }
+  }, [editableNarrative])
 
   // Generate consultation ID on mount
   useEffect(() => {
@@ -570,6 +561,11 @@ export default function ChronicProfessionalReport({
       const invoiceNumber = `TIBOK-${new Date().getFullYear()}-${Math.floor(Math.random() * 900000) + 100000}`
       const patientId = `ANON-RPT-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
 
+      const defaultFee = 950
+      const subtotal = defaultFee
+      const vatAmount = 0 // Medical services are VAT exempt
+      const totalDue = subtotal + vatAmount
+
       setInvoiceData(prev => ({
         ...prev,
         header: {
@@ -582,6 +578,19 @@ export default function ChronicProfessionalReport({
           email: report.medicalReport.patient.email || '',
           phone: report.medicalReport.patient.phone || '',
           patientId
+        },
+        consultationFee: defaultFee,
+        services: {
+          ...prev.services,
+          items: [{
+            description: 'Online Chronic Disease consultation via Tibok',
+            quantity: 1,
+            unitPrice: defaultFee,
+            total: defaultFee
+          }],
+          subtotal,
+          vatAmount,
+          totalDue
         }
       }))
     }
@@ -1688,8 +1697,11 @@ export default function ChronicProfessionalReport({
                 <Label htmlFor="narrative-edit" className="text-sm font-medium">Medical Report Narrative</Label>
                 <Textarea
                   id="narrative-edit"
-                  value={localNarrative}
-                  onChange={handleNarrativeChange}
+                  value={editableNarrative}
+                  onChange={(e) => {
+                    setEditableNarrative(e.target.value)
+                    setHasUnsavedChanges(true)
+                  }}
                   className="min-h-[600px] font-mono text-sm bg-white"
                   disabled={validationStatus === 'validated'}
                 />
@@ -4242,42 +4254,14 @@ export default function ChronicProfessionalReport({
               </div>
             </div>
 
-            {editMode && validationStatus !== 'validated' && (
-              <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <Label htmlFor="consultationFeeInput" className="font-bold mb-2 block">Set Consultation Fee</Label>
-                <Input
-                  id="consultationFeeInput"
-                  type="number"
-                  value={invoiceData.consultationFee}
-                  onChange={(e) => {
-                    const fee = parseFloat(e.target.value) || 0
-                    const subtotal = fee
-                    const vatAmount = 0 // Medical services are VAT exempt
-                    const totalDue = subtotal + vatAmount
-
-                    setInvoiceData(prev => ({
-                      ...prev,
-                      consultationFee: fee,
-                      services: {
-                        ...prev.services,
-                        items: [{
-                          description: 'Online Chronic Disease consultation via Tibok',
-                          quantity: 1,
-                          unitPrice: fee,
-                          total: fee
-                        }],
-                        subtotal,
-                        vatAmount,
-                        totalDue
-                      }
-                    }))
-                    setHasUnsavedChanges(true)
-                  }}
-                  placeholder="Enter consultation fee in MUR"
-                  className="max-w-xs"
-                />
-              </div>
-            )}
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>Standard Chronic Disease Consultation Fee:</strong> MUR 950
+              </p>
+              <p className="text-xs text-blue-600 mt-1">
+                This is the standard rate for chronic disease consultations via Tibok.
+              </p>
+            </div>
 
             <div className="mb-6">
               <h3 className="font-bold mb-4">Service Details</h3>
