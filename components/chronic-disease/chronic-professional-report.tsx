@@ -1699,7 +1699,7 @@ export default function ChronicProfessionalReport({
   // ==================== SECTION COMPONENTS ====================
   
   // Memoize medical report section to prevent recreation when typing
-  const medicalReportSection = useMemo(() => {
+  const MedicalReportSection = memo(() => {
     const { medicalReport } = report
 
     return (
@@ -2070,12 +2070,10 @@ export default function ChronicProfessionalReport({
         {/* Signature - REMOVED because already in narrative text */}
       </div>
     )
-  }, [editableNarrative, editMode, report.medicalReport])
-
-  const MedicalReportSection = () => medicalReportSection
+  })
 
   // Memoized sections to prevent recreation on every render
-  const medicationSection = useMemo(() => {
+  const MedicationPrescriptionSection = memo(() => {
     if (!report.medicationPrescription) {
       return (
         <Card>
@@ -2415,9 +2413,9 @@ export default function ChronicProfessionalReport({
         </div>
       </div>
     )
-  }, [localMedications, editMode, validationStatus, report.medicationPrescription])
+  })
 
-  const laboratorySection = useMemo(() => {
+  const LaboratoryTestsSection = memo(() => {
     if (!report.laboratoryTests) {
       return (
         <Card>
@@ -2748,9 +2746,9 @@ export default function ChronicProfessionalReport({
         </div>
       </div>
     )
-  }, [localLabTests, editMode, validationStatus, report.laboratoryTests])
+  })
 
-  const paraclinicalSection = useMemo(() => {
+  const ParaclinicalExamsSection = memo(() => {
     if (!report.paraclinicalExams) {
       return (
         <Card>
@@ -3031,7 +3029,7 @@ export default function ChronicProfessionalReport({
         </div>
       </div>
     )
-  }, [localParaclinicalExams, editMode, validationStatus, report.paraclinicalExams])
+  })
 
   const DietaryProtocolSection = () => {
     if (!report.dietaryProtocol) {
@@ -4161,15 +4159,15 @@ export default function ChronicProfessionalReport({
         </TabsContent>
         
         <TabsContent value="medications">
-          {medicationSection}
+          <MedicationPrescriptionSection />
         </TabsContent>
 
         <TabsContent value="laboratory">
-          {laboratorySection}
+          <LaboratoryTestsSection />
         </TabsContent>
 
         <TabsContent value="paraclinical">
-          {paraclinicalSection}
+          <ParaclinicalExamsSection />
         </TabsContent>
         
         <TabsContent value="dietary">
@@ -4480,17 +4478,17 @@ export default function ChronicProfessionalReport({
         <MedicalReportSection />
         {report.medicationPrescription && (
           <div className="page-break-before mt-8">
-            {medicationSection}
+            <MedicationPrescriptionSection />
           </div>
         )}
         {report.laboratoryTests && (
           <div className="page-break-before mt-8">
-            {laboratorySection}
+            <LaboratoryTestsSection />
           </div>
         )}
         {report.paraclinicalExams && (
           <div className="page-break-before mt-8">
-            {paraclinicalSection}
+            <ParaclinicalExamsSection />
           </div>
         )}
         {report.dietaryProtocol && (
