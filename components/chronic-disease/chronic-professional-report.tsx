@@ -461,12 +461,47 @@ export default function ChronicProfessionalReport({
     remarks: ''
   })
 
-  // Invoice state
+  // Invoice state with complete structure
   const [invoiceData, setInvoiceData] = useState({
-    consultationFee: 0,
-    additionalCharges: [] as any[],
-    total: 0
+    header: {
+      invoiceNumber: '',
+      consultationDate: '',
+      invoiceDate: ''
+    },
+    provider: {
+      companyName: 'Digital Data Solutions Ltd',
+      registrationNumber: 'C20173522',
+      vatNumber: '27816949',
+      registeredOffice: 'Bourdet Road, Grand Baie, Mauritius',
+      phone: '+230 4687377/78',
+      email: 'contact@tibok.mu',
+      website: 'www.tibok.mu',
+      tradeName: 'Tibok'
+    },
+    patient: {
+      name: '',
+      email: '',
+      phone: '',
+      patientId: ''
+    },
+    services: {
+      items: [] as any[],
+      subtotal: 0,
+      vatRate: 0.15,
+      vatAmount: 0,
+      totalDue: 0
+    },
+    payment: {
+      method: 'Credit Card',
+      status: 'pending',
+      receivedDate: ''
+    },
+    consultationFee: 0
   })
+
+  // Local state for narrative text to prevent typing issues
+  const [localNarrative, setLocalNarrative] = useState('')
+  const narrativeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
   // Consultation ID state
   const [consultationId, setConsultationId] = useState<string>('')
@@ -476,21 +511,39 @@ export default function ChronicProfessionalReport({
   const [dietaryError, setDietaryError] = useState<string | null>(null)
   const [detailedDietaryGenerated, setDetailedDietaryGenerated] = useState(false)
 
-  // Handle narrative text changes with useCallback to prevent focus loss
+  // Handle narrative text changes with local state and debouncing
   const handleNarrativeChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value
-    setReport(prev => {
-      if (!prev) return null
-      return {
-        ...prev,
-        medicalReport: {
-          ...prev.medicalReport,
-          narrative: newValue
+    // Update local state immediately (no lag for user)
+    setLocalNarrative(newValue)
+
+    // Clear existing timeout
+    if (narrativeTimeoutRef.current) {
+      clearTimeout(narrativeTimeoutRef.current)
+    }
+
+    // Debounce the actual state update (prevents re-renders during typing)
+    narrativeTimeoutRef.current = setTimeout(() => {
+      setReport(prev => {
+        if (!prev) return null
+        return {
+          ...prev,
+          medicalReport: {
+            ...prev.medicalReport,
+            narrative: newValue
+          }
         }
-      }
-    })
-    setHasUnsavedChanges(true)
+      })
+      setHasUnsavedChanges(true)
+    }, 300) // 300ms debounce
   }, [])
+
+  // Initialize local narrative when report loads
+  useEffect(() => {
+    if (report?.medicalReport?.narrative && localNarrative === '') {
+      setLocalNarrative(report.medicalReport.narrative)
+    }
+  }, [report, localNarrative])
 
   // Generate consultation ID on mount
   useEffect(() => {
@@ -509,6 +562,30 @@ export default function ChronicProfessionalReport({
       }
     }
   }, [report, sickLeaveData.medicalReason])
+
+  // Initialize invoice data when report is generated
+  useEffect(() => {
+    if (report && !invoiceData.header.invoiceNumber) {
+      const today = new Date().toLocaleDateString('en-US')
+      const invoiceNumber = `TIBOK-${new Date().getFullYear()}-${Math.floor(Math.random() * 900000) + 100000}`
+      const patientId = `ANON-RPT-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+
+      setInvoiceData(prev => ({
+        ...prev,
+        header: {
+          invoiceNumber,
+          consultationDate: today,
+          invoiceDate: today
+        },
+        patient: {
+          name: report.medicalReport.patient.fullName || '',
+          email: report.medicalReport.patient.email || '',
+          phone: report.medicalReport.patient.phone || '',
+          patientId
+        }
+      }))
+    }
+  }, [report, invoiceData.header.invoiceNumber])
   
   // ==================== DATA GENERATION ====================
   
@@ -1234,28 +1311,13 @@ export default function ChronicProfessionalReport({
             }
           })
         },
-        ...(invoiceData.total > 0 && {
+        ...(invoiceData.services.totalDue > 0 && {
           invoice: {
-            physician: {
-              name: report.medicalReport.practitioner.name,
-              registrationNumber: report.medicalReport.practitioner.registrationNumber,
-              address: "Medical Clinic",
-              phone: "+230 XXX XXXX",
-              email: report.medicalReport.practitioner.email
-            },
-            patient: {
-              name: report.medicalReport.patient.fullName,
-              age: parseInt(report.medicalReport.patient.age) || 0,
-              address: report.medicalReport.patient.address || ''
-            },
-            items: [
-              {
-                description: 'Online Chronic Disease consultation via Tibok',
-                amount: invoiceData.consultationFee
-              }
-            ],
-            totalAmount: invoiceData.total,
-            dateIssued: new Date().toISOString().split('T')[0]
+            header: invoiceData.header,
+            provider: invoiceData.provider,
+            patient: invoiceData.patient,
+            services: invoiceData.services,
+            payment: invoiceData.payment
           }
         })
       }
@@ -1626,7 +1688,7 @@ export default function ChronicProfessionalReport({
                 <Label htmlFor="narrative-edit" className="text-sm font-medium">Medical Report Narrative</Label>
                 <Textarea
                   id="narrative-edit"
-                  value={report.medicalReport.narrative}
+                  value={localNarrative}
                   onChange={handleNarrativeChange}
                   className="min-h-[600px] font-mono text-sm bg-white"
                   disabled={validationStatus === 'validated'}
@@ -4002,9 +4064,9 @@ export default function ChronicProfessionalReport({
           <TabsTrigger value="invoice">
             <Activity className="h-4 w-4 mr-2" />
             Invoice
-            {invoiceData.total > 0 && (
+            {invoiceData.services.totalDue > 0 && (
               <Badge variant="secondary" className="ml-2">
-                Rs {invoiceData.total}
+                Rs {invoiceData.services.totalDue}
               </Badge>
             )}
           </TabsTrigger>
@@ -4142,47 +4204,218 @@ export default function ChronicProfessionalReport({
         </TabsContent>
 
         <TabsContent value="invoice">
-          <Card>
-            <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b">
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-purple-600" />
-                Consultation Invoice (Facture)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-4">
-              <div>
-                <Label htmlFor="consultationFee">Consultation Fee (Honoraires) - MUR</Label>
+          <div id="invoice-document" className="bg-white p-8 rounded-lg shadow print:shadow-none">
+            <div className="mb-6 text-center">
+              <h1 className="text-2xl font-bold mb-2">INVOICE</h1>
+              <p className="text-lg">No.: {invoiceData.header.invoiceNumber}</p>
+              <p className="text-sm text-gray-600">
+                Consultation Date: {invoiceData.header.consultationDate} |
+                Invoice Date: {invoiceData.header.invoiceDate}
+              </p>
+            </div>
+
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+              <h3 className="font-bold mb-2">Service Provider</h3>
+              <p className="font-bold">{invoiceData.provider.companyName}</p>
+              <p className="text-sm">Private company incorporated under Mauritian law</p>
+              <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+                <div>Company Reg. No.: {invoiceData.provider.registrationNumber}</div>
+                <div>VAT No.: {invoiceData.provider.vatNumber}</div>
+                <div className="col-span-2">Registered Office: {invoiceData.provider.registeredOffice}</div>
+                <div>Phone: {invoiceData.provider.phone}</div>
+                <div>Email: {invoiceData.provider.email}</div>
+                <div>Website: {invoiceData.provider.website}</div>
+                <div className="col-span-2 font-medium">Trade Name: {invoiceData.provider.tradeName}</div>
+              </div>
+              <p className="text-sm mt-2 italic">
+                Medical consultations provided by licensed physicians registered with the Medical Council of Mauritius
+              </p>
+            </div>
+
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <h3 className="font-bold mb-2">Patient Information</h3>
+              <div className="grid grid-cols-1 gap-1 text-sm">
+                <div><strong>Name:</strong> {invoiceData.patient.name}</div>
+                <div><strong>Email:</strong> {invoiceData.patient.email}</div>
+                <div><strong>Phone Number:</strong> {invoiceData.patient.phone}</div>
+                <div><strong>Tibok Patient ID:</strong> {invoiceData.patient.patientId}</div>
+              </div>
+            </div>
+
+            {editMode && validationStatus !== 'validated' && (
+              <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <Label htmlFor="consultationFeeInput" className="font-bold mb-2 block">Set Consultation Fee</Label>
                 <Input
-                  id="consultationFee"
+                  id="consultationFeeInput"
                   type="number"
                   value={invoiceData.consultationFee}
                   onChange={(e) => {
                     const fee = parseFloat(e.target.value) || 0
-                    setInvoiceData(prev => ({ ...prev, consultationFee: fee, total: fee }))
+                    const subtotal = fee
+                    const vatAmount = 0 // Medical services are VAT exempt
+                    const totalDue = subtotal + vatAmount
+
+                    setInvoiceData(prev => ({
+                      ...prev,
+                      consultationFee: fee,
+                      services: {
+                        ...prev.services,
+                        items: [{
+                          description: 'Online Chronic Disease consultation via Tibok',
+                          quantity: 1,
+                          unitPrice: fee,
+                          total: fee
+                        }],
+                        subtotal,
+                        vatAmount,
+                        totalDue
+                      }
+                    }))
                     setHasUnsavedChanges(true)
                   }}
-                  disabled={validationStatus === 'validated'}
-                  placeholder="0.00"
+                  placeholder="Enter consultation fee in MUR"
+                  className="max-w-xs"
                 />
               </div>
+            )}
 
-              <div className="pt-4 border-t">
-                <div className="flex justify-between items-center text-lg font-bold">
-                  <span>Total Amount (Montant Total):</span>
-                  <span>MUR {invoiceData.total.toFixed(2)}</span>
+            <div className="mb-6">
+              <h3 className="font-bold mb-4">Service Details</h3>
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b-2 border-gray-300">
+                    <th className="text-left py-2">Description</th>
+                    <th className="text-center py-2">Quantity</th>
+                    <th className="text-right py-2">Unit Price (MUR)</th>
+                    <th className="text-right py-2">Total (MUR)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoiceData.services.items.length > 0 ? (
+                    invoiceData.services.items.map((item, idx) => (
+                      <tr key={idx} className="border-b border-gray-200">
+                        <td className="py-2">{item.description}</td>
+                        <td className="text-center py-2">{item.quantity}</td>
+                        <td className="text-right py-2">{item.unitPrice.toLocaleString()}</td>
+                        <td className="text-right py-2 font-medium">{item.total.toLocaleString()}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="py-4 text-center text-gray-500 italic">
+                        No services added yet. Set consultation fee above to generate invoice.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t-2 border-gray-300">
+                    <td colSpan={3} className="text-right py-2">Subtotal (Excl. VAT):</td>
+                    <td className="text-right py-2">MUR {invoiceData.services.subtotal.toLocaleString()}</td>
+                  </tr>
+                  <tr>
+                    <td colSpan={3} className="text-right py-2">
+                      VAT ({(invoiceData.services.vatRate * 100).toFixed(0)}%):
+                    </td>
+                    <td className="text-right py-2">
+                      MUR {invoiceData.services.vatAmount.toLocaleString()}
+                      {invoiceData.services.vatAmount === 0 && (
+                        <span className="text-xs text-gray-600 block">
+                          (Exempt - medical services)
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                  <tr className="font-bold text-lg">
+                    <td colSpan={3} className="text-right py-2">Total Due:</td>
+                    <td className="text-right py-2">MUR {invoiceData.services.totalDue.toLocaleString()}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <div className="mb-6 p-4 bg-teal-50 rounded-lg">
+              <h3 className="font-bold mb-2">Payment Information</h3>
+              {editMode && validationStatus !== 'validated' ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>Payment Method</Label>
+                      <Select
+                        value={invoiceData.payment.method}
+                        onValueChange={(value) => {
+                          setInvoiceData(prev => ({
+                            ...prev,
+                            payment: { ...prev.payment, method: value }
+                          }))
+                          setHasUnsavedChanges(true)
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Credit Card">Credit Card</SelectItem>
+                          <SelectItem value="MCB Juice">MCB Juice</SelectItem>
+                          <SelectItem value="MyT Money">MyT Money</SelectItem>
+                          <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                          <SelectItem value="Cash">Cash</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Payment Status</Label>
+                      <Select
+                        value={invoiceData.payment.status}
+                        onValueChange={(value) => {
+                          setInvoiceData(prev => ({
+                            ...prev,
+                            payment: { ...prev.payment, status: value }
+                          }))
+                          setHasUnsavedChanges(true)
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="paid">Paid</SelectItem>
+                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
-              </div>
-
-              {invoiceData.total > 0 && (
-                <Alert className="bg-purple-50 border-purple-200">
-                  <CheckCircle className="h-4 w-4 text-purple-600" />
-                  <AlertDescription className="text-purple-800">
-                    Invoice for <strong>MUR {invoiceData.total.toFixed(2)}</strong> will be included in the final report.
-                  </AlertDescription>
-                </Alert>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div><strong>Payment Method:</strong> {invoiceData.payment.method}</div>
+                  <div><strong>Payment Received On:</strong> {invoiceData.payment.receivedDate || invoiceData.header.invoiceDate}</div>
+                  <div className="col-span-2">
+                    <strong>Status:</strong>
+                    <Badge className={`ml-2 ${
+                      invoiceData.payment.status === 'paid' ? 'bg-teal-100 text-teal-800' :
+                      invoiceData.payment.status === 'pending' ? 'bg-cyan-100 text-cyan-800' :
+                      'bg-blue-100 text-blue-800'
+                    }`}>
+                      {invoiceData.payment.status.toUpperCase()}
+                    </Badge>
+                  </div>
+                </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+
+            <div className="mt-6 flex justify-center print:hidden">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.print()}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export Invoice
+              </Button>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="followup">
