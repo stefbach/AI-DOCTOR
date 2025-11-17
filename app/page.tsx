@@ -221,6 +221,14 @@ const handleNext = async () => {
 
       // Reload latest data from localStorage before proceeding
       const savedData = await consultationDataService.getAllData()
+      console.log('🔍 Loaded data from localStorage:', {
+        hasPatientData: !!savedData?.patientData,
+        hasClinicalData: !!savedData?.clinicalData,
+        hasQuestionsData: !!savedData?.questionsData,
+        hasDiagnosisData: !!savedData?.diagnosisData
+      })
+
+      // Update state with loaded data
       if (savedData?.patientData) setPatientData(savedData.patientData)
       if (savedData?.clinicalData) setClinicalData(savedData.clinicalData)
       if (savedData?.questionsData) setQuestionsData(savedData.questionsData)
@@ -228,8 +236,8 @@ const handleNext = async () => {
 
       // Special handling for step 0 (Patient Form)
       if (currentStep === 0) {
-        if (patientData) {
-          await consultationDataService.saveStepData(0, patientData)
+        if (savedData?.patientData) {
+          await consultationDataService.saveStepData(0, savedData.patientData)
           
           // Check if chief complaint indicates prescription renewal
           const chiefComplaint = clinicalData?.chiefComplaint || ''
@@ -282,31 +290,9 @@ const handleNext = async () => {
         }
       }
       
-      // Normal flow for other steps
-      switch (currentStep) {
-        case 1:
-          if (clinicalData) {
-            await consultationDataService.saveStepData(1, clinicalData)
-          }
-          break
-        case 2:
-          if (questionsData) {
-            await consultationDataService.saveStepData(2, questionsData)
-          }
-          break
-        case 3:
-          if (diagnosisData) {
-            await consultationDataService.saveStepData(3, diagnosisData)
-          }
-          break
-        case 4:
-          if (finalReport) {
-            await consultationDataService.saveStepData(4, finalReport)
-            await consultationDataService.markConsultationComplete()
-          }
-          break
-      }
-      console.log(`Data saved for step ${currentStep}`)
+      // Forms auto-save themselves, so data is already in localStorage
+      // Just log for confirmation
+      console.log(`Step ${currentStep} complete. Data already saved by form auto-save.`)
     } catch (error) {
       console.error('Error saving step data:', error)
     }
