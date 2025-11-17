@@ -376,6 +376,7 @@ export default function ModernPatientForm({
  lastName: data.lastName || '',
  first_name: data.firstName || '',
  last_name: data.lastName || '',
+ birthDate: data.birthDate || '',
  dateNaissance: data.birthDate || '',
  dateOfBirth: data.birthDate || '',
  date_of_birth: data.birthDate || '',
