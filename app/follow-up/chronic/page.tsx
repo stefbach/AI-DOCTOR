@@ -14,7 +14,7 @@ import {
 import { Heart, TrendingUp, FileText, UserCheck, ClipboardList, Activity, FileSignature } from 'lucide-react'
 import { ChronicVitalsTrends } from '@/lib/follow-up/chronic/components/chronic-vitals-trends'
 import { ChronicClinicalForm } from '@/lib/follow-up/chronic/components/chronic-clinical-form'
-import { ChronicReportDisplay } from '@/lib/follow-up/chronic/components/chronic-report-display'
+import { ChronicFollowUpProfessionalReport } from '@/lib/follow-up/chronic/components/chronic-follow-up-professional-report'
 import { FollowUpDocuments } from '@/lib/follow-up/shared/components/follow-up-documents'
 
 /**
@@ -45,12 +45,16 @@ export default function ChronicFollowUpPage() {
   const [trendsData, setTrendsData] = useState<any>(null)
   const [clinicalData, setClinicalData] = useState<any>(null)
   const [generatedReport, setGeneratedReport] = useState<any>(null)
+  const [consultationId, setConsultationId] = useState<string>('')
 
   const handleSearch = async (criteria: any) => {
     await searchPatient(criteria)
-    
+
     // Auto-advance to trends tab if patient found
     if (history.length > 0) {
+      // Generate a unique consultation ID for this follow-up session
+      const newConsultationId = `chronic_followup_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      setConsultationId(newConsultationId)
       setActiveTab('trends')
     }
   }
@@ -244,12 +248,13 @@ export default function ChronicFollowUpPage() {
 
         {/* Tab 4: Report Generation */}
         <TabsContent value="report" className="space-y-6">
-          <ChronicReportDisplay
+          <ChronicFollowUpProfessionalReport
             patientDemographics={patientDemographics}
             clinicalData={clinicalData}
             trendsData={trendsData}
             previousConsultation={mostRecent}
             consultationHistory={history}
+            consultationId={consultationId}
             onReportGenerated={handleReportGenerated}
           />
         </TabsContent>

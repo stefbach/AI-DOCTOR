@@ -185,7 +185,10 @@ function anonymizePatientData(patientData: any): {
     nationalId: getString(patientData?.nationalId) || '',
     birthDate: getString(patientData?.birthDate) || ''
   }
-  
+
+  // DEBUG: Verify birthDate is being received correctly
+  console.log('🔍 DEBUG - Patient birthDate received:', originalIdentity.birthDate)
+
   const anonymized = { ...patientData }
   const sensitiveFields = [
     'lastName', 'firstName', 'name',

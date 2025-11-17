@@ -83,11 +83,12 @@ class ConsultationDataService {
   // Get all consultation data
   getAllData(): Record<string, any> {
     const allData: Record<string, any> = {}
-    
+
     // Map steps to data names
     const stepMapping: Record<number, string> = {
-      1: 'patientData',
-      2: 'clinicalData',
+      0: 'patientData',
+      1: 'clinicalData',
+      2: 'questionsData',
       3: 'diagnosisData',
       4: 'reportData'
     }
@@ -169,8 +170,8 @@ class ConsultationDataService {
     percentage: number
   } {
     const completedSteps = Array.from(this.currentConsultation.keys()).sort()
-    const currentStep = completedSteps.length > 0 ? Math.max(...completedSteps) + 1 : 1
-    const totalSteps = 4 // Total number of steps
+    const currentStep = completedSteps.length > 0 ? Math.max(...completedSteps) + 1 : 0
+    const totalSteps = 5 // Total number of steps (0-4)
     const percentage = (completedSteps.length / totalSteps) * 100
 
     return {
@@ -317,10 +318,13 @@ class ConsultationDataService {
       
       // Load data by step
       if (consultation.patientData) {
-        await this.saveStepData(1, consultation.patientData)
+        await this.saveStepData(0, consultation.patientData)
       }
       if (consultation.clinicalData) {
-        await this.saveStepData(2, consultation.clinicalData)
+        await this.saveStepData(1, consultation.clinicalData)
+      }
+      if (consultation.questionsData) {
+        await this.saveStepData(2, consultation.questionsData)
       }
       if (consultation.diagnosisData) {
         await this.saveStepData(3, consultation.diagnosisData)
@@ -345,7 +349,7 @@ class ConsultationDataService {
     lastUpdate: Date | null
   } {
     const progress = this.getProgress()
-    const patientData = this.getStepData(1)
+    const patientData = this.getStepData(0)
     let lastUpdate: Date | null = null
     
     // Find last update
@@ -396,10 +400,13 @@ class ConsultationDataService {
       
       // Import data by step
       if (parsedData.patientData) {
-        await this.saveStepData(1, parsedData.patientData)
+        await this.saveStepData(0, parsedData.patientData)
       }
       if (parsedData.clinicalData) {
-        await this.saveStepData(2, parsedData.clinicalData)
+        await this.saveStepData(1, parsedData.clinicalData)
+      }
+      if (parsedData.questionsData) {
+        await this.saveStepData(2, parsedData.questionsData)
       }
       if (parsedData.diagnosisData) {
         await this.saveStepData(3, parsedData.diagnosisData)

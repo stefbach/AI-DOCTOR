@@ -1633,7 +1633,16 @@ useEffect(() => {
  if (!consultationId) {
  setIsLoadingFromDb(false)
  setDbCheckComplete(true)
- setShouldGenerateReport(false)
+
+ // Check if we have valid patient data to generate a new report
+ const hasValidPatientData = patientData &&
+ patientData.name !== 'Patient' &&
+ patientData.name !== 'Non spécifié' &&
+ patientData.name !== '1 janvier 1970' &&
+ !patientData.name?.includes('1970')
+
+ console.log('📋 No consultationId in URL, checking for valid patient data:', hasValidPatientData)
+ setShouldGenerateReport(hasValidPatientData)
  return
  }
  

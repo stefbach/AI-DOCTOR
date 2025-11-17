@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo, memo, useRef } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -451,11 +451,161 @@ export default function ChronicProfessionalReport({
   const [saving, setSaving] = useState(false)
   const [validationStatus, setValidationStatus] = useState<'draft' | 'validated'>('draft')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-  
+
+  // Sick leave state
+  const [sickLeaveData, setSickLeaveData] = useState({
+    startDate: '',
+    endDate: '',
+    numberOfDays: 0,
+    medicalReason: '',
+    remarks: ''
+  })
+
+  // Invoice state with complete structure
+  const [invoiceData, setInvoiceData] = useState({
+    header: {
+      invoiceNumber: '',
+      consultationDate: '',
+      invoiceDate: ''
+    },
+    provider: {
+      companyName: 'Digital Data Solutions Ltd',
+      registrationNumber: 'C20173522',
+      vatNumber: '27816949',
+      registeredOffice: 'Bourdet Road, Grand Baie, Mauritius',
+      phone: '+230 4687377/78',
+      email: 'contact@tibok.mu',
+      website: 'www.tibok.mu',
+      tradeName: 'Tibok'
+    },
+    patient: {
+      name: '',
+      email: '',
+      phone: '',
+      patientId: ''
+    },
+    services: {
+      items: [] as any[],
+      subtotal: 0,
+      vatRate: 0.15,
+      vatAmount: 0,
+      totalDue: 0
+    },
+    payment: {
+      method: 'Credit Card',
+      status: 'pending',
+      receivedDate: ''
+    },
+    consultationFee: 0
+  })
+
+  // Local state for narrative text (completely independent like sick leave)
+  const [editableNarrative, setEditableNarrative] = useState('')
+
+  // Local state for editable medications (independent, no auto-sync)
+  const [localMedications, setLocalMedications] = useState<any>(null)
+
+  // Local state for editable laboratory tests (independent, no auto-sync)
+  const [localLabTests, setLocalLabTests] = useState<any>(null)
+
+  // Local state for editable paraclinical exams (independent, no auto-sync)
+  const [localParaclinicalExams, setLocalParaclinicalExams] = useState<any>(null)
+
+  // Consultation ID state
+  const [consultationId, setConsultationId] = useState<string>('')
+
   // Dietary on-demand generation state
   const [dietaryLoading, setDietaryLoading] = useState(false)
   const [dietaryError, setDietaryError] = useState<string | null>(null)
   const [detailedDietaryGenerated, setDetailedDietaryGenerated] = useState(false)
+
+  // Initialize editable narrative once when report loads
+  useEffect(() => {
+    if (report?.medicalReport?.narrative && editableNarrative === '') {
+      setEditableNarrative(report.medicalReport.narrative)
+    }
+  }, [report?.medicalReport?.narrative])
+
+  // Initialize local medications from report (one-time sync)
+  useEffect(() => {
+    if (report?.medicationPrescription && !localMedications) {
+      setLocalMedications(JSON.parse(JSON.stringify(report.medicationPrescription)))
+    }
+  }, [report?.medicationPrescription])
+
+  // Initialize local lab tests from report (one-time sync)
+  useEffect(() => {
+    if (report?.laboratoryTests && !localLabTests) {
+      setLocalLabTests(JSON.parse(JSON.stringify(report.laboratoryTests)))
+    }
+  }, [report?.laboratoryTests])
+
+  // Initialize local paraclinical exams from report (one-time sync)
+  useEffect(() => {
+    if (report?.paraclinicalExams && !localParaclinicalExams) {
+      setLocalParaclinicalExams(JSON.parse(JSON.stringify(report.paraclinicalExams)))
+    }
+  }, [report?.paraclinicalExams])
+
+  // Generate consultation ID on mount
+  useEffect(() => {
+    const id = `chronic_disease_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    setConsultationId(id)
+    console.log('🔑 Generated consultation ID:', id)
+  }, [])
+
+  // Auto-fill sick leave medical reason from diagnosis when report is generated
+  useEffect(() => {
+    if (report && !sickLeaveData.medicalReason) {
+      const diagnosis = report.medicalReport.chronicDiseaseAssessment.primaryDiagnosis ||
+                       report.medicalReport.diagnosticSummary.diagnosticConclusion || ''
+      if (diagnosis) {
+        setSickLeaveData(prev => ({ ...prev, medicalReason: diagnosis }))
+      }
+    }
+  }, [report, sickLeaveData.medicalReason])
+
+  // Initialize invoice data when report is generated
+  useEffect(() => {
+    if (report && !invoiceData.header.invoiceNumber) {
+      const today = new Date().toLocaleDateString('en-US')
+      const invoiceNumber = `TIBOK-${new Date().getFullYear()}-${Math.floor(Math.random() * 900000) + 100000}`
+      const patientId = `ANON-RPT-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+
+      const defaultFee = 950
+      const subtotal = defaultFee
+      const vatAmount = 0 // Medical services are VAT exempt
+      const totalDue = subtotal + vatAmount
+
+      setInvoiceData(prev => ({
+        ...prev,
+        header: {
+          invoiceNumber,
+          consultationDate: today,
+          invoiceDate: today
+        },
+        patient: {
+          name: report.medicalReport.patient.fullName || '',
+          email: report.medicalReport.patient.email || '',
+          phone: report.medicalReport.patient.phone || '',
+          patientId
+        },
+        consultationFee: defaultFee,
+        services: {
+          ...prev.services,
+          items: [{
+            description: 'Online Chronic Disease consultation via Tibok',
+            quantity: 1,
+            unitPrice: defaultFee,
+            total: defaultFee
+          }],
+          subtotal,
+          vatAmount,
+          totalDue
+        }
+      }))
+    }
+  }, [report, invoiceData.header.invoiceNumber])
   
   // ==================== DATA GENERATION ====================
   
@@ -1094,10 +1244,150 @@ export default function ChronicProfessionalReport({
   
   const handleValidation = useCallback(async () => {
     if (validationStatus === 'validated') return
-    
+
+    if (!consultationId) {
+      toast({
+        title: "Validation Error",
+        description: "No consultation ID available",
+        variant: "destructive"
+      })
+      return
+    }
+
     setSaving(true)
     try {
-      // Here you would typically save to database
+      // Sync all local state back to report (same pattern as sickLeaveData)
+      const updatedReport = {
+        ...report,
+        medicalReport: {
+          ...report.medicalReport,
+          narrative: editableNarrative
+        },
+        ...(localMedications && { medicationPrescription: localMedications }),
+        ...(localLabTests && { laboratoryTests: localLabTests }),
+        ...(localParaclinicalExams && { paraclinicalExams: localParaclinicalExams })
+      }
+
+      // Format report for save-medical-report API
+      const formattedReport = {
+        compteRendu: {
+          praticien: {
+            nom: updatedReport.medicalReport.practitioner.name,
+            qualifications: updatedReport.medicalReport.practitioner.qualifications,
+            specialite: updatedReport.medicalReport.practitioner.specialty,
+            numeroEnregistrement: updatedReport.medicalReport.practitioner.registrationNumber,
+            email: updatedReport.medicalReport.practitioner.email,
+            adresseCabinet: "Medical Clinic",
+            telephone: "+230 XXX XXXX",
+            heuresConsultation: "Mon-Fri: 9:00-17:00"
+          },
+          patient: {
+            nom: updatedReport.medicalReport.patient.fullName,
+            age: updatedReport.medicalReport.patient.age,
+            dateNaissance: updatedReport.medicalReport.patient.dateOfBirth,
+            sexe: updatedReport.medicalReport.patient.gender,
+            adresse: updatedReport.medicalReport.patient.address || '',
+            telephone: updatedReport.medicalReport.patient.phone || '',
+            email: updatedReport.medicalReport.patient.email || ''
+          },
+          rapport: {
+            motifConsultation: updatedReport.medicalReport.chronicDiseaseAssessment.primaryDiagnosis,
+            antecedentsMedicaux: updatedReport.medicalReport.patient.medicalHistory || '',
+            examenClinique: updatedReport.medicalReport.clinicalEvaluation.physicalExamination,
+            conclusionDiagnostique: updatedReport.medicalReport.diagnosticSummary.diagnosticConclusion,
+            planTraitement: updatedReport.medicalReport.narrative,
+            recommandations: '',
+            planSuivi: ''
+          },
+          metadata: {
+            dateGeneration: new Date().toISOString(),
+            typeConsultation: 'chronic_disease',
+            validationStatus: 'validated'
+          }
+        },
+        ordonnances: {
+          ...(updatedReport.medicationPrescription && {
+            medicaments: updatedReport.medicationPrescription
+          }),
+          ...(updatedReport.laboratoryTests && {
+            biologie: updatedReport.laboratoryTests
+          }),
+          ...(updatedReport.paraclinicalExams && {
+            imagerie: updatedReport.paraclinicalExams
+          }),
+          ...(sickLeaveData.numberOfDays > 0 && {
+            arretMaladie: {
+              enTete: {
+                nom: updatedReport.medicalReport.practitioner.name,
+                numeroEnregistrement: updatedReport.medicalReport.practitioner.registrationNumber
+              },
+              patient: {
+                nom: updatedReport.medicalReport.patient.fullName,
+                age: updatedReport.medicalReport.patient.age,
+                dateNaissance: updatedReport.medicalReport.patient.dateOfBirth || '',
+                adresse: updatedReport.medicalReport.patient.address || ''
+              },
+              certificat: {
+                dateDebut: sickLeaveData.startDate,
+                dateFin: sickLeaveData.endDate,
+                nombreJours: sickLeaveData.numberOfDays,
+                motifMedical: sickLeaveData.medicalReason,
+                remarques: sickLeaveData.remarks
+              },
+              authentification: {
+                signature: "Medical Practitioner's Signature",
+                nomEnCapitales: updatedReport.medicalReport.practitioner.name.toUpperCase(),
+                numeroEnregistrement: updatedReport.medicalReport.practitioner.registrationNumber,
+                date: new Date().toISOString().split('T')[0]
+              }
+            }
+          })
+        },
+        ...(invoiceData.services.totalDue > 0 && {
+          invoice: {
+            header: invoiceData.header,
+            provider: invoiceData.provider,
+            patient: invoiceData.patient,
+            services: invoiceData.services,
+            payment: invoiceData.payment
+          }
+        })
+      }
+
+      // Save to consultation_records table
+      const response = await fetch('/api/save-medical-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          consultationId,
+          patientId: patientData?.patientId || 'unknown',
+          doctorId: updatedReport.medicalReport.practitioner.registrationNumber,
+          doctorName: updatedReport.medicalReport.practitioner.name,
+          patientName: updatedReport.medicalReport.patient.fullName,
+          report: formattedReport,
+          action: 'finalize',
+          metadata: {
+            signatures: {},
+            documentValidations: {}
+          },
+          patientData: {
+            name: updatedReport.medicalReport.patient.fullName,
+            age: updatedReport.medicalReport.patient.age,
+            gender: updatedReport.medicalReport.patient.gender,
+            email: updatedReport.medicalReport.patient.email,
+            phone: updatedReport.medicalReport.patient.phone,
+            birthDate: updatedReport.medicalReport.patient.dateOfBirth
+          },
+          clinicalData: clinicalData || {},
+          diagnosisData: diagnosisData || {}
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to validate report')
+      }
+
       setValidationStatus('validated')
       setReport(prev => {
         if (!prev) return null
@@ -1114,12 +1404,15 @@ export default function ChronicProfessionalReport({
           }
         }
       })
-      
+
+      setHasUnsavedChanges(false)
+
       toast({
         title: "Document Validated",
-        description: "The chronic disease report has been validated and signed.",
+        description: "Report saved to database. Documents sent to patient dashboard.",
+        duration: 5000
       })
-      
+
       if (onComplete) {
         onComplete()
       }
@@ -1133,7 +1426,7 @@ export default function ChronicProfessionalReport({
     } finally {
       setSaving(false)
     }
-  }, [validationStatus, onComplete])
+  }, [validationStatus, consultationId, report, sickLeaveData, invoiceData, patientData, clinicalData, diagnosisData, onComplete, editableNarrative, localMedications, localLabTests, localParaclinicalExams])
   
   const exportToPDF = useCallback((elementId: string, filename: string) => {
     // Simple print-based PDF export
@@ -1148,32 +1441,38 @@ export default function ChronicProfessionalReport({
       })
       return
     }
-    
+
+    if (!consultationId) {
+      toast({
+        title: "Save Error",
+        description: "No consultation ID available",
+        variant: "destructive"
+      })
+      return
+    }
+
     setSaving(true)
     try {
+      // Sync all local state back to report (same pattern as sickLeaveData)
+      const updatedReport = {
+        ...report,
+        medicalReport: {
+          ...report.medicalReport,
+          narrative: editableNarrative
+        },
+        ...(localMedications && { medicationPrescription: localMedications }),
+        ...(localLabTests && { laboratoryTests: localLabTests }),
+        ...(localParaclinicalExams && { paraclinicalExams: localParaclinicalExams })
+      }
+
       // Validate report data before saving
       const validationErrors: string[] = []
-      
+
       // Validate medical report
-      if (!report.medicalReport.narrative || report.medicalReport.narrative.trim() === '') {
+      if (!editableNarrative || editableNarrative.trim() === '') {
         validationErrors.push("Medical report narrative cannot be empty")
       }
-      
-      // Validate medications
-      if (report.medicationPrescription) {
-        report.medicationPrescription.prescription.medications.forEach((med, index) => {
-          if (!med.nom || med.nom.trim() === '') {
-            validationErrors.push(`Medication ${index + 1}: Brand name is required`)
-          }
-          if (!med.posologie || med.posologie.trim() === '') {
-            validationErrors.push(`Medication ${index + 1}: Frequency is required`)
-          }
-          if (!med.dureeTraitement || med.dureeTraitement.trim() === '') {
-            validationErrors.push(`Medication ${index + 1}: Duration is required`)
-          }
-        })
-      }
-      
+
       if (validationErrors.length > 0) {
         toast({
           title: "Validation Errors",
@@ -1183,20 +1482,46 @@ export default function ChronicProfessionalReport({
         setSaving(false)
         return
       }
-      
-      // Here you would typically save to database/backend
-      // For now, we'll simulate a save operation
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Save to sessionStorage for persistence
-      sessionStorage.setItem('chronicDiseaseReport', JSON.stringify(report))
-      
+
+      // Save to consultation_drafts table via API
+      const response = await fetch('/api/save-draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          consultationId,
+          reportContent: {
+            ...updatedReport,
+            sickLeave: sickLeaveData,
+            invoice: invoiceData
+          },
+          doctorInfo: {
+            nom: updatedReport.medicalReport.practitioner.name,
+            specialite: updatedReport.medicalReport.practitioner.specialty,
+            numeroEnregistrement: updatedReport.medicalReport.practitioner.registrationNumber,
+            email: updatedReport.medicalReport.practitioner.email
+          },
+          modifiedSections: [],
+          validationStatus
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save draft')
+      }
+
+      // Also save to sessionStorage for local persistence
+      sessionStorage.setItem('chronicDiseaseReport', JSON.stringify({
+        ...updatedReport,
+        sickLeave: sickLeaveData,
+        invoice: invoiceData
+      }))
+
       setHasUnsavedChanges(false)
       toast({
         title: "Changes Saved",
-        description: "All modifications have been saved successfully.",
+        description: "Draft saved to database successfully.",
       })
-      
+
     } catch (err: any) {
       console.error("Save error:", err)
       toast({
@@ -1207,7 +1532,7 @@ export default function ChronicProfessionalReport({
     } finally {
       setSaving(false)
     }
-  }, [hasUnsavedChanges, report])
+  }, [hasUnsavedChanges, report, consultationId, sickLeaveData, invoiceData, validationStatus, editableNarrative, localMedications, localLabTests, localParaclinicalExams])
   
   // Handle on-demand dietary plan generation
   const handleGenerateDietaryPlan = useCallback(async () => {
@@ -1373,9 +1698,10 @@ export default function ChronicProfessionalReport({
   
   // ==================== SECTION COMPONENTS ====================
   
+  // Medical report section component
   const MedicalReportSection = () => {
     const { medicalReport } = report
-    
+
     return (
       <div id="medical-report-section" className="bg-white p-8 rounded-lg shadow print:shadow-none">
         <div className="border-b-2 border-blue-600 pb-4 mb-6">
@@ -1401,29 +1727,49 @@ export default function ChronicProfessionalReport({
         {/* NARRATIVE REPORT - PROFESSIONAL FORMAT FROM API */}
         {medicalReport.narrative && (
           <div className="mb-6">
-            <style jsx>{`
-              .professional-narrative {
-                font-family: system-ui, -apple-system, sans-serif;
-                font-size: 14px;
-                line-height: 1.6;
-                white-space: pre-wrap;
-              }
-              /* Make section headers bold - targets ALL CAPS lines after separator */
-              .professional-narrative::before {
-                content: '';
-                display: block;
-              }
-              /* Target lines that are section headers (ALL CAPS, no colon at start) */
-              .professional-narrative {
-                /* This will be handled by processing the text */
-              }
-            `}</style>
-            <div 
-              className="prose prose-sm max-w-none bg-white p-8 rounded border border-gray-200 professional-narrative"
-              dangerouslySetInnerHTML={{
-                __html: formatNarrativeWithBoldHeaders(medicalReport.narrative)
-              }}
-            />
+            {editMode ? (
+              // EDIT MODE - Editable Textarea
+              <div className="space-y-2">
+                <Label htmlFor="narrative-edit" className="text-sm font-medium">Medical Report Narrative</Label>
+                <Textarea
+                  id="narrative-edit"
+                  value={editableNarrative}
+                  onChange={(e) => {
+                    setEditableNarrative(e.target.value)
+                    setHasUnsavedChanges(true)
+                  }}
+                  className="min-h-[600px] font-mono text-sm bg-white"
+                  disabled={validationStatus === 'validated'}
+                />
+              </div>
+            ) : (
+              // VIEW MODE - Formatted display
+              <>
+                <style jsx>{`
+                  .professional-narrative {
+                    font-family: system-ui, -apple-system, sans-serif;
+                    font-size: 14px;
+                    line-height: 1.6;
+                    white-space: pre-wrap;
+                  }
+                  /* Make section headers bold - targets ALL CAPS lines after separator */
+                  .professional-narrative::before {
+                    content: '';
+                    display: block;
+                  }
+                  /* Target lines that are section headers (ALL CAPS, no colon at start) */
+                  .professional-narrative {
+                    /* This will be handled by processing the text */
+                  }
+                `}</style>
+                <div
+                  className="prose prose-sm max-w-none bg-white p-8 rounded border border-gray-200 professional-narrative"
+                  dangerouslySetInnerHTML={{
+                    __html: formatNarrativeWithBoldHeaders(medicalReport.narrative)
+                  }}
+                />
+              </>
+            )}
           </div>
         )}
         
@@ -1725,7 +2071,8 @@ export default function ChronicProfessionalReport({
       </div>
     )
   }
-  
+
+  // Medication prescription section component
   const MedicationPrescriptionSection = () => {
     if (!report.medicationPrescription) {
       return (
@@ -1737,73 +2084,68 @@ export default function ChronicProfessionalReport({
         </Card>
       )
     }
-    
-    const { medicationPrescription } = report
+
+    // Use local state if available, otherwise use report (for display before editing)
+    const medicationPrescription = localMedications || report.medicationPrescription
     const medications = medicationPrescription.prescription.medications || []
-    
+
     const handleAddMedication = () => {
-      setReport(prev => {
-        if (!prev || !prev.medicationPrescription) return prev
+      // Update local state only - no setReport call
+      setLocalMedications(prev => {
+        if (!prev) return prev
         return {
           ...prev,
-          medicationPrescription: {
-            ...prev.medicationPrescription,
-            prescription: {
-              ...prev.medicationPrescription.prescription,
-              medications: [
-                ...prev.medicationPrescription.prescription.medications,
-                {
-                  nom: '',
-                  denominationCommune: '',
-                  dosage: '',
-                  forme: 'tablet',
-                  posologie: '',
-                  modeAdministration: 'Oral route',
-                  dureeTraitement: '',
-                  quantite: '',
-                  instructions: '',
-                  justification: '',
-                  surveillanceParticuliere: '',
-                  nonSubstituable: false
-                }
-              ]
-            }
+          prescription: {
+            ...prev.prescription,
+            medications: [
+              ...prev.prescription.medications,
+              {
+                nom: '',
+                denominationCommune: '',
+                dosage: '',
+                forme: 'tablet',
+                posologie: '',
+                modeAdministration: 'Oral route',
+                dureeTraitement: '',
+                quantite: '',
+                instructions: '',
+                justification: '',
+                surveillanceParticuliere: '',
+                nonSubstituable: false
+              }
+            ]
           }
         }
       })
       setHasUnsavedChanges(true)
     }
-    
+
     const handleRemoveMedication = (index: number) => {
-      setReport(prev => {
-        if (!prev || !prev.medicationPrescription) return prev
+      // Update local state only - no setReport call
+      setLocalMedications(prev => {
+        if (!prev) return prev
         return {
           ...prev,
-          medicationPrescription: {
-            ...prev.medicationPrescription,
-            prescription: {
-              ...prev.medicationPrescription.prescription,
-              medications: prev.medicationPrescription.prescription.medications.filter((_, i) => i !== index)
-            }
+          prescription: {
+            ...prev.prescription,
+            medications: prev.prescription.medications.filter((_, i) => i !== index)
           }
         }
       })
       setHasUnsavedChanges(true)
     }
-    
+
     const handleUpdateMedication = (index: number, field: string, value: any) => {
-      setReport(prev => {
-        if (!prev || !prev.medicationPrescription) return prev
-        const updatedMeds = [...prev.medicationPrescription.prescription.medications]
+      // Update local state only - no setReport call
+      setLocalMedications(prev => {
+        if (!prev) return prev
+        const updatedMeds = [...prev.prescription.medications]
         updatedMeds[index] = { ...updatedMeds[index], [field]: value }
         return {
           ...prev,
-          medicationPrescription: {
-            ...prev.medicationPrescription,
-            prescription: {
-              ...prev.medicationPrescription.prescription,
-              medications: updatedMeds
-            }
+          prescription: {
+            ...prev.prescription,
+            medications: updatedMeds
           }
         }
       })
@@ -2072,7 +2414,7 @@ export default function ChronicProfessionalReport({
       </div>
     )
   }
-  
+
   const LaboratoryTestsSection = () => {
     if (!report.laboratoryTests) {
       return (
@@ -2085,7 +2427,8 @@ export default function ChronicProfessionalReport({
       )
     }
     
-    const { laboratoryTests } = report
+    // Use local state if available, otherwise use report (for display before editing)
+    const laboratoryTests = localLabTests || report.laboratoryTests
     const tests = laboratoryTests.prescription.tests || {}
     const hasTests = Object.values(tests).some((testArray: any) => Array.isArray(testArray) && testArray.length > 0)
     
@@ -2099,36 +2442,48 @@ export default function ChronicProfessionalReport({
     ]
 
     const handleLabTestEdit = (categoryKey: string, testIdx: number, field: string, value: any) => {
-      const updatedReport = { ...report }
-      updatedReport.laboratoryTests.prescription.tests[categoryKey][testIdx][field] = value
-      setReport(updatedReport)
+      // Update local state only - no setReport call
+      setLocalLabTests(prev => {
+        if (!prev) return prev
+        const updated = JSON.parse(JSON.stringify(prev))
+        updated.prescription.tests[categoryKey][testIdx][field] = value
+        return updated
+      })
       setHasUnsavedChanges(true)
     }
 
     const handleDeleteLabTest = (categoryKey: string, testIdx: number) => {
       if (confirm('Delete this laboratory test?')) {
-        const updatedReport = { ...report }
-        updatedReport.laboratoryTests.prescription.tests[categoryKey].splice(testIdx, 1)
-        setReport(updatedReport)
+        // Update local state only - no setReport call
+        setLocalLabTests(prev => {
+          if (!prev) return prev
+          const updated = JSON.parse(JSON.stringify(prev))
+          updated.prescription.tests[categoryKey].splice(testIdx, 1)
+          return updated
+        })
         setHasUnsavedChanges(true)
       }
     }
 
     const handleAddLabTest = (categoryKey: string) => {
-      const updatedReport = { ...report }
-      if (!updatedReport.laboratoryTests.prescription.tests[categoryKey]) {
-        updatedReport.laboratoryTests.prescription.tests[categoryKey] = []
-      }
-      const newTest = {
-        nom: 'New Laboratory Test',
-        motifClinique: '',
-        conditionsPrelevement: '',
-        tubePrelevement: '',
-        urgence: false,
-        aJeun: false
-      }
-      updatedReport.laboratoryTests.prescription.tests[categoryKey].push(newTest)
-      setReport(updatedReport)
+      // Update local state only - no setReport call
+      setLocalLabTests(prev => {
+        if (!prev) return prev
+        const updated = JSON.parse(JSON.stringify(prev))
+        if (!updated.prescription.tests[categoryKey]) {
+          updated.prescription.tests[categoryKey] = []
+        }
+        const newTest = {
+          nom: 'New Laboratory Test',
+          motifClinique: '',
+          conditionsPrelevement: '',
+          tubePrelevement: '',
+          urgence: false,
+          aJeun: false
+        }
+        updated.prescription.tests[categoryKey].push(newTest)
+        return updated
+      })
       setHasUnsavedChanges(true)
       toast({
         title: "Test Added",
@@ -2172,18 +2527,26 @@ export default function ChronicProfessionalReport({
           <h3 className="font-bold mb-2">Clinical Indication:</h3>
           {editMode ? (
             <Textarea
-              value={laboratoryTests.prescription.clinicalIndication || ''}
+              value={localLabTests?.prescription.clinicalIndication || ''}
               onChange={(e) => {
-                const updatedReport = { ...report }
-                updatedReport.laboratoryTests.prescription.clinicalIndication = e.target.value
-                setReport(updatedReport)
+                // Update local state only - no setReport call
+                setLocalLabTests(prev => {
+                  if (!prev) return prev
+                  return {
+                    ...prev,
+                    prescription: {
+                      ...prev.prescription,
+                      clinicalIndication: e.target.value
+                    }
+                  }
+                })
                 setHasUnsavedChanges(true)
               }}
               className="text-sm"
               rows={3}
             />
           ) : (
-            <p className="text-sm">{laboratoryTests.prescription.clinicalIndication}</p>
+            <p className="text-sm">{localLabTests?.prescription.clinicalIndication}</p>
           )}
         </div>
         
@@ -2384,7 +2747,7 @@ export default function ChronicProfessionalReport({
       </div>
     )
   }
-  
+
   const ParaclinicalExamsSection = () => {
     if (!report.paraclinicalExams) {
       return (
@@ -2396,40 +2759,53 @@ export default function ChronicProfessionalReport({
         </Card>
       )
     }
-    
-    const { paraclinicalExams } = report
+
+    // Use local state if available, otherwise use report (for display before editing)
+    const paraclinicalExams = localParaclinicalExams || report.paraclinicalExams
     const exams = paraclinicalExams.prescription.exams || []
 
     const handleParaclinicalEdit = (examIdx: number, field: string, value: any) => {
-      const updatedReport = { ...report }
-      updatedReport.paraclinicalExams.prescription.exams[examIdx][field] = value
-      setReport(updatedReport)
+      // Update local state only - no setReport call
+      setLocalParaclinicalExams(prev => {
+        if (!prev) return prev
+        const updated = JSON.parse(JSON.stringify(prev))
+        updated.prescription.exams[examIdx][field] = value
+        return updated
+      })
       setHasUnsavedChanges(true)
     }
 
     const handleDeleteParaclinicalExam = (examIdx: number) => {
       if (confirm('Delete this paraclinical examination?')) {
-        const updatedReport = { ...report }
-        updatedReport.paraclinicalExams.prescription.exams.splice(examIdx, 1)
-        setReport(updatedReport)
+        // Update local state only - no setReport call
+        setLocalParaclinicalExams(prev => {
+          if (!prev) return prev
+          const updated = JSON.parse(JSON.stringify(prev))
+          updated.prescription.exams.splice(examIdx, 1)
+          return updated
+        })
         setHasUnsavedChanges(true)
       }
     }
 
     const handleAddParaclinicalExam = () => {
-      const updatedReport = { ...report }
-      const newExam = {
-        type: 'New Examination',
-        modality: '',
-        region: '',
-        clinicalIndication: '',
-        diagnosticQuestion: '',
-        specificProtocol: '',
-        urgency: false,
-        contrast: false
-      }
-      updatedReport.paraclinicalExams.prescription.exams.push(newExam)
-      setReport(updatedReport)
+      // Update local state only - no setReport call
+      setLocalParaclinicalExams(prev => {
+        if (!prev) return prev
+        const updated = JSON.parse(JSON.stringify(prev))
+        const newExam = {
+          type: 'New Examination',
+          modality: '',
+          region: '',
+          clinicalIndication: '',
+          diagnosticQuestion: '',
+          specificProtocol: '',
+          urgency: false,
+          contrast: false
+        }
+        updated.prescription.exams.push(newExam)
+        return updated
+      })
       setHasUnsavedChanges(true)
       toast({
         title: "Exam Added",
@@ -2654,7 +3030,7 @@ export default function ChronicProfessionalReport({
       </div>
     )
   }
-  
+
   const DietaryProtocolSection = () => {
     if (!report.dietaryProtocol) {
       return (
@@ -3717,7 +4093,7 @@ export default function ChronicProfessionalReport({
       <PrescriptionStats />
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="medical-report">
             <FileText className="h-4 w-4 mr-2" />
             Report
@@ -3754,6 +4130,24 @@ export default function ChronicProfessionalReport({
             <Utensils className="h-4 w-4 mr-2" />
             Diet Plan
           </TabsTrigger>
+          <TabsTrigger value="sick-leave">
+            <Calendar className="h-4 w-4 mr-2" />
+            Sick Leave
+            {sickLeaveData.numberOfDays > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {sickLeaveData.numberOfDays}d
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="invoice">
+            <Activity className="h-4 w-4 mr-2" />
+            Invoice
+            {invoiceData.services.totalDue > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                Rs {invoiceData.services.totalDue}
+              </Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="followup">
             <ClipboardList className="h-4 w-4 mr-2" />
             Follow-Up
@@ -3767,11 +4161,11 @@ export default function ChronicProfessionalReport({
         <TabsContent value="medications">
           <MedicationPrescriptionSection />
         </TabsContent>
-        
+
         <TabsContent value="laboratory">
           <LaboratoryTestsSection />
         </TabsContent>
-        
+
         <TabsContent value="paraclinical">
           <ParaclinicalExamsSection />
         </TabsContent>
@@ -3779,7 +4173,301 @@ export default function ChronicProfessionalReport({
         <TabsContent value="dietary">
           <DietaryProtocolSection />
         </TabsContent>
-        
+
+        <TabsContent value="sick-leave">
+          <Card>
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b">
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-blue-600" />
+                Medical Certificate / Sick Leave (Arrêt Maladie)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="startDate">Start Date (Date Début)</Label>
+                  <Input
+                    id="startDate"
+                    type="date"
+                    value={sickLeaveData.startDate}
+                    onChange={(e) => {
+                      setSickLeaveData(prev => ({ ...prev, startDate: e.target.value }))
+                      setHasUnsavedChanges(true)
+                      // Auto-calculate days
+                      if (sickLeaveData.endDate && e.target.value) {
+                        const start = new Date(e.target.value)
+                        const end = new Date(sickLeaveData.endDate)
+                        const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)) + 1
+                        setSickLeaveData(prev => ({ ...prev, numberOfDays: days > 0 ? days : 0 }))
+                      }
+                    }}
+                    disabled={validationStatus === 'validated'}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="endDate">End Date (Date Fin)</Label>
+                  <Input
+                    id="endDate"
+                    type="date"
+                    value={sickLeaveData.endDate}
+                    onChange={(e) => {
+                      setSickLeaveData(prev => ({ ...prev, endDate: e.target.value }))
+                      setHasUnsavedChanges(true)
+                      // Auto-calculate days
+                      if (sickLeaveData.startDate && e.target.value) {
+                        const start = new Date(sickLeaveData.startDate)
+                        const end = new Date(e.target.value)
+                        const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)) + 1
+                        setSickLeaveData(prev => ({ ...prev, numberOfDays: days > 0 ? days : 0 }))
+                      }
+                    }}
+                    disabled={validationStatus === 'validated'}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="numberOfDays">Number of Days (Nombre de Jours)</Label>
+                <Input
+                  id="numberOfDays"
+                  type="number"
+                  value={sickLeaveData.numberOfDays}
+                  onChange={(e) => {
+                    setSickLeaveData(prev => ({ ...prev, numberOfDays: parseInt(e.target.value) || 0 }))
+                    setHasUnsavedChanges(true)
+                  }}
+                  disabled={validationStatus === 'validated'}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="medicalReason">Medical Reason (Motif Médical)</Label>
+                <Textarea
+                  id="medicalReason"
+                  value={sickLeaveData.medicalReason}
+                  onChange={(e) => {
+                    setSickLeaveData(prev => ({ ...prev, medicalReason: e.target.value }))
+                    setHasUnsavedChanges(true)
+                  }}
+                  placeholder="Medical reason for sick leave..."
+                  className="min-h-[100px]"
+                  disabled={validationStatus === 'validated'}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="remarks">Additional Remarks (Remarques)</Label>
+                <Textarea
+                  id="remarks"
+                  value={sickLeaveData.remarks}
+                  onChange={(e) => {
+                    setSickLeaveData(prev => ({ ...prev, remarks: e.target.value }))
+                    setHasUnsavedChanges(true)
+                  }}
+                  placeholder="Any additional remarks..."
+                  disabled={validationStatus === 'validated'}
+                />
+              </div>
+
+              {sickLeaveData.numberOfDays > 0 && (
+                <Alert className="bg-blue-50 border-blue-200">
+                  <AlertCircle className="h-4 w-4 text-blue-600" />
+                  <AlertDescription className="text-blue-800">
+                    Sick leave certificate for <strong>{sickLeaveData.numberOfDays} days</strong> will be included in the final report.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="invoice">
+          <div id="invoice-document" className="bg-white p-8 rounded-lg shadow print:shadow-none">
+            <div className="mb-6 text-center">
+              <h1 className="text-2xl font-bold mb-2">INVOICE</h1>
+              <p className="text-lg">No.: {invoiceData.header.invoiceNumber}</p>
+              <p className="text-sm text-gray-600">
+                Consultation Date: {invoiceData.header.consultationDate} |
+                Invoice Date: {invoiceData.header.invoiceDate}
+              </p>
+            </div>
+
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+              <h3 className="font-bold mb-2">Service Provider</h3>
+              <p className="font-bold">{invoiceData.provider.companyName}</p>
+              <p className="text-sm">Private company incorporated under Mauritian law</p>
+              <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+                <div>Company Reg. No.: {invoiceData.provider.registrationNumber}</div>
+                <div>VAT No.: {invoiceData.provider.vatNumber}</div>
+                <div className="col-span-2">Registered Office: {invoiceData.provider.registeredOffice}</div>
+                <div>Phone: {invoiceData.provider.phone}</div>
+                <div>Email: {invoiceData.provider.email}</div>
+                <div>Website: {invoiceData.provider.website}</div>
+                <div className="col-span-2 font-medium">Trade Name: {invoiceData.provider.tradeName}</div>
+              </div>
+              <p className="text-sm mt-2 italic">
+                Medical consultations provided by licensed physicians registered with the Medical Council of Mauritius
+              </p>
+            </div>
+
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <h3 className="font-bold mb-2">Patient Information</h3>
+              <div className="grid grid-cols-1 gap-1 text-sm">
+                <div><strong>Name:</strong> {invoiceData.patient.name}</div>
+                <div><strong>Email:</strong> {invoiceData.patient.email}</div>
+                <div><strong>Phone Number:</strong> {invoiceData.patient.phone}</div>
+                <div><strong>Tibok Patient ID:</strong> {invoiceData.patient.patientId}</div>
+              </div>
+            </div>
+
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>Standard Chronic Disease Consultation Fee:</strong> MUR 950
+              </p>
+              <p className="text-xs text-blue-600 mt-1">
+                This is the standard rate for chronic disease consultations via Tibok.
+              </p>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="font-bold mb-4">Service Details</h3>
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b-2 border-gray-300">
+                    <th className="text-left py-2">Description</th>
+                    <th className="text-center py-2">Quantity</th>
+                    <th className="text-right py-2">Unit Price (MUR)</th>
+                    <th className="text-right py-2">Total (MUR)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoiceData.services.items.length > 0 ? (
+                    invoiceData.services.items.map((item, idx) => (
+                      <tr key={idx} className="border-b border-gray-200">
+                        <td className="py-2">{item.description}</td>
+                        <td className="text-center py-2">{item.quantity}</td>
+                        <td className="text-right py-2">{item.unitPrice.toLocaleString()}</td>
+                        <td className="text-right py-2 font-medium">{item.total.toLocaleString()}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="py-4 text-center text-gray-500 italic">
+                        No services added yet. Set consultation fee above to generate invoice.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t-2 border-gray-300">
+                    <td colSpan={3} className="text-right py-2">Subtotal (Excl. VAT):</td>
+                    <td className="text-right py-2">MUR {invoiceData.services.subtotal.toLocaleString()}</td>
+                  </tr>
+                  <tr>
+                    <td colSpan={3} className="text-right py-2">
+                      VAT ({(invoiceData.services.vatRate * 100).toFixed(0)}%):
+                    </td>
+                    <td className="text-right py-2">
+                      MUR {invoiceData.services.vatAmount.toLocaleString()}
+                      {invoiceData.services.vatAmount === 0 && (
+                        <span className="text-xs text-gray-600 block">
+                          (Exempt - medical services)
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                  <tr className="font-bold text-lg">
+                    <td colSpan={3} className="text-right py-2">Total Due:</td>
+                    <td className="text-right py-2">MUR {invoiceData.services.totalDue.toLocaleString()}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <div className="mb-6 p-4 bg-teal-50 rounded-lg">
+              <h3 className="font-bold mb-2">Payment Information</h3>
+              {editMode && validationStatus !== 'validated' ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>Payment Method</Label>
+                      <Select
+                        value={invoiceData.payment.method}
+                        onValueChange={(value) => {
+                          setInvoiceData(prev => ({
+                            ...prev,
+                            payment: { ...prev.payment, method: value }
+                          }))
+                          setHasUnsavedChanges(true)
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Credit Card">Credit Card</SelectItem>
+                          <SelectItem value="MCB Juice">MCB Juice</SelectItem>
+                          <SelectItem value="MyT Money">MyT Money</SelectItem>
+                          <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                          <SelectItem value="Cash">Cash</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Payment Status</Label>
+                      <Select
+                        value={invoiceData.payment.status}
+                        onValueChange={(value) => {
+                          setInvoiceData(prev => ({
+                            ...prev,
+                            payment: { ...prev.payment, status: value }
+                          }))
+                          setHasUnsavedChanges(true)
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="paid">Paid</SelectItem>
+                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div><strong>Payment Method:</strong> {invoiceData.payment.method}</div>
+                  <div><strong>Payment Received On:</strong> {invoiceData.payment.receivedDate || invoiceData.header.invoiceDate}</div>
+                  <div className="col-span-2">
+                    <strong>Status:</strong>
+                    <Badge className={`ml-2 ${
+                      invoiceData.payment.status === 'paid' ? 'bg-teal-100 text-teal-800' :
+                      invoiceData.payment.status === 'pending' ? 'bg-cyan-100 text-cyan-800' :
+                      'bg-blue-100 text-blue-800'
+                    }`}>
+                      {invoiceData.payment.status.toUpperCase()}
+                    </Badge>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 flex justify-center print:hidden">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.print()}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export Invoice
+              </Button>
+            </div>
+          </div>
+        </TabsContent>
+
         <TabsContent value="followup">
           <FollowUpPlanSection />
         </TabsContent>

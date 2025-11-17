@@ -227,6 +227,9 @@ export async function POST(request: NextRequest) {
       editedSections: metadata?.modifiedSections || []
     }
 
+    // Extract consultation type from report metadata
+    const consultationType = report?.compteRendu?.metadata?.typeConsultation || 'general'
+
     // Check if this is a prescription renewal
     const isRenewal = isPrescriptionRenewal(clinicalData, documentsData, report)
     
@@ -381,6 +384,7 @@ const updateData = {
         documents_data: documentsData,
         prescription_data: prescriptionData,
         documents_status: finalStatus,
+        consultation_type: consultationType,
         signatures: metadata?.signatures || {},
         document_validations: metadata?.documentValidations || {},
         doctor_name: doctorName,
@@ -392,18 +396,18 @@ const updateData = {
         has_lab_requests: hasLabTests,
         has_imaging_requests: hasImaging,
        has_sick_leave: !!(prescriptionData.sickLeave && (prescriptionData.sickLeave.nombreJours > 0 || prescriptionData.sickLeave.numberOfDays > 0)),
-  sick_leave_data: prescriptionData.sickLeave || null,      
+  sick_leave_data: prescriptionData.sickLeave || null,
   has_invoice: !!(report?.invoice),
-        chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation || 
-                         clinicalData?.chiefComplaint || 
+        chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation ||
+                         clinicalData?.chiefComplaint ||
                          existingRecord.chief_complaint ||
                          (isRenewal ? 'Prescription Renewal / Renouvellement d\'ordonnance' : null),
-        diagnosis: documentsData?.consultationReport?.rapport?.conclusionDiagnostique || 
+        diagnosis: documentsData?.consultationReport?.rapport?.conclusionDiagnostique ||
                    existingRecord.diagnosis ||
                    (isRenewal ? 'Prescription renewal - stable condition' : null),
-        doctor_specialty: documentsData?.consultationReport?.praticien?.specialite || 
-                          report?.compteRendu?.praticien?.specialite || 
-                          existingRecord.doctor_specialty || 
+        doctor_specialty: documentsData?.consultationReport?.praticien?.specialite ||
+                          report?.compteRendu?.praticien?.specialite ||
+                          existingRecord.doctor_specialty ||
                           null,
         updated_at: new Date().toISOString()
       }
@@ -446,6 +450,7 @@ const insertData = {
         documents_data: documentsData,
         prescription_data: prescriptionData,
         documents_status: finalStatus,
+        consultation_type: consultationType,
         prescription_status: hasMedications ? 'pending_validation' : null,
         signatures: metadata?.signatures || {},
         document_validations: metadata?.documentValidations || {},
@@ -456,15 +461,15 @@ const insertData = {
         has_lab_requests: hasLabTests,
         has_imaging_requests: hasImaging,
         has_sick_leave: !!(prescriptionData.sickLeave && (prescriptionData.sickLeave.nombreJours > 0 || prescriptionData.sickLeave.numberOfDays > 0)),
-  sick_leave_data: prescriptionData.sickLeave || null,      
+  sick_leave_data: prescriptionData.sickLeave || null,
   has_invoice: !!(report?.invoice),
-        chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation || 
-                         clinicalData?.chiefComplaint || 
+        chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation ||
+                         clinicalData?.chiefComplaint ||
                          (isRenewal ? 'Prescription Renewal / Renouvellement d\'ordonnance' : null),
-        diagnosis: documentsData?.consultationReport?.rapport?.conclusionDiagnostique || 
+        diagnosis: documentsData?.consultationReport?.rapport?.conclusionDiagnostique ||
                    (isRenewal ? 'Prescription renewal - stable condition' : null),
-        doctor_specialty: documentsData?.consultationReport?.praticien?.specialite || 
-                          report?.compteRendu?.praticien?.specialite || 
+        doctor_specialty: documentsData?.consultationReport?.praticien?.specialite ||
+                          report?.compteRendu?.praticien?.specialite ||
                           null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
