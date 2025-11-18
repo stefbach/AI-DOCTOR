@@ -60,23 +60,25 @@ function validateDoctorData(doctorName: string, doctorId: string, report: any): 
   if (!doctorName || doctorName.includes('[') || doctorName === 'Dr. [Name Required]') {
     return { isValid: false, error: "Valid doctor name is required" }
   }
-  
+
   if (!doctorId || doctorId === 'undefined' || doctorId === 'null') {
     return { isValid: false, error: "Valid doctor ID is required" }
   }
-  
-  // Check MCM registration number in report
-  const mcmNumber = report?.compteRendu?.praticien?.numeroEnregistrement
+
+  // Check MCM registration number in report (support both normal and chronic disease structures)
+  const mcmNumber = report?.compteRendu?.praticien?.numeroEnregistrement ||
+                    report?.medicalReport?.practitioner?.registrationNumber
   if (!mcmNumber || mcmNumber.includes('[') || mcmNumber === '[MCM Registration Required]') {
     return { isValid: false, error: "Valid MCM registration number is required" }
   }
-  
-  // Check doctor email
-  const doctorEmail = report?.compteRendu?.praticien?.email
+
+  // Check doctor email (support both normal and chronic disease structures)
+  const doctorEmail = report?.compteRendu?.praticien?.email ||
+                      report?.medicalReport?.practitioner?.email
   if (!doctorEmail || doctorEmail.includes('[') || !doctorEmail.includes('@')) {
     return { isValid: false, error: "Valid doctor email is required" }
   }
-  
+
   return { isValid: true }
 }
 
@@ -218,17 +220,24 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Structure the documents data
+    // Structure the documents data (support both normal and chronic disease structures)
     const documentsData = {
-      consultationReport: report?.compteRendu || {},
+      consultationReport: report?.compteRendu || report?.medicalReport || {},
       prescriptions: report?.ordonnances || {},
+      // Chronic disease specific data
+      medicationPrescription: report?.medicationPrescription || null,
+      laboratoryTests: report?.laboratoryTests || null,
+      paraclinicalExams: report?.paraclinicalExams || null,
+      dietaryPlan: report?.dietaryPlan || null,
+      followUpPlan: report?.followUpPlan || null,
       invoice: report?.invoice || null,
       lastModified: new Date().toISOString(),
       editedSections: metadata?.modifiedSections || []
     }
 
-    // Extract consultation type from report metadata
-    const consultationType = report?.compteRendu?.metadata?.typeConsultation || 'general'
+    // Extract consultation type from report metadata (support both structures)
+    const consultationType = report?.compteRendu?.metadata?.typeConsultation ||
+                             (report?.medicalReport ? 'chronic_disease' : 'general')
 
     // Check if this is a prescription renewal
     const isRenewal = isPrescriptionRenewal(clinicalData, documentsData, report)
@@ -269,11 +278,14 @@ export async function POST(request: NextRequest) {
           }, { status: 400 })
         }
         
-        // Check if report has actual medical content
-        const hasContent = report?.compteRendu?.rapport?.motifConsultation && 
-                          report?.compteRendu?.rapport?.conclusionDiagnostique
-        
-        if (!hasContent) {
+        // Check if report has actual medical content (support both structures)
+        const hasNormalContent = report?.compteRendu?.rapport?.motifConsultation &&
+                                report?.compteRendu?.rapport?.conclusionDiagnostique
+        const hasChronicContent = report?.medicalReport?.narrative &&
+                                 (report?.medicalReport?.diagnosticSummary?.diagnosticConclusion ||
+                                  report?.medicalReport?.chronicDiseaseAssessment)
+
+        if (!hasNormalContent && !hasChronicContent) {
           return NextResponse.json({
             success: false,
             error: "Medical report must contain consultation details and diagnosis",
@@ -293,17 +305,27 @@ export async function POST(request: NextRequest) {
     }
 
 // Structure prescription data separately for pharmacy workflow
+    // Support both normal consultation (French field names) and chronic disease (English field names)
+    const normalMeds = report?.ordonnances?.medicaments?.prescription?.medicaments || []
+    const chronicMeds = report?.ordonnances?.medicaments?.prescription?.medications || []
+
+    const normalLabs = report?.ordonnances?.biologie?.prescription?.analyses
+    const chronicLabs = report?.ordonnances?.biologie?.prescription?.tests
+
+    const normalImaging = report?.ordonnances?.imagerie?.prescription?.examens || []
+    const chronicImaging = report?.ordonnances?.imagerie?.prescription?.exams || []
+
     const prescriptionData = {
-      medications: report?.ordonnances?.medicaments?.prescription?.medicaments || [],
+      medications: normalMeds.length > 0 ? normalMeds : chronicMeds,
       laboratoryTests: {
-        hematology: report?.ordonnances?.biologie?.prescription?.analyses?.hematology || [],
-        clinicalChemistry: report?.ordonnances?.biologie?.prescription?.analyses?.clinicalChemistry || [],
-        immunology: report?.ordonnances?.biologie?.prescription?.analyses?.immunology || [],
-        microbiology: report?.ordonnances?.biologie?.prescription?.analyses?.microbiology || [],
-        endocrinology: report?.ordonnances?.biologie?.prescription?.analyses?.endocrinology || [],
-        general: report?.ordonnances?.biologie?.prescription?.analyses?.general || []
+        hematology: normalLabs?.hematology || chronicLabs?.hematology || [],
+        clinicalChemistry: normalLabs?.clinicalChemistry || chronicLabs?.clinicalChemistry || [],
+        immunology: normalLabs?.immunology || chronicLabs?.immunology || [],
+        microbiology: normalLabs?.microbiology || chronicLabs?.microbiology || [],
+        endocrinology: normalLabs?.endocrinology || chronicLabs?.endocrinology || [],
+        general: normalLabs?.general || chronicLabs?.general || []
       },
-imagingStudies: report?.ordonnances?.imagerie?.prescription?.examens || [],
+imagingStudies: normalImaging.length > 0 ? normalImaging : chronicImaging,
 sickLeave: report?.ordonnances?.arretMaladie?.certificat ? {
   dateDebut: report.ordonnances.arretMaladie.certificat.dateDebut,
   dateFin: report.ordonnances.arretMaladie.certificat.dateFin,
@@ -320,8 +342,12 @@ generatedAt: new Date().toISOString()
 
     // Validate content completeness before determining status
     let finalStatus = 'draft';
-    const hasValidContent = documentsData.consultationReport?.rapport?.motifConsultation &&
-                           documentsData.consultationReport?.rapport?.conclusionDiagnostique;
+    // Support both normal and chronic disease report structures
+    const hasValidContent = (documentsData.consultationReport?.rapport?.motifConsultation &&
+                            documentsData.consultationReport?.rapport?.conclusionDiagnostique) ||
+                           (documentsData.consultationReport?.narrative &&
+                            (documentsData.consultationReport?.diagnosticSummary?.diagnosticConclusion ||
+                             documentsData.consultationReport?.chronicDiseaseAssessment));
 
     const hasMedications = prescriptionData.medications && prescriptionData.medications.length > 0;
     const hasLabTests = Object.values(prescriptionData.laboratoryTests || {}).some((tests: any) => tests.length > 0);
@@ -400,13 +426,17 @@ const updateData = {
   has_invoice: !!(report?.invoice),
         chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation ||
                          clinicalData?.chiefComplaint ||
+                         clinicalData?.visitReasons?.join(', ') ||
                          existingRecord.chief_complaint ||
                          (isRenewal ? 'Prescription Renewal / Renouvellement d\'ordonnance' : null),
         diagnosis: documentsData?.consultationReport?.rapport?.conclusionDiagnostique ||
+                   documentsData?.consultationReport?.diagnosticSummary?.diagnosticConclusion ||
+                   documentsData?.consultationReport?.chronicDiseaseAssessment?.primaryDiagnosis ||
                    existingRecord.diagnosis ||
                    (isRenewal ? 'Prescription renewal - stable condition' : null),
         doctor_specialty: documentsData?.consultationReport?.praticien?.specialite ||
                           report?.compteRendu?.praticien?.specialite ||
+                          report?.medicalReport?.practitioner?.specialty ||
                           existingRecord.doctor_specialty ||
                           null,
         updated_at: new Date().toISOString()
@@ -465,11 +495,15 @@ const insertData = {
   has_invoice: !!(report?.invoice),
         chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation ||
                          clinicalData?.chiefComplaint ||
+                         clinicalData?.visitReasons?.join(', ') ||
                          (isRenewal ? 'Prescription Renewal / Renouvellement d\'ordonnance' : null),
         diagnosis: documentsData?.consultationReport?.rapport?.conclusionDiagnostique ||
+                   documentsData?.consultationReport?.diagnosticSummary?.diagnosticConclusion ||
+                   documentsData?.consultationReport?.chronicDiseaseAssessment?.primaryDiagnosis ||
                    (isRenewal ? 'Prescription renewal - stable condition' : null),
         doctor_specialty: documentsData?.consultationReport?.praticien?.specialite ||
                           report?.compteRendu?.praticien?.specialite ||
+                          report?.medicalReport?.practitioner?.specialty ||
                           null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()

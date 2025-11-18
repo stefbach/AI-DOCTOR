@@ -1615,8 +1615,8 @@ export default function ChronicProfessionalReport({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           consultationId,
-          patientId: patientData?.patientId || 'unknown',
-          doctorId: updatedReport.medicalReport.practitioner.registrationNumber,
+          patientId: tibokPatientId || patientData?.patientId || 'unknown',
+          doctorId: tibokDoctorId || updatedReport.medicalReport.practitioner.registrationNumber,
           doctorName: updatedReport.medicalReport.practitioner.name,
           patientName: updatedReport.medicalReport.patient.fullName,
           report: formattedReport,
