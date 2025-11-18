@@ -560,8 +560,10 @@ export default function ChronicProfessionalReport({
     digitalSignature: null as string | null
   })
 
-  // Consultation ID state
+  // Consultation IDs from URL params (from Tibok)
   const [consultationId, setConsultationId] = useState<string>('')
+  const [tibokPatientId, setTibokPatientId] = useState<string>('')
+  const [tibokDoctorId, setTibokDoctorId] = useState<string>('')
 
   // Dietary on-demand generation state
   const [dietaryLoading, setDietaryLoading] = useState(false)
@@ -612,11 +614,38 @@ export default function ChronicProfessionalReport({
     }
   }, [])
 
-  // Generate consultation ID on mount
+  // Load consultation IDs from URL params on mount (from Tibok)
   useEffect(() => {
-    const id = `chronic_disease_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    setConsultationId(id)
-    console.log('🔑 Generated consultation ID:', id)
+    const params = new URLSearchParams(window.location.search)
+    const urlConsultationId = params.get('consultationId')
+    const urlPatientId = params.get('patientId')
+    const urlDoctorId = params.get('doctorId')
+
+    console.log('🔑 Loading IDs from URL params:', { urlConsultationId, urlPatientId, urlDoctorId })
+
+    if (urlConsultationId) {
+      setConsultationId(urlConsultationId)
+      console.log('✅ Using consultation ID from Tibok:', urlConsultationId)
+    } else {
+      // Fallback to generating local ID if not provided
+      const fallbackId = `chronic_disease_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      setConsultationId(fallbackId)
+      console.warn('⚠️ No consultation ID from Tibok, using fallback:', fallbackId)
+    }
+
+    if (urlPatientId) {
+      setTibokPatientId(urlPatientId)
+      console.log('✅ Using patient ID from Tibok:', urlPatientId)
+    } else {
+      console.warn('⚠️ No patient ID from Tibok URL params')
+    }
+
+    if (urlDoctorId) {
+      setTibokDoctorId(urlDoctorId)
+      console.log('✅ Using doctor ID from Tibok:', urlDoctorId)
+    } else {
+      console.warn('⚠️ No doctor ID from Tibok URL params')
+    }
   }, [])
 
   // Auto-fill sick leave medical reason from diagnosis when report is generated
@@ -1725,71 +1754,25 @@ export default function ChronicProfessionalReport({
         description: "Preparing documents for patient dashboard"
       })
 
-      const params = new URLSearchParams(window.location.search)
+      // Use the IDs loaded from URL params at component mount
+      const patientId = tibokPatientId || patientData?.id || patientData?.patientId
+      const doctorId = tibokDoctorId
 
-      // Try to get IDs from URL params first
-      let tibokConsultationId = params.get('consultationId')
-      let patientId = params.get('patientId') || patientData?.id || patientData?.patientId
-      let doctorId = params.get('doctorId')
+      console.log('📍 IDs for sending:', { consultationId, patientId, doctorId })
 
-      console.log('📍 Initial IDs from params:', { tibokConsultationId, patientId, doctorId })
-
-      // If we have a Tibok consultation ID but missing patient/doctor IDs, fetch from consultations table
-      if (tibokConsultationId && (!patientId || !doctorId) && supabase) {
-        console.log('🔍 Fetching IDs from consultations table for:', tibokConsultationId)
-
-        const { data: consultationData, error: consultationError } = await supabase
-          .from('consultations')
-          .select('id, patient_id, doctor_id')
-          .eq('id', tibokConsultationId)
-          .single()
-
-        if (consultationData && !consultationError) {
-          patientId = patientId || consultationData.patient_id
-          doctorId = doctorId || consultationData.doctor_id
-          console.log('✅ Fetched IDs from consultations:', { patientId, doctorId })
-        } else {
-          console.log('⚠️ Could not fetch from consultations table:', consultationError)
-        }
-      }
-
-      // If still missing IDs, try to look up by patient email
-      if ((!patientId || !doctorId) && patientEmail && supabase) {
-        console.log('🔍 Trying to find consultation by patient email:', patientEmail)
-
-        const { data: consultationByEmail, error: emailError } = await supabase
-          .from('consultations')
-          .select('id, patient_id, doctor_id')
-          .eq('patient_email', patientEmail)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single()
-
-        if (consultationByEmail && !emailError) {
-          tibokConsultationId = tibokConsultationId || consultationByEmail.id
-          patientId = patientId || consultationByEmail.patient_id
-          doctorId = doctorId || consultationByEmail.doctor_id
-          console.log('✅ Found consultation by email:', { tibokConsultationId, patientId, doctorId })
-        } else {
-          console.log('⚠️ Could not find consultation by email:', emailError)
-        }
-      }
-
-      // Use the Tibok consultation ID if available, otherwise use our generated one
-      const finalConsultationId = tibokConsultationId || consultationId
-
-      console.log('📍 Final IDs:', { finalConsultationId, patientId, doctorId })
-
-      if (!finalConsultationId || !patientId || !doctorId) {
+      if (!consultationId || !patientId || !doctorId) {
         console.log('❌ Missing required IDs')
         toast({
           title: "Error",
-          description: `Missing IDs - Please ensure this consultation was started from Tibok. Consultation: ${finalConsultationId || 'missing'}, Patient: ${patientId || 'missing'}, Doctor: ${doctorId || 'missing'}`,
+          description: `Missing IDs - Please ensure this consultation was started from Tibok with proper URL parameters. Consultation: ${consultationId || 'missing'}, Patient: ${patientId || 'missing'}, Doctor: ${doctorId || 'missing'}`,
           variant: "destructive"
         })
         setIsSendingDocuments(false)
         return
       }
+
+      // Use the consultation ID from Tibok (or fallback)
+      const finalConsultationId = consultationId
 
       // Prepare doctor info with fallbacks
       const finalDoctorInfo = {
