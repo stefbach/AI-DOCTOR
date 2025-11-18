@@ -36,6 +36,8 @@ interface ChronicProfessionalReportData {
       registrationNumber: string
       email: string
       consultationPlatform: string
+      facility?: string
+      contact?: string
     }
     patient: {
       fullName: string
@@ -259,7 +261,9 @@ const createEmptyReport = (): ChronicProfessionalReportData => ({
       specialty: "Internal Medicine / Chronic Disease Management",
       registrationNumber: "[MCM Registration Required]",
       email: "[Email Required]",
-      consultationPlatform: "Tibok Teleconsultation Platform"
+      consultationPlatform: "Tibok Teleconsultation Platform",
+      facility: "Tibok Teleconsultation Platform",
+      contact: "+230 XXX XXXX"
     },
     patient: {
       fullName: "",
@@ -518,6 +522,9 @@ export default function ChronicProfessionalReport({
     specialite: "Internal Medicine / Chronic Disease Management",
     numeroEnregistrement: "[MCM Registration Required]",
     email: "[Email Required]",
+    adresseCabinet: "Tibok Teleconsultation Platform",
+    telephone: "+230 XXX XXXX",
+    heuresConsultation: "Teleconsultation Hours: 8:00 AM - 8:00 PM",
     signatureUrl: null as string | null,
     digitalSignature: null as string | null
   })
@@ -688,7 +695,9 @@ export default function ChronicProfessionalReport({
           specialty: doctorInfo.specialite,
           registrationNumber: doctorInfo.numeroEnregistrement,
           email: doctorInfo.email,
-          consultationPlatform: "Tibok Teleconsultation Platform"
+          consultationPlatform: "Tibok Teleconsultation Platform",
+          facility: doctorInfo.adresseCabinet || "Tibok Teleconsultation Platform",
+          contact: doctorInfo.telephone || doctorInfo.email
         }
         console.log('👨‍⚕️ Doctor info populated:', initialReport.medicalReport.practitioner)
 
@@ -4314,6 +4323,152 @@ export default function ChronicProfessionalReport({
                     Sick leave certificate for <strong>{sickLeaveData.numberOfDays} days</strong> will be included in the final report.
                   </AlertDescription>
                 </Alert>
+              )}
+
+              {/* Medical Certificate Document Preview */}
+              {sickLeaveData.numberOfDays > 0 && sickLeaveData.startDate && sickLeaveData.endDate && (
+                <div id="sick-leave-certificate" className="mt-6 bg-white p-8 rounded-lg border-2 border-gray-300 print:shadow-none">
+                  {/* Certificate Header */}
+                  <div className="text-center mb-8 pb-6 border-b-2 border-gray-800">
+                    <h1 className="text-2xl font-bold mb-2">MEDICAL CERTIFICATE</h1>
+                    <h2 className="text-lg font-semibold mb-4">CERTIFICAT D'ARRÊT DE TRAVAIL</h2>
+                    <p className="text-sm text-gray-600">Sick Leave Certificate / Certificat Médical</p>
+
+                    {/* Medical Practitioner Info Header */}
+                    <div className="bg-gray-100 p-4 rounded mt-4">
+                      <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm max-w-3xl mx-auto">
+                        <div className="text-left">
+                          <strong>Medical Practitioner:</strong> {report.medicalReport.practitioner.name}
+                        </div>
+                        <div className="text-left">
+                          <strong>Qualifications:</strong> {report.medicalReport.practitioner.qualifications}
+                        </div>
+                        <div className="text-left">
+                          <strong>Registration Number:</strong> {report.medicalReport.practitioner.registrationNumber}
+                        </div>
+                        <div className="text-left">
+                          <strong>Specialty:</strong> {report.medicalReport.practitioner.specialty}
+                        </div>
+                        <div className="text-left">
+                          <strong>Facility:</strong> {report.medicalReport.practitioner.facility}
+                        </div>
+                        <div className="text-left">
+                          <strong>Contact:</strong> {report.medicalReport.practitioner.contact}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Patient Information */}
+                  <div className="mb-6">
+                    <h3 className="text-lg font-bold mb-3 pb-2 border-b border-gray-400">PATIENT INFORMATION / INFORMATIONS DU PATIENT</h3>
+                    <div className="bg-gray-50 p-4 rounded">
+                      <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                        <div>
+                          <span className="font-semibold">Full Name / Nom complet:</span> {report.medicalReport.patient.fullName}
+                        </div>
+                        <div>
+                          <span className="font-semibold">Age / Âge:</span> {report.medicalReport.patient.age} years
+                        </div>
+                        <div>
+                          <span className="font-semibold">Date of Birth / Date de naissance:</span> {report.medicalReport.patient.dateOfBirth}
+                        </div>
+                        <div>
+                          <span className="font-semibold">Gender / Sexe:</span> {report.medicalReport.patient.gender}
+                        </div>
+                        <div className="col-span-2">
+                          <span className="font-semibold">Address / Adresse:</span> {report.medicalReport.patient.address}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Certificate Details */}
+                  <div className="mb-6">
+                    <h3 className="text-lg font-bold mb-3 pb-2 border-b border-gray-400">CERTIFICATE DETAILS / DÉTAILS DU CERTIFICAT</h3>
+                    <div className="space-y-4">
+                      <div className="p-4 bg-blue-50 rounded border border-blue-200">
+                        <p className="text-sm mb-2">
+                          <strong>I, the undersigned medical practitioner, hereby certify that:</strong>
+                        </p>
+                        <p className="text-sm italic mb-2">
+                          Je soussigné(e), médecin, certifie que:
+                        </p>
+                        <p className="text-base font-medium mt-3">
+                          <strong>{report.medicalReport.patient.fullName}</strong>
+                        </p>
+                        <p className="text-sm mt-2">
+                          is medically unfit for work and requires rest for a period of:
+                        </p>
+                        <p className="text-sm italic">
+                          est médicalement inapte au travail et nécessite un repos de:
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded">
+                        <div className="text-center">
+                          <p className="font-semibold text-sm">Start Date / Date Début</p>
+                          <p className="text-lg font-bold text-blue-600">{sickLeaveData.startDate}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="font-semibold text-sm">End Date / Date Fin</p>
+                          <p className="text-lg font-bold text-blue-600">{sickLeaveData.endDate}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="font-semibold text-sm">Duration / Durée</p>
+                          <p className="text-lg font-bold text-blue-600">{sickLeaveData.numberOfDays} days / jours</p>
+                        </div>
+                      </div>
+
+                      {sickLeaveData.medicalReason && (
+                        <div className="p-4 bg-gray-50 rounded">
+                          <p className="font-semibold text-sm mb-2">Medical Reason / Motif Médical:</p>
+                          <p className="text-sm">{sickLeaveData.medicalReason}</p>
+                        </div>
+                      )}
+
+                      {sickLeaveData.remarks && (
+                        <div className="p-4 bg-gray-50 rounded">
+                          <p className="font-semibold text-sm mb-2">Additional Remarks / Remarques:</p>
+                          <p className="text-sm">{sickLeaveData.remarks}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Certificate Footer with Doctor Signature */}
+                  <div className="mt-8 pt-6 border-t-2 border-gray-800">
+                    <div className="flex justify-between items-start">
+                      <div className="text-left">
+                        <p className="text-sm font-semibold mb-2">Certificate issued on / Certificat délivré le:</p>
+                        <p className="text-sm">{new Date().toLocaleDateString('en-GB')}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-600 mb-4">Medical Practitioner's Signature / Signature du Médecin:</p>
+                        <div className="mb-2">
+                          <p className="border-b-2 border-gray-400 w-64 mb-1"></p>
+                        </div>
+                        <p className="font-semibold">{report.medicalReport.practitioner.name}</p>
+                        <p className="text-sm text-gray-600">{report.medicalReport.practitioner.qualifications}</p>
+                        <p className="text-sm text-gray-600">Registration: {report.medicalReport.practitioner.registrationNumber}</p>
+                        <p className="text-sm text-gray-600 mt-2">Date: {new Date().toLocaleDateString('en-GB')}</p>
+                      </div>
+                    </div>
+
+                    {/* Official Stamp Area */}
+                    <div className="mt-6 text-center">
+                      <div className="inline-block border-2 border-dashed border-gray-400 p-4 rounded">
+                        <p className="text-sm text-gray-500">Official Medical Stamp / Cachet Médical Officiel</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Document Footer */}
+                  <div className="mt-8 pt-4 border-t border-gray-300 text-center text-xs text-gray-500">
+                    <p>This certificate is issued for work absence purposes only and is valid for the duration specified above.</p>
+                    <p className="mt-1">Ce certificat est délivré uniquement à des fins d'absence au travail et est valable pour la durée indiquée ci-dessus.</p>
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>
