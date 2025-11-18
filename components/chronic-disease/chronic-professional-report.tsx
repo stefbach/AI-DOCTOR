@@ -614,18 +614,18 @@ export default function ChronicProfessionalReport({
     }
   }, [])
 
-  // Load consultation IDs from URL params on mount (from Tibok)
+  // Load consultation IDs from patientData (passed via sessionStorage from main page)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const urlConsultationId = params.get('consultationId')
-    const urlPatientId = params.get('patientId')
-    const urlDoctorId = params.get('doctorId')
+    // IDs are included in patientData from the main page when chronic disease was selected
+    const sessionConsultationId = patientData?.consultationId
+    const sessionPatientId = patientData?.patientId
+    const sessionDoctorId = patientData?.doctorId
 
-    console.log('🔑 Loading IDs from URL params:', { urlConsultationId, urlPatientId, urlDoctorId })
+    console.log('🔑 Loading IDs from patientData (sessionStorage):', { sessionConsultationId, sessionPatientId, sessionDoctorId })
 
-    if (urlConsultationId) {
-      setConsultationId(urlConsultationId)
-      console.log('✅ Using consultation ID from Tibok:', urlConsultationId)
+    if (sessionConsultationId) {
+      setConsultationId(sessionConsultationId)
+      console.log('✅ Using consultation ID from Tibok:', sessionConsultationId)
     } else {
       // Fallback to generating local ID if not provided
       const fallbackId = `chronic_disease_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -633,20 +633,20 @@ export default function ChronicProfessionalReport({
       console.warn('⚠️ No consultation ID from Tibok, using fallback:', fallbackId)
     }
 
-    if (urlPatientId) {
-      setTibokPatientId(urlPatientId)
-      console.log('✅ Using patient ID from Tibok:', urlPatientId)
+    if (sessionPatientId) {
+      setTibokPatientId(sessionPatientId)
+      console.log('✅ Using patient ID from Tibok:', sessionPatientId)
     } else {
-      console.warn('⚠️ No patient ID from Tibok URL params')
+      console.warn('⚠️ No patient ID in patientData')
     }
 
-    if (urlDoctorId) {
-      setTibokDoctorId(urlDoctorId)
-      console.log('✅ Using doctor ID from Tibok:', urlDoctorId)
+    if (sessionDoctorId) {
+      setTibokDoctorId(sessionDoctorId)
+      console.log('✅ Using doctor ID from Tibok:', sessionDoctorId)
     } else {
-      console.warn('⚠️ No doctor ID from Tibok URL params')
+      console.warn('⚠️ No doctor ID in patientData')
     }
-  }, [])
+  }, [patientData])
 
   // Auto-fill sick leave medical reason from diagnosis when report is generated
   useEffect(() => {
