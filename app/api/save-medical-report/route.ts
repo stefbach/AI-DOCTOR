@@ -228,12 +228,16 @@ export async function POST(request: NextRequest) {
       medicationPrescription: report?.medicationPrescription || null,
       laboratoryTests: report?.laboratoryTests || null,
       paraclinicalExams: report?.paraclinicalExams || null,
-      dietaryPlan: report?.dietaryPlan || null,
+      dietaryPlan: report?.dietaryPlan || report?.dietaryProtocol || null,
       followUpPlan: report?.followUpPlan || null,
       invoice: report?.invoice || null,
       lastModified: new Date().toISOString(),
       editedSections: metadata?.modifiedSections || []
     }
+
+    // Extract diet plan and follow up data for separate columns
+    const dietPlanData = report?.dietaryPlan || report?.dietaryProtocol || null
+    const followUpData = report?.followUpPlan || null
 
     // Extract consultation type from report metadata (support both structures)
     const consultationType = report?.compteRendu?.metadata?.typeConsultation ||
@@ -424,8 +428,10 @@ const updateData = {
         has_sick_leave: !!(prescriptionData.sickLeave && (prescriptionData.sickLeave.nombreJours > 0 || prescriptionData.sickLeave.numberOfDays > 0)) || !!metadata?.documentValidations?.sickLeave,
         sick_leave_data: prescriptionData.sickLeave || null,
         has_invoice: !!(report?.invoice) || !!metadata?.documentValidations?.invoice,
-        has_diet_plan: !!report?.dietaryPlan || !!metadata?.documentValidations?.dietPlan,
-        has_follow_up: !!report?.followUpPlan || !!metadata?.documentValidations?.followUp,
+        has_diet_plan: !!dietPlanData || !!metadata?.documentValidations?.dietPlan,
+        has_follow_up: !!followUpData || !!metadata?.documentValidations?.followUp,
+        diet_plan_data: dietPlanData,
+        follow_up_data: followUpData,
         chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation ||
                          clinicalData?.chiefComplaint ||
                          clinicalData?.visitReasons?.join(', ') ||
@@ -495,8 +501,10 @@ const insertData = {
         has_sick_leave: !!(prescriptionData.sickLeave && (prescriptionData.sickLeave.nombreJours > 0 || prescriptionData.sickLeave.numberOfDays > 0)) || !!metadata?.documentValidations?.sickLeave,
         sick_leave_data: prescriptionData.sickLeave || null,
         has_invoice: !!(report?.invoice) || !!metadata?.documentValidations?.invoice,
-        has_diet_plan: !!report?.dietaryPlan || !!metadata?.documentValidations?.dietPlan,
-        has_follow_up: !!report?.followUpPlan || !!metadata?.documentValidations?.followUp,
+        has_diet_plan: !!dietPlanData || !!metadata?.documentValidations?.dietPlan,
+        has_follow_up: !!followUpData || !!metadata?.documentValidations?.followUp,
+        diet_plan_data: dietPlanData,
+        follow_up_data: followUpData,
         chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation ||
                          clinicalData?.chiefComplaint ||
                          clinicalData?.visitReasons?.join(', ') ||
