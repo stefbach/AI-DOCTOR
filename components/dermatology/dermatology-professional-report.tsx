@@ -927,6 +927,11 @@ export default function ProfessionalReportEditable({
  returnToWork: ''
 })
 
+// IDs from Tibok (loaded from patientData which came from sessionStorage)
+ const [consultationId, setConsultationId] = useState<string>('')
+ const [tibokPatientId, setTibokPatientId] = useState<string>('')
+ const [tibokDoctorId, setTibokDoctorId] = useState<string>('')
+
 // Helper function to get full Supabase storage URL
 const getFullSignatureUrl = (signatureUrl: string | null): string | null => {
  if (!signatureUrl) return null;
@@ -1626,24 +1631,57 @@ const doctorInfoFromTibok = {
  }
  }, [])
 
+// ==================== LOAD IDs FROM PATIENT DATA ====================
+useEffect(() => {
+ // IDs are included in patientData from the main page when dermatology was selected
+ const sessionConsultationId = patientData?.consultationId
+ const sessionPatientId = patientData?.patientId
+ const sessionDoctorId = patientData?.doctorId
+
+ console.log('🔑 Loading IDs from patientData (sessionStorage):', { sessionConsultationId, sessionPatientId, sessionDoctorId })
+
+ if (sessionConsultationId) {
+ setConsultationId(sessionConsultationId)
+ console.log('✅ Using consultation ID from Tibok:', sessionConsultationId)
+ } else {
+ // Fallback to generating local ID if not provided
+ const fallbackId = `dermatology_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+ setConsultationId(fallbackId)
+ console.warn('⚠️ No consultation ID from Tibok, using fallback:', fallbackId)
+ }
+
+ if (sessionPatientId) {
+ setTibokPatientId(sessionPatientId)
+ console.log('✅ Using patient ID from Tibok:', sessionPatientId)
+ } else {
+ console.warn('⚠️ No patient ID in patientData')
+ }
+
+ if (sessionDoctorId) {
+ setTibokDoctorId(sessionDoctorId)
+ console.log('✅ Using doctor ID from Tibok:', sessionDoctorId)
+ } else {
+ console.warn('⚠️ No doctor ID in patientData')
+ }
+}, [patientData])
+
 // ==================== LOAD DRAFT FROM DATABASE ====================
 useEffect(() => {
- // Prevent multiple loads
- const params = new URLSearchParams(window.location.search)
- const consultationId = params.get('consultationId')
- 
- if (!consultationId) {
+ // Get consultationId from patientData (passed from sessionStorage)
+ const sessionConsultationId = patientData?.consultationId
+
+ if (!sessionConsultationId) {
  setIsLoadingFromDb(false)
  setDbCheckComplete(true)
  setShouldGenerateReport(false)
  return
  }
- 
+
  const loadDraft = async () => {
  setIsLoadingFromDb(true)
- 
+
  try {
- const response = await fetch(`/api/save-draft?consultationId=${consultationId}`)
+ const response = await fetch(`/api/save-draft?consultationId=${sessionConsultationId}`)
  const result = await response.json()
  
  if (result.success && result.data) {
@@ -2699,11 +2737,10 @@ const handleSendDocuments = async () => {
  title: "📤 Sending documents...",
  description: "Preparing documents for patient dashboard"
  })
- 
- const params = new URLSearchParams(window.location.search)
- const consultationId = params.get('consultationId')
- const patientId = params.get('patientId') || patientData?.id || patientData?.patientId
- const doctorId = params.get('doctorId')
+
+ // Use state variables (loaded from patientData) instead of URL params
+ const patientId = tibokPatientId || patientData?.id || patientData?.patientId
+ const doctorId = tibokDoctorId
 
  console.log('📍 IDs found:', { consultationId, patientId, doctorId })
 
@@ -2711,7 +2748,7 @@ const handleSendDocuments = async () => {
  console.log(' Missing required IDs')
  toast({
  title: "Error",
- description: `Missing IDs - Consultation: ${consultationId}, Patient: ${patientId}, Doctor: ${doctorId}`,
+ description: `Missing IDs - Please ensure this consultation was started from Tibok with proper URL parameters. Consultation: ${consultationId || 'missing'}, Patient: ${patientId || 'missing'}, Doctor: ${doctorId || 'missing'}`,
  variant: "destructive"
  })
  return
@@ -2814,7 +2851,8 @@ const handleSendDocuments = async () => {
 
  // Get Tibok URL
  const getTibokUrl = () => {
- const urlParam = params.get('tibokUrl')
+ const urlParams = new URLSearchParams(window.location.search)
+ const urlParam = urlParams.get('tibokUrl')
  if (urlParam) {
  console.log('📍 Using Tibok URL from parameter:', decodeURIComponent(urlParam))
  return decodeURIComponent(urlParam)
