@@ -1988,11 +1988,42 @@ export default function ChronicProfessionalReport({
                     __html: formatNarrativeWithBoldHeaders(medicalReport.narrative)
                   }}
                 />
+
+                {/* Signature Section for Main Report */}
+                <div className="mt-8 pt-6 border-t-2 border-gray-800 bg-white p-8 rounded border border-gray-200">
+                  <div className="text-right">
+                    <p className="font-bold text-lg mb-4">PHYSICIAN AUTHENTICATION</p>
+                    <p className="font-semibold">{medicalReport.practitioner.name}</p>
+                    <p className="text-sm text-gray-600">{medicalReport.practitioner.qualifications}</p>
+                    <p className="text-sm text-gray-600">{medicalReport.practitioner.specialty}</p>
+                    <p className="text-sm text-gray-600">MCM Registration: {medicalReport.practitioner.registrationNumber}</p>
+
+                    {validationStatus === 'validated' && documentSignatures.consultation ? (
+                      <div className="mt-4">
+                        <img
+                          src={documentSignatures.consultation}
+                          alt="Doctor's Signature"
+                          className="ml-auto h-20 w-auto"
+                          style={{ maxWidth: '300px' }}
+                        />
+                        <p className="text-sm text-gray-600 mt-2">
+                          Digitally signed on {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="mt-6">
+                        <p className="text-sm">_______________________________</p>
+                        <p className="text-sm">Medical Practitioner's Signature</p>
+                        <p className="text-sm mt-2">Date: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </>
             )}
           </div>
         )}
-        
+
         {/* HIDE ALL REDUNDANT SECTIONS - They are already in narrative */}
         {false && (
         <>
