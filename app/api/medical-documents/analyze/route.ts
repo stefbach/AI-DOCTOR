@@ -35,11 +35,11 @@ const openai = new OpenAI({
 // ANALYSIS PROMPTS
 // ============================================================================
 
-const BIOLOGY_ANALYSIS_PROMPT = `Tu es un médecin généraliste mauricien expert en interprétation d'analyses biologiques.
+const BIOLOGY_ANALYSIS_PROMPT = `You are a Mauritian general practitioner expert in interpreting biology test results.
 
-CONTEXTE: Île Maurice - Système de santé mixte (public/privé), prévalence élevée de diabète et maladies cardiovasculaires.
+CONTEXT: Mauritius - Mixed healthcare system (public/private), high prevalence of diabetes and cardiovascular diseases.
 
-OBJECTIF: Analyser les résultats d'analyses biologiques et fournir une interprétation clinique complète.
+OBJECTIVE: Analyze biology test results and provide a complete clinical interpretation.
 
 INSTRUCTIONS:
 1. Analyser CHAQUE résultat par rapport aux valeurs de référence
@@ -97,11 +97,11 @@ IMPORTANT:
 - Clarté et précision pour médecins généralistes
 - Signaler les interactions médicamenteuses potentielles si contexte fourni`;
 
-const RADIOLOGY_ANALYSIS_PROMPT = `Tu es un médecin généraliste mauricien expert en interprétation de comptes-rendus radiologiques.
+const RADIOLOGY_ANALYSIS_PROMPT = `You are a Mauritian general practitioner expert in interpreting radiology reports.
 
-CONTEXTE: Île Maurice - Système de santé mixte (public/privé), accès variable à l'imagerie avancée.
+CONTEXT: Mauritius - Mixed healthcare system (public/private), variable access to advanced imaging.
 
-OBJECTIF: Analyser le compte-rendu radiologique et fournir une interprétation clinique pour la prise en charge.
+OBJECTIVE: Analyze the radiology report and provide clinical interpretation for patient management.
 
 INSTRUCTIONS:
 1. Analyser les observations (findings) du radiologue
@@ -196,7 +196,7 @@ function buildPatientContext(request: AnalyzeRequest): string {
 function buildBiologyPrompt(request: AnalyzeRequest): string {
   const contextStr = buildPatientContext(request);
   
-  return `Analyse les résultats d'analyses biologiques suivants et fournis une interprétation clinique complète.
+  return `Analyze the following biology test results and provide a complete clinical interpretation.
 
 TYPE D'ANALYSE: ${request.subType || 'Non spécifié'}
 
@@ -213,7 +213,7 @@ Fournis une analyse détaillée en JSON selon le format spécifié.`;
 function buildRadiologyPrompt(request: AnalyzeRequest): string {
   const contextStr = buildPatientContext(request);
   
-  return `Analyse le compte-rendu radiologique suivant et fournis une interprétation clinique complète.
+  return `Analyze the following radiology report and provide a complete clinical interpretation.
 
 TYPE D'IMAGERIE: ${request.subType || 'Non spécifié'}
 

@@ -49,10 +49,10 @@ import {
 type WorkflowStep = 'select-type' | 'upload' | 'analyze' | 'results';
 
 const WORKFLOW_STEPS = [
-  { id: 'select-type', title: 'Type de document', icon: FileText },
-  { id: 'upload', title: 'Téléchargement', icon: FileText },
-  { id: 'analyze', title: 'Analyse IA', icon: FileText },
-  { id: 'results', title: 'Résultats', icon: CheckCircle },
+  { id: 'select-type', title: 'Document Type', icon: FileText },
+  { id: 'upload', title: 'Upload', icon: FileText },
+  { id: 'analyze', title: 'AI Analysis', icon: FileText },
+  { id: 'results', title: 'Results', icon: CheckCircle },
 ];
 
 // ============================================================================
@@ -248,7 +248,7 @@ export default function MedicalDocumentsPage() {
       return (
         <Alert variant="destructive">
           <AlertTriangle className="w-4 h-4" />
-          <AlertDescription>Aucun résultat disponible</AlertDescription>
+          <AlertDescription>No results available</AlertDescription>
         </Alert>
       );
     }
@@ -270,12 +270,12 @@ export default function MedicalDocumentsPage() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <CheckCircle className={`w-6 h-6 text-${severityColor}-600`} />
-              <span>Analyse terminée</span>
+              <span>Analysis Complete</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-sm text-gray-600">Type de document</p>
+              <p className="text-sm text-gray-600">Document Type</p>
               <p className="font-semibold">
                 {documentType === 'biology' 
                   ? getBiologyTypeLabel(analyzedDocument.type === 'biology' ? analyzedDocument.biologyType : 'other_biology')
@@ -283,7 +283,7 @@ export default function MedicalDocumentsPage() {
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Sévérité</p>
+              <p className="text-sm text-gray-600">Severity</p>
               <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-${severityColor}-100 text-${severityColor}-800`}>
                 {clinicalSignificance.severity.toUpperCase()}
               </span>
@@ -292,7 +292,7 @@ export default function MedicalDocumentsPage() {
               <Alert variant="destructive">
                 <AlertTriangle className="w-4 h-4" />
                 <AlertDescription className="font-semibold">
-                  ⚠️ ATTENTION: Cette analyse nécessite une action médicale urgente
+                  ⚠️ WARNING: This analysis requires urgent medical action
                 </AlertDescription>
               </Alert>
             )}
@@ -302,7 +302,7 @@ export default function MedicalDocumentsPage() {
         {/* Clinical Summary */}
         <Card>
           <CardHeader>
-            <CardTitle>Résumé clinique</CardTitle>
+            <CardTitle>Clinical Summary</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-800 leading-relaxed whitespace-pre-line">
@@ -315,7 +315,7 @@ export default function MedicalDocumentsPage() {
         {clinicalSignificance.keyFindings.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Observations principales</CardTitle>
+              <CardTitle>Key Findings</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
@@ -334,7 +334,7 @@ export default function MedicalDocumentsPage() {
         {isBiologyDocument(analyzedDocument) && clinicalSignificance.abnormalResults.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Résultats anormaux</CardTitle>
+              <CardTitle>Results anormaux</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -343,8 +343,8 @@ export default function MedicalDocumentsPage() {
                     <div className="flex-1">
                       <p className="font-medium text-gray-900">{result.testName}</p>
                       <p className="text-sm text-gray-600">
-                        Valeur: {result.value} {result.unit}
-                        {result.referenceRange && ` (Norme: ${result.referenceRange})`}
+                        Value: {result.value} {result.unit}
+                        {result.referenceRange && ` (Reference: ${result.referenceRange})`}
                       </p>
                     </div>
                     <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getResultStatusBadgeClasses(result.status)}`}>
@@ -361,7 +361,7 @@ export default function MedicalDocumentsPage() {
         {recommendations.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Recommandations</CardTitle>
+              <CardTitle>Recommendations</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
@@ -381,7 +381,7 @@ export default function MedicalDocumentsPage() {
           <Alert variant="destructive">
             <AlertTriangle className="w-4 h-4" />
             <AlertDescription>
-              <p className="font-semibold mb-2">Alertes critiques:</p>
+              <p className="font-semibold mb-2">Critical Alerts:</p>
               <ul className="space-y-1">
                 {clinicalSignificance.criticalAlerts.map((alert, index) => (
                   <li key={index}>• {alert}</li>
@@ -404,10 +404,10 @@ export default function MedicalDocumentsPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Analyse de Documents Médicaux
+            Medical Documents Analysis
           </h1>
           <p className="text-gray-600">
-            Téléchargez et analysez vos documents de biologie et radiologie
+            Upload and analyze your biology and radiology documents
           </p>
         </div>
 
@@ -462,12 +462,12 @@ export default function MedicalDocumentsPage() {
             {currentStep === 'results' ? (
               <>
                 <Home className="w-4 h-4 mr-2" />
-                Nouvelle analyse
+                New Analysis
               </>
             ) : (
               <>
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Précédent
+                Previous
               </>
             )}
           </Button>
@@ -477,7 +477,7 @@ export default function MedicalDocumentsPage() {
               onClick={goToNextStep}
               disabled={!canProceed()}
             >
-              Suivant
+              Next
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           )}

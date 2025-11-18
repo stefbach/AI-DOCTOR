@@ -377,34 +377,34 @@ export function isRadiologyDocument(doc: MedicalDocument): doc is RadiologyDocum
 // ============================================================================
 
 /**
- * Biology type labels (French for Mauritius)
+ * Biology type labels (English for Mauritius)
  */
 export const BIOLOGY_TYPE_LABELS: Record<BiologyType, string> = {
-  blood_count: 'Numération Formule Sanguine (NFS)',
-  lipid_profile: 'Bilan Lipidique',
-  liver_function: 'Bilan Hépatique',
-  kidney_function: 'Bilan Rénal',
-  thyroid_function: 'Bilan Thyroïdien',
-  diabetes: 'Bilan Diabétique',
-  electrolytes: 'Ionogramme',
-  coagulation: 'Bilan de Coagulation',
-  inflammatory: 'Marqueurs Inflammatoires',
-  tumor_markers: 'Marqueurs Tumoraux',
-  hormones: 'Dosages Hormonaux',
-  vitamins: 'Dosages Vitaminiques',
-  other_biology: 'Autres Analyses',
+  blood_count: 'Complete Blood Count (CBC)',
+  lipid_profile: 'Lipid Profile',
+  liver_function: 'Liver Function Tests',
+  kidney_function: 'Kidney Function Tests',
+  thyroid_function: 'Thyroid Function Tests',
+  diabetes: 'Diabetes Tests',
+  electrolytes: 'Electrolytes',
+  coagulation: 'Coagulation Tests',
+  inflammatory: 'Inflammatory Markers',
+  tumor_markers: 'Tumor Markers',
+  hormones: 'Hormone Tests',
+  vitamins: 'Vitamin Tests',
+  other_biology: 'Other Tests',
 };
 
 /**
- * Radiology type labels (French for Mauritius)
+ * Radiology type labels (English for Mauritius)
  */
 export const RADIOLOGY_TYPE_LABELS: Record<RadiologyType, string> = {
-  xray: 'Radiographie',
-  ct_scan: 'Scanner (TDM)',
-  mri: 'IRM',
-  ultrasound: 'Échographie',
-  mammography: 'Mammographie',
-  other_radiology: 'Autres Imageries',
+  xray: 'X-Ray',
+  ct_scan: 'CT Scan',
+  mri: 'MRI',
+  ultrasound: 'Ultrasound',
+  mammography: 'Mammography',
+  other_radiology: 'Other Imaging',
 };
 
 /**

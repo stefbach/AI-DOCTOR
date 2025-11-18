@@ -40,16 +40,23 @@ export function generateDocumentId(type: DocumentType): string {
 // ============================================================================
 
 /**
- * Format ISO date to French locale date string
- * Example: "2024-11-18" → "18 novembre 2024"
+ * Format ISO date to English locale date string
+ * Example: "2024-11-18" → "18 November 2024"
  */
-export function formatDateFrench(isoDate: string): string {
+export function formatDateEnglish(isoDate: string): string {
   const date = new Date(isoDate);
-  return new Intl.DateTimeFormat('fr-FR', {
+  return new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   }).format(date);
+}
+
+/**
+ * @deprecated Use formatDateEnglish instead
+ */
+export function formatDateFrench(isoDate: string): string {
+  return formatDateEnglish(isoDate);
 }
 
 /**
@@ -58,7 +65,7 @@ export function formatDateFrench(isoDate: string): string {
  */
 export function formatDateShort(isoDate: string): string {
   const date = new Date(isoDate);
-  return new Intl.DateTimeFormat('fr-FR', {
+  return new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -67,11 +74,11 @@ export function formatDateShort(isoDate: string): string {
 
 /**
  * Format ISO timestamp to date and time
- * Example: "2024-11-18T10:30:00" → "18/11/2024 à 10:30"
+ * Example: "2024-11-18T10:30:00" → "18/11/2024 at 10:30"
  */
 export function formatDateTime(isoTimestamp: string): string {
   const date = new Date(isoTimestamp);
-  return new Intl.DateTimeFormat('fr-FR', {
+  return new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -81,7 +88,7 @@ export function formatDateTime(isoTimestamp: string): string {
 }
 
 /**
- * Get relative time string (e.g., "Il y a 2 heures")
+ * Get relative time string (e.g., "2 hours ago")
  */
 export function getRelativeTime(isoTimestamp: string): string {
   const date = new Date(isoTimestamp);
@@ -91,10 +98,10 @@ export function getRelativeTime(isoTimestamp: string): string {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return "À l'instant";
-  if (diffMins < 60) return `Il y a ${diffMins} minute${diffMins > 1 ? 's' : ''}`;
-  if (diffHours < 24) return `Il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`;
-  if (diffDays < 30) return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+  if (diffDays < 30) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
   
   return formatDateShort(isoTimestamp);
 }
@@ -107,7 +114,7 @@ export function getRelativeTime(isoTimestamp: string): string {
  * Get human-readable label for document type
  */
 export function getDocumentTypeLabel(type: DocumentType): string {
-  return type === 'biology' ? 'Biologie' : 'Radiologie';
+  return type === 'biology' ? 'Biology' : 'Radiology';
 }
 
 /**
@@ -129,11 +136,11 @@ export function getRadiologyTypeLabel(type: RadiologyType): string {
  */
 export function getStatusLabel(status: DocumentStatus): string {
   const labels: Record<DocumentStatus, string> = {
-    pending: 'En attente',
-    extracting: 'Extraction en cours',
-    analyzing: 'Analyse en cours',
-    completed: 'Terminé',
-    error: 'Erreur',
+    pending: 'Pending',
+    extracting: 'Extracting',
+    analyzing: 'Analyzing',
+    completed: 'Completed',
+    error: 'Error',
   };
   return labels[status] || status;
 }
@@ -144,10 +151,10 @@ export function getStatusLabel(status: DocumentStatus): string {
 export function getResultStatusLabel(status: ResultStatus): string {
   const labels: Record<ResultStatus, string> = {
     normal: 'Normal',
-    low: 'Bas',
-    high: 'Élevé',
-    critical: 'Critique',
-    unknown: 'Inconnu',
+    low: 'Low',
+    high: 'High',
+    critical: 'Critical',
+    unknown: 'Unknown',
   };
   return labels[status] || status;
 }
@@ -515,10 +522,10 @@ export function calculateConfidence(factors: {
  * Get confidence level label
  */
 export function getConfidenceLabel(confidence: number): string {
-  if (confidence >= 0.9) return 'Excellente';
-  if (confidence >= 0.75) return 'Bonne';
-  if (confidence >= 0.5) return 'Moyenne';
-  return 'Faible';
+  if (confidence >= 0.9) return 'Excellent';
+  if (confidence >= 0.75) return 'Good';
+  if (confidence >= 0.5) return 'Average';
+  return 'Low';
 }
 
 /**
@@ -543,7 +550,8 @@ export const DocumentUtils = {
   generateDocumentId,
   
   // Date Formatting
-  formatDateFrench,
+  formatDateEnglish,
+  formatDateFrench, // deprecated, use formatDateEnglish
   formatDateShort,
   formatDateTime,
   getRelativeTime,

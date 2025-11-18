@@ -13,7 +13,8 @@ import {
   ArrowRight,
   Sparkles,
   FileText,
-  TrendingUp
+  TrendingUp,
+  FileSearch
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { ConsultationType } from '@/lib/consultation-hub/route-decision'
@@ -213,6 +214,24 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
               </Card>
             </div>
           </RadioGroup>
+          
+          {/* Direct Access to Medical Documents */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                onProceed('/medical-documents')
+                router.push('/medical-documents')
+              }}
+            >
+              <FileSearch className="mr-2 h-5 w-5" />
+              Medical Documents Analysis
+            </Button>
+            <p className="text-xs text-gray-500 mt-2 text-center">
+              Upload and analyze biology tests or radiology reports
+            </p>
+          </div>
         </CardContent>
       </Card>
 

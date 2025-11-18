@@ -33,9 +33,9 @@ const openai = new OpenAI({
 // EXTRACTION PROMPTS
 // ============================================================================
 
-const BIOLOGY_EXTRACTION_PROMPT = `Tu es un expert médical spécialisé dans l'extraction de données à partir de documents d'analyses biologiques mauriciens.
+const BIOLOGY_EXTRACTION_PROMPT = `You are a medical expert specialized in extracting data from Mauritian biology test documents.
 
-OBJECTIF: Extraire TOUTES les informations structurées du document d'analyse biologique.
+OBJECTIVE: Extract ALL structured information from the biology test document.
 
 INSTRUCTIONS:
 1. Extraire le texte complet du document avec précision
@@ -84,9 +84,9 @@ IMPORTANT:
 - Conserver les valeurs exactes avec leurs unités
 - Le score de confiance doit refléter la qualité de l'extraction (0-1)`;
 
-const RADIOLOGY_EXTRACTION_PROMPT = `Tu es un expert médical spécialisé dans l'extraction de données à partir de comptes-rendus radiologiques mauriciens.
+const RADIOLOGY_EXTRACTION_PROMPT = `You are a medical expert specialized in extracting data from Mauritian radiology reports.
 
-OBJECTIF: Extraire TOUTES les informations structurées du compte-rendu radiologique.
+OBJECTIVE: Extract ALL structured information from the radiology report.
 
 INSTRUCTIONS:
 1. Extraire le texte complet du document avec précision
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
           content: [
             {
               type: 'text',
-              text: `Analyse ce document médical de type ${documentType === 'biology' ? 'biologie' : 'radiologie'} et extrais toutes les informations structurées.`,
+              text: `Analyze this medical document of type ${documentType === 'biology' ? 'biology' : 'radiology'} and extract all structured information.`,
             },
             {
               type: 'image_url',

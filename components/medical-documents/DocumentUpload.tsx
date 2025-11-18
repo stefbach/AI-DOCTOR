@@ -52,12 +52,12 @@ export default function DocumentUpload({
   const validateFile = (file: File): string | null => {
     // Check file type
     if (!isValidImageFile(file)) {
-      return 'Type de fichier invalide. Seules les images sont acceptées (JPEG, PNG, GIF, WebP).';
+      return 'Invalid file type. Only images are accepted (JPEG, PNG, GIF, WebP).';
     }
 
     // Check file size (max 10MB)
     if (!isValidFileSize(file, 10)) {
-      return 'Le fichier est trop volumineux. La taille maximale est de 10 Mo.';
+      return 'File is too large. Maximum size is 10 MB.';
     }
 
     return null;
@@ -86,7 +86,7 @@ export default function DocumentUpload({
       // Call parent callback
       onFileUpload(file, base64Data);
     } catch (err) {
-      setError('Erreur lors du chargement du fichier. Veuillez réessayer.');
+      setError('Error loading file. Please try again.');
       console.error('File upload error:', err);
     }
   }, [onFileUpload]);
@@ -196,8 +196,8 @@ export default function DocumentUpload({
           {isProcessing && (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">Traitement en cours...</span>
-                <span className="font-medium text-blue-600">Analyse IA</span>
+                <span className="text-gray-600">Processing...</span>
+                <span className="font-medium text-blue-600">AI Analysis</span>
               </div>
               <Progress value={undefined} className="h-2" />
             </div>
@@ -208,7 +208,7 @@ export default function DocumentUpload({
             <Alert className="bg-green-50 border-green-200">
               <Check className="w-4 h-4 text-green-600" />
               <AlertDescription className="text-green-800">
-                Document chargé avec succès. Cliquez sur &quot;Suivant&quot; pour continuer.
+                Document loaded successfully. Click &quot;Suivant&quot; to continue.
               </AlertDescription>
             </Alert>
           )}
@@ -252,21 +252,21 @@ export default function DocumentUpload({
             <div className="space-y-2">
               <p className="text-lg font-semibold text-gray-900">
                 {isDragging
-                  ? 'Déposez le fichier ici'
-                  : 'Glissez-déposez votre document'}
+                  ? 'Drop file here'
+                  : 'Drag and drop your document'}
               </p>
               <p className="text-sm text-gray-600">
                 ou{' '}
                 <span className="text-blue-600 font-medium hover:underline">
-                  parcourez vos fichiers
+                  browse your files
                 </span>
               </p>
             </div>
 
             {/* File Requirements */}
             <div className="text-xs text-gray-500 space-y-1">
-              <p>Formats acceptés: JPEG, PNG, GIF, WebP</p>
-              <p>Taille maximale: 10 Mo</p>
+              <p>Accepted formats: JPEG, PNG, GIF, WebP</p>
+              <p>Maximum size: 10 Mo</p>
             </div>
 
             {/* Browse Button */}
@@ -281,7 +281,7 @@ export default function DocumentUpload({
               disabled={disabled}
             >
               <FileImage className="w-4 h-4 mr-2" />
-              Sélectionner un fichier
+              Select a file
             </Button>
           </div>
         </CardContent>
@@ -307,12 +307,12 @@ export default function DocumentUpload({
 
       {/* Helper Text */}
       <div className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="font-medium mb-2">📋 Conseils pour une meilleure analyse</p>
+        <p className="font-medium mb-2">📋 Tips for better analysis</p>
         <ul className="space-y-1 list-disc list-inside">
-          <li>Assurez-vous que le document est bien éclairé et lisible</li>
-          <li>Évitez les reflets et les zones floues</li>
-          <li>Photographiez le document à plat, sans pliures</li>
-          <li>Assurez-vous que tout le texte est visible</li>
+          <li>Ensure the document is well-lit and readable</li>
+          <li>Avoid reflections and blurry areas</li>
+          <li>Photograph the document flat, without folds</li>
+          <li>Make sure all text is visible</li>
         </ul>
       </div>
     </div>

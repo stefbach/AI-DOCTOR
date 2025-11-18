@@ -54,15 +54,15 @@ export default function DocumentTypeSelector({
   const documentTypes = [
     {
       value: 'biology' as DocumentType,
-      label: 'Analyses Biologiques',
-      description: 'Bilans sanguins, analyses de laboratoire',
+      label: 'Biology Tests',
+      description: 'Blood tests, laboratory analyses',
       icon: Microscope,
       color: 'blue',
     },
     {
       value: 'radiology' as DocumentType,
-      label: 'Imagerie Médicale',
-      description: 'Radiographies, scanners, IRM, échographies',
+      label: 'Medical Imaging',
+      description: 'X-rays, CT scans, MRI, ultrasounds',
       icon: Stethoscope,
       color: 'purple',
     },
@@ -90,7 +90,7 @@ export default function DocumentTypeSelector({
     <div className="space-y-6">
       {/* Document Type Selection */}
       <div className="space-y-4">
-        <Label className="text-lg font-semibold">Type de document</Label>
+        <Label className="text-lg font-semibold">Document Type</Label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {documentTypes.map((type) => {
             const Icon = type.icon;
@@ -141,7 +141,7 @@ export default function DocumentTypeSelector({
       {selectedType && (
         <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
           <Label className="text-lg font-semibold">
-            Type d&apos;analyse spécifique
+            Specific Test Type
           </Label>
           <Select
             value={selectedSubType || undefined}
@@ -149,7 +149,7 @@ export default function DocumentTypeSelector({
             disabled={disabled}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Sélectionnez le type d'analyse..." />
+              <SelectValue placeholder="Select test type..." />
             </SelectTrigger>
             <SelectContent>
               {subTypeOptions.map((option) => (
@@ -161,8 +161,8 @@ export default function DocumentTypeSelector({
           </Select>
           <p className="text-sm text-gray-600">
             {selectedType === 'biology'
-              ? 'Sélectionnez le type de bilan biologique (NFS, bilan hépatique, etc.)'
-              : 'Sélectionnez le type d\'imagerie (radiographie, scanner, IRM, etc.)'}
+              ? 'Select the type of biology test (CBC, liver function, etc.)'
+              : 'Select the imaging type (X-ray, CT scan, MRI, etc.)'}
           </p>
         </div>
       )}
@@ -170,10 +170,10 @@ export default function DocumentTypeSelector({
       {/* Helper Text */}
       {!selectedType && (
         <div className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="font-medium mb-2">💡 Conseil</p>
+          <p className="font-medium mb-2">💡 Tip</p>
           <p>
-            Sélectionnez d&apos;abord le type de document que vous souhaitez analyser. Cela nous
-            permettra d&apos;optimiser l&apos;extraction et l&apos;analyse des données.
+            First select the document type you want to analyze. This allows us
+            to optimize data extraction and analysis.
           </p>
         </div>
       )}

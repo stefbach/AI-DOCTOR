@@ -31,20 +31,20 @@ interface AnalysisProgressProps {
 const STEPS = [
   {
     id: 'extracting',
-    title: 'Extraction du texte',
-    description: 'Lecture et extraction du contenu du document...',
+    title: 'Text Extraction',
+    description: 'Reading and extracting document content...',
     icon: FileText,
   },
   {
     id: 'analyzing',
-    title: 'Analyse médicale',
-    description: 'Analyse des résultats par intelligence artificielle...',
+    title: 'Medical Analysis',
+    description: 'Analyzing results with artificial intelligence...',
     icon: Brain,
   },
   {
     id: 'completed',
-    title: 'Analyse terminée',
-    description: 'Le document a été analysé avec succès',
+    title: 'Analysis Complete',
+    description: 'Document analyzed successfully',
     icon: CheckCircle,
   },
 ];
@@ -85,7 +85,7 @@ export default function AnalysisProgress({ currentStep, error }: AnalysisProgres
                 Erreur lors de l&apos;analyse
               </h3>
               <p className="text-sm text-red-800">
-                {error || 'Une erreur est survenue. Veuillez réessayer.'}
+                {error || 'An error occurred. Please try again.'}
               </p>
             </div>
           </div>
@@ -179,14 +179,14 @@ export default function AnalysisProgress({ currentStep, error }: AnalysisProgres
                 {isCompleted && (
                   <div className="flex-shrink-0">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Terminé
+                      Completed
                     </span>
                   </div>
                 )}
                 {isCurrent && (
                   <div className="flex-shrink-0">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      En cours
+                      In Progress
                     </span>
                   </div>
                 )}
@@ -201,7 +201,7 @@ export default function AnalysisProgress({ currentStep, error }: AnalysisProgres
             <p className="flex items-center">
               <span className="mr-2">⏱️</span>
               <span>
-                Temps estimé:{' '}
+                Estimated time:{' '}
                 <span className="font-medium">
                   {currentStep === 'extracting' ? '15-30 secondes' : '20-40 secondes'}
                 </span>
