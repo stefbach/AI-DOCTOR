@@ -1783,6 +1783,95 @@ export default function ChronicProfessionalReport({
 
       console.log('📝 Saving to database...')
 
+      // Format report for save-medical-report API (same structure as handleValidateDocument)
+      const formattedReport = {
+        compteRendu: {
+          praticien: {
+            nom: report.medicalReport.practitioner.name,
+            qualifications: report.medicalReport.practitioner.qualifications,
+            specialite: report.medicalReport.practitioner.specialty,
+            numeroEnregistrement: report.medicalReport.practitioner.registrationNumber,
+            email: report.medicalReport.practitioner.email,
+            adresseCabinet: "Tibok Teleconsultation Platform",
+            telephone: "+230 XXX XXXX",
+            heuresConsultation: "Teleconsultation Hours: 8:00 AM - 8:00 PM"
+          },
+          patient: {
+            nom: report.medicalReport.patient.fullName,
+            age: report.medicalReport.patient.age,
+            dateNaissance: report.medicalReport.patient.dateOfBirth,
+            sexe: report.medicalReport.patient.gender,
+            adresse: report.medicalReport.patient.address || '',
+            telephone: report.medicalReport.patient.phone || '',
+            email: report.medicalReport.patient.email || ''
+          },
+          rapport: {
+            motifConsultation: report.medicalReport.chronicDiseaseAssessment?.primaryDiagnosis || clinicalData?.chiefComplaint || '',
+            antecedentsMedicaux: report.medicalReport.patient.medicalHistory || '',
+            examenClinique: report.medicalReport.clinicalEvaluation?.physicalExamination || '',
+            conclusionDiagnostique: report.medicalReport.diagnosticSummary?.diagnosticConclusion || '',
+            planTraitement: report.medicalReport.narrative || '',
+            recommandations: '',
+            planSuivi: ''
+          },
+          metadata: {
+            dateGeneration: new Date().toISOString(),
+            typeConsultation: 'chronic_disease',
+            validationStatus: 'validated'
+          }
+        },
+        medicalReport: report.medicalReport,
+        ordonnances: {
+          ...(report.medicationPrescription && {
+            medicaments: report.medicationPrescription
+          }),
+          ...(report.laboratoryTests && {
+            biologie: report.laboratoryTests
+          }),
+          ...(report.paraclinicalExams && {
+            imagerie: report.paraclinicalExams
+          }),
+          ...(sickLeaveData.numberOfDays > 0 && {
+            arretMaladie: {
+              enTete: {
+                nom: report.medicalReport.practitioner.name,
+                numeroEnregistrement: report.medicalReport.practitioner.registrationNumber
+              },
+              patient: {
+                nom: report.medicalReport.patient.fullName,
+                age: report.medicalReport.patient.age,
+                dateNaissance: report.medicalReport.patient.dateOfBirth || '',
+                adresse: report.medicalReport.patient.address || ''
+              },
+              certificat: {
+                dateDebut: sickLeaveData.startDate,
+                dateFin: sickLeaveData.endDate,
+                nombreJours: sickLeaveData.numberOfDays,
+                motifMedical: sickLeaveData.medicalReason,
+                remarques: sickLeaveData.remarks
+              },
+              authentification: {
+                signature: "Medical Practitioner's Signature",
+                nomEnCapitales: report.medicalReport.practitioner.name.toUpperCase(),
+                numeroEnregistrement: report.medicalReport.practitioner.registrationNumber,
+                date: new Date().toISOString().split('T')[0]
+              }
+            }
+          })
+        },
+        dietaryProtocol: report.dietaryProtocol || null,
+        followUpPlan: report.followUpPlan || null,
+        ...(invoiceData.services.totalDue > 0 && {
+          invoice: {
+            header: invoiceData.header,
+            provider: invoiceData.provider,
+            patient: invoiceData.patient,
+            services: invoiceData.services,
+            payment: invoiceData.payment
+          }
+        })
+      }
+
       // Save final version to consultation_records table
       const saveResponse = await fetch('/api/save-medical-report', {
         method: 'POST',
@@ -1793,7 +1882,7 @@ export default function ChronicProfessionalReport({
           doctorId,
           doctorName: finalDoctorInfo.nom,
           patientName: patientName,
-          report: report,
+          report: formattedReport,
           action: 'finalize',
           metadata: {
             wordCount: report.medicalReport?.narrative?.split(' ').length || 0,
@@ -1805,7 +1894,7 @@ export default function ChronicProfessionalReport({
               prescription: !!report?.medicationPrescription,
               laboratory: !!report?.laboratoryTests,
               imaging: !!report?.paraclinicalExams,
-              dietPlan: !!report?.dietaryPlan,
+              dietPlan: !!report?.dietaryProtocol,
               sickLeave: !!(sickLeaveData?.startDate && sickLeaveData?.endDate),
               followUp: !!report?.followUpPlan,
               invoice: !!invoiceData?.header?.invoiceNumber
