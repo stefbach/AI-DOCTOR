@@ -626,11 +626,25 @@ export default function ModernPatientForm({
  // ========== USER CHOICE: DERMATOLOGY WORKFLOW ==========
  if (consultationType === 'dermatology') {
  console.log('🔬 User selected Dermatology Consultation, redirecting to dermatology workflow...')
- 
- // Store patient data for dermatology workflow
- sessionStorage.setItem('dermatologyPatientData', JSON.stringify(formData))
+
+ // Get IDs from URL params to preserve for dermatology workflow
+ const dermaParams = new URLSearchParams(window.location.search)
+ const consultationId = dermaParams.get('consultationId')
+ const patientId = dermaParams.get('patientId')
+ const doctorId = dermaParams.get('doctorId')
+
+ console.log('🔑 Preserving IDs for dermatology workflow:', { consultationId, patientId, doctorId })
+
+ // Store patient data with IDs for dermatology workflow
+ const dermatologyData = {
+ ...formData,
+ consultationId,
+ patientId,
+ doctorId
+ }
+ sessionStorage.setItem('dermatologyPatientData', JSON.stringify(dermatologyData))
  sessionStorage.setItem('isDermatologyWorkflow', 'true')
- 
+
  // Redirect to dermatology workflow
  window.location.href = '/dermatology'
  return

@@ -418,12 +418,14 @@ const updateData = {
         patient_data: patientData || existingRecord.patient_data || {},
         clinical_data: clinicalData || existingRecord.clinical_data || {},
         diagnosis_data: isRenewal ? {} : (diagnosisData || existingRecord.diagnosis_data || {}),
-        has_prescriptions: hasMedications,
-        has_lab_requests: hasLabTests,
-        has_imaging_requests: hasImaging,
-       has_sick_leave: !!(prescriptionData.sickLeave && (prescriptionData.sickLeave.nombreJours > 0 || prescriptionData.sickLeave.numberOfDays > 0)),
-  sick_leave_data: prescriptionData.sickLeave || null,
-  has_invoice: !!(report?.invoice),
+        has_prescriptions: hasMedications || !!metadata?.documentValidations?.prescription,
+        has_lab_requests: hasLabTests || !!metadata?.documentValidations?.laboratory,
+        has_imaging_requests: hasImaging || !!metadata?.documentValidations?.imaging,
+        has_sick_leave: !!(prescriptionData.sickLeave && (prescriptionData.sickLeave.nombreJours > 0 || prescriptionData.sickLeave.numberOfDays > 0)) || !!metadata?.documentValidations?.sickLeave,
+        sick_leave_data: prescriptionData.sickLeave || null,
+        has_invoice: !!(report?.invoice) || !!metadata?.documentValidations?.invoice,
+        has_diet_plan: !!report?.dietaryPlan || !!metadata?.documentValidations?.dietPlan,
+        has_follow_up: !!report?.followUpPlan || !!metadata?.documentValidations?.followUp,
         chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation ||
                          clinicalData?.chiefComplaint ||
                          clinicalData?.visitReasons?.join(', ') ||
@@ -487,12 +489,14 @@ const insertData = {
         doctor_name: doctorName,
         patient_name: patientName,
         consultation_date: consultationDate,
-        has_prescriptions: hasMedications,
-        has_lab_requests: hasLabTests,
-        has_imaging_requests: hasImaging,
-        has_sick_leave: !!(prescriptionData.sickLeave && (prescriptionData.sickLeave.nombreJours > 0 || prescriptionData.sickLeave.numberOfDays > 0)),
-  sick_leave_data: prescriptionData.sickLeave || null,
-  has_invoice: !!(report?.invoice),
+        has_prescriptions: hasMedications || !!metadata?.documentValidations?.prescription,
+        has_lab_requests: hasLabTests || !!metadata?.documentValidations?.laboratory,
+        has_imaging_requests: hasImaging || !!metadata?.documentValidations?.imaging,
+        has_sick_leave: !!(prescriptionData.sickLeave && (prescriptionData.sickLeave.nombreJours > 0 || prescriptionData.sickLeave.numberOfDays > 0)) || !!metadata?.documentValidations?.sickLeave,
+        sick_leave_data: prescriptionData.sickLeave || null,
+        has_invoice: !!(report?.invoice) || !!metadata?.documentValidations?.invoice,
+        has_diet_plan: !!report?.dietaryPlan || !!metadata?.documentValidations?.dietPlan,
+        has_follow_up: !!report?.followUpPlan || !!metadata?.documentValidations?.followUp,
         chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation ||
                          clinicalData?.chiefComplaint ||
                          clinicalData?.visitReasons?.join(', ') ||
