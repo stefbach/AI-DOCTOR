@@ -12,11 +12,11 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
-import { 
-  FileText, Download, Printer, CheckCircle, Loader2, Pill, TestTube, 
-  Scan, AlertTriangle, Eye, EyeOff, Edit, Save, FileCheck, Plus, 
+import {
+  FileText, Download, Printer, CheckCircle, Loader2, Pill, TestTube,
+  Scan, AlertTriangle, Eye, EyeOff, Edit, Save, FileCheck, Plus,
   Trash2, AlertCircle, Lock, Unlock, Calendar, User, Stethoscope,
-  Activity, Utensils, ClipboardList, HeartPulse
+  Activity, Utensils, ClipboardList, HeartPulse, Send
 } from "lucide-react"
 
 // ==================== TYPES & INTERFACES ====================
@@ -308,7 +308,7 @@ const createEmptyReport = (): ChronicProfessionalReportData => ({
 // Helper to format narrative text with bold section headers
 function formatNarrativeWithBoldHeaders(narrative: string): string {
   if (!narrative) return ''
-  
+
   // Define section headers that should be bold (from the API format)
   const sectionHeaders = [
     'CHRONIC DISEASE FOLLOW-UP CONSULTATION REPORT',
@@ -336,32 +336,44 @@ function formatNarrativeWithBoldHeaders(narrative: string): string {
     'SIGNATURE',
     'MEDICAL CERTIFICATION'
   ]
-  
+
+  // Remove the PHYSICIAN AUTHENTICATION section from the narrative
+  // This section will be added separately with the actual signature
+  let processedNarrative = narrative
+
+  // Pattern to match PHYSICIAN AUTHENTICATION section and everything after it
+  const physicianAuthPattern = /\n*═+\n*PHYSICIAN AUTHENTICATION[\s\S]*$/i
+  processedNarrative = processedNarrative.replace(physicianAuthPattern, '')
+
+  // Also try alternative patterns
+  const altPattern = /\nPHYSICIAN AUTHENTICATION[\s\S]*$/i
+  processedNarrative = processedNarrative.replace(altPattern, '')
+
   // Split into lines
-  const lines = narrative.split('\n')
-  
+  const lines = processedNarrative.split('\n')
+
   // Process each line
   const formattedLines = lines.map(line => {
     const trimmedLine = line.trim()
-    
+
     // Skip separator lines (preserve them as-is)
     if (trimmedLine.match(/^═+$/)) {
       return line
     }
-    
+
     // Check if this line is a section header
     if (sectionHeaders.includes(trimmedLine)) {
       // Make it bold using HTML
       return `<strong>${line}</strong>`
     }
-    
+
     // Regular line - escape HTML special chars to prevent XSS
     return line
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
   })
-  
+
   return formattedLines.join('\n')
 }
 
@@ -455,6 +467,7 @@ export default function ChronicProfessionalReport({
   const [saving, setSaving] = useState(false)
   const [validationStatus, setValidationStatus] = useState<'draft' | 'validated'>('draft')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [isSendingDocuments, setIsSendingDocuments] = useState(false)
 
   // Sick leave state
   const [sickLeaveData, setSickLeaveData] = useState({
@@ -1638,7 +1651,442 @@ export default function ChronicProfessionalReport({
       setSaving(false)
     }
   }, [validationStatus, consultationId, report, sickLeaveData, invoiceData, patientData, clinicalData, diagnosisData, editableNarrative, localMedications, localLabTests, localParaclinicalExams, doctorInfo])
-  
+
+  // ==================== SEND DOCUMENTS ====================
+  const handleSendDocuments = async () => {
+    console.log('📤 Starting handleSendDocuments for chronic disease...')
+    setIsSendingDocuments(true)
+
+    // Check if report is validated
+    if (!report || validationStatus !== 'validated') {
+      console.log('❌ Report not validated', { hasReport: !!report, validationStatus })
+      toast({
+        title: "Cannot send documents",
+        description: "Please validate the documents first",
+        variant: "destructive"
+      })
+      setIsSendingDocuments(false)
+      return
+    }
+
+    // Get patient data
+    const patient = report.medicalReport?.patient
+    let patientName = patient?.fullName || `${patientData?.firstName || ''} ${patientData?.lastName || ''}`.trim() || 'Patient'
+    let patientEmail = patient?.email || patientData?.email || ''
+    let patientPhone = patient?.phone || patientData?.phone || patientData?.phoneNumber || ''
+    let patientAddress = patient?.address || patientData?.address || patientData?.deliveryAddress || 'Mauritius'
+
+    console.log('📋 Patient data:', { name: patientName, email: patientEmail, phone: patientPhone })
+
+    // Email validation with fallback
+    if (!patientEmail || !patientEmail.includes('@')) {
+      patientEmail = `patient_${Date.now()}@tibok.mu`
+      console.log('⚠️ Using fallback email:', patientEmail)
+    }
+
+    // Phone validation with fallback
+    if (!patientPhone) {
+      patientPhone = '+230 0000 0000'
+      console.log('⚠️ Using fallback phone:', patientPhone)
+    }
+
+    // Doctor validation
+    if (!doctorInfo?.nom || doctorInfo.nom === 'Dr. [Name Required]') {
+      console.log('❌ Invalid doctor name')
+      toast({
+        title: "Incomplete Doctor Information",
+        description: "Please complete doctor profile before sending",
+        variant: "destructive"
+      })
+      setIsSendingDocuments(false)
+      return
+    }
+
+    // MCM number validation
+    let mcmNumber = doctorInfo?.numeroEnregistrement || ''
+    if (mcmNumber.includes('[') || mcmNumber === '[MCM Registration Required]') {
+      mcmNumber = 'PENDING'
+      console.log('⚠️ Using fallback MCM number:', mcmNumber)
+    }
+
+    try {
+      console.log('✅ All validations passed, proceeding to send...')
+
+      toast({
+        title: "Sending documents...",
+        description: "Preparing documents for patient dashboard"
+      })
+
+      const params = new URLSearchParams(window.location.search)
+      const patientId = params.get('patientId') || patientData?.id || patientData?.patientId
+      const doctorId = params.get('doctorId')
+
+      console.log('📍 IDs found:', { consultationId, patientId, doctorId })
+
+      if (!consultationId || !patientId || !doctorId) {
+        console.log('❌ Missing required IDs')
+        toast({
+          title: "Error",
+          description: `Missing IDs - Consultation: ${consultationId}, Patient: ${patientId}, Doctor: ${doctorId}`,
+          variant: "destructive"
+        })
+        setIsSendingDocuments(false)
+        return
+      }
+
+      // Prepare doctor info with fallbacks
+      const finalDoctorInfo = {
+        ...doctorInfo,
+        numeroEnregistrement: mcmNumber,
+        email: doctorInfo.email?.includes('[') ? 'doctor@tibok.mu' : doctorInfo.email
+      }
+
+      console.log('📝 Saving to database...')
+
+      // Save final version to consultation_records table
+      const saveResponse = await fetch('/api/save-medical-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          consultationId,
+          patientId,
+          doctorId,
+          doctorName: finalDoctorInfo.nom,
+          patientName: patientName,
+          report: report,
+          action: 'finalize',
+          metadata: {
+            wordCount: report.medicalReport?.narrative?.split(' ').length || 0,
+            signatures: documentSignatures,
+            validationStatus: 'validated',
+            finalizedAt: new Date().toISOString(),
+            documentValidations: {
+              consultation: true,
+              prescription: !!report?.medicationPrescription,
+              laboratory: !!report?.laboratoryTests,
+              imaging: !!report?.paraclinicalExams,
+              dietPlan: !!report?.dietaryPlan,
+              sickLeave: !!(sickLeaveData?.startDate && sickLeaveData?.endDate),
+              followUp: !!report?.followUpPlan,
+              invoice: !!invoiceData?.header?.invoiceNumber
+            }
+          },
+          patientData: {
+            ...patientData,
+            name: patientName,
+            email: patientEmail,
+            phone: patientPhone,
+            address: patientAddress
+          },
+          clinicalData: clinicalData || {},
+          diagnosisData: diagnosisData || {}
+        })
+      })
+
+      const saveResult = await saveResponse.json()
+      console.log('💾 Save response:', { status: saveResponse.status, result: saveResult })
+
+      if (!saveResponse.ok) {
+        console.log('❌ Save failed:', saveResult)
+        toast({
+          title: "Save Failed",
+          description: saveResult.error || 'Failed to save report',
+          variant: "destructive"
+        })
+        setIsSendingDocuments(false)
+        return
+      }
+
+      console.log('✅ Report saved successfully')
+
+      // Update draft as finalized
+      console.log('📝 Marking draft as finalized...')
+
+      await fetch('/api/save-draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          consultationId,
+          reportContent: {
+            ...report,
+            metadata: {
+              finalized: true,
+              finalizedAt: new Date().toISOString()
+            }
+          },
+          doctorInfo: finalDoctorInfo,
+          modifiedSections: []
+        })
+      })
+
+      // Get Tibok URL
+      const getTibokUrl = () => {
+        const urlParam = params.get('tibokUrl')
+        if (urlParam) {
+          console.log('📍 Using Tibok URL from parameter:', decodeURIComponent(urlParam))
+          return decodeURIComponent(urlParam)
+        }
+
+        if (document.referrer) {
+          try {
+            const referrerUrl = new URL(document.referrer)
+            const knownTibokDomains = ['tibok.mu', 'v0-tibokmain2.vercel.app', 'localhost']
+            if (knownTibokDomains.some(domain => referrerUrl.hostname.includes(domain))) {
+              console.log('📍 Using Tibok URL from referrer:', referrerUrl.origin)
+              return referrerUrl.origin
+            }
+          } catch (e) {
+            console.log('Could not parse referrer')
+          }
+        }
+
+        console.log('📍 Using default Tibok URL: https://tibok.mu')
+        return 'https://tibok.mu'
+      }
+
+      const tibokUrl = getTibokUrl()
+
+      // Prepare documents payload for chronic disease
+      console.log('📦 Preparing documents payload...')
+
+      const documentsPayload = {
+        consultationId,
+        patientId,
+        doctorId,
+        doctorName: finalDoctorInfo.nom,
+        patientName: patientName,
+        patientEmail: patientEmail,
+        patientPhone: patientPhone,
+        generatedAt: new Date().toISOString(),
+        consultationType: 'chronic_disease',
+        documents: {
+          consultationReport: report?.medicalReport ? {
+            type: 'chronic_disease_report',
+            title: 'Chronic Disease Follow-up Consultation Report',
+            content: report.medicalReport,
+            validated: true,
+            validatedAt: new Date().toISOString(),
+            signature: documentSignatures?.consultation || null
+          } : null,
+          prescriptions: report?.medicationPrescription ? {
+            type: 'prescription',
+            title: 'Medication Prescription',
+            medications: report.medicationPrescription.prescription?.medications || [],
+            validity: report.medicationPrescription.prescription?.validity || '3 months',
+            signature: documentSignatures?.prescription || null,
+            content: report.medicationPrescription
+          } : null,
+          laboratoryRequests: report?.laboratoryTests ? {
+            type: 'laboratory_request',
+            title: 'Laboratory Request Form',
+            tests: report.laboratoryTests.prescription?.tests || {},
+            signature: documentSignatures?.laboratory || null,
+            content: report.laboratoryTests
+          } : null,
+          imagingRequests: report?.paraclinicalExams ? {
+            type: 'paraclinical_request',
+            title: 'Paraclinical Examination Request',
+            examinations: report.paraclinicalExams.prescription?.exams || [],
+            signature: documentSignatures?.imaging || null,
+            content: report.paraclinicalExams
+          } : null,
+          dietaryPlan: report?.dietaryPlan ? {
+            type: 'dietary_plan',
+            title: 'Dietary Protocol for Chronic Disease Management',
+            content: report.dietaryPlan,
+            signature: documentSignatures?.prescription || null
+          } : null,
+          sickLeaveCertificate: (sickLeaveData?.startDate && sickLeaveData?.endDate) ? {
+            type: 'sick_leave',
+            title: 'Medical Certificate / Sick Leave',
+            certificate: {
+              dateDebut: sickLeaveData.startDate,
+              dateFin: sickLeaveData.endDate,
+              nombreJours: sickLeaveData.numberOfDays,
+              motifMedical: sickLeaveData.medicalReason || report?.medicalReport?.diagnosis?.primary || 'Medical condition requiring rest',
+              remarques: sickLeaveData.remarks || ''
+            },
+            signature: documentSignatures?.sickLeave || null
+          } : null,
+          followUpPlan: report?.followUpPlan ? {
+            type: 'follow_up_plan',
+            title: 'Chronic Disease Management / Follow-up Care Plan',
+            content: report.followUpPlan,
+            signature: documentSignatures?.consultation || null
+          } : null,
+          invoice: invoiceData?.header?.invoiceNumber ? {
+            type: 'invoice',
+            title: `Invoice ${invoiceData.header.invoiceNumber}`,
+            content: invoiceData,
+            signature: documentSignatures?.invoice || null
+          } : null
+        }
+      }
+
+      console.log('📨 Sending to Tibok at:', tibokUrl)
+      console.log('📦 Payload size:', JSON.stringify(documentsPayload).length, 'bytes')
+
+      const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(documentsPayload)
+      })
+
+      console.log('📨 Tibok response status:', response.status)
+
+      let responseText = ''
+      try {
+        responseText = await response.text()
+        console.log('📨 Raw response:', responseText.substring(0, 200))
+      } catch (e) {
+        console.error('Failed to read response text:', e)
+      }
+
+      let result
+      if (responseText) {
+        try {
+          result = JSON.parse(responseText)
+          console.log('✅ Parsed response:', result)
+        } catch (e) {
+          console.error('Failed to parse response as JSON:', responseText)
+
+          if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+            throw new Error('Received HTML instead of JSON - API endpoint might not exist')
+          } else {
+            throw new Error(`Invalid response: ${responseText.substring(0, 100)}`)
+          }
+        }
+      }
+
+      if (!response.ok) {
+        console.error('❌ Tibok API error:', result || responseText)
+        throw new Error(result?.error || `Failed to send documents: ${response.status}`)
+      }
+
+      if (result?.success) {
+        console.log('🎉 Documents sent successfully!')
+        setIsSendingDocuments(false)
+
+        toast({
+          title: "Documents sent successfully",
+          description: "The documents are now available in the patient dashboard"
+        })
+
+        // Show success modal
+        showSuccessModal()
+
+      } else {
+        throw new Error(result?.error || "Failed to send documents - no success flag")
+      }
+
+    } catch (error) {
+      console.error("❌ Error in handleSendDocuments:", error)
+      setIsSendingDocuments(false)
+      toast({
+        title: "Error sending documents",
+        description: error instanceof Error ? error.message : "An error occurred while sending documents",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const showSuccessModal = () => {
+    const modalContainer = document.createElement('div')
+    modalContainer.id = 'success-modal'
+    modalContainer.style.cssText = `
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeIn 0.3s ease-out;
+    `
+
+    const modalContent = document.createElement('div')
+    modalContent.style.cssText = `
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      max-width: 500px;
+      margin: 1rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      animation: slideUp 0.3s ease-out;
+      position: relative;
+    `
+
+    modalContent.innerHTML = `
+      <button id="close-x-btn" style="
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: none;
+        background: #f3f4f6;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      " onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+        <svg width="20" height="20" fill="#6b7280" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </button>
+      <div style="text-align: center;">
+        <div style="
+          width: 80px;
+          height: 80px;
+          background: linear-gradient(135deg, #10b981, #3b82f6);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 1.5rem;
+        ">
+          <svg width="40" height="40" fill="white" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; color: #111827;">
+          Consultation Complete!
+        </h2>
+        <p style="color: #6b7280; margin-bottom: 1.5rem;">
+          All documents have been successfully sent to the patient's Tibok dashboard. The patient can now access their chronic disease management documents.
+        </p>
+        <button id="close-modal-btn" style="
+          background: linear-gradient(135deg, #10b981, #3b82f6);
+          color: white;
+          padding: 0.75rem 2rem;
+          border-radius: 0.5rem;
+          border: none;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+          Close
+        </button>
+      </div>
+    `
+
+    modalContainer.appendChild(modalContent)
+    document.body.appendChild(modalContainer)
+
+    // Close handlers
+    const closeModal = () => {
+      modalContainer.remove()
+    }
+
+    document.getElementById('close-modal-btn')?.addEventListener('click', closeModal)
+    document.getElementById('close-x-btn')?.addEventListener('click', closeModal)
+    modalContainer.addEventListener('click', (e) => {
+      if (e.target === modalContainer) closeModal()
+    })
+  }
+
   const exportToPDF = useCallback((elementId: string, filename: string) => {
     // Simple print-based PDF export
     window.print()
@@ -4357,7 +4805,28 @@ export default function ChronicProfessionalReport({
                 )}
                 {validationStatus === 'validated' ? 'Validated' : 'Validate & Sign'}
               </Button>
-              
+
+              {validationStatus === 'validated' && (
+                <Button
+                  size="sm"
+                  onClick={handleSendDocuments}
+                  disabled={isSendingDocuments}
+                  className="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSendingDocuments ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4 mr-2" />
+                      Send Documents
+                    </>
+                  )}
+                </Button>
+              )}
+
               <Button variant="outline" size="sm" onClick={handlePrint}>
                 <Printer className="h-4 w-4 mr-2" />
                 Print All
