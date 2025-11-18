@@ -599,11 +599,25 @@ export default function ModernPatientForm({
  if (consultationType === 'chronic') {
  console.log(' User selected Chronic Disease Follow-up, redirecting to specialized workflow...')
  console.log('📋 Medical History:', formData.medicalHistory)
- 
- // Store patient data for chronic disease workflow
- sessionStorage.setItem('chronicDiseasePatientData', JSON.stringify(formData))
+
+ // Get IDs from URL params to preserve for chronic disease workflow
+ const params = new URLSearchParams(window.location.search)
+ const consultationId = params.get('consultationId')
+ const patientId = params.get('patientId')
+ const doctorId = params.get('doctorId')
+
+ console.log('🔑 Preserving IDs for chronic disease workflow:', { consultationId, patientId, doctorId })
+
+ // Store patient data with IDs for chronic disease workflow
+ const chronicData = {
+ ...formData,
+ consultationId,
+ patientId,
+ doctorId
+ }
+ sessionStorage.setItem('chronicDiseasePatientData', JSON.stringify(chronicData))
  sessionStorage.setItem('isChronicDiseaseWorkflow', 'true')
- 
+
  // Redirect to chronic disease workflow
  window.location.href = '/chronic-disease'
  return
