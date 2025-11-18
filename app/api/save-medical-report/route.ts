@@ -305,17 +305,27 @@ export async function POST(request: NextRequest) {
     }
 
 // Structure prescription data separately for pharmacy workflow
+    // Support both normal consultation (French field names) and chronic disease (English field names)
+    const normalMeds = report?.ordonnances?.medicaments?.prescription?.medicaments || []
+    const chronicMeds = report?.ordonnances?.medicaments?.prescription?.medications || []
+
+    const normalLabs = report?.ordonnances?.biologie?.prescription?.analyses
+    const chronicLabs = report?.ordonnances?.biologie?.prescription?.tests
+
+    const normalImaging = report?.ordonnances?.imagerie?.prescription?.examens || []
+    const chronicImaging = report?.ordonnances?.imagerie?.prescription?.exams || []
+
     const prescriptionData = {
-      medications: report?.ordonnances?.medicaments?.prescription?.medicaments || [],
+      medications: normalMeds.length > 0 ? normalMeds : chronicMeds,
       laboratoryTests: {
-        hematology: report?.ordonnances?.biologie?.prescription?.analyses?.hematology || [],
-        clinicalChemistry: report?.ordonnances?.biologie?.prescription?.analyses?.clinicalChemistry || [],
-        immunology: report?.ordonnances?.biologie?.prescription?.analyses?.immunology || [],
-        microbiology: report?.ordonnances?.biologie?.prescription?.analyses?.microbiology || [],
-        endocrinology: report?.ordonnances?.biologie?.prescription?.analyses?.endocrinology || [],
-        general: report?.ordonnances?.biologie?.prescription?.analyses?.general || []
+        hematology: normalLabs?.hematology || chronicLabs?.hematology || [],
+        clinicalChemistry: normalLabs?.clinicalChemistry || chronicLabs?.clinicalChemistry || [],
+        immunology: normalLabs?.immunology || chronicLabs?.immunology || [],
+        microbiology: normalLabs?.microbiology || chronicLabs?.microbiology || [],
+        endocrinology: normalLabs?.endocrinology || chronicLabs?.endocrinology || [],
+        general: normalLabs?.general || chronicLabs?.general || []
       },
-imagingStudies: report?.ordonnances?.imagerie?.prescription?.examens || [],
+imagingStudies: normalImaging.length > 0 ? normalImaging : chronicImaging,
 sickLeave: report?.ordonnances?.arretMaladie?.certificat ? {
   dateDebut: report.ordonnances.arretMaladie.certificat.dateDebut,
   dateFin: report.ordonnances.arretMaladie.certificat.dateFin,
