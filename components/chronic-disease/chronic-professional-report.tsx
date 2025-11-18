@@ -1330,6 +1330,124 @@ export default function ChronicProfessionalReport({
 
     setSaving(true)
     try {
+      // Generate signature for validation
+      let signatureDataUrl: string | null = null;
+
+      // Try to use real signature first
+      const realSignatureUrl = doctorInfo.signatureUrl || doctorInfo.digitalSignature;
+
+      if (realSignatureUrl) {
+        console.log('🖊️ Attempting to use real doctor signature...');
+
+        // Process the URL to ensure it's complete
+        if (realSignatureUrl.startsWith('data:')) {
+          signatureDataUrl = realSignatureUrl;
+          console.log('✅ Using stored digital signature (base64)');
+        } else if (realSignatureUrl.startsWith('http://') || realSignatureUrl.startsWith('https://')) {
+          signatureDataUrl = realSignatureUrl;
+          console.log('✅ Using signature URL directly:', signatureDataUrl);
+        } else {
+          // Build full URL from Supabase
+          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+          if (supabaseUrl) {
+            if (!realSignatureUrl.includes('/')) {
+              signatureDataUrl = `${supabaseUrl}/storage/v1/object/public/documents/doctor-signatures/${realSignatureUrl}`;
+            } else if (realSignatureUrl.startsWith('documents/doctor-signatures/')) {
+              signatureDataUrl = `${supabaseUrl}/storage/v1/object/public/${realSignatureUrl}`;
+            } else if (realSignatureUrl.startsWith('doctor-signatures/')) {
+              signatureDataUrl = `${supabaseUrl}/storage/v1/object/public/documents/${realSignatureUrl}`;
+            } else {
+              signatureDataUrl = `${supabaseUrl}/storage/v1/object/public/documents/doctor-signatures/${realSignatureUrl}`;
+            }
+            console.log('📎 Built signature URL:', signatureDataUrl);
+          }
+        }
+      }
+
+      // If no real signature, generate a fallback
+      if (!signatureDataUrl) {
+        console.log('📝 Generating fallback signature...');
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 300;
+        canvas.height = 80;
+        const ctx = canvas.getContext('2d');
+
+        if (ctx) {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, 300, 80);
+
+          const nameParts = doctorInfo.nom.replace('Dr. ', '').split(' ');
+          const nameHash = doctorInfo.nom.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+          const signatureStyle = nameHash % 3;
+
+          ctx.save();
+          ctx.translate(50, 40);
+
+          ctx.strokeStyle = '#1a1a2e';
+          ctx.lineWidth = 2;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+
+          if (signatureStyle === 0) {
+            // Cursive style
+            ctx.font = 'italic 24px "Brush Script MT", cursive';
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillText(nameParts.join(' '), 0, 0);
+          } else if (signatureStyle === 1) {
+            // Initial style
+            ctx.font = 'bold 28px Georgia';
+            ctx.fillStyle = '#1a1a2e';
+            const initials = nameParts.map(p => p.charAt(0)).join('');
+            ctx.fillText(initials, 0, 0);
+            ctx.beginPath();
+            ctx.moveTo(0, 8);
+            ctx.lineTo(60, 8);
+            ctx.stroke();
+          } else {
+            // Flowing style
+            ctx.beginPath();
+            let xOffset = 0;
+            for (const part of nameParts) {
+              const charWidth = 12;
+              for (let i = 0; i < part.length; i++) {
+                const x = xOffset + i * charWidth;
+                const y = Math.sin(i * 0.5) * 5;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+              }
+              xOffset += part.length * charWidth + 8;
+            }
+            ctx.stroke();
+          }
+
+          // Add date
+          ctx.font = '9px Arial';
+          ctx.fillStyle = '#9ca3af';
+          ctx.textAlign = 'left';
+          const date = new Date().toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          });
+          ctx.fillText(`Signed: ${date}`, 0, 35);
+          ctx.restore();
+
+          signatureDataUrl = canvas.toDataURL('image/png');
+          console.log('✅ Generated fallback signature');
+        }
+      }
+
+      // Create signatures object for all document types
+      const signatures = {
+        consultation: signatureDataUrl,
+        prescription: signatureDataUrl,
+        laboratory: signatureDataUrl,
+        imaging: signatureDataUrl,
+        sickLeave: signatureDataUrl,
+        invoice: signatureDataUrl
+      };
+
       // Sync all local state back to report (same pattern as sickLeaveData)
       const updatedReport = {
         ...report,
@@ -1441,8 +1559,15 @@ export default function ChronicProfessionalReport({
           report: formattedReport,
           action: 'finalize',
           metadata: {
-            signatures: {},
-            documentValidations: {}
+            signatures: signatures,
+            documentValidations: {
+              consultation: true,
+              prescription: !!updatedReport.medicationPrescription,
+              laboratory: !!updatedReport.laboratoryTests,
+              imaging: !!updatedReport.paraclinicalExams,
+              sickLeave: sickLeaveData.numberOfDays > 0,
+              invoice: invoiceData.services.totalDue > 0
+            }
           },
           patientData: {
             name: updatedReport.medicalReport.patient.fullName,
@@ -4488,13 +4613,6 @@ export default function ChronicProfessionalReport({
                         <p className="text-sm text-gray-600">{report.medicalReport.practitioner.qualifications}</p>
                         <p className="text-sm text-gray-600">Registration: {report.medicalReport.practitioner.registrationNumber}</p>
                         <p className="text-sm text-gray-600 mt-2">Date: {new Date().toLocaleDateString('en-GB')}</p>
-                      </div>
-                    </div>
-
-                    {/* Official Stamp Area */}
-                    <div className="mt-6 text-center">
-                      <div className="inline-block border-2 border-dashed border-gray-400 p-4 rounded">
-                        <p className="text-sm text-gray-500">Official Medical Stamp / Cachet Médical Officiel</p>
                       </div>
                     </div>
                   </div>
