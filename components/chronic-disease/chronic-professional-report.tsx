@@ -1861,7 +1861,8 @@ export default function ChronicProfessionalReport({
 
       // Get Tibok URL
       const getTibokUrl = () => {
-        const urlParam = params.get('tibokUrl')
+        const urlParams = new URLSearchParams(window.location.search)
+        const urlParam = urlParams.get('tibokUrl')
         if (urlParam) {
           console.log('📍 Using Tibok URL from parameter:', decodeURIComponent(urlParam))
           return decodeURIComponent(urlParam)
