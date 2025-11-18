@@ -503,6 +503,16 @@ export default function ChronicProfessionalReport({
     consultationFee: 0
   })
 
+  // Document signatures state for displaying validated signatures
+  const [documentSignatures, setDocumentSignatures] = useState<{
+    consultation?: string
+    prescription?: string
+    laboratory?: string
+    imaging?: string
+    sickLeave?: string
+    invoice?: string
+  }>({})
+
   // Local state for narrative text (completely independent like sick leave)
   const [editableNarrative, setEditableNarrative] = useState('')
 
@@ -1447,6 +1457,9 @@ export default function ChronicProfessionalReport({
         sickLeave: signatureDataUrl,
         invoice: signatureDataUrl
       };
+
+      // Update document signatures state for UI display
+      setDocumentSignatures(signatures);
 
       // Sync all local state back to report (same pattern as sickLeaveData)
       const updatedReport = {
@@ -2610,12 +2623,26 @@ export default function ChronicProfessionalReport({
             <p className="font-semibold">{medicationPrescription.authentication.practitionerName}</p>
             <p className="text-sm text-gray-600">{report.medicalReport.practitioner.qualifications}</p>
             <p className="text-sm text-gray-600">Medical Council Reg: {medicationPrescription.authentication.registrationNumber}</p>
-            <div className="mt-6">
-              <p className="text-sm">_______________________________</p>
-              <p className="text-sm">Medical Practitioner's Signature</p>
-              <p className="text-sm">Official Medical Stamp</p>
-              <p className="text-sm">Date: {medicationPrescription.authentication.date}</p>
-            </div>
+
+            {validationStatus === 'validated' && documentSignatures.prescription ? (
+              <div className="mt-4">
+                <img
+                  src={documentSignatures.prescription}
+                  alt="Doctor's Signature"
+                  className="ml-auto h-20 w-auto"
+                  style={{ maxWidth: '300px' }}
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Digitally signed on {new Date().toLocaleDateString()}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-6">
+                <p className="text-sm">_______________________________</p>
+                <p className="text-sm">Medical Practitioner's Signature</p>
+                <p className="text-sm">Date: {medicationPrescription.authentication.date}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -2944,11 +2971,26 @@ export default function ChronicProfessionalReport({
             <p className="font-semibold">{laboratoryTests.authentication.practitionerName}</p>
             <p className="text-sm text-gray-600">{report.medicalReport.practitioner.qualifications}</p>
             <p className="text-sm text-gray-600">Medical Council Reg: {laboratoryTests.authentication.registrationNumber}</p>
-            <div className="mt-6">
-              <p className="text-sm">_______________________________</p>
-              <p className="text-sm">Medical Practitioner's Signature</p>
-              <p className="text-sm">Date: {laboratoryTests.authentication.date}</p>
-            </div>
+
+            {validationStatus === 'validated' && documentSignatures.laboratory ? (
+              <div className="mt-4">
+                <img
+                  src={documentSignatures.laboratory}
+                  alt="Doctor's Signature"
+                  className="ml-auto h-20 w-auto"
+                  style={{ maxWidth: '300px' }}
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Digitally signed on {new Date().toLocaleDateString()}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-6">
+                <p className="text-sm">_______________________________</p>
+                <p className="text-sm">Medical Practitioner's Signature</p>
+                <p className="text-sm">Date: {laboratoryTests.authentication.date}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -3227,11 +3269,26 @@ export default function ChronicProfessionalReport({
             <p className="font-semibold">{paraclinicalExams.authentication.practitionerName}</p>
             <p className="text-sm text-gray-600">{report.medicalReport.practitioner.qualifications}</p>
             <p className="text-sm text-gray-600">Medical Council Reg: {paraclinicalExams.authentication.registrationNumber}</p>
-            <div className="mt-6">
-              <p className="text-sm">_______________________________</p>
-              <p className="text-sm">Medical Practitioner's Signature</p>
-              <p className="text-sm">Date: {paraclinicalExams.authentication.date}</p>
-            </div>
+
+            {validationStatus === 'validated' && documentSignatures.imaging ? (
+              <div className="mt-4">
+                <img
+                  src={documentSignatures.imaging}
+                  alt="Doctor's Signature"
+                  className="ml-auto h-20 w-auto"
+                  style={{ maxWidth: '300px' }}
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Digitally signed on {new Date().toLocaleDateString()}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-6">
+                <p className="text-sm">_______________________________</p>
+                <p className="text-sm">Medical Practitioner's Signature</p>
+                <p className="text-sm">Date: {paraclinicalExams.authentication.date}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -3821,17 +3878,32 @@ export default function ChronicProfessionalReport({
             <p className="font-semibold">{report.medicalReport.practitioner.name}</p>
             <p className="text-sm text-gray-600">{report.medicalReport.practitioner.qualifications}</p>
             <p className="text-sm text-gray-600">Medical Council Reg: {report.medicalReport.practitioner.registrationNumber}</p>
-            <div className="mt-6">
-              <p className="text-sm">_______________________________</p>
-              <p className="text-sm">Medical Practitioner's Signature</p>
-              <p className="text-sm">Date: {dietaryProtocol.header.date}</p>
-            </div>
+
+            {validationStatus === 'validated' && documentSignatures.prescription ? (
+              <div className="mt-4">
+                <img
+                  src={documentSignatures.prescription}
+                  alt="Doctor's Signature"
+                  className="ml-auto h-20 w-auto"
+                  style={{ maxWidth: '300px' }}
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Digitally signed on {new Date().toLocaleDateString()}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-6">
+                <p className="text-sm">_______________________________</p>
+                <p className="text-sm">Medical Practitioner's Signature</p>
+                <p className="text-sm">Date: {dietaryProtocol.header.date}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
     )
   }
-  
+
   const FollowUpPlanSection = () => {
     if (!report.followUpPlan) {
       return (
@@ -4158,16 +4230,27 @@ export default function ChronicProfessionalReport({
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-600 mb-4">Medical Practitioner's Signature:</p>
-              <div className="mb-2">
-                <p className="border-b-2 border-gray-400 w-64 mb-1"></p>
-              </div>
+              {validationStatus === 'validated' && documentSignatures.consultation ? (
+                <div className="mt-4">
+                  <img
+                    src={documentSignatures.consultation}
+                    alt="Doctor's Signature"
+                    className="ml-auto h-20 w-auto"
+                    style={{ maxWidth: '300px' }}
+                  />
+                </div>
+              ) : (
+                <div className="mb-2">
+                  <p className="border-b-2 border-gray-400 w-64 mb-1"></p>
+                </div>
+              )}
               <p className="font-semibold">{report.medicalReport.practitioner.name}</p>
               <p className="text-sm text-gray-600">{report.medicalReport.practitioner.qualifications}</p>
               <p className="text-sm text-gray-600">Registration: {report.medicalReport.practitioner.registrationNumber}</p>
               <p className="text-sm text-gray-600 mt-2">Date: {followUpPlan.header.date}</p>
             </div>
           </div>
-          
+
           {/* Document Footer */}
           <div className="mt-8 pt-4 border-t border-gray-300 text-center text-xs text-gray-500">
             <p>This document is confidential and intended solely for the use of the patient and authorized healthcare providers.</p>
@@ -4605,9 +4688,20 @@ export default function ChronicProfessionalReport({
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-600 mb-4">Medical Practitioner's Signature / Signature du Médecin:</p>
-                        <div className="mb-2">
-                          <p className="border-b-2 border-gray-400 w-64 mb-1"></p>
-                        </div>
+                        {validationStatus === 'validated' && documentSignatures.sickLeave ? (
+                          <div className="mt-4">
+                            <img
+                              src={documentSignatures.sickLeave}
+                              alt="Doctor's Signature"
+                              className="ml-auto h-20 w-auto"
+                              style={{ maxWidth: '300px' }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="mb-2">
+                            <p className="border-b-2 border-gray-400 w-64 mb-1"></p>
+                          </div>
+                        )}
                         <p className="font-semibold">{report.medicalReport.practitioner.name}</p>
                         <p className="text-sm text-gray-600">{report.medicalReport.practitioner.qualifications}</p>
                         <p className="text-sm text-gray-600">Registration: {report.medicalReport.practitioner.registrationNumber}</p>
