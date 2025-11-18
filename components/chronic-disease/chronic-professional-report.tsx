@@ -998,29 +998,56 @@ export default function ChronicProfessionalReport({
           fetch("/api/chronic-report", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-              patientData: normalizedPatientData, 
-              clinicalData, 
-              questionsData, 
-              diagnosisData 
+            body: JSON.stringify({
+              patientData: normalizedPatientData,
+              clinicalData,
+              questionsData,
+              diagnosisData,
+              doctorData: {
+                fullName: doctorInfo.nom.replace(/^Dr\.\s*/i, ''),
+                qualifications: doctorInfo.qualifications,
+                specialty: doctorInfo.specialite,
+                medicalCouncilNumber: doctorInfo.numeroEnregistrement,
+                email: doctorInfo.email,
+                clinicAddress: doctorInfo.adresseCabinet,
+                consultationHours: doctorInfo.heuresConsultation
+              }
             })
           }),
           fetch("/api/chronic-prescription", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-              patientData: normalizedPatientData, 
+            body: JSON.stringify({
+              patientData: normalizedPatientData,
               clinicalData,
-              diagnosisData 
+              diagnosisData,
+              doctorData: {
+                fullName: doctorInfo.nom.replace(/^Dr\.\s*/i, ''),
+                qualifications: doctorInfo.qualifications,
+                specialty: doctorInfo.specialite,
+                medicalCouncilNumber: doctorInfo.numeroEnregistrement,
+                email: doctorInfo.email,
+                clinicAddress: doctorInfo.adresseCabinet,
+                consultationHours: doctorInfo.heuresConsultation
+              }
             })
           }),
           fetch("/api/chronic-examens", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-              patientData: normalizedPatientData, 
+            body: JSON.stringify({
+              patientData: normalizedPatientData,
               clinicalData,
-              diagnosisData 
+              diagnosisData,
+              doctorData: {
+                fullName: doctorInfo.nom.replace(/^Dr\.\s*/i, ''),
+                qualifications: doctorInfo.qualifications,
+                specialty: doctorInfo.specialite,
+                medicalCouncilNumber: doctorInfo.numeroEnregistrement,
+                email: doctorInfo.email,
+                clinicAddress: doctorInfo.adresseCabinet,
+                consultationHours: doctorInfo.heuresConsultation
+              }
             })
           })
         ])
@@ -1599,7 +1626,16 @@ export default function ChronicProfessionalReport({
         body: JSON.stringify({
           patientData: normalizedPatientData,
           clinicalData,
-          diagnosisData
+          diagnosisData,
+          doctorData: {
+            fullName: doctorInfo.nom.replace(/^Dr\.\s*/i, ''),
+            qualifications: doctorInfo.qualifications,
+            specialty: doctorInfo.specialite,
+            medicalCouncilNumber: doctorInfo.numeroEnregistrement,
+            email: doctorInfo.email,
+            clinicAddress: doctorInfo.adresseCabinet,
+            consultationHours: doctorInfo.heuresConsultation
+          }
         })
       })
       
