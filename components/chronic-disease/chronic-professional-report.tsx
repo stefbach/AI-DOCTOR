@@ -18,6 +18,14 @@ import {
   Trash2, AlertCircle, Lock, Unlock, Calendar, User, Stethoscope,
   Activity, Utensils, ClipboardList, HeartPulse, Send
 } from "lucide-react"
+import { createClient } from '@supabase/supabase-js'
+
+// Initialize Supabase client for fetching consultation IDs
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+const supabase = (supabaseUrl && supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null
 
 // ==================== TYPES & INTERFACES ====================
 
@@ -1718,16 +1726,65 @@ export default function ChronicProfessionalReport({
       })
 
       const params = new URLSearchParams(window.location.search)
-      const patientId = params.get('patientId') || patientData?.id || patientData?.patientId
-      const doctorId = params.get('doctorId')
 
-      console.log('📍 IDs found:', { consultationId, patientId, doctorId })
+      // Try to get IDs from URL params first
+      let tibokConsultationId = params.get('consultationId')
+      let patientId = params.get('patientId') || patientData?.id || patientData?.patientId
+      let doctorId = params.get('doctorId')
 
-      if (!consultationId || !patientId || !doctorId) {
+      console.log('📍 Initial IDs from params:', { tibokConsultationId, patientId, doctorId })
+
+      // If we have a Tibok consultation ID but missing patient/doctor IDs, fetch from consultations table
+      if (tibokConsultationId && (!patientId || !doctorId) && supabase) {
+        console.log('🔍 Fetching IDs from consultations table for:', tibokConsultationId)
+
+        const { data: consultationData, error: consultationError } = await supabase
+          .from('consultations')
+          .select('id, patient_id, doctor_id')
+          .eq('id', tibokConsultationId)
+          .single()
+
+        if (consultationData && !consultationError) {
+          patientId = patientId || consultationData.patient_id
+          doctorId = doctorId || consultationData.doctor_id
+          console.log('✅ Fetched IDs from consultations:', { patientId, doctorId })
+        } else {
+          console.log('⚠️ Could not fetch from consultations table:', consultationError)
+        }
+      }
+
+      // If still missing IDs, try to look up by patient email
+      if ((!patientId || !doctorId) && patientEmail && supabase) {
+        console.log('🔍 Trying to find consultation by patient email:', patientEmail)
+
+        const { data: consultationByEmail, error: emailError } = await supabase
+          .from('consultations')
+          .select('id, patient_id, doctor_id')
+          .eq('patient_email', patientEmail)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single()
+
+        if (consultationByEmail && !emailError) {
+          tibokConsultationId = tibokConsultationId || consultationByEmail.id
+          patientId = patientId || consultationByEmail.patient_id
+          doctorId = doctorId || consultationByEmail.doctor_id
+          console.log('✅ Found consultation by email:', { tibokConsultationId, patientId, doctorId })
+        } else {
+          console.log('⚠️ Could not find consultation by email:', emailError)
+        }
+      }
+
+      // Use the Tibok consultation ID if available, otherwise use our generated one
+      const finalConsultationId = tibokConsultationId || consultationId
+
+      console.log('📍 Final IDs:', { finalConsultationId, patientId, doctorId })
+
+      if (!finalConsultationId || !patientId || !doctorId) {
         console.log('❌ Missing required IDs')
         toast({
           title: "Error",
-          description: `Missing IDs - Consultation: ${consultationId}, Patient: ${patientId}, Doctor: ${doctorId}`,
+          description: `Missing IDs - Please ensure this consultation was started from Tibok. Consultation: ${finalConsultationId || 'missing'}, Patient: ${patientId || 'missing'}, Doctor: ${doctorId || 'missing'}`,
           variant: "destructive"
         })
         setIsSendingDocuments(false)
@@ -1748,7 +1805,7 @@ export default function ChronicProfessionalReport({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          consultationId,
+          consultationId: finalConsultationId,
           patientId,
           doctorId,
           doctorName: finalDoctorInfo.nom,
@@ -1806,7 +1863,7 @@ export default function ChronicProfessionalReport({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          consultationId,
+          consultationId: finalConsultationId,
           reportContent: {
             ...report,
             metadata: {
@@ -1850,7 +1907,7 @@ export default function ChronicProfessionalReport({
       console.log('📦 Preparing documents payload...')
 
       const documentsPayload = {
-        consultationId,
+        consultationId: finalConsultationId,
         patientId,
         doctorId,
         doctorName: finalDoctorInfo.nom,
