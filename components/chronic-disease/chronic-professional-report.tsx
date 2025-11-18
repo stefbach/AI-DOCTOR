@@ -1608,13 +1608,12 @@ export default function ChronicProfessionalReport({
 
       toast({
         title: "Document Validated",
-        description: "Report saved to database. Documents sent to patient dashboard.",
+        description: "Report has been validated and signed. You can now review or print the documents.",
         duration: 5000
       })
 
-      if (onComplete) {
-        onComplete()
-      }
+      // Note: onComplete should be called separately after user reviews the validated documents
+      // Do not call onComplete here to allow user to see the signed documents
     } catch (err: any) {
       console.error("Validation error:", err)
       toast({
@@ -1625,7 +1624,7 @@ export default function ChronicProfessionalReport({
     } finally {
       setSaving(false)
     }
-  }, [validationStatus, consultationId, report, sickLeaveData, invoiceData, patientData, clinicalData, diagnosisData, onComplete, editableNarrative, localMedications, localLabTests, localParaclinicalExams])
+  }, [validationStatus, consultationId, report, sickLeaveData, invoiceData, patientData, clinicalData, diagnosisData, editableNarrative, localMedications, localLabTests, localParaclinicalExams, doctorInfo])
   
   const exportToPDF = useCallback((elementId: string, filename: string) => {
     // Simple print-based PDF export
