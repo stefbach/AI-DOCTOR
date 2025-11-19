@@ -214,24 +214,6 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
               </Card>
             </div>
           </RadioGroup>
-          
-          {/* Direct Access to Medical Documents */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                onProceed('/medical-documents-linked')
-                router.push('/medical-documents-linked')
-              }}
-            >
-              <FileSearch className="mr-2 h-5 w-5" />
-              Medical Documents Analysis
-            </Button>
-            <p className="text-xs text-gray-500 mt-2 text-center">
-              Select patient • Auto-detect type • Save to patient record
-            </p>
-          </div>
         </CardContent>
       </Card>
 
