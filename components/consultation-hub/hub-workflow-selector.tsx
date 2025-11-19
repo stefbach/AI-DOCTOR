@@ -221,15 +221,15 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
               variant="outline"
               className="w-full"
               onClick={() => {
-                onProceed('/medical-documents-v2')
-                router.push('/medical-documents-v2')
+                onProceed('/medical-documents-linked')
+                router.push('/medical-documents-linked')
               }}
             >
               <FileSearch className="mr-2 h-5 w-5" />
               Medical Documents Analysis
             </Button>
             <p className="text-xs text-gray-500 mt-2 text-center">
-              Auto-detect type • Upload multiple files • AI analysis
+              Select patient • Auto-detect type • Save to patient record
             </p>
           </div>
         </CardContent>
