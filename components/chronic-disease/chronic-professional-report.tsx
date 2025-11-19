@@ -1984,11 +1984,19 @@ export default function ChronicProfessionalReport({
         patientId,
         doctorId,
         doctorName: finalDoctorInfo.nom,
-        patientName: patientName,
-        patientEmail: patientEmail,
-        patientPhone: patientPhone,
         generatedAt: new Date().toISOString(),
         consultationType: 'chronic_disease',
+        // Patient data for Tibok chronic-disease-documents endpoint
+        patientData: {
+          name: patientName,
+          email: patientEmail,
+          phone: patientPhone,
+          address: patientAddress,
+          birthDate: patient?.dateOfBirth || '',
+          age: patient?.age || '',
+          gender: patient?.gender || '',
+          weight: patient?.weight || ''
+        },
         documents: {
           consultationReport: report?.medicalReport ? {
             type: 'chronic_disease_report',
@@ -2053,10 +2061,11 @@ export default function ChronicProfessionalReport({
         }
       }
 
-      console.log('📨 Sending to Tibok at:', tibokUrl)
+      console.log('📨 Sending chronic disease documents to Tibok at:', tibokUrl)
       console.log('📦 Payload size:', JSON.stringify(documentsPayload).length, 'bytes')
 
-      const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
+      // Send to dedicated chronic disease documents endpoint
+      const response = await fetch(`${tibokUrl}/api/chronic-disease-documents`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(documentsPayload)
