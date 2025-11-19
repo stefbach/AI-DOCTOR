@@ -25,9 +25,13 @@ import {
   Loader2,
   RefreshCw,
   TrendingUp,
-  Clock
+  Clock,
+  FileSearch,
+  Upload,
+  Microscope
 } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
+import { useRouter } from 'next/navigation'
 import type { ConsultationHistoryItem, PatientDemographics } from '../types'
 
 export interface FollowUpDocumentsProps {
@@ -91,6 +95,7 @@ export function FollowUpDocuments({
   consultationType,
   onComplete
 }: FollowUpDocumentsProps) {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<'prescription' | 'lab' | 'imaging' | 'sickleave'>('prescription')
   const [isGenerating, setIsGenerating] = useState(false)
   const [medications, setMedications] = useState<Medication[]>([])
@@ -591,20 +596,59 @@ export function FollowUpDocuments({
 
         {/* Lab Tests Tab */}
         <TabsContent value="lab" className="space-y-4">
+          {/* Medical Documents Analysis Section */}
+          <Card className="border-2 border-blue-200 bg-blue-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileSearch className="h-5 w-5 text-blue-600" />
+                Analyze Patient Lab Results with AI
+              </CardTitle>
+              <CardDescription>
+                Upload and analyze biology test documents to automatically extract results and get clinical interpretations
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <Alert className="bg-white border-blue-300">
+                  <Microscope className="h-4 w-4 text-blue-600" />
+                  <AlertDescription>
+                    <strong>AI-Powered Analysis:</strong> Upload patient lab reports (blood tests, lipid profiles, liver function, etc.) 
+                    and get instant OCR extraction + medical interpretation tailored for Mauritian healthcare standards.
+                  </AlertDescription>
+                </Alert>
+                
+                <Button 
+                  onClick={() => router.push('/medical-documents')}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  size="lg"
+                >
+                  <Upload className="h-5 w-5 mr-2" />
+                  Upload & Analyze Lab Documents
+                </Button>
+                
+                <p className="text-xs text-gray-600 text-center">
+                  Supports: Complete Blood Count (CBC), Lipid Profile, Liver Function Tests, Kidney Function, 
+                  Thyroid Tests, Diabetes Tests, and more
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Prescription Section */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="flex items-center gap-2">
                   <TestTube className="h-5 w-5 text-green-600" />
-                  Examens de Laboratoire (Suivi)
+                  Lab Test Orders (Follow-up)
                 </span>
                 <Button onClick={downloadLabTests} disabled={biologyTests.length === 0}>
                   <Download className="h-4 w-4 mr-2" />
-                  Télécharger PDF
+                  Download PDF
                 </Button>
               </CardTitle>
               <CardDescription>
-                Analyses de contrôle et surveillance
+                Prescribe lab tests for follow-up monitoring
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -708,11 +752,49 @@ export function FollowUpDocuments({
 
         {/* Imaging Tab */}
         <TabsContent value="imaging" className="space-y-4">
+          {/* Medical Documents Analysis Section */}
+          <Card className="border-2 border-purple-200 bg-purple-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileSearch className="h-5 w-5 text-purple-600" />
+                Analyze Patient Radiology Reports with AI
+              </CardTitle>
+              <CardDescription>
+                Upload and analyze radiology documents to automatically extract findings and get clinical interpretations
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <Alert className="bg-white border-purple-300">
+                  <Scan className="h-4 w-4 text-purple-600" />
+                  <AlertDescription>
+                    <strong>AI-Powered Analysis:</strong> Upload patient radiology reports (X-rays, CT scans, MRI, ultrasounds, etc.) 
+                    and get instant OCR extraction + medical interpretation tailored for Mauritian healthcare standards.
+                  </AlertDescription>
+                </Alert>
+                
+                <Button 
+                  onClick={() => router.push('/medical-documents')}
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  size="lg"
+                >
+                  <Upload className="h-5 w-5 mr-2" />
+                  Upload & Analyze Radiology Documents
+                </Button>
+                
+                <p className="text-xs text-gray-600 text-center">
+                  Supports: X-Ray, CT Scan (TDM), MRI, Ultrasound, Mammography, and other medical imaging reports
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Prescription Section */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Scan className="h-5 w-5 text-purple-600" />
-                Examens d'Imagerie (Suivi)
+                Imaging Exam Orders (Follow-up)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
