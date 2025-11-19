@@ -1948,8 +1948,9 @@ export default function ChronicProfessionalReport({
         })
       })
 
-      // Get Tibok URL
+      // Get Tibok URL based on environment
       const getTibokUrl = () => {
+        // First check URL parameter (highest priority)
         const urlParams = new URLSearchParams(window.location.search)
         const urlParam = urlParams.get('tibokUrl')
         if (urlParam) {
@@ -1957,6 +1958,7 @@ export default function ChronicProfessionalReport({
           return decodeURIComponent(urlParam)
         }
 
+        // Check referrer
         if (document.referrer) {
           try {
             const referrerUrl = new URL(document.referrer)
@@ -1968,6 +1970,33 @@ export default function ChronicProfessionalReport({
           } catch (e) {
             console.log('Could not parse referrer')
           }
+        }
+
+        // Environment-based mapping
+        const hostname = window.location.hostname
+
+        // Test/Development environment
+        if (hostname.includes('v0-medical')) {
+          console.log('📍 Using Tibok development URL for v0-medical')
+          return 'https://v0-tibokmain2.vercel.app'
+        }
+
+        // Staging environment
+        if (hostname.includes('staging') || hostname.includes('test')) {
+          console.log('📍 Using Tibok staging URL')
+          return 'https://staging.tibok.mu'
+        }
+
+        // Production
+        if (hostname.includes('medical-ai-expert.vercel.app')) {
+          console.log('📍 Using Tibok production URL')
+          return 'https://tibok.mu'
+        }
+
+        // Local development
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+          console.log('📍 Using Tibok local development URL')
+          return 'http://localhost:3000'
         }
 
         console.log('📍 Using default Tibok URL: https://tibok.mu')
