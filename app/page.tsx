@@ -553,14 +553,14 @@ const handlePrevious = () => {
             <Button 
               variant="outline" 
               className="h-auto py-4 px-6 flex flex-col items-start gap-2 hover:bg-green-50 hover:border-green-300"
-              onClick={() => window.location.href = '/medical-documents'}
+              onClick={() => window.location.href = '/medical-documents-v2'}
             >
               <div className="flex items-center gap-2 w-full">
                 <FileSearch className="h-5 w-5 text-green-600" />
                 <span className="font-semibold">Medical Documents</span>
               </div>
               <span className="text-xs text-gray-600 text-left">
-                Lab tests • Radiology reports • AI analysis
+                Auto-detect type • Multiple files • AI analysis
               </span>
             </Button>
           </div>

@@ -618,7 +618,7 @@ export function FollowUpDocuments({
                 </Alert>
                 
                 <Button 
-                  onClick={() => router.push('/medical-documents')}
+                  onClick={() => router.push('/medical-documents-v2')}
                   className="w-full bg-blue-600 hover:bg-blue-700"
                   size="lg"
                 >
@@ -774,7 +774,7 @@ export function FollowUpDocuments({
                 </Alert>
                 
                 <Button 
-                  onClick={() => router.push('/medical-documents')}
+                  onClick={() => router.push('/medical-documents-v2')}
                   className="w-full bg-purple-600 hover:bg-purple-700"
                   size="lg"
                 >
