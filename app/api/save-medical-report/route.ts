@@ -85,7 +85,7 @@ function validateDoctorData(doctorName: string, doctorId: string, report: any): 
 // Helper function to detect prescription renewal
 function isPrescriptionRenewal(clinicalData: any, documentsData: any, report: any): boolean {
   const chiefComplaint = clinicalData?.chiefComplaint?.toLowerCase() || ''
-  const motifConsultation = documentsData?.consultationReport?.rapport?.motifConsultation?.toLowerCase() || ''
+  const motifConsultation = documentsData?.consultationReport?.content?.rapport?.motifConsultation?.toLowerCase() || ''
   const reportMotif = report?.compteRendu?.rapport?.motifConsultation?.toLowerCase() || ''
   
   const renewalKeywords = [
@@ -221,8 +221,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Structure the documents data (support both normal and chronic disease structures)
+    // Tibok expects: documents_data.consultation_report.content.rapport
     const documentsData = {
-      consultationReport: report?.compteRendu || report?.medicalReport || {},
+      consultationReport: {
+        content: report?.compteRendu || {},
+        // Also include medicalReport for chronic disease compatibility
+        ...(report?.medicalReport && { medicalReport: report.medicalReport })
+      },
       prescriptions: report?.ordonnances || {},
       // Chronic disease specific data
       medicationPrescription: report?.medicationPrescription || null,
@@ -347,11 +352,13 @@ generatedAt: new Date().toISOString()
     // Validate content completeness before determining status
     let finalStatus = 'draft';
     // Support both normal and chronic disease report structures
-    const hasValidContent = (documentsData.consultationReport?.rapport?.motifConsultation &&
-                            documentsData.consultationReport?.rapport?.conclusionDiagnostique) ||
-                           (documentsData.consultationReport?.narrative &&
-                            (documentsData.consultationReport?.diagnosticSummary?.diagnosticConclusion ||
-                             documentsData.consultationReport?.chronicDiseaseAssessment));
+    // Normal: documents_data.consultationReport.content.rapport
+    // Chronic: documents_data.consultationReport.content.rapport (compteRendu) or medicalReport
+    const hasValidContent = (documentsData.consultationReport?.content?.rapport?.motifConsultation &&
+                            documentsData.consultationReport?.content?.rapport?.conclusionDiagnostique) ||
+                           (documentsData.consultationReport?.medicalReport?.narrative &&
+                            (documentsData.consultationReport?.medicalReport?.diagnosticSummary?.diagnosticConclusion ||
+                             documentsData.consultationReport?.medicalReport?.chronicDiseaseAssessment));
 
     const hasMedications = prescriptionData.medications && prescriptionData.medications.length > 0;
     const hasLabTests = Object.values(prescriptionData.laboratoryTests || {}).some((tests: any) => tests.length > 0);
@@ -432,17 +439,17 @@ const updateData = {
         has_follow_up: !!followUpData || !!metadata?.documentValidations?.followUp,
         diet_plan_data: dietPlanData,
         follow_up_data: followUpData,
-        chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation ||
+        chief_complaint: documentsData?.consultationReport?.content?.rapport?.motifConsultation ||
                          clinicalData?.chiefComplaint ||
                          clinicalData?.visitReasons?.join(', ') ||
                          existingRecord.chief_complaint ||
                          (isRenewal ? 'Prescription Renewal / Renouvellement d\'ordonnance' : null),
-        diagnosis: documentsData?.consultationReport?.rapport?.conclusionDiagnostique ||
-                   documentsData?.consultationReport?.diagnosticSummary?.diagnosticConclusion ||
-                   documentsData?.consultationReport?.chronicDiseaseAssessment?.primaryDiagnosis ||
+        diagnosis: documentsData?.consultationReport?.content?.rapport?.conclusionDiagnostique ||
+                   documentsData?.consultationReport?.medicalReport?.diagnosticSummary?.diagnosticConclusion ||
+                   documentsData?.consultationReport?.medicalReport?.chronicDiseaseAssessment?.primaryDiagnosis ||
                    existingRecord.diagnosis ||
                    (isRenewal ? 'Prescription renewal - stable condition' : null),
-        doctor_specialty: documentsData?.consultationReport?.praticien?.specialite ||
+        doctor_specialty: documentsData?.consultationReport?.content?.praticien?.specialite ||
                           report?.compteRendu?.praticien?.specialite ||
                           report?.medicalReport?.practitioner?.specialty ||
                           existingRecord.doctor_specialty ||
@@ -505,15 +512,15 @@ const insertData = {
         has_follow_up: !!followUpData || !!metadata?.documentValidations?.followUp,
         diet_plan_data: dietPlanData,
         follow_up_data: followUpData,
-        chief_complaint: documentsData?.consultationReport?.rapport?.motifConsultation ||
+        chief_complaint: documentsData?.consultationReport?.content?.rapport?.motifConsultation ||
                          clinicalData?.chiefComplaint ||
                          clinicalData?.visitReasons?.join(', ') ||
                          (isRenewal ? 'Prescription Renewal / Renouvellement d\'ordonnance' : null),
-        diagnosis: documentsData?.consultationReport?.rapport?.conclusionDiagnostique ||
-                   documentsData?.consultationReport?.diagnosticSummary?.diagnosticConclusion ||
-                   documentsData?.consultationReport?.chronicDiseaseAssessment?.primaryDiagnosis ||
+        diagnosis: documentsData?.consultationReport?.content?.rapport?.conclusionDiagnostique ||
+                   documentsData?.consultationReport?.medicalReport?.diagnosticSummary?.diagnosticConclusion ||
+                   documentsData?.consultationReport?.medicalReport?.chronicDiseaseAssessment?.primaryDiagnosis ||
                    (isRenewal ? 'Prescription renewal - stable condition' : null),
-        doctor_specialty: documentsData?.consultationReport?.praticien?.specialite ||
+        doctor_specialty: documentsData?.consultationReport?.content?.praticien?.specialite ||
                           report?.compteRendu?.praticien?.specialite ||
                           report?.medicalReport?.practitioner?.specialty ||
                           null,
