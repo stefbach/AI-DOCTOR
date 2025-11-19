@@ -39,7 +39,7 @@ export default function ConsultationHubPage() {
 
   const handleNewPatient = () => {
     // Redirect to normal consultation for new patient
-    window.location.href = '/consultation'
+    window.location.href = '/'
   }
 
   const handleViewHistory = () => {

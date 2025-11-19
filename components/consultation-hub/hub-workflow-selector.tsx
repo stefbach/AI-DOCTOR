@@ -116,7 +116,7 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
           console.log('💾 Chronic disease prefill data stored with history:', chronicHistory.length, 'entries')
         }
         // NORMAL CONSULTATION WORKFLOW
-        else if (selectedPath === '/consultation') {
+        else if (selectedPath === '/' || selectedPath === '/consultation') {
           sessionStorage.setItem('consultationPatientData', JSON.stringify(basePrefillData))
           sessionStorage.setItem('isExistingPatientConsultation', 'true')
           
