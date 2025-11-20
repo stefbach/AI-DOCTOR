@@ -678,17 +678,26 @@ export default function ChronicProfessionalReport({
       const historyOfPresentIllness = report.medicalReport?.clinicalEvaluation?.historyOfPresentIllness || ''
       const diagnosticConclusion = report.medicalReport?.diagnosticSummary?.diagnosticConclusion || ''
 
+      console.log('🏥 Auto-filling sick leave medical reason:')
+      console.log('  - historyOfPresentIllness:', historyOfPresentIllness ? `${historyOfPresentIllness.substring(0, 100)}...` : 'EMPTY')
+      console.log('  - diagnosticConclusion:', diagnosticConclusion ? `${diagnosticConclusion.substring(0, 100)}...` : 'EMPTY')
+
       // Combine full text from both sections with a blank line separator
       const sections = []
       if (historyOfPresentIllness) sections.push(historyOfPresentIllness)
       if (diagnosticConclusion) sections.push(diagnosticConclusion)
 
       if (sections.length > 0) {
+        console.log('  ✅ Using detailed text (both or one field available)')
         setSickLeaveData(prev => ({ ...prev, medicalReason: sections.join('\n\n') }))
       } else {
         // Fallback to shorter fields if detailed ones don't exist
         const chiefComplaint = report.medicalReport?.clinicalEvaluation?.chiefComplaint || ''
         const primaryDiagnosis = report.medicalReport?.chronicDiseaseAssessment?.primaryDiagnosis || ''
+
+        console.log('  ⚠️ No detailed text found, using fallback:')
+        console.log('    - chiefComplaint:', chiefComplaint)
+        console.log('    - primaryDiagnosis:', primaryDiagnosis)
 
         if (chiefComplaint && primaryDiagnosis) {
           setSickLeaveData(prev => ({ ...prev, medicalReason: `${chiefComplaint}\n\n${primaryDiagnosis}` }))
