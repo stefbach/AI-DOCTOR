@@ -651,10 +651,30 @@ export default function ChronicProfessionalReport({
   // Auto-fill sick leave medical reason from diagnosis when report is generated
   useEffect(() => {
     if (report && !sickLeaveData.medicalReason) {
-      const diagnosis = report.medicalReport.chronicDiseaseAssessment.primaryDiagnosis ||
-                       report.medicalReport.diagnosticSummary.diagnosticConclusion || ''
-      if (diagnosis) {
-        setSickLeaveData(prev => ({ ...prev, medicalReason: diagnosis }))
+      // Use full detailed text from consultation report
+      const historyOfPresentIllness = report.medicalReport?.clinicalEvaluation?.historyOfPresentIllness || ''
+      const diagnosticConclusion = report.medicalReport?.diagnosticSummary?.diagnosticConclusion || ''
+
+      // Combine full text from both sections with a blank line separator
+      const sections = []
+      if (historyOfPresentIllness) sections.push(historyOfPresentIllness)
+      if (diagnosticConclusion) sections.push(diagnosticConclusion)
+
+      if (sections.length > 0) {
+        setSickLeaveData(prev => ({ ...prev, medicalReason: sections.join('\n\n') }))
+      } else {
+        // Fallback to shorter fields if detailed ones don't exist
+        const chiefComplaint = report.medicalReport?.clinicalEvaluation?.chiefComplaint || ''
+        const primaryDiagnosis = report.medicalReport?.chronicDiseaseAssessment?.primaryDiagnosis || ''
+
+        if (chiefComplaint && primaryDiagnosis) {
+          setSickLeaveData(prev => ({ ...prev, medicalReason: `${chiefComplaint}\n\n${primaryDiagnosis}` }))
+        } else {
+          const diagnosis = chiefComplaint || primaryDiagnosis
+          if (diagnosis) {
+            setSickLeaveData(prev => ({ ...prev, medicalReason: diagnosis }))
+          }
+        }
       }
     }
   }, [report, sickLeaveData.medicalReason])
