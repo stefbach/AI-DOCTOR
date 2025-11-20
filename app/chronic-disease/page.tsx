@@ -38,8 +38,83 @@ export default function ChronicDiseaseWorkflow() {
     const isChronicWorkflow = sessionStorage.getItem('isChronicDiseaseWorkflow')
     const existingPatient = sessionStorage.getItem('isExistingPatientChronic')
     const history = sessionStorage.getItem('chronicDiseaseHistory')
-    
+
+    // Check if we're in a test environment
+    const isTestEnvironment = typeof window !== 'undefined' && (
+      window.location.hostname.includes('vercel.app') ||
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1'
+    )
+
     if (!savedPatientData || isChronicWorkflow !== 'true') {
+      // If in test environment and no data, use test data instead of redirecting
+      if (isTestEnvironment) {
+        console.log('🧪 No patient data found in test environment - using TEST data')
+        const testData = {
+          firstName: 'Megane',
+          lastName: 'Quenette',
+          email: 'megane-quenette@obesity-care-clinic.com',
+          phone: '+23059452424',
+          birthDate: '1980-03-17',
+          age: '45',
+          gender: 'Female',
+          weight: '150',
+          height: '120',
+          address: 'Ave des Lataniers, Morc St Jacques',
+          city: 'Flic en Flac',
+          country: 'Maurice',
+          medicalHistory: ['Obesity'],
+          allergies: [],
+          consultationId: '94cf134b-32bc-49a1-8168-37f85355e27d',
+          patientId: '4c42a303-ee2e-49ad-b156-8348f75c1375',
+          doctorId: 'e152c622-abe3-410e-a0ff-75902edaf739',
+          pregnancyStatus: 'not_pregnant',
+          currentMedicationsText: ''
+        }
+        sessionStorage.setItem('chronicDiseasePatientData', JSON.stringify(testData))
+        sessionStorage.setItem('isChronicDiseaseWorkflow', 'true')
+        setPatientData(testData)
+
+        // Also set test clinical and diagnosis data, and skip to report step
+        const testClinicalData = {
+          chiefComplaint: 'Chronic disease follow-up',
+          chronicDiseases: ['Obesity'],
+          currentSymptoms: ['Fatigue'],
+          visitReasons: ['Follow-up'],
+          vitalSigns: {
+            bloodPressureSystolic: '140',
+            bloodPressureDiastolic: '90',
+            bloodPressure: '140/90',
+            heartRate: '80',
+            bloodGlucose: '5.5',
+            temperature: '37'
+          }
+        }
+
+        const testDiagnosisData = {
+          overallAssessment: {
+            globalControl: 'Fair',
+            mainConcerns: ['Obesity management'],
+            priorityActions: ['Weight loss program']
+          },
+          detailedMealPlan: {
+            breakfast: {},
+            lunch: {},
+            dinner: {},
+            snacks: {},
+            hydration: '2 liters daily'
+          }
+        }
+
+        setClinicalData(testClinicalData)
+        setDiagnosisData(testDiagnosisData)
+        setCurrentStep(3) // Skip directly to report
+
+        console.log('✅ Test patient data loaded:', testData)
+        console.log('🧪 Auto-populated test clinical and diagnosis data, skipping to report')
+        return
+      }
+
       // Redirect back to home if no chronic disease data
       console.log('❌ No chronic disease patient data found, redirecting to home')
       router.push('/')
