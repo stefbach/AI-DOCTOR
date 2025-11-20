@@ -2057,10 +2057,10 @@ export default function ChronicProfessionalReport({
             signature: documentSignatures?.imaging || null,
             content: report.paraclinicalExams
           } : null,
-          dietaryPlan: report?.dietaryPlan ? {
+          dietaryPlan: report?.dietaryProtocol ? {
             type: 'dietary_plan',
             title: 'Dietary Protocol for Chronic Disease Management',
-            content: report.dietaryPlan,
+            content: report.dietaryProtocol,
             signature: documentSignatures?.prescription || null
           } : null,
           sickLeaveCertificate: (sickLeaveData?.startDate && sickLeaveData?.endDate) ? {
@@ -2071,17 +2071,24 @@ export default function ChronicProfessionalReport({
               dateFin: sickLeaveData.endDate,
               nombreJours: sickLeaveData.numberOfDays,
               motifMedical: sickLeaveData.medicalReason || (() => {
-                // Build medical reason from consultation report
-                const chiefComplaint = report?.medicalReport?.clinicalEvaluation?.chiefComplaint ||
-                                       report?.medicalReport?.chronicDiseaseAssessment?.primaryDiagnosis || ''
+                // Build medical reason from consultation report - prioritize detailed diagnosis
+                const primaryDiagnosis = report?.medicalReport?.chronicDiseaseAssessment?.primaryDiagnosis || ''
                 const diagnosticConclusion = report?.medicalReport?.diagnosticSummary?.diagnosticConclusion || ''
+                const chiefComplaint = report?.medicalReport?.clinicalEvaluation?.chiefComplaint || ''
 
-                if (chiefComplaint && diagnosticConclusion) {
-                  return `Chief Complaint: ${chiefComplaint}. Diagnosis: ${diagnosticConclusion}`
+                // Prioritize diagnostic conclusion and primary diagnosis over chief complaint
+                if (diagnosticConclusion) {
+                  if (primaryDiagnosis && !diagnosticConclusion.includes(primaryDiagnosis)) {
+                    return `${primaryDiagnosis}. ${diagnosticConclusion}`
+                  }
+                  return diagnosticConclusion
+                } else if (primaryDiagnosis) {
+                  if (chiefComplaint && !primaryDiagnosis.includes(chiefComplaint)) {
+                    return `${primaryDiagnosis} - ${chiefComplaint}`
+                  }
+                  return primaryDiagnosis
                 } else if (chiefComplaint) {
                   return chiefComplaint
-                } else if (diagnosticConclusion) {
-                  return diagnosticConclusion
                 }
                 return 'Medical condition requiring rest'
               })(),
