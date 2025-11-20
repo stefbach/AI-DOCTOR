@@ -623,9 +623,26 @@ export default function ChronicProfessionalReport({
 
     console.log('🔑 Loading IDs from patientData (sessionStorage):', { sessionConsultationId, sessionPatientId, sessionDoctorId })
 
+    // Test IDs for development/testing on Vercel
+    const isTestEnvironment = typeof window !== 'undefined' && (
+      window.location.hostname.includes('vercel.app') ||
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1'
+    )
+
+    const TEST_IDS = {
+      consultationId: '94cf134b-32bc-49a1-8168-37f85355e27d',
+      patientId: '4c42a303-ee2e-49ad-b156-8348f75c1375',
+      doctorId: 'e152c622-abe3-410e-a0ff-75902edaf739'
+    }
+
     if (sessionConsultationId) {
       setConsultationId(sessionConsultationId)
       console.log('✅ Using consultation ID from Tibok:', sessionConsultationId)
+    } else if (isTestEnvironment && !sessionConsultationId) {
+      // Use test ID in development/test environments
+      setConsultationId(TEST_IDS.consultationId)
+      console.log('🧪 Using TEST consultation ID:', TEST_IDS.consultationId)
     } else {
       // Fallback to generating local ID if not provided
       const fallbackId = `chronic_disease_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -636,6 +653,9 @@ export default function ChronicProfessionalReport({
     if (sessionPatientId) {
       setTibokPatientId(sessionPatientId)
       console.log('✅ Using patient ID from Tibok:', sessionPatientId)
+    } else if (isTestEnvironment && !sessionPatientId) {
+      setTibokPatientId(TEST_IDS.patientId)
+      console.log('🧪 Using TEST patient ID:', TEST_IDS.patientId)
     } else {
       console.warn('⚠️ No patient ID in patientData')
     }
@@ -643,6 +663,9 @@ export default function ChronicProfessionalReport({
     if (sessionDoctorId) {
       setTibokDoctorId(sessionDoctorId)
       console.log('✅ Using doctor ID from Tibok:', sessionDoctorId)
+    } else if (isTestEnvironment && !sessionDoctorId) {
+      setTibokDoctorId(TEST_IDS.doctorId)
+      console.log('🧪 Using TEST doctor ID:', TEST_IDS.doctorId)
     } else {
       console.warn('⚠️ No doctor ID in patientData')
     }
