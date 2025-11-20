@@ -2070,7 +2070,21 @@ export default function ChronicProfessionalReport({
               dateDebut: sickLeaveData.startDate,
               dateFin: sickLeaveData.endDate,
               nombreJours: sickLeaveData.numberOfDays,
-              motifMedical: sickLeaveData.medicalReason || report?.medicalReport?.diagnosis?.primary || 'Medical condition requiring rest',
+              motifMedical: sickLeaveData.medicalReason || (() => {
+                // Build medical reason from consultation report
+                const chiefComplaint = report?.medicalReport?.clinicalEvaluation?.chiefComplaint ||
+                                       report?.medicalReport?.chronicDiseaseAssessment?.primaryDiagnosis || ''
+                const diagnosticConclusion = report?.medicalReport?.diagnosticSummary?.diagnosticConclusion || ''
+
+                if (chiefComplaint && diagnosticConclusion) {
+                  return `Chief Complaint: ${chiefComplaint}. Diagnosis: ${diagnosticConclusion}`
+                } else if (chiefComplaint) {
+                  return chiefComplaint
+                } else if (diagnosticConclusion) {
+                  return diagnosticConclusion
+                }
+                return 'Medical condition requiring rest'
+              })(),
               remarques: sickLeaveData.remarks || ''
             },
             signature: documentSignatures?.sickLeave || null
