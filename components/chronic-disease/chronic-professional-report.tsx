@@ -2071,26 +2071,27 @@ export default function ChronicProfessionalReport({
               dateFin: sickLeaveData.endDate,
               nombreJours: sickLeaveData.numberOfDays,
               motifMedical: sickLeaveData.medicalReason || (() => {
-                // Build medical reason from consultation report - prioritize detailed diagnosis
-                const primaryDiagnosis = report?.medicalReport?.chronicDiseaseAssessment?.primaryDiagnosis || ''
+                // Build detailed medical reason from consultation report
+                const historyOfPresentIllness = report?.medicalReport?.clinicalEvaluation?.historyOfPresentIllness || ''
                 const diagnosticConclusion = report?.medicalReport?.diagnosticSummary?.diagnosticConclusion || ''
-                const chiefComplaint = report?.medicalReport?.clinicalEvaluation?.chiefComplaint || ''
 
-                // Prioritize diagnostic conclusion and primary diagnosis over chief complaint
-                if (diagnosticConclusion) {
-                  if (primaryDiagnosis && !diagnosticConclusion.includes(primaryDiagnosis)) {
-                    return `${primaryDiagnosis}. ${diagnosticConclusion}`
-                  }
-                  return diagnosticConclusion
-                } else if (primaryDiagnosis) {
-                  if (chiefComplaint && !primaryDiagnosis.includes(chiefComplaint)) {
-                    return `${primaryDiagnosis} - ${chiefComplaint}`
-                  }
-                  return primaryDiagnosis
-                } else if (chiefComplaint) {
-                  return chiefComplaint
+                // Combine full text from both sections with a blank line separator
+                const sections = [];
+                if (historyOfPresentIllness) sections.push(historyOfPresentIllness);
+                if (diagnosticConclusion) sections.push(diagnosticConclusion);
+
+                if (sections.length > 0) {
+                  return sections.join('\n\n');
                 }
-                return 'Medical condition requiring rest'
+
+                // Fallback to shorter fields if detailed ones don't exist
+                const chiefComplaint = report?.medicalReport?.clinicalEvaluation?.chiefComplaint || ''
+                const primaryDiagnosis = report?.medicalReport?.chronicDiseaseAssessment?.primaryDiagnosis || ''
+
+                if (chiefComplaint && primaryDiagnosis) {
+                  return `${chiefComplaint}\n\n${primaryDiagnosis}`
+                }
+                return chiefComplaint || primaryDiagnosis || 'Medical condition requiring rest'
               })(),
               remarques: sickLeaveData.remarks || ''
             },
