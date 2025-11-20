@@ -2057,10 +2057,10 @@ export default function ChronicProfessionalReport({
             signature: documentSignatures?.imaging || null,
             content: report.paraclinicalExams
           } : null,
-          dietaryPlan: report?.dietaryPlan ? {
+          dietaryPlan: report?.dietaryProtocol ? {
             type: 'dietary_plan',
             title: 'Dietary Protocol for Chronic Disease Management',
-            content: report.dietaryPlan,
+            content: report.dietaryProtocol,
             signature: documentSignatures?.prescription || null
           } : null,
           sickLeaveCertificate: (sickLeaveData?.startDate && sickLeaveData?.endDate) ? {
@@ -2071,19 +2071,27 @@ export default function ChronicProfessionalReport({
               dateFin: sickLeaveData.endDate,
               nombreJours: sickLeaveData.numberOfDays,
               motifMedical: sickLeaveData.medicalReason || (() => {
-                // Build medical reason from consultation report
-                const chiefComplaint = report?.medicalReport?.clinicalEvaluation?.chiefComplaint ||
-                                       report?.medicalReport?.chronicDiseaseAssessment?.primaryDiagnosis || ''
+                // Build detailed medical reason from consultation report
+                const historyOfPresentIllness = report?.medicalReport?.clinicalEvaluation?.historyOfPresentIllness || ''
                 const diagnosticConclusion = report?.medicalReport?.diagnosticSummary?.diagnosticConclusion || ''
 
-                if (chiefComplaint && diagnosticConclusion) {
-                  return `Chief Complaint: ${chiefComplaint}. Diagnosis: ${diagnosticConclusion}`
-                } else if (chiefComplaint) {
-                  return chiefComplaint
-                } else if (diagnosticConclusion) {
-                  return diagnosticConclusion
+                // Combine full text from both sections with a blank line separator
+                const sections = [];
+                if (historyOfPresentIllness) sections.push(historyOfPresentIllness);
+                if (diagnosticConclusion) sections.push(diagnosticConclusion);
+
+                if (sections.length > 0) {
+                  return sections.join('\n\n');
                 }
-                return 'Medical condition requiring rest'
+
+                // Fallback to shorter fields if detailed ones don't exist
+                const chiefComplaint = report?.medicalReport?.clinicalEvaluation?.chiefComplaint || ''
+                const primaryDiagnosis = report?.medicalReport?.chronicDiseaseAssessment?.primaryDiagnosis || ''
+
+                if (chiefComplaint && primaryDiagnosis) {
+                  return `${chiefComplaint}\n\n${primaryDiagnosis}`
+                }
+                return chiefComplaint || primaryDiagnosis || 'Medical condition requiring rest'
               })(),
               remarques: sickLeaveData.remarks || ''
             },
