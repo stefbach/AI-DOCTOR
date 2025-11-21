@@ -1695,11 +1695,12 @@ useEffect(() => {
  }
  
  setModifiedSections(new Set(result.data.modified_sections || []))
- setValidationStatus(result.data.validation_status || 'draft')
+        // Always reset to draft on page load/refresh to allow re-validation for testing
+        setValidationStatus('draft')
  
  toast({
  title: "Draft loaded",
- description: "Your previous edits have been restored",
+ description: "Your previous edits have been restored (ready for re-validation)",
  duration: 3000
  })
  
