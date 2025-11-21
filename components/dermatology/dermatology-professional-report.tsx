@@ -2909,13 +2909,37 @@ const handleSendDocuments = async () => {
  // Prepare documents payload for dermatology
  console.log('📦 Preparing dermatology documents payload...')
 
- // Extract image analysis from diagnosisData if available
- const imageAnalysis = diagnosisData?.imageAnalysis || diagnosisData?.skinAnalysis || null
+ // Get patient data from report
+ const patient = getReportPatient()
+
+ // Extract image analysis - check ocrAnalysisData first (contains AI vision analysis)
+ let imageAnalysis = null
+ let analysisSource = ''
+
+ if (ocrAnalysisData?.analysis) {
+ imageAnalysis = ocrAnalysisData.analysis
+ analysisSource = 'ocrAnalysisData.analysis'
+ } else if (diagnosisData?.diagnosis?.fullText) {
+ // If no OCR analysis, use diagnosis full text as it contains skin assessment
+ imageAnalysis = {
+ fullText: diagnosisData.diagnosis.fullText,
+ structured: diagnosisData.diagnosis.structured
+ }
+ analysisSource = 'diagnosisData.diagnosis (full dermatological assessment)'
+ } else if (imageData?.analysis) {
+ imageAnalysis = imageData.analysis
+ analysisSource = 'imageData.analysis'
+ }
 
  if (imageAnalysis) {
  console.log('🖼️ Including image analysis in payload')
+ console.log('  Analysis source:', analysisSource)
+ console.log('  Analysis preview:', typeof imageAnalysis === 'string' ?
+              imageAnalysis.substring(0, 100) + '...' :
+              JSON.stringify(imageAnalysis).substring(0, 100) + '...')
  } else {
  console.log('⚠️ No image analysis found - patient may not have provided image')
+ console.log('  Checked: ocrAnalysisData.analysis, diagnosisData.diagnosis, imageData.analysis')
  }
 
  const documentsPayload = {
@@ -2928,6 +2952,17 @@ const handleSendDocuments = async () => {
  patientPhone: patientPhone,
  generatedAt: new Date().toISOString(),
  consultationType: 'dermatology',
+ // Complete patient data for Tibok
+ patientData: {
+ name: patientName,
+ email: patientEmail,
+ phone: patientPhone,
+ address: patientAddress,
+ birthDate: patient?.dateNaissance || patientData?.birthDate || '',
+ age: patient?.age || patientData?.age || '',
+ gender: patient?.sexe || patientData?.gender || '',
+ weight: patient?.poids || patientData?.weight || ''
+ },
  imageAnalysis: imageAnalysis,
  documents: {
  consultationReport: report?.compteRendu ? {
