@@ -1695,11 +1695,12 @@ useEffect(() => {
  }
  
  setModifiedSections(new Set(result.data.modified_sections || []))
- setValidationStatus(result.data.validation_status || 'draft')
+        // Always reset to draft on page load/refresh to allow re-validation for testing
+        setValidationStatus('draft')
  
  toast({
  title: "Draft loaded",
- description: "Your previous edits have been restored",
+ description: "Your previous edits have been restored (ready for re-validation)",
  duration: 3000
  })
  
@@ -2849,8 +2850,9 @@ const handleSendDocuments = async () => {
  })
  })
 
- // Get Tibok URL
+ // Get Tibok URL based on environment
  const getTibokUrl = () => {
+ // First check URL parameter (highest priority)
  const urlParams = new URLSearchParams(window.location.search)
  const urlParam = urlParams.get('tibokUrl')
  if (urlParam) {
@@ -2858,6 +2860,7 @@ const handleSendDocuments = async () => {
  return decodeURIComponent(urlParam)
  }
 
+ // Check referrer
  if (document.referrer) {
  try {
  const referrerUrl = new URL(document.referrer)
@@ -2871,15 +2874,85 @@ const handleSendDocuments = async () => {
  }
  }
 
+ // Environment-based mapping
+ const hostname = window.location.hostname
+
+ // Test/Development environment
+ if (hostname.includes('v0-medical')) {
+ console.log('📍 Using Tibok development URL for v0-medical')
+ return 'https://v0-tibokmain2.vercel.app'
+ }
+
+ // Staging environment
+ if (hostname.includes('staging') || hostname.includes('test')) {
+ console.log('📍 Using Tibok staging URL')
+ return 'https://staging.tibok.mu'
+ }
+
+ // Production
+ if (hostname.includes('medical-ai-expert.vercel.app')) {
+ console.log('📍 Using Tibok production URL')
+ return 'https://tibok.mu'
+ }
+
+ // Local development
+ if (hostname === 'localhost' || hostname === '127.0.0.1') {
+ console.log('📍 Using Tibok local development URL')
+ return 'http://localhost:3000'
+ }
+
  console.log('📍 Using default Tibok URL: https://tibok.mu')
  return 'https://tibok.mu'
  }
 
  const tibokUrl = getTibokUrl()
 
- // Prepare documents payload
- console.log('📦 Preparing documents payload...')
- 
+ // Prepare documents payload for dermatology
+ console.log('📦 Preparing dermatology documents payload...')
+
+ // Get patient data from report
+ const patient = getReportPatient()
+
+
+// Debug: Log available patient data sources
+console.log('👤 Patient data sources:')
+console.log('  From report (patient):', patient)
+console.log('  From props (patientData):', patientData)
+console.log('  Extracted values:')
+console.log('    - birthDate:', patient?.dateNaissance || patientData?.birthDate || 'MISSING')
+console.log('    - age:', patient?.age || patientData?.age || 'MISSING')
+console.log('    - gender:', patient?.sexe || patientData?.gender || 'MISSING')
+console.log('    - weight:', patient?.poids || patientData?.weight || 'MISSING')
+ // Extract image analysis - check ocrAnalysisData first (contains AI vision analysis)
+ let imageAnalysis = null
+ let analysisSource = ''
+
+ if (ocrAnalysisData?.analysis) {
+ imageAnalysis = ocrAnalysisData.analysis
+ analysisSource = 'ocrAnalysisData.analysis'
+ } else if (diagnosisData?.diagnosis?.fullText) {
+ // If no OCR analysis, use diagnosis full text as it contains skin assessment
+ imageAnalysis = {
+ fullText: diagnosisData.diagnosis.fullText,
+ structured: diagnosisData.diagnosis.structured
+ }
+ analysisSource = 'diagnosisData.diagnosis (full dermatological assessment)'
+ } else if (imageData?.analysis) {
+ imageAnalysis = imageData.analysis
+ analysisSource = 'imageData.analysis'
+ }
+
+ if (imageAnalysis) {
+ console.log('🖼️ Including image analysis in payload')
+ console.log('  Analysis source:', analysisSource)
+ console.log('  Analysis preview:', typeof imageAnalysis === 'string' ?
+              imageAnalysis.substring(0, 100) + '...' :
+              JSON.stringify(imageAnalysis).substring(0, 100) + '...')
+ } else {
+ console.log('⚠️ No image analysis found - patient may not have provided image')
+ console.log('  Checked: ocrAnalysisData.analysis, diagnosisData.diagnosis, imageData.analysis')
+ }
+
  const documentsPayload = {
  consultationId,
  patientId,
@@ -2889,6 +2962,19 @@ const handleSendDocuments = async () => {
  patientEmail: patientEmail,
  patientPhone: patientPhone,
  generatedAt: new Date().toISOString(),
+ consultationType: 'dermatology',
+ // Complete patient data for Tibok
+ patientData: {
+ name: patientName,
+ email: patientEmail,
+ phone: patientPhone,
+ address: patientAddress,
+ birthDate: patient?.dateNaissance || patientData?.birthDate || '',
+ age: patient?.age || patientData?.age || '',
+ gender: patient?.sexe || patientData?.gender || '',
+ weight: patient?.poids || patientData?.weight || ''
+ },
+ imageAnalysis: imageAnalysis,
  documents: {
  consultationReport: report?.compteRendu ? {
  type: 'consultation_report',
@@ -2946,10 +3032,13 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  }
  }
 
- console.log('📨 Sending to Tibok at:', tibokUrl)
+ console.log('📨 Sending dermatology documents to Tibok at:', tibokUrl)
  console.log('📦 Payload size:', JSON.stringify(documentsPayload).length, 'bytes')
+ console.log('🏥 Consultation type: dermatology')
+console.log('👤 Patient data in payload:', documentsPayload.patientData)
 
- const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
+ // Send to dedicated dermatology documents endpoint
+ const response = await fetch(`${tibokUrl}/api/dermatology-documents`, {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
  body: JSON.stringify(documentsPayload)

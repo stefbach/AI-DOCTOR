@@ -623,9 +623,26 @@ export default function ChronicProfessionalReport({
 
     console.log('🔑 Loading IDs from patientData (sessionStorage):', { sessionConsultationId, sessionPatientId, sessionDoctorId })
 
+    // Test IDs for development/testing on Vercel
+    const isTestEnvironment = typeof window !== 'undefined' && (
+      window.location.hostname.includes('vercel.app') ||
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1'
+    )
+
+    const TEST_IDS = {
+      consultationId: '94cf134b-32bc-49a1-8168-37f85355e27d',
+      patientId: '4c42a303-ee2e-49ad-b156-8348f75c1375',
+      doctorId: 'e152c622-abe3-410e-a0ff-75902edaf739'
+    }
+
     if (sessionConsultationId) {
       setConsultationId(sessionConsultationId)
       console.log('✅ Using consultation ID from Tibok:', sessionConsultationId)
+    } else if (isTestEnvironment && !sessionConsultationId) {
+      // Use test ID in development/test environments
+      setConsultationId(TEST_IDS.consultationId)
+      console.log('🧪 Using TEST consultation ID:', TEST_IDS.consultationId)
     } else {
       // Fallback to generating local ID if not provided
       const fallbackId = `chronic_disease_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -636,6 +653,9 @@ export default function ChronicProfessionalReport({
     if (sessionPatientId) {
       setTibokPatientId(sessionPatientId)
       console.log('✅ Using patient ID from Tibok:', sessionPatientId)
+    } else if (isTestEnvironment && !sessionPatientId) {
+      setTibokPatientId(TEST_IDS.patientId)
+      console.log('🧪 Using TEST patient ID:', TEST_IDS.patientId)
     } else {
       console.warn('⚠️ No patient ID in patientData')
     }
@@ -643,6 +663,9 @@ export default function ChronicProfessionalReport({
     if (sessionDoctorId) {
       setTibokDoctorId(sessionDoctorId)
       console.log('✅ Using doctor ID from Tibok:', sessionDoctorId)
+    } else if (isTestEnvironment && !sessionDoctorId) {
+      setTibokDoctorId(TEST_IDS.doctorId)
+      console.log('🧪 Using TEST doctor ID:', TEST_IDS.doctorId)
     } else {
       console.warn('⚠️ No doctor ID in patientData')
     }
@@ -651,10 +674,39 @@ export default function ChronicProfessionalReport({
   // Auto-fill sick leave medical reason from diagnosis when report is generated
   useEffect(() => {
     if (report && !sickLeaveData.medicalReason) {
-      const diagnosis = report.medicalReport.chronicDiseaseAssessment.primaryDiagnosis ||
-                       report.medicalReport.diagnosticSummary.diagnosticConclusion || ''
-      if (diagnosis) {
-        setSickLeaveData(prev => ({ ...prev, medicalReason: diagnosis }))
+      // Use full detailed text from consultation report
+      const historyOfPresentIllness = report.medicalReport?.clinicalEvaluation?.historyOfPresentIllness || ''
+      const diagnosticConclusion = report.medicalReport?.diagnosticSummary?.diagnosticConclusion || ''
+
+      console.log('🏥 Auto-filling sick leave medical reason:')
+      console.log('  - historyOfPresentIllness:', historyOfPresentIllness ? `${historyOfPresentIllness.substring(0, 100)}...` : 'EMPTY')
+      console.log('  - diagnosticConclusion:', diagnosticConclusion ? `${diagnosticConclusion.substring(0, 100)}...` : 'EMPTY')
+
+      // Combine full text from both sections with a blank line separator
+      const sections = []
+      if (historyOfPresentIllness) sections.push(historyOfPresentIllness)
+      if (diagnosticConclusion) sections.push(diagnosticConclusion)
+
+      if (sections.length > 0) {
+        console.log('  ✅ Using detailed text (both or one field available)')
+        setSickLeaveData(prev => ({ ...prev, medicalReason: sections.join('\n\n') }))
+      } else {
+        // Fallback to shorter fields if detailed ones don't exist
+        const chiefComplaint = report.medicalReport?.clinicalEvaluation?.chiefComplaint || ''
+        const primaryDiagnosis = report.medicalReport?.chronicDiseaseAssessment?.primaryDiagnosis || ''
+
+        console.log('  ⚠️ No detailed text found, using fallback:')
+        console.log('    - chiefComplaint:', chiefComplaint)
+        console.log('    - primaryDiagnosis:', primaryDiagnosis)
+
+        if (chiefComplaint && primaryDiagnosis) {
+          setSickLeaveData(prev => ({ ...prev, medicalReason: `${chiefComplaint}\n\n${primaryDiagnosis}` }))
+        } else {
+          const diagnosis = chiefComplaint || primaryDiagnosis
+          if (diagnosis) {
+            setSickLeaveData(prev => ({ ...prev, medicalReason: diagnosis }))
+          }
+        }
       }
     }
   }, [report, sickLeaveData.medicalReason])

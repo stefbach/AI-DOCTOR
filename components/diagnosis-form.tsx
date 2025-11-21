@@ -737,9 +737,11 @@ export default function DiagnosisForm({
  setShowDocuments(true)
  setDocumentsGenerated(true)
  setSectionStatus(prev => ({ ...prev, documents: 'complete' }))
- 
- // Notify parent component
- const completeData = { 
+ }, 13000)
+
+ // CRITICAL FIX: Save data IMMEDIATELY (not after 13 seconds)
+ // This ensures currentMedicationsValidated is saved before user continues
+ const completeData = {
  diagnosis: data.diagnosis,
  diagnosticReasoning: data.diagnosticReasoning,
  mauritianDocuments: data.mauritianDocuments,
@@ -751,16 +753,16 @@ export default function DiagnosisForm({
  medications: data.medications,
  combinedPrescription: data.combinedPrescription
  }
- 
+
  // CLIENT DEBUG - Check what we're saving
  console.log(' CLIENT DEBUG - DIAGNOSIS FORM SAVING:')
  console.log(' 💊 currentMedicationsValidated:', completeData.currentMedicationsValidated)
  console.log(' 💊 Length:', completeData.currentMedicationsValidated?.length || 0)
  console.log(' 📋 medications:', completeData.medications)
  console.log(' 📋 combinedPrescription:', completeData.combinedPrescription)
- 
+
+ // Save immediately so data is available when user continues
  onDataChange(completeData)
- }, 13000)
  }
 
  const generateCompleteDiagnosisAndDocuments = async () => {
