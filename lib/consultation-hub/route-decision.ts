@@ -41,7 +41,7 @@ export function determineOptimalRoute(
       availablePaths: [
         {
           label: 'Consultation Normale',
-          path: '/consultation',
+          path: '/',
           description: 'Première consultation médicale générale',
           isRecommended: selectedType === 'normal'
         },
@@ -108,7 +108,7 @@ function getInitialConsultationPath(type: ConsultationType): string {
     case 'chronic':
       return '/chronic-disease'
     default:
-      return '/consultation'
+      return '/'
   }
 }
 
@@ -177,7 +177,7 @@ function buildAvailablePathsForExistingPatient(
   if (selectedType === 'normal') {
     paths.push({
       label: '📋 Nouvelle Consultation Complète',
-      path: '/consultation',
+      path: '/',
       description: 'Consultation complète avec questions IA et diagnostic approfondi (nouveau problème médical)',
       isRecommended: false
     })

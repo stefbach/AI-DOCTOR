@@ -13,10 +13,11 @@ import {
 import { HubPatientSearch } from '@/components/consultation-hub/hub-patient-search'
 import { HubPatientSummary } from '@/components/consultation-hub/hub-patient-summary'
 import { HubWorkflowSelector } from '@/components/consultation-hub/hub-workflow-selector'
+import { HubDocumentAnalysisOption } from '@/components/consultation-hub/hub-document-analysis-option'
 import { HistoryList, ConsultationDetailModal } from '@/lib/follow-up/shared'
 import type { ConsultationHistoryItem } from '@/lib/follow-up/shared'
 
-type WorkflowStep = 'search' | 'summary' | 'workflow'
+type WorkflowStep = 'search' | 'summary' | 'documents' | 'workflow'
 
 /**
  * Consultation Hub - Interface Centrale Intelligente
@@ -39,7 +40,7 @@ export default function ConsultationHubPage() {
 
   const handleNewPatient = () => {
     // Redirect to normal consultation for new patient
-    window.location.href = '/consultation'
+    window.location.href = '/'
   }
 
   const handleViewHistory = () => {
@@ -52,8 +53,19 @@ export default function ConsultationHubPage() {
   }
 
   const handleProceedToWorkflow = () => {
-    setCurrentStep('workflow')
+    // Go to document analysis option first
+    setCurrentStep('documents')
     setShowHistoryModal(false)
+  }
+
+  const handleDocumentsComplete = (hasDocuments: boolean) => {
+    // After documents (saved or skipped), go to workflow selection
+    setCurrentStep('workflow')
+  }
+
+  const handleSkipDocuments = () => {
+    // Skip directly to workflow selection
+    setCurrentStep('workflow')
   }
 
   const handleReset = () => {
@@ -118,7 +130,8 @@ export default function ConsultationHubPage() {
             Nouvelle Recherche
           </Button>
           <div className="flex-1 flex items-center gap-2">
-            <div className={`h-2 flex-1 rounded-full ${currentStep === 'summary' || currentStep === 'workflow' ? 'bg-green-500' : 'bg-gray-200'}`} />
+            <div className={`h-2 flex-1 rounded-full ${currentStep === 'summary' || currentStep === 'documents' || currentStep === 'workflow' ? 'bg-green-500' : 'bg-gray-200'}`} />
+            <div className={`h-2 flex-1 rounded-full ${currentStep === 'documents' || currentStep === 'workflow' ? 'bg-green-500' : 'bg-gray-200'}`} />
             <div className={`h-2 flex-1 rounded-full ${currentStep === 'workflow' ? 'bg-green-500' : 'bg-gray-200'}`} />
           </div>
         </div>
@@ -148,7 +161,7 @@ export default function ConsultationHubPage() {
                   onClick={handleProceedToWorkflow}
                   size="lg"
                 >
-                  Continuer vers Sélection Workflow →
+                  Continue →
                 </Button>
               </div>
             )}
@@ -181,7 +194,25 @@ export default function ConsultationHubPage() {
           </div>
         )}
 
-        {/* Step 3: Workflow Selection */}
+        {/* Step 3: Document Analysis (Optional) */}
+        {currentStep === 'documents' && patientData && (
+          <HubDocumentAnalysisOption
+            patient={{
+              id: patientData.consultations?.[0]?.patient_data?.id || 'patient_' + Date.now(),
+              fullName: patientData.consultations?.[0]?.patient_data?.fullName || 'Unknown',
+              firstName: patientData.consultations?.[0]?.patient_data?.firstName,
+              lastName: patientData.consultations?.[0]?.patient_data?.lastName,
+              age: patientData.consultations?.[0]?.patient_data?.age,
+              gender: patientData.consultations?.[0]?.patient_data?.gender,
+              phone: patientData.consultations?.[0]?.patient_data?.phone,
+              email: patientData.consultations?.[0]?.patient_data?.email,
+            }}
+            onComplete={handleDocumentsComplete}
+            onSkip={handleSkipDocuments}
+          />
+        )}
+
+        {/* Step 4: Workflow Selection */}
         {currentStep === 'workflow' && patientData && (
           <HubWorkflowSelector
             patientData={patientData}
