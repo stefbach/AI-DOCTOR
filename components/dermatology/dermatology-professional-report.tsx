@@ -2913,6 +2913,16 @@ const handleSendDocuments = async () => {
  // Get patient data from report
  const patient = getReportPatient()
 
+
+// Debug: Log available patient data sources
+console.log('👤 Patient data sources:')
+console.log('  From report (patient):', patient)
+console.log('  From props (patientData):', patientData)
+console.log('  Extracted values:')
+console.log('    - birthDate:', patient?.dateNaissance || patientData?.birthDate || 'MISSING')
+console.log('    - age:', patient?.age || patientData?.age || 'MISSING')
+console.log('    - gender:', patient?.sexe || patientData?.gender || 'MISSING')
+console.log('    - weight:', patient?.poids || patientData?.weight || 'MISSING')
  // Extract image analysis - check ocrAnalysisData first (contains AI vision analysis)
  let imageAnalysis = null
  let analysisSource = ''
@@ -3025,6 +3035,7 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  console.log('📨 Sending dermatology documents to Tibok at:', tibokUrl)
  console.log('📦 Payload size:', JSON.stringify(documentsPayload).length, 'bytes')
  console.log('🏥 Consultation type: dermatology')
+console.log('👤 Patient data in payload:', documentsPayload.patientData)
 
  // Send to dedicated dermatology documents endpoint
  const response = await fetch(`${tibokUrl}/api/dermatology-documents`, {
