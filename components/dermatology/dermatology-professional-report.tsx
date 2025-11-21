@@ -2849,8 +2849,9 @@ const handleSendDocuments = async () => {
  })
  })
 
- // Get Tibok URL
+ // Get Tibok URL based on environment
  const getTibokUrl = () => {
+ // First check URL parameter (highest priority)
  const urlParams = new URLSearchParams(window.location.search)
  const urlParam = urlParams.get('tibokUrl')
  if (urlParam) {
@@ -2858,6 +2859,7 @@ const handleSendDocuments = async () => {
  return decodeURIComponent(urlParam)
  }
 
+ // Check referrer
  if (document.referrer) {
  try {
  const referrerUrl = new URL(document.referrer)
@@ -2871,15 +2873,51 @@ const handleSendDocuments = async () => {
  }
  }
 
+ // Environment-based mapping
+ const hostname = window.location.hostname
+
+ // Test/Development environment
+ if (hostname.includes('v0-medical')) {
+ console.log('📍 Using Tibok development URL for v0-medical')
+ return 'https://v0-tibokmain2.vercel.app'
+ }
+
+ // Staging environment
+ if (hostname.includes('staging') || hostname.includes('test')) {
+ console.log('📍 Using Tibok staging URL')
+ return 'https://staging.tibok.mu'
+ }
+
+ // Production
+ if (hostname.includes('medical-ai-expert.vercel.app')) {
+ console.log('📍 Using Tibok production URL')
+ return 'https://tibok.mu'
+ }
+
+ // Local development
+ if (hostname === 'localhost' || hostname === '127.0.0.1') {
+ console.log('📍 Using Tibok local development URL')
+ return 'http://localhost:3000'
+ }
+
  console.log('📍 Using default Tibok URL: https://tibok.mu')
  return 'https://tibok.mu'
  }
 
  const tibokUrl = getTibokUrl()
 
- // Prepare documents payload
- console.log('📦 Preparing documents payload...')
- 
+ // Prepare documents payload for dermatology
+ console.log('📦 Preparing dermatology documents payload...')
+
+ // Extract image analysis from diagnosisData if available
+ const imageAnalysis = diagnosisData?.imageAnalysis || diagnosisData?.skinAnalysis || null
+
+ if (imageAnalysis) {
+ console.log('🖼️ Including image analysis in payload')
+ } else {
+ console.log('⚠️ No image analysis found - patient may not have provided image')
+ }
+
  const documentsPayload = {
  consultationId,
  patientId,
@@ -2889,6 +2927,8 @@ const handleSendDocuments = async () => {
  patientEmail: patientEmail,
  patientPhone: patientPhone,
  generatedAt: new Date().toISOString(),
+ consultationType: 'dermatology',
+ imageAnalysis: imageAnalysis,
  documents: {
  consultationReport: report?.compteRendu ? {
  type: 'consultation_report',
@@ -2946,10 +2986,12 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  }
  }
 
- console.log('📨 Sending to Tibok at:', tibokUrl)
+ console.log('📨 Sending dermatology documents to Tibok at:', tibokUrl)
  console.log('📦 Payload size:', JSON.stringify(documentsPayload).length, 'bytes')
+ console.log('🏥 Consultation type: dermatology')
 
- const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
+ // Send to dedicated dermatology documents endpoint
+ const response = await fetch(`${tibokUrl}/api/dermatology-documents`, {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
  body: JSON.stringify(documentsPayload)
