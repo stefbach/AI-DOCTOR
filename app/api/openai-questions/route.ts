@@ -182,8 +182,6 @@ interface MedicalContext {
   criticalityScore: number
   redFlags: string[]
   suggestedSpecialty?: string
-  ocrAnalysis?: any  // Optional OCR analysis for dermatology consultations
-  isDermatology?: boolean
 }
 
 interface APIResponse {
@@ -340,11 +338,11 @@ async function callOpenAIWithRetry(
       let enhancedSystemMessage = systemMessage
       
       if (attempt === 1) {
-        enhancedSystemMessage = `🚨 ATTEMPT 2/4 - ENHANCED QUALITY:\n\n${systemMessage}\n\n⚠️ CRITICAL: Questions must be:\n- Clinically specific and actionable\n- Evidence-based\n- Appropriate for patient context${isPregnant ? ' (pregnancy-safe)' : ''}\n- MULTIPLE CHOICE FORMAT ONLY with 4-6 specific options`
+        enhancedSystemMessage = `🚨 ATTEMPT 2/4 - ENHANCED QUALITY:\n\n${systemMessage}\n\n⚠️ CRITICAL: Questions must be:\n- Clinically specific and actionable\n- Evidence-based\n- Appropriate for patient context${isPregnant ? ' (pregnancy-safe)' : ''}`
       } else if (attempt === 2) {
-        enhancedSystemMessage = `🚨🚨 ATTEMPT 3/4 - STRICT STANDARDS:\n\n${systemMessage}\n\n⚠️ MANDATORY:\n- All questions must have unique IDs\n- All questions must have clear priorities\n- All questions must be patient-appropriate\n- Minimum 6 questions required\n- ALL questions MUST be type: "multiple_choice" with 4-6 options\n- NO open-ended questions allowed`
+        enhancedSystemMessage = `🚨🚨 ATTEMPT 3/4 - STRICT STANDARDS:\n\n${systemMessage}\n\n⚠️ MANDATORY:\n- All questions must have unique IDs\n- All questions must have clear priorities\n- All questions must be patient-appropriate\n- Minimum 6 questions required`
       } else if (attempt >= 3) {
-        enhancedSystemMessage = `🆘 ATTEMPT 4/4 - MAXIMUM QUALITY:\n\n${systemMessage}\n\n🎯 FINAL ATTEMPT - response must be PERFECT:\n- Questions must be comprehensive and cover all clinical aspects\n- Each question must be specific and actionable\n- Response must be valid JSON with complete structure\n- EVERY question MUST be type: "multiple_choice" with 4-6 specific answer options\n- ZERO open-ended questions accepted`
+        enhancedSystemMessage = `🆘 ATTEMPT 4/4 - MAXIMUM QUALITY:\n\n${systemMessage}\n\n🎯 FINAL ATTEMPT - response must be PERFECT:\n- Questions must be comprehensive and cover all clinical aspects\n- Each question must be specific and actionable\n- Response must be valid JSON with complete structure`
       }
       
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -387,32 +385,18 @@ async function callOpenAIWithRetry(
       // Quality validation
       const hasMinimumQuestions = questions.length >= 6
       const allHaveIds = questions.every((q: any) => q.id || q.question_id)
-      const allMultipleChoice = questions.every((q: any) => {
-        return (q.type === 'multiple_choice' || q.type === 'multiple-choice') && 
-               q.options && 
-               Array.isArray(q.options) && 
-               q.options.length >= 4
-      })
       
-      if ((!hasMinimumQuestions || !allHaveIds || !allMultipleChoice) && attempt < maxRetries) {
-        console.log(`⚠️ Quality issues: ${questions.length} questions, all have IDs: ${allHaveIds}, all multiple choice: ${allMultipleChoice}`)
+      if ((!hasMinimumQuestions || !allHaveIds) && attempt < maxRetries) {
+        console.log(`⚠️ Quality issues: ${questions.length} questions, all have IDs: ${allHaveIds}`)
         throw new Error('Quality validation failed')
       }
       
       // Auto-correction on final attempt
-      if ((!hasMinimumQuestions || !allHaveIds || !allMultipleChoice) && attempt === maxRetries) {
+      if ((!hasMinimumQuestions || !allHaveIds) && attempt === maxRetries) {
         console.log('🔧 AUTO-CORRECTION MODE')
         questions.forEach((q: any, idx: number) => {
           if (!q.id && !q.question_id) {
             q.id = `q${idx + 1}`
-          }
-          // Force multiple choice format
-          if (!q.type || q.type !== 'multiple_choice') {
-            q.type = 'multiple_choice'
-          }
-          if (!q.options || !Array.isArray(q.options) || q.options.length < 4) {
-            q.options = ['Option A', 'Option B', 'Option C', 'Option D']
-            console.log(`⚠️ Auto-corrected question ${q.id || idx + 1} to multiple choice format`)
           }
         })
         console.log('✅ Auto-correction applied')
@@ -425,8 +409,7 @@ async function callOpenAIWithRetry(
         qualityMetrics: {
           attempt: attempt + 1,
           questionsCount: questions.length,
-          allHaveIds,
-          allMultipleChoice
+          allHaveIds
         }
       }
       
@@ -1460,26 +1443,13 @@ function generateFastModePrompt(patient: ProcessedPatientData, clinical: Process
     ? `\nHISTORY RED FLAGS: ${clinical.historyAnalysis.redFlags.map(f => f.flag).join(', ')}`
     : ''
   
-  // Dermatology-specific OCR integration
-  const ocrSection = context.isDermatology && context.ocrAnalysis ? `
-
-🔬 DERMATOLOGY IMAGE ANALYSIS (FROM OCR/AI):
-${JSON.stringify(context.ocrAnalysis.diagnosis_summary || context.ocrAnalysis, null, 2)}
-
-⚠️ CRITICAL: Base your questions on the VISUAL FINDINGS from the image analysis above!
-- What does the image show? (morphology, distribution, color)
-- What is the urgency level indicated?
-- What are the differential diagnoses suggested by the image?
-
-Your questions MUST correlate with these visual findings to narrow down the diagnosis.` : ''
-  
   return `EMERGENCY TRIAGE ASSESSMENT - RAPID MODE
 
 PATIENT: ${patient.age}y ${patient.gender}${patient.isPregnant ? ' (PREGNANT)' : ''}
 CHIEF COMPLAINT: ${clinical.mainComplaint}
 DURATION: ${clinical.duration.value}
 PAIN: ${clinical.painLevel}/10
-RED FLAGS: ${context.redFlags.length > 0 ? context.redFlags.join(', ') : 'None identified'}${pregnancyAlert}${historyAlert}${ocrSection}
+RED FLAGS: ${context.redFlags.length > 0 ? context.redFlags.join(', ') : 'None identified'}${pregnancyAlert}${historyAlert}
 
 Generate 3 CRITICAL triage questions to rapidly identify life-threatening conditions.
 
@@ -1489,15 +1459,8 @@ Focus ONLY on:
 3. Detecting critical red flags
 ${patient.isPregnant ? '4. Pregnancy-specific emergencies (preeclampsia, placental abruption, ectopic pregnancy)' : ''}
 
-🚨 CRITICAL FORMAT REQUIREMENTS:
-- ALL questions MUST be multiple choice format ONLY
-- EVERY question MUST have type: "multiple_choice"
-- EVERY question MUST have 4-6 specific answer options
-- NO open-ended questions allowed
-- Options should be clear, specific choices (e.g., "Yes", "No", "Not sure", "Sometimes" OR severity levels)
-
 Each question must:
-- Be answerable with simple multiple choice selection
+- Be answerable with simple yes/no or quick selection
 - Target specific emergency conditions
 - Help determine if immediate medical attention needed
 ${patient.isPregnant ? '- Consider pregnancy safety' : ''}
@@ -1508,7 +1471,6 @@ Format:
     {
       "id": 1,
       "question": "Direct question targeting critical symptom",
-      "type": "multiple_choice",
       "options": ["Yes", "No", "Not sure", "Sometimes"],
       "priority": "critical",
       "redFlagDetection": true,
@@ -1578,20 +1540,6 @@ ASSESSMENT:
 - Red Flags: ${context.redFlags.join(', ') || 'None'}
 - Risk Factors: ${context.riskFactors.map(r => `${r.factor}(${r.severity})`).join(', ')}
 
-${context.isDermatology && context.ocrAnalysis ? `
-🔬 DERMATOLOGY IMAGE ANALYSIS (CRITICAL PRIMARY DATA):
-${JSON.stringify(context.ocrAnalysis.diagnosis_summary || context.ocrAnalysis, null, 2)}
-
-⚠️ MANDATORY OCR INTEGRATION FOR QUESTIONS:
-- Your questions MUST build upon the visual findings from the image analysis
-- Ask about symptoms that CORRELATE with the observed lesion morphology
-- Explore duration, changes, and associated symptoms related to what's VISIBLE
-- Differentiate between the differential diagnoses suggested by the IMAGE
-- Questions should help confirm or refute what the IMAGE suggests
-
-DO NOT ask generic skin questions - ask SPECIFIC questions about THIS visible condition!
-` : ''}
-
 ${patient.isPregnant ? `
 PREGNANCY CONSIDERATIONS:
 - All medications must be pregnancy-safe (Category A/B preferred)
@@ -1610,18 +1558,11 @@ Generate 5 diagnostic questions following standard clinical protocol:
 
 ${patient.isPregnant ? 'IMPORTANT: Include pregnancy-specific considerations in your questions.' : ''}
 
-🚨 CRITICAL FORMAT REQUIREMENTS:
-- ALL questions MUST be multiple choice format ONLY
-- EVERY question MUST have type: "multiple_choice"
-- EVERY question MUST have 4-6 specific answer options
-- NO open-ended questions allowed
-- Options should represent different severity levels, frequencies, or specific clinical presentations
-
 Each question must:
 - Be clinically relevant to the presentation
 - Help narrow the differential diagnosis
 - Use appropriate medical terminology with lay explanations
-- Include 4-6 specific answer options (not just yes/no)
+- Include 4 specific answer options
 ${patient.isPregnant ? '- Consider pregnancy safety when relevant' : ''}
 
 Format:
@@ -1630,8 +1571,7 @@ Format:
     {
       "id": 1,
       "question": "Clear clinical question",
-      "type": "multiple_choice",
-      "options": ["Specific option 1", "Specific option 2", "Specific option 3", "Specific option 4"],
+      "options": ["Specific option 1", "Specific option 2", "Specific option 3", "None of these"],
       "priority": "high",
       "rationale": "Clinical reasoning for this question",
       "clinicalRelevance": "How this helps diagnosis"
@@ -1703,22 +1643,6 @@ ${clinical.historyAnalysis.criticalityModifiers.map(mod =>
   `• ${mod.reason}: +${mod.points} points`
 ).join('\n')}
 
-${context.isDermatology && context.ocrAnalysis ? `
-🔬 DERMATOLOGY IMAGE ANALYSIS - EXPERT LEVEL CORRELATION REQUIRED:
-${JSON.stringify(context.ocrAnalysis, null, 2)}
-
-⚠️ CRITICAL EXPERT-LEVEL OCR INTEGRATION:
-As a specialist, you MUST use the IMAGE ANALYSIS as PRIMARY diagnostic data:
-- Correlate visual morphology with differential diagnoses
-- Ask about systemic symptoms that might explain the skin findings
-- Explore medication history that could cause these visual changes
-- Investigate genetic/familial skin conditions matching this presentation
-- Assess quality of life impact based on visible extent and location
-- Determine urgency based on IMAGE features (melanoma signs, infection, etc.)
-
-Your expert questions must demonstrate DEEP correlation between what's VISIBLE and potential diagnoses!
-` : ''}
-
 Generate 8 sophisticated diagnostic questions that:
 
 1. MUST explore rare but serious conditions (zebras)
@@ -1731,16 +1655,9 @@ Generate 8 sophisticated diagnostic questions that:
 8. MUST determine need for urgent vs routine evaluation
 ${patient.isPregnant ? '9. MUST consider pregnancy-specific conditions and safety' : ''}
 
-🚨 CRITICAL FORMAT REQUIREMENTS:
-- ALL questions MUST be multiple choice format ONLY
-- EVERY question MUST have type: "multiple_choice"
-- EVERY question MUST have 4-6 specific answer options
-- NO open-ended questions allowed
-- Options must be highly specific, representing different clinical scenarios, severity levels, or diagnostic possibilities
-
 Requirements for each question:
 - Use precise medical terminology WITH patient-friendly explanations
-- Include 4-6 highly specific differential options
+- Include 4 highly specific differential options
 - Explain the diagnostic value of each question
 - Indicate if positive response requires urgent action
 - Consider age and gender-specific conditions
@@ -1754,12 +1671,10 @@ Format:
     {
       "id": 1,
       "question": "Sophisticated clinical question with explanation",
-      "type": "multiple_choice",
       "options": [
         "Very specific option 1",
         "Very specific option 2", 
         "Very specific option 3",
-        "Very specific option 4",
         "None of the above/Not applicable"
       ],
       "priority": "high",
@@ -1947,16 +1862,7 @@ export async function POST(request: NextRequest) {
     }
     
     const body = await request.json()
-    const { patientData, clinicalData, mode = 'balanced', ocrAnalysisData } = body
-    
-    // Detect if this is a dermatology consultation (OCR data present)
-    const isDermatologyConsultation = !!(ocrAnalysisData && Object.keys(ocrAnalysisData).length > 0)
-    
-    if (isDermatologyConsultation) {
-      console.log('🔬 DERMATOLOGY CONSULTATION DETECTED - OCR analysis present')
-      console.log('   - OCR findings:', ocrAnalysisData?.diagnosis_summary || 'Not available')
-      console.log('   - Urgency:', ocrAnalysisData?.urgency_assessment?.level || 'Not available')
-    }
+    const { patientData, clinicalData, mode = 'balanced' } = body
     
     console.log('ENHANCED API Input Analysis:', {
       hasPatientData: !!patientData,
@@ -2078,9 +1984,7 @@ export async function POST(request: NextRequest) {
       riskFactors,
       criticalityScore,
       redFlags,
-      suggestedSpecialty,
-      ocrAnalysis: isDermatologyConsultation ? ocrAnalysisData : undefined,
-      isDermatology: isDermatologyConsultation
+      suggestedSpecialty
     }
     
     const prompt = generateModeSpecificPrompt(adjustedMode, context)
@@ -2093,7 +1997,7 @@ export async function POST(request: NextRequest) {
     
     console.log(`Calling ${aiConfig.model} with ${adjustedMode} mode (history-enhanced) with retry mechanism`)
     
-    const systemMessage = `You are an expert physician conducting a thorough clinical assessment with advanced history analysis capabilities. Generate diagnostic questions based on evidence-based medicine. CRITICAL: ALL questions MUST be multiple choice format with type: "multiple_choice" and 4-6 specific answer options. NO open-ended questions allowed. Always respond with valid JSON only. ${processedPatient.isPregnant ? 'IMPORTANT: This patient is pregnant - consider pregnancy-specific conditions and medication safety.' : ''} Pay special attention to history analysis findings when crafting questions.`
+    const systemMessage = `You are an expert physician conducting a thorough clinical assessment with advanced history analysis capabilities. Generate diagnostic questions based on evidence-based medicine. Always respond with valid JSON only. ${processedPatient.isPregnant ? 'IMPORTANT: This patient is pregnant - consider pregnancy-specific conditions and medication safety.' : ''} Pay special attention to history analysis findings when crafting questions.`
     
     const result = await callOpenAIWithRetry(
       apiKey,
