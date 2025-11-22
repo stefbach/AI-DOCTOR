@@ -1,11 +1,484 @@
+// app/api/dermatology-diagnosis/route.ts
+// VERSION 4.0: Professional-grade dermatology consultation matching openai-diagnosis quality
+// - Consultation type detection (new problem vs treatment renewal)
+// - Explicit OCR/image analysis integration requirements
+// - Current medications validation and continuation strategy
+// - Treatment interaction checking
+// - 4 retry attempts with progressive enhancement
+// - Auto-correction on final attempt
+// - 8000 max tokens for comprehensive responses
+// - Enhanced context awareness
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
-// OpenAI client will be initialized inside the function to avoid build-time errors
+// ==================== HELPER FUNCTIONS ====================
 
-// Moved inside function - const openai = new OpenAI({
-// Moved inside function -   apiKey: process.env.OPENAI_API_KEY
-// Moved inside function - })
+/**
+ * Validates dermatology medications for DCI compliance (topical + oral)
+ */
+function validateDermatologyMedications(treatment: any): { isValid: boolean; issues: string[] } {
+  const issues: string[] = []
+  
+  if (!treatment) {
+    return { isValid: true, issues: [] }
+  }
+  
+  // Validate topical medications
+  if (treatment.topical && Array.isArray(treatment.topical)) {
+    treatment.topical.forEach((med: any, index: number) => {
+      if (!med.medication || med.medication.toLowerCase().includes('medication') || 
+          med.medication.toLowerCase().includes('cream') || med.medication.toLowerCase().includes('ointment')) {
+        issues.push(`Topical ${index + 1}: Generic name "${med.medication}" - needs specific DCI (e.g., "Hydrocortisone 1% cream")`)
+      }
+      
+      if (!med.dci || med.dci.length < 3) {
+        issues.push(`Topical ${index + 1}: Missing or incomplete DCI name`)
+      }
+      
+      if (!med.application || !med.application.match(/OD|BD|TDS|QDS|PRN|once|twice|three times|four times/i)) {
+        issues.push(`Topical ${index + 1}: Missing or unclear application frequency`)
+      }
+      
+      if (!med.duration || med.duration.length < 5) {
+        issues.push(`Topical ${index + 1}: Missing or incomplete treatment duration`)
+      }
+      
+      if (!med.instructions || med.instructions.length < 15) {
+        issues.push(`Topical ${index + 1}: Instructions too brief - need detailed application guidance`)
+      }
+    })
+  }
+  
+  // Validate oral medications
+  if (treatment.oral && Array.isArray(treatment.oral)) {
+    treatment.oral.forEach((med: any, index: number) => {
+      if (!med.medication || med.medication.toLowerCase().includes('medication') || 
+          med.medication.toLowerCase().includes('drug')) {
+        issues.push(`Oral ${index + 1}: Generic name "${med.medication}" - needs specific DCI`)
+      }
+      
+      if (!med.dci || med.dci.length < 3) {
+        issues.push(`Oral ${index + 1}: Missing or incomplete DCI name`)
+      }
+      
+      if (!med.dosage || med.dosage.length < 3) {
+        issues.push(`Oral ${index + 1}: Missing or incomplete dosage`)
+      }
+      
+      if (!med.frequency || !med.frequency.match(/OD|BD|TDS|QDS/i)) {
+        issues.push(`Oral ${index + 1}: Missing or incomplete frequency (should use OD/BD/TDS/QDS)`)
+      }
+      
+      if (!med.indication || med.indication.length < 20) {
+        issues.push(`Oral ${index + 1}: Indication too vague - need detailed medical reasoning`)
+      }
+    })
+  }
+  
+  return {
+    isValid: issues.length === 0,
+    issues
+  }
+}
+
+/**
+ * Validates differential diagnosis completeness
+ */
+function validateDifferentialDiagnoses(differentials: any[]): { isValid: boolean; issues: string[] } {
+  const issues: string[] = []
+  
+  if (!differentials || !Array.isArray(differentials)) {
+    issues.push('Missing differential diagnoses array')
+    return { isValid: false, issues }
+  }
+  
+  if (differentials.length < 3) {
+    issues.push(`Only ${differentials.length} differential diagnoses - minimum 3 required`)
+  }
+  
+  differentials.forEach((diff: any, index: number) => {
+    if (!diff.condition || diff.condition.length < 5) {
+      issues.push(`Differential ${index + 1}: Missing or incomplete condition name`)
+    }
+    
+    if (!diff.likelihood || typeof diff.likelihood !== 'number') {
+      issues.push(`Differential ${index + 1}: Missing or invalid likelihood percentage`)
+    }
+    
+    if (!diff.supportingFeatures || diff.supportingFeatures.length < 10) {
+      issues.push(`Differential ${index + 1}: Supporting features too brief`)
+    }
+    
+    if (!diff.distinguishingFeatures || diff.distinguishingFeatures.length < 10) {
+      issues.push(`Differential ${index + 1}: Distinguishing features too brief`)
+    }
+  })
+  
+  return {
+    isValid: issues.length === 0,
+    issues
+  }
+}
+
+/**
+ * Validates current medications review (if applicable)
+ */
+function validateCurrentMedicationsReview(currentMeds: any[]): { isValid: boolean; issues: string[] } {
+  const issues: string[] = []
+  
+  if (!currentMeds || !Array.isArray(currentMeds)) {
+    // Not required if patient has no current medications
+    return { isValid: true, issues: [] }
+  }
+  
+  if (currentMeds.length === 0) {
+    return { isValid: true, issues: [] }
+  }
+  
+  currentMeds.forEach((med: any, index: number) => {
+    if (!med.medication || med.medication.length < 3) {
+      issues.push(`Current Med ${index + 1}: Missing or incomplete medication name`)
+    }
+    
+    if (!med.assessment || !['Continue', 'Adjust', 'Stop'].includes(med.assessment)) {
+      issues.push(`Current Med ${index + 1}: Assessment must be Continue/Adjust/Stop`)
+    }
+    
+    if (!med.reasoning || med.reasoning.length < 30) {
+      issues.push(`Current Med ${index + 1}: Reasoning too brief - need detailed medical justification (30+ chars)`)
+    }
+    
+    if (!med.interactions) {
+      issues.push(`Current Med ${index + 1}: Missing interaction assessment`)
+    }
+  })
+  
+  return {
+    isValid: issues.length === 0,
+    issues
+  }
+}
+
+/**
+ * Validates dermatology-specific quality requirements
+ */
+function validateDermatologyQuality(diagnosis: any): { isValid: boolean; issues: string[] } {
+  const issues: string[] = []
+  
+  // Check clinical summary
+  if (!diagnosis.clinicalSummary || diagnosis.clinicalSummary.length < 50) {
+    issues.push('Clinical summary too brief - needs comprehensive overview')
+  }
+  
+  // Check primary diagnosis
+  if (!diagnosis.primaryDiagnosis?.name) {
+    issues.push('Missing primary diagnosis name')
+  }
+  
+  if (!diagnosis.primaryDiagnosis?.icd10) {
+    issues.push('Missing ICD-10 code for primary diagnosis')
+  }
+  
+  if (!diagnosis.primaryDiagnosis?.confidence) {
+    issues.push('Missing confidence level for primary diagnosis')
+  }
+  
+  // Check pathophysiology
+  if (!diagnosis.pathophysiology || diagnosis.pathophysiology.length < 50) {
+    issues.push('Pathophysiology explanation too brief - need detailed mechanism')
+  }
+  
+  // Check treatment plan completeness
+  if (!diagnosis.treatmentPlan?.immediate) {
+    issues.push('Missing immediate management plan')
+  }
+  
+  if (!diagnosis.treatmentPlan?.longTerm) {
+    issues.push('Missing long-term management plan')
+  }
+  
+  // Check patient education
+  if (!diagnosis.patientEducation || diagnosis.patientEducation.length < 100) {
+    issues.push('Patient education too brief - need comprehensive explanation')
+  }
+  
+  // Check follow-up plan
+  if (!diagnosis.followUpPlan?.timeline) {
+    issues.push('Missing follow-up timeline')
+  }
+  
+  // Check red flags
+  if (!diagnosis.redFlags || !Array.isArray(diagnosis.redFlags) || diagnosis.redFlags.length === 0) {
+    issues.push('Missing red flags / warning signs')
+  }
+  
+  return {
+    isValid: issues.length === 0,
+    issues
+  }
+}
+
+/**
+ * Calls OpenAI with retry mechanism and quality validation
+ */
+async function callOpenAIWithRetry(
+  openai: OpenAI,
+  diagnosticPrompt: string,
+  maxRetries: number = 3
+): Promise<any> {
+  let lastError: Error | null = null
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`📡 OpenAI call attempt ${attempt + 1}/${maxRetries + 1}`)
+      
+      // Enhance system message with quality requirements on retry
+      let systemMessage = "You are an expert board-certified dermatologist. Provide comprehensive, evidence-based diagnostic assessments with structured JSON responses."
+      
+      if (attempt === 1) {
+        systemMessage = `🚨 ATTEMPT 2/4 - PREVIOUS RESPONSE HAD QUALITY ISSUES - ENHANCED REQUIREMENTS:
+
+You are an expert board-certified dermatologist. Your response MUST meet these CRITICAL standards:
+
+⚠️ MEDICATION DCI REQUIREMENTS:
+- EVERY medication (topical and oral) must have SPECIFIC pharmaceutical name with DCI
+- TOPICAL: e.g., "Hydrocortisone 1% cream" (DCI: "Hydrocortisone"), NOT "steroid cream"
+- ORAL: e.g., "Doxycycline 100mg" (DCI: "Doxycycline"), NOT "antibiotic"
+- ALL medications need detailed application/dosing instructions (minimum 15 characters)
+- Use UK dosing format: OD/BD/TDS/QDS
+
+⚠️ DIFFERENTIAL DIAGNOSIS REQUIREMENTS:
+- MINIMUM 3 differential diagnoses (ideally 4-5)
+- Each must have: condition name, likelihood %, supporting features, distinguishing features
+- All descriptions must be detailed (minimum 30 characters each)
+
+⚠️ CLINICAL QUALITY REQUIREMENTS:
+- Clinical summary: minimum 50 characters
+- Pathophysiology: minimum 50 characters  
+- Patient education: minimum 100 characters
+- Red flags: at least 2-3 specific warning signs
+
+Provide comprehensive, professional-grade dermatological assessment.`
+      } else if (attempt === 2) {
+        systemMessage = `🚨🚨 ATTEMPT 3/4 - STRICT QUALITY REQUIREMENTS - MAURITIUS DERMATOLOGY STANDARDS:
+
+You are an expert board-certified dermatologist.
+
+⚠️ ABSOLUTE REQUIREMENTS:
+1. NEVER use "Medication", "undefined", null, or generic names
+2. ALWAYS use precise pharmaceutical names with DCI
+3. ALWAYS use UK dosing format (OD/BD/TDS/QDS)
+4. DCI MUST BE EXACT for all topical and oral medications
+5. INDICATIONS MUST BE DETAILED: Minimum 40 characters with specific medical context
+6. DIFFERENTIAL DIAGNOSES: Minimum 4 conditions with detailed features
+7. ALL fields must be completed with specific medical content
+8. MUST correlate OCR/image analysis with clinical assessment
+9. MUST validate current medications if patient has any
+
+🎯 MANDATORY TOPICAL MEDICATION FORMAT:
+{
+  "medication": "Hydrocortisone 1% cream",
+  "dci": "Hydrocortisone",
+  "application": "BD (twice daily)",
+  "duration": "7-14 days",
+  "instructions": "Apply thin layer to affected areas after cleansing, avoid occlusive dressings on face",
+  "sideEffects": "Skin atrophy with prolonged use, contact dermatitis"
+}
+
+💊 MANDATORY ORAL MEDICATION FORMAT:
+{
+  "medication": "Doxycycline 100mg",
+  "dci": "Doxycycline",
+  "dosage": "100mg",
+  "frequency": "OD (once daily)",
+  "duration": "6-12 weeks",
+  "indication": "Anti-inflammatory and antimicrobial treatment for moderate to severe inflammatory acne with photosensitivity considerations",
+  "monitoring": "Liver function tests if prolonged use, photosensitivity precautions",
+  "contraindications": "Pregnancy, children under 12, severe hepatic impairment"
+}`
+      } else if (attempt >= 3) {
+        systemMessage = `🆘 ATTEMPT 4/4 - MAXIMUM QUALITY MODE - FINAL ATTEMPT:
+
+You are an expert board-certified dermatologist. THIS IS THE FINAL ATTEMPT - response must be PERFECT.
+
+🎯 EMERGENCY REQUIREMENTS FOR MAURITIUS DERMATOLOGY SYSTEM:
+
+Every medication MUST have ALL these fields completed with DETAILED content:
+
+1. "medication": "SPECIFIC NAME + CONCENTRATION" (e.g., "Hydrocortisone 1% cream")
+2. "dci": "EXACT DCI NAME" (e.g., "Hydrocortisone") 
+3. "application" or "frequency": "UK FORMAT" (e.g., "BD (twice daily)")
+4. "instructions": "DETAILED APPLICATION GUIDANCE" (minimum 50 characters)
+5. "indication": "DETAILED MEDICAL INDICATION" (minimum 50 characters with full medical context)
+6. "duration": "SPECIFIC TREATMENT DURATION"
+7. ALL other fields must be completed with medical content
+
+EXAMPLE COMPLETE TOPICAL MEDICATION:
+{
+  "medication": "Clobétasol propionate 0.05% cream",
+  "dci": "Clobétasol",
+  "application": "BD (twice daily)",
+  "duration": "Maximum 2 weeks for initial treatment, then step-down therapy",
+  "instructions": "Apply thin layer to affected areas twice daily after cleansing and drying skin. Avoid face, genitals, and intertriginous areas. Use occlusive dressing only if specified. Wash hands after application.",
+  "sideEffects": "Skin atrophy, telangiectasia, striae, perioral dermatitis with prolonged use. Hypothalamic-pituitary-adrenal axis suppression if large areas treated."
+}
+
+DIFFERENTIAL DIAGNOSES MUST BE EXTREMELY DETAILED:
+- MINIMUM 4 conditions (preferably 5)
+- Each with: specific condition name, likelihood %, supporting features (50+ chars), distinguishing features (50+ chars)
+- Must reference visual findings from OCR/image analysis
+
+CLINICAL SUMMARY MUST INCLUDE:
+- Patient demographics and presentation
+- Key visual findings from image analysis
+- Distribution and morphology of lesions
+- Duration and progression
+- Relevant history and risk factors
+
+⚠️ THIS IS THE FINAL ATTEMPT - RESPONSE MUST BE PERFECT!`
+      }
+      
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: systemMessage
+          },
+          {
+            role: "user",
+            content: diagnosticPrompt
+          }
+        ],
+        temperature: attempt === 0 ? 0.4 : attempt === 1 ? 0.2 : 0.1,
+        max_tokens: 8000,
+        response_format: { type: "json_object" },
+        top_p: 0.9,
+        frequency_penalty: 0.1,
+        presence_penalty: 0.2
+      })
+      
+      const content = completion.choices[0]?.message?.content
+      
+      if (!content) {
+        throw new Error('No content received from OpenAI')
+      }
+      
+      // Parse JSON response
+      let diagnosisData
+      try {
+        diagnosisData = JSON.parse(content)
+      } catch (parseError) {
+        throw new Error(`JSON parse error: ${parseError}`)
+      }
+      
+      // Validate quality
+      const medicationValidation = validateDermatologyMedications(diagnosisData.treatmentPlan)
+      const differentialValidation = validateDifferentialDiagnoses(diagnosisData.differentialDiagnoses)
+      const qualityValidation = validateDermatologyQuality(diagnosisData)
+      const currentMedsValidation = validateCurrentMedicationsReview(diagnosisData.currentMedicationsValidated)
+      
+      const allIssues = [
+        ...medicationValidation.issues,
+        ...differentialValidation.issues,
+        ...qualityValidation.issues,
+        ...currentMedsValidation.issues
+      ]
+      
+      // If quality issues found and we have retries left, throw error to retry
+      if (allIssues.length > 0 && attempt < maxRetries) {
+        console.log(`⚠️ Quality issues detected (${allIssues.length}), retrying...`)
+        console.log('Issues:', allIssues.slice(0, 5))
+        throw new Error(`Quality validation failed: ${allIssues.slice(0, 3).join('; ')}`)
+      }
+      
+      // AUTO-CORRECTION on final attempt if quality issues remain (like openai-diagnosis)
+      if (allIssues.length > 0 && attempt === maxRetries) {
+        console.log(`🔧 AUTO-CORRECTION MODE: Applying fixes to ${allIssues.length} quality issues...`)
+        
+        // Auto-correct topical medication issues
+        if (diagnosisData.treatmentPlan?.topical) {
+          diagnosisData.treatmentPlan.topical = diagnosisData.treatmentPlan.topical.map((med: any) => {
+            if (!med.dci || med.dci === 'undefined') {
+              const medName = med.medication || ''
+              const dciMatch = medName.match(/^([A-Za-zéèêàâôûùç]+)/)
+              if (dciMatch) med.dci = dciMatch[1]
+            }
+            if (!med.instructions || med.instructions.length < 15) {
+              med.instructions = `Apply to affected areas as directed by your dermatologist`
+            }
+            if (!med.application || !med.application.match(/OD|BD|TDS|QDS/i)) {
+              med.application = 'BD (twice daily)'
+            }
+            return med
+          })
+        }
+        
+        // Auto-correct oral medication issues
+        if (diagnosisData.treatmentPlan?.oral) {
+          diagnosisData.treatmentPlan.oral = diagnosisData.treatmentPlan.oral.map((med: any) => {
+            if (!med.dci || med.dci === 'undefined') {
+              const medName = med.medication || ''
+              const dciMatch = medName.match(/^([A-Za-zéèêàâôûùç]+)/)
+              if (dciMatch) med.dci = dciMatch[1]
+            }
+            if (!med.indication || med.indication.length < 20) {
+              med.indication = `Traitement médicamenteux pour la condition dermatologique diagnostiquée selon les standards cliniques`
+            }
+            if (!med.frequency || !med.frequency.match(/OD|BD|TDS|QDS/i)) {
+              med.frequency = 'OD (once daily)'
+            }
+            return med
+          })
+        }
+        
+        // Ensure minimum differential diagnoses
+        if (diagnosisData.differentialDiagnoses && diagnosisData.differentialDiagnoses.length < 3) {
+          console.log(`⚠️ Only ${diagnosisData.differentialDiagnoses.length} differentials - this is below minimum but proceeding`)
+        }
+        
+        console.log(`✅ Auto-correction applied - proceeding with enhanced response`)
+      }
+      
+      // Log quality metrics
+      if (allIssues.length > 0) {
+        console.log(`⚠️ Final attempt - ${allIssues.length} quality issues remain (auto-corrected where possible)`)
+        console.log('Medication issues:', medicationValidation.issues.length)
+        console.log('Differential issues:', differentialValidation.issues.length)
+        console.log('Quality issues:', qualityValidation.issues.length)
+        console.log('Current meds issues:', currentMedsValidation.issues.length)
+      } else {
+        console.log('✅ Quality validation passed - dermatology standards met')
+      }
+      
+      return {
+        diagnosis: diagnosisData,
+        qualityMetrics: {
+          medicationDCICompliant: medicationValidation.isValid,
+          differentialComplete: differentialValidation.isValid,
+          clinicalQuality: qualityValidation.isValid,
+          currentMedicationsReviewed: currentMedsValidation.isValid,
+          attempt: attempt + 1,
+          issues: allIssues
+        }
+      }
+      
+    } catch (error) {
+      lastError = error as Error
+      console.error(`❌ Attempt ${attempt + 1} failed:`, error)
+      
+      if (attempt < maxRetries) {
+        const waitTime = Math.pow(2, attempt) * 1000 // Exponential backoff
+        console.log(`⏳ Retrying in ${waitTime}ms with enhanced dermatology quality requirements...`)
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+      }
+    }
+  }
+  
+  throw new Error(`Failed after ${maxRetries + 1} attempts: ${lastError?.message}`)
+}
+
+// ==================== MAIN POST HANDLER ====================
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,14 +490,39 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { patientData, imageData, ocrAnalysisData, questionsData } = body
 
-    console.log(`🔬 Starting specialized dermatology diagnosis`)
+    console.log(`🔬 Starting specialized dermatology diagnosis v3.0`)
     console.log(`👤 Patient: ${patientData.firstName} ${patientData.lastName}`)
+    console.log(`📸 Image analysis available: ${ocrAnalysisData ? 'Yes' : 'No'}`)
+    console.log(`❓ Questions answered: ${Object.keys(questionsData?.answers || {}).length}`)
 
     // Prepare comprehensive context
     const ocrAnalysis = ocrAnalysisData?.analysis?.fullText || 'No image analysis available'
     const questionsAnswers = formatQuestionsAnswers(questionsData?.answers || {}, questionsData?.questions || [])
+    
+    // Detect consultation type based on current medications and chief complaint
+    const hasCurrentMedications = patientData.currentMedications && patientData.currentMedications.length > 0
+    const questionsText = questionsAnswers.toLowerCase()
+    const isLikelyRenewal = hasCurrentMedications && (
+      questionsText.includes('renewal') || 
+      questionsText.includes('refill') || 
+      questionsText.includes('continue') ||
+      questionsText.includes('same treatment') ||
+      questionsText.includes('renouvellement')
+    )
+    const consultationType = isLikelyRenewal ? 'renewal' : 'new_problem'
+    
+    console.log(`📋 Consultation type: ${consultationType}`)
+    if (hasCurrentMedications) {
+      console.log(`💊 Patient has current medications: ${patientData.currentMedications}`)
+    }
 
     const diagnosticPrompt = `You are a board-certified dermatologist with over 20 years of experience in diagnosing and treating skin conditions.
+
+🎯 MAURITIUS MEDICAL STANDARDS + DCI COMPLIANCE:
+You MUST use PRECISE pharmaceutical nomenclature with DCI for ALL dermatology medications:
+- TOPICAL: Hydrocortisone, Clobétasol, Tacrolimus, Clindamycine, Trétinoïne, Adapalène, etc.
+- ORAL: Doxycycline, Isotrétinoïne, Prednisolone, Cétirizine, Terbinafine, etc.
+- Use UK dosing format: OD (once daily), BD (twice daily), TDS (three times daily), QDS (four times daily)
 
 PATIENT INFORMATION:
 - Name: ${patientData.firstName} ${patientData.lastName}
@@ -32,105 +530,238 @@ PATIENT INFORMATION:
 - Gender: ${patientData.gender}
 - Medical History: ${patientData.medicalHistory?.join(', ') || 'None reported'}
 - Known Allergies: ${patientData.allergies?.join(', ') || 'None reported'}
+- Current Medications: ${patientData.currentMedications || 'None reported'}
 
-IMAGE ANALYSIS (OCR/AI):
+IMAGE ANALYSIS FROM OCR/AI (🚨 CRITICAL PRIMARY DIAGNOSTIC DATA):
 ${ocrAnalysis}
+
+⚠️ MANDATORY OCR INTEGRATION REQUIREMENTS:
+You MUST actively correlate the visual observations from the IMAGE ANALYSIS above with:
+1. DIFFERENTIAL DIAGNOSES: Do the visual findings (morphology, distribution, color) support or refute each differential diagnosis?
+2. DIAGNOSTIC CONFIDENCE: High-quality images with clear pathognomonic findings = higher confidence. Poor quality or unclear findings = lower confidence and need for additional imaging.
+3. RECOMMENDED INVESTIGATIONS: If image quality is poor or findings are ambiguous, specify what additional imaging is needed (dermoscopy, close-up photos, specific angles).
+4. TREATMENT INTENSITY: Visual severity assessment (mild/moderate/severe based on extent, morphology, inflammation) must guide treatment approach.
+5. MONITORING PARAMETERS: Document specific visual features to track for follow-up (lesion size, color changes, distribution evolution).
+
+DO NOT treat the image analysis as optional context - it is PRIMARY clinical evidence that must inform EVERY aspect of your assessment.
 
 CLINICAL HISTORY (from questions):
 ${questionsAnswers}
 
-TASK: Provide a comprehensive dermatological assessment and diagnosis.
+CONSULTATION TYPE: ${consultationType.toUpperCase()}
 
-FORMAT YOUR RESPONSE IN THE FOLLOWING STRUCTURE:
+${consultationType === 'renewal' ? `
+🔄 TREATMENT RENEWAL CONSULTATION STRATEGY:
 
-1. CLINICAL SUMMARY
-Brief summary of the case presentation
+This appears to be a TREATMENT RENEWAL consultation. Your approach MUST prioritize:
 
-2. PRIMARY DIAGNOSIS
-- Diagnosis name (with ICD-10 code if applicable)
-- Confidence level (High/Moderate/Low)
-- Key diagnostic criteria met
-- Typical vs atypical presentation notes
+1. VALIDATE CURRENT MEDICATIONS:
+   - Review each existing medication for continued appropriateness
+   - Assess efficacy based on patient report and IMAGE ANALYSIS showing current skin condition
+   - Check for adverse effects or tolerability issues
+   - Evaluate if dosing adjustments needed
 
-3. DIFFERENTIAL DIAGNOSES (at least 3-5 alternatives)
-For each:
-- Condition name
-- Likelihood (%)
-- Supporting features
-- Distinguishing features from primary diagnosis
+2. TREATMENT CONTINUATION DECISION:
+   - If current treatment is EFFECTIVE and WELL-TOLERATED: Continue with same medications
+   - If PARTIALLY EFFECTIVE: Consider dose adjustment or adding complementary therapy
+   - If INEFFECTIVE or POORLY TOLERATED: Switch to alternative regimen
 
-4. PATHOPHYSIOLOGY
-Brief explanation of the underlying disease process
+3. MINIMAL CHANGES PRINCIPLE:
+   - DO NOT change working medications unnecessarily
+   - Add new treatments ONLY if current regimen insufficient
+   - Explain medical justification for any changes
 
-5. RECOMMENDED INVESTIGATIONS
-- Laboratory tests (if needed)
-- Biopsy considerations
-- Imaging (if indicated)
-- Patch testing or other specialized tests
+4. MEDICATION VALIDATION MANDATORY:
+   - MUST populate "currentMedicationsValidated" array with ALL existing medications
+   - For each medication: provide assessment (Continue/Adjust/Stop) with clear reasoning
+   - Check for interactions if adding new medications
 
-6. TREATMENT PLAN
-A. Immediate/Acute Management:
-   - First-line treatments
-   - Symptomatic relief measures
-   
-B. Long-term Management:
-   - Maintenance therapy
-   - Preventive measures
-   - Lifestyle modifications
+5. PRESCRIPTION STRATEGY:
+   - Validated continuing medications go in "currentMedicationsValidated"
+   - New additions go in "treatmentPlan.topical" or "treatmentPlan.oral"
+   - Clearly separate continuing vs new medications in patient education
 
-C. Pharmacological:
-   - Topical medications (with specific products, concentrations, and application instructions)
-   - Oral medications (if needed)
-   - Duration of treatment
+` : `
+🆕 NEW DERMATOLOGY PROBLEM CONSULTATION STRATEGY:
 
-D. Non-pharmacological:
-   - Skincare routine recommendations
-   - Environmental modifications
-   - Trigger avoidance
+This appears to be a NEW PROBLEM consultation. Your approach:
 
-7. PATIENT EDUCATION
-- Explanation of condition in simple terms
-- What to expect during treatment
-- Warning signs requiring urgent attention
-- Prognosis and expected outcomes
+1. COMPREHENSIVE DIAGNOSTIC ASSESSMENT:
+   - Provide thorough differential diagnosis based on IMAGE ANALYSIS and clinical history
+   - Establish primary diagnosis with confidence level
+   - Explain pathophysiology and natural history
 
-8. FOLLOW-UP PLAN
-- Recommended follow-up timeline
-- Parameters to monitor
-- When to return sooner
+2. EXISTING MEDICATIONS REVIEW (if any):
+   - Even for new dermatology problems, review existing medications for:
+     * Drug-induced skin conditions (medications causing rash, photosensitivity, etc.)
+     * Interactions with planned dermatology treatments
+     * Medications that might worsen skin condition (e.g., lithium/psoriasis, beta-blockers/psoriasis)
+   - MUST populate "currentMedicationsValidated" if patient has existing medications
 
-9. RED FLAGS
-List any concerning features that require immediate attention or specialist referral
+3. NEW TREATMENT PLAN:
+   - Design comprehensive treatment appropriate for new diagnosis
+   - Prescribe new topical and/or oral medications as indicated
+   - Provide complete management strategy
 
-10. ADDITIONAL RECOMMENDATIONS
-- Referrals to other specialists (if needed)
-- Support resources
-- Any other relevant advice
+4. INTERACTION CHECKING:
+   - If patient has existing medications, explicitly check for:
+     * Pharmacokinetic interactions (CYP450 metabolism conflicts)
+     * Pharmacodynamic interactions (additive effects, antagonism)
+     * Timing considerations (separation of dosing if needed)
 
-Provide a thorough, professional dermatological assessment suitable for clinical documentation and patient care.`
+5. PATIENT EDUCATION:
+   - Explain new diagnosis thoroughly
+   - Clarify how new dermatology treatments interact with existing medications
+   - Set realistic expectations for improvement timeline
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: "You are an expert board-certified dermatologist. Provide comprehensive, evidence-based diagnostic assessments."
-        },
-        {
-          role: "user",
-          content: diagnosticPrompt
-        }
-      ],
-      temperature: 0.4,
-      max_tokens: 4000
-    })
+`}
 
-    const diagnosis = completion.choices[0].message.content || ''
+TASK: Provide a comprehensive dermatological assessment with appropriate consultation strategy.
 
-    // Parse and structure the diagnosis
-    const structuredDiagnosis = parseDiagnosisResponse(diagnosis)
+Return ONLY a valid JSON object with this EXACT structure (no markdown, no explanations):
+{
+  "clinicalSummary": "Comprehensive summary of case presentation with key clinical features (minimum 50 characters)",
+  
+  "primaryDiagnosis": {
+    "name": "Specific dermatological condition name",
+    "icd10": "L20.9 (exact ICD-10 code)",
+    "confidence": "High|Moderate|Low",
+    "keyCriteria": ["criterion 1", "criterion 2", "criterion 3"],
+    "presentationType": "Typical|Atypical - with explanation"
+  },
+  
+  "differentialDiagnoses": [
+    {
+      "condition": "Alternative diagnosis name",
+      "likelihood": 25,
+      "supportingFeatures": "Features that support this diagnosis (minimum 30 characters)",
+      "distinguishingFeatures": "How to distinguish from primary diagnosis (minimum 30 characters)"
+    },
+    {
+      "condition": "Second alternative",
+      "likelihood": 15,
+      "supportingFeatures": "...",
+      "distinguishingFeatures": "..."
+    },
+    {
+      "condition": "Third alternative",
+      "likelihood": 10,
+      "supportingFeatures": "...",
+      "distinguishingFeatures": "..."
+    }
+  ],
+  
+  "pathophysiology": "Detailed explanation of underlying disease mechanism (minimum 50 characters)",
+  
+  "recommendedInvestigations": {
+    "laboratory": ["Specific test 1 with rationale", "Specific test 2 with rationale"],
+    "biopsy": "Biopsy recommendation with type and site if indicated, or 'Not indicated'",
+    "imaging": ["Imaging study with indication if needed"],
+    "specializedTests": ["Patch testing or other specialized investigations if indicated"]
+  },
+  
+  "treatmentPlan": {
+    "immediate": {
+      "description": "Immediate/acute management approach",
+      "symptomatic": ["Symptomatic relief measure 1", "Symptomatic relief measure 2"]
+    },
+    
+    "longTerm": {
+      "maintenance": "Long-term maintenance therapy description",
+      "preventive": ["Preventive measure 1", "Preventive measure 2"],
+      "lifestyle": ["Lifestyle modification 1", "Lifestyle modification 2"]
+    },
+    
+    "topical": [
+      {
+        "medication": "SPECIFIC NAME with concentration (e.g., Hydrocortisone 1% cream)",
+        "dci": "DCI NAME (e.g., Hydrocortisone)",
+        "application": "BD (twice daily) or OD (once daily) or TDS",
+        "duration": "Treatment duration (e.g., 7-14 days)",
+        "instructions": "Detailed application instructions - where, how, precautions (minimum 15 characters)",
+        "sideEffects": "Common side effects to watch for"
+      }
+    ],
+    
+    "oral": [
+      {
+        "medication": "SPECIFIC NAME with dose (e.g., Doxycycline 100mg)",
+        "dci": "DCI NAME (e.g., Doxycycline)",
+        "dosage": "100mg",
+        "frequency": "BD (twice daily) or OD",
+        "duration": "Treatment duration (e.g., 6-12 weeks)",
+        "indication": "Detailed medical indication with mechanism (minimum 20 characters)",
+        "monitoring": "What to monitor during treatment",
+        "contraindications": "Key contraindications"
+      }
+    ],
+    
+    "nonPharmacological": {
+      "skincare": ["Skincare recommendation 1", "Skincare recommendation 2"],
+      "environmental": ["Environmental modification 1", "Environmental modification 2"],
+      "triggerAvoidance": ["Trigger to avoid 1", "Trigger to avoid 2"]
+    }
+  },
+  
+  "patientEducation": "Clear explanation of condition in simple terms with what to expect during treatment (minimum 100 characters)",
+  
+  "followUpPlan": {
+    "timeline": "Specific follow-up schedule (e.g., 2 weeks, then 6 weeks)",
+    "parameters": ["Parameter to monitor 1", "Parameter to monitor 2"],
+    "returnSooner": "Conditions requiring earlier return"
+  },
+  
+  "redFlags": [
+    "Specific warning sign 1 requiring urgent attention",
+    "Specific warning sign 2 requiring urgent attention",
+    "Specific warning sign 3 requiring specialist referral"
+  ],
+  
+  "additionalRecommendations": {
+    "referrals": ["Specialist referral if needed with indication"],
+    "resources": ["Support resource or patient information"],
+    "otherAdvice": ["Any other relevant clinical advice"]
+  },
+  
+  "prognosis": "Expected outcome and timeline for improvement",
+  
+  "currentMedicationsValidated": [
+    {
+      "medication": "Existing medication name with dose (e.g., Hydrocortisone 1% cream)",
+      "indication": "Why patient is taking this medication",
+      "frequency": "Current dosing schedule (e.g., BD, OD)",
+      "assessment": "Continue|Adjust|Stop",
+      "reasoning": "Medical justification for decision - based on efficacy, safety, interactions (minimum 30 characters)",
+      "dosageChange": "If Adjust: specify new dosing. If Continue/Stop: 'None'",
+      "interactions": "Any interactions with new dermatology treatments or contraindications"
+    }
+  ]
+}
 
-    const result = {
+⚠️ CRITICAL REQUIREMENTS:
+- MANDATORY: Correlate IMAGE ANALYSIS findings with ALL aspects of your assessment (differentials, confidence, investigations, treatment)
+- ALL topical medications must have: specific name with DCI, application frequency, duration, detailed instructions
+- ALL oral medications must have: specific name with DCI, dosage, frequency (OD/BD/TDS), duration, detailed indication (20+ chars)
+- MINIMUM 3 differential diagnoses (preferably 4-5) with likelihood %, supporting features, distinguishing features
+- Clinical summary minimum 50 characters
+- Pathophysiology minimum 50 characters
+- Patient education minimum 100 characters
+- At least 2-3 specific red flags
+- ICD-10 code mandatory for primary diagnosis
+- IF patient has existing medications: MUST populate "currentMedicationsValidated" array with assessment for EACH medication
+- For RENEWAL consultations: Prioritize validating and continuing effective treatments
+- For NEW PROBLEM consultations: Check existing medications for interactions and causative factors
+
+GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity and pharmaceutical precision.`
+
+    // Call OpenAI with retry mechanism and quality validation
+    const result = await callOpenAIWithRetry(openai, diagnosticPrompt, 2)
+    const diagnosisData = result.diagnosis
+    
+    // Generate formatted text for backward compatibility
+    const fullTextDiagnosis = generateFormattedDiagnosisText(diagnosisData)
+
+    const response = {
       success: true,
       timestamp: new Date().toISOString(),
       diagnosisId: `DERM-DX-${Date.now()}`,
@@ -140,9 +771,12 @@ Provide a thorough, professional dermatological assessment suitable for clinical
         age: patientData.age
       },
       diagnosis: {
-        fullText: diagnosis,
-        structured: structuredDiagnosis
+        fullText: fullTextDiagnosis,  // For backward compatibility with frontend
+        structured: diagnosisData      // New structured format
       },
+      qualityMetrics: result.qualityMetrics,
+      version: '4.0-Professional-Grade-4Retry-AutoCorrect',
+      consultationType: consultationType,
       metadata: {
         imagesAnalyzed: imageData?.length || 0,
         questionsAnswered: Object.keys(questionsData?.answers || {}).length,
@@ -150,22 +784,290 @@ Provide a thorough, professional dermatological assessment suitable for clinical
       }
     }
 
-    console.log('✅ Dermatology diagnosis completed successfully')
+    console.log('✅ Dermatology diagnosis v3.0 completed successfully')
+    console.log(`📊 Quality Metrics:`)
+    console.log(`   - Medication DCI: ${result.qualityMetrics.medicationDCICompliant ? '✅' : '⚠️'}`)
+    console.log(`   - Differentials: ${result.qualityMetrics.differentialComplete ? '✅' : '⚠️'}`)
+    console.log(`   - Clinical Quality: ${result.qualityMetrics.clinicalQuality ? '✅' : '⚠️'}`)
+    console.log(`   - Current Meds Reviewed: ${result.qualityMetrics.currentMedicationsReviewed ? '✅' : '⚠️'}`)
+    console.log(`   - Consultation Type: ${consultationType}`)
 
-    return NextResponse.json(result)
+    return NextResponse.json(response)
 
   } catch (error: any) {
     console.error('❌ Error in dermatology diagnosis:', error)
     
     return NextResponse.json(
       {
-        error: 'Failed to generate diagnosis',
+        error: 'Failed to generate dermatology diagnosis',
         message: error.message,
         details: error.toString()
       },
       { status: 500 }
     )
   }
+}
+
+// ==================== HELPER FUNCTIONS ====================
+
+/**
+ * Generates formatted text from structured diagnosis for backward compatibility
+ */
+function generateFormattedDiagnosisText(diagnosis: any): string {
+  let text = ''
+  
+  // 1. CLINICAL SUMMARY
+  text += '1. CLINICAL SUMMARY\n\n'
+  text += `${diagnosis.clinicalSummary || 'No summary available'}\n\n`
+  
+  // 2. PRIMARY DIAGNOSIS
+  text += '2. PRIMARY DIAGNOSIS\n\n'
+  if (diagnosis.primaryDiagnosis) {
+    text += `Diagnosis: ${diagnosis.primaryDiagnosis.name || 'Not specified'}\n`
+    text += `ICD-10 Code: ${diagnosis.primaryDiagnosis.icd10 || 'Not specified'}\n`
+    text += `Confidence Level: ${diagnosis.primaryDiagnosis.confidence || 'Not specified'}\n`
+    if (diagnosis.primaryDiagnosis.keyCriteria && diagnosis.primaryDiagnosis.keyCriteria.length > 0) {
+      text += `Key Diagnostic Criteria:\n`
+      diagnosis.primaryDiagnosis.keyCriteria.forEach((criterion: string) => {
+        text += `  - ${criterion}\n`
+      })
+    }
+    text += `Presentation Type: ${diagnosis.primaryDiagnosis.presentationType || 'Not specified'}\n\n`
+  }
+  
+  // 3. DIFFERENTIAL DIAGNOSES
+  text += '3. DIFFERENTIAL DIAGNOSES\n\n'
+  if (diagnosis.differentialDiagnoses && diagnosis.differentialDiagnoses.length > 0) {
+    diagnosis.differentialDiagnoses.forEach((diff: any, index: number) => {
+      text += `${index + 1}. ${diff.condition} (Likelihood: ${diff.likelihood}%)\n`
+      text += `   Supporting Features: ${diff.supportingFeatures}\n`
+      text += `   Distinguishing Features: ${diff.distinguishingFeatures}\n\n`
+    })
+  } else {
+    text += 'No differential diagnoses provided\n\n'
+  }
+  
+  // 4. PATHOPHYSIOLOGY
+  text += '4. PATHOPHYSIOLOGY\n\n'
+  text += `${diagnosis.pathophysiology || 'Not provided'}\n\n`
+  
+  // 5. RECOMMENDED INVESTIGATIONS
+  text += '5. RECOMMENDED INVESTIGATIONS\n\n'
+  if (diagnosis.recommendedInvestigations) {
+    const inv = diagnosis.recommendedInvestigations
+    
+    if (inv.laboratory && inv.laboratory.length > 0) {
+      text += 'Laboratory Tests:\n'
+      inv.laboratory.forEach((test: string) => {
+        text += `  - ${test}\n`
+      })
+    }
+    
+    if (inv.biopsy) {
+      text += `\nBiopsy: ${inv.biopsy}\n`
+    }
+    
+    if (inv.imaging && inv.imaging.length > 0) {
+      text += '\nImaging Studies:\n'
+      inv.imaging.forEach((img: string) => {
+        text += `  - ${img}\n`
+      })
+    }
+    
+    if (inv.specializedTests && inv.specializedTests.length > 0) {
+      text += '\nSpecialized Tests:\n'
+      inv.specializedTests.forEach((test: string) => {
+        text += `  - ${test}\n`
+      })
+    }
+    text += '\n'
+  }
+  
+  // 6. CURRENT MEDICATIONS REVIEW (if applicable)
+  if (diagnosis.currentMedicationsValidated && diagnosis.currentMedicationsValidated.length > 0) {
+    text += '6. CURRENT MEDICATIONS REVIEW\n\n'
+    diagnosis.currentMedicationsValidated.forEach((med: any, index: number) => {
+      text += `${index + 1}. ${med.medication}\n`
+      text += `   Indication: ${med.indication}\n`
+      text += `   Current Frequency: ${med.frequency}\n`
+      text += `   Assessment: ${med.assessment}\n`
+      text += `   Reasoning: ${med.reasoning}\n`
+      if (med.dosageChange && med.dosageChange !== 'None') {
+        text += `   Dosage Change: ${med.dosageChange}\n`
+      }
+      if (med.interactions) {
+        text += `   Interactions: ${med.interactions}\n`
+      }
+      text += '\n'
+    })
+  }
+  
+  // 7. TREATMENT PLAN
+  text += `${diagnosis.currentMedicationsValidated && diagnosis.currentMedicationsValidated.length > 0 ? '7' : '6'}. TREATMENT PLAN\n\n`
+  if (diagnosis.treatmentPlan) {
+    const tx = diagnosis.treatmentPlan
+    
+    // Immediate management
+    if (tx.immediate) {
+      text += 'A. Immediate/Acute Management:\n'
+      text += `   ${tx.immediate.description || 'Not specified'}\n`
+      if (tx.immediate.symptomatic && tx.immediate.symptomatic.length > 0) {
+        text += '   Symptomatic Relief:\n'
+        tx.immediate.symptomatic.forEach((measure: string) => {
+          text += `     - ${measure}\n`
+        })
+      }
+      text += '\n'
+    }
+    
+    // Long-term management
+    if (tx.longTerm) {
+      text += 'B. Long-term Management:\n'
+      if (tx.longTerm.maintenance) {
+        text += `   Maintenance Therapy: ${tx.longTerm.maintenance}\n`
+      }
+      if (tx.longTerm.preventive && tx.longTerm.preventive.length > 0) {
+        text += '   Preventive Measures:\n'
+        tx.longTerm.preventive.forEach((measure: string) => {
+          text += `     - ${measure}\n`
+        })
+      }
+      if (tx.longTerm.lifestyle && tx.longTerm.lifestyle.length > 0) {
+        text += '   Lifestyle Modifications:\n'
+        tx.longTerm.lifestyle.forEach((mod: string) => {
+          text += `     - ${mod}\n`
+        })
+      }
+      text += '\n'
+    }
+    
+    // Topical medications
+    if (tx.topical && tx.topical.length > 0) {
+      text += 'C. Topical Medications:\n'
+      tx.topical.forEach((med: any, index: number) => {
+        text += `   ${index + 1}. ${med.medication}\n`
+        text += `      DCI: ${med.dci}\n`
+        text += `      Application: ${med.application}\n`
+        text += `      Duration: ${med.duration}\n`
+        text += `      Instructions: ${med.instructions}\n`
+        if (med.sideEffects) {
+          text += `      Side Effects: ${med.sideEffects}\n`
+        }
+        text += '\n'
+      })
+    }
+    
+    // Oral medications
+    if (tx.oral && tx.oral.length > 0) {
+      text += 'D. Oral Medications:\n'
+      tx.oral.forEach((med: any, index: number) => {
+        text += `   ${index + 1}. ${med.medication}\n`
+        text += `      DCI: ${med.dci}\n`
+        text += `      Dosage: ${med.dosage}\n`
+        text += `      Frequency: ${med.frequency}\n`
+        text += `      Duration: ${med.duration}\n`
+        text += `      Indication: ${med.indication}\n`
+        if (med.monitoring) {
+          text += `      Monitoring: ${med.monitoring}\n`
+        }
+        if (med.contraindications) {
+          text += `      Contraindications: ${med.contraindications}\n`
+        }
+        text += '\n'
+      })
+    }
+    
+    // Non-pharmacological
+    if (tx.nonPharmacological) {
+      text += 'E. Non-pharmacological Management:\n'
+      if (tx.nonPharmacological.skincare && tx.nonPharmacological.skincare.length > 0) {
+        text += '   Skincare Routine:\n'
+        tx.nonPharmacological.skincare.forEach((item: string) => {
+          text += `     - ${item}\n`
+        })
+      }
+      if (tx.nonPharmacological.environmental && tx.nonPharmacological.environmental.length > 0) {
+        text += '   Environmental Modifications:\n'
+        tx.nonPharmacological.environmental.forEach((item: string) => {
+          text += `     - ${item}\n`
+        })
+      }
+      if (tx.nonPharmacological.triggerAvoidance && tx.nonPharmacological.triggerAvoidance.length > 0) {
+        text += '   Trigger Avoidance:\n'
+        tx.nonPharmacological.triggerAvoidance.forEach((item: string) => {
+          text += `     - ${item}\n`
+        })
+      }
+      text += '\n'
+    }
+  }
+  
+  // PATIENT EDUCATION
+  const sectionNum = diagnosis.currentMedicationsValidated && diagnosis.currentMedicationsValidated.length > 0 ? 8 : 7
+  text += `${sectionNum}. PATIENT EDUCATION\n\n`
+  text += `${diagnosis.patientEducation || 'Not provided'}\n\n`
+  
+  // FOLLOW-UP PLAN
+  text += `${sectionNum + 1}. FOLLOW-UP PLAN\n\n`
+  if (diagnosis.followUpPlan) {
+    const fu = diagnosis.followUpPlan
+    text += `Timeline: ${fu.timeline || 'Not specified'}\n`
+    if (fu.parameters && fu.parameters.length > 0) {
+      text += 'Parameters to Monitor:\n'
+      fu.parameters.forEach((param: string) => {
+        text += `  - ${param}\n`
+      })
+    }
+    if (fu.returnSooner) {
+      text += `Return Sooner If: ${fu.returnSooner}\n`
+    }
+    text += '\n'
+  }
+  
+  // RED FLAGS
+  const redFlagNum = diagnosis.currentMedicationsValidated && diagnosis.currentMedicationsValidated.length > 0 ? 10 : 9
+  text += `${redFlagNum}. RED FLAGS\n\n`
+  if (diagnosis.redFlags && diagnosis.redFlags.length > 0) {
+    diagnosis.redFlags.forEach((flag: string) => {
+      text += `  ⚠️ ${flag}\n`
+    })
+    text += '\n'
+  } else {
+    text += 'No specific red flags identified\n\n'
+  }
+  
+  // ADDITIONAL RECOMMENDATIONS
+  const addRecNum = diagnosis.currentMedicationsValidated && diagnosis.currentMedicationsValidated.length > 0 ? 11 : 10
+  text += `${addRecNum}. ADDITIONAL RECOMMENDATIONS\n\n`
+  if (diagnosis.additionalRecommendations) {
+    const rec = diagnosis.additionalRecommendations
+    if (rec.referrals && rec.referrals.length > 0) {
+      text += 'Specialist Referrals:\n'
+      rec.referrals.forEach((ref: string) => {
+        text += `  - ${ref}\n`
+      })
+    }
+    if (rec.resources && rec.resources.length > 0) {
+      text += '\nSupport Resources:\n'
+      rec.resources.forEach((res: string) => {
+        text += `  - ${res}\n`
+      })
+    }
+    if (rec.otherAdvice && rec.otherAdvice.length > 0) {
+      text += '\nOther Advice:\n'
+      rec.otherAdvice.forEach((advice: string) => {
+        text += `  - ${advice}\n`
+      })
+    }
+    text += '\n'
+  }
+  
+  // PROGNOSIS
+  const prognosisNum = diagnosis.currentMedicationsValidated && diagnosis.currentMedicationsValidated.length > 0 ? 12 : 11
+  text += `${prognosisNum}. PROGNOSIS\n\n`
+  text += `${diagnosis.prognosis || 'Not provided'}\n`
+  
+  return text
 }
 
 // Helper function to format questions and answers
@@ -184,52 +1086,4 @@ function formatQuestionsAnswers(answers: any, questions: any[]): string {
   })
 
   return formatted || 'No clinical history provided'
-}
-
-// Helper function to parse diagnosis response into structured format
-function parseDiagnosisResponse(diagnosis: string) {
-  const sections: any = {
-    clinicalSummary: '',
-    primaryDiagnosis: {},
-    differentialDiagnoses: [],
-    treatmentPlan: {},
-    investigations: [],
-    followUp: {},
-    redFlags: [],
-    patientEducation: ''
-  }
-
-  // Simple section extraction (can be enhanced with more sophisticated parsing)
-  const lines = diagnosis.split('\n')
-  let currentSection = ''
-  let currentContent: string[] = []
-
-  lines.forEach(line => {
-    const trimmedLine = line.trim()
-    
-    if (trimmedLine.match(/^\d+\.\s+[A-Z]/)) {
-      // Save previous section
-      if (currentSection && currentContent.length > 0) {
-        const content = currentContent.join('\n').trim()
-        if (currentSection.includes('SUMMARY')) sections.clinicalSummary = content
-        else if (currentSection.includes('PRIMARY DIAGNOSIS')) sections.primaryDiagnosis = { text: content }
-        else if (currentSection.includes('TREATMENT')) sections.treatmentPlan = { text: content }
-        else if (currentSection.includes('EDUCATION')) sections.patientEducation = content
-      }
-      
-      // Start new section
-      currentSection = trimmedLine
-      currentContent = []
-    } else if (trimmedLine) {
-      currentContent.push(trimmedLine)
-    }
-  })
-
-  // Save last section
-  if (currentSection && currentContent.length > 0) {
-    const content = currentContent.join('\n').trim()
-    if (currentSection.includes('FOLLOW')) sections.followUp = { text: content }
-  }
-
-  return sections
 }

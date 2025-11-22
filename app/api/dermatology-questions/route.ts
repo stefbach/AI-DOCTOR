@@ -1,11 +1,129 @@
+// app/api/dermatology-questions/route.ts - VERSION 2.0: Professional-grade quality
+// - 4 retry attempts with progressive enhancement
+// - Auto-correction on final attempt  
+// - 8000 max tokens for comprehensive questions
+// - Advanced OpenAI parameters
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
-// OpenAI client will be initialized inside the function to avoid build-time errors
+// ==================== RETRY MECHANISM ====================
+async function callOpenAIWithRetry(
+  openai: OpenAI,
+  prompt: string,
+  systemMessage: string,
+  maxRetries: number = 3
+): Promise<any> {
+  let lastError: Error | null = null
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`📡 OpenAI call attempt ${attempt + 1}/${maxRetries + 1}`)
+      
+      let enhancedSystemMessage = systemMessage
+      
+      if (attempt === 1) {
+        enhancedSystemMessage = `🚨 ATTEMPT 2/4 - ENHANCED QUALITY:
 
-// Moved inside function - const openai = new OpenAI({
-// Moved inside function -   apiKey: process.env.OPENAI_API_KEY
-// Moved inside function - })
+${systemMessage}
+
+⚠️ Each question must be:
+- Specific to dermatology assessment
+- Clinically relevant based on image analysis
+- Include proper options for multiple choice questions`
+      } else if (attempt === 2) {
+        enhancedSystemMessage = `🚨🚨 ATTEMPT 3/4 - STRICT STANDARDS:
+
+${systemMessage}
+
+⚠️ MANDATORY:
+- Questions must be targeted to visible skin condition
+- Multiple choice questions must have 4-6 specific options
+- All questions must have proper ID, category, type`
+      } else if (attempt >= 3) {
+        enhancedSystemMessage = `🆘 ATTEMPT 4/4 - MAXIMUM QUALITY:
+
+${systemMessage}
+
+🎯 FINAL ATTEMPT - response must be PERFECT:
+- All questions specific and clinically actionable
+- All IDs unique and properly formatted
+- All categories properly assigned
+- All multiple choice options comprehensive`
+      }
+      
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: enhancedSystemMessage },
+          { role: "user", content: prompt }
+        ],
+        temperature: attempt === 0 ? 0.4 : attempt === 1 ? 0.2 : 0.1,
+        max_tokens: 8000,
+        response_format: { type: "json_object" },
+        top_p: 0.9,
+        frequency_penalty: 0.1,
+        presence_penalty: 0.2
+      })
+      
+      let questionsText = completion.choices[0].message.content || '[]'
+      questionsText = questionsText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+      
+      let parsed
+      try {
+        parsed = JSON.parse(questionsText)
+      } catch (parseError) {
+        throw new Error('Invalid JSON response')
+      }
+      
+      const questions = Array.isArray(parsed) ? parsed : (parsed.questions || [])
+      
+      // Quality validation
+      const hasMinimumQuestions = questions.length >= 8
+      const allHaveIds = questions.every((q: any) => q.id)
+      const allHaveCategories = questions.every((q: any) => q.category)
+      
+      if ((!hasMinimumQuestions || !allHaveIds || !allHaveCategories) && attempt < maxRetries) {
+        console.log(`⚠️ Quality issues: ${questions.length} questions, ids ok: ${allHaveIds}, categories ok: ${allHaveCategories}`)
+        throw new Error('Quality validation failed')
+      }
+      
+      // Auto-correction on final attempt
+      if ((!hasMinimumQuestions || !allHaveIds || !allHaveCategories) && attempt === maxRetries) {
+        console.log('🔧 AUTO-CORRECTION MODE')
+        questions.forEach((q: any, idx: number) => {
+          if (!q.id) q.id = `derm_q${idx + 1}`
+          if (!q.category) q.category = 'General'
+          if (!q.type) q.type = 'open'
+        })
+        console.log('✅ Auto-correction applied')
+      }
+      
+      console.log(`✅ Generated ${questions.length} questions (attempt ${attempt + 1})`)
+      
+      return {
+        questions,
+        qualityMetrics: {
+          attempt: attempt + 1,
+          questionsCount: questions.length,
+          allHaveIds,
+          allHaveCategories
+        }
+      }
+      
+    } catch (error) {
+      lastError = error as Error
+      console.error(`❌ Attempt ${attempt + 1} failed:`, error)
+      
+      if (attempt < maxRetries) {
+        const waitTime = Math.pow(2, attempt) * 1000
+        console.log(`⏳ Retrying in ${waitTime}ms...`)
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+      }
+    }
+  }
+  
+  throw new Error(`Failed after ${maxRetries + 1} attempts: ${lastError?.message}`)
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -84,38 +202,12 @@ FORMAT each question as a JSON object:
 
 Return ONLY a valid JSON array of question objects, no additional text.`
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: "You are an expert dermatologist. Generate targeted clinical questions in valid JSON format only."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 2000
-    })
-
-    let questionsText = completion.choices[0].message.content || '[]'
+    const systemMessage = "You are an expert dermatologist. Generate targeted clinical questions in valid JSON format only."
     
-    // Clean up the response to ensure valid JSON
-    questionsText = questionsText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-    
-    // Parse questions
-    let questions
-    try {
-      questions = JSON.parse(questionsText)
-    } catch (parseError) {
-      console.error('Error parsing questions JSON:', parseError)
-      // Fallback to default questions if parsing fails
-      questions = getDefaultDermatologyQuestions()
-    }
+    const result = await callOpenAIWithRetry(openai, prompt, systemMessage, 3)
+    const questions = result.questions
 
-    console.log(`✅ Generated ${questions.length} dermatology questions`)
+    console.log(`✅ Generated ${questions.length} dermatology questions with retry mechanism`)
 
     return NextResponse.json({
       success: true,
@@ -123,6 +215,11 @@ Return ONLY a valid JSON array of question objects, no additional text.`
       patientInfo: {
         firstName: patientData.firstName,
         lastName: patientData.lastName
+      },
+      metadata: {
+        model: 'gpt-4o',
+        version: '2.0-Professional-Grade-4Retry',
+        qualityMetrics: result.qualityMetrics
       },
       timestamp: new Date().toISOString()
     })
