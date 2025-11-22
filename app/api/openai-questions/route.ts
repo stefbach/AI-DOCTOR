@@ -1,4 +1,9 @@
-// app/api/openai-questions/route.ts - VERSION 3.1 CORRIGÉE
+// app/api/openai-questions/route.ts - VERSION 4.0: Professional-grade quality
+// - 4 retry attempts with progressive enhancement
+// - Auto-correction on final attempt
+// - 8000 max tokens for all modes
+// - Upgraded models: fast→gpt-4o-mini, balanced→gpt-4o, intelligent→gpt-4o
+// - Advanced OpenAI parameters
 import { type NextRequest, NextResponse } from "next/server"
 
 // ==================== CONFIGURATION ====================
@@ -312,6 +317,115 @@ function containsAny(text: string, keywords: string[]): boolean {
 function containsAll(text: string, keywords: string[]): boolean {
   const normalizedText = normalizeText(text)
   return keywords.every(keyword => normalizedText.includes(normalizeText(keyword)))
+}
+
+// ==================== RETRY MECHANISM ====================
+async function callOpenAIWithRetry(
+  apiKey: string,
+  model: string,
+  prompt: string,
+  systemMessage: string,
+  baseTemperature: number,
+  isPregnant: boolean,
+  maxRetries: number = 3
+): Promise<any> {
+  let lastError: Error | null = null
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`📡 OpenAI call attempt ${attempt + 1}/${maxRetries + 1} (model: ${model})`)
+      
+      let enhancedSystemMessage = systemMessage
+      
+      if (attempt === 1) {
+        enhancedSystemMessage = `🚨 ATTEMPT 2/4 - ENHANCED QUALITY:\n\n${systemMessage}\n\n⚠️ CRITICAL: Questions must be:\n- Clinically specific and actionable\n- Evidence-based\n- Appropriate for patient context${isPregnant ? ' (pregnancy-safe)' : ''}`
+      } else if (attempt === 2) {
+        enhancedSystemMessage = `🚨🚨 ATTEMPT 3/4 - STRICT STANDARDS:\n\n${systemMessage}\n\n⚠️ MANDATORY:\n- All questions must have unique IDs\n- All questions must have clear priorities\n- All questions must be patient-appropriate\n- Minimum 6 questions required`
+      } else if (attempt >= 3) {
+        enhancedSystemMessage = `🆘 ATTEMPT 4/4 - MAXIMUM QUALITY:\n\n${systemMessage}\n\n🎯 FINAL ATTEMPT - response must be PERFECT:\n- Questions must be comprehensive and cover all clinical aspects\n- Each question must be specific and actionable\n- Response must be valid JSON with complete structure`
+      }
+      
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: enhancedSystemMessage },
+            { role: 'user', content: prompt }
+          ],
+          temperature: attempt === 0 ? baseTemperature : attempt === 1 ? baseTemperature * 0.7 : 0.1,
+          max_tokens: 8000,
+          response_format: { type: 'json_object' },
+          top_p: 0.9,
+          frequency_penalty: 0.1,
+          presence_penalty: 0.2
+        }),
+      })
+      
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`)
+      }
+      
+      const aiData = await response.json()
+      const content = aiData.choices[0]?.message?.content || '{}'
+      
+      let parsed
+      try {
+        parsed = JSON.parse(content)
+      } catch (parseError) {
+        throw new Error('Invalid JSON response')
+      }
+      
+      const questions = parsed.questions || []
+      
+      // Quality validation
+      const hasMinimumQuestions = questions.length >= 6
+      const allHaveIds = questions.every((q: any) => q.id || q.question_id)
+      
+      if ((!hasMinimumQuestions || !allHaveIds) && attempt < maxRetries) {
+        console.log(`⚠️ Quality issues: ${questions.length} questions, all have IDs: ${allHaveIds}`)
+        throw new Error('Quality validation failed')
+      }
+      
+      // Auto-correction on final attempt
+      if ((!hasMinimumQuestions || !allHaveIds) && attempt === maxRetries) {
+        console.log('🔧 AUTO-CORRECTION MODE')
+        questions.forEach((q: any, idx: number) => {
+          if (!q.id && !q.question_id) {
+            q.id = `q${idx + 1}`
+          }
+        })
+        console.log('✅ Auto-correction applied')
+      }
+      
+      console.log(`✅ Generated ${questions.length} questions (attempt ${attempt + 1})`)
+      
+      return {
+        questions,
+        qualityMetrics: {
+          attempt: attempt + 1,
+          questionsCount: questions.length,
+          allHaveIds
+        }
+      }
+      
+    } catch (error) {
+      lastError = error as Error
+      console.error(`❌ Attempt ${attempt + 1} failed:`, error)
+      
+      if (attempt < maxRetries) {
+        const waitTime = Math.pow(2, attempt) * 1000
+        console.log(`⏳ Retrying in ${waitTime}ms...`)
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+      }
+    }
+  }
+  
+  throw new Error(`Failed after ${maxRetries + 1} attempts: ${lastError?.message}`)
 }
 
 // ==================== ANALYSE HISTOIRE DE LA MALADIE ====================
@@ -1876,53 +1990,26 @@ export async function POST(request: NextRequest) {
     const prompt = generateModeSpecificPrompt(adjustedMode, context)
     
     const aiConfig = {
-      fast: { model: 'gpt-3.5-turbo', temperature: 0.1, maxTokens: 600 },
-      balanced: { model: 'gpt-4o-mini', temperature: 0.2, maxTokens: 1200 },
-      intelligent: { model: 'gpt-4o', temperature: 0.3, maxTokens: 1800 }
-    }[adjustedMode] || { model: 'gpt-4o-mini', temperature: 0.2, maxTokens: 1200 }
+      fast: { model: 'gpt-4o-mini', temperature: 0.2, maxTokens: 8000 },
+      balanced: { model: 'gpt-4o', temperature: 0.3, maxTokens: 8000 },
+      intelligent: { model: 'gpt-4o', temperature: 0.3, maxTokens: 8000 }
+    }[adjustedMode] || { model: 'gpt-4o', temperature: 0.3, maxTokens: 8000 }
     
-    console.log(`Calling ${aiConfig.model} with ${adjustedMode} mode (history-enhanced)`)
+    console.log(`Calling ${aiConfig.model} with ${adjustedMode} mode (history-enhanced) with retry mechanism`)
     
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: aiConfig.model,
-        messages: [
-          {
-            role: 'system',
-            content: `You are an expert physician conducting a thorough clinical assessment with advanced history analysis capabilities. Generate diagnostic questions based on evidence-based medicine. Always respond with valid JSON only. ${processedPatient.isPregnant ? 'IMPORTANT: This patient is pregnant - consider pregnancy-specific conditions and medication safety.' : ''} Pay special attention to history analysis findings when crafting questions.`
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: aiConfig.temperature,
-        max_tokens: aiConfig.maxTokens,
-        response_format: { type: 'json_object' }
-      }),
-    })
+    const systemMessage = `You are an expert physician conducting a thorough clinical assessment with advanced history analysis capabilities. Generate diagnostic questions based on evidence-based medicine. Always respond with valid JSON only. ${processedPatient.isPregnant ? 'IMPORTANT: This patient is pregnant - consider pregnancy-specific conditions and medication safety.' : ''} Pay special attention to history analysis findings when crafting questions.`
     
-    if (!openaiResponse.ok) {
-      throw new Error(`OpenAI API error: ${openaiResponse.status}`)
-    }
+    const result = await callOpenAIWithRetry(
+      apiKey,
+      aiConfig.model,
+      prompt,
+      systemMessage,
+      aiConfig.temperature,
+      processedPatient.isPregnant || false,
+      3
+    )
     
-    const aiData = await openaiResponse.json()
-    const content = aiData.choices[0]?.message?.content || '{}'
-    
-    let parsed
-    try {
-      parsed = JSON.parse(content)
-    } catch (parseError) {
-      console.error('Failed to parse OpenAI response:', content)
-      throw new Error('Invalid response format from AI')
-    }
-    
-    const questions = parsed.questions || []
+    const questions = result.questions
     
     const dataCompleteness = calculateDataCompleteness(processedPatient, processedClinical)
     const confidenceLevel = calculateConfidenceLevel(
@@ -1963,9 +2050,11 @@ export async function POST(request: NextRequest) {
       },
       metadata: {
         model: aiConfig.model,
+        version: '4.0-Professional-Grade-4Retry',
         processingTime: Date.now() - startTime,
         dataCompleteness,
-        confidenceLevel
+        confidenceLevel,
+        qualityMetrics: result.qualityMetrics
       }
     }
     

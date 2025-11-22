@@ -279,8 +279,147 @@ function formatPregnancyStatus(pregnancyStatus: string, gestationalAge?: string)
 // ==================== DATA EXTRACTION FROM OPENAI-DIAGNOSIS ====================
 function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any = {}, patientData: any) {
   
-  console.log(" DATA RECOVERY FROM OPENAI-DIAGNOSIS")
+  console.log("🔍 DATA RECOVERY FROM DIAGNOSIS API (DERMATOLOGY-SPECIFIC)")
   console.log("Structure received:", Object.keys(diagnosisData || {}))
+  
+  // ========== DETECT IF DERMATOLOGY DIAGNOSIS STRUCTURE ==========
+  const isDermatologyDiagnosis = !!(diagnosisData?.diagnosis?.structured)
+  
+  if (isDermatologyDiagnosis) {
+    console.log("🔬 DERMATOLOGY DIAGNOSIS STRUCTURE DETECTED - Using dermatology-specific extraction")
+    const dermData = diagnosisData.diagnosis.structured
+    
+    // Extract from dermatology structure
+    const chiefComplaint = getString(dermData?.clinicalSummary || "Dermatology consultation")
+    const historyOfPresentIllness = getString(dermData?.clinicalSummary || "")
+    const medicalHistory = getString(
+      patientData?.medicalHistory?.join(", ") ||
+      patientData?.pastMedicalHistory?.join(", ") ||
+      ""
+    )
+    const clinicalExamination = getString(dermData?.clinicalSummary || "")
+    const diagnosticSynthesis = getString(dermData?.pathophysiology || "")
+    const diagnosticConclusion = getString(
+      dermData?.primaryDiagnosis?.name || 
+      "Dermatological condition under evaluation"
+    )
+    
+    // Extract differential diagnoses from dermatology structure
+    const differentialDiagnoses = dermData?.differentialDiagnoses || []
+    const differentialText = differentialDiagnoses.length > 0 
+      ? differentialDiagnoses.map((diff: any) => 
+          `${getString(diff.condition)} (likelihood: ${diff.likelihood}%, supporting: ${getString(diff.supportingFeatures)})`
+        ).join('; ')
+      : ""
+    
+    const pregnancyImpact = ""
+    const managementPlan = getString(dermData?.treatmentRationale || "")
+    
+    console.log("✅ DERMATOLOGY DATA EXTRACTED:")
+    console.log(`   - Primary Dx: ${diagnosticConclusion}`)
+    console.log(`   - Differentials: ${differentialDiagnoses.length}`)
+    console.log(`   - Clinical Summary: ${clinicalExamination.substring(0, 50)}...`)
+    
+    // Extract medications from dermatology structure
+    let medications: any[] = []
+    let immediateTests: any[] = []
+    
+    // DERMATOLOGY: Handle treatmentPlan structure (topical + oral)
+    if (diagnosisData?.treatmentPlan && (diagnosisData.treatmentPlan.topical || diagnosisData.treatmentPlan.oral)) {
+      console.log('🔬 DERMATOLOGY treatmentPlan detected - extracting topical + oral medications')
+      const topical = diagnosisData.treatmentPlan.topical || []
+      const oral = diagnosisData.treatmentPlan.oral || []
+      medications = [...topical, ...oral]
+      console.log(`   - Topical: ${topical.length}, Oral: ${oral.length}, Total: ${medications.length}`)
+    }
+    
+    // DERMATOLOGY: Handle investigations structure
+    if (diagnosisData?.investigations) {
+      console.log('🔬 DERMATOLOGY investigations structure detected')
+      const dermImmediate = diagnosisData.investigations.immediate || []
+      const dermSpecialized = diagnosisData.investigations.specialized || []
+      immediateTests = [...dermImmediate, ...dermSpecialized]
+      console.log(`   - Immediate: ${dermImmediate.length}, Specialized: ${dermSpecialized.length}, Total: ${immediateTests.length}`)
+    }
+    
+    // Smart categorization for biology tests
+    const rawLabTests: any[] = []
+    const rawImagingTests: any[] = []
+    
+    immediateTests.forEach((test: any) => {
+      const category = (test.category || '').toLowerCase()
+      const examination = (test.examination || test.test || '').toLowerCase()
+      
+      // Check if it's imaging
+      if (category === 'imaging' || category === 'radiology' || 
+          category.includes('imag') || category.includes('radio')) {
+        rawImagingTests.push(test)
+      } 
+      // Check if it's dermatology-specific (biopsy, dermoscopy)
+      else if (examination.includes('biopsy') || examination.includes('dermoscopy') || 
+               examination.includes('patch test') || examination.includes('skin scraping')) {
+        rawLabTests.push({
+          name: test.examination || test.test,
+          category: 'Dermatology',
+          urgency: test.urgency || 'routine',
+          indication: test.indication || test.rationale || '',
+          clinical_information: test.clinical_information || ''
+        })
+      }
+      // Default to lab test
+      else {
+        rawLabTests.push({
+          name: test.examination || test.test,
+          category: category || 'Laboratory',
+          urgency: test.urgency || 'routine',
+          indication: test.indication || test.rationale || '',
+          clinical_information: test.clinical_information || ''
+        })
+      }
+    })
+    
+    console.log(`📊 DERMATOLOGY TESTS CATEGORIZED: ${rawLabTests.length} lab, ${rawImagingTests.length} imaging`)
+    
+    // Return early with dermatology data - ALL FIELDS
+    return {
+      chiefComplaint,
+      historyOfPresentIllness,
+      medicalHistory,
+      clinicalExamination,
+      diagnosticSynthesis,
+      diagnosticConclusion,
+      differentialText,
+      pregnancyImpact,
+      managementPlan,
+      followUp: dermData?.followUpPlan?.timeline || "",
+      pregnancyFollowUp: "",
+      patientEducation: dermData?.patientEducation || "",
+      redFlags: dermData?.redFlags?.join('; ') || "",
+      
+      clinicalReasoning: clinicalExamination,
+      pathophysiology: diagnosticSynthesis,
+      prognosis: dermData?.prognosis || "",
+      clinicalConfidence: dermData?.primaryDiagnosis?.confidence || "Moderate",
+      investigationStrategy: "",
+      
+      detailedMedications: medications,
+      detailedLabTests: rawLabTests,
+      detailedImaging: rawImagingTests,
+      
+      differentialDiagnoses: differentialDiagnoses,
+      
+      medicationsCount: medications.length,
+      labTestsCount: rawLabTests.length,
+      imagingStudiesCount: rawImagingTests.length,
+      
+      rawMedications: medications,
+      rawLabTests: rawLabTests,
+      rawImaging: rawImagingTests
+    }
+  }
+  
+  // ========== GENERAL CONSULTATION EXTRACTION (ORIGINAL CODE) ==========
+  console.log("📋 GENERAL DIAGNOSIS STRUCTURE - Using standard extraction")
   
   // DEBUG: Log complete structure for biology tests
   if (diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority) {
