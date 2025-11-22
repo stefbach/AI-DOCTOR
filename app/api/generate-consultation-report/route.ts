@@ -389,8 +389,9 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
     
     console.log(`📊 DERMATOLOGY TESTS CATEGORIZED: ${rawLabTests.length} lab, ${rawImagingTests.length} imaging`)
     
-    // Return early with dermatology data
+    // Return early with dermatology data - ALL FIELDS for prepareEnrichedGPTData
     return {
+      // Basic fields
       chiefComplaint,
       historyOfPresentIllness,
       medicalHistory,
@@ -403,7 +404,31 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
       medications,
       immediateTests,
       rawLabTests,
-      rawImagingTests
+      rawImagingTests,
+      
+      // Additional fields expected by prepareEnrichedGPTData
+      pathophysiology: diagnosticSynthesis,  // Same as diagnosticSynthesis
+      clinicalReasoning: clinicalExamination,
+      prognosis: dermData?.prognosis || "",
+      clinicalConfidence: dermData?.primaryDiagnosis?.confidence || "Moderate",
+      differentialDiagnoses: differentialDiagnoses,  // Return array for proper iteration in prompt
+      
+      // Treatment fields
+      detailedMedications: medications,
+      investigationStrategy: "",
+      detailedLabTests: rawLabTests,
+      detailedImaging: rawImagingTests,
+      
+      // Follow-up fields  
+      followUp: dermData?.followUpPlan?.timeline || "",
+      pregnancyFollowUp: "",
+      redFlags: dermData?.redFlags?.join('; ') || "",
+      patientEducation: dermData?.patientEducation || "",
+      
+      // Summary counts
+      medicationsCount: medications.length,
+      labTestsCount: rawLabTests.length,
+      imagingStudiesCount: rawImagingTests.length
     }
   }
   
@@ -973,7 +998,7 @@ ${enrichedData.diagnosis.clinicalReasoning}
 
 DIFFERENTIAL DIAGNOSES:
 ${enrichedData.diagnosis.differentialDiagnoses?.map((diff: any) => 
-  `- ${getString(diff.condition)} (${diff.probability}%): ${getString(diff.reasoning)}`
+  `- ${getString(diff.condition)} (${diff.likelihood || diff.probability}%): ${getString(diff.supportingFeatures || diff.reasoning)}`
 ).join('\n') || 'Primary diagnosis well supported'}
 
 === DERMATOLOGY TREATMENT PLAN ===
