@@ -182,6 +182,8 @@ interface MedicalContext {
   criticalityScore: number
   redFlags: string[]
   suggestedSpecialty?: string
+  ocrAnalysis?: any  // Optional OCR analysis for dermatology consultations
+  isDermatology?: boolean
 }
 
 interface APIResponse {
@@ -1458,13 +1460,26 @@ function generateFastModePrompt(patient: ProcessedPatientData, clinical: Process
     ? `\nHISTORY RED FLAGS: ${clinical.historyAnalysis.redFlags.map(f => f.flag).join(', ')}`
     : ''
   
+  // Dermatology-specific OCR integration
+  const ocrSection = context.isDermatology && context.ocrAnalysis ? `
+
+🔬 DERMATOLOGY IMAGE ANALYSIS (FROM OCR/AI):
+${JSON.stringify(context.ocrAnalysis.diagnosis_summary || context.ocrAnalysis, null, 2)}
+
+⚠️ CRITICAL: Base your questions on the VISUAL FINDINGS from the image analysis above!
+- What does the image show? (morphology, distribution, color)
+- What is the urgency level indicated?
+- What are the differential diagnoses suggested by the image?
+
+Your questions MUST correlate with these visual findings to narrow down the diagnosis.` : ''
+  
   return `EMERGENCY TRIAGE ASSESSMENT - RAPID MODE
 
 PATIENT: ${patient.age}y ${patient.gender}${patient.isPregnant ? ' (PREGNANT)' : ''}
 CHIEF COMPLAINT: ${clinical.mainComplaint}
 DURATION: ${clinical.duration.value}
 PAIN: ${clinical.painLevel}/10
-RED FLAGS: ${context.redFlags.length > 0 ? context.redFlags.join(', ') : 'None identified'}${pregnancyAlert}${historyAlert}
+RED FLAGS: ${context.redFlags.length > 0 ? context.redFlags.join(', ') : 'None identified'}${pregnancyAlert}${historyAlert}${ocrSection}
 
 Generate 3 CRITICAL triage questions to rapidly identify life-threatening conditions.
 
@@ -1562,6 +1577,20 @@ ASSESSMENT:
 - Criticality Score: ${context.criticalityScore}/10
 - Red Flags: ${context.redFlags.join(', ') || 'None'}
 - Risk Factors: ${context.riskFactors.map(r => `${r.factor}(${r.severity})`).join(', ')}
+
+${context.isDermatology && context.ocrAnalysis ? `
+🔬 DERMATOLOGY IMAGE ANALYSIS (CRITICAL PRIMARY DATA):
+${JSON.stringify(context.ocrAnalysis.diagnosis_summary || context.ocrAnalysis, null, 2)}
+
+⚠️ MANDATORY OCR INTEGRATION FOR QUESTIONS:
+- Your questions MUST build upon the visual findings from the image analysis
+- Ask about symptoms that CORRELATE with the observed lesion morphology
+- Explore duration, changes, and associated symptoms related to what's VISIBLE
+- Differentiate between the differential diagnoses suggested by the IMAGE
+- Questions should help confirm or refute what the IMAGE suggests
+
+DO NOT ask generic skin questions - ask SPECIFIC questions about THIS visible condition!
+` : ''}
 
 ${patient.isPregnant ? `
 PREGNANCY CONSIDERATIONS:
@@ -1673,6 +1702,22 @@ Total Bonus Points: ${clinical.historyAnalysis.criticalityModifiers.reduce((sum,
 ${clinical.historyAnalysis.criticalityModifiers.map(mod => 
   `• ${mod.reason}: +${mod.points} points`
 ).join('\n')}
+
+${context.isDermatology && context.ocrAnalysis ? `
+🔬 DERMATOLOGY IMAGE ANALYSIS - EXPERT LEVEL CORRELATION REQUIRED:
+${JSON.stringify(context.ocrAnalysis, null, 2)}
+
+⚠️ CRITICAL EXPERT-LEVEL OCR INTEGRATION:
+As a specialist, you MUST use the IMAGE ANALYSIS as PRIMARY diagnostic data:
+- Correlate visual morphology with differential diagnoses
+- Ask about systemic symptoms that might explain the skin findings
+- Explore medication history that could cause these visual changes
+- Investigate genetic/familial skin conditions matching this presentation
+- Assess quality of life impact based on visible extent and location
+- Determine urgency based on IMAGE features (melanoma signs, infection, etc.)
+
+Your expert questions must demonstrate DEEP correlation between what's VISIBLE and potential diagnoses!
+` : ''}
 
 Generate 8 sophisticated diagnostic questions that:
 
@@ -1902,7 +1947,16 @@ export async function POST(request: NextRequest) {
     }
     
     const body = await request.json()
-    const { patientData, clinicalData, mode = 'balanced' } = body
+    const { patientData, clinicalData, mode = 'balanced', ocrAnalysisData } = body
+    
+    // Detect if this is a dermatology consultation (OCR data present)
+    const isDermatologyConsultation = !!(ocrAnalysisData && Object.keys(ocrAnalysisData).length > 0)
+    
+    if (isDermatologyConsultation) {
+      console.log('🔬 DERMATOLOGY CONSULTATION DETECTED - OCR analysis present')
+      console.log('   - OCR findings:', ocrAnalysisData?.diagnosis_summary || 'Not available')
+      console.log('   - Urgency:', ocrAnalysisData?.urgency_assessment?.level || 'Not available')
+    }
     
     console.log('ENHANCED API Input Analysis:', {
       hasPatientData: !!patientData,
@@ -2024,7 +2078,9 @@ export async function POST(request: NextRequest) {
       riskFactors,
       criticalityScore,
       redFlags,
-      suggestedSpecialty
+      suggestedSpecialty,
+      ocrAnalysis: isDermatologyConsultation ? ocrAnalysisData : undefined,
+      isDermatology: isDermatologyConsultation
     }
     
     const prompt = generateModeSpecificPrompt(adjustedMode, context)

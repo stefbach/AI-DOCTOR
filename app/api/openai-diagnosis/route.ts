@@ -37,6 +37,8 @@ interface PatientContext {
   firstName?: string
   lastName?: string
   anonymousId?: string
+  ocrAnalysis?: any  // Optional OCR analysis for dermatology consultations
+  isDermatology?: boolean
 }
 
 interface ValidationResult {
@@ -1157,14 +1159,75 @@ function prepareMauritiusQualityPrompt(patientContext: PatientContext, consultat
     medical_history: patientContext.medical_history,
     allergies: patientContext.allergies,
     consultation_type: consultationType.consultationType,
-    ai_questions: patientContext.ai_questions
+    ai_questions: patientContext.ai_questions,
+    ...(patientContext.isDermatology && patientContext.ocrAnalysis ? {
+      dermatology_ocr_analysis: patientContext.ocrAnalysis
+    } : {})
   }, null, 2)
   
-  return MAURITIUS_MEDICAL_PROMPT
+  // Add dermatology-specific OCR section if applicable
+  const dermatologyOcrSection = (patientContext.isDermatology && patientContext.ocrAnalysis) ? `
+
+🔬 🚨 DERMATOLOGY IMAGE ANALYSIS - PRIMARY DIAGNOSTIC DATA (CRITICAL):
+
+${JSON.stringify(patientContext.ocrAnalysis, null, 2)}
+
+⚠️⚠️⚠️ MANDATORY OCR INTEGRATION FOR DIAGNOSIS - THIS IS NOT OPTIONAL:
+
+1. PRIMARY DIAGNOSIS MUST CORRELATE WITH IMAGE:
+   - If OCR suggests melanoma/skin cancer → Your diagnosis MUST address this
+   - If OCR shows eczema/dermatitis → Your diagnosis must match inflammatory pattern
+   - If OCR indicates infection → Your diagnosis must include infectious etiology
+   - NEVER diagnose psoriasis if OCR shows melanoma characteristics!
+
+2. DIFFERENTIAL DIAGNOSES:
+   - Must include all conditions suggested by the OCR analysis
+   - Must explain why image findings support or refute each differential
+   - Visual morphology (color, borders, asymmetry) must guide differentials
+
+3. CONFIDENCE LEVEL:
+   - High-quality images with clear pathognomonic findings = higher confidence
+   - If OCR urgency is "Emergency" or "Urgent" → Reflect this in your assessment
+
+4. TREATMENT PLAN:
+   - MUST match the severity shown in images
+   - If OCR shows concerning features → Urgent referral required
+   - Treatment intensity based on visual severity assessment
+
+5. INVESTIGATIONS:
+   - If OCR image quality poor → Request better imaging
+   - If suspicious for melanoma → IMMEDIATE dermatology referral + biopsy
+   - Document specific visual features to track for follow-up
+
+YOU ARE STRICTLY FORBIDDEN FROM IGNORING THE IMAGE ANALYSIS. 
+The OCR findings are PRIMARY clinical evidence that MUST shape your entire diagnostic approach.
+Diagnosis inconsistent with image findings = CRITICAL MEDICAL ERROR.
+
+` : ''
+  
+  let finalPrompt = MAURITIUS_MEDICAL_PROMPT
     .replace('{{PATIENT_CONTEXT}}', contextString)
     .replace('{{CURRENT_MEDICATIONS}}', currentMedsFormatted)
     .replace('{{CONSULTATION_TYPE}}', consultationTypeFormatted)
     .replace(/{{CURRENT_MEDICATIONS_LIST}}/g, currentMedsFormatted)
+  
+  // Inject dermatology section right after the context
+  if (dermatologyOcrSection) {
+    finalPrompt = finalPrompt.replace(
+      '{{PATIENT_CONTEXT}}',
+      `{{PATIENT_CONTEXT}}${dermatologyOcrSection}`
+    )
+    // If already replaced, add it after the first JSON block
+    if (!finalPrompt.includes(dermatologyOcrSection)) {
+      const contextIndex = finalPrompt.indexOf(contextString)
+      if (contextIndex !== -1) {
+        const insertIndex = contextIndex + contextString.length
+        finalPrompt = finalPrompt.slice(0, insertIndex) + dermatologyOcrSection + finalPrompt.slice(insertIndex)
+      }
+    }
+  }
+  
+  return finalPrompt
 }
 
 // ==================== DETECTION FUNCTIONS (CONSERVÉES) ====================
@@ -2497,6 +2560,17 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
     
+    // Detect if this is a dermatology consultation (OCR data present)
+    const ocrAnalysisData = body.ocrAnalysisData || body.ocrAnalysis
+    const isDermatologyConsultation = !!(ocrAnalysisData && Object.keys(ocrAnalysisData).length > 0)
+    
+    if (isDermatologyConsultation) {
+      console.log('🔬 DERMATOLOGY CONSULTATION DETECTED IN DIAGNOSIS - OCR analysis present')
+      console.log('   - OCR diagnosis_summary:', ocrAnalysisData?.diagnosis_summary)
+      console.log('   - OCR urgency:', ocrAnalysisData?.urgency_assessment?.level)
+      console.log('   - OCR primary findings:', ocrAnalysisData?.primary_findings)
+    }
+    
     if (!apiKey || !apiKey.startsWith('sk-')) {
       console.error('❌ Clé API OpenAI invalide ou manquante')
       return NextResponse.json({
@@ -2537,7 +2611,9 @@ export async function POST(request: NextRequest) {
       vital_signs: body.clinicalData?.vitalSigns || {},
       disease_history: body.clinicalData?.diseaseHistory || '',
       ai_questions: body.questionsData || [],
-      anonymousId: anonymizedPatientData.anonymousId
+      anonymousId: anonymizedPatientData.anonymousId,
+      ocrAnalysis: isDermatologyConsultation ? ocrAnalysisData : undefined,
+      isDermatology: isDermatologyConsultation
     }
     
     console.log('📋 Contexte patient préparé avec validation Maurice anglo-saxonne + DCI')
