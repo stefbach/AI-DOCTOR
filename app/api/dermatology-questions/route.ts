@@ -162,6 +162,18 @@ ${ocrContext}
 KEY OBSERVATIONS:
 ${observations}
 
+⚠️⚠️⚠️ CRITICAL: CORRELATION WITH IMAGE ANALYSIS IS MANDATORY
+
+Your questions MUST be SPECIFICALLY TAILORED to the visual findings above:
+- If image shows pigmented lesion → Ask about asymmetry, border irregularity, color changes, diameter growth, evolution
+- If image shows inflammatory pattern → Ask about triggers, flare patterns, response to previous anti-inflammatories
+- If image shows vesicles/pustules → Ask about fluid drainage, crusting, pain vs itch
+- If image shows scaling → Ask about distribution pattern, shedding frequency, previous moisturizer use
+- If image suggests infection → Ask about fever, rapid progression, systemic symptoms
+- If urgency is "Emergency" → Include questions about rapid changes, systemic involvement
+
+DO NOT ask generic dermatology questions - your questions must DIRECTLY relate to what's VISIBLE in the images!
+
 Generate 8-12 targeted dermatology questions to gather essential clinical information for accurate diagnosis. 
 
 QUESTION CATEGORIES TO INCLUDE:
