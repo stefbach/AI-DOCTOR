@@ -334,19 +334,21 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
     let immediateTests: any[] = []
     
     // DERMATOLOGY: Handle treatmentPlan structure (topical + oral)
-    if (diagnosisData?.treatmentPlan && (diagnosisData.treatmentPlan.topical || diagnosisData.treatmentPlan.oral)) {
+    // treatmentPlan is inside dermData (diagnosis.structured), not at root level
+    if (dermData?.treatmentPlan && (dermData.treatmentPlan.topical || dermData.treatmentPlan.oral)) {
       console.log('🔬 DERMATOLOGY treatmentPlan detected - extracting topical + oral medications')
-      const topical = diagnosisData.treatmentPlan.topical || []
-      const oral = diagnosisData.treatmentPlan.oral || []
+      const topical = dermData.treatmentPlan.topical || []
+      const oral = dermData.treatmentPlan.oral || []
       medications = [...topical, ...oral]
       console.log(`   - Topical: ${topical.length}, Oral: ${oral.length}, Total: ${medications.length}`)
     }
     
     // DERMATOLOGY: Handle investigations structure
-    if (diagnosisData?.investigations) {
+    // investigations is inside dermData (diagnosis.structured), not at root level
+    if (dermData?.investigations) {
       console.log('🔬 DERMATOLOGY investigations structure detected')
-      const dermImmediate = diagnosisData.investigations.immediate || []
-      const dermSpecialized = diagnosisData.investigations.specialized || []
+      const dermImmediate = dermData.investigations.immediate || []
+      const dermSpecialized = dermData.investigations.specialized || []
       immediateTests = [...dermImmediate, ...dermSpecialized]
       console.log(`   - Immediate: ${dermImmediate.length}, Specialized: ${dermSpecialized.length}, Total: ${immediateTests.length}`)
     }
@@ -753,42 +755,84 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   const labTests: any[] = []
   const imagingStudies: any[] = []
   
-  console.log("💊 PRESCRIPTION EXTRACTION FROM OPENAI-DIAGNOSIS")
+  console.log("💊 PRESCRIPTION EXTRACTION FROM DIAGNOSIS API")
   
-  // =========== 1. MEDICATIONS - COMBINED PRESCRIPTION (CURRENT + NEW) ===========
+  // ========== DETECT IF DERMATOLOGY STRUCTURE ==========
+  const isDermatologyStructure = !!(diagnosisData?.diagnosis?.structured)
   
-  // First, add VALIDATED CURRENT MEDICATIONS (if any)
-  const validatedCurrentMeds = diagnosisData?.currentMedicationsValidated || []
-  console.log(`📋 Current medications validated by AI: ${validatedCurrentMeds.length}`)
-  
-  validatedCurrentMeds.forEach((med: any, idx: number) => {
-    medications.push({
-      name: getString(med.name || med.medication_name || `Current medication ${idx + 1}`),
-      genericName: getString(med.dci || med.name || `Current medication ${idx + 1}`),
-      dosage: getString(med.dosage || ''),
-      form: getString(med.form || 'tablet'),
-      frequency: getString(med.posology || med.frequency || med.how_to_take || 'As prescribed'),
-      route: getString(med.route || 'Oral'),
-      duration: getString(med.duration || 'Ongoing treatment'),
-      quantity: getString(med.quantity || '1 box'),
-      instructions: getString(med.instructions || med.validated_corrections || 'Continue current treatment - Validated by AI'),
-      indication: getString(med.indication || med.why_prescribed || 'Chronic treatment'),
-      monitoring: getString(med.monitoring || 'Standard monitoring'),
-      doNotSubstitute: false,
-      medication_type: 'current_continued',
-      validated_by_ai: true,
-      original_input: getString(med.original_input || ''),
-      validated_corrections: getString(med.validated_corrections || 'None'),
-      pregnancyCategory: '',
-      pregnancySafety: '',
-      breastfeedingSafety: '',
-      completeLine: `${getString(med.name || med.medication_name)} ${getString(med.dosage || '')}\n${getString(med.posology || med.frequency || 'As prescribed')}\n[Current treatment - AI validated]`
+  if (isDermatologyStructure) {
+    console.log("🔬 DERMATOLOGY STRUCTURE DETECTED in extractPrescriptionsFromDiagnosisData")
+    const dermData = diagnosisData.diagnosis.structured
+    
+    // Extract dermatology medications (topical + oral)
+    const topical = dermData?.treatmentPlan?.topical || []
+    const oral = dermData?.treatmentPlan?.oral || []
+    const allDermMeds = [...topical, ...oral]
+    
+    console.log(`💊 Dermatology medications: ${topical.length} topical + ${oral.length} oral = ${allDermMeds.length} total`)
+    
+    allDermMeds.forEach((med: any, idx: number) => {
+      medications.push({
+        name: getString(med.medication || med.name || `Medication ${idx + 1}`),
+        genericName: getString(med.dci || med.medication || `Medication ${idx + 1}`),
+        dosage: getString(med.dosage || ''),
+        form: getString(med.form || (topical.includes(med) ? 'topical' : 'tablet')),
+        frequency: getString(med.application || med.frequency || 'As prescribed'),
+        route: getString(med.route || (topical.includes(med) ? 'Topical' : 'Oral')),
+        duration: getString(med.duration || '7-14 days'),
+        quantity: getString(med.quantity || '1 unit'),
+        instructions: getString(med.instructions || ''),
+        indication: getString(med.indication || ''),
+        monitoring: getString(med.monitoring || ''),
+        doNotSubstitute: false,
+        medication_type: 'newly_prescribed',
+        validated_by_ai: false,
+        pregnancyCategory: '',
+        pregnancySafety: '',
+        breastfeedingSafety: '',
+        completeLine: `${getString(med.medication || med.name)} ${getString(med.dosage || '')}\n${getString(med.application || med.frequency || 'As prescribed')}`
+      })
     })
-  })
-  
-  // Then, add NEWLY PRESCRIBED MEDICATIONS (if any)
-  const primaryTreatments = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []
-  console.log(`💊 Newly prescribed medications: ${primaryTreatments.length}`)
+    
+    // Continue to lab tests extraction (dermatology-specific path)
+    // Will be handled later in the function
+    
+  } else {
+    // =========== GENERAL CONSULTATION: STANDARD EXTRACTION ===========
+    console.log("📋 GENERAL STRUCTURE - Standard extraction")
+    
+    // First, add VALIDATED CURRENT MEDICATIONS (if any)
+    const validatedCurrentMeds = diagnosisData?.currentMedicationsValidated || []
+    console.log(`📋 Current medications validated by AI: ${validatedCurrentMeds.length}`)
+    
+    validatedCurrentMeds.forEach((med: any, idx: number) => {
+      medications.push({
+        name: getString(med.name || med.medication_name || `Current medication ${idx + 1}`),
+        genericName: getString(med.dci || med.name || `Current medication ${idx + 1}`),
+        dosage: getString(med.dosage || ''),
+        form: getString(med.form || 'tablet'),
+        frequency: getString(med.posology || med.frequency || med.how_to_take || 'As prescribed'),
+        route: getString(med.route || 'Oral'),
+        duration: getString(med.duration || 'Ongoing treatment'),
+        quantity: getString(med.quantity || '1 box'),
+        instructions: getString(med.instructions || med.validated_corrections || 'Continue current treatment - Validated by AI'),
+        indication: getString(med.indication || med.why_prescribed || 'Chronic treatment'),
+        monitoring: getString(med.monitoring || 'Standard monitoring'),
+        doNotSubstitute: false,
+        medication_type: 'current_continued',
+        validated_by_ai: true,
+        original_input: getString(med.original_input || ''),
+        validated_corrections: getString(med.validated_corrections || 'None'),
+        pregnancyCategory: '',
+        pregnancySafety: '',
+        breastfeedingSafety: '',
+        completeLine: `${getString(med.name || med.medication_name)} ${getString(med.dosage || '')}\n${getString(med.posology || med.frequency || 'As prescribed')}\n[Current treatment - AI validated]`
+      })
+    })
+    
+    // Then, add NEWLY PRESCRIBED MEDICATIONS (if any)
+    const primaryTreatments = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []
+    console.log(`💊 Newly prescribed medications: ${primaryTreatments.length}`)
   
   primaryTreatments.forEach((med: any, idx: number) => {
     medications.push({
@@ -811,11 +855,12 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
       breastfeedingSafety: getString(med.breastfeeding_safety || ''),
       completeLine: `${getString(med.medication_dci || med.drug)} ${getString(med.dosage_strength || med.dosage || '')}\n${getString(med.dosing_regimen?.adult || med.dosing?.adult || 'As prescribed')}`
     })
-  })
+    })
+  }
   
-  console.log(`✅ COMBINED PRESCRIPTION: ${validatedCurrentMeds.length} current + ${primaryTreatments.length} new = ${medications.length} total medications`)
+  console.log(`✅ COMBINED PRESCRIPTION: ${medications.length} total medications`)
 
-  // =========== 2. LAB TESTS ===========
+  // =========== 2. LAB TESTS (COMMON FOR ALL CONSULTATION TYPES) ===========
   const extractedData = extractRealDataFromDiagnosis(diagnosisData, {}, {})
   const extractedLabTests = extractedData.rawLabTests || []
   
