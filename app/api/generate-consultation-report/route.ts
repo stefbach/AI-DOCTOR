@@ -1131,7 +1131,11 @@ export async function POST(request: NextRequest) {
     const isDermatologyConsultation = !!(ocrAnalysisData && Object.keys(ocrAnalysisData).length > 0)
     const isChronicDiseaseConsultation = !!(
       (diagnosisData?.chronicDiseaseType) ||
-      (diagnosisData?.medicationManagement) ||
+      (diagnosisData?.chronicDiseases) ||  // From chronic-diagnosis response
+      (diagnosisData?.assessment?.medicationManagement) ||  // Inside assessment object
+      (diagnosisData?.assessment?.mealPlan) ||
+      (diagnosisData?.assessment?.exercisePlan) ||
+      (diagnosisData?.medicationManagement) ||  // Direct field (fallback)
       (diagnosisData?.mealPlan) ||
       (diagnosisData?.exercisePlan) ||
       (patientData?.medicalHistory && Array.isArray(patientData.medicalHistory) && 
