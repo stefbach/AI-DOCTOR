@@ -371,9 +371,37 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
   )
 
   // =========== 10. DETAILED PRESCRIPTIONS WITH BIOLOGY EXTRACTION ===========
-  const medications = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []
+  // Handle different API structures (general vs dermatology vs chronic)
+  let medications = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []
+  let immediateTests = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority || []
   
-  const immediateTests = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority || []
+  // DERMATOLOGY: Handle treatmentPlan structure (topical + oral)
+  if (diagnosisData?.treatmentPlan && (diagnosisData.treatmentPlan.topical || diagnosisData.treatmentPlan.oral)) {
+    console.log('🔬 DERMATOLOGY structure detected - extracting topical + oral medications')
+    const topical = diagnosisData.treatmentPlan.topical || []
+    const oral = diagnosisData.treatmentPlan.oral || []
+    medications = [...topical, ...oral]
+    console.log(`   - Topical: ${topical.length}, Oral: ${oral.length}, Total: ${medications.length}`)
+  }
+  
+  // DERMATOLOGY: Handle investigations structure
+  if (diagnosisData?.investigations) {
+    console.log('🔬 DERMATOLOGY investigations structure detected')
+    const dermImmediate = diagnosisData.investigations.immediate || []
+    const dermSpecialized = diagnosisData.investigations.specialized || []
+    immediateTests = [...dermImmediate, ...dermSpecialized]
+    console.log(`   - Immediate: ${dermImmediate.length}, Specialized: ${dermSpecialized.length}, Total: ${immediateTests.length}`)
+  }
+  
+  // CHRONIC: Handle medicationManagement structure
+  if (diagnosisData?.assessment?.medicationManagement) {
+    console.log('💊 CHRONIC structure detected - extracting medication management')
+    const add = diagnosisData.assessment.medicationManagement.add || []
+    const adjust = diagnosisData.assessment.medicationManagement.adjust || []
+    const continueM = diagnosisData.assessment.medicationManagement.continue || []
+    medications = [...add, ...adjust, ...continueM]
+    console.log(`   - Add: ${add.length}, Adjust: ${adjust.length}, Continue: ${continueM.length}, Total: ${medications.length}`)
+  }
   
   console.log(`🔬 SMART BIOLOGY EXTRACTION - ${immediateTests.length} total items to analyze`)
   
