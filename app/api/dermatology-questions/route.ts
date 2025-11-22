@@ -145,9 +145,58 @@ export async function POST(request: NextRequest) {
     console.log(`🔬 Generating dermatology-specific questions`)
     console.log(`👤 Patient: ${patientData.firstName} ${patientData.lastName}`)
 
-    // Create context from OCR analysis
-    const ocrContext = ocrAnalysisData?.analysis?.fullText || 'No image analysis available'
-    const observations = ocrAnalysisData?.observations?.join(', ') || 'No specific observations'
+    // Create context from OCR analysis - Extract from structured JSON
+    let ocrContext = 'No image analysis available'
+    
+    if (ocrAnalysisData && ocrAnalysisData.analysis) {
+      const ocr = ocrAnalysisData.analysis
+      const summary = ocrAnalysisData.summary || ''
+      
+      // Build comprehensive OCR analysis text from structured data
+      ocrContext = `
+=== IMAGE QUALITY ASSESSMENT ===
+Overall Quality: ${ocr.imageQualityAssessment?.overallQuality || 'Not assessed'}
+Focus: ${ocr.imageQualityAssessment?.focus || 'N/A'}
+Lighting: ${ocr.imageQualityAssessment?.lighting || 'N/A'}
+
+=== VISUAL OBSERVATIONS ===
+Primary Morphology: ${ocr.visualObservations?.primaryMorphology || 'Not specified'}
+Color: ${ocr.visualObservations?.color || 'Not described'}
+Border: ${ocr.visualObservations?.border || 'Not described'}
+Texture: ${ocr.visualObservations?.texture || 'Not described'}
+Distribution: ${ocr.visualObservations?.distribution || 'Not described'}
+
+=== LOCATION ===
+Primary Site: ${ocr.locationAnalysis?.primarySite || 'Not specified'}
+Specific Areas: ${ocr.locationAnalysis?.specificAreas?.join(', ') || 'Not specified'}
+
+${ocr.clinicalScoring?.melanomaConcern?.applicable ? `
+=== MELANOMA CONCERN (ABCDE SCORING) ===
+Asymmetry: ${ocr.clinicalScoring.melanomaConcern.abcdeScore?.asymmetryScore || 'N/A'}
+Border: ${ocr.clinicalScoring.melanomaConcern.abcdeScore?.borderScore || 'N/A'}
+Color: ${ocr.clinicalScoring.melanomaConcern.abcdeScore?.colorScore || 'N/A'}
+Diameter: ${ocr.clinicalScoring.melanomaConcern.abcdeScore?.diameterScore || 'N/A'}
+Evolution: ${ocr.clinicalScoring.melanomaConcern.abcdeScore?.evolutionScore || 'N/A'}
+Total ABCDE Score: ${ocr.clinicalScoring.melanomaConcern.totalScore || 'N/A'}/5
+Risk Assessment: ${ocr.clinicalScoring.melanomaConcern.riskLevel || 'Not assessed'}
+` : ''}
+
+=== DIFFERENTIAL DIAGNOSES (FROM IMAGE) ===
+${ocr.differentialDiagnoses?.map((dd: any, i: number) => `
+${i + 1}. ${dd.diagnosis} (${dd.likelihood || 'N/A'}%)
+   Supporting Features: ${dd.supportingFeatures || 'N/A'}
+`).join('') || 'No differentials provided'}
+
+=== URGENCY ASSESSMENT ===
+Level: ${ocr.urgencyAssessment?.level || 'Not assessed'}
+Red Flags: ${ocr.urgencyAssessment?.redFlags?.join('; ') || 'None identified'}
+
+=== SUMMARY ===
+${summary}
+`.trim()
+    }
+    
+    const observations = ocrAnalysisData?.analysis?.urgencyAssessment?.redFlags?.join(', ') || 'No specific red flags identified'
 
     const prompt = `You are an expert dermatologist conducting a detailed consultation.
 
