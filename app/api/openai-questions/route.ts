@@ -338,11 +338,11 @@ async function callOpenAIWithRetry(
       let enhancedSystemMessage = systemMessage
       
       if (attempt === 1) {
-        enhancedSystemMessage = `🚨 ATTEMPT 2/4 - ENHANCED QUALITY:\n\n${systemMessage}\n\n⚠️ CRITICAL: Questions must be:\n- Clinically specific and actionable\n- Evidence-based\n- Appropriate for patient context${isPregnant ? ' (pregnancy-safe)' : ''}`
+        enhancedSystemMessage = `🚨 ATTEMPT 2/4 - ENHANCED QUALITY:\n\n${systemMessage}\n\n⚠️ CRITICAL: Questions must be:\n- Clinically specific and actionable\n- Evidence-based\n- Appropriate for patient context${isPregnant ? ' (pregnancy-safe)' : ''}\n- MULTIPLE CHOICE FORMAT ONLY with 4-6 specific options`
       } else if (attempt === 2) {
-        enhancedSystemMessage = `🚨🚨 ATTEMPT 3/4 - STRICT STANDARDS:\n\n${systemMessage}\n\n⚠️ MANDATORY:\n- All questions must have unique IDs\n- All questions must have clear priorities\n- All questions must be patient-appropriate\n- Minimum 6 questions required`
+        enhancedSystemMessage = `🚨🚨 ATTEMPT 3/4 - STRICT STANDARDS:\n\n${systemMessage}\n\n⚠️ MANDATORY:\n- All questions must have unique IDs\n- All questions must have clear priorities\n- All questions must be patient-appropriate\n- Minimum 6 questions required\n- ALL questions MUST be type: "multiple_choice" with 4-6 options\n- NO open-ended questions allowed`
       } else if (attempt >= 3) {
-        enhancedSystemMessage = `🆘 ATTEMPT 4/4 - MAXIMUM QUALITY:\n\n${systemMessage}\n\n🎯 FINAL ATTEMPT - response must be PERFECT:\n- Questions must be comprehensive and cover all clinical aspects\n- Each question must be specific and actionable\n- Response must be valid JSON with complete structure`
+        enhancedSystemMessage = `🆘 ATTEMPT 4/4 - MAXIMUM QUALITY:\n\n${systemMessage}\n\n🎯 FINAL ATTEMPT - response must be PERFECT:\n- Questions must be comprehensive and cover all clinical aspects\n- Each question must be specific and actionable\n- Response must be valid JSON with complete structure\n- EVERY question MUST be type: "multiple_choice" with 4-6 specific answer options\n- ZERO open-ended questions accepted`
       }
       
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -385,18 +385,32 @@ async function callOpenAIWithRetry(
       // Quality validation
       const hasMinimumQuestions = questions.length >= 6
       const allHaveIds = questions.every((q: any) => q.id || q.question_id)
+      const allMultipleChoice = questions.every((q: any) => {
+        return (q.type === 'multiple_choice' || q.type === 'multiple-choice') && 
+               q.options && 
+               Array.isArray(q.options) && 
+               q.options.length >= 4
+      })
       
-      if ((!hasMinimumQuestions || !allHaveIds) && attempt < maxRetries) {
-        console.log(`⚠️ Quality issues: ${questions.length} questions, all have IDs: ${allHaveIds}`)
+      if ((!hasMinimumQuestions || !allHaveIds || !allMultipleChoice) && attempt < maxRetries) {
+        console.log(`⚠️ Quality issues: ${questions.length} questions, all have IDs: ${allHaveIds}, all multiple choice: ${allMultipleChoice}`)
         throw new Error('Quality validation failed')
       }
       
       // Auto-correction on final attempt
-      if ((!hasMinimumQuestions || !allHaveIds) && attempt === maxRetries) {
+      if ((!hasMinimumQuestions || !allHaveIds || !allMultipleChoice) && attempt === maxRetries) {
         console.log('🔧 AUTO-CORRECTION MODE')
         questions.forEach((q: any, idx: number) => {
           if (!q.id && !q.question_id) {
             q.id = `q${idx + 1}`
+          }
+          // Force multiple choice format
+          if (!q.type || q.type !== 'multiple_choice') {
+            q.type = 'multiple_choice'
+          }
+          if (!q.options || !Array.isArray(q.options) || q.options.length < 4) {
+            q.options = ['Option A', 'Option B', 'Option C', 'Option D']
+            console.log(`⚠️ Auto-corrected question ${q.id || idx + 1} to multiple choice format`)
           }
         })
         console.log('✅ Auto-correction applied')
@@ -409,7 +423,8 @@ async function callOpenAIWithRetry(
         qualityMetrics: {
           attempt: attempt + 1,
           questionsCount: questions.length,
-          allHaveIds
+          allHaveIds,
+          allMultipleChoice
         }
       }
       
@@ -1459,8 +1474,15 @@ Focus ONLY on:
 3. Detecting critical red flags
 ${patient.isPregnant ? '4. Pregnancy-specific emergencies (preeclampsia, placental abruption, ectopic pregnancy)' : ''}
 
+🚨 CRITICAL FORMAT REQUIREMENTS:
+- ALL questions MUST be multiple choice format ONLY
+- EVERY question MUST have type: "multiple_choice"
+- EVERY question MUST have 4-6 specific answer options
+- NO open-ended questions allowed
+- Options should be clear, specific choices (e.g., "Yes", "No", "Not sure", "Sometimes" OR severity levels)
+
 Each question must:
-- Be answerable with simple yes/no or quick selection
+- Be answerable with simple multiple choice selection
 - Target specific emergency conditions
 - Help determine if immediate medical attention needed
 ${patient.isPregnant ? '- Consider pregnancy safety' : ''}
@@ -1471,6 +1493,7 @@ Format:
     {
       "id": 1,
       "question": "Direct question targeting critical symptom",
+      "type": "multiple_choice",
       "options": ["Yes", "No", "Not sure", "Sometimes"],
       "priority": "critical",
       "redFlagDetection": true,
@@ -1558,11 +1581,18 @@ Generate 5 diagnostic questions following standard clinical protocol:
 
 ${patient.isPregnant ? 'IMPORTANT: Include pregnancy-specific considerations in your questions.' : ''}
 
+🚨 CRITICAL FORMAT REQUIREMENTS:
+- ALL questions MUST be multiple choice format ONLY
+- EVERY question MUST have type: "multiple_choice"
+- EVERY question MUST have 4-6 specific answer options
+- NO open-ended questions allowed
+- Options should represent different severity levels, frequencies, or specific clinical presentations
+
 Each question must:
 - Be clinically relevant to the presentation
 - Help narrow the differential diagnosis
 - Use appropriate medical terminology with lay explanations
-- Include 4 specific answer options
+- Include 4-6 specific answer options (not just yes/no)
 ${patient.isPregnant ? '- Consider pregnancy safety when relevant' : ''}
 
 Format:
@@ -1571,7 +1601,8 @@ Format:
     {
       "id": 1,
       "question": "Clear clinical question",
-      "options": ["Specific option 1", "Specific option 2", "Specific option 3", "None of these"],
+      "type": "multiple_choice",
+      "options": ["Specific option 1", "Specific option 2", "Specific option 3", "Specific option 4"],
       "priority": "high",
       "rationale": "Clinical reasoning for this question",
       "clinicalRelevance": "How this helps diagnosis"
@@ -1655,9 +1686,16 @@ Generate 8 sophisticated diagnostic questions that:
 8. MUST determine need for urgent vs routine evaluation
 ${patient.isPregnant ? '9. MUST consider pregnancy-specific conditions and safety' : ''}
 
+🚨 CRITICAL FORMAT REQUIREMENTS:
+- ALL questions MUST be multiple choice format ONLY
+- EVERY question MUST have type: "multiple_choice"
+- EVERY question MUST have 4-6 specific answer options
+- NO open-ended questions allowed
+- Options must be highly specific, representing different clinical scenarios, severity levels, or diagnostic possibilities
+
 Requirements for each question:
 - Use precise medical terminology WITH patient-friendly explanations
-- Include 4 highly specific differential options
+- Include 4-6 highly specific differential options
 - Explain the diagnostic value of each question
 - Indicate if positive response requires urgent action
 - Consider age and gender-specific conditions
@@ -1671,10 +1709,12 @@ Format:
     {
       "id": 1,
       "question": "Sophisticated clinical question with explanation",
+      "type": "multiple_choice",
       "options": [
         "Very specific option 1",
         "Very specific option 2", 
         "Very specific option 3",
+        "Very specific option 4",
         "None of the above/Not applicable"
       ],
       "priority": "high",
@@ -1997,7 +2037,7 @@ export async function POST(request: NextRequest) {
     
     console.log(`Calling ${aiConfig.model} with ${adjustedMode} mode (history-enhanced) with retry mechanism`)
     
-    const systemMessage = `You are an expert physician conducting a thorough clinical assessment with advanced history analysis capabilities. Generate diagnostic questions based on evidence-based medicine. Always respond with valid JSON only. ${processedPatient.isPregnant ? 'IMPORTANT: This patient is pregnant - consider pregnancy-specific conditions and medication safety.' : ''} Pay special attention to history analysis findings when crafting questions.`
+    const systemMessage = `You are an expert physician conducting a thorough clinical assessment with advanced history analysis capabilities. Generate diagnostic questions based on evidence-based medicine. CRITICAL: ALL questions MUST be multiple choice format with type: "multiple_choice" and 4-6 specific answer options. NO open-ended questions allowed. Always respond with valid JSON only. ${processedPatient.isPregnant ? 'IMPORTANT: This patient is pregnant - consider pregnancy-specific conditions and medication safety.' : ''} Pay special attention to history analysis findings when crafting questions.`
     
     const result = await callOpenAIWithRetry(
       apiKey,

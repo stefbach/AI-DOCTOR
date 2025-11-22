@@ -381,8 +381,9 @@ MEDICATION ASSESSMENT (1 question):
 LIFESTYLE ASSESSMENT (1 question):
 - Diet quality and physical activity
 
-Each question must:
-- Include EXACTLY 4 specific answer options
+🚨 CRITICAL FORMAT REQUIREMENTS:
+- ALL questions MUST be multiple choice with EXACTLY 4 specific answer options
+- NO open-ended questions allowed
 - Options should represent different severity/frequency levels
 - Use clear, patient-friendly language
 - Be clinically actionable
@@ -447,7 +448,7 @@ export async function POST(request: NextRequest) {
     
     console.log('🤖 Calling GPT-4o with retry mechanism for chronic disease questions...')
     
-    const systemMessage = 'You are an expert endocrinologist and diabetologist conducting a chronic disease follow-up assessment. Generate diagnostic questions based on evidence-based medicine. Always respond with valid JSON only.'
+    const systemMessage = 'You are an expert endocrinologist and diabetologist conducting a chronic disease follow-up assessment. Generate diagnostic questions based on evidence-based medicine. CRITICAL: ALL questions MUST be multiple choice format with EXACTLY 4 specific answer options. NO open-ended questions. Always respond with valid JSON only.'
     
     const result = await callOpenAIWithRetry(apiKey, prompt, systemMessage, 3)
     const questions = result.questions

@@ -93,7 +93,14 @@ ${systemMessage}
         questions.forEach((q: any, idx: number) => {
           if (!q.id) q.id = `derm_q${idx + 1}`
           if (!q.category) q.category = 'General'
-          if (!q.type) q.type = 'open'
+          if (!q.type) q.type = 'multiple_choice'
+          // Force all questions to be multiple choice
+          if (q.type !== 'multiple_choice') {
+            q.type = 'multiple_choice'
+            if (!q.options || q.options.length < 4) {
+              q.options = ['Option 1', 'Option 2', 'Option 3', 'Option 4']
+            }
+          }
         })
         console.log('✅ Auto-correction applied')
       }
@@ -191,18 +198,35 @@ QUESTION CATEGORIES TO INCLUDE:
 8. SPECIFIC DERMATOLOGY INQUIRIES:
    - Based on the image analysis, ask targeted questions about specific features observed
 
+🚨 CRITICAL FORMAT REQUIREMENTS:
+- ALL questions MUST be multiple choice format ONLY
+- NO open-ended questions allowed
+- NO yes/no questions without options
+- EVERY question MUST have 4-6 specific answer options
+
 FORMAT each question as a JSON object:
 {
   "id": "unique_id",
   "category": "category_name",
   "question": "question text",
-  "type": "open" | "closed" | "scale" | "multiple_choice",
-  "options": ["option1", "option2"] // for multiple choice
+  "type": "multiple_choice",
+  "options": ["Specific option 1", "Specific option 2", "Specific option 3", "Specific option 4"]
 }
+
+EXAMPLE:
+{
+  "id": "derm_q1",
+  "category": "Onset & Duration",
+  "question": "How long have you noticed this skin condition?",
+  "type": "multiple_choice",
+  "options": ["Less than 1 week", "1-4 weeks", "1-3 months", "More than 3 months"]
+}
+
+⚠️ Remember: ALL questions must have type: "multiple_choice" with 4-6 options!
 
 Return ONLY a valid JSON array of question objects, no additional text.`
 
-    const systemMessage = "You are an expert dermatologist. Generate targeted clinical questions in valid JSON format only."
+    const systemMessage = "You are an expert dermatologist. Generate targeted clinical questions in valid JSON format only. CRITICAL: ALL questions MUST be multiple choice format with 4-6 specific answer options. NO open-ended questions allowed."
     
     const result = await callOpenAIWithRetry(openai, prompt, systemMessage, 3)
     const questions = result.questions
@@ -244,63 +268,71 @@ function getDefaultDermatologyQuestions() {
       id: "derm_q1",
       category: "Onset & Duration",
       question: "When did you first notice this skin condition?",
-      type: "open"
+      type: "multiple_choice",
+      options: ["Less than 1 week ago", "1-4 weeks ago", "1-3 months ago", "More than 3 months ago"]
     },
     {
       id: "derm_q2",
       category: "Onset & Duration",
       question: "Has the condition changed in size, color, or appearance since it first appeared?",
-      type: "closed"
+      type: "multiple_choice",
+      options: ["No change", "Slowly getting worse", "Rapidly getting worse", "Getting better", "Fluctuating (better and worse)"]
     },
     {
       id: "derm_q3",
       category: "Symptoms",
       question: "Are you experiencing any itching, pain, or burning sensation?",
       type: "multiple_choice",
-      options: ["No symptoms", "Mild itching", "Moderate itching", "Severe itching", "Pain", "Burning"]
+      options: ["No symptoms", "Mild itching", "Moderate itching", "Severe itching", "Pain", "Burning sensation"]
     },
     {
       id: "derm_q4",
       category: "Aggravating Factors",
-      question: "What makes the condition worse? (Select all that apply)",
+      question: "What makes the condition worse?",
       type: "multiple_choice",
-      options: ["Sun exposure", "Heat", "Cold", "Stress", "Certain products", "Physical activity", "Nothing specific"]
+      options: ["Sun exposure", "Heat or sweating", "Cold weather", "Stress", "Certain products or chemicals", "Physical activity", "Nothing specific"]
     },
     {
       id: "derm_q5",
       category: "Previous Treatments",
       question: "Have you tried any treatments for this condition?",
-      type: "open"
+      type: "multiple_choice",
+      options: ["No treatment yet", "Over-the-counter creams/ointments", "Prescription medications", "Home remedies", "Multiple treatments with no improvement"]
     },
     {
       id: "derm_q6",
       category: "Medical History",
-      question: "Do you have a history of skin conditions (eczema, psoriasis, acne, etc.)?",
-      type: "closed"
+      question: "Do you have a history of skin conditions?",
+      type: "multiple_choice",
+      options: ["No history", "Eczema", "Psoriasis", "Acne", "Other skin conditions", "Multiple skin conditions"]
     },
     {
       id: "derm_q7",
       category: "Allergies",
       question: "Do you have any known allergies to medications, cosmetics, or other substances?",
-      type: "open"
+      type: "multiple_choice",
+      options: ["No known allergies", "Medication allergies", "Cosmetic/skincare allergies", "Contact allergies (metals, latex, etc.)", "Multiple allergies"]
     },
     {
       id: "derm_q8",
       category: "Lifestyle",
       question: "Have you recently changed any personal care products, detergents, or medications?",
-      type: "closed"
+      type: "multiple_choice",
+      options: ["No recent changes", "Changed skincare products", "Changed laundry detergent", "Started new medications", "Multiple changes recently"]
     },
     {
       id: "derm_q9",
       category: "Systemic Symptoms",
-      question: "Are you experiencing any other symptoms like fever, fatigue, or joint pain?",
-      type: "closed"
+      question: "Are you experiencing any other symptoms?",
+      type: "multiple_choice",
+      options: ["No other symptoms", "Fever", "Fatigue", "Joint pain", "Multiple symptoms"]
     },
     {
       id: "derm_q10",
       category: "Family History",
       question: "Does anyone in your family have similar skin conditions?",
-      type: "closed"
+      type: "multiple_choice",
+      options: ["No family history", "Yes, immediate family", "Yes, extended family", "Unsure", "Multiple family members affected"]
     }
   ]
 }
