@@ -835,6 +835,31 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
     console.log(`   - Topical medications (raw): ${topicalMedicationsRaw.length}`)
     console.log(`   - Oral medications (raw): ${oralMedicationsRaw.length}`)
     
+    // ========== CHECK FOR MEDICAL APPROPRIATENESS OF NO MEDICATIONS ==========
+    const primaryDiagnosisName = diagnosisData?.primaryDiagnosis?.name || ''
+    const hasBiopsy = diagnosisData?.recommendedInvestigations?.biopsy && 
+                      diagnosisData.recommendedInvestigations.biopsy !== 'Not indicated'
+    const hasReferral = diagnosisData?.additionalRecommendations?.referrals?.length > 0
+    
+    if (topicalMedicationsRaw.length === 0 && oralMedicationsRaw.length === 0) {
+      console.log(`⚠️ DERMATOLOGY: No medications prescribed`)
+      console.log(`   - Primary diagnosis: ${primaryDiagnosisName}`)
+      console.log(`   - Biopsy required: ${hasBiopsy ? 'Yes' : 'No'}`)
+      console.log(`   - Referral required: ${hasReferral ? 'Yes' : 'No'}`)
+      
+      // Check if this is medically appropriate (cancer, pre-malignant lesions, etc.)
+      const requiresSpecialistOnly = primaryDiagnosisName.toLowerCase().includes('melanoma') ||
+                                     primaryDiagnosisName.toLowerCase().includes('carcinoma') ||
+                                     primaryDiagnosisName.toLowerCase().includes('cancer') ||
+                                     hasBiopsy
+      
+      if (requiresSpecialistOnly) {
+        console.log(`   ✅ MEDICALLY APPROPRIATE: Condition requires specialist management, no GP-level treatment`)
+      } else {
+        console.log(`   ⚠️ WARNING: No medications prescribed for non-specialist condition`)
+      }
+    }
+    
     // ========== TRANSFORM MEDICATIONS TO MATCH NORMAL WORKFLOW FORMAT ==========
     // Dermatology uses: medication, dci, application/frequency, instructions/indication
     // Normal workflow uses: nom, denominationCommune, dosage, posologie, forme, modeAdministration
@@ -944,6 +969,20 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
     const combinedPrescription = [...currentMedicationsValidated, ...medications]
     console.log(`📋 DERMATOLOGY: Combined prescription - ${combinedPrescription.length} total medications`)
     
+    // ========== CHECK IF NO MEDICATIONS IS MEDICALLY APPROPRIATE ==========
+    const requiresSpecialistOnly = primaryDiagnosisName.toLowerCase().includes('melanoma') ||
+                                   primaryDiagnosisName.toLowerCase().includes('carcinoma') ||
+                                   primaryDiagnosisName.toLowerCase().includes('cancer') ||
+                                   hasBiopsy
+    
+    const noMedicationsReason = (medications.length === 0 && requiresSpecialistOnly) 
+      ? `No medications prescribed - ${primaryDiagnosisName} requires urgent specialist evaluation and biopsy confirmation before treatment initiation.`
+      : null
+    
+    if (noMedicationsReason) {
+      console.log(`ℹ️ NO MEDICATIONS REASON: ${noMedicationsReason}`)
+    }
+    
     // ========== BUILD RESPONSE WITH SAME STRUCTURE AS NORMAL WORKFLOW ==========
     const response = {
       success: true,
@@ -959,6 +998,7 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
       currentMedicationsValidated: currentMedicationsValidated,
       medications: medications,
       combinedPrescription: combinedPrescription,
+      noMedicationsReason: noMedicationsReason, // Explain when 0 medications is medically appropriate
       
       // ========== TOP-LEVEL ANALYSIS WITH INVESTIGATIONS (MATCH NORMAL WORKFLOW) ==========
       expertAnalysis: {

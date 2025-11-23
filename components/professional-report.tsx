@@ -4134,6 +4134,13 @@ const ConsultationReport = () => {
  <div className="text-center py-8 text-gray-500">
  <Pill className="h-12 w-12 mx-auto mb-4 text-gray-300" />
  <p>No medications prescribed</p>
+ {diagnosisData?.noMedicationsReason && (
+ <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-left max-w-2xl mx-auto">
+ <p className="text-sm text-blue-800">
+ <strong>ℹ️ Medical Note:</strong> {diagnosisData.noMedicationsReason}
+ </p>
+ </div>
+ )}
  {editMode && (
  <Button onClick={addMedicament} className="mt-4" variant="outline">
  <Plus className="h-4 w-4 mr-2" />
@@ -4321,6 +4328,13 @@ const ConsultationReport = () => {
  <div className="text-center py-8 text-gray-500">
  <TestTube className="h-12 w-12 mx-auto mb-4 text-gray-300" />
  <p>No laboratory tests ordered</p>
+ {diagnosisData?.noMedicationsReason && (
+ <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-left max-w-2xl mx-auto">
+ <p className="text-sm text-blue-800">
+ <strong>ℹ️ Medical Note:</strong> Biopsy and specialist evaluation required first.
+ </p>
+ </div>
+ )}
  {editMode && (
  <div className="mt-4">
  <Select onValueChange={(value) => addBiologyTest(value)}>
