@@ -1493,6 +1493,16 @@ export async function POST(request: NextRequest) {
         console.log(`     ${idx + 1}. "${test.name}" - Category: "${test.category}"`)
       })
     }
+    
+    // DEBUG: Log imaging studies
+    if (cleanImagingStudies.length > 0) {
+      console.log(" 📸 IMAGING STUDIES DEBUG:")
+      cleanImagingStudies.forEach((study, idx) => {
+        console.log(`     ${idx + 1}. "${study.type}" - Modality: "${study.modality}"`)
+      })
+    } else {
+      console.log(" ⚠️ WARNING: No imaging studies in cleanImagingStudies array!")
+    }
 
     // Current date and doctor info
     const currentDate = new Date()
