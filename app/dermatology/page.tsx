@@ -307,6 +307,12 @@ export default function DermatologyWorkflow() {
                   questionsData={questionsData}
                   onNext={(data) => {
                     console.log('✅ Diagnosis generated:', data)
+                    console.log('🔍 CRITICAL: diagnosisData keys:', Object.keys(data || {}))
+                    console.log('🔍 CRITICAL: expertAnalysis exists?:', !!data?.expertAnalysis)
+                    console.log('🔍 CRITICAL: medications exists?:', !!data?.medications)
+                    if (data?.expertAnalysis) {
+                      console.log('🔍 CRITICAL: expertAnalysis content:', JSON.stringify(data.expertAnalysis, null, 2))
+                    }
                     setDiagnosisData(data)
                     setCurrentStep(3)
                   }}
