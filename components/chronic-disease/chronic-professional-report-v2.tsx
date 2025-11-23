@@ -1938,12 +1938,21 @@ if (isRenewal) {
  }
  
  // CLIENT DEBUG - Check diagnosisData before API call
- console.log(' CLIENT DEBUG - PROFESSIONAL REPORT:')
+ console.log('🔍 ========== CHRONIC DISEASE REPORT - BEFORE API CALL ==========')
  console.log(' 📦 diagnosisData:', diagnosisData)
  console.log(' 💊 currentMedicationsValidated:', diagnosisData?.currentMedicationsValidated)
  console.log(' 💊 Length:', diagnosisData?.currentMedicationsValidated?.length || 0)
- console.log(' 📋 medications:', diagnosisData?.medications)
- console.log(' 📋 combinedPrescription:', diagnosisData?.combinedPrescription)
+ 
+ if (diagnosisData?.currentMedicationsValidated && diagnosisData.currentMedicationsValidated.length > 0) {
+   console.log(' ✅ CURRENT MEDICATIONS PRESENT IN diagnosisData:')
+   diagnosisData.currentMedicationsValidated.forEach((med: any, idx: number) => {
+     console.log(`    ${idx + 1}. ${med.name || med.medication_name} - ${med.dosage} - ${med.frequency || med.posology}`)
+   })
+ } else {
+   console.log(' ⚠️ WARNING: currentMedicationsValidated is EMPTY or UNDEFINED in diagnosisData!')
+   console.log(' 📋 medications field:', diagnosisData?.medications)
+   console.log(' 📋 combinedPrescription field:', diagnosisData?.combinedPrescription)
+ }
  
  const response = await fetch("/api/generate-consultation-report", {
  method: "POST",
