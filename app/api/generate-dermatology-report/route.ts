@@ -507,16 +507,29 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any = {}
   )
 
   // =========== 10. DETAILED PRESCRIPTIONS WITH BIOLOGY EXTRACTION ===========
-  // ========== CRITICAL DEBUG: Check expertAnalysis structure ==========
-  console.log('🔍 DERMATOLOGY REPORT: Checking expertAnalysis structure')
+  // ========== CRITICAL DEBUG: Check FULL diagnosisData structure ==========
+  console.log('🔍 DERMATOLOGY REPORT: Full diagnosisData analysis')
+  console.log('   - diagnosisData keys:', Object.keys(diagnosisData || {}))
   console.log('   - diagnosisData.expertAnalysis exists?:', !!diagnosisData?.expertAnalysis)
-  console.log('   - expertAnalysis keys:', Object.keys(diagnosisData?.expertAnalysis || {}))
+  
+  if (diagnosisData?.expertAnalysis) {
+    console.log('   - expertAnalysis:', JSON.stringify(diagnosisData.expertAnalysis, null, 2))
+  } else {
+    console.log('   ❌ expertAnalysis is MISSING!')
+  }
+  
   console.log('   - expert_investigations exists?:', !!diagnosisData?.expertAnalysis?.expert_investigations)
   if (diagnosisData?.expertAnalysis?.expert_investigations) {
     console.log('   - expert_investigations keys:', Object.keys(diagnosisData.expertAnalysis.expert_investigations))
     console.log('   - immediate_priority exists?:', !!diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority)
     console.log('   - immediate_priority is array?:', Array.isArray(diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority))
     console.log('   - immediate_priority length:', diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority?.length || 0)
+    
+    if (diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority) {
+      console.log('   - immediate_priority content:', JSON.stringify(diagnosisData.expertAnalysis.expert_investigations.immediate_priority, null, 2))
+    }
+  } else {
+    console.log('   ❌ expert_investigations is MISSING!')
   }
   
   const medications = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []
