@@ -1469,6 +1469,16 @@ export async function POST(request: NextRequest) {
     console.log(`   - Imaging: ${cleanImagingStudies.length}`)
     console.log(`   - Translation applied to all text content`)
     
+    // DEBUG: Log medications details
+    if (cleanMedications.length > 0) {
+      console.log(" 💊 MEDICATIONS DEBUG:")
+      cleanMedications.forEach((med, idx) => {
+        console.log(`     ${idx + 1}. "${med.name}" - Type: "${med.medication_type}" - Validated: ${med.validated_by_ai}`)
+      })
+    } else {
+      console.log(" ⚠️ WARNING: No medications in cleanMedications array!")
+    }
+    
     // DEBUG: Log lab test categories
     if (cleanLabTests.length > 0) {
       console.log(" 🔍 LAB TEST CATEGORIES DEBUG:")
