@@ -578,6 +578,13 @@ ${summary}
       console.log(`💊 Patient has current medications: ${patientData.currentMedications}`)
     }
 
+    // Format current medications properly for GPT-4
+    const currentMedicationsFormatted = hasCurrentMedications 
+      ? (Array.isArray(patientData.currentMedications) 
+          ? patientData.currentMedications.map((med, idx) => `${idx + 1}. ${med}`).join('\n  ')
+          : patientData.currentMedications)
+      : 'None reported'
+
     const diagnosticPrompt = `You are a board-certified dermatologist with over 20 years of experience in diagnosing and treating skin conditions.
 
 🎯 MAURITIUS MEDICAL STANDARDS + DCI COMPLIANCE:
@@ -592,7 +599,8 @@ PATIENT INFORMATION:
 - Gender: ${patientData.gender}
 - Medical History: ${patientData.medicalHistory?.join(', ') || 'None reported'}
 - Known Allergies: ${patientData.allergies?.join(', ') || 'None reported'}
-- Current Medications: ${patientData.currentMedications || 'None reported'}
+- Current Medications: 
+  ${currentMedicationsFormatted}
 
 IMAGE ANALYSIS FROM OCR/AI (🚨 CRITICAL PRIMARY DIAGNOSTIC DATA):
 ${ocrAnalysis}
