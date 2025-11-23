@@ -797,13 +797,13 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
   
   "currentMedicationsValidated": [
     {
-      "medication": "Existing medication name with dose (e.g., Hydrocortisone 1% cream)",
-      "indication": "Why patient is taking this medication",
-      "frequency": "Current dosing schedule (e.g., BD, OD)",
-      "assessment": "Continue|Adjust|Stop",
-      "reasoning": "Medical justification for decision - based on efficacy, safety, interactions (minimum 30 characters)",
-      "dosageChange": "If Adjust: specify new dosing. If Continue/Stop: 'None'",
-      "interactions": "Any interactions with new dermatology treatments or contraindications"
+      "medication_name": "MANDATORY - Full medication name with corrected dose (e.g., Amlodipine 5mg)",
+      "why_prescribed": "MANDATORY - Indication or chronic condition (e.g., Hypertension)",
+      "how_to_take": "MANDATORY - UK format dosing (e.g., OD, BD, TDS)",
+      "duration": "MANDATORY - Ongoing chronic treatment or specific duration",
+      "dci": "MANDATORY - DCI name (e.g., Amlodipine)",
+      "validated_corrections": "Any corrections made to spelling or dosing",
+      "original_input": "Original patient input for reference"
     }
   ]
 }
