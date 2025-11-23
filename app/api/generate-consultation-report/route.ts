@@ -776,6 +776,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     })
   } else {
     console.log("⚠️ WARNING: No current medications to extract!")
+  }
   
   validatedCurrentMeds.forEach((med: any, idx: number) => {
     medications.push({
