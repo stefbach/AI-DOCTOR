@@ -399,6 +399,13 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
     }
     
     // ========== PRIORITY 1: Extract investigations from top-level normalized fields ==========
+    console.log('🔍 DERMATOLOGY: Checking expertAnalysis for investigations')
+    console.log('   - diagnosisData.expertAnalysis exists?:', !!diagnosisData?.expertAnalysis)
+    console.log('   - expertAnalysis.expert_investigations exists?:', !!diagnosisData?.expertAnalysis?.expert_investigations)
+    console.log('   - immediate_priority exists?:', !!diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority)
+    console.log('   - immediate_priority is array?:', Array.isArray(diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority))
+    console.log('   - immediate_priority length:', diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority?.length || 0)
+    
     if (diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority && 
         Array.isArray(diagnosisData.expertAnalysis.expert_investigations.immediate_priority) &&
         diagnosisData.expertAnalysis.expert_investigations.immediate_priority.length > 0) {
@@ -409,6 +416,11 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
       // Log investigation categories for verification
       const categories = immediateTests.map((t: any) => t.category).join(', ')
       console.log(`   - Categories: ${categories}`)
+      
+      // Log first investigation for verification
+      if (immediateTests.length > 0) {
+        console.log(`   - First investigation:`, JSON.stringify(immediateTests[0]))
+      }
       
       // Count by category
       const labCount = immediateTests.filter((t: any) => t.category === 'Laboratory').length
