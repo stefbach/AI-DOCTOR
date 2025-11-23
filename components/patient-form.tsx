@@ -825,17 +825,19 @@ useEffect(() => {
  try {
  // 🔴 CRITICAL FIX: Transform data before saving
  const transformedData = transformDataForAPI(formData)
+ 
+ // ========== DEBUG LOGGING FOR CURRENT MEDICATIONS ==========
+ console.log('🚀 ========== PATIENT FORM - CALLING onDataChange ==========')
+ console.log('   📝 Raw formData.currentMedicationsText:', formData.currentMedicationsText)
+ console.log('   📋 Transformed currentMedications:', transformedData.currentMedications)
+ console.log('   📋 Transformed current_medications:', transformedData.current_medications)
+ console.log('   ✅ currentMedications is Array?:', Array.isArray(transformedData.currentMedications))
+ console.log('   ✅ currentMedications length:', transformedData.currentMedications?.length || 0)
+ console.log('   🔍 transformedData has these fields:', Object.keys(transformedData).slice(0, 20))
+ 
  await consultationDataService.saveStepData(0, transformedData)
  setLastSaved(new Date())
  onDataChange(transformedData)
- 
- // ========== DEBUG LOGGING FOR CURRENT MEDICATIONS ==========
- console.log('🚀 PATIENT FORM - onDataChange called with:')
- console.log('   📋 currentMedications:', transformedData.currentMedications)
- console.log('   📋 current_medications:', transformedData.current_medications)
- console.log('   📝 currentMedicationsText:', transformedData.currentMedicationsText)
- console.log('   ✅ currentMedications is Array?:', Array.isArray(transformedData.currentMedications))
- console.log('   ✅ currentMedications length:', transformedData.currentMedications?.length || 0)
  } catch (error) {
  console.error('Error saving:', error)
  }
