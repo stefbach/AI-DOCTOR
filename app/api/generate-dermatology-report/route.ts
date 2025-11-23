@@ -507,11 +507,25 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any = {}
   )
 
   // =========== 10. DETAILED PRESCRIPTIONS WITH BIOLOGY EXTRACTION ===========
+  // ========== CRITICAL DEBUG: Check expertAnalysis structure ==========
+  console.log('🔍 DERMATOLOGY REPORT: Checking expertAnalysis structure')
+  console.log('   - diagnosisData.expertAnalysis exists?:', !!diagnosisData?.expertAnalysis)
+  console.log('   - expertAnalysis keys:', Object.keys(diagnosisData?.expertAnalysis || {}))
+  console.log('   - expert_investigations exists?:', !!diagnosisData?.expertAnalysis?.expert_investigations)
+  if (diagnosisData?.expertAnalysis?.expert_investigations) {
+    console.log('   - expert_investigations keys:', Object.keys(diagnosisData.expertAnalysis.expert_investigations))
+    console.log('   - immediate_priority exists?:', !!diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority)
+    console.log('   - immediate_priority is array?:', Array.isArray(diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority))
+    console.log('   - immediate_priority length:', diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority?.length || 0)
+  }
+  
   const medications = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []
+  console.log(`   - medications from expertAnalysis: ${medications.length}`)
   
   const immediateTests = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority || []
+  console.log(`   - immediateTests from expertAnalysis: ${immediateTests.length}`)
   
-  console.log(` SMART BIOLOGY EXTRACTION - ${immediateTests.length} total items to analyze`)
+  console.log(`🧪 SMART BIOLOGY EXTRACTION - ${immediateTests.length} total items to analyze`)
   
   // Smart categorization function
   function smartCategorizeBiologyTest(test: any): string {
