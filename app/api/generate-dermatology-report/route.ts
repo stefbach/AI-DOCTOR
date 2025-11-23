@@ -1673,6 +1673,9 @@ export async function POST(request: NextRequest) {
               indication: med.indication,
               monitoring: med.monitoring,
               doNotSubstitute: med.doNotSubstitute || false,
+              medication_type: med.medication_type || 'newly_prescribed',  // ⭐ CRITICAL: Preserve medication type
+              validated_by_ai: med.validated_by_ai || false,
+              original_input: med.original_input || '',
               pregnancyCategory: med.pregnancyCategory || '',
               pregnancySafety: med.pregnancySafety || '',
               breastfeedingSafety: med.breastfeedingSafety || '',
