@@ -324,18 +324,30 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any = {}
     let medications: any[] = []
     let immediateTests: any[] = []
     
-    // DERMATOLOGY: Handle treatmentPlan structure (topical + oral)
-    if (diagnosisData?.treatmentPlan && (diagnosisData.treatmentPlan.topical || diagnosisData.treatmentPlan.oral)) {
-      console.log('🔬 DERMATOLOGY treatmentPlan detected - extracting topical + oral medications')
+    // DERMATOLOGY: Handle medications (check both new normalized and old format)
+    if (diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments) {
+      console.log('🔬 DERMATOLOGY expertAnalysis.expert_therapeutics detected (NORMALIZED FORMAT)')
+      medications = diagnosisData.expertAnalysis.expert_therapeutics.primary_treatments || []
+      console.log(`   - primary_treatments: ${medications.length}`)
+    } else if (diagnosisData?.treatmentPlan && (diagnosisData.treatmentPlan.topical || diagnosisData.treatmentPlan.oral)) {
+      console.log('🔬 DERMATOLOGY treatmentPlan detected (OLD FORMAT) - extracting topical + oral medications')
       const topical = diagnosisData.treatmentPlan.topical || []
       const oral = diagnosisData.treatmentPlan.oral || []
       medications = [...topical, ...oral]
       console.log(`   - Topical: ${topical.length}, Oral: ${oral.length}, Total: ${medications.length}`)
+    } else if (diagnosisData?.medications) {
+      console.log('🔬 DERMATOLOGY top-level medications detected (NORMALIZED FORMAT)')
+      medications = diagnosisData.medications || []
+      console.log(`   - medications: ${medications.length}`)
     }
     
-    // DERMATOLOGY: Handle investigations structure
-    if (diagnosisData?.investigations) {
-      console.log('🔬 DERMATOLOGY investigations structure detected')
+    // DERMATOLOGY: Handle investigations structure (check both old and new normalized format)
+    if (diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority) {
+      console.log('🔬 DERMATOLOGY expertAnalysis.expert_investigations detected (NORMALIZED FORMAT)')
+      immediateTests = diagnosisData.expertAnalysis.expert_investigations.immediate_priority || []
+      console.log(`   - immediate_priority tests: ${immediateTests.length}`)
+    } else if (diagnosisData?.investigations) {
+      console.log('🔬 DERMATOLOGY investigations structure detected (OLD FORMAT)')
       const dermImmediate = diagnosisData.investigations.immediate || []
       const dermSpecialized = diagnosisData.investigations.specialized || []
       immediateTests = [...dermImmediate, ...dermSpecialized]
