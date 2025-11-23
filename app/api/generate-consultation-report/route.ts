@@ -757,7 +757,37 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   
   console.log("💊 PRESCRIPTION EXTRACTION FROM DIAGNOSIS API")
   
-  // ========== DETECT IF DERMATOLOGY STRUCTURE ==========
+  // ========== 1. ALWAYS EXTRACT VALIDATED CURRENT MEDICATIONS FIRST (ALL CONSULTATION TYPES) ==========
+  // This must be done BEFORE checking consultation type to ensure current medications are never lost
+  const validatedCurrentMeds = diagnosisData?.currentMedicationsValidated || []
+  console.log(`📋 Current medications validated by AI: ${validatedCurrentMeds.length}`)
+  
+  validatedCurrentMeds.forEach((med: any, idx: number) => {
+    medications.push({
+      name: getString(med.name || med.medication_name || `Current medication ${idx + 1}`),
+      genericName: getString(med.dci || med.name || `Current medication ${idx + 1}`),
+      dosage: getString(med.dosage || ''),
+      form: getString(med.form || 'tablet'),
+      frequency: getString(med.posology || med.frequency || med.how_to_take || 'As prescribed'),
+      route: getString(med.route || 'Oral'),
+      duration: getString(med.duration || 'Ongoing treatment'),
+      quantity: getString(med.quantity || '1 box'),
+      instructions: getString(med.instructions || med.validated_corrections || 'Continue current treatment - Validated by AI'),
+      indication: getString(med.indication || med.why_prescribed || 'Chronic treatment'),
+      monitoring: getString(med.monitoring || 'Standard monitoring'),
+      doNotSubstitute: false,
+      medication_type: 'current_continued',
+      validated_by_ai: true,
+      original_input: getString(med.original_input || ''),
+      validated_corrections: getString(med.validated_corrections || 'None'),
+      pregnancyCategory: '',
+      pregnancySafety: '',
+      breastfeedingSafety: '',
+      completeLine: `${getString(med.name || med.medication_name)} ${getString(med.dosage || '')}\n${getString(med.posology || med.frequency || 'As prescribed')}\n[Current treatment - AI validated]`
+    })
+  })
+  
+  // ========== 2. THEN EXTRACT NEWLY PRESCRIBED MEDICATIONS BASED ON CONSULTATION TYPE ==========
   const isDermatologyStructure = !!(diagnosisData?.diagnosis?.structured)
   
   if (isDermatologyStructure) {
@@ -801,36 +831,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     // =========== GENERAL CONSULTATION: STANDARD EXTRACTION ===========
     console.log("📋 GENERAL STRUCTURE - Standard extraction")
     
-    // First, add VALIDATED CURRENT MEDICATIONS (if any)
-    const validatedCurrentMeds = diagnosisData?.currentMedicationsValidated || []
-    console.log(`📋 Current medications validated by AI: ${validatedCurrentMeds.length}`)
-    
-    validatedCurrentMeds.forEach((med: any, idx: number) => {
-      medications.push({
-        name: getString(med.name || med.medication_name || `Current medication ${idx + 1}`),
-        genericName: getString(med.dci || med.name || `Current medication ${idx + 1}`),
-        dosage: getString(med.dosage || ''),
-        form: getString(med.form || 'tablet'),
-        frequency: getString(med.posology || med.frequency || med.how_to_take || 'As prescribed'),
-        route: getString(med.route || 'Oral'),
-        duration: getString(med.duration || 'Ongoing treatment'),
-        quantity: getString(med.quantity || '1 box'),
-        instructions: getString(med.instructions || med.validated_corrections || 'Continue current treatment - Validated by AI'),
-        indication: getString(med.indication || med.why_prescribed || 'Chronic treatment'),
-        monitoring: getString(med.monitoring || 'Standard monitoring'),
-        doNotSubstitute: false,
-        medication_type: 'current_continued',
-        validated_by_ai: true,
-        original_input: getString(med.original_input || ''),
-        validated_corrections: getString(med.validated_corrections || 'None'),
-        pregnancyCategory: '',
-        pregnancySafety: '',
-        breastfeedingSafety: '',
-        completeLine: `${getString(med.name || med.medication_name)} ${getString(med.dosage || '')}\n${getString(med.posology || med.frequency || 'As prescribed')}\n[Current treatment - AI validated]`
-      })
-    })
-    
-    // Then, add NEWLY PRESCRIBED MEDICATIONS (if any)
+    // Extract NEWLY PRESCRIBED MEDICATIONS (current medications already extracted above)
     const primaryTreatments = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []
     console.log(`💊 Newly prescribed medications: ${primaryTreatments.length}`)
   
@@ -858,7 +859,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     })
   }
   
-  console.log(`✅ COMBINED PRESCRIPTION: ${medications.length} total medications`)
+  console.log(`✅ COMBINED PRESCRIPTION: ${validatedCurrentMeds.length} current + ${medications.length - validatedCurrentMeds.length} newly prescribed = ${medications.length} total medications`)
 
   // =========== 2. LAB TESTS (COMMON FOR ALL CONSULTATION TYPES) ===========
   const extractedData = extractRealDataFromDiagnosis(diagnosisData, {}, {})
