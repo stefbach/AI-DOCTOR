@@ -700,12 +700,35 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any = {}
     
     // Detailed prescription data
     detailedMedications: medications.map((med: any) => ({
-      name: getString(med.medication_dci || med.drug || 'Medication'),
-      indication: getString(med.precise_indication || med.indication || ''),
+      name: getString(
+        med.nom ||                  // Dermatology French format
+        med.medication_dci || 
+        med.drug || 
+        'Medication'
+      ),
+      indication: getString(
+        med.justification ||        // Dermatology French format
+        med.precise_indication || 
+        med.indication || 
+        ''
+      ),
       mechanism: getString(med.mechanism || ''),
-      dosing: getString(med.dosing_regimen?.adult || med.dosing?.adult || 'As prescribed'),
-      duration: getString(med.duration || '7 days'),
-      monitoring: getString(med.monitoring || '')
+      dosing: getString(
+        med.posologie ||            // Dermatology French format
+        med.dosing_regimen?.adult || 
+        med.dosing?.adult || 
+        'As prescribed'
+      ),
+      duration: getString(
+        med.dureeTraitement ||      // Dermatology French format
+        med.duration || 
+        '7 days'
+      ),
+      monitoring: getString(
+        med.surveillanceParticuliere ||  // Dermatology French format
+        med.monitoring || 
+        ''
+      )
     })),
     
     // Smart categorized lab tests
@@ -776,25 +799,100 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   console.log(` Newly prescribed medications: ${primaryTreatments.length}`)
   
   primaryTreatments.forEach((med: any, idx: number) => {
+    // Support BOTH normal workflow format AND dermatology French format
+    const medicationName = getString(
+      med.nom ||                          // Dermatology French format
+      med.medication_dci || 
+      med.drug || 
+      `Medication ${idx + 1}`
+    )
+    
+    const genericName = getString(
+      med.denominationCommune ||          // Dermatology French format
+      med.medication_dci || 
+      med.drug || 
+      `Medication ${idx + 1}`
+    )
+    
+    const dosage = getString(
+      med.dosage ||                       // Dermatology French format (already correct)
+      med.dosage_strength || 
+      med.strength || 
+      ''
+    )
+    
+    const form = getString(
+      med.forme ||                        // Dermatology French format
+      med.dosage_form || 
+      med.form || 
+      'tablet'
+    )
+    
+    const frequency = getString(
+      med.posologie ||                    // Dermatology French format
+      med.dosing_regimen?.adult || 
+      med.dosing?.adult || 
+      'As prescribed'
+    )
+    
+    const route = getString(
+      med.modeAdministration ||           // Dermatology French format
+      med.route || 
+      'Oral'
+    )
+    
+    const duration = getString(
+      med.dureeTraitement ||              // Dermatology French format
+      med.duration || 
+      '7 days'
+    )
+    
+    const quantity = getString(
+      med.quantite ||                     // Dermatology French format
+      med.quantity || 
+      '1 box'
+    )
+    
+    const instructions = getString(
+      med.instructions ||                 // Same in both formats
+      med.administration_instructions || 
+      ''
+    )
+    
+    const indication = getString(
+      med.justification ||                // Dermatology French format
+      med.precise_indication || 
+      med.indication || 
+      ''
+    )
+    
+    const monitoring = getString(
+      med.surveillanceParticuliere ||     // Dermatology French format
+      med.monitoring || 
+      ''
+    )
+    
+    console.log(`💊 Mapping medication ${idx + 1}: ${medicationName} (${genericName}) - ${dosage} - ${form}`)
+    
     medications.push({
-      name: getString(med.medication_dci || med.drug || `Medication ${idx + 1}`),
-      genericName: getString(med.medication_dci || med.drug || `Medication ${idx + 1}`),
-      dosage: getString(med.dosage_strength || med.dosage || med.strength || ''),
-      form: getString(med.dosage_form || med.form || 'tablet'),
-      frequency: getString(med.dosing_regimen?.adult || med.dosing?.adult || 'As prescribed'),
-      route: getString(med.route || 'Oral'),
-      duration: getString(med.duration || '7 days'),
-      quantity: getString(med.quantity || '1 box'),
-      instructions: getString(med.administration_instructions || med.instructions || ''),
-      indication: getString(med.precise_indication || med.indication || ''),
-      monitoring: getString(med.monitoring || ''),
-      doNotSubstitute: false,
+      name: medicationName,
+      genericName: genericName,
+      dosage: dosage,
+      form: form,
+      frequency: frequency,
+      route: route,
+      duration: duration,
+      quantity: quantity,
+      instructions: instructions,
+      indication: indication,
+      monitoring: monitoring,
+      doNotSubstitute: med.nonSubstituable || false,
       medication_type: 'newly_prescribed',
       validated_by_ai: false,
       pregnancyCategory: getString(med.pregnancy_category || ''),
       pregnancySafety: getString(med.pregnancy_safety || ''),
       breastfeedingSafety: getString(med.breastfeeding_safety || ''),
-      completeLine: `${getString(med.medication_dci || med.drug)} ${getString(med.dosage_strength || med.dosage || '')}\n${getString(med.dosing_regimen?.adult || med.dosing?.adult || 'As prescribed')}`
+      completeLine: `${medicationName} ${dosage}\n${frequency}`
     })
   })
   
