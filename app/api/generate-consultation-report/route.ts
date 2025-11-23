@@ -755,12 +755,27 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   const labTests: any[] = []
   const imagingStudies: any[] = []
   
-  console.log("💊 PRESCRIPTION EXTRACTION FROM DIAGNOSIS API")
+  console.log("💊 ========== PRESCRIPTION EXTRACTION FROM DIAGNOSIS API ==========")
+  console.log("📦 diagnosisData received:", {
+    hasCurrentMedicationsValidated: !!diagnosisData?.currentMedicationsValidated,
+    currentMedicationsValidatedLength: diagnosisData?.currentMedicationsValidated?.length || 0,
+    currentMedicationsValidatedContent: diagnosisData?.currentMedicationsValidated,
+    hasDiagnosis: !!diagnosisData?.diagnosis,
+    hasExpertAnalysis: !!diagnosisData?.expertAnalysis
+  })
   
   // ========== 1. ALWAYS EXTRACT VALIDATED CURRENT MEDICATIONS FIRST (ALL CONSULTATION TYPES) ==========
   // This must be done BEFORE checking consultation type to ensure current medications are never lost
   const validatedCurrentMeds = diagnosisData?.currentMedicationsValidated || []
   console.log(`📋 Current medications validated by AI: ${validatedCurrentMeds.length}`)
+  
+  if (validatedCurrentMeds.length > 0) {
+    console.log("✅ EXTRACTING CURRENT MEDICATIONS:")
+    validatedCurrentMeds.forEach((med: any, idx: number) => {
+      console.log(`   ${idx + 1}. ${med.name || med.medication_name} - ${med.dosage || 'no dosage'} - ${med.posology || med.frequency || 'no frequency'}`)
+    })
+  } else {
+    console.log("⚠️ WARNING: No current medications to extract!")
   
   validatedCurrentMeds.forEach((med: any, idx: number) => {
     medications.push({
@@ -917,10 +932,27 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     })
   })
 
-  console.log(`✅ PRESCRIPTIONS EXTRACTED:`)
-  console.log(`   - Medications: ${medications.length}`)
-  console.log(`   - Lab tests: ${labTests.length}`)
-  console.log(`   - Imaging: ${imagingStudies.length}`)
+  console.log(`✅ ========== PRESCRIPTIONS EXTRACTED SUMMARY ==========`)
+  console.log(`   📊 Total counts:`)
+  console.log(`      - Medications: ${medications.length}`)
+  console.log(`      - Lab tests: ${labTests.length}`)
+  console.log(`      - Imaging: ${imagingStudies.length}`)
+  
+  if (medications.length > 0) {
+    console.log(`   💊 Medications breakdown:`)
+    const currentMeds = medications.filter(m => m.medication_type === 'current_continued')
+    const newMeds = medications.filter(m => m.medication_type === 'newly_prescribed')
+    console.log(`      - Current (continued): ${currentMeds.length}`)
+    currentMeds.forEach((med, idx) => {
+      console.log(`         ${idx + 1}. ${med.name} - ${med.frequency} - medication_type: ${med.medication_type}`)
+    })
+    console.log(`      - Newly prescribed: ${newMeds.length}`)
+    newMeds.forEach((med, idx) => {
+      console.log(`         ${idx + 1}. ${med.name} - ${med.frequency} - medication_type: ${med.medication_type}`)
+    })
+  } else {
+    console.log(`   ⚠️ WARNING: NO MEDICATIONS EXTRACTED AT ALL!`)
+  }
   
   return { medications, labTests, imagingStudies }
 }
@@ -1609,6 +1641,15 @@ export async function POST(request: NextRequest) {
       getString(patientData?.pregnancyStatus)
     )
     
+    console.log("📦 AFTER EXTRACTION (before translation):")
+    console.log(`   - medications.length: ${medications.length}`)
+    if (medications.length > 0) {
+      console.log(`   - First medication:`, medications[0])
+      const currentCount = medications.filter(m => m.medication_type === 'current_continued').length
+      const newCount = medications.filter(m => m.medication_type === 'newly_prescribed').length
+      console.log(`   - Current medications: ${currentCount}, New medications: ${newCount}`)
+    }
+    
     // Apply translation to prescriptions
     const cleanMedications = medications.map(translateObjectRecursively)
     const cleanLabTests = labTests.map(translateObjectRecursively)
@@ -1619,6 +1660,15 @@ export async function POST(request: NextRequest) {
     console.log(`   - Lab tests: ${cleanLabTests.length}`)
     console.log(`   - Imaging: ${cleanImagingStudies.length}`)
     console.log(`   - Translation applied to all text content`)
+    
+    if (cleanMedications.length > 0) {
+      console.log("🔍 DETAILED MEDICATIONS AFTER TRANSLATION:")
+      cleanMedications.forEach((med, idx) => {
+        console.log(`   ${idx + 1}. ${med.name} - type: ${med.medication_type} - validated: ${med.validated_by_ai}`)
+      })
+    } else {
+      console.log("⚠️ CRITICAL: NO MEDICATIONS AFTER TRANSLATION!")
+    }
 
     // Current date and doctor info
     const currentDate = new Date()
