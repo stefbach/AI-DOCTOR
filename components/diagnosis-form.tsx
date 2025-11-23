@@ -837,6 +837,21 @@ export default function DiagnosisForm({
  hasDiagnosis: !!data.diagnosis,
  hasDocuments: !!data.mauritianDocuments
  })
+ 
+ // ========== CRITICAL DEBUG: CHECK WHAT WE RECEIVED ==========
+ console.log('🔍 ========== DIAGNOSIS FORM - API RESPONSE RECEIVED ==========')
+ console.log('   📋 currentMedicationsValidated present:', !!data.currentMedicationsValidated)
+ console.log('   📋 currentMedicationsValidated length:', data.currentMedicationsValidated?.length || 0)
+ if (data.currentMedicationsValidated && data.currentMedicationsValidated.length > 0) {
+   console.log('   ✅ RECEIVED CURRENT MEDICATIONS:')
+   data.currentMedicationsValidated.forEach((med: any, idx: number) => {
+     console.log(`      ${idx + 1}. ${med.name} - ${med.dosage} - ${med.posology}`)
+   })
+ } else {
+   console.log('   ⚠️ WARNING: NO CURRENT MEDICATIONS RECEIVED FROM API!')
+ }
+ console.log('==============================================================')
+ 
 
  if (data.success && data.diagnosis && data.mauritianDocuments) {
  console.log("✅ Starting progressive display...")

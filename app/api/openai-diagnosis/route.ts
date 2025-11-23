@@ -3125,6 +3125,22 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       }
     }
     
+    // ========== CRITICAL DEBUG: LOG WHAT WE'RE ACTUALLY RETURNING ==========
+    console.log('🚀 ========== OPENAI-DIAGNOSIS - FINAL RESPONSE ==========')
+    console.log('   📋 currentMedicationsValidated present:', !!finalResponse.currentMedicationsValidated)
+    console.log('   📋 currentMedicationsValidated length:', finalResponse.currentMedicationsValidated?.length || 0)
+    if (finalResponse.currentMedicationsValidated && finalResponse.currentMedicationsValidated.length > 0) {
+      console.log('   ✅ RETURNING CURRENT MEDICATIONS:')
+      finalResponse.currentMedicationsValidated.forEach((med: any, idx: number) => {
+        console.log(`      ${idx + 1}. ${med.name} - ${med.dosage} - ${med.posology}`)
+      })
+    } else {
+      console.log('   ⚠️ WARNING: NO CURRENT MEDICATIONS IN FINAL RESPONSE!')
+    }
+    console.log('   📦 medications length:', finalResponse.medications?.length || 0)
+    console.log('   📦 combinedPrescription length:', finalResponse.combinedPrescription?.length || 0)
+    console.log('=========================================================')
+    
     return NextResponse.json(finalResponse)
     
   } catch (error) {
