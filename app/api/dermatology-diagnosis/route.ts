@@ -823,10 +823,71 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
     // Generate formatted text for backward compatibility
     const fullTextDiagnosis = generateFormattedDiagnosisText(diagnosisData)
 
-    // ========== EXTRACT currentMedicationsValidated TO TOP LEVEL ==========
+    // ========== EXTRACT TO TOP LEVEL - MATCH NORMAL WORKFLOW STRUCTURE ==========
     const currentMedicationsValidated = diagnosisData?.currentMedicationsValidated || []
     console.log(`📋 DERMATOLOGY: Extracting currentMedicationsValidated - ${currentMedicationsValidated.length} medications`)
     
+    // ========== EXTRACT MEDICATIONS FROM treatmentPlan (topical + oral) ==========
+    const topicalMedications = diagnosisData?.treatmentPlan?.topical || []
+    const oralMedications = diagnosisData?.treatmentPlan?.oral || []
+    const medications = [...topicalMedications, ...oralMedications]
+    
+    console.log(`💊 DERMATOLOGY: Extracting medications from treatmentPlan`)
+    console.log(`   - Topical medications: ${topicalMedications.length}`)
+    console.log(`   - Oral medications: ${oralMedications.length}`)
+    console.log(`   - Total medications: ${medications.length}`)
+    
+    // ========== EXTRACT INVESTIGATIONS FROM recommendedInvestigations ==========
+    const investigations = diagnosisData?.recommendedInvestigations || {}
+    const laboratoryTests = investigations.laboratory || []
+    const imagingTests = investigations.imaging || []
+    const biopsyTest = investigations.biopsy ? [investigations.biopsy] : []
+    const specializedTests = investigations.specializedTests || []
+    
+    // Combine all investigations into expertAnalysis format (match normal workflow)
+    const allInvestigations = [
+      ...laboratoryTests.map((test: string) => ({
+        examination: test,
+        category: 'Laboratory',
+        urgency: 'routine',
+        indication: 'Dermatology investigation',
+        rationale: 'Clinical assessment'
+      })),
+      ...imagingTests.map((test: string) => ({
+        examination: test,
+        category: 'Imaging',
+        urgency: 'routine',
+        indication: 'Dermatology imaging',
+        rationale: 'Diagnostic imaging'
+      })),
+      ...biopsyTest.map((test: string) => ({
+        examination: test,
+        category: 'Dermatology',
+        urgency: 'urgent',
+        indication: 'Tissue diagnosis',
+        rationale: 'Histopathological confirmation'
+      })),
+      ...specializedTests.map((test: string) => ({
+        examination: test,
+        category: 'Laboratory',
+        urgency: 'routine',
+        indication: 'Specialized dermatology test',
+        rationale: 'Specific diagnostic test'
+      }))
+    ]
+    
+    console.log(`🔬 DERMATOLOGY: Extracting investigations`)
+    console.log(`   - Laboratory tests: ${laboratoryTests.length}`)
+    console.log(`   - Imaging tests: ${imagingTests.length}`)
+    console.log(`   - Biopsy: ${biopsyTest.length}`)
+    console.log(`   - Specialized tests: ${specializedTests.length}`)
+    console.log(`   - Total investigations: ${allInvestigations.length}`)
+    
+    // ========== COMBINED PRESCRIPTION (current + new medications) ==========
+    const combinedPrescription = [...currentMedicationsValidated, ...medications]
+    console.log(`📋 DERMATOLOGY: Combined prescription - ${combinedPrescription.length} total medications`)
+    
+    // ========== BUILD RESPONSE WITH SAME STRUCTURE AS NORMAL WORKFLOW ==========
     const response = {
       success: true,
       timestamp: new Date().toISOString(),
@@ -836,18 +897,37 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
         lastName: patientData.lastName,
         age: patientData.age
       },
-      diagnosis: {
-        fullText: fullTextDiagnosis,  // For backward compatibility with frontend
-        structured: diagnosisData      // New structured format
+      
+      // ========== TOP-LEVEL MEDICATIONS (MATCH NORMAL WORKFLOW) ==========
+      currentMedicationsValidated: currentMedicationsValidated,
+      medications: medications,
+      combinedPrescription: combinedPrescription,
+      
+      // ========== TOP-LEVEL ANALYSIS WITH INVESTIGATIONS (MATCH NORMAL WORKFLOW) ==========
+      expertAnalysis: {
+        expert_therapeutics: {
+          primary_treatments: medications
+        },
+        expert_investigations: {
+          immediate_priority: allInvestigations
+        }
       },
-      currentMedicationsValidated: currentMedicationsValidated,  // ⭐ ADD THIS TO TOP LEVEL
+      
+      // ========== ORIGINAL DERMATOLOGY STRUCTURE (FOR BACKWARD COMPATIBILITY) ==========
+      diagnosis: {
+        fullText: fullTextDiagnosis,
+        structured: diagnosisData
+      },
+      
       qualityMetrics: result.qualityMetrics,
-      version: '4.0-Professional-Grade-4Retry-AutoCorrect',
+      version: '4.0-Professional-Grade-4Retry-AutoCorrect-Normalized',
       consultationType: consultationType,
       metadata: {
         imagesAnalyzed: imageData?.length || 0,
         questionsAnswered: Object.keys(questionsData?.answers || {}).length,
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
+        structureNormalized: true,
+        matchesNormalWorkflow: true
       }
     }
 

@@ -806,10 +806,68 @@ CRITICAL: Return ONLY the JSON object, no markdown formatting, no explanations o
     
     console.log(`📋 CHRONIC: Extracted ${currentMedicationsValidated.length} continuing medications as currentMedicationsValidated`)
     
+    // ========== EXTRACT NEW/ADJUSTED MEDICATIONS (MATCH NORMAL WORKFLOW) ==========
+    const addMedications = assessmentData?.medicationManagement?.add || []
+    const adjustMedications = assessmentData?.medicationManagement?.adjust || []
+    const medications = [...addMedications, ...adjustMedications]
+    
+    console.log(`💊 CHRONIC: Extracting new/adjusted medications`)
+    console.log(`   - Add medications: ${addMedications.length}`)
+    console.log(`   - Adjust medications: ${adjustMedications.length}`)
+    console.log(`   - Total new medications: ${medications.length}`)
+    
+    // ========== COMBINED PRESCRIPTION (MATCH NORMAL WORKFLOW) ==========
+    const combinedPrescription = [...currentMedicationsValidated, ...medications]
+    console.log(`📋 CHRONIC: Combined prescription - ${combinedPrescription.length} total medications`)
+    
+    // ========== EXTRACT INVESTIGATIONS (MATCH NORMAL WORKFLOW) ==========
+    const investigations = []
+    if (assessmentData?.investigationsPlan?.laboratory) {
+      assessmentData.investigationsPlan.laboratory.forEach((test: string) => {
+        investigations.push({
+          examination: test,
+          category: 'Laboratory',
+          urgency: 'routine',
+          indication: 'Chronic disease monitoring',
+          rationale: 'Disease progression monitoring'
+        })
+      })
+    }
+    if (assessmentData?.investigationsPlan?.imaging) {
+      assessmentData.investigationsPlan.imaging.forEach((test: string) => {
+        investigations.push({
+          examination: test,
+          category: 'Imaging',
+          urgency: 'routine',
+          indication: 'Chronic disease assessment',
+          rationale: 'Structural assessment'
+        })
+      })
+    }
+    
+    console.log(`🔬 CHRONIC: Extracted ${investigations.length} investigations`)
+    
     return NextResponse.json({
       success: true,
+      
+      // ========== TOP-LEVEL MEDICATIONS (MATCH NORMAL WORKFLOW) ==========
+      currentMedicationsValidated: currentMedicationsValidated,
+      medications: medications,
+      combinedPrescription: combinedPrescription,
+      
+      // ========== TOP-LEVEL ANALYSIS WITH INVESTIGATIONS (MATCH NORMAL WORKFLOW) ==========
+      expertAnalysis: {
+        expert_therapeutics: {
+          primary_treatments: medications
+        },
+        expert_investigations: {
+          immediate_priority: investigations
+        }
+      },
+      
+      // ========== ORIGINAL CHRONIC STRUCTURE (FOR BACKWARD COMPATIBILITY) ==========
       assessment: assessmentData,
-      currentMedicationsValidated: currentMedicationsValidated,  // ⭐ ADD THIS TO TOP LEVEL
+      
       chronicDiseases: {
         diabetes: hasDiabetes,
         hypertension: hasHypertension,
@@ -817,8 +875,12 @@ CRITICAL: Return ONLY the JSON object, no markdown formatting, no explanations o
       },
       patientBMI: bmi.toFixed(1),
       qualityMetrics: result.qualityMetrics,
-      version: '3.0-Professional-Grade-4Retry-AutoCorrect',
-      timestamp: new Date().toISOString()
+      version: '3.0-Professional-Grade-4Retry-AutoCorrect-Normalized',
+      timestamp: new Date().toISOString(),
+      metadata: {
+        structureNormalized: true,
+        matchesNormalWorkflow: true
+      }
     })
 
   } catch (error: any) {
