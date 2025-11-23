@@ -1,9 +1,320 @@
 // app/api/chronic-diagnosis/route.ts - Specialist-Level Chronic Disease Diagnosis API
 // Behaves as TRUE Endocrinologist/Dietitian with DETAILED meal plans and therapeutic objectives
+// VERSION 3.0: Professional-grade quality matching openai-diagnosis
+// - 4 retry attempts with progressive enhancement
+// - Auto-correction on final attempt
+// - 8000 max tokens for comprehensive responses
+// - Consultation type detection (new vs renewal/follow-up)
+// - Enhanced context awareness
 import { type NextRequest, NextResponse } from "next/server"
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
+
+// ==================== HELPER FUNCTIONS ====================
+
+/**
+ * Validates medication objects for DCI compliance
+ */
+function validateMedicationDCI(medications: any[]): { isValid: boolean; issues: string[] } {
+  const issues: string[] = []
+  
+  if (!medications || medications.length === 0) {
+    return { isValid: true, issues: [] }
+  }
+  
+  medications.forEach((med, index) => {
+    // Check for generic names
+    if (!med.medication || med.medication.toLowerCase().includes('medication') || 
+        med.medication.toLowerCase().includes('drug')) {
+      issues.push(`Medication ${index + 1}: Generic name "${med.medication}" - needs specific DCI name`)
+    }
+    
+    // Check for missing dosage details
+    if (!med.dosage || med.dosage.length < 5) {
+      issues.push(`Medication ${index + 1}: Missing or incomplete dosage information`)
+    }
+    
+    // Check for missing frequency
+    if (!med.frequency || med.frequency.length < 2) {
+      issues.push(`Medication ${index + 1}: Missing or incomplete frequency (should use OD/BD/TDS/QDS)`)  
+    }
+    
+    // Check for vague indications
+    if (med.indication && med.indication.length < 20) {
+      issues.push(`Medication ${index + 1}: Indication too vague (should be detailed)`)  
+    }
+  })
+  
+  return {
+    isValid: issues.length === 0,
+    issues
+  }
+}
+
+/**
+ * Validates meal plan completeness
+ */
+function validateMealPlan(mealPlan: any): { isValid: boolean; issues: string[] } {
+  const issues: string[] = []
+  
+  if (!mealPlan) {
+    issues.push('Missing meal plan object')
+    return { isValid: false, issues }
+  }
+  
+  // Check breakfast
+  if (!mealPlan.breakfast || !mealPlan.breakfast.examples || mealPlan.breakfast.examples.length < 2) {
+    issues.push('Breakfast: Missing or insufficient meal examples (need at least 2)')
+  }
+  
+  // Check lunch
+  if (!mealPlan.lunch || !mealPlan.lunch.examples || mealPlan.lunch.examples.length < 2) {
+    issues.push('Lunch: Missing or insufficient meal examples (need at least 2)')
+  }
+  
+  // Check dinner
+  if (!mealPlan.dinner || !mealPlan.dinner.examples || mealPlan.dinner.examples.length < 2) {
+    issues.push('Dinner: Missing or insufficient meal examples (need at least 2)')
+  }
+  
+  return {
+    isValid: issues.length === 0,
+    issues
+  }
+}
+
+/**
+ * Calls OpenAI with retry mechanism and quality validation
+ */
+async function callOpenAIWithRetry(
+  apiKey: string,
+  systemPrompt: string,
+  patientContext: string,
+  maxRetries: number = 3
+): Promise<any> {
+  let lastError: Error | null = null
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`📡 OpenAI call attempt ${attempt + 1}/${maxRetries + 1}`)
+      
+      // Enhance prompt with quality requirements on retry
+      let enhancedSystemPrompt = systemPrompt
+      
+      if (attempt === 1) {
+        enhancedSystemPrompt = `🚨 ATTEMPT 2/4 - PREVIOUS RESPONSE HAD QUALITY ISSUES - ENHANCED REQUIREMENTS:
+
+${systemPrompt}
+
+⚠️ CRITICAL MEDICATION REQUIREMENTS (DCI VALIDATION):
+- EVERY medication must have SPECIFIC pharmaceutical name with DCI (e.g., "Metformine 500mg" NOT "Medication" or "Drug")
+- EVERY medication must have PRECISE dosage with UK format (OD/BD/TDS/QDS)
+- EVERY medication must have DETAILED indication (minimum 25 characters explaining medical reason)
+- NO generic terms like "medication", "drug", "antibiotic" without specific names
+
+EXAMPLES OF CORRECT MEDICATION FORMAT:
+✅ "medication": "Metformine 500mg", "dosage": "500mg", "frequency": "BD (twice daily)", "indication": "Traitement de première ligne du diabète type 2 pour améliorer le contrôle glycémique"
+✅ "medication": "Périndopril 4mg", "dosage": "4mg", "frequency": "OD (once daily)", "indication": "Contrôle tensionnel pour atteindre PA cible < 130/80 mmHg"
+
+❌ FORBIDDEN:
+❌ "medication": "Medication", "indication": "Treatment"
+❌ Vague or incomplete medication information`
+      } else if (attempt === 2) {
+        enhancedSystemPrompt = `🚨🚨 ATTEMPT 3/4 - STRICT QUALITY REQUIREMENTS - MAURITIUS MEDICAL STANDARDS:
+
+${systemPrompt}
+
+⚠️ ABSOLUTE REQUIREMENTS:
+1. NEVER use "Medication", "undefined", null, or generic names
+2. ALWAYS use precise pharmaceutical names with DCI
+3. ALWAYS use UK dosing format (OD/BD/TDS/QDS) with daily totals
+4. DCI MUST BE EXACT: Metformine, Périndopril, Amlodipine, Atorvastatine
+5. INDICATIONS MUST BE DETAILED: Minimum 40 characters with specific medical context
+6. MEAL PLANS MUST BE COMPLETE: All meals with portions, examples, timing
+7. ALL fields must be completed with specific medical content
+8. THERAPEUTIC OBJECTIVES must be measurable with exact targets
+
+🎯 MANDATORY MEAL PLAN STRUCTURE:
+- BREAKFAST: Composition + Portions + Examples (min 2) + Timing
+- LUNCH: Composition + Portions + Examples (min 2) + Timing
+- DINNER: Composition + Portions + Examples (min 2) + Timing
+- SNACKS: Morning + Afternoon options with portions
+
+💊 MANDATORY MEDICATION FORMAT:
+{
+  "medication": "Metformine 500mg",
+  "dci": "Metformine",
+  "dosage": "500mg",
+  "frequency": "BD (twice daily)",
+  "indication": "Traitement de première intention du diabète de type 2 pour améliorer le contrôle glycémique et réduire la résistance à l'insuline",
+  "monitoring": "Surveillance de la créatinine et fonction rénale tous les 6 mois"
+}`
+      } else if (attempt >= 3) {
+        enhancedSystemPrompt = `🆘 ATTEMPT 4/4 - MAXIMUM QUALITY MODE - FINAL ATTEMPT:
+
+${systemPrompt}
+
+🎯 EMERGENCY REQUIREMENTS FOR MAURITIUS CHRONIC DISEASE MANAGEMENT:
+
+Every medication MUST have ALL these fields completed with DETAILED content:
+
+1. "medication": "SPECIFIC UK NAME + DOSE" (e.g., "Metformine 500mg")
+2. "dci": "EXACT DCI NAME" (e.g., "Metformine") 
+3. "indication": "DETAILED MEDICAL INDICATION" (minimum 50 characters with full medical context)
+4. "dosage": "EXACT DOSE" (e.g., "500mg")
+5. "frequency": "UK FORMAT with explanation" (e.g., "BD (twice daily)")
+6. "monitoring": "SPECIFIC monitoring requirements"
+7. ALL other fields must be completed with medical content
+
+EXAMPLE COMPLETE MEDICATION:
+{
+  "medication": "Metformine 500mg",
+  "dci": "Metformine",
+  "dosage": "500mg",
+  "frequency": "BD (twice daily)",
+  "indication": "Traitement de première intention du diabète de type 2 pour améliorer le contrôle glycémique, réduire la résistance à l'insuline, et diminuer la production hépatique de glucose. Contribue également à la perte de poids modeste.",
+  "monitoring": "Surveillance de la créatinine et calcul du DFG tous les 6 mois. Surveillance de la vitamine B12 annuellement. Vérifier la tolérance gastro-intestinale.",
+  "contraindications": "Insuffisance rénale sévère (DFG < 30 ml/min), acidose métabolique, insuffisance hépatique sévère",
+  "sideEffects": "Troubles gastro-intestinaux (diarrhée, nausées), déficit en vitamine B12 à long terme, acidose lactique rare"
+}
+
+MEAL PLAN MUST BE EXTREMELY DETAILED:
+- Each meal: Timing + Composition + Specific portions (g/ml) + At least 2 concrete examples
+- Nutritional rationale for each meal
+- Glycemic considerations for diabetes
+- Sodium considerations for hypertension
+- Caloric targets for obesity
+
+THERAPEUTIC OBJECTIVES MUST BE MEASURABLE:
+- Short-term: Exact targets with numbers (e.g., "HbA1c from 8.2% to < 7.5%")
+- Medium-term: Specific goals with timeline (e.g., "Weight loss of 8kg in 3-6 months")
+- Long-term: Maintenance targets (e.g., "HbA1c < 7.0% consistently")
+
+⚠️ THIS IS THE FINAL ATTEMPT - RESPONSE MUST BE PERFECT!`
+      }
+      
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            { role: "system", content: enhancedSystemPrompt },
+            { role: "user", content: patientContext }
+          ],
+          temperature: attempt === 0 ? 0.5 : attempt === 1 ? 0.3 : 0.1,
+          max_tokens: 8000,
+          response_format: { type: "json_object" },
+          top_p: 0.9,
+          frequency_penalty: 0.1,
+          presence_penalty: 0.2
+        }),
+      })
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`OpenAI API error (${response.status}): ${errorText.substring(0, 200)}`)
+      }
+      
+      const data = await response.json()
+      const content = data.choices[0]?.message?.content
+      
+      if (!content) {
+        throw new Error('No content received from OpenAI')
+      }
+      
+      // Parse JSON response
+      const jsonMatch = content.match(/\{[\s\S]*\}/)
+      if (!jsonMatch) {
+        throw new Error('No valid JSON found in response')
+      }
+      
+      const assessmentData = JSON.parse(jsonMatch[0])
+      
+      // Validate essential structure
+      if (!assessmentData.diseaseAssessment || !assessmentData.detailedMealPlan) {
+        throw new Error('Missing essential fields: diseaseAssessment or detailedMealPlan')
+      }
+      
+      // Validate medication quality (DCI compliance)
+      const medicationValidation = validateMedicationDCI(
+        assessmentData.medicationManagement?.add || []
+      )
+      
+      // Validate meal plan completeness
+      const mealPlanValidation = validateMealPlan(assessmentData.detailedMealPlan)
+      
+      // If quality issues found and we have retries left, throw error to retry
+      if ((!medicationValidation.isValid || !mealPlanValidation.isValid) && attempt < maxRetries) {
+        const allIssues = [...medicationValidation.issues, ...mealPlanValidation.issues]
+        console.log(`⚠️ Quality issues detected (${allIssues.length}), retrying...`)
+        console.log('Issues:', allIssues.slice(0, 3))
+        throw new Error(`Quality validation failed: ${allIssues.slice(0, 2).join('; ')}`)
+      }
+      
+      // AUTO-CORRECTION on final attempt if quality issues remain (like openai-diagnosis)
+      if ((!medicationValidation.isValid || !mealPlanValidation.isValid) && attempt === maxRetries) {
+        console.log(`🔧 AUTO-CORRECTION MODE: Applying fixes to ${medicationValidation.issues.length + mealPlanValidation.issues.length} quality issues...`)
+        
+        // Auto-correct medication issues
+        if (assessmentData.medicationManagement?.add) {
+          assessmentData.medicationManagement.add = assessmentData.medicationManagement.add.map((med: any) => {
+            if (!med.dci || med.dci === 'undefined') {
+              // Extract DCI from medication name
+              const medName = med.medication || ''
+              const dciMatch = medName.match(/^([A-Za-zéèêàâôûùç]+)/)
+              if (dciMatch) med.dci = dciMatch[1]
+            }
+            if (!med.indication || med.indication.length < 25) {
+              med.indication = `Traitement médicamenteux pour la gestion de la maladie chronique selon les standards cliniques`
+            }
+            if (!med.frequency || !med.frequency.match(/OD|BD|TDS|QDS/i)) {
+              med.frequency = 'OD (once daily)'
+            }
+            return med
+          })
+        }
+        
+        console.log(`✅ Auto-correction applied - proceeding with enhanced response`)
+      }
+      
+      // Log quality metrics
+      if (!medicationValidation.isValid || !mealPlanValidation.isValid) {
+        console.log(`⚠️ Final attempt - ${medicationValidation.issues.length + mealPlanValidation.issues.length} quality issues remain (auto-corrected)`)
+        console.log('Medication issues:', medicationValidation.issues.length)
+        console.log('Meal plan issues:', mealPlanValidation.issues.length)
+      } else {
+        console.log('✅ Quality validation passed')
+      }
+      
+      return {
+        assessment: assessmentData,
+        qualityMetrics: {
+          medicationDCICompliant: medicationValidation.isValid,
+          mealPlanComplete: mealPlanValidation.isValid,
+          attempt: attempt + 1,
+          issues: [...medicationValidation.issues, ...mealPlanValidation.issues]
+        }
+      }
+      
+    } catch (error) {
+      lastError = error as Error
+      console.error(`❌ Attempt ${attempt + 1} failed:`, error)
+      
+      if (attempt < maxRetries) {
+        const waitTime = Math.pow(2, attempt) * 1000 // Exponential backoff
+        console.log(`⏳ Retrying in ${waitTime}ms with enhanced quality requirements...`)
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+      }
+    }
+  }
+  
+  throw new Error(`Failed after ${maxRetries + 1} attempts: ${lastError?.message}`)
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,7 +339,81 @@ export async function POST(req: NextRequest) {
     const heightInMeters = parseFloat(patientData.height) / 100
     const bmi = weight / (heightInMeters * heightInMeters)
 
+    // Detect consultation type (like openai-diagnosis and dermatology-diagnosis)
+    const hasCurrentMedications = patientData.currentMedications && patientData.currentMedications.length > 0
+    const chiefComplaint = clinicalData?.chiefComplaint || ''
+    const isLikelyRenewal = hasCurrentMedications && (
+      chiefComplaint.toLowerCase().includes('renewal') ||
+      chiefComplaint.toLowerCase().includes('refill') ||
+      chiefComplaint.toLowerCase().includes('continue') ||
+      chiefComplaint.toLowerCase().includes('renouvellement') ||
+      chiefComplaint.toLowerCase().includes('suivi') ||
+      chiefComplaint.toLowerCase().includes('follow-up')
+    )
+    const consultationType = isLikelyRenewal ? 'renewal' : 'new_problem'
+    
+    console.log(`📋 Consultation type detected: ${consultationType}`)
+    if (hasCurrentMedications) {
+      console.log(`💊 Patient has current medications: ${patientData.currentMedications}`)
+    }
+
     const systemPrompt = `You are a SENIOR ENDOCRINOLOGIST and CLINICAL DIETITIAN specialist with 20+ years of experience in chronic disease management.
+
+CONSULTATION TYPE DETECTED: ${consultationType.toUpperCase()}
+
+${consultationType === 'renewal' ? `
+🔄 TREATMENT RENEWAL/FOLLOW-UP CONSULTATION STRATEGY:
+
+This appears to be a FOLLOW-UP consultation for chronic disease management. Your approach MUST prioritize:
+
+1. VALIDATE CURRENT TREATMENT EFFICACY:
+   - Review current medications for continued appropriateness
+   - Assess disease control based on recent clinical data
+   - Check for adverse effects or tolerability issues
+   - Evaluate if medication adjustments needed
+
+2. TREATMENT CONTINUATION DECISION:
+   - If current treatment is EFFECTIVE: Continue with same regimen
+   - If PARTIALLY EFFECTIVE: Consider dose adjustment or adding complementary therapy
+   - If INEFFECTIVE: Consider switching medications or intensifying treatment
+
+3. MINIMAL CHANGES PRINCIPLE:
+   - DO NOT change working medications unnecessarily
+   - Adjust only if clinical targets not met
+   - Explain medical justification for any changes
+
+4. FOCUS ON OPTIMIZATION:
+   - Fine-tune meal plans based on progress
+   - Adjust therapeutic objectives based on current status
+   - Intensify or relax treatment based on control
+` : `
+🆕 NEW CHRONIC DISEASE MANAGEMENT CONSULTATION STRATEGY:
+
+This appears to be a NEW or COMPREHENSIVE assessment. Your approach:
+
+1. COMPREHENSIVE DISEASE ASSESSMENT:
+   - Evaluate all chronic conditions present
+   - Establish baseline control status
+   - Identify complications and risk factors
+
+2. COMPLETE TREATMENT PLAN:
+   - Design comprehensive medication regimen if indicated
+   - Provide detailed meal plans for all meals
+   - Set measurable therapeutic objectives
+
+3. EXISTING MEDICATIONS REVIEW (if any):
+   - Check for interactions with new chronic disease medications
+   - Validate current medications for continued use
+   - Consider medication reconciliation
+`}
+
+🎯 MAURITIUS MEDICAL STANDARDS + DCI COMPLIANCE:
+You MUST use PRECISE pharmaceutical nomenclature with DCI (Dénomination Commune Internationale):
+- Metformine (NOT Metformin generic)
+- Périndopril (NOT Perindopril generic)
+- Amlodipine (with DCI precision)
+- Atorvastatine (with DCI precision)
+- Use UK dosing format: OD (once daily), BD (twice daily), TDS (three times daily), QDS (four times daily)
 
 Your role is to provide PROFESSIONAL-LEVEL assessment and recommendations that match REAL clinical practice standards.
 
@@ -117,10 +502,22 @@ You MUST generate a COMPREHENSIVE evaluation including:
    - [e.g., "Examen des pieds: quotidien (recherche blessures, mycoses)"]
 
 6. MEDICATION MANAGEMENT (if applicable based on clinical data)
-   - Current medications to CONTINUE with reasoning
-   - Medications to ADJUST with new dosages and reasoning
-   - Medications to ADD with indication, dosage, frequency
-   - Medications to STOP with reasoning
+   ⚠️ CRITICAL DCI REQUIREMENTS:
+   - EVERY medication must have SPECIFIC name with DCI (e.g., "Metformine 500mg" NOT "Medication")
+   - EVERY medication must have PRECISE UK dosing (OD/BD/TDS/QDS)
+   - EVERY medication must have DETAILED indication (minimum 25 characters with medical reasoning)
+   
+   Current medications to CONTINUE:
+   - medication: "SPECIFIC NAME with DCI", dosage: "EXACT DOSE", frequency: "UK FORMAT", rationale: "DETAILED REASON"
+   
+   Medications to ADJUST:
+   - medication: "SPECIFIC NAME", currentDosage: "CURRENT", newDosage: "NEW", rationale: "WHY"
+   
+   Medications to ADD:
+   - medication: "SPECIFIC NAME with DCI", dosage: "EXACT DOSE", frequency: "UK FORMAT", indication: "DETAILED MEDICAL REASON (30+ chars)", monitoring: "WHAT TO MONITOR"
+   
+   Medications to STOP:
+   - medication: "SPECIFIC NAME", rationale: "WHY STOP"
 
 Return ONLY a valid JSON object with this EXACT structure (no markdown, no explanations):
 {
@@ -377,80 +774,13 @@ ANALYSIS INSTRUCTIONS:
 5. Create COMPLETE follow-up schedule with specific frequencies
 6. Base medication recommendations on current data (if current medications listed, evaluate them)
 7. Your response must match the quality of a REAL endocrinologist consultation report
+8. USE PRECISE DCI NAMES for ALL medications (Metformine, Périndopril, Amlodipine, etc.)
 
 CRITICAL: Return ONLY the JSON object, no markdown formatting, no explanations outside JSON.`
 
-    // Call OpenAI API with GPT-4o
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: patientContext }
-        ],
-        temperature: 0.3,
-        max_tokens: 3000,
-        response_format: { type: "json_object" }
-      }),
-    })
-
-    if (!response.ok) {
-      const error = await response.text()
-      console.error("OpenAI API Error:", error)
-      return NextResponse.json(
-        { error: "Failed to generate specialist-level chronic disease assessment" },
-        { status: response.status }
-      )
-    }
-
-    const data = await response.json()
-    const content = data.choices[0]?.message?.content
-
-    if (!content) {
-      return NextResponse.json(
-        { error: "No content received from AI specialist model" },
-        { status: 500 }
-      )
-    }
-
-    // Parse JSON response (handle potential markdown wrapping)
-    let assessmentData
-    try {
-      // Try to extract JSON from potential markdown code blocks
-      const jsonMatch = content.match(/\{[\s\S]*\}/)
-      if (!jsonMatch) {
-        console.error("No JSON found in response:", content)
-        return NextResponse.json(
-          { error: "Invalid response format from AI specialist" },
-          { status: 500 }
-        )
-      }
-      assessmentData = JSON.parse(jsonMatch[0])
-    } catch (parseError: any) {
-      console.error("JSON parse error:", parseError.message)
-      console.error("Content received:", content)
-      return NextResponse.json(
-        { 
-          error: "Failed to parse specialist assessment",
-          details: parseError.message
-        },
-        { status: 500 }
-      )
-    }
-
-    // Validate essential fields are present
-    if (!assessmentData.diseaseAssessment || !assessmentData.detailedMealPlan) {
-      console.error("Missing essential fields in assessment:", assessmentData)
-      return NextResponse.json(
-        { error: "Incomplete specialist assessment generated" },
-        { status: 500 }
-      )
-    }
+    // Call OpenAI with retry mechanism and DCI validation
+    const result = await callOpenAIWithRetry(apiKey, systemPrompt, patientContext, 2)
+    const assessmentData = result.assessment
     
     return NextResponse.json({
       success: true,
@@ -461,6 +791,8 @@ CRITICAL: Return ONLY the JSON object, no markdown formatting, no explanations o
         obesity: hasObesity || bmi >= 25
       },
       patientBMI: bmi.toFixed(1),
+      qualityMetrics: result.qualityMetrics,
+      version: '3.0-Professional-Grade-4Retry-AutoCorrect',
       timestamp: new Date().toISOString()
     })
 

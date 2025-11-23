@@ -282,8 +282,160 @@ function formatPregnancyStatus(pregnancyStatus: string, gestationalAge?: string)
 // ==================== DATA EXTRACTION FROM OPENAI-DIAGNOSIS ====================
 function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, patientData: any) {
   
-  console.log("🔍 DATA RECOVERY FROM OPENAI-DIAGNOSIS")
+  console.log("🔍 DATA RECOVERY FROM DIAGNOSIS API")
   console.log("Structure received:", Object.keys(diagnosisData || {}))
+  
+  // ========== DETECT IF DERMATOLOGY DIAGNOSIS STRUCTURE ==========
+  const isDermatologyDiagnosis = !!(diagnosisData?.diagnosis?.structured)
+  
+  if (isDermatologyDiagnosis) {
+    console.log("🔬 DERMATOLOGY DIAGNOSIS STRUCTURE DETECTED - Using dermatology-specific extraction")
+    const dermData = diagnosisData.diagnosis.structured
+    
+    // Extract from dermatology structure
+    const chiefComplaint = getString(dermData?.clinicalSummary || "Dermatology consultation")
+    
+    const historyOfPresentIllness = getString(dermData?.clinicalSummary || "")
+    
+    const medicalHistory = getString(
+      patientData?.medicalHistory?.join(", ") ||
+      patientData?.pastMedicalHistory?.join(", ") ||
+      ""
+    )
+    
+    const clinicalExamination = getString(dermData?.clinicalSummary || "")
+    
+    const diagnosticSynthesis = getString(dermData?.pathophysiology || "")
+    
+    const diagnosticConclusion = getString(
+      dermData?.primaryDiagnosis?.name || 
+      "Dermatological condition under evaluation"
+    )
+    
+    // Extract differential diagnoses from dermatology structure
+    const differentialDiagnoses = dermData?.differentialDiagnoses || []
+    const differentialText = differentialDiagnoses.length > 0 
+      ? differentialDiagnoses.map((diff: any) => 
+          `${getString(diff.condition)} (likelihood: ${diff.likelihood}%, supporting: ${getString(diff.supportingFeatures)})`
+        ).join('; ')
+      : ""
+    
+    const pregnancyImpact = ""
+    
+    const managementPlan = getString(dermData?.treatmentRationale || "")
+    
+    console.log("✅ DERMATOLOGY DATA EXTRACTED:")
+    console.log(`   - Primary Dx: ${diagnosticConclusion}`)
+    console.log(`   - Differentials: ${differentialDiagnoses.length}`)
+    console.log(`   - Clinical Summary: ${clinicalExamination.substring(0, 50)}...`)
+    
+    // Extract medications from dermatology structure
+    let medications: any[] = []
+    let immediateTests: any[] = []
+    
+    // DERMATOLOGY: Handle treatmentPlan structure (topical + oral)
+    // treatmentPlan is inside dermData (diagnosis.structured), not at root level
+    if (dermData?.treatmentPlan && (dermData.treatmentPlan.topical || dermData.treatmentPlan.oral)) {
+      console.log('🔬 DERMATOLOGY treatmentPlan detected - extracting topical + oral medications')
+      const topical = dermData.treatmentPlan.topical || []
+      const oral = dermData.treatmentPlan.oral || []
+      medications = [...topical, ...oral]
+      console.log(`   - Topical: ${topical.length}, Oral: ${oral.length}, Total: ${medications.length}`)
+    }
+    
+    // DERMATOLOGY: Handle investigations structure
+    // investigations is inside dermData (diagnosis.structured), not at root level
+    if (dermData?.investigations) {
+      console.log('🔬 DERMATOLOGY investigations structure detected')
+      const dermImmediate = dermData.investigations.immediate || []
+      const dermSpecialized = dermData.investigations.specialized || []
+      immediateTests = [...dermImmediate, ...dermSpecialized]
+      console.log(`   - Immediate: ${dermImmediate.length}, Specialized: ${dermSpecialized.length}, Total: ${immediateTests.length}`)
+    }
+    
+    // Smart categorization for biology tests
+    const rawLabTests: any[] = []
+    const rawImagingTests: any[] = []
+    
+    immediateTests.forEach((test: any) => {
+      const category = (test.category || '').toLowerCase()
+      const examination = (test.examination || test.test || '').toLowerCase()
+      
+      // Check if it's imaging
+      if (category === 'imaging' || category === 'radiology' || 
+          category.includes('imag') || category.includes('radio')) {
+        rawImagingTests.push(test)
+      } 
+      // Check if it's dermatology-specific (biopsy, dermoscopy)
+      else if (examination.includes('biopsy') || examination.includes('dermoscopy') || 
+               examination.includes('patch test') || examination.includes('skin scraping')) {
+        rawLabTests.push({
+          name: test.examination || test.test,
+          category: 'Dermatology',
+          urgency: test.urgency || 'routine',
+          indication: test.indication || test.rationale || '',
+          clinical_information: test.clinical_information || ''
+        })
+      }
+      // Default to lab test
+      else {
+        rawLabTests.push({
+          name: test.examination || test.test,
+          category: category || 'Laboratory',
+          urgency: test.urgency || 'routine',
+          indication: test.indication || test.rationale || '',
+          clinical_information: test.clinical_information || ''
+        })
+      }
+    })
+    
+    console.log(`📊 DERMATOLOGY TESTS CATEGORIZED: ${rawLabTests.length} lab, ${rawImagingTests.length} imaging`)
+    
+    // Return early with dermatology data - ALL FIELDS for prepareEnrichedGPTData
+    return {
+      // Basic fields
+      chiefComplaint,
+      historyOfPresentIllness,
+      medicalHistory,
+      clinicalExamination,
+      diagnosticSynthesis,
+      diagnosticConclusion,
+      differentialText,
+      pregnancyImpact,
+      managementPlan,
+      medications,
+      immediateTests,
+      rawLabTests,
+      rawImagingTests,
+      
+      // Additional fields expected by prepareEnrichedGPTData
+      pathophysiology: diagnosticSynthesis,  // Same as diagnosticSynthesis
+      clinicalReasoning: clinicalExamination,
+      prognosis: dermData?.prognosis || "",
+      clinicalConfidence: dermData?.primaryDiagnosis?.confidence || "Moderate",
+      differentialDiagnoses: differentialDiagnoses,  // Return array for proper iteration in prompt
+      
+      // Treatment fields
+      detailedMedications: medications,
+      investigationStrategy: "",
+      detailedLabTests: rawLabTests,
+      detailedImaging: rawImagingTests,
+      
+      // Follow-up fields  
+      followUp: dermData?.followUpPlan?.timeline || "",
+      pregnancyFollowUp: "",
+      redFlags: dermData?.redFlags?.join('; ') || "",
+      patientEducation: dermData?.patientEducation || "",
+      
+      // Summary counts
+      medicationsCount: medications.length,
+      labTestsCount: rawLabTests.length,
+      imagingStudiesCount: rawImagingTests.length
+    }
+  }
+  
+  // ========== GENERAL CONSULTATION EXTRACTION (ORIGINAL CODE) ==========
+  console.log("📋 GENERAL DIAGNOSIS STRUCTURE - Using standard extraction")
   
   // DEBUG: Log complete structure for biology tests
   if (diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority) {
@@ -371,9 +523,37 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
   )
 
   // =========== 10. DETAILED PRESCRIPTIONS WITH BIOLOGY EXTRACTION ===========
-  const medications = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []
+  // Handle different API structures (general vs dermatology vs chronic)
+  let medications = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []
+  let immediateTests = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority || []
   
-  const immediateTests = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority || []
+  // DERMATOLOGY: Handle treatmentPlan structure (topical + oral)
+  if (diagnosisData?.treatmentPlan && (diagnosisData.treatmentPlan.topical || diagnosisData.treatmentPlan.oral)) {
+    console.log('🔬 DERMATOLOGY structure detected - extracting topical + oral medications')
+    const topical = diagnosisData.treatmentPlan.topical || []
+    const oral = diagnosisData.treatmentPlan.oral || []
+    medications = [...topical, ...oral]
+    console.log(`   - Topical: ${topical.length}, Oral: ${oral.length}, Total: ${medications.length}`)
+  }
+  
+  // DERMATOLOGY: Handle investigations structure
+  if (diagnosisData?.investigations) {
+    console.log('🔬 DERMATOLOGY investigations structure detected')
+    const dermImmediate = diagnosisData.investigations.immediate || []
+    const dermSpecialized = diagnosisData.investigations.specialized || []
+    immediateTests = [...dermImmediate, ...dermSpecialized]
+    console.log(`   - Immediate: ${dermImmediate.length}, Specialized: ${dermSpecialized.length}, Total: ${immediateTests.length}`)
+  }
+  
+  // CHRONIC: Handle medicationManagement structure
+  if (diagnosisData?.assessment?.medicationManagement) {
+    console.log('💊 CHRONIC structure detected - extracting medication management')
+    const add = diagnosisData.assessment.medicationManagement.add || []
+    const adjust = diagnosisData.assessment.medicationManagement.adjust || []
+    const continueM = diagnosisData.assessment.medicationManagement.continue || []
+    medications = [...add, ...adjust, ...continueM]
+    console.log(`   - Add: ${add.length}, Adjust: ${adjust.length}, Continue: ${continueM.length}, Total: ${medications.length}`)
+  }
   
   console.log(`🔬 SMART BIOLOGY EXTRACTION - ${immediateTests.length} total items to analyze`)
   
@@ -575,11 +755,10 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   const labTests: any[] = []
   const imagingStudies: any[] = []
   
-  console.log("💊 PRESCRIPTION EXTRACTION FROM OPENAI-DIAGNOSIS")
+  console.log("💊 PRESCRIPTION EXTRACTION FROM DIAGNOSIS API")
   
-  // =========== 1. MEDICATIONS - COMBINED PRESCRIPTION (CURRENT + NEW) ===========
-  
-  // First, add VALIDATED CURRENT MEDICATIONS (if any)
+  // ========== 1. ALWAYS EXTRACT VALIDATED CURRENT MEDICATIONS FIRST (ALL CONSULTATION TYPES) ==========
+  // This must be done BEFORE checking consultation type to ensure current medications are never lost
   const validatedCurrentMeds = diagnosisData?.currentMedicationsValidated || []
   console.log(`📋 Current medications validated by AI: ${validatedCurrentMeds.length}`)
   
@@ -608,9 +787,53 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     })
   })
   
-  // Then, add NEWLY PRESCRIBED MEDICATIONS (if any)
-  const primaryTreatments = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []
-  console.log(`💊 Newly prescribed medications: ${primaryTreatments.length}`)
+  // ========== 2. THEN EXTRACT NEWLY PRESCRIBED MEDICATIONS BASED ON CONSULTATION TYPE ==========
+  const isDermatologyStructure = !!(diagnosisData?.diagnosis?.structured)
+  
+  if (isDermatologyStructure) {
+    console.log("🔬 DERMATOLOGY STRUCTURE DETECTED in extractPrescriptionsFromDiagnosisData")
+    const dermData = diagnosisData.diagnosis.structured
+    
+    // Extract dermatology medications (topical + oral)
+    const topical = dermData?.treatmentPlan?.topical || []
+    const oral = dermData?.treatmentPlan?.oral || []
+    const allDermMeds = [...topical, ...oral]
+    
+    console.log(`💊 Dermatology medications: ${topical.length} topical + ${oral.length} oral = ${allDermMeds.length} total`)
+    
+    allDermMeds.forEach((med: any, idx: number) => {
+      medications.push({
+        name: getString(med.medication || med.name || `Medication ${idx + 1}`),
+        genericName: getString(med.dci || med.medication || `Medication ${idx + 1}`),
+        dosage: getString(med.dosage || ''),
+        form: getString(med.form || (topical.includes(med) ? 'topical' : 'tablet')),
+        frequency: getString(med.application || med.frequency || 'As prescribed'),
+        route: getString(med.route || (topical.includes(med) ? 'Topical' : 'Oral')),
+        duration: getString(med.duration || '7-14 days'),
+        quantity: getString(med.quantity || '1 unit'),
+        instructions: getString(med.instructions || ''),
+        indication: getString(med.indication || ''),
+        monitoring: getString(med.monitoring || ''),
+        doNotSubstitute: false,
+        medication_type: 'newly_prescribed',
+        validated_by_ai: false,
+        pregnancyCategory: '',
+        pregnancySafety: '',
+        breastfeedingSafety: '',
+        completeLine: `${getString(med.medication || med.name)} ${getString(med.dosage || '')}\n${getString(med.application || med.frequency || 'As prescribed')}`
+      })
+    })
+    
+    // Continue to lab tests extraction (dermatology-specific path)
+    // Will be handled later in the function
+    
+  } else {
+    // =========== GENERAL CONSULTATION: STANDARD EXTRACTION ===========
+    console.log("📋 GENERAL STRUCTURE - Standard extraction")
+    
+    // Extract NEWLY PRESCRIBED MEDICATIONS (current medications already extracted above)
+    const primaryTreatments = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []
+    console.log(`💊 Newly prescribed medications: ${primaryTreatments.length}`)
   
   primaryTreatments.forEach((med: any, idx: number) => {
     medications.push({
@@ -633,11 +856,12 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
       breastfeedingSafety: getString(med.breastfeeding_safety || ''),
       completeLine: `${getString(med.medication_dci || med.drug)} ${getString(med.dosage_strength || med.dosage || '')}\n${getString(med.dosing_regimen?.adult || med.dosing?.adult || 'As prescribed')}`
     })
-  })
+    })
+  }
   
-  console.log(`✅ COMBINED PRESCRIPTION: ${validatedCurrentMeds.length} current + ${primaryTreatments.length} new = ${medications.length} total medications`)
+  console.log(`✅ COMBINED PRESCRIPTION: ${validatedCurrentMeds.length} current + ${medications.length - validatedCurrentMeds.length} newly prescribed = ${medications.length} total medications`)
 
-  // =========== 2. LAB TESTS ===========
+  // =========== 2. LAB TESTS (COMMON FOR ALL CONSULTATION TYPES) ===========
   const extractedData = extractRealDataFromDiagnosis(diagnosisData, {}, {})
   const extractedLabTests = extractedData.rawLabTests || []
   
@@ -760,6 +984,180 @@ function prepareEnrichedGPTData(realData: any, patientData: any) {
 }
 
 // ==================== GPT-4 PROMPTS ====================
+// ==================== DERMATOLOGY-SPECIFIC PROMPTS ====================
+function createDermatologySystemPrompt(pregnancyStatus: string): string {
+  const status = getString(pregnancyStatus)
+  const pregnancyNote = (status === 'pregnant' || status === 'possibly_pregnant') ?
+    'CRITICAL: Patient is PREGNANT - Ensure all topical/oral medications are pregnancy-safe.' : ''
+
+  return `You are a medical report writer for Mauritius specializing in DERMATOLOGY consultations.
+Write professional dermatology consultation reports in ENGLISH using the provided COMPLETE ANALYSIS from dermatology-diagnosis.
+
+IMPORTANT: This is a DERMATOLOGY consultation with:
+- Image analysis from OCR/AI showing visual skin findings
+- Dermatology-specific diagnosis with morphology descriptions
+- Topical and/or oral dermatological treatments
+- Dermatology-specific investigations (dermoscopy, biopsy, etc.)
+
+${pregnancyNote}
+
+DERMATOLOGY REPORT REQUIREMENTS:
+- Include VISUAL FINDINGS from image analysis in physical examination
+- Describe lesion morphology, distribution, color as observed in images
+- Correlate clinical history with visual findings
+- Emphasize dermatological terminology (macule, papule, plaque, etc.)
+- Include specific dermatology follow-up and monitoring
+- Each section minimum 150-200 words
+
+STRUCTURE existing dermatology analysis into narrative form, NOT to re-analyze.`
+}
+
+function createDermatologyUserPrompt(enrichedData: any, ocrAnalysisData: any): string {
+  const ocrSection = ocrAnalysisData ? `
+=== IMAGE ANALYSIS (OCR/AI) ===
+${JSON.stringify(ocrAnalysisData, null, 2)}
+
+CRITICAL: Integrate these visual findings into your physical examination section.
+` : ''
+
+  return `Based on this COMPLETE DERMATOLOGY ANALYSIS, generate a professional dermatology consultation report in ENGLISH:
+
+=== PATIENT INFORMATION ===
+${JSON.stringify(enrichedData.patient, null, 2)}
+
+${ocrSection}
+
+=== CLINICAL PRESENTATION ===
+Chief Complaint: ${enrichedData.presentation.chiefComplaint}
+History of Present Illness: ${enrichedData.presentation.historyOfPresentIllness}
+Medical History: ${enrichedData.presentation.medicalHistory}
+Clinical Examination: ${enrichedData.presentation.clinicalExamination}
+
+=== DERMATOLOGY DIAGNOSIS ===
+Primary Diagnosis: ${enrichedData.diagnosis.primary}
+
+PATHOPHYSIOLOGY:
+${enrichedData.diagnosis.pathophysiology}
+
+CLINICAL REASONING:
+${enrichedData.diagnosis.clinicalReasoning}
+
+DIFFERENTIAL DIAGNOSES:
+${enrichedData.diagnosis.differentialDiagnoses?.map((diff: any) => 
+  `- ${getString(diff.condition)} (${diff.likelihood || diff.probability}%): ${getString(diff.supportingFeatures || diff.reasoning)}`
+).join('\n') || 'Primary diagnosis well supported'}
+
+=== DERMATOLOGY TREATMENT PLAN ===
+Therapeutic Approach: ${enrichedData.treatment.approach}
+
+MEDICATIONS (${enrichedData.summary.medicationsCount}):
+${enrichedData.treatment.medications?.map((med: any) => 
+  `- ${med.name}: ${med.indication} - ${med.dosing} (${med.duration})`
+).join('\n') || 'No medications prescribed'}
+
+INVESTIGATIONS (${enrichedData.summary.labTestsCount + enrichedData.summary.imagingCount} total):
+${enrichedData.treatment.labTests?.map((test: any) => 
+  `- ${test.name}: ${test.indication}`
+).join('\n') || 'None required'}
+${enrichedData.treatment.imaging?.map((img: any) => 
+  `- ${img.type}: ${img.indication}`
+).join('\n') || ''}
+
+=== FOLLOW-UP PLAN ===
+Immediate Follow-up: ${enrichedData.followUp.immediate}
+Warning Signs: ${enrichedData.followUp.redFlags}
+
+TASK: Structure this dermatology analysis into these narrative sections:
+
+1. chiefComplaint - Focus on skin-related complaint
+2. historyOfPresentIllness - Include timeline of skin condition changes
+3. pastMedicalHistory - Include relevant dermatological history
+4. physicalExamination - MUST include detailed description of skin findings from images (morphology, distribution, color)
+5. diagnosticSynthesis - Correlate visual findings with clinical presentation
+6. diagnosticConclusion - Primary dermatological diagnosis with reasoning
+7. pregnancyConsiderations - If applicable
+8. managementPlan - Topical/oral dermatological treatments
+9. followUpPlan - Dermatology-specific monitoring
+10. conclusion - Synthesize the dermatology case
+
+Response must be valid JSON with all 10 sections.`
+}
+
+// ==================== CHRONIC DISEASE-SPECIFIC PROMPTS ====================
+function createChronicDiseaseSystemPrompt(pregnancyStatus: string): string {
+  const status = getString(pregnancyStatus)
+  const pregnancyNote = (status === 'pregnant' || status === 'possibly_pregnant') ?
+    'CRITICAL: Patient is PREGNANT - Ensure all medications are pregnancy-safe.' : ''
+
+  return `You are a medical report writer for Mauritius specializing in CHRONIC DISEASE management consultations.
+Write professional chronic disease management reports in ENGLISH.
+
+IMPORTANT: This is a CHRONIC DISEASE MANAGEMENT consultation with:
+- Diabetes, Hypertension, or Obesity management
+- Medication adjustments and optimization
+- Meal plans and exercise plans
+- Long-term monitoring and follow-up
+
+${pregnancyNote}
+
+CHRONIC DISEASE REPORT REQUIREMENTS:
+- Emphasize disease control and medication adherence
+- Include lifestyle modifications (diet, exercise)
+- Discuss complications prevention
+- Long-term monitoring plan (HbA1c, BP monitoring, etc.)
+- Each section minimum 150-200 words
+
+STRUCTURE existing chronic disease analysis into narrative form.`
+}
+
+function createChronicDiseaseUserPrompt(enrichedData: any): string {
+  return `Based on this COMPLETE CHRONIC DISEASE MANAGEMENT ANALYSIS, generate a professional report in ENGLISH:
+
+=== PATIENT INFORMATION ===
+${JSON.stringify(enrichedData.patient, null, 2)}
+
+=== CHRONIC DISEASE MANAGEMENT ===
+Disease Type: ${enrichedData.chronicDiseaseType || 'Chronic condition'}
+
+=== CLINICAL ASSESSMENT ===
+${enrichedData.presentation.chiefComplaint}
+${enrichedData.presentation.historyOfPresentIllness}
+
+=== CURRENT MANAGEMENT ===
+Primary Diagnosis: ${enrichedData.diagnosis.primary}
+Clinical Reasoning: ${enrichedData.diagnosis.clinicalReasoning}
+
+=== TREATMENT PLAN ===
+Medications: ${enrichedData.treatment.medications?.length || 0}
+${enrichedData.treatment.medications?.map((med: any) => 
+  `- ${med.name}: ${med.dosing}`
+).join('\n') || 'To be determined'}
+
+Lifestyle Modifications:
+- Meal Plan: Provided
+- Exercise Plan: Provided
+
+=== FOLLOW-UP ===
+${enrichedData.followUp.immediate}
+${enrichedData.followUp.redFlags}
+
+TASK: Structure this chronic disease management plan into these narrative sections:
+
+1. chiefComplaint - Focus on disease management concern
+2. historyOfPresentIllness - Include disease history and control status
+3. pastMedicalHistory - Chronic disease history
+4. physicalExamination - Current clinical assessment
+5. diagnosticSynthesis - Disease control analysis
+6. diagnosticConclusion - Current disease status
+7. pregnancyConsiderations - If applicable
+8. managementPlan - Medications, diet, exercise
+9. followUpPlan - Long-term monitoring plan
+10. conclusion - Overall chronic disease management strategy
+
+Response must be valid JSON with all 10 sections.`
+}
+
+// ==================== GENERAL CONSULTATION PROMPTS ====================
 function createEnhancedSystemPrompt(pregnancyStatus: string): string {
   const status = getString(pregnancyStatus)
   const pregnancyNote = (status === 'pregnant' || status === 'possibly_pregnant') ?
@@ -950,6 +1348,38 @@ export async function POST(request: NextRequest) {
 
     if (!patientData || !clinicalData || !diagnosisData) {
       return NextResponse.json({ success: false, error: "Incomplete data" }, { status: 400 })
+    }
+    
+    // ========== DETECT CONSULTATION TYPE ==========
+    const ocrAnalysisData = body.ocrAnalysisData || body.ocrAnalysis
+    const isDermatologyConsultation = !!(ocrAnalysisData && Object.keys(ocrAnalysisData).length > 0)
+    const isChronicDiseaseConsultation = !!(
+      (diagnosisData?.chronicDiseaseType) ||
+      (diagnosisData?.chronicDiseases) ||  // From chronic-diagnosis response
+      (diagnosisData?.assessment?.medicationManagement) ||  // Inside assessment object
+      (diagnosisData?.assessment?.mealPlan) ||
+      (diagnosisData?.assessment?.exercisePlan) ||
+      (diagnosisData?.medicationManagement) ||  // Direct field (fallback)
+      (diagnosisData?.mealPlan) ||
+      (diagnosisData?.exercisePlan) ||
+      (patientData?.medicalHistory && Array.isArray(patientData.medicalHistory) && 
+       patientData.medicalHistory.some((h: string) => 
+         h.toLowerCase().includes('diabetes') || 
+         h.toLowerCase().includes('hypertension') || 
+         h.toLowerCase().includes('obesity')
+       ))
+    )
+    
+    const consultationType = isDermatologyConsultation ? 'dermatology' : 
+                            isChronicDiseaseConsultation ? 'chronic' : 
+                            'general'
+    
+    console.log(`\n🏥 CONSULTATION TYPE DETECTED: ${consultationType.toUpperCase()}`)
+    if (isDermatologyConsultation) {
+      console.log('   - Dermatology: OCR analysis present')
+    }
+    if (isChronicDiseaseConsultation) {
+      console.log('   - Chronic disease: Specific fields detected')
     }
 
     // NEW: Check if diagnosisData is essentially empty
@@ -1232,8 +1662,23 @@ export async function POST(request: NextRequest) {
     let narrativeContent: any = {}
 
     try {
-      const systemPrompt = createEnhancedSystemPrompt(getString(patientData?.pregnancyStatus) || '')
-      const userPrompt = createEnhancedUserPrompt(enrichedGPTData)
+      // Route to appropriate prompt based on consultation type
+      let systemPrompt: string
+      let userPrompt: string
+      
+      if (consultationType === 'dermatology') {
+        console.log('📋 Using DERMATOLOGY-specific prompts')
+        systemPrompt = createDermatologySystemPrompt(getString(patientData?.pregnancyStatus) || '')
+        userPrompt = createDermatologyUserPrompt(enrichedGPTData, ocrAnalysisData)
+      } else if (consultationType === 'chronic') {
+        console.log('📋 Using CHRONIC DISEASE-specific prompts')
+        systemPrompt = createChronicDiseaseSystemPrompt(getString(patientData?.pregnancyStatus) || '')
+        userPrompt = createChronicDiseaseUserPrompt(enrichedGPTData)
+      } else {
+        console.log('📋 Using GENERAL consultation prompts')
+        systemPrompt = createEnhancedSystemPrompt(getString(patientData?.pregnancyStatus) || '')
+        userPrompt = createEnhancedUserPrompt(enrichedGPTData)
+      }
       
       const result = await generateText({
         model: openai("gpt-4o"),

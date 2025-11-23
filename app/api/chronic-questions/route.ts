@@ -1,5 +1,9 @@
-// app/api/chronic-questions/route.ts - REFONTE COMPLÈTE
+// app/api/chronic-questions/route.ts - VERSION 2.0: Professional-grade quality
 // Questions à choix multiples pour maladies chroniques (format identique à /api/openai-questions)
+// - 4 retry attempts with progressive enhancement
+// - Auto-correction on final attempt
+// - 8000 max tokens for comprehensive questions
+// - Advanced OpenAI parameters
 import { type NextRequest, NextResponse } from "next/server"
 
 // ==================== CONFIGURATION ====================
@@ -187,6 +191,150 @@ function processClinicalData(clinical: ClinicalData): ProcessedClinicalData {
   return result
 }
 
+// ==================== RETRY MECHANISM ====================
+async function callOpenAIWithRetry(
+  apiKey: string,
+  prompt: string,
+  systemMessage: string,
+  maxRetries: number = 3
+): Promise<any> {
+  let lastError: Error | null = null
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`📡 OpenAI call attempt ${attempt + 1}/${maxRetries + 1}`)
+      
+      // Progressive enhancement of system message
+      let enhancedSystemMessage = systemMessage
+      
+      if (attempt === 1) {
+        enhancedSystemMessage = `🚨 ATTEMPT 2/4 - ENHANCED QUALITY REQUIREMENTS:
+
+${systemMessage}
+
+⚠️ CRITICAL: Each question MUST have:
+- Clear, specific clinical language
+- EXACTLY 4 answer options representing different levels/severity
+- Clinically actionable information
+- Proper categorization (diabetes_control, hypertension_control, etc.)`
+      } else if (attempt === 2) {
+        enhancedSystemMessage = `🚨🚨 ATTEMPT 3/4 - STRICT QUALITY STANDARDS:
+
+${systemMessage}
+
+⚠️ MANDATORY REQUIREMENTS:
+- Questions must be specific to patient's chronic conditions
+- Options must represent clear clinical distinctions
+- Rationale must explain medical reasoning
+- Clinical relevance must justify why this question matters
+- Each question adds unique diagnostic value`
+      } else if (attempt >= 3) {
+        enhancedSystemMessage = `🆘 ATTEMPT 4/4 - MAXIMUM QUALITY MODE:
+
+${systemMessage}
+
+🎯 FINAL ATTEMPT REQUIREMENTS:
+- ALL questions must be specific, targeted, and clinically actionable
+- ALL options must provide clear diagnostic distinction
+- ALL rationales must explain medical reasoning (30+ characters)
+- ALL questions must align with patient's specific chronic conditions
+- Response MUST be valid JSON with complete fields`
+      }
+      
+      const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            { role: 'system', content: enhancedSystemMessage },
+            { role: 'user', content: prompt }
+          ],
+          temperature: attempt === 0 ? 0.3 : attempt === 1 ? 0.2 : 0.1,
+          max_tokens: 8000,
+          response_format: { type: 'json_object' },
+          top_p: 0.9,
+          frequency_penalty: 0.1,
+          presence_penalty: 0.2
+        }),
+      })
+      
+      if (!openaiResponse.ok) {
+        throw new Error(`OpenAI API error: ${openaiResponse.status}`)
+      }
+      
+      const aiData = await openaiResponse.json()
+      const content = aiData.choices[0]?.message?.content || '{}'
+      
+      let parsed
+      try {
+        parsed = JSON.parse(content)
+      } catch (parseError) {
+        console.error('Failed to parse OpenAI response:', content)
+        throw new Error('Invalid response format from AI')
+      }
+      
+      const questions: DiagnosticQuestion[] = parsed.questions || []
+      
+      // Quality validation
+      const hasMinimumQuestions = questions.length >= 6
+      const allHaveOptions = questions.every(q => q.options && q.options.length === 4)
+      const allHaveRationale = questions.every(q => q.rationale && q.rationale.length > 10)
+      
+      if ((!hasMinimumQuestions || !allHaveOptions || !allHaveRationale) && attempt < maxRetries) {
+        console.log(`⚠️ Quality issues: ${questions.length} questions, options ok: ${allHaveOptions}, rationales ok: ${allHaveRationale}`)
+        throw new Error('Quality validation failed')
+      }
+      
+      // Auto-correction on final attempt
+      if ((!hasMinimumQuestions || !allHaveOptions || !allHaveRationale) && attempt === maxRetries) {
+        console.log('🔧 AUTO-CORRECTION MODE: Fixing quality issues...')
+        
+        questions.forEach((q, idx) => {
+          if (!q.options || q.options.length !== 4) {
+            q.options = ['Never/Rarely', 'Sometimes', 'Often', 'Always/Daily']
+          }
+          if (!q.rationale || q.rationale.length < 10) {
+            q.rationale = 'Important for chronic disease management and treatment optimization'
+          }
+          if (!q.category) {
+            q.category = 'lifestyle'
+          }
+        })
+        
+        console.log('✅ Auto-correction applied')
+      }
+      
+      console.log(`✅ Generated ${questions.length} questions (attempt ${attempt + 1})`)
+      
+      return {
+        questions,
+        qualityMetrics: {
+          attempt: attempt + 1,
+          questionsCount: questions.length,
+          allHaveOptions,
+          allHaveRationale
+        }
+      }
+      
+    } catch (error) {
+      lastError = error as Error
+      console.error(`❌ Attempt ${attempt + 1} failed:`, error)
+      
+      if (attempt < maxRetries) {
+        const waitTime = Math.pow(2, attempt) * 1000
+        console.log(`⏳ Retrying in ${waitTime}ms...`)
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+      }
+    }
+  }
+  
+  throw new Error(`Failed after ${maxRetries + 1} attempts: ${lastError?.message}`)
+}
+
 // ==================== PROMPT GENERATION ====================
 function generateChronicDiseasePrompt(
   patient: ProcessedPatientData,
@@ -233,8 +381,9 @@ MEDICATION ASSESSMENT (1 question):
 LIFESTYLE ASSESSMENT (1 question):
 - Diet quality and physical activity
 
-Each question must:
-- Include EXACTLY 4 specific answer options
+🚨 CRITICAL FORMAT REQUIREMENTS:
+- ALL questions MUST be multiple choice with EXACTLY 4 specific answer options
+- NO open-ended questions allowed
 - Options should represent different severity/frequency levels
 - Use clear, patient-friendly language
 - Be clinically actionable
@@ -297,59 +446,25 @@ export async function POST(request: NextRequest) {
     
     const prompt = generateChronicDiseasePrompt(processedPatient, processedClinical)
     
-    console.log('🤖 Calling GPT-4o-mini for chronic disease questions (matching openai-questions config)...')
+    console.log('🤖 Calling GPT-4o with retry mechanism for chronic disease questions...')
     
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert endocrinologist and diabetologist conducting a chronic disease follow-up assessment. Generate diagnostic questions based on evidence-based medicine. Always respond with valid JSON only.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.2,
-        max_tokens: 1200,
-        response_format: { type: 'json_object' }
-      }),
-    })
+    const systemMessage = 'You are an expert endocrinologist and diabetologist conducting a chronic disease follow-up assessment. Generate diagnostic questions based on evidence-based medicine. CRITICAL: ALL questions MUST be multiple choice format with EXACTLY 4 specific answer options. NO open-ended questions. Always respond with valid JSON only.'
     
-    if (!openaiResponse.ok) {
-      throw new Error(`OpenAI API error: ${openaiResponse.status}`)
-    }
+    const result = await callOpenAIWithRetry(apiKey, prompt, systemMessage, 3)
+    const questions = result.questions
     
-    const aiData = await openaiResponse.json()
-    const content = aiData.choices[0]?.message?.content || '{}'
-    
-    let parsed
-    try {
-      parsed = JSON.parse(content)
-    } catch (parseError) {
-      console.error('Failed to parse OpenAI response:', content)
-      throw new Error('Invalid response format from AI')
-    }
-    
-    const questions: DiagnosticQuestion[] = parsed.questions || []
-    
-    console.log(`✅ Generated ${questions.length} chronic disease questions`)
+    console.log(`✅ Generated ${questions.length} chronic disease questions with retry mechanism`)
     
     return NextResponse.json({
       success: true,
       questions,
       metadata: {
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o',
+        version: '2.0-Professional-Grade-4Retry',
         processingTime: Date.now() - startTime,
         chronicDiseases: processedPatient.chronicDiseases,
-        questionsGenerated: questions.length
+        questionsGenerated: questions.length,
+        qualityMetrics: result.qualityMetrics
       }
     })
     
