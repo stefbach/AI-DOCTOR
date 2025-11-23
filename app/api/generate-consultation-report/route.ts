@@ -364,136 +364,38 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
     let medications: any[] = []
     let immediateTests: any[] = []
     
-    // ========== PRIORITY 1: Extract from top-level normalized fields ==========
-    console.log('🔍 DERMATOLOGY: Checking top-level normalized fields first')
-    console.log('   - diagnosisData.medications exists?:', !!diagnosisData?.medications)
+    // ========== CRITICAL FIX: Use top-level normalized data (like normal workflow) ==========
+    console.log('🔍 DERMATOLOGY: Extracting from TOP-LEVEL normalized structure (SAME AS NORMAL WORKFLOW)')
+    console.log('   - diagnosisData.medications?:', !!diagnosisData?.medications)
     console.log('   - diagnosisData.medications length:', diagnosisData?.medications?.length || 0)
-    console.log('   - diagnosisData.expertAnalysis exists?:', !!diagnosisData?.expertAnalysis)
-    console.log('   - diagnosisData.expertAnalysis.expert_investigations exists?:', !!diagnosisData?.expertAnalysis?.expert_investigations)
-    
-    if (diagnosisData?.medications && Array.isArray(diagnosisData.medications) && diagnosisData.medications.length > 0) {
-      console.log('✅ DERMATOLOGY: Using top-level medications array (NORMALIZED FORMAT)')
-      medications = diagnosisData.medications
-      console.log(`   - Medications extracted: ${medications.length}`)
-      
-      // Log first medication for verification
-      if (medications.length > 0) {
-        const firstMed = medications[0]
-        console.log(`   - First medication fields:`, Object.keys(firstMed))
-        console.log(`   - nom: ${firstMed.nom || firstMed.medication || 'MISSING'}`)
-        console.log(`   - denominationCommune: ${firstMed.denominationCommune || firstMed.dci || 'MISSING'}`)
-      }
-    } 
-    // ========== FALLBACK: Extract from nested dermData structure ==========
-    else if (dermData?.treatmentPlan && (dermData.treatmentPlan.topical || dermData.treatmentPlan.oral)) {
-      console.log('⚠️ DERMATOLOGY: Falling back to nested treatmentPlan extraction')
-      const topical = dermData.treatmentPlan.topical || []
-      const oral = dermData.treatmentPlan.oral || []
-      medications = [...topical, ...oral]
-      console.log(`   - Topical: ${topical.length}, Oral: ${oral.length}, Total: ${medications.length}`)
-    } else {
-      console.log('❌ DERMATOLOGY: NO medications found in any location')
-      console.log('   Checked locations:')
-      console.log('   - diagnosisData.medications?:', !!diagnosisData?.medications)
-      console.log('   - dermData.treatmentPlan?:', !!dermData?.treatmentPlan)
-    }
-    
-    // ========== PRIORITY 1: Extract investigations from top-level normalized fields ==========
-    console.log('🔍 DERMATOLOGY: Checking expertAnalysis for investigations')
-    console.log('   - diagnosisData.expertAnalysis exists?:', !!diagnosisData?.expertAnalysis)
-    console.log('   - expertAnalysis.expert_investigations exists?:', !!diagnosisData?.expertAnalysis?.expert_investigations)
-    console.log('   - immediate_priority exists?:', !!diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority)
-    console.log('   - immediate_priority is array?:', Array.isArray(diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority))
+    console.log('   - diagnosisData.expertAnalysis?:', !!diagnosisData?.expertAnalysis)
+    console.log('   - expertAnalysis.expert_investigations?:', !!diagnosisData?.expertAnalysis?.expert_investigations)
+    console.log('   - immediate_priority?:', !!diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority)
     console.log('   - immediate_priority length:', diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority?.length || 0)
     
-    if (diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority && 
-        Array.isArray(diagnosisData.expertAnalysis.expert_investigations.immediate_priority) &&
-        diagnosisData.expertAnalysis.expert_investigations.immediate_priority.length > 0) {
-      console.log('✅ DERMATOLOGY: Using top-level expertAnalysis.expert_investigations (NORMALIZED FORMAT)')
+    // Extract medications from TOP-LEVEL (already transformed to French format)
+    medications = diagnosisData?.medications || []
+    console.log(`✅ DERMATOLOGY: Medications from top-level: ${medications.length}`)
+    
+    if (medications.length > 0) {
+      const firstMed = medications[0]
+      console.log(`   - First medication:`, JSON.stringify(firstMed))
+    }
+    
+    // Extract investigations from TOP-LEVEL expertAnalysis
+    if (diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority) {
       immediateTests = diagnosisData.expertAnalysis.expert_investigations.immediate_priority
-      console.log(`   - Investigations extracted: ${immediateTests.length}`)
+      console.log(`✅ DERMATOLOGY: Investigations from top-level expertAnalysis: ${immediateTests.length}`)
       
-      // Log investigation categories for verification
-      const categories = immediateTests.map((t: any) => t.category).join(', ')
-      console.log(`   - Categories: ${categories}`)
-      
-      // Log first investigation for verification
       if (immediateTests.length > 0) {
         console.log(`   - First investigation:`, JSON.stringify(immediateTests[0]))
       }
-      
-      // Count by category
-      const labCount = immediateTests.filter((t: any) => t.category === 'Laboratory').length
-      const imgCount = immediateTests.filter((t: any) => t.category === 'Imaging').length
-      const dermCount = immediateTests.filter((t: any) => t.category === 'Dermatology').length
-      console.log(`   - Laboratory: ${labCount}, Imaging: ${imgCount}, Dermatology: ${dermCount}`)
-    }
-    // ========== FALLBACK: Extract from nested dermData structure ==========
-    else if (dermData?.investigations) {
-      console.log('⚠️ DERMATOLOGY: Falling back to nested investigations extraction')
-      const dermImmediate = dermData.investigations.immediate || []
-      const dermSpecialized = dermData.investigations.specialized || []
-      immediateTests = [...dermImmediate, ...dermSpecialized]
-      console.log(`   - Immediate: ${dermImmediate.length}, Specialized: ${dermSpecialized.length}, Total: ${immediateTests.length}`)
-    } else if (dermData?.recommendedInvestigations) {
-      console.log('⚠️ DERMATOLOGY: Falling back to nested recommendedInvestigations extraction')
-      const invData = dermData.recommendedInvestigations
-      console.log('   recommendedInvestigations structure:', Object.keys(invData))
-      
-      // Extract laboratory tests
-      if (invData.laboratory && Array.isArray(invData.laboratory)) {
-        invData.laboratory.forEach((test: string) => {
-          immediateTests.push({
-            examination: test,
-            category: 'Laboratory',
-            urgency: 'routine',
-            indication: 'Dermatology investigation'
-          })
-        })
-      }
-      
-      // Extract imaging tests
-      if (invData.imaging && Array.isArray(invData.imaging)) {
-        invData.imaging.forEach((test: string) => {
-          immediateTests.push({
-            examination: test,
-            category: 'Imaging',
-            urgency: 'routine',
-            indication: 'Dermatology investigation'
-          })
-        })
-      }
-      
-      // Extract biopsy
-      if (invData.biopsy) {
-        immediateTests.push({
-          examination: invData.biopsy,
-          category: 'Dermatology',
-          urgency: 'routine',
-          indication: 'Skin biopsy'
-        })
-      }
-      
-      // Extract specialized tests
-      if (invData.specializedTests && Array.isArray(invData.specializedTests)) {
-        invData.specializedTests.forEach((test: string) => {
-          immediateTests.push({
-            examination: test,
-            category: 'Laboratory',
-            urgency: 'routine',
-            indication: 'Specialized dermatology test'
-          })
-        })
-      }
-      
-      console.log(`   - Extracted ${immediateTests.length} tests from recommendedInvestigations`)
     } else {
-      console.log('❌ DERMATOLOGY: NO investigations found in any location')
-      console.log('   Checked locations:')
-      console.log('   - diagnosisData.expertAnalysis.expert_investigations?:', !!diagnosisData?.expertAnalysis?.expert_investigations)
-      console.log('   - dermData.investigations?:', !!dermData?.investigations)
-      console.log('   - dermData.recommendedInvestigations?:', !!dermData?.recommendedInvestigations)
+      console.log('❌ DERMATOLOGY: No investigations in expertAnalysis.expert_investigations.immediate_priority')
     }
+    
+    // ========== NOTE: Investigations already extracted above from top-level ==========
+    // No need for nested extraction - we use normalized structure
     
     // Smart categorization for biology tests
     const rawLabTests: any[] = []
