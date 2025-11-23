@@ -290,11 +290,31 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
   
   if (isDermatologyDiagnosis) {
     console.log("🔬 DERMATOLOGY DIAGNOSIS STRUCTURE DETECTED - Using dermatology-specific extraction")
+    console.log("🔍 diagnosisData.diagnosis keys:", Object.keys(diagnosisData.diagnosis || {}))
+    console.log("🔍 diagnosisData.diagnosis.structured exists?:", !!diagnosisData.diagnosis?.structured)
+    
     const dermData = diagnosisData.diagnosis.structured
     
     // ========== CRITICAL DEBUG: Log dermData structure ==========
     console.log('🔍 ========== DERMDATA STRUCTURE ==========')
+    console.log('   dermData type:', typeof dermData)
+    console.log('   dermData is null?:', dermData === null)
+    console.log('   dermData is undefined?:', dermData === undefined)
     console.log('   dermData keys:', Object.keys(dermData || {}))
+    console.log('   dermData keys length:', Object.keys(dermData || {}).length)
+    
+    // Log each key individually to see what's actually there
+    if (dermData) {
+      Object.keys(dermData).forEach(key => {
+        const value = dermData[key]
+        const valueType = Array.isArray(value) ? 'array' : typeof value
+        const valueInfo = Array.isArray(value) ? `[${value.length} items]` : 
+                         typeof value === 'object' && value !== null ? `{${Object.keys(value).length} keys}` :
+                         String(value).substring(0, 50)
+        console.log(`   - ${key}: ${valueType} ${valueInfo}`)
+      })
+    }
+    
     console.log('   Has treatmentPlan?:', !!dermData?.treatmentPlan)
     console.log('   treatmentPlan keys:', Object.keys(dermData?.treatmentPlan || {}))
     console.log('   Has investigations?:', !!dermData?.investigations)
