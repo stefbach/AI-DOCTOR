@@ -828,14 +828,71 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
     console.log(`📋 DERMATOLOGY: Extracting currentMedicationsValidated - ${currentMedicationsValidated.length} medications`)
     
     // ========== EXTRACT MEDICATIONS FROM treatmentPlan (topical + oral) ==========
-    const topicalMedications = diagnosisData?.treatmentPlan?.topical || []
-    const oralMedications = diagnosisData?.treatmentPlan?.oral || []
-    const medications = [...topicalMedications, ...oralMedications]
+    const topicalMedicationsRaw = diagnosisData?.treatmentPlan?.topical || []
+    const oralMedicationsRaw = diagnosisData?.treatmentPlan?.oral || []
     
     console.log(`💊 DERMATOLOGY: Extracting medications from treatmentPlan`)
+    console.log(`   - Topical medications (raw): ${topicalMedicationsRaw.length}`)
+    console.log(`   - Oral medications (raw): ${oralMedicationsRaw.length}`)
+    
+    // ========== TRANSFORM MEDICATIONS TO MATCH NORMAL WORKFLOW FORMAT ==========
+    // Dermatology uses: medication, dci, application/frequency, instructions/indication
+    // Normal workflow uses: nom, denominationCommune, dosage, posologie, forme, modeAdministration
+    
+    const topicalMedications = topicalMedicationsRaw.map((med: any) => {
+      console.log(`   📦 Transforming topical med: ${med.medication || 'UNNAMED'}`)
+      return {
+        nom: med.medication || '',
+        denominationCommune: med.dci || '',
+        dosage: '', // Topical doesn't have dosage in mg
+        forme: 'cream', // Could be cream, ointment, lotion - default to cream
+        posologie: med.application || '', // BD, OD, etc.
+        modeAdministration: 'Topical application',
+        dureeTraitement: med.duration || '',
+        quantite: '1 tube',
+        instructions: med.instructions || '',
+        justification: `Topical treatment. ${med.sideEffects || ''}`,
+        surveillanceParticuliere: med.sideEffects || '',
+        nonSubstituable: false
+      }
+    })
+    
+    const oralMedications = oralMedicationsRaw.map((med: any) => {
+      console.log(`   💊 Transforming oral med: ${med.medication || 'UNNAMED'}`)
+      return {
+        nom: med.medication || '',
+        denominationCommune: med.dci || '',
+        dosage: med.dosage || '',
+        forme: 'tablet',
+        posologie: med.frequency || '',
+        modeAdministration: 'Oral route',
+        dureeTraitement: med.duration || '',
+        quantite: '1 box',
+        instructions: med.indication || '',
+        justification: med.indication || '',
+        surveillanceParticuliere: med.monitoring || '',
+        nonSubstituable: false,
+        contraindications: med.contraindications || ''
+      }
+    })
+    
+    const medications = [...topicalMedications, ...oralMedications]
+    
+    console.log(`✅ DERMATOLOGY: Medications transformed to standard format`)
     console.log(`   - Topical medications: ${topicalMedications.length}`)
     console.log(`   - Oral medications: ${oralMedications.length}`)
     console.log(`   - Total medications: ${medications.length}`)
+    
+    // Log first medication details for verification
+    if (medications.length > 0) {
+      const firstMed = medications[0]
+      console.log(`   📋 First medication details:`)
+      console.log(`      - nom: ${firstMed.nom}`)
+      console.log(`      - denominationCommune: ${firstMed.denominationCommune}`)
+      console.log(`      - dosage: ${firstMed.dosage}`)
+      console.log(`      - posologie: ${firstMed.posologie}`)
+      console.log(`      - forme: ${firstMed.forme}`)
+    }
     
     // ========== EXTRACT INVESTIGATIONS FROM recommendedInvestigations ==========
     const investigations = diagnosisData?.recommendedInvestigations || {}
