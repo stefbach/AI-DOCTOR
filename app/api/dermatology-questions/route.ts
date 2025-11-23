@@ -91,7 +91,24 @@ ${systemMessage}
       console.log('🔍 Is array?:', Array.isArray(parsed))
       console.log('🔍 Has questions field?:', !!parsed.questions)
       
-      const questions = Array.isArray(parsed) ? parsed : (parsed.questions || [])
+      // ========== CRITICAL FIX: Handle single question object ==========
+      // GPT-4 sometimes returns a single question object instead of array
+      let questions: any[] = []
+      
+      if (Array.isArray(parsed)) {
+        // Case 1: Direct array of questions
+        questions = parsed
+      } else if (parsed.questions && Array.isArray(parsed.questions)) {
+        // Case 2: Object with questions array field
+        questions = parsed.questions
+      } else if (parsed.id && parsed.question) {
+        // Case 3: Single question object - wrap in array
+        console.log('⚠️ GPT-4 returned single question object, wrapping in array')
+        questions = [parsed]
+      } else {
+        // Case 4: Unknown format
+        questions = []
+      }
       
       console.log('🔍 Extracted questions count:', questions.length)
       
@@ -303,7 +320,29 @@ EXAMPLE:
 
 ⚠️ Remember: ALL questions must have type: "multiple_choice" with 4-6 options!
 
-Return ONLY a valid JSON array of question objects, no additional text.`
+🚨 CRITICAL OUTPUT FORMAT:
+Return a JSON object with a "questions" array containing 8-12 question objects:
+{
+  "questions": [
+    {
+      "id": "derm_q1",
+      "category": "Onset & Duration",
+      "question": "...",
+      "type": "multiple_choice",
+      "options": ["...", "...", "...", "..."]
+    },
+    {
+      "id": "derm_q2",
+      "category": "Symptoms & Sensations",
+      "question": "...",
+      "type": "multiple_choice",
+      "options": ["...", "...", "...", "..."]
+    },
+    ... (continue for 8-12 questions total)
+  ]
+}
+
+YOU MUST return a JSON object with "questions" array, NOT a single question!`
 
     const systemMessage = "You are an expert dermatologist. Generate targeted clinical questions in valid JSON format only. CRITICAL: ALL questions MUST be multiple choice format with 4-6 specific answer options. NO open-ended questions allowed."
     
