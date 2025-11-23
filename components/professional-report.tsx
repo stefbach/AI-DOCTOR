@@ -2079,7 +2079,7 @@ if (isRenewal) {
  patient: reportData.compteRendu.patient,
  prescription: {
  datePrescription: apiReport.prescriptions.medications.prescription?.prescriptionDate || new Date().toISOString().split('T')[0],
- // APPLY SANITIZATION HERE
+ // APPLY SANITIZATION HERE - NOW INCLUDING medication_type
  medicaments: sanitizeMedications(
  apiReport.prescriptions.medications.prescription?.medications?.map((med: any) => ({
  nom: med.name || '',
@@ -2094,6 +2094,9 @@ if (isRenewal) {
  justification: med.indication || '',
  surveillanceParticuliere: med.monitoring || '',
  nonSubstituable: med.doNotSubstitute || false,
+ medication_type: med.medication_type || 'newly_prescribed',  // ⭐ CRITICAL FIELD
+ validated_by_ai: med.validated_by_ai || false,
+ original_input: med.original_input || '',
  ligneComplete: med.fullDescription || ''
  })) || []
  ),
