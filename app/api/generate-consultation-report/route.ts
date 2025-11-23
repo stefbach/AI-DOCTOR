@@ -292,6 +292,17 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
     console.log("🔬 DERMATOLOGY DIAGNOSIS STRUCTURE DETECTED - Using dermatology-specific extraction")
     const dermData = diagnosisData.diagnosis.structured
     
+    // ========== CRITICAL DEBUG: Log dermData structure ==========
+    console.log('🔍 ========== DERMDATA STRUCTURE ==========')
+    console.log('   dermData keys:', Object.keys(dermData || {}))
+    console.log('   Has treatmentPlan?:', !!dermData?.treatmentPlan)
+    console.log('   treatmentPlan keys:', Object.keys(dermData?.treatmentPlan || {}))
+    console.log('   Has investigations?:', !!dermData?.investigations)
+    console.log('   investigations keys:', Object.keys(dermData?.investigations || {}))
+    console.log('   Has recommendedInvestigations?:', !!dermData?.recommendedInvestigations)
+    console.log('   recommendedInvestigations keys:', Object.keys(dermData?.recommendedInvestigations || {}))
+    console.log('==========================================')
+    
     // Extract from dermatology structure
     const chiefComplaint = getString(dermData?.clinicalSummary || "Dermatology consultation")
     
@@ -341,6 +352,12 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
       const oral = dermData.treatmentPlan.oral || []
       medications = [...topical, ...oral]
       console.log(`   - Topical: ${topical.length}, Oral: ${oral.length}, Total: ${medications.length}`)
+    } else {
+      console.log('⚠️ NO treatmentPlan found in dermData')
+      console.log('   Checking alternative fields...')
+      console.log('   - dermData.treatment?:', !!dermData?.treatment)
+      console.log('   - dermData.medications?:', !!dermData?.medications)
+      console.log('   - dermData.prescriptions?:', !!dermData?.prescriptions)
     }
     
     // DERMATOLOGY: Handle investigations structure
@@ -351,6 +368,63 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
       const dermSpecialized = dermData.investigations.specialized || []
       immediateTests = [...dermImmediate, ...dermSpecialized]
       console.log(`   - Immediate: ${dermImmediate.length}, Specialized: ${dermSpecialized.length}, Total: ${immediateTests.length}`)
+    } else if (dermData?.recommendedInvestigations) {
+      console.log('🔬 DERMATOLOGY recommendedInvestigations detected')
+      const invData = dermData.recommendedInvestigations
+      console.log('   recommendedInvestigations structure:', Object.keys(invData))
+      
+      // Extract laboratory tests
+      if (invData.laboratory && Array.isArray(invData.laboratory)) {
+        invData.laboratory.forEach((test: string) => {
+          immediateTests.push({
+            examination: test,
+            category: 'Laboratory',
+            urgency: 'routine',
+            indication: 'Dermatology investigation'
+          })
+        })
+      }
+      
+      // Extract imaging tests
+      if (invData.imaging && Array.isArray(invData.imaging)) {
+        invData.imaging.forEach((test: string) => {
+          immediateTests.push({
+            examination: test,
+            category: 'Imaging',
+            urgency: 'routine',
+            indication: 'Dermatology investigation'
+          })
+        })
+      }
+      
+      // Extract biopsy
+      if (invData.biopsy) {
+        immediateTests.push({
+          examination: invData.biopsy,
+          category: 'Dermatology',
+          urgency: 'routine',
+          indication: 'Skin biopsy'
+        })
+      }
+      
+      // Extract specialized tests
+      if (invData.specializedTests && Array.isArray(invData.specializedTests)) {
+        invData.specializedTests.forEach((test: string) => {
+          immediateTests.push({
+            examination: test,
+            category: 'Laboratory',
+            urgency: 'routine',
+            indication: 'Specialized dermatology test'
+          })
+        })
+      }
+      
+      console.log(`   - Extracted ${immediateTests.length} tests from recommendedInvestigations`)
+    } else {
+      console.log('⚠️ NO investigations found in dermData')
+      console.log('   Checking alternative fields...')
+      console.log('   - dermData.tests?:', !!dermData?.tests)
+      console.log('   - dermData.examinations?:', !!dermData?.examinations)
     }
     
     // Smart categorization for biology tests
