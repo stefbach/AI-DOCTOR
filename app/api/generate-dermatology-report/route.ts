@@ -599,6 +599,13 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any = {}
       return 'endocrinology'
     }
     
+    // Dermatology-specific tests (biopsy, dermoscopy, etc.)
+    if (category.includes('dermat') || 
+        examination.includes('biopsy') || examination.includes('dermoscopy') ||
+        examination.includes('patch test') || examination.includes('skin')) {
+      return 'general' // Map to 'general' category so they appear in lab tests
+    }
+    
     // General biology
     if (category.includes('biolog') || category.includes('pathol') || 
         category.includes('lab') || category === 'biology' || 
