@@ -1468,6 +1468,14 @@ export async function POST(request: NextRequest) {
     console.log(`   - Lab tests: ${cleanLabTests.length}`)
     console.log(`   - Imaging: ${cleanImagingStudies.length}`)
     console.log(`   - Translation applied to all text content`)
+    
+    // DEBUG: Log lab test categories
+    if (cleanLabTests.length > 0) {
+      console.log(" 🔍 LAB TEST CATEGORIES DEBUG:")
+      cleanLabTests.forEach((test, idx) => {
+        console.log(`     ${idx + 1}. "${test.name}" - Category: "${test.category}"`)
+      })
+    }
 
     // Current date and doctor info
     const currentDate = new Date()
