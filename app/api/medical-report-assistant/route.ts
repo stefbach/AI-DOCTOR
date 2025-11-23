@@ -1,7 +1,15 @@
-// app/api/medical-report-assistant/route.ts - AI Assistant for Medical Report Editing
+// app/api/medical-report-assistant/route.ts - AI Assistant for Medical Report Editing v2.0
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
+import { 
+  findLabTest, 
+  findImagingStudy, 
+  validateLabTest, 
+  validateImagingStudy,
+  LAB_TESTS_NOMENCLATURE,
+  IMAGING_NOMENCLATURE
+} from "./nomenclature"
 
 // ==================== TYPES ====================
 interface Message {
@@ -210,6 +218,120 @@ export async function POST(request: NextRequest) {
             },
             required: ['suggestions']
           }
+        },
+
+        // Tool 6: Validate & Challenge doctor's proposal
+        validateProposal: {
+          description: 'Validate or challenge a doctor\'s proposed change with medical argumentation. Use when doctor asks "Why do you accept/reject this?"',
+          parameters: {
+            type: 'object',
+            properties: {
+              proposalType: {
+                type: 'string',
+                enum: ['diagnosis_change', 'medication_change', 'test_addition', 'test_removal'],
+                description: 'Type of proposal being validated'
+              },
+              doctorProposal: {
+                type: 'string',
+                description: 'What the doctor wants to change'
+              },
+              validation: {
+                type: 'string',
+                enum: ['accept', 'reject', 'accept_with_modifications'],
+                description: 'Validation decision'
+              },
+              medicalReasoning: {
+                type: 'string',
+                description: 'Detailed medical reasoning for accepting or rejecting. Include clinical evidence, guidelines, contraindications, etc.'
+              },
+              alternative: {
+                type: 'string',
+                description: 'If rejecting, suggest alternative approach'
+              },
+              supportingEvidence: {
+                type: 'array',
+                items: {
+                  type: 'string'
+                },
+                description: 'Clinical guidelines, studies, or evidence supporting the decision'
+              }
+            },
+            required: ['proposalType', 'doctorProposal', 'validation', 'medicalReasoning']
+          }
+        },
+
+        // Tool 7: Modify diagnosis with validation
+        modifyDiagnosis: {
+          description: 'Modify the primary diagnosis with full medical argumentation',
+          parameters: {
+            type: 'object',
+            properties: {
+              currentDiagnosis: {
+                type: 'string',
+                description: 'Current diagnosis'
+              },
+              proposedDiagnosis: {
+                type: 'string',
+                description: 'Proposed new diagnosis'
+              },
+              clinicalJustification: {
+                type: 'string',
+                description: 'Clinical features supporting the new diagnosis'
+              },
+              differentialConsiderations: {
+                type: 'array',
+                items: {
+                  type: 'string'
+                },
+                description: 'Why other diagnoses were ruled out'
+              },
+              confidence: {
+                type: 'string',
+                enum: ['high', 'moderate', 'low'],
+                description: 'Confidence in new diagnosis'
+              },
+              additionalInvestigations: {
+                type: 'array',
+                items: {
+                  type: 'string'
+                },
+                description: 'Tests needed to confirm new diagnosis'
+              }
+            },
+            required: ['currentDiagnosis', 'proposedDiagnosis', 'clinicalJustification', 'confidence']
+          }
+        },
+
+        // Tool 8: Validate nomenclature conformity
+        validateNomenclature: {
+          description: 'Validate if a lab test or imaging study conforms to required nomenclature standards',
+          parameters: {
+            type: 'object',
+            properties: {
+              testType: {
+                type: 'string',
+                enum: ['lab_test', 'imaging'],
+                description: 'Type of test to validate'
+              },
+              testName: {
+                type: 'string',
+                description: 'Name of the test as entered by doctor'
+              },
+              conforms: {
+                type: 'boolean',
+                description: 'Whether the test name conforms to nomenclature'
+              },
+              standardizedName: {
+                type: 'string',
+                description: 'Correct standardized name according to nomenclature'
+              },
+              reasoning: {
+                type: 'string',
+                description: 'Explanation of nomenclature requirements'
+              }
+            },
+            required: ['testType', 'testName', 'conforms', 'reasoning']
+          }
         }
       }
     })
@@ -280,7 +402,44 @@ IMPORTANT GUIDELINES:
 - Consider pregnancy status if applicable
 - Flag potential drug interactions or contraindications
 - Suggest evidence-based investigations aligned with diagnosis
-- Be concise but medically thorough`
+- Be concise but medically thorough
+
+🔍 CRITICAL: MEDICAL VALIDATION & ARGUMENTATION
+When doctors propose changes (diagnosis, medications, tests), you MUST:
+1. VALIDATE medically using clinical evidence
+2. ACCEPT if proposal is sound with supporting reasoning
+3. REJECT if unsafe/inappropriate with clear medical justification
+4. SUGGEST ALTERNATIVES if rejecting
+5. Provide clinical guidelines/evidence supporting your decision
+
+Example dialogue:
+Doctor: "Je pense que c'est une pneumonie, pas une bronchite"
+You: "✅ ACCEPTÉ - Justification: Présence de fièvre >38.5°C, crépitants localisés lobe inférieur droit, leucocytose 15000. Radiographie thoracique recommandée pour confirmation."
+
+Doctor: "Retire l'Amoxicilline"
+You: "❌ REJETÉ - Justification: Patient présente pneumonie bactérienne confirmée. Arrêt prématuré risque complications et résistance. Alternative: Si allergie pénicilline → Azithromycine 500mg OD 3 jours."
+
+📋 STRICT NOMENCLATURE COMPLIANCE FOR INVESTIGATIONS
+ALL lab tests and imaging studies MUST conform to standardized nomenclature.
+
+REJECT non-conforming names and provide standardized equivalents:
+❌ "Prise de sang" → ✅ "Full Blood Count (FBC)"
+❌ "Echo abdomen" → ✅ "Abdominal Ultrasound (Complete)"
+❌ "Scanner cerveau" → ✅ "CT Brain (Non-contrast)"
+
+When doctor requests test by informal name:
+1. Identify standardized name from nomenclature database
+2. Explain why standardization is required (billing, lab processing, reporting)
+3. Provide complete test details (sample type, fasting, turnaround time)
+
+💡 DIAGNOSIS MODIFICATION PROTOCOL
+When doctor wants to change diagnosis:
+1. Review current clinical data supporting current diagnosis
+2. Assess new diagnosis against presenting symptoms/signs
+3. Consider differential diagnoses systematically
+4. Recommend additional investigations to confirm if needed
+5. Assign confidence level (high/moderate/low)
+6. Update treatment plan accordingly`
 
   // Add consultation-specific context
   if (consultationType === 'dermatology') {
@@ -452,6 +611,57 @@ function processToolCall(toolCall: any, context: ReportContext): AssistantAction
           type: 'suggest',
           data: args.suggestions,
           explanation: 'AI-generated suggestions for report improvement'
+        }
+
+      case 'validateProposal':
+        return {
+          type: args.validation === 'accept' ? 'modify' : 'clarify',
+          target: args.proposalType.includes('diagnosis') ? 'diagnosis' : 
+                 args.proposalType.includes('medication') ? 'medication' :
+                 args.proposalType.includes('test') ? 'lab_test' : undefined,
+          data: {
+            validation: args.validation,
+            reasoning: args.medicalReasoning,
+            alternative: args.alternative,
+            evidence: args.supportingEvidence
+          },
+          explanation: `${args.validation === 'accept' ? '✅ ACCEPTÉ' : args.validation === 'reject' ? '❌ REJETÉ' : '⚠️ ACCEPTÉ AVEC MODIFICATIONS'}: ${args.medicalReasoning}`
+        }
+
+      case 'modifyDiagnosis':
+        return {
+          type: 'modify',
+          target: 'diagnosis',
+          data: {
+            current: args.currentDiagnosis,
+            proposed: args.proposedDiagnosis,
+            justification: args.clinicalJustification,
+            differentials: args.differentialConsiderations,
+            confidence: args.confidence,
+            additionalTests: args.additionalInvestigations
+          },
+          explanation: `Modification diagnostique: ${args.currentDiagnosis} → ${args.proposedDiagnosis}\n\nJustification: ${args.clinicalJustification}\n\nConfiance: ${args.confidence}`
+        }
+
+      case 'validateNomenclature':
+        // Validate against actual nomenclature database
+        const validation = args.testType === 'lab_test' ? 
+          validateLabTest(args.testName) : 
+          validateImagingStudy(args.testName)
+        
+        return {
+          type: args.conforms ? 'clarify' : 'modify',
+          target: args.testType as any,
+          data: {
+            originalName: args.testName,
+            standardizedName: args.standardizedName || validation.standardized?.name,
+            conforms: validation.valid,
+            reasoning: args.reasoning,
+            nomenclatureDetails: validation.standardized
+          },
+          explanation: validation.valid ? 
+            `✅ CONFORME: "${args.testName}" est conforme à la nomenclature\n\n${args.reasoning}` :
+            `⚠️ NON-CONFORME: "${args.testName}"\n\nNom standardisé requis: "${args.standardizedName || validation.suggestion}"\n\n${args.reasoning}`
         }
 
       default:
