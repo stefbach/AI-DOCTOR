@@ -828,6 +828,14 @@ useEffect(() => {
  await consultationDataService.saveStepData(0, transformedData)
  setLastSaved(new Date())
  onDataChange(transformedData)
+ 
+ // ========== DEBUG LOGGING FOR CURRENT MEDICATIONS ==========
+ console.log('🚀 PATIENT FORM - onDataChange called with:')
+ console.log('   📋 currentMedications:', transformedData.currentMedications)
+ console.log('   📋 current_medications:', transformedData.current_medications)
+ console.log('   📝 currentMedicationsText:', transformedData.currentMedicationsText)
+ console.log('   ✅ currentMedications is Array?:', Array.isArray(transformedData.currentMedications))
+ console.log('   ✅ currentMedications length:', transformedData.currentMedications?.length || 0)
  } catch (error) {
  console.error('Error saving:', error)
  }

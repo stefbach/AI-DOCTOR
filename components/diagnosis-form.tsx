@@ -795,12 +795,25 @@ export default function DiagnosisForm({
  try {
  console.log("📡 Calling API /api/openai-diagnosis...")
  
+ // ========== DEBUG LOGGING FOR RECEIVED patientData ==========
+ console.log('🔍 DIAGNOSIS FORM - patientData received:')
+ console.log('   📋 patientData.currentMedications:', patientData?.currentMedications)
+ console.log('   📋 patientData.current_medications:', patientData?.current_medications)
+ console.log('   📝 patientData.currentMedicationsText:', patientData?.currentMedicationsText)
+ console.log('   ✅ Is Array?:', Array.isArray(patientData?.currentMedications))
+ console.log('   ✅ Length:', patientData?.currentMedications?.length || 0)
+ 
  const requestBody = {
  patientData,
  clinicalData,
  questionsData: questionsData?.responses || [],
  language,
  }
+ 
+ // ========== DEBUG LOGGING FOR API REQUEST ==========
+ console.log('📤 DIAGNOSIS FORM - Sending to API:')
+ console.log('   📋 requestBody.patientData.currentMedications:', requestBody.patientData?.currentMedications)
+ console.log('   📋 requestBody.patientData.current_medications:', requestBody.patientData?.current_medications)
  
  const response = await fetch("/api/openai-diagnosis", {
  method: "POST",
