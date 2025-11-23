@@ -66,16 +66,34 @@ ${systemMessage}
       })
       
       let questionsText = completion.choices[0].message.content || '[]'
+      
+      // ========== CRITICAL DEBUG: Log raw GPT-4 response ==========
+      console.log('🔍 ========== RAW GPT-4 RESPONSE ==========')
+      console.log('   Raw response length:', questionsText.length)
+      console.log('   Raw response preview:', questionsText.substring(0, 500))
+      console.log('   Raw response end:', questionsText.substring(Math.max(0, questionsText.length - 200)))
+      console.log('==========================================')
+      
       questionsText = questionsText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+      
+      console.log('🔍 After cleanup:', questionsText.substring(0, 300))
       
       let parsed
       try {
         parsed = JSON.parse(questionsText)
       } catch (parseError) {
+        console.error('❌ JSON PARSE ERROR:', parseError)
+        console.error('   Failed text:', questionsText.substring(0, 500))
         throw new Error('Invalid JSON response')
       }
       
+      console.log('🔍 Parsed object keys:', Object.keys(parsed))
+      console.log('🔍 Is array?:', Array.isArray(parsed))
+      console.log('🔍 Has questions field?:', !!parsed.questions)
+      
       const questions = Array.isArray(parsed) ? parsed : (parsed.questions || [])
+      
+      console.log('🔍 Extracted questions count:', questions.length)
       
       // Quality validation
       const hasMinimumQuestions = questions.length >= 8
