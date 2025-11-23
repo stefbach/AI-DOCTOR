@@ -29,16 +29,33 @@ export default function DermatologyQuestionsForm({ patientData, imageData, ocrAn
 
   const fetchQuestions = async () => {
     try {
+      console.log('🔍 FRONTEND: Fetching dermatology questions...')
       const response = await fetch('/api/dermatology-questions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ patientData, imageData, ocrAnalysisData })
       })
+      
+      console.log('🔍 FRONTEND: Response status:', response.status)
+      
       const data = await response.json()
-      setQuestions(data.questions || [])
+      console.log('🔍 FRONTEND: Response data keys:', Object.keys(data))
+      console.log('🔍 FRONTEND: data.questions exists?:', !!data.questions)
+      console.log('🔍 FRONTEND: data.questions length:', data.questions?.length || 0)
+      
+      if (data.questions && Array.isArray(data.questions)) {
+        console.log('✅ FRONTEND: Setting questions:', data.questions.length)
+        console.log('   First question:', data.questions[0])
+        setQuestions(data.questions)
+      } else {
+        console.error('❌ FRONTEND: No questions array in response')
+        console.error('   Response data:', data)
+        setQuestions([])
+      }
     } catch (error) {
-      console.error('Error fetching questions:', error)
+      console.error('❌ FRONTEND: Error fetching questions:', error)
       toast({ title: "Error", description: "Failed to load questions", variant: "destructive" })
+      setQuestions([])
     } finally {
       setIsLoading(false)
     }
@@ -53,9 +70,24 @@ export default function DermatologyQuestionsForm({ patientData, imageData, ocrAn
   }
 
   if (isLoading) {
+    console.log('🔄 FRONTEND: Still loading questions...')
     return (
       <div className="flex items-center justify-center p-12">
         <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+      </div>
+    )
+  }
+
+  console.log('🎨 FRONTEND: Rendering questions form')
+  console.log('   Questions count:', questions.length)
+  console.log('   Questions:', questions)
+
+  if (questions.length === 0) {
+    console.warn('⚠️ FRONTEND: No questions to display')
+    return (
+      <div className="text-center p-12">
+        <p className="text-gray-600 mb-4">No questions available</p>
+        <Button onClick={fetchQuestions}>Retry</Button>
       </div>
     )
   }
@@ -92,21 +124,14 @@ export default function DermatologyQuestionsForm({ patientData, imageData, ocrAn
             )}
 
             {q.type === 'multiple_choice' && q.options && (
-              <div className="space-y-2">
+              <RadioGroup value={answers[q.id]} onValueChange={(val) => handleAnswer(q.id, val)}>
                 {q.options.map((option: string) => (
                   <div key={option} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`${q.id}-${option}`}
-                      checked={(answers[q.id] || []).includes(option)}
-                      onCheckedChange={(checked) => {
-                        const current = answers[q.id] || []
-                        handleAnswer(q.id, checked ? [...current, option] : current.filter((o: string) => o !== option))
-                      }}
-                    />
+                    <RadioGroupItem value={option} id={`${q.id}-${option}`} />
                     <Label htmlFor={`${q.id}-${option}`}>{option}</Label>
                   </div>
                 ))}
-              </div>
+              </RadioGroup>
             )}
           </CardContent>
         </Card>
