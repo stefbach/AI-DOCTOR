@@ -823,6 +823,10 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
     // Generate formatted text for backward compatibility
     const fullTextDiagnosis = generateFormattedDiagnosisText(diagnosisData)
 
+    // ========== EXTRACT currentMedicationsValidated TO TOP LEVEL ==========
+    const currentMedicationsValidated = diagnosisData?.currentMedicationsValidated || []
+    console.log(`📋 DERMATOLOGY: Extracting currentMedicationsValidated - ${currentMedicationsValidated.length} medications`)
+    
     const response = {
       success: true,
       timestamp: new Date().toISOString(),
@@ -836,6 +840,7 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
         fullText: fullTextDiagnosis,  // For backward compatibility with frontend
         structured: diagnosisData      // New structured format
       },
+      currentMedicationsValidated: currentMedicationsValidated,  // ⭐ ADD THIS TO TOP LEVEL
       qualityMetrics: result.qualityMetrics,
       version: '4.0-Professional-Grade-4Retry-AutoCorrect',
       consultationType: consultationType,

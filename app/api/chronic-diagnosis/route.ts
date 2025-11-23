@@ -782,9 +782,34 @@ CRITICAL: Return ONLY the JSON object, no markdown formatting, no explanations o
     const result = await callOpenAIWithRetry(apiKey, systemPrompt, patientContext, 2)
     const assessmentData = result.assessment
     
+    // ========== EXTRACT currentMedicationsValidated FROM medicationManagement.continue ==========
+    const currentMedicationsValidated: any[] = []
+    
+    if (assessmentData?.medicationManagement?.continue && Array.isArray(assessmentData.medicationManagement.continue)) {
+      assessmentData.medicationManagement.continue.forEach((med: any, idx: number) => {
+        currentMedicationsValidated.push({
+          id: idx + 1,
+          name: med.medication || 'Current medication',
+          medication_name: med.medication || 'Current medication',
+          dci: med.medication || 'Current medication',
+          dosage: med.dosage || '',
+          frequency: med.frequency || 'As prescribed',
+          posology: med.frequency || 'As prescribed',
+          indication: 'Chronic disease management',
+          assessment: 'Continue',
+          reasoning: med.rationale || 'Continuing current treatment',
+          validated_corrections: 'AI validated for chronic disease management',
+          original_input: med.medication || ''
+        })
+      })
+    }
+    
+    console.log(`📋 CHRONIC: Extracted ${currentMedicationsValidated.length} continuing medications as currentMedicationsValidated`)
+    
     return NextResponse.json({
       success: true,
       assessment: assessmentData,
+      currentMedicationsValidated: currentMedicationsValidated,  // ⭐ ADD THIS TO TOP LEVEL
       chronicDiseases: {
         diabetes: hasDiabetes,
         hypertension: hasHypertension,
