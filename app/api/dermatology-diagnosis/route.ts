@@ -752,7 +752,7 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
   
   "recommendedInvestigations": {
     "laboratory": ["Specific test 1 with rationale", "Specific test 2 with rationale"],
-    "biopsy": "Biopsy recommendation with type and site if indicated, or 'Not indicated'",
+    "biopsy": "EITHER: Specific biopsy type with site (e.g., 'Punch biopsy of affected lesion for histopathological confirmation') OR: 'Not indicated' if biopsy not needed. NEVER use vague terms.",
     "imaging": ["Imaging study with indication if needed"],
     "specializedTests": ["Patch testing or other specialized investigations if indicated"]
   },
@@ -848,6 +848,7 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
 - IF patient has existing medications: MUST populate "currentMedicationsValidated" array with assessment for EACH medication
 - For RENEWAL consultations: Prioritize validating and continuing effective treatments
 - For NEW PROBLEM consultations: Check existing medications for interactions and causative factors
+- ⚠️ INVESTIGATION NAMES: If recommending biopsy, use SPECIFIC descriptive name (e.g., "Punch biopsy of lesion for histopathology"). NEVER leave generic or use test name as status indicator.
 
 GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity and pharmaceutical precision.`
 
@@ -958,8 +959,20 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
     const investigations = diagnosisData?.recommendedInvestigations || {}
     const laboratoryTests = investigations.laboratory || []
     const imagingTests = investigations.imaging || []
-    const biopsyTest = investigations.biopsy ? [investigations.biopsy] : []
+    
+    // ⚠️ FILTER OUT "Not indicated" from biopsy recommendation
+    const biopsyRaw = investigations.biopsy || ''
+    const biopsyTest = (biopsyRaw && 
+                        biopsyRaw !== 'Not indicated' && 
+                        !biopsyRaw.toLowerCase().includes('not indicated')) 
+      ? [biopsyRaw] 
+      : []
+    
     const specializedTests = investigations.specializedTests || []
+    
+    console.log(`🔬 DERMATOLOGY: Filtering investigations`)
+    console.log(`   - Biopsy raw: "${biopsyRaw}"`)
+    console.log(`   - Biopsy filtered: ${biopsyTest.length > 0 ? `"${biopsyTest[0]}"` : 'EXCLUDED (Not indicated)'}`)
     
     // Combine all investigations into expertAnalysis format (match normal workflow)
     const allInvestigations = [
@@ -981,7 +994,7 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
         examination: test,
         category: 'Dermatology',
         urgency: 'urgent',
-        indication: 'Tissue diagnosis',
+        indication: 'Tissue diagnosis if diagnosis uncertain',
         rationale: 'Histopathological confirmation'
       })),
       ...specializedTests.map((test: string) => ({
