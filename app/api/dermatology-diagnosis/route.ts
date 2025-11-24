@@ -618,6 +618,33 @@ DO NOT treat the image analysis as optional context - it is PRIMARY clinical evi
 CLINICAL HISTORY (from questions):
 ${questionsAnswers}
 
+🚨 MANDATORY CURRENT MEDICATIONS HANDLING:
+
+${hasCurrentMedications ? `
+⚠️ PATIENT HAS CURRENT MEDICATIONS - YOU MUST:
+1. VALIDATE and CORRECT each medication (spelling, dosing format)
+2. STANDARDIZE to UK format (OD/BD/TDS/QDS)
+3. ADD DCI name for each medication
+4. POPULATE "currentMedicationsValidated" array with EVERY existing medication
+5. FORMAT with ALL required fields: medication_name, why_prescribed, how_to_take, duration, dci, validated_corrections, original_input
+
+EXAMPLE VALIDATION:
+Input: "amlodipine 5mg once daily"
+→ Output in currentMedicationsValidated: {
+  "medication_name": "Amlodipine 5mg",
+  "why_prescribed": "Hypertension management",
+  "how_to_take": "OD (once daily)",
+  "duration": "Ongoing chronic treatment",
+  "dci": "Amlodipine",
+  "validated_corrections": "None - correctly formatted",
+  "original_input": "amlodipine 5mg once daily"
+}
+
+🚨 THIS IS MANDATORY - DO NOT SKIP CURRENT MEDICATIONS VALIDATION!
+` : `
+Patient has NO current medications - "currentMedicationsValidated" should be empty array []
+`}
+
 CONSULTATION TYPE: ${consultationType.toUpperCase()}
 
 ${consultationType === 'renewal' ? `
