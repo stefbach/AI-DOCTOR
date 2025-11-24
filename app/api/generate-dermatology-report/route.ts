@@ -276,6 +276,80 @@ function formatPregnancyStatus(pregnancyStatus: string, gestationalAge?: string)
   }
 }
 
+// ==================== SMART BIOLOGY TEST CATEGORIZATION ====================
+// Define this function BEFORE extractRealDataFromDiagnosis so it can be used in both workflows
+function smartCategorizeBiologyTest(test: any): string | null {
+  const category = (test.category || '').toLowerCase()
+  const examination = (test.examination || test.test || '').toLowerCase()
+  
+  console.log(`🧪 smartCategorizeBiologyTest: "${test.examination || test.test}" - Category: "${test.category}" (lowercase: "${category}")`)
+  
+  // Hematology
+  if (category.includes('haem') || category.includes('blood') || 
+      examination.includes('blood count') || examination.includes('fbc') || 
+      examination.includes('hemoglobin') || examination.includes('hematocrit') ||
+      examination.includes('platelet') || examination.includes('wbc')) {
+    console.log(`   ✅ Matched as HEMATOLOGY → hematology`)
+    return 'hematology'
+  }
+  
+  // Clinical Chemistry  
+  if (category.includes('chem') || category.includes('biochem') ||
+      examination.includes('glucose') || examination.includes('cholesterol') ||
+      examination.includes('creatinine') || examination.includes('urea') ||
+      examination.includes('liver') || examination.includes('kidney')) {
+    console.log(`   ✅ Matched as CLINICAL CHEMISTRY → clinicalChemistry`)
+    return 'clinicalChemistry'
+  }
+  
+  // Immunology
+  if (category.includes('immun') || category.includes('sero') || category.includes('pathol') ||
+      examination.includes('antibod') || examination.includes('antigen') ||
+      examination.includes('dengue') || examination.includes('ns1') ||
+      examination.includes('igm') || examination.includes('igg') ||
+      examination.includes('serology') || examination.includes('elisa')) {
+    console.log(`   ✅ Matched as IMMUNOLOGY → immunology`)
+    return 'immunology'
+  }
+  
+  // Microbiology
+  if (category.includes('micro') || category.includes('bacterio') ||
+      examination.includes('culture') || examination.includes('sensitivity') ||
+      examination.includes('pcr') || examination.includes('bacterial') ||
+      examination.includes('viral') || examination.includes('sputum')) {
+    console.log(`   ✅ Matched as MICROBIOLOGY → microbiology`)
+    return 'microbiology'
+  }
+  
+  // Endocrinology
+  if (category.includes('endo') || category.includes('hormon') ||
+      examination.includes('thyroid') || examination.includes('hormone') ||
+      examination.includes('insulin') || examination.includes('cortisol')) {
+    console.log(`   ✅ Matched as ENDOCRINOLOGY → endocrinology`)
+    return 'endocrinology'
+  }
+  
+  // Dermatology-specific tests (biopsy, dermoscopy, KOH, patch tests)
+  if (category.includes('dermat') || 
+      examination.includes('biopsy') || examination.includes('dermoscopy') ||
+      examination.includes('patch test') || examination.includes('skin') ||
+      examination.includes('koh') || examination.includes('scraping')) {
+    console.log(`   ✅ Matched as DERMATOLOGY-SPECIFIC → general`)
+    return 'general' // Map to 'general' category so they appear in lab tests
+  }
+  
+  // General biology/laboratory
+  if (category.includes('biolog') || category.includes('pathol') || 
+      category.includes('lab') || category === 'biology' || 
+      category === 'pathology' || category === 'laboratory') {
+    console.log(`   ✅ Matched as GENERAL BIOLOGY → general`)
+    return 'general'
+  }
+  
+  console.log(`   ❌ NO MATCH - returning null (test will be excluded)`)
+  return null // Not a biology test
+}
+
 // ==================== DATA EXTRACTION FROM OPENAI-DIAGNOSIS ====================
 function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any = {}, patientData: any) {
   
@@ -354,43 +428,55 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any = {}
       console.log(`   - Immediate: ${dermImmediate.length}, Specialized: ${dermSpecialized.length}, Total: ${immediateTests.length}`)
     }
     
-    // Smart categorization for biology tests
+    console.log(`🧪 DERMATOLOGY: APPLYING SMART CATEGORIZATION TO ${immediateTests.length} TESTS`)
+    
+    // Apply smart categorization for biology tests (SAME AS NORMAL WORKFLOW)
     const rawLabTests: any[] = []
     const rawImagingTests: any[] = []
     
     immediateTests.forEach((test: any) => {
       const category = (test.category || '').toLowerCase()
-      const examination = (test.examination || test.test || '').toLowerCase()
       
-      // Check if it's imaging
+      // Check if it's imaging first
       if (category === 'imaging' || category === 'radiology' || 
           category.includes('imag') || category.includes('radio')) {
-        rawImagingTests.push(test)
-      } 
-      // Check if it's dermatology-specific (biopsy, dermoscopy)
-      else if (examination.includes('biopsy') || examination.includes('dermoscopy') || 
-               examination.includes('patch test') || examination.includes('skin scraping')) {
-        rawLabTests.push({
-          name: test.examination || test.test,
-          category: 'Dermatology',
+        console.log(`📷 IMAGING TEST: "${test.examination || test.test}" - Category: "${test.category}"`)
+        rawImagingTests.push({
+          name: getString(test.examination || test.test_name || 'Imaging study'),
+          type: getString(test.examination || test.test_name || 'Imaging'),
           urgency: test.urgency || 'routine',
-          indication: test.indication || test.rationale || '',
-          clinical_information: test.clinical_information || ''
+          indication: getString(test.specific_indication || test.indication || ''),
+          clinical_information: getString(test.clinical_information || ''),
+          pregnancy_safe: test.pregnancy_safe !== false,
+          turnaround_time: getString(test.turnaround_time || 'Standard')
         })
-      }
-      // Default to lab test
-      else {
-        rawLabTests.push({
-          name: test.examination || test.test,
-          category: category || 'Laboratory',
-          urgency: test.urgency || 'routine',
-          indication: test.indication || test.rationale || '',
-          clinical_information: test.clinical_information || ''
-        })
+      } else {
+        // Apply smart categorization for biology tests
+        const smartCategory = smartCategorizeBiologyTest(test)
+        
+        if (smartCategory) {
+          console.log(`✅ BIOLOGY TEST: "${test.examination || test.test}" → ${smartCategory}`)
+          
+          rawLabTests.push({
+            name: getString(test.examination || test.test_name || 'Laboratory test'),
+            category: smartCategory,
+            originalCategory: test.category,
+            urgency: test.urgency || 'routine',
+            indication: getString(test.specific_indication || test.indication || ''),
+            findings_sought: getString(test.findings_sought || ''),
+            clinical_information: getString(test.clinical_information || ''),
+            tube_type: getString(test.sample_tube || 'As per laboratory protocol'),
+            turnaround_time: getString(test.turnaround_time || 'Standard'),
+            fasting_required: test.fasting_required || false,
+            pregnancy_safe: test.pregnancy_safe !== false
+          })
+        } else {
+          console.log(`⏭️ NOT A BIOLOGY TEST: "${test.examination || test.test}" (${test.category}) - SKIPPED`)
+        }
       }
     })
     
-    console.log(`📊 DERMATOLOGY TESTS CATEGORIZED: ${rawLabTests.length} lab, ${rawImagingTests.length} imaging`)
+    console.log(`📊 DERMATOLOGY TESTS SMART-CATEGORIZED: ${rawLabTests.length} lab, ${rawImagingTests.length} imaging`)
     
     // Return early with dermatology data - ALL FIELDS
     return {
@@ -550,71 +636,8 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any = {}
   const immediateTests = diagnosisData?.expertAnalysis?.expert_investigations?.immediate_priority || []
   console.log(`   - immediateTests from expertAnalysis: ${immediateTests.length}`)
   
-  console.log(`🧪 SMART BIOLOGY EXTRACTION - ${immediateTests.length} total items to analyze`)
-  
-  // Smart categorization function
-  function smartCategorizeBiologyTest(test: any): string {
-    const category = (test.category || '').toLowerCase()
-    const examination = (test.examination || '').toLowerCase()
-    
-    console.log(`🧪 Analyzing: "${test.examination}" - Category: "${test.category}"`)
-    
-    // Hematology
-    if (category.includes('haem') || category.includes('blood') || 
-        examination.includes('blood count') || examination.includes('fbc') || 
-        examination.includes('hemoglobin') || examination.includes('hematocrit') ||
-        examination.includes('platelet') || examination.includes('wbc')) {
-      return 'hematology'
-    }
-    
-    // Clinical Chemistry  
-    if (category.includes('chem') || category.includes('biochem') ||
-        examination.includes('glucose') || examination.includes('cholesterol') ||
-        examination.includes('creatinine') || examination.includes('urea') ||
-        examination.includes('liver') || examination.includes('kidney')) {
-      return 'clinicalChemistry'
-    }
-    
-    // Immunology
-    if (category.includes('immun') || category.includes('sero') || category.includes('pathol') ||
-        examination.includes('antibod') || examination.includes('antigen') ||
-        examination.includes('dengue') || examination.includes('ns1') ||
-        examination.includes('igm') || examination.includes('igg') ||
-        examination.includes('serology') || examination.includes('elisa')) {
-      return 'immunology'
-    }
-    
-    // Microbiology
-    if (category.includes('micro') || category.includes('bacterio') ||
-        examination.includes('culture') || examination.includes('sensitivity') ||
-        examination.includes('pcr') || examination.includes('bacterial') ||
-        examination.includes('viral') || examination.includes('sputum')) {
-      return 'microbiology'
-    }
-    
-    // Endocrinology
-    if (category.includes('endo') || category.includes('hormon') ||
-        examination.includes('thyroid') || examination.includes('hormone') ||
-        examination.includes('insulin') || examination.includes('cortisol')) {
-      return 'endocrinology'
-    }
-    
-    // Dermatology-specific tests (biopsy, dermoscopy, etc.)
-    if (category.includes('dermat') || 
-        examination.includes('biopsy') || examination.includes('dermoscopy') ||
-        examination.includes('patch test') || examination.includes('skin')) {
-      return 'general' // Map to 'general' category so they appear in lab tests
-    }
-    
-    // General biology
-    if (category.includes('biolog') || category.includes('pathol') || 
-        category.includes('lab') || category === 'biology' || 
-        category === 'pathology' || category === 'laboratory') {
-      return 'general'
-    }
-    
-    return null // Not a biology test
-  }
+  console.log(`🧪 NORMAL WORKFLOW: SMART BIOLOGY EXTRACTION - ${immediateTests.length} total items to analyze`)
+  // Note: smartCategorizeBiologyTest function is now defined at the top of the file
   
   // Extract all biology tests
   const labTests: any[] = []
@@ -786,7 +809,18 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   
   // First, add VALIDATED CURRENT MEDICATIONS (if any)
   const validatedCurrentMeds = diagnosisData?.currentMedicationsValidated || []
-  console.log(` Current medications validated by AI: ${validatedCurrentMeds.length}`)
+  console.log(`📋 DERMATOLOGY: Extracting currentMedicationsValidated - ${validatedCurrentMeds.length} medications`)
+  
+  if (validatedCurrentMeds.length > 0) {
+    console.log('✅ Current medications found:')
+    validatedCurrentMeds.forEach((med: any, idx: number) => {
+      console.log(`   ${idx + 1}. ${med.medication_name || med.name} - DCI: ${med.dci} - ${med.how_to_take}`)
+    })
+  } else {
+    console.log('⚠️ NO current medications found in diagnosisData.currentMedicationsValidated')
+    console.log('   Checking if diagnosisData.currentMedicationsValidated exists:', !!diagnosisData?.currentMedicationsValidated)
+    console.log('   Type:', typeof diagnosisData?.currentMedicationsValidated)
+  }
   
   validatedCurrentMeds.forEach((med: any, idx: number) => {
     medications.push({
