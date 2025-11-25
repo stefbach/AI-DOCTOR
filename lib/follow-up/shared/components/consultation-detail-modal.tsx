@@ -82,7 +82,7 @@ export function ConsultationDetailModal({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
           <TabsList className={`grid w-full flex-shrink-0 ${isChronic ? 'grid-cols-6' : 'grid-cols-5'}`}>
             <TabsTrigger value="overview" className="flex items-center gap-1">
               <ClipboardList className="h-4 w-4" />
@@ -112,10 +112,9 @@ export function ConsultationDetailModal({
             )}
           </TabsList>
 
-          <div className="flex-1 relative mt-4">
-            <div className="absolute inset-0 overflow-y-auto pr-2">
+          <div className="flex-1 min-h-0 overflow-y-auto mt-4 pr-2">
             {/* OVERVIEW TAB */}
-            <TabsContent value="overview" className="space-y-4 mt-0">
+            <TabsContent value="overview" className="mt-0 space-y-4">
               {/* Chief Complaint */}
               {consultation.chiefComplaint && (
                 <Section
@@ -186,32 +185,31 @@ export function ConsultationDetailModal({
             </TabsContent>
 
             {/* REPORT TAB */}
-            <TabsContent value="report" className="space-y-4 mt-0">
+            <TabsContent value="report" className="mt-0 space-y-4">
               <ReportTab consultation={consultation} fullReport={fullReport} />
             </TabsContent>
 
             {/* PRESCRIPTION TAB */}
-            <TabsContent value="prescription" className="space-y-4 mt-0">
+            <TabsContent value="prescription" className="mt-0 space-y-4">
               <PrescriptionTab prescription={prescription} consultation={consultation} />
             </TabsContent>
 
             {/* LAB TESTS TAB */}
-            <TabsContent value="labs" className="space-y-4 mt-0">
+            <TabsContent value="labs" className="mt-0 space-y-4">
               <LabTestsTab labTests={labTests} fullReport={fullReport} />
             </TabsContent>
 
             {/* IMAGING TAB */}
-            <TabsContent value="imaging" className="space-y-4 mt-0">
+            <TabsContent value="imaging" className="mt-0 space-y-4">
               <ImagingTab imaging={imaging} fullReport={fullReport} />
             </TabsContent>
 
             {/* DIET PLAN TAB (Chronic only) */}
             {isChronic && (
-              <TabsContent value="diet" className="space-y-4 mt-0">
+              <TabsContent value="diet" className="mt-0 space-y-4">
                 <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
               </TabsContent>
             )}
-            </div>
           </div>
         </Tabs>
       </DialogContent>
@@ -352,13 +350,6 @@ function PrescriptionTab({ prescription, consultation }: { prescription: any[], 
   const fullReport = consultation.fullReport || {}
   const prescriptionsData = fullReport?.prescriptions
 
-  console.log('💊 PrescriptionTab - prescription array:', prescription)
-  console.log('💊 PrescriptionTab - raw prescriptions:', prescriptionsData)
-  console.log('💊 PrescriptionTab - prescriptions.content:', prescriptionsData?.content)
-  if (prescriptionsData?.content) {
-    console.log('💊 PrescriptionTab - content keys:', Object.keys(prescriptionsData.content))
-  }
-
   // Try to get medications from prescriptions.content.medications or other paths
   let meds = prescription
   if ((!meds || meds.length === 0) && prescriptionsData?.content?.medications) {
@@ -415,14 +406,6 @@ function PrescriptionTab({ prescription, consultation }: { prescription: any[], 
 
 function LabTestsTab({ labTests, fullReport }: { labTests: any[], fullReport: any }) {
   const labData = fullReport?.laboratory_requests
-
-  console.log('🧪 LabTestsTab - labTests array:', labTests)
-  console.log('🧪 LabTestsTab - laboratory_requests:', labData)
-  console.log('🧪 LabTestsTab - laboratory_requests.tests:', labData?.tests)
-  console.log('🧪 LabTestsTab - laboratory_requests.content:', labData?.content)
-  if (labData?.content) {
-    console.log('🧪 LabTestsTab - content keys:', Object.keys(labData.content))
-  }
 
   // Try to get tests from laboratory_requests structure (grouped by category)
   const labRequests = labData?.tests || {}
@@ -481,14 +464,6 @@ function LabTestsTab({ labTests, fullReport }: { labTests: any[], fullReport: an
 
 function ImagingTab({ imaging, fullReport }: { imaging: any[], fullReport: any }) {
   const imagingData = fullReport?.imaging_requests
-
-  console.log('🩻 ImagingTab - imaging array:', imaging)
-  console.log('🩻 ImagingTab - imaging_requests:', imagingData)
-  console.log('🩻 ImagingTab - imaging_requests.examinations:', imagingData?.examinations)
-  console.log('🩻 ImagingTab - imaging_requests.content:', imagingData?.content)
-  if (imagingData?.content) {
-    console.log('🩻 ImagingTab - content keys:', Object.keys(imagingData.content))
-  }
 
   // Get imaging from imaging_requests structure - check multiple paths
   let imagingRequests = imagingData?.examinations || imagingData?.content?.examinations || imaging || []
