@@ -3,15 +3,12 @@
 import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
   User,
   Calendar,
   FileText,
   Heart,
-  Eye,
-  Activity,
-  ChevronRight
+  Activity
 } from 'lucide-react'
 import type { ConsultationHistoryItem } from '@/lib/follow-up/shared'
 import { format } from 'date-fns'
@@ -24,10 +21,9 @@ export interface HubPatientSummaryProps {
     totalConsultations: number
     tibokPatientInfo?: any // Patient info from Tibok URL
   }
-  onViewHistory: () => void
 }
 
-export function HubPatientSummary({ patientData, onViewHistory }: HubPatientSummaryProps) {
+export function HubPatientSummary({ patientData }: HubPatientSummaryProps) {
   const { searchCriteria, consultations, totalConsultations, tibokPatientInfo } = patientData
   const mostRecent = consultations[0]
 
@@ -162,16 +158,6 @@ export function HubPatientSummary({ patientData, onViewHistory }: HubPatientSumm
           </div>
         )}
 
-        {/* Action Button */}
-        <Button
-          onClick={onViewHistory}
-          variant="outline"
-          className="w-full border-green-300 hover:bg-green-100"
-        >
-          <Eye className="mr-2 h-4 w-4" />
-          Historique Complet
-          <ChevronRight className="ml-2 h-4 w-4" />
-        </Button>
       </CardContent>
     </Card>
   )

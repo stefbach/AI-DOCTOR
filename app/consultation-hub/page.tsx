@@ -6,7 +6,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import {
-  Building2,
   ArrowLeft,
   Info
 } from 'lucide-react'
@@ -74,10 +73,6 @@ export default function ConsultationHubPage() {
     window.location.href = '/consultation'
   }
 
-  const handleViewHistory = () => {
-    setShowHistoryModal(true)
-  }
-
   const handleConsultationSelect = (consultation: ConsultationHistoryItem) => {
     setSelectedConsultation(consultation)
     setIsDetailModalOpen(true)
@@ -85,12 +80,6 @@ export default function ConsultationHubPage() {
 
   const handleProceedToWorkflow = () => {
     setCurrentStep('workflow')
-    setShowHistoryModal(false)
-  }
-
-  const handleReset = () => {
-    setCurrentStep('search')
-    setPatientData(null)
     setShowHistoryModal(false)
   }
 
@@ -163,7 +152,6 @@ export default function ConsultationHubPage() {
           <div className="space-y-6">
             <HubPatientSummary
               patientData={patientData}
-              onViewHistory={handleViewHistory}
             />
 
             {!showHistoryModal && (

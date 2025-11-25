@@ -720,9 +720,23 @@ function extractReportText(fullReport: any): string {
   if (typeof fullReport === 'string') return fullReport
   if (fullReport?.medicalReport?.narrative) return fullReport.medicalReport.narrative
   if (fullReport?.compteRendu?.synthese) return fullReport.compteRendu.synthese
+  if (fullReport?.compteRendu?.rapport) {
+    const rapport = fullReport.compteRendu.rapport
+    const patient = fullReport.compteRendu.patient
+    return `Patient: ${patient?.nom || patient?.fullName || 'N/A'}
+Date: ${fullReport.compteRendu.header?.date || 'N/A'}
+
+Motif de Consultation: ${rapport?.motifConsultation || 'N/A'}
+
+Examen Clinique: ${rapport?.examenClinique || 'N/A'}
+
+Synthèse Diagnostique: ${rapport?.syntheseDiagnostique || 'N/A'}
+
+Plan de Traitement: ${rapport?.planTraitement || 'See full report for details.'}`
+  }
   if (fullReport?.medicalReport) {
     const mr = fullReport.medicalReport
-    return `Patient: ${mr.patient?.fullName || 'N/A'}
+    return `Patient: ${mr.patient?.fullName || mr.patient?.name || 'N/A'}
 Date: ${mr.header?.reportDate || 'N/A'}
 
 Chief Complaint: ${mr.clinicalEvaluation?.chiefComplaint || 'N/A'}
@@ -736,24 +750,72 @@ Treatment Plan: See full report for details.`
 
 function extractPrescription(fullReport: any, medications?: any[]): any[] {
   if (medications && medications.length > 0) return medications
-  return fullReport?.ordonnance?.medications ||
-         fullReport?.medicalReport?.prescription?.medications ||
-         fullReport?.prescription?.medications ||
-         []
+
+  // Try multiple possible paths for prescription data
+  const paths = [
+    fullReport?.ordonnances?.medicaments?.prescription?.medications,
+    fullReport?.ordonnances?.medicaments?.medications,
+    fullReport?.medicationPrescription?.prescription?.medications,
+    fullReport?.ordonnance?.medications,
+    fullReport?.medicalReport?.prescription?.medications,
+    fullReport?.prescription?.medications,
+    fullReport?.medicalReport?.treatmentPlan?.medications,
+    fullReport?.compteRendu?.traitement?.medications
+  ]
+
+  for (const path of paths) {
+    if (path && Array.isArray(path) && path.length > 0) {
+      return path
+    }
+  }
+
+  return []
 }
 
 function extractLabTests(fullReport: any, labTests?: any[]): any[] {
   if (labTests && labTests.length > 0) return labTests
-  return fullReport?.labResults ||
-         fullReport?.medicalReport?.labTests ||
-         []
+
+  // Try multiple possible paths for lab tests data
+  const paths = [
+    fullReport?.ordonnances?.biologie?.prescription?.analyses,
+    fullReport?.ordonnances?.biologie?.analyses,
+    fullReport?.laboratoryTests?.prescription?.tests,
+    fullReport?.labResults,
+    fullReport?.medicalReport?.labTests,
+    fullReport?.medicalReport?.recommendedTests,
+    fullReport?.compteRendu?.examensComplementaires?.biological
+  ]
+
+  for (const path of paths) {
+    if (path && Array.isArray(path) && path.length > 0) {
+      return path
+    }
+  }
+
+  return []
 }
 
 function extractImaging(fullReport: any, imagingStudies?: any[]): any[] {
   if (imagingStudies && imagingStudies.length > 0) return imagingStudies
-  return fullReport?.imagingResults ||
-         fullReport?.medicalReport?.imagingStudies ||
-         []
+
+  // Try multiple possible paths for imaging data
+  const paths = [
+    fullReport?.ordonnances?.imagerie?.prescription?.examinations,
+    fullReport?.ordonnances?.imagerie?.examinations,
+    fullReport?.paraclinicalExams?.prescription?.exams,
+    fullReport?.imagingResults,
+    fullReport?.medicalReport?.imagingStudies,
+    fullReport?.medicalReport?.paraclinicalExaminations,
+    fullReport?.compteRendu?.examensComplementaires?.imaging
+  ]
+
+  for (const path of paths) {
+    if (path && Array.isArray(path) && path.length > 0) {
+      return path
+    }
+  }
+
+  return []
 }
 
 function extractDietPlan(fullReport: any, dietaryPlan?: any): any {
