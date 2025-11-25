@@ -69,8 +69,8 @@ export function ConsultationDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh]">
-        <DialogHeader>
+      <DialogContent className="max-w-5xl h-[90vh] flex flex-col overflow-hidden">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             {typeConfig.icon}
             {typeConfig.label}
@@ -84,8 +84,8 @@ export function ConsultationDetailModal({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className={`grid w-full ${isChronic ? 'grid-cols-6' : 'grid-cols-5'}`}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+          <TabsList className={`grid w-full flex-shrink-0 ${isChronic ? 'grid-cols-6' : 'grid-cols-5'}`}>
             <TabsTrigger value="overview" className="flex items-center gap-1">
               <ClipboardList className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -114,9 +114,9 @@ export function ConsultationDetailModal({
             )}
           </TabsList>
 
-          <div className="h-[calc(90vh-14rem)] overflow-y-auto mt-4 pr-2">
+          <div className="flex-1 overflow-y-auto mt-4 pr-2">
             {/* OVERVIEW TAB */}
-            <TabsContent value="overview" className="space-y-4">
+            <TabsContent value="overview" className="space-y-4 mt-0">
               {/* Chief Complaint */}
               {consultation.chiefComplaint && (
                 <Section
@@ -187,28 +187,28 @@ export function ConsultationDetailModal({
             </TabsContent>
 
             {/* REPORT TAB */}
-            <TabsContent value="report" className="space-y-4">
+            <TabsContent value="report" className="space-y-4 mt-0">
               <ReportTab consultation={consultation} fullReport={fullReport} />
             </TabsContent>
 
             {/* PRESCRIPTION TAB */}
-            <TabsContent value="prescription" className="space-y-4">
+            <TabsContent value="prescription" className="space-y-4 mt-0">
               <PrescriptionTab prescription={prescription} consultation={consultation} />
             </TabsContent>
 
             {/* LAB TESTS TAB */}
-            <TabsContent value="labs" className="space-y-4">
+            <TabsContent value="labs" className="space-y-4 mt-0">
               <LabTestsTab labTests={labTests} fullReport={fullReport} />
             </TabsContent>
 
             {/* IMAGING TAB */}
-            <TabsContent value="imaging" className="space-y-4">
+            <TabsContent value="imaging" className="space-y-4 mt-0">
               <ImagingTab imaging={imaging} fullReport={fullReport} />
             </TabsContent>
 
             {/* DIET PLAN TAB (Chronic only) */}
             {isChronic && (
-              <TabsContent value="diet" className="space-y-4">
+              <TabsContent value="diet" className="space-y-4 mt-0">
                 <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
               </TabsContent>
             )}
