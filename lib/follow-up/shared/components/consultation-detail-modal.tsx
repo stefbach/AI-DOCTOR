@@ -222,6 +222,14 @@ export function ConsultationDetailModal({
 // ============ TAB COMPONENTS ============
 
 function ReportTab({ consultation, fullReport }: { consultation: ConsultationHistoryItem, fullReport: any }) {
+  // Debug: log the full report structure
+  console.log('📄 ReportTab - fullReport:', fullReport)
+  console.log('📄 ReportTab - consultation_report:', fullReport?.consultation_report)
+  console.log('📄 ReportTab - consultation_report.content:', fullReport?.consultation_report?.content)
+  if (fullReport?.consultation_report?.content) {
+    console.log('📄 ReportTab - content keys:', Object.keys(fullReport.consultation_report.content))
+  }
+
   // Extract report content from different possible structures
   const consultationReport = fullReport?.consultation_report
   const reportContent = consultationReport?.content || {}
@@ -242,6 +250,8 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
   const managementPlan = getField('planTraitement', 'managementPlan', 'treatmentPlan')
   const followUpText = getField('suivi', 'followUp', 'recommendations') ||
                        fullReport?.follow_up?.content?.instructions
+
+  console.log('📄 ReportTab - extracted fields:', { chiefComplaint, historyOfIllness, physicalExam, diagnosis, managementPlan, followUpText })
 
   const hasContent = chiefComplaint || historyOfIllness || physicalExam || diagnosis || managementPlan || followUpText
 
@@ -356,6 +366,8 @@ function formatKeyToLabel(key: string): string {
 }
 
 function PrescriptionTab({ prescription, consultation }: { prescription: any[], consultation: ConsultationHistoryItem }) {
+  console.log('💊 PrescriptionTab - prescription:', prescription)
+
   if (!prescription || prescription.length === 0) {
     return (
       <Card className="bg-gray-50">
@@ -402,6 +414,9 @@ function PrescriptionTab({ prescription, consultation }: { prescription: any[], 
 }
 
 function LabTestsTab({ labTests, fullReport }: { labTests: any[], fullReport: any }) {
+  console.log('🧪 LabTestsTab - labTests:', labTests)
+  console.log('🧪 LabTestsTab - laboratory_requests:', fullReport?.laboratory_requests)
+
   // Try to get tests from laboratory_requests structure (grouped by category)
   const labRequests = fullReport?.laboratory_requests?.tests || {}
 
@@ -458,6 +473,9 @@ function LabTestsTab({ labTests, fullReport }: { labTests: any[], fullReport: an
 }
 
 function ImagingTab({ imaging, fullReport }: { imaging: any[], fullReport: any }) {
+  console.log('🩻 ImagingTab - imaging:', imaging)
+  console.log('🩻 ImagingTab - imaging_requests:', fullReport?.imaging_requests)
+
   // Get imaging from imaging_requests structure
   const imagingRequests = fullReport?.imaging_requests?.examinations || imaging || []
 
