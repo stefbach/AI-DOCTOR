@@ -84,7 +84,7 @@ export function ConsultationDetailModal({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 overflow-hidden">
           <TabsList className={`grid w-full flex-shrink-0 ${isChronic ? 'grid-cols-6' : 'grid-cols-5'}`}>
             <TabsTrigger value="overview" className="flex items-center gap-1">
               <ClipboardList className="h-4 w-4" />
@@ -114,7 +114,8 @@ export function ConsultationDetailModal({
             )}
           </TabsList>
 
-          <div className="flex-1 overflow-y-auto mt-4 pr-2">
+          <div className="flex-1 relative mt-4">
+            <div className="absolute inset-0 overflow-y-auto pr-2">
             {/* OVERVIEW TAB */}
             <TabsContent value="overview" className="space-y-4 mt-0">
               {/* Chief Complaint */}
@@ -212,6 +213,7 @@ export function ConsultationDetailModal({
                 <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
               </TabsContent>
             )}
+            </div>
           </div>
         </Tabs>
       </DialogContent>
