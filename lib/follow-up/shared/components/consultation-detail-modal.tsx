@@ -230,6 +230,10 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
   const rootPatient = fullReport?.patient
   const hasRootData = rootPatient || fullReport?.dietaryPlan || fullReport?.nutritionalAssessment
 
+  // New document format (consultation_report, diet_plan, etc.)
+  const consultationReport = fullReport?.consultation_report
+  const hasDocumentFormat = consultationReport || fullReport?.diet_plan || fullReport?.prescriptions
+
   console.log('📄 ReportTab fullReport:', fullReport)
 
   return (
@@ -250,8 +254,130 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
       </div>
       <Separator />
 
+      {/* New Document Format (consultation_report, diet_plan, prescriptions, etc.) */}
+      {hasDocumentFormat && (
+        <div className="space-y-4">
+          {/* Consultation Report */}
+          {consultationReport?.content && (
+            <Card className="border-l-4 border-l-blue-500">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-blue-800">
+                  {consultationReport.title || 'Compte Rendu de Consultation'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-2 space-y-4">
+                {/* Patient Info from consultation_report */}
+                {consultationReport.patient && (
+                  <div className="bg-gray-50 p-3 rounded">
+                    <h4 className="font-medium text-gray-700 mb-2">Patient</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+                      {consultationReport.patient.nom && (
+                        <div><span className="font-medium">Nom:</span> {consultationReport.patient.nom}</div>
+                      )}
+                      {consultationReport.patient.age && (
+                        <div><span className="font-medium">Âge:</span> {consultationReport.patient.age} ans</div>
+                      )}
+                      {consultationReport.patient.sexe && (
+                        <div><span className="font-medium">Sexe:</span> {consultationReport.patient.sexe}</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Report Content */}
+                {consultationReport.content.motifConsultation && (
+                  <div>
+                    <h4 className="font-semibold text-blue-800 mb-1">Motif de Consultation</h4>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded">{consultationReport.content.motifConsultation}</p>
+                  </div>
+                )}
+                {consultationReport.content.histoireMaladie && (
+                  <div>
+                    <h4 className="font-semibold text-blue-800 mb-1">Histoire de la Maladie</h4>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{consultationReport.content.histoireMaladie}</p>
+                  </div>
+                )}
+                {consultationReport.content.examenClinique && (
+                  <div>
+                    <h4 className="font-semibold text-blue-800 mb-1">Examen Clinique</h4>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{consultationReport.content.examenClinique}</p>
+                  </div>
+                )}
+                {consultationReport.content.syntheseDiagnostique && (
+                  <div>
+                    <h4 className="font-semibold text-blue-800 mb-1">Synthèse Diagnostique</h4>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{consultationReport.content.syntheseDiagnostique}</p>
+                  </div>
+                )}
+                {consultationReport.content.planTraitement && (
+                  <div>
+                    <h4 className="font-semibold text-blue-800 mb-1">Plan de Traitement</h4>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{consultationReport.content.planTraitement}</p>
+                  </div>
+                )}
+                {consultationReport.content.recommandations && (
+                  <div>
+                    <h4 className="font-semibold text-blue-800 mb-1">Recommandations</h4>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{consultationReport.content.recommandations}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Practitioner Info */}
+          {consultationReport?.praticien && (
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="p-3">
+                <div className="flex items-center justify-between text-sm">
+                  <div>
+                    <span className="font-medium text-blue-800">Praticien:</span>{' '}
+                    <span className="text-blue-700">{consultationReport.praticien.nom}</span>
+                    {consultationReport.praticien.specialite && (
+                      <span className="text-blue-600 ml-2">({consultationReport.praticien.specialite})</span>
+                    )}
+                  </div>
+                  {consultationReport.praticien.etablissement && (
+                    <div className="text-blue-600">{consultationReport.praticien.etablissement}</div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Follow-up Info */}
+          {fullReport?.follow_up?.content && (
+            <Card className="border-l-4 border-l-green-500">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-green-800">Suivi</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-2 space-y-2 text-sm">
+                {fullReport.follow_up.content.nextAppointment && (
+                  <div>
+                    <span className="font-medium">Prochain RDV:</span>{' '}
+                    {fullReport.follow_up.content.nextAppointment}
+                  </div>
+                )}
+                {fullReport.follow_up.content.frequency && (
+                  <div>
+                    <span className="font-medium">Fréquence:</span>{' '}
+                    {fullReport.follow_up.content.frequency}
+                  </div>
+                )}
+                {fullReport.follow_up.content.instructions && (
+                  <div>
+                    <span className="font-medium">Instructions:</span>
+                    <p className="text-gray-600 mt-1">{fullReport.follow_up.content.instructions}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
       {/* Root-level data format (direct patient/diet data) */}
-      {hasRootData && !compteRendu && !medicalReport && (
+      {hasRootData && !compteRendu && !medicalReport && !hasDocumentFormat && (
         <div className="space-y-4">
           {/* Patient Info from root */}
           {rootPatient && (
@@ -608,7 +734,7 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
       )}
 
       {/* Fallback if no structured data at all */}
-      {!compteRendu && !medicalReport && !hasRootData && (
+      {!compteRendu && !medicalReport && !hasRootData && !hasDocumentFormat && (
         <Card className="bg-gray-50">
           <CardContent className="p-8 text-center">
             <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -1090,6 +1216,10 @@ function extractPrescription(fullReport: any, medications?: any[]): any[] {
 
   // Try multiple possible paths for prescription data
   const paths = [
+    // New document format
+    fullReport?.prescriptions?.content?.medications,
+    fullReport?.prescriptions?.content?.medicaments,
+    // Old formats
     fullReport?.ordonnances?.medicaments?.prescription?.medications,
     fullReport?.ordonnances?.medicaments?.medications,
     fullReport?.medicationPrescription?.prescription?.medications,
@@ -1114,6 +1244,11 @@ function extractLabTests(fullReport: any, labTests?: any[]): any[] {
 
   // Try multiple possible paths for lab tests data
   const paths = [
+    // New document format
+    fullReport?.laboratory_requests?.content?.tests,
+    fullReport?.laboratory_requests?.tests?.analyses,
+    fullReport?.laboratory_requests?.content?.analyses,
+    // Old formats
     fullReport?.ordonnances?.biologie?.prescription?.analyses,
     fullReport?.ordonnances?.biologie?.analyses,
     fullReport?.laboratoryTests?.prescription?.tests,
@@ -1137,6 +1272,11 @@ function extractImaging(fullReport: any, imagingStudies?: any[]): any[] {
 
   // Try multiple possible paths for imaging data
   const paths = [
+    // New document format
+    fullReport?.imaging_requests?.content?.examinations,
+    fullReport?.imaging_requests?.content?.exams,
+    fullReport?.imaging_requests?.content?.studies,
+    // Old formats
     fullReport?.ordonnances?.imagerie?.prescription?.examinations,
     fullReport?.ordonnances?.imagerie?.examinations,
     fullReport?.paraclinicalExams?.prescription?.exams,
@@ -1157,6 +1297,9 @@ function extractImaging(fullReport: any, imagingStudies?: any[]): any[] {
 
 function extractDietPlan(fullReport: any, dietaryPlan?: any): any {
   if (dietaryPlan && Object.keys(dietaryPlan).length > 0) return dietaryPlan
+  // New document format
+  if (fullReport?.diet_plan?.content) return fullReport.diet_plan.content
+  // Old formats
   return fullReport?.dietaryPlan ||
          fullReport?.mealPlan ||
          fullReport?.diet ||
@@ -1164,6 +1307,9 @@ function extractDietPlan(fullReport: any, dietaryPlan?: any): any {
 }
 
 function extractFollowUp(fullReport: any): any {
+  // New document format
+  if (fullReport?.follow_up?.content) return fullReport.follow_up.content
+  // Old formats
   return fullReport?.followUp ||
          fullReport?.suivi ||
          fullReport?.medicalReport?.followUp ||
