@@ -34,9 +34,10 @@ export default function MedicalAIExpert() {
   const [diagnosisData, setDiagnosisData] = useState<any>(null)
   const [finalReport, setFinalReport] = useState<any>(null)
   const [language, setLanguage] = useState<Language>('en')
-  
+
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [prefillData, setPrefillData] = useState<any>({})
+  const [checkingReturningPatient, setCheckingReturningPatient] = useState<boolean>(true)
 
   // Load doctor data from URL params (from Tibok) and save to sessionStorage
   useEffect(() => {
@@ -95,6 +96,7 @@ export default function MedicalAIExpert() {
       if (fromHub === 'true') {
         sessionStorage.removeItem('fromConsultationHub')
         console.log('📋 Coming from consultation hub, skipping redirect check')
+        setCheckingReturningPatient(false)
         return
       }
 
@@ -106,6 +108,7 @@ export default function MedicalAIExpert() {
       // Need at least one identifier to check history
       if (!patientId && !patientEmail && !patientPhone) {
         console.log('ℹ️ No patient identifier in URL, proceeding with normal flow')
+        setCheckingReturningPatient(false)
         return
       }
 
@@ -128,6 +131,7 @@ export default function MedicalAIExpert() {
 
         if (!response.ok) {
           console.log('⚠️ Could not fetch patient history, proceeding with normal flow. Status:', response.status)
+          setCheckingReturningPatient(false)
           return
         }
 
@@ -147,6 +151,8 @@ export default function MedicalAIExpert() {
           // Preserve URL params for the hub
           const currentParams = window.location.search
           window.location.href = `/consultation-hub${currentParams}&returning=true`
+          // Don't set checkingReturningPatient to false - we're redirecting
+          return
         } else {
           console.log('👤 New patient - proceeding with normal flow')
         }
@@ -154,6 +160,8 @@ export default function MedicalAIExpert() {
         console.error('❌ Error checking patient history:', error)
         // Continue with normal flow on error
       }
+
+      setCheckingReturningPatient(false)
     }
 
     checkReturningPatient()
@@ -527,6 +535,18 @@ const handlePrevious = () => {
             {t('loading')}
           </p>
           <p className="mt-2 text-sm text-muted-foreground">Préparation de votre consultation...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show loading screen while checking for returning patient
+  if (checkingReturningPatient) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-teal-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading consultation...</p>
         </div>
       </div>
     )
