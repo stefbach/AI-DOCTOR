@@ -1824,6 +1824,38 @@ Example:
              </div>
            </div>
          </label>
+
+         {/* Dermatology Consultation Option */}
+         <label
+           className={`flex items-start gap-4 p-6 rounded-xl border-3 transition-all cursor-pointer ${
+             consultationType === 'dermatology'
+               ? "border-teal-500 bg-teal-50 shadow-lg scale-[1.02]"
+               : "border-gray-300 hover:border-teal-400 hover:bg-teal-50/50"
+           }`}
+         >
+           <RadioGroupItem value="dermatology" id="consultation-dermatology" className="mt-1" />
+           <div className="flex-1">
+             <div className="flex items-center gap-2 mb-2">
+               <span className="text-2xl">🔬</span>
+               <span className="font-bold text-xl text-teal-900">Dermatology Consultation</span>
+             </div>
+             <p className="text-gray-600 text-sm leading-relaxed">
+               Specialized skin condition consultation with AI-assisted image analysis.
+               Upload photos of skin conditions for detailed examination and diagnosis support.
+             </p>
+             <div className="mt-3 flex flex-wrap gap-2">
+               <Badge variant="secondary" className="bg-teal-100 text-teal-800">
+                 Skin conditions
+               </Badge>
+               <Badge variant="secondary" className="bg-teal-100 text-teal-800">
+                 Image analysis
+               </Badge>
+               <Badge variant="secondary" className="bg-teal-100 text-teal-800">
+                 Rashes & lesions
+               </Badge>
+             </div>
+           </div>
+         </label>
        </RadioGroup>
 
        {consultationType && (
@@ -1833,7 +1865,9 @@ Example:
              <span className="font-medium">
                {consultationType === 'normal'
                  ? '✅ Normal Consultation selected - Standard medical workflow'
-                 : '✅ Chronic Disease Follow-up selected - Specialized management workflow'}
+                 : consultationType === 'chronic'
+                 ? '✅ Chronic Disease Follow-up selected - Specialized management workflow'
+                 : '✅ Dermatology Consultation selected - Image analysis workflow'}
              </span>
            </div>
          </div>
