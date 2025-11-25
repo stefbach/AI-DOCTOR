@@ -32,6 +32,7 @@ import {
  Baby
 } from "lucide-react"
 import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
+import { useTibokConsultation } from "@/hooks/use-tibok-consultation"
 import { getTranslation, Language } from "@/lib/translations"
 
 // ==================== INTERFACES & TYPES ====================
@@ -187,6 +188,11 @@ export default function ModernPatientForm({
 }: PatientFormProps) {
  // ========== Hooks ==========
  const { patientData: tibokPatient, isFromTibok } = useTibokPatientData()
+ const {
+   consultationType: tibokConsultationType,
+   isDermatology: tibokIsDermatology,
+   loading: tibokConsultationLoading
+ } = useTibokConsultation()
  const t = useCallback((key: string) => getTranslation(key, language), [language])
  
  // ========== States ==========
@@ -580,92 +586,113 @@ export default function ModernPatientForm({
 
  const handleSubmit = useCallback(() => {
  if (validateForm()) {
- // Validate consultation type selection
- if (!consultationType) {
- toast({
- title: "⚠️ Selection Required",
- description: "Please select the type of consultation (Normal or Chronic Disease Follow-up)",
- variant: "destructive"
- })
- // Scroll to consultation type selection
- const element = document.getElementById('consultation-type-section')
- if (element) {
- element.scrollIntoView({ behavior: 'smooth', block: 'center' })
- }
- return
- }
- 
- // ========== USER CHOICE: CHRONIC DISEASE WORKFLOW ==========
- if (consultationType === 'chronic') {
- console.log(' User selected Chronic Disease Follow-up, redirecting to specialized workflow...')
- console.log('📋 Medical History:', formData.medicalHistory)
+   // Validate consultation type selection (unless dermatology was auto-detected from Tibok)
+   if (!consultationType && !tibokIsDermatology) {
+     toast({
+       title: "⚠️ Selection Required",
+       description: "Please select the type of consultation (Normal or Chronic Disease Follow-up)",
+       variant: "destructive"
+     })
+     // Scroll to consultation type selection
+     const element = document.getElementById('consultation-type-section')
+     if (element) {
+       element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+     }
+     return
+   }
 
- // Get IDs from URL params to preserve for chronic disease workflow
- const params = new URLSearchParams(window.location.search)
- const consultationId = params.get('consultationId')
- const patientId = params.get('patientId')
- const doctorId = params.get('doctorId')
+   // ========== USER CHOICE: CHRONIC DISEASE WORKFLOW ==========
+   if (consultationType === 'chronic') {
+     console.log(' User selected Chronic Disease Follow-up, redirecting to specialized workflow...')
+     console.log('📋 Medical History:', formData.medicalHistory)
 
- console.log('🔑 Preserving IDs for chronic disease workflow:', { consultationId, patientId, doctorId })
+     // Get IDs from URL params to preserve for chronic disease workflow
+     const params = new URLSearchParams(window.location.search)
+     const consultationId = params.get('consultationId')
+     const patientId = params.get('patientId')
+     const doctorId = params.get('doctorId')
 
- // Store patient data with IDs for chronic disease workflow
- const chronicData = {
- ...formData,
- consultationId,
- patientId,
- doctorId
- }
- sessionStorage.setItem('chronicDiseasePatientData', JSON.stringify(chronicData))
- sessionStorage.setItem('isChronicDiseaseWorkflow', 'true')
+     console.log('🔑 Preserving IDs for chronic disease workflow:', { consultationId, patientId, doctorId })
 
- // Redirect to chronic disease workflow
- window.location.href = '/chronic-disease'
- return
- }
- 
- // ========== USER CHOICE: DERMATOLOGY WORKFLOW ==========
- if (consultationType === 'dermatology') {
- console.log('🔬 User selected Dermatology Consultation, redirecting to dermatology workflow...')
+     // Store patient data with IDs for chronic disease workflow
+     const chronicData = {
+       ...formData,
+       consultationId,
+       patientId,
+       doctorId
+     }
+     sessionStorage.setItem('chronicDiseasePatientData', JSON.stringify(chronicData))
+     sessionStorage.setItem('isChronicDiseaseWorkflow', 'true')
 
- // Get IDs from URL params to preserve for dermatology workflow
- const dermaParams = new URLSearchParams(window.location.search)
- const consultationId = dermaParams.get('consultationId')
- const patientId = dermaParams.get('patientId')
- const doctorId = dermaParams.get('doctorId')
+     // Redirect to chronic disease workflow
+     window.location.href = '/chronic-disease'
+     return
+   }
 
- console.log('🔑 Preserving IDs for dermatology workflow:', { consultationId, patientId, doctorId })
+   // ========== DERMATOLOGY WORKFLOW (auto-detected or manually selected) ==========
+   if (consultationType === 'dermatology' || tibokIsDermatology) {
+     console.log('🔬 Dermatology Consultation, redirecting to dermatology workflow...')
+     console.log('📌 Auto-detected from Tibok:', tibokIsDermatology)
 
- // Store patient data with IDs for dermatology workflow
- const dermatologyData = {
- ...formData,
- consultationId,
- patientId,
- doctorId
- }
- sessionStorage.setItem('dermatologyPatientData', JSON.stringify(dermatologyData))
- sessionStorage.setItem('isDermatologyWorkflow', 'true')
+     // Get IDs from URL params to preserve for dermatology workflow
+     const dermaParams = new URLSearchParams(window.location.search)
+     const consultationId = dermaParams.get('consultationId')
+     const patientId = dermaParams.get('patientId')
+     const doctorId = dermaParams.get('doctorId')
 
- // Redirect to dermatology workflow
- window.location.href = '/dermatology'
- return
- }
- 
- // ========== NORMAL WORKFLOW ==========
- console.log(' User selected Normal Consultation, continuing standard workflow...')
- onNext()
+     console.log('🔑 Preserving IDs for dermatology workflow:', { consultationId, patientId, doctorId })
+
+     // Store patient data with IDs for dermatology workflow
+     const dermatologyData = {
+       ...formData,
+       consultationId,
+       patientId,
+       doctorId,
+       autoDetectedFromTibok: tibokIsDermatology
+     }
+     sessionStorage.setItem('dermatologyPatientData', JSON.stringify(dermatologyData))
+     sessionStorage.setItem('isDermatologyWorkflow', 'true')
+
+     // Redirect to dermatology workflow
+     window.location.href = '/dermatology'
+     return
+   }
+
+   // ========== NORMAL WORKFLOW ==========
+   console.log(' User selected Normal Consultation, continuing standard workflow...')
+   onNext()
  } else {
- // Scroll to first error
- const firstErrorField = Object.keys(errors)[0]
- const element = document.getElementById(firstErrorField)
- if (element) {
- element.scrollIntoView({ behavior: 'smooth', block: 'center' })
- element.focus()
+   // Scroll to first error
+   const firstErrorField = Object.keys(errors)[0]
+   const element = document.getElementById(firstErrorField)
+   if (element) {
+     element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+     element.focus()
+   }
  }
- }
- }, [validateForm, onNext, errors, formData, consultationType, toast])
+ }, [validateForm, onNext, errors, formData, consultationType, tibokIsDermatology, toast])
 
  // ========== Effects ==========
- 
+
+ // Auto-set consultation type from Tibok when detected
+ useEffect(() => {
+   if (tibokConsultationType && !tibokConsultationLoading) {
+     console.log('🔍 Auto-detected consultation type from Tibok:', tibokConsultationType)
+
+     // If dermatology is detected from Tibok, auto-set the consultation type
+     if (tibokIsDermatology) {
+       console.log('🔬 Dermatology consultation detected from Tibok - auto-setting type')
+       setConsultationType('dermatology')
+     } else if (tibokConsultationType === 'chronic') {
+       console.log('🏥 Chronic disease consultation detected from Tibok')
+       // Don't auto-set for chronic - let doctor confirm
+     } else {
+       console.log('👨‍⚕️ General consultation detected from Tibok')
+       // Don't auto-set for general - let doctor confirm
+     }
+   }
+ }, [tibokConsultationType, tibokIsDermatology, tibokConsultationLoading])
+
  // Update age when birth date changes
  useEffect(() => {
  if (formData.birthDate) {
@@ -1672,162 +1699,170 @@ Example:
  </div>
 
  {/* CONSULTATION TYPE SELECTION */}
- <Card id="consultation-type-section" className="shadow-xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-50">
- <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-600 text-white">
- <CardTitle className="flex items-center gap-3 text-2xl">
- <Activity className="h-7 w-7" />
- Type of Consultation
- </CardTitle>
- </CardHeader>
- <CardContent className="p-8">
- <p className="text-gray-700 mb-6 text-lg font-medium">
- Please select the type of consultation you wish to perform:
- </p>
- 
- <RadioGroup 
- value={consultationType} 
- onValueChange={(value) => setConsultationType(value as 'normal' | 'chronic' | 'dermatology')}
- className="space-y-4"
- >
- {/* Normal Consultation Option */}
- <label 
- className={`flex items-start gap-4 p-6 rounded-xl border-3 transition-all cursor-pointer ${
- consultationType === 'normal'
- ? "border-blue-500 bg-blue-50 shadow-lg scale-[1.02]"
- : "border-gray-300 hover:border-blue-400 hover:bg-blue-50/50"
- }`}
- >
- <RadioGroupItem value="normal" id="consultation-normal" className="mt-1" />
- <div className="flex-1">
- <div className="flex items-center gap-2 mb-2">
- <span className="text-2xl"></span>
- <span className="font-bold text-xl text-blue-900">Normal Consultation</span>
- </div>
- <p className="text-gray-600 text-sm leading-relaxed">
- Standard medical consultation for acute symptoms, infections, injuries, or general health concerns.
- Suitable for new complaints, check-ups, and non-chronic conditions.
- </p>
- <div className="mt-3 flex flex-wrap gap-2">
- <Badge variant="secondary" className="bg-blue-100 text-blue-800">
- Acute symptoms
- </Badge>
- <Badge variant="secondary" className="bg-blue-100 text-blue-800">
- Infections
- </Badge>
- <Badge variant="secondary" className="bg-blue-100 text-blue-800">
- General check-up
- </Badge>
- </div>
- </div>
- </label>
+ {/* Show different UI based on whether dermatology was auto-detected from Tibok */}
+ {tibokIsDermatology ? (
+   // Dermatology Auto-Detected - Show info message instead of selection
+   <Card id="consultation-type-section" className="shadow-xl border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-cyan-50">
+     <CardHeader className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
+       <CardTitle className="flex items-center gap-3 text-2xl">
+         <Activity className="h-7 w-7" />
+         Dermatology Consultation
+       </CardTitle>
+     </CardHeader>
+     <CardContent className="p-8">
+       <div className="p-6 bg-teal-100 rounded-xl border-2 border-teal-300">
+         <div className="flex items-start gap-4">
+           <div className="p-3 bg-teal-500 rounded-full">
+             <CheckCircle className="h-8 w-8 text-white" />
+           </div>
+           <div className="flex-1">
+             <h3 className="text-xl font-bold text-teal-900 mb-2">
+               🔬 Dermatology Consultation Detected
+             </h3>
+             <p className="text-teal-800 mb-4">
+               This consultation has been identified as a dermatology consultation from the patient's booking.
+               The workflow will include image analysis and specialized skin condition diagnosis.
+             </p>
+             <div className="flex flex-wrap gap-2">
+               <Badge className="bg-teal-500 text-white">
+                 Auto-detected from Tibok
+               </Badge>
+               <Badge variant="secondary" className="bg-teal-200 text-teal-800">
+                 Image analysis enabled
+               </Badge>
+               <Badge variant="secondary" className="bg-teal-200 text-teal-800">
+                 Specialized workflow
+               </Badge>
+             </div>
+           </div>
+         </div>
+       </div>
+     </CardContent>
+   </Card>
+ ) : (
+   // Normal/Chronic Selection - Hide dermatology option
+   <Card id="consultation-type-section" className="shadow-xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-50">
+     <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-600 text-white">
+       <CardTitle className="flex items-center gap-3 text-2xl">
+         <Activity className="h-7 w-7" />
+         Type of Consultation
+       </CardTitle>
+     </CardHeader>
+     <CardContent className="p-8">
+       <p className="text-gray-700 mb-6 text-lg font-medium">
+         Please select the type of consultation you wish to perform:
+       </p>
 
- {/* Chronic Disease Follow-up Option */}
- <label 
- className={`flex items-start gap-4 p-6 rounded-xl border-3 transition-all cursor-pointer ${
- consultationType === 'chronic'
- ? "border-blue-500 bg-blue-50 shadow-lg scale-[1.02]"
- : "border-gray-300 hover:border-blue-400 hover:bg-blue-50/50"
- }`}
- >
- <RadioGroupItem value="chronic" id="consultation-chronic" className="mt-1" />
- <div className="flex-1">
- <div className="flex items-center gap-2 mb-2">
- <span className="text-2xl"></span>
- <span className="font-bold text-xl text-blue-900">Chronic Disease Follow-up</span>
- </div>
- <p className="text-gray-600 text-sm leading-relaxed">
- Specialized consultation for chronic disease management. Includes detailed assessment, 
- treatment plan optimization, lifestyle counseling, and long-term follow-up scheduling.
- </p>
- <div className="mt-3 flex flex-wrap gap-2">
- <Badge variant="secondary" className="bg-blue-100 text-blue-800">
- Diabetes
- </Badge>
- <Badge variant="secondary" className="bg-blue-100 text-blue-800">
- Hypertension
- </Badge>
- <Badge variant="secondary" className="bg-blue-100 text-blue-800">
- Obesity
- </Badge>
- <Badge variant="secondary" className="bg-blue-100 text-blue-800">
- Dyslipidemia
- </Badge>
- </div>
- </div>
- </label>
+       <RadioGroup
+         value={consultationType}
+         onValueChange={(value) => setConsultationType(value as 'normal' | 'chronic' | 'dermatology')}
+         className="space-y-4"
+       >
+         {/* Normal Consultation Option */}
+         <label
+           className={`flex items-start gap-4 p-6 rounded-xl border-3 transition-all cursor-pointer ${
+             consultationType === 'normal'
+               ? "border-blue-500 bg-blue-50 shadow-lg scale-[1.02]"
+               : "border-gray-300 hover:border-blue-400 hover:bg-blue-50/50"
+           }`}
+         >
+           <RadioGroupItem value="normal" id="consultation-normal" className="mt-1" />
+           <div className="flex-1">
+             <div className="flex items-center gap-2 mb-2">
+               <span className="text-2xl"></span>
+               <span className="font-bold text-xl text-blue-900">Normal Consultation</span>
+             </div>
+             <p className="text-gray-600 text-sm leading-relaxed">
+               Standard medical consultation for acute symptoms, infections, injuries, or general health concerns.
+               Suitable for new complaints, check-ups, and non-chronic conditions.
+             </p>
+             <div className="mt-3 flex flex-wrap gap-2">
+               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                 Acute symptoms
+               </Badge>
+               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                 Infections
+               </Badge>
+               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                 General check-up
+               </Badge>
+             </div>
+           </div>
+         </label>
 
- {/* Dermatology Consultation Option */}
- <label 
- className={`flex items-start gap-4 p-6 rounded-xl border-3 transition-all cursor-pointer ${
- consultationType === 'dermatology'
- ? "border-teal-500 bg-teal-50 shadow-lg scale-[1.02]"
- : "border-gray-300 hover:border-teal-400 hover:bg-teal-50/50"
- }`}
- >
- <RadioGroupItem value="dermatology" id="consultation-dermatology" className="mt-1" />
- <div className="flex-1">
- <div className="flex items-center gap-2 mb-2">
- <span className="text-2xl">🔬</span>
- <span className="font-bold text-xl text-teal-900">Dermatology Consultation</span>
- </div>
- <p className="text-gray-600 text-sm leading-relaxed">
- Specialized dermatological consultation with image analysis. Upload photos of skin conditions 
- for AI-powered analysis by a dermatology specialist, followed by comprehensive diagnosis and treatment plan.
- </p>
- <div className="mt-3 flex flex-wrap gap-2">
- <Badge variant="secondary" className="bg-teal-100 text-teal-800">
- Skin lesions
- </Badge>
- <Badge variant="secondary" className="bg-teal-100 text-teal-800">
- Rashes
- </Badge>
- <Badge variant="secondary" className="bg-teal-100 text-teal-800">
- Image analysis
- </Badge>
- <Badge variant="secondary" className="bg-teal-100 text-teal-800">
- AI-powered OCR
- </Badge>
- </div>
- </div>
- </label>
- </RadioGroup>
+         {/* Chronic Disease Follow-up Option */}
+         <label
+           className={`flex items-start gap-4 p-6 rounded-xl border-3 transition-all cursor-pointer ${
+             consultationType === 'chronic'
+               ? "border-blue-500 bg-blue-50 shadow-lg scale-[1.02]"
+               : "border-gray-300 hover:border-blue-400 hover:bg-blue-50/50"
+           }`}
+         >
+           <RadioGroupItem value="chronic" id="consultation-chronic" className="mt-1" />
+           <div className="flex-1">
+             <div className="flex items-center gap-2 mb-2">
+               <span className="text-2xl"></span>
+               <span className="font-bold text-xl text-blue-900">Chronic Disease Follow-up</span>
+             </div>
+             <p className="text-gray-600 text-sm leading-relaxed">
+               Specialized consultation for chronic disease management. Includes detailed assessment,
+               treatment plan optimization, lifestyle counseling, and long-term follow-up scheduling.
+             </p>
+             <div className="mt-3 flex flex-wrap gap-2">
+               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                 Diabetes
+               </Badge>
+               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                 Hypertension
+               </Badge>
+               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                 Obesity
+               </Badge>
+               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                 Dyslipidemia
+               </Badge>
+             </div>
+           </div>
+         </label>
+       </RadioGroup>
 
- {consultationType && (
- <div className="mt-6 p-4 bg-white rounded-lg border-l-4 border-teal-500">
- <div className="flex items-center gap-2 text-teal-700">
- <Check className="h-5 w-5" />
- <span className="font-medium">
- {consultationType === 'normal' 
- ? '✅ Normal Consultation selected - Standard medical workflow'
- : consultationType === 'chronic'
- ? '✅ Chronic Disease Follow-up selected - Specialized management workflow'
- : '✅ Dermatology Consultation selected - Image analysis and specialized diagnosis'}
- </span>
- </div>
- </div>
+       {consultationType && (
+         <div className="mt-6 p-4 bg-white rounded-lg border-l-4 border-teal-500">
+           <div className="flex items-center gap-2 text-teal-700">
+             <Check className="h-5 w-5" />
+             <span className="font-medium">
+               {consultationType === 'normal'
+                 ? '✅ Normal Consultation selected - Standard medical workflow'
+                 : '✅ Chronic Disease Follow-up selected - Specialized management workflow'}
+             </span>
+           </div>
+         </div>
+       )}
+     </CardContent>
+   </Card>
  )}
- </CardContent>
- </Card>
 
  {/* Submit button */}
  <div className="flex justify-center pt-6">
- <Button 
- type="submit"
- size="lg"
- disabled={!consultationType}
- className={`px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 ${
- consultationType === 'chronic'
- ? 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700'
- : 'bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700'
- } ${!consultationType ? 'opacity-50 cursor-not-allowed' : ''}`}
- >
- {consultationType === 'chronic' 
- ? 'Continue to Chronic Disease Management'
- : consultationType === 'dermatology'
- ? 'Continue to Dermatology Analysis'
- : 'Continue to Clinical Information'}
- <ArrowRight className="h-5 w-5 ml-2" />
- </Button>
+   <Button
+     type="submit"
+     size="lg"
+     disabled={!consultationType && !tibokIsDermatology}
+     className={`px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 ${
+       consultationType === 'chronic'
+         ? 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700'
+         : tibokIsDermatology || consultationType === 'dermatology'
+         ? 'bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700'
+         : 'bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700'
+     } ${!consultationType && !tibokIsDermatology ? 'opacity-50 cursor-not-allowed' : ''}`}
+   >
+     {consultationType === 'chronic'
+       ? 'Continue to Chronic Disease Management'
+       : tibokIsDermatology || consultationType === 'dermatology'
+       ? 'Continue to Dermatology Analysis'
+       : 'Continue to Clinical Information'}
+     <ArrowRight className="h-5 w-5 ml-2" />
+   </Button>
  </div>
  </form>
  )
