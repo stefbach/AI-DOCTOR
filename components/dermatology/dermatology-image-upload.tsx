@@ -295,18 +295,18 @@ export default function DermatologyImageUpload({
         </Alert>
       )}
 
-      {/* Instructions */}
-      <Alert className="border-teal-200 bg-teal-50">
-        <Camera className="h-4 w-4 text-teal-600" />
-        <AlertDescription className="text-teal-800">
-          <strong>Instructions:</strong> {hasPatientImage && !imageExpired ?
-            'The patient has uploaded an image. You can add more images if needed.' :
-            'Upload clear photos of the skin condition from different angles. Make sure the images are well-lit and in focus. You can upload multiple images.'}
-        </AlertDescription>
-      </Alert>
+      {/* Instructions - Only show when no Tibok image loaded */}
+      {!tibokImageLoaded && (
+        <Alert className="border-teal-200 bg-teal-50">
+          <Camera className="h-4 w-4 text-teal-600" />
+          <AlertDescription className="text-teal-800">
+            <strong>Instructions:</strong> Upload clear photos of the skin condition from different angles. Make sure the images are well-lit and in focus. You can upload multiple images.
+          </AlertDescription>
+        </Alert>
+      )}
 
-      {/* Upload Section - Always show for adding more images */}
-      {(shouldShowImageUpload || uploadedImages.length > 0) && (
+      {/* Upload Section - Only show when no Tibok image loaded */}
+      {!tibokImageLoaded && shouldShowImageUpload && (
         <Card className="border-2 border-dashed border-teal-300 bg-teal-50/30">
           <CardContent className="p-8">
             <div className="text-center">
@@ -314,12 +314,10 @@ export default function DermatologyImageUpload({
                 <Upload className="h-10 w-10 text-white" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {uploadedImages.length > 0 ? 'Add More Images' : 'Upload Skin Condition Images'}
+                Upload Skin Condition Images
               </h3>
               <p className="text-sm text-gray-600 mb-6">
-                {uploadedImages.length > 0 ?
-                  'Click to add additional images (max 10MB per image)' :
-                  'Click to select images or drag and drop (max 10MB per image)'}
+                Click to select images or drag and drop (max 10MB per image)
               </p>
               <label htmlFor="image-upload">
                 <Button
@@ -328,7 +326,7 @@ export default function DermatologyImageUpload({
                   onClick={() => document.getElementById('image-upload')?.click()}
                 >
                   <Camera className="h-4 w-4 mr-2" />
-                  {uploadedImages.length > 0 ? 'Add More Images' : 'Select Images'}
+                  Select Images
                 </Button>
               </label>
               <input
