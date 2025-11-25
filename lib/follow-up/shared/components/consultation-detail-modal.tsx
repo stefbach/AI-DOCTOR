@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -9,9 +9,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Calendar,
   FileText,
@@ -22,7 +24,13 @@ import {
   Image as ImageIcon,
   User,
   Heart,
-  AlertCircle
+  AlertCircle,
+  Download,
+  ExternalLink,
+  ClipboardList,
+  Salad,
+  CalendarCheck,
+  Scan
 } from 'lucide-react'
 import { ConsultationHistoryItem } from '@/lib/follow-up/shared/utils/history-fetcher'
 import { format } from 'date-fns'
@@ -35,33 +43,35 @@ export interface ConsultationDetailModalProps {
 
 /**
  * ConsultationDetailModal Component
- * 
+ *
  * Displays complete details of a previous consultation in a modal dialog.
- * Shows all clinical information including vitals, medications, lab tests, and images.
- * 
- * @component
- * @example
- * ```tsx
- * <ConsultationDetailModal 
- *   consultation={selectedConsultation}
- *   open={isModalOpen}
- *   onOpenChange={setIsModalOpen}
- * />
- * ```
+ * Organized in tabs: Overview, Report, Prescription, Lab Tests, Imaging
+ * For chronic disease: includes Diet Plan and Follow-up tabs
  */
 export function ConsultationDetailModal({
   consultation,
   open,
   onOpenChange
 }: ConsultationDetailModalProps) {
+  const [activeTab, setActiveTab] = useState('overview')
+
   if (!consultation) return null
 
   const consultationType = consultation.consultationType || 'normal'
   const typeConfig = getConsultationTypeConfig(consultationType)
+  const isChronic = consultationType === 'chronic' || consultationType === 'chronic_disease'
+
+  // Extract data from fullReport
+  const fullReport = consultation.fullReport || {}
+  const prescription = extractPrescription(fullReport, consultation.medications)
+  const labTests = extractLabTests(fullReport, consultation.labTests)
+  const imaging = extractImaging(fullReport, consultation.imagingStudies)
+  const dietPlan = extractDietPlan(fullReport, consultation.dietaryPlan)
+  const followUp = extractFollowUp(fullReport)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
+      <DialogContent className="max-w-5xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {typeConfig.icon}
@@ -76,134 +86,492 @@ export function ConsultationDetailModal({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[calc(90vh-8rem)] pr-4">
-          <div className="space-y-6">
-            {/* Chief Complaint */}
-            {consultation.chiefComplaint && (
-              <Section
-                icon={<Stethoscope className="h-5 w-5 text-red-500" />}
-                title="Chief Complaint"
-              >
-                <p className="text-gray-700 whitespace-pre-wrap">{consultation.chiefComplaint}</p>
-              </Section>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className={`grid w-full ${isChronic ? 'grid-cols-6' : 'grid-cols-5'}`}>
+            <TabsTrigger value="overview" className="flex items-center gap-1">
+              <ClipboardList className="h-4 w-4" />
+              <span className="hidden sm:inline">Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="report" className="flex items-center gap-1">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">Report</span>
+            </TabsTrigger>
+            <TabsTrigger value="prescription" className="flex items-center gap-1">
+              <Pill className="h-4 w-4" />
+              <span className="hidden sm:inline">Prescription</span>
+            </TabsTrigger>
+            <TabsTrigger value="labs" className="flex items-center gap-1">
+              <TestTube className="h-4 w-4" />
+              <span className="hidden sm:inline">Lab Tests</span>
+            </TabsTrigger>
+            <TabsTrigger value="imaging" className="flex items-center gap-1">
+              <Scan className="h-4 w-4" />
+              <span className="hidden sm:inline">Imaging</span>
+            </TabsTrigger>
+            {isChronic && (
+              <TabsTrigger value="diet" className="flex items-center gap-1">
+                <Salad className="h-4 w-4" />
+                <span className="hidden sm:inline">Diet</span>
+              </TabsTrigger>
             )}
+          </TabsList>
 
-            {/* Diagnosis */}
-            {consultation.diagnosis && (
-              <Section
-                icon={<FileText className="h-5 w-5 text-blue-500" />}
-                title="Diagnosis"
-              >
-                <p className="text-gray-700 whitespace-pre-wrap">{consultation.diagnosis}</p>
-              </Section>
-            )}
+          <ScrollArea className="max-h-[calc(90vh-12rem)] mt-4">
+            {/* OVERVIEW TAB */}
+            <TabsContent value="overview" className="space-y-4">
+              {/* Chief Complaint */}
+              {consultation.chiefComplaint && (
+                <Section
+                  icon={<Stethoscope className="h-5 w-5 text-red-500" />}
+                  title="Chief Complaint"
+                >
+                  <p className="text-gray-700 whitespace-pre-wrap">{consultation.chiefComplaint}</p>
+                </Section>
+              )}
 
-            {/* Vital Signs */}
-            {consultation.vitalSigns && Object.keys(consultation.vitalSigns).length > 0 && (
-              <Section
-                icon={<Activity className="h-5 w-5 text-green-500" />}
-                title="Vital Signs"
-              >
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {Object.entries(consultation.vitalSigns).map(([key, value]) => (
-                    <VitalSignItem key={key} label={formatLabel(key)} value={String(value)} />
-                  ))}
-                </div>
-              </Section>
-            )}
+              {/* Diagnosis */}
+              {consultation.diagnosis && (
+                <Section
+                  icon={<FileText className="h-5 w-5 text-blue-500" />}
+                  title="Diagnosis"
+                >
+                  <p className="text-gray-700 whitespace-pre-wrap">{consultation.diagnosis}</p>
+                </Section>
+              )}
 
-            {/* Medications */}
-            {consultation.medications && consultation.medications.length > 0 && (
-              <Section
-                icon={<Pill className="h-5 w-5 text-purple-500" />}
-                title="Medications Prescribed"
-                badge={consultation.medications.length}
-              >
-                <div className="space-y-3">
-                  {consultation.medications.map((med, idx) => (
-                    <MedicationItem key={idx} medication={med} />
-                  ))}
-                </div>
-              </Section>
-            )}
-
-            {/* Lab Tests */}
-            {consultation.labTests && consultation.labTests.length > 0 && (
-              <Section
-                icon={<TestTube className="h-5 w-5 text-cyan-500" />}
-                title="Laboratory Tests"
-                badge={consultation.labTests.length}
-              >
-                <div className="space-y-2">
-                  {consultation.labTests.map((test, idx) => (
-                    <LabTestItem key={idx} test={test} />
-                  ))}
-                </div>
-              </Section>
-            )}
-
-            {/* Images (Dermatology) */}
-            {consultation.images && consultation.images.length > 0 && (
-              <Section
-                icon={<ImageIcon className="h-5 w-5 text-indigo-500" />}
-                title="Clinical Images"
-                badge={consultation.images.length}
-              >
-                <div className="grid grid-cols-2 gap-4">
-                  {consultation.images.map((imageUrl, idx) => (
-                    <div key={idx} className="border rounded-lg overflow-hidden">
-                      <img 
-                        src={imageUrl} 
-                        alt={`Clinical image ${idx + 1}`}
-                        className="w-full h-48 object-cover"
-                      />
-                      <div className="p-2 bg-gray-50">
-                        <p className="text-xs text-gray-600">Image {idx + 1}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Section>
-            )}
-
-            {/* Full Report Preview */}
-            {consultation.fullReport && (
-              <Section
-                icon={<FileText className="h-5 w-5 text-gray-500" />}
-                title="Rapport Médical Complet"
-              >
-                <div className="space-y-3">
-                  {/* Professional Report Display */}
-                  {renderProfessionalReport(consultation.fullReport)}
-                  
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 pt-4">
-                    <button
-                      onClick={() => window.open(`/view-report/${consultation.consultationId}`, '_blank')}
-                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      <FileText className="h-4 w-4" />
-                      Voir le Rapport Complet
-                    </button>
-                    <button
-                      onClick={() => handleDownloadReport(consultation)}
-                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                    >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      Télécharger PDF
-                    </button>
+              {/* Vital Signs */}
+              {consultation.vitalSigns && Object.keys(consultation.vitalSigns).length > 0 && (
+                <Section
+                  icon={<Activity className="h-5 w-5 text-green-500" />}
+                  title="Vital Signs"
+                >
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {Object.entries(consultation.vitalSigns).map(([key, value]) => (
+                      <VitalSignItem key={key} label={formatLabel(key)} value={String(value)} />
+                    ))}
                   </div>
-                </div>
-              </Section>
+                </Section>
+              )}
+
+              {/* Images (Dermatology) */}
+              {consultation.images && consultation.images.length > 0 && (
+                <Section
+                  icon={<ImageIcon className="h-5 w-5 text-indigo-500" />}
+                  title="Clinical Images"
+                  badge={consultation.images.length}
+                >
+                  <div className="grid grid-cols-2 gap-4">
+                    {consultation.images.map((imageUrl, idx) => (
+                      <div key={idx} className="border rounded-lg overflow-hidden">
+                        <img
+                          src={imageUrl}
+                          alt={`Clinical image ${idx + 1}`}
+                          className="w-full h-48 object-cover"
+                        />
+                        <div className="p-2 bg-gray-50">
+                          <p className="text-xs text-gray-600">Image {idx + 1}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Section>
+              )}
+
+              {/* Quick Summary */}
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="p-4">
+                  <p className="text-sm text-blue-800">
+                    <strong>Quick Summary:</strong> Use the tabs above to view detailed information about the report, prescription, lab tests, and imaging studies.
+                    {isChronic && ' Diet plan is also available for this chronic disease consultation.'}
+                  </p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* REPORT TAB */}
+            <TabsContent value="report" className="space-y-4">
+              <ReportTab consultation={consultation} fullReport={fullReport} />
+            </TabsContent>
+
+            {/* PRESCRIPTION TAB */}
+            <TabsContent value="prescription" className="space-y-4">
+              <PrescriptionTab prescription={prescription} consultation={consultation} />
+            </TabsContent>
+
+            {/* LAB TESTS TAB */}
+            <TabsContent value="labs" className="space-y-4">
+              <LabTestsTab labTests={labTests} fullReport={fullReport} />
+            </TabsContent>
+
+            {/* IMAGING TAB */}
+            <TabsContent value="imaging" className="space-y-4">
+              <ImagingTab imaging={imaging} fullReport={fullReport} />
+            </TabsContent>
+
+            {/* DIET PLAN TAB (Chronic only) */}
+            {isChronic && (
+              <TabsContent value="diet" className="space-y-4">
+                <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
+              </TabsContent>
             )}
-          </div>
-        </ScrollArea>
+          </ScrollArea>
+        </Tabs>
       </DialogContent>
     </Dialog>
   )
 }
+
+// ============ TAB COMPONENTS ============
+
+function ReportTab({ consultation, fullReport }: { consultation: ConsultationHistoryItem, fullReport: any }) {
+  const reportText = extractReportText(fullReport)
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold flex items-center gap-2">
+          <FileText className="h-5 w-5 text-blue-600" />
+          Medical Report
+        </h3>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.open(`/view-report/${consultation.consultationId}`, '_blank')}
+          >
+            <ExternalLink className="h-4 w-4 mr-1" />
+            Full Report
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleDownloadReport(consultation)}
+          >
+            <Download className="h-4 w-4 mr-1" />
+            Download
+          </Button>
+        </div>
+      </div>
+      <Separator />
+
+      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+        <CardContent className="p-4">
+          <div
+            className="text-sm text-gray-700 whitespace-pre-wrap bg-white p-4 rounded border border-blue-100 max-h-96 overflow-y-auto"
+            style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
+          >
+            {reportText || 'No report text available. Click "Full Report" to view the complete medical report.'}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Report Sections Summary */}
+      {fullReport?.medicalReport && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Report Sections</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {fullReport.medicalReport.clinicalEvaluation && (
+              <Badge variant="secondary">✓ Clinical Evaluation</Badge>
+            )}
+            {fullReport.medicalReport.diagnosticSummary && (
+              <Badge variant="secondary">✓ Diagnostic Summary</Badge>
+            )}
+            {fullReport.medicalReport.treatmentPlan && (
+              <Badge variant="secondary">✓ Treatment Plan</Badge>
+            )}
+            {fullReport.medicalReport.recommendations && (
+              <Badge variant="secondary">✓ Recommendations</Badge>
+            )}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}
+
+function PrescriptionTab({ prescription, consultation }: { prescription: any[], consultation: ConsultationHistoryItem }) {
+  if (!prescription || prescription.length === 0) {
+    return (
+      <Card className="bg-gray-50">
+        <CardContent className="p-8 text-center">
+          <Pill className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600">No prescription available for this consultation.</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold flex items-center gap-2">
+          <Pill className="h-5 w-5 text-purple-600" />
+          Prescription ({prescription.length} medication{prescription.length > 1 ? 's' : ''})
+        </h3>
+      </div>
+      <Separator />
+
+      <div className="space-y-3">
+        {prescription.map((med, idx) => (
+          <MedicationCard key={idx} medication={med} index={idx + 1} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function LabTestsTab({ labTests, fullReport }: { labTests: any[], fullReport: any }) {
+  // Also check for recommended tests in the report
+  const recommendedTests = fullReport?.medicalReport?.recommendedTests ||
+                           fullReport?.compteRendu?.examensComplementaires?.biological || []
+
+  if ((!labTests || labTests.length === 0) && (!recommendedTests || recommendedTests.length === 0)) {
+    return (
+      <Card className="bg-gray-50">
+        <CardContent className="p-8 text-center">
+          <TestTube className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600">No laboratory tests available for this consultation.</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold flex items-center gap-2">
+          <TestTube className="h-5 w-5 text-cyan-600" />
+          Laboratory Tests
+        </h3>
+      </div>
+      <Separator />
+
+      {/* Performed Tests */}
+      {labTests && labTests.length > 0 && (
+        <div className="space-y-3">
+          <h4 className="font-medium text-gray-700">Test Results</h4>
+          {labTests.map((test, idx) => (
+            <LabTestCard key={idx} test={test} />
+          ))}
+        </div>
+      )}
+
+      {/* Recommended Tests */}
+      {recommendedTests && recommendedTests.length > 0 && (
+        <Card className="border-amber-200 bg-amber-50">
+          <CardHeader>
+            <CardTitle className="text-sm text-amber-800">Recommended Tests</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {recommendedTests.map((test: any, idx: number) => (
+                <li key={idx} className="flex items-start gap-2 text-sm">
+                  <TestTube className="h-4 w-4 text-amber-600 mt-0.5" />
+                  <span>{typeof test === 'string' ? test : test.name || test.test || JSON.stringify(test)}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}
+
+function ImagingTab({ imaging, fullReport }: { imaging: any[], fullReport: any }) {
+  // Also check for recommended imaging in the report
+  const recommendedImaging = fullReport?.medicalReport?.recommendedTests?.filter((t: any) =>
+    t.type === 'imaging' || t.category === 'imaging'
+  ) || fullReport?.compteRendu?.examensComplementaires?.imaging || []
+
+  if ((!imaging || imaging.length === 0) && (!recommendedImaging || recommendedImaging.length === 0)) {
+    return (
+      <Card className="bg-gray-50">
+        <CardContent className="p-8 text-center">
+          <Scan className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600">No imaging studies available for this consultation.</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold flex items-center gap-2">
+          <Scan className="h-5 w-5 text-indigo-600" />
+          Imaging Studies
+        </h3>
+      </div>
+      <Separator />
+
+      {/* Performed Imaging */}
+      {imaging && imaging.length > 0 && (
+        <div className="space-y-3">
+          <h4 className="font-medium text-gray-700">Completed Studies</h4>
+          {imaging.map((study, idx) => (
+            <Card key={idx} className="border-l-4 border-indigo-400">
+              <CardContent className="p-4">
+                <p className="font-semibold">{typeof study === 'string' ? study : study.name || study.type}</p>
+                {study.findings && <p className="text-sm text-gray-600 mt-1">{study.findings}</p>}
+                {study.date && <p className="text-xs text-gray-500 mt-1">Date: {study.date}</p>}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Recommended Imaging */}
+      {recommendedImaging && recommendedImaging.length > 0 && (
+        <Card className="border-amber-200 bg-amber-50">
+          <CardHeader>
+            <CardTitle className="text-sm text-amber-800">Recommended Imaging</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {recommendedImaging.map((img: any, idx: number) => (
+                <li key={idx} className="flex items-start gap-2 text-sm">
+                  <Scan className="h-4 w-4 text-amber-600 mt-0.5" />
+                  <span>{typeof img === 'string' ? img : img.name || img.study || JSON.stringify(img)}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}
+
+function DietPlanTab({ dietPlan, followUp, fullReport }: { dietPlan: any, followUp: any, fullReport: any }) {
+  const hasDietPlan = dietPlan && Object.keys(dietPlan).length > 0
+  const hasFollowUp = followUp && Object.keys(followUp).length > 0
+
+  // Try to extract from different report structures
+  const mealPlan = dietPlan?.mealPlan || fullReport?.dietaryPlan?.mealPlan || fullReport?.mealPlan
+  const supplements = dietPlan?.supplements || fullReport?.dietaryPlan?.supplements || []
+  const followUpSchedule = followUp?.schedule || fullReport?.followUp?.schedule || fullReport?.suivi
+
+  if (!hasDietPlan && !hasFollowUp && !mealPlan) {
+    return (
+      <Card className="bg-gray-50">
+        <CardContent className="p-8 text-center">
+          <Salad className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600">No diet plan or follow-up information available for this consultation.</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Diet Plan Section */}
+      {(hasDietPlan || mealPlan) && (
+        <>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Salad className="h-5 w-5 text-green-600" />
+              Diet Plan
+            </h3>
+          </div>
+          <Separator />
+
+          {mealPlan && (
+            <Card className="border-green-200 bg-green-50">
+              <CardContent className="p-4">
+                <div className="space-y-4">
+                  {mealPlan.breakfast && (
+                    <div>
+                      <h4 className="font-semibold text-green-800">🌅 Breakfast</h4>
+                      <p className="text-sm text-gray-700">{mealPlan.breakfast}</p>
+                    </div>
+                  )}
+                  {mealPlan.lunch && (
+                    <div>
+                      <h4 className="font-semibold text-green-800">☀️ Lunch</h4>
+                      <p className="text-sm text-gray-700">{mealPlan.lunch}</p>
+                    </div>
+                  )}
+                  {mealPlan.dinner && (
+                    <div>
+                      <h4 className="font-semibold text-green-800">🌙 Dinner</h4>
+                      <p className="text-sm text-gray-700">{mealPlan.dinner}</p>
+                    </div>
+                  )}
+                  {mealPlan.snacks && (
+                    <div>
+                      <h4 className="font-semibold text-green-800">🍎 Snacks</h4>
+                      <p className="text-sm text-gray-700">{mealPlan.snacks}</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {supplements && supplements.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Supplements</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {supplements.map((supp: any, idx: number) => (
+                    <li key={idx} className="flex items-center gap-2 text-sm">
+                      <Pill className="h-4 w-4 text-blue-500" />
+                      <span>{typeof supp === 'string' ? supp : `${supp.supplement || supp.name} - ${supp.dosage || ''}`}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+        </>
+      )}
+
+      {/* Follow-up Section */}
+      {(hasFollowUp || followUpSchedule) && (
+        <>
+          <div className="flex items-center justify-between mt-6">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <CalendarCheck className="h-5 w-5 text-blue-600" />
+              Follow-up Schedule
+            </h3>
+          </div>
+          <Separator />
+
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="p-4">
+              {followUpSchedule && (
+                <div className="space-y-2">
+                  {typeof followUpSchedule === 'string' ? (
+                    <p className="text-sm text-gray-700">{followUpSchedule}</p>
+                  ) : (
+                    <>
+                      {followUpSchedule.nextVisit && (
+                        <p className="text-sm"><strong>Next Visit:</strong> {followUpSchedule.nextVisit}</p>
+                      )}
+                      {followUpSchedule.frequency && (
+                        <p className="text-sm"><strong>Frequency:</strong> {followUpSchedule.frequency}</p>
+                      )}
+                      {followUpSchedule.notes && (
+                        <p className="text-sm"><strong>Notes:</strong> {followUpSchedule.notes}</p>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      )}
+    </div>
+  )
+}
+
+// ============ HELPER COMPONENTS ============
 
 interface SectionProps {
   icon: React.ReactNode
@@ -228,12 +596,7 @@ function Section({ icon, title, badge, children }: SectionProps) {
   )
 }
 
-interface VitalSignItemProps {
-  label: string
-  value: string
-}
-
-function VitalSignItem({ label, value }: VitalSignItemProps) {
+function VitalSignItem({ label, value }: { label: string, value: string }) {
   return (
     <Card>
       <CardContent className="p-3">
@@ -244,20 +607,20 @@ function VitalSignItem({ label, value }: VitalSignItemProps) {
   )
 }
 
-interface MedicationItemProps {
-  medication: any
-}
-
-function MedicationItem({ medication }: MedicationItemProps) {
-  const name = typeof medication === 'string' ? medication : medication.name
-  const dosage = typeof medication === 'object' ? medication.dosage : null
-  const frequency = typeof medication === 'object' ? medication.frequency : null
+function MedicationCard({ medication, index }: { medication: any, index: number }) {
+  const name = typeof medication === 'string' ? medication : medication.name || medication.medication
+  const dosage = typeof medication === 'object' ? medication.dosage || medication.dose : null
+  const frequency = typeof medication === 'object' ? medication.frequency || medication.posology : null
   const duration = typeof medication === 'object' ? medication.duration : null
+  const instructions = typeof medication === 'object' ? medication.instructions : null
 
   return (
     <Card className="border-l-4 border-purple-400">
-      <CardContent className="p-3">
-        <div className="flex items-start justify-between">
+      <CardContent className="p-4">
+        <div className="flex items-start gap-3">
+          <div className="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+            <span className="text-sm font-bold text-purple-600">{index}</span>
+          </div>
           <div className="flex-1">
             <p className="font-semibold text-gray-800">{name}</p>
             <div className="flex flex-wrap gap-2 mt-2">
@@ -280,6 +643,9 @@ function MedicationItem({ medication }: MedicationItemProps) {
                 </Badge>
               )}
             </div>
+            {instructions && (
+              <p className="text-sm text-gray-600 mt-2 italic">{instructions}</p>
+            )}
           </div>
         </div>
       </CardContent>
@@ -287,20 +653,16 @@ function MedicationItem({ medication }: MedicationItemProps) {
   )
 }
 
-interface LabTestItemProps {
-  test: any
-}
-
-function LabTestItem({ test }: LabTestItemProps) {
-  const name = typeof test === 'string' ? test : test.name
-  const value = typeof test === 'object' ? test.value : null
+function LabTestCard({ test }: { test: any }) {
+  const name = typeof test === 'string' ? test : test.name || test.test
+  const value = typeof test === 'object' ? test.value || test.result : null
   const unit = typeof test === 'object' ? test.unit : null
-  const normalRange = typeof test === 'object' ? test.normalRange : null
-  const isAbnormal = typeof test === 'object' ? test.isAbnormal : false
+  const normalRange = typeof test === 'object' ? test.normalRange || test.reference : null
+  const isAbnormal = typeof test === 'object' ? test.isAbnormal || test.abnormal : false
 
   return (
     <Card className={`border-l-4 ${isAbnormal ? 'border-red-400 bg-red-50' : 'border-cyan-400'}`}>
-      <CardContent className="p-3">
+      <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2">
@@ -323,6 +685,8 @@ function LabTestItem({ test }: LabTestItemProps) {
     </Card>
   )
 }
+
+// ============ HELPER FUNCTIONS ============
 
 function getConsultationTypeConfig(type: string) {
   switch (type.toLowerCase()) {
@@ -352,25 +716,13 @@ function formatLabel(key: string): string {
     .trim()
 }
 
-/**
- * Render professional report preview
- */
-function renderProfessionalReport(fullReport: any) {
-  // Extract narrative or summary from different report structures
-  let reportText = ''
-  
-  if (typeof fullReport === 'string') {
-    reportText = fullReport
-  } else if (fullReport?.medicalReport?.narrative) {
-    // English format with narrative
-    reportText = fullReport.medicalReport.narrative
-  } else if (fullReport?.compteRendu?.synthese) {
-    // Mauritian format with synthesis
-    reportText = fullReport.compteRendu.synthese
-  } else if (fullReport?.medicalReport) {
-    // Try to extract a summary
+function extractReportText(fullReport: any): string {
+  if (typeof fullReport === 'string') return fullReport
+  if (fullReport?.medicalReport?.narrative) return fullReport.medicalReport.narrative
+  if (fullReport?.compteRendu?.synthese) return fullReport.compteRendu.synthese
+  if (fullReport?.medicalReport) {
     const mr = fullReport.medicalReport
-    reportText = `Patient: ${mr.patient?.fullName || 'N/A'}
+    return `Patient: ${mr.patient?.fullName || 'N/A'}
 Date: ${mr.header?.reportDate || 'N/A'}
 
 Chief Complaint: ${mr.clinicalEvaluation?.chiefComplaint || 'N/A'}
@@ -378,35 +730,50 @@ Chief Complaint: ${mr.clinicalEvaluation?.chiefComplaint || 'N/A'}
 Diagnosis: ${mr.diagnosticSummary?.diagnosticConclusion || 'N/A'}
 
 Treatment Plan: See full report for details.`
-  } else {
-    reportText = 'Rapport disponible - Cliquez sur "Voir le Rapport Complet" pour afficher'
   }
-  
-  return (
-    <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-      <CardContent className="p-4">
-        <div className="prose prose-sm max-w-none">
-          <p className="text-xs text-gray-500 uppercase font-semibold mb-2">Aperçu du Rapport</p>
-          <div 
-            className="text-sm text-gray-700 whitespace-pre-wrap max-h-64 overflow-y-auto bg-white p-4 rounded border border-blue-100"
-            style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
-          >
-            {reportText.substring(0, 800)}
-            {reportText.length > 800 && '...'}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
+  return ''
 }
 
-/**
- * Handle report download
- */
+function extractPrescription(fullReport: any, medications?: any[]): any[] {
+  if (medications && medications.length > 0) return medications
+  return fullReport?.ordonnance?.medications ||
+         fullReport?.medicalReport?.prescription?.medications ||
+         fullReport?.prescription?.medications ||
+         []
+}
+
+function extractLabTests(fullReport: any, labTests?: any[]): any[] {
+  if (labTests && labTests.length > 0) return labTests
+  return fullReport?.labResults ||
+         fullReport?.medicalReport?.labTests ||
+         []
+}
+
+function extractImaging(fullReport: any, imagingStudies?: any[]): any[] {
+  if (imagingStudies && imagingStudies.length > 0) return imagingStudies
+  return fullReport?.imagingResults ||
+         fullReport?.medicalReport?.imagingStudies ||
+         []
+}
+
+function extractDietPlan(fullReport: any, dietaryPlan?: any): any {
+  if (dietaryPlan && Object.keys(dietaryPlan).length > 0) return dietaryPlan
+  return fullReport?.dietaryPlan ||
+         fullReport?.mealPlan ||
+         fullReport?.diet ||
+         {}
+}
+
+function extractFollowUp(fullReport: any): any {
+  return fullReport?.followUp ||
+         fullReport?.suivi ||
+         fullReport?.medicalReport?.followUp ||
+         {}
+}
+
 function handleDownloadReport(consultation: ConsultationHistoryItem) {
-  // Create a formatted report text
   let reportContent = ''
-  
+
   if (typeof consultation.fullReport === 'string') {
     reportContent = consultation.fullReport
   } else if (consultation.fullReport?.medicalReport?.narrative) {
@@ -414,8 +781,7 @@ function handleDownloadReport(consultation: ConsultationHistoryItem) {
   } else {
     reportContent = JSON.stringify(consultation.fullReport, null, 2)
   }
-  
-  // Create blob and download
+
   const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
@@ -425,7 +791,4 @@ function handleDownloadReport(consultation: ConsultationHistoryItem) {
   link.click()
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
-  
-  // TODO: In future, implement PDF generation via API
-  console.log('📄 Report downloaded. Future enhancement: PDF generation via API')
 }

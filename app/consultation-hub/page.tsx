@@ -35,6 +35,12 @@ export default function ConsultationHubPage() {
   const handlePatientFound = (data: any) => {
     setPatientData(data)
     setCurrentStep('summary')
+
+    // Auto-show history for returning patients (≥1 consultation)
+    if (data.consultations && data.consultations.length >= 1) {
+      console.log('📋 Returning patient detected - auto-showing consultation history')
+      setShowHistoryModal(true)
+    }
   }
 
   const handleNewPatient = () => {
