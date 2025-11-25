@@ -1749,8 +1749,29 @@ Example:
        </CardTitle>
      </CardHeader>
      <CardContent className="p-8">
+       {/* Show patient's selected type when coming from Tibok */}
+       {tibokConsultationType && (
+         <div className="mb-6 p-4 bg-blue-100 rounded-xl border-2 border-blue-300">
+           <div className="flex items-start gap-3">
+             <div className="p-2 bg-blue-500 rounded-full">
+               <Activity className="h-5 w-5 text-white" />
+             </div>
+             <div className="flex-1">
+               <h4 className="font-bold text-blue-900 mb-1">
+                 {tibokConsultationType === 'normal' ? '📋 Normal Consultation' : '🩺 Chronic Disease Follow-up'} Selected by Patient
+               </h4>
+               <p className="text-blue-800 text-sm">
+                 The patient has selected this consultation type from Tibok. You may confirm or change to the most appropriate type below.
+               </p>
+             </div>
+           </div>
+         </div>
+       )}
+
        <p className="text-gray-700 mb-6 text-lg font-medium">
-         Please select the type of consultation you wish to perform:
+         {tibokConsultationType
+           ? 'Confirm or select the type of consultation:'
+           : 'Please select the type of consultation you wish to perform:'}
        </p>
 
        <RadioGroup
