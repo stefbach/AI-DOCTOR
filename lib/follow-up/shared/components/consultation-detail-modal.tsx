@@ -226,6 +226,11 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
   // Extract report data from different formats
   const compteRendu = fullReport?.compteRendu
   const medicalReport = fullReport?.medicalReport
+  // Check for root-level patient data (direct format)
+  const rootPatient = fullReport?.patient
+  const hasRootData = rootPatient || fullReport?.dietaryPlan || fullReport?.nutritionalAssessment
+
+  console.log('📄 ReportTab fullReport:', fullReport)
 
   return (
     <div className="space-y-4">
@@ -244,6 +249,166 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
         </Button>
       </div>
       <Separator />
+
+      {/* Root-level data format (direct patient/diet data) */}
+      {hasRootData && !compteRendu && !medicalReport && (
+        <div className="space-y-4">
+          {/* Patient Info from root */}
+          {rootPatient && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Informations Patient
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                  {(rootPatient.nom || rootPatient.name) && (
+                    <div><span className="font-medium">Nom:</span> {rootPatient.nom || rootPatient.name}</div>
+                  )}
+                  {rootPatient.age && (
+                    <div><span className="font-medium">Âge:</span> {rootPatient.age} ans</div>
+                  )}
+                  {(rootPatient.sexe || rootPatient.gender) && (
+                    <div><span className="font-medium">Sexe:</span> {rootPatient.sexe || rootPatient.gender}</div>
+                  )}
+                  {rootPatient.email && (
+                    <div><span className="font-medium">Email:</span> {rootPatient.email}</div>
+                  )}
+                  {(rootPatient.poids || rootPatient.weight) && (
+                    <div><span className="font-medium">Poids:</span> {rootPatient.poids || rootPatient.weight} kg</div>
+                  )}
+                  {(rootPatient.taille || rootPatient.height) && (
+                    <div><span className="font-medium">Taille:</span> {rootPatient.taille || rootPatient.height} cm</div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Nutritional Assessment */}
+          {fullReport?.nutritionalAssessment && (
+            <Card className="border-l-4 border-l-green-500">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-green-800">Évaluation Nutritionnelle</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-2 space-y-2">
+                {fullReport.nutritionalAssessment.currentDiet && (
+                  <div>
+                    <span className="font-medium">État Actuel:</span>
+                    <p className="text-gray-700 bg-gray-50 p-2 rounded mt-1">{fullReport.nutritionalAssessment.currentDiet}</p>
+                  </div>
+                )}
+                {fullReport.nutritionalAssessment.culturalConsiderations && (
+                  <div>
+                    <span className="font-medium">Considérations Culturelles:</span>
+                    <p className="text-gray-600 text-sm">{fullReport.nutritionalAssessment.culturalConsiderations}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Nutritional Guidelines */}
+          {fullReport?.nutritionalGuidelines && (
+            <Card className="border-l-4 border-l-blue-500">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-blue-800">Recommandations Nutritionnelles</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                  {fullReport.nutritionalGuidelines.caloriesTarget && (
+                    <div className="bg-blue-50 p-2 rounded">
+                      <span className="font-medium text-blue-800">Calories:</span>
+                      <p className="text-blue-700">{fullReport.nutritionalGuidelines.caloriesTarget}</p>
+                    </div>
+                  )}
+                  {fullReport.nutritionalGuidelines.hydration && (
+                    <div className="bg-blue-50 p-2 rounded">
+                      <span className="font-medium text-blue-800">Hydratation:</span>
+                      <p className="text-blue-700">{fullReport.nutritionalGuidelines.hydration}</p>
+                    </div>
+                  )}
+                  {fullReport.nutritionalGuidelines.macronutrients && (
+                    <div className="bg-blue-50 p-2 rounded">
+                      <span className="font-medium text-blue-800">Macros:</span>
+                      <p className="text-blue-700 text-xs">
+                        P: {fullReport.nutritionalGuidelines.macronutrients.protein} |
+                        G: {fullReport.nutritionalGuidelines.macronutrients.carbs} |
+                        L: {fullReport.nutritionalGuidelines.macronutrients.fat}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Special Instructions */}
+          {fullReport?.specialInstructions && fullReport.specialInstructions.length > 0 && (
+            <Card className="border-l-4 border-l-amber-500">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-amber-800">Instructions Spéciales</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
+                  {fullReport.specialInstructions.map((instruction: string, idx: number) => (
+                    <li key={idx}>{instruction}</li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Cooking Methods */}
+          {fullReport?.cookingMethods && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Méthodes de Cuisson</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-2 grid grid-cols-2 gap-4">
+                {fullReport.cookingMethods.recommended && (
+                  <div>
+                    <span className="font-medium text-green-700">Recommandées:</span>
+                    <ul className="list-disc list-inside text-sm text-gray-600 mt-1">
+                      {fullReport.cookingMethods.recommended.map((method: string, idx: number) => (
+                        <li key={idx}>{method}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {fullReport.cookingMethods.avoid && (
+                  <div>
+                    <span className="font-medium text-red-700">À Éviter:</span>
+                    <ul className="list-disc list-inside text-sm text-gray-600 mt-1">
+                      {fullReport.cookingMethods.avoid.map((method: string, idx: number) => (
+                        <li key={idx}>{method}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Meal Prep Tips */}
+          {fullReport?.mealPrepTips && fullReport.mealPrepTips.length > 0 && (
+            <Card className="bg-green-50 border-green-200">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-green-800">Conseils de Préparation</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <ul className="list-disc list-inside space-y-1 text-sm text-green-700">
+                  {fullReport.mealPrepTips.map((tip: string, idx: number) => (
+                    <li key={idx}>{tip}</li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
 
       {/* French Format (compteRendu) */}
       {compteRendu && (
@@ -442,8 +607,8 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
         </div>
       )}
 
-      {/* Fallback if no structured data */}
-      {!compteRendu && !medicalReport && (
+      {/* Fallback if no structured data at all */}
+      {!compteRendu && !medicalReport && !hasRootData && (
         <Card className="bg-gray-50">
           <CardContent className="p-8 text-center">
             <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
