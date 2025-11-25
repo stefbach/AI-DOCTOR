@@ -87,6 +87,74 @@ export default function MedicalAIExpert() {
     }
   }, [])
 
+  // Check for returning patient and redirect to consultation hub if they have history
+  useEffect(() => {
+    const checkReturningPatient = async () => {
+      // Skip if coming from consultation hub (already processed)
+      const fromHub = sessionStorage.getItem('fromConsultationHub')
+      if (fromHub === 'true') {
+        sessionStorage.removeItem('fromConsultationHub')
+        console.log('📋 Coming from consultation hub, skipping redirect check')
+        return
+      }
+
+      const urlParams = new URLSearchParams(window.location.search)
+      const patientId = urlParams.get('patientId')
+      const patientEmail = urlParams.get('patientEmail')
+      const patientPhone = urlParams.get('patientPhone')
+
+      // Need at least one identifier to check history
+      if (!patientId && !patientEmail && !patientPhone) {
+        console.log('ℹ️ No patient identifier in URL, proceeding with normal flow')
+        return
+      }
+
+      console.log('🔍 Checking if returning patient...', { patientId, patientEmail, patientPhone })
+
+      try {
+        // Query patient history
+        const response = await fetch('/api/patient-history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            patientId,
+            email: patientEmail,
+            phone: patientPhone
+          })
+        })
+
+        if (!response.ok) {
+          console.log('⚠️ Could not fetch patient history, proceeding with normal flow')
+          return
+        }
+
+        const data = await response.json()
+
+        if (data.success && data.consultations && data.consultations.length >= 1) {
+          console.log(`📋 Returning patient detected with ${data.consultations.length} consultation(s) - redirecting to hub`)
+
+          // Store patient data for the hub
+          sessionStorage.setItem('returningPatientData', JSON.stringify({
+            searchCriteria: { patientId, email: patientEmail, phone: patientPhone },
+            consultations: data.consultations,
+            totalConsultations: data.consultations.length
+          }))
+
+          // Preserve URL params for the hub
+          const currentParams = window.location.search
+          window.location.href = `/consultation-hub${currentParams}&returning=true`
+        } else {
+          console.log('👤 New patient - proceeding with normal flow')
+        }
+      } catch (error) {
+        console.error('❌ Error checking patient history:', error)
+        // Continue with normal flow on error
+      }
+    }
+
+    checkReturningPatient()
+  }, [])
+
   // Load prefill data from sessionStorage for existing patient consultation
   useEffect(() => {
     const savedPatientData = sessionStorage.getItem('consultationPatientData')

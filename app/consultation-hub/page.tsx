@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -20,7 +20,7 @@ type WorkflowStep = 'search' | 'summary' | 'workflow'
 
 /**
  * Consultation Hub - Interface Centrale Intelligente
- * 
+ *
  * Point d'entrée unique pour tous les types de consultations.
  * Détecte automatiquement si le patient est nouveau ou existant
  * et route intelligemment vers le workflow approprié.
@@ -31,6 +31,32 @@ export default function ConsultationHubPage() {
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [selectedConsultation, setSelectedConsultation] = useState<ConsultationHistoryItem | null>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+
+  // Auto-load returning patient data from sessionStorage (set by main page redirect)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const isReturning = urlParams.get('returning') === 'true'
+
+    if (isReturning) {
+      const storedData = sessionStorage.getItem('returningPatientData')
+      if (storedData) {
+        try {
+          const returningPatientData = JSON.parse(storedData)
+          console.log('📋 Auto-loading returning patient data:', returningPatientData)
+
+          // Set patient data and show history
+          setPatientData(returningPatientData)
+          setCurrentStep('summary')
+          setShowHistoryModal(true)
+
+          // Clean up
+          sessionStorage.removeItem('returningPatientData')
+        } catch (error) {
+          console.error('❌ Error loading returning patient data:', error)
+        }
+      }
+    }
+  }, [])
 
   const handlePatientFound = (data: any) => {
     setPatientData(data)

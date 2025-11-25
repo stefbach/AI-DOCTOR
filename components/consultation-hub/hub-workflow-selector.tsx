@@ -38,7 +38,10 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
 
   const handleProceed = () => {
     const selectedPath = selectedWorkflow || routeDecision.recommendedPath
-    
+
+    // Mark that we're coming from the consultation hub (to prevent redirect loop)
+    sessionStorage.setItem('fromConsultationHub', 'true')
+
     // If going to a FULL consultation (not follow-up) AND we have patient history
     // Store demographics in sessionStorage for pre-filling
     if (!selectedPath.includes('/follow-up') && consultationHistory.length > 0) {
