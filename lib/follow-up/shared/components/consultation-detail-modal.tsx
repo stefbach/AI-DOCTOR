@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Calendar,
@@ -115,7 +114,7 @@ export function ConsultationDetailModal({
             )}
           </TabsList>
 
-          <ScrollArea className="max-h-[calc(90vh-12rem)] mt-4">
+          <div className="h-[calc(90vh-14rem)] overflow-y-auto mt-4 pr-2">
             {/* OVERVIEW TAB */}
             <TabsContent value="overview" className="space-y-4">
               {/* Chief Complaint */}
@@ -213,7 +212,7 @@ export function ConsultationDetailModal({
                 <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
               </TabsContent>
             )}
-          </ScrollArea>
+          </div>
         </Tabs>
       </DialogContent>
     </Dialog>
