@@ -114,8 +114,8 @@ export function ConsultationDetailModal({
           </TabsList>
 
           {/* OVERVIEW TAB */}
-          <TabsContent value="overview" className="flex-1 mt-4 data-[state=active]:flex data-[state=active]:flex-col">
-            <ScrollArea className="flex-1 h-[calc(90vh-12rem)]">
+          <TabsContent value="overview" className="mt-4">
+            <ScrollArea className="h-[calc(90vh-12rem)]">
               <div className="space-y-4 pr-4 pb-4">
               {/* Chief Complaint */}
               {consultation.chiefComplaint && (
@@ -189,8 +189,8 @@ export function ConsultationDetailModal({
           </TabsContent>
 
           {/* REPORT TAB */}
-          <TabsContent value="report" className="flex-1 mt-4 data-[state=active]:flex data-[state=active]:flex-col">
-            <ScrollArea className="flex-1 h-[calc(90vh-12rem)]">
+          <TabsContent value="report" className="mt-4">
+            <ScrollArea className="h-[calc(90vh-12rem)]">
               <div className="pr-4 pb-4">
                 <ReportTab consultation={consultation} fullReport={fullReport} />
               </div>
@@ -198,8 +198,8 @@ export function ConsultationDetailModal({
           </TabsContent>
 
           {/* PRESCRIPTION TAB */}
-          <TabsContent value="prescription" className="flex-1 mt-4 data-[state=active]:flex data-[state=active]:flex-col">
-            <ScrollArea className="flex-1 h-[calc(90vh-12rem)]">
+          <TabsContent value="prescription" className="mt-4">
+            <ScrollArea className="h-[calc(90vh-12rem)]">
               <div className="pr-4 pb-4">
                 <PrescriptionTab prescription={prescription} consultation={consultation} />
               </div>
@@ -207,8 +207,8 @@ export function ConsultationDetailModal({
           </TabsContent>
 
           {/* LAB TESTS TAB */}
-          <TabsContent value="labs" className="flex-1 mt-4 data-[state=active]:flex data-[state=active]:flex-col">
-            <ScrollArea className="flex-1 h-[calc(90vh-12rem)]">
+          <TabsContent value="labs" className="mt-4">
+            <ScrollArea className="h-[calc(90vh-12rem)]">
               <div className="pr-4 pb-4">
                 <LabTestsTab labTests={labTests} fullReport={fullReport} />
               </div>
@@ -216,8 +216,8 @@ export function ConsultationDetailModal({
           </TabsContent>
 
           {/* IMAGING TAB */}
-          <TabsContent value="imaging" className="flex-1 mt-4 data-[state=active]:flex data-[state=active]:flex-col">
-            <ScrollArea className="flex-1 h-[calc(90vh-12rem)]">
+          <TabsContent value="imaging" className="mt-4">
+            <ScrollArea className="h-[calc(90vh-12rem)]">
               <div className="pr-4 pb-4">
                 <ImagingTab imaging={imaging} fullReport={fullReport} />
               </div>
@@ -226,8 +226,8 @@ export function ConsultationDetailModal({
 
           {/* DIET PLAN TAB (Chronic only) */}
           {isChronic && (
-            <TabsContent value="diet" className="flex-1 mt-4 data-[state=active]:flex data-[state=active]:flex-col">
-              <ScrollArea className="flex-1 h-[calc(90vh-12rem)]">
+            <TabsContent value="diet" className="mt-4">
+              <ScrollArea className="h-[calc(90vh-12rem)]">
                 <div className="pr-4 pb-4">
                   <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
                 </div>
