@@ -220,29 +220,61 @@ export function ConsultationDetailModal({
 // ============ TAB COMPONENTS ============
 
 function ReportTab({ consultation, fullReport }: { consultation: ConsultationHistoryItem, fullReport: any }) {
-  // Extract report content
+  // Try multiple data paths for the report content
+
+  // Path 1: New document format (consultation_report.content.narrative)
   const consultationReport = fullReport?.consultation_report
   const reportContent = consultationReport?.content || {}
-
-  // The narrative field contains the complete formatted report
   const narrative = reportContent?.narrative
 
-  // Extract from clinicalEvaluation (nested structure)
+  // Path 2: Mauritian format (compteRendu)
+  const compteRendu = fullReport?.compteRendu
+  const rapport = compteRendu?.rapport || {}
+
+  // Path 3: Medical report format (medicalReport)
+  const medicalReport = fullReport?.medicalReport
+  const clinicalEvalMR = medicalReport?.clinicalEvaluation || {}
+  const diagSummaryMR = medicalReport?.diagnosticSummary || {}
+
+  // Path 4: From consultation_report.content structured fields
   const clinicalEval = reportContent?.clinicalEvaluation || {}
-  const chiefComplaint = clinicalEval?.chiefComplaint
-  const historyOfIllness = clinicalEval?.historyOfPresentIllness
-  const physicalExam = clinicalEval?.physicalExamination
+  const diagSummary = reportContent?.diagnosticSummary || {}
 
-  // Diagnostic summary
-  const diagSummary = reportContent?.diagnosticSummary
-  const diagnosis = diagSummary?.diagnosticConclusion
-
-  // Management and follow-up from different sources
-  const chronicAssessment = reportContent?.chronicDiseaseAssessment
-  const followUpContent = fullReport?.follow_up?.content
-
+  // Determine which content to display
   const hasNarrative = narrative && narrative.length > 0
+
+  // Build structured content from any available source
+  const chiefComplaint =
+    clinicalEval?.chiefComplaint ||
+    rapport?.motifConsultation ||
+    clinicalEvalMR?.chiefComplaint ||
+    consultation.chiefComplaint
+
+  const historyOfIllness =
+    clinicalEval?.historyOfPresentIllness ||
+    rapport?.histoireMaladie ||
+    clinicalEvalMR?.historyOfPresentIllness
+
+  const physicalExam =
+    clinicalEval?.physicalExamination ||
+    rapport?.examenClinique ||
+    clinicalEvalMR?.physicalExamination
+
+  const diagnosis =
+    diagSummary?.diagnosticConclusion ||
+    rapport?.syntheseDiagnostique ||
+    diagSummaryMR?.diagnosticConclusion ||
+    consultation.diagnosis
+
+  const treatmentPlan =
+    rapport?.planTraitement ||
+    medicalReport?.treatmentPlan?.medications ||
+    reportContent?.treatmentPlan
+
   const hasStructuredContent = chiefComplaint || historyOfIllness || physicalExam || diagnosis
+
+  // For compteRendu, we can build a narrative-like display
+  const hasCompteRendu = compteRendu && (rapport?.motifConsultation || rapport?.syntheseDiagnostique)
 
   return (
     <div className="space-y-6">
@@ -261,12 +293,12 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
       {hasNarrative ? (
         // Display the full narrative report (like Tibok does)
         <div className="prose prose-sm max-w-none">
-          <pre className="whitespace-pre-wrap font-sans text-gray-700 text-sm leading-relaxed bg-white p-0">
+          <div className="whitespace-pre-wrap font-sans text-gray-700 text-sm leading-relaxed">
             {narrative}
-          </pre>
+          </div>
         </div>
       ) : hasStructuredContent ? (
-        // Fallback to structured display if no narrative
+        // Display structured content from any source
         <div className="space-y-6">
           {chiefComplaint && (
             <ReportSection title="CHIEF COMPLAINT" content={chiefComplaint} />
@@ -280,12 +312,19 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
           {diagnosis && (
             <ReportSection title="DIAGNOSIS" content={diagnosis} />
           )}
+          {treatmentPlan && (
+            <ReportSection title="TREATMENT PLAN" content={treatmentPlan} />
+          )}
         </div>
       ) : (
         <Card className="bg-gray-50">
           <CardContent className="p-8 text-center">
             <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600">No report available for this consultation.</p>
+            {/* Debug info - can be removed later */}
+            <p className="text-xs text-gray-400 mt-2">
+              Available keys: {fullReport ? Object.keys(fullReport).join(', ') : 'none'}
+            </p>
           </CardContent>
         </Card>
       )}
