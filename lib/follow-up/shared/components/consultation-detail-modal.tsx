@@ -26,7 +26,6 @@ import {
   Heart,
   AlertCircle,
   Download,
-  ExternalLink,
   ClipboardList,
   Salad,
   CalendarCheck,
@@ -224,65 +223,238 @@ export function ConsultationDetailModal({
 // ============ TAB COMPONENTS ============
 
 function ReportTab({ consultation, fullReport }: { consultation: ConsultationHistoryItem, fullReport: any }) {
-  const reportText = extractReportText(fullReport)
+  // Extract report data from different formats
+  const compteRendu = fullReport?.compteRendu
+  const medicalReport = fullReport?.medicalReport
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <FileText className="h-5 w-5 text-blue-600" />
-          Medical Report
+          Compte Rendu Médical
         </h3>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.open(`/view-report/${consultation.consultationId}`, '_blank')}
-          >
-            <ExternalLink className="h-4 w-4 mr-1" />
-            Full Report
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleDownloadReport(consultation)}
-          >
-            <Download className="h-4 w-4 mr-1" />
-            Download
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleDownloadReport(consultation)}
+        >
+          <Download className="h-4 w-4 mr-1" />
+          Télécharger
+        </Button>
       </div>
       <Separator />
 
-      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-        <CardContent className="p-4">
-          <div
-            className="text-sm text-gray-700 whitespace-pre-wrap bg-white p-4 rounded border border-blue-100 max-h-96 overflow-y-auto"
-            style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
-          >
-            {reportText || 'No report text available. Click "Full Report" to view the complete medical report.'}
-          </div>
-        </CardContent>
-      </Card>
+      {/* French Format (compteRendu) */}
+      {compteRendu && (
+        <div className="space-y-4">
+          {/* Header */}
+          {compteRendu.header && (
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="p-4">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  {compteRendu.header.etablissement && (
+                    <div>
+                      <span className="font-semibold text-blue-800">Établissement:</span>{' '}
+                      <span className="text-blue-700">{compteRendu.header.etablissement}</span>
+                    </div>
+                  )}
+                  {compteRendu.header.date && (
+                    <div>
+                      <span className="font-semibold text-blue-800">Date:</span>{' '}
+                      <span className="text-blue-700">{compteRendu.header.date}</span>
+                    </div>
+                  )}
+                  {compteRendu.header.consultationType && (
+                    <div>
+                      <span className="font-semibold text-blue-800">Type:</span>{' '}
+                      <span className="text-blue-700">{compteRendu.header.consultationType}</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-      {/* Report Sections Summary */}
-      {fullReport?.medicalReport && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Report Sections</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {fullReport.medicalReport.clinicalEvaluation && (
-              <Badge variant="secondary">✓ Clinical Evaluation</Badge>
-            )}
-            {fullReport.medicalReport.diagnosticSummary && (
-              <Badge variant="secondary">✓ Diagnostic Summary</Badge>
-            )}
-            {fullReport.medicalReport.treatmentPlan && (
-              <Badge variant="secondary">✓ Treatment Plan</Badge>
-            )}
-            {fullReport.medicalReport.recommendations && (
-              <Badge variant="secondary">✓ Recommendations</Badge>
+          {/* Patient Info */}
+          {compteRendu.patient && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Informations Patient
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                  {compteRendu.patient.nom && (
+                    <div><span className="font-medium">Nom:</span> {compteRendu.patient.nom}</div>
+                  )}
+                  {compteRendu.patient.age && (
+                    <div><span className="font-medium">Âge:</span> {compteRendu.patient.age} ans</div>
+                  )}
+                  {compteRendu.patient.sexe && (
+                    <div><span className="font-medium">Sexe:</span> {compteRendu.patient.sexe}</div>
+                  )}
+                  {compteRendu.patient.poids && (
+                    <div><span className="font-medium">Poids:</span> {compteRendu.patient.poids} kg</div>
+                  )}
+                  {compteRendu.patient.taille && (
+                    <div><span className="font-medium">Taille:</span> {compteRendu.patient.taille} cm</div>
+                  )}
+                  {(compteRendu.patient.tensionSystolique || compteRendu.patient.bloodPressureSystolic) && (
+                    <div>
+                      <span className="font-medium">TA:</span>{' '}
+                      {compteRendu.patient.tensionSystolique || compteRendu.patient.bloodPressureSystolic}/
+                      {compteRendu.patient.tensionDiastolique || compteRendu.patient.bloodPressureDiastolic} mmHg
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Rapport (Main Content) */}
+          {compteRendu.rapport && (
+            <Card className="border-l-4 border-l-blue-500">
+              <CardContent className="p-4 space-y-4">
+                {compteRendu.rapport.motifConsultation && (
+                  <div>
+                    <h4 className="font-semibold text-blue-800 mb-1">Motif de Consultation</h4>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded">{compteRendu.rapport.motifConsultation}</p>
+                  </div>
+                )}
+                {compteRendu.rapport.histoireMaladie && (
+                  <div>
+                    <h4 className="font-semibold text-blue-800 mb-1">Histoire de la Maladie</h4>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{compteRendu.rapport.histoireMaladie}</p>
+                  </div>
+                )}
+                {compteRendu.rapport.examenClinique && (
+                  <div>
+                    <h4 className="font-semibold text-blue-800 mb-1">Examen Clinique</h4>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{compteRendu.rapport.examenClinique}</p>
+                  </div>
+                )}
+                {compteRendu.rapport.syntheseDiagnostique && (
+                  <div>
+                    <h4 className="font-semibold text-blue-800 mb-1">Synthèse Diagnostique</h4>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{compteRendu.rapport.syntheseDiagnostique}</p>
+                  </div>
+                )}
+                {compteRendu.rapport.planTraitement && (
+                  <div>
+                    <h4 className="font-semibold text-blue-800 mb-1">Plan de Traitement</h4>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{compteRendu.rapport.planTraitement}</p>
+                  </div>
+                )}
+                {compteRendu.rapport.recommandations && (
+                  <div>
+                    <h4 className="font-semibold text-blue-800 mb-1">Recommandations</h4>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{compteRendu.rapport.recommandations}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* English Format (medicalReport) */}
+      {medicalReport && !compteRendu && (
+        <div className="space-y-4">
+          {/* Patient Info */}
+          {medicalReport.patient && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Patient Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                  {medicalReport.patient.fullName && (
+                    <div><span className="font-medium">Name:</span> {medicalReport.patient.fullName}</div>
+                  )}
+                  {medicalReport.patient.age && (
+                    <div><span className="font-medium">Age:</span> {medicalReport.patient.age} years</div>
+                  )}
+                  {medicalReport.patient.gender && (
+                    <div><span className="font-medium">Gender:</span> {medicalReport.patient.gender}</div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Clinical Evaluation */}
+          {medicalReport.clinicalEvaluation && (
+            <Card className="border-l-4 border-l-blue-500">
+              <CardContent className="p-4 space-y-4">
+                {medicalReport.clinicalEvaluation.chiefComplaint && (
+                  <div>
+                    <h4 className="font-semibold text-blue-800 mb-1">Chief Complaint</h4>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded">{medicalReport.clinicalEvaluation.chiefComplaint}</p>
+                  </div>
+                )}
+                {medicalReport.clinicalEvaluation.historyOfPresentIllness && (
+                  <div>
+                    <h4 className="font-semibold text-blue-800 mb-1">History of Present Illness</h4>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{medicalReport.clinicalEvaluation.historyOfPresentIllness}</p>
+                  </div>
+                )}
+                {medicalReport.clinicalEvaluation.physicalExamination && (
+                  <div>
+                    <h4 className="font-semibold text-blue-800 mb-1">Physical Examination</h4>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{medicalReport.clinicalEvaluation.physicalExamination}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Diagnostic Summary */}
+          {medicalReport.diagnosticSummary && (
+            <Card className="border-l-4 border-l-green-500">
+              <CardContent className="p-4">
+                <h4 className="font-semibold text-green-800 mb-2">Diagnostic Summary</h4>
+                <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">
+                  {medicalReport.diagnosticSummary.diagnosticConclusion || JSON.stringify(medicalReport.diagnosticSummary, null, 2)}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Treatment Plan */}
+          {medicalReport.treatmentPlan && (
+            <Card className="border-l-4 border-l-purple-500">
+              <CardContent className="p-4">
+                <h4 className="font-semibold text-purple-800 mb-2">Treatment Plan</h4>
+                <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">
+                  {typeof medicalReport.treatmentPlan === 'string'
+                    ? medicalReport.treatmentPlan
+                    : JSON.stringify(medicalReport.treatmentPlan, null, 2)}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* Fallback if no structured data */}
+      {!compteRendu && !medicalReport && (
+        <Card className="bg-gray-50">
+          <CardContent className="p-8 text-center">
+            <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600">Aucun rapport structuré disponible.</p>
+            {fullReport && Object.keys(fullReport).length > 0 && (
+              <div className="mt-4 text-left">
+                <p className="text-sm text-gray-500 mb-2">Données brutes disponibles:</p>
+                <pre className="text-xs bg-white p-3 rounded border overflow-auto max-h-64">
+                  {JSON.stringify(fullReport, null, 2)}
+                </pre>
+              </div>
             )}
           </CardContent>
         </Card>
