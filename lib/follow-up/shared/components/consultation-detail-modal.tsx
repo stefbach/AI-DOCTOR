@@ -67,8 +67,7 @@ export function ConsultationDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl p-0">
-        <div className="max-h-[85vh] overflow-y-auto p-6">
+      <DialogContent className="max-w-5xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {typeConfig.icon}
@@ -114,7 +113,7 @@ export function ConsultationDetailModal({
           </TabsList>
 
           {/* OVERVIEW TAB */}
-          <TabsContent value="overview" className="mt-4">
+          <TabsContent value="overview" className="mt-4 max-h-[60vh] overflow-y-auto">
             <div className="space-y-4">
               {/* Chief Complaint */}
               {consultation.chiefComplaint && (
@@ -187,33 +186,32 @@ export function ConsultationDetailModal({
           </TabsContent>
 
           {/* REPORT TAB */}
-          <TabsContent value="report" className="mt-4">
+          <TabsContent value="report" className="mt-4 max-h-[60vh] overflow-y-auto">
             <ReportTab consultation={consultation} fullReport={fullReport} />
           </TabsContent>
 
           {/* PRESCRIPTION TAB */}
-          <TabsContent value="prescription" className="mt-4">
+          <TabsContent value="prescription" className="mt-4 max-h-[60vh] overflow-y-auto">
             <PrescriptionTab prescription={prescription} consultation={consultation} />
           </TabsContent>
 
           {/* LAB TESTS TAB */}
-          <TabsContent value="labs" className="mt-4">
+          <TabsContent value="labs" className="mt-4 max-h-[60vh] overflow-y-auto">
             <LabTestsTab labTests={labTests} fullReport={fullReport} />
           </TabsContent>
 
           {/* IMAGING TAB */}
-          <TabsContent value="imaging" className="mt-4">
+          <TabsContent value="imaging" className="mt-4 max-h-[60vh] overflow-y-auto">
             <ImagingTab imaging={imaging} fullReport={fullReport} />
           </TabsContent>
 
           {/* DIET PLAN TAB (Chronic only) */}
           {isChronic && (
-            <TabsContent value="diet" className="mt-4">
+            <TabsContent value="diet" className="mt-4 max-h-[60vh] overflow-y-auto">
               <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
             </TabsContent>
           )}
         </Tabs>
-        </div>
       </DialogContent>
     </Dialog>
   )
