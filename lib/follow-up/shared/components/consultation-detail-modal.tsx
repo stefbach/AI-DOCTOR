@@ -234,7 +234,35 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
   const consultationReport = fullReport?.consultation_report
   const hasDocumentFormat = consultationReport || fullReport?.diet_plan || fullReport?.prescriptions
 
+  // Debug logging - show all content structures
   console.log('📄 ReportTab fullReport:', fullReport)
+  if (consultationReport) {
+    console.log('📄 consultation_report.content:', consultationReport.content)
+    console.log('📄 consultation_report.content keys:', consultationReport.content ? Object.keys(consultationReport.content) : 'no content')
+  }
+  if (fullReport?.prescriptions) {
+    console.log('📄 prescriptions:', fullReport.prescriptions)
+    console.log('📄 prescriptions.content:', fullReport.prescriptions.content)
+  }
+  if (fullReport?.laboratory_requests) {
+    console.log('📄 laboratory_requests:', fullReport.laboratory_requests)
+  }
+  if (fullReport?.imaging_requests) {
+    console.log('📄 imaging_requests:', fullReport.imaging_requests)
+  }
+  if (fullReport?.diet_plan) {
+    console.log('📄 diet_plan:', fullReport.diet_plan)
+    console.log('📄 diet_plan.content:', fullReport.diet_plan.content)
+  }
+
+  // Get content with multiple possible field names
+  const reportContent = consultationReport?.content || {}
+  const getField = (obj: any, ...keys: string[]) => {
+    for (const key of keys) {
+      if (obj?.[key]) return obj[key]
+    }
+    return null
+  }
 
   return (
     <div className="space-y-4">
