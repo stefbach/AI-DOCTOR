@@ -304,13 +304,55 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
 }
 
 // Simple report section component matching Tibok style
-function ReportSection({ title, content }: { title: string, content: string }) {
+function ReportSection({ title, content }: { title: string, content: any }) {
+  // Convert content to displayable string
+  const displayContent = formatContentForDisplay(content)
+
   return (
     <div>
       <h4 className="font-bold text-gray-800 mb-2">{title}</h4>
-      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
+      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{displayContent}</p>
     </div>
   )
+}
+
+// Helper to convert any content (string, object, array) to displayable string
+function formatContentForDisplay(content: any): string {
+  if (!content) return ''
+
+  // If it's already a string, return it
+  if (typeof content === 'string') return content
+
+  // If it's an array, join items
+  if (Array.isArray(content)) {
+    return content.map(item =>
+      typeof item === 'string' ? item : formatContentForDisplay(item)
+    ).join('\n')
+  }
+
+  // If it's an object, format each key-value pair
+  if (typeof content === 'object') {
+    const parts: string[] = []
+    for (const [key, value] of Object.entries(content)) {
+      if (value) {
+        const label = formatKeyToLabel(key)
+        const formattedValue = typeof value === 'string' ? value : formatContentForDisplay(value)
+        parts.push(`${label}: ${formattedValue}`)
+      }
+    }
+    return parts.join('\n\n')
+  }
+
+  // Fallback: convert to string
+  return String(content)
+}
+
+// Convert camelCase key to readable label
+function formatKeyToLabel(key: string): string {
+  return key
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, str => str.toUpperCase())
+    .trim()
 }
 
 function PrescriptionTab({ prescription, consultation }: { prescription: any[], consultation: ConsultationHistoryItem }) {
