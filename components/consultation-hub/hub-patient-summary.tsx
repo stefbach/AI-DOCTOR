@@ -182,18 +182,66 @@ export function HubPatientSummary({ patientData, onViewHistory }: HubPatientSumm
 function extractPatientInfo(consultation: ConsultationHistoryItem) {
   // Try to extract from fullReport if available
   if (consultation.fullReport) {
-    const report = typeof consultation.fullReport === 'string' 
-      ? consultation.fullReport 
-      : JSON.stringify(consultation.fullReport)
-    
-    // Basic parsing (can be improved)
-    return {
-      name: consultation.fullReport?.compteRendu?.patient?.nom || '',
-      age: consultation.fullReport?.compteRendu?.patient?.age || null,
-      gender: consultation.fullReport?.compteRendu?.patient?.sexe || ''
+    const report = consultation.fullReport
+
+    // Try multiple possible locations for patient data
+    let name = ''
+    let age = null
+    let gender = ''
+
+    // French format (compteRendu)
+    if (report?.compteRendu?.patient) {
+      const patient = report.compteRendu.patient
+      name = patient.nom || patient.fullName || patient.name || ''
+      age = patient.age || null
+      gender = patient.sexe || patient.gender || ''
     }
+
+    // English format (medicalReport)
+    if (!name && report?.medicalReport?.patient) {
+      const patient = report.medicalReport.patient
+      name = patient.fullName || patient.name || `${patient.firstName || ''} ${patient.lastName || ''}`.trim()
+      age = patient.age || null
+      gender = patient.gender || patient.sex || ''
+    }
+
+    // Try header section
+    if (!name && report?.medicalReport?.header) {
+      const header = report.medicalReport.header
+      name = header.patientName || ''
+    }
+
+    // Try direct patient object in report
+    if (!name && report?.patient) {
+      const patient = report.patient
+      name = patient.fullName || patient.name || `${patient.firstName || ''} ${patient.lastName || ''}`.trim()
+      age = age || patient.age
+      gender = gender || patient.gender || patient.sex || ''
+    }
+
+    // Try ordonnance section for patient name
+    if (!name && report?.ordonnance?.patient) {
+      const patient = report.ordonnance.patient
+      name = patient.nom || patient.name || ''
+      age = age || patient.age
+    }
+
+    // Try to calculate age from date of birth if not directly available
+    if (!age && report?.medicalReport?.patient?.dateOfBirth) {
+      const dob = new Date(report.medicalReport.patient.dateOfBirth)
+      const today = new Date()
+      age = Math.floor((today.getTime() - dob.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+    }
+
+    if (!age && report?.compteRendu?.patient?.dateNaissance) {
+      const dob = new Date(report.compteRendu.patient.dateNaissance)
+      const today = new Date()
+      age = Math.floor((today.getTime() - dob.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+    }
+
+    return { name, age, gender }
   }
-  
+
   return { name: '', age: null, gender: '' }
 }
 
