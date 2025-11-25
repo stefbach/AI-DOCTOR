@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Calendar,
   FileText,
@@ -115,8 +114,8 @@ export function ConsultationDetailModal({
 
           {/* OVERVIEW TAB */}
           <TabsContent value="overview" className="mt-4">
-            <ScrollArea className="h-[calc(90vh-12rem)]">
-              <div className="space-y-4 pr-4 pb-4">
+            <div className="h-[calc(90vh-12rem)] overflow-y-auto pr-4">
+              <div className="space-y-4 pb-4">
               {/* Chief Complaint */}
               {consultation.chiefComplaint && (
                 <Section
@@ -185,53 +184,43 @@ export function ConsultationDetailModal({
                 </CardContent>
               </Card>
               </div>
-            </ScrollArea>
+            </div>
           </TabsContent>
 
           {/* REPORT TAB */}
           <TabsContent value="report" className="mt-4">
-            <ScrollArea className="h-[calc(90vh-12rem)]">
-              <div className="pr-4 pb-4">
-                <ReportTab consultation={consultation} fullReport={fullReport} />
-              </div>
-            </ScrollArea>
+            <div className="h-[calc(90vh-12rem)] overflow-y-auto pr-4">
+              <ReportTab consultation={consultation} fullReport={fullReport} />
+            </div>
           </TabsContent>
 
           {/* PRESCRIPTION TAB */}
           <TabsContent value="prescription" className="mt-4">
-            <ScrollArea className="h-[calc(90vh-12rem)]">
-              <div className="pr-4 pb-4">
-                <PrescriptionTab prescription={prescription} consultation={consultation} />
-              </div>
-            </ScrollArea>
+            <div className="h-[calc(90vh-12rem)] overflow-y-auto pr-4">
+              <PrescriptionTab prescription={prescription} consultation={consultation} />
+            </div>
           </TabsContent>
 
           {/* LAB TESTS TAB */}
           <TabsContent value="labs" className="mt-4">
-            <ScrollArea className="h-[calc(90vh-12rem)]">
-              <div className="pr-4 pb-4">
-                <LabTestsTab labTests={labTests} fullReport={fullReport} />
-              </div>
-            </ScrollArea>
+            <div className="h-[calc(90vh-12rem)] overflow-y-auto pr-4">
+              <LabTestsTab labTests={labTests} fullReport={fullReport} />
+            </div>
           </TabsContent>
 
           {/* IMAGING TAB */}
           <TabsContent value="imaging" className="mt-4">
-            <ScrollArea className="h-[calc(90vh-12rem)]">
-              <div className="pr-4 pb-4">
-                <ImagingTab imaging={imaging} fullReport={fullReport} />
-              </div>
-            </ScrollArea>
+            <div className="h-[calc(90vh-12rem)] overflow-y-auto pr-4">
+              <ImagingTab imaging={imaging} fullReport={fullReport} />
+            </div>
           </TabsContent>
 
           {/* DIET PLAN TAB (Chronic only) */}
           {isChronic && (
             <TabsContent value="diet" className="mt-4">
-              <ScrollArea className="h-[calc(90vh-12rem)]">
-                <div className="pr-4 pb-4">
-                  <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
-                </div>
-              </ScrollArea>
+              <div className="h-[calc(90vh-12rem)] overflow-y-auto pr-4">
+                <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
+              </div>
             </TabsContent>
           )}
         </Tabs>
