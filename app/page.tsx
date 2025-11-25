@@ -113,6 +113,7 @@ export default function MedicalAIExpert() {
 
       try {
         // Query patient history
+        console.log('📡 Calling /api/patient-history...')
         const response = await fetch('/api/patient-history', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -123,12 +124,15 @@ export default function MedicalAIExpert() {
           })
         })
 
+        console.log('📡 Response status:', response.status)
+
         if (!response.ok) {
-          console.log('⚠️ Could not fetch patient history, proceeding with normal flow')
+          console.log('⚠️ Could not fetch patient history, proceeding with normal flow. Status:', response.status)
           return
         }
 
         const data = await response.json()
+        console.log('📡 API response:', data)
 
         if (data.success && data.consultations && data.consultations.length >= 1) {
           console.log(`📋 Returning patient detected with ${data.consultations.length} consultation(s) - redirecting to hub`)

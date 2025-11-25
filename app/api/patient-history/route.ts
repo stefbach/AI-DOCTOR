@@ -14,6 +14,7 @@ export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
 
 interface PatientSearchCriteria {
+  patientId?: string
   name?: string
   email?: string
   phone?: string
@@ -24,16 +25,17 @@ interface PatientSearchCriteria {
 /**
  * POST /api/patient-history
  * Retrieve consultation history for a patient
- * 
+ *
  * Request body:
  * {
+ *   patientId?: string,
  *   name?: string,
  *   email?: string,
  *   phone?: string,
  *   nationalId?: string,
  *   dateOfBirth?: string
  * }
- * 
+ *
  * Response:
  * {
  *   success: boolean,
@@ -51,11 +53,11 @@ export async function POST(req: NextRequest) {
     }
 
     const criteria: PatientSearchCriteria = await req.json()
-    
+
     console.log('🔍 Patient history search with criteria:', criteria)
-    
+
     // Validate at least one search criterion
-    if (!criteria.name && !criteria.email && !criteria.phone && !criteria.nationalId && !criteria.dateOfBirth) {
+    if (!criteria.patientId && !criteria.name && !criteria.email && !criteria.phone && !criteria.nationalId && !criteria.dateOfBirth) {
       return NextResponse.json({
         success: false,
         error: 'At least one search criterion is required'
@@ -67,27 +69,32 @@ export async function POST(req: NextRequest) {
       .from('consultation_records')
       .select('*')
       .order('created_at', { ascending: false })
-    
-    // Apply filters based on criteria
-    const orConditions: string[] = []
-    
-    if (criteria.name) {
-      // Search in patient_name field (case-insensitive)
-      orConditions.push(`patient_name.ilike.%${criteria.name}%`)
-    }
-    
-    if (criteria.email) {
-      orConditions.push(`patient_email.eq.${criteria.email}`)
-    }
-    
-    if (criteria.phone) {
-      // Normalize phone number (remove spaces, dashes)
-      const normalizedPhone = criteria.phone.replace(/[\s\-\(\)]/g, '')
-      orConditions.push(`patient_phone.ilike.%${normalizedPhone}%`)
-    }
-    
-    if (orConditions.length > 0) {
-      query = query.or(orConditions.join(','))
+
+    // If patientId is provided, use it directly (most reliable)
+    if (criteria.patientId) {
+      query = query.eq('patient_id', criteria.patientId)
+    } else {
+      // Apply filters based on other criteria
+      const orConditions: string[] = []
+
+      if (criteria.name) {
+        // Search in patient_name field (case-insensitive)
+        orConditions.push(`patient_name.ilike.%${criteria.name}%`)
+      }
+
+      if (criteria.email) {
+        orConditions.push(`patient_email.eq.${criteria.email}`)
+      }
+
+      if (criteria.phone) {
+        // Normalize phone number (remove spaces, dashes)
+        const normalizedPhone = criteria.phone.replace(/[\s\-\(\)]/g, '')
+        orConditions.push(`patient_phone.ilike.%${normalizedPhone}%`)
+      }
+
+      if (orConditions.length > 0) {
+        query = query.or(orConditions.join(','))
+      }
     }
     
     const { data, error } = await query
