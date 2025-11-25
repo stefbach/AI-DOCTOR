@@ -312,43 +312,8 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
                   </div>
                 )}
 
-                {/* Report Content */}
-                {consultationReport.content.motifConsultation && (
-                  <div>
-                    <h4 className="font-semibold text-blue-800 mb-1">Motif de Consultation</h4>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded">{consultationReport.content.motifConsultation}</p>
-                  </div>
-                )}
-                {consultationReport.content.histoireMaladie && (
-                  <div>
-                    <h4 className="font-semibold text-blue-800 mb-1">Histoire de la Maladie</h4>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{consultationReport.content.histoireMaladie}</p>
-                  </div>
-                )}
-                {consultationReport.content.examenClinique && (
-                  <div>
-                    <h4 className="font-semibold text-blue-800 mb-1">Examen Clinique</h4>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{consultationReport.content.examenClinique}</p>
-                  </div>
-                )}
-                {consultationReport.content.syntheseDiagnostique && (
-                  <div>
-                    <h4 className="font-semibold text-blue-800 mb-1">Synthèse Diagnostique</h4>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{consultationReport.content.syntheseDiagnostique}</p>
-                  </div>
-                )}
-                {consultationReport.content.planTraitement && (
-                  <div>
-                    <h4 className="font-semibold text-blue-800 mb-1">Plan de Traitement</h4>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{consultationReport.content.planTraitement}</p>
-                  </div>
-                )}
-                {consultationReport.content.recommandations && (
-                  <div>
-                    <h4 className="font-semibold text-blue-800 mb-1">Recommandations</h4>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{consultationReport.content.recommandations}</p>
-                  </div>
-                )}
+                {/* Report Content - render dynamically based on available fields */}
+                {renderReportContent(consultationReport.content)}
               </CardContent>
             </Card>
           )}
@@ -1062,6 +1027,128 @@ function DietPlanTab({ dietPlan, followUp, fullReport }: { dietPlan: any, follow
   )
 }
 
+// ============ RENDER HELPERS ============
+
+// Map of field names to display labels
+const fieldLabels: Record<string, string> = {
+  // French fields
+  motifConsultation: 'Motif de Consultation',
+  histoireMaladie: 'Histoire de la Maladie',
+  examenClinique: 'Examen Clinique',
+  syntheseDiagnostique: 'Synthèse Diagnostique',
+  planTraitement: 'Plan de Traitement',
+  recommandations: 'Recommandations',
+  antecedents: 'Antécédents',
+  conclusion: 'Conclusion',
+  observations: 'Observations',
+  // English fields
+  chiefComplaint: 'Chief Complaint',
+  historyOfPresentIllness: 'History of Present Illness',
+  physicalExamination: 'Physical Examination',
+  diagnosis: 'Diagnosis',
+  diagnosticSummary: 'Diagnostic Summary',
+  treatmentPlan: 'Treatment Plan',
+  recommendations: 'Recommendations',
+  assessment: 'Assessment',
+  plan: 'Plan',
+  followUp: 'Follow-up',
+  notes: 'Notes',
+  // Common
+  summary: 'Summary',
+  details: 'Details',
+}
+
+function renderReportContent(content: any): React.ReactNode {
+  if (!content || typeof content !== 'object') return null
+
+  const sections: React.ReactNode[] = []
+
+  // Render each field in the content object
+  Object.entries(content).forEach(([key, value]) => {
+    if (!value) return
+
+    // Skip certain fields that are not report content
+    if (['type', 'signature', 'validated', 'date', 'timestamp'].includes(key)) return
+
+    const label = fieldLabels[key] || formatFieldName(key)
+
+    if (typeof value === 'string') {
+      sections.push(
+        <div key={key}>
+          <h4 className="font-semibold text-blue-800 mb-1">{label}</h4>
+          <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{value}</p>
+        </div>
+      )
+    } else if (Array.isArray(value)) {
+      sections.push(
+        <div key={key}>
+          <h4 className="font-semibold text-blue-800 mb-1">{label}</h4>
+          <ul className="list-disc list-inside text-gray-700 bg-gray-50 p-3 rounded">
+            {value.map((item, idx) => (
+              <li key={idx}>{typeof item === 'string' ? item : JSON.stringify(item)}</li>
+            ))}
+          </ul>
+        </div>
+      )
+    } else if (typeof value === 'object') {
+      // Recursively render nested objects
+      sections.push(
+        <div key={key}>
+          <h4 className="font-semibold text-blue-800 mb-1">{label}</h4>
+          <div className="bg-gray-50 p-3 rounded">
+            {renderNestedObject(value)}
+          </div>
+        </div>
+      )
+    }
+  })
+
+  return sections.length > 0 ? <div className="space-y-4">{sections}</div> : null
+}
+
+function renderNestedObject(obj: any): React.ReactNode {
+  if (!obj || typeof obj !== 'object') return null
+
+  return (
+    <div className="space-y-2 text-sm">
+      {Object.entries(obj).map(([key, value]) => {
+        if (!value) return null
+        const label = fieldLabels[key] || formatFieldName(key)
+
+        if (typeof value === 'string' || typeof value === 'number') {
+          return (
+            <div key={key}>
+              <span className="font-medium text-gray-600">{label}:</span>{' '}
+              <span className="text-gray-800">{value}</span>
+            </div>
+          )
+        } else if (Array.isArray(value)) {
+          return (
+            <div key={key}>
+              <span className="font-medium text-gray-600">{label}:</span>
+              <ul className="list-disc list-inside ml-2">
+                {value.map((item, idx) => (
+                  <li key={idx}>{typeof item === 'string' ? item : JSON.stringify(item)}</li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+        return null
+      })}
+    </div>
+  )
+}
+
+function formatFieldName(key: string): string {
+  // Convert camelCase or snake_case to Title Case
+  return key
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/_/g, ' ')
+    .replace(/^./, str => str.toUpperCase())
+    .trim()
+}
+
 // ============ HELPER COMPONENTS ============
 
 interface SectionProps {
@@ -1244,7 +1331,8 @@ function extractPrescription(fullReport: any, medications?: any[]): any[] {
 
   // Try multiple possible paths for prescription data
   const paths = [
-    // New document format
+    // New document format - top level medications
+    fullReport?.prescriptions?.medications,
     fullReport?.prescriptions?.content?.medications,
     fullReport?.prescriptions?.content?.medicaments,
     // Old formats
@@ -1272,9 +1360,10 @@ function extractLabTests(fullReport: any, labTests?: any[]): any[] {
 
   // Try multiple possible paths for lab tests data
   const paths = [
-    // New document format
-    fullReport?.laboratory_requests?.content?.tests,
+    // New document format - tests at top level
     fullReport?.laboratory_requests?.tests?.analyses,
+    fullReport?.laboratory_requests?.tests?.tests,
+    fullReport?.laboratory_requests?.content?.tests,
     fullReport?.laboratory_requests?.content?.analyses,
     // Old formats
     fullReport?.ordonnances?.biologie?.prescription?.analyses,
@@ -1292,6 +1381,19 @@ function extractLabTests(fullReport: any, labTests?: any[]): any[] {
     }
   }
 
+  // Also check if tests is an object with categories
+  const testsObj = fullReport?.laboratory_requests?.tests
+  if (testsObj && typeof testsObj === 'object') {
+    // Flatten all test categories into a single array
+    const allTests: any[] = []
+    for (const category of Object.values(testsObj)) {
+      if (Array.isArray(category)) {
+        allTests.push(...category)
+      }
+    }
+    if (allTests.length > 0) return allTests
+  }
+
   return []
 }
 
@@ -1300,7 +1402,8 @@ function extractImaging(fullReport: any, imagingStudies?: any[]): any[] {
 
   // Try multiple possible paths for imaging data
   const paths = [
-    // New document format
+    // New document format - examinations at top level
+    fullReport?.imaging_requests?.examinations,
     fullReport?.imaging_requests?.content?.examinations,
     fullReport?.imaging_requests?.content?.exams,
     fullReport?.imaging_requests?.content?.studies,
