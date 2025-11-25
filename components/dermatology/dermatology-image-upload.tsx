@@ -43,6 +43,7 @@ export default function DermatologyImageUpload({
   const [tibokImageLoaded, setTibokImageLoaded] = useState(false)
 
   // Use Tibok consultation hook for auto-fetching images
+  // Pass consultationId from patientData since URL params are lost during navigation
   const {
     dermatologyImage,
     hasPatientImage,
@@ -52,7 +53,7 @@ export default function DermatologyImageUpload({
     imageError,
     shouldShowImageUpload,
     fetchImage
-  } = useTibokConsultation()
+  } = useTibokConsultation({ consultationId: patientData?.consultationId })
 
   // Auto-load Tibok image when available
   useEffect(() => {

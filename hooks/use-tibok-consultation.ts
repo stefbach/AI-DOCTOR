@@ -49,7 +49,13 @@ export interface UseTibokConsultationResult {
   shouldShowImageUpload: boolean
 }
 
-export function useTibokConsultation(): UseTibokConsultationResult {
+export interface UseTibokConsultationOptions {
+  consultationId?: string | null
+}
+
+export function useTibokConsultation(options: UseTibokConsultationOptions = {}): UseTibokConsultationResult {
+  const { consultationId: providedConsultationId } = options
+
   const [consultationData, setConsultationData] = useState<TibokConsultationData | null>(null)
   const [consultationType, setConsultationType] = useState<'normal' | 'dermatology' | 'chronic' | null>(null)
   const [dermatologyImage, setDermatologyImage] = useState<DermatologyImageData | null>(null)
@@ -185,26 +191,31 @@ export function useTibokConsultation(): UseTibokConsultationResult {
     await fetchImageInternal(consultationData.temp_image_url)
   }, [consultationData])
 
-  // Auto-fetch consultation on mount if consultationId is in URL
+  // Auto-fetch consultation on mount if consultationId is provided or in URL
   useEffect(() => {
-    console.log('🔄 useTibokConsultation hook mounted, checking URL params...')
+    console.log('🔄 useTibokConsultation hook mounted, checking for consultationId...')
     console.log('🌐 Current URL:', typeof window !== 'undefined' ? window.location.href : 'SSR')
 
-    const urlParams = new URLSearchParams(window.location.search)
-    const consultationId = urlParams.get('consultationId')
+    // First check if consultationId was provided as prop
+    let consultationId = providedConsultationId
 
-    console.log('🔍 URL params found:', {
-      consultationId,
-      allParams: Object.fromEntries(urlParams.entries())
-    })
+    // Fall back to URL params if not provided
+    if (!consultationId && typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      consultationId = urlParams.get('consultationId')
+      console.log('🔍 URL params found:', {
+        consultationId,
+        allParams: Object.fromEntries(urlParams.entries())
+      })
+    }
 
     if (consultationId) {
-      console.log('🚀 Auto-fetching consultation from URL param:', consultationId)
+      console.log('🚀 Auto-fetching consultation:', consultationId, providedConsultationId ? '(from prop)' : '(from URL)')
       fetchConsultation(consultationId)
     } else {
-      console.log('⚠️ No consultationId found in URL params - dermatology auto-detection will not work')
+      console.log('⚠️ No consultationId found - dermatology auto-detection will not work')
     }
-  }, [fetchConsultation])
+  }, [fetchConsultation, providedConsultationId])
 
   return {
     // Data
