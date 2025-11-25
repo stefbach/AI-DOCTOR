@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Calendar,
   FileText,
@@ -112,9 +113,9 @@ export function ConsultationDetailModal({
             )}
           </TabsList>
 
-          <div className="h-[calc(90vh-10rem)] overflow-y-auto mt-4 pr-2">
+          <ScrollArea className="h-[calc(90vh-10rem)] mt-4 pr-2">
             {/* OVERVIEW TAB */}
-            <TabsContent value="overview" className="mt-0 space-y-4 pb-4">
+            <TabsContent value="overview" className="mt-0 space-y-4 pb-4 pr-4">
               {/* Chief Complaint */}
               {consultation.chiefComplaint && (
                 <Section
@@ -185,32 +186,32 @@ export function ConsultationDetailModal({
             </TabsContent>
 
             {/* REPORT TAB */}
-            <TabsContent value="report" className="mt-0 space-y-4 pb-4">
+            <TabsContent value="report" className="mt-0 space-y-4 pb-4 pr-4">
               <ReportTab consultation={consultation} fullReport={fullReport} />
             </TabsContent>
 
             {/* PRESCRIPTION TAB */}
-            <TabsContent value="prescription" className="mt-0 space-y-4 pb-4">
+            <TabsContent value="prescription" className="mt-0 space-y-4 pb-4 pr-4">
               <PrescriptionTab prescription={prescription} consultation={consultation} />
             </TabsContent>
 
             {/* LAB TESTS TAB */}
-            <TabsContent value="labs" className="mt-0 space-y-4 pb-4">
+            <TabsContent value="labs" className="mt-0 space-y-4 pb-4 pr-4">
               <LabTestsTab labTests={labTests} fullReport={fullReport} />
             </TabsContent>
 
             {/* IMAGING TAB */}
-            <TabsContent value="imaging" className="mt-0 space-y-4 pb-4">
+            <TabsContent value="imaging" className="mt-0 space-y-4 pb-4 pr-4">
               <ImagingTab imaging={imaging} fullReport={fullReport} />
             </TabsContent>
 
             {/* DIET PLAN TAB (Chronic only) */}
             {isChronic && (
-              <TabsContent value="diet" className="mt-0 space-y-4 pb-4">
+              <TabsContent value="diet" className="mt-0 space-y-4 pb-4 pr-4">
                 <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
               </TabsContent>
             )}
-          </div>
+          </ScrollArea>
         </Tabs>
       </DialogContent>
     </Dialog>
