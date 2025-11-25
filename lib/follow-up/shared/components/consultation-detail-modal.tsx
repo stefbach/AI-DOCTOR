@@ -222,38 +222,29 @@ export function ConsultationDetailModal({
 // ============ TAB COMPONENTS ============
 
 function ReportTab({ consultation, fullReport }: { consultation: ConsultationHistoryItem, fullReport: any }) {
-  // Debug: log the full report structure
-  console.log('📄 ReportTab - fullReport:', fullReport)
-  console.log('📄 ReportTab - consultation_report:', fullReport?.consultation_report)
-  console.log('📄 ReportTab - consultation_report.content:', fullReport?.consultation_report?.content)
-  if (fullReport?.consultation_report?.content) {
-    console.log('📄 ReportTab - content keys:', Object.keys(fullReport.consultation_report.content))
-  }
-
-  // Extract report content from different possible structures
+  // Extract report content
   const consultationReport = fullReport?.consultation_report
   const reportContent = consultationReport?.content || {}
 
-  // Helper to get field from multiple possible keys
-  const getField = (...keys: string[]) => {
-    for (const key of keys) {
-      if (reportContent?.[key]) return reportContent[key]
-    }
-    return null
-  }
+  // The narrative field contains the complete formatted report
+  const narrative = reportContent?.narrative
 
-  // Extract main report sections (matching Tibok format)
-  const chiefComplaint = getField('motifConsultation', 'chiefComplaint', 'reasonForVisit')
-  const historyOfIllness = getField('histoireMaladie', 'historyOfPresentIllness', 'historyOfIllness')
-  const physicalExam = getField('examenClinique', 'physicalExamination', 'clinicalExamination')
-  const diagnosis = getField('syntheseDiagnostique', 'diagnosis', 'diagnosticSummary')
-  const managementPlan = getField('planTraitement', 'managementPlan', 'treatmentPlan')
-  const followUpText = getField('suivi', 'followUp', 'recommendations') ||
-                       fullReport?.follow_up?.content?.instructions
+  // Extract from clinicalEvaluation (nested structure)
+  const clinicalEval = reportContent?.clinicalEvaluation || {}
+  const chiefComplaint = clinicalEval?.chiefComplaint
+  const historyOfIllness = clinicalEval?.historyOfPresentIllness
+  const physicalExam = clinicalEval?.physicalExamination
 
-  console.log('📄 ReportTab - extracted fields:', { chiefComplaint, historyOfIllness, physicalExam, diagnosis, managementPlan, followUpText })
+  // Diagnostic summary
+  const diagSummary = reportContent?.diagnosticSummary
+  const diagnosis = diagSummary?.diagnosticConclusion
 
-  const hasContent = chiefComplaint || historyOfIllness || physicalExam || diagnosis || managementPlan || followUpText
+  // Management and follow-up from different sources
+  const chronicAssessment = reportContent?.chronicDiseaseAssessment
+  const followUpContent = fullReport?.follow_up?.content
+
+  const hasNarrative = narrative && narrative.length > 0
+  const hasStructuredContent = chiefComplaint || historyOfIllness || physicalExam || diagnosis
 
   return (
     <div className="space-y-6">
@@ -269,36 +260,27 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
         </Button>
       </div>
 
-      {hasContent ? (
+      {hasNarrative ? (
+        // Display the full narrative report (like Tibok does)
+        <div className="prose prose-sm max-w-none">
+          <pre className="whitespace-pre-wrap font-sans text-gray-700 text-sm leading-relaxed bg-white p-0">
+            {narrative}
+          </pre>
+        </div>
+      ) : hasStructuredContent ? (
+        // Fallback to structured display if no narrative
         <div className="space-y-6">
-          {/* CHIEF COMPLAINT */}
           {chiefComplaint && (
             <ReportSection title="CHIEF COMPLAINT" content={chiefComplaint} />
           )}
-
-          {/* HISTORY OF PRESENT ILLNESS */}
           {historyOfIllness && (
             <ReportSection title="HISTORY OF PRESENT ILLNESS" content={historyOfIllness} />
           )}
-
-          {/* PHYSICAL EXAMINATION */}
           {physicalExam && (
             <ReportSection title="PHYSICAL EXAMINATION" content={physicalExam} />
           )}
-
-          {/* DIAGNOSIS */}
           {diagnosis && (
             <ReportSection title="DIAGNOSIS" content={diagnosis} />
-          )}
-
-          {/* MANAGEMENT PLAN */}
-          {managementPlan && (
-            <ReportSection title="MANAGEMENT PLAN" content={managementPlan} />
-          )}
-
-          {/* FOLLOW-UP */}
-          {followUpText && (
-            <ReportSection title="FOLLOW-UP" content={followUpText} />
           )}
         </div>
       ) : (
@@ -366,9 +348,27 @@ function formatKeyToLabel(key: string): string {
 }
 
 function PrescriptionTab({ prescription, consultation }: { prescription: any[], consultation: ConsultationHistoryItem }) {
-  console.log('💊 PrescriptionTab - prescription:', prescription)
+  // Get raw prescriptions data from fullReport
+  const fullReport = consultation.fullReport || {}
+  const prescriptionsData = fullReport?.prescriptions
 
-  if (!prescription || prescription.length === 0) {
+  console.log('💊 PrescriptionTab - prescription array:', prescription)
+  console.log('💊 PrescriptionTab - raw prescriptions:', prescriptionsData)
+  console.log('💊 PrescriptionTab - prescriptions.content:', prescriptionsData?.content)
+  if (prescriptionsData?.content) {
+    console.log('💊 PrescriptionTab - content keys:', Object.keys(prescriptionsData.content))
+  }
+
+  // Try to get medications from prescriptions.content.medications or other paths
+  let meds = prescription
+  if ((!meds || meds.length === 0) && prescriptionsData?.content?.medications) {
+    meds = prescriptionsData.content.medications
+  }
+  if ((!meds || meds.length === 0) && prescriptionsData?.medications) {
+    meds = prescriptionsData.medications
+  }
+
+  if (!meds || meds.length === 0) {
     return (
       <Card className="bg-gray-50">
         <CardContent className="p-8 text-center">
@@ -384,7 +384,7 @@ function PrescriptionTab({ prescription, consultation }: { prescription: any[], 
       <h3 className="text-lg font-semibold">Prescribed Medications:</h3>
 
       <div className="space-y-6">
-        {prescription.map((med, idx) => {
+        {meds.map((med: any, idx: number) => {
           const name = typeof med === 'string' ? med : med.name || med.medication || med.medicament
           const dosage = med.dosage || med.dose
           const frequency = med.frequency || med.posology || med.frequence
@@ -414,11 +414,18 @@ function PrescriptionTab({ prescription, consultation }: { prescription: any[], 
 }
 
 function LabTestsTab({ labTests, fullReport }: { labTests: any[], fullReport: any }) {
-  console.log('🧪 LabTestsTab - labTests:', labTests)
-  console.log('🧪 LabTestsTab - laboratory_requests:', fullReport?.laboratory_requests)
+  const labData = fullReport?.laboratory_requests
+
+  console.log('🧪 LabTestsTab - labTests array:', labTests)
+  console.log('🧪 LabTestsTab - laboratory_requests:', labData)
+  console.log('🧪 LabTestsTab - laboratory_requests.tests:', labData?.tests)
+  console.log('🧪 LabTestsTab - laboratory_requests.content:', labData?.content)
+  if (labData?.content) {
+    console.log('🧪 LabTestsTab - content keys:', Object.keys(labData.content))
+  }
 
   // Try to get tests from laboratory_requests structure (grouped by category)
-  const labRequests = fullReport?.laboratory_requests?.tests || {}
+  const labRequests = labData?.tests || {}
 
   // Group tests by category if we have categorized data
   const categorizedTests: Record<string, any[]> = {}
@@ -473,11 +480,18 @@ function LabTestsTab({ labTests, fullReport }: { labTests: any[], fullReport: an
 }
 
 function ImagingTab({ imaging, fullReport }: { imaging: any[], fullReport: any }) {
-  console.log('🩻 ImagingTab - imaging:', imaging)
-  console.log('🩻 ImagingTab - imaging_requests:', fullReport?.imaging_requests)
+  const imagingData = fullReport?.imaging_requests
 
-  // Get imaging from imaging_requests structure
-  const imagingRequests = fullReport?.imaging_requests?.examinations || imaging || []
+  console.log('🩻 ImagingTab - imaging array:', imaging)
+  console.log('🩻 ImagingTab - imaging_requests:', imagingData)
+  console.log('🩻 ImagingTab - imaging_requests.examinations:', imagingData?.examinations)
+  console.log('🩻 ImagingTab - imaging_requests.content:', imagingData?.content)
+  if (imagingData?.content) {
+    console.log('🩻 ImagingTab - content keys:', Object.keys(imagingData.content))
+  }
+
+  // Get imaging from imaging_requests structure - check multiple paths
+  let imagingRequests = imagingData?.examinations || imagingData?.content?.examinations || imaging || []
 
   if (!imagingRequests || imagingRequests.length === 0) {
     return (
