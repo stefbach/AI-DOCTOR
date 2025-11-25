@@ -22,16 +22,23 @@ export interface HubPatientSummaryProps {
     searchCriteria: any
     consultations: ConsultationHistoryItem[]
     totalConsultations: number
+    tibokPatientInfo?: any // Patient info from Tibok URL
   }
   onViewHistory: () => void
 }
 
 export function HubPatientSummary({ patientData, onViewHistory }: HubPatientSummaryProps) {
-  const { searchCriteria, consultations, totalConsultations } = patientData
+  const { searchCriteria, consultations, totalConsultations, tibokPatientInfo } = patientData
   const mostRecent = consultations[0]
-  
-  // Extraire info patient depuis la consultation la plus récente
-  const patientInfo = extractPatientInfo(mostRecent)
+
+  // First try to get patient info from Tibok, then fall back to consultation history
+  const patientInfo = tibokPatientInfo
+    ? {
+        name: `${tibokPatientInfo.firstName || ''} ${tibokPatientInfo.lastName || ''}`.trim(),
+        age: tibokPatientInfo.age || null,
+        gender: tibokPatientInfo.gender === 'F' ? 'Femme' : tibokPatientInfo.gender === 'M' ? 'Homme' : tibokPatientInfo.gender || ''
+      }
+    : extractPatientInfo(mostRecent)
   
   // Détecter type majoritaire
   const consultationTypes = consultations.map(c => detectType(c.consultationType))
@@ -75,16 +82,18 @@ export function HubPatientSummary({ patientData, onViewHistory }: HubPatientSumm
               {patientInfo.name && (
                 <p className="font-medium text-gray-900">{patientInfo.name}</p>
               )}
-              {patientInfo.age && patientInfo.gender && (
+              {(patientInfo.age || patientInfo.gender) && (
                 <p className="text-sm text-gray-600">
-                  {patientInfo.age} ans • {patientInfo.gender}
+                  {patientInfo.age && `${patientInfo.age} ans`}
+                  {patientInfo.age && patientInfo.gender && ' • '}
+                  {patientInfo.gender}
                 </p>
               )}
-              {searchCriteria.email && (
-                <p className="text-sm text-gray-600">📧 {searchCriteria.email}</p>
+              {(tibokPatientInfo?.email || searchCriteria.email) && (
+                <p className="text-sm text-gray-600">📧 {tibokPatientInfo?.email || searchCriteria.email}</p>
               )}
-              {searchCriteria.phone && (
-                <p className="text-sm text-gray-600">📞 {searchCriteria.phone}</p>
+              {(tibokPatientInfo?.phone || searchCriteria.phone) && (
+                <p className="text-sm text-gray-600">📞 {tibokPatientInfo?.phone || searchCriteria.phone}</p>
               )}
             </div>
           </div>

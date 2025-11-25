@@ -105,6 +105,18 @@ export default function MedicalAIExpert() {
       const patientEmail = urlParams.get('patientEmail')
       const patientPhone = urlParams.get('patientPhone')
 
+      // Also extract Tibok patient data from URL if available
+      const patientDataParam = urlParams.get('patientData')
+      let tibokPatientInfo = null
+      if (patientDataParam) {
+        try {
+          tibokPatientInfo = JSON.parse(decodeURIComponent(patientDataParam))
+          console.log('👤 Tibok patient info from URL:', tibokPatientInfo)
+        } catch (e) {
+          console.log('⚠️ Could not parse patientData from URL')
+        }
+      }
+
       // Need at least one identifier to check history
       if (!patientId && !patientEmail && !patientPhone) {
         console.log('ℹ️ No patient identifier in URL, proceeding with normal flow')
@@ -141,11 +153,12 @@ export default function MedicalAIExpert() {
         if (data.success && data.consultations && data.consultations.length >= 1) {
           console.log(`📋 Returning patient detected with ${data.consultations.length} consultation(s) - redirecting to hub`)
 
-          // Store patient data for the hub
+          // Store patient data for the hub - include Tibok patient info
           sessionStorage.setItem('returningPatientData', JSON.stringify({
             searchCriteria: { patientId, email: patientEmail, phone: patientPhone },
             consultations: data.consultations,
-            totalConsultations: data.consultations.length
+            totalConsultations: data.consultations.length,
+            tibokPatientInfo: tibokPatientInfo // Include the Tibok patient data
           }))
 
           // Preserve URL params for the hub
