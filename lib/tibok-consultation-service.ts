@@ -48,6 +48,7 @@ export async function fetchTibokConsultationData(
         temp_image_url,
         has_temp_image,
         image_expires_at,
+        image_uploaded_at,
         unable_to_provide_image,
         patient_id,
         doctor_id

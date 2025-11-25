@@ -187,12 +187,22 @@ export function useTibokConsultation(): UseTibokConsultationResult {
 
   // Auto-fetch consultation on mount if consultationId is in URL
   useEffect(() => {
+    console.log('🔄 useTibokConsultation hook mounted, checking URL params...')
+    console.log('🌐 Current URL:', typeof window !== 'undefined' ? window.location.href : 'SSR')
+
     const urlParams = new URLSearchParams(window.location.search)
     const consultationId = urlParams.get('consultationId')
+
+    console.log('🔍 URL params found:', {
+      consultationId,
+      allParams: Object.fromEntries(urlParams.entries())
+    })
 
     if (consultationId) {
       console.log('🚀 Auto-fetching consultation from URL param:', consultationId)
       fetchConsultation(consultationId)
+    } else {
+      console.log('⚠️ No consultationId found in URL params - dermatology auto-detection will not work')
     }
   }, [fetchConsultation])
 
