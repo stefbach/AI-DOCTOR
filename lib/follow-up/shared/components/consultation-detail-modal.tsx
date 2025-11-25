@@ -67,7 +67,8 @@ export function ConsultationDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl p-0">
+        <div className="max-h-[85vh] overflow-y-auto p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {typeConfig.icon}
@@ -212,6 +213,7 @@ export function ConsultationDetailModal({
             </TabsContent>
           )}
         </Tabs>
+        </div>
       </DialogContent>
     </Dialog>
   )
