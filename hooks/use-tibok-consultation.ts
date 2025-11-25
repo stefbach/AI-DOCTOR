@@ -1,9 +1,9 @@
 // hooks/use-tibok-consultation.ts
 // React hook to fetch and manage consultation data from Tibok
-// Uses URL params passed by Tibok instead of direct Supabase queries
 
 import { useEffect, useState, useCallback } from 'react'
 import {
+  fetchTibokConsultationData,
   fetchDermatologyImage,
   isImageUrlValid,
   mapSpecialtyToConsultationType,
@@ -77,79 +77,11 @@ export function useTibokConsultation(): UseTibokConsultationResult {
   )
 
   /**
-   * Load consultation data from URL params (passed by Tibok)
-   * This avoids RLS issues by not querying Supabase directly
-   */
-  const loadFromUrlParams = useCallback(async () => {
-    const urlParams = new URLSearchParams(window.location.search)
-
-    // Get consultation specialty from URL params
-    const consultationSpecialty = urlParams.get('consultationSpecialty') as ConsultationSpecialty | null
-    const tempImageUrl = urlParams.get('tempImageUrl')
-    const hasImage = urlParams.get('hasTempImage') === 'true'
-    const imageExpiresAt = urlParams.get('imageExpiresAt')
-    const unableToProvide = urlParams.get('unableToProvideImage') === 'true'
-    const consultationId = urlParams.get('consultationId')
-    const patientId = urlParams.get('patientId')
-    const doctorId = urlParams.get('doctorId')
-
-    console.log('🔍 Loading consultation data from URL params:', {
-      consultationSpecialty,
-      hasImage,
-      tempImageUrl: tempImageUrl ? '✓ Present' : '✗ Not present',
-      imageExpiresAt,
-      unableToProvide
-    })
-
-    if (consultationSpecialty) {
-      // Build consultation data from URL params
-      const data: TibokConsultationData = {
-        id: consultationId || '',
-        consultation_specialty: consultationSpecialty,
-        temp_image_url: tempImageUrl ? decodeURIComponent(tempImageUrl) : null,
-        has_temp_image: hasImage,
-        image_expires_at: imageExpiresAt ? decodeURIComponent(imageExpiresAt) : null,
-        unable_to_provide_image: unableToProvide,
-        patient_id: patientId || '',
-        doctor_id: doctorId || ''
-      }
-
-      setConsultationData(data)
-
-      // Map specialty to consultation type
-      const mappedType = mapSpecialtyToConsultationType(consultationSpecialty)
-      setConsultationType(mappedType)
-
-      console.log('✅ Consultation data loaded from URL params:', {
-        specialty: consultationSpecialty,
-        mappedType,
-        hasImage,
-        imageUrl: tempImageUrl ? 'Present' : 'Not present'
-      })
-
-      // Auto-fetch dermatology image if available
-      if (
-        consultationSpecialty === 'dermatology' &&
-        hasImage &&
-        tempImageUrl &&
-        (!imageExpiresAt || isImageUrlValid(imageExpiresAt))
-      ) {
-        console.log('📸 Dermatology consultation with valid image, auto-fetching...')
-        await fetchImageInternal(decodeURIComponent(tempImageUrl))
-      }
-
-      return true
-    }
-
-    return false
-  }, [])
-
-  /**
-   * Fetch consultation data - now just loads from URL params
+   * Fetch consultation data from Tibok's Supabase
    */
   const fetchConsultation = useCallback(async (consultationId: string) => {
     if (!consultationId) {
-      console.log('⚠️ No consultation ID provided')
+      console.log('⚠️ No consultation ID provided to fetch')
       return
     }
 
@@ -157,20 +89,45 @@ export function useTibokConsultation(): UseTibokConsultationResult {
     setError(null)
 
     try {
-      // Try to load from URL params first (Option C approach)
-      const loaded = await loadFromUrlParams()
+      console.log('🔍 Fetching Tibok consultation data from Supabase...')
+      const result = await fetchTibokConsultationData(consultationId)
 
-      if (!loaded) {
-        console.log('ℹ️ No consultation specialty in URL params - consultation type will need manual selection')
+      if (result.success && result.data) {
+        setConsultationData(result.data)
+
+        // Map specialty to consultation type
+        const mappedType = mapSpecialtyToConsultationType(result.data.consultation_specialty)
+        setConsultationType(mappedType)
+
+        console.log('✅ Consultation data loaded:', {
+          specialty: result.data.consultation_specialty,
+          mappedType,
+          hasImage: result.data.has_temp_image,
+          imageUrl: result.data.temp_image_url ? 'Present' : 'Not present'
+        })
+
+        // Auto-fetch dermatology image if available
+        if (
+          result.data.consultation_specialty === 'dermatology' &&
+          result.data.has_temp_image &&
+          result.data.temp_image_url &&
+          isImageUrlValid(result.data.image_expires_at)
+        ) {
+          console.log('📸 Dermatology consultation with valid image, auto-fetching...')
+          await fetchImageInternal(result.data.temp_image_url)
+        }
+      } else {
+        setError(result.error || 'Failed to fetch consultation data')
+        console.error('❌ Failed to fetch consultation:', result.error)
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       setError(errorMessage)
-      console.error('❌ Error loading consultation data:', err)
+      console.error('❌ Error fetching consultation:', err)
     } finally {
       setLoading(false)
     }
-  }, [loadFromUrlParams])
+  }, [])
 
   /**
    * Internal function to fetch image
