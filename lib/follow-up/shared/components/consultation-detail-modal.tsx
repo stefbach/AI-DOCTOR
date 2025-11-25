@@ -82,7 +82,7 @@ export function ConsultationDetailModal({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 overflow-hidden">
           <TabsList className={`grid w-full flex-shrink-0 ${isChronic ? 'grid-cols-6' : 'grid-cols-5'}`}>
             <TabsTrigger value="overview" className="flex items-center gap-1">
               <ClipboardList className="h-4 w-4" />
@@ -112,9 +112,9 @@ export function ConsultationDetailModal({
             )}
           </TabsList>
 
-          <div className="flex-1 min-h-0 overflow-y-auto mt-4 pr-2">
+          <div className="h-[calc(90vh-10rem)] overflow-y-auto mt-4 pr-2">
             {/* OVERVIEW TAB */}
-            <TabsContent value="overview" className="mt-0 space-y-4">
+            <TabsContent value="overview" className="mt-0 space-y-4 pb-4">
               {/* Chief Complaint */}
               {consultation.chiefComplaint && (
                 <Section
@@ -185,28 +185,28 @@ export function ConsultationDetailModal({
             </TabsContent>
 
             {/* REPORT TAB */}
-            <TabsContent value="report" className="mt-0 space-y-4">
+            <TabsContent value="report" className="mt-0 space-y-4 pb-4">
               <ReportTab consultation={consultation} fullReport={fullReport} />
             </TabsContent>
 
             {/* PRESCRIPTION TAB */}
-            <TabsContent value="prescription" className="mt-0 space-y-4">
+            <TabsContent value="prescription" className="mt-0 space-y-4 pb-4">
               <PrescriptionTab prescription={prescription} consultation={consultation} />
             </TabsContent>
 
             {/* LAB TESTS TAB */}
-            <TabsContent value="labs" className="mt-0 space-y-4">
+            <TabsContent value="labs" className="mt-0 space-y-4 pb-4">
               <LabTestsTab labTests={labTests} fullReport={fullReport} />
             </TabsContent>
 
             {/* IMAGING TAB */}
-            <TabsContent value="imaging" className="mt-0 space-y-4">
+            <TabsContent value="imaging" className="mt-0 space-y-4 pb-4">
               <ImagingTab imaging={imaging} fullReport={fullReport} />
             </TabsContent>
 
             {/* DIET PLAN TAB (Chronic only) */}
             {isChronic && (
-              <TabsContent value="diet" className="mt-0 space-y-4">
+              <TabsContent value="diet" className="mt-0 space-y-4 pb-4">
                 <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
               </TabsContent>
             )}
