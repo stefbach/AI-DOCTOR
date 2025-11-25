@@ -67,8 +67,8 @@ export function ConsultationDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl h-[90vh] flex flex-col overflow-hidden">
-        <DialogHeader className="flex-shrink-0">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {typeConfig.icon}
             {typeConfig.label}
@@ -82,8 +82,8 @@ export function ConsultationDetailModal({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
-          <TabsList className={`grid w-full flex-shrink-0 ${isChronic ? 'grid-cols-6' : 'grid-cols-5'}`}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
+          <TabsList className={`grid w-full ${isChronic ? 'grid-cols-6' : 'grid-cols-5'}`}>
             <TabsTrigger value="overview" className="flex items-center gap-1">
               <ClipboardList className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -114,8 +114,7 @@ export function ConsultationDetailModal({
 
           {/* OVERVIEW TAB */}
           <TabsContent value="overview" className="mt-4">
-            <div className="h-[calc(90vh-12rem)] overflow-y-auto pr-4">
-              <div className="space-y-4 pb-4">
+            <div className="space-y-4">
               {/* Chief Complaint */}
               {consultation.chiefComplaint && (
                 <Section
@@ -183,44 +182,33 @@ export function ConsultationDetailModal({
                   </p>
                 </CardContent>
               </Card>
-              </div>
             </div>
           </TabsContent>
 
           {/* REPORT TAB */}
           <TabsContent value="report" className="mt-4">
-            <div className="h-[calc(90vh-12rem)] overflow-y-auto pr-4">
-              <ReportTab consultation={consultation} fullReport={fullReport} />
-            </div>
+            <ReportTab consultation={consultation} fullReport={fullReport} />
           </TabsContent>
 
           {/* PRESCRIPTION TAB */}
           <TabsContent value="prescription" className="mt-4">
-            <div className="h-[calc(90vh-12rem)] overflow-y-auto pr-4">
-              <PrescriptionTab prescription={prescription} consultation={consultation} />
-            </div>
+            <PrescriptionTab prescription={prescription} consultation={consultation} />
           </TabsContent>
 
           {/* LAB TESTS TAB */}
           <TabsContent value="labs" className="mt-4">
-            <div className="h-[calc(90vh-12rem)] overflow-y-auto pr-4">
-              <LabTestsTab labTests={labTests} fullReport={fullReport} />
-            </div>
+            <LabTestsTab labTests={labTests} fullReport={fullReport} />
           </TabsContent>
 
           {/* IMAGING TAB */}
           <TabsContent value="imaging" className="mt-4">
-            <div className="h-[calc(90vh-12rem)] overflow-y-auto pr-4">
-              <ImagingTab imaging={imaging} fullReport={fullReport} />
-            </div>
+            <ImagingTab imaging={imaging} fullReport={fullReport} />
           </TabsContent>
 
           {/* DIET PLAN TAB (Chronic only) */}
           {isChronic && (
             <TabsContent value="diet" className="mt-4">
-              <div className="h-[calc(90vh-12rem)] overflow-y-auto pr-4">
-                <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
-              </div>
+              <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
             </TabsContent>
           )}
         </Tabs>
