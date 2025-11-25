@@ -21,9 +21,7 @@ import {
   Activity,
   TestTube,
   Image as ImageIcon,
-  User,
   Heart,
-  AlertCircle,
   Download,
   ClipboardList,
   Salad,
@@ -224,526 +222,93 @@ export function ConsultationDetailModal({
 // ============ TAB COMPONENTS ============
 
 function ReportTab({ consultation, fullReport }: { consultation: ConsultationHistoryItem, fullReport: any }) {
-  // Extract report data from different formats
-  const compteRendu = fullReport?.compteRendu
-  const medicalReport = fullReport?.medicalReport
-  // Check for root-level patient data (direct format)
-  const rootPatient = fullReport?.patient
-  const hasRootData = rootPatient || fullReport?.dietaryPlan || fullReport?.nutritionalAssessment
-
-  // New document format (consultation_report, diet_plan, etc.)
+  // Extract report content from different possible structures
   const consultationReport = fullReport?.consultation_report
-  const hasDocumentFormat = consultationReport || fullReport?.diet_plan || fullReport?.prescriptions
-
-  // Debug logging - show all content structures
-  console.log('📄 ReportTab fullReport:', fullReport)
-  if (consultationReport) {
-    console.log('📄 consultation_report.content:', consultationReport.content)
-    console.log('📄 consultation_report.content keys:', consultationReport.content ? Object.keys(consultationReport.content) : 'no content')
-  }
-  if (fullReport?.prescriptions) {
-    console.log('📄 prescriptions:', fullReport.prescriptions)
-    console.log('📄 prescriptions.content:', fullReport.prescriptions.content)
-  }
-  if (fullReport?.laboratory_requests) {
-    console.log('📄 laboratory_requests:', fullReport.laboratory_requests)
-  }
-  if (fullReport?.imaging_requests) {
-    console.log('📄 imaging_requests:', fullReport.imaging_requests)
-  }
-  if (fullReport?.diet_plan) {
-    console.log('📄 diet_plan:', fullReport.diet_plan)
-    console.log('📄 diet_plan.content:', fullReport.diet_plan.content)
-  }
-
-  // Get content with multiple possible field names
   const reportContent = consultationReport?.content || {}
-  const getField = (obj: any, ...keys: string[]) => {
+
+  // Helper to get field from multiple possible keys
+  const getField = (...keys: string[]) => {
     for (const key of keys) {
-      if (obj?.[key]) return obj[key]
+      if (reportContent?.[key]) return reportContent[key]
     }
     return null
   }
 
+  // Extract main report sections (matching Tibok format)
+  const chiefComplaint = getField('motifConsultation', 'chiefComplaint', 'reasonForVisit')
+  const historyOfIllness = getField('histoireMaladie', 'historyOfPresentIllness', 'historyOfIllness')
+  const physicalExam = getField('examenClinique', 'physicalExamination', 'clinicalExamination')
+  const diagnosis = getField('syntheseDiagnostique', 'diagnosis', 'diagnosticSummary')
+  const managementPlan = getField('planTraitement', 'managementPlan', 'treatmentPlan')
+  const followUpText = getField('suivi', 'followUp', 'recommendations') ||
+                       fullReport?.follow_up?.content?.instructions
+
+  const hasContent = chiefComplaint || historyOfIllness || physicalExam || diagnosis || managementPlan || followUpText
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <FileText className="h-5 w-5 text-blue-600" />
-          Compte Rendu Médical
-        </h3>
+        <h3 className="text-lg font-semibold">Medical Report</h3>
         <Button
           variant="outline"
           size="sm"
           onClick={() => handleDownloadReport(consultation)}
         >
           <Download className="h-4 w-4 mr-1" />
-          Télécharger
+          Download
         </Button>
       </div>
-      <Separator />
 
-      {/* New Document Format (consultation_report, diet_plan, prescriptions, etc.) */}
-      {hasDocumentFormat && (
-        <div className="space-y-4">
-          {/* Consultation Report */}
-          {consultationReport?.content && (
-            <Card className="border-l-4 border-l-blue-500">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-blue-800">
-                  {consultationReport.title || 'Compte Rendu de Consultation'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2 space-y-4">
-                {/* Patient Info from consultation_report */}
-                {consultationReport.patient && (
-                  <div className="bg-gray-50 p-3 rounded">
-                    <h4 className="font-medium text-gray-700 mb-2">Patient</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
-                      {consultationReport.patient.nom && (
-                        <div><span className="font-medium">Nom:</span> {consultationReport.patient.nom}</div>
-                      )}
-                      {consultationReport.patient.age && (
-                        <div><span className="font-medium">Âge:</span> {consultationReport.patient.age} ans</div>
-                      )}
-                      {consultationReport.patient.sexe && (
-                        <div><span className="font-medium">Sexe:</span> {consultationReport.patient.sexe}</div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Report Content - render dynamically based on available fields */}
-                {renderReportContent(consultationReport.content)}
-              </CardContent>
-            </Card>
+      {hasContent ? (
+        <div className="space-y-6">
+          {/* CHIEF COMPLAINT */}
+          {chiefComplaint && (
+            <ReportSection title="CHIEF COMPLAINT" content={chiefComplaint} />
           )}
 
-          {/* Practitioner Info */}
-          {consultationReport?.praticien && (
-            <Card className="bg-blue-50 border-blue-200">
-              <CardContent className="p-3">
-                <div className="flex items-center justify-between text-sm">
-                  <div>
-                    <span className="font-medium text-blue-800">Praticien:</span>{' '}
-                    <span className="text-blue-700">{consultationReport.praticien.nom}</span>
-                    {consultationReport.praticien.specialite && (
-                      <span className="text-blue-600 ml-2">({consultationReport.praticien.specialite})</span>
-                    )}
-                  </div>
-                  {consultationReport.praticien.etablissement && (
-                    <div className="text-blue-600">{consultationReport.praticien.etablissement}</div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+          {/* HISTORY OF PRESENT ILLNESS */}
+          {historyOfIllness && (
+            <ReportSection title="HISTORY OF PRESENT ILLNESS" content={historyOfIllness} />
           )}
 
-          {/* Follow-up Info */}
-          {fullReport?.follow_up?.content && (
-            <Card className="border-l-4 border-l-green-500">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-green-800">Suivi</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2 space-y-2 text-sm">
-                {fullReport.follow_up.content.nextAppointment && (
-                  <div>
-                    <span className="font-medium">Prochain RDV:</span>{' '}
-                    {fullReport.follow_up.content.nextAppointment}
-                  </div>
-                )}
-                {fullReport.follow_up.content.frequency && (
-                  <div>
-                    <span className="font-medium">Fréquence:</span>{' '}
-                    {fullReport.follow_up.content.frequency}
-                  </div>
-                )}
-                {fullReport.follow_up.content.instructions && (
-                  <div>
-                    <span className="font-medium">Instructions:</span>
-                    <p className="text-gray-600 mt-1">{fullReport.follow_up.content.instructions}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          {/* PHYSICAL EXAMINATION */}
+          {physicalExam && (
+            <ReportSection title="PHYSICAL EXAMINATION" content={physicalExam} />
+          )}
+
+          {/* DIAGNOSIS */}
+          {diagnosis && (
+            <ReportSection title="DIAGNOSIS" content={diagnosis} />
+          )}
+
+          {/* MANAGEMENT PLAN */}
+          {managementPlan && (
+            <ReportSection title="MANAGEMENT PLAN" content={managementPlan} />
+          )}
+
+          {/* FOLLOW-UP */}
+          {followUpText && (
+            <ReportSection title="FOLLOW-UP" content={followUpText} />
           )}
         </div>
-      )}
-
-      {/* Root-level data format (direct patient/diet data) */}
-      {hasRootData && !compteRendu && !medicalReport && !hasDocumentFormat && (
-        <div className="space-y-4">
-          {/* Patient Info from root */}
-          {rootPatient && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Informations Patient
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                  {(rootPatient.nom || rootPatient.name) && (
-                    <div><span className="font-medium">Nom:</span> {rootPatient.nom || rootPatient.name}</div>
-                  )}
-                  {rootPatient.age && (
-                    <div><span className="font-medium">Âge:</span> {rootPatient.age} ans</div>
-                  )}
-                  {(rootPatient.sexe || rootPatient.gender) && (
-                    <div><span className="font-medium">Sexe:</span> {rootPatient.sexe || rootPatient.gender}</div>
-                  )}
-                  {rootPatient.email && (
-                    <div><span className="font-medium">Email:</span> {rootPatient.email}</div>
-                  )}
-                  {(rootPatient.poids || rootPatient.weight) && (
-                    <div><span className="font-medium">Poids:</span> {rootPatient.poids || rootPatient.weight} kg</div>
-                  )}
-                  {(rootPatient.taille || rootPatient.height) && (
-                    <div><span className="font-medium">Taille:</span> {rootPatient.taille || rootPatient.height} cm</div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Nutritional Assessment */}
-          {fullReport?.nutritionalAssessment && (
-            <Card className="border-l-4 border-l-green-500">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-green-800">Évaluation Nutritionnelle</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2 space-y-2">
-                {fullReport.nutritionalAssessment.currentDiet && (
-                  <div>
-                    <span className="font-medium">État Actuel:</span>
-                    <p className="text-gray-700 bg-gray-50 p-2 rounded mt-1">{fullReport.nutritionalAssessment.currentDiet}</p>
-                  </div>
-                )}
-                {fullReport.nutritionalAssessment.culturalConsiderations && (
-                  <div>
-                    <span className="font-medium">Considérations Culturelles:</span>
-                    <p className="text-gray-600 text-sm">{fullReport.nutritionalAssessment.culturalConsiderations}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Nutritional Guidelines */}
-          {fullReport?.nutritionalGuidelines && (
-            <Card className="border-l-4 border-l-blue-500">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-blue-800">Recommandations Nutritionnelles</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                  {fullReport.nutritionalGuidelines.caloriesTarget && (
-                    <div className="bg-blue-50 p-2 rounded">
-                      <span className="font-medium text-blue-800">Calories:</span>
-                      <p className="text-blue-700">{fullReport.nutritionalGuidelines.caloriesTarget}</p>
-                    </div>
-                  )}
-                  {fullReport.nutritionalGuidelines.hydration && (
-                    <div className="bg-blue-50 p-2 rounded">
-                      <span className="font-medium text-blue-800">Hydratation:</span>
-                      <p className="text-blue-700">{fullReport.nutritionalGuidelines.hydration}</p>
-                    </div>
-                  )}
-                  {fullReport.nutritionalGuidelines.macronutrients && (
-                    <div className="bg-blue-50 p-2 rounded">
-                      <span className="font-medium text-blue-800">Macros:</span>
-                      <p className="text-blue-700 text-xs">
-                        P: {fullReport.nutritionalGuidelines.macronutrients.protein} |
-                        G: {fullReport.nutritionalGuidelines.macronutrients.carbs} |
-                        L: {fullReport.nutritionalGuidelines.macronutrients.fat}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Special Instructions */}
-          {fullReport?.specialInstructions && fullReport.specialInstructions.length > 0 && (
-            <Card className="border-l-4 border-l-amber-500">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-amber-800">Instructions Spéciales</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
-                  {fullReport.specialInstructions.map((instruction: string, idx: number) => (
-                    <li key={idx}>{instruction}</li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Cooking Methods */}
-          {fullReport?.cookingMethods && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Méthodes de Cuisson</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2 grid grid-cols-2 gap-4">
-                {fullReport.cookingMethods.recommended && (
-                  <div>
-                    <span className="font-medium text-green-700">Recommandées:</span>
-                    <ul className="list-disc list-inside text-sm text-gray-600 mt-1">
-                      {fullReport.cookingMethods.recommended.map((method: string, idx: number) => (
-                        <li key={idx}>{method}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {fullReport.cookingMethods.avoid && (
-                  <div>
-                    <span className="font-medium text-red-700">À Éviter:</span>
-                    <ul className="list-disc list-inside text-sm text-gray-600 mt-1">
-                      {fullReport.cookingMethods.avoid.map((method: string, idx: number) => (
-                        <li key={idx}>{method}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Meal Prep Tips */}
-          {fullReport?.mealPrepTips && fullReport.mealPrepTips.length > 0 && (
-            <Card className="bg-green-50 border-green-200">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-green-800">Conseils de Préparation</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <ul className="list-disc list-inside space-y-1 text-sm text-green-700">
-                  {fullReport.mealPrepTips.map((tip: string, idx: number) => (
-                    <li key={idx}>{tip}</li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
-
-      {/* French Format (compteRendu) */}
-      {compteRendu && (
-        <div className="space-y-4">
-          {/* Header */}
-          {compteRendu.header && (
-            <Card className="bg-blue-50 border-blue-200">
-              <CardContent className="p-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  {compteRendu.header.etablissement && (
-                    <div>
-                      <span className="font-semibold text-blue-800">Établissement:</span>{' '}
-                      <span className="text-blue-700">{compteRendu.header.etablissement}</span>
-                    </div>
-                  )}
-                  {compteRendu.header.date && (
-                    <div>
-                      <span className="font-semibold text-blue-800">Date:</span>{' '}
-                      <span className="text-blue-700">{compteRendu.header.date}</span>
-                    </div>
-                  )}
-                  {compteRendu.header.consultationType && (
-                    <div>
-                      <span className="font-semibold text-blue-800">Type:</span>{' '}
-                      <span className="text-blue-700">{compteRendu.header.consultationType}</span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Patient Info */}
-          {compteRendu.patient && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Informations Patient
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                  {compteRendu.patient.nom && (
-                    <div><span className="font-medium">Nom:</span> {compteRendu.patient.nom}</div>
-                  )}
-                  {compteRendu.patient.age && (
-                    <div><span className="font-medium">Âge:</span> {compteRendu.patient.age} ans</div>
-                  )}
-                  {compteRendu.patient.sexe && (
-                    <div><span className="font-medium">Sexe:</span> {compteRendu.patient.sexe}</div>
-                  )}
-                  {compteRendu.patient.poids && (
-                    <div><span className="font-medium">Poids:</span> {compteRendu.patient.poids} kg</div>
-                  )}
-                  {compteRendu.patient.taille && (
-                    <div><span className="font-medium">Taille:</span> {compteRendu.patient.taille} cm</div>
-                  )}
-                  {(compteRendu.patient.tensionSystolique || compteRendu.patient.bloodPressureSystolic) && (
-                    <div>
-                      <span className="font-medium">TA:</span>{' '}
-                      {compteRendu.patient.tensionSystolique || compteRendu.patient.bloodPressureSystolic}/
-                      {compteRendu.patient.tensionDiastolique || compteRendu.patient.bloodPressureDiastolic} mmHg
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Rapport (Main Content) */}
-          {compteRendu.rapport && (
-            <Card className="border-l-4 border-l-blue-500">
-              <CardContent className="p-4 space-y-4">
-                {compteRendu.rapport.motifConsultation && (
-                  <div>
-                    <h4 className="font-semibold text-blue-800 mb-1">Motif de Consultation</h4>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded">{compteRendu.rapport.motifConsultation}</p>
-                  </div>
-                )}
-                {compteRendu.rapport.histoireMaladie && (
-                  <div>
-                    <h4 className="font-semibold text-blue-800 mb-1">Histoire de la Maladie</h4>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{compteRendu.rapport.histoireMaladie}</p>
-                  </div>
-                )}
-                {compteRendu.rapport.examenClinique && (
-                  <div>
-                    <h4 className="font-semibold text-blue-800 mb-1">Examen Clinique</h4>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{compteRendu.rapport.examenClinique}</p>
-                  </div>
-                )}
-                {compteRendu.rapport.syntheseDiagnostique && (
-                  <div>
-                    <h4 className="font-semibold text-blue-800 mb-1">Synthèse Diagnostique</h4>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{compteRendu.rapport.syntheseDiagnostique}</p>
-                  </div>
-                )}
-                {compteRendu.rapport.planTraitement && (
-                  <div>
-                    <h4 className="font-semibold text-blue-800 mb-1">Plan de Traitement</h4>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{compteRendu.rapport.planTraitement}</p>
-                  </div>
-                )}
-                {compteRendu.rapport.recommandations && (
-                  <div>
-                    <h4 className="font-semibold text-blue-800 mb-1">Recommandations</h4>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{compteRendu.rapport.recommandations}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
-
-      {/* English Format (medicalReport) */}
-      {medicalReport && !compteRendu && (
-        <div className="space-y-4">
-          {/* Patient Info */}
-          {medicalReport.patient && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Patient Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                  {medicalReport.patient.fullName && (
-                    <div><span className="font-medium">Name:</span> {medicalReport.patient.fullName}</div>
-                  )}
-                  {medicalReport.patient.age && (
-                    <div><span className="font-medium">Age:</span> {medicalReport.patient.age} years</div>
-                  )}
-                  {medicalReport.patient.gender && (
-                    <div><span className="font-medium">Gender:</span> {medicalReport.patient.gender}</div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Clinical Evaluation */}
-          {medicalReport.clinicalEvaluation && (
-            <Card className="border-l-4 border-l-blue-500">
-              <CardContent className="p-4 space-y-4">
-                {medicalReport.clinicalEvaluation.chiefComplaint && (
-                  <div>
-                    <h4 className="font-semibold text-blue-800 mb-1">Chief Complaint</h4>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded">{medicalReport.clinicalEvaluation.chiefComplaint}</p>
-                  </div>
-                )}
-                {medicalReport.clinicalEvaluation.historyOfPresentIllness && (
-                  <div>
-                    <h4 className="font-semibold text-blue-800 mb-1">History of Present Illness</h4>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{medicalReport.clinicalEvaluation.historyOfPresentIllness}</p>
-                  </div>
-                )}
-                {medicalReport.clinicalEvaluation.physicalExamination && (
-                  <div>
-                    <h4 className="font-semibold text-blue-800 mb-1">Physical Examination</h4>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{medicalReport.clinicalEvaluation.physicalExamination}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Diagnostic Summary */}
-          {medicalReport.diagnosticSummary && (
-            <Card className="border-l-4 border-l-green-500">
-              <CardContent className="p-4">
-                <h4 className="font-semibold text-green-800 mb-2">Diagnostic Summary</h4>
-                <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">
-                  {medicalReport.diagnosticSummary.diagnosticConclusion || JSON.stringify(medicalReport.diagnosticSummary, null, 2)}
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Treatment Plan */}
-          {medicalReport.treatmentPlan && (
-            <Card className="border-l-4 border-l-purple-500">
-              <CardContent className="p-4">
-                <h4 className="font-semibold text-purple-800 mb-2">Treatment Plan</h4>
-                <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">
-                  {typeof medicalReport.treatmentPlan === 'string'
-                    ? medicalReport.treatmentPlan
-                    : JSON.stringify(medicalReport.treatmentPlan, null, 2)}
-                </p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
-
-      {/* Fallback if no structured data at all */}
-      {!compteRendu && !medicalReport && !hasRootData && !hasDocumentFormat && (
+      ) : (
         <Card className="bg-gray-50">
           <CardContent className="p-8 text-center">
             <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">Aucun rapport structuré disponible.</p>
-            {fullReport && Object.keys(fullReport).length > 0 && (
-              <div className="mt-4 text-left">
-                <p className="text-sm text-gray-500 mb-2">Données brutes disponibles:</p>
-                <pre className="text-xs bg-white p-3 rounded border overflow-auto max-h-64">
-                  {JSON.stringify(fullReport, null, 2)}
-                </pre>
-              </div>
-            )}
+            <p className="text-gray-600">No report available for this consultation.</p>
           </CardContent>
         </Card>
       )}
+    </div>
+  )
+}
+
+// Simple report section component matching Tibok style
+function ReportSection({ title, content }: { title: string, content: string }) {
+  return (
+    <div>
+      <h4 className="font-bold text-gray-800 mb-2">{title}</h4>
+      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
     </div>
   )
 }
@@ -761,30 +326,63 @@ function PrescriptionTab({ prescription, consultation }: { prescription: any[], 
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Pill className="h-5 w-5 text-purple-600" />
-          Prescription ({prescription.length} medication{prescription.length > 1 ? 's' : ''})
-        </h3>
-      </div>
-      <Separator />
+    <div className="space-y-6">
+      <h3 className="text-lg font-semibold">Prescribed Medications:</h3>
 
-      <div className="space-y-3">
-        {prescription.map((med, idx) => (
-          <MedicationCard key={idx} medication={med} index={idx + 1} />
-        ))}
+      <div className="space-y-6">
+        {prescription.map((med, idx) => {
+          const name = typeof med === 'string' ? med : med.name || med.medication || med.medicament
+          const dosage = med.dosage || med.dose
+          const frequency = med.frequency || med.posology || med.frequence
+          const duration = med.duration || med.duree
+          const quantity = med.quantity || med.quantite
+          const instructions = med.instructions || med.note
+
+          return (
+            <div key={idx} className="space-y-1">
+              <p className="font-semibold">{idx + 1}. {name}</p>
+              {dosage && <p className="text-gray-700 ml-4">Dosage: {dosage}</p>}
+              {frequency && <p className="text-gray-700 ml-4">Frequency: {frequency}</p>}
+              {(duration || quantity) && (
+                <p className="text-gray-700 ml-4">
+                  {duration && `Duration: ${duration}`}
+                  {duration && quantity && ' • '}
+                  {quantity && `Quantity: ${quantity}`}
+                </p>
+              )}
+              {instructions && <p className="text-gray-700 ml-4">Instructions: {instructions}</p>}
+            </div>
+          )
+        })}
       </div>
     </div>
   )
 }
 
 function LabTestsTab({ labTests, fullReport }: { labTests: any[], fullReport: any }) {
-  // Also check for recommended tests in the report
-  const recommendedTests = fullReport?.medicalReport?.recommendedTests ||
-                           fullReport?.compteRendu?.examensComplementaires?.biological || []
+  // Try to get tests from laboratory_requests structure (grouped by category)
+  const labRequests = fullReport?.laboratory_requests?.tests || {}
 
-  if ((!labTests || labTests.length === 0) && (!recommendedTests || recommendedTests.length === 0)) {
+  // Group tests by category if we have categorized data
+  const categorizedTests: Record<string, any[]> = {}
+
+  if (typeof labRequests === 'object' && !Array.isArray(labRequests)) {
+    // Tests are already categorized (e.g., { hematology: [...], immunology: [...] })
+    Object.entries(labRequests).forEach(([category, tests]) => {
+      if (Array.isArray(tests) && tests.length > 0) {
+        categorizedTests[category.toUpperCase()] = tests
+      }
+    })
+  }
+
+  // If we have flat labTests array, use them
+  if (labTests && labTests.length > 0 && Object.keys(categorizedTests).length === 0) {
+    categorizedTests['REQUESTED TESTS'] = labTests
+  }
+
+  const hasTests = Object.keys(categorizedTests).length > 0
+
+  if (!hasTests) {
     return (
       <Card className="bg-gray-50">
         <CardContent className="p-8 text-center">
@@ -796,54 +394,32 @@ function LabTestsTab({ labTests, fullReport }: { labTests: any[], fullReport: an
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <TestTube className="h-5 w-5 text-cyan-600" />
-          Laboratory Tests
-        </h3>
-      </div>
-      <Separator />
-
-      {/* Performed Tests */}
-      {labTests && labTests.length > 0 && (
-        <div className="space-y-3">
-          <h4 className="font-medium text-gray-700">Test Results</h4>
-          {labTests.map((test, idx) => (
-            <LabTestCard key={idx} test={test} />
-          ))}
-        </div>
-      )}
-
-      {/* Recommended Tests */}
-      {recommendedTests && recommendedTests.length > 0 && (
-        <Card className="border-amber-200 bg-amber-50">
-          <CardHeader>
-            <CardTitle className="text-sm text-amber-800">Recommended Tests</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {recommendedTests.map((test: any, idx: number) => (
-                <li key={idx} className="flex items-start gap-2 text-sm">
-                  <TestTube className="h-4 w-4 text-amber-600 mt-0.5" />
-                  <span>{typeof test === 'string' ? test : test.name || test.test || JSON.stringify(test)}</span>
+    <div className="space-y-6">
+      {Object.entries(categorizedTests).map(([category, tests]) => (
+        <div key={category}>
+          <h4 className="font-bold text-gray-800 mb-2">{category}</h4>
+          <ul className="space-y-1 ml-2">
+            {tests.map((test: any, idx: number) => {
+              const testName = typeof test === 'string' ? test : test.name || test.test || test.testName
+              const isUrgent = test.urgent || test.isUrgent || test.priority === 'urgent'
+              return (
+                <li key={idx} className="text-gray-700">
+                  • {testName} {isUrgent && <span className="text-red-600 font-medium">[URGENT]</span>}
                 </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
+              )
+            })}
+          </ul>
+        </div>
+      ))}
     </div>
   )
 }
 
 function ImagingTab({ imaging, fullReport }: { imaging: any[], fullReport: any }) {
-  // Also check for recommended imaging in the report
-  const recommendedImaging = fullReport?.medicalReport?.recommendedTests?.filter((t: any) =>
-    t.type === 'imaging' || t.category === 'imaging'
-  ) || fullReport?.compteRendu?.examensComplementaires?.imaging || []
+  // Get imaging from imaging_requests structure
+  const imagingRequests = fullReport?.imaging_requests?.examinations || imaging || []
 
-  if ((!imaging || imaging.length === 0) && (!recommendedImaging || recommendedImaging.length === 0)) {
+  if (!imagingRequests || imagingRequests.length === 0) {
     return (
       <Card className="bg-gray-50">
         <CardContent className="p-8 text-center">
@@ -855,49 +431,22 @@ function ImagingTab({ imaging, fullReport }: { imaging: any[], fullReport: any }
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Scan className="h-5 w-5 text-indigo-600" />
-          Imaging Studies
-        </h3>
+    <div className="space-y-6">
+      <h3 className="text-lg font-semibold">Requested Examinations:</h3>
+
+      <div className="space-y-4">
+        {imagingRequests.map((exam: any, idx: number) => {
+          const name = typeof exam === 'string' ? exam : exam.name || exam.examination || exam.type
+          const indication = exam.indication || exam.reason || exam.justification
+
+          return (
+            <div key={idx} className="space-y-1">
+              <p className="font-semibold">{idx + 1}. {name}</p>
+              {indication && <p className="text-gray-700 ml-4">Indication: {indication}</p>}
+            </div>
+          )
+        })}
       </div>
-      <Separator />
-
-      {/* Performed Imaging */}
-      {imaging && imaging.length > 0 && (
-        <div className="space-y-3">
-          <h4 className="font-medium text-gray-700">Completed Studies</h4>
-          {imaging.map((study, idx) => (
-            <Card key={idx} className="border-l-4 border-indigo-400">
-              <CardContent className="p-4">
-                <p className="font-semibold">{typeof study === 'string' ? study : study.name || study.type}</p>
-                {study.findings && <p className="text-sm text-gray-600 mt-1">{study.findings}</p>}
-                {study.date && <p className="text-xs text-gray-500 mt-1">Date: {study.date}</p>}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {/* Recommended Imaging */}
-      {recommendedImaging && recommendedImaging.length > 0 && (
-        <Card className="border-amber-200 bg-amber-50">
-          <CardHeader>
-            <CardTitle className="text-sm text-amber-800">Recommended Imaging</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {recommendedImaging.map((img: any, idx: number) => (
-                <li key={idx} className="flex items-start gap-2 text-sm">
-                  <Scan className="h-4 w-4 text-amber-600 mt-0.5" />
-                  <span>{typeof img === 'string' ? img : img.name || img.study || JSON.stringify(img)}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }
@@ -1028,128 +577,6 @@ function DietPlanTab({ dietPlan, followUp, fullReport }: { dietPlan: any, follow
   )
 }
 
-// ============ RENDER HELPERS ============
-
-// Map of field names to display labels
-const fieldLabels: Record<string, string> = {
-  // French fields
-  motifConsultation: 'Motif de Consultation',
-  histoireMaladie: 'Histoire de la Maladie',
-  examenClinique: 'Examen Clinique',
-  syntheseDiagnostique: 'Synthèse Diagnostique',
-  planTraitement: 'Plan de Traitement',
-  recommandations: 'Recommandations',
-  antecedents: 'Antécédents',
-  conclusion: 'Conclusion',
-  observations: 'Observations',
-  // English fields
-  chiefComplaint: 'Chief Complaint',
-  historyOfPresentIllness: 'History of Present Illness',
-  physicalExamination: 'Physical Examination',
-  diagnosis: 'Diagnosis',
-  diagnosticSummary: 'Diagnostic Summary',
-  treatmentPlan: 'Treatment Plan',
-  recommendations: 'Recommendations',
-  assessment: 'Assessment',
-  plan: 'Plan',
-  followUp: 'Follow-up',
-  notes: 'Notes',
-  // Common
-  summary: 'Summary',
-  details: 'Details',
-}
-
-function renderReportContent(content: any): React.ReactNode {
-  if (!content || typeof content !== 'object') return null
-
-  const sections: React.ReactNode[] = []
-
-  // Render each field in the content object
-  Object.entries(content).forEach(([key, value]) => {
-    if (!value) return
-
-    // Skip certain fields that are not report content
-    if (['type', 'signature', 'validated', 'date', 'timestamp'].includes(key)) return
-
-    const label = fieldLabels[key] || formatFieldName(key)
-
-    if (typeof value === 'string') {
-      sections.push(
-        <div key={key}>
-          <h4 className="font-semibold text-blue-800 mb-1">{label}</h4>
-          <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{value}</p>
-        </div>
-      )
-    } else if (Array.isArray(value)) {
-      sections.push(
-        <div key={key}>
-          <h4 className="font-semibold text-blue-800 mb-1">{label}</h4>
-          <ul className="list-disc list-inside text-gray-700 bg-gray-50 p-3 rounded">
-            {value.map((item, idx) => (
-              <li key={idx}>{typeof item === 'string' ? item : JSON.stringify(item)}</li>
-            ))}
-          </ul>
-        </div>
-      )
-    } else if (typeof value === 'object') {
-      // Recursively render nested objects
-      sections.push(
-        <div key={key}>
-          <h4 className="font-semibold text-blue-800 mb-1">{label}</h4>
-          <div className="bg-gray-50 p-3 rounded">
-            {renderNestedObject(value)}
-          </div>
-        </div>
-      )
-    }
-  })
-
-  return sections.length > 0 ? <div className="space-y-4">{sections}</div> : null
-}
-
-function renderNestedObject(obj: any): React.ReactNode {
-  if (!obj || typeof obj !== 'object') return null
-
-  return (
-    <div className="space-y-2 text-sm">
-      {Object.entries(obj).map(([key, value]) => {
-        if (!value) return null
-        const label = fieldLabels[key] || formatFieldName(key)
-
-        if (typeof value === 'string' || typeof value === 'number') {
-          return (
-            <div key={key}>
-              <span className="font-medium text-gray-600">{label}:</span>{' '}
-              <span className="text-gray-800">{value}</span>
-            </div>
-          )
-        } else if (Array.isArray(value)) {
-          return (
-            <div key={key}>
-              <span className="font-medium text-gray-600">{label}:</span>
-              <ul className="list-disc list-inside ml-2">
-                {value.map((item, idx) => (
-                  <li key={idx}>{typeof item === 'string' ? item : JSON.stringify(item)}</li>
-                ))}
-              </ul>
-            </div>
-          )
-        }
-        return null
-      })}
-    </div>
-  )
-}
-
-function formatFieldName(key: string): string {
-  // Convert camelCase or snake_case to Title Case
-  return key
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/_/g, ' ')
-    .replace(/^./, str => str.toUpperCase())
-    .trim()
-}
-
 // ============ HELPER COMPONENTS ============
 
 interface SectionProps {
@@ -1186,84 +613,6 @@ function VitalSignItem({ label, value }: { label: string, value: string }) {
   )
 }
 
-function MedicationCard({ medication, index }: { medication: any, index: number }) {
-  const name = typeof medication === 'string' ? medication : medication.name || medication.medication
-  const dosage = typeof medication === 'object' ? medication.dosage || medication.dose : null
-  const frequency = typeof medication === 'object' ? medication.frequency || medication.posology : null
-  const duration = typeof medication === 'object' ? medication.duration : null
-  const instructions = typeof medication === 'object' ? medication.instructions : null
-
-  return (
-    <Card className="border-l-4 border-purple-400">
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-            <span className="text-sm font-bold text-purple-600">{index}</span>
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-gray-800">{name}</p>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {dosage && (
-                <Badge variant="outline" className="text-xs">
-                  <Pill className="h-3 w-3 mr-1" />
-                  {dosage}
-                </Badge>
-              )}
-              {frequency && (
-                <Badge variant="outline" className="text-xs">
-                  <Calendar className="h-3 w-3 mr-1" />
-                  {frequency}
-                </Badge>
-              )}
-              {duration && (
-                <Badge variant="outline" className="text-xs">
-                  <Activity className="h-3 w-3 mr-1" />
-                  {duration}
-                </Badge>
-              )}
-            </div>
-            {instructions && (
-              <p className="text-sm text-gray-600 mt-2 italic">{instructions}</p>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function LabTestCard({ test }: { test: any }) {
-  const name = typeof test === 'string' ? test : test.name || test.test
-  const value = typeof test === 'object' ? test.value || test.result : null
-  const unit = typeof test === 'object' ? test.unit : null
-  const normalRange = typeof test === 'object' ? test.normalRange || test.reference : null
-  const isAbnormal = typeof test === 'object' ? test.isAbnormal || test.abnormal : false
-
-  return (
-    <Card className={`border-l-4 ${isAbnormal ? 'border-red-400 bg-red-50' : 'border-cyan-400'}`}>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <p className="font-semibold text-gray-800">{name}</p>
-              {isAbnormal && (
-                <AlertCircle className="h-4 w-4 text-red-600" />
-              )}
-            </div>
-            {value && (
-              <p className="text-sm text-gray-600 mt-1">
-                Result: <strong>{value}</strong> {unit}
-                {normalRange && (
-                  <span className="text-xs text-gray-500 ml-2">(Normal: {normalRange})</span>
-                )}
-              </p>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
 
 // ============ HELPER FUNCTIONS ============
 
