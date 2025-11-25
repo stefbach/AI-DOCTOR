@@ -83,7 +83,7 @@ export function ConsultationDetailModal({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
           <TabsList className={`grid w-full flex-shrink-0 ${isChronic ? 'grid-cols-6' : 'grid-cols-5'}`}>
             <TabsTrigger value="overview" className="flex items-center gap-1">
               <ClipboardList className="h-4 w-4" />
@@ -113,9 +113,10 @@ export function ConsultationDetailModal({
             )}
           </TabsList>
 
-          <ScrollArea className="h-[calc(90vh-10rem)] mt-4 pr-2">
-            {/* OVERVIEW TAB */}
-            <TabsContent value="overview" className="mt-0 space-y-4 pb-4 pr-4">
+          {/* OVERVIEW TAB */}
+          <TabsContent value="overview" className="flex-1 mt-4 data-[state=active]:flex data-[state=active]:flex-col">
+            <ScrollArea className="flex-1 h-[calc(90vh-12rem)]">
+              <div className="space-y-4 pr-4 pb-4">
               {/* Chief Complaint */}
               {consultation.chiefComplaint && (
                 <Section
@@ -183,35 +184,56 @@ export function ConsultationDetailModal({
                   </p>
                 </CardContent>
               </Card>
-            </TabsContent>
+              </div>
+            </ScrollArea>
+          </TabsContent>
 
-            {/* REPORT TAB */}
-            <TabsContent value="report" className="mt-0 space-y-4 pb-4 pr-4">
-              <ReportTab consultation={consultation} fullReport={fullReport} />
-            </TabsContent>
+          {/* REPORT TAB */}
+          <TabsContent value="report" className="flex-1 mt-4 data-[state=active]:flex data-[state=active]:flex-col">
+            <ScrollArea className="flex-1 h-[calc(90vh-12rem)]">
+              <div className="pr-4 pb-4">
+                <ReportTab consultation={consultation} fullReport={fullReport} />
+              </div>
+            </ScrollArea>
+          </TabsContent>
 
-            {/* PRESCRIPTION TAB */}
-            <TabsContent value="prescription" className="mt-0 space-y-4 pb-4 pr-4">
-              <PrescriptionTab prescription={prescription} consultation={consultation} />
-            </TabsContent>
+          {/* PRESCRIPTION TAB */}
+          <TabsContent value="prescription" className="flex-1 mt-4 data-[state=active]:flex data-[state=active]:flex-col">
+            <ScrollArea className="flex-1 h-[calc(90vh-12rem)]">
+              <div className="pr-4 pb-4">
+                <PrescriptionTab prescription={prescription} consultation={consultation} />
+              </div>
+            </ScrollArea>
+          </TabsContent>
 
-            {/* LAB TESTS TAB */}
-            <TabsContent value="labs" className="mt-0 space-y-4 pb-4 pr-4">
-              <LabTestsTab labTests={labTests} fullReport={fullReport} />
-            </TabsContent>
+          {/* LAB TESTS TAB */}
+          <TabsContent value="labs" className="flex-1 mt-4 data-[state=active]:flex data-[state=active]:flex-col">
+            <ScrollArea className="flex-1 h-[calc(90vh-12rem)]">
+              <div className="pr-4 pb-4">
+                <LabTestsTab labTests={labTests} fullReport={fullReport} />
+              </div>
+            </ScrollArea>
+          </TabsContent>
 
-            {/* IMAGING TAB */}
-            <TabsContent value="imaging" className="mt-0 space-y-4 pb-4 pr-4">
-              <ImagingTab imaging={imaging} fullReport={fullReport} />
-            </TabsContent>
+          {/* IMAGING TAB */}
+          <TabsContent value="imaging" className="flex-1 mt-4 data-[state=active]:flex data-[state=active]:flex-col">
+            <ScrollArea className="flex-1 h-[calc(90vh-12rem)]">
+              <div className="pr-4 pb-4">
+                <ImagingTab imaging={imaging} fullReport={fullReport} />
+              </div>
+            </ScrollArea>
+          </TabsContent>
 
-            {/* DIET PLAN TAB (Chronic only) */}
-            {isChronic && (
-              <TabsContent value="diet" className="mt-0 space-y-4 pb-4 pr-4">
-                <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
-              </TabsContent>
-            )}
-          </ScrollArea>
+          {/* DIET PLAN TAB (Chronic only) */}
+          {isChronic && (
+            <TabsContent value="diet" className="flex-1 mt-4 data-[state=active]:flex data-[state=active]:flex-col">
+              <ScrollArea className="flex-1 h-[calc(90vh-12rem)]">
+                <div className="pr-4 pb-4">
+                  <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+          )}
         </Tabs>
       </DialogContent>
     </Dialog>
