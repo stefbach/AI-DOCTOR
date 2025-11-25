@@ -141,14 +141,6 @@ export default function ConsultationHubPage() {
       {/* Progress Indicator */}
       {currentStep !== 'search' && (
         <div className="mb-6 flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleReset}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Nouvelle Recherche
-          </Button>
           <div className="flex-1 flex items-center gap-2">
             <div className={`h-2 flex-1 rounded-full ${currentStep === 'summary' || currentStep === 'workflow' ? 'bg-green-500' : 'bg-gray-200'}`} />
             <div className={`h-2 flex-1 rounded-full ${currentStep === 'workflow' ? 'bg-green-500' : 'bg-gray-200'}`} />

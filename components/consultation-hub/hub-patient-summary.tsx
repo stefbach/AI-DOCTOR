@@ -162,27 +162,16 @@ export function HubPatientSummary({ patientData, onViewHistory }: HubPatientSumm
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          <Button
-            onClick={() => window.open(`/view-report/${mostRecent.consultationId}`, '_blank')}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <FileText className="mr-2 h-4 w-4" />
-            Voir Dernier Rapport
-            <ChevronRight className="ml-2 h-4 w-4" />
-          </Button>
-          
-          <Button
-            onClick={onViewHistory}
-            variant="outline"
-            className="w-full border-green-300 hover:bg-green-100"
-          >
-            <Eye className="mr-2 h-4 w-4" />
-            Historique Complet
-            <ChevronRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
+        {/* Action Button */}
+        <Button
+          onClick={onViewHistory}
+          variant="outline"
+          className="w-full border-green-300 hover:bg-green-100"
+        >
+          <Eye className="mr-2 h-4 w-4" />
+          Historique Complet
+          <ChevronRight className="ml-2 h-4 w-4" />
+        </Button>
       </CardContent>
     </Card>
   )
