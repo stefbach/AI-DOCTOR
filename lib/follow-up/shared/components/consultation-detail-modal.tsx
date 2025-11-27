@@ -203,50 +203,61 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
   // Try multiple data paths for the report content
   // Debug: log fullReport structure
   console.log('📋 ReportTab - fullReport keys:', fullReport ? Object.keys(fullReport) : 'null')
-  console.log('📋 consultationReport keys:', fullReport?.consultationReport ? Object.keys(fullReport.consultationReport) : 'none')
+  console.log('📋 consultation_report keys:', fullReport?.consultation_report ? Object.keys(fullReport.consultation_report) : 'none')
 
-  // The data structure is:
-  // - fullReport.consultationReport.content = compteRendu structure (New format from save-medical-report)
+  // The data structure uses underscore keys (consultation_report, not consultationReport)
+  // - fullReport.consultation_report.content = report content
+  // - fullReport.consultation_report.content.rapport = French structure
   // - fullReport.compteRendu = legacy format
-  // - fullReport.consultationReport.medicalReport = chronic disease format
 
-  // Path 1: New document format (consultationReport.content)
-  const consultationReportContent = fullReport?.consultationReport?.content || {}
-  const consultationReportMedical = fullReport?.consultationReport?.medicalReport || {}
+  // Path 1: New document format with underscore key (consultation_report)
+  const consultationReportObj = fullReport?.consultation_report || {}
+  const consultationReportContent = consultationReportObj?.content || {}
+  console.log('📋 consultation_report.content keys:', consultationReportContent ? Object.keys(consultationReportContent) : 'none')
 
-  // Path 2: Legacy Mauritian format (compteRendu at root)
-  const compteRendu = fullReport?.compteRendu || consultationReportContent || {}
-  const rapport = compteRendu?.rapport || consultationReportContent?.rapport || {}
+  // Path 2: Legacy camelCase format (consultationReport) - fallback
+  const legacyConsultationReport = fullReport?.consultationReport || {}
+  const legacyContent = legacyConsultationReport?.content || {}
 
-  // Path 3: Medical report format for chronic disease
-  const medicalReport = consultationReportMedical || fullReport?.medicalReport || {}
+  // Merge both formats
+  const reportContent = Object.keys(consultationReportContent).length > 0 ? consultationReportContent : legacyContent
+
+  // Path 3: Legacy Mauritian format (compteRendu at root)
+  const compteRendu = fullReport?.compteRendu || reportContent || {}
+  const rapport = compteRendu?.rapport || reportContent?.rapport || {}
+  console.log('📋 rapport keys:', rapport ? Object.keys(rapport) : 'none')
+
+  // Path 4: Medical report format for chronic disease
+  const medicalReport = consultationReportObj?.medicalReport || legacyConsultationReport?.medicalReport || fullReport?.medicalReport || {}
   const clinicalEvalMR = medicalReport?.clinicalEvaluation || {}
   const diagSummaryMR = medicalReport?.diagnosticSummary || {}
 
-  // Path 4: From consultation_report.content structured fields
-  const clinicalEval = consultationReportContent?.clinicalEvaluation || {}
-  const diagSummary = consultationReportContent?.diagnosticSummary || {}
+  // Path 5: From report content structured fields
+  const clinicalEval = reportContent?.clinicalEvaluation || {}
+  const diagSummary = reportContent?.diagnosticSummary || {}
 
   // Try to find narrative from multiple sources - check ALL possible paths
   const narrative =
-    // In consultationReport.content
-    consultationReportContent?.narrative ||
-    consultationReportContent?.report ||
+    // In consultation_report.content
+    reportContent?.narrative ||
+    consultationReportObj?.narrative ||
+    // In content.report (nested)
+    reportContent?.report ||
     // Direct on compteRendu
     compteRendu?.narrative ||
     // From rapport synthese (French format - this builds the report content)
-    (rapport?.syntheseDiagnostique ? buildNarrativeFromRapport(rapport) : null) ||
+    (Object.keys(rapport).length > 0 && rapport?.syntheseDiagnostique ? buildNarrativeFromRapport(rapport) : null) ||
     // Direct on fullReport
     fullReport?.narrative ||
     fullReport?.report?.narrative ||
     fullReport?.content?.narrative ||
-    // In medical_report document
+    // In medical_report document (underscore)
     fullReport?.medical_report?.narrative ||
     fullReport?.medical_report?.content?.narrative ||
     // From medicalReport (chronic disease)
     medicalReport?.narrative ||
     // If there's a direct report string
-    (typeof consultationReportContent === 'string' ? consultationReportContent : null) ||
+    (typeof reportContent === 'string' ? reportContent : null) ||
     (typeof fullReport?.report === 'string' ? fullReport.report : null) ||
     // Also check if fullReport is itself a string/narrative
     (typeof fullReport === 'string' ? fullReport : null)
@@ -257,63 +268,63 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
   // Build structured content from any available source
   const chiefComplaint =
     rapport?.motifConsultation ||
+    reportContent?.chiefComplaint ||
     clinicalEval?.chiefComplaint ||
     clinicalEvalMR?.chiefComplaint ||
-    consultationReportContent?.chiefComplaint ||
     fullReport?.chiefComplaint ||
     consultation.chiefComplaint
 
   const historyOfIllness =
     rapport?.anamnese ||
     rapport?.histoireMaladie ||
+    reportContent?.historyOfPresentIllness ||
     clinicalEval?.historyOfPresentIllness ||
     clinicalEvalMR?.historyOfPresentIllness ||
-    consultationReportContent?.historyOfPresentIllness ||
     fullReport?.historyOfPresentIllness
 
   const physicalExam =
     rapport?.examenClinique ||
+    reportContent?.physicalExamination ||
     clinicalEval?.physicalExamination ||
     clinicalEvalMR?.physicalExamination ||
-    consultationReportContent?.physicalExamination ||
     fullReport?.physicalExamination
 
   const diagnosis =
     rapport?.syntheseDiagnostique ||
     rapport?.conclusionDiagnostique ||
+    reportContent?.diagnosis ||
     diagSummary?.diagnosticConclusion ||
     diagSummaryMR?.diagnosticConclusion ||
-    consultationReportContent?.diagnosis ||
     fullReport?.diagnosis ||
     consultation.diagnosis
 
   const treatmentPlan =
     rapport?.priseEnCharge ||
     rapport?.planTraitement ||
+    reportContent?.treatmentPlan ||
     medicalReport?.treatmentPlan?.medications ||
-    consultationReportContent?.treatmentPlan ||
     fullReport?.treatmentPlan
 
   const surveillance =
     rapport?.surveillance ||
-    consultationReportContent?.surveillance ||
+    reportContent?.surveillance ||
     fullReport?.surveillance
 
   const conclusion =
     rapport?.conclusion ||
-    consultationReportContent?.conclusion ||
+    reportContent?.conclusion ||
     fullReport?.conclusion
 
   const antecedents =
     rapport?.antecedents ||
-    consultationReportContent?.antecedents ||
+    reportContent?.antecedents ||
     fullReport?.antecedents
 
   // Also check for dermatology-specific fields
   const skinAnalysis = fullReport?.skinAnalysis || fullReport?.dermatologyAnalysis ||
-                       consultationReportContent?.skinAnalysis || compteRendu?.skinAnalysis
+                       reportContent?.skinAnalysis || compteRendu?.skinAnalysis
   const imageAnalysis = fullReport?.imageAnalysis || compteRendu?.imageAnalysis ||
-                        consultationReportContent?.imageAnalysis
+                        reportContent?.imageAnalysis
 
   const hasStructuredContent = chiefComplaint || historyOfIllness || physicalExam || diagnosis || skinAnalysis || treatmentPlan
 
@@ -668,29 +679,48 @@ function ImagingTab({ imaging, fullReport }: { imaging: any[], fullReport: any }
 }
 
 function DietPlanTab({ dietPlan, followUp, fullReport }: { dietPlan: any, followUp: any, fullReport: any }) {
+  // Debug: Log received data
+  console.log('🥗 DietPlanTab - dietPlan:', dietPlan ? Object.keys(dietPlan) : 'null')
+  console.log('🥗 DietPlanTab - followUp:', followUp ? Object.keys(followUp) : 'null')
+
   const hasDietPlan = dietPlan && Object.keys(dietPlan).length > 0
   const hasFollowUp = followUp && Object.keys(followUp).length > 0
 
   // Try to extract from different report structures
-  const mealPlan = dietPlan?.mealPlan || fullReport?.dietaryPlan?.mealPlan || fullReport?.mealPlan ||
+  const mealPlan = dietPlan?.mealPlan || dietPlan?.content?.mealPlan ||
+                   fullReport?.dietaryPlan?.mealPlan || fullReport?.mealPlan ||
                    fullReport?.diet_plan?.content?.mealPlan || fullReport?.diet_plan?.mealPlan
-  const supplements = dietPlan?.supplements || fullReport?.dietaryPlan?.supplements ||
+
+  const supplements = dietPlan?.supplements || dietPlan?.content?.supplements ||
+                      fullReport?.dietaryPlan?.supplements ||
                       fullReport?.diet_plan?.content?.supplements || []
-  const followUpSchedule = followUp?.schedule || fullReport?.followUp?.schedule || fullReport?.suivi ||
+
+  const followUpSchedule = followUp?.schedule || followUp?.content?.schedule ||
+                           fullReport?.followUp?.schedule || fullReport?.suivi ||
                            fullReport?.follow_up?.content?.schedule || fullReport?.follow_up?.schedule
 
-  // Check for raw text diet plan or recommendations
+  // Check for raw text diet plan or recommendations - also try content directly
   const dietNarrative = typeof dietPlan === 'string' ? dietPlan :
-                        dietPlan?.narrative || dietPlan?.recommendations || dietPlan?.content ||
+                        dietPlan?.narrative || dietPlan?.recommendations ||
+                        (typeof dietPlan?.content === 'string' ? dietPlan.content : dietPlan?.content?.narrative) ||
+                        dietPlan?.content?.recommendations ||
                         fullReport?.diet_plan?.content?.narrative || fullReport?.diet_plan?.content?.recommendations
 
-  // Check for raw text follow up
+  // Check for raw text follow up - also try content directly
   const followUpNarrative = typeof followUp === 'string' ? followUp :
                             followUp?.narrative || followUp?.recommendations || followUp?.notes ||
+                            (typeof followUp?.content === 'string' ? followUp.content : followUp?.content?.narrative) ||
+                            followUp?.content?.recommendations || followUp?.content?.notes ||
                             fullReport?.follow_up?.content?.narrative || fullReport?.follow_up?.content?.recommendations
 
-  const hasAnyDietContent = hasDietPlan || mealPlan || dietNarrative
-  const hasAnyFollowUpContent = hasFollowUp || followUpSchedule || followUpNarrative
+  // If we have diet/followUp objects but no specific fields extracted, display all content
+  const dietDataToDisplay = hasDietPlan && !mealPlan && !dietNarrative ? formatObjectForDisplay(dietPlan) : null
+  const followUpDataToDisplay = hasFollowUp && !followUpSchedule && !followUpNarrative ? formatObjectForDisplay(followUp) : null
+
+  const hasAnyDietContent = hasDietPlan || mealPlan || dietNarrative || dietDataToDisplay
+  const hasAnyFollowUpContent = hasFollowUp || followUpSchedule || followUpNarrative || followUpDataToDisplay
+
+  console.log('🥗 hasAnyDietContent:', hasAnyDietContent, 'hasAnyFollowUpContent:', hasAnyFollowUpContent)
 
   if (!hasAnyDietContent && !hasAnyFollowUpContent) {
     return (
@@ -701,6 +731,25 @@ function DietPlanTab({ dietPlan, followUp, fullReport }: { dietPlan: any, follow
         </CardContent>
       </Card>
     )
+  }
+
+  // Helper function to format object for display
+  function formatObjectForDisplay(obj: any): string | null {
+    if (!obj || typeof obj !== 'object') return null
+    if (Object.keys(obj).length === 0) return null
+
+    const parts: string[] = []
+    for (const [key, value] of Object.entries(obj)) {
+      if (value && key !== 'content') {
+        const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase())
+        if (typeof value === 'string') {
+          parts.push(`**${label}:** ${value}`)
+        } else if (typeof value === 'object') {
+          parts.push(`**${label}:**\n${JSON.stringify(value, null, 2)}`)
+        }
+      }
+    }
+    return parts.length > 0 ? parts.join('\n\n') : null
   }
 
   return (
@@ -777,6 +826,17 @@ function DietPlanTab({ dietPlan, followUp, fullReport }: { dietPlan: any, follow
               </CardContent>
             </Card>
           )}
+
+          {/* Fallback: Display raw diet data if no specific fields found */}
+          {dietDataToDisplay && !mealPlan && !dietNarrative && (
+            <Card className="border-green-200 bg-green-50">
+              <CardContent className="p-4">
+                <div className="whitespace-pre-wrap text-sm text-gray-700">
+                  {dietDataToDisplay}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
 
@@ -816,6 +876,12 @@ function DietPlanTab({ dietPlan, followUp, fullReport }: { dietPlan: any, follow
                       )}
                     </>
                   )}
+                </div>
+              )}
+              {/* Fallback: Display raw follow-up data if no specific fields found */}
+              {followUpDataToDisplay && !followUpSchedule && !followUpNarrative && (
+                <div className="whitespace-pre-wrap text-sm text-gray-700">
+                  {followUpDataToDisplay}
                 </div>
               )}
             </CardContent>
@@ -989,20 +1055,24 @@ function extractImaging(fullReport: any, imagingStudies?: any[]): any[] {
 }
 
 function extractDietPlan(fullReport: any, dietaryPlan?: any): any {
-  if (dietaryPlan && Object.keys(dietaryPlan).length > 0) return dietaryPlan
+  if (dietaryPlan && typeof dietaryPlan === 'object' && Object.keys(dietaryPlan).length > 0) return dietaryPlan
 
   // Debug: Log available keys
   console.log('🍎 extractDietPlan - fullReport keys:', fullReport ? Object.keys(fullReport) : 'null')
 
-  // Try multiple possible paths for diet plan data
+  // Try multiple possible paths for diet plan data (underscore keys first)
   const paths = [
-    // New document format
+    // Underscore format (from database)
     fullReport?.diet_plan?.content,
     fullReport?.diet_plan,
-    // Saved at root level by save-medical-report
+    fullReport?.diet_plan_data,
+    // CamelCase format
     fullReport?.dietaryPlan,
     fullReport?.dietaryProtocol,
-    // In consultationReport
+    // In consultation_report (underscore)
+    fullReport?.consultation_report?.dietaryPlan,
+    fullReport?.consultation_report?.content?.dietaryPlan,
+    // In consultationReport (camelCase)
     fullReport?.consultationReport?.dietaryPlan,
     fullReport?.consultationReport?.content?.dietaryPlan,
     // Other possible paths
@@ -1014,7 +1084,7 @@ function extractDietPlan(fullReport: any, dietaryPlan?: any): any {
 
   for (const path of paths) {
     if (path && typeof path === 'object' && Object.keys(path).length > 0) {
-      console.log('🍎 Found diet plan at path')
+      console.log('🍎 Found diet plan:', Object.keys(path))
       return path
     }
     if (path && typeof path === 'string' && path.length > 0) {
@@ -1023,6 +1093,7 @@ function extractDietPlan(fullReport: any, dietaryPlan?: any): any {
     }
   }
 
+  console.log('🍎 No diet plan found')
   return {}
 }
 
@@ -1030,15 +1101,19 @@ function extractFollowUp(fullReport: any): any {
   // Debug: Log available keys
   console.log('📅 extractFollowUp - fullReport keys:', fullReport ? Object.keys(fullReport) : 'null')
 
-  // Try multiple possible paths for follow-up data
+  // Try multiple possible paths for follow-up data (underscore keys first)
   const paths = [
-    // New document format
+    // Underscore format (from database)
     fullReport?.follow_up?.content,
     fullReport?.follow_up,
-    // Saved at root level by save-medical-report
+    fullReport?.follow_up_data,
+    // CamelCase format
     fullReport?.followUpPlan,
     fullReport?.followUp,
-    // In consultationReport
+    // In consultation_report (underscore)
+    fullReport?.consultation_report?.followUpPlan,
+    fullReport?.consultation_report?.content?.followUpPlan,
+    // In consultationReport (camelCase)
     fullReport?.consultationReport?.followUpPlan,
     fullReport?.consultationReport?.content?.followUpPlan,
     // Other possible paths
@@ -1049,7 +1124,7 @@ function extractFollowUp(fullReport: any): any {
 
   for (const path of paths) {
     if (path && typeof path === 'object' && Object.keys(path).length > 0) {
-      console.log('📅 Found follow-up at path')
+      console.log('📅 Found follow-up:', Object.keys(path))
       return path
     }
     if (path && typeof path === 'string' && path.length > 0) {
@@ -1058,6 +1133,7 @@ function extractFollowUp(fullReport: any): any {
     }
   }
 
+  console.log('📅 No follow-up found')
   return {}
 }
 
