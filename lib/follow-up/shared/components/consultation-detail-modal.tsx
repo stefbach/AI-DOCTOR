@@ -87,7 +87,7 @@ export function ConsultationDetailModal({
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={`grid w-full ${isChronic ? 'grid-cols-5' : 'grid-cols-4'}`}>
+          <TabsList className={`grid w-full ${isChronic ? 'grid-cols-6' : 'grid-cols-4'}`}>
               <TabsTrigger value="report" className="flex items-center gap-1">
                 <FileText className="h-4 w-4" />
                 <span className="hidden sm:inline">Report</span>
@@ -98,17 +98,23 @@ export function ConsultationDetailModal({
               </TabsTrigger>
               <TabsTrigger value="labs" className="flex items-center gap-1">
                 <TestTube className="h-4 w-4" />
-                <span className="hidden sm:inline">Lab Tests</span>
+                <span className="hidden sm:inline">Labs</span>
               </TabsTrigger>
               <TabsTrigger value="imaging" className="flex items-center gap-1">
                 <Scan className="h-4 w-4" />
                 <span className="hidden sm:inline">Imaging</span>
               </TabsTrigger>
               {isChronic && (
-                <TabsTrigger value="diet" className="flex items-center gap-1">
-                  <Salad className="h-4 w-4" />
-                  <span className="hidden sm:inline">Diet</span>
-                </TabsTrigger>
+                <>
+                  <TabsTrigger value="diet" className="flex items-center gap-1">
+                    <Salad className="h-4 w-4" />
+                    <span className="hidden sm:inline">Diet</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="followup" className="flex items-center gap-1">
+                    <CalendarCheck className="h-4 w-4" />
+                    <span className="hidden sm:inline">Follow-up</span>
+                  </TabsTrigger>
+                </>
               )}
             </TabsList>
 
@@ -144,7 +150,16 @@ export function ConsultationDetailModal({
             {isChronic && (
               <TabsContent value="diet" className="mt-4">
                 <div style={scrollContainerStyle} className="pr-2">
-                  <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
+                  <DietPlanTab dietPlan={dietPlan} fullReport={fullReport} />
+                </div>
+              </TabsContent>
+            )}
+
+            {/* FOLLOW-UP TAB (Chronic only) */}
+            {isChronic && (
+              <TabsContent value="followup" className="mt-4">
+                <div style={scrollContainerStyle} className="pr-2">
+                  <FollowUpTab followUp={followUp} fullReport={fullReport} />
                 </div>
               </TabsContent>
             )}
@@ -678,215 +693,420 @@ function ImagingTab({ imaging, fullReport }: { imaging: any[], fullReport: any }
   )
 }
 
-function DietPlanTab({ dietPlan, followUp, fullReport }: { dietPlan: any, followUp: any, fullReport: any }) {
-  // Debug: Log received data
+// Helper function to format a meal's foods as readable text
+function formatMealFoods(foods: any[]): string {
+  if (!foods || !Array.isArray(foods)) return ''
+  return foods.map(food => {
+    if (typeof food === 'string') return `• ${food}`
+    const item = food.item || food.name || food.food || ''
+    const quantity = food.quantity || food.portion || ''
+    const calories = food.calories || food.kcal || ''
+    if (quantity && calories) return `• ${item} (${quantity}) - ${calories} kcal`
+    if (quantity) return `• ${item} (${quantity})`
+    if (calories) return `• ${item} - ${calories} kcal`
+    return `• ${item}`
+  }).join('\n')
+}
+
+// Helper to format a daily meal plan
+function formatDayMeals(day: any, dayLabel: string): JSX.Element | null {
+  if (!day || typeof day !== 'object') return null
+
+  const meals = ['breakfast', 'midMorningSnack', 'lunch', 'afternoonSnack', 'dinner']
+  const mealLabels: Record<string, string> = {
+    breakfast: '🌅 Breakfast',
+    midMorningSnack: '🍎 Mid-Morning Snack',
+    lunch: '☀️ Lunch',
+    afternoonSnack: '🥜 Afternoon Snack',
+    dinner: '🌙 Dinner'
+  }
+
+  const hasMeals = meals.some(meal => day[meal])
+  if (!hasMeals) return null
+
+  return (
+    <div className="mb-4">
+      <h4 className="font-bold text-green-800 mb-2">{dayLabel}</h4>
+      <div className="space-y-3 ml-2">
+        {meals.map(meal => {
+          const mealData = day[meal]
+          if (!mealData) return null
+          const foods = mealData.foods || mealData
+          const totalCal = mealData.totalCalories
+          return (
+            <div key={meal}>
+              <p className="font-medium text-gray-800">{mealLabels[meal]}{totalCal ? ` (${totalCal} kcal total)` : ''}</p>
+              <div className="text-sm text-gray-700 ml-2 whitespace-pre-line">
+                {Array.isArray(foods) ? formatMealFoods(foods) : String(foods)}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function DietPlanTab({ dietPlan, fullReport }: { dietPlan: any, fullReport: any }) {
   console.log('🥗 DietPlanTab - dietPlan:', dietPlan ? Object.keys(dietPlan) : 'null')
-  console.log('🥗 DietPlanTab - followUp:', followUp ? Object.keys(followUp) : 'null')
 
-  const hasDietPlan = dietPlan && Object.keys(dietPlan).length > 0
-  const hasFollowUp = followUp && Object.keys(followUp).length > 0
+  const data = dietPlan?.content || dietPlan || {}
+  const hasDietPlan = data && Object.keys(data).length > 0
 
-  // Try to extract from different report structures
-  const mealPlan = dietPlan?.mealPlan || dietPlan?.content?.mealPlan ||
-                   fullReport?.dietaryPlan?.mealPlan || fullReport?.mealPlan ||
-                   fullReport?.diet_plan?.content?.mealPlan || fullReport?.diet_plan?.mealPlan
-
-  const supplements = dietPlan?.supplements || dietPlan?.content?.supplements ||
-                      fullReport?.dietaryPlan?.supplements ||
-                      fullReport?.diet_plan?.content?.supplements || []
-
-  const followUpSchedule = followUp?.schedule || followUp?.content?.schedule ||
-                           fullReport?.followUp?.schedule || fullReport?.suivi ||
-                           fullReport?.follow_up?.content?.schedule || fullReport?.follow_up?.schedule
-
-  // Check for raw text diet plan or recommendations - also try content directly
-  const dietNarrative = typeof dietPlan === 'string' ? dietPlan :
-                        dietPlan?.narrative || dietPlan?.recommendations ||
-                        (typeof dietPlan?.content === 'string' ? dietPlan.content : dietPlan?.content?.narrative) ||
-                        dietPlan?.content?.recommendations ||
-                        fullReport?.diet_plan?.content?.narrative || fullReport?.diet_plan?.content?.recommendations
-
-  // Check for raw text follow up - also try content directly
-  const followUpNarrative = typeof followUp === 'string' ? followUp :
-                            followUp?.narrative || followUp?.recommendations || followUp?.notes ||
-                            (typeof followUp?.content === 'string' ? followUp.content : followUp?.content?.narrative) ||
-                            followUp?.content?.recommendations || followUp?.content?.notes ||
-                            fullReport?.follow_up?.content?.narrative || fullReport?.follow_up?.content?.recommendations
-
-  // If we have diet/followUp objects but no specific fields extracted, display all content
-  const dietDataToDisplay = hasDietPlan && !mealPlan && !dietNarrative ? formatObjectForDisplay(dietPlan) : null
-  const followUpDataToDisplay = hasFollowUp && !followUpSchedule && !followUpNarrative ? formatObjectForDisplay(followUp) : null
-
-  const hasAnyDietContent = hasDietPlan || mealPlan || dietNarrative || dietDataToDisplay
-  const hasAnyFollowUpContent = hasFollowUp || followUpSchedule || followUpNarrative || followUpDataToDisplay
-
-  console.log('🥗 hasAnyDietContent:', hasAnyDietContent, 'hasAnyFollowUpContent:', hasAnyFollowUpContent)
-
-  if (!hasAnyDietContent && !hasAnyFollowUpContent) {
+  if (!hasDietPlan) {
     return (
       <Card className="bg-gray-50">
         <CardContent className="p-8 text-center">
           <Salad className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600">No diet plan or follow-up information available for this consultation.</p>
+          <p className="text-gray-600">No diet plan available for this consultation.</p>
         </CardContent>
       </Card>
     )
   }
 
-  // Helper function to format object for display
-  function formatObjectForDisplay(obj: any): string | null {
-    if (!obj || typeof obj !== 'object') return null
-    if (Object.keys(obj).length === 0) return null
-
-    const parts: string[] = []
-    for (const [key, value] of Object.entries(obj)) {
-      if (value && key !== 'content') {
-        const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase())
-        if (typeof value === 'string') {
-          parts.push(`**${label}:** ${value}`)
-        } else if (typeof value === 'object') {
-          parts.push(`**${label}:**\n${JSON.stringify(value, null, 2)}`)
-        }
-      }
-    }
-    return parts.length > 0 ? parts.join('\n\n') : null
-  }
+  // Extract structured data
+  const header = data.header || {}
+  const nutritionalGuidelines = data.nutritionalGuidelines || {}
+  const nutritionalAssessment = data.nutritionalAssessment || {}
+  const mealPlans = data.mealPlans || {}
+  const weeklyMealPlan = data.weeklyMealPlan || {}
+  const recommendedFoods = data.recommendedFoods || []
+  const forbiddenFoods = data.forbiddenFoods || []
+  const practicalGuidance = data.practicalGuidance || {}
+  const specialInstructions = data.specialInstructions || []
+  const followUpSchedule = data.followUpSchedule || ''
 
   return (
     <div className="space-y-6">
-      {/* Diet Plan Section */}
-      {hasAnyDietContent && (
-        <>
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <Salad className="h-5 w-5 text-green-600" />
-              Diet Plan
-            </h3>
-          </div>
-          <Separator />
-
-          {/* Show narrative if available */}
-          {dietNarrative && !mealPlan && (
-            <Card className="border-green-200 bg-green-50">
-              <CardContent className="p-4">
-                <div className="whitespace-pre-wrap text-sm text-gray-700">
-                  {dietNarrative}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {mealPlan && (
-            <Card className="border-green-200 bg-green-50">
-              <CardContent className="p-4">
-                <div className="space-y-4">
-                  {mealPlan.breakfast && (
-                    <div>
-                      <h4 className="font-semibold text-green-800">🌅 Breakfast</h4>
-                      <p className="text-sm text-gray-700">{mealPlan.breakfast}</p>
-                    </div>
-                  )}
-                  {mealPlan.lunch && (
-                    <div>
-                      <h4 className="font-semibold text-green-800">☀️ Lunch</h4>
-                      <p className="text-sm text-gray-700">{mealPlan.lunch}</p>
-                    </div>
-                  )}
-                  {mealPlan.dinner && (
-                    <div>
-                      <h4 className="font-semibold text-green-800">🌙 Dinner</h4>
-                      <p className="text-sm text-gray-700">{mealPlan.dinner}</p>
-                    </div>
-                  )}
-                  {mealPlan.snacks && (
-                    <div>
-                      <h4 className="font-semibold text-green-800">🍎 Snacks</h4>
-                      <p className="text-sm text-gray-700">{mealPlan.snacks}</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {supplements && supplements.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Supplements</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {supplements.map((supp: any, idx: number) => (
-                    <li key={idx} className="flex items-center gap-2 text-sm">
-                      <Pill className="h-4 w-4 text-blue-500" />
-                      <span>{typeof supp === 'string' ? supp : `${supp.supplement || supp.name} - ${supp.dosage || ''}`}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Fallback: Display raw diet data if no specific fields found */}
-          {dietDataToDisplay && !mealPlan && !dietNarrative && (
-            <Card className="border-green-200 bg-green-50">
-              <CardContent className="p-4">
-                <div className="whitespace-pre-wrap text-sm text-gray-700">
-                  {dietDataToDisplay}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </>
+      {/* Header */}
+      {header.title && (
+        <div className="text-center pb-2">
+          <h3 className="text-xl font-bold text-green-800">{header.title}</h3>
+          {header.patientName && <p className="text-gray-600">Patient: {header.patientName}</p>}
+          {header.date && <p className="text-sm text-gray-500">Date: {header.date}</p>}
+        </div>
       )}
 
-      {/* Follow-up Section */}
-      {hasAnyFollowUpContent && (
-        <>
-          <div className="flex items-center justify-between mt-6">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <CalendarCheck className="h-5 w-5 text-blue-600" />
-              Follow-up Schedule
-            </h3>
-          </div>
-          <Separator />
+      {/* Nutritional Guidelines */}
+      {Object.keys(nutritionalGuidelines).length > 0 && (
+        <Card className="border-green-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base text-green-800">Nutritional Guidelines</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm space-y-1">
+            {nutritionalGuidelines.caloriesTarget && <p><strong>Daily Calories:</strong> {nutritionalGuidelines.caloriesTarget}</p>}
+            {nutritionalGuidelines.hydration && <p><strong>Hydration:</strong> {nutritionalGuidelines.hydration}</p>}
+            {nutritionalGuidelines.macronutrients && (
+              <p><strong>Macros:</strong> Protein {nutritionalGuidelines.macronutrients.protein}, Carbs {nutritionalGuidelines.macronutrients.carbs}, Fat {nutritionalGuidelines.macronutrients.fat}</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
-          <Card className="border-blue-200 bg-blue-50">
-            <CardContent className="p-4">
-              {/* Show narrative if no structured schedule */}
-              {followUpNarrative && !followUpSchedule && (
-                <div className="whitespace-pre-wrap text-sm text-gray-700">
-                  {followUpNarrative}
-                </div>
-              )}
-              {followUpSchedule && (
-                <div className="space-y-2">
-                  {typeof followUpSchedule === 'string' ? (
-                    <p className="text-sm text-gray-700">{followUpSchedule}</p>
-                  ) : (
-                    <>
-                      {followUpSchedule.nextVisit && (
-                        <p className="text-sm"><strong>Next Visit:</strong> {followUpSchedule.nextVisit}</p>
-                      )}
-                      {followUpSchedule.frequency && (
-                        <p className="text-sm"><strong>Frequency:</strong> {followUpSchedule.frequency}</p>
-                      )}
-                      {followUpSchedule.notes && (
-                        <p className="text-sm"><strong>Notes:</strong> {followUpSchedule.notes}</p>
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
-              {/* Fallback: Display raw follow-up data if no specific fields found */}
-              {followUpDataToDisplay && !followUpSchedule && !followUpNarrative && (
-                <div className="whitespace-pre-wrap text-sm text-gray-700">
-                  {followUpDataToDisplay}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </>
+      {/* Current Assessment */}
+      {nutritionalAssessment.currentDiet && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="p-4">
+            <p className="text-sm"><strong>Current Status:</strong> {nutritionalAssessment.currentDiet}</p>
+            {nutritionalAssessment.culturalConsiderations && (
+              <p className="text-sm text-gray-600 mt-1">{nutritionalAssessment.culturalConsiderations}</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Daily Meal Plan Summary */}
+      {Object.keys(mealPlans).length > 0 && (
+        <Card className="border-green-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base text-green-800">Daily Meal Plan</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm">
+            {mealPlans.breakfast && (
+              <div className="mb-3">
+                <p className="font-medium">🌅 Breakfast</p>
+                <div className="ml-2 text-gray-700">{Array.isArray(mealPlans.breakfast) ? mealPlans.breakfast.map((f: string, i: number) => <p key={i}>• {f}</p>) : mealPlans.breakfast}</div>
+              </div>
+            )}
+            {mealPlans.lunch && (
+              <div className="mb-3">
+                <p className="font-medium">☀️ Lunch</p>
+                <div className="ml-2 text-gray-700">{Array.isArray(mealPlans.lunch) ? mealPlans.lunch.map((f: string, i: number) => <p key={i}>• {f}</p>) : mealPlans.lunch}</div>
+              </div>
+            )}
+            {mealPlans.dinner && (
+              <div className="mb-3">
+                <p className="font-medium">🌙 Dinner</p>
+                <div className="ml-2 text-gray-700">{Array.isArray(mealPlans.dinner) ? mealPlans.dinner.map((f: string, i: number) => <p key={i}>• {f}</p>) : mealPlans.dinner}</div>
+              </div>
+            )}
+            {mealPlans.snacks && (
+              <div className="mb-3">
+                <p className="font-medium">🍎 Snacks</p>
+                <div className="ml-2 text-gray-700">{Array.isArray(mealPlans.snacks) ? mealPlans.snacks.map((f: string, i: number) => <p key={i}>• {f}</p>) : mealPlans.snacks}</div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Weekly Meal Plan */}
+      {Object.keys(weeklyMealPlan).length > 0 && (
+        <Card className="border-green-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base text-green-800">7-Day Meal Plan</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm">
+            {['day1', 'day2', 'day3', 'day4', 'day5', 'day6', 'day7'].map((day, idx) =>
+              weeklyMealPlan[day] ? formatDayMeals(weeklyMealPlan[day], `Day ${idx + 1}`) : null
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Recommended Foods */}
+      {recommendedFoods.length > 0 && (
+        <Card className="border-green-200 bg-green-50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base text-green-800">✅ Recommended Foods</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {recommendedFoods.map((food: string, idx: number) => (
+                <span key={idx} className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">{food}</span>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Forbidden Foods */}
+      {forbiddenFoods.length > 0 && (
+        <Card className="border-red-200 bg-red-50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base text-red-800">❌ Foods to Avoid</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {forbiddenFoods.map((food: string, idx: number) => (
+                <span key={idx} className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">{food}</span>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Practical Guidance */}
+      {Object.keys(practicalGuidance).length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Practical Tips</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm space-y-3">
+            {practicalGuidance.cookingMethods?.recommended && (
+              <div>
+                <p className="font-medium text-green-700">Recommended cooking methods:</p>
+                <p className="ml-2">{practicalGuidance.cookingMethods.recommended.join(', ')}</p>
+              </div>
+            )}
+            {practicalGuidance.cookingMethods?.avoid && (
+              <div>
+                <p className="font-medium text-red-700">Avoid:</p>
+                <p className="ml-2">{practicalGuidance.cookingMethods.avoid.join(', ')}</p>
+              </div>
+            )}
+            {practicalGuidance.mealPrepTips && (
+              <div>
+                <p className="font-medium">Meal prep tips:</p>
+                {practicalGuidance.mealPrepTips.map((tip: string, idx: number) => (
+                  <p key={idx} className="ml-2">• {tip}</p>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Special Instructions */}
+      {specialInstructions.length > 0 && (
+        <Card className="border-yellow-200 bg-yellow-50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base text-yellow-800">Special Instructions</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm">
+            {specialInstructions.map((instruction: string, idx: number) => (
+              <p key={idx}>• {instruction}</p>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}
+
+function FollowUpTab({ followUp, fullReport }: { followUp: any, fullReport: any }) {
+  console.log('📅 FollowUpTab - followUp:', followUp ? Object.keys(followUp) : 'null')
+
+  const data = followUp?.content || followUp || {}
+  const hasFollowUp = data && Object.keys(data).length > 0
+
+  if (!hasFollowUp) {
+    return (
+      <Card className="bg-gray-50">
+        <CardContent className="p-8 text-center">
+          <CalendarCheck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600">No follow-up plan available for this consultation.</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Extract structured data
+  const header = data.header || {}
+  const schedule = data.schedule || data.followUpSchedule || ''
+  const appointments = data.appointments || []
+  const monitoringParameters = data.monitoringParameters || []
+  const selfMonitoring = data.selfMonitoring || {}
+  const warningSymptoms = data.warningSymptoms || data.warningSigns || []
+  const medications = data.medicationAdjustments || data.medications || []
+  const lifestyleGoals = data.lifestyleGoals || []
+  const nextSteps = data.nextSteps || []
+  const emergencyContact = data.emergencyContact || ''
+  const notes = data.notes || data.recommendations || ''
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      {header.title && (
+        <div className="text-center pb-2">
+          <h3 className="text-xl font-bold text-blue-800">{header.title}</h3>
+          {header.patientName && <p className="text-gray-600">Patient: {header.patientName}</p>}
+          {header.date && <p className="text-sm text-gray-500">Date: {header.date}</p>}
+        </div>
+      )}
+
+      {/* Schedule */}
+      {schedule && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="p-4">
+            <p className="text-lg"><strong>Next Follow-up:</strong> {typeof schedule === 'string' ? schedule : schedule.nextVisit || schedule.frequency || JSON.stringify(schedule)}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Appointments */}
+      {appointments.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base text-blue-800">Scheduled Appointments</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm">
+            {appointments.map((apt: any, idx: number) => (
+              <div key={idx} className="mb-2 p-2 bg-gray-50 rounded">
+                <p className="font-medium">{apt.type || apt.purpose || `Appointment ${idx + 1}`}</p>
+                {apt.date && <p className="text-gray-600">Date: {apt.date}</p>}
+                {apt.provider && <p className="text-gray-600">Provider: {apt.provider}</p>}
+                {apt.notes && <p className="text-gray-600">{apt.notes}</p>}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Monitoring Parameters */}
+      {monitoringParameters.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Parameters to Monitor</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm">
+            {monitoringParameters.map((param: any, idx: number) => (
+              <div key={idx} className="mb-2">
+                <p className="font-medium">• {typeof param === 'string' ? param : param.parameter || param.name}</p>
+                {param.frequency && <p className="ml-4 text-gray-600">Frequency: {param.frequency}</p>}
+                {param.target && <p className="ml-4 text-gray-600">Target: {param.target}</p>}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Self Monitoring */}
+      {Object.keys(selfMonitoring).length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Self-Monitoring Guidelines</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm">
+            {selfMonitoring.bloodPressure && <p>• Blood Pressure: {selfMonitoring.bloodPressure}</p>}
+            {selfMonitoring.bloodGlucose && <p>• Blood Glucose: {selfMonitoring.bloodGlucose}</p>}
+            {selfMonitoring.weight && <p>• Weight: {selfMonitoring.weight}</p>}
+            {selfMonitoring.symptoms && <p>• Symptoms: {selfMonitoring.symptoms}</p>}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Warning Symptoms */}
+      {warningSymptoms.length > 0 && (
+        <Card className="border-red-200 bg-red-50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base text-red-800">⚠️ Warning Signs - Seek Immediate Care</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm">
+            {warningSymptoms.map((symptom: string, idx: number) => (
+              <p key={idx}>• {symptom}</p>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Lifestyle Goals */}
+      {lifestyleGoals.length > 0 && (
+        <Card className="border-green-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base text-green-800">Lifestyle Goals</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm">
+            {lifestyleGoals.map((goal: string, idx: number) => (
+              <p key={idx}>✓ {goal}</p>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Next Steps */}
+      {nextSteps.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Next Steps</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm">
+            {nextSteps.map((step: string, idx: number) => (
+              <p key={idx}>{idx + 1}. {step}</p>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Notes */}
+      {notes && (
+        <Card className="border-gray-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Additional Notes</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm whitespace-pre-line">
+            {typeof notes === 'string' ? notes : JSON.stringify(notes, null, 2)}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Emergency Contact */}
+      {emergencyContact && (
+        <Card className="border-red-200">
+          <CardContent className="p-4">
+            <p className="text-sm"><strong>Emergency Contact:</strong> {emergencyContact}</p>
+          </CardContent>
+        </Card>
       )}
     </div>
   )
