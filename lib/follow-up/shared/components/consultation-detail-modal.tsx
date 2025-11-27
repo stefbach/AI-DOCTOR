@@ -63,10 +63,16 @@ export function ConsultationDetailModal({
   const dietPlan = extractDietPlan(fullReport, consultation.dietaryPlan)
   const followUp = extractFollowUp(fullReport)
 
+  // Calculate scroll container height: 85vh - header (~80px) - tabs (~50px) - padding
+  const scrollContainerStyle = {
+    maxHeight: 'calc(85vh - 180px)',
+    overflowY: 'auto' as const
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl h-[85vh] flex flex-col overflow-hidden">
-        <DialogHeader className="flex-shrink-0 pb-4">
+      <DialogContent className="max-w-5xl max-h-[85vh] overflow-hidden">
+        <DialogHeader className="pb-4">
           <DialogTitle className="flex items-center gap-2">
             {typeConfig.icon}
             {typeConfig.label}
@@ -80,8 +86,8 @@ export function ConsultationDetailModal({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 min-h-0 overflow-hidden">
-          <TabsList className={`grid w-full flex-shrink-0 ${isChronic ? 'grid-cols-5' : 'grid-cols-4'}`}>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className={`grid w-full ${isChronic ? 'grid-cols-5' : 'grid-cols-4'}`}>
               <TabsTrigger value="report" className="flex items-center gap-1">
                 <FileText className="h-4 w-4" />
                 <span className="hidden sm:inline">Report</span>
@@ -107,37 +113,37 @@ export function ConsultationDetailModal({
             </TabsList>
 
             {/* REPORT TAB */}
-            <TabsContent value="report" className="mt-4 flex-1 overflow-hidden" forceMount style={{ display: activeTab === 'report' ? 'block' : 'none' }}>
-              <div className="h-full overflow-y-auto pr-2">
+            <TabsContent value="report" className="mt-4">
+              <div style={scrollContainerStyle} className="pr-2">
                 <ReportTab consultation={consultation} fullReport={fullReport} />
               </div>
             </TabsContent>
 
             {/* PRESCRIPTION TAB */}
-            <TabsContent value="prescription" className="mt-4 flex-1 overflow-hidden" forceMount style={{ display: activeTab === 'prescription' ? 'block' : 'none' }}>
-              <div className="h-full overflow-y-auto pr-2">
+            <TabsContent value="prescription" className="mt-4">
+              <div style={scrollContainerStyle} className="pr-2">
                 <PrescriptionTab prescription={prescription} consultation={consultation} />
               </div>
             </TabsContent>
 
             {/* LAB TESTS TAB */}
-            <TabsContent value="labs" className="mt-4 flex-1 overflow-hidden" forceMount style={{ display: activeTab === 'labs' ? 'block' : 'none' }}>
-              <div className="h-full overflow-y-auto pr-2">
+            <TabsContent value="labs" className="mt-4">
+              <div style={scrollContainerStyle} className="pr-2">
                 <LabTestsTab labTests={labTests} fullReport={fullReport} />
               </div>
             </TabsContent>
 
             {/* IMAGING TAB */}
-            <TabsContent value="imaging" className="mt-4 flex-1 overflow-hidden" forceMount style={{ display: activeTab === 'imaging' ? 'block' : 'none' }}>
-              <div className="h-full overflow-y-auto pr-2">
+            <TabsContent value="imaging" className="mt-4">
+              <div style={scrollContainerStyle} className="pr-2">
                 <ImagingTab imaging={imaging} fullReport={fullReport} />
               </div>
             </TabsContent>
 
             {/* DIET PLAN TAB (Chronic only) */}
             {isChronic && (
-              <TabsContent value="diet" className="mt-4 flex-1 overflow-hidden" forceMount style={{ display: activeTab === 'diet' ? 'block' : 'none' }}>
-                <div className="h-full overflow-y-auto pr-2">
+              <TabsContent value="diet" className="mt-4">
+                <div style={scrollContainerStyle} className="pr-2">
                   <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
                 </div>
               </TabsContent>
@@ -984,23 +990,75 @@ function extractImaging(fullReport: any, imagingStudies?: any[]): any[] {
 
 function extractDietPlan(fullReport: any, dietaryPlan?: any): any {
   if (dietaryPlan && Object.keys(dietaryPlan).length > 0) return dietaryPlan
-  // New document format
-  if (fullReport?.diet_plan?.content) return fullReport.diet_plan.content
-  // Old formats
-  return fullReport?.dietaryPlan ||
-         fullReport?.mealPlan ||
-         fullReport?.diet ||
-         {}
+
+  // Debug: Log available keys
+  console.log('🍎 extractDietPlan - fullReport keys:', fullReport ? Object.keys(fullReport) : 'null')
+
+  // Try multiple possible paths for diet plan data
+  const paths = [
+    // New document format
+    fullReport?.diet_plan?.content,
+    fullReport?.diet_plan,
+    // Saved at root level by save-medical-report
+    fullReport?.dietaryPlan,
+    fullReport?.dietaryProtocol,
+    // In consultationReport
+    fullReport?.consultationReport?.dietaryPlan,
+    fullReport?.consultationReport?.content?.dietaryPlan,
+    // Other possible paths
+    fullReport?.mealPlan,
+    fullReport?.diet,
+    fullReport?.medicalReport?.dietaryPlan,
+    fullReport?.medicalReport?.nutritionalPlan
+  ]
+
+  for (const path of paths) {
+    if (path && typeof path === 'object' && Object.keys(path).length > 0) {
+      console.log('🍎 Found diet plan at path')
+      return path
+    }
+    if (path && typeof path === 'string' && path.length > 0) {
+      console.log('🍎 Found diet plan as string')
+      return { narrative: path }
+    }
+  }
+
+  return {}
 }
 
 function extractFollowUp(fullReport: any): any {
-  // New document format
-  if (fullReport?.follow_up?.content) return fullReport.follow_up.content
-  // Old formats
-  return fullReport?.followUp ||
-         fullReport?.suivi ||
-         fullReport?.medicalReport?.followUp ||
-         {}
+  // Debug: Log available keys
+  console.log('📅 extractFollowUp - fullReport keys:', fullReport ? Object.keys(fullReport) : 'null')
+
+  // Try multiple possible paths for follow-up data
+  const paths = [
+    // New document format
+    fullReport?.follow_up?.content,
+    fullReport?.follow_up,
+    // Saved at root level by save-medical-report
+    fullReport?.followUpPlan,
+    fullReport?.followUp,
+    // In consultationReport
+    fullReport?.consultationReport?.followUpPlan,
+    fullReport?.consultationReport?.content?.followUpPlan,
+    // Other possible paths
+    fullReport?.suivi,
+    fullReport?.medicalReport?.followUp,
+    fullReport?.medicalReport?.followUpPlan
+  ]
+
+  for (const path of paths) {
+    if (path && typeof path === 'object' && Object.keys(path).length > 0) {
+      console.log('📅 Found follow-up at path')
+      return path
+    }
+    if (path && typeof path === 'string' && path.length > 0) {
+      console.log('📅 Found follow-up as string')
+      return { narrative: path }
+    }
+  }
+
+  return {}
 }
 
 function handleDownloadReport(consultation: ConsultationHistoryItem) {

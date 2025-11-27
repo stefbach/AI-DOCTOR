@@ -239,9 +239,21 @@ export async function POST(req: NextRequest) {
       // Extract images for dermatology
       const images = compteRendu.imageAnalysis?.images || consultationReportContent.imageAnalysis?.images || []
 
-      // Extract diet plan
+      // Extract diet plan and follow-up from multiple sources
       const dietaryPlan = documentsData.dietaryPlan || record.diet_plan_data || null
-      
+      const followUpPlan = documentsData.followUpPlan || record.follow_up_data || null
+
+      // Merge record column data into fullReport so modal can access it
+      const fullReport = {
+        ...documentsData,
+        // Ensure diet and follow-up data are available at root level
+        dietaryPlan: dietaryPlan,
+        followUpPlan: followUpPlan,
+        // Also include record-level data
+        diet_plan_data: record.diet_plan_data,
+        follow_up_data: record.follow_up_data
+      }
+
       return {
         id: record.id,
         consultationId: record.consultation_id,
@@ -255,7 +267,7 @@ export async function POST(req: NextRequest) {
         imagingStudies,
         images,
         dietaryPlan,
-        fullReport: documentsData
+        fullReport
       }
     })
     
