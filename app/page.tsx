@@ -104,6 +104,7 @@ export default function MedicalAIExpert() {
       let patientId = urlParams.get('patientId')
       let patientEmail = urlParams.get('patientEmail')
       let patientPhone = urlParams.get('patientPhone')
+      const consultationId = urlParams.get('consultationId')
 
       // Also extract Tibok patient data from URL if available
       const patientDataParam = urlParams.get('patientData')
@@ -131,14 +132,14 @@ export default function MedicalAIExpert() {
         }
       }
 
-      // Need at least one identifier to check history
-      if (!patientId && !patientEmail && !patientPhone) {
+      // Need at least one identifier to check history (including consultationId)
+      if (!patientId && !patientEmail && !patientPhone && !consultationId) {
         console.log('ℹ️ No patient identifier in URL, proceeding with normal flow')
         setCheckingReturningPatient(false)
         return
       }
 
-      console.log('🔍 Checking if returning patient...', { patientId, patientEmail, patientPhone })
+      console.log('🔍 Checking if returning patient...', { patientId, patientEmail, patientPhone, consultationId })
 
       try {
         // Query patient history
@@ -148,6 +149,7 @@ export default function MedicalAIExpert() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             patientId,
+            consultationId,
             email: patientEmail,
             phone: patientPhone
           })

@@ -15,6 +15,7 @@ export const preferredRegion = 'auto'
 
 interface PatientSearchCriteria {
   patientId?: string
+  consultationId?: string  // Can be used to find patient by consultation
   name?: string
   email?: string
   phone?: string
@@ -57,11 +58,29 @@ export async function POST(req: NextRequest) {
     console.log('🔍 Patient history search with criteria:', criteria)
 
     // Validate at least one search criterion
-    if (!criteria.patientId && !criteria.name && !criteria.email && !criteria.phone && !criteria.nationalId && !criteria.dateOfBirth) {
+    if (!criteria.patientId && !criteria.consultationId && !criteria.name && !criteria.email && !criteria.phone && !criteria.nationalId && !criteria.dateOfBirth) {
       return NextResponse.json({
         success: false,
         error: 'At least one search criterion is required'
       }, { status: 400 })
+    }
+
+    // If consultationId is provided, first find the patient_id from that consultation
+    let resolvedPatientId = criteria.patientId
+    if (!resolvedPatientId && criteria.consultationId) {
+      console.log('🔍 Looking up patient_id from consultation:', criteria.consultationId)
+      const { data: consultationRecord, error: lookupError } = await supabase
+        .from('consultation_records')
+        .select('patient_id')
+        .eq('consultation_id', criteria.consultationId)
+        .single()
+
+      if (!lookupError && consultationRecord?.patient_id) {
+        resolvedPatientId = consultationRecord.patient_id
+        console.log('✅ Found patient_id from consultation:', resolvedPatientId)
+      } else {
+        console.log('⚠️ Could not find patient_id from consultation')
+      }
     }
 
     // Build query
@@ -70,9 +89,9 @@ export async function POST(req: NextRequest) {
       .select('*')
       .order('created_at', { ascending: false })
 
-    // If patientId is provided, use it directly (most reliable)
-    if (criteria.patientId) {
-      query = query.eq('patient_id', criteria.patientId)
+    // If patientId is provided or resolved, use it directly (most reliable)
+    if (resolvedPatientId) {
+      query = query.eq('patient_id', resolvedPatientId)
     } else {
       // Apply filters based on other criteria
       const orConditions: string[] = []
