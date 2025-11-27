@@ -67,8 +67,8 @@ export function ConsultationDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl">
-        <DialogHeader>
+      <DialogContent className="max-w-5xl max-h-[85vh] flex flex-col overflow-hidden">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             {typeConfig.icon}
             {typeConfig.label}
@@ -82,8 +82,8 @@ export function ConsultationDetailModal({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-          <TabsList className={`grid w-full ${isChronic ? 'grid-cols-6' : 'grid-cols-5'}`}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4 flex-1 flex flex-col min-h-0">
+          <TabsList className={`grid w-full flex-shrink-0 ${isChronic ? 'grid-cols-6' : 'grid-cols-5'}`}>
             <TabsTrigger value="overview" className="flex items-center gap-1">
               <ClipboardList className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -113,8 +113,8 @@ export function ConsultationDetailModal({
           </TabsList>
 
           {/* OVERVIEW TAB */}
-          <TabsContent value="overview" className="mt-4">
-            <div className="max-h-[60vh] overflow-y-scroll space-y-4 pr-2">
+          <TabsContent value="overview" className="mt-4 flex-1 overflow-y-auto">
+            <div className="space-y-4 pr-2">
               {/* Chief Complaint */}
               {consultation.chiefComplaint && (
                 <Section
@@ -186,39 +186,29 @@ export function ConsultationDetailModal({
           </TabsContent>
 
           {/* REPORT TAB */}
-          <TabsContent value="report" className="mt-4">
-            <div className="max-h-[60vh] overflow-y-scroll pr-2">
-              <ReportTab consultation={consultation} fullReport={fullReport} />
-            </div>
+          <TabsContent value="report" className="mt-4 flex-1 overflow-y-auto pr-2">
+            <ReportTab consultation={consultation} fullReport={fullReport} />
           </TabsContent>
 
           {/* PRESCRIPTION TAB */}
-          <TabsContent value="prescription" className="mt-4">
-            <div className="max-h-[60vh] overflow-y-scroll pr-2">
-              <PrescriptionTab prescription={prescription} consultation={consultation} />
-            </div>
+          <TabsContent value="prescription" className="mt-4 flex-1 overflow-y-auto pr-2">
+            <PrescriptionTab prescription={prescription} consultation={consultation} />
           </TabsContent>
 
           {/* LAB TESTS TAB */}
-          <TabsContent value="labs" className="mt-4">
-            <div className="max-h-[60vh] overflow-y-scroll pr-2">
-              <LabTestsTab labTests={labTests} fullReport={fullReport} />
-            </div>
+          <TabsContent value="labs" className="mt-4 flex-1 overflow-y-auto pr-2">
+            <LabTestsTab labTests={labTests} fullReport={fullReport} />
           </TabsContent>
 
           {/* IMAGING TAB */}
-          <TabsContent value="imaging" className="mt-4">
-            <div className="max-h-[60vh] overflow-y-scroll pr-2">
-              <ImagingTab imaging={imaging} fullReport={fullReport} />
-            </div>
+          <TabsContent value="imaging" className="mt-4 flex-1 overflow-y-auto pr-2">
+            <ImagingTab imaging={imaging} fullReport={fullReport} />
           </TabsContent>
 
           {/* DIET PLAN TAB (Chronic only) */}
           {isChronic && (
-            <TabsContent value="diet" className="mt-4">
-              <div className="max-h-[60vh] overflow-y-scroll pr-2">
-                <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
-              </div>
+            <TabsContent value="diet" className="mt-4 flex-1 overflow-y-auto pr-2">
+              <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
             </TabsContent>
           )}
         </Tabs>
@@ -416,9 +406,6 @@ function PrescriptionTab({ prescription, consultation }: { prescription: any[], 
         <CardContent className="p-8 text-center">
           <Pill className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600">No prescription available for this consultation.</p>
-          <p className="text-xs text-gray-400 mt-2">
-            Debug - prescriptions keys: {prescriptionsData ? Object.keys(prescriptionsData).join(', ') : 'none'}
-          </p>
         </CardContent>
       </Card>
     )
@@ -430,21 +417,30 @@ function PrescriptionTab({ prescription, consultation }: { prescription: any[], 
 
       <div className="space-y-6">
         {meds.map((med: any, idx: number) => {
-          // Try many possible field names for medication name
+          // Try many possible field names for medication name (including French)
           const name = typeof med === 'string'
             ? med
-            : med.name || med.medication || med.medicament || med.drugName || med.medicineName || med.product || JSON.stringify(med)
+            : med.nom || med.name || med.medication || med.medicament || med.drugName || med.medicineName || med.product || med.dci || 'Unknown medication'
           const dosage = med.dosage || med.dose || med.strength
-          const frequency = med.frequency || med.posology || med.frequence || med.schedule
-          const duration = med.duration || med.duree || med.days
-          const quantity = med.quantity || med.quantite || med.qty
+          const frequency = med.posologie || med.frequency || med.frequence || med.schedule
+          const duration = med.dureeTraitement || med.duration || med.duree || med.days
+          const quantity = med.quantite || med.quantity || med.qty
           const instructions = med.instructions || med.note || med.notes || med.directions
+          const form = med.forme || med.form
+          const route = med.modeAdministration || med.route
 
           return (
             <div key={idx} className="space-y-1">
               <p className="font-semibold">{idx + 1}. {name}</p>
-              {dosage && <p className="text-gray-700 ml-4">Dosage: {dosage}</p>}
+              {(form || dosage) && (
+                <p className="text-gray-700 ml-4">
+                  {form && `Form: ${form}`}
+                  {form && dosage && ' • '}
+                  {dosage && `Dosage: ${dosage}`}
+                </p>
+              )}
               {frequency && <p className="text-gray-700 ml-4">Frequency: {frequency}</p>}
+              {route && <p className="text-gray-700 ml-4">Route: {route}</p>}
               {(duration || quantity) && (
                 <p className="text-gray-700 ml-4">
                   {duration && `Duration: ${duration}`}
@@ -504,18 +500,23 @@ function LabTestsTab({ labTests, fullReport }: { labTests: any[], fullReport: an
           <h4 className="font-bold text-gray-800 mb-2">{category}</h4>
           <div className="space-y-3 ml-2">
             {tests.map((test: any, idx: number) => {
-              const testName = typeof test === 'string' ? test : test.name || test.test || test.testName || JSON.stringify(test)
-              const isUrgent = test.urgent || test.isUrgent || test.priority === 'urgent'
-              const reason = test.reason || test.indication || test.justification
-              const notes = test.notes || test.note || test.comment
+              // Use French field names (nom, urgence, motifClinique)
+              const testName = typeof test === 'string' ? test : test.nom || test.name || test.test || test.testName || 'Unknown test'
+              const isUrgent = test.urgence || test.urgent || test.isUrgent || test.priority === 'urgent'
+              const reason = test.motifClinique || test.reason || test.indication || test.justification
+              const fasting = test.aJeun ? 'Yes' : null
+              const resultDelay = test.delaiResultat
+              const clinicalInfo = test.renseignementsCliniques
 
               return (
                 <div key={idx} className="text-gray-700">
                   <p className="font-medium">
                     • {testName} {isUrgent && <span className="text-red-600 font-medium">[URGENT]</span>}
                   </p>
-                  {reason && <p className="text-sm text-gray-600 ml-4">Reason: {reason}</p>}
-                  {notes && <p className="text-sm text-gray-600 ml-4">Notes: {notes}</p>}
+                  {reason && <p className="text-sm text-gray-600 ml-4">Clinical reason: {reason}</p>}
+                  {fasting && <p className="text-sm text-gray-600 ml-4">Fasting required: {fasting}</p>}
+                  {resultDelay && <p className="text-sm text-gray-600 ml-4">Expected delay: {resultDelay}</p>}
+                  {clinicalInfo && <p className="text-sm text-gray-600 ml-4">Clinical info: {clinicalInfo}</p>}
                 </div>
               )
             })}
@@ -549,18 +550,22 @@ function ImagingTab({ imaging, fullReport }: { imaging: any[], fullReport: any }
 
       <div className="space-y-4">
         {imagingRequests.map((exam: any, idx: number) => {
-          const name = typeof exam === 'string' ? exam : exam.name || exam.examination || exam.type || exam.modality || JSON.stringify(exam)
-          const indication = exam.indication || exam.reason || exam.justification || exam.clinicalIndication
-          const bodyPart = exam.bodyPart || exam.region || exam.anatomicalRegion
-          const notes = exam.notes || exam.note || exam.comment
-          const priority = exam.priority || exam.urgency
+          // Use French field names (nom, motifClinique, regionAnatomique)
+          const name = typeof exam === 'string' ? exam : exam.nom || exam.name || exam.examination || exam.type || exam.modality || 'Unknown examination'
+          const indication = exam.motifClinique || exam.indication || exam.reason || exam.justification || exam.clinicalIndication
+          const bodyPart = exam.regionAnatomique || exam.bodyPart || exam.region || exam.anatomicalRegion
+          const notes = exam.notes || exam.note || exam.comment || exam.renseignementsCliniques
+          const isUrgent = exam.urgence || exam.urgent || exam.priority === 'urgent'
+          const preparation = exam.preparation || exam.preparationPatient
 
           return (
             <div key={idx} className="space-y-1">
-              <p className="font-semibold">{idx + 1}. {name}</p>
+              <p className="font-semibold">
+                {idx + 1}. {name} {isUrgent && <span className="text-red-600 font-medium">[URGENT]</span>}
+              </p>
               {bodyPart && <p className="text-gray-700 ml-4">Body Part: {bodyPart}</p>}
               {indication && <p className="text-gray-700 ml-4">Indication: {indication}</p>}
-              {priority && <p className="text-gray-700 ml-4">Priority: {priority}</p>}
+              {preparation && <p className="text-gray-700 ml-4">Preparation: {preparation}</p>}
               {notes && <p className="text-gray-700 ml-4">Notes: {notes}</p>}
             </div>
           )

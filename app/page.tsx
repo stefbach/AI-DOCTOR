@@ -101,9 +101,9 @@ export default function MedicalAIExpert() {
       }
 
       const urlParams = new URLSearchParams(window.location.search)
-      const patientId = urlParams.get('patientId')
-      const patientEmail = urlParams.get('patientEmail')
-      const patientPhone = urlParams.get('patientPhone')
+      let patientId = urlParams.get('patientId')
+      let patientEmail = urlParams.get('patientEmail')
+      let patientPhone = urlParams.get('patientPhone')
 
       // Also extract Tibok patient data from URL if available
       const patientDataParam = urlParams.get('patientData')
@@ -112,6 +112,20 @@ export default function MedicalAIExpert() {
         try {
           tibokPatientInfo = JSON.parse(decodeURIComponent(patientDataParam))
           console.log('👤 Tibok patient info from URL:', tibokPatientInfo)
+
+          // Extract patient identifiers from tibokPatientInfo if not in URL directly
+          if (!patientId && tibokPatientInfo.id) {
+            patientId = tibokPatientInfo.id
+            console.log('📋 Using patientId from patientData:', patientId)
+          }
+          if (!patientEmail && tibokPatientInfo.email) {
+            patientEmail = tibokPatientInfo.email
+            console.log('📋 Using email from patientData:', patientEmail)
+          }
+          if (!patientPhone && tibokPatientInfo.phone) {
+            patientPhone = tibokPatientInfo.phone
+            console.log('📋 Using phone from patientData:', patientPhone)
+          }
         } catch (e) {
           console.log('⚠️ Could not parse patientData from URL')
         }

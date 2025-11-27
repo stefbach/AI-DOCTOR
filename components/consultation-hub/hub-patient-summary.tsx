@@ -210,6 +210,22 @@ function extractPatientInfo(consultation: ConsultationHistoryItem) {
       age = age || patient.age
     }
 
+    // Try consultation_report structure (new format)
+    if (!name && report?.consultation_report?.content?.patient) {
+      const patient = report.consultation_report.content.patient
+      name = patient.fullName || patient.name || `${patient.firstName || ''} ${patient.lastName || ''}`.trim()
+      age = age || patient.age
+      gender = gender || patient.gender || patient.sex || ''
+    }
+
+    // Try prescriptions structure for patient info
+    if (!name && report?.prescriptions?.content?.patient) {
+      const patient = report.prescriptions.content.patient
+      name = patient.fullName || patient.name || patient.nom || ''
+      age = age || patient.age
+      gender = gender || patient.gender || patient.sexe || ''
+    }
+
     // Try to calculate age from date of birth if not directly available
     if (!age && report?.medicalReport?.patient?.dateOfBirth) {
       const dob = new Date(report.medicalReport.patient.dateOfBirth)
@@ -219,6 +235,12 @@ function extractPatientInfo(consultation: ConsultationHistoryItem) {
 
     if (!age && report?.compteRendu?.patient?.dateNaissance) {
       const dob = new Date(report.compteRendu.patient.dateNaissance)
+      const today = new Date()
+      age = Math.floor((today.getTime() - dob.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+    }
+
+    if (!age && report?.consultation_report?.content?.patient?.dateOfBirth) {
+      const dob = new Date(report.consultation_report.content.patient.dateOfBirth)
       const today = new Date()
       age = Math.floor((today.getTime() - dob.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
     }
