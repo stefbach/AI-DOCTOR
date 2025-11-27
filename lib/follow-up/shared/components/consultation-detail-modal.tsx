@@ -65,7 +65,7 @@ export function ConsultationDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl flex flex-col" style={{ maxHeight: '85vh' }}>
+      <DialogContent className="max-w-5xl h-[85vh] flex flex-col overflow-hidden">
         <DialogHeader className="flex-shrink-0 pb-4">
           <DialogTitle className="flex items-center gap-2">
             {typeConfig.icon}
@@ -80,7 +80,7 @@ export function ConsultationDetailModal({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 min-h-0">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 min-h-0 overflow-hidden">
           <TabsList className={`grid w-full flex-shrink-0 ${isChronic ? 'grid-cols-5' : 'grid-cols-4'}`}>
               <TabsTrigger value="report" className="flex items-center gap-1">
                 <FileText className="h-4 w-4" />
@@ -107,29 +107,39 @@ export function ConsultationDetailModal({
             </TabsList>
 
             {/* REPORT TAB */}
-            <TabsContent value="report" className="flex-1 overflow-y-auto mt-4 pr-2">
-              <ReportTab consultation={consultation} fullReport={fullReport} />
+            <TabsContent value="report" className="mt-4 flex-1 overflow-hidden" forceMount style={{ display: activeTab === 'report' ? 'block' : 'none' }}>
+              <div className="h-full overflow-y-auto pr-2">
+                <ReportTab consultation={consultation} fullReport={fullReport} />
+              </div>
             </TabsContent>
 
             {/* PRESCRIPTION TAB */}
-            <TabsContent value="prescription" className="flex-1 overflow-y-auto mt-4 pr-2">
-              <PrescriptionTab prescription={prescription} consultation={consultation} />
+            <TabsContent value="prescription" className="mt-4 flex-1 overflow-hidden" forceMount style={{ display: activeTab === 'prescription' ? 'block' : 'none' }}>
+              <div className="h-full overflow-y-auto pr-2">
+                <PrescriptionTab prescription={prescription} consultation={consultation} />
+              </div>
             </TabsContent>
 
             {/* LAB TESTS TAB */}
-            <TabsContent value="labs" className="flex-1 overflow-y-auto mt-4 pr-2">
-              <LabTestsTab labTests={labTests} fullReport={fullReport} />
+            <TabsContent value="labs" className="mt-4 flex-1 overflow-hidden" forceMount style={{ display: activeTab === 'labs' ? 'block' : 'none' }}>
+              <div className="h-full overflow-y-auto pr-2">
+                <LabTestsTab labTests={labTests} fullReport={fullReport} />
+              </div>
             </TabsContent>
 
             {/* IMAGING TAB */}
-            <TabsContent value="imaging" className="flex-1 overflow-y-auto mt-4 pr-2">
-              <ImagingTab imaging={imaging} fullReport={fullReport} />
+            <TabsContent value="imaging" className="mt-4 flex-1 overflow-hidden" forceMount style={{ display: activeTab === 'imaging' ? 'block' : 'none' }}>
+              <div className="h-full overflow-y-auto pr-2">
+                <ImagingTab imaging={imaging} fullReport={fullReport} />
+              </div>
             </TabsContent>
 
             {/* DIET PLAN TAB (Chronic only) */}
             {isChronic && (
-              <TabsContent value="diet" className="flex-1 overflow-y-auto mt-4 pr-2">
-                <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
+              <TabsContent value="diet" className="mt-4 flex-1 overflow-hidden" forceMount style={{ display: activeTab === 'diet' ? 'block' : 'none' }}>
+                <div className="h-full overflow-y-auto pr-2">
+                  <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
+                </div>
               </TabsContent>
             )}
           </Tabs>
@@ -138,35 +148,100 @@ export function ConsultationDetailModal({
   )
 }
 
+// ============ HELPER FUNCTIONS ============
+
+// Build a narrative string from the French rapport structure
+function buildNarrativeFromRapport(rapport: any): string | null {
+  if (!rapport || typeof rapport !== 'object') return null
+
+  const sections: string[] = []
+
+  if (rapport.motifConsultation) {
+    sections.push(`**CHIEF COMPLAINT**\n${rapport.motifConsultation}`)
+  }
+
+  if (rapport.anamnese || rapport.histoireMaladie) {
+    sections.push(`**HISTORY OF PRESENT ILLNESS**\n${rapport.anamnese || rapport.histoireMaladie}`)
+  }
+
+  if (rapport.antecedents) {
+    sections.push(`**MEDICAL HISTORY**\n${rapport.antecedents}`)
+  }
+
+  if (rapport.examenClinique) {
+    sections.push(`**PHYSICAL EXAMINATION**\n${rapport.examenClinique}`)
+  }
+
+  if (rapport.syntheseDiagnostique || rapport.conclusionDiagnostique) {
+    sections.push(`**DIAGNOSIS**\n${rapport.syntheseDiagnostique || rapport.conclusionDiagnostique}`)
+  }
+
+  if (rapport.priseEnCharge || rapport.planTraitement) {
+    sections.push(`**MANAGEMENT PLAN**\n${rapport.priseEnCharge || rapport.planTraitement}`)
+  }
+
+  if (rapport.surveillance) {
+    sections.push(`**FOLLOW-UP**\n${rapport.surveillance}`)
+  }
+
+  if (rapport.conclusion) {
+    sections.push(`**CONCLUSION**\n${rapport.conclusion}`)
+  }
+
+  return sections.length > 0 ? sections.join('\n\n') : null
+}
+
 // ============ TAB COMPONENTS ============
 
 function ReportTab({ consultation, fullReport }: { consultation: ConsultationHistoryItem, fullReport: any }) {
   // Try multiple data paths for the report content
+  // Debug: log fullReport structure
+  console.log('📋 ReportTab - fullReport keys:', fullReport ? Object.keys(fullReport) : 'null')
+  console.log('📋 consultationReport keys:', fullReport?.consultationReport ? Object.keys(fullReport.consultationReport) : 'none')
 
-  // Path 1: New document format (consultation_report.content.narrative)
-  const consultationReport = fullReport?.consultation_report
-  const reportContent = consultationReport?.content || {}
+  // The data structure is:
+  // - fullReport.consultationReport.content = compteRendu structure (New format from save-medical-report)
+  // - fullReport.compteRendu = legacy format
+  // - fullReport.consultationReport.medicalReport = chronic disease format
 
-  // Path 2: Mauritian format (compteRendu)
-  const compteRendu = fullReport?.compteRendu
-  const rapport = compteRendu?.rapport || {}
+  // Path 1: New document format (consultationReport.content)
+  const consultationReportContent = fullReport?.consultationReport?.content || {}
+  const consultationReportMedical = fullReport?.consultationReport?.medicalReport || {}
 
-  // Path 3: Medical report format (medicalReport)
-  const medicalReport = fullReport?.medicalReport
+  // Path 2: Legacy Mauritian format (compteRendu at root)
+  const compteRendu = fullReport?.compteRendu || consultationReportContent || {}
+  const rapport = compteRendu?.rapport || consultationReportContent?.rapport || {}
+
+  // Path 3: Medical report format for chronic disease
+  const medicalReport = consultationReportMedical || fullReport?.medicalReport || {}
   const clinicalEvalMR = medicalReport?.clinicalEvaluation || {}
   const diagSummaryMR = medicalReport?.diagnosticSummary || {}
 
   // Path 4: From consultation_report.content structured fields
-  const clinicalEval = reportContent?.clinicalEvaluation || {}
-  const diagSummary = reportContent?.diagnosticSummary || {}
+  const clinicalEval = consultationReportContent?.clinicalEvaluation || {}
+  const diagSummary = consultationReportContent?.diagnosticSummary || {}
 
-  // Try to find narrative from multiple sources
+  // Try to find narrative from multiple sources - check ALL possible paths
   const narrative =
-    reportContent?.narrative ||
+    // In consultationReport.content
+    consultationReportContent?.narrative ||
+    consultationReportContent?.report ||
+    // Direct on compteRendu
+    compteRendu?.narrative ||
+    // From rapport synthese (French format - this builds the report content)
+    (rapport?.syntheseDiagnostique ? buildNarrativeFromRapport(rapport) : null) ||
+    // Direct on fullReport
     fullReport?.narrative ||
     fullReport?.report?.narrative ||
     fullReport?.content?.narrative ||
-    consultationReport?.narrative ||
+    // In medical_report document
+    fullReport?.medical_report?.narrative ||
+    fullReport?.medical_report?.content?.narrative ||
+    // From medicalReport (chronic disease)
+    medicalReport?.narrative ||
+    // If there's a direct report string
+    (typeof consultationReportContent === 'string' ? consultationReportContent : null) ||
+    (typeof fullReport?.report === 'string' ? fullReport.report : null) ||
     // Also check if fullReport is itself a string/narrative
     (typeof fullReport === 'string' ? fullReport : null)
 
@@ -175,50 +250,69 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
 
   // Build structured content from any available source
   const chiefComplaint =
-    clinicalEval?.chiefComplaint ||
     rapport?.motifConsultation ||
+    clinicalEval?.chiefComplaint ||
     clinicalEvalMR?.chiefComplaint ||
-    reportContent?.chiefComplaint ||
+    consultationReportContent?.chiefComplaint ||
     fullReport?.chiefComplaint ||
     consultation.chiefComplaint
 
   const historyOfIllness =
-    clinicalEval?.historyOfPresentIllness ||
+    rapport?.anamnese ||
     rapport?.histoireMaladie ||
+    clinicalEval?.historyOfPresentIllness ||
     clinicalEvalMR?.historyOfPresentIllness ||
-    reportContent?.historyOfPresentIllness ||
+    consultationReportContent?.historyOfPresentIllness ||
     fullReport?.historyOfPresentIllness
 
   const physicalExam =
-    clinicalEval?.physicalExamination ||
     rapport?.examenClinique ||
+    clinicalEval?.physicalExamination ||
     clinicalEvalMR?.physicalExamination ||
-    reportContent?.physicalExamination ||
+    consultationReportContent?.physicalExamination ||
     fullReport?.physicalExamination
 
   const diagnosis =
-    diagSummary?.diagnosticConclusion ||
     rapport?.syntheseDiagnostique ||
+    rapport?.conclusionDiagnostique ||
+    diagSummary?.diagnosticConclusion ||
     diagSummaryMR?.diagnosticConclusion ||
-    reportContent?.diagnosis ||
+    consultationReportContent?.diagnosis ||
     fullReport?.diagnosis ||
     consultation.diagnosis
 
   const treatmentPlan =
+    rapport?.priseEnCharge ||
     rapport?.planTraitement ||
     medicalReport?.treatmentPlan?.medications ||
-    reportContent?.treatmentPlan ||
+    consultationReportContent?.treatmentPlan ||
     fullReport?.treatmentPlan
+
+  const surveillance =
+    rapport?.surveillance ||
+    consultationReportContent?.surveillance ||
+    fullReport?.surveillance
+
+  const conclusion =
+    rapport?.conclusion ||
+    consultationReportContent?.conclusion ||
+    fullReport?.conclusion
+
+  const antecedents =
+    rapport?.antecedents ||
+    consultationReportContent?.antecedents ||
+    fullReport?.antecedents
 
   // Also check for dermatology-specific fields
   const skinAnalysis = fullReport?.skinAnalysis || fullReport?.dermatologyAnalysis ||
-                       reportContent?.skinAnalysis || consultationReport?.skinAnalysis
-  const imageAnalysis = fullReport?.imageAnalysis || compteRendu?.imageAnalysis
+                       consultationReportContent?.skinAnalysis || compteRendu?.skinAnalysis
+  const imageAnalysis = fullReport?.imageAnalysis || compteRendu?.imageAnalysis ||
+                        consultationReportContent?.imageAnalysis
 
-  const hasStructuredContent = chiefComplaint || historyOfIllness || physicalExam || diagnosis || skinAnalysis
+  const hasStructuredContent = chiefComplaint || historyOfIllness || physicalExam || diagnosis || skinAnalysis || treatmentPlan
 
   // For compteRendu, we can build a narrative-like display
-  const hasCompteRendu = compteRendu && (rapport?.motifConsultation || rapport?.syntheseDiagnostique)
+  const hasCompteRendu = Object.keys(rapport).length > 0 && (rapport?.motifConsultation || rapport?.syntheseDiagnostique)
 
   return (
     <div className="space-y-6">
@@ -250,6 +344,9 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
           {historyOfIllness && (
             <ReportSection title="HISTORY OF PRESENT ILLNESS" content={historyOfIllness} />
           )}
+          {antecedents && (
+            <ReportSection title="MEDICAL HISTORY" content={antecedents} />
+          )}
           {physicalExam && (
             <ReportSection title="PHYSICAL EXAMINATION" content={physicalExam} />
           )}
@@ -263,7 +360,13 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
             <ReportSection title="DIAGNOSIS" content={diagnosis} />
           )}
           {treatmentPlan && (
-            <ReportSection title="TREATMENT PLAN" content={treatmentPlan} />
+            <ReportSection title="MANAGEMENT PLAN" content={treatmentPlan} />
+          )}
+          {surveillance && (
+            <ReportSection title="FOLLOW-UP / SURVEILLANCE" content={surveillance} />
+          )}
+          {conclusion && (
+            <ReportSection title="CONCLUSION" content={conclusion} />
           )}
         </div>
       ) : (
