@@ -113,8 +113,8 @@ export function ConsultationDetailModal({
           </TabsList>
 
           {/* OVERVIEW TAB */}
-          <TabsContent value="overview" className="mt-4 max-h-[60vh] overflow-y-auto">
-            <div className="space-y-4">
+          <TabsContent value="overview" className="mt-4">
+            <div className="max-h-[60vh] overflow-y-scroll space-y-4 pr-2">
               {/* Chief Complaint */}
               {consultation.chiefComplaint && (
                 <Section
@@ -186,29 +186,39 @@ export function ConsultationDetailModal({
           </TabsContent>
 
           {/* REPORT TAB */}
-          <TabsContent value="report" className="mt-4 max-h-[60vh] overflow-y-auto">
-            <ReportTab consultation={consultation} fullReport={fullReport} />
+          <TabsContent value="report" className="mt-4">
+            <div className="max-h-[60vh] overflow-y-scroll pr-2">
+              <ReportTab consultation={consultation} fullReport={fullReport} />
+            </div>
           </TabsContent>
 
           {/* PRESCRIPTION TAB */}
-          <TabsContent value="prescription" className="mt-4 max-h-[60vh] overflow-y-auto">
-            <PrescriptionTab prescription={prescription} consultation={consultation} />
+          <TabsContent value="prescription" className="mt-4">
+            <div className="max-h-[60vh] overflow-y-scroll pr-2">
+              <PrescriptionTab prescription={prescription} consultation={consultation} />
+            </div>
           </TabsContent>
 
           {/* LAB TESTS TAB */}
-          <TabsContent value="labs" className="mt-4 max-h-[60vh] overflow-y-auto">
-            <LabTestsTab labTests={labTests} fullReport={fullReport} />
+          <TabsContent value="labs" className="mt-4">
+            <div className="max-h-[60vh] overflow-y-scroll pr-2">
+              <LabTestsTab labTests={labTests} fullReport={fullReport} />
+            </div>
           </TabsContent>
 
           {/* IMAGING TAB */}
-          <TabsContent value="imaging" className="mt-4 max-h-[60vh] overflow-y-auto">
-            <ImagingTab imaging={imaging} fullReport={fullReport} />
+          <TabsContent value="imaging" className="mt-4">
+            <div className="max-h-[60vh] overflow-y-scroll pr-2">
+              <ImagingTab imaging={imaging} fullReport={fullReport} />
+            </div>
           </TabsContent>
 
           {/* DIET PLAN TAB (Chronic only) */}
           {isChronic && (
-            <TabsContent value="diet" className="mt-4 max-h-[60vh] overflow-y-auto">
-              <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
+            <TabsContent value="diet" className="mt-4">
+              <div className="max-h-[60vh] overflow-y-scroll pr-2">
+                <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
+              </div>
             </TabsContent>
           )}
         </Tabs>
@@ -299,10 +309,8 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
         </div>
       ) : hasStructuredContent ? (
         // Display structured content from any source
+        // Note: Chief complaint is shown in Overview tab, so not duplicating here
         <div className="space-y-6">
-          {chiefComplaint && (
-            <ReportSection title="CHIEF COMPLAINT" content={chiefComplaint} />
-          )}
           {historyOfIllness && (
             <ReportSection title="HISTORY OF PRESENT ILLNESS" content={historyOfIllness} />
           )}
@@ -397,6 +405,10 @@ function PrescriptionTab({ prescription, consultation }: { prescription: any[], 
   if ((!meds || meds.length === 0) && prescriptionsData?.medications) {
     meds = prescriptionsData.medications
   }
+  // Also try prescriptions.content.prescription.medications
+  if ((!meds || meds.length === 0) && prescriptionsData?.content?.prescription?.medications) {
+    meds = prescriptionsData.content.prescription.medications
+  }
 
   if (!meds || meds.length === 0) {
     return (
@@ -404,6 +416,9 @@ function PrescriptionTab({ prescription, consultation }: { prescription: any[], 
         <CardContent className="p-8 text-center">
           <Pill className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600">No prescription available for this consultation.</p>
+          <p className="text-xs text-gray-400 mt-2">
+            Debug - prescriptions keys: {prescriptionsData ? Object.keys(prescriptionsData).join(', ') : 'none'}
+          </p>
         </CardContent>
       </Card>
     )
@@ -415,12 +430,15 @@ function PrescriptionTab({ prescription, consultation }: { prescription: any[], 
 
       <div className="space-y-6">
         {meds.map((med: any, idx: number) => {
-          const name = typeof med === 'string' ? med : med.name || med.medication || med.medicament
-          const dosage = med.dosage || med.dose
-          const frequency = med.frequency || med.posology || med.frequence
-          const duration = med.duration || med.duree
-          const quantity = med.quantity || med.quantite
-          const instructions = med.instructions || med.note
+          // Try many possible field names for medication name
+          const name = typeof med === 'string'
+            ? med
+            : med.name || med.medication || med.medicament || med.drugName || med.medicineName || med.product || JSON.stringify(med)
+          const dosage = med.dosage || med.dose || med.strength
+          const frequency = med.frequency || med.posology || med.frequence || med.schedule
+          const duration = med.duration || med.duree || med.days
+          const quantity = med.quantity || med.quantite || med.qty
+          const instructions = med.instructions || med.note || med.notes || med.directions
 
           return (
             <div key={idx} className="space-y-1">
@@ -484,17 +502,24 @@ function LabTestsTab({ labTests, fullReport }: { labTests: any[], fullReport: an
       {Object.entries(categorizedTests).map(([category, tests]) => (
         <div key={category}>
           <h4 className="font-bold text-gray-800 mb-2">{category}</h4>
-          <ul className="space-y-1 ml-2">
+          <div className="space-y-3 ml-2">
             {tests.map((test: any, idx: number) => {
-              const testName = typeof test === 'string' ? test : test.name || test.test || test.testName
+              const testName = typeof test === 'string' ? test : test.name || test.test || test.testName || JSON.stringify(test)
               const isUrgent = test.urgent || test.isUrgent || test.priority === 'urgent'
+              const reason = test.reason || test.indication || test.justification
+              const notes = test.notes || test.note || test.comment
+
               return (
-                <li key={idx} className="text-gray-700">
-                  • {testName} {isUrgent && <span className="text-red-600 font-medium">[URGENT]</span>}
-                </li>
+                <div key={idx} className="text-gray-700">
+                  <p className="font-medium">
+                    • {testName} {isUrgent && <span className="text-red-600 font-medium">[URGENT]</span>}
+                  </p>
+                  {reason && <p className="text-sm text-gray-600 ml-4">Reason: {reason}</p>}
+                  {notes && <p className="text-sm text-gray-600 ml-4">Notes: {notes}</p>}
+                </div>
               )
             })}
-          </ul>
+          </div>
         </div>
       ))}
     </div>
@@ -524,13 +549,19 @@ function ImagingTab({ imaging, fullReport }: { imaging: any[], fullReport: any }
 
       <div className="space-y-4">
         {imagingRequests.map((exam: any, idx: number) => {
-          const name = typeof exam === 'string' ? exam : exam.name || exam.examination || exam.type
-          const indication = exam.indication || exam.reason || exam.justification
+          const name = typeof exam === 'string' ? exam : exam.name || exam.examination || exam.type || exam.modality || JSON.stringify(exam)
+          const indication = exam.indication || exam.reason || exam.justification || exam.clinicalIndication
+          const bodyPart = exam.bodyPart || exam.region || exam.anatomicalRegion
+          const notes = exam.notes || exam.note || exam.comment
+          const priority = exam.priority || exam.urgency
 
           return (
             <div key={idx} className="space-y-1">
               <p className="font-semibold">{idx + 1}. {name}</p>
+              {bodyPart && <p className="text-gray-700 ml-4">Body Part: {bodyPart}</p>}
               {indication && <p className="text-gray-700 ml-4">Indication: {indication}</p>}
+              {priority && <p className="text-gray-700 ml-4">Priority: {priority}</p>}
+              {notes && <p className="text-gray-700 ml-4">Notes: {notes}</p>}
             </div>
           )
         })}
