@@ -65,8 +65,8 @@ export function ConsultationDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[85vh] !grid-rows-[auto_1fr] overflow-hidden">
-        <DialogHeader>
+      <DialogContent className="max-w-5xl flex flex-col" style={{ maxHeight: '85vh' }}>
+        <DialogHeader className="flex-shrink-0 pb-4">
           <DialogTitle className="flex items-center gap-2">
             {typeConfig.icon}
             {typeConfig.label}
@@ -80,9 +80,8 @@ export function ConsultationDetailModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="overflow-y-auto min-h-0">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className={`grid w-full sticky top-0 z-10 bg-background ${isChronic ? 'grid-cols-5' : 'grid-cols-4'}`}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 min-h-0">
+          <TabsList className={`grid w-full flex-shrink-0 ${isChronic ? 'grid-cols-5' : 'grid-cols-4'}`}>
               <TabsTrigger value="report" className="flex items-center gap-1">
                 <FileText className="h-4 w-4" />
                 <span className="hidden sm:inline">Report</span>
@@ -108,33 +107,32 @@ export function ConsultationDetailModal({
             </TabsList>
 
             {/* REPORT TAB */}
-            <TabsContent value="report" className="mt-4 pr-2">
+            <TabsContent value="report" className="flex-1 overflow-y-auto mt-4 pr-2">
               <ReportTab consultation={consultation} fullReport={fullReport} />
             </TabsContent>
 
             {/* PRESCRIPTION TAB */}
-            <TabsContent value="prescription" className="mt-4 pr-2">
+            <TabsContent value="prescription" className="flex-1 overflow-y-auto mt-4 pr-2">
               <PrescriptionTab prescription={prescription} consultation={consultation} />
             </TabsContent>
 
             {/* LAB TESTS TAB */}
-            <TabsContent value="labs" className="mt-4 pr-2">
+            <TabsContent value="labs" className="flex-1 overflow-y-auto mt-4 pr-2">
               <LabTestsTab labTests={labTests} fullReport={fullReport} />
             </TabsContent>
 
             {/* IMAGING TAB */}
-            <TabsContent value="imaging" className="mt-4 pr-2">
+            <TabsContent value="imaging" className="flex-1 overflow-y-auto mt-4 pr-2">
               <ImagingTab imaging={imaging} fullReport={fullReport} />
             </TabsContent>
 
             {/* DIET PLAN TAB (Chronic only) */}
             {isChronic && (
-              <TabsContent value="diet" className="mt-4 pr-2">
+              <TabsContent value="diet" className="flex-1 overflow-y-auto mt-4 pr-2">
                 <DietPlanTab dietPlan={dietPlan} followUp={followUp} fullReport={fullReport} />
               </TabsContent>
             )}
           </Tabs>
-        </div>
       </DialogContent>
     </Dialog>
   )
@@ -148,7 +146,6 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
   // Path 1: New document format (consultation_report.content.narrative)
   const consultationReport = fullReport?.consultation_report
   const reportContent = consultationReport?.content || {}
-  const narrative = reportContent?.narrative
 
   // Path 2: Mauritian format (compteRendu)
   const compteRendu = fullReport?.compteRendu
@@ -163,38 +160,62 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
   const clinicalEval = reportContent?.clinicalEvaluation || {}
   const diagSummary = reportContent?.diagnosticSummary || {}
 
+  // Try to find narrative from multiple sources
+  const narrative =
+    reportContent?.narrative ||
+    fullReport?.narrative ||
+    fullReport?.report?.narrative ||
+    fullReport?.content?.narrative ||
+    consultationReport?.narrative ||
+    // Also check if fullReport is itself a string/narrative
+    (typeof fullReport === 'string' ? fullReport : null)
+
   // Determine which content to display
-  const hasNarrative = narrative && narrative.length > 0
+  const hasNarrative = narrative && typeof narrative === 'string' && narrative.length > 0
 
   // Build structured content from any available source
   const chiefComplaint =
     clinicalEval?.chiefComplaint ||
     rapport?.motifConsultation ||
     clinicalEvalMR?.chiefComplaint ||
+    reportContent?.chiefComplaint ||
+    fullReport?.chiefComplaint ||
     consultation.chiefComplaint
 
   const historyOfIllness =
     clinicalEval?.historyOfPresentIllness ||
     rapport?.histoireMaladie ||
-    clinicalEvalMR?.historyOfPresentIllness
+    clinicalEvalMR?.historyOfPresentIllness ||
+    reportContent?.historyOfPresentIllness ||
+    fullReport?.historyOfPresentIllness
 
   const physicalExam =
     clinicalEval?.physicalExamination ||
     rapport?.examenClinique ||
-    clinicalEvalMR?.physicalExamination
+    clinicalEvalMR?.physicalExamination ||
+    reportContent?.physicalExamination ||
+    fullReport?.physicalExamination
 
   const diagnosis =
     diagSummary?.diagnosticConclusion ||
     rapport?.syntheseDiagnostique ||
     diagSummaryMR?.diagnosticConclusion ||
+    reportContent?.diagnosis ||
+    fullReport?.diagnosis ||
     consultation.diagnosis
 
   const treatmentPlan =
     rapport?.planTraitement ||
     medicalReport?.treatmentPlan?.medications ||
-    reportContent?.treatmentPlan
+    reportContent?.treatmentPlan ||
+    fullReport?.treatmentPlan
 
-  const hasStructuredContent = chiefComplaint || historyOfIllness || physicalExam || diagnosis
+  // Also check for dermatology-specific fields
+  const skinAnalysis = fullReport?.skinAnalysis || fullReport?.dermatologyAnalysis ||
+                       reportContent?.skinAnalysis || consultationReport?.skinAnalysis
+  const imageAnalysis = fullReport?.imageAnalysis || compteRendu?.imageAnalysis
+
+  const hasStructuredContent = chiefComplaint || historyOfIllness || physicalExam || diagnosis || skinAnalysis
 
   // For compteRendu, we can build a narrative-like display
   const hasCompteRendu = compteRendu && (rapport?.motifConsultation || rapport?.syntheseDiagnostique)
@@ -231,6 +252,12 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
           )}
           {physicalExam && (
             <ReportSection title="PHYSICAL EXAMINATION" content={physicalExam} />
+          )}
+          {skinAnalysis && (
+            <ReportSection title="SKIN ANALYSIS" content={skinAnalysis} />
+          )}
+          {imageAnalysis && (
+            <ReportSection title="IMAGE ANALYSIS" content={imageAnalysis} />
           )}
           {diagnosis && (
             <ReportSection title="DIAGNOSIS" content={diagnosis} />
