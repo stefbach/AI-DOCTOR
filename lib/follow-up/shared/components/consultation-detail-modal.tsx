@@ -749,8 +749,18 @@ function formatDayMeals(day: any, dayLabel: string): JSX.Element | null {
 
 function DietPlanTab({ dietPlan, fullReport }: { dietPlan: any, fullReport: any }) {
   console.log('🥗 DietPlanTab - dietPlan:', dietPlan ? Object.keys(dietPlan) : 'null')
+  console.log('🥗 DietPlanTab - dietPlan data:', JSON.stringify(dietPlan, null, 2)?.substring(0, 1000))
 
-  const data = dietPlan?.content || dietPlan || {}
+  // Handle nested content - check multiple levels
+  let data = dietPlan || {}
+  if (data.content && typeof data.content === 'object') {
+    data = data.content
+  }
+  // Check for double-nested content
+  if (data.content && typeof data.content === 'object') {
+    data = data.content
+  }
+
   const hasDietPlan = data && Object.keys(data).length > 0
 
   if (!hasDietPlan) {
@@ -775,6 +785,16 @@ function DietPlanTab({ dietPlan, fullReport }: { dietPlan: any, fullReport: any 
   const practicalGuidance = data.practicalGuidance || {}
   const specialInstructions = data.specialInstructions || []
   const followUpSchedule = data.followUpSchedule || ''
+
+  // Check if we have any of the expected fields
+  const hasExpectedDietFields = Object.keys(nutritionalGuidelines).length > 0 ||
+                                 nutritionalAssessment.currentDiet ||
+                                 Object.keys(mealPlans).length > 0 ||
+                                 Object.keys(weeklyMealPlan).length > 0 ||
+                                 recommendedFoods.length > 0 ||
+                                 forbiddenFoods.length > 0 ||
+                                 Object.keys(practicalGuidance).length > 0 ||
+                                 specialInstructions.length > 0
 
   return (
     <div className="space-y-6">
@@ -940,14 +960,129 @@ function DietPlanTab({ dietPlan, fullReport }: { dietPlan: any, fullReport: any 
           </CardContent>
         </Card>
       )}
+
+      {/* Fallback: Display all content if no expected fields found */}
+      {!hasExpectedDietFields && Object.keys(data).filter(k => k !== 'header').length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base text-green-800">Diet Plan Details</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm space-y-4">
+            {Object.keys(data).filter(k => k !== 'header').map((key) => {
+              const value = data[key]
+              const label = key
+                .replace(/([A-Z])/g, ' $1')
+                .replace(/_/g, ' ')
+                .replace(/^./, s => s.toUpperCase())
+                .trim()
+
+              return (
+                <div key={key} className="border-b border-gray-100 pb-3 last:border-0">
+                  <p className="font-semibold text-green-800 mb-2">{label}</p>
+                  <div className="ml-2 text-gray-700">
+                    {renderDietValue(value)}
+                  </div>
+                </div>
+              )
+            })}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}
+
+// Helper to render diet values recursively with proper formatting
+function renderDietValue(value: any): JSX.Element {
+  if (value === null || value === undefined) {
+    return <span className="text-gray-400">N/A</span>
+  }
+
+  if (typeof value === 'string') {
+    return <p className="whitespace-pre-wrap">{value}</p>
+  }
+
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return <p>{String(value)}</p>
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return <span className="text-gray-400">None specified</span>
+    }
+    return (
+      <ul className="list-disc list-inside space-y-1">
+        {value.map((item, idx) => (
+          <li key={idx} className="text-gray-700">
+            {typeof item === 'string' ? item : typeof item === 'object' ? renderDietObject(item) : String(item)}
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  if (typeof value === 'object') {
+    return renderDietObject(value)
+  }
+
+  return <p>{String(value)}</p>
+}
+
+// Helper to render nested diet objects
+function renderDietObject(obj: any): JSX.Element {
+  if (!obj || typeof obj !== 'object') {
+    return <span>{String(obj)}</span>
+  }
+
+  const entries = Object.entries(obj)
+  if (entries.length === 0) {
+    return <span className="text-gray-400">Empty</span>
+  }
+
+  return (
+    <div className="space-y-2 pl-2 border-l-2 border-green-200">
+      {entries.map(([key, val]) => {
+        const label = key
+          .replace(/([A-Z])/g, ' $1')
+          .replace(/_/g, ' ')
+          .replace(/^./, s => s.toUpperCase())
+          .trim()
+
+        return (
+          <div key={key}>
+            <span className="font-medium text-gray-700">{label}: </span>
+            {typeof val === 'string' ? (
+              <span>{val}</span>
+            ) : typeof val === 'number' || typeof val === 'boolean' ? (
+              <span>{String(val)}</span>
+            ) : Array.isArray(val) ? (
+              <span>{val.map(v => typeof v === 'string' ? v : v.item || v.name || JSON.stringify(v)).join(', ')}</span>
+            ) : typeof val === 'object' && val !== null ? (
+              <div className="ml-2 mt-1">{renderDietObject(val)}</div>
+            ) : (
+              <span>{String(val)}</span>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
 
 function FollowUpTab({ followUp, fullReport }: { followUp: any, fullReport: any }) {
   console.log('📅 FollowUpTab - followUp:', followUp ? Object.keys(followUp) : 'null')
+  console.log('📅 FollowUpTab - followUp data:', JSON.stringify(followUp, null, 2)?.substring(0, 1000))
 
-  const data = followUp?.content || followUp || {}
+  // Handle nested content - check multiple levels
+  let data = followUp || {}
+  if (data.content && typeof data.content === 'object') {
+    data = data.content
+  }
+  // Check for double-nested content
+  if (data.content && typeof data.content === 'object') {
+    data = data.content
+  }
+
   const hasFollowUp = data && Object.keys(data).length > 0
 
   if (!hasFollowUp) {
@@ -961,18 +1096,27 @@ function FollowUpTab({ followUp, fullReport }: { followUp: any, fullReport: any 
     )
   }
 
-  // Extract structured data
+  // Extract structured data - check multiple possible field names
   const header = data.header || {}
-  const schedule = data.schedule || data.followUpSchedule || ''
-  const appointments = data.appointments || []
-  const monitoringParameters = data.monitoringParameters || []
-  const selfMonitoring = data.selfMonitoring || {}
-  const warningSymptoms = data.warningSymptoms || data.warningSigns || []
-  const medications = data.medicationAdjustments || data.medications || []
-  const lifestyleGoals = data.lifestyleGoals || []
-  const nextSteps = data.nextSteps || []
-  const emergencyContact = data.emergencyContact || ''
-  const notes = data.notes || data.recommendations || ''
+  const schedule = data.schedule || data.followUpSchedule || data.nextAppointment || data.followUp || ''
+  const appointments = data.appointments || data.scheduledAppointments || []
+  const monitoringParameters = data.monitoringParameters || data.parametersToMonitor || data.monitoring || []
+  const selfMonitoring = data.selfMonitoring || data.homeMonitoring || {}
+  const warningSymptoms = data.warningSymptoms || data.warningSigns || data.redFlags || data.alertSymptoms || []
+  const medications = data.medicationAdjustments || data.medications || data.treatmentAdjustments || []
+  const lifestyleGoals = data.lifestyleGoals || data.goals || data.objectives || []
+  const nextSteps = data.nextSteps || data.actionItems || data.recommendations || []
+  const emergencyContact = data.emergencyContact || data.emergency || ''
+  const notes = data.notes || data.additionalNotes || data.clinicalNotes || ''
+
+  // Check if we have any of the expected fields
+  const hasExpectedFields = schedule || appointments.length > 0 || monitoringParameters.length > 0 ||
+                            Object.keys(selfMonitoring).length > 0 || warningSymptoms.length > 0 ||
+                            lifestyleGoals.length > 0 || nextSteps.length > 0 || notes
+
+  // Get all non-header keys for fallback display
+  const otherKeys = Object.keys(data).filter(k => k !== 'header')
+  const hasOtherContent = otherKeys.length > 0
 
   return (
     <div className="space-y-6">
@@ -1108,6 +1252,111 @@ function FollowUpTab({ followUp, fullReport }: { followUp: any, fullReport: any 
           </CardContent>
         </Card>
       )}
+
+      {/* Fallback: Display all content if no expected fields found but there's other content */}
+      {!hasExpectedFields && hasOtherContent && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Follow-up Plan Details</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm space-y-4">
+            {otherKeys.map((key) => {
+              const value = data[key]
+              const label = key
+                .replace(/([A-Z])/g, ' $1')
+                .replace(/_/g, ' ')
+                .replace(/^./, s => s.toUpperCase())
+                .trim()
+
+              return (
+                <div key={key} className="border-b border-gray-100 pb-3 last:border-0">
+                  <p className="font-semibold text-blue-800 mb-2">{label}</p>
+                  <div className="ml-2 text-gray-700">
+                    {renderFollowUpValue(value)}
+                  </div>
+                </div>
+              )
+            })}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}
+
+// Helper to render follow-up values recursively with proper formatting
+function renderFollowUpValue(value: any, depth: number = 0): JSX.Element {
+  if (value === null || value === undefined) {
+    return <span className="text-gray-400">N/A</span>
+  }
+
+  if (typeof value === 'string') {
+    return <p className="whitespace-pre-wrap">{value}</p>
+  }
+
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return <p>{String(value)}</p>
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return <span className="text-gray-400">None specified</span>
+    }
+    return (
+      <ul className="list-disc list-inside space-y-1">
+        {value.map((item, idx) => (
+          <li key={idx} className="text-gray-700">
+            {typeof item === 'string' ? item : typeof item === 'object' ? renderFollowUpObject(item) : String(item)}
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  if (typeof value === 'object') {
+    return renderFollowUpObject(value)
+  }
+
+  return <p>{String(value)}</p>
+}
+
+// Helper to render nested objects
+function renderFollowUpObject(obj: any): JSX.Element {
+  if (!obj || typeof obj !== 'object') {
+    return <span>{String(obj)}</span>
+  }
+
+  const entries = Object.entries(obj)
+  if (entries.length === 0) {
+    return <span className="text-gray-400">Empty</span>
+  }
+
+  return (
+    <div className="space-y-2 pl-2 border-l-2 border-gray-200">
+      {entries.map(([key, val]) => {
+        const label = key
+          .replace(/([A-Z])/g, ' $1')
+          .replace(/_/g, ' ')
+          .replace(/^./, s => s.toUpperCase())
+          .trim()
+
+        return (
+          <div key={key}>
+            <span className="font-medium text-gray-700">{label}: </span>
+            {typeof val === 'string' ? (
+              <span>{val}</span>
+            ) : typeof val === 'number' || typeof val === 'boolean' ? (
+              <span>{String(val)}</span>
+            ) : Array.isArray(val) ? (
+              <span>{val.join(', ')}</span>
+            ) : typeof val === 'object' && val !== null ? (
+              <div className="ml-2 mt-1">{renderFollowUpObject(val)}</div>
+            ) : (
+              <span>{String(val)}</span>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -1323,20 +1572,26 @@ function extractFollowUp(fullReport: any): any {
 
   // Try multiple possible paths for follow-up data (underscore keys first)
   const paths = [
-    // Underscore format (from database)
+    // Underscore format (from database) - check content first
     fullReport?.follow_up?.content,
     fullReport?.follow_up,
+    fullReport?.follow_up_data?.content,
     fullReport?.follow_up_data,
     // CamelCase format
+    fullReport?.followUpPlan?.content,
     fullReport?.followUpPlan,
+    fullReport?.followUp?.content,
     fullReport?.followUp,
     // In consultation_report (underscore)
+    fullReport?.consultation_report?.follow_up?.content,
+    fullReport?.consultation_report?.follow_up,
     fullReport?.consultation_report?.followUpPlan,
     fullReport?.consultation_report?.content?.followUpPlan,
     // In consultationReport (camelCase)
     fullReport?.consultationReport?.followUpPlan,
     fullReport?.consultationReport?.content?.followUpPlan,
     // Other possible paths
+    fullReport?.suivi?.content,
     fullReport?.suivi,
     fullReport?.medicalReport?.followUp,
     fullReport?.medicalReport?.followUpPlan
@@ -1345,12 +1600,32 @@ function extractFollowUp(fullReport: any): any {
   for (const path of paths) {
     if (path && typeof path === 'object' && Object.keys(path).length > 0) {
       console.log('📅 Found follow-up:', Object.keys(path))
+      // If the found object only has header, check if there's nested content
+      if (Object.keys(path).length === 1 && path.header) {
+        console.log('📅 Follow-up only has header, checking for nested content...')
+        continue // Try next path
+      }
       return path
     }
     if (path && typeof path === 'string' && path.length > 0) {
       console.log('📅 Found follow-up as string')
       return { narrative: path }
     }
+  }
+
+  // Last resort: if follow_up exists with any structure, return the deepest content
+  const followUpRaw = fullReport?.follow_up || fullReport?.followUp || fullReport?.follow_up_data
+  if (followUpRaw) {
+    console.log('📅 Using raw follow-up object:', Object.keys(followUpRaw))
+    // Check for content property recursively
+    if (followUpRaw.content && typeof followUpRaw.content === 'object') {
+      if (followUpRaw.content.content && typeof followUpRaw.content.content === 'object') {
+        console.log('📅 Found double-nested content')
+        return followUpRaw.content.content
+      }
+      return followUpRaw.content
+    }
+    return followUpRaw
   }
 
   console.log('📅 No follow-up found')
