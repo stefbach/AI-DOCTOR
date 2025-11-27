@@ -23,7 +23,8 @@ import {
   Download,
   Salad,
   CalendarCheck,
-  Scan
+  Scan,
+  Image as ImageIcon
 } from 'lucide-react'
 import { ConsultationHistoryItem } from '@/lib/follow-up/shared/utils/history-fetcher'
 import { format } from 'date-fns'
@@ -221,8 +222,10 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
         </div>
       ) : hasStructuredContent ? (
         // Display structured content from any source
-        // Note: Chief complaint is shown in Overview tab, so not duplicating here
         <div className="space-y-6">
+          {chiefComplaint && (
+            <ReportSection title="CHIEF COMPLAINT" content={chiefComplaint} />
+          )}
           {historyOfIllness && (
             <ReportSection title="HISTORY OF PRESENT ILLNESS" content={historyOfIllness} />
           )}
@@ -533,11 +536,27 @@ function DietPlanTab({ dietPlan, followUp, fullReport }: { dietPlan: any, follow
   const hasFollowUp = followUp && Object.keys(followUp).length > 0
 
   // Try to extract from different report structures
-  const mealPlan = dietPlan?.mealPlan || fullReport?.dietaryPlan?.mealPlan || fullReport?.mealPlan
-  const supplements = dietPlan?.supplements || fullReport?.dietaryPlan?.supplements || []
-  const followUpSchedule = followUp?.schedule || fullReport?.followUp?.schedule || fullReport?.suivi
+  const mealPlan = dietPlan?.mealPlan || fullReport?.dietaryPlan?.mealPlan || fullReport?.mealPlan ||
+                   fullReport?.diet_plan?.content?.mealPlan || fullReport?.diet_plan?.mealPlan
+  const supplements = dietPlan?.supplements || fullReport?.dietaryPlan?.supplements ||
+                      fullReport?.diet_plan?.content?.supplements || []
+  const followUpSchedule = followUp?.schedule || fullReport?.followUp?.schedule || fullReport?.suivi ||
+                           fullReport?.follow_up?.content?.schedule || fullReport?.follow_up?.schedule
 
-  if (!hasDietPlan && !hasFollowUp && !mealPlan) {
+  // Check for raw text diet plan or recommendations
+  const dietNarrative = typeof dietPlan === 'string' ? dietPlan :
+                        dietPlan?.narrative || dietPlan?.recommendations || dietPlan?.content ||
+                        fullReport?.diet_plan?.content?.narrative || fullReport?.diet_plan?.content?.recommendations
+
+  // Check for raw text follow up
+  const followUpNarrative = typeof followUp === 'string' ? followUp :
+                            followUp?.narrative || followUp?.recommendations || followUp?.notes ||
+                            fullReport?.follow_up?.content?.narrative || fullReport?.follow_up?.content?.recommendations
+
+  const hasAnyDietContent = hasDietPlan || mealPlan || dietNarrative
+  const hasAnyFollowUpContent = hasFollowUp || followUpSchedule || followUpNarrative
+
+  if (!hasAnyDietContent && !hasAnyFollowUpContent) {
     return (
       <Card className="bg-gray-50">
         <CardContent className="p-8 text-center">
@@ -551,7 +570,7 @@ function DietPlanTab({ dietPlan, followUp, fullReport }: { dietPlan: any, follow
   return (
     <div className="space-y-6">
       {/* Diet Plan Section */}
-      {(hasDietPlan || mealPlan) && (
+      {hasAnyDietContent && (
         <>
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -560,6 +579,17 @@ function DietPlanTab({ dietPlan, followUp, fullReport }: { dietPlan: any, follow
             </h3>
           </div>
           <Separator />
+
+          {/* Show narrative if available */}
+          {dietNarrative && !mealPlan && (
+            <Card className="border-green-200 bg-green-50">
+              <CardContent className="p-4">
+                <div className="whitespace-pre-wrap text-sm text-gray-700">
+                  {dietNarrative}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {mealPlan && (
             <Card className="border-green-200 bg-green-50">
@@ -615,7 +645,7 @@ function DietPlanTab({ dietPlan, followUp, fullReport }: { dietPlan: any, follow
       )}
 
       {/* Follow-up Section */}
-      {(hasFollowUp || followUpSchedule) && (
+      {hasAnyFollowUpContent && (
         <>
           <div className="flex items-center justify-between mt-6">
             <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -627,6 +657,12 @@ function DietPlanTab({ dietPlan, followUp, fullReport }: { dietPlan: any, follow
 
           <Card className="border-blue-200 bg-blue-50">
             <CardContent className="p-4">
+              {/* Show narrative if no structured schedule */}
+              {followUpNarrative && !followUpSchedule && (
+                <div className="whitespace-pre-wrap text-sm text-gray-700">
+                  {followUpNarrative}
+                </div>
+              )}
               {followUpSchedule && (
                 <div className="space-y-2">
                   {typeof followUpSchedule === 'string' ? (

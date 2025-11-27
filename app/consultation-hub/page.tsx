@@ -31,17 +31,22 @@ export default function ConsultationHubPage() {
   const [selectedConsultation, setSelectedConsultation] = useState<ConsultationHistoryItem | null>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
 
-  // Auto-load returning patient data from sessionStorage (set by main page redirect)
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const isReturning = urlParams.get('returning') === 'true'
+  const [isLoading, setIsLoading] = useState(false)
 
-    if (isReturning) {
+  // Auto-load returning patient data from sessionStorage or URL params
+  useEffect(() => {
+    const loadReturningPatient = async () => {
+      const urlParams = new URLSearchParams(window.location.search)
+      const isReturning = urlParams.get('returning') === 'true'
+
+      if (!isReturning) return
+
+      // First, try to load from sessionStorage (set by main page redirect)
       const storedData = sessionStorage.getItem('returningPatientData')
       if (storedData) {
         try {
           const returningPatientData = JSON.parse(storedData)
-          console.log('📋 Auto-loading returning patient data:', returningPatientData)
+          console.log('📋 Auto-loading returning patient data from sessionStorage:', returningPatientData)
 
           // Set patient data and show history
           setPatientData(returningPatientData)
@@ -50,11 +55,82 @@ export default function ConsultationHubPage() {
 
           // Clean up
           sessionStorage.removeItem('returningPatientData')
+          return
         } catch (error) {
-          console.error('❌ Error loading returning patient data:', error)
+          console.error('❌ Error loading returning patient data from sessionStorage:', error)
         }
       }
+
+      // If no sessionStorage data, try to fetch from URL params directly
+      console.log('📋 No sessionStorage data, fetching from URL params...')
+
+      let patientId = urlParams.get('patientId')
+      const consultationId = urlParams.get('consultationId')
+      const patientDataParam = urlParams.get('patientData')
+
+      // Parse Tibok patient info from URL
+      let tibokPatientInfo = null
+      if (patientDataParam) {
+        try {
+          tibokPatientInfo = JSON.parse(decodeURIComponent(patientDataParam))
+          console.log('👤 Tibok patient info from URL:', tibokPatientInfo)
+
+          // Extract patientId from tibokPatientInfo if not in URL directly
+          if (!patientId && tibokPatientInfo.id) {
+            patientId = tibokPatientInfo.id
+          }
+        } catch (e) {
+          console.log('⚠️ Could not parse patientData from URL')
+        }
+      }
+
+      // Need at least patientId or consultationId to fetch history
+      if (!patientId && !consultationId) {
+        console.log('⚠️ No patient identifier in URL, showing search')
+        return
+      }
+
+      setIsLoading(true)
+      try {
+        console.log('📡 Fetching patient history...', { patientId, consultationId })
+        const response = await fetch('/api/patient-history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            patientId,
+            consultationId
+          })
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.consultations && data.consultations.length > 0) {
+            console.log(`✅ Found ${data.consultations.length} consultation(s)`)
+
+            const returningPatientData = {
+              searchCriteria: { patientId, consultationId },
+              consultations: data.consultations,
+              totalConsultations: data.consultations.length,
+              tibokPatientInfo: tibokPatientInfo
+            }
+
+            setPatientData(returningPatientData)
+            setCurrentStep('summary')
+            setShowHistoryModal(true)
+          } else {
+            console.log('⚠️ No consultations found')
+          }
+        } else {
+          console.error('❌ Failed to fetch patient history')
+        }
+      } catch (error) {
+        console.error('❌ Error fetching patient history:', error)
+      } finally {
+        setIsLoading(false)
+      }
     }
+
+    loadReturningPatient()
   }, [])
 
   const handlePatientFound = (data: any) => {
@@ -127,8 +203,18 @@ export default function ConsultationHubPage() {
         </Alert>
       </div>
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-teal-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Chargement de l'historique patient...</p>
+          </div>
+        </div>
+      )}
+
       {/* Progress Indicator */}
-      {currentStep !== 'search' && (
+      {!isLoading && currentStep !== 'search' && (
         <div className="mb-6 flex items-center gap-2">
           <div className="flex-1 flex items-center gap-2">
             <div className={`h-2 flex-1 rounded-full ${currentStep === 'summary' || currentStep === 'workflow' ? 'bg-green-500' : 'bg-gray-200'}`} />
@@ -138,6 +224,7 @@ export default function ConsultationHubPage() {
       )}
 
       {/* Main Content */}
+      {!isLoading && (
       <div className="space-y-6">
         {/* Step 1: Search */}
         {currentStep === 'search' && (
@@ -201,6 +288,7 @@ export default function ConsultationHubPage() {
           />
         )}
       </div>
+      )}
 
       {/* Consultation Detail Modal */}
       <ConsultationDetailModal
