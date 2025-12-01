@@ -40,6 +40,10 @@ export default function MedicalAIExpert() {
   const [checkingReturningPatient, setCheckingReturningPatient] = useState<boolean>(true)
   // Track workflow type when coming from consultation hub (to skip type selection in PatientForm)
   const [hubWorkflowType, setHubWorkflowType] = useState<'normal' | 'chronic' | 'dermatology' | undefined>(undefined)
+  // Track IDs from consultation hub for document sending
+  const [currentConsultationId, setCurrentConsultationId] = useState<string | null>(null)
+  const [currentPatientId, setCurrentPatientId] = useState<string | null>(null)
+  const [currentDoctorId, setCurrentDoctorId] = useState<string | null>(null)
 
   // Load doctor data from URL params (from Tibok) and save to sessionStorage
   useEffect(() => {
@@ -261,6 +265,20 @@ export default function MedicalAIExpert() {
         setPrefillData(patientData)
         console.log('✅ Prefill data loaded:', patientData)
 
+        // Extract and set IDs for document sending at the end of the flow
+        if (patientData.consultationId) {
+          setCurrentConsultationId(patientData.consultationId)
+          console.log('✅ ConsultationId set from hub:', patientData.consultationId)
+        }
+        if (patientData.patientId) {
+          setCurrentPatientId(patientData.patientId)
+          console.log('✅ PatientId set from hub:', patientData.patientId)
+        }
+        if (patientData.doctorId) {
+          setCurrentDoctorId(patientData.doctorId)
+          console.log('✅ DoctorId set from hub:', patientData.doctorId)
+        }
+
         // Set workflow type to 'normal' since doctor already selected it in the hub
         // This will skip the consultation type selection in PatientForm
         setHubWorkflowType('normal')
@@ -330,9 +348,7 @@ useEffect(() => {
   }
 }, [])
 
-  const currentConsultationId: string | null = null
-  const currentPatientId: string | null = null
-  const currentDoctorId: string | null = null
+  // IDs are now managed as state variables above (lines 44-46)
 
   const handleStepClick = (index: number) => {
     if (index <= currentStep) {
