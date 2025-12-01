@@ -40,21 +40,48 @@ export default function ConsultationHubPage() {
       // Extract and save doctor data from URL params
       const doctorDataParam = urlParams.get('doctorData')
       if (doctorDataParam) {
+        console.log('👨‍⚕️ Raw doctorData length:', doctorDataParam.length, 'starts with:', doctorDataParam.substring(0, 30))
+
         try {
-          // Handle double-encoded URLs (e.g., from Tibok where %257B = double-encoded {)
+          let tibokDoctorData: any = null
           let decodedDoctorData = doctorDataParam
 
-          // Try to decode - keep decoding while it looks encoded
-          let attempts = 0
-          while (attempts < 3 && (decodedDoctorData.includes('%7B') || decodedDoctorData.includes('%22') || decodedDoctorData.includes('%7D'))) {
-            console.log(`👨‍⚕️ Decoding doctor data (attempt ${attempts + 1})...`)
-            decodedDoctorData = decodeURIComponent(decodedDoctorData)
-            attempts++
+          // Try parsing directly first (in case it's already valid JSON)
+          if (decodedDoctorData.startsWith('{')) {
+            try {
+              tibokDoctorData = JSON.parse(decodedDoctorData)
+              console.log('👨‍⚕️ Parsed directly without decoding')
+            } catch {
+              console.log('👨‍⚕️ Direct parse failed, will try decoding...')
+            }
           }
 
-          console.log('👨‍⚕️ Decoded doctor data:', decodedDoctorData.substring(0, 100) + '...')
+          // If not parsed yet, keep decoding until we can parse
+          if (!tibokDoctorData) {
+            for (let attempt = 1; attempt <= 5; attempt++) {
+              try {
+                decodedDoctorData = decodeURIComponent(decodedDoctorData)
+                console.log(`👨‍⚕️ Decode attempt ${attempt}, starts with:`, decodedDoctorData.substring(0, 30))
 
-          const tibokDoctorData = JSON.parse(decodedDoctorData)
+                if (decodedDoctorData.startsWith('{')) {
+                  tibokDoctorData = JSON.parse(decodedDoctorData)
+                  console.log(`👨‍⚕️ Successfully parsed after ${attempt} decode(s)`)
+                  break
+                }
+              } catch (e) {
+                console.log(`👨‍⚕️ Decode attempt ${attempt} parse failed:`, e instanceof Error ? e.message : e)
+                if (attempt === 5) {
+                  console.error('👨‍⚕️ Last decoded value (first 200 chars):', decodedDoctorData.substring(0, 200))
+                  throw e
+                }
+              }
+            }
+          }
+
+          if (!tibokDoctorData) {
+            throw new Error('Failed to parse doctor data after all attempts')
+          }
+
           console.log('👨‍⚕️ Consultation hub: Parsed doctor data:', tibokDoctorData)
 
           const doctorInfoFromTibok = {
