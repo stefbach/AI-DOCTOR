@@ -70,8 +70,10 @@ export default function ConsultationHubPage() {
                 }
               } catch (e) {
                 console.log(`👨‍⚕️ Decode attempt ${attempt} parse failed:`, e instanceof Error ? e.message : e)
+                // Log around position 477 to see what's causing the issue
+                console.log('👨‍⚕️ Full length:', decodedDoctorData.length, 'Chars 470-490:', JSON.stringify(decodedDoctorData.substring(470, 490)))
                 if (attempt === 5) {
-                  console.error('👨‍⚕️ Last decoded value (first 200 chars):', decodedDoctorData.substring(0, 200))
+                  console.error('👨‍⚕️ Full decoded value:', decodedDoctorData)
                   throw e
                 }
               }
