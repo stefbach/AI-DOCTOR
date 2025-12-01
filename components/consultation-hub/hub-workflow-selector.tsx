@@ -224,7 +224,7 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
           }
         }
         // NORMAL CONSULTATION WORKFLOW
-        else if (selectedPath === '/consultation') {
+        else if (selectedPath === '/') {
           // Map Tibok specialty to consultation type for banner display
           // 'general' → 'normal', 'chronic_disease' → 'chronic'
           let tibokConsultationType: 'normal' | 'chronic' | null = null
