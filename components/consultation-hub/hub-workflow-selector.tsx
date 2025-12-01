@@ -47,11 +47,29 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
 
   const consultationHistory = patientData?.consultations || []
   const routeDecision = determineOptimalRoute(consultationHistory, selectedType)
+  const tibokPatientInfo = patientData?.tibokPatientInfo
 
   // Extract patient demographics for display
-  const demographics = consultationHistory.length > 0
+  // First try from consultation history, then fallback to tibokPatientInfo
+  const demographicsFromHistory = consultationHistory.length > 0
     ? extractPatientDemographicsFromHistory(consultationHistory)
     : null
+
+  // Build demographics object with fallbacks from tibokPatientInfo
+  const demographics = {
+    firstName: demographicsFromHistory?.firstName || tibokPatientInfo?.first_name || tibokPatientInfo?.firstName || '',
+    lastName: demographicsFromHistory?.lastName || tibokPatientInfo?.last_name || tibokPatientInfo?.lastName || '',
+    fullName: demographicsFromHistory?.fullName || tibokPatientInfo?.full_name || tibokPatientInfo?.fullName || '',
+    age: demographicsFromHistory?.age || tibokPatientInfo?.age || '',
+    dateOfBirth: demographicsFromHistory?.dateOfBirth || tibokPatientInfo?.date_of_birth || tibokPatientInfo?.dateOfBirth || '',
+    gender: demographicsFromHistory?.gender || tibokPatientInfo?.gender || tibokPatientInfo?.sexe || '',
+    phone: demographicsFromHistory?.phone || tibokPatientInfo?.phone || tibokPatientInfo?.telephone || '',
+    email: demographicsFromHistory?.email || tibokPatientInfo?.email || '',
+    address: demographicsFromHistory?.address || tibokPatientInfo?.address || tibokPatientInfo?.adresse || '',
+  }
+
+  // Check if we have any meaningful patient data
+  const hasPatientInfo = demographics.firstName || demographics.lastName || demographics.fullName || demographics.age
 
   const handleProceed = () => {
     const selectedPath = selectedWorkflow || routeDecision.recommendedPath
@@ -59,42 +77,62 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
     // Mark that we're coming from the consultation hub (to prevent redirect loop)
     sessionStorage.setItem('fromConsultationHub', 'true')
 
-    // If going to a FULL consultation (not follow-up) AND we have patient history
+    // If going to a FULL consultation (not follow-up) AND we have patient data
     // Store demographics in sessionStorage for pre-filling
-    if (!selectedPath.includes('/follow-up') && consultationHistory.length > 0) {
+    const hasPatientData = consultationHistory.length > 0 || tibokPatientInfo
+    if (!selectedPath.includes('/follow-up') && hasPatientData) {
       console.log('📋 Preparing patient data for prefill...')
-      
-      // Extract demographics from consultation history
-      const demographics = extractPatientDemographicsFromHistory(consultationHistory)
-      
-      if (demographics) {
-        console.log('✅ Demographics extracted:', demographics)
+
+      // Extract demographics from consultation history, then fallback to tibokPatientInfo
+      const historyDemographics = consultationHistory.length > 0
+        ? extractPatientDemographicsFromHistory(consultationHistory)
+        : null
+
+      // Build combined demographics with fallbacks
+      const prefillDemographics = {
+        firstName: historyDemographics?.firstName || tibokPatientInfo?.first_name || tibokPatientInfo?.firstName || '',
+        lastName: historyDemographics?.lastName || tibokPatientInfo?.last_name || tibokPatientInfo?.lastName || '',
+        age: historyDemographics?.age || tibokPatientInfo?.age || '',
+        dateOfBirth: historyDemographics?.dateOfBirth || tibokPatientInfo?.date_of_birth || tibokPatientInfo?.dateOfBirth || '',
+        gender: historyDemographics?.gender || tibokPatientInfo?.gender || tibokPatientInfo?.sexe || '',
+        phone: historyDemographics?.phone || tibokPatientInfo?.phone || tibokPatientInfo?.telephone || '',
+        email: historyDemographics?.email || tibokPatientInfo?.email || '',
+        address: historyDemographics?.address || tibokPatientInfo?.address || tibokPatientInfo?.adresse || '',
+        weight: historyDemographics?.weight || tibokPatientInfo?.weight || tibokPatientInfo?.poids || '',
+        height: historyDemographics?.height || tibokPatientInfo?.height || tibokPatientInfo?.taille || '',
+        allergies: historyDemographics?.allergies || tibokPatientInfo?.allergies || [],
+        medicalHistory: historyDemographics?.medicalHistory || tibokPatientInfo?.medicalHistory || tibokPatientInfo?.antecedentsMedicaux || [],
+        currentMedications: historyDemographics?.currentMedications || tibokPatientInfo?.currentMedications || tibokPatientInfo?.medicamentsActuels || ''
+      }
+
+      if (prefillDemographics.firstName || prefillDemographics.lastName || prefillDemographics.age) {
+        console.log('✅ Demographics extracted:', prefillDemographics)
         
         // Prepare base data in PatientForm format
         const basePrefillData = {
-          firstName: demographics.firstName || '',
-          lastName: demographics.lastName || '',
-          birthDate: demographics.dateOfBirth || '',
-          age: demographics.age || '',
-          gender: demographics.gender || '',
-          phone: demographics.phone || '',
-          email: demographics.email || '',
-          address: demographics.address || '',
-          weight: demographics.weight || '',
-          height: demographics.height || '',
+          firstName: prefillDemographics.firstName || '',
+          lastName: prefillDemographics.lastName || '',
+          birthDate: prefillDemographics.dateOfBirth || '',
+          age: prefillDemographics.age || '',
+          gender: prefillDemographics.gender || '',
+          phone: prefillDemographics.phone || '',
+          email: prefillDemographics.email || '',
+          address: prefillDemographics.address || '',
+          weight: prefillDemographics.weight || '',
+          height: prefillDemographics.height || '',
           // Handle allergies - can be array or string
-          allergies: Array.isArray(demographics.allergies) 
-            ? demographics.allergies 
-            : (demographics.allergies ? [demographics.allergies] : []),
+          allergies: Array.isArray(prefillDemographics.allergies)
+            ? prefillDemographics.allergies
+            : (prefillDemographics.allergies ? [prefillDemographics.allergies] : []),
           otherAllergies: '',
           // Handle medical history - can be array or string
-          medicalHistory: Array.isArray(demographics.medicalHistory)
-            ? demographics.medicalHistory
-            : (demographics.medicalHistory ? [demographics.medicalHistory] : []),
+          medicalHistory: Array.isArray(prefillDemographics.medicalHistory)
+            ? prefillDemographics.medicalHistory
+            : (prefillDemographics.medicalHistory ? [prefillDemographics.medicalHistory] : []),
           otherMedicalHistory: '',
-          currentMedicationsText: Array.isArray(demographics.currentMedications)
-            ? demographics.currentMedications.join(', ')
-            : (demographics.currentMedications || '')
+          currentMedicationsText: Array.isArray(prefillDemographics.currentMedications)
+            ? prefillDemographics.currentMedications.join(', ')
+            : (prefillDemographics.currentMedications || '')
         }
         
         // DERMATOLOGY WORKFLOW
@@ -172,7 +210,7 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
         </Card>
 
         {/* Patient Information Summary */}
-        {demographics && (
+        {hasPatientInfo && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -182,10 +220,14 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                {demographics.firstName && demographics.lastName && (
+                {(demographics.firstName || demographics.lastName || demographics.fullName) && (
                   <div>
                     <span className="text-gray-500">Nom:</span>
-                    <p className="font-medium">{demographics.firstName} {demographics.lastName}</p>
+                    <p className="font-medium">
+                      {demographics.firstName && demographics.lastName
+                        ? `${demographics.firstName} ${demographics.lastName}`
+                        : demographics.fullName || demographics.firstName || demographics.lastName}
+                    </p>
                   </div>
                 )}
                 {demographics.age && (
@@ -204,6 +246,12 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
                   <div>
                     <span className="text-gray-500">Téléphone:</span>
                     <p className="font-medium">{demographics.phone}</p>
+                  </div>
+                )}
+                {demographics.email && (
+                  <div>
+                    <span className="text-gray-500">Email:</span>
+                    <p className="font-medium">{demographics.email}</p>
                   </div>
                 )}
               </div>
