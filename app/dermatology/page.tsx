@@ -273,6 +273,7 @@ export default function DermatologyWorkflow() {
                     setCurrentStep(1)
                   }}
                   language="fr"
+                  workflowType="dermatology"
                 />
               </CardContent>
             </Card>

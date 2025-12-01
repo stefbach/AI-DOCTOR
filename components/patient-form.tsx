@@ -83,6 +83,8 @@ interface PatientFormProps {
  language?: Language
  consultationId?: string | null
  data?: Partial<PatientFormData>
+ // When set, skips consultation type selection and uses this type
+ workflowType?: 'dermatology' | 'chronic' | 'normal'
 }
 
 interface ValidationErrors {
@@ -179,12 +181,13 @@ const PREGNANCY_STATUS_OPTIONS = [
  { value: "not_applicable", label: "Not applicable", color: "gray" }
 ]
 // ==================== MAIN COMPONENT ====================
-export default function ModernPatientForm({ 
- onDataChange, 
- onNext, 
+export default function ModernPatientForm({
+ onDataChange,
+ onNext,
  language = 'en',
  consultationId,
- data
+ data,
+ workflowType
 }: PatientFormProps) {
  // ========== Hooks ==========
  const { patientData: tibokPatient, isFromTibok } = useTibokPatientData()
@@ -193,6 +196,12 @@ export default function ModernPatientForm({
    isDermatology: tibokIsDermatology,
    loading: tibokConsultationLoading
  } = useTibokConsultation()
+
+ // If workflowType is set, use it instead of Tibok detection
+ const isWorkflowDermatology = workflowType === 'dermatology' || tibokIsDermatology
+ const isWorkflowChronic = workflowType === 'chronic'
+ const isWorkflowNormal = workflowType === 'normal'
+ const skipConsultationTypeSelection = !!workflowType
  const t = useCallback((key: string) => getTranslation(key, language), [language])
  
  // ========== States ==========
@@ -586,6 +595,15 @@ export default function ModernPatientForm({
 
  const handleSubmit = useCallback(() => {
  if (validateForm()) {
+   // If workflowType is set, skip consultation type selection and just call onNext
+   // This is used when PatientForm is embedded in a specific workflow (e.g., dermatology page)
+   if (skipConsultationTypeSelection) {
+     console.log('✅ Form validated, calling onNext (workflowType:', workflowType, ')')
+     onDataChange(formData)
+     onNext()
+     return
+   }
+
    // Validate consultation type selection (unless dermatology was auto-detected from Tibok)
    if (!consultationType && !tibokIsDermatology) {
      toast({
@@ -670,7 +688,7 @@ export default function ModernPatientForm({
      element.focus()
    }
  }
- }, [validateForm, onNext, errors, formData, consultationType, tibokIsDermatology, toast])
+ }, [validateForm, onNext, onDataChange, errors, formData, consultationType, tibokIsDermatology, skipConsultationTypeSelection, workflowType, toast])
 
  // ========== Effects ==========
 
@@ -1699,8 +1717,67 @@ Example:
  </div>
 
  {/* CONSULTATION TYPE SELECTION */}
- {/* Show different UI based on whether dermatology was auto-detected from Tibok */}
- {tibokIsDermatology ? (
+ {/* Skip entirely when workflowType is set (e.g., when in dermatology workflow) */}
+ {skipConsultationTypeSelection ? (
+   // Workflow type already determined - show info only
+   <Card id="consultation-type-section" className={`shadow-xl border-2 ${
+     isWorkflowDermatology ? 'border-teal-200 bg-gradient-to-br from-teal-50 to-cyan-50' :
+     isWorkflowChronic ? 'border-blue-200 bg-gradient-to-br from-blue-50 to-blue-50' :
+     'border-green-200 bg-gradient-to-br from-green-50 to-green-50'
+   }`}>
+     <CardHeader className={`${
+       isWorkflowDermatology ? 'bg-gradient-to-r from-teal-600 to-cyan-600' :
+       isWorkflowChronic ? 'bg-gradient-to-r from-blue-600 to-blue-600' :
+       'bg-gradient-to-r from-green-600 to-green-600'
+     } text-white`}>
+       <CardTitle className="flex items-center gap-3 text-2xl">
+         <Activity className="h-7 w-7" />
+         {isWorkflowDermatology ? 'Consultation Dermatologique' :
+          isWorkflowChronic ? 'Consultation Maladie Chronique' :
+          'Consultation Normale'}
+       </CardTitle>
+     </CardHeader>
+     <CardContent className="p-8">
+       <div className={`p-6 rounded-xl border-2 ${
+         isWorkflowDermatology ? 'bg-teal-100 border-teal-300' :
+         isWorkflowChronic ? 'bg-blue-100 border-blue-300' :
+         'bg-green-100 border-green-300'
+       }`}>
+         <div className="flex items-start gap-4">
+           <div className={`p-3 rounded-full ${
+             isWorkflowDermatology ? 'bg-teal-500' :
+             isWorkflowChronic ? 'bg-blue-500' :
+             'bg-green-500'
+           }`}>
+             <CheckCircle className="h-8 w-8 text-white" />
+           </div>
+           <div className="flex-1">
+             <h3 className={`text-xl font-bold mb-2 ${
+               isWorkflowDermatology ? 'text-teal-900' :
+               isWorkflowChronic ? 'text-blue-900' :
+               'text-green-900'
+             }`}>
+               {isWorkflowDermatology ? '🔬 Consultation Dermatologique' :
+                isWorkflowChronic ? '🏥 Maladie Chronique' :
+                '📋 Consultation Normale'}
+             </h3>
+             <p className={`mb-4 ${
+               isWorkflowDermatology ? 'text-teal-800' :
+               isWorkflowChronic ? 'text-blue-800' :
+               'text-green-800'
+             }`}>
+               {isWorkflowDermatology
+                 ? "Cette consultation inclura l'analyse d'images et le diagnostic spécialisé des affections cutanées."
+                 : isWorkflowChronic
+                 ? "Cette consultation inclura la gestion des maladies chroniques et le plan diététique."
+                 : "Consultation médicale standard avec questions IA et diagnostic."}
+             </p>
+           </div>
+         </div>
+       </div>
+     </CardContent>
+   </Card>
+ ) : tibokIsDermatology ? (
    // Dermatology Auto-Detected - Show info message instead of selection
    <Card id="consultation-type-section" className="shadow-xl border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-cyan-50">
      <CardHeader className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
@@ -1904,20 +1981,20 @@ Example:
    <Button
      type="submit"
      size="lg"
-     disabled={!consultationType && !tibokIsDermatology}
+     disabled={!consultationType && !tibokIsDermatology && !skipConsultationTypeSelection}
      className={`px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 ${
-       consultationType === 'chronic'
+       isWorkflowChronic || consultationType === 'chronic'
          ? 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700'
-         : tibokIsDermatology || consultationType === 'dermatology'
+         : isWorkflowDermatology || consultationType === 'dermatology'
          ? 'bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700'
          : 'bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700'
-     } ${!consultationType && !tibokIsDermatology ? 'opacity-50 cursor-not-allowed' : ''}`}
+     } ${!consultationType && !tibokIsDermatology && !skipConsultationTypeSelection ? 'opacity-50 cursor-not-allowed' : ''}`}
    >
-     {consultationType === 'chronic'
-       ? 'Continue to Chronic Disease Management'
-       : tibokIsDermatology || consultationType === 'dermatology'
-       ? 'Continue to Dermatology Analysis'
-       : 'Continue to Clinical Information'}
+     {isWorkflowChronic || consultationType === 'chronic'
+       ? 'Continuer vers Maladie Chronique'
+       : isWorkflowDermatology || consultationType === 'dermatology'
+       ? 'Continuer vers Analyse Dermatologique'
+       : 'Continuer vers Informations Cliniques'}
      <ArrowRight className="h-5 w-5 ml-2" />
    </Button>
  </div>
