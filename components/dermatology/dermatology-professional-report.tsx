@@ -1584,12 +1584,17 @@ const handleManualSave = useCallback(async () => {
  if (doctorDataParam) {
  try {
  // Handle double-encoded URLs (e.g., from Tibok where %257B = double-encoded {)
- let decodedDoctorData = decodeURIComponent(doctorDataParam)
- // Check if still encoded (starts with %7B which is { or contains %22 which is ")
- if (decodedDoctorData.startsWith('%7B') || decodedDoctorData.includes('%22')) {
- console.log('👨‍⚕️ Detected double-encoded doctor data, decoding again...')
+ let decodedDoctorData = doctorDataParam
+
+ // Try to decode - keep decoding while it looks encoded
+ let attempts = 0
+ while (attempts < 3 && (decodedDoctorData.includes('%7B') || decodedDoctorData.includes('%22') || decodedDoctorData.includes('%7D'))) {
+ console.log(`👨‍⚕️ Decoding doctor data (attempt ${attempts + 1})...`)
  decodedDoctorData = decodeURIComponent(decodedDoctorData)
+ attempts++
  }
+
+ console.log('👨‍⚕️ Decoded doctor data:', decodedDoctorData.substring(0, 100) + '...')
 
  const tibokDoctorData = JSON.parse(decodedDoctorData)
  console.log(' Loading Tibok Doctor Data:', tibokDoctorData)
