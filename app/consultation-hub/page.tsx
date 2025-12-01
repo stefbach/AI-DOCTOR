@@ -64,14 +64,20 @@ export default function ConsultationHubPage() {
                 console.log(`👨‍⚕️ Decode attempt ${attempt}, starts with:`, decodedDoctorData.substring(0, 30))
 
                 if (decodedDoctorData.startsWith('{')) {
-                  tibokDoctorData = JSON.parse(decodedDoctorData)
+                  // Fix: Tibok sometimes appends extra URL after the JSON - extract just the JSON
+                  let jsonString = decodedDoctorData
+                  const lastBrace = jsonString.lastIndexOf('}')
+                  if (lastBrace !== -1 && lastBrace < jsonString.length - 1) {
+                    console.log('👨‍⚕️ Found extra content after JSON, trimming from position', lastBrace + 1)
+                    jsonString = jsonString.substring(0, lastBrace + 1)
+                  }
+
+                  tibokDoctorData = JSON.parse(jsonString)
                   console.log(`👨‍⚕️ Successfully parsed after ${attempt} decode(s)`)
                   break
                 }
               } catch (e) {
                 console.log(`👨‍⚕️ Decode attempt ${attempt} parse failed:`, e instanceof Error ? e.message : e)
-                // Log around position 477 to see what's causing the issue
-                console.log('👨‍⚕️ Full length:', decodedDoctorData.length, 'Chars 470-490:', JSON.stringify(decodedDoctorData.substring(470, 490)))
                 if (attempt === 5) {
                   console.error('👨‍⚕️ Full decoded value:', decodedDoctorData)
                   throw e

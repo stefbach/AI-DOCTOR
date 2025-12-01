@@ -57,6 +57,15 @@ export default function MedicalAIExpert() {
           attempts++
         }
 
+        // Fix: Tibok sometimes appends extra URL after the JSON - extract just the JSON
+        if (decodedDoctorData.startsWith('{')) {
+          const lastBrace = decodedDoctorData.lastIndexOf('}')
+          if (lastBrace !== -1 && lastBrace < decodedDoctorData.length - 1) {
+            console.log('👨‍⚕️ Found extra content after JSON, trimming from position', lastBrace + 1)
+            decodedDoctorData = decodedDoctorData.substring(0, lastBrace + 1)
+          }
+        }
+
         console.log('👨‍⚕️ Decoded doctor data:', decodedDoctorData.substring(0, 100) + '...')
 
         const tibokDoctorData = JSON.parse(decodedDoctorData)
