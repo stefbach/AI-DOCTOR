@@ -55,10 +55,76 @@ export default function DermatologyImageUpload({
     fetchImage
   } = useTibokConsultation({ consultationId: patientData?.consultationId })
 
-  // Auto-load Tibok image when available
+  // Auto-load Tibok image from direct URL (from patientData.tibokImageUrl)
+  useEffect(() => {
+    const loadTibokImageFromUrl = async () => {
+      // Check if we have a direct Tibok image URL in patientData
+      const tibokImageUrl = patientData?.tibokImageUrl
+      const hasTibokImage = patientData?.hasTibokImage
+
+      if (tibokImageUrl && hasTibokImage && !tibokImageLoaded) {
+        console.log('📸 Loading patient image directly from Tibok URL:', tibokImageUrl)
+
+        try {
+          // Fetch the image and convert to data URL
+          const response = await fetch(tibokImageUrl)
+          if (!response.ok) {
+            throw new Error(`Failed to fetch image: ${response.status}`)
+          }
+
+          const blob = await response.blob()
+          const reader = new FileReader()
+
+          reader.onload = () => {
+            const dataUrl = reader.result as string
+
+            const tibokImage = {
+              id: Date.now(),
+              name: 'patient-image-tibok.jpg',
+              size: blob.size,
+              type: blob.type || 'image/jpeg',
+              dataUrl: dataUrl,
+              uploadedAt: patientData?.imageUploadedAt || new Date().toISOString(),
+              source: 'tibok' as const
+            }
+
+            setUploadedImages([tibokImage])
+            setTibokImageLoaded(true)
+
+            toast({
+              title: "Image Patient Chargée",
+              description: "L'image téléchargée par le patient depuis Tibok a été automatiquement chargée",
+            })
+          }
+
+          reader.onerror = () => {
+            console.error('❌ Error reading image blob')
+            toast({
+              title: "Erreur de chargement",
+              description: "Impossible de charger l'image du patient. Veuillez télécharger manuellement.",
+              variant: "destructive"
+            })
+          }
+
+          reader.readAsDataURL(blob)
+        } catch (error) {
+          console.error('❌ Error loading Tibok image from URL:', error)
+          toast({
+            title: "Erreur de chargement",
+            description: "Impossible de charger l'image du patient. Veuillez télécharger manuellement.",
+            variant: "destructive"
+          })
+        }
+      }
+    }
+
+    loadTibokImageFromUrl()
+  }, [patientData?.tibokImageUrl, patientData?.hasTibokImage, tibokImageLoaded])
+
+  // Auto-load Tibok image from hook (fallback method)
   useEffect(() => {
     if (dermatologyImage && !tibokImageLoaded) {
-      console.log('📸 Auto-loading patient image from Tibok')
+      console.log('📸 Auto-loading patient image from Tibok hook')
 
       // Add the Tibok image to uploaded images
       const tibokImage = {
@@ -75,8 +141,8 @@ export default function DermatologyImageUpload({
       setTibokImageLoaded(true)
 
       toast({
-        title: "Patient Image Loaded",
-        description: "The patient's uploaded image has been automatically loaded from Tibok",
+        title: "Image Patient Chargée",
+        description: "L'image téléchargée par le patient depuis Tibok a été automatiquement chargée",
       })
     }
   }, [dermatologyImage, tibokImageLoaded])
