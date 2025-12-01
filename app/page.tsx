@@ -105,6 +105,7 @@ export default function MedicalAIExpert() {
       let patientEmail = urlParams.get('patientEmail')
       let patientPhone = urlParams.get('patientPhone')
       const consultationId = urlParams.get('consultationId')
+      const doctorId = urlParams.get('doctorId')
 
       // Also extract Tibok patient data from URL if available
       const patientDataParam = urlParams.get('patientData')
@@ -173,7 +174,7 @@ export default function MedicalAIExpert() {
 
           // Store patient data for the hub - include Tibok patient info
           sessionStorage.setItem('returningPatientData', JSON.stringify({
-            searchCriteria: { patientId, consultationId, email: patientEmail, phone: patientPhone },
+            searchCriteria: { patientId, consultationId, doctorId, email: patientEmail, phone: patientPhone },
             consultations: consultations,
             totalConsultations: consultations.length,
             tibokPatientInfo: tibokPatientInfo // Include the Tibok patient data
@@ -189,7 +190,7 @@ export default function MedicalAIExpert() {
           console.log(`📋 Returning patient detected with ${consultations.length} consultation(s) - redirecting to hub`)
 
           sessionStorage.setItem('returningPatientData', JSON.stringify({
-            searchCriteria: { patientId, email: patientEmail, phone: patientPhone },
+            searchCriteria: { patientId, consultationId, doctorId, email: patientEmail, phone: patientPhone },
             consultations: consultations,
             totalConsultations: consultations.length,
             tibokPatientInfo: tibokPatientInfo
@@ -207,7 +208,7 @@ export default function MedicalAIExpert() {
         if (consultationId) {
           console.log('📋 Error occurred but have consultationId - redirecting to hub anyway')
           sessionStorage.setItem('returningPatientData', JSON.stringify({
-            searchCriteria: { patientId, consultationId, email: patientEmail, phone: patientPhone },
+            searchCriteria: { patientId, consultationId, doctorId, email: patientEmail, phone: patientPhone },
             consultations: [],
             totalConsultations: 0,
             tibokPatientInfo: tibokPatientInfo

@@ -139,11 +139,13 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
         if (selectedPath === '/dermatology') {
           console.log('🔬 Setting up dermatology workflow with patient prefill')
 
-          // Include Tibok image data and consultationId for dermatology
+          // Include Tibok image data and IDs for dermatology
           const dermatologyData = {
             ...basePrefillData,
-            // Consultation ID for hook fallback
+            // IDs for document sending
             consultationId: patientData?.searchCriteria?.consultationId || '',
+            patientId: patientData?.searchCriteria?.patientId || '',
+            doctorId: patientData?.searchCriteria?.doctorId || '',
             // Tibok image data
             tibokImageUrl: tibokPatientInfo?.temp_image_url || '',
             hasTibokImage: tibokPatientInfo?.has_temp_image || false,
@@ -156,7 +158,11 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
           sessionStorage.setItem('isExistingPatientDermatology', 'true')
 
           console.log('💾 Dermatology prefill data stored with Tibok image:', dermatologyData.tibokImageUrl ? 'Yes' : 'No')
-          console.log('📋 ConsultationId:', dermatologyData.consultationId)
+          console.log('📋 IDs stored:', {
+            consultationId: dermatologyData.consultationId,
+            patientId: dermatologyData.patientId,
+            doctorId: dermatologyData.doctorId
+          })
         }
         // CHRONIC DISEASE WORKFLOW
         else if (selectedPath === '/chronic-disease') {

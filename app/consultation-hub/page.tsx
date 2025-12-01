@@ -94,6 +94,7 @@ export default function ConsultationHubPage() {
       console.log('📋 No sessionStorage data, fetching from URL params...')
 
       let patientId = urlParams.get('patientId')
+      const doctorId = urlParams.get('doctorId')
       const patientDataParam = urlParams.get('patientData')
 
       // Parse Tibok patient info from URL
@@ -153,7 +154,7 @@ export default function ConsultationHubPage() {
           console.log(`✅ Found ${consultations.length} consultation(s)`)
 
           const patientDataToSet = {
-            searchCriteria: { patientId, consultationId },
+            searchCriteria: { patientId, consultationId, doctorId },
             consultations: consultations,
             totalConsultations: consultations.length,
             tibokPatientInfo: tibokPatientInfo
@@ -178,7 +179,7 @@ export default function ConsultationHubPage() {
           if (consultationId && tibokPatientInfo) {
             console.log('👤 API failed but have Tibok data - proceeding to workflow')
             setPatientData({
-              searchCriteria: { patientId, consultationId },
+              searchCriteria: { patientId, consultationId, doctorId },
               consultations: [],
               totalConsultations: 0,
               tibokPatientInfo: tibokPatientInfo
