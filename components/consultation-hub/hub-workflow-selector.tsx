@@ -362,8 +362,32 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
   }
 
   // For Normal/Chronic from Tibok: show type selection (doctor chooses between Normal and Chronic)
+  // Map tibokSpecialty to display text
+  const patientSelectedType = tibokSpecialty === 'general' ? 'normal' : tibokSpecialty === 'chronic_disease' ? 'chronic' : null
+
   return (
     <div className="space-y-6">
+      {/* Banner showing patient's original selection from Tibok */}
+      {patientSelectedType && (
+        <Card className="border-2 border-blue-300 bg-blue-50">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-blue-500 rounded-full">
+                <User className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-bold text-blue-900 mb-1">
+                  {patientSelectedType === 'normal' ? '📋 Consultation Normale' : '🩺 Suivi Maladie Chronique'} sélectionné par le patient
+                </h4>
+                <p className="text-blue-800 text-sm">
+                  Le patient a choisi ce type de consultation sur Tibok. Vous pouvez confirmer ou modifier selon votre évaluation clinique.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Type Selection - Only Normal and Chronic options for doctor to choose */}
       <Card>
         <CardHeader>
