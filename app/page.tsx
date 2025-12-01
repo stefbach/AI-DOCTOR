@@ -124,6 +124,12 @@ export default function MedicalAIExpert() {
       if (fromHub === 'true') {
         sessionStorage.removeItem('fromConsultationHub')
         console.log('📋 Coming from consultation hub, skipping redirect check')
+
+        // CRITICAL: Clear old consultation data to start fresh
+        // This prevents old localStorage data from contaminating the new consultation
+        console.log('🧹 Clearing old consultation data for fresh start...')
+        await consultationDataService.clearCurrentConsultation()
+
         setCheckingReturningPatient(false)
         return
       }
