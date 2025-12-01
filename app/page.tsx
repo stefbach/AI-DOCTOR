@@ -166,14 +166,17 @@ export default function MedicalAIExpert() {
         const data = await response.json()
         console.log('📡 API response:', data)
 
-        if (data.success && data.consultations && data.consultations.length >= 1) {
-          console.log(`📋 Returning patient detected with ${data.consultations.length} consultation(s) - redirecting to hub`)
+        // Always redirect to hub for patients coming from Tibok (with consultationId)
+        // The hub will handle both new and returning patients
+        if (consultationId) {
+          const consultations = (data.success && data.consultations) ? data.consultations : []
+          console.log(`📋 Patient from Tibok - redirecting to hub (${consultations.length} consultation(s))`)
 
           // Store patient data for the hub - include Tibok patient info
           sessionStorage.setItem('returningPatientData', JSON.stringify({
             searchCriteria: { patientId, email: patientEmail, phone: patientPhone },
-            consultations: data.consultations,
-            totalConsultations: data.consultations.length,
+            consultations: consultations,
+            totalConsultations: consultations.length,
             tibokPatientInfo: tibokPatientInfo // Include the Tibok patient data
           }))
 
@@ -182,8 +185,22 @@ export default function MedicalAIExpert() {
           window.location.href = `/consultation-hub${currentParams}&returning=true`
           // Don't set checkingReturningPatient to false - we're redirecting
           return
+        } else if (data.success && data.consultations && data.consultations.length >= 1) {
+          // Non-Tibok returning patients (searched by email/phone)
+          console.log(`📋 Returning patient detected with ${data.consultations.length} consultation(s) - redirecting to hub`)
+
+          sessionStorage.setItem('returningPatientData', JSON.stringify({
+            searchCriteria: { patientId, email: patientEmail, phone: patientPhone },
+            consultations: data.consultations,
+            totalConsultations: data.consultations.length,
+            tibokPatientInfo: tibokPatientInfo
+          }))
+
+          const currentParams = window.location.search
+          window.location.href = `/consultation-hub${currentParams}&returning=true`
+          return
         } else {
-          console.log('👤 New patient - proceeding with normal flow')
+          console.log('👤 New patient without consultationId - proceeding with normal flow')
         }
       } catch (error) {
         console.error('❌ Error checking patient history:', error)

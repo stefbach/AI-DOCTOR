@@ -66,10 +66,21 @@ export default function ConsultationHubPage() {
             }
           }
 
-          // Set patient data and show history
+          // Set patient data
           setPatientData(returningPatientData)
-          setCurrentStep('summary')
-          setShowHistoryModal(true)
+
+          // For new patients (0 consultations): skip to workflow selection directly
+          // For returning patients: show summary with history modal
+          const hasConsultations = returningPatientData.consultations && returningPatientData.consultations.length > 0
+          if (hasConsultations) {
+            console.log('📋 Returning patient - showing history modal')
+            setCurrentStep('summary')
+            setShowHistoryModal(true)
+          } else {
+            console.log('👤 New patient from Tibok - skipping to workflow selection')
+            setCurrentStep('workflow')
+            setShowHistoryModal(false)
+          }
 
           // Clean up
           sessionStorage.removeItem('returningPatientData')
@@ -138,24 +149,42 @@ export default function ConsultationHubPage() {
 
         if (response.ok) {
           const data = await response.json()
-          if (data.success && data.consultations && data.consultations.length > 0) {
-            console.log(`✅ Found ${data.consultations.length} consultation(s)`)
+          const consultations = (data.success && data.consultations) ? data.consultations : []
+          console.log(`✅ Found ${consultations.length} consultation(s)`)
 
-            const returningPatientData = {
-              searchCriteria: { patientId, consultationId },
-              consultations: data.consultations,
-              totalConsultations: data.consultations.length,
-              tibokPatientInfo: tibokPatientInfo
-            }
+          const patientDataToSet = {
+            searchCriteria: { patientId, consultationId },
+            consultations: consultations,
+            totalConsultations: consultations.length,
+            tibokPatientInfo: tibokPatientInfo
+          }
 
-            setPatientData(returningPatientData)
+          setPatientData(patientDataToSet)
+
+          // For new patients (0 consultations): skip to workflow selection directly
+          // For returning patients: show summary with history modal
+          if (consultations.length > 0) {
+            console.log('📋 Returning patient - showing history modal')
             setCurrentStep('summary')
             setShowHistoryModal(true)
           } else {
-            console.log('⚠️ No consultations found')
+            console.log('👤 New patient from Tibok - skipping to workflow selection')
+            setCurrentStep('workflow')
+            setShowHistoryModal(false)
           }
         } else {
           console.error('❌ Failed to fetch patient history')
+          // Still allow new patient flow if we have consultationId
+          if (consultationId && tibokPatientInfo) {
+            console.log('👤 API failed but have Tibok data - proceeding to workflow')
+            setPatientData({
+              searchCriteria: { patientId, consultationId },
+              consultations: [],
+              totalConsultations: 0,
+              tibokPatientInfo: tibokPatientInfo
+            })
+            setCurrentStep('workflow')
+          }
         }
       } catch (error) {
         console.error('❌ Error fetching patient history:', error)
