@@ -38,6 +38,8 @@ export default function MedicalAIExpert() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [prefillData, setPrefillData] = useState<any>({})
   const [checkingReturningPatient, setCheckingReturningPatient] = useState<boolean>(true)
+  // Track workflow type when coming from consultation hub (to skip type selection in PatientForm)
+  const [hubWorkflowType, setHubWorkflowType] = useState<'normal' | 'chronic' | 'dermatology' | undefined>(undefined)
 
   // Load doctor data from URL params (from Tibok) and save to sessionStorage
   useEffect(() => {
@@ -258,6 +260,11 @@ export default function MedicalAIExpert() {
         const patientData = JSON.parse(savedPatientData)
         setPrefillData(patientData)
         console.log('✅ Prefill data loaded:', patientData)
+
+        // Set workflow type to 'normal' since doctor already selected it in the hub
+        // This will skip the consultation type selection in PatientForm
+        setHubWorkflowType('normal')
+        console.log('✅ Workflow type set to "normal" from hub selection')
 
         // Clean up sessionStorage after reading
         sessionStorage.removeItem('consultationPatientData')
@@ -554,6 +561,8 @@ const handlePrevious = () => {
           data: Object.keys(prefillData).length > 0 ? { ...patientData, ...prefillData } : patientData,
           onDataChange: setPatientData,
           onNext: handleNext,
+          // Pass workflowType to skip consultation type selection when coming from hub
+          workflowType: hubWorkflowType,
         }
       case 1:
         return {
