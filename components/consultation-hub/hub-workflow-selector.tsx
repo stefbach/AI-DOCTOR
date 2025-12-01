@@ -39,6 +39,10 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
   const tibokSpecialty = patientData?.tibokPatientInfo?.consultation_specialty
   const isDermatologyFromTibok = tibokSpecialty === 'dermatology'
 
+  // Debug: Log what we received from Tibok
+  console.log('🏥 Hub Workflow - tibokPatientInfo:', patientData?.tibokPatientInfo)
+  console.log('🏥 Hub Workflow - consultation_specialty from Tibok:', tibokSpecialty)
+
   // For dermatology, auto-select; for others, default to 'normal'
   const [selectedType, setSelectedType] = useState<ConsultationType>(
     isDermatologyFromTibok ? 'dermatology' : 'normal'
