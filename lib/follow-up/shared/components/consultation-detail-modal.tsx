@@ -1071,7 +1071,6 @@ function renderDietObject(obj: any): JSX.Element {
 
 function FollowUpTab({ followUp, fullReport }: { followUp: any, fullReport: any }) {
   console.log('📅 FollowUpTab - followUp:', followUp ? Object.keys(followUp) : 'null')
-  console.log('📅 FollowUpTab - followUp data:', JSON.stringify(followUp, null, 2)?.substring(0, 1000))
 
   // Handle nested content - check multiple levels
   let data = followUp || {}
@@ -1096,187 +1095,250 @@ function FollowUpTab({ followUp, fullReport }: { followUp: any, fullReport: any 
     )
   }
 
-  // Extract structured data - check multiple possible field names
+  // Extract structured data from the actual data structure
   const header = data.header || {}
-  const schedule = data.schedule || data.followUpSchedule || data.nextAppointment || data.followUp || ''
-  const appointments = data.appointments || data.scheduledAppointments || []
-  const monitoringParameters = data.monitoringParameters || data.parametersToMonitor || data.monitoring || []
-  const selfMonitoring = data.selfMonitoring || data.homeMonitoring || {}
-  const warningSymptoms = data.warningSymptoms || data.warningSigns || data.redFlags || data.alertSymptoms || []
-  const medications = data.medicationAdjustments || data.medications || data.treatmentAdjustments || []
-  const lifestyleGoals = data.lifestyleGoals || data.goals || data.objectives || []
-  const nextSteps = data.nextSteps || data.actionItems || data.recommendations || []
-  const emergencyContact = data.emergencyContact || data.emergency || ''
-  const notes = data.notes || data.additionalNotes || data.clinicalNotes || ''
-
-  // Check if we have any of the expected fields
-  const hasExpectedFields = schedule || appointments.length > 0 || monitoringParameters.length > 0 ||
-                            Object.keys(selfMonitoring).length > 0 || warningSymptoms.length > 0 ||
-                            lifestyleGoals.length > 0 || nextSteps.length > 0 || notes
-
-  // Get all non-header keys for fallback display
-  const otherKeys = Object.keys(data).filter(k => k !== 'header')
-  const hasOtherContent = otherKeys.length > 0
+  const patient = data.patient || {}
+  const praticien = data.praticien || {}
+  const shortTermGoals = data.shortTermGoals || []
+  const longTermGoals = data.longTermGoals || []
+  const monitoringSchedule = data.monitoringSchedule || {}
+  const lifestyleModifications = data.lifestyleModifications || {}
+  const educationalResources = data.educationalResources || []
+  const specialInstructions = data.specialInstructions || []
+  const emergencyProtocol = data.emergencyProtocol || {}
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      {header.title && (
-        <div className="text-center pb-2">
-          <h3 className="text-xl font-bold text-blue-800">{header.title}</h3>
-          {header.patientName && <p className="text-gray-600">Patient: {header.patientName}</p>}
-          {header.date && <p className="text-sm text-gray-500">Date: {header.date}</p>}
-        </div>
-      )}
+      <div className="text-center border-b pb-4">
+        <h3 className="text-xl font-bold text-blue-800">
+          {header.title || 'Chronic Disease Management & Follow-Up Plan'}
+        </h3>
+        {header.date && <p className="text-sm text-gray-500 mt-1">Date: {header.date}</p>}
+      </div>
 
-      {/* Schedule */}
-      {schedule && (
-        <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="p-4">
-            <p className="text-lg"><strong>Next Follow-up:</strong> {typeof schedule === 'string' ? schedule : schedule.nextVisit || schedule.frequency || JSON.stringify(schedule)}</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Appointments */}
-      {appointments.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base text-blue-800">Scheduled Appointments</CardTitle>
+      {/* SHORT-TERM GOALS */}
+      {shortTermGoals.length > 0 && (
+        <Card className="border-orange-200">
+          <CardHeader className="pb-2 bg-orange-50">
+            <CardTitle className="text-base text-orange-800">SHORT-TERM GOALS (0-3 months)</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm">
-            {appointments.map((apt: any, idx: number) => (
-              <div key={idx} className="mb-2 p-2 bg-gray-50 rounded">
-                <p className="font-medium">{apt.type || apt.purpose || `Appointment ${idx + 1}`}</p>
-                {apt.date && <p className="text-gray-600">Date: {apt.date}</p>}
-                {apt.provider && <p className="text-gray-600">Provider: {apt.provider}</p>}
-                {apt.notes && <p className="text-gray-600">{apt.notes}</p>}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Monitoring Parameters */}
-      {monitoringParameters.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Parameters to Monitor</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm">
-            {monitoringParameters.map((param: any, idx: number) => (
-              <div key={idx} className="mb-2">
-                <p className="font-medium">• {typeof param === 'string' ? param : param.parameter || param.name}</p>
-                {param.frequency && <p className="ml-4 text-gray-600">Frequency: {param.frequency}</p>}
-                {param.target && <p className="ml-4 text-gray-600">Target: {param.target}</p>}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Self Monitoring */}
-      {Object.keys(selfMonitoring).length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Self-Monitoring Guidelines</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm">
-            {selfMonitoring.bloodPressure && <p>• Blood Pressure: {selfMonitoring.bloodPressure}</p>}
-            {selfMonitoring.bloodGlucose && <p>• Blood Glucose: {selfMonitoring.bloodGlucose}</p>}
-            {selfMonitoring.weight && <p>• Weight: {selfMonitoring.weight}</p>}
-            {selfMonitoring.symptoms && <p>• Symptoms: {selfMonitoring.symptoms}</p>}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Warning Symptoms */}
-      {warningSymptoms.length > 0 && (
-        <Card className="border-red-200 bg-red-50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base text-red-800">⚠️ Warning Signs - Seek Immediate Care</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm">
-            {warningSymptoms.map((symptom: string, idx: number) => (
-              <p key={idx}>• {symptom}</p>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Lifestyle Goals */}
-      {lifestyleGoals.length > 0 && (
-        <Card className="border-green-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base text-green-800">Lifestyle Goals</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm">
-            {lifestyleGoals.map((goal: string, idx: number) => (
-              <p key={idx}>✓ {goal}</p>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Next Steps */}
-      {nextSteps.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Next Steps</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm">
-            {nextSteps.map((step: string, idx: number) => (
-              <p key={idx}>{idx + 1}. {step}</p>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Notes */}
-      {notes && (
-        <Card className="border-gray-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Additional Notes</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm whitespace-pre-line">
-            {typeof notes === 'string' ? notes : JSON.stringify(notes, null, 2)}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Emergency Contact */}
-      {emergencyContact && (
-        <Card className="border-red-200">
-          <CardContent className="p-4">
-            <p className="text-sm"><strong>Emergency Contact:</strong> {emergencyContact}</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Fallback: Display all content if no expected fields found but there's other content */}
-      {!hasExpectedFields && hasOtherContent && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Follow-up Plan Details</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm space-y-4">
-            {otherKeys.map((key) => {
-              const value = data[key]
-              const label = key
-                .replace(/([A-Z])/g, ' $1')
-                .replace(/_/g, ' ')
-                .replace(/^./, s => s.toUpperCase())
-                .trim()
-
-              return (
-                <div key={key} className="border-b border-gray-100 pb-3 last:border-0">
-                  <p className="font-semibold text-blue-800 mb-2">{label}</p>
-                  <div className="ml-2 text-gray-700">
-                    {renderFollowUpValue(value)}
+          <CardContent className="text-sm space-y-4 pt-4">
+            {shortTermGoals.map((goal: any, idx: number) => (
+              <div key={idx} className="border-l-4 border-orange-300 pl-4">
+                <p className="font-semibold text-gray-800">{idx + 1}. {goal.goal}</p>
+                <p className="text-gray-600 mt-1">Timeline: {goal.timeline}</p>
+                {goal.metrics && (
+                  <div className="mt-2">
+                    <p className="text-gray-700 font-medium">Success Metrics:</p>
+                    {Array.isArray(goal.metrics) ? (
+                      goal.metrics.map((m: string, i: number) => (
+                        <p key={i} className="text-gray-600 ml-2">• {m}</p>
+                      ))
+                    ) : (
+                      <p className="text-gray-600 ml-2">• {goal.metrics}</p>
+                    )}
                   </div>
-                </div>
-              )
-            })}
+                )}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* LONG-TERM GOALS */}
+      {longTermGoals.length > 0 && (
+        <Card className="border-purple-200">
+          <CardHeader className="pb-2 bg-purple-50">
+            <CardTitle className="text-base text-purple-800">LONG-TERM GOALS (3-12 months)</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm space-y-4 pt-4">
+            {longTermGoals.map((goal: any, idx: number) => (
+              <div key={idx} className="border-l-4 border-purple-300 pl-4">
+                <p className="font-semibold text-gray-800">{idx + 1}. {goal.goal}</p>
+                <p className="text-gray-600 mt-1">Timeline: {goal.timeline}</p>
+                {goal.metrics && (
+                  <div className="mt-2">
+                    <p className="text-gray-700 font-medium">Success Metrics:</p>
+                    {Array.isArray(goal.metrics) ? (
+                      goal.metrics.map((m: string, i: number) => (
+                        <p key={i} className="text-gray-600 ml-2">• {m}</p>
+                      ))
+                    ) : (
+                      <p className="text-gray-600 ml-2">• {goal.metrics}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* MONITORING & FOLLOW-UP SCHEDULE */}
+      {Object.keys(monitoringSchedule).length > 0 && (
+        <Card className="border-blue-200">
+          <CardHeader className="pb-2 bg-blue-50">
+            <CardTitle className="text-base text-blue-800">MONITORING & FOLLOW-UP SCHEDULE</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm space-y-3 pt-4">
+            {monitoringSchedule.nextAppointment && (
+              <div className="bg-blue-100 p-3 rounded-lg">
+                <p className="font-semibold text-blue-800">Next Appointment:</p>
+                <p className="text-gray-700">{monitoringSchedule.nextAppointment}</p>
+              </div>
+            )}
+            {monitoringSchedule.followUpFrequency && (
+              <div>
+                <p className="font-semibold text-gray-700">Follow-up Frequency:</p>
+                <p className="text-gray-600">{monitoringSchedule.followUpFrequency}</p>
+              </div>
+            )}
+            {monitoringSchedule.monitoringParameters && (
+              <div>
+                <p className="font-semibold text-gray-700">Parameters to Monitor:</p>
+                {Array.isArray(monitoringSchedule.monitoringParameters) ? (
+                  monitoringSchedule.monitoringParameters.map((p: string, i: number) => (
+                    <p key={i} className="text-gray-600 ml-2">• {p}</p>
+                  ))
+                ) : (
+                  <p className="text-gray-600 ml-2">• {monitoringSchedule.monitoringParameters}</p>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* LIFESTYLE MODIFICATIONS & RECOMMENDATIONS */}
+      {Object.keys(lifestyleModifications).length > 0 && (
+        <Card className="border-green-200">
+          <CardHeader className="pb-2 bg-green-50">
+            <CardTitle className="text-base text-green-800">LIFESTYLE MODIFICATIONS & RECOMMENDATIONS</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm space-y-4 pt-4">
+            {/* Physical Activity */}
+            {lifestyleModifications.physicalActivity && (
+              <div>
+                <p className="font-semibold text-green-700 mb-2">Physical Activity Recommendations:</p>
+                {Array.isArray(lifestyleModifications.physicalActivity) ? (
+                  lifestyleModifications.physicalActivity.map((item: string, i: number) => (
+                    <p key={i} className="text-gray-600 ml-2">• {item}</p>
+                  ))
+                ) : (
+                  <p className="text-gray-600 ml-2">• {lifestyleModifications.physicalActivity}</p>
+                )}
+              </div>
+            )}
+
+            {/* Dietary Changes */}
+            {lifestyleModifications.dietaryChanges && (
+              <div>
+                <p className="font-semibold text-green-700 mb-2">Dietary Modifications:</p>
+                {Array.isArray(lifestyleModifications.dietaryChanges) ? (
+                  lifestyleModifications.dietaryChanges.map((item: string, i: number) => (
+                    <p key={i} className="text-gray-600 ml-2">• {item}</p>
+                  ))
+                ) : (
+                  <p className="text-gray-600 ml-2">• {lifestyleModifications.dietaryChanges}</p>
+                )}
+              </div>
+            )}
+
+            {/* Stress Management */}
+            {lifestyleModifications.stressManagement && (
+              <div>
+                <p className="font-semibold text-green-700 mb-2">Stress Management:</p>
+                {Array.isArray(lifestyleModifications.stressManagement) ? (
+                  lifestyleModifications.stressManagement.map((item: string, i: number) => (
+                    <p key={i} className="text-gray-600 ml-2">• {item}</p>
+                  ))
+                ) : (
+                  <p className="text-gray-600 ml-2">• {lifestyleModifications.stressManagement}</p>
+                )}
+              </div>
+            )}
+
+            {/* Sleep Hygiene */}
+            {lifestyleModifications.sleepHygiene && (
+              <div>
+                <p className="font-semibold text-green-700 mb-2">Sleep Hygiene:</p>
+                {Array.isArray(lifestyleModifications.sleepHygiene) ? (
+                  lifestyleModifications.sleepHygiene.map((item: string, i: number) => (
+                    <p key={i} className="text-gray-600 ml-2">• {item}</p>
+                  ))
+                ) : (
+                  <p className="text-gray-600 ml-2">• {lifestyleModifications.sleepHygiene}</p>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* PATIENT EDUCATION & RESOURCES */}
+      {educationalResources.length > 0 && (
+        <Card className="border-indigo-200">
+          <CardHeader className="pb-2 bg-indigo-50">
+            <CardTitle className="text-base text-indigo-800">PATIENT EDUCATION & RESOURCES</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm pt-4">
+            {educationalResources.map((resource: string, idx: number) => (
+              <p key={idx} className="text-gray-600 mb-1">• {resource}</p>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* SPECIAL INSTRUCTIONS & PRECAUTIONS */}
+      {specialInstructions.length > 0 && (
+        <Card className="border-yellow-200">
+          <CardHeader className="pb-2 bg-yellow-50">
+            <CardTitle className="text-base text-yellow-800">SPECIAL INSTRUCTIONS & PRECAUTIONS</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm pt-4">
+            {specialInstructions.map((instruction: string, idx: number) => (
+              <p key={idx} className="text-gray-600 mb-1">• {instruction}</p>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* EMERGENCY PROTOCOL */}
+      {Object.keys(emergencyProtocol).length > 0 && (
+        <Card className="border-red-300 bg-red-50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base text-red-800">EMERGENCY PROTOCOL</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm space-y-3 pt-4">
+            {emergencyProtocol.emergencyContacts && (
+              <div>
+                <p className="font-semibold text-red-700">Emergency Contact Numbers:</p>
+                {Array.isArray(emergencyProtocol.emergencyContacts) ? (
+                  emergencyProtocol.emergencyContacts.map((contact: string, i: number) => (
+                    <p key={i} className="text-gray-700 ml-2">• {contact}</p>
+                  ))
+                ) : (
+                  <p className="text-gray-700 ml-2">• {emergencyProtocol.emergencyContacts}</p>
+                )}
+              </div>
+            )}
+            {emergencyProtocol.warningSigns && Array.isArray(emergencyProtocol.warningSigns) && emergencyProtocol.warningSigns.length > 0 && (
+              <div>
+                <p className="font-semibold text-red-700">Warning Signs:</p>
+                {emergencyProtocol.warningSigns.map((sign: string, i: number) => (
+                  <p key={i} className="text-gray-700 ml-2">• {sign}</p>
+                ))}
+              </div>
+            )}
+            {emergencyProtocol.actionSteps && Array.isArray(emergencyProtocol.actionSteps) && emergencyProtocol.actionSteps.length > 0 && (
+              <div>
+                <p className="font-semibold text-red-700">Action Steps:</p>
+                {emergencyProtocol.actionSteps.map((step: string, i: number) => (
+                  <p key={i} className="text-gray-700 ml-2">{i + 1}. {step}</p>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
