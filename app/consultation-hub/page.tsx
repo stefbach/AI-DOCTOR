@@ -2,18 +2,15 @@
 
 import React, { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import {
-  ArrowLeft,
-  Info
-} from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { HubPatientSearch } from '@/components/consultation-hub/hub-patient-search'
 import { HubPatientSummary } from '@/components/consultation-hub/hub-patient-summary'
 import { HubWorkflowSelector } from '@/components/consultation-hub/hub-workflow-selector'
 import { HistoryList, ConsultationDetailModal } from '@/lib/follow-up/shared'
 import type { ConsultationHistoryItem } from '@/lib/follow-up/shared'
+import { fetchTibokConsultationData } from '@/lib/tibok-consultation-service'
 
 type WorkflowStep = 'search' | 'summary' | 'workflow'
 
@@ -38,6 +35,7 @@ export default function ConsultationHubPage() {
     const loadReturningPatient = async () => {
       const urlParams = new URLSearchParams(window.location.search)
       const isReturning = urlParams.get('returning') === 'true'
+      const consultationId = urlParams.get('consultationId')
 
       if (!isReturning) return
 
@@ -45,8 +43,28 @@ export default function ConsultationHubPage() {
       const storedData = sessionStorage.getItem('returningPatientData')
       if (storedData) {
         try {
-          const returningPatientData = JSON.parse(storedData)
+          let returningPatientData = JSON.parse(storedData)
           console.log('📋 Auto-loading returning patient data from sessionStorage:', returningPatientData)
+
+          // Fetch consultation specialty from Tibok if we have a consultationId
+          if (consultationId) {
+            console.log('🔍 Fetching consultation specialty from Tibok...')
+            const tibokResult = await fetchTibokConsultationData(consultationId)
+            if (tibokResult.success && tibokResult.data) {
+              console.log('✅ Tibok consultation data:', tibokResult.data)
+              // Merge Tibok consultation data into tibokPatientInfo
+              returningPatientData = {
+                ...returningPatientData,
+                tibokPatientInfo: {
+                  ...returningPatientData.tibokPatientInfo,
+                  consultation_specialty: tibokResult.data.consultation_specialty,
+                  temp_image_url: tibokResult.data.temp_image_url,
+                  has_temp_image: tibokResult.data.has_temp_image
+                }
+              }
+              console.log('📋 Updated patientData with consultation_specialty:', tibokResult.data.consultation_specialty)
+            }
+          }
 
           // Set patient data and show history
           setPatientData(returningPatientData)
@@ -65,11 +83,10 @@ export default function ConsultationHubPage() {
       console.log('📋 No sessionStorage data, fetching from URL params...')
 
       let patientId = urlParams.get('patientId')
-      const consultationId = urlParams.get('consultationId')
       const patientDataParam = urlParams.get('patientData')
 
       // Parse Tibok patient info from URL
-      let tibokPatientInfo = null
+      let tibokPatientInfo: any = null
       if (patientDataParam) {
         try {
           tibokPatientInfo = JSON.parse(decodeURIComponent(patientDataParam))
@@ -92,6 +109,23 @@ export default function ConsultationHubPage() {
 
       setIsLoading(true)
       try {
+        // Fetch consultation specialty from Tibok if we have consultationId
+        if (consultationId) {
+          console.log('🔍 Fetching consultation specialty from Tibok...')
+          const tibokResult = await fetchTibokConsultationData(consultationId)
+          if (tibokResult.success && tibokResult.data) {
+            console.log('✅ Tibok consultation data:', tibokResult.data)
+            // Merge Tibok consultation data into tibokPatientInfo
+            tibokPatientInfo = {
+              ...tibokPatientInfo,
+              consultation_specialty: tibokResult.data.consultation_specialty,
+              temp_image_url: tibokResult.data.temp_image_url,
+              has_temp_image: tibokResult.data.has_temp_image
+            }
+            console.log('📋 Updated tibokPatientInfo with consultation_specialty:', tibokResult.data.consultation_specialty)
+          }
+        }
+
         console.log('📡 Fetching patient history...', { patientId, consultationId })
         const response = await fetch('/api/patient-history', {
           method: 'POST',
@@ -192,15 +226,6 @@ export default function ConsultationHubPage() {
           </Button>
         </div>
 
-        {/* Info Banner */}
-        <Alert className="bg-blue-50 border-blue-200">
-          <Info className="h-4 w-4 text-blue-600" />
-          <AlertDescription className="text-blue-800">
-            <strong>Comment ça marche:</strong> Recherchez votre patient. 
-            Le système détectera automatiquement s'il s'agit d'une première consultation 
-            ou d'un suivi et vous proposera le workflow optimal.
-          </AlertDescription>
-        </Alert>
       </div>
 
       {/* Loading State */}

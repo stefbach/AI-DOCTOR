@@ -11,9 +11,7 @@ import {
   Eye,
   Heart,
   ArrowRight,
-  Sparkles,
   FileText,
-  TrendingUp,
   User,
   CheckCircle
 } from 'lucide-react'
@@ -254,7 +252,7 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-blue-600" />
-            1. Type de Consultation
+            Type de Consultation
           </CardTitle>
           <CardDescription>
             Choisissez le type de consultation à effectuer
@@ -313,85 +311,15 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
         </CardContent>
       </Card>
 
-      {/* Workflow Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-green-600" />
-            2. Workflow Recommandé
-          </CardTitle>
-          <CardDescription>
-            {routeDecision.isNewPatient
-              ? 'Nouveau patient - Consultation initiale'
-              : `Patient existant - ${routeDecision.patientSummary?.totalConsultations} consultation(s) précédente(s)`}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {routeDecision.availablePaths.map((option, index) => (
-            <Card
-              key={option.path}
-              className={`cursor-pointer transition-all ${
-                selectedWorkflow === option.path
-                  ? 'ring-2 ring-green-500 bg-green-50'
-                  : option.isRecommended
-                  ? 'border-green-300 bg-green-50'
-                  : 'hover:bg-gray-50'
-              }`}
-              onClick={() => setSelectedWorkflow(option.path)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-semibold text-lg">{option.label}</span>
-                      {option.isRecommended && (
-                        <Badge className="bg-green-600 flex items-center gap-1">
-                          <Sparkles className="h-3 w-3" />
-                          Recommandé
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-600">{option.description}</p>
-                    <p className="text-xs text-gray-500 mt-2 font-mono">
-                      → {option.path}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-
-          {/* Patient Summary if exists */}
-          {routeDecision.patientSummary && (
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <h4 className="font-semibold text-blue-900 mb-2">
-                📊 Résumé Historique
-              </h4>
-              <div className="text-sm text-blue-800 space-y-1">
-                <p>
-                  • Total consultations: {routeDecision.patientSummary.totalConsultations}
-                </p>
-                <p>
-                  • Dernière consultation: {new Date(routeDecision.patientSummary.lastConsultationDate).toLocaleDateString()}
-                </p>
-                <p>
-                  • Type précédent: {routeDecision.patientSummary.lastConsultationType}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Proceed Button */}
-          <Button
-            onClick={handleProceed}
-            size="lg"
-            className="w-full"
-          >
-            <ArrowRight className="mr-2 h-5 w-5" />
-            Commencer la Consultation
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Proceed Button */}
+      <Button
+        onClick={handleProceed}
+        size="lg"
+        className={`w-full ${selectedType === 'chronic' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+      >
+        <ArrowRight className="mr-2 h-5 w-5" />
+        {selectedType === 'chronic' ? 'Continuer vers Maladie Chronique' : 'Continuer vers Consultation Normale'}
+      </Button>
     </div>
   )
 }
