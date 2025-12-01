@@ -217,6 +217,8 @@ export default function ModernPatientForm({
  const [historySearch, setHistorySearch] = useState("")
  const [currentSection, setCurrentSection] = useState(0)
  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+ // Track patient's original selection from Tibok (from sessionStorage when coming from hub)
+ const [sessionStorageConsultationType, setSessionStorageConsultationType] = useState<'normal' | 'chronic' | null>(null)
 
  // ========== Memoization ==========
  const COMMON_ALLERGIES = useMemo(() => [
@@ -711,6 +713,38 @@ export default function ModernPatientForm({
    }
  }, [tibokConsultationType, tibokIsDermatology, tibokConsultationLoading])
 
+ // Read patient's Tibok consultation type from sessionStorage (when coming from hub)
+ useEffect(() => {
+   // Only read from sessionStorage if the hook doesn't have data
+   if (!tibokConsultationType && !tibokConsultationLoading) {
+     try {
+       // Check consultationPatientData first (normal consultation from hub)
+       const normalData = sessionStorage.getItem('consultationPatientData')
+       if (normalData) {
+         const parsed = JSON.parse(normalData)
+         if (parsed.tibokConsultationType) {
+           console.log('📋 Found patient Tibok selection in sessionStorage:', parsed.tibokConsultationType)
+           setSessionStorageConsultationType(parsed.tibokConsultationType)
+           return
+         }
+       }
+
+       // Also check chronicDiseasePatientData (chronic from hub)
+       const chronicData = sessionStorage.getItem('chronicDiseasePatientData')
+       if (chronicData) {
+         const parsed = JSON.parse(chronicData)
+         if (parsed.tibokConsultationType) {
+           console.log('📋 Found patient Tibok selection in chronic sessionStorage:', parsed.tibokConsultationType)
+           setSessionStorageConsultationType(parsed.tibokConsultationType)
+           return
+         }
+       }
+     } catch (error) {
+       console.error('Error reading tibokConsultationType from sessionStorage:', error)
+     }
+   }
+ }, [tibokConsultationType, tibokConsultationLoading])
+
  // Update age when birth date changes
  useEffect(() => {
  if (formData.birthDate) {
@@ -908,6 +942,8 @@ useEffect(() => {
  const bmiCategory = bmi ? getBMICategory(parseFloat(bmi)) : null
  const progress = calculateProgress()
  const showTibokNotification = dataInitialized && isFromTibok
+ // Use tibokConsultationType from hook if available, otherwise from sessionStorage (hub flow)
+ const effectiveTibokConsultationType = tibokConsultationType || sessionStorageConsultationType
 
  const filteredAllergies = COMMON_ALLERGIES.filter(allergy =>
  allergy.toLowerCase().includes(allergySearch.toLowerCase())
@@ -1826,8 +1862,8 @@ Example:
        </CardTitle>
      </CardHeader>
      <CardContent className="p-8">
-       {/* Show patient's selected type when coming from Tibok */}
-       {tibokConsultationType && (
+       {/* Show patient's selected type when coming from Tibok or hub */}
+       {effectiveTibokConsultationType && (
          <div className="mb-6 p-4 bg-blue-100 rounded-xl border-2 border-blue-300">
            <div className="flex items-start gap-3">
              <div className="p-2 bg-blue-500 rounded-full">
@@ -1835,7 +1871,7 @@ Example:
              </div>
              <div className="flex-1">
                <h4 className="font-bold text-blue-900 mb-1">
-                 {tibokConsultationType === 'normal' ? '📋 Normal Consultation' : '🩺 Chronic Disease Follow-up'} Selected by Patient
+                 {effectiveTibokConsultationType === 'normal' ? '📋 Normal Consultation' : '🩺 Chronic Disease Follow-up'} Selected by Patient
                </h4>
                <p className="text-blue-800 text-sm">
                  The patient has selected this consultation type from Tibok. You may confirm or change to the most appropriate type below.
@@ -1846,7 +1882,7 @@ Example:
        )}
 
        <p className="text-gray-700 mb-6 text-lg font-medium">
-         {tibokConsultationType
+         {effectiveTibokConsultationType
            ? 'Confirm or select the type of consultation:'
            : 'Please select the type of consultation you wish to perform:'}
        </p>
@@ -1923,8 +1959,8 @@ Example:
            </div>
          </label>
 
-         {/* Dermatology Consultation Option - Only show when NOT coming from Tibok */}
-         {!tibokConsultationType && (
+         {/* Dermatology Consultation Option - Only show when NOT coming from Tibok/hub */}
+         {!effectiveTibokConsultationType && (
            <label
              className={`flex items-start gap-4 p-6 rounded-xl border-3 transition-all cursor-pointer ${
                consultationType === 'dermatology'

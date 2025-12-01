@@ -178,7 +178,7 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
         // CHRONIC DISEASE WORKFLOW
         else if (selectedPath === '/chronic-disease') {
           console.log('🏥 Setting up chronic disease workflow with patient prefill')
-          
+
           // Extract chronic disease history
           const chronicHistory = consultationHistory
             .filter((c: any) => c.consultationType === 'chronic' || c.consultationType === 'chronic_disease')
@@ -187,27 +187,66 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
               diagnosis: c.diagnosis || 'N/A',
               medications: c.medications || []
             }))
-          
+
+          // Map Tibok specialty to consultation type for banner display
+          let tibokConsultationType: 'normal' | 'chronic' | null = null
+          if (tibokSpecialty === 'general') {
+            tibokConsultationType = 'normal'
+          } else if (tibokSpecialty === 'chronic_disease') {
+            tibokConsultationType = 'chronic'
+          }
+
           // Add chronic-specific data
           const chronicPrefillData = {
             ...basePrefillData,
             knownChronicDiseases: chronicHistory,
-            previousChronicDiagnoses: chronicHistory.map((c: any) => c.diagnosis).filter(d => d !== 'N/A').join(', ')
+            previousChronicDiagnoses: chronicHistory.map((c: any) => c.diagnosis).filter(d => d !== 'N/A').join(', '),
+            // Include patient's original Tibok selection for doctor awareness banner
+            tibokConsultationType: tibokConsultationType,
+            // IDs for document sending
+            consultationId: patientData?.searchCriteria?.consultationId || '',
+            patientId: patientData?.searchCriteria?.patientId || '',
+            doctorId: patientData?.searchCriteria?.doctorId || ''
           }
-          
+
           sessionStorage.setItem('chronicDiseasePatientData', JSON.stringify(chronicPrefillData))
           sessionStorage.setItem('isChronicDiseaseWorkflow', 'true')
           sessionStorage.setItem('isExistingPatientChronic', 'true')
           sessionStorage.setItem('chronicDiseaseHistory', JSON.stringify(chronicHistory))
-          
+
           console.log('💾 Chronic disease prefill data stored with history:', chronicHistory.length, 'entries')
+          if (tibokConsultationType) {
+            console.log('📋 Patient selected consultation type from Tibok:', tibokConsultationType)
+          }
         }
         // NORMAL CONSULTATION WORKFLOW
         else if (selectedPath === '/consultation') {
-          sessionStorage.setItem('consultationPatientData', JSON.stringify(basePrefillData))
+          // Map Tibok specialty to consultation type for banner display
+          // 'general' → 'normal', 'chronic_disease' → 'chronic'
+          let tibokConsultationType: 'normal' | 'chronic' | null = null
+          if (tibokSpecialty === 'general') {
+            tibokConsultationType = 'normal'
+          } else if (tibokSpecialty === 'chronic_disease') {
+            tibokConsultationType = 'chronic'
+          }
+
+          const normalConsultationData = {
+            ...basePrefillData,
+            // Include patient's original Tibok selection for doctor awareness banner
+            tibokConsultationType: tibokConsultationType,
+            // IDs for document sending
+            consultationId: patientData?.searchCriteria?.consultationId || '',
+            patientId: patientData?.searchCriteria?.patientId || '',
+            doctorId: patientData?.searchCriteria?.doctorId || ''
+          }
+
+          sessionStorage.setItem('consultationPatientData', JSON.stringify(normalConsultationData))
           sessionStorage.setItem('isExistingPatientConsultation', 'true')
-          
+
           console.log('💾 Normal consultation prefill data stored')
+          if (tibokConsultationType) {
+            console.log('📋 Patient selected consultation type from Tibok:', tibokConsultationType)
+          }
         }
       } else {
         console.warn('⚠️ Could not extract demographics from consultation history')
