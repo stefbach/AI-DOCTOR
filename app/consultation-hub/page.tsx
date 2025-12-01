@@ -38,11 +38,12 @@ export default function ConsultationHubPage() {
       const consultationId = urlParams.get('consultationId')
 
       // CRITICAL: If we have a consultationId in URL, this is a FRESH consultation from Tibok
-      // Clear any stale sessionStorage data from previous sessions to avoid loading old data
+      // Clear ALL stale sessionStorage data from previous sessions to force fresh API fetch
       if (consultationId) {
-        console.log('🧹 Fresh consultation from Tibok detected, clearing stale sessionStorage...')
-        // Don't clear returningPatientData yet - it might be from the current redirect
-        // But clear other stale data that could interfere
+        console.log('🧹 Fresh consultation from Tibok detected, clearing ALL stale sessionStorage...')
+        // Clear returningPatientData to force fresh fetch from API
+        sessionStorage.removeItem('returningPatientData')
+        // Clear other stale data that could interfere
         sessionStorage.removeItem('consultationPatientData')
         sessionStorage.removeItem('isExistingPatientConsultation')
         sessionStorage.removeItem('chronicDiseasePatientData')
