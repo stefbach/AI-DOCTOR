@@ -157,24 +157,23 @@ export default function MedicalAIExpert() {
 
         console.log('📡 Response status:', response.status)
 
-        if (!response.ok) {
-          console.log('⚠️ Could not fetch patient history, proceeding with normal flow. Status:', response.status)
-          setCheckingReturningPatient(false)
-          return
+        let consultations: any[] = []
+        if (response.ok) {
+          const data = await response.json()
+          console.log('📡 API response:', data)
+          consultations = (data.success && data.consultations) ? data.consultations : []
+        } else {
+          console.log('⚠️ Could not fetch patient history, status:', response.status)
         }
-
-        const data = await response.json()
-        console.log('📡 API response:', data)
 
         // Always redirect to hub for patients coming from Tibok (with consultationId)
         // The hub will handle both new and returning patients
         if (consultationId) {
-          const consultations = (data.success && data.consultations) ? data.consultations : []
           console.log(`📋 Patient from Tibok - redirecting to hub (${consultations.length} consultation(s))`)
 
           // Store patient data for the hub - include Tibok patient info
           sessionStorage.setItem('returningPatientData', JSON.stringify({
-            searchCriteria: { patientId, email: patientEmail, phone: patientPhone },
+            searchCriteria: { patientId, consultationId, email: patientEmail, phone: patientPhone },
             consultations: consultations,
             totalConsultations: consultations.length,
             tibokPatientInfo: tibokPatientInfo // Include the Tibok patient data
@@ -185,14 +184,14 @@ export default function MedicalAIExpert() {
           window.location.href = `/consultation-hub${currentParams}&returning=true`
           // Don't set checkingReturningPatient to false - we're redirecting
           return
-        } else if (data.success && data.consultations && data.consultations.length >= 1) {
+        } else if (consultations.length >= 1) {
           // Non-Tibok returning patients (searched by email/phone)
-          console.log(`📋 Returning patient detected with ${data.consultations.length} consultation(s) - redirecting to hub`)
+          console.log(`📋 Returning patient detected with ${consultations.length} consultation(s) - redirecting to hub`)
 
           sessionStorage.setItem('returningPatientData', JSON.stringify({
             searchCriteria: { patientId, email: patientEmail, phone: patientPhone },
-            consultations: data.consultations,
-            totalConsultations: data.consultations.length,
+            consultations: consultations,
+            totalConsultations: consultations.length,
             tibokPatientInfo: tibokPatientInfo
           }))
 
@@ -204,7 +203,19 @@ export default function MedicalAIExpert() {
         }
       } catch (error) {
         console.error('❌ Error checking patient history:', error)
-        // Continue with normal flow on error
+        // If we have consultationId, still redirect to hub even on error
+        if (consultationId) {
+          console.log('📋 Error occurred but have consultationId - redirecting to hub anyway')
+          sessionStorage.setItem('returningPatientData', JSON.stringify({
+            searchCriteria: { patientId, consultationId, email: patientEmail, phone: patientPhone },
+            consultations: [],
+            totalConsultations: 0,
+            tibokPatientInfo: tibokPatientInfo
+          }))
+          const currentParams = window.location.search
+          window.location.href = `/consultation-hub${currentParams}&returning=true`
+          return
+        }
       }
 
       setCheckingReturningPatient(false)

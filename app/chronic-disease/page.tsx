@@ -115,31 +115,31 @@ export default function ChronicDiseaseWorkflow() {
         return
       }
 
-      // Redirect back to home if no chronic disease data
-      console.log('❌ No chronic disease patient data found, redirecting to home')
-      router.push('/')
+      // Redirect back to consultation hub if no chronic disease data
+      console.log('❌ No chronic disease patient data found, redirecting to consultation hub')
+      router.push('/consultation-hub')
       return
     }
-    
+
     try {
       const data = JSON.parse(savedPatientData)
       setPatientData(data)
       setIsExistingPatient(existingPatient === 'true')
       console.log('✅ Chronic disease patient data loaded:', data)
       console.log('👤 Existing patient:', existingPatient === 'true')
-      
+
       if (history) {
         const parsedHistory = JSON.parse(history)
         setChronicHistory(parsedHistory)
         console.log('📋 Chronic history loaded:', parsedHistory.length, 'entries')
       }
-      
+
       // Clean up flags after reading
       sessionStorage.removeItem('isExistingPatientChronic')
       sessionStorage.removeItem('chronicDiseaseHistory')
     } catch (error) {
       console.error('Error parsing patient data:', error)
-      router.push('/')
+      router.push('/consultation-hub')
     }
   }, [router])
 

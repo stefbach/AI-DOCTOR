@@ -40,9 +40,9 @@ export default function DermatologyWorkflow() {
     const existingPatient = sessionStorage.getItem('isExistingPatientDermatology')
     
     if (!savedPatientData || isDermatologyWorkflow !== 'true') {
-      // Redirect back to home if no dermatology data
-      console.log('❌ No dermatology patient data found, redirecting to home')
-      router.push('/')
+      // Redirect back to consultation hub if no dermatology data
+      console.log('❌ No dermatology patient data found, redirecting to consultation hub')
+      router.push('/consultation-hub')
       return
     }
     
@@ -57,7 +57,7 @@ export default function DermatologyWorkflow() {
       sessionStorage.removeItem('isExistingPatientDermatology')
     } catch (error) {
       console.error('Error parsing patient data:', error)
-      router.push('/')
+      router.push('/consultation-hub')
     }
   }, [router])
 
