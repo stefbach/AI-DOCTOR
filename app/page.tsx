@@ -274,6 +274,8 @@ export default function MedicalAIExpert() {
         // Extract and set IDs for document sending at the end of the flow
         if (patientData.consultationId) {
           setCurrentConsultationId(patientData.consultationId)
+          // CRITICAL: Also set the consultationDataService ID so it's used throughout the flow
+          consultationDataService.setCurrentConsultationId(patientData.consultationId)
           console.log('✅ ConsultationId set from hub:', patientData.consultationId)
         }
         if (patientData.patientId) {

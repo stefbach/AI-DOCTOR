@@ -37,6 +37,23 @@ export default function ConsultationHubPage() {
       const isReturning = urlParams.get('returning') === 'true'
       const consultationId = urlParams.get('consultationId')
 
+      // CRITICAL: If we have a consultationId in URL, this is a FRESH consultation from Tibok
+      // Clear any stale sessionStorage data from previous sessions to avoid loading old data
+      if (consultationId) {
+        console.log('🧹 Fresh consultation from Tibok detected, clearing stale sessionStorage...')
+        // Don't clear returningPatientData yet - it might be from the current redirect
+        // But clear other stale data that could interfere
+        sessionStorage.removeItem('consultationPatientData')
+        sessionStorage.removeItem('isExistingPatientConsultation')
+        sessionStorage.removeItem('chronicDiseasePatientData')
+        sessionStorage.removeItem('isChronicDiseaseWorkflow')
+        sessionStorage.removeItem('isExistingPatientChronic')
+        sessionStorage.removeItem('dermatologyPatientData')
+        sessionStorage.removeItem('isDermatologyWorkflow')
+        sessionStorage.removeItem('isExistingPatientDermatology')
+        sessionStorage.removeItem('fromConsultationHub')
+      }
+
       // Extract and save doctor data from URL params
       const doctorDataParam = urlParams.get('doctorData')
       if (doctorDataParam) {
