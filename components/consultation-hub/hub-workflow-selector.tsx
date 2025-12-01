@@ -107,14 +107,25 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
 
       if (prefillDemographics.firstName || prefillDemographics.lastName || prefillDemographics.age) {
         console.log('✅ Demographics extracted:', prefillDemographics)
-        
+
+        // Normalize gender to match PatientForm expected values ('Male' or 'Female')
+        const normalizeGender = (gender: string | undefined): string => {
+          if (!gender) return ''
+          const g = gender.toLowerCase().trim()
+          const maleVariants = ['m', 'male', 'masculin', 'homme', 'man']
+          const femaleVariants = ['f', 'female', 'féminin', 'femme', 'woman']
+          if (maleVariants.includes(g)) return 'Male'
+          if (femaleVariants.includes(g)) return 'Female'
+          return gender // Return as-is if already correct format
+        }
+
         // Prepare base data in PatientForm format
         const basePrefillData = {
           firstName: prefillDemographics.firstName || '',
           lastName: prefillDemographics.lastName || '',
           birthDate: prefillDemographics.dateOfBirth || '',
           age: prefillDemographics.age || '',
-          gender: prefillDemographics.gender || '',
+          gender: normalizeGender(prefillDemographics.gender),
           phone: prefillDemographics.phone || '',
           email: prefillDemographics.email || '',
           address: prefillDemographics.address || '',

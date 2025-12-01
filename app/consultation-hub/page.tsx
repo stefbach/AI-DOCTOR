@@ -37,6 +37,43 @@ export default function ConsultationHubPage() {
       const isReturning = urlParams.get('returning') === 'true'
       const consultationId = urlParams.get('consultationId')
 
+      // Extract and save doctor data from URL params (backup in case main page didn't save it)
+      const doctorDataParam = urlParams.get('doctorData')
+      if (doctorDataParam && !sessionStorage.getItem('currentDoctorInfo')) {
+        try {
+          const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
+          console.log('👨‍⚕️ Consultation hub: Loading doctor data from URL params')
+
+          const doctorInfoFromTibok = {
+            nom: tibokDoctorData.fullName || tibokDoctorData.full_name ?
+              `Dr. ${tibokDoctorData.fullName || tibokDoctorData.full_name}` :
+              'Dr. [Name Required]',
+            qualifications: tibokDoctorData.qualifications || 'MBBS',
+            specialite: tibokDoctorData.specialty || 'General Medicine',
+            adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
+            email: tibokDoctorData.email || '[Email Required]',
+            heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+            numeroEnregistrement: (() => {
+              const mcmNumber = tibokDoctorData.mcm_reg_no ||
+                tibokDoctorData.medicalCouncilNumber ||
+                tibokDoctorData.medical_council_number ||
+                tibokDoctorData.license_number ||
+                ''
+              return mcmNumber && mcmNumber.trim() !== ''
+                ? String(mcmNumber)
+                : '[MCM Registration Required]'
+            })(),
+            signatureUrl: tibokDoctorData.signature_url || null,
+            digitalSignature: tibokDoctorData.digital_signature || null
+          }
+
+          console.log('✅ Doctor info saved to sessionStorage:', doctorInfoFromTibok.nom)
+          sessionStorage.setItem('currentDoctorInfo', JSON.stringify(doctorInfoFromTibok))
+        } catch (error) {
+          console.error('❌ Error parsing doctor data in consultation-hub:', error)
+        }
+      }
+
       if (!isReturning) return
 
       // First, try to load from sessionStorage (set by main page redirect)
