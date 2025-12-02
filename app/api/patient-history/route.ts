@@ -21,6 +21,8 @@ interface PatientSearchCriteria {
   phone?: string
   nationalId?: string
   dateOfBirth?: string
+  limit?: number  // Number of records to fetch (default 10)
+  offset?: number // Number of records to skip (for pagination)
 }
 
 /**
@@ -98,13 +100,16 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Build query - limit to 10 most recent consultations to prevent timeout
+    // Build query with pagination to prevent timeout
     // The documents_data column contains large JSON blobs
+    const queryLimit = criteria.limit || 10
+    const queryOffset = criteria.offset || 0
+
     let query = supabase
       .from('consultation_records')
-      .select('*')
+      .select('*', { count: 'exact' })  // Get total count for pagination
       .order('created_at', { ascending: false })
-      .limit(10)
+      .range(queryOffset, queryOffset + queryLimit - 1)
 
     // If patientId is provided or resolved, use it directly (most reliable)
     if (resolvedPatientId) {
@@ -142,8 +147,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const { data, error } = await query
-    
+    const { data, error, count: totalCount } = await query
+
     if (error) {
       console.error('❌ Supabase query error:', error)
       return NextResponse.json({
@@ -157,11 +162,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         consultations: [],
-        count: 0
+        count: 0,
+        totalCount: totalCount || 0,
+        hasMore: false
       })
     }
 
-    console.log(`✅ Found ${data.length} consultation(s)`)
+    console.log(`✅ Found ${data.length} consultation(s), total: ${totalCount}`)
 
     // Transform data to consultation history format
     // Wrap each record transformation in try-catch to handle malformed data
@@ -312,10 +319,14 @@ export async function POST(req: NextRequest) {
       }
     })
 
+    const hasMore = totalCount ? (queryOffset + data.length) < totalCount : false
+
     return NextResponse.json({
       success: true,
       consultations,
-      count: consultations.length
+      count: consultations.length,
+      totalCount: totalCount || consultations.length,
+      hasMore
     })
 
   } catch (error: any) {

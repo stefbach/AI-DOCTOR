@@ -29,6 +29,9 @@ export default function ConsultationHubPage() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
 
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [hasMoreConsultations, setHasMoreConsultations] = useState(false)
+  const [totalConsultationsCount, setTotalConsultationsCount] = useState(0)
 
   // Auto-load returning patient data from sessionStorage or URL params
   useEffect(() => {
@@ -254,12 +257,16 @@ export default function ConsultationHubPage() {
         if (response.ok) {
           const data = await response.json()
           const consultations = (data.success && data.consultations) ? data.consultations : []
-          console.log(`✅ Found ${consultations.length} consultation(s)`)
+          console.log(`✅ Found ${consultations.length} consultation(s), total: ${data.totalCount}, hasMore: ${data.hasMore}`)
+
+          // Set pagination state
+          setHasMoreConsultations(data.hasMore || false)
+          setTotalConsultationsCount(data.totalCount || consultations.length)
 
           const patientDataToSet = {
             searchCriteria: { patientId, consultationId, doctorId },
             consultations: consultations,
-            totalConsultations: consultations.length,
+            totalConsultations: data.totalCount || consultations.length,
             tibokPatientInfo: tibokPatientInfo
           }
 
@@ -329,6 +336,44 @@ export default function ConsultationHubPage() {
   const handleWorkflowProceed = (path: string) => {
     // Navigation will be handled by the component
     console.log('Proceeding to:', path)
+  }
+
+  const handleLoadMore = async () => {
+    if (!patientData || isLoadingMore || !hasMoreConsultations) return
+
+    setIsLoadingMore(true)
+    try {
+      const currentCount = patientData.consultations?.length || 0
+      console.log(`📡 Loading more consultations... offset: ${currentCount}`)
+
+      const response = await fetch('/api/patient-history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientId: patientData.searchCriteria?.patientId,
+          consultationId: patientData.searchCriteria?.consultationId,
+          limit: 10,
+          offset: currentCount
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        const newConsultations = (data.success && data.consultations) ? data.consultations : []
+        console.log(`✅ Loaded ${newConsultations.length} more consultation(s)`)
+
+        // Append new consultations to existing ones
+        setPatientData((prev: any) => ({
+          ...prev,
+          consultations: [...(prev.consultations || []), ...newConsultations]
+        }))
+        setHasMoreConsultations(data.hasMore || false)
+      }
+    } catch (error) {
+      console.error('❌ Error loading more consultations:', error)
+    } finally {
+      setIsLoadingMore(false)
+    }
   }
 
   return (
@@ -416,7 +461,12 @@ export default function ConsultationHubPage() {
                 <CardContent className="pt-6">
                   <div className="mb-4 flex items-center justify-between">
                     <h3 className="text-lg font-semibold">
-                      Historique Complet des Consultations
+                      Historique des Consultations
+                      {totalConsultationsCount > 0 && (
+                        <span className="text-sm font-normal text-gray-500 ml-2">
+                          ({patientData.consultations?.length || 0} sur {totalConsultationsCount})
+                        </span>
+                      )}
                     </h3>
                     <Button
                       onClick={handleProceedToWorkflow}
@@ -432,6 +482,25 @@ export default function ConsultationHubPage() {
                     selectedId={selectedConsultation?.id}
                     showTimeline={true}
                   />
+                  {/* Load More Button */}
+                  {hasMoreConsultations && (
+                    <div className="mt-4 flex justify-center">
+                      <Button
+                        variant="outline"
+                        onClick={handleLoadMore}
+                        disabled={isLoadingMore}
+                      >
+                        {isLoadingMore ? (
+                          <>
+                            <span className="animate-spin mr-2">⏳</span>
+                            Chargement...
+                          </>
+                        ) : (
+                          `Charger plus de consultations`
+                        )}
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
