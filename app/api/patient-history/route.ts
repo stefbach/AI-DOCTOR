@@ -98,11 +98,12 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Build query
+    // Build query - limit to 50 most recent consultations to prevent timeout
     let query = supabase
       .from('consultation_records')
       .select('*')
       .order('created_at', { ascending: false })
+      .limit(50)
 
     // If patientId is provided or resolved, use it directly (most reliable)
     if (resolvedPatientId) {
