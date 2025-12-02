@@ -160,141 +160,156 @@ export async function POST(req: NextRequest) {
     }
 
     console.log(`✅ Found ${data.length} consultation(s)`)
-    
+
     // Transform data to consultation history format
-    const consultations = data.map(record => {
-      const documentsData = record.documents_data || {}
+    // Wrap each record transformation in try-catch to handle malformed data
+    const consultations = data.map((record, index) => {
+      try {
+        const documentsData = record.documents_data || {}
 
-      // The data is saved in different structures depending on how it was saved:
-      // - New format: consultationReport.content contains compteRendu structure
-      // - Legacy format: compteRendu at root level
-      const consultationReportContent = documentsData.consultationReport?.content || {}
-      const compteRendu = documentsData.compteRendu || consultationReportContent || {}
-      const rapport = compteRendu.rapport || consultationReportContent.rapport || {}
-      const medicalReport = documentsData.consultationReport?.medicalReport || documentsData.medicalReport || {}
+        // The data is saved in different structures depending on how it was saved:
+        // - New format: consultationReport.content contains compteRendu structure
+        // - Legacy format: compteRendu at root level
+        const consultationReportContent = documentsData.consultationReport?.content || {}
+        const compteRendu = documentsData.compteRendu || consultationReportContent || {}
+        const rapport = compteRendu.rapport || consultationReportContent.rapport || {}
+        const medicalReport = documentsData.consultationReport?.medicalReport || documentsData.medicalReport || {}
 
-      // Debug: Log the structure for troubleshooting
-      console.log('📋 Data structure keys:', Object.keys(documentsData))
-      console.log('📋 consultationReport keys:', documentsData.consultationReport ? Object.keys(documentsData.consultationReport) : 'none')
-
-      // Detect consultation type
-      let consultationType: 'normal' | 'dermatology' | 'chronic' = 'normal'
-      if (record.consultation_type) {
-        consultationType = record.consultation_type
-      } else if (compteRendu.header?.consultationType?.toLowerCase().includes('dermatology')) {
-        consultationType = 'dermatology'
-      } else if (medicalReport?.chronicDiseaseAssessment) {
-        consultationType = 'chronic'
-      }
-
-      // Extract vital signs (try different structures)
-      let vitalSigns: any = {}
-
-      // From compteRendu.patient (may be in consultationReport.content or directly)
-      const patientData = compteRendu.patient || consultationReportContent.patient || {}
-      if (Object.keys(patientData).length > 0) {
-        vitalSigns = {
-          bloodPressureSystolic: patientData.bloodPressureSystolic || patientData.tensionSystolique,
-          bloodPressureDiastolic: patientData.bloodPressureDiastolic || patientData.tensionDiastolique,
-          bloodGlucose: patientData.bloodGlucose || patientData.glycemie,
-          weight: patientData.poids || patientData.weight,
-          height: patientData.taille || patientData.height,
-          temperature: patientData.temperature,
-          heartRate: patientData.heartRate || patientData.frequenceCardiaque
+        // Detect consultation type
+        let consultationType: 'normal' | 'dermatology' | 'chronic' = 'normal'
+        if (record.consultation_type) {
+          consultationType = record.consultation_type
+        } else if (compteRendu.header?.consultationType?.toLowerCase().includes('dermatology')) {
+          consultationType = 'dermatology'
+        } else if (medicalReport?.chronicDiseaseAssessment) {
+          consultationType = 'chronic'
         }
-      }
 
-      // From medicalReport structure (chronic)
-      if (medicalReport?.patient) {
-        const mrPatient = medicalReport.patient
-        vitalSigns = {
-          ...vitalSigns,
-          bloodPressureSystolic: vitalSigns.bloodPressureSystolic || mrPatient.bloodPressureSystolic,
-          bloodPressureDiastolic: vitalSigns.bloodPressureDiastolic || mrPatient.bloodPressureDiastolic,
-          bloodGlucose: vitalSigns.bloodGlucose || mrPatient.bloodGlucose,
-          weight: vitalSigns.weight || mrPatient.weight,
-          height: vitalSigns.height || mrPatient.height,
-          temperature: vitalSigns.temperature || mrPatient.temperature
+        // Extract vital signs (try different structures)
+        let vitalSigns: any = {}
+
+        // From compteRendu.patient (may be in consultationReport.content or directly)
+        const patientData = compteRendu.patient || consultationReportContent.patient || {}
+        if (Object.keys(patientData).length > 0) {
+          vitalSigns = {
+            bloodPressureSystolic: patientData.bloodPressureSystolic || patientData.tensionSystolique,
+            bloodPressureDiastolic: patientData.bloodPressureDiastolic || patientData.tensionDiastolique,
+            bloodGlucose: patientData.bloodGlucose || patientData.glycemie,
+            weight: patientData.poids || patientData.weight,
+            height: patientData.taille || patientData.height,
+            temperature: patientData.temperature,
+            heartRate: patientData.heartRate || patientData.frequenceCardiaque
+          }
         }
-      }
 
-      // Extract chief complaint from multiple possible paths
-      const chiefComplaint =
-        rapport.motifConsultation ||
-        consultationReportContent.rapport?.motifConsultation ||
-        medicalReport?.clinicalEvaluation?.chiefComplaint ||
-        record.chief_complaint ||
-        'Follow-up consultation'
+        // From medicalReport structure (chronic)
+        if (medicalReport?.patient) {
+          const mrPatient = medicalReport.patient
+          vitalSigns = {
+            ...vitalSigns,
+            bloodPressureSystolic: vitalSigns.bloodPressureSystolic || mrPatient.bloodPressureSystolic,
+            bloodPressureDiastolic: vitalSigns.bloodPressureDiastolic || mrPatient.bloodPressureDiastolic,
+            bloodGlucose: vitalSigns.bloodGlucose || mrPatient.bloodGlucose,
+            weight: vitalSigns.weight || mrPatient.weight,
+            height: vitalSigns.height || mrPatient.height,
+            temperature: vitalSigns.temperature || mrPatient.temperature
+          }
+        }
 
-      // Extract diagnosis from multiple possible paths
-      const diagnosis =
-        rapport.syntheseDiagnostique ||
-        rapport.conclusionDiagnostique ||
-        consultationReportContent.rapport?.syntheseDiagnostique ||
-        medicalReport?.diagnosticSummary?.diagnosticConclusion ||
-        record.diagnosis ||
-        ''
+        // Extract chief complaint from multiple possible paths
+        const chiefComplaint =
+          rapport.motifConsultation ||
+          consultationReportContent.rapport?.motifConsultation ||
+          medicalReport?.clinicalEvaluation?.chiefComplaint ||
+          record.chief_complaint ||
+          'Follow-up consultation'
 
-      // Extract prescriptions from multiple possible paths
-      const prescriptions = documentsData.prescriptions || documentsData.ordonnances || {}
-      const medications =
-        prescriptions.medications?.prescription?.medications ||
-        prescriptions.medicaments?.prescription?.medications ||
-        prescriptions.medicaments?.prescription?.medicaments ||
-        documentsData.medicationPrescription?.prescription?.medications ||
-        []
+        // Extract diagnosis from multiple possible paths
+        const diagnosis =
+          rapport.syntheseDiagnostique ||
+          rapport.conclusionDiagnostique ||
+          consultationReportContent.rapport?.syntheseDiagnostique ||
+          medicalReport?.diagnosticSummary?.diagnosticConclusion ||
+          record.diagnosis ||
+          ''
 
-      // Extract lab tests from multiple possible paths
-      const laboratoryData = prescriptions.laboratoryTests || prescriptions.biologie || documentsData.laboratoryTests || {}
-      const labTests =
-        laboratoryData.prescription?.analyses ||
-        laboratoryData.prescription?.tests ||
-        laboratoryData.tests ||
-        []
+        // Extract prescriptions from multiple possible paths
+        const prescriptions = documentsData.prescriptions || documentsData.ordonnances || {}
+        const medications =
+          prescriptions.medications?.prescription?.medications ||
+          prescriptions.medicaments?.prescription?.medications ||
+          prescriptions.medicaments?.prescription?.medicaments ||
+          documentsData.medicationPrescription?.prescription?.medications ||
+          []
 
-      // Extract imaging from multiple possible paths
-      const imagingData = prescriptions.imagingStudies || prescriptions.imagerie || documentsData.paraclinicalExams || {}
-      const imagingStudies =
-        imagingData.prescription?.examinations ||
-        imagingData.prescription?.exams ||
-        imagingData.examinations ||
-        []
+        // Extract lab tests from multiple possible paths
+        const laboratoryData = prescriptions.laboratoryTests || prescriptions.biologie || documentsData.laboratoryTests || {}
+        const labTests =
+          laboratoryData.prescription?.analyses ||
+          laboratoryData.prescription?.tests ||
+          laboratoryData.tests ||
+          []
 
-      // Extract images for dermatology
-      const images = compteRendu.imageAnalysis?.images || consultationReportContent.imageAnalysis?.images || []
+        // Extract imaging from multiple possible paths
+        const imagingData = prescriptions.imagingStudies || prescriptions.imagerie || documentsData.paraclinicalExams || {}
+        const imagingStudies =
+          imagingData.prescription?.examinations ||
+          imagingData.prescription?.exams ||
+          imagingData.examinations ||
+          []
 
-      // Extract diet plan and follow-up from multiple sources
-      const dietaryPlan = documentsData.dietaryPlan || record.diet_plan_data || null
-      const followUpPlan = documentsData.followUpPlan || record.follow_up_data || null
+        // Extract images for dermatology
+        const images = compteRendu.imageAnalysis?.images || consultationReportContent.imageAnalysis?.images || []
 
-      // Merge record column data into fullReport so modal can access it
-      const fullReport = {
-        ...documentsData,
-        // Ensure diet and follow-up data are available at root level
-        dietaryPlan: dietaryPlan,
-        followUpPlan: followUpPlan,
-        // Also include record-level data
-        diet_plan_data: record.diet_plan_data,
-        follow_up_data: record.follow_up_data
-      }
+        // Extract diet plan and follow-up from multiple sources
+        const dietaryPlan = documentsData.dietaryPlan || record.diet_plan_data || null
+        const followUpPlan = documentsData.followUpPlan || record.follow_up_data || null
 
-      return {
-        id: record.id,
-        consultationId: record.consultation_id,
-        consultationType,
-        date: record.created_at,
-        chiefComplaint,
-        diagnosis,
-        medications,
-        vitalSigns,
-        labTests,
-        imagingStudies,
-        images,
-        dietaryPlan,
-        fullReport
+        // Merge record column data into fullReport so modal can access it
+        const fullReport = {
+          ...documentsData,
+          dietaryPlan: dietaryPlan,
+          followUpPlan: followUpPlan,
+          diet_plan_data: record.diet_plan_data,
+          follow_up_data: record.follow_up_data
+        }
+
+        return {
+          id: record.id,
+          consultationId: record.consultation_id,
+          consultationType,
+          date: record.created_at,
+          chiefComplaint,
+          diagnosis,
+          medications,
+          vitalSigns,
+          labTests,
+          imagingStudies,
+          images,
+          dietaryPlan,
+          fullReport
+        }
+      } catch (recordError: any) {
+        console.error(`❌ Error transforming record ${index}:`, recordError?.message, 'Record ID:', record?.id)
+        // Return a minimal safe object for failed records
+        return {
+          id: record?.id || `error-${index}`,
+          consultationId: record?.consultation_id || null,
+          consultationType: 'normal' as const,
+          date: record?.created_at || new Date().toISOString(),
+          chiefComplaint: 'Error loading consultation',
+          diagnosis: '',
+          medications: [],
+          vitalSigns: {},
+          labTests: [],
+          imagingStudies: [],
+          images: [],
+          dietaryPlan: null,
+          fullReport: {}
+        }
       }
     })
-    
+
     return NextResponse.json({
       success: true,
       consultations,
