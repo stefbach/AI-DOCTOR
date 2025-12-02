@@ -67,6 +67,8 @@ export async function POST(req: NextRequest) {
 
     // If consultationId is provided, first find the patient_id from that consultation
     let resolvedPatientId = criteria.patientId
+    let isNewConsultation = false
+
     if (!resolvedPatientId && criteria.consultationId) {
       console.log('🔍 Looking up patient_id from consultation:', criteria.consultationId)
       const { data: consultationRecord, error: lookupError } = await supabase
@@ -79,8 +81,21 @@ export async function POST(req: NextRequest) {
         resolvedPatientId = consultationRecord.patient_id
         console.log('✅ Found patient_id from consultation:', resolvedPatientId)
       } else {
-        console.log('⚠️ Could not find patient_id from consultation')
+        console.log('⚠️ Could not find patient_id from consultation - this is likely a NEW consultation')
+        isNewConsultation = true
       }
+    }
+
+    // If this is a new consultation (consultationId provided but not found in our database)
+    // and we have no patientId to look up by, return empty result immediately
+    // This prevents querying all records when there's no valid filter
+    if (isNewConsultation && !resolvedPatientId && !criteria.name && !criteria.email && !criteria.phone) {
+      console.log('📋 New consultation detected with no patient history - returning empty result')
+      return NextResponse.json({
+        success: true,
+        consultations: [],
+        count: 0
+      })
     }
 
     // Build query
@@ -113,9 +128,18 @@ export async function POST(req: NextRequest) {
 
       if (orConditions.length > 0) {
         query = query.or(orConditions.join(','))
+      } else {
+        // Safety check: if we have no filters at all, return empty result
+        // This prevents returning ALL records from the database
+        console.log('⚠️ No valid filters to apply - returning empty result to prevent unfiltered query')
+        return NextResponse.json({
+          success: true,
+          consultations: [],
+          count: 0
+        })
       }
     }
-    
+
     const { data, error } = await query
     
     if (error) {
