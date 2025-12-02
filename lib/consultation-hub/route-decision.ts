@@ -41,7 +41,7 @@ export function determineOptimalRoute(
       availablePaths: [
         {
           label: 'Consultation Normale',
-          path: '/consultation',
+          path: '/',
           description: 'Première consultation médicale générale',
           isRecommended: selectedType === 'normal'
         },
@@ -62,6 +62,8 @@ export function determineOptimalRoute(
   }
 
   // PATIENT EXISTANT - Analyser l'historique
+  // Note: From consultation hub, we always start NEW consultations (not follow-ups)
+  // The follow-up routes are kept for future use but not used in this workflow
   const lastConsultation = consultationHistory[0]
   const lastType = detectConsultationType(lastConsultation)
   const hasMatchingHistory = consultationHistory.some(
@@ -70,8 +72,8 @@ export function determineOptimalRoute(
 
   return {
     isNewPatient: false,
-    recommendedWorkflow: 'follow-up',
-    recommendedPath: getFollowUpPath(selectedType),
+    recommendedWorkflow: 'new-consultation',
+    recommendedPath: getInitialConsultationPath(selectedType),
     consultationType: selectedType,
     availablePaths: buildAvailablePathsForExistingPatient(
       selectedType,
@@ -108,7 +110,7 @@ function getInitialConsultationPath(type: ConsultationType): string {
     case 'chronic':
       return '/chronic-disease'
     default:
-      return '/consultation'
+      return '/'
   }
 }
 
@@ -135,6 +137,7 @@ function getTypeLabel(type: ConsultationType): string {
 
 /**
  * Build available paths for existing patient with detailed descriptions
+ * Note: New consultations are now recommended (not follow-ups) from the hub workflow
  */
 function buildAvailablePathsForExistingPatient(
   selectedType: ConsultationType,
@@ -142,8 +145,32 @@ function buildAvailablePathsForExistingPatient(
   hasMatchingHistory: boolean
 ) {
   const paths = []
-  
-  // Follow-up option (always recommended for existing patients)
+
+  // Full consultation option (recommended from hub workflow)
+  if (selectedType === 'normal') {
+    paths.push({
+      label: '📋 Consultation Normale',
+      path: '/',
+      description: 'Consultation complète avec questions IA et diagnostic approfondi',
+      isRecommended: true
+    })
+  } else if (selectedType === 'dermatology') {
+    paths.push({
+      label: '🔬 Consultation Dermatologique',
+      path: '/dermatology',
+      description: 'Consultation complète avec upload d\'images, OCR, questions IA et diagnostic',
+      isRecommended: true
+    })
+  } else if (selectedType === 'chronic') {
+    paths.push({
+      label: '🏥 Consultation Maladie Chronique',
+      path: '/chronic-disease',
+      description: 'Évaluation complète avec plan diététique et suivi personnalisé',
+      isRecommended: true
+    })
+  }
+
+  // Follow-up option (kept for future use, not recommended from hub)
   if (selectedType === 'normal') {
     paths.push({
       label: '🔄 Suivi Consultation Normale',
@@ -151,7 +178,7 @@ function buildAvailablePathsForExistingPatient(
       description: hasMatchingHistory
         ? `Suivi médical avec analyse d'évolution (${consultationHistory.length} consultations précédentes)`
         : 'Suivi médical simplifié (nouveau type de consultation)',
-      isRecommended: true
+      isRecommended: false
     })
   } else if (selectedType === 'dermatology') {
     paths.push({
@@ -160,7 +187,7 @@ function buildAvailablePathsForExistingPatient(
       description: hasMatchingHistory
         ? `Comparaison d'images avant/après et analyse d'évolution (${consultationHistory.length} consultations précédentes)`
         : 'Comparaison d\'images et suivi dermatologique',
-      isRecommended: true
+      isRecommended: false
     })
   } else if (selectedType === 'chronic') {
     paths.push({
@@ -169,34 +196,10 @@ function buildAvailablePathsForExistingPatient(
       description: hasMatchingHistory
         ? `Tendances des constantes vitales et compliance médicamenteuse (${consultationHistory.length} consultations précédentes)`
         : 'Suivi des paramètres chroniques',
-      isRecommended: true
-    })
-  }
-  
-  // Full consultation option (for new problems)
-  if (selectedType === 'normal') {
-    paths.push({
-      label: '📋 Nouvelle Consultation Complète',
-      path: '/consultation',
-      description: 'Consultation complète avec questions IA et diagnostic approfondi (nouveau problème médical)',
-      isRecommended: false
-    })
-  } else if (selectedType === 'dermatology') {
-    paths.push({
-      label: '🔬 Nouvelle Consultation Dermatologique Complète',
-      path: '/dermatology',
-      description: 'Consultation complète avec upload d\'images, OCR, questions IA et diagnostic (nouveau problème cutané)',
-      isRecommended: false
-    })
-  } else if (selectedType === 'chronic') {
-    paths.push({
-      label: '🏥 Nouvelle Consultation Maladie Chronique Complète',
-      path: '/chronic-disease',
-      description: 'Évaluation complète pour nouvelle pathologie chronique ou réévaluation approfondie avec plan diététique',
       isRecommended: false
     })
   }
-  
+
   return paths
 }
 

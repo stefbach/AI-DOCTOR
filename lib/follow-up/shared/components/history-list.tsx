@@ -122,13 +122,16 @@ function ConsultationCard({
   const typeConfig = getConsultationTypeConfig(consultationType)
 
   return (
-    <Card 
+    <Card
       className={`relative transition-all ${
-        isSelected 
-          ? 'ring-2 ring-blue-500 shadow-md' 
+        isSelected
+          ? 'ring-2 ring-blue-500 shadow-md'
           : 'hover:shadow-md cursor-pointer'
       }`}
-      onClick={() => onSelect?.(consultation)}
+      onClick={() => {
+        console.log('📋 Consultation clicked:', consultation)
+        onSelect?.(consultation)
+      }}
     >
       {/* Timeline Dot */}
       {showTimelineDot && (

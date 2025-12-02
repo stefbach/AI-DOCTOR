@@ -11,15 +11,17 @@ import {
   Brain,
   FileSignature,
   ArrowLeft,
-  ClipboardList
+  ClipboardList,
+  User
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
-// Import dermatology specific components (to be created)
+// Import dermatology specific components
 import DermatologyImageUpload from "@/components/dermatology/dermatology-image-upload"
 import DermatologyQuestionsForm from "@/components/dermatology/dermatology-questions-form"
 import DermatologyDiagnosisForm from "@/components/dermatology/dermatology-diagnosis-form"
 import DermatologyProfessionalReport from "@/components/dermatology/dermatology-professional-report"
+import PatientForm from "@/components/patient-form"
 
 export default function DermatologyWorkflow() {
   const router = useRouter()
@@ -38,9 +40,9 @@ export default function DermatologyWorkflow() {
     const existingPatient = sessionStorage.getItem('isExistingPatientDermatology')
     
     if (!savedPatientData || isDermatologyWorkflow !== 'true') {
-      // Redirect back to home if no dermatology data
-      console.log('❌ No dermatology patient data found, redirecting to home')
-      router.push('/')
+      // Redirect back to consultation hub if no dermatology data
+      console.log('❌ No dermatology patient data found, redirecting to consultation hub')
+      router.push('/consultation-hub')
       return
     }
     
@@ -55,7 +57,7 @@ export default function DermatologyWorkflow() {
       sessionStorage.removeItem('isExistingPatientDermatology')
     } catch (error) {
       console.error('Error parsing patient data:', error)
-      router.push('/')
+      router.push('/consultation-hub')
     }
   }, [router])
 
@@ -74,28 +76,34 @@ export default function DermatologyWorkflow() {
 
   const steps = [
     {
+      icon: User,
+      title: "Patient Information",
+      description: "Patient details & history",
+      status: currentStep === 0 ? "current" : currentStep > 0 ? "complete" : "upcoming"
+    },
+    {
       icon: Camera,
       title: "Image Upload",
       description: "Upload skin condition photos",
-      status: currentStep === 0 ? "current" : currentStep > 0 ? "complete" : "upcoming"
+      status: currentStep === 1 ? "current" : currentStep > 1 ? "complete" : "upcoming"
     },
     {
       icon: ClipboardList,
       title: "AI Analysis Questions",
       description: "Dermatology-specific questions",
-      status: currentStep === 1 ? "current" : currentStep > 1 ? "complete" : "upcoming"
+      status: currentStep === 2 ? "current" : currentStep > 2 ? "complete" : "upcoming"
     },
     {
       icon: Brain,
       title: "Dermatology Diagnosis",
       description: "AI-powered skin condition analysis",
-      status: currentStep === 2 ? "current" : currentStep > 2 ? "complete" : "upcoming"
+      status: currentStep === 3 ? "current" : currentStep > 3 ? "complete" : "upcoming"
     },
     {
       icon: FileSignature,
       title: "Professional Report",
       description: "Treatment plan & recommendations",
-      status: currentStep === 3 ? "current" : currentStep > 3 ? "complete" : "upcoming"
+      status: currentStep === 4 ? "current" : currentStep > 4 ? "complete" : "upcoming"
     }
   ]
 
@@ -206,7 +214,7 @@ export default function DermatologyWorkflow() {
           </CardHeader>
           <CardContent className="pt-6">
             <Progress value={progress} className="mb-6" />
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
               {steps.map((step, index) => {
                 const Icon = step.icon
                 return (
@@ -244,7 +252,35 @@ export default function DermatologyWorkflow() {
 
         {/* Main Content Area */}
         <div className="space-y-6">
+          {/* Step 0: Patient Information */}
           {currentStep === 0 && (
+            <Card className="shadow-xl border-teal-200">
+              <CardHeader className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white">
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-6 w-6" />
+                  Informations Patient
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <PatientForm
+                  data={patientData}
+                  onDataChange={(data) => {
+                    console.log('✅ Patient data updated:', data)
+                    setPatientData(data)
+                  }}
+                  onNext={() => {
+                    console.log('✅ Patient info completed, moving to image upload')
+                    setCurrentStep(1)
+                  }}
+                  language="fr"
+                  workflowType="dermatology"
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 1: Image Upload */}
+          {currentStep === 1 && (
             <Card className="shadow-xl border-teal-200">
               <CardHeader className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white">
                 <CardTitle className="flex items-center gap-2">
@@ -259,15 +295,16 @@ export default function DermatologyWorkflow() {
                     console.log('✅ Image data captured:', data)
                     setImageData(data.images)
                     setOcrAnalysisData(data.ocrAnalysis)
-                    setCurrentStep(1)
+                    setCurrentStep(2)
                   }}
-                  onBack={handleBackToHome}
+                  onBack={() => setCurrentStep(0)}
                 />
               </CardContent>
             </Card>
           )}
 
-          {currentStep === 1 && (
+          {/* Step 2: AI Analysis Questions */}
+          {currentStep === 2 && (
             <Card className="shadow-xl border-teal-200">
               <CardHeader className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white">
                 <CardTitle className="flex items-center gap-2">
@@ -283,15 +320,16 @@ export default function DermatologyWorkflow() {
                   onNext={(data) => {
                     console.log('✅ Questions answered:', data)
                     setQuestionsData(data)
-                    setCurrentStep(2)
+                    setCurrentStep(3)
                   }}
-                  onBack={() => setCurrentStep(0)}
+                  onBack={() => setCurrentStep(1)}
                 />
               </CardContent>
             </Card>
           )}
 
-          {currentStep === 2 && (
+          {/* Step 3: Dermatology Diagnosis */}
+          {currentStep === 3 && (
             <Card className="shadow-xl border-teal-200">
               <CardHeader className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white">
                 <CardTitle className="flex items-center gap-2">
@@ -314,15 +352,16 @@ export default function DermatologyWorkflow() {
                       console.log('🔍 CRITICAL: expertAnalysis content:', JSON.stringify(data.expertAnalysis, null, 2))
                     }
                     setDiagnosisData(data)
-                    setCurrentStep(3)
+                    setCurrentStep(4)
                   }}
-                  onBack={() => setCurrentStep(1)}
+                  onBack={() => setCurrentStep(2)}
                 />
               </CardContent>
             </Card>
           )}
 
-          {currentStep === 3 && (
+          {/* Step 4: Professional Report */}
+          {currentStep === 4 && (
             <Card className="shadow-xl border-teal-200">
               <CardHeader className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white">
                 <CardTitle className="flex items-center gap-2">
@@ -340,9 +379,9 @@ export default function DermatologyWorkflow() {
                   onComplete={handleBackToHome}
                 />
                 <div className="mt-4 flex justify-start">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setCurrentStep(2)}
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentStep(3)}
                   >
                     Back to Diagnosis
                   </Button>

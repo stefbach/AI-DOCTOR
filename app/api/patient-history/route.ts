@@ -14,26 +14,31 @@ export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
 
 interface PatientSearchCriteria {
+  patientId?: string
+  consultationId?: string  // Can be used to find patient by consultation
   name?: string
   email?: string
   phone?: string
   nationalId?: string
   dateOfBirth?: string
+  limit?: number  // Number of records to fetch (default 10)
+  offset?: number // Number of records to skip (for pagination)
 }
 
 /**
  * POST /api/patient-history
  * Retrieve consultation history for a patient
- * 
+ *
  * Request body:
  * {
+ *   patientId?: string,
  *   name?: string,
  *   email?: string,
  *   phone?: string,
  *   nationalId?: string,
  *   dateOfBirth?: string
  * }
- * 
+ *
  * Response:
  * {
  *   success: boolean,
@@ -51,47 +56,99 @@ export async function POST(req: NextRequest) {
     }
 
     const criteria: PatientSearchCriteria = await req.json()
-    
+
     console.log('🔍 Patient history search with criteria:', criteria)
-    
+
     // Validate at least one search criterion
-    if (!criteria.name && !criteria.email && !criteria.phone && !criteria.nationalId && !criteria.dateOfBirth) {
+    if (!criteria.patientId && !criteria.consultationId && !criteria.name && !criteria.email && !criteria.phone && !criteria.nationalId && !criteria.dateOfBirth) {
       return NextResponse.json({
         success: false,
         error: 'At least one search criterion is required'
       }, { status: 400 })
     }
 
-    // Build query
+    // If consultationId is provided, first find the patient_id from that consultation
+    let resolvedPatientId = criteria.patientId
+    let isNewConsultation = false
+
+    if (!resolvedPatientId && criteria.consultationId) {
+      console.log('🔍 Looking up patient_id from consultation:', criteria.consultationId)
+      const { data: consultationRecord, error: lookupError } = await supabase
+        .from('consultation_records')
+        .select('patient_id')
+        .eq('consultation_id', criteria.consultationId)
+        .single()
+
+      if (!lookupError && consultationRecord?.patient_id) {
+        resolvedPatientId = consultationRecord.patient_id
+        console.log('✅ Found patient_id from consultation:', resolvedPatientId)
+      } else {
+        console.log('⚠️ Could not find patient_id from consultation - this is likely a NEW consultation')
+        isNewConsultation = true
+      }
+    }
+
+    // If this is a new consultation (consultationId provided but not found in our database)
+    // and we have no patientId to look up by, return empty result immediately
+    // This prevents querying all records when there's no valid filter
+    if (isNewConsultation && !resolvedPatientId && !criteria.name && !criteria.email && !criteria.phone) {
+      console.log('📋 New consultation detected with no patient history - returning empty result')
+      return NextResponse.json({
+        success: true,
+        consultations: [],
+        count: 0
+      })
+    }
+
+    // Build query with pagination to prevent timeout
+    // The documents_data column contains large JSON blobs
+    const queryLimit = criteria.limit || 10
+    const queryOffset = criteria.offset || 0
+
     let query = supabase
       .from('consultation_records')
-      .select('*')
+      .select('*', { count: 'exact' })  // Get total count for pagination
       .order('created_at', { ascending: false })
-    
-    // Apply filters based on criteria
-    const orConditions: string[] = []
-    
-    if (criteria.name) {
-      // Search in patient_name field (case-insensitive)
-      orConditions.push(`patient_name.ilike.%${criteria.name}%`)
+      .range(queryOffset, queryOffset + queryLimit - 1)
+
+    // If patientId is provided or resolved, use it directly (most reliable)
+    if (resolvedPatientId) {
+      query = query.eq('patient_id', resolvedPatientId)
+    } else {
+      // Apply filters based on other criteria
+      const orConditions: string[] = []
+
+      if (criteria.name) {
+        // Search in patient_name field (case-insensitive)
+        orConditions.push(`patient_name.ilike.%${criteria.name}%`)
+      }
+
+      if (criteria.email) {
+        orConditions.push(`patient_email.eq.${criteria.email}`)
+      }
+
+      if (criteria.phone) {
+        // Normalize phone number (remove spaces, dashes)
+        const normalizedPhone = criteria.phone.replace(/[\s\-\(\)]/g, '')
+        orConditions.push(`patient_phone.ilike.%${normalizedPhone}%`)
+      }
+
+      if (orConditions.length > 0) {
+        query = query.or(orConditions.join(','))
+      } else {
+        // Safety check: if we have no filters at all, return empty result
+        // This prevents returning ALL records from the database
+        console.log('⚠️ No valid filters to apply - returning empty result to prevent unfiltered query')
+        return NextResponse.json({
+          success: true,
+          consultations: [],
+          count: 0
+        })
+      }
     }
-    
-    if (criteria.email) {
-      orConditions.push(`patient_email.eq.${criteria.email}`)
-    }
-    
-    if (criteria.phone) {
-      // Normalize phone number (remove spaces, dashes)
-      const normalizedPhone = criteria.phone.replace(/[\s\-\(\)]/g, '')
-      orConditions.push(`patient_phone.ilike.%${normalizedPhone}%`)
-    }
-    
-    if (orConditions.length > 0) {
-      query = query.or(orConditions.join(','))
-    }
-    
-    const { data, error } = await query
-    
+
+    const { data, error, count: totalCount } = await query
+
     if (error) {
       console.error('❌ Supabase query error:', error)
       return NextResponse.json({
@@ -105,108 +162,171 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         consultations: [],
-        count: 0
+        count: 0,
+        totalCount: totalCount || 0,
+        hasMore: false
       })
     }
 
-    console.log(`✅ Found ${data.length} consultation(s)`)
-    
+    console.log(`✅ Found ${data.length} consultation(s), total: ${totalCount}`)
+
     // Transform data to consultation history format
-    const consultations = data.map(record => {
-      const documentsData = record.documents_data || {}
-      
-      // Detect consultation type
-      let consultationType: 'normal' | 'dermatology' | 'chronic' = 'normal'
-      if (record.consultation_type) {
-        consultationType = record.consultation_type
-      } else if (documentsData.compteRendu?.header?.consultationType?.toLowerCase().includes('dermatology')) {
-        consultationType = 'dermatology'
-      } else if (documentsData.medicalReport?.chronicDiseaseAssessment) {
-        consultationType = 'chronic'
-      }
-      
-      // Extract vital signs (try different structures)
-      let vitalSigns = {}
-      
-      // From Mauritian structure (compteRendu)
-      if (documentsData.compteRendu?.patient) {
-        const patient = documentsData.compteRendu.patient
-        vitalSigns = {
-          bloodPressureSystolic: patient.bloodPressureSystolic || patient.tensionSystolique,
-          bloodPressureDiastolic: patient.bloodPressureDiastolic || patient.tensionDiastolique,
-          bloodGlucose: patient.bloodGlucose || patient.glycemie,
-          weight: patient.poids || patient.weight,
-          height: patient.taille || patient.height,
-          temperature: patient.temperature,
-          heartRate: patient.heartRate || patient.frequenceCardiaque
+    // Wrap each record transformation in try-catch to handle malformed data
+    const consultations = data.map((record, index) => {
+      try {
+        const documentsData = record.documents_data || {}
+
+        // The data is saved in different structures depending on how it was saved:
+        // - New format: consultationReport.content contains compteRendu structure
+        // - Legacy format: compteRendu at root level
+        const consultationReportContent = documentsData.consultationReport?.content || {}
+        const compteRendu = documentsData.compteRendu || consultationReportContent || {}
+        const rapport = compteRendu.rapport || consultationReportContent.rapport || {}
+        const medicalReport = documentsData.consultationReport?.medicalReport || documentsData.medicalReport || {}
+
+        // Detect consultation type
+        let consultationType: 'normal' | 'dermatology' | 'chronic' = 'normal'
+        if (record.consultation_type) {
+          consultationType = record.consultation_type
+        } else if (compteRendu.header?.consultationType?.toLowerCase().includes('dermatology')) {
+          consultationType = 'dermatology'
+        } else if (medicalReport?.chronicDiseaseAssessment) {
+          consultationType = 'chronic'
         }
-      }
-      
-      // From medicalReport structure (chronic)
-      if (documentsData.medicalReport?.patient) {
-        const patient = documentsData.medicalReport.patient
-        vitalSigns = {
-          ...vitalSigns,
-          bloodPressureSystolic: vitalSigns.bloodPressureSystolic || patient.bloodPressureSystolic,
-          bloodPressureDiastolic: vitalSigns.bloodPressureDiastolic || patient.bloodPressureDiastolic,
-          bloodGlucose: vitalSigns.bloodGlucose || patient.bloodGlucose,
-          weight: vitalSigns.weight || patient.weight,
-          height: vitalSigns.height || patient.height,
-          temperature: vitalSigns.temperature || patient.temperature
+
+        // Extract vital signs (try different structures)
+        let vitalSigns: any = {}
+
+        // From compteRendu.patient (may be in consultationReport.content or directly)
+        const patientData = compteRendu.patient || consultationReportContent.patient || {}
+        if (Object.keys(patientData).length > 0) {
+          vitalSigns = {
+            bloodPressureSystolic: patientData.bloodPressureSystolic || patientData.tensionSystolique,
+            bloodPressureDiastolic: patientData.bloodPressureDiastolic || patientData.tensionDiastolique,
+            bloodGlucose: patientData.bloodGlucose || patientData.glycemie,
+            weight: patientData.poids || patientData.weight,
+            height: patientData.taille || patientData.height,
+            temperature: patientData.temperature,
+            heartRate: patientData.heartRate || patientData.frequenceCardiaque
+          }
         }
-      }
-      
-      // Extract other data
-      const chiefComplaint = 
-        documentsData.compteRendu?.rapport?.motifConsultation ||
-        documentsData.medicalReport?.clinicalEvaluation?.chiefComplaint ||
-        'Follow-up consultation'
-      
-      const diagnosis = 
-        documentsData.compteRendu?.rapport?.syntheseDiagnostique ||
-        documentsData.medicalReport?.diagnosticSummary?.diagnosticConclusion ||
-        ''
-      
-      const medications = 
-        documentsData.ordonnances?.medicaments?.prescription?.medications ||
-        documentsData.medicationPrescription?.prescription?.medications ||
-        []
-      
-      const labTests = 
-        documentsData.ordonnances?.biologie?.prescription?.analyses ||
-        documentsData.laboratoryTests?.prescription?.tests ||
-        []
-      
-      const imagingStudies = 
-        documentsData.ordonnances?.imagerie?.prescription?.examinations ||
-        documentsData.paraclinicalExams?.prescription?.exams ||
-        []
-      
-      const images = documentsData.compteRendu?.imageAnalysis?.images || []
-      
-      const dietaryPlan = documentsData.dietaryPlan || null
-      
-      return {
-        id: record.id,
-        consultationId: record.consultation_id,
-        consultationType,
-        date: record.created_at,
-        chiefComplaint,
-        diagnosis,
-        medications,
-        vitalSigns,
-        labTests,
-        imagingStudies,
-        images,
-        dietaryPlan,
-        fullReport: documentsData
+
+        // From medicalReport structure (chronic)
+        if (medicalReport?.patient) {
+          const mrPatient = medicalReport.patient
+          vitalSigns = {
+            ...vitalSigns,
+            bloodPressureSystolic: vitalSigns.bloodPressureSystolic || mrPatient.bloodPressureSystolic,
+            bloodPressureDiastolic: vitalSigns.bloodPressureDiastolic || mrPatient.bloodPressureDiastolic,
+            bloodGlucose: vitalSigns.bloodGlucose || mrPatient.bloodGlucose,
+            weight: vitalSigns.weight || mrPatient.weight,
+            height: vitalSigns.height || mrPatient.height,
+            temperature: vitalSigns.temperature || mrPatient.temperature
+          }
+        }
+
+        // Extract chief complaint from multiple possible paths
+        const chiefComplaint =
+          rapport.motifConsultation ||
+          consultationReportContent.rapport?.motifConsultation ||
+          medicalReport?.clinicalEvaluation?.chiefComplaint ||
+          record.chief_complaint ||
+          'Follow-up consultation'
+
+        // Extract diagnosis from multiple possible paths
+        const diagnosis =
+          rapport.syntheseDiagnostique ||
+          rapport.conclusionDiagnostique ||
+          consultationReportContent.rapport?.syntheseDiagnostique ||
+          medicalReport?.diagnosticSummary?.diagnosticConclusion ||
+          record.diagnosis ||
+          ''
+
+        // Extract prescriptions from multiple possible paths
+        const prescriptions = documentsData.prescriptions || documentsData.ordonnances || {}
+        const medications =
+          prescriptions.medications?.prescription?.medications ||
+          prescriptions.medicaments?.prescription?.medications ||
+          prescriptions.medicaments?.prescription?.medicaments ||
+          documentsData.medicationPrescription?.prescription?.medications ||
+          []
+
+        // Extract lab tests from multiple possible paths
+        const laboratoryData = prescriptions.laboratoryTests || prescriptions.biologie || documentsData.laboratoryTests || {}
+        const labTests =
+          laboratoryData.prescription?.analyses ||
+          laboratoryData.prescription?.tests ||
+          laboratoryData.tests ||
+          []
+
+        // Extract imaging from multiple possible paths
+        const imagingData = prescriptions.imagingStudies || prescriptions.imagerie || documentsData.paraclinicalExams || {}
+        const imagingStudies =
+          imagingData.prescription?.examinations ||
+          imagingData.prescription?.exams ||
+          imagingData.examinations ||
+          []
+
+        // Extract images for dermatology
+        const images = compteRendu.imageAnalysis?.images || consultationReportContent.imageAnalysis?.images || []
+
+        // Extract diet plan and follow-up from multiple sources
+        const dietaryPlan = documentsData.dietaryPlan || record.diet_plan_data || null
+        const followUpPlan = documentsData.followUpPlan || record.follow_up_data || null
+
+        // Merge record column data into fullReport so modal can access it
+        const fullReport = {
+          ...documentsData,
+          dietaryPlan: dietaryPlan,
+          followUpPlan: followUpPlan,
+          diet_plan_data: record.diet_plan_data,
+          follow_up_data: record.follow_up_data
+        }
+
+        return {
+          id: record.id,
+          consultationId: record.consultation_id,
+          consultationType,
+          date: record.created_at,
+          chiefComplaint,
+          diagnosis,
+          medications,
+          vitalSigns,
+          labTests,
+          imagingStudies,
+          images,
+          dietaryPlan,
+          fullReport
+        }
+      } catch (recordError: any) {
+        console.error(`❌ Error transforming record ${index}:`, recordError?.message, 'Record ID:', record?.id)
+        // Return a minimal safe object for failed records
+        return {
+          id: record?.id || `error-${index}`,
+          consultationId: record?.consultation_id || null,
+          consultationType: 'normal' as const,
+          date: record?.created_at || new Date().toISOString(),
+          chiefComplaint: 'Error loading consultation',
+          diagnosis: '',
+          medications: [],
+          vitalSigns: {},
+          labTests: [],
+          imagingStudies: [],
+          images: [],
+          dietaryPlan: null,
+          fullReport: {}
+        }
       }
     })
-    
+
+    const hasMore = totalCount ? (queryOffset + data.length) < totalCount : false
+
     return NextResponse.json({
       success: true,
       consultations,
-      count: consultations.length
+      count: consultations.length,
+      totalCount: totalCount || consultations.length,
+      hasMore
     })
 
   } catch (error: any) {

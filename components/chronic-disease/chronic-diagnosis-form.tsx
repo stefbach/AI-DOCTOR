@@ -571,8 +571,8 @@ export default function ChronicDiagnosisForm({
  Supplements:
  </Label>
  <ul className="text-sm text-gray-700 space-y-1">
- {detailedMealPlan.supplements.map((supplement: string, idx: number) => (
- <li key={idx}>• {supplement}</li>
+ {detailedMealPlan.supplements.map((supplement: string | { supplement: string; dosage: string }, idx: number) => (
+ <li key={idx}>• {typeof supplement === 'string' ? supplement : `${supplement.supplement} - ${supplement.dosage}`}</li>
  ))}
  </ul>
  </div>

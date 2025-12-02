@@ -139,6 +139,10 @@ interface ProfessionalReportProps {
  diagnosisData: any
  editedDocuments?: any
  onComplete?: () => void
+ // IDs for document sending (passed from parent when coming from hub)
+ consultationId?: string | null
+ patientId?: string | null
+ doctorId?: string | null
 }
 
 // ==================== HELPER FUNCTIONS ====================
@@ -865,7 +869,10 @@ export default function ProfessionalReportEditable({
  questionsData,
  diagnosisData,
  editedDocuments,
- onComplete
+ onComplete,
+ consultationId: propConsultationId,
+ patientId: propPatientId,
+ doctorId: propDoctorId
 }: ProfessionalReportProps) {
 
 // ==================== STATE MANAGEMENT ====================
@@ -1576,7 +1583,20 @@ const handleManualSave = useCallback(async () => {
  
  if (doctorDataParam) {
  try {
- const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
+ // Handle double-encoded URLs (e.g., from Tibok where %257B = double-encoded {)
+ let decodedDoctorData = doctorDataParam
+
+ // Try to decode - keep decoding while it looks encoded
+ let attempts = 0
+ while (attempts < 3 && (decodedDoctorData.includes('%7B') || decodedDoctorData.includes('%22') || decodedDoctorData.includes('%7D'))) {
+ console.log(`👨‍⚕️ Decoding doctor data (attempt ${attempts + 1})...`)
+ decodedDoctorData = decodeURIComponent(decodedDoctorData)
+ attempts++
+ }
+
+ console.log('👨‍⚕️ Decoded doctor data:', decodedDoctorData.substring(0, 100) + '...')
+
+ const tibokDoctorData = JSON.parse(decodedDoctorData)
  console.log(' Loading Tibok Doctor Data:', tibokDoctorData)
  
 // In the useEffect that processes doctorDataParam
@@ -2701,12 +2721,55 @@ const handleSendDocuments = async () => {
  description: "Preparing documents for patient dashboard"
  })
  
+ // Get IDs from multiple sources with priority: props > consultationDataService > sessionStorage > URL params
  const params = new URLSearchParams(window.location.search)
- const consultationId = params.get('consultationId')
- const patientId = params.get('patientId') || patientData?.id || patientData?.patientId
- const doctorId = params.get('doctorId')
 
- console.log('📍 IDs found:', { consultationId, patientId, doctorId })
+ // Get consultationId: props > consultationDataService > sessionStorage > URL
+ let consultationId = propConsultationId || consultationDataService.getCurrentConsultationId()
+ if (!consultationId) {
+   const storedData = sessionStorage.getItem('consultationPatientData')
+   if (storedData) {
+     try {
+       const parsed = JSON.parse(storedData)
+       consultationId = parsed.consultationId
+     } catch (e) { /* ignore */ }
+   }
+ }
+ if (!consultationId) {
+   consultationId = params.get('consultationId')
+ }
+
+ // Get patientId: props > patientData > sessionStorage > URL
+ let patientId = propPatientId || patientData?.id || patientData?.patientId
+ if (!patientId) {
+   const storedData = sessionStorage.getItem('consultationPatientData')
+   if (storedData) {
+     try {
+       const parsed = JSON.parse(storedData)
+       patientId = parsed.patientId
+     } catch (e) { /* ignore */ }
+   }
+ }
+ if (!patientId) {
+   patientId = params.get('patientId')
+ }
+
+ // Get doctorId: props > sessionStorage > URL
+ let doctorId = propDoctorId
+ if (!doctorId) {
+   const storedData = sessionStorage.getItem('consultationPatientData')
+   if (storedData) {
+     try {
+       const parsed = JSON.parse(storedData)
+       doctorId = parsed.doctorId
+     } catch (e) { /* ignore */ }
+   }
+ }
+ if (!doctorId) {
+   doctorId = params.get('doctorId')
+ }
+
+ console.log('📍 IDs found:', { consultationId, patientId, doctorId, sources: { props: { propConsultationId, propPatientId, propDoctorId }, service: consultationDataService.getCurrentConsultationId() } })
 
  if (!consultationId || !patientId || !doctorId) {
  console.log('❌ Missing required IDs')

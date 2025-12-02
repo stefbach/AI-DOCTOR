@@ -34,9 +34,16 @@ export default function MedicalAIExpert() {
   const [diagnosisData, setDiagnosisData] = useState<any>(null)
   const [finalReport, setFinalReport] = useState<any>(null)
   const [language, setLanguage] = useState<Language>('en')
-  
+
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [prefillData, setPrefillData] = useState<any>({})
+  const [checkingReturningPatient, setCheckingReturningPatient] = useState<boolean>(true)
+  // Track workflow type when coming from consultation hub (to skip type selection in PatientForm)
+  const [hubWorkflowType, setHubWorkflowType] = useState<'normal' | 'chronic' | 'dermatology' | undefined>(undefined)
+  // Track IDs from consultation hub for document sending
+  const [currentConsultationId, setCurrentConsultationId] = useState<string | null>(null)
+  const [currentPatientId, setCurrentPatientId] = useState<string | null>(null)
+  const [currentDoctorId, setCurrentDoctorId] = useState<string | null>(null)
 
   // Load doctor data from URL params (from Tibok) and save to sessionStorage
   useEffect(() => {
@@ -45,7 +52,29 @@ export default function MedicalAIExpert() {
 
     if (doctorDataParam) {
       try {
-        const tibokDoctorData = JSON.parse(decodeURIComponent(doctorDataParam))
+        // Handle double-encoded URLs (e.g., from Tibok where %257B = double-encoded {)
+        let decodedDoctorData = doctorDataParam
+
+        // Try to decode - keep decoding while it looks encoded
+        let attempts = 0
+        while (attempts < 3 && (decodedDoctorData.includes('%7B') || decodedDoctorData.includes('%22') || decodedDoctorData.includes('%7D'))) {
+          console.log(`👨‍⚕️ Decoding doctor data (attempt ${attempts + 1})...`)
+          decodedDoctorData = decodeURIComponent(decodedDoctorData)
+          attempts++
+        }
+
+        // Fix: Tibok sometimes appends extra URL after the JSON - extract just the JSON
+        if (decodedDoctorData.startsWith('{')) {
+          const lastBrace = decodedDoctorData.lastIndexOf('}')
+          if (lastBrace !== -1 && lastBrace < decodedDoctorData.length - 1) {
+            console.log('👨‍⚕️ Found extra content after JSON, trimming from position', lastBrace + 1)
+            decodedDoctorData = decodedDoctorData.substring(0, lastBrace + 1)
+          }
+        }
+
+        console.log('👨‍⚕️ Decoded doctor data:', decodedDoctorData.substring(0, 100) + '...')
+
+        const tibokDoctorData = JSON.parse(decodedDoctorData)
         console.log('👨‍⚕️ Loading doctor data from Tibok:', tibokDoctorData)
 
         const doctorInfoFromTibok = {
@@ -87,6 +116,149 @@ export default function MedicalAIExpert() {
     }
   }, [])
 
+  // Check for returning patient and redirect to consultation hub if they have history
+  useEffect(() => {
+    const checkReturningPatient = async () => {
+      // Skip if coming from consultation hub (already processed)
+      const fromHub = sessionStorage.getItem('fromConsultationHub')
+      if (fromHub === 'true') {
+        sessionStorage.removeItem('fromConsultationHub')
+        console.log('📋 Coming from consultation hub, skipping redirect check')
+
+        // CRITICAL: Clear old consultation data to start fresh
+        // This prevents old localStorage data from contaminating the new consultation
+        console.log('🧹 Clearing old consultation data for fresh start...')
+        await consultationDataService.clearCurrentConsultation()
+
+        setCheckingReturningPatient(false)
+        return
+      }
+
+      const urlParams = new URLSearchParams(window.location.search)
+      let patientId = urlParams.get('patientId')
+      let patientEmail = urlParams.get('patientEmail')
+      let patientPhone = urlParams.get('patientPhone')
+      const consultationId = urlParams.get('consultationId')
+      const doctorId = urlParams.get('doctorId')
+
+      // Also extract Tibok patient data from URL if available
+      const patientDataParam = urlParams.get('patientData')
+      let tibokPatientInfo = null
+      if (patientDataParam) {
+        try {
+          tibokPatientInfo = JSON.parse(decodeURIComponent(patientDataParam))
+          console.log('👤 Tibok patient info from URL:', tibokPatientInfo)
+
+          // Extract patient identifiers from tibokPatientInfo if not in URL directly
+          if (!patientId && tibokPatientInfo.id) {
+            patientId = tibokPatientInfo.id
+            console.log('📋 Using patientId from patientData:', patientId)
+          }
+          if (!patientEmail && tibokPatientInfo.email) {
+            patientEmail = tibokPatientInfo.email
+            console.log('📋 Using email from patientData:', patientEmail)
+          }
+          if (!patientPhone && tibokPatientInfo.phone) {
+            patientPhone = tibokPatientInfo.phone
+            console.log('📋 Using phone from patientData:', patientPhone)
+          }
+        } catch (e) {
+          console.log('⚠️ Could not parse patientData from URL')
+        }
+      }
+
+      // Need at least one identifier to check history (including consultationId)
+      if (!patientId && !patientEmail && !patientPhone && !consultationId) {
+        console.log('ℹ️ No patient identifier in URL, proceeding with normal flow')
+        setCheckingReturningPatient(false)
+        return
+      }
+
+      console.log('🔍 Checking if returning patient...', { patientId, patientEmail, patientPhone, consultationId })
+
+      try {
+        // Query patient history
+        console.log('📡 Calling /api/patient-history...')
+        const response = await fetch('/api/patient-history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            patientId,
+            consultationId,
+            email: patientEmail,
+            phone: patientPhone
+          })
+        })
+
+        console.log('📡 Response status:', response.status)
+
+        let consultations: any[] = []
+        if (response.ok) {
+          const data = await response.json()
+          console.log('📡 API response:', data)
+          consultations = (data.success && data.consultations) ? data.consultations : []
+        } else {
+          console.log('⚠️ Could not fetch patient history, status:', response.status)
+        }
+
+        // Always redirect to hub for patients coming from Tibok (with consultationId)
+        // The hub will handle both new and returning patients
+        if (consultationId) {
+          console.log(`📋 Patient from Tibok - redirecting to hub (${consultations.length} consultation(s))`)
+
+          // Store patient data for the hub - include Tibok patient info
+          sessionStorage.setItem('returningPatientData', JSON.stringify({
+            searchCriteria: { patientId, consultationId, doctorId, email: patientEmail, phone: patientPhone },
+            consultations: consultations,
+            totalConsultations: consultations.length,
+            tibokPatientInfo: tibokPatientInfo // Include the Tibok patient data
+          }))
+
+          // Preserve URL params for the hub
+          const currentParams = window.location.search
+          window.location.href = `/consultation-hub${currentParams}&returning=true`
+          // Don't set checkingReturningPatient to false - we're redirecting
+          return
+        } else if (consultations.length >= 1) {
+          // Non-Tibok returning patients (searched by email/phone)
+          console.log(`📋 Returning patient detected with ${consultations.length} consultation(s) - redirecting to hub`)
+
+          sessionStorage.setItem('returningPatientData', JSON.stringify({
+            searchCriteria: { patientId, consultationId, doctorId, email: patientEmail, phone: patientPhone },
+            consultations: consultations,
+            totalConsultations: consultations.length,
+            tibokPatientInfo: tibokPatientInfo
+          }))
+
+          const currentParams = window.location.search
+          window.location.href = `/consultation-hub${currentParams}&returning=true`
+          return
+        } else {
+          console.log('👤 New patient without consultationId - proceeding with normal flow')
+        }
+      } catch (error) {
+        console.error('❌ Error checking patient history:', error)
+        // If we have consultationId, still redirect to hub even on error
+        if (consultationId) {
+          console.log('📋 Error occurred but have consultationId - redirecting to hub anyway')
+          sessionStorage.setItem('returningPatientData', JSON.stringify({
+            searchCriteria: { patientId, consultationId, doctorId, email: patientEmail, phone: patientPhone },
+            consultations: [],
+            totalConsultations: 0,
+            tibokPatientInfo: tibokPatientInfo
+          }))
+          const currentParams = window.location.search
+          window.location.href = `/consultation-hub${currentParams}&returning=true`
+          return
+        }
+      }
+
+      setCheckingReturningPatient(false)
+    }
+
+    checkReturningPatient()
+  }, [])
+
   // Load prefill data from sessionStorage for existing patient consultation
   useEffect(() => {
     const savedPatientData = sessionStorage.getItem('consultationPatientData')
@@ -98,6 +270,27 @@ export default function MedicalAIExpert() {
         const patientData = JSON.parse(savedPatientData)
         setPrefillData(patientData)
         console.log('✅ Prefill data loaded:', patientData)
+
+        // Extract and set IDs for document sending at the end of the flow
+        if (patientData.consultationId) {
+          setCurrentConsultationId(patientData.consultationId)
+          // CRITICAL: Also set the consultationDataService ID so it's used throughout the flow
+          consultationDataService.setCurrentConsultationId(patientData.consultationId)
+          console.log('✅ ConsultationId set from hub:', patientData.consultationId)
+        }
+        if (patientData.patientId) {
+          setCurrentPatientId(patientData.patientId)
+          console.log('✅ PatientId set from hub:', patientData.patientId)
+        }
+        if (patientData.doctorId) {
+          setCurrentDoctorId(patientData.doctorId)
+          console.log('✅ DoctorId set from hub:', patientData.doctorId)
+        }
+
+        // Set workflow type to 'normal' since doctor already selected it in the hub
+        // This will skip the consultation type selection in PatientForm
+        setHubWorkflowType('normal')
+        console.log('✅ Workflow type set to "normal" from hub selection')
 
         // Clean up sessionStorage after reading
         sessionStorage.removeItem('consultationPatientData')
@@ -163,9 +356,7 @@ useEffect(() => {
   }
 }, [])
 
-  const currentConsultationId: string | null = null
-  const currentPatientId: string | null = null
-  const currentDoctorId: string | null = null
+  // IDs are now managed as state variables above (lines 44-46)
 
   const handleStepClick = (index: number) => {
     if (index <= currentStep) {
@@ -394,6 +585,8 @@ const handlePrevious = () => {
           data: Object.keys(prefillData).length > 0 ? { ...patientData, ...prefillData } : patientData,
           onDataChange: setPatientData,
           onNext: handleNext,
+          // Pass workflowType to skip consultation type selection when coming from hub
+          workflowType: hubWorkflowType,
         }
       case 1:
         return {
@@ -455,6 +648,18 @@ const handlePrevious = () => {
             {t('loading')}
           </p>
           <p className="mt-2 text-sm text-muted-foreground">Préparation de votre consultation...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show loading screen while checking for returning patient
+  if (checkingReturningPatient) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-teal-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading consultation...</p>
         </div>
       </div>
     )

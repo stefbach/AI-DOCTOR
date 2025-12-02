@@ -11,10 +11,13 @@ import {
   ClipboardList,
   Brain,
   FileSignature,
-  ArrowLeft
+  ArrowLeft,
+  User
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
+// Import patient form (shared with normal consultation)
+import PatientForm from "@/components/patient-form"
 // Import chronic disease specific components
 import ChronicClinicalForm from "@/components/chronic-disease/chronic-clinical-form"
 import ChronicQuestionsForm from "@/components/chronic-disease/chronic-questions-form"
@@ -108,38 +111,38 @@ export default function ChronicDiseaseWorkflow() {
 
         setClinicalData(testClinicalData)
         setDiagnosisData(testDiagnosisData)
-        setCurrentStep(3) // Skip directly to report
+        setCurrentStep(4) // Skip directly to report (now step 4 after adding PatientForm)
 
         console.log('✅ Test patient data loaded:', testData)
         console.log('🧪 Auto-populated test clinical and diagnosis data, skipping to report')
         return
       }
 
-      // Redirect back to home if no chronic disease data
-      console.log('❌ No chronic disease patient data found, redirecting to home')
-      router.push('/')
+      // Redirect back to consultation hub if no chronic disease data
+      console.log('❌ No chronic disease patient data found, redirecting to consultation hub')
+      router.push('/consultation-hub')
       return
     }
-    
+
     try {
       const data = JSON.parse(savedPatientData)
       setPatientData(data)
       setIsExistingPatient(existingPatient === 'true')
       console.log('✅ Chronic disease patient data loaded:', data)
       console.log('👤 Existing patient:', existingPatient === 'true')
-      
+
       if (history) {
         const parsedHistory = JSON.parse(history)
         setChronicHistory(parsedHistory)
         console.log('📋 Chronic history loaded:', parsedHistory.length, 'entries')
       }
-      
+
       // Clean up flags after reading
       sessionStorage.removeItem('isExistingPatientChronic')
       sessionStorage.removeItem('chronicDiseaseHistory')
     } catch (error) {
       console.error('Error parsing patient data:', error)
-      router.push('/')
+      router.push('/consultation-hub')
     }
   }, [router])
 
@@ -158,28 +161,34 @@ export default function ChronicDiseaseWorkflow() {
 
   const steps = [
     {
+      icon: User,
+      title: "Patient Information",
+      description: "Review and confirm patient details",
+      status: currentStep === 0 ? "current" : currentStep > 0 ? "complete" : "upcoming"
+    },
+    {
       icon: Stethoscope,
       title: "Clinical Examination",
       description: "Chronic disease specific vitals & symptoms",
-      status: currentStep === 0 ? "current" : currentStep > 0 ? "complete" : "upcoming"
+      status: currentStep === 1 ? "current" : currentStep > 1 ? "complete" : "upcoming"
     },
     {
       icon: ClipboardList,
       title: "AI Specialized Questions",
       description: "Chronic disease targeted questions",
-      status: currentStep === 1 ? "current" : currentStep > 1 ? "complete" : "upcoming"
+      status: currentStep === 2 ? "current" : currentStep > 2 ? "complete" : "upcoming"
     },
     {
       icon: Brain,
       title: "Chronic Disease Analysis",
       description: "AI-powered chronic disease assessment",
-      status: currentStep === 2 ? "current" : currentStep > 2 ? "complete" : "upcoming"
+      status: currentStep === 3 ? "current" : currentStep > 3 ? "complete" : "upcoming"
     },
     {
       icon: FileSignature,
       title: "Chronic Disease Report",
       description: "Follow-up plan & monitoring",
-      status: currentStep === 3 ? "current" : currentStep > 3 ? "complete" : "upcoming"
+      status: currentStep === 4 ? "current" : currentStep > 4 ? "complete" : "upcoming"
     }
   ]
 
@@ -314,7 +323,7 @@ export default function ChronicDiseaseWorkflow() {
           </CardHeader>
           <CardContent className="pt-6">
             <Progress value={progress} className="mb-6" />
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               {steps.map((step, index) => {
                 const Icon = step.icon
                 return (
@@ -348,7 +357,48 @@ export default function ChronicDiseaseWorkflow() {
 
         {/* Main Content Area */}
         <div className="space-y-6">
+          {/* Step 0: Patient Information */}
           {currentStep === 0 && (
+            <Card className="shadow-xl border-blue-200">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white">
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-6 w-6" />
+                  Patient Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <PatientForm
+                  data={patientData}
+                  onDataChange={(data) => {
+                    console.log('✅ Patient data updated:', data)
+                    // Merge new data with existing patientData to preserve IDs
+                    setPatientData((prev: any) => ({
+                      ...prev,
+                      ...data,
+                      // Ensure IDs are preserved
+                      consultationId: prev?.consultationId || data.consultationId,
+                      patientId: prev?.patientId || data.patientId,
+                      doctorId: prev?.doctorId || data.doctorId
+                    }))
+                    // Update sessionStorage with merged data
+                    const updatedData = {
+                      ...patientData,
+                      ...data,
+                      consultationId: patientData?.consultationId || data.consultationId,
+                      patientId: patientData?.patientId || data.patientId,
+                      doctorId: patientData?.doctorId || data.doctorId
+                    }
+                    sessionStorage.setItem('chronicDiseasePatientData', JSON.stringify(updatedData))
+                  }}
+                  onNext={() => setCurrentStep(1)}
+                  workflowType="chronic"
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 1: Clinical Examination */}
+          {currentStep === 1 && (
             <Card className="shadow-xl border-blue-200">
               <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white">
                 <CardTitle className="flex items-center gap-2">
@@ -362,15 +412,16 @@ export default function ChronicDiseaseWorkflow() {
                   onNext={(data) => {
                     console.log('✅ Clinical data captured:', data)
                     setClinicalData(data)
-                    setCurrentStep(1)
+                    setCurrentStep(2)
                   }}
-                  onBack={handleBackToHome}
+                  onBack={() => setCurrentStep(0)}
                 />
               </CardContent>
             </Card>
           )}
 
-          {currentStep === 1 && (
+          {/* Step 2: AI Questions */}
+          {currentStep === 2 && (
             <Card className="shadow-xl border-blue-200">
               <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white">
                 <CardTitle className="flex items-center gap-2">
@@ -385,15 +436,16 @@ export default function ChronicDiseaseWorkflow() {
                   onNext={(data) => {
                     console.log('✅ Questions answered:', data)
                     setQuestionsData(data)
-                    setCurrentStep(2)
+                    setCurrentStep(3)
                   }}
-                  onBack={() => setCurrentStep(0)}
+                  onBack={() => setCurrentStep(1)}
                 />
               </CardContent>
             </Card>
           )}
 
-          {currentStep === 2 && (
+          {/* Step 3: Diagnosis/Analysis */}
+          {currentStep === 3 && (
             <Card className="shadow-xl border-blue-200">
               <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white">
                 <CardTitle className="flex items-center gap-2">
@@ -409,15 +461,16 @@ export default function ChronicDiseaseWorkflow() {
                   onNext={(data) => {
                     console.log('✅ Diagnosis generated:', data)
                     setDiagnosisData(data)
-                    setCurrentStep(3)
+                    setCurrentStep(4)
                   }}
-                  onBack={() => setCurrentStep(1)}
+                  onBack={() => setCurrentStep(2)}
                 />
               </CardContent>
             </Card>
           )}
 
-          {currentStep === 3 && (
+          {/* Step 4: Professional Report */}
+          {currentStep === 4 && (
             <Card className="shadow-xl border-blue-200">
               <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white">
                 <CardTitle className="flex items-center gap-2">
@@ -434,9 +487,9 @@ export default function ChronicDiseaseWorkflow() {
                   onComplete={handleBackToHome}
                 />
                 <div className="mt-4 flex justify-start">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setCurrentStep(2)}
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentStep(3)}
                   >
                     Back to Diagnosis
                   </Button>

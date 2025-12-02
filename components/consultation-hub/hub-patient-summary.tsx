@@ -3,15 +3,12 @@
 import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
   User,
   Calendar,
   FileText,
   Heart,
-  Eye,
-  Activity,
-  ChevronRight
+  Activity
 } from 'lucide-react'
 import type { ConsultationHistoryItem } from '@/lib/follow-up/shared'
 import { format } from 'date-fns'
@@ -22,16 +19,22 @@ export interface HubPatientSummaryProps {
     searchCriteria: any
     consultations: ConsultationHistoryItem[]
     totalConsultations: number
+    tibokPatientInfo?: any // Patient info from Tibok URL
   }
-  onViewHistory: () => void
 }
 
-export function HubPatientSummary({ patientData, onViewHistory }: HubPatientSummaryProps) {
-  const { searchCriteria, consultations, totalConsultations } = patientData
+export function HubPatientSummary({ patientData }: HubPatientSummaryProps) {
+  const { searchCriteria, consultations, totalConsultations, tibokPatientInfo } = patientData
   const mostRecent = consultations[0]
-  
-  // Extraire info patient depuis la consultation la plus récente
-  const patientInfo = extractPatientInfo(mostRecent)
+
+  // First try to get patient info from Tibok, then fall back to consultation history
+  const patientInfo = tibokPatientInfo
+    ? {
+        name: `${tibokPatientInfo.firstName || ''} ${tibokPatientInfo.lastName || ''}`.trim(),
+        age: tibokPatientInfo.age || null,
+        gender: tibokPatientInfo.gender === 'F' ? 'Femme' : tibokPatientInfo.gender === 'M' ? 'Homme' : tibokPatientInfo.gender || ''
+      }
+    : extractPatientInfo(mostRecent)
   
   // Détecter type majoritaire
   const consultationTypes = consultations.map(c => detectType(c.consultationType))
@@ -75,16 +78,18 @@ export function HubPatientSummary({ patientData, onViewHistory }: HubPatientSumm
               {patientInfo.name && (
                 <p className="font-medium text-gray-900">{patientInfo.name}</p>
               )}
-              {patientInfo.age && patientInfo.gender && (
+              {(patientInfo.age || patientInfo.gender) && (
                 <p className="text-sm text-gray-600">
-                  {patientInfo.age} ans • {patientInfo.gender}
+                  {patientInfo.age && `${patientInfo.age} ans`}
+                  {patientInfo.age && patientInfo.gender && ' • '}
+                  {patientInfo.gender}
                 </p>
               )}
-              {searchCriteria.email && (
-                <p className="text-sm text-gray-600">📧 {searchCriteria.email}</p>
+              {(tibokPatientInfo?.email || searchCriteria.email) && (
+                <p className="text-sm text-gray-600">📧 {tibokPatientInfo?.email || searchCriteria.email}</p>
               )}
-              {searchCriteria.phone && (
-                <p className="text-sm text-gray-600">📞 {searchCriteria.phone}</p>
+              {(tibokPatientInfo?.phone || searchCriteria.phone) && (
+                <p className="text-sm text-gray-600">📞 {tibokPatientInfo?.phone || searchCriteria.phone}</p>
               )}
             </div>
           </div>
@@ -153,27 +158,6 @@ export function HubPatientSummary({ patientData, onViewHistory }: HubPatientSumm
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          <Button
-            onClick={() => window.open(`/view-report/${mostRecent.consultationId}`, '_blank')}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <FileText className="mr-2 h-4 w-4" />
-            Voir Dernier Rapport
-            <ChevronRight className="ml-2 h-4 w-4" />
-          </Button>
-          
-          <Button
-            onClick={onViewHistory}
-            variant="outline"
-            className="w-full border-green-300 hover:bg-green-100"
-          >
-            <Eye className="mr-2 h-4 w-4" />
-            Historique Complet
-            <ChevronRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
       </CardContent>
     </Card>
   )
@@ -182,18 +166,88 @@ export function HubPatientSummary({ patientData, onViewHistory }: HubPatientSumm
 function extractPatientInfo(consultation: ConsultationHistoryItem) {
   // Try to extract from fullReport if available
   if (consultation.fullReport) {
-    const report = typeof consultation.fullReport === 'string' 
-      ? consultation.fullReport 
-      : JSON.stringify(consultation.fullReport)
-    
-    // Basic parsing (can be improved)
-    return {
-      name: consultation.fullReport?.compteRendu?.patient?.nom || '',
-      age: consultation.fullReport?.compteRendu?.patient?.age || null,
-      gender: consultation.fullReport?.compteRendu?.patient?.sexe || ''
+    const report = consultation.fullReport
+
+    // Try multiple possible locations for patient data
+    let name = ''
+    let age = null
+    let gender = ''
+
+    // French format (compteRendu)
+    if (report?.compteRendu?.patient) {
+      const patient = report.compteRendu.patient
+      name = patient.nom || patient.fullName || patient.name || ''
+      age = patient.age || null
+      gender = patient.sexe || patient.gender || ''
     }
+
+    // English format (medicalReport)
+    if (!name && report?.medicalReport?.patient) {
+      const patient = report.medicalReport.patient
+      name = patient.fullName || patient.name || `${patient.firstName || ''} ${patient.lastName || ''}`.trim()
+      age = patient.age || null
+      gender = patient.gender || patient.sex || ''
+    }
+
+    // Try header section
+    if (!name && report?.medicalReport?.header) {
+      const header = report.medicalReport.header
+      name = header.patientName || ''
+    }
+
+    // Try direct patient object in report
+    if (!name && report?.patient) {
+      const patient = report.patient
+      name = patient.fullName || patient.name || `${patient.firstName || ''} ${patient.lastName || ''}`.trim()
+      age = age || patient.age
+      gender = gender || patient.gender || patient.sex || ''
+    }
+
+    // Try ordonnance section for patient name
+    if (!name && report?.ordonnance?.patient) {
+      const patient = report.ordonnance.patient
+      name = patient.nom || patient.name || ''
+      age = age || patient.age
+    }
+
+    // Try consultation_report structure (new format)
+    if (!name && report?.consultation_report?.content?.patient) {
+      const patient = report.consultation_report.content.patient
+      name = patient.fullName || patient.name || `${patient.firstName || ''} ${patient.lastName || ''}`.trim()
+      age = age || patient.age
+      gender = gender || patient.gender || patient.sex || ''
+    }
+
+    // Try prescriptions structure for patient info
+    if (!name && report?.prescriptions?.content?.patient) {
+      const patient = report.prescriptions.content.patient
+      name = patient.fullName || patient.name || patient.nom || ''
+      age = age || patient.age
+      gender = gender || patient.gender || patient.sexe || ''
+    }
+
+    // Try to calculate age from date of birth if not directly available
+    if (!age && report?.medicalReport?.patient?.dateOfBirth) {
+      const dob = new Date(report.medicalReport.patient.dateOfBirth)
+      const today = new Date()
+      age = Math.floor((today.getTime() - dob.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+    }
+
+    if (!age && report?.compteRendu?.patient?.dateNaissance) {
+      const dob = new Date(report.compteRendu.patient.dateNaissance)
+      const today = new Date()
+      age = Math.floor((today.getTime() - dob.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+    }
+
+    if (!age && report?.consultation_report?.content?.patient?.dateOfBirth) {
+      const dob = new Date(report.consultation_report.content.patient.dateOfBirth)
+      const today = new Date()
+      age = Math.floor((today.getTime() - dob.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+    }
+
+    return { name, age, gender }
   }
-  
+
   return { name: '', age: null, gender: '' }
 }
 

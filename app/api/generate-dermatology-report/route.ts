@@ -1992,13 +1992,13 @@ export async function POST(request: NextRequest) {
           items: [{
             description: "Online dermatology consultation with image analysis via Tibok",
             quantity: 1,
-            unitPrice: 1500,
-            total: 1500
+            unitPrice: 950,
+            total: 950
           }],
-          subtotal: 1500,
+          subtotal: 950,
           vatRate: 0.15,
           vatAmount: 0,
-          totalDue: 1500
+          totalDue: 950
         },
         payment: {
           method: "[Credit Card / MCB Juice / MyT Money / Other]",
