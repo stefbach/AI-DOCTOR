@@ -5103,7 +5103,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <PrescriptionStats />
 
  <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
- <TabsList className="grid w-full grid-cols-7">
+ <TabsList className="flex flex-wrap w-full gap-1">
  <TabsTrigger value="consultation">
  <FileText className="h-4 w-4 mr-2" />
  Report
@@ -5147,9 +5147,9 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <Receipt className="h-4 w-4 mr-2" />
  Invoice
  </TabsTrigger>
- <TabsTrigger value="ai-assistant" className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white">
- <Brain className="h-4 w-4 mr-2" />
- AI Assistant
+ <TabsTrigger value="ai-assistant" className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold shadow-lg hover:from-teal-600 hover:to-cyan-600 data-[state=active]:ring-2 data-[state=active]:ring-yellow-400">
+ <Brain className="h-4 w-4 mr-2 animate-pulse" />
+ 🤖 AI Assistant
  </TabsTrigger>
  </TabsList>
 
