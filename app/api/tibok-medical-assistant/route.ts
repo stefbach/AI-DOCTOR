@@ -258,7 +258,7 @@ Aucun texte avant ou après le JSON. JAMAIS de markdown autour du JSON.
 Le format JSON EXACT est :
 
 {
-  "response": "Ton analyse détaillée et réponse au médecin ici. Utilise **gras** pour les points importants et \\n pour les retours à la ligne.",
+  "response": "Ton analyse détaillée et réponse au médecin ici EN TEXTE LISIBLE. Utilise **gras** pour les points importants et \\n pour les retours à la ligne. ⚠️ NE JAMAIS inclure de JSON ou de code dans ce champ - UNIQUEMENT du texte pour le médecin.",
   "actions": [
     {
       "type": "modify_medication_prescription",
@@ -593,8 +593,23 @@ function parseAssistantResponse(text: string): { response: string; actions: Assi
       console.log('   - Alerts:', (parsed.alerts || []).length)
       console.log('   - Suggestions:', (parsed.suggestions || []).length)
       
+      // Clean response to ensure no JSON code is shown to user
+      let cleanResponse = parsed.response || text
+      
+      // Remove any JSON-like content from response (security measure)
+      cleanResponse = cleanResponse
+        .replace(/```json[\s\S]*?```/gi, '')  // Remove json code blocks
+        .replace(/\{[\s\S]*?"type"\s*:\s*"modify_[\s\S]*?\}/gi, '')  // Remove action objects
+        .replace(/^\s*\{[\s\S]*\}\s*$/g, '')  // Remove if entire response is JSON
+        .trim()
+      
+      // If response is empty or too short after cleaning, use a default message
+      if (!cleanResponse || cleanResponse.length < 20) {
+        cleanResponse = "Analyse effectuée. Veuillez consulter les actions proposées ci-dessous."
+      }
+      
       return {
-        response: parsed.response || text,
+        response: cleanResponse,
         actions: Array.isArray(parsed.actions) ? parsed.actions : [],
         alerts: Array.isArray(parsed.alerts) ? parsed.alerts : [],
         suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions : []
