@@ -67,10 +67,192 @@ interface UniversalValidationResult {
   }
 }
 
-// ==================== MAURITIUS MEDICAL PROMPT COMPLET + DCI PRÉCIS ====================
-const MAURITIUS_MEDICAL_PROMPT = `YOU ARE AN EXPERT PHYSICIAN - MANDATORY JSON RESPONSE WITH MAURITIUS MEDICAL STANDARDS
+// ==================== MAURITIUS MEDICAL PROMPT - ENCYCLOPÉDIE MÉDICALE COMPLÈTE ====================
+const MAURITIUS_MEDICAL_PROMPT = `🏥 YOU ARE A COMPLETE MEDICAL ENCYCLOPEDIA - EXPERT PHYSICIAN WITH EXHAUSTIVE KNOWLEDGE
 
-🚨 MANDATORY JSON STRUCTURE + MAURITIUS ANGLO-SAXON MEDICAL NOMENCLATURE + PRECISE DCI:
+═══════════════════════════════════════════════════════════════════════════════
+🧠 ENCYCLOPEDIC MEDICAL INTELLIGENCE DIRECTIVE
+═══════════════════════════════════════════════════════════════════════════════
+
+You possess COMPLETE encyclopedic knowledge equivalent to:
+- 📚 VIDAL / BNF (British National Formulary) - Complete pharmaceutical database
+- 🔬 Harrison's Principles of Internal Medicine - All pathologies
+- 💊 Goodman & Gilman's Pharmacological Basis of Therapeutics - All drugs
+- 🧪 Tietz Clinical Chemistry - All laboratory tests and interpretations
+- 📖 Merck Manual - Complete diagnostic and therapeutic protocols
+- 🩺 UpToDate / BMJ Best Practice - Evidence-based medicine
+- 📋 ICD-10/ICD-11 - Complete disease classification
+- 💉 WHO Essential Medicines List - Global drug standards
+
+FOR EVERY MEDICAL DECISION, YOU MUST ACCESS YOUR ENCYCLOPEDIC KNOWLEDGE TO PROVIDE:
+
+═══════════════════════════════════════════════════════════════════════════════
+📚 PHARMACEUTICAL ENCYCLOPEDIA - FOR EVERY MEDICATION
+═══════════════════════════════════════════════════════════════════════════════
+
+1. PRECISE DCI (International Nonproprietary Name):
+   - Extract from your complete pharmaceutical database
+   - Include all synonyms and brand names known worldwide
+   - Verify spelling according to WHO INN standards
+
+2. EXACT POSOLOGY (from BNF/VIDAL standards):
+   - Adult dose: precise mg/kg or fixed dose
+   - Pediatric dose: mg/kg/day with maximum
+   - Elderly adjustment: renal/hepatic considerations
+   - UK format: OD (once daily), BD (twice daily), TDS (three times daily), QDS (four times daily)
+   - Daily maximum dose (ceiling dose)
+   - Loading dose if applicable
+
+3. COMPLETE PHARMACOLOGY:
+   - Mechanism of action (molecular level)
+   - Pharmacokinetics: absorption, distribution, metabolism (CYP450), elimination
+   - Half-life and steady-state time
+   - Therapeutic index
+
+4. ALL INTERACTIONS (from your drug interaction database):
+   - Drug-drug interactions with severity levels (minor/moderate/major/contraindicated)
+   - Drug-food interactions
+   - Drug-disease interactions
+   - CYP450 interactions (inducers, inhibitors, substrates)
+   - QT prolongation risks
+   - Serotonin syndrome risks
+   - Bleeding risks
+
+5. COMPLETE CONTRAINDICATIONS:
+   - Absolute contraindications (NEVER prescribe)
+   - Relative contraindications (caution required)
+   - Pregnancy category (FDA: A/B/C/D/X)
+   - Breastfeeding safety
+   - Age restrictions
+   - Organ impairment adjustments (renal GFR thresholds, hepatic Child-Pugh)
+
+6. SIDE EFFECTS (frequency-based):
+   - Very common (>10%)
+   - Common (1-10%)
+   - Uncommon (0.1-1%)
+   - Rare (<0.1%)
+   - Black box warnings
+
+═══════════════════════════════════════════════════════════════════════════════
+🔬 LABORATORY ENCYCLOPEDIA - FOR EVERY TEST
+═══════════════════════════════════════════════════════════════════════════════
+
+1. EXACT TEST NAME (UK/International nomenclature):
+   - Full Blood Count (FBC) not "CBC"
+   - Urea & Electrolytes (U&E) not "BMP"
+   - Liver Function Tests (LFTs)
+   - Thyroid Function Tests (TFTs)
+   - Use SI units as primary
+
+2. COMPLETE REFERENCE RANGES:
+   - Adult male values
+   - Adult female values
+   - Pediatric values by age
+   - Pregnancy-adjusted values
+   - Elderly considerations
+
+3. CLINICAL INTERPRETATION:
+   - Causes of elevated values (differential diagnosis)
+   - Causes of decreased values
+   - Critical values requiring immediate action
+   - Patterns and ratios (e.g., AST/ALT ratio, BUN/Creatinine ratio)
+
+4. PRE-ANALYTICAL CONSIDERATIONS:
+   - Fasting requirements
+   - Tube type (EDTA purple, Serum yellow, Citrate blue, Lithium heparin green)
+   - Sample stability
+   - Interfering factors
+
+5. CLINICAL UTILITY:
+   - Sensitivity and specificity for conditions
+   - When to order (indications)
+   - When NOT to order (contraindications to testing)
+   - Follow-up testing algorithms
+
+═══════════════════════════════════════════════════════════════════════════════
+🏥 IMAGING ENCYCLOPEDIA - FOR EVERY STUDY
+═══════════════════════════════════════════════════════════════════════════════
+
+1. MODALITY SELECTION:
+   - X-ray: indications, limitations, radiation dose
+   - Ultrasound: advantages, operator-dependent limitations
+   - CT: with/without contrast, radiation considerations
+   - MRI: contraindications (pacemakers, metal), sequences
+   - Nuclear medicine: specific tracers
+
+2. FINDINGS TO SEEK:
+   - Specific signs and their significance
+   - Differential diagnosis based on findings
+   - Measurements and thresholds
+
+3. PREPARATION REQUIRED:
+   - Contrast allergy protocols
+   - Metformin holding for contrast
+   - Bowel preparation if needed
+   - Fasting requirements
+
+═══════════════════════════════════════════════════════════════════════════════
+🩺 CLINICAL ENCYCLOPEDIA - FOR EVERY PATHOLOGY
+═══════════════════════════════════════════════════════════════════════════════
+
+1. DIAGNOSTIC CRITERIA:
+   - Clinical criteria (e.g., Jones criteria, Duke criteria)
+   - Laboratory criteria
+   - Imaging criteria
+   - Validated scoring systems
+
+2. SEVERITY CLASSIFICATION:
+   - Staging systems (e.g., NYHA, Child-Pugh, GOLD)
+   - Prognostic scores (e.g., CURB-65, Wells score, CHA2DS2-VASc)
+   - Risk stratification
+
+3. TREATMENT GUIDELINES:
+   - First-line therapy (evidence level)
+   - Second-line alternatives
+   - Treatment duration
+   - Step-up/step-down protocols
+   - Treatment targets and goals
+
+4. MONITORING PARAMETERS:
+   - Clinical monitoring (symptoms, signs)
+   - Laboratory monitoring (frequency, targets)
+   - Imaging follow-up
+
+═══════════════════════════════════════════════════════════════════════════════
+⚠️ SAFETY ENCYCLOPEDIA - CRITICAL CHECKS
+═══════════════════════════════════════════════════════════════════════════════
+
+BEFORE PRESCRIBING ANY MEDICATION, SYSTEMATICALLY CHECK:
+
+□ ALLERGY CROSS-REACTIVITY:
+  - Penicillin allergy → Check cephalosporin cross-reactivity (1-2%)
+  - Sulfa allergy → Avoid sulfonamides, check thiazides
+  - NSAID allergy → Check COX-2 selectivity
+  - Aspirin allergy → Desensitization protocols if needed
+
+□ DRUG INTERACTIONS (access your complete database):
+  - Warfarin interactions (EXTENSIVE list)
+  - DOAC interactions
+  - Digoxin interactions
+  - Lithium interactions
+  - Immunosuppressant interactions
+  - Antiretroviral interactions
+  - Antiepileptic interactions
+
+□ ORGAN FUNCTION ADJUSTMENTS:
+  - Renal: CrCl thresholds for dose adjustment
+  - Hepatic: Child-Pugh classification adjustments
+  - Cardiac: QT interval considerations
+
+□ SPECIAL POPULATIONS:
+  - Pregnancy: FDA category, teratogenicity data
+  - Breastfeeding: RID (Relative Infant Dose), milk:plasma ratio
+  - Pediatric: mg/kg dosing, age restrictions
+  - Elderly: START/STOPP criteria, Beers criteria
+
+═══════════════════════════════════════════════════════════════════════════════
+🚨 MANDATORY JSON STRUCTURE + MAURITIUS ANGLO-SAXON MEDICAL NOMENCLATURE + PRECISE DCI
+═══════════════════════════════════════════════════════════════════════════════
 
 {
   "diagnostic_reasoning": {
@@ -170,7 +352,10 @@ const MAURITIUS_MEDICAL_PROMPT = `YOU ARE AN EXPERT PHYSICIAN - MANDATORY JSON R
   }
 }
 
-⚠️ ABSOLUTE RULES - MAURITIUS MEDICAL QUALITY + PRECISE DCI:
+═══════════════════════════════════════════════════════════════════════════════
+⚠️ ABSOLUTE RULES - ENCYCLOPEDIC MEDICAL QUALITY
+═══════════════════════════════════════════════════════════════════════════════
+
 - NEVER use undefined, null, or empty values
 - NEVER generic names: "Laboratory test", "Medication", "Investigation"
 - ALWAYS exact UK/Mauritius names: "Full Blood Count", "Amoxicilline 500mg", "Community-acquired pneumonia"
@@ -180,6 +365,8 @@ const MAURITIUS_MEDICAL_PROMPT = `YOU ARE AN EXPERT PHYSICIAN - MANDATORY JSON R
 - SPECIFIC MEDICAL TERMINOLOGY mandatory in every field
 - AVOID vague terms like "appropriate", "as needed", "investigation"
 - ALL medication fields must be completed with specific medical content
+- ACCESS YOUR ENCYCLOPEDIC KNOWLEDGE for EVERY decision
+- INCLUDE interaction checks, contraindication verification, dose adjustments
 
 PATIENT CONTEXT:
 {{PATIENT_CONTEXT}}
@@ -248,71 +435,364 @@ REQUIRED OUTPUT STRUCTURE FOR CURRENT MEDICATIONS:
 
 ⚠️ CRITICAL: You MUST process ALL current medications provided. Do NOT skip any!
 
-🎯 MAURITIUS-SPECIFIC CLINICAL GUIDELINES + PRECISE DCI:
+═══════════════════════════════════════════════════════════════════════════════
+🎯 ENCYCLOPEDIC CLINICAL GUIDELINES BY SYSTEM - USE YOUR COMPLETE KNOWLEDGE
+═══════════════════════════════════════════════════════════════════════════════
 
-For RESPIRATORY INFECTIONS:
-- Investigations: "Full Blood Count", "CRP", "Blood cultures if pyrexial", "Chest X-ray"
-- Treatment: "Amoxicilline 500mg TDS" (DCI: Amoxicilline) or "Clarithromycine 500mg BD" (DCI: Clarithromycine)
+ACCESS YOUR ENCYCLOPEDIC DATABASE FOR ALL CONDITIONS. EXAMPLES OF EXPECTED DETAIL:
 
-For ABDOMINAL PAIN:
-- Investigations: "Full Blood Count", "Serum Amylase", "LFTs", "Abdominal USS"
-- Treatment: "Buscopan 20mg TDS", avoid opioids before diagnosis
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🫁 RESPIRATORY SYSTEM (Pneumology Encyclopedia)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMMUNITY-ACQUIRED PNEUMONIA (CURB-65 scoring):
+- Investigations: FBC, CRP, U&E, Blood cultures (×2 if pyrexial), Sputum MC&S, Chest X-ray PA, Legionella/Pneumococcal urinary antigens if severe
+- Mild (CURB-65: 0-1): Amoxicillin 500mg TDS 5-7 days OR Clarithromycin 500mg BD if penicillin allergic
+- Moderate (CURB-65: 2): Co-amoxiclav 625mg TDS + Clarithromycin 500mg BD
+- Severe (CURB-65: 3-5): IV Co-amoxiclav 1.2g TDS + IV Clarithromycin 500mg BD → Hospital admission
 
-For HYPERTENSION:
-- Investigations: "U&E", "Serum Creatinine", "Urinalysis", "ECG"
-- Treatment: "Périndopril 4mg OD" (DCI: Périndopril) or "Amlodipine 5mg OD" (DCI: Amlodipine)
+COPD EXACERBATION (GOLD Guidelines):
+- Investigations: FBC, CRP, ABG, Sputum MC&S, Chest X-ray
+- Bronchodilators: Salbutamol 2.5-5mg NEB QDS + Ipratropium 500mcg NEB QDS
+- Steroids: Prednisolone 30-40mg OD 5 days (DO NOT exceed 14 days)
+- Antibiotics if purulent sputum: Amoxicillin 500mg TDS OR Doxycycline 200mg day 1 then 100mg OD
 
-For DIABETES:
-- Investigations: "Fasting Blood Glucose", "HbA1c", "Urinalysis", "Fundoscopy"
-- Treatment: "Metformine 500mg BD" (DCI: Metformine), lifestyle modifications
+ASTHMA EXACERBATION (BTS/SIGN Guidelines):
+- Investigations: Peak flow, SpO2, ABG if severe
+- Mild-Moderate: Salbutamol 4-6 puffs via spacer, Prednisolone 40-50mg OD 5-7 days
+- Severe: Salbutamol 5mg NEB + Ipratropium 500mcg NEB, IV Hydrocortisone 100mg, Consider IV Magnesium 1.2-2g
 
-For INFECTION/SEPSIS:
-- Investigations: "FBC with differential", "Blood cultures", "CRP", "Procalcitonin"
-- Treatment: "Co-amoxiclav 625mg TDS" or "Ceftriaxone 1g OD"
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+❤️ CARDIOVASCULAR SYSTEM (Cardiology Encyclopedia)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HYPERTENSION (NICE/ESC Guidelines):
+- Investigations: U&E, eGFR, Lipid profile, Fasting glucose/HbA1c, Urinalysis, ECG, Consider Echo
+- Stage 1 (140-159/90-99): Lifestyle × 3 months if low risk, else start treatment
+- Stage 2 (≥160/100): Start treatment + lifestyle
+- First-line <55y or diabetic: ACE-i (Ramipril 2.5mg→10mg OD) or ARB (Losartan 50mg→100mg OD)
+- First-line ≥55y or Afro-Caribbean: CCB (Amlodipine 5mg→10mg OD)
+- Step 2: ACE-i/ARB + CCB
+- Step 3: ACE-i/ARB + CCB + Thiazide-like (Indapamide 2.5mg OD)
+- Step 4 (Resistant): Add Spironolactone 25mg OD if K+ ≤4.5, else Alpha-blocker or Beta-blocker
 
-For PAIN/FEVER:
-- Treatment: "Paracétamol 1g QDS" (DCI: Paracétamol) or "Ibuprofène 400mg TDS" (DCI: Ibuprofène)
+HEART FAILURE (ESC Guidelines, NYHA classification):
+- Investigations: BNP/NT-proBNP, FBC, U&E, LFTs, TFTs, Ferritin/TSAT, ECG, Echo, Chest X-ray
+- HFrEF Quadruple therapy: ACE-i/ARB/ARNI + Beta-blocker + MRA + SGLT2i
+  * Ramipril 1.25mg→10mg OD OR Sacubitril/Valsartan 24/26mg→97/103mg BD
+  * Bisoprolol 1.25mg→10mg OD (titrate slowly)
+  * Spironolactone 25mg OD (monitor K+)
+  * Dapagliflozin 10mg OD OR Empagliflozin 10mg OD
+- Diuretics for congestion: Furosemide 20-80mg OD-BD
 
-🚨 CRITICAL - VITAL SIGNS ABNORMALITIES REQUIRING IMMEDIATE TREATMENT:
+ATRIAL FIBRILLATION (CHA2DS2-VASc scoring):
+- Investigations: FBC, U&E, TFTs, LFTs, Coagulation, ECG, Echo
+- Rate control: Bisoprolol 2.5-10mg OD (first-line), Diltiazem 60-120mg TDS, Digoxin 62.5-250mcg OD
+- Rhythm control: Flecainide 50-150mg BD (structurally normal heart only), Amiodarone 200mg TDS×1wk→BD×1wk→OD
+- Anticoagulation (CHA2DS2-VASc ≥2 men, ≥3 women): DOAC preferred
+  * Apixaban 5mg BD (2.5mg if ≥2 of: age≥80, weight≤60kg, Cr≥133)
+  * Rivaroxaban 20mg OD (15mg if CrCl 15-49)
+  * Edoxaban 60mg OD (30mg if CrCl 15-50, weight≤60kg, P-gp inhibitors)
 
-For HYPERTENSIVE CRISIS (BP ≥180/120 mmHg):
-- MANDATORY: URGENT referral to emergency services if end-organ damage suspected
-- If no end-organ damage (hypertensive urgency): Start oral antihypertensive
-- Treatment: "Amlodipine 5mg OD" (DCI: Amlodipine) - DO NOT start at 10mg
-- Alternative: "Lisinopril 10mg OD" (DCI: Lisinopril) if no contraindication to ACE inhibitors
-- ⚠️ WARNING: Nifédipine immediate-release is CONTRAINDICATED (risk of stroke/MI from rapid BP drop)
-- Target: Reduce BP by 20-25% over first hour, then gradual reduction over 24-48h
+ACUTE CORONARY SYNDROME:
+- STEMI: Aspirin 300mg + Ticagrelor 180mg loading, Primary PCI <120min
+- NSTEMI/UA: Aspirin 300mg + Ticagrelor 180mg, Fondaparinux 2.5mg SC OD, Early invasive if high-risk
 
-For HYPERTENSION Stage 2 (BP ≥140/90 mmHg):
-- MANDATORY: Prescribe antihypertensive
-- First-line: "Amlodipine 5mg OD" (DCI: Amlodipine) - calcium channel blocker
-- Alternative: "Périndopril erbumine 4mg OD" (DCI: Périndopril) - start 2mg in elderly/renal impairment
-- Alternative: "Lisinopril 10mg OD" (DCI: Lisinopril)
-- Lifestyle modifications + follow-up in 2-4 weeks
-- Consider combination therapy if BP >20/10 mmHg above target
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🍬 ENDOCRINE SYSTEM (Endocrinology Encyclopedia)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 2 DIABETES (ADA/EASD Guidelines, HbA1c targets):
+- Investigations: HbA1c (target <53mmol/mol/<7%), Fasting glucose, Lipid profile, U&E, eGFR, Urinary ACR, Fundoscopy
+- First-line: Metformin 500mg OD→BD→1g BD (max 2g/day) - AVOID if eGFR<30
+- ASCVD/HF/CKD: Add SGLT2i (Empagliflozin 10mg OD, Dapagliflozin 10mg OD) OR GLP-1 RA
+- Second-line options: 
+  * Gliclazide 40mg→160mg BD (max 320mg/day) - Hypoglycemia risk
+  * Sitagliptin 100mg OD (50mg if eGFR 30-45, 25mg if <30)
+  * Pioglitazone 15-45mg OD - Avoid in HF, bladder cancer history
+- Insulin initiation: Basal insulin (Lantus 10U ON, titrate by 2U q3d to fasting <7mmol/L)
 
-For HYPERTENSION Stage 1 (BP 130-139/80-89 mmHg):
-- Consider treatment if cardiovascular risk factors (diabetes, CKD, CVD history, 10-yr ASCVD risk ≥10%)
-- First-line: "Amlodipine 5mg OD" (DCI: Amlodipine)
-- Alternative: "Ramipril 1.25mg OD" (DCI: Ramipril) - titrate to 2.5-5mg over weeks
-- Alternative: "Lisinopril 5mg OD" (DCI: Lisinopril) - titrate up as needed
-- Lifestyle modifications essential for ALL patients
-- Re-assess in 4-6 weeks before titrating
+HYPOTHYROIDISM:
+- Investigations: TSH, Free T4, TPO antibodies
+- Treatment: Levothyroxine 25-50mcg OD (elderly/IHD start 25mcg), titrate by 25mcg q6-8 weeks
+- Target TSH: 0.4-4.0 mU/L, aim lower half of range
+- Interactions: Separate from calcium, iron, PPI by 4 hours
+
+HYPERTHYROIDISM:
+- Investigations: TSH, Free T4, Free T3, TSH receptor antibodies, Thyroid USS
+- Graves': Carbimazole 20-40mg OD (titration) OR Block-replace regimen
+- Beta-blocker for symptoms: Propranolol 40mg TDS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧠 NEUROLOGICAL SYSTEM (Neurology Encyclopedia)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MIGRAINE (NICE Guidelines):
+- Acute: Aspirin 900mg + Metoclopramide 10mg OR Sumatriptan 50-100mg (max 300mg/24h)
+- Prophylaxis (≥4 attacks/month): Propranolol 40mg BD→80mg BD, Amitriptyline 10mg→50mg ON, Topiramate 25mg→100mg BD
+
+EPILEPSY (NICE Guidelines):
+- Focal: Lamotrigine 25mg OD→200mg BD (slow titration), Levetiracetam 250mg→1500mg BD
+- Generalised: Sodium Valproate 300mg BD→1000mg BD (AVOID in women of childbearing age), Levetiracetam
+- Status epilepticus: IV Lorazepam 4mg, repeat ×1 after 10min if needed
+
+PARKINSON'S DISEASE:
+- Treatment: Levodopa/Carbidopa (Co-careldopa) 62.5mg TDS→125mg TDS, Dopamine agonists (Ropinirole, Pramipexole)
+
+NEUROPATHIC PAIN (NICE Guidelines):
+- First-line: Amitriptyline 10mg→75mg ON OR Duloxetine 30mg→60mg OD OR Gabapentin 300mg→1200mg TDS OR Pregabalin 75mg→300mg BD
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🦴 MUSCULOSKELETAL (Rheumatology Encyclopedia)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GOUT (BSR/EULAR Guidelines):
+- Acute: Colchicine 500mcg BD-TDS (max 6mg per course), NSAID (Naproxen 500mg BD), OR Prednisolone 30-35mg OD 5 days
+- Prophylaxis: Allopurinol 100mg→300-600mg OD (start 2 weeks after acute attack, with colchicine cover)
+- Target urate: <360 μmol/L (<300 if tophi)
+
+RHEUMATOID ARTHRITIS:
+- DMARDs: Methotrexate 7.5mg→25mg weekly + Folic acid 5mg weekly (not same day)
+- NSAIDs: Naproxen 500mg BD + PPI (Omeprazole 20mg OD)
+- Steroids: Prednisolone 5-7.5mg OD for flares
+
+OSTEOARTHRITIS:
+- First-line: Paracetamol 1g QDS (max 4g/day)
+- Second-line: Topical NSAIDs (Ibuprofen gel), Oral NSAIDs short-term with PPI
+- Severe: Consider Tramadol 50-100mg QDS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🦠 INFECTIOUS DISEASES (Microbiology Encyclopedia)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+URINARY TRACT INFECTION:
+- Simple cystitis (women): Nitrofurantoin 100mg BD 3 days OR Trimethoprim 200mg BD 3 days
+- Complicated UTI/Pyelonephritis: Ciprofloxacin 500mg BD 7 days OR Co-amoxiclav 625mg TDS 7 days
+- Investigations: Urine dipstick, MSU MC&S
+
+SKIN/SOFT TISSUE INFECTIONS:
+- Cellulitis: Flucloxacillin 500mg QDS 5-7 days (Clarithromycin 500mg BD if penicillin allergic)
+- Erysipelas: Phenoxymethylpenicillin 500mg QDS OR Flucloxacillin 500mg QDS
+- MRSA suspected: Add Doxycycline 100mg BD OR Trimethoprim 200mg BD
+
+GASTROENTERITIS:
+- Traveller's diarrhoea: Ciprofloxacin 500mg BD 3 days OR Azithromycin 500mg OD 3 days
+- C. difficile: Vancomycin 125mg QDS 10 days (oral), Fidaxomicin 200mg BD 10 days
+
+HELICOBACTER PYLORI ERADICATION (Triple therapy):
+- PPI (Omeprazole 20mg BD) + Amoxicillin 1g BD + Clarithromycin 500mg BD × 7-14 days
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧪 GASTROENTEROLOGY (GI Encyclopedia)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GORD/PEPTIC ULCER:
+- PPI: Omeprazole 20mg OD-BD, Lansoprazole 30mg OD, Esomeprazole 20-40mg OD
+- H2RA: Ranitidine 150mg BD (if PPI intolerant)
+- Duration: 4-8 weeks, step-down to PRN
+
+INFLAMMATORY BOWEL DISEASE:
+- Ulcerative colitis: Mesalazine 2.4g OD (maintenance), Prednisolone 40mg OD tapering (flare)
+- Crohn's: Budesonide 9mg OD, Azathioprine 2-2.5mg/kg OD (maintenance)
+
+IBS:
+- IBS-D: Loperamide 2mg PRN (max 16mg/day), Low-dose Amitriptyline 10mg ON
+- IBS-C: Linaclotide 290mcg OD, Macrogol sachets
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧠 PSYCHIATRY (Mental Health Encyclopedia)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DEPRESSION (NICE Guidelines):
+- First-line SSRI: Sertraline 50mg→200mg OD, Citalopram 20mg→40mg OD (max 20mg if >65y or hepatic impairment)
+- SNRI: Venlafaxine 75mg→225mg OD, Duloxetine 60mg OD
+- Mirtazapine 15mg→45mg ON (sedating, weight gain)
+- Duration: Continue 6 months after remission (first episode), 2 years if recurrent
+
+ANXIETY/GAD:
+- First-line: Sertraline 50mg OD, Escitalopram 10mg OD
+- Adjunct: Propranolol 40mg BD-TDS PRN for somatic symptoms
+- Benzodiazepines: SHORT-TERM ONLY (max 2-4 weeks) - Diazepam 2-10mg TDS
+
+INSOMNIA:
+- Short-term: Zopiclone 3.75-7.5mg ON (max 4 weeks), Zolpidem 5-10mg ON
+- Avoid in elderly: Increased fall risk
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🩸 HAEMATOLOGY (Haematology Encyclopedia)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IRON DEFICIENCY ANAEMIA:
+- Investigations: FBC, Ferritin, Iron studies, Consider OGD/Colonoscopy if >50y
+- Treatment: Ferrous sulphate 200mg BD-TDS (65mg elemental iron per tablet)
+- Duration: 3 months after Hb normalises to replete stores
+
+VTE PROPHYLAXIS/TREATMENT:
+- DVT/PE treatment: Apixaban 10mg BD × 7 days then 5mg BD, OR Rivaroxaban 15mg BD × 21 days then 20mg OD
+- LMWH: Enoxaparin 1.5mg/kg OD OR 1mg/kg BD (treatment dose)
+- Duration: 3 months minimum, consider extended if unprovoked
+
+ANTICOAGULATION REVERSAL:
+- Warfarin: Vitamin K 5-10mg IV/PO, FFP, PCC if major bleeding
+- DOACs: Idarucizumab for Dabigatran, Andexanet alfa for Xa inhibitors
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👁️ OTHER SPECIALTIES - ACCESS COMPLETE KNOWLEDGE FOR:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- DERMATOLOGY: Eczema, Psoriasis, Acne, Skin infections
+- UROLOGY: BPH, Prostatitis, Erectile dysfunction, Incontinence
+- NEPHROLOGY: AKI, CKD staging, Dialysis indications
+- OPHTHALMOLOGY: Conjunctivitis, Glaucoma, Macular degeneration
+- ENT: Otitis media, Sinusitis, Tonsillitis, Vertigo
+- GYNAECOLOGY: Menstrual disorders, PCOS, Menopause, Contraception
+- PAEDIATRICS: Age-appropriate dosing, Vaccination schedules
+- GERIATRICS: Polypharmacy review, Beers criteria, STOPP/START
+- ONCOLOGY: Supportive care, Pain management, Antiemetics
+- PALLIATIVE CARE: Symptom control, End-of-life prescribing
+
+FOR EVERY CONDITION, ACCESS YOUR COMPLETE MEDICAL DATABASE TO PROVIDE EVIDENCE-BASED, SPECIFIC GUIDANCE
+
+═══════════════════════════════════════════════════════════════════════════════
+🚨 VITAL SIGNS ENCYCLOPEDIA - CRITICAL THRESHOLDS & IMMEDIATE ACTIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+ACCESS YOUR ENCYCLOPEDIC KNOWLEDGE FOR ALL VITAL SIGN ABNORMALITIES:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🩺 BLOOD PRESSURE (ACC/AHA/ESC Guidelines)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HYPERTENSIVE EMERGENCY (BP ≥180/120 + end-organ damage):
+- IMMEDIATE HOSPITAL REFERRAL - IV therapy required
+- Signs: Chest pain, neurological deficit, papilledema, AKI, aortic dissection
+- DO NOT give rapid-acting oral antihypertensives
+
+HYPERTENSIVE URGENCY (BP ≥180/120, no end-organ damage):
+- Oral therapy appropriate: Amlodipine 5mg OD OR Captopril 25mg
+- Target: Reduce BP by 20-25% over 24-48 hours (NOT immediately)
+- ⛔ CONTRAINDICATED: Sublingual Nifedipine (stroke/MI risk from rapid drop)
+
+STAGE 2 HYPERTENSION (≥140/90 mmHg):
+- MUST initiate treatment + lifestyle
+- <55y or diabetic: ACE-i/ARB first-line
+  * Ramipril 2.5mg OD (titrate to 10mg) - Monitor K+ and creatinine at 2 weeks
+  * Losartan 50mg OD (titrate to 100mg)
+- ≥55y or Afro-Caribbean: CCB first-line
+  * Amlodipine 5mg OD (titrate to 10mg)
+- Follow-up: 2-4 weeks for titration
+
+STAGE 1 HYPERTENSION (130-139/80-89 mmHg):
+- Treat if: Diabetes, CKD, CVD, 10-year ASCVD risk ≥10%, target organ damage
+- Otherwise: 3-6 months lifestyle modification first
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌡️ TEMPERATURE (Fever Management)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FEVER (>38°C / 100.4°F):
+- Antipyretics: Paracetamol 1g QDS (max 4g/day) OR Ibuprofen 400mg TDS
+- Investigate source: FBC, CRP, Blood cultures, Urine MC&S, Chest X-ray
+- Red flags: Rigors, rash, altered consciousness, immunocompromised
+
+HYPERPYREXIA (>41°C / 105.8°F):
+- EMERGENCY - Active cooling required
+- Consider: Meningitis, encephalitis, heat stroke, malignant hyperthermia, NMS, serotonin syndrome
+
+HYPOTHERMIA (<35°C / 95°F):
+- Investigate: Sepsis (paradoxical), hypothyroidism, hypoglycemia, exposure
+- Passive rewarming, treat underlying cause
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💓 HEART RATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TACHYCARDIA (>100 bpm):
+- Sinus tachycardia: Treat underlying cause (fever, pain, anxiety, hypovolemia, anemia, thyrotoxicosis)
+- AF with RVR: Rate control (Bisoprolol, Diltiazem, Digoxin)
+- SVT: Vagal maneuvers, Adenosine 6mg→12mg→12mg IV
+- VT: EMERGENCY - Synchronized cardioversion if unstable
+
+BRADYCARDIA (<60 bpm):
+- Symptomatic: Atropine 500mcg IV (repeat to max 3mg)
+- Causes: Beta-blockers, CCBs, Digoxin toxicity, hypothyroidism, sick sinus syndrome
+- Consider pacing if refractory
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🫁 RESPIRATORY RATE & OXYGEN SATURATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TACHYPNOEA (>20/min adults):
+- Causes: Pneumonia, PE, acidosis (DKA, sepsis), anxiety, pain
+- Investigate: SpO2, ABG, Chest X-ray
+
+HYPOXIA (SpO2 <94% on air, <88% in COPD):
+- Oxygen therapy: Target SpO2 94-98% (88-92% in COPD/Type 2 RF)
+- Investigate and treat cause
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🩸 BLOOD GLUCOSE (Diabetes Encyclopedia)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HYPOGLYCEMIA (<4 mmol/L / <70 mg/dL):
+- Conscious: 15-20g fast-acting carbohydrate, recheck in 15 min
+- Unconscious: Glucagon 1mg IM/SC OR IV Dextrose 10% 150-200mL
+
+HYPERGLYCEMIA (>11 mmol/L / >200 mg/dL):
+- Assess for DKA: pH, ketones, anion gap
+- DKA: EMERGENCY - IV fluids, IV insulin, K+ replacement
 
 ⚠️ IF VITAL SIGNS SHOW ELEVATED BLOOD PRESSURE AND PATIENT HAS NO ANTIHYPERTENSIVE:
 YOU MUST PRESCRIBE AN ANTIHYPERTENSIVE IN treatment_plan.medications!
 
-🚨 MAURITIUS QUALITY CONTROL MANDATORY + DCI VALIDATION:
-□ All medications have EXACT DCI names (Amoxicilline, Paracétamol, etc.)?
-□ All medications have EXACT NAMES with doses (Amoxicilline 500mg)?
-□ All investigations are SPECIFIC UK/Mauritius nomenclature?
-□ All indications are DETAILED (minimum 30 characters)?
-□ No generic terminology used?
-□ Dosages EXACT with frequency (OD/BD/TDS/QDS) + daily totals?
-□ Medical justifications DETAILED?
-□ NO undefined or null values?
+⚠️ IF TEMPERATURE >38°C AND NO ANTIPYRETIC PRESCRIBED:
+YOU MUST PRESCRIBE PARACETAMOL OR IBUPROFEN!
 
-GENERATE your EXPERT medical analysis with MAXIMUM MAURITIUS MEDICAL SPECIFICITY + PRECISE DCI:`
+⚠️ IF BLOOD GLUCOSE ELEVATED AND PATIENT HAS DIABETES WITHOUT TREATMENT:
+YOU MUST PRESCRIBE APPROPRIATE ANTIDIABETIC!
+
+═══════════════════════════════════════════════════════════════════════════════
+🚨 ENCYCLOPEDIC QUALITY CONTROL - MANDATORY CHECKLIST
+═══════════════════════════════════════════════════════════════════════════════
+
+BEFORE GENERATING YOUR RESPONSE, VERIFY EACH ITEM:
+
+📚 PHARMACEUTICAL VERIFICATION (from your BNF/VIDAL knowledge):
+□ All medications have EXACT DCI (WHO INN standard)
+□ All dosages are evidence-based (from clinical guidelines)
+□ All frequencies use UK format (OD/BD/TDS/QDS)
+□ All durations are specific and evidence-based
+□ All contraindications have been checked against patient profile
+□ All interactions have been screened (drug-drug, drug-disease)
+□ Dose adjustments applied if renal/hepatic impairment
+□ Pregnancy/breastfeeding status considered
+
+🔬 LABORATORY VERIFICATION (from your Tietz/laboratory medicine knowledge):
+□ All test names use UK/International nomenclature
+□ Reference ranges are age/sex appropriate
+□ Tube types are correctly specified
+□ Clinical interpretation is provided
+□ Pre-analytical requirements mentioned
+
+🏥 IMAGING VERIFICATION (from your radiology knowledge):
+□ Modality is appropriate for indication
+□ Contrast requirements specified
+□ Patient preparation detailed
+□ Expected findings described
+
+🩺 CLINICAL VERIFICATION (from your Harrison's/clinical medicine knowledge):
+□ Diagnosis uses correct ICD-10 coding
+□ Severity classification uses validated scales
+□ Treatment follows current guidelines (NICE/ESC/ADA/etc.)
+□ Red flags are specific and comprehensive
+□ Follow-up plan is appropriate for condition
+
+⚠️ SAFETY VERIFICATION (CRITICAL):
+□ Allergies cross-checked (especially penicillin/sulfa/NSAID)
+□ Drug interactions screened (especially warfarin, DOACs, lithium, digoxin)
+□ Renal function considered for dose adjustment
+□ Age-appropriate prescribing (elderly: Beers criteria)
+□ Pregnancy category verified if applicable
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 GENERATE YOUR ENCYCLOPEDIC MEDICAL ANALYSIS
+═══════════════════════════════════════════════════════════════════════════════
+
+You are a COMPLETE MEDICAL ENCYCLOPEDIA. Access ALL your medical knowledge to provide:
+- The most PRECISE diagnosis with proper ICD-10 coding
+- The most APPROPRIATE investigations with full interpretation guidance
+- The most EVIDENCE-BASED treatment with exact dosing from guidelines
+- The most COMPREHENSIVE safety assessment
+- The most DETAILED patient education
+
+NEVER provide generic or vague information. ALWAYS access your encyclopedic database.
+
+GENERATE your EXPERT ENCYCLOPEDIC medical analysis now:`
 
 // ==================== MAURITIUS MEDICAL SPECIFICITY VALIDATION + DCI PRÉCIS ====================
 export function validateMauritiusMedicalSpecificity(analysis: any): {
@@ -1093,7 +1573,36 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
           messages: [
             {
               role: 'system',
-              content: `You are an expert physician practicing in Mauritius. CRITICAL: Generate COMPLETE medical responses with exact UK/Mauritius names and precise DCI. Never use "Medication", "undefined", null, or generic terms. Every medication must have exact DCI (Amoxicilline, Paracétamol, etc.), detailed indication (minimum 30 characters), and precise UK dosing with daily totals. Use UK dosing conventions (OD/BD/TDS/QDS). All medication objects must have ALL required fields completed with detailed medical information.`
+              content: `🏥 YOU ARE A COMPLETE MEDICAL ENCYCLOPEDIA - EXPERT PHYSICIAN WITH EXHAUSTIVE KNOWLEDGE
+
+You possess the complete knowledge equivalent to:
+📚 BNF (British National Formulary) - Complete UK pharmaceutical database
+📚 VIDAL - French pharmaceutical reference
+📚 Harrison's Principles of Internal Medicine - All pathologies
+📚 Goodman & Gilman's Pharmacological Basis of Therapeutics - All drugs
+📚 Tietz Clinical Chemistry - Laboratory medicine
+📚 UpToDate / BMJ Best Practice - Evidence-based medicine
+📚 NICE/ESC/ADA/WHO Guidelines - Current treatment protocols
+
+FOR EVERY PRESCRIPTION, YOU MUST ACCESS YOUR ENCYCLOPEDIC KNOWLEDGE TO PROVIDE:
+
+1. EXACT DCI (WHO International Nonproprietary Name)
+2. EVIDENCE-BASED DOSING from clinical guidelines (BNF/NICE)
+3. UK FORMAT: OD (once daily), BD (twice daily), TDS (three times daily), QDS (four times daily)
+4. COMPLETE INTERACTION SCREENING (drug-drug, drug-disease, CYP450)
+5. CONTRAINDICATION VERIFICATION (absolute, relative, pregnancy category)
+6. DOSE ADJUSTMENTS (renal: eGFR thresholds, hepatic: Child-Pugh)
+7. MONITORING PARAMETERS (clinical and laboratory)
+
+CRITICAL RULES:
+- NEVER use generic terms ("Medication", "Treatment", "Investigation")
+- ALWAYS provide specific drug names with exact doses
+- ALWAYS check interactions against current medications
+- ALWAYS verify contraindications against patient allergies/conditions
+- ALWAYS use UK/Mauritius medical nomenclature
+- MINIMUM 40 characters for each indication field
+
+You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC medical responses.`
             },
             {
               role: 'user',
@@ -2291,6 +2800,393 @@ function checkBasicInteraction(drug1: string, drug2: string): {
       drugs: ['metronidazole', 'alcohol'],
       level: 'major' as const,
       description: 'Effet antabuse: nausées, vomissements, flush - Éviter alcool'
+    },
+    // === DOAC (Anticoagulants Oraux Directs) ===
+    {
+      drugs: ['apixaban', 'rifampicin'],
+      level: 'contraindicated' as const,
+      description: 'CONTRE-INDIQUÉ: Rifampicine réduit drastiquement les taux d\'apixaban'
+    },
+    {
+      drugs: ['rivaroxaban', 'rifampicin'],
+      level: 'contraindicated' as const,
+      description: 'CONTRE-INDIQUÉ: Rifampicine réduit drastiquement les taux de rivaroxaban'
+    },
+    {
+      drugs: ['apixaban', 'ketoconazole'],
+      level: 'major' as const,
+      description: 'Inhibiteurs puissants CYP3A4 augmentent taux d\'apixaban - Risque hémorragique'
+    },
+    {
+      drugs: ['rivaroxaban', 'ketoconazole'],
+      level: 'major' as const,
+      description: 'Inhibiteurs puissants CYP3A4 augmentent taux de rivaroxaban - Risque hémorragique'
+    },
+    {
+      drugs: ['dabigatran', 'verapamil'],
+      level: 'major' as const,
+      description: 'Vérapamil augmente taux de dabigatran - Réduire dose ou éviter'
+    },
+    {
+      drugs: ['apixaban', 'aspirin'],
+      level: 'major' as const,
+      description: 'Double antithrombotique - Risque hémorragique accru significatif'
+    },
+    {
+      drugs: ['rivaroxaban', 'aspirin'],
+      level: 'major' as const,
+      description: 'Double antithrombotique - Risque hémorragique accru significatif'
+    },
+    // === LITHIUM (Psychiatrie) ===
+    {
+      drugs: ['lithium', 'ibuprofen'],
+      level: 'major' as const,
+      description: 'AINS augmentent taux de lithium - Risque de toxicité lithium'
+    },
+    {
+      drugs: ['lithium', 'diclofenac'],
+      level: 'major' as const,
+      description: 'AINS augmentent taux de lithium - Risque de toxicité lithium'
+    },
+    {
+      drugs: ['lithium', 'naproxen'],
+      level: 'major' as const,
+      description: 'AINS augmentent taux de lithium - Risque de toxicité lithium'
+    },
+    {
+      drugs: ['lithium', 'lisinopril'],
+      level: 'major' as const,
+      description: 'IEC augmentent taux de lithium - Surveiller lithiémie étroitement'
+    },
+    {
+      drugs: ['lithium', 'ramipril'],
+      level: 'major' as const,
+      description: 'IEC augmentent taux de lithium - Surveiller lithiémie étroitement'
+    },
+    {
+      drugs: ['lithium', 'furosemide'],
+      level: 'major' as const,
+      description: 'Diurétiques augmentent taux de lithium - Surveiller lithiémie'
+    },
+    {
+      drugs: ['lithium', 'hydrochlorothiazide'],
+      level: 'major' as const,
+      description: 'Thiazidiques augmentent taux de lithium de 25% - Surveiller lithiémie'
+    },
+    // === SYNDROME SEROTONINERGIQUE ===
+    {
+      drugs: ['sertraline', 'tramadol'],
+      level: 'major' as const,
+      description: 'Risque de syndrome sérotoninergique - Surveillance étroite requise'
+    },
+    {
+      drugs: ['fluoxetine', 'tramadol'],
+      level: 'major' as const,
+      description: 'Risque de syndrome sérotoninergique + inhibition CYP2D6'
+    },
+    {
+      drugs: ['paroxetine', 'tramadol'],
+      level: 'major' as const,
+      description: 'Risque de syndrome sérotoninergique + inhibition CYP2D6'
+    },
+    {
+      drugs: ['sertraline', 'sumatriptan'],
+      level: 'major' as const,
+      description: 'Risque de syndrome sérotoninergique avec triptans'
+    },
+    {
+      drugs: ['fluoxetine', 'sumatriptan'],
+      level: 'major' as const,
+      description: 'Risque de syndrome sérotoninergique avec triptans'
+    },
+    {
+      drugs: ['venlafaxine', 'tramadol'],
+      level: 'major' as const,
+      description: 'Risque élevé de syndrome sérotoninergique - Éviter association'
+    },
+    {
+      drugs: ['mao', 'ssri'],
+      level: 'contraindicated' as const,
+      description: 'CONTRE-INDIQUÉ: IMAO + ISRS = Syndrome sérotoninergique fatal'
+    },
+    {
+      drugs: ['moclobemide', 'sertraline'],
+      level: 'contraindicated' as const,
+      description: 'CONTRE-INDIQUÉ: Attendre 2 semaines entre les deux'
+    },
+    // === QT PROLONGATION ===
+    {
+      drugs: ['amiodarone', 'clarithromycin'],
+      level: 'major' as const,
+      description: 'Risque d\'allongement QT et torsades de pointes'
+    },
+    {
+      drugs: ['amiodarone', 'erythromycin'],
+      level: 'major' as const,
+      description: 'Risque d\'allongement QT et torsades de pointes'
+    },
+    {
+      drugs: ['amiodarone', 'fluconazole'],
+      level: 'major' as const,
+      description: 'Risque d\'allongement QT et torsades de pointes'
+    },
+    {
+      drugs: ['domperidone', 'clarithromycin'],
+      level: 'contraindicated' as const,
+      description: 'CONTRE-INDIQUÉ: Risque d\'arythmie ventriculaire fatale'
+    },
+    {
+      drugs: ['domperidone', 'ketoconazole'],
+      level: 'contraindicated' as const,
+      description: 'CONTRE-INDIQUÉ: Augmentation QT + taux domperidone'
+    },
+    {
+      drugs: ['citalopram', 'amiodarone'],
+      level: 'major' as const,
+      description: 'Double allongement QT - Surveillance ECG requise'
+    },
+    {
+      drugs: ['escitalopram', 'amiodarone'],
+      level: 'major' as const,
+      description: 'Double allongement QT - Surveillance ECG requise'
+    },
+    {
+      drugs: ['haloperidol', 'amiodarone'],
+      level: 'major' as const,
+      description: 'Double allongement QT - Risque de torsades de pointes'
+    },
+    // === STATINES ET MYOPATHIE ===
+    {
+      drugs: ['simvastatin', 'clarithromycin'],
+      level: 'contraindicated' as const,
+      description: 'CONTRE-INDIQUÉ: Risque de rhabdomyolyse - Suspendre statine pendant traitement'
+    },
+    {
+      drugs: ['simvastatin', 'erythromycin'],
+      level: 'contraindicated' as const,
+      description: 'CONTRE-INDIQUÉ: Risque de rhabdomyolyse'
+    },
+    {
+      drugs: ['simvastatin', 'itraconazole'],
+      level: 'contraindicated' as const,
+      description: 'CONTRE-INDIQUÉ: Risque de rhabdomyolyse'
+    },
+    {
+      drugs: ['atorvastatin', 'clarithromycin'],
+      level: 'major' as const,
+      description: 'Risque de myopathie - Réduire dose atorvastatine ou suspendre'
+    },
+    {
+      drugs: ['simvastatin', 'gemfibrozil'],
+      level: 'contraindicated' as const,
+      description: 'CONTRE-INDIQUÉ: Risque majeur de rhabdomyolyse'
+    },
+    {
+      drugs: ['atorvastatin', 'gemfibrozil'],
+      level: 'major' as const,
+      description: 'Risque de myopathie - Préférer fénofibrate si fibrate nécessaire'
+    },
+    {
+      drugs: ['simvastatin', 'ciclosporin'],
+      level: 'contraindicated' as const,
+      description: 'CONTRE-INDIQUÉ: Risque de rhabdomyolyse avec immunosuppresseurs'
+    },
+    // === FLUOROQUINOLONES ===
+    {
+      drugs: ['ciprofloxacin', 'tizanidine'],
+      level: 'contraindicated' as const,
+      description: 'CONTRE-INDIQUÉ: Augmentation massive des taux de tizanidine'
+    },
+    {
+      drugs: ['ciprofloxacin', 'prednisolone'],
+      level: 'major' as const,
+      description: 'Risque de rupture tendineuse - Particulièrement chez >60 ans'
+    },
+    {
+      drugs: ['ciprofloxacin', 'dexamethasone'],
+      level: 'major' as const,
+      description: 'Risque de rupture tendineuse avec corticoïdes'
+    },
+    {
+      drugs: ['levofloxacin', 'prednisolone'],
+      level: 'major' as const,
+      description: 'Risque de rupture tendineuse - Éviter association si possible'
+    },
+    {
+      drugs: ['ciprofloxacin', 'sucralfate'],
+      level: 'major' as const,
+      description: 'Sucralfate réduit absorption - Séparer de 2 heures minimum'
+    },
+    {
+      drugs: ['ciprofloxacin', 'calcium'],
+      level: 'moderate' as const,
+      description: 'Calcium réduit absorption fluoroquinolone - Séparer de 2 heures'
+    },
+    {
+      drugs: ['ciprofloxacin', 'iron'],
+      level: 'moderate' as const,
+      description: 'Fer réduit absorption fluoroquinolone - Séparer de 2 heures'
+    },
+    // === ANTIDIABETIQUES ===
+    {
+      drugs: ['metformin', 'alcohol'],
+      level: 'major' as const,
+      description: 'Alcool + metformine = Risque accru d\'acidose lactique'
+    },
+    {
+      drugs: ['gliclazide', 'fluconazole'],
+      level: 'major' as const,
+      description: 'Inhibition CYP2C9 - Risque d\'hypoglycémie sévère'
+    },
+    {
+      drugs: ['glipizide', 'fluconazole'],
+      level: 'major' as const,
+      description: 'Inhibition CYP2C9 - Risque d\'hypoglycémie sévère'
+    },
+    {
+      drugs: ['insulin', 'beta'],
+      level: 'moderate' as const,
+      description: 'Bêta-bloquants masquent signes d\'hypoglycémie - Surveillance accrue'
+    },
+    {
+      drugs: ['gliclazide', 'beta'],
+      level: 'moderate' as const,
+      description: 'Bêta-bloquants masquent signes d\'hypoglycémie'
+    },
+    // === BENZODIAZEPINES ET OPIOIDES ===
+    {
+      drugs: ['diazepam', 'morphine'],
+      level: 'major' as const,
+      description: 'Dépression respiratoire additive - Réduire doses des deux'
+    },
+    {
+      drugs: ['diazepam', 'codeine'],
+      level: 'major' as const,
+      description: 'Dépression respiratoire et SNC additive'
+    },
+    {
+      drugs: ['lorazepam', 'morphine'],
+      level: 'major' as const,
+      description: 'Dépression respiratoire additive - Surveillance étroite'
+    },
+    {
+      drugs: ['alprazolam', 'oxycodone'],
+      level: 'major' as const,
+      description: 'FDA Black Box Warning: Risque de décès par dépression respiratoire'
+    },
+    {
+      drugs: ['zopiclone', 'morphine'],
+      level: 'major' as const,
+      description: 'Dépression SNC additive - Utiliser avec précaution extrême'
+    },
+    // === IMMUNOSUPPRESSEURS ===
+    {
+      drugs: ['tacrolimus', 'clarithromycin'],
+      level: 'major' as const,
+      description: 'Augmentation taux tacrolimus - Surveiller taux et fonction rénale'
+    },
+    {
+      drugs: ['ciclosporin', 'clarithromycin'],
+      level: 'major' as const,
+      description: 'Augmentation taux ciclosporine - Surveiller taux et néphrotoxicité'
+    },
+    {
+      drugs: ['methotrexate', 'trimethoprim'],
+      level: 'major' as const,
+      description: 'Potentialisation toxicité méthotrexate - Éviter association'
+    },
+    {
+      drugs: ['methotrexate', 'ibuprofen'],
+      level: 'major' as const,
+      description: 'AINS augmentent toxicité méthotrexate - Éviter ou surveillance étroite'
+    },
+    {
+      drugs: ['methotrexate', 'omeprazole'],
+      level: 'moderate' as const,
+      description: 'IPP peuvent augmenter taux méthotrexate - Surveillance'
+    },
+    // === LEVOTHYROXINE ===
+    {
+      drugs: ['levothyroxine', 'calcium'],
+      level: 'moderate' as const,
+      description: 'Calcium réduit absorption - Séparer de 4 heures minimum'
+    },
+    {
+      drugs: ['levothyroxine', 'iron'],
+      level: 'moderate' as const,
+      description: 'Fer réduit absorption - Séparer de 4 heures minimum'
+    },
+    {
+      drugs: ['levothyroxine', 'omeprazole'],
+      level: 'moderate' as const,
+      description: 'IPP peuvent réduire absorption - Surveiller TSH'
+    },
+    {
+      drugs: ['levothyroxine', 'sucralfate'],
+      level: 'major' as const,
+      description: 'Sucralfate réduit significativement absorption - Séparer de 4-6h'
+    },
+    // === WARFARINE - INTERACTIONS ETENDUES ===
+    {
+      drugs: ['warfarin', 'amiodarone'],
+      level: 'major' as const,
+      description: 'Amiodarone augmente INR - Réduire warfarine de 30-50%'
+    },
+    {
+      drugs: ['warfarin', 'fluconazole'],
+      level: 'major' as const,
+      description: 'Fluconazole augmente INR significativement - Surveiller INR'
+    },
+    {
+      drugs: ['warfarin', 'metronidazole'],
+      level: 'major' as const,
+      description: 'Métronidazole augmente INR - Réduire dose warfarine'
+    },
+    {
+      drugs: ['warfarin', 'omeprazole'],
+      level: 'moderate' as const,
+      description: 'Possible augmentation INR - Surveillance'
+    },
+    {
+      drugs: ['warfarin', 'paracetamol'],
+      level: 'moderate' as const,
+      description: 'Paracétamol régulier >2g/j peut augmenter INR - Surveiller'
+    },
+    {
+      drugs: ['warfarin', 'vitamin k'],
+      level: 'major' as const,
+      description: 'Vitamine K antagonise effet warfarine - Éviter supplémentation'
+    },
+    {
+      drugs: ['warfarin', 'cranberry'],
+      level: 'moderate' as const,
+      description: 'Canneberge peut augmenter INR - Éviter grandes quantités'
+    },
+    // === DIGOXINE - INTERACTIONS ETENDUES ===
+    {
+      drugs: ['digoxin', 'verapamil'],
+      level: 'major' as const,
+      description: 'Vérapamil augmente taux digoxine de 50-75% - Réduire dose digoxine'
+    },
+    {
+      drugs: ['digoxin', 'amiodarone'],
+      level: 'major' as const,
+      description: 'Amiodarone augmente taux digoxine de 100% - Réduire dose de moitié'
+    },
+    {
+      drugs: ['digoxin', 'clarithromycin'],
+      level: 'major' as const,
+      description: 'Clarithromycine augmente taux digoxine - Surveiller'
+    },
+    {
+      drugs: ['digoxin', 'erythromycin'],
+      level: 'major' as const,
+      description: 'Érythromycine augmente taux digoxine'
+    },
+    {
+      drugs: ['digoxin', 'spironolactone'],
+      level: 'moderate' as const,
+      description: 'Spironolactone peut augmenter taux digoxine et fausser dosage'
     }
   ];
   
@@ -2309,13 +3205,181 @@ function checkBasicInteraction(drug1: string, drug2: string): {
 }
 
 function isSameActiveIngredient(drug1: string, drug2: string): boolean {
+  // ENCYCLOPEDIC DATABASE OF EQUIVALENT ACTIVE INGREDIENTS
   const activeIngredients = [
-    ['paracetamol', 'acetaminophen', 'paracétamol', 'panadol'],
-    ['ibuprofen', 'ibuprofène', 'brufen', 'nurofen'],
-    ['amoxicillin', 'amoxicilline', 'amoxil'],
-    ['omeprazole', 'oméprazole', 'losec'],
-    ['amlodipine', 'norvasc'],
-    ['metformin', 'metformine', 'glucophage']
+    // === ANALGESIQUES ===
+    ['paracetamol', 'acetaminophen', 'paracétamol', 'panadol', 'doliprane', 'efferalgan', 'dafalgan'],
+    ['ibuprofen', 'ibuprofène', 'brufen', 'nurofen', 'advil', 'motrin'],
+    ['diclofenac', 'diclofénac', 'voltaren', 'voltarene'],
+    ['naproxen', 'naproxène', 'naprosyn', 'aleve'],
+    ['aspirin', 'aspirine', 'aspro', 'kardegic', 'acetylsalicylic'],
+    ['codeine', 'codéine', 'codoliprane', 'dafalgan codeine'],
+    ['tramadol', 'contramal', 'topalgic', 'zaldiar'],
+    
+    // === ANTIBIOTIQUES ===
+    ['amoxicillin', 'amoxicilline', 'amoxil', 'clamoxyl'],
+    ['amoxicillin-clavulanate', 'co-amoxiclav', 'augmentin', 'amoxiclav'],
+    ['clarithromycin', 'clarithromycine', 'zeclar', 'klacid'],
+    ['azithromycin', 'azithromycine', 'zithromax', 'azadose'],
+    ['ciprofloxacin', 'ciprofloxacine', 'ciflox', 'cipro'],
+    ['levofloxacin', 'lévofloxacine', 'tavanic'],
+    ['metronidazole', 'métronidazole', 'flagyl'],
+    ['doxycycline', 'vibramycine', 'doxy'],
+    ['trimethoprim', 'triméthoprime', 'bactrim', 'cotrimoxazole'],
+    ['flucloxacillin', 'flucloxacilline', 'floxapen'],
+    ['nitrofurantoin', 'nitrofurantoïne', 'furadantine'],
+    
+    // === CARDIOVASCULAIRE - IEC ===
+    ['ramipril', 'triatec', 'tritace'],
+    ['lisinopril', 'zestril', 'prinivil'],
+    ['perindopril', 'périndopril', 'coversyl', 'perindopril erbumine'],
+    ['enalapril', 'énalapril', 'renitec'],
+    ['captopril', 'lopril'],
+    
+    // === CARDIOVASCULAIRE - ARA2 ===
+    ['losartan', 'cozaar'],
+    ['valsartan', 'tareg', 'diovan'],
+    ['irbesartan', 'irbésartan', 'aprovel'],
+    ['candesartan', 'candésartan', 'atacand', 'kenzen'],
+    ['telmisartan', 'telmisartan', 'micardis', 'pritor'],
+    
+    // === CARDIOVASCULAIRE - CCB ===
+    ['amlodipine', 'norvasc', 'amlor'],
+    ['nifedipine', 'nifédipine', 'adalat'],
+    ['diltiazem', 'tildiem', 'cardizem'],
+    ['verapamil', 'vérapamil', 'isoptine'],
+    ['felodipine', 'félodipine', 'plendil'],
+    
+    // === CARDIOVASCULAIRE - BETA-BLOQUANTS ===
+    ['bisoprolol', 'cardensiel', 'detensiel'],
+    ['atenolol', 'aténolol', 'tenormin'],
+    ['metoprolol', 'métoprolol', 'lopressor', 'seloken'],
+    ['propranolol', 'avlocardyl', 'inderal'],
+    ['carvedilol', 'kredex'],
+    ['nebivolol', 'nébivolol', 'nebilox', 'temerit'],
+    
+    // === CARDIOVASCULAIRE - DIURETIQUES ===
+    ['furosemide', 'furosémide', 'lasilix', 'lasix'],
+    ['hydrochlorothiazide', 'esidrex'],
+    ['indapamide', 'fludex', 'natrilix'],
+    ['spironolactone', 'aldactone'],
+    ['eplerenone', 'éplérénone', 'inspra'],
+    ['bumetanide', 'bumétanide', 'burinex'],
+    
+    // === STATINES ===
+    ['atorvastatin', 'atorvastatine', 'tahor', 'lipitor'],
+    ['simvastatin', 'simvastatine', 'zocor'],
+    ['rosuvastatin', 'rosuvastatine', 'crestor'],
+    ['pravastatin', 'pravastatine', 'elisor', 'vasten'],
+    ['fluvastatin', 'fluvastatine', 'lescol'],
+    
+    // === ANTICOAGULANTS ===
+    ['warfarin', 'warfarine', 'coumadin', 'coumadine'],
+    ['apixaban', 'eliquis'],
+    ['rivaroxaban', 'xarelto'],
+    ['dabigatran', 'pradaxa'],
+    ['edoxaban', 'lixiana'],
+    ['enoxaparin', 'énoxaparine', 'lovenox', 'clexane'],
+    ['heparin', 'héparine'],
+    
+    // === ANTIPLAQUETTAIRES ===
+    ['clopidogrel', 'plavix'],
+    ['ticagrelor', 'brilique', 'brilinta'],
+    ['prasugrel', 'efient'],
+    
+    // === ANTIDIABETIQUES ===
+    ['metformin', 'metformine', 'glucophage', 'stagid'],
+    ['gliclazide', 'diamicron'],
+    ['glimepiride', 'glimépiride', 'amarel'],
+    ['glipizide', 'glibenese', 'minidiab'],
+    ['sitagliptin', 'sitagliptine', 'januvia', 'xelevia'],
+    ['linagliptin', 'linagliptine', 'trajenta'],
+    ['empagliflozin', 'empagliflozine', 'jardiance'],
+    ['dapagliflozin', 'dapagliflozine', 'forxiga'],
+    ['canagliflozin', 'canagliflozine', 'invokana'],
+    ['liraglutide', 'victoza', 'saxenda'],
+    ['semaglutide', 'sémaglutide', 'ozempic', 'wegovy', 'rybelsus'],
+    ['pioglitazone', 'actos'],
+    
+    // === IPP (Inhibiteurs Pompe à Protons) ===
+    ['omeprazole', 'oméprazole', 'mopral', 'losec'],
+    ['esomeprazole', 'ésoméprazole', 'inexium', 'nexium'],
+    ['lansoprazole', 'lanzor', 'ogast', 'prevacid'],
+    ['pantoprazole', 'eupantol', 'inipomp', 'protonix'],
+    ['rabeprazole', 'rabéprazole', 'pariet'],
+    
+    // === ANTIDEPRESSEURS ISRS ===
+    ['sertraline', 'zoloft'],
+    ['fluoxetine', 'fluoxétine', 'prozac'],
+    ['paroxetine', 'paroxétine', 'deroxat', 'paxil'],
+    ['citalopram', 'seropram'],
+    ['escitalopram', 'seroplex', 'lexapro'],
+    ['fluvoxamine', 'floxyfral'],
+    
+    // === ANTIDEPRESSEURS AUTRES ===
+    ['venlafaxine', 'effexor'],
+    ['duloxetine', 'duloxétine', 'cymbalta'],
+    ['mirtazapine', 'norset', 'remeron'],
+    ['amitriptyline', 'laroxyl', 'elavil'],
+    ['bupropion', 'wellbutrin', 'zyban'],
+    
+    // === ANXIOLYTIQUES / HYPNOTIQUES ===
+    ['diazepam', 'valium'],
+    ['lorazepam', 'temesta', 'ativan'],
+    ['alprazolam', 'xanax'],
+    ['bromazepam', 'lexomil'],
+    ['zopiclone', 'imovane'],
+    ['zolpidem', 'stilnox', 'ambien'],
+    
+    // === ANTIHISTAMINIQUES ===
+    ['cetirizine', 'cétirizine', 'zyrtec', 'virlix'],
+    ['loratadine', 'clarityne', 'claritin'],
+    ['desloratadine', 'aerius'],
+    ['fexofenadine', 'fexofénadine', 'telfast'],
+    ['levocetirizine', 'lévocétirizine', 'xyzall'],
+    
+    // === CORTICOIDES ===
+    ['prednisolone', 'solupred'],
+    ['prednisone', 'cortancyl'],
+    ['methylprednisolone', 'méthylprednisolone', 'medrol', 'solumedrol'],
+    ['dexamethasone', 'dexaméthasone', 'dectancyl'],
+    ['hydrocortisone', 'hydrocortisone'],
+    ['betamethasone', 'bétaméthasone', 'celestene', 'diprosone'],
+    
+    // === THYROIDE ===
+    ['levothyroxine', 'lévothyroxine', 'levothyrox', 'euthyrox', 'synthroid'],
+    ['carbimazole', 'neo-mercazole'],
+    ['propylthiouracil', 'ptu'],
+    
+    // === ANTIEPILEPTIQUES ===
+    ['levetiracetam', 'lévétiracétam', 'keppra'],
+    ['lamotrigine', 'lamictal'],
+    ['valproate', 'valproic acid', 'depakine', 'depakote', 'sodium valproate'],
+    ['carbamazepine', 'carbamazépine', 'tegretol'],
+    ['phenytoin', 'phénytoïne', 'dilantin'],
+    ['gabapentin', 'gabapentine', 'neurontin'],
+    ['pregabalin', 'prégabaline', 'lyrica'],
+    ['topiramate', 'epitomax', 'topamax'],
+    
+    // === ANTIEMETIQUES ===
+    ['metoclopramide', 'métoclopramide', 'primperan', 'maxolon'],
+    ['domperidone', 'dompéridone', 'motilium'],
+    ['ondansetron', 'ondansétron', 'zophren', 'zofran'],
+    
+    // === BRONCHODILATATEURS ===
+    ['salbutamol', 'ventolin', 'ventoline', 'albuterol'],
+    ['terbutaline', 'bricanyl'],
+    ['ipratropium', 'atrovent'],
+    ['tiotropium', 'spiriva'],
+    ['formoterol', 'formotérol', 'foradil'],
+    ['salmeterol', 'serevent'],
+    
+    // === ANTIPSYCHOTIQUES ===
+    ['haloperidol', 'halopéridol', 'haldol'],
+    ['risperidone', 'rispéridone', 'risperdal'],
+    ['quetiapine', 'quétiapine', 'seroquel', 'xeroquel'],
+    ['olanzapine', 'zyprexa'],
+    ['aripiprazole', 'abilify']
   ];
   
   for (const ingredients of activeIngredients) {
