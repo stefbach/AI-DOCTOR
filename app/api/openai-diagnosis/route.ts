@@ -273,6 +273,26 @@ For INFECTION/SEPSIS:
 For PAIN/FEVER:
 - Treatment: "Paracétamol 1g QDS" (DCI: Paracétamol) or "Ibuprofène 400mg TDS" (DCI: Ibuprofène)
 
+🚨 CRITICAL - VITAL SIGNS ABNORMALITIES REQUIRING IMMEDIATE TREATMENT:
+
+For HYPERTENSIVE CRISIS (BP ≥180/120 mmHg):
+- MANDATORY: Start antihypertensive immediately
+- Treatment: "Amlodipine 10mg OD" (DCI: Amlodipine) or "Nifédipine LP 20mg BD" (DCI: Nifédipine)
+- URGENT referral if end-organ damage suspected
+
+For HYPERTENSION Stage 2 (BP ≥140/90 mmHg):
+- MANDATORY: Prescribe antihypertensive
+- Treatment: "Amlodipine 5mg OD" (DCI: Amlodipine) or "Périndopril 4mg OD" (DCI: Périndopril)
+- Lifestyle modifications + follow-up in 2-4 weeks
+
+For HYPERTENSION Stage 1 (BP 130-139/80-89 mmHg):
+- Consider treatment if cardiovascular risk factors
+- Treatment: "Amlodipine 5mg OD" (DCI: Amlodipine) or "Ramipril 2.5mg OD" (DCI: Ramipril)
+- Lifestyle modifications essential
+
+⚠️ IF VITAL SIGNS SHOW ELEVATED BLOOD PRESSURE AND PATIENT HAS NO ANTIHYPERTENSIVE:
+YOU MUST PRESCRIBE AN ANTIHYPERTENSIVE IN treatment_plan.medications!
+
 🚨 MAURITIUS QUALITY CONTROL MANDATORY + DCI VALIDATION:
 □ All medications have EXACT DCI names (Amoxicilline, Paracétamol, etc.)?
 □ All medications have EXACT NAMES with doses (Amoxicilline 500mg)?
@@ -1147,6 +1167,47 @@ function prepareMauritiusQualityPrompt(patientContext: PatientContext, consultat
   
   const consultationTypeFormatted = `${consultationType.consultationType.toUpperCase()} (${Math.round(consultationType.confidence * 100)}%)`
   
+  // 🩺 ANALYZE VITAL SIGNS FOR CRITICAL ALERTS
+  const bpAnalysis = hasHypertensiveCrisis(patientContext.vital_signs)
+  let vitalSignsAlerts = ''
+  
+  if (bpAnalysis.systolic > 0 && bpAnalysis.diastolic > 0) {
+    if (bpAnalysis.severity === 'crisis') {
+      vitalSignsAlerts = `
+🚨 CRITICAL VITAL SIGN ALERT 🚨
+Blood Pressure: ${bpAnalysis.systolic}/${bpAnalysis.diastolic} mmHg = HYPERTENSIVE CRISIS
+ACTION REQUIRED: YOU MUST prescribe an antihypertensive medication immediately!
+Recommended: Amlodipine 10mg OD or Nifédipine LP 20mg BD
+`
+    } else if (bpAnalysis.severity === 'stage2') {
+      vitalSignsAlerts = `
+⚠️ VITAL SIGN ALERT ⚠️
+Blood Pressure: ${bpAnalysis.systolic}/${bpAnalysis.diastolic} mmHg = HYPERTENSION STAGE 2
+ACTION REQUIRED: YOU MUST prescribe an antihypertensive medication!
+Recommended: Amlodipine 5mg OD or Périndopril 4mg OD
+`
+    } else if (bpAnalysis.severity === 'stage1') {
+      vitalSignsAlerts = `
+⚠️ VITAL SIGN ALERT ⚠️
+Blood Pressure: ${bpAnalysis.systolic}/${bpAnalysis.diastolic} mmHg = HYPERTENSION STAGE 1
+Consider antihypertensive treatment especially if cardiovascular risk factors present.
+Recommended: Amlodipine 5mg OD or Ramipril 2.5mg OD
+`
+    }
+  }
+  
+  // Check if patient already has antihypertensive in current meds
+  const currentMedsHaveAntihypertensive = hasAntihypertensive(
+    patientContext.current_medications.map(med => ({ drug: med, medication_name: med }))
+  )
+  
+  if (currentMedsHaveAntihypertensive && bpAnalysis.needsAntihypertensive) {
+    vitalSignsAlerts += `
+NOTE: Patient already on antihypertensive medication but BP still elevated.
+Consider: dose adjustment, adding second agent, or specialist referral.
+`
+  }
+  
   const contextString = JSON.stringify({
     age: patientContext.age,
     sex: patientContext.sex,
@@ -1154,17 +1215,30 @@ function prepareMauritiusQualityPrompt(patientContext: PatientContext, consultat
     symptoms: patientContext.symptoms,
     current_medications: patientContext.current_medications,
     vital_signs: patientContext.vital_signs,
+    vital_signs_analysis: {
+      blood_pressure: bpAnalysis.systolic > 0 ? `${bpAnalysis.systolic}/${bpAnalysis.diastolic} mmHg` : 'Not measured',
+      bp_severity: bpAnalysis.severity,
+      requires_antihypertensive: bpAnalysis.needsAntihypertensive && !currentMedsHaveAntihypertensive
+    },
     medical_history: patientContext.medical_history,
     allergies: patientContext.allergies,
     consultation_type: consultationType.consultationType,
     ai_questions: patientContext.ai_questions
   }, null, 2)
   
-  return MAURITIUS_MEDICAL_PROMPT
+  // Prepend vital signs alerts to the prompt
+  const finalPrompt = vitalSignsAlerts + MAURITIUS_MEDICAL_PROMPT
     .replace('{{PATIENT_CONTEXT}}', contextString)
     .replace('{{CURRENT_MEDICATIONS}}', currentMedsFormatted)
     .replace('{{CONSULTATION_TYPE}}', consultationTypeFormatted)
     .replace(/{{CURRENT_MEDICATIONS_LIST}}/g, currentMedsFormatted)
+  
+  if (vitalSignsAlerts) {
+    console.log('🩺 VITAL SIGNS ALERTS ADDED TO PROMPT:')
+    console.log(vitalSignsAlerts)
+  }
+  
+  return finalPrompt
 }
 
 // ==================== DETECTION FUNCTIONS (CONSERVÉES) ====================
@@ -1201,6 +1275,103 @@ function hasFeverSymptoms(symptoms: string[], chiefComplaint: string = '', vital
   const tempHigh = vitalSigns?.temperature && vitalSigns.temperature > 37.5
   
   return symptomsHaveFever || tempHigh
+}
+
+// ==================== HYPERTENSION DETECTION FUNCTIONS ====================
+function hasHypertensiveCrisis(vitalSigns: any = {}): {
+  isHypertensive: boolean;
+  severity: 'normal' | 'elevated' | 'stage1' | 'stage2' | 'crisis';
+  systolic: number;
+  diastolic: number;
+  needsAntihypertensive: boolean;
+} {
+  // Parse blood pressure from various formats
+  let systolic = 0;
+  let diastolic = 0;
+  
+  // Handle blood_pressure as string "150/95"
+  if (typeof vitalSigns?.blood_pressure === 'string') {
+    const match = vitalSigns.blood_pressure.match(/(\d+)\s*[\/]\s*(\d+)/)
+    if (match) {
+      systolic = parseInt(match[1])
+      diastolic = parseInt(match[2])
+    }
+  }
+  // Handle bloodPressure as string
+  if (typeof vitalSigns?.bloodPressure === 'string') {
+    const match = vitalSigns.bloodPressure.match(/(\d+)\s*[\/]\s*(\d+)/)
+    if (match) {
+      systolic = parseInt(match[1])
+      diastolic = parseInt(match[2])
+    }
+  }
+  // Handle separate systolic/diastolic fields
+  if (vitalSigns?.bloodPressureSystolic) {
+    systolic = parseInt(vitalSigns.bloodPressureSystolic) || 0
+  }
+  if (vitalSigns?.bloodPressureDiastolic) {
+    diastolic = parseInt(vitalSigns.bloodPressureDiastolic) || 0
+  }
+  // Handle systolic/diastolic directly
+  if (vitalSigns?.systolic) {
+    systolic = parseInt(vitalSigns.systolic) || 0
+  }
+  if (vitalSigns?.diastolic) {
+    diastolic = parseInt(vitalSigns.diastolic) || 0
+  }
+  
+  // Classify blood pressure according to AHA guidelines
+  let severity: 'normal' | 'elevated' | 'stage1' | 'stage2' | 'crisis' = 'normal'
+  let needsAntihypertensive = false
+  
+  if (systolic >= 180 || diastolic >= 120) {
+    severity = 'crisis'
+    needsAntihypertensive = true
+  } else if (systolic >= 140 || diastolic >= 90) {
+    severity = 'stage2'
+    needsAntihypertensive = true
+  } else if (systolic >= 130 || diastolic >= 80) {
+    severity = 'stage1'
+    needsAntihypertensive = true
+  } else if (systolic >= 120 && systolic < 130 && diastolic < 80) {
+    severity = 'elevated'
+    needsAntihypertensive = false
+  }
+  
+  const isHypertensive = severity !== 'normal' && severity !== 'elevated'
+  
+  console.log(`🩺 Blood Pressure Analysis: ${systolic}/${diastolic} mmHg - Severity: ${severity}, Needs treatment: ${needsAntihypertensive}`)
+  
+  return {
+    isHypertensive,
+    severity,
+    systolic,
+    diastolic,
+    needsAntihypertensive
+  }
+}
+
+function hasAntihypertensive(medications: any[]): boolean {
+  const antihypertensives = [
+    // ACE inhibitors
+    'perindopril', 'périndopril', 'lisinopril', 'ramipril', 'enalapril', 'captopril',
+    // ARBs
+    'losartan', 'valsartan', 'irbesartan', 'candesartan', 'telmisartan', 'olmesartan',
+    // Calcium channel blockers
+    'amlodipine', 'nifedipine', 'diltiazem', 'verapamil', 'felodipine',
+    // Beta blockers
+    'bisoprolol', 'atenolol', 'metoprolol', 'propranolol', 'carvedilol', 'nebivolol',
+    // Diuretics
+    'hydrochlorothiazide', 'indapamide', 'furosemide', 'spironolactone', 'chlortalidone',
+    // Combination
+    'co-aprovel', 'exforge', 'coveram'
+  ]
+  
+  return medications.some(med => {
+    const drugName = (med?.drug || med?.medication_name || '').toLowerCase()
+    const dci = (med?.dci || '').toLowerCase()
+    return antihypertensives.some(anti => drugName.includes(anti) || dci.includes(anti))
+  })
 }
 
 function hasPainSymptoms(symptoms: string[], chiefComplaint: string = ''): boolean {
@@ -1461,6 +1632,45 @@ function analyzeUnaddressedSymptoms(patientContext: PatientContext, medications:
     scoreDeduction += 10
   }
   
+  // 🩺 CRITICAL: Check for hypertensive crisis requiring antihypertensive treatment
+  const bpAnalysis = hasHypertensiveCrisis(patientContext.vital_signs)
+  if (bpAnalysis.needsAntihypertensive && !hasAntihypertensive(medications)) {
+    // Also check in current medications (patient may already be on antihypertensive)
+    const currentMedsHaveAntihypertensive = hasAntihypertensive(
+      (patientContext.current_medications || []).map(med => ({ drug: med, medication_name: med }))
+    )
+    
+    if (!currentMedsHaveAntihypertensive) {
+      issues.push({
+        type: 'critical',
+        category: 'symptomatic',
+        description: `Hypertensive ${bpAnalysis.severity} (${bpAnalysis.systolic}/${bpAnalysis.diastolic} mmHg) without antihypertensive treatment`,
+        suggestion: bpAnalysis.severity === 'crisis' 
+          ? 'URGENT: Initiate antihypertensive therapy (Amlodipine 5mg or Perindopril 4mg) immediately'
+          : 'Add antihypertensive (Amlodipine 5mg OD or Perindopril 4mg OD)'
+      })
+      scoreDeduction += bpAnalysis.severity === 'crisis' ? 40 : 25
+    }
+  }
+  
+  // Check for hypertension mentioned in symptoms/complaint without treatment
+  const hypertensionKeywords = ['hypertension', 'hypertensive', 'high blood pressure', 'tension artérielle', 'hta', 'pression élevée']
+  if (hypertensionKeywords.some(kw => symptoms.includes(kw)) && !hasAntihypertensive(medications)) {
+    const currentMedsHaveAntihypertensive = hasAntihypertensive(
+      (patientContext.current_medications || []).map(med => ({ drug: med, medication_name: med }))
+    )
+    
+    if (!currentMedsHaveAntihypertensive) {
+      issues.push({
+        type: 'critical',
+        category: 'symptomatic',
+        description: 'Hypertension mentioned without antihypertensive treatment',
+        suggestion: 'Prescribe appropriate antihypertensive (Amlodipine 5mg OD or Perindopril 4mg OD)'
+      })
+      scoreDeduction += 25
+    }
+  }
+  
   return { issues, scoreDeduction }
 }
 
@@ -1700,6 +1910,44 @@ function applySymptomaticCorrections(analysis: any, issue: any, patientContext: 
       _added_by_universal_correction: "nausea_symptomatic"
     })
     analysis.treatment_plan.medications = medications
+    return 1
+  }
+  
+  // 🩺 CRITICAL: Add antihypertensive for hypertensive patients
+  if (issue.description.includes('Hypertensive') || issue.description.includes('hypertension')) {
+    const isCrisis = issue.description.includes('crisis') || issue.description.includes('Crisis')
+    
+    medications.push({
+      drug: "Amlodipine 5mg",
+      dci: "Amlodipine",
+      indication: isCrisis 
+        ? "URGENT: Traitement antihypertenseur pour crise hypertensive - Inhibiteur calcique pour réduction progressive de la pression artérielle"
+        : "Traitement antihypertenseur de première intention pour hypertension artérielle selon recommandations ESC/ESH 2023",
+      mechanism: "Inhibiteur des canaux calciques dihydropyridinique, vasodilatateur artériel périphérique",
+      dosing: { 
+        adult: "5mg OD (once daily)",
+        frequency_per_day: 1,
+        individual_dose: "5mg",
+        daily_total_dose: "5mg/day"
+      },
+      duration: "Traitement chronique - réévaluation à 4 semaines",
+      interactions: "Prudence avec inhibiteurs CYP3A4. Compatible avec IEC/ARA2 si bithérapie nécessaire",
+      relationship_to_current_treatment: isCrisis ? "urgence_therapeutique" : "traitement_chronique",
+      monitoring: "Surveillance TA à domicile, contrôle fréquence cardiaque, œdèmes des membres inférieurs",
+      side_effects: "Œdèmes des chevilles, flush facial, céphalées, palpitations",
+      contraindications: "Hypersensibilité à l'amlodipine, sténose aortique sévère, choc cardiogénique",
+      mauritius_availability: {
+        public_free: true,
+        estimated_cost: "Rs 100-200",
+        alternatives: "Périndopril 4mg si œdèmes, Losartan 50mg si toux sous IEC",
+        brand_names: "Norvasc, Amlor disponibles"
+      },
+      administration_instructions: "Prendre le matin à heure fixe, indépendamment des repas",
+      _added_by_universal_correction: isCrisis ? "critical_hypertensive_crisis" : "hypertension_treatment"
+    })
+    analysis.treatment_plan.medications = medications
+    
+    console.log(`🩺 HYPERTENSION AUTO-CORRECTION: Added Amlodipine 5mg OD for ${isCrisis ? 'HYPERTENSIVE CRISIS' : 'hypertension'}`)
     return 1
   }
   
@@ -2569,15 +2817,106 @@ export async function POST(request: NextRequest) {
     console.log('✅ Analyse médicale avec qualité anglo-saxonne + DCI précis terminée')
     
     // ========== DEBUG CURRENT MEDICATIONS VALIDATED ==========
-    if (medicalAnalysis.current_medications_validated) {
+    if (medicalAnalysis.current_medications_validated && medicalAnalysis.current_medications_validated.length > 0) {
       console.log('💊 CURRENT MEDICATIONS VALIDATED BY AI:', medicalAnalysis.current_medications_validated.length)
       medicalAnalysis.current_medications_validated.forEach((med: any, idx: number) => {
         console.log(`   ${idx + 1}. ${med.medication_name} - ${med.how_to_take}`)
         console.log(`      Original: "${med.original_input}"`)
         console.log(`      Corrections: ${med.validated_corrections}`)
       })
+    } else if (patientContext.current_medications.length > 0) {
+      // 🚨 FALLBACK: GPT-4 didn't return current_medications_validated, generate from patient input
+      console.log('⚠️ AI did not return current_medications_validated - GENERATING FALLBACK from patient input!')
+      console.log(`   📋 Patient has ${patientContext.current_medications.length} current medications to process`)
+      
+      medicalAnalysis.current_medications_validated = patientContext.current_medications.map((medString: string, idx: number) => {
+        // Parse the medication string to extract name, dosage, frequency
+        const medLower = medString.toLowerCase()
+        const originalInput = medString
+        
+        // Try to extract dosage (e.g., "500mg", "100 mg")
+        const dosageMatch = medString.match(/(\d+)\s*(mg|g|ml|mcg|µg)/i)
+        const dosage = dosageMatch ? dosageMatch[0] : ''
+        
+        // Try to extract frequency patterns
+        let frequency = 'OD'
+        let frequencyText = ''
+        if (medLower.includes('twice') || medLower.includes('2 fois') || medLower.includes('2x') || medLower.includes('bd')) {
+          frequency = 'BD'
+          frequencyText = 'BD (twice daily)'
+        } else if (medLower.includes('three') || medLower.includes('3 fois') || medLower.includes('3x') || medLower.includes('tds')) {
+          frequency = 'TDS'
+          frequencyText = 'TDS (three times daily)'
+        } else if (medLower.includes('four') || medLower.includes('4 fois') || medLower.includes('4x') || medLower.includes('qds')) {
+          frequency = 'QDS'
+          frequencyText = 'QDS (four times daily)'
+        } else if (medLower.includes('once') || medLower.includes('1 fois') || medLower.includes('1x') || medLower.includes('od') || medLower.includes('par jour')) {
+          frequency = 'OD'
+          frequencyText = 'OD (once daily)'
+        }
+        
+        // Extract medication name (first word usually, removing dosage)
+        let medName = medString.replace(/\d+\s*(mg|g|ml|mcg|µg|fois|times|daily|par jour|x)/gi, '').trim()
+        medName = medName.split(' ')[0] || medString // Take first word as med name
+        
+        // Apply basic DCI corrections
+        const dciCorrections: { [key: string]: string } = {
+          'metformin': 'Metformin', 'metfromin': 'Metformin', 'metformine': 'Metformin',
+          'amlodipine': 'Amlodipine', 'amlodipin': 'Amlodipine',
+          'atorvastatin': 'Atorvastatin', 'atorvastatine': 'Atorvastatin',
+          'aspirin': 'Aspirin', 'asprin': 'Aspirin', 'aspirine': 'Aspirin',
+          'omeprazole': 'Omeprazole', 'oméprazole': 'Omeprazole',
+          'lisinopril': 'Lisinopril', 'perindopril': 'Perindopril', 'périndopril': 'Perindopril',
+          'losartan': 'Losartan', 'valsartan': 'Valsartan',
+          'bisoprolol': 'Bisoprolol', 'atenolol': 'Atenolol',
+          'furosemide': 'Furosemide', 'furosémide': 'Furosemide',
+          'paracetamol': 'Paracetamol', 'paracétamol': 'Paracetamol',
+          'ibuprofen': 'Ibuprofen', 'ibuprofène': 'Ibuprofen'
+        }
+        
+        let dci = medName
+        for (const [wrong, correct] of Object.entries(dciCorrections)) {
+          if (medLower.includes(wrong)) {
+            dci = correct
+            break
+          }
+        }
+        
+        // Infer indication from drug class
+        let indication = 'Chronic treatment continuation'
+        if (['metformin', 'glipizide', 'gliclazide', 'insulin'].some(d => medLower.includes(d))) {
+          indication = 'Type 2 diabetes management'
+        } else if (['amlodipine', 'lisinopril', 'perindopril', 'losartan', 'valsartan', 'bisoprolol', 'atenolol'].some(d => medLower.includes(d))) {
+          indication = 'Hypertension management'
+        } else if (['atorvastatin', 'simvastatin', 'rosuvastatin'].some(d => medLower.includes(d))) {
+          indication = 'Hyperlipidemia management - Cardiovascular prevention'
+        } else if (['aspirin', 'clopidogrel'].some(d => medLower.includes(d))) {
+          indication = 'Cardiovascular prophylaxis - Antiplatelet therapy'
+        } else if (['omeprazole', 'pantoprazole', 'esomeprazole'].some(d => medLower.includes(d))) {
+          indication = 'Gastric acid suppression - Gastroprotection'
+        }
+        
+        const validatedMed = {
+          medication_name: `${dci} ${dosage}`.trim(),
+          dci: dci,
+          how_to_take: frequencyText || frequency,
+          why_prescribed: indication,
+          duration: 'Ongoing treatment',
+          validated_corrections: medName.toLowerCase() !== dci.toLowerCase() 
+            ? `Spelling/format corrected: ${medName} → ${dci}` 
+            : 'Format standardized to UK nomenclature',
+          original_input: originalInput
+        }
+        
+        console.log(`   ✅ Fallback validation ${idx + 1}: "${originalInput}" → ${validatedMed.medication_name} (${validatedMed.how_to_take})`)
+        
+        return validatedMed
+      })
+      
+      console.log(`✅ FALLBACK: Generated ${medicalAnalysis.current_medications_validated.length} validated current medications`)
     } else {
-      console.log('⚠️ NO CURRENT MEDICATIONS VALIDATED - AI did not return current_medications_validated field!')
+      console.log('ℹ️ Patient has no current medications - current_medications_validated is empty')
+      medicalAnalysis.current_medications_validated = []
     }
     
     // ========== DÉDUPLICATION DES MÉDICAMENTS ==========
@@ -2843,19 +3182,14 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
           treatment_approach: finalAnalysis.treatment_plan?.approach || "Approche thérapeutique personnalisée avec standards UK/Maurice",
           prescription_rationale: finalAnalysis.treatment_plan?.prescription_rationale || "Justification de prescription selon standards internationaux",
           primary_treatments: deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any) => ({
-  medication_name: med.drug,  // Direct
-        medication_dci: med.drug || med.medication_name, 
-        precise_indication: med.indication || med.why_prescribed,
-        dosing_regimen: { 
-          adult: {
-      en: med.dosing?.adult || med.how_to_take || "Selon prescription"
-    }
-  },
-        therapeutic_class: extractTherapeuticClass(med) || "Agent thérapeutique",
-            precise_indication: med?.indication || "Indication thérapeutique",
+            medication_name: med.drug || med.medication_name,
+            medication_dci: med.dci || med.drug || med.medication_name, 
+            precise_indication: med.indication || med.why_prescribed || "Indication thérapeutique",
+            therapeutic_class: extractTherapeuticClass(med) || "Agent thérapeutique",
             mechanism: med?.mechanism || "Mécanisme d'action spécifique pour le patient",
             dosing_regimen: {
               adult: { 
+                en: med?.dosing?.adult || med?.how_to_take || "Selon prescription",
                 fr: med?.dosing?.adult || "Posologie à déterminer",
                 individual_dose: med?.dosing?.individual_dose || "Dose individuelle",
                 frequency_per_day: med?.dosing?.frequency_per_day || 0,
