@@ -409,6 +409,7 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
 
         case 'modify_lab_prescription':
           if (action.action === 'add') {
+            console.log('🔬 LAB TEST - Raw action.content:', action.content)
             const category = action.content?.category || 'clinicalChemistry'
             const test = action.content?.test || {
               nom: action.content?.nom || action.content?.name || 'Nouveau test',
@@ -417,11 +418,14 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
               urgence: action.content?.urgence || action.content?.urgent || false,
               aJeun: action.content?.aJeun || action.content?.fasting || false
             }
-            console.log('🔬 Adding lab test:', category, test)
+            console.log('🔬 LAB TEST - Category:', category)
+            console.log('🔬 LAB TEST - Constructed test object:', test)
+            console.log('🔬 LAB TEST - Calling onAddLabTest')
             onAddLabTest(category, test)
+            console.log('🔬 LAB TEST - onAddLabTest called successfully')
             toast({
               title: "✅ Examen biologique ajouté",
-              description: `${test.nom} ajouté (${category})`
+              description: `${test.nom} ajouté (${category}) dans l'onglet Laboratory`
             })
           } else if (action.action === 'remove') {
             const category = action.content?.category || 'clinicalChemistry'
@@ -436,6 +440,7 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
 
         case 'modify_paraclinical_prescription':
           if (action.action === 'add') {
+            console.log('🩻 PARACLINICAL - Raw action.content:', action.content)
             const exam = {
               type: action.content?.type || action.content?.modalite || 'Imagerie',
               modalite: action.content?.modalite || action.content?.type || '',
@@ -445,11 +450,13 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
               contraste: action.content?.contraste || action.content?.contrast || false,
               instructions: action.content?.instructions || ''
             }
-            console.log('🩻 Adding imaging:', exam)
+            console.log('🩻 PARACLINICAL - Constructed exam object:', exam)
+            console.log('🩻 PARACLINICAL - Calling onAddImaging with:', exam)
             onAddImaging(exam)
+            console.log('🩻 PARACLINICAL - onAddImaging called successfully')
             toast({
               title: "✅ Examen paraclinique ajouté",
-              description: `${exam.type} ${exam.region ? `- ${exam.region}` : ''} ajouté`
+              description: `${exam.type} ${exam.region ? `- ${exam.region}` : ''} ajouté à l'onglet Imaging`
             })
           } else if (action.action === 'remove') {
             const index = action.content?.index ?? 0
@@ -765,178 +772,4 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
                       {/* Inline Suggestions */}
                       {message.suggestions && message.suggestions.length > 0 && (
                         <div className="mt-3 space-y-2">
-                          <p className="text-xs font-medium text-gray-500 flex items-center gap-1">
-                            <Lightbulb className="h-3 w-3 text-yellow-500" />
-                            {message.suggestions.length} suggestion(s) :
-                          </p>
-                          {message.suggestions.map((suggestion, sugIndex) => (
-                            <div key={sugIndex} className={`p-3 rounded-lg border-l-4 ${getPriorityColor(suggestion.priority)}`}>
-                              <div className="flex items-center gap-2 mb-1">
-                                <Badge className={`text-xs ${getPriorityColor(suggestion.priority)}`}>
-                                  {suggestion.priority?.toUpperCase() || 'INFO'}
-                                </Badge>
-                                <span className="text-xs text-gray-500 capitalize">{suggestion.category || 'général'}</span>
-                              </div>
-                              <p className="text-sm font-medium">{suggestion.suggestion}</p>
-                              {suggestion.reasoning && (
-                                <p className="text-xs text-gray-600 mt-1 italic">💡 {suggestion.reasoning}</p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      <p className="text-xs text-gray-500 mt-2">
-                        {message.timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-
-                {/* Loading Indicator */}
-                {isLoading && (
-                  <div className="flex gap-3">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-teal-500 to-emerald-500">
-                      <Brain className="h-5 w-5 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="rounded-2xl p-4 bg-gray-100 border border-gray-200">
-                        <div className="flex items-center gap-2">
-                          <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
-                          <span className="text-sm text-gray-600">
-                            Analyse en cours avec mon expertise encyclopédique...
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-          </TabsContent>
-
-          {/* Alerts Tab */}
-          <TabsContent value="alerts" className="flex-1 overflow-auto p-4 m-0">
-            {pendingAlerts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                <Shield className="h-12 w-12 mb-4 text-green-300" />
-                <p className="text-lg font-medium">Aucune alerte</p>
-                <p className="text-sm">Tout semble conforme</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {pendingAlerts.map((alert, index) => (
-                  <Alert key={index} className={`${getAlertStyle(alert.type)}`}>
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription className="flex justify-between items-start">
-                      <span>{alert.message}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setPendingAlerts(prev => prev.filter((_, i) => i !== index))}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </AlertDescription>
-                  </Alert>
-                ))}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPendingAlerts([])}
-                  className="w-full"
-                >
-                  Effacer toutes les alertes
-                </Button>
-              </div>
-            )}
-          </TabsContent>
-
-          {/* Suggestions Tab */}
-          <TabsContent value="suggestions" className="flex-1 overflow-auto p-4 m-0">
-            {pendingSuggestions.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                <Lightbulb className="h-12 w-12 mb-4 text-yellow-300" />
-                <p className="text-lg font-medium">Aucune suggestion</p>
-                <p className="text-sm">Utilisez l'assistant pour générer des suggestions</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {pendingSuggestions.map((suggestion, index) => (
-                  <Card key={index} className={`border-2 ${getPriorityColor(suggestion.priority)}`}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <div className="flex items-center gap-2 mb-2">
-                            <Badge className={getPriorityColor(suggestion.priority)}>
-                              {suggestion.priority.toUpperCase()}
-                            </Badge>
-                            <span className="text-xs text-gray-500 capitalize">{suggestion.category}</span>
-                          </div>
-                          <p className="text-sm font-medium">{suggestion.suggestion}</p>
-                          {suggestion.reasoning && (
-                            <p className="text-xs text-gray-600 mt-1">{suggestion.reasoning}</p>
-                          )}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setPendingSuggestions(prev => prev.filter((_, i) => i !== index))}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPendingSuggestions([])}
-                  className="w-full"
-                >
-                  Effacer toutes les suggestions
-                </Button>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-
-        {/* Input Area */}
-        <div className="border-t border-gray-200 p-4 bg-gray-50 flex-shrink-0">
-          <div className="flex gap-2">
-            <Input
-              ref={inputRef}
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Posez une question ou demandez une modification..."
-              disabled={isLoading}
-              className="flex-1"
-            />
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => sendMessage(QUICK_ACTIONS[0].prompt)}
-              disabled={isLoading}
-              title="Analyser la cohérence"
-            >
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-            <Button 
-              onClick={() => sendMessage()}
-              disabled={isLoading || !inputMessage.trim()}
-              className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600"
-            >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Send className="h-5 w-5" />
-              )}
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
+                          <p className="text-xs font-medium text-gray
