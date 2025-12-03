@@ -1610,7 +1610,7 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
             }
           ],
           temperature: qualityLevel === 0 ? 0.3 : 0.05,
-          max_tokens: 8000,
+          max_tokens: 4000,  // Reduced from 8000 to improve response time
           response_format: { type: "json_object" },
           top_p: 0.9,
           frequency_penalty: 0.1,

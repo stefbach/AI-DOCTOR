@@ -258,7 +258,7 @@ Aucun texte avant ou après le JSON. JAMAIS de markdown autour du JSON.
 Le format JSON EXACT est :
 
 {
-  "response": "Ton analyse détaillée et réponse au médecin ici EN TEXTE LISIBLE. Utilise **gras** pour les points importants et \\n pour les retours à la ligne. ⚠️ NE JAMAIS inclure de JSON ou de code dans ce champ - UNIQUEMENT du texte pour le médecin.",
+  "response": "TEXTE UNIQUEMENT - Écris ici ton analyse en français, lisible par le médecin. Exemple: J'ai analysé les documents. Voici mes observations: 1. Diagnostic cohérent 2. Surveillance nécessaire. Utilise **gras** et \\n. PAS DE CODE. PAS DE JSON. PAS D'ACCOLADES. SEULEMENT DU TEXTE.",
   "actions": [
     {
       "type": "modify_medication_prescription",
@@ -326,7 +326,7 @@ Le format JSON EXACT est :
 
 **EXEMPLE COMPLET** :
 {
-  "response": "**Analyse de cohérence effectuée**\\n\\nJ'ai analysé les 4 documents de consultation. Voici mes observations :\\n\\n**1. Diagnostic ↔ Traitement** ✅\\nLe traitement prescrit est cohérent avec le diagnostic d'hypertension.\\n\\n**2. Optimisation posologie** 💡\\nL'Amlodipine 5mg peut être augmentée à 10mg si TA >140/90 persiste.\\n\\n**3. Surveillance biologique** ⚠️\\nJe recommande d'ajouter HbA1c pour le suivi diabétique.",
+  "response": "Analyse de cohérence effectuée\\n\\nJ'ai analysé les 4 documents de consultation. Voici mes observations :\\n\\n**1. Diagnostic et Traitement** ✅\\nLe traitement prescrit est cohérent avec le diagnostic d'hypertension.\\n\\n**2. Optimisation posologie** 💡\\nL'Amlodipine 5mg peut être augmentée à 10mg si TA supérieure à 140/90 persiste.\\n\\n**3. Surveillance biologique** ⚠️\\nJe recommande d'ajouter HbA1c pour le suivi diabétique.",
   "actions": [
     {
       "type": "modify_medication_prescription",
@@ -596,18 +596,32 @@ function parseAssistantResponse(text: string): { response: string; actions: Assi
       // Clean response to ensure no JSON code is shown to user
       let cleanResponse = parsed.response || text
       
+      console.log('🧹 Raw response before cleaning (first 200 chars):', cleanResponse.substring(0, 200))
+      
       // CRITICAL: The response field should ONLY contain human-readable text
       // Remove any JSON-like content from response (security measure)
-      cleanResponse = cleanResponse
-        .replace(/```json[\s\S]*?```/gi, '')  // Remove json code blocks
-        .replace(/\{[\s\S]*?\}/g, '')  // Remove ALL JSON objects (even nested)
-        .replace(/\[[\s\S]*?\]/g, '')  // Remove ALL JSON arrays
-        .trim()
+      
+      // Strategy 1: Remove code blocks
+      cleanResponse = cleanResponse.replace(/```[\s\S]*?```/gi, '')
+      
+      // Strategy 2: Remove everything that looks like JSON (starts with { or [)
+      cleanResponse = cleanResponse.replace(/\{[^}]*"type"[^}]*\}/gi, '')  // Remove action objects
+      cleanResponse = cleanResponse.replace(/\{[^}]*"category"[^}]*\}/gi, '')  // Remove category objects
+      
+      // Strategy 3: If response still contains { or }, it's probably JSON - clear it
+      if (cleanResponse.includes('"type":') || cleanResponse.includes('"action":') || cleanResponse.includes('"content":')) {
+        console.log('⚠️ Response still contains JSON keywords - using default message')
+        cleanResponse = "✅ Analyse effectuée avec succès.\n\nVeuillez consulter les actions proposées ci-dessous pour appliquer les modifications recommandées."
+      }
+      
+      cleanResponse = cleanResponse.trim()
       
       // If response is empty or too short after cleaning, use a default message
       if (!cleanResponse || cleanResponse.length < 50) {
         cleanResponse = "✅ Analyse effectuée avec succès.\n\nVeuillez consulter les actions proposées ci-dessous pour appliquer les modifications recommandées."
       }
+      
+      console.log('✨ Cleaned response (first 200 chars):', cleanResponse.substring(0, 200))
       
       return {
         response: cleanResponse,
