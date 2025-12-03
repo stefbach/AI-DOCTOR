@@ -259,11 +259,28 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
       })
 
       const data = await response.json()
+      
+      console.log('📥 TIBOK API Response:', {
+        success: data.success,
+        responseLength: data.response?.length || 0,
+        responsePreview: data.response?.substring(0, 200) || 'empty',
+        actionsCount: data.actions?.length || 0,
+        alertsCount: data.alerts?.length || 0
+      })
 
       if (data.success) {
+        // CRITICAL: Clean response client-side as additional security
+        let cleanedResponse = data.response || ''
+        
+        // Remove any JSON that might have slipped through
+        if (cleanedResponse.includes('"type":') || cleanedResponse.includes('"action":') || cleanedResponse.includes('{"response"')) {
+          console.warn('🧹 Client-side JSON detected in response, cleaning...')
+          cleanedResponse = "✅ Analyse effectuée avec succès.\n\nVeuillez consulter les actions proposées ci-dessous pour appliquer les modifications recommandées."
+        }
+        
         const assistantMessage: Message = {
           role: 'assistant',
-          content: data.response,
+          content: cleanedResponse,
           timestamp: new Date(),
           actions: data.actions || [],
           alerts: data.alerts || [],
