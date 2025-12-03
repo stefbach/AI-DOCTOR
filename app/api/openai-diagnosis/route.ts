@@ -276,19 +276,28 @@ For PAIN/FEVER:
 🚨 CRITICAL - VITAL SIGNS ABNORMALITIES REQUIRING IMMEDIATE TREATMENT:
 
 For HYPERTENSIVE CRISIS (BP ≥180/120 mmHg):
-- MANDATORY: Start antihypertensive immediately
-- Treatment: "Amlodipine 10mg OD" (DCI: Amlodipine) or "Nifédipine LP 20mg BD" (DCI: Nifédipine)
-- URGENT referral if end-organ damage suspected
+- MANDATORY: URGENT referral to emergency services if end-organ damage suspected
+- If no end-organ damage (hypertensive urgency): Start oral antihypertensive
+- Treatment: "Amlodipine 5mg OD" (DCI: Amlodipine) - DO NOT start at 10mg
+- Alternative: "Lisinopril 10mg OD" (DCI: Lisinopril) if no contraindication to ACE inhibitors
+- ⚠️ WARNING: Nifédipine immediate-release is CONTRAINDICATED (risk of stroke/MI from rapid BP drop)
+- Target: Reduce BP by 20-25% over first hour, then gradual reduction over 24-48h
 
 For HYPERTENSION Stage 2 (BP ≥140/90 mmHg):
 - MANDATORY: Prescribe antihypertensive
-- Treatment: "Amlodipine 5mg OD" (DCI: Amlodipine) or "Périndopril 4mg OD" (DCI: Périndopril)
+- First-line: "Amlodipine 5mg OD" (DCI: Amlodipine) - calcium channel blocker
+- Alternative: "Périndopril erbumine 4mg OD" (DCI: Périndopril) - start 2mg in elderly/renal impairment
+- Alternative: "Lisinopril 10mg OD" (DCI: Lisinopril)
 - Lifestyle modifications + follow-up in 2-4 weeks
+- Consider combination therapy if BP >20/10 mmHg above target
 
 For HYPERTENSION Stage 1 (BP 130-139/80-89 mmHg):
-- Consider treatment if cardiovascular risk factors
-- Treatment: "Amlodipine 5mg OD" (DCI: Amlodipine) or "Ramipril 2.5mg OD" (DCI: Ramipril)
-- Lifestyle modifications essential
+- Consider treatment if cardiovascular risk factors (diabetes, CKD, CVD history, 10-yr ASCVD risk ≥10%)
+- First-line: "Amlodipine 5mg OD" (DCI: Amlodipine)
+- Alternative: "Ramipril 1.25mg OD" (DCI: Ramipril) - titrate to 2.5-5mg over weeks
+- Alternative: "Lisinopril 5mg OD" (DCI: Lisinopril) - titrate up as needed
+- Lifestyle modifications essential for ALL patients
+- Re-assess in 4-6 weeks before titrating
 
 ⚠️ IF VITAL SIGNS SHOW ELEVATED BLOOD PRESSURE AND PATIENT HAS NO ANTIHYPERTENSIVE:
 YOU MUST PRESCRIBE AN ANTIHYPERTENSIVE IN treatment_plan.medications!
@@ -1175,23 +1184,40 @@ function prepareMauritiusQualityPrompt(patientContext: PatientContext, consultat
     if (bpAnalysis.severity === 'crisis') {
       vitalSignsAlerts = `
 🚨 CRITICAL VITAL SIGN ALERT 🚨
-Blood Pressure: ${bpAnalysis.systolic}/${bpAnalysis.diastolic} mmHg = HYPERTENSIVE CRISIS
-ACTION REQUIRED: YOU MUST prescribe an antihypertensive medication immediately!
-Recommended: Amlodipine 10mg OD or Nifédipine LP 20mg BD
+Blood Pressure: ${bpAnalysis.systolic}/${bpAnalysis.diastolic} mmHg = HYPERTENSIVE CRISIS (≥180/120)
+
+⚠️ IMPORTANT DISTINCTION:
+- HYPERTENSIVE EMERGENCY (with end-organ damage): Needs IV therapy in hospital - URGENT REFERRAL
+- HYPERTENSIVE URGENCY (no end-organ damage): Can initiate oral therapy
+
+If NO signs of end-organ damage (stroke, chest pain, dyspnoea, confusion, papilloedema):
+- Start oral antihypertensive: Amlodipine 5mg OD (NOT 10mg - start low)
+- Alternative: Lisinopril 10mg OD (if no contraindication to ACE inhibitors)
+- ⛔ DO NOT use immediate-release Nifédipine (risk of stroke/MI from rapid BP drop)
+- Target: Reduce BP by 20-25% over 24-48 hours, NOT immediately
+- Arrange urgent follow-up within 24-48 hours
 `
     } else if (bpAnalysis.severity === 'stage2') {
       vitalSignsAlerts = `
 ⚠️ VITAL SIGN ALERT ⚠️
-Blood Pressure: ${bpAnalysis.systolic}/${bpAnalysis.diastolic} mmHg = HYPERTENSION STAGE 2
-ACTION REQUIRED: YOU MUST prescribe an antihypertensive medication!
-Recommended: Amlodipine 5mg OD or Périndopril 4mg OD
+Blood Pressure: ${bpAnalysis.systolic}/${bpAnalysis.diastolic} mmHg = HYPERTENSION STAGE 2 (≥140/90)
+ACTION REQUIRED: Initiate antihypertensive medication
+Recommended first-line: Amlodipine 5mg OD (calcium channel blocker)
+Alternative: Périndopril erbumine 4mg OD or Lisinopril 10mg OD (ACE inhibitor)
+Consider lower starting doses (2mg perindopril) in elderly or renal impairment
+Follow-up in 2-4 weeks for dose titration
 `
     } else if (bpAnalysis.severity === 'stage1') {
       vitalSignsAlerts = `
 ⚠️ VITAL SIGN ALERT ⚠️
-Blood Pressure: ${bpAnalysis.systolic}/${bpAnalysis.diastolic} mmHg = HYPERTENSION STAGE 1
-Consider antihypertensive treatment especially if cardiovascular risk factors present.
-Recommended: Amlodipine 5mg OD or Ramipril 2.5mg OD
+Blood Pressure: ${bpAnalysis.systolic}/${bpAnalysis.diastolic} mmHg = HYPERTENSION STAGE 1 (130-139/80-89)
+Consider antihypertensive treatment if:
+- 10-year ASCVD risk ≥10%
+- Established cardiovascular disease
+- Diabetes mellitus
+- Chronic kidney disease
+Recommended: Amlodipine 5mg OD or Ramipril 1.25mg OD (titrate to 2.5-5mg)
+Lifestyle modifications essential for ALL patients
 `
     }
   }
@@ -1917,33 +1943,40 @@ function applySymptomaticCorrections(analysis: any, issue: any, patientContext: 
   if (issue.description.includes('Hypertensive') || issue.description.includes('hypertension')) {
     const isCrisis = issue.description.includes('crisis') || issue.description.includes('Crisis')
     
+    // ⚠️ IMPORTANT: For hypertensive CRISIS with end-organ damage, patient needs EMERGENCY referral
+    // Oral antihypertensives are for hypertensive URGENCY (no end-organ damage)
+    
     medications.push({
       drug: "Amlodipine 5mg",
       dci: "Amlodipine",
       indication: isCrisis 
-        ? "URGENT: Traitement antihypertenseur pour crise hypertensive - Inhibiteur calcique pour réduction progressive de la pression artérielle"
-        : "Traitement antihypertenseur de première intention pour hypertension artérielle selon recommandations ESC/ESH 2023",
-      mechanism: "Inhibiteur des canaux calciques dihydropyridinique, vasodilatateur artériel périphérique",
+        ? "URGENT: Traitement antihypertenseur pour urgence hypertensive SANS atteinte d'organe cible. Si signes d'atteinte d'organe (AVC, douleur thoracique, dyspnée, confusion), ORIENTER VERS URGENCES IMMÉDIATEMENT. Objectif: réduction TA de 20-25% sur 24-48h."
+        : "Traitement antihypertenseur de première intention pour hypertension artérielle selon recommandations ESC/ESH 2024 et BNF UK",
+      mechanism: "Inhibiteur des canaux calciques dihydropyridinique (long-acting), vasodilatateur artériel périphérique - Action progressive et contrôlée",
       dosing: { 
         adult: "5mg OD (once daily)",
         frequency_per_day: 1,
         individual_dose: "5mg",
-        daily_total_dose: "5mg/day"
+        daily_total_dose: "5mg/day",
+        titration_note: "Peut être augmenté à 10mg OD après 4 semaines si contrôle insuffisant"
       },
-      duration: "Traitement chronique - réévaluation à 4 semaines",
-      interactions: "Prudence avec inhibiteurs CYP3A4. Compatible avec IEC/ARA2 si bithérapie nécessaire",
+      duration: isCrisis 
+        ? "Initiation traitement chronique - Consultation urgente dans 24-48h pour réévaluation"
+        : "Traitement chronique - réévaluation à 4 semaines",
+      interactions: "⚠️ Simvastatine: ne pas dépasser 20mg/jour. Prudence avec inhibiteurs CYP3A4 (clarithromycine, kétoconazole). Compatible avec IEC/ARA2 si bithérapie nécessaire.",
       relationship_to_current_treatment: isCrisis ? "urgence_therapeutique" : "traitement_chronique",
-      monitoring: "Surveillance TA à domicile, contrôle fréquence cardiaque, œdèmes des membres inférieurs",
-      side_effects: "Œdèmes des chevilles, flush facial, céphalées, palpitations",
-      contraindications: "Hypersensibilité à l'amlodipine, sténose aortique sévère, choc cardiogénique",
+      monitoring: "Surveillance TA à domicile (objectif <140/90 ou <130/80 si haut risque CV), contrôle fréquence cardiaque, œdèmes des membres inférieurs",
+      side_effects: "Œdèmes des chevilles (dose-dépendant), flush facial, céphalées, palpitations - Ces effets diminuent souvent avec le temps",
+      contraindications: "Hypersensibilité à l'amlodipine, sténose aortique sévère, choc cardiogénique, insuffisance cardiaque instable",
       mauritius_availability: {
         public_free: true,
         estimated_cost: "Rs 100-200",
-        alternatives: "Périndopril 4mg si œdèmes, Losartan 50mg si toux sous IEC",
+        alternatives: "Périndopril 2-4mg OD si œdèmes, Losartan 50mg OD si toux sous IEC",
         brand_names: "Norvasc, Amlor disponibles"
       },
-      administration_instructions: "Prendre le matin à heure fixe, indépendamment des repas",
-      _added_by_universal_correction: isCrisis ? "critical_hypertensive_crisis" : "hypertension_treatment"
+      administration_instructions: "Prendre le matin à heure fixe, indépendamment des repas. Ne pas arrêter brutalement.",
+      _added_by_universal_correction: isCrisis ? "critical_hypertensive_crisis" : "hypertension_treatment",
+      _clinical_warning: isCrisis ? "⚠️ Si céphalées sévères, troubles visuels, douleur thoracique, confusion ou déficit neurologique: URGENCES MÉDICALES IMMÉDIATES" : null
     })
     analysis.treatment_plan.medications = medications
     
@@ -2097,10 +2130,11 @@ function checkBasicInteraction(drug1: string, drug2: string): {
   description: string;
 } {
   const criticalInteractions = [
+    // === ANTICOAGULANTS ===
     {
       drugs: ['warfarin', 'ciprofloxacin'],
       level: 'major' as const,
-      description: 'Potentialisation de l\'effet anticoagulant'
+      description: 'Potentialisation de l\'effet anticoagulant - Risque hémorragique accru'
     },
     {
       drugs: ['warfarin', 'cipro'],
@@ -2108,24 +2142,155 @@ function checkBasicInteraction(drug1: string, drug2: string): {
       description: 'Potentialisation de l\'effet anticoagulant'
     },
     {
+      drugs: ['warfarin', 'aspirin'],
+      level: 'major' as const,
+      description: 'Risque hémorragique majeur - Éviter si possible'
+    },
+    {
+      drugs: ['warfarin', 'ibuprofen'],
+      level: 'major' as const,
+      description: 'Risque hémorragique majeur + ulcère gastrique - AINS à éviter sous anticoagulant'
+    },
+    {
+      drugs: ['warfarin', 'nsaid'],
+      level: 'major' as const,
+      description: 'Risque hémorragique majeur avec tous les AINS'
+    },
+    // === CARDIOVASCULAIRE ===
+    {
       drugs: ['digoxin', 'furosemide'],
       level: 'moderate' as const,
-      description: 'Risque de toxicité digitalique par hypokaliémie'
+      description: 'Risque de toxicité digitalique par hypokaliémie - Surveiller kaliémie'
     },
+    {
+      drugs: ['digoxin', 'amiodarone'],
+      level: 'major' as const,
+      description: 'Augmentation des taux de digoxine - Réduire dose de digoxine de 50%'
+    },
+    {
+      drugs: ['amlodipine', 'simvastatin'],
+      level: 'major' as const,
+      description: 'Risque de rhabdomyolyse - Ne pas dépasser simvastatine 20mg avec amlodipine'
+    },
+    {
+      drugs: ['verapamil', 'beta'],
+      level: 'major' as const,
+      description: 'Risque de bradycardie sévère et bloc AV - Éviter association'
+    },
+    {
+      drugs: ['diltiazem', 'beta'],
+      level: 'major' as const,
+      description: 'Risque de bradycardie et insuffisance cardiaque - Surveillance étroite'
+    },
+    // === AINS + ANTIHYPERTENSEURS ===
+    {
+      drugs: ['ibuprofen', 'lisinopril'],
+      level: 'major' as const,
+      description: 'AINS + IEC: Risque d\'insuffisance rénale aiguë et réduction effet antihypertenseur'
+    },
+    {
+      drugs: ['ibuprofen', 'perindopril'],
+      level: 'major' as const,
+      description: 'AINS + IEC: Risque d\'insuffisance rénale aiguë et hyperkaliémie'
+    },
+    {
+      drugs: ['ibuprofen', 'ramipril'],
+      level: 'major' as const,
+      description: 'AINS + IEC: Risque d\'insuffisance rénale aiguë - Éviter ou surveiller créatinine'
+    },
+    {
+      drugs: ['ibuprofen', 'losartan'],
+      level: 'major' as const,
+      description: 'AINS + ARA2: Risque d\'insuffisance rénale et réduction effet antihypertenseur'
+    },
+    {
+      drugs: ['ibuprofen', 'furosemide'],
+      level: 'moderate' as const,
+      description: 'AINS réduisent l\'effet diurétique - Surveillance fonction rénale'
+    },
+    {
+      drugs: ['diclofenac', 'lisinopril'],
+      level: 'major' as const,
+      description: 'AINS + IEC: Risque rénal et hyperkaliémie'
+    },
+    {
+      drugs: ['naproxen', 'lisinopril'],
+      level: 'major' as const,
+      description: 'AINS + IEC: Risque rénal et réduction efficacité antihypertensive'
+    },
+    // === MÉTABOLIQUE ===
     {
       drugs: ['metformin', 'iodine'],
       level: 'major' as const,
-      description: 'Risque d\'acidose lactique'
+      description: 'Risque d\'acidose lactique - Arrêter metformine 48h avant/après contraste iodé'
     },
+    {
+      drugs: ['metformin', 'contrast'],
+      level: 'major' as const,
+      description: 'Risque d\'acidose lactique avec produit de contraste iodé'
+    },
+    // === NEUROPSYCHIATRIE ===
     {
       drugs: ['tramadol', 'sertraline'],
       level: 'major' as const,
-      description: 'Risque de syndrome sérotoninergique'
+      description: 'Risque de syndrome sérotoninergique - Éviter ou surveillance étroite'
     },
     {
-      drugs: ['warfarin', 'aspirin'],
+      drugs: ['tramadol', 'ssri'],
       level: 'major' as const,
-      description: 'Risque hémorragique majeur'
+      description: 'Risque de syndrome sérotoninergique avec tous les ISRS'
+    },
+    {
+      drugs: ['tramadol', 'fluoxetine'],
+      level: 'major' as const,
+      description: 'Syndrome sérotoninergique + inhibition métabolisme tramadol'
+    },
+    {
+      drugs: ['metoclopramide', 'sertraline'],
+      level: 'moderate' as const,
+      description: 'Risque accru de syndrome sérotoninergique et effets extrapyramidaux'
+    },
+    {
+      drugs: ['metoclopramide', 'haloperidol'],
+      level: 'major' as const,
+      description: 'Risque d\'effets extrapyramidaux sévères - Éviter association'
+    },
+    // === POTASSIUM ===
+    {
+      drugs: ['spironolactone', 'lisinopril'],
+      level: 'major' as const,
+      description: 'Risque d\'hyperkaliémie sévère - Surveiller kaliémie régulièrement'
+    },
+    {
+      drugs: ['spironolactone', 'potassium'],
+      level: 'contraindicated' as const,
+      description: 'CONTRE-INDIQUÉ: Risque d\'hyperkaliémie mortelle'
+    },
+    {
+      drugs: ['lisinopril', 'potassium'],
+      level: 'major' as const,
+      description: 'Risque d\'hyperkaliémie - Éviter supplémentation potassium sous IEC'
+    },
+    // === ANTIBIOTIQUES ===
+    {
+      drugs: ['ciprofloxacin', 'theophylline'],
+      level: 'major' as const,
+      description: 'Augmentation toxicité théophylline - Réduire dose de 50%'
+    },
+    {
+      drugs: ['clarithromycin', 'simvastatin'],
+      level: 'contraindicated' as const,
+      description: 'CONTRE-INDIQUÉ: Risque majeur de rhabdomyolyse'
+    },
+    {
+      drugs: ['clarithromycin', 'colchicine'],
+      level: 'contraindicated' as const,
+      description: 'CONTRE-INDIQUÉ: Toxicité colchicine potentiellement mortelle'
+    },
+    {
+      drugs: ['metronidazole', 'alcohol'],
+      level: 'major' as const,
+      description: 'Effet antabuse: nausées, vomissements, flush - Éviter alcool'
     }
   ];
   
