@@ -5212,9 +5212,9 @@ const [localSickLeave, setLocalSickLeave] = useState({
  removeMedicament(index)
  }}
  onAddLabTest={(category, test) => {
- addBiologyTest(category)
- const lastIndex = report?.ordonnances?.biologie?.prescription?.analyses?.[category]?.length || 0
- setTimeout(() => {
+ // Direct creation: no add+update pattern - create complete line immediately
+ if (validationStatus === 'validated') return
+ 
  const testWithDefaults = {
  nom: test.nom || '',
  code: test.code || '',
@@ -5227,8 +5227,52 @@ const [localSickLeave, setLocalSickLeave] = useState({
  tubePrelevement: test.tubePrelevement || 'As per laboratory protocol',
  delaiResultat: test.delaiResultat || 'Standard'
  }
- updateBiologyTestBatch(category, lastIndex, testWithDefaults)
- }, 100)
+ 
+ setReport(prev => {
+ if (!prev) return null
+ const newReport = { ...prev }
+ 
+ // Initialize biologie section if needed
+ if (!newReport.ordonnances) newReport.ordonnances = {}
+ if (!newReport.ordonnances.biologie) {
+ const praticien = getReportPraticien()
+ const patient = getReportPatient()
+ newReport.ordonnances.biologie = {
+ enTete: praticien,
+ patient: patient,
+ prescription: {
+ datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
+ motifClinique: '',
+ analyses: {},
+ instructionsSpeciales: [],
+ laboratoireRecommande: ''
+ },
+ authentification: {
+ signature: "Medical Practitioner's Signature",
+ nomEnCapitales: praticien.nom.toUpperCase(),
+ numeroEnregistrement: praticien.numeroEnregistrement,
+ date: patient.dateExamen || new Date().toISOString().split('T')[0]
+ }
+ }
+ }
+ 
+ // Initialize category if needed
+ if (!newReport.ordonnances.biologie.prescription.analyses) {
+ newReport.ordonnances.biologie.prescription.analyses = {}
+ }
+ if (!newReport.ordonnances.biologie.prescription.analyses[category]) {
+ newReport.ordonnances.biologie.prescription.analyses[category] = []
+ }
+ 
+ // Add complete test directly
+ newReport.ordonnances.biologie.prescription.analyses[category] = [
+ ...newReport.ordonnances.biologie.prescription.analyses[category], 
+ testWithDefaults
+ ]
+ 
+ return newReport
+ })
+ trackModification(`biologie.add.${category}.${test.nom}`)
  }}
  onUpdateLabTest={(category, index, test) => {
  updateBiologyTestBatch(category, index, test)
@@ -5237,9 +5281,9 @@ const [localSickLeave, setLocalSickLeave] = useState({
  removeBiologyTest(category, index)
  }}
  onAddImaging={(exam) => {
- addImagingExam()
- const lastIndex = report?.ordonnances?.imagerie?.prescription?.examens?.length || 0
- setTimeout(() => {
+ // Direct creation: no add+update pattern - create complete line immediately
+ if (validationStatus === 'validated') return
+ 
  const examWithDefaults = {
  type: exam.type || exam.modalite || '',
  modalite: exam.modalite || exam.type || '',
@@ -5249,10 +5293,47 @@ const [localSickLeave, setLocalSickLeave] = useState({
  contraste: exam.contraste || false,
  instructions: exam.instructions || '',
  preparationPatient: exam.preparationPatient || '',
- delaiResultat: exam.delaiResultat || 'Standard'
+ delaiResultat: exam.delaiResultat || 'Standard',
+ protocoleSpecifique: exam.protocoleSpecifique || '',
+ questionDiagnostique: exam.questionDiagnostique || ''
  }
- updateImagingExamBatch(lastIndex, examWithDefaults)
- }, 100)
+ 
+ setReport(prev => {
+ if (!prev) return null
+ const newReport = { ...prev }
+ 
+ // Initialize imagerie section if needed
+ if (!newReport.ordonnances) newReport.ordonnances = {}
+ if (!newReport.ordonnances.imagerie) {
+ const praticien = getReportPraticien()
+ const patient = getReportPatient()
+ newReport.ordonnances.imagerie = {
+ enTete: praticien,
+ patient: patient,
+ prescription: {
+ datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
+ examens: [],
+ renseignementsCliniques: '',
+ centreImagerie: ''
+ },
+ authentification: {
+ signature: "Medical Practitioner's Signature",
+ nomEnCapitales: praticien.nom.toUpperCase(),
+ numeroEnregistrement: praticien.numeroEnregistrement,
+ date: patient.dateExamen || new Date().toISOString().split('T')[0]
+ }
+ }
+ }
+ 
+ // Add complete exam directly
+ newReport.ordonnances.imagerie.prescription.examens = [
+ ...(newReport.ordonnances.imagerie.prescription.examens || []),
+ examWithDefaults
+ ]
+ 
+ return newReport
+ })
+ trackModification(`imagerie.add.${exam.type}`)
  }}
  onUpdateImaging={(index, exam) => {
  updateImagingExamBatch(index, exam)
