@@ -17,8 +17,9 @@ import {
  FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube, 
  Scan, AlertTriangle, XCircle, Eye, EyeOff, Edit, Save, FileCheck, Plus, 
  Trash2, AlertCircle, Lock, Unlock, Copy, ClipboardCheck, Stethoscope, 
- Calendar, User, Building, CreditCard, Receipt
+ Calendar, User, Building, CreditCard, Receipt, Brain
 } from "lucide-react"
+import TibokMedicalAssistant from './tibok-medical-assistant'
 
 // ==================== HELPER FUNCTIONS ====================
 // Helper function to safely handle DCI fields
@@ -5102,7 +5103,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <PrescriptionStats />
 
  <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
- <TabsList className="grid w-full grid-cols-6">
+ <TabsList className="grid w-full grid-cols-7">
  <TabsTrigger value="consultation">
  <FileText className="h-4 w-4 mr-2" />
  Report
@@ -5146,6 +5147,10 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <Receipt className="h-4 w-4 mr-2" />
  Invoice
  </TabsTrigger>
+ <TabsTrigger value="ai-assistant" className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white">
+ <Brain className="h-4 w-4 mr-2" />
+ AI Assistant
+ </TabsTrigger>
  </TabsList>
 
  <TabsContent value="consultation">
@@ -5170,6 +5175,54 @@ const [localSickLeave, setLocalSickLeave] = useState({
 
  <TabsContent value="invoice">
  <InvoiceComponent />
+ </TabsContent>
+ 
+ <TabsContent value="ai-assistant">
+ <TibokMedicalAssistant
+ reportData={report}
+ onUpdateSection={(section, value) => {
+ updateRapportSection(section, value)
+ }}
+ onAddMedication={(medication) => {
+ addMedicament()
+ const lastIndex = report?.ordonnances?.medicaments?.prescription?.medicaments?.length || 0
+ setTimeout(() => {
+ updateMedicamentBatch(lastIndex, medication)
+ }, 100)
+ }}
+ onUpdateMedication={(index, medication) => {
+ updateMedicamentBatch(index, medication)
+ }}
+ onRemoveMedication={(index) => {
+ removeMedicament(index)
+ }}
+ onAddLabTest={(category, test) => {
+ addBiologyTest(category)
+ const lastIndex = report?.ordonnances?.biologie?.prescription?.analyses?.[category]?.length || 0
+ setTimeout(() => {
+ updateBiologyTestBatch(category, lastIndex, test)
+ }, 100)
+ }}
+ onUpdateLabTest={(category, index, test) => {
+ updateBiologyTestBatch(category, index, test)
+ }}
+ onRemoveLabTest={(category, index) => {
+ removeBiologyTest(category, index)
+ }}
+ onAddImaging={(exam) => {
+ addImagingExam()
+ const lastIndex = report?.ordonnances?.imagerie?.prescription?.examens?.length || 0
+ setTimeout(() => {
+ updateImagingExamBatch(lastIndex, exam)
+ }, 100)
+ }}
+ onUpdateImaging={(index, exam) => {
+ updateImagingExamBatch(index, exam)
+ }}
+ onRemoveImaging={(index) => {
+ removeImagingExam(index)
+ }}
+ />
  </TabsContent>
  </Tabs>
 
@@ -5264,18 +5317,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  </div>
  )}
 
-{/* AI Medical Assistant - Disabled for now */}
-{/* <MedicalAIAssistant
- reportData={report}
- onUpdateSection={handleUpdateSectionImmediate}
- onUpdateMedication={stableUpdateMedication}
- onAddMedication={handleAIAddMedication}
- onUpdateLabTest={stableUpdateBiologyTest}
- onAddLabTest={handleAIAddLabTest}
- onUpdateImaging={stableUpdateImagingExam}
- onAddImaging={handleAIAddImaging}
- currentSection={activeTab === 'consultation' ? 'motifConsultation' : activeTab}
-/> */}
+{/* TIBOK Medical Assistant is now integrated as a tab - see AI Assistant tab */}
  </div>
  )
 }
