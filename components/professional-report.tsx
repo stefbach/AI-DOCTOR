@@ -5187,7 +5187,22 @@ const [localSickLeave, setLocalSickLeave] = useState({
  addMedicament()
  const lastIndex = report?.ordonnances?.medicaments?.prescription?.medicaments?.length || 0
  setTimeout(() => {
- updateMedicamentBatch(lastIndex, medication)
+ const medicationWithDefaults = {
+ nom: medication.nom || '',
+ denominationCommune: medication.denominationCommune || medication.dci || '',
+ dosage: medication.dosage || '',
+ forme: medication.forme || 'tablet',
+ posologie: medication.posologie || '',
+ modeAdministration: medication.voieAdministration || medication.modeAdministration || 'Oral route',
+ dureeTraitement: medication.dureeTraitement || '7 days',
+ quantite: medication.quantite || '1 box',
+ instructions: medication.instructions || '',
+ justification: medication.justification || '',
+ surveillanceParticuliere: medication.surveillanceParticuliere || '',
+ nonSubstituable: medication.nonSubstituable || false,
+ ligneComplete: ''
+ }
+ updateMedicamentBatch(lastIndex, medicationWithDefaults)
  }, 100)
  }}
  onUpdateMedication={(index, medication) => {
@@ -5200,7 +5215,19 @@ const [localSickLeave, setLocalSickLeave] = useState({
  addBiologyTest(category)
  const lastIndex = report?.ordonnances?.biologie?.prescription?.analyses?.[category]?.length || 0
  setTimeout(() => {
- updateBiologyTestBatch(category, lastIndex, test)
+ const testWithDefaults = {
+ nom: test.nom || '',
+ code: test.code || '',
+ categorie: category,
+ urgence: test.urgence || false,
+ aJeun: test.aJeun || false,
+ conditionsPrelevement: test.conditionsPrelevement || '',
+ motifClinique: test.motifClinique || test.indication || '',
+ renseignementsCliniques: test.renseignementsCliniques || '',
+ tubePrelevement: test.tubePrelevement || 'As per laboratory protocol',
+ delaiResultat: test.delaiResultat || 'Standard'
+ }
+ updateBiologyTestBatch(category, lastIndex, testWithDefaults)
  }, 100)
  }}
  onUpdateLabTest={(category, index, test) => {
@@ -5213,7 +5240,18 @@ const [localSickLeave, setLocalSickLeave] = useState({
  addImagingExam()
  const lastIndex = report?.ordonnances?.imagerie?.prescription?.examens?.length || 0
  setTimeout(() => {
- updateImagingExamBatch(lastIndex, exam)
+ const examWithDefaults = {
+ type: exam.type || exam.modalite || '',
+ modalite: exam.modalite || exam.type || '',
+ region: exam.region || exam.area || '',
+ indicationClinique: exam.indicationClinique || exam.indication || '',
+ urgence: exam.urgence || false,
+ contraste: exam.contraste || false,
+ instructions: exam.instructions || '',
+ preparationPatient: exam.preparationPatient || '',
+ delaiResultat: exam.delaiResultat || 'Standard'
+ }
+ updateImagingExamBatch(lastIndex, examWithDefaults)
  }, 100)
  }}
  onUpdateImaging={(index, exam) => {
