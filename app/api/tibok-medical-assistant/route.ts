@@ -596,16 +596,17 @@ function parseAssistantResponse(text: string): { response: string; actions: Assi
       // Clean response to ensure no JSON code is shown to user
       let cleanResponse = parsed.response || text
       
+      // CRITICAL: The response field should ONLY contain human-readable text
       // Remove any JSON-like content from response (security measure)
       cleanResponse = cleanResponse
         .replace(/```json[\s\S]*?```/gi, '')  // Remove json code blocks
-        .replace(/\{[\s\S]*?"type"\s*:\s*"modify_[\s\S]*?\}/gi, '')  // Remove action objects
-        .replace(/^\s*\{[\s\S]*\}\s*$/g, '')  // Remove if entire response is JSON
+        .replace(/\{[\s\S]*?\}/g, '')  // Remove ALL JSON objects (even nested)
+        .replace(/\[[\s\S]*?\]/g, '')  // Remove ALL JSON arrays
         .trim()
       
       // If response is empty or too short after cleaning, use a default message
-      if (!cleanResponse || cleanResponse.length < 20) {
-        cleanResponse = "Analyse effectuée. Veuillez consulter les actions proposées ci-dessous."
+      if (!cleanResponse || cleanResponse.length < 50) {
+        cleanResponse = "✅ Analyse effectuée avec succès.\n\nVeuillez consulter les actions proposées ci-dessous pour appliquer les modifications recommandées."
       }
       
       return {
