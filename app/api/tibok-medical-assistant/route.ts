@@ -249,6 +249,12 @@ Tu analyses TOUJOURS les interdépendances :
 ⚠️ **CRITIQUE** : Tu DOIS OBLIGATOIREMENT répondre UNIQUEMENT avec un objet JSON valide. 
 Aucun texte avant ou après le JSON. JAMAIS de markdown autour du JSON.
 
+🚨 **RÈGLE ABSOLUE POUR LES ACTIONS** :
+- Pour TOUT nouveau médicament, test biologique, ou examen d'imagerie → TOUJOURS utiliser action: "add"
+- JAMAIS utiliser action: "update" sauf si un index précis est fourni dans le contexte
+- Si tu veux modifier une posologie (ex: Amlodipine 5mg → 10mg) → utilise "add" pour créer une NOUVELLE ligne
+- Le médecin supprimera manuellement l'ancienne ligne si nécessaire
+
 Le format JSON EXACT est :
 
 {
@@ -296,9 +302,13 @@ Le format JSON EXACT est :
 **TYPES D'ACTIONS VALIDES** :
 
 1. **modify_medication_prescription** :
-   - action: "add" - TOUJOURS utiliser "add" pour ajouter un nouveau médicament ou modifier une posologie
-   - action: "remove" - Retirer un médicament (nécessite content.index)
-   - action: "update" - Modifier un médicament existant (nécessite content.index ET content.medication)
+   - action: "add" - ⚠️ **OBLIGATOIRE** pour TOUT nouveau médicament à prescrire
+     * Ajouter un nouveau médicament → "add"
+     * Augmenter/diminuer une posologie → "add" (nouvelle prescription)
+     * Changer un médicament existant → "add" (nouvelle ligne)
+     * JAMAIS "update" sauf si vous connaissez l'index exact de la ligne
+   - action: "remove" - Retirer un médicament (nécessite content.index - rarement utilisé)
+   - action: "update" - ❌ NE PAS UTILISER sauf si content.index est fourni par le système
    
 2. **modify_lab_prescription** :
    - action: "add" - Ajouter un test biologique
@@ -321,6 +331,7 @@ Le format JSON EXACT est :
     {
       "type": "modify_medication_prescription",
       "action": "add",
+      "_comment": "TOUJOURS 'add' pour nouveau médicament - JAMAIS 'update'",
       "content": {
         "nom": "Amlodipine",
         "denominationCommune": "Amlodipine",
