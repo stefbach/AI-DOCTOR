@@ -326,35 +326,60 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
 
   // ==================== APPLY ACTION ====================
   const applyAction = useCallback((action: AssistantAction) => {
-    console.log('Applying TIBOK action:', action)
+    console.log('🎯 Applying TIBOK action:', JSON.stringify(action, null, 2))
 
     try {
       switch (action.type) {
         case 'modify_medical_report':
           if (action.section && action.content) {
-            onUpdateSection(action.section, action.content.value || JSON.stringify(action.content))
+            const value = action.content.value || action.content.text || 
+                         (typeof action.content === 'string' ? action.content : JSON.stringify(action.content))
+            onUpdateSection(action.section, value)
             toast({
               title: "✅ Rapport médical modifié",
-              description: action.reasoning || "Section mise à jour avec succès"
+              description: action.reasoning || `Section "${action.section}" mise à jour`
+            })
+          } else {
+            toast({
+              title: "⚠️ Action incomplète",
+              description: "La section ou le contenu est manquant",
+              variant: "destructive"
             })
           }
           break
 
         case 'modify_medication_prescription':
-          if (action.action === 'add' && action.content) {
-            onAddMedication(action.content)
+          if (action.action === 'add') {
+            // Build medication object from content
+            const medication = {
+              nom: action.content?.nom || action.content?.name || 'Nouveau médicament',
+              denominationCommune: action.content?.denominationCommune || action.content?.dci || action.content?.nom || '',
+              dosage: action.content?.dosage || '',
+              forme: action.content?.forme || action.content?.form || 'comprimé',
+              posologie: action.content?.posologie || action.content?.dosing || '',
+              voieAdministration: action.content?.voieAdministration || action.content?.route || 'oral',
+              dureeTraitement: action.content?.dureeTraitement || action.content?.duration || '',
+              quantite: action.content?.quantite || action.content?.quantity || '',
+              instructions: action.content?.instructions || '',
+              justification: action.content?.justification || action.content?.indication || action.reasoning || ''
+            }
+            console.log('💊 Adding medication:', medication)
+            onAddMedication(medication)
             toast({
               title: "✅ Médicament ajouté",
-              description: `${action.content.nom || 'Nouveau médicament'} ajouté à l'ordonnance`
+              description: `${medication.nom} (${medication.dosage}) ajouté à l'ordonnance`
             })
-          } else if (action.action === 'remove' && action.content?.index !== undefined) {
-            onRemoveMedication(action.content.index)
+          } else if (action.action === 'remove') {
+            const index = action.content?.index ?? 0
+            onRemoveMedication(index)
             toast({
               title: "✅ Médicament retiré",
               description: action.reasoning || "Médicament retiré de l'ordonnance"
             })
-          } else if (action.action === 'update' && action.content?.index !== undefined) {
-            onUpdateMedication(action.content.index, action.content.medication)
+          } else if (action.action === 'update') {
+            const index = action.content?.index ?? 0
+            const medication = action.content?.medication || action.content
+            onUpdateMedication(index, medication)
             toast({
               title: "✅ Médicament modifié",
               description: action.reasoning || "Prescription mise à jour"
@@ -363,15 +388,25 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
           break
 
         case 'modify_lab_prescription':
-          if (action.action === 'add' && action.content) {
-            const category = action.content.category || 'clinicalChemistry'
-            onAddLabTest(category, action.content.test)
+          if (action.action === 'add') {
+            const category = action.content?.category || 'clinicalChemistry'
+            const test = action.content?.test || {
+              nom: action.content?.nom || action.content?.name || 'Nouveau test',
+              code: action.content?.code || '',
+              motifClinique: action.content?.motifClinique || action.content?.indication || action.reasoning || '',
+              urgence: action.content?.urgence || action.content?.urgent || false,
+              aJeun: action.content?.aJeun || action.content?.fasting || false
+            }
+            console.log('🔬 Adding lab test:', category, test)
+            onAddLabTest(category, test)
             toast({
               title: "✅ Examen biologique ajouté",
-              description: `${action.content.test?.nom || 'Nouveau test'} ajouté`
+              description: `${test.nom} ajouté (${category})`
             })
-          } else if (action.action === 'remove' && action.content) {
-            onRemoveLabTest(action.content.category, action.content.index)
+          } else if (action.action === 'remove') {
+            const category = action.content?.category || 'clinicalChemistry'
+            const index = action.content?.index ?? 0
+            onRemoveLabTest(category, index)
             toast({
               title: "✅ Examen biologique retiré",
               description: action.reasoning || "Test retiré de la prescription"
@@ -380,14 +415,25 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
           break
 
         case 'modify_paraclinical_prescription':
-          if (action.action === 'add' && action.content) {
-            onAddImaging(action.content)
+          if (action.action === 'add') {
+            const exam = {
+              type: action.content?.type || action.content?.modalite || 'Imagerie',
+              modalite: action.content?.modalite || action.content?.type || '',
+              region: action.content?.region || action.content?.area || '',
+              indicationClinique: action.content?.indicationClinique || action.content?.indication || action.reasoning || '',
+              urgence: action.content?.urgence || action.content?.urgent || false,
+              contraste: action.content?.contraste || action.content?.contrast || false,
+              instructions: action.content?.instructions || ''
+            }
+            console.log('🩻 Adding imaging:', exam)
+            onAddImaging(exam)
             toast({
               title: "✅ Examen paraclinique ajouté",
-              description: `${action.content.type || 'Nouvel examen'} ajouté`
+              description: `${exam.type} ${exam.region ? `- ${exam.region}` : ''} ajouté`
             })
-          } else if (action.action === 'remove' && action.content?.index !== undefined) {
-            onRemoveImaging(action.content.index)
+          } else if (action.action === 'remove') {
+            const index = action.content?.index ?? 0
+            onRemoveImaging(index)
             toast({
               title: "✅ Examen paraclinique retiré",
               description: action.reasoning || "Examen retiré"
@@ -395,14 +441,28 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
           }
           break
 
+        case 'analyze_document_coherence':
+        case 'none':
+          // Just informational, no action needed
+          toast({
+            title: "ℹ️ Information",
+            description: action.reasoning || "Analyse terminée"
+          })
+          break
+
         default:
-          console.log('Action type not handled:', action.type)
+          console.log('⚠️ Action type not handled:', action.type)
+          toast({
+            title: "⚠️ Action non reconnue",
+            description: `Type d'action "${action.type}" non géré`,
+            variant: "destructive"
+          })
       }
     } catch (error) {
-      console.error('Error applying action:', error)
+      console.error('❌ Error applying action:', error)
       toast({
         title: "Erreur",
-        description: "Impossible d'appliquer cette action",
+        description: `Impossible d'appliquer cette action: ${error}`,
         variant: "destructive"
       })
     }
@@ -609,34 +669,54 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
                       {/* Actions */}
                       {message.actions && message.actions.length > 0 && (
                         <div className="mt-3 space-y-2">
-                          <p className="text-xs font-medium text-gray-500">Actions proposées :</p>
+                          <p className="text-xs font-medium text-gray-500 flex items-center gap-1">
+                            <Sparkles className="h-3 w-3 text-teal-500" />
+                            {message.actions.length} action(s) proposée(s) :
+                          </p>
                           {message.actions.map((action, actionIndex) => (
                             <div 
                               key={actionIndex}
-                              className="flex items-start gap-2 p-3 bg-white border-2 border-teal-200 rounded-xl hover:border-teal-400 transition-all"
+                              className="flex items-start gap-2 p-3 bg-white border-2 border-teal-200 rounded-xl hover:border-teal-400 hover:shadow-md transition-all"
                             >
                               <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Badge className="bg-teal-500 text-white">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Badge className="bg-teal-500 text-white px-2 py-1">
                                     {getActionIcon(action.type)}
                                     <span className="ml-1 capitalize">{action.action || 'Modifier'}</span>
                                   </Badge>
+                                  <Badge variant="outline" className="text-xs">
+                                    {action.type?.replace('modify_', '').replace(/_/g, ' ') || 'action'}
+                                  </Badge>
                                   {action.section && (
-                                    <span className="text-xs text-gray-600 font-medium">
+                                    <span className="text-xs text-gray-600 font-medium bg-gray-100 px-2 py-0.5 rounded">
                                       {action.section}
                                     </span>
                                   )}
                                 </div>
+                                {/* Show content details */}
+                                {action.content && (
+                                  <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded mb-2">
+                                    {action.content.nom && <p><strong>Médicament:</strong> {action.content.nom}</p>}
+                                    {action.content.denominationCommune && <p><strong>DCI:</strong> {action.content.denominationCommune}</p>}
+                                    {action.content.dosage && <p><strong>Dosage:</strong> {action.content.dosage}</p>}
+                                    {action.content.posologie && <p><strong>Posologie:</strong> {action.content.posologie}</p>}
+                                    {action.content.dureeTraitement && <p><strong>Durée:</strong> {action.content.dureeTraitement}</p>}
+                                    {action.content.test?.nom && <p><strong>Test:</strong> {action.content.test.nom}</p>}
+                                    {action.content.type && <p><strong>Examen:</strong> {action.content.type}</p>}
+                                    {action.content.description && <p><strong>Description:</strong> {action.content.description}</p>}
+                                    {action.content.value && <p><strong>Valeur:</strong> {typeof action.content.value === 'string' ? action.content.value.substring(0, 100) + '...' : JSON.stringify(action.content.value).substring(0, 100)}</p>}
+                                  </div>
+                                )}
                                 {action.reasoning && (
-                                  <p className="text-sm text-gray-700">
-                                    {action.reasoning}
+                                  <p className="text-sm text-gray-700 italic">
+                                    💡 {action.reasoning}
                                   </p>
                                 )}
                               </div>
                               <Button 
                                 size="sm"
                                 onClick={() => applyAction(action)}
-                                className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600"
+                                className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-md"
                               >
                                 <Check className="h-4 w-4 mr-1" />
                                 Appliquer
@@ -649,16 +729,44 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
                       {/* Inline Alerts */}
                       {message.alerts && message.alerts.length > 0 && (
                         <div className="mt-3 space-y-2">
+                          <p className="text-xs font-medium text-gray-500 flex items-center gap-1">
+                            <AlertTriangle className="h-3 w-3 text-orange-500" />
+                            {message.alerts.length} alerte(s) :
+                          </p>
                           {message.alerts.map((alert, alertIndex) => (
-                            <Alert key={alertIndex} className={`${getAlertStyle(alert.type)}`}>
+                            <Alert key={alertIndex} className={`${getAlertStyle(alert.type)} border-l-4`}>
                               <AlertTriangle className="h-4 w-4" />
-                              <AlertDescription>{alert.message}</AlertDescription>
+                              <AlertDescription className="font-medium">{alert.message}</AlertDescription>
                             </Alert>
                           ))}
                         </div>
                       )}
 
-                      <p className="text-xs text-gray-500 mt-1">
+                      {/* Inline Suggestions */}
+                      {message.suggestions && message.suggestions.length > 0 && (
+                        <div className="mt-3 space-y-2">
+                          <p className="text-xs font-medium text-gray-500 flex items-center gap-1">
+                            <Lightbulb className="h-3 w-3 text-yellow-500" />
+                            {message.suggestions.length} suggestion(s) :
+                          </p>
+                          {message.suggestions.map((suggestion, sugIndex) => (
+                            <div key={sugIndex} className={`p-3 rounded-lg border-l-4 ${getPriorityColor(suggestion.priority)}`}>
+                              <div className="flex items-center gap-2 mb-1">
+                                <Badge className={`text-xs ${getPriorityColor(suggestion.priority)}`}>
+                                  {suggestion.priority?.toUpperCase() || 'INFO'}
+                                </Badge>
+                                <span className="text-xs text-gray-500 capitalize">{suggestion.category || 'général'}</span>
+                              </div>
+                              <p className="text-sm font-medium">{suggestion.suggestion}</p>
+                              {suggestion.reasoning && (
+                                <p className="text-xs text-gray-600 mt-1 italic">💡 {suggestion.reasoning}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <p className="text-xs text-gray-500 mt-2">
                         {message.timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>

@@ -244,38 +244,95 @@ Tu analyses TOUJOURS les interdépendances :
 
 ---
 
-# FORMAT DE RÉPONSE STRUCTURÉ
+# FORMAT DE RÉPONSE STRUCTURÉ - OBLIGATOIRE
 
-Tu dois TOUJOURS fournir tes réponses en JSON valide avec la structure suivante :
+⚠️ **CRITIQUE** : Tu DOIS OBLIGATOIREMENT répondre UNIQUEMENT avec un objet JSON valide. 
+Aucun texte avant ou après le JSON. JAMAIS de markdown autour du JSON.
 
-\`\`\`json
+Le format JSON EXACT est :
+
 {
-  "response": "Texte de ta réponse au médecin",
+  "response": "Ton analyse détaillée et réponse au médecin ici. Utilise **gras** pour les points importants et \\n pour les retours à la ligne.",
   "actions": [
     {
-      "type": "modify_medical_report|modify_medication_prescription|modify_lab_prescription|modify_paraclinical_prescription|analyze_document_coherence|none",
-      "section": "diagnosis|symptoms|physical_exam|clinical_reasoning|treatment_plan|follow_up|recommendations|medications|laboratory|imaging",
-      "action": "add|update|remove",
-      "content": {},
-      "reasoning": "Justification médicale"
+      "type": "modify_medication_prescription",
+      "action": "add",
+      "content": {
+        "nom": "Nom du médicament",
+        "denominationCommune": "DCI",
+        "dosage": "Dosage",
+        "posologie": "Posologie complète",
+        "voieAdministration": "oral|injectable|topique",
+        "dureeTraitement": "Durée",
+        "justification": "Indication médicale"
+      },
+      "reasoning": "Justification médicale pour cette action"
     }
   ],
   "alerts": [
     {
-      "type": "critical|warning|info",
-      "message": "Description de l'alerte"
+      "type": "critical",
+      "message": "Description de l'alerte de sécurité"
     }
   ],
   "suggestions": [
     {
-      "category": "medication|lab_test|imaging|safety",
-      "priority": "high|medium|low",
-      "suggestion": "Description de la suggestion",
-      "reasoning": "Justification"
+      "category": "medication",
+      "priority": "high",
+      "suggestion": "Suggestion détaillée",
+      "reasoning": "Pourquoi cette suggestion est importante"
     }
   ]
 }
-\`\`\`
+
+**RÈGLES STRICTES** :
+1. Pas de \`\`\`json ou \`\`\` autour du JSON
+2. Le JSON doit être DIRECTEMENT parsable
+3. "response" doit contenir ton analyse complète en texte formaté
+4. "actions" = tableau d'actions applicables (bouton "Appliquer")
+5. "alerts" = alertes de sécurité (critical/warning/info)
+6. "suggestions" = recommandations pour le médecin
+
+**TYPES D'ACTIONS VALIDES** :
+- "modify_medication_prescription" avec action "add"|"update"|"remove"
+- "modify_lab_prescription" avec action "add"|"update"|"remove" et content.category (hematology|clinicalChemistry|immunology|microbiology|endocrinology|general)
+- "modify_paraclinical_prescription" avec action "add"|"update"|"remove"
+- "modify_medical_report" avec section et content.value
+
+**EXEMPLE COMPLET** :
+{
+  "response": "**Analyse de cohérence effectuée**\\n\\nJ'ai analysé les 4 documents de consultation. Voici mes observations :\\n\\n**1. Diagnostic ↔ Traitement** ✅\\nLe traitement prescrit est cohérent avec le diagnostic.\\n\\n**2. Surveillance biologique** ⚠️\\nJe recommande d'ajouter un suivi biologique.",
+  "actions": [
+    {
+      "type": "modify_lab_prescription",
+      "action": "add",
+      "content": {
+        "category": "clinicalChemistry",
+        "test": {
+          "nom": "HbA1c",
+          "code": "HBA1C",
+          "motifClinique": "Surveillance diabète",
+          "urgence": false
+        }
+      },
+      "reasoning": "Surveillance glycémique recommandée selon ADA guidelines"
+    }
+  ],
+  "alerts": [
+    {
+      "type": "warning",
+      "message": "Surveillance rénale recommandée avec Metformine - ajouter créatinine et DFG"
+    }
+  ],
+  "suggestions": [
+    {
+      "category": "lab_test",
+      "priority": "medium",
+      "suggestion": "Contrôle fonction rénale dans 3 mois",
+      "reasoning": "Surveillance standard sous Metformine"
+    }
+  ]
+}
 
 ---
 
@@ -434,30 +491,137 @@ function buildDocumentContextSummary(context: DocumentContext): string {
 }
 
 function parseAssistantResponse(text: string): { response: string; actions: AssistantAction[]; alerts: any[]; suggestions: any[] } {
-  // Try to extract JSON from the response
-  const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/i) || text.match(/\{[\s\S]*"response"[\s\S]*\}/i)
+  console.log('🔍 Parsing TIBOK response, length:', text.length)
   
-  if (jsonMatch) {
-    try {
-      const jsonStr = jsonMatch[1] || jsonMatch[0]
-      const parsed = JSON.parse(jsonStr)
-      return {
-        response: parsed.response || text,
-        actions: parsed.actions || [],
-        alerts: parsed.alerts || [],
-        suggestions: parsed.suggestions || []
-      }
-    } catch (e) {
-      console.log('Failed to parse JSON response, using raw text')
+  // Multiple strategies to extract JSON
+  let jsonStr: string | null = null
+  
+  // Strategy 1: Look for ```json blocks
+  const jsonBlockMatch = text.match(/```json\s*([\s\S]*?)\s*```/i)
+  if (jsonBlockMatch && jsonBlockMatch[1]) {
+    jsonStr = jsonBlockMatch[1].trim()
+    console.log('📋 Found JSON in code block')
+  }
+  
+  // Strategy 2: Look for raw JSON object with "response" key
+  if (!jsonStr) {
+    const rawJsonMatch = text.match(/\{[\s\S]*?"response"\s*:\s*"[\s\S]*?\}(?=\s*$|\s*\n)/i)
+    if (rawJsonMatch) {
+      jsonStr = rawJsonMatch[0]
+      console.log('📋 Found raw JSON object')
     }
   }
   
-  // Return raw text if JSON parsing fails
+  // Strategy 3: Try to find any JSON object in the text
+  if (!jsonStr) {
+    const anyJsonMatch = text.match(/\{[\s\S]*\}/g)
+    if (anyJsonMatch) {
+      // Try each match, starting from the longest
+      const sortedMatches = anyJsonMatch.sort((a, b) => b.length - a.length)
+      for (const match of sortedMatches) {
+        try {
+          const test = JSON.parse(match)
+          if (test.response || test.actions || test.alerts || test.suggestions) {
+            jsonStr = match
+            console.log('📋 Found JSON via deep search')
+            break
+          }
+        } catch {}
+      }
+    }
+  }
+  
+  if (jsonStr) {
+    try {
+      // Clean the JSON string
+      jsonStr = jsonStr.replace(/[\x00-\x1F\x7F]/g, ' ') // Remove control characters
+      const parsed = JSON.parse(jsonStr)
+      
+      console.log('✅ JSON parsed successfully')
+      console.log('   - Response length:', (parsed.response || '').length)
+      console.log('   - Actions:', (parsed.actions || []).length)
+      console.log('   - Alerts:', (parsed.alerts || []).length)
+      console.log('   - Suggestions:', (parsed.suggestions || []).length)
+      
+      return {
+        response: parsed.response || text,
+        actions: Array.isArray(parsed.actions) ? parsed.actions : [],
+        alerts: Array.isArray(parsed.alerts) ? parsed.alerts : [],
+        suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions : []
+      }
+    } catch (e) {
+      console.log('⚠️ JSON parse error:', e)
+    }
+  }
+  
+  // Fallback: Extract actions/alerts/suggestions from text patterns
+  console.log('📝 Using text pattern extraction fallback')
+  
+  const extractedActions: AssistantAction[] = []
+  const extractedAlerts: any[] = []
+  const extractedSuggestions: any[] = []
+  
+  // Extract alerts from text patterns like "⚠️ ALERTE:" or "⛔ CRITIQUE:"
+  const alertPatterns = [
+    /⚠️\s*(?:ALERTE|ATTENTION|WARNING)[:\s]+([^\n]+)/gi,
+    /⛔\s*(?:CRITIQUE|CRITICAL)[:\s]+([^\n]+)/gi,
+    /🔴\s*(?:URGENT|DANGER)[:\s]+([^\n]+)/gi
+  ]
+  
+  alertPatterns.forEach(pattern => {
+    let match
+    while ((match = pattern.exec(text)) !== null) {
+      extractedAlerts.push({
+        type: pattern.source.includes('CRITIQUE') || pattern.source.includes('DANGER') ? 'critical' : 'warning',
+        message: match[1].trim()
+      })
+    }
+  })
+  
+  // Extract suggestions from text patterns like "💡 SUGGESTION:" or "📋 RECOMMANDATION:"
+  const suggestionPatterns = [
+    /💡\s*(?:SUGGESTION|RECOMMANDATION)[:\s]+([^\n]+)/gi,
+    /📋\s*(?:CONSEIL|TIP)[:\s]+([^\n]+)/gi,
+    /✅\s*(?:À FAIRE|ACTION)[:\s]+([^\n]+)/gi
+  ]
+  
+  suggestionPatterns.forEach(pattern => {
+    let match
+    while ((match = pattern.exec(text)) !== null) {
+      extractedSuggestions.push({
+        category: 'general',
+        priority: 'medium',
+        suggestion: match[1].trim(),
+        reasoning: 'Extracted from response'
+      })
+    }
+  })
+  
+  // Extract medication actions from patterns like "AJOUTER: Metformin 500mg"
+  const actionPatterns = [
+    { pattern: /(?:AJOUTER|ADD)[:\s]+(?:médicament|medication)?[:\s]*([^\n]+)/gi, action: 'add' as const, type: 'modify_medication_prescription' as const },
+    { pattern: /(?:MODIFIER|UPDATE)[:\s]+(?:médicament|medication)?[:\s]*([^\n]+)/gi, action: 'update' as const, type: 'modify_medication_prescription' as const },
+    { pattern: /(?:RETIRER|REMOVE|SUPPRIMER)[:\s]+(?:médicament|medication)?[:\s]*([^\n]+)/gi, action: 'remove' as const, type: 'modify_medication_prescription' as const }
+  ]
+  
+  actionPatterns.forEach(({ pattern, action, type }) => {
+    let match
+    while ((match = pattern.exec(text)) !== null) {
+      extractedActions.push({
+        type,
+        action,
+        content: { description: match[1].trim() },
+        reasoning: `Extracted: ${match[1].trim()}`
+      })
+    }
+  })
+  
+  // Return with fallback extraction results
   return {
     response: text,
-    actions: [],
-    alerts: [],
-    suggestions: []
+    actions: extractedActions,
+    alerts: extractedAlerts,
+    suggestions: extractedSuggestions
   }
 }
 
