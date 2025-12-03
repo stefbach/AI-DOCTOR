@@ -294,42 +294,81 @@ Le format JSON EXACT est :
 6. "suggestions" = recommandations pour le médecin
 
 **TYPES D'ACTIONS VALIDES** :
-- "modify_medication_prescription" avec action "add"|"update"|"remove"
-- "modify_lab_prescription" avec action "add"|"update"|"remove" et content.category (hematology|clinicalChemistry|immunology|microbiology|endocrinology|general)
-- "modify_paraclinical_prescription" avec action "add"|"update"|"remove"
-- "modify_medical_report" avec section et content.value
+
+1. **modify_medication_prescription** :
+   - action: "add" - TOUJOURS utiliser "add" pour ajouter un nouveau médicament ou modifier une posologie
+   - action: "remove" - Retirer un médicament (nécessite content.index)
+   - action: "update" - Modifier un médicament existant (nécessite content.index ET content.medication)
+   
+2. **modify_lab_prescription** :
+   - action: "add" - Ajouter un test biologique
+   - content.category OBLIGATOIRE: "hematology"|"clinicalChemistry"|"immunology"|"microbiology"|"endocrinology"|"general"
+   - content.test.nom, content.test.code, content.test.motifClinique
+   
+3. **modify_paraclinical_prescription** :
+   - action: "add" - Ajouter un examen d'imagerie
+   - content.type (ex: "Radiographie", "Échographie", "Scanner", "IRM")
+   - content.region, content.indicationClinique
+   
+4. **modify_medical_report** :
+   - section: "motifConsultation"|"anamnese"|"examenClinique"|"conclusionDiagnostique"|"priseEnCharge"|"recommandations"
+   - content.value: Le nouveau texte pour cette section
 
 **EXEMPLE COMPLET** :
 {
-  "response": "**Analyse de cohérence effectuée**\\n\\nJ'ai analysé les 4 documents de consultation. Voici mes observations :\\n\\n**1. Diagnostic ↔ Traitement** ✅\\nLe traitement prescrit est cohérent avec le diagnostic.\\n\\n**2. Surveillance biologique** ⚠️\\nJe recommande d'ajouter un suivi biologique.",
+  "response": "**Analyse de cohérence effectuée**\\n\\nJ'ai analysé les 4 documents de consultation. Voici mes observations :\\n\\n**1. Diagnostic ↔ Traitement** ✅\\nLe traitement prescrit est cohérent avec le diagnostic d'hypertension.\\n\\n**2. Optimisation posologie** 💡\\nL'Amlodipine 5mg peut être augmentée à 10mg si TA >140/90 persiste.\\n\\n**3. Surveillance biologique** ⚠️\\nJe recommande d'ajouter HbA1c pour le suivi diabétique.",
   "actions": [
+    {
+      "type": "modify_medication_prescription",
+      "action": "add",
+      "content": {
+        "nom": "Amlodipine",
+        "denominationCommune": "Amlodipine",
+        "dosage": "10mg",
+        "forme": "comprimé",
+        "posologie": "1 comprimé le matin",
+        "voieAdministration": "oral",
+        "dureeTraitement": "Continue",
+        "quantite": "30 comprimés",
+        "justification": "Optimisation du contrôle tensionnel - augmentation de 5mg à 10mg selon NICE Hypertension Guidelines",
+        "medication_type": "prescription"
+      },
+      "reasoning": "Augmentation posologie Amlodipine de 5mg à 10mg pour meilleur contrôle TA (NICE recommande titration progressive)"
+    },
     {
       "type": "modify_lab_prescription",
       "action": "add",
       "content": {
-        "category": "clinicalChemistry",
+        "category": "endocrinology",
         "test": {
-          "nom": "HbA1c",
+          "nom": "HbA1c (Hémoglobine glyquée)",
           "code": "HBA1C",
-          "motifClinique": "Surveillance diabète",
-          "urgence": false
+          "motifClinique": "Surveillance diabète de type 2 - contrôle glycémique trimestriel",
+          "urgence": false,
+          "aJeun": false
         }
       },
-      "reasoning": "Surveillance glycémique recommandée selon ADA guidelines"
+      "reasoning": "Surveillance glycémique recommandée selon ADA guidelines (HbA1c tous les 3 mois si diabète non contrôlé)"
     }
   ],
   "alerts": [
     {
       "type": "warning",
-      "message": "Surveillance rénale recommandée avec Metformine - ajouter créatinine et DFG"
+      "message": "Surveillance rénale recommandée avec Metformine - ajouter créatinine et DFG si non fait récemment"
     }
   ],
   "suggestions": [
     {
       "category": "lab_test",
+      "priority": "high",
+      "suggestion": "Ajouter ionogramme (Na, K, créatinine) + DFG pour surveillance rénale",
+      "reasoning": "Surveillance obligatoire sous Metformine (risque acidose lactique si insuffisance rénale)"
+    },
+    {
+      "category": "medication",
       "priority": "medium",
-      "suggestion": "Contrôle fonction rénale dans 3 mois",
-      "reasoning": "Surveillance standard sous Metformine"
+      "suggestion": "Envisager ajout SGLT2i (Dapagliflozine) si HbA1c >7% malgré Metformine",
+      "reasoning": "Bénéfice cardio-rénal prouvé selon ESC/ADA 2023 guidelines"
     }
   ]
 }

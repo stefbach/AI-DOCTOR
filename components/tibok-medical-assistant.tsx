@@ -349,8 +349,9 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
           break
 
         case 'modify_medication_prescription':
-          if (action.action === 'add') {
+          if (action.action === 'add' || (action.action === 'update' && action.content?.index === undefined)) {
             // Build medication object from content
+            // For 'update' without index, treat as 'add' (new prescription)
             const medication = {
               nom: action.content?.nom || action.content?.name || 'Nouveau médicament',
               denominationCommune: action.content?.denominationCommune || action.content?.dci || action.content?.nom || '',
@@ -361,13 +362,14 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
               dureeTraitement: action.content?.dureeTraitement || action.content?.duration || '',
               quantite: action.content?.quantite || action.content?.quantity || '',
               instructions: action.content?.instructions || '',
-              justification: action.content?.justification || action.content?.indication || action.reasoning || ''
+              justification: action.content?.justification || action.content?.indication || action.reasoning || '',
+              medication_type: action.content?.medication_type || 'prescription'
             }
-            console.log('💊 Adding medication:', medication)
+            console.log('💊 Adding/Updating medication:', medication)
             onAddMedication(medication)
             toast({
-              title: "✅ Médicament ajouté",
-              description: `${medication.nom} (${medication.dosage}) ajouté à l'ordonnance`
+              title: action.action === 'update' ? "✅ Médicament ajouté (modification)" : "✅ Médicament ajouté",
+              description: `${medication.nom} ${medication.dosage ? `(${medication.dosage})` : ''} ajouté à l'ordonnance`
             })
           } else if (action.action === 'remove') {
             const index = action.content?.index ?? 0
@@ -376,8 +378,9 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
               title: "✅ Médicament retiré",
               description: action.reasoning || "Médicament retiré de l'ordonnance"
             })
-          } else if (action.action === 'update') {
-            const index = action.content?.index ?? 0
+          } else if (action.action === 'update' && action.content?.index !== undefined) {
+            // Only do true update if index is provided
+            const index = action.content.index
             const medication = action.content?.medication || action.content
             onUpdateMedication(index, medication)
             toast({
