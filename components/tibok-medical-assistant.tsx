@@ -370,26 +370,25 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
 
         case 'modify_medication_prescription':
           if (action.action === 'add' || (action.action === 'update' && action.content?.index === undefined)) {
-            // Build medication object from content
-            // For 'update' without index, treat as 'add' (new prescription)
+            // Map English fields (from AI) to French fields (expected by system)
             const medication = {
-              nom: action.content?.nom || action.content?.name || 'Nouveau médicament',
-              denominationCommune: action.content?.denominationCommune || action.content?.dci || action.content?.nom || '',
+              nom: action.content?.name || action.content?.nom || 'New medication',
+              denominationCommune: action.content?.generic_name || action.content?.denominationCommune || action.content?.dci || action.content?.name || '',
               dosage: action.content?.dosage || '',
-              forme: action.content?.forme || action.content?.form || 'comprimé',
-              posologie: action.content?.posologie || action.content?.dosing || '',
-              voieAdministration: action.content?.voieAdministration || action.content?.route || 'oral',
-              dureeTraitement: action.content?.dureeTraitement || action.content?.duration || '',
-              quantite: action.content?.quantite || action.content?.quantity || '',
+              forme: action.content?.form || action.content?.forme || 'tablet',
+              posologie: action.content?.dosing || action.content?.posologie || '',
+              voieAdministration: action.content?.route || action.content?.voieAdministration || 'oral',
+              dureeTraitement: action.content?.duration || action.content?.dureeTraitement || '',
+              quantite: action.content?.quantity || action.content?.quantite || '',
               instructions: action.content?.instructions || '',
-              justification: action.content?.justification || action.content?.indication || action.reasoning || '',
+              justification: action.content?.indication || action.content?.justification || action.reasoning || '',
               medication_type: action.content?.medication_type || 'prescription'
             }
             console.log('💊 Adding/Updating medication:', medication)
             onAddMedication(medication)
             toast({
-              title: action.action === 'update' ? "✅ Médicament ajouté (modification)" : "✅ Médicament ajouté",
-              description: `${medication.nom} ${medication.dosage ? `(${medication.dosage})` : ''} ajouté à l'ordonnance`
+              title: action.action === 'update' ? "✅ Medication added (modification)" : "✅ Medication added",
+              description: `${medication.nom} ${medication.dosage ? `(${medication.dosage})` : ''} added to prescription`
             })
           } else if (action.action === 'remove') {
             const index = action.content?.index ?? 0
@@ -414,19 +413,21 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
           if (action.action === 'add') {
             console.log('🔬 LAB ACTION - Raw content:', JSON.stringify(action.content, null, 2))
             const category = action.content?.category || 'clinicalChemistry'
-            const test = action.content?.test || {
-              nom: action.content?.nom || action.content?.name || 'Nouveau test',
-              code: action.content?.code || '',
-              motifClinique: action.content?.motifClinique || action.content?.indication || action.reasoning || '',
-              urgence: action.content?.urgence || action.content?.urgent || false,
-              aJeun: action.content?.aJeun || action.content?.fasting || false
+            // Map English fields (from AI) to French fields (expected by system)
+            const testData = action.content?.test || action.content
+            const test = {
+              nom: testData?.name || testData?.nom || 'New test',
+              code: testData?.code || '',
+              motifClinique: testData?.clinical_indication || testData?.motifClinique || testData?.indication || action.reasoning || '',
+              urgence: testData?.urgent || testData?.urgence || false,
+              aJeun: testData?.fasting || testData?.aJeun || false
             }
             console.log('🔬 LAB ACTION - Calling onAddLabTest with:', {category, test})
             onAddLabTest(category, test)
             console.log('✅ LAB ACTION - onAddLabTest called successfully')
             toast({
-              title: "✅ Examen biologique ajouté",
-              description: `${test.nom} ajouté dans Laboratory (${category})`
+              title: "✅ Biological exam added",
+              description: `${test.nom} added to Laboratory (${category})`
             })
           } else if (action.action === 'remove') {
             const category = action.content?.category || 'clinicalChemistry'
@@ -442,21 +443,21 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
         case 'modify_paraclinical_prescription':
           if (action.action === 'add') {
             console.log('🩻 IMAGING ACTION - Raw content:', JSON.stringify(action.content, null, 2))
+            // Map English fields (from AI) to French fields (expected by system)
             const exam = {
-              type: action.content?.type || action.content?.modalite || 'Imagerie',
-              modalite: action.content?.modalite || action.content?.type || '',
+              type: action.content?.type || action.content?.modalite || 'Imaging',
+              modalite: action.content?.modality || action.content?.modalite || action.content?.type || '',
               region: action.content?.region || action.content?.area || '',
-              indicationClinique: action.content?.indicationClinique || action.content?.indication || action.reasoning || '',
-              urgence: action.content?.urgence || action.content?.urgent || false,
-              contraste: action.content?.contraste || action.content?.contrast || false,
+              indicationClinique: action.content?.clinical_indication || action.content?.indicationClinique || action.content?.indication || action.reasoning || '',
+              urgence: action.content?.urgent || action.content?.urgence || false,
+              contraste: action.content?.contrast || action.content?.contraste || false,
               instructions: action.content?.instructions || ''
             }
             console.log('🩻 IMAGING ACTION - Calling onAddImaging with:', exam)
-            console.log('🩻 IMAGING - Exam:', exam)
             onAddImaging(exam)
             toast({
-              title: "✅ Examen paraclinique ajouté",
-              description: `${exam.type} ${exam.region ? `- ${exam.region}` : ''} ajouté dans Imaging`
+              title: "✅ Imaging exam added",
+              description: `${exam.type} ${exam.region ? `- ${exam.region}` : ''} added to Imaging`
             })
           } else if (action.action === 'remove') {
             const index = action.content?.index ?? 0
