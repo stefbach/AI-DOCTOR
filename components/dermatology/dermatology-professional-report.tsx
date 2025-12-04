@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
 import { consultationDataService } from '@/lib/consultation-data-service'
+import TibokMedicalAssistant from '../tibok-medical-assistant'
 import { 
  FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube, 
  Scan, AlertTriangle, XCircle, Eye, EyeOff, Edit, Save, FileCheck, Plus, 
@@ -5187,7 +5188,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <PrescriptionStats />
 
  <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
- <TabsList className="grid w-full grid-cols-6">
+ <TabsList className="grid w-full grid-cols-7">
  <TabsTrigger value="consultation">
  <FileText className="h-4 w-4 mr-2" />
  Report
@@ -5231,6 +5232,10 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <Receipt className="h-4 w-4 mr-2" />
  Invoice
  </TabsTrigger>
+ <TabsTrigger value="ai-assistant" className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold shadow-lg hover:from-teal-600 hover:to-cyan-600 data-[state=active]:ring-2 data-[state=active]:ring-yellow-400">
+ <Stethoscope className="h-4 w-4 mr-2" />
+ AI Assistant
+ </TabsTrigger>
  </TabsList>
 
  <TabsContent value="consultation">
@@ -5255,6 +5260,217 @@ const [localSickLeave, setLocalSickLeave] = useState({
 
  <TabsContent value="invoice">
  <InvoiceComponent />
+ </TabsContent>
+ 
+ <TabsContent value="ai-assistant">
+ <TibokMedicalAssistant
+ reportData={report}
+ onUpdateSection={(section, value) => {
+ updateRapportSection(section, value)
+ }}
+ onAddMedication={(medication) => {
+ // Direct creation: no add+update pattern - create complete medication immediately
+ console.log('💊 CALLBACK onAddMedication called:', medication)
+ if (validationStatus === 'validated') {
+ console.log('⚠️ CALLBACK onAddMedication BLOCKED - document validated')
+ return
+ }
+ 
+ const medicationWithDefaults = {
+ nom: medication.nom || medication.name || '',
+ denominationCommune: medication.denominationCommune || medication.generic_name || medication.dci || '',
+ dosage: medication.dosage || '',
+ forme: medication.forme || medication.form || 'tablet',
+ posologie: medication.posologie || medication.dosing || '',
+ modeAdministration: medication.voieAdministration || medication.modeAdministration || medication.route || 'Oral route',
+ dureeTraitement: medication.dureeTraitement || medication.duration || '7 days',
+ quantite: medication.quantite || medication.quantity || '1 box',
+ instructions: medication.instructions || '',
+ justification: medication.justification || medication.indication || '',
+ surveillanceParticuliere: medication.surveillanceParticuliere || medication.monitoring || '',
+ nonSubstituable: medication.nonSubstituable || false,
+ ligneComplete: ''
+ }
+ 
+ setReport(prev => {
+ if (!prev) return prev
+ 
+ const newReport = JSON.parse(JSON.stringify(prev))
+ 
+ // Ensure ordonnances structure exists
+ if (!newReport.ordonnances) newReport.ordonnances = {}
+ if (!newReport.ordonnances.medicaments) newReport.ordonnances.medicaments = {}
+ if (!newReport.ordonnances.medicaments.prescription) {
+ newReport.ordonnances.medicaments.prescription = {
+ praticien: { nom: '', prenom: '', qualite: '' },
+ patient: { nom: '', prenom: '', dateNaissance: '', numeroSecuriteSociale: '' },
+ date: new Date().toISOString(),
+ medicaments: []
+ }
+ }
+ 
+ // Add medication directly to the array
+ newReport.ordonnances.medicaments.prescription.medicaments.push(medicationWithDefaults)
+ 
+ console.log('💊 Medication added directly:', medicationWithDefaults)
+ return newReport
+ })
+ }}
+ onUpdateMedication={(index, medication) => {
+ updateMedicamentBatch(index, medication)
+ }}
+ onRemoveMedication={(index) => {
+ removeMedicament(index)
+ }}
+ onAddLabTest={(category, test) => {
+ // Direct creation: no add+update pattern - create complete line immediately
+ console.log('📋 CALLBACK onAddLabTest called:', {category, test})
+ if (validationStatus === 'validated') {
+ console.log('⚠️ CALLBACK onAddLabTest BLOCKED - document validated')
+ return
+ }
+ 
+ const testWithDefaults = {
+ nom: test.nom || '',
+ code: test.code || '',
+ categorie: category,
+ urgence: test.urgence || false,
+ aJeun: test.aJeun || false,
+ conditionsPrelevement: test.conditionsPrelevement || '',
+ motifClinique: test.motifClinique || test.indication || '',
+ renseignementsCliniques: test.renseignementsCliniques || '',
+ tubePrelevement: test.tubePrelevement || 'As per laboratory protocol',
+ delaiResultat: test.delaiResultat || 'Standard'
+ }
+ 
+ setReport(prev => {
+ if (!prev) return null
+ const newReport = { ...prev }
+ 
+ // Initialize biologie section if needed
+ if (!newReport.ordonnances) newReport.ordonnances = {}
+ if (!newReport.ordonnances.biologie) {
+ const praticien = getReportPraticien()
+ const patient = getReportPatient()
+ newReport.ordonnances.biologie = {
+ enTete: praticien,
+ patient: patient,
+ prescription: {
+ datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
+ motifClinique: '',
+ analyses: {},
+ instructionsSpeciales: [],
+ laboratoireRecommande: ''
+ },
+ authentification: {
+ signature: "Medical Practitioner's Signature",
+ nomEnCapitales: praticien.nom.toUpperCase(),
+ numeroEnregistrement: praticien.numeroEnregistrement,
+ date: patient.dateExamen || new Date().toISOString().split('T')[0]
+ }
+ }
+ }
+ 
+ // Initialize category if needed
+ if (!newReport.ordonnances.biologie.prescription.analyses) {
+ newReport.ordonnances.biologie.prescription.analyses = {}
+ }
+ if (!newReport.ordonnances.biologie.prescription.analyses[category]) {
+ newReport.ordonnances.biologie.prescription.analyses[category] = []
+ }
+ 
+ // Add complete test directly
+ newReport.ordonnances.biologie.prescription.analyses[category] = [
+ ...newReport.ordonnances.biologie.prescription.analyses[category], 
+ testWithDefaults
+ ]
+ 
+ console.log('✅ CALLBACK onAddLabTest - Test added to biologie.prescription.analyses.' + category, testWithDefaults)
+ return newReport
+ })
+ trackModification(`biologie.add.${category}.${test.nom}`)
+ console.log('🎉 CALLBACK onAddLabTest - Complete!')
+ }}
+ onUpdateLabTest={(category, index, test) => {
+ updateBiologyTestBatch(category, index, test)
+ }}
+ onRemoveLabTest={(category, index) => {
+ removeBiologyTest(category, index)
+ }}
+ onAddImaging={(exam) => {
+ // Direct creation: no add+update pattern - create complete line immediately
+ console.log('🖼️ CALLBACK onAddImaging called:', exam)
+ if (validationStatus === 'validated') {
+ console.log('⚠️ CALLBACK onAddImaging BLOCKED - document validated')
+ return
+ }
+ 
+ const examWithDefaults = {
+ type: exam.type || exam.modalite || '',
+ modalite: exam.modalite || exam.type || '',
+ region: exam.region || exam.area || '',
+ indicationClinique: exam.indicationClinique || exam.indication || '',
+ urgence: exam.urgence || false,
+ contraste: exam.contraste || false,
+ instructions: exam.instructions || '',
+ preparationPatient: exam.preparationPatient || '',
+ delaiResultat: exam.delaiResultat || 'Standard',
+ protocoleSpecifique: exam.protocoleSpecifique || '',
+ questionDiagnostique: exam.questionDiagnostique || ''
+ }
+ 
+ setReport(prev => {
+ if (!prev) return null
+ const newReport = { ...prev }
+ 
+ // Initialize imagerie section if needed
+ if (!newReport.ordonnances) newReport.ordonnances = {}
+ if (!newReport.ordonnances.imagerie) {
+ const praticien = getReportPraticien()
+ const patient = getReportPatient()
+ newReport.ordonnances.imagerie = {
+ enTete: praticien,
+ patient: patient,
+ prescription: {
+ datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
+ motifClinique: '',
+ examens: [],
+ instructionsSpeciales: '',
+ etablissementRecommande: ''
+ },
+ authentification: {
+ signature: "Medical Practitioner's Signature",
+ nomEnCapitales: praticien.nom.toUpperCase(),
+ numeroEnregistrement: praticien.numeroEnregistrement,
+ date: patient.dateExamen || new Date().toISOString().split('T')[0]
+ }
+ }
+ }
+ 
+ // Initialize examens array if needed
+ if (!newReport.ordonnances.imagerie.prescription.examens) {
+ newReport.ordonnances.imagerie.prescription.examens = []
+ }
+ 
+ // Add complete exam directly
+ newReport.ordonnances.imagerie.prescription.examens = [
+ ...newReport.ordonnances.imagerie.prescription.examens,
+ examWithDefaults
+ ]
+ 
+ console.log('✅ CALLBACK onAddImaging - Exam added to imagerie.prescription.examens', examWithDefaults)
+ return newReport
+ })
+ trackModification(`imagerie.add.${exam.type}`)
+ console.log('🎉 CALLBACK onAddImaging - Complete!')
+ }}
+ onUpdateImaging={(index, exam) => {
+ updateImagingExamBatch(index, exam)
+ }}
+ onRemoveImaging={(index) => {
+ removeImagingExam(index)
+ }}
+ />
  </TabsContent>
  </Tabs>
 

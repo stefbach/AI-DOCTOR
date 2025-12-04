@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
+import TibokMedicalAssistant from '../tibok-medical-assistant'
 import {
   FileText, Download, Printer, CheckCircle, Loader2, Pill, TestTube,
   Scan, AlertTriangle, Eye, EyeOff, Edit, Save, FileCheck, Plus,
@@ -5125,7 +5126,7 @@ export default function ChronicProfessionalReport({
       <PrescriptionStats />
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="medical-report">
             <FileText className="h-4 w-4 mr-2" />
             Report
@@ -5183,6 +5184,10 @@ export default function ChronicProfessionalReport({
           <TabsTrigger value="followup">
             <ClipboardList className="h-4 w-4 mr-2" />
             Follow-Up
+          </TabsTrigger>
+          <TabsTrigger value="ai-assistant" className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold shadow-lg hover:from-teal-600 hover:to-cyan-600 data-[state=active]:ring-2 data-[state=active]:ring-yellow-400">
+            <Stethoscope className="h-4 w-4 mr-2" />
+            AI Assistant
           </TabsTrigger>
         </TabsList>
         
@@ -5652,6 +5657,334 @@ export default function ChronicProfessionalReport({
 
         <TabsContent value="followup">
           <FollowUpPlanSection />
+        </TabsContent>
+        
+        <TabsContent value="ai-assistant">
+          <TibokMedicalAssistant
+            reportData={{
+              compteRendu: {
+                patient: report.medicalReport?.patient || {},
+                rapport: report.medicalReport?.clinicalEvaluation || {}
+              },
+              ordonnances: {
+                medicaments: {
+                  prescription: {
+                    medicaments: report.medicationPrescription?.prescription?.medications || []
+                  }
+                },
+                biologie: {
+                  prescription: {
+                    analyses: report.laboratoryTests?.prescription?.tests || {}
+                  }
+                },
+                imagerie: {
+                  prescription: {
+                    examens: report.paraclinicalExams?.prescription?.exams || []
+                  }
+                }
+              }
+            }}
+            onUpdateSection={(section, value) => {
+              setReport(prev => {
+                if (!prev) return prev
+                return {
+                  ...prev,
+                  medicalReport: {
+                    ...prev.medicalReport,
+                    clinicalEvaluation: {
+                      ...prev.medicalReport.clinicalEvaluation,
+                      [section]: value
+                    }
+                  }
+                }
+              })
+            }}
+            onAddMedication={(medication) => {
+              console.log('💊 CALLBACK onAddMedication called:', medication)
+              if (validationStatus === 'validated') {
+                console.log('⚠️ CALLBACK onAddMedication BLOCKED - document validated')
+                return
+              }
+              
+              const medicationWithDefaults = {
+                name: medication.name || medication.nom || '',
+                genericName: medication.generic_name || medication.denominationCommune || medication.dci || '',
+                dosage: medication.dosage || '',
+                form: medication.form || medication.forme || 'tablet',
+                dosing: medication.dosing || medication.posologie || '',
+                route: medication.route || medication.modeAdministration || medication.voieAdministration || 'Oral route',
+                duration: medication.duration || medication.dureeTraitement || '7 days',
+                quantity: medication.quantity || medication.quantite || '1 box',
+                instructions: medication.instructions || '',
+                indication: medication.indication || medication.justification || '',
+                monitoring: medication.monitoring || medication.surveillanceParticuliere || '',
+                nonSubstitutable: medication.nonSubstituable || false
+              }
+              
+              setReport(prev => {
+                if (!prev) return prev
+                
+                const newReport = JSON.parse(JSON.stringify(prev))
+                
+                // Ensure medicationPrescription structure exists
+                if (!newReport.medicationPrescription) {
+                  newReport.medicationPrescription = {
+                    header: {
+                      doctorName: prev.medicalReport?.practitioner?.name || '',
+                      doctorQualification: prev.medicalReport?.practitioner?.qualification || '',
+                      clinicAddress: prev.medicalReport?.practitioner?.address || '',
+                      phoneNumber: prev.medicalReport?.practitioner?.phone || '',
+                      registrationNumber: prev.medicalReport?.practitioner?.registrationNumber || '',
+                      patientName: prev.medicalReport?.patient?.fullName || '',
+                      patientAge: prev.medicalReport?.patient?.age || 0,
+                      patientGender: prev.medicalReport?.patient?.gender || '',
+                      date: new Date().toISOString().split('T')[0]
+                    },
+                    prescription: {
+                      medications: []
+                    }
+                  }
+                }
+                
+                if (!newReport.medicationPrescription.prescription) {
+                  newReport.medicationPrescription.prescription = { medications: [] }
+                }
+                
+                if (!newReport.medicationPrescription.prescription.medications) {
+                  newReport.medicationPrescription.prescription.medications = []
+                }
+                
+                // Add medication directly to the array
+                newReport.medicationPrescription.prescription.medications.push(medicationWithDefaults)
+                
+                console.log('💊 Medication added directly:', medicationWithDefaults)
+                return newReport
+              })
+            }}
+            onUpdateMedication={(index, medication) => {
+              setReport(prev => {
+                if (!prev?.medicationPrescription?.prescription?.medications) return prev
+                const newMedications = [...prev.medicationPrescription.prescription.medications]
+                newMedications[index] = { ...newMedications[index], ...medication }
+                return {
+                  ...prev,
+                  medicationPrescription: {
+                    ...prev.medicationPrescription,
+                    prescription: {
+                      ...prev.medicationPrescription.prescription,
+                      medications: newMedications
+                    }
+                  }
+                }
+              })
+            }}
+            onRemoveMedication={(index) => {
+              setReport(prev => {
+                if (!prev?.medicationPrescription?.prescription?.medications) return prev
+                const newMedications = prev.medicationPrescription.prescription.medications.filter((_, i) => i !== index)
+                return {
+                  ...prev,
+                  medicationPrescription: {
+                    ...prev.medicationPrescription,
+                    prescription: {
+                      ...prev.medicationPrescription.prescription,
+                      medications: newMedications
+                    }
+                  }
+                }
+              })
+            }}
+            onAddLabTest={(category, test) => {
+              console.log('📋 CALLBACK onAddLabTest called:', {category, test})
+              if (validationStatus === 'validated') {
+                console.log('⚠️ CALLBACK onAddLabTest BLOCKED - document validated')
+                return
+              }
+              
+              const testWithDefaults = {
+                name: test.name || test.nom || '',
+                code: test.code || '',
+                category: category,
+                urgent: test.urgent || test.urgence || false,
+                fasting: test.fasting || test.aJeun || false,
+                specimenCollectionConditions: test.specimenCollectionConditions || test.conditionsPrelevement || '',
+                clinicalIndication: test.clinicalIndication || test.motifClinique || test.indication || '',
+                clinicalNotes: test.clinicalNotes || test.renseignementsCliniques || '',
+                specimenType: test.specimenType || test.tubePrelevement || 'As per laboratory protocol',
+                turnaroundTime: test.turnaroundTime || test.delaiResultat || 'Standard'
+              }
+              
+              setReport(prev => {
+                if (!prev) return null
+                const newReport = JSON.parse(JSON.stringify(prev))
+                
+                // Initialize laboratoryTests section if needed
+                if (!newReport.laboratoryTests) {
+                  newReport.laboratoryTests = {
+                    header: {
+                      doctorName: prev.medicalReport?.practitioner?.name || '',
+                      doctorQualification: prev.medicalReport?.practitioner?.qualification || '',
+                      clinicAddress: prev.medicalReport?.practitioner?.address || '',
+                      registrationNumber: prev.medicalReport?.practitioner?.registrationNumber || '',
+                      patientName: prev.medicalReport?.patient?.fullName || '',
+                      patientAge: prev.medicalReport?.patient?.age || 0,
+                      patientGender: prev.medicalReport?.patient?.gender || '',
+                      date: new Date().toISOString().split('T')[0]
+                    },
+                    prescription: {
+                      clinicalIndication: '',
+                      tests: {}
+                    }
+                  }
+                }
+                
+                // Initialize category if needed
+                if (!newReport.laboratoryTests.prescription.tests) {
+                  newReport.laboratoryTests.prescription.tests = {}
+                }
+                if (!newReport.laboratoryTests.prescription.tests[category]) {
+                  newReport.laboratoryTests.prescription.tests[category] = []
+                }
+                
+                // Add complete test directly
+                newReport.laboratoryTests.prescription.tests[category].push(testWithDefaults)
+                
+                console.log('✅ CALLBACK onAddLabTest - Test added to laboratoryTests.prescription.tests.' + category, testWithDefaults)
+                return newReport
+              })
+              console.log('🎉 CALLBACK onAddLabTest - Complete!')
+            }}
+            onUpdateLabTest={(category, index, test) => {
+              setReport(prev => {
+                if (!prev?.laboratoryTests?.prescription?.tests?.[category]) return prev
+                const newTests = [...prev.laboratoryTests.prescription.tests[category]]
+                newTests[index] = { ...newTests[index], ...test }
+                return {
+                  ...prev,
+                  laboratoryTests: {
+                    ...prev.laboratoryTests,
+                    prescription: {
+                      ...prev.laboratoryTests.prescription,
+                      tests: {
+                        ...prev.laboratoryTests.prescription.tests,
+                        [category]: newTests
+                      }
+                    }
+                  }
+                }
+              })
+            }}
+            onRemoveLabTest={(category, index) => {
+              setReport(prev => {
+                if (!prev?.laboratoryTests?.prescription?.tests?.[category]) return prev
+                const newTests = prev.laboratoryTests.prescription.tests[category].filter((_, i) => i !== index)
+                return {
+                  ...prev,
+                  laboratoryTests: {
+                    ...prev.laboratoryTests,
+                    prescription: {
+                      ...prev.laboratoryTests.prescription,
+                      tests: {
+                        ...prev.laboratoryTests.prescription.tests,
+                        [category]: newTests
+                      }
+                    }
+                  }
+                }
+              })
+            }}
+            onAddImaging={(exam) => {
+              console.log('🖼️ CALLBACK onAddImaging called:', exam)
+              if (validationStatus === 'validated') {
+                console.log('⚠️ CALLBACK onAddImaging BLOCKED - document validated')
+                return
+              }
+              
+              const examWithDefaults = {
+                type: exam.type || exam.modalite || '',
+                modality: exam.modality || exam.modalite || exam.type || '',
+                region: exam.region || exam.area || '',
+                clinicalIndication: exam.clinicalIndication || exam.indicationClinique || exam.indication || '',
+                urgent: exam.urgent || exam.urgence || false,
+                contrast: exam.contrast || exam.contraste || false,
+                instructions: exam.instructions || '',
+                patientPreparation: exam.patientPreparation || exam.preparationPatient || '',
+                turnaroundTime: exam.turnaroundTime || exam.delaiResultat || 'Standard',
+                specificProtocol: exam.specificProtocol || exam.protocoleSpecifique || '',
+                diagnosticQuestion: exam.diagnosticQuestion || exam.questionDiagnostique || ''
+              }
+              
+              setReport(prev => {
+                if (!prev) return null
+                const newReport = JSON.parse(JSON.stringify(prev))
+                
+                // Initialize paraclinicalExams section if needed
+                if (!newReport.paraclinicalExams) {
+                  newReport.paraclinicalExams = {
+                    header: {
+                      doctorName: prev.medicalReport?.practitioner?.name || '',
+                      doctorQualification: prev.medicalReport?.practitioner?.qualification || '',
+                      clinicAddress: prev.medicalReport?.practitioner?.address || '',
+                      registrationNumber: prev.medicalReport?.practitioner?.registrationNumber || '',
+                      patientName: prev.medicalReport?.patient?.fullName || '',
+                      patientAge: prev.medicalReport?.patient?.age || 0,
+                      patientGender: prev.medicalReport?.patient?.gender || '',
+                      date: new Date().toISOString().split('T')[0]
+                    },
+                    prescription: {
+                      clinicalIndication: '',
+                      exams: []
+                    }
+                  }
+                }
+                
+                // Initialize exams array if needed
+                if (!newReport.paraclinicalExams.prescription.exams) {
+                  newReport.paraclinicalExams.prescription.exams = []
+                }
+                
+                // Add complete exam directly
+                newReport.paraclinicalExams.prescription.exams.push(examWithDefaults)
+                
+                console.log('✅ CALLBACK onAddImaging - Exam added to paraclinicalExams.prescription.exams', examWithDefaults)
+                return newReport
+              })
+              console.log('🎉 CALLBACK onAddImaging - Complete!')
+            }}
+            onUpdateImaging={(index, exam) => {
+              setReport(prev => {
+                if (!prev?.paraclinicalExams?.prescription?.exams) return prev
+                const newExams = [...prev.paraclinicalExams.prescription.exams]
+                newExams[index] = { ...newExams[index], ...exam }
+                return {
+                  ...prev,
+                  paraclinicalExams: {
+                    ...prev.paraclinicalExams,
+                    prescription: {
+                      ...prev.paraclinicalExams.prescription,
+                      exams: newExams
+                    }
+                  }
+                }
+              })
+            }}
+            onRemoveImaging={(index) => {
+              setReport(prev => {
+                if (!prev?.paraclinicalExams?.prescription?.exams) return prev
+                const newExams = prev.paraclinicalExams.prescription.exams.filter((_, i) => i !== index)
+                return {
+                  ...prev,
+                  paraclinicalExams: {
+                    ...prev.paraclinicalExams,
+                    prescription: {
+                      ...prev.paraclinicalExams.prescription,
+                      exams: newExams
+                    }
+                  }
+                }
+              })
+            }}
+          />
         </TabsContent>
       </Tabs>
       
