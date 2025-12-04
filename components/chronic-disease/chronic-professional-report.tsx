@@ -1143,18 +1143,19 @@ export default function ChronicProfessionalReport({
               if (line.startsWith('event: ')) {
                 currentEvent = line.slice(7).trim()
               } else if (line.startsWith('data: ')) {
+                let data: any
                 try {
-                  const data = JSON.parse(line.slice(6))
-                  if (currentEvent === 'complete' || data.success) {
-                    result = data
-                  } else if (currentEvent === 'error' || data.error) {
-                    throw new Error(data.details || data.error)
-                  }
-                } catch (e: any) {
-                  // Only rethrow if it's our custom error, not JSON parse error
-                  if (e.message && !e.message.includes('JSON')) {
-                    throw e
-                  }
+                  data = JSON.parse(line.slice(6))
+                } catch {
+                  // Skip lines that aren't valid JSON
+                  return
+                }
+
+                // Handle events (JSON parsing succeeded)
+                if (currentEvent === 'complete' || data.success) {
+                  result = data
+                } else if (currentEvent === 'error' || data.error) {
+                  throw new Error(data.details || data.error || 'Unknown error from server')
                 }
               }
             }

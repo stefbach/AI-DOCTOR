@@ -96,33 +96,32 @@ export default function ChronicDiagnosisForm({
          if (line.startsWith('event: ')) {
            currentEvent = line.slice(7).trim()
          } else if (line.startsWith('data: ')) {
+           let data: any
            try {
-             const data = JSON.parse(line.slice(6))
-
-             // Handle different event types
-             if (currentEvent === 'progress' || (data.progress !== undefined && data.message)) {
-               // Progress event
-               setProgressMessage(data.message)
-               setProgressPercent(data.progress)
-             } else if (currentEvent === 'complete' || (data.success && data.assessment)) {
-               // Complete event - got full assessment
-               resultReceived = true
-               setAssessment(data.assessment)
-               setLoading(false)
-               toast({
-                 title: "Specialist Assessment Complete",
-                 description: "Comprehensive chronic disease evaluation generated successfully"
-               })
-             } else if (currentEvent === 'error' || data.error) {
-               // Error event
-               throw new Error(data.details || data.error || 'Unknown error')
-             }
-           } catch (parseError: any) {
-             // Only rethrow if it's our custom error, not JSON parse error
-             if (parseError.message && !parseError.message.includes('JSON')) {
-               throw parseError
-             }
+             data = JSON.parse(line.slice(6))
+           } catch {
+             // Skip lines that aren't valid JSON
              console.debug('Skipping non-JSON line:', line)
+             return
+           }
+
+           // Handle different event types (JSON parsing succeeded)
+           if (currentEvent === 'progress' || (data.progress !== undefined && data.message)) {
+             // Progress event
+             setProgressMessage(data.message)
+             setProgressPercent(data.progress)
+           } else if (currentEvent === 'complete' || (data.success && data.assessment)) {
+             // Complete event - got full assessment
+             resultReceived = true
+             setAssessment(data.assessment)
+             setLoading(false)
+             toast({
+               title: "Specialist Assessment Complete",
+               description: "Comprehensive chronic disease evaluation generated successfully"
+             })
+           } else if (currentEvent === 'error' || data.error) {
+             // Error event - throw to be caught by outer handler
+             throw new Error(data.details || data.error || 'Unknown error from server')
            }
          }
        }
