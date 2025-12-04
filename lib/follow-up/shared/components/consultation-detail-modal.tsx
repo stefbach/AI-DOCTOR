@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -24,7 +24,8 @@ import {
   Salad,
   CalendarCheck,
   Scan,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Loader2
 } from 'lucide-react'
 import { ConsultationHistoryItem } from '@/lib/follow-up/shared/utils/history-fetcher'
 import { format } from 'date-fns'
@@ -41,6 +42,9 @@ export interface ConsultationDetailModalProps {
  * Displays complete details of a previous consultation in a modal dialog.
  * Organized in tabs: Overview, Report, Prescription, Lab Tests, Imaging
  * For chronic disease: includes Diet Plan and Follow-up tabs
+ *
+ * Now supports lazy-loading: fetches full details on-demand via /api/consultation-detail
+ * when the consultation is lightweight (no documents_data preloaded)
  */
 export function ConsultationDetailModal({
   consultation,
@@ -48,19 +52,81 @@ export function ConsultationDetailModal({
   onOpenChange
 }: ConsultationDetailModalProps) {
   const [activeTab, setActiveTab] = useState('report')
+  const [fullConsultation, setFullConsultation] = useState<ConsultationHistoryItem | null>(null)
+  const [loadingDetails, setLoadingDetails] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
+
+  // Fetch full details when modal opens with a lightweight consultation
+  useEffect(() => {
+    const fetchFullDetails = async () => {
+      if (!open || !consultation) return
+
+      // Check if we already have full data or if this consultation already loaded
+      const isLightweight = (consultation as any)?._lightweight === true
+      const alreadyLoaded = fullConsultation?.id === consultation.id && !(fullConsultation as any)?._lightweight
+
+      if (!isLightweight || alreadyLoaded) {
+        setFullConsultation(consultation)
+        return
+      }
+
+      setLoadingDetails(true)
+      setLoadError(null)
+
+      try {
+        const response = await fetch('/api/consultation-detail', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: consultation.id,
+            consultationId: consultation.consultationId
+          })
+        })
+
+        const data = await response.json()
+
+        if (data.success && data.consultation) {
+          setFullConsultation(data.consultation)
+        } else {
+          setLoadError(data.error || 'Failed to load consultation details')
+          // Fall back to lightweight data
+          setFullConsultation(consultation)
+        }
+      } catch (err: any) {
+        console.error('Error fetching consultation details:', err)
+        setLoadError(err.message || 'Failed to load details')
+        setFullConsultation(consultation)
+      } finally {
+        setLoadingDetails(false)
+      }
+    }
+
+    fetchFullDetails()
+  }, [open, consultation?.id])
+
+  // Reset state when modal closes
+  useEffect(() => {
+    if (!open) {
+      setActiveTab('report')
+      // Don't clear fullConsultation to allow cache on reopen
+    }
+  }, [open])
 
   if (!consultation) return null
 
-  const consultationType = consultation.consultationType || 'normal'
+  // Use full consultation data if loaded, otherwise use the lightweight version
+  const displayConsultation = fullConsultation || consultation
+
+  const consultationType = displayConsultation.consultationType || 'normal'
   const typeConfig = getConsultationTypeConfig(consultationType)
   const isChronic = consultationType === 'chronic' || consultationType === 'chronic_disease'
 
-  // Extract data from fullReport
-  const fullReport = consultation.fullReport || {}
-  const prescription = extractPrescription(fullReport, consultation.medications)
-  const labTests = extractLabTests(fullReport, consultation.labTests)
-  const imaging = extractImaging(fullReport, consultation.imagingStudies)
-  const dietPlan = extractDietPlan(fullReport, consultation.dietaryPlan)
+  // Extract data from fullReport (use displayConsultation which has full data)
+  const fullReport = displayConsultation.fullReport || {}
+  const prescription = extractPrescription(fullReport, displayConsultation.medications)
+  const labTests = extractLabTests(fullReport, displayConsultation.labTests)
+  const imaging = extractImaging(fullReport, displayConsultation.imagingStudies)
+  const dietPlan = extractDietPlan(fullReport, displayConsultation.dietaryPlan)
   const followUp = extractFollowUp(fullReport)
 
   // Calculate scroll container height: 85vh - header (~80px) - tabs (~50px) - padding
@@ -79,12 +145,28 @@ export function ConsultationDetailModal({
           </DialogTitle>
           <DialogDescription className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-            {format(new Date(consultation.date), 'MMMM dd, yyyy - HH:mm')}
+            {format(new Date(displayConsultation.date), 'MMMM dd, yyyy - HH:mm')}
             <Badge variant="outline" className="ml-2">
-              ID: {consultation.consultationId}
+              ID: {displayConsultation.consultationId}
             </Badge>
+            {loadingDetails && (
+              <Badge variant="secondary" className="ml-2">
+                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                Loading details...
+              </Badge>
+            )}
           </DialogDescription>
         </DialogHeader>
+
+        {/* Loading overlay for full details */}
+        {loadingDetails && (
+          <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 rounded-lg">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-blue-600" />
+              <p className="text-sm text-gray-600">Loading consultation details...</p>
+            </div>
+          </div>
+        )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className={`grid w-full ${isChronic ? 'grid-cols-6' : 'grid-cols-4'}`}>
@@ -121,14 +203,14 @@ export function ConsultationDetailModal({
             {/* REPORT TAB */}
             <TabsContent value="report" className="mt-4">
               <div style={scrollContainerStyle} className="pr-2">
-                <ReportTab consultation={consultation} fullReport={fullReport} />
+                <ReportTab consultation={displayConsultation} fullReport={fullReport} />
               </div>
             </TabsContent>
 
             {/* PRESCRIPTION TAB */}
             <TabsContent value="prescription" className="mt-4">
               <div style={scrollContainerStyle} className="pr-2">
-                <PrescriptionTab prescription={prescription} consultation={consultation} />
+                <PrescriptionTab prescription={prescription} consultation={displayConsultation} />
               </div>
             </TabsContent>
 

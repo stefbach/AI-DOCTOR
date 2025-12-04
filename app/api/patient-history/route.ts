@@ -101,13 +101,29 @@ export async function POST(req: NextRequest) {
     }
 
     // Build query with pagination to prevent timeout
-    // The documents_data column contains large JSON blobs
+    // OPTIMIZATION: Only select essential columns for list view
+    // Exclude documents_data (large JSON blobs) - fetch on demand via /api/consultation-detail
     const queryLimit = criteria.limit || 10
     const queryOffset = criteria.offset || 0
 
+    // Essential columns for list view (excludes documents_data to prevent Supabase overload)
+    const listViewColumns = `
+      id,
+      consultation_id,
+      patient_id,
+      patient_name,
+      patient_email,
+      patient_phone,
+      chief_complaint,
+      diagnosis,
+      consultation_type,
+      created_at,
+      updated_at
+    `
+
     let query = supabase
       .from('consultation_records')
-      .select('*', { count: 'exact' })  // Get total count for pagination
+      .select(listViewColumns, { count: 'exact' })  // Only essential columns + count
       .order('created_at', { ascending: false })
       .range(queryOffset, queryOffset + queryLimit - 1)
 
@@ -170,137 +186,33 @@ export async function POST(req: NextRequest) {
 
     console.log(`✅ Found ${data.length} consultation(s), total: ${totalCount}`)
 
-    // Transform data to consultation history format
-    // Wrap each record transformation in try-catch to handle malformed data
+    // Transform data to consultation history format (lightweight - no documents_data)
+    // Full details are fetched on-demand via /api/consultation-detail
     const consultations = data.map((record, index) => {
       try {
-        const documentsData = record.documents_data || {}
-
-        // The data is saved in different structures depending on how it was saved:
-        // - New format: consultationReport.content contains compteRendu structure
-        // - Legacy format: compteRendu at root level
-        const consultationReportContent = documentsData.consultationReport?.content || {}
-        const compteRendu = documentsData.compteRendu || consultationReportContent || {}
-        const rapport = compteRendu.rapport || consultationReportContent.rapport || {}
-        const medicalReport = documentsData.consultationReport?.medicalReport || documentsData.medicalReport || {}
-
-        // Detect consultation type
-        let consultationType: 'normal' | 'dermatology' | 'chronic' = 'normal'
-        if (record.consultation_type) {
-          consultationType = record.consultation_type
-        } else if (compteRendu.header?.consultationType?.toLowerCase().includes('dermatology')) {
-          consultationType = 'dermatology'
-        } else if (medicalReport?.chronicDiseaseAssessment) {
-          consultationType = 'chronic'
-        }
-
-        // Extract vital signs (try different structures)
-        let vitalSigns: any = {}
-
-        // From compteRendu.patient (may be in consultationReport.content or directly)
-        const patientData = compteRendu.patient || consultationReportContent.patient || {}
-        if (Object.keys(patientData).length > 0) {
-          vitalSigns = {
-            bloodPressureSystolic: patientData.bloodPressureSystolic || patientData.tensionSystolique,
-            bloodPressureDiastolic: patientData.bloodPressureDiastolic || patientData.tensionDiastolique,
-            bloodGlucose: patientData.bloodGlucose || patientData.glycemie,
-            weight: patientData.poids || patientData.weight,
-            height: patientData.taille || patientData.height,
-            temperature: patientData.temperature,
-            heartRate: patientData.heartRate || patientData.frequenceCardiaque
-          }
-        }
-
-        // From medicalReport structure (chronic)
-        if (medicalReport?.patient) {
-          const mrPatient = medicalReport.patient
-          vitalSigns = {
-            ...vitalSigns,
-            bloodPressureSystolic: vitalSigns.bloodPressureSystolic || mrPatient.bloodPressureSystolic,
-            bloodPressureDiastolic: vitalSigns.bloodPressureDiastolic || mrPatient.bloodPressureDiastolic,
-            bloodGlucose: vitalSigns.bloodGlucose || mrPatient.bloodGlucose,
-            weight: vitalSigns.weight || mrPatient.weight,
-            height: vitalSigns.height || mrPatient.height,
-            temperature: vitalSigns.temperature || mrPatient.temperature
-          }
-        }
-
-        // Extract chief complaint from multiple possible paths
-        const chiefComplaint =
-          rapport.motifConsultation ||
-          consultationReportContent.rapport?.motifConsultation ||
-          medicalReport?.clinicalEvaluation?.chiefComplaint ||
-          record.chief_complaint ||
-          'Follow-up consultation'
-
-        // Extract diagnosis from multiple possible paths
-        const diagnosis =
-          rapport.syntheseDiagnostique ||
-          rapport.conclusionDiagnostique ||
-          consultationReportContent.rapport?.syntheseDiagnostique ||
-          medicalReport?.diagnosticSummary?.diagnosticConclusion ||
-          record.diagnosis ||
-          ''
-
-        // Extract prescriptions from multiple possible paths
-        const prescriptions = documentsData.prescriptions || documentsData.ordonnances || {}
-        const medications =
-          prescriptions.medications?.prescription?.medications ||
-          prescriptions.medicaments?.prescription?.medications ||
-          prescriptions.medicaments?.prescription?.medicaments ||
-          documentsData.medicationPrescription?.prescription?.medications ||
-          []
-
-        // Extract lab tests from multiple possible paths
-        const laboratoryData = prescriptions.laboratoryTests || prescriptions.biologie || documentsData.laboratoryTests || {}
-        const labTests =
-          laboratoryData.prescription?.analyses ||
-          laboratoryData.prescription?.tests ||
-          laboratoryData.tests ||
-          []
-
-        // Extract imaging from multiple possible paths
-        const imagingData = prescriptions.imagingStudies || prescriptions.imagerie || documentsData.paraclinicalExams || {}
-        const imagingStudies =
-          imagingData.prescription?.examinations ||
-          imagingData.prescription?.exams ||
-          imagingData.examinations ||
-          []
-
-        // Extract images for dermatology
-        const images = compteRendu.imageAnalysis?.images || consultationReportContent.imageAnalysis?.images || []
-
-        // Extract diet plan and follow-up from multiple sources
-        const dietaryPlan = documentsData.dietaryPlan || record.diet_plan_data || null
-        const followUpPlan = documentsData.followUpPlan || record.follow_up_data || null
-
-        // Merge record column data into fullReport so modal can access it
-        const fullReport = {
-          ...documentsData,
-          dietaryPlan: dietaryPlan,
-          followUpPlan: followUpPlan,
-          diet_plan_data: record.diet_plan_data,
-          follow_up_data: record.follow_up_data
-        }
+        // Use direct columns only (no documents_data parsing needed)
+        const consultationType = record.consultation_type || 'normal'
 
         return {
           id: record.id,
           consultationId: record.consultation_id,
           consultationType,
           date: record.created_at,
-          chiefComplaint,
-          diagnosis,
-          medications,
-          vitalSigns,
-          labTests,
-          imagingStudies,
-          images,
-          dietaryPlan,
-          fullReport
+          chiefComplaint: record.chief_complaint || 'Follow-up consultation',
+          diagnosis: record.diagnosis || '',
+          // These will be populated when user views details via /api/consultation-detail
+          medications: [],
+          vitalSigns: {},
+          labTests: [],
+          imagingStudies: [],
+          images: [],
+          dietaryPlan: null,
+          fullReport: null,  // null indicates details need to be fetched
+          // Flag to indicate this is a lightweight record
+          _lightweight: true
         }
       } catch (recordError: any) {
         console.error(`❌ Error transforming record ${index}:`, recordError?.message, 'Record ID:', record?.id)
-        // Return a minimal safe object for failed records
         return {
           id: record?.id || `error-${index}`,
           consultationId: record?.consultation_id || null,
@@ -314,7 +226,8 @@ export async function POST(req: NextRequest) {
           imagingStudies: [],
           images: [],
           dietaryPlan: null,
-          fullReport: {}
+          fullReport: null,
+          _lightweight: true
         }
       }
     })
