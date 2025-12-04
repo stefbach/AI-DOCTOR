@@ -246,8 +246,22 @@ Tu analyses TOUJOURS les interdépendances :
 
 # FORMAT DE RÉPONSE STRUCTURÉ - OBLIGATOIRE
 
-⚠️ **CRITIQUE** : Tu DOIS OBLIGATOIREMENT répondre UNIQUEMENT avec un objet JSON valide. 
-Aucun texte avant ou après le JSON. JAMAIS de markdown autour du JSON.
+⚠️ **CRITIQUE - FORMAT JSON OBLIGATOIRE** : 
+
+🔴 **RÈGLE #1 ABSOLUE** :
+- Tu DOIS répondre UNIQUEMENT avec un objet JSON valide
+- COMMENCE directement par { et TERMINE par }
+- AUCUN texte avant le {
+- AUCUN texte après le }
+- AUCUN markdown (pas de \`\`\`json)
+- Si tu ne peux pas générer de JSON valide, n'envoie RIEN
+
+🔴 **RÈGLE #2 - STRUCTURE COMPLÈTE** :
+- Chaque action DOIT avoir une structure complète
+- JAMAIS de champ "description" générique
+- Pour médicament : OBLIGATOIRE {nom, denominationCommune, dosage, posologie, voieAdministration, dureeTraitement, justification}
+- Pour test bio : OBLIGATOIRE {category, test: {nom, code, motifClinique, urgence, aJeun}}
+- Pour imagerie : OBLIGATOIRE {type, modalite, region, indicationClinique, urgence, contraste}
 
 🚨 **RÈGLE ABSOLUE POUR LES ACTIONS** :
 - Pour TOUT nouveau médicament, test biologique, ou examen d'imagerie → TOUJOURS utiliser action: "add"
@@ -690,74 +704,21 @@ function parseAssistantResponse(text: string): { response: string; actions: Assi
     }
   }
   
-  // Fallback: Extract actions/alerts/suggestions from text patterns
-  console.log('📝 Using text pattern extraction fallback')
+  // ❌ JSON parsing failed completely - this should NOT happen
+  console.error('🚨 CRITICAL: JSON parsing failed completely!')
+  console.error('🚨 Raw AI response:', text.substring(0, 500))
+  console.error('🚨 This indicates AI did not follow JSON format instructions')
   
-  const extractedActions: AssistantAction[] = []
-  const extractedAlerts: any[] = []
-  const extractedSuggestions: any[] = []
-  
-  // Extract alerts from text patterns like "⚠️ ALERTE:" or "⛔ CRITIQUE:"
-  const alertPatterns = [
-    /⚠️\s*(?:ALERTE|ATTENTION|WARNING)[:\s]+([^\n]+)/gi,
-    /⛔\s*(?:CRITIQUE|CRITICAL)[:\s]+([^\n]+)/gi,
-    /🔴\s*(?:URGENT|DANGER)[:\s]+([^\n]+)/gi
-  ]
-  
-  alertPatterns.forEach(pattern => {
-    let match
-    while ((match = pattern.exec(text)) !== null) {
-      extractedAlerts.push({
-        type: pattern.source.includes('CRITIQUE') || pattern.source.includes('DANGER') ? 'critical' : 'warning',
-        message: match[1].trim()
-      })
-    }
-  })
-  
-  // Extract suggestions from text patterns like "💡 SUGGESTION:" or "📋 RECOMMANDATION:"
-  const suggestionPatterns = [
-    /💡\s*(?:SUGGESTION|RECOMMANDATION)[:\s]+([^\n]+)/gi,
-    /📋\s*(?:CONSEIL|TIP)[:\s]+([^\n]+)/gi,
-    /✅\s*(?:À FAIRE|ACTION)[:\s]+([^\n]+)/gi
-  ]
-  
-  suggestionPatterns.forEach(pattern => {
-    let match
-    while ((match = pattern.exec(text)) !== null) {
-      extractedSuggestions.push({
-        category: 'general',
-        priority: 'medium',
-        suggestion: match[1].trim(),
-        reasoning: 'Extracted from response'
-      })
-    }
-  })
-  
-  // Extract medication actions from patterns like "AJOUTER: Metformin 500mg"
-  const actionPatterns = [
-    { pattern: /(?:AJOUTER|ADD)[:\s]+(?:médicament|medication)?[:\s]*([^\n]+)/gi, action: 'add' as const, type: 'modify_medication_prescription' as const },
-    { pattern: /(?:MODIFIER|UPDATE)[:\s]+(?:médicament|medication)?[:\s]*([^\n]+)/gi, action: 'update' as const, type: 'modify_medication_prescription' as const },
-    { pattern: /(?:RETIRER|REMOVE|SUPPRIMER)[:\s]+(?:médicament|medication)?[:\s]*([^\n]+)/gi, action: 'remove' as const, type: 'modify_medication_prescription' as const }
-  ]
-  
-  actionPatterns.forEach(({ pattern, action, type }) => {
-    let match
-    while ((match = pattern.exec(text)) !== null) {
-      extractedActions.push({
-        type,
-        action,
-        content: { description: match[1].trim() },
-        reasoning: `Extracted: ${match[1].trim()}`
-      })
-    }
-  })
-  
-  // Return with fallback extraction results
+  // Return error state - DO NOT use unreliable text extraction fallback
+  // The fallback creates broken actions with only "description" field
   return {
-    response: text,
-    actions: extractedActions,
-    alerts: extractedAlerts,
-    suggestions: extractedSuggestions
+    response: "❌ Erreur de format de réponse. L'assistant doit générer du JSON valide.\n\nVeuillez réessayer votre demande.",
+    actions: [],
+    alerts: [{
+      type: 'warning',
+      message: 'Format de réponse incorrect détecté - veuillez reformuler votre question'
+    }],
+    suggestions: []
   }
 }
 
