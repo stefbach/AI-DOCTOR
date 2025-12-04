@@ -10,6 +10,7 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
+export const maxDuration = 60 // 60 seconds for GPT-4 calls with retries
 
 // ==================== HELPER FUNCTIONS ====================
 

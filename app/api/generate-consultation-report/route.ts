@@ -3,6 +3,9 @@ import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
 
+export const runtime = 'nodejs'
+export const maxDuration = 60 // 60 seconds for GPT-4 report generation
+
 // ==================== FONCTION DE TRADUCTION PRAGMATIQUE ====================
 function translateFrenchMedicalTerms(text: string): string {
   if (!text || typeof text !== 'string') return text

@@ -7,6 +7,9 @@ import { generateObject } from "ai"
 import { openai } from "@ai-sdk/openai"
 import { z } from "zod"
 
+export const runtime = 'nodejs'
+export const maxDuration = 60 // 60 seconds for GPT-4 medical assistance
+
 // ==================== ZOD SCHEMA FOR STRUCTURED OUTPUT ====================
 const tibokResponseSchema = z.object({
   response: z.string().max(300).describe("Concise analysis text in English (max 300 chars)"),
