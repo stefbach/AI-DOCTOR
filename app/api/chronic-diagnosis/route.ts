@@ -30,8 +30,8 @@ function validateMedicationDCI(medications: any[]): { isValid: boolean; issues: 
       issues.push(`Medication ${index + 1}: Generic name "${med.medication}" - needs specific DCI name`)
     }
     
-    // Check for missing dosage details
-    if (!med.dosage || med.dosage.length < 5) {
+    // Check for missing dosage details (e.g., "10mg", "500mg", "5mg/kg")
+    if (!med.dosage || med.dosage.length < 3) {
       issues.push(`Medication ${index + 1}: Missing or incomplete dosage information`)
     }
     
