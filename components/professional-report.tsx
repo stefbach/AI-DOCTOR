@@ -5184,26 +5184,52 @@ const [localSickLeave, setLocalSickLeave] = useState({
  updateRapportSection(section, value)
  }}
  onAddMedication={(medication) => {
- addMedicament()
- const lastIndex = report?.ordonnances?.medicaments?.prescription?.medicaments?.length || 0
- setTimeout(() => {
+ // Direct creation: no add+update pattern - create complete medication immediately
+ console.log('💊 CALLBACK onAddMedication called:', medication)
+ if (validationStatus === 'validated') {
+ console.log('⚠️ CALLBACK onAddMedication BLOCKED - document validated')
+ return
+ }
+ 
  const medicationWithDefaults = {
- nom: medication.nom || '',
- denominationCommune: medication.denominationCommune || medication.dci || '',
+ nom: medication.nom || medication.name || '',
+ denominationCommune: medication.denominationCommune || medication.generic_name || medication.dci || '',
  dosage: medication.dosage || '',
- forme: medication.forme || 'tablet',
- posologie: medication.posologie || '',
- modeAdministration: medication.voieAdministration || medication.modeAdministration || 'Oral route',
- dureeTraitement: medication.dureeTraitement || '7 days',
- quantite: medication.quantite || '1 box',
+ forme: medication.forme || medication.form || 'tablet',
+ posologie: medication.posologie || medication.dosing || '',
+ modeAdministration: medication.voieAdministration || medication.modeAdministration || medication.route || 'Oral route',
+ dureeTraitement: medication.dureeTraitement || medication.duration || '7 days',
+ quantite: medication.quantite || medication.quantity || '1 box',
  instructions: medication.instructions || '',
- justification: medication.justification || '',
- surveillanceParticuliere: medication.surveillanceParticuliere || '',
+ justification: medication.justification || medication.indication || '',
+ surveillanceParticuliere: medication.surveillanceParticuliere || medication.monitoring || '',
  nonSubstituable: medication.nonSubstituable || false,
  ligneComplete: ''
  }
- updateMedicamentBatch(lastIndex, medicationWithDefaults)
- }, 100)
+ 
+ setReport(prev => {
+ if (!prev) return prev
+ 
+ const newReport = JSON.parse(JSON.stringify(prev))
+ 
+ // Ensure ordonnances structure exists
+ if (!newReport.ordonnances) newReport.ordonnances = {}
+ if (!newReport.ordonnances.medicaments) newReport.ordonnances.medicaments = {}
+ if (!newReport.ordonnances.medicaments.prescription) {
+ newReport.ordonnances.medicaments.prescription = {
+ praticien: { nom: '', prenom: '', qualite: '' },
+ patient: { nom: '', prenom: '', dateNaissance: '', numeroSecuriteSociale: '' },
+ date: new Date().toISOString(),
+ medicaments: []
+ }
+ }
+ 
+ // Add medication directly to the array
+ newReport.ordonnances.medicaments.prescription.medicaments.push(medicationWithDefaults)
+ 
+ console.log('💊 Medication added directly:', medicationWithDefaults)
+ return newReport
+ })
  }}
  onUpdateMedication={(index, medication) => {
  updateMedicamentBatch(index, medication)
