@@ -97,46 +97,39 @@ interface TibokMedicalAssistantProps {
 // ==================== QUICK ACTIONS ====================
 const QUICK_ACTIONS = [
   {
-    id: 'analyze_coherence',
-    label: 'Analyser la cohérence',
-    icon: ClipboardList,
-    prompt: 'Analyse la cohérence globale entre le diagnostic, les prescriptions médicamenteuses, les examens biologiques et l\'imagerie. Y a-t-il des incohérences ou des éléments manquants ?',
+    id: 'suggest_lab_tests',
+    label: 'Suggest Lab Tests',
+    icon: FlaskConical,
+    prompt: 'Based on the diagnosis and treatment, what laboratory tests should I add for optimal monitoring? Suggest 1-2 specific tests with clear clinical indications.',
+    color: 'bg-purple-500'
+  },
+  {
+    id: 'suggest_imaging',
+    label: 'Suggest Imaging',
+    icon: Activity,
+    prompt: 'Based on the clinical presentation, what imaging studies should I add? Suggest 1-2 relevant exams (ECG, X-ray, CT, etc.) with clinical indications.',
     color: 'bg-blue-500'
   },
   {
     id: 'check_interactions',
-    label: 'Vérifier interactions',
+    label: 'Check Interactions',
     icon: AlertTriangle,
-    prompt: 'Vérifie s\'il y a des interactions médicamenteuses potentielles entre les médicaments prescrits. Inclus également les médicaments du traitement actuel du patient.',
+    prompt: 'Check for drug interactions between prescribed medications. If issues found, suggest alternatives.',
     color: 'bg-orange-500'
   },
   {
-    id: 'suggest_exams',
-    label: 'Suggérer examens',
-    icon: FlaskConical,
-    prompt: 'Basé sur le diagnostic et les traitements prescrits, quels examens biologiques ou paracliniques devrais-je ajouter pour une surveillance optimale ?',
-    color: 'bg-purple-500'
-  },
-  {
-    id: 'optimize_treatment',
-    label: 'Optimiser traitement',
+    id: 'optimize_medication',
+    label: 'Optimize Medication',
     icon: Pill,
-    prompt: 'Analyse les prescriptions médicamenteuses. Y a-t-il des optimisations possibles (posologies, durées, alternatives) selon les guidelines NICE/BNF ?',
+    prompt: 'Review prescribed medications. Suggest dosage adjustments or additions based on NICE/BNF guidelines. Max 1-2 suggestions.',
     color: 'bg-green-500'
   },
   {
-    id: 'safety_check',
-    label: 'Contrôle sécurité',
+    id: 'safety_monitoring',
+    label: 'Safety Monitoring',
     icon: Shield,
-    prompt: 'Effectue un contrôle de sécurité complet : contre-indications, allergies croisées, ajustements de dose (fonction rénale/hépatique), et surveillances obligatoires manquantes.',
+    prompt: 'What monitoring tests are required for the prescribed medications? Suggest essential lab tests for drug safety.',
     color: 'bg-red-500'
-  },
-  {
-    id: 'summary',
-    label: 'Résumé clinique',
-    icon: Stethoscope,
-    prompt: 'Génère un résumé clinique concis de cette consultation incluant : motif, diagnostic principal, traitement prescrit, et points de suivi.',
-    color: 'bg-cyan-500'
   }
 ]
 
@@ -161,24 +154,24 @@ export default function TibokMedicalAssistant({
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: `🏥 **Assistant Médical TIBOK**
+      content: `🏥 **TIBOK Medical Assistant**
 
-Bonjour Docteur ! Je suis votre assistant IA expert pour l'analyse et l'optimisation des documents de consultation.
+Hello Doctor! I am your AI expert to **suggest additions** to your consultation.
 
-**J'ai accès aux 4 documents générés :**
-📄 Rapport médical de consultation
-💊 Ordonnance médicamenteuse
-🔬 Prescription d'examens biologiques
-🩻 Prescription d'examens paracliniques
+**I have access to your generated documents:**
+📄 Medical Report
+💊 Medication Prescription
+🔬 Laboratory Tests
+🩻 Imaging Studies
 
-**Je peux vous aider à :**
-✅ Analyser la cohérence inter-documents
-✅ Détecter les interactions médicamenteuses
-✅ Suggérer des examens complémentaires
-✅ Vérifier les contre-indications
-✅ Optimiser les prescriptions selon NICE/BNF
+**I can suggest:**
+✅ Missing lab tests (HbA1c, Creatinine, etc.)
+✅ Additional imaging exams (ECG, X-ray, CT, etc.)
+✅ Medication adjustments (dosage optimization)
+✅ Complementary exams based on diagnosis
+✅ Safety checks (drug interactions, contraindications)
 
-Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre question.`,
+Use the quick action buttons below or ask me directly: "What exams should I add?" or "Check drug interactions".`,
       timestamp: new Date()
     }
   ])
