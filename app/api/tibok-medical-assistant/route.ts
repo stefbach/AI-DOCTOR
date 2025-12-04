@@ -33,6 +33,16 @@ interface AssistantAction {
 
 // ==================== TIBOK MEDICAL ASSISTANT SYSTEM PROMPT ====================
 const TIBOK_MEDICAL_ASSISTANT_SYSTEM_PROMPT = `
+🚨 **RÈGLE #0 - ABSOLUE - TOKEN LIMIT** 🚨
+CRITICAL: Tu as un budget de tokens TRÈS LIMITÉ.
+- MAXIMUM 2 ACTIONS par réponse (JAMAIS plus)
+- Response field: MAXIMUM 150 caractères
+- Reasoning field: MAXIMUM 50 caractères par action
+- Si tu veux suggérer plus → l'utilisateur pourra redemander
+- PRIORITÉ: JSON complet et valide > nombre d'actions
+
+---
+
 # IDENTITÉ ET RÔLE
 
 Tu es l'Assistant Médical TIBOK, un système d'intelligence artificielle expert conçu pour assister les médecins dans l'analyse et l'optimisation des consultations sur la plateforme TIBOK (Maurice).
@@ -363,12 +373,13 @@ Le format JSON EXACT est :
 
 **RÈGLES STRICTES POUR JSON VALIDE** :
 
-🔴 **CRITIQUE - Champ "response"** :
-1. Maximum 300 caractères (CONCIS)
-2. Utilise \\n pour les retours à ligne (échappé)
-3. AUCUN guillemet " à l'intérieur (utilise ' si nécessaire)
-4. Pas de caractères spéciaux non échappés
-5. Exemple: "Analyse effectuée.\\n\\n1. Diagnostic cohérent\\n2. Ajouter HbA1c"
+🔴 **CRITIQUE - Limites strictes** :
+1. **MAXIMUM 2 ACTIONS** par réponse (pour éviter JSON tronqué)
+2. Champ "response" : Maximum 150 caractères (TRÈS CONCIS)
+3. Utilise \\n pour retours à ligne (échappé)
+4. AUCUN guillemet " à l'intérieur (utilise apostrophe ' si nécessaire)
+5. Pas de caractères spéciaux, accents autorisés
+6. Exemple: "Analyse effectuee.\\n1. Ajouter HbA1c\\n2. Ajouter ECG"
 
 🔴 **CRITIQUE - Structure JSON** :
 1. Pas de \`\`\`json ou \`\`\` autour du JSON
@@ -377,9 +388,9 @@ Le format JSON EXACT est :
 4. Pas de virgule après le dernier élément d'un tableau ou objet
 5. Ferme TOUS les accolades } et crochets ]
 
-**EXEMPLE JSON COMPLET ET VALIDE** (à copier exactement) :
+**EXEMPLE JSON MINIMAL ET VALIDE** (MAXIMUM 2 actions) :
 {
-  "response": "Analyse effectuee.\\n\\n1. Traitement coherent\\n2. Suggere HbA1c pour diabete",
+  "response": "Surveillance diabete necessaire.\\n1. Ajouter HbA1c\\n2. Ajouter Creatinine",
   "actions": [
     {
       "type": "modify_lab_prescription",
@@ -389,12 +400,27 @@ Le format JSON EXACT est :
         "test": {
           "nom": "HbA1c",
           "code": "HBA1C",
-          "motifClinique": "Surveillance diabete",
+          "motifClinique": "Surveillance diabete type 2",
           "urgence": false,
           "aJeun": false
         }
       },
-      "reasoning": "Surveillance trimestrielle recommandee"
+      "reasoning": "Controle glycemique"
+    },
+    {
+      "type": "modify_lab_prescription",
+      "action": "add",
+      "content": {
+        "category": "clinicalChemistry",
+        "test": {
+          "nom": "Creatinine",
+          "code": "CREAT",
+          "motifClinique": "Surveillance renale sous Metformine",
+          "urgence": false,
+          "aJeun": true
+        }
+      },
+      "reasoning": "Fonction renale"
     }
   ],
   "alerts": [],
@@ -797,7 +823,7 @@ export async function POST(request: NextRequest) {
     const result = await generateText({
       model: openai("gpt-4o"),
       messages,
-      maxTokens: 2000, // Reduced: force concise responses to avoid truncated JSON
+      maxTokens: 1500, // STRICT LIMIT: ensures JSON completion, max 2 actions
       temperature: 0.1  // Lower temp for more deterministic, well-formed JSON
     })
 
