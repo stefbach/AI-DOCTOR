@@ -92,7 +92,7 @@ async function callOpenAIWithRetry(
   apiKey: string,
   systemPrompt: string,
   patientContext: string,
-  maxRetries: number = 3
+  maxRetries: number = 1  // Reduced from 3 to 1 for Vercel Hobby 10s timeout
 ): Promise<any> {
   let lastError: Error | null = null
   
@@ -207,8 +207,8 @@ THERAPEUTIC OBJECTIVES MUST BE MEASURABLE:
             { role: "system", content: enhancedSystemPrompt },
             { role: "user", content: patientContext }
           ],
-          temperature: attempt === 0 ? 0.5 : attempt === 1 ? 0.3 : 0.1,
-          max_tokens: 8000,
+          temperature: attempt === 0 ? 0.3 : 0.1,  // Reduced temperature for faster, more focused responses
+          max_tokens: 4000,  // Reduced from 8000 to 4000 for faster generation (fits Vercel Hobby 10s timeout)
           response_format: { type: "json_object" },
           top_p: 0.9,
           frequency_penalty: 0.1,
