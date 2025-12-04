@@ -4296,8 +4296,8 @@ export default function ChronicProfessionalReport({
                 <div>
                   <h4 className="font-semibold text-sm text-gray-700">Nutritional Deficiencies:</h4>
                   <ul className="list-disc list-inside text-base">
-                    {dietaryProtocol.nutritionalAssessment.nutritionalDeficiencies.map((item, idx) => (
-                      <li key={idx}>{item}</li>
+                    {dietaryProtocol.nutritionalAssessment.nutritionalDeficiencies.map((item: any, idx: number) => (
+                      <li key={idx}>{typeof item === 'string' ? item : JSON.stringify(item)}</li>
                     ))}
                   </ul>
                 </div>
@@ -4306,8 +4306,8 @@ export default function ChronicProfessionalReport({
                 <div>
                   <h4 className="font-semibold text-sm text-gray-700">Dietary Restrictions:</h4>
                   <ul className="list-disc list-inside text-base">
-                    {dietaryProtocol.nutritionalAssessment.dietaryRestrictions.map((item, idx) => (
-                      <li key={idx}>{item}</li>
+                    {dietaryProtocol.nutritionalAssessment.dietaryRestrictions.map((item: any, idx: number) => (
+                      <li key={idx}>{typeof item === 'string' ? item : JSON.stringify(item)}</li>
                     ))}
                   </ul>
                 </div>
@@ -4477,8 +4477,8 @@ export default function ChronicProfessionalReport({
                     <div>
                       <p className="font-semibold text-blue-700">Proteins:</p>
                       <ul className="list-disc list-inside ml-2">
-                        {dietaryProtocol.practicalGuidance.groceryList.proteins.map((item: string, idx: number) => (
-                          <li key={idx}>{item}</li>
+                        {dietaryProtocol.practicalGuidance.groceryList.proteins.map((item: any, idx: number) => (
+                          <li key={idx}>{typeof item === 'string' ? item : JSON.stringify(item)}</li>
                         ))}
                       </ul>
                     </div>
@@ -4487,8 +4487,8 @@ export default function ChronicProfessionalReport({
                     <div>
                       <p className="font-semibold text-teal-700">Vegetables:</p>
                       <ul className="list-disc list-inside ml-2">
-                        {dietaryProtocol.practicalGuidance.groceryList.vegetables.map((item: string, idx: number) => (
-                          <li key={idx}>{item}</li>
+                        {dietaryProtocol.practicalGuidance.groceryList.vegetables.map((item: any, idx: number) => (
+                          <li key={idx}>{typeof item === 'string' ? item : JSON.stringify(item)}</li>
                         ))}
                       </ul>
                     </div>
@@ -4497,8 +4497,8 @@ export default function ChronicProfessionalReport({
                     <div>
                       <p className="font-semibold text-cyan-700">Grains:</p>
                       <ul className="list-disc list-inside ml-2">
-                        {dietaryProtocol.practicalGuidance.groceryList.grains.map((item: string, idx: number) => (
-                          <li key={idx}>{item}</li>
+                        {dietaryProtocol.practicalGuidance.groceryList.grains.map((item: any, idx: number) => (
+                          <li key={idx}>{typeof item === 'string' ? item : JSON.stringify(item)}</li>
                         ))}
                       </ul>
                     </div>
@@ -4512,8 +4512,8 @@ export default function ChronicProfessionalReport({
               <div className="mb-4">
                 <h4 className="font-semibold mb-2 text-blue-700">💡 Meal Preparation Tips:</h4>
                 <ul className="list-disc list-inside text-sm space-y-1 ml-2">
-                  {dietaryProtocol.practicalGuidance.mealPrepTips.map((tip: string, idx: number) => (
-                    <li key={idx}>{tip}</li>
+                  {dietaryProtocol.practicalGuidance.mealPrepTips.map((tip: any, idx: number) => (
+                    <li key={idx}>{typeof tip === 'string' ? tip : JSON.stringify(tip)}</li>
                   ))}
                 </ul>
               </div>
@@ -4528,8 +4528,8 @@ export default function ChronicProfessionalReport({
                     <div className="bg-teal-50 p-3 rounded">
                       <p className="font-semibold text-teal-700 mb-1">✅ Recommended:</p>
                       <ul className="list-disc list-inside ml-2">
-                        {dietaryProtocol.practicalGuidance.cookingMethods.recommended.map((method: string, idx: number) => (
-                          <li key={idx}>{method}</li>
+                        {dietaryProtocol.practicalGuidance.cookingMethods.recommended.map((method: any, idx: number) => (
+                          <li key={idx}>{typeof method === 'string' ? method : JSON.stringify(method)}</li>
                         ))}
                       </ul>
                     </div>
@@ -4538,8 +4538,8 @@ export default function ChronicProfessionalReport({
                     <div className="bg-blue-50 p-3 rounded">
                       <p className="font-semibold text-blue-700 mb-1">❌ Avoid:</p>
                       <ul className="list-disc list-inside ml-2">
-                        {dietaryProtocol.practicalGuidance.cookingMethods.avoid.map((method: string, idx: number) => (
-                          <li key={idx}>{method}</li>
+                        {dietaryProtocol.practicalGuidance.cookingMethods.avoid.map((method: any, idx: number) => (
+                          <li key={idx}>{typeof method === 'string' ? method : JSON.stringify(method)}</li>
                         ))}
                       </ul>
                     </div>
@@ -4556,8 +4556,8 @@ export default function ChronicProfessionalReport({
             <div className="p-4 bg-blue-50 rounded">
               <h4 className="font-semibold mb-2 text-blue-700">Foods to Avoid:</h4>
               <ul className="list-disc list-inside text-sm space-y-1">
-                {dietaryProtocol.forbiddenFoods.map((food, idx) => (
-                  <li key={idx}>{food}</li>
+                {dietaryProtocol.forbiddenFoods.map((food: any, idx: number) => (
+                  <li key={idx}>{typeof food === 'string' ? food : JSON.stringify(food)}</li>
                 ))}
               </ul>
             </div>
@@ -4566,8 +4566,8 @@ export default function ChronicProfessionalReport({
             <div className="p-4 bg-teal-50 rounded">
               <h4 className="font-semibold mb-2 text-teal-700">Recommended Foods:</h4>
               <ul className="list-disc list-inside text-sm space-y-1">
-                {dietaryProtocol.recommendedFoods.map((food, idx) => (
-                  <li key={idx}>{food}</li>
+                {dietaryProtocol.recommendedFoods.map((food: any, idx: number) => (
+                  <li key={idx}>{typeof food === 'string' ? food : JSON.stringify(food)}</li>
                 ))}
               </ul>
             </div>
@@ -4579,8 +4579,8 @@ export default function ChronicProfessionalReport({
           <div className="p-4 bg-cyan-50 rounded mb-6">
             <h4 className="font-semibold mb-2">Special Instructions:</h4>
             <ul className="list-disc list-inside text-sm space-y-1">
-              {dietaryProtocol.specialInstructions.map((instruction, idx) => (
-                <li key={idx}>{instruction}</li>
+              {dietaryProtocol.specialInstructions.map((instruction: any, idx: number) => (
+                <li key={idx}>{typeof instruction === 'string' ? instruction : JSON.stringify(instruction)}</li>
               ))}
             </ul>
           </div>
