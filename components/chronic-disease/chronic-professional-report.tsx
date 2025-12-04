@@ -1107,7 +1107,73 @@ export default function ChronicProfessionalReport({
         
         // Now fetch only the THREE critical API responses in parallel (report, prescription, examens)
         // Dietary plan will be generated ON-DEMAND when user clicks button
-        const [reportResponse, prescriptionResponse, examensResponse] = await Promise.all([
+        // Note: chronic-examens uses SSE streaming, so we handle it separately
+
+        const doctorPayload = {
+          fullName: doctorInfo.nom.replace(/^Dr\.\s*/i, ''),
+          qualifications: doctorInfo.qualifications,
+          specialty: doctorInfo.specialite,
+          medicalCouncilNumber: doctorInfo.numeroEnregistrement,
+          email: doctorInfo.email,
+          clinicAddress: doctorInfo.adresseCabinet,
+          consultationHours: doctorInfo.heuresConsultation
+        }
+
+        // Helper function to handle SSE streaming responses
+        const fetchWithSSE = async (url: string, body: any): Promise<any> => {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+          })
+
+          const contentType = response.headers.get('content-type')
+
+          if (contentType?.includes('text/event-stream')) {
+            // Handle SSE streaming response
+            const reader = response.body?.getReader()
+            if (!reader) throw new Error('No response body')
+
+            const decoder = new TextDecoder()
+            let buffer = ''
+            let result = null
+
+            while (true) {
+              const { done, value } = await reader.read()
+              if (done) break
+
+              buffer += decoder.decode(value, { stream: true })
+              const lines = buffer.split('\n')
+              buffer = lines.pop() || ''
+
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  try {
+                    const data = JSON.parse(line.slice(6))
+                    if (data.success) {
+                      result = data
+                    } else if (data.error) {
+                      throw new Error(data.details || data.error)
+                    }
+                  } catch (e) {
+                    // Skip non-JSON lines
+                  }
+                }
+              }
+            }
+
+            if (!result) throw new Error('No result from SSE stream')
+            return result
+          } else {
+            // Handle regular JSON response
+            if (!response.ok) {
+              throw new Error(`API failed: ${response.statusText}`)
+            }
+            return response.json()
+          }
+        }
+
+        const [reportResponse, prescriptionResponse] = await Promise.all([
           fetch("/api/chronic-report", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1116,15 +1182,7 @@ export default function ChronicProfessionalReport({
               clinicalData,
               questionsData,
               diagnosisData,
-              doctorData: {
-                fullName: doctorInfo.nom.replace(/^Dr\.\s*/i, ''),
-                qualifications: doctorInfo.qualifications,
-                specialty: doctorInfo.specialite,
-                medicalCouncilNumber: doctorInfo.numeroEnregistrement,
-                email: doctorInfo.email,
-                clinicAddress: doctorInfo.adresseCabinet,
-                consultationHours: doctorInfo.heuresConsultation
-              }
+              doctorData: doctorPayload
             })
           }),
           fetch("/api/chronic-prescription", {
@@ -1134,51 +1192,29 @@ export default function ChronicProfessionalReport({
               patientData: normalizedPatientData,
               clinicalData,
               diagnosisData,
-              doctorData: {
-                fullName: doctorInfo.nom.replace(/^Dr\.\s*/i, ''),
-                qualifications: doctorInfo.qualifications,
-                specialty: doctorInfo.specialite,
-                medicalCouncilNumber: doctorInfo.numeroEnregistrement,
-                email: doctorInfo.email,
-                clinicAddress: doctorInfo.adresseCabinet,
-                consultationHours: doctorInfo.heuresConsultation
-              }
-            })
-          }),
-          fetch("/api/chronic-examens", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              patientData: normalizedPatientData,
-              clinicalData,
-              diagnosisData,
-              doctorData: {
-                fullName: doctorInfo.nom.replace(/^Dr\.\s*/i, ''),
-                qualifications: doctorInfo.qualifications,
-                specialty: doctorInfo.specialite,
-                medicalCouncilNumber: doctorInfo.numeroEnregistrement,
-                email: doctorInfo.email,
-                clinicAddress: doctorInfo.adresseCabinet,
-                consultationHours: doctorInfo.heuresConsultation
-              }
+              doctorData: doctorPayload
             })
           })
         ])
-        
-        // Check all critical APIs
+
+        // Check report and prescription APIs
         if (!reportResponse.ok) {
           throw new Error(`Report API failed: ${reportResponse.statusText}`)
         }
         if (!prescriptionResponse.ok) {
           throw new Error(`Prescription API failed: ${prescriptionResponse.statusText}`)
         }
-        if (!examensResponse.ok) {
-          throw new Error(`Examens API failed: ${examensResponse.statusText}`)
-        }
-        
+
         const reportData = await reportResponse.json()
         const prescriptionData = await prescriptionResponse.json()
-        const examensData = await examensResponse.json()
+
+        // Fetch examens with SSE handling (in parallel with above, but handled separately)
+        const examensData = await fetchWithSSE("/api/chronic-examens", {
+          patientData: normalizedPatientData,
+          clinicalData,
+          diagnosisData,
+          doctorData: doctorPayload
+        })
         
         // NO dietary API call here - will be called on-demand via button
         
