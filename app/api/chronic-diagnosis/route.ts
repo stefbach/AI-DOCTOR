@@ -109,7 +109,7 @@ async function callOpenAIStreaming(
         { role: "user", content: patientContext }
       ],
       temperature: 0.3,
-      max_tokens: 4000,
+      max_tokens: 8000, // Increased for comprehensive chronic disease assessment
       response_format: { type: "json_object" },
       stream: true  // Enable streaming
     }),
@@ -651,21 +651,39 @@ CRITICAL: Return ONLY the JSON object, no markdown formatting, no explanations o
           // Send initial progress
           sendSSE('progress', { message: 'Initializing AI assessment...', progress: 5 })
 
-          // Start OpenAI streaming call
+          // Start OpenAI streaming call with timeout
           sendSSE('progress', { message: 'Connecting to AI model...', progress: 10 })
 
-          const { reader } = await callOpenAIStreaming(apiKey, systemPrompt, patientContext)
+          // Add timeout for the entire streaming operation (4 minutes max)
+          const streamTimeout = 240000 // 4 minutes
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('OpenAI streaming timeout - response took too long')), streamTimeout)
+          })
+
+          const { reader } = await Promise.race([
+            callOpenAIStreaming(apiKey, systemPrompt, patientContext),
+            timeoutPromise
+          ]) as { stream: ReadableStream, reader: ReadableStreamDefaultReader<Uint8Array> }
 
           sendSSE('progress', { message: 'Generating specialist assessment...', progress: 15 })
 
-          // Process the stream
+          // Process the stream with activity timeout
           const decoder = new TextDecoder()
           let fullContent = ''
           let chunkCount = 0
+          let lastActivityTime = Date.now()
+          const activityTimeout = 60000 // 60 seconds without chunks = timeout
 
           while (true) {
+            // Check for inactivity timeout
+            if (Date.now() - lastActivityTime > activityTimeout) {
+              throw new Error('OpenAI stream stalled - no data received for 60 seconds')
+            }
+
             const { done, value } = await reader.read()
             if (done) break
+
+            lastActivityTime = Date.now() // Reset activity timer
 
             const chunk = decoder.decode(value, { stream: true })
             const lines = chunk.split('\n')
@@ -699,6 +717,7 @@ CRITICAL: Return ONLY the JSON object, no markdown formatting, no explanations o
           }
 
           sendSSE('progress', { message: 'Validating assessment quality...', progress: 92 })
+          console.log(`📊 OpenAI stream completed: ${chunkCount} chunks, ${fullContent.length} chars`)
 
           // Parse the complete JSON response
           const jsonMatch = fullContent.match(/\{[\s\S]*\}/)

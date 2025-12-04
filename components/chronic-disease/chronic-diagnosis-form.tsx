@@ -89,6 +89,43 @@ export default function ChronicDiagnosisForm({
 
        const decoder = new TextDecoder()
        let buffer = ''
+       let currentEvent = ''
+       let resultReceived = false
+
+       const processLine = (line: string) => {
+         if (line.startsWith('event: ')) {
+           currentEvent = line.slice(7).trim()
+         } else if (line.startsWith('data: ')) {
+           try {
+             const data = JSON.parse(line.slice(6))
+
+             // Handle different event types
+             if (currentEvent === 'progress' || (data.progress !== undefined && data.message)) {
+               // Progress event
+               setProgressMessage(data.message)
+               setProgressPercent(data.progress)
+             } else if (currentEvent === 'complete' || (data.success && data.assessment)) {
+               // Complete event - got full assessment
+               resultReceived = true
+               setAssessment(data.assessment)
+               setLoading(false)
+               toast({
+                 title: "Specialist Assessment Complete",
+                 description: "Comprehensive chronic disease evaluation generated successfully"
+               })
+             } else if (currentEvent === 'error' || data.error) {
+               // Error event
+               throw new Error(data.details || data.error || 'Unknown error')
+             }
+           } catch (parseError: any) {
+             // Only rethrow if it's our custom error, not JSON parse error
+             if (parseError.message && !parseError.message.includes('JSON')) {
+               throw parseError
+             }
+             console.debug('Skipping non-JSON line:', line)
+           }
+         }
+       }
 
        while (true) {
          const { done, value } = await reader.read()
@@ -99,38 +136,21 @@ export default function ChronicDiagnosisForm({
          buffer = lines.pop() || '' // Keep incomplete line in buffer
 
          for (const line of lines) {
-           if (line.startsWith('event: ')) {
-             const eventType = line.slice(7)
-             continue
-           }
-
-           if (line.startsWith('data: ')) {
-             try {
-               const data = JSON.parse(line.slice(6))
-
-               // Handle different event types based on data structure
-               if (data.progress !== undefined && data.message) {
-                 // Progress event
-                 setProgressMessage(data.message)
-                 setProgressPercent(data.progress)
-               } else if (data.success && data.assessment) {
-                 // Complete event - got full assessment
-                 setAssessment(data.assessment)
-                 setLoading(false)
-                 toast({
-                   title: "Specialist Assessment Complete",
-                   description: "Comprehensive chronic disease evaluation generated successfully"
-                 })
-               } else if (data.error) {
-                 // Error event
-                 throw new Error(data.details || data.error)
-               }
-             } catch (parseError) {
-               // Skip invalid JSON
-               console.debug('Skipping non-JSON line:', line)
-             }
-           }
+           processLine(line)
          }
+       }
+
+       // Process any remaining data in buffer
+       if (buffer.trim()) {
+         const remainingLines = buffer.split('\n')
+         for (const line of remainingLines) {
+           processLine(line)
+         }
+       }
+
+       // If stream ended without a result, show error
+       if (!resultReceived) {
+         throw new Error('Stream ended without receiving assessment result')
        }
      } else {
        // Handle regular JSON response (fallback for non-streaming)
