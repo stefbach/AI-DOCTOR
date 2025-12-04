@@ -1137,6 +1137,27 @@ export default function ChronicProfessionalReport({
             const decoder = new TextDecoder()
             let buffer = ''
             let result = null
+            let currentEvent = ''
+
+            const processLine = (line: string) => {
+              if (line.startsWith('event: ')) {
+                currentEvent = line.slice(7).trim()
+              } else if (line.startsWith('data: ')) {
+                try {
+                  const data = JSON.parse(line.slice(6))
+                  if (currentEvent === 'complete' || data.success) {
+                    result = data
+                  } else if (currentEvent === 'error' || data.error) {
+                    throw new Error(data.details || data.error)
+                  }
+                } catch (e: any) {
+                  // Only rethrow if it's our custom error, not JSON parse error
+                  if (e.message && !e.message.includes('JSON')) {
+                    throw e
+                  }
+                }
+              }
+            }
 
             while (true) {
               const { done, value } = await reader.read()
@@ -1147,18 +1168,15 @@ export default function ChronicProfessionalReport({
               buffer = lines.pop() || ''
 
               for (const line of lines) {
-                if (line.startsWith('data: ')) {
-                  try {
-                    const data = JSON.parse(line.slice(6))
-                    if (data.success) {
-                      result = data
-                    } else if (data.error) {
-                      throw new Error(data.details || data.error)
-                    }
-                  } catch (e) {
-                    // Skip non-JSON lines
-                  }
-                }
+                processLine(line)
+              }
+            }
+
+            // Process any remaining data in the buffer
+            if (buffer.trim()) {
+              const remainingLines = buffer.split('\n')
+              for (const line of remainingLines) {
+                processLine(line)
               }
             }
 
