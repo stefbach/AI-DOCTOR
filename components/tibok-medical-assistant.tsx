@@ -111,6 +111,13 @@ const QUICK_ACTIONS = [
     color: 'bg-blue-500'
   },
   {
+    id: 'improve_report',
+    label: 'Improve Report',
+    icon: FileText,
+    prompt: 'Review the medical report sections. Suggest improvements or additions to: diagnostic conclusion, management plan, or follow-up recommendations. Max 1-2 modifications.',
+    color: 'bg-indigo-500'
+  },
+  {
     id: 'check_interactions',
     label: 'Check Interactions',
     icon: AlertTriangle,
@@ -156,7 +163,7 @@ export default function TibokMedicalAssistant({
       role: 'assistant',
       content: `🏥 **TIBOK Medical Assistant**
 
-Hello Doctor! I am your AI expert to **suggest additions** to your consultation.
+Hello Doctor! I am your AI expert to **suggest additions and improvements** to your consultation.
 
 **I have access to your generated documents:**
 📄 Medical Report
@@ -167,11 +174,11 @@ Hello Doctor! I am your AI expert to **suggest additions** to your consultation.
 **I can suggest:**
 ✅ Missing lab tests (HbA1c, Creatinine, etc.)
 ✅ Additional imaging exams (ECG, X-ray, CT, etc.)
+✅ **Improvements to medical report sections** (diagnosis, management plan, recommendations)
 ✅ Medication adjustments (dosage optimization)
-✅ Complementary exams based on diagnosis
 ✅ Safety checks (drug interactions, contraindications)
 
-Use the quick action buttons below or ask me directly: "What exams should I add?" or "Check drug interactions".`,
+Use the quick action buttons below or ask me directly: "What should I add to the diagnostic conclusion?" or "Improve management plan".`,
       timestamp: new Date()
     }
   ])
@@ -345,17 +352,17 @@ Use the quick action buttons below or ask me directly: "What exams should I add?
       switch (action.type) {
         case 'modify_medical_report':
           if (action.section && action.content) {
-            const value = action.content.value || action.content.text || 
+            const value = action.content.value || action.content.text || action.content ||
                          (typeof action.content === 'string' ? action.content : JSON.stringify(action.content))
             onUpdateSection(action.section, value)
             toast({
-              title: "✅ Rapport médical modifié",
-              description: action.reasoning || `Section "${action.section}" mise à jour`
+              title: "✅ Medical report updated",
+              description: action.reasoning || `Section "${action.section}" modified`
             })
           } else {
             toast({
-              title: "⚠️ Action incomplète",
-              description: "La section ou le contenu est manquant",
+              title: "⚠️ Incomplete action",
+              description: "Section or content is missing",
               variant: "destructive"
             })
           }

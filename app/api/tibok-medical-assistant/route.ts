@@ -487,8 +487,26 @@ The EXACT JSON format is:
    - content.region, content.indicationClinique
    
 4. **modify_medical_report** :
+   - action: "update" (modify existing section text)
    - section: "motifConsultation"|"anamnese"|"examenClinique"|"conclusionDiagnostique"|"priseEnCharge"|"recommandations"
-   - content.value: Le nouveau texte pour cette section
+   - content: The new text for this section (in ENGLISH)
+   
+   Section mapping:
+   - "motifConsultation" → Chief Complaint
+   - "anamnese" → History of Present Illness
+   - "examenClinique" → Physical Examination
+   - "conclusionDiagnostique" → Diagnostic Conclusion
+   - "priseEnCharge" → Management Plan
+   - "recommandations" → Follow-up Recommendations
+   
+   Example:
+   {
+     "type": "modify_medical_report",
+     "action": "update",
+     "section": "conclusionDiagnostique",
+     "content": "Type 2 Diabetes Mellitus with inadequate glycemic control (HbA1c 8.5%). Hypertension stage 2 (BP 165/95 mmHg). Acute gastroenteritis.",
+     "reasoning": "Clarify diagnosis with specific values"
+   }
 
 **EXEMPLE COMPLET** :
 {
