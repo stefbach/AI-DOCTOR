@@ -255,6 +255,31 @@ Aucun texte avant ou après le JSON. JAMAIS de markdown autour du JSON.
 - Si tu veux modifier une posologie (ex: Amlodipine 5mg → 10mg) → utilise "add" pour créer une NOUVELLE ligne
 - Le médecin supprimera manuellement l'ancienne ligne si nécessaire
 
+🔴 **RÈGLE CRITIQUE - CHOIX DU TYPE D'ACTION** :
+
+⚠️ **ATTENTION ABSOLUE** : Le "type" de l'action détermine où elle sera ajoutée dans l'interface.
+
+1. **Pour un MÉDICAMENT** (Amlodipine, Metformine, Paracétamol, antibiotique, etc.)
+   → type: "modify_medication_prescription"
+   → Apparaîtra dans l'onglet "Traitement médicamenteux"
+
+2. **Pour un TEST BIOLOGIQUE** (HbA1c, NFS, Créatinine, Ionogramme, TSH, CRP, etc.)
+   → type: "modify_lab_prescription"  ← PAS modify_medication_prescription !
+   → Apparaîtra dans l'onglet "Laboratory"
+
+3. **Pour un EXAMEN D'IMAGERIE** (Scanner, IRM, Radiographie, Échographie, ECG, etc.)
+   → type: "modify_paraclinical_prescription"  ← PAS modify_medication_prescription !
+   → Apparaîtra dans l'onglet "Imaging"
+
+4. **Pour modifier le RAPPORT MÉDICAL** (diagnostic, anamnèse, recommandations, etc.)
+   → type: "modify_medical_report"
+   → Modifie les sections textuelles du rapport
+
+⛔ **ERREUR FRÉQUENTE À ÉVITER** :
+- ❌ JAMAIS "modify_medication_prescription" pour un test biologique (HbA1c, NFS, etc.)
+- ❌ JAMAIS "modify_medication_prescription" pour une imagerie (Scanner, ECG, Radio, etc.)
+- ✅ TOUJOURS vérifier : est-ce un MÉDICAMENT ou un EXAMEN ?
+
 Le format JSON EXACT est :
 
 {
@@ -262,17 +287,48 @@ Le format JSON EXACT est :
   "actions": [
     {
       "type": "modify_medication_prescription",
+      "_comment": "Pour un MÉDICAMENT UNIQUEMENT",
       "action": "add",
       "content": {
-        "nom": "Nom du médicament",
-        "denominationCommune": "DCI",
-        "dosage": "Dosage",
-        "posologie": "Posologie complète",
-        "voieAdministration": "oral|injectable|topique",
-        "dureeTraitement": "Durée",
-        "justification": "Indication médicale"
+        "nom": "Amlodipine",
+        "denominationCommune": "Amlodipine",
+        "dosage": "10mg",
+        "posologie": "1 comprimé le matin",
+        "voieAdministration": "oral",
+        "dureeTraitement": "Continue",
+        "justification": "Optimisation du contrôle tensionnel"
       },
-      "reasoning": "Justification médicale pour cette action"
+      "reasoning": "Augmentation posologie pour meilleur contrôle TA"
+    },
+    {
+      "type": "modify_lab_prescription",
+      "_comment": "Pour un TEST BIOLOGIQUE (HbA1c, NFS, etc.) - PAS modify_medication_prescription !",
+      "action": "add",
+      "content": {
+        "category": "endocrinology",
+        "test": {
+          "nom": "HbA1c (Hémoglobine glyquée)",
+          "code": "HBA1C",
+          "motifClinique": "Surveillance diabète de type 2 - contrôle glycémique trimestriel",
+          "urgence": false,
+          "aJeun": false
+        }
+      },
+      "reasoning": "Surveillance diabétique trimestrielle recommandée par ADA"
+    },
+    {
+      "type": "modify_paraclinical_prescription",
+      "_comment": "Pour un EXAMEN D'IMAGERIE (Scanner, ECG, etc.) - PAS modify_medication_prescription !",
+      "action": "add",
+      "content": {
+        "type": "Scanner",
+        "modalite": "Scanner abdominal avec injection",
+        "region": "Abdomen",
+        "indicationClinique": "Douleurs abdominales persistantes - recherche étiologie",
+        "urgence": false,
+        "contraste": true
+      },
+      "reasoning": "Nécessaire pour évaluation complète des douleurs abdominales"
     }
   ],
   "alerts": [
