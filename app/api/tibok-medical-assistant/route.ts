@@ -9,13 +9,13 @@ import { z } from "zod"
 
 // ==================== ZOD SCHEMA FOR STRUCTURED OUTPUT ====================
 const tibokResponseSchema = z.object({
-  response: z.string().max(150).describe("Concise analysis text (max 150 chars)"),
+  response: z.string().max(300).describe("Concise analysis text in English (max 300 chars)"),
   actions: z.array(z.object({
     type: z.enum(['modify_medical_report', 'modify_medication_prescription', 'modify_lab_prescription', 'modify_paraclinical_prescription', 'analyze_document_coherence']),
     action: z.enum(['add', 'update', 'remove']).optional(),
     section: z.string().optional(),
     content: z.any(),
-    reasoning: z.string().max(50).describe("Brief justification (max 50 chars)")
+    reasoning: z.string().max(80).describe("Brief justification in English (max 80 chars)")
   })).max(2).describe("Maximum 2 actions"),
   alerts: z.array(z.object({
     type: z.enum(['critical', 'warning', 'info']),
@@ -59,8 +59,8 @@ const TIBOK_MEDICAL_ASSISTANT_SYSTEM_PROMPT = `
 🚨 **RULE #0 - ABSOLUTE - TOKEN LIMIT** 🚨
 CRITICAL: You have a VERY LIMITED token budget.
 - MAXIMUM 2 ACTIONS per response (NEVER more)
-- Response field: MAXIMUM 150 characters
-- Reasoning field: MAXIMUM 50 characters per action
+- Response field: MAXIMUM 300 characters (be concise)
+- Reasoning field: MAXIMUM 80 characters per action
 - If you want to suggest more → user can ask again
 - PRIORITY: Complete valid JSON > number of actions
 
@@ -402,13 +402,13 @@ The EXACT JSON format is:
 
 **RÈGLES STRICTES POUR JSON VALIDE** :
 
-🔴 **CRITIQUE - Limites strictes** :
-1. **MAXIMUM 2 ACTIONS** par réponse (pour éviter JSON tronqué)
-2. Champ "response" : Maximum 150 caractères (TRÈS CONCIS)
-3. Utilise \\n pour retours à ligne (échappé)
-4. AUCUN guillemet " à l'intérieur (utilise apostrophe ' si nécessaire)
-5. Pas de caractères spéciaux, accents autorisés
-6. Exemple: "Analyse effectuee.\\n1. Ajouter HbA1c\\n2. Ajouter ECG"
+🔴 **CRITICAL - Strict Limits** :
+1. **MAXIMUM 2 ACTIONS** per response (to avoid truncated JSON)
+2. "response" field: Maximum 300 characters (CONCISE but complete)
+3. Use \\n for line breaks (escaped)
+4. NO quotes " inside (use apostrophe ' if needed)
+5. Write in ENGLISH
+6. Example: "Analysis complete.\\nDiagnosis: Acute gastroenteritis.\\nAdd HbA1c for diabetes monitoring."
 
 🔴 **CRITIQUE - Structure JSON** :
 1. Pas de \`\`\`json ou \`\`\` autour du JSON
