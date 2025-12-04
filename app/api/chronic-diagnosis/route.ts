@@ -1,16 +1,16 @@
 // app/api/chronic-diagnosis/route.ts - Specialist-Level Chronic Disease Diagnosis API
 // Behaves as TRUE Endocrinologist/Dietitian with DETAILED meal plans and therapeutic objectives
-// VERSION 3.0: Professional-grade quality matching openai-diagnosis
-// - 4 retry attempts with progressive enhancement
-// - Auto-correction on final attempt
-// - 8000 max tokens for comprehensive responses
+// VERSION 3.1: Streaming SSE to avoid Vercel Hobby 10s timeout
+// - Uses OpenAI streaming API with Server-Sent Events
+// - Progressive response delivery
+// - Works within Vercel Hobby timeout limits
 // - Consultation type detection (new vs renewal/follow-up)
 // - Enhanced context awareness
 import { type NextRequest, NextResponse } from "next/server"
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
-export const maxDuration = 60 // 60 seconds for GPT-4 calls with retries
+export const maxDuration = 60 // Extended timeout for Pro plans (Hobby uses streaming to avoid 10s limit)
 
 // ==================== HELPER FUNCTIONS ====================
 
@@ -86,248 +86,106 @@ function validateMealPlan(mealPlan: any): { isValid: boolean; issues: string[] }
 }
 
 /**
- * Calls OpenAI with retry mechanism and quality validation
+ * Calls OpenAI with streaming to avoid Vercel Hobby 10s timeout
+ * Returns a ReadableStream that can be used for SSE
  */
-async function callOpenAIWithRetry(
+async function callOpenAIStreaming(
   apiKey: string,
   systemPrompt: string,
-  patientContext: string,
-  maxRetries: number = 1  // Reduced from 3 to 1 for Vercel Hobby 10s timeout
-): Promise<any> {
-  let lastError: Error | null = null
-  
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      console.log(`📡 OpenAI call attempt ${attempt + 1}/${maxRetries + 1}`)
-      
-      // Enhance prompt with quality requirements on retry
-      let enhancedSystemPrompt = systemPrompt
-      
-      if (attempt === 1) {
-        enhancedSystemPrompt = `🚨 ATTEMPT 2/4 - PREVIOUS RESPONSE HAD QUALITY ISSUES - ENHANCED REQUIREMENTS:
+  patientContext: string
+): Promise<{ stream: ReadableStream, reader: ReadableStreamDefaultReader<Uint8Array> }> {
+  console.log(`📡 OpenAI streaming call initiated`)
 
-${systemPrompt}
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: patientContext }
+      ],
+      temperature: 0.3,
+      max_tokens: 8000, // Increased for comprehensive chronic disease assessment
+      response_format: { type: "json_object" },
+      stream: true  // Enable streaming
+    }),
+  })
 
-⚠️ CRITICAL MEDICATION REQUIREMENTS (DCI VALIDATION):
-- EVERY medication must have SPECIFIC pharmaceutical name with DCI (e.g., "Metformine 500mg" NOT "Medication" or "Drug")
-- EVERY medication must have PRECISE dosage with UK format (OD/BD/TDS/QDS)
-- EVERY medication must have DETAILED indication (minimum 25 characters explaining medical reason)
-- NO generic terms like "medication", "drug", "antibiotic" without specific names
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`OpenAI API error (${response.status}): ${errorText.substring(0, 200)}`)
+  }
 
-EXAMPLES OF CORRECT MEDICATION FORMAT:
-✅ "medication": "Metformine 500mg", "dosage": "500mg", "frequency": "BD (twice daily)", "indication": "Traitement de première ligne du diabète type 2 pour améliorer le contrôle glycémique"
-✅ "medication": "Périndopril 4mg", "dosage": "4mg", "frequency": "OD (once daily)", "indication": "Contrôle tensionnel pour atteindre PA cible < 130/80 mmHg"
+  if (!response.body) {
+    throw new Error('No response body from OpenAI')
+  }
 
-❌ FORBIDDEN:
-❌ "medication": "Medication", "indication": "Treatment"
-❌ Vague or incomplete medication information`
-      } else if (attempt === 2) {
-        enhancedSystemPrompt = `🚨🚨 ATTEMPT 3/4 - STRICT QUALITY REQUIREMENTS - MAURITIUS MEDICAL STANDARDS:
-
-${systemPrompt}
-
-⚠️ ABSOLUTE REQUIREMENTS:
-1. NEVER use "Medication", "undefined", null, or generic names
-2. ALWAYS use precise pharmaceutical names with DCI
-3. ALWAYS use UK dosing format (OD/BD/TDS/QDS) with daily totals
-4. DCI MUST BE EXACT: Metformine, Périndopril, Amlodipine, Atorvastatine
-5. INDICATIONS MUST BE DETAILED: Minimum 40 characters with specific medical context
-6. MEAL PLANS MUST BE COMPLETE: All meals with portions, examples, timing
-7. ALL fields must be completed with specific medical content
-8. THERAPEUTIC OBJECTIVES must be measurable with exact targets
-
-🎯 MANDATORY MEAL PLAN STRUCTURE:
-- BREAKFAST: Composition + Portions + Examples (min 2) + Timing
-- LUNCH: Composition + Portions + Examples (min 2) + Timing
-- DINNER: Composition + Portions + Examples (min 2) + Timing
-- SNACKS: Morning + Afternoon options with portions
-
-💊 MANDATORY MEDICATION FORMAT:
-{
-  "medication": "Metformine 500mg",
-  "dci": "Metformine",
-  "dosage": "500mg",
-  "frequency": "BD (twice daily)",
-  "indication": "Traitement de première intention du diabète de type 2 pour améliorer le contrôle glycémique et réduire la résistance à l'insuline",
-  "monitoring": "Surveillance de la créatinine et fonction rénale tous les 6 mois"
-}`
-      } else if (attempt >= 3) {
-        enhancedSystemPrompt = `🆘 ATTEMPT 4/4 - MAXIMUM QUALITY MODE - FINAL ATTEMPT:
-
-${systemPrompt}
-
-🎯 EMERGENCY REQUIREMENTS FOR MAURITIUS CHRONIC DISEASE MANAGEMENT:
-
-Every medication MUST have ALL these fields completed with DETAILED content:
-
-1. "medication": "SPECIFIC UK NAME + DOSE" (e.g., "Metformine 500mg")
-2. "dci": "EXACT DCI NAME" (e.g., "Metformine") 
-3. "indication": "DETAILED MEDICAL INDICATION" (minimum 50 characters with full medical context)
-4. "dosage": "EXACT DOSE" (e.g., "500mg")
-5. "frequency": "UK FORMAT with explanation" (e.g., "BD (twice daily)")
-6. "monitoring": "SPECIFIC monitoring requirements"
-7. ALL other fields must be completed with medical content
-
-EXAMPLE COMPLETE MEDICATION:
-{
-  "medication": "Metformine 500mg",
-  "dci": "Metformine",
-  "dosage": "500mg",
-  "frequency": "BD (twice daily)",
-  "indication": "Traitement de première intention du diabète de type 2 pour améliorer le contrôle glycémique, réduire la résistance à l'insuline, et diminuer la production hépatique de glucose. Contribue également à la perte de poids modeste.",
-  "monitoring": "Surveillance de la créatinine et calcul du DFG tous les 6 mois. Surveillance de la vitamine B12 annuellement. Vérifier la tolérance gastro-intestinale.",
-  "contraindications": "Insuffisance rénale sévère (DFG < 30 ml/min), acidose métabolique, insuffisance hépatique sévère",
-  "sideEffects": "Troubles gastro-intestinaux (diarrhée, nausées), déficit en vitamine B12 à long terme, acidose lactique rare"
+  return {
+    stream: response.body,
+    reader: response.body.getReader()
+  }
 }
 
-MEAL PLAN MUST BE EXTREMELY DETAILED:
-- Each meal: Timing + Composition + Specific portions (g/ml) + At least 2 concrete examples
-- Nutritional rationale for each meal
-- Glycemic considerations for diabetes
-- Sodium considerations for hypertension
-- Caloric targets for obesity
+/**
+ * Process streamed response and extract complete JSON
+ */
+async function processStreamedResponse(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  onProgress: (progress: string) => void
+): Promise<string> {
+  const decoder = new TextDecoder()
+  let fullContent = ''
+  let chunkCount = 0
 
-THERAPEUTIC OBJECTIVES MUST BE MEASURABLE:
-- Short-term: Exact targets with numbers (e.g., "HbA1c from 8.2% to < 7.5%")
-- Medium-term: Specific goals with timeline (e.g., "Weight loss of 8kg in 3-6 months")
-- Long-term: Maintenance targets (e.g., "HbA1c < 7.0% consistently")
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
 
-⚠️ THIS IS THE FINAL ATTEMPT - RESPONSE MUST BE PERFECT!`
-      }
-      
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o",
-          messages: [
-            { role: "system", content: enhancedSystemPrompt },
-            { role: "user", content: patientContext }
-          ],
-          temperature: attempt === 0 ? 0.3 : 0.1,  // Reduced temperature for faster, more focused responses
-          max_tokens: 4000,  // Reduced from 8000 to 4000 for faster generation (fits Vercel Hobby 10s timeout)
-          response_format: { type: "json_object" },
-          top_p: 0.9,
-          frequency_penalty: 0.1,
-          presence_penalty: 0.2
-        }),
-      })
-      
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`OpenAI API error (${response.status}): ${errorText.substring(0, 200)}`)
-      }
-      
-      const data = await response.json()
-      const content = data.choices[0]?.message?.content
-      
-      if (!content) {
-        throw new Error('No content received from OpenAI')
-      }
-      
-      // Parse JSON response
-      const jsonMatch = content.match(/\{[\s\S]*\}/)
-      if (!jsonMatch) {
-        throw new Error('No valid JSON found in response')
-      }
-      
-      const assessmentData = JSON.parse(jsonMatch[0])
-      
-      // Validate essential structure
-      if (!assessmentData.diseaseAssessment || !assessmentData.detailedMealPlan) {
-        throw new Error('Missing essential fields: diseaseAssessment or detailedMealPlan')
-      }
-      
-      // Validate medication quality (DCI compliance)
-      const medicationValidation = validateMedicationDCI(
-        assessmentData.medicationManagement?.add || []
-      )
-      
-      // Validate meal plan completeness
-      const mealPlanValidation = validateMealPlan(assessmentData.detailedMealPlan)
-      
-      // If quality issues found and we have retries left, throw error to retry
-      if ((!medicationValidation.isValid || !mealPlanValidation.isValid) && attempt < maxRetries) {
-        const allIssues = [...medicationValidation.issues, ...mealPlanValidation.issues]
-        console.log(`⚠️ Quality issues detected (${allIssues.length}), retrying...`)
-        console.log('Issues:', allIssues.slice(0, 3))
-        throw new Error(`Quality validation failed: ${allIssues.slice(0, 2).join('; ')}`)
-      }
-      
-      // AUTO-CORRECTION on final attempt if quality issues remain (like openai-diagnosis)
-      if ((!medicationValidation.isValid || !mealPlanValidation.isValid) && attempt === maxRetries) {
-        console.log(`🔧 AUTO-CORRECTION MODE: Applying fixes to ${medicationValidation.issues.length + mealPlanValidation.issues.length} quality issues...`)
-        
-        // Auto-correct medication issues
-        if (assessmentData.medicationManagement?.add) {
-          assessmentData.medicationManagement.add = assessmentData.medicationManagement.add.map((med: any) => {
-            if (!med.dci || med.dci === 'undefined') {
-              // Extract DCI from medication name
-              const medName = med.medication || ''
-              const dciMatch = medName.match(/^([A-Za-zéèêàâôûùç]+)/)
-              if (dciMatch) med.dci = dciMatch[1]
+    const chunk = decoder.decode(value, { stream: true })
+    const lines = chunk.split('\n')
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const data = line.slice(6)
+        if (data === '[DONE]') continue
+
+        try {
+          const parsed = JSON.parse(data)
+          const content = parsed.choices?.[0]?.delta?.content
+          if (content) {
+            fullContent += content
+            chunkCount++
+
+            // Send progress update every 10 chunks
+            if (chunkCount % 10 === 0) {
+              onProgress(`Generating assessment... ${Math.min(95, Math.floor(chunkCount / 2))}%`)
             }
-            if (!med.indication || med.indication.length < 25) {
-              med.indication = `Traitement médicamenteux pour la gestion de la maladie chronique selon les standards cliniques`
-            }
-            if (!med.frequency || !med.frequency.match(/OD|BD|TDS|QDS/i)) {
-              med.frequency = 'OD (once daily)'
-            }
-            return med
-          })
+          }
+        } catch {
+          // Skip invalid JSON chunks
         }
-        
-        console.log(`✅ Auto-correction applied - proceeding with enhanced response`)
-      }
-      
-      // Log quality metrics
-      if (!medicationValidation.isValid || !mealPlanValidation.isValid) {
-        console.log(`⚠️ Final attempt - ${medicationValidation.issues.length + mealPlanValidation.issues.length} quality issues remain (auto-corrected)`)
-        console.log('Medication issues:', medicationValidation.issues.length)
-        console.log('Meal plan issues:', mealPlanValidation.issues.length)
-      } else {
-        console.log('✅ Quality validation passed')
-      }
-      
-      return {
-        assessment: assessmentData,
-        qualityMetrics: {
-          medicationDCICompliant: medicationValidation.isValid,
-          mealPlanComplete: mealPlanValidation.isValid,
-          attempt: attempt + 1,
-          issues: [...medicationValidation.issues, ...mealPlanValidation.issues]
-        }
-      }
-      
-    } catch (error) {
-      lastError = error as Error
-      console.error(`❌ Attempt ${attempt + 1} failed:`, error)
-      
-      if (attempt < maxRetries) {
-        const waitTime = Math.pow(2, attempt) * 1000 // Exponential backoff
-        console.log(`⏳ Retrying in ${waitTime}ms with enhanced quality requirements...`)
-        await new Promise(resolve => setTimeout(resolve, waitTime))
       }
     }
   }
-  
-  throw new Error(`Failed after ${maxRetries + 1} attempts: ${lastError?.message}`)
+
+  return fullContent
 }
 
 export async function POST(req: NextRequest) {
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: "OpenAI API key not configured" },
+      { status: 500 }
+    )
+  }
+
   try {
     const { patientData, clinicalData, questionsData } = await req.json()
-
-    const apiKey = process.env.OPENAI_API_KEY
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: "OpenAI API key not configured" },
-        { status: 500 }
-      )
-    }
 
     // Detect chronic diseases from patient data
     const chronicDiseases = patientData.medicalHistory || []
@@ -779,117 +637,240 @@ ANALYSIS INSTRUCTIONS:
 
 CRITICAL: Return ONLY the JSON object, no markdown formatting, no explanations outside JSON.`
 
-    // Call OpenAI with retry mechanism and DCI validation
-    const result = await callOpenAIWithRetry(apiKey, systemPrompt, patientContext, 2)
-    const assessmentData = result.assessment
-    
-    // ========== EXTRACT currentMedicationsValidated FROM medicationManagement.continue ==========
-    const currentMedicationsValidated: any[] = []
-    
-    if (assessmentData?.medicationManagement?.continue && Array.isArray(assessmentData.medicationManagement.continue)) {
-      assessmentData.medicationManagement.continue.forEach((med: any, idx: number) => {
-        currentMedicationsValidated.push({
-          id: idx + 1,
-          name: med.medication || 'Current medication',
-          medication_name: med.medication || 'Current medication',
-          dci: med.medication || 'Current medication',
-          dosage: med.dosage || '',
-          frequency: med.frequency || 'As prescribed',
-          posology: med.frequency || 'As prescribed',
-          indication: 'Chronic disease management',
-          assessment: 'Continue',
-          reasoning: med.rationale || 'Continuing current treatment',
-          validated_corrections: 'AI validated for chronic disease management',
-          original_input: med.medication || ''
-        })
-      })
-    }
-    
-    console.log(`📋 CHRONIC: Extracted ${currentMedicationsValidated.length} continuing medications as currentMedicationsValidated`)
-    
-    // ========== EXTRACT NEW/ADJUSTED MEDICATIONS (MATCH NORMAL WORKFLOW) ==========
-    const addMedications = assessmentData?.medicationManagement?.add || []
-    const adjustMedications = assessmentData?.medicationManagement?.adjust || []
-    const medications = [...addMedications, ...adjustMedications]
-    
-    console.log(`💊 CHRONIC: Extracting new/adjusted medications`)
-    console.log(`   - Add medications: ${addMedications.length}`)
-    console.log(`   - Adjust medications: ${adjustMedications.length}`)
-    console.log(`   - Total new medications: ${medications.length}`)
-    
-    // ========== COMBINED PRESCRIPTION (MATCH NORMAL WORKFLOW) ==========
-    const combinedPrescription = [...currentMedicationsValidated, ...medications]
-    console.log(`📋 CHRONIC: Combined prescription - ${combinedPrescription.length} total medications`)
-    
-    // ========== EXTRACT INVESTIGATIONS (MATCH NORMAL WORKFLOW) ==========
-    const investigations = []
-    if (assessmentData?.investigationsPlan?.laboratory) {
-      assessmentData.investigationsPlan.laboratory.forEach((test: string) => {
-        investigations.push({
-          examination: test,
-          category: 'Laboratory',
-          urgency: 'routine',
-          indication: 'Chronic disease monitoring',
-          rationale: 'Disease progression monitoring'
-        })
-      })
-    }
-    if (assessmentData?.investigationsPlan?.imaging) {
-      assessmentData.investigationsPlan.imaging.forEach((test: string) => {
-        investigations.push({
-          examination: test,
-          category: 'Imaging',
-          urgency: 'routine',
-          indication: 'Chronic disease assessment',
-          rationale: 'Structural assessment'
-        })
-      })
-    }
-    
-    console.log(`🔬 CHRONIC: Extracted ${investigations.length} investigations`)
-    
-    return NextResponse.json({
-      success: true,
-      
-      // ========== TOP-LEVEL MEDICATIONS (MATCH NORMAL WORKFLOW) ==========
-      currentMedicationsValidated: currentMedicationsValidated,
-      medications: medications,
-      combinedPrescription: combinedPrescription,
-      
-      // ========== TOP-LEVEL ANALYSIS WITH INVESTIGATIONS (MATCH NORMAL WORKFLOW) ==========
-      expertAnalysis: {
-        expert_therapeutics: {
-          primary_treatments: medications
-        },
-        expert_investigations: {
-          immediate_priority: investigations
+    // ========== STREAMING SSE IMPLEMENTATION ==========
+    // Create a TransformStream to handle SSE
+    const encoder = new TextEncoder()
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        const sendSSE = (event: string, data: any) => {
+          controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`))
         }
-      },
-      
-      // ========== ORIGINAL CHRONIC STRUCTURE (FOR BACKWARD COMPATIBILITY) ==========
-      assessment: assessmentData,
-      
-      chronicDiseases: {
-        diabetes: hasDiabetes,
-        hypertension: hasHypertension,
-        obesity: hasObesity || bmi >= 25
-      },
-      patientBMI: bmi.toFixed(1),
-      qualityMetrics: result.qualityMetrics,
-      version: '3.0-Professional-Grade-4Retry-AutoCorrect-Normalized',
-      timestamp: new Date().toISOString(),
-      metadata: {
-        structureNormalized: true,
-        matchesNormalWorkflow: true
+
+        try {
+          // Send initial progress
+          sendSSE('progress', { message: 'Initializing AI assessment...', progress: 5 })
+
+          // Start OpenAI streaming call with timeout
+          sendSSE('progress', { message: 'Connecting to AI model...', progress: 10 })
+
+          // Add timeout for the entire streaming operation (4 minutes max)
+          const streamTimeout = 240000 // 4 minutes
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('OpenAI streaming timeout - response took too long')), streamTimeout)
+          })
+
+          const { reader } = await Promise.race([
+            callOpenAIStreaming(apiKey, systemPrompt, patientContext),
+            timeoutPromise
+          ]) as { stream: ReadableStream, reader: ReadableStreamDefaultReader<Uint8Array> }
+
+          sendSSE('progress', { message: 'Generating specialist assessment...', progress: 15 })
+
+          // Process the stream with activity timeout
+          const decoder = new TextDecoder()
+          let fullContent = ''
+          let chunkCount = 0
+          let lastActivityTime = Date.now()
+          const activityTimeout = 60000 // 60 seconds without chunks = timeout
+
+          while (true) {
+            // Check for inactivity timeout
+            if (Date.now() - lastActivityTime > activityTimeout) {
+              throw new Error('OpenAI stream stalled - no data received for 60 seconds')
+            }
+
+            const { done, value } = await reader.read()
+            if (done) break
+
+            lastActivityTime = Date.now() // Reset activity timer
+
+            const chunk = decoder.decode(value, { stream: true })
+            const lines = chunk.split('\n')
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6)
+                if (data === '[DONE]') continue
+
+                try {
+                  const parsed = JSON.parse(data)
+                  const content = parsed.choices?.[0]?.delta?.content
+                  if (content) {
+                    fullContent += content
+                    chunkCount++
+
+                    // Send progress update every 15 chunks
+                    if (chunkCount % 15 === 0) {
+                      const progress = Math.min(90, 15 + Math.floor(chunkCount / 3))
+                      sendSSE('progress', {
+                        message: `Analyzing chronic conditions... ${progress}%`,
+                        progress
+                      })
+                    }
+                  }
+                } catch {
+                  // Skip invalid JSON chunks
+                }
+              }
+            }
+          }
+
+          sendSSE('progress', { message: 'Validating assessment quality...', progress: 92 })
+          console.log(`📊 OpenAI stream completed: ${chunkCount} chunks, ${fullContent.length} chars`)
+
+          // Parse the complete JSON response
+          const jsonMatch = fullContent.match(/\{[\s\S]*\}/)
+          if (!jsonMatch) {
+            throw new Error('No valid JSON found in AI response')
+          }
+
+          const assessmentData = JSON.parse(jsonMatch[0])
+
+          // Validate essential structure
+          if (!assessmentData.diseaseAssessment || !assessmentData.detailedMealPlan) {
+            throw new Error('Missing essential fields in assessment')
+          }
+
+          sendSSE('progress', { message: 'Processing medications...', progress: 95 })
+
+          // Validate and auto-correct medications
+          const medicationValidation = validateMedicationDCI(assessmentData.medicationManagement?.add || [])
+          const mealPlanValidation = validateMealPlan(assessmentData.detailedMealPlan)
+
+          // Auto-correct medication issues if needed
+          if (!medicationValidation.isValid && assessmentData.medicationManagement?.add) {
+            assessmentData.medicationManagement.add = assessmentData.medicationManagement.add.map((med: any) => {
+              if (!med.dci || med.dci === 'undefined') {
+                const medName = med.medication || ''
+                const dciMatch = medName.match(/^([A-Za-zéèêàâôûùç]+)/)
+                if (dciMatch) med.dci = dciMatch[1]
+              }
+              if (!med.indication || med.indication.length < 25) {
+                med.indication = `Traitement médicamenteux pour la gestion de la maladie chronique selon les standards cliniques`
+              }
+              if (!med.frequency || !med.frequency.match(/OD|BD|TDS|QDS/i)) {
+                med.frequency = 'OD (once daily)'
+              }
+              return med
+            })
+          }
+
+          // ========== EXTRACT currentMedicationsValidated ==========
+          const currentMedicationsValidated: any[] = []
+          if (assessmentData?.medicationManagement?.continue && Array.isArray(assessmentData.medicationManagement.continue)) {
+            assessmentData.medicationManagement.continue.forEach((med: any, idx: number) => {
+              currentMedicationsValidated.push({
+                id: idx + 1,
+                name: med.medication || 'Current medication',
+                medication_name: med.medication || 'Current medication',
+                dci: med.medication || 'Current medication',
+                dosage: med.dosage || '',
+                frequency: med.frequency || 'As prescribed',
+                posology: med.frequency || 'As prescribed',
+                indication: 'Chronic disease management',
+                assessment: 'Continue',
+                reasoning: med.rationale || 'Continuing current treatment',
+                validated_corrections: 'AI validated for chronic disease management',
+                original_input: med.medication || ''
+              })
+            })
+          }
+
+          // ========== EXTRACT NEW/ADJUSTED MEDICATIONS ==========
+          const addMedications = assessmentData?.medicationManagement?.add || []
+          const adjustMedications = assessmentData?.medicationManagement?.adjust || []
+          const medications = [...addMedications, ...adjustMedications]
+          const combinedPrescription = [...currentMedicationsValidated, ...medications]
+
+          // ========== EXTRACT INVESTIGATIONS ==========
+          const investigations: any[] = []
+          if (assessmentData?.investigationsPlan?.laboratory) {
+            assessmentData.investigationsPlan.laboratory.forEach((test: string) => {
+              investigations.push({
+                examination: test,
+                category: 'Laboratory',
+                urgency: 'routine',
+                indication: 'Chronic disease monitoring',
+                rationale: 'Disease progression monitoring'
+              })
+            })
+          }
+          if (assessmentData?.investigationsPlan?.imaging) {
+            assessmentData.investigationsPlan.imaging.forEach((test: string) => {
+              investigations.push({
+                examination: test,
+                category: 'Imaging',
+                urgency: 'routine',
+                indication: 'Chronic disease assessment',
+                rationale: 'Structural assessment'
+              })
+            })
+          }
+
+          sendSSE('progress', { message: 'Finalizing report...', progress: 98 })
+
+          // Send the complete result
+          const result = {
+            success: true,
+            currentMedicationsValidated,
+            medications,
+            combinedPrescription,
+            expertAnalysis: {
+              expert_therapeutics: { primary_treatments: medications },
+              expert_investigations: { immediate_priority: investigations }
+            },
+            assessment: assessmentData,
+            chronicDiseases: {
+              diabetes: hasDiabetes,
+              hypertension: hasHypertension,
+              obesity: hasObesity || bmi >= 25
+            },
+            patientBMI: bmi.toFixed(1),
+            qualityMetrics: {
+              medicationDCICompliant: medicationValidation.isValid,
+              mealPlanComplete: mealPlanValidation.isValid,
+              attempt: 1,
+              issues: [...medicationValidation.issues, ...mealPlanValidation.issues]
+            },
+            version: '3.1-Streaming-SSE',
+            timestamp: new Date().toISOString(),
+            metadata: {
+              structureNormalized: true,
+              matchesNormalWorkflow: true,
+              streaming: true
+            }
+          }
+
+          sendSSE('complete', result)
+          sendSSE('progress', { message: 'Assessment complete!', progress: 100 })
+
+        } catch (error: any) {
+          console.error('Streaming error:', error)
+          sendSSE('error', {
+            error: 'Failed to generate assessment',
+            details: error.message
+          })
+        } finally {
+          controller.close()
+        }
       }
+    })
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
     })
 
   } catch (error: any) {
     console.error("Chronic Diagnosis API Error:", error)
     return NextResponse.json(
-      { 
+      {
         error: "Failed to generate specialist-level chronic disease assessment",
-        details: error.message 
+        details: error.message
       },
       { status: 500 }
     )

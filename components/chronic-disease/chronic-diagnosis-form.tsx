@@ -1,15 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { 
- Brain, 
- Loader2, 
- Activity, 
- Heart, 
- TrendingUp, 
+import { Progress } from "@/components/ui/progress"
+import {
+ Brain,
+ Loader2,
+ Activity,
+ Heart,
+ TrendingUp,
  Utensils,
  Target,
  Calendar,
@@ -32,58 +33,153 @@ interface ChronicDiagnosisFormProps {
  onBack: () => void
 }
 
-export default function ChronicDiagnosisForm({ 
- patientData, 
- clinicalData, 
- questionsData, 
- onNext, 
- onBack 
+export default function ChronicDiagnosisForm({
+ patientData,
+ clinicalData,
+ questionsData,
+ onNext,
+ onBack
 }: ChronicDiagnosisFormProps) {
  const [assessment, setAssessment] = useState<any>(null)
  const [loading, setLoading] = useState(true)
  const [error, setError] = useState("")
+ const [progressMessage, setProgressMessage] = useState("Initializing AI assessment...")
+ const [progressPercent, setProgressPercent] = useState(0)
+ const abortControllerRef = useRef<AbortController | null>(null)
 
  useEffect(() => {
- generateAssessment()
+   generateAssessment()
+
+   // Cleanup on unmount
+   return () => {
+     if (abortControllerRef.current) {
+       abortControllerRef.current.abort()
+     }
+   }
  }, [])
 
  const generateAssessment = async () => {
- setLoading(true)
- setError("")
- 
- try {
- const response = await fetch("/api/chronic-diagnosis", {
- method: "POST",
- headers: { "Content-Type": "application/json" },
- body: JSON.stringify({ patientData, clinicalData, questionsData })
- })
+   setLoading(true)
+   setError("")
+   setProgressMessage("Initializing AI assessment...")
+   setProgressPercent(0)
 
- if (!response.ok) {
- throw new Error(`Failed to generate assessment: ${response.statusText}`)
- }
+   // Create abort controller for cleanup
+   abortControllerRef.current = new AbortController()
 
- const data = await response.json()
- 
- if (data.success && data.assessment) {
- setAssessment(data.assessment)
- toast({
- title: "✅ Specialist Assessment Complete",
- description: "Comprehensive chronic disease evaluation generated successfully"
- })
- } else {
- throw new Error(data.error || "Failed to generate assessment")
- }
- } catch (err: any) {
- console.error("Error generating assessment:", err)
- setError(err.message)
- toast({
- title: "Error",
- description: "Failed to generate specialist assessment. Please try again.",
- variant: "destructive"
- })
- } finally {
- setLoading(false)
- }
+   try {
+     const response = await fetch("/api/chronic-diagnosis", {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify({ patientData, clinicalData, questionsData }),
+       signal: abortControllerRef.current.signal
+     })
+
+     if (!response.ok) {
+       throw new Error(`Failed to generate assessment: ${response.statusText}`)
+     }
+
+     // Check if response is SSE stream
+     const contentType = response.headers.get('content-type')
+
+     if (contentType?.includes('text/event-stream')) {
+       // Handle SSE streaming response
+       const reader = response.body?.getReader()
+       if (!reader) throw new Error('No response body')
+
+       const decoder = new TextDecoder()
+       let buffer = ''
+       let currentEvent = ''
+       let resultReceived = false
+
+       const processLine = (line: string) => {
+         if (line.startsWith('event: ')) {
+           currentEvent = line.slice(7).trim()
+         } else if (line.startsWith('data: ')) {
+           let data: any
+           try {
+             data = JSON.parse(line.slice(6))
+           } catch {
+             // Skip lines that aren't valid JSON
+             console.debug('Skipping non-JSON line:', line)
+             return
+           }
+
+           // Handle different event types (JSON parsing succeeded)
+           if (currentEvent === 'progress' || (data.progress !== undefined && data.message)) {
+             // Progress event
+             setProgressMessage(data.message)
+             setProgressPercent(data.progress)
+           } else if (currentEvent === 'complete' || (data.success && data.assessment)) {
+             // Complete event - got full assessment
+             resultReceived = true
+             setAssessment(data.assessment)
+             setLoading(false)
+             toast({
+               title: "Specialist Assessment Complete",
+               description: "Comprehensive chronic disease evaluation generated successfully"
+             })
+           } else if (currentEvent === 'error' || data.error) {
+             // Error event - throw to be caught by outer handler
+             throw new Error(data.details || data.error || 'Unknown error from server')
+           }
+         }
+       }
+
+       while (true) {
+         const { done, value } = await reader.read()
+         if (done) break
+
+         buffer += decoder.decode(value, { stream: true })
+         const lines = buffer.split('\n')
+         buffer = lines.pop() || '' // Keep incomplete line in buffer
+
+         for (const line of lines) {
+           processLine(line)
+         }
+       }
+
+       // Process any remaining data in buffer
+       if (buffer.trim()) {
+         const remainingLines = buffer.split('\n')
+         for (const line of remainingLines) {
+           processLine(line)
+         }
+       }
+
+       // If stream ended without a result, show error
+       if (!resultReceived) {
+         throw new Error('Stream ended without receiving assessment result')
+       }
+     } else {
+       // Handle regular JSON response (fallback for non-streaming)
+       const data = await response.json()
+
+       if (data.success && data.assessment) {
+         setAssessment(data.assessment)
+         toast({
+           title: "Specialist Assessment Complete",
+           description: "Comprehensive chronic disease evaluation generated successfully"
+         })
+       } else {
+         throw new Error(data.error || "Failed to generate assessment")
+       }
+       setLoading(false)
+     }
+   } catch (err: any) {
+     if (err.name === 'AbortError') {
+       console.log('Assessment generation aborted')
+       return
+     }
+     console.error("Error generating assessment:", err)
+     setError(err.message)
+     setLoading(false)
+     toast({
+       title: "Error",
+       description: "Failed to generate specialist assessment. Please try again.",
+       variant: "destructive"
+     })
+   }
  }
 
  const handleContinue = () => {
@@ -91,16 +187,20 @@ export default function ChronicDiagnosisForm({
  }
 
  if (loading) {
- return (
- <Card className="border-blue-200">
- <CardContent className="p-12 text-center">
- <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
- <p className="text-lg font-semibold text-gray-700"> Generating Specialist-Level Assessment...</p>
- <p className="text-sm text-gray-500 mt-2">Analyzing chronic disease status with endocrinologist precision</p>
- <p className="text-xs text-gray-400 mt-1">This may take 30-60 seconds</p>
- </CardContent>
- </Card>
- )
+   return (
+     <Card className="border-blue-200">
+       <CardContent className="p-12 text-center">
+         <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
+         <p className="text-lg font-semibold text-gray-700">Generating Specialist-Level Assessment...</p>
+         <p className="text-sm text-blue-600 mt-2 font-medium">{progressMessage}</p>
+         <div className="mt-4 max-w-md mx-auto">
+           <Progress value={progressPercent} className="h-2" />
+           <p className="text-xs text-gray-400 mt-2">{progressPercent}% complete</p>
+         </div>
+         <p className="text-xs text-gray-400 mt-3">Streaming AI response to avoid timeout...</p>
+       </CardContent>
+     </Card>
+   )
  }
 
  if (error) {

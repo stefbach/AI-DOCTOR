@@ -1,12 +1,11 @@
 // app/api/chronic-examens/route.ts - Chronic Disease Laboratory and Paraclinical Exam Orders API
 // Generates exam orders for chronic disease monitoring (HbA1c, lipids, ECG, fundus exam, etc.)
+// VERSION 2.0: Streaming SSE to avoid Vercel Hobby 10s timeout
 import { type NextRequest, NextResponse } from "next/server"
-import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
-export const maxDuration = 60 // 60 seconds for GPT-4 exam generation
+export const maxDuration = 60 // Extended for Pro plans (Hobby uses streaming)
 
 export async function POST(req: NextRequest) {
   try {
@@ -392,77 +391,140 @@ EXAM ORDER INSTRUCTIONS:
 
 Generate the comprehensive chronic disease exam orders now.`
 
-    // Call OpenAI API using Vercel AI SDK (like generate-consultation-report)
-    console.log('🤖 Calling OpenAI API using Vercel AI SDK...')
-    
-    const result = await generateText({
-      model: openai("gpt-4o-mini"),
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: patientContext }
-      ],
-      maxTokens: 2500,
-      temperature: 0.2,
+    // ========== STREAMING SSE IMPLEMENTATION ==========
+    const encoder = new TextEncoder()
+    const apiKey = process.env.OPENAI_API_KEY
+
+    if (!apiKey) {
+      return NextResponse.json({ error: "OpenAI API key not configured" }, { status: 500 })
+    }
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        const sendSSE = (event: string, data: any) => {
+          controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`))
+        }
+
+        try {
+          sendSSE('progress', { message: 'Generating exam orders...', progress: 10 })
+
+          // Call OpenAI with streaming
+          const response = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+              model: "gpt-4o-mini",
+              messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: patientContext }
+              ],
+              temperature: 0.2,
+              max_tokens: 2500,
+              response_format: { type: "json_object" },
+              stream: true
+            }),
+          })
+
+          if (!response.ok) {
+            throw new Error(`OpenAI API error: ${response.status}`)
+          }
+
+          if (!response.body) {
+            throw new Error('No response body from OpenAI')
+          }
+
+          sendSSE('progress', { message: 'Processing exam data...', progress: 30 })
+
+          // Process the stream
+          const reader = response.body.getReader()
+          const decoder = new TextDecoder()
+          let fullContent = ''
+          let chunkCount = 0
+
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+
+            const chunk = decoder.decode(value, { stream: true })
+            const lines = chunk.split('\n')
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6)
+                if (data === '[DONE]') continue
+
+                try {
+                  const parsed = JSON.parse(data)
+                  const content = parsed.choices?.[0]?.delta?.content
+                  if (content) {
+                    fullContent += content
+                    chunkCount++
+
+                    if (chunkCount % 10 === 0) {
+                      const progress = Math.min(85, 30 + Math.floor(chunkCount / 2))
+                      sendSSE('progress', { message: `Generating lab tests... ${progress}%`, progress })
+                    }
+                  }
+                } catch {
+                  // Skip invalid JSON
+                }
+              }
+            }
+          }
+
+          sendSSE('progress', { message: 'Validating exam orders...', progress: 90 })
+
+          // Parse JSON response
+          const jsonMatch = fullContent.match(/\{[\s\S]*\}/)
+          if (!jsonMatch) {
+            throw new Error('No valid JSON found in AI response')
+          }
+
+          const examOrdersData = JSON.parse(jsonMatch[0])
+
+          // Validate essential fields
+          if (!examOrdersData.examOrders || (!examOrdersData.examOrders.laboratoryTests && !examOrdersData.examOrders.paraclinicalExams)) {
+            throw new Error('Incomplete exam orders generated')
+          }
+
+          sendSSE('progress', { message: 'Finalizing...', progress: 95 })
+
+          // Send complete result
+          sendSSE('complete', {
+            success: true,
+            examOrders: examOrdersData.examOrders,
+            orderId: orderId,
+            generatedAt: orderDate.toISOString()
+          })
+
+          sendSSE('progress', { message: 'Complete!', progress: 100 })
+
+        } catch (error: any) {
+          console.error('Streaming error:', error)
+          sendSSE('error', { error: 'Failed to generate exam orders', details: error.message })
+        } finally {
+          controller.close()
+        }
+      }
     })
 
-    const content = result.text
-    
-    if (!content) {
-      console.error("❌ No content in AI response")
-      return NextResponse.json(
-        { error: "No content received from AI" },
-        { status: 500 }
-      )
-    }
-    
-    console.log('✅ AI response received, length:', content.length)
-
-    // Parse JSON response
-    let examOrdersData
-    try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/)
-      if (!jsonMatch) {
-        console.error("No JSON found in response:", content)
-        return NextResponse.json(
-          { error: "Invalid response format from AI - no JSON found" },
-          { status: 500 }
-        )
-      }
-      examOrdersData = JSON.parse(jsonMatch[0])
-    } catch (parseError: any) {
-      console.error("JSON parse error:", parseError.message)
-      console.error("Content received:", content)
-      return NextResponse.json(
-        { 
-          error: "Failed to parse exam orders data",
-          details: parseError.message
-        },
-        { status: 500 }
-      )
-    }
-
-    // Validate essential fields
-    if (!examOrdersData.examOrders || (!examOrdersData.examOrders.laboratoryTests && !examOrdersData.examOrders.paraclinicalExams)) {
-      console.error("Missing essential exam orders fields:", examOrdersData)
-      return NextResponse.json(
-        { error: "Incomplete exam orders generated" },
-        { status: 500 }
-      )
-    }
-    
-    return NextResponse.json({
-      success: true,
-      examOrders: examOrdersData.examOrders,
-      orderId: orderId,
-      generatedAt: orderDate.toISOString()
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
     })
 
   } catch (error: any) {
     console.error("Chronic Examens API Error:", error)
     return NextResponse.json(
-      { 
+      {
         error: "Failed to generate chronic disease exam orders",
-        details: error.message 
+        details: error.message
       },
       { status: 500 }
     )
