@@ -343,7 +343,10 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
 
   // ==================== APPLY ACTION ====================
   const applyAction = useCallback((action: AssistantAction) => {
-    console.log('🎯 Applying TIBOK action:', JSON.stringify(action, null, 2))
+    console.log('🎯 ====== APPLYING TIBOK ACTION ======')
+    console.log('🎯 Action type:', action.type)
+    console.log('🎯 Action.action:', action.action)
+    console.log('🎯 Full action:', JSON.stringify(action, null, 2))
 
     try {
       switch (action.type) {
@@ -409,7 +412,7 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
 
         case 'modify_lab_prescription':
           if (action.action === 'add') {
-            console.log('🔬 LAB - Raw:', action.content)
+            console.log('🔬 LAB ACTION - Raw content:', JSON.stringify(action.content, null, 2))
             const category = action.content?.category || 'clinicalChemistry'
             const test = action.content?.test || {
               nom: action.content?.nom || action.content?.name || 'Nouveau test',
@@ -418,8 +421,9 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
               urgence: action.content?.urgence || action.content?.urgent || false,
               aJeun: action.content?.aJeun || action.content?.fasting || false
             }
-            console.log('🔬 LAB - Category:', category, 'Test:', test)
+            console.log('🔬 LAB ACTION - Calling onAddLabTest with:', {category, test})
             onAddLabTest(category, test)
+            console.log('✅ LAB ACTION - onAddLabTest called successfully')
             toast({
               title: "✅ Examen biologique ajouté",
               description: `${test.nom} ajouté dans Laboratory (${category})`
@@ -437,7 +441,7 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
 
         case 'modify_paraclinical_prescription':
           if (action.action === 'add') {
-            console.log('🩻 IMAGING - Raw:', action.content)
+            console.log('🩻 IMAGING ACTION - Raw content:', JSON.stringify(action.content, null, 2))
             const exam = {
               type: action.content?.type || action.content?.modalite || 'Imagerie',
               modalite: action.content?.modalite || action.content?.type || '',
@@ -447,6 +451,7 @@ Utilisez les boutons d'action rapide ci-dessous ou posez-moi directement votre q
               contraste: action.content?.contraste || action.content?.contrast || false,
               instructions: action.content?.instructions || ''
             }
+            console.log('🩻 IMAGING ACTION - Calling onAddImaging with:', exam)
             console.log('🩻 IMAGING - Exam:', exam)
             onAddImaging(exam)
             toast({

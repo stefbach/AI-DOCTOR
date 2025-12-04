@@ -5213,7 +5213,11 @@ const [localSickLeave, setLocalSickLeave] = useState({
  }}
  onAddLabTest={(category, test) => {
  // Direct creation: no add+update pattern - create complete line immediately
- if (validationStatus === 'validated') return
+ console.log('📋 CALLBACK onAddLabTest called:', {category, test})
+ if (validationStatus === 'validated') {
+ console.log('⚠️ CALLBACK onAddLabTest BLOCKED - document validated')
+ return
+ }
  
  const testWithDefaults = {
  nom: test.nom || '',
@@ -5270,9 +5274,11 @@ const [localSickLeave, setLocalSickLeave] = useState({
  testWithDefaults
  ]
  
+ console.log('✅ CALLBACK onAddLabTest - Test added to biologie.prescription.analyses.' + category, testWithDefaults)
  return newReport
  })
  trackModification(`biologie.add.${category}.${test.nom}`)
+ console.log('🎉 CALLBACK onAddLabTest - Complete!')
  }}
  onUpdateLabTest={(category, index, test) => {
  updateBiologyTestBatch(category, index, test)
@@ -5282,7 +5288,11 @@ const [localSickLeave, setLocalSickLeave] = useState({
  }}
  onAddImaging={(exam) => {
  // Direct creation: no add+update pattern - create complete line immediately
- if (validationStatus === 'validated') return
+ console.log('🖼️ CALLBACK onAddImaging called:', exam)
+ if (validationStatus === 'validated') {
+ console.log('⚠️ CALLBACK onAddImaging BLOCKED - document validated')
+ return
+ }
  
  const examWithDefaults = {
  type: exam.type || exam.modalite || '',
@@ -5331,9 +5341,11 @@ const [localSickLeave, setLocalSickLeave] = useState({
  examWithDefaults
  ]
  
+ console.log('✅ CALLBACK onAddImaging - Exam added to imagerie.prescription.examens', examWithDefaults)
  return newReport
  })
  trackModification(`imagerie.add.${exam.type}`)
+ console.log('🎉 CALLBACK onAddImaging - Complete!')
  }}
  onUpdateImaging={(index, exam) => {
  updateImagingExamBatch(index, exam)
