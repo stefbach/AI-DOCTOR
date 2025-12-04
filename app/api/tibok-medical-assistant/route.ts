@@ -361,10 +361,46 @@ Le format JSON EXACT est :
   ]
 }
 
-**RÈGLES STRICTES** :
+**RÈGLES STRICTES POUR JSON VALIDE** :
+
+🔴 **CRITIQUE - Champ "response"** :
+1. Maximum 300 caractères (CONCIS)
+2. Utilise \\n pour les retours à ligne (échappé)
+3. AUCUN guillemet " à l'intérieur (utilise ' si nécessaire)
+4. Pas de caractères spéciaux non échappés
+5. Exemple: "Analyse effectuée.\\n\\n1. Diagnostic cohérent\\n2. Ajouter HbA1c"
+
+🔴 **CRITIQUE - Structure JSON** :
 1. Pas de \`\`\`json ou \`\`\` autour du JSON
 2. Le JSON doit être DIRECTEMENT parsable
-3. "response" doit contenir ton analyse complète en texte formaté
+3. Tous les strings entre guillemets doubles "
+4. Pas de virgule après le dernier élément d'un tableau ou objet
+5. Ferme TOUS les accolades } et crochets ]
+
+**EXEMPLE JSON COMPLET ET VALIDE** (à copier exactement) :
+{
+  "response": "Analyse effectuee.\\n\\n1. Traitement coherent\\n2. Suggere HbA1c pour diabete",
+  "actions": [
+    {
+      "type": "modify_lab_prescription",
+      "action": "add",
+      "content": {
+        "category": "endocrinology",
+        "test": {
+          "nom": "HbA1c",
+          "code": "HBA1C",
+          "motifClinique": "Surveillance diabete",
+          "urgence": false,
+          "aJeun": false
+        }
+      },
+      "reasoning": "Surveillance trimestrielle recommandee"
+    }
+  ],
+  "alerts": [],
+  "suggestions": []
+}
+
 4. "actions" = tableau d'actions applicables (bouton "Appliquer")
 5. "alerts" = alertes de sécurité (critical/warning/info)
 6. "suggestions" = recommandations pour le médecin
@@ -761,8 +797,8 @@ export async function POST(request: NextRequest) {
     const result = await generateText({
       model: openai("gpt-4o"),
       messages,
-      maxTokens: 4000,
-      temperature: 0.2
+      maxTokens: 2000, // Reduced: force concise responses to avoid truncated JSON
+      temperature: 0.1  // Lower temp for more deterministic, well-formed JSON
     })
 
     const responseText = result.text
