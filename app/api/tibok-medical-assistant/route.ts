@@ -3,8 +3,31 @@
 // Version 1.0 - Integration with Professional Report Page
 
 import { NextRequest, NextResponse } from "next/server"
-import { generateText } from "ai"
+import { generateObject } from "ai"
 import { openai } from "@ai-sdk/openai"
+import { z } from "zod"
+
+// ==================== ZOD SCHEMA FOR STRUCTURED OUTPUT ====================
+const tibokResponseSchema = z.object({
+  response: z.string().max(150).describe("Concise analysis text (max 150 chars)"),
+  actions: z.array(z.object({
+    type: z.enum(['modify_medical_report', 'modify_medication_prescription', 'modify_lab_prescription', 'modify_paraclinical_prescription', 'analyze_document_coherence']),
+    action: z.enum(['add', 'update', 'remove']).optional(),
+    section: z.string().optional(),
+    content: z.any(),
+    reasoning: z.string().max(50).describe("Brief justification (max 50 chars)")
+  })).max(2).describe("Maximum 2 actions"),
+  alerts: z.array(z.object({
+    type: z.enum(['critical', 'warning', 'info']),
+    message: z.string()
+  })),
+  suggestions: z.array(z.object({
+    category: z.string(),
+    priority: z.enum(['high', 'medium', 'low']),
+    suggestion: z.string(),
+    reasoning: z.string()
+  }))
+})
 
 // ==================== TYPES ====================
 interface Message {
@@ -817,20 +840,18 @@ export async function POST(request: NextRequest) {
       { role: 'user', content: message }
     ]
 
-    console.log('📡 Calling GPT-4 with TIBOK Medical Assistant prompt...')
+    console.log('📡 Calling GPT-4 with TIBOK Medical Assistant prompt (structured output)...')
 
-    // Call GPT-4
-    const result = await generateText({
+    // Call GPT-4 with structured output (guarantees valid JSON)
+    const result = await generateObject({
       model: openai("gpt-4o"),
+      schema: tibokResponseSchema,
       messages,
-      maxTokens: 1500, // STRICT LIMIT: ensures JSON completion, max 2 actions
-      temperature: 0.1  // Lower temp for more deterministic, well-formed JSON
+      maxTokens: 1500,
+      temperature: 0.1
     })
 
-    const responseText = result.text
-
-    // Parse the response to extract structured actions
-    const parsed = parseAssistantResponse(responseText)
+    const parsed = result.object as any
 
     console.log('✅ TIBOK Assistant response generated')
     console.log(`   - Response length: ${parsed.response.length} chars`)
