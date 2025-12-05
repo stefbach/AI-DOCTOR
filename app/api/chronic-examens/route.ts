@@ -422,7 +422,7 @@ Generate the comprehensive chronic disease exam orders now.`
                 { role: "user", content: patientContext }
               ],
               temperature: 0.2,
-              max_tokens: 2500,
+              max_tokens: 6000, // Increased to prevent truncated JSON response
               response_format: { type: "json_object" },
               stream: true
             }),
