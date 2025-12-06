@@ -166,19 +166,25 @@ export default function TibokMedicalAssistant({
 Hello Doctor! I am your AI expert to **suggest additions and improvements** to your consultation.
 
 **I have access to your generated documents:**
-📄 Medical Report
+📄 Medical Report (Chief Complaint, History, Examination, Diagnosis, Management, Recommendations)
 💊 Medication Prescription
 🔬 Laboratory Tests
 🩻 Imaging Studies
 
 **I can suggest:**
-✅ Missing lab tests (HbA1c, Creatinine, etc.)
-✅ Additional imaging exams (ECG, X-ray, CT, etc.)
-✅ **Improvements to medical report sections** (diagnosis, management plan, recommendations)
-✅ Medication adjustments (dosage optimization)
+✅ Missing lab tests (HbA1c, Creatinine, Lipid profile, etc.)
+✅ Additional imaging exams (ECG, X-ray, CT scan, etc.)
+✅ **Medical report improvements** - Enhance any section with clinical details
+✅ Medication adjustments (dosage optimization, new prescriptions)
 ✅ Safety checks (drug interactions, contraindications)
 
-Use the quick action buttons below or ask me directly: "What should I add to the diagnostic conclusion?" or "Improve management plan".`,
+**📝 To modify medical report sections, just ask me:**
+• "Add more details to the diagnostic conclusion"
+• "Improve the management plan with specific targets"
+• "Enhance follow-up recommendations"
+• "Complete the physical examination findings"
+
+I will suggest precise improvements that you can review and apply!`,
       timestamp: new Date()
     }
   ])
