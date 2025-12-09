@@ -38,14 +38,16 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
   // Get the consultation type from Tibok (patient's choice)
   const tibokSpecialty = patientData?.tibokPatientInfo?.consultation_specialty
   const isDermatologyFromTibok = tibokSpecialty === 'dermatology'
+  const isGeneralFromTibok = tibokSpecialty === 'general'
+  const isChronicFromTibok = tibokSpecialty === 'chronic_disease'
 
   // Debug: Log what we received from Tibok
   console.log('🏥 Hub Workflow - tibokPatientInfo:', patientData?.tibokPatientInfo)
   console.log('🏥 Hub Workflow - consultation_specialty from Tibok:', tibokSpecialty)
 
-  // For dermatology, auto-select; for others, default to 'normal'
+  // Auto-select based on Tibok specialty
   const [selectedType, setSelectedType] = useState<ConsultationType>(
-    isDermatologyFromTibok ? 'dermatology' : 'normal'
+    isDermatologyFromTibok ? 'dermatology' : isChronicFromTibok ? 'chronic' : 'normal'
   )
   const [selectedWorkflow, setSelectedWorkflow] = useState<string>('')
 
@@ -261,7 +263,81 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
     router.push(selectedPath)
   }
 
-  // For dermatology from Tibok: skip type selection, show patient info directly
+  // Helper component for patient information display
+  const PatientInfoCard = () => (
+    hasPatientInfo ? (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User className="h-5 w-5 text-gray-600" />
+            Informations Patient
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            {(demographics.firstName || demographics.lastName || demographics.fullName) && (
+              <div>
+                <span className="text-gray-500">Nom:</span>
+                <p className="font-medium">
+                  {demographics.firstName && demographics.lastName
+                    ? `${demographics.firstName} ${demographics.lastName}`
+                    : demographics.fullName || demographics.firstName || demographics.lastName}
+                </p>
+              </div>
+            )}
+            {demographics.age && (
+              <div>
+                <span className="text-gray-500">Âge:</span>
+                <p className="font-medium">{demographics.age} ans</p>
+              </div>
+            )}
+            {demographics.gender && (
+              <div>
+                <span className="text-gray-500">Genre:</span>
+                <p className="font-medium">{demographics.gender === 'male' ? 'Homme' : demographics.gender === 'female' ? 'Femme' : demographics.gender}</p>
+              </div>
+            )}
+            {demographics.phone && (
+              <div>
+                <span className="text-gray-500">Téléphone:</span>
+                <p className="font-medium">{demographics.phone}</p>
+              </div>
+            )}
+            {demographics.email && (
+              <div>
+                <span className="text-gray-500">Email:</span>
+                <p className="font-medium">{demographics.email}</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    ) : null
+  )
+
+  // Helper component for history summary
+  const HistorySummaryCard = () => (
+    routeDecision.patientSummary ? (
+      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+        <h4 className="font-semibold text-blue-900 mb-2">
+          📊 Résumé Historique
+        </h4>
+        <div className="text-sm text-blue-800 space-y-1">
+          <p>
+            • Total consultations: {routeDecision.patientSummary.totalConsultations}
+          </p>
+          <p>
+            • Dernière consultation: {new Date(routeDecision.patientSummary.lastConsultationDate).toLocaleDateString()}
+          </p>
+          <p>
+            • Type précédent: {routeDecision.patientSummary.lastConsultationType}
+          </p>
+        </div>
+      </div>
+    ) : null
+  )
+
+  // ============ DERMATOLOGY PATH ============
   if (isDermatologyFromTibok) {
     return (
       <div className="space-y-6">
@@ -282,75 +358,8 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
           </CardHeader>
         </Card>
 
-        {/* Patient Information Summary */}
-        {hasPatientInfo && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5 text-gray-600" />
-                Informations Patient
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                {(demographics.firstName || demographics.lastName || demographics.fullName) && (
-                  <div>
-                    <span className="text-gray-500">Nom:</span>
-                    <p className="font-medium">
-                      {demographics.firstName && demographics.lastName
-                        ? `${demographics.firstName} ${demographics.lastName}`
-                        : demographics.fullName || demographics.firstName || demographics.lastName}
-                    </p>
-                  </div>
-                )}
-                {demographics.age && (
-                  <div>
-                    <span className="text-gray-500">Âge:</span>
-                    <p className="font-medium">{demographics.age} ans</p>
-                  </div>
-                )}
-                {demographics.gender && (
-                  <div>
-                    <span className="text-gray-500">Genre:</span>
-                    <p className="font-medium">{demographics.gender === 'male' ? 'Homme' : demographics.gender === 'female' ? 'Femme' : demographics.gender}</p>
-                  </div>
-                )}
-                {demographics.phone && (
-                  <div>
-                    <span className="text-gray-500">Téléphone:</span>
-                    <p className="font-medium">{demographics.phone}</p>
-                  </div>
-                )}
-                {demographics.email && (
-                  <div>
-                    <span className="text-gray-500">Email:</span>
-                    <p className="font-medium">{demographics.email}</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Patient Summary if exists */}
-        {routeDecision.patientSummary && (
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <h4 className="font-semibold text-blue-900 mb-2">
-              📊 Résumé Historique
-            </h4>
-            <div className="text-sm text-blue-800 space-y-1">
-              <p>
-                • Total consultations: {routeDecision.patientSummary.totalConsultations}
-              </p>
-              <p>
-                • Dernière consultation: {new Date(routeDecision.patientSummary.lastConsultationDate).toLocaleDateString()}
-              </p>
-              <p>
-                • Type précédent: {routeDecision.patientSummary.lastConsultationType}
-              </p>
-            </div>
-          </div>
-        )}
+        <PatientInfoCard />
+        <HistorySummaryCard />
 
         {/* Proceed Button - Dermatology */}
         <Button
@@ -365,8 +374,82 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
     )
   }
 
-  // For Normal/Chronic from Tibok: show type selection (doctor chooses between Normal and Chronic)
-  // Map tibokSpecialty to display text
+  // ============ GENERAL/NORMAL CONSULTATION PATH ============
+  if (isGeneralFromTibok) {
+    return (
+      <div className="space-y-6">
+        {/* Normal Consultation Auto-Selected Notice */}
+        <Card className="border-blue-300 bg-blue-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Stethoscope className="h-5 w-5 text-blue-600" />
+              Consultation Normale
+              <Badge className="bg-blue-600 ml-2">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Sélectionné par le patient
+              </Badge>
+            </CardTitle>
+            <CardDescription className="text-blue-700">
+              Le patient a choisi une consultation médicale générale sur Tibok
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <PatientInfoCard />
+        <HistorySummaryCard />
+
+        {/* Proceed Button - Normal */}
+        <Button
+          onClick={handleProceed}
+          size="lg"
+          className="w-full bg-blue-600 hover:bg-blue-700"
+        >
+          <ArrowRight className="mr-2 h-5 w-5" />
+          Continuer vers Consultation Normale
+        </Button>
+      </div>
+    )
+  }
+
+  // ============ CHRONIC DISEASE PATH ============
+  if (isChronicFromTibok) {
+    return (
+      <div className="space-y-6">
+        {/* Chronic Disease Auto-Selected Notice */}
+        <Card className="border-red-300 bg-red-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Heart className="h-5 w-5 text-red-600" />
+              Suivi Maladie Chronique
+              <Badge className="bg-red-600 ml-2">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Sélectionné par le patient
+              </Badge>
+            </CardTitle>
+            <CardDescription className="text-red-700">
+              Le patient a choisi un suivi de maladie chronique sur Tibok
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <PatientInfoCard />
+        <HistorySummaryCard />
+
+        {/* Proceed Button - Chronic */}
+        <Button
+          onClick={handleProceed}
+          size="lg"
+          className="w-full bg-red-600 hover:bg-red-700"
+        >
+          <ArrowRight className="mr-2 h-5 w-5" />
+          Continuer vers Maladie Chronique
+        </Button>
+      </div>
+    )
+  }
+
+  // ============ FALLBACK: NO TIBOK SPECIALTY - SHOW TYPE SELECTION ============
+  // This is shown when no consultation_specialty was provided from Tibok
   const patientSelectedType = tibokSpecialty === 'general' ? 'normal' : tibokSpecialty === 'chronic_disease' ? 'chronic' : null
 
   return (
