@@ -77,8 +77,8 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
   // Check if we have any meaningful patient data
   const hasPatientInfo = demographics.firstName || demographics.lastName || demographics.fullName || demographics.age
 
-  const handleProceed = () => {
-    const selectedPath = selectedWorkflow || routeDecision.recommendedPath
+  const handleProceed = (pathOverride?: string) => {
+    const selectedPath = pathOverride || selectedWorkflow || routeDecision.recommendedPath
 
     // Mark that we're coming from the consultation hub (to prevent redirect loop)
     sessionStorage.setItem('fromConsultationHub', 'true')
@@ -363,7 +363,7 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
 
         {/* Proceed Button - Dermatology */}
         <Button
-          onClick={handleProceed}
+          onClick={() => handleProceed()}
           size="lg"
           className="w-full bg-indigo-600 hover:bg-indigo-700"
         >
@@ -400,7 +400,7 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
 
         {/* Proceed Button - Normal */}
         <Button
-          onClick={handleProceed}
+          onClick={() => handleProceed()}
           size="lg"
           className="w-full bg-blue-600 hover:bg-blue-700"
         >
@@ -435,15 +435,31 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
         <PatientInfoCard />
         <HistorySummaryCard />
 
-        {/* Proceed Button - Chronic */}
+        {/* Proceed Button - Chronic (Primary) */}
         <Button
-          onClick={handleProceed}
+          onClick={() => handleProceed()}
           size="lg"
           className="w-full bg-red-600 hover:bg-red-700"
         >
           <ArrowRight className="mr-2 h-5 w-5" />
           Continuer vers Maladie Chronique
         </Button>
+
+        {/* Alternative Button - Normal Consultation */}
+        <div className="text-center">
+          <Button
+            onClick={() => handleProceed('/')}
+            variant="outline"
+            size="lg"
+            className="w-full border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400"
+          >
+            <Stethoscope className="mr-2 h-5 w-5" />
+            Ou choisir Consultation Normale
+          </Button>
+          <p className="text-xs text-gray-500 mt-2">
+            Si le médecin estime qu&apos;une consultation générale est plus appropriée
+          </p>
+        </div>
       </div>
     )
   }
@@ -541,7 +557,7 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
 
       {/* Proceed Button */}
       <Button
-        onClick={handleProceed}
+        onClick={() => handleProceed()}
         size="lg"
         className={`w-full ${selectedType === 'chronic' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}
       >
