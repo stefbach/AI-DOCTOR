@@ -729,12 +729,52 @@ CRITICAL: Return ONLY the JSON object, no markdown formatting, no explanations o
 
           console.log(`📋 JSON matched, length: ${jsonMatch[0].length} chars`)
 
-          // Clean up potential JSON issues (control characters, etc.)
-          let cleanedJson = jsonMatch[0]
-            // Remove control characters except newlines and tabs within strings
-            .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
-            // Fix potential unescaped newlines in strings (common OpenAI issue)
-            .replace(/:\s*"([^"]*)\n([^"]*)"/g, ': "$1\\n$2"')
+          // Robust JSON cleanup function to fix control characters in strings
+          const cleanJsonString = (jsonStr: string): string => {
+            // Process the string character by character to properly escape control chars in strings
+            let result = ''
+            let inString = false
+            let escaped = false
+
+            for (let i = 0; i < jsonStr.length; i++) {
+              const char = jsonStr[i]
+              const charCode = jsonStr.charCodeAt(i)
+
+              if (escaped) {
+                result += char
+                escaped = false
+                continue
+              }
+
+              if (char === '\\' && inString) {
+                escaped = true
+                result += char
+                continue
+              }
+
+              if (char === '"' && !escaped) {
+                inString = !inString
+                result += char
+                continue
+              }
+
+              // If we're inside a string and hit a control character, escape it
+              if (inString && charCode < 32) {
+                // Escape control characters properly
+                if (charCode === 10) result += '\\n'      // newline
+                else if (charCode === 13) result += '\\r' // carriage return
+                else if (charCode === 9) result += '\\t'  // tab
+                else result += `\\u${charCode.toString(16).padStart(4, '0')}` // other control chars
+                continue
+              }
+
+              result += char
+            }
+
+            return result
+          }
+
+          const cleanedJson = cleanJsonString(jsonMatch[0])
 
           let assessmentData
           try {
