@@ -729,14 +729,24 @@ CRITICAL: Return ONLY the JSON object, no markdown formatting, no explanations o
 
           console.log(`📋 JSON matched, length: ${jsonMatch[0].length} chars`)
 
+          // Clean up potential JSON issues (control characters, etc.)
+          let cleanedJson = jsonMatch[0]
+            // Remove control characters except newlines and tabs within strings
+            .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
+            // Fix potential unescaped newlines in strings (common OpenAI issue)
+            .replace(/:\s*"([^"]*)\n([^"]*)"/g, ': "$1\\n$2"')
+
           let assessmentData
           try {
-            assessmentData = JSON.parse(jsonMatch[0])
+            assessmentData = JSON.parse(cleanedJson)
           } catch (parseError: any) {
             console.error('❌ JSON parse error:', parseError.message)
-            console.error('❌ Position info:', parseError.message.match(/position (\d+)/)?.[1])
-            console.error('❌ JSON content around error (first 500 chars):', jsonMatch[0].substring(0, 500))
-            console.error('❌ JSON content (last 200 chars):', jsonMatch[0].substring(jsonMatch[0].length - 200))
+            const errorPosition = parseInt(parseError.message.match(/position (\d+)/)?.[1] || '0')
+            console.error('❌ Position info:', errorPosition)
+            console.error('❌ Character at error position:', cleanedJson.charAt(errorPosition), '(code:', cleanedJson.charCodeAt(errorPosition), ')')
+            console.error('❌ JSON content around error (pos-50 to pos+50):', cleanedJson.substring(Math.max(0, errorPosition - 50), errorPosition + 50))
+            console.error('❌ JSON content (first 500 chars):', cleanedJson.substring(0, 500))
+            console.error('❌ JSON content (last 200 chars):', cleanedJson.substring(cleanedJson.length - 200))
             throw new Error(`JSON parse error: ${parseError.message}`)
           }
 
