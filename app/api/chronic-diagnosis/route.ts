@@ -780,14 +780,38 @@ CRITICAL: Return ONLY the JSON object, no markdown formatting, no explanations o
           try {
             assessmentData = JSON.parse(cleanedJson)
           } catch (parseError: any) {
-            console.error('❌ JSON parse error:', parseError.message)
+            console.error('❌ JSON parse error (attempt 1):', parseError.message)
             const errorPosition = parseInt(parseError.message.match(/position (\d+)/)?.[1] || '0')
             console.error('❌ Position info:', errorPosition)
             console.error('❌ Character at error position:', cleanedJson.charAt(errorPosition), '(code:', cleanedJson.charCodeAt(errorPosition), ')')
             console.error('❌ JSON content around error (pos-50 to pos+50):', cleanedJson.substring(Math.max(0, errorPosition - 50), errorPosition + 50))
-            console.error('❌ JSON content (first 500 chars):', cleanedJson.substring(0, 500))
-            console.error('❌ JSON content (last 200 chars):', cleanedJson.substring(cleanedJson.length - 200))
-            throw new Error(`JSON parse error: ${parseError.message}`)
+
+            // Attempt 2: More aggressive cleanup
+            console.log('🔄 Attempting more aggressive JSON repair...')
+            try {
+              // Remove any text before first { and after last }
+              const startIdx = cleanedJson.indexOf('{')
+              const endIdx = cleanedJson.lastIndexOf('}')
+              let repairedJson = cleanedJson.substring(startIdx, endIdx + 1)
+
+              // Fix common issues:
+              // 1. Replace smart quotes with regular quotes
+              repairedJson = repairedJson.replace(/[""]/g, '"').replace(/['']/g, "'")
+              // 2. Fix unescaped backslashes before non-escape characters
+              repairedJson = repairedJson.replace(/\\([^"\\\/bfnrtu])/g, '\\\\$1')
+              // 3. Remove any BOM or zero-width characters
+              repairedJson = repairedJson.replace(/[\uFEFF\u200B-\u200D\u2060]/g, '')
+              // 4. Fix trailing commas in arrays/objects
+              repairedJson = repairedJson.replace(/,(\s*[}\]])/g, '$1')
+
+              assessmentData = JSON.parse(repairedJson)
+              console.log('✅ JSON repair successful on attempt 2')
+            } catch (repairError: any) {
+              console.error('❌ JSON repair attempt 2 failed:', repairError.message)
+              console.error('❌ JSON content (first 500 chars):', cleanedJson.substring(0, 500))
+              console.error('❌ JSON content (last 200 chars):', cleanedJson.substring(cleanedJson.length - 200))
+              throw new Error(`JSON parse error: ${parseError.message}`)
+            }
           }
 
           // Validate essential structure

@@ -453,42 +453,57 @@ Generate the comprehensive chronic disease exam orders now.`
           let chunkCount = 0
 
           let buffer = ''
-          while (true) {
-            const { done, value } = await reader.read()
-            if (done) {
-              // Flush any remaining data in decoder
-              const remaining = decoder.decode()
-              if (remaining) buffer += remaining
-              break
-            }
+          let streamError: Error | null = null
 
-            const chunk = decoder.decode(value, { stream: true })
-            buffer += chunk
-            const lines = buffer.split('\n')
-            buffer = lines.pop() || '' // Keep incomplete line in buffer
+          try {
+            while (true) {
+              const { done, value } = await reader.read()
+              if (done) {
+                // Flush any remaining data in decoder
+                const remaining = decoder.decode()
+                if (remaining) buffer += remaining
+                console.log('✅ OpenAI reader done signal received')
+                break
+              }
 
-            for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                const data = line.slice(6)
-                if (data === '[DONE]') continue
+              const chunk = decoder.decode(value, { stream: true })
+              buffer += chunk
+              const lines = buffer.split('\n')
+              buffer = lines.pop() || '' // Keep incomplete line in buffer
 
-                try {
-                  const parsed = JSON.parse(data)
-                  const content = parsed.choices?.[0]?.delta?.content
-                  if (content) {
-                    fullContent += content
-                    chunkCount++
-
-                    if (chunkCount % 10 === 0) {
-                      const progress = Math.min(85, 30 + Math.floor(chunkCount / 2))
-                      sendSSE('progress', { message: `Generating lab tests... ${progress}%`, progress })
-                    }
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  const data = line.slice(6)
+                  if (data === '[DONE]') {
+                    console.log('✅ Received [DONE] from OpenAI')
+                    continue
                   }
-                } catch {
-                  // Skip invalid JSON
+
+                  try {
+                    const parsed = JSON.parse(data)
+                    const content = parsed.choices?.[0]?.delta?.content
+                    if (content) {
+                      fullContent += content
+                      chunkCount++
+
+                      if (chunkCount % 10 === 0) {
+                        const progress = Math.min(85, 30 + Math.floor(chunkCount / 2))
+                        sendSSE('progress', { message: `Generating lab tests... ${progress}%`, progress })
+                      }
+                    }
+                  } catch {
+                    // Skip invalid JSON
+                  }
                 }
               }
             }
+          } catch (readError: any) {
+            console.error('❌ Error reading OpenAI stream:', readError.message)
+            streamError = readError
+          }
+
+          if (streamError) {
+            throw new Error(`OpenAI stream read error: ${streamError.message}`)
           }
 
           // Process any remaining data in the buffer
@@ -574,11 +589,31 @@ Generate the comprehensive chronic disease exam orders now.`
           try {
             examOrdersData = JSON.parse(cleanedJson)
           } catch (parseError: any) {
-            console.error('JSON parse error:', parseError.message)
+            console.error('❌ JSON parse error (attempt 1):', parseError.message)
             const errorPosition = parseInt(parseError.message.match(/position (\d+)/)?.[1] || '0')
             console.error('Character at error position:', cleanedJson.charAt(errorPosition), '(code:', cleanedJson.charCodeAt(errorPosition), ')')
             console.error('Content around error:', cleanedJson.substring(Math.max(0, errorPosition - 50), errorPosition + 50))
-            throw new Error(`JSON parse error: ${parseError.message}`)
+
+            // Attempt 2: More aggressive cleanup
+            console.log('🔄 Attempting more aggressive JSON repair...')
+            try {
+              const startIdx = cleanedJson.indexOf('{')
+              const endIdx = cleanedJson.lastIndexOf('}')
+              let repairedJson = cleanedJson.substring(startIdx, endIdx + 1)
+
+              // Fix common issues
+              repairedJson = repairedJson.replace(/[""]/g, '"').replace(/['']/g, "'")
+              repairedJson = repairedJson.replace(/\\([^"\\\/bfnrtu])/g, '\\\\$1')
+              repairedJson = repairedJson.replace(/[\uFEFF\u200B-\u200D\u2060]/g, '')
+              repairedJson = repairedJson.replace(/,(\s*[}\]])/g, '$1')
+
+              examOrdersData = JSON.parse(repairedJson)
+              console.log('✅ JSON repair successful on attempt 2')
+            } catch (repairError: any) {
+              console.error('❌ JSON repair attempt 2 failed:', repairError.message)
+              console.error('Content (first 500 chars):', cleanedJson.substring(0, 500))
+              throw new Error(`JSON parse error: ${parseError.message}`)
+            }
           }
 
           console.log('✅ JSON parsed successfully')
