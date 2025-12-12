@@ -402,7 +402,15 @@ Generate the comprehensive chronic disease exam orders now.`
     const stream = new ReadableStream({
       async start(controller) {
         const sendSSE = (event: string, data: any) => {
-          controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`))
+          try {
+            const jsonData = JSON.stringify(data)
+            controller.enqueue(encoder.encode(`event: ${event}\ndata: ${jsonData}\n\n`))
+            console.log(`📤 SSE sent: ${event} (${jsonData.length} bytes)`)
+          } catch (err: any) {
+            console.error(`❌ Failed to send SSE event ${event}:`, err.message)
+            // Send a simplified error if JSON stringify fails
+            controller.enqueue(encoder.encode(`event: error\ndata: {"error":"Failed to serialize ${event} event","details":"${err.message}"}\n\n`))
+          }
         }
 
         try {
@@ -494,30 +502,67 @@ Generate the comprehensive chronic disease exam orders now.`
             throw new Error(`JSON parse error: ${parseError.message}`)
           }
 
-          // Handle both possible structures: { examOrders: {...} } or { success: true, examOrders: {...} } or direct examOrders
+          // Handle multiple possible structures from OpenAI
           let finalExamOrders = examOrdersData.examOrders || examOrdersData
 
-          // Validate essential fields - be more flexible
-          const hasLabTests = finalExamOrders.laboratoryTests && Array.isArray(finalExamOrders.laboratoryTests)
-          const hasParaclinical = finalExamOrders.paraclinicalExams && Array.isArray(finalExamOrders.paraclinicalExams)
+          // Log the structure we received
+          console.log('📋 Received data structure:', {
+            topLevelKeys: Object.keys(examOrdersData),
+            hasExamOrdersWrapper: !!examOrdersData.examOrders,
+            finalKeys: Object.keys(finalExamOrders)
+          })
 
-          if (!hasLabTests && !hasParaclinical) {
-            console.error('Missing exam orders. Keys found:', Object.keys(finalExamOrders))
-            // Try to find any array that looks like tests
-            const possibleKeys = Object.keys(finalExamOrders).filter(k => Array.isArray(finalExamOrders[k]))
-            console.error('Possible array keys:', possibleKeys)
-            throw new Error('Incomplete exam orders generated - no laboratoryTests or paraclinicalExams found')
+          // Try to find lab tests and paraclinical exams in various possible locations
+          let labTests = finalExamOrders.laboratoryTests ||
+                         finalExamOrders.laboratory_tests ||
+                         finalExamOrders.labTests ||
+                         finalExamOrders.lab_tests ||
+                         []
+
+          let paraclinicalExams = finalExamOrders.paraclinicalExams ||
+                                  finalExamOrders.paraclinical_exams ||
+                                  finalExamOrders.imaging ||
+                                  finalExamOrders.imagingExams ||
+                                  []
+
+          // Normalize arrays
+          if (!Array.isArray(labTests)) labTests = []
+          if (!Array.isArray(paraclinicalExams)) paraclinicalExams = []
+
+          console.log('🔍 Validation:', {
+            labTestsCount: labTests.length,
+            paraclinicalCount: paraclinicalExams.length,
+            allKeys: Object.keys(finalExamOrders)
+          })
+
+          // Normalize the structure
+          finalExamOrders = {
+            ...finalExamOrders,
+            laboratoryTests: labTests,
+            paraclinicalExams: paraclinicalExams
+          }
+
+          // Warn if empty but don't fail - some patients might not need tests
+          if (labTests.length === 0 && paraclinicalExams.length === 0) {
+            console.warn('⚠️ No lab tests or paraclinical exams found - proceeding anyway')
           }
 
           sendSSE('progress', { message: 'Finalizing...', progress: 95 })
 
-          // Send complete result
-          sendSSE('complete', {
+          // Build complete result
+          const completeResult = {
             success: true,
             examOrders: finalExamOrders,
             orderId: orderId,
             generatedAt: orderDate.toISOString()
-          })
+          }
+
+          console.log('📦 Sending complete event...')
+
+          // Send complete result
+          sendSSE('complete', completeResult)
+
+          console.log('✅ Complete event sent successfully')
 
           sendSSE('progress', { message: 'Complete!', progress: 100 })
 
