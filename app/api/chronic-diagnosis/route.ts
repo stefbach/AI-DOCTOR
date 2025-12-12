@@ -718,14 +718,27 @@ CRITICAL: Return ONLY the JSON object, no markdown formatting, no explanations o
 
           sendSSE('progress', { message: 'Validating assessment quality...', progress: 92 })
           console.log(`📊 OpenAI stream completed: ${chunkCount} chunks, ${fullContent.length} chars`)
+          console.log(`📄 Full content preview (first 500 chars):`, fullContent.substring(0, 500))
 
           // Parse the complete JSON response
           const jsonMatch = fullContent.match(/\{[\s\S]*\}/)
           if (!jsonMatch) {
+            console.error('❌ No JSON found in response. Full content:', fullContent.substring(0, 1000))
             throw new Error('No valid JSON found in AI response')
           }
 
-          const assessmentData = JSON.parse(jsonMatch[0])
+          console.log(`📋 JSON matched, length: ${jsonMatch[0].length} chars`)
+
+          let assessmentData
+          try {
+            assessmentData = JSON.parse(jsonMatch[0])
+          } catch (parseError: any) {
+            console.error('❌ JSON parse error:', parseError.message)
+            console.error('❌ Position info:', parseError.message.match(/position (\d+)/)?.[1])
+            console.error('❌ JSON content around error (first 500 chars):', jsonMatch[0].substring(0, 500))
+            console.error('❌ JSON content (last 200 chars):', jsonMatch[0].substring(jsonMatch[0].length - 200))
+            throw new Error(`JSON parse error: ${parseError.message}`)
+          }
 
           // Validate essential structure
           if (!assessmentData.diseaseAssessment || !assessmentData.detailedMealPlan) {
