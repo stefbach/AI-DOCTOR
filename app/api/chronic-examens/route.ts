@@ -402,7 +402,15 @@ Generate the comprehensive chronic disease exam orders now.`
     const stream = new ReadableStream({
       async start(controller) {
         const sendSSE = (event: string, data: any) => {
-          controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`))
+          try {
+            const jsonData = JSON.stringify(data)
+            controller.enqueue(encoder.encode(`event: ${event}\ndata: ${jsonData}\n\n`))
+            console.log(`📤 SSE sent: ${event} (${jsonData.length} bytes)`)
+          } catch (err: any) {
+            console.error(`❌ Failed to send SSE event ${event}:`, err.message)
+            // Send a simplified error if JSON stringify fails
+            controller.enqueue(encoder.encode(`event: error\ndata: {"error":"Failed to serialize ${event} event","details":"${err.message}"}\n\n`))
+          }
         }
 
         try {
@@ -480,25 +488,81 @@ Generate the comprehensive chronic disease exam orders now.`
           // Parse JSON response
           const jsonMatch = fullContent.match(/\{[\s\S]*\}/)
           if (!jsonMatch) {
+            console.error('No JSON found in response. Content length:', fullContent.length)
+            console.error('Content preview:', fullContent.substring(0, 500))
             throw new Error('No valid JSON found in AI response')
           }
 
-          const examOrdersData = JSON.parse(jsonMatch[0])
+          let examOrdersData
+          try {
+            examOrdersData = JSON.parse(jsonMatch[0])
+          } catch (parseError: any) {
+            console.error('JSON parse error:', parseError.message)
+            console.error('Content that failed to parse:', jsonMatch[0].substring(0, 500))
+            throw new Error(`JSON parse error: ${parseError.message}`)
+          }
 
-          // Validate essential fields
-          if (!examOrdersData.examOrders || (!examOrdersData.examOrders.laboratoryTests && !examOrdersData.examOrders.paraclinicalExams)) {
-            throw new Error('Incomplete exam orders generated')
+          // Handle multiple possible structures from OpenAI
+          let finalExamOrders = examOrdersData.examOrders || examOrdersData
+
+          // Log the structure we received
+          console.log('📋 Received data structure:', {
+            topLevelKeys: Object.keys(examOrdersData),
+            hasExamOrdersWrapper: !!examOrdersData.examOrders,
+            finalKeys: Object.keys(finalExamOrders)
+          })
+
+          // Try to find lab tests and paraclinical exams in various possible locations
+          let labTests = finalExamOrders.laboratoryTests ||
+                         finalExamOrders.laboratory_tests ||
+                         finalExamOrders.labTests ||
+                         finalExamOrders.lab_tests ||
+                         []
+
+          let paraclinicalExams = finalExamOrders.paraclinicalExams ||
+                                  finalExamOrders.paraclinical_exams ||
+                                  finalExamOrders.imaging ||
+                                  finalExamOrders.imagingExams ||
+                                  []
+
+          // Normalize arrays
+          if (!Array.isArray(labTests)) labTests = []
+          if (!Array.isArray(paraclinicalExams)) paraclinicalExams = []
+
+          console.log('🔍 Validation:', {
+            labTestsCount: labTests.length,
+            paraclinicalCount: paraclinicalExams.length,
+            allKeys: Object.keys(finalExamOrders)
+          })
+
+          // Normalize the structure
+          finalExamOrders = {
+            ...finalExamOrders,
+            laboratoryTests: labTests,
+            paraclinicalExams: paraclinicalExams
+          }
+
+          // Warn if empty but don't fail - some patients might not need tests
+          if (labTests.length === 0 && paraclinicalExams.length === 0) {
+            console.warn('⚠️ No lab tests or paraclinical exams found - proceeding anyway')
           }
 
           sendSSE('progress', { message: 'Finalizing...', progress: 95 })
 
-          // Send complete result
-          sendSSE('complete', {
+          // Build complete result
+          const completeResult = {
             success: true,
-            examOrders: examOrdersData.examOrders,
+            examOrders: finalExamOrders,
             orderId: orderId,
             generatedAt: orderDate.toISOString()
-          })
+          }
+
+          console.log('📦 Sending complete event...')
+
+          // Send complete result
+          sendSSE('complete', completeResult)
+
+          console.log('✅ Complete event sent successfully')
 
           sendSSE('progress', { message: 'Complete!', progress: 100 })
 

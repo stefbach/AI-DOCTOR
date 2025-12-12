@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Progress } from "@/components/ui/progress"
 import { toast } from "@/components/ui/use-toast"
 import TibokMedicalAssistant from '../tibok-medical-assistant'
 import {
@@ -470,6 +471,8 @@ export default function ChronicProfessionalReport({
   // ==================== STATE MANAGEMENT ====================
   const [report, setReport] = useState<ChronicProfessionalReportData | null>(null)
   const [loading, setLoading] = useState(false)
+  const [loadingProgress, setLoadingProgress] = useState(0)
+  const [loadingMessage, setLoadingMessage] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState("medical-report")
   const [editMode, setEditMode] = useState(false)
@@ -772,6 +775,8 @@ export default function ChronicProfessionalReport({
   useEffect(() => {
     const generateReport = async () => {
       setLoading(true)
+      setLoadingProgress(0)
+      setLoadingMessage('Initializing report generation...')
       setError(null)
       
       try {
@@ -1100,11 +1105,15 @@ export default function ChronicProfessionalReport({
         }
         
         setReport(initialReport)
-        
+
+        // Update progress: Patient data loaded
+        setLoadingProgress(10)
+        setLoadingMessage('Patient data loaded, preparing API requests...')
+
         // Normalize patient data BEFORE sending to APIs
         const normalizedPatientData = normalizePatientData(patientData)
         console.log('✅ Normalized patient data:', normalizedPatientData)
-        
+
         // Now fetch only the THREE critical API responses in parallel (report, prescription, examens)
         // Dietary plan will be generated ON-DEMAND when user clicks button
         // Note: chronic-examens uses SSE streaming, so we handle it separately
@@ -1128,6 +1137,14 @@ export default function ChronicProfessionalReport({
           })
 
           const contentType = response.headers.get('content-type')
+          console.log('🔍 SSE Response - Status:', response.status, 'Content-Type:', contentType)
+
+          // Check if response is OK before processing
+          if (!response.ok) {
+            const errorText = await response.text()
+            console.error('❌ SSE Response Error:', errorText)
+            throw new Error(`API error ${response.status}: ${errorText}`)
+          }
 
           if (contentType?.includes('text/event-stream')) {
             // Handle SSE streaming response
@@ -1138,23 +1155,44 @@ export default function ChronicProfessionalReport({
             let buffer = ''
             let result = null
             let currentEvent = ''
+            let eventCount = 0
+            let lastEventType = ''
 
             const processLine = (line: string) => {
               if (line.startsWith('event: ')) {
                 currentEvent = line.slice(7).trim()
+                lastEventType = currentEvent
+                eventCount++
               } else if (line.startsWith('data: ')) {
                 let data: any
                 try {
                   data = JSON.parse(line.slice(6))
-                } catch {
-                  // Skip lines that aren't valid JSON
+                } catch (parseErr) {
+                  console.warn('⚠️ SSE JSON parse failed for line:', line.substring(0, 100))
                   return
+                }
+
+                console.log(`📨 SSE Event #${eventCount}: ${currentEvent || 'unknown'}`,
+                  data.progress ? `(${data.progress}%)` : '',
+                  data.success ? '✅ SUCCESS' : '',
+                  data.error ? `❌ ERROR: ${data.error}` : ''
+                )
+
+                // Update UI progress for SSE events (map 0-100% to 50-90%)
+                if (data.progress !== undefined && currentEvent === 'progress') {
+                  const mappedProgress = Math.round(50 + (data.progress * 0.4))
+                  setLoadingProgress(mappedProgress)
+                  if (data.message) {
+                    setLoadingMessage(data.message)
+                  }
                 }
 
                 // Handle events (JSON parsing succeeded)
                 if (currentEvent === 'complete' || data.success) {
                   result = data
+                  console.log('✅ SSE Complete event received with success:', !!data.success)
                 } else if (currentEvent === 'error' || data.error) {
+                  console.error('❌ SSE Error event:', data)
                   throw new Error(data.details || data.error || 'Unknown error from server')
                 }
               }
@@ -1162,7 +1200,10 @@ export default function ChronicProfessionalReport({
 
             while (true) {
               const { done, value } = await reader.read()
-              if (done) break
+              if (done) {
+                console.log('📭 SSE Stream ended. Events received:', eventCount, 'Last event:', lastEventType, 'Has result:', !!result)
+                break
+              }
 
               buffer += decoder.decode(value, { stream: true })
               const lines = buffer.split('\n')
@@ -1175,22 +1216,31 @@ export default function ChronicProfessionalReport({
 
             // Process any remaining data in the buffer
             if (buffer.trim()) {
+              console.log('📝 Processing remaining buffer:', buffer.substring(0, 100))
               const remainingLines = buffer.split('\n')
               for (const line of remainingLines) {
                 processLine(line)
               }
             }
 
-            if (!result) throw new Error('No result from SSE stream')
+            if (!result) {
+              console.error('❌ No result received. Total events:', eventCount, 'Last event type:', lastEventType)
+              throw new Error(`No result from SSE stream (received ${eventCount} events, last: ${lastEventType})`)
+            }
             return result
           } else {
             // Handle regular JSON response
+            console.log('📄 Non-SSE response, parsing as JSON')
             if (!response.ok) {
               throw new Error(`API failed: ${response.statusText}`)
             }
             return response.json()
           }
         }
+
+        // Update progress: Starting API calls
+        setLoadingProgress(20)
+        setLoadingMessage('Generating medical report and prescription...')
 
         const [reportResponse, prescriptionResponse] = await Promise.all([
           fetch("/api/chronic-report", {
@@ -1227,6 +1277,10 @@ export default function ChronicProfessionalReport({
         const reportData = await reportResponse.json()
         const prescriptionData = await prescriptionResponse.json()
 
+        // Update progress: Report and prescription received
+        setLoadingProgress(50)
+        setLoadingMessage('Medical report and prescription generated. Now generating laboratory tests and examinations...')
+
         // Fetch examens with SSE handling (in parallel with above, but handled separately)
         const examensData = await fetchWithSSE("/api/chronic-examens", {
           patientData: normalizedPatientData,
@@ -1236,12 +1290,16 @@ export default function ChronicProfessionalReport({
         })
         
         // NO dietary API call here - will be called on-demand via button
-        
+
+        // Update progress: All data received
+        setLoadingProgress(95)
+        setLoadingMessage('Assembling final report...')
+
         console.log('📊 API Response - Report:', reportData)
         console.log('💊 API Response - Prescription:', prescriptionData)
         console.log('🧪 API Response - Examens:', examensData)
         console.log('ℹ️ Dietary will be generated on-demand via button')
-        
+
         // Update report with API responses
         setReport(prev => {
           if (!prev) return null
@@ -1455,11 +1513,15 @@ export default function ChronicProfessionalReport({
           return updatedReport
         })
         
+        // Update progress: Complete
+        setLoadingProgress(100)
+        setLoadingMessage('Report generated successfully!')
+
         toast({
           title: "Success",
           description: "Professional chronic disease report generated successfully",
         })
-        
+
       } catch (err: any) {
         console.error("Error generating chronic professional report:", err)
         setError(err.message || "Failed to generate report")
@@ -2625,12 +2687,23 @@ export default function ChronicProfessionalReport({
   if (loading) {
     return (
       <Card>
-        <CardContent className="p-12 text-center">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" />
-          <p className="text-lg">Generating comprehensive chronic disease report...</p>
-          <p className="text-sm text-gray-600 mt-2">
-            This may take 30-60 seconds as we generate multiple professional documents
-          </p>
+        <CardContent className="p-12">
+          <div className="flex flex-col items-center">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
+            <p className="text-lg font-medium mb-2">Generating comprehensive chronic disease report...</p>
+            <p className="text-sm text-gray-600 mb-6">
+              {loadingMessage || 'Initializing...'}
+            </p>
+            <div className="w-full max-w-md">
+              <Progress value={loadingProgress} className="h-3 mb-2" />
+              <p className="text-xs text-gray-500 text-center">{loadingProgress}% complete</p>
+            </div>
+            <div className="mt-6 text-xs text-gray-400 space-y-1">
+              <p>• Medical report generation</p>
+              <p>• Prescription processing</p>
+              <p>• Laboratory tests & examinations</p>
+            </div>
+          </div>
         </CardContent>
       </Card>
     )
