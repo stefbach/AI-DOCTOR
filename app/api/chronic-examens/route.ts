@@ -452,12 +452,20 @@ Generate the comprehensive chronic disease exam orders now.`
           let fullContent = ''
           let chunkCount = 0
 
+          let buffer = ''
           while (true) {
             const { done, value } = await reader.read()
-            if (done) break
+            if (done) {
+              // Flush any remaining data in decoder
+              const remaining = decoder.decode()
+              if (remaining) buffer += remaining
+              break
+            }
 
             const chunk = decoder.decode(value, { stream: true })
-            const lines = chunk.split('\n')
+            buffer += chunk
+            const lines = buffer.split('\n')
+            buffer = lines.pop() || '' // Keep incomplete line in buffer
 
             for (const line of lines) {
               if (line.startsWith('data: ')) {
@@ -483,6 +491,28 @@ Generate the comprehensive chronic disease exam orders now.`
             }
           }
 
+          // Process any remaining data in the buffer
+          if (buffer.trim()) {
+            const remainingLines = buffer.split('\n')
+            for (const line of remainingLines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6)
+                if (data === '[DONE]') continue
+                try {
+                  const parsed = JSON.parse(data)
+                  const content = parsed.choices?.[0]?.delta?.content
+                  if (content) {
+                    fullContent += content
+                    chunkCount++
+                  }
+                } catch {
+                  // Skip invalid JSON
+                }
+              }
+            }
+          }
+
+          console.log('📊 OpenAI stream completed:', chunkCount, 'chunks,', fullContent.length, 'chars')
           sendSSE('progress', { message: 'Validating exam orders...', progress: 90 })
 
           // Parse JSON response
@@ -493,14 +523,65 @@ Generate the comprehensive chronic disease exam orders now.`
             throw new Error('No valid JSON found in AI response')
           }
 
+          console.log('📋 JSON matched, length:', jsonMatch[0].length, 'chars')
+
+          // Robust JSON cleanup function to fix control characters in strings
+          const cleanJsonString = (jsonStr: string): string => {
+            let result = ''
+            let inString = false
+            let escaped = false
+
+            for (let i = 0; i < jsonStr.length; i++) {
+              const char = jsonStr[i]
+              const charCode = jsonStr.charCodeAt(i)
+
+              if (escaped) {
+                result += char
+                escaped = false
+                continue
+              }
+
+              if (char === '\\' && inString) {
+                escaped = true
+                result += char
+                continue
+              }
+
+              if (char === '"' && !escaped) {
+                inString = !inString
+                result += char
+                continue
+              }
+
+              // If inside a string and hit a control character, escape it
+              if (inString && charCode < 32) {
+                if (charCode === 10) result += '\\n'
+                else if (charCode === 13) result += '\\r'
+                else if (charCode === 9) result += '\\t'
+                else result += `\\u${charCode.toString(16).padStart(4, '0')}`
+                continue
+              }
+
+              result += char
+            }
+
+            return result
+          }
+
+          const cleanedJson = cleanJsonString(jsonMatch[0])
+
           let examOrdersData
           try {
-            examOrdersData = JSON.parse(jsonMatch[0])
+            examOrdersData = JSON.parse(cleanedJson)
           } catch (parseError: any) {
             console.error('JSON parse error:', parseError.message)
-            console.error('Content that failed to parse:', jsonMatch[0].substring(0, 500))
+            const errorPosition = parseInt(parseError.message.match(/position (\d+)/)?.[1] || '0')
+            console.error('Character at error position:', cleanedJson.charAt(errorPosition), '(code:', cleanedJson.charCodeAt(errorPosition), ')')
+            console.error('Content around error:', cleanedJson.substring(Math.max(0, errorPosition - 50), errorPosition + 50))
             throw new Error(`JSON parse error: ${parseError.message}`)
           }
+
+          console.log('✅ JSON parsed successfully')
 
           // Handle multiple possible structures from OpenAI
           let finalExamOrders = examOrdersData.examOrders || examOrdersData
@@ -568,9 +649,18 @@ Generate the comprehensive chronic disease exam orders now.`
 
         } catch (error: any) {
           console.error('Streaming error:', error)
-          sendSSE('error', { error: 'Failed to generate exam orders', details: error.message })
+          console.error('Error stack:', error.stack)
+          try {
+            sendSSE('error', { error: 'Failed to generate exam orders', details: error.message })
+          } catch (sendError: any) {
+            console.error('Failed to send error event:', sendError.message)
+          }
         } finally {
-          controller.close()
+          try {
+            controller.close()
+          } catch (closeError: any) {
+            console.error('Failed to close controller:', closeError.message)
+          }
         }
       }
     })
