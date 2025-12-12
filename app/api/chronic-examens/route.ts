@@ -454,6 +454,16 @@ Generate the comprehensive chronic disease exam orders now.`
 
           let buffer = ''
           let streamError: Error | null = null
+          let lastProgressTime = Date.now()
+
+          // Keep-alive interval to prevent connection timeout
+          const keepAliveInterval = setInterval(() => {
+            try {
+              sendSSE('heartbeat', { timestamp: Date.now() })
+            } catch {
+              // Ignore heartbeat errors
+            }
+          }, 5000) // Send heartbeat every 5 seconds
 
           try {
             while (true) {
@@ -466,6 +476,7 @@ Generate the comprehensive chronic disease exam orders now.`
                 break
               }
 
+              lastProgressTime = Date.now()
               const chunk = decoder.decode(value, { stream: true })
               buffer += chunk
               const lines = buffer.split('\n')
@@ -500,6 +511,8 @@ Generate the comprehensive chronic disease exam orders now.`
           } catch (readError: any) {
             console.error('❌ Error reading OpenAI stream:', readError.message)
             streamError = readError
+          } finally {
+            clearInterval(keepAliveInterval)
           }
 
           if (streamError) {
