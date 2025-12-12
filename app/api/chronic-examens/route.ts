@@ -480,14 +480,33 @@ Generate the comprehensive chronic disease exam orders now.`
           // Parse JSON response
           const jsonMatch = fullContent.match(/\{[\s\S]*\}/)
           if (!jsonMatch) {
+            console.error('No JSON found in response. Content length:', fullContent.length)
+            console.error('Content preview:', fullContent.substring(0, 500))
             throw new Error('No valid JSON found in AI response')
           }
 
-          const examOrdersData = JSON.parse(jsonMatch[0])
+          let examOrdersData
+          try {
+            examOrdersData = JSON.parse(jsonMatch[0])
+          } catch (parseError: any) {
+            console.error('JSON parse error:', parseError.message)
+            console.error('Content that failed to parse:', jsonMatch[0].substring(0, 500))
+            throw new Error(`JSON parse error: ${parseError.message}`)
+          }
 
-          // Validate essential fields
-          if (!examOrdersData.examOrders || (!examOrdersData.examOrders.laboratoryTests && !examOrdersData.examOrders.paraclinicalExams)) {
-            throw new Error('Incomplete exam orders generated')
+          // Handle both possible structures: { examOrders: {...} } or { success: true, examOrders: {...} } or direct examOrders
+          let finalExamOrders = examOrdersData.examOrders || examOrdersData
+
+          // Validate essential fields - be more flexible
+          const hasLabTests = finalExamOrders.laboratoryTests && Array.isArray(finalExamOrders.laboratoryTests)
+          const hasParaclinical = finalExamOrders.paraclinicalExams && Array.isArray(finalExamOrders.paraclinicalExams)
+
+          if (!hasLabTests && !hasParaclinical) {
+            console.error('Missing exam orders. Keys found:', Object.keys(finalExamOrders))
+            // Try to find any array that looks like tests
+            const possibleKeys = Object.keys(finalExamOrders).filter(k => Array.isArray(finalExamOrders[k]))
+            console.error('Possible array keys:', possibleKeys)
+            throw new Error('Incomplete exam orders generated - no laboratoryTests or paraclinicalExams found')
           }
 
           sendSSE('progress', { message: 'Finalizing...', progress: 95 })
@@ -495,7 +514,7 @@ Generate the comprehensive chronic disease exam orders now.`
           // Send complete result
           sendSSE('complete', {
             success: true,
-            examOrders: examOrdersData.examOrders,
+            examOrders: finalExamOrders,
             orderId: orderId,
             generatedAt: orderDate.toISOString()
           })
