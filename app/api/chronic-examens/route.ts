@@ -455,18 +455,38 @@ Generate the comprehensive chronic disease exam orders now.`
           let buffer = ''
           let streamError: Error | null = null
           let lastProgressTime = Date.now()
+          const MAX_STREAM_DURATION = 55000 // 55 seconds max (before Vercel 60s limit)
 
           // Keep-alive interval to prevent connection timeout
           const keepAliveInterval = setInterval(() => {
             try {
               sendSSE('heartbeat', { timestamp: Date.now() })
-            } catch {
-              // Ignore heartbeat errors
+              console.log('💓 Heartbeat sent')
+            } catch (e) {
+              console.error('❌ Heartbeat failed:', e)
             }
           }, 5000) // Send heartbeat every 5 seconds
 
+          // Timeout protection
+          const timeoutCheck = setInterval(() => {
+            const elapsed = Date.now() - lastProgressTime
+            if (elapsed > 30000) { // 30 seconds without OpenAI data
+              console.error('⏰ OpenAI stream timeout - no data for 30s')
+              streamError = new Error('OpenAI stream timeout - no data received for 30 seconds')
+            }
+            if (Date.now() - lastProgressTime > MAX_STREAM_DURATION) {
+              console.error('⏰ Max stream duration exceeded')
+              streamError = new Error('Maximum stream duration exceeded (55s)')
+            }
+          }, 5000)
+
           try {
             while (true) {
+              if (streamError) {
+                console.error('🛑 Breaking loop due to error:', streamError.message)
+                break
+              }
+
               const { done, value } = await reader.read()
               if (done) {
                 // Flush any remaining data in decoder
@@ -513,10 +533,11 @@ Generate the comprehensive chronic disease exam orders now.`
             streamError = readError
           } finally {
             clearInterval(keepAliveInterval)
+            clearInterval(timeoutCheck)
           }
 
           if (streamError) {
-            throw new Error(`OpenAI stream read error: ${streamError.message}`)
+            throw new Error(`OpenAI stream error: ${streamError.message}`)
           }
 
           // Process any remaining data in the buffer
