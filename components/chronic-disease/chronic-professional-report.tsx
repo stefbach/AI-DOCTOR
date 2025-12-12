@@ -1128,6 +1128,14 @@ export default function ChronicProfessionalReport({
           })
 
           const contentType = response.headers.get('content-type')
+          console.log('🔍 SSE Response - Status:', response.status, 'Content-Type:', contentType)
+
+          // Check if response is OK before processing
+          if (!response.ok) {
+            const errorText = await response.text()
+            console.error('❌ SSE Response Error:', errorText)
+            throw new Error(`API error ${response.status}: ${errorText}`)
+          }
 
           if (contentType?.includes('text/event-stream')) {
             // Handle SSE streaming response
@@ -1138,23 +1146,35 @@ export default function ChronicProfessionalReport({
             let buffer = ''
             let result = null
             let currentEvent = ''
+            let eventCount = 0
+            let lastEventType = ''
 
             const processLine = (line: string) => {
               if (line.startsWith('event: ')) {
                 currentEvent = line.slice(7).trim()
+                lastEventType = currentEvent
+                eventCount++
               } else if (line.startsWith('data: ')) {
                 let data: any
                 try {
                   data = JSON.parse(line.slice(6))
-                } catch {
-                  // Skip lines that aren't valid JSON
+                } catch (parseErr) {
+                  console.warn('⚠️ SSE JSON parse failed for line:', line.substring(0, 100))
                   return
                 }
+
+                console.log(`📨 SSE Event #${eventCount}: ${currentEvent || 'unknown'}`,
+                  data.progress ? `(${data.progress}%)` : '',
+                  data.success ? '✅ SUCCESS' : '',
+                  data.error ? `❌ ERROR: ${data.error}` : ''
+                )
 
                 // Handle events (JSON parsing succeeded)
                 if (currentEvent === 'complete' || data.success) {
                   result = data
+                  console.log('✅ SSE Complete event received with success:', !!data.success)
                 } else if (currentEvent === 'error' || data.error) {
+                  console.error('❌ SSE Error event:', data)
                   throw new Error(data.details || data.error || 'Unknown error from server')
                 }
               }
@@ -1162,7 +1182,10 @@ export default function ChronicProfessionalReport({
 
             while (true) {
               const { done, value } = await reader.read()
-              if (done) break
+              if (done) {
+                console.log('📭 SSE Stream ended. Events received:', eventCount, 'Last event:', lastEventType, 'Has result:', !!result)
+                break
+              }
 
               buffer += decoder.decode(value, { stream: true })
               const lines = buffer.split('\n')
@@ -1175,16 +1198,21 @@ export default function ChronicProfessionalReport({
 
             // Process any remaining data in the buffer
             if (buffer.trim()) {
+              console.log('📝 Processing remaining buffer:', buffer.substring(0, 100))
               const remainingLines = buffer.split('\n')
               for (const line of remainingLines) {
                 processLine(line)
               }
             }
 
-            if (!result) throw new Error('No result from SSE stream')
+            if (!result) {
+              console.error('❌ No result received. Total events:', eventCount, 'Last event type:', lastEventType)
+              throw new Error(`No result from SSE stream (received ${eventCount} events, last: ${lastEventType})`)
+            }
             return result
           } else {
             // Handle regular JSON response
+            console.log('📄 Non-SSE response, parsing as JSON')
             if (!response.ok) {
               throw new Error(`API failed: ${response.statusText}`)
             }
