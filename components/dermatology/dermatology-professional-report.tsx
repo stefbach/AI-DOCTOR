@@ -155,9 +155,9 @@ const createEmptyReport = (): MauritianReport => ({
  nom: "Dr. [Name Required]",
  qualifications: "MBBS",
  specialite: "General Medicine",
- adresseCabinet: "Tibok Teleconsultation Platform",
+ adresseCabinet: "",
  email: "[Email Required]",
- heuresConsultation: "Teleconsultation Hours: 8:00 AM - 8:00 PM",
+ heuresConsultation: "",
  numeroEnregistrement: "[MCM Registration Required]"
  },
  patient: {
@@ -902,9 +902,9 @@ export default function ProfessionalReportEditable({
  nom: "Dr. [Name Required]",
  qualifications: "MBBS",
  specialite: "General Medicine",
- adresseCabinet: "Tibok Teleconsultation Platform",
+ adresseCabinet: "",
  email: "[Email Required]",
- heuresConsultation: "Teleconsultation Hours: 8:00 AM - 8:00 PM",
+ heuresConsultation: "",
  numeroEnregistrement: "[MCM Registration Required]",
  signatureUrl: null,
  digitalSignature: null
@@ -1607,9 +1607,9 @@ const doctorInfoFromTibok = {
  'Dr. [Name Required]',
  qualifications: tibokDoctorData.qualifications || 'MBBS',
  specialite: tibokDoctorData.specialty || 'General Medicine',
- adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
+ adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || '',
  email: tibokDoctorData.email || '[Email Required]',
- heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+ heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || '',
  numeroEnregistrement: (() => {
  const mcmNumber = tibokDoctorData.mcm_reg_no || 
  tibokDoctorData.medicalCouncilNumber || 
@@ -2108,9 +2108,14 @@ if (isRenewal) {
  currentMedications: (() => {
  const meds = diagnosisData?.currentMedicationsValidated || []
  if (Array.isArray(meds) && meds.length > 0) {
- return meds.map((med: any, idx: number) => 
- `${idx + 1}. ${med.name || med.medication_name}${med.dosage ? ` - ${med.dosage}` : ''}${med.frequency ? ` - ${med.frequency}` : ''}`
- ).join('\n')
+ return meds.map((med: any, idx: number) => {
+ const name = med.name || med.medication_name || ''
+ const dosage = med.dosage || ''
+ // Avoid duplicate dosage if name already contains it
+ const dosageStr = dosage && !name.toLowerCase().includes(dosage.toLowerCase()) ? ` - ${dosage}` : ''
+ const frequencyStr = med.frequency ? ` - ${med.frequency}` : ''
+ return `${idx + 1}. ${name}${dosageStr}${frequencyStr}`
+ }).join('\n')
  }
  return validPatientData?.currentMedicationsText || 'No current medications'
  })(),
@@ -3692,7 +3697,7 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
  ref={(el) => { inputRefs.current['heuresConsultation'] = el }}
  value={localDoctorInfo.heuresConsultation}
  onChange={(e) => handleDoctorFieldChange('heuresConsultation', e.target.value)}
- placeholder="Teleconsultation Hours: 8:00 AM - 8:00 PM"
+ placeholder="Consultation Hours"
  />
  </div>
  <div className="col-span-2">
@@ -3785,7 +3790,7 @@ const ConsultationReport = () => {
  <h4 className="font-semibold text-sm text-gray-700 mb-2">Personal Information</h4>
  <div className="grid grid-cols-2 gap-3 text-sm">
  <div><span className="font-medium">Patient:</span> {patient.nomComplet || patient.nom}</div>
- <div><span className="font-medium">Age:</span> {patient.age} years</div>
+ <div><span className="font-medium">Age:</span> {patient.age}</div>
  <div><span className="font-medium">Gender:</span> {patient.sexe}</div>
  <div><span className="font-medium">DOB:</span> {patient.dateNaissance}</div>
  {patient.identifiantNational && (
@@ -4141,11 +4146,7 @@ const ConsultationReport = () => {
  )}
  </div>
 
- <div className="mt-8 pt-4 border-t border-gray-200 text-sm text-gray-600">
- <p>{metadata.complianceNote}</p>
- <p>Word count: {metadata.wordCount}</p>
- </div>
-
+ 
  <div className="mt-12 pt-8 border-t border-gray-300 signature">
  <div className="text-right">
  <p className="font-semibold">{praticien.nom}</p>

@@ -39,13 +39,21 @@ export default function DermatologyDiagnosisForm(props: Props) {
     }
   }
 
+  // Auto-generate diagnosis on component mount
+  useEffect(() => {
+    if (!diagnosis && !isGenerating) {
+      generateDiagnosis()
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div className="space-y-6">
       {!diagnosis ? (
         <div className="text-center py-12">
-          <Button onClick={generateDiagnosis} disabled={isGenerating} size="lg" className="bg-gradient-to-r from-teal-600 to-cyan-600">
-            {isGenerating ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" />Generating Diagnosis...</> : <><Brain className="h-5 w-5 mr-2" />Generate AI Diagnosis</>}
-          </Button>
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+            <p className="text-gray-600">Generating AI Diagnosis...</p>
+          </div>
         </div>
       ) : (
         <>
