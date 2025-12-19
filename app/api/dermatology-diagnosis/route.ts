@@ -11,6 +11,37 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
+// ==================== DATA ANONYMIZATION ====================
+function anonymizePatientData(patientData: any): {
+  anonymized: any,
+  originalIdentity: any,
+  anonymousId: string
+} {
+  const originalIdentity = {
+    firstName: patientData?.firstName || '',
+    lastName: patientData?.lastName || '',
+    name: patientData?.name || '',
+    email: patientData?.email || '',
+    phone: patientData?.phone || '',
+    address: patientData?.address || '',
+    nationalId: patientData?.nationalId || ''
+  }
+
+  const anonymized = { ...patientData }
+  const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'nationalId']
+
+  sensitiveFields.forEach(field => {
+    delete anonymized[field]
+  })
+
+  const anonymousId = `ANON-DD-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+  anonymized.anonymousId = anonymousId
+
+  console.log('🔒 Patient data anonymized for dermatology diagnosis')
+
+  return { anonymized, originalIdentity, anonymousId }
+}
+
 // ==================== HELPER FUNCTIONS ====================
 
 /**
@@ -490,8 +521,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { patientData, imageData, ocrAnalysisData, questionsData } = body
 
+    // Anonymize patient data before sending to AI
+    const { anonymized: anonymizedPatient, originalIdentity, anonymousId } = anonymizePatientData(patientData)
+
     console.log(`🔬 Starting specialized dermatology diagnosis v3.0`)
-    console.log(`👤 Patient: ${patientData.firstName} ${patientData.lastName}`)
+    console.log(`👤 Patient ID: ${anonymousId} (anonymized)`)
     console.log(`📸 Image analysis available: ${ocrAnalysisData ? 'Yes' : 'No'}`)
     console.log(`❓ Questions answered: ${Object.keys(questionsData?.answers || {}).length}`)
 
@@ -562,29 +596,30 @@ ${summary}
     const questionsAnswers = formatQuestionsAnswers(questionsData?.answers || {}, questionsData?.questions || [])
     
     // Detect consultation type based on current medications and chief complaint
-    const hasCurrentMedications = patientData.currentMedications && patientData.currentMedications.length > 0
+    const hasCurrentMedications = anonymizedPatient.currentMedications && anonymizedPatient.currentMedications.length > 0
     const questionsText = questionsAnswers.toLowerCase()
     const isLikelyRenewal = hasCurrentMedications && (
-      questionsText.includes('renewal') || 
-      questionsText.includes('refill') || 
+      questionsText.includes('renewal') ||
+      questionsText.includes('refill') ||
       questionsText.includes('continue') ||
       questionsText.includes('same treatment') ||
       questionsText.includes('renouvellement')
     )
     const consultationType = isLikelyRenewal ? 'renewal' : 'new_problem'
-    
+
     console.log(`📋 Consultation type: ${consultationType}`)
     if (hasCurrentMedications) {
-      console.log(`💊 Patient has current medications: ${patientData.currentMedications}`)
+      console.log(`💊 Patient has current medications: ${anonymizedPatient.currentMedications}`)
     }
 
     // Format current medications properly for GPT-4
-    const currentMedicationsFormatted = hasCurrentMedications 
-      ? (Array.isArray(patientData.currentMedications) 
-          ? patientData.currentMedications.map((med, idx) => `${idx + 1}. ${med}`).join('\n  ')
-          : patientData.currentMedications)
+    const currentMedicationsFormatted = hasCurrentMedications
+      ? (Array.isArray(anonymizedPatient.currentMedications)
+          ? anonymizedPatient.currentMedications.map((med: string, idx: number) => `${idx + 1}. ${med}`).join('\n  ')
+          : anonymizedPatient.currentMedications)
       : 'None reported'
 
+    // ANONYMIZED diagnostic prompt - no personal identifiers sent to AI
     const diagnosticPrompt = `You are a board-certified dermatologist with over 20 years of experience in diagnosing and treating skin conditions.
 
 🎯 MAURITIUS MEDICAL STANDARDS + DCI COMPLIANCE:
@@ -594,12 +629,12 @@ You MUST use PRECISE pharmaceutical nomenclature with DCI for ALL dermatology me
 - Use UK dosing format: OD (once daily), BD (twice daily), TDS (three times daily), QDS (four times daily)
 
 PATIENT INFORMATION:
-- Name: ${patientData.firstName} ${patientData.lastName}
-- Age: ${patientData.age}
-- Gender: ${patientData.gender}
-- Medical History: ${patientData.medicalHistory?.join(', ') || 'None reported'}
-- Known Allergies: ${patientData.allergies?.join(', ') || 'None reported'}
-- Current Medications: 
+- Patient ID: ${anonymousId}
+- Age: ${anonymizedPatient.age}
+- Gender: ${anonymizedPatient.gender}
+- Medical History: ${anonymizedPatient.medicalHistory?.join(', ') || 'None reported'}
+- Known Allergies: ${anonymizedPatient.allergies?.join(', ') || 'None reported'}
+- Current Medications:
   ${currentMedicationsFormatted}
 
 IMAGE ANALYSIS FROM OCR/AI (🚨 CRITICAL PRIMARY DIAGNOSTIC DATA):
@@ -1037,9 +1072,9 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
       timestamp: new Date().toISOString(),
       diagnosisId: `DERM-DX-${Date.now()}`,
       patientInfo: {
-        firstName: patientData.firstName,
-        lastName: patientData.lastName,
-        age: patientData.age
+        firstName: originalIdentity.firstName,
+        lastName: originalIdentity.lastName,
+        age: anonymizedPatient.age
       },
       
       // ========== TOP-LEVEL MEDICATIONS (MATCH NORMAL WORKFLOW) ==========

@@ -3,6 +3,37 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
+// ==================== DATA ANONYMIZATION ====================
+function anonymizePatientData(patientData: any): {
+  anonymized: any,
+  originalIdentity: any,
+  anonymousId: string
+} {
+  const originalIdentity = {
+    firstName: patientData?.firstName || '',
+    lastName: patientData?.lastName || '',
+    name: patientData?.name || '',
+    email: patientData?.email || '',
+    phone: patientData?.phone || '',
+    address: patientData?.address || '',
+    nationalId: patientData?.nationalId || ''
+  }
+
+  const anonymized = { ...patientData }
+  const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'nationalId']
+
+  sensitiveFields.forEach(field => {
+    delete anonymized[field]
+  })
+
+  const anonymousId = `ANON-OCR-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+  anonymized.anonymousId = anonymousId
+
+  console.log('🔒 Patient data anonymized for dermatology OCR')
+
+  return { anonymized, originalIdentity, anonymousId }
+}
+
 // ==================== VALIDATION FUNCTIONS ====================
 
 /**
@@ -124,20 +155,22 @@ function validateClinicalScoring(analysis: any): { isValid: boolean; issues: str
 
 /**
  * Calls OpenAI Vision API with retry mechanism and quality validation
+ * Uses anonymized patient data - no personal identifiers sent to AI
  */
 async function callOpenAIVisionWithRetry(
   openai: OpenAI,
   images: any[],
-  patientData: any,
+  anonymizedPatient: any,
+  anonymousId: string,
   additionalNotes: string,
   maxRetries: number = 2
 ): Promise<any> {
   let lastError: Error | null = null
-  
+
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       console.log(`📡 OpenAI Vision call attempt ${attempt + 1}/${maxRetries + 1}`)
-      
+
       // Prepare image messages
       const imageMessages: any[] = images.map((img: any) => ({
         type: "image_url",
@@ -146,14 +179,14 @@ async function callOpenAIVisionWithRetry(
           detail: "high"
         }
       }))
-      
-      // Create base prompt
+
+      // Create base prompt - ANONYMIZED
       let analysisPrompt = `You are an expert dermatologist with advanced training in skin condition analysis and dermoscopy.
 
 PATIENT INFORMATION:
-- Name: ${patientData.firstName} ${patientData.lastName}
-- Age: ${patientData.age}
-- Gender: ${patientData.gender}
+- Patient ID: ${anonymousId}
+- Age: ${anonymizedPatient.age}
+- Gender: ${anonymizedPatient.gender}
 ${additionalNotes ? `\nCLINICAL NOTES:\n${additionalNotes}` : ''}
 
 Analyze the provided skin condition image(s) in comprehensive detail.`
@@ -411,18 +444,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`🔬 Starting dermatology OCR analysis v2.0 for ${images.length} image(s)`)
-    console.log(`👤 Patient: ${patientData.firstName} ${patientData.lastName}`)
+    // Anonymize patient data before sending to AI
+    const { anonymized: anonymizedPatient, originalIdentity, anonymousId } = anonymizePatientData(patientData)
 
-    // Call OpenAI Vision with retry mechanism and quality validation
+    console.log(`🔬 Starting dermatology OCR analysis v2.0 for ${images.length} image(s)`)
+    console.log(`👤 Patient ID: ${anonymousId} (anonymized)`)
+
+    // Call OpenAI Vision with retry mechanism and quality validation - using anonymized data
     const result = await callOpenAIVisionWithRetry(
-      openai, 
-      images, 
-      patientData, 
-      additionalNotes || '', 
+      openai,
+      images,
+      anonymizedPatient,
+      anonymousId,
+      additionalNotes || '',
       2
     )
-    
+
     const analysisData = result.analysis
 
     const response = {
@@ -430,10 +467,10 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
       analysisId: `DERM-OCR-${Date.now()}`,
       patientInfo: {
-        firstName: patientData.firstName,
-        lastName: patientData.lastName,
-        age: patientData.age,
-        gender: patientData.gender
+        firstName: originalIdentity.firstName,
+        lastName: originalIdentity.lastName,
+        age: anonymizedPatient.age,
+        gender: anonymizedPatient.gender
       },
       images: {
         count: images.length,

@@ -112,9 +112,6 @@ export default function ChronicClinicalForm({
  if (!formData.heartRate) {
  newErrors.heartRate = "Heart rate is required"
  }
- if (!formData.bloodGlucose) {
- newErrors.bloodGlucose = "Blood glucose is required"
- }
  if (!formData.weight) {
  newErrors.weight = "Weight is required"
  }
@@ -272,7 +269,7 @@ export default function ChronicClinicalForm({
  <CardHeader className="bg-gradient-to-r from-blue-100 to-cyan-100">
  <CardTitle className="flex items-center gap-2">
  <Activity className="h-5 w-5 text-blue-600" />
- 2. Vital Signs (All Required)
+ 2. Vital Signs
  </CardTitle>
  </CardHeader>
  <CardContent className="p-6 space-y-4">
@@ -320,7 +317,7 @@ export default function ChronicClinicalForm({
 
  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
  <div>
- <Label htmlFor="bloodGlucose">Blood Glucose (g/L) *</Label>
+ <Label htmlFor="bloodGlucose">Blood Glucose (g/L)</Label>
  <Input
  id="bloodGlucose"
  type="number"

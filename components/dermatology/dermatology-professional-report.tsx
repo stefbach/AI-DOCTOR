@@ -155,9 +155,9 @@ const createEmptyReport = (): MauritianReport => ({
  nom: "Dr. [Name Required]",
  qualifications: "MBBS",
  specialite: "General Medicine",
- adresseCabinet: "Tibok Teleconsultation Platform",
+ adresseCabinet: "",
  email: "[Email Required]",
- heuresConsultation: "Teleconsultation Hours: 8:00 AM - 8:00 PM",
+ heuresConsultation: "",
  numeroEnregistrement: "[MCM Registration Required]"
  },
  patient: {
@@ -902,9 +902,9 @@ export default function ProfessionalReportEditable({
  nom: "Dr. [Name Required]",
  qualifications: "MBBS",
  specialite: "General Medicine",
- adresseCabinet: "Tibok Teleconsultation Platform",
+ adresseCabinet: "",
  email: "[Email Required]",
- heuresConsultation: "Teleconsultation Hours: 8:00 AM - 8:00 PM",
+ heuresConsultation: "",
  numeroEnregistrement: "[MCM Registration Required]",
  signatureUrl: null,
  digitalSignature: null
@@ -1607,9 +1607,9 @@ const doctorInfoFromTibok = {
  'Dr. [Name Required]',
  qualifications: tibokDoctorData.qualifications || 'MBBS',
  specialite: tibokDoctorData.specialty || 'General Medicine',
- adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
+ adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || '',
  email: tibokDoctorData.email || '[Email Required]',
- heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
+ heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || '',
  numeroEnregistrement: (() => {
  const mcmNumber = tibokDoctorData.mcm_reg_no || 
  tibokDoctorData.medicalCouncilNumber || 
@@ -2108,9 +2108,14 @@ if (isRenewal) {
  currentMedications: (() => {
  const meds = diagnosisData?.currentMedicationsValidated || []
  if (Array.isArray(meds) && meds.length > 0) {
- return meds.map((med: any, idx: number) => 
- `${idx + 1}. ${med.name || med.medication_name}${med.dosage ? ` - ${med.dosage}` : ''}${med.frequency ? ` - ${med.frequency}` : ''}`
- ).join('\n')
+ return meds.map((med: any, idx: number) => {
+ const name = med.name || med.medication_name || ''
+ const dosage = med.dosage || ''
+ // Avoid duplicate dosage if name already contains it
+ const dosageStr = dosage && !name.toLowerCase().includes(dosage.toLowerCase()) ? ` - ${dosage}` : ''
+ const frequencyStr = med.frequency ? ` - ${med.frequency}` : ''
+ return `${idx + 1}. ${name}${dosageStr}${frequencyStr}`
+ }).join('\n')
  }
  return validPatientData?.currentMedicationsText || 'No current medications'
  })(),
@@ -3692,7 +3697,7 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
  ref={(el) => { inputRefs.current['heuresConsultation'] = el }}
  value={localDoctorInfo.heuresConsultation}
  onChange={(e) => handleDoctorFieldChange('heuresConsultation', e.target.value)}
- placeholder="Teleconsultation Hours: 8:00 AM - 8:00 PM"
+ placeholder="Consultation Hours"
  />
  </div>
  <div className="col-span-2">
@@ -3706,8 +3711,12 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
  <div><strong>Speciality:</strong> {doctorInfo.specialite}</div>
  <div><strong>Medical Council No.:</strong> {doctorInfo.numeroEnregistrement}</div>
  <div><strong>Email:</strong> {doctorInfo.email}</div>
+ {doctorInfo.adresseCabinet && !doctorInfo.adresseCabinet.toLowerCase().includes('tibok') && (
  <div className="col-span-2"><strong>Clinic Address:</strong> {doctorInfo.adresseCabinet}</div>
- <div className="col-span-2"><strong>Consultation Hours:</strong> {doctorInfo.heuresConsultation}</div>
+ )}
+ {doctorInfo.heuresConsultation && (
+ <div className="col-span-2"><strong>Consultation Hours:</strong> {doctorInfo.heuresConsultation.replace(/^Teleconsultation Hours:\s*/i, '').replace(/8:00\s*PM/gi, '00:00').replace(/8:00\s*pm/gi, '00:00')}</div>
+ )}
  </div>
  )}
  </CardContent>
@@ -3767,8 +3776,9 @@ const ConsultationReport = () => {
  <div>{praticien.specialite}</div>
  <div>Medical Council Reg: {praticien.numeroEnregistrement}</div>
  <div>{praticien.email}</div>
- <div className="col-span-2">{praticien.adresseCabinet}</div>
- <div className="col-span-2">{praticien.heuresConsultation}</div>
+ {praticien.heuresConsultation && (
+ <div className="col-span-2">Consultation Hours: {praticien.heuresConsultation.replace(/^Teleconsultation Hours:\s*/i, '').replace(/8:00\s*PM/gi, '00:00').replace(/8:00\s*pm/gi, '00:00')}</div>
+ )}
  </div>
  </div>
 
@@ -3785,7 +3795,7 @@ const ConsultationReport = () => {
  <h4 className="font-semibold text-sm text-gray-700 mb-2">Personal Information</h4>
  <div className="grid grid-cols-2 gap-3 text-sm">
  <div><span className="font-medium">Patient:</span> {patient.nomComplet || patient.nom}</div>
- <div><span className="font-medium">Age:</span> {patient.age} years</div>
+ <div><span className="font-medium">Age:</span> {patient.age}</div>
  <div><span className="font-medium">Gender:</span> {patient.sexe}</div>
  <div><span className="font-medium">DOB:</span> {patient.dateNaissance}</div>
  {patient.identifiantNational && (
@@ -4141,18 +4151,13 @@ const ConsultationReport = () => {
  )}
  </div>
 
- <div className="mt-8 pt-4 border-t border-gray-200 text-sm text-gray-600">
- <p>{metadata.complianceNote}</p>
- <p>Word count: {metadata.wordCount}</p>
- </div>
-
+ 
  <div className="mt-12 pt-8 border-t border-gray-300 signature">
  <div className="text-right">
  <p className="font-semibold">{praticien.nom}</p>
  <p className="text-sm text-gray-600">{praticien.qualifications}</p>
  <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
- <p className="text-sm text-gray-600">{praticien.adresseCabinet}</p>
- 
+
  {validationStatus === 'validated' && documentSignatures.consultation ? (
  <div className="mt-4">
  <img 

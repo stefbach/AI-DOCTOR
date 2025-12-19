@@ -7,22 +7,56 @@ export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
 export const maxDuration = 60 // 60 seconds for GPT-4 dietary plan generation
 
+// ==================== DATA ANONYMIZATION ====================
+function anonymizePatientData(patientData: any): {
+  anonymized: any,
+  originalIdentity: any,
+  anonymousId: string
+} {
+  const originalIdentity = {
+    firstName: patientData?.firstName || '',
+    lastName: patientData?.lastName || '',
+    name: patientData?.name || '',
+    email: patientData?.email || '',
+    phone: patientData?.phone || '',
+    address: patientData?.address || '',
+    nationalId: patientData?.nationalId || ''
+  }
+
+  const anonymized = { ...patientData }
+  const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'nationalId']
+
+  sensitiveFields.forEach(field => {
+    delete anonymized[field]
+  })
+
+  const anonymousId = `ANON-DIET-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+  anonymized.anonymousId = anonymousId
+
+  console.log('🔒 Patient data anonymized for dietary protocol')
+
+  return { anonymized, originalIdentity, anonymousId }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { patientData, diagnosisData, clinicalData } = await req.json()
 
-    const weight = parseFloat(patientData.weight)
-    const heightInMeters = parseFloat(patientData.height) / 100
+    // Anonymize patient data before sending to AI
+    const { anonymized: anonymizedPatient, originalIdentity, anonymousId } = anonymizePatientData(patientData)
+
+    const weight = parseFloat(anonymizedPatient.weight)
+    const heightInMeters = parseFloat(anonymizedPatient.height) / 100
     const bmi = weight / (heightInMeters * heightInMeters)
-    const age = parseInt(patientData.age) || 40
-    const gender = patientData.gender?.toLowerCase() || 'male'
+    const age = parseInt(anonymizedPatient.age) || 40
+    const gender = anonymizedPatient.gender?.toLowerCase() || 'male'
 
     // CALCULATE BASAL METABOLIC RATE (BMR) using Mifflin-St Jeor Equation
     let bmr = 0
     if (gender === 'male' || gender === 'm' || gender === 'homme') {
-      bmr = (10 * weight) + (6.25 * parseFloat(patientData.height)) - (5 * age) + 5
+      bmr = (10 * weight) + (6.25 * parseFloat(anonymizedPatient.height)) - (5 * age) + 5
     } else {
-      bmr = (10 * weight) + (6.25 * parseFloat(patientData.height)) - (5 * age) - 161
+      bmr = (10 * weight) + (6.25 * parseFloat(anonymizedPatient.height)) - (5 * age) - 161
     }
 
     // CALCULATE TOTAL DAILY ENERGY EXPENDITURE (TDEE)
@@ -69,10 +103,10 @@ export async function POST(req: NextRequest) {
     // DETERMINE MACRO DISTRIBUTION based on chronic conditions
     let carbsPercent = 50, proteinPercent = 20, fatPercent = 30
     
-    const hasDiabetes = patientData.medicalHistory?.some((condition: string) => 
+    const hasDiabetes = anonymizedPatient.medicalHistory?.some((condition: string) =>
       condition.toLowerCase().includes('diabet') || condition.toLowerCase().includes('glyc')
     )
-    const hasHypertension = patientData.medicalHistory?.some((condition: string) => 
+    const hasHypertension = anonymizedPatient.medicalHistory?.some((condition: string) =>
       condition.toLowerCase().includes('hypertension') || condition.toLowerCase().includes('tension')
     )
     
@@ -165,14 +199,15 @@ ${bmi >= 30 ? '- OBESITY: High protein for satiety, high fiber, portion control 
 
 Use Mauritius-appropriate foods (rice, dholl puri, rougaille, fish, tropical fruits).`
 
+    // ANONYMIZED patient context - no personal identifiers sent to AI
     const patientContext = `
-PATIENT: ${patientData.firstName} ${patientData.lastName}
+PATIENT: ${anonymousId}
 AGE: ${age} years | GENDER: ${gender}
-WEIGHT: ${weight} kg | HEIGHT: ${patientData.height} cm | BMI: ${bmi.toFixed(1)}
+WEIGHT: ${weight} kg | HEIGHT: ${anonymizedPatient.height} cm | BMI: ${bmi.toFixed(1)}
 
-CHRONIC CONDITIONS: ${(patientData.medicalHistory || []).join(', ') || 'None'}
-ALLERGIES: ${Array.isArray(patientData.allergies) ? patientData.allergies.join(', ') : (patientData.allergies || 'None')}
-MEDICATIONS: ${patientData.currentMedicationsText || 'None'}
+CHRONIC CONDITIONS: ${(anonymizedPatient.medicalHistory || []).join(', ') || 'None'}
+ALLERGIES: ${Array.isArray(anonymizedPatient.allergies) ? anonymizedPatient.allergies.join(', ') : (anonymizedPatient.allergies || 'None')}
+MEDICATIONS: ${anonymizedPatient.currentMedicationsText || 'None'}
 
 VITAL SIGNS:
 - BP: ${clinicalData?.vitalSigns?.bloodPressureSystolic || '?'}/${clinicalData?.vitalSigns?.bloodPressureDiastolic || '?'} mmHg

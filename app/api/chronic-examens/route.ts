@@ -10,6 +10,37 @@ export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
 export const maxDuration = 60
 
+// ==================== DATA ANONYMIZATION ====================
+function anonymizePatientData(patientData: any): {
+  anonymized: any,
+  originalIdentity: any,
+  anonymousId: string
+} {
+  const originalIdentity = {
+    firstName: patientData?.firstName || '',
+    lastName: patientData?.lastName || '',
+    name: patientData?.name || '',
+    email: patientData?.email || '',
+    phone: patientData?.phone || '',
+    address: patientData?.address || '',
+    nationalId: patientData?.nationalId || ''
+  }
+
+  const anonymized = { ...patientData }
+  const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'nationalId']
+
+  sensitiveFields.forEach(field => {
+    delete anonymized[field]
+  })
+
+  const anonymousId = `ANON-EXM-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+  anonymized.anonymousId = anonymousId
+
+  console.log('🔒 Patient data anonymized for chronic examens')
+
+  return { anonymized, originalIdentity, anonymousId }
+}
+
 // ==================== HELPER FUNCTIONS ====================
 
 async function callOpenAI(
@@ -60,31 +91,34 @@ export async function POST(req: NextRequest) {
   try {
     const { patientData, clinicalData, diagnosisData } = await req.json()
 
+    // Anonymize patient data before sending to AI
+    const { anonymized: anonymizedPatient, originalIdentity, anonymousId } = anonymizePatientData(patientData)
+
     // Get current date for exam orders
     const orderDate = new Date()
     const orderId = `EXM-CHR-${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}-${String(orderDate.getDate()).padStart(2, '0')}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`
 
     // Calculate BMI
-    const weight = parseFloat(patientData.weight) || 70
-    const heightInMeters = (parseFloat(patientData.height) || 170) / 100
+    const weight = parseFloat(anonymizedPatient.weight) || 70
+    const heightInMeters = (parseFloat(anonymizedPatient.height) || 170) / 100
     const bmi = weight / (heightInMeters * heightInMeters)
 
     // Detect chronic diseases
-    const chronicDiseases = patientData.medicalHistory || []
+    const chronicDiseases = anonymizedPatient.medicalHistory || []
     const hasDiabetes = chronicDiseases.some((d: string) =>
       d.toLowerCase().includes('diabetes') || d.toLowerCase().includes('diabète'))
     const hasHypertension = chronicDiseases.some((d: string) =>
       d.toLowerCase().includes('hypertension') || d.toLowerCase().includes('hta'))
 
-    // Build patient context (shared across all calls)
+    // Build patient context (shared across all calls) - ANONYMIZED
     const patientContext = `
-PATIENT: ${patientData.firstName} ${patientData.lastName}, ${patientData.age} ans, ${patientData.gender}
-POIDS: ${weight} kg | TAILLE: ${patientData.height} cm | IMC: ${bmi.toFixed(1)}
+PATIENT: ${anonymousId}, ${anonymizedPatient.age} ans, ${anonymizedPatient.gender}
+POIDS: ${weight} kg | TAILLE: ${anonymizedPatient.height} cm | IMC: ${bmi.toFixed(1)}
 MALADIES CHRONIQUES: ${chronicDiseases.join(', ') || 'Aucune déclarée'}
 PA: ${clinicalData?.vitalSigns?.bloodPressureSystolic || '?'}/${clinicalData?.vitalSigns?.bloodPressureDiastolic || '?'} mmHg
 GLYCÉMIE: ${clinicalData?.vitalSigns?.bloodGlucose || '?'} g/L
-MÉDICAMENTS ACTUELS: ${patientData.currentMedications || patientData.currentMedicationsText || 'Aucun'}
-ALLERGIES: ${patientData.allergies || 'Aucune'}
+MÉDICAMENTS ACTUELS: ${anonymizedPatient.currentMedications || anonymizedPatient.currentMedicationsText || 'Aucun'}
+ALLERGIES: ${anonymizedPatient.allergies || 'Aucune'}
 MOTIF: ${clinicalData?.chiefComplaint || 'Suivi maladie chronique'}
 DIABETES: ${hasDiabetes ? 'OUI' : 'NON'}
 HYPERTENSION: ${hasHypertension ? 'OUI' : 'NON'}
