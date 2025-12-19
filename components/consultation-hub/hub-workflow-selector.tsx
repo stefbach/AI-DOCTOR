@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -13,7 +13,8 @@ import {
   ArrowRight,
   FileText,
   User,
-  CheckCircle
+  CheckCircle,
+  RefreshCw
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { ConsultationType } from '@/lib/consultation-hub/route-decision'
@@ -34,6 +35,35 @@ export interface HubWorkflowSelectorProps {
 
 export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelectorProps) {
   const router = useRouter()
+  const hasRefreshed = useRef(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  // Auto-refresh on mount to get latest consultation type from Tibok
+  useEffect(() => {
+    // Check if we already refreshed this session to avoid infinite loop
+    const alreadyRefreshed = sessionStorage.getItem('hubWorkflowRefreshed')
+
+    if (!alreadyRefreshed && !hasRefreshed.current) {
+      hasRefreshed.current = true
+      sessionStorage.setItem('hubWorkflowRefreshed', 'true')
+
+      console.log('🔄 Auto-refreshing to get latest consultation type from Tibok...')
+      setIsRefreshing(true)
+
+      // Small delay to show the refreshing state, then refresh
+      setTimeout(() => {
+        router.refresh()
+      }, 500)
+    }
+
+    // Cleanup: remove the flag when navigating away
+    return () => {
+      // Don't remove on unmount during refresh, only when truly leaving
+      if (!isRefreshing) {
+        sessionStorage.removeItem('hubWorkflowRefreshed')
+      }
+    }
+  }, [router, isRefreshing])
 
   // Get the consultation type from Tibok (patient's choice)
   const tibokSpecialty = patientData?.tibokPatientInfo?.consultation_specialty
@@ -79,6 +109,9 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
 
   const handleProceed = (pathOverride?: string) => {
     const selectedPath = pathOverride || selectedWorkflow || routeDecision.recommendedPath
+
+    // Clear the refresh flag so next time we come back it will refresh again
+    sessionStorage.removeItem('hubWorkflowRefreshed')
 
     // Mark that we're coming from the consultation hub (to prevent redirect loop)
     sessionStorage.setItem('fromConsultationHub', 'true')
@@ -336,6 +369,17 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
       </div>
     ) : null
   )
+
+  // ============ REFRESHING STATE ============
+  if (isRefreshing) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 space-y-4">
+        <RefreshCw className="h-8 w-8 text-blue-600 animate-spin" />
+        <p className="text-gray-600">Mise à jour des informations...</p>
+        <p className="text-xs text-gray-400">Récupération du type de consultation depuis Tibok</p>
+      </div>
+    )
+  }
 
   // ============ DERMATOLOGY PATH ============
   if (isDermatologyFromTibok) {
