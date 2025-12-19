@@ -168,7 +168,8 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
     "present": true/false,
     "currentBMI": "${bmi.toFixed(1)}",
     "category": "Normal/Overweight/Obesity Class I/II/III",
-    "targetWeight": "poids cible en kg",
+    "currentWeight": "${weight}",
+    "targetWeight": "target weight NUMBER ONLY without unit (e.g., 75)",
     "riskFactors": ["facteur 1"]
   },
   "overallAssessment": {

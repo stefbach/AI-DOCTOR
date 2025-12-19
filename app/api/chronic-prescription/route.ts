@@ -41,7 +41,7 @@ CRITICAL REQUIREMENTS:
    - Dosage form (comprimé, gélule, injection, etc.)
    - Strength (mg, UI, etc.)
    - Posology (precise dosage, frequency, timing)
-   - Treatment duration (for chronic disease: usually "Traitement au long cours" or specific duration)
+   - Treatment duration (for chronic disease: usually "Long-term ongoing treatment" or specific duration)
    - Quantity to dispense
    - Renewals (usually renewable for chronic medications)
    - Administration instructions
@@ -112,7 +112,7 @@ Return ONLY valid JSON with this EXACT structure:
         },
         "treatment": {
           "treatmentType": "LONG-TERM CHRONIC|SHORT-TERM INITIATION|ADJUSTMENT",
-          "duration": "duration or 'Traitement au long cours'",
+          "duration": "duration or 'Long-term ongoing treatment'",
           "totalQuantity": "quantity to dispense (with unit)",
           "renewals": "renewable or not",
           "renewalInstructions": "renewal instructions"
@@ -293,7 +293,7 @@ PRESCRIPTION INSTRUCTIONS:
    - Atorvastatine: 10-80mg 1x/jour
    - Gliclazide: 30-120mg 1x/jour
    - Amlodipine: 5-10mg 1x/jour
-7. All chronic medications should be "Traitement au long cours - Renouvelable"
+7. All chronic medications should be "Long-term ongoing treatment - Renewable"
 8. Include complete safety information and monitoring requirements
 9. Write in ENGLISH with Anglo-Saxon medical standards (UK/US medical terminology)
 10. Generate COMPLETE JSON with ALL required fields
