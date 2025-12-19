@@ -13,11 +13,12 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     const patientId = searchParams.get('patientId')
+    const patientName = searchParams.get('patientName')
     const type = searchParams.get('type') // 'lab', 'radiology', or 'all'
 
-    if (!patientId) {
+    if (!patientId && !patientName) {
       return NextResponse.json(
-        { error: "Patient ID is required" },
+        { error: "Patient ID or Patient Name is required" },
         { status: 400 }
       )
     }
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest) {
 
     // Fetch Lab Results
     if (type === 'lab' || type === 'all' || !type) {
-      const { data: labData, error: labError } = await supabase
+      let labQuery = supabase
         .from('lab_results')
         .select(`
           id,
@@ -51,15 +52,25 @@ export async function GET(req: NextRequest) {
             id,
             order_number,
             patient_id,
+            patient_name,
             tests_ordered,
             scheduled_date,
             results_ready_at,
             clinical_notes
           )
         `)
-        .eq('lab_orders.patient_id', patientId)
         .order('created_at', { ascending: false })
         .limit(1)
+
+      // Filter by patient_id or patient_name
+      if (patientId) {
+        labQuery = labQuery.eq('lab_orders.patient_id', patientId)
+      } else if (patientName) {
+        // Use ilike for case-insensitive partial match
+        labQuery = labQuery.ilike('lab_orders.patient_name', `%${patientName}%`)
+      }
+
+      const { data: labData, error: labError } = await labQuery
 
       if (labError) {
         console.error('Error fetching lab results:', labError)
@@ -71,7 +82,7 @@ export async function GET(req: NextRequest) {
 
     // Fetch Radiology Results
     if (type === 'radiology' || type === 'all' || !type) {
-      const { data: radioData, error: radioError } = await supabase
+      let radioQuery = supabase
         .from('radiology_results')
         .select(`
           id,
@@ -84,15 +95,25 @@ export async function GET(req: NextRequest) {
             id,
             order_number,
             patient_id,
+            patient_name,
             exams_ordered,
             scheduled_date,
             results_ready_at,
             clinical_notes
           )
         `)
-        .eq('radiology_orders.patient_id', patientId)
         .order('created_at', { ascending: false })
         .limit(1)
+
+      // Filter by patient_id or patient_name
+      if (patientId) {
+        radioQuery = radioQuery.eq('radiology_orders.patient_id', patientId)
+      } else if (patientName) {
+        // Use ilike for case-insensitive partial match
+        radioQuery = radioQuery.ilike('radiology_orders.patient_name', `%${patientName}%`)
+      }
+
+      const { data: radioData, error: radioError } = await radioQuery
 
       if (radioError) {
         console.error('Error fetching radiology results:', radioError)
@@ -105,6 +126,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       patientId,
+      patientName,
       ...results
     })
 

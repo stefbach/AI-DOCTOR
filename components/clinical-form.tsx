@@ -398,32 +398,54 @@ const COMMON_SYMPTOMS = useMemo(() => [
  }, [updateVitalSigns])
 
  // ========== Lab and Radiology Results Import ==========
- const getPatientId = useCallback((): string | null => {
+ const getPatientIdentifier = useCallback((): { patientId: string | null, patientName: string | null } => {
+   let patientId: string | null = null
+   let patientName: string | null = null
+
    // Try to get patient ID from various sources
    // 1. From patientData prop
-   if (patientData?.patientId) return patientData.patientId
+   if (patientData?.patientId) patientId = patientData.patientId
+   if (patientData?.firstName && patientData?.lastName) {
+     patientName = `${patientData.firstName} ${patientData.lastName}`
+   } else if (patientData?.fullName) {
+     patientName = patientData.fullName
+   }
 
    // 2. From sessionStorage (consultationPatientData)
    try {
      const storedData = sessionStorage.getItem('consultationPatientData')
      if (storedData) {
        const parsed = JSON.parse(storedData)
-       if (parsed.patientId) return parsed.patientId
+       if (parsed.patientId && !patientId) patientId = parsed.patientId
+       if (!patientName) {
+         if (parsed.firstName && parsed.lastName) {
+           patientName = `${parsed.firstName} ${parsed.lastName}`
+         } else if (parsed.fullName) {
+           patientName = parsed.fullName
+         }
+       }
      }
    } catch (e) {
      console.warn('Error parsing sessionStorage:', e)
    }
 
    // 3. From Tibok patient data
-   if (tibokPatient?.patientId) return tibokPatient.patientId
+   if (tibokPatient?.patientId && !patientId) patientId = tibokPatient.patientId
+   if (!patientName && tibokPatient) {
+     if (tibokPatient.firstName && tibokPatient.lastName) {
+       patientName = `${tibokPatient.firstName} ${tibokPatient.lastName}`
+     } else if (tibokPatient.fullName) {
+       patientName = tibokPatient.fullName
+     }
+   }
 
-   return null
+   return { patientId, patientName }
  }, [patientData, tibokPatient])
 
  const fetchLabResults = useCallback(async () => {
-   const patientId = getPatientId()
-   if (!patientId) {
-     setLabResultsError("Patient ID not found - cannot fetch lab results")
+   const { patientId, patientName } = getPatientIdentifier()
+   if (!patientId && !patientName) {
+     setLabResultsError("Patient information not found - please fill in patient details first")
      return
    }
 
@@ -431,7 +453,15 @@ const COMMON_SYMPTOMS = useMemo(() => [
    setLabResultsError(null)
 
    try {
-     const response = await fetch(`/api/patient-results?patientId=${patientId}&type=lab`)
+     // Build query params - prefer patientId, fallback to patientName
+     const params = new URLSearchParams({ type: 'lab' })
+     if (patientId) {
+       params.append('patientId', patientId)
+     } else if (patientName) {
+       params.append('patientName', patientName)
+     }
+
+     const response = await fetch(`/api/patient-results?${params.toString()}`)
      const data = await response.json()
 
      if (!response.ok) {
@@ -460,12 +490,12 @@ const COMMON_SYMPTOMS = useMemo(() => [
    } finally {
      setIsLoadingLabResults(false)
    }
- }, [getPatientId])
+ }, [getPatientIdentifier])
 
  const fetchRadiologyResults = useCallback(async () => {
-   const patientId = getPatientId()
-   if (!patientId) {
-     setRadiologyResultsError("Patient ID not found - cannot fetch radiology results")
+   const { patientId, patientName } = getPatientIdentifier()
+   if (!patientId && !patientName) {
+     setRadiologyResultsError("Patient information not found - please fill in patient details first")
      return
    }
 
@@ -473,7 +503,15 @@ const COMMON_SYMPTOMS = useMemo(() => [
    setRadiologyResultsError(null)
 
    try {
-     const response = await fetch(`/api/patient-results?patientId=${patientId}&type=radiology`)
+     // Build query params - prefer patientId, fallback to patientName
+     const params = new URLSearchParams({ type: 'radiology' })
+     if (patientId) {
+       params.append('patientId', patientId)
+     } else if (patientName) {
+       params.append('patientName', patientName)
+     }
+
+     const response = await fetch(`/api/patient-results?${params.toString()}`)
      const data = await response.json()
 
      if (!response.ok) {
@@ -502,7 +540,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
    } finally {
      setIsLoadingRadiologyResults(false)
    }
- }, [getPatientId])
+ }, [getPatientIdentifier])
 
  // Format lab results for display in disease history
  const formatLabResultsForHistory = (labResult: any): string => {
