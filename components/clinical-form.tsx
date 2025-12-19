@@ -464,6 +464,13 @@ const COMMON_SYMPTOMS = useMemo(() => [
      const response = await fetch(`/api/patient-results?${params.toString()}`)
      const data = await response.json()
 
+     // Log debug info to help diagnose issues
+     console.log('📋 Lab Results API Response:', {
+       success: data.success,
+       hasLabResults: data.hasLabResults,
+       debug: data.debug
+     })
+
      if (!response.ok) {
        throw new Error(data.error || 'Failed to fetch lab results')
      }
@@ -482,7 +489,17 @@ const COMMON_SYMPTOMS = useMemo(() => [
          }))
        }
      } else {
-       setLabResultsError("No lab results found for this patient")
+       // More detailed error based on debug info
+       const debugInfo = data.debug || {}
+       if (debugInfo.labOrdersCount === 0) {
+         setLabResultsError("No lab orders found in the database")
+       } else if (!debugInfo.matchedLabOrder) {
+         setLabResultsError(`No matching lab order found for patient "${patientName || patientId}". Found ${debugInfo.labOrdersCount} orders.`)
+       } else if (debugInfo.labResultsCount === 0) {
+         setLabResultsError(`Lab order found but no results available yet for order #${debugInfo.matchedLabOrder.id}`)
+       } else {
+         setLabResultsError("No lab results found for this patient")
+       }
      }
    } catch (error: any) {
      console.error('Error fetching lab results:', error)
@@ -514,6 +531,13 @@ const COMMON_SYMPTOMS = useMemo(() => [
      const response = await fetch(`/api/patient-results?${params.toString()}`)
      const data = await response.json()
 
+     // Log debug info to help diagnose issues
+     console.log('🩻 Radiology Results API Response:', {
+       success: data.success,
+       hasRadiologyResults: data.hasRadiologyResults,
+       debug: data.debug
+     })
+
      if (!response.ok) {
        throw new Error(data.error || 'Failed to fetch radiology results')
      }
@@ -532,7 +556,17 @@ const COMMON_SYMPTOMS = useMemo(() => [
          }))
        }
      } else {
-       setRadiologyResultsError("No radiology results found for this patient")
+       // More detailed error based on debug info
+       const debugInfo = data.debug || {}
+       if (debugInfo.radioOrdersCount === 0) {
+         setRadiologyResultsError("No radiology orders found in the database")
+       } else if (!debugInfo.matchedRadioOrder) {
+         setRadiologyResultsError(`No matching radiology order found for patient "${patientName || patientId}". Found ${debugInfo.radioOrdersCount} orders.`)
+       } else if (debugInfo.radioResultsCount === 0) {
+         setRadiologyResultsError(`Radiology order found but no results available yet for order #${debugInfo.matchedRadioOrder.id}`)
+       } else {
+         setRadiologyResultsError("No radiology results found for this patient")
+       }
      }
    } catch (error: any) {
      console.error('Error fetching radiology results:', error)

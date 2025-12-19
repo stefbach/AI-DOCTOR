@@ -5,10 +5,6 @@ import { createClient } from "@supabase/supabase-js"
 
 export const runtime = 'nodejs'
 
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -23,7 +19,34 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    // Check environment variables
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Missing Supabase credentials:', {
+        hasUrl: !!supabaseUrl,
+        hasServiceKey: !!supabaseServiceKey
+      })
+      return NextResponse.json(
+        { error: "Server configuration error - missing Supabase credentials" },
+        { status: 500 }
+      )
+    }
+
+    // Create Supabase client with service role key (bypasses RLS)
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
+
+    // Debug info to track what's happening
+    const debug: any = {
+      searchedPatientName: patientName,
+      searchedPatientId: patientId
+    }
 
     const results: {
       labResults: any | null
@@ -47,9 +70,15 @@ export async function GET(req: NextRequest) {
         .select('id, order_number, patient_id, patient_name, tests_ordered, scheduled_date, results_ready_at, clinical_notes')
         .order('created_at', { ascending: false })
 
+      debug.labOrdersCount = allLabOrders?.length || 0
+      debug.labOrdersError = labOrdersError?.message || null
+
       if (labOrdersError) {
         console.error('Error fetching lab orders:', labOrdersError)
       } else if (allLabOrders && allLabOrders.length > 0) {
+        // Log all patient names for debugging
+        debug.labOrderPatientNames = allLabOrders.slice(0, 10).map(o => o.patient_name)
+
         // Find matching order by patient
         let matchedOrder = null
 
@@ -70,6 +99,8 @@ export async function GET(req: NextRequest) {
           }
         }
 
+        debug.matchedLabOrder = matchedOrder ? { id: matchedOrder.id, patient_name: matchedOrder.patient_name } : null
+
         // Step 2: If we found an order, get the results
         if (matchedOrder) {
           const { data: labResultData, error: labResultError } = await supabase
@@ -78,6 +109,9 @@ export async function GET(req: NextRequest) {
             .eq('lab_order_id', matchedOrder.id)
             .order('created_at', { ascending: false })
             .limit(1)
+
+          debug.labResultsCount = labResultData?.length || 0
+          debug.labResultsError = labResultError?.message || null
 
           if (labResultError) {
             console.error('Error fetching lab results:', labResultError)
@@ -102,9 +136,15 @@ export async function GET(req: NextRequest) {
         .select('id, order_number, patient_id, patient_name, exams_ordered, scheduled_date, results_ready_at, clinical_notes')
         .order('created_at', { ascending: false })
 
+      debug.radioOrdersCount = allRadioOrders?.length || 0
+      debug.radioOrdersError = radioOrdersError?.message || null
+
       if (radioOrdersError) {
         console.error('Error fetching radiology orders:', radioOrdersError)
       } else if (allRadioOrders && allRadioOrders.length > 0) {
+        // Log all patient names for debugging
+        debug.radioOrderPatientNames = allRadioOrders.slice(0, 10).map(o => o.patient_name)
+
         // Find matching order by patient
         let matchedOrder = null
 
@@ -125,6 +165,8 @@ export async function GET(req: NextRequest) {
           }
         }
 
+        debug.matchedRadioOrder = matchedOrder ? { id: matchedOrder.id, patient_name: matchedOrder.patient_name } : null
+
         // Step 2: If we found an order, get the results
         if (matchedOrder) {
           const { data: radioResultData, error: radioResultError } = await supabase
@@ -133,6 +175,9 @@ export async function GET(req: NextRequest) {
             .eq('radiology_order_id', matchedOrder.id)
             .order('created_at', { ascending: false })
             .limit(1)
+
+          debug.radioResultsCount = radioResultData?.length || 0
+          debug.radioResultsError = radioResultError?.message || null
 
           if (radioResultError) {
             console.error('Error fetching radiology results:', radioResultError)
@@ -151,6 +196,7 @@ export async function GET(req: NextRequest) {
       success: true,
       patientId,
       patientName,
+      debug, // Include debug info to help diagnose
       ...results
     })
 
