@@ -672,9 +672,9 @@ const handlePrevious = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <img 
-                src="/tibok-logo.svg" 
-                alt="TIBOK Logo" 
+              <img
+                src="/tibok-logo.png.png"
+                alt="TIBOK Logo"
                 className="h-10 w-auto object-contain"
               />
               <div>

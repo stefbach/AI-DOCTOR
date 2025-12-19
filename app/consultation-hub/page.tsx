@@ -381,9 +381,9 @@ export default function ConsultationHubPage() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
-          <img 
-            src="/tibok-logo.svg" 
-            alt="TIBOK Logo" 
+          <img
+            src="/tibok-logo.png.png"
+            alt="TIBOK Logo"
             className="h-12 w-auto object-contain"
           />
           <div className="flex-1">
