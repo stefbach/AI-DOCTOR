@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
-import { ArrowLeft, ArrowRight, Loader2, Brain } from "lucide-react"
+import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 
 interface Props {
@@ -103,12 +103,6 @@ export default function DermatologyDiagnosisForm(props: Props) {
     <div className="space-y-6">
       {!diagnosis ? (
         <Card className="border-teal-200">
-          <CardHeader className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white">
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5" />
-              Dermatology AI Diagnosis
-            </CardTitle>
-          </CardHeader>
           <CardContent className="p-8">
             <div className="flex flex-col items-center gap-6">
               <div className="w-full max-w-md space-y-3">
