@@ -21,12 +21,12 @@ export async function GET(req: NextRequest) {
 
     // Check environment variables
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-    if (!supabaseUrl || !supabaseServiceKey) {
+    if (!supabaseUrl || !supabaseAnonKey) {
       console.error('Missing Supabase credentials:', {
         hasUrl: !!supabaseUrl,
-        hasServiceKey: !!supabaseServiceKey
+        hasAnonKey: !!supabaseAnonKey
       })
       return NextResponse.json(
         { error: "Server configuration error - missing Supabase credentials" },
@@ -34,13 +34,9 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // Create Supabase client with service role key (bypasses RLS)
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    })
+    // Create Supabase client with anon key (same as other APIs)
+    // Note: RLS policies must allow SELECT for authenticated users on lab/radiology tables
+    const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
     // Debug info to track what's happening
     const debug: any = {
