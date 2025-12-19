@@ -3715,7 +3715,7 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
  <div className="col-span-2"><strong>Clinic Address:</strong> {doctorInfo.adresseCabinet}</div>
  )}
  {doctorInfo.heuresConsultation && (
- <div className="col-span-2"><strong>Consultation Hours:</strong> {doctorInfo.heuresConsultation.replace(/^Teleconsultation Hours:\s*/i, '').replace(/8:00 PM/gi, '00:00')}</div>
+ <div className="col-span-2"><strong>Consultation Hours:</strong> {doctorInfo.heuresConsultation.replace(/^Teleconsultation Hours:\s*/i, '').replace(/8:00\s*PM/gi, '00:00').replace(/8:00\s*pm/gi, '00:00')}</div>
  )}
  </div>
  )}
@@ -3777,7 +3777,7 @@ const ConsultationReport = () => {
  <div>Medical Council Reg: {praticien.numeroEnregistrement}</div>
  <div>{praticien.email}</div>
  {praticien.heuresConsultation && (
- <div className="col-span-2">Consultation Hours: {praticien.heuresConsultation.replace(/^Teleconsultation Hours:\s*/i, '').replace(/8:00 PM/gi, '00:00')}</div>
+ <div className="col-span-2">Consultation Hours: {praticien.heuresConsultation.replace(/^Teleconsultation Hours:\s*/i, '').replace(/8:00\s*PM/gi, '00:00').replace(/8:00\s*pm/gi, '00:00')}</div>
  )}
  </div>
  </div>
