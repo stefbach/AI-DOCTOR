@@ -7,13 +7,49 @@ import { openai } from "@ai-sdk/openai"
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
 
+// ==================== DATA ANONYMIZATION ====================
+function anonymizePatientData(patientData: any): {
+  anonymized: any,
+  originalIdentity: any,
+  anonymousId: string
+} {
+  const originalIdentity = {
+    firstName: patientData?.firstName || '',
+    lastName: patientData?.lastName || '',
+    name: patientData?.name || '',
+    email: patientData?.email || '',
+    phone: patientData?.phone || '',
+    address: patientData?.address || '',
+    nationalId: patientData?.nationalId || '',
+    city: patientData?.city || '',
+    country: patientData?.country || ''
+  }
+
+  const anonymized = { ...patientData }
+  const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'nationalId', 'city', 'country']
+
+  sensitiveFields.forEach(field => {
+    delete anonymized[field]
+  })
+
+  const anonymousId = `ANON-RX-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+  anonymized.anonymousId = anonymousId
+
+  console.log('🔒 Patient data anonymized for chronic prescription')
+
+  return { anonymized, originalIdentity, anonymousId }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { patientData, clinicalData, diagnosisData, reportData } = await req.json()
 
+    // Anonymize patient data before sending to AI
+    const { anonymized: anonymizedPatient, originalIdentity, anonymousId } = anonymizePatientData(patientData)
+
     // Calculate BMI for medication dosing considerations
-    const weight = parseFloat(patientData.weight)
-    const heightInMeters = parseFloat(patientData.height) / 100
+    const weight = parseFloat(anonymizedPatient.weight)
+    const heightInMeters = parseFloat(anonymizedPatient.height) / 100
     const bmi = weight / (heightInMeters * heightInMeters)
 
     // Get current date for prescription
@@ -201,44 +237,42 @@ IMPORTANT:
 9. Use International Nonproprietary Names (INN) - English terminology with Anglo-Saxon standards
 10. Make prescription COMPREHENSIVE and SAFE`
 
+    // ANONYMIZED patient context - no personal identifiers sent to AI
     const patientContext = `
 PRESCRIPTION DATE: ${prescriptionDate.toLocaleDateString('fr-MU', { day: '2-digit', month: '2-digit', year: 'numeric' })}
 TIME: ${prescriptionDate.toLocaleTimeString('fr-MU', { hour: '2-digit', minute: '2-digit' })}
 PRESCRIPTION ID: ${prescriptionId}
 
 PATIENT INFORMATION:
-- Full Name: ${patientData.firstName} ${patientData.lastName}
-- Age: ${patientData.age} years ${patientData.age >= 65 ? '(ELDERLY - Dosage caution)' : ''}
-- Gender: ${patientData.gender}
-- Date of Birth: ${patientData.birthDate || patientData.dateOfBirth || 'Not provided'}
+- Patient ID: ${anonymousId}
+- Age: ${anonymizedPatient.age} years ${anonymizedPatient.age >= 65 ? '(ELDERLY - Dosage caution)' : ''}
+- Gender: ${anonymizedPatient.gender}
 - Weight: ${weight} kg
-- Height: ${patientData.height} cm
+- Height: ${anonymizedPatient.height} cm
 - BMI: ${bmi.toFixed(1)} kg/m² (${bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal weight' : bmi < 30 ? 'Overweight' : 'Obese'})
-- Address: ${patientData.address || 'Not provided'}, ${patientData.city || ''} ${patientData.country || ''}
-- Phone: ${patientData.phone || 'Not provided'}
 
 GYNECOLOGICAL STATUS (if female):
-${patientData.gender?.toLowerCase() === 'female' || patientData.gender?.toLowerCase() === 'femme' ? `
-- Pregnancy Status: ${patientData.pregnancyStatus || 'Not specified'}
-- Last Menstrual Period: ${patientData.lastMenstrualPeriod || 'Not specified'}
-- Gestational Age: ${patientData.gestationalAge || 'Not applicable'}
+${anonymizedPatient.gender?.toLowerCase() === 'female' || anonymizedPatient.gender?.toLowerCase() === 'femme' ? `
+- Pregnancy Status: ${anonymizedPatient.pregnancyStatus || 'Not specified'}
+- Last Menstrual Period: ${anonymizedPatient.lastMenstrualPeriod || 'Not specified'}
+- Gestational Age: ${anonymizedPatient.gestationalAge || 'Not applicable'}
 ` : '- Not applicable (male patient)'}
 
 CHRONIC DISEASES & MEDICAL HISTORY:
-${(patientData.medicalHistory || []).map((d: string, i: number) => `${i + 1}. ${d}`).join('\n') || '- None declared'}
-${patientData.otherMedicalHistory ? `\nAdditional Medical History: ${patientData.otherMedicalHistory}` : ''}
+${(anonymizedPatient.medicalHistory || []).map((d: string, i: number) => `${i + 1}. ${d}`).join('\n') || '- None declared'}
+${anonymizedPatient.otherMedicalHistory ? `\nAdditional Medical History: ${anonymizedPatient.otherMedicalHistory}` : ''}
 
 CURRENT MEDICATIONS (TO REVIEW):
-${patientData.currentMedicationsText || patientData.currentMedications || 'None reported'}
+${anonymizedPatient.currentMedicationsText || anonymizedPatient.currentMedications || 'None reported'}
 
 ALLERGIES (CRITICAL FOR PRESCRIPTION SAFETY):
-${Array.isArray(patientData.allergies) ? patientData.allergies.join(', ') : (patientData.allergies || 'No known allergies')}
-${patientData.otherAllergies ? `\nOther Allergies: ${patientData.otherAllergies}` : ''}
+${Array.isArray(anonymizedPatient.allergies) ? anonymizedPatient.allergies.join(', ') : (anonymizedPatient.allergies || 'No known allergies')}
+${anonymizedPatient.otherAllergies ? `\nOther Allergies: ${anonymizedPatient.otherAllergies}` : ''}
 
 LIFESTYLE HABITS (may affect medication choice):
-- Smoking: ${patientData.lifeHabits?.smoking || 'Not specified'}
-- Alcohol Consumption: ${patientData.lifeHabits?.alcohol || 'Not specified'}
-- Physical Activity: ${patientData.lifeHabits?.physicalActivity || 'Not specified'}
+- Smoking: ${anonymizedPatient.lifeHabits?.smoking || 'Not specified'}
+- Alcohol Consumption: ${anonymizedPatient.lifeHabits?.alcohol || 'Not specified'}
+- Physical Activity: ${anonymizedPatient.lifeHabits?.physicalActivity || 'Not specified'}
 
 CURRENT CLINICAL EXAMINATION DATA:
 ${clinicalData ? `

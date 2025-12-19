@@ -1,10 +1,41 @@
 // app/api/dermatology-questions/route.ts - VERSION 2.0: Professional-grade quality
 // - 4 retry attempts with progressive enhancement
-// - Auto-correction on final attempt  
+// - Auto-correction on final attempt
 // - 8000 max tokens for comprehensive questions
 // - Advanced OpenAI parameters
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+
+// ==================== DATA ANONYMIZATION ====================
+function anonymizePatientData(patientData: any): {
+  anonymized: any,
+  originalIdentity: any,
+  anonymousId: string
+} {
+  const originalIdentity = {
+    firstName: patientData?.firstName || '',
+    lastName: patientData?.lastName || '',
+    name: patientData?.name || '',
+    email: patientData?.email || '',
+    phone: patientData?.phone || '',
+    address: patientData?.address || '',
+    nationalId: patientData?.nationalId || ''
+  }
+
+  const anonymized = { ...patientData }
+  const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'nationalId']
+
+  sensitiveFields.forEach(field => {
+    delete anonymized[field]
+  })
+
+  const anonymousId = `ANON-DQ-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+  anonymized.anonymousId = anonymousId
+
+  console.log('🔒 Patient data anonymized for dermatology questions')
+
+  return { anonymized, originalIdentity, anonymousId }
+}
 
 // ==================== RETRY MECHANISM ====================
 async function callOpenAIWithRetry(
@@ -177,8 +208,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { patientData, imageData, ocrAnalysisData } = body
 
+    // Anonymize patient data before sending to AI
+    const { anonymized: anonymizedPatient, originalIdentity, anonymousId } = anonymizePatientData(patientData)
+
     console.log(`🔬 Generating dermatology-specific questions`)
-    console.log(`👤 Patient: ${patientData.firstName} ${patientData.lastName}`)
+    console.log(`👤 Patient ID: ${anonymousId} (anonymized)`)
 
     // Create context from OCR analysis - Extract from structured JSON
     let ocrContext = 'No image analysis available'
@@ -233,12 +267,13 @@ ${summary}
     
     const observations = ocrAnalysisData?.analysis?.urgencyAssessment?.redFlags?.join(', ') || 'No specific red flags identified'
 
+    // ANONYMIZED prompt - no personal identifiers sent to AI
     const prompt = `You are an expert dermatologist conducting a detailed consultation.
 
 PATIENT INFORMATION:
-- Name: ${patientData.firstName} ${patientData.lastName}
-- Age: ${patientData.age}
-- Gender: ${patientData.gender}
+- Patient ID: ${anonymousId}
+- Age: ${anonymizedPatient.age}
+- Gender: ${anonymizedPatient.gender}
 
 IMAGE ANALYSIS RESULTS:
 ${ocrContext}
@@ -355,8 +390,8 @@ YOU MUST return a JSON object with "questions" array, NOT a single question!`
       success: true,
       questions,
       patientInfo: {
-        firstName: patientData.firstName,
-        lastName: patientData.lastName
+        firstName: originalIdentity.firstName,
+        lastName: originalIdentity.lastName
       },
       metadata: {
         model: 'gpt-4o',
