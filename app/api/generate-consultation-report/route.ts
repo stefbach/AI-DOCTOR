@@ -1021,7 +1021,11 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
 }
 
 // ==================== GPT-4 DATA PREPARATION ====================
-function prepareEnrichedGPTData(realData: any, patientData: any) {
+function prepareEnrichedGPTData(realData: any, patientData: any, clinicalData?: any) {
+  // Extract workplace incident information
+  const workplaceIncident = clinicalData?.workplaceIncident || {}
+  const hasWorkplaceIncident = workplaceIncident.illnessAtWork || workplaceIncident.accidentAtWork
+
   return {
     // Patient info
     patient: {
@@ -1039,6 +1043,16 @@ function prepareEnrichedGPTData(realData: any, patientData: any) {
       clinicalExamination: realData.clinicalExamination,
       historyOfPresentIllness: realData.historyOfPresentIllness,
       medicalHistory: realData.medicalHistory
+    },
+
+    // Workplace incident information
+    workplaceIncident: {
+      hasIncident: hasWorkplaceIncident,
+      illnessAtWork: workplaceIncident.illnessAtWork || false,
+      accidentAtWork: workplaceIncident.accidentAtWork || false,
+      summary: hasWorkplaceIncident ?
+        `${workplaceIncident.illnessAtWork ? 'Illness occurred at workplace. ' : ''}${workplaceIncident.accidentAtWork ? 'Accident/incident occurred at workplace.' : ''}`.trim() :
+        'No workplace-related incident reported.'
     },
 
     // Complete diagnosis
@@ -1295,6 +1309,12 @@ History of Present Illness: ${enrichedData.presentation.historyOfPresentIllness}
 Medical History: ${enrichedData.presentation.medicalHistory}
 Clinical Examination: ${enrichedData.presentation.clinicalExamination}
 
+=== WORKPLACE INCIDENT ASSESSMENT ===
+Has Workplace Incident: ${enrichedData.workplaceIncident?.hasIncident ? 'YES' : 'NO'}
+${enrichedData.workplaceIncident?.illnessAtWork ? '- Illness at Workplace: YES - Patient got sick at their working place' : ''}
+${enrichedData.workplaceIncident?.accidentAtWork ? '- Accident/Incident at Workplace: YES - Patient had an accident or incident at their working place' : ''}
+Summary: ${enrichedData.workplaceIncident?.summary || 'No workplace-related incident reported.'}
+
 === COMPLETE DIAGNOSTIC ANALYSIS ===
 Primary Diagnosis: ${enrichedData.diagnosis.primary}
 
@@ -1344,15 +1364,16 @@ Patient Education: ${enrichedData.followUp.patientEducation}
 TASK: Structure this EXISTING analysis into these narrative sections:
 
 1. chiefComplaint - Use provided chief complaint, expand professionally
-2. historyOfPresentIllness - Use provided history + clinical reasoning analysis  
+2. historyOfPresentIllness - Use provided history + clinical reasoning analysis
 3. pastMedicalHistory - Use provided medical history
 4. physicalExamination - Use clinical examination findings
 5. diagnosticSynthesis - Use the pathophysiology analysis (200+ words) + investigation strategy
 6. diagnosticConclusion - Use primary diagnosis + clinical reasoning (150+ words) + differential diagnoses
 7. pregnancyConsiderations - Use pregnancy impact if applicable, otherwise "Not applicable"
-8. managementPlan - Use therapeutic approach + mention ${enrichedData.summary.medicationsCount} medications, ${enrichedData.summary.labTestsCount} lab tests, ${enrichedData.summary.imagingCount} imaging studies
-9. followUpPlan - Use follow-up plan + warning signs + pregnancy monitoring if applicable
-10. conclusion - Synthesize the complete case
+8. workplaceIncident - If workplace incident is reported (illness or accident at work), document this clearly with occupational health implications. If no workplace incident, write "No workplace-related illness or accident reported."
+9. managementPlan - Use therapeutic approach + mention ${enrichedData.summary.medicationsCount} medications, ${enrichedData.summary.labTestsCount} lab tests, ${enrichedData.summary.imagingCount} imaging studies
+10. followUpPlan - Use follow-up plan + warning signs + pregnancy monitoring if applicable
+11. conclusion - Synthesize the complete case${enrichedData.workplaceIncident?.hasIncident ? ' including workplace incident documentation' : ''}
 
 IMPORTANT:
 - Use the PROVIDED analysis - do not re-analyze
@@ -1361,7 +1382,7 @@ IMPORTANT:
 - Include all medication counts, test counts as specified
 - Preserve all pregnancy considerations
 
-Return ONLY a JSON object with these 10 keys and their narrative content in ENGLISH.`
+Return ONLY a JSON object with these 11 keys and their narrative content in ENGLISH.`
 }
 
 // ==================== IMPROVED FALLBACK FUNCTION ====================
@@ -1399,10 +1420,27 @@ function useRealDataFallback(realData: any, pregnancyInfo: any, clinicalData?: a
       `Following systematic clinical evaluation, the primary diagnostic impression is: ${realData.diagnosticConclusion}. ${realData.clinicalReasoning || 'This diagnosis is established through comprehensive analysis of clinical presentation, symptomatology, and available medical information.'} The diagnostic confidence is based on teleconsultation assessment methodology.${realData.differentialText ? ` Differential diagnostic considerations include: ${realData.differentialText}` : ''}${isPregnant ? ` This diagnosis has been evaluated considering pregnancy status and implications for both maternal and fetal wellbeing.` : ''} Clinical management will be guided by this diagnostic assessment.` :
       `Comprehensive teleconsultation evaluation has been completed with systematic diagnostic assessment. Clinical impression is being formulated based on available symptomatology and clinical presentation.${isPregnant ? ` All diagnostic considerations have been evaluated in the context of pregnancy status.` : ''} Further clinical correlation and monitoring may enhance diagnostic precision. Treatment approach will be tailored to clinical findings and patient presentation.`,
     
-    pregnancyConsiderations: isPregnant ? 
-      `Patient is currently ${pregnancyInfo.display}${pregnancyInfo.trimester ? ` in the ${pregnancyInfo.trimester}` : ''}. All clinical decisions have been made with comprehensive consideration of pregnancy safety protocols. Medication selections prioritize pregnancy categories A and B when possible. Diagnostic procedures avoid unnecessary radiation exposure. Management plan includes appropriate obstetric coordination and specialized pregnancy monitoring as indicated.` : 
+    pregnancyConsiderations: isPregnant ?
+      `Patient is currently ${pregnancyInfo.display}${pregnancyInfo.trimester ? ` in the ${pregnancyInfo.trimester}` : ''}. All clinical decisions have been made with comprehensive consideration of pregnancy safety protocols. Medication selections prioritize pregnancy categories A and B when possible. Diagnostic procedures avoid unnecessary radiation exposure. Management plan includes appropriate obstetric coordination and specialized pregnancy monitoring as indicated.` :
       'Not applicable - patient is not currently pregnant.',
-    
+
+    workplaceIncident: (() => {
+      const workplaceData = clinicalData?.workplaceIncident
+      const hasIncident = workplaceData?.illnessAtWork || workplaceData?.accidentAtWork
+      if (hasIncident) {
+        let incidentText = 'WORKPLACE-RELATED INCIDENT REPORTED: '
+        if (workplaceData?.illnessAtWork) {
+          incidentText += 'Patient reports illness that occurred at their workplace. '
+        }
+        if (workplaceData?.accidentAtWork) {
+          incidentText += 'Patient reports an accident or incident that occurred at their workplace. '
+        }
+        incidentText += 'This documentation is provided for occupational health records and may be relevant for workplace health and safety reporting, workers\' compensation claims, or occupational medicine follow-up. Appropriate workplace incident documentation protocols should be followed.'
+        return incidentText
+      }
+      return 'No workplace-related illness or accident reported. The patient\'s condition is not documented as being related to their workplace environment or occupational activities.'
+    })(),
+
     managementPlan: `Comprehensive therapeutic strategy has been developed based on clinical assessment and diagnostic conclusions.${realData.managementPlan ? ` ${realData.managementPlan}` : ' Evidence-based treatment approach focuses on appropriate interventions for presenting condition.'} ${realData.medicationsCount > 0 ? `Pharmacological management includes ${realData.medicationsCount} medication(s)${isPregnant ? ' with confirmed pregnancy safety profiles' : ''}.` : 'Non-pharmacological management approach has been prioritized.'} ${realData.labTestsCount > 0 || realData.imagingStudiesCount > 0 ? `Diagnostic investigations include ${realData.labTestsCount || 0} laboratory studies and ${realData.imagingStudiesCount || 0} imaging examinations${isPregnant ? ' selected for pregnancy safety' : ''}.` : 'Clinical monitoring approach without immediate diagnostic testing.'} Treatment plan ensures patient safety and optimal clinical outcomes.`,
     
     followUpPlan: `Structured follow-up protocol ensures continuity of care and clinical monitoring.${realData.followUp ? ` ${realData.followUp}` : ' Appropriate follow-up intervals have been established based on clinical presentation.'} ${realData.pregnancyFollowUp ? `Pregnancy-specific monitoring includes: ${realData.pregnancyFollowUp}` : ''}${realData.redFlags ? ` Critical warning signs requiring immediate medical attention: ${realData.redFlags}` : ' Patient has been counseled regarding symptoms requiring urgent medical evaluation.'} This comprehensive follow-up approach promotes patient safety and ensures appropriate clinical progression.${isPregnant ? ' Coordination with obstetric care providers ensures comprehensive pregnancy management.' : ''}`,
@@ -1696,7 +1734,7 @@ export async function POST(request: NextRequest) {
     const translatedDiagnosisData = translateObjectRecursively(diagnosisData)
     
     // ===== ENRICHED GPT DATA PREPARATION =====
-    const enrichedGPTData = prepareEnrichedGPTData(realData, anonymizedPatientData)
+    const enrichedGPTData = prepareEnrichedGPTData(realData, anonymizedPatientData, clinicalData)
     
     // ===== PRESCRIPTION EXTRACTION WITH TRANSLATION =====
     const { medications, labTests, imagingStudies } = extractPrescriptionsFromDiagnosisData(

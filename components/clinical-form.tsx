@@ -41,6 +41,11 @@ interface VitalSigns {
  bloodGlucose: string // Test de glycémie en g/L (optionnel)
 }
 
+interface WorkplaceIncident {
+ illnessAtWork: boolean    // Patient got sick at workplace
+ accidentAtWork: boolean   // Patient had accident/incident at workplace
+}
+
 interface ClinicalData {
  chiefComplaint: string
  diseaseHistory: string
@@ -48,6 +53,7 @@ interface ClinicalData {
  symptoms: string[]
  painScale: string
  vitalSigns: VitalSigns
+ workplaceIncident: WorkplaceIncident
 }
 
 interface ClinicalFormProps {
@@ -76,6 +82,10 @@ const INITIAL_CLINICAL_DATA: ClinicalData = {
  bloodPressureSystolic: "",
  bloodPressureDiastolic: "",
  bloodGlucose: "" // Test de glycémie optionnel
+ },
+ workplaceIncident: {
+ illnessAtWork: false,
+ accidentAtWork: false
  }
 }
 
@@ -99,6 +109,7 @@ const SECTIONS = [
  { id: "duration", titleKey: 'clinicalForm.sections.duration', icon: Clock },
  { id: "symptoms", titleKey: 'clinicalForm.sections.symptoms', icon: Activity },
  { id: "vitals", titleKey: 'clinicalForm.sections.vitals', icon: Stethoscope },
+ { id: "workplace", titleKey: 'clinicalForm.sections.workplace', icon: AlertCircle },
 ]
 
 // ==================== HELPER FUNCTIONS ====================
@@ -179,10 +190,14 @@ export default function ModernClinicalForm({
  temperature: validatedTemperature,
  bloodPressureSystolic: tibokPatient.vitalSigns?.bloodPressureSystolic?.toString() || "",
  bloodPressureDiastolic: tibokPatient.vitalSigns?.bloodPressureDiastolic?.toString() || ""
+ },
+ workplaceIncident: {
+ illnessAtWork: false,
+ accidentAtWork: false
  }
  }
  }
- 
+
  if (data) {
  return {
  ...INITIAL_CLINICAL_DATA,
@@ -191,6 +206,10 @@ export default function ModernClinicalForm({
  vitalSigns: {
  ...INITIAL_CLINICAL_DATA.vitalSigns,
  ...data.vitalSigns
+ },
+ workplaceIncident: {
+ ...INITIAL_CLINICAL_DATA.workplaceIncident,
+ ...data.workplaceIncident
  }
  }
  }
@@ -367,6 +386,13 @@ const COMMON_SYMPTOMS = useMemo(() => [
  setLocalData(prev => ({
  ...prev,
  vitalSigns: { ...prev.vitalSigns, [field]: value }
+ }))
+ }, [])
+
+ const updateWorkplaceIncident = useCallback((field: keyof WorkplaceIncident, value: boolean) => {
+ setLocalData(prev => ({
+ ...prev,
+ workplaceIncident: { ...prev.workplaceIncident, [field]: value }
  }))
  }, [])
 
@@ -778,6 +804,10 @@ const COMMON_SYMPTOMS = useMemo(() => [
  temperature: validatedTemperature,
  bloodPressureSystolic: tibokPatient.vitalSigns?.bloodPressureSystolic?.toString() || "",
  bloodPressureDiastolic: tibokPatient.vitalSigns?.bloodPressureDiastolic?.toString() || ""
+ },
+ workplaceIncident: {
+ illnessAtWork: false,
+ accidentAtWork: false
  }
  }
 
@@ -808,12 +838,16 @@ const COMMON_SYMPTOMS = useMemo(() => [
  setLocalData(prev => ({
  ...prev,
  ...savedData.clinicalData,
- symptoms: Array.isArray(savedData.clinicalData.symptoms) 
- ? savedData.clinicalData.symptoms 
+ symptoms: Array.isArray(savedData.clinicalData.symptoms)
+ ? savedData.clinicalData.symptoms
  : [],
  vitalSigns: {
  ...INITIAL_CLINICAL_DATA.vitalSigns,
  ...savedData.clinicalData.vitalSigns
+ },
+ workplaceIncident: {
+ ...INITIAL_CLINICAL_DATA.workplaceIncident,
+ ...savedData.clinicalData.workplaceIncident
  }
  }))
  }
@@ -1433,6 +1467,94 @@ const COMMON_SYMPTOMS = useMemo(() => [
  </div>
  </div>
  )}
+ </CardContent>
+ </Card>
+
+ {/* Section 6: Workplace Incident */}
+ <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+ <CardHeader className="bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-t-lg">
+ <CardTitle className="flex items-center gap-3">
+ <AlertCircle className="h-6 w-6" />
+ Workplace Incident Assessment
+ </CardTitle>
+ </CardHeader>
+ <CardContent className="p-6">
+ <div className="space-y-4">
+ <p className="text-sm text-gray-600">
+ Please indicate if the patient's condition is related to their workplace:
+ </p>
+
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+ {/* Illness at Work */}
+ <label
+ className={`flex items-center space-x-4 p-4 rounded-lg border-2 transition-all cursor-pointer ${
+ localData.workplaceIncident?.illnessAtWork
+ ? "border-amber-400 bg-amber-50"
+ : "border-gray-200 hover:border-amber-300 hover:bg-amber-50/50"
+ }`}
+ >
+ <Checkbox
+ checked={localData.workplaceIncident?.illnessAtWork || false}
+ onCheckedChange={(checked) => updateWorkplaceIncident("illnessAtWork", checked as boolean)}
+ className="h-5 w-5"
+ />
+ <div>
+ <span className="font-medium text-gray-900">Illness at Workplace</span>
+ <p className="text-xs text-gray-500 mt-1">
+ Patient got sick at their working place
+ </p>
+ </div>
+ </label>
+
+ {/* Accident at Work */}
+ <label
+ className={`flex items-center space-x-4 p-4 rounded-lg border-2 transition-all cursor-pointer ${
+ localData.workplaceIncident?.accidentAtWork
+ ? "border-orange-400 bg-orange-50"
+ : "border-gray-200 hover:border-orange-300 hover:bg-orange-50/50"
+ }`}
+ >
+ <Checkbox
+ checked={localData.workplaceIncident?.accidentAtWork || false}
+ onCheckedChange={(checked) => updateWorkplaceIncident("accidentAtWork", checked as boolean)}
+ className="h-5 w-5"
+ />
+ <div>
+ <span className="font-medium text-gray-900">Accident / Incident at Workplace</span>
+ <p className="text-xs text-gray-500 mt-1">
+ Patient had an accident or incident at their working place
+ </p>
+ </div>
+ </label>
+ </div>
+
+ {/* Summary display */}
+ {(localData.workplaceIncident?.illnessAtWork || localData.workplaceIncident?.accidentAtWork) && (
+ <div className="mt-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
+ <div className="flex items-center gap-2 mb-2">
+ <AlertCircle className="h-5 w-5 text-amber-600" />
+ <p className="font-semibold text-amber-800">
+ Workplace-Related Condition
+ </p>
+ </div>
+ <div className="flex flex-wrap gap-2">
+ {localData.workplaceIncident?.illnessAtWork && (
+ <Badge className="bg-amber-100 text-amber-800 border-amber-300">
+ 🏥 Illness at Work
+ </Badge>
+ )}
+ {localData.workplaceIncident?.accidentAtWork && (
+ <Badge className="bg-orange-100 text-orange-800 border-orange-300">
+ ⚠️ Accident at Work
+ </Badge>
+ )}
+ </div>
+ <p className="text-xs text-amber-700 mt-2">
+ This information will be included in the medical report for occupational health documentation.
+ </p>
+ </div>
+ )}
+ </div>
  </CardContent>
  </Card>
 
