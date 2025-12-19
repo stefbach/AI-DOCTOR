@@ -39,87 +39,85 @@ export async function GET(req: NextRequest) {
 
     // Fetch Lab Results
     if (type === 'lab' || type === 'all' || !type) {
-      let labQuery = supabase
-        .from('lab_results')
-        .select(`
-          id,
-          results_data,
-          interpretation_notes,
-          validated_by,
-          validated_at,
-          created_at,
-          lab_orders!inner (
-            id,
-            order_number,
-            patient_id,
-            patient_name,
-            tests_ordered,
-            scheduled_date,
-            results_ready_at,
-            clinical_notes
-          )
-        `)
+      // First, find the lab order for this patient
+      let labOrderQuery = supabase
+        .from('lab_orders')
+        .select('id, order_number, patient_id, patient_name, tests_ordered, scheduled_date, results_ready_at, clinical_notes')
         .order('created_at', { ascending: false })
         .limit(1)
 
-      // Filter by patient_id or patient_name
       if (patientId) {
-        labQuery = labQuery.eq('lab_orders.patient_id', patientId)
+        labOrderQuery = labOrderQuery.eq('patient_id', patientId)
       } else if (patientName) {
-        // Use ilike for case-insensitive partial match
-        labQuery = labQuery.ilike('lab_orders.patient_name', `%${patientName}%`)
+        labOrderQuery = labOrderQuery.ilike('patient_name', `%${patientName}%`)
       }
 
-      const { data: labData, error: labError } = await labQuery
+      const { data: labOrderData, error: labOrderError } = await labOrderQuery
 
-      if (labError) {
-        console.error('Error fetching lab results:', labError)
-      } else if (labData && labData.length > 0) {
-        results.labResults = labData[0]
-        results.hasLabResults = true
+      if (labOrderError) {
+        console.error('Error fetching lab orders:', labOrderError)
+      } else if (labOrderData && labOrderData.length > 0) {
+        const labOrderId = labOrderData[0].id
+
+        // Now fetch the results for this order
+        const { data: labResultData, error: labResultError } = await supabase
+          .from('lab_results')
+          .select('id, results_data, interpretation_notes, validated_by, validated_at, created_at')
+          .eq('lab_order_id', labOrderId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+
+        if (labResultError) {
+          console.error('Error fetching lab results:', labResultError)
+        } else if (labResultData && labResultData.length > 0) {
+          results.labResults = {
+            ...labResultData[0],
+            lab_orders: labOrderData[0]
+          }
+          results.hasLabResults = true
+        }
       }
     }
 
     // Fetch Radiology Results
     if (type === 'radiology' || type === 'all' || !type) {
-      let radioQuery = supabase
-        .from('radiology_results')
-        .select(`
-          id,
-          results_data,
-          radiologist_name,
-          radiologist_notes,
-          validated_at,
-          created_at,
-          radiology_orders!inner (
-            id,
-            order_number,
-            patient_id,
-            patient_name,
-            exams_ordered,
-            scheduled_date,
-            results_ready_at,
-            clinical_notes
-          )
-        `)
+      // First, find the radiology order for this patient
+      let radioOrderQuery = supabase
+        .from('radiology_orders')
+        .select('id, order_number, patient_id, patient_name, exams_ordered, scheduled_date, results_ready_at, clinical_notes')
         .order('created_at', { ascending: false })
         .limit(1)
 
-      // Filter by patient_id or patient_name
       if (patientId) {
-        radioQuery = radioQuery.eq('radiology_orders.patient_id', patientId)
+        radioOrderQuery = radioOrderQuery.eq('patient_id', patientId)
       } else if (patientName) {
-        // Use ilike for case-insensitive partial match
-        radioQuery = radioQuery.ilike('radiology_orders.patient_name', `%${patientName}%`)
+        radioOrderQuery = radioOrderQuery.ilike('patient_name', `%${patientName}%`)
       }
 
-      const { data: radioData, error: radioError } = await radioQuery
+      const { data: radioOrderData, error: radioOrderError } = await radioOrderQuery
 
-      if (radioError) {
-        console.error('Error fetching radiology results:', radioError)
-      } else if (radioData && radioData.length > 0) {
-        results.radiologyResults = radioData[0]
-        results.hasRadiologyResults = true
+      if (radioOrderError) {
+        console.error('Error fetching radiology orders:', radioOrderError)
+      } else if (radioOrderData && radioOrderData.length > 0) {
+        const radioOrderId = radioOrderData[0].id
+
+        // Now fetch the results for this order
+        const { data: radioResultData, error: radioResultError } = await supabase
+          .from('radiology_results')
+          .select('id, results_data, radiologist_name, radiologist_notes, validated_at, created_at')
+          .eq('radiology_order_id', radioOrderId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+
+        if (radioResultError) {
+          console.error('Error fetching radiology results:', radioResultError)
+        } else if (radioResultData && radioResultData.length > 0) {
+          results.radiologyResults = {
+            ...radioResultData[0],
+            radiology_orders: radioOrderData[0]
+          }
+          results.hasRadiologyResults = true
+        }
       }
     }
 
