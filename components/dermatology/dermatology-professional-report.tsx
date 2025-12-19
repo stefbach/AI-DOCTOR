@@ -3711,8 +3711,12 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
  <div><strong>Speciality:</strong> {doctorInfo.specialite}</div>
  <div><strong>Medical Council No.:</strong> {doctorInfo.numeroEnregistrement}</div>
  <div><strong>Email:</strong> {doctorInfo.email}</div>
+ {doctorInfo.adresseCabinet && !doctorInfo.adresseCabinet.toLowerCase().includes('tibok') && (
  <div className="col-span-2"><strong>Clinic Address:</strong> {doctorInfo.adresseCabinet}</div>
- <div className="col-span-2"><strong>Consultation Hours:</strong> {doctorInfo.heuresConsultation}</div>
+ )}
+ {doctorInfo.heuresConsultation && (
+ <div className="col-span-2"><strong>Consultation Hours:</strong> {doctorInfo.heuresConsultation.replace(/^Teleconsultation Hours:\s*/i, '')}</div>
+ )}
  </div>
  )}
  </CardContent>
@@ -3772,8 +3776,9 @@ const ConsultationReport = () => {
  <div>{praticien.specialite}</div>
  <div>Medical Council Reg: {praticien.numeroEnregistrement}</div>
  <div>{praticien.email}</div>
- <div className="col-span-2">{praticien.adresseCabinet}</div>
- <div className="col-span-2">{praticien.heuresConsultation}</div>
+ {praticien.heuresConsultation && (
+ <div className="col-span-2">Consultation Hours: {praticien.heuresConsultation.replace(/^Teleconsultation Hours:\s*/i, '')}</div>
+ )}
  </div>
  </div>
 
@@ -4152,8 +4157,7 @@ const ConsultationReport = () => {
  <p className="font-semibold">{praticien.nom}</p>
  <p className="text-sm text-gray-600">{praticien.qualifications}</p>
  <p className="text-sm text-gray-600">Medical Council Reg: {praticien.numeroEnregistrement}</p>
- <p className="text-sm text-gray-600">{praticien.adresseCabinet}</p>
- 
+
  {validationStatus === 'validated' && documentSignatures.consultation ? (
  <div className="mt-4">
  <img 
