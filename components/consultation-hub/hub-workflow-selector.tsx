@@ -50,9 +50,11 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
       console.log('🔄 Auto-refreshing to get latest consultation type from Tibok...')
       setIsRefreshing(true)
 
-      // Small delay to show the refreshing state, then refresh
+      // Small delay to show the refreshing state, then do full page reload
+      // Using window.location.reload() instead of router.refresh() because
+      // router.refresh() only refreshes server data but keeps component state
       setTimeout(() => {
-        router.refresh()
+        window.location.reload()
       }, 500)
     }
 
