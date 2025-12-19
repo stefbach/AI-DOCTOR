@@ -11,11 +11,11 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { 
- ArrowLeft, 
- ArrowRight, 
- Stethoscope, 
- Thermometer, 
+import {
+ ArrowLeft,
+ ArrowRight,
+ Stethoscope,
+ Thermometer,
  Activity,
  FileText,
  Clock,
@@ -23,7 +23,12 @@ import {
  Search,
  XCircle,
  CheckCircle,
- AlertCircle
+ AlertCircle,
+ FlaskConical,
+ ImageIcon,
+ Download,
+ Loader2,
+ Info
 } from "lucide-react"
 import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
 import { getTranslation, Language } from "@/lib/translations"
@@ -200,6 +205,14 @@ export default function ModernClinicalForm({
  const [bpNotApplicable, setBpNotApplicable] = useState(false)
  const [lastSaved, setLastSaved] = useState<Date | null>(null)
  const [isLoading, setIsLoading] = useState(false)
+
+ // Lab and Radiology results import state
+ const [labResults, setLabResults] = useState<any>(null)
+ const [radiologyResults, setRadiologyResults] = useState<any>(null)
+ const [isLoadingLabResults, setIsLoadingLabResults] = useState(false)
+ const [isLoadingRadiologyResults, setIsLoadingRadiologyResults] = useState(false)
+ const [labResultsError, setLabResultsError] = useState<string | null>(null)
+ const [radiologyResultsError, setRadiologyResultsError] = useState<string | null>(null)
 
  // ========== Memoization of translated lists ==========
 // Replace the COMMON_SYMPTOMS useMemo in your clinical-form.tsx (around line 139-163)
@@ -383,6 +396,214 @@ const COMMON_SYMPTOMS = useMemo(() => [
  return newValue
  })
  }, [updateVitalSigns])
+
+ // ========== Lab and Radiology Results Import ==========
+ const getPatientId = useCallback((): string | null => {
+   // Try to get patient ID from various sources
+   // 1. From patientData prop
+   if (patientData?.patientId) return patientData.patientId
+
+   // 2. From sessionStorage (consultationPatientData)
+   try {
+     const storedData = sessionStorage.getItem('consultationPatientData')
+     if (storedData) {
+       const parsed = JSON.parse(storedData)
+       if (parsed.patientId) return parsed.patientId
+     }
+   } catch (e) {
+     console.warn('Error parsing sessionStorage:', e)
+   }
+
+   // 3. From Tibok patient data
+   if (tibokPatient?.patientId) return tibokPatient.patientId
+
+   return null
+ }, [patientData, tibokPatient])
+
+ const fetchLabResults = useCallback(async () => {
+   const patientId = getPatientId()
+   if (!patientId) {
+     setLabResultsError("Patient ID not found - cannot fetch lab results")
+     return
+   }
+
+   setIsLoadingLabResults(true)
+   setLabResultsError(null)
+
+   try {
+     const response = await fetch(`/api/patient-results?patientId=${patientId}&type=lab`)
+     const data = await response.json()
+
+     if (!response.ok) {
+       throw new Error(data.error || 'Failed to fetch lab results')
+     }
+
+     if (data.hasLabResults && data.labResults) {
+       setLabResults(data.labResults)
+
+       // Format lab results for disease history
+       const labResultsText = formatLabResultsForHistory(data.labResults)
+       if (labResultsText) {
+         setLocalData(prev => ({
+           ...prev,
+           diseaseHistory: prev.diseaseHistory
+             ? `${prev.diseaseHistory}\n\n--- LAST LAB RESULTS ---\n${labResultsText}`
+             : `--- LAST LAB RESULTS ---\n${labResultsText}`
+         }))
+       }
+     } else {
+       setLabResultsError("No lab results found for this patient")
+     }
+   } catch (error: any) {
+     console.error('Error fetching lab results:', error)
+     setLabResultsError(error.message || 'Failed to fetch lab results')
+   } finally {
+     setIsLoadingLabResults(false)
+   }
+ }, [getPatientId])
+
+ const fetchRadiologyResults = useCallback(async () => {
+   const patientId = getPatientId()
+   if (!patientId) {
+     setRadiologyResultsError("Patient ID not found - cannot fetch radiology results")
+     return
+   }
+
+   setIsLoadingRadiologyResults(true)
+   setRadiologyResultsError(null)
+
+   try {
+     const response = await fetch(`/api/patient-results?patientId=${patientId}&type=radiology`)
+     const data = await response.json()
+
+     if (!response.ok) {
+       throw new Error(data.error || 'Failed to fetch radiology results')
+     }
+
+     if (data.hasRadiologyResults && data.radiologyResults) {
+       setRadiologyResults(data.radiologyResults)
+
+       // Format radiology results for disease history
+       const radiologyResultsText = formatRadiologyResultsForHistory(data.radiologyResults)
+       if (radiologyResultsText) {
+         setLocalData(prev => ({
+           ...prev,
+           diseaseHistory: prev.diseaseHistory
+             ? `${prev.diseaseHistory}\n\n--- LAST RADIOLOGY RESULTS ---\n${radiologyResultsText}`
+             : `--- LAST RADIOLOGY RESULTS ---\n${radiologyResultsText}`
+         }))
+       }
+     } else {
+       setRadiologyResultsError("No radiology results found for this patient")
+     }
+   } catch (error: any) {
+     console.error('Error fetching radiology results:', error)
+     setRadiologyResultsError(error.message || 'Failed to fetch radiology results')
+   } finally {
+     setIsLoadingRadiologyResults(false)
+   }
+ }, [getPatientId])
+
+ // Format lab results for display in disease history
+ const formatLabResultsForHistory = (labResult: any): string => {
+   if (!labResult) return ''
+
+   const lines: string[] = []
+   const resultsData = labResult.results_data
+   const order = labResult.lab_orders
+
+   // Add date
+   if (labResult.validated_at) {
+     lines.push(`Date: ${new Date(labResult.validated_at).toLocaleDateString()}`)
+   } else if (labResult.created_at) {
+     lines.push(`Date: ${new Date(labResult.created_at).toLocaleDateString()}`)
+   }
+
+   // Add order number
+   if (order?.order_number) {
+     lines.push(`Order: ${order.order_number}`)
+   }
+
+   // Add test results
+   if (resultsData?.tests && Array.isArray(resultsData.tests)) {
+     lines.push('\nTest Results:')
+     resultsData.tests.forEach((test: any) => {
+       const abnormalFlag = test.is_abnormal ? ' ⚠️' : ''
+       lines.push(`• ${test.test_name}: ${test.value} ${test.unit || ''}${abnormalFlag}`)
+       if (test.reference_range) {
+         lines.push(`  (Ref: ${test.reference_range})`)
+       }
+     })
+   }
+
+   // Add interpretation notes
+   if (labResult.interpretation_notes) {
+     lines.push(`\nInterpretation: ${labResult.interpretation_notes}`)
+   }
+
+   // Add validator
+   if (labResult.validated_by) {
+     lines.push(`\nValidated by: ${labResult.validated_by}`)
+   }
+
+   return lines.join('\n')
+ }
+
+ // Format radiology results for display in disease history
+ const formatRadiologyResultsForHistory = (radioResult: any): string => {
+   if (!radioResult) return ''
+
+   const lines: string[] = []
+   const resultsData = radioResult.results_data
+   const order = radioResult.radiology_orders
+
+   // Add date
+   if (radioResult.validated_at) {
+     lines.push(`Date: ${new Date(radioResult.validated_at).toLocaleDateString()}`)
+   } else if (radioResult.created_at) {
+     lines.push(`Date: ${new Date(radioResult.created_at).toLocaleDateString()}`)
+   }
+
+   // Add order number
+   if (order?.order_number) {
+     lines.push(`Order: ${order.order_number}`)
+   }
+
+   // Add exam type
+   if (order?.exams_ordered) {
+     const exams = Array.isArray(order.exams_ordered)
+       ? order.exams_ordered.map((e: any) => e.name || e).join(', ')
+       : order.exams_ordered
+     lines.push(`Exam: ${exams}`)
+   }
+
+   // Add findings
+   if (resultsData?.findings) {
+     lines.push(`\nFindings: ${resultsData.findings}`)
+   }
+
+   // Add conclusion
+   if (resultsData?.conclusion) {
+     lines.push(`\nConclusion: ${resultsData.conclusion}`)
+   }
+
+   // Add recommendations
+   if (resultsData?.recommendations) {
+     lines.push(`\nRecommendations: ${resultsData.recommendations}`)
+   }
+
+   // Add radiologist notes
+   if (radioResult.radiologist_notes) {
+     lines.push(`\nRadiologist Notes: ${radioResult.radiologist_notes}`)
+   }
+
+   // Add radiologist name
+   if (radioResult.radiologist_name) {
+     lines.push(`\nRadiologist: ${radioResult.radiologist_name}`)
+   }
+
+   return lines.join('\n')
+ }
 
  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
  if (e.key === 'Enter' && e.currentTarget.tagName !== 'TEXTAREA') {
@@ -698,6 +919,86 @@ const COMMON_SYMPTOMS = useMemo(() => [
  <p className="text-xs text-gray-500">
  Include details about when symptoms started, what makes them better or worse, and any treatments you've tried.
  </p>
+ </div>
+
+ {/* Import Lab/Radiology Results Buttons */}
+ <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+   <div className="flex items-center gap-2 mb-3">
+     <Download className="h-5 w-5 text-gray-600" />
+     <p className="font-semibold text-gray-800">Import Previous Results</p>
+   </div>
+   <p className="text-xs text-gray-500 mb-3">
+     Import the patient's last laboratory or radiology results to include in the disease history.
+   </p>
+   <div className="flex flex-wrap gap-3">
+     {/* Lab Results Button */}
+     <Button
+       type="button"
+       variant="outline"
+       size="sm"
+       onClick={fetchLabResults}
+       disabled={isLoadingLabResults || !!labResults}
+       className={`flex items-center gap-2 ${labResults ? 'bg-green-50 border-green-300 text-green-700' : ''}`}
+     >
+       {isLoadingLabResults ? (
+         <Loader2 className="h-4 w-4 animate-spin" />
+       ) : labResults ? (
+         <CheckCircle className="h-4 w-4" />
+       ) : (
+         <FlaskConical className="h-4 w-4" />
+       )}
+       {labResults ? 'Lab Results Imported' : 'Import Lab Results'}
+     </Button>
+
+     {/* Radiology Results Button */}
+     <Button
+       type="button"
+       variant="outline"
+       size="sm"
+       onClick={fetchRadiologyResults}
+       disabled={isLoadingRadiologyResults || !!radiologyResults}
+       className={`flex items-center gap-2 ${radiologyResults ? 'bg-green-50 border-green-300 text-green-700' : ''}`}
+     >
+       {isLoadingRadiologyResults ? (
+         <Loader2 className="h-4 w-4 animate-spin" />
+       ) : radiologyResults ? (
+         <CheckCircle className="h-4 w-4" />
+       ) : (
+         <ImageIcon className="h-4 w-4" />
+       )}
+       {radiologyResults ? 'Radiology Results Imported' : 'Import Radiology Results'}
+     </Button>
+   </div>
+
+   {/* Error/Info messages */}
+   {labResultsError && (
+     <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+       <div className="flex items-center gap-2">
+         <Info className="h-4 w-4 text-amber-600" />
+         <p className="text-sm text-amber-700">{labResultsError}</p>
+       </div>
+     </div>
+   )}
+   {radiologyResultsError && (
+     <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+       <div className="flex items-center gap-2">
+         <Info className="h-4 w-4 text-amber-600" />
+         <p className="text-sm text-amber-700">{radiologyResultsError}</p>
+       </div>
+     </div>
+   )}
+
+   {/* Success indicators */}
+   {(labResults || radiologyResults) && (
+     <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded-lg">
+       <div className="flex items-center gap-2">
+         <CheckCircle className="h-4 w-4 text-green-600" />
+         <p className="text-sm text-green-700">
+           Results have been added to the disease history above.
+         </p>
+       </div>
+     </div>
+   )}
  </div>
 
  {localData.diseaseHistory && (
