@@ -13,7 +13,8 @@ import {
   ArrowRight,
   FileText,
   User,
-  CheckCircle
+  CheckCircle,
+  Mic
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { ConsultationType } from '@/lib/consultation-hub/route-decision'
@@ -510,7 +511,7 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
               setSelectedWorkflow('') // Reset workflow selection
             }}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Normal */}
               <Card className={`cursor-pointer transition-all ${selectedType === 'normal' ? 'ring-2 ring-blue-500' : ''}`}>
                 <CardContent className="p-4" onClick={() => setSelectedType('normal')}>
@@ -550,6 +551,29 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Voice Dictation */}
+              <Card className={`cursor-pointer transition-all ${selectedType === 'voice_dictation' ? 'ring-2 ring-purple-500' : ''}`}>
+                <CardContent className="p-4" onClick={() => setSelectedType('voice_dictation' as ConsultationType)}>
+                  <div className="flex items-start gap-3">
+                    <RadioGroupItem value="voice_dictation" id="type-voice" />
+                    <div className="flex-1">
+                      <Label htmlFor="type-voice" className="cursor-pointer">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Mic className="h-5 w-5 text-purple-600" />
+                          <span className="font-semibold">Dictée Vocale</span>
+                          <Badge variant="outline" className="text-xs bg-purple-100 text-purple-700 border-purple-300">
+                            NOUVEAU
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          Consultation par dictée audio
+                        </p>
+                      </Label>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </RadioGroup>
         </CardContent>
@@ -557,12 +581,24 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
 
       {/* Proceed Button */}
       <Button
-        onClick={() => handleProceed()}
+        onClick={() => {
+          if (selectedType === 'voice_dictation') {
+            handleProceed('/voice-dictation')
+          } else {
+            handleProceed()
+          }
+        }}
         size="lg"
-        className={`w-full ${selectedType === 'chronic' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+        className={`w-full ${
+          selectedType === 'chronic' ? 'bg-red-600 hover:bg-red-700' : 
+          selectedType === 'voice_dictation' ? 'bg-purple-600 hover:bg-purple-700' : 
+          'bg-blue-600 hover:bg-blue-700'
+        }`}
       >
         <ArrowRight className="mr-2 h-5 w-5" />
-        {selectedType === 'chronic' ? 'Continuer vers Maladie Chronique' : 'Continuer vers Consultation Normale'}
+        {selectedType === 'chronic' ? 'Continuer vers Maladie Chronique' : 
+         selectedType === 'voice_dictation' ? 'Continuer vers Dictée Vocale' : 
+         'Continuer vers Consultation Normale'}
       </Button>
     </div>
   )
