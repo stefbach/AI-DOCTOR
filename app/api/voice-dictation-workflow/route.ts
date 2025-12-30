@@ -22,6 +22,12 @@ interface VoiceDictationInput {
     medicalCouncilNumber?: string;
   };
   patientId?: string;
+  consultationType?: 'standard' | 'specialist_referral'; // Type de consultation
+  referringPhysician?: { // Si consultation de correspondant
+    name: string;
+    specialty?: string;
+    contact?: string;
+  };
 }
 
 interface ExtractedClinicalData {
@@ -51,6 +57,13 @@ interface ExtractedClinicalData {
     question: string;
     answer: string;
   }>;
+  referralInfo?: { // Informations de correspondant
+    referringPhysician?: string;
+    referralReason?: string;
+    previousInvestigations?: string[];
+    referralDate?: string;
+    urgency?: 'routine' | 'urgent' | 'emergency';
+  };
 }
 
 // ============================================
@@ -61,9 +74,19 @@ const EXTRACTION_SYSTEM_PROMPT = `
 
 Vous êtes un expert médical qui extrait et structure les informations d'une dictée vocale médicale.
 
+⚠️ **IMPORTANT**: Cette dictée peut être :
+- Une **consultation standard** (médecin généraliste ou spécialiste)
+- Une **consultation de correspondant spécialiste** (avis spécialisé suite à référence)
+
 ## 🎯 VOTRE MISSION
 
 À partir d'une transcription de dictée médicale (en français ou anglais), extraire TOUTES les informations cliniques pertinentes et les structurer en format JSON standardisé.
+
+**Si c'est une consultation de correspondant**, identifiez et extrayez également :
+- Le médecin référent (qui a envoyé le patient)
+- Le motif de la référence
+- Les investigations déjà réalisées
+- L'urgence de la consultation
 
 ## 📋 FORMAT DE SORTIE JSON REQUIS
 
@@ -97,10 +120,18 @@ Vous êtes un expert médical qui extrait et structure les informations d'une di
       "answer": "Réponse extraite de la dictée ou 'Non mentionné'"
     }
   ],
+  "referralInfo": {
+    "referringPhysician": "Nom du médecin référent ou null",
+    "referralReason": "Raison de la référence au spécialiste ou null",
+    "previousInvestigations": ["Examen 1 déjà fait", "Examen 2 déjà fait"],
+    "referralDate": "Date de la référence ou null",
+    "urgency": "routine" | "urgent" | "emergency" | null
+  },
   "transcriptionMetadata": {
     "language": "fr" | "en",
     "originalText": "Transcription complète",
-    "extractionConfidence": "high" | "medium" | "low"
+    "extractionConfidence": "high" | "medium" | "low",
+    "consultationType": "standard" | "specialist_referral"
   }
 }
 \`\`\`
@@ -126,11 +157,20 @@ Vous êtes un expert médical qui extrait et structure les informations d'une di
 - Ajouter comme questions/réponses dans aiQuestions
 - Exemple : {"question": "Auscultation pulmonaire", "answer": "Râles crépitants bilatéraux"}
 
-### 4. IMPRESSIONS DIAGNOSTIQUES
+### 4. INFORMATIONS DE CORRESPONDANT (si applicable)
+- **Médecin référent** : "Référé par Dr. X" / "Envoyé par le Dr. Y" / "Sur demande de..."
+- **Motif de référence** : "pour avis spécialisé", "pour prise en charge", "suspicion de..."
+- **Investigations déjà faites** : "Patient a déjà fait...", "examens précédents montrent..."
+- **Urgence** : "urgent", "semi-urgent", "routine", "à voir rapidement"
+- **Date de référence** : Si mentionnée
+- **MOTS-CLÉS** : "référé", "envoyé", "correspondant", "avis spécialisé", "référence"
+
+### 5. IMPRESSIONS DIAGNOSTIQUES
 - Si le médecin mentionne un diagnostic suspecté, l'inclure dans aiQuestions
 - Exemple : {"question": "Impression diagnostique du clinicien", "answer": "Pneumonie communautaire probable"}
+- Pour correspondant : Inclure l'impression du médecin référent si mentionnée
 
-### 5. PRESCRIPTIONS DICTÉES
+### 6. PRESCRIPTIONS DICTÉES
 - Si le médecin dicte des prescriptions, les extraire dans currentMedications avec format standardisé
 - Exemple : "Amoxicilline 500mg trois fois par jour pendant 7 jours"
 
@@ -181,6 +221,35 @@ Vous êtes un expert médical qui extrait et structure les informations d'une di
 
 → Extraction complète avec diagnostic et prescriptions
 
+**Exemple 3 - Dictée de correspondant spécialiste (IMPORTANT):**
+"Homme de 58 ans référé par Dr. Martin pour avis cardiologique concernant douleurs thoraciques atypiques. Patient a déjà fait ECG et troponines qui sont normaux selon son médecin traitant. Examen d'aujourd'hui : auscultation cardiaque normale, souffle 2/6 systolique au foyer mitral. Tension 145/85. Je pense qu'il s'agit plutôt de douleurs musculo-squelettiques d'origine pariétale. Je recommande test d'effort de dépistage à faire dans les 3 mois. Je renvoie le patient à son médecin traitant Dr. Martin avec ces conclusions et mes recommandations."
+
+→ Extraction avec referralInfo rempli :
+\`\`\`json
+{
+  "patientInfo": {
+    "age": 58,
+    "sex": "M"
+  },
+  "clinicalData": {
+    "chiefComplaint": "Avis cardiologique pour douleurs thoraciques atypiques",
+    "symptoms": ["douleurs thoraciques atypiques"],
+    "vitalSigns": {
+      "bloodPressure": "145/85"
+    }
+  },
+  "referralInfo": {
+    "referringPhysician": "Dr. Martin",
+    "referralReason": "Avis cardiologique pour douleurs thoraciques atypiques",
+    "previousInvestigations": ["ECG normal", "Troponines normales"],
+    "urgency": "routine"
+  },
+  "transcriptionMetadata": {
+    "consultationType": "specialist_referral"
+  }
+}
+\`\`\`
+
 ## 🎯 VALIDATION FINALE
 
 Avant de retourner le JSON :
@@ -190,6 +259,8 @@ Avant de retourner le JSON :
 - [ ] diseaseHistory est une phrase complète et cohérente
 - [ ] Signes vitaux en format standardisé
 - [ ] aiQuestions inclut examen clinique ET impressions diagnostiques si mentionnés
+- [ ] referralInfo rempli si c'est une consultation de correspondant
+- [ ] consultationType correctement identifié ("standard" ou "specialist_referral")
 
 Extraire maintenant les données de la dictée médicale fournie.
 `;
@@ -258,6 +329,17 @@ async function extractClinicalData(
   console.log(`   Chief complaint: ${extractedData.clinicalData?.chiefComplaint || 'not specified'}`);
   console.log(`   Symptoms: ${extractedData.clinicalData?.symptoms?.length || 0}`);
   
+  // Détecter si c'est une consultation de correspondant
+  const isReferral = extractedData.referralInfo?.referringPhysician || 
+                     extractedData.transcriptionMetadata?.consultationType === 'specialist_referral';
+  
+  if (isReferral) {
+    console.log(`   🔍 SPECIALIST REFERRAL DETECTED`);
+    console.log(`      Referring physician: ${extractedData.referralInfo?.referringPhysician || 'Not specified'}`);
+    console.log(`      Referral reason: ${extractedData.referralInfo?.referralReason || 'Not specified'}`);
+    console.log(`      Previous investigations: ${extractedData.referralInfo?.previousInvestigations?.length || 0}`);
+  }
+  
   return extractedData;
 }
 
@@ -269,6 +351,31 @@ function prepareForDiagnosisAPI(extractedData: ExtractedClinicalData) {
   
   const patientInfo = extractedData.patientInfo;
   const clinicalData = extractedData.clinicalData;
+  const referralInfo = extractedData.referralInfo;
+  
+  // Si c'est une consultation de correspondant, ajouter les informations dans aiQuestions
+  const aiQuestions = [...(extractedData.aiQuestions || [])];
+  
+  if (referralInfo?.referringPhysician) {
+    aiQuestions.push({
+      question: "Médecin référent",
+      answer: referralInfo.referringPhysician
+    });
+  }
+  
+  if (referralInfo?.referralReason) {
+    aiQuestions.push({
+      question: "Motif de la référence",
+      answer: referralInfo.referralReason
+    });
+  }
+  
+  if (referralInfo?.previousInvestigations && referralInfo.previousInvestigations.length > 0) {
+    aiQuestions.push({
+      question: "Examens déjà réalisés",
+      answer: referralInfo.previousInvestigations.join(', ')
+    });
+  }
   
   return {
     patientData: {
@@ -288,7 +395,8 @@ function prepareForDiagnosisAPI(extractedData: ExtractedClinicalData) {
       diseaseHistory: clinicalData.diseaseHistory || '',
       vitalSigns: clinicalData.vitalSigns || {}
     },
-    aiQuestions: extractedData.aiQuestions || []
+    aiQuestions: aiQuestions,
+    referralInfo: referralInfo || null
   };
 }
 
@@ -427,13 +535,19 @@ export async function POST(request: NextRequest) {
     // ===== RÉPONSE FINALE =====
     const processingTime = Date.now() - startTime;
     
+    // Détecter si c'est une consultation de correspondant
+    const isReferralConsultation = extractedData.referralInfo?.referringPhysician || 
+                                   extractedData.transcriptionMetadata?.consultationType === 'specialist_referral';
+    
     console.log('✅ ========================================');
     console.log('   WORKFLOW COMPLETED SUCCESSFULLY');
+    console.log(`   Consultation type: ${isReferralConsultation ? 'SPECIALIST REFERRAL' : 'STANDARD'}`);
     console.log(`   Total processing time: ${processingTime}ms`);
     console.log('========================================');
     
     return NextResponse.json({
       success: true,
+      consultationType: isReferralConsultation ? 'specialist_referral' : 'standard',
       workflow: {
         step1_transcription: {
           text: transcription.text,
@@ -443,7 +557,9 @@ export async function POST(request: NextRequest) {
         step2_extraction: {
           patientInfo: extractedData.patientInfo,
           clinicalData: extractedData.clinicalData,
-          aiQuestions: extractedData.aiQuestions
+          aiQuestions: extractedData.aiQuestions,
+          referralInfo: extractedData.referralInfo || null,
+          consultationType: isReferralConsultation ? 'specialist_referral' : 'standard'
         },
         step3_diagnosis: {
           primaryDiagnosis: diagnosisResult.analysis?.clinical_analysis?.primary_diagnosis?.condition,

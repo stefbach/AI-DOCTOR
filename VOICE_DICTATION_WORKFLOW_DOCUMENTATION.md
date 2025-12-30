@@ -112,6 +112,20 @@ POST /api/voice-dictation-workflow
 3. **patientId** (string)
    - Identifiant du patient (si disponible)
 
+4. **consultationType** (string) - 🆕 NOUVEAU
+   - `"standard"` : Consultation normale
+   - `"specialist_referral"` : Consultation de correspondant spécialiste
+   - Si non spécifié, détection automatique basée sur la transcription
+
+5. **referringPhysician** (JSON string) - 🆕 NOUVEAU (pour consultations de correspondant)
+   ```json
+   {
+     "name": "Dr. Marie Martin",
+     "specialty": "General Practice",
+     "contact": "+230 5123 4567"
+   }
+   ```
+
 ### Exemple d'appel avec curl
 
 ```bash
@@ -150,6 +164,7 @@ console.log(result);
 ```json
 {
   "success": true,
+  "consultationType": "specialist_referral", // 🆕 NOUVEAU: "standard" ou "specialist_referral"
   "workflow": {
     "step1_transcription": {
       "text": "Transcription complète de la dictée...",
@@ -174,7 +189,15 @@ console.log(result);
           "bloodPressure": "150/95",
           "pulse": 88
         }
-      }
+      },
+      "referralInfo": { // 🆕 NOUVEAU: Présent uniquement si consultation de correspondant
+        "referringPhysician": "Dr. Martin",
+        "referralReason": "Avis cardiologique pour douleurs thoraciques atypiques",
+        "previousInvestigations": ["ECG normal", "Troponines normales"],
+        "referralDate": "2025-12-28",
+        "urgency": "routine"
+      },
+      "consultationType": "specialist_referral" // 🆕 NOUVEAU
     },
     "step3_diagnosis": {
       "primaryDiagnosis": "Syndrome coronarien aigu - Possible angine instable",
@@ -279,6 +302,12 @@ console.log(result);
 - ✅ Signes vitaux (TA, pouls, température, FR, SpO2)
 - ✅ Examen clinique (si dicté)
 - ✅ Impressions diagnostiques (si mentionnées)
+- ✅ 🆕 **Informations de correspondant** (si applicable) :
+  - Médecin référent
+  - Motif de la référence
+  - Examens déjà réalisés
+  - Date de référence
+  - Urgence de la consultation
 
 ### Étape 3: Préparation pour diagnostic
 
@@ -397,6 +426,72 @@ Contrôle HbA1c et créatinine dans 3 mois."
 ```
 
 **Output**: Rapport complet avec ajustements posologiques, nouvelles prescriptions, ordonnances examens biologiques (HbA1c, créatinine, etc.), plan de suivi à 3 mois.
+
+### 4. 🆕 Consultation de correspondant spécialiste (NOUVEAU)
+
+**Exemple de dictée - Cardiologue**:
+```
+"Homme de 58 ans référé par Dr. Martin pour avis cardiologique concernant 
+douleurs thoraciques atypiques. Patient a déjà fait ECG et troponines qui sont 
+normaux selon son médecin traitant. Examen d'aujourd'hui : tension 145/85, 
+auscultation cardiaque normale, souffle 2/6 systolique au foyer mitral. 
+Pas de signes d'insuffisance cardiaque. Je pense qu'il s'agit plutôt de douleurs 
+musculo-squelettiques d'origine pariétale. Je recommande test d'effort de dépistage 
+à faire dans les 3 mois. Je renvoie le patient à son médecin traitant Dr. Martin 
+avec ces conclusions et mes recommandations."
+```
+
+**Output**: 
+- Rapport de correspondant avec :
+  - Identification du médecin référent (Dr. Martin)
+  - Motif de la référence (avis cardiologique douleurs thoraciques)
+  - Examens déjà réalisés (ECG, troponines normaux)
+  - Avis du spécialiste (douleurs musculo-squelettiques)
+  - Recommandations pour le médecin traitant
+  - Plan de retour vers le médecin référent
+
+**Détection automatique** :
+- Type de consultation : `specialist_referral`
+- Médecin référent : `Dr. Martin`
+- Motif référence : `Avis cardiologique pour douleurs thoraciques atypiques`
+- Examens précédents : `["ECG normal", "Troponines normales"]`
+- Urgence : `routine`
+
+**Exemple de dictée - Dermatologue**:
+```
+"Femme de 42 ans envoyée par Dr. Dubois pour lésions cutanées persistantes. 
+Sa médecin traitante a déjà essayé corticoïdes locaux sans succès. 
+Examen : multiples plaques érythémato-squameuses bien délimitées sur coudes 
+et genoux. Signe d'Auspitz positif. Diagnostic : psoriasis en plaques modéré. 
+Je débute Méthotrexate 15mg par semaine avec surveillance hépatique. 
+Lettre de réponse à Dr. Dubois à suivre."
+```
+
+**Output**:
+- Consultation de correspondant dermatologique
+- Référent identifié : Dr. Dubois
+- Traitements déjà essayés documentés
+- Diagnostic spécialisé établi
+- Nouveau traitement initié
+- Lettre de réponse au médecin traitant
+
+**Exemple de dictée - Endocrinologue**:
+```
+"Monsieur 65 ans référé en urgence par Dr. Lee pour diabète déséquilibré. 
+Dernière HbA1c à 12% malgré bithérapie Metformine + Gliclazide. 
+Patient présente également une neuropathie diabétique débutante. 
+Je débute insulinothérapie avec Lantus 20 unités le soir. 
+Revoir dans 2 semaines avec glycémies capillaires. 
+Lettre urgente à Dr. Lee pour coordination du suivi."
+```
+
+**Output**:
+- Consultation urgente de correspondant
+- Urgence détectée
+- Historique thérapeutique documenté
+- Nouvelle insulinothérapie
+- Plan de suivi rapproché
+- Communication avec médecin référent
 
 ## Sécurité et validation
 
