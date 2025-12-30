@@ -53,7 +53,18 @@ export default function VoiceDictationPage() {
   // Load patient and doctor data from sessionStorage
   useEffect(() => {
     const savedPatientData = sessionStorage.getItem('consultationPatientData')
-    const savedDoctorData = sessionStorage.getItem('currentDoctorInfo')
+    let savedDoctorData = sessionStorage.getItem('currentDoctorInfo')
+    
+    // Fallback: try to get doctor info from other sources
+    if (!savedDoctorData) {
+      // Try dermatology workflow
+      savedDoctorData = sessionStorage.getItem('dermatologyDoctorData')
+    }
+    if (!savedDoctorData) {
+      // Try chronic workflow
+      savedDoctorData = sessionStorage.getItem('chronicDoctorData')
+    }
+    
     const existingPatient = sessionStorage.getItem('isExistingPatientConsultation')
     
     if (savedPatientData) {
@@ -75,6 +86,8 @@ export default function VoiceDictationPage() {
       } catch (error) {
         console.error('Error parsing doctor data:', error)
       }
+    } else {
+      console.warn('⚠️ No doctor data found in session storage - will need to be provided in dictation')
     }
     
     // Clean up on unmount
@@ -169,11 +182,6 @@ export default function VoiceDictationPage() {
       return
     }
     
-    if (!doctorData) {
-      setError('Informations du médecin manquantes. Veuillez vous reconnecter.')
-      return
-    }
-    
     setIsProcessing(true)
     setError(null)
     setSuccess(false)
@@ -193,12 +201,17 @@ export default function VoiceDictationPage() {
       
       formData.append('audioFile', audioFile)
       
-      // Add doctor info
-      const doctorInfo = {
+      // Add doctor info (optional - can be provided in dictation)
+      const doctorInfo = doctorData ? {
         fullName: doctorData.nom || 'Dr. Unknown',
         qualifications: doctorData.qualifications || 'MBBS',
         specialty: doctorData.specialite || 'General Medicine',
         medicalCouncilNumber: doctorData.numeroEnregistrement || 'N/A'
+      } : {
+        fullName: 'Dr. [À compléter]',
+        qualifications: 'MBBS',
+        specialty: 'General Medicine',
+        medicalCouncilNumber: 'N/A'
       }
       
       formData.append('doctorInfo', JSON.stringify(doctorInfo))
@@ -301,6 +314,20 @@ export default function VoiceDictationPage() {
             <p className="text-gray-600 mt-1">
               Enregistrez votre consultation vocalement pour génération automatique du rapport
             </p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
+                ✅ Consultations normales
+              </Badge>
+              <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">
+                🚨 Urgences
+              </Badge>
+              <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-300">
+                🏥 Spécialistes
+              </Badge>
+              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
+                📋 Correspondants
+              </Badge>
+            </div>
           </div>
           <Button
             variant="outline"
@@ -359,7 +386,7 @@ export default function VoiceDictationPage() {
       )}
 
       {/* Doctor Info Card */}
-      {doctorData && (
+      {doctorData ? (
         <Card className="mb-6 border-teal-200 bg-teal-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-teal-900">
@@ -384,6 +411,13 @@ export default function VoiceDictationPage() {
             </div>
           </CardContent>
         </Card>
+      ) : (
+        <Alert className="mb-6 border-yellow-300 bg-yellow-50">
+          <AlertCircle className="h-4 w-4 text-yellow-600" />
+          <AlertDescription className="text-yellow-900">
+            <strong>Informations médecin non disponibles.</strong> Veuillez inclure vos informations (nom, qualifications, spécialité) dans la dictée vocale.
+          </AlertDescription>
+        </Alert>
       )}
 
       {/* Main Recording Card */}
@@ -405,7 +439,16 @@ export default function VoiceDictationPage() {
                 <AlertCircle className="h-4 w-4 text-purple-600" />
                 <AlertDescription className="text-purple-900">
                   <strong>Instructions:</strong> Cliquez sur "Démarrer l'enregistrement" et dictez votre consultation.
-                  Incluez les informations patient, symptômes, signes vitaux, diagnostic et prescriptions.
+                  <br />
+                  <strong>Incluez:</strong> Informations patient, symptômes, signes vitaux, examen clinique, diagnostic, prescriptions.
+                  <br />
+                  <strong>Types supportés:</strong> Consultations normales, urgences, spécialistes, correspondants, maladies chroniques.
+                  {!doctorData && (
+                    <>
+                      <br />
+                      <strong>⚠️ Important:</strong> Mentionnez vos informations (nom, spécialité, qualifications) au début de la dictée.
+                    </>
+                  )}
                 </AlertDescription>
               </Alert>
             )}
@@ -536,7 +579,7 @@ export default function VoiceDictationPage() {
       </Card>
 
       {/* Info Cards */}
-      <div className="grid md:grid-cols-2 gap-6 mt-6">
+      <div className="grid md:grid-cols-3 gap-6 mt-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">📝 Contenu Recommandé</CardTitle>
@@ -552,6 +595,25 @@ export default function VoiceDictationPage() {
               <li>• Prescriptions et posologie</li>
               <li>• Plan de suivi</li>
             </ul>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">🏥 Types Supportés</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2 text-sm text-gray-700">
+              <li>✅ Consultations normales</li>
+              <li>🚨 Urgences médicales</li>
+              <li>🩺 Consultations spécialistes</li>
+              <li>📋 Consultations de correspondants</li>
+              <li>💊 Suivi maladies chroniques</li>
+              <li>🔄 Renouvellements ordonnances</li>
+            </ul>
+            <p className="text-xs text-gray-500 mt-3">
+              Le système détecte automatiquement le type de consultation à partir de votre dictée.
+            </p>
           </CardContent>
         </Card>
 
