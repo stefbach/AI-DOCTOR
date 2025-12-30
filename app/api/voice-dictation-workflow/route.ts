@@ -1,0 +1,516 @@
+// app/api/voice-dictation-workflow/route.ts
+// WORKFLOW DICTÉE VOCALE → DIAGNOSTIC → RAPPORT CONSULTATION
+import { NextRequest, NextResponse } from 'next/server';
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+export const runtime = 'nodejs';
+export const maxDuration = 180; // 3 minutes pour le workflow complet
+
+// ============================================
+// TYPES
+// ============================================
+interface VoiceDictationInput {
+  audioFile: File;
+  doctorInfo: {
+    fullName: string;
+    qualifications?: string;
+    specialty?: string;
+    medicalCouncilNumber?: string;
+  };
+  patientId?: string;
+}
+
+interface ExtractedClinicalData {
+  patientInfo: {
+    age?: number;
+    sex?: string;
+    weight?: number;
+    height?: number;
+    allergies?: string[];
+    currentMedications?: string[];
+    medicalHistory?: string[];
+  };
+  clinicalData: {
+    chiefComplaint: string;
+    symptoms: string[];
+    symptomDuration: string;
+    diseaseHistory: string;
+    vitalSigns?: {
+      bloodPressure?: string;
+      pulse?: number;
+      temperature?: number;
+      respiratoryRate?: number;
+      oxygenSaturation?: number;
+    };
+  };
+  aiQuestions?: Array<{
+    question: string;
+    answer: string;
+  }>;
+}
+
+// ============================================
+// PROMPT D'EXTRACTION DES DONNÉES CLINIQUES
+// ============================================
+const EXTRACTION_SYSTEM_PROMPT = `
+# 🎤 SYSTÈME D'EXTRACTION DE DONNÉES MÉDICALES DEPUIS DICTÉE
+
+Vous êtes un expert médical qui extrait et structure les informations d'une dictée vocale médicale.
+
+## 🎯 VOTRE MISSION
+
+À partir d'une transcription de dictée médicale (en français ou anglais), extraire TOUTES les informations cliniques pertinentes et les structurer en format JSON standardisé.
+
+## 📋 FORMAT DE SORTIE JSON REQUIS
+
+\`\`\`json
+{
+  "patientInfo": {
+    "age": number | null,
+    "sex": "M" | "F" | "Unknown",
+    "weight": number | null,
+    "height": number | null,
+    "allergies": ["allergie1", "allergie2"],
+    "currentMedications": ["med1 dosage", "med2 dosage"],
+    "medicalHistory": ["antécédent1", "antécédent2"]
+  },
+  "clinicalData": {
+    "chiefComplaint": "Motif principal de consultation",
+    "symptoms": ["symptôme1", "symptôme2", "symptôme3"],
+    "symptomDuration": "3 jours" | "2 semaines" | etc.,
+    "diseaseHistory": "Histoire détaillée de la maladie actuelle",
+    "vitalSigns": {
+      "bloodPressure": "120/80",
+      "pulse": 72,
+      "temperature": 37.5,
+      "respiratoryRate": 16,
+      "oxygenSaturation": 98
+    }
+  },
+  "aiQuestions": [
+    {
+      "question": "Question pertinente identifiée",
+      "answer": "Réponse extraite de la dictée ou 'Non mentionné'"
+    }
+  ],
+  "transcriptionMetadata": {
+    "language": "fr" | "en",
+    "originalText": "Transcription complète",
+    "extractionConfidence": "high" | "medium" | "low"
+  }
+}
+\`\`\`
+
+## 🔍 RÈGLES D'EXTRACTION
+
+### 1. INFORMATIONS PATIENT
+- **Âge** : Chercher mentions explicites ("patient de 45 ans", "45-year-old patient")
+- **Sexe** : Identifier pronoms, titres (M./Mme), ou mentions directes
+- **Poids/Taille** : Chercher valeurs en kg/lbs, cm/m
+- **Allergies** : Chercher "allergique à", "allergie", "contre-indication"
+- **Médicaments actuels** : "prend actuellement", "traitement en cours", "sous"
+- **Antécédents** : "antécédents de", "historique de", "history of"
+
+### 2. DONNÉES CLINIQUES
+- **Motif principal** : Première plainte mentionnée, raison de consultation
+- **Symptômes** : TOUS les symptômes mentionnés (douleur, fièvre, toux, etc.)
+- **Durée** : "depuis 3 jours", "for 2 weeks", "il y a une semaine"
+- **Histoire de la maladie** : Chronologie, évolution, facteurs déclenchants
+- **Signes vitaux** : TA, pouls, température, fréquence respiratoire, SpO2
+
+### 3. EXAMEN CLINIQUE (si mentionné)
+- Ajouter comme questions/réponses dans aiQuestions
+- Exemple : {"question": "Auscultation pulmonaire", "answer": "Râles crépitants bilatéraux"}
+
+### 4. IMPRESSIONS DIAGNOSTIQUES
+- Si le médecin mentionne un diagnostic suspecté, l'inclure dans aiQuestions
+- Exemple : {"question": "Impression diagnostique du clinicien", "answer": "Pneumonie communautaire probable"}
+
+### 5. PRESCRIPTIONS DICTÉES
+- Si le médecin dicte des prescriptions, les extraire dans currentMedications avec format standardisé
+- Exemple : "Amoxicilline 500mg trois fois par jour pendant 7 jours"
+
+## ⚠️ RÈGLES IMPORTANTES
+
+1. **NE PAS INVENTER** : Si une information n'est pas mentionnée, mettre null ou []
+2. **PRÉSERVER LE LANGAGE** : Garder les termes médicaux exacts de la dictée
+3. **ÊTRE EXHAUSTIF** : Extraire TOUTE information cliniquement pertinente
+4. **NORMALISER LES FORMATS** :
+   - Âge : nombre entier
+   - Sexe : "M", "F", ou "Unknown"
+   - TA : format "systolic/diastolic"
+   - Température : nombre décimal en °C
+5. **CONTEXTUALISER** : Dans diseaseHistory, créer une narration cohérente
+
+## 📝 EXEMPLES
+
+**Exemple 1 - Dictée courte:**
+"Patient masculin de 52 ans se présentant pour douleurs thoraciques depuis 2 heures. Tension à 150/95, pouls à 88. Antécédent d'hypertension, sous Amlodipine 5mg."
+
+→ Extraction :
+\`\`\`json
+{
+  "patientInfo": {
+    "age": 52,
+    "sex": "M",
+    "weight": null,
+    "height": null,
+    "allergies": [],
+    "currentMedications": ["Amlodipine 5mg"],
+    "medicalHistory": ["Hypertension"]
+  },
+  "clinicalData": {
+    "chiefComplaint": "Douleurs thoraciques",
+    "symptoms": ["douleurs thoraciques"],
+    "symptomDuration": "2 heures",
+    "diseaseHistory": "Patient masculin de 52 ans se présentant pour douleurs thoraciques évoluant depuis 2 heures",
+    "vitalSigns": {
+      "bloodPressure": "150/95",
+      "pulse": 88
+    }
+  }
+}
+\`\`\`
+
+**Exemple 2 - Dictée détaillée:**
+"Femme de 34 ans, enceinte de 18 semaines, consulte pour fièvre à 38.5°C depuis 3 jours, toux productive, dyspnée d'effort. Pas d'allergie connue. Auscultation : râles crépitants base droite. SpO2 à 94% en air ambiant. Je suspecte une pneumonie du lobe inférieur droit. Prescrire Amoxicilline-acide clavulanique 1g deux fois par jour pendant 7 jours et Paracétamol 1g si fièvre."
+
+→ Extraction complète avec diagnostic et prescriptions
+
+## 🎯 VALIDATION FINALE
+
+Avant de retourner le JSON :
+- [ ] Toutes les sections présentes (même si vides)
+- [ ] Aucune valeur "undefined"
+- [ ] Formats respectés (âge=number, sex=M/F/Unknown)
+- [ ] diseaseHistory est une phrase complète et cohérente
+- [ ] Signes vitaux en format standardisé
+- [ ] aiQuestions inclut examen clinique ET impressions diagnostiques si mentionnés
+
+Extraire maintenant les données de la dictée médicale fournie.
+`;
+
+// ============================================
+// FONCTION 1: TRANSCRIPTION WHISPER
+// ============================================
+async function transcribeAudio(audioFile: File): Promise<{
+  text: string;
+  duration: number;
+  language: string;
+}> {
+  console.log('🎤 Step 1: Transcribing audio with Whisper...');
+  
+  const transcription = await openai.audio.transcriptions.create({
+    file: audioFile,
+    model: 'whisper-1',
+    language: 'fr', // Auto-detect français/anglais
+    response_format: 'verbose_json',
+    temperature: 0.2
+  });
+  
+  console.log(`✅ Transcription completed`);
+  console.log(`   Duration: ${transcription.duration}s`);
+  console.log(`   Language: ${transcription.language}`);
+  console.log(`   Text length: ${transcription.text.length} chars`);
+  
+  return {
+    text: transcription.text,
+    duration: transcription.duration || 0,
+    language: transcription.language || 'fr'
+  };
+}
+
+// ============================================
+// FONCTION 2: EXTRACTION DES DONNÉES CLINIQUES
+// ============================================
+async function extractClinicalData(
+  transcriptionText: string
+): Promise<ExtractedClinicalData> {
+  console.log('🧠 Step 2: Extracting clinical data with GPT-4o...');
+  
+  const extraction = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [
+      {
+        role: 'system',
+        content: EXTRACTION_SYSTEM_PROMPT
+      },
+      {
+        role: 'user',
+        content: `Transcription de la dictée médicale:\n\n${transcriptionText}\n\nExtrayez toutes les données cliniques en JSON.`
+      }
+    ],
+    temperature: 0.1,
+    max_tokens: 3000,
+    response_format: { type: "json_object" }
+  });
+  
+  const extractedData = JSON.parse(
+    extraction.choices[0].message.content || '{}'
+  );
+  
+  console.log('✅ Clinical data extracted');
+  console.log(`   Patient age: ${extractedData.patientInfo?.age || 'not specified'}`);
+  console.log(`   Chief complaint: ${extractedData.clinicalData?.chiefComplaint || 'not specified'}`);
+  console.log(`   Symptoms: ${extractedData.clinicalData?.symptoms?.length || 0}`);
+  
+  return extractedData;
+}
+
+// ============================================
+// FONCTION 3: PRÉPARATION POUR API OPENAI-DIAGNOSIS
+// ============================================
+function prepareForDiagnosisAPI(extractedData: ExtractedClinicalData) {
+  console.log('📋 Step 3: Preparing data for openai-diagnosis API...');
+  
+  const patientInfo = extractedData.patientInfo;
+  const clinicalData = extractedData.clinicalData;
+  
+  return {
+    patientData: {
+      age: patientInfo.age || 'Not specified',
+      sex: patientInfo.sex || 'Unknown',
+      gender: patientInfo.sex || 'Unknown',
+      weight: patientInfo.weight || null,
+      height: patientInfo.height || null,
+      medicalHistory: patientInfo.medicalHistory || [],
+      currentMedications: patientInfo.currentMedications || [],
+      allergies: patientInfo.allergies || []
+    },
+    clinicalData: {
+      chiefComplaint: clinicalData.chiefComplaint,
+      symptoms: clinicalData.symptoms || [],
+      symptomDuration: clinicalData.symptomDuration || 'Not specified',
+      diseaseHistory: clinicalData.diseaseHistory || '',
+      vitalSigns: clinicalData.vitalSigns || {}
+    },
+    aiQuestions: extractedData.aiQuestions || []
+  };
+}
+
+// ============================================
+// FONCTION 4: APPEL API OPENAI-DIAGNOSIS
+// ============================================
+async function callDiagnosisAPI(
+  preparedData: any,
+  baseUrl: string
+): Promise<any> {
+  console.log('🔬 Step 4: Calling openai-diagnosis API...');
+  
+  const diagnosisResponse = await fetch(`${baseUrl}/api/openai-diagnosis`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      patientData: preparedData.patientData,
+      clinicalData: preparedData.clinicalData,
+      aiQuestions: preparedData.aiQuestions
+    })
+  });
+  
+  if (!diagnosisResponse.ok) {
+    const errorText = await diagnosisResponse.text();
+    throw new Error(`Diagnosis API failed: ${diagnosisResponse.status} - ${errorText}`);
+  }
+  
+  const diagnosisResult = await diagnosisResponse.json();
+  
+  console.log('✅ Diagnosis API completed');
+  console.log(`   Primary diagnosis: ${diagnosisResult.analysis?.clinical_analysis?.primary_diagnosis?.condition || 'Unknown'}`);
+  console.log(`   Medications: ${diagnosisResult.analysis?.treatment_plan?.medications?.length || 0}`);
+  
+  return diagnosisResult;
+}
+
+// ============================================
+// FONCTION 5: APPEL API GENERATE-CONSULTATION-REPORT
+// ============================================
+async function callReportGenerationAPI(
+  diagnosisData: any,
+  patientData: any,
+  clinicalData: any,
+  doctorInfo: any,
+  baseUrl: string
+): Promise<any> {
+  console.log('📄 Step 5: Calling generate-consultation-report API...');
+  
+  const reportResponse = await fetch(`${baseUrl}/api/generate-consultation-report`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      patientData: patientData,
+      clinicalData: clinicalData,
+      diagnosisData: diagnosisData.analysis,
+      doctorData: doctorInfo,
+      includeFullPrescriptions: true
+    })
+  });
+  
+  if (!reportResponse.ok) {
+    const errorText = await reportResponse.text();
+    throw new Error(`Report generation API failed: ${reportResponse.status} - ${errorText}`);
+  }
+  
+  const reportResult = await reportResponse.json();
+  
+  console.log('✅ Report generation completed');
+  console.log(`   Report sections: ${Object.keys(reportResult.report?.medicalReport?.report || {}).length}`);
+  console.log(`   Medications in prescription: ${reportResult.report?.prescriptions?.medications?.prescription?.medications?.length || 0}`);
+  
+  return reportResult;
+}
+
+// ============================================
+// FONCTION PRINCIPALE - WORKFLOW COMPLET
+// ============================================
+export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  
+  try {
+    console.log('🎤 ========================================');
+    console.log('   VOICE DICTATION WORKFLOW STARTED');
+    console.log('========================================');
+    
+    // Récupérer les données du formulaire
+    const formData = await request.formData();
+    const audioFile = formData.get('audioFile') as File;
+    const doctorInfoStr = formData.get('doctorInfo') as string;
+    const patientId = formData.get('patientId') as string;
+    
+    if (!audioFile) {
+      return NextResponse.json({
+        success: false,
+        error: 'Audio file is required'
+      }, { status: 400 });
+    }
+    
+    const doctorInfo = doctorInfoStr ? JSON.parse(doctorInfoStr) : {};
+    
+    console.log(`📁 Audio file received: ${audioFile.name} (${audioFile.size} bytes)`);
+    console.log(`👨‍⚕️ Doctor: ${doctorInfo.fullName || 'Not specified'}`);
+    
+    // Déterminer l'URL de base
+    const baseUrl = request.headers.get('origin') || 
+                    request.headers.get('referer')?.split('/').slice(0, 3).join('/') || 
+                    'http://localhost:3000';
+    
+    console.log(`🌐 Base URL: ${baseUrl}`);
+    
+    // ===== ÉTAPE 1: TRANSCRIPTION =====
+    const transcription = await transcribeAudio(audioFile);
+    
+    // ===== ÉTAPE 2: EXTRACTION DES DONNÉES =====
+    const extractedData = await extractClinicalData(transcription.text);
+    
+    // ===== ÉTAPE 3: PRÉPARATION POUR DIAGNOSTIC =====
+    const preparedData = prepareForDiagnosisAPI(extractedData);
+    
+    // ===== ÉTAPE 4: APPEL API DIAGNOSTIC =====
+    const diagnosisResult = await callDiagnosisAPI(preparedData, baseUrl);
+    
+    // ===== ÉTAPE 5: GÉNÉRATION DU RAPPORT =====
+    const reportResult = await callReportGenerationAPI(
+      diagnosisResult,
+      preparedData.patientData,
+      preparedData.clinicalData,
+      doctorInfo,
+      baseUrl
+    );
+    
+    // ===== RÉPONSE FINALE =====
+    const processingTime = Date.now() - startTime;
+    
+    console.log('✅ ========================================');
+    console.log('   WORKFLOW COMPLETED SUCCESSFULLY');
+    console.log(`   Total processing time: ${processingTime}ms`);
+    console.log('========================================');
+    
+    return NextResponse.json({
+      success: true,
+      workflow: {
+        step1_transcription: {
+          text: transcription.text,
+          duration: `${transcription.duration}s`,
+          language: transcription.language
+        },
+        step2_extraction: {
+          patientInfo: extractedData.patientInfo,
+          clinicalData: extractedData.clinicalData,
+          aiQuestions: extractedData.aiQuestions
+        },
+        step3_diagnosis: {
+          primaryDiagnosis: diagnosisResult.analysis?.clinical_analysis?.primary_diagnosis?.condition,
+          confidence: diagnosisResult.analysis?.clinical_analysis?.primary_diagnosis?.confidence_level,
+          medications: diagnosisResult.analysis?.treatment_plan?.medications?.length || 0,
+          investigations: (diagnosisResult.analysis?.investigation_strategy?.laboratory_tests?.length || 0) +
+                         (diagnosisResult.analysis?.investigation_strategy?.imaging_studies?.length || 0)
+        },
+        step4_report: {
+          reportGenerated: !!reportResult.report,
+          sections: Object.keys(reportResult.report?.medicalReport?.report || {}),
+          prescriptionMedications: reportResult.report?.prescriptions?.medications?.prescription?.medications?.length || 0
+        }
+      },
+      finalReport: reportResult.report,
+      metadata: {
+        workflowType: 'voice_dictation_to_consultation_report',
+        totalProcessingTime: `${processingTime}ms`,
+        stepsCompleted: [
+          '1. Audio transcription (Whisper)',
+          '2. Clinical data extraction (GPT-4o)',
+          '3. Medical diagnosis (openai-diagnosis API)',
+          '4. Report generation (generate-consultation-report API)'
+        ],
+        timestamp: new Date().toISOString()
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Voice dictation workflow error:', error);
+    
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      errorDetails: error instanceof Error ? error.stack : undefined
+    }, { status: 500 });
+  }
+}
+
+// ============================================
+// HEALTH CHECK
+// ============================================
+export async function GET() {
+  return NextResponse.json({
+    status: 'OK',
+    endpoint: 'voice-dictation-workflow',
+    description: 'Complete voice dictation to consultation report workflow',
+    workflow: [
+      'Step 1: Whisper audio transcription',
+      'Step 2: GPT-4o clinical data extraction',
+      'Step 3: openai-diagnosis API call',
+      'Step 4: generate-consultation-report API call'
+    ],
+    features: [
+      'Automatic transcription (French/English)',
+      'Intelligent clinical data extraction',
+      'Full integration with existing diagnosis pipeline',
+      'Complete consultation report generation',
+      'Prescription management',
+      'UK/Mauritius medical nomenclature'
+    ],
+    requiredInput: {
+      audioFile: 'File (MP3, WAV, M4A, etc.)',
+      doctorInfo: 'JSON string with doctor details',
+      patientId: 'String (optional)'
+    },
+    estimatedProcessingTime: '60-120 seconds',
+    maxDuration: '180 seconds'
+  });
+}
