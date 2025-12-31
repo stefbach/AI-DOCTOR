@@ -726,13 +726,18 @@ NEUROPATHIC PAIN (NICE Guidelines):
 🦴 MUSCULOSKELETAL (Rheumatology Encyclopedia)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 GOUT (BSR/EULAR Guidelines):
-- Acute: Colchicine 500mcg BD-TDS (max 6mg per course), NSAID (Naproxen 500mg BD), OR Prednisolone 30-35mg OD 5 days
+- Acute: FIRST-LINE: Colchicine 500mcg BD-TDS (max 6mg per course)
+- SECOND-LINE: NSAID (Naproxen 500mg BD) ⚠️ ONLY IF NO CARDIAC/RENAL CONTRAINDICATIONS
+- THIRD-LINE (or if NSAID contraindicated): Prednisolone 30-35mg OD 5 days
+- ⛔ AVOID NSAIDs IF: CVD, hypertension, CKD, >65 years, heart failure, previous MI
 - Prophylaxis: Allopurinol 100mg→300-600mg OD (start 2 weeks after acute attack, with colchicine cover)
 - Target urate: <360 μmol/L (<300 if tophi)
 
 RHEUMATOID ARTHRITIS:
 - DMARDs: Methotrexate 7.5mg→25mg weekly + Folic acid 5mg weekly (not same day)
 - NSAIDs: Naproxen 500mg BD + PPI (Omeprazole 20mg OD)
+  ⚠️ NSAID SAFETY: Only if no cardiac/renal disease; avoid if CVD, hypertension, CKD, >65, HF
+  ⚠️ ALTERNATIVE: COX-2 inhibitors (Celecoxib 200mg OD) - lower GI risk, similar CV risk
 - Steroids: Prednisolone 5-7.5mg OD for flares
 
 OSTEOARTHRITIS:
@@ -927,15 +932,37 @@ YOU MUST PRESCRIBE AN ANTIHYPERTENSIVE IN treatment_plan.medications!
 YOU MUST PRESCRIBE PARACETAMOL (first choice, safest)!
 ⚠️ IBUPROFEN/NSAIDs: Check for cardiac contraindications first!
 
-⚠️ 🚨 CRITICAL - NSAIDs CARDIAC SAFETY ALERT 🚨
+⚠️ 🚨 CRITICAL - NSAIDs COMPLETE SAFETY ALERT 🚨
 ABSOLUTE CONTRAINDICATIONS FOR NSAIDs (Ibuprofen, Diclofenac, Naproxen, COX-2):
-• Chest pain / Angina / Recent MI
-• Acute coronary syndrome (ACS)
+
+🫀 CARDIAC CONTRAINDICATIONS:
+• Chest pain / Angina / Recent MI / ACS
 • Heart failure (any severity)
 • Stroke / TIA history
 • Peripheral arterial disease
 • Post-cardiac surgery (<3 months)
-→ USE PARACETAMOL ONLY for analgesia/antipyresis in these patients!
+• Uncontrolled hypertension (>160/100)
+
+🩸 GI/BLEEDING CONTRAINDICATIONS:
+• Active peptic ulcer or GI bleeding
+• History of GI bleeding/perforation with NSAIDs
+• Taking anticoagulants (Warfarin, DOACs, Aspirin >75mg)
+• History of 2+ peptic ulcers
+• Crohn's disease / Ulcerative colitis (active)
+
+🩺 RENAL CONTRAINDICATIONS:
+• CKD Stage 4-5 (eGFR <30 ml/min)
+• Acute kidney injury
+• Taking ACE-I + diuretic ("triple whammy")
+
+👴 AGE-RELATED CAUTIONS:
+• Age >65: Use lowest dose, shortest duration, with PPI
+• Age >75: Avoid if possible; prefer Paracetamol
+
+⚠️ SAFER ALTERNATIVES:
+→ FIRST CHOICE: Paracetamol 1g QDS (max 4g/day)
+→ SECOND CHOICE (if truly needed): Topical NSAIDs (Ibuprofen gel)
+→ THIRD CHOICE: Short-term oral NSAID (<5 days) + PPI if no contraindications
 
 ⚠️ IF BLOOD GLUCOSE ELEVATED AND PATIENT HAS DIABETES WITHOUT TREATMENT:
 YOU MUST PRESCRIBE APPROPRIATE ANTIDIABETIC!
