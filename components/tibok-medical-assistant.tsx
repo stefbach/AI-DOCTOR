@@ -28,6 +28,8 @@ import {
   FileText,
   Brain,
   Shield,
+  Mic,
+  Square,
   Lightbulb,
   RefreshCw,
   ChevronDown,
