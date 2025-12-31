@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Progress } from "@/components/ui/progress"
 import {
   Mic,
   Square,
@@ -14,9 +15,14 @@ import {
   Loader2,
   FileAudio,
   User,
-  Stethoscope
+  Stethoscope,
+  Brain,
+  FileSignature,
+  ArrowRight
 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import DiagnosisForm from "@/components/diagnosis-form"
+import ProfessionalReport from "@/components/professional-report"
 
 interface RecordingState {
   isRecording: boolean
@@ -25,12 +31,24 @@ interface RecordingState {
   audioBlob: Blob | null
 }
 
+// 4 ÉTAPES (comme consultation normale mais avec enregistrement audio au début)
+const STEPS = [
+  { id: 1, name: "Enregistrement Audio", icon: Mic, description: "Dicter la consultation" },
+  { id: 2, name: "Révision des Données", icon: User, description: "Vérifier les données extraites" },
+  { id: 3, name: "Diagnostic AI", icon: Brain, description: "Analyse diagnostique" },
+  { id: 4, name: "Rapport Final", icon: FileSignature, description: "Génération du rapport" }
+]
+
 export default function VoiceDictationPage() {
   const router = useRouter()
   
+  const [currentStep, setCurrentStep] = useState(1)
   const [patientData, setPatientData] = useState<any>(null)
   const [doctorData, setDoctorData] = useState<any>(null)
-  const [isExistingPatient, setIsExistingPatient] = useState(false)
+  const [clinicalData, setClinicalData] = useState<any>(null)
+  const [questionsData, setQuestionsData] = useState<any>(null)
+  const [diagnosisData, setDiagnosisData] = useState<any>(null)
+  const [transcriptionText, setTranscriptionText] = useState<string>("")
   
   const [recordingState, setRecordingState] = useState<RecordingState>({
     isRecording: false,
@@ -40,10 +58,7 @@ export default function VoiceDictationPage() {
   })
   
   const [isProcessing, setIsProcessing] = useState(false)
-  const [processingProgress, setProcessingProgress] = useState(0)
-  const [processingStep, setProcessingStep] = useState("")
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
@@ -55,24 +70,16 @@ export default function VoiceDictationPage() {
     const savedPatientData = sessionStorage.getItem('consultationPatientData')
     let savedDoctorData = sessionStorage.getItem('currentDoctorInfo')
     
-    // Fallback: try to get doctor info from other sources
     if (!savedDoctorData) {
-      // Try dermatology workflow
       savedDoctorData = sessionStorage.getItem('dermatologyDoctorData')
     }
     if (!savedDoctorData) {
-      // Try chronic workflow
       savedDoctorData = sessionStorage.getItem('chronicDoctorData')
     }
     
-    const existingPatient = sessionStorage.getItem('isExistingPatientConsultation')
-    
     if (savedPatientData) {
       try {
-        const data = JSON.parse(savedPatientData)
-        setPatientData(data)
-        setIsExistingPatient(existingPatient === 'true')
-        console.log('✅ Patient data loaded for voice dictation:', data)
+        setPatientData(JSON.parse(savedPatientData))
       } catch (error) {
         console.error('Error parsing patient data:', error)
       }
@@ -80,40 +87,34 @@ export default function VoiceDictationPage() {
     
     if (savedDoctorData) {
       try {
-        const data = JSON.parse(savedDoctorData)
-        setDoctorData(data)
-        console.log('✅ Doctor data loaded:', data)
+        setDoctorData(JSON.parse(savedDoctorData))
+        console.log('✅ Doctor data loaded for voice dictation')
       } catch (error) {
         console.error('Error parsing doctor data:', error)
       }
     } else {
       console.warn('⚠️ No doctor data found in session storage - will need to be provided in dictation')
     }
-    
-    // Clean up on unmount
+  }, [])
+
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop())
-      }
       if (timerRef.current) {
         clearInterval(timerRef.current)
       }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop())
+      }
     }
-  }, [router])
+  }, [])
 
   const startRecording = async () => {
     try {
-      setError(null)
-      
-      // Request microphone permission
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       streamRef.current = stream
       
-      // Create MediaRecorder
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4'
-      })
-      
+      const mediaRecorder = new MediaRecorder(stream)
       mediaRecorderRef.current = mediaRecorder
       audioChunksRef.current = []
       
@@ -124,22 +125,17 @@ export default function VoiceDictationPage() {
       }
       
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { 
-          type: mediaRecorder.mimeType 
-        })
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
         setRecordingState(prev => ({ ...prev, audioBlob, isRecording: false }))
         
-        // Stop all tracks
         if (streamRef.current) {
           streamRef.current.getTracks().forEach(track => track.stop())
-          streamRef.current = null
         }
       }
       
       mediaRecorder.start()
       setRecordingState(prev => ({ ...prev, isRecording: true, duration: 0 }))
       
-      // Start timer
       timerRef.current = setInterval(() => {
         setRecordingState(prev => ({ ...prev, duration: prev.duration + 1 }))
       }, 1000)
@@ -147,563 +143,421 @@ export default function VoiceDictationPage() {
       console.log('🎤 Recording started')
     } catch (error) {
       console.error('Error starting recording:', error)
-      setError('Erreur lors du démarrage de l\'enregistrement. Vérifiez les permissions du microphone.')
+      setError('Impossible d\'accéder au microphone. Vérifiez les permissions.')
     }
   }
 
   const stopRecording = () => {
     if (mediaRecorderRef.current && recordingState.isRecording) {
       mediaRecorderRef.current.stop()
-      
       if (timerRef.current) {
         clearInterval(timerRef.current)
-        timerRef.current = null
       }
-      
       console.log('🎤 Recording stopped')
     }
   }
 
-  const discardRecording = () => {
-    setRecordingState({
-      isRecording: false,
-      isPaused: false,
-      duration: 0,
-      audioBlob: null
-    })
-    audioChunksRef.current = []
-    setError(null)
-    setSuccess(false)
-  }
-
   const processAudio = async () => {
-    if (!recordingState.audioBlob) {
+    const { audioBlob } = recordingState
+    
+    if (!audioBlob) {
       setError('Aucun enregistrement audio disponible')
       return
     }
-    
+
     setIsProcessing(true)
     setError(null)
-    setSuccess(false)
-    setProcessingProgress(0)
-    setProcessingStep("Préparation de l'audio...")
-    
+
     try {
-      // Create FormData
+      // Create form data
       const formData = new FormData()
-      
-      // Convert audio blob to file
       const audioFile = new File(
-        [recordingState.audioBlob], 
-        `dictation_${Date.now()}.${recordingState.audioBlob.type.includes('webm') ? 'webm' : 'mp4'}`,
-        { type: recordingState.audioBlob.type }
+        [audioBlob],
+        `dictation_${Date.now()}.${audioBlob.type.includes('webm') ? 'webm' : 'mp4'}`,
+        { type: audioBlob.type }
       )
-      
       formData.append('audioFile', audioFile)
       
-      // Add doctor info (optional - can be provided in dictation)
-      const doctorInfo = doctorData ? {
-        fullName: doctorData.nom || 'Dr. Unknown',
-        qualifications: doctorData.qualifications || 'MBBS',
-        specialty: doctorData.specialite || 'General Medicine',
-        medicalCouncilNumber: doctorData.numeroEnregistrement || 'N/A'
-      } : {
+      // Add doctor info with fallback
+      const doctorInfo = doctorData || {
         fullName: 'Dr. [À compléter]',
         qualifications: 'MBBS',
         specialty: 'General Medicine',
         medicalCouncilNumber: 'N/A'
       }
-      
       formData.append('doctorInfo', JSON.stringify(doctorInfo))
       
       // Add patient ID if available
       if (patientData?.patientId) {
         formData.append('patientId', patientData.patientId)
       }
+
+      console.log('📤 Uploading audio for transcription and extraction...')
       
-      console.log('📤 Uploading audio for processing...')
-      setProcessingStep("Transcription de l'audio (Whisper)...")
-      setProcessingProgress(10)
-      
-      // Call voice dictation API
-      const response = await fetch('/api/voice-dictation-workflow', {
+      // Call the NEW transcribe-only API
+      const response = await fetch('/api/voice-dictation-transcribe', {
         method: 'POST',
-        body: formData
+        body: formData,
       })
-      
+
       if (!response.ok) {
-        const errorData = await response.text()
-        throw new Error(`Erreur API: ${response.status} - ${errorData}`)
+        const errorData = await response.json()
+        throw new Error(`Erreur API: ${response.status} - ${JSON.stringify(errorData)}`)
       }
-      
-      setProcessingStep("Extraction des données cliniques (GPT-4o)...")
-      setProcessingProgress(30)
-      
-      // Wait for the actual API response (this takes time!)
-      console.log('⏳ Waiting for voice dictation workflow to complete...')
-      setProcessingStep("Traitement en cours (Whisper + GPT-4o + Diagnosis + Report)...")
-      setProcessingProgress(40)
-      
+
       const result = await response.json()
       
-      console.log('📦 Received workflow result:', result)
-      console.log('   Step 1 (Transcription):', result.workflow?.step1_transcription ? '✅' : '❌')
-      console.log('   Step 2 (Extraction):', result.workflow?.step2_extraction ? '✅' : '❌')
-      console.log('   Step 3 (Diagnosis):', result.workflow?.step3_diagnosis ? '✅' : '❌')
-      console.log('   Step 4 (Report):', result.workflow?.step4_report ? '✅' : '❌')
+      console.log('✅ Transcription and extraction completed:', result)
       
-      if (!result.success) {
-        throw new Error(result.error || 'Erreur lors du traitement de la dictée')
-      }
+      // Store transcription text
+      setTranscriptionText(result.transcription.text)
       
-      // Show real workflow steps from backend
-      if (result.workflow?.step3_diagnosis) {
-        setProcessingStep(`Analyse diagnostique terminée: ${result.workflow.step3_diagnosis.primaryDiagnosis || 'Diagnostic en cours'}`)
-        setProcessingProgress(70)
-      }
-      
-      if (result.workflow?.step4_report) {
-        setProcessingStep(`Rapport généré avec succès (${result.workflow.step4_report.prescriptionMedications || 0} médicaments)`)
-        setProcessingProgress(90)
-      }
-      
-      setProcessingProgress(100)
-      setProcessingStep("✅ Workflow complet terminé: Transcription → Extraction → Diagnostic → Rapport")
-      
-      console.log('✅ Voice dictation processing completed:', result)
-      console.log('📊 Final Report Structure:', {
-        hasFinalReport: !!result.finalReport,
-        hasConsultationId: !!result.finalReport?.consultationId,
-        finalReportKeys: result.finalReport ? Object.keys(result.finalReport) : [],
-        consultationId: result.finalReport?.consultationId || 'NOT FOUND'
+      // Build patientData from extracted info
+      const extractedPatient = result.extractedData.patientInfo
+      setPatientData({
+        ...patientData,
+        firstName: extractedPatient.firstName || patientData?.firstName || '',
+        lastName: extractedPatient.lastName || patientData?.lastName || '',
+        age: extractedPatient.age || patientData?.age || '',
+        gender: extractedPatient.gender || patientData?.gender || '',
+        email: extractedPatient.email || patientData?.email || '',
+        phone: extractedPatient.phone || patientData?.phone || '',
       })
       
-      // Store consultation ID for follow-up
-      if (result.finalReport?.consultationId) {
-        sessionStorage.setItem('lastConsultationId', result.finalReport.consultationId)
-      } else {
-        console.warn('⚠️ No consultationId found in finalReport!')
-        console.warn('   Checking alternative locations...')
-        
-        // Try to find consultationId in other locations
-        const alternativeId = 
-          result.consultationId ||
-          result.finalReport?.medicalReport?.consultationId ||
-          result.finalReport?.report?.consultationId ||
-          result.metadata?.consultationId
-        
-        if (alternativeId) {
-          console.log('✅ Found consultationId in alternative location:', alternativeId)
-          sessionStorage.setItem('lastConsultationId', alternativeId)
-        } else {
-          console.error('❌ No consultationId found anywhere in the response!')
-          console.error('   Full result structure:', JSON.stringify(result, null, 2))
-        }
-      }
+      // Build clinicalData from extracted info
+      const extractedClinical = result.extractedData.clinicalData
+      setClinicalData({
+        chiefComplaint: extractedClinical.chiefComplaint || '',
+        symptoms: extractedClinical.symptoms || [],
+        duration: extractedClinical.duration || '',
+        severity: extractedClinical.severity || '',
+        medicalHistory: extractedClinical.medicalHistory || [],
+        currentMedications: extractedClinical.currentMedications || [],
+        allergies: extractedClinical.allergies || [],
+        vitalSigns: extractedClinical.vitalSigns || {},
+      })
       
-      setSuccess(true)
+      // Build questionsData from extracted info
+      setQuestionsData(result.extractedData.aiQuestions || {})
       
-      // Check if consultationId starts with TEMP_ (indicates save failure)
-      const consultationId = 
-        result.finalReport?.consultationId ||
-        result.consultationId ||
-        result.finalReport?.medicalReport?.consultationId ||
-        result.finalReport?.report?.consultationId ||
-        result.metadata?.consultationId ||
-        sessionStorage.getItem('lastConsultationId')
+      // Move to next step (Revision des données)
+      setCurrentStep(2)
       
-      const isTempId = consultationId?.startsWith('TEMP_')
-      
-      if (isTempId) {
-        console.warn('⚠️ Temporary ID detected - Supabase save probably failed')
-        console.warn('⚠️ Showing report directly from memory instead of redirecting')
-        
-        // Store report in sessionStorage with a special flag
-        sessionStorage.setItem('voiceDictationTempReport', JSON.stringify(result.finalReport))
-        sessionStorage.setItem('voiceDictationTempId', consultationId)
-        
-        // Show alert to user
-        alert('⚠️ Le rapport a été généré mais n\'a pas pu être sauvegardé dans la base de données.\n\nVous pouvez le consulter maintenant, mais il ne sera pas accessible dans l\'historique.')
-      }
-      
-      // Redirect to report view after 2 seconds
-      setTimeout(() => {
-        if (consultationId && !isTempId) {
-          console.log('🔄 Redirecting to report:', consultationId)
-          router.push(`/view-report/${consultationId}`)
-        } else if (consultationId && isTempId) {
-          // For temp IDs, still try to show the report page
-          // The view-report page will need to handle temp IDs by reading from sessionStorage
-          console.log('🔄 Redirecting to temporary report:', consultationId)
-          router.push(`/view-report/${consultationId}`)
-        } else {
-          console.warn('⚠️ No consultationId found at all - redirecting to hub')
-          
-          // Store the full report in sessionStorage for later retrieval
-          if (result.finalReport) {
-            sessionStorage.setItem('lastVoiceDictationReport', JSON.stringify(result.finalReport))
-          }
-          
-          router.push('/consultation-hub')
-        }
-      }, 2000)
-      
-    } catch (error) {
-      console.error('❌ Error processing audio:', error)
-      setError(error instanceof Error ? error.message : 'Erreur lors du traitement de la dictée vocale')
-      setProcessingProgress(0)
-      setProcessingStep("")
+    } catch (error: any) {
+      console.error('Error processing audio:', error)
+      setError('Erreur lors du traitement de la dictée vocale: ' + error.message)
     } finally {
       setIsProcessing(false)
     }
   }
 
-  const formatDuration = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  const proceedToDiagnosis = () => {
+    // User reviewed the data, proceed to DiagnosisForm
+    setCurrentStep(3)
   }
 
-  const handleBackToHub = () => {
+  const handleDiagnosisComplete = (diagnosis: any) => {
+    console.log('✅ Diagnosis completed:', diagnosis)
+    setDiagnosisData(diagnosis)
+    setCurrentStep(4)
+  }
+
+  const handleReportComplete = () => {
+    console.log('✅ Report completed')
+    // Navigate back to hub or show success
     router.push('/consultation-hub')
   }
 
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  const goBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1)
+    } else {
+      router.push('/consultation-hub')
+    }
+  }
+
+  const progress = (currentStep / STEPS.length) * 100
+
   return (
-    <div className="container mx-auto py-8 px-4 max-w-5xl">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <img
-            src="/tibok-logo.png.png"
-            alt="TIBOK Logo"
-            className="h-12 w-auto object-contain"
-          />
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-              <Mic className="h-8 w-8 text-purple-600" />
-              Dictée Vocale Médicale
-            </h1>
-            <p className="text-gray-600 mt-1">
-              Enregistrez votre consultation vocalement pour génération automatique du rapport
-            </p>
-            <div className="flex flex-wrap gap-2 mt-2">
-              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
-                ✅ Consultations normales
-              </Badge>
-              <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">
-                🚨 Urgences
-              </Badge>
-              <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-300">
-                🏥 Spécialistes
-              </Badge>
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
-                📋 Correspondants
-              </Badge>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-4">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={goBack}
+              className="rounded-full"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Dictée Vocale</h1>
+              <p className="text-sm text-gray-600">Consultation médicale par dictée vocale</p>
             </div>
           </div>
-          <Button
-            variant="outline"
-            onClick={handleBackToHub}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Retour Hub
-          </Button>
+          <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+            {STEPS[currentStep - 1].name}
+          </Badge>
         </div>
-      </div>
 
-      {/* Patient Info Card */}
-      {patientData && (
-        <Card className="mb-6 border-blue-200 bg-blue-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-blue-900">
-              <User className="h-5 w-5" />
-              Patient
-              {isExistingPatient && (
-                <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
-                  Patient existant
-                </Badge>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              {(patientData.firstName || patientData.lastName) && (
-                <div>
-                  <span className="text-blue-700 font-medium">Nom:</span>
-                  <p className="text-blue-900">{patientData.firstName} {patientData.lastName}</p>
-                </div>
-              )}
-              {patientData.age && (
-                <div>
-                  <span className="text-blue-700 font-medium">Âge:</span>
-                  <p className="text-blue-900">{patientData.age} ans</p>
-                </div>
-              )}
-              {patientData.gender && (
-                <div>
-                  <span className="text-blue-700 font-medium">Genre:</span>
-                  <p className="text-blue-900">{patientData.gender === 'Male' ? 'Homme' : 'Femme'}</p>
-                </div>
-              )}
-              {patientData.phone && (
-                <div>
-                  <span className="text-blue-700 font-medium">Téléphone:</span>
-                  <p className="text-blue-900">{patientData.phone}</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Doctor Info Card */}
-      {doctorData ? (
-        <Card className="mb-6 border-teal-200 bg-teal-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-teal-900">
-              <Stethoscope className="h-5 w-5" />
-              Médecin
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-              <div>
-                <span className="text-teal-700 font-medium">Nom:</span>
-                <p className="text-teal-900">{doctorData.nom}</p>
+        {/* Progress Bar */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="space-y-3">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-600">Progression</span>
+                <span className="font-semibold">{Math.round(progress)}%</span>
               </div>
-              <div>
-                <span className="text-teal-700 font-medium">Qualifications:</span>
-                <p className="text-teal-900">{doctorData.qualifications}</p>
-              </div>
-              <div>
-                <span className="text-teal-700 font-medium">Spécialité:</span>
-                <p className="text-teal-900">{doctorData.specialite}</p>
+              <Progress value={progress} className="h-2" />
+              <div className="flex justify-between pt-2">
+                {STEPS.map((step) => (
+                  <div
+                    key={step.id}
+                    className={`flex flex-col items-center gap-1 ${
+                      step.id === currentStep
+                        ? 'text-blue-600'
+                        : step.id < currentStep
+                        ? 'text-green-600'
+                        : 'text-gray-400'
+                    }`}
+                  >
+                    <step.icon className="h-5 w-5" />
+                    <span className="text-xs font-medium hidden sm:block">{step.name}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </CardContent>
         </Card>
-      ) : (
-        <Alert className="mb-6 border-yellow-300 bg-yellow-50">
-          <AlertCircle className="h-4 w-4 text-yellow-600" />
-          <AlertDescription className="text-yellow-900">
-            <strong>Informations médecin non disponibles.</strong> Veuillez inclure vos informations (nom, qualifications, spécialité) dans la dictée vocale.
-          </AlertDescription>
-        </Alert>
-      )}
 
-      {/* Main Recording Card */}
-      <Card className="border-purple-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Mic className="h-6 w-6 text-purple-600" />
-            Enregistrement de la Dictée
-          </CardTitle>
-          <CardDescription>
-            Enregistrez votre consultation médicale. Le système transcrit automatiquement et génère un rapport complet.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {/* Instructions */}
-            {!recordingState.audioBlob && !recordingState.isRecording && (
-              <Alert className="border-purple-200 bg-purple-50">
-                <AlertCircle className="h-4 w-4 text-purple-600" />
-                <AlertDescription className="text-purple-900">
-                  <strong>Instructions:</strong> Cliquez sur "Démarrer l'enregistrement" et dictez votre consultation.
-                  <br />
-                  <strong>Incluez:</strong> Informations patient, symptômes, signes vitaux, examen clinique, diagnostic, prescriptions.
-                  <br />
-                  <strong>Types supportés:</strong> Consultations normales, urgences, spécialistes, correspondants, maladies chroniques.
-                  {!doctorData && (
-                    <>
-                      <br />
-                      <strong>⚠️ Important:</strong> Mentionnez vos informations (nom, spécialité, qualifications) au début de la dictée.
-                    </>
-                  )}
-                </AlertDescription>
-              </Alert>
-            )}
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-            {/* Recording Status */}
-            {recordingState.isRecording && (
-              <div className="text-center py-8">
-                <div className="inline-flex items-center gap-3 px-6 py-4 bg-red-50 border-2 border-red-500 rounded-full">
-                  <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
-                  <span className="text-2xl font-bold text-red-600 font-mono">
-                    {formatDuration(recordingState.duration)}
-                  </span>
-                </div>
-                <p className="text-gray-600 mt-4">Enregistrement en cours...</p>
-              </div>
-            )}
-
-            {/* Audio Ready */}
-            {recordingState.audioBlob && !recordingState.isRecording && (
-              <div className="text-center py-6">
-                <div className="inline-flex items-center gap-3 px-6 py-4 bg-green-50 border-2 border-green-500 rounded-lg">
-                  <FileAudio className="h-8 w-8 text-green-600" />
-                  <div className="text-left">
-                    <p className="font-semibold text-green-900">Enregistrement prêt</p>
-                    <p className="text-sm text-green-700">Durée: {formatDuration(recordingState.duration)}</p>
+        {/* STEP 1: Audio Recording */}
+        {currentStep === 1 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mic className="h-6 w-6 text-blue-600" />
+                Enregistrement Audio
+              </CardTitle>
+              <CardDescription>
+                Dictez la consultation médicale. Le système extraira automatiquement les données cliniques.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Patient Info Display */}
+              {patientData && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <User className="h-5 w-5 text-blue-600" />
+                    <span className="font-medium">Patient</span>
+                  </div>
+                  <div className="text-sm text-gray-700">
+                    {patientData.firstName} {patientData.lastName}
+                    {patientData.age && ` • ${patientData.age} ans`}
+                    {patientData.gender && ` • ${patientData.gender}`}
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* Control Buttons */}
-            <div className="flex justify-center gap-4">
-              {!recordingState.isRecording && !recordingState.audioBlob && (
-                <Button
-                  onClick={startRecording}
-                  size="lg"
-                  className="bg-purple-600 hover:bg-purple-700 px-8"
-                  disabled={isProcessing}
-                >
-                  <Mic className="mr-2 h-5 w-5" />
-                  Démarrer l'Enregistrement
-                </Button>
               )}
 
-              {recordingState.isRecording && (
-                <Button
-                  onClick={stopRecording}
-                  size="lg"
-                  variant="destructive"
-                  className="px-8"
-                >
-                  <Square className="mr-2 h-5 w-5" />
-                  Arrêter l'Enregistrement
-                </Button>
-              )}
-
-              {recordingState.audioBlob && !isProcessing && (
-                <>
+              {/* Recording Controls */}
+              <div className="flex flex-col items-center gap-6 py-8">
+                {!recordingState.isRecording && !recordingState.audioBlob && (
                   <Button
-                    onClick={processAudio}
+                    onClick={startRecording}
                     size="lg"
-                    className="bg-green-600 hover:bg-green-700 px-8"
+                    className="h-24 w-24 rounded-full bg-red-500 hover:bg-red-600"
                   >
-                    <CheckCircle className="mr-2 h-5 w-5" />
-                    Traiter la Dictée
+                    <Mic className="h-8 w-8" />
                   </Button>
-                  <Button
-                    onClick={discardRecording}
-                    size="lg"
-                    variant="outline"
-                    className="px-8"
-                  >
-                    Recommencer
-                  </Button>
-                </>
-              )}
-            </div>
+                )}
 
-            {/* Processing Progress */}
-            {isProcessing && (
-              <div className="space-y-4 mt-6">
-                <div className="flex items-center gap-3">
-                  <Loader2 className="h-5 w-5 animate-spin text-purple-600" />
-                  <span className="text-sm font-medium text-gray-700">{processingStep}</span>
-                </div>
-                <div className="relative pt-1">
-                  <div className="flex mb-2 items-center justify-between">
-                    <div>
-                      <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-purple-600 bg-purple-200">
-                        Progression
+                {recordingState.isRecording && (
+                  <>
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="h-24 w-24 rounded-full bg-red-500 flex items-center justify-center animate-pulse">
+                        <Square className="h-8 w-8 text-white" />
+                      </div>
+                      <div className="text-3xl font-mono font-bold">
+                        {formatTime(recordingState.duration)}
+                      </div>
+                    </div>
+                    <Button
+                      onClick={stopRecording}
+                      size="lg"
+                      variant="destructive"
+                    >
+                      <Square className="h-5 w-5 mr-2" />
+                      Arrêter l'enregistrement
+                    </Button>
+                  </>
+                )}
+
+                {recordingState.audioBlob && !recordingState.isRecording && (
+                  <div className="w-full space-y-4">
+                    <div className="flex items-center justify-center gap-3 text-green-600">
+                      <CheckCircle className="h-6 w-6" />
+                      <span className="font-medium">
+                        Enregistrement terminé ({formatTime(recordingState.duration)})
                       </span>
                     </div>
-                    <div className="text-right">
-                      <span className="text-xs font-semibold inline-block text-purple-600">
-                        {processingProgress}%
-                      </span>
+                    
+                    <div className="flex gap-3 justify-center">
+                      <Button
+                        onClick={() => {
+                          setRecordingState({
+                            isRecording: false,
+                            isPaused: false,
+                            duration: 0,
+                            audioBlob: null
+                          })
+                        }}
+                        variant="outline"
+                      >
+                        Réenregistrer
+                      </Button>
+                      <Button
+                        onClick={processAudio}
+                        disabled={isProcessing}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        {isProcessing ? (
+                          <>
+                            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                            Traitement en cours...
+                          </>
+                        ) : (
+                          <>
+                            Traiter l'audio
+                            <ArrowRight className="h-5 w-5 ml-2" />
+                          </>
+                        )}
+                      </Button>
                     </div>
                   </div>
-                  <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-purple-200">
-                    <div 
-                      style={{ width: `${processingProgress}%` }}
-                      className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-purple-600 transition-all duration-500"
-                    ></div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* STEP 2: Review Extracted Data */}
+        {currentStep === 2 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-6 w-6 text-blue-600" />
+                Révision des Données Extraites
+              </CardTitle>
+              <CardDescription>
+                Vérifiez les données extraites de la dictée vocale avant de continuer.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Transcription */}
+              <div>
+                <h3 className="font-semibold mb-2">Transcription</h3>
+                <div className="bg-gray-50 p-4 rounded-lg text-sm text-gray-700">
+                  {transcriptionText}
+                </div>
+              </div>
+
+              {/* Patient Info */}
+              <div>
+                <h3 className="font-semibold mb-2">Informations Patient</h3>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="text-gray-600">Nom:</span>{' '}
+                    <span className="font-medium">{patientData?.firstName} {patientData?.lastName}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Âge:</span>{' '}
+                    <span className="font-medium">{patientData?.age} ans</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Genre:</span>{' '}
+                    <span className="font-medium">{patientData?.gender}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Email:</span>{' '}
+                    <span className="font-medium">{patientData?.email || 'N/A'}</span>
                   </div>
                 </div>
               </div>
-            )}
 
-            {/* Error Alert */}
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+              {/* Clinical Data */}
+              <div>
+                <h3 className="font-semibold mb-2">Données Cliniques</h3>
+                <div className="space-y-2 text-sm">
+                  <div>
+                    <span className="text-gray-600">Motif:</span>{' '}
+                    <span className="font-medium">{clinicalData?.chiefComplaint}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Symptômes:</span>{' '}
+                    <span className="font-medium">{clinicalData?.symptoms?.join(', ')}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Durée:</span>{' '}
+                    <span className="font-medium">{clinicalData?.duration}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Sévérité:</span>{' '}
+                    <span className="font-medium">{clinicalData?.severity}</span>
+                  </div>
+                </div>
+              </div>
 
-            {/* Success Alert */}
-            {success && (
-              <Alert className="border-green-500 bg-green-50">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-900">
-                  <strong>Succès!</strong> Rapport de consultation généré. Redirection en cours...
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              {/* Actions */}
+              <div className="flex gap-3 justify-end pt-4">
+                <Button variant="outline" onClick={() => setCurrentStep(1)}>
+                  Retour
+                </Button>
+                <Button onClick={proceedToDiagnosis} className="bg-blue-600 hover:bg-blue-700">
+                  Continuer vers le Diagnostic
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Info Cards */}
-      <div className="grid md:grid-cols-3 gap-6 mt-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">📝 Contenu Recommandé</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm text-gray-700">
-              <li>• Identité patient (âge, sexe, poids, taille)</li>
-              <li>• Motif de consultation</li>
-              <li>• Symptômes et leur durée</li>
-              <li>• Signes vitaux (TA, pouls, température, SpO2)</li>
-              <li>• Examen clinique</li>
-              <li>• Diagnostic et différentiels</li>
-              <li>• Prescriptions et posologie</li>
-              <li>• Plan de suivi</li>
-            </ul>
-          </CardContent>
-        </Card>
+        {/* STEP 3: Diagnosis (use existing DiagnosisForm component) */}
+        {currentStep === 3 && patientData && clinicalData && (
+          <DiagnosisForm
+            patientData={patientData}
+            clinicalData={clinicalData}
+            questionsData={questionsData || {}}
+            onComplete={handleDiagnosisComplete}
+            onBack={() => setCurrentStep(2)}
+          />
+        )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">🏥 Types Supportés</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm text-gray-700">
-              <li>✅ Consultations normales</li>
-              <li>🚨 Urgences médicales</li>
-              <li>🩺 Consultations spécialistes</li>
-              <li>📋 Consultations de correspondants</li>
-              <li>💊 Suivi maladies chroniques</li>
-              <li>🔄 Renouvellements ordonnances</li>
-            </ul>
-            <p className="text-xs text-gray-500 mt-3">
-              Le système détecte automatiquement le type de consultation à partir de votre dictée.
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">⚡ Workflow Automatique</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm text-gray-700">
-              <li>✅ Transcription Whisper (FR/EN)</li>
-              <li>✅ Extraction GPT-4o (données cliniques)</li>
-              <li>✅ Analyse diagnostique (API Diagnosis)</li>
-              <li>✅ Génération rapport (API Report)</li>
-              <li>✅ Validation DCI & interactions</li>
-              <li>✅ Format UK/Maurice</li>
-            </ul>
-          </CardContent>
-        </Card>
+        {/* STEP 4: Report (use existing ProfessionalReport component) */}
+        {currentStep === 4 && diagnosisData && (
+          <ProfessionalReport
+            patientData={patientData}
+            clinicalData={clinicalData}
+            diagnosisData={diagnosisData}
+            doctorData={doctorData}
+            onComplete={handleReportComplete}
+            onBack={() => setCurrentStep(3)}
+          />
+        )}
       </div>
     </div>
   )
