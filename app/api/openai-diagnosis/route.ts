@@ -343,7 +343,13 @@ BEFORE PRESCRIBING ANY MEDICATION, SYSTEMATICALLY CHECK:
   {
     "medication_name": "Drug name + dose (e.g., Amoxicillin 500mg)",
     "why_prescribed": "MANDATORY - Why you are prescribing this medication to this patient",
-    "how_to_take": "Clear dosing instructions (e.g., three times daily)",
+    "how_to_take": "UK format dosing (e.g., TDS = three times daily)",
+    "dosing_details": {
+      "uk_format": "UK frequency code (OD/BD/TDS/QDS)",
+      "frequency_per_day": "NUMBER - how many times per day (e.g., 3)",
+      "individual_dose": "EXACT DOSE per intake (e.g., 500mg)",
+      "daily_total_dose": "TOTAL daily dose (e.g., 1500mg/day)"
+    },
     "duration": "Treatment duration (e.g., 7 days)",
     "dci": "Active ingredient name (e.g., Amoxicillin)"
   }
@@ -395,6 +401,7 @@ IF PATIENT HAS CURRENT MEDICATIONS, YOU MUST:
 3. ADD PRECISE DCI for each current medication if not provided
 4. INCLUDE in "current_medications_validated" field with complete medical details
 5. FORMAT exactly like new prescriptions with all required fields
+6. ⚕️ INCLUDE dosing_details with uk_format, frequency_per_day, individual_dose, daily_total_dose
 
 FOR CONSULTATION TYPE "renewal":
 - Focus on validating current medications
@@ -414,6 +421,12 @@ Input: "metfromin 500mg 2 fois par jour"
   "medication_name": "Metformin 500mg",
   "dci": "Metformin",
   "how_to_take": "BD (twice daily)",
+  "dosing_details": {
+    "uk_format": "BD",
+    "frequency_per_day": 2,
+    "individual_dose": "500mg",
+    "daily_total_dose": "1000mg/day"
+  },
   "why_prescribed": "Type 2 diabetes management",
   "duration": "Ongoing treatment",
   "validated_corrections": "Spelling: metfromin→Metformin, Dosology: 2 fois par jour→BD",
@@ -425,6 +438,12 @@ Input: "asprin 100mg once daily"
   "medication_name": "Aspirin 100mg",
   "dci": "Aspirin",
   "how_to_take": "OD (once daily)",
+  "dosing_details": {
+    "uk_format": "OD",
+    "frequency_per_day": 1,
+    "individual_dose": "100mg",
+    "daily_total_dose": "100mg/day"
+  },
   "why_prescribed": "Cardiovascular prophylaxis",
   "duration": "Ongoing treatment",
   "validated_corrections": "Spelling: asprin→Aspirin, Dosology standardized to OD",
@@ -437,6 +456,12 @@ REQUIRED OUTPUT STRUCTURE FOR CURRENT MEDICATIONS:
     "medication_name": "Validated Drug name + corrected dose (e.g., Metformin 500mg)",
     "why_prescribed": "Original indication from patient history OR chronic condition management (infer from drug class if needed)",
     "how_to_take": "CORRECTED UK dosing format (e.g., BD, TDS, QDS, OD)",
+    "dosing_details": {
+      "uk_format": "UK frequency code (OD/BD/TDS/QDS)",
+      "frequency_per_day": "NUMBER - how many times per day",
+      "individual_dose": "EXACT DOSE per intake (extract from medication_name)",
+      "daily_total_dose": "TOTAL daily dose calculation"
+    },
     "duration": "Ongoing treatment or specific duration",
     "dci": "Validated DCI (e.g., Metformin)",
     "validated_corrections": "Explicit list of corrections made (spelling, dosology format, etc.)",
@@ -4494,12 +4519,13 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         id: idx + 1,
         name: med?.medication_name || "Médicament actuel",
         dci: med?.dci || "DCI",
-        dosage: med?.medication_name?.match(/\d+\s*mg/)?.[0] || "Dosage non spécifié",
+        dosage: med?.medication_name?.match(/\d+\s*mg/)?.[0] || med?.dosing_details?.individual_dose || "Dosage non spécifié",
         posology: med?.how_to_take || "Selon prescription",
         indication: med?.why_prescribed || "Traitement chronique en cours",
         duration: med?.duration || "Traitement continu",
         route: "Oral",
         frequency: med?.how_to_take || "",
+        dosing_details: med?.dosing_details || null, // ⚕️ Detailed dosage information
         instructions: `Traitement actuel du patient - ${med?.validated_corrections || 'Validé par IA'}`,
         original_input: med?.original_input || "",
         validated_corrections: med?.validated_corrections || "Aucune correction nécessaire",

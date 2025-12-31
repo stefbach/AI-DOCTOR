@@ -841,12 +841,31 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   }
   
   validatedCurrentMeds.forEach((med: any, idx: number) => {
+    // Extract detailed dosing information if available
+    const dosingDetails = med.dosing_details || {}
+    const individualDose = dosingDetails.individual_dose || ''
+    const frequencyPerDay = dosingDetails.frequency_per_day || 0
+    const dailyTotalDose = dosingDetails.daily_total_dose || ''
+    const ukFormat = med.posology || med.frequency || med.how_to_take || 'As prescribed'
+    
+    // Build complete dosage string
+    let completeDosage = getString(med.dosage || '')
+    if (!completeDosage && individualDose) {
+      completeDosage = individualDose
+    }
+    
+    // Build detailed frequency with total daily dose
+    let detailedFrequency = ukFormat
+    if (frequencyPerDay > 0 && dailyTotalDose) {
+      detailedFrequency = `${ukFormat} (${frequencyPerDay}×/jour, total: ${dailyTotalDose})`
+    }
+    
     medications.push({
       name: getString(med.name || med.medication_name || `Current medication ${idx + 1}`),
       genericName: getString(med.dci || med.name || `Current medication ${idx + 1}`),
-      dosage: getString(med.dosage || ''),
+      dosage: completeDosage,
       form: getString(med.form || 'tablet'),
-      frequency: getString(med.posology || med.frequency || med.how_to_take || 'As prescribed'),
+      frequency: detailedFrequency,
       route: getString(med.route || 'Oral'),
       duration: getString(med.duration || 'Ongoing treatment'),
       quantity: getString(med.quantity || '1 box'),
@@ -861,7 +880,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
       pregnancyCategory: '',
       pregnancySafety: '',
       breastfeedingSafety: '',
-      completeLine: `${getString(med.name || med.medication_name)} ${getString(med.dosage || '')}\n${getString(med.posology || med.frequency || 'As prescribed')}\n[Current treatment - AI validated]`
+      completeLine: `${getString(med.name || med.medication_name)} ${completeDosage}\n${detailedFrequency}\n[Current treatment - AI validated]`
     })
   })
   
@@ -914,12 +933,31 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     console.log(`💊 Newly prescribed medications: ${primaryTreatments.length}`)
   
   primaryTreatments.forEach((med: any, idx: number) => {
+    // Extract detailed dosing information
+    const dosingDetails = med.dosing_regimen?.adult || {}
+    const individualDose = dosingDetails.individual_dose || ''
+    const frequencyPerDay = dosingDetails.frequency_per_day || 0
+    const dailyTotalDose = dosingDetails.daily_total_dose || ''
+    const ukFormat = dosingDetails.en || dosingDetails.fr || 'As prescribed'
+    
+    // Build complete dosage string with detailed information
+    let completeDosage = getString(med.dosage_strength || med.dosage || med.strength || '')
+    if (!completeDosage && individualDose) {
+      completeDosage = individualDose
+    }
+    
+    // Build detailed frequency with total daily dose
+    let detailedFrequency = ukFormat
+    if (frequencyPerDay > 0 && dailyTotalDose) {
+      detailedFrequency = `${ukFormat} (${frequencyPerDay}×/jour, total: ${dailyTotalDose})`
+    }
+    
     medications.push({
       name: getString(med.medication_dci || med.drug || `Medication ${idx + 1}`),
       genericName: getString(med.medication_dci || med.drug || `Medication ${idx + 1}`),
-      dosage: getString(med.dosage_strength || med.dosage || med.strength || ''),
+      dosage: completeDosage,
       form: getString(med.dosage_form || med.form || 'tablet'),
-      frequency: getString(med.dosing_regimen?.adult || med.dosing?.adult || 'As prescribed'),
+      frequency: detailedFrequency,
       route: getString(med.route || 'Oral'),
       duration: getString(med.duration || '7 days'),
       quantity: getString(med.quantity || '1 box'),
@@ -932,7 +970,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
       pregnancyCategory: getString(med.pregnancy_category || ''),
       pregnancySafety: getString(med.pregnancy_safety || ''),
       breastfeedingSafety: getString(med.breastfeeding_safety || ''),
-      completeLine: `${getString(med.medication_dci || med.drug)} ${getString(med.dosage_strength || med.dosage || '')}\n${getString(med.dosing_regimen?.adult || med.dosing?.adult || 'As prescribed')}`
+      completeLine: `${getString(med.medication_dci || med.drug)} ${completeDosage}\n${detailedFrequency}`
     })
     })
   }
