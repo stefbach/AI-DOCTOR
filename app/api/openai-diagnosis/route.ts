@@ -403,16 +403,30 @@ IF PATIENT HAS CURRENT MEDICATIONS, YOU MUST:
 5. FORMAT exactly like new prescriptions with all required fields
 6. ⚕️ INCLUDE dosing_details with uk_format, frequency_per_day, individual_dose, daily_total_dose
 
-FOR CONSULTATION TYPE "renewal":
-- Focus on validating current medications
-- Add new medications ONLY if medically necessary for current complaint
-- MUST return all validated current medications in "current_medications_validated"
+🚨 CRITICAL: TREATMENT PLAN MEDICATIONS MANDATORY
 
-FOR CONSULTATION TYPE "new_problem":
-- Validate and keep current medications safe
-- Check for interactions with new medications
-- MUST return validated current medications + new medications separately
-- System will merge them in final prescription
+YOU MUST ALWAYS PRESCRIBE MEDICATIONS IN "treatment_plan.medications" ARRAY!
+
+FOR CONSULTATION TYPE "RENEWAL" or "RENOUVELLEMENT":
+- IF patient provided current medications:
+  * Copy them to "current_medications_validated" with validation
+  * ALSO copy them to "treatment_plan.medications" for renewal prescription
+  * Add dosing_details for each medication
+- IF patient DID NOT provide current medications:
+  * Generate appropriate medications based on chief complaint and symptoms
+  * Example: "renouvellement ordonnance" for hypertension → Amlodipine 5mg OD
+  * Example: "renouvellement" for diabetes → Metformin 500mg BD
+  * Example: "même traitement" with pain → Ibuprofen 400mg TDS
+
+FOR CONSULTATION TYPE "NEW_PROBLEM":
+- Validate and keep current medications in "current_medications_validated"
+- Generate NEW medications in "treatment_plan.medications" based on current complaint
+- Check for drug interactions between current and new medications
+- NEVER leave "treatment_plan.medications" empty!
+
+⚠️ NEVER RETURN EMPTY "treatment_plan.medications" ARRAY!
+⚠️ ALWAYS prescribe at least ONE medication appropriate for the condition!
+⚠️ If renewal without current meds listed: INFER medications from medical history/symptoms!
 
 PARSING EXAMPLES FOR CURRENT MEDICATIONS:
 
@@ -2118,6 +2132,198 @@ function validateDiagnosticProcess(analysis: any) {
   return { issues }
 }
 
+// ==================== AUTO-GENERATE MEDICATIONS (SI VIDE) ====================
+function generateDefaultMedications(patientContext: PatientContext): any[] {
+  console.log('🏥 Generating default medications based on symptoms and history...')
+  
+  const medications: any[] = []
+  const symptoms = [...(patientContext.symptoms || []), patientContext.chief_complaint || ''].join(' ').toLowerCase()
+  const medicalHistory = (patientContext.medical_history || []).join(' ').toLowerCase()
+  
+  // Pain / Douleur
+  if (symptoms.includes('pain') || symptoms.includes('douleur') || symptoms.includes('ache') || symptoms.includes('mal')) {
+    medications.push({
+      medication_name: "Ibuprofen 400mg",
+      drug: "Ibuprofen 400mg",
+      dci: "Ibuprofen",
+      indication: "Pain management and anti-inflammatory treatment",
+      why_prescribed: "For relief of moderate pain and inflammation",
+      how_to_take: "TDS (three times daily) with food",
+      dosing_details: {
+        uk_format: "TDS",
+        frequency_per_day: 3,
+        individual_dose: "400mg",
+        daily_total_dose: "1200mg/day"
+      },
+      dosing: {
+        adult: "400mg TDS with food",
+        frequency_per_day: 3,
+        individual_dose: "400mg",
+        daily_total_dose: "1200mg/day"
+      },
+      duration: "5-7 days",
+      contraindications: "Gastric ulcer, severe renal impairment, pregnancy (3rd trimester)",
+      side_effects: "Gastric irritation, dizziness, headache",
+      monitoring: "Monitor for gastric symptoms",
+      administration_instructions: "Take with food to reduce gastric irritation"
+    })
+  }
+  
+  // Fever / Fièvre
+  if (symptoms.includes('fever') || symptoms.includes('fièvre') || symptoms.includes('temperature') ||
+      (patientContext.vital_signs?.temperature && parseFloat(patientContext.vital_signs.temperature) > 38)) {
+    medications.push({
+      medication_name: "Paracetamol 1g",
+      drug: "Paracetamol 1g",
+      dci: "Paracetamol",
+      indication: "Antipyretic and analgesic for fever management",
+      why_prescribed: "To reduce fever and provide pain relief",
+      how_to_take: "QDS (four times daily)",
+      dosing_details: {
+        uk_format: "QDS",
+        frequency_per_day: 4,
+        individual_dose: "1g",
+        daily_total_dose: "4g/day"
+      },
+      dosing: {
+        adult: "1g QDS (maximum 4g/day)",
+        frequency_per_day: 4,
+        individual_dose: "1g",
+        daily_total_dose: "4g/day"
+      },
+      duration: "While fever persists (maximum 3 days without medical review)",
+      contraindications: "Severe hepatic impairment",
+      side_effects: "Rare at therapeutic doses; hepatotoxicity in overdose",
+      monitoring: "Monitor temperature; liver function if prolonged use",
+      administration_instructions: "Can be taken with or without food"
+    })
+  }
+  
+  // Hypertension
+  if (symptoms.includes('hypertension') || symptoms.includes('blood pressure') || medicalHistory.includes('hypertension') ||
+      (patientContext.vital_signs?.bloodPressure && 
+       (patientContext.vital_signs.bloodPressure.includes('140') || patientContext.vital_signs.bloodPressure.includes('150')))) {
+    medications.push({
+      medication_name: "Amlodipine 5mg",
+      drug: "Amlodipine 5mg",
+      dci: "Amlodipine",
+      indication: "First-line treatment for essential hypertension",
+      why_prescribed: "To control blood pressure and reduce cardiovascular risk",
+      how_to_take: "OD (once daily) in the morning",
+      dosing_details: {
+        uk_format: "OD",
+        frequency_per_day: 1,
+        individual_dose: "5mg",
+        daily_total_dose: "5mg/day"
+      },
+      dosing: {
+        adult: "5mg OD (can increase to 10mg if needed)",
+        frequency_per_day: 1,
+        individual_dose: "5mg",
+        daily_total_dose: "5mg/day"
+      },
+      duration: "Long-term treatment - ongoing",
+      contraindications: "Severe hypotension, cardiogenic shock",
+      side_effects: "Ankle edema, flushing, headache, palpitations",
+      monitoring: "Blood pressure monitoring every 2-4 weeks initially",
+      administration_instructions: "Take at same time each day"
+    })
+  }
+  
+  // Diabetes
+  if (symptoms.includes('diabetes') || symptoms.includes('diabète') || medicalHistory.includes('diabetes') || medicalHistory.includes('diabète') ||
+      (patientContext.vital_signs?.bloodGlucose && parseFloat(patientContext.vital_signs.bloodGlucose) > 7.0)) {
+    medications.push({
+      medication_name: "Metformin 500mg",
+      drug: "Metformin 500mg",
+      dci: "Metformin",
+      indication: "First-line treatment for type 2 diabetes mellitus",
+      why_prescribed: "To improve glycemic control and reduce HbA1c",
+      how_to_take: "BD (twice daily) with meals",
+      dosing_details: {
+        uk_format: "BD",
+        frequency_per_day: 2,
+        individual_dose: "500mg",
+        daily_total_dose: "1000mg/day"
+      },
+      dosing: {
+        adult: "500mg BD with meals (can increase to 1g BD)",
+        frequency_per_day: 2,
+        individual_dose: "500mg",
+        daily_total_dose: "1000mg/day"
+      },
+      duration: "Long-term treatment - ongoing",
+      contraindications: "Severe renal impairment (eGFR <30), acute metabolic acidosis",
+      side_effects: "Gastrointestinal upset (nausea, diarrhea), lactic acidosis (rare)",
+      monitoring: "HbA1c every 3 months; renal function annually",
+      administration_instructions: "Take with meals to reduce GI side effects"
+    })
+  }
+  
+  // Cough / Toux
+  if (symptoms.includes('cough') || symptoms.includes('toux')) {
+    medications.push({
+      medication_name: "Amoxicillin 500mg",
+      drug: "Amoxicillin 500mg",
+      dci: "Amoxicillin",
+      indication: "Antibiotic treatment for suspected bacterial respiratory infection",
+      why_prescribed: "For treatment of bacterial lower respiratory tract infection",
+      how_to_take: "TDS (three times daily)",
+      dosing_details: {
+        uk_format: "TDS",
+        frequency_per_day: 3,
+        individual_dose: "500mg",
+        daily_total_dose: "1500mg/day"
+      },
+      dosing: {
+        adult: "500mg TDS",
+        frequency_per_day: 3,
+        individual_dose: "500mg",
+        daily_total_dose: "1500mg/day"
+      },
+      duration: "7 days",
+      contraindications: "Penicillin allergy, infectious mononucleosis",
+      side_effects: "Diarrhea, nausea, rash",
+      monitoring: "Monitor for allergic reaction",
+      administration_instructions: "Complete full course even if symptoms improve"
+    })
+  }
+  
+  // If no specific medication generated, add generic symptomatic treatment
+  if (medications.length === 0) {
+    console.log('⚠️ No specific symptoms matched - adding generic paracetamol')
+    medications.push({
+      medication_name: "Paracetamol 500mg",
+      drug: "Paracetamol 500mg",
+      dci: "Paracetamol",
+      indication: "Symptomatic relief of mild to moderate pain",
+      why_prescribed: "For general symptomatic relief",
+      how_to_take: "TDS-QDS as needed",
+      dosing_details: {
+        uk_format: "TDS-QDS PRN",
+        frequency_per_day: 3,
+        individual_dose: "500mg-1g",
+        daily_total_dose: "3g-4g/day max"
+      },
+      dosing: {
+        adult: "500mg-1g TDS-QDS PRN (max 4g/day)",
+        frequency_per_day: 3,
+        individual_dose: "500mg",
+        daily_total_dose: "2g/day"
+      },
+      duration: "As needed (maximum 3 days without medical review)",
+      contraindications: "Severe hepatic impairment",
+      side_effects: "Rare at therapeutic doses",
+      monitoring: "Standard monitoring",
+      administration_instructions: "Can be taken with or without food"
+    })
+  }
+  
+  console.log(`✅ Generated ${medications.length} medications:`, medications.map(m => m.medication_name).join(', '))
+  
+  return medications
+}
+
 export function validateTherapeuticCompleteness(analysis: any, patientContext: PatientContext) {
   const issues: Array<{type: 'critical'|'important'|'minor', category: string, description: string, suggestion: string}> = []
   const medications = analysis?.treatment_plan?.medications || []
@@ -2138,6 +2344,11 @@ export function validateTherapeuticCompleteness(analysis: any, patientContext: P
         suggestion: 'Prescribe appropriate treatment according to guidelines'
       })
       completenessScore -= 50
+      
+      // 🚨 AUTO-GENERATE medications if empty
+      console.log('⚠️ No medications found - auto-generating based on context...')
+      analysis.treatment_plan.medications = generateDefaultMedications(patientContext)
+      console.log(`✅ Generated ${analysis.treatment_plan.medications.length} default medications`)
     }
   }
   
