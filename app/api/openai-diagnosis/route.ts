@@ -396,12 +396,24 @@ CONSULTATION TYPE DETECTED: {{CONSULTATION_TYPE}}
 🚨 MANDATORY CURRENT MEDICATIONS HANDLING:
 
 IF PATIENT HAS CURRENT MEDICATIONS, YOU MUST:
-1. VALIDATE and CORRECT spelling errors (e.g., "metfromin" → "Metformin")
+1. ✅ **NORMALIZE DRUG NAMES TO ENGLISH (UK STANDARD)** - CRITICAL!
+   - French → English: "metformine" → "Metformin", "paracétamol" → "Paracetamol"
+   - Misspellings → Correct: "metfromin" → "Metformin", "ibuprofene" → "Ibuprofen"
+   - ANY drug name → Correct English international name (INN/DCI)
+   - Use your medical knowledge to identify and normalize ANY medication
 2. STANDARDIZE dosology to UK format (e.g., "2 fois par jour" → "BD", "once daily" → "OD")
-3. ADD PRECISE DCI for each current medication if not provided
-4. INCLUDE in "current_medications_validated" field with complete medical details
-5. FORMAT exactly like new prescriptions with all required fields
-6. ⚕️ INCLUDE dosing_details with uk_format, frequency_per_day, individual_dose, daily_total_dose
+3. ADD PRECISE DCI (English international name) for each current medication
+4. ADD STANDARD THERAPEUTIC DOSE if missing (based on BNF/NICE guidelines)
+5. INCLUDE in "current_medications_validated" field with complete medical details
+6. FORMAT exactly like new prescriptions with all required fields
+7. ⚕️ INCLUDE dosing_details with uk_format, frequency_per_day, individual_dose, daily_total_dose
+
+⚠️ **CRITICAL RULE - ENGLISH DRUG NAMES**:
+- ALL medication names MUST be in ENGLISH (UK/International standard)
+- Use British National Formulary (BNF) naming conventions
+- Examples: Metformin (NOT Metformine), Paracetamol (NOT Paracétamol), 
+  Amoxicillin (NOT Amoxicilline), Clarithromycin (NOT Clarithromycine)
+- Apply your medical knowledge to normalize ANY drug name to English
 
 🚨 CRITICAL: TREATMENT PLAN MEDICATIONS MANDATORY
 
@@ -430,13 +442,65 @@ FOR CONSULTATION TYPE "NEW_PROBLEM":
 
 PARSING EXAMPLES FOR CURRENT MEDICATIONS:
 
-Input: "metfromin 500mg 2 fois par jour"
+Example 1 - French name with dose:
+Input: "metformine 500mg 2 fois par jour"
 → Output: {
   "medication_name": "Metformin 500mg",
   "dci": "Metformin",
   "how_to_take": "BD (twice daily)",
   "dosing_details": {
     "uk_format": "BD",
+    "frequency_per_day": 2,
+    "individual_dose": "500mg",
+    "daily_total_dose": "1000mg/day"
+  },
+  "why_prescribed": "Type 2 diabetes management",
+  "duration": "Ongoing treatment",
+  "validated_corrections": "Spelling: metformine→Metformin, Dosology: 2 fois par jour→BD",
+  "original_input": "metformine 500mg 2 fois par jour"
+}
+
+Example 2 - Misspelled with frequency:
+Input: "amoxiciline 1g trois fois par jour"
+→ Output: {
+  "medication_name": "Amoxicillin 1g",
+  "dci": "Amoxicillin",
+  "how_to_take": "TDS (three times daily)",
+  "dosing_details": {
+    "uk_format": "TDS",
+    "frequency_per_day": 3,
+    "individual_dose": "1g",
+    "daily_total_dose": "3g/day"
+  },
+  "validated_corrections": "Spelling: amoxiciline→Amoxicillin, Dosology: trois fois par jour→TDS"
+}
+
+Example 3 - ANY drug, French name, no dose → add standard dose:
+Input: "périndopril 1/j"
+→ Output: {
+  "medication_name": "Perindopril 4mg",
+  "dci": "Perindopril",
+  "how_to_take": "OD (once daily)",
+  "dosing_details": {
+    "uk_format": "OD",
+    "frequency_per_day": 1,
+    "individual_dose": "4mg",
+    "daily_total_dose": "4mg/day"
+  },
+  "validated_corrections": "Spelling: périndopril→Perindopril, Dosology: 1/j→OD, Added standard dose: 4mg (NICE guidelines)"
+}
+
+Example 4 - Uncommon drug, use medical knowledge:
+Input: "enalapril 10mg matin"
+→ Output: {
+  "medication_name": "Enalapril 10mg",
+  "dci": "Enalapril",
+  "how_to_take": "OD (once daily - morning)",
+  "validated_corrections": "Dosology: matin→OD morning"
+}
+
+⚠️ **KEY PRINCIPLE**: Use your MEDICAL KNOWLEDGE to normalize ANY medication name to English.
+You are NOT limited to a fixed list - apply clinical expertise to identify and correct ANY drug.
     "frequency_per_day": 2,
     "individual_dose": "500mg",
     "daily_total_dose": "1000mg/day"
@@ -988,48 +1052,19 @@ export function validateMauritiusMedicalSpecificity(analysis: any): {
 }
 // ==================== NOUVELLES FONCTIONS DCI + POSOLOGIE PRÉCISE ====================
 function extractDCIFromDrugName(drugName: string): string {
-  if (!drugName) return 'Principe actif'
+  if (!drugName) return 'Active ingredient'
   
-  const name = drugName.toLowerCase()
-  
-  // ✅ CORRECTION AUTOMATIQUE ACTIVÉE: Normaliser l'orthographe vers DCI standard ANGLAIS
-  // ⚠️ IMPORTANT: Le système utilise des noms ANGLAIS (UK standard)
-  // Dictionnaire de normalisation français/anglais → ANGLAIS standard
-  const dciMap: { [key: string]: string } = {
-    'paracetamol': 'Paracetamol',
-    'acetaminophen': 'Paracetamol',
-    'paracétamol': 'Paracetamol',
-    'ibuprofen': 'Ibuprofen',
-    'ibuprofène': 'Ibuprofen',
-    'clarithromycin': 'Clarithromycin',
-    'clarithromycine': 'Clarithromycin',
-    'metoclopramide': 'Metoclopramide',
-    'métoclopramide': 'Metoclopramide',
-    'amlodipine': 'Amlodipine',
-    'périndopril': 'Perindopril',
-    'perindopril': 'Perindopril',
-    'atorvastatin': 'Atorvastatin',
-    'atorvastatine': 'Atorvastatin',
-    'metformin': 'Metformin',
-    'metformine': 'Metformin',
-    'omeprazole': 'Omeprazole',
-    'oméprazole': 'Omeprazole',
-    'amoxicillin': 'Amoxicillin',
-    'amoxicilline': 'Amoxicillin'
-  }
-  
-  const nameLower = drugName.toLowerCase()
-  
-  // Chercher d'abord dans le dictionnaire
-  for (const [search, dci] of Object.entries(dciMap)) {
-    if (nameLower.includes(search)) {
-      return dci
-    }
-  }
-  
-  // Fallback: extraire le premier mot et capitaliser (ANGLAIS)
+  // ✅ SIMPLIFIED: Let GPT-4 handle drug name normalization
+  // No fixed dictionary - AI normalizes ANY medication intelligently
+  // Just extract and capitalize the first word (drug name)
   const match = drugName.match(/^([a-zA-ZÀ-ÿ]+)/)
-  return match ? match[1].charAt(0).toUpperCase() + match[1].slice(1).toLowerCase() : 'Active ingredient'
+  if (match) {
+    const extracted = match[1]
+    // Capitalize first letter, lowercase the rest (English convention)
+    return extracted.charAt(0).toUpperCase() + extracted.slice(1).toLowerCase()
+  }
+  
+  return 'Active ingredient'
 }
 
 function generatePrecisePosology(dci: string, patientContext: PatientContext): any {
