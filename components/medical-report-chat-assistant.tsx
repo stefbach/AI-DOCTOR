@@ -19,7 +19,9 @@ import {
   Pill,
   FlaskConical,
   Scan,
-  FileText
+  FileText,
+  Mic,
+  Square
 } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 
@@ -63,6 +65,7 @@ Je peux vous aider à :
 ✅ Ajouter ou supprimer des éléments du rapport
 ✅ Répondre à vos questions sur le diagnostic
 ✅ Suggérer des améliorations basées sur les meilleures pratiques
+🎤 Utiliser la dictée vocale pour vos questions
 
 Comment puis-je vous assister aujourd'hui ?`,
       timestamp: new Date()
@@ -71,8 +74,16 @@ Comment puis-je vous assister aujourd'hui ?`,
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [conversationId, setConversationId] = useState('')
+  
+  // Voice recording states
+  const [isRecording, setIsRecording] = useState(false)
+  const [isTranscribing, setIsTranscribing] = useState(false)
+  
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
+  const streamRef = useRef<MediaStream | null>(null)
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -80,6 +91,101 @@ Comment puis-je vous assister aujourd'hui ?`,
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
     }
   }, [messages])
+
+  // Voice Recording Functions
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      streamRef.current = stream
+      
+      const mediaRecorder = new MediaRecorder(stream)
+      mediaRecorderRef.current = mediaRecorder
+      audioChunksRef.current = []
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data)
+        }
+      }
+      
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+        await transcribeAudio(audioBlob)
+        
+        // Stop and cleanup stream
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => track.stop())
+          streamRef.current = null
+        }
+      }
+      
+      mediaRecorder.start()
+      setIsRecording(true)
+      
+      toast({
+        title: "🎤 Enregistrement en cours",
+        description: "Parlez maintenant, cliquez à nouveau pour arrêter"
+      })
+    } catch (error: any) {
+      console.error('Error starting recording:', error)
+      toast({
+        title: "❌ Erreur d'enregistrement",
+        description: error.message,
+        variant: "destructive"
+      })
+    }
+  }
+  
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop()
+      setIsRecording(false)
+    }
+  }
+  
+  const transcribeAudio = async (audioBlob: Blob) => {
+    setIsTranscribing(true)
+    
+    try {
+      // Convert to File
+      const audioFile = new File([audioBlob], `chat_voice_${Date.now()}.webm`, { type: 'audio/webm' })
+      
+      const formData = new FormData()
+      formData.append('audioFile', audioFile)
+      formData.append('doctorInfo', JSON.stringify({})) // Empty for transcription only
+      
+      const response = await fetch('/api/voice-dictation-transcribe', {
+        method: 'POST',
+        body: formData
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Transcription failed: ${response.status}`)
+      }
+      
+      const result = await response.json()
+      const transcribedText = result.transcription?.text || ''
+      
+      if (transcribedText) {
+        setInputMessage(transcribedText)
+        inputRef.current?.focus()
+        
+        toast({
+          title: "✅ Transcription réussie",
+          description: `Texte: "${transcribedText.substring(0, 50)}..."`
+        })
+      }
+    } catch (error: any) {
+      console.error('Error transcribing audio:', error)
+      toast({
+        title: "❌ Erreur de transcription",
+        description: error.message,
+        variant: "destructive"
+      })
+    } finally {
+      setIsTranscribing(false)
+    }
+  }
 
   const sendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return
@@ -316,12 +422,31 @@ Comment puis-je vous assister aujourd'hui ?`,
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Posez une question ou demandez une modification..."
-              disabled={isLoading}
+              disabled={isLoading || isTranscribing}
               className="flex-1"
             />
+            
+            {/* Voice Recording Button */}
+            <Button 
+              onClick={isRecording ? stopRecording : startRecording}
+              disabled={isLoading || isTranscribing}
+              variant={isRecording ? "destructive" : "outline"}
+              className={isRecording ? "animate-pulse" : ""}
+              title={isRecording ? "Arrêter l'enregistrement" : "Enregistrer un message vocal"}
+            >
+              {isTranscribing ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : isRecording ? (
+                <Square className="h-5 w-5" />
+              ) : (
+                <Mic className="h-5 w-5" />
+              )}
+            </Button>
+            
+            {/* Send Button */}
             <Button 
               onClick={sendMessage}
-              disabled={isLoading || !inputMessage.trim()}
+              disabled={isLoading || isTranscribing || !inputMessage.trim()}
               className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
             >
               {isLoading ? (
