@@ -47,6 +47,7 @@ interface DiagnosisFormProps {
  patientData: any
  clinicalData: any
  questionsData: any
+ doctorNotes?: any // ⚕️ Hypothèses/notes du médecin de la dictée vocale
  onDataChange: (data: any) => void
  onNext: () => void
  onPrevious: () => void
@@ -470,6 +471,7 @@ export default function DiagnosisForm({
  patientData,
  clinicalData,
  questionsData,
+ doctorNotes, // ⚕️ Hypothèses du médecin de la dictée vocale
  onDataChange,
  onNext,
  onPrevious,
@@ -872,6 +874,7 @@ export default function DiagnosisForm({
  patientData,
  clinicalData,
  questionsData: questionsData?.responses || [],
+ doctorNotes, // ⚕️ Hypothèses et notes du médecin
  language,
  }
  

@@ -77,6 +77,14 @@ const MAURITIUS_MEDICAL_PROMPT = `🏥 YOU ARE A COMPLETE MEDICAL ENCYCLOPEDIA -
 🧠 ENCYCLOPEDIC MEDICAL INTELLIGENCE DIRECTIVE
 ═══════════════════════════════════════════════════════════════════════════════
 
+⚕️ CRITICAL: DOCTOR'S CLINICAL HYPOTHESES PRESERVATION
+If the patient context includes "doctor_clinical_notes" with clinical hypotheses:
+- PRESERVE ALL doctor's hypotheses in "diagnostic_reasoning.syndrome_identification.supporting_features"
+- ADJUST dosages/medications but NEVER DELETE doctor's clinical reasoning
+- INTEGRATE doctor's differential diagnoses into your own analysis
+- RESPECT doctor's treatment plan and ENHANCE it with evidence-based additions
+- If doctor says "je pense que" (I think), "probablement" (probably) → KEEP and VALIDATE
+
 You possess COMPLETE encyclopedic knowledge equivalent to:
 - 📚 VIDAL / BNF (British National Formulary) - Complete pharmaceutical database
 - 🔬 Harrison's Principles of Internal Medicine - All pathologies
@@ -1681,7 +1689,7 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
   throw lastError || new Error('Failed after multiple attempts with Mauritius quality enhancement')
 }
 
-function prepareMauritiusQualityPrompt(patientContext: PatientContext, consultationType: any): string {
+function prepareMauritiusQualityPrompt(patientContext: PatientContext, consultationType: any, doctorNotes?: any): string {
   const currentMedsFormatted = patientContext.current_medications.length > 0 
     ? patientContext.current_medications.join(', ')
     : 'Aucun médicament actuel'
@@ -1761,7 +1769,8 @@ Consider: dose adjustment, adding second agent, or specialist referral.
     medical_history: patientContext.medical_history,
     allergies: patientContext.allergies,
     consultation_type: consultationType.consultationType,
-    ai_questions: patientContext.ai_questions
+    ai_questions: patientContext.ai_questions,
+    doctor_clinical_notes: doctorNotes || null // ⚕️ Hypothèses et notes du médecin
   }, null, 2)
   
   // Prepend vital signs alerts to the prompt
@@ -4037,8 +4046,17 @@ export async function POST(request: NextRequest) {
     
     console.log(`🔍 Pré-analyse : ${consultationAnalysis.consultationType} (${Math.round(consultationAnalysis.confidence * 100)}%)`)
     
+    // ⚕️ Extract doctor's clinical notes if provided
+    const doctorNotes = body.doctorNotes || null
+    if (doctorNotes) {
+      console.log('⚕️ DOCTOR CLINICAL NOTES DETECTED:')
+      console.log('   - Hypotheses:', doctorNotes.clinicalHypotheses?.length || 0)
+      console.log('   - Differential diagnoses:', doctorNotes.differentialDiagnoses?.length || 0)
+      console.log('   - Clinical reasoning present:', !!doctorNotes.clinicalReasoning)
+    }
+    
     // ============ APPEL OPENAI AVEC QUALITÉ MAURITIUS + DCI ============
-    const mauritiusPrompt = prepareMauritiusQualityPrompt(patientContext, consultationAnalysis)
+    const mauritiusPrompt = prepareMauritiusQualityPrompt(patientContext, consultationAnalysis, doctorNotes)
     
     const { data: openaiData, analysis: medicalAnalysis, mauritius_quality_level } = await callOpenAIWithMauritiusQuality(
       apiKey,

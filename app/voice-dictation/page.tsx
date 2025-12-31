@@ -48,6 +48,7 @@ export default function VoiceDictationPage() {
   const [clinicalData, setClinicalData] = useState<any>(null)
   const [questionsData, setQuestionsData] = useState<any>(null)
   const [diagnosisData, setDiagnosisData] = useState<any>(null)
+  const [doctorNotes, setDoctorNotes] = useState<any>(null) // ⚕️ Hypothèses du médecin
   const [transcriptionText, setTranscriptionText] = useState<string>("")
   
   const [recordingState, setRecordingState] = useState<RecordingState>({
@@ -239,6 +240,10 @@ export default function VoiceDictationPage() {
       
       // Build questionsData from extracted info
       setQuestionsData(result.extractedData.aiQuestions || {})
+      
+      // ⚕️ Store doctor's clinical notes and hypotheses
+      setDoctorNotes(result.extractedData.doctorNotes || {})
+      console.log('⚕️ Doctor notes preserved:', result.extractedData.doctorNotes)
       
       // Move to next step (Revision des données)
       setCurrentStep(2)
@@ -542,6 +547,7 @@ export default function VoiceDictationPage() {
             patientData={patientData}
             clinicalData={clinicalData}
             questionsData={questionsData || {}}
+            doctorNotes={doctorNotes} // ⚕️ Hypothèses du médecin
             onDataChange={(data: any) => {
               console.log('✅ Diagnosis data updated:', data)
               setDiagnosisData(data)

@@ -62,6 +62,8 @@ async function extractClinicalData(transcriptionText: string): Promise<{
 
   const extractionPrompt = `Tu es un assistant médical expert. Analyse cette transcription de consultation médicale et extrais les informations suivantes au format JSON strict:
 
+⚠️ IMPORTANT: PRÉSERVE TOUTES les hypothèses diagnostiques, notes cliniques, et raisonnements du médecin. NE PAS SUPPRIMER ces informations cruciales.
+
 {
   "patientInfo": {
     "firstName": "prénom du patient",
@@ -91,6 +93,14 @@ async function extractClinicalData(transcriptionText: string): Promise<{
     "additionalSymptoms": ["autres symptômes"],
     "riskFactors": ["facteurs de risque identifiés"]
   },
+  "doctorNotes": {
+    "clinicalHypotheses": ["hypothèse 1 du médecin", "hypothèse 2"],
+    "differentialDiagnoses": ["diagnostic différentiel 1", "diagnostic différentiel 2"],
+    "clinicalReasoning": "raisonnement clinique du médecin",
+    "treatmentPlan": "plan thérapeutique préliminaire du médecin",
+    "observations": "observations cliniques importantes du médecin",
+    "recommendations": ["recommandation 1", "recommandation 2"]
+  },
   "referralInfo": {
     "isReferral": true/false,
     "referringPhysician": "nom du médecin référent si c'est une référence",
@@ -98,6 +108,13 @@ async function extractClinicalData(transcriptionText: string): Promise<{
     "reasonForReferral": "raison de la référence"
   }
 }
+
+🎯 RÈGLES CRITIQUES:
+1. PRÉSERVE ABSOLUMENT toutes les hypothèses diagnostiques du médecin dans "doctorNotes.clinicalHypotheses"
+2. CONSERVE tous les diagnostics différentiels mentionnés par le médecin
+3. GARDE le raisonnement clinique original du médecin
+4. NE TRANSFORME PAS ni ne SUPPRIME les pensées cliniques du médecin
+5. Si le médecin mentionne "je pense que", "probablement", "possiblement" → PRÉSERVE dans doctorNotes
 
 Transcription:
 ${transcriptionText}
@@ -126,6 +143,11 @@ Réponds UNIQUEMENT avec le JSON, sans texte additionnel.`;
     console.log('✅ Extraction completed');
     console.log(`   Patient: ${extractedData.patientInfo?.firstName} ${extractedData.patientInfo?.lastName}`);
     console.log(`   Chief complaint: ${extractedData.clinicalData?.chiefComplaint}`);
+    
+    // Log doctor's clinical hypotheses if present
+    if (extractedData.doctorNotes?.clinicalHypotheses?.length > 0) {
+      console.log(`   ⚕️ Doctor's hypotheses preserved: ${extractedData.doctorNotes.clinicalHypotheses.length} hypotheses`);
+    }
 
     // Determine consultation type
     const isReferral = extractedData.referralInfo?.isReferral === true;
@@ -135,6 +157,7 @@ Réponds UNIQUEMENT avec le JSON, sans texte additionnel.`;
       patientInfo: extractedData.patientInfo || {},
       clinicalData: extractedData.clinicalData || {},
       aiQuestions: extractedData.aiQuestions || {},
+      doctorNotes: extractedData.doctorNotes || {}, // ⚕️ NOUVEAU: Hypothèses du médecin
       referralInfo: isReferral ? extractedData.referralInfo : undefined,
       consultationType,
     };
@@ -231,6 +254,7 @@ export async function POST(request: NextRequest) {
         patientInfo: extractedData.patientInfo,
         clinicalData: extractedData.clinicalData,
         aiQuestions: extractedData.aiQuestions,
+        doctorNotes: extractedData.doctorNotes, // ⚕️ IMPORTANT: Hypothèses du médecin
         referralInfo: extractedData.referralInfo,
         consultationType: extractedData.consultationType,
       },
