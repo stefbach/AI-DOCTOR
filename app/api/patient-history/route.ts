@@ -70,20 +70,27 @@ export async function POST(req: NextRequest) {
     // If consultationId is provided, first find the patient_id from that consultation
     let resolvedPatientId = criteria.patientId
     let isNewConsultation = false
+    let singleConsultationData = null  // Store single consultation data if consultationId is provided
 
     if (!resolvedPatientId && criteria.consultationId) {
-      console.log('🔍 Looking up patient_id from consultation:', criteria.consultationId)
+      console.log('🔍 Looking up consultation by ID:', criteria.consultationId)
+      // When consultationId is provided, fetch the FULL consultation record directly
       const { data: consultationRecord, error: lookupError } = await supabase
         .from('consultation_records')
-        .select('patient_id')
+        .select('*')  // ✅ Select ALL columns including medical_report, prescriptions, etc.
         .eq('consultation_id', criteria.consultationId)
         .single()
 
-      if (!lookupError && consultationRecord?.patient_id) {
+      if (!lookupError && consultationRecord) {
         resolvedPatientId = consultationRecord.patient_id
-        console.log('✅ Found patient_id from consultation:', resolvedPatientId)
+        singleConsultationData = consultationRecord  // ✅ Store the full record
+        console.log('✅ Found consultation record:', {
+          consultationId: consultationRecord.consultation_id,
+          patientId: consultationRecord.patient_id,
+          hasReport: !!consultationRecord.medical_report
+        })
       } else {
-        console.log('⚠️ Could not find patient_id from consultation - this is likely a NEW consultation')
+        console.log('⚠️ Could not find consultation - this is likely a NEW consultation')
         isNewConsultation = true
       }
     }
@@ -97,6 +104,41 @@ export async function POST(req: NextRequest) {
         success: true,
         consultations: [],
         count: 0
+      })
+    }
+
+    // ✅ If we have a single consultation record, return it directly with fullReport
+    if (singleConsultationData) {
+      console.log('📄 Returning single consultation with full report')
+      
+      const fullReport = {
+        medicalReport: singleConsultationData.medical_report,
+        prescriptions: singleConsultationData.prescriptions,
+        labOrders: singleConsultationData.lab_orders,
+        imagingOrders: singleConsultationData.imaging_orders
+      }
+      
+      return NextResponse.json({
+        success: true,
+        consultations: [{
+          id: singleConsultationData.id,
+          consultationId: singleConsultationData.consultation_id,
+          consultationType: singleConsultationData.consultation_type || 'standard',
+          date: singleConsultationData.created_at || singleConsultationData.consultation_date,
+          chiefComplaint: singleConsultationData.chief_complaint || 'Voice Dictation Consultation',
+          diagnosis: singleConsultationData.diagnosis || '',
+          medications: [],
+          vitalSigns: {},
+          labTests: [],
+          imagingStudies: [],
+          images: [],
+          dietaryPlan: null,
+          fullReport: fullReport,  // ✅ Include the full report!
+          _lightweight: false
+        }],
+        count: 1,
+        totalCount: 1,
+        hasMore: false
       })
     }
 

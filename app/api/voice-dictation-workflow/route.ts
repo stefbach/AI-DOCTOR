@@ -532,9 +532,12 @@ async function saveReportToSupabase(
       patient_id: patientData.patientId || `VOICE_PATIENT_${Date.now()}`,
       consultation_type: consultationType,
       consultation_date: new Date().toISOString(),
+      created_at: new Date().toISOString(),  // ✅ Add created_at timestamp
       
       // Patient info
       patient_name: `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim() || 'Patient from Voice Dictation',
+      patient_email: patientData.email || null,
+      patient_phone: patientData.phone || null,
       patient_age: patientData.age,
       patient_gender: patientData.gender,
       
@@ -559,7 +562,7 @@ async function saveReportToSupabase(
     
     // Insert into Supabase
     const { data, error } = await supabase
-      .from('consultations')
+      .from('consultation_records')  // ✅ Changed from 'consultations' to 'consultation_records'
       .insert([consultationRecord])
       .select()
       .single();
