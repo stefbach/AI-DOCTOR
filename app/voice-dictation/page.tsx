@@ -303,22 +303,41 @@ export default function VoiceDictationPage() {
       
       setSuccess(true)
       
+      // Check if consultationId starts with TEMP_ (indicates save failure)
+      const consultationId = 
+        result.finalReport?.consultationId ||
+        result.consultationId ||
+        result.finalReport?.medicalReport?.consultationId ||
+        result.finalReport?.report?.consultationId ||
+        result.metadata?.consultationId ||
+        sessionStorage.getItem('lastConsultationId')
+      
+      const isTempId = consultationId?.startsWith('TEMP_')
+      
+      if (isTempId) {
+        console.warn('⚠️ Temporary ID detected - Supabase save probably failed')
+        console.warn('⚠️ Showing report directly from memory instead of redirecting')
+        
+        // Store report in sessionStorage with a special flag
+        sessionStorage.setItem('voiceDictationTempReport', JSON.stringify(result.finalReport))
+        sessionStorage.setItem('voiceDictationTempId', consultationId)
+        
+        // Show alert to user
+        alert('⚠️ Le rapport a été généré mais n\'a pas pu être sauvegardé dans la base de données.\n\nVous pouvez le consulter maintenant, mais il ne sera pas accessible dans l\'historique.')
+      }
+      
       // Redirect to report view after 2 seconds
       setTimeout(() => {
-        // Try to find consultationId in multiple locations
-        const consultationId = 
-          result.finalReport?.consultationId ||
-          result.consultationId ||
-          result.finalReport?.medicalReport?.consultationId ||
-          result.finalReport?.report?.consultationId ||
-          result.metadata?.consultationId ||
-          sessionStorage.getItem('lastConsultationId')
-        
-        if (consultationId) {
+        if (consultationId && !isTempId) {
           console.log('🔄 Redirecting to report:', consultationId)
           router.push(`/view-report/${consultationId}`)
+        } else if (consultationId && isTempId) {
+          // For temp IDs, still try to show the report page
+          // The view-report page will need to handle temp IDs by reading from sessionStorage
+          console.log('🔄 Redirecting to temporary report:', consultationId)
+          router.push(`/view-report/${consultationId}`)
         } else {
-          console.warn('⚠️ No consultationId found - storing report in session and redirecting to hub')
+          console.warn('⚠️ No consultationId found at all - redirecting to hub')
           
           // Store the full report in sessionStorage for later retrieval
           if (result.finalReport) {

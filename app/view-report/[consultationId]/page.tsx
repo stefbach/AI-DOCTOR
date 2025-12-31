@@ -41,7 +41,24 @@ export default function ViewReportPage() {
       setLoading(true)
       setError(null)
       
-      // Fetch from Supabase via API
+      // Check if this is a temporary ID (from failed Supabase save)
+      if (id.startsWith('TEMP_')) {
+        console.log('🔍 Temporary ID detected - loading from sessionStorage')
+        
+        const tempReport = sessionStorage.getItem('voiceDictationTempReport')
+        const tempId = sessionStorage.getItem('voiceDictationTempId')
+        
+        if (tempReport && tempId === id) {
+          const reportData = JSON.parse(tempReport)
+          setReport(reportData)
+          console.log('✅ Loaded temporary report from sessionStorage')
+          return
+        } else {
+          throw new Error('Temporary report not found in session. Please generate a new report.')
+        }
+      }
+      
+      // Normal flow: Fetch from Supabase via API
       const response = await fetch('/api/patient-history', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

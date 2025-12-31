@@ -561,21 +561,38 @@ async function saveReportToSupabase(
     };
     
     // Insert into Supabase
+    console.log('📝 Attempting to insert into consultation_records table...');
+    console.log('   Record keys:', Object.keys(consultationRecord));
+    console.log('   Consultation ID:', consultationId);
+    
     const { data, error } = await supabase
-      .from('consultation_records')  // ✅ Changed from 'consultations' to 'consultation_records'
+      .from('consultation_records')
       .insert([consultationRecord])
       .select()
       .single();
     
     if (error) {
-      console.error('❌ Supabase insert error:', error);
+      console.error('❌ ========================================');
+      console.error('   SUPABASE INSERT FAILED');
+      console.error('========================================');
+      console.error('   Error code:', error.code);
+      console.error('   Error message:', error.message);
+      console.error('   Error details:', JSON.stringify(error, null, 2));
+      console.error('   Hint:', error.hint);
+      console.error('========================================');
+      
       // Don't throw - just log and return the ID anyway
       console.warn('⚠️ Could not save to Supabase, but continuing with in-memory ID');
+      console.warn('⚠️ This report will NOT be accessible from /view-report or patient history');
       return consultationId;
     }
     
-    console.log('✅ Report saved to Supabase successfully');
-    console.log(`   Consultation ID: ${consultationId}`);
+    console.log('✅ ========================================');
+    console.log('   REPORT SAVED TO SUPABASE SUCCESSFULLY');
+    console.log('========================================');
+    console.log('   Consultation ID:', consultationId);
+    console.log('   Database record ID:', data?.id);
+    console.log('========================================');
     
     return consultationId;
     
