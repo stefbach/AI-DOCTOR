@@ -405,14 +405,24 @@ function prepareForDiagnosisAPI(extractedData: ExtractedClinicalData) {
 // ============================================
 async function callDiagnosisAPI(
   preparedData: any,
-  baseUrl: string
+  request: NextRequest
 ): Promise<any> {
   console.log('🔬 Step 4: Calling openai-diagnosis API...');
   
-  const diagnosisResponse = await fetch(`${baseUrl}/api/openai-diagnosis`, {
+  // Use internal server-to-server call with full URL
+  const protocol = request.headers.get('x-forwarded-proto') || 'http'
+  const host = request.headers.get('host') || 'localhost:3000'
+  const internalUrl = `${protocol}://${host}/api/openai-diagnosis`
+  
+  console.log(`   Internal API URL: ${internalUrl}`)
+  
+  const diagnosisResponse = await fetch(internalUrl, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      // Forward important headers for authentication
+      ...(request.headers.get('cookie') && { 'cookie': request.headers.get('cookie')! }),
+      ...(request.headers.get('authorization') && { 'authorization': request.headers.get('authorization')! })
     },
     body: JSON.stringify({
       patientData: preparedData.patientData,
@@ -443,14 +453,24 @@ async function callReportGenerationAPI(
   patientData: any,
   clinicalData: any,
   doctorInfo: any,
-  baseUrl: string
+  request: NextRequest
 ): Promise<any> {
   console.log('📄 Step 5: Calling generate-consultation-report API...');
   
-  const reportResponse = await fetch(`${baseUrl}/api/generate-consultation-report`, {
+  // Use internal server-to-server call with full URL
+  const protocol = request.headers.get('x-forwarded-proto') || 'http'
+  const host = request.headers.get('host') || 'localhost:3000'
+  const internalUrl = `${protocol}://${host}/api/generate-consultation-report`
+  
+  console.log(`   Internal API URL: ${internalUrl}`)
+  
+  const reportResponse = await fetch(internalUrl, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      // Forward important headers for authentication
+      ...(request.headers.get('cookie') && { 'cookie': request.headers.get('cookie')! }),
+      ...(request.headers.get('authorization') && { 'authorization': request.headers.get('authorization')! })
     },
     body: JSON.stringify({
       patientData: patientData,
@@ -504,13 +524,6 @@ export async function POST(request: NextRequest) {
     console.log(`📁 Audio file received: ${audioFile.name} (${audioFile.size} bytes)`);
     console.log(`👨‍⚕️ Doctor: ${doctorInfo.fullName || 'Not specified'}`);
     
-    // Déterminer l'URL de base
-    const baseUrl = request.headers.get('origin') || 
-                    request.headers.get('referer')?.split('/').slice(0, 3).join('/') || 
-                    'http://localhost:3000';
-    
-    console.log(`🌐 Base URL: ${baseUrl}`);
-    
     // ===== ÉTAPE 1: TRANSCRIPTION =====
     const transcription = await transcribeAudio(audioFile);
     
@@ -521,7 +534,7 @@ export async function POST(request: NextRequest) {
     const preparedData = prepareForDiagnosisAPI(extractedData);
     
     // ===== ÉTAPE 4: APPEL API DIAGNOSTIC =====
-    const diagnosisResult = await callDiagnosisAPI(preparedData, baseUrl);
+    const diagnosisResult = await callDiagnosisAPI(preparedData, request);
     
     // ===== ÉTAPE 5: GÉNÉRATION DU RAPPORT =====
     const reportResult = await callReportGenerationAPI(
@@ -529,7 +542,7 @@ export async function POST(request: NextRequest) {
       preparedData.patientData,
       preparedData.clinicalData,
       doctorInfo,
-      baseUrl
+      request
     );
     
     // ===== RÉPONSE FINALE =====
