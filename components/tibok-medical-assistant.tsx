@@ -199,8 +199,15 @@ I will suggest precise improvements that you can review and apply!`,
   const [pendingAlerts, setPendingAlerts] = useState<AssistantAlert[]>([])
   const [pendingSuggestions, setPendingSuggestions] = useState<AssistantSuggestion[]>([])
   
+  // Voice recording states
+  const [isRecording, setIsRecording] = useState(false)
+  const [isTranscribing, setIsTranscribing] = useState(false)
+  
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
+  const streamRef = useRef<MediaStream | null>(null)
 
   // ==================== AUTO-SCROLL ====================
   useEffect(() => {
@@ -233,6 +240,80 @@ I will suggest precise improvements that you can review and apply!`,
       }
     }
   }, [reportData])
+
+  // ==================== VOICE RECORDING FUNCTIONS ====================
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      streamRef.current = stream
+      
+      const mediaRecorder = new MediaRecorder(stream)
+      mediaRecorderRef.current = mediaRecorder
+      audioChunksRef.current = []
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data)
+        }
+      }
+      
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+        await transcribeAudio(audioBlob)
+        
+        // Stop and cleanup stream
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => track.stop())
+          streamRef.current = null
+        }
+      }
+      
+      mediaRecorder.start()
+      setIsRecording(true)
+    } catch (error: any) {
+      console.error('Error starting recording:', error)
+    }
+  }
+  
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop()
+      setIsRecording(false)
+    }
+  }
+  
+  const transcribeAudio = async (audioBlob: Blob) => {
+    setIsTranscribing(true)
+    
+    try {
+      const audioFile = new File([audioBlob], `tibok_voice_${Date.now()}.webm`, { type: 'audio/webm' })
+      
+      const formData = new FormData()
+      formData.append('audioFile', audioFile)
+      formData.append('doctorInfo', JSON.stringify({}))
+      
+      const response = await fetch('/api/voice-dictation-transcribe', {
+        method: 'POST',
+        body: formData
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Transcription failed: ${response.status}`)
+      }
+      
+      const result = await response.json()
+      const transcribedText = result.transcription?.text || ''
+      
+      if (transcribedText) {
+        setInputMessage(transcribedText)
+        inputRef.current?.focus()
+      }
+    } catch (error: any) {
+      console.error('Error transcribing audio:', error)
+    } finally {
+      setIsTranscribing(false)
+    }
+  }
 
   // ==================== SEND MESSAGE ====================
   const sendMessage = async (customMessage?: string) => {
@@ -927,21 +1008,40 @@ I will suggest precise improvements that you can review and apply!`,
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Posez une question ou demandez une modification..."
-              disabled={isLoading}
+              disabled={isLoading || isTranscribing}
               className="flex-1"
             />
             <Button
               variant="outline"
               size="icon"
               onClick={() => sendMessage(QUICK_ACTIONS[0].prompt)}
-              disabled={isLoading}
+              disabled={isLoading || isTranscribing}
               title="Analyser la cohérence"
             >
               <RefreshCw className="h-4 w-4" />
             </Button>
+            
+            {/* Voice Recording Button */}
+            <Button
+              variant={isRecording ? "destructive" : "outline"}
+              size="icon"
+              onClick={isRecording ? stopRecording : startRecording}
+              disabled={isLoading || isTranscribing}
+              className={isRecording ? "animate-pulse" : ""}
+              title={isRecording ? "Arrêter l'enregistrement" : "Enregistrer un message vocal"}
+            >
+              {isTranscribing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : isRecording ? (
+                <Square className="h-4 w-4" />
+              ) : (
+                <Mic className="h-4 w-4" />
+              )}
+            </Button>
+            
             <Button 
               onClick={() => sendMessage()}
-              disabled={isLoading || !inputMessage.trim()}
+              disabled={isLoading || isTranscribing || !inputMessage.trim()}
               className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600"
             >
               {isLoading ? (
