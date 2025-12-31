@@ -464,6 +464,64 @@ Input: "asprin 100mg once daily"
   "original_input": "asprin 100mg once daily"
 }
 
+Input: "metformine 1/j"
+→ Output: {
+  "medication_name": "Metformin 500mg",
+  "dci": "Metformin",
+  "how_to_take": "OD (once daily)",
+  "dosing_details": {
+    "uk_format": "OD",
+    "frequency_per_day": 1,
+    "individual_dose": "500mg",
+    "daily_total_dose": "500mg/day"
+  },
+  "why_prescribed": "Type 2 diabetes management",
+  "duration": "Ongoing treatment",
+  "validated_corrections": "Spelling: metformine→Metformin, Dosology: 1/j→OD, Added standard dose: 500mg",
+  "original_input": "metformine 1/j"
+}
+
+Input: "amlodipine 1/j"
+→ Output: {
+  "medication_name": "Amlodipine 5mg",
+  "dci": "Amlodipine",
+  "how_to_take": "OD (once daily)",
+  "dosing_details": {
+    "uk_format": "OD",
+    "frequency_per_day": 1,
+    "individual_dose": "5mg",
+    "daily_total_dose": "5mg/day"
+  },
+  "why_prescribed": "Essential hypertension management",
+  "duration": "Ongoing treatment",
+  "validated_corrections": "Dosology: 1/j→OD, Added standard dose: 5mg",
+  "original_input": "amlodipine 1/j"
+}
+
+Input: "paracetamol 3/j"
+→ Output: {
+  "medication_name": "Paracetamol 1g",
+  "dci": "Paracetamol",
+  "how_to_take": "TDS (three times daily)",
+  "dosing_details": {
+    "uk_format": "TDS",
+    "frequency_per_day": 3,
+    "individual_dose": "1g",
+    "daily_total_dose": "3g/day"
+  },
+  "why_prescribed": "Pain and fever management",
+  "duration": "As needed (maximum 3 days)",
+  "validated_corrections": "Dosology: 3/j→TDS, Added standard dose: 1g",
+  "original_input": "paracetamol 3/j"
+}
+
+🚨 KEY RULES FOR ABBREVIATIONS:
+- "1/j" or "1x/j" or "une fois par jour" → OD (once daily)
+- "2/j" or "2x/j" or "deux fois par jour" → BD (twice daily)
+- "3/j" or "3x/j" or "trois fois par jour" → TDS (three times daily)
+- "4/j" or "4x/j" or "quatre fois par jour" → QDS (four times daily)
+- If dose is MISSING, add standard therapeutic dose based on medication
+
 REQUIRED OUTPUT STRUCTURE FOR CURRENT MEDICATIONS:
 "current_medications_validated": [
   {
@@ -4385,18 +4443,30 @@ export async function POST(request: NextRequest) {
         // Try to extract frequency patterns
         let frequency = 'OD'
         let frequencyText = ''
-        if (medLower.includes('twice') || medLower.includes('2 fois') || medLower.includes('2x') || medLower.includes('bd')) {
+        let frequencyPerDay = 1
+        
+        // Pattern matching for frequency (including /j format)
+        if (medLower.includes('twice') || medLower.includes('2 fois') || medLower.includes('2x') || 
+            medLower.includes('2/j') || medLower.includes('bd')) {
           frequency = 'BD'
           frequencyText = 'BD (twice daily)'
-        } else if (medLower.includes('three') || medLower.includes('3 fois') || medLower.includes('3x') || medLower.includes('tds')) {
+          frequencyPerDay = 2
+        } else if (medLower.includes('three') || medLower.includes('3 fois') || medLower.includes('3x') || 
+                   medLower.includes('3/j') || medLower.includes('tds')) {
           frequency = 'TDS'
           frequencyText = 'TDS (three times daily)'
-        } else if (medLower.includes('four') || medLower.includes('4 fois') || medLower.includes('4x') || medLower.includes('qds')) {
+          frequencyPerDay = 3
+        } else if (medLower.includes('four') || medLower.includes('4 fois') || medLower.includes('4x') || 
+                   medLower.includes('4/j') || medLower.includes('qds')) {
           frequency = 'QDS'
           frequencyText = 'QDS (four times daily)'
-        } else if (medLower.includes('once') || medLower.includes('1 fois') || medLower.includes('1x') || medLower.includes('od') || medLower.includes('par jour')) {
+          frequencyPerDay = 4
+        } else if (medLower.includes('once') || medLower.includes('1 fois') || medLower.includes('1x') || 
+                   medLower.includes('1/j') || medLower.includes('od') || medLower.includes('daily') || 
+                   medLower.includes('par jour')) {
           frequency = 'OD'
           frequencyText = 'OD (once daily)'
+          frequencyPerDay = 1
         }
         
         // Extract medication name (first word usually, removing dosage)
@@ -4440,15 +4510,64 @@ export async function POST(request: NextRequest) {
           indication = 'Gastric acid suppression - Gastroprotection'
         }
         
+        // 🚨 ADD STANDARD DOSE IF MISSING
+        let finalDosage = dosage
+        if (!dosage || dosage.trim() === '') {
+          console.log(`   ⚠️ No dosage found for ${dci}, adding standard therapeutic dose...`)
+          
+          // Standard doses for common medications
+          const standardDoses: { [key: string]: string } = {
+            'Metformin': '500mg',
+            'Amlodipine': '5mg',
+            'Lisinopril': '10mg',
+            'Perindopril': '4mg',
+            'Atorvastatin': '20mg',
+            'Simvastatin': '20mg',
+            'Aspirin': '100mg',
+            'Omeprazole': '20mg',
+            'Pantoprazole': '40mg',
+            'Bisoprolol': '5mg',
+            'Furosemide': '40mg',
+            'Paracetamol': '1g',
+            'Ibuprofen': '400mg',
+            'Losartan': '50mg',
+            'Valsartan': '80mg'
+          }
+          
+          finalDosage = standardDoses[dci] || '1 unit'
+          console.log(`   ✅ Added standard dose: ${finalDosage}`)
+        }
+        
+        // Calculate daily total dose
+        let individualDose = finalDosage
+        let dailyTotal = finalDosage
+        
+        if (finalDosage.match(/\d+mg/)) {
+          const doseValue = parseInt(finalDosage.match(/\d+/)?.[0] || '0')
+          if (doseValue > 0 && frequencyPerDay > 1) {
+            dailyTotal = `${doseValue * frequencyPerDay}mg/day`
+          } else if (doseValue > 0) {
+            dailyTotal = `${doseValue}mg/day`
+          }
+        }
+        
         const validatedMed = {
-          medication_name: `${dci} ${dosage}`.trim(),
+          medication_name: `${dci} ${finalDosage}`.trim(),
           dci: dci,
           how_to_take: frequencyText || frequency,
+          dosing_details: {
+            uk_format: frequency,
+            frequency_per_day: frequencyPerDay,
+            individual_dose: individualDose,
+            daily_total_dose: dailyTotal
+          },
           why_prescribed: indication,
           duration: 'Ongoing treatment',
-          validated_corrections: medName.toLowerCase() !== dci.toLowerCase() 
-            ? `Spelling/format corrected: ${medName} → ${dci}` 
-            : 'Format standardized to UK nomenclature',
+          validated_corrections: [
+            medName.toLowerCase() !== dci.toLowerCase() ? `Spelling: ${medName} → ${dci}` : null,
+            !dosage ? `Added standard dose: ${finalDosage}` : null,
+            `Dosology: ${medString.includes('/j') ? medString.match(/\d+\/j/)?.[0] + ' → ' : ''}${frequency}`
+          ].filter(Boolean).join(', ') || 'Format standardized to UK nomenclature',
           original_input: originalInput
         }
         
