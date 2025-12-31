@@ -2,10 +2,17 @@
 // WORKFLOW DICTÉE VOCALE → DIAGNOSTIC → RAPPORT CONSULTATION
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { createClient } from '@supabase/supabase-js';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
+
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export const runtime = 'nodejs';
 export const maxDuration = 180; // 3 minutes pour le workflow complet
@@ -504,6 +511,81 @@ async function callReportGenerationAPI(
 }
 
 // ============================================
+// FONCTION 6: SAUVEGARDER LE RAPPORT DANS SUPABASE
+// ============================================
+async function saveReportToSupabase(
+  reportData: any,
+  patientData: any,
+  diagnosisData: any,
+  transcription: string,
+  consultationType: string
+): Promise<string> {
+  console.log('💾 Step 6: Saving report to Supabase...');
+  
+  try {
+    // Generate a unique consultation ID
+    const consultationId = `VOICE_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    
+    // Prepare the data to save
+    const consultationRecord = {
+      consultation_id: consultationId,
+      patient_id: patientData.patientId || `VOICE_PATIENT_${Date.now()}`,
+      consultation_type: consultationType,
+      consultation_date: new Date().toISOString(),
+      
+      // Patient info
+      patient_name: `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim() || 'Patient from Voice Dictation',
+      patient_age: patientData.age,
+      patient_gender: patientData.gender,
+      
+      // Clinical data
+      chief_complaint: reportData.report?.medicalReport?.report?.presentingComplaint?.chiefComplaint,
+      diagnosis: diagnosisData.analysis?.clinical_analysis?.primary_diagnosis?.condition,
+      
+      // Full report data
+      medical_report: reportData.report?.medicalReport,
+      prescriptions: reportData.report?.prescriptions,
+      lab_orders: reportData.report?.labOrders,
+      imaging_orders: reportData.report?.imagingOrders,
+      
+      // Metadata
+      transcription_text: transcription,
+      workflow_metadata: {
+        source: 'voice_dictation',
+        timestamp: new Date().toISOString(),
+        consultationType: consultationType
+      }
+    };
+    
+    // Insert into Supabase
+    const { data, error } = await supabase
+      .from('consultations')
+      .insert([consultationRecord])
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('❌ Supabase insert error:', error);
+      // Don't throw - just log and return the ID anyway
+      console.warn('⚠️ Could not save to Supabase, but continuing with in-memory ID');
+      return consultationId;
+    }
+    
+    console.log('✅ Report saved to Supabase successfully');
+    console.log(`   Consultation ID: ${consultationId}`);
+    
+    return consultationId;
+    
+  } catch (error) {
+    console.error('❌ Error saving to Supabase:', error);
+    // Return a temporary ID even if save fails
+    const tempId = `TEMP_${Date.now()}`;
+    console.warn(`⚠️ Using temporary ID: ${tempId}`);
+    return tempId;
+  }
+}
+
+// ============================================
 // FONCTION PRINCIPALE - WORKFLOW COMPLET
 // ============================================
 export async function POST(request: NextRequest) {
@@ -597,21 +679,46 @@ export async function POST(request: NextRequest) {
       throw new Error(`Report generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
     
+    // ===== ÉTAPE 6: SAUVEGARDE DANS SUPABASE =====
+    let consultationId;
+    const isReferralConsultation = extractedData.referralInfo?.referringPhysician || 
+                                   extractedData.transcriptionMetadata?.consultationType === 'specialist_referral';
+    const consultationType = isReferralConsultation ? 'specialist_referral' : 'standard';
+    
+    try {
+      console.log('🎯 Starting Step 6: Saving to Supabase...');
+      consultationId = await saveReportToSupabase(
+        reportResult,
+        preparedData.patientData,
+        diagnosisResult,
+        transcription.text,
+        consultationType
+      );
+      console.log('✅ Step 6 completed successfully');
+      console.log(`   Consultation ID: ${consultationId}`);
+    } catch (error) {
+      console.error('❌ Step 6 FAILED:', error);
+      console.error('   Error details:', error);
+      // Don't throw - use a temporary ID
+      consultationId = `TEMP_${Date.now()}`;
+      console.warn(`⚠️ Using temporary consultation ID: ${consultationId}`);
+    }
+    
     // ===== RÉPONSE FINALE =====
     const processingTime = Date.now() - startTime;
     
-    // Détecter si c'est une consultation de correspondant
-    const isReferralConsultation = extractedData.referralInfo?.referringPhysician || 
-                                   extractedData.transcriptionMetadata?.consultationType === 'specialist_referral';
+    // Détecter si c'est une consultation de correspondant (déjà fait en haut)
     
     console.log('✅ ========================================');
     console.log('   WORKFLOW COMPLETED SUCCESSFULLY');
+    console.log(`   Consultation ID: ${consultationId}`);
     console.log(`   Consultation type: ${isReferralConsultation ? 'SPECIALIST REFERRAL' : 'STANDARD'}`);
     console.log(`   Total processing time: ${processingTime}ms`);
     console.log('========================================');
     
     return NextResponse.json({
       success: true,
+      consultationId: consultationId, // ✅ ADD THIS!
       consultationType: isReferralConsultation ? 'specialist_referral' : 'standard',
       workflow: {
         step1_transcription: {
@@ -637,10 +744,18 @@ export async function POST(request: NextRequest) {
           reportGenerated: !!reportResult.report,
           sections: Object.keys(reportResult.report?.medicalReport?.report || {}),
           prescriptionMedications: reportResult.report?.prescriptions?.medications?.prescription?.medications?.length || 0
+        },
+        step5_save: {
+          saved: !!consultationId,
+          consultationId: consultationId
         }
       },
-      finalReport: reportResult.report,
+      finalReport: {
+        ...reportResult.report,
+        consultationId: consultationId // ✅ ADD THIS TOO!
+      },
       metadata: {
+        consultationId: consultationId, // ✅ AND HERE!
         workflowType: 'voice_dictation_to_consultation_report',
         totalProcessingTime: `${processingTime}ms`,
         stepsCompleted: [

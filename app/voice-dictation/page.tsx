@@ -271,19 +271,60 @@ export default function VoiceDictationPage() {
       setProcessingStep("✅ Workflow complet terminé: Transcription → Extraction → Diagnostic → Rapport")
       
       console.log('✅ Voice dictation processing completed:', result)
+      console.log('📊 Final Report Structure:', {
+        hasFinalReport: !!result.finalReport,
+        hasConsultationId: !!result.finalReport?.consultationId,
+        finalReportKeys: result.finalReport ? Object.keys(result.finalReport) : [],
+        consultationId: result.finalReport?.consultationId || 'NOT FOUND'
+      })
       
       // Store consultation ID for follow-up
       if (result.finalReport?.consultationId) {
         sessionStorage.setItem('lastConsultationId', result.finalReport.consultationId)
+      } else {
+        console.warn('⚠️ No consultationId found in finalReport!')
+        console.warn('   Checking alternative locations...')
+        
+        // Try to find consultationId in other locations
+        const alternativeId = 
+          result.consultationId ||
+          result.finalReport?.medicalReport?.consultationId ||
+          result.finalReport?.report?.consultationId ||
+          result.metadata?.consultationId
+        
+        if (alternativeId) {
+          console.log('✅ Found consultationId in alternative location:', alternativeId)
+          sessionStorage.setItem('lastConsultationId', alternativeId)
+        } else {
+          console.error('❌ No consultationId found anywhere in the response!')
+          console.error('   Full result structure:', JSON.stringify(result, null, 2))
+        }
       }
       
       setSuccess(true)
       
       // Redirect to report view after 2 seconds
       setTimeout(() => {
-        if (result.finalReport?.consultationId) {
-          router.push(`/view-report/${result.finalReport.consultationId}`)
+        // Try to find consultationId in multiple locations
+        const consultationId = 
+          result.finalReport?.consultationId ||
+          result.consultationId ||
+          result.finalReport?.medicalReport?.consultationId ||
+          result.finalReport?.report?.consultationId ||
+          result.metadata?.consultationId ||
+          sessionStorage.getItem('lastConsultationId')
+        
+        if (consultationId) {
+          console.log('🔄 Redirecting to report:', consultationId)
+          router.push(`/view-report/${consultationId}`)
         } else {
+          console.warn('⚠️ No consultationId found - storing report in session and redirecting to hub')
+          
+          // Store the full report in sessionStorage for later retrieval
+          if (result.finalReport) {
+            sessionStorage.setItem('lastVoiceDictationReport', JSON.stringify(result.finalReport))
+          }
+          
           router.push('/consultation-hub')
         }
       }, 2000)
