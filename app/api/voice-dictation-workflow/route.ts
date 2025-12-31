@@ -531,28 +531,37 @@ async function saveReportToSupabase(
       consultation_id: consultationId,
       patient_id: patientData.patientId || `VOICE_PATIENT_${Date.now()}`,
       consultation_type: consultationType,
-      consultation_date: new Date().toISOString(),
-      created_at: new Date().toISOString(),  // ✅ Add created_at timestamp
+      consultation_date: new Date().toISOString().split('T')[0],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
       
-      // Patient info
+      // Patient info - store in patient_data JSONB and also in flat columns
+      patient_data: {
+        name: `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim() || 'Patient from Voice Dictation',
+        age: patientData.age || null,
+        gender: patientData.gender || null,
+        email: patientData.email || null,
+        phone: patientData.phone || null
+      },
       patient_name: `${patientData.firstName || ''} ${patientData.lastName || ''}`.trim() || 'Patient from Voice Dictation',
       patient_email: patientData.email || null,
       patient_phone: patientData.phone || null,
-      patient_age: patientData.age,
-      patient_gender: patientData.gender,
+      patient_age: patientData.age?.toString() || null,
       
       // Clinical data
-      chief_complaint: reportData.report?.medicalReport?.report?.presentingComplaint?.chiefComplaint,
-      diagnosis: diagnosisData.analysis?.clinical_analysis?.primary_diagnosis?.condition,
+      chief_complaint: reportData.report?.medicalReport?.report?.presentingComplaint?.chiefComplaint || 'Voice dictation consultation',
+      diagnosis: diagnosisData.analysis?.clinical_analysis?.primary_diagnosis?.condition || 'Pending analysis',
       
-      // Full report data
-      medical_report: reportData.report?.medicalReport,
-      prescriptions: reportData.report?.prescriptions,
-      lab_orders: reportData.report?.labOrders,
-      imaging_orders: reportData.report?.imagingOrders,
+      // Full report data (NEW COLUMNS)
+      medical_report: reportData.report?.medicalReport || null,
+      prescriptions: reportData.report?.prescriptions || null,
+      lab_orders: reportData.report?.labOrders || null,
+      imaging_orders: reportData.report?.imagingOrders || null,
       
-      // Metadata
+      // Transcription
       transcription_text: transcription,
+      
+      // Workflow metadata
       workflow_metadata: {
         source: 'voice_dictation',
         timestamp: new Date().toISOString(),
