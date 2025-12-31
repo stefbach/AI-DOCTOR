@@ -542,8 +542,18 @@ export default function VoiceDictationPage() {
             patientData={patientData}
             clinicalData={clinicalData}
             questionsData={questionsData || {}}
-            onComplete={handleDiagnosisComplete}
-            onBack={() => setCurrentStep(2)}
+            onDataChange={(data: any) => {
+              console.log('✅ Diagnosis data updated:', data)
+              setDiagnosisData(data)
+            }}
+            onNext={() => {
+              console.log('✅ Moving to next step (Report)')
+              handleDiagnosisComplete(diagnosisData)
+            }}
+            onPrevious={() => {
+              console.log('✅ Going back to data review')
+              setCurrentStep(2)
+            }}
           />
         )}
 
@@ -554,8 +564,9 @@ export default function VoiceDictationPage() {
             clinicalData={clinicalData}
             diagnosisData={diagnosisData}
             doctorData={doctorData}
+            questionsData={questionsData}
             onComplete={handleReportComplete}
-            onBack={() => setCurrentStep(3)}
+            onPrevious={() => setCurrentStep(3)}
           />
         )}
       </div>
