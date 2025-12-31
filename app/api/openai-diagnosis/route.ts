@@ -466,52 +466,52 @@ Input: "asprin 100mg once daily"
 
 Input: "metformine 1/j"
 → Output: {
-  "medication_name": "metformine",
-  "dci": "metformine",
+  "medication_name": "Metformin 500mg",
+  "dci": "Metformin",
   "how_to_take": "OD (once daily)",
   "dosing_details": {
     "uk_format": "OD",
     "frequency_per_day": 1,
-    "individual_dose": "",
-    "daily_total_dose": ""
+    "individual_dose": "500mg",
+    "daily_total_dose": "500mg/day"
   },
   "why_prescribed": "Type 2 diabetes management",
   "duration": "Ongoing treatment",
-  "validated_corrections": "Dosology: 1/j→OD (frequency format standardized to UK)",
+  "validated_corrections": "Spelling: metformine→Metformin, Dosology: 1/j→OD, Added standard dose: 500mg",
   "original_input": "metformine 1/j"
 }
 
 Input: "amlodipine 1/j"
 → Output: {
-  "medication_name": "amlodipine",
-  "dci": "amlodipine",
+  "medication_name": "Amlodipine 5mg",
+  "dci": "Amlodipine",
   "how_to_take": "OD (once daily)",
   "dosing_details": {
     "uk_format": "OD",
     "frequency_per_day": 1,
-    "individual_dose": "",
-    "daily_total_dose": ""
+    "individual_dose": "5mg",
+    "daily_total_dose": "5mg/day"
   },
   "why_prescribed": "Essential hypertension management",
   "duration": "Ongoing treatment",
-  "validated_corrections": "Dosology: 1/j→OD (frequency format standardized to UK)",
+  "validated_corrections": "Dosology: 1/j→OD, Added standard dose: 5mg",
   "original_input": "amlodipine 1/j"
 }
 
 Input: "paracetamol 3/j"
 → Output: {
-  "medication_name": "paracetamol",
-  "dci": "paracetamol",
+  "medication_name": "Paracetamol 1g",
+  "dci": "Paracetamol",
   "how_to_take": "TDS (three times daily)",
   "dosing_details": {
     "uk_format": "TDS",
     "frequency_per_day": 3,
-    "individual_dose": "",
-    "daily_total_dose": ""
+    "individual_dose": "1g",
+    "daily_total_dose": "3g/day"
   },
   "why_prescribed": "Pain and fever management",
   "duration": "As needed (maximum 3 days)",
-  "validated_corrections": "Dosology: 3/j→TDS (frequency format standardized to UK)",
+  "validated_corrections": "Dosology: 3/j→TDS, Added standard dose: 1g",
   "original_input": "paracetamol 3/j"
 }
 
@@ -521,12 +521,12 @@ Input: "paracetamol 3/j"
 - "3/j" or "3x/j" or "trois fois par jour" → TDS (three times daily)
 - "4/j" or "4x/j" or "quatre fois par jour" → QDS (four times daily)
 
-🚨 CRITICAL RULES FOR MEDICATION NAMES:
-- PRESERVE the EXACT spelling provided by the doctor (do NOT correct French to English or vice versa)
-- If dose is MISSING, DO NOT add any dose (leave medication name without dose)
-- ONLY include dose if explicitly provided in the original input
-- Example: "metformine 1/j" → "metformine" (NOT "Metformin 500mg")
-- Example: "amlodipine 5mg 1/j" → "amlodipine 5mg" (dose included because provided)
+🚨 CRITICAL RULES FOR MEDICATION PROCESSING:
+- CORRECT spelling errors and standardize to international names (metformine → Metformin, paracétamol → Paracetamol)
+- If dose is MISSING, ADD standard therapeutic dose based on medication
+- Example: "metformine 1/j" → "Metformin 500mg OD"
+- Example: "amlodipine 1/j" → "Amlodipine 5mg OD"
+- Example: "paracetamol 3/j" → "Paracetamol 1g TDS"
 
 REQUIRED OUTPUT STRUCTURE FOR CURRENT MEDICATIONS:
 "current_medications_validated": [
@@ -992,50 +992,117 @@ function extractDCIFromDrugName(drugName: string): string {
   
   const name = drugName.toLowerCase()
   
-  // ⚠️ MODIFICATION: Ne plus normaliser l'orthographe, préserver l'original du médecin
-  // Extraction du nom du médicament tel quel sans correction FR/EN
+  // ✅ CORRECTION AUTOMATIQUE ACTIVÉE: Normaliser l'orthographe vers DCI standard
+  // Dictionnaire de normalisation DCI français/anglais → standard
+  const dciMap: { [key: string]: string } = {
+    'paracetamol': 'Paracétamol',
+    'acetaminophen': 'Paracétamol',
+    'paracétamol': 'Paracétamol',
+    'ibuprofen': 'Ibuprofène',
+    'ibuprofène': 'Ibuprofène',
+    'clarithromycin': 'Clarithromycine',
+    'clarithromycine': 'Clarithromycine',
+    'metoclopramide': 'Métoclopramide',
+    'métoclopramide': 'Métoclopramide',
+    'amlodipine': 'Amlodipine',
+    'périndopril': 'Périndopril',
+    'perindopril': 'Périndopril',
+    'atorvastatin': 'Atorvastatine',
+    'atorvastatine': 'Atorvastatine',
+    'metformin': 'Metformine',
+    'metformine': 'Metformine',
+    'omeprazole': 'Oméprazole',
+    'oméprazole': 'Oméprazole',
+    'amoxicillin': 'Amoxicilline',
+    'amoxicilline': 'Amoxicilline'
+  }
+  
+  const nameLower = drugName.toLowerCase()
+  
+  // Chercher d'abord dans le dictionnaire
+  for (const [search, dci] of Object.entries(dciMap)) {
+    if (nameLower.includes(search)) {
+      return dci
+    }
+  }
+  
+  // Fallback: extraire le premier mot et capitaliser
   const match = drugName.match(/^([a-zA-ZÀ-ÿ]+)/)
-  return match ? match[1] : 'Principe actif'
+  return match ? match[1].charAt(0).toUpperCase() + match[1].slice(1).toLowerCase() : 'Principe actif'
 }
 
 function generatePrecisePosology(dci: string, patientContext: PatientContext): any {
-  // Posologies standards par DCI
+  // ✅ DOSES STANDARD ACTIVÉES: Posologies standards par DCI
   const standardPosologies: { [key: string]: any } = {
-    'Amoxicilline': {
-      adult: '500mg TDS',
-      frequency_per_day: 3,
-      individual_dose: '500mg',
-      daily_total_dose: '1500mg/day'
-    },
-    'Paracétamol': {
-      adult: '1g QDS',
-      frequency_per_day: 4,
-      individual_dose: '1g',
-      daily_total_dose: '4g/day'
-    },
-    'Ibuprofène': {
-      adult: '400mg TDS',
-      frequency_per_day: 3,
-      individual_dose: '400mg',
-      daily_total_dose: '1200mg/day'
-    },
-    'Clarithromycine': {
+    'Metformine': {
       adult: '500mg BD',
       frequency_per_day: 2,
       individual_dose: '500mg',
-      daily_total_dose: '1g/day'
-    },
-    'Métoclopramide': {
-      adult: '10mg TDS',
-      frequency_per_day: 3,
-      individual_dose: '10mg',
-      daily_total_dose: '30mg/day'
+      daily_total_dose: '1000mg/day',
+      indication: 'Type 2 Diabetes Management'
     },
     'Amlodipine': {
       adult: '5mg OD',
       frequency_per_day: 1,
       individual_dose: '5mg',
-      daily_total_dose: '5mg/day'
+      daily_total_dose: '5mg/day',
+      indication: 'Hypertension Management'
+    },
+    'Amoxicilline': {
+      adult: '500mg TDS',
+      frequency_per_day: 3,
+      individual_dose: '500mg',
+      daily_total_dose: '1500mg/day',
+      indication: 'Bacterial Infection'
+    },
+    'Paracétamol': {
+      adult: '1g QDS',
+      frequency_per_day: 4,
+      individual_dose: '1g',
+      daily_total_dose: '4g/day',
+      indication: 'Pain/Fever Management'
+    },
+    'Ibuprofène': {
+      adult: '400mg TDS',
+      frequency_per_day: 3,
+      individual_dose: '400mg',
+      daily_total_dose: '1200mg/day',
+      indication: 'Pain/Inflammation Management'
+    },
+    'Clarithromycine': {
+      adult: '500mg BD',
+      frequency_per_day: 2,
+      individual_dose: '500mg',
+      daily_total_dose: '1g/day',
+      indication: 'Bacterial Infection'
+    },
+    'Métoclopramide': {
+      adult: '10mg TDS',
+      frequency_per_day: 3,
+      individual_dose: '10mg',
+      daily_total_dose: '30mg/day',
+      indication: 'Nausea/Vomiting Management'
+    },
+    'Atorvastatine': {
+      adult: '20mg OD',
+      frequency_per_day: 1,
+      individual_dose: '20mg',
+      daily_total_dose: '20mg/day',
+      indication: 'Dyslipidemia Management'
+    },
+    'Oméprazole': {
+      adult: '20mg OD',
+      frequency_per_day: 1,
+      individual_dose: '20mg',
+      daily_total_dose: '20mg/day',
+      indication: 'GERD/Ulcer Management'
+    },
+    'Périndopril': {
+      adult: '4mg OD',
+      frequency_per_day: 1,
+      individual_dose: '4mg',
+      daily_total_dose: '4mg/day',
+      indication: 'Hypertension/Heart Failure Management'
     }
   }
   
