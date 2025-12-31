@@ -929,16 +929,30 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     console.log("📋 GENERAL STRUCTURE - Standard extraction")
     
     // Extract NEWLY PRESCRIBED MEDICATIONS (current medications already extracted above)
-    const primaryTreatments = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []
+    // Try multiple paths for medications
+    let primaryTreatments = diagnosisData?.expertAnalysis?.expert_therapeutics?.primary_treatments || []
+    
+    // FALLBACK 1: Try treatment_plan.medications
+    if (primaryTreatments.length === 0 && diagnosisData?.treatment_plan?.medications) {
+      console.log("⚠️ No medications in expert_therapeutics, trying treatment_plan.medications")
+      primaryTreatments = diagnosisData.treatment_plan.medications
+    }
+    
+    // FALLBACK 2: Try top-level medications array
+    if (primaryTreatments.length === 0 && diagnosisData?.medications) {
+      console.log("⚠️ No medications in treatment_plan, trying top-level medications")
+      primaryTreatments = diagnosisData.medications
+    }
+    
     console.log(`💊 Newly prescribed medications: ${primaryTreatments.length}`)
   
   primaryTreatments.forEach((med: any, idx: number) => {
     // Extract detailed dosing information
-    const dosingDetails = med.dosing_regimen?.adult || {}
+    const dosingDetails = med.dosing_regimen?.adult || med.dosing_details || {}
     const individualDose = dosingDetails.individual_dose || ''
     const frequencyPerDay = dosingDetails.frequency_per_day || 0
     const dailyTotalDose = dosingDetails.daily_total_dose || ''
-    const ukFormat = dosingDetails.en || dosingDetails.fr || 'As prescribed'
+    const ukFormat = dosingDetails.en || dosingDetails.fr || dosingDetails.uk_format || med.how_to_take || 'As prescribed'
     
     // Build complete dosage string with detailed information
     let completeDosage = getString(med.dosage_strength || med.dosage || med.strength || '')
@@ -953,8 +967,8 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     }
     
     medications.push({
-      name: getString(med.medication_dci || med.drug || `Medication ${idx + 1}`),
-      genericName: getString(med.medication_dci || med.drug || `Medication ${idx + 1}`),
+      name: getString(med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),
+      genericName: getString(med.dci || med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),
       dosage: completeDosage,
       form: getString(med.dosage_form || med.form || 'tablet'),
       frequency: detailedFrequency,
@@ -962,7 +976,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
       duration: getString(med.duration || '7 days'),
       quantity: getString(med.quantity || '1 box'),
       instructions: getString(med.administration_instructions || med.instructions || ''),
-      indication: getString(med.precise_indication || med.indication || ''),
+      indication: getString(med.precise_indication || med.indication || med.why_prescribed || ''),
       monitoring: getString(med.monitoring || ''),
       doNotSubstitute: false,
       medication_type: 'newly_prescribed',
@@ -970,7 +984,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
       pregnancyCategory: getString(med.pregnancy_category || ''),
       pregnancySafety: getString(med.pregnancy_safety || ''),
       breastfeedingSafety: getString(med.breastfeeding_safety || ''),
-      completeLine: `${getString(med.medication_dci || med.drug)} ${completeDosage}\n${detailedFrequency}`
+      completeLine: `${getString(med.medication_dci || med.dci || med.drug || med.medication_name || med.name)} ${completeDosage}\n${detailedFrequency}`
     })
     })
   }

@@ -50,6 +50,48 @@ function sanitizeMedications(medications: any[]): any[] {
  })
 }
 
+// Helper function to highlight urgent/critical keywords in red
+function highlightUrgentContent(text: string): React.ReactNode {
+  if (!text || typeof text !== 'string') return text
+  
+  // Keywords that should be highlighted in red
+  const urgentKeywords = [
+    // English
+    'URGENT', 'EMERGENCY', 'IMMEDIATE', 'CRITICAL', 'SEVERE', 'ACUTE', 
+    'RED FLAG', 'WARNING', 'DANGER', 'LIFE-THREATENING', 'RISK', 
+    'CONTRAINDICATED', 'AVOID', 'DO NOT', 'STOP IMMEDIATELY',
+    'IMMEDIATELY', 'AS SOON AS POSSIBLE', 'ASAP', 'STAT',
+    // French
+    'URGENT', 'URGENCE', 'IMMÉDIAT', 'IMMÉDIATE', 'CRITIQUE', 'GRAVE', 
+    'SÉVÈRE', 'AIGU', 'AIGUË', 'SIGNAL D\'ALARME', 'ALERTE', 
+    'AVERTISSEMENT', 'DANGER', 'RISQUE VITAL', 'RISQUE', 
+    'CONTRE-INDIQUÉ', 'ÉVITER', 'NE PAS', 'ARRÊTER IMMÉDIATEMENT',
+    'IMMÉDIATEMENT', 'DÈS QUE POSSIBLE'
+  ]
+  
+  // Create a regex pattern to match any of the keywords (case-insensitive)
+  const pattern = urgentKeywords.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')
+  const regex = new RegExp(`(${pattern})`, 'gi')
+  
+  // Split text by the pattern and wrap matches in red spans
+  const parts = text.split(regex)
+  
+  return (
+    <>
+      {parts.map((part, index) => {
+        if (regex.test(part)) {
+          return (
+            <span key={index} className="text-red-600 font-bold urgent-highlight">
+              {part}
+            </span>
+          )
+        }
+        return <span key={index}>{part}</span>
+      })}
+    </>
+  )
+}
+
 // ==================== TYPES ====================
 interface MauritianReport {
  compteRendu: {
@@ -3330,10 +3372,23 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  margin-top: 10pt;
  }
  
+ .urgent-highlight {
+ color: #dc2626 !important;
+ font-weight: bold !important;
+ background-color: #fee2e2;
+ padding: 2px 4px;
+ border-radius: 2px;
+ }
+ 
  button, .button, input, select, textarea { display: none !important; }
  
  @media print {
  body { margin: 0; }
+ .urgent-highlight {
+ color: #dc2626 !important;
+ font-weight: bold !important;
+ text-decoration: underline;
+ }
  }
  `
  
@@ -4039,7 +4094,7 @@ const ConsultationReport = () => {
  ) : (
  <div className="prose pcyan-lg max-w-none">
  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
- {content}
+ {highlightUrgentContent(content)}
  </p>
  </div>
  )}
