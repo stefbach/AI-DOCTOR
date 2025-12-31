@@ -533,25 +533,69 @@ export async function POST(request: NextRequest) {
     console.log(`👨‍⚕️ Doctor: ${doctorInfo.fullName || 'Not specified'}`);
     
     // ===== ÉTAPE 1: TRANSCRIPTION =====
-    const transcription = await transcribeAudio(audioFile);
+    let transcription;
+    try {
+      console.log('🎯 Starting Step 1: Transcription...');
+      transcription = await transcribeAudio(audioFile);
+      console.log('✅ Step 1 completed successfully');
+    } catch (error) {
+      console.error('❌ Step 1 FAILED:', error);
+      throw new Error(`Transcription failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
     
     // ===== ÉTAPE 2: EXTRACTION DES DONNÉES =====
-    const extractedData = await extractClinicalData(transcription.text);
+    let extractedData;
+    try {
+      console.log('🎯 Starting Step 2: Clinical Data Extraction...');
+      extractedData = await extractClinicalData(transcription.text);
+      console.log('✅ Step 2 completed successfully');
+    } catch (error) {
+      console.error('❌ Step 2 FAILED:', error);
+      throw new Error(`Clinical data extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
     
     // ===== ÉTAPE 3: PRÉPARATION POUR DIAGNOSTIC =====
-    const preparedData = prepareForDiagnosisAPI(extractedData);
+    let preparedData;
+    try {
+      console.log('🎯 Starting Step 3: Data Preparation...');
+      preparedData = prepareForDiagnosisAPI(extractedData);
+      console.log('✅ Step 3 completed successfully');
+    } catch (error) {
+      console.error('❌ Step 3 FAILED:', error);
+      throw new Error(`Data preparation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
     
     // ===== ÉTAPE 4: APPEL API DIAGNOSTIC =====
-    const diagnosisResult = await callDiagnosisAPI(preparedData, request);
+    let diagnosisResult;
+    try {
+      console.log('🎯 Starting Step 4: Diagnosis API Call...');
+      diagnosisResult = await callDiagnosisAPI(preparedData, request);
+      console.log('✅ Step 4 completed successfully');
+      console.log('   Diagnosis result keys:', Object.keys(diagnosisResult));
+    } catch (error) {
+      console.error('❌ Step 4 FAILED:', error);
+      console.error('   Error details:', error);
+      throw new Error(`Diagnosis API failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
     
     // ===== ÉTAPE 5: GÉNÉRATION DU RAPPORT =====
-    const reportResult = await callReportGenerationAPI(
-      diagnosisResult,
-      preparedData.patientData,
-      preparedData.clinicalData,
-      doctorInfo,
-      request
-    );
+    let reportResult;
+    try {
+      console.log('🎯 Starting Step 5: Report Generation API Call...');
+      reportResult = await callReportGenerationAPI(
+        diagnosisResult,
+        preparedData.patientData,
+        preparedData.clinicalData,
+        doctorInfo,
+        request
+      );
+      console.log('✅ Step 5 completed successfully');
+      console.log('   Report result keys:', Object.keys(reportResult));
+    } catch (error) {
+      console.error('❌ Step 5 FAILED:', error);
+      console.error('   Error details:', error);
+      throw new Error(`Report generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
     
     // ===== RÉPONSE FINALE =====
     const processingTime = Date.now() - startTime;
@@ -610,12 +654,25 @@ export async function POST(request: NextRequest) {
     });
     
   } catch (error) {
-    console.error('❌ Voice dictation workflow error:', error);
+    const processingTime = Date.now() - startTime;
+    
+    console.error('❌ ========================================');
+    console.error('   VOICE DICTATION WORKFLOW FAILED');
+    console.error('   Processing time before error:', processingTime + 'ms');
+    console.error('   Error type:', error instanceof Error ? error.constructor.name : typeof error);
+    console.error('   Error message:', error instanceof Error ? error.message : String(error));
+    console.error('   Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('========================================');
     
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      errorDetails: error instanceof Error ? error.stack : undefined
+      error: error instanceof Error ? error.message : 'Unknown error occurred during voice dictation processing',
+      errorDetails: {
+        type: error instanceof Error ? error.constructor.name : typeof error,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack?.split('\n').slice(0, 5).join('\n') : undefined,
+        processingTime: `${processingTime}ms`
+      }
     }, { status: 500 });
   }
 }
