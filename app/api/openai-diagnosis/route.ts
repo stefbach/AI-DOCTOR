@@ -1416,7 +1416,23 @@ function ensureCompleteStructure(analysis: any): any {
                     "Signes nécessitant une consultation médicale urgente"
     },
     
-    ...analysis
+    ...analysis,
+    
+    // ENSURE patient_education remains an object (not overwritten by spread)
+    patient_education: typeof analysis?.patient_education === 'object' && analysis?.patient_education !== null
+      ? {
+          understanding_condition: analysis.patient_education.understanding_condition || 
+                                  "Explication de la condition médicale et de son évolution",
+          treatment_importance: analysis.patient_education.treatment_importance || 
+                               "Importance de l'adhésion au traitement prescrit",
+          warning_signs: analysis.patient_education.warning_signs || 
+                        "Signes nécessitant une consultation médicale urgente"
+        }
+      : {
+          understanding_condition: "Explication de la condition médicale et de son évolution",
+          treatment_importance: "Importance de l'adhésion au traitement prescrit",
+          warning_signs: "Signes nécessitant une consultation médicale urgente"
+        }
   }
   
   // Attribution d'urgence du diagnostic si nécessaire
@@ -3596,8 +3612,17 @@ function validateAndFixPosology(medications: any[]) {
 function addMauritiusSpecificAdvice(analysis: any, patientContext: PatientContext): any {
   console.log('🏝️ Ajout de conseils spécifiques à Maurice...')
   
-  if (!analysis.patient_education?.mauritius_specific) {
-    analysis.patient_education = analysis.patient_education || {}
+  // ENSURE patient_education is an object
+  if (typeof analysis.patient_education !== 'object' || analysis.patient_education === null) {
+    console.log('⚠️ patient_education was not an object, converting...')
+    analysis.patient_education = {
+      understanding_condition: "Explication de la condition médicale",
+      treatment_importance: "Importance du traitement",
+      warning_signs: "Signes d'alarme"
+    }
+  }
+  
+  if (!analysis.patient_education.mauritius_specific) {
     analysis.patient_education.mauritius_specific = {}
   }
   
