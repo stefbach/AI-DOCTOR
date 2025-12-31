@@ -239,24 +239,36 @@ export default function VoiceDictationPage() {
       setProcessingStep("Extraction des données cliniques (GPT-4o)...")
       setProcessingProgress(30)
       
+      // Wait for the actual API response (this takes time!)
+      console.log('⏳ Waiting for voice dictation workflow to complete...')
+      setProcessingStep("Traitement en cours (Whisper + GPT-4o + Diagnosis + Report)...")
+      setProcessingProgress(40)
+      
       const result = await response.json()
+      
+      console.log('📦 Received workflow result:', result)
+      console.log('   Step 1 (Transcription):', result.workflow?.step1_transcription ? '✅' : '❌')
+      console.log('   Step 2 (Extraction):', result.workflow?.step2_extraction ? '✅' : '❌')
+      console.log('   Step 3 (Diagnosis):', result.workflow?.step3_diagnosis ? '✅' : '❌')
+      console.log('   Step 4 (Report):', result.workflow?.step4_report ? '✅' : '❌')
       
       if (!result.success) {
         throw new Error(result.error || 'Erreur lors du traitement de la dictée')
       }
       
-      setProcessingStep("Analyse diagnostique en cours...")
-      setProcessingProgress(60)
+      // Show real workflow steps from backend
+      if (result.workflow?.step3_diagnosis) {
+        setProcessingStep(`Analyse diagnostique terminée: ${result.workflow.step3_diagnosis.primaryDiagnosis || 'Diagnostic en cours'}`)
+        setProcessingProgress(70)
+      }
       
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      setProcessingStep("Génération du rapport de consultation...")
-      setProcessingProgress(80)
-      
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      if (result.workflow?.step4_report) {
+        setProcessingStep(`Rapport généré avec succès (${result.workflow.step4_report.prescriptionMedications || 0} médicaments)`)
+        setProcessingProgress(90)
+      }
       
       setProcessingProgress(100)
-      setProcessingStep("Traitement terminé avec succès!")
+      setProcessingStep("✅ Workflow complet terminé: Transcription → Extraction → Diagnostic → Rapport")
       
       console.log('✅ Voice dictation processing completed:', result)
       
