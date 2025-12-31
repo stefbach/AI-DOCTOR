@@ -670,9 +670,15 @@ ATRIAL FIBRILLATION (CHA2DS2-VASc scoring):
   * Rivaroxaban 20mg OD (15mg if CrCl 15-49)
   * Edoxaban 60mg OD (30mg if CrCl 15-50, weight≤60kg, P-gp inhibitors)
 
-ACUTE CORONARY SYNDROME:
+ACUTE CORONARY SYNDROME (ACS):
+- 🚨 IMMEDIATE HOSPITAL REFERRAL - EMERGENCY
 - STEMI: Aspirin 300mg + Ticagrelor 180mg loading, Primary PCI <120min
 - NSTEMI/UA: Aspirin 300mg + Ticagrelor 180mg, Fondaparinux 2.5mg SC OD, Early invasive if high-risk
+- ⛔ ABSOLUTE CONTRAINDICATION: NSAIDs (Ibuprofen, Diclofenac, Naproxen)
+  * Increase MI risk by 30-50%
+  * Worsen cardiovascular outcomes
+  * Use PARACETAMOL ONLY for pain management in cardiac patients
+  * NEVER prescribe Ibuprofen/NSAIDs if chest pain, cardiac symptoms, or known CAD
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🍬 ENDOCRINE SYSTEM (Endocrinology Encyclopedia)
@@ -857,7 +863,16 @@ STAGE 1 HYPERTENSION (130-139/80-89 mmHg):
 🌡️ TEMPERATURE (Fever Management)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 FEVER (>38°C / 100.4°F):
-- Antipyretics: Paracetamol 1g QDS (max 4g/day) OR Ibuprofen 400mg TDS
+- Antipyretics: Paracetamol 1g QDS (max 4g/day) - FIRST CHOICE, safest option
+- Ibuprofen 400mg TDS - ONLY IF NO CARDIAC CONTRAINDICATIONS
+  ⚠️ NSAID CONTRAINDICATIONS (CRITICAL):
+  • Acute coronary syndrome (ACS/MI/angina)
+  • Heart failure
+  • Recent cardiac surgery (<3 months)
+  • Active peptic ulcer/GI bleeding
+  • Severe renal impairment (eGFR <30)
+  • Anticoagulation therapy
+  • Aspirin-exacerbated respiratory disease
 - Investigate source: FBC, CRP, Blood cultures, Urine MC&S, Chest X-ray
 - Red flags: Rigors, rash, altered consciousness, immunocompromised
 
@@ -909,7 +924,18 @@ HYPERGLYCEMIA (>11 mmol/L / >200 mg/dL):
 YOU MUST PRESCRIBE AN ANTIHYPERTENSIVE IN treatment_plan.medications!
 
 ⚠️ IF TEMPERATURE >38°C AND NO ANTIPYRETIC PRESCRIBED:
-YOU MUST PRESCRIBE PARACETAMOL OR IBUPROFEN!
+YOU MUST PRESCRIBE PARACETAMOL (first choice, safest)!
+⚠️ IBUPROFEN/NSAIDs: Check for cardiac contraindications first!
+
+⚠️ 🚨 CRITICAL - NSAIDs CARDIAC SAFETY ALERT 🚨
+ABSOLUTE CONTRAINDICATIONS FOR NSAIDs (Ibuprofen, Diclofenac, Naproxen, COX-2):
+• Chest pain / Angina / Recent MI
+• Acute coronary syndrome (ACS)
+• Heart failure (any severity)
+• Stroke / TIA history
+• Peripheral arterial disease
+• Post-cardiac surgery (<3 months)
+→ USE PARACETAMOL ONLY for analgesia/antipyresis in these patients!
 
 ⚠️ IF BLOOD GLUCOSE ELEVATED AND PATIENT HAS DIABETES WITHOUT TREATMENT:
 YOU MUST PRESCRIBE APPROPRIATE ANTIDIABETIC!
