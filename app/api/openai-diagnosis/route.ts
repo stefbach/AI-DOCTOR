@@ -992,29 +992,30 @@ function extractDCIFromDrugName(drugName: string): string {
   
   const name = drugName.toLowerCase()
   
-  // ✅ CORRECTION AUTOMATIQUE ACTIVÉE: Normaliser l'orthographe vers DCI standard
-  // Dictionnaire de normalisation DCI français/anglais → standard
+  // ✅ CORRECTION AUTOMATIQUE ACTIVÉE: Normaliser l'orthographe vers DCI standard ANGLAIS
+  // ⚠️ IMPORTANT: Le système utilise des noms ANGLAIS (UK standard)
+  // Dictionnaire de normalisation français/anglais → ANGLAIS standard
   const dciMap: { [key: string]: string } = {
-    'paracetamol': 'Paracétamol',
-    'acetaminophen': 'Paracétamol',
-    'paracétamol': 'Paracétamol',
-    'ibuprofen': 'Ibuprofène',
-    'ibuprofène': 'Ibuprofène',
-    'clarithromycin': 'Clarithromycine',
-    'clarithromycine': 'Clarithromycine',
-    'metoclopramide': 'Métoclopramide',
-    'métoclopramide': 'Métoclopramide',
+    'paracetamol': 'Paracetamol',
+    'acetaminophen': 'Paracetamol',
+    'paracétamol': 'Paracetamol',
+    'ibuprofen': 'Ibuprofen',
+    'ibuprofène': 'Ibuprofen',
+    'clarithromycin': 'Clarithromycin',
+    'clarithromycine': 'Clarithromycin',
+    'metoclopramide': 'Metoclopramide',
+    'métoclopramide': 'Metoclopramide',
     'amlodipine': 'Amlodipine',
-    'périndopril': 'Périndopril',
-    'perindopril': 'Périndopril',
-    'atorvastatin': 'Atorvastatine',
-    'atorvastatine': 'Atorvastatine',
-    'metformin': 'Metformine',
-    'metformine': 'Metformine',
-    'omeprazole': 'Oméprazole',
-    'oméprazole': 'Oméprazole',
-    'amoxicillin': 'Amoxicilline',
-    'amoxicilline': 'Amoxicilline'
+    'périndopril': 'Perindopril',
+    'perindopril': 'Perindopril',
+    'atorvastatin': 'Atorvastatin',
+    'atorvastatine': 'Atorvastatin',
+    'metformin': 'Metformin',
+    'metformine': 'Metformin',
+    'omeprazole': 'Omeprazole',
+    'oméprazole': 'Omeprazole',
+    'amoxicillin': 'Amoxicillin',
+    'amoxicilline': 'Amoxicillin'
   }
   
   const nameLower = drugName.toLowerCase()
@@ -1026,15 +1027,15 @@ function extractDCIFromDrugName(drugName: string): string {
     }
   }
   
-  // Fallback: extraire le premier mot et capitaliser
+  // Fallback: extraire le premier mot et capitaliser (ANGLAIS)
   const match = drugName.match(/^([a-zA-ZÀ-ÿ]+)/)
-  return match ? match[1].charAt(0).toUpperCase() + match[1].slice(1).toLowerCase() : 'Principe actif'
+  return match ? match[1].charAt(0).toUpperCase() + match[1].slice(1).toLowerCase() : 'Active ingredient'
 }
 
 function generatePrecisePosology(dci: string, patientContext: PatientContext): any {
-  // ✅ DOSES STANDARD ACTIVÉES: Posologies standards par DCI
+  // ✅ DOSES STANDARD ACTIVÉES: Posologies standards par DCI (ANGLAIS UK)
   const standardPosologies: { [key: string]: any } = {
-    'Metformine': {
+    'Metformin': {
       adult: '500mg BD',
       frequency_per_day: 2,
       individual_dose: '500mg',
@@ -1048,56 +1049,56 @@ function generatePrecisePosology(dci: string, patientContext: PatientContext): a
       daily_total_dose: '5mg/day',
       indication: 'Hypertension Management'
     },
-    'Amoxicilline': {
+    'Amoxicillin': {
       adult: '500mg TDS',
       frequency_per_day: 3,
       individual_dose: '500mg',
       daily_total_dose: '1500mg/day',
       indication: 'Bacterial Infection'
     },
-    'Paracétamol': {
+    'Paracetamol': {
       adult: '1g QDS',
       frequency_per_day: 4,
       individual_dose: '1g',
       daily_total_dose: '4g/day',
       indication: 'Pain/Fever Management'
     },
-    'Ibuprofène': {
+    'Ibuprofen': {
       adult: '400mg TDS',
       frequency_per_day: 3,
       individual_dose: '400mg',
       daily_total_dose: '1200mg/day',
       indication: 'Pain/Inflammation Management'
     },
-    'Clarithromycine': {
+    'Clarithromycin': {
       adult: '500mg BD',
       frequency_per_day: 2,
       individual_dose: '500mg',
       daily_total_dose: '1g/day',
       indication: 'Bacterial Infection'
     },
-    'Métoclopramide': {
+    'Metoclopramide': {
       adult: '10mg TDS',
       frequency_per_day: 3,
       individual_dose: '10mg',
       daily_total_dose: '30mg/day',
       indication: 'Nausea/Vomiting Management'
     },
-    'Atorvastatine': {
+    'Atorvastatin': {
       adult: '20mg OD',
       frequency_per_day: 1,
       individual_dose: '20mg',
       daily_total_dose: '20mg/day',
       indication: 'Dyslipidemia Management'
     },
-    'Oméprazole': {
+    'Omeprazole': {
       adult: '20mg OD',
       frequency_per_day: 1,
       individual_dose: '20mg',
       daily_total_dose: '20mg/day',
       indication: 'GERD/Ulcer Management'
     },
-    'Périndopril': {
+    'Perindopril': {
       adult: '4mg OD',
       frequency_per_day: 1,
       individual_dose: '4mg',

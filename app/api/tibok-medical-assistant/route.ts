@@ -606,128 +606,21 @@ The EXACT JSON format is:
 
 ---
 
-**EXEMPLES D'UTILISATION - SUPPRIMER ET REMPLACER** :
+**EXEMPLES CONCIS - ACTIONS PRINCIPALES** :
 
-📌 **Exemple 1: Médecin demande "supprimer le Paracétamol de l'ordonnance"**
+1. **Add medication**: {"type": "modify_medication_prescription", "action": "add", "content": {"nom": "Metformin 500mg", "denominationCommune": "Metformin", "dosage": "500mg", "forme": "tablet", "posologie": "BD", "voieAdministration": "oral", "dureeTraitement": "Continue", "quantite": "60", "justification": "Type 2 diabetes management"}}
 
-{
-  "response": "I will remove Paracetamol from the prescription as requested.",
-  "actions": [
-    {
-      "type": "modify_medication_prescription",
-      "action": "remove",
-      "content": {
-        "index": 2,
-        "medication_name": "Paracetamol"
-      },
-      "reasoning": "Remove Paracetamol as per doctor's request"
-    }
-  ],
-  "alerts": [],
-  "suggestions": []
-}
+2. **Remove medication**: {"type": "modify_medication_prescription", "action": "remove", "content": {"index": 0, "medication_name": "Paracetamol"}}
 
-📌 **Exemple 2: Médecin demande "enlever la NFS des examens biologiques"**
+3. **Add lab test**: {"type": "modify_lab_prescription", "action": "add", "content": {"category": "endocrinology", "test": {"nom": "HbA1c", "code": "HBA1C", "motifClinique": "Diabetes monitoring", "urgence": false}}}
 
-{
-  "response": "I will remove the Complete Blood Count (FBC) from laboratory tests.",
-  "actions": [
-    {
-      "type": "modify_lab_prescription",
-      "action": "remove",
-      "content": {
-        "category": "hematology",
-        "index": 0,
-        "test_name": "NFS (Numération Formule Sanguine)"
-      },
-      "reasoning": "Remove FBC as requested by doctor"
-    }
-  ],
-  "alerts": [],
-  "suggestions": []
-}
+4. **Remove lab test**: {"type": "modify_lab_prescription", "action": "remove", "content": {"category": "hematology", "index": 0, "test_name": "FBC"}}
 
-📌 **Exemple 3: Médecin demande "supprimer la radio thorax"**
+5. **Add imaging**: {"type": "modify_paraclinical_prescription", "action": "add", "content": {"type": "Chest X-ray", "region": "Thorax", "indicationClinique": "Suspected pneumonia", "urgence": false}}
 
-{
-  "response": "I will remove the Chest X-ray from imaging prescriptions.",
-  "actions": [
-    {
-      "type": "modify_paraclinical_prescription",
-      "action": "remove",
-      "content": {
-        "index": 0,
-        "exam_type": "Radiographie thorax"
-      },
-      "reasoning": "Remove chest X-ray as per doctor's request"
-    }
-  ],
-  "alerts": [],
-  "suggestions": []
-}
+6. **Remove imaging**: {"type": "modify_paraclinical_prescription", "action": "remove", "content": {"index": 0, "exam_type": "Chest X-ray"}}
 
-📌 **Exemple 4: Médecin demande "remplacer la conclusion diagnostique par diabète type 2 décompensé"**
-
-{
-  "response": "I will replace the diagnostic conclusion with the updated diagnosis.",
-  "actions": [
-    {
-      "type": "modify_medical_report",
-      "action": "update",
-      "section": "conclusionDiagnostique",
-      "content": "Type 2 Diabetes Mellitus - Decompensated (HbA1c 9.2%). Patient presents with polyuria, polydipsia, and fatigue indicating poor glycemic control. Requires immediate therapeutic optimization.",
-      "reasoning": "Update diagnosis to decompensated T2DM"
-    }
-  ],
-  "alerts": [
-    {
-      "type": "warning",
-      "message": "Decompensated diabetes requires urgent glycemic control optimization"
-    }
-  ],
-  "suggestions": []
-}
-
-📌 **Exemple 5: Médecin demande "supprimer Aspirin et ajouter Ticagrelor 90mg"**
-
-{
-  "response": "I will remove Aspirin and add Ticagrelor 90mg as requested.",
-  "actions": [
-    {
-      "type": "modify_medication_prescription",
-      "action": "remove",
-      "content": {
-        "index": 1,
-        "medication_name": "Aspirin"
-      },
-      "reasoning": "Remove Aspirin"
-    },
-    {
-      "type": "modify_medication_prescription",
-      "action": "add",
-      "content": {
-        "nom": "Ticagrelor 90mg",
-        "denominationCommune": "Ticagrelor",
-        "dosage": "90mg",
-        "forme": "comprimé",
-        "posologie": "1 comprimé deux fois par jour",
-        "voieAdministration": "oral",
-        "dureeTraitement": "12 mois",
-        "quantite": "60 comprimés",
-        "justification": "Antiplatelet therapy post-ACS - superior to Aspirin for secondary prevention",
-        "medication_type": "prescription"
-      },
-      "reasoning": "Add Ticagrelor 90mg BD per ESC guidelines"
-    }
-  ],
-  "alerts": [
-    {
-      "type": "warning",
-      "message": "Ticagrelor requires bleeding risk assessment and patient education about dyspnea side effect"
-    }
-  ],
-  "suggestions": []
-}
+7. **Update report section**: {"type": "modify_medical_report", "action": "update", "section": "conclusionDiagnostique", "content": "Type 2 Diabetes Mellitus - decompensated (HbA1c 9.2%)"}
 
 ---
 
