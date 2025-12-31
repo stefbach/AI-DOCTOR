@@ -2,6 +2,37 @@ import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
 
+// ==================== DATA ANONYMIZATION ====================
+function anonymizePatientData(patientData: any): {
+  anonymized: any,
+  originalIdentity: any,
+  anonymousId: string
+} {
+  const originalIdentity = {
+    firstName: patientData?.firstName || '',
+    lastName: patientData?.lastName || '',
+    name: patientData?.name || '',
+    email: patientData?.email || '',
+    phone: patientData?.phone || '',
+    address: patientData?.address || '',
+    nationalId: patientData?.nationalId || ''
+  }
+
+  const anonymized = { ...patientData }
+  const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'nationalId']
+
+  sensitiveFields.forEach(field => {
+    delete anonymized[field]
+  })
+
+  const anonymousId = `ANON-EXG-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+  anonymized.anonymousId = anonymousId
+
+  console.log('🔒 Patient data anonymized for examens generator')
+
+  return { anonymized, originalIdentity, anonymousId }
+}
+
 export async function POST(request: NextRequest) {
   try {
     console.log("🔬 Début génération ordonnance examens EXPERT")
@@ -15,23 +46,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Construction du contexte médical complet pour prescription examens
+    // Anonymize patient data before sending to AI
+    const { anonymized: anonymizedPatient, originalIdentity, anonymousId } = anonymizePatientData(patientData)
+
+    console.log(`🔬 Generating exams for patient ${anonymousId} (anonymized)`)
+
+    // Construction du contexte médical complet pour prescription examens - ANONYMIZED
     const examensContext = `
 PROFIL PATIENT DÉTAILLÉ POUR EXAMENS:
-- Identité: ${patientData.firstName || "N/A"} ${patientData.lastName || "N/A"}
-- Âge: ${patientData.age || "N/A"} ans (${patientData.age >= 65 ? "PATIENT ÂGÉE - Adaptations gériatriques nécessaires" : "Adulte standard"})
-- Sexe: ${patientData.gender || "N/A"} ${patientData.gender === "Femme" && patientData.age >= 15 && patientData.age <= 50 ? "(Âge de procréation - Test grossesse si pertinent)" : ""}
-- Poids: ${patientData.weight || "N/A"} kg, Taille: ${patientData.height || "N/A"} cm
-- IMC: ${patientData.weight && patientData.height ? (patientData.weight / Math.pow(patientData.height / 100, 2)).toFixed(2) : "N/A"} kg/m²
+- Identité: ${anonymousId} (ID anonyme)
+- Âge: ${anonymizedPatient.age || "N/A"} ans (${anonymizedPatient.age >= 65 ? "PATIENT ÂGÉE - Adaptations gériatriques nécessaires" : "Adulte standard"})
+- Sexe: ${anonymizedPatient.gender || "N/A"} ${anonymizedPatient.gender === "Femme" && anonymizedPatient.age >= 15 && anonymizedPatient.age <= 50 ? "(Âge de procréation - Test grossesse si pertinent)" : ""}
+- Poids: ${anonymizedPatient.weight || "N/A"} kg, Taille: ${anonymizedPatient.height || "N/A"} cm
+- IMC: ${anonymizedPatient.weight && anonymizedPatient.height ? (anonymizedPatient.weight / Math.pow(anonymizedPatient.height / 100, 2)).toFixed(2) : "N/A"} kg/m²
 
 ALLERGIES ET INTOLÉRANCES CRITIQUES:
-- Allergies médicamenteuses: ${(patientData.allergies || []).join(", ") || "Aucune allergie connue"}
-- Allergie iode/produits de contraste: ${patientData.allergies?.includes("Iode") || patientData.allergies?.includes("Contraste") ? "ALLERGIE IODE - CONTRE-INDICATION ABSOLUE" : "Non documentée"}
+- Allergies médicamenteuses: ${(anonymizedPatient.allergies || []).join(", ") || "Aucune allergie connue"}
+- Allergie iode/produits de contraste: ${anonymizedPatient.allergies?.includes("Iode") || anonymizedPatient.allergies?.includes("Contraste") ? "ALLERGIE IODE - CONTRE-INDICATION ABSOLUE" : "Non documentée"}
 
 TERRAIN MÉDICAL SPÉCIFIQUE:
-- Cardiopathie: ${patientData.medicalHistory?.filter((h: string) => h.includes("cardiaque") || h.includes("infarctus")).join(", ") || "Aucune cardiopathie connue"}
-- Diabète: ${patientData.medicalHistory?.includes("Diabète") ? "DIABÈTE - Précautions metformine et produits de contraste" : "Pas de diabète connu"}
-- Insuffisance rénale: ${patientData.medicalHistory?.includes("Insuffisance rénale") ? "IR CONNUE - Adaptation doses et contre-indications" : "Fonction rénale supposée normale"}
+- Cardiopathie: ${anonymizedPatient.medicalHistory?.filter((h: string) => h.includes("cardiaque") || h.includes("infarctus")).join(", ") || "Aucune cardiopathie connue"}
+- Diabète: ${anonymizedPatient.medicalHistory?.includes("Diabète") ? "DIABÈTE - Précautions metformine et produits de contraste" : "Pas de diabète connu"}
+- Insuffisance rénale: ${anonymizedPatient.medicalHistory?.includes("Insuffisance rénale") ? "IR CONNUE - Adaptation doses et contre-indications" : "Fonction rénale supposée normale"}
 
 PRÉSENTATION CLINIQUE POUR ORIENTATION EXAMENS:
 - Diagnostic principal: ${diagnosisData.diagnosis?.primaryDiagnosis?.condition || "Non établi"}
@@ -68,8 +104,8 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
       "establishment": "Centre Médical TIBOK - Consultation IA Expert"
     },
     "patient": {
-      "lastName": "${patientData.lastName || "N/A"}",
-      "firstName": "${patientData.firstName || "N/A"}",
+      "lastName": "${originalIdentity.lastName || "N/A"}",
+      "firstName": "${originalIdentity.firstName || "N/A"}",
       "birthDate": "${patientData.dateOfBirth || "N/A"}",
       "age": "${patientData.age || "N/A"} ans",
       "weight": "${patientData.weight || "N/A"} kg"
@@ -269,7 +305,7 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
       examens: examensData,
       metadata: {
         prescriptionType: "EXPERT_EXAMINATIONS_PRESCRIPTION",
-        patientId: `${patientData.lastName}-${patientData.firstName}`,
+        patientId: `${originalIdentity.lastName}-${originalIdentity.firstName}`,
         prescriptionDate: new Date().toISOString(),
         generatedAt: new Date().toISOString(),
         model: "gpt-4o-diagnostic-expert",

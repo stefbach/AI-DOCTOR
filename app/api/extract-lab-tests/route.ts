@@ -1,11 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
-// OpenAI client will be initialized inside the function to avoid build-time errors
+// ==================== DATA ANONYMIZATION ====================
+function anonymizePatientData(patientData: any): {
+  anonymized: any,
+  originalIdentity: any,
+  anonymousId: string
+} {
+  const originalIdentity = {
+    firstName: patientData?.firstName || '',
+    lastName: patientData?.lastName || '',
+    name: patientData?.name || '',
+    email: patientData?.email || '',
+    phone: patientData?.phone || '',
+    address: patientData?.address || '',
+    nationalId: patientData?.nationalId || ''
+  }
 
-// Moved inside function - const openai = new OpenAI({
-// Moved inside function -   apiKey: process.env.OPENAI_API_KEY
-// Moved inside function - })
+  const anonymized = { ...patientData }
+  const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'nationalId']
+
+  sensitiveFields.forEach(field => {
+    delete anonymized[field]
+  })
+
+  const anonymousId = `ANON-LAB-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+  anonymized.anonymousId = anonymousId
+
+  console.log('🔒 Patient data anonymized for lab tests extraction')
+
+  return { anonymized, originalIdentity, anonymousId }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,7 +42,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { diagnosisText, patientData } = body
 
-    console.log(`🧪 Extracting lab tests from diagnosis for ${patientData.firstName} ${patientData.lastName}`)
+    // Anonymize patient data before processing
+    const { anonymized: anonymizedPatient, originalIdentity, anonymousId } = anonymizePatientData(patientData)
+
+    console.log(`🧪 Extracting lab tests from diagnosis for patient ${anonymousId} (anonymized)`)
 
     const extractionPrompt = `Extract all laboratory test recommendations from this dermatology diagnosis and convert them into a structured format.
 
