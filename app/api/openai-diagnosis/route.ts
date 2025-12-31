@@ -466,52 +466,52 @@ Input: "asprin 100mg once daily"
 
 Input: "metformine 1/j"
 → Output: {
-  "medication_name": "Metformin 500mg",
-  "dci": "Metformin",
+  "medication_name": "metformine",
+  "dci": "metformine",
   "how_to_take": "OD (once daily)",
   "dosing_details": {
     "uk_format": "OD",
     "frequency_per_day": 1,
-    "individual_dose": "500mg",
-    "daily_total_dose": "500mg/day"
+    "individual_dose": "",
+    "daily_total_dose": ""
   },
   "why_prescribed": "Type 2 diabetes management",
   "duration": "Ongoing treatment",
-  "validated_corrections": "Spelling: metformine→Metformin, Dosology: 1/j→OD, Added standard dose: 500mg",
+  "validated_corrections": "Dosology: 1/j→OD (frequency format standardized to UK)",
   "original_input": "metformine 1/j"
 }
 
 Input: "amlodipine 1/j"
 → Output: {
-  "medication_name": "Amlodipine 5mg",
-  "dci": "Amlodipine",
+  "medication_name": "amlodipine",
+  "dci": "amlodipine",
   "how_to_take": "OD (once daily)",
   "dosing_details": {
     "uk_format": "OD",
     "frequency_per_day": 1,
-    "individual_dose": "5mg",
-    "daily_total_dose": "5mg/day"
+    "individual_dose": "",
+    "daily_total_dose": ""
   },
   "why_prescribed": "Essential hypertension management",
   "duration": "Ongoing treatment",
-  "validated_corrections": "Dosology: 1/j→OD, Added standard dose: 5mg",
+  "validated_corrections": "Dosology: 1/j→OD (frequency format standardized to UK)",
   "original_input": "amlodipine 1/j"
 }
 
 Input: "paracetamol 3/j"
 → Output: {
-  "medication_name": "Paracetamol 1g",
-  "dci": "Paracetamol",
+  "medication_name": "paracetamol",
+  "dci": "paracetamol",
   "how_to_take": "TDS (three times daily)",
   "dosing_details": {
     "uk_format": "TDS",
     "frequency_per_day": 3,
-    "individual_dose": "1g",
-    "daily_total_dose": "3g/day"
+    "individual_dose": "",
+    "daily_total_dose": ""
   },
   "why_prescribed": "Pain and fever management",
   "duration": "As needed (maximum 3 days)",
-  "validated_corrections": "Dosology: 3/j→TDS, Added standard dose: 1g",
+  "validated_corrections": "Dosology: 3/j→TDS (frequency format standardized to UK)",
   "original_input": "paracetamol 3/j"
 }
 
@@ -520,7 +520,13 @@ Input: "paracetamol 3/j"
 - "2/j" or "2x/j" or "deux fois par jour" → BD (twice daily)
 - "3/j" or "3x/j" or "trois fois par jour" → TDS (three times daily)
 - "4/j" or "4x/j" or "quatre fois par jour" → QDS (four times daily)
-- If dose is MISSING, add standard therapeutic dose based on medication
+
+🚨 CRITICAL RULES FOR MEDICATION NAMES:
+- PRESERVE the EXACT spelling provided by the doctor (do NOT correct French to English or vice versa)
+- If dose is MISSING, DO NOT add any dose (leave medication name without dose)
+- ONLY include dose if explicitly provided in the original input
+- Example: "metformine 1/j" → "metformine" (NOT "Metformin 500mg")
+- Example: "amlodipine 5mg 1/j" → "amlodipine 5mg" (dose included because provided)
 
 REQUIRED OUTPUT STRUCTURE FOR CURRENT MEDICATIONS:
 "current_medications_validated": [
@@ -986,39 +992,10 @@ function extractDCIFromDrugName(drugName: string): string {
   
   const name = drugName.toLowerCase()
   
-  // Correspondances DCI spécifiques
-  const dciMap: { [key: string]: string } = {
-    'amoxicillin': 'Amoxicilline',
-    'amoxicilline': 'Amoxicilline',
-    'paracetamol': 'Paracétamol',
-    'acetaminophen': 'Paracétamol',
-    'ibuprofen': 'Ibuprofène',
-    'ibuprofène': 'Ibuprofène',
-    'clarithromycin': 'Clarithromycine',
-    'clarithromycine': 'Clarithromycine',
-    'metoclopramide': 'Métoclopramide',
-    'métoclopramide': 'Métoclopramide',
-    'amlodipine': 'Amlodipine',
-    'perindopril': 'Périndopril',
-    'périndopril': 'Périndopril',
-    'atorvastatin': 'Atorvastatine',
-    'atorvastatine': 'Atorvastatine',
-    'metformin': 'Metformine',
-    'metformine': 'Metformine',
-    'omeprazole': 'Oméprazole',
-    'oméprazole': 'Oméprazole'
-  }
-  
-  // Recherche dans le mapping
-  for (const [search, dci] of Object.entries(dciMap)) {
-    if (name.includes(search)) {
-      return dci
-    }
-  }
-  
-  // Extraction générique
+  // ⚠️ MODIFICATION: Ne plus normaliser l'orthographe, préserver l'original du médecin
+  // Extraction du nom du médicament tel quel sans correction FR/EN
   const match = drugName.match(/^([a-zA-ZÀ-ÿ]+)/)
-  return match ? match[1].charAt(0).toUpperCase() + match[1].slice(1) : 'Principe actif'
+  return match ? match[1] : 'Principe actif'
 }
 
 function generatePrecisePosology(dci: string, patientContext: PatientContext): any {
