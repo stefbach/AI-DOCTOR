@@ -1082,12 +1082,17 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
     // Corrections pour les medications avec DCI + posologie précise
     analysis.treatment_plan.medications = analysis.treatment_plan.medications.map((med: any, idx: number) => {
       // Créer un objet medication complet avec tous les champs requis
+      // Accept both 'drug' and 'medication_name' formats
+      const medName = med?.drug || med?.medication_name || med?.name || ''
+      const medDci = med?.dci || med?.genericName || ''
+      
       const fixedMed = {
-        drug: med?.drug || '',
-        dci: med?.dci || '',
-        indication: med?.indication || '',
+        drug: medName,
+        medication_name: medName,  // Keep both for compatibility
+        dci: medDci,
+        indication: med?.indication || med?.why_prescribed || '',
         mechanism: med?.mechanism || '',
-        dosing: med?.dosing || { adult: '' },
+        dosing: med?.dosing || med?.dosing_details || { adult: med?.how_to_take || '' },
         duration: med?.duration || '',
         contraindications: med?.contraindications || '',
         interactions: med?.interactions || '',
@@ -1312,17 +1317,45 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
       return fixedMed
     })
     
+    console.log(`🔍 Medications BEFORE cleanup: ${analysis.treatment_plan.medications.length}`)
+    if (analysis.treatment_plan.medications.length > 0) {
+      console.log('   First medication (before cleanup):', {
+        drug: analysis.treatment_plan.medications[0]?.drug,
+        medication_name: analysis.treatment_plan.medications[0]?.medication_name,
+        dci: analysis.treatment_plan.medications[0]?.dci,
+        genericName: analysis.treatment_plan.medications[0]?.genericName
+      })
+    }
+    
     // Nettoyer les medications undefined ou invalides
-    analysis.treatment_plan.medications = analysis.treatment_plan.medications.filter((med: any) => 
-      med && 
-      med.drug && 
-      med.drug !== 'undefined' && 
-      med.drug !== null &&
-      med.drug.length > 0 &&
-      med.dci &&
-      med.dci !== 'undefined' &&
-      med.dci !== null
-    )
+    // Accept both 'drug' and 'medication_name' formats
+    analysis.treatment_plan.medications = analysis.treatment_plan.medications.filter((med: any) => {
+      const medName = med?.drug || med?.medication_name || med?.name
+      const medDci = med?.dci || med?.genericName
+      
+      const isValid = med && 
+        medName && 
+        medName !== 'undefined' && 
+        medName !== null &&
+        medName.length > 0 &&
+        medDci &&
+        medDci !== 'undefined' &&
+        medDci !== null
+      
+      if (!isValid && med) {
+        console.log('   ❌ Filtering out invalid medication:', {
+          drug: med?.drug,
+          medication_name: med?.medication_name,
+          dci: med?.dci,
+          genericName: med?.genericName,
+          reason: !medName ? 'No name' : !medDci ? 'No DCI' : 'Other'
+        })
+      }
+      
+      return isValid
+    })
+    
+    console.log(`🧹 Medications AFTER cleanup: ${analysis.treatment_plan.medications.length}`)
     
     analysis.mauritius_specificity_enhancement = {
       issues_detected: qualityCheck.issues.length,
