@@ -1812,6 +1812,18 @@ useEffect(() => {
 const parseMedicationText = (medicationText: string): any[] => {
  if (!medicationText) return []
  
+ // Safety check: ensure medicationText is actually a string
+ if (typeof medicationText !== 'string') {
+ console.warn('⚠️ parseMedicationText received non-string:', typeof medicationText, medicationText)
+ // If it's an array, try to join it
+ if (Array.isArray(medicationText)) {
+ medicationText = medicationText.join('\n')
+ } else {
+ // Convert to string as last resort
+ medicationText = String(medicationText || '')
+ }
+ }
+ 
  const lines = medicationText.split('\n').filter(line => line.trim())
  const medications = []
  
@@ -1928,8 +1940,13 @@ if (isRenewal) {
  if (currentMeds) {
  console.log('📋 Auto-parsing current medications text for renewal:', currentMeds)
  
+ // Convert to string if it's an array
+ const currentMedsText = Array.isArray(currentMeds) 
+ ? currentMeds.join('\n') 
+ : (typeof currentMeds === 'string' ? currentMeds : '')
+ 
  // Parse medications from text
- const parsedMedications = parseMedicationText(currentMeds)
+ const parsedMedications = parseMedicationText(currentMedsText)
  
  if (parsedMedications.length > 0) {
  // Store parsed medications to be added to report
