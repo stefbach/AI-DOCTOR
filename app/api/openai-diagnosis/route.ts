@@ -375,8 +375,8 @@ BEFORE PRESCRIBING ANY MEDICATION, SYSTEMATICALLY CHECK:
 
 - NEVER use undefined, null, or empty values
 - NEVER generic names: "Laboratory test", "Medication", "Investigation"
-- ALWAYS exact UK/Mauritius names: "Full Blood Count", "Amoxicilline 500mg", "Community-acquired pneumonia"
-- EVERY medication MUST have exact DCI (e.g., "Amoxicilline", "Paracétamol")
+- ALWAYS exact UK/Mauritius names: "Full Blood Count", "Amoxicillin 500mg", "Community-acquired pneumonia"
+- EVERY medication MUST have exact DCI in ENGLISH (e.g., "Amoxicillin", "Paracetamol", "Metformin")
 - WHY_PRESCRIBED is MANDATORY: Always explain why you prescribe each medication
 - DOSING MUST BE PRECISE: exact mg + UK frequency (OD/BD/TDS/QDS) + daily total
 - SPECIFIC MEDICAL TERMINOLOGY mandatory in every field
@@ -411,8 +411,8 @@ IF PATIENT HAS CURRENT MEDICATIONS, YOU MUST:
 ⚠️ **CRITICAL RULE - ENGLISH DRUG NAMES**:
 - ALL medication names MUST be in ENGLISH (UK/International standard)
 - Use British National Formulary (BNF) naming conventions
-- Examples: Metformin (NOT Metformine), Paracetamol (NOT Paracétamol), 
-  Amoxicillin (NOT Amoxicilline), Clarithromycin (NOT Clarithromycine)
+- Examples: Metformin (NOT Metformin), Paracetamol (NOT Paracetamol), 
+  Amoxicillin (NOT Amoxicillin), Clarithromycin (NOT Clarithromycin)
 - Apply your medical knowledge to normalize ANY drug name to English
 
 🚨 CRITICAL: TREATMENT PLAN MEDICATIONS MANDATORY
@@ -1275,8 +1275,8 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
         // Assignation intelligente basée sur les symptômes avec DCI précis
         if (allSymptoms.includes('pain') || allSymptoms.includes('douleur') || allSymptoms.includes('ache')) {
           Object.assign(fixedMed, {
-            drug: "Ibuprofène 400mg",
-            dci: "Ibuprofène",
+            drug: "Ibuprofen 400mg",
+            dci: "Ibuprofen",
             indication: "Traitement anti-inflammatoire pour soulagement de la douleur musculo-squelettique avec réduction de l'inflammation associée",
             mechanism: "Anti-inflammatoire non stéroïdien (AINS), inhibition de la cyclooxygénase",
             dosing: { 
@@ -1299,8 +1299,8 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
           })
         } else if (allSymptoms.includes('fever') || allSymptoms.includes('fièvre') || allSymptoms.includes('temperature')) {
           Object.assign(fixedMed, {
-            drug: "Paracétamol 1g",
-            dci: "Paracétamol",
+            drug: "Paracetamol 1g",
+            dci: "Paracetamol",
             indication: "Prise en charge symptomatique de la pyrexie et soulagement de la douleur légère à modérée dans une affection fébrile aiguë",
             mechanism: "Analgésique et antipyrétique, inhibition centrale de la cyclooxygénase",
             dosing: { 
@@ -1347,8 +1347,8 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
           })
         } else if (allSymptoms.includes('cough') || allSymptoms.includes('toux') || allSymptoms.includes('respiratory') || allSymptoms.includes('ear') || allSymptoms.includes('oreille')) {
           Object.assign(fixedMed, {
-            drug: "Amoxicilline 500mg",
-            dci: "Amoxicilline",
+            drug: "Amoxicillin 500mg",
+            dci: "Amoxicillin",
             indication: "Antibiothérapie empirique à large spectre pour infection bactérienne suspectée des voies respiratoires incluant otite moyenne aiguë",
             mechanism: "Antibiotique bêta-lactamine, inhibition de la synthèse de la paroi cellulaire bactérienne",
             dosing: { 
@@ -1372,8 +1372,8 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
         } else {
           // Médicament par défaut pour les cas non spécifiques
           Object.assign(fixedMed, {
-            drug: "Paracétamol 500mg",
-            dci: "Paracétamol",
+            drug: "Paracetamol 500mg",
+            dci: "Paracetamol",
             indication: "Soulagement symptomatique de la douleur et de la fièvre dans les conditions médicales aiguës",
             mechanism: "Analgésique et antipyrétique, inhibition centrale de la cyclooxygénase",
             dosing: { 
@@ -1421,11 +1421,11 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
         const dci = fixedMed.dci || ''
         
         // Créer des indications très spécifiques selon le DCI
-        if (dci === 'Paracétamol') {
+        if (dci === 'Paracetamol') {
           fixedMed.indication = `Prise en charge symptomatique de la fièvre et soulagement de la douleur légère à modérée associées à ${diagnosis}`
-        } else if (dci === 'Ibuprofène') {
+        } else if (dci === 'Ibuprofen') {
           fixedMed.indication = `Traitement anti-inflammatoire non stéroïdien pour soulagement de la douleur et réduction de l'inflammation dans le contexte de ${diagnosis}`
-        } else if (dci === 'Amoxicilline') {
+        } else if (dci === 'Amoxicillin') {
           fixedMed.indication = `Antibiothérapie empirique à large spectre pour infection bactérienne suspectée contribuant à ${diagnosis}`
         } else if (dci === 'Métoclopramide') {
           fixedMed.indication = `Thérapie antiémétique et prokinétique pour prise en charge des symptômes de nausées et vomissements associés à ${diagnosis}`
@@ -1701,16 +1701,16 @@ async function callOpenAIWithMauritiusQuality(
 ${basePrompt}
 
 ⚠️ CRITICAL REQUIREMENTS:
-- EVERY medication must have EXACT UK name + dose + DCI (e.g., "Amoxicilline 500mg", DCI: "Amoxicilline")
+- EVERY medication must have EXACT ENGLISH UK name + dose + DCI (e.g., "Amoxicillin 500mg", DCI: "Amoxicillin")
 - EVERY indication must be DETAILED and SPECIFIC (minimum 30 characters with medical context)
 - EVERY dosing must use UK format with precise daily totals (e.g., "500mg TDS", daily: "1500mg/day")
 - NO undefined, null, or empty values allowed
 - EVERY medication must have frequency_per_day as number
 - YOU MUST RETURN current_medications_validated field if patient has current medications
 
-EXAMPLES OF DETAILED MEDICATIONS WITH DCI:
-✅ "drug": "Amoxicilline 500mg", "dci": "Amoxicilline", "indication": "Antibiothérapie empirique pour infection bactérienne suspectée des voies respiratoires"
-✅ "drug": "Ibuprofène 400mg", "dci": "Ibuprofène", "indication": "Traitement anti-inflammatoire pour soulagement de la douleur musculo-squelettique"
+EXAMPLES OF DETAILED MEDICATIONS WITH DCI (ENGLISH):
+✅ "drug": "Amoxicillin 500mg", "dci": "Amoxicillin", "indication": "Empirical antibiotic therapy for suspected bacterial respiratory tract infection"
+✅ "drug": "Ibuprofen 400mg", "dci": "Ibuprofen", "indication": "Anti-inflammatory treatment for musculoskeletal pain relief"
 
 ❌ FORBIDDEN:
 ❌ "drug": "Medication" or "Antibiotic" (too generic)
@@ -1725,19 +1725,19 @@ ${basePrompt}
 
 🆘 ABSOLUTE REQUIREMENTS:
 1. NEVER use "Medication", "undefined", null, or generic names
-2. ALWAYS use UK pharmaceutical names with exact doses + DCI
+2. ALWAYS use ENGLISH UK pharmaceutical names with exact doses + DCI
 3. ALWAYS use UK dosing format (OD/BD/TDS/QDS) with daily totals
-4. DCI MUST BE EXACT: Amoxicilline, Paracétamol, Ibuprofène, etc.
+4. DCI MUST BE EXACT ENGLISH: Amoxicillin, Paracetamol, Ibuprofen, Metformin, etc.
 5. INDICATIONS MUST BE DETAILED: Minimum 30 characters with specific medical context
 6. DOSING MUST INCLUDE: adult, frequency_per_day, individual_dose, daily_total_dose
 7. ALL fields must be completed with specific medical content
 8. MUST RETURN current_medications_validated if patient has current medications
 
-MANDATORY DCI + MEDICATION FORMAT:
+MANDATORY DCI + MEDICATION FORMAT (ENGLISH):
 {
-  "drug": "Amoxicilline 500mg",
-  "dci": "Amoxicilline",
-  "indication": "Antibiothérapie empirique à large spectre pour infection bactérienne suspectée des voies respiratoires incluant otite moyenne aiguë",
+  "drug": "Amoxicillin 500mg",
+  "dci": "Amoxicillin",
+  "indication": "Broad-spectrum empirical antibiotic therapy for suspected bacterial respiratory tract infection including acute otitis media",
   "dosing": {
     "adult": "500mg TDS",
     "frequency_per_day": 3,
@@ -1761,8 +1761,8 @@ ${basePrompt}
 🎯 EMERGENCY REQUIREMENTS FOR MAURITIUS SYSTEM:
 Every medication MUST have ALL these fields completed with DETAILED content:
 
-1. "drug": "SPECIFIC UK NAME + DOSE" (e.g., "Amoxicilline 500mg")
-2. "dci": "EXACT DCI NAME" (e.g., "Amoxicilline") 
+1. "drug": "SPECIFIC UK NAME + DOSE" (e.g., "Amoxicillin 500mg")
+2. "dci": "EXACT DCI NAME" (e.g., "Amoxicillin") 
 3. "indication": "DETAILED MEDICAL INDICATION" (minimum 40 characters with full medical context)
 4. "dosing": {
      "adult": "UK FORMAT" (using OD/BD/TDS/QDS),
@@ -1775,8 +1775,8 @@ Every medication MUST have ALL these fields completed with DETAILED content:
 
 EXAMPLE COMPLETE MEDICATION WITH DCI + DETAILED INDICATION:
 {
-  "drug": "Amoxicilline 500mg",
-  "dci": "Amoxicilline",
+  "drug": "Amoxicillin 500mg",
+  "dci": "Amoxicillin",
   "indication": "Antibiothérapie empirique à large spectre pour infection bactérienne suspectée des voies respiratoires incluant otite moyenne aiguë et infections des voies respiratoires basses",
   "mechanism": "Antibiotique bêta-lactamine, inhibition de la synthèse de la paroi cellulaire bactérienne",
   "dosing": {
@@ -2761,8 +2761,8 @@ function applyMinimalCorrections(analysis: any, issues: any[], patientContext: P
     if (issue.category === 'symptomatic' && issue.description.includes('Fever present without antipyretic')) {
       const medications = analysis?.treatment_plan?.medications || []
       medications.push({
-        drug: "Paracétamol 500mg",
-        dci: "Paracétamol",
+        drug: "Paracetamol 500mg",
+        dci: "Paracetamol",
         indication: "Prise en charge symptomatique de la fièvre et soulagement de la douleur légère à modérée dans une affection fébrile aiguë",
         mechanism: "Inhibition centrale de la cyclooxygénase, action antipyrétique",
         dosing: { 
@@ -2780,8 +2780,8 @@ function applyMinimalCorrections(analysis: any, issues: any[], patientContext: P
         mauritius_availability: {
           public_free: true,
           estimated_cost: "Rs 50-100",
-          alternatives: "Ibuprofène si pas de contre-indication",
-          brand_names: "Panadol, Paracétamol"
+          alternatives: "Ibuprofen si pas de contre-indication",
+          brand_names: "Panadol, Paracetamol"
         },
         administration_instructions: "Prendre avec de l'eau si température >38°C",
         _added_by_universal_safety: "critical_fever_management"
@@ -2823,8 +2823,8 @@ function applySymptomaticCorrections(analysis: any, issue: any, patientContext: 
   
   if (issue.description.includes('Fever') && issue.description.includes('antipyretic')) {
     medications.push({
-      drug: "Paracétamol 500mg", 
-      dci: "Paracétamol",
+      drug: "Paracetamol 500mg", 
+      dci: "Paracetamol",
       indication: "Prise en charge symptomatique de la pyrexie et soulagement de la douleur légère à modérée dans une affection fébrile aiguë",
       mechanism: "Inhibition centrale de la cyclooxygénase",
       dosing: { 
@@ -2842,7 +2842,7 @@ function applySymptomaticCorrections(analysis: any, issue: any, patientContext: 
       mauritius_availability: {
         public_free: true,
         estimated_cost: "Rs 50-100",
-        alternatives: "Ibuprofène",
+        alternatives: "Ibuprofen",
         brand_names: "Panadol"
       },
       administration_instructions: "Avec de l'eau si fièvre",
@@ -3585,7 +3585,7 @@ function checkBasicInteraction(drug1: string, drug2: string): {
     {
       drugs: ['warfarin', 'paracetamol'],
       level: 'moderate' as const,
-      description: 'Paracétamol régulier >2g/j peut augmenter INR - Surveiller'
+      description: 'Paracetamol régulier >2g/j peut augmenter INR - Surveiller'
     },
     {
       drugs: ['warfarin', 'vitamin k'],
@@ -3611,7 +3611,7 @@ function checkBasicInteraction(drug1: string, drug2: string): {
     {
       drugs: ['digoxin', 'clarithromycin'],
       level: 'major' as const,
-      description: 'Clarithromycine augmente taux digoxine - Surveiller'
+      description: 'Clarithromycin augmente taux digoxine - Surveiller'
     },
     {
       drugs: ['digoxin', 'erythromycin'],
@@ -5283,7 +5283,7 @@ export async function GET(request: NextRequest) {
       treatment_plan: {
         medications: [
           { drug: "Amoxicillin 500mg", dci: undefined, indication: "Treatment", dosing: { adult: "500mg TDS" } },
-          { drug: "Paracetamol 500mg", dci: "Paracétamol", indication: "Treatment of pain", dosing: { adult: "500mg QDS" } },
+          { drug: "Paracetamol 500mg", dci: "Paracetamol", indication: "Treatment of pain", dosing: { adult: "500mg QDS" } },
           { drug: undefined, dci: undefined, indication: undefined, dosing: { adult: "selon besoin" } },
           { drug: null, dci: null, indication: null, dosing: null },
           { /* incomplete object */ }
@@ -5371,7 +5371,7 @@ export async function GET(request: NextRequest) {
       uk_features_detected: {
         uk_nomenclature_required: testPrompt.includes('UK/MAURITIUS NOMENCLATURE'),
         laboratory_tests_uk: testPrompt.includes('Full Blood Count'),
-        medications_uk: testPrompt.includes('Amoxicilline 500mg'),
+        medications_uk: testPrompt.includes('Amoxicillin 500mg'),
         dosing_uk_format: testPrompt.includes('TDS'),
         anglo_saxon_examples: testPrompt.includes('U&E'),
         mauritius_context: testPrompt.includes('MAURITIUS'),
