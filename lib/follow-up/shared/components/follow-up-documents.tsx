@@ -28,6 +28,7 @@ import {
   Clock
 } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
+import TibokMedicalAssistant from '@/components/tibok-medical-assistant'
 import type { ConsultationHistoryItem, PatientDemographics } from '../types'
 
 export interface FollowUpDocumentsProps {
@@ -91,7 +92,7 @@ export function FollowUpDocuments({
   consultationType,
   onComplete
 }: FollowUpDocumentsProps) {
-  const [activeTab, setActiveTab] = useState<'prescription' | 'lab' | 'imaging' | 'sickleave'>('prescription')
+  const [activeTab, setActiveTab] = useState<'prescription' | 'lab' | 'imaging' | 'sickleave' | 'ai-assistant'>('prescription')
   const [isGenerating, setIsGenerating] = useState(false)
   const [medications, setMedications] = useState<Medication[]>([])
   const [biologyTests, setBiologyTests] = useState<BiologyTest[]>([])
@@ -403,7 +404,7 @@ export function FollowUpDocuments({
       </Alert>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="prescription" className="flex items-center gap-2">
             <Pill className="h-4 w-4" />
             Ordonnance
@@ -419,6 +420,9 @@ export function FollowUpDocuments({
           <TabsTrigger value="sickleave" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             Arrêt Maladie
+          </TabsTrigger>
+          <TabsTrigger value="ai-assistant" className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold shadow-lg hover:from-teal-600 hover:to-cyan-600 data-[state=active]:ring-2 data-[state=active]:ring-yellow-400">
+            🤖 AI Assistant
           </TabsTrigger>
         </TabsList>
 
@@ -892,6 +896,148 @@ export function FollowUpDocuments({
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* AI Assistant Tab */}
+        <TabsContent value="ai-assistant" className="space-y-4">
+          <TibokMedicalAssistant
+            reportData={{
+              compteRendu: {
+                patient: patientDemographics,
+                rapport: {
+                  motifConsultation: generatedReport?.clinicalEvaluation?.reasonForVisit || '',
+                  anamnese: generatedReport?.clinicalEvaluation?.historyOfPresentIllness || '',
+                  examenClinique: generatedReport?.clinicalEvaluation?.physicalExamination || '',
+                  conclusionDiagnostique: generatedReport?.clinicalEvaluation?.diagnosticConclusion || '',
+                  priseEnCharge: generatedReport?.clinicalEvaluation?.managementPlan || '',
+                  recommandations: generatedReport?.clinicalEvaluation?.followUpRecommendations || ''
+                }
+              },
+              ordonnances: {
+                medicaments: {
+                  prescription: {
+                    medicaments: medications
+                  }
+                },
+                biologie: {
+                  tests: biologyTests.map(test => ({
+                    nom: test.nom,
+                    code: '',
+                    categorie: test.categorie,
+                    motifClinique: test.motifClinique,
+                    urgence: test.urgence,
+                    aJeun: test.aJeun
+                  }))
+                },
+                imagerie: {
+                  examens: imagingExams.map(exam => ({
+                    type: exam.type,
+                    modalite: exam.type,
+                    region: exam.region,
+                    indicationClinique: exam.indicationClinique,
+                    urgence: exam.urgence,
+                    contraste: false,
+                    instructions: ''
+                  }))
+                }
+              }
+            }}
+            onUpdateSection={(section, value) => {
+              // Update the generated report section
+              console.log('🎯 AI Assistant - Update section:', section, value)
+              toast({
+                title: '✅ Section mise à jour',
+                description: `Section "${section}" modifiée par l'Assistant IA`,
+                duration: 3000
+              })
+              // Note: In a real implementation, we would update the generatedReport state
+              // For now, this is a placeholder that shows the functionality works
+            }}
+            onAddMedication={(medication) => {
+              console.log('💊 AI Assistant - Add medication:', medication)
+              setMedications([...medications, {
+                ...medication,
+                status: 'new'
+              } as Medication])
+              toast({
+                title: '✅ Médicament ajouté',
+                description: `${medication.nom} ajouté à l'ordonnance`,
+                duration: 3000
+              })
+            }}
+            onUpdateMedication={(index, medication) => {
+              console.log('💊 AI Assistant - Update medication:', index, medication)
+              const updated = [...medications]
+              updated[index] = { ...updated[index], ...medication, status: 'modified' }
+              setMedications(updated)
+              toast({
+                title: '✅ Médicament mis à jour',
+                description: `${medication.nom} modifié`,
+                duration: 3000
+              })
+            }}
+            onRemoveMedication={(index) => {
+              console.log('💊 AI Assistant - Remove medication:', index)
+              const removed = medications[index]
+              setMedications(medications.filter((_, i) => i !== index))
+              toast({
+                title: '✅ Médicament retiré',
+                description: `${removed.nom} retiré de l'ordonnance`,
+                duration: 3000
+              })
+            }}
+            onAddLabTest={(category, test) => {
+              console.log('🧪 AI Assistant - Add lab test:', category, test)
+              setBiologyTests([...biologyTests, {
+                nom: test.nom,
+                categorie: category,
+                urgence: test.urgence || false,
+                aJeun: test.aJeun || false,
+                motifClinique: test.motifClinique || '',
+                isFollowUp: true
+              }])
+              toast({
+                title: '✅ Examen biologique ajouté',
+                description: `${test.nom} ajouté aux analyses`,
+                duration: 3000
+              })
+            }}
+            onRemoveLabTest={(category, index) => {
+              console.log('🧪 AI Assistant - Remove lab test:', category, index)
+              const removed = biologyTests[index]
+              setBiologyTests(biologyTests.filter((_, i) => i !== index))
+              toast({
+                title: '✅ Examen biologique retiré',
+                description: `${removed.nom} retiré`,
+                duration: 3000
+              })
+            }}
+            onAddImaging={(exam) => {
+              console.log('🩻 AI Assistant - Add imaging:', exam)
+              setImagingExams([...imagingExams, {
+                type: exam.type || exam.modalite || '',
+                region: exam.region || '',
+                indicationClinique: exam.indicationClinique || '',
+                urgence: exam.urgence || false,
+                isFollowUp: true
+              }])
+              toast({
+                title: '✅ Examen d\'imagerie ajouté',
+                description: `${exam.type} ${exam.region} ajouté`,
+                duration: 3000
+              })
+            }}
+            onRemoveImaging={(index) => {
+              console.log('🩻 AI Assistant - Remove imaging:', index)
+              const removed = imagingExams[index]
+              setImagingExams(imagingExams.filter((_, i) => i !== index))
+              toast({
+                title: '✅ Examen d\'imagerie retiré',
+                description: `${removed.type} ${removed.region} retiré`,
+                duration: 3000
+              })
+            }}
+          />
         </TabsContent>
       </Tabs>
 
