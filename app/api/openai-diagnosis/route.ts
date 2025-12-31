@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
 export const runtime = 'nodejs'
-export const maxDuration = 60 // 60 seconds for GPT-4 diagnosis generation
+export const maxDuration = 120 // 120 seconds for GPT-4 diagnosis generation (increased due to prompt size)
 
 // ==================== TYPES AND INTERFACES ====================
 interface PatientContext {
