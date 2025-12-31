@@ -439,6 +439,8 @@ async function callDiagnosisAPI(
   const diagnosisResult = await diagnosisResponse.json();
   
   console.log('✅ Diagnosis API completed');
+  console.log('   Response structure:', Object.keys(diagnosisResult));
+  console.log(`   Has analysis: ${!!diagnosisResult.analysis}`);
   console.log(`   Primary diagnosis: ${diagnosisResult.analysis?.clinical_analysis?.primary_diagnosis?.condition || 'Unknown'}`);
   console.log(`   Medications: ${diagnosisResult.analysis?.treatment_plan?.medications?.length || 0}`);
   
@@ -464,6 +466,12 @@ async function callReportGenerationAPI(
   
   console.log(`   Internal API URL: ${internalUrl}`)
   
+  // Extract diagnosis analysis - handle different response structures
+  const analysisData = diagnosisData.analysis || diagnosisData
+  
+  console.log('   Diagnosis data structure:', Object.keys(diagnosisData))
+  console.log('   Using analysis data:', Object.keys(analysisData))
+  
   const reportResponse = await fetch(internalUrl, {
     method: 'POST',
     headers: {
@@ -475,7 +483,7 @@ async function callReportGenerationAPI(
     body: JSON.stringify({
       patientData: patientData,
       clinicalData: clinicalData,
-      diagnosisData: diagnosisData.analysis,
+      diagnosisData: analysisData,  // Use extracted analysis
       doctorData: doctorInfo,
       includeFullPrescriptions: true
     })
