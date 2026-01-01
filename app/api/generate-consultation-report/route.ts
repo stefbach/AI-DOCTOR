@@ -2351,6 +2351,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       report: reportStructure,
+      diagnosisData: diagnosisData, // ⭐ Pass diagnosis data including follow_up_plan.specialist_referral
       metadata: {
         type: "enhanced_narrative_with_pragmatic_translation_v2.6",
         dataSource: "openai_diagnosis_with_french_to_english_translation",

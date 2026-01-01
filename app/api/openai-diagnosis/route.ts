@@ -360,7 +360,14 @@ BEFORE PRESCRIBING ANY MEDICATION, SYSTEMATICALLY CHECK:
   "follow_up_plan": {
     "red_flags": "MANDATORY - Specific alarm signs",
     "immediate": "MANDATORY - Specific surveillance",
-    "next_consultation": "MANDATORY - Precise timing"
+    "next_consultation": "MANDATORY - Precise timing",
+    "specialist_referral": {
+      "required": "MANDATORY - true/false",
+      "specialty": "MANDATORY IF required=true - EXACT specialty name (Cardiology, Neurology, Gastroenterology, Endocrinology, Nephrology, Rheumatology, Dermatology, Psychiatry, Pulmonology, etc.)",
+      "urgency": "MANDATORY IF required=true - routine/urgent/emergency",
+      "reason": "MANDATORY IF required=true - SPECIFIC medical reason for referral",
+      "investigations_before_referral": "OPTIONAL - Investigations to complete before specialist appointment"
+    }
   },
   "patient_education": {
     "understanding_condition": "MANDATORY - Specific condition explanation",
@@ -384,6 +391,87 @@ BEFORE PRESCRIBING ANY MEDICATION, SYSTEMATICALLY CHECK:
 - ALL medication fields must be completed with specific medical content
 - ACCESS YOUR ENCYCLOPEDIC KNOWLEDGE for EVERY decision
 - INCLUDE interaction checks, contraindication verification, dose adjustments
+
+═══════════════════════════════════════════════════════════════════════════════
+🏥 SPECIALIST REFERRAL RULES - WHEN TO REFER
+═══════════════════════════════════════════════════════════════════════════════
+
+YOU MUST SET specialist_referral.required = true AND SPECIFY THE SPECIALTY WHEN:
+
+🫀 **CARDIOLOGY REFERRAL**:
+- Chest pain with cardiac features (angina, suspected ACS, post-MI)
+- Heart failure (new diagnosis or decompensation)
+- Arrhythmias (atrial fibrillation, heart block, palpitations)
+- Hypertension resistant to 3+ drugs
+- Valvular heart disease
+- Syncope of cardiac origin
+- Peripheral arterial disease
+
+🧠 **NEUROLOGY REFERRAL**:
+- Stroke or TIA (urgent/emergency)
+- Seizures (new onset or poorly controlled epilepsy)
+- Suspected multiple sclerosis or neuromuscular disorders
+- Movement disorders (Parkinson's, tremor)
+- Persistent headache with red flags
+- Neuropathy requiring specialist investigation
+
+🩺 **GASTROENTEROLOGY REFERRAL**:
+- Suspected inflammatory bowel disease (Crohn's, UC)
+- Persistent dysphagia or GI bleeding
+- Chronic liver disease or elevated liver enzymes
+- Suspected coeliac disease
+- Chronic diarrhea (>4 weeks) requiring investigation
+
+🍬 **ENDOCRINOLOGY REFERRAL**:
+- Type 1 diabetes (new diagnosis or complex management)
+- Poorly controlled Type 2 diabetes (HbA1c >75 mmol/mol on 3+ agents)
+- Thyroid disorders requiring specialist management
+- Adrenal disorders, pituitary disorders
+- Suspected Cushing's or Addison's disease
+
+🦴 **RHEUMATOLOGY REFERRAL**:
+- Suspected inflammatory arthritis (RA, PsA, AS)
+- Systemic lupus erythematosus or other connective tissue diseases
+- Gout resistant to urate-lowering therapy
+- Polymyalgia rheumatica or giant cell arteritis
+
+💊 **NEPHROLOGY REFERRAL**:
+- CKD stage 4-5 (eGFR <30)
+- Rapidly declining renal function
+- Proteinuria >1g/24h or nephrotic syndrome
+- Resistant hypertension with renal disease
+- Suspected glomerulonephritis
+
+🫁 **PULMONOLOGY REFERRAL**:
+- Suspected lung cancer or unexplained lung nodules
+- Chronic cough (>8 weeks) with red flags
+- Suspected interstitial lung disease
+- COPD with frequent exacerbations or severe disease
+- Suspected pulmonary embolism (non-emergency)
+
+🩹 **DERMATOLOGY REFERRAL**:
+- Suspected skin cancer or changing moles
+- Severe psoriasis or eczema resistant to treatment
+- Suspected autoimmune blistering disorders
+- Complex dermatological conditions
+
+🧠 **PSYCHIATRY REFERRAL**:
+- Severe depression with suicidal ideation
+- Psychosis or bipolar disorder
+- Treatment-resistant mental health conditions
+- Eating disorders
+
+⚠️ **URGENCY LEVELS**:
+- **emergency**: Life-threatening conditions requiring same-day specialist review
+- **urgent**: Serious conditions requiring specialist review within 2 weeks
+- **routine**: Non-urgent conditions requiring specialist review within 3-6 months
+
+🚨 **CRITICAL RULE**: If you recommend specialist referral, you MUST:
+1. Set specialist_referral.required = true
+2. Specify EXACT specialty (e.g., "Cardiology", "Neurology", NOT "specialist")
+3. Set appropriate urgency (emergency/urgent/routine)
+4. Provide SPECIFIC medical reason for referral
+5. List any investigations to complete before referral (if applicable)
 
 PATIENT CONTEXT:
 {{PATIENT_CONTEXT}}
@@ -1642,7 +1730,14 @@ function ensureCompleteStructure(analysis: any): any {
       immediate: analysis?.follow_up_plan?.immediate || 
                 "Surveillance clinique selon l'évolution symptomatique",
       next_consultation: analysis?.follow_up_plan?.next_consultation || 
-                        "Consultation de suivi dans 48-72h si persistance des symptômes"
+                        "Consultation de suivi dans 48-72h si persistance des symptômes",
+      specialist_referral: analysis?.follow_up_plan?.specialist_referral || {
+        required: false,
+        specialty: null,
+        urgency: null,
+        reason: null,
+        investigations_before_referral: null
+      }
     },
     
     patient_education: {

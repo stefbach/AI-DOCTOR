@@ -2782,6 +2782,10 @@ export default function ChronicProfessionalReport({
     
     const isEmergency = detectEmergency()
 
+    // 🏥 CHECK SPECIALIST REFERRAL
+    const specialistReferral = diagnosisData?.follow_up_plan?.specialist_referral || null
+    const needsSpecialistReferral = specialistReferral?.required === true
+
     return (
       <div id="medical-report-section" className="bg-white p-8 rounded-lg shadow print:shadow-none">
         
@@ -2796,6 +2800,55 @@ export default function ChronicProfessionalReport({
                 <p className="text-lg mt-2">This consultation requires urgent hospital referral - Do not delay</p>
               </div>
               <div className="text-6xl">🚨</div>
+            </div>
+          </div>
+        )}
+        
+        {/* 🏥 SPECIALIST REFERRAL BANNER */}
+        {needsSpecialistReferral && (
+          <div className={`mb-6 p-6 rounded-lg border-4 shadow-2xl print:shadow-lg ${
+            specialistReferral.urgency === 'emergency' 
+              ? 'bg-red-600 text-white border-red-700 animate-pulse print:animate-none print:bg-red-100 print:text-red-900 print:border-red-900' 
+              : specialistReferral.urgency === 'urgent'
+              ? 'bg-orange-500 text-white border-orange-700 print:bg-orange-100 print:text-orange-900 print:border-orange-900'
+              : 'bg-blue-500 text-white border-blue-700 print:bg-blue-100 print:text-blue-900 print:border-blue-900'
+          }`}>
+            <div className="flex items-center gap-4">
+              <div className="text-6xl">🏥</div>
+              <div className="flex-1">
+                <h2 className="text-3xl font-black mb-2 tracking-wide">
+                  {specialistReferral.urgency === 'emergency' && '🚨 URGENT SPECIALIST REFERRAL REQUIRED 🚨'}
+                  {specialistReferral.urgency === 'urgent' && '⚡ SPECIALIST REFERRAL REQUIRED (URGENT)'}
+                  {specialistReferral.urgency === 'routine' && '📋 SPECIALIST REFERRAL RECOMMENDED'}
+                </h2>
+                <p className="text-xl font-bold mb-2">
+                  Specialty: {specialistReferral.specialty}
+                </p>
+                <p className="text-lg mb-2">
+                  Reason: {specialistReferral.reason}
+                </p>
+                {specialistReferral.investigations_before_referral && (
+                  <p className="text-base">
+                    <span className="font-semibold">Before referral:</span> {specialistReferral.investigations_before_referral}
+                  </p>
+                )}
+                {specialistReferral.urgency === 'emergency' && (
+                  <p className="text-base mt-2 font-bold">
+                    ⚠️ Arrange specialist appointment within 24-48 hours
+                  </p>
+                )}
+                {specialistReferral.urgency === 'urgent' && (
+                  <p className="text-base mt-2 font-semibold">
+                    Arrange specialist appointment within 2 weeks
+                  </p>
+                )}
+                {specialistReferral.urgency === 'routine' && (
+                  <p className="text-base mt-2">
+                    Arrange specialist appointment within 3-6 months
+                  </p>
+                )}
+              </div>
+              <div className="text-6xl">🏥</div>
             </div>
           </div>
         )}
