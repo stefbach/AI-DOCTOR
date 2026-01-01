@@ -2741,8 +2741,65 @@ export default function ChronicProfessionalReport({
   const MedicalReportSection = () => {
     const { medicalReport } = report
 
+    // 🚨 DETECT EMERGENCY SITUATIONS
+    const detectEmergency = () => {
+      const textToCheck = [
+        medicalReport?.narrative || '',
+        medicalReport?.patient?.chiefComplaint || '',
+        JSON.stringify(medicalReport?.diagnosis || '')
+      ].join(' ').toUpperCase()
+      
+      // Emergency keywords
+      const emergencyKeywords = [
+        'IMMEDIATE HOSPITAL REFERRAL',
+        'EMERGENCY REFERRAL',
+        'EMERGENCY',
+        'URGENT REFERRAL',
+        'SAMU 114',
+        'CALL AMBULANCE',
+        'LIFE-THREATENING',
+        'ACUTE CORONARY SYNDROME',
+        'ACS',
+        'STEMI',
+        'NSTEMI',
+        'STROKE',
+        'PULMONARY EMBOLISM',
+        'AORTIC DISSECTION',
+        'SEPSIS',
+        'DIABETIC KETOACIDOSIS',
+        'HYPOGLYCEMIC COMA',
+        'ANAPHYLAXIS',
+        'STATUS EPILEPTICUS',
+        'HYPERTENSIVE EMERGENCY',
+        'ACUTE ABDOMEN',
+        'URGENCES',
+        'URGENCE MÉDICALE',
+        'ORIENTATION URGENCES'
+      ]
+      
+      return emergencyKeywords.some(keyword => textToCheck.includes(keyword))
+    }
+    
+    const isEmergency = detectEmergency()
+
     return (
       <div id="medical-report-section" className="bg-white p-8 rounded-lg shadow print:shadow-none">
+        
+        {/* 🚨 EMERGENCY BANNER */}
+        {isEmergency && (
+          <div className="mb-6 p-6 bg-red-600 text-white rounded-lg border-4 border-red-700 shadow-2xl animate-pulse print:animate-none print:bg-red-100 print:text-red-900 print:border-red-900">
+            <div className="flex items-center gap-4">
+              <div className="text-6xl">🚨</div>
+              <div className="flex-1">
+                <h2 className="text-3xl font-black mb-2 tracking-wide">⚠️ EMERGENCY CASE ⚠️</h2>
+                <p className="text-xl font-bold">IMMEDIATE MEDICAL ATTENTION REQUIRED</p>
+                <p className="text-lg mt-2">This consultation requires urgent hospital referral - Do not delay</p>
+              </div>
+              <div className="text-6xl">🚨</div>
+            </div>
+          </div>
+        )}
+        
         <div className="border-b-2 border-blue-600 pb-4 mb-6">
           <div className="flex justify-between items-start">
             <div>
