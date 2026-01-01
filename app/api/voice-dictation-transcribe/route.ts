@@ -1,9 +1,14 @@
 // app/api/voice-dictation-transcribe/route.ts
-// NOUVELLE API: Transcription + Extraction uniquement
+// NOUVELLE API: Transcription + Normalisation Anglo-Saxonne + Extraction
 // Le frontend affichera ensuite DiagnosisForm et ProfessionalReport
 
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { 
+  normalizeTranscriptionToEnglish,
+  normalizeMedicationList,
+  type NormalizationResult 
+} from '@/lib/medical-terminology-normalizer';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -49,77 +54,110 @@ async function transcribeAudio(audioFile: File): Promise<{
 }
 
 // ============================================
-// FUNCTION 2: EXTRACT CLINICAL DATA
+// FUNCTION 2: NORMALIZE TRANSCRIPTION TO ENGLISH
 // ============================================
-async function extractClinicalData(transcriptionText: string): Promise<{
+async function normalizeTranscription(transcriptionText: string): Promise<NormalizationResult> {
+  console.log('🔄 Step 2: Normalizing transcription to Anglo-Saxon nomenclature...');
+  
+  const normalizationResult = normalizeTranscriptionToEnglish(transcriptionText);
+  
+  console.log('✅ Normalization completed');
+  console.log(`   Original text length: ${normalizationResult.originalText.length} chars`);
+  console.log(`   Normalized text length: ${normalizationResult.normalizedText.length} chars`);
+  console.log(`   Corrections made: ${normalizationResult.corrections.length}`);
+  console.log(`   Confidence: ${normalizationResult.confidence.toFixed(1)}%`);
+  
+  // Log corrections by type
+  const medCorrections = normalizationResult.corrections.filter(c => c.type === 'medication').length;
+  const termCorrections = normalizationResult.corrections.filter(c => c.type === 'medical_term').length;
+  const dosageCorrections = normalizationResult.corrections.filter(c => c.type === 'dosage').length;
+  
+  if (medCorrections > 0) console.log(`   → Medications: ${medCorrections} corrections`);
+  if (termCorrections > 0) console.log(`   → Medical terms: ${termCorrections} corrections`);
+  if (dosageCorrections > 0) console.log(`   → Dosages: ${dosageCorrections} corrections`);
+  
+  return normalizationResult;
+}
+
+// ============================================
+// FUNCTION 3: EXTRACT CLINICAL DATA
+// ============================================
+async function extractClinicalData(normalizedText: string): Promise<{
   patientInfo: any;
   clinicalData: any;
   aiQuestions: any;
   referralInfo?: any;
   consultationType: 'standard' | 'specialist_referral';
 }> {
-  console.log('📊 Step 2: Extracting clinical data with GPT-4o...');
+  console.log('📊 Step 3: Extracting clinical data with GPT-4o...');
 
-  const extractionPrompt = `Tu es un assistant médical expert. Analyse cette transcription de consultation médicale et extrais les informations suivantes au format JSON strict:
+  const extractionPrompt = `You are an expert medical assistant. Analyze this medical consultation transcription and extract the following information in strict JSON format:
 
-⚠️ IMPORTANT: PRÉSERVE TOUTES les hypothèses diagnostiques, notes cliniques, et raisonnements du médecin. NE PAS SUPPRIMER ces informations cruciales.
+⚠️ CRITICAL: This transcription has been NORMALIZED to Anglo-Saxon (UK/US) medical nomenclature. Use ENGLISH medical terminology throughout.
+
+⚠️ IMPORTANT: PRESERVE ALL diagnostic hypotheses, clinical notes, and reasoning from the physician. DO NOT DELETE this crucial information.
 
 {
   "patientInfo": {
-    "firstName": "prénom du patient",
-    "lastName": "nom du patient",
-    "age": nombre (age en années),
-    "gender": "M" ou "F" ou "Other",
-    "email": "email si mentionné",
-    "phone": "téléphone si mentionné"
+    "firstName": "patient first name",
+    "lastName": "patient last name",
+    "age": number (age in years),
+    "gender": "M" or "F" or "Other",
+    "email": "email if mentioned",
+    "phone": "phone if mentioned"
   },
   "clinicalData": {
-    "chiefComplaint": "motif principal de consultation",
-    "symptoms": ["symptôme 1", "symptôme 2"],
-    "duration": "durée des symptômes",
-    "severity": "légère/modérée/sévère",
-    "medicalHistory": ["antécédent 1", "antécédent 2"],
-    "currentMedications": ["médicament 1", "médicament 2"],
-    "allergies": ["allergie 1", "allergie 2"],
+    "chiefComplaint": "main reason for consultation IN ENGLISH",
+    "symptoms": ["symptom 1 IN ENGLISH", "symptom 2 IN ENGLISH"],
+    "duration": "symptom duration",
+    "severity": "mild/moderate/severe",
+    "medicalHistory": ["history 1 IN ENGLISH", "history 2 IN ENGLISH"],
+    "currentMedications": ["medication 1 (USE INN/GENERIC NAME IN ENGLISH)", "medication 2"],
+    "allergies": ["allergy 1", "allergy 2"],
     "vitalSigns": {
-      "temperature": "en °C si mentionné",
-      "bloodPressure": "en mmHg si mentionné",
-      "heartRate": "en bpm si mentionné",
-      "respiratoryRate": "en /min si mentionné"
+      "temperature": "in °C if mentioned",
+      "bloodPressure": "in mmHg if mentioned (e.g., 140/90)",
+      "heartRate": "in bpm if mentioned",
+      "respiratoryRate": "in /min if mentioned",
+      "oxygenSaturation": "SpO2 in % if mentioned"
     }
   },
   "aiQuestions": {
-    "primaryConcern": "préoccupation principale",
-    "additionalSymptoms": ["autres symptômes"],
-    "riskFactors": ["facteurs de risque identifiés"]
+    "primaryConcern": "main concern IN ENGLISH",
+    "additionalSymptoms": ["other symptoms IN ENGLISH"],
+    "riskFactors": ["identified risk factors IN ENGLISH"]
   },
   "doctorNotes": {
-    "clinicalHypotheses": ["hypothèse 1 du médecin", "hypothèse 2"],
-    "differentialDiagnoses": ["diagnostic différentiel 1", "diagnostic différentiel 2"],
-    "clinicalReasoning": "raisonnement clinique du médecin",
-    "treatmentPlan": "plan thérapeutique préliminaire du médecin",
-    "observations": "observations cliniques importantes du médecin",
-    "recommendations": ["recommandation 1", "recommandation 2"]
+    "clinicalHypotheses": ["physician hypothesis 1 IN ENGLISH", "hypothesis 2"],
+    "differentialDiagnoses": ["differential diagnosis 1 IN ENGLISH", "differential 2"],
+    "clinicalReasoning": "physician's clinical reasoning IN ENGLISH",
+    "treatmentPlan": "physician's preliminary treatment plan IN ENGLISH",
+    "observations": "important clinical observations from physician IN ENGLISH",
+    "recommendations": ["recommendation 1 IN ENGLISH", "recommendation 2"]
   },
   "referralInfo": {
     "isReferral": true/false,
-    "referringPhysician": "nom du médecin référent si c'est une référence",
-    "specialty": "spécialité si mentionnée",
-    "reasonForReferral": "raison de la référence"
+    "referringPhysician": "referring physician name if this is a referral",
+    "specialty": "specialty if mentioned",
+    "reasonForReferral": "reason for referral IN ENGLISH"
   }
 }
 
-🎯 RÈGLES CRITIQUES:
-1. PRÉSERVE ABSOLUMENT toutes les hypothèses diagnostiques du médecin dans "doctorNotes.clinicalHypotheses"
-2. CONSERVE tous les diagnostics différentiels mentionnés par le médecin
-3. GARDE le raisonnement clinique original du médecin
-4. NE TRANSFORME PAS ni ne SUPPRIME les pensées cliniques du médecin
-5. Si le médecin mentionne "je pense que", "probablement", "possiblement" → PRÉSERVE dans doctorNotes
+🎯 CRITICAL RULES:
+1. USE ENGLISH MEDICAL TERMINOLOGY ONLY (e.g., "chest pain" NOT "douleur thoracique")
+2. USE INN/GENERIC DRUG NAMES IN ENGLISH (e.g., "Amoxicillin" NOT "Amoxicilline")
+3. PRESERVE ALL diagnostic hypotheses from the physician in "doctorNotes.clinicalHypotheses"
+4. KEEP ALL differential diagnoses mentioned by the physician
+5. MAINTAIN the original clinical reasoning from the physician
+6. DO NOT TRANSFORM or DELETE the physician's clinical thoughts
+7. If physician says "I think", "probably", "possibly" → PRESERVE in doctorNotes IN ENGLISH
+8. Use standard UK/US abbreviations: BP (blood pressure), HR (heart rate), RR (respiratory rate), SpO2 (oxygen saturation)
+9. Medications: MUST use INN (International Nonproprietary Names) in English
 
-Transcription:
-${transcriptionText}
+Transcription (ALREADY NORMALIZED TO ENGLISH):
+${normalizedText}
 
-Réponds UNIQUEMENT avec le JSON, sans texte additionnel.`;
+Respond ONLY with JSON, no additional text.`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -127,7 +165,7 @@ Réponds UNIQUEMENT avec le JSON, sans texte additionnel.`;
       messages: [
         {
           role: 'system',
-          content: 'Tu es un assistant médical expert qui extrait des données cliniques structurées.',
+          content: 'You are an expert medical assistant who extracts structured clinical data using Anglo-Saxon (UK/US) medical nomenclature.',
         },
         {
           role: 'user',
@@ -147,6 +185,24 @@ Réponds UNIQUEMENT avec le JSON, sans texte additionnel.`;
     // Log doctor's clinical hypotheses if present
     if (extractedData.doctorNotes?.clinicalHypotheses?.length > 0) {
       console.log(`   ⚕️ Doctor's hypotheses preserved: ${extractedData.doctorNotes.clinicalHypotheses.length} hypotheses`);
+    }
+    
+    // Normalize medications if present
+    if (extractedData.clinicalData?.currentMedications?.length > 0) {
+      console.log(`   💊 Normalizing ${extractedData.clinicalData.currentMedications.length} medications...`);
+      const normalizedMeds = normalizeMedicationList(extractedData.clinicalData.currentMedications);
+      
+      // Log any corrections
+      const medCorrections = normalizedMeds.filter(m => m.original !== m.normalized);
+      if (medCorrections.length > 0) {
+        console.log(`   ✅ Corrected ${medCorrections.length} medication names:`);
+        medCorrections.forEach(m => {
+          console.log(`      "${m.original}" → "${m.normalized}"`);
+        });
+      }
+      
+      // Update with normalized names
+      extractedData.clinicalData.currentMedications = normalizedMeds.map(m => m.normalized);
     }
 
     // Determine consultation type
@@ -201,7 +257,7 @@ export async function POST(request: NextRequest) {
     // STEP 1: Transcribe audio
     let transcription;
     try {
-      console.log('\n📝 STEP 1/2: Audio Transcription');
+      console.log('\n📝 STEP 1/3: Audio Transcription');
       transcription = await transcribeAudio(audioFile);
     } catch (error: any) {
       console.error('❌ STEP 1 FAILED:', error.message);
@@ -216,20 +272,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // STEP 2: Extract clinical data
-    let extractedData;
+    // STEP 2: Normalize transcription to Anglo-Saxon nomenclature
+    let normalization;
     try {
-      console.log('\n📝 STEP 2/2: Clinical Data Extraction');
-      extractedData = await extractClinicalData(transcription.text);
+      console.log('\n🔄 STEP 2/3: Normalization to Anglo-Saxon Nomenclature');
+      normalization = await normalizeTranscription(transcription.text);
     } catch (error: any) {
       console.error('❌ STEP 2 FAILED:', error.message);
+      // Continue with original text if normalization fails
+      console.warn('⚠️ Continuing with original transcription text');
+      normalization = {
+        originalText: transcription.text,
+        normalizedText: transcription.text,
+        corrections: [],
+        confidence: 100
+      };
+    }
+
+    // STEP 3: Extract clinical data
+    let extractedData;
+    try {
+      console.log('\n📝 STEP 3/3: Clinical Data Extraction');
+      extractedData = await extractClinicalData(normalization.normalizedText);
+    } catch (error: any) {
+      console.error('❌ STEP 3 FAILED:', error.message);
       return NextResponse.json(
         {
           success: false,
           error: 'Data extraction failed',
           details: error.message,
-          failedAt: 'step2_extraction',
+          failedAt: 'step3_extraction',
           transcription, // Return transcription for debugging
+          normalization, // Return normalization for debugging
         },
         { status: 500 }
       );
@@ -238,8 +312,10 @@ export async function POST(request: NextRequest) {
     const totalTime = Date.now() - startTime;
 
     console.log('\n✅ ========================================');
-    console.log('   TRANSCRIPTION + EXTRACTION COMPLETE');
+    console.log('   TRANSCRIPTION + NORMALIZATION + EXTRACTION COMPLETE');
     console.log(`   Total time: ${totalTime}ms`);
+    console.log(`   Normalization confidence: ${normalization.confidence.toFixed(1)}%`);
+    console.log(`   Corrections applied: ${normalization.corrections.length}`);
     console.log('========================================\n');
 
     // Return data for frontend to display and continue workflow
@@ -247,6 +323,21 @@ export async function POST(request: NextRequest) {
       success: true,
       transcription: {
         text: transcription.text,
+        originalText: transcription.text,
+        normalizedText: normalization.normalizedText,
+        duration: transcription.duration,
+        language: transcription.language,
+      },
+      normalization: {
+        corrections: normalization.corrections,
+        confidence: normalization.confidence,
+        correctionsByType: {
+          medication: normalization.corrections.filter(c => c.type === 'medication').length,
+          medicalTerm: normalization.corrections.filter(c => c.type === 'medical_term').length,
+          dosage: normalization.corrections.filter(c => c.type === 'dosage').length,
+          spelling: normalization.corrections.filter(c => c.type === 'spelling').length,
+        }
+      },
         duration: transcription.duration,
         language: transcription.language,
       },
