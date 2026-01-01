@@ -1693,58 +1693,6 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
         // Return null to filter out later
         return null
       }
-          Object.assign(fixedMed, {
-            drug: "Amoxicillin 500mg",
-            dci: "Amoxicillin",
-            indication: "Antibiothérapie empirique à large spectre pour infection bactérienne suspectée des voies respiratoires incluant otite moyenne aiguë",
-            mechanism: "Antibiotique bêta-lactamine, inhibition de la synthèse de la paroi cellulaire bactérienne",
-            dosing: { 
-              adult: "500mg TDS",
-              frequency_per_day: 3,
-              individual_dose: "500mg",
-              daily_total_dose: "1500mg/day"
-            },
-            duration: "7 jours",
-            contraindications: "Allergie aux pénicillines, mononucléose infectieuse sévère",
-            side_effects: "Diarrhée, nausées, éruption cutanée, surinfection à Candida",
-            interactions: "Efficacité réduite des contraceptifs oraux, augmentation effet warfarine",
-            monitoring: "Réponse clinique, réactions allergiques, symptômes gastro-intestinaux",
-            mauritius_availability: {
-              public_free: true,
-              estimated_cost: "Rs 100-250",
-              brand_names: "Amoxil, Flemoxin disponibles"
-            },
-            administration_instructions: "Prendre avec la nourriture pour réduire les troubles gastriques, terminer le traitement complet"
-          })
-        } else {
-          // Médicament par défaut pour les cas non spécifiques
-          Object.assign(fixedMed, {
-            drug: "Paracetamol 500mg",
-            dci: "Paracetamol",
-            indication: "Soulagement symptomatique de la douleur et de la fièvre dans les conditions médicales aiguës",
-            mechanism: "Analgésique et antipyrétique, inhibition centrale de la cyclooxygénase",
-            dosing: { 
-              adult: "500mg QDS",
-              frequency_per_day: 4,
-              individual_dose: "500mg",
-              daily_total_dose: "2g/day"
-            },
-            duration: "3-5 jours selon nécessité",
-            contraindications: "Insuffisance hépatique sévère, allergie au paracétamol",
-            side_effects: "Rares aux doses thérapeutiques, hépatotoxicité en cas de surdosage",
-            interactions: "Compatible avec la plupart des traitements, prudence avec warfarine",
-            monitoring: "Température si pour fièvre, fonction hépatique si utilisation prolongée",
-            mauritius_availability: {
-              public_free: true,
-              estimated_cost: "Rs 50-150",
-              brand_names: "Panadol disponible partout"
-            },
-            administration_instructions: "Prendre avec de l'eau, respecter les intervalles de dosage"
-          })
-        }
-        
-        fixedMed._mauritius_specificity_applied = true
-      }
       
       // Corriger les indications vagues avec DCI précis
       const currentIndication = fixedMed.indication || ''
