@@ -2112,36 +2112,16 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
           messages: [
             {
               role: 'system',
-              content: `🏥 YOU ARE A COMPLETE MEDICAL ENCYCLOPEDIA - EXPERT PHYSICIAN WITH EXHAUSTIVE KNOWLEDGE
+              content: `You are an expert physician practicing in Mauritius following UK medical standards (BNF/NICE guidelines).
 
-You possess the complete knowledge equivalent to:
-📚 BNF (British National Formulary) - Complete UK pharmaceutical database
-📚 VIDAL - French pharmaceutical reference
-📚 Harrison's Principles of Internal Medicine - All pathologies
-📚 Goodman & Gilman's Pharmacological Basis of Therapeutics - All drugs
-📚 Tietz Clinical Chemistry - Laboratory medicine
-📚 UpToDate / BMJ Best Practice - Evidence-based medicine
-📚 NICE/ESC/ADA/WHO Guidelines - Current treatment protocols
+CRITICAL REQUIREMENTS:
+1. Use exact INN drug names (e.g., Amoxicillin 500mg TDS, NOT "antibiotic")
+2. Provide evidence-based dosing with UK abbreviations: OD/BD/TDS/QDS
+3. Check drug interactions and contraindications
+4. Include monitoring parameters
+5. Minimum 40 characters per indication field
 
-FOR EVERY PRESCRIPTION, YOU MUST ACCESS YOUR ENCYCLOPEDIC KNOWLEDGE TO PROVIDE:
-
-1. EXACT DCI (WHO International Nonproprietary Name)
-2. EVIDENCE-BASED DOSING from clinical guidelines (BNF/NICE)
-3. UK FORMAT: OD (once daily), BD (twice daily), TDS (three times daily), QDS (four times daily)
-4. COMPLETE INTERACTION SCREENING (drug-drug, drug-disease, CYP450)
-5. CONTRAINDICATION VERIFICATION (absolute, relative, pregnancy category)
-6. DOSE ADJUSTMENTS (renal: eGFR thresholds, hepatic: Child-Pugh)
-7. MONITORING PARAMETERS (clinical and laboratory)
-
-CRITICAL RULES:
-- NEVER use generic terms ("Medication", "Treatment", "Investigation")
-- ALWAYS provide specific drug names with exact doses
-- ALWAYS check interactions against current medications
-- ALWAYS verify contraindications against patient allergies/conditions
-- ALWAYS use UK/Mauritius medical nomenclature
-- MINIMUM 40 characters for each indication field
-
-You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC medical responses.`
+Generate comprehensive medical JSON with complete diagnostic reasoning, investigations, and treatment plans.`
             },
             {
               role: 'user',
@@ -2149,13 +2129,12 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
             }
           ],
           temperature: qualityLevel === 0 ? 0.3 : 0.05,
-          max_tokens: 3000,  // Reduced from 4000 to improve response time
+          max_tokens: 4000,  // Reduced from 8000 to improve response time
           response_format: { type: "json_object" },
           top_p: 0.9,
           frequency_penalty: 0.1,
           presence_penalty: 0.2
         }),
-        signal: AbortSignal.timeout(50000) // 50 seconds timeout (leave 10s margin for Vercel)
       })
       
       if (!response.ok) {
@@ -2206,16 +2185,6 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
     } catch (error) {
       lastError = error as Error
       console.error(`❌ Error attempt ${attempt + 1}:`, error)
-      
-      // Check if it's a timeout error
-      if (error instanceof Error && (error.name === 'AbortError' || error.message.includes('timeout'))) {
-        console.error('⏰ Request timeout - GPT-4 took too long to respond')
-        console.error('   This usually happens when the prompt is too long or complex')
-        console.error('   Consider: 1) Reducing prompt size, 2) Using gpt-4o-mini, 3) Upgrading Vercel plan')
-        
-        // Don't retry on timeout, fail fast
-        throw new Error('GPT-4 API timeout (>50s). The request is too complex. Please try again with simpler input or contact support.')
-      }
       
       if (attempt < maxRetries) {
         const waitTime = Math.pow(2, attempt) * 1000
