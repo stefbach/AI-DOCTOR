@@ -4,7 +4,7 @@ import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
 
 export const runtime = 'nodejs'
-export const maxDuration = 60 // 60 seconds for GPT-4 report generation
+export const maxDuration = 120 // 120 seconds for GPT-4 report generation (increased from 60s to prevent 504 timeouts)
 
 // ==================== FONCTION DE TRADUCTION PRAGMATIQUE ====================
 function translateFrenchMedicalTerms(text: string): string {
