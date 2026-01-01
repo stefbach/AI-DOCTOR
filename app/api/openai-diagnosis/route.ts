@@ -1690,30 +1690,45 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
         const chiefComplaint = (patientContext.chief_complaint || '').toLowerCase()
         const allSymptoms = `${symptoms} ${chiefComplaint}`
         
+        // 🚫 CHECK CARDIAC SYMPTOMS FIRST - NEVER IBUPROFEN FOR CARDIAC PAIN
+        const hasCardiacSymptoms = allSymptoms.includes('chest pain') || 
+                                   allSymptoms.includes('douleur thoracique') ||
+                                   allSymptoms.includes('cardiac') ||
+                                   allSymptoms.includes('cardiaque') ||
+                                   allSymptoms.includes('angina') ||
+                                   allSymptoms.includes('angine') ||
+                                   allSymptoms.includes('heart') ||
+                                   allSymptoms.includes('coeur') ||
+                                   allSymptoms.includes('acs') ||
+                                   allSymptoms.includes('stemi') ||
+                                   allSymptoms.includes('nstemi') ||
+                                   allSymptoms.includes('coronary') ||
+                                   allSymptoms.includes('coronaire')
+        
         // Assignation intelligente basée sur les symptômes avec DCI précis
-        if (allSymptoms.includes('pain') || allSymptoms.includes('douleur') || allSymptoms.includes('ache')) {
+        if ((allSymptoms.includes('pain') || allSymptoms.includes('douleur') || allSymptoms.includes('ache')) && !hasCardiacSymptoms) {
           Object.assign(fixedMed, {
-            drug: "Ibuprofen 400mg",
-            dci: "Ibuprofen",
-            indication: "Traitement anti-inflammatoire pour soulagement de la douleur musculo-squelettique avec réduction de l'inflammation associée",
-            mechanism: "Anti-inflammatoire non stéroïdien (AINS), inhibition de la cyclooxygénase",
+            drug: "Paracetamol 1g",  // 🔄 CHANGÉ: Paracetamol par défaut au lieu d'Ibuprofen
+            dci: "Paracetamol",
+            indication: "Analgésie pour soulagement de la douleur légère à modérée (musculoskeletal, céphalées, douleurs diverses)",
+            mechanism: "Analgésique et antipyrétique, inhibition centrale de la cyclooxygénase",
             dosing: { 
-              adult: "400mg TDS", 
-              frequency_per_day: 3,
-              individual_dose: "400mg",
-              daily_total_dose: "1200mg/day"
+              adult: "1g QDS", 
+              frequency_per_day: 4,
+              individual_dose: "1g",
+              daily_total_dose: "4g/day (maximum)"
             },
-            duration: "5-7 jours maximum",
-            contraindications: "Ulcère gastroduodénal, insuffisance rénale sévère, grossesse (3e trimestre)",
-            side_effects: "Irritation gastrique, vertiges, céphalées, insuffisance rénale",
-            interactions: "Éviter avec anticoagulants, IEC, diurétiques",
-            monitoring: "Fonction rénale si utilisation prolongée, symptômes gastriques",
+            duration: "5-7 jours selon nécessité",
+            contraindications: "Insuffisance hépatique sévère, allergie au paracétamol",
+            side_effects: "Rares aux doses thérapeutiques, hépatotoxicité en cas de surdosage (>4g/jour)",
+            interactions: "Compatible avec la plupart des médicaments, prudence avec warfarine et alcool",
+            monitoring: "Fonction hépatique si utilisation prolongée, respecter dose maximale 4g/jour",
             mauritius_availability: {
               public_free: true,
-              estimated_cost: "Rs 50-200",
-              brand_names: "Brufen, Nurofen disponibles"
+              estimated_cost: "Rs 50-150",
+              brand_names: "Panadol, Doliprane disponibles partout"
             },
-            administration_instructions: "Prendre avec la nourriture pour réduire l'irritation gastrique"
+            administration_instructions: "Prendre avec de l'eau, peut être pris avec ou sans nourriture. JAMAIS dépasser 4g/jour"
           })
         } else if (allSymptoms.includes('fever') || allSymptoms.includes('fièvre') || allSymptoms.includes('temperature')) {
           Object.assign(fixedMed, {
@@ -2879,32 +2894,47 @@ function generateDefaultMedications(patientContext: PatientContext): any[] {
   const symptoms = [...(patientContext.symptoms || []), patientContext.chief_complaint || ''].join(' ').toLowerCase()
   const medicalHistory = (patientContext.medical_history || []).join(' ').toLowerCase()
   
-  // Pain / Douleur
-  if (symptoms.includes('pain') || symptoms.includes('douleur') || symptoms.includes('ache') || symptoms.includes('mal')) {
+  // 🚫 CHECK CARDIAC SYMPTOMS FIRST - NEVER IBUPROFEN FOR CARDIAC PAIN
+  const hasCardiacSymptoms = symptoms.includes('chest pain') || 
+                             symptoms.includes('douleur thoracique') ||
+                             symptoms.includes('cardiac') ||
+                             symptoms.includes('cardiaque') ||
+                             symptoms.includes('angina') ||
+                             symptoms.includes('angine') ||
+                             symptoms.includes('heart') ||
+                             symptoms.includes('coeur') ||
+                             symptoms.includes('acs') ||
+                             symptoms.includes('stemi') ||
+                             symptoms.includes('nstemi') ||
+                             symptoms.includes('coronary') ||
+                             symptoms.includes('coronaire')
+  
+  // Pain / Douleur - ONLY IF NOT CARDIAC
+  if ((symptoms.includes('pain') || symptoms.includes('douleur') || symptoms.includes('ache') || symptoms.includes('mal')) && !hasCardiacSymptoms) {
     medications.push({
-      medication_name: "Ibuprofen 400mg",
-      drug: "Ibuprofen 400mg",
-      dci: "Ibuprofen",
-      indication: "Pain management and anti-inflammatory treatment",
-      why_prescribed: "For relief of moderate pain and inflammation",
-      how_to_take: "TDS (three times daily) with food",
+      medication_name: "Paracetamol 1g",  // 🔄 CHANGÉ: Paracetamol par défaut
+      drug: "Paracetamol 1g",
+      dci: "Paracetamol",
+      indication: "Analgésie pour soulagement de la douleur légère à modérée",
+      why_prescribed: "For relief of mild to moderate pain",
+      how_to_take: "QDS (four times daily) with or without food",
       dosing_details: {
-        uk_format: "TDS",
-        frequency_per_day: 3,
-        individual_dose: "400mg",
-        daily_total_dose: "1200mg/day"
+        uk_format: "QDS",
+        frequency_per_day: 4,
+        individual_dose: "1g",
+        daily_total_dose: "4g/day (maximum)"
       },
       dosing: {
-        adult: "400mg TDS with food",
-        frequency_per_day: 3,
-        individual_dose: "400mg",
-        daily_total_dose: "1200mg/day"
+        adult: "1g QDS",
+        frequency_per_day: 4,
+        individual_dose: "1g",
+        daily_total_dose: "4g/day"
       },
       duration: "5-7 days",
-      contraindications: "Gastric ulcer, severe renal impairment, pregnancy (3rd trimester)",
-      side_effects: "Gastric irritation, dizziness, headache",
-      monitoring: "Monitor for gastric symptoms",
-      administration_instructions: "Take with food to reduce gastric irritation"
+      contraindications: "Severe hepatic impairment, paracetamol allergy",
+      side_effects: "Rare at therapeutic doses, hepatotoxicity with overdose",
+      monitoring: "Hepatic function if prolonged use, never exceed 4g/day",
+      administration_instructions: "Take with water, with or without food. NEVER exceed 4g/day"
     })
   }
   
