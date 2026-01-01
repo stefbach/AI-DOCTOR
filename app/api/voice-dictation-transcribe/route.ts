@@ -86,6 +86,7 @@ async function extractClinicalData(normalizedText: string): Promise<{
   patientInfo: any;
   clinicalData: any;
   aiQuestions: any;
+  doctorNotes?: any;
   referralInfo?: any;
   consultationType: 'standard' | 'specialist_referral';
 }> {
@@ -337,9 +338,6 @@ export async function POST(request: NextRequest) {
           dosage: normalization.corrections.filter(c => c.type === 'dosage').length,
           spelling: normalization.corrections.filter(c => c.type === 'spelling').length,
         }
-      },
-        duration: transcription.duration,
-        language: transcription.language,
       },
       extractedData: {
         patientInfo: extractedData.patientInfo,
