@@ -821,6 +821,36 @@ ACUTE CORONARY SYNDROME (ACS):
   * Use PARACETAMOL ONLY for pain management in cardiac patients
   * NEVER prescribe Ibuprofen/NSAIDs if chest pain, cardiac symptoms, or known CAD
 
+🔬 MANDATORY INVESTIGATIONS FOR ACS (ESC Guidelines 2023):
+IMMEDIATE/STAT (within 10 minutes):
+  * 12-lead ECG - STAT (detect STEMI vs NSTEMI, ST elevation, Q waves, T wave inversion)
+  * Troponin hs (high-sensitivity) T0 - STAT (baseline cardiac biomarker)
+  * Point-of-care glucose - STAT (exclude hypoglycemia, detect diabetes)
+
+URGENT (within 1 hour):
+  * Troponin hs T1 (at 1 hour) - URGENT (delta change for rule-in/rule-out)
+  * Full Blood Count (FBC) - URGENT (exclude anemia as cause of angina)
+  * U&E (Urea & Electrolytes) + eGFR - URGENT (renal function before anticoagulation, adjust fondaparinux dose)
+  * Coagulation screen (PT/INR, APTT) - URGENT (baseline before anticoagulation)
+  * Lipid profile (Total cholesterol, LDL, HDL, TG) - URGENT (cardiovascular risk assessment, statin indication)
+
+WITHIN 3 HOURS:
+  * Troponin hs T3 (at 3 hours) - if T0 and T1 inconclusive (ESC 0h/1h algorithm)
+  * HbA1c - URGENT (diabetes screening, prognostic indicator)
+  * Chest X-ray - URGENT (exclude pulmonary edema, aortic dissection, pneumothorax)
+  * CK-MB (Creatine Kinase-MB) - OPTIONAL (if troponin unavailable, less sensitive)
+
+IMAGING AFTER STABILIZATION:
+  * Echocardiography - URGENT (assess LV function, wall motion abnormalities, complications)
+  * Coronary angiography - EMERGENCY if STEMI; URGENT if NSTEMI high-risk
+
+🚨 CRITICAL RULE FOR ACS INVESTIGATIONS:
+- ALWAYS order: ECG + Troponin hs (T0, T1h, T3h) + FBC + U&E + Lipid profile + Glucose/HbA1c
+- NEVER order only "routine bloods" - be SPECIFIC with each test name
+- Troponin MUST be high-sensitivity (hs-cTnI or hs-cTnT) for ESC 0h/1h algorithm
+- ECG within 10 minutes is MANDATORY for suspected ACS
+
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🍬 ENDOCRINE SYSTEM (Endocrinology Encyclopedia)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1107,6 +1137,41 @@ ABSOLUTE CONTRAINDICATIONS FOR NSAIDs (Ibuprofen, Diclofenac, Naproxen, COX-2):
 
 ⚠️ IF BLOOD GLUCOSE ELEVATED AND PATIENT HAS DIABETES WITHOUT TREATMENT:
 YOU MUST PRESCRIBE APPROPRIATE ANTIDIABETIC!
+
+═══════════════════════════════════════════════════════════════════════════════
+🚨 CRITICAL CONDITIONS - MANDATORY PROTOCOL VERIFICATION
+═══════════════════════════════════════════════════════════════════════════════
+
+BEFORE GENERATING YOUR RESPONSE, IF PATIENT HAS ANY OF THESE SYMPTOMS, VERIFY:
+
+🫀 **CHEST PAIN / SUSPECTED ACS**:
+□ ✅ Diagnosis: "Acute Coronary Syndrome" or "Suspected ACS" or "STEMI" or "NSTEMI"
+□ ✅ Specialist referral: required=true, specialty="Cardiology", urgency="emergency"
+□ ✅ Medications: Aspirin 300mg STAT + Ticagrelor 180mg STAT
+□ ❌ NSAIDs: NEVER Ibuprofen, Diclofenac, Naproxen
+□ ✅ Investigations: ECG (STAT), Troponin hs T0/T1h/T3h (STAT/URGENT), FBC, U&E, Lipids, HbA1c
+□ ❌ DO NOT prescribe only "FBC + CXR" - ACS needs TROPONIN + ECG + U&E + LIPIDS
+
+🧠 **STROKE / NEUROLOGICAL DEFICIT**:
+□ ✅ Diagnosis: "Stroke" or "TIA" or "CVA"
+□ ✅ Specialist referral: required=true, specialty="Neurology", urgency="emergency"
+□ ✅ Investigations: CT head (STAT), ECG, FBC, U&E, Coagulation, Glucose
+□ ✅ Treatment: Aspirin 300mg (after CT excludes hemorrhage) OR thrombolysis if <4.5h
+
+🍬 **DIABETIC EMERGENCY**:
+□ ✅ If DKA: Insulin IV, Fluids, K+ monitoring, Bicarb if pH <7.0
+□ ✅ If Hypoglycemia: Glucose 20g PO or 50ml 50% Dextrose IV
+□ ✅ Investigations: Glucose, HbA1c, U&E, Ketones, VBG/ABG if DKA
+
+🫁 **RESPIRATORY DISTRESS**:
+□ ✅ If PE suspected: CTPA, D-dimer, ECG, ABG, anticoagulation
+□ ✅ If pneumonia: CXR, CRP, FBC, sputum culture, antibiotics
+□ ✅ If asthma: Peak flow, Salbutamol, Prednisolone
+
+🔥 **SEPSIS**:
+□ ✅ Investigations: FBC, CRP, Lactate, Blood cultures, Urine MC&S
+□ ✅ Treatment: IV fluids, Broad-spectrum antibiotics <1h
+□ ✅ Sepsis-6 bundle within 1 hour
 
 ═══════════════════════════════════════════════════════════════════════════════
 🚨 ENCYCLOPEDIC QUALITY CONTROL - MANDATORY CHECKLIST
@@ -2373,6 +2438,178 @@ function hasInfectionSymptoms(symptoms: string[], chiefComplaint: string = ''): 
 }
 
 // ==================== UNIVERSAL VALIDATION FUNCTIONS (CONSERVÉES) ====================
+// ==================== CRITICAL CONDITIONS VALIDATION ====================
+function validateCriticalConditions(analysis: any, patientContext: PatientContext) {
+  const issues: Array<{type: 'critical'|'important'|'minor', category: string, description: string, suggestion: string}> = []
+  
+  const diagnosis = (analysis?.clinical_analysis?.primary_diagnosis?.condition || '').toLowerCase()
+  const chiefComplaint = (patientContext?.chiefComplaint || '').toLowerCase()
+  const symptoms = (patientContext?.symptoms || '').toLowerCase()
+  const allText = `${diagnosis} ${chiefComplaint} ${symptoms}`
+  
+  // 🫀 ACS / CHEST PAIN VALIDATION
+  if (allText.includes('chest pain') || allText.includes('acs') || allText.includes('coronary') || 
+      allText.includes('stemi') || allText.includes('nstemi') || allText.includes('angina')) {
+    
+    console.log('🚨 ACS/Chest pain detected - Running critical validation...')
+    
+    // Check medications
+    const medications = analysis?.treatment_plan?.medications || []
+    const hasIbuprofen = medications.some((m: any) => 
+      (m?.medication_name || m?.drug || '').toLowerCase().includes('ibuprofen') ||
+      (m?.medication_name || m?.drug || '').toLowerCase().includes('diclofenac') ||
+      (m?.medication_name || m?.drug || '').toLowerCase().includes('naproxen')
+    )
+    
+    if (hasIbuprofen) {
+      issues.push({
+        type: 'critical',
+        category: 'safety',
+        description: '❌ FATAL ERROR: NSAIDs prescribed in cardiac patient (increases MI risk by 30-50%)',
+        suggestion: 'REMOVE NSAIDs immediately. Use Paracetamol 1g QDS OR Aspirin 300mg + Ticagrelor 180mg if ACS'
+      })
+    }
+    
+    const hasAspirin = medications.some((m: any) => 
+      (m?.medication_name || m?.drug || '').toLowerCase().includes('aspirin')
+    )
+    const hasTicagrelor = medications.some((m: any) => 
+      (m?.medication_name || m?.drug || '').toLowerCase().includes('ticagrelor')
+    )
+    
+    if (!hasAspirin || !hasTicagrelor) {
+      issues.push({
+        type: 'critical',
+        category: 'treatment',
+        description: '❌ ACS protocol incomplete: Missing Aspirin 300mg and/or Ticagrelor 180mg',
+        suggestion: 'Add: Aspirin 300mg STAT + Ticagrelor 180mg STAT (ESC Guidelines 2023)'
+      })
+    }
+    
+    // Check investigations
+    const labTests = analysis?.investigation_strategy?.laboratory_tests || []
+    const hasTroponin = labTests.some((t: any) => 
+      (t?.test_name || '').toLowerCase().includes('troponin')
+    )
+    const hasECG = (analysis?.investigation_strategy?.imaging_studies || []).some((i: any) => 
+      (i?.study_name || '').toLowerCase().includes('ecg') || (i?.study_name || '').toLowerCase().includes('electrocardiogram')
+    )
+    const hasUE = labTests.some((t: any) => 
+      (t?.test_name || '').toLowerCase().includes('u&e') || (t?.test_name || '').toLowerCase().includes('urea') || (t?.test_name || '').toLowerCase().includes('electrolyte')
+    )
+    const hasLipids = labTests.some((t: any) => 
+      (t?.test_name || '').toLowerCase().includes('lipid') || (t?.test_name || '').toLowerCase().includes('cholesterol')
+    )
+    
+    if (!hasTroponin) {
+      issues.push({
+        type: 'critical',
+        category: 'investigation',
+        description: '❌ ACS: Missing Troponin hs (T0, T1h, T3h) - MANDATORY for ACS diagnosis',
+        suggestion: 'Add: Troponin hs T0 (STAT), T1h (URGENT), T3h if needed (ESC 0h/1h algorithm)'
+      })
+    }
+    
+    if (!hasECG) {
+      issues.push({
+        type: 'critical',
+        category: 'investigation',
+        description: '❌ ACS: Missing 12-lead ECG - MANDATORY within 10 minutes',
+        suggestion: 'Add: 12-lead ECG (STAT) to detect STEMI vs NSTEMI'
+      })
+    }
+    
+    if (!hasUE) {
+      issues.push({
+        type: 'important',
+        category: 'investigation',
+        description: '⚠️ ACS: Missing U&E + eGFR - needed before anticoagulation',
+        suggestion: 'Add: U&E + eGFR (URGENT) to assess renal function and adjust fondaparinux dose'
+      })
+    }
+    
+    if (!hasLipids) {
+      issues.push({
+        type: 'important',
+        category: 'investigation',
+        description: '⚠️ ACS: Missing Lipid profile - needed for CV risk assessment',
+        suggestion: 'Add: Lipid profile (Total cholesterol, LDL, HDL, TG) for statin indication'
+      })
+    }
+    
+    // Check specialist referral
+    const specialistReferral = analysis?.follow_up_plan?.specialist_referral
+    if (!specialistReferral || !specialistReferral.required) {
+      issues.push({
+        type: 'critical',
+        category: 'referral',
+        description: '❌ ACS: Missing EMERGENCY Cardiology referral',
+        suggestion: 'Set: specialist_referral.required=true, specialty="Cardiology", urgency="emergency"'
+      })
+    } else if (specialistReferral.urgency !== 'emergency') {
+      issues.push({
+        type: 'critical',
+        category: 'referral',
+        description: '❌ ACS: Cardiology referral urgency must be EMERGENCY',
+        suggestion: 'Change urgency to "emergency" for suspected ACS'
+      })
+    }
+  }
+  
+  // 🧠 STROKE VALIDATION
+  if (allText.includes('stroke') || allText.includes('cva') || allText.includes('tia') || 
+      allText.includes('hemiparesis') || allText.includes('facial droop')) {
+    
+    console.log('🚨 Stroke detected - Running critical validation...')
+    
+    const imaging = analysis?.investigation_strategy?.imaging_studies || []
+    const hasCTHead = imaging.some((i: any) => 
+      (i?.study_name || '').toLowerCase().includes('ct') && (i?.study_name || '').toLowerCase().includes('head')
+    )
+    
+    if (!hasCTHead) {
+      issues.push({
+        type: 'critical',
+        category: 'investigation',
+        description: '❌ Stroke: Missing CT head (STAT) - MANDATORY to exclude hemorrhage before aspirin',
+        suggestion: 'Add: CT head non-contrast (STAT) before any antiplatelet therapy'
+      })
+    }
+    
+    const specialistReferral = analysis?.follow_up_plan?.specialist_referral
+    if (!specialistReferral || !specialistReferral.required || specialistReferral.specialty !== 'Neurology') {
+      issues.push({
+        type: 'critical',
+        category: 'referral',
+        description: '❌ Stroke: Missing EMERGENCY Neurology referral',
+        suggestion: 'Set: specialist_referral.required=true, specialty="Neurology", urgency="emergency"'
+      })
+    }
+  }
+  
+  // 🫁 PULMONARY EMBOLISM VALIDATION
+  if (allText.includes('pulmonary embolism') || allText.includes(' pe ') || allText.includes('pe suspected')) {
+    const imaging = analysis?.investigation_strategy?.imaging_studies || []
+    const hasCTPA = imaging.some((i: any) => 
+      (i?.study_name || '').toLowerCase().includes('ctpa') || 
+      ((i?.study_name || '').toLowerCase().includes('ct') && (i?.study_name || '').toLowerCase().includes('pulmonary'))
+    )
+    
+    if (!hasCTPA) {
+      issues.push({
+        type: 'critical',
+        category: 'investigation',
+        description: '❌ PE suspected: Missing CTPA (CT Pulmonary Angiography)',
+        suggestion: 'Add: CTPA (URGENT) to confirm/exclude pulmonary embolism'
+      })
+    }
+  }
+  
+  console.log(`✅ Critical conditions validation: ${issues.length} issue(s) found`)
+  return { issues }
+}
+
+// ==================== UNIVERSAL MEDICAL VALIDATION ====================
 function universalMedicalValidation(
   analysis: any, 
   patientContext: PatientContext
@@ -2381,6 +2618,10 @@ function universalMedicalValidation(
   console.log('🌍 Universal Medical Validation - Works for ALL pathologies...')
   
   const issues: Array<{type: 'critical'|'important'|'minor', category: string, description: string, suggestion: string}> = []
+  
+  // ⚠️ NEW: Critical conditions validation FIRST
+  const criticalValidation = validateCriticalConditions(analysis, patientContext)
+  issues.push(...criticalValidation.issues)
   
   const diagnosticValidation = validateDiagnosticProcess(analysis)
   issues.push(...diagnosticValidation.issues)
