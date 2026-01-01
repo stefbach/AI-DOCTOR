@@ -338,10 +338,22 @@ BEFORE PRESCRIBING ANY MEDICATION, SYSTEMATICALLY CHECK:
   ],
   "treatment_plan": {
     "approach": "MANDATORY - Specific therapeutic approach",
-    "prescription_rationale": "MANDATORY - Precise medical justification", 
+    "prescription_rationale": "MANDATORY - Precise medical justification",
+    
+    "⚠️🚨 CRITICAL MEDICATION SAFETY CHECK BEFORE PRESCRIBING 🚨⚠️": {
+      "cardiac_symptoms_present": "MANDATORY CHECK - Does patient have chest pain, angina, cardiac history, ACS, MI, heart failure?",
+      "if_YES_cardiac_symptoms": "🚫 ABSOLUTE BAN: NEVER prescribe NSAIDs (Ibuprofen, Diclofenac, Naproxen, COX-2). USE ONLY: Paracetamol 1g QDS OR Morphine if severe pain OR Aspirin 300mg + Ticagrelor 180mg if ACS",
+      "gi_bleeding_risk": "CHECK - Active ulcer, GI bleeding history, anticoagulants?",
+      "if_YES_gi_risk": "🚫 AVOID NSAIDs. USE: Paracetamol 1g QDS",
+      "renal_impairment": "CHECK - CKD stage 4-5 (eGFR <30)?",
+      "if_YES_renal": "🚫 AVOID NSAIDs. USE: Paracetamol (reduce dose if eGFR <30)",
+      "age_over_65": "CHECK - Patient age >65 years?",
+      "if_YES_elderly": "⚠️ NSAIDs: Lowest dose, shortest duration, WITH PPI. PREFER: Paracetamol first"
+    },
+    
     "medications": [
   {
-    "medication_name": "Drug name + dose (e.g., Amoxicillin 500mg)",
+    "medication_name": "Drug name + dose (e.g., Amoxicillin 500mg) - ⚠️ NEVER Ibuprofen if cardiac symptoms!",
     "why_prescribed": "MANDATORY - Why you are prescribing this medication to this patient",
     "how_to_take": "UK format dosing (e.g., TDS = three times daily)",
     "dosing_details": {
@@ -472,6 +484,47 @@ YOU MUST SET specialist_referral.required = true AND SPECIFY THE SPECIALTY WHEN:
 3. Set appropriate urgency (emergency/urgent/routine)
 4. Provide SPECIFIC medical reason for referral
 5. List any investigations to complete before referral (if applicable)
+
+═══════════════════════════════════════════════════════════════════════════════
+🚫🚨 ABSOLUTE MEDICATION BAN - CARDIAC PATIENTS 🚨🚫
+═══════════════════════════════════════════════════════════════════════════════
+
+⛔ **NEVER PRESCRIBE NSAIDs (Ibuprofen, Diclofenac, Naproxen, COX-2 inhibitors) IF**:
+   1. ❌ Chest pain / Angina symptoms
+   2. ❌ Suspected or confirmed ACS (Acute Coronary Syndrome)
+   3. ❌ Recent MI (myocardial infarction)
+   4. ❌ ANY cardiac symptoms (palpitations, dyspnea, syncope)
+   5. ❌ Known coronary artery disease
+   6. ❌ Heart failure (any stage)
+   7. ❌ Stroke / TIA history
+   8. ❌ Age >65 years (use with extreme caution, prefer alternatives)
+
+🚨 **WHY THIS IS CRITICAL**:
+   - NSAIDs increase myocardial infarction risk by 30-50%
+   - NSAIDs worsen cardiovascular outcomes
+   - NSAIDs promote thrombosis (pro-coagulant effect)
+   - NSAIDs reduce aspirin effectiveness
+
+✅ **SAFE ALTERNATIVES FOR CARDIAC PATIENTS**:
+   1. **FIRST CHOICE**: Paracetamol 1g QDS (max 4g/day) - ALWAYS SAFE
+   2. **IF ACS/MI**: Aspirin 300mg loading + Ticagrelor 180mg loading
+   3. **IF SEVERE PAIN**: Morphine 2.5-5mg IV (in hospital setting)
+   4. **NEVER**: Ibuprofen, Diclofenac, Naproxen, Celecoxib
+
+🚨 **EMERGENCY PROTOCOL FOR ACS**:
+   - IMMEDIATE HOSPITAL REFERRAL
+   - Aspirin 300mg STAT
+   - Ticagrelor 180mg STAT
+   - Fondaparinux 2.5mg SC (if NSTEMI)
+   - Primary PCI within 120 minutes (if STEMI)
+   - NO NSAIDs EVER!
+
+⚠️ **BEFORE PRESCRIBING ANY MEDICATION, ASK YOURSELF**:
+   → Does patient have chest pain? → YES → NO NSAIDs!
+   → Does patient have cardiac history? → YES → NO NSAIDs!
+   → Is patient >65 years old? → YES → Prefer Paracetamol!
+
+═══════════════════════════════════════════════════════════════════════════════
 
 PATIENT CONTEXT:
 {{PATIENT_CONTEXT}}
