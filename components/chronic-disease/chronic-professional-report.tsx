@@ -2852,7 +2852,7 @@ export default function ChronicProfessionalReport({
             <Stethoscope className="h-5 w-5" />
             Practitioner Information
           </h3>
-          <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
             <div><strong>Name:</strong> {medicalReport.practitioner.name}</div>
             <div><strong>Specialty:</strong> {medicalReport.practitioner.specialty}</div>
             <div><strong>Qualifications:</strong> {medicalReport.practitioner.qualifications}</div>
@@ -2871,7 +2871,7 @@ export default function ChronicProfessionalReport({
           {/* Demographics Section */}
           <div className="mb-4 pb-4 border-b border-blue-200">
             <h4 className="font-semibold text-sm text-blue-700 mb-2">Patient Demographics</h4>
-            <div className="grid grid-cols-3 gap-x-6 gap-y-2 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
               <div><strong>Nom complet / Full Name:</strong> {medicalReport.patient.fullName}</div>
               <div><strong>Date de naissance / Date of Birth:</strong> {medicalReport.patient.dateOfBirth}</div>
               <div><strong>Âge / Age:</strong> {medicalReport.patient.age} years</div>
@@ -2987,7 +2987,7 @@ export default function ChronicProfessionalReport({
             patientData?.alcool || patientData?.physicalActivity || patientData?.activitePhysique) && (
             <div>
               <h4 className="font-semibold text-sm text-blue-700 mb-2">🚶 Habitudes de vie / Lifestyle Habits</h4>
-              <div className="grid grid-cols-3 gap-x-6 gap-y-2 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
                 {(patientData?.smokingStatus || patientData?.tabac) && (
                   <div>
                     <strong>Tabac / Smoking:</strong>{' '}
@@ -3261,7 +3261,7 @@ export default function ChronicProfessionalReport({
         
         {/* Patient Info */}
         <div className="mb-6 p-4 bg-gray-50 rounded">
-          <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
             <div><strong>Patient:</strong> {report.medicalReport.patient.fullName}</div>
             <div><strong>Date:</strong> {medicationPrescription.prescription.datePrescription}</div>
             <div><strong>Address:</strong> {report.medicalReport.patient.address}</div>
@@ -3290,7 +3290,7 @@ export default function ChronicProfessionalReport({
                       </Button>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
                         <Label>Brand Name *</Label>
                         <Input
@@ -3598,7 +3598,7 @@ export default function ChronicProfessionalReport({
         
         {/* Patient Info */}
         <div className="mb-6 p-4 bg-gray-50 rounded">
-          <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
             <div><strong>Patient:</strong> {report.medicalReport.patient.fullName}</div>
             <div><strong>Date:</strong> {laboratoryTests.prescription.datePrescription}</div>
             <div><strong>Age:</strong> {report.medicalReport.patient.age}</div>
@@ -3779,7 +3779,7 @@ export default function ChronicProfessionalReport({
         {editMode && hasTests && (
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
             <h3 className="font-semibold mb-3">Add Test to Category:</h3>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {categories.map(category => (
                 <Button
                   key={category.key}
@@ -3938,7 +3938,7 @@ export default function ChronicProfessionalReport({
         
         {/* Patient Info */}
         <div className="mb-6 p-4 bg-gray-50 rounded">
-          <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
             <div><strong>Patient:</strong> {report.medicalReport.patient.fullName}</div>
             <div><strong>Date:</strong> {paraclinicalExams.prescription.datePrescription}</div>
             <div><strong>Age:</strong> {report.medicalReport.patient.age}</div>
@@ -3963,7 +3963,7 @@ export default function ChronicProfessionalReport({
                             className="font-bold"
                           />
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div>
                             <Label>Modality</Label>
                             <Input
@@ -4254,7 +4254,7 @@ export default function ChronicProfessionalReport({
           {/* Demographics Section */}
           <div className="mb-4 pb-4 border-b border-cyan-200">
             <h4 className="font-semibold text-sm text-cyan-700 mb-2">👤 Patient Demographics</h4>
-            <div className="grid grid-cols-3 gap-x-6 gap-y-2 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
               <div><strong>Nom complet / Full Name:</strong> {report.medicalReport.patient.fullName}</div>
               <div><strong>Date de naissance / Date of Birth:</strong> {report.medicalReport.patient.dateOfBirth}</div>
               <div><strong>Âge / Age:</strong> {report.medicalReport.patient.age} years</div>
@@ -4370,7 +4370,7 @@ export default function ChronicProfessionalReport({
             patientData?.alcool || patientData?.physicalActivity || patientData?.activitePhysique) && (
             <div>
               <h4 className="font-semibold text-sm text-cyan-700 mb-2">🚶 Habitudes de vie / Lifestyle Habits</h4>
-              <div className="grid grid-cols-3 gap-x-6 gap-y-2 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
                 {(patientData?.smokingStatus || patientData?.tabac) && (
                   <div>
                     <strong>Tabac / Smoking:</strong>{' '}
@@ -4448,7 +4448,7 @@ export default function ChronicProfessionalReport({
         {dietaryProtocol.nutritionalGuidelines && (
           <div className="mb-6 p-4 bg-cyan-50 rounded">
             <h3 className="font-bold mb-3">Nutritional Guidelines</h3>
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
               {dietaryProtocol.nutritionalGuidelines.caloriesTarget && (
                 <div>
                   <strong>Daily Calories Target:</strong> {dietaryProtocol.nutritionalGuidelines.caloriesTarget}
@@ -4463,7 +4463,7 @@ export default function ChronicProfessionalReport({
             {dietaryProtocol.nutritionalGuidelines.macronutrients && (
               <div className="mt-3">
                 <strong>Macronutrients:</strong>
-                <div className="grid grid-cols-3 gap-2 mt-2 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-2 text-sm">
                   {dietaryProtocol.nutritionalGuidelines.macronutrients.proteins && (
                     <div>Proteins: {dietaryProtocol.nutritionalGuidelines.macronutrients.proteins}</div>
                   )}
@@ -4600,7 +4600,7 @@ export default function ChronicProfessionalReport({
             {dietaryProtocol.practicalGuidance.groceryList && (
               <div className="mb-4">
                 <h4 className="font-semibold mb-2 text-blue-700">🛒 Grocery Shopping List:</h4>
-                <div className="grid grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                   {dietaryProtocol.practicalGuidance.groceryList.proteins && (
                     <div>
                       <p className="font-semibold text-blue-700">Proteins:</p>
@@ -4651,7 +4651,7 @@ export default function ChronicProfessionalReport({
             {dietaryProtocol.practicalGuidance.cookingMethods && (
               <div>
                 <h4 className="font-semibold mb-2 text-blue-700">👨‍🍳 Cooking Methods:</h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   {dietaryProtocol.practicalGuidance.cookingMethods.recommended && (
                     <div className="bg-teal-50 p-3 rounded">
                       <p className="font-semibold text-teal-700 mb-1">✅ Recommended:</p>
@@ -4679,7 +4679,7 @@ export default function ChronicProfessionalReport({
         )}
         
         {/* Foods to Avoid & Recommended */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {dietaryProtocol.forbiddenFoods && dietaryProtocol.forbiddenFoods.length > 0 && (
             <div className="p-4 bg-blue-50 rounded">
               <h4 className="font-semibold mb-2 text-blue-700">Foods to Avoid:</h4>
@@ -4777,7 +4777,7 @@ export default function ChronicProfessionalReport({
           
           {/* Medical Practitioner Info */}
           <div className="bg-gray-100 p-4 rounded mb-4">
-            <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm max-w-3xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm max-w-3xl mx-auto">
               <div className="text-left">
                 <strong>Medical Practitioner:</strong> {report.medicalReport.practitioner.name}
               </div>
@@ -4816,7 +4816,7 @@ export default function ChronicProfessionalReport({
         <div className="mb-8">
           <h3 className="text-lg font-bold mb-3 pb-2 border-b border-gray-400">PATIENT IDENTIFICATION & MEDICAL PROFILE</h3>
           <div className="bg-gray-50 p-4 rounded">
-            <div className="grid grid-cols-3 gap-x-6 gap-y-3 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-3 text-sm">
               <div>
                 <span className="font-semibold">Full Name:</span> {report.medicalReport.patient.fullName}
               </div>
@@ -4909,7 +4909,7 @@ export default function ChronicProfessionalReport({
           <div className="mb-8">
             <h3 className="text-lg font-bold mb-3 pb-2 border-b border-gray-400">MONITORING & FOLLOW-UP SCHEDULE</h3>
             <div className="bg-blue-50 p-4 rounded border border-blue-200">
-              <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-sm">
                 {followUpPlan.monitoringSchedule.nextAppointment && (
                   <div>
                     <span className="font-semibold">Next Appointment:</span>
@@ -5224,7 +5224,7 @@ export default function ChronicProfessionalReport({
           <CardTitle className="text-lg">Prescription Summary</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-4 text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-center">
             <div className="p-4 bg-teal-50 rounded">
               <Pill className="h-8 w-8 mx-auto mb-2 text-teal-600" />
               <p className="text-2xl font-bold text-teal-600">{medicationCount}</p>
@@ -5348,7 +5348,7 @@ export default function ChronicProfessionalReport({
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="startDate">Start Date (Date Début)</Label>
                   <Input
@@ -5454,7 +5454,7 @@ export default function ChronicProfessionalReport({
 
                     {/* Medical Practitioner Info Header */}
                     <div className="bg-gray-100 p-4 rounded mt-4">
-                      <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm max-w-3xl mx-auto">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm max-w-3xl mx-auto">
                         <div className="text-left">
                           <strong>Medical Practitioner:</strong> {report.medicalReport.practitioner.name}
                         </div>
@@ -5481,7 +5481,7 @@ export default function ChronicProfessionalReport({
                   <div className="mb-6">
                     <h3 className="text-lg font-bold mb-3 pb-2 border-b border-gray-400">PATIENT INFORMATION / INFORMATIONS DU PATIENT</h3>
                     <div className="bg-gray-50 p-4 rounded">
-                      <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm">
                         <div>
                           <span className="font-semibold">Full Name / Nom complet:</span> {report.medicalReport.patient.fullName}
                         </div>
@@ -5523,7 +5523,7 @@ export default function ChronicProfessionalReport({
                         </p>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded">
                         <div className="text-center">
                           <p className="font-semibold text-sm">Start Date / Date Début</p>
                           <p className="text-lg font-bold text-blue-600">{sickLeaveData.startDate}</p>
@@ -5611,7 +5611,7 @@ export default function ChronicProfessionalReport({
               <h3 className="font-bold mb-2">Service Provider</h3>
               <p className="font-bold">{invoiceData.provider.companyName}</p>
               <p className="text-sm">Private company incorporated under Mauritian law</p>
-              <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm mt-2">
                 <div>Company Reg. No.: {invoiceData.provider.registrationNumber}</div>
                 <div>VAT No.: {invoiceData.provider.vatNumber}</div>
                 <div className="col-span-2">Registered Office: {invoiceData.provider.registeredOffice}</div>
@@ -5703,7 +5703,7 @@ export default function ChronicProfessionalReport({
               <h3 className="font-bold mb-2">Payment Information</h3>
               {editMode && validationStatus !== 'validated' ? (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                       <Label>Payment Method</Label>
                       <Select
@@ -5753,7 +5753,7 @@ export default function ChronicProfessionalReport({
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                   <div><strong>Payment Method:</strong> {invoiceData.payment.method}</div>
                   <div><strong>Payment Received On:</strong> {invoiceData.payment.receivedDate || invoiceData.header.invoiceDate}</div>
                   <div className="col-span-2">
