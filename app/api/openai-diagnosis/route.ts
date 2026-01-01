@@ -2603,7 +2603,7 @@ function validateCriticalConditions(analysis: any, patientContext: PatientContex
   
   const diagnosis = (analysis?.clinical_analysis?.primary_diagnosis?.condition || '').toLowerCase()
   const chiefComplaint = (patientContext?.chiefComplaint || '').toLowerCase()
-  const symptoms = (patientContext?.symptoms || '').toLowerCase()
+  const symptoms = (patientContext?.symptoms || []).join(' ').toLowerCase()
   const allText = `${diagnosis} ${chiefComplaint} ${symptoms}`
   
   // 🫀 ACS / CHEST PAIN VALIDATION
