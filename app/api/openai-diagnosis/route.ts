@@ -1686,99 +1686,13 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
           fixedMed.drug === null ||
           fixedMed.drug.length < 5) {
         
-        const symptoms = (patientContext.symptoms || []).join(' ').toLowerCase()
-        const chiefComplaint = (patientContext.chief_complaint || '').toLowerCase()
-        const allSymptoms = `${symptoms} ${chiefComplaint}`
+        // 🚫 DO NOT AUTO-FIX - Trust GPT-4 or remove invalid medication
+        console.log(`⚠️ Invalid medication detected: ${fixedMed.drug || 'undefined'}`)
+        console.log('✅ Removing invalid medication - Trusting GPT-4 decision')
         
-        // 🚫 CHECK CARDIAC SYMPTOMS FIRST - NEVER IBUPROFEN FOR CARDIAC PAIN
-        const hasCardiacSymptoms = allSymptoms.includes('chest pain') || 
-                                   allSymptoms.includes('douleur thoracique') ||
-                                   allSymptoms.includes('cardiac') ||
-                                   allSymptoms.includes('cardiaque') ||
-                                   allSymptoms.includes('angina') ||
-                                   allSymptoms.includes('angine') ||
-                                   allSymptoms.includes('heart') ||
-                                   allSymptoms.includes('coeur') ||
-                                   allSymptoms.includes('acs') ||
-                                   allSymptoms.includes('stemi') ||
-                                   allSymptoms.includes('nstemi') ||
-                                   allSymptoms.includes('coronary') ||
-                                   allSymptoms.includes('coronaire')
-        
-        // Assignation intelligente basée sur les symptômes avec DCI précis
-        if ((allSymptoms.includes('pain') || allSymptoms.includes('douleur') || allSymptoms.includes('ache')) && !hasCardiacSymptoms) {
-          Object.assign(fixedMed, {
-            drug: "Paracetamol 1g",  // 🔄 CHANGÉ: Paracetamol par défaut au lieu d'Ibuprofen
-            dci: "Paracetamol",
-            indication: "Analgésie pour soulagement de la douleur légère à modérée (musculoskeletal, céphalées, douleurs diverses)",
-            mechanism: "Analgésique et antipyrétique, inhibition centrale de la cyclooxygénase",
-            dosing: { 
-              adult: "1g QDS", 
-              frequency_per_day: 4,
-              individual_dose: "1g",
-              daily_total_dose: "4g/day (maximum)"
-            },
-            duration: "5-7 jours selon nécessité",
-            contraindications: "Insuffisance hépatique sévère, allergie au paracétamol",
-            side_effects: "Rares aux doses thérapeutiques, hépatotoxicité en cas de surdosage (>4g/jour)",
-            interactions: "Compatible avec la plupart des médicaments, prudence avec warfarine et alcool",
-            monitoring: "Fonction hépatique si utilisation prolongée, respecter dose maximale 4g/jour",
-            mauritius_availability: {
-              public_free: true,
-              estimated_cost: "Rs 50-150",
-              brand_names: "Panadol, Doliprane disponibles partout"
-            },
-            administration_instructions: "Prendre avec de l'eau, peut être pris avec ou sans nourriture. JAMAIS dépasser 4g/jour"
-          })
-        } else if (allSymptoms.includes('fever') || allSymptoms.includes('fièvre') || allSymptoms.includes('temperature')) {
-          Object.assign(fixedMed, {
-            drug: "Paracetamol 1g",
-            dci: "Paracetamol",
-            indication: "Prise en charge symptomatique de la pyrexie et soulagement de la douleur légère à modérée dans une affection fébrile aiguë",
-            mechanism: "Analgésique et antipyrétique, inhibition centrale de la cyclooxygénase",
-            dosing: { 
-              adult: "1g QDS",
-              frequency_per_day: 4,
-              individual_dose: "1g",
-              daily_total_dose: "4g/day"
-            },
-            duration: "3-5 jours selon nécessité",
-            contraindications: "Insuffisance hépatique sévère, allergie au paracétamol",
-            side_effects: "Rares aux doses thérapeutiques, hépatotoxicité en cas de surdosage",
-            interactions: "Compatible avec la plupart des médicaments, prudence avec warfarine",
-            monitoring: "Surveillance de la température, fonction hépatique si utilisation prolongée",
-            mauritius_availability: {
-              public_free: true,
-              estimated_cost: "Rs 50-150",
-              brand_names: "Panadol, Doliprane disponibles partout"
-            },
-            administration_instructions: "Prendre avec de l'eau, peut être pris avec ou sans nourriture"
-          })
-        } else if (allSymptoms.includes('nausea') || allSymptoms.includes('vomit') || allSymptoms.includes('gastro') || allSymptoms.includes('stomach')) {
-          Object.assign(fixedMed, {
-            drug: "Métoclopramide 10mg",
-            dci: "Métoclopramide",
-            indication: "Thérapie antiémétique pour prise en charge des nausées et vomissements associés aux troubles gastro-intestinaux",
-            mechanism: "Antagoniste dopaminergique avec activité prokinétique",
-            dosing: { 
-              adult: "10mg TDS",
-              frequency_per_day: 3,
-              individual_dose: "10mg",
-              daily_total_dose: "30mg/day"
-            },
-            duration: "48-72 heures maximum",
-            contraindications: "Phéochromocytome, obstruction gastro-intestinale, maladie de Parkinson",
-            side_effects: "Somnolence, effets extrapyramidaux (rares), agitation",
-            interactions: "Éviter avec neuroleptiques, sédation accrue avec dépresseurs SNC",
-            monitoring: "Symptômes neurologiques, efficacité sur nausées/vomissements",
-            mauritius_availability: {
-              public_free: true,
-              estimated_cost: "Rs 60-180",
-              brand_names: "Maxolon, Primperan disponibles"
-            },
-            administration_instructions: "Prendre 30 minutes avant les repas si nauséeux"
-          })
-        } else if (allSymptoms.includes('cough') || allSymptoms.includes('toux') || allSymptoms.includes('respiratory') || allSymptoms.includes('ear') || allSymptoms.includes('oreille')) {
+        // Return null to filter out later
+        return null
+      }
           Object.assign(fixedMed, {
             drug: "Amoxicillin 500mg",
             dci: "Amoxicillin",
@@ -1900,9 +1814,9 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
       }
       
       return fixedMed
-    })
+    }).filter((med: any) => med !== null)  // Remove invalid medications
     
-    console.log(`🔍 Medications BEFORE cleanup: ${analysis.treatment_plan.medications.length}`)
+    console.log(`🔍 Medications AFTER filtering: ${analysis.treatment_plan.medications.length}`)
     if (analysis.treatment_plan.medications.length > 0) {
       console.log('   First medication (before cleanup):', {
         drug: analysis.treatment_plan.medications[0]?.drug,
@@ -3114,10 +3028,10 @@ export function validateTherapeuticCompleteness(analysis: any, patientContext: P
       })
       completenessScore -= 50
       
-      // 🚨 AUTO-GENERATE medications if empty
-      console.log('⚠️ No medications found - auto-generating based on context...')
-      analysis.treatment_plan.medications = generateDefaultMedications(patientContext)
-      console.log(`✅ Generated ${analysis.treatment_plan.medications.length} default medications`)
+      // 🚨 NO AUTO-GENERATION - Trust GPT-4 decision
+      // If GPT-4 didn't prescribe medications, it may be CORRECT (e.g., ACS → immediate hospital referral)
+      console.log('⚠️ No medications prescribed by GPT-4 - This may be intentional (emergency referral)')
+      console.log('✅ Trusting GPT-4 decision - NOT auto-generating medications')
     }
   }
   
