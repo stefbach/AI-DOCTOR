@@ -12,7 +12,13 @@ export const metadata: Metadata = {
   title: "TIBOK IA DOCTOR - Assistant Médical Intelligent",
   description: "Assistant médical intelligent pour le diagnostic clinique avec IA",
   keywords: "médecine, diagnostic, IA, intelligence artificielle, santé",
-  generator: 'v0.dev'
+  generator: 'v0.dev',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  }
 }
 
 export default function RootLayout({

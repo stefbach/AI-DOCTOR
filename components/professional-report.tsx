@@ -428,7 +428,7 @@ const MedicationEditForm = memo(({
  )}
  </div>
  
- <div className="grid grid-cols-2 gap-3">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
  <div>
  <Label htmlFor={`med-nom-${index}`}>Medication Name</Label>
  <Input
@@ -649,7 +649,7 @@ const BiologyTestEditForm = memo(({
  </div>
  )}
  
- <div className="grid grid-cols-2 gap-3">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
  <div>
  <Label>Test Name</Label>
  <Input
@@ -816,7 +816,7 @@ const ImagingExamEditForm = memo(({
  </div>
  )}
  
- <div className="grid grid-cols-2 gap-3">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
  <div>
  <Label>Imaging Type</Label>
  <Select
@@ -3606,7 +3606,7 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
  )}
  
  {editingDoctor ? (
- <div className="grid grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
  <div>
  <Label>Full name *</Label>
  <Input
@@ -3678,7 +3678,7 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
  </div>
  </div>
  ) : (
- <div className="grid grid-cols-2 gap-2 text-sm">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
  <div><strong>Name:</strong> {doctorInfo.nom}</div>
  <div><strong>Qualifications:</strong> {doctorInfo.qualifications}</div>
  <div><strong>Speciality:</strong> {doctorInfo.specialite}</div>
@@ -3743,7 +3743,7 @@ const ConsultationReport = () => {
 
  <div className="mb-6 p-4 bg-blue-50 rounded-lg print:bg-transparent print:border print:border-gray-300 info-box">
  <h3 className="font-bold mb-2">Medical Practitioner</h3>
- <div className="grid grid-cols-2 gap-2 text-sm">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
  <div>{praticien.nom}</div>
  <div>{praticien.qualifications}</div>
  <div>{praticien.specialite}</div>
@@ -3804,7 +3804,7 @@ const ConsultationReport = () => {
  
  {/* Gestational Age - Editable (if pregnant) */}
  {patient.pregnancyStatus === 'pregnant' && (
- <div className="grid grid-cols-2 gap-3">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
  <div>
  <Label htmlFor="patient-gestational-age" className="text-xs">Gestational Age</Label>
  <Input
@@ -3870,7 +3870,7 @@ const ConsultationReport = () => {
  <div className="mb-4 pb-3 border-b border-gray-200">
  <h4 className="font-semibold text-sm text-gray-700 mb-2">Vital Signs & Measurements</h4>
  {editMode && validationStatus !== 'validated' ? (
- <div className="grid grid-cols-2 gap-3">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
  {/* Poids - Editable */}
  <div>
  <Label htmlFor="patient-weight" className="text-xs">Weight (kg)</Label>
@@ -3954,7 +3954,7 @@ const ConsultationReport = () => {
  </div>
  </div>
  ) : (
- <div className="grid grid-cols-2 gap-2 text-sm">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
  {/* Display mode */}
  {patient.poids && (
  <div><span className="font-medium">Weight:</span> {patient.poids} kg</div>
@@ -4173,7 +4173,7 @@ const ConsultationReport = () => {
  }
 
  return (
- <div id="prescription-medicaments" className="bg-white p-8 rounded-lg shadow print:shadow-none">
+ <div id="prescription-medicaments" className="bg-white p-4 md:p-8 rounded-lg shadow print:shadow-none">
  <div className="border-b-2 border-teal-600 pb-4 mb-6 header">
  <div className="flex justify-between items-start">
  <div>
@@ -4203,7 +4203,7 @@ const ConsultationReport = () => {
  </div>
 
  <div className="mb-6 p-4 bg-gray-50 rounded info-box">
- <div className="grid grid-cols-2 gap-2 text-sm">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
  <div><strong>Patient:</strong> {patient.nomComplet || patient.nom}</div>
  <div><strong>Date:</strong> {patient.dateExamen}</div>
  <div><strong>Address:</strong> {patient.adresse}</div>
@@ -4389,7 +4389,7 @@ const ConsultationReport = () => {
  </div>
 
  <div className="mb-6 p-4 bg-blue-50 rounded info-box">
- <div className="grid grid-cols-2 gap-2 text-sm">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
  <div><strong>Patient:</strong> {patient.nomComplet || patient.nom}</div>
  <div><strong>Date:</strong> {patient.dateExamen}</div>
  <div><strong>Clinical Information:</strong> {report?.ordonnances?.biologie?.patient?.diagnosticProvisoire || rapport.conclusionDiagnostique?.substring(0, 100) + '...' || 'N/A'}</div>
@@ -4561,7 +4561,7 @@ const ConsultationReport = () => {
  </div>
 
  <div className="mb-6 p-4 bg-blue-50 rounded info-box">
- <div className="grid grid-cols-2 gap-2 text-sm">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
  <div><strong>Patient:</strong> {patient.nomComplet || patient.nom}</div>
  <div><strong>Weight:</strong> {patient.poids}</div>
  <div><strong>Clinical Diagnosis:</strong> {report?.ordonnances?.imagerie?.prescription?.renseignementsCliniques || 'N/A'}</div>
@@ -4781,7 +4781,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  </div>
 
  <div className="mb-6 p-4 bg-cyan-50 rounded info-box">
- <div className="grid grid-cols-2 gap-2 text-sm">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
  <div><strong>Patient:</strong> {patient.nomComplet || patient.nom}</div>
  <div><strong>Date of Birth:</strong> {patient.dateNaissance}</div>
  <div><strong>Address:</strong> {patient.adresse}</div>
@@ -4798,7 +4798,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  </div>
  )}
  
- <div className="grid grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
  <div>
  <Label>Start Date *</Label>
  <Input
@@ -5000,7 +5000,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <h3 className="font-bold mb-2">Payment Information</h3>
  {editMode && validationStatus !== 'validated' ? (
  <div className="space-y-3">
- <div className="grid grid-cols-2 gap-3">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
  <div>
  <Label>Payment Method</Label>
  <Select value={invoice.payment.method} onValueChange={updatePaymentMethod}>
@@ -5032,7 +5032,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  </div>
  </div>
  ) : (
- <div className="grid grid-cols-2 gap-2 text-sm">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
  <div><strong>Payment Method:</strong> {invoice.payment.method}</div>
  <div><strong>Payment Received On:</strong> {invoice.payment.receivedDate}</div>
  <div className="col-span-2">
@@ -5069,18 +5069,20 @@ const [localSickLeave, setLocalSickLeave] = useState({
  return (
  <Card className="print:hidden">
  <CardContent className="p-4">
- <div className="flex justify-between items-center">
- <div className="flex items-center gap-4">
+ <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+ <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
  <Badge className={validationStatus === 'validated' ? 'bg-teal-100 text-teal-800' : 'bg-cyan-100 text-cyan-800'}>
  {validationStatus === 'validated' ? (
  <>
  <Lock className="h-3 w-3 mr-1" />
- Document validated & signed
+ <span className="hidden sm:inline">Document validated & signed</span>
+ <span className="sm:hidden">Validated</span>
  </>
  ) : (
  <>
  <Unlock className="h-3 w-3 mr-1" />
- Draft - awaiting validation
+ <span className="hidden sm:inline">Draft - awaiting validation</span>
+ <span className="sm:hidden">Draft</span>
  </>
  )}
  </Badge>
@@ -5088,12 +5090,13 @@ const [localSickLeave, setLocalSickLeave] = useState({
  {metadata.wordCount} words
  </span>
  </div>
- <div className="flex gap-2">
+ <div className="flex flex-wrap gap-2 w-full md:w-auto">
  <Button
  variant={editMode ? 'default' : 'outline'}
  size="sm"
  onClick={() => setEditMode(!editMode)}
  disabled={validationStatus === 'validated'}
+ className="flex-1 sm:flex-none"
  >
  {editMode ? <Eye className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
  {editMode ? 'Preview' : 'Edit'}
@@ -5104,18 +5107,21 @@ const [localSickLeave, setLocalSickLeave] = useState({
  size="sm"
  onClick={handleValidation}
  disabled={saving || validationStatus === 'validated'}
+ className="flex-1 sm:flex-none"
  >
  {saving ? (
  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
  ) : (
  <FileCheck className="h-4 w-4 mr-2" />
  )}
- {validationStatus === 'validated' ? 'Validated' : 'Validate & Sign'}
+ <span className="hidden sm:inline">{validationStatus === 'validated' ? 'Validated' : 'Validate & Sign'}</span>
+ <span className="sm:hidden">{validationStatus === 'validated' ? 'Valid' : 'Sign'}</span>
  </Button>
  
- <Button variant="outline" size="sm" onClick={handlePrint}>
+ <Button variant="outline" size="sm" onClick={handlePrint} className="flex-1 sm:flex-none">
  <Printer className="h-4 w-4 mr-2" />
- Print all
+ <span className="hidden sm:inline">Print all</span>
+ <span className="sm:hidden">Print</span>
  </Button>
  </div>
  </div>
@@ -5149,7 +5155,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <CardTitle className="text-lg">Prescription Summary</CardTitle>
  </CardHeader>
  <CardContent>
- <div className="grid grid-cols-3 gap-4 text-center">
+ <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-center">
  <div className="p-4 bg-teal-50 rounded">
  <Pill className="h-8 w-8 mx-auto mb-2 text-teal-600" />
  <p className="text-2xl font-bold text-teal-600">{medicamentCount}</p>
@@ -5180,7 +5186,49 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <PrescriptionStats />
 
  <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
- <TabsList className="flex flex-wrap w-full gap-1">
+ {/* Mobile: Dropdown */}
+ <div className="block md:hidden mb-4">
+   <Select value={activeTab} onValueChange={setActiveTab}>
+     <SelectTrigger className="w-full">
+       <SelectValue />
+     </SelectTrigger>
+     <SelectContent>
+       <SelectItem value="consultation">
+         📄 Report
+         {report?.compteRendu && " ✓"}
+       </SelectItem>
+       <SelectItem value="medicaments">
+         💊 Medications
+         {report?.ordonnances?.medicaments?.prescription?.medicaments?.length > 0 && 
+           ` (${report.ordonnances.medicaments.prescription.medicaments.length})`}
+       </SelectItem>
+       <SelectItem value="biologie">
+         🔬 Laboratory
+         {report?.ordonnances?.biologie && 
+           ` (${Object.values(report.ordonnances.biologie.prescription.analyses || {})
+             .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)})`}
+       </SelectItem>
+       <SelectItem value="imagerie">
+         🔍 Imaging
+         {report?.ordonnances?.imagerie?.prescription?.examens?.length > 0 && 
+           ` (${report.ordonnances.imagerie.prescription.examens.length})`}
+       </SelectItem>
+       <SelectItem value="sickleave">
+         📅 Sick Leave
+         {report?.ordonnances?.arretMaladie && " ✓"}
+       </SelectItem>
+       <SelectItem value="invoice">
+         🧾 Invoice
+       </SelectItem>
+       <SelectItem value="ai-assistant">
+         🤖 AI Assistant
+       </SelectItem>
+     </SelectContent>
+   </Select>
+ </div>
+
+ {/* Desktop: Tabs */}
+ <TabsList className="hidden md:flex flex-wrap w-full gap-1">
  <TabsTrigger value="consultation">
  <FileText className="h-4 w-4 mr-2" />
  Report
