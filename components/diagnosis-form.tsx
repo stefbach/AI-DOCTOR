@@ -496,6 +496,22 @@ export default function DiagnosisForm({
  const [medications, setMedications] = useState<any[]>([])
  const [combinedPrescription, setCombinedPrescription] = useState<any[]>([])
  
+ // 🏥 CONSULTATION CONTEXT STATE
+ const [consultationContext, setConsultationContext] = useState<{
+   setting: 'teleconsultation' | 'emergency_department' | 'general_practice'
+   location?: string
+   access_to_investigations: boolean
+   access_to_iv_medications: boolean
+ }>(() => {
+   // Default: teleconsultation (safest assumption)
+   return {
+     setting: 'teleconsultation',
+     location: 'Patient at home',
+     access_to_investigations: false,
+     access_to_iv_medications: false
+   }
+ })
+ 
  // States for progression
  const [analysisProgress, setAnalysisProgress] = useState(0)
  const [progressMessage, setProgressMessage] = useState("Initializing...")
@@ -871,7 +887,10 @@ export default function DiagnosisForm({
  console.log('   ✅ Length:', patientData?.currentMedications?.length || 0)
  
  const requestBody = {
- patientData,
+ patientData: {
+   ...patientData,
+   consultation_context: consultationContext // 🏥 Add consultation context
+ },
  clinicalData,
  questionsData: questionsData?.responses || [],
  doctorNotes, // ⚕️ Hypothèses et notes du médecin
@@ -1280,6 +1299,74 @@ export default function DiagnosisForm({
  AI questions: {questionsData?.responses?.length || 0} responses
  </li>
  </ul>
+ </div>
+ 
+ {/* 🏥 CONSULTATION CONTEXT SELECTOR */}
+ <div className="bg-blue-50 p-6 rounded-lg border border-blue-200 max-w-2xl mx-auto">
+ <h3 className="text-sm font-semibold text-blue-900 mb-3 flex items-center gap-2">
+ <MapPin className="h-4 w-4" />
+ Consultation Context
+ </h3>
+ <div className="grid grid-cols-1 gap-3">
+ <button
+ onClick={() => setConsultationContext({
+   setting: 'teleconsultation',
+   location: 'Patient at home',
+   access_to_investigations: false,
+   access_to_iv_medications: false
+ })}
+ className={`p-4 rounded-lg border-2 text-left transition-all ${
+   consultationContext.setting === 'teleconsultation'
+   ? 'border-blue-600 bg-blue-100'
+   : 'border-gray-300 hover:border-blue-400'
+ }`}
+ >
+ <div className="font-semibold text-sm">📞 Téléconsultation</div>
+ <div className="text-xs text-gray-600 mt-1">Patient at home - Remote consultation</div>
+ </button>
+ 
+ <button
+ onClick={() => setConsultationContext({
+   setting: 'emergency_department',
+   location: 'Emergency room',
+   access_to_investigations: true,
+   access_to_iv_medications: true
+ })}
+ className={`p-4 rounded-lg border-2 text-left transition-all ${
+   consultationContext.setting === 'emergency_department'
+   ? 'border-red-600 bg-red-100'
+   : 'border-gray-300 hover:border-red-400'
+ }`}
+ >
+ <div className="font-semibold text-sm">🚨 Emergency Department / Urgences</div>
+ <div className="text-xs text-gray-600 mt-1">Hospital - STAT investigations + IV medications available</div>
+ </button>
+ 
+ <button
+ onClick={() => setConsultationContext({
+   setting: 'general_practice',
+   location: 'Medical office',
+   access_to_investigations: true,
+   access_to_iv_medications: false
+ })}
+ className={`p-4 rounded-lg border-2 text-left transition-all ${
+   consultationContext.setting === 'general_practice'
+   ? 'border-green-600 bg-green-100'
+   : 'border-gray-300 hover:border-green-400'
+ }`}
+ >
+ <div className="font-semibold text-sm">🏥 General Practice / Cabinet Médical</div>
+ <div className="text-xs text-gray-600 mt-1">Office - Lab tests available (24-48h results)</div>
+ </button>
+ </div>
+ 
+ <div className="mt-3 text-xs text-gray-600">
+ Current: <span className="font-semibold text-blue-700">
+   {consultationContext.setting === 'teleconsultation' && '📞 Téléconsultation'}
+   {consultationContext.setting === 'emergency_department' && '🚨 Emergency Department'}
+   {consultationContext.setting === 'general_practice' && '🏥 General Practice'}
+ </span>
+ </div>
  </div>
  
  <div className="flex flex-col gap-4 items-center">

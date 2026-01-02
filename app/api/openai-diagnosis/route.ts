@@ -40,6 +40,12 @@ interface PatientContext {
   firstName?: string
   lastName?: string
   anonymousId?: string
+  consultation_context?: {
+    setting: 'teleconsultation' | 'emergency_department' | 'general_practice'
+    location?: string
+    access_to_investigations: boolean
+    access_to_iv_medications: boolean
+  }
 }
 
 interface ValidationResult {
@@ -612,6 +618,12 @@ CURRENT PATIENT MEDICATIONS:
 {{CURRENT_MEDICATIONS}}
 
 CONSULTATION TYPE DETECTED: {{CONSULTATION_TYPE}}
+
+═══════════════════════════════════════════════════════════════════════════════
+🏥 CONSULTATION CONTEXT - CRITICAL ADAPTATION REQUIRED
+═══════════════════════════════════════════════════════════════════════════════
+
+{{CONSULTATION_CONTEXT_DIRECTIVE}}
 
 🚨 MANDATORY CURRENT MEDICATIONS HANDLING:
 
@@ -2217,6 +2229,158 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
   throw lastError || new Error('Failed after multiple attempts with Mauritius quality enhancement')
 }
 
+// 🏥 GENERATE CONSULTATION_CONTEXT DIRECTIVE
+function generateConsultationContextDirective(consultationContext?: {
+  setting: 'teleconsultation' | 'emergency_department' | 'general_practice'
+  location?: string
+  access_to_investigations: boolean
+  access_to_iv_medications: boolean
+}): string {
+  // Default: assume teleconsultation if not specified
+  if (!consultationContext) {
+    return `
+⚠️ CONSULTATION CONTEXT: TELECONSULTATION (Default)
+📍 LOCATION: Patient at home / Remote consultation
+🔬 ACCESS TO INVESTIGATIONS: NO (patient cannot access investigations immediately)
+💉 ACCESS TO IV MEDICATIONS: NO (patient at home)
+
+🚨 CRITICAL RULES FOR TELECONSULTATION:
+1. **EMERGENCY CONDITIONS** (ACS, Stroke, Sepsis, etc.):
+   - ⛔ DO NOT provide hospital-based protocols (ECG STAT, Troponin T0/T1h/T3h, IV medications)
+   - ✅ PROVIDE: Clear emergency referral instructions
+   - ✅ INSTRUCT: "CALL AMBULANCE NOW - SAMU 114 (Mauritius) or 15 (France)"
+   - ✅ IF Aspirin available at home: "Chew Aspirin 300mg while waiting for ambulance"
+   - ✅ EXPLAIN: "This is a MEDICAL EMERGENCY - immediate hospital evaluation required"
+
+2. **NON-EMERGENCY CONDITIONS** (UTI, Pneumonia, Minor ailments):
+   - ✅ PROVIDE: Ambulatory prescriptions (oral medications)
+   - ✅ PROVIDE: Investigations to be scheduled (CXR within 24h, blood tests at local lab)
+   - ✅ PROVIDE: Clear follow-up plan (review in 24-48h)
+   - ✅ PROVIDE: Red flags requiring immediate consultation
+
+🚫 NEVER IN TELECONSULTATION:
+- Hospital investigations (ECG STAT, Troponin T0/T1h/T3h, CT Brain STAT)
+- IV/IM medications (IV Morphine, IV Fondaparinux, IM Adrenaline)
+- Hospital monitoring protocols (q15min vitals, continuous ECG)
+- Direct hospital procedures (Primary PCI, Thrombolysis)
+`
+  }
+  
+  const setting = consultationContext.setting
+  const location = consultationContext.location || 'Location not specified'
+  const hasInvestigations = consultationContext.access_to_investigations
+  const hasIVMeds = consultationContext.access_to_iv_medications
+  
+  if (setting === 'teleconsultation') {
+    return `
+🏥 CONSULTATION CONTEXT: TÉLÉCONSULTATION
+📍 LOCATION: ${location}
+🔬 ACCESS TO INVESTIGATIONS: ${hasInvestigations ? 'YES (patient can access lab/imaging)' : 'NO (patient at home, no immediate access)'}
+💉 ACCESS TO IV MEDICATIONS: ${hasIVMeds ? 'YES' : 'NO (patient at home)'}
+
+🚨 CRITICAL RULES FOR TELECONSULTATION:
+1. **EMERGENCY CONDITIONS** (ACS, Stroke, Sepsis, Anaphylaxis):
+   - ⛔ DO NOT provide detailed hospital protocols
+   - ✅ PROVIDE: Immediate emergency referral
+   - ✅ INSTRUCT: "CALL AMBULANCE NOW - SAMU 114 (Mauritius) or 15 (France) or 911 (USA)"
+   - ✅ IF Aspirin at home: "Chew Aspirin 300mg IMMEDIATELY while waiting"
+   - ✅ EXPLAIN: Patient needs IMMEDIATE HOSPITAL EVALUATION
+
+2. **NON-EMERGENCY CONDITIONS**:
+   - ✅ PRESCRIBE: Oral medications (ambulatory treatment)
+   - ✅ SCHEDULE: Investigations within 24-48h at local lab/clinic
+   - ✅ FOLLOW-UP: Review in 24-72h depending on severity
+   - ✅ RED FLAGS: Clear instructions when to seek immediate help
+
+🚫 NEVER IN TELECONSULTATION:
+- Hospital STAT investigations (ECG within 10min, Troponin T0/T1h/T3h, CT Brain STAT)
+- IV/IM/SC medications or injections
+- Hospital monitoring (continuous ECG, q15min vitals)
+- Direct procedures (PCI, thrombolysis, intubation)
+`
+  }
+  
+  if (setting === 'emergency_department') {
+    return `
+🏥 CONSULTATION CONTEXT: EMERGENCY DEPARTMENT / URGENCES
+📍 LOCATION: ${location}
+🔬 ACCESS TO INVESTIGATIONS: ${hasInvestigations ? 'YES - STAT investigations available' : 'NO'}
+💉 ACCESS TO IV MEDICATIONS: ${hasIVMeds ? 'YES - IV/IM/SC medications available' : 'NO'}
+
+✅ FULL EMERGENCY PROTOCOLS AVAILABLE:
+
+1. **EMERGENCY CONDITIONS** (ACS, Stroke, Sepsis):
+   - ✅ PROVIDE: Complete emergency protocols
+   - ✅ INVESTIGATIONS: ECG STAT, Troponin hs T0/T1h/T3h, CT Brain STAT, etc.
+   - ✅ MEDICATIONS: Aspirin 300mg STAT, Ticagrelor 180mg STAT, Morphine IV PRN, Fondaparinux 2.5mg SC
+   - ✅ MONITORING: q15min vitals, continuous ECG, oxygen saturation
+   - ✅ REFERRAL: Immediate Cardiology/Neurology/ICU as needed
+
+2. **EXAMPLE - ACS PROTOCOL**:
+   - INVESTIGATIONS:
+     * ECG 12-lead STAT (within 10 minutes)
+     * Troponin hs T0 STAT, T1h (1 hour), T3h if needed
+     * FBC, U&E, eGFR, Lipids, HbA1c (URGENT)
+     * Chest X-ray (URGENT - exclude pulmonary edema, aortic dissection)
+   - MEDICATIONS STAT:
+     * Aspirin 300mg STAT (chewed)
+     * Ticagrelor 180mg STAT (loading dose)
+     * Fondaparinux 2.5mg SC (if NSTEMI)
+     * Morphine 2.5-5mg IV PRN if severe pain
+     * Atorvastatin 80mg STAT (high-intensity statin)
+   - MONITORING & REFERRAL:
+     * Vital signs q15min
+     * Continuous ECG monitoring
+     * IMMEDIATE Cardiology referral
+     * Consider Primary PCI if STEMI (within 120 minutes)
+
+3. **NON-EMERGENCY CONDITIONS**:
+   - ✅ FULL ACCESS to all investigations and treatments
+   - ✅ Same-day results for urgent tests
+   - ✅ Specialist consultations available
+
+🚨 CRITICAL: You are in a HOSPITAL SETTING - provide COMPLETE protocols with all investigations, IV medications, and monitoring details.
+`
+  }
+  
+  // General practice
+  return `
+🏥 CONSULTATION CONTEXT: GENERAL PRACTICE / CABINET MÉDICAL
+📍 LOCATION: ${location}
+🔬 ACCESS TO INVESTIGATIONS: ${hasInvestigations ? 'YES (can order lab/imaging)' : 'LIMITED'}
+💉 ACCESS TO IV MEDICATIONS: ${hasIVMeds ? 'YES (IM injections available)' : 'NO (oral only)'}
+
+✅ GENERAL PRACTICE PROTOCOLS:
+
+1. **URGENT CONDITIONS** requiring hospital referral:
+   - ⚠️ IDENTIFY: ACS, Stroke, Sepsis, Acute abdomen
+   - ✅ PROVIDE: Immediate referral to Emergency Department
+   - ✅ ARRANGE: Ambulance transport if unstable
+   - ✅ INITIATE: Basic treatment before transfer (Aspirin, oxygen if available)
+
+2. **MANAGEABLE CONDITIONS** in primary care:
+   - ✅ PRESCRIBE: Oral medications
+   - ✅ ORDER: Investigations (blood tests, imaging) - results in 24-48h
+   - ✅ FOLLOW-UP: Review in 1-7 days depending on severity
+   - ✅ REFER: Specialist if needed (routine/urgent referral)
+
+3. **AVAILABLE RESOURCES**:
+   - Oral medications
+   - IM injections (antibiotics, corticosteroids, B12, etc.)
+   - Laboratory tests (results 24-48h)
+   - Imaging (X-ray same day, CT/MRI scheduled)
+   - ECG (basic interpretation)
+
+🚫 NOT AVAILABLE in general practice:
+- STAT investigations (immediate results)
+- IV infusions (except emergency pre-hospital care)
+- Continuous monitoring
+- Immediate specialist consultations
+
+⚠️ THRESHOLD FOR HOSPITAL REFERRAL: Any suspicion of life-threatening condition or need for STAT investigations/IV therapy.
+`
+}
+
 function prepareMauritiusQualityPrompt(patientContext: PatientContext, consultationType: any, doctorNotes?: any): string {
   const currentMedsFormatted = patientContext.current_medications.length > 0 
     ? patientContext.current_medications.join(', ')
@@ -2298,14 +2462,19 @@ Consider: dose adjustment, adding second agent, or specialist referral.
     allergies: patientContext.allergies,
     consultation_type: consultationType.consultationType,
     ai_questions: patientContext.ai_questions,
-    doctor_clinical_notes: doctorNotes || null // ⚕️ Hypothèses et notes du médecin
+    doctor_clinical_notes: doctorNotes || null, // ⚕️ Hypothèses et notes du médecin
+    consultation_context: patientContext.consultation_context || null
   }, null, 2)
+  
+  // 🏥 Generate CONSULTATION_CONTEXT directive based on setting
+  const consultationContextDirective = generateConsultationContextDirective(patientContext.consultation_context)
   
   // Prepend vital signs alerts to the prompt
   const finalPrompt = vitalSignsAlerts + MAURITIUS_MEDICAL_PROMPT
     .replace('{{PATIENT_CONTEXT}}', contextString)
     .replace('{{CURRENT_MEDICATIONS}}', currentMedsFormatted)
     .replace('{{CONSULTATION_TYPE}}', consultationTypeFormatted)
+    .replace('{{CONSULTATION_CONTEXT_DIRECTIVE}}', consultationContextDirective)
     .replace(/{{CURRENT_MEDICATIONS_LIST}}/g, currentMedsFormatted)
   
   if (vitalSignsAlerts) {
