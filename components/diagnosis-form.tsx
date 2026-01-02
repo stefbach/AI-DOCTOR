@@ -822,6 +822,14 @@ export default function DiagnosisForm({
  console.log('   💊 Setting medications:', data.medications?.length || 0, 'items')
  console.log('   💊 Setting combinedPrescription:', data.combinedPrescription?.length || 0, 'items')
  
+ // VERIFICATION: Check if state was actually updated
+ console.log('🔍 ========== STATE VERIFICATION AFTER SET ==========')
+ setTimeout(() => {
+   console.log('   🔎 medications state after set:', medications.length, 'items')
+   console.log('   🔎 combinedPrescription state after set:', combinedPrescription.length, 'items')
+   console.log('   🔎 currentMedicationsValidated state after set:', currentMedicationsValidated.length, 'items')
+ }, 100)
+ 
  // CRITICAL FIX: Save data IMMEDIATELY (not after 13 seconds)
  // This ensures currentMedicationsValidated is saved before user continues
  const completeData = {
@@ -936,6 +944,30 @@ export default function DiagnosisForm({
    })
  } else {
    console.log('   ⚠️ WARNING: NO CURRENT MEDICATIONS RECEIVED FROM API!')
+ }
+ 
+ // Log NEW medications
+ console.log('   💊 medications present:', !!data.medications)
+ console.log('   💊 medications length:', data.medications?.length || 0)
+ if (data.medications && data.medications.length > 0) {
+   console.log('   ✅ RECEIVED NEW MEDICATIONS:')
+   data.medications.forEach((med: any, idx: number) => {
+     console.log(`      ${idx + 1}. ${med.name || med.drug} - ${med.dosage} - ${med.posology}`)
+   })
+ } else {
+   console.log('   ⚠️ WARNING: NO NEW MEDICATIONS RECEIVED FROM API!')
+ }
+ 
+ // Log combinedPrescription
+ console.log('   📝 combinedPrescription present:', !!data.combinedPrescription)
+ console.log('   📝 combinedPrescription length:', data.combinedPrescription?.length || 0)
+ if (data.combinedPrescription && data.combinedPrescription.length > 0) {
+   console.log('   ✅ RECEIVED COMBINED PRESCRIPTION:')
+   data.combinedPrescription.forEach((med: any, idx: number) => {
+     console.log(`      ${idx + 1}. ${med.name} - ${med.dosage} - ${med.posology} [${med.medication_type}]`)
+   })
+ } else {
+   console.log('   ⚠️ WARNING: NO COMBINED PRESCRIPTION RECEIVED FROM API!')
  }
  console.log('==============================================================')
  
@@ -1828,31 +1860,109 @@ export default function DiagnosisForm({
  )}
  </AnimatedSection>
 
- {/* TREATMENTS - With animation AND EDITOR */}
+ {/* TREATMENTS - With animation - USING COMBINED PRESCRIPTION */}
  <AnimatedSection show={showTreatments} delay={400}>
- {currentSection === 3 && expertAnalysis?.expert_therapeutics?.primary_treatments && expertAnalysis.expert_therapeutics.primary_treatments.length > 0 && (
+ {currentSection === 3 && (combinedPrescription.length > 0 || medications.length > 0) && (
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
  <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
  <CardTitle className="flex items-center gap-3">
  <Pill className="h-6 w-6" />
- Prescribed Treatments ({expertAnalysis.expert_therapeutics.primary_treatments.length})
+ Prescribed Medications ({combinedPrescription.length > 0 ? combinedPrescription.length : medications.length})
  </CardTitle>
  </CardHeader>
  <CardContent className="p-8">
- {/* Treatment Editor Component */}
- <TreatmentEditorSection 
- treatments={expertAnalysis.expert_therapeutics.primary_treatments}
- onTreatmentsUpdate={(updatedTreatments) => {
- // Update the expertAnalysis with modified treatments
- setExpertAnalysis({
- ...expertAnalysis,
- expert_therapeutics: {
- ...expertAnalysis.expert_therapeutics,
- primary_treatments: updatedTreatments
- }
- })
- }}
- />
+ <div className="grid gap-6">
+ {(combinedPrescription.length > 0 ? combinedPrescription : medications).map((med: any, index: number) => (
+ <div key={index} className="border-l-4 border-blue-400 pl-6 bg-blue-25 p-4 rounded-r-lg hover:shadow-md transition-shadow">
+ <div className="flex items-center justify-between mb-3">
+ <h4 className="font-semibold text-lg text-blue-800">
+ {med.name || med.drug || "Medication"}
+ </h4>
+ <Badge className="bg-blue-100 text-blue-800">
+ {med.medication_type === 'current' ? 'Current' : 'New'}
+ </Badge>
+ </div>
+ 
+ <div className="space-y-2">
+ <div className="grid grid-cols-2 gap-4">
+ <div>
+ <span className="font-medium text-gray-700">DCI:</span>
+ <span className="ml-2 text-gray-600">{med.dci || 'N/A'}</span>
+ </div>
+ <div>
+ <span className="font-medium text-gray-700">Dosage:</span>
+ <span className="ml-2 text-gray-600">{med.dosage || 'N/A'}</span>
+ </div>
+ </div>
+ 
+ <div>
+ <span className="font-medium text-gray-700">Posology:</span>
+ <span className="ml-2 text-gray-600">{med.posology || 'N/A'}</span>
+ </div>
+ 
+ {med.precise_posology && (
+ <div className="bg-blue-50 p-3 rounded border border-blue-200">
+ <span className="font-medium text-blue-700">Precise Posology:</span>
+ <div className="ml-4 mt-1 space-y-1 text-sm">
+ <div>Individual dose: {med.precise_posology.individual_dose}</div>
+ <div>Frequency: {med.precise_posology.frequency_per_day}x/day</div>
+ <div>Daily total: {med.precise_posology.daily_total_dose}</div>
+ <div>UK format: {med.precise_posology.uk_format}</div>
+ </div>
+ </div>
+ )}
+ 
+ <div>
+ <span className="font-medium text-gray-700">Indication:</span>
+ <p className="text-sm text-gray-600 mt-1">{med.indication || 'N/A'}</p>
+ </div>
+ 
+ <div>
+ <span className="font-medium text-gray-700">Duration:</span>
+ <span className="ml-2 text-gray-600">{med.duration || 'N/A'}</span>
+ </div>
+ 
+ {med.instructions && (
+ <div>
+ <span className="font-medium text-gray-700">Instructions:</span>
+ <p className="text-sm text-gray-600 mt-1">{med.instructions}</p>
+ </div>
+ )}
+ 
+ {med.contraindications && (
+ <div>
+ <span className="font-medium text-red-700">Contraindications:</span>
+ <p className="text-sm text-gray-600 mt-1">{med.contraindications}</p>
+ </div>
+ )}
+ 
+ {med.side_effects && (
+ <div>
+ <span className="font-medium text-orange-700">Side effects:</span>
+ <p className="text-sm text-gray-600 mt-1">{med.side_effects}</p>
+ </div>
+ )}
+ 
+ {med.mauritius_availability && (
+ <div className="bg-green-50 p-3 rounded border border-green-200 mt-2">
+ <span className="font-medium text-green-700">Mauritius Availability:</span>
+ <div className="ml-4 mt-1 space-y-1 text-sm">
+ {med.mauritius_availability.public_free && (
+ <Badge className="bg-green-100 text-green-800">Public Free</Badge>
+ )}
+ {med.mauritius_availability.estimated_cost && (
+ <div>Cost: {med.mauritius_availability.estimated_cost}</div>
+ )}
+ {med.mauritius_availability.brand_names && (
+ <div>Brands: {med.mauritius_availability.brand_names}</div>
+ )}
+ </div>
+ </div>
+ )}
+ </div>
+ </div>
+ ))}
+ </div>
  </CardContent>
  </Card>
  )}
