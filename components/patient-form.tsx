@@ -34,6 +34,7 @@ import {
 import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
 import { useTibokConsultation } from "@/hooks/use-tibok-consultation"
 import { getTranslation, Language } from "@/lib/translations"
+import { VoiceDictationButton } from "@/components/voice-dictation-button"
 
 // ==================== INTERFACES & TYPES ====================
 interface LifeHabits {
@@ -1569,7 +1570,19 @@ useEffect(() => {
  </CardHeader>
  <CardContent className="p-6 space-y-4">
  <div className="space-y-2">
+ <div className="flex items-center justify-between">
  <Label htmlFor="currentMedicationsText">Ongoing Treatments</Label>
+ <VoiceDictationButton
+ onTranscript={(text) => {
+ const currentText = formData.currentMedicationsText
+ const newText = currentText 
+ ? `${currentText}\n${text}` 
+ : text
+ handleInputChange("currentMedicationsText", newText)
+ }}
+ language="en-US"
+ />
+ </div>
  <Textarea
  id="currentMedicationsText"
  value={formData.currentMedicationsText}

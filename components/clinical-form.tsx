@@ -32,6 +32,7 @@ import {
 } from "lucide-react"
 import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
 import { getTranslation, Language } from "@/lib/translations"
+import { VoiceDictationButton } from "@/components/voice-dictation-button"
 
 // ==================== INTERFACES & TYPES ====================
 interface VitalSigns {
@@ -970,9 +971,21 @@ const COMMON_SYMPTOMS = useMemo(() => [
  </CardHeader>
  <CardContent className="p-6">
  <div className="space-y-2">
+ <div className="flex items-center justify-between">
  <Label htmlFor="chiefComplaint" className="font-medium">
  What is the main reason for your consultation?
  </Label>
+ <VoiceDictationButton
+ onTranscript={(text) => {
+ const currentText = localData.chiefComplaint
+ const newText = currentText 
+ ? `${currentText} ${text}` 
+ : text
+ updateData({ chiefComplaint: newText })
+ }}
+ language="en-US"
+ />
+ </div>
  <Textarea
  id="chiefComplaint"
  value={localData.chiefComplaint}
@@ -1005,9 +1018,21 @@ const COMMON_SYMPTOMS = useMemo(() => [
  </CardHeader>
  <CardContent className="p-6">
  <div className="space-y-2">
+ <div className="flex items-center justify-between">
  <Label htmlFor="diseaseHistory" className="font-medium">
  How have your symptoms evolved?
  </Label>
+ <VoiceDictationButton
+ onTranscript={(text) => {
+ const currentText = localData.diseaseHistory
+ const newText = currentText 
+ ? `${currentText} ${text}` 
+ : text
+ updateData({ diseaseHistory: newText })
+ }}
+ language="en-US"
+ />
+ </div>
  <Textarea
  id="diseaseHistory"
  value={localData.diseaseHistory}
