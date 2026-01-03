@@ -1,0 +1,136 @@
+/* ============================================
+   EMBEDDED MODE STYLES FOR TIBOK IFRAME
+   ============================================ */
+
+/* Mode embedded : enlever marges/padding */
+body.embedded-mode {
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-y: auto;
+  overflow-x: hidden;
+  
+  /* Smooth scroll sur mobile */
+  -webkit-overflow-scrolling: touch;
+  
+  /* Pas de sélection de texte accidentelle */
+  -webkit-user-select: text;
+  user-select: text;
+  
+  /* Background blanc pour l'iframe */
+  background: white !important;
+}
+
+/* Cacher header/footer/navbar en mode embedded */
+body.embedded-mode header,
+body.embedded-mode footer,
+body.embedded-mode .main-header,
+body.embedded-mode .main-footer,
+body.embedded-mode .navbar,
+body.embedded-mode .top-bar,
+body.embedded-mode nav:first-child {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Contenu prend toute la hauteur */
+body.embedded-mode main,
+body.embedded-mode .embedded-content {
+  min-height: 100vh;
+  padding: 0.5rem;
+  background: white;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Optimisations mobile en iframe */
+@media (max-width: 1024px) {
+  body.embedded-mode {
+    /* Pas de zoom sur input focus (iOS fix) */
+    font-size: 16px;
+  }
+  
+  body.embedded-mode main,
+  body.embedded-mode .embedded-content {
+    padding: 0.5rem;
+  }
+  
+  /* Inputs plus grands pour touch */
+  body.embedded-mode input,
+  body.embedded-mode textarea,
+  body.embedded-mode select {
+    min-height: 44px;
+    font-size: 16px;
+  }
+  
+  /* Boutons touch-friendly */
+  body.embedded-mode button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Fix scrolling issues */
+body.embedded-mode * {
+  box-sizing: border-box;
+}
+
+/* Désactiver animations lourdes en iframe pour performance */
+body.embedded-mode * {
+  animation-duration: 0.2s !important;
+  transition-duration: 0.2s !important;
+}
+
+/* Optimisations supplémentaires pour iframe */
+body.embedded-mode {
+  /* Pas de pull-to-refresh sur mobile */
+  overscroll-behavior: contain;
+  
+  /* Meilleure performance scrolling */
+  scroll-behavior: smooth;
+}
+
+/* Fix pour les modals/dialogs en embedded */
+body.embedded-mode .modal,
+body.embedded-mode .dialog,
+body.embedded-mode [role="dialog"] {
+  position: fixed !important;
+  z-index: 9999 !important;
+}
+
+/* Assurer que le contenu principal est visible */
+body.embedded-mode > div:first-child {
+  min-height: 100vh;
+}
+
+/* Fix pour les tooltips en embedded */
+body.embedded-mode [data-tooltip],
+body.embedded-mode [role="tooltip"] {
+  z-index: 10000 !important;
+}
+
+/* Performance: désactiver certaines animations en embedded */
+@media (prefers-reduced-motion: reduce) {
+  body.embedded-mode * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Debug mode (optionnel) */
+body.embedded-mode.debug-mode::before {
+  content: "🎯 EMBEDDED MODE ACTIVE";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #4CAF50;
+  color: white;
+  text-align: center;
+  padding: 4px;
+  font-size: 12px;
+  z-index: 99999;
+  font-weight: bold;
+}

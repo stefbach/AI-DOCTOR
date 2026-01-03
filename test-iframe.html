@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test AI Doctor Iframe - TIBOK Integration</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    
+    .test-info {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .test-info h2 {
+      color: #2196F3;
+      margin-bottom: 10px;
+    }
+    
+    .test-info ul {
+      margin-left: 20px;
+    }
+    
+    .test-info li {
+      margin: 5px 0;
+    }
+    
+    .status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    
+    .status.success {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .status.pending {
+      background: #FFC107;
+      color: black;
+    }
+    
+    .iframe-container {
+      width: 100%;
+      height: 600px;
+      border: 2px solid #2196F3;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    
+    .logs {
+      margin-top: 20px;
+      background: #263238;
+      color: #4CAF50;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .logs h3 {
+      color: #4CAF50;
+      margin-bottom: 10px;
+    }
+    
+    .log-entry {
+      margin: 5px 0;
+      padding: 2px 0;
+    }
+    
+    .log-entry.error {
+      color: #f44336;
+    }
+    
+    .log-entry.success {
+      color: #4CAF50;
+    }
+    
+    .log-entry.info {
+      color: #2196F3;
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      
+      .iframe-container {
+        height: 500px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Test AI Doctor Iframe - TIBOK Integration</h1>
+  
+  <div class="test-info">
+    <h2>📋 Test Information</h2>
+    <ul>
+      <li><strong>Mode:</strong> Embedded (iframe) <span class="status success">ACTIVE</span></li>
+      <li><strong>URL Parameter:</strong> <code>?embedded=true</code></li>
+      <li><strong>Expected Behavior:</strong>
+        <ul>
+          <li>✅ Header hidden</li>
+          <li>✅ Footer hidden</li>
+          <li>✅ Interface adapted for iframe</li>
+          <li>✅ No CORS errors in console</li>
+          <li>✅ Smooth scrolling</li>
+          <li>✅ Touch-friendly on mobile</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+  
+  <div class="iframe-container">
+    <iframe 
+      id="aidoctor-iframe"
+      src="http://localhost:3000?embedded=true&consultationId=test123&patientId=patient456&doctorId=doctor789&source=tibok"
+      sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
+      allow="clipboard-read; clipboard-write; microphone"
+      title="AI Doctor Embedded"
+    ></iframe>
+  </div>
+  
+  <div class="logs">
+    <h3>📊 Console Logs</h3>
+    <div id="log-container"></div>
+  </div>
+  
+  <script>
+    // Log container
+    const logContainer = document.getElementById('log-container');
+    
+    function addLog(message, type = 'info') {
+      const logEntry = document.createElement('div');
+      logEntry.className = `log-entry ${type}`;
+      logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logContainer.appendChild(logEntry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+    
+    // Listen for messages from iframe
+    window.addEventListener('message', (event) => {
+      // Security: verify origin
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'https://aidoctor.tibok.mu',
+        'https://www.tibok.mu'
+      ];
+      
+      if (allowedOrigins.some(origin => event.origin.startsWith(origin))) {
+        addLog(`📥 Message from AI Doctor: ${JSON.stringify(event.data)}`, 'success');
+      } else {
+        addLog(`❌ Message from unauthorized origin: ${event.origin}`, 'error');
+      }
+    });
+    
+    // Test sending message to iframe
+    setTimeout(() => {
+      const iframe = document.getElementById('aidoctor-iframe');
+      iframe.contentWindow.postMessage({
+        type: 'TEST_MESSAGE',
+        data: 'Hello from TIBOK test page',
+        timestamp: new Date().toISOString()
+      }, 'http://localhost:3000');
+      
+      addLog('📤 Sent test message to AI Doctor iframe', 'info');
+    }, 2000);
+    
+    // Monitor iframe load
+    const iframe = document.getElementById('aidoctor-iframe');
+    
+    iframe.addEventListener('load', () => {
+      addLog('✅ Iframe loaded successfully', 'success');
+    });
+    
+    iframe.addEventListener('error', (e) => {
+      addLog(`❌ Iframe error: ${e.message}`, 'error');
+    });
+    
+    // Initial log
+    addLog('🚀 Test page loaded', 'info');
+    addLog('🔍 Waiting for iframe to load...', 'info');
+  </script>
+</body>
+</html>

@@ -2,9 +2,11 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
+import "../styles/embedded.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { PatientDataLoader } from "@/components/patient-data-loader"
+import { EmbeddedModeProvider } from "@/components/embedded-mode-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -35,9 +37,11 @@ export default function RootLayout({
           enableSystem 
           disableTransitionOnChange
         >
-          <PatientDataLoader />
-          {children}
-          <Toaster />
+          <EmbeddedModeProvider>
+            <PatientDataLoader />
+            {children}
+            <Toaster />
+          </EmbeddedModeProvider>
         </ThemeProvider>
       </body>
     </html>
