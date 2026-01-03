@@ -12,6 +12,107 @@ body {
   }
 }
 
+/* ============================================
+   MOBILE RESPONSIVE FIXES (GLOBAL)
+   ============================================ */
+
+/* Assurer que tout est responsive par défaut */
+@media (max-width: 768px) {
+  /* Container principal prend toute la largeur */
+  .container {
+    max-width: 100% !important;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Cards responsive */
+  .card {
+    margin-bottom: 1rem;
+  }
+  
+  /* Grilles: 1 colonne sur mobile */
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Formulaires full-width */
+  input,
+  textarea,
+  select {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  /* Boutons touch-friendly (minimum 44px Apple HIG) */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Texte lisible sans zoom sur iOS */
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+  
+  /* Pas de zoom sur focus iOS */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    font-size: 16px !important;
+  }
+}
+
+/* Très petit écran (≤480px) */
+@media (max-width: 480px) {
+  .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  h2 {
+    font-size: 1.25rem;
+  }
+  
+  h3 {
+    font-size: 1.1rem;
+  }
+}
+
+/* Fix pour éviter le débordement horizontal */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Images responsives par défaut */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Smooth scroll sur mobile */
+html {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Désactiver pull-to-refresh sur mobile (évite les conflits avec scroll) */
+body {
+  overscroll-behavior: contain;
+}
+
 @layer base {
   :root {
     /* TIBOK Brand Colors - Blue to Turquoise Gradient */

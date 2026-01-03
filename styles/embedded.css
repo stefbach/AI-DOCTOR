@@ -134,3 +134,197 @@ body.embedded-mode.debug-mode::before {
   z-index: 99999;
   font-weight: bold;
 }
+
+/* ============================================
+   MOBILE OPTIMIZATIONS (ENHANCED)
+   ============================================ */
+
+/* Mobile: réduire padding global */
+@media (max-width: 768px) {
+  body.embedded-mode {
+    padding: 0 !important;
+  }
+  
+  body.embedded-mode main,
+  body.embedded-mode .embedded-content {
+    padding: 0.25rem !important;
+  }
+  
+  /* Cards plus compactes sur mobile */
+  body.embedded-mode .card,
+  body.embedded-mode [class*="card"] {
+    margin-bottom: 0.5rem !important;
+  }
+  
+  /* Textes plus petits sur mobile pour économiser l'espace */
+  body.embedded-mode h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  body.embedded-mode h2 {
+    font-size: 1.25rem !important;
+  }
+  
+  body.embedded-mode h3 {
+    font-size: 1.1rem !important;
+  }
+  
+  body.embedded-mode p,
+  body.embedded-mode label {
+    font-size: 0.9rem !important;
+  }
+  
+  /* Formulaires optimisés mobile */
+  body.embedded-mode form {
+    width: 100% !important;
+  }
+  
+  body.embedded-mode input,
+  body.embedded-mode textarea,
+  body.embedded-mode select {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Grilles responsive: 1 colonne sur mobile */
+  body.embedded-mode .grid,
+  body.embedded-mode [class*="grid"] {
+    grid-template-columns: 1fr !important;
+    gap: 0.5rem !important;
+  }
+  
+  /* Flex items: stacking vertical sur mobile */
+  body.embedded-mode .flex,
+  body.embedded-mode [class*="flex"] {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  
+  /* Boutons full-width sur mobile */
+  body.embedded-mode button:not(.inline-button) {
+    width: 100% !important;
+  }
+  
+  /* Progress bar visible sur mobile */
+  body.embedded-mode .progress,
+  body.embedded-mode [role="progressbar"] {
+    width: 100% !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  /* Tabs responsive */
+  body.embedded-mode [role="tablist"] {
+    flex-wrap: wrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  body.embedded-mode [role="tab"] {
+    font-size: 0.85rem !important;
+    padding: 0.5rem !important;
+  }
+}
+
+/* Très petit écran (≤480px) */
+@media (max-width: 480px) {
+  body.embedded-mode {
+    font-size: 14px !important;
+  }
+  
+  body.embedded-mode main,
+  body.embedded-mode .embedded-content {
+    padding: 0.25rem !important;
+  }
+  
+  body.embedded-mode h1 {
+    font-size: 1.25rem !important;
+  }
+  
+  body.embedded-mode h2 {
+    font-size: 1.1rem !important;
+  }
+  
+  body.embedded-mode h3 {
+    font-size: 1rem !important;
+  }
+  
+  body.embedded-mode p,
+  body.embedded-mode label {
+    font-size: 0.85rem !important;
+  }
+  
+  /* Badges plus petits */
+  body.embedded-mode .badge,
+  body.embedded-mode [class*="badge"] {
+    font-size: 0.7rem !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+}
+
+/* Fix pour les containers qui débordent */
+body.embedded-mode * {
+  max-width: 100% !important;
+}
+
+body.embedded-mode img,
+body.embedded-mode video {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Container principal prend toute la largeur en embedded */
+body.embedded-mode .container,
+body.embedded-mode [class*="container"] {
+  max-width: 100% !important;
+  width: 100% !important;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+}
+
+/* Fix pour les modals en mode mobile */
+@media (max-width: 768px) {
+  body.embedded-mode .modal,
+  body.embedded-mode .dialog,
+  body.embedded-mode [role="dialog"] {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    margin: 0.5rem !important;
+  }
+}
+
+/* Optimiser les tables pour mobile */
+@media (max-width: 768px) {
+  body.embedded-mode table {
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  body.embedded-mode thead {
+    display: none !important;
+  }
+  
+  body.embedded-mode tbody,
+  body.embedded-mode tr,
+  body.embedded-mode td {
+    display: block !important;
+    width: 100% !important;
+  }
+  
+  body.embedded-mode tr {
+    margin-bottom: 1rem !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 0.5rem !important;
+    padding: 0.5rem !important;
+  }
+  
+  body.embedded-mode td {
+    text-align: left !important;
+    padding: 0.25rem !important;
+  }
+  
+  body.embedded-mode td::before {
+    content: attr(data-label) ": " !important;
+    font-weight: bold !important;
+  }
+}
