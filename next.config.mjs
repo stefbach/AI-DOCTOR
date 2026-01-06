@@ -22,18 +22,15 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            // Allow iframe from TIBOK domains
-            value: "frame-ancestors 'self' https://www.tibok.mu https://staging.tibok.mu https://v0-tibokmain2.vercel.app http://localhost:3000 http://localhost:3001"
+            // Allow iframe from TIBOK domains and all Vercel preview deployments
+            value: "frame-ancestors 'self' https://tibok.mu https://www.tibok.mu https://staging.tibok.mu https://*.vercel.app http://localhost:* https://localhost:*"
           },
-          {
-            key: 'X-Frame-Options',
-            // Allow TIBOK to embed AI Doctor in iframe
-            value: 'ALLOW-FROM https://www.tibok.mu'
-          },
+          // Note: X-Frame-Options ALLOW-FROM is deprecated. CSP frame-ancestors is the modern standard.
+          // Removing X-Frame-Options to avoid conflicts with CSP frame-ancestors directive.
           {
             key: 'Access-Control-Allow-Origin',
-            // Allow CORS from TIBOK domains
-            value: 'https://www.tibok.mu'
+            // Allow CORS from all origins for iframe embedding
+            value: '*'
           },
           {
             key: 'Access-Control-Allow-Methods',
