@@ -52,11 +52,28 @@ export function HubPatientSummary({ patientData }: HubPatientSummaryProps) {
   const historyPatientInfo = extractPatientInfo(mostRecent)
   const tibokName = buildPatientNameFromTibok()
 
+  // Calculate age from date_of_birth if age not directly available
+  const calculateAge = () => {
+    if (tibokPatientInfo?.age) return tibokPatientInfo.age
+    const dob = tibokPatientInfo?.date_of_birth || tibokPatientInfo?.dateOfBirth
+    if (dob) {
+      const birthDate = new Date(dob)
+      const today = new Date()
+      let age = today.getFullYear() - birthDate.getFullYear()
+      const monthDiff = today.getMonth() - birthDate.getMonth()
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--
+      }
+      return age
+    }
+    return historyPatientInfo.age || null
+  }
+
   // Use tibokPatientInfo only if it has a name, otherwise fallback to history
   // This handles the case where tibokPatientInfo exists but is missing name fields (common in iframe)
   const patientInfo = {
     name: tibokName || historyPatientInfo.name || '',
-    age: tibokPatientInfo?.age || historyPatientInfo.age || null,
+    age: calculateAge(),
     gender: tibokPatientInfo?.gender === 'F' ? 'Femme'
       : tibokPatientInfo?.gender === 'M' ? 'Homme'
       : tibokPatientInfo?.sexe === 'F' ? 'Femme'
@@ -116,8 +133,8 @@ export function HubPatientSummary({ patientData }: HubPatientSummaryProps) {
               {(tibokPatientInfo?.email || searchCriteria.email) && (
                 <p className="text-sm text-gray-600">📧 {tibokPatientInfo?.email || searchCriteria.email}</p>
               )}
-              {(tibokPatientInfo?.phone || tibokPatientInfo?.telephone || searchCriteria.phone) && (
-                <p className="text-sm text-gray-600">📞 {tibokPatientInfo?.phone || tibokPatientInfo?.telephone || searchCriteria.phone}</p>
+              {(tibokPatientInfo?.phone || tibokPatientInfo?.phone_number || tibokPatientInfo?.telephone || searchCriteria.phone) && (
+                <p className="text-sm text-gray-600">📞 {tibokPatientInfo?.phone || tibokPatientInfo?.phone_number || tibokPatientInfo?.telephone || searchCriteria.phone}</p>
               )}
             </div>
           </div>
