@@ -203,19 +203,59 @@ export default function ConsultationHubPage() {
       const doctorId = urlParams.get('doctorId')
       const patientDataParam = urlParams.get('patientData')
 
-      // Parse Tibok patient info from URL
+      // Parse Tibok patient info from URL (handle multi-encoded data)
       let tibokPatientInfo: any = null
       if (patientDataParam) {
+        console.log('👤 Raw patientData param length:', patientDataParam.length)
+
         try {
-          tibokPatientInfo = JSON.parse(decodeURIComponent(patientDataParam))
-          console.log('👤 Tibok patient info from URL:', tibokPatientInfo)
+          let decodedPatientData = patientDataParam
+
+          // Try parsing directly first (in case it's already valid JSON)
+          if (decodedPatientData.startsWith('{')) {
+            try {
+              tibokPatientInfo = JSON.parse(decodedPatientData)
+              console.log('👤 Parsed patientData directly without decoding')
+            } catch {
+              console.log('👤 Direct parse failed, will try decoding...')
+            }
+          }
+
+          // If not parsed yet, keep decoding until we can parse
+          if (!tibokPatientInfo) {
+            for (let attempt = 1; attempt <= 5; attempt++) {
+              try {
+                decodedPatientData = decodeURIComponent(decodedPatientData)
+                console.log(`👤 Decode attempt ${attempt}, starts with:`, decodedPatientData.substring(0, 50))
+
+                if (decodedPatientData.startsWith('{')) {
+                  // Fix: Tibok sometimes appends extra URL after the JSON - extract just the JSON
+                  let jsonString = decodedPatientData
+                  const lastBrace = jsonString.lastIndexOf('}')
+                  if (lastBrace !== -1 && lastBrace < jsonString.length - 1) {
+                    console.log('👤 Found extra content after JSON, trimming')
+                    jsonString = jsonString.substring(0, lastBrace + 1)
+                  }
+
+                  tibokPatientInfo = JSON.parse(jsonString)
+                  console.log(`👤 Successfully parsed patientData after ${attempt} decode(s):`, tibokPatientInfo)
+                  break
+                }
+              } catch (e) {
+                console.log(`👤 Decode attempt ${attempt} failed:`, e instanceof Error ? e.message : e)
+                if (attempt === 5) {
+                  console.error('👤 Could not parse patientData after 5 attempts')
+                }
+              }
+            }
+          }
 
           // Extract patientId from tibokPatientInfo if not in URL directly
-          if (!patientId && tibokPatientInfo.id) {
+          if (tibokPatientInfo && !patientId && tibokPatientInfo.id) {
             patientId = tibokPatientInfo.id
           }
         } catch (e) {
-          console.log('⚠️ Could not parse patientData from URL')
+          console.log('⚠️ Could not parse patientData from URL:', e)
         }
       }
 
