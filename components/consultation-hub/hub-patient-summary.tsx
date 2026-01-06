@@ -28,11 +28,12 @@ export function HubPatientSummary({ patientData }: HubPatientSummaryProps) {
   const mostRecent = consultations[0]
 
   // First try to get patient info from Tibok, then fall back to consultation history
+  // Handle both snake_case (from Tibok URL params) and camelCase (from sessionStorage) field names
   const patientInfo = tibokPatientInfo
     ? {
-        name: `${tibokPatientInfo.firstName || ''} ${tibokPatientInfo.lastName || ''}`.trim(),
+        name: `${tibokPatientInfo.first_name || tibokPatientInfo.firstName || ''} ${tibokPatientInfo.last_name || tibokPatientInfo.lastName || ''}`.trim(),
         age: tibokPatientInfo.age || null,
-        gender: tibokPatientInfo.gender === 'F' ? 'Femme' : tibokPatientInfo.gender === 'M' ? 'Homme' : tibokPatientInfo.gender || ''
+        gender: tibokPatientInfo.gender === 'F' ? 'Femme' : tibokPatientInfo.gender === 'M' ? 'Homme' : tibokPatientInfo.sexe === 'F' ? 'Femme' : tibokPatientInfo.sexe === 'M' ? 'Homme' : tibokPatientInfo.gender || tibokPatientInfo.sexe || ''
       }
     : extractPatientInfo(mostRecent)
   
@@ -88,8 +89,8 @@ export function HubPatientSummary({ patientData }: HubPatientSummaryProps) {
               {(tibokPatientInfo?.email || searchCriteria.email) && (
                 <p className="text-sm text-gray-600">📧 {tibokPatientInfo?.email || searchCriteria.email}</p>
               )}
-              {(tibokPatientInfo?.phone || searchCriteria.phone) && (
-                <p className="text-sm text-gray-600">📞 {tibokPatientInfo?.phone || searchCriteria.phone}</p>
+              {(tibokPatientInfo?.phone || tibokPatientInfo?.telephone || searchCriteria.phone) && (
+                <p className="text-sm text-gray-600">📞 {tibokPatientInfo?.phone || tibokPatientInfo?.telephone || searchCriteria.phone}</p>
               )}
             </div>
           </div>
