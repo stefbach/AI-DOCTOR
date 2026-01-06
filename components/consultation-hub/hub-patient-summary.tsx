@@ -34,7 +34,7 @@ export function HubPatientSummary({ patientData }: HubPatientSummaryProps) {
   // First try to get patient info from Tibok, then fall back to consultation history
   // Handle both snake_case (from Tibok URL params) and camelCase (from sessionStorage) field names
   // Build name from multiple possible field combinations
-  const buildPatientName = () => {
+  const buildPatientNameFromTibok = () => {
     if (!tibokPatientInfo) return ''
     // Try full_name / fullName first
     if (tibokPatientInfo.full_name) return tibokPatientInfo.full_name
@@ -46,13 +46,21 @@ export function HubPatientSummary({ patientData }: HubPatientSummaryProps) {
     return `${firstName} ${lastName}`.trim()
   }
 
-  const patientInfo = tibokPatientInfo
-    ? {
-        name: buildPatientName(),
-        age: tibokPatientInfo.age || null,
-        gender: tibokPatientInfo.gender === 'F' ? 'Femme' : tibokPatientInfo.gender === 'M' ? 'Homme' : tibokPatientInfo.sexe === 'F' ? 'Femme' : tibokPatientInfo.sexe === 'M' ? 'Homme' : tibokPatientInfo.gender || tibokPatientInfo.sexe || ''
-      }
-    : extractPatientInfo(mostRecent)
+  // Get patient info from consultation history as fallback
+  const historyPatientInfo = extractPatientInfo(mostRecent)
+  const tibokName = buildPatientNameFromTibok()
+
+  // Use tibokPatientInfo only if it has a name, otherwise fallback to history
+  // This handles the case where tibokPatientInfo exists but is missing name fields (common in iframe)
+  const patientInfo = {
+    name: tibokName || historyPatientInfo.name || '',
+    age: tibokPatientInfo?.age || historyPatientInfo.age || null,
+    gender: tibokPatientInfo?.gender === 'F' ? 'Femme'
+      : tibokPatientInfo?.gender === 'M' ? 'Homme'
+      : tibokPatientInfo?.sexe === 'F' ? 'Femme'
+      : tibokPatientInfo?.sexe === 'M' ? 'Homme'
+      : tibokPatientInfo?.gender || tibokPatientInfo?.sexe || historyPatientInfo.gender || ''
+  }
   
   // Détecter type majoritaire
   const consultationTypes = consultations.map(c => detectType(c.consultationType))
