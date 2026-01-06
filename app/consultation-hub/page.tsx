@@ -201,12 +201,13 @@ export default function ConsultationHubPage() {
 
       let patientId = urlParams.get('patientId')
       const doctorId = urlParams.get('doctorId')
-      const patientDataParam = urlParams.get('patientData')
+      // Tibok sends patient data in either 'patientData' OR 'medicalData' parameter
+      const patientDataParam = urlParams.get('patientData') || urlParams.get('medicalData')
 
       // Parse Tibok patient info from URL (handle multi-encoded data)
       let tibokPatientInfo: any = null
       if (patientDataParam) {
-        console.log('👤 Raw patientData param length:', patientDataParam.length)
+        console.log('👤 Raw patientData/medicalData param length:', patientDataParam.length)
 
         try {
           let decodedPatientData = patientDataParam
