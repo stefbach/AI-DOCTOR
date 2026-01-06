@@ -27,11 +27,28 @@ export function HubPatientSummary({ patientData }: HubPatientSummaryProps) {
   const { searchCriteria, consultations, totalConsultations, tibokPatientInfo } = patientData
   const mostRecent = consultations[0]
 
+  // Debug: Log tibokPatientInfo to see actual field names from Tibok
+  console.log('🔍 HubPatientSummary - tibokPatientInfo:', tibokPatientInfo)
+  console.log('🔍 HubPatientSummary - searchCriteria:', searchCriteria)
+
   // First try to get patient info from Tibok, then fall back to consultation history
   // Handle both snake_case (from Tibok URL params) and camelCase (from sessionStorage) field names
+  // Build name from multiple possible field combinations
+  const buildPatientName = () => {
+    if (!tibokPatientInfo) return ''
+    // Try full_name / fullName first
+    if (tibokPatientInfo.full_name) return tibokPatientInfo.full_name
+    if (tibokPatientInfo.fullName) return tibokPatientInfo.fullName
+    if (tibokPatientInfo.name) return tibokPatientInfo.name
+    // Try first + last name combinations
+    const firstName = tibokPatientInfo.first_name || tibokPatientInfo.firstName || ''
+    const lastName = tibokPatientInfo.last_name || tibokPatientInfo.lastName || ''
+    return `${firstName} ${lastName}`.trim()
+  }
+
   const patientInfo = tibokPatientInfo
     ? {
-        name: `${tibokPatientInfo.first_name || tibokPatientInfo.firstName || ''} ${tibokPatientInfo.last_name || tibokPatientInfo.lastName || ''}`.trim(),
+        name: buildPatientName(),
         age: tibokPatientInfo.age || null,
         gender: tibokPatientInfo.gender === 'F' ? 'Femme' : tibokPatientInfo.gender === 'M' ? 'Homme' : tibokPatientInfo.sexe === 'F' ? 'Femme' : tibokPatientInfo.sexe === 'M' ? 'Homme' : tibokPatientInfo.gender || tibokPatientInfo.sexe || ''
       }
