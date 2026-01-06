@@ -30,6 +30,8 @@ export function HubPatientSummary({ patientData }: HubPatientSummaryProps) {
   // Debug: Log tibokPatientInfo to see actual field names from Tibok
   console.log('🔍 HubPatientSummary - tibokPatientInfo:', tibokPatientInfo)
   console.log('🔍 HubPatientSummary - searchCriteria:', searchCriteria)
+  console.log('🔍 HubPatientSummary - mostRecent consultation:', mostRecent)
+  console.log('🔍 HubPatientSummary - mostRecent.fullReport:', mostRecent?.fullReport)
 
   // First try to get patient info from Tibok, then fall back to consultation history
   // Handle both snake_case (from Tibok URL params) and camelCase (from sessionStorage) field names
@@ -190,9 +192,12 @@ export function HubPatientSummary({ patientData }: HubPatientSummaryProps) {
 }
 
 function extractPatientInfo(consultation: ConsultationHistoryItem) {
+  console.log('🔍 extractPatientInfo - consultation:', consultation)
+
   // Try to extract from fullReport if available
   if (consultation.fullReport) {
     const report = consultation.fullReport
+    console.log('🔍 extractPatientInfo - report keys:', Object.keys(report))
 
     // Try multiple possible locations for patient data
     let name = ''
