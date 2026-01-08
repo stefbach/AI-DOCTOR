@@ -2,8 +2,8 @@
 import { createClient } from '@supabase/supabase-js'
 
 // For production use - these are public keys (safe to expose)
-const supabaseUrl = 'https://ehlqjfuutyhpbrqcvdut.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVobHFqZnV1dHlocGJycWN2ZHV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczODkxMzQsImV4cCI6MjA2Mjk2NTEzNH0.-pujAg_Fn9zONxS61HCNJ_8zsnaX00N5raoUae2olAs'
+const supabaseUrl = 'https://yyxmqositmmyyeyuryln.supabase.co'
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5eG1xb3NpdG1teXlleXVyeWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2NzcwODUsImV4cCI6MjA4MzI1MzA4NX0.JaBP3MYI_d283bSQetYxJ4cj9ZCqDiQQ-xfPq0EuG2E'
 
 // Create client with proper headers to avoid 406 errors
 export const supabase = createClient(
