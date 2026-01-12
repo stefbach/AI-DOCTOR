@@ -2787,7 +2787,7 @@ export default function ChronicProfessionalReport({
     const needsSpecialistReferral = specialistReferral?.required === true
 
     return (
-      <div id="medical-report-section" className="bg-white p-8 rounded-lg shadow print:shadow-none">
+      <div id="medical-report-section" className="bg-white p-3 sm:p-6 md:p-8 rounded-lg shadow print:shadow-none">
         
         {/* 🚨 EMERGENCY BANNER */}
         {isEmergency && (
@@ -2853,20 +2853,21 @@ export default function ChronicProfessionalReport({
           </div>
         )}
         
-        <div className="border-b-2 border-blue-600 pb-4 mb-6">
-          <div className="flex justify-between items-start">
-            <div>
-              <h2 className="text-2xl font-bold">{medicalReport.header.title}</h2>
-              <p className="text-gray-600 mt-1">{medicalReport.header.subtitle}</p>
-              <p className="text-sm text-gray-500 mt-1">Reference: {medicalReport.header.reference}</p>
+        <div className="border-b-2 border-blue-600 pb-3 sm:pb-4 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold break-words">{medicalReport.header.title}</h2>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">{medicalReport.header.subtitle}</p>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">Reference: {medicalReport.header.reference}</p>
             </div>
-            <div className="flex gap-2 print:hidden">
+            <div className="flex gap-2 print:hidden flex-shrink-0">
               <Button
                 variant="outline"
                 size="sm"
+                className="text-xs sm:text-sm"
                 onClick={() => exportToPDF('medical-report-section', `chronic_report_${medicalReport.patient.fullName}.pdf`)}
               >
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 Export PDF
               </Button>
             </div>
@@ -2912,14 +2913,14 @@ export default function ChronicProfessionalReport({
                   }
                 `}</style>
                 <div
-                  className="prose prose-sm max-w-none bg-white p-8 rounded border border-gray-200 professional-narrative"
+                  className="prose prose-sm max-w-none bg-white p-3 sm:p-6 md:p-8 rounded border border-gray-200 professional-narrative text-sm sm:text-base"
                   dangerouslySetInnerHTML={{
                     __html: formatNarrativeWithBoldHeaders(medicalReport.narrative)
                   }}
                 />
 
                 {/* Signature Section for Main Report */}
-                <div className="mt-8 pt-6 border-t-2 border-gray-800 bg-white p-8 rounded border border-gray-200">
+                <div className="mt-4 sm:mt-8 pt-4 sm:pt-6 border-t-2 border-gray-800 bg-white p-3 sm:p-6 md:p-8 rounded border border-gray-200">
                   <div className="text-right">
                     <p className="font-bold text-lg mb-4">PHYSICIAN AUTHENTICATION</p>
                     <p className="font-semibold">{medicalReport.practitioner.name}</p>
@@ -5364,68 +5365,63 @@ export default function ChronicProfessionalReport({
       <PrescriptionStats />
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
-        <TabsList className="grid w-full grid-cols-9">
-          <TabsTrigger value="medical-report">
-            <FileText className="h-4 w-4 mr-2" />
+        <TabsList className="flex overflow-x-auto pb-2 gap-1 w-full sm:grid sm:grid-cols-9 sm:overflow-visible sm:pb-0 sm:gap-0 h-auto sm:h-10" style={{ flexDirection: 'row' }}>
+          <TabsTrigger value="medical-report" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap">
+            <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
             Report
           </TabsTrigger>
-          <TabsTrigger value="medications">
-            <Pill className="h-4 w-4 mr-2" />
-            Medications
+          <TabsTrigger value="medications" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap">
+            <Pill className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            Meds
             {report.medicationPrescription && (
-              <Badge variant="secondary" className="ml-2">
+              <Badge variant="secondary" className="ml-1 text-xs scale-75 sm:scale-100">
                 {report.medicationPrescription.prescription.medications?.length || 0}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="laboratory">
-            <TestTube className="h-4 w-4 mr-2" />
-            Lab Tests
+          <TabsTrigger value="laboratory" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap">
+            <TestTube className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            Labs
             {report.laboratoryTests && (
-              <Badge variant="secondary" className="ml-2">
+              <Badge variant="secondary" className="ml-1 text-xs scale-75 sm:scale-100">
                 {Object.values(report.laboratoryTests.prescription.tests || {})
                   .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="paraclinical">
-            <Scan className="h-4 w-4 mr-2" />
-            Paraclinical
+          <TabsTrigger value="paraclinical" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap">
+            <Scan className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            Exams
             {report.paraclinicalExams && (
-              <Badge variant="secondary" className="ml-2">
+              <Badge variant="secondary" className="ml-1 text-xs scale-75 sm:scale-100">
                 {report.paraclinicalExams.prescription.exams?.length || 0}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="dietary">
-            <Utensils className="h-4 w-4 mr-2" />
-            Diet Plan
+          <TabsTrigger value="dietary" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap">
+            <Utensils className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            Diet
           </TabsTrigger>
-          <TabsTrigger value="sick-leave">
-            <Calendar className="h-4 w-4 mr-2" />
-            Sick Leave
+          <TabsTrigger value="sick-leave" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap">
+            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            Leave
             {sickLeaveData.numberOfDays > 0 && (
-              <Badge variant="secondary" className="ml-2">
+              <Badge variant="secondary" className="ml-1 text-xs scale-75 sm:scale-100">
                 {sickLeaveData.numberOfDays}d
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="invoice">
-            <Activity className="h-4 w-4 mr-2" />
+          <TabsTrigger value="invoice" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap">
+            <Activity className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
             Invoice
-            {invoiceData.services.totalDue > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                Rs {invoiceData.services.totalDue}
-              </Badge>
-            )}
           </TabsTrigger>
-          <TabsTrigger value="followup">
-            <ClipboardList className="h-4 w-4 mr-2" />
-            Follow-Up
+          <TabsTrigger value="followup" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap">
+            <ClipboardList className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            Follow
           </TabsTrigger>
-          <TabsTrigger value="ai-assistant" className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold shadow-lg hover:from-teal-600 hover:to-cyan-600 data-[state=active]:ring-2 data-[state=active]:ring-yellow-400">
-            <Stethoscope className="h-4 w-4 mr-2" />
-            AI Assistant
+          <TabsTrigger value="ai-assistant" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold shadow-lg hover:from-teal-600 hover:to-cyan-600 data-[state=active]:ring-2 data-[state=active]:ring-yellow-400">
+            <Stethoscope className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            AI
           </TabsTrigger>
         </TabsList>
         
