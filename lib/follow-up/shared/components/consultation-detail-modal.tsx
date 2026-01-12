@@ -129,15 +129,15 @@ export function ConsultationDetailModal({
   const dietPlan = extractDietPlan(fullReport, displayConsultation.dietaryPlan)
   const followUp = extractFollowUp(fullReport)
 
-  // Calculate scroll container height: 85vh - header (~80px) - tabs (~50px) - padding
+  // Calculate scroll container height: 90vh - header (~100px) - tabs (~60px) - padding
   const scrollContainerStyle = {
-    maxHeight: 'calc(85vh - 180px)',
+    maxHeight: 'calc(90vh - 200px)',
     overflowY: 'auto' as const
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[85vh] overflow-hidden w-[95vw] sm:w-auto">
+      <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-hidden">
         <DialogHeader className="pb-2 sm:pb-4">
           <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
             {typeConfig.icon}
@@ -172,61 +172,61 @@ export function ConsultationDetailModal({
           </div>
         )}
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="relative">
-          <TabsList className={`grid w-full ${isChronic ? 'grid-cols-3 sm:grid-cols-6' : 'grid-cols-4'} gap-0.5 sm:gap-1 relative z-10 overflow-hidden`}>
-              <TabsTrigger value="report" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm overflow-hidden">
-                <FileText className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                <span className="hidden sm:inline truncate">Report</span>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+          <TabsList className={`grid w-full ${isChronic ? 'grid-cols-6' : 'grid-cols-4'} gap-1 bg-gray-100 p-1 rounded-lg mb-4`}>
+              <TabsTrigger value="report" className="flex items-center justify-center gap-1 px-2 py-2 text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <FileText className="h-4 w-4 flex-shrink-0" />
+                <span className="hidden sm:inline">Report</span>
               </TabsTrigger>
-              <TabsTrigger value="prescription" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm overflow-hidden">
-                <Pill className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                <span className="hidden sm:inline truncate">Rx</span>
+              <TabsTrigger value="prescription" className="flex items-center justify-center gap-1 px-2 py-2 text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <Pill className="h-4 w-4 flex-shrink-0" />
+                <span className="hidden sm:inline">Rx</span>
               </TabsTrigger>
-              <TabsTrigger value="labs" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm overflow-hidden">
-                <TestTube className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                <span className="hidden sm:inline truncate">Labs</span>
+              <TabsTrigger value="labs" className="flex items-center justify-center gap-1 px-2 py-2 text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <TestTube className="h-4 w-4 flex-shrink-0" />
+                <span className="hidden sm:inline">Labs</span>
               </TabsTrigger>
-              <TabsTrigger value="imaging" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm overflow-hidden">
-                <Scan className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                <span className="hidden sm:inline truncate">Imaging</span>
+              <TabsTrigger value="imaging" className="flex items-center justify-center gap-1 px-2 py-2 text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <Scan className="h-4 w-4 flex-shrink-0" />
+                <span className="hidden sm:inline">Imaging</span>
               </TabsTrigger>
               {isChronic && (
                 <>
-                  <TabsTrigger value="diet" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm overflow-hidden">
-                    <Salad className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                    <span className="hidden sm:inline truncate">Diet</span>
+                  <TabsTrigger value="diet" className="flex items-center justify-center gap-1 px-2 py-2 text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                    <Salad className="h-4 w-4 flex-shrink-0" />
+                    <span className="hidden sm:inline">Diet</span>
                   </TabsTrigger>
-                  <TabsTrigger value="followup" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm overflow-hidden">
-                    <CalendarCheck className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                    <span className="hidden sm:inline truncate">Follow</span>
+                  <TabsTrigger value="followup" className="flex items-center justify-center gap-1 px-2 py-2 text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                    <CalendarCheck className="h-4 w-4 flex-shrink-0" />
+                    <span className="hidden sm:inline">Follow</span>
                   </TabsTrigger>
                 </>
               )}
             </TabsList>
 
             {/* REPORT TAB */}
-            <TabsContent value="report" className="mt-4 relative z-0">
+            <TabsContent value="report" className="flex-1 overflow-hidden">
               <div style={scrollContainerStyle} className="pr-2">
                 <ReportTab consultation={displayConsultation} fullReport={fullReport} />
               </div>
             </TabsContent>
 
             {/* PRESCRIPTION TAB */}
-            <TabsContent value="prescription" className="mt-4 relative z-0">
+            <TabsContent value="prescription" className="flex-1 overflow-hidden">
               <div style={scrollContainerStyle} className="pr-2">
                 <PrescriptionTab prescription={prescription} consultation={displayConsultation} />
               </div>
             </TabsContent>
 
             {/* LAB TESTS TAB */}
-            <TabsContent value="labs" className="mt-4 relative z-0">
+            <TabsContent value="labs" className="flex-1 overflow-hidden">
               <div style={scrollContainerStyle} className="pr-2">
                 <LabTestsTab labTests={labTests} fullReport={fullReport} />
               </div>
             </TabsContent>
 
             {/* IMAGING TAB */}
-            <TabsContent value="imaging" className="mt-4 relative z-0">
+            <TabsContent value="imaging" className="flex-1 overflow-hidden">
               <div style={scrollContainerStyle} className="pr-2">
                 <ImagingTab imaging={imaging} fullReport={fullReport} />
               </div>
@@ -234,7 +234,7 @@ export function ConsultationDetailModal({
 
             {/* DIET PLAN TAB (Chronic only) */}
             {isChronic && (
-              <TabsContent value="diet" className="mt-4 relative z-0">
+              <TabsContent value="diet" className="flex-1 overflow-hidden">
                 <div style={scrollContainerStyle} className="pr-2">
                   <DietPlanTab dietPlan={dietPlan} fullReport={fullReport} />
                 </div>
@@ -243,7 +243,7 @@ export function ConsultationDetailModal({
 
             {/* FOLLOW-UP TAB (Chronic only) */}
             {isChronic && (
-              <TabsContent value="followup" className="mt-4 relative z-0">
+              <TabsContent value="followup" className="flex-1 overflow-hidden">
                 <div style={scrollContainerStyle} className="pr-2">
                   <FollowUpTab followUp={followUp} fullReport={fullReport} />
                 </div>
