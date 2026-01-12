@@ -71,17 +71,17 @@ export function HubPatientSearch({ onPatientFound, onNewPatient }: HubPatientSea
 
   return (
     <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Search className="h-6 w-6 text-blue-600" />
+      <CardHeader className="p-3 sm:p-4 md:p-6">
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <Search className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
           Recherche Patient
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-xs sm:text-sm">
           Recherchez un patient existant ou créez un nouveau dossier
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSearch} className="space-y-4">
+      <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+        <form onSubmit={handleSearch} className="space-y-3 sm:space-y-4">
           {/* Nom */}
           <div className="space-y-2">
             <Label htmlFor="patient-name">Nom du Patient</Label>
@@ -122,11 +122,11 @@ export function HubPatientSearch({ onPatientFound, onNewPatient }: HubPatientSea
           </div>
 
           {/* Buttons */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
             <Button
               type="submit"
               disabled={isSearchDisabled || loading}
-              className="flex-1"
+              className="flex-1 text-sm sm:text-base"
             >
               {loading ? (
                 <>
@@ -140,12 +140,13 @@ export function HubPatientSearch({ onPatientFound, onNewPatient }: HubPatientSea
                 </>
               )}
             </Button>
-            
+
             <Button
               type="button"
               variant="outline"
               onClick={handleClear}
               disabled={loading || isSearchDisabled}
+              className="text-sm sm:text-base"
             >
               Effacer
             </Button>
@@ -153,7 +154,7 @@ export function HubPatientSearch({ onPatientFound, onNewPatient }: HubPatientSea
 
           {/* Help text */}
           {isSearchDisabled && (
-            <p className="text-sm text-gray-500 italic">
+            <p className="text-xs sm:text-sm text-gray-500 italic">
               Entrez au moins un critère de recherche
             </p>
           )}
@@ -169,18 +170,18 @@ export function HubPatientSearch({ onPatientFound, onNewPatient }: HubPatientSea
 
         {/* Patient Not Found */}
         {notFound && (
-          <Alert className="mt-4 border-yellow-200 bg-yellow-50">
+          <Alert className="mt-3 sm:mt-4 border-yellow-200 bg-yellow-50">
             <AlertCircle className="h-4 w-4 text-yellow-600" />
             <AlertDescription className="text-yellow-800">
-              <div className="space-y-3">
-                <p className="font-medium">❌ Aucun patient trouvé avec ces critères</p>
-                <p className="text-sm">
+              <div className="space-y-2 sm:space-y-3">
+                <p className="font-medium text-sm sm:text-base">❌ Aucun patient trouvé avec ces critères</p>
+                <p className="text-xs sm:text-sm">
                   Ce patient n'a pas d'historique de consultation dans le système.
                 </p>
                 <Button
                   onClick={onNewPatient}
                   size="sm"
-                  className="bg-yellow-600 hover:bg-yellow-700"
+                  className="bg-yellow-600 hover:bg-yellow-700 text-xs sm:text-sm w-full sm:w-auto"
                 >
                   <UserPlus className="mr-2 h-4 w-4" />
                   Créer Nouveau Dossier Patient

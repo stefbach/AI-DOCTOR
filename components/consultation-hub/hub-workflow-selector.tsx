@@ -268,14 +268,14 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
   const PatientInfoCard = () => (
     hasPatientInfo ? (
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5 text-gray-600" />
+        <CardHeader className="p-3 sm:p-4 md:p-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
             Informations Patient
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+        <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 text-xs sm:text-sm">
             {(demographics.firstName || demographics.lastName || demographics.fullName) && (
               <div>
                 <span className="text-gray-500">Nom:</span>
@@ -305,9 +305,9 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
               </div>
             )}
             {demographics.email && (
-              <div>
+              <div className="sm:col-span-2 md:col-span-1">
                 <span className="text-gray-500">Email:</span>
-                <p className="font-medium">{demographics.email}</p>
+                <p className="font-medium truncate">{demographics.email}</p>
               </div>
             )}
           </div>
@@ -319,11 +319,11 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
   // Helper component for history summary
   const HistorySummaryCard = () => (
     routeDecision.patientSummary ? (
-      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-        <h4 className="font-semibold text-blue-900 mb-2">
+      <div className="bg-blue-50 p-3 sm:p-4 rounded-lg border border-blue-200">
+        <h4 className="font-semibold text-blue-900 mb-2 text-sm sm:text-base">
           📊 Résumé Historique
         </h4>
-        <div className="text-sm text-blue-800 space-y-1">
+        <div className="text-xs sm:text-sm text-blue-800 space-y-1">
           <p>
             • Total consultations: {routeDecision.patientSummary.totalConsultations}
           </p>
@@ -341,19 +341,21 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
   // ============ DERMATOLOGY PATH ============
   if (isDermatologyFromTibok) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Dermatology Auto-Selected Notice */}
         <Card className="border-indigo-300 bg-indigo-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5 text-indigo-600" />
-              Consultation Dermatologique
-              <Badge className="bg-indigo-600 ml-2">
+          <CardHeader className="p-3 sm:p-4 md:p-6">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-base sm:text-lg">
+              <div className="flex items-center gap-2">
+                <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600" />
+                <span>Consultation Dermatologique</span>
+              </div>
+              <Badge className="bg-indigo-600 self-start sm:ml-2 text-xs">
                 <CheckCircle className="h-3 w-3 mr-1" />
                 Sélectionné par le patient
               </Badge>
             </CardTitle>
-            <CardDescription className="text-indigo-700">
+            <CardDescription className="text-indigo-700 text-xs sm:text-sm">
               Le patient a choisi une consultation dermatologique sur Tibok
             </CardDescription>
           </CardHeader>
@@ -366,9 +368,9 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
         <Button
           onClick={() => handleProceed()}
           size="lg"
-          className="w-full bg-indigo-600 hover:bg-indigo-700"
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-sm sm:text-base"
         >
-          <ArrowRight className="mr-2 h-5 w-5" />
+          <ArrowRight className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
           Continuer vers Dermatologie
         </Button>
       </div>
@@ -378,19 +380,21 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
   // ============ GENERAL/NORMAL CONSULTATION PATH ============
   if (isGeneralFromTibok) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Normal Consultation Auto-Selected Notice */}
         <Card className="border-blue-300 bg-blue-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Stethoscope className="h-5 w-5 text-blue-600" />
-              Consultation Normale
-              <Badge className="bg-blue-600 ml-2">
+          <CardHeader className="p-3 sm:p-4 md:p-6">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-base sm:text-lg">
+              <div className="flex items-center gap-2">
+                <Stethoscope className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                <span>Consultation Normale</span>
+              </div>
+              <Badge className="bg-blue-600 self-start sm:ml-2 text-xs">
                 <CheckCircle className="h-3 w-3 mr-1" />
                 Sélectionné par le patient
               </Badge>
             </CardTitle>
-            <CardDescription className="text-blue-700">
+            <CardDescription className="text-blue-700 text-xs sm:text-sm">
               Le patient a choisi une consultation médicale générale sur Tibok
             </CardDescription>
           </CardHeader>
@@ -403,9 +407,9 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
         <Button
           onClick={() => handleProceed()}
           size="lg"
-          className="w-full bg-blue-600 hover:bg-blue-700"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-sm sm:text-base"
         >
-          <ArrowRight className="mr-2 h-5 w-5" />
+          <ArrowRight className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
           Continuer vers Consultation Normale
         </Button>
       </div>
@@ -415,19 +419,21 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
   // ============ CHRONIC DISEASE PATH ============
   if (isChronicFromTibok) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Chronic Disease Auto-Selected Notice */}
         <Card className="border-red-300 bg-red-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Heart className="h-5 w-5 text-red-600" />
-              Suivi Maladie Chronique
-              <Badge className="bg-red-600 ml-2">
+          <CardHeader className="p-3 sm:p-4 md:p-6">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-base sm:text-lg">
+              <div className="flex items-center gap-2">
+                <Heart className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
+                <span>Suivi Maladie Chronique</span>
+              </div>
+              <Badge className="bg-red-600 self-start sm:ml-2 text-xs">
                 <CheckCircle className="h-3 w-3 mr-1" />
                 Sélectionné par le patient
               </Badge>
             </CardTitle>
-            <CardDescription className="text-red-700">
+            <CardDescription className="text-red-700 text-xs sm:text-sm">
               Le patient a choisi un suivi de maladie chronique sur Tibok
             </CardDescription>
           </CardHeader>
@@ -440,9 +446,9 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
         <Button
           onClick={() => handleProceed()}
           size="lg"
-          className="w-full bg-red-600 hover:bg-red-700"
+          className="w-full bg-red-600 hover:bg-red-700 text-sm sm:text-base"
         >
-          <ArrowRight className="mr-2 h-5 w-5" />
+          <ArrowRight className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
           Continuer vers Maladie Chronique
         </Button>
 
@@ -452,9 +458,9 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
             onClick={() => handleProceed('/')}
             variant="outline"
             size="lg"
-            className="w-full border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400"
+            className="w-full border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400 text-sm sm:text-base"
           >
-            <Stethoscope className="mr-2 h-5 w-5" />
+            <Stethoscope className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
             Ou choisir Consultation Normale
           </Button>
           <p className="text-xs text-gray-500 mt-2">
@@ -470,20 +476,20 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
   const patientSelectedType = tibokSpecialty === 'general' ? 'normal' : tibokSpecialty === 'chronic_disease' ? 'chronic' : null
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Banner showing patient's original selection from Tibok */}
       {patientSelectedType && (
         <Card className="border-2 border-blue-300 bg-blue-50">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-blue-500 rounded-full">
-                <User className="h-5 w-5 text-white" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-blue-500 rounded-full flex-shrink-0">
+                <User className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
-              <div className="flex-1">
-                <h4 className="font-bold text-blue-900 mb-1">
+              <div className="flex-1 min-w-0">
+                <h4 className="font-bold text-blue-900 mb-1 text-sm sm:text-base">
                   {patientSelectedType === 'normal' ? '📋 Consultation Normale' : '🩺 Suivi Maladie Chronique'} sélectionné par le patient
                 </h4>
-                <p className="text-blue-800 text-sm">
+                <p className="text-blue-800 text-xs sm:text-sm">
                   Le patient a choisi ce type de consultation sur Tibok. Vous pouvez confirmer ou modifier selon votre évaluation clinique.
                 </p>
               </div>
@@ -494,16 +500,16 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
 
       {/* Type Selection - Only Normal and Chronic options for doctor to choose */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-600" />
+        <CardHeader className="p-3 sm:p-4 md:p-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
             Type de Consultation
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             Choisissez le type de consultation à effectuer
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
           <RadioGroup
             value={selectedType}
             onValueChange={(value) => {
@@ -511,19 +517,19 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
               setSelectedWorkflow('') // Reset workflow selection
             }}
           >
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {/* Normal */}
               <Card className={`cursor-pointer transition-all ${selectedType === 'normal' ? 'ring-2 ring-blue-500' : ''}`}>
-                <CardContent className="p-4" onClick={() => setSelectedType('normal')}>
-                  <div className="flex items-start gap-3">
-                    <RadioGroupItem value="normal" id="type-normal" />
-                    <div className="flex-1">
+                <CardContent className="p-3 sm:p-4" onClick={() => setSelectedType('normal')}>
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <RadioGroupItem value="normal" id="type-normal" className="mt-0.5" />
+                    <div className="flex-1 min-w-0">
                       <Label htmlFor="type-normal" className="cursor-pointer">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Stethoscope className="h-5 w-5 text-blue-600" />
-                          <span className="font-semibold">Consultation Normale</span>
+                        <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                          <Stethoscope className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
+                          <span className="font-semibold text-sm sm:text-base">Consultation Normale</span>
                         </div>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs sm:text-sm text-gray-600">
                           Consultation médicale générale
                         </p>
                       </Label>
@@ -534,16 +540,16 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
 
               {/* Chronic */}
               <Card className={`cursor-pointer transition-all ${selectedType === 'chronic' ? 'ring-2 ring-red-500' : ''}`}>
-                <CardContent className="p-4" onClick={() => setSelectedType('chronic')}>
-                  <div className="flex items-start gap-3">
-                    <RadioGroupItem value="chronic" id="type-chronic" />
-                    <div className="flex-1">
+                <CardContent className="p-3 sm:p-4" onClick={() => setSelectedType('chronic')}>
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <RadioGroupItem value="chronic" id="type-chronic" className="mt-0.5" />
+                    <div className="flex-1 min-w-0">
                       <Label htmlFor="type-chronic" className="cursor-pointer">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Heart className="h-5 w-5 text-red-600" />
-                          <span className="font-semibold">Maladie Chronique</span>
+                        <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                          <Heart className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 flex-shrink-0" />
+                          <span className="font-semibold text-sm sm:text-base">Maladie Chronique</span>
                         </div>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs sm:text-sm text-gray-600">
                           Diabète, hypertension, etc.
                         </p>
                       </Label>
@@ -553,20 +559,20 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
               </Card>
 
               {/* Voice Dictation */}
-              <Card className={`cursor-pointer transition-all ${selectedType === 'voice_dictation' ? 'ring-2 ring-purple-500' : ''}`}>
-                <CardContent className="p-4" onClick={() => setSelectedType('voice_dictation' as ConsultationType)}>
-                  <div className="flex items-start gap-3">
-                    <RadioGroupItem value="voice_dictation" id="type-voice" />
-                    <div className="flex-1">
+              <Card className={`cursor-pointer transition-all ${selectedType === 'voice_dictation' ? 'ring-2 ring-purple-500' : ''} sm:col-span-2 lg:col-span-1`}>
+                <CardContent className="p-3 sm:p-4" onClick={() => setSelectedType('voice_dictation' as ConsultationType)}>
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <RadioGroupItem value="voice_dictation" id="type-voice" className="mt-0.5" />
+                    <div className="flex-1 min-w-0">
                       <Label htmlFor="type-voice" className="cursor-pointer">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Mic className="h-5 w-5 text-purple-600" />
-                          <span className="font-semibold">Dictée Vocale</span>
-                          <Badge variant="outline" className="text-xs bg-purple-100 text-purple-700 border-purple-300">
+                        <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                          <Mic className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 flex-shrink-0" />
+                          <span className="font-semibold text-sm sm:text-base">Dictée Vocale</span>
+                          <Badge variant="outline" className="text-[10px] sm:text-xs bg-purple-100 text-purple-700 border-purple-300">
                             NOUVEAU
                           </Badge>
                         </div>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs sm:text-sm text-gray-600">
                           Consultation par dictée audio
                         </p>
                       </Label>
@@ -589,15 +595,15 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
           }
         }}
         size="lg"
-        className={`w-full ${
-          selectedType === 'chronic' ? 'bg-red-600 hover:bg-red-700' : 
-          selectedType === 'voice_dictation' ? 'bg-purple-600 hover:bg-purple-700' : 
+        className={`w-full text-sm sm:text-base ${
+          selectedType === 'chronic' ? 'bg-red-600 hover:bg-red-700' :
+          selectedType === 'voice_dictation' ? 'bg-purple-600 hover:bg-purple-700' :
           'bg-blue-600 hover:bg-blue-700'
         }`}
       >
-        <ArrowRight className="mr-2 h-5 w-5" />
-        {selectedType === 'chronic' ? 'Continuer vers Maladie Chronique' : 
-         selectedType === 'voice_dictation' ? 'Continuer vers Dictée Vocale' : 
+        <ArrowRight className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+        {selectedType === 'chronic' ? 'Continuer vers Maladie Chronique' :
+         selectedType === 'voice_dictation' ? 'Continuer vers Dictée Vocale' :
          'Continuer vers Consultation Normale'}
       </Button>
     </div>

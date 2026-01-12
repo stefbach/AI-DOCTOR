@@ -669,87 +669,87 @@ const handlePrevious = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50">
       {/* Modern Header with Gradient */}
       <div className="gradient-primary text-white shadow-xl">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 md:py-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <img
                 src="/tibok-logo.png.png"
                 alt="TIBOK Logo"
-                className="h-10 w-auto object-contain"
+                className="h-8 sm:h-10 w-auto object-contain"
               />
               <div>
-                <h1 className="text-2xl font-bold tracking-tight">TIBOK IA DOCTOR</h1>
-                <p className="text-blue-100 text-sm">Assistant Médical Intelligent</p>
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight">TIBOK IA DOCTOR</h1>
+                <p className="text-blue-100 text-xs sm:text-sm">Assistant Médical Intelligent</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Button 
-                variant="outline" 
-                className="bg-white/10 text-white border-white/30 hover:bg-white/20 backdrop-blur-sm"
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Button
+                variant="outline"
+                className="bg-white/10 text-white border-white/30 hover:bg-white/20 backdrop-blur-sm text-xs sm:text-sm px-2 sm:px-4"
                 onClick={() => window.location.href = '/consultation-hub'}
               >
-                <Stethoscope className="h-4 w-4 mr-2" />
-                Consultation Hub
+                <Stethoscope className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Consultation</span> Hub
               </Button>
-              <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-4 py-2">
-                Version 2.0
+              <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm">
+                v2.0
               </Badge>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">
         {/* Quick Navigation Card */}
-        <Card className="glass-card shadow-xl border-0 p-6 mb-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <Stethoscope className="h-5 w-5 text-blue-600" />
+        <Card className="glass-card shadow-xl border-0 p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
+          <h3 className="text-sm sm:text-base md:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
+            <Stethoscope className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
             Accès Rapide aux Consultations
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button 
-              variant="outline" 
-              className="h-auto py-4 px-6 flex flex-col items-start gap-2 hover:bg-blue-50 hover:border-blue-300"
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            <Button
+              variant="outline"
+              className="h-auto py-3 sm:py-4 px-3 sm:px-6 flex flex-col items-start gap-1 sm:gap-2 hover:bg-blue-50 hover:border-blue-300"
               onClick={() => window.location.href = '/consultation-hub'}
             >
               <div className="flex items-center gap-2 w-full">
-                <Stethoscope className="h-5 w-5 text-blue-600" />
-                <span className="font-semibold">Consultation Hub</span>
+                <Stethoscope className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
+                <span className="font-semibold text-sm sm:text-base">Consultation Hub</span>
               </div>
-              <span className="text-xs text-gray-600 text-left">
+              <span className="text-[10px] sm:text-xs text-gray-600 text-left">
                 Routage intelligent • Historique patient • Suivi automatique
               </span>
             </Button>
-            
-            <Button 
-              variant="outline" 
-              className="h-auto py-4 px-6 flex flex-col items-start gap-2 hover:bg-indigo-50 hover:border-indigo-300"
+
+            <Button
+              variant="outline"
+              className="h-auto py-3 sm:py-4 px-3 sm:px-6 flex flex-col items-start gap-1 sm:gap-2 hover:bg-indigo-50 hover:border-indigo-300"
               onClick={() => window.location.href = '/dermatology'}
             >
               <div className="flex items-center gap-2 w-full">
-                <svg className="h-5 w-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                <span className="font-semibold">Dermatologie</span>
+                <span className="font-semibold text-sm sm:text-base">Dermatologie</span>
               </div>
-              <span className="text-xs text-gray-600 text-left">
+              <span className="text-[10px] sm:text-xs text-gray-600 text-left">
                 Analyse d'images • OCR • Diagnostic dermatologique
               </span>
             </Button>
-            
-            <Button 
-              variant="outline" 
-              className="h-auto py-4 px-6 flex flex-col items-start gap-2 hover:bg-red-50 hover:border-red-300"
+
+            <Button
+              variant="outline"
+              className="h-auto py-3 sm:py-4 px-3 sm:px-6 flex flex-col items-start gap-1 sm:gap-2 hover:bg-red-50 hover:border-red-300 sm:col-span-2 lg:col-span-1"
               onClick={() => window.location.href = '/chronic-disease'}
             >
               <div className="flex items-center gap-2 w-full">
-                <svg className="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
-                <span className="font-semibold">Maladies Chroniques</span>
+                <span className="font-semibold text-sm sm:text-base">Maladies Chroniques</span>
               </div>
-              <span className="text-xs text-gray-600 text-left">
+              <span className="text-[10px] sm:text-xs text-gray-600 text-left">
                 Diabète • Hypertension • Suivi long terme
               </span>
             </Button>
@@ -757,84 +757,85 @@ const handlePrevious = () => {
         </Card>
 
         {/* Progress Section - Modern Design */}
-        <Card className="glass-card shadow-2xl border-0 p-6 mb-8 smooth-transition hover-lift">
-          <div className="flex items-center justify-between mb-6">
+        <Card className="glass-card shadow-2xl border-0 p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 md:mb-8 smooth-transition hover-lift">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                 {t('progress.title')}
               </h2>
-              <p className="text-sm text-muted-foreground mt-1">Consultation médicale guidée</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">Consultation médicale guidée</p>
             </div>
             <div className="text-right">
-              <div className="text-3xl font-bold text-primary">
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-primary">
                 {currentStep + 1}/{steps.length}
               </div>
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">
+              <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">
                 Étapes
               </span>
             </div>
           </div>
-          
-          <Progress value={progress} className="mb-8 h-3 bg-blue-100" />
-          
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+
+          <Progress value={progress} className="mb-4 sm:mb-6 md:mb-8 h-2 sm:h-3 bg-blue-100" />
+
+          {/* Mobile: Horizontal scroll, Tablet+: Grid */}
+          <div className="flex overflow-x-auto pb-2 gap-3 sm:grid sm:grid-cols-3 md:grid-cols-5 sm:gap-4 sm:overflow-visible sm:pb-0 -mx-1 px-1 sm:mx-0 sm:px-0">
             {steps.map((step, index) => (
               <div
                 key={step.id}
                 onClick={() => handleStepClick(index)}
-                className={`relative flex flex-col items-center text-center p-5 rounded-xl smooth-transition cursor-pointer transform
-                  ${index === currentStep 
-                    ? 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-xl scale-105 step-active' 
-                    : index < currentStep 
-                    ? 'bg-gradient-to-br from-teal-500 to-teal-500 text-white shadow-lg hover:scale-105 hover:shadow-xl' 
+                className={`relative flex flex-col items-center text-center p-3 sm:p-4 md:p-5 rounded-xl smooth-transition cursor-pointer transform min-w-[120px] sm:min-w-0 flex-shrink-0 sm:flex-shrink
+                  ${index === currentStep
+                    ? 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-xl sm:scale-105 step-active'
+                    : index < currentStep
+                    ? 'bg-gradient-to-br from-teal-500 to-teal-500 text-white shadow-lg hover:scale-105 hover:shadow-xl'
                     : 'bg-white/50 backdrop-blur-sm border-2 border-gray-200 opacity-70 cursor-not-allowed'
                   }`}
               >
                 {/* Step Number Badge */}
-                <div className={`absolute -top-3 -right-3 w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shadow-lg
-                  ${index === currentStep 
-                    ? 'bg-white text-blue-600 ring-4 ring-blue-200' 
-                    : index < currentStep 
-                    ? 'bg-white text-teal-600 ring-4 ring-teal-200' 
+                <div className={`absolute -top-2 -right-2 sm:-top-3 sm:-right-3 w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold shadow-lg
+                  ${index === currentStep
+                    ? 'bg-white text-blue-600 ring-2 sm:ring-4 ring-blue-200'
+                    : index < currentStep
+                    ? 'bg-white text-teal-600 ring-2 sm:ring-4 ring-teal-200'
                     : 'bg-gray-300 text-gray-600'
                   }`}>
                   {index < currentStep ? '✓' : index + 1}
                 </div>
-                
+
                 {/* Icon Circle */}
-                <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-4 smooth-transition
-                  ${index === currentStep 
-                    ? 'bg-white/20 backdrop-blur-sm shadow-inner' 
-                    : index < currentStep 
-                    ? 'bg-white/20 backdrop-blur-sm' 
+                <div className={`w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-3 md:mb-4 smooth-transition
+                  ${index === currentStep
+                    ? 'bg-white/20 backdrop-blur-sm shadow-inner'
+                    : index < currentStep
+                    ? 'bg-white/20 backdrop-blur-sm'
                     : 'bg-gray-200 text-gray-500'
                   }`}>
-                  {React.cloneElement(step.icon, { className: "h-9 w-9" })}
+                  {React.cloneElement(step.icon, { className: "h-6 w-6 sm:h-7 sm:w-7 md:h-9 md:w-9" })}
                 </div>
-                
+
                 {/* Title */}
-                <h3 className={`font-bold mb-2 text-sm leading-tight
+                <h3 className={`font-bold mb-1 sm:mb-2 text-[11px] sm:text-xs md:text-sm leading-tight
                   ${index === currentStep || index < currentStep
-                    ? 'text-white' 
+                    ? 'text-white'
                     : 'text-gray-600'
                   }`}>
                   {step.title}
                 </h3>
-                
-                {/* Description */}
-                <p className={`text-xs leading-relaxed
-                  ${index === currentStep 
-                    ? 'text-blue-100' 
-                    : index < currentStep 
-                    ? 'text-teal-100' 
+
+                {/* Description - Hidden on mobile */}
+                <p className={`text-[10px] sm:text-xs leading-relaxed hidden sm:block
+                  ${index === currentStep
+                    ? 'text-blue-100'
+                    : index < currentStep
+                    ? 'text-teal-100'
                     : 'text-gray-500'
                   }`}>
                   {step.description}
                 </p>
-                
+
                 {/* Active Indicator */}
                 {index === currentStep && (
-                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white rounded-full shadow-lg"></div>
+                  <div className="absolute -bottom-1 sm:-bottom-2 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full shadow-lg"></div>
                 )}
               </div>
             ))}
@@ -843,23 +844,25 @@ const handlePrevious = () => {
 
         {/* Current Step Content - Modern Card */}
         <Card className="glass-card shadow-2xl border-0 overflow-hidden smooth-transition hover-lift">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-100">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
-                {React.cloneElement(steps[currentStep]?.icon, { className: "h-7 w-7 text-white" })}
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-100 p-3 sm:p-4 md:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg flex-shrink-0">
+                  {React.cloneElement(steps[currentStep]?.icon, { className: "h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-white" })}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                    {steps[currentStep]?.title}
+                  </CardTitle>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">{steps[currentStep]?.description}</p>
+                </div>
               </div>
-              <div className="flex-1">
-                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                  {steps[currentStep]?.title}
-                </CardTitle>
-                <p className="text-muted-foreground mt-1">{steps[currentStep]?.description}</p>
-              </div>
-              <Badge className="gradient-primary text-white border-0 px-4 py-2 shadow-md">
+              <Badge className="gradient-primary text-white border-0 px-3 sm:px-4 py-1.5 sm:py-2 shadow-md text-xs sm:text-sm self-start sm:self-auto flex-shrink-0">
                 Étape {currentStep + 1}
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="p-8">
+          <CardContent className="p-3 sm:p-4 md:p-6 lg:p-8">
             {CurrentStepComponent && <CurrentStepComponent {...getCurrentStepProps()} />}
           </CardContent>
         </Card>

@@ -418,30 +418,31 @@ export default function ConsultationHubPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-7xl">
+    <div className="container mx-auto py-4 sm:py-6 md:py-8 px-3 sm:px-4 max-w-7xl">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
+      <div className="mb-4 sm:mb-6 md:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
           <img
             src="/tibok-logo.png.png"
             alt="TIBOK Logo"
-            className="h-12 w-auto object-contain"
+            className="h-8 sm:h-10 md:h-12 w-auto object-contain"
           />
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
               Hub de Consultation
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-sm sm:text-base text-gray-600 mt-1">
               Centre intelligent de gestion des consultations médicales
             </p>
           </div>
           <Button
             variant="outline"
             onClick={() => window.location.href = '/'}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 self-start sm:self-auto"
           >
             <ArrowLeft className="h-4 w-4" />
-            Retour Accueil
+            <span className="hidden sm:inline">Retour Accueil</span>
+            <span className="sm:hidden">Retour</span>
           </Button>
         </div>
 
@@ -449,27 +450,27 @@ export default function ConsultationHubPage() {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-8 sm:py-12">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-teal-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Chargement de l'historique patient...</p>
+            <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 border-b-4 border-teal-600 mx-auto mb-4"></div>
+            <p className="text-sm sm:text-base text-gray-600">Chargement de l'historique patient...</p>
           </div>
         </div>
       )}
 
       {/* Progress Indicator */}
       {!isLoading && currentStep !== 'search' && (
-        <div className="mb-6 flex items-center gap-2">
-          <div className="flex-1 flex items-center gap-2">
-            <div className={`h-2 flex-1 rounded-full ${currentStep === 'summary' || currentStep === 'workflow' ? 'bg-green-500' : 'bg-gray-200'}`} />
-            <div className={`h-2 flex-1 rounded-full ${currentStep === 'workflow' ? 'bg-green-500' : 'bg-gray-200'}`} />
+        <div className="mb-4 sm:mb-6 flex items-center gap-2">
+          <div className="flex-1 flex items-center gap-1 sm:gap-2">
+            <div className={`h-1.5 sm:h-2 flex-1 rounded-full ${currentStep === 'summary' || currentStep === 'workflow' ? 'bg-green-500' : 'bg-gray-200'}`} />
+            <div className={`h-1.5 sm:h-2 flex-1 rounded-full ${currentStep === 'workflow' ? 'bg-green-500' : 'bg-gray-200'}`} />
           </div>
         </div>
       )}
 
       {/* Main Content */}
       {!isLoading && (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Step 1: Search */}
         {currentStep === 'search' && (
           <HubPatientSearch
@@ -499,12 +500,12 @@ export default function ConsultationHubPage() {
             {/* History Modal Content */}
             {showHistoryModal && (
               <Card>
-                <CardContent className="pt-6">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">
+                <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+                  <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <h3 className="text-base sm:text-lg font-semibold">
                       Historique des Consultations
                       {totalConsultationsCount > 0 && (
-                        <span className="text-sm font-normal text-gray-500 ml-2">
+                        <span className="text-xs sm:text-sm font-normal text-gray-500 ml-2">
                           ({patientData.consultations?.length || 0} sur {totalConsultationsCount})
                         </span>
                       )}
@@ -512,6 +513,7 @@ export default function ConsultationHubPage() {
                     <Button
                       onClick={handleProceedToWorkflow}
                       size="sm"
+                      className="self-start sm:self-auto"
                     >
                       Continuer →
                     </Button>
