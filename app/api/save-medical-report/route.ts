@@ -72,12 +72,8 @@ function validateDoctorData(doctorName: string, doctorId: string, report: any): 
     return { isValid: false, error: "Valid MCM registration number is required" }
   }
 
-  // Check doctor email (support both normal and chronic disease structures)
-  const doctorEmail = report?.compteRendu?.praticien?.email ||
-                      report?.medicalReport?.practitioner?.email
-  if (!doctorEmail || doctorEmail.includes('[') || !doctorEmail.includes('@')) {
-    return { isValid: false, error: "Valid doctor email is required" }
-  }
+  // Email is now optional - no longer required for validation
+  // Doctor email check removed to allow signing without email
 
   return { isValid: true }
 }
