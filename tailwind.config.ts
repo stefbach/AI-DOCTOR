@@ -11,6 +11,15 @@ const config: Config = {
     "*.{js,ts,jsx,tsx,mdx}"
   ],
   theme: {
+  	// Custom breakpoints for better mobile support
+  	screens: {
+  		'xs': '480px',   // Extra small devices (large phones)
+  		'sm': '640px',   // Small devices (tablets)
+  		'md': '768px',   // Medium devices (small laptops)
+  		'lg': '1024px',  // Large devices (laptops)
+  		'xl': '1280px',  // Extra large devices (desktops)
+  		'2xl': '1536px', // 2X large devices (large desktops)
+  	},
   	extend: {
   		colors: {
   			background: 'hsl(var(--background))',
