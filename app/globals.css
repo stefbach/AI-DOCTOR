@@ -20,21 +20,18 @@ body {
 @media (max-width: 768px) {
   /* Container principal prend toute la largeur */
   .container {
-    max-width: 100% !important;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    max-width: 100%;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
-  
+
   /* Cards responsive */
   .card {
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
   }
-  
-  /* Grilles: 1 colonne sur mobile */
-  .grid {
-    grid-template-columns: 1fr !important;
-  }
-  
+
+  /* NOTE: Removed forced single-column grid - let Tailwind handle responsive grids */
+
   /* Formulaires full-width */
   input,
   textarea,
@@ -42,25 +39,26 @@ body {
     width: 100%;
     max-width: 100%;
   }
-  
-  /* Boutons touch-friendly (minimum 44px Apple HIG) */
-  button {
-    min-height: 44px;
-    min-width: 44px;
-  }
-  
-  /* Texte lisible sans zoom sur iOS */
+
+  /* Texte lisible sans zoom sur iOS (16px prevents auto-zoom) */
   input,
   textarea,
   select {
     font-size: 16px !important;
   }
-  
+
   /* Pas de zoom sur focus iOS */
   input:focus,
   textarea:focus,
   select:focus {
     font-size: 16px !important;
+  }
+}
+
+/* Touch-friendly buttons - separate rule to not override Tailwind sizing */
+@media (max-width: 768px) {
+  button:not(.btn-sm):not([class*="h-"]):not([class*="w-"]) {
+    min-height: 44px;
   }
 }
 
