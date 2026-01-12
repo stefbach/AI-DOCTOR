@@ -137,24 +137,28 @@ export function ConsultationDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[85vh] overflow-hidden">
-        <DialogHeader className="pb-4">
-          <DialogTitle className="flex items-center gap-2">
+      <DialogContent className="max-w-5xl max-h-[85vh] overflow-hidden w-[95vw] sm:w-auto">
+        <DialogHeader className="pb-2 sm:pb-4">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
             {typeConfig.icon}
-            {typeConfig.label}
+            <span className="truncate">{typeConfig.label}</span>
           </DialogTitle>
-          <DialogDescription className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            {format(new Date(displayConsultation.date), 'MMMM dd, yyyy - HH:mm')}
-            <Badge variant="outline" className="ml-2">
-              ID: {displayConsultation.consultationId}
-            </Badge>
-            {loadingDetails && (
-              <Badge variant="secondary" className="ml-2">
-                <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                Loading details...
+          <DialogDescription className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span className="truncate">{format(new Date(displayConsultation.date), 'MMM dd, yyyy - HH:mm')}</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+              <Badge variant="outline" className="text-[10px] sm:text-xs">
+                ID: {displayConsultation.consultationId?.slice(0, 8)}...
               </Badge>
-            )}
+              {loadingDetails && (
+                <Badge variant="secondary" className="text-[10px] sm:text-xs">
+                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                  Loading...
+                </Badge>
+              )}
+            </div>
           </DialogDescription>
         </DialogHeader>
 
@@ -169,32 +173,32 @@ export function ConsultationDetailModal({
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={`grid w-full ${isChronic ? 'grid-cols-6' : 'grid-cols-4'}`}>
-              <TabsTrigger value="report" className="flex items-center gap-1">
-                <FileText className="h-4 w-4" />
+          <TabsList className={`grid w-full ${isChronic ? 'grid-cols-3 sm:grid-cols-6' : 'grid-cols-4'} gap-0.5 sm:gap-1`}>
+              <TabsTrigger value="report" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm">
+                <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">Report</span>
               </TabsTrigger>
-              <TabsTrigger value="prescription" className="flex items-center gap-1">
-                <Pill className="h-4 w-4" />
-                <span className="hidden sm:inline">Prescription</span>
+              <TabsTrigger value="prescription" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm">
+                <Pill className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Rx</span>
               </TabsTrigger>
-              <TabsTrigger value="labs" className="flex items-center gap-1">
-                <TestTube className="h-4 w-4" />
+              <TabsTrigger value="labs" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm">
+                <TestTube className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">Labs</span>
               </TabsTrigger>
-              <TabsTrigger value="imaging" className="flex items-center gap-1">
-                <Scan className="h-4 w-4" />
+              <TabsTrigger value="imaging" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm">
+                <Scan className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">Imaging</span>
               </TabsTrigger>
               {isChronic && (
                 <>
-                  <TabsTrigger value="diet" className="flex items-center gap-1">
-                    <Salad className="h-4 w-4" />
+                  <TabsTrigger value="diet" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm">
+                    <Salad className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">Diet</span>
                   </TabsTrigger>
-                  <TabsTrigger value="followup" className="flex items-center gap-1">
-                    <CalendarCheck className="h-4 w-4" />
-                    <span className="hidden sm:inline">Follow-up</span>
+                  <TabsTrigger value="followup" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm">
+                    <CalendarCheck className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Follow</span>
                   </TabsTrigger>
                 </>
               )}
@@ -430,14 +434,15 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Medical Report</h3>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+        <h3 className="text-base sm:text-lg font-semibold">Medical Report</h3>
         <Button
           variant="outline"
           size="sm"
           onClick={() => handleDownloadReport(consultation)}
+          className="self-start sm:self-auto text-xs sm:text-sm"
         >
-          <Download className="h-4 w-4 mr-1" />
+          <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
           Download
         </Button>
       </div>
