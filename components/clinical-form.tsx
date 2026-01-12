@@ -927,49 +927,49 @@ const COMMON_SYMPTOMS = useMemo(() => [
 
  {/* Header with progress */}
  <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
- <CardHeader className="text-center">
- <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent">
- <Stethoscope className="h-8 w-8 text-blue-600" />
+ <CardHeader className="text-center p-3 sm:p-4 md:p-6">
+ <CardTitle className="flex items-center justify-center gap-2 sm:gap-3 text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent">
+ <Stethoscope className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-blue-600" />
  Clinical Information
  </CardTitle>
- <div className="mt-4 space-y-2">
- <div className="flex justify-between text-sm text-gray-600">
+ <div className="mt-3 sm:mt-4 space-y-2">
+ <div className="flex justify-between text-xs sm:text-sm text-gray-600">
  <span>Progress</span>
  <span className="font-semibold">{progress}%</span>
  </div>
- <Progress value={progress} className="h-2" />
+ <Progress value={progress} className="h-1.5 sm:h-2" />
  </div>
  </CardHeader>
  </Card>
 
- {/* Quick navigation */}
- <div className="flex flex-wrap gap-2 justify-center">
+ {/* Quick navigation - Horizontal scroll on mobile */}
+ <div className="flex overflow-x-auto pb-2 gap-2 justify-start sm:justify-center sm:flex-wrap sm:overflow-visible -mx-1 px-1 sm:mx-0 sm:px-0">
  {SECTIONS.map((section, index) => (
  <button
  key={section.id}
  type="button"
  onClick={() => setCurrentSection(index)}
- className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
+ className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all duration-200 flex-shrink-0 text-xs sm:text-sm ${
  currentSection === index
  ? "bg-blue-600 text-white shadow-lg"
  : "bg-white/70 text-gray-600 hover:bg-white hover:shadow-md"
  }`}
  >
- <section.icon className="h-4 w-4" />
- <span className="text-sm font-medium">{t(section.titleKey)}</span>
+ <section.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+ <span className="font-medium whitespace-nowrap">{t(section.titleKey)}</span>
  </button>
  ))}
  </div>
 
  {/* Section 1: Chief complaint */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
- <CardTitle className="flex items-center gap-3">
- <FileText className="h-6 w-6" />
+ <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg p-3 sm:p-4 md:p-6">
+ <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl">
+ <FileText className="h-5 w-5 sm:h-6 sm:w-6" />
  Chief Complaint
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6">
+ <CardContent className="p-3 sm:p-4 md:p-6">
  <div className="space-y-2">
  <div className="flex items-center justify-between">
  <Label htmlFor="chiefComplaint" className="font-medium">
@@ -1010,13 +1010,13 @@ const COMMON_SYMPTOMS = useMemo(() => [
 
  {/* Section 2: Disease history */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
- <CardTitle className="flex items-center gap-3">
- <Heart className="h-6 w-6" />
+ <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg p-3 sm:p-4 md:p-6">
+ <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl">
+ <Heart className="h-5 w-5 sm:h-6 sm:w-6" />
  Disease History
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6">
+ <CardContent className="p-3 sm:p-4 md:p-6">
  <div className="space-y-2">
  <div className="flex items-center justify-between">
  <Label htmlFor="diseaseHistory" className="font-medium">
@@ -1147,13 +1147,13 @@ const COMMON_SYMPTOMS = useMemo(() => [
 
  {/* Section 3: Symptom duration - FIXED WITH SAFEGUARD */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-t-lg">
- <CardTitle className="flex items-center gap-3">
- <Clock className="h-6 w-6" />
+ <CardHeader className="bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-t-lg p-3 sm:p-4 md:p-6">
+ <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl">
+ <Clock className="h-5 w-5 sm:h-6 sm:w-6" />
  Duration
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6">
+ <CardContent className="p-3 sm:p-4 md:p-6">
  <div className="space-y-2">
  <Label htmlFor="symptomDuration" className="font-medium">
  How long have you been experiencing these symptoms?
@@ -1204,13 +1204,13 @@ const COMMON_SYMPTOMS = useMemo(() => [
 
  {/* Section 3.5: Pain intensity */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-t-lg">
- <CardTitle className="flex items-center gap-3">
- <Activity className="h-6 w-6" />
+ <CardHeader className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-t-lg p-3 sm:p-4 md:p-6">
+ <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl">
+ <Activity className="h-5 w-5 sm:h-6 sm:w-6" />
  Pain Intensity
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6">
+ <CardContent className="p-3 sm:p-4 md:p-6">
  <div className="space-y-4">
  <Label className="font-medium">
  Rate your pain on a scale from 0 to 10
@@ -1251,13 +1251,13 @@ const COMMON_SYMPTOMS = useMemo(() => [
 
  {/* Section 4: Current symptoms */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-t-lg">
- <CardTitle className="flex items-center gap-3">
- <Activity className="h-6 w-6" />
+ <CardHeader className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-t-lg p-3 sm:p-4 md:p-6">
+ <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl">
+ <Activity className="h-5 w-5 sm:h-6 sm:w-6" />
  Current Symptoms
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6 space-y-6">
+ <CardContent className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
  <div className="relative">
  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
  <Input
@@ -1277,16 +1277,16 @@ const COMMON_SYMPTOMS = useMemo(() => [
  </div>
  )}
 
- <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+ <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
  {filteredSymptoms.map((symptom) => {
- const isSelected = localData.symptoms.some(s => 
+ const isSelected = localData.symptoms.some(s =>
  s.toLowerCase() === symptom.toLowerCase()
  )
- 
+
  return (
  <label
  key={symptom}
- className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
+ className={`flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg border-2 transition-all cursor-pointer ${
  isSelected
  ? "border-cyan-400 bg-cyan-50"
  : "border-gray-200 hover:border-cyan-300 hover:bg-cyan-50/50"
@@ -1296,7 +1296,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
  checked={isSelected}
  onCheckedChange={() => toggleSymptom(symptom)}
  />
- <span className="text-sm font-medium">{symptom}</span>
+ <span className="text-xs sm:text-sm font-medium">{symptom}</span>
  </label>
  )
  })}
@@ -1324,14 +1324,14 @@ const COMMON_SYMPTOMS = useMemo(() => [
 
  {/* Section 5: Vital signs */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
- <CardTitle className="flex items-center gap-3">
- <Stethoscope className="h-6 w-6" />
+ <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg p-3 sm:p-4 md:p-6">
+ <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl">
+ <Stethoscope className="h-5 w-5 sm:h-6 sm:w-6" />
  Vital Signs
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6">
- <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+ <CardContent className="p-3 sm:p-4 md:p-6">
+ <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
  {/* Temperature */}
  <div className="space-y-2">
  <div className="flex items-center gap-2">
@@ -1497,19 +1497,19 @@ const COMMON_SYMPTOMS = useMemo(() => [
 
  {/* Section 6: Workplace Incident */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-t-lg">
- <CardTitle className="flex items-center gap-3">
- <AlertCircle className="h-6 w-6" />
+ <CardHeader className="bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-t-lg p-3 sm:p-4 md:p-6">
+ <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl">
+ <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6" />
  Workplace Incident Assessment
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6">
- <div className="space-y-4">
- <p className="text-sm text-gray-600">
+ <CardContent className="p-3 sm:p-4 md:p-6">
+ <div className="space-y-3 sm:space-y-4">
+ <p className="text-xs sm:text-sm text-gray-600">
  Please indicate if the patient's condition is related to their workplace:
  </p>
 
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
  {/* Illness at Work */}
  <label
  className={`flex items-center space-x-4 p-4 rounded-lg border-2 transition-all cursor-pointer ${
@@ -1599,19 +1599,19 @@ const COMMON_SYMPTOMS = useMemo(() => [
  </div>
 
  {/* Navigation */}
- <div className="flex justify-between">
- <Button 
+ <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0">
+ <Button
  type="button"
- variant="outline" 
+ variant="outline"
  onClick={onPrevious}
- className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
+ className="px-4 sm:px-6 py-2 sm:py-3 shadow-md hover:shadow-lg transition-all duration-300 text-sm sm:text-base order-2 sm:order-1"
  >
  <ArrowLeft className="h-4 w-4 mr-2" />
  Previous
  </Button>
- <Button 
+ <Button
  type="submit"
- className="bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+ className="bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white px-4 sm:px-6 py-2 sm:py-3 shadow-lg hover:shadow-xl transition-all duration-300 text-sm sm:text-base order-1 sm:order-2"
  >
  Continue to AI Analysis
  <ArrowRight className="h-4 w-4 ml-2" />
