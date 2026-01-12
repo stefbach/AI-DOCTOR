@@ -1255,9 +1255,9 @@ export default function DiagnosisForm({
  <li>Your internet connection is stable</li>
  </ul>
  </div>
- <div className="flex gap-4 justify-center">
- <Button 
- onClick={generateCompleteDiagnosisAndDocuments} 
+ <div className="flex gap-4 justify-center !flex-row" style={{ flexDirection: 'row' }}>
+ <Button
+ onClick={generateCompleteDiagnosisAndDocuments}
  className="mt-6"
  size="lg"
  >
@@ -1475,7 +1475,7 @@ export default function DiagnosisForm({
  </Card>
 
  {/* Section navigation with statuses */}
- <div className="flex flex-wrap gap-2 justify-center">
+ <div className="flex flex-wrap gap-2 justify-center !flex-row" style={{ flexDirection: 'row' }}>
  {sections.map((section, index) => (
  <button
  key={section.id}
@@ -2209,9 +2209,9 @@ export default function DiagnosisForm({
  </AnimatedSection>
 
  {/* Navigation */}
- <div className="flex justify-between">
- <Button 
- variant="outline" 
+ <div className="flex justify-between !flex-row" style={{ flexDirection: 'row' }}>
+ <Button
+ variant="outline"
  onClick={onPrevious}
  className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
  >

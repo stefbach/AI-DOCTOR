@@ -663,7 +663,7 @@ export default function QuestionsForm({
  {/* Mode selector and regenerate button */}
  <div className="mt-6 space-y-4">
  {/* Mode selector */}
- <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
+ <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 !flex-row" style={{ flexDirection: 'row' }}>
  {Object.entries(MODE_CONFIGS).map(([mode, config]) => (
  <Button
  key={mode}
@@ -722,7 +722,7 @@ export default function QuestionsForm({
 
  {/* Question navigation */}
  {questions.length > 0 && (
- <div className="flex flex-wrap gap-2 justify-center">
+ <div className="flex flex-wrap gap-2 justify-center !flex-row" style={{ flexDirection: 'row' }}>
  {questions.map((_, index) => {
  const isAnswered = responses[index] && responses[index].answer !== ""
  
@@ -853,7 +853,7 @@ export default function QuestionsForm({
 
  {/* Question navigation */}
  {questions.length > 0 && (
- <div className="flex justify-between">
+ <div className="flex justify-between !flex-row" style={{ flexDirection: 'row' }}>
  <Button
  variant="outline"
  onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
@@ -909,9 +909,9 @@ export default function QuestionsForm({
  </div>
 
  {/* Main navigation */}
- <div className="flex justify-between">
- <Button 
- variant="outline" 
+ <div className="flex justify-between !flex-row" style={{ flexDirection: 'row' }}>
+ <Button
+ variant="outline"
  onClick={onPrevious}
  className="px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm shadow-md hover:shadow-lg transition-all duration-300"
  >

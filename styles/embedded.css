@@ -193,12 +193,9 @@ body.embedded-mode.debug-mode::before {
     gap: 0.5rem !important;
   }
   
-  /* Flex items: stacking vertical sur mobile */
-  body.embedded-mode .flex,
-  body.embedded-mode [class*="flex"] {
-    flex-direction: column !important;
-    gap: 0.5rem !important;
-  }
+  /* Flex items: ONLY stack certain containers vertically, NOT all flex elements */
+  /* Remove the aggressive flex-direction: column rule that was breaking layouts */
+  /* Specific containers that should stack can use explicit classes like flex-col */
   
   /* Boutons full-width sur mobile */
   body.embedded-mode button:not(.inline-button) {
