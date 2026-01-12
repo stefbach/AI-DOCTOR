@@ -1444,18 +1444,18 @@ export default function DiagnosisForm({
  <CheckCircle className="h-8 w-8 text-teal-600" />
  Expert Medical Analysis
  </CardTitle>
- <div className="flex justify-center gap-4 mt-4">
- <Badge variant="outline" className="bg-teal-50 text-teal-800 border-teal-300">
+ <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mt-4">
+ <Badge variant="outline" className="bg-teal-50 text-teal-800 border-teal-300 text-xs sm:text-sm">
  Confidence: {diagnosis?.primary?.confidence || 70}%
  </Badge>
- <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-300">
+ <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-300 text-xs sm:text-sm">
  Certainty: {diagnosis?.primary?.certaintyLevel || "Moderate"}
  </Badge>
- <Badge className="bg-blue-500 text-white">
+ <Badge className="bg-blue-500 text-white text-xs sm:text-sm">
  GPT 4o Enhanced
  </Badge>
  {documentsGenerated && (
- <Badge className="bg-teal-500 text-white">
+ <Badge className="bg-teal-500 text-white text-xs sm:text-sm">
  Documents Ready
  </Badge>
  )}
@@ -1480,7 +1480,7 @@ export default function DiagnosisForm({
  <button
  key={section.id}
  onClick={() => setCurrentSection(index)}
- className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
+ className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-full transition-all duration-200 ${
  currentSection === index
  ? "bg-teal-600 text-white shadow-lg"
  : "bg-white/70 text-gray-600 hover:bg-white hover:shadow-md"
