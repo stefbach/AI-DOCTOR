@@ -423,7 +423,7 @@ export default function DermatologyImageUpload({
             </Badge>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {uploadedImages.map((image) => (
               <Card key={image.id} className="overflow-hidden">
                 <CardContent className="p-0">

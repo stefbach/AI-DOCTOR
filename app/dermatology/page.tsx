@@ -214,7 +214,7 @@ export default function DermatologyWorkflow() {
           </CardHeader>
           <CardContent className="pt-6">
             <Progress value={progress} className="mb-6" />
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3">
               {steps.map((step, index) => {
                 const Icon = step.icon
                 return (
