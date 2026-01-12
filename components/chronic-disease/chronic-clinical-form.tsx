@@ -355,7 +355,7 @@ export default function ChronicClinicalForm({
  </div>
  </div>
 
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div>
  <Label htmlFor="temperature">Temperature (°C)</Label>
  <Input
@@ -405,7 +405,7 @@ export default function ChronicClinicalForm({
  </CardTitle>
  </CardHeader>
  <CardContent className="p-6 space-y-4">
- <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
  {[
  "Type 2 Diabetes",
  "Arterial Hypertension",
@@ -467,7 +467,7 @@ export default function ChronicClinicalForm({
  <CardContent className="p-6 space-y-4">
  
  {/* Last HbA1c */}
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div>
  <Label htmlFor="lastHbA1c">Last HbA1c (%)</Label>
  <Input
@@ -522,7 +522,7 @@ export default function ChronicClinicalForm({
  {/* Diabetic Complications */}
  <div>
  <Label className="text-base font-semibold mb-2 block">Complications (check all that apply)</Label>
- <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
  {[
  "Neuropathy",
  "Retinopathy",
@@ -587,7 +587,7 @@ export default function ChronicClinicalForm({
  {/* Warning Signs */}
  <div>
  <Label className="text-base font-semibold mb-2 block">Warning Signs</Label>
- <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
  {[
  "Severe headaches",
  "Chest pain",
@@ -652,7 +652,7 @@ export default function ChronicClinicalForm({
  {/* Side Effects */}
  <div>
  <Label className="text-base font-semibold mb-2 block">Side Effects (check all that apply)</Label>
- <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
  {[
  "None",
  "Digestive problems",
@@ -705,7 +705,7 @@ export default function ChronicClinicalForm({
  </CardTitle>
  </CardHeader>
  <CardContent className="p-6 space-y-4">
- <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
  {[
  "None",
  "Dyspnea",

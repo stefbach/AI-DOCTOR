@@ -663,18 +663,18 @@ export default function QuestionsForm({
  {/* Mode selector and regenerate button */}
  <div className="mt-6 space-y-4">
  {/* Mode selector */}
- <div className="flex justify-center gap-2">
+ <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
  {Object.entries(MODE_CONFIGS).map(([mode, config]) => (
  <Button
  key={mode}
  variant={generationMode === mode ? 'default' : 'outline'}
  size="sm"
  onClick={() => setGenerationMode(mode as GenerationMode)}
- className={generationMode === mode ? (config?.bgColor || 'bg-blue-50') : ''}
+ className={`text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 ${generationMode === mode ? (config?.bgColor || 'bg-blue-50') : ''}`}
  >
  <DynamicIcon icon={config.icon} className="h-3 w-3 mr-1" />
  <span className="font-medium">{config.label}</span>
- <span className="text-xs ml-1 opacity-70">({config.duration})</span>
+ <span className="hidden sm:inline text-xs ml-1 opacity-70">({config.duration})</span>
  </Button>
  ))}
  </div>
@@ -730,7 +730,7 @@ export default function QuestionsForm({
  <button
  key={index}
  onClick={() => setCurrentQuestionIndex(index)}
- className={`w-10 h-10 rounded-full transition-all duration-200 font-semibold ${
+ className={`w-7 h-7 sm:w-10 sm:h-10 text-xs sm:text-base rounded-full transition-all duration-200 font-semibold ${
  currentQuestionIndex === index
  ? "bg-blue-600 text-white shadow-lg scale-110"
  : isAnswered
@@ -913,7 +913,7 @@ export default function QuestionsForm({
  <Button 
  variant="outline" 
  onClick={onPrevious}
- className="px-6 py-3 shadow-md hover:shadow-lg transition-all duration-300"
+ className="px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm shadow-md hover:shadow-lg transition-all duration-300"
  >
  <ArrowLeft className="h-4 w-4 mr-2" />
  Back to Clinical Info
@@ -921,7 +921,7 @@ export default function QuestionsForm({
  <Button 
  onClick={onNext} 
  disabled={!isFormValid()}
- className="bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
+ className="bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
  >
  Continue to Diagnosis
  <ArrowRight className="h-4 w-4 ml-2" />

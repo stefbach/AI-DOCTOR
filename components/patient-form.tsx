@@ -971,49 +971,49 @@ useEffect(() => {
 
  {/* Header with progress */}
  <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
- <CardHeader className="text-center">
- <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">
- <User className="h-8 w-8 text-blue-600" />
+ <CardHeader className="text-center p-3 sm:p-4 md:p-6">
+ <CardTitle className="flex items-center justify-center gap-2 sm:gap-3 text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">
+ <User className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-blue-600" />
  Patient Information
  </CardTitle>
- <div className="mt-4 space-y-2">
- <div className="flex justify-between text-sm text-gray-600">
+ <div className="mt-3 sm:mt-4 space-y-2">
+ <div className="flex justify-between text-xs sm:text-sm text-gray-600">
  <span>Form Progress</span>
  <span className="font-semibold">{progress}%</span>
  </div>
- <Progress value={progress} className="h-2" />
+ <Progress value={progress} className="h-1.5 sm:h-2" />
  </div>
  </CardHeader>
  </Card>
 
- {/* Quick navigation */}
- <div className="flex flex-wrap gap-2 justify-center">
+ {/* Quick navigation - Horizontal scroll on mobile */}
+ <div className="flex overflow-x-auto pb-2 gap-2 justify-start sm:justify-center sm:flex-wrap sm:overflow-visible -mx-1 px-1 sm:mx-0 sm:px-0">
  {SECTIONS.map((section, index) => (
  <button
  key={section.id}
  type="button"
  onClick={() => setCurrentSection(index)}
- className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
+ className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all duration-200 flex-shrink-0 text-xs sm:text-sm ${
  currentSection === index
  ? "bg-blue-600 text-white shadow-lg"
  : "bg-white/70 text-gray-600 hover:bg-white hover:shadow-md"
  }`}
  >
- <section.icon className="h-4 w-4" />
- <span className="text-sm font-medium">{t(section.titleKey)}</span>
+ <section.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+ <span className="font-medium whitespace-nowrap">{t(section.titleKey)}</span>
  </button>
  ))}
  </div>
  {/* Section 1: Identity */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
- <CardTitle className="flex items-center gap-3">
- <User className="h-6 w-6" />
+ <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg p-3 sm:p-4 md:p-6">
+ <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl">
+ <User className="h-5 w-5 sm:h-6 sm:w-6" />
  Personal Information
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6 space-y-6">
- <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+ <CardContent className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
  <div className="space-y-2">
  <Label htmlFor="firstName" className="flex items-center gap-2 font-medium">
  First Name <span className="text-blue-500">*</span>
@@ -1055,9 +1055,9 @@ useEffect(() => {
  </div>
  </div>
 
- <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
  <div className="space-y-2">
- <Label htmlFor="birthDate" className="flex items-center gap-2 font-medium">
+ <Label htmlFor="birthDate" className="flex items-center gap-2 font-medium text-sm sm:text-base">
  Birth Date <span className="text-blue-500">*</span>
  </Label>
  <Input
@@ -1096,29 +1096,29 @@ useEffect(() => {
  value={formData.gender}
  onValueChange={(value) => handleInputChange("gender", value)}
  >
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
- <label 
+ <div className="grid grid-cols-2 gap-3 sm:gap-4">
+ <label
  htmlFor="gender-male"
- className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
- formData.gender === 'Male' 
- ? "border-blue-500 bg-blue-50" 
+ className={`flex items-center space-x-2 sm:space-x-3 p-3 sm:p-4 rounded-lg border-2 transition-all cursor-pointer ${
+ formData.gender === 'Male'
+ ? "border-blue-500 bg-blue-50"
  : "border-gray-200 hover:border-blue-300"
  }`}
  >
  <RadioGroupItem value="Male" id="gender-male" />
- <span className="text-sm font-medium">Male</span>
+ <span className="text-xs sm:text-sm font-medium">Male</span>
  </label>
 
- <label 
+ <label
  htmlFor="gender-female"
- className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
- formData.gender === 'Female' 
- ? "border-blue-500 bg-cyan-50" 
+ className={`flex items-center space-x-2 sm:space-x-3 p-3 sm:p-4 rounded-lg border-2 transition-all cursor-pointer ${
+ formData.gender === 'Female'
+ ? "border-blue-500 bg-cyan-50"
  : "border-gray-200 hover:border-blue-300"
  }`}
  >
  <RadioGroupItem value="Female" id="gender-female" />
- <span className="text-sm font-medium">Female</span>
+ <span className="text-xs sm:text-sm font-medium">Female</span>
  </label>
  </div>
  </RadioGroup>
@@ -1133,64 +1133,64 @@ useEffect(() => {
 
  {/* PREGNANCY STATUS SECTION - NEW */}
  {isChildbearingAge && (
- <div className="space-y-4 p-4 bg-cyan-50 rounded-lg border border-blue-200">
- <Label className="flex items-center gap-2 font-medium text-cyan-800">
+ <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 bg-cyan-50 rounded-lg border border-blue-200">
+ <Label className="flex items-center gap-2 font-medium text-cyan-800 text-sm sm:text-base">
  <Baby className="h-4 w-4" />
  Pregnancy Information <span className="text-blue-500">*</span>
  </Label>
- 
+
  <RadioGroup
  id="pregnancyStatus"
  value={formData.pregnancyStatus}
  onValueChange={(value) => handleInputChange("pregnancyStatus", value)}
  >
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
- <label 
+ <div className="grid grid-cols-2 gap-2 sm:gap-4">
+ <label
  htmlFor="pregnancy-not"
- className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
- formData.pregnancyStatus === 'not_pregnant' 
- ? "border-teal-500 bg-teal-50" 
+ className={`flex items-center space-x-2 sm:space-x-3 p-2 sm:p-4 rounded-lg border-2 transition-all cursor-pointer ${
+ formData.pregnancyStatus === 'not_pregnant'
+ ? "border-teal-500 bg-teal-50"
  : "border-gray-200 hover:border-teal-300"
  }`}
  >
  <RadioGroupItem value="not_pregnant" id="pregnancy-not" />
- <span className="text-sm font-medium">Not pregnant</span>
+ <span className="text-xs sm:text-sm font-medium">Not pregnant</span>
  </label>
 
- <label 
+ <label
  htmlFor="pregnancy-yes"
- className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
- formData.pregnancyStatus === 'pregnant' 
- ? "border-blue-500 bg-cyan-100" 
+ className={`flex items-center space-x-2 sm:space-x-3 p-2 sm:p-4 rounded-lg border-2 transition-all cursor-pointer ${
+ formData.pregnancyStatus === 'pregnant'
+ ? "border-blue-500 bg-cyan-100"
  : "border-gray-200 hover:border-blue-300"
  }`}
  >
  <RadioGroupItem value="pregnant" id="pregnancy-yes" />
- <span className="text-sm font-medium">Currently pregnant</span>
+ <span className="text-xs sm:text-sm font-medium">Currently pregnant</span>
  </label>
 
- <label 
+ <label
  htmlFor="pregnancy-maybe"
- className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
- formData.pregnancyStatus === 'possibly_pregnant' 
- ? "border-cyan-500 bg-cyan-50" 
+ className={`flex items-center space-x-2 sm:space-x-3 p-2 sm:p-4 rounded-lg border-2 transition-all cursor-pointer ${
+ formData.pregnancyStatus === 'possibly_pregnant'
+ ? "border-cyan-500 bg-cyan-50"
  : "border-gray-200 hover:border-cyan-300"
  }`}
  >
  <RadioGroupItem value="possibly_pregnant" id="pregnancy-maybe" />
- <span className="text-sm font-medium">Possibly pregnant</span>
+ <span className="text-xs sm:text-sm font-medium">Possibly pregnant</span>
  </label>
 
- <label 
+ <label
  htmlFor="pregnancy-breastfeeding"
- className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
- formData.pregnancyStatus === 'breastfeeding' 
- ? "border-blue-500 bg-blue-50" 
+ className={`flex items-center space-x-2 sm:space-x-3 p-2 sm:p-4 rounded-lg border-2 transition-all cursor-pointer ${
+ formData.pregnancyStatus === 'breastfeeding'
+ ? "border-blue-500 bg-blue-50"
  : "border-gray-200 hover:border-blue-300"
  }`}
  >
  <RadioGroupItem value="breastfeeding" id="pregnancy-breastfeeding" />
- <span className="text-sm font-medium">Breastfeeding</span>
+ <span className="text-xs sm:text-sm font-medium">Breastfeeding</span>
  </label>
  </div>
  </RadioGroup>
@@ -1253,9 +1253,9 @@ useEffect(() => {
  </div>
  )}
 
- <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+ <div className="grid grid-cols-2 gap-3 sm:gap-6">
  <div className="space-y-2">
- <Label htmlFor="weight" className="flex items-center gap-2 font-medium">
+ <Label htmlFor="weight" className="flex items-center gap-2 font-medium text-sm sm:text-base">
  Weight (kg) <span className="text-blue-500">*</span>
  </Label>
  <Input
@@ -1322,14 +1322,14 @@ useEffect(() => {
  </Card>
  {/* Section 2: Contact */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
- <CardTitle className="flex items-center gap-3">
- <Phone className="h-6 w-6" />
+ <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg p-3 sm:p-4 md:p-6">
+ <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl">
+ <Phone className="h-5 w-5 sm:h-6 sm:w-6" />
  Contact Information
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6 space-y-6">
- <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+ <CardContent className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
  <div className="space-y-2">
  <Label htmlFor="phone" className="flex items-center gap-2 font-medium">
  <Phone className="h-4 w-4" />
@@ -1383,9 +1383,9 @@ useEffect(() => {
  />
  </div>
 
- <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
  <div className="space-y-2">
- <Label htmlFor="city" className="flex items-center gap-2 font-medium">
+ <Label htmlFor="city" className="flex items-center gap-2 font-medium text-sm sm:text-base">
  <MapPin className="h-4 w-4" />
  City
  </Label>
@@ -1417,13 +1417,13 @@ useEffect(() => {
 
  {/* Section 3: Allergies */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
- <CardTitle className="flex items-center gap-3">
- <AlertTriangle className="h-6 w-6" />
+ <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg p-3 sm:p-4 md:p-6">
+ <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl">
+ <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6" />
  Known Allergies
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6 space-y-6">
+ <CardContent className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
  <div className="relative">
  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
  <Input
@@ -1434,11 +1434,11 @@ useEffect(() => {
  />
  </div>
 
- <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+ <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
  {filteredAllergies.map((allergy) => (
  <label
  key={allergy}
- className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
+ className={`flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg border-2 transition-all cursor-pointer ${
  formData.allergies.includes(allergy)
  ? "border-blue-400 bg-blue-50"
  : "border-gray-200 hover:border-blue-300 hover:bg-blue-50/50"
@@ -1448,7 +1448,7 @@ useEffect(() => {
  checked={formData.allergies.includes(allergy)}
  onCheckedChange={() => handleAllergyToggle(allergy)}
  />
- <span className="text-sm font-medium">{allergy}</span>
+ <span className="text-xs sm:text-sm font-medium">{allergy}</span>
  </label>
  ))}
  </div>
@@ -1490,13 +1490,13 @@ useEffect(() => {
 
  {/* Section 4: Medical History */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
- <CardTitle className="flex items-center gap-3">
- <Heart className="h-6 w-6" />
+ <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg p-3 sm:p-4 md:p-6">
+ <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl">
+ <Heart className="h-5 w-5 sm:h-6 sm:w-6" />
  Medical History
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6 space-y-6">
+ <CardContent className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
  <div className="relative">
  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
  <Input
@@ -1507,11 +1507,11 @@ useEffect(() => {
  />
  </div>
 
- <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
  {filteredHistory.map((condition) => (
  <label
  key={condition}
- className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
+ className={`flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg border-2 transition-all cursor-pointer ${
  formData.medicalHistory.includes(condition)
  ? "border-blue-400 bg-blue-50"
  : "border-gray-200 hover:border-blue-300 hover:bg-blue-50/50"
@@ -1521,7 +1521,7 @@ useEffect(() => {
  checked={formData.medicalHistory.includes(condition)}
  onCheckedChange={() => handleMedicalHistoryToggle(condition)}
  />
- <span className="text-sm font-medium">{condition}</span>
+ <span className="text-xs sm:text-sm font-medium">{condition}</span>
  </label>
  ))}
  </div>
@@ -1562,13 +1562,13 @@ useEffect(() => {
  </Card>
 {/* Section 5: Current Medications */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-t-lg">
- <CardTitle className="flex items-center gap-3">
- <Pill className="h-6 w-6" />
+ <CardHeader className="bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-t-lg p-3 sm:p-4 md:p-6">
+ <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl">
+ <Pill className="h-5 w-5 sm:h-6 sm:w-6" />
  Current Medications
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6 space-y-4">
+ <CardContent className="p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4">
  <div className="space-y-2">
  <div className="flex items-center justify-between">
  <Label htmlFor="currentMedicationsText">Ongoing Treatments</Label>
@@ -1648,17 +1648,17 @@ Example:
 
  {/* Section 6: Lifestyle */}
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
- <CardHeader className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-t-lg">
- <CardTitle className="flex items-center gap-3">
- <Activity className="h-6 w-6" />
+ <CardHeader className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-t-lg p-3 sm:p-4 md:p-6">
+ <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl">
+ <Activity className="h-5 w-5 sm:h-6 sm:w-6" />
  Lifestyle
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6">
- <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+ <CardContent className="p-3 sm:p-4 md:p-6">
+ <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
  {/* Tobacco */}
- <div className="space-y-4">
- <Label className="font-medium text-lg flex items-center gap-2">
+ <div className="space-y-3 sm:space-y-4">
+ <Label className="font-medium text-sm sm:text-base lg:text-lg flex items-center gap-2">
  🚬 Tobacco Use
  </Label>
  <RadioGroup
@@ -1687,8 +1687,8 @@ Example:
  </div>
 
  {/* Alcohol */}
- <div className="space-y-4">
- <Label className="font-medium text-lg flex items-center gap-2">
+ <div className="space-y-3 sm:space-y-4">
+ <Label className="font-medium text-sm sm:text-base lg:text-lg flex items-center gap-2">
  🍷 Alcohol Consumption
  </Label>
  <RadioGroup
@@ -1718,8 +1718,8 @@ Example:
  </div>
 
  {/* Physical Activity */}
- <div className="space-y-4">
- <Label className="font-medium text-lg flex items-center gap-2">
+ <div className="space-y-3 sm:space-y-4">
+ <Label className="font-medium text-sm sm:text-base lg:text-lg flex items-center gap-2">
  🏃 Physical Activity
  </Label>
  <RadioGroup
@@ -2026,12 +2026,12 @@ Example:
  )}
 
  {/* Submit button */}
- <div className="flex justify-center pt-6">
+ <div className="flex justify-center pt-4 sm:pt-6">
    <Button
      type="submit"
      size="lg"
      disabled={!consultationType && !tibokIsDermatology && !skipConsultationTypeSelection}
-     className={`px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 ${
+     className={`px-4 sm:px-6 md:px-8 py-3 sm:py-4 text-sm sm:text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-auto ${
        isWorkflowChronic || consultationType === 'chronic'
          ? 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700'
          : isWorkflowDermatology || consultationType === 'dermatology'
@@ -2044,7 +2044,7 @@ Example:
        : isWorkflowDermatology || consultationType === 'dermatology'
        ? 'Continuer vers Analyse Dermatologique'
        : 'Continuer vers Informations Cliniques'}
-     <ArrowRight className="h-5 w-5 ml-2" />
+     <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-2" />
    </Button>
  </div>
  </form>

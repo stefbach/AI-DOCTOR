@@ -129,32 +129,36 @@ export function ConsultationDetailModal({
   const dietPlan = extractDietPlan(fullReport, displayConsultation.dietaryPlan)
   const followUp = extractFollowUp(fullReport)
 
-  // Calculate scroll container height: 85vh - header (~80px) - tabs (~50px) - padding
+  // Calculate scroll container height: 90vh - header (~100px) - tabs (~60px) - padding
   const scrollContainerStyle = {
-    maxHeight: 'calc(85vh - 180px)',
+    maxHeight: 'calc(90vh - 200px)',
     overflowY: 'auto' as const
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[85vh] overflow-hidden">
-        <DialogHeader className="pb-4">
-          <DialogTitle className="flex items-center gap-2">
+      <DialogContent className="!w-[calc(100vw-16px)] !max-w-5xl max-h-[90vh] overflow-hidden mx-2">
+        <DialogHeader className="pb-2 sm:pb-4">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
             {typeConfig.icon}
-            {typeConfig.label}
+            <span className="truncate">{typeConfig.label}</span>
           </DialogTitle>
-          <DialogDescription className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            {format(new Date(displayConsultation.date), 'MMMM dd, yyyy - HH:mm')}
-            <Badge variant="outline" className="ml-2">
-              ID: {displayConsultation.consultationId}
-            </Badge>
-            {loadingDetails && (
-              <Badge variant="secondary" className="ml-2">
-                <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                Loading details...
+          <DialogDescription className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span className="truncate">{format(new Date(displayConsultation.date), 'MMM dd, yyyy - HH:mm')}</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+              <Badge variant="outline" className="text-[10px] sm:text-xs">
+                ID: {displayConsultation.consultationId?.slice(0, 8)}...
               </Badge>
-            )}
+              {loadingDetails && (
+                <Badge variant="secondary" className="text-[10px] sm:text-xs">
+                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                  Loading...
+                </Badge>
+              )}
+            </div>
           </DialogDescription>
         </DialogHeader>
 
@@ -168,61 +172,56 @@ export function ConsultationDetailModal({
           </div>
         )}
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={`grid w-full ${isChronic ? 'grid-cols-6' : 'grid-cols-4'}`}>
-              <TabsTrigger value="report" className="flex items-center gap-1">
-                <FileText className="h-4 w-4" />
-                <span className="hidden sm:inline">Report</span>
-              </TabsTrigger>
-              <TabsTrigger value="prescription" className="flex items-center gap-1">
-                <Pill className="h-4 w-4" />
-                <span className="hidden sm:inline">Prescription</span>
-              </TabsTrigger>
-              <TabsTrigger value="labs" className="flex items-center gap-1">
-                <TestTube className="h-4 w-4" />
-                <span className="hidden sm:inline">Labs</span>
-              </TabsTrigger>
-              <TabsTrigger value="imaging" className="flex items-center gap-1">
-                <Scan className="h-4 w-4" />
-                <span className="hidden sm:inline">Imaging</span>
-              </TabsTrigger>
-              {isChronic && (
-                <>
-                  <TabsTrigger value="diet" className="flex items-center gap-1">
-                    <Salad className="h-4 w-4" />
-                    <span className="hidden sm:inline">Diet</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="followup" className="flex items-center gap-1">
-                    <CalendarCheck className="h-4 w-4" />
-                    <span className="hidden sm:inline">Follow-up</span>
-                  </TabsTrigger>
-                </>
-              )}
-            </TabsList>
+        {/* Dropdown menu for section selection */}
+        <div className="mb-4">
+          <select
+            value={activeTab}
+            onChange={(e) => setActiveTab(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="report">📄 Medical Report</option>
+            <option value="prescription">💊 Prescription</option>
+            <option value="labs">🧪 Laboratory Tests</option>
+            <option value="imaging">📷 Imaging Studies</option>
+            {isChronic && <option value="diet">🥗 Diet Plan</option>}
+            {isChronic && <option value="followup">📅 Follow-up Plan</option>}
+          </select>
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+          {/* Hidden TabsList - required by Tabs but we use the dropdown instead */}
+          <TabsList className="hidden">
+            <TabsTrigger value="report">Report</TabsTrigger>
+            <TabsTrigger value="prescription">Prescription</TabsTrigger>
+            <TabsTrigger value="labs">Labs</TabsTrigger>
+            <TabsTrigger value="imaging">Imaging</TabsTrigger>
+            {isChronic && <TabsTrigger value="diet">Diet</TabsTrigger>}
+            {isChronic && <TabsTrigger value="followup">Follow-up</TabsTrigger>}
+          </TabsList>
 
             {/* REPORT TAB */}
-            <TabsContent value="report" className="mt-4">
+            <TabsContent value="report" className="flex-1 overflow-hidden">
               <div style={scrollContainerStyle} className="pr-2">
                 <ReportTab consultation={displayConsultation} fullReport={fullReport} />
               </div>
             </TabsContent>
 
             {/* PRESCRIPTION TAB */}
-            <TabsContent value="prescription" className="mt-4">
+            <TabsContent value="prescription" className="flex-1 overflow-hidden">
               <div style={scrollContainerStyle} className="pr-2">
                 <PrescriptionTab prescription={prescription} consultation={displayConsultation} />
               </div>
             </TabsContent>
 
             {/* LAB TESTS TAB */}
-            <TabsContent value="labs" className="mt-4">
+            <TabsContent value="labs" className="flex-1 overflow-hidden">
               <div style={scrollContainerStyle} className="pr-2">
                 <LabTestsTab labTests={labTests} fullReport={fullReport} />
               </div>
             </TabsContent>
 
             {/* IMAGING TAB */}
-            <TabsContent value="imaging" className="mt-4">
+            <TabsContent value="imaging" className="flex-1 overflow-hidden">
               <div style={scrollContainerStyle} className="pr-2">
                 <ImagingTab imaging={imaging} fullReport={fullReport} />
               </div>
@@ -230,7 +229,7 @@ export function ConsultationDetailModal({
 
             {/* DIET PLAN TAB (Chronic only) */}
             {isChronic && (
-              <TabsContent value="diet" className="mt-4">
+              <TabsContent value="diet" className="flex-1 overflow-hidden">
                 <div style={scrollContainerStyle} className="pr-2">
                   <DietPlanTab dietPlan={dietPlan} fullReport={fullReport} />
                 </div>
@@ -239,7 +238,7 @@ export function ConsultationDetailModal({
 
             {/* FOLLOW-UP TAB (Chronic only) */}
             {isChronic && (
-              <TabsContent value="followup" className="mt-4">
+              <TabsContent value="followup" className="flex-1 overflow-hidden">
                 <div style={scrollContainerStyle} className="pr-2">
                   <FollowUpTab followUp={followUp} fullReport={fullReport} />
                 </div>
@@ -430,14 +429,15 @@ function ReportTab({ consultation, fullReport }: { consultation: ConsultationHis
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Medical Report</h3>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+        <h3 className="text-base sm:text-lg font-semibold">Medical Report</h3>
         <Button
           variant="outline"
           size="sm"
           onClick={() => handleDownloadReport(consultation)}
+          className="self-start sm:self-auto text-xs sm:text-sm"
         >
-          <Download className="h-4 w-4 mr-1" />
+          <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
           Download
         </Button>
       </div>

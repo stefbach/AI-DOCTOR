@@ -91,67 +91,67 @@ export function HubPatientSummary({ patientData }: HubPatientSummaryProps) {
 
   return (
     <Card className="w-full border-green-200 bg-green-50">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-green-100 rounded-lg">
-              <User className="h-6 w-6 text-green-600" />
+      <CardHeader className="p-3 sm:p-4 md:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="p-2 sm:p-3 bg-green-100 rounded-lg">
+              <User className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
             </div>
             <div>
-              <CardTitle className="text-green-900">
+              <CardTitle className="text-green-900 text-base sm:text-lg">
                 ✅ Patient Trouvé
               </CardTitle>
-              <CardDescription className="text-green-700">
+              <CardDescription className="text-green-700 text-xs sm:text-sm">
                 Historique médical disponible
               </CardDescription>
             </div>
           </div>
-          <Badge className="bg-green-600 text-white">
+          <Badge className="bg-green-600 text-white self-start sm:self-auto text-xs sm:text-sm">
             {totalConsultations} consultation{totalConsultations > 1 ? 's' : ''}
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-4 md:p-6 pt-0">
         {/* Patient Identity */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div className="space-y-2">
-            <h4 className="font-semibold text-green-900 flex items-center gap-2">
-              <User className="h-4 w-4" />
+            <h4 className="font-semibold text-green-900 flex items-center gap-2 text-sm sm:text-base">
+              <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Identité Patient
             </h4>
-            <div className="bg-white p-3 rounded-lg border border-green-200">
+            <div className="bg-white p-2 sm:p-3 rounded-lg border border-green-200">
               {patientInfo.name && (
-                <p className="font-medium text-gray-900">{patientInfo.name}</p>
+                <p className="font-medium text-gray-900 text-sm sm:text-base">{patientInfo.name}</p>
               )}
               {(patientInfo.age || patientInfo.gender) && (
-                <p className="text-sm text-gray-600">
+                <p className="text-xs sm:text-sm text-gray-600">
                   {patientInfo.age && `${patientInfo.age} ans`}
                   {patientInfo.age && patientInfo.gender && ' • '}
                   {patientInfo.gender}
                 </p>
               )}
               {(tibokPatientInfo?.email || searchCriteria.email) && (
-                <p className="text-sm text-gray-600">📧 {tibokPatientInfo?.email || searchCriteria.email}</p>
+                <p className="text-xs sm:text-sm text-gray-600 truncate">📧 {tibokPatientInfo?.email || searchCriteria.email}</p>
               )}
               {(tibokPatientInfo?.phone || tibokPatientInfo?.phone_number || tibokPatientInfo?.telephone || searchCriteria.phone) && (
-                <p className="text-sm text-gray-600">📞 {tibokPatientInfo?.phone || tibokPatientInfo?.phone_number || tibokPatientInfo?.telephone || searchCriteria.phone}</p>
+                <p className="text-xs sm:text-sm text-gray-600">📞 {tibokPatientInfo?.phone || tibokPatientInfo?.phone_number || tibokPatientInfo?.telephone || searchCriteria.phone}</p>
               )}
             </div>
           </div>
 
           <div className="space-y-2">
-            <h4 className="font-semibold text-green-900 flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
+            <h4 className="font-semibold text-green-900 flex items-center gap-2 text-sm sm:text-base">
+              <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Dernière Consultation
             </h4>
-            <div className="bg-white p-3 rounded-lg border border-green-200">
-              <p className="font-medium text-gray-900">
+            <div className="bg-white p-2 sm:p-3 rounded-lg border border-green-200">
+              <p className="font-medium text-gray-900 text-sm sm:text-base">
                 {format(new Date(mostRecent.date), 'dd MMMM yyyy', { locale: fr })}
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs sm:text-sm text-gray-600">
                 Il y a {getDaysSince(mostRecent.date)} jours
               </p>
-              <Badge variant="outline" className="mt-2">
+              <Badge variant="outline" className="mt-2 text-xs">
                 {getTypeIcon(dominantType)} {getTypeLabel(dominantType)}
               </Badge>
             </div>
@@ -161,12 +161,12 @@ export function HubPatientSummary({ patientData }: HubPatientSummaryProps) {
         {/* Medical Summary */}
         {mostRecent.diagnosis && (
           <div className="space-y-2">
-            <h4 className="font-semibold text-green-900 flex items-center gap-2">
-              <FileText className="h-4 w-4" />
+            <h4 className="font-semibold text-green-900 flex items-center gap-2 text-sm sm:text-base">
+              <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Dernier Diagnostic
             </h4>
-            <div className="bg-white p-3 rounded-lg border border-green-200">
-              <p className="text-sm text-gray-700 line-clamp-2">
+            <div className="bg-white p-2 sm:p-3 rounded-lg border border-green-200">
+              <p className="text-xs sm:text-sm text-gray-700 line-clamp-2 sm:line-clamp-3">
                 {mostRecent.diagnosis}
               </p>
             </div>
@@ -176,25 +176,25 @@ export function HubPatientSummary({ patientData }: HubPatientSummaryProps) {
         {/* Recent Vitals */}
         {mostRecent.vitalSigns && Object.keys(mostRecent.vitalSigns).length > 0 && (
           <div className="space-y-2">
-            <h4 className="font-semibold text-green-900 flex items-center gap-2">
-              <Activity className="h-4 w-4" />
+            <h4 className="font-semibold text-green-900 flex items-center gap-2 text-sm sm:text-base">
+              <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Dernières Constantes
             </h4>
-            <div className="bg-white p-3 rounded-lg border border-green-200">
-              <div className="flex flex-wrap gap-3">
+            <div className="bg-white p-2 sm:p-3 rounded-lg border border-green-200">
+              <div className="flex flex-wrap gap-2 sm:gap-3">
                 {mostRecent.vitalSigns.bloodPressure && (
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="text-xs">
                     <Heart className="h-3 w-3 mr-1" />
                     TA: {mostRecent.vitalSigns.bloodPressure}
                   </Badge>
                 )}
                 {mostRecent.vitalSigns.weight && (
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="text-xs">
                     Poids: {mostRecent.vitalSigns.weight} kg
                   </Badge>
                 )}
                 {mostRecent.vitalSigns.temperature && (
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="text-xs">
                     T°: {mostRecent.vitalSigns.temperature}°C
                   </Badge>
                 )}
