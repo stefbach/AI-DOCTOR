@@ -137,7 +137,7 @@ export function ConsultationDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-hidden">
+      <DialogContent className="w-[98vw] max-w-5xl max-h-[90vh] overflow-hidden">
         <DialogHeader className="pb-2 sm:pb-4">
           <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
             {typeConfig.icon}
