@@ -5227,63 +5227,70 @@ export default function ChronicProfessionalReport({
   const ActionsBar = () => {
     return (
       <Card className="print:hidden">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <Badge className={validationStatus === 'validated' ? 'bg-teal-100 text-teal-800' : 'bg-cyan-100 text-cyan-800'}>
-                {validationStatus === 'validated' ? (
-                  <>
-                    <Lock className="h-3 w-3 mr-1" />
-                    Document validated & signed
-                  </>
-                ) : (
-                  <>
-                    <Unlock className="h-3 w-3 mr-1" />
-                    Draft - awaiting validation
-                  </>
-                )}
-              </Badge>
-              <span className="text-sm text-gray-600">
-                {report.medicalReport.metadata.wordCount} words
-              </span>
-            </div>
-            <div className="flex gap-2">
+        <CardContent className="p-3 sm:p-4">
+          <div className="space-y-3">
+            {/* Row 1: Status badge and word count + Edit button */}
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+                <Badge className={`text-xs ${validationStatus === 'validated' ? 'bg-teal-100 text-teal-800' : 'bg-cyan-100 text-cyan-800'}`}>
+                  {validationStatus === 'validated' ? (
+                    <>
+                      <Lock className="h-3 w-3 mr-1" />
+                      Validated
+                    </>
+                  ) : (
+                    <>
+                      <Unlock className="h-3 w-3 mr-1" />
+                      Draft
+                    </>
+                  )}
+                </Badge>
+                <span className="text-xs sm:text-sm text-gray-600">
+                  {report.medicalReport.metadata.wordCount} words
+                </span>
+              </div>
               <Button
                 variant={editMode ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setEditMode(!editMode)}
                 disabled={validationStatus === 'validated'}
+                className="text-xs sm:text-sm"
               >
-                {editMode ? <Eye className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
+                {editMode ? <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> : <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />}
                 {editMode ? 'Preview' : 'Edit'}
               </Button>
-              
+            </div>
+
+            {/* Row 2: Validate & Sign button (full width on mobile) */}
+            <div className="flex flex-col sm:flex-row gap-2">
               {hasUnsavedChanges && (
                 <Button
                   variant="secondary"
                   size="sm"
                   onClick={handleSave}
                   disabled={saving || validationStatus === 'validated'}
+                  className="w-full sm:w-auto text-xs sm:text-sm"
                 >
                   {saving ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 animate-spin" />
                   ) : (
-                    <Save className="h-4 w-4 mr-2" />
+                    <Save className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                   )}
-                  Save Changes
+                  Save
                 </Button>
               )}
-              
+
               <Button
                 variant="default"
                 size="sm"
                 onClick={handleValidation}
                 disabled={saving || validationStatus === 'validated' || hasUnsavedChanges}
+                className="w-full sm:w-auto text-xs sm:text-sm"
               >
                 {saving ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 animate-spin" />
                 ) : (
-                  <FileCheck className="h-4 w-4 mr-2" />
+                  <FileCheck className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 )}
                 {validationStatus === 'validated' ? 'Validated' : 'Validate & Sign'}
               </Button>
@@ -5293,25 +5300,25 @@ export default function ChronicProfessionalReport({
                   size="sm"
                   onClick={handleSendDocuments}
                   disabled={isSendingDocuments}
-                  className="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto text-xs sm:text-sm bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSendingDocuments ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 animate-spin" />
                       Sending...
                     </>
                   ) : (
                     <>
-                      <Send className="h-4 w-4 mr-2" />
-                      Send Documents
+                      <Send className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                      Send
                     </>
                   )}
                 </Button>
               )}
 
-              <Button variant="outline" size="sm" onClick={handlePrint}>
-                <Printer className="h-4 w-4 mr-2" />
-                Print All
+              <Button variant="outline" size="sm" onClick={handlePrint} className="w-full sm:w-auto text-xs sm:text-sm">
+                <Printer className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                Print
               </Button>
             </div>
           </div>
@@ -5364,67 +5371,28 @@ export default function ChronicProfessionalReport({
       <ActionsBar />
       <PrescriptionStats />
       
+      {/* Section selector dropdown */}
+      <div className="mb-4 print:hidden">
+        <select
+          value={activeTab}
+          onChange={(e) => setActiveTab(e.target.value)}
+          className="w-full p-3 border border-gray-300 rounded-lg bg-white text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="medical-report">📄 Medical Report</option>
+          <option value="medications">💊 Medications ({report.medicationPrescription?.prescription.medications?.length || 0})</option>
+          <option value="laboratory">🧪 Lab Tests ({report.laboratoryTests ? Object.values(report.laboratoryTests.prescription.tests || {}).reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0) : 0})</option>
+          <option value="paraclinical">🔬 Paraclinical Exams ({report.paraclinicalExams?.prescription.exams?.length || 0})</option>
+          <option value="dietary">🥗 Diet Plan</option>
+          <option value="sick-leave">📅 Sick Leave {sickLeaveData.numberOfDays > 0 ? `(${sickLeaveData.numberOfDays}d)` : ''}</option>
+          <option value="invoice">💰 Invoice</option>
+          <option value="followup">📋 Follow-Up Plan</option>
+          <option value="ai-assistant">🤖 AI Assistant</option>
+        </select>
+      </div>
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
-        <TabsList className="flex overflow-x-auto pb-2 gap-1 w-full sm:grid sm:grid-cols-9 sm:overflow-visible sm:pb-0 sm:gap-0 h-auto sm:h-10" style={{ flexDirection: 'row' }}>
-          <TabsTrigger value="medical-report" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap">
-            <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            Report
-          </TabsTrigger>
-          <TabsTrigger value="medications" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap">
-            <Pill className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            Meds
-            {report.medicationPrescription && (
-              <Badge variant="secondary" className="ml-1 text-xs scale-75 sm:scale-100">
-                {report.medicationPrescription.prescription.medications?.length || 0}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="laboratory" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap">
-            <TestTube className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            Labs
-            {report.laboratoryTests && (
-              <Badge variant="secondary" className="ml-1 text-xs scale-75 sm:scale-100">
-                {Object.values(report.laboratoryTests.prescription.tests || {})
-                  .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="paraclinical" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap">
-            <Scan className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            Exams
-            {report.paraclinicalExams && (
-              <Badge variant="secondary" className="ml-1 text-xs scale-75 sm:scale-100">
-                {report.paraclinicalExams.prescription.exams?.length || 0}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="dietary" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap">
-            <Utensils className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            Diet
-          </TabsTrigger>
-          <TabsTrigger value="sick-leave" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap">
-            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            Leave
-            {sickLeaveData.numberOfDays > 0 && (
-              <Badge variant="secondary" className="ml-1 text-xs scale-75 sm:scale-100">
-                {sickLeaveData.numberOfDays}d
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="invoice" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap">
-            <Activity className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            Invoice
-          </TabsTrigger>
-          <TabsTrigger value="followup" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap">
-            <ClipboardList className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            Follow
-          </TabsTrigger>
-          <TabsTrigger value="ai-assistant" className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 whitespace-nowrap bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold shadow-lg hover:from-teal-600 hover:to-cyan-600 data-[state=active]:ring-2 data-[state=active]:ring-yellow-400">
-            <Stethoscope className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            AI
-          </TabsTrigger>
-        </TabsList>
-        
+        <TabsList className="hidden"></TabsList>
+
         <TabsContent value="medical-report">
           <MedicalReportSection />
         </TabsContent>

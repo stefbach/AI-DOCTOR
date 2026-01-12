@@ -335,21 +335,21 @@ export default function ChronicQuestionsForm({
  </Card>
  )}
 
- {/* Action Buttons */}
- <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4">
- <Button onClick={onBack} variant="outline" size="sm" className="text-xs sm:text-sm sm:size-lg order-2 sm:order-1">
- ← Back
- </Button>
+ {/* Action Buttons - Always stack on mobile */}
+ <div className="flex flex-col gap-3 pt-4">
  <Button
  onClick={handleSubmit}
- size="sm"
- className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm sm:size-lg order-1 sm:order-2"
+ size="default"
+ className="bg-blue-600 hover:bg-blue-700 w-full"
  disabled={answeredCount === 0}
  >
  Continue to Analysis
- <span className="ml-1 sm:ml-2 px-1 sm:px-2 py-0.5 bg-white/20 rounded text-xs">
- {answeredCount}
+ <span className="ml-2 px-2 py-0.5 bg-white/20 rounded text-xs">
+ {answeredCount} answers
  </span>
+ </Button>
+ <Button onClick={onBack} variant="outline" size="default" className="w-full">
+ ← Back to Clinical Data
  </Button>
  </div>
  </div>
