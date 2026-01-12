@@ -206,16 +206,16 @@ export default function ChronicClinicalForm({
  }
 
  return (
- <div className="space-y-6">
+ <div className="space-y-4 sm:space-y-6">
  {/* 1. REASON FOR VISIT */}
  <Card className="border-blue-200">
- <CardHeader className="bg-gradient-to-r from-blue-100 to-cyan-100">
- <CardTitle className="flex items-center gap-2">
- <ClipboardList className="h-5 w-5 text-blue-600" />
+ <CardHeader className="bg-gradient-to-r from-blue-100 to-cyan-100 p-3 sm:p-6">
+ <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+ <ClipboardList className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
  1. Reason for Visit
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6 space-y-4">
+ <CardContent className="p-3 sm:p-6 space-y-3 sm:space-y-4">
  <div className="space-y-3">
  {[
  "Regular chronic disease follow-up",
@@ -266,13 +266,13 @@ export default function ChronicClinicalForm({
 
  {/* 2. VITAL SIGNS */}
  <Card className="border-blue-200">
- <CardHeader className="bg-gradient-to-r from-blue-100 to-cyan-100">
- <CardTitle className="flex items-center gap-2">
- <Activity className="h-5 w-5 text-blue-600" />
+ <CardHeader className="bg-gradient-to-r from-blue-100 to-cyan-100 p-3 sm:p-6">
+ <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+ <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
  2. Vital Signs
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6 space-y-4">
+ <CardContent className="p-3 sm:p-6 space-y-3 sm:space-y-4">
  
  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
  <div>
@@ -398,13 +398,13 @@ export default function ChronicClinicalForm({
 
  {/* 3. CHRONIC DISEASES MONITORED */}
  <Card className="border-teal-200">
- <CardHeader className="bg-gradient-to-r from-teal-100 to-teal-100">
+ <CardHeader className="bg-gradient-to-r from-teal-100 to-teal-100 p-3 sm:p-6">
  <CardTitle className="flex items-center gap-2">
  <Heart className="h-5 w-5 text-teal-600" />
  3. Chronic Diseases Monitored
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6 space-y-4">
+ <CardContent className="p-3 sm:p-6 space-y-3 sm:space-y-4">
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
  {[
  "Type 2 Diabetes",
@@ -458,13 +458,13 @@ export default function ChronicClinicalForm({
  {/* 4. DIABETES CONTROL (if diabetic) */}
  {(formData.chronicDiseases.includes("Type 2 Diabetes") || formData.chronicDiseases.includes("Type 1 Diabetes")) && (
  <Card className="border-blue-200">
- <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-100">
+ <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-100 p-3 sm:p-6">
  <CardTitle className="flex items-center gap-2">
  <Activity className="h-5 w-5 text-blue-600" />
  4. Diabetes Control
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6 space-y-4">
+ <CardContent className="p-3 sm:p-6 space-y-3 sm:space-y-4">
  
  {/* Last HbA1c */}
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -551,13 +551,13 @@ export default function ChronicClinicalForm({
  {/* 5. HYPERTENSION CONTROL (if hypertensive) */}
  {formData.chronicDiseases.includes("Arterial Hypertension") && (
  <Card className="border-cyan-200">
- <CardHeader className="bg-gradient-to-r from-cyan-100 to-cyan-100">
+ <CardHeader className="bg-gradient-to-r from-cyan-100 to-cyan-100 p-3 sm:p-6">
  <CardTitle className="flex items-center gap-2">
  <Heart className="h-5 w-5 text-cyan-600" />
  5. Hypertension Control
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6 space-y-4">
+ <CardContent className="p-3 sm:p-6 space-y-3 sm:space-y-4">
  
  {/* Blood Pressure Control */}
  <div>
@@ -615,13 +615,13 @@ export default function ChronicClinicalForm({
 
  {/* 6. TREATMENT ADHERENCE */}
  <Card className="border-blue-200">
- <CardHeader className="bg-gradient-to-r from-blue-100 to-cyan-100">
+ <CardHeader className="bg-gradient-to-r from-blue-100 to-cyan-100 p-3 sm:p-6">
  <CardTitle className="flex items-center gap-2">
  <FileText className="h-5 w-5 text-blue-600" />
  6. Treatment Adherence
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6 space-y-4">
+ <CardContent className="p-3 sm:p-6 space-y-3 sm:space-y-4">
  
  {/* Adherence Status */}
  <div>
@@ -698,13 +698,13 @@ export default function ChronicClinicalForm({
 
  {/* 7. CURRENT SYMPTOMS */}
  <Card className="border-blue-200">
- <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-100">
+ <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-100 p-3 sm:p-6">
  <CardTitle className="flex items-center gap-2">
  <Stethoscope className="h-5 w-5 text-blue-600" />
  7. Current Symptoms
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6 space-y-4">
+ <CardContent className="p-3 sm:p-6 space-y-3 sm:space-y-4">
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
  {[
  "None",
@@ -752,13 +752,13 @@ export default function ChronicClinicalForm({
 
  {/* 8. RECENT TESTS */}
  <Card className="border-cyan-200">
- <CardHeader className="bg-gradient-to-r from-cyan-100 to-cyan-100">
+ <CardHeader className="bg-gradient-to-r from-cyan-100 to-cyan-100 p-3 sm:p-6">
  <CardTitle className="flex items-center gap-2">
  <ClipboardList className="h-5 w-5 text-cyan-600" />
  8. Recent Tests (last 6 months)
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6 space-y-4">
+ <CardContent className="p-3 sm:p-6 space-y-3 sm:space-y-4">
  <div className="space-y-2">
  {[
  "Renal function (creatinine, eGFR)",
@@ -803,13 +803,13 @@ export default function ChronicClinicalForm({
 
  {/* 9. MEDICAL PLAN */}
  <Card className="border-teal-200">
- <CardHeader className="bg-gradient-to-r from-teal-100 to-teal-100">
+ <CardHeader className="bg-gradient-to-r from-teal-100 to-teal-100 p-3 sm:p-6">
  <CardTitle className="flex items-center gap-2">
  <FileText className="h-5 w-5 text-teal-600" />
  9. Medical Plan / Course of Action
  </CardTitle>
  </CardHeader>
- <CardContent className="p-6 space-y-4">
+ <CardContent className="p-3 sm:p-6 space-y-3 sm:space-y-4">
  <div className="space-y-2">
  {[
  "Treatment unchanged",
@@ -848,14 +848,14 @@ export default function ChronicClinicalForm({
  </Card>
 
  {/* Action Buttons */}
- <div className="flex justify-between pt-4">
- <Button onClick={onBack} variant="outline" size="lg">
+ <div className="flex justify-between pt-4 gap-2" style={{ flexDirection: 'row' }}>
+ <Button onClick={onBack} variant="outline" size="sm" className="sm:size-lg px-3 sm:px-6 text-xs sm:text-sm">
  Back
  </Button>
- <Button 
- onClick={handleSubmit} 
- size="lg"
- className="bg-blue-600 hover:bg-blue-700"
+ <Button
+ onClick={handleSubmit}
+ size="sm"
+ className="sm:size-lg bg-blue-600 hover:bg-blue-700 px-3 sm:px-6 text-xs sm:text-sm"
  >
  Continue to AI Questions
  </Button>

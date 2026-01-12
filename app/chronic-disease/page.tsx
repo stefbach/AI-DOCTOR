@@ -208,55 +208,56 @@ export default function ChronicDiseaseWorkflow() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50">
-      {/* Modern Header with Gradient */}
+      {/* Modern Header with Gradient - Mobile Optimized */}
       <div className="gradient-secondary text-white shadow-xl">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <img
                 src="/tibok-logo.png.png"
                 alt="TIBOK Logo"
-                className="h-12 w-auto object-contain"
+                className="h-8 sm:h-12 w-auto object-contain flex-shrink-0"
               />
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-2xl font-bold tracking-tight truncate">
                   Gestion des Maladies Chroniques
                 </h1>
-                <p className="text-teal-100 text-sm">Suivi spécialisé et plan de traitement</p>
+                <p className="text-teal-100 text-xs sm:text-sm truncate">Suivi spécialisé et plan de traitement</p>
               </div>
             </div>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handleBackToHome}
-              className="flex items-center gap-2 bg-white/20 text-white border-white/30 backdrop-blur-sm hover:bg-white/30"
+              size="sm"
+              className="flex items-center gap-2 bg-white/20 text-white border-white/30 backdrop-blur-sm hover:bg-white/30 self-start sm:self-auto"
             >
               <ArrowLeft className="h-4 w-4" />
-              Retour
+              <span className="hidden xs:inline">Retour</span>
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
 
-        {/* Patient Info Banner - Modern Design */}
-        <Card className="glass-card mb-6 shadow-xl border-0 overflow-hidden">
+        {/* Patient Info Banner - Mobile Optimized */}
+        <Card className="glass-card mb-4 sm:mb-6 shadow-xl border-0 overflow-hidden">
           <div className="bg-gradient-to-r from-teal-500 to-teal-500 h-2"></div>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+          <CardContent className="p-3 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
               <div>
-                <p className="text-sm text-muted-foreground font-medium mb-1">Patient</p>
-                <p className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-teal-600 bg-clip-text text-transparent">
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium mb-1">Patient</p>
+                <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-teal-600 to-teal-600 bg-clip-text text-transparent">
                   {patientData.firstName} {patientData.lastName}
                 </p>
               </div>
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground font-medium mb-2">Maladies Chroniques</p>
-                <div className="flex gap-2 flex-wrap justify-end">
+              <div className="sm:text-right">
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium mb-1 sm:mb-2">Maladies Chroniques</p>
+                <div className="flex gap-1 sm:gap-2 flex-wrap sm:justify-end">
                   {patientData.medicalHistory.map((condition: string, idx: number) => (
-                    <Badge 
-                      key={idx} 
-                      className="bg-gradient-to-r from-teal-500 to-teal-500 text-white border-0 shadow-md"
+                    <Badge
+                      key={idx}
+                      className="bg-gradient-to-r from-teal-500 to-teal-500 text-white border-0 shadow-md text-xs"
                     >
                       {condition}
                     </Badge>
@@ -306,48 +307,49 @@ export default function ChronicDiseaseWorkflow() {
           </Card>
         )}
 
-        {/* Progress - Modern Design */}
-        <Card className="glass-card mb-6 shadow-2xl border-0">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-100 pb-4">
-            <div className="flex items-center justify-between">
+        {/* Progress - Mobile Optimized */}
+        <Card className="glass-card mb-4 sm:mb-6 shadow-2xl border-0">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-100 p-3 sm:p-6 pb-3 sm:pb-4">
+            <div className="flex items-center justify-between gap-2">
               <div>
-                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                <CardTitle className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                   Progression
                 </CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">Suivi de votre consultation</p>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">Suivi de votre consultation</p>
               </div>
-              <Badge className="gradient-secondary text-white border-0 px-4 py-2 shadow-md">
+              <Badge className="gradient-secondary text-white border-0 px-2 sm:px-4 py-1 sm:py-2 shadow-md text-xs sm:text-sm flex-shrink-0">
                 Étape {currentStep + 1}/{steps.length}
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="pt-6">
-            <Progress value={progress} className="mb-6" />
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <CardContent className="p-3 sm:p-6 pt-4 sm:pt-6">
+            <Progress value={progress} className="mb-4 sm:mb-6 h-2 sm:h-3" />
+            {/* Mobile: horizontal scroll, Desktop: grid */}
+            <div className="flex overflow-x-auto pb-2 gap-3 sm:grid sm:grid-cols-3 md:grid-cols-5 sm:gap-4 sm:overflow-visible sm:pb-0 -mx-1 px-1 sm:mx-0 sm:px-0" style={{ flexDirection: 'row' }}>
               {steps.map((step, index) => {
                 const Icon = step.icon
                 return (
                   <div
                     key={index}
                     onClick={() => handleStepClick(index)}
-                    className={`p-5 rounded-xl smooth-transition cursor-pointer transform
-                      ${step.status === "current" 
-                        ? "bg-gradient-to-br from-teal-500 to-teal-500 text-white shadow-xl scale-105 step-active" 
-                        : step.status === "complete" 
-                        ? "bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg hover:scale-105 hover:shadow-xl" 
+                    className={`p-3 sm:p-5 rounded-xl smooth-transition cursor-pointer transform flex-shrink-0 w-[140px] sm:w-auto
+                      ${step.status === "current"
+                        ? "bg-gradient-to-br from-teal-500 to-teal-500 text-white shadow-xl scale-105 step-active"
+                        : step.status === "complete"
+                        ? "bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg hover:scale-105 hover:shadow-xl"
                         : "bg-white/50 backdrop-blur-sm border-2 border-gray-200 opacity-70 cursor-not-allowed"}`}
                   >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center
+                    <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0
                         ${step.status === "current" || step.status === "complete"
                           ? "bg-white/20 backdrop-blur-sm"
                           : "bg-gray-200"
                         }`}>
-                        <Icon className="h-5 w-5" />
+                        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
                       </div>
-                      <h3 className="font-bold text-sm flex-1">{step.title}</h3>
+                      <h3 className="font-bold text-xs sm:text-sm flex-1 leading-tight">{step.title}</h3>
                     </div>
-                    <p className="text-xs text-gray-600">{step.description}</p>
+                    <p className={`text-xs leading-tight ${step.status === "current" || step.status === "complete" ? "text-white/80" : "text-gray-600"}`}>{step.description}</p>
                   </div>
                 )
               })}
@@ -356,17 +358,17 @@ export default function ChronicDiseaseWorkflow() {
         </Card>
 
         {/* Main Content Area */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Step 0: Patient Information */}
           {currentStep === 0 && (
             <Card className="shadow-xl border-blue-200">
-              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white">
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-6 w-6" />
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white p-3 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <User className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
                   Patient Information
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <PatientForm
                   data={patientData}
                   onDataChange={(data) => {
@@ -400,13 +402,13 @@ export default function ChronicDiseaseWorkflow() {
           {/* Step 1: Clinical Examination */}
           {currentStep === 1 && (
             <Card className="shadow-xl border-blue-200">
-              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white">
-                <CardTitle className="flex items-center gap-2">
-                  <Stethoscope className="h-6 w-6" />
-                  Chronic Disease Clinical Examination
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white p-3 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Stethoscope className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
+                  <span className="truncate">Chronic Disease Clinical Examination</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <ChronicClinicalForm
                   patientData={patientData}
                   onNext={(data) => {
@@ -423,13 +425,13 @@ export default function ChronicDiseaseWorkflow() {
           {/* Step 2: AI Questions */}
           {currentStep === 2 && (
             <Card className="shadow-xl border-blue-200">
-              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white">
-                <CardTitle className="flex items-center gap-2">
-                  <ClipboardList className="h-6 w-6" />
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white p-3 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
                   AI Specialized Questions
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <ChronicQuestionsForm
                   patientData={patientData}
                   clinicalData={clinicalData}
@@ -447,13 +449,13 @@ export default function ChronicDiseaseWorkflow() {
           {/* Step 3: Diagnosis/Analysis */}
           {currentStep === 3 && (
             <Card className="shadow-xl border-blue-200">
-              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white">
-                <CardTitle className="flex items-center gap-2">
-                  <Brain className="h-6 w-6" />
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white p-3 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Brain className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
                   Chronic Disease Analysis
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <ChronicDiagnosisForm
                   patientData={patientData}
                   clinicalData={clinicalData}
@@ -472,13 +474,13 @@ export default function ChronicDiseaseWorkflow() {
           {/* Step 4: Professional Report */}
           {currentStep === 4 && (
             <Card className="shadow-xl border-blue-200">
-              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white">
-                <CardTitle className="flex items-center gap-2">
-                  <FileSignature className="h-6 w-6" />
-                  Professional Chronic Disease Report
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-500 text-white p-3 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <FileSignature className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
+                  <span className="truncate">Professional Chronic Disease Report</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <ChronicProfessionalReport
                   patientData={patientData}
                   clinicalData={clinicalData}
