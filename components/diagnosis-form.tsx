@@ -402,9 +402,9 @@ function TreatmentEditorSection({
  )}
 
  {/* DOSING & DURATION */}
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
  <div>
- <h4 className="font-semibold text-sm text-gray-700 mb-2">DOSING:</h4>
+ <h4 className="font-semibold text-xs sm:text-sm text-gray-700 mb-2">DOSING:</h4>
  {isEditing ? (
  <div className="space-y-2">
  <Input
@@ -1170,7 +1170,7 @@ export default function DiagnosisForm({
  </CardHeader>
  <CardContent className="p-6">
  {/* Quality indicators in compact grid */}
- <div className="grid grid-cols-4 gap-3 mb-6">
+ <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
  <div className="text-center p-3 bg-white rounded-lg shadow-sm">
  <Shield className="h-6 w-6 text-teal-600 mx-auto mb-1" />
  <p className="text-xs font-medium text-gray-700">Int. Guidelines</p>
@@ -1706,7 +1706,7 @@ export default function DiagnosisForm({
 
  {/* Tests by Purpose */}
  {expertAnalysis.expert_investigations.tests_by_purpose && (
- <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+ <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
  {/* To Confirm Primary */}
  <div className="bg-teal-50 p-4 rounded-lg border border-teal-200">
  <h4 className="font-semibold text-teal-800 mb-3 flex items-center gap-2">
@@ -1884,7 +1884,7 @@ export default function DiagnosisForm({
  </div>
  
  <div className="space-y-2">
- <div className="grid grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
  <div>
  <span className="font-medium text-gray-700">DCI:</span>
  <span className="ml-2 text-gray-600">{med.dci || 'N/A'}</span>
@@ -1972,9 +1972,9 @@ export default function DiagnosisForm({
  <AnimatedSection show={showDifferential} delay={500}>
  {currentSection === 4 && diagnosis?.differential && diagnosis.differential.length > 0 && (
  <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
- <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
- <CardTitle className="flex items-center gap-3">
- <Search className="h-6 w-6" />
+ <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg p-3 sm:p-4 md:p-6">
+ <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl">
+ <Search className="h-5 w-5 sm:h-6 sm:w-6" />
  Differential Diagnoses ({diagnosis.differential.length})
  </CardTitle>
  </CardHeader>
@@ -2041,7 +2041,7 @@ export default function DiagnosisForm({
  </CardTitle>
  </CardHeader>
  <CardContent className="p-8">
- <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+ <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
  <div className="flex items-center gap-2 mb-3">
  <Clock className="h-5 w-5 text-blue-600" />
@@ -2116,7 +2116,7 @@ export default function DiagnosisForm({
  </CardTitle>
  </CardHeader>
  <CardContent className="p-8">
- <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
  
  {/* Consultation Report */}
  <div className="bg-blue-50 p-6 rounded-lg border border-blue-200 hover:shadow-md transition-shadow">
