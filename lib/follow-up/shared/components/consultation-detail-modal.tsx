@@ -172,61 +172,61 @@ export function ConsultationDetailModal({
           </div>
         )}
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={`grid w-full ${isChronic ? 'grid-cols-3 sm:grid-cols-6' : 'grid-cols-4'} gap-0.5 sm:gap-1`}>
-              <TabsTrigger value="report" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm">
-                <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Report</span>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="relative">
+          <TabsList className={`grid w-full ${isChronic ? 'grid-cols-3 sm:grid-cols-6' : 'grid-cols-4'} gap-0.5 sm:gap-1 relative z-10 overflow-hidden`}>
+              <TabsTrigger value="report" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm overflow-hidden">
+                <FileText className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="hidden sm:inline truncate">Report</span>
               </TabsTrigger>
-              <TabsTrigger value="prescription" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm">
-                <Pill className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Rx</span>
+              <TabsTrigger value="prescription" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm overflow-hidden">
+                <Pill className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="hidden sm:inline truncate">Rx</span>
               </TabsTrigger>
-              <TabsTrigger value="labs" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm">
-                <TestTube className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Labs</span>
+              <TabsTrigger value="labs" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm overflow-hidden">
+                <TestTube className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="hidden sm:inline truncate">Labs</span>
               </TabsTrigger>
-              <TabsTrigger value="imaging" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm">
-                <Scan className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Imaging</span>
+              <TabsTrigger value="imaging" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm overflow-hidden">
+                <Scan className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="hidden sm:inline truncate">Imaging</span>
               </TabsTrigger>
               {isChronic && (
                 <>
-                  <TabsTrigger value="diet" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm">
-                    <Salad className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Diet</span>
+                  <TabsTrigger value="diet" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm overflow-hidden">
+                    <Salad className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className="hidden sm:inline truncate">Diet</span>
                   </TabsTrigger>
-                  <TabsTrigger value="followup" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm">
-                    <CalendarCheck className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Follow</span>
+                  <TabsTrigger value="followup" className="flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-3 text-[10px] sm:text-sm overflow-hidden">
+                    <CalendarCheck className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className="hidden sm:inline truncate">Follow</span>
                   </TabsTrigger>
                 </>
               )}
             </TabsList>
 
             {/* REPORT TAB */}
-            <TabsContent value="report" className="mt-4">
+            <TabsContent value="report" className="mt-4 relative z-0">
               <div style={scrollContainerStyle} className="pr-2">
                 <ReportTab consultation={displayConsultation} fullReport={fullReport} />
               </div>
             </TabsContent>
 
             {/* PRESCRIPTION TAB */}
-            <TabsContent value="prescription" className="mt-4">
+            <TabsContent value="prescription" className="mt-4 relative z-0">
               <div style={scrollContainerStyle} className="pr-2">
                 <PrescriptionTab prescription={prescription} consultation={displayConsultation} />
               </div>
             </TabsContent>
 
             {/* LAB TESTS TAB */}
-            <TabsContent value="labs" className="mt-4">
+            <TabsContent value="labs" className="mt-4 relative z-0">
               <div style={scrollContainerStyle} className="pr-2">
                 <LabTestsTab labTests={labTests} fullReport={fullReport} />
               </div>
             </TabsContent>
 
             {/* IMAGING TAB */}
-            <TabsContent value="imaging" className="mt-4">
+            <TabsContent value="imaging" className="mt-4 relative z-0">
               <div style={scrollContainerStyle} className="pr-2">
                 <ImagingTab imaging={imaging} fullReport={fullReport} />
               </div>
@@ -234,7 +234,7 @@ export function ConsultationDetailModal({
 
             {/* DIET PLAN TAB (Chronic only) */}
             {isChronic && (
-              <TabsContent value="diet" className="mt-4">
+              <TabsContent value="diet" className="mt-4 relative z-0">
                 <div style={scrollContainerStyle} className="pr-2">
                   <DietPlanTab dietPlan={dietPlan} fullReport={fullReport} />
                 </div>
@@ -243,7 +243,7 @@ export function ConsultationDetailModal({
 
             {/* FOLLOW-UP TAB (Chronic only) */}
             {isChronic && (
-              <TabsContent value="followup" className="mt-4">
+              <TabsContent value="followup" className="mt-4 relative z-0">
                 <div style={scrollContainerStyle} className="pr-2">
                   <FollowUpTab followUp={followUp} fullReport={fullReport} />
                 </div>
