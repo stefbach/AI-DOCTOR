@@ -2427,7 +2427,7 @@ if (isRenewal) {
  const requiredFieldsMissing = []
  if (doctorInfo.nom.includes('[')) requiredFieldsMissing.push('Doctor name')
  if (doctorInfo.numeroEnregistrement.includes('[')) requiredFieldsMissing.push('Registration number')
- if (doctorInfo.email.includes('[')) requiredFieldsMissing.push('Email')
+ // Email is now optional - removed from required fields
  
  if (requiredFieldsMissing.length > 0) {
  toast({
