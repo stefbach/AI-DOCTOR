@@ -172,37 +172,32 @@ export function ConsultationDetailModal({
           </div>
         )}
 
+        {/* Dropdown menu for section selection */}
+        <div className="mb-4">
+          <select
+            value={activeTab}
+            onChange={(e) => setActiveTab(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="report">📄 Medical Report</option>
+            <option value="prescription">💊 Prescription</option>
+            <option value="labs">🧪 Laboratory Tests</option>
+            <option value="imaging">📷 Imaging Studies</option>
+            {isChronic && <option value="diet">🥗 Diet Plan</option>}
+            {isChronic && <option value="followup">📅 Follow-up Plan</option>}
+          </select>
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <TabsList className={`grid w-full ${isChronic ? 'grid-cols-6' : 'grid-cols-4'} gap-1 bg-gray-100 p-1 rounded-lg mb-4`}>
-              <TabsTrigger value="report" className="flex items-center justify-center gap-1 px-2 py-2 text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                <FileText className="h-4 w-4 flex-shrink-0" />
-                <span className="hidden sm:inline">Report</span>
-              </TabsTrigger>
-              <TabsTrigger value="prescription" className="flex items-center justify-center gap-1 px-2 py-2 text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                <Pill className="h-4 w-4 flex-shrink-0" />
-                <span className="hidden sm:inline">Rx</span>
-              </TabsTrigger>
-              <TabsTrigger value="labs" className="flex items-center justify-center gap-1 px-2 py-2 text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                <TestTube className="h-4 w-4 flex-shrink-0" />
-                <span className="hidden sm:inline">Labs</span>
-              </TabsTrigger>
-              <TabsTrigger value="imaging" className="flex items-center justify-center gap-1 px-2 py-2 text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                <Scan className="h-4 w-4 flex-shrink-0" />
-                <span className="hidden sm:inline">Imaging</span>
-              </TabsTrigger>
-              {isChronic && (
-                <>
-                  <TabsTrigger value="diet" className="flex items-center justify-center gap-1 px-2 py-2 text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                    <Salad className="h-4 w-4 flex-shrink-0" />
-                    <span className="hidden sm:inline">Diet</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="followup" className="flex items-center justify-center gap-1 px-2 py-2 text-xs sm:text-sm rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                    <CalendarCheck className="h-4 w-4 flex-shrink-0" />
-                    <span className="hidden sm:inline">Follow</span>
-                  </TabsTrigger>
-                </>
-              )}
-            </TabsList>
+          {/* Hidden TabsList - required by Tabs but we use the dropdown instead */}
+          <TabsList className="hidden">
+            <TabsTrigger value="report">Report</TabsTrigger>
+            <TabsTrigger value="prescription">Prescription</TabsTrigger>
+            <TabsTrigger value="labs">Labs</TabsTrigger>
+            <TabsTrigger value="imaging">Imaging</TabsTrigger>
+            {isChronic && <TabsTrigger value="diet">Diet</TabsTrigger>}
+            {isChronic && <TabsTrigger value="followup">Follow-up</TabsTrigger>}
+          </TabsList>
 
             {/* REPORT TAB */}
             <TabsContent value="report" className="flex-1 overflow-hidden">
