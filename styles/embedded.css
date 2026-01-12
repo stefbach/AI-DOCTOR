@@ -196,12 +196,10 @@ body.embedded-mode.debug-mode::before {
   /* Flex items: ONLY stack certain containers vertically, NOT all flex elements */
   /* Remove the aggressive flex-direction: column rule that was breaking layouts */
   /* Specific containers that should stack can use explicit classes like flex-col */
-  
-  /* Boutons full-width sur mobile */
-  body.embedded-mode button:not(.inline-button) {
-    width: 100% !important;
-  }
-  
+
+  /* Removed aggressive button width rule that was breaking allergy/checkbox buttons */
+  /* Only apply full-width to specific action buttons, not all buttons */
+
   /* Progress bar visible sur mobile */
   body.embedded-mode .progress,
   body.embedded-mode [role="progressbar"] {
