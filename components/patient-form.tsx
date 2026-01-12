@@ -977,7 +977,7 @@ useEffect(() => {
  Patient Information
  </CardTitle>
  <div className="mt-3 sm:mt-4 space-y-2">
- <div className="flex justify-between text-xs sm:text-sm text-gray-600">
+ <div className="flex justify-between text-xs sm:text-sm text-gray-600 !flex-row" style={{ flexDirection: 'row' }}>
  <span>Form Progress</span>
  <span className="font-semibold">{progress}%</span>
  </div>
@@ -987,7 +987,7 @@ useEffect(() => {
  </Card>
 
  {/* Quick navigation - Horizontal scroll on mobile */}
- <div className="flex overflow-x-auto pb-2 gap-2 justify-start sm:justify-center sm:flex-wrap sm:overflow-visible -mx-1 px-1 sm:mx-0 sm:px-0">
+ <div className="flex overflow-x-auto pb-2 gap-2 justify-start sm:justify-center sm:flex-wrap sm:overflow-visible -mx-1 px-1 sm:mx-0 sm:px-0 !flex-row" style={{ flexDirection: 'row' }}>
  {SECTIONS.map((section, index) => (
  <button
  key={section.id}
