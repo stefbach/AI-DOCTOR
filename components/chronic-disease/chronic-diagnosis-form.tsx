@@ -1005,17 +1005,17 @@ export default function ChronicDiagnosisForm({
  </Card>
  )}
 
- {/* Action Buttons */}
- <div className="flex justify-between pt-6 border-t-2">
- <Button onClick={onBack} variant="outline" size="lg" className="text-base">
- ← Back to Questions
- </Button>
- <Button 
- onClick={handleContinue} 
- size="lg"
- className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white text-base px-8"
+ {/* Action Buttons - Always stack */}
+ <div className="flex flex-col gap-3 pt-4 border-t-2">
+ <Button
+ onClick={handleContinue}
+ size="default"
+ className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white w-full"
  >
  Generate Complete Medical Report →
+ </Button>
+ <Button onClick={onBack} variant="outline" size="default" className="w-full">
+ ← Back to Questions
  </Button>
  </div>
  </div>
