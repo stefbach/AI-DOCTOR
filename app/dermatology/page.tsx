@@ -61,6 +61,11 @@ export default function DermatologyWorkflow() {
     }
   }, [router])
 
+  // Scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [currentStep])
+
   const handleBackToHome = () => {
     // Clear dermatology workflow data
     sessionStorage.removeItem('dermatologyPatientData')
