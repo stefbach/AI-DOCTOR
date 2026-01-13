@@ -2853,7 +2853,7 @@ export default function ChronicProfessionalReport({
           </div>
         )}
         
-        <div className="border-b-2 border-blue-600 pb-3 sm:pb-4 mb-4 sm:mb-6">
+        <div className="border-b-2 border-blue-600 pb-3 sm:pb-4 mb-4 sm:mb-6 overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
             <div className="min-w-0 flex-1">
               <h2 className="text-lg sm:text-xl md:text-2xl font-bold break-words">{medicalReport.header.title}</h2>
@@ -4295,41 +4295,41 @@ export default function ChronicProfessionalReport({
     const { dietaryProtocol } = report
     
     return (
-      <div id="dietary-protocol-section" className="bg-white p-8 rounded-lg shadow print:shadow-none">
-        <div className="border-b-2 border-cyan-600 pb-4 mb-6">
-          <div className="flex justify-between items-start">
+      <div id="dietary-protocol-section" className="bg-white p-3 sm:p-6 md:p-8 rounded-lg shadow print:shadow-none">
+        <div className="border-b-2 border-cyan-600 pb-4 mb-6 overflow-hidden">
+          <div className="flex flex-col gap-3">
             <div>
-              <h2 className="text-2xl font-bold flex items-center gap-2">
-                <Utensils className="h-6 w-6" />
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold flex items-center gap-2">
+                <Utensils className="h-5 w-5 sm:h-6 sm:w-6" />
                 {dietaryProtocol.header.title}
               </h2>
-              <p className="text-gray-600 mt-1">Personalized Nutrition Plan</p>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">Personalized Nutrition Plan</p>
               {!detailedDietaryGenerated && (
-                <p className="text-sm text-cyan-600 mt-1 font-medium">
+                <p className="text-xs sm:text-sm text-cyan-600 mt-1 font-medium">
                   📋 Basic meal plan from diagnosis. Click button to generate detailed 7-day plan.
                 </p>
               )}
               {detailedDietaryGenerated && (
-                <p className="text-sm text-teal-600 mt-1 font-medium">
+                <p className="text-xs sm:text-sm text-teal-600 mt-1 font-medium">
                   ✓ Detailed 7-day meal plan generated with exact portions and nutrition
                 </p>
               )}
             </div>
-            <div className="flex gap-2 print:hidden">
+            <div className="flex flex-wrap gap-2 print:hidden">
               {!detailedDietaryGenerated && !dietaryLoading && (
                 <Button
                   onClick={handleGenerateDietaryPlan}
                   variant="default"
                   size="sm"
-                  className="bg-cyan-600 hover:bg-cyan-700"
+                  className="bg-cyan-600 hover:bg-cyan-700 text-xs sm:text-sm"
                 >
-                  <Utensils className="h-4 w-4 mr-2" />
+                  <Utensils className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                   Generate Detailed 7-Day Plan
                 </Button>
               )}
               {dietaryLoading && (
-                <Button disabled size="sm">
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Button disabled size="sm" className="text-xs sm:text-sm">
+                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 animate-spin" />
                   Generating...
                 </Button>
               )}
@@ -4338,17 +4338,19 @@ export default function ChronicProfessionalReport({
                   onClick={handleGenerateDietaryPlan}
                   variant="outline"
                   size="sm"
+                  className="text-xs sm:text-sm"
                 >
-                  <Utensils className="h-4 w-4 mr-2" />
+                  <Utensils className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                   Regenerate Plan
                 </Button>
               )}
               <Button
                 variant="outline"
                 size="sm"
+                className="text-xs sm:text-sm"
                 onClick={() => exportToPDF('dietary-protocol-section', `dietary_plan_${report.medicalReport.patient.fullName}.pdf`)}
               >
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 Export PDF
               </Button>
             </div>
@@ -4880,7 +4882,7 @@ export default function ChronicProfessionalReport({
     const { followUpPlan } = report
     
     return (
-      <div id="followup-plan-section" className="bg-white p-8 rounded-lg shadow print:shadow-none">
+      <div id="followup-plan-section" className="bg-white p-3 sm:p-6 md:p-8 rounded-lg shadow print:shadow-none">
         {/* Professional Header */}
         <div className="text-center mb-8 pb-6 border-b-2 border-gray-800">
           <h1 className="text-2xl font-bold mb-4">CHRONIC DISEASE MANAGEMENT</h1>
@@ -5182,33 +5184,33 @@ export default function ChronicProfessionalReport({
         )}
         
         {/* Professional Footer with Signature */}
-        <div className="mt-12 pt-6 border-t-2 border-gray-800">
-          <div className="flex justify-between items-start">
+        <div className="mt-8 sm:mt-12 pt-4 sm:pt-6 border-t-2 border-gray-800">
+          <div className="flex flex-col sm:flex-row sm:justify-between gap-6 sm:gap-4">
             <div className="text-left">
-              <p className="text-sm text-gray-600 mb-2">This follow-up care plan has been prepared for:</p>
-              <p className="font-semibold">{report.medicalReport.patient.fullName}</p>
-              <p className="text-sm text-gray-600">Date: {followUpPlan.header.date}</p>
+              <p className="text-xs sm:text-sm text-gray-600 mb-2">This follow-up care plan has been prepared for:</p>
+              <p className="font-semibold text-sm sm:text-base">{report.medicalReport.patient.fullName}</p>
+              <p className="text-xs sm:text-sm text-gray-600">Date: {followUpPlan.header.date}</p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-600 mb-4">Medical Practitioner's Signature:</p>
+            <div className="text-left sm:text-right">
+              <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-4">Medical Practitioner's Signature:</p>
               {validationStatus === 'validated' && documentSignatures.consultation ? (
-                <div className="mt-4">
+                <div className="mt-2 sm:mt-4">
                   <img
                     src={documentSignatures.consultation}
                     alt="Doctor's Signature"
-                    className="ml-auto h-20 w-auto"
-                    style={{ maxWidth: '300px' }}
+                    className="sm:ml-auto h-16 sm:h-20 w-auto"
+                    style={{ maxWidth: '250px' }}
                   />
                 </div>
               ) : (
                 <div className="mb-2">
-                  <p className="border-b-2 border-gray-400 w-64 mb-1"></p>
+                  <p className="border-b-2 border-gray-400 w-48 sm:w-64 mb-1"></p>
                 </div>
               )}
-              <p className="font-semibold">{report.medicalReport.practitioner.name}</p>
-              <p className="text-sm text-gray-600">{report.medicalReport.practitioner.qualifications}</p>
-              <p className="text-sm text-gray-600">Registration: {report.medicalReport.practitioner.registrationNumber}</p>
-              <p className="text-sm text-gray-600 mt-2">Date: {followUpPlan.header.date}</p>
+              <p className="font-semibold text-sm sm:text-base">{report.medicalReport.practitioner.name}</p>
+              <p className="text-xs sm:text-sm text-gray-600">{report.medicalReport.practitioner.qualifications}</p>
+              <p className="text-xs sm:text-sm text-gray-600">Registration: {report.medicalReport.practitioner.registrationNumber}</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-2">Date: {followUpPlan.header.date}</p>
             </div>
           </div>
 
