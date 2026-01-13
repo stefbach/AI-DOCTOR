@@ -4315,31 +4315,32 @@ const ConsultationReport = () => {
  }
 
  return (
- <div id="prescription-medicaments" className="bg-white p-8 rounded-lg shadow print:shadow-none">
- <div className="border-b-2 border-teal-600 pb-4 mb-6 header">
- <div className="flex justify-between items-start">
+ <div id="prescription-medicaments" className="bg-white p-3 sm:p-6 md:p-8 rounded-lg shadow print:shadow-none">
+ <div className="border-b-2 border-teal-600 pb-4 mb-6 header overflow-hidden">
+ <div className="flex flex-col gap-3">
  <div>
- <h2 className="text-2xl font-bold">MEDICAL PRESCRIPTION</h2>
- <p className="text-gray-600 mt-1">Compliant with Medical Council & Pharmacy Act of Mauritius</p>
- <p className="text-sm text-gray-500 mt-1">
+ <h2 className="text-lg sm:text-xl md:text-2xl font-bold">MEDICAL PRESCRIPTION</h2>
+ <p className="text-sm sm:text-base text-gray-600 mt-1">Compliant with Medical Council & Pharmacy Act of Mauritius</p>
+ <p className="text-xs sm:text-sm text-gray-500 mt-1">
  {medications.length} medication{medications.length !== 1 ? 's' : ''} prescribed
  </p>
  </div>
- <div className="flex gap-2 print:hidden">
- {editMode && validationStatus !== 'validated' && (
- <Button onClick={addMedicament} size="sm" variant="outline">
- <Plus className="h-4 w-4 mr-2" />
- Add Medication
- </Button>
- )}
+ <div className="flex flex-wrap gap-2 print:hidden">
  <Button
  variant="outline"
  size="sm"
+ className="text-xs sm:text-sm"
  onClick={() => exportSectionToPDF('prescription-medicaments', `prescription_${patient.nom}_${new Date().toISOString().split('T')[0]}.pdf`)}
  >
- <Download className="h-4 w-4 mr-2" />
+ <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
  Export PDF
  </Button>
+ {editMode && validationStatus !== 'validated' && (
+ <Button onClick={addMedicament} size="sm" variant="outline" className="text-xs sm:text-sm">
+ <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+ Add Medication
+ </Button>
+ )}
  </div>
  </div>
  </div>
@@ -4489,17 +4490,26 @@ const ConsultationReport = () => {
  }
 
  return (
- <div id="prescription-biologie" className="bg-white p-8 rounded-lg shadow print:shadow-none">
- <div className="border-b-2 border-blue-600 pb-4 mb-6 header">
- <div className="flex justify-between items-start">
+ <div id="prescription-biologie" className="bg-white p-3 sm:p-6 md:p-8 rounded-lg shadow print:shadow-none">
+ <div className="border-b-2 border-blue-600 pb-4 mb-6 header overflow-hidden">
+ <div className="flex flex-col gap-3">
  <div>
- <h2 className="text-2xl font-bold">LABORATORY REQUEST FORM</h2>
- <p className="text-gray-600 mt-1">Compliant with MoH Laboratory Standards</p>
+ <h2 className="text-lg sm:text-xl md:text-2xl font-bold">LABORATORY REQUEST FORM</h2>
+ <p className="text-sm sm:text-base text-gray-600 mt-1">Compliant with MoH Laboratory Standards</p>
  </div>
- <div className="flex gap-2 print:hidden">
+ <div className="flex flex-wrap gap-2 print:hidden">
+ <Button
+ variant="outline"
+ size="sm"
+ className="text-xs sm:text-sm"
+ onClick={() => exportSectionToPDF('prescription-biologie', `lab_request_${patient.nom}_${new Date().toISOString().split('T')[0]}.pdf`)}
+ >
+ <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+ Export PDF
+ </Button>
  {editMode && validationStatus !== 'validated' && (
  <Select onValueChange={(value) => addBiologyTest(value)}>
- <SelectTrigger className="w-[200px]">
+ <SelectTrigger className="w-[160px] sm:w-[200px] text-xs sm:text-sm">
  <SelectValue placeholder="Add Test Category" />
  </SelectTrigger>
  <SelectContent>
@@ -4511,14 +4521,6 @@ const ConsultationReport = () => {
  </SelectContent>
  </Select>
  )}
- <Button
- variant="outline"
- size="sm"
- onClick={() => exportSectionToPDF('prescription-biologie', `lab_request_${patient.nom}_${new Date().toISOString().split('T')[0]}.pdf`)}
- >
- <Download className="h-4 w-4 mr-2" />
- Export PDF
- </Button>
  </div>
  </div>
  </div>
@@ -4662,28 +4664,29 @@ const ConsultationReport = () => {
  const praticien = getReportPraticien()
  
  return (
- <div id="prescription-imagerie" className="bg-white p-8 rounded-lg shadow print:shadow-none">
- <div className="border-b-2 border-blue-600 pb-4 mb-6 header">
- <div className="flex justify-between items-start">
+ <div id="prescription-imagerie" className="bg-white p-3 sm:p-6 md:p-8 rounded-lg shadow print:shadow-none">
+ <div className="border-b-2 border-blue-600 pb-4 mb-6 header overflow-hidden">
+ <div className="flex flex-col gap-3">
  <div>
- <h2 className="text-2xl font-bold">RADIOLOGY REQUEST FORM</h2>
- <p className="text-gray-600 mt-1">Compliant with MoH Radiology Standards</p>
+ <h2 className="text-lg sm:text-xl md:text-2xl font-bold">RADIOLOGY REQUEST FORM</h2>
+ <p className="text-sm sm:text-base text-gray-600 mt-1">Compliant with MoH Radiology Standards</p>
  </div>
- <div className="flex gap-2 print:hidden">
- {editMode && validationStatus !== 'validated' && (
- <Button onClick={addImagingExam} size="sm" variant="outline">
- <Plus className="h-4 w-4 mr-2" />
- Add Imaging
- </Button>
- )}
+ <div className="flex flex-wrap gap-2 print:hidden">
  <Button
  variant="outline"
  size="sm"
+ className="text-xs sm:text-sm"
  onClick={() => exportSectionToPDF('prescription-imagerie', `imaging_request_${patient.nom}_${new Date().toISOString().split('T')[0]}.pdf`)}
  >
- <Download className="h-4 w-4 mr-2" />
+ <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
  Export PDF
  </Button>
+ {editMode && validationStatus !== 'validated' && (
+ <Button onClick={addImagingExam} size="sm" variant="outline" className="text-xs sm:text-sm">
+ <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+ Add Imaging
+ </Button>
+ )}
  </div>
  </div>
  </div>
@@ -4888,20 +4891,21 @@ const [localSickLeave, setLocalSickLeave] = useState({
  }, [localSickLeave, hasLocalChanges, validationStatus, praticien, patient, trackModification])
  
  return (
- <div id="sick-leave-certificate" className="bg-white p-8 rounded-lg shadow print:shadow-none">
- <div className="border-b-2 border-cyan-600 pb-4 mb-6 header">
- <div className="flex justify-between items-start">
+ <div id="sick-leave-certificate" className="bg-white p-3 sm:p-6 md:p-8 rounded-lg shadow print:shadow-none">
+ <div className="border-b-2 border-cyan-600 pb-4 mb-6 header overflow-hidden">
+ <div className="flex flex-col gap-3">
  <div>
- <h2 className="text-2xl font-bold">SICK LEAVE CERTIFICATE</h2>
- <p className="text-gray-600 mt-1">Medical Leave Certificate</p>
+ <h2 className="text-lg sm:text-xl md:text-2xl font-bold">SICK LEAVE CERTIFICATE</h2>
+ <p className="text-sm sm:text-base text-gray-600 mt-1">Medical Leave Certificate</p>
  </div>
- <div className="flex gap-2 print:hidden">
+ <div className="flex flex-wrap gap-2 print:hidden">
  <Button
  variant="outline"
  size="sm"
+ className="text-xs sm:text-sm"
  onClick={() => exportSectionToPDF('sick-leave-certificate', `sick_leave_${patient.nom}_${new Date().toISOString().split('T')[0]}.pdf`)}
  >
- <Download className="h-4 w-4 mr-2" />
+ <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
  Export PDF
  </Button>
  </div>
@@ -5039,12 +5043,12 @@ const [localSickLeave, setLocalSickLeave] = useState({
  if (!invoice) return null
 
  return (
- <div id="invoice-document" className="bg-white p-8 rounded-lg shadow print:shadow-none">
- <div className="text-center mb-8 header">
- <h1 className="text-2xl font-bold mb-2">INVOICE</h1>
- <p className="text-lg">No.: {invoice.header.invoiceNumber}</p>
- <p className="text-sm text-gray-600">
- Consultation Date: {invoice.header.consultationDate} | 
+ <div id="invoice-document" className="bg-white p-3 sm:p-6 md:p-8 rounded-lg shadow print:shadow-none">
+ <div className="text-center mb-6 sm:mb-8 header">
+ <h1 className="text-xl sm:text-2xl font-bold mb-2">INVOICE</h1>
+ <p className="text-base sm:text-lg">No.: {invoice.header.invoiceNumber}</p>
+ <p className="text-xs sm:text-sm text-gray-600">
+ Consultation Date: {invoice.header.consultationDate} |
  Invoice Date: {invoice.header.invoiceDate}
  </p>
  </div>
@@ -5193,56 +5197,62 @@ const [localSickLeave, setLocalSickLeave] = useState({
 
  const ActionsBar = () => {
  const metadata = getReportMetadata()
- 
+
  return (
  <Card className="print:hidden">
- <CardContent className="p-4">
- <div className="flex justify-between items-center">
- <div className="flex items-center gap-4">
- <Badge className={validationStatus === 'validated' ? 'bg-teal-100 text-teal-800' : 'bg-cyan-100 text-cyan-800'}>
+ <CardContent className="p-3 sm:p-4">
+ <div className="space-y-3">
+ {/* Row 1: Status badge and word count + Edit button */}
+ <div className="flex flex-wrap items-center justify-between gap-2">
+ <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+ <Badge className={`text-xs ${validationStatus === 'validated' ? 'bg-teal-100 text-teal-800' : 'bg-cyan-100 text-cyan-800'}`}>
  {validationStatus === 'validated' ? (
  <>
  <Lock className="h-3 w-3 mr-1" />
- Document validated & signed
+ Validated
  </>
  ) : (
  <>
  <Unlock className="h-3 w-3 mr-1" />
- Draft - awaiting validation
+ Draft
  </>
  )}
  </Badge>
- <span className="text-sm text-gray-600">
+ <span className="text-xs sm:text-sm text-gray-600">
  {metadata.wordCount} words
  </span>
  </div>
- <div className="flex gap-2">
  <Button
  variant={editMode ? 'default' : 'outline'}
  size="sm"
  onClick={() => setEditMode(!editMode)}
  disabled={validationStatus === 'validated'}
+ className="text-xs sm:text-sm"
  >
- {editMode ? <Eye className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
+ {editMode ? <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> : <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />}
  {editMode ? 'Preview' : 'Edit'}
  </Button>
- 
+ </div>
+
+ {/* Row 2: Validate & Sign and Print buttons */}
+ <div className="flex flex-col sm:flex-row gap-2">
  <Button
  variant="default"
  size="sm"
  onClick={handleValidation}
  disabled={saving || validationStatus === 'validated'}
+ className="w-full sm:w-auto text-xs sm:text-sm"
  >
  {saving ? (
- <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+ <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 animate-spin" />
  ) : (
- <FileCheck className="h-4 w-4 mr-2" />
+ <FileCheck className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
  )}
  {validationStatus === 'validated' ? 'Validated' : 'Validate & Sign'}
  </Button>
- 
- <Button variant="outline" size="sm" onClick={handlePrint}>
- <Printer className="h-4 w-4 mr-2" />
+
+ <Button variant="outline" size="sm" onClick={handlePrint} className="w-full sm:w-auto text-xs sm:text-sm">
+ <Printer className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
  Print all
  </Button>
  </div>
@@ -5307,56 +5317,24 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <DoctorInfoEditor />
  <PrescriptionStats />
 
+ {/* Section selector dropdown */}
+ <div className="mb-4 print:hidden">
+ <select
+ value={activeTab}
+ onChange={(e) => setActiveTab(e.target.value)}
+ className="w-full p-3 border border-gray-300 rounded-lg bg-white text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+ >
+ <option value="consultation">📄 Report</option>
+ <option value="medicaments">💊 Medications ({report?.ordonnances?.medicaments?.prescription?.medicaments?.length || 0})</option>
+ <option value="biologie">🧪 Laboratory ({Object.values(report?.ordonnances?.biologie?.prescription?.analyses || {}).reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)})</option>
+ <option value="imagerie">🔬 Imaging ({report?.ordonnances?.imagerie?.prescription?.examens?.length || 0})</option>
+ <option value="sickleave">📅 Sick Leave {report?.ordonnances?.arretMaladie ? '(1)' : '(0)'}</option>
+ <option value="invoice">💰 Invoice</option>
+ <option value="ai-assistant">🤖 AI Assistant</option>
+ </select>
+ </div>
  <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
- <TabsList className="grid w-full grid-cols-7">
- <TabsTrigger value="consultation">
- <FileText className="h-4 w-4 mr-2" />
- Report
- </TabsTrigger>
- <TabsTrigger value="medicaments">
- <Pill className="h-4 w-4 mr-2" />
- Medications
- {report?.ordonnances?.medicaments?.prescription?.medicaments?.length > 0 && (
- <Badge variant="secondary" className="ml-2">
- {report.ordonnances.medicaments.prescription.medicaments.length}
- </Badge>
- )}
- </TabsTrigger>
- <TabsTrigger value="biologie">
- <TestTube className="h-4 w-4 mr-2" />
- Laboratory
- {report?.ordonnances?.biologie && (
- <Badge variant="secondary" className="ml-2">
- {Object.values(report.ordonnances.biologie.prescription.analyses || {})
- .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)}
- </Badge>
- )}
- </TabsTrigger>
-<TabsTrigger value="imagerie">
- <Scan className="h-4 w-4 mr-2" />
- Imaging
- {report?.ordonnances?.imagerie?.prescription?.examens?.length > 0 && (
- <Badge variant="secondary" className="ml-2">
- {report.ordonnances.imagerie.prescription.examens.length}
- </Badge>
- )}
- </TabsTrigger>
- <TabsTrigger value="sickleave">
- <Calendar className="h-4 w-4 mr-2" />
- Sick Leave
- {report?.ordonnances?.arretMaladie && (
- <Badge variant="secondary" className="ml-2">1</Badge>
- )}
- </TabsTrigger>
- <TabsTrigger value="invoice">
- <Receipt className="h-4 w-4 mr-2" />
- Invoice
- </TabsTrigger>
- <TabsTrigger value="ai-assistant" className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold shadow-lg hover:from-teal-600 hover:to-cyan-600 data-[state=active]:ring-2 data-[state=active]:ring-yellow-400">
- <Stethoscope className="h-4 w-4 mr-2" />
- AI Assistant
- </TabsTrigger>
- </TabsList>
+ <TabsList className="hidden"></TabsList>
 
  <TabsContent value="consultation">
  <ConsultationReport />
