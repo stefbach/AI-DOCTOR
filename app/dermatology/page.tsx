@@ -217,33 +217,33 @@ export default function DermatologyWorkflow() {
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="pt-6">
-            <Progress value={progress} className="mb-6" />
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3">
+          <CardContent className="pt-4 sm:pt-6">
+            <Progress value={progress} className="mb-4 sm:mb-6" />
+            <div className="flex overflow-x-auto gap-2 sm:gap-3 pb-2 -mx-2 px-2 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 md:grid-cols-5 sm:overflow-visible">
               {steps.map((step, index) => {
                 const Icon = step.icon
                 return (
                   <div
                     key={index}
                     onClick={() => handleStepClick(index)}
-                    className={`p-5 rounded-xl smooth-transition cursor-pointer transform
-                      ${step.status === "current" 
-                        ? "bg-gradient-to-br from-teal-500 to-cyan-500 text-white shadow-xl scale-105 step-active" 
-                        : step.status === "complete" 
-                        ? "bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg hover:scale-105 hover:shadow-xl" 
+                    className={`flex-shrink-0 w-36 sm:w-auto p-3 sm:p-5 rounded-xl smooth-transition cursor-pointer transform
+                      ${step.status === "current"
+                        ? "bg-gradient-to-br from-teal-500 to-cyan-500 text-white shadow-xl scale-105 step-active"
+                        : step.status === "complete"
+                        ? "bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg hover:scale-105 hover:shadow-xl"
                         : "bg-white/50 backdrop-blur-sm border-2 border-gray-200 opacity-70 cursor-not-allowed"}`}
                   >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center
+                    <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0
                         ${step.status === "current" || step.status === "complete"
                           ? "bg-white/20 backdrop-blur-sm"
                           : "bg-gray-200"
                         }`}>
-                        <Icon className="h-5 w-5" />
+                        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
                       </div>
-                      <h3 className="font-bold text-sm flex-1">{step.title}</h3>
+                      <h3 className="font-bold text-xs sm:text-sm flex-1 line-clamp-2">{step.title}</h3>
                     </div>
-                    <p className={`text-xs ${
+                    <p className={`text-xs line-clamp-2 ${
                       step.status === "current" || step.status === "complete"
                         ? "text-white/80"
                         : "text-gray-600"
