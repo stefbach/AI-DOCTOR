@@ -3564,29 +3564,21 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
  
  return (
  <Card className="mb-6 print:hidden">
- <CardHeader>
- <CardTitle className="flex items-center justify-between">
- <span className="flex items-center">
- <Stethoscope className="h-5 w-5 mr-2" />
- Doctor Information
- {/* ADD THIS BADGE FOR PRESCRIPTION RENEWAL */}
- {(sessionStorage.getItem('prescriptionRenewal') === 'true' ||
- clinicalData?.chiefComplaint?.toLowerCase().includes('renewal') ||
- clinicalData?.chiefComplaint?.toLowerCase().includes('renouvellement') ||
- clinicalData?.chiefComplaint?.toLowerCase().includes('ordonnance')) && (
- <Badge className="ml-2 bg-blue-100 text-blue-800">
- Prescription Renewal
- </Badge>
- )}
- </span>
+ <CardHeader className="pb-3">
+ <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
  <Button
  variant="outline"
  size="sm"
  onClick={() => setEditingDoctor(!editingDoctor)}
+ className="w-fit text-xs sm:text-sm"
  >
- {editingDoctor ? <Eye className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
+ {editingDoctor ? <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> : <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />}
  {editingDoctor ? 'Done' : 'Complete Profile'}
  </Button>
+ <span className="flex items-center text-base sm:text-lg">
+ <Stethoscope className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+ Doctor Information
+ </span>
  </CardTitle>
  </CardHeader>
  <CardContent>
