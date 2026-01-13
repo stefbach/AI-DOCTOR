@@ -337,6 +337,11 @@ export default function MedicalAIExpert() {
     loadSavedData()
   }, [currentStep, prefillData])
 
+  // Scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [currentStep])
+
   // Listen for prescription renewal detection from Tibok data
 useEffect(() => {
   const handleRenewalDetected = (event: CustomEvent) => {

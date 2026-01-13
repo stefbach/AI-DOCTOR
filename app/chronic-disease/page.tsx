@@ -146,6 +146,11 @@ export default function ChronicDiseaseWorkflow() {
     }
   }, [router])
 
+  // Scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [currentStep])
+
   const handleBackToHome = () => {
     // Clear chronic disease workflow data
     sessionStorage.removeItem('chronicDiseasePatientData')
