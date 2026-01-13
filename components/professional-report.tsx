@@ -201,7 +201,7 @@ const createEmptyReport = (): MauritianReport => ({
  qualifications: "MBBS",
  specialite: "General Medicine",
  adresseCabinet: "",
- email: "[Email Required]",
+ email: "Email",
  heuresConsultation: "",
  numeroEnregistrement: "[MCM Registration Required]"
  },
@@ -950,7 +950,7 @@ export default function ProfessionalReportEditable({
  qualifications: "MBBS",
  specialite: "General Medicine",
  adresseCabinet: "",
- email: "[Email Required]",
+ email: "Email",
  heuresConsultation: "",
  numeroEnregistrement: "[MCM Registration Required]",
  signatureUrl: null,
@@ -1650,7 +1650,7 @@ const doctorInfoFromTibok = {
  qualifications: tibokDoctorData.qualifications || 'MBBS',
  specialite: tibokDoctorData.specialty || 'General Medicine',
  adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || '',
- email: tibokDoctorData.email || '[Email Required]',
+ email: tibokDoctorData.email || 'Email',
  heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || '',
  numeroEnregistrement: (() => {
  const mcmNumber = tibokDoctorData.mcm_reg_no || 
@@ -3537,10 +3537,9 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  }
  // ==================== DOCTOR INFO EDITOR ====================
  const DoctorInfoEditor = memo(() => {
- const hasRequiredFields = doctorInfo.nom !== 'Dr. [Name Required]' && 
- !doctorInfo.numeroEnregistrement.includes('[') &&
- !doctorInfo.email.includes('[')
- 
+ const hasRequiredFields = doctorInfo.nom !== 'Dr. [Name Required]' &&
+ !doctorInfo.numeroEnregistrement.includes('[')
+
  const [localDoctorInfo, setLocalDoctorInfo] = useState(doctorInfo)
  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
  
@@ -3570,13 +3569,8 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
  <span className="flex items-center">
  <Stethoscope className="h-5 w-5 mr-2" />
  Doctor Information
- {!hasRequiredFields && (
- <Badge variant="destructive" className="ml-2">
- Incomplete Profile
- </Badge>
- )}
  {/* ADD THIS BADGE FOR PRESCRIPTION RENEWAL */}
- {(sessionStorage.getItem('prescriptionRenewal') === 'true' || 
+ {(sessionStorage.getItem('prescriptionRenewal') === 'true' ||
  clinicalData?.chiefComplaint?.toLowerCase().includes('renewal') ||
  clinicalData?.chiefComplaint?.toLowerCase().includes('renouvellement') ||
  clinicalData?.chiefComplaint?.toLowerCase().includes('ordonnance')) && (
@@ -3596,15 +3590,6 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
  </CardTitle>
  </CardHeader>
  <CardContent>
- {!hasRequiredFields && !editingDoctor && (
- <Alert className="mb-4">
- <AlertCircle className="h-4 w-4" />
- <AlertDescription>
- Doctor profile is incomplete. Please click "Complete Profile" to add required information.
- </AlertDescription>
- </Alert>
- )}
- 
  {editingDoctor ? (
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
  <div>

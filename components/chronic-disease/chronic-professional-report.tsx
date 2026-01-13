@@ -270,7 +270,7 @@ const createEmptyReport = (): ChronicProfessionalReportData => ({
       qualifications: "MBBS",
       specialty: "Internal Medicine / Chronic Disease Management",
       registrationNumber: "[MCM Registration Required]",
-      email: "[Email Required]",
+      email: "Email",
       consultationPlatform: "Tibok Teleconsultation Platform",
       facility: "Tibok Teleconsultation Platform",
       contact: "+230 XXX XXXX"
@@ -556,7 +556,7 @@ export default function ChronicProfessionalReport({
     qualifications: "MBBS",
     specialite: "Internal Medicine / Chronic Disease Management",
     numeroEnregistrement: "[MCM Registration Required]",
-    email: "[Email Required]",
+    email: "Email",
     adresseCabinet: "Tibok Teleconsultation Platform",
     telephone: "+230 XXX XXXX",
     heuresConsultation: "Teleconsultation Hours: 8:00 AM - 8:00 PM",

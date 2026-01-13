@@ -156,7 +156,7 @@ const createEmptyReport = (): MauritianReport => ({
  qualifications: "MBBS",
  specialite: "General Medicine",
  adresseCabinet: "",
- email: "[Email Required]",
+ email: "Email",
  heuresConsultation: "",
  numeroEnregistrement: "[MCM Registration Required]"
  },
@@ -903,7 +903,7 @@ export default function ProfessionalReportEditable({
  qualifications: "MBBS",
  specialite: "General Medicine",
  adresseCabinet: "",
- email: "[Email Required]",
+ email: "Email",
  heuresConsultation: "",
  numeroEnregistrement: "[MCM Registration Required]",
  signatureUrl: null,
@@ -1608,7 +1608,7 @@ const doctorInfoFromTibok = {
  qualifications: tibokDoctorData.qualifications || 'MBBS',
  specialite: tibokDoctorData.specialty || 'General Medicine',
  adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || '',
- email: tibokDoctorData.email || '[Email Required]',
+ email: tibokDoctorData.email || 'Email',
  heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || '',
  numeroEnregistrement: (() => {
  const mcmNumber = tibokDoctorData.mcm_reg_no || 
@@ -3567,10 +3567,9 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
  }
  // ==================== DOCTOR INFO EDITOR ====================
  const DoctorInfoEditor = memo(() => {
- const hasRequiredFields = doctorInfo.nom !== 'Dr. [Name Required]' && 
- !doctorInfo.numeroEnregistrement.includes('[') &&
- !doctorInfo.email.includes('[')
- 
+ const hasRequiredFields = doctorInfo.nom !== 'Dr. [Name Required]' &&
+ !doctorInfo.numeroEnregistrement.includes('[')
+
  const [localDoctorInfo, setLocalDoctorInfo] = useState(doctorInfo)
  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
  
@@ -3600,11 +3599,6 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
  <span className="flex items-center">
  <Stethoscope className="h-5 w-5 mr-2" />
  Doctor Information
- {!hasRequiredFields && (
- <Badge variant="destructive" className="ml-2">
- Incomplete Profile
- </Badge>
- )}
  {/* ADD THIS BADGE FOR PRESCRIPTION RENEWAL (Rare in dermatology) */}
  {sessionStorage.getItem('prescriptionRenewal') === 'true' && (
  <Badge className="ml-2 bg-blue-100 text-blue-800">
@@ -3623,15 +3617,6 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
  </CardTitle>
  </CardHeader>
  <CardContent>
- {!hasRequiredFields && !editingDoctor && (
- <Alert className="mb-4">
- <AlertCircle className="h-4 w-4" />
- <AlertDescription>
- Doctor profile is incomplete. Please click "Complete Profile" to add required information.
- </AlertDescription>
- </Alert>
- )}
- 
  {editingDoctor ? (
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div>
@@ -5202,9 +5187,8 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <Card className="print:hidden">
  <CardContent className="p-3 sm:p-4">
  <div className="space-y-3">
- {/* Row 1: Status badge and word count + Edit button */}
- <div className="flex flex-wrap items-center justify-between gap-2">
- <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+ {/* Row 1: Status badge and word count */}
+ <div className="flex flex-wrap items-center gap-2 sm:gap-4">
  <Badge className={`text-xs ${validationStatus === 'validated' ? 'bg-teal-100 text-teal-800' : 'bg-cyan-100 text-cyan-800'}`}>
  {validationStatus === 'validated' ? (
  <>
@@ -5222,20 +5206,20 @@ const [localSickLeave, setLocalSickLeave] = useState({
  {metadata.wordCount} words
  </span>
  </div>
+
+ {/* Row 2: Edit, Validate & Sign and Print buttons */}
+ <div className="flex flex-col sm:flex-row gap-2">
  <Button
  variant={editMode ? 'default' : 'outline'}
  size="sm"
  onClick={() => setEditMode(!editMode)}
  disabled={validationStatus === 'validated'}
- className="text-xs sm:text-sm"
+ className="w-full sm:w-auto text-xs sm:text-sm"
  >
  {editMode ? <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> : <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />}
  {editMode ? 'Preview' : 'Edit'}
  </Button>
- </div>
 
- {/* Row 2: Validate & Sign and Print buttons */}
- <div className="flex flex-col sm:flex-row gap-2">
  <Button
  variant="default"
  size="sm"
