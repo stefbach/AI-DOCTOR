@@ -3800,32 +3800,31 @@ const ConsultationReport = () => {
  
  {/* 🚨 EMERGENCY BANNER */}
  {isEmergency && (
-   <div className="mb-6 p-6 bg-red-600 text-white rounded-lg border-4 border-red-700 shadow-2xl animate-pulse print:animate-none print:bg-red-100 print:text-red-900 print:border-red-900">
-     <div className="flex items-center gap-4">
-       <div className="text-6xl">🚨</div>
-       <div className="flex-1">
-         <h2 className="text-3xl font-black mb-2 tracking-wide">⚠️ EMERGENCY CASE ⚠️</h2>
-         <p className="text-xl font-bold">IMMEDIATE MEDICAL ATTENTION REQUIRED</p>
-         <p className="text-lg mt-2">This consultation requires urgent hospital referral - Do not delay</p>
-       </div>
-       <div className="text-6xl">🚨</div>
+   <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-600 text-white rounded-lg border-2 sm:border-4 border-red-700 shadow-xl sm:shadow-2xl animate-pulse print:animate-none print:bg-red-100 print:text-red-900 print:border-red-900 overflow-hidden">
+    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
+      <div className="text-3xl sm:text-4xl">🚨</div>
+      <div className="flex-1 min-w-0">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-black mb-1 sm:mb-2 tracking-wide">⚠️ EMERGENCY ⚠️</h2>
+        <p className="text-sm sm:text-base font-bold">IMMEDIATE ATTENTION REQUIRED</p>
+        <p className="text-xs sm:text-sm mt-1 sm:mt-2">Urgent hospital referral - Do not delay</p>
+      </div>
      </div>
    </div>
  )}
 
  {/* 🏥 SPECIALIST REFERRAL BANNER */}
  {needsSpecialistReferral && (
-   <div className={`mb-6 p-6 rounded-lg border-4 shadow-2xl print:shadow-lg ${
+   <div className={`mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg border-2 sm:border-4 shadow-xl sm:shadow-2xl overflow-hidden print:shadow-lg ${
      specialistReferral.urgency === 'emergency' 
        ? 'bg-red-600 text-white border-red-700 animate-pulse print:animate-none print:bg-red-100 print:text-red-900 print:border-red-900' 
        : specialistReferral.urgency === 'urgent'
        ? 'bg-orange-500 text-white border-orange-700 print:bg-orange-100 print:text-orange-900 print:border-orange-900'
        : 'bg-blue-500 text-white border-blue-700 print:bg-blue-100 print:text-blue-900 print:border-blue-900'
    }`}>
-     <div className="flex items-center gap-4">
-       <div className="text-6xl">🏥</div>
-       <div className="flex-1">
-         <h2 className="text-3xl font-black mb-2 tracking-wide">
+     <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
+       <div className="text-3xl sm:text-4xl">🏥</div>
+       <div className="flex-1 min-w-0">
+         <h2 className="text-base sm:text-lg md:text-xl font-black mb-2 tracking-wide">
            {specialistReferral.urgency === 'emergency' && '🚨 URGENT SPECIALIST REFERRAL REQUIRED 🚨'}
            {specialistReferral.urgency === 'urgent' && '⚡ SPECIALIST REFERRAL REQUIRED (URGENT)'}
            {specialistReferral.urgency === 'routine' && '📋 SPECIALIST REFERRAL RECOMMENDED'}
@@ -4543,14 +4542,20 @@ const ConsultationReport = () => {
  onLocalChange={stableTrackModification}
 />
  ) : (
- <div className="flex items-start justify-between p-2 hover:bg-gray-50 rounded">
- <div className="flex-1">
+ <div className="p-2 hover:bg-gray-50 rounded">
+ <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-4">
+ <div className="flex-1 min-w-0">
  <p className="font-medium">
  {test.nom}
  {test.urgence && <Badge className="ml-2 bg-blue-100 text-blue-800 urgent badge badge-red">URGENT</Badge>}
  </p>
+ </div>
+ <div className="text-xs sm:text-sm text-gray-500">
+ <p>Tube: {test.tubePrelevement} | TAT: {test.delaiResultat}</p>
+ </div>
+ </div>
  {test.aJeun && (
- <p className="text-sm text-blue-600 mt-1"> Fasting required</p>
+ <p className="text-sm text-blue-600 mt-1">Fasting required</p>
  )}
  {test.conditionsPrelevement && (
  <p className="text-sm text-gray-600 mt-1">
@@ -4562,11 +4567,6 @@ const ConsultationReport = () => {
  Indication: {test.motifClinique}
  </p>
  )}
- </div>
- <div className="text-sm text-gray-500">
- <p>Tube: {test.tubePrelevement}</p>
- <p>TAT: {test.delaiResultat}</p>
- </div>
  </div>
  )}
  </div>
