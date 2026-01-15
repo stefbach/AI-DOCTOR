@@ -4340,7 +4340,8 @@ const ConsultationReport = () => {
  <div className={`space-y-6 ${!showFullReport && !editMode ? 'max-h-96 overflow-hidden relative' : ''} print:max-h-none`}>
  {sections.map((section) => {
  const content = rapport[section.key as keyof typeof rapport]
- if (!content && !editMode) return null
+ // Show section if: has content, OR in edit mode, OR not validated (so user can use Voice to add content)
+ if (!content && !editMode && validationStatus === 'validated') return null
 
  return (
  <section key={section.key} className="space-y-2 section">
