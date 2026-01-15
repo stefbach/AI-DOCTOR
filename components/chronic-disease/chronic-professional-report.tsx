@@ -1663,9 +1663,39 @@ export default function ChronicProfessionalReport({
       generateReport()
     }
   }, [patientData, clinicalData, questionsData, diagnosisData, doctorInfo])
-  
+
+  // ==================== COMPUTED VALUES ====================
+
+  // Computed narrative from sections (for saving)
+  const computedNarrative = useMemo(() => {
+    const hasAnySectionContent = Object.values(chronicSections).some(v => v && v.trim())
+    if (hasAnySectionContent) {
+      // Build narrative from individual sections
+      const parts: string[] = []
+
+      // Add document header info from existing narrative if available
+      if (report?.medicalReport?.narrative) {
+        const headerMatch = report.medicalReport.narrative.match(/^([\s\S]*?)(?=CHIEF COMPLAINT)/i)
+        if (headerMatch && headerMatch[1]) {
+          parts.push(headerMatch[1].trim())
+        }
+      }
+
+      // Add each section with its title
+      CHRONIC_SECTION_KEYS.forEach(section => {
+        const content = chronicSections[section.key]
+        if (content && content.trim()) {
+          parts.push(`\n═══════════════════════════════════════════════════════════════\n${section.title}\n═══════════════════════════════════════════════════════════════\n${content}`)
+        }
+      })
+
+      return parts.join('\n')
+    }
+    return editableNarrative
+  }, [chronicSections, editableNarrative, report?.medicalReport?.narrative])
+
   // ==================== EVENT HANDLERS ====================
-  
+
   const handlePrint = useCallback(() => {
     window.print()
   }, [])
@@ -2865,38 +2895,6 @@ export default function ChronicProfessionalReport({
     }))
     setHasUnsavedChanges(true)
   }, [])
-
-  // Build narrative from individual sections for saving
-  const buildNarrativeFromSections = useCallback(() => {
-    const parts: string[] = []
-
-    // Add document header info from existing narrative if available
-    if (report?.medicalReport?.narrative) {
-      const headerMatch = report.medicalReport.narrative.match(/^([\s\S]*?)(?=CHIEF COMPLAINT)/i)
-      if (headerMatch && headerMatch[1]) {
-        parts.push(headerMatch[1].trim())
-      }
-    }
-
-    // Add each section with its title
-    CHRONIC_SECTION_KEYS.forEach(section => {
-      const content = chronicSections[section.key]
-      if (content && content.trim()) {
-        parts.push(`\n═══════════════════════════════════════════════════════════════\n${section.title}\n═══════════════════════════════════════════════════════════════\n${content}`)
-      }
-    })
-
-    return parts.join('\n')
-  }, [chronicSections, report?.medicalReport?.narrative])
-
-  // Computed narrative from sections (for saving)
-  const computedNarrative = useMemo(() => {
-    const hasAnySectionContent = Object.values(chronicSections).some(v => v && v.trim())
-    if (hasAnySectionContent) {
-      return buildNarrativeFromSections()
-    }
-    return editableNarrative
-  }, [chronicSections, editableNarrative, buildNarrativeFromSections])
 
   const handleSave = useCallback(async () => {
     if (!hasUnsavedChanges) {
