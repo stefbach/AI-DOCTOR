@@ -615,6 +615,10 @@ export default function ChronicProfessionalReport({
     if (storedDoctorInfo) {
       try {
         const doctorData = JSON.parse(storedDoctorInfo)
+        // Clean up old cached values - replace "[Email Required]" with "Email"
+        if (doctorData.email === '[Email Required]') {
+          doctorData.email = 'Email'
+        }
         console.log('✅ Loaded doctor info from sessionStorage:', doctorData)
         setDoctorInfo(doctorData)
       } catch (error) {
