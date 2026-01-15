@@ -14,31 +14,46 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Draft saving not configured' }, { status: 503 })
     }
     const body = await request.json()
-    const { consultationId, reportContent, doctorInfo, modifiedSections, patientId, doctorId } = body
-    
+    const { consultationId, reportContent, doctorInfo, modifiedSections, patientId, doctorId, validationStatus } = body
+
+    if (!consultationId) {
+      return NextResponse.json({ success: false, error: 'Missing consultationId' }, { status: 400 })
+    }
+
+    // Build the upsert object, only including non-null values
+    const upsertData: Record<string, any> = {
+      consultation_id: consultationId,
+      report_content: reportContent,
+      doctor_info: doctorInfo,
+      modified_sections: modifiedSections || [],
+      last_edited_at: new Date().toISOString(),
+      validation_status: validationStatus || reportContent?.compteRendu?.metadata?.validationStatus || reportContent?.medicalReport?.metadata?.validationStatus || 'draft'
+    }
+
+    // Only include patient_id and doctor_id if they are provided
+    if (patientId) upsertData.patient_id = patientId
+    if (doctorId) upsertData.doctor_id = doctorId
+
+    console.log('📝 Saving draft for consultation:', consultationId)
+
     const { data, error } = await supabase
       .from('consultation_drafts')
-      .upsert({
-        consultation_id: consultationId,
-        patient_id: patientId,
-        doctor_id: doctorId,
-        report_content: reportContent,
-        doctor_info: doctorInfo,
-        modified_sections: modifiedSections,
-        last_edited_at: new Date().toISOString(),
-        validation_status: reportContent?.compteRendu?.metadata?.validationStatus || 'draft'
-      }, {
+      .upsert(upsertData, {
         onConflict: 'consultation_id'
       })
-    
-    if (error) throw error
-    
+
+    if (error) {
+      console.error('Supabase upsert error:', error)
+      throw error
+    }
+
+    console.log('✅ Draft saved successfully')
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Draft save error:', error)
-    return NextResponse.json({ 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to save draft' 
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to save draft'
     }, { status: 500 })
   }
 }
