@@ -21,23 +21,24 @@ export const maxDuration = 180; // 3 minutes max
 // ============================================
 // FUNCTION 1: TRANSCRIBE AUDIO
 // ============================================
-async function transcribeAudio(audioFile: File, targetLanguage: string = 'en'): Promise<{
+async function transcribeAudio(audioFile: File): Promise<{
   text: string;
   duration: number;
   language: string;
 }> {
   console.log('🔊 Step 1: Starting audio transcription...');
   console.log(`   Audio file: ${audioFile.name} (${audioFile.size} bytes)`);
-  console.log(`   Target language: ${targetLanguage}`);
 
-  // Medical prompt to help Whisper recognize medical terms (English focused)
-  const medicalPrompt = `Medical transcription in English. Common medications: Doliprane, Paracetamol, Acetaminophen, Metformin, Amoxicillin, Augmentin, Ibuprofen, Aspirin, Omeprazole, Pantoprazole, Atorvastatin, Simvastatin, Amlodipine, Ramipril, Lisinopril, Bisoprolol, Furosemide, Spironolactone, Levothyroxine, Prednisone, Prednisolone, Insulin, Lantus, Novorapid, Glucophage, Diamicron, Gliclazide, Januvia, Sitagliptin, Plavix, Clopidogrel, Xarelto, Eliquis, Pradaxa, Ventolin, Salbutamol, Albuterol, Seretide, Symbicort, Singulair, Montelukast, Nexium, Gaviscon, Imodium, Xanax, Zolpidem, Zopiclone, Sertraline, Fluoxetine, Prozac, Effexor, Venlafaxine, Cymbalta, Duloxetine, Lyrica, Pregabalin, Gabapentin, Neurontin. Dosages: milligrams, mg, grams, g, micrograms, mcg, milliliters, ml.`;
+  // Medical prompt to help Whisper recognize medical terms (bilingual French/English)
+  const medicalPrompt = `Medical transcription. Common medications: Doliprane, Paracetamol, Acetaminophen, Metformin, Metformine, Amoxicillin, Amoxicilline, Augmentin, Ibuprofen, Ibuprofène, Aspirin, Aspirine, Omeprazole, Pantoprazole, Atorvastatin, Simvastatin, Amlodipine, Ramipril, Lisinopril, Bisoprolol, Furosemide, Spironolactone, Levothyroxine, Prednisone, Prednisolone, Insulin, Insuline, Lantus, Novorapid, Glucophage, Diamicron, Gliclazide, Januvia, Sitagliptin, Plavix, Clopidogrel, Xarelto, Eliquis, Pradaxa, Ventolin, Ventoline, Salbutamol, Albuterol, Seretide, Symbicort, Singulair, Montelukast, Nexium, Gaviscon, Imodium, Xanax, Zolpidem, Zopiclone, Sertraline, Fluoxetine, Prozac, Effexor, Venlafaxine, Cymbalta, Duloxetine, Lyrica, Pregabalin, Gabapentin, Neurontin. Dosages: milligrams, mg, grams, g, micrograms, mcg, milliliters, ml.`;
 
   try {
+    // Auto-detect language - Whisper will detect French or English
+    // The normalizer will then convert French terms to English
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
       model: 'whisper-1',
-      language: targetLanguage, // Force the specified language
+      // No language parameter = auto-detect (French or English)
       response_format: 'verbose_json',
       prompt: medicalPrompt, // Help Whisper recognize medical terms
     });
@@ -244,7 +245,7 @@ export async function POST(request: NextRequest) {
     const audioFile = formData.get('audioFile') as File;
     const doctorInfo = JSON.parse(formData.get('doctorInfo') as string || '{}');
     const patientId = formData.get('patientId') as string | null;
-    const targetLanguage = (formData.get('language') as string) || 'en'; // Default to English
+    // Language auto-detected by Whisper, then normalized to English
 
     // Validate audio file
     if (!audioFile) {
@@ -261,11 +262,11 @@ export async function POST(request: NextRequest) {
 
     const startTime = Date.now();
 
-    // STEP 1: Transcribe audio
+    // STEP 1: Transcribe audio (auto-detect language)
     let transcription;
     try {
-      console.log('\n📝 STEP 1/3: Audio Transcription');
-      transcription = await transcribeAudio(audioFile, targetLanguage);
+      console.log('\n📝 STEP 1/3: Audio Transcription (auto-detect language)');
+      transcription = await transcribeAudio(audioFile);
     } catch (error: any) {
       console.error('❌ STEP 1 FAILED:', error.message);
       return NextResponse.json(
