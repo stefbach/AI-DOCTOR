@@ -29,12 +29,16 @@ async function transcribeAudio(audioFile: File): Promise<{
   console.log('🔊 Step 1: Starting audio transcription...');
   console.log(`   Audio file: ${audioFile.name} (${audioFile.size} bytes)`);
 
+  // Medical prompt to help Whisper recognize French medical terms and medications
+  const medicalPrompt = `Transcription médicale en français. Médicaments courants: Doliprane, Paracétamol, Metformine, Metformin, Amoxicilline, Augmentin, Clamoxyl, Ibuprofène, Aspirine, Oméprazole, Pantoprazole, Atorvastatine, Simvastatine, Amlodipine, Ramipril, Lisinopril, Bisoprolol, Furosémide, Spironolactone, Lévothyrox, Levothyroxine, Prednisone, Prednisolone, Insuline, Lantus, Novorapid, Glucophage, Diamicron, Gliclazide, Januvia, Sitagliptine, Kardégic, Plavix, Clopidogrel, Xarelto, Eliquis, Pradaxa, Ventoline, Salbutamol, Seretide, Symbicort, Singulair, Montelukast, Inexium, Gaviscon, Smecta, Imodium, Spasfon, Débridat, Mopral, Vogalène, Motilium, Primperan, Lysanxia, Lexomil, Xanax, Stilnox, Zolpidem, Imovane, Zopiclone, Deroxat, Seroplex, Prozac, Effexor, Cymbalta, Laroxyl, Lyrica, Neurontin, Rivotril, Dépakine, Tégrétol, Keppra. Dosages: milligrammes, mg, grammes, g, microgrammes, µg, millilitres, ml.`;
+
   try {
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
       model: 'whisper-1',
       language: 'fr', // French by default, Whisper will auto-detect if needed
       response_format: 'verbose_json',
+      prompt: medicalPrompt, // Help Whisper recognize medical terms
     });
 
     console.log('✅ Transcription completed');
