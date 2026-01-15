@@ -29,12 +29,14 @@ RULES:
 5. Use proper punctuation and capitalization
 6. If the section already has content, append the new information appropriately
 7. Be concise but complete
-8. Use bullet points for lists when appropriate
+8. Write in flowing prose/paragraph format - DO NOT use bullet points, lists, or dashes
 9. Maintain a professional, objective tone
+10. DO NOT include any section title or header - the title is already shown separately
+11. Start directly with the content, no headings like "Chief Complaint:" or "**Title**"
 
 ${currentContent ? `EXISTING CONTENT IN THIS SECTION:\n${currentContent}\n\nAppend the new information naturally, avoiding repetition.` : ''}
 
-Return ONLY the formatted medical text, nothing else.`
+Return ONLY the formatted medical text as a paragraph, nothing else. No titles, no bullet points.`
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
