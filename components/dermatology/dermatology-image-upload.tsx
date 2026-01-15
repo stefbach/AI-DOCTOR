@@ -24,6 +24,7 @@ import {
 } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 import { useTibokConsultation, DermatologyImageData } from "@/hooks/use-tibok-consultation"
+import { VoiceDictationButton } from "@/components/voice-dictation-button"
 
 interface DermatologyImageUploadProps {
   patientData: any
@@ -467,9 +468,17 @@ export default function DermatologyImageUpload({
 
       {/* Additional Notes */}
       <div className="space-y-2">
-        <Label htmlFor="additionalNotes" className="text-base font-semibold">
-          Additional Clinical Notes (Optional)
-        </Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="additionalNotes" className="text-base font-semibold">
+            Additional Clinical Notes (Optional)
+          </Label>
+          <VoiceDictationButton
+            onTranscript={(text) => {
+              const newText = additionalNotes ? `${additionalNotes} ${text}` : text
+              setAdditionalNotes(newText)
+            }}
+          />
+        </div>
         <Textarea
           id="additionalNotes"
           value={additionalNotes}
