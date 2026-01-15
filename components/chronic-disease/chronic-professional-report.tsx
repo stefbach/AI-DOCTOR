@@ -2525,8 +2525,10 @@ export default function ChronicProfessionalReport({
         })
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to save draft')
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to save draft')
       }
 
       // Also save to sessionStorage for local persistence
